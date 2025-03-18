@@ -1,10 +1,6 @@
 import { useCart } from "../context/cart-context";
 import Link from "next/link";
 import "./cart-icon.css";
-import Image from "next/image";
-import cartIcon from "../../../assets/icons/fishing-net.png";
-// import { Button } from "@/components/ui/button";
-// import { Button } from '@/components/ui/button';
 
 export function CartIcon() {
   const { items } = useCart();

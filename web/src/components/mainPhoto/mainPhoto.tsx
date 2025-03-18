@@ -1,10 +1,6 @@
 "use client";
-
-import Image from "next/image";
-import fishingPhoto from "../../assets/Images/van gog.jpg";
-// import target from "../../assets/target.png";
 import "./mainPhoto.css";
-import SearchPage from "@/app/(pages)/search/[keyword]/page";
+
 import SearchBox from "../SearchBox/search-box";
 
 const MainPhoto = () => {
