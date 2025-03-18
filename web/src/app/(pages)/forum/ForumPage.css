@@ -3,7 +3,7 @@
 }
 
 .create-post-button {
-  background: green;
+  background: #012645;
   border: none;
   border-radius: 5px;
   margin-bottom: 15px;
@@ -12,7 +12,7 @@
 }
 
 .create-post-button:hover {
-  background: #17702b;
+  background: #093f6b;
 }
 .delete-post-button {
   background: red;

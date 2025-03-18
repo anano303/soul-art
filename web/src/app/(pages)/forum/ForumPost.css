@@ -55,8 +55,8 @@
 }
 
 .forum-post-category {
-  background: #2a5530;
-  color: #ec9843;
+  background: #012645;
+  color: #43b1ec;
   padding: 5px 10px;
   border-radius: 6px;
   font-size: 14px;
@@ -65,7 +65,7 @@
 .forum-post-time,
 .forum-post-favorite {
   font-size: 14px;
-  color: #264d2b;
+  color: #012645;
 }
 
 .forum-post-favorite {
@@ -84,7 +84,7 @@
 }
 
 .comment-item {
-  border-left: 1px solid #2a5530a5;
+  border-left: 1px solid #012645a5;
   padding: 10px;
   border-radius: 12px;
   margin-top: 10px;
@@ -129,7 +129,7 @@
 }
 
 .main-comment-container button {
-  background: linear-gradient(to left, #2a5530, #ec9843);
+  background: linear-gradient(to left, #012645, #080866);
   color: white;
   margin-top: 10px;
   padding: 10px 20px;
@@ -156,7 +156,7 @@
 
 .forum-post-comments {
   font-size: 14px;
-  color: #264d2b;
+  color: #012645;
   cursor: pointer;
 }
 
@@ -185,7 +185,7 @@
 }
 
 .reply-section button {
-  background-color: #2a5530;
+  background-color: #012645;
   color: white;
   padding: 5px 10px;
   border: none;
@@ -196,7 +196,7 @@
 }
 
 .reply-section button:hover {
-  background-color: #1e3d22;
+  background-color: #012645;
 }
 
 .comment-actions {
@@ -208,7 +208,7 @@
 .edit-button,
 .delete-button {
   font-size: 13px;
-  color: #264d2b;
+  color: #012645;
   border: none;
   background-color: inherit;
   cursor: pointer;
@@ -218,7 +218,7 @@
 }
 
 .edit-button:hover {
-  color: #2a5530;
+  color: #012645;
   background-color: rgba(42, 85, 48, 0.1);
 }
 
@@ -240,7 +240,7 @@
 }
 
 .edit-comment-section button {
-  background-color: #2a5530;
+  background-color: #012645;
   color: white;
   padding: 5px 10px;
   border: none;
@@ -292,7 +292,7 @@
 }
 
 .edit-post-buttons button:first-child {
-  background-color: #2a5530;
+  background-color: #012645;
   color: white;
 }
 
