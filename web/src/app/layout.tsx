@@ -12,8 +12,9 @@ import Header from "@/components/Header/header";
 import SiteTimer from "@/components/SiteTimer/SiteTimer";
 
 export const metadata: Metadata = {
-  title: "FishHunt",
-  description: "ECommerce platform",
+  title: "SoulArt",
+  description:
+    "SoulArt - ნახატების ონლაინ პლატფორმა, სადაც შეგიძლიათ გაყიდოთ და შეიძინოთ უნიკალური ხელოვნების ნიმუშები. შექმენით პირადი გალერეა და გახდით მხატვარი ან კოლექციონერი.",
 };
 
 export default function RootLayout({
@@ -31,7 +32,7 @@ export default function RootLayout({
             <CartProvider>
               <CheckoutProvider>
                 <LanguageProvider>
-                  <SiteTimer/>
+                  <SiteTimer />
                   <Header />
                   <main className="flex-1">{children}</main>
                   <Footer />

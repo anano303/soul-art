@@ -1,84 +1,72 @@
-.photo-container {
+/* styles/home.scss */
+
+.home-container {
+  background-color: #f0f0f0;
+  color: #333;
+}
+
+.hero-section {
+  position: relative;
+  height: 500px;
+  background-image: url("../../assets/Images/van\ gog.jpg");
+  background-size: cover;
+  background-position: center;
+  color: #fff;
+  text-align: center;
   display: flex;
+  flex-direction: column;
+  gap: 10%;
   justify-content: center;
-  align-items: flex-start;
-  position: relative;
-  cursor: crosshair;
-  /* cursor: url("custom-cursor.png"), crosshair;  */
+  align-items: center;
 }
 
-.photo-frame {
-  position: relative;
-  border: 7px solid #264d2b;
+.hero-text {
+  background-color: rgba(0, 0, 0, 0.5);
+  padding: 20px;
   border-radius: 10px;
-  overflow: hidden;
-  width: 80%;
-  max-width: 800px;
+  z-index: 1;
+  margin-top: 10%;
 }
 
-.main-photo {
+.hero-text h2 {
+  font-size: 36px;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.hero-text p {
+  font-size: 18px;
+}
+
+.search-box {
+  position: relative;
+  display: flex;
+  flex: 1;
+  max-width: 400px;
+  margin: 0 auto;
+  gap: 10px;
+  width: 50vw;
+}
+
+.search-bar input {
   width: 100%;
-  height: auto;
-  display: block;
+  padding: 10px;
+  font-size: 16px;
+  border: 1px solid #ddd;
+  border-radius: 10px;
 }
 
-.map {
+.search-bar button {
   position: absolute;
-  bottom: 10px;
-  right: 10px;
-  width: 200px;
-  height: auto;
-  border-radius: 8px;
-  background-color: white;
-  z-index: 2;
+  right: 0;
+  padding: 10px;
+  background-color: transparent;
+  border: none;
+  border-radius: 10px;
   cursor: pointer;
-  transition: transform 0.3s ease;
+  transition: 0.6s ease-out;
 }
 
-.map:hover {
-  transform: scale(1.1);
-}
-
-.target {
-  position: absolute;
-  width: 120px;
-  height: 120px;
-  pointer-events: none;
-  transform: translate(-50%, -50%);
-  /* transition: all 0s ease;  */
-}
-
-@media screen and (max-width: 768px) {
-  .photo-container {
-    height: auto;
-    min-height: 50vh;
-    padding: 10px;
-  }
-
-  .photo-frame {
-    width: 100%;
-    border-width: 5px;
-  }
-
-  .map {
-    width: 120px;
-    bottom: 5px;
-    right: 5px;
-  }
-
-  .target {
-    width: 80px;
-    height: 80px;
-  }
-}
-
-@media screen and (max-width: 480px) {
-  .map {
-    width: 100px;
-  }
-
-  .target {
-    width: 60px;
-    height: 60px;
-  }
+.search-bar button:hover {
+  font-size: 20px;
 }

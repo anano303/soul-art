@@ -14,12 +14,9 @@ export function CartIcon() {
     <Link href="/cart">
       {/* <Button variant="ghost" size="icon" className="relative"> */}
       <button className="cartIconButton">
-        {itemCount > 0 && (
-          <span className="cartIconsSpan">
-            {itemCount}
-          </span>
-        )}
-        <Image src={cartIcon} alt="cart icon" className="cartIcon" />
+        {itemCount > 0 && <span className="cartIconsSpan">{itemCount}</span>}
+        {/* <Image src={cartIcon} alt="cart icon" className="cartIcon" /> */}
+        🛒
       </button>
       {/* </Button> */}
     </Link>

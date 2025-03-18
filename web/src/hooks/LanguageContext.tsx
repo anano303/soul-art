@@ -24,7 +24,7 @@ export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) 
     const fontFamily =
       language === "en"
         ? "'supreme', sans-serif"
-        : "'BPGNinoMtavruliNormal', sans-serif";
+        : "'firaGo', sans-serif;";
     document.body.style.fontFamily = fontFamily;
   }, [language]);
 

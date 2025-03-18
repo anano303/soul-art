@@ -1,0 +1,11 @@
+$primary-color: #012645;
+
+@mixin flexCenter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+body {
+  font-family: "firaGo", sans-serif;
+  font-style: normal;
+}

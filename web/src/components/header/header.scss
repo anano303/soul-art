@@ -1,0 +1,120 @@
+/* styles/Header.scss */
+
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 20px;
+  background-color: #012645;
+  position: relative;
+
+  .logo {
+    margin-right: 5%;
+    a {
+      text-decoration: none;
+      font-size: 24px;
+      font-weight: bold;
+      color: #f2ebeb;
+    }
+  }
+
+  .main-nav {
+    flex-grow: 2;
+    ul {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      justify-content: flex-start;
+      list-style: none;
+      gap: min(10%);
+      .mobileAuth {
+        display: none;
+      }
+      a {
+        text-decoration: none;
+        color: #ffffff;
+      }
+    }
+  }
+
+  .auth-cart {
+    display: flex;
+    a {
+      white-space: nowrap;
+      text-decoration: none;
+      color: #ffffff;
+    }
+    .d-none {
+      margin-right: 20px;
+    }
+  }
+
+  .mobile-nav-btn {
+    display: none;
+  }
+
+  /* Mobile responsiveness */
+  @media (max-width: 811px) {
+    .main-nav ul {
+      display: flex;
+      flex-direction: column;
+      background-color: #012645 + cc;
+      position: absolute;
+      top: 60px;
+      right: 0;
+      border-radius: 5px;
+      box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+      max-height: 0; /* Initially collapsed */
+      overflow: hidden; /* Hide overflow */
+      transition: max-height 0.7s ease-out;
+      z-index: 999;
+      li {
+        padding: 15px 35px;
+      }
+      .mobileAuth {
+        display: flex;
+      }
+    }
+
+    .auth-cart {
+      display: none;
+    }
+
+    /* Mobile menu icon (Hamburger) */
+    .mobile-nav-btn {
+      display: inline-flex;
+      align-items: center;
+      cursor: pointer;
+      width: 1.625rem;
+      font-size: 24px;
+      z-index: 10;
+    }
+
+    .hamburger-icon {
+      font-size: 30px;
+      transition: transform 0.3s ease-in-out;
+      color: #ffffff;
+    }
+
+    .hamburger-icon.close {
+      transform: rotate(90deg); /* Rotation effect for X */
+    }
+
+    /* Toggle navigation when active */
+    &.mobile-nav-active .main-nav ul {
+      max-height: 500px;
+    }
+
+    .auth-cart {
+      display: flex;
+      .d-none,
+      span {
+        display: none;
+      }
+      a {
+        padding: 10px;
+        font-size: 1.875rem;
+      }
+    }
+  }
+}

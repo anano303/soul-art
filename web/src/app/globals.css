@@ -1,10 +1,12 @@
+@import "@fontsource/firago";
 body {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: Arial, sans-serif;
-  background-color: #f9f9f9;
-  color: #333;
+  /* background-color: #f9f9f9;
+  color: #333; */
+  font-family: "firaGo", sans-serif;
+  font-style: normal;
 }
 
 .container {
