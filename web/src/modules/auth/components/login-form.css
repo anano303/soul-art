@@ -3,7 +3,7 @@
   flex-direction: column;
   gap: 16px;
   width: 100%;
-  color: #2a5530;
+  color: #012645;
 }
 
 .login-form {
@@ -25,7 +25,7 @@ label {
 
 input {
   padding: 8px;
-  border: 1px solid #2a5530;
+  border: 1px solid #012645;
   border-radius: 4px;
   font-size: 14px;
   transition: border 0.3s ease-in-out;
@@ -33,7 +33,7 @@ input {
 }
 
 input:focus {
-  border: 2px solid #2a5530; /* უფრო სქელი და იგივე ფერის ბორდერი */
+  border: 2px solid #012645; /* უფრო სქელი და იგივე ფერის ბორდერი */
 }
 
 .error-text {
@@ -43,7 +43,7 @@ input:focus {
 
 .login-button {
   padding: 10px 20px;
-  background: linear-gradient(to left, #ec9843, #2a5530);
+  background: linear-gradient(to left, #03214b, #012645);
   background-size: 130% 100%; /* გრადიენტის ზომა */
   color: white;
   border: none;
@@ -89,7 +89,7 @@ input:focus {
   display: block;
   width: 100%;
   height: 1px;
-  background-color: #2a5530b2;
+  background-color: #012645b2;
   position: absolute;
   top: 50%;
   left: 0;
@@ -101,7 +101,7 @@ input:focus {
   position: relative;
   z-index: 1;
   font-size: 12px;
-  color: #2a5530b2;
+  color: #012645b2;
 }
 
 .social-buttons {
@@ -132,7 +132,7 @@ input:focus {
   inset: 0;
   border-radius: 4px;
   padding: 1px; /* ბორდერის სისქე */
-  background: linear-gradient(to right, #2a5530, #ec9843);
+  background: linear-gradient(to right, #012645, #03214b);
   mask: linear-gradient(white, white) content-box, linear-gradient(white, white);
   mask-composite: exclude;
   -webkit-mask: linear-gradient(white, white) content-box,
@@ -143,7 +143,7 @@ input:focus {
 }
 
 .social-button:hover::before {
-  background: linear-gradient(to left, #2a5530, #ec9843);
+  background: linear-gradient(to left, #012645, #03214b);
 }
 
 .icon {
@@ -153,11 +153,11 @@ input:focus {
 .signup-text {
   text-align: center;
   font-size: 14px;
-  color: #2a5530b2;
+  color: #012645b2;
 }
 
 .signup-link {
-  color: #2a5530;
+  color: #012645;
   text-decoration: none;
   font-weight: 600;
 }

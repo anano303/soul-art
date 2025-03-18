@@ -28,11 +28,11 @@ export function SellerRegisterForm() {
     <div className="form-container">
       <form onSubmit={onSubmit} className="form">
         <div className="input-group">
-          <label htmlFor="storeName">მაღაზიის სახელი</label>
+          <label htmlFor="storeName">მხატვრის/კომპანიის სახელი</label>
           <input
             id="storeName"
             type="text"
-            placeholder="მაღაზიის სახელი"
+            placeholder="მხატვრის/კომპანიის სახელი"
             {...registerField("storeName")}
           />
           {errors.storeName && (
@@ -41,7 +41,7 @@ export function SellerRegisterForm() {
         </div>
 
         <div className="input-group">
-          <label htmlFor="storeLogo">მაღაზიის ლოგო (არასავალდებულო)</label>
+          <label htmlFor="storeLogo"> ლოგო (არასავალდებულო)</label>
           <input
             id="storeLogo"
             type="text"
@@ -155,4 +155,4 @@ export function SellerRegisterForm() {
       </form>
     </div>
   );
-} 
+}

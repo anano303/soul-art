@@ -29,11 +29,10 @@ export default function Header() {
       <div className="logo">
         <Link href="/">
           <Image
-            className="logoImage"
             src={logo}
             width={200}
             style={{ height: "auto" }}
-            alt="logo"
+            alt="logo soulArt"
           />
         </Link>
       </div>
@@ -49,7 +48,6 @@ export default function Header() {
             <Link href="/contact">ჩემი შეკვეთები</Link>
           </li>
           <li className="mobileAuth">
-            <CartIcon />
             <UserMenu />
           </li>
         </ul>
@@ -58,9 +56,8 @@ export default function Header() {
         <div className="d-none">
           <UserMenu />
         </div>
-        <div className="d-none">
-          <CartIcon />
-        </div>
+
+        <CartIcon />
       </div>
 
       {/* Mobile Navigation */}

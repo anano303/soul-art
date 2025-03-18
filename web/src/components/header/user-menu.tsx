@@ -22,9 +22,9 @@ export default function UserMenu() {
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
 
@@ -36,9 +36,10 @@ export default function UserMenu() {
     return (
       <Link href="/login" className="button">
         <span className="icon">
-          {/* 👤 */}
-          <Image src={hunterIcon} alt="hunterIcon" width={28} height={28} />
-          </span> Sign In
+          🎭{" "}
+          {/* <Image src={hunterIcon} alt="hunterIcon" width={28} height={28} /> */}
+          შესვლა{" "}
+        </span>
       </Link>
     );
   }
@@ -48,9 +49,10 @@ export default function UserMenu() {
       <button onClick={() => setIsOpen(!isOpen)} className="button">
         <span className="icon">
           <Image src={hunterIcon} alt="hunterIcon" width={42} height={42} />
-          
+
           {/* 👤 */}
-          </span> {user.name}
+        </span>{" "}
+        {user.name}
       </button>
       {isOpen && (
         <div className="dropdown-menu">
