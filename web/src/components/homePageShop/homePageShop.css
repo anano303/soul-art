@@ -1,0 +1,57 @@
+.homePageShop{
+    padding: 2%;
+}
+/* .homePageShopH1 {
+    color: black;
+    margin-bottom: 40px;
+} */
+.productGrid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 24px;
+    padding-bottom: 50px;
+}
+
+@media screen and (max-width: 1200px) {
+    .productGrid {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 20px;
+    }
+}
+
+@media screen and (max-width: 992px) {
+    .productGrid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+    }
+}
+
+@media screen and (max-width: 768px) {
+    .homePageShop {
+        padding: 1%;
+    }
+    
+    .productGrid {
+        grid-template-columns: repeat(1, 1fr);
+        gap: 12px;
+        padding-bottom: 30px;
+    }
+}
+
+@media screen and (max-width: 480px) {
+    .homePageShop {
+        padding: 0.5%;
+    }
+    
+    .productGrid {
+        grid-template-columns: 1fr; /* მხოლოდ ერთი ქარდი ხაზში */
+        gap: 10px;
+        padding-bottom: 20px;
+    }
+
+    .forumPageLink {
+        margin: 15px auto;
+        display: block;
+        text-align: center;
+    }
+}

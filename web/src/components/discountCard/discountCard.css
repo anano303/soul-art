@@ -1,0 +1,146 @@
+.discountCard{
+  padding-bottom: 62px;
+}
+.circle-container {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 200px;
+    height: 200px;
+  }
+  
+  .circle {
+    position: relative;
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    border: 3px solid #0F1E11;
+    display: flex;
+    justify-content: center;
+    padding: 10px;
+    text-align: center;
+    background-color: white;
+  }
+  
+  .line {
+    position: absolute;
+    background-color: #0F1E11;
+  }
+  
+  .top-line {
+    width: 3px;
+    height: 20px;
+    top: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+  
+  .right-line {
+    width: 20px;
+    height: 3px;
+    top: 50%;
+    right: -20px;
+    transform: translateY(-50%);
+  }
+  
+  .bottom-line {
+    width: 3px;
+    height: 20px;
+    bottom: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+  
+  .left-line {
+    width: 20px;
+    height: 3px;
+    top: 50%;
+    left: -20px;
+    transform: translateY(-50%);
+  }
+  
+  .circle-text {
+    position: absolute;
+    color: #0F1E11;
+    font-size: 12px;
+    text-align: center;
+    text-justify: start;
+  }
+  
+  .overlay-circle {
+    position: absolute;
+    width: 140px;
+    height: 140px;
+    border-radius: 0 40% 40% ;
+    background-color: white; 
+    bottom: -58px; 
+    right: 0px;
+    overflow: hidden;
+    border: 3px solid #0F1E11;
+  }
+  .circle-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; 
+  }
+  
+@media screen and (max-width: 768px) {
+    .discountCard {
+        padding-bottom: 40px;
+    }
+
+    .circle-container {
+        width: 160px;
+        height: 160px;
+    }
+
+    .circle {
+        width: 120px;
+        height: 120px;
+    }
+
+    .overlay-circle {
+        width: 120px;
+        height: 120px;
+        bottom: -40px;
+    }
+
+    .circle-text {
+        font-size: 10px;
+    }
+
+  
+
+    .top-line, .bottom-line {
+        height: 15px;
+        top: -15px;
+    }
+
+    .right-line, .left-line {
+        width: 15px;
+    }
+}
+
+@media screen and (max-width: 480px) {
+    .circle-container {
+        width: 140px;
+        height: 140px;
+    }
+
+    .circle {
+        width: 100px;
+        height: 100px;
+    }
+
+    .overlay-circle {
+        width: 100px;
+        height: 100px;
+        bottom: -35px;
+    }
+
+    .circle-text {
+        font-size: 9px;
+    }
+}
+  

@@ -1,0 +1,96 @@
+.orders-container {
+  width: 100%;
+  background: #fff;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.orders-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.orders-title {
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.orders-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.orders-table th,
+.orders-table td {
+  padding: 12px;
+  border-bottom: 1px solid #ddd;
+  text-align: left;
+}
+
+.orders-actions {
+  text-align: right;
+}
+
+.order-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.order-badge.paid {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.order-badge.not-paid {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+.order-badge.delivered {
+  background-color: #cce5ff;
+  color: #004085;
+}
+
+.order-badge.not-delivered {
+  background-color: #fff3cd;
+  color: #856404;
+}
+
+.order-view-button {
+  padding: 6px 12px;
+  background: #007bff;
+  color: white;
+  border-radius: 4px;
+  text-decoration: none;
+  font-size: 14px;
+}
+
+.order-view-button:hover {
+  background: #0056b3;
+}
+
+.order-deliver-button {
+  padding: 6px 12px;
+  background: #28a745;
+  color: white;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.order-deliver-button:hover {
+  background: #218838;
+}
+
+.icon {
+  width: 14px;
+  height: 14px;
+  margin-right: 4px;
+}

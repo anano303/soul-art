@@ -1,0 +1,134 @@
+.hunting-main-container {
+  background-color: #ffffff;
+  color: #2a5530;
+  padding: 20px;
+  border-radius: 10px;
+  text-align: center;
+}
+
+.hunting-main-title1 {
+  color: #37241e;
+  text-align: center;
+  font-size: 32px;
+}
+.hunting-main-title {
+  color: #2a5530;
+  text-align: center;
+  font-size: 32px;
+}
+
+.hunting-main-list-title {
+  color: #34211d;
+  text-align: center;
+  font-size: 24px;
+  margin-top: 20px;
+  border-bottom: 2px solid #ec974372;
+  padding-bottom: 5px;
+}
+.hunting-main-list-category-p{
+  color: #34211d;
+  text-align: center;
+}
+
+.hunting-main-list-category {
+  color: #37241e;
+  font-size: 20px;
+  margin-top: 30px;
+  font-weight: bold;
+}
+.status {
+  text-align: center;
+}
+.hunting-main-list{
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 5px;
+  margin-left: 50vh;
+  margin-bottom: 80px;
+}
+
+.bird-item {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  /* background-color: #f9f9f9; */
+  padding: 10px;
+  border-radius: 5px;
+  color: #2a5530;
+  /* border-left: 5px solid #ec9843; */
+  /* border-bottom: 2px solid #2a55306a; */
+}
+
+.bird-item img {
+  border-radius: 10px;
+}
+
+
+.hunting-main-map-title {
+  color: #2a5530;
+  font-size: 20px;
+  margin-top: 20px;
+}
+
+.hunting-main-permit-link {
+  display: block;
+  text-align: center;
+  color: #ec9843;
+  font-size: 18px;
+  margin-top: 20px;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.hunting-main-permit-link:hover {
+  color: #37241e;
+}
+
+.hunting-main-map {
+  display: flex;
+  flex-direction: column;
+  align-content: center;
+  align-items: center;
+  justify-content: center;
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+
+}
+
+.hunting-main-map-title {
+  text-align: center;
+  font-size: 18px;
+  color: #37241E;
+  margin-bottom: 10px;
+}
+
+.hunting-main-map-image{
+  height: auto;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  max-width: 200px;
+  max-height: 100px;
+}
+
+
+.hunting-main-permit-link {
+  width: 100%;
+  display: inline-block;
+  background-color: #37241E;
+  color: #EC9843;
+  padding: 50px 0px;
+  font-size: 32px;
+  font-weight: bold;
+  border-radius: 6px;
+  text-decoration: none;
+  margin-top: 40px;
+}
+
+.hunting-main-permit-link:hover {
+  background-color: #34211d;
+  color: #e9a562;
+}
+

@@ -1,0 +1,125 @@
+.prd-card {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+}
+
+.prd-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.prd-title {
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+.prd-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.prd-btn,
+.prd-btn-outline {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.prd-btn {
+  background-color: #3b82f6;
+  color: white;
+  border: none;
+}
+
+.prd-btn-outline {
+  background: white;
+  border: 1px solid #d1d5db;
+  color: #374151;
+}
+
+.prd-icon {
+  width: 16px;
+  height: 16px;
+}
+
+.prd-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+.prd-th,
+.prd-td {
+  padding: 10px;
+  text-align: left;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.prd-th {
+  font-weight: bold;
+  background: #f9fafb;
+}
+
+.prd-th-right,
+.prd-td-right {
+  text-align: right;
+}
+
+.prd-tr:hover {
+  background: #f3f4f6;
+}
+
+.prd-td-bold {
+  font-weight: 600;
+}
+
+.prd-img-wrapper {
+  position: relative;
+  width: 40px;
+  height: 40px;
+}
+
+.prd-img {
+  object-fit: cover;
+  border-radius: 6px;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.pagination-btn {
+  padding: 0.5rem 1rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background: white;
+  cursor: pointer;
+}
+
+.pagination-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pagination-btn:hover:not(:disabled) {
+  background: #f3f4f6;
+}
+
+.pagination-info {
+  font-size: 0.875rem;
+  color: #6b7280;
+}

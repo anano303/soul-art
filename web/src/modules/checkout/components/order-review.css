@@ -1,0 +1,90 @@
+.order-review-grid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 32px;
+}
+
+.order-details {
+  grid-column: span 8;
+}
+
+.card {
+  padding: 24px;
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.section-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+
+.address-details,
+.payment-method {
+  color: #6c6c6c;
+}
+
+.order-items {
+  space-y: 16px;
+}
+
+.order-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.image-container {
+  position: relative;
+  height: 80px;
+  width: 80px;
+}
+
+.item-name {
+  font-weight: 500;
+}
+
+.item-price {
+  font-size: 0.875rem;
+  color: #6c6c6c;
+}
+
+.order-summary {
+  grid-column: span 4;
+}
+
+.summary-details {
+  margin-top: 16px;
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.summary-label {
+  color: #6c6c6c;
+}
+
+.separator {
+  border-top: 1px solid #e5e5e5;
+  margin: 16px 0;
+}
+
+.place-order-button {
+  width: 100%;
+  padding: 12px;
+  font-size: 1rem;
+  background-color: #000;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.place-order-button:hover {
+  background-color: #333;
+}

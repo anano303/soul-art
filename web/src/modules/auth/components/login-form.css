@@ -1,0 +1,179 @@
+.login-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+  color: #2a5530;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+label {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+input {
+  padding: 8px;
+  border: 1px solid #2a5530;
+  border-radius: 4px;
+  font-size: 14px;
+  transition: border 0.3s ease-in-out;
+  outline: none;
+}
+
+input:focus {
+  border: 2px solid #2a5530; /* უფრო სქელი და იგივე ფერის ბორდერი */
+}
+
+.error-text {
+  color: red;
+  font-size: 12px;
+}
+
+.login-button {
+  padding: 10px 20px;
+  background: linear-gradient(to left, #ec9843, #2a5530);
+  background-size: 130% 100%; /* გრადიენტის ზომა */
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: bold;
+  transition: background-position 0.9s ease-in-out; /* ნელი მოძრაობა */
+  background-position: right;
+}
+
+.login-button:hover {
+  background-position: left; /* ფერები ნელა იცვლება */
+}
+
+.loading-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid white;
+  border-top: 2px solid transparent;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.separator {
+  text-align: center;
+  margin: 10px 0;
+  position: relative;
+}
+
+.separator::before,
+.separator::after {
+  content: "";
+  display: block;
+  width: 100%;
+  height: 1px;
+  background-color: #2a5530b2;
+  position: absolute;
+  top: 50%;
+  left: 0;
+}
+
+.separator-text {
+  background: white;
+  padding: 0 10px;
+  position: relative;
+  z-index: 1;
+  font-size: 12px;
+  color: #2a5530b2;
+}
+
+.social-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.social-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+  background-color: #f5f5f5;
+  border: 2px solid transparent;
+  border-radius: 4px;
+  cursor: pointer;
+  width: 100%;
+  font-weight: bold;
+  color: #333;
+  transition: border 1.5s ease-in-out, color 0.5s ease-in-out;
+  background-clip: padding-box;
+  position: relative;
+}
+
+.social-button::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 4px;
+  padding: 1px; /* ბორდერის სისქე */
+  background: linear-gradient(to right, #2a5530, #ec9843);
+  mask: linear-gradient(white, white) content-box, linear-gradient(white, white);
+  mask-composite: exclude;
+  -webkit-mask: linear-gradient(white, white) content-box,
+    linear-gradient(white, white);
+  -webkit-mask-composite: xor;
+
+  transition: background-position 1.5s ease-in-out;
+}
+
+.social-button:hover::before {
+  background: linear-gradient(to left, #2a5530, #ec9843);
+}
+
+.icon {
+  margin-right: 5px;
+}
+
+.signup-text {
+  text-align: center;
+  font-size: 14px;
+  color: #2a5530b2;
+}
+
+.signup-link {
+  color: #2a5530;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.signup-link:hover {
+  text-decoration: underline;
+}
+
+.error-message {
+  margin: 10px 0;
+
+  border-radius: 4px;
+}
+
+.error-text {
+  color: #dc2626;
+  font-size: 14px;
+  margin: 0;
+}

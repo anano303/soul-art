@@ -1,0 +1,79 @@
+.UlCont {
+  display: flex;
+  flex-direction: column;
+  gap: 30px; 
+  list-style: none;
+  z-index: 2;
+}
+
+.UlCont li {
+  display: flex;
+  align-items: center;
+}
+
+.UlCont li a {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  color: #37241E;
+  padding-bottom: 5px;
+  border-bottom: 3px solid #EAEEEA;
+  gap: 10px;
+  position: relative;
+  overflow: hidden;
+}
+
+.UlCont li a:hover {
+  color: #19100d;
+  border-bottom: 3px solid #a5bda5;
+}
+
+/* მობილური სტილები */
+@media screen and (max-width: 768px) {
+  .UlCont li a span {
+    position: absolute;
+    left: 35px;
+    opacity: 0;
+    transform: translateX(-20px);
+    transition: all 0.3s ease;
+    white-space: nowrap;
+    background: white;
+    padding: 5px 10px;
+    border-radius: 4px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  }
+  
+  .UlCont li a {
+    width: 28px;
+    transition: all 0.3s ease;
+  }
+
+  /* აქტიური ლინკის სტილები */
+  .UlCont li a.active {
+    width: 150px;
+    padding-right: 15px;
+  }
+
+  .UlCont li a:hover {
+    width: 150px;
+  }
+
+  .UlCont li a.active span,
+  .UlCont li a:hover span {
+    opacity: 1;
+    transform: translateX(0);
+    pointer-events: auto;
+  }
+
+  .icon {
+    z-index: 2;
+    min-width: 20px;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .UlCont li a.active,
+  .UlCont li a:hover {
+    width: 130px;
+  }
+}

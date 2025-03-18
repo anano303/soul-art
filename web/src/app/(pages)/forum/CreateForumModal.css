@@ -1,0 +1,159 @@
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: white;
+  padding: 24px;
+  border-radius: 8px;
+  width: 100%;
+  max-width: 500px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.modal-overlay h2 {
+  font-size: 1.5rem;
+  margin-bottom: 16px;
+  color: #333;
+}
+
+.content-input {
+  width: 100%;
+  min-height: 120px;
+  padding: 12px;
+  margin: 12px 0;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  resize: vertical;
+  font-size: 1rem;
+  line-height: 1.5;
+  color: #333;
+  transition: border-color 0.3s;
+}
+
+.content-input:focus {
+  border-color: #2a5530;
+  outline: none;
+}
+
+.tags-input {
+  display: flex;
+  gap: 12px;
+  margin: 16px 0;
+  align-items: center;
+}
+
+.tags-input select,
+.tags-input button {
+  padding: 10px 16px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.tags-input select {
+  flex-grow: 1;
+}
+
+.tags-input button {
+  background: #2a5530;
+  color: white;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.tags-input button:hover {
+  background: #3e6f49;
+}
+
+.tags-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 12px 0;
+}
+
+.tag {
+  background: #f1f1f1;
+  padding: 6px 12px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.9rem;
+}
+
+.tag button {
+  background: none;
+  border: none;
+  color: #999;
+  cursor: pointer;
+  font-size: 1.2rem;
+  line-height: 1;
+}
+
+.tag button:hover {
+  color: #e60000;
+}
+
+.file-input {
+  margin: 12px 0;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background: #f9f9f9;
+  cursor: pointer;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.create-button {
+  background: #2a5530;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.create-button:hover {
+  background: #3e6f49;
+}
+
+.create-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.cancel-button {
+  background: #f3f4f6;
+  color: #666;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.cancel-button:hover {
+  background: #ddd;
+}

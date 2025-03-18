@@ -1,0 +1,63 @@
+.HomePageshead {
+    padding: 1%;
+    display: flex;
+    justify-content: space-around;
+    position: relative;
+}
+
+@media screen and (max-width: 768px) {
+    .HomePageshead {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        padding: 0.5%;
+    }
+
+    /* ზედა კონტეინერი */
+    .HomePageshead > div:nth-child(-n+2) {
+        display: flex;
+    }
+
+    /* ნავბარის კონტეინერი */
+    .HomePageshead > div:first-child {
+        width: 25%; /* შევამცირეთ სიგანე */
+        position: absolute;
+        left: 0; /* სრულიად მარცხენა კუთხეში */
+        top: 0; /* სრულიად ზედა კუთხეში */
+        z-index: 10;
+    }
+
+    /* მეინფოტოს კონტეინერი */
+    .HomePageshead > div:nth-child(2) {
+        width: 85%; /* შევამცირეთ სიგანე */
+        margin-left: auto;
+        z-index: 1;
+    }
+
+    /* დისქაუნთ ქარდების კონტეინერი */
+    .HomePageshead > div:nth-child(3) {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+        margin-top: 10px;
+    }
+}
+
+@media screen and (max-width: 480px) {
+    .HomePageshead {
+        padding: 0;
+    }
+
+    .HomePageshead > div:first-child {
+        width: 30%;
+    }
+
+    .HomePageshead > div:nth-child(2) {
+        width: 80%;
+    }
+
+    .HomePageshead > div:nth-child(3) {
+        gap: 10px;
+    }
+}

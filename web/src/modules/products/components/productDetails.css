@@ -1,0 +1,186 @@
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px 16px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 48px;
+}
+
+.image-container {
+  position: relative;
+  width: 100%;
+  padding-top: 100%;
+  background-color: #f3f3f3;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.image-wrapper {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.thumbnail-container {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+}
+
+.thumbnail {
+  position: relative;
+  width: 80px;
+  height: 80px;
+  border-radius: 6px;
+  overflow: hidden;
+  border: 1px solid transparent;
+  transition: all 0.2s ease-in-out;
+}
+
+.thumbnail.active {
+  border-color: black;
+}
+
+.thumbnail:hover {
+  transform: scale(1.05);
+}
+
+.product-info {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.brand-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 14px;
+}
+
+.brand-details {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.brand-logo {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  overflow: hidden;
+}
+
+.product-title {
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.rating-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.rating-stars {
+  display: flex;
+  gap: 2px;
+}
+
+.price {
+  font-size: 32px;
+  font-weight: bold;
+}
+
+.separator {
+  width: 100%;
+  height: 1px;
+  background-color: #e0e0e0;
+}
+
+.stock-info {
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.select-container {
+  margin-top: 8px;
+}
+
+.add-to-cart-btn {
+  width: 100%;
+  height: 48px;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background-color: black;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.add-to-cart-btn:disabled {
+  background-color: #a0a0a0;
+  cursor: not-allowed;
+}
+
+.add-to-cart-btn:hover:not(:disabled) {
+  background-color: #333;
+}
+
+.tabs {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.tabs-list {
+  display: flex;
+  width: 100%;
+}
+
+.tabs-trigger {
+  flex: 1;
+  text-align: center;
+  padding: 12px;
+  cursor: pointer;
+  border: none;
+  background-color: transparent;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.tabs-trigger.active {
+  border-bottom: 2px solid black;
+}
+
+.tab-content {
+  display: none;
+}
+
+.tab-content.active {
+  display: block;
+}
+
+.prose {
+  font-size: 14px;
+  color: #333;
+}
+.object-cover{
+max-height: 80px;
+max-width: 80px;
+}

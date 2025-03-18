@@ -1,0 +1,73 @@
+.messageContainer {
+  display: flex;
+  gap: 1rem;
+  padding: 0 1rem;
+  width: 100%;
+  max-width: 48rem;
+  opacity: 0;
+  transform: translateY(5px);
+  animation: fadeIn 0.3s forwards;
+}
+
+@keyframes fadeIn {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.iconContainer {
+  width: 2rem;
+  height: 2rem;
+  border: 1px solid;
+  border-radius: 0.25rem;
+  padding: 0.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.messageContent {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  width: 100%;
+}
+
+.markdownText {
+  color: #1c1c1c;
+}
+
+.dark .markdownText {
+  color: #d1d1d1;
+}
+
+.toolContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.pulse {
+  animation: pulseAnimation 1.5s infinite ease-in-out;
+}
+
+@keyframes pulseAnimation {
+  0% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.5;
+  }
+}
+
+.preContainer {
+  background-color: #f4f4f4;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  overflow: auto;
+}

@@ -1,0 +1,28 @@
+.forum-page {
+  padding: 5%;
+}
+
+.create-post-button {
+  background: green;
+  border: none;
+  border-radius: 5px;
+  margin-bottom: 15px;
+  padding: 15px 50px;
+  color: white;
+}
+
+.create-post-button:hover {
+  background: #17702b;
+}
+.delete-post-button {
+  background: red;
+  border: none;
+  box-shadow: 3px 3px 9px 0px;
+  color: white;
+  padding: 5px 10px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+.delete-post-button:hover {
+  background: #b22b2b;
+}

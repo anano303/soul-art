@@ -1,0 +1,8 @@
+.space-x-2 {
+  display: flex;
+  gap: 5px;
+}
+.space-x-2 button {
+  background-color: black;
+  color: white;
+}

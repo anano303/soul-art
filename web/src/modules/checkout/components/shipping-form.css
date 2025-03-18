@@ -1,0 +1,88 @@
+.shipping-form-card {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  background-color: #fff;
+}
+
+.shipping-form-header h1 {
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.shipping-form-header p {
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+.shipping-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.shipping-form label {
+  display: block;
+  font-weight: 500;
+  margin-bottom: 0.25rem;
+}
+
+.shipping-form input {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.375rem;
+  font-size: 1rem;
+}
+
+.shipping-form input:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.3);
+}
+
+.shipping-form select {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.375rem;
+  font-size: 1rem;
+  background-color: #fff;
+}
+
+.shipping-form select:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.3);
+}
+
+.shipping-form .error-text {
+  font-size: 0.875rem;
+  color: #dc2626;
+}
+
+.shipping-form-button {
+  width: 100%;
+  padding: 0.75rem;
+  background-color: #2563eb;
+  color: white;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: 0.375rem;
+  text-align: center;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.shipping-form-button:disabled {
+  background-color: #93c5fd;
+  cursor: not-allowed;
+}
+
+.shipping-form-button:hover:not(:disabled) {
+  background-color: #1e40af;
+}

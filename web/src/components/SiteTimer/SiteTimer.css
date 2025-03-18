@@ -1,0 +1,77 @@
+.site-timer-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 2px;
+  color: black;
+  text-align: center;
+  font-size: 18px;
+  gap: 20px;
+}
+
+.site-timer-text {
+  white-space: nowrap;
+}
+
+/* ანიმაციის სტილები */
+.bolt-container {
+    display: inline-block;
+    position: relative;
+  }
+  
+  .bolt-image {
+    width: 100%;
+    animation: spin 10s linear infinite;
+  }
+
+  .small-small {
+    width: 15px;
+    height: 15px;
+  }
+  
+  .small-medium {
+    width: 20px;
+    height: 20px;
+  }
+  
+  .small-large {
+    width: 30px;
+    height: 30px;
+  }
+
+  .rotate-right .bolt-image {
+    animation-direction: normal;
+  }
+  
+  .rotate-left .bolt-image {
+    animation-direction: reverse;
+  }
+
+  @keyframes spin {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  .small-anim-logo {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .small-top-bolt {
+    margin-bottom: -10px; 
+    margin-left: 60px; 
+  }
+  
+  .small-bottom-bolts {
+    display: flex;
+    gap: 0px;
+    width: 0px; 
+  }
+  

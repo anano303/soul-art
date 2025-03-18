@@ -1,0 +1,126 @@
+.usr-card {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+}
+
+.usr-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.usr-title {
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+.usr-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+.usr-th,
+.usr-td {
+  padding: 10px;
+  text-align: left;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.usr-th {
+  font-weight: bold;
+  background: #f9fafb;
+}
+
+.usr-th-right,
+.usr-td-right {
+  text-align: right;
+}
+
+.usr-tr:hover {
+  background: #f3f4f6;
+}
+
+.usr-td-bold {
+  font-weight: 600;
+}
+
+.usr-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.usr-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 5px;
+  display: flex;
+  align-items: center;
+}
+
+.usr-btn:hover {
+  background: #e5e7eb;
+  border-radius: 6px;
+}
+
+.usr-btn-danger {
+  color: red;
+}
+
+.usr-btn-danger:hover {
+  background: #fee2e2;
+}
+
+.usr-badge {
+  background: #e5e7eb;
+  color: #374151;
+  border-radius: 6px;
+  padding: 4px 8px;
+  display: flex;
+  align-items: center;
+  font-size: 12px;
+}
+
+.usr-badge-admin {
+  background: #ede9fe;
+  color: #6d28d9;
+  border-radius: 6px;
+  padding: 4px 8px;
+  display: flex;
+  align-items: center;
+  font-size: 12px;
+}
+
+.usr-icon {
+  width: 14px;
+  height: 14px;
+  margin-right: 5px;
+}
+.usr-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.create-user-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #2a5530;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.create-user-btn:hover {
+  background: #1e3d22;
+}

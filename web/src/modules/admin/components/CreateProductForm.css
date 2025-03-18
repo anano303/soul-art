@@ -1,0 +1,102 @@
+/* General form container */
+.create-product-form {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 20px;
+  background: #f9f9f9;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  border: 1px solid #2a5530;
+}
+.create-product-form h1 {
+  text-align: center;
+}
+.create-product-form form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.create-product-form label {
+  display: block;
+  font-weight: bold;
+  margin-bottom: 5px;
+  color: #2a5530;
+}
+
+.create-product-input,
+.create-product-textarea,
+.create-product-select,
+.create-product-file {
+  width: 98%;
+  padding: 10px 5px;
+  border: 1px solid #2a5530;
+  border-radius: 5px;
+  font-size: 16px;
+
+  color: #2a5530;
+}
+.create-product-select {
+  width: 100%;
+}
+
+.create-product-textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+.create-product-error {
+  color: red;
+  font-size: 14px;
+  margin-top: 5px;
+}
+
+.image-preview-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.image-preview {
+  position: relative;
+  display: inline-block;
+}
+
+.preview-image {
+  width: 100px;
+  height: 100px;
+  border-radius: 5px;
+  object-fit: cover;
+  border: 1px solid #2a5530;
+}
+
+.remove-image-button {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  background: red;
+  color: white;
+  border: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.create-product-button {
+  width: 100%;
+  margin-top: 15px;
+  padding: 12px;
+  font-size: 18px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  background: linear-gradient(to left, #ec9843, #2a5530);
+  color: white;
+  transition: background 0.3s ease;
+}
+
+.create-product-button:hover {
+  background: linear-gradient(to left, #2a5530, #ec9843);
+}

@@ -1,0 +1,38 @@
+.loading-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+  }
+  
+  .loading-image {
+    animation: spin 3.5s linear infinite;
+    /* height: 16px;
+    width: 30px; */
+  }
+  
+  @keyframes spin {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  
+  .loading-text {
+    font-size: 18px;
+    color: rgba(80, 58, 17, 0.959);
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    min-width: 100px; 
+    max-width: 100px; 
+}
+  
+  .dots {
+    display: inline-block;
+    width: 20px;
+    text-align: left;
+  }
+  

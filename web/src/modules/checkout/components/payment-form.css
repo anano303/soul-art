@@ -1,0 +1,105 @@
+.card {
+  padding: 24px;
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.text-2xl {
+  font-size: 1.5rem;
+}
+
+.font-semibold {
+  font-weight: 600;
+}
+
+.text-muted-foreground {
+  color: #6c6c6c;
+}
+
+.space-y-6 > * + * {
+  margin-top: 1.5rem;
+}
+
+.form-item {
+  margin-bottom: 16px;
+}
+
+.form-label {
+  display: block;
+  font-weight: 500;
+  margin-bottom: 8px;
+}
+
+.form-control {
+  display: block;
+}
+
+input[type="radio"].sr-only {
+  display: none;
+}
+
+.grid {
+  display: grid;
+}
+
+.grid-cols-2 {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.gap-4 {
+  gap: 16px;
+}
+
+.btn {
+  padding: 12px;
+  font-size: 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  border: none;
+}
+
+.btn-primary {
+  background-color: #000;
+  color: white;
+}
+
+.btn-primary:hover {
+  background-color: #333;
+}
+
+.border {
+  border: 1px solid #ddd;
+}
+
+.rounded-lg {
+  border-radius: 8px;
+}
+
+.p-4 {
+  padding: 16px;
+}
+
+.cursor-pointer {
+  cursor: pointer;
+}
+
+.hover\:border-primary:hover {
+  border-color: #0070f3;
+}
+
+.block {
+  display: block;
+}
+
+.flex {
+  display: flex;
+}
+
+.items-center {
+  align-items: center;
+}
+
+.space-y-2 > * + * {
+  margin-top: 8px;
+}
