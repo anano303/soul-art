@@ -35,8 +35,17 @@ export class Forum extends Document {
   @Prop({
     type: [String],
     enum: {
-      values: ['Fishing', 'Camping', 'Hunting'],
-      message: 'Tags must be one of: Fishing, Camping, Hunting',
+      values: [
+        'პეიზაჟი',
+        'პორტრეტი',
+        'აბსტრაქცია',
+        'შავ-თეთრი',
+        'ანიმაციური',
+        'ციფრული ილუსტრაციები',
+        'სხვა',
+      ],
+      message:
+        'Tags must be one of: პეიზაჟი, პორტრეტი, აბსტრაქცია,შავ-თეთრი,ანიმაციური,ციფრული ილუსტრაციები,სხვა',
     },
     required: true,
   })

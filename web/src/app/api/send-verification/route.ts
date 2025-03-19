@@ -48,7 +48,7 @@ export async function POST(req: Request) {
 
   const mailOptions = {
     // from: process.env.EMAIL_USER,
-    from: `"FishHunt" <${process.env.EMAIL_USER}>`,
+    from: `"SoulArt" <${process.env.EMAIL_USER}>`,
     to: email,
     subject: "Your Verification Code",
     text: `Your verification code is: ${verificationCode}`,

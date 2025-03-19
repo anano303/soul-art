@@ -1,8 +1,8 @@
 {
   "name": "server",
   "version": "0.0.1",
-  "description": "E-commerce FishHunt Server",
-  "author": "FishHunt",
+  "description": "E-commerce SoulArt Server",
+  "author": "SoulArt",
   "private": true,
   "license": "UNLICENSED",
   "scripts": {

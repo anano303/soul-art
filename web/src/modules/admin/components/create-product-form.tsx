@@ -11,7 +11,15 @@ import "./CreateProductForm.css";
 import Image from "next/image";
 // import { fetchWithAuth } from "@/lib/fetch-with-auth";
 
-const categories = ["Fishing", "Hunting", "Camping", "Other"];
+const categories = [
+  "პეიზაჟი",
+  "პორტრეტი",
+  "აბსტრაქცია",
+  "შავ-თეთრი",
+  "ანიმაციური",
+  "ციფრული ილუსტრაციები",
+  "სხვა",
+];
 
 interface CreateProductFormProps {
   initialData?: ProductFormData & { _id?: string };

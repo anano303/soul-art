@@ -5,7 +5,15 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "@/hooks/use-toast";
 import "./CreateForumModal.css";
 
-const validTags = ["Fishing", "Camping", "Hunting"]; // Valid tags defined by the backend
+const validTags = [
+  "პეიზაჟი",
+  "პორტრეტი",
+  "აბსტრაქცია",
+  "შავ-თეთრი",
+  "ანიმაციური",
+  "ციფრული ილუსტრაციები",
+  "სხვა",
+]; // Valid tags defined by the backend
 
 interface CreateForumModalProps {
   isOpen: boolean;
@@ -29,11 +37,11 @@ const CreateForumModal = ({ isOpen, onClose }: CreateForumModalProps) => {
       throw new Error("All tags' elements must be unique");
     }
 
-    // Ensure tags are valid (Fishing, Camping, or Hunting)
+    // Ensure tags are valid
     tags.forEach((tag) => {
       if (!validTags.includes(tag)) {
         throw new Error(
-          `Tag '${tag}' is not valid. Valid tags are: Fishing, Camping, Hunting`
+          `Tag '${tag}' is not valid. Valid tags are: პეიზაჟი,პორტრეტი,აბსტრაქცია,შავ-თეთრი,ანიმაციური,ციფრული ილუსტრაციები,სხვა`
         );
       }
     });

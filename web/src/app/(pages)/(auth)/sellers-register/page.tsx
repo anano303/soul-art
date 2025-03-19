@@ -5,9 +5,9 @@ export default function SellerRegisterPage() {
   return (
     <AuthLayout
       title="Seller Registration"
-      subtitle="Register your store and start selling on FishHunt!"
+      subtitle="Register your store and start selling on SoulArt!"
     >
       <SellerRegisterForm />
     </AuthLayout>
   );
-} 
+}
