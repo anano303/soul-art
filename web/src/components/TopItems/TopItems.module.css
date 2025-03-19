@@ -9,9 +9,13 @@
 }
 
 .fisher {
-  height: 50px;
-  width: auto;
-  align-self: flex-start;
+  height: 90%;
+    width: 120px;
+    align-self: flex-end;
+    position: absolute;
+    z-index: 999;
+    bottom:5px;
+    background: transparent;
 }
 
 .scroller {
