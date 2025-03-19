@@ -3,8 +3,6 @@
 import { useState } from "react";
 import { useCart } from "@/modules/cart/context/cart-context";
 import { useToast } from "@/hooks/use-toast";
-import cartIcon from "../../../assets/icons/fishing-net.png";
-import Image from "next/image";
 
 
 interface AddToCartButtonProps {
@@ -13,7 +11,11 @@ interface AddToCartButtonProps {
   className?: string;
 }
 
-export function AddToCartButton({ productId, countInStock, className }: AddToCartButtonProps) {
+export function AddToCartButton({
+  productId,
+  countInStock,
+  className,
+}: AddToCartButtonProps) {
   const { addItem } = useCart();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
@@ -53,11 +55,19 @@ export function AddToCartButton({ productId, countInStock, className }: AddToCar
   return (
     <div className="cart-actions">
       <div className="quantity-container">
-        <button className="quantity-button" onClick={decreaseQuantity} disabled={quantity <= 1}>
+        <button
+          className="quantity-button"
+          onClick={decreaseQuantity}
+          disabled={quantity <= 1}
+        >
           -
         </button>
         <span className="quantity-input">{quantity}</span>
-        <button className="quantity-button" onClick={increaseQuantity} disabled={quantity >= countInStock}>
+        <button
+          className="quantity-button"
+          onClick={increaseQuantity}
+          disabled={quantity >= countInStock}
+        >
           +
         </button>
       </div>
@@ -68,8 +78,8 @@ export function AddToCartButton({ productId, countInStock, className }: AddToCar
         onClick={handleAddToCart}
       >
         {/* <HiOutlineShoppingBag size={20} /> */}
-        <Image src={cartIcon} alt="Cart Icon" width={28} height={28} />
-        {isOutOfStock ? "Out of Stock" : loading ? "Adding..." : "Add to Cart"}
+        <span>🛒</span> 
+        {isOutOfStock ? "არ არის მარაგში" : loading ? "Adding..." : "კალათაში დამატება"}
       </button>
     </div>
   );

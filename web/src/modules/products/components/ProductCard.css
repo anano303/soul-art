@@ -1,13 +1,13 @@
 .product-card {
+  font-family: firaGo, sans-serif;
   display: flex;
   flex-direction: column;
-  /* width: calc(20% - 20px); */
   min-width: 20vh;
   padding: 15px;
   border-radius: 8px;
   overflow: hidden;
-  background-color: #2a553020;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  background-color: #012645;
+  box-shadow: 0 4px 10px #012645;
   transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
   text-decoration: none;
   margin: 0px;
@@ -18,15 +18,13 @@
 
 .product-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 6px 15px #043761;
 }
 
 .product-image {
   position: relative;
   width: 100%;
   max-height: 80px;
-  /* background-color: #EC9843; */
-  border: 1px solid #012645;
   border-radius: 8px;
   overflow: hidden;
 }
@@ -38,7 +36,7 @@
 }
 
 .product-info {
-  /* padding: 5px; */
+  margin-top: 5%;
   display: flex;
   flex-direction: column;
   min-height: 130px;
@@ -67,25 +65,26 @@
 .product-price {
   font-weight: 900;
   color: #012645;
+  white-space: nowrap;
 }
 
 .product-rating {
   display: flex;
   align-items: center;
-  color: #10324e;
+  color: #012645;
 }
 
 .quantity-container {
   display: flex;
   align-items: center;
-  background-color: #012645c4;
-  padding: 4px;
-  border-radius: 6px;
+  background-color: #ff6f61;
+  padding: 2px;
+  border-radius: 10px;
   width: fit-content;
 }
 
 .quantity-button {
-  background-color: #ec9843;
+  background-color: #ff6f61;
   color: white;
   border: none;
   padding: 2.5px 6px;
@@ -111,10 +110,11 @@
 }
 
 .addButtonCart {
+  font-family: firaGo, sans-serif;
   background: linear-gradient(to left, #012645, #1b055b);
   color: white;
   border: none;
-  padding: 12px;
+  padding: 4px;
   font-size: 16px;
   font-weight: 600;
   cursor: pointer;
@@ -127,6 +127,10 @@
   width: 100%;
   margin-top: 12px;
 }
+.addButtonCart span {
+  font-size: 24px;
+  margin-bottom: 5px;
+}
 
 /* .addButtonCart:hover {
   background: linear-gradient(to right, ##012645, #EC9843);
@@ -137,20 +141,9 @@
   cursor: not-allowed;
 }
 
-@media (max-width: 1024px) {
-  .product-card {
-    width: calc(33% - 20px);
-  }
-}
-
 @media (max-width: 768px) {
-  .product-card {
-    width: calc(50% - 20px);
-  }
-}
-
-@media (max-width: 480px) {
-  .product-card {
-    width: 100%;
+  .priceAndRaiting {
+    display: flex;
+    gap: 20%;
   }
 }

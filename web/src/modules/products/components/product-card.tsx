@@ -32,10 +32,10 @@ export function ProductCard({ product }: ProductCardProps) {
           <h3 className="product-name">{product.name}</h3>
           <div className="product-details">
             <div className="priceAndRaiting">
-              <p className="product-price">${product.price}</p>
+              <p className="product-price">{product.price} ₾ </p>
               <div className="product-rating">
                 <span>⭐</span>
-                <span className="rating-text">
+                <span className="rating-text" style={{ whiteSpace: "nowrap" }}>
                   {product.rating.toFixed(1)} ({product.numReviews})
                 </span>
               </div>

@@ -31,7 +31,7 @@ const HomePageShop = () => {
   if (isLoading) {
     return (
       <div className="homePageShop">
-        <h1 className="homePageForumH1">Shop</h1>
+        <h1 className="homePageForumH1">ნამუშევრები</h1>
         <div className="productGrid">
           {Array.from({ length: 8 }).map((_, i) => (
             <ProductCardSkeleton key={i} />
@@ -46,10 +46,8 @@ const HomePageShop = () => {
       <h1 className="homePageForumH1">Shop</h1>
       <div className="productGrid">
         {products.map((product) => (
-          <div key={product._id} style={{ display: 'block' }}>
-            <ProductCard 
-              product={product}
-            />
+          <div key={product._id} style={{ display: "block" }}>
+            <ProductCard product={product} />
           </div>
         ))}
       </div>
