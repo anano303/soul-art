@@ -1,4 +1,4 @@
-.logo {
+/* .logo {
   position: absolute;
   top: 20px;
   left: 20px;
@@ -6,7 +6,7 @@
   font-weight: bold;
   text-decoration: none;
   color: black;
-}
+} */
 .auth-layout {
   height: 100vh;
   display: flex;
