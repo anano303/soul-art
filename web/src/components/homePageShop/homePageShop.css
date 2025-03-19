@@ -41,6 +41,7 @@
 
 @media screen and (max-width: 480px) {
   .productGrid {
+    width: 90%;
     grid-template-columns: 1fr; /* მხოლოდ ერთი ქარდი ხაზში */
     gap: 10px;
     padding-bottom: 20px;
