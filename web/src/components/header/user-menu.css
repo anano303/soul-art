@@ -72,4 +72,7 @@
     position: static;
     transform: translateY(-50%);
   }
+  .icon {
+    z-index: 0;
+  }
 }
