@@ -55,17 +55,28 @@ export class AuthService {
     await user.save();
   }
 
-  async singInWithGoogle(user) {
-    let existUser = await this.userModel.findOne({ email: user.email });
+  async singInWithGoogle(googleUser) {
+    let existUser = await this.userModel.findOne({ email: googleUser.email });
+
+    console.log('🆕 ახალი მომხმარებლის რეგისტრაცია Google-ით:', googleUser);
+
     if (!existUser) {
-      existUser = await this.userModel.create({
-        ...user,
+      const newUser = new this.userModel({
+        email: googleUser.email,
+        name: googleUser.name || 'Google User',
+        googleId: googleUser.id || googleUser.sub, // Google ID უნდა შევინახოთ
         role: Role.User,
       });
+
+      await newUser.save(); // ⬅️ აქამდე უკვე აქვს googleId მნიშვნელობა, ამიტომ password არ ითვლება required
+
+      existUser = newUser;
+      console.log('✅ ახალი მომხმარებელი წარმატებით დაემატა:', existUser);
     }
 
     const { tokens, user: userData } = await this.login(existUser);
 
+    console.log('✅ გენერირებული access_token და refresh_token:', tokens);
     return { tokens, user: userData };
   }
 

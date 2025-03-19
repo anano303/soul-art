@@ -123,11 +123,12 @@ export class AuthController {
     @Res({ passthrough: true }) res: Response,
   ) {
     try {
-      const { tokens, user } = await this.authService.singInWithGoogle(
-        req.user,
-      );
-
-      // დავაყენოთ ქუქიები
+      const { tokens, user } = await this.authService.singInWithGoogle({
+        email: req.user.email,
+        name: req.user.name || 'Google User', // 👈 თუ სახელი არ არის, default მნიშვნელობა
+        id: req.user.id,
+      });
+      console.log('🍪 Setting cookies:', tokens);
       res.cookie(
         'access_token',
         tokens.accessToken,
@@ -138,15 +139,12 @@ export class AuthController {
         tokens.refreshToken,
         cookieConfig.refresh.options,
       );
-
-      // გადავამისამართოთ მთავარ გვერდზე
-      res.redirect(`${process.env.ALLOWED_ORIGINS}/`);
+      console.log('✅ Cookies set successfully');
+      res.redirect(${process.env.ALLOWED_ORIGINS}/);
     } catch (error) {
       console.error('Google auth error:', error);
-      res.redirect(`${process.env.ALLOWED_ORIGINS}/login?error=auth_failed`);
+      res.redirect(${process.env.ALLOWED_ORIGINS}/login?error=auth_failed);
     }
-  }
-
   @Post('logout')
   @UseGuards(JwtAuthGuard)
   async logout(
