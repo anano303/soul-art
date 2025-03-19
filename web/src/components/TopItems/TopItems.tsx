@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import styles from "./TopItems.module.css";
 import noPhoto from "../../assets/nophoto.webp";
-import fisher from "../../assets/fishing-rods-fly-fishing-clip-art-fishing-pole-70c32f173f79b4fbb4f724627b2f73b9.png";
+import fisher from "./world-art-day.gif";
 import needle from "../../assets/fish-hook-circle-hook-fishing-bait-hooks-cbc2947b1d4849fa29ae5d039fbc8297.png";
 import { useQuery } from "@tanstack/react-query";
 import { fetchWithAuth } from "@/lib/fetch-with-auth";
@@ -38,7 +38,12 @@ const TopItems: React.FC = () => {
   }, [topProducts]);
 
   if (isLoading) {
-    return <div className={styles.container}> <LoadingAnim/> </div>;
+    return (
+      <div className={styles.container}>
+        {" "}
+        <LoadingAnim />{" "}
+      </div>
+    );
   }
 
   return (
