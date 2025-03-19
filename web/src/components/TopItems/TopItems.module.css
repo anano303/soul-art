@@ -64,7 +64,7 @@
 
 .hook {
   height: 20px;
-  width: auto;
+  /* width: auto; */
 }
 
 .productNameWrapper {
