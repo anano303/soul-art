@@ -7,7 +7,7 @@
   cursor: pointer;
   font-size: 16px;
   text-decoration: none;
-  color: black;
+  color: #e0d849;
 }
 
 .icon {
@@ -64,5 +64,13 @@
 @keyframes spin {
   to {
     transform: rotate(360deg);
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .dropdown-menu {
+    top: auto;
+    right: 1px;
+    bottom: 0;
   }
 }
