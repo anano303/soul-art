@@ -43,7 +43,7 @@ const HomePageShop = () => {
 
   return (
     <div className="homePageShop">
-      <h1 className="homePageForumH1">Shop</h1>
+      <h1 className="homePageForumH1">ნამუშევრები</h1>
       <div className="productGrid">
         {products.map((product) => (
           <div key={product._id} style={{ display: "block" }}>
