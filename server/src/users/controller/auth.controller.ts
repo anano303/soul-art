@@ -139,12 +139,15 @@ export class AuthController {
         tokens.refreshToken,
         cookieConfig.refresh.options,
       );
-      console.log('✅ Cookies set successfully');
-      res.redirect(${process.env.ALLOWED_ORIGINS}/);
+
+      // გადავამისამართოთ მთავარ გვერდზე
+      res.redirect(`${process.env.ALLOWED_ORIGINS}/`);
     } catch (error) {
       console.error('Google auth error:', error);
-      res.redirect(${process.env.ALLOWED_ORIGINS}/login?error=auth_failed);
+      res.redirect(`${process.env.ALLOWED_ORIGINS}/login?error=auth_failed`);
     }
+  }
+
   @Post('logout')
   @UseGuards(JwtAuthGuard)
   async logout(
