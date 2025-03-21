@@ -124,24 +124,24 @@ export function AdminOrderDetails({ order }: AdminOrderDetailsProps) {
             <h2>Order Summary</h2>
             <div className="summary-item">
               <span>Items</span>
-              <span>${order.itemsPrice.toFixed(2)}</span>
+              <span>₾{order.itemsPrice.toFixed(2)}</span>
             </div>
             <div className="summary-item">
               <span>Shipping</span>
               <span>
                 {order.shippingPrice === 0
                   ? "Free"
-                  : `$${order.shippingPrice.toFixed(2)}`}
+                  : `₾${order.shippingPrice.toFixed(2)}`}
               </span>
             </div>
             <div className="summary-item">
               <span>Tax</span>
-              <span>${order.taxPrice.toFixed(2)}</span>
+              <span>₾{order.taxPrice.toFixed(2)}</span>
             </div>
             <hr />
             <div className="summary-total">
               <span>Total</span>
-              <span>${order.totalPrice.toFixed(2)}</span>
+              <span>₾{order.totalPrice.toFixed(2)}</span>
             </div>
           </div>
         </div>

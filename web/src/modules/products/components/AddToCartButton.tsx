@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useCart } from "@/modules/cart/context/cart-context";
 import { useToast } from "@/hooks/use-toast";
+import "./productCard.css";
 
 
 interface AddToCartButtonProps {

@@ -16,6 +16,13 @@
   gap: 24px;
   padding-bottom: 50px;
 }
+.see-more-btn{
+  border: none;
+    background: transparent;
+    color: #012645;
+    font-weight: bold;
+    float: right;
+}
 
 @media screen and (max-width: 1200px) {
   .productGrid {

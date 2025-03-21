@@ -7,14 +7,13 @@
 
 .cartIconsSpan {
   position: relative;
-  top: -36px;
+  top: -23px;
   right: -30px;
   border-radius: 50%;
-  background-color: white;
   font-size: 22px;
   font-style: bold;
-  color: #ec9843;
+  color: yellow;
   padding: 2px 4px;
 
-  border: 1px solid #ec9843;
+  border: 1px solid yellow;
 }

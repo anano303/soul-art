@@ -1,66 +1,70 @@
+"use client";
+
+import { useEffect, useState, useRef } from "react";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import { ProductGrid } from "@/modules/products/components/product-grid";
 import { getProducts } from "@/modules/products/api/get-products";
-import { getVisiblePages } from "@/lib/utils";
-import Link from "next/link";
+import { Product } from "@/types";
 
-interface HomePageProps {
-  searchParams: Promise<{ page?: string }>;
-}
+export default function Home() {
+  const [products, setProducts] = useState<Product[]>([]);
+  const loader = useRef<HTMLDivElement | null>(null);
 
-export default async function home({ searchParams }: HomePageProps) {
-  const { page } = await searchParams;
-  const currentPage = Number(page) || 1;
-  const { items: products, pages } = await getProducts(currentPage, 10);
+  const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery({
+    queryKey: ["products"],
+    queryFn: async ({ pageParam = 1 }) => {
+      const response = await getProducts(pageParam, 10);
+      return response;
+    },
+    getNextPageParam: (lastPage, allPages) => {
+      return lastPage.pages > allPages.length ? allPages.length + 1 : undefined;
+    },
+    initialPageParam: 1,
+  });
 
-  const visiblePages = getVisiblePages(currentPage, pages);
+  useEffect(() => {
+    if (data) {
+      const allProducts = data.pages.flatMap((page) => page.items);
+      setProducts(allProducts);
+    }
+  }, [data]);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasNextPage) {
+          fetchNextPage().then(() => {
+            const nextPage = data?.pages ? data.pages.length + 1 : 1;
+            window.history.pushState(null, '', `/shop/?page=${nextPage}`);
+          });
+        }
+      },
+      { threshold: 1.0 }
+    );
+
+    if (loader.current) {
+      observer.observe(loader.current);
+    }
+
+    return () => {
+      if (loader.current) {
+        observer.unobserve(loader.current);
+      }
+    };
+  }, [hasNextPage, fetchNextPage, data]);
+
+  if (isLoading && !data) return <div>იტვირთება...</div>;
 
   return (
     <div className="container">
       <div className="content">
-        <h1 className="title">Latest Products</h1>
+        <h1 className="title"> ნამუშევრები </h1>
 
         <ProductGrid products={products} />
 
-        {/* პაგინაცია */}
-        {pages > 1 && (
-          <div className="pagination">
-            <Link
-              href={`/shop/?page=${currentPage - 1}`}
-              className={`pagination-button ${
-                currentPage === 1 ? "disabled" : ""
-              }`}
-            >
-              Previous
-            </Link>
-
-            {visiblePages.map((pageNum, idx) =>
-              pageNum === null ? (
-                <span key={`ellipsis-${idx}`} className="pagination-ellipsis">
-                  ...
-                </span>
-              ) : (
-                <Link
-                  key={pageNum}
-                  href={`/shop/?page=${pageNum}`}
-                  className={`pagination-button ${
-                    currentPage === pageNum ? "active" : ""
-                  }`}
-                >
-                  {pageNum}
-                </Link>
-              )
-            )}
-
-            <Link
-              href={`/shop/?page=${currentPage + 1}`}
-              className={`pagination-button ${
-                currentPage === pages ? "disabled" : ""
-              }`}
-            >
-              Next
-            </Link>
-          </div>
-        )}
+        <div ref={loader} className="loading">
+          {isFetchingNextPage && <div>იტვირთება მეტი...</div>}
+        </div>
       </div>
     </div>
   );

@@ -109,16 +109,16 @@ export function ProductDetails({ product }: ProductDetailsProps) {
             <span className="text-gray-400">{product.numReviews} reviews</span>
           </div>
 
-          <div className="price">${product.price}</div>
+          <div className="price">₾{product.price}</div>
 
           <div className="separator"></div>
 
           <div className="stock-info">
             {isOutOfStock ? (
-              <div className="text-red-500">Out of Stock</div>
+              <div className="text-red-500">არ არის მარაგში</div>
             ) : (
               <div>
-                <div className="text-green-600">In Stock</div>
+                <div className="text-green-600">მარაგშია</div>
                 <label className="select-container">
                   Quantity:
                   <select
