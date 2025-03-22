@@ -40,6 +40,7 @@ interface PostProps {
   likes: number;
   isLiked: boolean;
   isAuthorized: boolean;
+  canModify: boolean;
 }
 
 const ForumPost = ({
@@ -54,6 +55,7 @@ const ForumPost = ({
   likes,
   isLiked,
   isAuthorized,
+  
 }: PostProps) => {
   const [newComment, setNewComment] = useState("");
   const [editingComment, setEditingComment] = useState<string | null>(null);
