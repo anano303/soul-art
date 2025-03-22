@@ -197,3 +197,24 @@
 max-height: 80px;
 max-width: 80px;
 }
+
+.space-y-6{
+
+  display: flex;
+justify-content: space-around;
+
+margin-top: 20px;
+}
+
+
+
+@media screen and (max-width:768px) {
+  .grid {
+    width:90%;
+    grid-template-columns: 1fr ;
+    justify-self: center;
+}
+.brand-container{
+  flex-wrap: wrap;
+}
+}
