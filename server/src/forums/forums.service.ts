@@ -58,6 +58,7 @@ export class ForumsService {
 
     const forumData = await this.forumModel
       .find()
+      .sort({ createdAt: -1 }) 
       .skip((page - 1) * limit)
       .limit(limit)
       .populate('user', 'name _id role')

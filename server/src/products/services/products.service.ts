@@ -60,6 +60,7 @@ export class ProductsService {
     const count = await this.productModel.countDocuments(searchQuery);
     const products = await this.productModel
       .find(searchQuery)
+      .sort({ createdAt: -1 }) 
       .limit(pageSize)
       .skip(pageSize * (currentPage - 1));
 
