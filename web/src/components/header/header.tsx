@@ -1,25 +1,18 @@
 "use client";
 
 import React, { useState } from "react";
-// import { LanguageContext } from "../../hooks/LanguageContext";
 import Image from "next/image";
-// import geoFlag from "../../assets/geoFlag.png";
-// import engFlag from "../../assets/engFlag.png";
 import Link from "next/link";
 import logo from "../../assets/Images/logo white.png";
-
 import { CartIcon } from "@/modules/cart/components/cart-icon";
 import "./header.scss";
 import UserMenu from "./user-menu";
+import { useUser } from "@/modules/auth/hooks/use-user";
 
 export default function Header() {
   const [isNavOpen, setIsNavOpen] = useState(false);
-  // const { language, setLanguage } = useContext(LanguageContext); // ენის კონტროლი
+  const { user } = useUser();
 
-  // const handleLangClick = () => {
-  //   const newLanguage = language === "ge" ? "en" : "ge"; // ენების გადართვა
-  //   setLanguage(newLanguage); // ახალი ენის დაყენება
-  // };
   const toggleNav = () => {
     setIsNavOpen((prevState) => !prevState); // Toggle navigation visibility
   };
@@ -39,13 +32,15 @@ export default function Header() {
       <nav className="main-nav">
         <ul>
           <li>
-            <Link href="/artists">გაყიდე ნახატები</Link>
+            <Link href={user?.role === "seller" ? "/admin/products?seller=true" : "/sellers-register"}>
+              {user?.role === "seller" ? "ჩემი ნახატები" : "გაყიდე ნახატები"}
+            </Link>
           </li>
           <li>
-            <Link href="/artworks">შეიძინე ნახატები</Link>
+            <Link href="/shop">შეიძინე ნახატები</Link>
           </li>
           <li>
-            <Link href="/contact">ჩემი შეკვეთები</Link>
+            <Link href="/profile/orders">ჩემი შეკვეთები</Link>
           </li>
           <li className="mobileAuth">
             <UserMenu />

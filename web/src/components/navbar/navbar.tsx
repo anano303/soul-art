@@ -10,9 +10,7 @@ import type { StaticImageData } from "next/image"; // StaticImageData ტიპ�
 import "./navbar.css";
 
 import homeIcon from "../../assets/icons/home.png";
-import fishing from "../../assets/icons/fishing.png";
-import hunting from "../../assets/icons/hunting.png";
-import camping from "../../assets/icons/camping.png";
+
 import shopping from "../../assets/icons/shopping.png";
 import video from "../../assets/icons/video.png";
 import forum from "../../assets/icons/forum.png";
@@ -31,9 +29,7 @@ const Navbar: React.FC = () => {
 
   const menuItems: MenuItem[] = [
     { href: "/", text: TEXTS[language].home, icon: homeIcon },
-    { href: "/fishing", text: "Fishing", icon: fishing },
-    { href: "/hunting", text: "Hunting", icon: hunting },
-    { href: "/camping", text: "Camping", icon: camping },
+  
     { href: "/shop", text: "Shopping", icon: shopping },
     { href: "/video", text: "Video", icon: video },
     { href: "/forum", text: "Forum", icon: forum },
