@@ -9,6 +9,7 @@ import { Role } from '@/types/role.enum';
       ret.id = ret._id;
       delete ret.__v;
       delete ret.password;
+      ret.createdAt = ret.createdAt;
     },
   },
 })
@@ -24,6 +25,11 @@ export class User {
 
   @Prop({ type: String, enum: Role, default: Role.User })
   role: Role;
+  @Prop()
+  createdAt?: Date;
+
+  @Prop()
+  updatedAt?: Date;
 
   @Prop({ type: String, default: null })
   refreshToken?: string | null;
@@ -55,6 +61,7 @@ export class User {
 
   @Prop()
   passwordResetExpires?: Date;
+  
 }
 
 export type UserDocument = User & Document;

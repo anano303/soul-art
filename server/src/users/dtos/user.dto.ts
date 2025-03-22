@@ -18,4 +18,10 @@ export class UserDto {
 
   @Expose()
   accessToken?: string;
+  
+  @Expose()
+  createdAt!: Date;
+
+  @Expose()
+  updatedAt!: Date;
 }

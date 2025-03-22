@@ -103,7 +103,7 @@ export function UsersList() {
                 )}
               </td>
               <td className="usr-td">
-                {new Date(user.createdAt).toLocaleDateString()}
+              {new Date(user.createdAt).toLocaleDateString() || "არასწორი თარიღი"}
               </td>
               <td className="usr-td usr-td-right">
                 <div className="usr-actions">
