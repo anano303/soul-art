@@ -172,20 +172,31 @@ export function CreateProductForm({ initialData }: CreateProductFormProps) {
     }
 
     try {
-      const method = initialData?._id ? "PUT" : "POST";
-      const url = initialData?._id
-        ? `${process.env.NEXT_PUBLIC_API_URL}/products/${initialData._id}`
-        : `${process.env.NEXT_PUBLIC_API_URL}/products`;
+  const method = initialData?._id ? "PUT" : "POST";
+  const url = initialData?._id
+    ? `/products/${initialData._id}`
+    : "/products";
 
-      const response = await apiClient.post(url, formDataToSend, {
-        headers: {
-          Cookie: `access_token=${document.cookie
-            .split("; ")
-            .find((row) => row.startsWith("access_token="))
-            ?.split("=")[1] || ""
-            }`,
-        }
-      });
+  console.log("Request Method:", method); // შესამოწმებლად
+
+  const response = await apiClient({
+    method, 
+    url,
+    data: formDataToSend,
+    headers: {
+      Cookie: `access_token=${document.cookie
+        .split("; ")
+        .find((row) => row.startsWith("access_token="))
+        ?.split("=")[1] || ""
+      }`,
+    }
+  });
+
+  console.log("Response:", response.data);
+} catch (error) {
+  console.error("Error:", error);
+}
+
 
       if (response.status >= 300 || response.status < 200) {
         throw new Error(
