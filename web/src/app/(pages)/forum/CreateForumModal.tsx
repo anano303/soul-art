@@ -58,9 +58,7 @@ const CreateForumModal = ({ isOpen, onClose }: CreateForumModalProps) => {
         const validatedTags = validateTags(tags);
 
         let body;
-        const headers: HeadersInit = {
-          "Content-Type": "multipart/form-data",
-        };
+        const headers: HeadersInit = {};
 
         if (image) {
           // Compress the image before uploading
@@ -78,10 +76,10 @@ const CreateForumModal = ({ isOpen, onClose }: CreateForumModalProps) => {
           formData.append("file", compressedImage);
 
           body = formData;
-          delete headers["Content-Type"]; // Let browser set multipart headers
         } else {
           // Send as JSON when there's no file
           body = JSON.stringify({ content, tags: validatedTags });
+          headers["Content-Type"] = "application/json";
         }
 
         const response = await fetch(
