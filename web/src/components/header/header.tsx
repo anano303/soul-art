@@ -32,7 +32,7 @@ export default function Header() {
       <nav className="main-nav">
         <ul>
           <li>
-            <Link href={user?.role === "seller" ? "/admin/products?seller=true" : "/sellers-register"}>
+            <Link href={user?.role === "seller" ? "/admin/products" : "/sellers-register"}>
               {user?.role === "seller" ? "ჩემი ნახატები" : "გაყიდე ნახატები"}
             </Link>
           </li>
