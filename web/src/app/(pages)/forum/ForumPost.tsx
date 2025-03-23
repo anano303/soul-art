@@ -6,6 +6,7 @@ import Image from "next/image";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "@/hooks/use-toast";
 import { fetchWithAuth } from "@/lib/fetch-with-auth";
+import imageCompression from "browser-image-compression";
 
 interface Comment {
   id: string;
@@ -55,13 +56,14 @@ const ForumPost = ({
   likes,
   isLiked,
   isAuthorized,
-  
 }: PostProps) => {
   const [newComment, setNewComment] = useState("");
   const [editingComment, setEditingComment] = useState<string | null>(null);
   const [editText, setEditText] = useState("");
   const [isEditingPost, setIsEditingPost] = useState(false);
   const [editedPostText, setEditedPostText] = useState(text);
+  const [editedPostImage, setEditedPostImage] = useState<File | null>(null);
+  const [editedPostTags, setEditedPostTags] = useState<string[]>(category);
   const queryClient = useQueryClient();
 
   const [likesCount, setLikes] = useState(likes);
@@ -71,6 +73,8 @@ const ForumPost = ({
     [key: string]: boolean;
   }>({});
   const [replyText, setReplyText] = useState<{ [key: string]: string }>({});
+
+  const [error, setError] = useState<string | null>(null);
 
   console.log("Current User:", currentUser);
   console.log("Author:", author);
@@ -287,21 +291,37 @@ const ForumPost = ({
     },
   });
 
+  const validTags = [
+    "პეიზაჟი",
+    "პორტრეტი",
+    "აბსტრაქცია",
+    "შავ-თეთრი",
+    "ანიმაციური",
+    "ციფრული ილუსტრაციები",
+    "სხვა",
+  ];
+
   const editPostMutation = useMutation({
-    mutationFn: async (newText: string) => {
-      const response = await fetchWithAuth(`/forums/${id}`, {
+    mutationFn: async ({ text, tags, image }: { text: string; tags: string[]; image: File | null }) => {
+      const formData = new FormData();
+      formData.append("content", text);
+      tags.forEach((tag, index) => {
+        formData.append(`tags[${index}]`, tag);
+      });
+      if (image) {
+        formData.append("file", image);
+      }
+
+      console.log("FormData before sending:", Array.from(formData.entries())); // Log FormData entries
+
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/forums/${id}`, {
         method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        body: formData,
         credentials: "include",
-        body: JSON.stringify({
-          content: newText,
-          tags: category,
-        }),
       });
       if (!response.ok) {
         const error = await response.json();
+        console.error("Edit post error:", error); // Log error response
         throw new Error(error.message || "Failed to edit post");
       }
       return response.json();
@@ -313,6 +333,7 @@ const ForumPost = ({
         title: "წარმატება",
         description: "პოსტი წარმატებით განახლდა",
       });
+      setError(null);
     },
     onError: (error: Error) => {
       toast({
@@ -320,6 +341,7 @@ const ForumPost = ({
         title: "შეცდომა",
         description: error.message,
       });
+      setError(error.message);
     },
   });
 
@@ -398,9 +420,60 @@ const ForumPost = ({
       isPostAuthor,
       canModifyPost,
       editedPostText,
-      category,
+      editedPostTags,
+      editedPostImage,
     });
-    editPostMutation.mutate(editedPostText);
+    editPostMutation.mutate({ text: editedPostText, tags: editedPostTags, image: editedPostImage });
+  };
+
+  const handleTagChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const newTag = e.target.value;
+    if (newTag && !editedPostTags.includes(newTag)) {
+      setEditedPostTags([...editedPostTags, newTag]);
+    }
+  };
+
+  const handleRemoveTag = (tagToRemove: string) => {
+    setEditedPostTags(editedPostTags.filter((tag) => tag !== tagToRemove));
+  };
+
+  const handleEditedFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] || null;
+    if (file && file.size > 5 * 1024 * 1024) { // Check if file size is greater than 5MB
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "File size should not exceed 5MB",
+      });
+      return;
+    }
+    if (file) {
+      try {
+        const compressedFile = await imageCompression(file, {
+          maxSizeMB: 0.5, // Reduce max size to 0.5MB
+          maxWidthOrHeight: 1280, // Reduce max dimensions to 1280px
+          useWebWorker: true,
+        });
+        if (compressedFile.size > 5 * 1024 * 1024) { // Check if compressed file size is greater than 5MB
+          toast({
+            variant: "destructive",
+            title: "Error",
+            description: "Compressed file size should not exceed 5MB",
+          });
+          return;
+        }
+        setEditedPostImage(compressedFile);
+      } catch (error) {
+      console.log(error)
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Failed to compress image",
+        });
+      }
+    } else {
+      setEditedPostImage(null);
+    }
   };
 
   const renderComment = (comment: Comment, level = 0) => {
@@ -542,12 +615,64 @@ const ForumPost = ({
               onChange={(e) => setEditedPostText(e.target.value)}
               className="edit-post-input"
             />
+            <div className="tags-input">
+              <select
+                value=""
+                onChange={handleTagChange}
+                disabled={editedPostTags.length >= 3}
+              >
+                <option value="" disabled>
+                  Select a tag
+                </option>
+                {validTags.map((tag) => (
+                  <option key={tag} value={tag}>
+                    {tag}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="tags-list">
+              {editedPostTags.map((tag) => (
+                <span key={tag} className="tag">
+                  {tag}
+                  <button onClick={() => handleRemoveTag(tag)}>×</button>
+                </span>
+              ))}
+            </div>
+            {editedPostImage ? (
+              <div className="current-image">
+                <Image
+                  src={URL.createObjectURL(editedPostImage)}
+                  alt="current post image"
+                  width={150}
+                  height={100}
+                />
+              </div>
+            ) : (
+              <div className="current-image">
+                <Image
+                  src={image}
+                  alt="current post image"
+                  width={150}
+                  height={100}
+                />
+              </div>
+            )}
+            <input
+              type="file"
+              onChange={handleEditedFileChange}
+              accept="image/*"
+              className="file-input"
+            />
+            {error && <div className="error-message">{error}</div>}
             <div className="edit-post-buttons">
               <button onClick={handlePostEdit}>შენახვა</button>
               <button
                 onClick={() => {
                   setIsEditingPost(false);
                   setEditedPostText(text);
+                  setEditedPostTags(category);
+                  setEditedPostImage(null);
                 }}
               >
                 გაუქმება

@@ -151,12 +151,18 @@ export class ForumsController {
 
   @Put(':id')
   @UseGuards(JwtAuthGuard)
+  @UseInterceptors(FileInterceptor('file'))
   update(
     @CurrentUser() user: User,
     @Param('id') id: string,
     @Body() updateForumDto: UpdateForumDto,
+    @UploadedFile() file: Express.Multer.File,
   ) {
-    return this.forumsService.update(id, updateForumDto, user._id);
+    const timestamp = Date.now();
+    const filePath = file ? `images/${timestamp}` : undefined;
+    const fileBuffer = file ? file.buffer : undefined;
+
+    return this.forumsService.update(id, updateForumDto, user._id, filePath, fileBuffer);
   }
 
   @Delete(':id')

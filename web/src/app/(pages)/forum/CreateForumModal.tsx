@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "@/hooks/use-toast";
+import imageCompression from 'browser-image-compression';
 import "./CreateForumModal.css";
 
 const validTags = [
@@ -25,6 +26,7 @@ const CreateForumModal = ({ isOpen, onClose }: CreateForumModalProps) => {
   const [tags, setTags] = useState<string[]>([]);
   const [selectedTag, setSelectedTag] = useState(""); // Track selected tag from dropdown
   const [image, setImage] = useState<File | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const queryClient = useQueryClient();
 
   // Helper function to validate tags
@@ -61,22 +63,19 @@ const CreateForumModal = ({ isOpen, onClose }: CreateForumModalProps) => {
         };
 
         if (image) {
+          // Compress the image before uploading
+          const compressedImage = await imageCompression(image, {
+            maxSizeMB: 1,
+            maxWidthOrHeight: 1920,
+            useWebWorker: true,
+          });
+
           const formData = new FormData();
           formData.append("content", content);
           validatedTags.forEach((tag, index) => {
             formData.append(`tags[${index}]`, tag); // Append each tag as a separate entry
-          }); // ✅ აქ JSON.stringify სწორია
-          formData.append("file", image);
-
-          // ✅ დამატებითი ლოგირება
-          console.log("✅ FormData before sending:");
-          formData.forEach((value, key) => {
-            console.log(`📦 ${key}:`, value);
           });
-
-          for (const pair of formData.entries()) {
-            console.log("📦 FormData Entry:", pair[0], pair[1]);
-          }
+          formData.append("file", compressedImage);
 
           body = formData;
           delete headers["Content-Type"]; // Let browser set multipart headers
@@ -84,8 +83,6 @@ const CreateForumModal = ({ isOpen, onClose }: CreateForumModalProps) => {
           // Send as JSON when there's no file
           body = JSON.stringify({ content, tags: validatedTags });
         }
-        console.log("🚀 Sending request with body:", body);
-        console.log("🔍 Headers:", headers);
 
         const response = await fetch(
           `${process.env.NEXT_PUBLIC_API_URL}/forums`,
@@ -96,10 +93,8 @@ const CreateForumModal = ({ isOpen, onClose }: CreateForumModalProps) => {
             credentials: "include",
           }
         );
-        console.log("🌍 Response status:", response.status);
         if (!response.ok) {
           const error = await response.json();
-          console.log("❌ API Error Response:", error);
           throw new Error(error.message || "Failed to create post");
         }
 
@@ -116,6 +111,7 @@ const CreateForumModal = ({ isOpen, onClose }: CreateForumModalProps) => {
       setContent("");
       setTags([]);
       setImage(null);
+      setError(null);
     },
     onError: (error: Error) => {
       toast({
@@ -123,6 +119,7 @@ const CreateForumModal = ({ isOpen, onClose }: CreateForumModalProps) => {
         title: "Error",
         description: error.message,
       });
+      setError(error.message);
     },
   });
 
@@ -136,6 +133,45 @@ const CreateForumModal = ({ isOpen, onClose }: CreateForumModalProps) => {
 
   const handleRemoveTag = (tagToRemove: string) => {
     setTags(tags.filter((tag) => tag !== tagToRemove));
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] || null;
+    if (file && file.size > 5 * 1024 * 1024) { // Check if file size is greater than 5MB
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "File size should not exceed 5MB",
+      });
+      return;
+    }
+    if (file) {
+      try {
+        const compressedFile = await imageCompression(file, {
+          maxSizeMB: 0.5, // Reduce max size to 0.5MB
+          maxWidthOrHeight: 1280, // Reduce max dimensions to 1280px
+          useWebWorker: true,
+        });
+        if (compressedFile.size > 5 * 1024 * 1024) { // Check if compressed file size is greater than 5MB
+          toast({
+            variant: "destructive",
+            title: "Error",
+            description: "Compressed file size should not exceed 5MB",
+          });
+          return;
+        }
+        setImage(compressedFile);
+      } catch (error) {
+        console.log(error)
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Failed to compress image",
+        });
+      }
+    } else {
+      setImage(null);
+    }
   };
 
   if (!isOpen) return null;
@@ -181,10 +217,12 @@ const CreateForumModal = ({ isOpen, onClose }: CreateForumModalProps) => {
 
         <input
           type="file"
-          onChange={(e) => setImage(e.target.files?.[0] || null)}
+          onChange={handleFileChange}
           accept="image/*"
           className="file-input"
         />
+
+        {error && <div className="error-message">{error}</div>}
 
         <div className="modal-actions">
           <button

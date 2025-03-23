@@ -143,7 +143,7 @@ export class ForumsService {
     return `This action returns a #${id} forum`;
   }
 
-  async update(id: string, updateForumDto: UpdateForumDto, userId: string) {
+  async update(id: string, updateForumDto: UpdateForumDto, userId: string, filePath?: string, file?: Buffer) {
     if (!isValidObjectId(id)) {
       throw new BadRequestException('Invalid forum ID');
     }
@@ -163,8 +163,13 @@ export class ForumsService {
       throw new UnauthorizedException('You can only edit your own posts');
     }
 
+    let imagePath = forum.imagePath;
+    if (filePath && file) {
+      imagePath = await this.awsS3Service.uploadImage(filePath, file);
+    }
+
     const updatedForum = await this.forumModel
-      .findByIdAndUpdate(id, { ...updateForumDto }, { new: true })
+      .findByIdAndUpdate(id, { ...updateForumDto, imagePath }, { new: true })
       .populate('user', 'name _id role');
 
     return updatedForum;
