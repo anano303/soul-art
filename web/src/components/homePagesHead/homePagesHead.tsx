@@ -1,4 +1,4 @@
-import Navbar from "@/components/navbar/navbar";
+// import Navbar from "@/components/navbar/navbar";
 import MainPhoto from "../mainPhoto/mainPhoto";
 import "./homePagesHead.css";
 // import DiscountCard from "../discountCard/discountCard";
@@ -11,9 +11,7 @@ const HomePagesHead = () => {
       <div>
         <MainPhoto />
       </div>
-      <div>
-        <Navbar />
-      </div>
+     
       <div>
         {/* <DiscountCard
         title="Special Offer"

@@ -12,6 +12,7 @@ import { fetchWithAuth } from "@/lib/fetch-with-auth";
 import { Product } from "@/types";
 import LoadingAnim from "../loadingAnim/loadingAnim";
 
+
 const TopItems: React.FC = () => {
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -78,6 +79,7 @@ const TopItems: React.FC = () => {
           ))}
         </div>
       </div>
+     
     </div>
   );
 };
