@@ -108,44 +108,45 @@ export class UsersService {
       throw new NotFoundException(`User with ID ${id} not found`);
     }
   }
-
   async update(
     id: string,
     attrs: Partial<User>,
-    // isAdmin = false,
     adminRole = false,
   ): Promise<UserDocument> {
     if (!Types.ObjectId.isValid(id)) {
       throw new BadRequestException('Invalid user ID');
     }
+  
     const user = await this.findById(id);
     if (!user) {
       throw new NotFoundException(`User with ID ${id} not found`);
     }
-
-    if (attrs.password) {
+  
+    // მხოლოდ მომხმარებლისთვის პაროლის მოთხოვნა
+    if (attrs.password && !adminRole) {
       const passwordMatch = await bcrypt.compare(attrs.password, user.password);
       if (passwordMatch) {
         throw new BadRequestException(
           'New password must be different from the current password',
         );
       }
+      attrs.password = await hashPassword(attrs.password);
     }
-
+  
     if (attrs.email) {
       const existingUser = await this.findOne(attrs.email);
       if (existingUser && existingUser._id.toString() !== id) {
         throw new BadRequestException('Email is already in use');
       }
     }
-
+  
     const updateData: Partial<User> = {
       ...attrs,
-      // isAdmin: isAdmin ? attrs.isAdmin : undefined,
-      role: adminRole ? attrs.role : undefined,
-      password: attrs.password ? await hashPassword(attrs.password) : undefined,
+      role: adminRole ? attrs.role : undefined, // Admins can update the role
+      // პაროლი მხოლოდ მაშინ განახლდება, როცა არ არის ადმინისტრატორი და პაროლი მოცემულია
+      password: attrs.password || undefined,
     };
-
+  
     // Remove undefined values
     type UpdateKeys = keyof Partial<User>;
     Object.keys(updateData as Record<UpdateKeys, unknown>).forEach(
@@ -153,18 +154,18 @@ export class UsersService {
         updateData[key as UpdateKeys] === undefined &&
         delete updateData[key as UpdateKeys],
     );
-
+  
     try {
       const updatedUser = await this.userModel.findByIdAndUpdate(
         id,
         updateData,
         { new: true, runValidators: true },
       );
-
+  
       if (!updatedUser) {
         throw new NotFoundException(`User with ID ${id} not found`);
       }
-
+  
       this.logger.log(`User ${id} updated successfully`);
       return updatedUser;
     } catch (error: any) {
@@ -172,6 +173,7 @@ export class UsersService {
       throw new BadRequestException('Failed to update user');
     }
   }
+  
 
   async adminUpdate(id: string, updateDto: AdminProfileDto) {
     try {
@@ -179,12 +181,18 @@ export class UsersService {
       if (!user) {
         throw new NotFoundException('User not found');
       }
-
+  
       // მხოლოდ განახლება იმ ველების, რომლებიც მოვიდა
       if (updateDto.name) user.name = updateDto.name;
       if (updateDto.email) user.email = updateDto.email;
       if (updateDto.role) user.role = updateDto.role;
-
+  
+      // თუ პაროლი არ არის გაცემული, არ უნდა შეიცვალოს
+      if (updateDto.password) {
+        const hashedPassword = await hashPassword(updateDto.password);
+        user.password = hashedPassword;
+      }
+  
       await user.save();
       return user;
     } catch (error) {
@@ -192,6 +200,7 @@ export class UsersService {
       throw error;
     }
   }
+  
 
   async deleteMany(): Promise<void> {
     try {
