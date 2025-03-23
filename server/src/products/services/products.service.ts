@@ -130,6 +130,8 @@ export class ProductsService {
     product.category = category ?? product.category;
     product.countInStock = countInStock ?? product.countInStock;
 
+    console.log('Updated product data:', product);
+
     return product.save();
   }
 

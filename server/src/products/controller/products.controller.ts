@@ -14,6 +14,7 @@ import {
   Res,
   BadRequestException,
   InternalServerErrorException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { RolesGuard } from '@/guards/roles.guard';
 import { JwtAuthGuard } from '@/guards/jwt-auth.guard';
@@ -144,10 +145,58 @@ export class ProductsController {
     }
   }
 
-  @UseGuards(RolesGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.Admin, Role.Seller)
   @Put(':id')
-  updateProduct(@Param('id') id: string, @Body() product: ProductDto) {
-    return this.productsService.update(id, product);
+  @UseInterceptors(
+    FileFieldsInterceptor([
+      { name: 'images', maxCount: 10 },
+      { name: 'brandLogo', maxCount: 1 },
+    ])
+  )
+  async updateProduct(
+    @Param('id') id: string,
+    @CurrentUser() user: UserDocument,
+    @Body() productData: Omit<ProductDto, 'images'>,
+    @UploadedFiles() files: { images?: Express.Multer.File[], brandLogo?: Express.Multer.File[] }
+  ) {
+    console.log('Update request received:', { id, productData, files });
+
+    // Check if user is admin or the owner of the product
+    const product = await this.productsService.findById(id);
+    if (user.role !== Role.Admin && product.user.toString() !== user._id.toString()) {
+      throw new UnauthorizedException('You can only edit your own products');
+    }
+
+    try {
+      let imageUrls;
+      let brandLogoUrl;
+
+      if (files?.images?.length) {
+        imageUrls = await Promise.all(
+          files.images.map(file => this.appService.uploadImageToCloudinary(file))
+        );
+      }
+
+      if (files?.brandLogo?.length) {
+        brandLogoUrl = await this.appService.uploadImageToCloudinary(files.brandLogo[0]);
+      }
+
+      const updatedProduct = await this.productsService.update(id, {
+        ...productData,
+        ...(imageUrls && { images: imageUrls }),
+        ...(brandLogoUrl && { brandLogo: brandLogoUrl }),
+      });
+
+      console.log('Product updated successfully:', updatedProduct);
+      return updatedProduct;
+    } catch (error) {
+      console.error('Update error:', error);
+      throw new InternalServerErrorException(
+        'Failed to update product',
+        error.message
+      );
+    }
   }
 
   @UseGuards(JwtAuthGuard)

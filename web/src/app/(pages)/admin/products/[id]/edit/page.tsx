@@ -4,15 +4,19 @@ import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { CreateProductForm } from "@/modules/admin/components/create-product-form";
 
+import { fetchWithAuth } from "@/lib/fetch-with-auth";
+
 export default function EditProductPage() {
   const searchParams = useSearchParams();
-  const id = searchParams.get("id");
+  const id = searchParams ? searchParams.get("id") : null;
   const [product, setProduct] = useState(null);
 
   useEffect(() => {
     if (!id) return;
 
-    fetch(`${process.env.NEXT_PUBLIC_API_URL}/products/${id}`)
+    fetchWithAuth(`/products/${id}`, {
+      method: "GET",
+    })
       .then((res) => res.json())
       .then((data) => setProduct(data))
       .catch((error) => console.error("Failed to fetch product", error));
@@ -23,7 +27,7 @@ export default function EditProductPage() {
   return (
     <div className="editProduct">
       <h1 style={{ textAlign: "center" }}> Update Product </h1>
-      <CreateProductForm initialData={product} />;
+      <CreateProductForm initialData={product} />
     </div>
   );
 }

@@ -9,8 +9,7 @@ import { ZodError } from "zod";
 import { ProductFormData } from "@/modules/products/validation/product";
 import "./CreateProductForm.css";
 import Image from "next/image";
-import { apiClient } from "@/lib/api-client";
-// import { fetchWithAuth } from "@/lib/fetch-with-auth";
+import { fetchWithAuth } from "@/lib/fetch-with-auth";
 
 const categories = [
   "პეიზაჟი",
@@ -46,9 +45,6 @@ export function CreateProductForm({ initialData }: CreateProductFormProps) {
 
   const [pending, setPending] = useState(false);
 
-  useEffect(() => {
-    // Handle success or error response for product creation
-  }, [formData]);
   useEffect(() => {
     if (initialData) {
       setFormData((prev) => ({
@@ -101,15 +97,6 @@ export function CreateProductForm({ initialData }: CreateProductFormProps) {
     validateField("category", e.target.value);
   };
 
-  // const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-  //   const { name, files } = e.target;
-  //   if (files) {
-  //     setFormData((prev) => ({
-  //       ...prev,
-  //       [name]: Array.from(files), // მხოლოდ სახელები გადავა FormData-ში
-  //     }));
-  //   }
-  // };
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { files } = e.target;
     if (files) {
@@ -129,11 +116,11 @@ export function CreateProductForm({ initialData }: CreateProductFormProps) {
   };
 
   const handleBrandLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, files } = e.target;
+    const { files } = e.target;
     if (files && files[0]) {
       setFormData((prev) => ({
         ...prev,
-        [name]: files[0], // ბრენდის ლოგოს მხოლოდ სახელი
+        brandLogo: files[0], // ბრენდის ლოგოს მხოლოდ სახელი
       }));
     }
   };
@@ -141,84 +128,69 @@ export function CreateProductForm({ initialData }: CreateProductFormProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     console.log("Form data on submit", formData);
-    console.log("Submitting form...");
+    console.log("Initial Data:", initialData); // დავამატოთ ლოგი
     setPending(true);
 
-    const result = productSchema.safeParse(formData);
-
-    if (!result.success) {
-      toast({
-        variant: "destructive",
-        title: "Validation Error in `" + result.error.issues[0].path[0] + "`",
-        description: result.error.issues[0].message,
+    try {
+      const formDataToSend = new FormData();
+      
+      // ყველა ველის დამატება
+      Object.entries(formData).forEach(([key, value]) => {
+        if (key !== "images" && key !== "brandLogo") {
+          formDataToSend.append(key, String(value));
+        }
       });
-      setPending(false);
-      return;
-    }
 
-    const formDataToSend = new FormData();
-    Object.entries(formData).forEach(([key, value]) => {
-      if (key !== "images" && key !== "brandLogo") {
-        formDataToSend.append(key, String(value)); // სხვა ყველა მონაცემი
+      // სურათების დამატება
+      if (formData.images) {
+        formData.images.forEach((image) => {
+          if (image instanceof File) {
+            formDataToSend.append('images', image);
+          }
+        });
       }
-    });
 
-    formData.images.forEach((fileName: File) => {
-      formDataToSend.append("images", fileName); // სურათების სახელები
-    });
-
-    if (formData.brandLogo) {
-      formDataToSend.append("brandLogo", formData.brandLogo);
-    }
-
-try {
-  const method = initialData?._id ? "PUT" : "POST";
-  const url = initialData?._id
-    ? `/products/${initialData._id}`
-    : "/products";
-
-  console.log("Request Method:", method); // შესამოწმებლად
-
-  const response = await apiClient({
-    method, 
-    url,
-    data: formDataToSend,
-    headers: {
-      Cookie: `access_token=${document.cookie
-        .split("; ")
-        .find((row) => row.startsWith("access_token="))
-        ?.split("=")[1] || ""
-      }`,
-    }
-  });
-
-  console.log("Response:", response.data);
-
-  if (response.status >= 300 || response.status < 200) {
-        throw new Error(
-          initialData?._id
-            ? "Failed to update product"
-            : "Failed to create product"
-        );
+      // ბრენდის ლოგოს დამატება
+      if (formData.brandLogo instanceof File) {
+        formDataToSend.append('brandLogo', formData.brandLogo);
       }
+
+      const method = initialData?._id ? "PUT" : "POST";
+      const endpoint = initialData?._id
+        ? `/products/${initialData._id}`
+        : "/products";
+
+      console.log("Sending request:", {
+        method,
+        endpoint,
+        formData: Object.fromEntries(formDataToSend),
+      });
+
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}${endpoint}`, {
+        method,
+        body: formDataToSend,
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log("Server response:", data);
 
       toast({
-        title: initialData?._id
-          ? "Product updated successfully"
-          : "Product created successfully",
-        description: initialData?._id
-          ? "Your product has been updated."
-          : "Your product has been added.",
+        title: initialData?._id ? "Product updated" : "Product created",
+        description: "Success!",
       });
 
       router.push("/admin/products");
     } catch (error) {
-    console.log(error)
+      console.error("Error:", error);
       toast({
         variant: "destructive",
         title: "Error",
-        description:
-          error instanceof Error ? error.message : "Something went wrong",
+        description: error instanceof Error ? error.message : "Something went wrong",
       });
     } finally {
       setPending(false);
@@ -371,9 +343,20 @@ try {
             accept="image/*"
             onChange={handleBrandLogoChange}
             className="create-product-file"
-            required
           />
-
+          {formData.brandLogo && typeof formData.brandLogo === "string" && (
+            <div className="image-preview">
+              <Image
+                loader={({ src }) => src}
+                src={formData.brandLogo}
+                alt="Brand logo preview"
+                width={100}
+                height={100}
+                unoptimized
+                className="preview-image"
+              />
+            </div>
+          )}
           {errors.brandLogo && (
             <p className="create-product-error">{errors.brandLogo}</p>
           )}

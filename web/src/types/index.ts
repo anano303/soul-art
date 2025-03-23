@@ -2,6 +2,7 @@ import { Role } from "./role";
 
 export interface Product {
   _id: string;
+  user: string;
   name: string;
   images: string[];
   description: string;
