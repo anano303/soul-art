@@ -217,6 +217,7 @@ export function CreateProductForm({ initialData }: CreateProductFormProps) {
 
       router.push("/admin/products");
     } catch (error) {
+    console.log(error)
       toast({
         variant: "destructive",
         title: "Error",
