@@ -9,7 +9,14 @@ const publicPaths = [
   "/reset-password",
   "/forum",
 ];
-const protectedPaths = ["/profile", "/orders", "/admin"];
+const protectedPaths = [
+  "/profile",
+  "/orders",
+  "/admin",
+  "/admin/products",
+  "/admin/products/create",
+  "/admin/products/[id]/edit", // დავამატოთ პროდუქტის რედაქტირების გზა
+];
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -45,9 +52,13 @@ export function middleware(request: NextRequest) {
   // Redirect unauthenticated users trying to access protected pages
   if (
     !isAuthenticated &&
-    protectedPaths.some((path) => pathname.startsWith(path))
+    protectedPaths.some((path) => {
+      const isProtected = pathname.startsWith(path);
+      console.log(`Checking path ${pathname} against ${path}: ${isProtected}`);
+      return isProtected;
+    })
   ) {
-    console.log("🚨 Redirecting unauthenticated user to /login");
+    console.log("🚨 Redirecting unauthenticated user to /login from:", pathname);
     return NextResponse.redirect(new URL("/login", request.url));
   }
 

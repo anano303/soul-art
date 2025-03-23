@@ -11,7 +11,7 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   const { user, isLoading, error } = useUser();
-  const pathname = usePathname(); // იღებს მიმდინარე URL-ს
+  const pathname = usePathname();
 
   if (isLoading) {
     return (
@@ -26,19 +26,22 @@ export default function AdminLayout({
     );
   }
 
-  // თუ მომხმარებელი არაა ავტორიზებული ან API-ს შეცდომა აქვს, გადაამისამართე
   if (!isLoading && (!user || error)) {
     return redirect("/login");
   }
-  if (!user) {
-    return null; // ან რაღაც 404/error კომპონენტი
-  }
-  // თუ მიმდინარე გვერდი /admin/products-ია, Seller-საც შეიყვანე
-  const isSellerAllowed =
-    (pathname === "/admin/products" || pathname === "/admin/products/create") &&
-    user.role === Role.Seller;
-  // თუ Admin-ია ან Seller და /admin/products-ზეა, შევუშვათ, სხვა შემთხვევაში არა
-  if (!isLoading && !(user.role === Role.Admin || isSellerAllowed)) {
+
+  // შევამოწმოთ წვდომები უფრო დეტალურად
+  const isProductRelatedPath = pathname?.includes('/products') ?? false;
+  const hasAccess = 
+    user?.role === Role.Admin || 
+    (user?.role === Role.Seller && isProductRelatedPath);
+
+  if (!hasAccess) {
+    console.log("Access denied:", {
+      role: user?.role,
+      path: pathname,
+      isProductPath: isProductRelatedPath
+    });
     return redirect("/login");
   }
 
