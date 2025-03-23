@@ -9,7 +9,7 @@ import { ZodError } from "zod";
 import { ProductFormData } from "@/modules/products/validation/product";
 import "./CreateProductForm.css";
 import Image from "next/image";
-import { fetchWithAuth } from "@/lib/fetch-with-auth";
+
 
 const categories = [
   "პეიზაჟი",
