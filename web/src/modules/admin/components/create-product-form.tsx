@@ -171,7 +171,7 @@ export function CreateProductForm({ initialData }: CreateProductFormProps) {
       formDataToSend.append("brandLogo", formData.brandLogo);
     }
 
-    try {
+try {
   const method = initialData?._id ? "PUT" : "POST";
   const url = initialData?._id
     ? `/products/${initialData._id}`
@@ -193,12 +193,8 @@ export function CreateProductForm({ initialData }: CreateProductFormProps) {
   });
 
   console.log("Response:", response.data);
-} catch (error) {
-  console.error("Error:", error);
-}
 
-
-      if (response.status >= 300 || response.status < 200) {
+  if (response.status >= 300 || response.status < 200) {
         throw new Error(
           initialData?._id
             ? "Failed to update product"
