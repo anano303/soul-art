@@ -15,7 +15,7 @@ export function ProductsList() {
   const { data, isLoading } = useQuery({
     queryKey: ["products", page],
     queryFn: async () => {
-      const response = await fetchWithAuth(`/products?page=${page}&limit=8`);
+      const response = await fetchWithAuth(`/products/user?page=${page}&limit=8`);
       return response.json();
     },
   });

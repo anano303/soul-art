@@ -32,6 +32,8 @@ import { ProductExpertAgent } from '@/ai/agents/product-expert.agent';
 // import { ChatRequest } from '@/types/agents';
 import { Response } from 'express';
 import { ChatRequest } from '@/types/agents';
+import { Roles } from '@/decorators/roles.decorator';
+import { Role } from '@/types/role.enum';
 
 @Controller('products')
 export class ProductsController {
@@ -39,7 +41,7 @@ export class ProductsController {
     private productsService: ProductsService,
     private appService: AppService,
     private productExpertAgent: ProductExpertAgent,
-  ) {}
+  ) { }
 
   @Get()
   getProducts(
@@ -48,6 +50,18 @@ export class ProductsController {
     @Query('limit') limit: string,
   ) {
     return this.productsService.findMany(keyword, page, limit);
+  }
+
+  @Get('user')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.Admin, Role.Seller)
+  getUserProducts(
+    @CurrentUser() user: UserDocument,
+    @Query('keyword') keyword: string,
+    @Query('page') page: string,
+    @Query('limit') limit: string
+  ) {
+    return this.productsService.findMany(keyword, page, limit, user.role === Role.Admin ? undefined : user);
   }
 
   @Get('topRated')
@@ -66,7 +80,8 @@ export class ProductsController {
     return this.productsService.deleteOne(id);
   }
 
-  @UseGuards(RolesGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.Admin, Role.Seller)
   @Post()
   @UseInterceptors(
     FileFieldsInterceptor(
@@ -91,6 +106,7 @@ export class ProductsController {
     ),
   )
   async createProduct(
+    @CurrentUser() user: UserDocument,
     @Body() productData: Omit<ProductDto, 'images'>,
     @UploadedFiles()
     allFiles: {
@@ -116,6 +132,7 @@ export class ProductsController {
       console.log('success');
       return this.productsService.create({
         ...productData,
+        user,
         images: imageUrls,
         brandLogo: brandLogoUrl,
       });

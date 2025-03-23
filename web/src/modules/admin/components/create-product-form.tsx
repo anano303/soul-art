@@ -9,6 +9,7 @@ import { ZodError } from "zod";
 import { ProductFormData } from "@/modules/products/validation/product";
 import "./CreateProductForm.css";
 import Image from "next/image";
+import { apiClient } from "@/lib/api-client";
 // import { fetchWithAuth } from "@/lib/fetch-with-auth";
 
 const categories = [
@@ -176,19 +177,17 @@ export function CreateProductForm({ initialData }: CreateProductFormProps) {
         ? `${process.env.NEXT_PUBLIC_API_URL}/products/${initialData._id}`
         : `${process.env.NEXT_PUBLIC_API_URL}/products`;
 
-      const response = await fetch(url, {
-        method,
+      const response = await apiClient.post(url, formDataToSend, {
         headers: {
-          Cookie: `access_token=${
-            document.cookie
-              .split("; ")
-              .find((row) => row.startsWith("access_token="))
-              ?.split("=")[1] || ""
-          }`,
-        },
-        body: formDataToSend, // FormData, სადაც მხოლოდ ერთჯერ გაიგზავნება images
+          Cookie: `access_token=${document.cookie
+            .split("; ")
+            .find((row) => row.startsWith("access_token="))
+            ?.split("=")[1] || ""
+            }`,
+        }
       });
-      if (!response.ok) {
+
+      if (response.status >= 300 || response.status < 200) {
         throw new Error(
           initialData?._id
             ? "Failed to update product"
