@@ -16,6 +16,9 @@
   gap: 24px;
   padding-bottom: 50px;
 }
+.see-more{
+  margin-right: 4%;
+}
 .see-more-btn{
   border: none;
     background: transparent;
