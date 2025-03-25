@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Product } from "@/types";
+import { Product, User } from "@/types";
 import { ProductsActions } from "./products-actions";
 import { Sparkles, Plus } from "lucide-react";
 import "./productList.css";
@@ -128,11 +128,12 @@ export function ProductsList() {
             <th className="prd-th">CATEGORY</th>
             <th className="prd-th">STOCK</th>
             <th className="prd-th">Status</th>
+            <th className="prd-th">SELLER INFO</th>
             <th className="prd-th prd-th-right">ACTIONS</th>
           </tr>
         </thead>
         <tbody>
-          {products.map((product: Product) => (
+          {products.map((product: Product & { user?: User }) => (
             <tr key={product._id} className="prd-tr">
               <td className="prd-td prd-td-bold">
                 {" "}
@@ -154,6 +155,13 @@ export function ProductsList() {
               <td className="prd-td">{product.countInStock}</td>
               <td className="prd-td">
                 <StatusBadge status={product.status} />
+              </td>
+              <td className="prd-td">
+                <div className="seller-info">
+                  <p className="font-medium">{product.user?.name || 'N/A'}</p>
+                  <p className="text-sm text-gray-500">{product.user?.email || 'N/A'}</p>
+                  {/* <p className="text-sm text-gray-500">{product.user?.phoneNumber || 'N/A'}</p> */}
+                </div>
               </td>
               <td className="prd-td prd-td-right">
                 <ProductsActions 

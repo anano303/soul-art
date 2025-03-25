@@ -73,6 +73,7 @@ export class ProductsService {
     const count = await this.productModel.countDocuments(searchQueryWithStatus);
     const products = await this.productModel
       .find(searchQueryWithStatus)
+      .populate('user', 'name email phoneNumber')
       .sort({ createdAt: -1 })
       .limit(pageSize)
       .skip(pageSize * (currentPage - 1));
@@ -159,7 +160,10 @@ export class ProductsService {
   }
 
   async findByStatus(status: ProductStatus): Promise<ProductDocument[]> {
-    return this.productModel.find({ status }).exec();
+    return this.productModel
+      .find({ status })
+      .populate('user', 'name email phoneNumber')
+      .exec();
   }
 
   async createReview(
