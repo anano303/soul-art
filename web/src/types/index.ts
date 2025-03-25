@@ -44,9 +44,22 @@ export interface User {
   _id: string;
   name: string;
   email: string;
+  phoneNumber: string;
   role: Role; 
   createdAt: string;
   updatedAt: string;
+  seller?: Seller[];
+}
+interface Seller {
+  storeName: string;
+  storeLogo?: string;
+  ownerFirstName: string;
+  ownerLastName: string;
+  phoneNumber: string;
+  email: string;
+  password: string;
+  identificationNumber: string;
+  accountNumber: string;
 }
 
 export interface ApiResponse<T> {

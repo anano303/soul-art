@@ -16,6 +16,7 @@ import { Role } from "@/types/role";
 export function ProductsList() {
   const [page, setPage] = useState(1);
   const { user } = useUser();
+  
   const isAdmin = user?.role === Role.Admin;
   
   console.log("ProductsList user check:", {
@@ -160,7 +161,7 @@ export function ProductsList() {
                 <div className="seller-info">
                   <p className="font-medium">{product.user?.name || 'N/A'}</p>
                   <p className="text-sm text-gray-500">{product.user?.email || 'N/A'}</p>
-                  {/* <p className="text-sm text-gray-500">{product.user?.phoneNumber || 'N/A'}</p> */}
+                  <p className="text-sm text-gray-500">{product.user?.phoneNumber || 'N/A'}</p>
                 </div>
               </td>
               <td className="prd-td prd-td-right">
