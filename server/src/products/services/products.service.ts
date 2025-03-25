@@ -6,10 +6,11 @@ import {
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { UserDocument } from 'src/users/schemas/user.schema';
-import { Product, ProductDocument } from '../schemas/product.schema';
+import { Product, ProductDocument, ProductStatus } from '../schemas/product.schema';
 import { PaginatedResponse } from '@/types';
 import { Order } from '../../orders/schemas/order.schema';
 import { sampleProduct } from '@/utils/data/product';
+import { Role } from '@/types/role.enum';
 
 @Injectable()
 export class ProductsService {
@@ -34,6 +35,7 @@ export class ProductsService {
     page?: string,
     limit?: string,
     user?: UserDocument,
+    status?: ProductStatus,
   ): Promise<PaginatedResponse<Product>> {
     const pageSize = parseInt(limit ?? '10');
     const currentPage = parseInt(page ?? '1');
@@ -63,9 +65,14 @@ export class ProductsService {
       }
       : user ? { user: user._id } : {};
 
-    const count = await this.productModel.countDocuments(searchQuery);
+    const searchQueryWithStatus = {
+      ...searchQuery,
+      ...(status && { status }),
+    };
+
+    const count = await this.productModel.countDocuments(searchQueryWithStatus);
     const products = await this.productModel
-      .find(searchQuery)
+      .find(searchQueryWithStatus)
       .sort({ createdAt: -1 })
       .limit(pageSize)
       .skip(pageSize * (currentPage - 1));
@@ -113,6 +120,7 @@ export class ProductsService {
       brand,
       category,
       countInStock,
+      status,
     } = attrs;
 
     if (!Types.ObjectId.isValid(id))
@@ -129,10 +137,29 @@ export class ProductsService {
     product.brand = brand ?? product.brand;
     product.category = category ?? product.category;
     product.countInStock = countInStock ?? product.countInStock;
-
-    console.log('Updated product data:', product);
+    // სტატუსის განახლება
+    product.status = status ?? product.status;
 
     return product.save();
+  }
+
+  async updateStatus(
+    id: string,
+    status: ProductStatus,
+    rejectionReason?: string
+  ): Promise<ProductDocument> {
+    const product = await this.findById(id);
+    
+    product.status = status;
+    if (rejectionReason) {
+      product.rejectionReason = rejectionReason;
+    }
+    
+    return product.save();
+  }
+
+  async findByStatus(status: ProductStatus): Promise<ProductDocument[]> {
+    return this.productModel.find({ status }).exec();
   }
 
   async createReview(
@@ -204,8 +231,13 @@ export class ProductsService {
   }
 
   async create(productData: Partial<Product>): Promise<ProductDocument> {
+    const status = productData.user.role === Role.Admin 
+      ? ProductStatus.APPROVED 
+      : ProductStatus.PENDING;
+
     const product = await this.productModel.create({
       ...productData,
+      status,
       rating: 0,
       numReviews: 0,
       reviews: [],

@@ -1,4 +1,5 @@
-import { IsString, IsNumber, IsArray } from 'class-validator';
+import { IsString, IsNumber, IsArray, IsEnum, IsOptional } from 'class-validator';
+import { ProductStatus } from '../schemas/product.schema';
 
 export class ProductDto {
   @IsString()
@@ -25,5 +26,11 @@ export class ProductDto {
 
   @IsString()
   brandLogo!: string;
-  
+
+  @IsEnum(ProductStatus)
+  status?: ProductStatus;
+
+  @IsString()
+  @IsOptional()
+  rejectionReason?: string;
 }

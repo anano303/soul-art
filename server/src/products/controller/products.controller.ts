@@ -35,6 +35,7 @@ import { Response } from 'express';
 import { ChatRequest } from '@/types/agents';
 import { Roles } from '@/decorators/roles.decorator';
 import { Role } from '@/types/role.enum';
+import { ProductStatus } from '../schemas/product.schema';
 
 @Controller('products')
 export class ProductsController {
@@ -50,7 +51,8 @@ export class ProductsController {
     @Query('page') page: string,
     @Query('limit') limit: string,
   ) {
-    return this.productsService.findMany(keyword, page, limit);
+    // მხოლოდ დადასტურებული პროდუქტების გამოტანა
+    return this.productsService.findMany(keyword, page, limit, undefined, ProductStatus.APPROVED);
   }
 
   @Get('user')
@@ -186,6 +188,8 @@ export class ProductsController {
         ...productData,
         ...(imageUrls && { images: imageUrls }),
         ...(brandLogoUrl && { brandLogo: brandLogoUrl }),
+        // თუ სელერია, სტატუსი PENDING-ზე დავაყენოთ
+        ...(user.role === Role.Seller && { status: ProductStatus.PENDING }),
       });
 
       console.log('Product updated successfully:', updatedProduct);
@@ -216,5 +220,22 @@ export class ProductsController {
     const result = await this.productExpertAgent.chat(messages);
 
     return result.pipeDataStreamToResponse(res);
+  }
+
+  @Put(':id/status')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.Admin)
+  async updateProductStatus(
+    @Param('id') id: string,
+    @Body() { status, rejectionReason }: { status: ProductStatus; rejectionReason?: string }
+  ) {
+    return this.productsService.updateStatus(id, status, rejectionReason);
+  }
+
+  @Get('pending')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.Admin)
+  async getPendingProducts() {
+    return this.productsService.findByStatus(ProductStatus.PENDING);
   }
 }

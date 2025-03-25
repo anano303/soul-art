@@ -16,6 +16,14 @@ export interface Product {
   reviews: Review[];
   createdAt: string;
   updatedAt: string;
+  status: ProductStatus;
+  rejectionReason?: string;
+}
+
+export enum ProductStatus {
+  PENDING = 'PENDING',
+  APPROVED = 'APPROVED',
+  REJECTED = 'REJECTED'
 }
 
 export interface Review {
@@ -52,4 +60,4 @@ export interface PaginatedResponse<T> {
   total: number;
   page: number;
   pages: number;
-} 
+}

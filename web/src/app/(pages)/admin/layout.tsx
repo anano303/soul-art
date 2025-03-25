@@ -30,7 +30,6 @@ export default function AdminLayout({
     return redirect("/login");
   }
 
-  // შევამოწმოთ წვდომები უფრო დეტალურად
   const isProductRelatedPath = pathname?.includes('/products') ?? false;
   const hasAccess = 
     user?.role === Role.Admin || 
