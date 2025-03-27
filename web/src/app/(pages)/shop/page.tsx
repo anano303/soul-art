@@ -1,13 +1,13 @@
 'use client';
 
-import { Suspense, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { useSearchParams } from 'next/navigation';
 import { ProductGrid } from '@/modules/products/components/product-grid';
 import { getProducts } from '@/modules/products/api/get-products';
 import { Product } from '@/types';
 
-function ShopContent() {
+export default function ShopPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const searchParams = useSearchParams();
   const brand = searchParams ? searchParams.get('brand') : null;
@@ -40,13 +40,5 @@ function ShopContent() {
       </h1>
       <ProductGrid products={products} />
     </div>
-  );
-}
-
-export default function ShopPage() {
-  return (
-    <Suspense fallback={<div>Loading...</div>}>
-      <ShopContent />
-    </Suspense>
   );
 }

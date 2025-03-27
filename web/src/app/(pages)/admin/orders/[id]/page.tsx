@@ -7,11 +7,6 @@ import { AdminOrderDetails } from "@/modules/admin/components/admin-order-detail
 
 export default function AdminOrderPage() {
   const params = useParams();
-  
-  if (!params?.id) {
-    return <div>Invalid order ID</div>;
-  }
-
   const orderId = params.id as string;
 
   const { data: order, isLoading } = useQuery({
