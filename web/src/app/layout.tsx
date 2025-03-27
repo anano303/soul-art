@@ -14,16 +14,7 @@ import SiteTimer from "@/components/SiteTimer/SiteTimer";
 export const metadata: Metadata = {
   title: "SoulArt",
   description:
-    "SoulArt - ნახატების ონლაინ პლატფორმა, სადაც შეგიძლიათ გაყიდოთ და შეიძინოთ უნიკალური ხელოვნების ნიმუშები.",
-  openGraph: {
-    type: 'website',
-    locale: 'ka_GE',
-    url: 'https://soulart.ge/',
-    siteName: 'SoulArt',
-  },
-  twitter: {
-    card: 'summary_large_image',
-  },
+    "SoulArt - ნახატების ონლაინ პლატფორმა, სადაც შეგიძლიათ გაყიდოთ და შეიძინოთ უნიკალური ხელოვნების ნიმუშები. შექმენით პირადი გალერეა და გახდით მხატვარი ან კოლექციონერი.",
 };
 
 export default function RootLayout({
@@ -33,15 +24,6 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <head>
-        {/* Facebook SDK */}
-        <script
-          async
-          defer
-          crossOrigin="anonymous"
-          src={`https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v13.0&appId=${process.env.NEXT_PUBLIC_FACEBOOK_APP_ID}&autoLogAppEvents=1`}
-        />
-      </head>
       <body className={`${satoshi.variable} antialiased min-h-screen flex flex-col`}>
         <Providers>
           <AuthProvider>
