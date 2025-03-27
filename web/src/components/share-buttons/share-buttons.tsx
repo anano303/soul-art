@@ -3,7 +3,7 @@ import { Copy, Share2, X } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import {
   FacebookShareButton,
-  // FacebookMessengerShareButton, // დროებით გამორთულია
+  FacebookMessengerShareButton, // დავამატეთ მესენჯერის ღილაკი
   TelegramShareButton,
   TwitterShareButton,
   ViberShareButton,
@@ -11,7 +11,7 @@ import {
   LinkedinShareButton,
   EmailShareButton,
   FacebookIcon,
-  // FacebookMessengerIcon, // დროებით გამორთულია
+  FacebookMessengerIcon, // დავამატეთ მესენჯერის აიქონი
   TelegramIcon,
   TwitterIcon,
   ViberIcon,
@@ -56,21 +56,21 @@ export function ShareButtons({ url, title }: ShareButtonsProps) {
       label: 'Facebook',
       props: {
         url: url,
-        quote: `${title}\n\nნახეთ მეტი: ${url}`,
-        hashtag: '#SoulArt'
+        quote: title,
+        hashtag: '#SoulArt',
+        appId: process.env.NEXT_PUBLIC_FACEBOOK_APP_ID,
       }
     },
-    /* დროებით გამორთულია მესენჯერის ღილაკი
     {
-      Button: FacebookMessengerShareButton,
+      Button: FacebookMessengerShareButton, // დავამატეთ მესენჯერის ღილაკი
       Icon: FacebookMessengerIcon,
       label: 'Messenger',
       props: {
         url: url,
-        title: title
+        appId: process.env.NEXT_PUBLIC_FACEBOOK_APP_ID, // საჭიროა Facebook App ID
+        redirectUri: url,
       }
     },
-    */
     {
       Button: TwitterShareButton,
       Icon: TwitterIcon,
@@ -146,21 +146,11 @@ export function ShareButtons({ url, title }: ShareButtonsProps) {
           )}
         </button>
 
-        {mainButtons.map(({ Button, Icon, label, props }) => {
-          if (label === 'Messenger') return null;
-          
-          // ვქმნით ახალ props ობიექტს ტიპების შესამოწმებლად
-          const buttonProps = {
-            ...props,
-            className: "share-button"
-          };
-
-          return (
-            <Button key={label} {...buttonProps}>
-              <Icon size={36} round />
-            </Button>
-          );
-        })}
+        {mainButtons.map(({ Button, Icon, label, props }) => (
+          <Button key={label} {...props} className="share-button">
+            <Icon size={36} round />
+          </Button>
+        ))}
 
         <button
           className="share-button more"
