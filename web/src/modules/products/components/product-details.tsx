@@ -101,6 +101,7 @@ export function ProductDetails({ product }: ProductDetailsProps) {
           <ShareButtons 
             url={typeof window !== 'undefined' ? window.location.href : ''}
             title={`Check out ${product.name} by ${product.brand} on SoulArt`}
+            // Messenger share button is not supported
           />
 
           <div className="rating-container">

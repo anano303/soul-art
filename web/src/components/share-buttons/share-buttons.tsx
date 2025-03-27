@@ -3,7 +3,7 @@ import { Copy, Share2, X } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import {
   FacebookShareButton,
-  FacebookMessengerShareButton, // დავამატეთ მესენჯერის ღილაკი
+  // FacebookMessengerShareButton, // Commented out messenger
   TelegramShareButton,
   TwitterShareButton,
   ViberShareButton,
@@ -11,7 +11,7 @@ import {
   LinkedinShareButton,
   EmailShareButton,
   FacebookIcon,
-  FacebookMessengerIcon, // დავამატეთ მესენჯერის აიქონი
+  // FacebookMessengerIcon, // Commented out messenger icon
   TelegramIcon,
   TwitterIcon,
   ViberIcon,
@@ -58,19 +58,21 @@ export function ShareButtons({ url, title }: ShareButtonsProps) {
         url: url,
         quote: title,
         hashtag: '#SoulArt',
-        appId: process.env.NEXT_PUBLIC_FACEBOOK_APP_ID,
+        appId: process.env.NEXT_PUBLIC_FACEBOOK_APP_ID || '',
       }
     },
+    /* Removed Messenger button
     {
-      Button: FacebookMessengerShareButton, // დავამატეთ მესენჯერის ღილაკი
+      Button: FacebookMessengerShareButton,
       Icon: FacebookMessengerIcon,
       label: 'Messenger',
       props: {
         url: url,
-        appId: process.env.NEXT_PUBLIC_FACEBOOK_APP_ID, // საჭიროა Facebook App ID
+        appId: process.env.NEXT_PUBLIC_FACEBOOK_APP_ID,
         redirectUri: url,
       }
     },
+    */
     {
       Button: TwitterShareButton,
       Icon: TwitterIcon,
@@ -145,6 +147,7 @@ export function ShareButtons({ url, title }: ShareButtonsProps) {
             <Copy size={20} />
           )}
         </button>
+        
 
         {mainButtons.map(({ Button, Icon, label, props }) => (
           <Button key={label} {...props} className="share-button">
