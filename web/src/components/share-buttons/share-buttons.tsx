@@ -3,7 +3,7 @@ import { Copy, Share2, X } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import {
   FacebookShareButton,
-  FacebookMessengerShareButton, // დავამატეთ მესენჯერის ღილაკი
+  // FacebookMessengerShareButton, // დროებით გამორთულია
   TelegramShareButton,
   TwitterShareButton,
   ViberShareButton,
@@ -11,7 +11,7 @@ import {
   LinkedinShareButton,
   EmailShareButton,
   FacebookIcon,
-  FacebookMessengerIcon, // დავამატეთ მესენჯერის აიქონი
+  // FacebookMessengerIcon, // დროებით გამორთულია
   TelegramIcon,
   TwitterIcon,
   ViberIcon,
@@ -56,21 +56,21 @@ export function ShareButtons({ url, title }: ShareButtonsProps) {
       label: 'Facebook',
       props: {
         url: url,
-        quote: title,
-        hashtag: '#SoulArt',
-        appId: process.env.NEXT_PUBLIC_FACEBOOK_APP_ID,
+        quote: `${title}\n\nნახეთ მეტი: ${url}`,
+        hashtag: '#SoulArt'
       }
     },
+    /* დროებით გამორთულია მესენჯერის ღილაკი
     {
-      Button: FacebookMessengerShareButton, // დავამატეთ მესენჯერის ღილაკი
+      Button: FacebookMessengerShareButton,
       Icon: FacebookMessengerIcon,
       label: 'Messenger',
       props: {
         url: url,
-        appId: process.env.NEXT_PUBLIC_FACEBOOK_APP_ID, // საჭიროა Facebook App ID
-        redirectUri: url,
+        title: title
       }
     },
+    */
     {
       Button: TwitterShareButton,
       Icon: TwitterIcon,
@@ -146,11 +146,21 @@ export function ShareButtons({ url, title }: ShareButtonsProps) {
           )}
         </button>
 
-        {mainButtons.map(({ Button, Icon, label, props }) => (
-          <Button key={label} {...props} className="share-button">
-            <Icon size={36} round />
-          </Button>
-        ))}
+        {mainButtons.map(({ Button, Icon, label, props }) => {
+          if (label === 'Messenger') return null;
+          
+          // ვქმნით ახალ props ობიექტს ტიპების შესამოწმებლად
+          const buttonProps = {
+            ...props,
+            className: "share-button"
+          };
+
+          return (
+            <Button key={label} {...buttonProps}>
+              <Icon size={36} round />
+            </Button>
+          );
+        })}
 
         <button
           className="share-button more"
