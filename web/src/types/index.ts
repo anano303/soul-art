@@ -2,7 +2,7 @@ import { Role } from "./role";
 
 export interface Product {
   _id: string;
-  user: string;
+  user: User;
   name: string;
   images: string[];
   description: string;
@@ -45,22 +45,24 @@ export interface User {
   name: string;
   email: string;
   phoneNumber: string;
-  role: Role; 
+  role: Role;
+  seller?: {
+    storeName: string;
+    storeLogo?: string;
+    ownerFirstName: string;
+    ownerLastName: string;
+    phoneNumber: string;
+    email: string;
+    identificationNumber: string;
+    accountNumber: string;
+    createdAt: string;
+    updatedAt: string;
+  };
   createdAt: string;
   updatedAt: string;
-  seller?: Seller[];
+  
 }
-interface Seller {
-  storeName: string;
-  storeLogo?: string;
-  ownerFirstName: string;
-  ownerLastName: string;
-  phoneNumber: string;
-  email: string;
-  password: string;
-  identificationNumber: string;
-  accountNumber: string;
-}
+
 
 export interface ApiResponse<T> {
   success: boolean;
