@@ -8,7 +8,7 @@ export interface Product {
   description: string;
   brand: string;
   brandLogo: string;
-  category: string;
+  category: string; // Make sure this exists
   price: number;
   countInStock: number;
   rating: number;

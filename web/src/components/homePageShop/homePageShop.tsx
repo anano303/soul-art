@@ -26,22 +26,26 @@ export default function HomePageShop() {
   useEffect(() => {
     let filtered = [...products];
     
-if (selectedArtist && selectedArtist !== 'all') {
-  filtered = filtered.filter((product) => {
-    return product.brand && product.brand.toLowerCase() === selectedArtist.toLowerCase();
-  });
-}
+    if (selectedCategory) {
+      filtered = filtered.filter((product) => product.category === selectedCategory);
+    }
 
-console.log('Filtering products:', {
-  total: products.length,
-  filtered: filtered.length,
-  category: selectedCategory,
-  artist: selectedArtist
-});
+    if (selectedArtist) {
+      filtered = filtered.filter((product) => 
+        product.brand && product.brand.toLowerCase() === selectedArtist.toLowerCase()
+      );
+    }
 
-setFilteredProducts(filtered);
-}, [selectedCategory, selectedArtist, products]);
+    console.log('Filtering products:', {
+      total: products.length,
+      filtered: filtered.length,
+      category: selectedCategory,
+      artist: selectedArtist,
+      filteredProducts: filtered
+    });
 
+    setFilteredProducts(filtered);
+  }, [selectedCategory, selectedArtist, products]);
 
   return (
     <div className="container">
