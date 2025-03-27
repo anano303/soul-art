@@ -11,6 +11,7 @@ import "./productDetails.css";
 import { Product } from "@/types";
 import { AddToCartButton } from "./AddToCartButton";
 import Link from 'next/link';
+import { ShareButtons } from '@/components/share-buttons/share-buttons';
 
 interface ProductDetailsProps {
   product: Product;
@@ -95,6 +96,11 @@ export function ProductDetails({ product }: ProductDetailsProps) {
           </div>
 
           <h1 className="product-title">{product.name}</h1>
+
+          <ShareButtons 
+            url={typeof window !== 'undefined' ? window.location.href : ''}
+            title={`Check out ${product.name} by ${product.brand} on SoulArt`}
+          />
 
           <div className="rating-container">
             <div className="rating-stars">
