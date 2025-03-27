@@ -24,7 +24,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${satoshi.variable} antialiased min-h-screen flex flex-col`}>
+      <body
+        className={`${satoshi.variable} antialiased min-h-screen flex flex-col`}
+      >
         <Providers>
           <AuthProvider>
             <CartProvider>

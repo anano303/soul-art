@@ -6,8 +6,7 @@ import type { PaginatedResponse, Product } from "@/types";
 export async function getProducts(
   page: number = 1,
   limit: number = 10,
-  keyword?: string,
-  brand?: string
+  keyword?: string
 ): Promise<PaginatedResponse<Product>> {
   try {
     const searchParams = new URLSearchParams({
@@ -16,28 +15,27 @@ export async function getProducts(
     });
 
     if (keyword) {
-      searchParams.append('keyword', keyword);
-    }
-    
-    if (brand) {
-      searchParams.append('brand', brand);
+      searchParams.append("keyword", keyword);
     }
 
-    const response = await fetchWithAuth(`/products?${searchParams.toString()}`);
-    
+    const response = await fetchWithAuth(
+      `/products?${searchParams.toString()}`
+    );
+
     if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.message || 'Failed to fetch products');
+      throw new Error("Failed to fetch products");
     }
 
-    return response.json();
+    const data = (await response.json()) as PaginatedResponse<Product>;
+
+    return data;
   } catch (error) {
-    console.error('Error fetching products:', error);
+    console.error("Error fetching products:", error);
     return {
       items: [],
       total: 0,
       page: 1,
-      pages: 1
+      pages: 1,
     };
   }
 }

@@ -50,10 +50,9 @@ export class ProductsController {
     @Query('keyword') keyword: string,
     @Query('page') page: string,
     @Query('limit') limit: string,
-    @Query('brand') brand: string,
   ) {
     // მხოლოდ დადასტურებული პროდუქტების გამოტანა
-    return this.productsService.findMany(keyword, page, limit, undefined, ProductStatus.APPROVED, brand);
+    return this.productsService.findMany(keyword, page, limit, undefined, ProductStatus.APPROVED);
   }
 
   @Get('user')

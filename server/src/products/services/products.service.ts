@@ -36,7 +36,6 @@ export class ProductsService {
     limit?: string,
     user?: UserDocument,
     status?: ProductStatus,
-    brand?: string,
   ): Promise<PaginatedResponse<Product>> {
     const pageSize = parseInt(limit ?? '10');
     const currentPage = parseInt(page ?? '1');
@@ -61,14 +60,10 @@ export class ProductsService {
               { category: { $regex: searchPattern, $options: 'i' } },
             ],
           },
-          user ? { user: user._id } : {},
-          brand ? { brand: brand } : {},
+          user ? { user: user._id } : {}
         ]
       }
-      : {
-        ...( user ? { user: user._id } : {} ),
-        ...( brand ? { brand: brand } : {} ),
-      };
+      : user ? { user: user._id } : {};
 
     const searchQueryWithStatus = {
       ...searchQuery,
@@ -78,10 +73,7 @@ export class ProductsService {
     const count = await this.productModel.countDocuments(searchQueryWithStatus);
     const products = await this.productModel
       .find(searchQueryWithStatus)
-      .populate({
-        path: 'user',
-        select: 'name email phoneNumber seller',
-      })
+      .populate('user')  // მხოლოდ user-ის populate
       .sort({ createdAt: -1 })
       .limit(pageSize)
       .skip(pageSize * (currentPage - 1));
@@ -170,10 +162,7 @@ export class ProductsService {
   async findByStatus(status: ProductStatus): Promise<ProductDocument[]> {
     return this.productModel
       .find({ status })
-      .populate({
-        path: 'user',
-        select: 'name email phoneNumber seller',
-      })
+      .populate('user')  // მხოლოდ user-ის populate
       .exec();
   }
 
