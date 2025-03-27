@@ -1,0 +1,152 @@
+.filters-container {
+  margin: 2rem 0;
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 10px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.filter-section {
+  margin-bottom: 1.5rem;
+}
+
+.filter-section:last-child {
+  margin-bottom: 0;
+}
+
+.filter-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: #012645;
+}
+
+.filter-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.filter-options.scrollable {
+  max-height: 200px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.5rem;
+  margin-top: 0.25rem;
+  padding: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.filter-options.scrollable::-webkit-scrollbar {
+  width: 4px;
+}
+
+.filter-options.scrollable::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 2px;
+}
+
+.filter-options.scrollable::-webkit-scrollbar-thumb {
+  background: #012645;
+  border-radius: 2px;
+}
+
+.filter-options.scrollable .filter-btn {
+  text-align: left;
+  border: none;
+  border-radius: 0.25rem;
+  width: 100%;
+}
+
+.filter-btn {
+  padding: 0.5rem 1rem;
+  border: 1px solid #012645;
+  border-radius: 20px;
+  background: white;
+  color: #012645;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  display: block;
+  text-align: center;
+}
+
+.filter-btn:hover {
+  background: #012645;
+  color: white;
+}
+
+.filter-btn.active {
+  background: #012645;
+  color: white;
+  font-weight: 500;
+}
+
+.search-container {
+  position: relative;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.5rem;
+  padding: 0.5rem;
+}
+
+.search-icon {
+  width: 1.2rem;
+  height: 1.2rem;
+  color: #64748b;
+  margin-right: 0.5rem;
+}
+
+.search-input {
+  width: 100%;
+  border: none;
+  outline: none;
+  font-size: 0.9rem;
+  color: #1a202c;
+}
+
+.search-input::placeholder {
+  color: #a0aec0;
+}
+
+.selected-filter {
+  margin-top: 0.5rem;
+}
+
+.clear-filter {
+  display: inline-flex;
+  align-items: center;
+  background: #012645;
+  color: white;
+  padding: 0.3rem 0.8rem;
+  border-radius: 1rem;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.clear-filter:hover {
+  background: #011d34;
+}
+
+@media (max-width: 768px) {
+  .filters-container {
+    margin: 1rem 0;
+  }
+  
+  .filter-options {
+    gap: 0.3rem;
+  }
+  
+  .filter-btn {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.8rem;
+  }
+}

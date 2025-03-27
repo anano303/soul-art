@@ -72,10 +72,18 @@
 .brand-details {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 0.5rem;
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+}
+
+.brand-details:hover .brand-logo {
+  transform: scale(1.05);
 }
 
 .brand-logo {
+  transition: transform 0.2s ease;
   width: auto;
   height: 30px;
   border-radius: 50%;

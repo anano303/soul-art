@@ -10,6 +10,7 @@ import { useRouter } from "next/navigation";
 import "./productDetails.css";
 import { Product } from "@/types";
 import { AddToCartButton } from "./AddToCartButton";
+import Link from 'next/link';
 
 interface ProductDetailsProps {
   product: Product;
@@ -24,7 +25,6 @@ export function ProductDetails({ product }: ProductDetailsProps) {
   if (!product) return null;
 
   const isOutOfStock = product.countInStock === 0;
-
 
   return (
     <div className="container">
@@ -77,7 +77,10 @@ export function ProductDetails({ product }: ProductDetailsProps) {
         {/* Right Column - Product Info */}
         <div className="product-info">
           <div className="brand-container">
-            <div className="brand-details">
+            <Link 
+              href={`/shop?brand=${encodeURIComponent(product.brand)}`}
+              className="brand-details hover:opacity-75 transition-opacity"
+            >
               <div className="brand-logo">
                 <Image
                   src={product.brandLogo}
@@ -87,7 +90,7 @@ export function ProductDetails({ product }: ProductDetailsProps) {
                 />
               </div>
               <span className="font-bold">{product.brand}</span>
-            </div>
+            </Link>
             <span className="text-muted">Ref: {product._id}</span>
           </div>
 
@@ -139,18 +142,6 @@ export function ProductDetails({ product }: ProductDetailsProps) {
             )}
           </div>
 
-          {/* <button
-            className="add-to-cart-btn"
-            disabled={isOutOfStock || loading}
-            onClick={handleAddToCart}
-          >
-            <HiOutlineShoppingBag size={30} />
-            {isOutOfStock
-              ? "Out of Stock"
-              : loading
-              ? "Adding..."
-              : "Add to Cart"}
-          </button> */}
           <AddToCartButton productId={product._id} countInStock={product.countInStock} className="custom-style-2" />
 
           <div className="tabs">
