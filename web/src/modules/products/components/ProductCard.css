@@ -6,7 +6,7 @@
   padding: 15px;
   border-radius: 8px;
   overflow: hidden;
-  background-color: #012645;
+  /* background-color: #012645; */
   box-shadow: 0 4px 10px #012645;
   transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
   text-decoration: none;
