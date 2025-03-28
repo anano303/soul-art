@@ -33,6 +33,14 @@ const TopItems: React.FC = () => {
     if (scrollRef.current) {
       scrollRef.current.innerHTML += scrollRef.current.innerHTML;
     }
+
+    // Apply margin-top to every second .easel element
+    const easels = document.querySelectorAll(`.${styles.easel}`);
+    easels.forEach((easel, index) => {
+      if ((index + 1) % 2 === 0) {
+        (easel as HTMLElement).style.marginTop = "20%";
+      }
+    });
   }, [topProducts]);
 
   if (isLoading) {
@@ -45,7 +53,6 @@ const TopItems: React.FC = () => {
 
   return (
     <div className={styles.container}>
-      {/* <Image src={fisher} alt="Fisher Icon" className={styles.fisher} /> */}
       <div className={styles.scroller} ref={scrollRef}>
         <div className={styles.inner}>
           {topProducts?.map((product: Product) => (
