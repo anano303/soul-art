@@ -15,17 +15,29 @@ export const metadata: Metadata = {
   title: "SoulArt",
   description:
     "SoulArt - ნახატების ონლაინ პლატფორმა, სადაც შეგიძლიათ გაყიდოთ და შეიძინოთ უნიკალური ხელოვნების ნიმუშები. შექმენით პირადი გალერეა და გახდით მხატვარი ან კოლექციონერი.",
-    openGraph: {
-      type: 'website',
-      locale: 'ka_GE',
-      url: 'https://soulart.ge/',
-      siteName: 'soulart',
-      title: 'soulart',
-    },
-    twitter: {
-      card: 'summary_large_image',
-    },
-  };
+  openGraph: {
+    type: 'website',
+    locale: 'ka_GE',
+    url: 'https://soulart.ge/',
+    siteName: 'soulart',
+    title: 'soulart',
+    images: [
+      {
+        url: '/van%20gog.jpg',
+        width: 1200,
+        height: 630,
+        alt: 'SoulArt Sharing Image',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'SoulArt',
+    description:
+      'SoulArt - ნახატების ონლაინ პლატფორმა უნიკალური ხელოვნების ნიმუშებისთვის.',
+    images: ['/van%20gog.jpg'],
+  },
+};
 
 export default function RootLayout({
   children,
