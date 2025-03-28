@@ -6,12 +6,10 @@ import Link from "next/link";
 import styles from "./TopItems.module.css";
 import noPhoto from "../../assets/nophoto.webp";
 import fisher from "./world-art-day.gif";
-import needle from "../../assets/fish-hook-circle-hook-fishing-bait-hooks-cbc2947b1d4849fa29ae5d039fbc8297.png";
 import { useQuery } from "@tanstack/react-query";
 import { fetchWithAuth } from "@/lib/fetch-with-auth";
 import { Product } from "@/types";
 import LoadingAnim from "../loadingAnim/loadingAnim";
-
 
 const TopItems: React.FC = () => {
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -41,15 +39,14 @@ const TopItems: React.FC = () => {
   if (isLoading) {
     return (
       <div className={styles.container}>
-        {" "}
-        <LoadingAnim />{" "}
+        <LoadingAnim />
       </div>
     );
   }
 
   return (
     <div className={styles.container}>
-      <Image src={fisher} alt="Fisher Icon" className={styles.fisher} />
+      {/* <Image src={fisher} alt="Fisher Icon" className={styles.fisher} /> */}
       <div className={styles.scroller} ref={scrollRef}>
         <div className={styles.inner}>
           {topProducts?.map((product: Product) => (
@@ -58,28 +55,24 @@ const TopItems: React.FC = () => {
               key={product._id}
               className={styles.itemLink}
             >
-              <div className={styles.itemCard}>
-                <div className={styles.hookWrapper}>
-                  <Image src={needle} alt="Hook" className={styles.hook} />
-                </div>
-                <div className={styles.imageWrapper}>
+              <div className={styles.easel}>
+                <div className={`${styles.easelLeg} ${styles.easelLeftLeg}`}></div>
+                <div className={`${styles.easelLeg} ${styles.easelRightLeg}`}></div>
+                <div className={`${styles.easelLeg} ${styles.easelBackLeg}`}></div>
+                <div className={styles.board}>
                   <Image
                     src={product.images[0] || noPhoto}
                     alt={product.name}
                     fill
                     className={styles.productImage}
-                    style={{ objectFit: "cover" }}
+                    style={{ objectFit: "cover", width: "100%" }}
                   />
-                </div>
-                <div className={styles.productNameWrapper}>
-                  <p className={styles.productName}>{product.name}</p>
                 </div>
               </div>
             </Link>
           ))}
         </div>
       </div>
-     
     </div>
   );
 };
