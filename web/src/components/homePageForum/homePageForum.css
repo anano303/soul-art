@@ -1,42 +1,55 @@
 .homePageForum {
-  padding: 10px 5%;
-  /* background-color: #e9ebf8;
+  padding: 20px 5%;
+  background: linear-gradient(135deg, #a29fea, #fad0c4);
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 15px; */
+  gap: 20px;
+  border-radius: 15px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
 
 .homePageForumH1 {
   width: 100%;
-  text-align: left;
-  color: #012645;
+  text-align: center;
+  color: #2c3e50;
+  font-size: 36px;
+  font-family: "Brush Script MT", cursive;
+  margin-bottom: 20px;
 }
 
 .forumPageLink {
-  display: flex;
+  display: inline-block;
   text-decoration: none;
-  color: #012645;
-  justify-self: right;
+  color: #f9ca58;;
+  background-color: #FAF3CB;
+  padding: 10px 20px;
+  border-radius: 25px;
   font-weight: bold;
-  margin-bottom: 20px;
+  font-size: 18px;
+  transition: background-color 0.3s ease;
+
+}
+
+.forumPageLink:hover {
+  background-color: #f1954a;
+  color: #FAF3CB;
 }
 
 /* 768px-მდე ეკრანებისთვის */
 @media screen and (max-width: 768px) {
   .homePageForum {
-    padding: 10px 3%;
-    gap: 10px;
+    padding: 15px 3%;
+    gap: 15px;
   }
 
   .homePageForumH1 {
-    font-size: 22px;
-    text-align: center;
+    font-size: 28px;
   }
 
   .forumPageLink {
-    font-size: 18px;
-    text-align: center;
+    font-size: 16px;
+    padding: 8px 16px;
   }
 }
 
@@ -44,16 +57,15 @@
 @media screen and (max-width: 480px) {
   .homePageForum {
     padding: 10px 2%;
-    gap: 8px;
+    gap: 10px;
   }
 
   .homePageForumH1 {
-    font-size: 20px;
-    text-align: center;
+    font-size: 24px;
   }
 
   .forumPageLink {
-    font-size: 16px;
-    text-align: center;
+    font-size: 14px;
+    padding: 6px 12px;
   }
 }
