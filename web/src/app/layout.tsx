@@ -42,6 +42,22 @@ export default function RootLayout({
           crossOrigin="anonymous"
           src={`https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v13.0&appId=${process.env.NEXT_PUBLIC_FACEBOOK_APP_ID}&autoLogAppEvents=1`}
         />
+        {/* Prefetch non-critical images */}
+        <link
+          rel="prefetch"
+          href="http://localhost:3000/_next/image?url=https%3A%2F%2Fres.cloudinary.com%2Fdsufx8uzd%2Fimage%2Fupload%2Fq_auto%2Cf_auto%2Cw_1024%2Fv1743141951%2Fecommerce%2Fezpkajmvijgztiswc18p.png&w=640&q=75"
+          as="image"
+        />
+        <link
+          rel="prefetch"
+          href="http://localhost:3000/_next/image?url=https%3A%2F%2Fres.cloudinary.com%2Fdsufx8uzd%2Fimage%2Fupload%2Fq_auto%2Cf_auto%2Cw_1024%2Fv1743115400%2Fecommerce%2Fwmny5jfzplylecdoct9f.jpg&w=640&q=75"
+          as="image"
+        />
+        <link
+          rel="prefetch"
+          href="http://localhost:3000/_next/image?url=https%3A%2F%2Fres.cloudinary.com%2Fdsufx8uzd%2Fimage%2Fupload%2Fq_auto%2Cf_auto%2Cw_1024%2Fv1743145178%2Fecommerce%2Fbzxnlhaspyu3tkofccov.jpg&w=640&q=75"
+          as="image"
+        />
       </head>
       <body className={`${satoshi.variable} antialiased min-h-screen flex flex-col`}>
         <Providers>
