@@ -4,30 +4,33 @@
   padding: 2rem;
   font-family: 'Satoshi', sans-serif;
   color: #012645;
-  background: #f8f9fa;
-  border-radius: 10px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  background: linear-gradient(135deg, #f8f9fa, #e3f2fd);
+  border-radius: 15px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+  border: 2px solid #014f86;
 }
 
 .contact-title {
-  font-size: 2.5rem;
+  font-size: 2.8rem;
   font-weight: bold;
   text-align: center;
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;
   color: #014f86;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .contact-description {
   text-align: center;
-  font-size: 1.1rem;
-  margin-bottom: 2rem;
+  font-size: 1.2rem;
+  margin-bottom: 2.5rem;
   color: #012645;
+  line-height: 1.6;
 }
 
 .contact-form {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 2rem;
 }
 
 .form-group {
@@ -36,7 +39,7 @@
 }
 
 label {
-  font-size: 1rem;
+  font-size: 1.1rem;
   font-weight: 600;
   margin-bottom: 0.5rem;
   color: #012645;
@@ -44,17 +47,19 @@ label {
 
 .form-input,
 .form-textarea {
-  padding: 0.8rem;
+  padding: 1rem;
   font-size: 1rem;
   border: 1px solid #d1e7f3;
-  border-radius: 5px;
+  border-radius: 10px;
   outline: none;
-  transition: border-color 0.3s ease;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  background: #ffffff;
 }
 
 .form-input:focus,
 .form-textarea:focus {
   border-color: #014f86;
+  box-shadow: 0 0 8px rgba(1, 79, 134, 0.5);
 }
 
 .form-textarea {
@@ -73,17 +78,35 @@ label {
 }
 
 .form-button {
-  padding: 0.8rem 1.5rem;
-  font-size: 1rem;
+  padding: 1rem 2rem;
+  font-size: 1.1rem;
   font-weight: 600;
   color: #f8f9fa;
-  background: #014f86;
+  background: linear-gradient(135deg, #014f86, #012645);
   border: none;
-  border-radius: 5px;
+  border-radius: 10px;
   cursor: pointer;
-  transition: background 0.3s ease;
+  transition: background 0.3s ease, transform 0.2s ease;
 }
 
 .form-button:hover {
-  background: #012645;
+  background: linear-gradient(135deg, #012645, #014f86);
+  transform: translateY(-2px);
+}
+
+.form-button:active {
+  transform: translateY(0);
+}
+
+.contact-container::before {
+  content: "";
+  position: absolute;
+  top: -10px;
+  left: -10px;
+  right: -10px;
+  bottom: -10px;
+  z-index: -1;
+  background: linear-gradient(135deg, #014f86, #012645);
+  border-radius: 20px;
+  filter: blur(20px);
 }
