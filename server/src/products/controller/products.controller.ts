@@ -103,6 +103,7 @@ export class ProductsController {
         fileFilter: (req, file, cb) => {
           const allowedMimeTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/gif'];
           if (!allowedMimeTypes.includes(file.mimetype)) {
+            return cb(new Error('Only image files are allowed!'), false);
           }
           cb(null, true);
         },
