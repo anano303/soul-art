@@ -51,7 +51,6 @@ async function bootstrap() {
   );
   app.use('/favicon.ico', (req, res) => res.status(204).send());
 
-  // if (process.env.NODE_ENV !== 'production') {
   const config = new DocumentBuilder()
     .setTitle('SoulArt  API')
     .setDescription('SoulArt E-commerce REST API')
@@ -60,8 +59,7 @@ async function bootstrap() {
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('docs', app, document);
-  // }
+  SwaggerModule.setup('docs', app, document); // დარწმუნდით, რომ როუტი არის '/docs'
 
   app.enableShutdownHooks();
 
