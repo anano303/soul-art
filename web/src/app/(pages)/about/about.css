@@ -1,0 +1,71 @@
+.about-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem;
+  font-family: 'Satoshi', sans-serif;
+  color: #012645;
+  background: #f8f9fa;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.about-title {
+  font-size: 2.5rem;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 2rem;
+  color: #014f86;
+}
+
+.about-section {
+  margin-bottom: 2rem;
+}
+
+.about-subtitle {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: #012645;
+}
+
+.about-description {
+  font-size: 1.1rem;
+  line-height: 1.6;
+  margin-bottom: 1rem;
+}
+
+.about-highlight {
+  background: linear-gradient(135deg, #014f86, #012645);
+  color: #f8f9fa;
+  padding: 1.5rem;
+  border-radius: 8px;
+}
+
+.about-button {
+  display: inline-block;
+  padding: 0.8rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  text-align: center;
+  border-radius: 5px;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.about-seller-button {
+  background: #014f86;
+  color: #f8f9fa;
+}
+
+.about-seller-button:hover {
+  background: #012645;
+}
+
+.about-shop-button {
+  background: #28a745;
+  color: #f8f9fa;
+}
+
+.about-shop-button:hover {
+  background: #218838;
+}
