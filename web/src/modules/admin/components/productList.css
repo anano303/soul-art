@@ -32,7 +32,7 @@
   border-radius: 6px;
   font-size: 14px;
   font-weight: 500;
-  cursor: pointer;
+   cursor: url('/brush.png'), pointer; 
 }
 
 .prd-btn {
@@ -107,7 +107,7 @@
   border: 1px solid #ddd;
   border-radius: 4px;
   background: white;
-  cursor: pointer;
+   cursor: url('/brush.png'), pointer; 
 }
 
 .pagination-btn:disabled {

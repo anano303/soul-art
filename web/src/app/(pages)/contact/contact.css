@@ -87,7 +87,7 @@ label {
   background: linear-gradient(135deg, #014f86, #012645);
   border: none;
   border-radius: 10px;
-  cursor: pointer;
+  cursor: url('/brush.png'), pointer; 
   transition: background 0.3s ease, transform 0.2s ease;
 }
 

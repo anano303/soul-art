@@ -63,7 +63,7 @@
   background-color: transparent;
   border: none;
   border-radius: 10px;
-  cursor: pointer;
+  cursor: url('/brush.png'), pointer; 
   transition: 0.6s ease-out;
 }
 

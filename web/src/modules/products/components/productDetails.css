@@ -75,7 +75,7 @@
   gap: 0.5rem;
   text-decoration: none;
   color: inherit;
-  cursor: pointer;
+   cursor: url('/brush.png'), pointer; 
 }
 
 .brand-details:hover .brand-logo {
@@ -149,7 +149,7 @@
   color: white;
   border: none;
   border-radius: 6px;
-  cursor: pointer;
+   cursor: url('/brush.png'), pointer; 
   transition: all 0.2s ease-in-out;
 }
 
@@ -177,7 +177,7 @@
   flex: 1;
   text-align: center;
   padding: 12px;
-  cursor: pointer;
+   cursor: url('/brush.png'), pointer; 
   border: none;
   background-color: transparent;
   font-size: 16px;

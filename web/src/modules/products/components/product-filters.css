@@ -68,7 +68,7 @@
   background: white;
   color: #012645;
   font-size: 0.9rem;
-  cursor: pointer;
+  cursor: url('/brush.png'), pointer; 
   transition: all 0.3s ease;
   text-decoration: none;
   display: block;
@@ -128,7 +128,7 @@
   padding: 0.3rem 0.8rem;
   border-radius: 1rem;
   font-size: 0.9rem;
-  cursor: pointer;
+  cursor: url('/brush.png'), pointer; 
   transition: all 0.2s ease;
 }
 
