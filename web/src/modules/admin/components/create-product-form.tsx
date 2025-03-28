@@ -10,7 +10,6 @@ import { ProductFormData } from "@/modules/products/validation/product";
 import "./CreateProductForm.css";
 import Image from "next/image";
 
-
 const categories = [
   "პეიზაჟი",
   "პორტრეტი",
@@ -44,6 +43,7 @@ export function CreateProductForm({ initialData }: CreateProductFormProps) {
   );
 
   const [pending, setPending] = useState(false);
+  const [serverError, setServerError] = useState<string | null>(null);
 
   useEffect(() => {
     if (initialData) {
@@ -128,31 +128,48 @@ export function CreateProductForm({ initialData }: CreateProductFormProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     console.log("Form data on submit", formData);
-    console.log("Initial Data:", initialData); // დავამატოთ ლოგი
+    console.log("Initial Data:", initialData); // Debug log
     setPending(true);
+    setServerError(null); // Clear previous server error
 
     try {
+      // Validate image file type
+      const allowedTypes = ["image/jpeg", "image/png", "image/jpg"];
+      if (
+        formData.images.some(
+          (image) =>
+            image instanceof File && !allowedTypes.includes(image.type)
+        )
+      ) {
+        setErrors((prev) => ({
+          ...prev,
+          images: "მხოლოდ JPG, JPEG და PNG ფორმატის სურათებია დაშვებული",
+        }));
+        setPending(false);
+        return;
+      }
+
       const formDataToSend = new FormData();
-      
-      // ყველა ველის დამატება
+
+      // Add all fields
       Object.entries(formData).forEach(([key, value]) => {
         if (key !== "images" && key !== "brandLogo") {
           formDataToSend.append(key, String(value));
         }
       });
 
-      // სურათების დამატება
+      // Add images
       if (formData.images) {
         formData.images.forEach((image) => {
           if (image instanceof File) {
-            formDataToSend.append('images', image);
+            formDataToSend.append("images", image);
           }
         });
       }
 
-      // ბრენდის ლოგოს დამატება
+      // Add brand logo
       if (formData.brandLogo instanceof File) {
-        formDataToSend.append('brandLogo', formData.brandLogo);
+        formDataToSend.append("brandLogo", formData.brandLogo);
       }
 
       const method = initialData?._id ? "PUT" : "POST";
@@ -166,14 +183,20 @@ export function CreateProductForm({ initialData }: CreateProductFormProps) {
         formData: Object.fromEntries(formDataToSend),
       });
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}${endpoint}`, {
-        method,
-        body: formDataToSend,
-        credentials: 'include',
-      });
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}${endpoint}`,
+        {
+          method,
+          body: formDataToSend,
+          credentials: "include",
+        }
+      );
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const errorData = await response.json();
+        throw new Error(
+          errorData.message || "პროდუქტის დამატება ვერ მოხერხდა"
+        );
       }
 
       const data = await response.json();
@@ -187,11 +210,9 @@ export function CreateProductForm({ initialData }: CreateProductFormProps) {
       router.push("/admin/products");
     } catch (error) {
       console.error("Error:", error);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: error instanceof Error ? error.message : "Something went wrong",
-      });
+      setServerError(
+        error instanceof Error ? error.message : "Something went wrong"
+      );
     } finally {
       setPending(false);
     }
@@ -200,6 +221,11 @@ export function CreateProductForm({ initialData }: CreateProductFormProps) {
   return (
     <div className="create-product-form">
       <form onSubmit={handleSubmit} className="space-y-4">
+        {serverError && (
+          <div className="server-error">
+            <p className="create-product-error text-center">{serverError}</p>
+          </div>
+        )}
         <div>
           <label htmlFor="name">Product Name</label>
           <input
@@ -301,7 +327,6 @@ export function CreateProductForm({ initialData }: CreateProductFormProps) {
               );
             })}
           </div>
-
           {errors.images && (
             <p className="create-product-error">{errors.images}</p>
           )}
@@ -316,7 +341,7 @@ export function CreateProductForm({ initialData }: CreateProductFormProps) {
             placeholder="Enter brand name"
             required
           />
-          {errors.brand && <p className="text-red-500">{errors.brand}</p>}
+          {errors.brand && <p className="create-product-error">{errors.brand}</p>}
         </div>
         <div>
           <label htmlFor="countInStock">Stock Count</label>
@@ -330,7 +355,7 @@ export function CreateProductForm({ initialData }: CreateProductFormProps) {
             required
           />
           {errors.countInStock && (
-            <p className="text-red-500">{errors.countInStock}</p>
+            <p className="create-product-error">{errors.countInStock}</p>
           )}
         </div>
 
@@ -362,11 +387,14 @@ export function CreateProductForm({ initialData }: CreateProductFormProps) {
           )}
         </div>
 
+        {serverError && (
+          <p className="create-product-error text-center">{serverError}</p>
+        )}
+
         <button
           type="submit"
           className="create-product-button"
           disabled={pending || !formData.name}
-          onClick={() => console.log("Button Clicked")}
         >
           {pending && <Loader2 className="loader" />}
           {initialData?._id ? "Update Product" : "Create Product"}
