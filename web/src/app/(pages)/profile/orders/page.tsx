@@ -3,15 +3,35 @@
 import { useQuery } from "@tanstack/react-query";
 import { fetchWithAuth } from "@/lib/fetch-with-auth";
 import { OrderHistory } from "@/modules/profile/components/order-history";
+import { useUser } from "@/modules/auth/hooks/use-user";
+import Link from "next/link";
 
 export default function OrderHistoryPage() {
+  const { user } = useUser();
+
   const { data: orders, isLoading } = useQuery({
     queryKey: ["myOrders"],
     queryFn: async () => {
       const response = await fetchWithAuth("/orders/myorders");
       return response.json();
     },
+    enabled: !!user, // Only run the query if the user exists
   });
+
+  if (!user) {
+    return (
+      <div className="container text-center py-5">
+        <h2>არ ხართ ავტორიზებული</h2>
+        <p>შეკვეთების სანახავად გაიარეთ ავტორიზაცია</p>
+        <Link 
+          href="/login" 
+          className="btn btn-primary"
+        >
+          ავტორიზაცია
+        </Link>
+      </div>
+    );
+  }
 
   if (isLoading) {
     return <div>Loading...</div>;

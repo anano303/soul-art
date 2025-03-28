@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import logo from "../../assets/Images/logo white.png";
 import { CartIcon } from "@/modules/cart/components/cart-icon";
 import "./header.scss";
@@ -12,9 +13,19 @@ import { useUser } from "@/modules/auth/hooks/use-user";
 export default function Header() {
   const [isNavOpen, setIsNavOpen] = useState(false);
   const { user } = useUser();
+  const router = useRouter();
 
   const toggleNav = () => {
     setIsNavOpen((prevState) => !prevState); // Toggle navigation visibility
+  };
+
+  const handleOrdersClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (user) {
+      router.push("/profile/orders");
+    } else {
+      router.push("/unauthorized-orders");
+    }
   };
 
   return (
@@ -40,7 +51,7 @@ export default function Header() {
             <Link href="/shop">შეიძინე ნახატები</Link>
           </li>
           <li>
-            <Link href="/profile/orders">ჩემი შეკვეთები</Link>
+            <a href="#" onClick={handleOrdersClick}>ჩემი შეკვეთები</a>
           </li>
           <li className="mobileAuth">
             <UserMenu />
