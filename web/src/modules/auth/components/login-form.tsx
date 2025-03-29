@@ -6,6 +6,7 @@ import { loginSchema } from "../validation";
 import { useLogin } from "../hooks/use-auth";
 import { FaGoogle, FaFacebook } from "react-icons/fa";
 import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
 import "./login-form.css";
 import { useState } from "react";
 
@@ -24,6 +25,9 @@ interface ApiError {
 export function LoginForm() {
   const { mutate: login, isPending } = useLogin();
   const [loginError, setLoginError] = useState<string | null>(null);
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const returnUrl = searchParams.get("returnUrl") || "/";
 
   const {
     register,
@@ -37,6 +41,9 @@ export function LoginForm() {
     setLoginError(null);
     try {
       await login(data, {
+        onSuccess: () => {
+          router.push(returnUrl);
+        },
         onError: (error: unknown) => {
           const apiError = error as ApiError;
           setLoginError(apiError.response?.data?.message || "Login failed");

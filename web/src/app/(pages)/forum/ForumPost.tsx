@@ -590,7 +590,7 @@ const ForumPost = ({
             className="forum-post-avatar"
           />
           <span className="forum-post-author-name">{author.name}</span>
-          {canModifyPost && (
+          {isAuthorized && canModifyPost && (
             <div className="post-actions">
               <button
                 className="edit-button"

@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation"; // Import useRouter for navigation
 import ForumPost from "./ForumPost";
 import "./ForumPage.css";
 import { useInfiniteQuery } from "@tanstack/react-query";
@@ -38,6 +39,7 @@ interface Forum {
 const ForumPage = () => {
   const { user, isLoading: isUserLoading } = useUser();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const router = useRouter(); // Initialize the router
 
   const {
     data,
@@ -81,6 +83,15 @@ const ForumPage = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
 
+  const handleAddPostClick = () => {
+    if (!user) {
+      const currentPath = window.location.pathname; // Get the current page path
+      router.push(`/login?returnUrl=${encodeURIComponent(currentPath)}`); // Redirect to login with returnUrl
+    } else {
+      setIsModalOpen(true); // Open the modal if authorized
+    }
+  };
+
   if (isUserLoading || isForumsLoading) {
     return <div> <LoadingAnim/> </div>;
   }
@@ -91,14 +102,12 @@ const ForumPage = () => {
         <div> <Loading/> </div>
       ) : (
         <>
-          {user && (
-            <button
-              className="create-post-button"
-              onClick={() => setIsModalOpen(true)}
-            >
-              ➕ ახალი პოსტის დამატება
-            </button>
-          )}
+          <button
+            className="create-post-button"
+            onClick={handleAddPostClick} // Use the new handler
+          >
+            ➕ ახალი პოსტის დამატება
+          </button>
 
           <CreateForumModal
             isOpen={isModalOpen}
