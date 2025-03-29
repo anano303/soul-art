@@ -8,6 +8,7 @@ body {
   font-family: "firaGo", sans-serif;
   font-style: normal;
   cursor: url('/brush.png'), auto; 
+  overflow-x: hidden;
  
 }
 main{
