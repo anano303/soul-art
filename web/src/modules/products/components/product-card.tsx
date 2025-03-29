@@ -29,16 +29,21 @@ export function ProductCard({ product }: ProductCardProps) {
           />
         </div>
         <div className="product-info">
+          <div className="product-name-rating">
           <h3 className="product-name">{product.name}</h3>
-          <div className="product-details">
-            <div className="priceAndRaiting">
-              <p className="product-price">{product.price} ₾ </p>
-              <div className="product-rating">
+          <div className="product-rating">
                 <span>⭐</span>
                 <span className="rating-text" style={{ whiteSpace: "nowrap" }}>
                   {product.rating.toFixed(1)} ({product.numReviews})
                 </span>
               </div>
+              </div>
+              <p style={{ margin: "5px 15px 0px 15px", color:"#153754" }}>{product.brand}</p>
+             
+          <div className="product-details">
+            <div className="priceAndRaiting">
+              <h3 className="product-price">{product.price} ₾ </h3>
+              
             </div>
           </div>
         </div>
