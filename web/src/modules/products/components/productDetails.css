@@ -8,6 +8,7 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 48px;
+  max-width: 90%;
 }
 
 .image-container {
