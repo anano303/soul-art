@@ -70,25 +70,17 @@ export class ForumsService {
         },
       });
 
-    const forumDataWithImages = forumData.map((forum) => {
-      const imageUrl = forum.imagePath
-        ? `${process.env.AWS_S3_BASE_URL}/${forum.imagePath}` // Construct the image URL
-        : null;
-
-      if (imageUrl && !imageUrl.startsWith("http")) {
-        console.error("Invalid image URL:", imageUrl); // Log invalid URLs
+    const forumDataWithImages = await Promise.all(
+      forumData.map(async (forum) => {
+        const imageUrl = await this.awsS3Service.getImageByFileId(
+          forum.imagePath,
+        );
         return {
           ...forum.toObject(),
-          image: null, // Fallback to null if the URL is invalid
+          image: imageUrl,
         };
-      }
-
-      return {
-        ...forum.toObject(),
-        image: imageUrl, // Use the URL if valid
-      };
-    });
-
+      }),
+    );
     return forumDataWithImages;
   }
 

@@ -145,7 +145,6 @@
     flex-direction: column;
     align-items: center;
     text-align: center;
-    max-width: 90%;
   }
 
   .forum-post-content {
@@ -261,11 +260,9 @@
 }
 
 .post-actions {
-  display: none; /* Hide buttons by default */
-}
-
-.logged-in .post-actions {
-  display: flex; /* Show buttons when logged in */
+  display: flex;
+  gap: 10px;
+  margin-left: 15px;
 }
 
 .edit-post-section {
