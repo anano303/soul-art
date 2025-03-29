@@ -6,9 +6,9 @@ import { loginSchema } from "../validation";
 import { useLogin } from "../hooks/use-auth";
 import { FaGoogle, FaFacebook } from "react-icons/fa";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation"; // Use useRouter instead of useSearchParams
 import "./login-form.css";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 import type * as z from "zod";
 
@@ -26,8 +26,13 @@ export function LoginForm() {
   const { mutate: login, isPending } = useLogin();
   const [loginError, setLoginError] = useState<string | null>(null);
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const returnUrl = searchParams.get("returnUrl") || "/";
+  const [returnUrl, setReturnUrl] = useState("/");
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search); // Parse query parameters manually
+    const url = params.get("returnUrl") || "/";
+    setReturnUrl(url);
+  }, []);
 
   const {
     register,
