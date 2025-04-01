@@ -169,11 +169,11 @@
     display: flex;
     gap: 20%;
   }
-  .product-card {
+  /* .product-card {
     min-width: 250px;
     margin: 0 auto;
   }
-  
+   */
 }
 @media (max-width: 605px) {
 
