@@ -2,7 +2,7 @@
   max-width: 800px;
   margin: 0 auto;
   padding: 2rem;
-  font-family: 'Satoshi', sans-serif;
+
   color: #012645;
   background: linear-gradient(135deg, #f8f9fa, #e3f2fd);
   border-radius: 15px;
@@ -10,6 +10,7 @@
   border: 2px solid #014f86;
   margin-top: 5%;
   margin-bottom: 5%;
+
 }
 
 .contact-title {
@@ -111,4 +112,12 @@ label {
   background: linear-gradient(135deg, #014f86, #012645);
   border-radius: 20px;
   filter: blur(20px);
+}
+
+@media screen and (max-width: 768px) {
+  .contact-container {
+    max-width: 80vw;
+  }
+  
+  
 }

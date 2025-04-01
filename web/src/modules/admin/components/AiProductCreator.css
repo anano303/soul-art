@@ -5,6 +5,7 @@
   background: linear-gradient(135deg, #012645, #093d67);
   border-radius: 16px;
   box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+  padding: 16px;
 }
 
 .ai-product-creator__card {
@@ -14,7 +15,7 @@
   overflow: hidden;
   border: 2px solid #e0d849;
   border-radius: 16px;
-  background: #ffffff;
+  background: linear-gradient(135deg, #ffffff, #f9f9f9);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
@@ -35,6 +36,7 @@
   padding: 16px;
   font-family: 'Georgia', serif;
   font-size: 14px;
+  line-height: 1.5;
 }
 
 .ai-product-creator__message--user {
@@ -42,6 +44,7 @@
   color: #e0d849;
   border: 2px solid #e0d849;
   margin-left: auto;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
 }
 
 .ai-product-creator__message--assistant {
@@ -49,6 +52,7 @@
   color: #ffffff;
   border: 2px solid #e0d849;
   margin-left: 16px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
 }
 
 .ai-product-creator__message-header {
@@ -62,11 +66,15 @@
   padding: 16px;
   border-top: 1px solid #e5e7eb;
   background-color: #ffffff;
+  border-radius: 0 0 16px 16px;
 }
 
 .ai-product-creator__form {
   display: flex;
   gap: 8px;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
 }
 
 .ai-product-creator__input {
@@ -74,6 +82,14 @@
   padding: 8px;
   border: 1px solid #d1d5db;
   border-radius: 4px;
+  font-size: 14px;
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.ai-product-creator__input:focus {
+  outline: none;
+  border-color: #093d67;
+  box-shadow: 0 0 0 2px rgba(9, 61, 103, 0.3);
 }
 
 .ai-product-creator__button {
@@ -82,15 +98,22 @@
   font-weight: bold;
   border-radius: 8px;
   padding: 10px 16px;
-  transition: transform 0.2s ease;
+  transition: transform 0.2s ease, background 0.3s;
 }
 
 .ai-product-creator__button:hover {
   transform: scale(1.05);
+  background: linear-gradient(135deg, #d4a373, #012645);
 }
 
 .ai-product-creator__button--outline {
   background-color: transparent;
   border: 1px solid #3b82f6;
   color: #3b82f6;
+  transition: border-color 0.3s, color 0.3s;
+}
+
+.ai-product-creator__button--outline:hover {
+  border-color: #2563eb;
+  color: #2563eb;
 }

@@ -10,20 +10,23 @@
 
 .card {
   padding: 24px;
-  background-color: #ffffff;
-  border-radius: 8px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  background: linear-gradient(135deg, #ffffff, #f9f9f9);
+  border-radius: 16px;
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+  border: 1px solid #d4a373;
 }
 
 .section-title {
-  font-size: 1.25rem;
-  font-weight: 600;
+  font-size: 1.5rem;
+  font-weight: 700;
   margin-bottom: 16px;
+  color: #4a3f35;
 }
 
 .address-details,
 .payment-method {
-  color: #6c6c6c;
+  color: #6b7280;
+  font-size: 1rem;
 }
 
 .order-items {
@@ -40,15 +43,19 @@
   position: relative;
   height: 80px;
   width: 80px;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 }
 
 .item-name {
-  font-weight: 500;
+  font-weight: 600;
+  color: #4a3f35;
 }
 
 .item-price {
   font-size: 0.875rem;
-  color: #6c6c6c;
+  color: #6b7280;
 }
 
 .order-summary {
@@ -66,7 +73,7 @@
 }
 
 .summary-label {
-  color: #6c6c6c;
+  color: #6b7280;
 }
 
 .separator {
@@ -78,13 +85,15 @@
   width: 100%;
   padding: 12px;
   font-size: 1rem;
-  background-color: #000;
-  color: #fff;
+  background: linear-gradient(135deg, #d4a373, #4a3f35);
+  color: #ffffff;
   border: none;
   border-radius: 8px;
   cursor: pointer;
+  transition: background 0.3s, transform 0.2s;
 }
 
 .place-order-button:hover {
-  background-color: #333;
+  background: linear-gradient(135deg, #4a3f35, #d4a373);
+  transform: scale(1.05);
 }
