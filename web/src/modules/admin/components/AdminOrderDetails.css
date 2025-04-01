@@ -2,6 +2,9 @@
   max-width: 1200px;
   margin: auto;
   padding: 20px;
+  background: linear-gradient(135deg, #012645, #093d67);
+  border-radius: 16px;
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
 }
 
 .header {
@@ -12,8 +15,10 @@
 }
 
 .header h1 {
-  font-size: 24px;
+  font-size: 28px;
   font-weight: bold;
+  color: #2a5530;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 .status {
@@ -29,22 +34,24 @@
 }
 
 .badge.paid {
-  background-color: #4caf50;
-  color: white;
+  background: linear-gradient(135deg, #4caf50, #093d67);
+  color: #ffffff;
 }
 
 .badge.pending {
-  background-color: #f44336;
-  color: white;
+  background: linear-gradient(135deg, #f44336, #093d67);
+  color: #ffffff;
 }
 
 .deliver-btn {
-  background-color: #007bff;
-  color: white;
-  padding: 6px 12px;
-  border: none;
-  cursor: pointer;
-  border-radius: 5px;
+  background: linear-gradient(135deg, #e0d849, #093d67);
+  color: #012645;
+  border-radius: 8px;
+  transition: transform 0.2s ease;
+}
+
+.deliver-btn:hover {
+  transform: scale(1.05);
 }
 
 .grid-container {
@@ -55,10 +62,10 @@
 }
 
 .card {
-  background: white;
-  padding: 15px;
-  border-radius: 10px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  background: linear-gradient(to bottom, #ffffff, #f3f4f6);
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .card h2 {
@@ -77,13 +84,13 @@
 }
 
 .alert.success {
-  background-color: #d4edda;
-  color: #012645;
+  background: linear-gradient(to right, #d4edda, #2a5530);
+  color: white;
 }
 
 .alert.error {
-  background-color: #f8d7da;
-  color: #721c24;
+  background: linear-gradient(to right, #f8d7da, #ec9843);
+  color: white;
 }
 
 .order-item {

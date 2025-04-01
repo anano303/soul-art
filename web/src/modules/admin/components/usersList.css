@@ -1,39 +1,75 @@
 .usr-card {
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  padding: 20px;
+  background: linear-gradient(135deg, #012645, #093d67);
+  border-radius: 16px;
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+  padding: 24px;
+  color: #ffffff;
+  font-family: 'Georgia', serif;
+  overflow-x: auto;
+  max-width: 90%;
+  margin: 20px auto;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border: 2px solid #e0d849; /* Add yellow border */
+}
+
+.usr-card:hover {
+  transform: scale(1.02);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+  border-color: #ffffff; /* Change border color on hover */
+}
+
+.usr-card::-webkit-scrollbar {
+  height: 10px;
+}
+
+.usr-card::-webkit-scrollbar-thumb {
+  background: #e0d849;
+  border-radius: 5px;
+}
+
+.usr-card::-webkit-scrollbar-track {
+  background: #012645;
 }
 
 .usr-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding-bottom: 10px;
-  border-bottom: 1px solid #e5e7eb;
+  padding-bottom: 12px;
+  border-bottom: 2px solid #e0d849;
+  margin-bottom: 20px;
 }
 
 .usr-title {
-  font-size: 1.5rem;
+  font-size: 1.8rem;
   font-weight: bold;
+  color: #e0d849;
+  text-shadow: 1px 1px 2px #000;
 }
 
 .usr-table {
   width: 100%;
   border-collapse: collapse;
-  margin-top: 10px;
+  margin-top: 16px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  overflow: hidden;
 }
 
 .usr-th,
 .usr-td {
-  padding: 10px;
+  padding: 12px;
   text-align: left;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  color: #ffffff;
 }
 
 .usr-th {
   font-weight: bold;
-  background: #f9fafb;
+  background: #093d67;
+  color: #e0d849;
+  text-shadow: 1px 1px 2px #000;
+  border-bottom: 2px solid #e0d849; /* Add yellow border to table headers */
 }
 
 .usr-th-right,
@@ -42,7 +78,9 @@
 }
 
 .usr-tr:hover {
-  background: #f3f4f6;
+  background: rgba(255, 255, 255, 0.1);
+  color: #e0d849;
+  border-left: 4px solid #e0d849; /* Add yellow highlight on hover */
 }
 
 .usr-td-bold {
@@ -78,7 +116,7 @@
 }
 
 .usr-badge {
-  background: #e5e7eb;
+  background: antiquewhite;
   color: #374151;
   border-radius: 6px;
   padding: 4px 8px;
@@ -102,25 +140,24 @@
   height: 14px;
   margin-right: 5px;
 }
-.usr-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-}
 
 .create-user-btn {
   display: flex;
   align-items: center;
   gap: 8px;
-  background: #2a5530;
-  color: white;
+  background: #e0d849;
+  color: #012645;
   border: none;
-  padding: 8px 16px;
-  border-radius: 4px;
-  cursor: url('/brush.png'), pointer; 
+  padding: 10px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background 0.3s ease, color 0.3s ease;
+  border: 2px solid #e0d849; /* Add yellow border */
 }
 
 .create-user-btn:hover {
-  background: #1e3d22;
+  background: #012645;
+  color: #e0d849;
+  border-color: #ffffff; /* Change border color on hover */
 }

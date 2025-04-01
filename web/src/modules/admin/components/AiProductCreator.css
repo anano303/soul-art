@@ -2,6 +2,9 @@
   display: flex;
   flex-direction: column;
   height: 600px;
+  background: linear-gradient(135deg, #012645, #093d67);
+  border-radius: 16px;
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
 }
 
 .ai-product-creator__card {
@@ -9,9 +12,10 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
-  background-color: #fff;
+  border: 2px solid #e0d849;
+  border-radius: 16px;
+  background: #ffffff;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
 .ai-product-creator__chat-container {
@@ -21,21 +25,29 @@
   display: flex;
   flex-direction: column;
   gap: 16px;
+  background: linear-gradient(to bottom, #ffffff, #ec9843);
+  border-radius: 8px;
 }
 
 .ai-product-creator__message {
   max-width: 80%;
-  border-radius: 8px;
+  border-radius: 12px;
   padding: 16px;
+  font-family: 'Georgia', serif;
+  font-size: 14px;
 }
 
 .ai-product-creator__message--user {
-  background-color: rgba(59, 130, 246, 0.1);
+  background: linear-gradient(135deg, #012645, #093d67);
+  color: #e0d849;
+  border: 2px solid #e0d849;
   margin-left: auto;
 }
 
 .ai-product-creator__message--assistant {
-  background-color: #f3f4f6;
+  background: #093d67;
+  color: #ffffff;
+  border: 2px solid #e0d849;
   margin-left: 16px;
 }
 
@@ -65,10 +77,16 @@
 }
 
 .ai-product-creator__button {
-  padding: 8px 12px;
-  border-radius: 4px;
-  background-color: #3b82f6;
-  color: #ffffff;
+  background: linear-gradient(135deg, #e0d849, #093d67);
+  color: #012645;
+  font-weight: bold;
+  border-radius: 8px;
+  padding: 10px 16px;
+  transition: transform 0.2s ease;
+}
+
+.ai-product-creator__button:hover {
+  transform: scale(1.05);
 }
 
 .ai-product-creator__button--outline {

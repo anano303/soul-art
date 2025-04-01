@@ -106,7 +106,7 @@ export function ProductsActions({ product, onStatusChange, onDelete }: ProductsA
           router.push(`/admin/products/${product._id}/edit?id=${product._id}`)
         }
       >
-        <Pencil className="h-4 w-4" />
+        <Pencil className="actions edit" />
       </button>
       
    
@@ -118,14 +118,14 @@ export function ProductsActions({ product, onStatusChange, onDelete }: ProductsA
             className="text-green-500 hover:text-green-600"
             title="Approve product"
           >
-            <CheckCircle className="h-4 w-4" />
+            <CheckCircle className="actions approve" />
           </button>
           <button
             onClick={() => handleStatusChange(ProductStatus.REJECTED)}
             className="text-red-500 hover:text-red-600"
             title="Reject product"
           >
-            <XCircle className="h-4 w-4" />
+            <XCircle className="actions reject" />
           </button>
         </>
       )}
@@ -134,7 +134,7 @@ export function ProductsActions({ product, onStatusChange, onDelete }: ProductsA
         className="text-red-500 hover:text-red-600"
         onClick={handleDelete}
       >
-        <Trash2 className="h-4 w-4" />
+        <Trash2 className="actions trash" />
       </button>
     </div>
   );

@@ -9,6 +9,8 @@ body {
   font-style: normal;
   cursor: url('/brush.png'), auto; 
   overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
  
 }
 main{

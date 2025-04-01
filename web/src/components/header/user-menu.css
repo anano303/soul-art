@@ -25,11 +25,14 @@
   top: 100%;
   right: 0;
   width: 200px;
-  background: white;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-  padding: 8px 0;
+  background: linear-gradient(135deg, #012645, #093d67);
+  border: 2px solid #e0d849;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  padding: 12px 0;
+  font-family: 'Courier New', Courier, monospace;
+  color: #ffffff;
+  animation: fadeIn 0.3s ease-in-out;
   z-index: 999;
 }
 
@@ -65,6 +68,17 @@
 @keyframes spin {
   to {
     transform: rotate(360deg);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 

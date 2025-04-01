@@ -3,10 +3,10 @@
   max-width: 600px;
   margin: 0 auto;
   padding: 20px;
-  background: #f9f9f9;
-  border-radius: 10px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-  border: 1px solid #2a5530;
+  background: linear-gradient(135deg, #012645, #093d67);
+  border-radius: 16px;
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+  border: 2px solid #e0d849;
 }
 .create-product-form h1 {
   text-align: center;
@@ -21,7 +21,7 @@
   display: block;
   font-weight: bold;
   margin-bottom: 5px;
-  color: #2a5530;
+  color:      yellow;;
 }
 
 .create-product-input,
@@ -29,11 +29,11 @@
 .create-product-select,
 .create-product-file {
   width: 98%;
-  padding: 10px 5px;
+  padding: 10px;
   border: 1px solid #2a5530;
-  border-radius: 5px;
+  border-radius: 8px;
   font-size: 16px;
-
+  background: linear-gradient(to bottom, #ffffff, #f3f4f6);
   color: #2a5530;
 }
 .create-product-select {
@@ -90,13 +90,14 @@
   padding: 12px;
   font-size: 18px;
   border: none;
-  border-radius: 5px;
+  border-radius: 8px;
   cursor: pointer;
-  background: linear-gradient(to left, #ec9843, #2a5530);
-  color: white;
-  transition: background 0.3s ease;
+  background: linear-gradient(135deg, #e0d849, #093d67);
+  color: #012645;
+  font-weight: bold;
+  transition: transform 0.2s ease;
 }
 
 .create-product-button:hover {
-  background: linear-gradient(to left, #2a5530, #ec9843);
+  transform: scale(1.05);
 }

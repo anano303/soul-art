@@ -1,21 +1,57 @@
 .prd-card {
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  padding: 20px;
+  background: linear-gradient(135deg, #012645, #093d67);
+  border-radius: 16px;
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+  padding: 24px;
+  color: #ffffff;
+  font-family: 'Georgia', serif;
+  overflow-x: auto;
+  max-width: 90%;
+  margin: 20px auto;
+  border: 2px solid #e0d849;
+  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+}
+
+.prd-card:hover {
+  transform: scale(1.02);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+  border-color: #ffffff;
+}
+
+.prd-card::-webkit-scrollbar {
+  height: 10px;
+}
+
+.prd-card::-webkit-scrollbar-thumb {
+  background: #e0d849;
+  border-radius: 5px;
+}
+
+.prd-card::-webkit-scrollbar-track {
+  background: #012645;
+}
+
+@media screen and (max-width: 768px) {
+  .prd-card {
+    padding: 16px;
+    max-width: 90%;
+  }
 }
 
 .prd-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding-bottom: 10px;
-  border-bottom: 1px solid #e5e7eb;
+  padding-bottom: 12px;
+  border-bottom: 2px solid #e0d849;
+  margin-bottom: 20px;
 }
 
 .prd-title {
-  font-size: 1.5rem;
+  font-size: 1.8rem;
   font-weight: bold;
+  color: #e0d849;
+  text-shadow: 1px 1px 2px #000;
 }
 
 .prd-actions {
@@ -29,22 +65,33 @@
   align-items: center;
   gap: 5px;
   padding: 8px 12px;
-  border-radius: 6px;
+  border-radius: 8px;
   font-size: 14px;
   font-weight: 500;
-   cursor: url('/brush.png'), pointer; 
+  cursor: url('/brush.png'), pointer;
 }
 
 .prd-btn {
-  background-color: #3b82f6;
-  color: white;
-  border: none;
+  background: linear-gradient(135deg, #e0d849, #093d67);
+  color: #012645;
+  border: 2px solid #e0d849;
+}
+
+.prd-btn:hover {
+  background: #012645;
+  color: #e0d849;
+  border-color: #ffffff;
 }
 
 .prd-btn-outline {
   background: white;
   border: 1px solid #d1d5db;
   color: #374151;
+}
+
+.prd-btn-outline:hover {
+  background: #f3f4f6;
+  color: #012645;
 }
 
 .prd-icon {
@@ -55,19 +102,26 @@
 .prd-table {
   width: 100%;
   border-collapse: collapse;
-  margin-top: 10px;
+  margin-top: 16px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  overflow: hidden;
 }
 
 .prd-th,
 .prd-td {
-  padding: 10px;
+  padding: 12px;
   text-align: left;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  color: #ffffff;
 }
 
 .prd-th {
   font-weight: bold;
-  background: #f9fafb;
+  background: #093d67;
+  color: #e0d849;
+  text-shadow: 1px 1px 2px #000;
+  border-bottom: 2px solid #e0d849;
 }
 
 .prd-th-right,
@@ -76,7 +130,9 @@
 }
 
 .prd-tr:hover {
-  background: #f3f4f6;
+  background: rgba(255, 255, 255, 0.1);
+  color: #e0d849;
+  border-left: 4px solid #e0d849;
 }
 
 .prd-td-bold {
@@ -104,10 +160,12 @@
 
 .pagination-btn {
   padding: 0.5rem 1rem;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  background: white;
-   cursor: url('/brush.png'), pointer; 
+  border: 2px solid #e0d849;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #e0d849, #093d67);
+  color: #012645;
+  font-weight: bold;
+  cursor: url('/brush.png'), pointer;
 }
 
 .pagination-btn:disabled {
@@ -116,10 +174,33 @@
 }
 
 .pagination-btn:hover:not(:disabled) {
-  background: #f3f4f6;
+  background: #012645;
+  color: #e0d849;
+  border-color: #ffffff;
 }
 
 .pagination-info {
   font-size: 0.875rem;
   color: #6b7280;
+}
+
+.actions {
+  border: none;
+  background-color: transparent;
+}
+
+.trash {
+  color: red;
+}
+
+.edit {
+  color: yellow;
+}
+
+.approve {
+  color: green;
+}
+
+.reject {
+  color: orange;
 }
