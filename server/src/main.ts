@@ -21,12 +21,12 @@ async function bootstrap() {
   //   allowedHeaders: ['Content-Type', 'Authorization'],
   // }));
 
-  const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(',') || 'https://soul-art.vercel.app';
+  const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(',') || 'https://www.soulart.ge';
   console.log('Allowed Origins:', allowedOrigins);
 
   app.enableCors({
     origin:
-      process.env.ALLOWED_ORIGINS?.split(',') || 'https://soul-art.vercel.app',
+      process.env.ALLOWED_ORIGINS?.split(',') || 'https://www.soulart.ge',
 
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
     credentials: true,
