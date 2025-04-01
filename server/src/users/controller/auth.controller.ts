@@ -64,21 +64,20 @@ export class AuthController {
 
     const { tokens, user: userData } = await this.authService.login(user);
 
-    const isLocal = process.env.NODE_ENV === 'development';
-
     response.cookie(
-      isLocal ? cookieConfig.localAccess.name : cookieConfig.access.name,
+      'access_token',
       tokens.accessToken,
-      isLocal ? cookieConfig.localAccess.options : cookieConfig.access.options,
+      cookieConfig.access.options,
     );
     response.cookie(
-      isLocal ? cookieConfig.localRefresh.name : cookieConfig.refresh.name,
+      'refresh_token',
       tokens.refreshToken,
-      isLocal ? cookieConfig.localRefresh.options : cookieConfig.refresh.options,
+      cookieConfig.refresh.options,
     );
 
     return { user: userData };
   }
+  //aqamde sworia
 
   @Serialize(UserDto)
   @UseGuards(JwtAuthGuard, RolesGuard)
