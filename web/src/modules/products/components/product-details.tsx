@@ -12,6 +12,7 @@ import { Product } from "@/types";
 import { AddToCartButton } from "./AddToCartButton";
 import Link from 'next/link';
 import { ShareButtons } from '@/components/share-buttons/share-buttons';
+import { RoomViewer } from "@/components/room-viewer/room-viewer";
 
 interface ProductDetailsProps {
   product: Product;
@@ -21,12 +22,12 @@ export function ProductDetails({ product }: ProductDetailsProps) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState("details");
+  const [isRoomViewerOpen, setIsRoomViewerOpen] = useState(false);
   const router = useRouter();
 
   if (!product) return null;
 
   const isOutOfStock = product.countInStock === 0;
-
 
   return (
     <div className="container">
@@ -74,12 +75,21 @@ export function ProductDetails({ product }: ProductDetailsProps) {
               </motion.button>
             ))}
           </div>
+          
+          <div className="try-on-wall-container">
+            <button 
+              className="try-on-wall-btn"
+              onClick={() => setIsRoomViewerOpen(true)}
+            >
+              მოარგე ოთახს
+            </button>
+          </div>
         </div>
 
         {/* Right Column - Product Info */}
         <div className="product-info">
           <div className="brand-container">
-          <Link 
+            <Link 
               href={`/shop?brand=${encodeURIComponent(product.brand)}`}
               className="brand-details hover:opacity-75 transition-opacity"
             >
@@ -150,7 +160,6 @@ export function ProductDetails({ product }: ProductDetailsProps) {
             )}
           </div>
 
-        
           <AddToCartButton productId={product._id} countInStock={product.countInStock} className="custom-style-2" />
 
           <div className="tabs">
@@ -197,6 +206,13 @@ export function ProductDetails({ product }: ProductDetailsProps) {
           </div>
         </div>
       </div>
+      
+      {/* Room Viewer Modal */}
+      <RoomViewer
+        productImage={product.images[currentImageIndex]}
+        isOpen={isRoomViewerOpen}
+        onClose={() => setIsRoomViewerOpen(false)}
+      />
     </div>
   );
 }

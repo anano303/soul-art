@@ -214,7 +214,29 @@ justify-content: space-around;
 margin-top: 20px;
 }
 
+.try-on-wall-container {
+  margin-top: 20px;
+  text-align: center;
+}
 
+.try-on-wall-btn {
+  background-color: #f0f0f0;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 10px 20px;
+  font-size: 16px;
+  font-weight: 500;
+  transition: all 0.2s;
+  cursor: url('/brush.png'), pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+}
+
+.try-on-wall-btn:hover {
+  background-color: #e0e0e0;
+}
 
 @media screen and (max-width:768px) {
   .grid {
