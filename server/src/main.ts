@@ -14,24 +14,19 @@ async function bootstrap() {
 
   app.use(helmet());
   app.use(cookieParser());
-  //   app.use(cors({
-  //   origin: process.env.ALLOWED_ORIGINS?.split(',') || 'http://localhost:3000',
-  //   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
-  //   credentials: true,
-  //   allowedHeaders: ['Content-Type', 'Authorization'],
-  // }));
-
-  const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(',') || 'https://www.soulart.ge';
-  console.log('Allowed Origins:', allowedOrigins);
-
   app.enableCors({
-    origin:
-      process.env.ALLOWED_ORIGINS?.split(',') || 'https://www.soulart.ge',
-
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
+    origin: [
+      'https://soulart.ge',
+      'https://www.soulart.ge',
+      'http://localhost:3000',
+      'https://localhost:3000',  // Added HTTPS local frontend
+      'http://localhost:4000',   // Added HTTP local backend
+      'https://localhost:4000',  // Added HTTPS local backend
+      /localhost/               // Fallback pattern for any localhost
+    ],
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     credentials: true,
-    allowedHeaders: ['Content-Type', 'Authorization', 'forum-id', 'file-id', 'product-id'],
-    optionsSuccessStatus: 204,
+    allowedHeaders: ['Content-Type', 'Authorization', 'forum-id', 'Origin', 'Accept']
   });
 
   app.enableVersioning({

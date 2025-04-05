@@ -1,24 +1,28 @@
 import { apiClient } from "@/lib/api-client";
-import { queryClient } from "@/app/providers";
+import { getRefreshToken, storeTokens, clearTokens } from "@/lib/auth";
 
-export async function refreshToken() {
+export async function refreshToken(): Promise<boolean> {
   try {
-    console.log("Attempting refresh token...");
-    const response = await apiClient.post(
-      "/auth/refresh",
-      {},
-      {
-        withCredentials: true,
-      }
-    );
-    console.log("Refresh response:", response.data);
-    if (!response.data?.success) {
-      throw new Error("Refresh failed");
+    const refreshToken = getRefreshToken();
+    
+    if (!refreshToken) {
+      clearTokens();
+      return false;
     }
-    return response.data;
+    
+    const response = await apiClient.post('/auth/refresh', { refreshToken });
+    
+    if (response.data?.tokens) {
+      const { accessToken, refreshToken: newRefreshToken } = response.data.tokens;
+      storeTokens(accessToken, newRefreshToken);
+      return true;
+    }
+    
+    clearTokens();
+    return false;
   } catch (error) {
-    console.error("Refresh error:", error);
-    queryClient.setQueryData(["user"], null);
-    throw error;
+    console.error('Failed to refresh token:', error);
+    clearTokens();
+    return false;
   }
 }

@@ -9,6 +9,7 @@ import { ZodError } from "zod";
 import { ProductFormData } from "@/modules/products/validation/product";
 import "./CreateProductForm.css";
 import Image from "next/image";
+import { getAccessToken } from "@/lib/auth";
 
 const categories = [
   "პეიზაჟი",
@@ -22,14 +23,20 @@ const categories = [
 
 interface CreateProductFormProps {
   initialData?: ProductFormData & { _id?: string };
+  onSuccess?: (data: { id: string; name: string; [key: string]: string | number | boolean | null | undefined }) => void;
+  isEdit?: boolean;
 }
-export function CreateProductForm({ initialData }: CreateProductFormProps) {
+export function CreateProductForm({ 
+  initialData, 
+  onSuccess,
+  isEdit = !!initialData?._id
+}: CreateProductFormProps) {
   console.log("Initial Data in Form:", initialData);
   const router = useRouter();
   const [errors, setErrors] = useState<
     Partial<Record<keyof ProductFormData, string>>
   >({});
-  const [formData, setFormData] = useState<ProductFormData>(
+  const [formData, setFormData] = useState<ProductFormData & { _id?: string }>(
     initialData || {
       name: "",
       price: 0,
@@ -44,11 +51,13 @@ export function CreateProductForm({ initialData }: CreateProductFormProps) {
 
   const [pending, setPending] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
 
   useEffect(() => {
     if (initialData) {
       setFormData((prev) => ({
         ...prev,
+        _id: initialData._id,
         name: initialData.name || "",
         brand: initialData.brand || "",
         // Check brandLogo type
@@ -64,6 +73,23 @@ export function CreateProductForm({ initialData }: CreateProductFormProps) {
       }));
     }
   }, [initialData]);
+
+  const resetForm = () => {
+    setFormData({
+      name: "",
+      price: 0,
+      description: "",
+      images: [],
+      brand: "",
+      category: "",
+      countInStock: 0,
+      brandLogo: undefined,
+    });
+    setErrors({});
+    setServerError(null);
+    setSuccess(null);
+  };
+
 
   const validateField = (field: keyof ProductFormData, value: unknown) => {
     try {
@@ -131,6 +157,7 @@ export function CreateProductForm({ initialData }: CreateProductFormProps) {
     console.log("Initial Data:", initialData); // Debug log
     setPending(true);
     setServerError(null); // Clear previous server error
+    setSuccess(null);
 
     try {
       // Validate image file type
@@ -148,21 +175,34 @@ export function CreateProductForm({ initialData }: CreateProductFormProps) {
         setPending(false);
         return;
       }
+      const token = getAccessToken();
+      if (!token) {
+        setServerError("ავტორიზაცია ვერ მოხერხდა. გთხოვთ, შეხვიდეთ თავიდან.");
+        setPending(false);
+        setTimeout(() => {
+          // Redirect to login
+          window.location.href = '/login?redirect=/admin/products';
+        }, 2000);
+        return;
+      }
 
       const formDataToSend = new FormData();
 
       // Add all fields
       Object.entries(formData).forEach(([key, value]) => {
-        if (key !== "images" && key !== "brandLogo") {
+        if (key !== "images" && key !== "brandLogo" && key !== "newImages" && value !== undefined) {
           formDataToSend.append(key, String(value));
         }
       });
 
       // Add images
       if (formData.images) {
-        formData.images.forEach((image) => {
+        formData.images.forEach((image, index) => {
           if (image instanceof File) {
             formDataToSend.append("images", image);
+          } else if (typeof image === 'string') {
+            // For existing images, pass URLs separately
+            formDataToSend.append(`existingImages[${index}]`, image);
           }
         });
       }
@@ -170,17 +210,19 @@ export function CreateProductForm({ initialData }: CreateProductFormProps) {
       // Add brand logo
       if (formData.brandLogo instanceof File) {
         formDataToSend.append("brandLogo", formData.brandLogo);
+      } else if (typeof formData.brandLogo === 'string') {
+        formDataToSend.append("existingBrandLogo", formData.brandLogo);
       }
 
-      const method = initialData?._id ? "PUT" : "POST";
-      const endpoint = initialData?._id
-        ? `/products/${initialData._id}`
+      const method = isEdit ? "PUT" : "POST";
+      const endpoint = isEdit
+        ? `/products/${formData._id}`
         : "/products";
 
       console.log("Sending request:", {
         method,
         endpoint,
-        formData: Object.fromEntries(formDataToSend),
+         formData: "FormData object (not shown)"
       });
 
       const response = await fetch(
@@ -188,26 +230,48 @@ export function CreateProductForm({ initialData }: CreateProductFormProps) {
         {
           method,
           body: formDataToSend,
-          credentials: "include",
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
         }
       );
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(
-          errorData.message || "პროდუქტის დამატება ვერ მოხერხდა"
-        );
+        let errorMessage = "პროდუქტის დამატება/განახლება ვერ მოხერხდა";
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.message || errorMessage;
+        } catch {
+          // If parsing fails, use status text
+          errorMessage = `Error: ${response.status} ${response.statusText}`;
+        }
+        throw new Error(errorMessage);
       }
 
       const data = await response.json();
       console.log("Server response:", data);
+      const successMessage = isEdit ? "პროდუქტი წარმატებით განახლდა!" : "პროდუქტი წარმატებით დაემატა!";
+      setSuccess(successMessage);
 
       toast({
-        title: initialData?._id ? "Product updated" : "Product created",
-        description: "Success!",
+        title: isEdit ? "პროდუქტი განახლდა" : "პროდუქტი დაემატა",
+        description: "წარმატებით!",
       });
 
-      router.push("/admin/products");
+      if (!isEdit) {
+        // For new product, reset form
+        resetForm();
+      } 
+      
+      if (onSuccess) {
+        // Call success callback
+        onSuccess(data);
+      } else {
+        // Navigate back to products list after a short delay
+        setTimeout(() => {
+          router.push("/admin/products");
+        }, 1500);
+      }
     } catch (error) {
       console.error("Error:", error);
       setServerError(
@@ -220,6 +284,11 @@ export function CreateProductForm({ initialData }: CreateProductFormProps) {
 
   return (
     <div className="create-product-form">
+          {success && (
+        <div className="success-message">
+          <p className="text-center">{success}</p>
+        </div>
+      )}
       <form onSubmit={handleSubmit} className="space-y-4">
         {serverError && (
           <div className="server-error">
@@ -227,7 +296,7 @@ export function CreateProductForm({ initialData }: CreateProductFormProps) {
           </div>
         )}
         <div>
-          <label htmlFor="name">Product Name</label>
+          <label htmlFor="name">პროდუქტის სახელი</label>
           <input
             id="name"
             name="name"
@@ -387,9 +456,7 @@ export function CreateProductForm({ initialData }: CreateProductFormProps) {
           )}
         </div>
 
-        {serverError && (
-          <p className="create-product-error text-center">{serverError}</p>
-        )}
+       
 
         <button
           type="submit"
@@ -397,7 +464,7 @@ export function CreateProductForm({ initialData }: CreateProductFormProps) {
           disabled={pending || !formData.name}
         >
           {pending && <Loader2 className="loader" />}
-          {initialData?._id ? "Update Product" : "Create Product"}
+          {isEdit ? "პროდუქტის განახლება" : "პროდუქტის დამატება"}
         </button>
       </form>
     </div>

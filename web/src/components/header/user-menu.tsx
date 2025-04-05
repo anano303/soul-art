@@ -2,16 +2,13 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { useUser } from "@/modules/auth/hooks/use-user";
-import { useLogout } from "@/modules/auth/hooks/use-auth";
 import "./user-menu.css";
 import { Role } from "@/types/role";
-// import hunterIcon from "../../assets/icons/hunter.png";
-// import Image from "next/image";
+import { useAuth } from "@/hooks/use-auth";
+
 
 export default function UserMenu() {
-  const { user, isLoading } = useUser();
-  const logout = useLogout();
+  const { user, isLoading, logout } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -46,44 +43,55 @@ export default function UserMenu() {
 
   return (
     <div className="dropdown" ref={menuRef}>
-      <button onClick={() => setIsOpen(!isOpen)} className="button">
-        <span className="icon">🧑‍🎨</span> {user.name}
+         <button 
+        onClick={() => setIsOpen(!isOpen)} 
+        className="button"
+        aria-label="Toggle user menu"
+      >
+        <span className="icon">🧑‍🎨</span> {user.name || 'მომხმარებელი'}
       </button>
       {isOpen && (
         <div className="dropdown-menu">
-          <div className="dropdown-label">My Account</div>
+          <div className="dropdown-label">ჩემი ანგარიში</div>
           <hr />
-          <Link href="/profile" className="dropdown-item">
-            Profile
+          <Link href="/profile" className="dropdown-item" onClick={() => setIsOpen(false)}>
+            პროფილი
           </Link>
-          <Link href="/profile/orders" className="dropdown-item">
-            Orders
+          <Link href="/profile/orders" className="dropdown-item" onClick={() => setIsOpen(false)}>
+            შეკვეთები
           </Link>
+
 
           {(user.role === Role.Admin || user.role === Role.Seller) && (
             <>
               <hr />
-              <div className="dropdown-label">Admin Dashboard</div>
-              <Link href="/admin/products" className="dropdown-item">
-                Products
+              <div className="dropdown-label">ადმინ პანელი</div>
+              <Link href="/admin/products" className="dropdown-item" onClick={() => setIsOpen(false)}>
+                პროდუქტები
               </Link>
             </>
           )}
 
           {user.role === Role.Admin && (
             <>
-              <Link href="/admin/users" className="dropdown-item">
-                Users
+              <Link href="/admin/users" className="dropdown-item" onClick={() => setIsOpen(false)}>
+              მომხმარებლები
               </Link>
-              <Link href="/admin/orders" className="dropdown-item">
-                Orders
+              <Link href="/admin/orders" className="dropdown-item" onClick={() => setIsOpen(false)}>
+              შეკვეთები
               </Link>
             </>
           )}
 
           <hr />
-          <button onClick={() => logout.mutate()} className="dropdown-item">
-            Sign Out
+          <button 
+            onClick={() => {
+              setIsOpen(false);
+              logout();
+            }} 
+            className="dropdown-item logout-button"
+          >
+            გასვლა
           </button>
         </div>
       )}

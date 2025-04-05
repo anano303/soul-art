@@ -6,6 +6,7 @@ const nextConfig: NextConfig = {
       bodySizeLimit: "50mb",
     },
   },
+  serverExternalPackages: [],
   images: {
     remotePatterns: [
       {
@@ -15,7 +16,12 @@ const nextConfig: NextConfig = {
         pathname: "**",
       },
     ],
+      unoptimized: process.env.NODE_ENV !== 'production'
   },
+  reactStrictMode: true,
+  poweredByHeader: false,
+  output: 'standalone',
+  distDir: '.next',
 };
 
 export default nextConfig;

@@ -7,11 +7,12 @@ export class NotAuthenticatedGuard implements CanActivate {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
-    const token = request.cookies?.access_token;
-
-    if (!token) {
+    const authHeader = request.headers.authorization;
+    
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return true; // Allow access if no token
     }
+    const token = authHeader.split(' ')[1];
 
     try {
       await this.jwtService.verifyAsync(token, {

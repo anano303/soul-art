@@ -21,7 +21,15 @@ export function SellerRegisterForm() {
   });
 
   const onSubmit = handleSubmit((data) => {
-    register(data);
+    const transformedData = {
+      name: `${data.ownerFirstName} ${data.ownerLastName}`,
+      email: data.email,
+      password: data.password,
+      phone: data.phoneNumber,
+      address: data.accountNumber,
+      shopName: data.storeName,
+    };
+    register(transformedData);
   });
 
   return (

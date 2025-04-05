@@ -1,48 +1,76 @@
 "use client";
 
-import { useUser } from "@/modules/auth/hooks/use-user";
-import { redirect, usePathname } from "next/navigation";
-import { Loader2 } from "lucide-react";
+
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { isAuthenticated } from "@/lib/api-client";
+import { getUserData } from "@/lib/auth";
 import { Role } from "@/types/role";
+import { Sidebar } from "lucide-react";
 
 export default function AdminLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const { user, isLoading, error } = useUser();
-  const pathname = usePathname();
+  const router = useRouter();
+  const [loading, setLoading] = useState(true);
+  const [authorized, setAuthorized] = useState(false);
 
-  if (isLoading) {
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        // Check if user is authenticated
+        if (!isAuthenticated()) {
+          console.log("Not authenticated, redirecting to login");
+          router.push("/login?redirect=/admin");
+          return;
+        }
+
+        // Get user data from local storage
+        const userData = getUserData();
+        if (!userData) {
+          console.log("No user data found, redirecting to login");
+          router.push("/login?redirect=/admin");
+          return;
+        }
+
+        // Check if user has admin or seller role
+        if (userData.role !== Role.Admin && userData.role !== Role.Seller) {
+          console.log("User doesn't have admin permissions");
+          router.push("/");
+          return;
+        }
+
+        // User is authenticated and authorized
+        setAuthorized(true);
+      } catch (error) {
+        console.error("Error checking auth:", error);
+        router.push("/login?redirect=/admin");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    checkAuth();
+  }, [router]);
+
+  if (loading) {
     return (
-      <div className="container">
-        <div className="h-[calc(100vh-5rem)] flex items-center justify-center space-y-6">
-          <div className="flex items-center justify-center gap-2">
-            <Loader2 className="h-6 w-6 animate-spin" />
-            <p className="text-lg">Loading users...</p>
-          </div>
-        </div>
+      <div className="flex items-center justify-center min-h-screen">
+        <p className="text-lg">იტვირთება...</p>
       </div>
     );
   }
 
-  if (!isLoading && (!user || error)) {
-    return redirect("/login");
+  if (!authorized) {
+    return null; // Will be redirected by useEffect
   }
 
-  const isProductRelatedPath = pathname?.includes('/products') ?? false;
-  const hasAccess = 
-    user?.role === Role.Admin || 
-    (user?.role === Role.Seller && isProductRelatedPath);
-
-  if (!hasAccess) {
-    console.log("Access denied:", {
-      role: user?.role,
-      path: pathname,
-      isProductPath: isProductRelatedPath
-    });
-    return redirect("/login");
-  }
-
-  return children;
+  return (
+    <div className="flex">
+      <Sidebar />
+      <main className="flex-1">{children}</main>
+    </div>
+  );
 }

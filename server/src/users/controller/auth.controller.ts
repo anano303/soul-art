@@ -53,10 +53,7 @@ export class AuthController {
   })
   @UseGuards(NotAuthenticatedGuard, LocalAuthGuard)
   @Post('login')
-  async login(
-    @Body() loginDto: LoginDto,
-    @Res({ passthrough: true }) response: Response,
-  ) {
+  async login(@Body() loginDto: LoginDto) {
     const user = await this.authService.validateUser(
       loginDto.email,
       loginDto.password,
@@ -64,18 +61,7 @@ export class AuthController {
 
     const { tokens, user: userData } = await this.authService.login(user);
 
-    response.cookie(
-      'access_token',
-      tokens.accessToken,
-      cookieConfig.access.options,
-    );
-    response.cookie(
-      'refresh_token',
-      tokens.refreshToken,
-      cookieConfig.refresh.options,
-    );
-
-    return { user: userData };
+    return { tokens, user: userData };
   }
   //aqamde sworia
 
@@ -88,28 +74,13 @@ export class AuthController {
   }
 
   @Post('refresh')
-  async refresh(
-    @Req() request: Request,
-    @Res({ passthrough: true }) response: Response,
-  ) {
-    const refreshToken = request.cookies['refresh_token'];
-    if (!refreshToken) {
+  async refresh(@Body() body: { refreshToken: string }) {
+    if (!body.refreshToken) {
       throw new UnauthorizedException('No refresh token');
     }
 
-    const tokens = await this.authService.refresh(refreshToken);
-
-    response.cookie('access_token', tokens.accessToken, {
-      ...cookieConfig.access.options,
-      expires: new Date(Date.now() + cookieConfig.access.options.maxAge),
-    });
-
-    response.cookie('refresh_token', tokens.refreshToken, {
-      ...cookieConfig.refresh.options,
-      expires: new Date(Date.now() + cookieConfig.refresh.options.maxAge),
-    });
-
-    return { success: true };
+    const tokens = await this.authService.refresh(body.refreshToken);
+    return { tokens, success: true };
   }
 
   @Get('google')
@@ -118,30 +89,20 @@ export class AuthController {
 
   @Get('google/callback')
   @UseGuards(GoogleAuthGuard)
-  async googleAuthRedirect(
-    @Req() req,
-    @Res({ passthrough: true }) res: Response,
-  ) {
+  async googleAuthRedirect(@Req() req, @Res() res: Response) {
     try {
       const { tokens, user } = await this.authService.singInWithGoogle({
         email: req.user.email,
-        name: req.user.name || 'Google User', // 👈 თუ სახელი არ არის, default მნიშვნელობა
+        name: req.user.name || 'Google User',
         id: req.user.id,
       });
-      console.log('🍪 Setting cookies:', tokens);
-      res.cookie(
-        'access_token',
-        tokens.accessToken,
-        cookieConfig.access.options,
-      );
-      res.cookie(
-        'refresh_token',
-        tokens.refreshToken,
-        cookieConfig.refresh.options,
-      );
-
-      // გადავამისამართოთ მთავარ გვერდზე
-      res.redirect(`${process.env.ALLOWED_ORIGINS}/`);
+      console.log('✅ Google auth successful, redirecting with tokens');
+      
+      // Include user data in the URL fragment (encoded)
+      const encodedUserData = encodeURIComponent(JSON.stringify(user));
+      
+      // Instead of setting cookies, redirect with token in URL fragment (safer than query params)
+      res.redirect(`${process.env.ALLOWED_ORIGINS}/auth-callback#accessToken=${tokens.accessToken}&refreshToken=${tokens.refreshToken}&userData=${encodedUserData}`);
     } catch (error) {
       console.error('Google auth error:', error);
       res.redirect(`${process.env.ALLOWED_ORIGINS}/login?error=auth_failed`);
@@ -150,38 +111,10 @@ export class AuthController {
 
   @Post('logout')
   @UseGuards(JwtAuthGuard)
-  async logout(
-    @CurrentUser() user: UserDocument,
-    @Res({ passthrough: true }) response: Response,
-  ) {
+  async logout(@CurrentUser() user: UserDocument) {
     await this.authService.logout(user._id.toString());
 
-    response.clearCookie('access_token', {
-      httpOnly: true,
-      secure:
-        process.env.NODE_ENV === 'production' ||
-        process.env.NODE_ENV === 'development'
-          ? true
-          : false,
-      sameSite: 'none',
-      path: '/', // Ensure the correct path
-
-      maxAge: 0,
-    });
-
-    response.clearCookie('refresh_token', {
-      httpOnly: true,
-      secure:
-        process.env.NODE_ENV === 'production' ||
-        process.env.NODE_ENV === 'development'
-          ? true
-          : false,
-      sameSite: 'none',
-      path: '/', // Ensure the correct path
-
-      maxAge: 0,
-    });
-
+   
     return { success: true };
   }
   @ApiOperation({ summary: 'Register a new user' })
