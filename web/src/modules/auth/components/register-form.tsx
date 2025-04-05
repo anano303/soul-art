@@ -6,23 +6,19 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { registerSchema } from "../validation";
 import { useRegister } from "../hooks/use-auth";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { toast } from "@/hooks/use-toast";
 import "./register-form.css";
 import type * as z from "zod";
 import { useState, useEffect } from "react";
 
 type RegisterFormData = z.infer<typeof registerSchema>;
 
-interface ApiError {
-  response?: {
-    data?: {
-      message?: string;
-    };
-  };
-}
-
 export function RegisterForm() {
+  const router = useRouter();
   const { mutate: register, isPending } = useRegister();
   const [registerError, setRegisterError] = useState<string | null>(null);
+  const [isSuccess, setIsSuccess] = useState(false);
 
   const {
     register: registerField,
@@ -85,26 +81,50 @@ export function RegisterForm() {
       return;
     }
     setErrorMessage("");
-    try {
-      await register(data, {
-        onError: (error: unknown) => {
-          const apiError = error as ApiError;
-          setRegisterError(
-            apiError.response?.data?.message || "Registration failed"
-          );
-        },
-      });
-    } catch (error: unknown) {
-      const apiError = error as ApiError;
-      setRegisterError(
-        apiError.response?.data?.message || "Registration failed"
-      );
-    }
+
+    register(data, {
+      onSuccess: () => {
+        setIsSuccess(true);
+        toast({
+          title: "რეგისტრაცია წარმატებულია",
+          description: "თქვენი ანგარიში წარმატებით შეიქმნა",
+          variant: "default",
+        });
+
+        // Redirect to login page after 2 seconds
+        setTimeout(() => {
+          router.push("/login");
+        }, 2000);
+      },
+      onError: (error) => {
+        // Display the error from the backend
+        const errorMessage = error.message;
+        setRegisterError(errorMessage);
+
+        toast({
+          title: "რეგისტრაცია ვერ მოხერხდა",
+          description: errorMessage,
+          variant: "destructive",
+        });
+      },
+    });
   };
 
   const handleGoogleAuth = () => {
     window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/auth/google`;
   };
+
+  if (isSuccess) {
+    return (
+      <div className="form-container">
+        <div className="success-message">
+          <h3>რეგისტრაცია წარმატებულია!</h3>
+          <p>თქვენი ანგარიში წარმატებით შეიქმნა.</p>
+          <p>გადამისამართება ავტორიზაციის გვერდზე...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="form-container">
@@ -127,8 +147,10 @@ export function RegisterForm() {
               id="email"
               type="email"
               placeholder="name@example.com"
+              disabled={isVerified} // Disable the input if email is verified
+              className={isVerified ? "verified-input" : ""} // Add a class for styling
               {...registerField("email", {
-                onChange: (e) => setEmail(e.target.value),
+                onChange: (e) => !isVerified && setEmail(e.target.value), // Only update email if not verified
               })}
             />
             {isVerified && <FaCheckCircle className="verified-icon" />}

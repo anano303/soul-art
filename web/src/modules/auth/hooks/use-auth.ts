@@ -3,7 +3,6 @@
 import { useAuth as useGlobalAuth } from "@/hooks/use-auth";
 import { useMutation } from "@tanstack/react-query";
 import { apiClient } from "@/lib/api-client";
-import { storeTokens, storeUserData } from "@/lib/auth";
 import axios, { AxiosError } from 'axios';
 import { User } from "@/types";
 
@@ -25,10 +24,17 @@ export interface RegisterData {
   password: string;
 }
 
-export interface SellerRegisterData extends RegisterData {
-  phone: string;
-  address: string;
-  shopName: string;
+// Define seller registration data types
+export interface SellerRegisterData {
+  storeName: string;
+  storeLogo?: string;
+  ownerFirstName: string;
+  ownerLastName: string;
+  phoneNumber: string;
+  email: string;
+  password: string;
+  identificationNumber: string;
+  accountNumber: string;
 }
 
 // Logout hook
@@ -39,6 +45,55 @@ export function useLogout() {
     mutate: logout,
     logout
   };
+}
+
+// Enhanced error handling function for consistent backend error extraction
+function extractErrorMessage(error: unknown): string {
+  if (axios.isAxiosError(error)) {
+    const axiosError = error as AxiosError<{
+      message?: string | string[];
+      error?: string;
+      statusCode?: number;
+    }>;
+    
+    // Extract error message from response data
+    if (axiosError.response?.data) {
+      const { data } = axiosError.response;
+      
+      // Handle array of error messages (typically from validation errors)
+      if (data.message && Array.isArray(data.message)) {
+        return data.message.join(', ');
+      }
+      
+      // Handle single error message
+      if (data.message && typeof data.message === 'string') {
+        return data.message;
+      }
+      
+      // Handle error field
+      if (data.error && typeof data.error === 'string') {
+        return data.error;
+      }
+    }
+    
+    // Handle network errors
+    if (axiosError.message === 'Network Error') {
+      return 'სერვერთან კავშირი ვერ მოხერხდა. გთხოვთ, შეამოწმოთ ინტერნეტ კავშირი.';
+    }
+    
+    // Handle timeout errors
+    if (axiosError.code === 'ECONNABORTED') {
+      return 'მოთხოვნის დრო ამოიწურა. გთხოვთ, სცადოთ მოგვიანებით.';
+    }
+  }
+  
+  // Handle standard Error objects
+  if (error instanceof Error) {
+    return error.message;
+  }
+  
+  // Fallback for unknown error types
+  return 'დაფიქსირდა უცნობი შეცდომა. გთხოვთ, სცადოთ მოგვიანებით.';
 }
 
 // Login hook 
@@ -60,28 +115,10 @@ export function useRegister() {
     mutationFn: async (userData: RegisterData) => {
       try {
         const response = await apiClient.post<AuthResponse>('/auth/register', userData);
-        
-        // Store tokens and user data
-        if (response.data.tokens) {
-          const { accessToken, refreshToken } = response.data.tokens;
-          storeTokens(accessToken, refreshToken);
-          storeUserData(response.data.user);
-        }
-        
         return response.data;
       } catch (error) {
-        // Handle Axios errors properly to display server messages
-        if (axios.isAxiosError(error)) {
-          const axiosError = error as AxiosError<{ message: string | string[] }>;
-          if (axiosError.response?.data?.message) {
-            const errorMessage = Array.isArray(axiosError.response.data.message) 
-              ? axiosError.response.data.message.join(', ')
-              : axiosError.response.data.message;
-            throw new Error(errorMessage);
-          }
-        }
-        // Generic error fallback
-        throw new Error('რეგისტრაცია ვერ მოხერხდა, გთხოვთ სცადოთ თავიდან');
+        const errorMessage = extractErrorMessage(error);
+        throw new Error(errorMessage);
       }
     }
   });
@@ -98,25 +135,10 @@ export function useSellerRegister() {
     mutationFn: async (userData: SellerRegisterData) => {
       try {
         const response = await apiClient.post<AuthResponse>('/auth/sellers-register', userData);
-        
-        // Store tokens and user data
-        if (response.data.tokens) {
-          const { accessToken, refreshToken } = response.data.tokens;
-          storeTokens(accessToken, refreshToken);
-          storeUserData(response.data.user);
-        }
-        
         return response.data;
       } catch (error) {
-        // Handle Axios errors properly
-        if (axios.isAxiosError(error)) {
-          const axiosError = error as AxiosError<{ message: string }>;
-          if (axiosError.response?.data?.message) {
-            throw new Error(axiosError.response.data.message);
-          }
-        }
-        // Generic error fallback
-        throw new Error('გამყიდველის რეგისტრაცია ვერ მოხერხდა, გთხოვთ სცადოთ თავიდან');
+        const errorMessage = extractErrorMessage(error);
+        throw new Error(errorMessage);
       }
     }
   });

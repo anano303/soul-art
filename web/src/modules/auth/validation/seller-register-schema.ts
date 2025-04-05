@@ -16,7 +16,8 @@ export const sellerRegisterSchema = z.object({
   identificationNumber: z
     .string()
     .length(11, "პირადი ნომერი უნდა შეიცავდეს 11 ციფრს"),
-  accountNumber: z
-    .string()
-    .regex(/^GE\d{2}[A-Z0-9]{16}$/, "არასწორი IBAN ფორმატი"),
-}); 
+accountNumber: z
+  .string()
+  .regex(/^GE[0-9]{2}[A-Z0-9]{18}$/, "არასწორი IBAN ფორმატი")
+  .refine(value => value.length === 22, "IBAN უნდა შეიცავდეს 22 სიმბოლოს"),
+});

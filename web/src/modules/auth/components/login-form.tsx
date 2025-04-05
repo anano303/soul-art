@@ -61,16 +61,17 @@ export function LoginForm() {
             router.push(returnUrl);
           } else {
             // Login was processed but returned an error
-            setLoginError(response.error || "ავტორიზაცია ვერ მოხერხდა");
+            const errorMessage = response.error || "ავტორიზაცია ვერ მოხერხდა";
+            setLoginError(errorMessage);
             toast({
               title: "ავტორიზაციის შეცდომა",
-              description: response.error || "ავტორიზაცია ვერ მოხერხდა",
+              description: errorMessage,
               variant: "destructive"
             });
           }
         },
         onError: (error) => {
-          // Error from API call
+          // Display detailed error message from backend
           const errorMessage = error instanceof Error 
             ? error.message 
             : "ავტორიზაცია ვერ მოხერხდა";
@@ -85,7 +86,7 @@ export function LoginForm() {
         }
       });
     } catch (error) {
-      // Unexpected error
+      // Handle unexpected client-side errors
       const errorMessage = error instanceof Error 
         ? error.message 
         : "სისტემური შეცდომა, გთხოვთ სცადოთ მოგვიანებით";
@@ -133,6 +134,7 @@ export function LoginForm() {
           )}
         </div>
 
+        {/* Enhanced error message display */}
         {loginError && (
           <div className="error-message">
             <p className="error-text">{loginError}</p>
