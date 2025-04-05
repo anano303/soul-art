@@ -1,7 +1,6 @@
 "use client";
 
 import { OrdersList } from "@/modules/admin/components/orders-list";
-import "./adminOrders.css";
 import { useEffect, useState } from "react";
 import { isAuthenticated } from "@/lib/api-client";
 import { useRouter } from "next/navigation";
