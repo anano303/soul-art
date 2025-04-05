@@ -23,7 +23,7 @@
   flex-direction: column;
   position: relative;
   padding: 20px;
-  overflow: hidden;
+  
 }
 
 .close-button {
@@ -152,7 +152,7 @@
   overflow: visible;
 }
 
-.product-image {
+.room-product-image {
   pointer-events: none;
   max-width: 100%;
   max-height: 100%;

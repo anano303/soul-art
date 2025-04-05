@@ -220,22 +220,60 @@ margin-top: 20px;
 }
 
 .try-on-wall-btn {
-  background-color: #f0f0f0;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  padding: 10px 20px;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border: 2px solid #333;
+  border-radius: 12px;
+  padding: 12px 24px;
   font-size: 16px;
-  font-weight: 500;
-  transition: all 0.2s;
+  font-weight: 600;
+  color: #333;
+  transition: all 0.3s ease;
   cursor: url('/brush.png'), pointer;
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  margin: 0 auto;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  font-family: 'Georgia', serif;
+  letter-spacing: 0.5px;
+}
+
+.try-on-wall-btn::before {
+  content: "";
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  border-radius: 12px;
+  background: linear-gradient(45deg, #6a11cb, #2575fc, #ff758c, #ff7eb3);
+  z-index: -1;
+  opacity: 0;
+  transition: opacity 0.3s ease;
 }
 
 .try-on-wall-btn:hover {
-  background-color: #e0e0e0;
+  transform: translateY(-2px);
+  color: #000;
+  background: white;
+  border-color: transparent;
+}
+
+.try-on-wall-btn:hover::before {
+  opacity: 1;
+}
+
+.try-on-wall-btn:active {
+  transform: translateY(1px);
+  box-shadow: 0 2px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* Add a small paintbrush icon using a pseudo-element */
+.try-on-wall-btn::after {
+  content: "🖌️";
+  margin-left: 8px;
+  font-size: 18px;
 }
 
 @media screen and (max-width:768px) {

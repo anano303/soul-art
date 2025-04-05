@@ -215,7 +215,7 @@ export function RoomViewer({ productImage, isOpen, onClose }: RoomViewerProps) {
                     alt="Product"
                     width={300}
                     height={300}
-                    className="product-image"
+                    className="room-product-image"
                     style={{
                       objectFit: 'contain',
                       width: 'auto',

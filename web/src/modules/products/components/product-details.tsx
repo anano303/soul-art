@@ -77,12 +77,14 @@ export function ProductDetails({ product }: ProductDetailsProps) {
           </div>
           
           <div className="try-on-wall-container">
-            <button 
+            <motion.button 
               className="try-on-wall-btn"
               onClick={() => setIsRoomViewerOpen(true)}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
             >
               მოარგე ოთახს
-            </button>
+            </motion.button>
           </div>
         </div>
 
