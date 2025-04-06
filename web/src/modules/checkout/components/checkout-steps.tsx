@@ -1,61 +1,54 @@
 import { Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import './checkout-steps.css';
 
 interface CheckoutStepsProps {
   currentStep: number;
 }
 
 const steps = [
-  { id: 1, name: 'Sign In' },
-  { id: 2, name: 'Shipping' },
-  { id: 3, name: 'Payment' },
-  { id: 4, name: 'Place Order' },
+  { id: 1, name: 'ავტორიზაცია' },
+  { id: 2, name: 'მიწოდება' },
+  { id: 3, name: 'გადახდა' },
+  { id: 4, name: 'შეკვეთა' },
 ];
 
 export function CheckoutSteps({ currentStep }: CheckoutStepsProps) {
   return (
-    <div className="w-full">
+    <div className="checkout-steps-container">
       <nav aria-label="Progress">
-        <ol className="flex items-center justify-center">
+        <ol className="steps-list">
           {steps.map((step, stepIdx) => (
             <li
               key={step.name}
               className={cn(
-                stepIdx !== steps.length - 1 ? 'pr-20' : '',
-                'relative',
+                'step-item',
+                stepIdx !== steps.length - 1 ? 'with-connector' : '',
               )}
             >
               {step.id < currentStep ? (
                 // Completed step
-                <div className="flex items-center">
-                  <span className="flex h-8 w-8 items-center justify-center rounded-full bg-primary">
-                    <Check className="h-5 w-5 text-primary-foreground" />
+                <div className="step-content">
+                  <span className="step-indicator completed">
+                    <Check className="step-icon" />
                   </span>
-                  <span className="ml-3 text-sm font-medium">{step.name}</span>
+                  <span className="step-label completed">{step.name}</span>
                 </div>
               ) : step.id === currentStep ? (
                 // Current step
-                <div className="flex items-center">
-                  <span className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-primary">
-                    <span className="text-sm font-medium text-primary">
-                      {step.id}
-                    </span>
+                <div className="step-content">
+                  <span className="step-indicator current">
+                    <span className="step-number">{step.id}</span>
                   </span>
-                  <span className="ml-3 text-sm font-medium text-primary">
-                    {step.name}
-                  </span>
+                  <span className="step-label current">{step.name}</span>
                 </div>
               ) : (
                 // Upcoming step
-                <div className="flex items-center">
-                  <span className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-muted">
-                    <span className="text-sm font-medium text-muted-foreground">
-                      {step.id}
-                    </span>
+                <div className="step-content">
+                  <span className="step-indicator upcoming">
+                    <span className="step-number">{step.id}</span>
                   </span>
-                  <span className="ml-3 text-sm font-medium text-muted-foreground">
-                    {step.name}
-                  </span>
+                  <span className="step-label upcoming">{step.name}</span>
                 </div>
               )}
             </li>

@@ -1,0 +1,142 @@
+.checkout-steps-container {
+  width: 100%;
+  max-width: 900px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+  font-family: 'Georgia', serif;
+}
+
+.steps-list {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+}
+
+.step-item {
+  position: relative;
+  z-index: 2;
+}
+
+.step-item.with-connector::after {
+  content: "";
+  position: absolute;
+  top: 16px;
+  left: 45px;
+  width: calc(100% - 20px);
+  height: 2px;
+  background: #e0d5c8;
+  z-index: 1;
+}
+
+.step-item.with-connector:has(.completed + .step-label)::after {
+  background: #8d6e63;
+}
+
+.step-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.step-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+}
+
+.step-indicator.completed {
+  background-color: #8d6e63;
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(141, 110, 99, 0.3);
+}
+
+.step-indicator.current {
+  background-color: #faf6f2;
+  border: 2px solid #8d6e63;
+  color: #8d6e63;
+  box-shadow: 0 2px 8px rgba(141, 110, 99, 0.15);
+}
+
+.step-indicator.upcoming {
+  background-color: #faf6f2;
+  border: 2px solid #e0d5c8;
+  color: #7d6e63;
+}
+
+.step-icon {
+  width: 16px;
+  height: 16px;
+}
+
+.step-number {
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.step-label {
+  font-size: 0.95rem;
+  text-align: center;
+  letter-spacing: 0.5px;
+}
+
+.step-label.completed {
+  color: #5d4037;
+  font-weight: 600;
+}
+
+.step-label.current {
+  color: #8d6e63;
+  font-weight: 600;
+}
+
+.step-label.upcoming {
+  color: #7d6e63;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .steps-list {
+    flex-direction: column;
+    gap: 1.5rem;
+    align-items: flex-start;
+  }
+  
+  .step-item {
+    width: 100%;
+  }
+  
+  .step-content {
+    flex-direction: row;
+    gap: 1rem;
+    align-items: center;
+  }
+  
+  .step-item.with-connector::after {
+    left: 16px;
+    top: 40px;
+    width: 2px;
+    height: calc(100% + 1rem);
+  }
+}
+
+@media (max-width: 480px) {
+  .step-label {
+    font-size: 0.85rem;
+  }
+  
+  .step-indicator {
+    width: 28px;
+    height: 28px;
+  }
+  
+  .step-icon {
+    width: 14px;
+    height: 14px;
+  }
+}

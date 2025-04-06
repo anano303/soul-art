@@ -1,4 +1,5 @@
 export const countries = [
+  { code: "GE", name: "საქართველო" },
   { code: "US", name: "United States" },
   { code: "CA", name: "Canada" },
   { code: "GB", name: "United Kingdom" },
