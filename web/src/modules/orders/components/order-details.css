@@ -6,6 +6,7 @@
 
 .order-header {
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
   align-items: center;
 }
@@ -120,4 +121,11 @@ hr {
   margin: 10px 0;
   border: none;
   border-top: 1px solid #ccc;
+}
+
+@media screen and (max-width: 768px) {
+  .order-grid {
+    grid-template-columns: 1fr;
+  }
+  
 }
