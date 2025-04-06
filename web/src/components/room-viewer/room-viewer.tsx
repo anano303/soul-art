@@ -147,7 +147,7 @@ export function RoomViewer({ productImage, isOpen, onClose }: RoomViewerProps) {
           </div>
 
           <div className="product-size-control">
-            <label>პროდუქტის ზომა: {productSize}%</label>
+            <label>ნამუშევრის ზომა: {productSize}%</label>
             <input
               type="range"
               min="10"
@@ -233,7 +233,7 @@ export function RoomViewer({ productImage, isOpen, onClose }: RoomViewerProps) {
                   />
                   {!productLoaded && (
                     <div className="product-loading">
-                      პროდუქტის ჩატვირთვა...
+                      ნამუშევრების ჩატვირთვა...
                     </div>
                   )}
                 </div>
@@ -243,7 +243,7 @@ export function RoomViewer({ productImage, isOpen, onClose }: RoomViewerProps) {
         </div>
 
         <div className="instructions">
-          <p>გადაიტანეთ პროდუქტი კედელზე სასურველ პოზიციაზე. გამოიყენეთ ზომის რეგულატორი.</p>
+          <p>გადაიტანეთ არჩეული პროდუქტი კედელზე სასურველ პოზიციაზე. გამოიყენეთ ზომის რეგულატორი.</p>
         </div>
       </div>
     </div>

@@ -237,7 +237,7 @@ export function CreateProductForm({
       );
 
       if (!response.ok) {
-        let errorMessage = "პროდუქტის დამატება/განახლება ვერ მოხერხდა";
+        let errorMessage = "ნამუშევრის დამატება/განახლება ვერ მოხერხდა";
         try {
           const errorData = await response.json();
           errorMessage = errorData.message || errorMessage;
@@ -250,11 +250,11 @@ export function CreateProductForm({
 
       const data = await response.json();
       console.log("Server response:", data);
-      const successMessage = isEdit ? "პროდუქტი წარმატებით განახლდა!" : "პროდუქტი წარმატებით დაემატა!";
+      const successMessage = isEdit ? "ნამუშევარი წარმატებით განახლდა!" : "ნამუშევარი წარმატებით დაემატა!";
       setSuccess(successMessage);
 
       toast({
-        title: isEdit ? "პროდუქტი განახლდა" : "პროდუქტი დაემატა",
+        title: isEdit ? "ნამუშევარი განახლდა" : "ნამუშევარი დაემატა",
         description: "წარმატებით!",
       });
 
@@ -296,7 +296,7 @@ export function CreateProductForm({
           </div>
         )}
         <div>
-          <label htmlFor="name">პროდუქტის სახელი</label>
+          <label htmlFor="name">ნამუშევარის სახელი</label>
           <input
             id="name"
             name="name"
@@ -464,7 +464,7 @@ export function CreateProductForm({
           disabled={pending || !formData.name}
         >
           {pending && <Loader2 className="loader" />}
-          {isEdit ? "პროდუქტის განახლება" : "პროდუქტის დამატება"}
+          {isEdit ? "ნამუშევარის განახლება" : "ნამუშევარის დამატება"}
         </button>
       </form>
     </div>
