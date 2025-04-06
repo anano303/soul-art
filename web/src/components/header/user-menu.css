@@ -85,7 +85,7 @@
 @media screen and (max-width: 768px) {
   .dropdown-menu {
     position: static;
-    transform: translateY(-50%);
+    transform: translateY(-45%);
   }
   .icon {
     z-index: 0;
