@@ -40,10 +40,32 @@ export class ForumsController {
     if (!user) {
       throw new BadRequestException('User not found');
     }
-    if (!file) return this.forumsService.create(createForumDto, user._id);
+    
+    if (!file) {
+      return this.forumsService.create(createForumDto, user._id);
+    }
 
+    console.log("Received file:", {
+      originalName: file.originalname,
+      mimeType: file.mimetype,
+      size: `${(file.size / (1024 * 1024)).toFixed(2)} MB`
+    });
+
+    // Check file type more permissively
+    const validMimeTypes = [
+      'image/jpeg', 'image/jpg', 'image/png', 'image/gif', 
+      'image/webp', 'image/heic', 'image.heif'
+    ];
+    
+    if (!validMimeTypes.includes(file.mimetype.toLowerCase()) && 
+        !file.mimetype.toLowerCase().startsWith('image/')) {
+      throw new BadRequestException(
+        `Unsupported file type: ${file.mimetype}. Supported types: JPEG, PNG, GIF, WEBP, HEIC.`
+      );
+    }
+    
     const timestamp = Date.now();
-    const filePath = `images/${timestamp}`;
+    const filePath = `images/${timestamp}-${file.originalname.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
     const filesSizeInMb = Number((file.size / (1024 * 1024)).toFixed(1));
 
     if (filesSizeInMb > 5) {
@@ -158,9 +180,32 @@ export class ForumsController {
     @Body() updateForumDto: UpdateForumDto,
     @UploadedFile() file: Express.Multer.File,
   ) {
+    if (!file) {
+      return this.forumsService.update(id, updateForumDto, user._id);
+    }
+    
+    console.log("Received file for update:", {
+      originalName: file.originalname,
+      mimeType: file.mimetype,
+      size: `${(file.size / (1024 * 1024)).toFixed(2)} MB`
+    });
+    
+    // Check file type more permissively
+    const validMimeTypes = [
+      'image/jpeg', 'image/jpg', 'image/png', 'image/gif', 
+      'image/webp', 'image.heic', 'image.heif'
+    ];
+    
+    if (!validMimeTypes.includes(file.mimetype.toLowerCase()) && 
+        !file.mimetype.toLowerCase().startsWith('image/')) {
+      throw new BadRequestException(
+        `Unsupported file type: ${file.mimetype}. Supported types: JPEG, PNG, GIF, WEBP, HEIC.`
+      );
+    }
+
     const timestamp = Date.now();
-    const filePath = file ? `images/${timestamp}` : undefined;
-    const fileBuffer = file ? file.buffer : undefined;
+    const filePath = `images/${timestamp}-${file.originalname.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
+    const fileBuffer = file.buffer;
 
     return this.forumsService.update(id, updateForumDto, user._id, filePath, fileBuffer);
   }

@@ -128,40 +128,70 @@ const CreateForumModal = ({ isOpen, onClose }: CreateForumModalProps) => {
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] || null;
-    if (file && file.size > 5 * 1024 * 1024) { // Check if file size is greater than 5MB
+    if (!file) {
+      setImage(null);
+      return;
+    }
+    
+    console.log("Selected file:", {
+      name: file.name,
+      type: file.type,
+      size: `${(file.size / (1024 * 1024)).toFixed(2)} MB`
+    });
+
+    // Check file type - support more image formats
+    const supportedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/heic', 'image/heif'];
+    if (!supportedTypes.includes(file.type.toLowerCase()) && !file.type.toLowerCase().startsWith('image/')) {
       toast({
         variant: "destructive",
         title: "Error",
-        description: "File size should not exceed 5MB",
+        description: "Unsupported file type. Please upload an image file.",
       });
       return;
     }
-    if (file) {
-      try {
-        const compressedFile = await imageCompression(file, {
-          maxSizeMB: 0.5, // Reduce max size to 0.5MB
-          maxWidthOrHeight: 1280, // Reduce max dimensions to 1280px
-          useWebWorker: true,
+    
+    if (file.size > 10 * 1024 * 1024) { // Increase max size to 10MB before compression
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "File size should not exceed 10MB",
+      });
+      return;
+    }
+    
+    try {
+      // More permissive compression options
+      const compressedFile = await imageCompression(file, {
+        maxSizeMB: 1, // Target 1MB after compression
+        maxWidthOrHeight: 1920,
+        useWebWorker: true,
+        fileType: "image/jpeg", // Convert all images to JPEG for better compatibility
+        alwaysKeepResolution: true,
+        initialQuality: 0.8, // Start with higher quality
+      });
+      
+      console.log("Compressed file:", {
+        type: compressedFile.type,
+        size: `${(compressedFile.size / (1024 * 1024)).toFixed(2)} MB`
+      });
+      
+      setImage(compressedFile);
+    } catch (error) {
+      console.error("Image compression error:", error);
+      // If compression fails, try using the original file if it's not too large
+      if (file.size <= 2 * 1024 * 1024) {
+        setImage(file);
+        toast({
+          title: "Information",
+          description: "Using original image as compression failed",
         });
-        if (compressedFile.size > 5 * 1024 * 1024) { // Check if compressed file size is greater than 5MB
-          toast({
-            variant: "destructive",
-            title: "Error",
-            description: "Compressed file size should not exceed 5MB",
-          });
-          return;
-        }
-        setImage(compressedFile);
-      } catch (error) {
-        console.log(error)
+      } else {
         toast({
           variant: "destructive",
           title: "Error",
-          description: "Failed to compress image",
+          description: "Failed to process the image. Please try another image.",
         });
       }
-    } else {
-      setImage(null);
     }
   };
 
