@@ -163,11 +163,11 @@ export function SellerRegisterForm() {
         </div>
 
         <div className="input-group">
-          <label htmlFor="identificationNumber">პირადი ნომერი</label>
+          <label htmlFor="identificationNumber">პირადი ნომერი / საიდენტ. კოდი</label>
           <input
             id="identificationNumber"
             type="text"
-            placeholder="11-ნიშნა პირადი ნომერი"
+            placeholder="11-ნიშნა პირადი ნომერი / საიდენტ. კოდი"
             {...registerField("identificationNumber")}
           />
           {errors.identificationNumber && (
