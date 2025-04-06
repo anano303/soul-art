@@ -7,6 +7,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "@/hooks/use-toast";
 import { fetchWithAuth } from "@/lib/fetch-with-auth";
 import imageCompression from "browser-image-compression";
+import { apiClient } from "@/lib/api-client";
 
 interface Comment {
   id: string;
@@ -303,28 +304,30 @@ const ForumPost = ({
 
   const editPostMutation = useMutation({
     mutationFn: async ({ text, tags, image }: { text: string; tags: string[]; image: File | null }) => {
-      const formData = new FormData();
-      formData.append("content", text);
-      tags.forEach((tag, index) => {
-        formData.append(`tags[${index}]`, tag);
-      });
-      if (image) {
-        formData.append("file", image);
-      }
+      try {
+        const formData = new FormData();
+        formData.append("content", text);
+        tags.forEach((tag, index) => {
+          formData.append(`tags[${index}]`, tag);
+        });
+        if (image) {
+          formData.append("file", image);
+        }
 
-      console.log("FormData before sending:", Array.from(formData.entries())); // Log FormData entries
+        console.log("FormData before sending:", Array.from(formData.entries())); // Log FormData entries
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/forums/${id}`, {
-        method: "PUT",
-        body: formData,
-        credentials: "include",
-      });
-      if (!response.ok) {
-        const error = await response.json();
+        // Use apiClient instead of fetch for proper authorization handling
+        const response = await apiClient.put(`/forums/${id}`, formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          }
+        });
+
+        return response.data;
+      } catch (error) {
         console.error("Edit post error:", error); // Log error response
-        throw new Error(error.message || "Failed to edit post");
+        throw error;
       }
-      return response.json();
     },
     onSuccess: () => {
       setIsEditingPost(false);
@@ -347,18 +350,14 @@ const ForumPost = ({
 
   const deletePostMutation = useMutation({
     mutationFn: async () => {
-      const response = await fetchWithAuth(`/forums/${id}`, {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-      });
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || "Failed to delete post");
+      try {
+        // Also use apiClient for deletion
+        const response = await apiClient.delete(`/forums/${id}`);
+        return response.data;
+      } catch (error) {
+        console.error("Delete post error:", error);
+        throw error;
       }
-      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["forums"] });
