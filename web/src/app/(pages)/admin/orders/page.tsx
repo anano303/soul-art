@@ -23,12 +23,13 @@ export default function AdminOrdersPage() {
   }
 
   return (
-    <div className="admin-orders-container">
-      <div className="scrollable-container">
-        <div className="orders-content">
-          <OrdersList />
-        </div>
-      </div>
+    <div className="responsive-container" style={{
+      maxWidth: "90%",
+      margin: "0 auto",
+      overflowX: "auto",
+      width: "100%"
+    }}>
+      <OrdersList />
     </div>
   );
 }

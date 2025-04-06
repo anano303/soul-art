@@ -27,8 +27,8 @@ export function CartPage() {
   return (
     <div className="cart-page">
       <div className="cart-header">
-        <h1 className="cart-title">Shopping Cart</h1>
-        <p className="cart-items-count">{items.length} items</p>
+        <h1 className="cart-title">თქვენი კალათა</h1>
+        <p className="cart-items-count">{items.length} ნივთი</p>
       </div>
 
       <div className="cart-content">
@@ -40,30 +40,30 @@ export function CartPage() {
 
         <div className="order-summary">
           <div className="summary-card">
-            <h2 className="summary-title">Order Summary</h2>
+            <h2 className="summary-title">შეკვეთის დეტალები</h2>
             <div className="summary-details">
               <div className="summary-row">
-                <span className="summary-label">Subtotal</span>
+                <span className="summary-label">ჯამი</span>
                 <span>{formatPrice(subtotal)}</span>
               </div>
               <div className="summary-row">
-                <span className="summary-label">Shipping</span>
-                <span>{shipping === 0 ? "Free" : formatPrice(shipping)}</span>
+                <span className="summary-label">მიწოდება</span>
+                <span>{shipping === 0 ? "უფასო" : formatPrice(shipping)}</span>
               </div>
               <div className="summary-row">
-                <span className="summary-label">Tax</span>
+                <span className="summary-label">გადასახადი</span>
                 <span>{formatPrice(tax)}</span>
               </div>
               <hr className="separator" />
               <div className="summary-row total">
-                <span>Total</span>
+                <span>სრული ღირებულება</span>
                 <span>{formatPrice(total)}</span>
               </div>
               <button
                 className="checkout-button"
                 onClick={() => router.push("/checkout/shipping")}
               >
-                Proceed to Checkout
+                შეკვეთის გაფორმება
               </button>
             </div>
           </div>

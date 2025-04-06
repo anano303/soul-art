@@ -1,97 +1,70 @@
+/* Main container */
 .prd-card {
-  background: linear-gradient(135deg, #012645, #093d67);
-  border-radius: 16px;
-  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
-  padding: 24px;
-  color: #ffffff;
+  background-color: #faf6f2;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 8px 20px rgba(122, 94, 65, 0.08);
+  color: #4a3f35;
   font-family: 'Georgia', serif;
-  overflow-x: auto;
-  max-width: 90%;
-  margin: 20px auto;
-  border: 2px solid #e0d849;
-  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
 }
 
-.prd-card:hover {
-  transform: scale(1.02);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
-  border-color: #ffffff;
-}
-
-.prd-card::-webkit-scrollbar {
-  height: 10px;
-}
-
-.prd-card::-webkit-scrollbar-thumb {
-  background: #e0d849;
-  border-radius: 5px;
-}
-
-.prd-card::-webkit-scrollbar-track {
-  background: #012645;
-}
-
-@media screen and (max-width: 768px) {
-  .prd-card {
-    padding: 16px;
-    max-width: 90%;
-  }
-}
-
+/* Header */
 .prd-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding-bottom: 12px;
-  border-bottom: 2px solid #e0d849;
-  margin-bottom: 20px;
+  margin-bottom: 1.5rem;
+  border-bottom: 2px solid #e0d5c8;
+  padding-bottom: 1rem;
 }
 
 .prd-title {
-  font-size: 1.8rem;
-  font-weight: bold;
-  color: #e0d849;
-  text-shadow: 1px 1px 2px #000;
+  font-size: 2rem;
+  font-weight: normal;
+  color: #5d4037;
+  letter-spacing: 1px;
+  font-family: 'Playfair Display', serif;
 }
 
 .prd-actions {
   display: flex;
-  gap: 8px;
+  gap: 0.75rem;
 }
 
-.prd-btn,
-.prd-btn-outline {
+/* Buttons */
+.prd-btn, .prd-btn-outline, .pagination-btn {
   display: flex;
   align-items: center;
-  gap: 5px;
-  padding: 8px 12px;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: url('/brush.png'), pointer;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
 }
 
 .prd-btn {
-  background: linear-gradient(135deg, #e0d849, #093d67);
-  color: #012645;
-  border: 2px solid #e0d849;
+  background-color: #8d6e63;
+  color: white;
+  border: none;
 }
 
 .prd-btn:hover {
-  background: #012645;
-  color: #e0d849;
-  border-color: #ffffff;
+  background-color: #6d4c41;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(109, 76, 65, 0.3);
 }
 
 .prd-btn-outline {
-  background: white;
-  border: 1px solid #d1d5db;
-  color: #374151;
+  background-color: transparent;
+  color: #8d6e63;
+  border: 1px solid #8d6e63;
 }
 
 .prd-btn-outline:hover {
-  background: #f3f4f6;
-  color: #012645;
+  background-color: #f5f0e9;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(109, 76, 65, 0.1);
 }
 
 .prd-icon {
@@ -99,73 +72,95 @@
   height: 16px;
 }
 
+/* Table styling */
 .prd-table {
   width: 100%;
   border-collapse: collapse;
-  margin-top: 16px;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 12px;
+  border-radius: 8px;
   overflow: hidden;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
-.prd-th,
-.prd-td {
-  padding: 12px;
-  text-align: left;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-  color: #ffffff;
+.prd-thead-row {
+  background-color: #e0d5c8;
 }
 
 .prd-th {
-  font-weight: bold;
-  background: #093d67;
-  color: #e0d849;
-  text-shadow: 1px 1px 2px #000;
-  border-bottom: 2px solid #e0d849;
+  text-align: left;
+  padding: 12px 16px;
+  font-weight: 600;
+  color: #5d4037;
+  border-bottom: 2px solid #d7c9b8;
+  font-family: 'Playfair Display', serif;
+  font-size: 0.9rem;
 }
 
-.prd-th-right,
-.prd-td-right {
+.prd-th-right {
   text-align: right;
 }
 
+.prd-tr {
+  background-color: #f5f0e9;
+  transition: background-color 0.2s;
+}
+
+.prd-tr:nth-child(even) {
+  background-color: #f9f5f0;
+}
+
 .prd-tr:hover {
-  background: rgba(255, 255, 255, 0.1);
-  color: #e0d849;
-  border-left: 4px solid #e0d849;
+  background-color: #efe6da;
+}
+
+.prd-td {
+  padding: 12px 16px;
+  border-bottom: 1px solid #e0d5c8;
+  color: #4a3f35;
+  font-size: 0.9rem;
 }
 
 .prd-td-bold {
   font-weight: 600;
+  color: #6d4c41;
 }
 
+.prd-td-right {
+  text-align: right;
+}
+
+/* Image styling */
 .prd-img-wrapper {
   position: relative;
-  width: 40px;
-  height: 40px;
+  width: 60px;
+  height: 60px;
+  border-radius: 6px;
+  overflow: hidden;
+  border: 1px solid #e0d5c8;
 }
 
 .prd-img {
   object-fit: cover;
-  border-radius: 6px;
 }
 
+/* Pagination */
 .pagination {
   display: flex;
   justify-content: center;
   align-items: center;
   gap: 1rem;
-  margin-top: 2rem;
+  margin-top: 1.5rem;
 }
 
 .pagination-btn {
+  background-color: #f5f0e9;
+  color: #6d4c41;
+  border: 1px solid #e0d5c8;
   padding: 0.5rem 1rem;
-  border: 2px solid #e0d849;
-  border-radius: 8px;
-  background: linear-gradient(135deg, #e0d849, #093d67);
-  color: #012645;
-  font-weight: bold;
-  cursor: url('/brush.png'), pointer;
+}
+
+.pagination-btn:hover:not(:disabled) {
+  background-color: #e0d5c8;
 }
 
 .pagination-btn:disabled {
@@ -173,34 +168,68 @@
   cursor: not-allowed;
 }
 
-.pagination-btn:hover:not(:disabled) {
-  background: #012645;
-  color: #e0d849;
-  border-color: #ffffff;
-}
-
 .pagination-info {
-  font-size: 0.875rem;
-  color: #6b7280;
+  color: #7d6e63;
+  font-style: italic;
 }
 
-.actions {
-  border: none;
-  background-color: transparent;
+/* Pending products section */
+.pending-products {
+  background-color: #f9f2ed;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 2rem;
+  border-left: 4px solid #c27c80;
 }
 
-.trash {
-  color: red;
+.pending-products h2 {
+  color: #5d4037;
+  font-family: 'Playfair Display', serif;
+  margin-bottom: 1rem;
 }
 
-.edit {
-  color: yellow;
+/* Seller info */
+.seller-info {
+  font-size: 0.85rem;
+  line-height: 1.4;
 }
 
-.approve {
-  color: green;
+.seller-info p:first-child {
+  color: #5d4037;
+  font-weight: 500;
 }
 
-.reject {
-  color: orange;
+.seller-info p {
+  color: #7d6e63;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1024px) {
+  .prd-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  
+  .prd-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+}
+
+@media (max-width: 768px) {
+  .prd-table {
+    display: block;
+    overflow-x: auto;
+  }
+  
+  .prd-actions {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .prd-btn, .prd-btn-outline {
+    width: 100%;
+    justify-content: center;
+  }
 }

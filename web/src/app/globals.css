@@ -15,9 +15,14 @@ body {
 }
 main{
   min-height: 100vh;
+  max-width: 100%;
 }
 .container {
  width: 100%;
+}
+.flex-col{
+  display: flex;
+  flex-direction: column;
 }
 
 .content {

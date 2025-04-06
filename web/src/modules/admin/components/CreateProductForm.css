@@ -1,103 +1,173 @@
-/* General form container */
 .create-product-form {
-  max-width: 600px;
+  background-color: #faf6f2;
+  color: #4a3f35;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 8px 20px rgba(122, 94, 65, 0.08);
+  max-width: 800px;
   margin: 0 auto;
-  padding: 20px;
-  background: linear-gradient(135deg, #012645, #093d67);
-  border-radius: 16px;
-  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
-  border: 2px solid #e0d849;
+  font-family: 'Georgia', serif;
+  
 }
+
 .create-product-form h1 {
   text-align: center;
 }
+
 .create-product-form form {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 1.25rem;
+  width: 95%;
+
 }
 
 .create-product-form label {
   display: block;
-  font-weight: bold;
-  margin-bottom: 5px;
-  color:      yellow;;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  color: #6d4c41;
 }
 
-.create-product-input,
-.create-product-textarea,
-.create-product-select,
-.create-product-file {
-  width: 98%;
-  padding: 10px;
-  border: 1px solid #2a5530;
-  border-radius: 8px;
-  font-size: 16px;
-  background: linear-gradient(to bottom, #ffffff, #f3f4f6);
-  color: #2a5530;
-}
-.create-product-select {
+.create-product-form input,
+.create-product-form textarea,
+.create-product-form select {
   width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #e0d5c8;
+  border-radius: 6px;
+  background-color: #f9f5f0;
+  color: #4a3f35;
+  font-family: inherit;
+}
+
+.create-product-form input:focus,
+.create-product-form textarea:focus,
+.create-product-form select:focus {
+  outline: none;
+  border-color: #8d6e63;
+  box-shadow: 0 0 0 2px rgba(141, 110, 99, 0.2);
 }
 
 .create-product-textarea {
+  min-height: 150px;
   resize: vertical;
-  min-height: 100px;
 }
 
-.create-product-error {
-  color: red;
-  font-size: 14px;
-  margin-top: 5px;
+.create-product-file {
+  border: 1px dashed #e0d5c8;
+  background-color: #f5f0e9;
+  padding: 1rem;
+  cursor: pointer;
 }
 
 .image-preview-container {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
-  margin-top: 10px;
+  gap: 1rem;
+  margin-top: 1rem;
 }
 
 .image-preview {
   position: relative;
-  display: inline-block;
+  width: 100px;
+  height: 100px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid #e0d5c8;
 }
 
 .preview-image {
-  width: 100px;
-  height: 100px;
-  border-radius: 5px;
+  width: 100%;
+  height: 100%;
   object-fit: cover;
-  border: 1px solid #2a5530;
 }
 
 .remove-image-button {
   position: absolute;
   top: 5px;
   right: 5px;
-  background: red;
-  color: white;
-  border: none;
   width: 20px;
   height: 20px;
+  background-color: rgba(255, 255, 255, 0.8);
   border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
   cursor: pointer;
+  color: #a65d5d;
+  font-size: 12px;
+  z-index: 2;
 }
 
 .create-product-button {
-  width: 100%;
-  margin-top: 15px;
-  padding: 12px;
-  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background-color: #8d6e63;
+  color: white;
+  padding: 0.75rem;
   border: none;
-  border-radius: 8px;
+  border-radius: 6px;
+  font-weight: 500;
   cursor: pointer;
-  background: linear-gradient(135deg, #e0d849, #093d67);
-  color: #012645;
-  font-weight: bold;
-  transition: transform 0.2s ease;
+  transition: all 0.3s ease;
+  margin-top: 1rem;
 }
 
-.create-product-button:hover {
-  transform: scale(1.05);
+.create-product-button:hover:not(:disabled) {
+  background-color: #6d4c41;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(109, 76, 65, 0.3);
+}
+
+.create-product-button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.loader {
+  animation: spin 1s linear infinite;
+  width: 18px;
+  height: 18px;
+}
+
+.create-product-error {
+  color: #a65d5d;
+  font-size: 0.9rem;
+  margin-top: 0.25rem;
+}
+
+.server-error {
+  background-color: #f9e5e5;
+  padding: 0.75rem;
+  border-radius: 6px;
+  border-left: 4px solid #c27c80;
+  margin-bottom: 1rem;
+}
+
+.success-message {
+  background-color: #e5f0e5;
+  padding: 0.75rem;
+  border-radius: 6px;
+  border-left: 4px solid #7cc280;
+  margin-bottom: 1rem;
+  color: #3d5f3d;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 768px) {
+  .create-product-form {
+    padding: 1.5rem;
+  }
 }

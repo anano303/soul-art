@@ -1,22 +1,23 @@
 import { ShoppingBag } from "lucide-react";
 import Link from "next/link";
+import "./cart-empty.css";
 
 export function CartEmpty() {
   return (
-    <div className="flex flex-col items-center justify-center py-20 space-y-6">
-      <div className="relative">
-        <ShoppingBag className="w-24 h-24 text-muted-foreground/30" />
+    <div className="cart-empty-container">
+      <div className="cart-empty-icon">
+        <ShoppingBag size={80} />
       </div>
 
-      <div className="text-center space-y-2">
-        <h2 className="text-2xl font-semibold">Your cart is empty</h2>
-        <p className="text-muted-foreground">
-          Looks like you have not added anything to your cart yet
+      <div className="cart-empty-content">
+        <h2 className="cart-empty-title">თქვენი კალათა ცარიელია</h2>
+        <p className="cart-empty-message">
+          როგორც ჩანს, თქვენ ჯერ არ დაგიმატებიათ ნივთები კალათაში
         </p>
       </div>
 
-      <Link href="/">
-        <button>Continue Shopping</button>
+      <Link href="/" className="continue-shopping-link">
+        <button className="continue-shopping-button">გაგრძელება</button>
       </Link>
     </div>
   );

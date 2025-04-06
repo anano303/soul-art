@@ -24,12 +24,13 @@ export default function AdminProductsPage() {
   }
 
   return (
-    <div className="admin-products-container">
-      <div className="scrollable-container">
-        <div className="products-content">
-          <ProductsList />
-        </div>
-      </div>
+    <div className="responsive-container" style={{
+      maxWidth: "90%",
+      margin: "0 auto",
+      overflowX: "auto",
+      width: "100%"
+    }}>
+      <ProductsList />
     </div>
   );
 }
