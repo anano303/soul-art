@@ -18,7 +18,7 @@ export function OrdersClient() {
       
       try {
         setIsLoading(true);
-        const response = await apiClient.get("/orders/my-orders");
+        const response = await apiClient.get("/orders/myorders");
         setOrders(response.data);
       } catch (err) {
         console.error("Failed to fetch orders:", err);
