@@ -1,0 +1,59 @@
+.sellerRegisterContainer {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 1rem 0.5rem;
+  gap: 2rem;
+  box-sizing: border-box;
+}
+
+.benefitsSection {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.formSection {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  background-color: white;
+  border-radius: 10px;
+  box-shadow: 0 5px 15px rgba(1, 38, 69, 0.08);
+  padding: 0.5rem;
+  box-sizing: border-box;
+}
+
+@media (min-width: 768px) {
+  .sellerRegisterContainer {
+    padding: 2rem 1rem;
+    gap: 3rem;
+  }
+  
+  .formSection {
+    padding: 1rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .sellerRegisterContainer {
+    padding: 3rem 2rem;
+  }
+  
+  .formSection {
+    padding: 2rem;
+  }
+}
+
+@media (max-width: 420px) {
+  .sellerRegisterContainer {
+    padding: 0.5rem 0.25rem;
+    gap: 1rem;
+  }
+  
+  .formSection {
+    padding: 0.25rem;
+    border-radius: 6px;
+  }
+}
