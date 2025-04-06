@@ -71,7 +71,7 @@ export function SellerRegisterForm() {
   }
 
   return (
-    <div className="form-container">
+    <div className="form-container" id="seller-register-form">
       <form onSubmit={onSubmit} className="form">
         <div className="input-group">
           <label htmlFor="storeName">მხატვრის/კომპანიის სახელი</label>

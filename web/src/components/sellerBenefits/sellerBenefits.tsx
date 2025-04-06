@@ -39,7 +39,7 @@ export default function SellerBenefits() {
 
       <div className="cta">
         <p className="cta-text">✨ დაიწყეთ  მოგზაურობა Soulart-ზე და მიეცით თქვენს ნამუშევრებს ის აუდიტორია, რომელსაც იმსახურებენ!</p>
-        <a href="/register/seller" className="cta-button">დარეგისტრირდი ახლავე</a>
+        <a href="#seller-register-form" className="cta-button">დარეგისტრირდი ახლავე</a>
       </div>
     </section>
   );
