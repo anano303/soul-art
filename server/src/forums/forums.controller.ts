@@ -54,7 +54,7 @@ export class ForumsController {
     // Check file type more permissively
     const validMimeTypes = [
       'image/jpeg', 'image/jpg', 'image/png', 'image/gif', 
-      'image/webp', 'image/heic', 'image.heif'
+      'image/webp', 'image.heic', 'image.heif'
     ];
     
     if (!validMimeTypes.includes(file.mimetype.toLowerCase()) && 
@@ -180,14 +180,19 @@ export class ForumsController {
     @Body() updateForumDto: UpdateForumDto,
     @UploadedFile() file: Express.Multer.File,
   ) {
-    if (!file) {
-      return this.forumsService.update(id, updateForumDto, user._id);
+    if (!user) {
+      throw new BadRequestException('User authentication required');
     }
     
-    console.log("Received file for update:", {
-      originalName: file.originalname,
-      mimeType: file.mimetype,
-      size: `${(file.size / (1024 * 1024)).toFixed(2)} MB`
+    // Pass user role to the service
+    if (!file) {
+      return this.forumsService.update(id, updateForumDto, user._id, user.role);
+    }
+    
+    console.log("Update request from:", {
+      userId: user._id,
+      userName: user.name,
+      userRole: user.role
     });
     
     // Check file type more permissively
@@ -207,12 +212,23 @@ export class ForumsController {
     const filePath = `images/${timestamp}-${file.originalname.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
     const fileBuffer = file.buffer;
 
-    return this.forumsService.update(id, updateForumDto, user._id, filePath, fileBuffer);
+    return this.forumsService.update(id, updateForumDto, user._id, user.role, filePath, fileBuffer);
   }
 
   @Delete(':id')
   @UseGuards(JwtAuthGuard)
   remove(@CurrentUser() user: User, @Param('id') id: string) {
-    return this.forumsService.remove(id, user._id);
+    if (!user) {
+      throw new BadRequestException('User authentication required');
+    }
+    
+    console.log("Delete request from:", {
+      userId: user._id,
+      userName: user.name,
+      userRole: user.role
+    });
+    
+    // Pass user role to the service
+    return this.forumsService.remove(id, user._id, user.role);
   }
 }

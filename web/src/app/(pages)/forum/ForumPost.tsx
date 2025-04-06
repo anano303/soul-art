@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import "./ForumPost.css";
 import Image from "next/image";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -77,17 +77,23 @@ const ForumPost = ({
 
   const [error, setError] = useState<string | null>(null);
 
-  console.log("Current User:", currentUser);
-  console.log("Author:", author);
-  console.log("Is Authorized:", isAuthorized);
-
   const isPostAuthor = currentUser?._id === author._id;
   const isAdmin = currentUser?.role === "admin";
   const canModifyPost = isPostAuthor || isAdmin;
 
-  console.log("Is Post Author:", isPostAuthor);
-  console.log("Is Admin:", isAdmin);
-  console.log("Can Modify Post:", canModifyPost);
+  useEffect(() => {
+    if (currentUser) {
+      console.log("Post permissions:", {
+        postId: id,
+        currentUserId: currentUser._id,
+        authorId: author._id,
+        currentUserRole: currentUser.role,
+        isAdmin,
+        isPostAuthor,
+        canModifyPost,
+      });
+    }
+  }, [currentUser, author._id, id, isAdmin, isPostAuthor, canModifyPost]);
 
   const replyMutation = useMutation({
     mutationFn: async ({
@@ -303,8 +309,23 @@ const ForumPost = ({
   ];
 
   const editPostMutation = useMutation({
-    mutationFn: async ({ text, tags, image }: { text: string; tags: string[]; image: File | null }) => {
+    mutationFn: async ({
+      text,
+      tags,
+      image,
+    }: {
+      text: string;
+      tags: string[];
+      image: File | null;
+    }) => {
       try {
+        console.log("Attempting to edit post:", {
+          postId: id,
+          currentUserRole: currentUser?.role,
+          isAdmin,
+          isPostAuthor,
+        });
+
         const formData = new FormData();
         formData.append("content", text);
         tags.forEach((tag, index) => {
@@ -314,18 +335,17 @@ const ForumPost = ({
           formData.append("file", image);
         }
 
-        console.log("FormData before sending:", Array.from(formData.entries())); // Log FormData entries
+        console.log("FormData before sending:", Array.from(formData.entries()));
 
-        // Use apiClient instead of fetch for proper authorization handling
         const response = await apiClient.put(`/forums/${id}`, formData, {
           headers: {
-            'Content-Type': 'multipart/form-data'
-          }
+            "Content-Type": "multipart/form-data",
+          },
         });
 
         return response.data;
       } catch (error) {
-        console.error("Edit post error:", error); // Log error response
+        console.error("Edit post error:", error);
         throw error;
       }
     },
@@ -351,7 +371,13 @@ const ForumPost = ({
   const deletePostMutation = useMutation({
     mutationFn: async () => {
       try {
-        // Also use apiClient for deletion
+        console.log("Attempting to delete post:", {
+          postId: id,
+          currentUserRole: currentUser?.role,
+          isAdmin,
+          isPostAuthor,
+        });
+
         const response = await apiClient.delete(`/forums/${id}`);
         return response.data;
       } catch (error) {
@@ -422,7 +448,11 @@ const ForumPost = ({
       editedPostTags,
       editedPostImage,
     });
-    editPostMutation.mutate({ text: editedPostText, tags: editedPostTags, image: editedPostImage });
+    editPostMutation.mutate({
+      text: editedPostText,
+      tags: editedPostTags,
+      image: editedPostImage,
+    });
   };
 
   const handleTagChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -442,16 +472,25 @@ const ForumPost = ({
       setEditedPostImage(null);
       return;
     }
-    
+
     console.log("Selected file for edit:", {
       name: file.name,
       type: file.type,
-      size: `${(file.size / (1024 * 1024)).toFixed(2)} MB`
+      size: `${(file.size / (1024 * 1024)).toFixed(2)} MB`,
     });
 
-    // Check file type - support more image formats
-    const supportedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/heic', 'image/heif'];
-    if (!supportedTypes.includes(file.type.toLowerCase()) && !file.type.toLowerCase().startsWith('image/')) {
+    const supportedTypes = [
+      "image/jpeg",
+      "image/png",
+      "image/gif",
+      "image/webp",
+      "image/heic",
+      "image/heif",
+    ];
+    if (
+      !supportedTypes.includes(file.type.toLowerCase()) &&
+      !file.type.toLowerCase().startsWith("image/")
+    ) {
       toast({
         variant: "destructive",
         title: "Error",
@@ -459,8 +498,8 @@ const ForumPost = ({
       });
       return;
     }
-    
-    if (file.size > 10 * 1024 * 1024) { // Increase max size to 10MB before compression
+
+    if (file.size > 10 * 1024 * 1024) {
       toast({
         variant: "destructive",
         title: "Error",
@@ -468,27 +507,25 @@ const ForumPost = ({
       });
       return;
     }
-    
+
     try {
-      // More permissive compression options
       const compressedFile = await imageCompression(file, {
-        maxSizeMB: 1, // Target 1MB after compression
+        maxSizeMB: 1,
         maxWidthOrHeight: 1920,
         useWebWorker: true,
-        fileType: "image/jpeg", // Convert all images to JPEG for better compatibility
+        fileType: "image/jpeg",
         alwaysKeepResolution: true,
-        initialQuality: 0.8, // Start with higher quality
+        initialQuality: 0.8,
       });
-      
+
       console.log("Compressed file for edit:", {
         type: compressedFile.type,
-        size: `${(compressedFile.size / (1024 * 1024)).toFixed(2)} MB`
+        size: `${(compressedFile.size / (1024 * 1024)).toFixed(2)} MB`,
       });
-      
+
       setEditedPostImage(compressedFile);
     } catch (error) {
       console.error("Image compression error:", error);
-      // If compression fails, try using the original file if it's not too large
       if (file.size <= 2 * 1024 * 1024) {
         setEditedPostImage(file);
         toast({
@@ -508,10 +545,6 @@ const ForumPost = ({
   const renderComment = (comment: Comment, level = 0) => {
     const isCommentAuthor = currentUser?._id === comment.author._id;
     const canModifyComment = isCommentAuthor || isAdmin;
-
-    console.log("Comment:", comment);
-    console.log("Is Comment Author:", isCommentAuthor);
-    console.log("Can Modify Comment:", canModifyComment);
 
     return (
       <div
@@ -623,13 +656,19 @@ const ForumPost = ({
             <div className="post-actions">
               <button
                 className="edit-button"
-                onClick={() => setIsEditingPost(true)}
+                onClick={() => {
+                  console.log("Edit button clicked, canModifyPost:", canModifyPost);
+                  setIsEditingPost(true);
+                }}
               >
                 ✏️ რედაქტირება
               </button>
               <button
                 className="delete-button"
-                onClick={() => deletePostMutation.mutate()}
+                onClick={() => {
+                  console.log("Delete button clicked, canModifyPost:", canModifyPost);
+                  deletePostMutation.mutate();
+                }}
               >
                 🗑️ წაშლა
               </button>

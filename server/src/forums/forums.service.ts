@@ -143,7 +143,7 @@ export class ForumsService {
     return `This action returns a #${id} forum`;
   }
 
-  async update(id: string, updateForumDto: UpdateForumDto, userId: string, filePath?: string, file?: Buffer) {
+  async update(id: string, updateForumDto: UpdateForumDto, userId: string, userRole: string, filePath?: string, file?: Buffer) {
     if (!isValidObjectId(id)) {
       throw new BadRequestException('Invalid forum ID');
     }
@@ -153,13 +153,19 @@ export class ForumsService {
       throw new NotFoundException('Forum not found');
     }
 
+    const isAdmin = userRole === 'admin';
+    const isOwner = forum.user.toString() === userId.toString();
+    
     console.log('Update method values:', {
       forumUserId: forum.user.toString(),
       receivedUserId: userId,
-      isMatch: forum.user.toString() === userId.toString(),
+      userRole,
+      isAdmin,
+      isOwner
     });
 
-    if (forum.user.toString() !== userId.toString()) {
+    // Allow update if user is admin or is the post owner
+    if (!isAdmin && !isOwner) {
       throw new UnauthorizedException('You can only edit your own posts');
     }
 
@@ -175,17 +181,23 @@ export class ForumsService {
     return updatedForum;
   }
 
-  async remove(forumId, userId) {
+  async remove(forumId, userId, userRole) {
     const forum = await this.forumModel.findById(forumId);
     if (!forum) throw new BadRequestException('forum not found');
 
+    const isAdmin = userRole === 'admin';
+    const isOwner = forum.user.toString() === userId.toString();
+    
     console.log('Delete Post values:', {
       forumUserId: forum.user.toString(),
-      receivedUserId: userId.toString(),
-      isMatch: forum.user.toString() === userId.toString(),
+      receivedUserId: userId,
+      userRole,
+      isAdmin,
+      isOwner
     });
 
-    if (forum.user.toString() !== userId.toString()) {
+    // Allow deletion if user is admin or is the post owner
+    if (!isAdmin && !isOwner) {
       throw new UnauthorizedException('You can only delete your own posts');
     }
 

@@ -120,6 +120,14 @@ const ForumPage = () => {
               const isAdmin = user?.role === "admin";
               const canModify = isOwner || isAdmin;
 
+              console.log("Forum post permissions:", {
+                forumId: forum._id,
+                userRole: user?.role,
+                isAdmin,
+                isOwner,
+                canModify
+              });
+
               return (
                 <ForumPost
                   key={forum._id}
@@ -138,6 +146,7 @@ const ForumPage = () => {
                       ? {
                           _id: user._id,
                           role: user.role,
+                          name: user.name
                         }
                       : undefined
                   }
