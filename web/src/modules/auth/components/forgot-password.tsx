@@ -5,7 +5,6 @@ import { useForm, SubmitHandler } from "react-hook-form";
 import axios, { AxiosError } from "axios";
 import { useToast } from "@/hooks/use-toast";
 import "./reset-password.css";
-import { color } from "framer-motion";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
