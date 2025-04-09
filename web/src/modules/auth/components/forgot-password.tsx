@@ -4,6 +4,8 @@ import { useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import axios, { AxiosError } from "axios";
 import { useToast } from "@/hooks/use-toast";
+import "./reset-password.css";
+import { color } from "framer-motion";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -44,14 +46,16 @@ export function ForgotPasswordForm() {
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)}>
+    <form className="forPass" onSubmit={handleSubmit(onSubmit)}>
+      <div className="space-y-2">
       <input
         type="email"
         placeholder="Enter your email"
         {...register("email", { required: "Email is required" })}
       />
-      {errors.email && <span>{String(errors.email.message)}</span>}
-      <button type="submit" disabled={loading}>
+      {errors.email && <span style={{ color: "red" }}>{errors.email.message}</span>}
+      </div>
+      <button type="submit" disabled={loading} className="w-full">
         {loading ? "Sending..." : "Send Reset Link"}
       </button>
     </form>
