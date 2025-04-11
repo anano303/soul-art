@@ -157,6 +157,45 @@
   color: #3d5f3d;
 }
 
+.delivery-options {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-top: 1rem;
+  padding: 1rem;
+  background-color: #f9f5f0;
+  border-radius: 6px;
+  border: 1px solid #e0d5c8;
+}
+
+.delivery-type-selector {
+  display: flex;
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+
+.delivery-type-option {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.delivery-days {
+  display: flex;
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+
+.dimensions-inputs {
+  display: flex;
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+
+.dimension-input {
+  flex: 1;
+}
+
 @keyframes spin {
   0% {
     transform: rotate(0deg);
@@ -169,5 +208,11 @@
 @media (max-width: 768px) {
   .create-product-form {
     padding: 1.5rem;
+  }
+
+  .delivery-days,
+  .dimensions-inputs {
+    flex-direction: column;
+    gap: 0.5rem;
   }
 }

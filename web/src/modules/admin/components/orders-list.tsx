@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { fetchWithAuth } from "@/lib/fetch-with-auth";
 import Link from "next/link";
-import { CheckCircle2, XCircle } from "lucide-react";
+import { CheckCircle2, XCircle, Truck, Store } from "lucide-react";
 import { Order } from "@/types/order";
 import "./ordersList.css";
 
@@ -16,9 +16,9 @@ export function OrdersList() {
     queryFn: async () => {
       const response = await fetchWithAuth(`/orders?page=${page}&limit=8`);
       const data = await response.json();
-      console.log("Orders data:", data); // დებაგისთვის
+      console.log("Orders data:", data);
       return {
-        items: Array.isArray(data) ? data : [], // თუ მასივია პირდაპირ ვიღებთ, თუ არა ცარიელ მასივს
+        items: Array.isArray(data) ? data : [],
         pages: Math.ceil((Array.isArray(data) ? data.length : 0) / 8),
       };
     },
@@ -30,7 +30,7 @@ export function OrdersList() {
 
   const orders = data?.items || [];
   const totalPages = data?.pages || 0;
-  console.log("Rendered orders:", orders); // დებაგისთვის
+  console.log("Rendered orders:", orders);
 
   return (
     <div className="orders-container">
@@ -48,6 +48,7 @@ export function OrdersList() {
                 <th>USER</th>
                 <th>DATE</th>
                 <th>TOTAL</th>
+                <th>DELIVERY TYPE</th>
                 <th>PAID</th>
                 <th>DELIVERED</th>
                 <th className="orders-actions">ACTIONS</th>
@@ -60,6 +61,30 @@ export function OrdersList() {
                   <td>{order.user.email}</td>
                   <td>{new Date(order.createdAt).toLocaleDateString()}</td>
                   <td>${order.totalPrice.toFixed(2)}</td>
+                  <td>
+                    {order.orderItems.some(item => 
+                      item.product && String(item.product.deliveryType) === "SELLER"
+                    ) ? (
+                      <span className="delivery-badge seller">
+                        <Store className="icon" />
+                        გამყიდველის მიტანა
+                        {order.orderItems
+                          .filter(item => item.product && String(item.product.deliveryType) === "SELLER")
+                          .map(item => (
+                            item.product?.minDeliveryDays && item.product?.maxDeliveryDays ? (
+                              <span className="delivery-time" key={item._id}>
+                                {item.product.minDeliveryDays}-{item.product.maxDeliveryDays} დღე
+                              </span>
+                            ) : null
+                          ))}
+                      </span>
+                    ) : (
+                      <span className="delivery-badge soulart">
+                        <Truck className="icon" />
+                        SoulArt-ის კურიერი
+                      </span>
+                    )}
+                  </td>
                   <td>
                     {order.isPaid ? (
                       <span className="status-badge success">

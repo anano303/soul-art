@@ -18,6 +18,14 @@ export interface Product {
   updatedAt: string;
   status: ProductStatus;
   rejectionReason?: string;
+  deliveryType?: 'SELLER' | 'SoulArt';  // Corrected from 'SOULART' to 'SoulArt'
+  minDeliveryDays?: number;
+  maxDeliveryDays?: number;
+  dimensions?: {
+    width?: number;
+    height?: number;
+    depth?: number;
+  };
 }
 
 export enum ProductStatus {
@@ -62,7 +70,6 @@ export interface User {
   updatedAt: string;
   
 }
-
 
 export interface ApiResponse<T> {
   success: boolean;

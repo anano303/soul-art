@@ -123,6 +123,47 @@ hr {
   border-top: 1px solid #ccc;
 }
 
+.delivery-group {
+  margin-bottom: 1.5rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.delivery-group:last-child {
+  margin-bottom: 0;
+}
+
+.delivery-group-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background-color: #f3f4f6;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.delivery-group-header h3 {
+  margin: 0;
+  font-weight: 500;
+  font-size: 1rem;
+}
+
+.delivery-group-header .icon {
+  width: 18px;
+  height: 18px;
+}
+
+.delivery-time {
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
+  color: #b7791f;
+  background-color: #ffecb3;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  display: inline-block;
+}
+
 @media screen and (max-width: 768px) {
   .order-grid {
     grid-template-columns: 1fr;

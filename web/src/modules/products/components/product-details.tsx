@@ -134,6 +134,35 @@ export function ProductDetails({ product }: ProductDetailsProps) {
 
           <div className="price">₾{product.price}</div>
 
+          {/* Product Dimensions */}
+          {product.dimensions && (product.dimensions.width || product.dimensions.height || product.dimensions.depth) && (
+            <div className="dimensions-info">
+              <h3 className="info-title">ნამუშევრის ზომები</h3>
+              <div className="dimensions-details">
+                {product.dimensions.width && <span>სიგანე: {product.dimensions.width} სმ</span>}
+                {product.dimensions.height && <span>სიმაღლე: {product.dimensions.height} სმ</span>}
+                {product.dimensions.depth && <span>სიღრმე: {product.dimensions.depth} სმ</span>}
+              </div>
+            </div>
+          )}
+
+          {/* Delivery Information */}
+          <div className="delivery-info">
+            <h3 className="info-title">მიწოდების ინფორმაცია</h3>
+            <div className="delivery-details">
+              {product.deliveryType === 'SELLER' ? (
+                <div>
+                  <p>მიწოდება გამყიდველისგან</p>
+                  {product.minDeliveryDays && product.maxDeliveryDays && (
+                    <p className="delivery-time">მიწოდების ვადა: {product.minDeliveryDays}-{product.maxDeliveryDays} დღე</p>
+                  )}
+                </div>
+              ) : (
+                <p>მიწოდება SoulArt-ის კურიერით</p>
+              )}
+            </div>
+          </div>
+
           <div className="separator"></div>
 
           <div className="stock-info">

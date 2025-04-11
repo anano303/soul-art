@@ -1,11 +1,23 @@
 import { ShippingDetails, PaymentResult } from './shipping';
 import { User } from '.';
 export interface OrderItem {
+  _id?: string;
   name: string;
   qty: number;
   image: string;
   price: number;
   productId: string;
+  product: {
+    _id: string;
+    deliveryType?: string;
+    minDeliveryDays?: number;
+    maxDeliveryDays?: number;
+    dimensions?: {
+      width?: number;
+      height?: number;
+      depth?: number;
+    };
+  };
 }
 
 export interface Order {

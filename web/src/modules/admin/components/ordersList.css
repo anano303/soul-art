@@ -141,3 +141,37 @@
     overflow-x: auto;
   }
 }
+
+.delivery-badge {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.9em;
+  font-weight: 500;
+}
+
+.delivery-badge .icon {
+  width: 16px;
+  height: 16px;
+}
+
+.delivery-badge.seller {
+  background-color: #ffecb3;
+  color: #b7791f;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.delivery-badge.soulart {
+  background-color: #d1e7dd;
+  color: #0f5132;
+}
+
+.delivery-time {
+  font-size: 0.8em;
+  display: block;
+  margin-top: 2px;
+  color: #6b7280;
+}

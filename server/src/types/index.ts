@@ -2,12 +2,13 @@ import { Role } from './role.enum';
 
 export interface Product {
   _id: string;
+  user: User;
   name: string;
   images: string[];
   description: string;
   brand: string;
   brandLogo: string;
-  category: string;
+  category: string; // Make sure this exists
   price: number;
   countInStock: number;
   rating: number;
@@ -15,6 +16,21 @@ export interface Product {
   reviews: Review[];
   createdAt: string;
   updatedAt: string;
+  status: ProductStatus;
+  rejectionReason?: string;
+  deliveryType?: 'SELLER' | 'SoulArt';  // Corrected from 'SOULART' to 'SoulArt'
+  minDeliveryDays?: number;
+  maxDeliveryDays?: number;
+  dimensions?: {
+    width?: number;
+    height?: number;
+    depth?: number;
+  };
+}
+export enum ProductStatus {
+  PENDING = 'PENDING',
+  APPROVED = 'APPROVED',
+  REJECTED = 'REJECTED'
 }
 
 export interface Review {
@@ -35,15 +51,23 @@ export interface User {
   _id: string;
   name: string;
   email: string;
-  // isAdmin: boolean;
+  phoneNumber: string;
   role: Role;
+  seller?: {
+    storeName: string;
+    storeLogo?: string;
+    ownerFirstName: string;
+    ownerLastName: string;
+    phoneNumber: string;
+    email: string;
+    identificationNumber: string;
+    accountNumber: string;
+    createdAt: string;
+    updatedAt: string;
+  };
   createdAt: string;
   updatedAt: string;
-}
-
-export interface Seller extends User {
-  storeName: string;
-  products: Product[]; 
+  
 }
 
 export interface ApiResponse<T> {

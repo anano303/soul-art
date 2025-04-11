@@ -130,6 +130,10 @@ export class ProductsService {
       category,
       countInStock,
       status,
+      deliveryType,
+      minDeliveryDays,
+      maxDeliveryDays,
+      dimensions,
     } = attrs;
 
     if (!Types.ObjectId.isValid(id))
@@ -146,8 +150,11 @@ export class ProductsService {
     product.brand = brand ?? product.brand;
     product.category = category ?? product.category;
     product.countInStock = countInStock ?? product.countInStock;
-    // სტატუსის განახლება
     product.status = status ?? product.status;
+    product.deliveryType = deliveryType ?? product.deliveryType;
+    product.minDeliveryDays = minDeliveryDays ?? product.minDeliveryDays;
+    product.maxDeliveryDays = maxDeliveryDays ?? product.maxDeliveryDays;
+    product.dimensions = dimensions ?? product.dimensions;
 
     return product.save();
   }

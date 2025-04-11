@@ -129,6 +129,7 @@ export function ProductsList() {
             <th className="prd-th">CATEGORY</th>
             <th className="prd-th">STOCK</th>
             <th className="prd-th">Status</th>
+            <th className="prd-th">DELIVERY</th>
             <th className="prd-th">SELLER INFO</th>
             <th className="prd-th prd-th-right">ACTIONS</th>
           </tr>
@@ -156,6 +157,14 @@ export function ProductsList() {
               <td className="prd-td">{product.countInStock}</td>
               <td className="prd-td">
                 <StatusBadge status={product.status} />
+              </td>
+              <td className="prd-td">
+                <div className="delivery-info">
+                  <span>{product.deliveryType || 'SOULART'}</span>
+                  {product.deliveryType === 'SELLER' && product.minDeliveryDays && product.maxDeliveryDays && (
+                    <p className="text-sm text-gray-500">{product.minDeliveryDays}-{product.maxDeliveryDays} დღე</p>
+                  )}
+                </div>
               </td>
               <td className="prd-td">
                 <div className="seller-info">

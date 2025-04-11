@@ -1,6 +1,6 @@
 "use client";
 
-import { CheckCircle2, XCircle } from "lucide-react";
+import { CheckCircle2, XCircle, Truck, Store } from "lucide-react";
 import Link from "next/link";
 import "./history.css";
 
@@ -13,6 +13,14 @@ interface OrderType {
   paidAt?: string;
   isDelivered: boolean;
   deliveredAt?: string;
+  orderItems: Array<{
+    _id: string;
+    product?: {
+      deliveryType?: 'SELLER' | 'SoulArt';
+      minDeliveryDays?: number;
+      maxDeliveryDays?: number;
+    }
+  }>;
 }
 
 interface OrderHistoryProps {
@@ -42,6 +50,7 @@ export function OrderHistory({ orders }: OrderHistoryProps) {
             <th>ID</th>
             <th>DATE</th>
             <th>TOTAL</th>
+            <th>DELIVERY</th>
             <th>PAID</th>
             <th>DELIVERED</th>
             <th className="actions">ACTIONS</th>
@@ -53,6 +62,21 @@ export function OrderHistory({ orders }: OrderHistoryProps) {
               <td className="order-id">#{order._id.substring(0, 8)}</td>
               <td>{new Date(order.createdAt).toLocaleDateString()}</td>
               <td>${order.totalPrice.toFixed(2)}</td>
+              <td>
+                {order.orderItems.some(item => 
+                  item.product && String(item.product.deliveryType) === "SELLER"
+                ) ? (
+                  <span className="badge delivery-badge seller">
+                    <Store size={14} />
+                    გამყიდველის მიტანა
+                  </span>
+                ) : (
+                  <span className="badge delivery-badge soulart">
+                    <Truck size={14} />
+                    SoulArt-ის კურიერი
+                  </span>
+                )}
+              </td>
               <td>
                 {order.isPaid ? (
                   <span className="badge badge-green">

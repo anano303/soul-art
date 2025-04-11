@@ -276,6 +276,43 @@ margin-top: 20px;
   font-size: 18px;
 }
 
+.dimensions-info,
+.delivery-info {
+  margin: 16px 0;
+  padding: 12px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+}
+
+.info-title {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #012645;
+}
+
+.dimensions-details,
+.delivery-details {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  font-size: 14px;
+  color: #333;
+}
+
+.dimensions-details span {
+  background: #e9ecef;
+  padding: 4px 10px;
+  border-radius: 4px;
+}
+
+.delivery-time {
+  margin-top: 4px;
+  font-weight: 500;
+  color: #012645;
+}
+
 @media screen and (max-width:768px) {
   .grid {
     width:90%;

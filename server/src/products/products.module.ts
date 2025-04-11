@@ -27,6 +27,14 @@ import { OrderSchema } from '@/orders/schemas/order.schema';
   ],
   providers: [ProductsService, AppService, ProductExpertAgent],
   controllers: [ProductsController],
-  exports: [ProductsService],
+  exports: [
+    ProductsService,
+    MongooseModule.forFeature([
+      {
+        name: Product.name,
+        schema: ProductSchema,
+      },
+    ]), // Export the ProductModel to be available for other modules
+  ],
 })
 export class ProductsModule {}

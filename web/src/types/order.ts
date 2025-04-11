@@ -1,12 +1,17 @@
 import { ShippingDetails, PaymentResult } from './shipping';
-import { User } from '.';
+import { Product, User } from '.';
+
 export interface OrderItem {
+  _id: string;
   name: string;
   qty: number;
   image: string;
   price: number;
   productId: string;
+  product?: Product;
 }
+
+
 
 export interface Order {
   _id: string;

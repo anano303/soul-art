@@ -5,6 +5,7 @@ import { AiConfigService } from '../services/ai-config.service';
 import { ImageGenerationService } from '../services/image-generation.service';
 import { ProductCreationStep } from '@/types/agents';
 import { ProductsService } from '@/products/services/products.service';
+import { DeliveryType } from '@/products/schemas/product.schema';
 
 @Injectable()
 export class ProductGenerationTool {
@@ -138,6 +139,14 @@ export class ProductGenerationTool {
         .array(z.string().url())
         .min(1, 'At least one product image is required'),
       brandLogo: z.string().url('Brand logo URL is required'),
+      deliveryType: z.nativeEnum(DeliveryType).optional(),
+      minDeliveryDays: z.number().min(1).optional(),
+      maxDeliveryDays: z.number().min(1).optional(),
+      dimensions: z.object({
+        width: z.number().optional(),
+        height: z.number().optional(),
+        depth: z.number().optional(),
+      }).optional(),
     });
 
     const schemaValidation = productSchema.safeParse(product);
@@ -200,6 +209,14 @@ export class ProductGenerationTool {
     countInStock: number;
     images: string[] | { url: string }[];
     brandLogo?: string | { url: string };
+    deliveryType?: DeliveryType;
+    minDeliveryDays?: number;
+    maxDeliveryDays?: number;
+    dimensions?: {
+      width?: number;
+      height?: number;
+      depth?: number;
+    };
   }) {
     console.log('Received product data:', JSON.stringify(product, null, 2));
 
@@ -212,6 +229,14 @@ export class ProductGenerationTool {
       countInStock: z.number().min(0),
       images: z.array(z.string().url()),
       brandLogo: z.string().url().optional(),
+      deliveryType: z.nativeEnum(DeliveryType).optional(),
+      minDeliveryDays: z.number().optional(),
+      maxDeliveryDays: z.number().optional(),
+      dimensions: z.object({
+        width: z.number().optional(),
+        height: z.number().optional(),
+        depth: z.number().optional(),
+      }).optional(),
     });
 
     try {
@@ -226,6 +251,7 @@ export class ProductGenerationTool {
           typeof product.brandLogo === 'string'
             ? product.brandLogo
             : product.brandLogo?.url,
+        deliveryType: product.deliveryType || DeliveryType.SoulArt,
       };
 
       console.log('Transforming product data:', transformedData);

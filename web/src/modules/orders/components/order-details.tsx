@@ -1,6 +1,6 @@
 "use client";
 
-import { CheckCircle2, XCircle } from "lucide-react";
+import { CheckCircle2, XCircle, Truck, Store } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { Order } from "@/types/order";
@@ -13,6 +13,18 @@ interface OrderDetailsProps {
 }
 
 export function OrderDetails({ order }: OrderDetailsProps) {
+  // Group order items by delivery type - fixed to check string equality
+  const sellerDeliveryItems = order.orderItems.filter(
+    (item) => item.product && String(item.product.deliveryType) === "SELLER"
+  );
+  
+  const soulartDeliveryItems = order.orderItems.filter(
+    (item) => !item.product || String(item.product.deliveryType) !== "SELLER"
+  );
+
+  console.log("Seller items:", sellerDeliveryItems);
+  console.log("SoulArt items:", soulartDeliveryItems);
+
   return (
     <div className="order-container">
       <div className="order-header">
@@ -70,33 +82,80 @@ export function OrderDetails({ order }: OrderDetailsProps) {
             </div>
           </div>
 
-          {/* Order Items */}
+          {/* Order Items - Grouped by delivery type with fixed string comparison */}
           <div className="order-card">
             <h2 className="order-subtitle">Order Items</h2>
-            {order.orderItems.map((item) => (
-              <div key={item.productId} className="order-item">
-                <div className="order-item-image">
-                  <Image
-                    src={item.image}
-                    alt={item.name}
-                    fill
-                    className="object-cover rounded-md"
-                  />
+            
+            {sellerDeliveryItems.length > 0 && (
+              <div className="delivery-group">
+                <div className="delivery-group-header">
+                  <Store className="icon" />
+                  <h3>გამყიდველის მიტანა</h3>
                 </div>
-                <div className="order-item-details">
-                  <Link
-                    href={`/products/${item.productId}`}
-                    className="order-item-link"
-                  >
-                    {item.name}
-                  </Link>
-                  <p>
-                    {item.qty} x ₾{item.price.toFixed(2)} = $
-                    {(item.qty * item.price).toFixed(2)}
-                  </p>
-                </div>
+                {sellerDeliveryItems.map((item) => (
+                  <div key={item.productId} className="order-item">
+                    <div className="order-item-image">
+                      <Image
+                        src={item.image}
+                        alt={item.name}
+                        fill
+                        className="object-cover rounded-md"
+                      />
+                    </div>
+                    <div className="order-item-details">
+                      <Link
+                        href={`/products/${item.productId}`}
+                        className="order-item-link"
+                      >
+                        {item.name}
+                      </Link>
+                      <p>
+                        {item.qty} x ₾{item.price.toFixed(2)} = $
+                        {(item.qty * item.price).toFixed(2)}
+                      </p>
+                      {item.product?.minDeliveryDays && item.product?.maxDeliveryDays && (
+                        <p className="delivery-time">
+                          მიწოდების ვადა: {item.product.minDeliveryDays}-{item.product.maxDeliveryDays} დღე
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                ))}
               </div>
-            ))}
+            )}
+            
+            {soulartDeliveryItems.length > 0 && (
+              <div className="delivery-group">
+                <div className="delivery-group-header">
+                  <Truck className="icon" />
+                  <h3>SoulArt-ის კურიერი</h3>
+                </div>
+                {soulartDeliveryItems.map((item) => (
+                  <div key={item.productId} className="order-item">
+                    <div className="order-item-image">
+                      <Image
+                        src={item.image}
+                        alt={item.name}
+                        fill
+                        className="object-cover rounded-md"
+                      />
+                    </div>
+                    <div className="order-item-details">
+                      <Link
+                        href={`/products/${item.productId}`}
+                        className="order-item-link"
+                      >
+                        {item.name}
+                      </Link>
+                      <p>
+                        {item.qty} x ₾{item.price.toFixed(2)} = $
+                        {(item.qty * item.price).toFixed(2)}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
 

@@ -49,6 +49,13 @@ export function CreateProductForm({
     }
   );
 
+  const [deliveryType, setDeliveryType] = useState<'SELLER' | 'SoulArt'>('SoulArt');
+  const [minDeliveryDays, setMinDeliveryDays] = useState("");
+  const [maxDeliveryDays, setMaxDeliveryDays] = useState("");
+  const [width, setWidth] = useState("");
+  const [height, setHeight] = useState("");
+  const [depth, setDepth] = useState("");
+
   const [pending, setPending] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -60,7 +67,6 @@ export function CreateProductForm({
         _id: initialData._id,
         name: initialData.name || "",
         brand: initialData.brand || "",
-        // Check brandLogo type
         brandLogo:
           typeof initialData.brandLogo === "string"
             ? initialData.brandLogo
@@ -71,6 +77,27 @@ export function CreateProductForm({
         price: initialData.price || 0,
         countInStock: initialData.countInStock || 0,
       }));
+
+      if (initialData.deliveryType) {
+        setDeliveryType(initialData.deliveryType as 'SELLER' | 'SoulArt');
+      }
+      if (initialData.minDeliveryDays) {
+        setMinDeliveryDays(initialData.minDeliveryDays.toString());
+      }
+      if (initialData.maxDeliveryDays) {
+        setMaxDeliveryDays(initialData.maxDeliveryDays.toString());
+      }
+      if (initialData.dimensions) {
+        if (initialData.dimensions.width) {
+          setWidth(initialData.dimensions.width.toString());
+        }
+        if (initialData.dimensions.height) {
+          setHeight(initialData.dimensions.height.toString());
+        }
+        if (initialData.dimensions.depth) {
+          setDepth(initialData.dimensions.depth.toString());
+        }
+      }
     }
   }, [initialData]);
 
@@ -88,8 +115,14 @@ export function CreateProductForm({
     setErrors({});
     setServerError(null);
     setSuccess(null);
-  };
 
+    setDeliveryType('SoulArt');
+    setMinDeliveryDays("");
+    setMaxDeliveryDays("");
+    setWidth("");
+    setHeight("");
+    setDepth("");
+  };
 
   const validateField = (field: keyof ProductFormData, value: unknown) => {
     try {
@@ -146,7 +179,7 @@ export function CreateProductForm({
     if (files && files[0]) {
       setFormData((prev) => ({
         ...prev,
-        brandLogo: files[0], // ბრენდის ლოგოს მხოლოდ სახელი
+        brandLogo: files[0],
       }));
     }
   };
@@ -154,13 +187,12 @@ export function CreateProductForm({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     console.log("Form data on submit", formData);
-    console.log("Initial Data:", initialData); // Debug log
+    console.log("Initial Data:", initialData);
     setPending(true);
-    setServerError(null); // Clear previous server error
+    setServerError(null);
     setSuccess(null);
 
     try {
-      // Validate image file type
       const allowedTypes = ["image/jpeg", "image/png", "image/jpg"];
       if (
         formData.images.some(
@@ -175,12 +207,18 @@ export function CreateProductForm({
         setPending(false);
         return;
       }
+
+      if (deliveryType === 'SELLER' && (!minDeliveryDays || !maxDeliveryDays)) {
+        setServerError("გთხოვთ მიუთითოთ მიწოდების დრო თუ გამყიდველი ასრულებს მიწოდებას.");
+        setPending(false);
+        return;
+      }
+
       const token = getAccessToken();
       if (!token) {
         setServerError("ავტორიზაცია ვერ მოხერხდა. გთხოვთ, შეხვიდეთ თავიდან.");
         setPending(false);
         setTimeout(() => {
-          // Redirect to login
           window.location.href = '/login?redirect=/admin/products';
         }, 2000);
         return;
@@ -188,26 +226,37 @@ export function CreateProductForm({
 
       const formDataToSend = new FormData();
 
-      // Add all fields
       Object.entries(formData).forEach(([key, value]) => {
         if (key !== "images" && key !== "brandLogo" && key !== "newImages" && value !== undefined) {
           formDataToSend.append(key, String(value));
         }
       });
 
-      // Add images
+      formDataToSend.append("deliveryType", deliveryType);
+      if (deliveryType === 'SELLER') {
+        formDataToSend.append("minDeliveryDays", minDeliveryDays);
+        formDataToSend.append("maxDeliveryDays", maxDeliveryDays);
+      }
+
+      const dimensions: Record<string, string> = {};
+      if (width) dimensions.width = width;
+      if (height) dimensions.height = height;
+      if (depth) dimensions.depth = depth;
+
+      if (Object.keys(dimensions).length > 0) {
+        formDataToSend.append("dimensions", JSON.stringify(dimensions));
+      }
+
       if (formData.images) {
         formData.images.forEach((image, index) => {
           if (image instanceof File) {
             formDataToSend.append("images", image);
           } else if (typeof image === 'string') {
-            // For existing images, pass URLs separately
             formDataToSend.append(`existingImages[${index}]`, image);
           }
         });
       }
 
-      // Add brand logo
       if (formData.brandLogo instanceof File) {
         formDataToSend.append("brandLogo", formData.brandLogo);
       } else if (typeof formData.brandLogo === 'string') {
@@ -242,7 +291,6 @@ export function CreateProductForm({
           const errorData = await response.json();
           errorMessage = errorData.message || errorMessage;
         } catch {
-          // If parsing fails, use status text
           errorMessage = `Error: ${response.status} ${response.statusText}`;
         }
         throw new Error(errorMessage);
@@ -259,15 +307,12 @@ export function CreateProductForm({
       });
 
       if (!isEdit) {
-        // For new product, reset form
         resetForm();
       } 
       
       if (onSuccess) {
-        // Call success callback
         onSuccess(data);
       } else {
-        // Navigate back to products list after a short delay
         setTimeout(() => {
           router.push("/admin/products");
         }, 1500);
@@ -357,6 +402,105 @@ export function CreateProductForm({
           {errors.category && (
             <p className="create-product-error">{errors.category}</p>
           )}
+        </div>
+        
+        <div>
+          <label>მიუთითეთ ნახატის ზომები (არასავალდებულოა)</label>
+          <div className="dimensions-inputs">
+            <div className="dimension-input">
+              <label htmlFor="width">სიგანე (სმ)</label>
+              <input
+                id="width"
+                type="number"
+                min="0"
+                step="0.1"
+                value={width}
+                onChange={(e) => setWidth(e.target.value)}
+                className="create-product-input"
+              />
+            </div>
+            <div className="dimension-input">
+              <label htmlFor="height">სიმაღლე (სმ)</label>
+              <input
+                id="height"
+                type="number"
+                min="0"
+                step="0.1"
+                value={height}
+                onChange={(e) => setHeight(e.target.value)}
+                className="create-product-input"
+              />
+            </div>
+            <div className="dimension-input">
+              <label htmlFor="depth">სიღრმე (სმ)</label>
+              <input
+                id="depth"
+                type="number"
+                min="0"
+                step="0.1"
+                value={depth}
+                onChange={(e) => setDepth(e.target.value)}
+                className="create-product-input"
+              />
+            </div>
+          </div>
+        </div>
+        
+        <div>
+          <label>მიტანის ტიპი</label>
+          <div className="delivery-options">
+            <div className="delivery-type-selector">
+              <div className="delivery-type-option">
+                <input
+                  type="radio"
+                  id="soulart-delivery"
+                  name="deliveryType"
+                  checked={deliveryType === 'SoulArt'}
+                  onChange={() => setDeliveryType('SoulArt')}
+                />
+                <label htmlFor="soulart-delivery">SoulArt-ის კურიერი</label>
+              </div>
+              <div className="delivery-type-option">
+                <input
+                  type="radio"
+                  id="seller-delivery"
+                  name="deliveryType"
+                  checked={deliveryType === 'SELLER'}
+                  onChange={() => setDeliveryType('SELLER')}
+                />
+                <label htmlFor="seller-delivery">გამყიდველი</label>
+              </div>
+            </div>
+            
+            {deliveryType === 'SELLER' && (
+              <div className="delivery-days">
+                <div>
+                  <label htmlFor="minDeliveryDays">მინიმალური ვადა (დღეები)</label>
+                  <input
+                    id="minDeliveryDays"
+                    type="number"
+                    min="1"
+                    value={minDeliveryDays}
+                    onChange={(e) => setMinDeliveryDays(e.target.value)}
+                    className="create-product-input"
+                    required={deliveryType === 'SELLER'}
+                  />
+                </div>
+                <div>
+                  <label htmlFor="maxDeliveryDays">მაქსიმალური ვადა (დღეები)</label>
+                  <input
+                    id="maxDeliveryDays"
+                    type="number"
+                    min="1"
+                    value={maxDeliveryDays}
+                    onChange={(e) => setMaxDeliveryDays(e.target.value)}
+                    className="create-product-input"
+                    required={deliveryType === 'SELLER'}
+                  />
+                </div>
+              </div>
+            )}
+          </div>
         </div>
 
         <div>
@@ -455,8 +599,6 @@ export function CreateProductForm({
             <p className="create-product-error">{errors.brandLogo}</p>
           )}
         </div>
-
-       
 
         <button
           type="submit"

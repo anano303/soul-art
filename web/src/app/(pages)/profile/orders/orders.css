@@ -197,3 +197,35 @@
     text-align: center;
   }
 }
+
+.delivery-info {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0.75rem 0;
+}
+
+.delivery-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.8rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+}
+
+.delivery-badge.seller {
+  background-color: #ffecb3;
+  color: #92400e;
+}
+
+.delivery-badge.soulart {
+  background-color: #dcfce7;
+  color: #166534;
+}
+
+.delivery-time {
+  font-size: 0.8rem;
+  color: #666;
+  margin-top: 0.25rem;
+}

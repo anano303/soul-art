@@ -13,6 +13,17 @@ export const productSchema = z.object({
   countInStock: z.coerce.number().min(0, "Stock cannot be negative"),
   images: z.array(fileSchema).min(1, "At least one image is required"),
   brandLogo: fileSchema.optional(),
+  deliveryType: z.enum(["SELLER", "SoulArt"]).optional(),
+  minDeliveryDays: z.number().optional(),
+  maxDeliveryDays: z.number().optional(),
+  dimensions: z
+    .object({
+      width: z.number().optional(),
+      height: z.number().optional(),
+      depth: z.number().optional(),
+    })
+    .optional(),
+  
 });
 
 export type ProductFormData = z.infer<typeof productSchema>;
