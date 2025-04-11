@@ -279,17 +279,20 @@ margin-top: 20px;
 .dimensions-info,
 .delivery-info {
   margin: 16px 0;
-  padding: 12px;
+  padding: 16px;
   background-color: #f8f9fa;
   border-radius: 8px;
   border: 1px solid #e0e0e0;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
 
 .info-title {
   font-size: 16px;
   font-weight: 600;
-  margin-bottom: 8px;
+  margin-bottom: 12px;
   color: #012645;
+  border-bottom: 1px solid #e0e0e0;
+  padding-bottom: 8px;
 }
 
 .dimensions-details,
@@ -303,8 +306,30 @@ margin-top: 20px;
 
 .dimensions-details span {
   background: #e9ecef;
-  padding: 4px 10px;
-  border-radius: 4px;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+}
+
+/* Add icons to dimension values for better visualization */
+.dimensions-details span::before {
+  margin-right: 6px;
+  font-weight: bold;
+  font-size: 12px;
+}
+
+.dimensions-details span:nth-child(1)::before {
+  content: "↔️";
+}
+
+.dimensions-details span:nth-child(2)::before {
+  content: "↕️";
+}
+
+.dimensions-details span:nth-child(3)::before {
+  content: "📏";
 }
 
 .delivery-time {

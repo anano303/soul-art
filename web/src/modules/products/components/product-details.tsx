@@ -25,6 +25,24 @@ export function ProductDetails({ product }: ProductDetailsProps) {
   const [isRoomViewerOpen, setIsRoomViewerOpen] = useState(false);
   const router = useRouter();
 
+  // Parse dimensions if they are stored as a string
+  const parseDimensions = () => {
+    if (!product.dimensions) return null;
+    
+    try {
+      if (typeof product.dimensions === 'string') {
+        return JSON.parse(product.dimensions);
+      }
+      return product.dimensions;
+    } catch (e) {
+      console.error("Error parsing dimensions:", e);
+      return null;
+    }
+  };
+  
+  const dimensions = parseDimensions();
+  console.log("Parsed dimensions:", dimensions);
+
   if (!product) return null;
 
   const isOutOfStock = product.countInStock === 0;
@@ -134,14 +152,14 @@ export function ProductDetails({ product }: ProductDetailsProps) {
 
           <div className="price">₾{product.price}</div>
 
-          {/* Product Dimensions */}
-          {product.dimensions && (product.dimensions.width || product.dimensions.height || product.dimensions.depth) && (
+          {/* Product Dimensions - Fixed to handle string dimensions */}
+          {dimensions && (
             <div className="dimensions-info">
               <h3 className="info-title">ნამუშევრის ზომები</h3>
               <div className="dimensions-details">
-                {product.dimensions.width && <span>სიგანე: {product.dimensions.width} სმ</span>}
-                {product.dimensions.height && <span>სიმაღლე: {product.dimensions.height} სმ</span>}
-                {product.dimensions.depth && <span>სიღრმე: {product.dimensions.depth} სმ</span>}
+                {dimensions.width && <span>{dimensions.width} სმ *</span>}
+                {dimensions.height && <span> {dimensions.height} სმ *</span>}
+                {dimensions.depth && <span>{dimensions.depth} სმ</span>}
               </div>
             </div>
           )}
