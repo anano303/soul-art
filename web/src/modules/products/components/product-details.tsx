@@ -152,7 +152,7 @@ export function ProductDetails({ product }: ProductDetailsProps) {
             <div className="delivery-details">
               {product.deliveryType === 'SELLER' ? (
                 <div>
-                  <p>მიწოდება გამყიდველისგან</p>
+                  <p>მიწოდება ავტორისგან</p>
                   {product.minDeliveryDays && product.maxDeliveryDays && (
                     <p className="delivery-time">მიწოდების ვადა: {product.minDeliveryDays}-{product.maxDeliveryDays} დღე</p>
                   )}

@@ -68,7 +68,7 @@ export function OrderHistory({ orders }: OrderHistoryProps) {
                 ) ? (
                   <span className="badge delivery-badge seller">
                     <Store size={14} />
-                    გამყიდველის მიტანა
+                   მიწოდება ავტორისგან
                   </span>
                 ) : (
                   <span className="badge delivery-badge soulart">

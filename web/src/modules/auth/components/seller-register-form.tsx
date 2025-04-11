@@ -35,7 +35,7 @@ export function SellerRegisterForm() {
         setIsSuccess(true);
         toast({
           title: "რეგისტრაცია წარმატებულია",
-          description: "თქვენი გამყიდველის ანგარიში წარმატებით შეიქმნა",
+          description: "თქვენი, როგორც  გამყიდველის ანგარიში წარმატებით შეიქმნა",
           variant: "default",
         });
         
@@ -63,7 +63,7 @@ export function SellerRegisterForm() {
       <div className="form-container">
         <div className="success-message">
           <h3>რეგისტრაცია წარმატებულია!</h3>
-          <p>თქვენი გამყიდველის ანგარიში წარმატებით შეიქმნა.</p>
+          <p>თქვენი  ანგარიში წარმატებით შეიქმნა.</p>
           <p>გადამისამართება ავტორიზაციის გვერდზე...</p>
         </div>
       </div>

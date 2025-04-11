@@ -90,7 +90,7 @@ export function OrderDetails({ order }: OrderDetailsProps) {
               <div className="delivery-group">
                 <div className="delivery-group-header">
                   <Store className="icon" />
-                  <h3>გამყიდველის მიტანა</h3>
+                  <h3>აგზავნის ავტორი</h3>
                 </div>
                 {sellerDeliveryItems.map((item) => (
                   <div key={item.productId} className="order-item">

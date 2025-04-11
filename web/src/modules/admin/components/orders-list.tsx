@@ -67,7 +67,7 @@ export function OrdersList() {
                     ) ? (
                       <span className="delivery-badge seller">
                         <Store className="icon" />
-                        გამყიდველის მიტანა
+                        აგზავნის ავტორი
                         {order.orderItems
                           .filter(item => item.product && String(item.product.deliveryType) === "SELLER")
                           .map(item => (
