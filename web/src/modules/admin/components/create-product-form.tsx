@@ -62,6 +62,8 @@ export function CreateProductForm({
 
   useEffect(() => {
     if (initialData) {
+      console.log("Initial Data in Form:", initialData);
+      
       setFormData((prev) => ({
         ...prev,
         _id: initialData._id,
@@ -87,15 +89,37 @@ export function CreateProductForm({
       if (initialData.maxDeliveryDays) {
         setMaxDeliveryDays(initialData.maxDeliveryDays.toString());
       }
+      
+      // Fix dimensions parsing - handle both object and string formats
       if (initialData.dimensions) {
-        if (initialData.dimensions.width) {
-          setWidth(initialData.dimensions.width.toString());
+        let dimensionsObj;
+        
+        // If dimensions is a string, parse it
+        if (typeof initialData.dimensions === 'string') {
+          try {
+            dimensionsObj = JSON.parse(initialData.dimensions);
+            console.log("Parsed dimensions from string:", dimensionsObj);
+          } catch (error) {
+            console.error("Error parsing dimensions:", error);
+            dimensionsObj = {};
+          }
+        } else {
+          // If it's already an object
+          dimensionsObj = initialData.dimensions;
+          console.log("Using dimensions as object:", dimensionsObj);
         }
-        if (initialData.dimensions.height) {
-          setHeight(initialData.dimensions.height.toString());
-        }
-        if (initialData.dimensions.depth) {
-          setDepth(initialData.dimensions.depth.toString());
+        
+        // Set dimensions values
+        if (dimensionsObj) {
+          if (dimensionsObj.width) {
+            setWidth(dimensionsObj.width.toString());
+          }
+          if (dimensionsObj.height) {
+            setHeight(dimensionsObj.height.toString());
+          }
+          if (dimensionsObj.depth) {
+            setDepth(dimensionsObj.depth.toString());
+          }
         }
       }
     }
@@ -226,37 +250,55 @@ export function CreateProductForm({
 
       const formDataToSend = new FormData();
 
-      Object.entries(formData).forEach(([key, value]) => {
-        if (key !== "images" && key !== "brandLogo" && key !== "newImages" && value !== undefined) {
-          formDataToSend.append(key, String(value));
-        }
-      });
+      // Add basic form fields
+      formDataToSend.append("name", formData.name);
+      formDataToSend.append("price", String(formData.price));
+      formDataToSend.append("description", formData.description);
+      formDataToSend.append("brand", formData.brand);
+      formDataToSend.append("category", formData.category);
+      formDataToSend.append("countInStock", String(formData.countInStock));
 
+      // Add delivery type
       formDataToSend.append("deliveryType", deliveryType);
+      
+      // Add delivery days if SELLER type
       if (deliveryType === 'SELLER') {
         formDataToSend.append("minDeliveryDays", minDeliveryDays);
         formDataToSend.append("maxDeliveryDays", maxDeliveryDays);
       }
 
-      const dimensions: Record<string, string> = {};
-      if (width) dimensions.width = width;
-      if (height) dimensions.height = height;
-      if (depth) dimensions.depth = depth;
-
-      if (Object.keys(dimensions).length > 0) {
-        formDataToSend.append("dimensions", JSON.stringify(dimensions));
+      // Add dimensions if provided
+      if (width || height || depth) {
+        const dimensionsObj: Record<string, string> = {};
+        if (width) dimensionsObj['width'] = width;
+        if (height) dimensionsObj['height'] = height;
+        if (depth) dimensionsObj['depth'] = depth;
+        formDataToSend.append("dimensions", JSON.stringify(dimensionsObj));
       }
 
-      if (formData.images) {
-        formData.images.forEach((image, index) => {
-          if (image instanceof File) {
-            formDataToSend.append("images", image);
-          } else if (typeof image === 'string') {
-            formDataToSend.append(`existingImages[${index}]`, image);
-          }
-        });
+      // Handle images - separate existing images from new ones
+      const existingImages: string[] = [];
+      const newFiles: File[] = [];
+
+      formData.images.forEach(image => {
+        if (typeof image === 'string') {
+          existingImages.push(image);
+        } else if (image instanceof File) {
+          newFiles.push(image);
+        }
+      });
+
+      // Add existing images as JSON array
+      if (existingImages.length > 0) {
+        formDataToSend.append("existingImages", JSON.stringify(existingImages));
       }
 
+      // Add new image files
+      newFiles.forEach(file => {
+        formDataToSend.append("images", file);
+      });
+
+      // Handle brand logo
       if (formData.brandLogo instanceof File) {
         formDataToSend.append("brandLogo", formData.brandLogo);
       } else if (typeof formData.brandLogo === 'string') {
@@ -271,7 +313,7 @@ export function CreateProductForm({
       console.log("Sending request:", {
         method,
         endpoint,
-         formData: "FormData object (not shown)"
+        formData: "FormData object (not shown)"
       });
 
       const response = await fetch(
