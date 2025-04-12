@@ -10,6 +10,7 @@ import Footer from "@/components/footer/footer";
 import { LanguageProvider } from "@/hooks/LanguageContext";
 import Header from "@/components/header/header";
 import SiteTimer from "@/components/SiteTimer/SiteTimer";
+import FacebookMessenger from "@/components/FacebookMessenger";
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_CLIENT_URL || 'https://soulart.ge'),
@@ -87,6 +88,7 @@ export default function RootLayout({
             </CartProvider>
           </AuthProvider>
         </Providers>
+        <FacebookMessenger />
       </body>
     </html>
   );
