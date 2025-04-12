@@ -83,3 +83,14 @@ export interface PaginatedResponse<T> {
   page: number;
   pages: number;
 }
+// Definition for Facebook SDK
+export interface FacebookSDK {
+  init(options: { xfbml: boolean; version: string }): void;
+  XFBML: {
+    parse(): void;
+  };
+  CustomerChat: {
+    show(): void;
+    hide(): void;
+  };
+}
