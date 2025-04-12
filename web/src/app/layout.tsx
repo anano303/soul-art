@@ -10,6 +10,7 @@ import Footer from "@/components/footer/footer";
 import { LanguageProvider } from "@/hooks/LanguageContext";
 import Header from "@/components/header/header";
 import SiteTimer from "@/components/SiteTimer/SiteTimer";
+import { MessengerChat } from "@/components/messenger-chat/messenger-chat";
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_CLIENT_URL || 'https://soulart.ge'),
@@ -47,7 +48,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-       <head>
+      <head>
+        {/* Facebook Domain Verification */}
+        <meta name="facebook-domain-verification" content="6s6ytex30x21cc2qvg53trrun7t8lq" />
+        
         {/* Facebook SDK */}
         <script
           async
@@ -55,6 +59,7 @@ export default function RootLayout({
           crossOrigin="anonymous"
           src={`https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v13.0&appId=${process.env.NEXT_PUBLIC_FACEBOOK_APP_ID}&autoLogAppEvents=1`}
         />
+        
         {/* Prefetch non-critical images */}
         <link
           rel="prefetch"
@@ -82,6 +87,7 @@ export default function RootLayout({
                   <Header />
                   <main className="flex-1">{children}</main>
                   <Footer />
+                  <MessengerChat />
                 </LanguageProvider>
               </CheckoutProvider>
             </CartProvider>
