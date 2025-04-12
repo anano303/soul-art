@@ -22,6 +22,8 @@ async function bootstrap() {
       'https://localhost:3000',  // Added HTTPS local frontend
       'http://localhost:4000',   // Added HTTP local backend
       'https://localhost:4000',  // Added HTTPS local backend
+      'https://connect.facebook.net',  // Allow Facebook to connect
+      'https://www.facebook.com',      // Allow Facebook main site
       /localhost/               // Fallback pattern for any localhost
     ],
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
