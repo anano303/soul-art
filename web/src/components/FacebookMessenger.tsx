@@ -39,6 +39,15 @@ export const FacebookMessenger: React.FC = () => {
   const language = process.env.NEXT_PUBLIC_LANGUAGE_CODE || "ka_GE";
   
   useEffect(() => {
+    // Only initialize Facebook if we're on HTTPS or in production
+    const isSecureContext = window.location.protocol === 'https:' || process.env.NODE_ENV === 'production';
+    
+    if (!isSecureContext) {
+      console.warn('Facebook SDK requires HTTPS to work properly. The chat plugin is disabled on HTTP in development.');
+      setError('Facebook chat requires HTTPS. It will work when deployed to production.');
+      return;
+    }
+    
     // Initialize Facebook SDK
     window.fbAsyncInit = function() {
       if (window.FB) {
@@ -65,7 +74,7 @@ export const FacebookMessenger: React.FC = () => {
         const js = d.createElement('script') as HTMLScriptElement;
         
         js.id = id;
-        js.src = `https://connect.facebook.net/${language}/sdk/xfbml.customerchat.js`;
+        js.src = `https://connect.facebook.net/${language}/sdk.js`; // Use sdk.js instead of xfbml.customerchat.js
         js.async = true;
         js.crossOrigin = 'anonymous';
         
@@ -113,7 +122,7 @@ export const FacebookMessenger: React.FC = () => {
       <div id="fb-customer-chat" className="fb-customerchat"></div>
 
       {/* Error display for debugging */}
-      {error && process.env.NODE_ENV !== "production" && (
+      {error && (
         <div 
           style={{ 
             position: 'fixed',
@@ -123,10 +132,15 @@ export const FacebookMessenger: React.FC = () => {
             padding: '10px',
             border: '1px solid red',
             borderRadius: '5px',
-            zIndex: 9999
+            zIndex: 9999,
+            maxWidth: '300px',
+            fontSize: '12px'
           }}
         >
           <p>Facebook Messenger Error: {error}</p>
+          {window.location.protocol === 'http:' && (
+            <p>Facebook requires HTTPS. The chat will work when deployed to production.</p>
+          )}
         </div>
       )}
     </>
