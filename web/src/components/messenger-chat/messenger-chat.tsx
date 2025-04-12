@@ -73,19 +73,14 @@ export function MessengerChat() {
       console.log("Facebook Messenger chat initialized with page ID: 699512925859265");
     };
     
-    // SDK-ს ჩატვირთვა - ფიქსირებული ვერსია
+    // SDK-ს ჩატვირთვა
     (function(d, s, id) {
       const fjs = d.getElementsByTagName(s)[0];
+      const js = d.createElement(s);
       if (d.getElementById(id)) return;
-      
-      // HTMLScriptElement ტიპის გამოყენება სწორი createElement მეთოდით
-      const js = d.createElement(s) as HTMLScriptElement;
       js.id = id;
       js.src = 'https://connect.facebook.net/ka_GE/sdk/xfbml.customerchat.js';
-      
-      if (fjs && fjs.parentNode) {
-        fjs.parentNode.insertBefore(js, fjs);
-      }
+      fjs.parentNode.insertBefore(js, fjs);
     }(document, 'script', 'facebook-jssdk'));
     
     return () => {
