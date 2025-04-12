@@ -6,19 +6,13 @@ import "./messenger-chat.css";
 declare global {
   interface Window {
     fbAsyncInit: () => void;
-    FB?: {
-      init(options: { xfbml: boolean; version: string }): void;
-      CustomerChat?: {
-        show(): void;
-        hide(): void;
-      };
-    };
+    FB?: any;
   }
 }
 
 export function MessengerChat() {
   const [isDevEnvironment, setIsDevEnvironment] = useState(false);
-  const [isChatEnabled] = useState(
+  const [isChatEnabled, setIsChatEnabled] = useState(
     process.env.NEXT_PUBLIC_MESSENGER_CHAT_ENABLED === 'true'
   );
   
@@ -75,10 +69,9 @@ export function MessengerChat() {
     
     // SDK-ს ჩატვირთვა
     (function(d, s, id) {
-      const fjs = d.getElementsByTagName(s)[0];
-      const js = d.createElement(s);
+      var js, fjs = d.getElementsByTagName(s)[0];
       if (d.getElementById(id)) return;
-      js.id = id;
+      js = d.createElement(s); js.id = id;
       js.src = 'https://connect.facebook.net/ka_GE/sdk/xfbml.customerchat.js';
       fjs.parentNode.insertBefore(js, fjs);
     }(document, 'script', 'facebook-jssdk'));
