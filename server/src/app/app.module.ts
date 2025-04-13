@@ -15,6 +15,7 @@ import { ForumsModule } from '@/forums/forums.module';
 import { GoogleStrategy } from '@/strategies/google.strategy';
 import { connectDB } from '@/utils/config';
 import { ProductsModule } from '@/products/products.module';
+import { MessengerModule } from '@/messenger/messenger.module';
 
 @Module({
   imports: [
@@ -36,6 +37,7 @@ import { ProductsModule } from '@/products/products.module';
     // SeedsModule,
     AwsS3Module,
     ForumsModule,
+    MessengerModule,
   ],
   controllers: [AppController],
   providers: [AppService, GoogleStrategy],

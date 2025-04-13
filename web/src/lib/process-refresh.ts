@@ -1,6 +1,6 @@
+import { getRefreshToken, getAccessToken, clearTokens } from "./auth";
+// Import the apiClient but NOT the refreshAuthToken function to avoid circular dependency
 import { apiClient } from "./api-client";
-
-import { getRefreshToken, getAccessToken, storeTokens, clearTokens } from "./auth";
 
 let isRefreshing = false;
 let failedQueue: Array<{
@@ -25,49 +25,57 @@ const resetRefreshState = () => {
   failedQueue = [];
 };
 
-// Refresh token function
+// Use refreshAuthToken from api-client.ts instead of implementing it here
 export const refreshAuthToken = async (): Promise<boolean> => {
-  try {
-    console.log('📡 Attempting to refresh token');
-    
-    const refreshToken = getRefreshToken();
-    if (!refreshToken) {
-      console.log('❌ No refresh token found');
-      clearTokens();
-      return false;
-    }
+  // Import dynamically to avoid circular dependency
+  const { refreshAuthToken } = await import('./api-client');
+  return refreshAuthToken();
+};
 
-    // Using axios directly with baseURL to avoid interceptors
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/refresh`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ refreshToken }),
-    });
+// Function to check if the token is about to expire
+const isTokenAboutToExpire = (): boolean => {
+  const token = getAccessToken();
+  if (!token) return false;
+  
+  try {
+    // JWT tokens are base64 encoded with 3 parts: header.payload.signature
+    const tokenParts = token.split('.');
+    if (tokenParts.length !== 3) return true; // Invalid token format
     
-    if (!response.ok) {
-      console.log(`❌ Refresh failed with status ${response.status}`);
-      clearTokens();
-      return false;
-    }
+    // Decode the payload part
+    const payload = JSON.parse(Buffer.from(tokenParts[1], 'base64').toString());
     
-    const data = await response.json();
+    // Check if exp field exists
+    if (!payload.exp) return false;
     
-    if (data.tokens && data.tokens.accessToken && data.tokens.refreshToken) {
-      console.log('✅ Token refresh successful');
-      storeTokens(data.tokens.accessToken, data.tokens.refreshToken);
-      return true;
-    }
+    // If token expiration is within 5 minutes, consider it "about to expire"
+    const expiryTime = payload.exp * 1000; // Convert to milliseconds
+    const currentTime = Date.now();
+    const timeUntilExpiry = expiryTime - currentTime;
     
-    console.log('❌ Invalid response format from refresh endpoint');
-    clearTokens();
-    return false;
+    return timeUntilExpiry < 5 * 60 * 1000; // Less than 5 minutes
   } catch (error) {
-    console.error('❌ Token refresh error:', error);
-    clearTokens();
+    console.error('Error checking token expiry:', error);
+    return true; // If we can't check, assume it needs refresh
+  }
+};
+
+// Function to check auth state and refresh tokens if needed
+export const checkAndRefreshAuth = async (): Promise<boolean> => {
+  const accessToken = getAccessToken();
+  if (!accessToken) {
+    console.log('🔍 No access token found during init');
     return false;
   }
+  
+  console.log('🔄 Auth initialized, refresh token restored');
+
+  if (isTokenAboutToExpire()) {
+    console.log('🔄 Token about to expire, attempting to refresh during init');
+    return refreshAuthToken();
+  }
+  
+  return true;
 };
 
 apiClient.interceptors.response.use(
@@ -142,16 +150,3 @@ apiClient.interceptors.response.use(
     }
   }
 );
-
-// Export a function to check auth status and potentially refresh token on app start
-export const checkAndRefreshAuth = async (): Promise<boolean> => {
-  if (!getAccessToken() && !getRefreshToken()) {
-    return false;
-  }
-  
-  if (!getAccessToken() && getRefreshToken()) {
-    return await refreshAuthToken();
-  }
-  
-  return true;
-};

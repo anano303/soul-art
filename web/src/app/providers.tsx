@@ -6,6 +6,13 @@ import "@/lib/process-refresh";
 import { initializeAuth } from '@/lib/auth';
 import { useEffect } from 'react';
 import { checkAndRefreshAuth } from '@/lib/process-refresh';
+import { setupDevEnvironment } from '@/lib/dev-config';
+// Try the main implementation first
+import { MessengerChat } from '@/components/messenger-chat';
+import { MessengerDebug } from '@/components/messenger-debug';
+// Uncomment below and comment above if the main one doesn't work
+// import { MessengerChatAlternative as MessengerChat } from '@/components/messenger-chat-alternative';
+import { Toaster } from 'sonner';
 
 // Declare global window property for query client access
 declare global {
@@ -30,8 +37,13 @@ if (typeof window !== 'undefined') {
 }
 
 export function Providers({ children }: { children: React.ReactNode }) {
-  // Initialize auth when the app starts
   useEffect(() => {
+    // Setup development-specific configuration
+    if (process.env.NODE_ENV === 'development') {
+      setupDevEnvironment();
+    }
+
+    // Initialize auth when the app starts
     const initAuth = async () => {
       console.log('🚀 Initializing auth...');
       initializeAuth();
@@ -55,6 +67,9 @@ export function Providers({ children }: { children: React.ReactNode }) {
     <QueryClientProvider client={queryClient}>
       <ReactQueryDevtools />
       {children}
+      <Toaster />
+      <MessengerChat />
+      {process.env.NODE_ENV === 'development' && <MessengerDebug />}
     </QueryClientProvider>
   );
 }
