@@ -12,20 +12,8 @@ async function bootstrap() {
     logger: ['error', 'warn', 'debug', 'log', 'verbose'],
   });
 
-  app.use(helmet({
-    contentSecurityPolicy: {
-      directives: {
-        'default-src': ["'self'"],
-        'connect-src': ["'self'", 'https://www.facebook.com', 'https://connect.facebook.net'],
-        'script-src': ["'self'", "'unsafe-inline'", "'unsafe-eval'", 'https://connect.facebook.net'],
-        'frame-src': ["'self'", 'https://www.facebook.com'],
-      },
-    },
-  }));
-  
+  app.use(helmet());
   app.use(cookieParser());
-  
-  // Allow requests from Facebook for the webhook
   app.enableCors({
     origin: [
       'https://soulart.ge',
@@ -34,13 +22,11 @@ async function bootstrap() {
       'https://localhost:3000',  // Added HTTPS local frontend
       'http://localhost:4000',   // Added HTTP local backend
       'https://localhost:4000',  // Added HTTPS local backend
-      'https://www.facebook.com',
-      'https://graph.facebook.com',
       /localhost/               // Fallback pattern for any localhost
     ],
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     credentials: true,
-    allowedHeaders: ['Content-Type', 'Authorization', 'forum-id', 'Origin', 'Accept', 'X-Hub-Signature', 'X-Hub-Signature-256']
+    allowedHeaders: ['Content-Type', 'Authorization', 'forum-id', 'Origin', 'Accept']
   });
 
   app.enableVersioning({

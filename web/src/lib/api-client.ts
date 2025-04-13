@@ -1,5 +1,6 @@
 import axios from 'axios';
-import { getAccessToken, isTokenAboutToExpire, getRefreshToken, storeTokens, clearTokens } from './auth';
+import { getAccessToken, isTokenAboutToExpire } from './auth';
+import { refreshAuthToken } from './process-refresh';
 
 // Create an axios instance with default configs
 export const apiClient = axios.create({
@@ -10,51 +11,6 @@ export const apiClient = axios.create({
   // Important for working with cookies in cross-domain requests
   withCredentials: true,
 });
-
-// Function to refresh token that doesn't depend on process-refresh
-export const refreshAuthToken = async (): Promise<boolean> => {
-  try {
-    console.log('📡 Attempting to refresh token');
-    
-    const refreshToken = getRefreshToken();
-    if (!refreshToken) {
-      console.log('❌ No refresh token found');
-      clearTokens();
-      return false;
-    }
-
-    // Using fetch directly instead of apiClient to avoid circular dependency
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/v1/auth/refresh`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ refreshToken }),
-    });
-    
-    if (!response.ok) {
-      console.log(`❌ Refresh failed with status ${response.status}`);
-      clearTokens();
-      return false;
-    }
-    
-    const data = await response.json();
-    
-    if (data.tokens && data.tokens.accessToken && data.tokens.refreshToken) {
-      console.log('✅ Token refresh successful');
-      storeTokens(data.tokens.accessToken, data.tokens.refreshToken);
-      return true;
-    }
-    
-    console.log('❌ Invalid response format from refresh endpoint');
-    clearTokens();
-    return false;
-  } catch (error) {
-    console.error('❌ Token refresh error:', error);
-    clearTokens();
-    return false;
-  }
-};
 
 // Add a request interceptor to add auth token
 apiClient.interceptors.request.use(
