@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { Providers } from "./providers";
+// import { Toaster } from "@/components/ui/toaster";
 import { AuthProvider } from "@/components/auth-provider";
 import { CartProvider } from "@/modules/cart/context/cart-context";
 import { CheckoutProvider } from "@/modules/checkout/context/checkout-context";
@@ -9,7 +10,7 @@ import Footer from "@/components/footer/footer";
 import { LanguageProvider } from "@/hooks/LanguageContext";
 import Header from "@/components/header/header";
 import SiteTimer from "@/components/SiteTimer/SiteTimer";
-import MessengerWrapper from "@/components/MessengerWrapper";
+import FacebookMessenger from "@/components/FacebookMessenger";
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_CLIENT_URL || 'https://soulart.ge'),
@@ -47,7 +48,14 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <head>
+       <head>
+        {/* Facebook SDK */}
+        <script
+          async
+          defer
+          crossOrigin="anonymous"
+          src={`https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v13.0&appId=${process.env.NEXT_PUBLIC_FACEBOOK_APP_ID}&autoLogAppEvents=1`}
+        />
         {/* Prefetch non-critical images */}
         <link
           rel="prefetch"
@@ -75,13 +83,12 @@ export default function RootLayout({
                   <Header />
                   <main className="flex-1">{children}</main>
                   <Footer />
-                  {/* Use MessengerWrapper which is properly set up as a Client Component */}
-                  <MessengerWrapper />
                 </LanguageProvider>
               </CheckoutProvider>
             </CartProvider>
           </AuthProvider>
         </Providers>
+        <FacebookMessenger />
       </body>
     </html>
   );
