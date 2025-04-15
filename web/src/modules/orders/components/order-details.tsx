@@ -8,6 +8,9 @@ import { PayPalButton } from "./paypal-button";
 import { StripeButton } from "./stripe-button";
 import "./order-details.css";
 
+// ლარი დოლარში გადამყვანი კურსი (1 ლარი = ~0.37 დოლარი)
+const GEL_TO_USD_RATE = 2.8;
+
 interface OrderDetailsProps {
   order: Order;
 }
@@ -24,6 +27,9 @@ export function OrderDetails({ order }: OrderDetailsProps) {
 
   console.log("Seller items:", sellerDeliveryItems);
   console.log("SoulArt items:", soulartDeliveryItems);
+
+  // ლარის დოლარში გადაყვანა გადახდისთვის
+  const totalPriceInUSD = +(order.totalPrice / GEL_TO_USD_RATE).toFixed(2);
 
   return (
     <div className="order-container">
@@ -185,12 +191,18 @@ export function OrderDetails({ order }: OrderDetailsProps) {
                 <span>Total</span>
                 <span>{order.totalPrice.toFixed(2)} ₾</span>
               </div>
+              
+              {/* დავამატოთ დოლარის ეკვივალენტი */}
+              <div className="summary-total-usd">
+                <span>Total (USD)</span>
+                <span>${totalPriceInUSD}</span>
+              </div>
 
               {!order.isPaid &&
                 (order.paymentMethod === "PayPal" ? (
-                  <PayPalButton orderId={order._id} amount={order.totalPrice} />
+                  <PayPalButton orderId={order._id} amount={totalPriceInUSD} />
                 ) : (
-                  <StripeButton orderId={order._id} amount={order.totalPrice} />
+                  <StripeButton orderId={order._id} amount={totalPriceInUSD} />
                 ))}
             </div>
           </div>
