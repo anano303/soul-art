@@ -59,9 +59,22 @@ export class AuthController {
       loginDto.password,
     );
 
+    // პროფილის სურათის დამატება მომხმარებლის ინფორმაციაში
+    let profileImage = null;
+    if (user.profileImagePath) {
+      profileImage = await this.usersService.getProfileImageUrl(user.profileImagePath);
+    }
+
     const { tokens, user: userData } = await this.authService.login(user);
 
-    return { tokens, user: userData };
+    // დავამატოთ profileImage პასუხში
+    return { 
+      tokens, 
+      user: {
+        ...userData,
+        profileImage
+      } 
+    };
   }
 
   @Get('profile')

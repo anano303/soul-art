@@ -302,6 +302,16 @@ export class UsersService {
     };
   }
 
+  async getProfileImageUrl(profileImagePath: string): Promise<string | null> {
+    if (!profileImagePath) return null;
+    try {
+      return await this.awsS3Service.getImageByFileId(profileImagePath);
+    } catch (error) {
+      this.logger.error(`Failed to get image URL: ${error.message}`);
+      return null;
+    }
+  }
+
   async remove(id: string) {
     if (!isValidObjectId(id)) {
       throw new BadRequestException('Invalid user ID');

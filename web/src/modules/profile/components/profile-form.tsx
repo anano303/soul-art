@@ -260,7 +260,7 @@ export function ProfileForm() {
 
         <button
           type="submit"
-          className="button"
+          className="ProfileButton"
           disabled={updateProfile.isPending}
         >
           {updateProfile.isPending ? "Updating..." : "Update Profile"}

@@ -12,6 +12,21 @@ export default function UserMenu() {
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
+  // Add state to store profile image URL
+  const [profileImage, setProfileImage] = useState<string | null>(null);
+
+  // Update profile image when user changes
+  useEffect(() => {
+    if (user?.profileImage) {
+      setProfileImage(user.profileImage);
+    } else {
+      setProfileImage("/avatar.jpg");
+    }
+
+    // დავამატოთ ლოგი დებაგისთვის
+    console.log("User profile updated:", user);
+  }, [user]);
+
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
@@ -50,7 +65,7 @@ export default function UserMenu() {
       >
         <div className="user-avatar">
           <Image 
-            src={user.profileImage || "/avatar.jpg"} 
+            src={profileImage || "/avatar.jpg"} 
             alt={user.name}
             width={32} 
             height={32}

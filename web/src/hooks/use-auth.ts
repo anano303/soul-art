@@ -54,6 +54,10 @@ export function useAuth() {
     onSuccess: (data) => {
       if (data.success && data.user) {
         console.log('Login successful, setting user data');
+        // Make sure we're storing the profile image URL as well
+        if (data.user.profileImage) {
+          localStorage.setItem('userProfileImage', data.user.profileImage);
+        }
         queryClient.setQueryData(['user'], data.user);
       }
     },
