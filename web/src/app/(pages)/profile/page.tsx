@@ -1,9 +1,12 @@
 import { ProfileForm } from "@/modules/profile/components/profile-form";
+import { ProtectedRoute } from "@/components/protected-route";
 
 export default function ProfilePage() {
   return (
-    <div>
-      <ProfileForm />
-    </div>
+    <ProtectedRoute>
+      <div>
+        <ProfileForm />
+      </div>
+    </ProtectedRoute>
   );
 }
