@@ -7,7 +7,7 @@ import { AdminOrderDetails } from "@/modules/admin/components/admin-order-detail
 
 export default function AdminOrderPage() {
   const params = useParams();
-  const orderId = params.id as string;
+  const orderId = params?.id ? (params.id as string) : "";
 
   const { data: order, isLoading } = useQuery({
     queryKey: ["order", orderId],

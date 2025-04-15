@@ -7,7 +7,7 @@ import { OrderDetails } from "@/modules/orders/components/order-details";
 
 export default function OrderPage() {
   const params = useParams();
-  const orderId = params.id as string;
+  const orderId = params?.id ? (params.id as string) : "";
 
   const { data: order, isLoading } = useQuery({
     queryKey: ["order", orderId],

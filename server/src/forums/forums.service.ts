@@ -54,33 +54,87 @@ export class ForumsService {
 
   async findAll(queryParams: queryParamsDto) {
     const { page, take } = queryParams;
-    const limit = Math.min(take, 20); // Adjust the limit to 20 for the forum page
+    const limit = Math.min(take, 20);
 
     const forumData = await this.forumModel
       .find()
       .sort({ createdAt: -1 }) 
       .skip((page - 1) * limit)
       .limit(limit)
-      .populate('user', 'name _id role')
+      .populate('user', 'name _id role profileImagePath')
       .populate({
         path: 'comments',
         populate: {
           path: 'user',
-          select: 'name _id',
+          select: 'name _id profileImagePath',
         },
       });
 
     const forumDataWithImages = await Promise.all(
       forumData.map(async (forum) => {
+        // Get forum post image
         const imageUrl = await this.awsS3Service.getImageByFileId(
           forum.imagePath,
         );
+        
+        // Get user profile image if available
+        let userProfileImage = null;
+        const populatedUser = forum.user as any; // Cast to any to access properties
+        
+        if (populatedUser && populatedUser.profileImagePath) {
+          userProfileImage = await this.awsS3Service.getImageByFileId(
+            populatedUser.profileImagePath as string
+          );
+        }
+        
+        // Create a safe user object
+        const userObj = typeof populatedUser === 'string' 
+          ? { _id: populatedUser, name: 'Unknown', role: 'user' } 
+          : (populatedUser && typeof populatedUser.toObject === 'function') 
+            ? populatedUser.toObject() 
+            : populatedUser;
+        
+        // Get comment authors profile images
+        const commentsWithProfileImages = await Promise.all(
+          forum.comments.map(async (comment) => {
+            let commentUserProfileImage = null;
+            const populatedCommentUser = comment.user as any; // Cast to any
+            
+            if (populatedCommentUser && populatedCommentUser.profileImagePath) {
+              commentUserProfileImage = await this.awsS3Service.getImageByFileId(
+                populatedCommentUser.profileImagePath as string
+              );
+            }
+            
+            // Create a safe comment user object
+            const commentUserObj = typeof populatedCommentUser === 'string'
+              ? { _id: populatedCommentUser, name: 'Unknown' }
+              : (populatedCommentUser && typeof populatedCommentUser.toObject === 'function')
+                ? populatedCommentUser.toObject()
+                : populatedCommentUser;
+            
+            return {
+              ...comment.toObject(),
+              user: {
+                ...commentUserObj,
+                profileImage: commentUserProfileImage
+              }
+            };
+          })
+        );
+        
         return {
           ...forum.toObject(),
           image: imageUrl,
+          user: {
+            ...userObj,
+            profileImage: userProfileImage
+          },
+          comments: commentsWithProfileImages
         };
-      }),
+      })
     );
+    
     return forumDataWithImages;
   }
 

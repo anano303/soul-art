@@ -1,4 +1,4 @@
-import { Model, Types } from 'mongoose';
+import { Model, Types, isValidObjectId } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import * as bcrypt from 'bcrypt';
 import {
@@ -16,12 +16,16 @@ import { PaginatedResponse } from '@/types';
 import { Role } from '@/types/role.enum';
 import { SellerRegisterDto } from '../dtos/seller-register.dto';
 import { AdminProfileDto } from '../dtos/admin.profile.dto';
+import { AwsS3Service } from '@/aws-s3/aws-s3.service';
 
 @Injectable()
 export class UsersService {
   private readonly logger = new Logger(UsersService.name);
 
-  constructor(@InjectModel(User.name) private userModel: Model<User>) {}
+  constructor(
+    @InjectModel(User.name) private userModel: Model<User>,
+    private readonly awsS3Service: AwsS3Service,
+  ) {}
 
   async create(user: Partial<User>): Promise<UserDocument> {
     try {
@@ -241,5 +245,84 @@ export class UsersService {
 
       throw error;
     }
+  }
+
+  async updateProfileImage(userId: string, filePath: string, fileBuffer: Buffer) {
+    try {
+      const user = await this.userModel.findById(userId);
+      
+      if (!user) {
+        throw new NotFoundException('User not found');
+      }
+      
+      // Delete old image if it exists
+      if (user.profileImagePath) {
+        try {
+          await this.awsS3Service.deleteImageByFileId(user.profileImagePath as string);
+        } catch (error) {
+          console.error('Failed to delete old profile image', error);
+          // Continue even if deletion fails
+        }
+      }
+      
+      // Upload new image
+      const profileImagePath = await this.awsS3Service.uploadImage(filePath, fileBuffer);
+      
+      // Update user record
+      await this.userModel.findByIdAndUpdate(userId, { profileImagePath });
+      
+      // Get image URL
+      const imageUrl = await this.awsS3Service.getImageByFileId(profileImagePath);
+      
+      return { 
+        message: 'Profile image updated successfully',
+        profileImage: imageUrl
+      };
+    } catch (error) {
+      throw new BadRequestException('Failed to update profile image: ' + error.message);
+    }
+  }
+  
+  async getProfileData(userId: string) {
+    const user = await this.userModel.findById(userId, { password: 0 });
+    
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    
+    // Get profile image URL if it exists
+    let profileImage = null;
+    if (user.profileImagePath) {
+      profileImage = await this.awsS3Service.getImageByFileId(user.profileImagePath as string);
+    }
+    
+    return {
+      ...user.toObject(),
+      profileImage
+    };
+  }
+
+  async remove(id: string) {
+    if (!isValidObjectId(id)) {
+      throw new BadRequestException('Invalid user ID');
+    }
+    
+    const user = await this.userModel.findById(id);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    
+    // Remove user's profile image if exists
+    if (user.profileImagePath) {
+      try {
+        await this.awsS3Service.deleteImageByFileId(user.profileImagePath as string);
+      } catch (error) {
+        console.error('Failed to delete profile image', error);
+        // Continue even if image deletion fails
+      }
+    }
+    
+    await this.userModel.findByIdAndDelete(id);
+    return { message: 'User deleted successfully' };
   }
 }

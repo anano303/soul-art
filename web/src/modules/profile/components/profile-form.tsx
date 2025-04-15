@@ -9,7 +9,8 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiClient } from "@/lib/api-client";
 import { motion } from "framer-motion";
 import "./ProfileForm.css";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
+import Image from "next/image";
 
 const formSchema = z
   .object({
@@ -40,13 +41,21 @@ export function ProfileForm() {
 
   const queryClient = useQueryClient();
   const [shouldFetchUser, setShouldFetchUser] = useState(false);
+  const [profileImage, setProfileImage] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadSuccess, setUploadSuccess] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const { user, isLoading } = useUser();
 
   useEffect(() => {
     setShouldFetchUser(true);
   }, []);
 
-  // ჰუკები ყოველთვის იძახე ერთი და იგივე თანმიმდევრობით
-  const { user, isLoading } = useUser();
+  useEffect(() => {
+    if (user && user.profileImage) {
+      setProfileImage(user.profileImage);
+    }
+  }, [user]);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -102,6 +111,43 @@ export function ProfileForm() {
     },
   });
 
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      setIsUploading(true);
+      setUploadSuccess(false);
+
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const response = await apiClient.post("/users/profile-image", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      setProfileImage(response.data.profileImage);
+      setUploadSuccess(true);
+    } catch (error) {
+      console.error("Error uploading file:", error);
+      toast({
+        title: "Error",
+        description: "Failed to upload profile image. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const triggerFileInput = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+  };
+
   if (!shouldFetchUser || isLoading) {
     return <div className="loading-container">Loading profile...</div>;
   }
@@ -109,6 +155,38 @@ export function ProfileForm() {
   return (
     <div className="card">
       <h2>User Profile</h2>
+      <div className="profile-image-container">
+        <Image
+          src={profileImage || "/avatar.jpg"}
+          alt="Profile"
+          className="profile-image"
+          width={150}
+          height={150}
+          priority
+        />
+        <button
+        
+          type="button"
+          onClick={triggerFileInput}
+          className="upload-button"
+          disabled={isUploading}
+        >
+          {isUploading ? "Uploading..." : "Upload Photo"}
+        </button>
+        <input
+          ref={fileInputRef}
+          type="file"
+          onChange={handleFileChange}
+          accept="image/*"
+          className="file-input"
+        />
+        {uploadSuccess && (
+          <span className="upload-success">
+            Profile image updated successfully!
+          </span>
+        )}
+      </div>
+
       <form
         onSubmit={form.handleSubmit((values) => updateProfile.mutate(values))}
         className="space-y-6"

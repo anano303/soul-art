@@ -15,6 +15,7 @@ const HomePageForum = () => {
       name: string;
       _id: string;
       role: string;
+      profileImage?: string; // Add profileImage property to user
     };
     comments: {
       _id: string;
@@ -22,6 +23,7 @@ const HomePageForum = () => {
       user: {
         name: string;
         _id: string;
+        profileImage?: string; // Add profileImage property to comment user
       };
       parentId?: string;
       replies?: string[];
@@ -61,8 +63,9 @@ const HomePageForum = () => {
           author={{
             name: post.user.name,
             _id: post.user._id,
-            avatar: "/avatar.jpg",
+            avatar: post.user.profileImage || "/avatar.jpg", // Use profile image if available
             role: post.user.role,
+            profileImage: post.user.profileImage, // Pass profile image to ForumPost
           }}
           currentUser={undefined}
           comments={post.comments.map((comment) => ({
@@ -71,7 +74,8 @@ const HomePageForum = () => {
             author: {
               name: comment.user.name,
               _id: comment.user._id,
-              avatar: "/avatar.jpg",
+              avatar: comment.user.profileImage || "/avatar.jpg", // Use profile image for comments too
+              profileImage: comment.user.profileImage,
             },
             parentId: comment.parentId?.toString(),
             replies: comment.replies?.map((r) => r.toString()),

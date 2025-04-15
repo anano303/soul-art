@@ -63,14 +63,11 @@ export class AuthController {
 
     return { tokens, user: userData };
   }
-  //aqamde sworia
 
-  @Serialize(UserDto)
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.Admin, Role.User, Role.Seller)
   @Get('profile')
-  getProfile(@CurrentUser() user: UserDocument) {
-    return user;
+  @UseGuards(JwtAuthGuard)
+  async getProfile(@CurrentUser() user: UserDocument) {
+    return this.usersService.getProfileData(user._id.toString());
   }
 
   @Post('refresh')

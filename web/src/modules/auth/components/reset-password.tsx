@@ -17,7 +17,7 @@ export function ResetPasswordForm() {
   const [error, setError] = useState<string | null>(null);
 
   // Get the token from URL query parameters
-  const token = searchParams.get('token');
+  const token = searchParams?.get('token') || null;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

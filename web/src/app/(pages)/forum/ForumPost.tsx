@@ -16,6 +16,7 @@ interface Comment {
     name: string;
     _id: string;
     avatar: string;
+    profileImage?: string;
   };
   parentId?: string;
   replies?: string[];
@@ -31,11 +32,13 @@ interface PostProps {
     _id: string;
     avatar: string;
     role: string;
+    profileImage?: string;
   };
   currentUser?: {
     _id: string;
     role: string;
     name?: string;
+    profileImage?: string;
   };
   comments: Comment[];
   time: string;
@@ -554,7 +557,7 @@ const ForumPost = ({
       >
         <div className="comment-header">
           <Image
-            src={comment.author.avatar}
+            src={comment.author.profileImage || comment.author.avatar}
             alt={comment.author.name}
             width={25}
             height={25}
@@ -645,7 +648,7 @@ const ForumPost = ({
       <div className="forum-post-content">
         <div className="forum-post-author">
           <Image
-            src={author.avatar}
+            src={author.profileImage || "/avatar.jpg"}
             alt={`${author.name}'s avatar`}
             width={30}
             height={30}

@@ -20,8 +20,8 @@ export class User {
   @Prop({ required: true, unique: true })
   email: string;
 
-  @Prop()
-  password?: string;
+  @Prop({ type: String })
+  password: string;
 
   @Prop({ type: String, enum: Role, default: Role.User })
   role: Role;
@@ -61,6 +61,9 @@ export class User {
 
   @Prop()
   passwordResetExpires?: Date;
+
+  @Prop({ type: String, default: null })
+  profileImagePath: string;
   
 }
 

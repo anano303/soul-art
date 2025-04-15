@@ -2,10 +2,10 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import "./user-menu.css";
 import { Role } from "@/types/role";
 import { useAuth } from "@/hooks/use-auth";
-
 
 export default function UserMenu() {
   const { user, isLoading, logout } = useAuth();
@@ -43,12 +43,22 @@ export default function UserMenu() {
 
   return (
     <div className="dropdown" ref={menuRef}>
-         <button 
+      <button 
         onClick={() => setIsOpen(!isOpen)} 
         className="button"
         aria-label="Toggle user menu"
       >
-        <span className="icon">🧑‍🎨</span> {user.name || 'მომხმარებელი'}
+        <div className="user-avatar">
+          <Image 
+            src={user.profileImage || "/avatar.jpg"} 
+            alt={user.name}
+            width={32} 
+            height={32}
+            className="avatar-image"
+          />
+        </div>
+        <span className="username">{user.name || 'მომხმარებელი'}</span>
+        <span className="icon">▼</span>
       </button>
       {isOpen && (
         <div className="dropdown-menu">
@@ -60,7 +70,6 @@ export default function UserMenu() {
           <Link href="/profile/orders" className="dropdown-item" onClick={() => setIsOpen(false)}>
             შეკვეთები
           </Link>
-
 
           {(user.role === Role.Admin || user.role === Role.Seller) && (
             <>

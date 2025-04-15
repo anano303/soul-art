@@ -17,6 +17,7 @@ interface Forum {
     name: string;
     _id: string;
     role: string;
+    profileImage?: string; // Add profileImage field
   };
   tags: string[];
   comments: Array<{
@@ -139,6 +140,7 @@ const ForumPage = () => {
                     name: forum.user.name,
                     _id: forum.user._id,
                     avatar: "/avatar.jpg",
+                    profileImage: forum.user.profileImage, // Add profile image
                     role: forum.user.role,
                   }}
                   currentUser={
@@ -146,7 +148,8 @@ const ForumPage = () => {
                       ? {
                           _id: user._id,
                           role: user.role,
-                          name: user.name
+                          name: user.name,
+                          profileImage: user.profileImage // Add profile image
                         }
                       : undefined
                   }

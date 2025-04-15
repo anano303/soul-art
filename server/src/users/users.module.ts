@@ -11,6 +11,7 @@ import { JwtStrategy } from 'src/strategies/jwt.strategy';
 import { UsersController } from './controller/users.controller';
 import { GoogleStrategy } from '@/strategies/google.strategy';
 import { EmailService } from '@/email/services/email.services';
+import { AwsS3Module } from '@/aws-s3/aws-s3.module'; // Import the AwsS3Module
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { EmailService } from '@/email/services/email.services';
       secret: process.env.JWT_ACCESS_SECRET,
       signOptions: { expiresIn: '10m' },
     }),
+    AwsS3Module, // Add this line to import AwsS3Module
   ],
   controllers: [AuthController, UsersController],
   providers: [

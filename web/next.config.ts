@@ -16,12 +16,21 @@ const nextConfig: NextConfig = {
         pathname: "**",
       },
     ],
-      unoptimized: process.env.NODE_ENV !== 'production'
+    unoptimized: process.env.NODE_ENV !== 'production'
   },
   reactStrictMode: true,
   poweredByHeader: false,
   output: 'standalone',
   distDir: '.next',
+  webpack: (config, { isServer }) => {
+    if (!isServer) {
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        fs: false,
+      };
+    }
+    return config;
+  },
 };
 
 export default nextConfig;

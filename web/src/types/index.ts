@@ -52,6 +52,7 @@ export interface User {
   _id: string;
   name: string;
   email: string;
+  profileImage?: string;
   phoneNumber: string;
   role: Role;
   seller?: {

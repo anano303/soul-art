@@ -17,7 +17,8 @@ export default function EditUserPage() {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const response = await fetchWithAuth(`/users/${params.id}`);
+        const userId = params?.id ? params.id as string : "";
+        const response = await fetchWithAuth(`/users/${userId}`);
         const data = await response.json();
         setUser(data);
       } catch (error) {
@@ -33,7 +34,7 @@ export default function EditUserPage() {
     };
 
     fetchUser();
-  }, [params.id]);
+  }, [params]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -47,7 +48,8 @@ export default function EditUserPage() {
         role: user.role,
       };
 
-      await fetchWithAuth(`/users/${params.id}`, {
+      const userId = params?.id as string;
+      await fetchWithAuth(`/users/${userId}`, {
         method: "PUT",
         body: JSON.stringify(updateData),
       });
