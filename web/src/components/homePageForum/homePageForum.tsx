@@ -4,6 +4,7 @@ import "./homePageForum.css";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import ForumPost from "@/app/(pages)/forum/ForumPost";
+import Image from "next/image";
 
 const HomePageForum = () => {
   interface Post {
@@ -52,7 +53,17 @@ const HomePageForum = () => {
 
   return (
     <div className="homePageForum">
-      <h1 className="homePageForumH1">ფორუმი </h1>
+       <h1 className="homePageForumH1">
+          <Image 
+            src="/chat-icon.svg" 
+            alt="Forum Icon" 
+            width={28} 
+            height={28}
+            className="forum-icon"
+          />
+           ფორუმი
+        </h1>
+      
       {posts.map((post) => (
         <ForumPost
           key={post._id}

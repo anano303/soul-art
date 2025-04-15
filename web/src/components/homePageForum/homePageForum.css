@@ -1,10 +1,14 @@
 .homePageForum {
   padding: 20px 5%;
- background: radial-gradient(circle at 20% 30%, rgba(255, 0, 0, 0.3), transparent 10%), 
- radial-gradient(circle at 50% 20%, rgba(0, 255, 0, 0.3), transparent 30%), 
- radial-gradient(circle at 80% 50%, rgba(0, 0, 255, 0.3), transparent 20%), 
- radial-gradient(circle at 30% 70%, rgba(255, 255, 0, 0.3), transparent 19%), 
- radial-gradient(circle at 70% 80%, rgba(255, 165, 0, 0.3), transparent 20%);
+  background: radial-gradient(
+      circle at 20% 30%,
+      rgba(255, 0, 0, 0.3),
+      transparent 10%
+    ),
+    radial-gradient(circle at 50% 20%, rgba(0, 255, 0, 0.3), transparent 30%),
+    radial-gradient(circle at 80% 50%, rgba(0, 0, 255, 0.3), transparent 20%),
+    radial-gradient(circle at 30% 70%, rgba(255, 255, 0, 0.3), transparent 19%),
+    radial-gradient(circle at 70% 80%, rgba(255, 165, 0, 0.3), transparent 20%);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -17,26 +21,28 @@
   width: 100%;
   text-align: center;
   color: #2c3e50;
-
+  display: flex;
+  align-items: center;
+  gap: 2%;
+  justify-content: center;
   margin-bottom: 20px;
 }
 
 .forumPageLink {
   display: inline-block;
   text-decoration: none;
-  color: #012645;;
-  background-color: #FAF3CB;
+  color: #012645;
+  background-color: #faf3cb;
   padding: 10px 20px;
   border-radius: 25px;
   font-weight: bold;
   font-size: 18px;
   transition: background-color 0.3s ease;
-
 }
 
 .forumPageLink:hover {
   background-color: #f1954a;
-  color: #FAF3CB;
+  color: #faf3cb;
 }
 
 /* 768px-მდე ეკრანებისთვის */
@@ -44,6 +50,9 @@
   .homePageForum {
     padding: 15px 3%;
     gap: 15px;
+    width: 100%;
+    box-sizing: border-box;
+    border-radius: 10px;
   }
 
   .homePageForumH1 {
@@ -61,6 +70,18 @@
   .homePageForum {
     padding: 10px 2%;
     gap: 10px;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    margin: 0;
+    overflow: hidden;
+  }
+
+  /* Fix potential child overflow */
+  .homePageForum > * {
+    max-width: 100%;
+    width: 100%;
+    box-sizing: border-box;
   }
 
   .homePageForumH1 {

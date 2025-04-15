@@ -469,7 +469,9 @@ const ForumPost = ({
     setEditedPostTags(editedPostTags.filter((tag) => tag !== tagToRemove));
   };
 
-  const handleEditedFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleEditedFileChange = async (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
     const file = e.target.files?.[0] || null;
     if (!file) {
       setEditedPostImage(null);
@@ -600,14 +602,16 @@ const ForumPost = ({
                       setEditingComment(comment.id);
                       setEditText(comment.text);
                     }}
+                    aria-label="რედაქტირება"
                   >
-                    რედაქტირება
+                    <span className="button-text">რედაქტირება</span>
                   </button>
                   <button
                     className="delete-button"
                     onClick={() => deleteCommentMutation.mutate(comment.id)}
+                    aria-label="წაშლა"
                   >
-                    წაშლა
+                    <span className="button-text">წაშლა</span>
                   </button>
                 </>
               )}
@@ -660,20 +664,28 @@ const ForumPost = ({
               <button
                 className="edit-button"
                 onClick={() => {
-                  console.log("Edit button clicked, canModifyPost:", canModifyPost);
+                  console.log(
+                    "Edit button clicked, canModifyPost:",
+                    canModifyPost
+                  );
                   setIsEditingPost(true);
                 }}
+                aria-label="რედაქტირება"
               >
-                ✏️ რედაქტირება
+                <span className="button-text">რედაქტირება</span>
               </button>
               <button
                 className="delete-button"
                 onClick={() => {
-                  console.log("Delete button clicked, canModifyPost:", canModifyPost);
+                  console.log(
+                    "Delete button clicked, canModifyPost:",
+                    canModifyPost
+                  );
                   deletePostMutation.mutate();
                 }}
+                aria-label="წაშლა"
               >
-                🗑️ წაშლა
+                <span className="button-text">წაშლა</span>
               </button>
             </div>
           )}
