@@ -97,13 +97,13 @@ export function OrderReview() {
                 </div>
                 <div className="order-item-details flex-1">
                   <Link
-                    href={`/products/${item.productId}`}
+                    href={`/products/{item.productId}`}
                     className="item-name font-medium hover:underline"
                   >
                     {item.name}
                   </Link>
                   <p className="item-price text-sm text-muted-foreground">
-                    {item.qty} x ${item.price} = ${item.qty * item.price}
+                    {item.qty} x  {item.price} ₾ = {item.qty * item.price} ₾
                   </p>
                 </div>
               </div>
@@ -119,24 +119,24 @@ export function OrderReview() {
           <div className="summary-details space-y-4">
             <div className="summary-row flex justify-between">
               <span className="summary-label text-muted-foreground">Items</span>
-              <span>${itemsPrice.toFixed(2)}</span>
+              <span>{itemsPrice.toFixed(2)} ₾</span>
             </div>
             <div className="summary-row flex justify-between">
               <span className="summary-label text-muted-foreground">
                 Shipping
               </span>
               <span>
-                {shippingPrice === 0 ? "Free" : `$${shippingPrice.toFixed(2)}`}
+                {shippingPrice === 0 ? "Free" : `${shippingPrice.toFixed(2)}₾`}
               </span>
             </div>
             <div className="summary-row flex justify-between">
               <span className="summary-label text-muted-foreground">Tax</span>
-              <span>${taxPrice.toFixed(2)}</span>
+              <span>{taxPrice.toFixed(2)} ₾</span>
             </div>
             <div className="separator" />
             <div className="summary-row flex justify-between font-medium">
               <span>Total</span>
-              <span>${totalPrice.toFixed(2)}</span>
+              <span>{totalPrice.toFixed(2)} ₾</span>
             </div>
             <button
               className="place-order-button w-full"

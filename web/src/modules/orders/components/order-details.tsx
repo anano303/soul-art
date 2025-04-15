@@ -110,8 +110,8 @@ export function OrderDetails({ order }: OrderDetailsProps) {
                         {item.name}
                       </Link>
                       <p>
-                        {item.qty} x ₾{item.price.toFixed(2)} = $
-                        {(item.qty * item.price).toFixed(2)}
+                        {item.qty} x {item.price.toFixed(2)} ₾ = 
+                        {(item.qty * item.price).toFixed(2)} ₾
                       </p>
                       {item.product?.minDeliveryDays && item.product?.maxDeliveryDays && (
                         <p className="delivery-time">
@@ -148,8 +148,8 @@ export function OrderDetails({ order }: OrderDetailsProps) {
                         {item.name}
                       </Link>
                       <p>
-                        {item.qty} x ₾{item.price.toFixed(2)} = $
-                        {(item.qty * item.price).toFixed(2)}
+                        {item.qty} x {item.price.toFixed(2)} ₾= 
+                        {(item.qty * item.price).toFixed(2)} ₾
                       </p>
                     </div>
                   </div>
@@ -166,24 +166,24 @@ export function OrderDetails({ order }: OrderDetailsProps) {
             <div className="order-summary">
               <div className="summary-item">
                 <span>Items</span>
-                <span>${order.itemsPrice.toFixed(2)}</span>
+                <span>{order.itemsPrice.toFixed(2)} ₾</span>
               </div>
               <div className="summary-item">
                 <span>Shipping</span>
                 <span>
                   {order.shippingPrice === 0
                     ? "Free"
-                    : `₾${order.shippingPrice.toFixed(2)}`}
+                    : `${order.shippingPrice.toFixed(2)} ₾`}
                 </span>
               </div>
               <div className="summary-item">
                 <span>Tax</span>
-                <span>₾{order.taxPrice.toFixed(2)}</span>
+                <span>{order.taxPrice.toFixed(2)} ₾</span>
               </div>
               <hr />
               <div className="summary-total">
                 <span>Total</span>
-                <span>₾{order.totalPrice.toFixed(2)}</span>
+                <span>{order.totalPrice.toFixed(2)} ₾</span>
               </div>
 
               {!order.isPaid &&
