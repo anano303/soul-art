@@ -14,11 +14,11 @@ import Image from "next/image";
 
 const formSchema = z
   .object({
-    name: z.string().min(1, "Name is required"),
-    email: z.string().email("Invalid email address"),
+    name: z.string().min(1, "სახელის შეყვანა აუცილებელია"),
+    email: z.string().email("არასწორი ელ-ფოსტის ფორმატი"),
     password: z
       .string()
-      .min(6, "Password must be at least 6 characters")
+      .min(6, "პაროლი უნდა შეიცავდეს მინიმუმ 6 სიმბოლოს")
       .optional()
       .or(z.literal("")),
     confirmPassword: z.string().optional().or(z.literal("")),
@@ -31,7 +31,7 @@ const formSchema = z
       return true;
     },
     {
-      message: "Passwords don't match",
+      message: "პაროლები არ ემთხვევა",
       path: ["confirmPassword"],
     }
   );
@@ -88,23 +88,23 @@ export function ProfileForm() {
       form.reset({ password: "", confirmPassword: "" });
 
       toast({
-        title: "Profile Updated",
-        description: "Your profile has been successfully updated.",
+        title: "პროფილი განახლდა",
+        description: "თქვენი პროფილი წარმატებით განახლდა.",
       });
 
       if (data.passwordChanged) {
         toast({
-          title: "Password Updated",
-          description: "Your password has been successfully changed.",
+          title: "პაროლი განახლდა",
+          description: "თქვენი პაროლი წარმატებით შეიცვალა.",
         });
       }
     },
     onError: (error) => {
       const errorMessage =
         (error as { message?: string }).message ||
-        "Failed to update profile. Please try again.";
+        "პროფილის განახლება ვერ მოხერხდა. გთხოვთ, სცადოთ თავიდან.";
       toast({
-        title: "Error",
+        title: "შეცდომა",
         description: errorMessage,
         variant: "destructive",
       });
@@ -149,29 +149,28 @@ export function ProfileForm() {
   };
 
   if (!shouldFetchUser || isLoading) {
-    return <div className="loading-container">Loading profile...</div>;
+    return <div className="loading-container">პროფილი იტვირთება...</div>;
   }
 
   return (
     <div className="card">
-      <h2>User Profile</h2>
+      <h2>მომხმარებლის პროფილი</h2>
       <div className="profile-image-container">
         <Image
           src={profileImage || "/avatar.jpg"}
-          alt="Profile"
+          alt="პროფილი"
           className="profile-image"
           width={150}
           height={150}
           priority
         />
         <button
-        
           type="button"
           onClick={triggerFileInput}
           className="upload-button"
           disabled={isUploading}
         >
-          {isUploading ? "Uploading..." : "Upload Photo"}
+          {isUploading ? "იტვირთება..." : "ფოტოს ატვირთვა"}
         </button>
         <input
           ref={fileInputRef}
@@ -182,7 +181,7 @@ export function ProfileForm() {
         />
         {uploadSuccess && (
           <span className="upload-success">
-            Profile image updated successfully!
+            პროფილის სურათი წარმატებით განახლდა!
           </span>
         )}
       </div>
@@ -193,7 +192,7 @@ export function ProfileForm() {
       >
         <div className="form-field">
           <label htmlFor="name" className="label">
-            Name
+            სახელი
           </label>
           <input id="name" {...form.register("name")} className="input" />
           {form.formState.errors.name && (
@@ -205,7 +204,7 @@ export function ProfileForm() {
 
         <div className="form-field">
           <label htmlFor="email" className="label">
-            Email
+            ელ-ფოსტა
           </label>
           <input
             id="email"
@@ -222,15 +221,14 @@ export function ProfileForm() {
 
         <div className="form-field">
           <label htmlFor="password" className="label">
-            New Password
+            ახალი პაროლი
           </label>
           <input
             id="password"
             type="password"
             {...form.register("password")}
-            placeholder="Leave blank to keep current"
+            placeholder="დატოვეთ ცარიელი არსებული პაროლის შესანარჩუნებლად"
             className="input"
-            required
           />
           {form.formState.errors.password && (
             <span className="error-message">
@@ -241,15 +239,14 @@ export function ProfileForm() {
 
         <div className="form-field">
           <label htmlFor="confirmPassword" className="label">
-            Confirm New Password
+            გაიმეორეთ ახალი პაროლი
           </label>
           <input
             id="confirmPassword"
             type="password"
             {...form.register("confirmPassword")}
-            placeholder="Leave blank to keep current"
+            placeholder="დატოვეთ ცარიელი არსებული პაროლის შესანარჩუნებლად"
             className="input"
-            required
           />
           {form.formState.errors.confirmPassword && (
             <span className="error-message">
@@ -263,7 +260,7 @@ export function ProfileForm() {
           className="ProfileButton"
           disabled={updateProfile.isPending}
         >
-          {updateProfile.isPending ? "Updating..." : "Update Profile"}
+          {updateProfile.isPending ? "მიმდინარეობს განახლება..." : "პროფილის განახლება"}
         </button>
       </form>
       {updateProfile.isSuccess && (
@@ -273,7 +270,7 @@ export function ProfileForm() {
           exit={{ opacity: 0, y: -10 }}
           className="success-message"
         >
-          🎉 Profile successfully updated!
+          🎉 პროფილი წარმატებით განახლდა!
         </motion.div>
       )}
     </div>
