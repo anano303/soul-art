@@ -7,20 +7,19 @@ body {
   color: #333; */
   font-family: "firaGo", sans-serif;
   font-style: normal;
-  cursor: url('/brush.png'), auto; 
+  cursor: url("/brush.png"), auto;
   overflow-x: hidden;
   display: flex;
   flex-direction: column;
- 
 }
-main{
+main {
   min-height: 100vh;
   max-width: 100%;
 }
 .container {
- width: 100%;
+  width: 100%;
 }
-.flex-col{
+.flex-col {
   display: flex;
   flex-direction: column;
 }
@@ -32,7 +31,7 @@ main{
 }
 
 .title {
- color: #012645; 
+  color: #012645;
   font-size: 24px;
   font-weight: bold;
   text-align: center;
@@ -80,7 +79,11 @@ main{
   position: absolute;
   width: 10px;
   height: 10px;
-  background: radial-gradient(circle, rgba(255, 0, 0, 1), rgba(255, 255, 0, 0.5));
+  background: radial-gradient(
+    circle,
+    rgba(255, 0, 0, 1),
+    rgba(255, 255, 0, 0.5)
+  );
   border-radius: 50%;
   pointer-events: none;
   animation: fadeOut 1s forwards;

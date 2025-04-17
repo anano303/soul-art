@@ -10,17 +10,17 @@
 
 .fisher {
   height: 90%;
-    width: 120px;
-    align-self: flex-end;
-    position: absolute;
-    z-index: 999;
-    bottom:5px;
-    background: transparent;
+  width: 120px;
+  align-self: flex-end;
+  position: absolute;
+  z-index: 999;
+  bottom: 5px;
+  background: transparent;
 }
 
 .scroller {
   /* border-top: 3px solid #080866; */
-  padding-top: 8px;
+  padding-top: 20px;
   display: flex;
   overflow: hidden;
   width: 100%;
@@ -105,7 +105,7 @@
 .itemLink {
   text-decoration: none;
   color: inherit;
-  cursor: url('/brush.png'), pointer; 
+  cursor: url("/brush.png"), pointer;
 }
 
 .itemLink:hover .easel {
