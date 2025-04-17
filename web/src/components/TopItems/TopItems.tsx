@@ -9,6 +9,7 @@ import { useQuery } from "@tanstack/react-query";
 import { fetchWithAuth } from "@/lib/fetch-with-auth";
 import { Product } from "@/types";
 import LoadingAnim from "../loadingAnim/loadingAnim";
+import BrushTrail from "../BrushTrail/BrushTrail";
 
 const TopItems: React.FC = () => {
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -53,6 +54,7 @@ const TopItems: React.FC = () => {
 
   return (
     <div className={styles.container}>
+      <BrushTrail />
       <div className={styles.scroller} ref={scrollRef}>
         <div className={styles.inner}>
           {topProducts?.map((product: Product) => (
