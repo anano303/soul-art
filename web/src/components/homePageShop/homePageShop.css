@@ -16,15 +16,25 @@
   gap: 24px;
   padding-bottom: 50px;
 }
-.see-more{
+.see-more {
   margin-right: 4%;
+  margin-bottom: 5%;
+  cursor: pointer;
 }
-.see-more-btn{
+
+.see-more-btn {
   border: none;
-    background: transparent;
-    color: #012645;
-    font-weight: bold;
-    float: right;
+  background: transparent;
+  color: #012645;
+  font-weight: bold;
+  float: right;
+  transition: all 0.3s ease-in-out;
+  cursor: pointer;
+}
+.see-more-btn:hover {
+  color: #2a5530;
+  transition: all 0.3s ease-in-out;
+  cursor: pointer;
 }
 
 @media screen and (max-width: 1200px) {
