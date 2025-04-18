@@ -51,7 +51,7 @@ export function CartPage() {
                 <span>{shipping === 0 ? "უფასო" : formatPrice(shipping)}</span>
               </div>
               <div className="summary-row">
-                <span className="summary-label">გადასახადი</span>
+                <span className="summary-label">საკომისიო</span>
                 <span>{formatPrice(tax)}</span>
               </div>
               <hr className="separator" />
