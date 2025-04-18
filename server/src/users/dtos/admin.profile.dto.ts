@@ -18,6 +18,7 @@ export class AdminProfileDto {
   @IsEmail({}, { message: 'Email address is not valid.' })
   email: string;
 
+  @IsOptional()
   @IsString()
   @MinLength(6, { message: 'Password is too short.' })
   @MaxLength(20, { message: 'Password is too long.' })
