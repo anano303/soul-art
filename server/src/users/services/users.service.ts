@@ -226,7 +226,7 @@ export class UsersService {
       if (updateDto.email) user.email = updateDto.email;
       if (updateDto.role) user.role = updateDto.role;
 
-      // Only hash and update password if it's provided
+      // Only hash and update password if it's provided and not empty
       if (updateDto.password && updateDto.password.trim() !== '') {
         this.logger.log('Updating password for user', id);
         user.password = await hashPassword(updateDto.password);
