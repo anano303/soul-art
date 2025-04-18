@@ -64,8 +64,14 @@ export class User {
 
   @Prop({ type: String, default: null })
   profileImagePath: string;
-  
 }
 
 export type UserDocument = User & Document;
 export const UserSchema = SchemaFactory.createForClass(User);
+
+UserSchema.pre('save', function (next) {
+  if (this.email) {
+    this.email = this.email.toLowerCase();
+  }
+  next();
+});

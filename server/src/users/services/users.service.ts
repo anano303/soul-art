@@ -27,11 +27,28 @@ export class UsersService {
     private readonly awsS3Service: AwsS3Service,
   ) {}
 
+  async findByEmail(email: string) {
+    // Convert to lowercase to ensure case-insensitive matching
+    const lowercaseEmail = email.toLowerCase();
+    return this.userModel.findOne({ email: lowercaseEmail }).exec();
+  }
+
   async create(user: Partial<User>): Promise<UserDocument> {
     try {
+      const existingUser = await this.findByEmail(
+        user.email?.toLowerCase() ?? '',
+      );
+
+      if (existingUser) {
+        throw new ConflictException('Email already exists');
+      }
+
       const hashedPassword = await hashPassword(user.password ?? '');
+
+      // Store email in lowercase
       return await this.userModel.create({
         ...user,
+        email: user.email?.toLowerCase(),
         password: hashedPassword,
         role: user.role ?? Role.User,
       });
@@ -52,8 +69,12 @@ export class UsersService {
 
   async createMany(users: Partial<User>[]): Promise<UserDocument[]> {
     try {
+      const usersWithLowercaseEmails = users.map((user) => ({
+        ...user,
+        email: user.email?.toLowerCase(),
+      }));
       return (await this.userModel.insertMany(
-        users,
+        usersWithLowercaseEmails,
       )) as unknown as UserDocument[];
     } catch (error: any) {
       this.logger.error(`Failed to create users: ${error.message}`);
@@ -62,7 +83,7 @@ export class UsersService {
   }
 
   async findOne(email: string): Promise<UserDocument | null> {
-    return this.userModel.findOne({ email });
+    return this.findByEmail(email);
   }
 
   async findById(id: string): Promise<UserDocument> {
@@ -112,6 +133,7 @@ export class UsersService {
       throw new NotFoundException(`User with ID ${id} not found`);
     }
   }
+
   async update(
     id: string,
     attrs: Partial<User>,
@@ -120,12 +142,22 @@ export class UsersService {
     if (!Types.ObjectId.isValid(id)) {
       throw new BadRequestException('Invalid user ID');
     }
-  
+
     const user = await this.findById(id);
     if (!user) {
       throw new NotFoundException(`User with ID ${id} not found`);
     }
-  
+
+    // Convert email to lowercase if provided
+    if (attrs.email) {
+      attrs.email = attrs.email.toLowerCase();
+
+      const existingUser = await this.findByEmail(attrs.email);
+      if (existingUser && existingUser._id.toString() !== id) {
+        throw new BadRequestException('Email is already in use');
+      }
+    }
+
     // მხოლოდ მომხმარებლისთვის პაროლის მოთხოვნა
     if (attrs.password && !adminRole) {
       const passwordMatch = await bcrypt.compare(attrs.password, user.password);
@@ -136,21 +168,14 @@ export class UsersService {
       }
       attrs.password = await hashPassword(attrs.password);
     }
-  
-    if (attrs.email) {
-      const existingUser = await this.findOne(attrs.email);
-      if (existingUser && existingUser._id.toString() !== id) {
-        throw new BadRequestException('Email is already in use');
-      }
-    }
-  
+
     const updateData: Partial<User> = {
       ...attrs,
       role: adminRole ? attrs.role : undefined, // Admins can update the role
       // პაროლი მხოლოდ მაშინ განახლდება, როცა არ არის ადმინისტრატორი და პაროლი მოცემულია
       password: attrs.password || undefined,
     };
-  
+
     // Remove undefined values
     type UpdateKeys = keyof Partial<User>;
     Object.keys(updateData as Record<UpdateKeys, unknown>).forEach(
@@ -158,18 +183,18 @@ export class UsersService {
         updateData[key as UpdateKeys] === undefined &&
         delete updateData[key as UpdateKeys],
     );
-  
+
     try {
       const updatedUser = await this.userModel.findByIdAndUpdate(
         id,
         updateData,
         { new: true, runValidators: true },
       );
-  
+
       if (!updatedUser) {
         throw new NotFoundException(`User with ID ${id} not found`);
       }
-  
+
       this.logger.log(`User ${id} updated successfully`);
       return updatedUser;
     } catch (error: any) {
@@ -177,7 +202,6 @@ export class UsersService {
       throw new BadRequestException('Failed to update user');
     }
   }
-  
 
   async adminUpdate(id: string, updateDto: AdminProfileDto) {
     try {
@@ -185,18 +209,23 @@ export class UsersService {
       if (!user) {
         throw new NotFoundException('User not found');
       }
-  
+
+      // Convert email to lowercase if provided
+      if (updateDto.email) {
+        updateDto.email = updateDto.email.toLowerCase();
+      }
+
       // მხოლოდ განახლება იმ ველების, რომლებიც მოვიდა
       if (updateDto.name) user.name = updateDto.name;
       if (updateDto.email) user.email = updateDto.email;
       if (updateDto.role) user.role = updateDto.role;
-  
+
       // თუ პაროლი არ არის გაცემული, არ უნდა შეიცვალოს
       if (updateDto.password) {
         const hashedPassword = await hashPassword(updateDto.password);
         user.password = hashedPassword;
       }
-  
+
       await user.save();
       return user;
     } catch (error) {
@@ -204,7 +233,6 @@ export class UsersService {
       throw error;
     }
   }
-  
 
   async deleteMany(): Promise<void> {
     try {
@@ -223,7 +251,7 @@ export class UsersService {
 
   async createSeller(dto: SellerRegisterDto): Promise<UserDocument> {
     try {
-      const existingUser = await this.userModel.findOne({ email: dto.email });
+      const existingUser = await this.findByEmail(dto.email.toLowerCase());
       if (existingUser) {
         throw new ConflictException('User with this email already exists');
       }
@@ -231,6 +259,7 @@ export class UsersService {
       const sellerData = {
         ...dto,
         name: dto.storeName,
+        email: dto.email.toLowerCase(),
         role: Role.Seller,
         password: dto.password,
       };
@@ -247,58 +276,72 @@ export class UsersService {
     }
   }
 
-  async updateProfileImage(userId: string, filePath: string, fileBuffer: Buffer) {
+  async updateProfileImage(
+    userId: string,
+    filePath: string,
+    fileBuffer: Buffer,
+  ) {
     try {
       const user = await this.userModel.findById(userId);
-      
+
       if (!user) {
         throw new NotFoundException('User not found');
       }
-      
+
       // Delete old image if it exists
       if (user.profileImagePath) {
         try {
-          await this.awsS3Service.deleteImageByFileId(user.profileImagePath as string);
+          await this.awsS3Service.deleteImageByFileId(
+            user.profileImagePath as string,
+          );
         } catch (error) {
           console.error('Failed to delete old profile image', error);
           // Continue even if deletion fails
         }
       }
-      
+
       // Upload new image
-      const profileImagePath = await this.awsS3Service.uploadImage(filePath, fileBuffer);
-      
+      const profileImagePath = await this.awsS3Service.uploadImage(
+        filePath,
+        fileBuffer,
+      );
+
       // Update user record
       await this.userModel.findByIdAndUpdate(userId, { profileImagePath });
-      
+
       // Get image URL
-      const imageUrl = await this.awsS3Service.getImageByFileId(profileImagePath);
-      
-      return { 
+      const imageUrl =
+        await this.awsS3Service.getImageByFileId(profileImagePath);
+
+      return {
         message: 'Profile image updated successfully',
-        profileImage: imageUrl
+        profileImage: imageUrl,
       };
     } catch (error) {
-      throw new BadRequestException('Failed to update profile image: ' + error.message);
+      throw new BadRequestException(
+        'Failed to update profile image: ' + error.message,
+      );
     }
   }
-  
+
   async getProfileData(userId: string) {
     const user = await this.userModel.findById(userId, { password: 0 });
-    
+
     if (!user) {
       throw new NotFoundException('User not found');
     }
-    
+
     // Get profile image URL if it exists
     let profileImage = null;
     if (user.profileImagePath) {
-      profileImage = await this.awsS3Service.getImageByFileId(user.profileImagePath as string);
+      profileImage = await this.awsS3Service.getImageByFileId(
+        user.profileImagePath as string,
+      );
     }
-    
+
     return {
       ...user.toObject(),
-      profileImage
+      profileImage,
     };
   }
 
@@ -316,22 +359,24 @@ export class UsersService {
     if (!isValidObjectId(id)) {
       throw new BadRequestException('Invalid user ID');
     }
-    
+
     const user = await this.userModel.findById(id);
     if (!user) {
       throw new NotFoundException('User not found');
     }
-    
+
     // Remove user's profile image if exists
     if (user.profileImagePath) {
       try {
-        await this.awsS3Service.deleteImageByFileId(user.profileImagePath as string);
+        await this.awsS3Service.deleteImageByFileId(
+          user.profileImagePath as string,
+        );
       } catch (error) {
         console.error('Failed to delete profile image', error);
         // Continue even if image deletion fails
       }
     }
-    
+
     await this.userModel.findByIdAndDelete(id);
     return { message: 'User deleted successfully' };
   }

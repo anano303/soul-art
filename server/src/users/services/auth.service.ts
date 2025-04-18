@@ -27,7 +27,11 @@ export class AuthService {
   ) {}
 
   async requestPasswordReset(email: string): Promise<void> {
-    const user = await this.usersService.findOne(email);
+    // Convert email to lowercase
+    const lowercaseEmail = email.toLowerCase();
+
+    // Find user with lowercase email
+    const user = await this.usersService.findByEmail(lowercaseEmail);
     if (!user) {
       throw new BadRequestException('მომხმარებელი ვერ მოიძებნა');
     }
@@ -39,6 +43,7 @@ export class AuthService {
     await user.save();
     await this.emailService.sendPasswordResetEmail(email, resetToken);
   }
+
   async resetPassword(token: string, newPassword: string): Promise<void> {
     const user = await this.userModel.findOne({
       passwordResetToken: token,
@@ -55,16 +60,24 @@ export class AuthService {
     await user.save();
   }
 
-  async singInWithGoogle(googleUser) {
-    let existUser = await this.userModel.findOne({ email: googleUser.email });
+  async singInWithGoogle(googleData: {
+    email: string;
+    name: string;
+    id: string;
+    sub?: string;
+  }) {
+    // Convert email to lowercase
+    const email = googleData.email.toLowerCase();
 
-    console.log('🆕 ახალი მომხმარებლის რეგისტრაცია Google-ით:', googleUser);
+    let existUser = await this.userModel.findOne({ email });
+
+    console.log('🆕 ახალი მომხმარებლის რეგისტრაცია Google-ით:', googleData);
 
     if (!existUser) {
       const newUser = new this.userModel({
-        email: googleUser.email,
-        name: googleUser.name || 'Google User',
-        googleId: googleUser.id || googleUser.sub, // Google ID უნდა შევინახოთ
+        email,
+        name: googleData.name || 'Google User',
+        googleId: googleData.id || googleData.sub, // Google ID უნდა შევინახოთ
         role: Role.User,
       });
 
@@ -81,14 +94,17 @@ export class AuthService {
   }
 
   async validateUser(email: string, password: string): Promise<UserDocument> {
-    const user = await this.usersService.findOne(email);
+    // Convert email to lowercase for case-insensitive comparison
+    const lowercaseEmail = email.toLowerCase();
+    const user = await this.usersService.findByEmail(lowercaseEmail);
+
     if (!user) {
-      throw new UnauthorizedException('Invalid credentials');
+      throw new UnauthorizedException('არასწორი მეილი ან პაროლი.');
     }
 
     const isPasswordValid = await verifyPassword(user.password, password);
     if (!isPasswordValid) {
-      throw new UnauthorizedException('Invalid credentials');
+      throw new UnauthorizedException('არასწორი მეილი ან პაროლი.');
     }
 
     return user;
