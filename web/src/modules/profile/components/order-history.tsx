@@ -16,10 +16,10 @@ interface OrderType {
   orderItems: Array<{
     _id: string;
     product?: {
-      deliveryType?: 'SELLER' | 'SoulArt';
+      deliveryType?: "SELLER" | "SoulArt";
       minDeliveryDays?: number;
       maxDeliveryDays?: number;
-    }
+    };
   }>;
 }
 
@@ -61,14 +61,16 @@ export function OrderHistory({ orders }: OrderHistoryProps) {
             <tr key={order._id}>
               <td className="order-id">#{order._id.substring(0, 8)}</td>
               <td>{new Date(order.createdAt).toLocaleDateString()}</td>
-              <td>${order.totalPrice.toFixed(2)}</td>
+              <td>{order.totalPrice.toFixed(2)} ₾ </td>
               <td>
-                {order.orderItems.some(item => 
-                  item.product && String(item.product.deliveryType) === "SELLER"
+                {order.orderItems.some(
+                  (item) =>
+                    item.product &&
+                    String(item.product.deliveryType) === "SELLER"
                 ) ? (
                   <span className="badge delivery-badge seller">
                     <Store size={14} />
-                   მიწოდება ავტორისგან
+                    მიწოდება ავტორისგან
                   </span>
                 ) : (
                   <span className="badge delivery-badge soulart">
@@ -81,7 +83,8 @@ export function OrderHistory({ orders }: OrderHistoryProps) {
                 {order.isPaid ? (
                   <span className="badge badge-green">
                     <CheckCircle2 className="icon" />
-                    {order.paidAt && new Date(order.paidAt).toLocaleDateString()}
+                    {order.paidAt &&
+                      new Date(order.paidAt).toLocaleDateString()}
                   </span>
                 ) : (
                   <span className="badge badge-red">
@@ -94,7 +97,8 @@ export function OrderHistory({ orders }: OrderHistoryProps) {
                 {order.isDelivered ? (
                   <span className="badge badge-default">
                     <CheckCircle2 className="icon" />
-                    {order.deliveredAt && new Date(order.deliveredAt).toLocaleDateString()}
+                    {order.deliveredAt &&
+                      new Date(order.deliveredAt).toLocaleDateString()}
                   </span>
                 ) : (
                   <span className="badge badge-gray">
