@@ -1,5 +1,5 @@
-import { ShippingDetails, PaymentResult } from './shipping';
-import { Product, User } from '.';
+import { ShippingDetails, PaymentResult } from "./shipping";
+import { Product, User } from ".";
 
 export interface OrderItem {
   _id: string;
@@ -10,8 +10,6 @@ export interface OrderItem {
   productId: string;
   product?: Product;
 }
-
-
 
 export interface Order {
   _id: string;
