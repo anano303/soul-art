@@ -43,15 +43,30 @@ export default function Header() {
       <nav className="main-nav">
         <ul>
           <li>
-            <Link href={user?.role === "seller" ? "/admin/products" : "/sellers-register"}>
+            <Link
+              href={
+                user?.role === "seller"
+                  ? "/admin/products"
+                  : "/sellers-register"
+              }
+            >
               {user?.role === "seller" ? "ჩემი ნახატები" : "გაყიდე ნახატები"}
             </Link>
           </li>
-          <li>
+          <li className="shop-dropdown">
             <Link href="/shop">შეიძინე ნახატები</Link>
+            <div className="dropdown-menu">
+              <Link href="/auction">აუქციონი</Link>
+            </div>
+          </li>
+          {/* Mobile-only auction link */}
+          <li className="mobile-only-nav">
+            <Link href="/auction">აუქციონი</Link>
           </li>
           <li>
-            <a href="#" onClick={handleOrdersClick}>ჩემი შეკვეთები</a>
+            <a href="#" onClick={handleOrdersClick}>
+              ჩემი შეკვეთები
+            </a>
           </li>
           <li className="mobileAuth">
             <UserMenu />

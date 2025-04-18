@@ -1,7 +1,7 @@
 .UlCont {
   display: flex;
   flex-direction: column;
-  gap: 30px; 
+  gap: 30px;
   list-style: none;
   z-index: 2;
 }
@@ -15,9 +15,9 @@
   display: flex;
   align-items: center;
   text-decoration: none;
-  color: #37241E;
+  color: #37241e;
   padding-bottom: 5px;
-  border-bottom: 3px solid #EAEEEA;
+  border-bottom: 3px solid #eaeeea;
   gap: 10px;
   position: relative;
   overflow: hidden;
@@ -40,9 +40,9 @@
     background: white;
     padding: 5px 10px;
     border-radius: 4px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
   }
-  
+
   .UlCont li a {
     width: 28px;
     transition: all 0.3s ease;
@@ -75,5 +75,10 @@
   .UlCont li a.active,
   .UlCont li a:hover {
     width: 130px;
+  }
+
+  /* Adjust font sizes for better mobile experience */
+  .UlCont li a span {
+    font-size: 14px;
   }
 }

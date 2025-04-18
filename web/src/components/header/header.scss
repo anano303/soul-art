@@ -54,6 +54,52 @@ header {
     display: none;
   }
 
+  .shop-dropdown {
+    position: relative;
+
+    .dropdown-menu {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      background: #012645;
+      min-width: 180px;
+      border-radius: 0 0 8px 8px;
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(-10px);
+      transition: all 0.3s ease;
+      z-index: 100;
+      overflow: hidden;
+
+      a {
+        display: block;
+        padding: 12px 20px;
+        color: #ffffff; /* Match the same color as other header links */
+        border-bottom: none;
+        width: 100%;
+        text-align: left;
+        font-family: "firaGo", sans-serif; /* Use firaGo font */
+        font-size: inherit; /* Inherit font size from parent */
+
+        &:hover {
+          background: rgba(255, 255, 255, 0.1); /* Subtle hover background */
+          color: #e0d849; /* Change text color on hover to match other links */
+        }
+      }
+    }
+
+    &:hover .dropdown-menu {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+  }
+
+  .mobile-only-nav {
+    display: none;
+  }
+
   /* Mobile responsiveness */
   @media (max-width: 811px) {
     .main-nav ul {
@@ -116,14 +162,21 @@ header {
         font-size: 1.875rem;
       }
     }
+
+    .shop-dropdown .dropdown-menu {
+      display: none;
+    }
+
+    .mobile-only-nav {
+      display: block;
+    }
   }
 }
 
 @media screen and (max-width: 480px) {
- .logo{
-  img{
-    width: 160px;
+  .logo {
+    img {
+      width: 160px;
+    }
   }
- }
-  }
-  
+}
