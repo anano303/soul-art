@@ -1,65 +1,67 @@
-import { 
-  IsEmail, 
-  IsNotEmpty, 
-  IsString, 
-  IsPhoneNumber, 
-  MinLength, 
-  MaxLength, 
-  IsOptional 
+import {
+  IsEmail,
+  IsNotEmpty,
+  IsString,
+  IsPhoneNumber,
+  MinLength,
+  MaxLength,
+  IsOptional,
 } from 'class-validator';
+import { Transform } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class SellerRegisterDto {
-  @ApiProperty({ 
+  @ApiProperty({
     example: 'ციფრული სამყარო',
-    description: 'მაღაზიის სახელი'
+    description: 'მაღაზიის სახელი',
   })
   @IsNotEmpty()
   @IsString()
   storeName: string;
 
-  @ApiProperty({ 
+  @ApiProperty({
     example: 'https://example.com/logo.png',
     description: 'მაღაზიის ლოგოს URL მისამართი',
-    required: false
+    required: false,
   })
   @IsOptional()
   @IsString()
   storeLogo?: string;
 
-  @ApiProperty({ 
+  @ApiProperty({
     example: 'გიორგი',
-    description: 'მფლობელის სახელი'
+    description: 'მფლობელის სახელი',
   })
   @IsNotEmpty()
   @IsString()
   ownerFirstName: string;
 
-  @ApiProperty({ 
+  @ApiProperty({
     example: 'გიორგაძე',
-    description: 'მფლობელის გვარი'
+    description: 'მფლობელის გვარი',
   })
   @IsNotEmpty()
   @IsString()
   ownerLastName: string;
 
-  @ApiProperty({ 
+  @ApiProperty({
     example: '+995555123456',
-    description: 'ტელეფონის ნომერი საერთაშორისო ფორმატში'
+    description: 'ტელეფონის ნომერი საერთაშორისო ფორმატში',
   })
   @IsPhoneNumber()
   phoneNumber: string;
 
-  @ApiProperty({ 
+  @ApiProperty({
     example: 'example@mail.com',
-    description: 'ელ-ფოსტის მისამართი'
+    description: 'ელ-ფოსტის მისამართი',
   })
+  @Transform(({ value }) => value.toLowerCase())
   @IsEmail()
   email: string;
 
-  @ApiProperty({ 
+  @ApiProperty({
     example: 'Password123!',
-    description: 'პაროლი (მინიმუმ 6 და მაქსიმუმ 20 სიმბოლო)'
+    description: 'პაროლი (მინიმუმ 6 და მაქსიმუმ 20 სიმბოლო)',
   })
   @IsNotEmpty()
   @IsString()
@@ -67,17 +69,17 @@ export class SellerRegisterDto {
   @MaxLength(20, { message: 'პაროლი არ უნდა აღემატებოდეს 20 სიმბოლოს' })
   password: string;
 
-  @ApiProperty({ 
+  @ApiProperty({
     example: '01024085800',
-    description: 'პირადი ნომერი'
+    description: 'პირადი ნომერი',
   })
   @IsNotEmpty()
   @IsString()
   identificationNumber: string;
 
-  @ApiProperty({ 
+  @ApiProperty({
     example: 'GE29TB7777777777777777',
-    description: 'საბანკო ანგარიშის ნომერი IBAN ფორმატში'
+    description: 'საბანკო ანგარიშის ნომერი IBAN ფორმატში',
   })
   @IsNotEmpty()
   @IsString()

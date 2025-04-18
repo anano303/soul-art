@@ -1,4 +1,10 @@
-import { IsEmail, IsString, MinLength, MaxLength } from 'class-validator';
+import {
+  IsEmail,
+  IsString,
+  MinLength,
+  MaxLength,
+} from 'class-validator';
+import { Transform } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class RegisterDto {
@@ -15,6 +21,7 @@ export class RegisterDto {
   @ApiProperty({
     example: 'john@example.com',
   })
+  @Transform(({ value }) => value.toLowerCase())
   @IsEmail({}, { message: 'Email address is not valid.' })
   email!: string;
 

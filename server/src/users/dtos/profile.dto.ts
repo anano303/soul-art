@@ -5,6 +5,7 @@ import {
   MaxLength,
   IsOptional,
 } from 'class-validator';
+import { Transform } from 'class-transformer';
 
 export class ProfileDto {
   @IsString()
@@ -13,6 +14,7 @@ export class ProfileDto {
   @IsOptional()
   name?: string;
 
+  @Transform(({ value }) => value?.toLowerCase())
   @IsEmail({}, { message: 'Email address is not valid.' })
   @IsOptional()
   email?: string;
