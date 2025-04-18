@@ -35,13 +35,17 @@
   margin-top: 24px;
 }
 
+.form-action {
+  margin-bottom: 20px;
+}
+
 .save-button {
   background: #2a5530;
   color: white;
   border: none;
   padding: 8px 16px;
   border-radius: 4px;
-   cursor: url('/brush.png'), pointer; 
+  cursor: url("/brush.png"), pointer;
 }
 
 .cancel-button {
@@ -49,7 +53,28 @@
   border: none;
   padding: 8px 16px;
   border-radius: 4px;
-   cursor: url('/brush.png'), pointer; 
+  cursor: url("/brush.png"), pointer;
+}
+
+.password-button {
+  background: #012645;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: url("/brush.png"), pointer;
+  font-size: 0.9rem;
+}
+
+.cancel-password-button {
+  background: #e2c0c0;
+  color: #a65d5d;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 4px;
+  margin-top: 8px;
+  font-size: 0.8rem;
+  cursor: url("/brush.png"), pointer;
 }
 
 .save-button:hover {
@@ -58,4 +83,12 @@
 
 .cancel-button:hover {
   background: #e5e7eb;
+}
+
+.password-button:hover {
+  background: #093d67;
+}
+
+.cancel-password-button:hover {
+  background: #d7a9a9;
 }

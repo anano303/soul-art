@@ -213,17 +213,23 @@ export class UsersService {
       // Convert email to lowercase if provided
       if (updateDto.email) {
         updateDto.email = updateDto.email.toLowerCase();
+
+        // Check if the email is already in use by another user
+        const existingUser = await this.findByEmail(updateDto.email);
+        if (existingUser && existingUser._id.toString() !== id) {
+          throw new ConflictException('Email already exists');
+        }
       }
 
-      // მხოლოდ განახლება იმ ველების, რომლებიც მოვიდა
+      // Update fields only if they are provided
       if (updateDto.name) user.name = updateDto.name;
       if (updateDto.email) user.email = updateDto.email;
       if (updateDto.role) user.role = updateDto.role;
 
-      // თუ პაროლი არ არის გაცემული, არ უნდა შეიცვალოს
-      if (updateDto.password) {
-        const hashedPassword = await hashPassword(updateDto.password);
-        user.password = hashedPassword;
+      // Only hash and update password if it's provided
+      if (updateDto.password && updateDto.password.trim() !== '') {
+        this.logger.log('Updating password for user', id);
+        user.password = await hashPassword(updateDto.password);
       }
 
       await user.save();
