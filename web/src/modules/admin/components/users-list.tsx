@@ -103,13 +103,15 @@ export function UsersList() {
                 )}
               </td>
               <td className="usr-td">
-              {new Date(user.createdAt).toLocaleDateString() || "არასწორი თარიღი"}
+                {new Date(user.createdAt).toLocaleDateString() ||
+                  "არასწორი თარიღი"}
               </td>
               <td className="usr-td usr-td-right">
                 <div className="usr-actions">
                   <button
                     className="usr-btn"
                     onClick={() => router.push(`/admin/users/${user._id}/edit`)}
+                    title="Edit user"
                   >
                     <Pencil className="usr-icon" />
                   </button>
