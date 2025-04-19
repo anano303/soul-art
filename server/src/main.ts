@@ -6,6 +6,8 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
+import { join } from 'path';
+import * as fs from 'fs';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
@@ -19,14 +21,20 @@ async function bootstrap() {
       'https://soulart.ge',
       'https://www.soulart.ge',
       'http://localhost:3000',
-      'https://localhost:3000',  // Added HTTPS local frontend
-      'http://localhost:4000',   // Added HTTP local backend
-      'https://localhost:4000',  // Added HTTPS local backend
-      /localhost/               // Fallback pattern for any localhost
+      'https://localhost:3000', // Added HTTPS local frontend
+      'http://localhost:4000', // Added HTTP local backend
+      'https://localhost:4000', // Added HTTPS local backend
+      /localhost/, // Fallback pattern for any localhost
     ],
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     credentials: true,
-    allowedHeaders: ['Content-Type', 'Authorization', 'forum-id', 'Origin', 'Accept']
+    allowedHeaders: [
+      'Content-Type',
+      'Authorization',
+      'forum-id',
+      'Origin',
+      'Accept',
+    ],
   });
 
   app.enableVersioning({
@@ -45,6 +53,23 @@ async function bootstrap() {
     }),
   );
   app.use('/favicon.ico', (req, res) => res.status(204).send());
+
+  // Setup static file serving for uploads
+  app.useStaticAssets(join(__dirname, '..', 'uploads'), {
+    prefix: '/uploads/',
+  });
+
+  // Make sure uploads directory exists
+  const uploadsDir = join(__dirname, '..', 'uploads');
+  const logosDir = join(uploadsDir, 'logos');
+
+  if (!fs.existsSync(uploadsDir)) {
+    fs.mkdirSync(uploadsDir, { recursive: true });
+  }
+
+  if (!fs.existsSync(logosDir)) {
+    fs.mkdirSync(logosDir, { recursive: true });
+  }
 
   const config = new DocumentBuilder()
     .setTitle('SoulArt  API')
