@@ -360,6 +360,18 @@ form {
   margin-top: 1rem;
 }
 
+.avatar-initial {
+  border: 5px solid #012645;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  margin-bottom: 1rem;
+  transition: all 0.3s ease;
+}
+
+.avatar-initial:hover {
+  transform: scale(1.05);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+}
+
 @media (max-width: 768px) {
   .card {
     max-width: 95%;

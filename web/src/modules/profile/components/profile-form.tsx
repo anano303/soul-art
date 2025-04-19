@@ -254,6 +254,66 @@ export function ProfileForm() {
     }
   };
 
+  // Add this function to generate a consistent color based on the user's name
+  const getColorFromName = (name: string): string => {
+    // List of pleasant background colors
+    const colors = [
+      "#FF6B6B",
+      "#4ECDC4",
+      "#45B7D1",
+      "#9370DB",
+      "#48A36D",
+      "#F9A03F",
+      "#D46A6A",
+      "#4A90E2",
+      "#9C27B0",
+      "#673AB7",
+      "#3F51B5",
+      "#2196F3",
+      "#009688",
+      "#4CAF50",
+      "#8BC34A",
+      "#CDDC39",
+    ];
+
+    if (!name) return colors[0];
+
+    // Use the character code sum to pick a color
+    let sum = 0;
+    for (let i = 0; i < name.length; i++) {
+      sum += name.charCodeAt(i);
+    }
+
+    return colors[sum % colors.length];
+  };
+
+  // Add this component for rendering initials
+  const AvatarInitial = ({ name }: { name: string }) => {
+    const initial = name ? name.charAt(0).toUpperCase() : "?";
+    const bgColor = getColorFromName(name);
+
+    return (
+      <div
+        className="avatar-initial"
+        style={{
+          backgroundColor: bgColor,
+          width: "150px",
+          height: "150px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          borderRadius: "50%",
+          fontSize: "4rem",
+          fontWeight: "bold",
+          color: "white",
+          textTransform: "uppercase",
+        }}
+      >
+        {initial}
+      </div>
+    );
+  };
+
   if (!shouldFetchUser || isLoading) {
     return <div className="loading-container">პროფილი იტვირთება...</div>;
   }
@@ -265,7 +325,7 @@ export function ProfileForm() {
       <div className="profile-images-container">
         {/* User profile image section */}
         <div className="profile-image-section">
-          {profileImage && (
+          {profileImage ? (
             <div className="profile-image-container">
               <Image
                 src={profileImage}
@@ -274,6 +334,10 @@ export function ProfileForm() {
                 height={150}
                 className="profile-image"
               />
+            </div>
+          ) : (
+            <div className="profile-image-container">
+              <AvatarInitial name={user?.name || ""} />
             </div>
           )}
           <div>
@@ -373,7 +437,9 @@ export function ProfileForm() {
           user.role &&
           (user.role.toUpperCase() === "SELLER" || isSellerAccount) && (
             <div className="seller-section">
-              <h2 className="seller-section-title">მხატვრის/კომპანიის ინფორმაცია</h2>
+              <h2 className="seller-section-title">
+                მხატვრის/კომპანიის ინფორმაცია
+              </h2>
 
               <div className="seller-logo-container">
                 <Image
@@ -435,7 +501,7 @@ export function ProfileForm() {
 
                 <div className="form-field">
                   <label htmlFor="identificationNumber" className="label">
-                   პირადი ნომ./საიდენტიფიკაციო კოდი
+                    პირადი ნომ./საიდენტიფიკაციო კოდი
                   </label>
                   <input
                     id="identificationNumber"
