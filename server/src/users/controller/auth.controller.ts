@@ -10,6 +10,8 @@ import {
   UnauthorizedException,
   ConflictException,
   BadRequestException,
+  UseInterceptors,
+  UploadedFile,
 } from '@nestjs/common';
 import { Roles } from '@/decorators/roles.decorator';
 import { Role } from '@/types/role.enum';
@@ -24,7 +26,12 @@ import { UserDto } from '../dtos/user.dto';
 import { UserDocument } from '../schemas/user.schema';
 import { AuthService } from '../services/auth.service';
 import { UsersService } from '../services/users.service';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+  ApiConsumes,
+} from '@nestjs/swagger';
 import { AuthResponseDto, LoginDto } from '../dtos/auth.dto';
 import { NotAuthenticatedGuard } from '@/guards/not-authenticated.guard';
 import { Response, Request } from 'express';
@@ -33,6 +40,9 @@ import { SellerRegisterDto } from '../dtos/seller-register.dto';
 import { GoogleAuthGuard } from '@/guards/google-oauth.guard';
 import { ForgotPasswordDto } from '../dtos/forgot-password.dto';
 import { ResetPasswordDto } from '../dtos/reset-password.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+import { extname } from 'path';
 
 @ApiTags('Authentication')
 @Controller('auth')
@@ -59,21 +69,21 @@ export class AuthController {
       loginDto.password,
     );
 
-    // პროფილის სურათის დამატება მომხმარებლის ინფორმაციაში
     let profileImage = null;
     if (user.profileImagePath) {
-      profileImage = await this.usersService.getProfileImageUrl(user.profileImagePath);
+      profileImage = await this.usersService.getProfileImageUrl(
+        user.profileImagePath,
+      );
     }
 
     const { tokens, user: userData } = await this.authService.login(user);
 
-    // დავამატოთ profileImage პასუხში
-    return { 
-      tokens, 
+    return {
+      tokens,
       user: {
         ...userData,
-        profileImage
-      } 
+        profileImage,
+      },
     };
   }
 
@@ -107,12 +117,12 @@ export class AuthController {
         id: req.user.id,
       });
       console.log('✅ Google auth successful, redirecting with tokens');
-      
-      // Include user data in the URL fragment (encoded)
+
       const encodedUserData = encodeURIComponent(JSON.stringify(user));
-      
-      // Instead of setting cookies, redirect with token in URL fragment (safer than query params)
-      res.redirect(`${process.env.ALLOWED_ORIGINS}/auth-callback#accessToken=${tokens.accessToken}&refreshToken=${tokens.refreshToken}&userData=${encodedUserData}`);
+
+      res.redirect(
+        `${process.env.ALLOWED_ORIGINS}/auth-callback#accessToken=${tokens.accessToken}&refreshToken=${tokens.refreshToken}&userData=${encodedUserData}`,
+      );
     } catch (error) {
       console.error('Google auth error:', error);
       res.redirect(`${process.env.ALLOWED_ORIGINS}/login?error=auth_failed`);
@@ -124,7 +134,6 @@ export class AuthController {
   async logout(@CurrentUser() user: UserDocument) {
     await this.authService.logout(user._id.toString());
 
-   
     return { success: true };
   }
   @ApiOperation({ summary: 'Register a new user' })
@@ -163,9 +172,45 @@ export class AuthController {
     status: 400,
     description: 'Bad request - validation error',
   })
+  @ApiConsumes('multipart/form-data')
+  @UseInterceptors(
+    FileInterceptor('logoFile', {
+      storage: diskStorage({
+        destination: './uploads/logos',
+        filename: (req, file, cb) => {
+          const uniqueSuffix =
+            Date.now() + '-' + Math.round(Math.random() * 1e9);
+          const ext = extname(file.originalname);
+          const filename = `${uniqueSuffix}${ext}`;
+          cb(null, filename);
+        },
+      }),
+      fileFilter: (req, file, cb) => {
+        if (!file) {
+          return cb(null, true);
+        }
+        if (!file.originalname.match(/\.(jpg|jpeg|png|gif|webp)$/)) {
+          return cb(new Error('Only image files are allowed!'), false);
+        }
+        cb(null, true);
+      },
+      limits: {
+        fileSize: 5 * 1024 * 1024, // 5MB max size
+      },
+    }),
+  )
   @Post('sellers-register')
-  async registerSeller(@Body() sellerRegisterDto: SellerRegisterDto) {
+  async registerSeller(
+    @Body() sellerRegisterDto: SellerRegisterDto,
+    @UploadedFile() logoFile: Express.Multer.File,
+  ) {
     try {
+      if (logoFile) {
+        const baseUrl = process.env.API_URL || 'http://localhost:3000';
+        const logoUrl = `${baseUrl}/uploads/logos/${logoFile.filename}`;
+        sellerRegisterDto.storeLogo = logoUrl;
+      }
+
       const seller = await this.usersService.createSeller(sellerRegisterDto);
       const { tokens, user } = await this.authService.login(seller);
 
@@ -174,7 +219,7 @@ export class AuthController {
       if (error instanceof ConflictException) {
         throw new ConflictException(error.message);
       }
-      throw new BadRequestException('Registration failed');
+      throw new BadRequestException('Registration failed: ' + error.message);
     }
   }
 

@@ -131,10 +131,14 @@ export function useRegister() {
 
 // Seller register hook
 export function useSellerRegister() {
-  const mutation = useMutation<AuthResponse, Error, SellerRegisterData>({
-    mutationFn: async (userData: SellerRegisterData) => {
+  return useMutation({
+    mutationFn: async (data: FormData) => {
       try {
-        const response = await apiClient.post<AuthResponse>('/auth/sellers-register', userData);
+        const response = await apiClient.post<AuthResponse>('/auth/sellers-register', data, {
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          }
+        });
         return response.data;
       } catch (error) {
         const errorMessage = extractErrorMessage(error);
@@ -142,9 +146,4 @@ export function useSellerRegister() {
       }
     }
   });
-  
-  return {
-    ...mutation,
-    isPending: mutation.status === 'pending'
-  };
 }

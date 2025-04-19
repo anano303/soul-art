@@ -20,6 +20,15 @@ export class SellerRegisterDto {
   storeName: string;
 
   @ApiProperty({
+    type: 'string',
+    format: 'binary',
+    description: 'მაღაზიის ლოგოს ფაილი',
+    required: false,
+  })
+  @IsOptional()
+  logoFile?: Express.Multer.File;
+
+  @ApiProperty({
     example: 'https://example.com/logo.png',
     description: 'მაღაზიის ლოგოს URL მისამართი',
     required: false,

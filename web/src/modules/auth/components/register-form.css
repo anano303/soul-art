@@ -176,7 +176,7 @@ input:focus {
 
 .success-message {
   background-color: rgba(75, 181, 67, 0.1);
-  border-left: 4px solid #4BB543;
+  border-left: 4px solid #4bb543;
   border-radius: 4px;
   padding: 20px;
   margin: 20px 0;
@@ -185,7 +185,7 @@ input:focus {
 }
 
 .success-message h3 {
-  color: #4BB543;
+  color: #4bb543;
   margin-bottom: 10px;
   font-size: 18px;
   font-weight: bold;
@@ -197,10 +197,10 @@ input:focus {
 
 .verified-input {
   background-color: #f8f9fa;
-  border-color: #4BB543 !important;
+  border-color: #4bb543 !important;
   color: #495057;
   padding-right: 30px; /* Space for the checkmark icon */
-  box-shadow: inset 0 0 0 1px #4BB543;
+  box-shadow: inset 0 0 0 1px #4bb543;
 }
 
 .email-container {
@@ -213,6 +213,45 @@ input:focus {
 .verified-icon {
   position: absolute;
   right: 10px;
-  color: #4BB543;
+  color: #4bb543;
   font-size: 16px;
+}
+
+.logo-upload-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.logo-preview {
+  width: 100px;
+  height: 100px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 2px solid #012645;
+  position: relative;
+}
+
+.logo-preview-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.logo-upload-button {
+  background: linear-gradient(to left, #03214b, #012645);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 8px 16px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.3s ease;
+}
+
+.logo-upload-button:hover {
+  background-position: left;
+  transform: translateY(-2px);
 }

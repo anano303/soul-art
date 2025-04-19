@@ -2,7 +2,7 @@ import * as z from "zod";
 
 export const sellerRegisterSchema = z.object({
   storeName: z.string().min(1, "მაღაზიის სახელი სავალდებულოა"),
-  storeLogo: z.string().optional(),
+  // Remove storeLogo since we'll handle it as a file upload
   ownerFirstName: z.string().min(1, "სახელი სავალდებულოა"),
   ownerLastName: z.string().min(1, "გვარი სავალდებულოა"),
   phoneNumber: z
@@ -16,8 +16,8 @@ export const sellerRegisterSchema = z.object({
   identificationNumber: z
     .string()
     .length(11, "პირადი ნომერი უნდა შეიცავდეს 11 ციფრს"),
-accountNumber: z
-  .string()
-  .regex(/^GE[0-9]{2}[A-Z0-9]{18}$/, "არასწორი IBAN ფორმატი")
-  .refine(value => value.length === 22, "IBAN უნდა შეიცავდეს 22 სიმბოლოს"),
+  accountNumber: z
+    .string()
+    .regex(/^GE[0-9]{2}[A-Z0-9]{18}$/, "არასწორი IBAN ფორმატი")
+    .refine((value) => value.length === 22, "IBAN უნდა შეიცავდეს 22 სიმბოლოს"),
 });
