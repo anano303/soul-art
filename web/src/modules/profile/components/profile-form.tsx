@@ -42,30 +42,56 @@ const formSchema = z
 
 export function ProfileForm() {
   const { toast } = useToast();
-
   const queryClient = useQueryClient();
   const [shouldFetchUser, setShouldFetchUser] = useState(false);
   const [profileImage, setProfileImage] = useState<string | null>(null);
-  const [storeLogo, setStoreLogo] = useState("");
+  const [storeLogo, setStoreLogo] = useState<string | null>(null);
   const [isSellerAccount, setIsSellerAccount] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadSuccess, setUploadSuccess] = useState(false);
+  const [logoError, setLogoError] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const logoInputRef = useRef<HTMLInputElement>(null);
   const { user, isLoading } = useUser();
+
+  // Use manual invalidation instead of refetch
+  const refreshUserData = () => {
+    queryClient.invalidateQueries({ queryKey: ["user"] });
+  };
 
   useEffect(() => {
     setShouldFetchUser(true);
   }, []);
 
   useEffect(() => {
-    if (user && user.profileImage) {
-      setProfileImage(user.profileImage);
+    if (shouldFetchUser) {
+      refreshUserData();
     }
+  }, [shouldFetchUser]);
+
+  useEffect(() => {
     if (user) {
+      console.log("User data loaded:", {
+        name: user.name,
+        role: user.role,
+        hasProfileImage: !!user.profileImage,
+        hasStoreLogo: !!user.storeLogo,
+        storeLogo: user.storeLogo,
+      });
+
+      if (user.profileImage) {
+        setProfileImage(`${user.profileImage}`);
+      }
+
       setIsSellerAccount(user.role?.toUpperCase() === "SELLER");
+
       if (user.storeLogo) {
+        setLogoError(false);
+        console.log("Setting store logo:", user.storeLogo);
         setStoreLogo(user.storeLogo);
+      } else {
+        console.log("No store logo found in user data");
+        setStoreLogo(null);
       }
     }
   }, [user]);
@@ -87,10 +113,8 @@ export function ProfileForm() {
   const updateProfile = useMutation({
     mutationFn: async (values: z.infer<typeof formSchema>) => {
       try {
-        // Start with empty payload
         const payload: Record<string, string | undefined> = {};
 
-        // Only include fields that have been changed from their original values
         if (values.name !== user?.name) {
           payload.name = values.name;
         }
@@ -103,7 +127,6 @@ export function ProfileForm() {
           payload.password = values.password;
         }
 
-        // For seller fields, only add them if they've changed and the user is a seller
         if (user && user.role?.toUpperCase() === "SELLER") {
           if (
             values.storeName !== undefined &&
@@ -134,7 +157,6 @@ export function ProfileForm() {
           }
         }
 
-        // Only proceed with the update if there are changes
         if (Object.keys(payload).length === 0) {
           return { message: "No changes to update" };
         }
@@ -193,13 +215,13 @@ export function ProfileForm() {
         },
       });
 
-      // Add cache busting query parameter
-      const cacheBustingUrl = `${response.data.profileImage}?t=${new Date().getTime()}`;
+      const cacheBustingUrl = `${
+        response.data.profileImage
+      }?t=${new Date().getTime()}`;
       setProfileImage(cacheBustingUrl);
-      
-      // Invalidate user query to update cache
+
       queryClient.invalidateQueries({ queryKey: ["user"] });
-      
+
       setUploadSuccess(true);
     } catch (error) {
       console.error("Error uploading profile image:", error);
@@ -218,10 +240,13 @@ export function ProfileForm() {
 
     try {
       setIsUploading(true);
+      setLogoError(false);
 
       const file = e.target.files[0];
       const formData = new FormData();
       formData.append("file", file);
+
+      console.log("Uploading logo file:", file.name);
 
       const response = await apiClient.post("/users/seller-logo", formData, {
         headers: {
@@ -229,24 +254,29 @@ export function ProfileForm() {
         },
       });
 
-      // Add cache busting query parameter
-      const cacheBustingUrl = `${response.data.logoUrl}?t=${new Date().getTime()}`;
-      setStoreLogo(cacheBustingUrl);
-      
-      // Invalidate user query to update cache
-      queryClient.invalidateQueries({ queryKey: ["user"] });
-      
-      setUploadSuccess(true);
+      console.log("Logo upload response:", response.data);
 
-      toast({
-        title: "Success",
-        description: "Store logo updated successfully.",
-      });
+      if (response.data && response.data.logoUrl) {
+        console.log("Setting new logo URL:", response.data.logoUrl);
+        setStoreLogo(response.data.logoUrl);
+        setUploadSuccess(true);
+
+        // Use the refreshUserData function instead of refetch
+        refreshUserData();
+
+        toast({
+          title: "წარმატება",
+          description: "ლოგო წარმატებით განახლდა.",
+        });
+      } else {
+        throw new Error("Logo URL not found in response");
+      }
     } catch (error) {
       console.error("Error uploading store logo:", error);
+      setLogoError(true);
       toast({
-        title: "Error",
-        description: "Failed to upload store logo. Please try again.",
+        title: "შეცდომა",
+        description: "ლოგოს ატვირთვა ვერ მოხერხდა. გთხოვთ, სცადოთ თავიდან.",
         variant: "destructive",
       });
     } finally {
@@ -266,9 +296,7 @@ export function ProfileForm() {
     }
   };
 
-  // Add this function to generate a consistent color based on the user's name
   const getColorFromName = (name: string): string => {
-    // List of pleasant background colors
     const colors = [
       "#FF6B6B",
       "#4ECDC4",
@@ -290,7 +318,6 @@ export function ProfileForm() {
 
     if (!name) return colors[0];
 
-    // Use the character code sum to pick a color
     let sum = 0;
     for (let i = 0; i < name.length; i++) {
       sum += name.charCodeAt(i);
@@ -299,7 +326,6 @@ export function ProfileForm() {
     return colors[sum % colors.length];
   };
 
-  // Add this component for rendering initials
   const AvatarInitial = ({ name }: { name: string }) => {
     const initial = name ? name.charAt(0).toUpperCase() : "?";
     const bgColor = getColorFromName(name);
@@ -335,7 +361,6 @@ export function ProfileForm() {
       <h2>მომხმარებლის პროფილი</h2>
 
       <div className="profile-images-container">
-        {/* User profile image section */}
         <div className="profile-image-section">
           {profileImage ? (
             <div className="profile-image-container">
@@ -345,7 +370,7 @@ export function ProfileForm() {
                 width={150}
                 height={150}
                 className="profile-image"
-                unoptimized // დავამატოთ ეს პარამეტრი კეშირების პრობლემის გამოსასწორებლად
+                unoptimized
               />
             </div>
           ) : (
@@ -373,8 +398,6 @@ export function ProfileForm() {
             )}
           </div>
         </div>
-
-        {/* Seller logo section - only show for seller accounts */}
       </div>
 
       <form
@@ -455,20 +478,66 @@ export function ProfileForm() {
               </h2>
 
               <div className="seller-logo-container">
-                <Image
-                  src={storeLogo || "/store-placeholder.jpg"}
-                  alt="Store Logo"
-                  width={120}
-                  height={120}
-                  className="seller-logo"
-                  unoptimized // დავამატოთ ეს პარამეტრი კეშირების პრობლემის გამოსასწორებლად
-                />
+                {isUploading ? (
+                  <div className="loading-logo">ლოგო იტვირთება...</div>
+                ) : (
+                  <>
+                    {logoError ? (
+                      <div className="logo-error">
+                        ლოგოს ჩატვირთვა ვერ მოხერხდა
+                      </div>
+                    ) : storeLogo ? (
+                      <div
+                        className="logo-wrapper"
+                        style={{
+                          position: "relative",
+                          width: "120px",
+                          height: "120px",
+                          marginBottom: "1rem",
+                        }}
+                      >
+                        <Image
+                          src={storeLogo}
+                          alt="მხატვრის/კომპანიის ლოგო"
+                          width={120}
+                          height={120}
+                          style={{
+                            objectFit: "cover",
+                            borderRadius: "50%",
+                          }}
+                          onError={() => {
+                            console.error("Logo failed to load:", storeLogo);
+                            setLogoError(true);
+                          }}
+                        />
+                      </div>
+                    ) : (
+                      <div
+                        className="no-logo-placeholder"
+                        style={{
+                          width: "120px",
+                          height: "120px",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          backgroundColor: "#f0f0f0",
+                          borderRadius: "8px",
+                          fontSize: "14px",
+                          color: "#666",
+                        }}
+                      >
+                        ლოგო არ არის ატვირთული
+                      </div>
+                    )}
+                  </>
+                )}
                 <button
                   type="button"
                   onClick={triggerLogoInput}
                   className="upload-button"
+                  disabled={isUploading}
                 >
-                  {isUploading ? "Uploading..." : "Change Store Logo"}
+                  {isUploading ? "იტვირთება..." : "ლოგოს ატვირთვა"}
                 </button>
                 <input
                   type="file"
@@ -515,7 +584,7 @@ export function ProfileForm() {
 
                 <div className="form-field">
                   <label htmlFor="identificationNumber" className="label">
-                    პირადი ნომ./საიდენტიფიკაციო კოდი
+                    პირადი ნომ./საიდენტ. კოდი
                   </label>
                   <input
                     id="identificationNumber"
