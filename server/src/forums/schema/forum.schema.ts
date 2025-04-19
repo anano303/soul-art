@@ -20,6 +20,12 @@ export class Comment extends Document {
     default: [],
   })
   replies: mongoose.Schema.Types.ObjectId[];
+
+  @Prop({ type: Number, default: 0 })
+  likes: number;
+
+  @Prop({ type: [mongoose.Schema.Types.ObjectId], default: [] })
+  likesArray: mongoose.Schema.Types.ObjectId[];
 }
 
 export const CommentSchema = SchemaFactory.createForClass(Comment);

@@ -80,7 +80,24 @@
   font-size: 14px;
   transition: 0.3s;
   white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
+
+.forum-post-favorite.favorited {
+  color: #012645;
+  font-weight: 600;
+}
+
+.forum-post-favorite:hover {
+  transform: scale(1.1);
+}
+
+.forum-post-favorite.favorited:hover {
+  transform: scale(1.05);
+}
+
 .forum-post-comments {
   white-space: nowrap;
 }
@@ -119,6 +136,62 @@
   font-size: 14px;
   color: #37241e;
   margin-top: 5px;
+}
+
+.comment-like-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 13px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: #012645;
+  padding: 5px;
+  border-radius: 4px;
+  margin-right: 8px;
+}
+
+.comment-like-button.liked {
+  font-weight: 600;
+  color: #012645;
+}
+
+.comment-like-button:hover {
+  background-color: rgba(1, 38, 69, 0.08);
+}
+
+.comment-like-button.liked:hover {
+  background-color: rgba(1, 38, 69, 0.12);
+}
+
+.art-like-icon {
+  display: inline-block;
+  transition: transform 0.3s ease;
+}
+
+.comment-like-button:hover .art-like-icon {
+  transform: rotate(15deg) scale(1.1);
+}
+
+.comment-like-button.liked .art-like-icon {
+  animation: colorSplash 1s ease-in-out;
+}
+
+@keyframes colorSplash {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.4) rotate(15deg);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
 }
 
 .main-comment-container {
