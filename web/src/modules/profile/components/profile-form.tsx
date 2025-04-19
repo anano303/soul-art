@@ -193,7 +193,13 @@ export function ProfileForm() {
         },
       });
 
-      setProfileImage(response.data.profileImage);
+      // Add cache busting query parameter
+      const cacheBustingUrl = `${response.data.profileImage}?t=${new Date().getTime()}`;
+      setProfileImage(cacheBustingUrl);
+      
+      // Invalidate user query to update cache
+      queryClient.invalidateQueries({ queryKey: ["user"] });
+      
       setUploadSuccess(true);
     } catch (error) {
       console.error("Error uploading profile image:", error);
@@ -223,7 +229,13 @@ export function ProfileForm() {
         },
       });
 
-      setStoreLogo(response.data.logoUrl);
+      // Add cache busting query parameter
+      const cacheBustingUrl = `${response.data.logoUrl}?t=${new Date().getTime()}`;
+      setStoreLogo(cacheBustingUrl);
+      
+      // Invalidate user query to update cache
+      queryClient.invalidateQueries({ queryKey: ["user"] });
+      
       setUploadSuccess(true);
 
       toast({
@@ -333,6 +345,7 @@ export function ProfileForm() {
                 width={150}
                 height={150}
                 className="profile-image"
+                unoptimized // დავამატოთ ეს პარამეტრი კეშირების პრობლემის გამოსასწორებლად
               />
             </div>
           ) : (
@@ -448,6 +461,7 @@ export function ProfileForm() {
                   width={120}
                   height={120}
                   className="seller-logo"
+                  unoptimized // დავამატოთ ეს პარამეტრი კეშირების პრობლემის გამოსასწორებლად
                 />
                 <button
                   type="button"
