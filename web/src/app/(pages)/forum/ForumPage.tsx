@@ -26,6 +26,7 @@ interface Forum {
     user: {
       name: string;
       _id: string;
+      profileImage?: string; // Add profileImage field for comments
     };
     createdAt: string;
     parentId?: string;
@@ -94,19 +95,24 @@ const ForumPage = () => {
   };
 
   if (isUserLoading || isForumsLoading) {
-    return <div> <LoadingAnim/> </div>;
+    return (
+      <div>
+        {" "}
+        <LoadingAnim />{" "}
+      </div>
+    );
   }
 
   return (
     <div className="forum-page">
       {isUserLoading || isForumsLoading ? (
-        <div> <Loading/> </div>
+        <div>
+          {" "}
+          <Loading />{" "}
+        </div>
       ) : (
         <>
-          <button
-            className="create-post-button"
-            onClick={handleAddPostClick} // Use the new handler
-          >
+          <button className="create-post-button" onClick={handleAddPostClick}>
             ➕ ახალი პოსტის დამატება
           </button>
 
@@ -121,14 +127,6 @@ const ForumPage = () => {
               const isAdmin = user?.role === "admin";
               const canModify = isOwner || isAdmin;
 
-              console.log("Forum post permissions:", {
-                forumId: forum._id,
-                userRole: user?.role,
-                isAdmin,
-                isOwner,
-                canModify
-              });
-
               return (
                 <ForumPost
                   key={forum._id}
@@ -140,7 +138,7 @@ const ForumPage = () => {
                     name: forum.user.name,
                     _id: forum.user._id,
                     avatar: "/avatar.jpg",
-                    profileImage: forum.user.profileImage, // Add profile image
+                    profileImage: forum.user.profileImage, // Already passed correctly
                     role: forum.user.role,
                   }}
                   currentUser={
@@ -149,7 +147,7 @@ const ForumPage = () => {
                           _id: user._id,
                           role: user.role,
                           name: user.name,
-                          profileImage: user.profileImage // Add profile image
+                          profileImage: user.profileImage, // Already passed correctly
                         }
                       : undefined
                   }
@@ -160,6 +158,7 @@ const ForumPage = () => {
                       name: comment.user.name,
                       _id: comment.user._id,
                       avatar: "/avatar.jpg",
+                      profileImage: comment.user.profileImage || null, // Add profile image for comments
                     },
                     parentId: comment.parentId?.toString(),
                     replies: comment.replies?.map((r) => r.toString()),
