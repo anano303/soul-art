@@ -31,6 +31,8 @@ interface Forum {
     createdAt: string;
     parentId?: string;
     replies?: string[];
+    likes?: number;
+    likesArray?: string[];
   }>;
   likes: number;
   likesArray: string[];
@@ -158,10 +160,12 @@ const ForumPage = () => {
                       name: comment.user.name,
                       _id: comment.user._id,
                       avatar: "/avatar.jpg",
-                      profileImage: comment.user.profileImage || null, // Add profile image for comments
+                      profileImage: comment.user.profileImage || undefined, // Add profile image for comments
                     },
                     parentId: comment.parentId?.toString(),
                     replies: comment.replies?.map((r) => r.toString()),
+                    likes: comment.likes || 0,
+                    likesArray: comment.likesArray || [],
                   }))}
                   time={new Date(forum.createdAt).toLocaleDateString()}
                   likes={forum.likes}

@@ -58,7 +58,7 @@ export class ForumsService {
 
     const forumData = await this.forumModel
       .find()
-      .sort({ createdAt: -1 }) 
+      .sort({ createdAt: -1 })
       .skip((page - 1) * limit)
       .limit(limit)
       .populate('user', 'name _id role profileImagePath')
@@ -76,65 +76,69 @@ export class ForumsService {
         const imageUrl = await this.awsS3Service.getImageByFileId(
           forum.imagePath,
         );
-        
+
         // Get user profile image if available
         let userProfileImage = null;
         const populatedUser = forum.user as any; // Cast to any to access properties
-        
+
         if (populatedUser && populatedUser.profileImagePath) {
           userProfileImage = await this.awsS3Service.getImageByFileId(
-            populatedUser.profileImagePath as string
+            populatedUser.profileImagePath as string,
           );
         }
-        
+
         // Create a safe user object
-        const userObj = typeof populatedUser === 'string' 
-          ? { _id: populatedUser, name: 'Unknown', role: 'user' } 
-          : (populatedUser && typeof populatedUser.toObject === 'function') 
-            ? populatedUser.toObject() 
-            : populatedUser;
-        
+        const userObj =
+          typeof populatedUser === 'string'
+            ? { _id: populatedUser, name: 'Unknown', role: 'user' }
+            : populatedUser && typeof populatedUser.toObject === 'function'
+              ? populatedUser.toObject()
+              : populatedUser;
+
         // Get comment authors profile images
         const commentsWithProfileImages = await Promise.all(
           forum.comments.map(async (comment) => {
             let commentUserProfileImage = null;
             const populatedCommentUser = comment.user as any; // Cast to any
-            
+
             if (populatedCommentUser && populatedCommentUser.profileImagePath) {
-              commentUserProfileImage = await this.awsS3Service.getImageByFileId(
-                populatedCommentUser.profileImagePath as string
-              );
+              commentUserProfileImage =
+                await this.awsS3Service.getImageByFileId(
+                  populatedCommentUser.profileImagePath as string,
+                );
             }
-            
+
             // Create a safe comment user object
-            const commentUserObj = typeof populatedCommentUser === 'string'
-              ? { _id: populatedCommentUser, name: 'Unknown' }
-              : (populatedCommentUser && typeof populatedCommentUser.toObject === 'function')
-                ? populatedCommentUser.toObject()
-                : populatedCommentUser;
-            
+            const commentUserObj =
+              typeof populatedCommentUser === 'string'
+                ? { _id: populatedCommentUser, name: 'Unknown' }
+                : populatedCommentUser &&
+                    typeof populatedCommentUser.toObject === 'function'
+                  ? populatedCommentUser.toObject()
+                  : populatedCommentUser;
+
             return {
               ...comment.toObject(),
               user: {
                 ...commentUserObj,
-                profileImage: commentUserProfileImage
-              }
+                profileImage: commentUserProfileImage,
+              },
             };
-          })
+          }),
         );
-        
+
         return {
           ...forum.toObject(),
           image: imageUrl,
           user: {
             ...userObj,
-            profileImage: userProfileImage
+            profileImage: userProfileImage,
           },
-          comments: commentsWithProfileImages
+          comments: commentsWithProfileImages,
         };
-      })
+      }),
     );
-    
+
     return forumDataWithImages;
   }
 
@@ -197,7 +201,14 @@ export class ForumsService {
     return `This action returns a #${id} forum`;
   }
 
-  async update(id: string, updateForumDto: UpdateForumDto, userId: string, userRole: string, filePath?: string, file?: Buffer) {
+  async update(
+    id: string,
+    updateForumDto: UpdateForumDto,
+    userId: string,
+    userRole: string,
+    filePath?: string,
+    file?: Buffer,
+  ) {
     if (!isValidObjectId(id)) {
       throw new BadRequestException('Invalid forum ID');
     }
@@ -209,13 +220,13 @@ export class ForumsService {
 
     const isAdmin = userRole === 'admin';
     const isOwner = forum.user.toString() === userId.toString();
-    
+
     console.log('Update method values:', {
       forumUserId: forum.user.toString(),
       receivedUserId: userId,
       userRole,
       isAdmin,
-      isOwner
+      isOwner,
     });
 
     // Allow update if user is admin or is the post owner
@@ -241,13 +252,13 @@ export class ForumsService {
 
     const isAdmin = userRole === 'admin';
     const isOwner = forum.user.toString() === userId.toString();
-    
+
     console.log('Delete Post values:', {
       forumUserId: forum.user.toString(),
       receivedUserId: userId,
       userRole,
       isAdmin,
-      isOwner
+      isOwner,
     });
 
     // Allow deletion if user is admin or is the post owner
@@ -433,5 +444,104 @@ export class ForumsService {
       path: 'comments.user',
       select: 'name _id',
     });
+  }
+
+  async addCommentLike(forumId: string, commentId: string, userId: string) {
+    if (!isValidObjectId(forumId) || !isValidObjectId(commentId)) {
+      throw new BadRequestException('Invalid ID format');
+    }
+
+    const forum = await this.forumModel.findById(forumId);
+    if (!forum) {
+      throw new NotFoundException('Forum not found');
+    }
+
+    const commentIndex = forum.comments.findIndex(
+      (c) => c._id.toString() === commentId,
+    );
+
+    if (commentIndex === -1) {
+      throw new NotFoundException('Comment not found');
+    }
+
+    const comment = forum.comments[commentIndex];
+
+    // Initialize likesArray if it doesn't exist
+    if (!comment.likesArray) {
+      comment.likesArray = [];
+    }
+
+    // Convert likesArray elements to strings for comparison
+    const userIdStr = userId.toString();
+    const alreadyLiked = comment.likesArray.some(
+      (id) => id.toString() === userIdStr,
+    );
+
+    // Check if user already liked this comment
+    if (alreadyLiked) {
+      throw new BadRequestException('User already liked this comment');
+    }
+
+    // Add like
+    comment.likesArray.push(userId as any);
+    comment.likes = comment.likesArray.length;
+
+    await forum.save();
+
+    return {
+      message: 'Comment liked successfully',
+      likes: comment.likes,
+    };
+  }
+
+  async removeCommentLike(forumId: string, commentId: string, userId: string) {
+    if (!isValidObjectId(forumId) || !isValidObjectId(commentId)) {
+      throw new BadRequestException('Invalid ID format');
+    }
+
+    const forum = await this.forumModel.findById(forumId);
+    if (!forum) {
+      throw new NotFoundException('Forum not found');
+    }
+
+    const commentIndex = forum.comments.findIndex(
+      (c) => c._id.toString() === commentId,
+    );
+
+    if (commentIndex === -1) {
+      throw new NotFoundException('Comment not found');
+    }
+
+    const comment = forum.comments[commentIndex];
+
+    // Initialize likesArray if it doesn't exist
+    if (!comment.likesArray) {
+      comment.likesArray = [];
+      throw new BadRequestException('User has not liked this comment');
+    }
+
+    // Convert user ID to string for comparison
+    const userIdStr = userId.toString();
+    const hasLiked = comment.likesArray.some(
+      (id) => id.toString() === userIdStr,
+    );
+
+    // Check if user has liked this comment
+    if (!hasLiked) {
+      throw new BadRequestException('User has not liked this comment');
+    }
+
+    // Remove like
+    comment.likesArray = comment.likesArray.filter(
+      (id) => id.toString() !== userIdStr,
+    );
+    comment.likes = comment.likesArray.length;
+
+    await forum.save();
+
+    return {
+      message: 'Comment like removed successfully',
+      likes: comment.likes,
+    };
   }
 }

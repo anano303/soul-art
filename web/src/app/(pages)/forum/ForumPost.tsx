@@ -20,6 +20,8 @@ interface Comment {
   };
   parentId?: string;
   replies?: string[];
+  likes?: number;
+  likesArray?: string[];
 }
 
 interface PostProps {
@@ -77,6 +79,10 @@ const ForumPost = ({
     [key: string]: boolean;
   }>({});
   const [replyText, setReplyText] = useState<{ [key: string]: string }>({});
+  const [commentLikes, setCommentLikes] = useState<Record<string, number>>({});
+  const [likedComments, setLikedComments] = useState<Record<string, boolean>>(
+    {}
+  );
 
   const [error, setError] = useState<string | null>(null);
 
@@ -97,6 +103,35 @@ const ForumPost = ({
       });
     }
   }, [currentUser, author._id, id, isAdmin, isPostAuthor, canModifyPost]);
+
+  useEffect(() => {
+    if (comments) {
+      const likesMap: Record<string, number> = {};
+      const likedMap: Record<string, boolean> = {};
+
+      comments.forEach((comment) => {
+        likesMap[comment.id] = comment.likes || 0;
+        const hasLiked =
+          comment.likesArray?.some((userId) => userId === currentUser?._id) ||
+          false;
+        likedMap[comment.id] = hasLiked;
+      });
+
+      setCommentLikes(likesMap);
+      setLikedComments(likedMap);
+
+      console.log("Comment likes initialized:", {
+        likesMap,
+        likedMap,
+        currentUserId: currentUser?._id,
+        comments: comments.map((c) => ({
+          id: c.id,
+          likesArray: c.likesArray,
+          hasCurrentUserLike: c.likesArray?.includes(currentUser?._id || ""),
+        })),
+      });
+    }
+  }, [comments, currentUser]);
 
   const replyMutation = useMutation({
     mutationFn: async ({
@@ -301,6 +336,92 @@ const ForumPost = ({
     },
   });
 
+  const likeCommentMutation = useMutation({
+    mutationFn: async (commentId: string) => {
+      const isLiked = likedComments[commentId];
+      const endpoint = isLiked ? "remove-comment-like" : "add-comment-like";
+
+      console.log("Like mutation starting:", {
+        commentId,
+        action: isLiked ? "unlike" : "like",
+        endpoint,
+      });
+
+      const response = await fetchWithAuth(`/forums/${endpoint}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "forum-id": id,
+        },
+        body: JSON.stringify({
+          commentId: commentId,
+        }),
+        credentials: "include",
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error("Like mutation error:", errorData);
+        throw new Error(errorData.message || "Failed to update comment like");
+      }
+
+      return response.json();
+    },
+    onSuccess: (data, commentId) => {
+      console.log("Like mutation success:", data);
+
+      queryClient.invalidateQueries({ queryKey: ["forums"] });
+
+      setCommentLikes((prev) => ({
+        ...prev,
+        [commentId]: data.likes,
+      }));
+
+      setLikedComments((prev) => ({
+        ...prev,
+        [commentId]: !prev[commentId],
+      }));
+    },
+    onError: (error: Error) => {
+      console.error("Like mutation error:", error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error.message,
+      });
+    },
+  });
+
+  const handleLike = () => {
+    if (!isAuthorized) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Please login to like posts",
+      });
+      return;
+    }
+    likeMutation.mutate();
+  };
+
+  const handleCommentLike = (commentId: string) => {
+    if (!isAuthorized) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "გთხოვთ გაიაროთ ავტორიზაცია",
+      });
+      return;
+    }
+
+    console.log("Comment like clicked:", {
+      commentId,
+      currentStatus: likedComments[commentId] ? "liked" : "not liked",
+    });
+
+    likeCommentMutation.mutate(commentId);
+  };
+
   const validTags = [
     "პეიზაჟი",
     "პორტრეტი",
@@ -404,18 +525,6 @@ const ForumPost = ({
     },
   });
 
-  const handleLike = () => {
-    if (!isAuthorized) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Please login to like posts",
-      });
-      return;
-    }
-    likeMutation.mutate();
-  };
-
   const toggleReplyInput = (commentId: string) => {
     setReplyInputVisible((prev) => ({
       ...prev,
@@ -489,8 +598,8 @@ const ForumPost = ({
       "image/png",
       "image/gif",
       "image/webp",
-      "image/heic",
-      "image/heif",
+      "image.heic",
+      "image.heif",
     ];
     if (
       !supportedTypes.includes(file.type.toLowerCase()) &&
@@ -550,6 +659,8 @@ const ForumPost = ({
   const renderComment = (comment: Comment, level = 0) => {
     const isCommentAuthor = currentUser?._id === comment.author._id;
     const canModifyComment = isCommentAuthor || isAdmin;
+    const commentLikeCount = commentLikes[comment.id] || 0;
+    const isCommentLiked = likedComments[comment.id] || false;
 
     return (
       <div
@@ -587,12 +698,27 @@ const ForumPost = ({
 
             <div className="comment-actions">
               {isAuthorized && (
-                <button
-                  className="reply-button"
-                  onClick={() => toggleReplyInput(comment.id)}
-                >
-                  პასუხი
-                </button>
+                <>
+                  <button
+                    className="reply-button"
+                    onClick={() => toggleReplyInput(comment.id)}
+                  >
+                    პასუხი
+                  </button>
+                  <button
+                    className={`comment-like-button ${
+                      isCommentLiked ? "liked" : ""
+                    }`}
+                    onClick={() => handleCommentLike(comment.id)}
+                    disabled={likeCommentMutation.isPending}
+                    aria-label={isCommentLiked ? "Unlike" : "Like"}
+                  >
+                    <span>{commentLikeCount}</span>
+                    <span className="art-like-icon">
+                      {isCommentLiked ? "🎨" : "🖌️"}
+                    </span>
+                  </button>
+                </>
               )}
               {canModifyComment && (
                 <>
@@ -786,7 +912,7 @@ const ForumPost = ({
             onClick={handleLike}
             disabled={!isAuthorized || likeMutation.isPending}
           >
-            {likesCount} {userLiked ? "👍" : "👍🏻"}
+            {likesCount} {userLiked ? "🎨" : "🖌️"}
           </button>
         </div>
 
