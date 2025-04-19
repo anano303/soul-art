@@ -373,7 +373,7 @@ export function ProfileForm() {
           user.role &&
           (user.role.toUpperCase() === "SELLER" || isSellerAccount) && (
             <div className="seller-section">
-              <h2 className="seller-section-title">Store Information</h2>
+              <h2 className="seller-section-title">მხატვრის/კომპანიის ინფორმაცია</h2>
 
               <div className="seller-logo-container">
                 <Image
@@ -402,7 +402,7 @@ export function ProfileForm() {
               <div className="seller-form-grid">
                 <div className="form-field">
                   <label htmlFor="storeName" className="label">
-                    Store Name
+                    მხატვრის/კომპანიის სახელი
                   </label>
                   <input
                     id="storeName"
@@ -418,7 +418,7 @@ export function ProfileForm() {
 
                 <div className="form-field">
                   <label htmlFor="phoneNumber" className="label">
-                    Phone Number
+                    ტელეფონის ნომერი
                   </label>
                   <input
                     id="phoneNumber"
@@ -435,7 +435,7 @@ export function ProfileForm() {
 
                 <div className="form-field">
                   <label htmlFor="identificationNumber" className="label">
-                    ID Number
+                   პირადი ნომ./საიდენტიფიკაციო კოდი
                   </label>
                   <input
                     id="identificationNumber"
@@ -451,7 +451,7 @@ export function ProfileForm() {
 
                 <div className="form-field">
                   <label htmlFor="accountNumber" className="label">
-                    IBAN
+                    საბანკო ანგარიშის რეკვიზიტი
                   </label>
                   <input
                     id="accountNumber"
