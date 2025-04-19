@@ -4,24 +4,39 @@ import {
   MinLength,
   MaxLength,
   IsOptional,
+  IsPhoneNumber,
 } from 'class-validator';
 import { Transform } from 'class-transformer';
 
 export class ProfileDto {
-  @IsString()
-  @MinLength(4, { message: 'Username is too short.' })
-  @MaxLength(20, { message: 'Username is too long.' })
   @IsOptional()
+  @IsString()
   name?: string;
 
-  @Transform(({ value }) => value?.toLowerCase())
-  @IsEmail({}, { message: 'Email address is not valid.' })
   @IsOptional()
+  @Transform(({ value }) => (value ? value.toLowerCase() : value))
+  @IsEmail()
   email?: string;
 
-  @IsString()
-  @MinLength(5, { message: 'Password is too short.' })
-  @MaxLength(20, { message: 'Password is too long.' })
   @IsOptional()
+  @IsString()
+  @MinLength(6, { message: 'Password must be at least 6 characters long' })
+  @MaxLength(20, { message: 'Password must not exceed 20 characters' })
   password?: string;
+
+  @IsOptional()
+  @IsString()
+  storeName?: string;
+
+  @IsOptional()
+  @IsPhoneNumber(null, { message: 'Invalid phone number format' })
+  phoneNumber?: string;
+
+  @IsOptional()
+  @IsString()
+  identificationNumber?: string;
+
+  @IsOptional()
+  @IsString()
+  accountNumber?: string;
 }

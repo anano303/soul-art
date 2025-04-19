@@ -63,7 +63,6 @@ export function ProfileForm() {
       setProfileImage(user.profileImage);
     }
     if (user) {
-      console.log("User role:", user.role);
       setIsSellerAccount(user.role?.toUpperCase() === "SELLER");
       if (user.storeLogo) {
         setStoreLogo(user.storeLogo);
@@ -88,33 +87,61 @@ export function ProfileForm() {
   const updateProfile = useMutation({
     mutationFn: async (values: z.infer<typeof formSchema>) => {
       try {
-        const payload: Record<string, string | undefined> = {
-          name: values.name,
-          email: values.email,
-        };
+        // Start with empty payload
+        const payload: Record<string, string | undefined> = {};
+
+        // Only include fields that have been changed from their original values
+        if (values.name !== user?.name) {
+          payload.name = values.name;
+        }
+
+        if (values.email !== user?.email) {
+          payload.email = values.email;
+        }
 
         if (values.password) {
           payload.password = values.password;
         }
 
-        if (
-          user &&
-          (user.role?.toUpperCase() === "SELLER" || isSellerAccount)
-        ) {
-          if (values.storeName) payload.storeName = values.storeName;
-          if (values.phoneNumber) payload.phoneNumber = values.phoneNumber;
-          if (values.identificationNumber)
+        // For seller fields, only add them if they've changed and the user is a seller
+        if (user && user.role?.toUpperCase() === "SELLER") {
+          if (
+            values.storeName !== undefined &&
+            values.storeName !== user?.storeName
+          ) {
+            payload.storeName = values.storeName;
+          }
+
+          if (
+            values.phoneNumber !== undefined &&
+            values.phoneNumber !== user?.phoneNumber
+          ) {
+            payload.phoneNumber = values.phoneNumber;
+          }
+
+          if (
+            values.identificationNumber !== undefined &&
+            values.identificationNumber !== user?.identificationNumber
+          ) {
             payload.identificationNumber = values.identificationNumber;
-          if (values.accountNumber)
+          }
+
+          if (
+            values.accountNumber !== undefined &&
+            values.accountNumber !== user?.accountNumber
+          ) {
             payload.accountNumber = values.accountNumber;
+          }
         }
 
-        console.log("Updating profile with payload:", payload);
+        // Only proceed with the update if there are changes
+        if (Object.keys(payload).length === 0) {
+          return { message: "No changes to update" };
+        }
 
         const response = await apiClient.put("/auth/profile", payload);
         return response.data;
       } catch (error) {
-        console.error("Profile update error:", error);
         if (error instanceof Error) {
           throw { message: error.message };
         }
@@ -169,7 +196,7 @@ export function ProfileForm() {
       setProfileImage(response.data.profileImage);
       setUploadSuccess(true);
     } catch (error) {
-      console.error("Error uploading file:", error);
+      console.error("Error uploading profile image:", error);
       toast({
         title: "Error",
         description: "Failed to upload profile image. Please try again.",
@@ -204,7 +231,7 @@ export function ProfileForm() {
         description: "Store logo updated successfully.",
       });
     } catch (error) {
-      console.error("Error uploading logo:", error);
+      console.error("Error uploading store logo:", error);
       toast({
         title: "Error",
         description: "Failed to upload store logo. Please try again.",
@@ -231,41 +258,46 @@ export function ProfileForm() {
     return <div className="loading-container">პროფილი იტვირთება...</div>;
   }
 
-  console.log("Is seller account:", isSellerAccount);
-  console.log("User data:", user);
-
   return (
     <div className="card">
       <h2>მომხმარებლის პროფილი</h2>
-      <div className="profile-image-container">
-        <Image
-          src={profileImage || "/avatar.jpg"}
-          alt="პროფილი"
-          className="profile-image"
-          width={150}
-          height={150}
-          priority
-        />
-        <button
-          type="button"
-          onClick={triggerFileInput}
-          className="upload-button"
-          disabled={isUploading}
-        >
-          {isUploading ? "იტვირთება..." : "ფოტოს ატვირთვა"}
-        </button>
-        <input
-          ref={fileInputRef}
-          type="file"
-          onChange={handleFileChange}
-          accept="image/*"
-          className="file-input"
-        />
-        {uploadSuccess && (
-          <span className="upload-success">
-            პროფილის სურათი წარმატებით განახლდა!
-          </span>
-        )}
+
+      <div className="profile-images-container">
+        {/* User profile image section */}
+        <div className="profile-image-section">
+          {profileImage && (
+            <div className="profile-image-container">
+              <Image
+                src={profileImage}
+                alt="Profile"
+                width={150}
+                height={150}
+                className="profile-image"
+              />
+            </div>
+          )}
+          <div>
+            <input
+              type="file"
+              onChange={handleFileChange}
+              ref={fileInputRef}
+              className="file-input"
+              accept="image/*"
+            />
+            <button
+              onClick={triggerFileInput}
+              disabled={isUploading}
+              className="upload-button"
+            >
+              {isUploading ? "იტვირთება..." : "პროფილის სურათის ატვირთვა"}
+            </button>
+            {uploadSuccess && (
+              <div className="upload-success">სურათი წარმატებით აიტვირთა</div>
+            )}
+          </div>
+        </div>
+
+        {/* Seller logo section - only show for seller accounts */}
       </div>
 
       <form
