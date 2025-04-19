@@ -159,7 +159,37 @@ export class AuthController {
     @CurrentUser() user: UserDocument,
     @Body() updateDto: ProfileDto,
   ) {
-    return this.usersService.update(user._id.toString(), updateDto);
+    // Filter out undefined fields to make all fields truly optional
+    const filteredDto = Object.entries(updateDto)
+      .filter(([_, value]) => value !== undefined)
+      .reduce((obj, [key, value]) => {
+        obj[key] = value;
+        return obj;
+      }, {});
+
+    // Check if the update contains seller-specific fields
+    const hasSellerFields = [
+      'storeName',
+      'phoneNumber',
+      'identificationNumber',
+      'accountNumber',
+    ].some((field) => field in filteredDto);
+
+    // Only allow updating seller fields if the user is actually a seller
+    if (hasSellerFields && user.role !== Role.Seller) {
+      const sellerFields = [
+        'storeName',
+        'phoneNumber',
+        'identificationNumber',
+        'accountNumber',
+      ].filter((field) => field in filteredDto);
+
+      throw new BadRequestException(
+        `Only sellers can update the following fields: ${sellerFields.join(', ')}`,
+      );
+    }
+
+    return this.usersService.update(user._id.toString(), filteredDto);
   }
 
   @ApiOperation({ summary: 'Register a new seller' })
@@ -173,45 +203,17 @@ export class AuthController {
     description: 'Bad request - validation error',
   })
   @ApiConsumes('multipart/form-data')
-  @UseInterceptors(
-    FileInterceptor('logoFile', {
-      storage: diskStorage({
-        destination: './uploads/logos',
-        filename: (req, file, cb) => {
-          const uniqueSuffix =
-            Date.now() + '-' + Math.round(Math.random() * 1e9);
-          const ext = extname(file.originalname);
-          const filename = `${uniqueSuffix}${ext}`;
-          cb(null, filename);
-        },
-      }),
-      fileFilter: (req, file, cb) => {
-        if (!file) {
-          return cb(null, true);
-        }
-        if (!file.originalname.match(/\.(jpg|jpeg|png|gif|webp)$/)) {
-          return cb(new Error('Only image files are allowed!'), false);
-        }
-        cb(null, true);
-      },
-      limits: {
-        fileSize: 5 * 1024 * 1024, // 5MB max size
-      },
-    }),
-  )
+  @UseInterceptors(FileInterceptor('logoFile'))
   @Post('sellers-register')
   async registerSeller(
     @Body() sellerRegisterDto: SellerRegisterDto,
     @UploadedFile() logoFile: Express.Multer.File,
   ) {
     try {
-      if (logoFile) {
-        const baseUrl = process.env.API_URL || 'http://localhost:3000';
-        const logoUrl = `${baseUrl}/uploads/logos/${logoFile.filename}`;
-        sellerRegisterDto.storeLogo = logoUrl;
-      }
-
-      const seller = await this.usersService.createSeller(sellerRegisterDto);
+      const seller = await this.usersService.createSellerWithLogo(
+        sellerRegisterDto,
+        logoFile,
+      );
       const { tokens, user } = await this.authService.login(seller);
 
       return { tokens, user };

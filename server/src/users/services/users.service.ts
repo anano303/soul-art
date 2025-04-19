@@ -148,8 +148,8 @@ export class UsersService {
       throw new NotFoundException(`User with ID ${id} not found`);
     }
 
-    // Convert email to lowercase if provided
-    if (attrs.email) {
+    // Only validate email if it's being updated
+    if (attrs.email && attrs.email !== user.email) {
       attrs.email = attrs.email.toLowerCase();
 
       const existingUser = await this.findByEmail(attrs.email);
@@ -158,7 +158,7 @@ export class UsersService {
       }
     }
 
-    // მხოლოდ მომხმარებლისთვის პაროლის მოთხოვნა
+    // Handle password update if provided
     if (attrs.password && !adminRole) {
       const passwordMatch = await bcrypt.compare(attrs.password, user.password);
       if (passwordMatch) {
@@ -169,25 +169,23 @@ export class UsersService {
       attrs.password = await hashPassword(attrs.password);
     }
 
-    const updateData: Partial<User> = {
-      ...attrs,
-      role: adminRole ? attrs.role : undefined, // Admins can update the role
-      // პაროლი მხოლოდ მაშინ განახლდება, როცა არ არის ადმინისტრატორი და პაროლი მოცემულია
-      password: attrs.password || undefined,
-    };
+    // Prepare update data, filter out undefined values
+    const updateData = { ...attrs };
 
-    // Remove undefined values
-    type UpdateKeys = keyof Partial<User>;
-    Object.keys(updateData as Record<UpdateKeys, unknown>).forEach(
-      (key) =>
-        updateData[key as UpdateKeys] === undefined &&
-        delete updateData[key as UpdateKeys],
-    );
+    // Prevent role changes unless admin
+    if (!adminRole) delete updateData.role;
+
+    // Filter out undefined values to ensure only provided fields are updated
+    Object.keys(updateData).forEach((key) => {
+      if (updateData[key] === undefined) {
+        delete updateData[key];
+      }
+    });
 
     try {
       const updatedUser = await this.userModel.findByIdAndUpdate(
         id,
-        updateData,
+        { $set: updateData },
         { new: true, runValidators: true },
       );
 
@@ -199,7 +197,7 @@ export class UsersService {
       return updatedUser;
     } catch (error: any) {
       this.logger.error(`Failed to update user ${id}: ${error.message}`);
-      throw new BadRequestException('Failed to update user');
+      throw new BadRequestException(error.message || 'Failed to update user');
     }
   }
 
@@ -271,6 +269,61 @@ export class UsersService {
       };
 
       return await this.create(sellerData);
+    } catch (error: any) {
+      this.logger.error(`Failed to create seller: ${error.message}`);
+
+      if (error.code === 11000) {
+        throw new ConflictException('User with this email already exists');
+      }
+
+      throw error;
+    }
+  }
+
+  async createSellerWithLogo(
+    dto: SellerRegisterDto,
+    logoFile?: Express.Multer.File,
+  ): Promise<UserDocument> {
+    try {
+      const existingUser = await this.findByEmail(dto.email.toLowerCase());
+      if (existingUser) {
+        throw new ConflictException('User with this email already exists');
+      }
+
+      // Create the seller account first
+      const sellerData = {
+        ...dto,
+        name: dto.storeName,
+        email: dto.email.toLowerCase(),
+        role: Role.Seller,
+        password: dto.password,
+      };
+
+      const seller = await this.create(sellerData);
+
+      // If logo file is provided, upload it to S3
+      if (logoFile) {
+        try {
+          const timestamp = Date.now();
+          const filePath = `seller-logos/${timestamp}-${logoFile.originalname.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
+
+          // Upload logo to S3
+          const storeLogoPath = await this.awsS3Service.uploadImage(
+            filePath,
+            logoFile.buffer,
+          );
+
+          // Update the seller record with the logo path
+          await this.userModel.findByIdAndUpdate(seller._id, { storeLogoPath });
+
+          this.logger.log(`Logo uploaded for seller ${seller._id}`);
+        } catch (error) {
+          this.logger.error(`Failed to upload seller logo: ${error.message}`);
+          // Continue even if logo upload fails - the account has been created
+        }
+      }
+
+      return seller;
     } catch (error: any) {
       this.logger.error(`Failed to create seller: ${error.message}`);
 
