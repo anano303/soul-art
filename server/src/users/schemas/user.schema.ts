@@ -42,6 +42,9 @@ export class User {
   storeLogo?: string;
 
   @Prop({ type: String, default: null })
+  storeLogoPath?: string;
+
+  @Prop({ type: String, default: null })
   ownerFirstName?: string;
 
   @Prop({ type: String, default: null })

@@ -330,6 +330,53 @@ export class UsersService {
     }
   }
 
+  async updateSellerLogo(userId: string, filePath: string, fileBuffer: Buffer) {
+    try {
+      const user = await this.userModel.findById(userId);
+
+      if (!user) {
+        throw new NotFoundException('User not found');
+      }
+
+      if (user.role !== Role.Seller) {
+        throw new BadRequestException('Only sellers can update store logos');
+      }
+
+      // Delete old logo if it exists
+      if (user.storeLogoPath) {
+        try {
+          await this.awsS3Service.deleteImageByFileId(
+            user.storeLogoPath as string,
+          );
+        } catch (error) {
+          console.error('Failed to delete old store logo', error);
+          // Continue even if deletion fails
+        }
+      }
+
+      // Upload new logo
+      const storeLogoPath = await this.awsS3Service.uploadImage(
+        filePath,
+        fileBuffer,
+      );
+
+      // Update user record
+      await this.userModel.findByIdAndUpdate(userId, { storeLogoPath });
+
+      // Get logo URL
+      const logoUrl = await this.awsS3Service.getImageByFileId(storeLogoPath);
+
+      return {
+        message: 'Store logo updated successfully',
+        logoUrl: logoUrl,
+      };
+    } catch (error) {
+      throw new BadRequestException(
+        'Failed to update store logo: ' + error.message,
+      );
+    }
+  }
+
   async getProfileData(userId: string) {
     const user = await this.userModel.findById(userId, { password: 0 });
 
@@ -345,9 +392,18 @@ export class UsersService {
       );
     }
 
+    // If user is a seller, get store logo URL
+    let storeLogo = null;
+    if (user.role === Role.Seller && user.storeLogoPath) {
+      storeLogo = await this.awsS3Service.getImageByFileId(
+        user.storeLogoPath as string,
+      );
+    }
+
     return {
       ...user.toObject(),
       profileImage,
+      storeLogo,
     };
   }
 

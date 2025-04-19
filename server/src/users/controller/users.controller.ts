@@ -140,4 +140,55 @@ export class UsersController {
       file.buffer,
     );
   }
+
+  @Post('seller-logo')
+  @UseGuards(JwtAuthGuard)
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadSellerLogo(
+    @CurrentUser() user: User,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
+    // Check if user is a seller
+    if (user.role !== Role.Seller) {
+      throw new BadRequestException('Only sellers can upload store logos');
+    }
+
+    if (!file) {
+      throw new BadRequestException('No file uploaded');
+    }
+
+    // Check file type - same validation as profile images
+    const validMimeTypes = [
+      'image/jpeg',
+      'image/jpg',
+      'image/png',
+      'image/gif',
+      'image/webp',
+      'image/heic',
+      'image/heif',
+    ];
+
+    if (
+      !validMimeTypes.includes(file.mimetype.toLowerCase()) &&
+      !file.mimetype.toLowerCase().startsWith('image/')
+    ) {
+      throw new BadRequestException(
+        `Unsupported file type: ${file.mimetype}. Supported types: JPEG, PNG, GIF, WEBP.`,
+      );
+    }
+
+    const timestamp = Date.now();
+    const filePath = `seller-logos/${timestamp}-${file.originalname.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
+    const filesSizeInMb = Number((file.size / (1024 * 1024)).toFixed(1));
+
+    if (filesSizeInMb > 5) {
+      throw new BadRequestException('The file must be less than 5 MB.');
+    }
+
+    return this.usersService.updateSellerLogo(
+      user['_id'] as string,
+      filePath,
+      file.buffer,
+    );
+  }
 }

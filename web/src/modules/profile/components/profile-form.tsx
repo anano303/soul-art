@@ -22,6 +22,10 @@ const formSchema = z
       .optional()
       .or(z.literal("")),
     confirmPassword: z.string().optional().or(z.literal("")),
+    storeName: z.string().optional(),
+    phoneNumber: z.string().optional(),
+    identificationNumber: z.string().optional(),
+    accountNumber: z.string().optional(),
   })
   .refine(
     (data) => {
@@ -42,9 +46,12 @@ export function ProfileForm() {
   const queryClient = useQueryClient();
   const [shouldFetchUser, setShouldFetchUser] = useState(false);
   const [profileImage, setProfileImage] = useState<string | null>(null);
+  const [storeLogo, setStoreLogo] = useState("");
+  const [isSellerAccount, setIsSellerAccount] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadSuccess, setUploadSuccess] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const logoInputRef = useRef<HTMLInputElement>(null);
   const { user, isLoading } = useUser();
 
   useEffect(() => {
@@ -55,6 +62,13 @@ export function ProfileForm() {
     if (user && user.profileImage) {
       setProfileImage(user.profileImage);
     }
+    if (user) {
+      console.log("User role:", user.role);
+      setIsSellerAccount(user.role?.toUpperCase() === "SELLER");
+      if (user.storeLogo) {
+        setStoreLogo(user.storeLogo);
+      }
+    }
   }, [user]);
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -64,19 +78,43 @@ export function ProfileForm() {
       email: user?.email || "",
       password: "",
       confirmPassword: "",
+      storeName: user?.storeName || "",
+      phoneNumber: user?.phoneNumber || "",
+      identificationNumber: user?.identificationNumber || "",
+      accountNumber: user?.accountNumber || "",
     },
   });
 
   const updateProfile = useMutation({
     mutationFn: async (values: z.infer<typeof formSchema>) => {
       try {
-        const response = await apiClient.put("/auth/profile", {
+        const payload: Record<string, string | undefined> = {
           name: values.name,
           email: values.email,
-          ...(values.password ? { password: values.password } : {}),
-        });
+        };
+
+        if (values.password) {
+          payload.password = values.password;
+        }
+
+        if (
+          user &&
+          (user.role?.toUpperCase() === "SELLER" || isSellerAccount)
+        ) {
+          if (values.storeName) payload.storeName = values.storeName;
+          if (values.phoneNumber) payload.phoneNumber = values.phoneNumber;
+          if (values.identificationNumber)
+            payload.identificationNumber = values.identificationNumber;
+          if (values.accountNumber)
+            payload.accountNumber = values.accountNumber;
+        }
+
+        console.log("Updating profile with payload:", payload);
+
+        const response = await apiClient.put("/auth/profile", payload);
         return response.data;
       } catch (error) {
+        console.error("Profile update error:", error);
         if (error instanceof Error) {
           throw { message: error.message };
         }
@@ -142,15 +180,59 @@ export function ProfileForm() {
     }
   };
 
+  const handleLogoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || !e.target.files[0]) return;
+
+    try {
+      setIsUploading(true);
+
+      const file = e.target.files[0];
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const response = await apiClient.post("/users/seller-logo", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      setStoreLogo(response.data.logoUrl);
+      setUploadSuccess(true);
+
+      toast({
+        title: "Success",
+        description: "Store logo updated successfully.",
+      });
+    } catch (error) {
+      console.error("Error uploading logo:", error);
+      toast({
+        title: "Error",
+        description: "Failed to upload store logo. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
   const triggerFileInput = () => {
     if (fileInputRef.current) {
       fileInputRef.current.click();
     }
   };
 
+  const triggerLogoInput = () => {
+    if (logoInputRef.current) {
+      logoInputRef.current.click();
+    }
+  };
+
   if (!shouldFetchUser || isLoading) {
     return <div className="loading-container">პროფილი იტვირთება...</div>;
   }
+
+  console.log("Is seller account:", isSellerAccount);
+  console.log("User data:", user);
 
   return (
     <div className="card">
@@ -255,12 +337,114 @@ export function ProfileForm() {
           )}
         </div>
 
+        {user &&
+          user.role &&
+          (user.role.toUpperCase() === "SELLER" || isSellerAccount) && (
+            <div className="seller-section">
+              <h2 className="seller-section-title">Store Information</h2>
+
+              <div className="seller-logo-container">
+                <Image
+                  src={storeLogo || "/store-placeholder.jpg"}
+                  alt="Store Logo"
+                  width={120}
+                  height={120}
+                  className="seller-logo"
+                />
+                <button
+                  type="button"
+                  onClick={triggerLogoInput}
+                  className="upload-button"
+                >
+                  {isUploading ? "Uploading..." : "Change Store Logo"}
+                </button>
+                <input
+                  type="file"
+                  ref={logoInputRef}
+                  onChange={handleLogoChange}
+                  accept="image/*"
+                  className="file-input"
+                />
+              </div>
+
+              <div className="seller-form-grid">
+                <div className="form-field">
+                  <label htmlFor="storeName" className="label">
+                    Store Name
+                  </label>
+                  <input
+                    id="storeName"
+                    {...form.register("storeName")}
+                    className="input"
+                  />
+                  {form.formState.errors.storeName && (
+                    <span className="error-message">
+                      {form.formState.errors.storeName.message}
+                    </span>
+                  )}
+                </div>
+
+                <div className="form-field">
+                  <label htmlFor="phoneNumber" className="label">
+                    Phone Number
+                  </label>
+                  <input
+                    id="phoneNumber"
+                    {...form.register("phoneNumber")}
+                    className="input"
+                    placeholder="+995..."
+                  />
+                  {form.formState.errors.phoneNumber && (
+                    <span className="error-message">
+                      {form.formState.errors.phoneNumber.message}
+                    </span>
+                  )}
+                </div>
+
+                <div className="form-field">
+                  <label htmlFor="identificationNumber" className="label">
+                    ID Number
+                  </label>
+                  <input
+                    id="identificationNumber"
+                    {...form.register("identificationNumber")}
+                    className="input"
+                  />
+                  {form.formState.errors.identificationNumber && (
+                    <span className="error-message">
+                      {form.formState.errors.identificationNumber.message}
+                    </span>
+                  )}
+                </div>
+
+                <div className="form-field">
+                  <label htmlFor="accountNumber" className="label">
+                    IBAN
+                  </label>
+                  <input
+                    id="accountNumber"
+                    {...form.register("accountNumber")}
+                    className="input"
+                    placeholder="GE..."
+                  />
+                  {form.formState.errors.accountNumber && (
+                    <span className="error-message">
+                      {form.formState.errors.accountNumber.message}
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
         <button
           type="submit"
           className="ProfileButton"
           disabled={updateProfile.isPending}
         >
-          {updateProfile.isPending ? "მიმდინარეობს განახლება..." : "პროფილის განახლება"}
+          {updateProfile.isPending
+            ? "მიმდინარეობს განახლება..."
+            : "პროფილის განახლება"}
         </button>
       </form>
       {updateProfile.isSuccess && (
