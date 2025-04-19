@@ -39,9 +39,12 @@ const HomePageForum = () => {
   useEffect(() => {
     const fetchPosts = async () => {
       try {
-        const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/forums`, {
-          params: { page: 1, take: 3 },
-        });
+        const response = await axios.get(
+          `${process.env.NEXT_PUBLIC_API_URL}/forums`,
+          {
+            params: { page: 1, take: 3 },
+          }
+        );
         setPosts(response.data);
       } catch (error) {
         console.error("Error fetching posts:", error);
@@ -53,17 +56,17 @@ const HomePageForum = () => {
 
   return (
     <div className="homePageForum">
-       <h1 className="homePageForumH1">
-          <Image 
-            src="/chat-icon.svg" 
-            alt="Forum Icon" 
-            width={28} 
-            height={28}
-            className="forum-icon"
-          />
-           ფორუმი
-        </h1>
-      
+      <h1 className="homePageForumH1">
+        <Image
+          src="/chat-icon.svg"
+          alt="Forum Icon"
+          width={28}
+          height={28}
+          className="forum-icon"
+        />
+        ფორუმი
+      </h1>
+
       {posts.map((post) => (
         <ForumPost
           key={post._id}
@@ -74,9 +77,9 @@ const HomePageForum = () => {
           author={{
             name: post.user.name,
             _id: post.user._id,
-            avatar: post.user.profileImage || "/avatar.jpg", // Use profile image if available
+            avatar: post.user.profileImage || "/avatar.jpg",
             role: post.user.role,
-            profileImage: post.user.profileImage, // Pass profile image to ForumPost
+            profileImage: post.user.profileImage,
           }}
           currentUser={undefined}
           comments={post.comments.map((comment) => ({
@@ -85,7 +88,7 @@ const HomePageForum = () => {
             author: {
               name: comment.user.name,
               _id: comment.user._id,
-              avatar: comment.user.profileImage || "/avatar.jpg", // Use profile image for comments too
+              avatar: comment.user.profileImage || "/avatar.jpg",
               profileImage: comment.user.profileImage,
             },
             parentId: comment.parentId?.toString(),
