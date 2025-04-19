@@ -179,6 +179,13 @@ const ForumPost = ({
 
   const deleteCommentMutation = useMutation({
     mutationFn: async (commentId: string) => {
+      const isConfirmed = window.confirm(
+        "დარწმუნებული ხართ რომ გსურთ კომენტარის წაშლა?"
+      );
+      if (!isConfirmed) {
+        throw new Error("Operation canceled by user");
+      }
+
       const response = await fetchWithAuth(
         `/forums/delete-comment/${commentId}`,
         {
@@ -495,6 +502,13 @@ const ForumPost = ({
   const deletePostMutation = useMutation({
     mutationFn: async () => {
       try {
+        const isConfirmed = window.confirm(
+          "დარწმუნებული ხართ რომ გსურთ პოსტის წაშლა?"
+        );
+        if (!isConfirmed) {
+          throw new Error("Operation canceled by user");
+        }
+
         console.log("Attempting to delete post:", {
           postId: id,
           currentUserRole: currentUser?.role,
@@ -715,7 +729,7 @@ const ForumPost = ({
                   >
                     <span>{commentLikeCount}</span>
                     <span className="art-like-icon">
-                      {isCommentLiked ? "🎨" : "🖌️"}
+                      {isCommentLiked ? "💫" : "⭐"}
                     </span>
                   </button>
                 </>
@@ -912,7 +926,7 @@ const ForumPost = ({
             onClick={handleLike}
             disabled={!isAuthorized || likeMutation.isPending}
           >
-            {likesCount} {userLiked ? "🎨" : "🖌️"}
+            {likesCount} {userLiked ? "💫" : "⭐"}
           </button>
         </div>
 

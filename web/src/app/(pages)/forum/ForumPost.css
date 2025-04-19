@@ -169,6 +169,7 @@
 .art-like-icon {
   display: inline-block;
   transition: transform 0.3s ease;
+  font-size: 16px; /* Slightly larger size for the star icon */
 }
 
 .comment-like-button:hover .art-like-icon {
@@ -176,7 +177,22 @@
 }
 
 .comment-like-button.liked .art-like-icon {
-  animation: colorSplash 1s ease-in-out;
+  animation: sparkleAnimation 1s ease-in-out;
+}
+
+@keyframes sparkleAnimation {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.4) rotate(30deg);
+    opacity: 0.9;
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
 }
 
 @keyframes colorSplash {
