@@ -17,7 +17,7 @@ export default function HomePageShop() {
 
   useEffect(() => {
     async function fetchProducts() {
-      const { items } = await getProducts(1, 4); // Fetch only 4 products
+      const { items } = await getProducts(1, 6); // Fetch only 4 products
       setProducts(items);
       setFilteredProducts(items);
     }
