@@ -22,7 +22,7 @@ export default function SearchBox() {
       {/* <Image src={searchIcon} alt="search icon" className="searchIcon" /> */}
       <input
         type="text"
-        placeholder="ძიება ნამუშევრებისთვის"
+        placeholder="ნამუშევრების ძიება"
         value={keyword}
         onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
           setKeyword(e.target.value)
