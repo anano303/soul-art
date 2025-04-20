@@ -37,13 +37,17 @@ export function ProductsList() {
     },
   });
 
+  const fetchPendingProducts = async () => {
+    console.log("Fetching pending products...");
+    const response = await fetchWithAuth("/products/pending");
+    const data = await response.json();
+    console.log("Pending products data:", data);
+    return data;
+  };
+
   const { data: pendingProducts } = useQuery({
     queryKey: ["pendingProducts"],
-    queryFn: async () => {
-      const response = await fetchWithAuth("/products/pending");
-      const data = await response.json();
-      return data;
-    },
+    queryFn: fetchPendingProducts,
     enabled: isAdmin,
   });
 
