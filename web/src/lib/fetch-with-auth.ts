@@ -1,4 +1,9 @@
-import { getAccessToken, getRefreshToken, storeTokens, clearTokens } from './auth';
+import {
+  getAccessToken,
+  getRefreshToken,
+  storeTokens,
+  clearTokens,
+} from "./auth";
 
 export async function fetchWithAuth(url: string, config: RequestInit = {}) {
   const { headers, ...rest } = config;
@@ -14,10 +19,10 @@ export async function fetchWithAuth(url: string, config: RequestInit = {}) {
       headers: {
         ...headers,
         "Content-Type": "application/json",
-        ...(accessToken ? { "Authorization": `Bearer ${accessToken}` } : {}),
+        ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
       },
-      credentials: 'include',
-      mode: 'cors',
+      credentials: "include",
+      mode: "cors",
     });
   };
 
@@ -79,40 +84,50 @@ export async function fetchWithAuth(url: string, config: RequestInit = {}) {
     if (!response.ok) {
       // Try to parse error details from the response
       try {
-        const contentType = response.headers.get('content-type');
-        
-        if (contentType && contentType.includes('application/json')) {
+        const contentType = response.headers.get("content-type");
+
+        if (contentType && contentType.includes("application/json")) {
           const errorData = await response.json();
           console.error(`[fetchWithAuth] Error response:`, errorData);
-          
+
           // Special handling for specific error messages
-          if (errorData.message === 'Invalid order ID.' && url.includes('/orders')) {
+          if (
+            errorData.message === "Invalid order ID." &&
+            url.includes("/orders")
+          ) {
             // For orders endpoints with this specific error, we'll pass it through
             // without treating it as an error - the component will handle it
-            throw new Error('Invalid order ID - user likely has no orders yet');
+            throw new Error("Invalid order ID - user likely has no orders yet");
           }
-          
+
           if (errorData.message) {
-            throw new Error(typeof errorData.message === 'string' 
-              ? errorData.message 
-              : Array.isArray(errorData.message) 
-                ? errorData.message.join(', ') 
-                : JSON.stringify(errorData.message));
+            throw new Error(
+              typeof errorData.message === "string"
+                ? errorData.message
+                : Array.isArray(errorData.message)
+                ? errorData.message.join(", ")
+                : JSON.stringify(errorData.message)
+            );
           } else if (errorData.error) {
             throw new Error(errorData.error);
           }
         } else {
           // Not JSON response
           const textError = await response.text();
-          console.error(`[fetchWithAuth] Non-JSON error response: ${textError}`);
+          console.error(
+            `[fetchWithAuth] Non-JSON error response: ${textError}`
+          );
           throw new Error(`შეცდომა: ${response.status} ${response.statusText}`);
         }
       } catch (parseError) {
-        console.error(`[fetchWithAuth] Failed to parse error response:`, parseError);
+        console.error(
+          `[fetchWithAuth] Failed to parse error response:`,
+          parseError
+        );
         // If we can't parse the response, use the HTTP status
         throw new Error(`შეცდომა: ${response.status} ${response.statusText}`);
       }
-      
+
       // Fallback error if we couldn't extract a more specific message
       throw new Error("მოთხოვნის შესრულება ვერ მოხერხდა");
     }

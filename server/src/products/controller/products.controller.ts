@@ -78,6 +78,14 @@ export class ProductsController {
     );
   }
 
+  @Get('pending')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.Admin)
+  async getPendingProducts() {
+    console.log('Getting pending products');
+    return this.productsService.findByStatus(ProductStatus.PENDING);
+  }
+
   @Get('topRated')
   getTopRatedProducts() {
     return this.productsService.findTopRated();
@@ -285,12 +293,5 @@ export class ProductsController {
     }: { status: ProductStatus; rejectionReason?: string },
   ) {
     return this.productsService.updateStatus(id, status, rejectionReason);
-  }
-
-  @Get('pending')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.Admin)
-  async getPendingProducts() {
-    return this.productsService.findByStatus(ProductStatus.PENDING);
   }
 }
