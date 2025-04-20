@@ -6,7 +6,7 @@ import "./ProductCard.css";
 import { Product } from "@/types";
 import { AddToCartButton } from "./AddToCartButton";
 import noPhoto from "../../../assets/nophoto.webp";
-import Star from "../../../assets/images/star.png";
+import Star from "../../../assets/Images/star.png";
 
 interface ProductCardProps {
   product: Product;
