@@ -9,7 +9,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiClient } from "@/lib/api-client";
 import { motion } from "framer-motion";
 import "./ProfileForm.css";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import Image from "next/image";
 
 const formSchema = z
@@ -55,9 +55,9 @@ export function ProfileForm() {
   const { user, isLoading } = useUser();
 
   // Use manual invalidation instead of refetch
-  const refreshUserData = () => {
+  const refreshUserData = useCallback(() => {
     queryClient.invalidateQueries({ queryKey: ["user"] });
-  };
+  }, [queryClient]);
 
   useEffect(() => {
     setShouldFetchUser(true);
@@ -67,7 +67,7 @@ export function ProfileForm() {
     if (shouldFetchUser) {
       refreshUserData();
     }
-  }, [shouldFetchUser]);
+  }, [shouldFetchUser, refreshUserData]);
 
   useEffect(() => {
     if (user) {

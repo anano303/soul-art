@@ -1,4 +1,11 @@
-import { IsString, IsNumber, IsArray, IsEnum, IsOptional, IsObject } from 'class-validator';
+import {
+  IsString,
+  IsNumber,
+  IsArray,
+  IsEnum,
+  IsOptional,
+  IsObject,
+} from 'class-validator';
 import { ProductStatus, DeliveryType } from '../schemas/product.schema';
 
 export class ProductDto {
@@ -33,19 +40,19 @@ export class ProductDto {
   @IsString()
   @IsOptional()
   rejectionReason?: string;
-  
+
   @IsEnum(DeliveryType)
   @IsOptional()
   deliveryType?: DeliveryType;
-  
+
   @IsNumber()
   @IsOptional()
   minDeliveryDays?: number;
-  
+
   @IsNumber()
   @IsOptional()
   maxDeliveryDays?: number;
-  
+
   @IsObject()
   @IsOptional()
   dimensions?: {
@@ -53,4 +60,8 @@ export class ProductDto {
     height?: number;
     depth?: number;
   };
+
+  @IsString()
+  @IsOptional()
+  brandLogoUrl?: string;
 }
