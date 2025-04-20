@@ -15,14 +15,21 @@ const ShopContent = () => {
   const brand = searchParams ? searchParams.get("brand") : null;
 
   // Set initial category state to 'all' when brand is present
-  const initialCategory = brand ? 'all' : '';
+  const initialCategory = brand ? "all" : "";
 
   const [selectedCategory, setSelectedCategory] = useState(initialCategory);
+  // Add new state for sort option
+  const [sortOption, setSortOption] = useState("");
 
   const { data, isLoading } = useInfiniteQuery({
     queryKey: ["products", brand],
     queryFn: async ({ pageParam = 1 }) => {
-      const response = await getProducts(pageParam, 10, undefined, brand || undefined);
+      const response = await getProducts(
+        pageParam,
+        10,
+        undefined,
+        brand || undefined
+      );
       return response;
     },
     getNextPageParam: (lastPage) => {
@@ -35,12 +42,13 @@ const ShopContent = () => {
     if (data) {
       const allProducts = data.pages.flatMap((page) => page.items);
       setProducts(allProducts);
-      
+
       // Reset category and filter products when brand parameter exists
       if (brand) {
-        setSelectedCategory('all'); // Reset category to 'all'
+        setSelectedCategory("all"); // Reset category to 'all'
         const brandFiltered = allProducts.filter(
-          product => product.brand && product.brand.toLowerCase() === brand.toLowerCase()
+          (product) =>
+            product.brand && product.brand.toLowerCase() === brand.toLowerCase()
         );
         setFilteredProducts(brandFiltered);
       } else {
@@ -49,36 +57,56 @@ const ShopContent = () => {
     }
   }, [data, brand]);
 
+  // Apply filtering and sorting whenever relevant state changes
+  useEffect(() => {
+    let filtered = [...products];
+
+    if (brand) {
+      filtered = filtered.filter(
+        (product) =>
+          product.brand && product.brand.toLowerCase() === brand.toLowerCase()
+      );
+    }
+
+    if (selectedCategory && selectedCategory !== "all") {
+      filtered = filtered.filter(
+        (product) => product.category === selectedCategory
+      );
+    }
+
+    // Apply sorting
+    if (sortOption === "lowToHigh") {
+      filtered.sort((a, b) => a.price - b.price);
+    } else if (sortOption === "highToLow") {
+      filtered.sort((a, b) => b.price - a.price);
+    }
+
+    setFilteredProducts(filtered);
+  }, [selectedCategory, brand, products, sortOption]);
+
   // Handle category changes while preserving brand filter
   const handleCategoryChange = (category: string) => {
     setSelectedCategory(category);
-    let filtered = [...products];
-    
-    if (brand) {
-      filtered = filtered.filter(product => 
-        product.brand && product.brand.toLowerCase() === brand.toLowerCase()
-      );
-    }
-    
-    if (category) {
-      filtered = filtered.filter(product => product.category === category);
-    }
-    
-    setFilteredProducts(filtered);
   };
 
   const handleArtistChange = (artist: string) => {
     let filtered = [...products];
-    
+
     if (artist) {
-      filtered = filtered.filter(product => 
-        product.brand && product.brand.toLowerCase() === artist.toLowerCase()
+      filtered = filtered.filter(
+        (product) =>
+          product.brand && product.brand.toLowerCase() === artist.toLowerCase()
       );
     } else {
       filtered = products;
     }
-    
+
     setFilteredProducts(filtered);
+  };
+
+  // Handle sort change
+  const handleSortChange = (option: string) => {
+    setSortOption(option);
   };
 
   if (isLoading) return <div>იტვირთება...</div>;
@@ -88,10 +116,11 @@ const ShopContent = () => {
       <h1 className="text-2xl font-bold mb-4">
         {brand ? `${brand}-ის ნამუშევრები` : "ყველა ნამუშევარი"}
       </h1>
-      <ProductFilters 
+      <ProductFilters
         products={products}
         onCategoryChange={handleCategoryChange}
         onArtistChange={handleArtistChange}
+        onSortChange={handleSortChange}
         selectedCategory={selectedCategory}
       />
       <ProductGrid products={filteredProducts} />

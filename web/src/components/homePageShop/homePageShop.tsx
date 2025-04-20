@@ -13,6 +13,7 @@ export default function HomePageShop() {
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const [selectedCategory, setSelectedCategory] = useState("");
   const [selectedArtist, setSelectedArtist] = useState("");
+  const [sortOption, setSortOption] = useState("");
 
   useEffect(() => {
     async function fetchProducts() {
@@ -40,16 +41,27 @@ export default function HomePageShop() {
       );
     }
 
+    if (sortOption === "lowToHigh") {
+      filtered.sort((a, b) => a.price - b.price);
+    } else if (sortOption === "highToLow") {
+      filtered.sort((a, b) => b.price - a.price);
+    }
+
     console.log("Filtering products:", {
       total: products.length,
       filtered: filtered.length,
       category: selectedCategory,
       artist: selectedArtist,
+      sortOption: sortOption,
       filteredProducts: filtered,
     });
 
     setFilteredProducts(filtered);
-  }, [selectedCategory, selectedArtist, products]);
+  }, [selectedCategory, selectedArtist, sortOption, products]);
+
+  const handleSortChange = (option: string) => {
+    setSortOption(option);
+  };
 
   return (
     <div className="container">
@@ -60,6 +72,7 @@ export default function HomePageShop() {
           products={products}
           onCategoryChange={setSelectedCategory}
           onArtistChange={setSelectedArtist}
+          onSortChange={handleSortChange}
         />
         <ProductGrid products={filteredProducts} />
 

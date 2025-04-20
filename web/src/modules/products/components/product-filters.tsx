@@ -1,33 +1,36 @@
 "use client";
 
-import { useEffect, useState } from 'react';
-import { Search } from 'lucide-react';
-import './product-filters.css';
-import { Product } from '@/types';
-import Link from 'next/link';
+import { useEffect, useState, useCallback } from "react";
+import { Search } from "lucide-react";
+import "./product-filters.css";
+import { Product } from "@/types";
+import Link from "next/link";
 
 interface FilterProps {
   products: Product[];
   onCategoryChange: (category: string) => void;
   onArtistChange: (artist: string) => void;
-  selectedCategory?: string; // Add this prop
+  onSortChange?: (sortOption: string) => void;
+  selectedCategory?: string;
 }
 
-export function ProductFilters({ 
-  products, 
-  onCategoryChange, 
+export function ProductFilters({
+  products,
+  onCategoryChange,
   onArtistChange,
-  selectedCategory: initialCategory = 'all' // Add default value
+  onSortChange,
+  selectedCategory: initialCategory = "all",
 }: FilterProps) {
   const [selectedCategory, setSelectedCategory] = useState(initialCategory);
-  const [selectedArtist, setSelectedArtist] = useState('all');
-  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedArtist, setSelectedArtist] = useState("all");
+  const [searchTerm, setSearchTerm] = useState("");
   const [isSearching, setIsSearching] = useState(false);
-  const [artists, setArtists] = useState<string[]>(['all']);
-  const [filteredArtists, setFilteredArtists] = useState<string[]>(['all']);
+  const [artists, setArtists] = useState<string[]>(["all"]);
+  const [filteredArtists, setFilteredArtists] = useState<string[]>(["all"]);
+  const [sortOption, setSortOption] = useState<string>("");
 
   const categories = [
-    'all',
+    "all",
     "პეიზაჟი",
     "პორტრეტი",
     "აბსტრაქცია",
@@ -38,62 +41,79 @@ export function ProductFilters({
   ];
 
   useEffect(() => {
-    const uniqueBrands = Array.from(new Set(
-      products.map(product => product.brand)
-    )).filter(Boolean).sort();
-    
-    setArtists(['all', ...uniqueBrands]);
+    const uniqueBrands = Array.from(
+      new Set(products.map((product) => product.brand))
+    )
+      .filter(Boolean)
+      .sort();
+
+    setArtists(["all", ...uniqueBrands]);
   }, [products]);
 
   const filterArtists = (search: string) => {
     setSearchTerm(search);
     setIsSearching(search.length > 0);
-    
+
     if (search) {
-      const filtered = artists.filter(artist => 
-        artist !== 'all' && artist.toLowerCase().includes(search.toLowerCase())
+      const filtered = artists.filter(
+        (artist) =>
+          artist !== "all" &&
+          artist.toLowerCase().includes(search.toLowerCase())
       );
       setFilteredArtists(filtered);
     } else {
-      setFilteredArtists(['all']);
+      setFilteredArtists(["all"]);
     }
   };
 
-  const handleCategoryChange = (category: string) => {
-    console.log('Changing category to:', category); // Debug log
-    const newCategory = category === 'all' ? '' : category;
-    setSelectedCategory(category);
-    onCategoryChange(newCategory);
+  const handleArtistChange = useCallback(
+    (artist: string) => {
+      const newArtist = artist === "all" ? "" : artist;
+      setSelectedArtist(artist);
+      onArtistChange(newArtist);
 
-    // Reset artist filter when changing category
-    if (selectedArtist !== 'all') {
-      handleArtistChange('all');
-    }
-  };
+      // Reset category filter when changing artist
+      if (selectedCategory !== "all") {
+        setSelectedCategory("all");
+        onCategoryChange("");
+      }
+    },
+    [selectedCategory, onArtistChange, onCategoryChange]
+  );
 
-  const handleArtistChange = (artist: string) => {
-    const newArtist = artist === 'all' ? '' : artist;
-    setSelectedArtist(artist);
-    onArtistChange(newArtist);
+  const handleCategoryChange = useCallback(
+    (category: string) => {
+      console.log("Changing category to:", category); // Debug log
+      const newCategory = category === "all" ? "" : category;
+      setSelectedCategory(category);
+      onCategoryChange(newCategory);
 
-    // Reset category filter when changing artist
-    if (selectedCategory !== 'all') {
-      setSelectedCategory('all');
-      onCategoryChange('');
-    }
-  };
+      // Reset artist filter when changing category
+      if (selectedArtist !== "all") {
+        handleArtistChange("all");
+      }
+    },
+    [selectedArtist, onCategoryChange, handleArtistChange]
+  );
 
   const handleArtistClick = (brand: string) => {
     setSelectedArtist(brand);
-    setSearchTerm('');
+    setSearchTerm("");
     setIsSearching(false);
   };
 
+  const handleSortChange = (option: string) => {
+    setSortOption(option);
+    if (onSortChange) {
+      onSortChange(option);
+    }
+  };
+
   useEffect(() => {
-    if (initialCategory !== 'all') {
+    if (initialCategory !== "all") {
       handleCategoryChange(initialCategory);
     }
-  }, [initialCategory]);
+  }, [initialCategory, handleCategoryChange]);
 
   return (
     <div className="filters-container">
@@ -103,23 +123,55 @@ export function ProductFilters({
           {categories.map((category) => (
             <button
               key={category}
-              className={`filter-btn ${selectedCategory === category ? 'active' : ''}`}
+              className={`filter-btn ${
+                selectedCategory === category ? "active" : ""
+              }`}
               onClick={() => handleCategoryChange(category)}
             >
-              {category === 'all' ? 'ყველა' : category}
+              {category === "all" ? "ყველა" : category}
             </button>
           ))}
         </div>
-        {selectedCategory !== 'all' && (
+        {selectedCategory !== "all" && (
           <div className="selected-filter">
             <button
               className="clear-filter"
-              onClick={() => handleCategoryChange('all')}
+              onClick={() => handleCategoryChange("all")}
             >
               × {selectedCategory}
             </button>
           </div>
         )}
+      </div>
+
+      <div className="filter-section">
+        <h3 className="filter-title">ფასების სორტირება</h3>
+        <div className="filter-options">
+          <button
+            className={`filter-btn ${
+              sortOption === "lowToHigh" ? "active" : ""
+            }`}
+            onClick={() => handleSortChange("lowToHigh")}
+          >
+            ↑ დაბლიდან მაღლა
+          </button>
+          <button
+            className={`filter-btn ${
+              sortOption === "highToLow" ? "active" : ""
+            }`}
+            onClick={() => handleSortChange("highToLow")}
+          >
+            ↓ მაღლიდან დაბლა
+          </button>
+          {sortOption && (
+            <button
+              className="filter-btn clear-filter"
+              onClick={() => handleSortChange("")}
+            >
+              გასუფთავება
+            </button>
+          )}
+        </div>
       </div>
 
       <div className="filter-section">
@@ -135,33 +187,36 @@ export function ProductFilters({
             className="search-input"
           />
         </div>
-        {(isSearching || selectedArtist !== 'all') && (
+        {(isSearching || selectedArtist !== "all") && (
           <div className="filter-options scrollable">
-            {(searchTerm ? filteredArtists : artists).map((brand) => (
-              brand !== 'all' && (
-                <Link 
-                  key={brand} 
-                  href={`/shop?brand=${encodeURIComponent(brand)}`}
-                  className={`filter-btn ${selectedArtist === brand ? 'active' : ''}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={() => {
-                    handleArtistClick(brand);
-                  }}
-                >
-                  {brand}
-                </Link>
-              )
-            ))}
+            {(searchTerm ? filteredArtists : artists).map(
+              (brand) =>
+                brand !== "all" && (
+                  <Link
+                    key={brand}
+                    href={`/shop?brand=${encodeURIComponent(brand)}`}
+                    className={`filter-btn ${
+                      selectedArtist === brand ? "active" : ""
+                    }`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={() => {
+                      handleArtistClick(brand);
+                    }}
+                  >
+                    {brand}
+                  </Link>
+                )
+            )}
           </div>
         )}
-        {selectedArtist !== 'all' && (
+        {selectedArtist !== "all" && (
           <div className="selected-filter">
             <button
               className="clear-filter"
               onClick={() => {
-                handleArtistChange('all');
-                setSearchTerm('');
+                handleArtistChange("all");
+                setSearchTerm("");
                 setIsSearching(false);
               }}
             >
