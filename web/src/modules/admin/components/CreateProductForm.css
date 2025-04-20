@@ -6,8 +6,7 @@
   box-shadow: 0 8px 20px rgba(122, 94, 65, 0.08);
   max-width: 800px;
   margin: 0 auto;
-  font-family: 'Georgia', serif;
-  
+  font-family: "Georgia", serif;
 }
 
 .create-product-form h1 {
@@ -19,7 +18,6 @@
   flex-direction: column;
   gap: 1.25rem;
   width: 95%;
-
 }
 
 .create-product-form label {
@@ -47,6 +45,13 @@
   outline: none;
   border-color: #8d6e63;
   box-shadow: 0 0 0 2px rgba(141, 110, 99, 0.2);
+}
+
+.create-product-input.disabled {
+  background-color: #f0f0f0;
+  color: #666;
+  cursor: not-allowed;
+  border-color: #ddd;
 }
 
 .create-product-textarea {
@@ -194,6 +199,57 @@
 
 .dimension-input {
   flex: 1;
+}
+
+.brand-notice {
+  font-size: 0.85rem;
+  color: #6d4c41;
+  margin-top: 5px;
+  font-style: italic;
+}
+
+.brand-logo-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.missing-logo-message {
+  background-color: #fff3e0;
+  border-left: 4px solid #ff9800;
+  padding: 10px 15px;
+  margin: 10px 0;
+}
+
+.missing-logo-message a {
+  color: #e65100;
+  text-decoration: underline;
+}
+
+.missing-logo-message a:hover {
+  color: #bf360c;
+}
+
+.upload-reminder {
+  color: #f57c00;
+  font-size: 0.9rem;
+  margin: 8px 0;
+  font-style: italic;
+}
+
+.no-logo-message {
+  background-color: #f8f9fa;
+  border-left: 4px solid #6c757d;
+  padding: 10px 15px;
+  margin: 10px 0;
+  font-size: 0.9rem;
+}
+
+.logo-optional-note {
+  color: #6c757d;
+  font-size: 0.85rem;
+  font-style: italic;
+  margin-top: 5px;
 }
 
 @keyframes spin {
