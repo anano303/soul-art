@@ -9,19 +9,27 @@ import { getProducts } from "@/modules/products/api/get-products";
 import { Product, MainCategory } from "@/types";
 
 const ShopContent = () => {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const searchParams = useSearchParams();
   const brand = searchParams ? searchParams.get("brand") : null;
+  const categoryParam = searchParams ? searchParams.get("category") : null;
+  const mainCategoryParam = searchParams
+    ? searchParams.get("mainCategory")
+    : null;
 
-  // Set initial category state to 'all' when brand is present
-  const initialCategory = brand ? "all" : "";
+  // Set initial category state using URL param if available
+  const initialCategory = categoryParam || (brand ? "all" : "");
 
+  const [products, setProducts] = useState<Product[]>([]);
+  const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const [selectedCategory, setSelectedCategory] = useState(initialCategory);
   // Add new state for sort option
   const [sortOption, setSortOption] = useState("");
   const [selectedMainCategory, setSelectedMainCategory] =
-    useState<MainCategory>(MainCategory.PAINTINGS);
+    useState<MainCategory>(
+      mainCategoryParam === "HANDMADE"
+        ? MainCategory.HANDMADE
+        : MainCategory.PAINTINGS
+    );
 
   const { data, isLoading } = useInfiniteQuery({
     queryKey: ["products", brand],
@@ -58,6 +66,23 @@ const ShopContent = () => {
       }
     }
   }, [data, brand]);
+
+  // Update useEffect to handle URL parameters for categories
+  useEffect(() => {
+    // Set main category from URL parameter if it exists
+    if (mainCategoryParam) {
+      if (mainCategoryParam === "HANDMADE") {
+        setSelectedMainCategory(MainCategory.HANDMADE);
+      } else if (mainCategoryParam === "PAINTINGS") {
+        setSelectedMainCategory(MainCategory.PAINTINGS);
+      }
+    }
+
+    // Set subcategory from URL parameter if it exists
+    if (categoryParam) {
+      setSelectedCategory(categoryParam);
+    }
+  }, [mainCategoryParam, categoryParam]);
 
   // Apply filtering and sorting whenever relevant state changes
   useEffect(() => {
@@ -102,7 +127,7 @@ const ShopContent = () => {
           "ტექსტილი",
           "მინანქარი",
           "სკულპტურები",
-          'სხვა',
+          "სხვა",
         ];
         const isHandmade = handmadeCategories.includes(product.category);
 
@@ -140,6 +165,17 @@ const ShopContent = () => {
   // Handle category changes while preserving brand filter
   const handleCategoryChange = (category: string) => {
     setSelectedCategory(category);
+    
+    // Update URL with category parameter
+    if (typeof window !== "undefined") {
+      const url = new URL(window.location.href);
+      if (category) {
+        url.searchParams.set("category", category);
+      } else {
+        url.searchParams.delete("category");
+      }
+      window.history.pushState({}, "", url.toString());
+    }
   };
 
   const handleArtistChange = (artist: string) => {
@@ -165,6 +201,13 @@ const ShopContent = () => {
   // Handle main category changes
   const handleMainCategoryChange = (mainCategory: MainCategory) => {
     setSelectedMainCategory(mainCategory);
+    
+    // Update URL with main category parameter
+    if (typeof window !== "undefined") {
+      const url = new URL(window.location.href);
+      url.searchParams.set("mainCategory", mainCategory);
+      window.history.pushState({}, "", url.toString());
+    }
   };
 
   if (isLoading) return <div>იტვირთება...</div>;

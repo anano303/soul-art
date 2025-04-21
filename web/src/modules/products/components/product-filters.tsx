@@ -104,17 +104,37 @@ export function ProductFilters({
       setSelectedCategory(category);
       onCategoryChange(newCategory);
 
+      // Update URL with new category parameter without page refresh
+      if (typeof window !== "undefined") {
+        const url = new URL(window.location.href);
+        if (category === "all") {
+          url.searchParams.delete("category");
+        } else {
+          url.searchParams.set("category", category);
+        }
+        url.searchParams.set("mainCategory", selectedMainCategory);
+        window.history.pushState({}, "", url.toString());
+      }
+
       if (selectedArtist !== "all") {
         handleArtistChange("all");
       }
     },
-    [selectedArtist, onCategoryChange, handleArtistChange]
+    [selectedArtist, onCategoryChange, handleArtistChange, selectedMainCategory]
   );
 
   const handleMainCategoryChange = (mainCategory: MainCategory) => {
     setSelectedMainCategory(mainCategory);
     setSelectedCategory("all");
     onCategoryChange("");
+
+    // Update URL with new main category parameter without page refresh
+    if (typeof window !== "undefined") {
+      const url = new URL(window.location.href);
+      url.searchParams.set("mainCategory", mainCategory);
+      url.searchParams.delete("category");
+      window.history.pushState({}, "", url.toString());
+    }
 
     if (onMainCategoryChange) {
       onMainCategoryChange(mainCategory);
@@ -125,6 +145,17 @@ export function ProductFilters({
     setSelectedArtist(brand);
     setSearchTerm("");
     setIsSearching(false);
+
+    // Update URL with brand parameter without page refresh
+    if (typeof window !== "undefined") {
+      const url = new URL(window.location.href);
+      url.searchParams.set("brand", brand);
+      url.searchParams.set("mainCategory", selectedMainCategory);
+      if (selectedCategory !== "all") {
+        url.searchParams.set("category", selectedCategory);
+      }
+      window.history.pushState({}, "", url.toString());
+    }
   };
 
   const handleSortChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
@@ -231,13 +262,18 @@ export function ProductFilters({
                 brand !== "all" && (
                   <Link
                     key={brand}
-                    href={`/shop?brand=${encodeURIComponent(brand)}`}
+                    href={`/shop?brand=${encodeURIComponent(
+                      brand
+                    )}&mainCategory=${selectedMainCategory}${
+                      selectedCategory !== "all"
+                        ? `&category=${encodeURIComponent(selectedCategory)}`
+                        : ""
+                    }`}
                     className={`filter-btn ${
                       selectedArtist === brand ? "active" : ""
                     }`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    onClick={() => {
+                    onClick={(e) => {
+                      e.preventDefault(); // Prevent default navigation
                       handleArtistClick(brand);
                     }}
                   >
