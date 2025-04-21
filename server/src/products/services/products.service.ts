@@ -7,12 +7,11 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { UserDocument } from 'src/users/schemas/user.schema';
 import {
-  MainCategory,
   Product,
   ProductDocument,
   ProductStatus,
 } from '../schemas/product.schema';
-import { PaginatedResponse } from '@/types';
+import { MainCategory, PaginatedResponse } from '@/types';
 import { Order } from '../../orders/schemas/order.schema';
 import { sampleProduct } from '@/utils/data/product';
 import { Role } from '@/types/role.enum';
@@ -57,6 +56,51 @@ export class ProductsService {
           .join('')
       : '';
 
+    // Create a more flexible query for mainCategory
+    let mainCategoryQuery = {};
+    if (mainCategory) {
+      mainCategoryQuery = {
+        $or: [
+          { 'categoryStructure.main': mainCategory },
+          // For legacy products without categoryStructure but with category field
+          ...(mainCategory === MainCategory.HANDMADE
+            ? [
+                {
+                  categoryStructure: { $exists: false },
+                  category: {
+                    $in: [
+                      'კერამიკა',
+                      'ხის ნაკეთობები',
+                      'სამკაულები',
+                      'ტექსტილი',
+                      'მინანქარი',
+                      'სკულპტურები',
+                    ],
+                  },
+                },
+              ]
+            : []),
+          ...(mainCategory === MainCategory.PAINTINGS
+            ? [
+                {
+                  categoryStructure: { $exists: false },
+                  category: {
+                    $nin: [
+                      'კერამიკა',
+                      'ხის ნაკეთობები',
+                      'სამკაულები',
+                      'ტექსტილი',
+                      'მინანქარი',
+                      'სკულპტურები',
+                    ],
+                  },
+                },
+              ]
+            : []),
+        ],
+      };
+    }
+
     const searchQuery = decodedKeyword
       ? {
           $and: [
@@ -70,14 +114,16 @@ export class ProductsService {
             },
             user ? { user: user._id } : {},
             brand ? { brand: brand } : {},
-            mainCategory ? { 'categoryStructure.main': mainCategory } : {},
+            mainCategory ? mainCategoryQuery : {},
           ],
         }
       : {
           ...(user ? { user: user._id } : {}),
           ...(brand ? { brand: brand } : {}),
-          ...(mainCategory ? { 'categoryStructure.main': mainCategory } : {}),
+          ...(mainCategory ? mainCategoryQuery : {}),
         };
+
+    console.log('Search query:', JSON.stringify(searchQuery, null, 2));
 
     const searchQueryWithStatus = {
       ...searchQuery,
@@ -95,10 +141,37 @@ export class ProductsService {
       .limit(pageSize)
       .skip(pageSize * (currentPage - 1));
 
-    if (!products.length) throw new NotFoundException('No products found.');
+    // Process products to ensure they all have categoryStructure
+    const processedProducts = products.map((product) => {
+      const doc = product.toObject();
+
+      if (!doc.categoryStructure) {
+        // Check if category is a handmade category
+        const isHandmadeCategory = [
+          'კერამიკა',
+          'ხის ნაკეთობები',
+          'სამკაულები',
+          'ტექსტილი',
+          'მინანქარი',
+          'სკულპტურები',
+        ].includes(doc.category);
+
+        doc.categoryStructure = {
+          main: isHandmadeCategory
+            ? MainCategory.HANDMADE
+            : MainCategory.PAINTINGS,
+          sub: doc.category,
+        };
+      }
+
+      return doc;
+    });
+
+    if (!processedProducts.length)
+      throw new NotFoundException('No products found.');
 
     return {
-      items: products,
+      items: processedProducts,
       total: count,
       page: currentPage,
       pages: Math.ceil(count / pageSize),
@@ -115,8 +188,20 @@ export class ProductsService {
 
     // Make sure the product has a category structure even if it's a legacy product
     if (!product.categoryStructure) {
+      // Check if category is a handmade category
+      const isHandmadeCategory = [
+        'კერამიკა',
+        'ხის ნაკეთობები',
+        'სამკაულები',
+        'ტექსტილი',
+        'მინანქარი',
+        'სკულპტურები',
+      ].includes(product.category);
+
       product.categoryStructure = {
-        main: MainCategory.PAINTINGS, // Default for legacy products
+        main: isHandmadeCategory
+          ? MainCategory.HANDMADE
+          : MainCategory.PAINTINGS,
         sub: product.category,
       };
     }
@@ -278,8 +363,20 @@ export class ProductsService {
         : ProductStatus.PENDING;
 
     if (!productData.categoryStructure) {
+      // Check if category is a handmade category
+      const isHandmadeCategory = [
+        'კერამიკა',
+        'ხის ნაკეთობები',
+        'სამკაულები',
+        'ტექსტილი',
+        'მინანქარი',
+        'სკულპტურები',
+      ].includes(productData.category);
+
       productData.categoryStructure = {
-        main: MainCategory.PAINTINGS,
+        main: isHandmadeCategory
+          ? MainCategory.HANDMADE
+          : MainCategory.PAINTINGS,
         sub: productData.category,
       };
     }

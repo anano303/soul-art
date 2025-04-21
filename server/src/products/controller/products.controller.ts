@@ -35,6 +35,7 @@ import { ChatRequest } from '@/types/agents';
 import { Roles } from '@/decorators/roles.decorator';
 import { Role } from '@/types/role.enum';
 import { ProductStatus } from '../schemas/product.schema';
+import { MainCategory } from '@/types';
 
 @Controller('products')
 export class ProductsController {
@@ -52,6 +53,7 @@ export class ProductsController {
     @Query('brand') brand: string,
     @Query('mainCategory') mainCategory: string,
   ) {
+    console.log('Getting products with mainCategory:', mainCategory);
     return this.productsService.findMany(
       keyword,
       page,

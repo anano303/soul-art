@@ -20,7 +20,8 @@ const ShopContent = () => {
   const [selectedCategory, setSelectedCategory] = useState(initialCategory);
   // Add new state for sort option
   const [sortOption, setSortOption] = useState("");
-  const [selectedMainCategory, setSelectedMainCategory] = useState<MainCategory>(MainCategory.PAINTINGS);
+  const [selectedMainCategory, setSelectedMainCategory] =
+    useState<MainCategory>(MainCategory.PAINTINGS);
 
   const { data, isLoading } = useInfiniteQuery({
     queryKey: ["products", brand],
@@ -62,28 +63,66 @@ const ShopContent = () => {
   useEffect(() => {
     let filtered = [...products];
 
+    console.log("Shop filtering - initial products:", products.length);
+    console.log("Selected main category:", selectedMainCategory);
+
     if (brand) {
       filtered = filtered.filter(
         (product) =>
           product.brand && product.brand.toLowerCase() === brand.toLowerCase()
       );
+      console.log("After brand filter:", filtered.length);
     }
 
-    // Filter by main category first
-    filtered = filtered.filter(product => {
+    // Filter by main category first - with string normalization
+    filtered = filtered.filter((product) => {
+      // Convert everything to strings for comparison
+      const productMainCategory = product.categoryStructure?.main
+        ?.toString()
+        .toLowerCase();
+      const selectedMainCategoryStr = selectedMainCategory
+        ?.toString()
+        .toLowerCase();
+
+      console.log(`Product ${product._id}:`, {
+        name: product.name,
+        category: product.category,
+        productMainCategory,
+        selectedMainCategoryStr,
+        hasStructure: !!product.categoryStructure,
+      });
+
       // Handle legacy products without categoryStructure
       if (!product.categoryStructure) {
-        // By default, treat old products as paintings
-        return selectedMainCategory === MainCategory.PAINTINGS;
+        // Default categorization based on known handmade categories
+        const handmadeCategories = [
+          "კერამიკა",
+          "ხის ნაკეთობები",
+          "სამკაულები",
+          "ტექსტილი",
+          "მინანქარი",
+          "სკულპტურები",
+        ];
+        const isHandmade = handmadeCategories.includes(product.category);
+
+        return (
+          (isHandmade && selectedMainCategoryStr === "handmade") ||
+          (!isHandmade && selectedMainCategoryStr === "paintings")
+        );
       }
-      return product.categoryStructure.main === selectedMainCategory;
+
+      // Direct string comparison for products with categoryStructure
+      return productMainCategory === selectedMainCategoryStr;
     });
+
+    console.log("After main category filter:", filtered.length);
 
     // Then filter by subcategory if selected
     if (selectedCategory && selectedCategory !== "all") {
       filtered = filtered.filter(
         (product) => product.category === selectedCategory
       );
+      console.log("After subcategory filter:", filtered.length);
     }
 
     // Apply sorting
@@ -93,6 +132,7 @@ const ShopContent = () => {
       filtered.sort((a, b) => b.price - a.price);
     }
 
+    console.log("Final filtered products:", filtered.length);
     setFilteredProducts(filtered);
   }, [selectedCategory, selectedMainCategory, brand, products, sortOption]);
 
