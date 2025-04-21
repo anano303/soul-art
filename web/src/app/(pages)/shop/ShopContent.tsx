@@ -6,7 +6,7 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 import { ProductGrid } from "@/modules/products/components/product-grid";
 import { ProductFilters } from "@/modules/products/components/product-filters";
 import { getProducts } from "@/modules/products/api/get-products";
-import { Product } from "@/types";
+import { Product, MainCategory } from "@/types";
 
 const ShopContent = () => {
   const [products, setProducts] = useState<Product[]>([]);
@@ -20,6 +20,7 @@ const ShopContent = () => {
   const [selectedCategory, setSelectedCategory] = useState(initialCategory);
   // Add new state for sort option
   const [sortOption, setSortOption] = useState("");
+  const [selectedMainCategory, setSelectedMainCategory] = useState<MainCategory>(MainCategory.PAINTINGS);
 
   const { data, isLoading } = useInfiniteQuery({
     queryKey: ["products", brand],
@@ -68,6 +69,17 @@ const ShopContent = () => {
       );
     }
 
+    // Filter by main category first
+    filtered = filtered.filter(product => {
+      // Handle legacy products without categoryStructure
+      if (!product.categoryStructure) {
+        // By default, treat old products as paintings
+        return selectedMainCategory === MainCategory.PAINTINGS;
+      }
+      return product.categoryStructure.main === selectedMainCategory;
+    });
+
+    // Then filter by subcategory if selected
     if (selectedCategory && selectedCategory !== "all") {
       filtered = filtered.filter(
         (product) => product.category === selectedCategory
@@ -82,7 +94,7 @@ const ShopContent = () => {
     }
 
     setFilteredProducts(filtered);
-  }, [selectedCategory, brand, products, sortOption]);
+  }, [selectedCategory, selectedMainCategory, brand, products, sortOption]);
 
   // Handle category changes while preserving brand filter
   const handleCategoryChange = (category: string) => {
@@ -109,6 +121,11 @@ const ShopContent = () => {
     setSortOption(option);
   };
 
+  // Handle main category changes
+  const handleMainCategoryChange = (mainCategory: MainCategory) => {
+    setSelectedMainCategory(mainCategory);
+  };
+
   if (isLoading) return <div>იტვირთება...</div>;
 
   return (
@@ -122,6 +139,8 @@ const ShopContent = () => {
         onArtistChange={handleArtistChange}
         onSortChange={handleSortChange}
         selectedCategory={selectedCategory}
+        selectedMainCategory={selectedMainCategory}
+        onMainCategoryChange={handleMainCategoryChange}
       />
       <ProductGrid products={filteredProducts} />
     </div>

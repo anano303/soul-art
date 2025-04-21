@@ -50,6 +50,7 @@ export class ProductsController {
     @Query('page') page: string,
     @Query('limit') limit: string,
     @Query('brand') brand: string,
+    @Query('mainCategory') mainCategory: string,
   ) {
     return this.productsService.findMany(
       keyword,
@@ -58,6 +59,7 @@ export class ProductsController {
       undefined,
       ProductStatus.APPROVED,
       brand,
+      mainCategory,
     );
   }
 
@@ -241,10 +243,26 @@ export class ProductsController {
         brandLogoUrl = productData.brandLogoUrl;
       }
 
+      // Handle category structure if it exists in the request
+      let categoryStructure;
+      if (productData.categoryStructure) {
+        try {
+          // If it's a string (from form data), parse it
+          if (typeof productData.categoryStructure === 'string') {
+            categoryStructure = JSON.parse(productData.categoryStructure);
+          } else {
+            categoryStructure = productData.categoryStructure;
+          }
+        } catch (error) {
+          console.error('Error parsing category structure:', error);
+        }
+      }
+
       const updateData = {
         ...productData,
         ...(imageUrls && { images: imageUrls }),
         ...(brandLogoUrl && { brandLogo: brandLogoUrl }),
+        ...(categoryStructure && { categoryStructure }),
         ...(user.role === Role.Seller && { status: ProductStatus.PENDING }),
       };
 

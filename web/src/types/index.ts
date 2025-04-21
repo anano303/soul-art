@@ -1,5 +1,16 @@
 import { Role } from "./role";
 
+// Adding category types for better organization
+export enum MainCategory {
+  PAINTINGS = 'paintings',
+  HANDMADE = 'handmade'
+}
+
+export interface CategoryStructure {
+  main: MainCategory;
+  sub: string;
+}
+
 export interface Product {
   _id: string;
   user: User;
@@ -8,7 +19,8 @@ export interface Product {
   description: string;
   brand: string;
   brandLogo: string;
-  category: string; // Make sure this exists
+  category: string; // For backward compatibility
+  categoryStructure?: CategoryStructure; // New structured category
   price: number;
   countInStock: number;
   rating: number;

@@ -5,7 +5,7 @@ import Link from "next/link";
 import "./homePageShop.css";
 import { ProductGrid } from "@/modules/products/components/product-grid";
 import { getProducts } from "@/modules/products/api/get-products";
-import { Product } from "@/types";
+import { Product, MainCategory } from "@/types";
 import { ProductFilters } from "@/modules/products/components/product-filters";
 
 export default function HomePageShop() {
@@ -14,6 +14,8 @@ export default function HomePageShop() {
   const [selectedCategory, setSelectedCategory] = useState("");
   const [selectedArtist, setSelectedArtist] = useState("");
   const [sortOption, setSortOption] = useState("");
+  const [selectedMainCategory, setSelectedMainCategory] =
+    useState<MainCategory>(MainCategory.PAINTINGS);
 
   useEffect(() => {
     async function fetchProducts() {
@@ -26,6 +28,16 @@ export default function HomePageShop() {
 
   useEffect(() => {
     let filtered = [...products];
+
+    // Filter by main category first
+    filtered = filtered.filter((product) => {
+      // Handle legacy products without categoryStructure
+      if (!product.categoryStructure) {
+        // By default, treat old products as paintings
+        return selectedMainCategory === MainCategory.PAINTINGS;
+      }
+      return product.categoryStructure.main === selectedMainCategory;
+    });
 
     if (selectedCategory) {
       filtered = filtered.filter(
@@ -57,10 +69,20 @@ export default function HomePageShop() {
     });
 
     setFilteredProducts(filtered);
-  }, [selectedCategory, selectedArtist, sortOption, products]);
+  }, [
+    selectedCategory,
+    selectedMainCategory,
+    selectedArtist,
+    sortOption,
+    products,
+  ]);
 
   const handleSortChange = (option: string) => {
     setSortOption(option);
+  };
+
+  const handleMainCategoryChange = (mainCategory: MainCategory) => {
+    setSelectedMainCategory(mainCategory);
   };
 
   return (
@@ -78,6 +100,8 @@ export default function HomePageShop() {
           onCategoryChange={setSelectedCategory}
           onArtistChange={setSelectedArtist}
           onSortChange={handleSortChange}
+          selectedMainCategory={selectedMainCategory}
+          onMainCategoryChange={handleMainCategoryChange}
         />
         <ProductGrid products={filteredProducts} />
 

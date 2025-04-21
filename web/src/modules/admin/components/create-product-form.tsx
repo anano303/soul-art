@@ -6,21 +6,47 @@ import { toast } from "@/hooks/use-toast";
 import { useState, useEffect } from "react";
 import { productSchema } from "@/modules/products/validation/product";
 import { ZodError } from "zod";
-import { ProductFormData } from "@/modules/products/validation/product";
+import { ProductFormData as BaseProductFormData } from "@/modules/products/validation/product";
+
+// Extended ProductFormData to include categoryStructure
+interface ProductFormData extends BaseProductFormData {
+  categoryStructure?: {
+    main: MainCategory;
+    sub: string;
+  };
+}
 import "./CreateProductForm.css";
 import Image from "next/image";
 import { getAccessToken } from "@/lib/auth";
 import { useUser } from "@/modules/auth/hooks/use-user";
 
-const categories = [
-  "პეიზაჟი",
-  "პორტრეტი",
-  "აბსტრაქცია",
-  "შავ-თეთრი",
-  "ანიმაციური",
-  "ციფრული ილუსტრაციები",
-  "სხვა",
-];
+// Ensure enum values are the same as what we expect from the database
+enum MainCategory {
+  PAINTINGS = "PAINTINGS",
+  HANDMADE = "HANDMADE",
+}
+
+// Make sure this object uses the same keys as in the MainCategory enum
+const categoryStructure = {
+  [MainCategory.PAINTINGS]: [
+    "პეიზაჟი",
+    "პორტრეტი",
+    "აბსტრაქცია",
+    "შავ-თეთრი",
+    "ანიმაციური",
+    "ციფრული ილუსტრაციები",
+    "სხვა",
+  ],
+  [MainCategory.HANDMADE]: [
+    "კერამიკა",
+    "ხის ნაკეთობები",
+    "სამკაულები",
+    "ტექსტილი",
+    "მინანქარი",
+    "სკულპტურები",
+    "სხვა",
+  ],
+};
 
 interface CreateProductFormProps {
   initialData?: ProductFormData & { _id?: string };
@@ -57,6 +83,9 @@ export function CreateProductForm({
     }
   );
 
+  const [selectedMainCategory, setSelectedMainCategory] = useState<MainCategory>(
+    initialData?.categoryStructure?.main || MainCategory.PAINTINGS
+  );
   const [deliveryType, setDeliveryType] = useState<"SELLER" | "SoulArt">(
     "SoulArt"
   );
@@ -143,6 +172,22 @@ export function CreateProductForm({
           }
         }
       }
+
+      // Handle category structure if available
+      if (initialData.categoryStructure) {
+        // Check if the value from the API matches our enum values
+        const mainCat = initialData.categoryStructure.main;
+        // Make sure we use a valid value that exists in our enum
+        if (mainCat && Object.values(MainCategory).includes(mainCat as MainCategory)) {
+          setSelectedMainCategory(mainCat as MainCategory);
+        } else {
+          // Default to PAINTINGS if the value doesn't match
+          setSelectedMainCategory(MainCategory.PAINTINGS);
+        }
+      } else {
+        // Default for legacy products without category structure
+        setSelectedMainCategory(MainCategory.PAINTINGS);
+      }
     }
   }, [initialData]);
 
@@ -171,7 +216,11 @@ export function CreateProductForm({
 
   const validateField = (field: keyof ProductFormData, value: unknown) => {
     try {
-      productSchema.shape[field].parse(value);
+      // Check if the field exists in productSchema before validating
+      if (field in productSchema.shape) {
+        const shape = productSchema.shape as Record<string, {parse(value: unknown): unknown}>;
+        shape[field].parse(value);
+      }
       setErrors((prev) => ({ ...prev, [field]: undefined }));
       return true;
     } catch (error) {
@@ -190,6 +239,15 @@ export function CreateProductForm({
       ...prev,
       [name]:
         name === "price" || name === "countInStock" ? Number(value) : value,
+    }));
+  };
+
+  const handleMainCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const newMainCategory = e.target.value as MainCategory;
+    setSelectedMainCategory(newMainCategory);
+    setFormData((prev) => ({
+      ...prev,
+      category: "", // Reset subcategory when main category changes
     }));
   };
 
@@ -333,6 +391,12 @@ export function CreateProductForm({
         if (depth) dimensionsObj["depth"] = depth;
         formDataToSend.append("dimensions", JSON.stringify(dimensionsObj));
       }
+
+      // Add category structure to form data
+      formDataToSend.append("categoryStructure", JSON.stringify({
+        main: selectedMainCategory,
+        sub: formData.category,
+      }));
 
       // Handle images - separate existing images from new ones
       const existingImages: string[] = [];
@@ -513,19 +577,35 @@ export function CreateProductForm({
         </div>
 
         <div>
-          <label htmlFor="category">Category</label>
+          <label htmlFor="mainCategory">მთავარი კატეგორია</label>
+          <select
+            name="mainCategory"
+            value={selectedMainCategory}
+            onChange={handleMainCategoryChange}
+            className="create-product-select"
+          >
+            <option value={MainCategory.PAINTINGS}>ნახატები</option>
+            <option value={MainCategory.HANDMADE}>ხელნაკეთი ნივთები</option>
+          </select>
+        </div>
+
+        <div>
+          <label htmlFor="category">ქვეკატეგორია</label>
           <select
             name="category"
             value={formData.category}
             onChange={handleCategoryChange}
             className="create-product-select"
           >
-            <option value="">Select a category</option>
-            {categories.map((category) => (
-              <option key={category} value={category}>
-                {category}
-              </option>
-            ))}
+            <option value="">აირჩიეთ ქვეკატეგორია</option>
+            {/* Add a safety check to ensure categoryStructure[selectedMainCategory] exists */}
+            {categoryStructure[selectedMainCategory] && 
+              categoryStructure[selectedMainCategory].map((category) => (
+                <option key={category} value={category}>
+                  {category}
+                </option>
+              ))
+            }
           </select>
           {errors.category && (
             <p className="create-product-error">{errors.category}</p>

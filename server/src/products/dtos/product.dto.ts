@@ -5,8 +5,18 @@ import {
   IsEnum,
   IsOptional,
   IsObject,
+  ValidateNested,
 } from 'class-validator';
-import { ProductStatus, DeliveryType } from '../schemas/product.schema';
+import { ProductStatus, DeliveryType, MainCategory } from '../schemas/product.schema';
+import { Type } from 'class-transformer';
+
+class CategoryStructureDto {
+  @IsEnum(MainCategory)
+  main: MainCategory;
+
+  @IsString()
+  sub: string;
+}
 
 export class ProductDto {
   @IsString()
@@ -27,6 +37,12 @@ export class ProductDto {
 
   @IsString()
   category!: string;
+
+  @IsOptional()
+  @IsObject()
+  @ValidateNested()
+  @Type(() => CategoryStructureDto)
+  categoryStructure?: CategoryStructureDto;
 
   @IsNumber()
   countInStock!: number;
