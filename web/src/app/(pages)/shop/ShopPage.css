@@ -2,7 +2,7 @@
   min-height: 100vh;
   padding: 20px;
   transition: background 0.5s ease;
-  max-width:90%;
+  max-width:100%;
 }
 
 /* Default theme (Paintings) */
