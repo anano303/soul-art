@@ -2,7 +2,7 @@
   min-height: 100vh;
   padding: 20px;
   transition: background 0.5s ease;
-  max-width:90%;
+  max-width:100%;
 }
 
 /* Default theme (Paintings) */
@@ -72,4 +72,9 @@
 
 .shop-container.handmade-theme h1 {
   color: #7d5a35;
+}
+@media (max-width:768px) {
+  .shop-container {
+    max-width:90%;
+  }
 }
