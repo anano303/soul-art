@@ -47,6 +47,7 @@ export function ProductGrid({
                   "ტექსტილი",
                   "მინანქარი",
                   "სკულპტურები",
+                  'სხვა',
                 ].includes(item.category)
                   ? MainCategory.HANDMADE
                   : MainCategory.PAINTINGS;
@@ -84,6 +85,7 @@ export function ProductGrid({
             "ტექსტილი",
             "მინანქარი",
             "სკულპტურები",
+            'სხვა',
           ];
           const isHandmade = handmadeCategories.includes(item.category);
 
