@@ -102,6 +102,7 @@ const ShopContent = () => {
           "ტექსტილი",
           "მინანქარი",
           "სკულპტურები",
+          'სხვა',
         ];
         const isHandmade = handmadeCategories.includes(product.category);
 
