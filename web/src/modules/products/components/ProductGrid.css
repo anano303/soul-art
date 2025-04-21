@@ -13,13 +13,51 @@
   column-gap: min(15px);
 }
 
-
-
 .no-products {
   text-align: center;
   padding: 40px 0;
   font-size: 18px;
   color: #888;
+}
+
+/* Infinite scroll styling */
+.loading-more-container {
+  width: 100%;
+  height: 150px; /* კიდევ უფრო გავზარდოთ სიმაღლე */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 30px 0;
+  margin-top: 20px;
+}
+
+.loading-more {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.loading-spinner {
+  width: 30px;
+  height: 30px;
+  border: 3px solid rgba(0, 0, 0, 0.1);
+  border-radius: 50%;
+  border-top-color: #0070f3;
+  animation: spin 1s ease-in-out infinite;
+}
+
+.no-more-products {
+  text-align: center;
+  padding: 20px 0;
+  font-size: 16px;
+  color: #888;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .pagination-container {
@@ -32,7 +70,7 @@
   padding: 8px 16px;
   border: 1px solid #ddd;
   background-color: #fff;
-  cursor: url('/brush.png'), pointer; 
+  cursor: url("/brush.png"), pointer;
   border-radius: 4px;
   transition: all 0.2s ease-in-out;
 }
