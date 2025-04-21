@@ -24,27 +24,19 @@ import {
 } from "lucide-react";
 
 const ShopContent = () => {
-  const searchParams = useSearchParams();
-  const brand = searchParams ? searchParams.get("brand") : null;
-  const categoryParam = searchParams ? searchParams.get("category") : null;
-  const mainCategoryParam = searchParams
-    ? searchParams.get("mainCategory")
-    : null;
-
-  // Set initial category state using URL param if available
-  const initialCategory = categoryParam || (brand ? "all" : "");
-
   const [products, setProducts] = useState<Product[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
+  const searchParams = useSearchParams();
+  const brand = searchParams ? searchParams.get("brand") : null;
+
+  // Set initial category state to 'all' when brand is present
+  const initialCategory = brand ? "all" : "";
+
   const [selectedCategory, setSelectedCategory] = useState(initialCategory);
   // Add new state for sort option
   const [sortOption, setSortOption] = useState("");
   const [selectedMainCategory, setSelectedMainCategory] =
-    useState<MainCategory>(
-      mainCategoryParam === "HANDMADE"
-        ? MainCategory.HANDMADE
-        : MainCategory.PAINTINGS
-    );
+    useState<MainCategory>(MainCategory.PAINTINGS);
 
   const { data, isLoading } = useInfiniteQuery({
     queryKey: ["products", brand],
@@ -81,23 +73,6 @@ const ShopContent = () => {
       }
     }
   }, [data, brand]);
-
-  // Update useEffect to handle URL parameters for categories
-  useEffect(() => {
-    // Set main category from URL parameter if it exists
-    if (mainCategoryParam) {
-      if (mainCategoryParam === "HANDMADE") {
-        setSelectedMainCategory(MainCategory.HANDMADE);
-      } else if (mainCategoryParam === "PAINTINGS") {
-        setSelectedMainCategory(MainCategory.PAINTINGS);
-      }
-    }
-
-    // Set subcategory from URL parameter if it exists
-    if (categoryParam) {
-      setSelectedCategory(categoryParam);
-    }
-  }, [mainCategoryParam, categoryParam]);
 
   // Apply filtering and sorting whenever relevant state changes
   useEffect(() => {
@@ -142,7 +117,7 @@ const ShopContent = () => {
           "ტექსტილი",
           "მინანქარი",
           "სკულპტურები",
-          "სხვა",
+          'სხვა',
         ];
         const isHandmade = handmadeCategories.includes(product.category);
 
