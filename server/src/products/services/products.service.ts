@@ -6,18 +6,24 @@ import {
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { UserDocument } from 'src/users/schemas/user.schema';
-import { Product, ProductDocument, ProductStatus } from '../schemas/product.schema';
+import {
+  MainCategory,
+  Product,
+  ProductDocument,
+  ProductStatus,
+} from '../schemas/product.schema';
 import { PaginatedResponse } from '@/types';
 import { Order } from '../../orders/schemas/order.schema';
 import { sampleProduct } from '@/utils/data/product';
 import { Role } from '@/types/role.enum';
+// import { MainCategory } from '@/types/main-category.enum';
 
 @Injectable()
 export class ProductsService {
   constructor(
     @InjectModel(Product.name) private productModel: Model<Product>,
     @InjectModel(Order.name) private orderModel: Model<Order>,
-  ) { }
+  ) {}
 
   async findTopRated(): Promise<ProductDocument[]> {
     const products = await this.productModel
@@ -37,6 +43,7 @@ export class ProductsService {
     user?: UserDocument,
     status?: ProductStatus,
     brand?: string,
+    mainCategory?: string,
   ): Promise<PaginatedResponse<Product>> {
     const pageSize = parseInt(limit ?? '10');
     const currentPage = parseInt(page ?? '1');
@@ -45,30 +52,32 @@ export class ProductsService {
 
     const searchPattern = decodedKeyword
       ? decodedKeyword
-        .split(' ')
-        .map((term) => `(?=.*${term})`)
-        .join('')
+          .split(' ')
+          .map((term) => `(?=.*${term})`)
+          .join('')
       : '';
 
     const searchQuery = decodedKeyword
       ? {
-        $and: [
-          {
-            $or: [
-              { name: { $regex: searchPattern, $options: 'i' } },
-              { description: { $regex: searchPattern, $options: 'i' } },
-              { brand: { $regex: searchPattern, $options: 'i' } },
-              { category: { $regex: searchPattern, $options: 'i' } },
-            ],
-          },
-          user ? { user: user._id } : {},
-          brand ? { brand: brand } : {},
-        ]
-      }
+          $and: [
+            {
+              $or: [
+                { name: { $regex: searchPattern, $options: 'i' } },
+                { description: { $regex: searchPattern, $options: 'i' } },
+                { brand: { $regex: searchPattern, $options: 'i' } },
+                { category: { $regex: searchPattern, $options: 'i' } },
+              ],
+            },
+            user ? { user: user._id } : {},
+            brand ? { brand: brand } : {},
+            mainCategory ? { 'categoryStructure.main': mainCategory } : {},
+          ],
+        }
       : {
-        ...( user ? { user: user._id } : {} ),
-        ...( brand ? { brand: brand } : {} ),
-      };
+          ...(user ? { user: user._id } : {}),
+          ...(brand ? { brand: brand } : {}),
+          ...(mainCategory ? { 'categoryStructure.main': mainCategory } : {}),
+        };
 
     const searchQueryWithStatus = {
       ...searchQuery,
@@ -104,6 +113,14 @@ export class ProductsService {
 
     if (!product) throw new NotFoundException('No product with given ID.');
 
+    // Make sure the product has a category structure even if it's a legacy product
+    if (!product.categoryStructure) {
+      product.categoryStructure = {
+        main: MainCategory.PAINTINGS, // Default for legacy products
+        sub: product.category,
+      };
+    }
+
     return product;
   }
 
@@ -128,6 +145,7 @@ export class ProductsService {
       brandLogo,
       brand,
       category,
+      categoryStructure,
       countInStock,
       status,
       deliveryType,
@@ -149,6 +167,7 @@ export class ProductsService {
     product.brandLogo = brandLogo ?? product.brandLogo;
     product.brand = brand ?? product.brand;
     product.category = category ?? product.category;
+    product.categoryStructure = categoryStructure ?? product.categoryStructure;
     product.countInStock = countInStock ?? product.countInStock;
     product.status = status ?? product.status;
     product.deliveryType = deliveryType ?? product.deliveryType;
@@ -162,15 +181,15 @@ export class ProductsService {
   async updateStatus(
     id: string,
     status: ProductStatus,
-    rejectionReason?: string
+    rejectionReason?: string,
   ): Promise<ProductDocument> {
     const product = await this.findById(id);
-    
+
     product.status = status;
     if (rejectionReason) {
       product.rejectionReason = rejectionReason;
     }
-    
+
     return product.save();
   }
 
@@ -253,9 +272,17 @@ export class ProductsService {
   }
 
   async create(productData: Partial<Product>): Promise<ProductDocument> {
-    const status = productData.user.role === Role.Admin 
-      ? ProductStatus.APPROVED 
-      : ProductStatus.PENDING;
+    const status =
+      productData.user.role === Role.Admin
+        ? ProductStatus.APPROVED
+        : ProductStatus.PENDING;
+
+    if (!productData.categoryStructure) {
+      productData.categoryStructure = {
+        main: MainCategory.PAINTINGS,
+        sub: productData.category,
+      };
+    }
 
     const product = await this.productModel.create({
       ...productData,

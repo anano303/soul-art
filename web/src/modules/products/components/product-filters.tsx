@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { Search } from "lucide-react";
 import "./product-filters.css";
-import { Product } from "@/types";
+import { Product, MainCategory } from "@/types";
 import Link from "next/link";
 
 interface FilterProps {
@@ -12,6 +12,8 @@ interface FilterProps {
   onArtistChange: (artist: string) => void;
   onSortChange?: (sortOption: string) => void;
   selectedCategory?: string;
+  selectedMainCategory?: MainCategory;
+  onMainCategoryChange?: (mainCategory: MainCategory) => void;
 }
 
 export function ProductFilters({
@@ -20,6 +22,8 @@ export function ProductFilters({
   onArtistChange,
   onSortChange,
   selectedCategory: initialCategory = "all",
+  selectedMainCategory: initialMainCategory = MainCategory.PAINTINGS,
+  onMainCategoryChange,
 }: FilterProps) {
   const [selectedCategory, setSelectedCategory] = useState(initialCategory);
   const [selectedArtist, setSelectedArtist] = useState("all");
@@ -28,17 +32,31 @@ export function ProductFilters({
   const [artists, setArtists] = useState<string[]>(["all"]);
   const [filteredArtists, setFilteredArtists] = useState<string[]>(["all"]);
   const [sortOption, setSortOption] = useState<string>("");
+  const [selectedMainCategory, setSelectedMainCategory] =
+    useState(initialMainCategory);
 
-  const categories = [
-    "all",
-    "პეიზაჟი",
-    "პორტრეტი",
-    "აბსტრაქცია",
-    "შავ-თეთრი",
-    "ანიმაციური",
-    "ციფრული ილუსტრაციები",
-    "სხვა",
-  ];
+  const categoriesByType = {
+    [MainCategory.PAINTINGS]: [
+      "პეიზაჟი",
+      "პორტრეტი",
+      "აბსტრაქცია",
+      "შავ-თეთრი",
+      "ანიმაციური",
+      "ციფრული ილუსტრაციები",
+      "სხვა",
+    ],
+    [MainCategory.HANDMADE]: [
+      "კერამიკა",
+      "ხის ნაკეთობები",
+      "სამკაულები",
+      "ტექსტილი",
+      "მინანქარი",
+      "სკულპტურები",
+      "სხვა",
+    ],
+  };
+
+  const categories = ["all", ...categoriesByType[selectedMainCategory]];
 
   useEffect(() => {
     const uniqueBrands = Array.from(
@@ -72,7 +90,6 @@ export function ProductFilters({
       setSelectedArtist(artist);
       onArtistChange(newArtist);
 
-      // Reset category filter when changing artist
       if (selectedCategory !== "all") {
         setSelectedCategory("all");
         onCategoryChange("");
@@ -83,18 +100,26 @@ export function ProductFilters({
 
   const handleCategoryChange = useCallback(
     (category: string) => {
-      console.log("Changing category to:", category); // Debug log
       const newCategory = category === "all" ? "" : category;
       setSelectedCategory(category);
       onCategoryChange(newCategory);
 
-      // Reset artist filter when changing category
       if (selectedArtist !== "all") {
         handleArtistChange("all");
       }
     },
     [selectedArtist, onCategoryChange, handleArtistChange]
   );
+
+  const handleMainCategoryChange = (mainCategory: MainCategory) => {
+    setSelectedMainCategory(mainCategory);
+    setSelectedCategory("all");
+    onCategoryChange("");
+
+    if (onMainCategoryChange) {
+      onMainCategoryChange(mainCategory);
+    }
+  };
 
   const handleArtistClick = (brand: string) => {
     setSelectedArtist(brand);
@@ -118,7 +143,29 @@ export function ProductFilters({
   return (
     <div className="filters-container">
       <div className="filter-section">
-        <h3 className="filter-title">კატეგორიები</h3>
+        <h3 className="filter-title">მთავარი კატეგორია</h3>
+        <div className="filter-options">
+          <button
+            className={`filter-btn ${
+              selectedMainCategory === MainCategory.PAINTINGS ? "active" : ""
+            }`}
+            onClick={() => handleMainCategoryChange(MainCategory.PAINTINGS)}
+          >
+            ნახატები
+          </button>
+          <button
+            className={`filter-btn ${
+              selectedMainCategory === MainCategory.HANDMADE ? "active" : ""
+            }`}
+            onClick={() => handleMainCategoryChange(MainCategory.HANDMADE)}
+          >
+            ხელნაკეთი ნივთები
+          </button>
+        </div>
+      </div>
+
+      <div className="filter-section">
+        <h3 className="filter-title">ქვეკატეგორიები</h3>
         <div className="filter-options">
           {categories.map((category) => (
             <button

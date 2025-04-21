@@ -33,7 +33,17 @@ export enum ProductStatus {
 
 export enum DeliveryType {
   SELLER = 'SELLER',
-  SoulArt = 'SoulArt'  // Changed from SOULART to SoulArt
+  SoulArt = 'SoulArt'
+}
+
+export enum MainCategory {
+  PAINTINGS = 'PAINTINGS',
+  HANDMADE = 'HANDMADE'
+}
+
+export interface CategoryStructure {
+  main: MainCategory;
+  sub: string;
 }
 
 @Schema({ timestamps: true })
@@ -57,6 +67,9 @@ export class Product {
 
   @Prop({ required: true })
   category!: string;
+
+  @Prop({ type: Object })
+  categoryStructure?: CategoryStructure;
 
   @Prop({ required: true, type: [String], default: [] })
   images!: string[];
@@ -85,7 +98,7 @@ export class Product {
   @Prop({ type: String })
   rejectionReason?: string;
 
-  @Prop({ type: String, enum: DeliveryType, default: DeliveryType.SoulArt })  // Changed default value
+  @Prop({ type: String, enum: DeliveryType, default: DeliveryType.SoulArt })
   deliveryType?: DeliveryType;
 
   @Prop({ type: Number })

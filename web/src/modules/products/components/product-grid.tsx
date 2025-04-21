@@ -1,6 +1,6 @@
 "use client";
 
-import { Product } from "@/types";
+import { MainCategory, Product } from "@/types";
 import { ProductCard } from "./product-card";
 import { ProductCardSkeleton } from "./product-card-skeleton";
 import { useEffect, useState } from "react";
@@ -33,7 +33,22 @@ export function ProductGrid({
             10,
             searchKeyword
           );
-          setProducts(items);
+
+          // Convert old products to use the new category structure
+          const processedItems = items.map((item) => {
+            if (!item.categoryStructure) {
+              return {
+                ...item,
+                categoryStructure: {
+                  main: MainCategory.PAINTINGS,
+                  sub: item.category,
+                },
+              };
+            }
+            return item;
+          });
+
+          setProducts(processedItems);
           setPages(totalPages);
         } catch (error) {
           console.error("Failed to search products:", error);
@@ -44,7 +59,21 @@ export function ProductGrid({
 
       fetchSearchResults();
     } else {
-      setProducts(initialProducts);
+      // Also process initial products if they don't have category structure
+      const processedProducts = initialProducts?.map((item) => {
+        if (!item.categoryStructure) {
+          return {
+            ...item,
+            categoryStructure: {
+              main: MainCategory.PAINTINGS,
+              sub: item.category,
+            },
+          };
+        }
+        return item;
+      });
+
+      setProducts(processedProducts);
     }
   }, [searchKeyword, currentPage, initialProducts]);
 
