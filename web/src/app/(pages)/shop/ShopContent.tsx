@@ -7,21 +7,6 @@ import { ProductGrid } from "@/modules/products/components/product-grid";
 import { ProductFilters } from "@/modules/products/components/product-filters";
 import { getProducts } from "@/modules/products/api/get-products";
 import { Product, MainCategory } from "@/types";
-// Import the new CSS file
-import "./ShopPage.css";
-// Import the animated icons CSS
-import "./ShopAnimatedIcons.css";
-// Import icons from lucide-react
-import {
-  Paintbrush,
-  Palette,
-  Printer,
-  Square,
-  Scissors,
-  CakeSlice,
-  Hammer,
-  Gem,
-} from "lucide-react";
 
 const ShopContent = () => {
   const searchParams = useSearchParams();
@@ -232,53 +217,11 @@ const ShopContent = () => {
       : "default";
   };
 
-  // Render animated icons based on theme
-  const renderAnimatedIcons = () => {
-    if (selectedMainCategory === MainCategory.HANDMADE) {
-      return (
-        <div className="shop-animated-icons handmade-theme">
-          <div className="icon pottery-icon">
-            <CakeSlice />
-          </div>
-          <div className="icon wood-icon">
-            <Hammer />
-          </div>
-          <div className="icon jewelry-icon">
-            <Gem />
-          </div>
-          <div className="icon textile-icon">
-            <Scissors />
-          </div>
-        </div>
-      );
-    } else {
-      return (
-        <div className="shop-animated-icons default">
-          <div className="icon brush-icon">
-            <Paintbrush />
-          </div>
-          <div className="icon palette-icon">
-            <Palette />
-          </div>
-          <div className="icon canvas-icon">
-            <Square />
-          </div>
-          <div className="icon frame-icon">
-            <Printer />
-          </div>
-        </div>
-      );
-    }
-  };
-
   if (isLoading) return <div>იტვირთება...</div>;
 
   return (
-    <div className={`shop-container ${getTheme()}`}>
-      {/* Add animated icons */}
-      {renderAnimatedIcons()}
-
-      <h1 className="text-2xl font-bold mb-4 relative z-10">
+    <div className="container mx-auto px-4 py-8">
+      <h1 className="text-2xl font-bold mb-4">
         {brand ? `${brand}-ის ნამუშევრები` : "ყველა ნამუშევარი"}
       </h1>
       <ProductFilters
