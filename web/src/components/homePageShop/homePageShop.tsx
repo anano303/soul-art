@@ -166,7 +166,14 @@ export default function HomePageShop() {
           selectedMainCategory={selectedMainCategory}
           onMainCategoryChange={handleMainCategoryChange}
         />
-        <ProductGrid products={filteredProducts} />
+        <ProductGrid
+          products={filteredProducts}
+          theme={
+            selectedMainCategory === MainCategory.HANDMADE
+              ? "handmade-theme"
+              : "default"
+          }
+        />
 
         <div className="see-more">
           <Link

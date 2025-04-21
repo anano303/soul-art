@@ -165,7 +165,7 @@ const ShopContent = () => {
   // Handle category changes while preserving brand filter
   const handleCategoryChange = (category: string) => {
     setSelectedCategory(category);
-    
+
     // Update URL with category parameter
     if (typeof window !== "undefined") {
       const url = new URL(window.location.href);
@@ -201,13 +201,20 @@ const ShopContent = () => {
   // Handle main category changes
   const handleMainCategoryChange = (mainCategory: MainCategory) => {
     setSelectedMainCategory(mainCategory);
-    
+
     // Update URL with main category parameter
     if (typeof window !== "undefined") {
       const url = new URL(window.location.href);
       url.searchParams.set("mainCategory", mainCategory);
       window.history.pushState({}, "", url.toString());
     }
+  };
+
+  // Get the theme based on selected main category
+  const getTheme = () => {
+    return selectedMainCategory === MainCategory.HANDMADE
+      ? "handmade-theme"
+      : "default";
   };
 
   if (isLoading) return <div>იტვირთება...</div>;
@@ -226,7 +233,7 @@ const ShopContent = () => {
         selectedMainCategory={selectedMainCategory}
         onMainCategoryChange={handleMainCategoryChange}
       />
-      <ProductGrid products={filteredProducts} />
+      <ProductGrid products={filteredProducts} theme={getTheme()} />
     </div>
   );
 };
