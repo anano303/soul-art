@@ -45,14 +45,16 @@ export default function HomePageShop() {
               "ტექსტილი",
               "მინანქარი",
               "სკულპტურები",
-              'სხვა',
+              "სხვა",
             ];
             const isHandmade = handmadeCategories.includes(item.category);
 
             return {
               ...item,
               categoryStructure: {
-                main: isHandmade ? MainCategory.HANDMADE : MainCategory.PAINTINGS,
+                main: isHandmade
+                  ? MainCategory.HANDMADE
+                  : MainCategory.PAINTINGS,
                 sub: item.category,
               },
             };
@@ -99,7 +101,7 @@ export default function HomePageShop() {
           "ტექსტილი",
           "მინანქარი",
           "სკულპტურები",
-          'სხვა',
+          "სხვა",
         ];
         const isHandmade = handmadeCategories.includes(product.category);
         return (
@@ -234,7 +236,13 @@ export default function HomePageShop() {
         />
 
         <div className="see-more">
-          <Link href="/shop">
+          <Link
+            href={`/shop?mainCategory=${selectedMainCategory}${
+              selectedCategory !== "all" && selectedCategory
+                ? `&category=${encodeURIComponent(selectedCategory)}`
+                : ""
+            }`}
+          >
             <button className="see-more-btn">ნახეთ ყველა...</button>
           </Link>
         </div>
