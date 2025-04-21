@@ -12,14 +12,12 @@ interface ProductGridProps {
   products?: Product[];
   searchKeyword?: string;
   currentPage?: number;
-  theme?: "default" | "handmade-theme";
 }
 
 export function ProductGrid({
   products: initialProducts,
   searchKeyword,
   currentPage = 1,
-  theme = "default",
 }: ProductGridProps) {
   const [products, setProducts] = useState(initialProducts);
   const [pages, setPages] = useState(1);
@@ -49,7 +47,7 @@ export function ProductGrid({
                   "ტექსტილი",
                   "მინანქარი",
                   "სკულპტურები",
-                  "სხვა",
+                  'სხვა',
                 ].includes(item.category)
                   ? MainCategory.HANDMADE
                   : MainCategory.PAINTINGS;
@@ -87,7 +85,7 @@ export function ProductGrid({
             "ტექსტილი",
             "მინანქარი",
             "სკულპტურები",
-            "სხვა",
+            'სხვა',
           ];
           const isHandmade = handmadeCategories.includes(item.category);
 
@@ -132,7 +130,7 @@ export function ProductGrid({
     <div className="product-grid">
       <div className="grid-container">
         {products.map((product) => (
-          <ProductCard key={product._id} product={product} theme={theme} />
+          <ProductCard key={product._id} product={product} />
         ))}
       </div>
 
