@@ -2,7 +2,6 @@
 
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import { useInfiniteQuery } from "@tanstack/react-query";
 import { ProductGrid } from "@/modules/products/components/product-grid";
 import { ProductFilters } from "@/modules/products/components/product-filters";
 import { getProducts } from "@/modules/products/api/get-products";
@@ -28,54 +27,80 @@ const ShopContent = () => {
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const searchParams = useSearchParams();
   const brand = searchParams ? searchParams.get("brand") : null;
+  const pageParam = searchParams
+    ? parseInt(searchParams.get("page") || "1")
+    : 1;
 
   // Set initial category state to 'all' when brand is present
   const initialCategory = brand ? "all" : "";
 
   const [selectedCategory, setSelectedCategory] = useState(initialCategory);
-  // Add new state for sort option
   const [sortOption, setSortOption] = useState("");
   const [selectedMainCategory, setSelectedMainCategory] =
     useState<MainCategory>(MainCategory.PAINTINGS);
+  const [currentPage, setCurrentPage] = useState(pageParam);
+  const [totalPages, setTotalPages] = useState(1);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const { data, isLoading } = useInfiniteQuery({
-    queryKey: ["products", brand],
-    queryFn: async ({ pageParam = 1 }) => {
-      const response = await getProducts(
-        pageParam,
-        10,
-        undefined,
-        brand || undefined
-      );
-      return response;
-    },
-    getNextPageParam: (lastPage) => {
-      return lastPage.pages > lastPage.page ? lastPage.page + 1 : undefined;
-    },
-    initialPageParam: 1,
-  });
-
+  // Replace useInfiniteQuery with direct data fetching for better pagination control
   useEffect(() => {
-    if (data) {
-      const allProducts = data.pages.flatMap((page) => page.items);
-      setProducts(allProducts);
-
-      // Reset category and filter products when brand parameter exists
-      if (brand) {
-        setSelectedCategory("all"); // Reset category to 'all'
-        const brandFiltered = allProducts.filter(
-          (product) =>
-            product.brand && product.brand.toLowerCase() === brand.toLowerCase()
+    const fetchProducts = async () => {
+      setIsLoading(true);
+      try {
+        // Fetch more products per page (20-30) to ensure we have enough to display
+        const response = await getProducts(
+          currentPage,
+          30,
+          undefined,
+          brand || undefined
         );
-        setFilteredProducts(brandFiltered);
-      } else {
+
+        const allProducts = response.items.map((item) => {
+          // Process items to ensure they have categoryStructure
+          if (!item.categoryStructure) {
+            const handmadeCategories = [
+              "კერამიკა",
+              "ხის ნაკეთობები",
+              "სამკაულები",
+              "ტექსტილი",
+              "მინანქარი",
+              "სკულპტურები",
+              "სხვა",
+            ];
+            const isHandmade = handmadeCategories.includes(item.category);
+
+            return {
+              ...item,
+              categoryStructure: {
+                main: isHandmade
+                  ? MainCategory.HANDMADE
+                  : MainCategory.PAINTINGS,
+                sub: item.category,
+              },
+            };
+          }
+          return item;
+        });
+
+        setProducts(allProducts);
+        setTotalPages(response.pages);
+
+        // Initially set all products
         setFilteredProducts(allProducts);
+      } catch (error) {
+        console.error("Failed to fetch products:", error);
+      } finally {
+        setIsLoading(false);
       }
-    }
-  }, [data, brand]);
+    };
+
+    fetchProducts();
+  }, [currentPage, brand]);
 
   // Apply filtering and sorting whenever relevant state changes
   useEffect(() => {
+    if (products.length === 0) return;
+
     let filtered = [...products];
 
     console.log("Shop filtering - initial products:", products.length);
@@ -89,9 +114,8 @@ const ShopContent = () => {
       console.log("After brand filter:", filtered.length);
     }
 
-    // Filter by main category first - with string normalization
+    // Filter by main category first
     filtered = filtered.filter((product) => {
-      // Convert everything to strings for comparison
       const productMainCategory = product.categoryStructure?.main
         ?.toString()
         .toLowerCase();
@@ -99,17 +123,8 @@ const ShopContent = () => {
         ?.toString()
         .toLowerCase();
 
-      console.log(`Product ${product._id}:`, {
-        name: product.name,
-        category: product.category,
-        productMainCategory,
-        selectedMainCategoryStr,
-        hasStructure: !!product.categoryStructure,
-      });
-
       // Handle legacy products without categoryStructure
-      if (!product.categoryStructure) {
-        // Default categorization based on known handmade categories
+      if (!productMainCategory) {
         const handmadeCategories = [
           "კერამიკა",
           "ხის ნაკეთობები",
@@ -117,7 +132,7 @@ const ShopContent = () => {
           "ტექსტილი",
           "მინანქარი",
           "სკულპტურები",
-          'სხვა',
+          "სხვა",
         ];
         const isHandmade = handmadeCategories.includes(product.category);
 
@@ -127,7 +142,6 @@ const ShopContent = () => {
         );
       }
 
-      // Direct string comparison for products with categoryStructure
       return productMainCategory === selectedMainCategoryStr;
     });
 
@@ -155,32 +169,53 @@ const ShopContent = () => {
   // Handle category changes while preserving brand filter
   const handleCategoryChange = (category: string) => {
     setSelectedCategory(category);
+    // Reset to page 1 when changing category
+    setCurrentPage(1);
 
     // Update URL with category parameter
     if (typeof window !== "undefined") {
       const url = new URL(window.location.href);
-      if (category) {
+      if (category && category !== "all") {
         url.searchParams.set("category", category);
       } else {
         url.searchParams.delete("category");
       }
+      url.searchParams.set("page", "1"); // Reset to page 1
       window.history.pushState({}, "", url.toString());
     }
   };
 
   const handleArtistChange = (artist: string) => {
-    let filtered = [...products];
+    // Reset to page 1 when changing artist
+    setCurrentPage(1);
 
-    if (artist) {
-      filtered = filtered.filter(
-        (product) =>
-          product.brand && product.brand.toLowerCase() === artist.toLowerCase()
-      );
+    if (typeof window !== "undefined" && artist) {
+      window.location.href = `/shop?brand=${encodeURIComponent(artist)}&page=1`;
     } else {
-      filtered = products;
-    }
+      let filtered = [...products];
 
-    setFilteredProducts(filtered);
+      if (artist) {
+        filtered = filtered.filter(
+          (product) =>
+            product.brand &&
+            product.brand.toLowerCase() === artist.toLowerCase()
+        );
+      }
+
+      setFilteredProducts(filtered);
+    }
+  };
+
+  // Handle page change
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+
+    // Update URL with page parameter
+    if (typeof window !== "undefined") {
+      const url = new URL(window.location.href);
+      url.searchParams.set("page", page.toString());
+      window.history.pushState({}, "", url.toString());
+    }
   };
 
   // Handle sort change
@@ -191,11 +226,14 @@ const ShopContent = () => {
   // Handle main category changes
   const handleMainCategoryChange = (mainCategory: MainCategory) => {
     setSelectedMainCategory(mainCategory);
+    // Reset to page 1 when changing main category
+    setCurrentPage(1);
 
     // Update URL with main category parameter
     if (typeof window !== "undefined") {
       const url = new URL(window.location.href);
       url.searchParams.set("mainCategory", mainCategory);
+      url.searchParams.set("page", "1"); // Reset to page 1
       window.history.pushState({}, "", url.toString());
     }
   };
@@ -250,7 +288,6 @@ const ShopContent = () => {
 
   return (
     <div className={`shop-container ${getTheme()}`}>
-      {/* Add animated icons */}
       {renderAnimatedIcons()}
 
       <h1 className="text-2xl font-bold mb-4 relative z-10">
@@ -265,7 +302,14 @@ const ShopContent = () => {
         selectedMainCategory={selectedMainCategory}
         onMainCategoryChange={handleMainCategoryChange}
       />
-      <ProductGrid products={filteredProducts} theme={getTheme()} />
+      <ProductGrid
+        products={filteredProducts}
+        theme={getTheme()}
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={handlePageChange}
+        isShopPage={true} // Add a prop to indicate this is the shop page
+      />
     </div>
   );
 };
