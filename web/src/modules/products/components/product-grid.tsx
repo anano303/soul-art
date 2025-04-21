@@ -13,6 +13,9 @@ interface ProductGridProps {
   searchKeyword?: string;
   currentPage?: number;
   theme?: "default" | "handmade-theme";
+  totalPages?: number;
+  onPageChange?: (page: number) => void;
+  isShopPage?: boolean; // New prop to distinguish between homepage and shop page
 }
 
 export function ProductGrid({
@@ -20,9 +23,12 @@ export function ProductGrid({
   searchKeyword,
   currentPage = 1,
   theme = "default",
+  totalPages = 1,
+  onPageChange,
+  isShopPage = false, // Default is false (homepage)
 }: ProductGridProps) {
   const [products, setProducts] = useState(initialProducts);
-  const [pages, setPages] = useState(1);
+  const [pages, setPages] = useState(totalPages);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
@@ -103,8 +109,13 @@ export function ProductGrid({
       });
 
       setProducts(processedProducts);
+
+      // Update pages state if totalPages is provided from props
+      if (totalPages > 1) {
+        setPages(totalPages);
+      }
     }
-  }, [searchKeyword, currentPage, initialProducts]);
+  }, [searchKeyword, currentPage, initialProducts, totalPages]);
 
   if (isLoading) {
     return (
@@ -136,15 +147,53 @@ export function ProductGrid({
         ))}
       </div>
 
-      {pages > 1 && (
+      {pages > 1 && isShopPage && (
+        <div className="pagination-container">
+          <button
+            className="pagination-btn"
+            disabled={currentPage <= 1}
+            onClick={() => onPageChange && onPageChange(currentPage - 1)}
+          >
+            Previous
+          </button>
+
+          {visiblePages.map((pageNum, idx) =>
+            pageNum === null ? (
+              <span key={`ellipsis-${idx}`} className="pagination-ellipsis">
+                ...
+              </span>
+            ) : (
+              <button
+                key={pageNum}
+                className={`pagination-btn ${
+                  currentPage === pageNum ? "active" : ""
+                }`}
+                onClick={() => onPageChange && onPageChange(pageNum)}
+              >
+                {pageNum}
+              </button>
+            )
+          )}
+
+          <button
+            className="pagination-btn"
+            disabled={currentPage >= pages}
+            onClick={() => onPageChange && onPageChange(currentPage + 1)}
+          >
+            Next
+          </button>
+        </div>
+      )}
+
+      {pages > 1 && !isShopPage && searchKeyword && (
         <div className="pagination-container">
           <button
             className="pagination-btn"
             disabled={currentPage <= 1}
             onClick={() =>
-              (window.location.href = searchKeyword
-                ? `/search/${searchKeyword}?page=${currentPage - 1}`
-                : `/?page=${currentPage - 1}`)
+              (window.location.href = `/search/${searchKeyword}?page=${
+                currentPage - 1
+              }`)
             }
           >
             Previous
@@ -162,9 +211,7 @@ export function ProductGrid({
                   currentPage === pageNum ? "active" : ""
                 }`}
                 onClick={() =>
-                  (window.location.href = searchKeyword
-                    ? `/search/${searchKeyword}?page=${pageNum}`
-                    : `/?page=${pageNum}`)
+                  (window.location.href = `/search/${searchKeyword}?page=${pageNum}`)
                 }
               >
                 {pageNum}
@@ -176,9 +223,9 @@ export function ProductGrid({
             className="pagination-btn"
             disabled={currentPage >= pages}
             onClick={() =>
-              (window.location.href = searchKeyword
-                ? `/search/${searchKeyword}?page=${currentPage + 1}`
-                : `/?page=${currentPage + 1}`)
+              (window.location.href = `/search/${searchKeyword}?page=${
+                currentPage + 1
+              }`)
             }
           >
             Next

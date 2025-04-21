@@ -26,16 +26,17 @@ export default function HomePageShop() {
   const [selectedCategory, setSelectedCategory] = useState("");
   const [selectedArtist, setSelectedArtist] = useState("");
   const [sortOption, setSortOption] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
   const [selectedMainCategory, setSelectedMainCategory] =
     useState<MainCategory>(MainCategory.PAINTINGS);
 
   useEffect(() => {
     async function fetchProducts() {
       try {
-        const { items } = await getProducts(1, 6);
+        setIsLoading(true);
+        const { items } = await getProducts(1, 18);
         console.log("Fetched products:", items);
 
-        // Ensure all products have categoryStructure
         const processedItems = items.map((item) => {
           if (!item.categoryStructure) {
             const handmadeCategories = [
@@ -45,14 +46,16 @@ export default function HomePageShop() {
               "ტექსტილი",
               "მინანქარი",
               "სკულპტურები",
-              'სხვა',
+              "სხვა",
             ];
             const isHandmade = handmadeCategories.includes(item.category);
 
             return {
               ...item,
               categoryStructure: {
-                main: isHandmade ? MainCategory.HANDMADE : MainCategory.PAINTINGS,
+                main: isHandmade
+                  ? MainCategory.HANDMADE
+                  : MainCategory.PAINTINGS,
                 sub: item.category,
               },
             };
@@ -61,36 +64,57 @@ export default function HomePageShop() {
         });
 
         setProducts(processedItems);
-        setFilteredProducts(processedItems);
+
+        const initialFiltered = processedItems.filter((product) => {
+          const productMain = product.categoryStructure?.main
+            ?.toString()
+            ?.toLowerCase();
+          const selectedMain = selectedMainCategory?.toString()?.toLowerCase();
+
+          if (!productMain) {
+            const handmadeCategories = [
+              "კერამიკა",
+              "ხის ნაკეთობები",
+              "სამკაულები",
+              "ტექსტილი",
+              "მინანქარი",
+              "სკულპტურები",
+              "სხვა",
+            ];
+            const isHandmade = handmadeCategories.includes(product.category);
+            return (
+              (isHandmade && selectedMain === "handmade") ||
+              (!isHandmade && selectedMain === "paintings")
+            );
+          }
+
+          return productMain === selectedMain;
+        });
+
+        setFilteredProducts(initialFiltered.slice(0, 6));
+        setIsLoading(false);
       } catch (error) {
         console.error("Error fetching products:", error);
+        setIsLoading(false);
       }
     }
     fetchProducts();
-  }, []);
+  }, [selectedMainCategory]);
 
   useEffect(() => {
+    if (products.length === 0 || isLoading) return;
+
     let filtered = [...products];
 
     console.log("Filtering products with mainCategory:", selectedMainCategory);
-    console.log("Products before filtering:", products);
+    console.log("Products before filtering:", products.length);
 
-    // Filter by main category first - improved handling
     filtered = filtered.filter((product) => {
-      // Normalize main category values for comparison
       const productMain = product.categoryStructure?.main
         ?.toString()
         ?.toLowerCase();
       const selectedMain = selectedMainCategory?.toString()?.toLowerCase();
 
-      console.log(`Product ${product._id} - ${product.name}:`, {
-        productMain,
-        selectedMain,
-        hasStructure: !!product.categoryStructure,
-        match: productMain === selectedMain,
-      });
-
-      // Handle legacy products without categoryStructure
       if (!productMain) {
         const handmadeCategories = [
           "კერამიკა",
@@ -99,7 +123,7 @@ export default function HomePageShop() {
           "ტექსტილი",
           "მინანქარი",
           "სკულპტურები",
-          'სხვა',
+          "სხვა",
         ];
         const isHandmade = handmadeCategories.includes(product.category);
         return (
@@ -138,17 +162,10 @@ export default function HomePageShop() {
       artist: selectedArtist,
       sortOption: sortOption,
       mainCategory: selectedMainCategory,
-      filteredProducts: filtered,
     });
 
-    setFilteredProducts(filtered);
-  }, [
-    selectedCategory,
-    selectedMainCategory,
-    selectedArtist,
-    sortOption,
-    products,
-  ]);
+    setFilteredProducts(filtered.slice(0, 6));
+  }, [selectedCategory, selectedArtist, sortOption, products, isLoading]);
 
   const handleSortChange = (option: string) => {
     setSortOption(option);
@@ -158,7 +175,6 @@ export default function HomePageShop() {
     setSelectedMainCategory(mainCategory);
   };
 
-  // Render animated icons based on theme
   const renderAnimatedIcons = () => {
     if (selectedMainCategory === MainCategory.HANDMADE) {
       return (
@@ -205,7 +221,6 @@ export default function HomePageShop() {
           : "default"
       }`}
     >
-      {/* Add animated icons */}
       {renderAnimatedIcons()}
 
       <div className="content">
@@ -224,20 +239,30 @@ export default function HomePageShop() {
           selectedMainCategory={selectedMainCategory}
           onMainCategoryChange={handleMainCategoryChange}
         />
-        <ProductGrid
-          products={filteredProducts}
-          theme={
-            selectedMainCategory === MainCategory.HANDMADE
-              ? "handmade-theme"
-              : "default"
-          }
-        />
 
-        <div className="see-more">
-          <Link href="/shop">
-            <button className="see-more-btn">ნახეთ ყველა...</button>
-          </Link>
-        </div>
+        {isLoading ? (
+          <div className="loading-container">
+            <p>იტვირთება...</p>
+          </div>
+        ) : (
+          <>
+            <ProductGrid
+              products={filteredProducts}
+              theme={
+                selectedMainCategory === MainCategory.HANDMADE
+                  ? "handmade-theme"
+                  : "default"
+              }
+              isShopPage={false}
+            />
+
+            <div className="see-more">
+              <Link href="/shop">
+                <button className="see-more-btn">ნახეთ ყველა...</button>
+              </Link>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
