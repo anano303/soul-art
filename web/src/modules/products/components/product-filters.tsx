@@ -127,7 +127,8 @@ export function ProductFilters({
     setIsSearching(false);
   };
 
-  const handleSortChange = (option: string) => {
+  const handleSortChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    const option = event.target.value;
     setSortOption(option);
     if (onSortChange) {
       onSortChange(option);
@@ -140,13 +141,17 @@ export function ProductFilters({
     }
   }, [initialCategory, handleCategoryChange]);
 
+  // Determine the theme class based on the selected main category
+  const themeClass =
+    selectedMainCategory === MainCategory.HANDMADE ? "handmade-theme" : "";
+
   return (
-    <div className="filters-container">
+    <div className={`filters-container ${themeClass}`}>
       <div className="filter-section">
         <h3 className="filter-title">მთავარი კატეგორია</h3>
-        <div className="filter-options">
+        <div className="main-category-buttons">
           <button
-            className={`filter-btn ${
+            className={`main-category-btn paintings ${
               selectedMainCategory === MainCategory.PAINTINGS ? "active" : ""
             }`}
             onClick={() => handleMainCategoryChange(MainCategory.PAINTINGS)}
@@ -154,7 +159,7 @@ export function ProductFilters({
             ნახატები
           </button>
           <button
-            className={`filter-btn ${
+            className={`main-category-btn handmade ${
               selectedMainCategory === MainCategory.HANDMADE ? "active" : ""
             }`}
             onClick={() => handleMainCategoryChange(MainCategory.HANDMADE)}
@@ -189,36 +194,6 @@ export function ProductFilters({
             </button>
           </div>
         )}
-      </div>
-
-      <div className="filter-section">
-        <h3 className="filter-title">ფასების სორტირება</h3>
-        <div className="filter-options">
-          <button
-            className={`filter-btn ${
-              sortOption === "lowToHigh" ? "active" : ""
-            }`}
-            onClick={() => handleSortChange("lowToHigh")}
-          >
-            ↑ დაბლიდან მაღლა
-          </button>
-          <button
-            className={`filter-btn ${
-              sortOption === "highToLow" ? "active" : ""
-            }`}
-            onClick={() => handleSortChange("highToLow")}
-          >
-            ↓ მაღლიდან დაბლა
-          </button>
-          {sortOption && (
-            <button
-              className="filter-btn clear-filter"
-              onClick={() => handleSortChange("")}
-            >
-              გასუფთავება
-            </button>
-          )}
-        </div>
       </div>
 
       <div className="filter-section">
@@ -271,6 +246,23 @@ export function ProductFilters({
             </button>
           </div>
         )}
+      </div>
+
+      {/* Sort dropdown as normal flow element with inline layout */}
+      <div className="filter-section sort-section">
+        <h3 className="filter-title sort-title">ფასების სორტირება:</h3>
+        <div className="sort-dropdown inline">
+          <select
+            className="sort-dropdown-select inline"
+            value={sortOption}
+            onChange={handleSortChange}
+            title="ფასების სორტირება"
+          >
+            <option value="">აირჩიეთ</option>
+            <option value="lowToHigh">↑ დაბალი-მაღალი</option>
+            <option value="highToLow">↓ მაღალი-დაბალი</option>
+          </select>
+        </div>
       </div>
     </div>
   );
