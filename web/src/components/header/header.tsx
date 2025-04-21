@@ -54,7 +54,7 @@ export default function Header() {
             </Link>
           </li>
           <li className="shop-dropdown">
-            <Link href="/shop">შეიძინე ნახატები</Link>
+            <Link href="/shop">შეიძინე ნამუშევრები</Link>
             <div className="dropdown-menu">
               <Link href="/auction">აუქციონი</Link>
             </div>
