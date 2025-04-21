@@ -1,5 +1,14 @@
 import { Role } from './role.enum';
 
+export enum MainCategory {
+  PAINTINGS = 'paintings',
+  HANDMADE = 'handmade',
+}
+
+export interface CategoryStructure {
+  main: MainCategory;
+  sub: string;
+}
 export interface Product {
   _id: string;
   user: User;
@@ -18,7 +27,7 @@ export interface Product {
   updatedAt: string;
   status: ProductStatus;
   rejectionReason?: string;
-  deliveryType?: 'SELLER' | 'SoulArt';  // Corrected from 'SOULART' to 'SoulArt'
+  deliveryType?: 'SELLER' | 'SoulArt'; // Corrected from 'SOULART' to 'SoulArt'
   minDeliveryDays?: number;
   maxDeliveryDays?: number;
   dimensions?: {
@@ -30,7 +39,7 @@ export interface Product {
 export enum ProductStatus {
   PENDING = 'PENDING',
   APPROVED = 'APPROVED',
-  REJECTED = 'REJECTED'
+  REJECTED = 'REJECTED',
 }
 
 export interface Review {
@@ -67,7 +76,6 @@ export interface User {
   };
   createdAt: string;
   updatedAt: string;
-  
 }
 
 export interface ApiResponse<T> {
@@ -81,4 +89,4 @@ export interface PaginatedResponse<T> {
   total: number;
   page: number;
   pages: number;
-} 
+}

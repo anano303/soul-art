@@ -19,9 +19,39 @@ export default function HomePageShop() {
 
   useEffect(() => {
     async function fetchProducts() {
-      const { items } = await getProducts(1, 6); // Fetch only 4 products
-      setProducts(items);
-      setFilteredProducts(items);
+      try {
+        const { items } = await getProducts(1, 6);
+        console.log("Fetched products:", items);
+
+        // Ensure all products have categoryStructure
+        const processedItems = items.map((item) => {
+          if (!item.categoryStructure) {
+            const handmadeCategories = [
+              "კერამიკა",
+              "ხის ნაკეთობები",
+              "სამკაულები",
+              "ტექსტილი",
+              "მინანქარი",
+              "სკულპტურები",
+            ];
+            const isHandmade = handmadeCategories.includes(item.category);
+
+            return {
+              ...item,
+              categoryStructure: {
+                main: isHandmade ? MainCategory.HANDMADE : MainCategory.PAINTINGS,
+                sub: item.category,
+              },
+            };
+          }
+          return item;
+        });
+
+        setProducts(processedItems);
+        setFilteredProducts(processedItems);
+      } catch (error) {
+        console.error("Error fetching products:", error);
+      }
     }
     fetchProducts();
   }, []);
@@ -29,14 +59,42 @@ export default function HomePageShop() {
   useEffect(() => {
     let filtered = [...products];
 
-    // Filter by main category first
+    console.log("Filtering products with mainCategory:", selectedMainCategory);
+    console.log("Products before filtering:", products);
+
+    // Filter by main category first - improved handling
     filtered = filtered.filter((product) => {
+      // Normalize main category values for comparison
+      const productMain = product.categoryStructure?.main
+        ?.toString()
+        ?.toLowerCase();
+      const selectedMain = selectedMainCategory?.toString()?.toLowerCase();
+
+      console.log(`Product ${product._id} - ${product.name}:`, {
+        productMain,
+        selectedMain,
+        hasStructure: !!product.categoryStructure,
+        match: productMain === selectedMain,
+      });
+
       // Handle legacy products without categoryStructure
-      if (!product.categoryStructure) {
-        // By default, treat old products as paintings
-        return selectedMainCategory === MainCategory.PAINTINGS;
+      if (!productMain) {
+        const handmadeCategories = [
+          "კერამიკა",
+          "ხის ნაკეთობები",
+          "სამკაულები",
+          "ტექსტილი",
+          "მინანქარი",
+          "სკულპტურები",
+        ];
+        const isHandmade = handmadeCategories.includes(product.category);
+        return (
+          (isHandmade && selectedMain === "handmade") ||
+          (!isHandmade && selectedMain === "paintings")
+        );
       }
-      return product.categoryStructure.main === selectedMainCategory;
+
+      return productMain === selectedMain;
     });
 
     if (selectedCategory) {
@@ -59,12 +117,13 @@ export default function HomePageShop() {
       filtered.sort((a, b) => b.price - a.price);
     }
 
-    console.log("Filtering products:", {
+    console.log("Filtering results:", {
       total: products.length,
       filtered: filtered.length,
       category: selectedCategory,
       artist: selectedArtist,
       sortOption: sortOption,
+      mainCategory: selectedMainCategory,
       filteredProducts: filtered,
     });
 

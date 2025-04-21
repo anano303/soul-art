@@ -37,10 +37,24 @@ export function ProductGrid({
           // Convert old products to use the new category structure
           const processedItems = items.map((item) => {
             if (!item.categoryStructure) {
+              // Assign a default category structure based on the item's category
+              const mainCategory =
+                item.category &&
+                [
+                  "კერამიკა",
+                  "ხის ნაკეთობები",
+                  "სამკაულები",
+                  "ტექსტილი",
+                  "მინანქარი",
+                  "სკულპტურები",
+                ].includes(item.category)
+                  ? MainCategory.HANDMADE
+                  : MainCategory.PAINTINGS;
+
               return {
                 ...item,
                 categoryStructure: {
-                  main: MainCategory.PAINTINGS,
+                  main: mainCategory,
                   sub: item.category,
                 },
               };
@@ -62,10 +76,21 @@ export function ProductGrid({
       // Also process initial products if they don't have category structure
       const processedProducts = initialProducts?.map((item) => {
         if (!item.categoryStructure) {
+          // Assign a default category structure based on the item's category
+          const handmadeCategories = [
+            "კერამიკა",
+            "ხის ნაკეთობები",
+            "სამკაულები",
+            "ტექსტილი",
+            "მინანქარი",
+            "სკულპტურები",
+          ];
+          const isHandmade = handmadeCategories.includes(item.category);
+
           return {
             ...item,
             categoryStructure: {
-              main: MainCategory.PAINTINGS,
+              main: isHandmade ? MainCategory.HANDMADE : MainCategory.PAINTINGS,
               sub: item.category,
             },
           };

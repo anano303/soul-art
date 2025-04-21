@@ -28,17 +28,17 @@ export class Review {
 export enum ProductStatus {
   PENDING = 'PENDING',
   APPROVED = 'APPROVED',
-  REJECTED = 'REJECTED'
+  REJECTED = 'REJECTED',
 }
 
 export enum DeliveryType {
   SELLER = 'SELLER',
-  SoulArt = 'SoulArt'
+  SoulArt = 'SoulArt',
 }
 
 export enum MainCategory {
-  PAINTINGS = 'PAINTINGS',
-  HANDMADE = 'HANDMADE'
+  PAINTINGS = 'paintings',
+  HANDMADE = 'handmade',
 }
 
 export interface CategoryStructure {
