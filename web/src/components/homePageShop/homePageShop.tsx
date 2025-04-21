@@ -3,22 +3,10 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import "./homePageShop.css";
-import "../../app/(pages)/shop/ShopPage.css";
-import "../../app/(pages)/shop/ShopAnimatedIcons.css";
 import { ProductGrid } from "@/modules/products/components/product-grid";
 import { getProducts } from "@/modules/products/api/get-products";
 import { Product, MainCategory } from "@/types";
 import { ProductFilters } from "@/modules/products/components/product-filters";
-import {
-  Paintbrush,
-  Palette,
-  Printer,
-  Square,
-  Scissors,
-  CakeSlice,
-  Hammer,
-  Gem,
-} from "lucide-react";
 
 export default function HomePageShop() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -160,56 +148,8 @@ export default function HomePageShop() {
     setSelectedMainCategory(mainCategory);
   };
 
-  // Render animated icons based on theme
-  const renderAnimatedIcons = () => {
-    if (selectedMainCategory === MainCategory.HANDMADE) {
-      return (
-        <div className="shop-animated-icons handmade-theme">
-          <div className="icon pottery-icon">
-            <CakeSlice />
-          </div>
-          <div className="icon wood-icon">
-            <Hammer />
-          </div>
-          <div className="icon jewelry-icon">
-            <Gem />
-          </div>
-          <div className="icon textile-icon">
-            <Scissors />
-          </div>
-        </div>
-      );
-    } else {
-      return (
-        <div className="shop-animated-icons default">
-          <div className="icon brush-icon">
-            <Paintbrush />
-          </div>
-          <div className="icon palette-icon">
-            <Palette />
-          </div>
-          <div className="icon canvas-icon">
-            <Square />
-          </div>
-          <div className="icon frame-icon">
-            <Printer />
-          </div>
-        </div>
-      );
-    }
-  };
-
   return (
-    <div
-      className={`container shop-container ${
-        selectedMainCategory === MainCategory.HANDMADE
-          ? "handmade-theme"
-          : "default"
-      }`}
-    >
-      {/* Add animated icons */}
-      {renderAnimatedIcons()}
-
+    <div className="container">
       <div className="content">
         <h1
           className="title"
