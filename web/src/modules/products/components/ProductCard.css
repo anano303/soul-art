@@ -24,6 +24,16 @@
   justify-content: space-between;
 }
 
+/* Handmade theme styles */
+.product-card.handmade-theme {
+  box-shadow: 0 4px 10px #7d5a35;
+}
+
+.product-card.handmade-theme:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 15px #9a6c40;
+}
+
 .product-card a {
   text-decoration: none;
 }
@@ -117,6 +127,11 @@
   text-align: center;
 }
 
+/* Handmade theme name color */
+.handmade-theme .product-name {
+  color: #7d5a35;
+}
+
 .product-details {
   display: flex;
   justify-content: flex-start;
@@ -134,12 +149,22 @@
   white-space: nowrap;
 }
 
+/* Handmade theme price color */
+.handmade-theme .product-price {
+  color: #7d5a35;
+}
+
 .product-rating {
   display: flex;
   align-items: center;
   color: #012645;
   background: #f5f5f5;
   padding: 5px;
+}
+
+/* Handmade theme rating color */
+.handmade-theme .product-rating {
+  color: #7d5a35;
 }
 
 .quantity-container {
@@ -167,6 +192,11 @@
 
 .quantity-button:hover {
   color: #012645;
+}
+
+/* Handmade theme button hover */
+.handmade-theme .quantity-button:hover {
+  color: #7d5a35;
 }
 
 .quantity-input {
@@ -197,6 +227,18 @@
   width: 100%;
   margin-top: 12px;
 }
+
+/* Handmade theme button */
+.handmade-theme .addButtonCart {
+  background: linear-gradient(to left, #7d5a35, #a67c52);
+}
+
+.handmade-theme .addButtonCart:hover:not(:disabled) {
+  background: linear-gradient(to left, #63472a, #8a6743);
+  box-shadow: 0 5px 15px rgba(125, 90, 53, 0.3);
+  transform: translateY(-2px);
+}
+
 .addButtonCart span {
   font-size: 24px;
   margin-bottom: 5px;
