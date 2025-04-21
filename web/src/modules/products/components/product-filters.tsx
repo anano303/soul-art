@@ -145,6 +145,20 @@ export function ProductFilters({
   const themeClass =
     selectedMainCategory === MainCategory.HANDMADE ? "handmade-theme" : "";
 
+  // Get the appropriate search label based on the selected main category
+  const getSearchLabel = () => {
+    return selectedMainCategory === MainCategory.PAINTINGS
+      ? "მხატვრები"
+      : "ავტორი / კომპანია";
+  };
+
+  // Get placeholder text for search input
+  const getSearchPlaceholder = () => {
+    return selectedMainCategory === MainCategory.PAINTINGS
+      ? "მოძებნე მხატვარი..."
+      : "მოძებნე ავტორი / კომპანია...";
+  };
+
   return (
     <div className={`filters-container ${themeClass}`}>
       <div className="filter-section">
@@ -197,12 +211,13 @@ export function ProductFilters({
       </div>
 
       <div className="filter-section">
-        <h3 className="filter-title">მხატვრები</h3>
+        {/* Dynamic title based on selected main category */}
+        <h3 className="filter-title">{getSearchLabel()}</h3>
         <div className="search-container">
           <Search className="search-icon" />
           <input
             type="text"
-            placeholder="მოძებნე მხატვარი..."
+            placeholder={getSearchPlaceholder()}
             value={searchTerm}
             onChange={(e) => filterArtists(e.target.value)}
             onFocus={() => setIsSearching(true)}
