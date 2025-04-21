@@ -75,7 +75,6 @@ export class ProductsService {
                       'ტექსტილი',
                       'მინანქარი',
                       'სკულპტურები',
-                      'სხვა',
                     ],
                   },
                 },
@@ -93,7 +92,6 @@ export class ProductsService {
                       'ტექსტილი',
                       'მინანქარი',
                       'სკულპტურები',
-                      'სხვა',
                     ],
                   },
                 },
@@ -156,7 +154,6 @@ export class ProductsService {
           'ტექსტილი',
           'მინანქარი',
           'სკულპტურები',
-          'სხვა',
         ].includes(doc.category);
 
         doc.categoryStructure = {
@@ -199,7 +196,6 @@ export class ProductsService {
         'ტექსტილი',
         'მინანქარი',
         'სკულპტურები',
-        'სხვა',
       ].includes(product.category);
 
       product.categoryStructure = {
@@ -375,7 +371,6 @@ export class ProductsService {
         'ტექსტილი',
         'მინანქარი',
         'სკულპტურები',
-        'სხვა',
       ].includes(productData.category);
 
       productData.categoryStructure = {

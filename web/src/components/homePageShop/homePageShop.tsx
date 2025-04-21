@@ -33,7 +33,6 @@ export default function HomePageShop() {
               "ტექსტილი",
               "მინანქარი",
               "სკულპტურები",
-              'სხვა',
             ];
             const isHandmade = handmadeCategories.includes(item.category);
 
@@ -87,7 +86,6 @@ export default function HomePageShop() {
           "ტექსტილი",
           "მინანქარი",
           "სკულპტურები",
-          'სხვა',
         ];
         const isHandmade = handmadeCategories.includes(product.category);
         return (
