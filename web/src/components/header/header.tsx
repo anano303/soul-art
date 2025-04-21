@@ -54,35 +54,14 @@ export default function Header() {
             </Link>
           </li>
           <li className="shop-dropdown">
-            <Link href="/shop?mainCategory=PAINTINGS">შეიძინე ნახატები</Link>
+            <Link href="/shop">შეიძინე ნახატები</Link>
             <div className="dropdown-menu">
-              <Link href="/shop?mainCategory=PAINTINGS&category=პეიზაჟი">
-                პეიზაჟი
-              </Link>
-              <Link href="/shop?mainCategory=PAINTINGS&category=პორტრეტი">
-                პორტრეტი
-              </Link>
-              <Link href="/shop?mainCategory=PAINTINGS&category=აბსტრაქცია">
-                აბსტრაქცია
-              </Link>
-              <Link href="/shop?mainCategory=HANDMADE">
-                ხელნაკეთი ნივთები
-              </Link>
-              <Link href="/shop?mainCategory=HANDMADE&category=კერამიკა">
-                კერამიკა
-              </Link>
-              <Link href="/shop?mainCategory=HANDMADE&category=ხის%20ნაკეთობები">
-                ხის ნაკეთობები
-              </Link>
               <Link href="/auction">აუქციონი</Link>
             </div>
           </li>
           {/* Mobile-only auction link */}
           <li className="mobile-only-nav">
             <Link href="/auction">აუქციონი</Link>
-          </li>
-          <li className="mobile-only-nav">
-            <Link href="/shop?mainCategory=HANDMADE">ხელნაკეთი ნივთები</Link>
           </li>
           <li>
             <a href="#" onClick={handleOrdersClick}>
