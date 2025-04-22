@@ -50,7 +50,7 @@ export default function Header() {
                   : "/sellers-register"
               }
             >
-              {user?.role === "seller" ? "ჩემი ნახატები" : "გაყიდე ნახატები"}
+              {user?.role === "seller" ? "ჩემი ნამუშევრები" : "გაყიდე ნამუშევრები"}
             </Link>
           </li>
           <li className="shop-dropdown">
