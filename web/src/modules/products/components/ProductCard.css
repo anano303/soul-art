@@ -96,10 +96,15 @@
 }
 
 .image {
-  object-fit: cover;
+  object-fit: contain;
   width: 100%;
   height: 100%;
   transition: transform 0.5s ease; /* Add transition for smooth zoom effect */
+  background-color: #012645;
+}
+
+.handmade-theme .product-image img {
+  background-color: #7d5a35;
 }
 
 .product-card:hover .image {
