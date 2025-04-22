@@ -50,11 +50,15 @@ export default function Header() {
                   : "/sellers-register"
               }
             >
-              {user?.role === "seller" ? "ჩემი ნამუშევრები" : "გაყიდე ნამუშევრები"}
+              {user?.role === "seller"
+                ? "ჩემი ნამუშევრები"
+                : "გაყიდე ნამუშევრები"}
             </Link>
           </li>
           <li className="shop-dropdown">
-            <Link href="/shop">შეიძინე ნამუშევრები</Link>
+            <Link href="/shop?page=1&mainCategory=paintings">
+              შეიძინე ნამუშევრები
+            </Link>
             <div className="dropdown-menu">
               <Link href="/auction">აუქციონი</Link>
             </div>

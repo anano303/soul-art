@@ -1,16 +1,13 @@
 "use client";
 
-import { useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { ProductGrid } from "@/modules/products/components/product-grid";
 import { ProductFilters } from "@/modules/products/components/product-filters";
 import { getProducts } from "@/modules/products/api/get-products";
 import { Product, MainCategory } from "@/types";
-// Import the new CSS file
 import "./ShopPage.css";
-// Import the animated icons CSS
 import "./ShopAnimatedIcons.css";
-// Import icons from lucide-react
 import {
   Paintbrush,
   Palette,
@@ -23,98 +20,123 @@ import {
 } from "lucide-react";
 
 const ShopContent = () => {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
+  const router = useRouter();
   const searchParams = useSearchParams();
+
   const brand = searchParams ? searchParams.get("brand") : null;
   const pageParam = searchParams
     ? parseInt(searchParams.get("page") || "1")
     : 1;
+  const mainCategoryParam = searchParams
+    ? searchParams.get("mainCategory")
+    : null;
 
-  // Set initial category state to 'all' when brand is present
+  const initializedRef = useRef(false);
+
   const initialCategory = brand ? "all" : "";
 
   const [selectedCategory, setSelectedCategory] = useState(initialCategory);
   const [sortOption, setSortOption] = useState("");
   const [selectedMainCategory, setSelectedMainCategory] =
-    useState<MainCategory>(MainCategory.PAINTINGS);
-  const [currentPage, setCurrentPage] = useState(pageParam);
+    useState<MainCategory>(
+      mainCategoryParam === MainCategory.HANDMADE.toString()
+        ? MainCategory.HANDMADE
+        : MainCategory.PAINTINGS
+    );
+
+  const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Replace useInfiniteQuery with direct data fetching for better pagination control
+  const [products, setProducts] = useState<Product[]>([]);
+  const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
+
   useEffect(() => {
-    const fetchProducts = async () => {
-      setIsLoading(true);
-      try {
-        // Fetch more products per page (20-30) to ensure we have enough to display
-        const response = await getProducts(
-          currentPage,
-          30,
-          undefined,
-          brand || undefined
-        );
+    if (initializedRef.current) return;
+    initializedRef.current = true;
 
-        const allProducts = response.items.map((item) => {
-          // Process items to ensure they have categoryStructure
-          if (!item.categoryStructure) {
-            const handmadeCategories = [
-              "კერამიკა",
-              "ხის ნაკეთობები",
-              "სამკაულები",
-              "ტექსტილი",
-              "მინანქარი",
-              "სკულპტურები",
-              "სხვა",
-            ];
-            const isHandmade = handmadeCategories.includes(item.category);
+    console.log("Initial setup with URL params:", {
+      page: pageParam,
+      mainCategory: mainCategoryParam,
+    });
 
-            return {
-              ...item,
-              categoryStructure: {
-                main: isHandmade
-                  ? MainCategory.HANDMADE
-                  : MainCategory.PAINTINGS,
-                sub: item.category,
-              },
-            };
-          }
-          return item;
-        });
+    setCurrentPage(pageParam);
 
-        setProducts(allProducts);
-        setTotalPages(response.pages);
+    const mainCat =
+      mainCategoryParam === MainCategory.HANDMADE.toString()
+        ? MainCategory.HANDMADE
+        : MainCategory.PAINTINGS;
+    setSelectedMainCategory(mainCat);
+  }, []);
 
-        // Initially set all products
-        setFilteredProducts(allProducts);
-      } catch (error) {
-        console.error("Failed to fetch products:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
+  const fetchProducts = useCallback(async () => {
+    if (!initializedRef.current) return;
 
-    fetchProducts();
+    console.log(`Fetching products for page ${currentPage}`);
+    setIsLoading(true);
+
+    try {
+      const response = await getProducts(
+        currentPage,
+        30,
+        undefined,
+        brand || undefined
+      );
+
+      console.log(
+        `Got ${response.items.length} products for page ${currentPage}`
+      );
+
+      const allProducts = response.items.map((item) => {
+        if (!item.categoryStructure) {
+          const handmadeCategories = [
+            "კერამიკა",
+            "ხის ნაკეთობები",
+            "სამკაულები",
+            "ტექსტილი",
+            "მინანქარი",
+            "სკულპტურები",
+            "სხვა",
+          ];
+          const isHandmade = handmadeCategories.includes(item.category);
+
+          return {
+            ...item,
+            categoryStructure: {
+              main: isHandmade ? MainCategory.HANDMADE : MainCategory.PAINTINGS,
+              sub: item.category,
+            },
+          };
+        }
+        return item;
+      });
+
+      setProducts(allProducts);
+      setTotalPages(response.pages);
+    } catch (error) {
+      console.error(`Failed to fetch products:`, error);
+    } finally {
+      setIsLoading(false);
+    }
   }, [currentPage, brand]);
 
-  // Apply filtering and sorting whenever relevant state changes
+  useEffect(() => {
+    let mounted = true;
+    if (mounted) {
+      fetchProducts();
+    }
+    return () => {
+      mounted = false;
+    };
+  }, [fetchProducts]);
+
   useEffect(() => {
     if (products.length === 0) return;
 
+    console.log("Applying filters to products");
+
     let filtered = [...products];
 
-    console.log("Shop filtering - initial products:", products.length);
-    console.log("Selected main category:", selectedMainCategory);
-
-    if (brand) {
-      filtered = filtered.filter(
-        (product) =>
-          product.brand && product.brand.toLowerCase() === brand.toLowerCase()
-      );
-      console.log("After brand filter:", filtered.length);
-    }
-
-    // Filter by main category first
     filtered = filtered.filter((product) => {
       const productMainCategory = product.categoryStructure?.main
         ?.toString()
@@ -123,7 +145,6 @@ const ShopContent = () => {
         ?.toString()
         .toLowerCase();
 
-      // Handle legacy products without categoryStructure
       if (!productMainCategory) {
         const handmadeCategories = [
           "კერამიკა",
@@ -145,107 +166,111 @@ const ShopContent = () => {
       return productMainCategory === selectedMainCategoryStr;
     });
 
-    console.log("After main category filter:", filtered.length);
-
-    // Then filter by subcategory if selected
     if (selectedCategory && selectedCategory !== "all") {
       filtered = filtered.filter(
         (product) => product.category === selectedCategory
       );
-      console.log("After subcategory filter:", filtered.length);
     }
 
-    // Apply sorting
     if (sortOption === "lowToHigh") {
       filtered.sort((a, b) => a.price - b.price);
     } else if (sortOption === "highToLow") {
       filtered.sort((a, b) => b.price - a.price);
     }
 
-    console.log("Final filtered products:", filtered.length);
+    console.log(`After filtering: ${filtered.length} products`);
     setFilteredProducts(filtered);
-  }, [selectedCategory, selectedMainCategory, brand, products, sortOption]);
+  }, [products, selectedCategory, selectedMainCategory, sortOption]);
 
-  // Handle category changes while preserving brand filter
-  const handleCategoryChange = (category: string) => {
-    setSelectedCategory(category);
-    // Reset to page 1 when changing category
-    setCurrentPage(1);
-
-    // Update URL with category parameter
-    if (typeof window !== "undefined") {
-      const url = new URL(window.location.href);
-      if (category && category !== "all") {
-        url.searchParams.set("category", category);
-      } else {
-        url.searchParams.delete("category");
-      }
-      url.searchParams.set("page", "1"); // Reset to page 1
-      window.history.pushState({}, "", url.toString());
-    }
-  };
-
-  const handleArtistChange = (artist: string) => {
-    // Reset to page 1 when changing artist
-    setCurrentPage(1);
-
-    if (typeof window !== "undefined" && artist) {
-      window.location.href = `/shop?brand=${encodeURIComponent(artist)}&page=1`;
-    } else {
-      let filtered = [...products];
-
-      if (artist) {
-        filtered = filtered.filter(
-          (product) =>
-            product.brand &&
-            product.brand.toLowerCase() === artist.toLowerCase()
-        );
-      }
-
-      setFilteredProducts(filtered);
-    }
-  };
-
-  // Handle page change
   const handlePageChange = (page: number) => {
+    if (page === currentPage || page < 1 || page > totalPages) return;
+
+    console.log(`Changing page to ${page}`);
     setCurrentPage(page);
 
-    // Update URL with page parameter
-    if (typeof window !== "undefined") {
-      const url = new URL(window.location.href);
-      url.searchParams.set("page", page.toString());
-      window.history.pushState({}, "", url.toString());
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("page", page.toString());
+
+    router.replace(`/shop?${params.toString()}`);
+
+    window.scrollTo(0, 0);
+  };
+
+  const handleCategoryChange = (category: string) => {
+    if (category === selectedCategory) return;
+
+    console.log(`Changing category to: ${category}`);
+    setSelectedCategory(category);
+
+    if (currentPage !== 1) {
+      setCurrentPage(1);
+
+      const params = new URLSearchParams(searchParams.toString());
+
+      if (category && category !== "all") {
+        params.set("category", category);
+      } else {
+        params.delete("category");
+      }
+
+      params.set("page", "1");
+      router.replace(`/shop?${params.toString()}`);
+    } else {
+      const params = new URLSearchParams(searchParams.toString());
+
+      if (category && category !== "all") {
+        params.set("category", category);
+      } else {
+        params.delete("category");
+      }
+
+      router.replace(`/shop?${params.toString()}`);
     }
   };
 
-  // Handle sort change
+  const handleMainCategoryChange = (mainCategory: MainCategory) => {
+    if (mainCategory === selectedMainCategory) return;
+
+    console.log(`Changing main category to: ${mainCategory}`);
+    setSelectedMainCategory(mainCategory);
+    setSelectedCategory("all");
+    setCurrentPage(1);
+
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("mainCategory", mainCategory.toString());
+    params.set("page", "1");
+    params.delete("category");
+
+    router.replace(`/shop?${params.toString()}`);
+  };
+
   const handleSortChange = (option: string) => {
     setSortOption(option);
   };
 
-  // Handle main category changes
-  const handleMainCategoryChange = (mainCategory: MainCategory) => {
-    setSelectedMainCategory(mainCategory);
-    // Reset to page 1 when changing main category
+  const handleArtistChange = (artist: string) => {
+    if (!artist) return;
+
+    console.log(`Changing artist filter to: ${artist}`);
+
+    // Reset to page 1
     setCurrentPage(1);
 
-    // Update URL with main category parameter
-    if (typeof window !== "undefined") {
-      const url = new URL(window.location.href);
-      url.searchParams.set("mainCategory", mainCategory);
-      url.searchParams.set("page", "1"); // Reset to page 1
-      window.history.pushState({}, "", url.toString());
-    }
+    // Update URL with brand parameter and navigate
+    const params = new URLSearchParams();
+    params.set("brand", artist);
+    params.set("page", "1");
+
+    // Use router.push since we're changing to a fundamentally different view
+    router.push(`/shop?${params.toString()}`);
   };
 
-  // Get the theme based on selected main category
   const getTheme = () => {
     return selectedMainCategory === MainCategory.HANDMADE
       ? "handmade-theme"
       : "default";
   };
 
-  // Render animated icons based on theme
   const renderAnimatedIcons = () => {
     if (selectedMainCategory === MainCategory.HANDMADE) {
       return (
@@ -308,7 +333,7 @@ const ShopContent = () => {
         currentPage={currentPage}
         totalPages={totalPages}
         onPageChange={handlePageChange}
-        isShopPage={true} // Add a prop to indicate this is the shop page
+        isShopPage={true}
       />
     </div>
   );

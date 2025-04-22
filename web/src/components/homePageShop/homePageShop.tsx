@@ -257,7 +257,7 @@ export default function HomePageShop() {
             />
 
             <div className="see-more">
-              <Link href="/shop">
+              <Link href={`/shop?page=1&mainCategory=${selectedMainCategory}`}>
                 <button className="see-more-btn">ნახეთ ყველა...</button>
               </Link>
             </div>
