@@ -124,8 +124,8 @@
   border-radius: 0.5rem;
   margin-top: 0.25rem;
   padding: 0.5rem;
-  display: flex;
-  flex-direction: column;
+  /* display: flex;
+  flex-direction: column; */
   gap: 0.5rem;
 }
 
