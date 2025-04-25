@@ -7,8 +7,8 @@ import { AuthLayout } from "@/modules/auth/layouts/auth-layout";
 export default function LoginPage() {
   return (
     <AuthLayout
-      title="Log in to your account"
-      subtitle="Welcome back! Please enter your details."
+      title="შედით თქვენი ანგარიშით"
+      subtitle="კეთილი იყოს თქვენი დაბრუნება! "
     >
       <LoginForm />
     </AuthLayout>
