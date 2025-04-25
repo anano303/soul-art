@@ -15,13 +15,25 @@ const nextConfig: NextConfig = {
         port: "",
         pathname: "**",
       },
+      {
+        protocol: "https",
+        hostname: "fish-hunt.s3.eu-north-1.amazonaws.com",
+        port: "",
+        pathname: "**",
+      },
+      {
+        protocol: "https",
+        hostname: "res.cloudinary.com",
+        port: "",
+        pathname: "**",
+      },
     ],
-    unoptimized: process.env.NODE_ENV !== 'production'
+    unoptimized: process.env.NODE_ENV !== "production",
   },
   reactStrictMode: true,
   poweredByHeader: false,
-  output: 'standalone',
-  distDir: '.next',
+  output: "standalone",
+  distDir: ".next",
   webpack: (config, { isServer }) => {
     if (!isServer) {
       config.resolve.fallback = {
