@@ -13,21 +13,24 @@
   align-items: center;
   justify-content: center;
   position: relative;
+  background-image: url("../../../assets/abstract-poster-background_670672-10372.avif");
   background-color: white;
   padding: 40px;
   padding-bottom: 80px;
+  background-position: center;
+  background-size: cover;
 }
-.auth-bg {
+/* .auth-bg {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
-  height: 50vh; /* ნახევარი ეკრანი */
+  height: 50vh; 
   background: linear-gradient(to bottom, #012645, #03214b);
   border-bottom-left-radius: 50% 20%;
   border-bottom-right-radius: 50% 20%;
   z-index: 0;
-}
+} */
 
 .auth-layout-inner {
   margin-top: 80px;
@@ -35,12 +38,12 @@
   max-width: 24rem;
   position: relative;
   z-index: 1;
-  background: rgba(253, 245, 236, 0.52);
+  /* background: rgba(253, 245, 236, 0.52); */
   padding: 2rem;
   border-radius: 30px;
   box-shadow: 0 4px 10px #012645b5;
-  backdrop-filter: blur(10px); /* ბლურ ეფექტი */
-  -webkit-backdrop-filter: blur(10px); /* Safari მხარდაჭერა */
+  /* backdrop-filter: blur(10px); 
+  -webkit-backdrop-filter: blur(10px);  */
 }
 
 .auth-layout-header {
@@ -72,5 +75,4 @@
     padding: 0;
     padding-bottom: 70px;
   }
-  
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { FaCheckCircle, FaFacebook, FaGoogle } from "react-icons/fa";
+import { FaCheckCircle, FaGoogle } from "react-icons/fa";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { registerSchema } from "../validation";
@@ -222,10 +222,10 @@ export function RegisterForm() {
         </div>
 
         <div className="social-buttons">
-          <button type="button" className="social-button">
+          {/* <button type="button" className="social-button">
             <FaFacebook className="icon" />
             Facebook
-          </button>
+          </button> */}
           <button
             type="button"
             onClick={handleGoogleAuth}

@@ -4,7 +4,7 @@ import { useForm, SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { loginSchema } from "../validation";
 import { useLogin } from "../hooks/use-auth";
-import { FaGoogle, FaFacebook } from "react-icons/fa";
+import { FaGoogle } from "react-icons/fa";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import "./login-form.css";
@@ -30,9 +30,10 @@ export function LoginForm() {
   // Watch for errors from the hook
   useEffect(() => {
     if (hookError) {
-      const errorMessage = hookError instanceof Error 
-        ? hookError.message 
-        : "ავტორიზაცია ვერ მოხერხდა";
+      const errorMessage =
+        hookError instanceof Error
+          ? hookError.message
+          : "ავტორიზაცია ვერ მოხერხდა";
       setLoginError(errorMessage);
     }
   }, [hookError]);
@@ -47,7 +48,7 @@ export function LoginForm() {
 
   const onSubmit: SubmitHandler<LoginFormData> = async (data) => {
     setLoginError(null); // Clear previous errors
-    
+
     try {
       login(data, {
         onSuccess: (response) => {
@@ -56,7 +57,7 @@ export function LoginForm() {
             toast({
               title: "წარმატებული ავტორიზაცია",
               description: "კეთილი იყოს თქვენი დაბრუნება!",
-              variant: "default"
+              variant: "default",
             });
             router.push(returnUrl);
           } else {
@@ -66,37 +67,37 @@ export function LoginForm() {
             toast({
               title: "ავტორიზაციის შეცდომა",
               description: errorMessage,
-              variant: "destructive"
+              variant: "destructive",
             });
           }
         },
         onError: (error) => {
           // Display detailed error message from backend
-          const errorMessage = error instanceof Error 
-            ? error.message 
-            : "ავტორიზაცია ვერ მოხერხდა";
-          
+          const errorMessage =
+            error instanceof Error ? error.message : "ავტორიზაცია ვერ მოხერხდა";
+
           setLoginError(errorMessage);
-          
+
           toast({
             title: "ავტორიზაციის შეცდომა",
             description: errorMessage,
-            variant: "destructive"
+            variant: "destructive",
           });
-        }
+        },
       });
     } catch (error) {
       // Handle unexpected client-side errors
-      const errorMessage = error instanceof Error 
-        ? error.message 
-        : "სისტემური შეცდომა, გთხოვთ სცადოთ მოგვიანებით";
-      
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "სისტემური შეცდომა, გთხოვთ სცადოთ მოგვიანებით";
+
       setLoginError(errorMessage);
-      
+
       toast({
         title: "ავტორიზაციის შეცდომა",
         description: errorMessage,
-        variant: "destructive"
+        variant: "destructive",
       });
     }
   };
@@ -141,11 +142,7 @@ export function LoginForm() {
           </div>
         )}
 
-        <button
-          type="submit"
-          className="login-button"
-          disabled={isLoading}
-        >
+        <button type="submit" className="login-button" disabled={isLoading}>
           {isLoading ? <span className="loading-spinner"></span> : "შესვლა"}
         </button>
 
@@ -154,10 +151,10 @@ export function LoginForm() {
         </div>
 
         <div className="social-buttons">
-          <button type="button" className="social-button">
+          {/* <button type="button" className="social-button">
             <FaFacebook className="icon" />
             Facebook
-          </button>
+          </button> */}
           <button
             type="button"
             onClick={handleGoogleAuth}

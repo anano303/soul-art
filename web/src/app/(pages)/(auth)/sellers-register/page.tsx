@@ -11,8 +11,8 @@ export default function SellerRegisterPage() {
       </div>
       <div className={styles.formSection}>
         <AuthLayout
-          title="Seller Registration"
-          subtitle="Register your store and start selling on SoulArt!"
+          title="მოგესალებით SoulArt-ის სამყაროში!"
+          subtitle="შექმენით თქვენი პორტფოლიო და დაიწყეთ გაყიდვები!"
         >
           <SellerRegisterForm />
         </AuthLayout>
