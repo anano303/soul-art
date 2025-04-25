@@ -1,6 +1,10 @@
-import { apiClient } from "./api-client";
-
-import { getRefreshToken, getAccessToken, storeTokens, clearTokens } from "./auth";
+import {  setupResponseInterceptors } from "./api-client";
+import {
+  getRefreshToken,
+  getAccessToken,
+  storeTokens,
+  clearTokens,
+} from "./auth";
 
 let isRefreshing = false;
 let failedQueue: Array<{
@@ -28,130 +32,81 @@ const resetRefreshState = () => {
 // Refresh token function
 export const refreshAuthToken = async (): Promise<boolean> => {
   try {
-    console.log('📡 Attempting to refresh token');
+    // If a refresh is already in progress, queue this request
+    if (isRefreshing) {
+      return new Promise<boolean>((resolve, reject) => {
+        failedQueue.push({
+          resolve: (token) => resolve(!!token),
+          reject,
+        });
+      });
+    }
     
+    isRefreshing = true;
+    console.log("📡 Attempting to refresh token");
+
     const refreshToken = getRefreshToken();
     if (!refreshToken) {
-      console.log('❌ No refresh token found');
+      console.log("❌ No refresh token found");
       clearTokens();
+      resetRefreshState();
       return false;
     }
 
-    // Using axios directly with baseURL to avoid interceptors
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/refresh`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ refreshToken }),
-    });
-    
-    if (!response.ok) {
-      console.log(`❌ Refresh failed with status ${response.status}`);
-      clearTokens();
-      return false;
-    }
+    // Using fetch directly to avoid interceptors
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/auth/refresh`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ refreshToken }),
+      }
+    );
     
     const data = await response.json();
-    
+
     if (data.tokens && data.tokens.accessToken && data.tokens.refreshToken) {
-      console.log('✅ Token refresh successful');
+      console.log("✅ Token refresh successful");
       storeTokens(data.tokens.accessToken, data.tokens.refreshToken);
+      processQueue(null, data.tokens.accessToken);
+      resetRefreshState();
       return true;
     }
     
-    console.log('❌ Invalid response format from refresh endpoint');
+    console.log("❌ Invalid response format from refresh endpoint");
     clearTokens();
+    processQueue(new Error("Invalid response format"));
+    resetRefreshState();
     return false;
   } catch (error) {
-    console.error('❌ Token refresh error:', error);
+    console.error("❌ Token refresh error:", error);
     clearTokens();
+    processQueue(error);
+    resetRefreshState();
     return false;
   }
 };
 
-apiClient.interceptors.response.use(
-  (response) => response,
-  async (error) => {
-    const originalRequest = error.config;
-
-    // Skip auth endpoints to avoid infinite loops
-    const isAuthEndpoint = originalRequest.url?.includes('/auth/') && 
-                           !originalRequest.url?.includes('/auth/profile');
-    
-    if (isAuthEndpoint) {
-      return Promise.reject(error);
-    }
-
-    // If we're already retrying or it's not a 401, reject immediately
-    if (originalRequest._retry || error.response?.status !== 401) {
-      return Promise.reject(error);
-    }
-
-    // If there's no access token or refresh token, reject immediately
-    if (!getAccessToken() || !getRefreshToken()) {
-      clearTokens();
-      return Promise.reject(error);
-    }
-
-    // Safety check - if we somehow got stuck
-    if (isRefreshing) {
-      return new Promise((resolve, reject) => {
-        failedQueue.push({ resolve, reject });
-      })
-        .then(() => {
-          return apiClient(originalRequest);
-        })
-        .catch((err) => {
-          return Promise.reject(err);
-        });
-    }
-
-    originalRequest._retry = true;
-    isRefreshing = true;
-
-    try {
-      const success = await refreshAuthToken();
-      if (success) {
-        console.log('🔄 Retrying original request with new token');
-        // Update the Authorization header with new token
-        originalRequest.headers.Authorization = `Bearer ${getAccessToken()}`;
-        processQueue(null, "refreshed");
-        return apiClient(originalRequest);
-      } else {
-        console.log('❌ Token refresh failed, rejecting original request');
-        processQueue(new Error("Token refresh failed"), null);
-        // Clear user data in query client to fix UI state
-        const queryClient = window.queryClient;
-        if (queryClient) {
-          queryClient.setQueryData(['user'], null);
-        }
-        return Promise.reject(error);
-      }
-    } catch (refreshError) {
-      console.error('❌ Error during refresh:', refreshError);
-      processQueue(refreshError, null);
-      // Clear user data in query client to fix UI state
-      const queryClient = window.queryClient;
-      if (queryClient) {
-        queryClient.setQueryData(['user'], null);
-      }
-      return Promise.reject(refreshError);
-    } finally {
-      resetRefreshState();
-    }
-  }
-);
-
-// Export a function to check auth status and potentially refresh token on app start
+// Check and refresh auth if needed
 export const checkAndRefreshAuth = async (): Promise<boolean> => {
-  if (!getAccessToken() && !getRefreshToken()) {
+  const accessToken = getAccessToken();
+  const refreshToken = getRefreshToken();
+
+  if (!accessToken || !refreshToken) {
     return false;
   }
-  
-  if (!getAccessToken() && getRefreshToken()) {
-    return await refreshAuthToken();
+
+  // If token is about to expire or we just want to refresh on startup
+  try {
+    const success = await refreshAuthToken();
+    return success;
+  } catch (error) {
+    console.error("Failed to refresh token during init:", error);
+    return false;
   }
-  
-  return true;
 };
+
+// Setup response interceptors with the refreshAuthToken function
+setupResponseInterceptors(refreshAuthToken);
