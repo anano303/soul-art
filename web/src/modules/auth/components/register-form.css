@@ -145,6 +145,57 @@ input:focus {
   background: linear-gradient(to left, #012645, #03214b);
 }
 
+.social-btn.google-btn {
+  background-color: white;
+  color: rgba(0, 0, 0, 0.87);
+  border: 1px solid #dadce0;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  transition: box-shadow 0.3s;
+}
+
+.social-btn.google-btn::before {
+  display: none;
+}
+
+.social-btn.google-btn:hover {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+  background-color: #fafafa;
+}
+
+.social-btn.google-btn .icon {
+  color: #4285f4;
+  margin-right: 8px;
+}
+
+.social-btn.google-btn .google-text span {
+  display: inline-block;
+  color: #4285f4; /* Blue */
+}
+
+.social-btn.google-btn .google-text span:nth-child(1) {
+  color: #4285f4; /* Blue */
+}
+
+.social-btn.google-btn .google-text span:nth-child(2) {
+  color: #ea4335; /* Red */
+}
+
+.social-btn.google-btn .google-text span:nth-child(3) {
+  color: #fbbc05; /* Yellow */
+}
+
+.social-btn.google-btn .google-text span:nth-child(4) {
+  color: #4285f4; /* Blue */
+}
+
+.social-btn.google-btn .google-text span:nth-child(5) {
+  color: #34a853; /* Green */
+}
+
+.social-btn.google-btn .google-text span:nth-child(6) {
+  color: #ea4335; /* Red */
+}
+
 .icon {
   margin-right: 8px;
 }

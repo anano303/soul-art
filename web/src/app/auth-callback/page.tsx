@@ -54,13 +54,13 @@ export default function AuthCallback() {
           </>
         ) : error ? (
           <>
-            <h1 className="text-2xl font-bold mb-4 text-red-600">Authentication Error</h1>
+            <h1 className="text-2xl font-bold mb-4 text-red-600">შეცდომა ავტორიზაციისას</h1>
             <p>{error}</p>
-            <p className="mt-2">Redirecting to login page...</p>
+            <p className="mt-2">გადამისამართება ავტორიზაციის გვერდზე...</p>
           </>
         ) : (
           <>
-            <h1 className="text-2xl font-bold mb-4 text-green-600">Authentication Successful</h1>
+            <h1 className="text-2xl font-bold mb-4 text-green-600">ავტორიზაცია წარმატებულია</h1>
             <p>Redirecting to homepage...</p>
           </>
         )}
