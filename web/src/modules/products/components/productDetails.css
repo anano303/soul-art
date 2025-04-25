@@ -42,6 +42,9 @@
   align-items: center;
   justify-content: center;
 }
+.image-wrapper img {
+  object-fit: contain;
+}
 
 .thumbnail-container {
   display: grid;
@@ -59,7 +62,7 @@
   overflow: hidden;
   border: 2px solid transparent;
   transition: all 0.3s ease;
-  cursor: url('/brush.png'), pointer;
+  cursor: url("/brush.png"), pointer;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
 }
 
@@ -68,6 +71,9 @@
   transform: scale(1.05);
 }
 
+.thumbnail.active img {
+  object-fit: contain;
+}
 .thumbnail:hover {
   transform: scale(1.05);
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.12);
@@ -94,7 +100,7 @@
   text-decoration: none;
   color: #333;
   font-size: 15px;
-  cursor: url('/brush.png'), pointer;
+  cursor: url("/brush.png"), pointer;
   transition: all 0.2s ease;
   padding: 6px 12px;
   border-radius: 30px;
@@ -127,7 +133,7 @@
   margin-bottom: 8px;
   color: #012645;
   line-height: 1.2;
-  font-family: 'Georgia', serif;
+  font-family: "Georgia", serif;
 }
 
 .rating-container {
@@ -165,14 +171,14 @@
   background-color: #f8f9fa;
   border-radius: 12px;
   border: none;
-  box-shadow: 0 3px 8px rgba(0,0,0,0.04);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.04);
   transition: all 0.3s ease;
 }
 
 .dimensions-info:hover,
 .delivery-info:hover {
   transform: translateY(-3px);
-  box-shadow: 0 6px 12px rgba(0,0,0,0.08);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08);
 }
 
 .info-title {
@@ -182,7 +188,7 @@
   color: #012645;
   border-bottom: 2px solid rgba(1, 38, 69, 0.15);
   padding-bottom: 10px;
-  font-family: 'Georgia', serif;
+  font-family: "Georgia", serif;
 }
 
 .dimensions-details,
@@ -201,7 +207,7 @@
   font-weight: 500;
   display: inline-flex;
   align-items: center;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 /* Add icons to dimension values for better visualization */
@@ -289,7 +295,7 @@
   color: white;
   border: none;
   border-radius: 8px;
-  cursor: url('/brush.png'), pointer;
+  cursor: url("/brush.png"), pointer;
   transition: all 0.3s ease;
   margin-top: 8px;
   font-weight: 600;
@@ -329,7 +335,7 @@
   flex: 1;
   text-align: center;
   padding: 16px;
-  cursor: url('/brush.png'), pointer;
+  cursor: url("/brush.png"), pointer;
   border: none;
   background-color: transparent;
   font-size: 16px;
@@ -381,14 +387,14 @@
   font-weight: 600;
   color: #012645;
   transition: all 0.3s ease;
-  cursor: url('/brush.png'), pointer;
+  cursor: url("/brush.png"), pointer;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   position: relative;
   overflow: hidden;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  font-family: 'Georgia', serif;
+  font-family: "Georgia", serif;
   letter-spacing: 0.5px;
 }
 
@@ -430,24 +436,28 @@
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 @media screen and (max-width: 992px) {
   .container {
     padding: 40px 20px;
   }
-  
+
   .grid {
     padding: 30px;
     gap: 40px;
   }
-  
+
   .product-title {
     font-size: 28px;
   }
-  
+
   .price {
     font-size: 32px;
   }
@@ -458,21 +468,21 @@
     grid-template-columns: 1fr;
     padding: 24px;
   }
-  
+
   .brand-container {
     flex-wrap: wrap;
     gap: 12px;
   }
-  
+
   .dimensions-info,
   .delivery-info {
     padding: 16px;
   }
-  
+
   .product-title {
     font-size: 24px;
   }
-  
+
   .price {
     font-size: 28px;
   }
@@ -482,21 +492,21 @@
   .container {
     padding: 20px 16px;
   }
-  
+
   .grid {
     padding: 16px;
   }
-  
+
   .thumbnail-container {
     grid-template-columns: repeat(4, 1fr);
     gap: 10px;
   }
-  
+
   .tabs-trigger {
     padding: 12px 8px;
     font-size: 14px;
   }
-  
+
   .try-on-wall-btn {
     padding: 12px 20px;
     font-size: 14px;
