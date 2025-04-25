@@ -48,7 +48,8 @@ export class ProductDto {
   countInStock!: number;
 
   @IsString()
-  brandLogo!: string;
+  @IsOptional()
+  brandLogo?: string;
 
   @IsEnum(ProductStatus)
   status?: ProductStatus;

@@ -23,7 +23,6 @@ export const productSchema = z.object({
       depth: z.number().optional(),
     })
     .optional(),
-  
 });
 
 export type ProductFormData = z.infer<typeof productSchema>;
