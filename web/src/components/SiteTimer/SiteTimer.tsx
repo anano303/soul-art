@@ -1,37 +1,16 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import Image from "next/image";
-import { StaticImageData } from "next/image";
+import "./SiteTimer.css";
+import { OptimizedStaticImage } from "../optimized-static-image";
+
+// Import gear images directly where they're used
 import gear1 from "../../assets/gear 1.png";
 import gear2 from "../../assets/gear 2.png";
 import gear3 from "../../assets/gear 3.png";
-import "./SiteTimer.css";
-
-// ⚙️ Bolt კომპონენტი 
-const Bolt: React.FC<{ size: string; direction: string; src: StaticImageData }> = ({ size, direction, src }) => (
-  <div className={`bolt-container ${size} ${direction}`}>
-    <Image src={src} alt={`${size} bolt`} className={`bolt-image ${size}`} priority />
-  </div>
-);
-
-// 🔧 ლოგო ანიმაცია 
-const SmallAnimLogo = () => {
-  return (
-    <div className="small-anim-logo">
-      <div className="small-top-bolt">
-        <Bolt size="small-medium" direction="rotate-left" src={gear2} />
-      </div>
-      <div className="small-bottom-bolts">
-        <Bolt size="small-large" direction="rotate-right" src={gear1} />
-        <Bolt size="small-small" direction="rotate-right" src={gear3} />
-      </div>
-    </div>
-  );
-};
 
 // 📅 დროის გამოთვლა
-const startDate = new Date("2025-03-01T00:00:00"); //დაწყების თარიღი
+const startDate = new Date("2025-04-01T00:00:00"); //დაწყების თარიღი
 const durationInDays = 60; //დასრულების დრო
 const endDate = new Date(startDate);
 endDate.setDate(startDate.getDate() + durationInDays);
@@ -46,8 +25,12 @@ const calculateTimeLeft = (end: Date) => {
   }
 
   const months = Math.floor(difference / (1000 * 60 * 60 * 24 * 30));
-  const days = Math.floor((difference % (1000 * 60 * 60 * 24 * 30)) / (1000 * 60 * 60 * 24));
-  const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+  const days = Math.floor(
+    (difference % (1000 * 60 * 60 * 24 * 30)) / (1000 * 60 * 60 * 24)
+  );
+  const hours = Math.floor(
+    (difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
+  );
   const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
   const seconds = Math.floor((difference % (1000 * 60)) / 1000);
 
@@ -56,15 +39,20 @@ const calculateTimeLeft = (end: Date) => {
 
 // ⏳ Timer კომპონენტი
 const SiteTimer = () => {
-  const [timeLeft, setTimeLeft] = useState<{ months: number; days: number; hours: number; minutes: number; seconds: number } | null>(null);
-
+  const [timeLeft, setTimeLeft] = useState<{
+    months: number;
+    days: number;
+    hours: number;
+    minutes: number;
+    seconds: number;
+  } | null>(null);
 
   useEffect(() => {
     const updateTimer = () => {
       setTimeLeft(calculateTimeLeft(endDate));
     };
 
-    updateTimer(); 
+    updateTimer();
     const timer = setInterval(updateTimer, 1000);
 
     return () => clearInterval(timer);
@@ -73,7 +61,43 @@ const SiteTimer = () => {
   if (!timeLeft) {
     return (
       <div className="site-timer-container">
-        <SmallAnimLogo />
+        <div className="small-anim-logo">
+          <div className="small-top-bolt bolt-container rotate-right small-medium">
+            <OptimizedStaticImage
+              src={gear1}
+              alt="Gear 1"
+              className="bolt-image"
+              width={30}
+              height={30}
+              loading="eager"
+              style={{ width: "auto", height: "auto" }}
+            />
+          </div>
+          <div className="small-bottom-bolts">
+            <div className="bolt-container rotate-left small-small">
+              <OptimizedStaticImage
+                src={gear2}
+                alt="Gear 2"
+                className="bolt-image"
+                width={15}
+                height={15}
+                loading="eager"
+                style={{ width: "auto", height: "auto" }}
+              />
+            </div>
+            <div className="bolt-container rotate-right small-large">
+              <OptimizedStaticImage
+                src={gear3}
+                alt="Gear 3"
+                className="bolt-image"
+                width={45}
+                height={45}
+                loading="eager"
+                style={{ width: "auto", height: "auto" }}
+              />
+            </div>
+          </div>
+        </div>
         <p className="site-timer-text">Loading timer...</p>
       </div>
     );
@@ -81,11 +105,49 @@ const SiteTimer = () => {
 
   return (
     <div className="site-timer-container">
-      <SmallAnimLogo />
+      <div className="small-anim-logo">
+        <div className="small-top-bolt bolt-container rotate-right small-medium">
+          <OptimizedStaticImage
+            src={gear1}
+            alt="Gear 1"
+            className="bolt-image"
+            width={30}
+            height={30}
+            loading="eager"
+            style={{ width: "auto", height: "auto" }}
+          />
+        </div>
+        <div className="small-bottom-bolts">
+          <div className="bolt-container rotate-left small-small">
+            <OptimizedStaticImage
+              src={gear2}
+              alt="Gear 2"
+              className="bolt-image"
+              width={15}
+              height={15}
+              loading="eager"
+              style={{ width: "auto", height: "auto" }}
+            />
+          </div>
+          <div className="bolt-container rotate-right small-large">
+            <OptimizedStaticImage
+              src={gear3}
+              alt="Gear 3"
+              className="bolt-image"
+              width={45}
+              height={45}
+              loading="eager"
+              style={{ width: "auto", height: "auto" }}
+            />
+          </div>
+        </div>
+      </div>
       <p className="site-timer-text">
         ვებგვერდზე მიმდინარეობს ტექნიკური სამუშაო, დასრულებამდე დარჩა{" "}
-        {timeLeft.months > 0 && `${timeLeft.months.toString().padStart(2, "")} თვე `}
-        {timeLeft.days > 0 && `${timeLeft.days.toString().padStart(2, "")} დღე `}
+        {timeLeft.months > 0 &&
+          `${timeLeft.months.toString().padStart(2, "")} თვე `}
+        {timeLeft.days > 0 &&
+          `${timeLeft.days.toString().padStart(2, "")} დღე `}
         {timeLeft.hours.toString().padStart(2, "0")} :{" "}
         {timeLeft.minutes.toString().padStart(2, "0")} :{" "}
         {timeLeft.seconds.toString().padStart(2, "0")}

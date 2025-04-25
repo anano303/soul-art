@@ -16,62 +16,67 @@
 
 /* ანიმაციის სტილები */
 .bolt-container {
-    display: inline-block;
-    position: relative;
-  }
-  
-  .bolt-image {
-    width: 100%;
-    animation: spin 10s linear infinite;
-  }
+  display: inline-block;
+  position: relative;
+}
 
-  .small-small {
-    width: 15px;
-    height: 15px;
-  }
-  
-  .small-medium {
-    width: 20px;
-    height: 20px;
-  }
-  
-  .small-large {
-    width: 30px;
-    height: 30px;
-  }
+.bolt-image {
+  width: 100% !important;
+  height: auto !important;
+  animation: spin 10s linear infinite;
+  /* Performance improvements */
+  will-change: transform;
+  backface-visibility: hidden;
+  /* Prevent unnecessary preloading */
+  content-visibility: auto;
+}
 
-  .rotate-right .bolt-image {
-    animation-direction: normal;
-  }
-  
-  .rotate-left .bolt-image {
-    animation-direction: reverse;
-  }
+.small-small {
+  width: 15px;
+  height: 15px;
+}
 
-  @keyframes spin {
-    from {
-      transform: rotate(0deg);
-    }
-    to {
-      transform: rotate(360deg);
-    }
-  }
+.small-medium {
+  width: 20px;
+  height: 20px;
+}
 
-  .small-anim-logo {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
+.small-large {
+  width: 30px;
+  height: 30px;
+}
+
+.rotate-right .bolt-image {
+  animation-direction: normal;
+}
+
+.rotate-left .bolt-image {
+  animation-direction: reverse;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
   }
-  
-  .small-top-bolt {
-    margin-bottom: -10px; 
-    margin-left: 60px; 
+  to {
+    transform: rotate(360deg);
   }
-  
-  .small-bottom-bolts {
-    display: flex;
-    gap: 0px;
-    width: 0px; 
-  }
-  
+}
+
+.small-anim-logo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.small-top-bolt {
+  margin-bottom: -10px;
+  margin-left: 60px;
+}
+
+.small-bottom-bolts {
+  display: flex;
+  gap: 0px;
+  width: 0px;
+}

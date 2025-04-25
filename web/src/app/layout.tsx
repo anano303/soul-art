@@ -12,31 +12,33 @@ import Header from "@/components/header/header";
 import SiteTimer from "@/components/SiteTimer/SiteTimer";
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_CLIENT_URL || 'https://soulart.ge'),
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_CLIENT_URL || "https://soulart.ge"
+  ),
   title: "SoulArt",
   description:
     "SoulArt - ნახატების ონლაინ პლატფორმა, სადაც შეგიძლიათ გაყიდოთ და შეიძინოთ უნიკალური ხელოვნების ნიმუშები. შექმენით პირადი გალერეა და გახდით მხატვარი ან კოლექციონერი.",
   openGraph: {
-    type: 'website',
-    locale: 'ka_GE',
-    url: 'https://soulart.ge/',
-    siteName: 'soulart',
-    title: 'soulart',
+    type: "website",
+    locale: "ka_GE",
+    url: "https://soulart.ge/",
+    siteName: "soulart",
+    title: "soulart",
     images: [
       {
-        url: '/van%20gog.jpg',
+        url: "/van%20gog.jpg",
         width: 1200,
         height: 630,
-        alt: 'SoulArt Sharing Image',
+        alt: "SoulArt Sharing Image",
       },
     ],
   },
   twitter: {
-    card: 'summary_large_image',
-    title: 'SoulArt',
+    card: "summary_large_image",
+    title: "SoulArt",
     description:
-      'SoulArt - ნახატების ონლაინ პლატფორმა უნიკალური ხელოვნების ნიმუშებისთვის.',
-    images: ['/van%20gog.jpg'],
+      "SoulArt - ნახატების ონლაინ პლატფორმა უნიკალური ხელოვნების ნიმუშებისთვის.",
+    images: ["/van%20gog.jpg"],
   },
 };
 
@@ -47,7 +49,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-       <head>
+      <head>
         {/* Facebook SDK */}
         <script
           async
@@ -55,24 +57,11 @@ export default function RootLayout({
           crossOrigin="anonymous"
           src={`https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v13.0&appId=${process.env.NEXT_PUBLIC_FACEBOOK_APP_ID}&autoLogAppEvents=1`}
         />
-        {/* Prefetch non-critical images */}
-        <link
-          rel="prefetch"
-          href="http://localhost:3000/_next/image?url=https%3A%2F%2Fres.cloudinary.com%2Fdsufx8uzd%2Fimage%2Fupload%2Fq_auto%2Cf_auto%2Cw_1024%2Fv1743141951%2Fecommerce%2Fezpkajmvijgztiswc18p.png&w=640&q=75"
-          as="image"
-        />
-        <link
-          rel="prefetch"
-          href="http://localhost:3000/_next/image?url=https%3A%2F%2Fres.cloudinary.com%2Fdsufx8uzd%2Fimage%2Fupload%2Fq_auto%2Cf_auto%2Cw_1024%2Fv1743115400%2Fecommerce%2Fwmny5jfzplylecdoct9f.jpg&w=640&q=75"
-          as="image"
-        />
-        <link
-          rel="prefetch"
-          href="http://localhost:3000/_next/image?url=https%3A%2F%2Fres.cloudinary.com%2Fdsufx8uzd%2Fimage%2Fupload%2Fq_auto%2Cf_auto%2Cw_1024%2Fv1743145178%2Fecommerce%2Fbzxnlhaspyu3tkofccov.jpg&w=640&q=75"
-          as="image"
-        />
+        {/* Remove the problematic prefetch links */}
       </head>
-      <body className={`${satoshi.variable} antialiased min-h-screen flex flex-col`}>
+      <body
+        className={`${satoshi.variable} antialiased min-h-screen flex flex-col`}
+      >
         <Providers>
           <AuthProvider>
             <CartProvider>

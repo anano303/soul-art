@@ -8,6 +8,7 @@ const nextConfig: NextConfig = {
   },
   serverExternalPackages: [],
   images: {
+    domains: ["res.cloudinary.com", "fish-hunt.s3.eu-north-1.amazonaws.com"],
     remotePatterns: [
       {
         protocol: "https",
@@ -28,7 +29,11 @@ const nextConfig: NextConfig = {
         pathname: "**",
       },
     ],
-    unoptimized: process.env.NODE_ENV !== "production",
+    // Disable image optimization completely in development
+    unoptimized: true,
+    // Add a larger deviceSizes array for better responsive images
+    deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
+    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
   },
   reactStrictMode: true,
   poweredByHeader: false,
