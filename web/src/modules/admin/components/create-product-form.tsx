@@ -78,14 +78,16 @@ export function CreateProductForm({
       images: [],
       brand: "",
       category: "",
+      subcategory: "", // Add the required subcategory field
       countInStock: 0,
       brandLogo: undefined,
     }
   );
 
-  const [selectedMainCategory, setSelectedMainCategory] = useState<MainCategory>(
-    initialData?.categoryStructure?.main || MainCategory.PAINTINGS
-  );
+  const [selectedMainCategory, setSelectedMainCategory] =
+    useState<MainCategory>(
+      initialData?.categoryStructure?.main || MainCategory.PAINTINGS
+    );
   const [deliveryType, setDeliveryType] = useState<"SELLER" | "SoulArt">(
     "SoulArt"
   );
@@ -178,7 +180,10 @@ export function CreateProductForm({
         // Check if the value from the API matches our enum values
         const mainCat = initialData.categoryStructure.main;
         // Make sure we use a valid value that exists in our enum
-        if (mainCat && Object.values(MainCategory).includes(mainCat as MainCategory)) {
+        if (
+          mainCat &&
+          Object.values(MainCategory).includes(mainCat as MainCategory)
+        ) {
           setSelectedMainCategory(mainCat as MainCategory);
         } else {
           // Default to PAINTINGS if the value doesn't match
@@ -191,6 +196,17 @@ export function CreateProductForm({
     }
   }, [initialData]);
 
+  useEffect(() => {
+    if (
+      !formData.category &&
+      categoryStructure[selectedMainCategory]?.length > 0
+    ) {
+      setFormData((prev) => ({
+        ...prev,
+        category: categoryStructure[selectedMainCategory][0],
+      }));
+    }
+  }, [selectedMainCategory, formData.category]);
   const resetForm = () => {
     setFormData({
       name: "",
@@ -199,6 +215,7 @@ export function CreateProductForm({
       images: [],
       brand: "",
       category: "",
+      subcategory: "", // Add the required subcategory field
       countInStock: 0,
       brandLogo: undefined,
     });
@@ -206,6 +223,7 @@ export function CreateProductForm({
     setServerError(null);
     setSuccess(null);
 
+    setDeliveryType("SoulArt");
     setDeliveryType("SoulArt");
     setMinDeliveryDays("");
     setMaxDeliveryDays("");
@@ -218,7 +236,10 @@ export function CreateProductForm({
     try {
       // Check if the field exists in productSchema before validating
       if (field in productSchema.shape) {
-        const shape = productSchema.shape as Record<string, {parse(value: unknown): unknown}>;
+        const shape = productSchema.shape as Record<
+          string,
+          { parse(value: unknown): unknown }
+        >;
         shape[field].parse(value);
       }
       setErrors((prev) => ({ ...prev, [field]: undefined }));
@@ -242,12 +263,17 @@ export function CreateProductForm({
     }));
   };
 
-  const handleMainCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+  const handleMainCategoryChange = (
+    e: React.ChangeEvent<HTMLSelectElement>
+  ) => {
     const newMainCategory = e.target.value as MainCategory;
     setSelectedMainCategory(newMainCategory);
+
+    // Automatically select the first subcategory when changing the main category
+    const firstSubcategory = categoryStructure[newMainCategory]?.[0] || "";
     setFormData((prev) => ({
       ...prev,
-      category: "", // Reset subcategory when main category changes
+      category: firstSubcategory,
     }));
   };
 
@@ -362,7 +388,7 @@ export function CreateProductForm({
       if (formData.brandLogo instanceof File) {
         console.log("Sending brand logo file", formData.brandLogo.name);
         formDataToSend.append("brandLogo", formData.brandLogo);
-      } 
+      }
       // For existing logo URLs - just pass the URL as a string
       else if (typeof formData.brandLogo === "string" && formData.brandLogo) {
         console.log("Sending brand logo URL", formData.brandLogo);
@@ -393,10 +419,13 @@ export function CreateProductForm({
       }
 
       // Add category structure to form data
-      formDataToSend.append("categoryStructure", JSON.stringify({
-        main: selectedMainCategory,
-        sub: formData.category,
-      }));
+      formDataToSend.append(
+        "categoryStructure",
+        JSON.stringify({
+          main: selectedMainCategory,
+          sub: formData.category,
+        })
+      );
 
       // Handle images - separate existing images from new ones
       const existingImages: string[] = [];
@@ -597,15 +626,12 @@ export function CreateProductForm({
             onChange={handleCategoryChange}
             className="create-product-select"
           >
-            <option value="">აირჩიეთ ქვეკატეგორია</option>
-            {/* Add a safety check to ensure categoryStructure[selectedMainCategory] exists */}
-            {categoryStructure[selectedMainCategory] && 
+            {categoryStructure[selectedMainCategory] &&
               categoryStructure[selectedMainCategory].map((category) => (
                 <option key={category} value={category}>
                   {category}
                 </option>
-              ))
-            }
+              ))}
           </select>
           {errors.category && (
             <p className="create-product-error">{errors.category}</p>
