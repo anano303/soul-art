@@ -158,10 +158,17 @@ export function LoginForm() {
           <button
             type="button"
             onClick={handleGoogleAuth}
-            className="social-button"
+            className="social-button google-btn"
           >
             <FaGoogle className="icon" />
-            Google
+            <span className="google-text">
+              <span>G</span>
+              <span>o</span>
+              <span>o</span>
+              <span>g</span>
+              <span>l</span>
+              <span>e</span>
+            </span>
           </button>
         </div>
       </form>

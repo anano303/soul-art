@@ -218,7 +218,7 @@ export function RegisterForm() {
         </button>
 
         <div className="divider">
-          <span>Or continue with</span>
+          <span>ან გააგრძელეთ : </span>
         </div>
 
         <div className="social-buttons">
@@ -229,18 +229,25 @@ export function RegisterForm() {
           <button
             type="button"
             onClick={handleGoogleAuth}
-            className="social-btn"
+            className="social-btn google-btn"
             disabled={isPending}
           >
             <FaGoogle className="icon" />
-            Google
+            <span className="google-text">
+              <span>G</span>
+              <span>o</span>
+              <span>o</span>
+              <span>g</span>
+              <span>l</span>
+              <span>e</span>
+            </span>
           </button>
         </div>
 
         <div className="text-center">
-          Already have an account?{" "}
+         უკვე გაქვთ ანგარიში ? {" "}
           <Link href="/login" className="login-link">
-            Sign in
+            შესვლა
           </Link>
         </div>
       </form>

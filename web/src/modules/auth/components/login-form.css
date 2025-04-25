@@ -63,7 +63,7 @@ input:focus {
   color: white;
   border: none;
   border-radius: 4px;
-   cursor: url('/brush.png'), pointer; 
+  cursor: url("/brush.png"), pointer;
   font-size: 16px;
   font-weight: bold;
   transition: background-position 0.9s ease-in-out; /* ნელი მოძრაობა */
@@ -132,7 +132,7 @@ input:focus {
   background-color: #f5f5f5;
   border: 2px solid transparent;
   border-radius: 4px;
-   cursor: url('/brush.png'), pointer; 
+  cursor: url("/brush.png"), pointer;
   width: 100%;
   font-weight: bold;
   color: #333;
@@ -161,6 +161,57 @@ input:focus {
   background: linear-gradient(to left, #012645, #03214b);
 }
 
+.social-button.google-btn {
+  background-color: white;
+  color: rgba(0, 0, 0, 0.87);
+  border: 1px solid #dadce0;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  transition: box-shadow 0.3s;
+}
+
+.social-button.google-btn::before {
+  display: none;
+}
+
+.social-button.google-btn:hover {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+  background-color: #fafafa;
+}
+
+.social-button.google-btn .icon {
+  color: #4285f4;
+  margin-right: 8px;
+}
+
+.social-button.google-btn .google-text span {
+  display: inline-block;
+  color: #4285f4; /* Blue */
+}
+
+.social-button.google-btn .google-text span:nth-child(1) {
+  color: #4285f4; /* Blue */
+}
+
+.social-button.google-btn .google-text span:nth-child(2) {
+  color: #ea4335; /* Red */
+}
+
+.social-button.google-btn .google-text span:nth-child(3) {
+  color: #fbbc05; /* Yellow */
+}
+
+.social-button.google-btn .google-text span:nth-child(4) {
+  color: #4285f4; /* Blue */
+}
+
+.social-button.google-btn .google-text span:nth-child(5) {
+  color: #34a853; /* Green */
+}
+
+.social-button.google-btn .google-text span:nth-child(6) {
+  color: #ea4335; /* Red */
+}
+
 .icon {
   margin-right: 5px;
 }
@@ -186,5 +237,3 @@ input:focus {
 
   border-radius: 4px;
 }
-
-
