@@ -109,4 +109,7 @@ export const checkAndRefreshAuth = async (): Promise<boolean> => {
 };
 
 // Setup response interceptors with the refreshAuthToken function
-setupResponseInterceptors(refreshAuthToken);
+setupResponseInterceptors(async () => {
+  await refreshAuthToken();
+  return;
+});
