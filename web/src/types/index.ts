@@ -2,8 +2,8 @@ import { Role } from "./role";
 
 // Adding category types for better organization
 export enum MainCategory {
-  PAINTINGS = 'paintings',
-  HANDMADE = 'handmade'
+  PAINTINGS = "PAINTINGS",
+  HANDMADE = "HANDMADE",
 }
 
 export interface CategoryStructure {
@@ -30,7 +30,7 @@ export interface Product {
   updatedAt: string;
   status: ProductStatus;
   rejectionReason?: string;
-  deliveryType?: 'SELLER' | 'SoulArt';  // Corrected from 'SOULART' to 'SoulArt'
+  deliveryType?: "SELLER" | "SoulArt"; // Corrected from 'SOULART' to 'SoulArt'
   minDeliveryDays?: number;
   maxDeliveryDays?: number;
   dimensions?: {
@@ -41,9 +41,9 @@ export interface Product {
 }
 
 export enum ProductStatus {
-  PENDING = 'PENDING',
-  APPROVED = 'APPROVED',
-  REJECTED = 'REJECTED'
+  PENDING = "PENDING",
+  APPROVED = "APPROVED",
+  REJECTED = "REJECTED",
 }
 
 export interface Review {
@@ -81,7 +81,6 @@ export interface User {
   };
   createdAt: string;
   updatedAt: string;
-  
 }
 
 export interface ApiResponse<T> {
