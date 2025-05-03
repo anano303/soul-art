@@ -357,8 +357,10 @@ export const TRANSLATIONS: Translations = {
 
     // Art Categories
     categories: {
+      // Main categories
       paintings: "ნახატები",
       handmade: "ხელნაკეთი",
+
       // Painting subcategories
       oil: "ზეთი",
       acrylic: "აკრილი",
@@ -377,6 +379,11 @@ export const TRANSLATIONS: Translations = {
       realism: "რეალიზმი",
       surrealism: "სიურეალიზმი",
       digital: "ციფრული",
+      blackAndWhite: "შავ-თეთრი",
+      animation: "ანიმაციური",
+      digitalIllustrations: "ციფრული ილუსტრაციები",
+      other: "სხვა",
+
       // Handmade subcategories
       pottery: "კერამიკა",
       woodwork: "ხის ნაკეთობები",
@@ -384,7 +391,9 @@ export const TRANSLATIONS: Translations = {
       textile: "ტექსტილი",
       glasswork: "მინის ნაკეთობები",
       sculpture: "სკულპტურა",
-      other: "სხვა",
+      enamel: "მინანქარი",
+      sculptures: "სკულპტურები",
+      otherHandmade: "სხვა",
     },
   },
 
@@ -733,8 +742,10 @@ export const TRANSLATIONS: Translations = {
 
     // Art Categories
     categories: {
+      // Main categories
       paintings: "Paintings",
       handmade: "Handmade",
+
       // Painting subcategories
       oil: "Oil",
       acrylic: "Acrylic",
@@ -753,6 +764,11 @@ export const TRANSLATIONS: Translations = {
       realism: "Realism",
       surrealism: "Surrealism",
       digital: "Digital",
+      blackAndWhite: "Black & White",
+      animation: "Animation",
+      digitalIllustrations: "Digital Illustrations",
+      other: "Other",
+
       // Handmade subcategories
       pottery: "Pottery",
       woodwork: "Woodwork",
@@ -760,7 +776,9 @@ export const TRANSLATIONS: Translations = {
       textile: "Textile",
       glasswork: "Glasswork",
       sculpture: "Sculpture",
-      other: "Other",
+      enamel: "Enamel",
+      sculptures: "Sculptures",
+      otherHandmade: "Other",
     },
   },
 };
