@@ -20,7 +20,7 @@ export function OrderReview() {
     (acc, item) => acc + item.price * item.qty,
     0
   );
-  const shippingPrice = itemsPrice > 100 ? 0 : 0;
+  const shippingPrice = itemsPrice > 100 ? 0 : 10;
   const taxPrice = Number((itemsPrice * TAX_RATE).toFixed(2));
   const totalPrice = itemsPrice + shippingPrice + taxPrice;
 
@@ -125,7 +125,9 @@ export function OrderReview() {
               <span className="summary-label text-muted-foreground">
                 Shipping
               </span>
-              <span>{shippingPrice === 0 ? "Free" : `${shippingPrice}₾`}</span>
+              <span>
+                {shippingPrice === 0 ? "Free" : `${shippingPrice.toFixed(2)}₾`}
+              </span>
             </div>
             <div className="summary-row flex justify-between">
               <span className="summary-label text-muted-foreground">Tax</span>
