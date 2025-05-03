@@ -1,6 +1,7 @@
 "use client";
 
 import { CheckCircle2, XCircle, Truck, Store } from "lucide-react";
+import { useLanguage } from "@/hooks/LanguageContext";
 import Image from "next/image";
 import Link from "next/link";
 import { Order } from "@/types/order";
@@ -16,11 +17,13 @@ interface OrderDetailsProps {
 }
 
 export function OrderDetails({ order }: OrderDetailsProps) {
+  const { t } = useLanguage();
+
   // Group order items by delivery type - fixed to check string equality
   const sellerDeliveryItems = order.orderItems.filter(
     (item) => item.product && String(item.product.deliveryType) === "SELLER"
   );
-  
+
   const soulartDeliveryItems = order.orderItems.filter(
     (item) => !item.product || String(item.product.deliveryType) !== "SELLER"
   );
@@ -34,9 +37,11 @@ export function OrderDetails({ order }: OrderDetailsProps) {
   return (
     <div className="order-container">
       <div className="order-header">
-        <h1 className="order-title">Order #{order._id}</h1>
+        <h1 className="order-title">
+          {t("Order")} #{order._id}
+        </h1>
         <span className={`order-badge ${order.isPaid ? "paid" : "pending"}`}>
-          {order.isPaid ? "Paid" : "Pending Payment"}
+          {order.isPaid ? t("Paid") : t("Pending Payment")}
         </span>
       </div>
 
@@ -44,9 +49,9 @@ export function OrderDetails({ order }: OrderDetailsProps) {
         <div className="order-left">
           {/* Shipping Info */}
           <div className="order-card">
-            <h2 className="order-subtitle">Shipping</h2>
+            <h2 className="order-subtitle">{t("Shipping")}</h2>
             <p>
-              <span className="font-medium">Address: </span>
+              <span className="font-medium">{t("Address")}: </span>
               {order.shippingDetails.address}, {order.shippingDetails.city},{" "}
               {order.shippingDetails.postalCode},{" "}
               {order.shippingDetails.country}
@@ -59,19 +64,19 @@ export function OrderDetails({ order }: OrderDetailsProps) {
               )}
               <span>
                 {order.isDelivered
-                  ? `Delivered on ${new Date(
+                  ? `${t("Delivered on")} ${new Date(
                       order.deliveredAt!
                     ).toLocaleDateString()}`
-                  : "Not Delivered"}
+                  : t("Not Delivered")}
               </span>
             </div>
           </div>
 
           {/* Payment Info */}
           <div className="order-card">
-            <h2 className="order-subtitle">Payment</h2>
+            <h2 className="order-subtitle">{t("Payment")}</h2>
             <p>
-              <span className="font-medium">Method: </span>
+              <span className="font-medium">{t("Method")}: </span>
               {order.paymentMethod}
             </p>
             <div className={`alert ${order.isPaid ? "success" : "error"}`}>
@@ -82,21 +87,23 @@ export function OrderDetails({ order }: OrderDetailsProps) {
               )}
               <span>
                 {order.isPaid
-                  ? `Paid on ${new Date(order.paidAt!).toLocaleDateString()}`
-                  : "Not Paid"}
+                  ? `${t("Paid on")} ${new Date(
+                      order.paidAt!
+                    ).toLocaleDateString()}`
+                  : t("Not Paid")}
               </span>
             </div>
           </div>
 
           {/* Order Items - Grouped by delivery type with fixed string comparison */}
           <div className="order-card">
-            <h2 className="order-subtitle">Order Items</h2>
-            
+            <h2 className="order-subtitle">{t("Order Items")}</h2>
+
             {sellerDeliveryItems.length > 0 && (
               <div className="delivery-group">
                 <div className="delivery-group-header">
                   <Store className="icon" />
-                  <h3>აგზავნის ავტორი</h3>
+                  <h3>{t("Seller Delivery")}</h3>
                 </div>
                 {sellerDeliveryItems.map((item) => (
                   <div key={item.productId} className="order-item">
@@ -116,25 +123,27 @@ export function OrderDetails({ order }: OrderDetailsProps) {
                         {item.name}
                       </Link>
                       <p>
-                        {item.qty} x {item.price.toFixed(2)} ₾ = 
+                        {item.qty} x {item.price.toFixed(2)} ₾ ={" "}
                         {(item.qty * item.price).toFixed(2)} ₾
                       </p>
-                      {item.product?.minDeliveryDays && item.product?.maxDeliveryDays && (
-                        <p className="delivery-time">
-                          მიწოდების ვადა: {item.product.minDeliveryDays}-{item.product.maxDeliveryDays} დღე
-                        </p>
-                      )}
+                      {item.product?.minDeliveryDays &&
+                        item.product?.maxDeliveryDays && (
+                          <p className="delivery-time">
+                            {t("Delivery Time")}: {item.product.minDeliveryDays}
+                            -{item.product.maxDeliveryDays} {t("days")}
+                          </p>
+                        )}
                     </div>
                   </div>
                 ))}
               </div>
             )}
-            
+
             {soulartDeliveryItems.length > 0 && (
               <div className="delivery-group">
                 <div className="delivery-group-header">
                   <Truck className="icon" />
-                  <h3>SoulArt-ის კურიერი</h3>
+                  <h3>{t("SoulArt Courier")}</h3>
                 </div>
                 {soulartDeliveryItems.map((item) => (
                   <div key={item.productId} className="order-item">
@@ -154,7 +163,7 @@ export function OrderDetails({ order }: OrderDetailsProps) {
                         {item.name}
                       </Link>
                       <p>
-                        {item.qty} x {item.price.toFixed(2)} ₾= 
+                        {item.qty} x {item.price.toFixed(2)} ₾={" "}
                         {(item.qty * item.price).toFixed(2)} ₾
                       </p>
                     </div>
@@ -168,33 +177,33 @@ export function OrderDetails({ order }: OrderDetailsProps) {
         {/* Order Summary */}
         <div className="order-right">
           <div className="order-card">
-            <h2 className="order-subtitle">Order Summary</h2>
+            <h2 className="order-subtitle">{t("Order Summary")}</h2>
             <div className="order-summary">
               <div className="summary-item">
-                <span>Items</span>
+                <span>{t("Items")}</span>
                 <span>{order.itemsPrice.toFixed(2)} ₾</span>
               </div>
               <div className="summary-item">
-                <span>Shipping</span>
+                <span>{t("Shipping")}</span>
                 <span>
                   {order.shippingPrice === 0
-                    ? "Free"
+                    ? t("Free")
                     : `${order.shippingPrice.toFixed(2)} ₾`}
                 </span>
               </div>
               <div className="summary-item">
-                <span>Tax</span>
+                <span>{t("Tax")}</span>
                 <span>{order.taxPrice.toFixed(2)} ₾</span>
               </div>
               <hr />
               <div className="summary-total">
-                <span>Total</span>
+                <span>{t("Total")}</span>
                 <span>{order.totalPrice.toFixed(2)} ₾</span>
               </div>
-              
+
               {/* დავამატოთ დოლარის ეკვივალენტი */}
               <div className="summary-total-usd">
-                <span>Total (USD)</span>
+                <span>{t("Total (USD)")}</span>
                 <span>${totalPriceInUSD}</span>
               </div>
 

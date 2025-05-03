@@ -11,10 +11,12 @@ import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "@/hooks/use-toast";
 import Image from "next/image";
+import { useLanguage } from "@/hooks/LanguageContext";
 
 type SellerRegisterFormData = z.infer<typeof sellerRegisterSchema>;
 
 export function SellerRegisterForm() {
+  const { t } = useLanguage();
   const router = useRouter();
   const { mutate: register, isPending } = useSellerRegister();
   const [registrationError, setRegistrationError] = useState<string | null>(
@@ -67,8 +69,8 @@ export function SellerRegisterForm() {
       onSuccess: () => {
         setIsSuccess(true);
         toast({
-          title: "რეგისტრაცია წარმატებულია",
-          description: "თქვენი, როგორც გამყიდველის ანგარიში წარმატებით შეიქმნა",
+          title: t("auth.registrationSuccessful"),
+          description: t("auth.sellerAccountCreatedSuccessfully"),
           variant: "default",
         });
 
@@ -83,7 +85,7 @@ export function SellerRegisterForm() {
         setRegistrationError(errorMessage);
 
         toast({
-          title: "რეგისტრაცია ვერ მოხერხდა",
+          title: t("auth.registrationFailed"),
           description: errorMessage,
           variant: "destructive",
         });
@@ -101,9 +103,9 @@ export function SellerRegisterForm() {
     return (
       <div className="form-container">
         <div className="success-message">
-          <h3>რეგისტრაცია წარმატებულია!</h3>
-          <p>თქვენი ანგარიში წარმატებით შეიქმნა.</p>
-          <p>გადამისამართება ავტორიზაციის გვერდზე...</p>
+          <h3>{t("auth.registrationSuccessful")}</h3>
+          <p>{t("auth.sellerAccountCreatedSuccessfully")}</p>
+          <p>{t("auth.redirectingToLogin")}</p>
         </div>
       </div>
     );
@@ -113,11 +115,11 @@ export function SellerRegisterForm() {
     <div className="form-container" id="seller-register-form">
       <form onSubmit={onSubmit} className="form">
         <div className="input-group">
-          <label htmlFor="storeName">მხატვრის/კომპანიის სახელი</label>
+          <label htmlFor="storeName">{t("auth.companyName")}</label>
           <input
             id="storeName"
             type="text"
-            placeholder="მხატვრის/კომპანიის სახელი"
+            placeholder={t("auth.enterCompanyName")}
             {...registerField("storeName")}
           />
           {errors.storeName && (
@@ -126,13 +128,13 @@ export function SellerRegisterForm() {
         </div>
 
         <div className="input-group">
-          <label htmlFor="logoFile">ლოგო (არასავალდებულო)</label>
+          <label htmlFor="logoFile">{t("auth.uploadLogo")}</label>
           <div className="logo-upload-container">
             {logoPreview && (
               <div className="logo-preview">
                 <Image
                   src={logoPreview}
-                  alt="Logo Preview"
+                  alt={t("auth.logoPreview")}
                   width={100}
                   height={100}
                   className="logo-preview-image"
@@ -153,17 +155,17 @@ export function SellerRegisterForm() {
               onClick={triggerFileInput}
               className="logo-upload-button"
             >
-              {logoPreview ? "შეცვლა" : "ლოგოს ატვირთვა"}
+              {logoPreview ? t("auth.changeLogo") : t("auth.uploadLogo")}
             </button>
           </div>
         </div>
 
         <div className="input-group">
-          <label htmlFor="ownerFirstName">მფლობელის სახელი</label>
+          <label htmlFor="ownerFirstName">{t("auth.firstName")}</label>
           <input
             id="ownerFirstName"
             type="text"
-            placeholder="სახელი"
+            placeholder={t("auth.enterFirstName")}
             {...registerField("ownerFirstName")}
           />
           {errors.ownerFirstName && (
@@ -172,11 +174,11 @@ export function SellerRegisterForm() {
         </div>
 
         <div className="input-group">
-          <label htmlFor="ownerLastName">მფლობელის გვარი</label>
+          <label htmlFor="ownerLastName">{t("auth.lastName")}</label>
           <input
             id="ownerLastName"
             type="text"
-            placeholder="გვარი"
+            placeholder={t("auth.enterLastName")}
             {...registerField("ownerLastName")}
           />
           {errors.ownerLastName && (
@@ -185,7 +187,7 @@ export function SellerRegisterForm() {
         </div>
 
         <div className="input-group">
-          <label htmlFor="phoneNumber">ტელეფონის ნომერი</label>
+          <label htmlFor="phoneNumber">{t("auth.phoneNumber")}</label>
           <input
             id="phoneNumber"
             type="tel"
@@ -198,7 +200,7 @@ export function SellerRegisterForm() {
         </div>
 
         <div className="input-group">
-          <label htmlFor="email">ელ-ფოსტა</label>
+          <label htmlFor="email">{t("auth.email")}</label>
           <input
             id="email"
             type="email"
@@ -209,7 +211,7 @@ export function SellerRegisterForm() {
         </div>
 
         <div className="input-group">
-          <label htmlFor="password">პაროლი</label>
+          <label htmlFor="password">{t("auth.password")}</label>
           <input
             id="password"
             type="password"
@@ -222,13 +224,11 @@ export function SellerRegisterForm() {
         </div>
 
         <div className="input-group">
-          <label htmlFor="identificationNumber">
-            პირადი ნომერი / საიდენტ. კოდი
-          </label>
+          <label htmlFor="identificationNumber">{t("auth.idNumber")}</label>
           <input
             id="identificationNumber"
             type="text"
-            placeholder="11-ნიშნა პირადი ნომერი / საიდენტ. კოდი"
+            placeholder={t("auth.enterIdNumber")}
             {...registerField("identificationNumber")}
           />
           {errors.identificationNumber && (
@@ -237,7 +237,7 @@ export function SellerRegisterForm() {
         </div>
 
         <div className="input-group">
-          <label htmlFor="accountNumber">საბანკო ანგარიშის ნომერი (IBAN)</label>
+          <label htmlFor="accountNumber">{t("auth.accountNumber")}</label>
           <input
             id="accountNumber"
             type="text"
@@ -257,13 +257,13 @@ export function SellerRegisterForm() {
         )}
 
         <button type="submit" className="submit-btn" disabled={isPending}>
-          {isPending ? "რეგისტრაცია..." : "დარეგისტრირება"}
+          {isPending ? t("auth.registering") : t("auth.register")}
         </button>
 
         <div className="text-center">
-          უკვე გაქვთ ანგარიში?{" "}
+          {t("auth.alreadyHaveAccount")}{" "}
           <Link href="/login" className="login-link">
-            შესვლა
+            {t("auth.login")}
           </Link>
         </div>
       </form>

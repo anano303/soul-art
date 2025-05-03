@@ -1,78 +1,56 @@
+"use client";
+
 import Link from "next/link";
 import "./about.css";
+import { useLanguage } from "@/hooks/LanguageContext";
 
 export default function AboutPage() {
+  const { t } = useLanguage();
+
   return (
     <div className="about-container">
-      <h1 className="about-title">ჩვენს შესახებ</h1>
-      
+      <h1 className="about-title">{t("about.title")}</h1>
+
       <div className="about-section">
-        <p className="about-description">
-          SoulArt არის პლატფორმა, რომელიც აერთიანებს მხატვრებს და ხელოვნების მოყვარულებს. 
-          ჩვენი მიზანია შევქმნათ სივრცე, სადაც შეძლებთ გაყიდოთ და შეიძინოთ უნიკალური 
-          ხელოვნების ნიმუშები, შექმნათ პირადი გალერეა და გახდეთ კოლექციონერი ან მხატვარი.
-        </p>
+        <p className="about-description">{t("about.description")}</p>
       </div>
 
       <div className="about-section">
-        <h2 className="about-subtitle">მისია</h2>
-        <p>
-          ჩვენი მისიაა მხატვრებისთვის შევქმნათ პლატფორმა, სადაც ისინი შეძლებენ 
-          თავიანთი ნამუშევრების გაზიარებას და გაყიდვას, ხოლო ხელოვნების მოყვარულებს 
-          მივაწვდინოთ უნიკალური ნამუშევრები.
-        </p>
+        <h2 className="about-subtitle">{t("about.mission.title")}</h2>
+        <p>{t("about.mission.description")}</p>
       </div>
 
       <div className="about-section">
-        <h2 className="about-subtitle">მიზანი</h2>
-        <p>
-          ჩვენი მიზანია გავაერთიანოთ ხელოვნების მოყვარულები და მხატვრები ერთიან 
-          სივრცეში, სადაც ხელოვნება ყველასთვის ხელმისაწვდომი იქნება.
-        </p>
+        <h2 className="about-subtitle">{t("about.goal.title")}</h2>
+        <p>{t("about.goal.description")}</p>
       </div>
 
       <div className="about-section">
-        <h2 className="about-subtitle">ხედვა</h2>
-        <p>
-          SoulArt არის პირველი მსგავსი პლატფორმა საქართველოში, რომელიც აერთიანებს 
-          ხელოვნების სამყაროს. ჩვენი ხედვაა გავხდეთ ხელოვნების მოყვარულთა და 
-          მხატვართა მთავარი ადგილი.
-        </p>
+        <h2 className="about-subtitle">{t("about.vision.title")}</h2>
+        <p>{t("about.vision.description")}</p>
       </div>
 
       <div className="about-section about-highlight">
-        <h2 className="about-subtitle">რატომ SoulArt?</h2>
-        <p>
-          საქართველოში მსგავსი პლატფორმა არ არსებობს. ჩვენ ვქმნით უნიკალურ 
-          შესაძლებლობას, სადაც ხელოვნება და ტექნოლოგია ერთმანეთს ხვდება.
-        </p>
+        <h2 className="about-subtitle">{t("about.whyUs.title")}</h2>
+        <p>{t("about.whyUs.description")}</p>
       </div>
 
       <div className="about-section">
-        <h2 className="about-subtitle">გახდით მიმწოდებელი</h2>
-        <p>
-          გსურთ გაყიდოთ თქვენი ნამუშევრები? გახდით ჩვენი პლატფორმის ნაწილი და 
-          გააცანით თქვენი ხელოვნების ნიმუშები ფართო აუდიტორიას.
-        </p>
-        <Link 
-          href="/sellers-register" 
+        <h2 className="about-subtitle">{t("about.becomeSeller.title")}</h2>
+        <p>{t("about.becomeSeller.description")}</p>
+        <Link
+          href="/sellers-register"
           className="about-button about-seller-button"
         >
-          დარეგისტრირდით როგორც გამყიდველი
+          {t("about.becomeSeller.button")}
         </Link>
       </div>
 
       <div className="about-section">
-        <h2 className="about-subtitle">შეიძინეთ უნიკალური ნამუშევრები</h2>
-        <p>
-          ეძებთ უნიკალურ ხელოვნების ნიმუშებს ? დაათვალიერეთ ჩვენი პლატფორმა და იპოვეთ 
-          ნამუშევრები, რომლებიც თქვენს გემოვნებას შეესაბამება.
-        </p>
-        <Link 
-          href="/shop" 
-          className="about-button about-shop-button"
-        >
-          დაათვალიერეთ ნამუშევრები
+        <h2 className="about-subtitle">{t("about.buyUnique.title")}</h2>
+        <p>{t("about.buyUnique.description")}</p>
+        <Link href="/shop" className="about-button about-shop-button">
+          {t("about.buyUnique.button")}
         </Link>
       </div>
     </div>

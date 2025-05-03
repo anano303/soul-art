@@ -1,16 +1,14 @@
 "use client";
 
-import { useContext, useState } from "react";
-import { LanguageContext } from "../../hooks/LanguageContext";
-import { TEXTS } from "../../hooks/Languages";
+import { useState } from "react";
+import { useLanguage } from "../../hooks/LanguageContext";
 import Link from "next/link";
 import Image from "next/image";
-import { useRouter } from 'next/navigation';
-import type { StaticImageData } from "next/image"; // StaticImageData ტიპის იმპორტი
+import { useRouter } from "next/navigation";
+import type { StaticImageData } from "next/image";
 import "./navbar.css";
 
 import homeIcon from "../../assets/icons/home.png";
-
 import shopping from "../../assets/icons/shopping.png";
 import video from "../../assets/icons/video.png";
 import forum from "../../assets/icons/forum.png";
@@ -18,33 +16,30 @@ import about from "../../assets/icons/about.png";
 
 interface MenuItem {
   href: string;
-  text: string;
+  textKey: string;
   icon: StaticImageData;
 }
 
 const Navbar: React.FC = () => {
-  const { language } = useContext(LanguageContext);
+  const { t } = useLanguage();
   const [activeItem, setActiveItem] = useState<number | null>(null);
   const router = useRouter();
 
   const menuItems: MenuItem[] = [
-    { href: "/", text: TEXTS[language].home, icon: homeIcon },
-  
-    { href: "/shop", text: "Shopping", icon: shopping },
-    { href: "/video", text: "Video", icon: video },
-    { href: "/forum", text: "Forum", icon: forum },
-    { href: "/about", text: TEXTS[language].about, icon: about },
+    { href: "/", textKey: "navigation.home", icon: homeIcon },
+    { href: "/shop", textKey: "navigation.shop", icon: shopping },
+    { href: "/video", textKey: "navigation.forum", icon: video },
+    { href: "/forum", textKey: "navigation.forum", icon: forum },
+    { href: "/about", textKey: "navigation.about", icon: about },
   ];
 
   const handleClick = (e: React.MouseEvent, index: number, href: string) => {
     e.preventDefault();
-    
+
     if (activeItem === index) {
-      // თუ იგივე აიტემზე დავაკლიკეთ მეორედ, გადავდივართ ლინკზე
       router.push(href);
-      setActiveItem(null); // ვასუფთავებთ აქტიურ აიტემს
+      setActiveItem(null);
     } else {
-      // პირველი კლიკი - ვააქტიურებთ აიტემს
       setActiveItem(index);
     }
   };
@@ -54,19 +49,19 @@ const Navbar: React.FC = () => {
       <ul className="UlCont">
         {menuItems.map((item, index) => (
           <li key={index}>
-            <Link 
+            <Link
               href={item.href}
-              className={activeItem === index ? 'active' : ''}
+              className={activeItem === index ? "active" : ""}
               onClick={(e) => handleClick(e, index, item.href)}
             >
-              <Image 
-                src={item.icon} 
-                alt={item.text} 
-                width={20} 
-                height={20} 
+              <Image
+                src={item.icon}
+                alt={t(item.textKey) as string}
+                width={20}
+                height={20}
                 className="icon"
               />
-              <span>{item.text}</span>
+              <span>{t(item.textKey)}</span>
             </Link>
           </li>
         ))}

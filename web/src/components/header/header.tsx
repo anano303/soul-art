@@ -9,11 +9,14 @@ import { CartIcon } from "@/modules/cart/components/cart-icon";
 import "./header.scss";
 import UserMenu from "./user-menu";
 import { useUser } from "@/modules/auth/hooks/use-user";
+import { LanguageSwitcher } from "@/components/language-switcher/language-switcher";
+import { useLanguage } from "@/hooks/LanguageContext";
 
 export default function Header() {
   const [isNavOpen, setIsNavOpen] = useState(false);
   const { user } = useUser();
   const router = useRouter();
+  const { t } = useLanguage();
 
   const toggleNav = () => {
     setIsNavOpen((prevState) => !prevState); // Toggle navigation visibility
@@ -51,25 +54,25 @@ export default function Header() {
               }
             >
               {user?.role === "seller"
-                ? "ჩემი ნამუშევრები"
-                : "გაყიდე ნამუშევრები"}
+                ? t("navigation.myArtworks")
+                : t("navigation.sellArtwork")}
             </Link>
           </li>
           <li className="shop-dropdown">
             <Link href="/shop?page=1&mainCategory=paintings">
-              შეიძინე ნამუშევრები
+              {t("navigation.shop")}
             </Link>
             <div className="dropdown-menu">
-              <Link href="/auction">აუქციონი</Link>
+              <Link href="/auction">{t("navigation.auction")}</Link>
             </div>
           </li>
           {/* Mobile-only auction link */}
           <li className="mobile-only-nav">
-            <Link href="/auction">აუქციონი</Link>
+            <Link href="/auction">{t("navigation.auction")}</Link>
           </li>
           <li>
             <a href="#" onClick={handleOrdersClick}>
-              ჩემი შეკვეთები
+              {t("navigation.myOrders")}
             </a>
           </li>
           <li className="mobileAuth">
@@ -78,6 +81,9 @@ export default function Header() {
         </ul>
       </nav>
       <div className="auth-cart">
+        <div className="language-switcher-container">
+          <LanguageSwitcher />
+        </div>
         <div className="d-none">
           <UserMenu />
         </div>

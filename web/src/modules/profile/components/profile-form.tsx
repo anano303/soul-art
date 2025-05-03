@@ -11,6 +11,7 @@ import { motion } from "framer-motion";
 import "./ProfileForm.css";
 import { useEffect, useState, useRef, useCallback } from "react";
 import Image from "next/image";
+import { useLanguage } from "@/hooks/LanguageContext";
 
 const formSchema = z
   .object({
@@ -53,6 +54,7 @@ export function ProfileForm() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const logoInputRef = useRef<HTMLInputElement>(null);
   const { user, isLoading } = useUser();
+  const { t } = useLanguage();
 
   // Use manual invalidation instead of refetch
   const refreshUserData = useCallback(() => {
@@ -175,23 +177,23 @@ export function ProfileForm() {
       form.reset({ password: "", confirmPassword: "" });
 
       toast({
-        title: "პროფილი განახლდა",
-        description: "თქვენი პროფილი წარმატებით განახლდა.",
+        title: t("profile.updateSuccess"),
+        description: t("profile.updateSuccessDescription"),
       });
 
       if (data.passwordChanged) {
         toast({
-          title: "პაროლი განახლდა",
-          description: "თქვენი პაროლი წარმატებით შეიცვალა.",
+          title: t("profile.passwordChanged"),
+          description: t("profile.passwordChangedDescription"),
         });
       }
     },
     onError: (error) => {
       const errorMessage =
         (error as { message?: string }).message ||
-        "პროფილის განახლება ვერ მოხერხდა. გთხოვთ, სცადოთ თავიდან.";
+        t("profile.updateErrorDescription");
       toast({
-        title: "შეცდომა",
+        title: t("profile.updateError"),
         description: errorMessage,
         variant: "destructive",
       });
@@ -226,8 +228,8 @@ export function ProfileForm() {
     } catch (error) {
       console.error("Error uploading profile image:", error);
       toast({
-        title: "Error",
-        description: "Failed to upload profile image. Please try again.",
+        title: t("profile.uploadError"),
+        description: t("profile.uploadErrorDescription"),
         variant: "destructive",
       });
     } finally {
@@ -265,8 +267,8 @@ export function ProfileForm() {
         refreshUserData();
 
         toast({
-          title: "წარმატება",
-          description: "ლოგო წარმატებით განახლდა.",
+          title: t("profile.logoUploadSuccess"),
+          description: t("profile.logoUploadSuccessDescription"),
         });
       } else {
         throw new Error("Logo URL not found in response");
@@ -275,8 +277,8 @@ export function ProfileForm() {
       console.error("Error uploading store logo:", error);
       setLogoError(true);
       toast({
-        title: "შეცდომა",
-        description: "ლოგოს ატვირთვა ვერ მოხერხდა. გთხოვთ, სცადოთ თავიდან.",
+        title: t("profile.logoUploadError"),
+        description: t("profile.logoUploadErrorDescription"),
         variant: "destructive",
       });
     } finally {
@@ -353,12 +355,12 @@ export function ProfileForm() {
   };
 
   if (!shouldFetchUser || isLoading) {
-    return <div className="loading-container">პროფილი იტვირთება...</div>;
+    return <div className="loading-container">{t("profile.loading")}</div>;
   }
 
   return (
     <div className="card">
-      <h2>მომხმარებლის პროფილი</h2>
+      <h2>{t("profile.title")}</h2>
 
       <div className="profile-images-container">
         <div className="profile-image-section">
@@ -391,10 +393,10 @@ export function ProfileForm() {
               disabled={isUploading}
               className="upload-button"
             >
-              {isUploading ? "იტვირთება..." : "პროფილის სურათის ატვირთვა"}
+              {isUploading ? t("profile.uploading") : t("profile.uploadAvatar")}
             </button>
             {uploadSuccess && (
-              <div className="upload-success">სურათი წარმატებით აიტვირთა</div>
+              <div className="upload-success">{t("profile.uploadSuccess")}</div>
             )}
           </div>
         </div>
@@ -406,7 +408,7 @@ export function ProfileForm() {
       >
         <div className="form-field">
           <label htmlFor="name" className="label">
-            სახელი
+            {t("profile.name")}
           </label>
           <input id="name" {...form.register("name")} className="input" />
           {form.formState.errors.name && (
@@ -418,7 +420,7 @@ export function ProfileForm() {
 
         <div className="form-field">
           <label htmlFor="email" className="label">
-            ელ-ფოსტა
+            {t("profile.email")}
           </label>
           <input
             id="email"
@@ -435,13 +437,13 @@ export function ProfileForm() {
 
         <div className="form-field">
           <label htmlFor="password" className="label">
-            ახალი პაროლი
+            {t("profile.newPassword")}
           </label>
           <input
             id="password"
             type="password"
             {...form.register("password")}
-            placeholder="დატოვეთ ცარიელი არსებული პაროლის შესანარჩუნებლად"
+            placeholder={t("profile.passwordPlaceholder") as string}
             className="input"
           />
           {form.formState.errors.password && (
@@ -453,13 +455,13 @@ export function ProfileForm() {
 
         <div className="form-field">
           <label htmlFor="confirmPassword" className="label">
-            გაიმეორეთ ახალი პაროლი
+            {t("profile.confirmPassword")}
           </label>
           <input
             id="confirmPassword"
             type="password"
             {...form.register("confirmPassword")}
-            placeholder="დატოვეთ ცარიელი არსებული პაროლის შესანარჩუნებლად"
+            placeholder={t("profile.passwordPlaceholder") as string}
             className="input"
           />
           {form.formState.errors.confirmPassword && (
@@ -474,18 +476,16 @@ export function ProfileForm() {
           (user.role.toUpperCase() === "SELLER" || isSellerAccount) && (
             <div className="seller-section">
               <h2 className="seller-section-title">
-                მხატვრის/კომპანიის ინფორმაცია
+                {t("profile.sellerInfo")}
               </h2>
 
               <div className="seller-logo-container">
                 {isUploading ? (
-                  <div className="loading-logo">ლოგო იტვირთება...</div>
+                  <div className="loading-logo">{t("profile.logoLoading")}</div>
                 ) : (
                   <>
                     {logoError ? (
-                      <div className="logo-error">
-                        ლოგოს ჩატვირთვა ვერ მოხერხდა
-                      </div>
+                      <div className="logo-error">{t("profile.logoError")}</div>
                     ) : storeLogo ? (
                       <div
                         className="logo-wrapper"
@@ -498,7 +498,7 @@ export function ProfileForm() {
                       >
                         <Image
                           src={storeLogo}
-                          alt="მხატვრის/კომპანიის ლოგო"
+                          alt={t("profile.storeName") as string}
                           width={120}
                           height={120}
                           style={{
@@ -526,7 +526,7 @@ export function ProfileForm() {
                           color: "#666",
                         }}
                       >
-                        ლოგო არ არის ატვირთული
+                        {t("profile.noLogo")}
                       </div>
                     )}
                   </>
@@ -537,7 +537,9 @@ export function ProfileForm() {
                   className="upload-button"
                   disabled={isUploading}
                 >
-                  {isUploading ? "იტვირთება..." : "ლოგოს ატვირთვა"}
+                  {isUploading
+                    ? t("profile.uploading")
+                    : t("profile.uploadLogo")}
                 </button>
                 <input
                   type="file"
@@ -551,7 +553,7 @@ export function ProfileForm() {
               <div className="seller-form-grid">
                 <div className="form-field">
                   <label htmlFor="storeName" className="label">
-                    მხატვრის/კომპანიის სახელი
+                    {t("profile.storeName")}
                   </label>
                   <input
                     id="storeName"
@@ -567,13 +569,13 @@ export function ProfileForm() {
 
                 <div className="form-field">
                   <label htmlFor="phoneNumber" className="label">
-                    ტელეფონის ნომერი
+                    {t("profile.phoneNumber")}
                   </label>
                   <input
                     id="phoneNumber"
                     {...form.register("phoneNumber")}
                     className="input"
-                    placeholder="+995..."
+                    placeholder={t("profile.phoneNumberPlaceholder") as string}
                   />
                   {form.formState.errors.phoneNumber && (
                     <span className="error-message">
@@ -584,7 +586,7 @@ export function ProfileForm() {
 
                 <div className="form-field">
                   <label htmlFor="identificationNumber" className="label">
-                    პირადი ნომ./საიდენტ. კოდი
+                    {t("profile.idNumber")}
                   </label>
                   <input
                     id="identificationNumber"
@@ -600,13 +602,15 @@ export function ProfileForm() {
 
                 <div className="form-field">
                   <label htmlFor="accountNumber" className="label">
-                    საბანკო ანგარიშის რეკვიზიტი
+                    {t("profile.accountNumber")}
                   </label>
                   <input
                     id="accountNumber"
                     {...form.register("accountNumber")}
                     className="input"
-                    placeholder="GE..."
+                    placeholder={
+                      t("profile.accountNumberPlaceholder") as string
+                    }
                   />
                   {form.formState.errors.accountNumber && (
                     <span className="error-message">
@@ -624,8 +628,8 @@ export function ProfileForm() {
           disabled={updateProfile.isPending}
         >
           {updateProfile.isPending
-            ? "მიმდინარეობს განახლება..."
-            : "პროფილის განახლება"}
+            ? t("profile.updating")
+            : t("profile.updateProfile")}
         </button>
       </form>
       {updateProfile.isSuccess && (
@@ -635,7 +639,7 @@ export function ProfileForm() {
           exit={{ opacity: 0, y: -10 }}
           className="success-message"
         >
-          🎉 პროფილი წარმატებით განახლდა!
+          {t("profile.updateSuccess")}
         </motion.div>
       )}
     </div>

@@ -10,9 +10,10 @@ import { useRouter } from "next/navigation";
 import "./productDetails.css";
 import { Product } from "@/types";
 import { AddToCartButton } from "./AddToCartButton";
-import Link from 'next/link';
-import { ShareButtons } from '@/components/share-buttons/share-buttons';
+import Link from "next/link";
+import { ShareButtons } from "@/components/share-buttons/share-buttons";
 import { RoomViewer } from "@/components/room-viewer/room-viewer";
+import { useLanguage } from "@/hooks/LanguageContext";
 
 interface ProductDetailsProps {
   product: Product;
@@ -24,13 +25,14 @@ export function ProductDetails({ product }: ProductDetailsProps) {
   const [activeTab, setActiveTab] = useState("details");
   const [isRoomViewerOpen, setIsRoomViewerOpen] = useState(false);
   const router = useRouter();
+  const { t } = useLanguage();
 
   // Parse dimensions if they are stored as a string
   const parseDimensions = () => {
     if (!product.dimensions) return null;
-    
+
     try {
-      if (typeof product.dimensions === 'string') {
+      if (typeof product.dimensions === "string") {
         return JSON.parse(product.dimensions);
       }
       return product.dimensions;
@@ -39,7 +41,7 @@ export function ProductDetails({ product }: ProductDetailsProps) {
       return null;
     }
   };
-  
+
   const dimensions = parseDimensions();
   console.log("Parsed dimensions:", dimensions);
 
@@ -93,15 +95,15 @@ export function ProductDetails({ product }: ProductDetailsProps) {
               </motion.button>
             ))}
           </div>
-          
+
           <div className="try-on-wall-container">
-            <motion.button 
+            <motion.button
               className="try-on-wall-btn"
               onClick={() => setIsRoomViewerOpen(true)}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
-              მოარგე ოთახს
+              {t("product.tryInRoom")}
             </motion.button>
           </div>
         </div>
@@ -109,7 +111,7 @@ export function ProductDetails({ product }: ProductDetailsProps) {
         {/* Right Column - Product Info */}
         <div className="product-info">
           <div className="brand-container">
-            <Link 
+            <Link
               href={`/shop?brand=${encodeURIComponent(product.brand)}`}
               className="brand-details hover:opacity-75 transition-opacity"
             >
@@ -123,15 +125,16 @@ export function ProductDetails({ product }: ProductDetailsProps) {
               </div>
               <span className="font-bold">{product.brand}</span>
             </Link>
-            <span className="text-muted">Ref: {product._id}</span>
+            <span className="text-muted">
+              {t("product.ref")} {product._id}
+            </span>
           </div>
 
           <h1 className="product-title">{product.name}</h1>
 
-          <ShareButtons 
-            url={typeof window !== 'undefined' ? window.location.href : ''}
+          <ShareButtons
+            url={typeof window !== "undefined" ? window.location.href : ""}
             title={`Check out ${product.name} by ${product.brand} on SoulArt`}
-            // Messenger share button is not supported
           />
 
           <div className="rating-container">
@@ -147,7 +150,9 @@ export function ProductDetails({ product }: ProductDetailsProps) {
                 />
               ))}
             </div>
-            <span className="text-gray-400">{product.numReviews} reviews</span>
+            <span className="text-gray-400">
+              {product.numReviews} {t("product.reviews")}
+            </span>
           </div>
 
           <div className="price">₾{product.price}</div>
@@ -155,7 +160,7 @@ export function ProductDetails({ product }: ProductDetailsProps) {
           {/* Product Dimensions - Fixed to handle string dimensions */}
           {dimensions && (
             <div className="dimensions-info">
-              <h3 className="info-title">ნამუშევრის ზომები</h3>
+              <h3 className="info-title">{t("product.dimensions")}</h3>
               <div className="dimensions-details">
                 {dimensions.width && <span>{dimensions.width} სმ *</span>}
                 {dimensions.height && <span> {dimensions.height} სმ *</span>}
@@ -166,17 +171,20 @@ export function ProductDetails({ product }: ProductDetailsProps) {
 
           {/* Delivery Information */}
           <div className="delivery-info">
-            <h3 className="info-title">მიწოდების ინფორმაცია</h3>
+            <h3 className="info-title">{t("product.deliveryInfo")}</h3>
             <div className="delivery-details">
-              {product.deliveryType === 'SELLER' ? (
+              {product.deliveryType === "SELLER" ? (
                 <div>
-                  <p>მიწოდება ავტორისგან</p>
+                  <p>{t("product.sellerDelivery")}</p>
                   {product.minDeliveryDays && product.maxDeliveryDays && (
-                    <p className="delivery-time">მიწოდების ვადა: {product.minDeliveryDays}-{product.maxDeliveryDays} დღე</p>
+                    <p className="delivery-time">
+                      {t("product.deliveryTime")}: {product.minDeliveryDays}-
+                      {product.maxDeliveryDays} {t("product.days")}
+                    </p>
                   )}
                 </div>
               ) : (
-                <p>მიწოდება SoulArt-ის კურიერით</p>
+                <p>{t("product.courierDelivery")}</p>
               )}
             </div>
           </div>
@@ -185,12 +193,12 @@ export function ProductDetails({ product }: ProductDetailsProps) {
 
           <div className="stock-info">
             {isOutOfStock ? (
-              <div className="text-red-500">არ არის მარაგში</div>
+              <div className="text-red-500">{t("shop.outOfStock")}</div>
             ) : (
               <div>
-                <div className="text-green-600">მარაგშია</div>
+                <div className="text-green-600">{t("shop.inStock")}</div>
                 <label className="select-container">
-                  Quantity:
+                  {t("product.quantity")}:
                   <select
                     value={quantity}
                     onChange={(e) => setQuantity(Number(e.target.value))}
@@ -209,7 +217,11 @@ export function ProductDetails({ product }: ProductDetailsProps) {
             )}
           </div>
 
-          <AddToCartButton productId={product._id} countInStock={product.countInStock} className="custom-style-2" />
+          <AddToCartButton
+            productId={product._id}
+            countInStock={product.countInStock}
+            className="custom-style-2"
+          />
 
           <div className="tabs">
             <div className="tabs-list">
@@ -227,7 +239,7 @@ export function ProductDetails({ product }: ProductDetailsProps) {
                 }`}
                 onClick={() => setActiveTab("reviews")}
               >
-                Reviews ({product.numReviews})
+                {t("product.reviews")} ({product.numReviews})
               </button>
             </div>
 
@@ -255,7 +267,7 @@ export function ProductDetails({ product }: ProductDetailsProps) {
           </div>
         </div>
       </div>
-      
+
       {/* Room Viewer Modal */}
       <RoomViewer
         productImage={product.images[currentImageIndex]}

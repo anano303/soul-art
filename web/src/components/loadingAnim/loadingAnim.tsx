@@ -2,11 +2,13 @@
 
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
+import { useLanguage } from "@/hooks/LanguageContext";
 import Spiner from "../../assets/spiner.png";
 import "./loadingAnim.css";
 
 const LoadingAnim = () => {
   const [dots, setDots] = useState("");
+  const { t } = useLanguage();
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -21,11 +23,14 @@ const LoadingAnim = () => {
       <Image
         src={Spiner}
         alt="Loading"
-        width={24} // სურათის სიგანე ტექსტის სიმაღლის შესაბამისად
-        height={24} // სურათის სიმაღლე ტექსტის სიმაღლის შესაბამისად
+        width={24}
+        height={24}
         className="loading-image"
       />
-        <p className="loading-text">იტვირთება{dots}</p>
+      <p className="loading-text">
+        {t("shop.loading")}
+        {dots}
+      </p>
     </div>
   );
 };

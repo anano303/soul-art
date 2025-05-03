@@ -1,11 +1,16 @@
+"use client";
+
 import { ForgotPasswordForm } from "@/modules/auth/components/forgot-password";
 import { AuthLayout } from "@/modules/auth/layouts/auth-layout";
+import { useLanguage } from "@/hooks/LanguageContext";
 
-export default function LoginPage() {
+export default function ForgotPasswordPage() {
+  const { t } = useLanguage();
+
   return (
     <AuthLayout
-      title="განაახლეთ პაროლი"
-      subtitle="გთხოვთ, შეავსოთ პაროლის აღდგენის ფორმა"
+      title={t("auth.forgotPasswordTitle")}
+      subtitle={t("auth.forgotPasswordSubtitle")}
     >
       <ForgotPasswordForm />
     </AuthLayout>

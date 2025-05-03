@@ -40,6 +40,12 @@ header {
   .auth-cart {
     display: flex;
     align-items: center;
+    gap: 16px;
+
+    .language-switcher-container {
+      margin-right: 8px;
+    }
+
     a {
       white-space: nowrap;
       text-decoration: none;
@@ -169,6 +175,15 @@ header {
 
     .mobile-only-nav {
       display: block;
+    }
+  }
+}
+
+// Mobile support for language switcher
+@media (max-width: 768px) {
+  .auth-cart {
+    .language-switcher-container {
+      margin-right: 4px;
     }
   }
 }
