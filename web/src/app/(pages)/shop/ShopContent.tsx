@@ -38,7 +38,7 @@ const ShopContent = () => {
   const initialCategory = brand ? "all" : "";
 
   const [selectedCategory, setSelectedCategory] = useState(initialCategory);
-  const [sortOption, setSortOption] = useState("");
+  const [sortOption, setSortOption] = useState<"asc" | "desc" | "">("");
   const [selectedMainCategory, setSelectedMainCategory] =
     useState<MainCategory>(
       mainCategoryParam === MainCategory.HANDMADE.toString()
@@ -51,7 +51,6 @@ const ShopContent = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   const [products, setProducts] = useState<Product[]>([]);
-  const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
 
   useEffect(() => {
     if (initializedRef.current) return;
@@ -69,7 +68,7 @@ const ShopContent = () => {
         ? MainCategory.HANDMADE
         : MainCategory.PAINTINGS;
     setSelectedMainCategory(mainCat);
-  }, []);
+  }, [pageParam, mainCategoryParam]);
 
   const fetchProducts = useCallback(async () => {
     if (!initializedRef.current) return;
@@ -82,45 +81,25 @@ const ShopContent = () => {
         currentPage,
         30,
         undefined,
-        brand || undefined
+        brand || undefined,
+        selectedMainCategory.toString(),
+        selectedCategory !== "all" ? selectedCategory : undefined,
+        sortOption !== "" ? "price" : "createdAt",
+        sortOption !== "" ? sortOption : undefined
       );
 
       console.log(
         `Got ${response.items.length} products for page ${currentPage}`
       );
 
-      const allProducts = response.items.map((item) => {
-        if (!item.categoryStructure) {
-          const handmadeCategories = [
-            "კერამიკა",
-            "ხის ნაკეთობები",
-            "სამკაულები",
-            "ტექსტილი",
-            "მინანქარი",
-            "სკულპტურები",
-            "სხვა",
-          ];
-          const isHandmade = handmadeCategories.includes(item.category);
-
-          return {
-            ...item,
-            categoryStructure: {
-              main: isHandmade ? MainCategory.HANDMADE : MainCategory.PAINTINGS,
-              sub: item.category,
-            },
-          };
-        }
-        return item;
-      });
-
-      setProducts(allProducts);
+      setProducts(response.items);
       setTotalPages(response.pages);
     } catch (error) {
       console.error(`Failed to fetch products:`, error);
     } finally {
       setIsLoading(false);
     }
-  }, [currentPage, brand]);
+  }, [currentPage, brand, selectedMainCategory, selectedCategory, sortOption]);
 
   useEffect(() => {
     let mounted = true;
@@ -131,58 +110,6 @@ const ShopContent = () => {
       mounted = false;
     };
   }, [fetchProducts]);
-
-  useEffect(() => {
-    if (products.length === 0) return;
-
-    console.log("Applying filters to products");
-
-    let filtered = [...products];
-
-    filtered = filtered.filter((product) => {
-      const productMainCategory = product.categoryStructure?.main
-        ?.toString()
-        .toLowerCase();
-      const selectedMainCategoryStr = selectedMainCategory
-        ?.toString()
-        .toLowerCase();
-
-      if (!productMainCategory) {
-        const handmadeCategories = [
-          "კერამიკა",
-          "ხის ნაკეთობები",
-          "სამკაულები",
-          "ტექსტილი",
-          "მინანქარი",
-          "სკულპტურები",
-          "სხვა",
-        ];
-        const isHandmade = handmadeCategories.includes(product.category);
-
-        return (
-          (isHandmade && selectedMainCategoryStr === "handmade") ||
-          (!isHandmade && selectedMainCategoryStr === "paintings")
-        );
-      }
-
-      return productMainCategory === selectedMainCategoryStr;
-    });
-
-    if (selectedCategory && selectedCategory !== "all") {
-      filtered = filtered.filter(
-        (product) => product.category === selectedCategory
-      );
-    }
-
-    if (sortOption === "lowToHigh") {
-      filtered.sort((a, b) => a.price - b.price);
-    } else if (sortOption === "highToLow") {
-      filtered.sort((a, b) => b.price - a.price);
-    }
-
-    console.log(`After filtering: ${filtered.length} products`);
-    setFilteredProducts(filtered);
-  }, [products, selectedCategory, selectedMainCategory, sortOption]);
 
   const handlePageChange = (page: number) => {
     if (page === currentPage || page < 1 || page > totalPages) return;
@@ -246,7 +173,7 @@ const ShopContent = () => {
     router.replace(`/shop?${params.toString()}`);
   };
 
-  const handleSortChange = (option: string) => {
+  const handleSortChange = (option: "asc" | "desc" | "") => {
     setSortOption(option);
   };
 
@@ -330,7 +257,7 @@ const ShopContent = () => {
         onMainCategoryChange={handleMainCategoryChange}
       />
       <ProductGrid
-        products={filteredProducts}
+        products={products}
         theme={getTheme()}
         currentPage={currentPage}
         totalPages={totalPages}

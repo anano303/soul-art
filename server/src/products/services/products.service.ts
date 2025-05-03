@@ -15,6 +15,10 @@ import { MainCategory, PaginatedResponse } from '@/types';
 import { Order } from '../../orders/schemas/order.schema';
 import { sampleProduct } from '@/utils/data/product';
 import { Role } from '@/types/role.enum';
+import {
+  HANDMADE_CATEGORIES,
+  PAINTING_CATEGORIES,
+} from '@/utils/subcategories';
 // import { MainCategory } from '@/types/main-category.enum';
 
 @Injectable()
@@ -43,6 +47,9 @@ export class ProductsService {
     status?: ProductStatus,
     brand?: string,
     mainCategory?: string,
+    subCategory?: string,
+    sortBy: string = 'createdAt',
+    sortDirection: 'asc' | 'desc' = 'desc',
   ): Promise<PaginatedResponse<Product>> {
     const pageSize = parseInt(limit ?? '10');
     const currentPage = parseInt(page ?? '1');
@@ -68,15 +75,7 @@ export class ProductsService {
                 {
                   categoryStructure: { $exists: false },
                   category: {
-                    $in: [
-                      'კერამიკა',
-                      'ხის ნაკეთობები',
-                      'სამკაულები',
-                      'ტექსტილი',
-                      'მინანქარი',
-                      'სკულპტურები',
-                      'სხვა',
-                    ],
+                    $in: HANDMADE_CATEGORIES,
                   },
                 },
               ]
@@ -86,15 +85,7 @@ export class ProductsService {
                 {
                   categoryStructure: { $exists: false },
                   category: {
-                    $nin: [
-                      'კერამიკა',
-                      'ხის ნაკეთობები',
-                      'სამკაულები',
-                      'ტექსტილი',
-                      'მინანქარი',
-                      'სკულპტურები',
-                      'სხვა',
-                    ],
+                    $in: PAINTING_CATEGORIES,
                   },
                 },
               ]
@@ -117,12 +108,14 @@ export class ProductsService {
             user ? { user: user._id } : {},
             brand ? { brand: brand } : {},
             mainCategory ? mainCategoryQuery : {},
+            subCategory ? { category: subCategory } : {},
           ],
         }
       : {
           ...(user ? { user: user._id } : {}),
           ...(brand ? { brand: brand } : {}),
           ...(mainCategory ? mainCategoryQuery : {}),
+          ...(subCategory ? { category: subCategory } : {}),
         };
 
     console.log('Search query:', JSON.stringify(searchQuery, null, 2));
@@ -139,7 +132,7 @@ export class ProductsService {
         path: 'user',
         select: 'name email phoneNumber seller',
       })
-      .sort({ createdAt: -1 })
+      .sort({ [sortBy]: sortDirection === 'desc' ? -1 : 1 })
       .limit(pageSize)
       .skip(pageSize * (currentPage - 1));
 
@@ -149,15 +142,7 @@ export class ProductsService {
 
       if (!doc.categoryStructure) {
         // Check if category is a handmade category
-        const isHandmadeCategory = [
-          'კერამიკა',
-          'ხის ნაკეთობები',
-          'სამკაულები',
-          'ტექსტილი',
-          'მინანქარი',
-          'სკულპტურები',
-          'სხვა',
-        ].includes(doc.category);
+        const isHandmadeCategory = HANDMADE_CATEGORIES.includes(doc.category);
 
         doc.categoryStructure = {
           main: isHandmadeCategory

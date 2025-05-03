@@ -149,9 +149,9 @@ export default function HomePageShop() {
       );
     }
 
-    if (sortOption === "lowToHigh") {
+    if (sortOption === "asc") {
       filtered.sort((a, b) => a.price - b.price);
-    } else if (sortOption === "highToLow") {
+    } else if (sortOption === "desc") {
       filtered.sort((a, b) => b.price - a.price);
     }
 
@@ -165,7 +165,14 @@ export default function HomePageShop() {
     });
 
     setFilteredProducts(filtered.slice(0, 6));
-  }, [selectedCategory, selectedArtist, sortOption, products, isLoading]);
+  }, [
+    selectedCategory,
+    selectedArtist,
+    sortOption,
+    products,
+    isLoading,
+    selectedMainCategory,
+  ]);
 
   const handleSortChange = (option: string) => {
     setSortOption(option);
