@@ -9,6 +9,7 @@ import { ProductGrid } from "@/modules/products/components/product-grid";
 import { getProducts } from "@/modules/products/api/get-products";
 import { Product, MainCategory } from "@/types";
 import { ProductFilters } from "@/modules/products/components/product-filters";
+import { useLanguage } from "@/hooks/LanguageContext";
 import {
   Paintbrush,
   Palette,
@@ -21,6 +22,7 @@ import {
 } from "lucide-react";
 
 export default function HomePageShop() {
+  const { t } = useLanguage();
   const [products, setProducts] = useState<Product[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const [selectedCategory, setSelectedCategory] = useState("");
@@ -235,7 +237,7 @@ export default function HomePageShop() {
           className="title"
           style={{ marginBottom: -40, marginTop: 70, zIndex: 9 }}
         >
-          ნამუშევრები{" "}
+          {t("shop.allArtworks")}{" "}
         </h1>
 
         <ProductFilters
@@ -249,7 +251,7 @@ export default function HomePageShop() {
 
         {isLoading ? (
           <div className="loading-container">
-            <p>იტვირთება...</p>
+            <p>{t("shop.loading")}</p>
           </div>
         ) : (
           <>
@@ -265,7 +267,7 @@ export default function HomePageShop() {
 
             <div className="see-more">
               <Link href={`/shop?page=1&mainCategory=${selectedMainCategory}`}>
-                <button className="see-more-btn">ნახეთ ყველა...</button>
+                <button className="see-more-btn">{t("shop.seeAll")}</button>
               </Link>
             </div>
           </>

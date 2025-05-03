@@ -8,13 +8,8 @@ import "./CreateForumModal.css";
 import { apiClient } from "@/lib/api-client";
 
 const validTags = [
-  "პეიზაჟი",
-  "პორტრეტი",
-  "აბსტრაქცია",
-  "შავ-თეთრი",
-  "ანიმაციური",
-  "ციფრული ილუსტრაციები",
-  "სხვა",
+ 'ხელნაკეთი ნივთები',
+      'ნახატები',
 ]; // Valid tags defined by the backend
 
 interface CreateForumModalProps {
@@ -44,7 +39,7 @@ const CreateForumModal = ({ isOpen, onClose }: CreateForumModalProps) => {
     tags.forEach((tag) => {
       if (!validTags.includes(tag)) {
         throw new Error(
-          `Tag '${tag}' is not valid. Valid tags are: პეიზაჟი,პორტრეტი,აბსტრაქცია,შავ-თეთრი,ანიმაციური,ციფრული ილუსტრაციები,სხვა`
+          `Tag '${tag}' is not valid. Valid tags are: ხელნაკეთი ნივთები, ნახატები`
         );
       }
     });

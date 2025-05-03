@@ -5,8 +5,11 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import ForumPost from "@/app/(pages)/forum/ForumPost";
 import Image from "next/image";
+import { useLanguage } from "@/hooks/LanguageContext";
 
 const HomePageForum = () => {
+  const { t } = useLanguage();
+
   interface Post {
     _id: string;
     image?: string;
@@ -64,7 +67,7 @@ const HomePageForum = () => {
           height={28}
           className="forum-icon"
         />
-        ფორუმი
+        {t("navigation.forum")}
       </h1>
 
       {posts.map((post) => (
@@ -102,7 +105,7 @@ const HomePageForum = () => {
         />
       ))}
       <Link href="/forum" className="forumPageLink">
-        დაამატე პოსტი / ნახე სხვა პოსტებიც
+        {t("forum.addPostSeeOthers")}
       </Link>
     </div>
   );

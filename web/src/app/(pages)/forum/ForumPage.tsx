@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation"; // Import useRouter for navigation
+import { useRouter } from "next/navigation";
 import ForumPost from "./ForumPost";
 import "./ForumPage.css";
 import { useInfiniteQuery } from "@tanstack/react-query";
@@ -9,6 +9,7 @@ import CreateForumModal from "./CreateForumModal";
 import { useUser } from "@/modules/auth/hooks/use-user";
 import Loading from "../admin/users/loading";
 import LoadingAnim from "@/components/loadingAnim/loadingAnim";
+import { useLanguage } from "@/hooks/LanguageContext";
 
 interface Forum {
   _id: string;
@@ -17,7 +18,7 @@ interface Forum {
     name: string;
     _id: string;
     role: string;
-    profileImage?: string; // Add profileImage field
+    profileImage?: string;
   };
   tags: string[];
   comments: Array<{
@@ -26,7 +27,7 @@ interface Forum {
     user: {
       name: string;
       _id: string;
-      profileImage?: string; // Add profileImage field for comments
+      profileImage?: string;
     };
     createdAt: string;
     parentId?: string;
@@ -41,9 +42,10 @@ interface Forum {
 }
 
 const ForumPage = () => {
+  const { t } = useLanguage();
   const { user, isLoading: isUserLoading } = useUser();
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const router = useRouter(); // Initialize the router
+  const router = useRouter();
 
   const {
     data,
@@ -89,10 +91,10 @@ const ForumPage = () => {
 
   const handleAddPostClick = () => {
     if (!user) {
-      const currentPath = window.location.pathname; // Get the current page path
-      router.push(`/login?returnUrl=${encodeURIComponent(currentPath)}`); // Redirect to login with returnUrl
+      const currentPath = window.location.pathname;
+      router.push(`/login?returnUrl=${encodeURIComponent(currentPath)}`);
     } else {
-      setIsModalOpen(true); // Open the modal if authorized
+      setIsModalOpen(true);
     }
   };
 
@@ -115,7 +117,7 @@ const ForumPage = () => {
       ) : (
         <>
           <button className="create-post-button" onClick={handleAddPostClick}>
-            ➕ ახალი პოსტის დამატება
+            {t("forum.addNewPost")}
           </button>
 
           <CreateForumModal
@@ -140,7 +142,7 @@ const ForumPage = () => {
                     name: forum.user.name,
                     _id: forum.user._id,
                     avatar: "/avatar.jpg",
-                    profileImage: forum.user.profileImage, // Already passed correctly
+                    profileImage: forum.user.profileImage,
                     role: forum.user.role,
                   }}
                   currentUser={
@@ -149,7 +151,7 @@ const ForumPage = () => {
                           _id: user._id,
                           role: user.role,
                           name: user.name,
-                          profileImage: user.profileImage, // Already passed correctly
+                          profileImage: user.profileImage,
                         }
                       : undefined
                   }
@@ -160,7 +162,7 @@ const ForumPage = () => {
                       name: comment.user.name,
                       _id: comment.user._id,
                       avatar: "/avatar.jpg",
-                      profileImage: comment.user.profileImage || undefined, // Add profile image for comments
+                      profileImage: comment.user.profileImage || undefined,
                     },
                     parentId: comment.parentId?.toString(),
                     replies: comment.replies?.map((r) => r.toString()),
@@ -177,7 +179,7 @@ const ForumPage = () => {
             })
           )}
 
-          {isFetchingNextPage && <div>Loading more...</div>}
+          {isFetchingNextPage && <div>{t("forum.loadingMore")}</div>}
         </>
       )}
     </div>
