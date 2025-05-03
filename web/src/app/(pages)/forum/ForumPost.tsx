@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useLanguage } from "@/hooks/LanguageContext";
 import "./ForumPost.css";
 import Image from "next/image";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -63,6 +64,7 @@ const ForumPost = ({
   isLiked,
   isAuthorized,
 }: PostProps) => {
+  const { t } = useLanguage();
   const [newComment, setNewComment] = useState("");
   const [editingComment, setEditingComment] = useState<string | null>(null);
   const [editText, setEditText] = useState("");
@@ -429,15 +431,7 @@ const ForumPost = ({
     likeCommentMutation.mutate(commentId);
   };
 
-  const validTags = [
-    "პეიზაჟი",
-    "პორტრეტი",
-    "აბსტრაქცია",
-    "შავ-თეთრი",
-    "ანიმაციური",
-    "ციფრული ილუსტრაციები",
-    "სხვა",
-  ];
+  const validTags = ["ხელნაკეთი ნივთები", "ნახატები"];
 
   const editPostMutation = useMutation({
     mutationFn: async ({
@@ -702,9 +696,11 @@ const ForumPost = ({
               className="edit-comment-input"
             />
             <button onClick={() => handleEditSubmit(comment.id)}>
-              შენახვა
+              {t("forum.save")}
             </button>
-            <button onClick={() => setEditingComment(null)}>გაუქმება</button>
+            <button onClick={() => setEditingComment(null)}>
+              {t("forum.cancel")}
+            </button>
           </div>
         ) : (
           <>
@@ -717,7 +713,7 @@ const ForumPost = ({
                     className="reply-button"
                     onClick={() => toggleReplyInput(comment.id)}
                   >
-                    პასუხი
+                    {t("forum.reply")}
                   </button>
                   <button
                     className={`comment-like-button ${
@@ -725,7 +721,9 @@ const ForumPost = ({
                     }`}
                     onClick={() => handleCommentLike(comment.id)}
                     disabled={likeCommentMutation.isPending}
-                    aria-label={isCommentLiked ? "Unlike" : "Like"}
+                    aria-label={
+                      isCommentLiked ? t("forum.unlike") : t("forum.like")
+                    }
                   >
                     <span>{commentLikeCount}</span>
                     <span className="art-like-icon">
@@ -742,16 +740,16 @@ const ForumPost = ({
                       setEditingComment(comment.id);
                       setEditText(comment.text);
                     }}
-                    aria-label="რედაქტირება"
+                    aria-label={t("forum.edit")}
                   >
-                    <span className="button-text">რედაქტირება</span>
+                    <span className="button-text">{t("forum.edit")}</span>
                   </button>
                   <button
                     className="delete-button"
                     onClick={() => deleteCommentMutation.mutate(comment.id)}
-                    aria-label="წაშლა"
+                    aria-label={t("forum.delete")}
                   >
-                    <span className="button-text">წაშლა</span>
+                    <span className="button-text">{t("forum.delete")}</span>
                   </button>
                 </>
               )}
@@ -765,10 +763,10 @@ const ForumPost = ({
               type="text"
               value={replyText[comment.id] || ""}
               onChange={(e) => handleReplyChange(comment.id, e.target.value)}
-              placeholder="დაწერეთ პასუხი..."
+              placeholder={t("forum.writeReply")}
             />
             <button onClick={() => handleReplySubmit(comment.id)}>
-              გაგზავნა
+              {t("forum.send")}
             </button>
           </div>
         )}
@@ -810,9 +808,9 @@ const ForumPost = ({
                   );
                   setIsEditingPost(true);
                 }}
-                aria-label="რედაქტირება"
+                aria-label={t("forum.edit")}
               >
-                <span className="button-text">რედაქტირება</span>
+                <span className="button-text">{t("forum.edit")}</span>
               </button>
               <button
                 className="delete-button"
@@ -823,9 +821,9 @@ const ForumPost = ({
                   );
                   deletePostMutation.mutate();
                 }}
-                aria-label="წაშლა"
+                aria-label={t("forum.delete")}
               >
-                <span className="button-text">წაშლა</span>
+                <span className="button-text">{t("forum.delete")}</span>
               </button>
             </div>
           )}
@@ -845,7 +843,7 @@ const ForumPost = ({
                 disabled={editedPostTags.length >= 3}
               >
                 <option value="" disabled>
-                  Select a tag
+                  {t("forum.selectTag")}
                 </option>
                 {validTags.map((tag) => (
                   <option key={tag} value={tag}>
@@ -889,7 +887,7 @@ const ForumPost = ({
             />
             {error && <div className="error-message">{error}</div>}
             <div className="edit-post-buttons">
-              <button onClick={handlePostEdit}>შენახვა</button>
+              <button onClick={handlePostEdit}>{t("forum.save")}</button>
               <button
                 onClick={() => {
                   setIsEditingPost(false);
@@ -898,7 +896,7 @@ const ForumPost = ({
                   setEditedPostImage(null);
                 }}
               >
-                გაუქმება
+                {t("forum.cancel")}
               </button>
             </div>
           </div>
@@ -945,13 +943,13 @@ const ForumPost = ({
               value={newComment}
               onChange={(e) => setNewComment(e.target.value)}
               className="main-comment-input"
-              placeholder="Write a comment..."
+              placeholder={t("forum.writeComment")}
             />
             <button
               onClick={() => commentMutation.mutate()}
               disabled={!newComment.trim() || commentMutation.isPending}
             >
-              {commentMutation.isPending ? "Posting..." : "Send"}
+              {commentMutation.isPending ? t("forum.posting") : t("forum.send")}
             </button>
           </div>
         )}

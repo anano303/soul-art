@@ -3,8 +3,8 @@
 import { useState } from "react";
 import { useCart } from "@/modules/cart/context/cart-context";
 import { useToast } from "@/hooks/use-toast";
+import { useLanguage } from "@/hooks/LanguageContext";
 import "./ProductCard.css";
-
 
 interface AddToCartButtonProps {
   productId: string;
@@ -17,6 +17,7 @@ export function AddToCartButton({
   countInStock,
   className,
 }: AddToCartButtonProps) {
+  const { t } = useLanguage();
   const { addItem } = useCart();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
@@ -27,8 +28,8 @@ export function AddToCartButton({
   const handleAddToCart = async () => {
     setLoading(true);
     toast({
-      title: "Adding to cart...",
-      description: "Please wait while we add your item.",
+      title: t("cart.addingToCart"),
+      description: t("cart.pleaseWait"),
     });
 
     try {
@@ -36,8 +37,8 @@ export function AddToCartButton({
     } catch (error) {
       console.log(error);
       toast({
-        title: "Error",
-        description: "Failed to add item to cart. Please try again.",
+        title: t("cart.error"),
+        description: t("cart.failedToAdd"),
         variant: "destructive",
       });
     } finally {
@@ -78,9 +79,12 @@ export function AddToCartButton({
         disabled={isOutOfStock || loading}
         onClick={handleAddToCart}
       >
-        {/* <HiOutlineShoppingBag size={20} /> */}
-        <span>🛒</span> 
-        {isOutOfStock ? "არ არის მარაგში" : loading ? "Adding..." : "კალათაში დამატება"}
+        <span>🛒</span>
+        {isOutOfStock
+          ? t("cart.outOfStock")
+          : loading
+          ? t("cart.adding")
+          : t("cart.addToCart")}
       </button>
     </div>
   );

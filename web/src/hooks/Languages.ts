@@ -50,6 +50,7 @@ export const TRANSLATIONS: Translations = {
       priceHighToLow: "ფასი: მაღლიდან დაბლისკენ",
       emptyDescription:
         "დაათვალიერეთ ჩვენი პლატფორმა და იპოვეთ უნიკალური ნამუშევრები",
+      seeAll: "ნახეთ ყველა...",
     },
 
     // Product Details
@@ -136,6 +137,9 @@ export const TRANSLATIONS: Translations = {
       totalCost: "სრული ღირებულება",
       checkout: "შეკვეთის გაფორმება",
       remove: "წაშლა",
+      addToCart: "კალათაში დამატება",
+      adding: "ემატება...",
+      outOfStock: "არ არის მარაგში",
     },
 
     // About page
@@ -395,6 +399,15 @@ export const TRANSLATIONS: Translations = {
       sculptures: "სკულპტურები",
       otherHandmade: "სხვა",
     },
+
+    // Forum
+    forum: {
+      addNewPost: "➕ ახალი პოსტის დამატება",
+      loadingMore: "იტვირთება მეტი...",
+      addPostSeeOthers: "დაამატე პოსტი / ნახე სხვა პოსტებიც",
+      edit: "რედაქტირება",
+      delete: "წაშლა",
+    },
   },
 
   en: {
@@ -437,6 +450,7 @@ export const TRANSLATIONS: Translations = {
       priceLowToHigh: "Price: Low to High",
       priceHighToLow: "Price: High to Low",
       emptyDescription: "Browse our platform to find unique artworks",
+      seeAll: "See All...",
     },
 
     // Product Details
@@ -523,6 +537,9 @@ export const TRANSLATIONS: Translations = {
       totalCost: "Total",
       checkout: "Checkout",
       remove: "Remove",
+      addToCart: "Add to Cart",
+      adding: "Adding...",
+      outOfStock: "Out of Stock",
     },
 
     // About page
@@ -779,6 +796,15 @@ export const TRANSLATIONS: Translations = {
       enamel: "Enamel",
       sculptures: "Sculptures",
       otherHandmade: "Other",
+    },
+
+    // Forum
+    forum: {
+      addNewPost: "➕ Add new post",
+      loadingMore: "Loading more...",
+      addPostSeeOthers: "Add post / See other posts",
+      edit: "Edit",
+      delete: "Delete",
     },
   },
 };

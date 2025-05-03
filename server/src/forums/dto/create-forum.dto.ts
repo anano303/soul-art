@@ -16,15 +16,7 @@ export class CreateForumDto {
   content: string;
 
   @ApiProperty({
-    example: [
-      'პეიზაჟი',
-      'პორტრეტი',
-      'აბსტრაქცია',
-      'შავ-თეთრი',
-      'ანიმაციური',
-      'ციფრული ილუსტრაციები',
-      'სხვა',
-    ],
+    example: ['ხელნაკეთი ნივთები', 'ნახატები'],
   })
   @IsArray()
   @ArrayNotEmpty()
