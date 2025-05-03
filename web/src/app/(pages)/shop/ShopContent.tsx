@@ -6,6 +6,7 @@ import { ProductGrid } from "@/modules/products/components/product-grid";
 import { ProductFilters } from "@/modules/products/components/product-filters";
 import { getProducts } from "@/modules/products/api/get-products";
 import { Product, MainCategory } from "@/types";
+import { useLanguage } from "@/hooks/LanguageContext";
 import "./ShopPage.css";
 import "./ShopAnimatedIcons.css";
 import {
@@ -22,6 +23,7 @@ import {
 const ShopContent = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { t } = useLanguage();
 
   const brand = searchParams ? searchParams.get("brand") : null;
   const pageParam = searchParams
@@ -309,14 +311,14 @@ const ShopContent = () => {
     }
   };
 
-  if (isLoading) return <div>იტვირთება...</div>;
+  if (isLoading) return <div>{t("shop.loading")}</div>;
 
   return (
     <div className={`shop-container ${getTheme()}`}>
       {renderAnimatedIcons()}
 
       <h1 className="text-2xl font-bold mb-4 relative z-10">
-        {brand ? `${brand}-ის ნამუშევრები` : "ყველა ნამუშევარი"}
+        {brand ? `${brand}${t("shop.artistWorks")}` : t("shop.allArtworks")}
       </h1>
       <ProductFilters
         products={products}

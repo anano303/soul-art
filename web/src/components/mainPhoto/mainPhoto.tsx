@@ -1,15 +1,17 @@
 "use client";
 import "./mainPhoto.css";
-
+import { useLanguage } from "@/hooks/LanguageContext";
 import SearchBox from "../SearchBox/search-box";
 
 const MainPhoto = () => {
+  const { t } = useLanguage();
+
   return (
     <div className="home-container">
       <div className="hero-section">
         <div className="hero-text">
-          <h2>შეარჩიე მხატვრების ნამუშევრები ან გაყიდე შენი 🖌️</h2>
-          <p> პერსონალური და ხელნაკეთი ნამუშევრები ქართველი ხელოვანებისგან </p>
+          <h2>{t("home.heroTitle")}</h2>
+          <p>{t("home.heroSubtitle")}</p>
         </div>
         <div className="search-box">
           <SearchBox />

@@ -1,17 +1,18 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from 'react';
-import Image from 'next/image';
-import { motion } from 'framer-motion';
-import './room-viewer.css';
+import React, { useState, useRef, useEffect } from "react";
+import Image from "next/image";
+import { motion } from "framer-motion";
+import "./room-viewer.css";
+import { useLanguage } from "@/hooks/LanguageContext";
 
 // Import room images to ensure they're properly loaded
-import livingRoomImg from '@/assets/roomview/Living_Room-removebg-preview.png';
-import bedroomImg from '@/assets/roomview/bedroom-removebg-preview.png';
-import kitchenImg from '@/assets/roomview/dinning.png';
-import hallImg from '@/assets/roomview/hall-removebg-preview.png';
+import livingRoomImg from "@/assets/roomview/Living_Room-removebg-preview.png";
+import bedroomImg from "@/assets/roomview/bedroom-removebg-preview.png";
+import kitchenImg from "@/assets/roomview/dinning.png";
+import hallImg from "@/assets/roomview/hall-removebg-preview.png";
 
-type RoomType = 'living' | 'bedroom' | 'kitchen' | 'hall';
+type RoomType = "living" | "bedroom" | "kitchen" | "hall";
 
 interface RoomViewerProps {
   productImage: string;
@@ -27,27 +28,28 @@ const rooms = {
 };
 
 const colorOptions = [
-  { name: 'White', value: '#FFFFFF' },
-  { name: 'Cream', value: '#FFF8E1' },
-  { name: 'Light Gray', value: '#F5F5F5' },
-  { name: 'Beige', value: '#F5F5DC' },
-  { name: 'Light Blue', value: '#E3F2FD' },
-  { name: 'Soft Green', value: '#E8F5E9' },
-  { name: 'Lavender', value: '#F3E5F5' },
-  { name: 'Peach', value: '#FFDAB9' },
-  { name: 'Light Yellow', value: '#FFFDE7' },
-  { name: 'Mint', value: '#E0F2F1' },
-  { name: 'Sky Blue', value: '#BBDEFB' },
-  { name: 'Blush Pink', value: '#FFEBEE' },
+  { name: "White", value: "#FFFFFF" },
+  { name: "Cream", value: "#FFF8E1" },
+  { name: "Light Gray", value: "#F5F5F5" },
+  { name: "Beige", value: "#F5F5DC" },
+  { name: "Light Blue", value: "#E3F2FD" },
+  { name: "Soft Green", value: "#E8F5E9" },
+  { name: "Lavender", value: "#F3E5F5" },
+  { name: "Peach", value: "#FFDAB9" },
+  { name: "Light Yellow", value: "#FFFDE7" },
+  { name: "Mint", value: "#E0F2F1" },
+  { name: "Sky Blue", value: "#BBDEFB" },
+  { name: "Blush Pink", value: "#FFEBEE" },
 ];
 
 export function RoomViewer({ productImage, isOpen, onClose }: RoomViewerProps) {
-  const [currentRoom, setCurrentRoom] = useState<RoomType>('living');
-  const [wallColor, setWallColor] = useState('#FFFFFF');
+  const [currentRoom, setCurrentRoom] = useState<RoomType>("living");
+  const [wallColor, setWallColor] = useState("#FFFFFF");
   const [productPosition, setProductPosition] = useState({ x: 0, y: 0 });
   const [productSize, setProductSize] = useState(30); // percentage of container height
   const [roomImagesLoaded, setRoomImagesLoaded] = useState(false);
   const [productLoaded, setProductLoaded] = useState(false);
+  const { t } = useLanguage();
 
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -111,43 +113,47 @@ export function RoomViewer({ productImage, isOpen, onClose }: RoomViewerProps) {
   return (
     <div className="room-viewer-overlay">
       <div className="room-viewer-modal">
-        <button className="close-button" onClick={onClose}>×</button>
+        <button className="close-button" onClick={onClose}>
+          ×
+        </button>
 
-        <h2 className="room-viewer-title">მოარგე ოთახს</h2>
+        <h2 className="room-viewer-title">{t("roomViewer.title")}</h2>
 
         <div className="room-controls">
           <div className="room-selector">
-            <label>აირჩიე ოთახი:</label>
+            <label>{t("roomViewer.chooseRoom")}:</label>
             <div className="room-buttons">
               <button
-                className={currentRoom === 'living' ? 'active' : ''}
-                onClick={() => handleRoomChange('living')}
+                className={currentRoom === "living" ? "active" : ""}
+                onClick={() => handleRoomChange("living")}
               >
-                მისაღები
+                {t("roomViewer.livingRoom")}
               </button>
               <button
-                className={currentRoom === 'bedroom' ? 'active' : ''}
-                onClick={() => handleRoomChange('bedroom')}
+                className={currentRoom === "bedroom" ? "active" : ""}
+                onClick={() => handleRoomChange("bedroom")}
               >
-                საძინებელი
+                {t("roomViewer.bedroom")}
               </button>
               <button
-                className={currentRoom === 'kitchen' ? 'active' : ''}
-                onClick={() => handleRoomChange('kitchen')}
+                className={currentRoom === "kitchen" ? "active" : ""}
+                onClick={() => handleRoomChange("kitchen")}
               >
-                სამზარეულო
+                {t("roomViewer.kitchen")}
               </button>
               <button
-                className={currentRoom === 'hall' ? 'active' : ''}
-                onClick={() => handleRoomChange('hall')}
+                className={currentRoom === "hall" ? "active" : ""}
+                onClick={() => handleRoomChange("hall")}
               >
-                დერეფანი
+                {t("roomViewer.hall")}
               </button>
             </div>
           </div>
 
           <div className="product-size-control">
-            <label>ნამუშევრის ზომა: {productSize}%</label>
+            <label>
+              {t("roomViewer.artworkSize")}: {productSize}%
+            </label>
             <input
               type="range"
               min="10"
@@ -158,12 +164,14 @@ export function RoomViewer({ productImage, isOpen, onClose }: RoomViewerProps) {
           </div>
 
           <div className="color-selector">
-            <label>კედლის ფერი:</label>
+            <label>{t("roomViewer.wallColor")}:</label>
             <div className="color-options">
               {colorOptions.map((color) => (
                 <button
                   key={color.value}
-                  className={`color-option ${wallColor === color.value ? 'active' : ''}`}
+                  className={`color-option ${
+                    wallColor === color.value ? "active" : ""
+                  }`}
                   style={{ backgroundColor: color.value }}
                   onClick={() => handleColorChange(color.value)}
                   title={color.name}
@@ -173,7 +181,11 @@ export function RoomViewer({ productImage, isOpen, onClose }: RoomViewerProps) {
           </div>
         </div>
 
-        <div className="room-view-container" ref={containerRef} style={{ backgroundColor: wallColor }}>
+        <div
+          className="room-view-container"
+          ref={containerRef}
+          style={{ backgroundColor: wallColor }}
+        >
           <div className="room-image-wrapper">
             {roomImagesLoaded ? (
               <Image
@@ -183,7 +195,7 @@ export function RoomViewer({ productImage, isOpen, onClose }: RoomViewerProps) {
                 className="room-image"
               />
             ) : (
-              <div className="loading-message">ოთახის სურათების ჩატვირთვა...</div>
+              <div className="loading-message">{t("roomViewer.loading")}</div>
             )}
 
             <motion.div
@@ -193,18 +205,18 @@ export function RoomViewer({ productImage, isOpen, onClose }: RoomViewerProps) {
               dragMomentum={false}
               style={{
                 height: `${productSize}%`,
-                width: 'auto',
-                position: 'absolute',
-                top: '30%',
-                left: '40%',
-                transform: 'translate(-50%, -50%)',
+                width: "auto",
+                position: "absolute",
+                top: "30%",
+                left: "40%",
+                transform: "translate(-50%, -50%)",
                 x: productPosition.x,
-                y: productPosition.y
+                y: productPosition.y,
               }}
               onDragEnd={(event, info) => {
                 setProductPosition({
                   x: productPosition.x + info.offset.x,
-                  y: productPosition.y + info.offset.y
+                  y: productPosition.y + info.offset.y,
                 });
               }}
             >
@@ -217,12 +229,12 @@ export function RoomViewer({ productImage, isOpen, onClose }: RoomViewerProps) {
                     height={300}
                     className="room-product-image"
                     style={{
-                      objectFit: 'contain',
-                      width: 'auto',
-                      height: '100%',
-                      border: 'none',
-                      clipPath: 'none',
-                      WebkitClipPath: 'none'
+                      objectFit: "contain",
+                      width: "auto",
+                      height: "100%",
+                      border: "none",
+                      clipPath: "none",
+                      WebkitClipPath: "none",
                     }}
                     unoptimized={true} // Use original image without Next.js optimization
                     priority
@@ -233,7 +245,7 @@ export function RoomViewer({ productImage, isOpen, onClose }: RoomViewerProps) {
                   />
                   {!productLoaded && (
                     <div className="product-loading">
-                      ნამუშევრების ჩატვირთვა...
+                      {t("roomViewer.artworkLoading")}
                     </div>
                   )}
                 </div>
@@ -243,7 +255,7 @@ export function RoomViewer({ productImage, isOpen, onClose }: RoomViewerProps) {
         </div>
 
         <div className="instructions">
-          <p>გადაიტანეთ არჩეული პროდუქტი კედელზე სასურველ პოზიციაზე. გამოიყენეთ ზომის რეგულატორი.</p>
+          <p>{t("roomViewer.instructions")}</p>
         </div>
       </div>
     </div>

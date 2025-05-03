@@ -5,14 +5,16 @@ import { CartEmpty } from "./cart-empty";
 import { CartItem } from "./cart-item";
 import { formatPrice } from "@/lib/utils";
 import { useRouter } from "next/navigation";
+import { useLanguage } from "@/hooks/LanguageContext";
 import "./cart-page.css";
 
 export function CartPage() {
   const { items, loading } = useCart();
   const router = useRouter();
+  const { t } = useLanguage();
 
   if (loading) {
-    return <div>Loading...</div>;
+    return <div>{t("shop.loading")}</div>;
   }
 
   if (items.length === 0) {
@@ -27,8 +29,10 @@ export function CartPage() {
   return (
     <div className="cart-page">
       <div className="cart-header">
-        <h1 className="cart-title">თქვენი კალათა</h1>
-        <p className="cart-items-count">{items.length} ნივთი</p>
+        <h1 className="cart-title">{t("cart.yourCart")}</h1>
+        <p className="cart-items-count">
+          {items.length} {t("cart.items")}
+        </p>
       </div>
 
       <div className="cart-content">
@@ -40,30 +44,32 @@ export function CartPage() {
 
         <div className="order-summary">
           <div className="summary-card">
-            <h2 className="summary-title">შეკვეთის დეტალები</h2>
+            <h2 className="summary-title">{t("cart.checkout")}</h2>
             <div className="summary-details">
               <div className="summary-row">
-                <span className="summary-label">ჯამი</span>
+                <span className="summary-label">{t("cart.total")}</span>
                 <span>{formatPrice(subtotal)}</span>
               </div>
               <div className="summary-row">
-                <span className="summary-label">მიწოდება</span>
-                <span>{shipping === 0 ? "უფასო" : formatPrice(shipping)}</span>
+                <span className="summary-label">{t("cart.delivery")}</span>
+                <span>
+                  {shipping === 0 ? t("cart.free") : formatPrice(shipping)}
+                </span>
               </div>
               <div className="summary-row">
-                <span className="summary-label">საკომისიო</span>
+                <span className="summary-label">{t("cart.commission")}</span>
                 <span>{formatPrice(tax)}</span>
               </div>
               <hr className="separator" />
               <div className="summary-row total">
-                <span>სრული ღირებულება</span>
+                <span>{t("cart.totalCost")}</span>
                 <span>{formatPrice(total)}</span>
               </div>
               <button
                 className="checkout-button"
                 onClick={() => router.push("/checkout/shipping")}
               >
-                შეკვეთის გაფორმება
+                {t("cart.checkout")}
               </button>
             </div>
           </div>

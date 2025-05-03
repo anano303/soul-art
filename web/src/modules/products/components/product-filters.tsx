@@ -5,6 +5,7 @@ import { Search } from "lucide-react";
 import "./product-filters.css";
 import { Product, MainCategory } from "@/types";
 import Link from "next/link";
+import { useLanguage } from "@/hooks/LanguageContext";
 
 interface FilterProps {
   products: Product[];
@@ -25,6 +26,7 @@ export function ProductFilters({
   selectedMainCategory: initialMainCategory = MainCategory.PAINTINGS,
   onMainCategoryChange,
 }: FilterProps) {
+  const { t } = useLanguage();
   const [selectedCategory, setSelectedCategory] = useState(initialCategory);
   const [selectedArtist, setSelectedArtist] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
@@ -148,21 +150,21 @@ export function ProductFilters({
   // Get the appropriate search label based on the selected main category
   const getSearchLabel = () => {
     return selectedMainCategory === MainCategory.PAINTINGS
-      ? "მხატვრები"
-      : "ავტორი / კომპანია";
+      ? t("shop.painters")
+      : t("shop.authorCompany");
   };
 
   // Get placeholder text for search input
   const getSearchPlaceholder = () => {
     return selectedMainCategory === MainCategory.PAINTINGS
-      ? "მოძებნე მხატვარი..."
-      : "მოძებნე ავტორი / კომპანია...";
+      ? t("shop.searchPainter")
+      : t("shop.searchAuthorCompany");
   };
 
   return (
     <div className={`filters-container ${themeClass}`}>
       <div className="filter-section">
-        <h3 className="filter-title">მთავარი კატეგორია</h3>
+        <h3 className="filter-title">{t("shop.mainCategory")}</h3>
         <div className="main-category-buttons">
           <button
             className={`main-category-btn paintings ${
@@ -170,7 +172,7 @@ export function ProductFilters({
             }`}
             onClick={() => handleMainCategoryChange(MainCategory.PAINTINGS)}
           >
-            ნახატები
+            {MainCategory.PAINTINGS}
           </button>
           <button
             className={`main-category-btn handmade ${
@@ -178,13 +180,13 @@ export function ProductFilters({
             }`}
             onClick={() => handleMainCategoryChange(MainCategory.HANDMADE)}
           >
-            ხელნაკეთი ნივთები
+            {MainCategory.HANDMADE}
           </button>
         </div>
       </div>
 
       <div className="filter-section">
-        <h3 className="filter-title">ქვეკატეგორიები</h3>
+        <h3 className="filter-title">{t("shop.categories")}</h3>
         <div className="filter-options">
           {categories.map((category) => (
             <button
@@ -194,7 +196,7 @@ export function ProductFilters({
               }`}
               onClick={() => handleCategoryChange(category)}
             >
-              {category === "all" ? "ყველა" : category}
+              {category === "all" ? t("shop.allArtworks") : category}
             </button>
           ))}
         </div>
@@ -265,17 +267,17 @@ export function ProductFilters({
 
       {/* Sort dropdown as normal flow element with inline layout */}
       <div className="filter-section sort-section">
-        <h3 className="filter-title sort-title">ფასების სორტირება:</h3>
+        <h3 className="filter-title sort-title">{t("shop.sort")}</h3>
         <div className="sort-dropdown inline">
           <select
             className="sort-dropdown-select inline"
             value={sortOption}
             onChange={handleSortChange}
-            title="ფასების სორტირება"
+            title={t("shop.sort")}
           >
-            <option value="">აირჩიეთ</option>
-            <option value="lowToHigh">↑ დაბალი-მაღალი</option>
-            <option value="highToLow">↓ მაღალი-დაბალი</option>
+            <option value="">{t("shop.defaultSort")}</option>
+            <option value="lowToHigh">{t("shop.priceLowToHigh")}</option>
+            <option value="highToLow">{t("shop.priceHighToLow")}</option>
           </select>
         </div>
       </div>

@@ -10,12 +10,14 @@ import { useRouter } from "next/navigation";
 import "./login-form.css";
 import { useState, useEffect } from "react";
 import { toast } from "@/hooks/use-toast";
+import { useLanguage } from "@/hooks/LanguageContext";
 
 import type * as z from "zod";
 
 type LoginFormData = z.infer<typeof loginSchema>;
 
 export function LoginForm() {
+  const { t } = useLanguage();
   const { mutate: login, isLoading, error: hookError } = useLogin();
   const [loginError, setLoginError] = useState<string | null>(null);
   const router = useRouter();
@@ -110,7 +112,7 @@ export function LoginForm() {
     <div className="login-container">
       <form onSubmit={handleSubmit(onSubmit)} className="login-form">
         <div className="input-group">
-          <label htmlFor="email">ელ-ფოსტა</label>
+          <label htmlFor="email">{t("auth.email")}</label>
           <input
             id="email"
             type="email"
@@ -122,7 +124,7 @@ export function LoginForm() {
         </div>
 
         <div className="input-group">
-          <label htmlFor="password">პაროლი</label>
+          <label htmlFor="password">{t("auth.password")}</label>
           <input
             id="password"
             type="password"
@@ -143,18 +145,18 @@ export function LoginForm() {
         )}
 
         <button type="submit" className="login-button" disabled={isLoading}>
-          {isLoading ? <span className="loading-spinner"></span> : "შესვლა"}
+          {isLoading ? (
+            <span className="loading-spinner"></span>
+          ) : (
+            t("auth.loginButton")
+          )}
         </button>
 
         <div className="separator">
-          <span className="separator-text">ან გაიარეთ ავტორიზაცია</span>
+          <span className="separator-text">{t("auth.orLoginWith")}</span>
         </div>
 
         <div className="social-buttons">
-          {/* <button type="button" className="social-button">
-            <FaFacebook className="icon" />
-            Facebook
-          </button> */}
           <button
             type="button"
             onClick={handleGoogleAuth}
@@ -174,14 +176,14 @@ export function LoginForm() {
       </form>
       <div className="forgot-password signup-text">
         <Link href="/forgot-password" className="signup-link">
-          დაგავიწყდათ პაროლი?
+          {t("auth.forgotPassword")}
         </Link>
       </div>
 
       <div className="signup-text">
-        არ გაქვთ ანგარიში?{" "}
+        {t("auth.dontHaveAccount")}{" "}
         <Link href="/register" className="signup-link">
-          რეგისტრაცია
+          {t("auth.createAccount")}
         </Link>
       </div>
     </div>

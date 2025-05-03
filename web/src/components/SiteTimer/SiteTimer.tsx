@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import "./SiteTimer.css";
 import { OptimizedStaticImage } from "../optimized-static-image";
+import { useLanguage } from "@/hooks/LanguageContext";
 
 // Import gear images directly where they're used
 import gear1 from "../../assets/gear 1.png";
@@ -39,6 +40,7 @@ const calculateTimeLeft = (end: Date) => {
 
 // ⏳ Timer კომპონენტი
 const SiteTimer = () => {
+  const { t } = useLanguage();
   const [timeLeft, setTimeLeft] = useState<{
     months: number;
     days: number;
@@ -98,7 +100,7 @@ const SiteTimer = () => {
             </div>
           </div>
         </div>
-        <p className="site-timer-text">Loading timer...</p>
+        <p className="site-timer-text">{t("timer.loading")}</p>
       </div>
     );
   }
@@ -143,11 +145,11 @@ const SiteTimer = () => {
         </div>
       </div>
       <p className="site-timer-text">
-        ვებგვერდზე მიმდინარეობს ტექნიკური სამუშაო, დასრულებამდე დარჩა{" "}
+        {t("timer.message")}{" "}
         {timeLeft.months > 0 &&
-          `${timeLeft.months.toString().padStart(2, "")} თვე `}
+          `${timeLeft.months.toString().padStart(2, "")} ${t("timer.month")} `}
         {timeLeft.days > 0 &&
-          `${timeLeft.days.toString().padStart(2, "")} დღე `}
+          `${timeLeft.days.toString().padStart(2, "")} ${t("timer.day")} `}
         {timeLeft.hours.toString().padStart(2, "0")} :{" "}
         {timeLeft.minutes.toString().padStart(2, "0")} :{" "}
         {timeLeft.seconds.toString().padStart(2, "0")}

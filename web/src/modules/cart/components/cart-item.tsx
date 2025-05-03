@@ -1,5 +1,6 @@
 import { CartItem as CartItemType } from "@/types/cart";
 import { useCart } from "../context/cart-context";
+import { useLanguage } from "@/hooks/LanguageContext";
 import Image from "next/image";
 import Link from "next/link";
 import { formatPrice } from "@/lib/utils";
@@ -11,6 +12,7 @@ interface CartItemProps {
 
 export function CartItem({ item }: CartItemProps) {
   const { updateQuantity, removeItem } = useCart();
+  const { t } = useLanguage();
 
   return (
     <div className="cart-item">
@@ -52,7 +54,7 @@ export function CartItem({ item }: CartItemProps) {
               onClick={() => removeItem(item.productId)}
               className="remove-button"
             >
-              Remove
+              {t("cart.remove")}
             </button>
           </div>
         </div>
