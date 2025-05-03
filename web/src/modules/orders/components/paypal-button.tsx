@@ -70,8 +70,10 @@ function PayPalButtonWrapper({ orderId, amount }: PayPalButtonProps) {
           throw new Error("Failed to capture order");
         }
 
-        const paymentSource = details.payment_source?.paypal;
-        if (!paymentSource?.email_address) {
+        const email_address =
+          details.payment_source?.paypal?.email_address ||
+          details.payer?.email_address;
+        if (!email_address) {
           throw new Error("Missing payment information");
         }
 
@@ -79,7 +81,7 @@ function PayPalButtonWrapper({ orderId, amount }: PayPalButtonProps) {
           id: details.id || "",
           status: details.status || "",
           update_time: details.update_time || "",
-          email_address: paymentSource.email_address || "",
+          email_address,
         };
 
         handlePaymentSuccess(paymentResult);
