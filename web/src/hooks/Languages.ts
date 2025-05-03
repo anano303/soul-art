@@ -1,7 +1,7 @@
 "use client";
 
 export interface TranslationContent {
-  [key: string]: string | TranslationContent;
+  [key: string]: string | string[] | TranslationContent;
 }
 
 export interface Translations {
