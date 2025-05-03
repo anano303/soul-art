@@ -11,10 +11,16 @@ import { TRANSLATIONS } from "./Languages";
 
 type Language = "en" | "ge";
 
+// Define recursive type for nested translations
+interface TranslationContent {
+  [key: string]: string | TranslationContent;
+}
+
 interface LanguageContextType {
   language: Language;
   setLanguage: (lang: Language) => void;
-  t: (key: string) => string;
+  // Update the type signature to accept optional values for interpolation
+  t: (key: string, values?: Record<string, string | number>) => string;
 }
 
 const LanguageContext = createContext<LanguageContextType | undefined>(
@@ -42,8 +48,8 @@ export function LanguageProvider({ children }: LanguageProviderProps) {
     localStorage.setItem("language", language);
   }, [language]);
 
-  // Translation function that works with the nested structure in Languages.ts
-  const t = (key: string): string => {
+  // Updated translation function that supports interpolation
+  const t = (key: string, values?: Record<string, string | number>): string => {
     // If key doesn't contain dots, it's not a nested path
     if (!key.includes(".")) {
       return key;
@@ -59,20 +65,25 @@ export function LanguageProvider({ children }: LanguageProviderProps) {
         if (!result || typeof result !== "object") {
           // If we can't go deeper but still have parts to process, try English fallback
           if (language !== "en") {
-            let enResult = TRANSLATIONS.en;
+            let enResult = TRANSLATIONS.en as TranslationContent;
             let foundInEn = true;
 
             // Try to find the key in English translations
             for (const p of parts) {
-              if (!enResult || typeof enResult !== "object" || !enResult[p]) {
+              if (
+                !enResult ||
+                typeof enResult !== "object" ||
+                !(p in enResult)
+              ) {
                 foundInEn = false;
                 break;
               }
-              enResult = enResult[p];
+
+              enResult = enResult[p] as TranslationContent;
             }
 
             if (foundInEn && typeof enResult === "string") {
-              return enResult;
+              return interpolateValues(enResult, values);
             }
           }
 
@@ -80,15 +91,35 @@ export function LanguageProvider({ children }: LanguageProviderProps) {
           return key;
         }
 
-        result = result[part];
+        result = result[part] as TranslationContent;
       }
 
       // Return the result if it's a string, otherwise return the key
-      return typeof result === "string" ? result : key;
+      return typeof result === "string"
+        ? interpolateValues(result, values)
+        : key;
     } catch (error) {
       console.error(`Error translating key: ${key}`, error);
       return key;
     }
+  };
+
+  // Helper function to replace placeholders with values
+  const interpolateValues = (
+    text: string,
+    values?: Record<string, string | number>
+  ): string => {
+    if (!values) return text;
+
+    let interpolatedText = text;
+    Object.keys(values).forEach((key) => {
+      interpolatedText = interpolatedText.replace(
+        new RegExp(`{${key}}`, "g"),
+        String(values[key])
+      );
+    });
+
+    return interpolatedText;
   };
 
   return (
