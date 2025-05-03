@@ -22,7 +22,7 @@ export function CartPage() {
   }
 
   const subtotal = items.reduce((acc, item) => acc + item.price * item.qty, 0);
-  const shipping = subtotal > 100 ? 0 : 10;
+  const shipping = subtotal > 100 ? 0 : 0;
   const tax = Number((0.02 * subtotal).toFixed(2));
   const total = subtotal + shipping + tax;
 

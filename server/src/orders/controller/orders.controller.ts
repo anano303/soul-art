@@ -45,7 +45,7 @@ export class OrdersController {
   @Put(':id/pay')
   async updateOrderPayment(
     @Param('id') id: string,
-    @Body() { paymentResult }: any,
+    @Body() paymentResult: any,
   ) {
     return this.ordersService.updatePaid(id, paymentResult);
   }
