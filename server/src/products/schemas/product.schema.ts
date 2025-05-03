@@ -37,8 +37,8 @@ export enum DeliveryType {
 }
 
 export enum MainCategory {
-  PAINTINGS = 'paintings',
-  HANDMADE = 'handmade',
+  PAINTINGS = 'PAINTINGS',
+  HANDMADE = 'HANDMADE',
 }
 
 export interface CategoryStructure {
@@ -62,7 +62,7 @@ export class Product {
   @Prop({ required: true })
   brand!: string;
 
-  @Prop({ })
+  @Prop({})
   brandLogo?: string;
 
   @Prop({ required: true })

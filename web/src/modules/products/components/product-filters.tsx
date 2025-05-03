@@ -11,7 +11,7 @@ interface FilterProps {
   products: Product[];
   onCategoryChange: (category: string) => void;
   onArtistChange: (artist: string) => void;
-  onSortChange?: (sortOption: string) => void;
+  onSortChange?: (sortOption: "asc" | "desc" | "") => void;
   selectedCategory?: string;
   selectedMainCategory?: MainCategory;
   onMainCategoryChange?: (mainCategory: MainCategory) => void;
@@ -33,7 +33,7 @@ export function ProductFilters({
   const [isSearching, setIsSearching] = useState(false);
   const [artists, setArtists] = useState<string[]>(["all"]);
   const [filteredArtists, setFilteredArtists] = useState<string[]>(["all"]);
-  const [sortOption, setSortOption] = useState<string>("");
+  const [sortOption, setSortOption] = useState<"asc" | "desc" | "">("");
   const [selectedMainCategory, setSelectedMainCategory] =
     useState(initialMainCategory);
 
@@ -130,7 +130,7 @@ export function ProductFilters({
   };
 
   const handleSortChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    const option = event.target.value;
+    const option = event.target.value as "asc" | "desc" | "";
     setSortOption(option);
     if (onSortChange) {
       onSortChange(option);
@@ -275,9 +275,9 @@ export function ProductFilters({
             onChange={handleSortChange}
             title={t("shop.sort")}
           >
-            <option value="">{t("shop.defaultSort")}</option>
-            <option value="lowToHigh">{t("shop.priceLowToHigh")}</option>
-            <option value="highToLow">{t("shop.priceHighToLow")}</option>
+            <option value={undefined}>{t("shop.defaultSort")}</option>
+            <option value="asc">{t("shop.priceLowToHigh")}</option>
+            <option value="desc">{t("shop.priceHighToLow")}</option>
           </select>
         </div>
       </div>

@@ -52,6 +52,9 @@ export class ProductsController {
     @Query('limit') limit: string,
     @Query('brand') brand: string,
     @Query('mainCategory') mainCategory: string,
+    @Query('subCategory') subCategory: string,
+    @Query('sortBy') sortBy: string,
+    @Query('sortDirection') sortDirection: 'asc' | 'desc',
   ) {
     console.log('Getting products with mainCategory:', mainCategory);
     return this.productsService.findMany(
@@ -62,6 +65,9 @@ export class ProductsController {
       ProductStatus.APPROVED,
       brand,
       mainCategory,
+      subCategory,
+      sortBy,
+      sortDirection,
     );
   }
 
@@ -183,6 +189,10 @@ export class ProductsController {
 
       return this.productsService.create({
         ...productData,
+        categoryStructure:
+          typeof productData.categoryStructure === 'string'
+            ? JSON.parse(productData.categoryStructure)
+            : productData.categoryStructure,
         user,
         images: imageUrls,
         brandLogo: brandLogoUrl,
