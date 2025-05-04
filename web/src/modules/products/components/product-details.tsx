@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import { StarIcon } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -24,26 +24,42 @@ export function ProductDetails({ product }: ProductDetailsProps) {
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState("details");
   const [isRoomViewerOpen, setIsRoomViewerOpen] = useState(false);
+  const [dimensions, setDimensions] = useState<{
+    width?: number;
+    height?: number;
+    depth?: number;
+  } | null>(null);
   const router = useRouter();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+
+  // Display name and description based on selected language
+  const displayName =
+    language === "en" && product.nameEn ? product.nameEn : product.name;
+
+  const displayDescription =
+    language === "en" && product.descriptionEn
+      ? product.descriptionEn
+      : product.description;
 
   // Parse dimensions if they are stored as a string
-  const parseDimensions = () => {
-    if (!product.dimensions) return null;
+  useEffect(() => {
+    if (!product.dimensions) {
+      setDimensions(null);
+      return;
+    }
 
     try {
       if (typeof product.dimensions === "string") {
-        return JSON.parse(product.dimensions);
+        const parsed = JSON.parse(product.dimensions);
+        setDimensions(parsed);
+      } else {
+        setDimensions(product.dimensions);
       }
-      return product.dimensions;
     } catch (e) {
       console.error("Error parsing dimensions:", e);
-      return null;
+      setDimensions(null);
     }
-  };
-
-  const dimensions = parseDimensions();
-  console.log("Parsed dimensions:", dimensions);
+  }, [product.dimensions]);
 
   if (!product) return null;
 
@@ -66,7 +82,7 @@ export function ProductDetails({ product }: ProductDetailsProps) {
               >
                 <Image
                   src={product.images[currentImageIndex]}
-                  alt={product.name}
+                  alt={displayName}
                   fill
                   className="object-contain"
                   priority
@@ -88,7 +104,7 @@ export function ProductDetails({ product }: ProductDetailsProps) {
               >
                 <Image
                   src={image}
-                  alt={`${product.name} view ${index + 1}`}
+                  alt={`${displayName} view ${index + 1}`}
                   fill
                   className="object-cover"
                 />
@@ -130,11 +146,11 @@ export function ProductDetails({ product }: ProductDetailsProps) {
             </span>
           </div>
 
-          <h1 className="product-title">{product.name}</h1>
+          <h1 className="product-title">{displayName}</h1>
 
           <ShareButtons
             url={typeof window !== "undefined" ? window.location.href : ""}
-            title={`Check out ${product.name} by ${product.brand} on SoulArt`}
+            title={`Check out ${displayName} by ${product.brand} on SoulArt`}
           />
 
           <div className="rating-container">
@@ -231,7 +247,7 @@ export function ProductDetails({ product }: ProductDetailsProps) {
                 }`}
                 onClick={() => setActiveTab("details")}
               >
-                {product.description}
+                {t("product.details")}
               </button>
               <button
                 className={`tabs-trigger ${
@@ -249,7 +265,7 @@ export function ProductDetails({ product }: ProductDetailsProps) {
               }`}
             >
               <div className="prose">
-                <p>{product.description}</p>
+                <p>{displayDescription}</p>
               </div>
             </div>
 

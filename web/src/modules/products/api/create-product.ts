@@ -16,7 +16,7 @@ export interface ProductResponseState {
 }
 
 export async function createProduct(
-  data: ProductFormData,
+  data: ProductFormData & { nameEn?: string; descriptionEn?: string },
   formState: ProductResponseState,
   formData: FormData
 ): Promise<ProductResponseState> {
@@ -40,6 +40,15 @@ export async function createProduct(
         description: "At least one image is required",
       },
     };
+  }
+
+  // Add English fields to form data
+  if (data.nameEn) {
+    formData.append("nameEn", data.nameEn);
+  }
+
+  if (data.descriptionEn) {
+    formData.append("descriptionEn", data.descriptionEn);
   }
 
   try {

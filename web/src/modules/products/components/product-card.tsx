@@ -8,6 +8,7 @@ import { AddToCartButton } from "./AddToCartButton";
 import noPhoto from "../../../assets/nophoto.webp";
 import Star from "../../../assets/Images/star.png";
 import Star2 from "../../../assets/Images/startHandMade.png";
+import { useLanguage } from "@/hooks/LanguageContext";
 
 interface ProductCardProps {
   product: Product;
@@ -20,8 +21,13 @@ export function ProductCard({
   className = "",
   theme = "default",
 }: ProductCardProps) {
+  const { language } = useLanguage();
   // ვამოწმებთ სურათის ვალიდურობას
   const productImage = product.images?.[0] || noPhoto.src;
+
+  // Display name based on selected language
+  const displayName =
+    language === "en" && product.nameEn ? product.nameEn : product.name;
 
   return (
     <div className={`product-card ${theme} ${className}`}>
@@ -29,7 +35,7 @@ export function ProductCard({
         <div className="product-image">
           <Image
             src={productImage}
-            alt={product.name}
+            alt={displayName}
             fill
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             priority
@@ -38,7 +44,7 @@ export function ProductCard({
         </div>
         <div className="product-info">
           <div className="product-name-rating">
-            <h3 className="product-name">{product.name}</h3>
+            <h3 className="product-name">{displayName}</h3>
             <div className="product-rating">
               <span style={{ marginRight: "5px" }}>
                 <Image

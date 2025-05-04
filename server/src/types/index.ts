@@ -13,8 +13,10 @@ export interface Product {
   _id: string;
   user: User;
   name: string;
+  nameEn?: string;
   images: string[];
   description: string;
+  descriptionEn?: string;
   brand: string;
   brandLogo: string;
   category: string; // Make sure this exists

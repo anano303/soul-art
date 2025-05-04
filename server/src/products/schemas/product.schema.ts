@@ -59,6 +59,9 @@ export class Product {
   @Prop({ required: true })
   name!: string;
 
+  @Prop({ required: false })
+  nameEn?: string;
+
   @Prop({ required: true })
   brand!: string;
 
@@ -76,6 +79,9 @@ export class Product {
 
   @Prop({ required: true })
   description!: string;
+
+  @Prop({ required: false })
+  descriptionEn?: string;
 
   @Prop({ required: true })
   reviews!: Review[];

@@ -15,6 +15,8 @@ interface ProductFormData extends BaseProductFormData {
     main: MainCategory;
     sub: string;
   };
+  nameEn?: string;
+  descriptionEn?: string;
 }
 import "./CreateProductForm.css";
 import Image from "next/image";
@@ -74,8 +76,10 @@ export function CreateProductForm({
   const [formData, setFormData] = useState<ProductFormData & { _id?: string }>(
     initialData || {
       name: "",
+      nameEn: "",
       price: 0,
       description: "",
+      descriptionEn: "",
       images: [],
       brand: "",
       category: "",
@@ -121,6 +125,7 @@ export function CreateProductForm({
         ...prev,
         _id: initialData._id,
         name: initialData.name || "",
+        nameEn: initialData.nameEn || "",
         brand: initialData.brand || "",
         brandLogo:
           typeof initialData.brandLogo === "string"
@@ -129,6 +134,7 @@ export function CreateProductForm({
         category: initialData.category || "",
         images: initialData.images || [],
         description: initialData.description || "",
+        descriptionEn: initialData.descriptionEn || "",
         price: initialData.price || 0,
         countInStock: initialData.countInStock || 0,
       }));
@@ -211,8 +217,10 @@ export function CreateProductForm({
   const resetForm = () => {
     setFormData({
       name: "",
+      nameEn: "",
       price: 0,
       description: "",
+      descriptionEn: "",
       images: [],
       brand: "",
       category: "",
@@ -369,8 +377,10 @@ export function CreateProductForm({
 
       // Add basic form fields
       formDataToSend.append("name", formData.name);
+      formDataToSend.append("nameEn", formData.nameEn || "");
       formDataToSend.append("price", String(formData.price));
       formDataToSend.append("description", formData.description);
+      formDataToSend.append("descriptionEn", formData.descriptionEn || "");
       formDataToSend.append("category", formData.category);
       formDataToSend.append("countInStock", String(formData.countInStock));
 
@@ -574,7 +584,7 @@ export function CreateProductForm({
           </div>
         )}
         <div>
-          <label htmlFor="name">ნამუშევარის სახელი</label>
+          <label htmlFor="name">ნამუშევარის სახელი (ქართულად)</label>
           <input
             id="name"
             name="name"
@@ -587,7 +597,22 @@ export function CreateProductForm({
         </div>
 
         <div>
-          <label htmlFor="description">Description</label>
+          <label htmlFor="nameEn">ნამუშევარის სახელი (ინგლისურად)</label>
+          <input
+            id="nameEn"
+            name="nameEn"
+            value={formData.nameEn}
+            onChange={handleChange}
+            className="create-product-input"
+            placeholder="Product name in English (optional)"
+          />
+          {errors.nameEn && (
+            <p className="create-product-error">{errors.nameEn}</p>
+          )}
+        </div>
+
+        <div>
+          <label htmlFor="description">აღწერა (ქართულად)</label>
           <textarea
             id="description"
             name="description"
@@ -598,6 +623,21 @@ export function CreateProductForm({
           />
           {errors.description && (
             <p className="create-product-error">{errors.description}</p>
+          )}
+        </div>
+
+        <div>
+          <label htmlFor="descriptionEn">აღწერა (ინგლისურად)</label>
+          <textarea
+            id="descriptionEn"
+            name="descriptionEn"
+            value={formData.descriptionEn}
+            onChange={handleChange}
+            className="create-product-textarea"
+            placeholder="Product description in English (optional)"
+          />
+          {errors.descriptionEn && (
+            <p className="create-product-error">{errors.descriptionEn}</p>
           )}
         </div>
 
