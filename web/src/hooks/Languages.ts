@@ -407,6 +407,46 @@ export const TRANSLATIONS: Translations = {
       addPostSeeOthers: "დაამატე პოსტი / ნახე სხვა პოსტებიც",
       edit: "რედაქტირება",
       delete: "წაშლა",
+      save: "შენახვა",
+      cancel: "გაუქმება",
+      reply: "პასუხი",
+      like: "მოწონება",
+      unlike: "მოწონების გაუქმება",
+      writeReply: "დაწერეთ პასუხი...",
+      writeComment: "დაწერეთ კომენტარი...",
+      posting: "იგზავნება...",
+      send: "გაგზავნა",
+      selectTag: "აირჩიეთ თეგი",
+      creating: "იქმნება...",
+      create: "შექმნა",
+      newPost: "ახალი პოსტის შექმნა",
+      writePostContent: "დაწერეთ პოსტის შინაარსი...",
+      tags: {
+        handmade: "ხელნაკეთი ნივთები",
+        paintings: "ნახატები",
+        other: "სხვა",
+      },
+    },
+
+    // Categories translations
+    productCategories: {
+      // Painting subcategories
+      პეიზაჟი: "პეიზაჟი",
+      პორტრეტი: "პორტრეტი",
+      აბსტრაქცია: "აბსტრაქცია",
+      "შავ-თეთრი": "შავ-თეთრი",
+      ანიმაციური: "ანიმაციური",
+      "ციფრული ილუსტრაციები": "ციფრული ილუსტრაციები",
+      მინიატურა: "მინიატურა",
+      სხვა: "სხვა",
+
+      // Handmade subcategories
+      კერამიკა: "კერამიკა",
+      "ხის ნაკეთობები": "ხის ნაკეთობები",
+      სამკაულები: "სამკაულები",
+      ტექსტილი: "ტექსტილი",
+      მინანქარი: "მინანქარი",
+      სკულპტურები: "სკულპტურები",
     },
   },
 
@@ -805,6 +845,46 @@ export const TRANSLATIONS: Translations = {
       addPostSeeOthers: "Add post / See other posts",
       edit: "Edit",
       delete: "Delete",
+      save: "Save",
+      cancel: "Cancel",
+      reply: "Reply",
+      like: "Like",
+      unlike: "Unlike",
+      writeReply: "Write a reply...",
+      writeComment: "Write a comment...",
+      posting: "Posting...",
+      send: "Send",
+      selectTag: "Select a tag",
+      creating: "Creating...",
+      create: "Create",
+      newPost: "Create New Post",
+      writePostContent: "Write your post content...",
+      tags: {
+        handmade: "Handmade Items",
+        paintings: "Paintings",
+        other: "Other",
+      },
+    },
+
+    // Categories translations
+    productCategories: {
+      // Painting subcategories
+      პეიზაჟი: "Landscape",
+      პორტრეტი: "Portrait",
+      აბსტრაქცია: "Abstract",
+      "შავ-თეთრი": "Black & White",
+      ანიმაციური: "Animation",
+      "ციფრული ილუსტრაციები": "Digital Illustrations",
+      მინიატურა: "Miniature",
+      სხვა: "Other",
+
+      // Handmade subcategories
+      კერამიკა: "Pottery",
+      "ხის ნაკეთობები": "Woodwork",
+      სამკაულები: "Jewelry",
+      ტექსტილი: "Textile",
+      მინანქარი: "Enamel",
+      სკულპტურები: "Sculptures",
     },
   },
 };

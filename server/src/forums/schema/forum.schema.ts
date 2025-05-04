@@ -44,9 +44,10 @@ export class Forum extends Document {
       values: [
       'ხელნაკეთი ნივთები',
       'ნახატები',
+      'სხვა'
       ],
       message:
-        'Tags must be one of: ხელნაკეთი ნივთები, ნახატები',
+        'Tags must be one of: ხელნაკეთი ნივთები, ნახატები, სხვა',
     },
     required: true,
   })
