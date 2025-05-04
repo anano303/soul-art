@@ -55,6 +55,20 @@ export function AiProductCreator() {
         .map((line) => line.trim())
         .filter(Boolean);
 
+      // Add support for English fields in AI-generated content
+      let nameEn = "";
+      let descriptionEn = "";
+
+      // Check if there are lines with English content markers
+      lines.forEach((line) => {
+        if (line.startsWith("English Name:")) {
+          nameEn = line.split(":")[1]?.trim() || "";
+        }
+        if (line.startsWith("English Description:")) {
+          descriptionEn = line.split(":")[1]?.trim() || "";
+        }
+      });
+
       return (
         <div className="ai-product-creator__info">
           <div className="ai-product-creator__info-section">
@@ -119,6 +133,27 @@ export function AiProductCreator() {
                   </div>
                 );
               })}
+
+              {/* Add English fields if available */}
+              {nameEn && (
+                <div className="ai-product-creator__field">
+                  <span className="ai-product-creator__label">
+                    English Name:
+                  </span>{" "}
+                  <span>{nameEn}</span>
+                </div>
+              )}
+
+              {descriptionEn && (
+                <div className="ai-product-creator__description">
+                  <span className="ai-product-creator__label">
+                    English Description:
+                  </span>
+                  <p className="ai-product-creator__description-text">
+                    {descriptionEn}
+                  </p>
+                </div>
+              )}
             </div>
           </div>
 

@@ -15,8 +15,10 @@ export interface Product {
   _id: string;
   user: User;
   name: string;
+  nameEn?: string;
   images: string[];
   description: string;
+  descriptionEn?: string;
   brand: string;
   brandLogo: string;
   category: string; // For backward compatibility
@@ -48,6 +50,7 @@ export enum ProductStatus {
 
 export interface Review {
   name: string;
+  nameEn?: string;
   rating: number;
   comment: string;
   user: string;

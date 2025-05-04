@@ -12,10 +12,12 @@ import { fetchWithAuth } from "@/lib/fetch-with-auth";
 import { useUser } from "@/modules/auth/hooks/use-user";
 import { StatusBadge } from "./status-badge";
 import { Role } from "@/types/role";
+import { useLanguage } from "@/hooks/LanguageContext";
 
 export function ProductsList() {
   const [page, setPage] = useState(1);
   const { user } = useUser();
+  const { language } = useLanguage();
 
   const isAdmin = user?.role === Role.Admin;
 
@@ -65,6 +67,12 @@ export function ProductsList() {
     queryClient.invalidateQueries({ queryKey: ["pendingProducts"] });
   }
 
+  function getDisplayName(product: Product): string {
+    return language === "en" && product.nameEn
+      ? product.nameEn
+      : product.name;
+  }
+
   return (
     <div className="prd-card">
       {isAdmin && pendingProducts?.length > 0 && (
@@ -82,13 +90,13 @@ export function ProductsList() {
                     <div className="prd-img-wrapper">
                       <Image
                         src={product.images[0]}
-                        alt={product.name}
+                        alt={getDisplayName(product)}
                         fill
                         className="prd-img"
                       />
                     </div>
                   </td>
-                  <td className="prd-td">{product.name}</td>
+                  <td className="prd-td">{getDisplayName(product)}</td>
                   <td className="prd-td">{product.price} ₾ </td>
                   <td className="prd-td">{product.category}</td>
                   <td className="prd-td">{product.countInStock}</td>
@@ -151,13 +159,13 @@ export function ProductsList() {
                 <div className="prd-img-wrapper">
                   <Image
                     src={product.images[0]}
-                    alt={product.name}
+                    alt={getDisplayName(product)}
                     fill
                     className="prd-img"
                   />
                 </div>
               </td>
-              <td className="prd-td">{product.name}</td>
+              <td className="prd-td">{getDisplayName(product)}</td>
               <td className="prd-td">{product.price} ₾ </td>
               <td className="prd-td">{product.category}</td>
               <td className="prd-td">{product.countInStock}</td>

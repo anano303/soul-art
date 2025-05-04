@@ -7,7 +7,11 @@ import {
   IsObject,
   ValidateNested,
 } from 'class-validator';
-import { ProductStatus, DeliveryType, MainCategory } from '../schemas/product.schema';
+import {
+  ProductStatus,
+  DeliveryType,
+  MainCategory,
+} from '../schemas/product.schema';
 import { Type } from 'class-transformer';
 
 class CategoryStructureDto {
@@ -22,11 +26,19 @@ export class ProductDto {
   @IsString()
   name!: string;
 
+  @IsString()
+  @IsOptional()
+  nameEn?: string;
+
   @IsNumber()
   price!: number;
 
   @IsString()
   description!: string;
+
+  @IsString()
+  @IsOptional()
+  descriptionEn?: string;
 
   @IsArray()
   @IsString({ each: true })

@@ -6,7 +6,9 @@ const fileSchema = z.custom<File>((file) => {
 
 export const productSchema = z.object({
   name: z.string().min(1, "პროდუქტის სახელი სავალდებულოა"),
+  nameEn: z.string().optional(),
   description: z.string().min(5, "აღწერა უნდა იყოს მინიმუმ 5 სიმბოლო"),
+  descriptionEn: z.string().optional(),
   brand: z.string().min(1, "ბრენდის სახელი სავალდებულოა"),
   category: z.string().min(1, "კატეგორია სავალდებულოა"),
   subcategory: z
