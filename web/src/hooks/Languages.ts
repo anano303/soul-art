@@ -66,6 +66,7 @@ export const TRANSLATIONS: Translations = {
       tryInRoom: "მოარგე ოთახს",
       quantity: "რაოდენობა",
       details: "აღწერა",
+      author: "ავტორი",
     },
 
     // Room Viewer
@@ -507,6 +508,7 @@ export const TRANSLATIONS: Translations = {
       tryInRoom: "Try in Room",
       quantity: "Quantity",
       details: "Description",
+      author: "Author",
     },
 
     // Room Viewer

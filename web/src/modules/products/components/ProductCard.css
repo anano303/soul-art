@@ -252,6 +252,10 @@
 /* .addButtonCart:hover {
   background: linear-gradient(to right, ##012645, #EC9843);
 } */
+.author {
+  color: rgb(21, 55, 84, 0.7);
+  font-style: oblique;
+}
 
 .addButtonCart:disabled {
   background-color: #ccc;

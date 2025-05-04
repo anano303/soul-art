@@ -65,6 +65,7 @@ export function ProductCard({
               color: theme === "handmade-theme" ? "#7d5a35" : "#153754",
             }}
           >
+            <span className="author">{language === "en" ? "Author: " : "ავტორი: "}</span>
             {product.brand}
           </p>
 
