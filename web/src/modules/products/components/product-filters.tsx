@@ -66,6 +66,12 @@ export function ProductFilters({
     return t(`productCategories.${category}`);
   };
 
+  // Main category translation mapping
+  const mainCategoryLabels = {
+    [MainCategory.PAINTINGS]: t("categories.paintings"),
+    [MainCategory.HANDMADE]: t("categories.handmade"),
+  };
+
   const categories = ["all", ...categoriesByType[selectedMainCategory]];
 
   useEffect(() => {
@@ -180,7 +186,7 @@ export function ProductFilters({
             }`}
             onClick={() => handleMainCategoryChange(MainCategory.PAINTINGS)}
           >
-            {MainCategory.PAINTINGS}
+            {mainCategoryLabels[MainCategory.PAINTINGS]}
           </button>
           <button
             className={`main-category-btn handmade ${
@@ -188,7 +194,7 @@ export function ProductFilters({
             }`}
             onClick={() => handleMainCategoryChange(MainCategory.HANDMADE)}
           >
-            {MainCategory.HANDMADE}
+            {mainCategoryLabels[MainCategory.HANDMADE]}
           </button>
         </div>
       </div>

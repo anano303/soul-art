@@ -363,7 +363,7 @@ export const TRANSLATIONS: Translations = {
     categories: {
       // Main categories
       paintings: "ნახატები",
-      handmade: "ხელნაკეთი",
+      handmade: "ხელნაკეთი ნივთები",
 
       // Painting subcategories
       oil: "ზეთი",
