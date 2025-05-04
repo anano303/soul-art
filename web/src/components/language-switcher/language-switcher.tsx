@@ -33,7 +33,7 @@ export function LanguageSwitcher() {
   return (
     <div className="language-switcher" ref={switcherRef}>
       <button className="language-button" onClick={toggleDropdown}>
-        {language === "ge" ? "ქარ" : "ENG"}
+        {language === "en" ? "ENG" : "ქარ"}
       </button>
 
       {isOpen && (
