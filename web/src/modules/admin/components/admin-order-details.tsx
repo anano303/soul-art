@@ -3,10 +3,11 @@
 import { CheckCircle2, XCircle, Store, Truck } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { Order } from "@/types/order";
+import { Order, OrderItem } from "@/types/order";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 import { apiClient } from "@/lib/api-client";
+import { useLanguage } from "@/hooks/LanguageContext";
 import "./AdminOrderDetails.css";
 
 interface AdminOrderDetailsProps {
@@ -16,6 +17,12 @@ interface AdminOrderDetailsProps {
 export function AdminOrderDetails({ order }: AdminOrderDetailsProps) {
   const { toast } = useToast();
   const router = useRouter();
+  const { language } = useLanguage();
+
+  // Helper function to get display name based on language
+  const getDisplayName = (item: OrderItem) => {
+    return language === "en" && item.nameEn ? item.nameEn : item.name;
+  };
 
   // Group order items by delivery type with fixed logic for string comparison
   const sellerDeliveryItems = order.orderItems.filter(
@@ -112,7 +119,7 @@ export function AdminOrderDetails({ order }: AdminOrderDetailsProps) {
                   <div key={item.productId} className="order-item">
                     <Image
                       src={item.image}
-                      alt={item.name}
+                      alt={getDisplayName(item)}
                       width={80}
                       height={80}
                       className="item-image"
@@ -122,7 +129,7 @@ export function AdminOrderDetails({ order }: AdminOrderDetailsProps) {
                         href={`/products/${item.productId}`}
                         className="item-name"
                       >
-                        {item.name}
+                        {getDisplayName(item)}
                       </Link>
                       <p>
                         {item.qty} x ${item.price.toFixed(2)} = $
@@ -151,7 +158,7 @@ export function AdminOrderDetails({ order }: AdminOrderDetailsProps) {
                   <div key={item.productId} className="order-item">
                     <Image
                       src={item.image}
-                      alt={item.name}
+                      alt={getDisplayName(item)}
                       width={80}
                       height={80}
                       className="item-image"
@@ -161,7 +168,7 @@ export function AdminOrderDetails({ order }: AdminOrderDetailsProps) {
                         href={`/products/${item.productId}`}
                         className="item-name"
                       >
-                        {item.name}
+                        {getDisplayName(item)}
                       </Link>
                       <p>
                         {item.qty} x ${item.price.toFixed(2)} = $
@@ -180,7 +187,7 @@ export function AdminOrderDetails({ order }: AdminOrderDetailsProps) {
                 <div key={item.productId} className="order-item">
                   <Image
                     src={item.image}
-                    alt={item.name}
+                    alt={getDisplayName(item)}
                     width={80}
                     height={80}
                     className="item-image"
@@ -190,7 +197,7 @@ export function AdminOrderDetails({ order }: AdminOrderDetailsProps) {
                       href={`/products/${item.productId}`}
                       className="item-name"
                     >
-                      {item.name}
+                      {getDisplayName(item)}
                     </Link>
                     <p>
                       {item.qty} x ${item.price.toFixed(2)} = $

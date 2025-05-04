@@ -12,14 +12,18 @@ interface CartItemProps {
 
 export function CartItem({ item }: CartItemProps) {
   const { updateQuantity, removeItem } = useCart();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+
+  // Display name based on selected language
+  const displayName =
+    language === "en" && item.nameEn ? item.nameEn : item.name;
 
   return (
     <div className="cart-item">
       <div className="cart-item-image">
         <Image
           src={item.image}
-          alt={item.name}
+          alt={displayName}
           fill
           className="object-cover rounded-md"
         />
@@ -27,7 +31,7 @@ export function CartItem({ item }: CartItemProps) {
       <div className="cart-item-details">
         <div className="cart-item-info">
           <Link href={`/products/${item.productId}`} className="cart-item-name">
-            {item.name}
+            {displayName}
           </Link>
           <p className="cart-item-price">{formatPrice(item.price)}</p>
         </div>

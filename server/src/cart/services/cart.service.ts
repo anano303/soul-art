@@ -41,6 +41,45 @@ export class CartService {
     return cart;
   }
 
+  async addItemToCart(
+    userId: string,
+    productId: string,
+    qty: number,
+  ): Promise<CartDocument> {
+    const product = await this.productsService.findById(productId);
+    if (!product) throw new NotFoundException('Product not found');
+
+    let cart = await this.cartModel.findOne({ user: userId });
+
+    if (!cart) {
+      cart = await this.cartModel.create({
+        user: userId,
+        items: [],
+      });
+    }
+
+    const existingItem = cart.items.find(
+      (item) => item.productId.toString() === productId,
+    );
+
+    if (existingItem) {
+      existingItem.qty = qty;
+    } else {
+      cart.items.push({
+        productId,
+        name: product.name,
+        nameEn: product.nameEn, // Include nameEn
+        image: product.images[0],
+        price: product.price,
+        countInStock: product.countInStock,
+        qty,
+      });
+    }
+
+    this.calculatePrices(cart);
+    return await cart.save();
+  }
+
   async addCartItem(
     productId: string,
     qty: number,
@@ -60,6 +99,7 @@ export class CartService {
       const cartItem: CartItem = {
         productId: product._id.toString(),
         name: product.name,
+        nameEn: product.nameEn, // Add nameEn field
         image: product.images[0],
         price: product.price,
         countInStock: product.countInStock,

@@ -1,4 +1,8 @@
-import { Product, ProductDocument, DeliveryType } from 'src/products/schemas/product.schema';
+import {
+  Product,
+  ProductDocument,
+  DeliveryType,
+} from 'src/products/schemas/product.schema';
 
 export interface ShippingDetails {
   address: string;
@@ -14,7 +18,7 @@ export interface OrderItem {
   price: number;
   productId: string;
   product?: {
-    deliveryType?: string;  // Use string type to avoid enum conversion issues
+    deliveryType?: string; // Use string type to avoid enum conversion issues
     minDeliveryDays?: number;
     maxDeliveryDays?: number;
     dimensions?: {
@@ -36,6 +40,7 @@ export interface PaymentResult {
 export interface CartItem {
   productId: string;
   name: string;
+  nameEn?: string;
   image: string;
   price: number;
   countInStock: number;

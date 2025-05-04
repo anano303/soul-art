@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import { apiClient } from "@/lib/api-client";
 import { TAX_RATE } from "@/config/constants";
+import { useLanguage } from "@/hooks/LanguageContext";
 import Image from "next/image";
 import Link from "next/link";
 import "./order-review.css";
@@ -15,6 +16,7 @@ export function OrderReview() {
   const { items, clearCart } = useCart();
   const router = useRouter();
   const { toast } = useToast();
+  const { language } = useLanguage();
 
   const itemsPrice = items.reduce(
     (acc, item) => acc + item.price * item.qty,
@@ -28,6 +30,7 @@ export function OrderReview() {
     try {
       const orderItems = items.map((item) => ({
         name: item.name,
+        nameEn: item.nameEn,
         qty: item.qty,
         image: item.image,
         price: item.price,
@@ -82,32 +85,38 @@ export function OrderReview() {
         <div className="card p-6">
           <h2 className="section-title">Order Items</h2>
           <div className="order-items space-y-4">
-            {items.map((item) => (
-              <div
-                key={item.productId}
-                className="order-item flex items-center space-x-4"
-              >
-                <div className="image-container relative h-20 w-20">
-                  <Image
-                    src={item.image}
-                    alt={item.name}
-                    fill
-                    className="object-cover rounded-md"
-                  />
+            {items.map((item) => {
+              // Display name based on selected language
+              const displayName =
+                language === "en" && item.nameEn ? item.nameEn : item.name;
+
+              return (
+                <div
+                  key={item.productId}
+                  className="order-item flex items-center space-x-4"
+                >
+                  <div className="image-container relative h-20 w-20">
+                    <Image
+                      src={item.image}
+                      alt={displayName}
+                      fill
+                      className="object-cover rounded-md"
+                    />
+                  </div>
+                  <div className="order-item-details flex-1">
+                    <Link
+                      href={`/products/${item.productId}`}
+                      className="item-name font-medium hover:underline"
+                    >
+                      {displayName}
+                    </Link>
+                    <p className="item-price text-sm text-muted-foreground">
+                      {item.qty} x {item.price} ₾ = {item.qty * item.price} ₾
+                    </p>
+                  </div>
                 </div>
-                <div className="order-item-details flex-1">
-                  <Link
-                    href={`/products/{item.productId}`}
-                    className="item-name font-medium hover:underline"
-                  >
-                    {item.name}
-                  </Link>
-                  <p className="item-price text-sm text-muted-foreground">
-                    {item.qty} x {item.price} ₾ = {item.qty * item.price} ₾
-                  </p>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </div>
