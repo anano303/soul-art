@@ -7,6 +7,7 @@ import { useState, useEffect } from "react";
 import { productSchema } from "@/modules/products/validation/product";
 import { ZodError } from "zod";
 import { ProductFormData as BaseProductFormData } from "@/modules/products/validation/product";
+import { useLanguage } from "@/hooks/LanguageContext";
 
 // Extended ProductFormData to include categoryStructure
 interface ProductFormData extends BaseProductFormData {
@@ -62,7 +63,7 @@ export function CreateProductForm({
   onSuccess,
   isEdit = !!initialData?._id,
 }: CreateProductFormProps) {
-  console.log("Initial Data in Form:", initialData);
+  const { t } = useLanguage();
   const router = useRouter();
   const { user } = useUser();
   const isSeller = user?.role?.toLowerCase() === "seller";
@@ -548,6 +549,17 @@ export function CreateProductForm({
     }
   };
 
+  // Helper function to translate category names for display
+  const translateCategory = (category: string) => {
+    return t(`productCategories.${category}`);
+  };
+
+  // Add main category translations
+  const mainCategoryLabels = {
+    [MainCategory.PAINTINGS]: t("categories.paintings"),
+    [MainCategory.HANDMADE]: t("categories.handmade"),
+  };
+
   return (
     <div className="create-product-form">
       {success && (
@@ -613,8 +625,11 @@ export function CreateProductForm({
             onChange={handleMainCategoryChange}
             className="create-product-select"
           >
-            <option value={MainCategory.PAINTINGS}>ნახატები</option>
-            <option value={MainCategory.HANDMADE}>ხელნაკეთი ნივთები</option>
+            {Object.entries(mainCategoryLabels).map(([value, label]) => (
+              <option key={value} value={value}>
+                {label}
+              </option>
+            ))}
           </select>
         </div>
 
@@ -629,7 +644,7 @@ export function CreateProductForm({
             {categoryStructure[selectedMainCategory] &&
               categoryStructure[selectedMainCategory].map((category) => (
                 <option key={category} value={category}>
-                  {category}
+                  {translateCategory(category)}
                 </option>
               ))}
           </select>

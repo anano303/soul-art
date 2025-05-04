@@ -37,6 +37,8 @@ export function ProductFilters({
   const [selectedMainCategory, setSelectedMainCategory] =
     useState(initialMainCategory);
 
+  // These category arrays stay in Georgian for backend compatibility
+  // but will be displayed in the current language
   const categoriesByType = {
     [MainCategory.PAINTINGS]: [
       "პეიზაჟი",
@@ -56,6 +58,12 @@ export function ProductFilters({
       "სკულპტურები",
       "სხვა",
     ],
+  };
+
+  // Helper function to translate category names
+  const translateCategory = (category: string) => {
+    if (category === "all") return t("shop.allArtworks");
+    return t(`productCategories.${category}`);
   };
 
   const categories = ["all", ...categoriesByType[selectedMainCategory]];
@@ -196,7 +204,7 @@ export function ProductFilters({
               }`}
               onClick={() => handleCategoryChange(category)}
             >
-              {category === "all" ? t("shop.allArtworks") : category}
+              {translateCategory(category)}
             </button>
           ))}
         </div>
@@ -206,7 +214,7 @@ export function ProductFilters({
               className="clear-filter"
               onClick={() => handleCategoryChange("all")}
             >
-              × {selectedCategory}
+              × {translateCategory(selectedCategory)}
             </button>
           </div>
         )}

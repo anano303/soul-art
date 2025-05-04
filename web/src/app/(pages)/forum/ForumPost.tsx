@@ -431,7 +431,21 @@ const ForumPost = ({
     likeCommentMutation.mutate(commentId);
   };
 
-  const validTags = ["ხელნაკეთი ნივთები", "ნახატები"];
+  const validTags = ["ხელნაკეთი ნივთები", "ნახატები", "სხვა"];
+
+  // Helper function to translate backend tags to current language
+  const translateTag = (backendTag: string) => {
+    // Map from backend tag values to translation keys
+    const tagToKeyMap: Record<string, string> = {
+      "ხელნაკეთი ნივთები": "forum.tags.handmade",
+      ნახატები: "forum.tags.paintings",
+      სხვა: "forum.tags.other",
+    };
+
+    // If we have a mapping for this tag, translate it; otherwise show as is
+    const translationKey = tagToKeyMap[backendTag];
+    return translationKey ? t(translationKey) : backendTag;
+  };
 
   const editPostMutation = useMutation({
     mutationFn: async ({
@@ -908,7 +922,7 @@ const ForumPost = ({
           <div className="forum-post-categories">
             {category.map((cat, index) => (
               <span key={index} className="forum-post-category">
-                {cat}
+                {translateTag(cat)}
               </span>
             ))}
           </div>

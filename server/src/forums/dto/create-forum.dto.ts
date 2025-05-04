@@ -16,7 +16,7 @@ export class CreateForumDto {
   content: string;
 
   @ApiProperty({
-    example: ['ხელნაკეთი ნივთები', 'ნახატები'],
+    example: ['ხელნაკეთი ნივთები', 'ნახატები', 'სხვა'],
   })
   @IsArray()
   @ArrayNotEmpty()
