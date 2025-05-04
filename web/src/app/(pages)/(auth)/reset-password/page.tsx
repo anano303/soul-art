@@ -1,17 +1,14 @@
 import { Suspense } from "react";
 import { ResetPasswordForm } from "@/modules/auth/components/reset-password";
 import { AuthLayout } from "@/modules/auth/layouts/auth-layout";
-import { useLanguage } from "@/hooks/LanguageContext";
 
-export default function LoginPage() {
-  const { t } = useLanguage();
-
+export default function ResetPasswordPage() {
   return (
     <AuthLayout
-      title={t("auth.forgotPasswordTitle")}
-      subtitle={t("auth.forgotPasswordSubtitle")}
+      title="Reset Your Password"
+      subtitle="Please fill in the password recovery form"
     >
-      <Suspense fallback={<div>{t("profile.loading")}</div>}>
+      <Suspense fallback={<div>Loading...</div>}>
         <ResetPasswordForm />
       </Suspense>
     </AuthLayout>

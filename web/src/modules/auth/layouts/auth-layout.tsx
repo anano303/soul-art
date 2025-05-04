@@ -1,5 +1,6 @@
-import "./auth-layout.css";
+"use client";
 
+import "./auth-layout.css";
 
 interface AuthLayoutProps {
   children: React.ReactNode;
@@ -10,10 +11,8 @@ interface AuthLayoutProps {
 export function AuthLayout({ children, title, subtitle }: AuthLayoutProps) {
   return (
     <div className="auth-layout">
-  {/* ფონის გრადიენტი */}
-  <div className="auth-bg"></div>
- 
-
+      {/* ფონის გრადიენტი */}
+      <div className="auth-bg"></div>
 
       <div className="auth-layout-inner">
         <div className="auth-layout-header">
