@@ -7,7 +7,10 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { PaymentResult } from 'src/interfaces';
 import { Order, OrderDocument } from '../schemas/order.schema';
-import { Product, ProductDocument } from '../../products/schemas/product.schema';
+import {
+  Product,
+  ProductDocument,
+} from '../../products/schemas/product.schema';
 
 @Injectable()
 export class OrdersService {
@@ -39,22 +42,28 @@ export class OrdersService {
         orderItems.map(async (item) => {
           const product = await this.productModel.findById(item.productId);
           if (!product) {
-            throw new NotFoundException(`Product with ID ${item.productId} not found`);
+            throw new NotFoundException(
+              `Product with ID ${item.productId} not found`,
+            );
           }
-          
+
           return {
             ...item,
             product: {
               _id: product._id,
+              name: product.name,
+              nameEn: product.nameEn, // Include nameEn
               deliveryType: product.deliveryType,
               minDeliveryDays: product.minDeliveryDays,
               maxDeliveryDays: product.maxDeliveryDays,
-              dimensions: product.dimensions ? {
-                width: product.dimensions.width,
-                height: product.dimensions.height,
-                depth: product.dimensions.depth,
-              } : undefined,
-            }
+              dimensions: product.dimensions
+                ? {
+                    width: product.dimensions.width,
+                    height: product.dimensions.height,
+                    depth: product.dimensions.depth,
+                  }
+                : undefined,
+            },
           };
         }),
       );

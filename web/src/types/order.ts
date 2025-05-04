@@ -4,6 +4,7 @@ import { Product, User } from ".";
 export interface OrderItem {
   _id: string;
   name: string;
+  nameEn?: string;
   qty: number;
   image: string;
   price: number;

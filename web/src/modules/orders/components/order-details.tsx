@@ -4,7 +4,7 @@ import { CheckCircle2, XCircle, Truck, Store } from "lucide-react";
 import { useLanguage } from "@/hooks/LanguageContext";
 import Image from "next/image";
 import Link from "next/link";
-import { Order } from "@/types/order";
+import { Order, OrderItem } from "@/types/order";
 import { PayPalButton } from "./paypal-button";
 import { StripeButton } from "./stripe-button";
 import "./order-details.css";
@@ -17,7 +17,7 @@ interface OrderDetailsProps {
 }
 
 export function OrderDetails({ order }: OrderDetailsProps) {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
 
   // Group order items by delivery type - fixed to check string equality
   const sellerDeliveryItems = order.orderItems.filter(
@@ -28,11 +28,13 @@ export function OrderDetails({ order }: OrderDetailsProps) {
     (item) => !item.product || String(item.product.deliveryType) !== "SELLER"
   );
 
-  console.log("Seller items:", sellerDeliveryItems);
-  console.log("SoulArt items:", soulartDeliveryItems);
-
   // ლარის დოლარში გადაყვანა გადახდისთვის
   const totalPriceInUSD = +(order.totalPrice / GEL_TO_USD_RATE).toFixed(2);
+
+  // Helper function to get display name based on language
+  const getDisplayName = (item: OrderItem) => {
+    return language === "en" && item.nameEn ? item.nameEn : item.name;
+  };
 
   return (
     <div className="order-container">
@@ -110,7 +112,7 @@ export function OrderDetails({ order }: OrderDetailsProps) {
                     <div className="order-item-image">
                       <Image
                         src={item.image}
-                        alt={item.name}
+                        alt={getDisplayName(item)}
                         fill
                         className="object-cover rounded-md"
                       />
@@ -120,7 +122,7 @@ export function OrderDetails({ order }: OrderDetailsProps) {
                         href={`/products/${item.productId}`}
                         className="order-item-link"
                       >
-                        {item.name}
+                        {getDisplayName(item)}
                       </Link>
                       <p>
                         {item.qty} x {item.price.toFixed(2)} ₾ ={" "}
@@ -150,7 +152,7 @@ export function OrderDetails({ order }: OrderDetailsProps) {
                     <div className="order-item-image">
                       <Image
                         src={item.image}
-                        alt={item.name}
+                        alt={getDisplayName(item)}
                         fill
                         className="object-cover rounded-md"
                       />
@@ -160,7 +162,7 @@ export function OrderDetails({ order }: OrderDetailsProps) {
                         href={`/products/${item.productId}`}
                         className="order-item-link"
                       >
-                        {item.name}
+                        {getDisplayName(item)}
                       </Link>
                       <p>
                         {item.qty} x {item.price.toFixed(2)} ₾={" "}

@@ -15,6 +15,7 @@ export class Order {
     type: [
       {
         name: { required: true, type: String },
+        nameEn: { required: false, type: String },
         qty: { required: true, type: Number },
         image: { required: true, type: String },
         price: { required: true, type: Number },

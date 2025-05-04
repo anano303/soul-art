@@ -11,7 +11,7 @@ import "./cart-page.css";
 export function CartPage() {
   const { items, loading } = useCart();
   const router = useRouter();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage(); // Added language here
 
   if (loading) {
     return <div>{t("shop.loading")}</div>;
@@ -37,9 +37,16 @@ export function CartPage() {
 
       <div className="cart-content">
         <div className="cart-items">
-          {items.map((item) => (
-            <CartItem key={item.productId} item={item} />
-          ))}
+          {items.map((item) => {
+            // Prepare the item with proper display name based on language
+            const itemWithDisplayName = {
+              ...item,
+              displayName:
+                language === "en" && item.nameEn ? item.nameEn : item.name,
+            };
+
+            return <CartItem key={item.productId} item={itemWithDisplayName} />;
+          })}
         </div>
 
         <div className="order-summary">

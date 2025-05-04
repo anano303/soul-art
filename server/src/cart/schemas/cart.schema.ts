@@ -18,6 +18,7 @@ export class Cart {
         required: true,
       },
       name: { type: String, required: true },
+      nameEn: { type: String, required: false },
       image: { type: String, required: true },
       price: { type: Number, required: true },
       countInStock: { type: Number, required: true },
