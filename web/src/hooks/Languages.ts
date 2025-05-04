@@ -244,7 +244,7 @@ export const TRANSLATIONS: Translations = {
     // Timer translations
     timer: {
       loading: "იტვირთება...",
-      message: "შეზღუდული დროის შეთავაზება",
+      message: "საიტის დასრულებამდე დარჩა",
       day: "დღე",
       days: "დღე",
       hour: "საათი",
@@ -683,7 +683,7 @@ export const TRANSLATIONS: Translations = {
     // Timer translations
     timer: {
       loading: "Loading...",
-      message: "Limited time offer",
+      message: "Time left until website ends",
       day: "Day",
       days: "Days",
       hour: "Hour",
