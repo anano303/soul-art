@@ -91,30 +91,35 @@ export default function HomePageShop() {
 
   const renderAnimatedIcons = () => {
     return (
-      <div className="shop-animated-icons">
-        <div className="icon brush-icon">
-          <Paintbrush />
+      <div className="shop-animated-icons-container">
+        <div className="shop-animated-icons default">
+          <div className="icon brush-icon">
+            <Paintbrush />
+          </div>
+          <div className="icon palette-icon">
+            <Palette />
+          </div>
+          <div className="icon canvas-icon">
+            <Square />
+          </div>
+          <div className="icon frame-icon">
+            <Printer />
+          </div>
         </div>
-        <div className="icon palette-icon">
-          <Palette />
-        </div>
-        <div className="icon canvas-icon">
-          <Square />
-        </div>
-        <div className="icon frame-icon">
-          <Printer />
-        </div>
-        <div className="icon pottery-icon">
-          <CakeSlice />
-        </div>
-        <div className="icon wood-icon">
-          <Hammer />
-        </div>
-        <div className="icon jewelry-icon">
-          <Gem />
-        </div>
-        <div className="icon textile-icon">
-          <Scissors />
+
+        <div className="shop-animated-icons handmade-theme">
+          <div className="icon pottery-icon">
+            <CakeSlice />
+          </div>
+          <div className="icon wood-icon">
+            <Hammer />
+          </div>
+          <div className="icon jewelry-icon">
+            <Gem />
+          </div>
+          <div className="icon textile-icon">
+            <Scissors />
+          </div>
         </div>
       </div>
     );
