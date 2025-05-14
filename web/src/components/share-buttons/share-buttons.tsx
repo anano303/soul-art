@@ -58,7 +58,6 @@ export function ShareButtons({ url, title }: ShareButtonsProps) {
         url: url,
         quote: title,
         hashtag: "#SoulArt",
-        appId: process.env.NEXT_PUBLIC_FACEBOOK_APP_ID || "",
       },
     },
     {
