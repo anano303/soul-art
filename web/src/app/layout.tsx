@@ -50,12 +50,13 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        {/* Facebook SDK */}
+        {/* Facebook SDK - Use data-appid instead of appId for HTML attribute compatibility */}
         <script
           async
           defer
           crossOrigin="anonymous"
           src={`https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v13.0&appId=${process.env.NEXT_PUBLIC_FACEBOOK_APP_ID}&autoLogAppEvents=1`}
+          data-appid={process.env.NEXT_PUBLIC_FACEBOOK_APP_ID}
         />
         {/* Remove the problematic prefetch links */}
       </head>
