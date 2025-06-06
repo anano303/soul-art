@@ -6,9 +6,17 @@ header {
   align-items: center;
   padding: 10px 20px;
   background-color: #012645;
+  position: relative;
+
+  /* Add .flex class */
+  .flex {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
 
   .logo {
-    margin-right: 5%;
+    // margin-right: 5%;
     align-self: center;
     a {
       text-decoration: none;
@@ -27,9 +35,7 @@ header {
       justify-content: flex-start;
       list-style: none;
       gap: min(10%);
-      .mobileAuth {
-        display: none;
-      }
+
       a {
         text-decoration: none;
         color: #ffffff;
@@ -50,9 +56,6 @@ header {
       white-space: nowrap;
       text-decoration: none;
       color: #ffffff;
-    }
-    .d-none {
-      margin-right: 20px;
     }
   }
 
@@ -107,30 +110,57 @@ header {
   }
 
   /* Mobile responsiveness */
-  @media (max-width: 811px) {
+  @media (max-width: 900px) {
+    .header {
+      position: relative;
+    }
+    .desktop-only {
+      display: none;
+    }
+
     .main-nav ul {
       display: flex;
       flex-direction: column;
       background-color: #012645 + cc;
       position: absolute;
-      // top: 60px;
+      top: 100%; /* Default position for mobile */
+      left: 0;
       right: 0;
-      border-radius: 5px;
+      border-radius: 0 0 5px 5px;
       box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
       max-height: 0; /* Initially collapsed */
       overflow: hidden; /* Hide overflow */
       transition: max-height 0.7s ease-out;
       z-index: 999;
+      width: 100%;
+      padding: 0;
+      margin: 0;
+
       li {
         padding: 15px 35px;
+        width: 100%;
+        box-sizing: border-box;
+        text-align: left;
       }
-      .mobileAuth {
-        display: flex;
-      }
-    }
 
-    .auth-cart {
-      display: none;
+      /* Updated to allow language and cart to display side by side */
+      .mobile-language-cart-container {
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
+        gap: 20px;
+        padding: 15px 35px;
+      }
+
+      .mobile-language {
+        display: flex;
+        justify-content: flex-start;
+      }
+
+      .mobile-cart {
+        display: flex;
+        justify-content: flex-start;
+      }
     }
 
     /* Mobile menu icon (Hamburger) */
@@ -158,17 +188,6 @@ header {
       max-height: 500px;
     }
 
-    .auth-cart {
-      display: flex;
-      .d-none {
-        display: none;
-      }
-      a {
-        padding: 10px;
-        font-size: 1.875rem;
-      }
-    }
-
     .shop-dropdown .dropdown-menu {
       display: none;
     }
@@ -179,11 +198,18 @@ header {
   }
 }
 
-// Mobile support for language switcher
-@media (max-width: 768px) {
-  .auth-cart {
-    .language-switcher-container {
-      margin-right: 4px;
+// Mobile support for language switcher in burger menu
+@media (max-width: 900px) {
+  .mobile-language {
+    > div {
+      width: 100%;
+    }
+  }
+
+  .mobile-cart {
+    a {
+      display: flex;
+      align-items: center;
     }
   }
 }
