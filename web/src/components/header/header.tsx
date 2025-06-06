@@ -75,19 +75,25 @@ export default function Header() {
               {t("navigation.myOrders")}
             </a>
           </li>
-          <li className="mobileAuth">
+          {/* Mobile-only auth, language and cart */}
+          <li className="mobile-only-nav">
             <UserMenu />
           </li>
+          <div className="flex">
+            <li className="mobile-only-nav mobile-language">
+              <LanguageSwitcher />
+            </li>
+            <li className="mobile-only-nav mobile-cart">
+              <CartIcon />
+            </li>
+          </div>
         </ul>
       </nav>
-      <div className="auth-cart">
+      <div className="auth-cart desktop-only">
         <div className="language-switcher-container">
           <LanguageSwitcher />
         </div>
-        <div className="d-none">
-          <UserMenu />
-        </div>
-
+        <UserMenu />
         <CartIcon />
       </div>
 
