@@ -51,7 +51,7 @@ export function ShippingForm() {
         <p>Enter your shipping details</p>
       </div>
       <form onSubmit={handleSubmit(onSubmit)} className="shipping-form">
-        <div>
+        <div className="shipping-form-field">
           <label htmlFor="address">Street Address</label>
           <input
             id="address"
@@ -63,7 +63,7 @@ export function ShippingForm() {
           )}
         </div>
 
-        <div>
+        <div className="shipping-form-field">
           <label htmlFor="city">City</label>
           <input
             id="city"
@@ -73,7 +73,7 @@ export function ShippingForm() {
           {errors.city && <p className="error-text">{errors.city.message}</p>}
         </div>
 
-        <div>
+        <div className="shipping-form-field">
           <label htmlFor="postalCode">Postal Code</label>
           <input
             id="postalCode"
@@ -85,7 +85,7 @@ export function ShippingForm() {
           )}
         </div>
 
-        <div>
+        <div className="shipping-form-field">
           <label htmlFor="country">Country</label>
           <Controller
             name="country"

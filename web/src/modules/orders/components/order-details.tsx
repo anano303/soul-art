@@ -1,12 +1,16 @@
 "use client";
 
-import { CheckCircle2, XCircle, Truck, Store } from "lucide-react";
+import { CheckCircle2, XCircle, Store } from "lucide-react";
 import { useLanguage } from "@/hooks/LanguageContext";
+import { useQuery } from "@tanstack/react-query";
+import { fetchWithAuth } from "@/lib/fetch-with-auth";
+import { Color, AgeGroupItem } from "@/types";
 import Image from "next/image";
 import Link from "next/link";
 import { Order, OrderItem } from "@/types/order";
 import { PayPalButton } from "./paypal-button";
 import { StripeButton } from "./stripe-button";
+import { BOGButton } from "./bog-button";
 import "./order-details.css";
 
 // ლარი დოლარში გადამყვანი კურსი (1 ლარი = ~0.37 დოლარი)
@@ -19,12 +23,92 @@ interface OrderDetailsProps {
 export function OrderDetails({ order }: OrderDetailsProps) {
   const { t, language } = useLanguage();
 
+  // Check if stock reservation has expired
+  const isStockExpired = order.stockReservationExpires
+    ? new Date() > new Date(order.stockReservationExpires)
+    : false;
+
+  // Get order status display
+  const getOrderStatusDisplay = () => {
+    if (order.status === "cancelled") {
+      return { text: t("Cancelled"), className: "cancelled" };
+    }
+    if (order.isPaid) {
+      return { text: t("Paid"), className: "paid" };
+    }
+    return { text: t("Pending Payment"), className: "pending" };
+  };
+
+  const orderStatus = getOrderStatusDisplay();
+
+  // Fetch all colors for proper nameEn support
+  const { data: availableColors = [] } = useQuery<Color[]>({
+    queryKey: ["colors"],
+    queryFn: async () => {
+      try {
+        const response = await fetchWithAuth("/categories/attributes/colors");
+        if (!response.ok) {
+          return [];
+        }
+        return response.json();
+      } catch {
+        return [];
+      }
+    },
+    retry: 1,
+    refetchOnWindowFocus: false,
+  });
+
+  // Fetch all age groups for proper nameEn support
+  const { data: availableAgeGroups = [] } = useQuery<AgeGroupItem[]>({
+    queryKey: ["ageGroups"],
+    queryFn: async () => {
+      try {
+        const response = await fetchWithAuth(
+          "/categories/attributes/age-groups"
+        );
+        if (!response.ok) {
+          return [];
+        }
+        return response.json();
+      } catch {
+        return [];
+      }
+    },
+    retry: 1,
+    refetchOnWindowFocus: false,
+  });
+
+  // Get localized color name based on current language
+  const getLocalizedColorName = (colorName: string): string => {
+    if (language === "en") {
+      // Find the color in availableColors to get its English name
+      const colorObj = availableColors.find(
+        (color) => color.name === colorName
+      );
+      return colorObj?.nameEn || colorName;
+    }
+    return colorName;
+  };
+
+  // Get localized age group name based on current language
+  const getLocalizedAgeGroupName = (ageGroupName: string): string => {
+    if (language === "en") {
+      // Find the age group in availableAgeGroups to get its English name
+      const ageGroupObj = availableAgeGroups.find(
+        (ageGroup) => ageGroup.name === ageGroupName
+      );
+      return ageGroupObj?.nameEn || ageGroupName;
+    }
+    return ageGroupName;
+  };
+
   // Group order items by delivery type - fixed to check string equality
   const sellerDeliveryItems = order.orderItems.filter(
     (item) => item.product && String(item.product.deliveryType) === "SELLER"
   );
 
-  const soulartDeliveryItems = order.orderItems.filter(
+  const fishhuntDeliveryItems = order.orderItems.filter(
     (item) => !item.product || String(item.product.deliveryType) !== "SELLER"
   );
 
@@ -42,8 +126,8 @@ export function OrderDetails({ order }: OrderDetailsProps) {
         <h1 className="order-title">
           {t("Order")} #{order._id}
         </h1>
-        <span className={`order-badge ${order.isPaid ? "paid" : "pending"}`}>
-          {order.isPaid ? t("Paid") : t("Pending Payment")}
+        <span className={`order-badge ${orderStatus.className}`}>
+          {orderStatus.text}
         </span>
       </div>
 
@@ -108,7 +192,12 @@ export function OrderDetails({ order }: OrderDetailsProps) {
                   <h3>{t("Seller Delivery")}</h3>
                 </div>
                 {sellerDeliveryItems.map((item) => (
-                  <div key={item.productId} className="order-item">
+                  <div
+                    key={`${item.productId}-${item.color ?? "c"}-${
+                      item.size ?? "s"
+                    }-${item.ageGroup ?? "a"}`}
+                    className="order-item"
+                  >
                     <div className="order-item-image">
                       <Image
                         src={item.image}
@@ -116,14 +205,36 @@ export function OrderDetails({ order }: OrderDetailsProps) {
                         fill
                         className="object-cover rounded-md"
                       />
-                    </div>
+                    </div>{" "}
                     <div className="order-item-details">
                       <Link
                         href={`/products/${item.productId}`}
                         className="order-item-link"
                       >
                         {getDisplayName(item)}
-                      </Link>
+                      </Link>{" "}
+                      {/* Display variant information if available */}
+                      {(item.size || item.color || item.ageGroup) && (
+                        <div className="variant-info">
+                          {item.size && (
+                            <span className="variant-tag">
+                              {t("cart.size")}: {item.size}
+                            </span>
+                          )}
+                          {item.color && (
+                            <span className="variant-tag">
+                              {t("cart.color")}:{" "}
+                              {getLocalizedColorName(item.color)}
+                            </span>
+                          )}
+                          {item.ageGroup && (
+                            <span className="variant-tag">
+                              {t("cart.age")}:{" "}
+                              {getLocalizedAgeGroupName(item.ageGroup)}
+                            </span>
+                          )}
+                        </div>
+                      )}
                       <p>
                         {item.qty} x {item.price.toFixed(2)} ₾ ={" "}
                         {(item.qty * item.price).toFixed(2)} ₾
@@ -141,14 +252,19 @@ export function OrderDetails({ order }: OrderDetailsProps) {
               </div>
             )}
 
-            {soulartDeliveryItems.length > 0 && (
+            {fishhuntDeliveryItems.length > 0 && (
               <div className="delivery-group">
-                <div className="delivery-group-header">
+                {/* <div className="delivery-group-header">
                   <Truck className="icon" />
-                  <h3>{t("SoulArt Courier")}</h3>
-                </div>
-                {soulartDeliveryItems.map((item) => (
-                  <div key={item.productId} className="order-item">
+                  <h3>{t("fishhunt Courier")}</h3>
+                </div> */}
+                {fishhuntDeliveryItems.map((item) => (
+                  <div
+                    key={`${item.productId}-${item.color ?? "c"}-${
+                      item.size ?? "s"
+                    }-${item.ageGroup ?? "a"}`}
+                    className="order-item"
+                  >
                     <div className="order-item-image">
                       <Image
                         src={item.image}
@@ -156,14 +272,36 @@ export function OrderDetails({ order }: OrderDetailsProps) {
                         fill
                         className="object-cover rounded-md"
                       />
-                    </div>
+                    </div>{" "}
                     <div className="order-item-details">
                       <Link
                         href={`/products/${item.productId}`}
                         className="order-item-link"
                       >
                         {getDisplayName(item)}
-                      </Link>
+                      </Link>{" "}
+                      {/* Display variant information if available */}
+                      {(item.size || item.color || item.ageGroup) && (
+                        <div className="variant-info">
+                          {item.size && (
+                            <span className="variant-tag">
+                              {t("cart.size")}: {item.size}
+                            </span>
+                          )}
+                          {item.color && (
+                            <span className="variant-tag">
+                              {t("cart.color")}:{" "}
+                              {getLocalizedColorName(item.color)}
+                            </span>
+                          )}
+                          {item.ageGroup && (
+                            <span className="variant-tag">
+                              {t("cart.age")}:{" "}
+                              {getLocalizedAgeGroupName(item.ageGroup)}
+                            </span>
+                          )}
+                        </div>
+                      )}
                       <p>
                         {item.qty} x {item.price.toFixed(2)} ₾={" "}
                         {(item.qty * item.price).toFixed(2)} ₾
@@ -209,9 +347,52 @@ export function OrderDetails({ order }: OrderDetailsProps) {
                 <span>${totalPriceInUSD}</span>
               </div>
 
+              {/* Stock expiration warning */}
+              {!order.isPaid && isStockExpired && (
+                <div className="alert error" style={{ marginBottom: "1rem" }}>
+                  <XCircle className="icon" />
+                  <span>
+                    {t(
+                      "Stock reservation has expired. Please create a new order."
+                    )}
+                  </span>
+                </div>
+              )}
+
+              {/* Order cancelled message */}
+              {order.status === "cancelled" && (
+                <div className="alert error" style={{ marginBottom: "1rem" }}>
+                  <XCircle className="icon" />
+                  <span>
+                    {t("Order has been cancelled")}
+                    {order.statusReason && ` - ${order.statusReason}`}
+                  </span>
+                </div>
+              )}
+
+              {/* Stock expiration countdown */}
               {!order.isPaid &&
+                !isStockExpired &&
+                order.status !== "cancelled" &&
+                order.stockReservationExpires && (
+                  <div
+                    className="alert warning"
+                    style={{ marginBottom: "1rem" }}
+                  >
+                    <span>
+                      {t("Stock reserved until")}:{" "}
+                      {new Date(order.stockReservationExpires).toLocaleString()}
+                    </span>
+                  </div>
+                )}
+
+              {!order.isPaid &&
+                !isStockExpired &&
+                order.status !== "cancelled" &&
                 (order.paymentMethod === "PayPal" ? (
                   <PayPalButton orderId={order._id} amount={totalPriceInUSD} />
+                ) : order.paymentMethod === "BOG" ? (
+                  <BOGButton orderId={order._id} amount={order.totalPrice} />
                 ) : (
                   <StripeButton orderId={order._id} amount={totalPriceInUSD} />
                 ))}

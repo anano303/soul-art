@@ -1,7 +1,7 @@
 "use client";
 
 import { useCheckout } from "../context/checkout-context";
-import { useCart } from "@/modules/cart/context/cart-context";
+
 import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import { apiClient } from "@/lib/api-client";
@@ -10,6 +10,7 @@ import { useLanguage } from "@/hooks/LanguageContext";
 import Image from "next/image";
 import Link from "next/link";
 import "./order-review.css";
+import { useCart } from "@/modules/cart/context/cart-context";
 
 export function OrderReview() {
   const { shippingAddress: shippingDetails, paymentMethod } = useCheckout();
@@ -22,7 +23,7 @@ export function OrderReview() {
     (acc, item) => acc + item.price * item.qty,
     0
   );
-  const shippingPrice = itemsPrice > 100 ? 0 : 10;
+  const shippingPrice: number = itemsPrice > 100 ? 0 : 0;
   const taxPrice = Number((itemsPrice * TAX_RATE).toFixed(2));
   const totalPrice = itemsPrice + shippingPrice + taxPrice;
 
@@ -35,6 +36,9 @@ export function OrderReview() {
         image: item.image,
         price: item.price,
         productId: item.productId,
+        size: item.size,
+        color: item.color,
+        ageGroup: item.ageGroup,
       }));
 
       const response = await apiClient.post("/orders", {
@@ -92,7 +96,9 @@ export function OrderReview() {
 
               return (
                 <div
-                  key={item.productId}
+                  key={`${item.productId}-${item.color ?? "c"}-${
+                    item.size ?? "s"
+                  }-${item.ageGroup ?? "a"}`}
                   className="order-item flex items-center space-x-4"
                 >
                   <div className="image-container relative h-20 w-20">
