@@ -120,7 +120,9 @@ export const useCategory = (id: string) => {
       const response = await apiClient.get(`/categories/${id}`);
       return response.data;
     },
-    enabled: !!id,
+    enabled: !!id && id !== "undefined" && id !== "null",
+    retry: 1,
+    staleTime: 5 * 60 * 1000, // 5 minutes
   });
 };
 

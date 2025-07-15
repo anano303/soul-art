@@ -59,9 +59,7 @@ export default function Header() {
             </Link>
           </li>
           <li className="shop-dropdown">
-            <Link href="/shop?page=1&mainCategory=paintings">
-              {t("navigation.shop")}
-            </Link>
+            <Link href="/shop?page=1">{t("navigation.shop")}</Link>
             <div className="dropdown-menu">
               <Link href="/auction">{t("navigation.auction")}</Link>
             </div>

@@ -125,7 +125,6 @@ export default function RootLayout({
         className={`${satoshi.variable} antialiased min-h-screen flex flex-col overflow-x-hidden`}
         style={{ maxWidth: "100vw" }}
       >
-        {/* <LandingPage /> */}
         <Providers>
           <AuthProvider>
             <CartProvider>
@@ -139,7 +138,11 @@ export default function RootLayout({
             </CartProvider>
           </AuthProvider>
         </Providers>
-        <MessengerChatWrapper />
+
+        {/* Wrap in error boundary */}
+        <ErrorBoundary>
+          <MessengerChatWrapper />
+        </ErrorBoundary>
 
         {/* Google Analytics */}
         <GoogleAnalytics />
@@ -166,4 +169,9 @@ export default function RootLayout({
       </body>
     </html>
   );
+}
+
+// Simple error boundary component
+function ErrorBoundary({ children }: { children: React.ReactNode }) {
+  return <div>{children}</div>;
 }

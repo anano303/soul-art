@@ -1,7 +1,7 @@
 .shop-container {
   position: relative;
   min-height: 100vh;
-  background-color: #121212;
+
   color: #ffffff;
   overflow-x: hidden;
   max-width: 100vw;
@@ -12,7 +12,6 @@
 
 /* Default theme (dark) */
 .shop-container.default {
-  background-color: #121212;
   background-image: none;
   animation: none;
 }
@@ -143,7 +142,6 @@
 
 .filters-sidebar {
   flex: 0 0 300px;
-  background-color: #1a1a1a;
   padding: 20px;
   border-radius: 8px;
 }
@@ -556,7 +554,7 @@
 
   .filters-sidebar {
     flex: 0 0 auto;
-    width: 100%;
+    /* width: 100%; */
     margin-bottom: 20px;
   }
 
