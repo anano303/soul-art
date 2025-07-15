@@ -5,7 +5,7 @@ import "./MessengerChat.css";
 
 const MessengerChat = () => {
   const handleChatClick = () => {
-    window.open("https://m.me/SSBBmarket", "_blank");
+    window.open("https://m.me/61574985443236", "_blank");
   };
 
   return (
@@ -20,10 +20,12 @@ const MessengerChat = () => {
         width: "60px",
         height: "60px",
         borderRadius: "50%",
-        backgroundColor: "#5b6c18",
+        backgroundColor: "#012645",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
+        zIndex: 99999,
+        cursor: "pointer",
       }}
       onMouseEnter={(e) => {
         e.currentTarget.style.transform = "scale(1.1)";

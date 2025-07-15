@@ -25,6 +25,8 @@ export function SellerRegisterForm() {
   const [isSuccess, setIsSuccess] = useState(false);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [privacyAgreed, setPrivacyAgreed] = useState(false);
+  const [privacyError, setPrivacyError] = useState<string | null>(null);
 
   const {
     register: registerField,
@@ -49,6 +51,13 @@ export function SellerRegisterForm() {
 
   const onSubmit = handleSubmit((data) => {
     setRegistrationError(null);
+    setPrivacyError(null);
+
+    // Check if privacy policy is agreed
+    if (!privacyAgreed) {
+      setPrivacyError(t("auth.privacyPolicyRequired"));
+      return;
+    }
 
     // Create FormData to handle file uploads
     const formData = new FormData();
@@ -256,7 +265,30 @@ export function SellerRegisterForm() {
           </div>
         )}
 
-        <button type="submit" className="submit-btn" disabled={isPending}>
+        {/* Privacy Policy Agreement */}
+        <div className="privacy-policy-group">
+          <label className="privacy-policy-label">
+            <input
+              type="checkbox"
+              checked={privacyAgreed}
+              onChange={(e) => setPrivacyAgreed(e.target.checked)}
+              className="privacy-policy-checkbox"
+            />
+            <span className="privacy-policy-text">
+              {t("auth.agreeToPrivacyPolicy")}{" "}
+              <Link href="/privacy-policy" className="privacy-policy-link">
+                {t("privacyPolicy.title")}
+              </Link>
+            </span>
+          </label>
+          {privacyError && <p className="error-text">{privacyError}</p>}
+        </div>
+
+        <button
+          type="submit"
+          className={`submit-btn ${!privacyAgreed ? "disabled" : ""}`}
+          disabled={isPending || !privacyAgreed}
+        >
           {isPending ? t("auth.registering") : t("auth.register")}
         </button>
 

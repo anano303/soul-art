@@ -5,7 +5,7 @@
   z-index: 1000;
   cursor: pointer;
   border-radius: 50%;
-  background-color: #5b6c18;
+  background-color: #012645;
   width: 60px;
   height: 60px;
   display: flex;
@@ -18,7 +18,7 @@
 }
 
 .custom-messenger-button:hover {
-  background-color: #4a5813;
+  background-color: #052f52;
   transform: translateY(-2px) scale(1.05);
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
 }
@@ -110,7 +110,8 @@ iframe[data-testid="bubble_iframe"] {
     height: 50px !important;
     bottom: 20px !important;
     right: 20px !important;
-    z-index: 1000 !important;
+    z-index: 99999 !important;
+    background-color: #012645 !important;
   }
 
   .chatIcon svg {

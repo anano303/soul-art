@@ -375,6 +375,12 @@ export const TRANSLATIONS: Translations = {
       orContinueWith: "ან გააგრძელეთ",
       forgotPasswordTitle: "განაახლეთ პაროლი",
       forgotPasswordSubtitle: "გთხოვთ, შეავსოთ პაროლის აღდგენის ფორმა",
+      agreeToTerms: "ვეთანხმები",
+      privacyPolicy: "კონფიდენციალურობის პოლიტიკას",
+      pleaseAgreeToTerms: "გთხოვთ, დაეთანხმოთ კონფიდენციალურობის პოლიტიკას",
+      agreeToPrivacyPolicy: "ვეთანხმები",
+      privacyPolicyRequired:
+        "კონფიდენციალურობის პოლიტიკასთან დათანხმება აუცილებელია",
     },
 
     // Contact form
@@ -395,6 +401,11 @@ export const TRANSLATIONS: Translations = {
       emailPlaceholder: "შეიყვანეთ თქვენი ელ-ფოსტა",
       subjectPlaceholder: "შეიყვანეთ თემა",
       messagePlaceholder: "შეიყვანეთ თქვენი შეტყობინება",
+    },
+
+    // Privacy Policy
+    privacyPolicy: {
+      title: "კონფიდენციალურობის პოლიტიკა",
     },
 
     // Art Categories
@@ -851,6 +862,11 @@ export const TRANSLATIONS: Translations = {
       orContinueWith: "or continue with",
       forgotPasswordTitle: "Reset Your Password",
       forgotPasswordSubtitle: "Please fill in the password recovery form",
+      agreeToTerms: "I agree to the",
+      privacyPolicy: "Privacy Policy",
+      pleaseAgreeToTerms: "Please agree to the Privacy Policy",
+      agreeToPrivacyPolicy: "I agree to the",
+      privacyPolicyRequired: "Privacy Policy agreement is required",
     },
 
     // Contact form
@@ -871,6 +887,11 @@ export const TRANSLATIONS: Translations = {
       emailPlaceholder: "Enter your email",
       subjectPlaceholder: "Enter subject",
       messagePlaceholder: "Enter your message",
+    },
+
+    // Privacy Policy
+    privacyPolicy: {
+      title: "Privacy Policy",
     },
 
     // Art Categories

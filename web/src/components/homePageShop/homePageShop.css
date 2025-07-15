@@ -30,11 +30,36 @@
   float: right;
   transition: all 0.3s ease-in-out;
   cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  font-family: "Georgia", serif;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
 }
 .see-more-btn:hover {
   color: #2a5530;
   transition: all 0.3s ease-in-out;
   cursor: pointer;
+}
+
+.see-more-btn::after {
+  content: "👀";
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.8em;
+  opacity: 0;
+  transition: all 0.3s ease;
+}
+
+.see-more-btn:hover::after {
+  opacity: 1;
+  right: 12px;
+}
+
+.see-more-btn:active {
+  transform: translateY(0) scale(0.95);
 }
 
 .two-column-layout .product-columns {
@@ -171,15 +196,188 @@
 .product-section {
   width: 100%;
   margin-bottom: 2rem;
+  position: relative;
+  margin-bottom: 4rem;
+  padding: 2rem 0;
+  border-radius: 15px;
+  overflow: hidden;
 }
 
+.product-section::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    45deg,
+    rgba(255, 255, 255, 0.02) 0%,
+    rgba(248, 246, 240, 0.05) 50%,
+    rgba(255, 255, 255, 0.02) 100%
+  );
+  pointer-events: none;
+  z-index: -1;
+}
+
+.product-section:nth-child(odd)::before {
+  background: linear-gradient(
+    -45deg,
+    rgba(123, 86, 66, 0.03) 0%,
+    rgba(248, 246, 240, 0.05) 50%,
+    rgba(123, 86, 66, 0.03) 100%
+  );
+}
+
+.product-section:nth-child(even)::before {
+  background: linear-gradient(
+    45deg,
+    rgba(1, 38, 69, 0.03) 0%,
+    rgba(248, 246, 240, 0.05) 50%,
+    rgba(1, 38, 69, 0.03) 100%
+  );
+}
+
+.see-more-mobile {
+  display: none; /* Hide on desktop */
+}
 .section-title {
-  font-size: 1.8rem;
-  font-weight: 600;
-  margin-bottom: 1.5rem;
+  font-size: 2.8rem;
+  font-weight: 800;
+  margin-bottom: 2.5rem;
   text-align: left;
-  border-bottom: 2px solid #e5e5e5;
-  padding-bottom: 0.5rem;
+  position: relative;
+  color: #012645;
+  font-family: FiraGo;
+  text-shadow: 3px 3px 8px rgba(0, 0, 0, 0.2);
+  padding-bottom: 1.5rem;
+  overflow: hidden;
+  letter-spacing: 1px;
+  line-height: 1.2;
+}
+
+.section-title::before {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 120px;
+  height: 6px;
+  background: linear-gradient(90deg, #7b5642, #012645, #f48c06);
+  border-radius: 3px;
+  transition: all 0.8s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  animation: shimmerBase 4s ease-in-out infinite;
+}
+
+@keyframes shimmerBase {
+  0%,
+  100% {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  }
+  50% {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  }
+}
+
+.section-title:hover::before {
+  width: 250px;
+  height: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+
+.section-title::after {
+  content: "";
+  position: absolute;
+  bottom: 6px;
+  left: 0;
+  width: 60%;
+  height: 2px;
+  background: linear-gradient(90deg, #7b5642, #f48c06, transparent);
+  opacity: 0.4;
+  animation: afterGlow 3s ease-in-out infinite;
+}
+
+@keyframes afterGlow {
+  0%,
+  100% {
+    opacity: 0.4;
+    transform: scaleX(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scaleX(1.1);
+  }
+}
+
+/* კატეგორიების სპეციფიური ეფექტები */
+.section-title:first-child {
+  background: linear-gradient(135deg, #012645, #01456b);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.section-title:last-child {
+  background: linear-gradient(135deg, #7b5642, #654932);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ანიმაცია */
+.section-title {
+  transform: translateY(30px);
+  opacity: 0;
+  transition: all 0.8s ease;
+}
+
+.section-title.animate-visible {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+/* ეფექტი hover-ზე */
+.section-title:hover {
+  transform: translateX(10px);
+  transition: all 0.4s ease;
+}
+
+/* ღია ყავისფერი ლურჯი კატეგორიებისთვის */
+.section-title:first-of-type {
+  position: relative;
+}
+
+.section-title:first-of-type::before {
+  background: linear-gradient(90deg, #012645, #01456b, #003055);
+  background-size: 200% 100%;
+  animation: blueGradient 3s ease-in-out infinite;
+}
+
+@keyframes blueGradient {
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+.section-title:last-of-type::before {
+  background: linear-gradient(90deg, #7b5642, #654932, #5d3e2b);
+  background-size: 200% 100%;
+  animation: brownGradient 3s ease-in-out infinite;
+}
+
+@keyframes brownGradient {
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
 }
 
 .site-timer-container {
@@ -193,6 +391,15 @@
   z-index: 21;
 }
 
+/* "ნახე ყველა" ღილაკების რესპონსივი ჩვენება */
+.see-more-desktop {
+  display: none; /* დაიმალოს დესკტოპზე */
+}
+
+.see-more-mobile {
+  display: block; /* იჩნდეს მობილურზე */
+}
+
 .shop-container .see-more {
   display: flex;
   justify-content: center;
@@ -200,22 +407,344 @@
 }
 
 .shop-container .see-more-btn {
-  background-color: #a5bda5;
+  background: linear-gradient(135deg, #7b5642, #012645);
   color: white;
-  padding: 0.5rem 2rem;
+  padding: 12px 24px;
   border: none;
-  border-radius: 4px;
+  border-radius: 25px;
   cursor: pointer;
-  font-weight: 500;
-  transition: background-color 0.3s;
+  font-weight: 600;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(123, 86, 66, 0.3);
+  position: relative;
+  overflow: hidden;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  font-family: "Georgia", serif;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.shop-container .see-more-btn::after {
+  content: "👀";
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.8em;
+  opacity: 0;
+  transition: all 0.3s ease;
+}
+
+.shop-container .see-more-btn:hover::after {
+  opacity: 1;
+  right: 12px;
+}
+
+.shop-container .see-more-btn:active {
+  transform: translateY(0) scale(0.95);
 }
 
 .shop-container .see-more-btn:hover {
-  background-color: #92a992;
+  animation: buttonPulse 2s infinite;
+}
+
+/* pulse ეფექტი */
+@keyframes buttonPulse {
+  0% {
+    box-shadow: 0 4px 15px rgba(123, 86, 66, 0.3);
+  }
+  50% {
+    box-shadow: 0 6px 25px rgba(123, 86, 66, 0.5);
+  }
+  100% {
+    box-shadow: 0 4px 15px rgba(123, 86, 66, 0.3);
+  }
+}
+
+/* კატეგორიების ემოჯი ეფექტები */
+.category-emoji {
+  display: inline-block;
+  margin-left: 16px;
+  font-size: 1.8em;
+  animation: gentleBounce 3s infinite;
+  filter: drop-shadow(3px 3px 6px rgba(0, 0, 0, 0.3));
+  transition: all 0.3s ease;
+}
+
+@keyframes gentleBounce {
+  0%,
+  20%,
+  50%,
+  80%,
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  40% {
+    transform: translateY(-12px) rotate(-5deg);
+  }
+  60% {
+    transform: translateY(-6px) rotate(3deg);
+  }
+}
+
+/* ხელნაკეთი კატეგორიისთვის სპეციალური ეფექტები - ყავისფერი */
+.section-title.category-handmade {
+  position: relative;
+  color: #7b5642;
+  font-weight: 900;
+  text-shadow: 3px 3px 8px rgba(123, 86, 66, 0.4),
+    0 0 20px rgba(123, 86, 66, 0.2);
+}
+
+@keyframes handmadeTextGradient {
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  33% {
+    background-position: 50% 50%;
+  }
+  66% {
+    background-position: 100% 50%;
+  }
+}
+
+.section-title.category-handmade::before {
+  background: linear-gradient(90deg, #7b5642, #8b6f47, #654932, #a0754d);
+  background-size: 300% 100%;
+  animation: handmadeGradient 6s ease-in-out infinite;
+  box-shadow: 0 0 20px rgba(123, 86, 66, 0.4);
+}
+
+@keyframes handmadeGradient {
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  33% {
+    background-position: 50% 50%;
+  }
+  66% {
+    background-position: 100% 50%;
+  }
+}
+
+.section-title.category-handmade:hover .category-emoji {
+  animation: paintBrush 1s ease-in-out;
+  transform: scale(1.3);
+}
+
+@keyframes paintBrush {
+  0% {
+    transform: rotate(0deg) scale(1.3);
+  }
+  20% {
+    transform: rotate(-20deg) scale(1.4);
+  }
+  40% {
+    transform: rotate(15deg) scale(1.5);
+  }
+  60% {
+    transform: rotate(-10deg) scale(1.4);
+  }
+  80% {
+    transform: rotate(5deg) scale(1.3);
+  }
+  100% {
+    transform: rotate(0deg) scale(1.3);
+  }
+}
+
+/* ნახატების კატეგორიისთვის სპეციალური ეფექტები - ლურჯი */
+.section-title.category-paintings {
+  position: relative;
+  color: #012645;
+  font-weight: 900;
+  text-shadow: 3px 3px 8px rgba(1, 38, 69, 0.4), 0 0 20px rgba(1, 38, 69, 0.2);
+}
+
+@keyframes paintingsTextGradient {
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  33% {
+    background-position: 50% 50%;
+  }
+  66% {
+    background-position: 100% 50%;
+  }
+}
+
+.section-title.category-paintings::before {
+  background: linear-gradient(90deg, #012645, #01456b, #003055, #2a5a7a);
+  background-size: 300% 100%;
+  animation: paintingsGradient 6s ease-in-out infinite;
+  box-shadow: 0 0 20px rgba(1, 38, 69, 0.4);
+}
+
+@keyframes paintingsGradient {
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  33% {
+    background-position: 50% 50%;
+  }
+  66% {
+    background-position: 100% 50%;
+  }
+}
+
+.section-title.category-paintings:hover .category-emoji {
+  animation: frameGlow 1s ease-in-out;
+  transform: scale(1.3);
+}
+
+@keyframes frameGlow {
+  0%,
+  100% {
+    transform: scale(1.3);
+    filter: drop-shadow(0 0 10px rgba(1, 38, 69, 0.8));
+  }
+  50% {
+    transform: scale(1.4);
+    filter: drop-shadow(0 0 20px rgba(1, 38, 69, 1));
+  }
+}
+
+@keyframes frameShake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  10% {
+    transform: translateX(-2px);
+  }
+  20% {
+    transform: translateX(2px);
+  }
+  30% {
+    transform: translateX(-2px);
+  }
+  40% {
+    transform: translateX(2px);
+  }
+  50% {
+    transform: translateX(-1px);
+  }
+  60% {
+    transform: translateX(1px);
+  }
+  70% {
+    transform: translateX(-1px);
+  }
+  80% {
+    transform: translateX(1px);
+  }
+  90% {
+    transform: translateX(0);
+  }
+}
+
+/* ღია ფერებისთვის gradient ეფექტები - ამ სტილები შეიცვალა ზემოთ */
+
+/* ღია ეფექტები hover-ზე */
+.section-title.category-handmade:hover {
+  transform: translateX(15px) scale(1.05);
+  filter: drop-shadow(4px 4px 12px rgba(123, 86, 66, 0.5));
+  transition: all 0.5s ease;
+  text-shadow: 4px 4px 12px rgba(123, 86, 66, 0.6),
+    0 0 30px rgba(123, 86, 66, 0.4), 0 0 40px rgba(160, 117, 77, 0.3);
+}
+
+.section-title.category-paintings:hover {
+  transform: translateX(15px) scale(1.05);
+  filter: drop-shadow(4px 4px 12px rgba(1, 38, 69, 0.5));
+  transition: all 0.5s ease;
+  text-shadow: 4px 4px 12px rgba(1, 38, 69, 0.6), 0 0 30px rgba(1, 38, 69, 0.4),
+    0 0 40px rgba(42, 90, 122, 0.3);
+}
+.section-title {
+  font-family: FiraGo;
+}
+
+/* დამატებითი ეფექტები */
+.section-title.category-handmade::after {
+  background: linear-gradient(90deg, #7b5642, #a0754d, transparent);
+}
+
+.section-title.category-paintings::after {
+  background: linear-gradient(90deg, #012645, #2a5a7a, transparent);
+}
+
+/* არტისტული ეფექტები */
+.section-title.category-handmade:hover::after {
+  animation: artGlow 2s ease-in-out infinite;
+}
+
+.section-title.category-paintings:hover::after {
+  animation: paintingGlow 2s ease-in-out infinite;
+}
+
+@keyframes artGlow {
+  0%,
+  100% {
+    opacity: 0.4;
+    width: 60%;
+  }
+  50% {
+    opacity: 0.8;
+    width: 80%;
+  }
+}
+
+@keyframes paintingGlow {
+  0%,
+  100% {
+    opacity: 0.4;
+    width: 60%;
+  }
+  50% {
+    opacity: 0.8;
+    width: 80%;
+  }
 }
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
+  .section-title {
+    font-size: 2.2rem;
+    margin-bottom: 2rem;
+    letter-spacing: 0.5px;
+  }
+  .see-more-desktop {
+    display: none !important; /* Hide on mobile */
+  }
+  .see-more-mobile {
+    display: block; /* Show on mobile */
+  }
+
+  .category-emoji {
+    font-size: 1.5em;
+    margin-left: 12px;
+  }
+
+  .section-title::before {
+    width: 100px;
+    height: 5px;
+  }
+
+  .section-title:hover::before {
+    width: 180px;
+    height: 6px;
+  }
+
+  .section-title.category-handmade:hover,
+  .section-title.category-paintings:hover {
+    transform: translateX(8px) scale(1.03);
+  }
+
   .two-column-layout .product-columns {
     flex-direction: column;
   }
@@ -223,6 +752,34 @@
   .two-column-layout .product-column {
     width: 100%;
     margin-bottom: 2rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .section-title {
+    font-size: 1.8rem;
+    margin-bottom: 1.5rem;
+    letter-spacing: 0.3px;
+  }
+
+  .category-emoji {
+    font-size: 1.2em;
+    margin-left: 10px;
+  }
+
+  .section-title::before {
+    width: 80px;
+    height: 4px;
+  }
+
+  .section-title:hover::before {
+    width: 140px;
+    height: 5px;
+  }
+
+  .section-title.category-handmade:hover,
+  .section-title.category-paintings:hover {
+    transform: translateX(5px) scale(1.02);
   }
 }
 
@@ -250,15 +807,218 @@
 
 @media screen and (max-width: 480px) {
   .productGrid {
-    width: 90%;
-    grid-template-columns: 1fr; /* მხოლოდ ერთი ქარდი ხაზში */
-    gap: 10px;
+    grid-template-columns: 1fr;
+    gap: 8px;
     padding-bottom: 20px;
   }
+}
 
-  .forumPageLink {
-    margin: 15px auto;
+/* კატეგორიების განყოფილებისთვის ფონური ეფექტები */
+.product-section {
+  position: relative;
+  margin-bottom: 4rem;
+  padding: 2rem 0;
+  border-radius: 15px;
+  overflow: hidden;
+}
+
+.product-section::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    45deg,
+    rgba(255, 255, 255, 0.02) 0%,
+    rgba(248, 246, 240, 0.05) 50%,
+    rgba(255, 255, 255, 0.02) 100%
+  );
+  pointer-events: none;
+  z-index: -1;
+}
+
+.product-section:nth-child(odd)::before {
+  background: linear-gradient(
+    -45deg,
+    rgba(123, 86, 66, 0.03) 0%,
+    rgba(248, 246, 240, 0.05) 50%,
+    rgba(123, 86, 66, 0.03) 100%
+  );
+}
+
+.product-section:nth-child(even)::before {
+  background: linear-gradient(
+    45deg,
+    rgba(1, 38, 69, 0.03) 0%,
+    rgba(248, 246, 240, 0.05) 50%,
+    rgba(1, 38, 69, 0.03) 100%
+  );
+}
+
+/* სექციის header-ისთვის დამატებითი სტილები */
+.section-header {
+  position: relative;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+}
+
+.section-header::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(123, 86, 66, 0.3) 25%,
+    rgba(1, 38, 69, 0.3) 75%,
+    transparent 100%
+  );
+}
+
+/* კატეგორიების მონაცვლეობითი ფერები */
+.product-section:nth-child(odd) .section-title {
+  color: #012645; /* ლურჯი - ნახატები */
+}
+
+.product-section:nth-child(even) .section-title {
+  color: #7b5642; /* ყავისფერი - ხელნაკეთი */
+}
+
+.product-section:nth-child(odd) .see-more-btn {
+  background: linear-gradient(135deg, #012645, #01456b);
+}
+
+.product-section:nth-child(odd) .see-more-btn:hover {
+  background: linear-gradient(135deg, #01456b, #012645);
+  box-shadow: 0 6px 20px rgba(1, 38, 69, 0.4);
+}
+
+.product-section:nth-child(even) .see-more-btn {
+  background: linear-gradient(135deg, #7b5642, #8b6f47);
+}
+
+.product-section:nth-child(even) .see-more-btn:hover {
+  background: linear-gradient(135deg, #8b6f47, #7b5642);
+  box-shadow: 0 6px 20px rgba(123, 86, 66, 0.4);
+}
+
+/* დესკტოპზე "ნახე ყველა" ღილაკების დამალვა */
+@media (min-width: 769px) {
+  .see-more-desktop {
+    display: none;
+  }
+
+  .see-more-mobile {
+    display: none;
+  }
+}
+
+/* მობილურზე "ნახე ყველა" ღილაკების ჩვენება */
+@media (max-width: 768px) {
+  .see-more-desktop {
+    display: none;
+  }
+
+  .see-more-mobile {
     display: block;
-    text-align: center;
+  }
+
+  .shop-container .see-more-btn {
+    padding: 10px 20px;
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .shop-container .see-more-btn {
+    padding: 8px 16px;
+    font-size: 0.8rem;
+    border-radius: 20px;
+  }
+}
+
+/* ღილაკების ნაცრისფერი ტექსტი */
+.shop-container .see-more-btn {
+  font-family: "Georgia", serif;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+/* რიბონის ეფექტი */
+.shop-container .see-more-btn::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.4),
+    transparent
+  );
+  transition: left 0.6s ease;
+  z-index: 1;
+}
+
+.shop-container .see-more-btn:hover::before {
+  left: 100%;
+}
+
+/* ღილაკის ტექსტი */
+.shop-container .see-more-btn span {
+  position: relative;
+  z-index: 2;
+}
+
+/* კატეგორიის მიხედვით ღილაკების სპეციფიური ეფექტები */
+.product-section:nth-child(odd) .see-more-btn {
+  background: linear-gradient(135deg, #012645, #01456b);
+  box-shadow: 0 4px 15px rgba(1, 38, 69, 0.3);
+}
+
+.product-section:nth-child(even) .see-more-btn {
+  background: linear-gradient(135deg, #7b5642, #8b6f47);
+  box-shadow: 0 4px 15px rgba(123, 86, 66, 0.3);
+}
+
+.product-section:nth-child(odd) .see-more-btn:hover {
+  background: linear-gradient(135deg, #01456b, #012645);
+  box-shadow: 0 6px 20px rgba(1, 38, 69, 0.4);
+  animation: bluePulse 2s infinite;
+}
+
+.product-section:nth-child(even) .see-more-btn:hover {
+  background: linear-gradient(135deg, #8b6f47, #7b5642);
+  box-shadow: 0 6px 20px rgba(123, 86, 66, 0.4);
+  animation: brownPulse 2s infinite;
+}
+
+@keyframes bluePulse {
+  0% {
+    box-shadow: 0 6px 20px rgba(1, 38, 69, 0.4);
+  }
+  50% {
+    box-shadow: 0 8px 30px rgba(1, 38, 69, 0.6);
+  }
+  100% {
+    box-shadow: 0 6px 20px rgba(1, 38, 69, 0.4);
+  }
+}
+
+@keyframes brownPulse {
+  0% {
+    box-shadow: 0 6px 20px rgba(123, 86, 66, 0.4);
+  }
+  50% {
+    box-shadow: 0 8px 30px rgba(123, 86, 66, 0.6);
+  }
+  100% {
+    box-shadow: 0 6px 20px rgba(123, 86, 66, 0.4);
   }
 }

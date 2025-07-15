@@ -1,28 +1,31 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "კონფიდენციალურობის პოლიტიკა - MyHunter | Privacy Policy",
+  title: "კონფიდენციალურობის პოლიტიკა - SoulArt | Privacy Policy",
   description:
-    "გაეცანით MyHunter-ის კონფიდენციალურობის პოლიტიკას. როგორ ვიყენებთ და ვიცავთ თქვენს პირად ინფორმაციას. GDPR შესაბამისი მონაცემთა დაცვის პოლიტიკა. Privacy Policy - MyHunter data protection.",
+    "გაეცანით SoulArt-ის კონფიდენციალურობის პოლიტიკას. როგორ ვიყენებთ და ვიცავთ თქვენს პირად ინფორმაციას. GDPR შესაბამისი მონაცემთა დაცვის პოლიტიკა. ხელნაკეთი ნაწარმოებისა და ნახატების მარკეტპლეისი.",
   keywords: [
     "კონფიდენციალურობის პოლიტიკა",
     "მონაცემთა დაცვა",
     "პირადი ინფორმაცია",
     "უსაფრთხოება",
     "GDPR",
-    "MyHunter",
-    "მაიჰანტერი",
+    "SoulArt",
+    "სოულარტი",
+    "ხელნაკეთი",
+    "ნახატები",
     "privacy policy",
     "data protection",
     "personal information",
     "security",
     "privacy",
-    "terms",
-    "conditions",
+    "handmade",
+    "artwork",
+    "paintings",
   ],
-  authors: [{ name: "MyHunter" }],
-  creator: "MyHunter",
-  publisher: "MyHunter",
+  authors: [{ name: "SoulArt" }],
+  creator: "SoulArt",
+  publisher: "SoulArt",
   robots: {
     index: true,
     follow: true,
@@ -34,17 +37,17 @@ export const metadata: Metadata = {
     },
   },
   openGraph: {
-    title: "კონფიდენციალურობის პოლიტიკა - MyHunter | Privacy Policy",
+    title: "კონფიდენციალურობის პოლიტიკა - SoulArt | Privacy Policy",
     description:
-      "გაეცანით MyHunter-ის კონფიდენციალურობის პოლიტიკას. როგორ ვიყენებთ და ვიცავთ თქვენს პირად ინფორმაციას.",
-    url: "https://myhunter.ge/privacy-policy",
-    siteName: "MyHunter",
+      "გაეცანით SoulArt-ის კონფიდენციალურობის პოლიტიკას. როგორ ვიყენებთ და ვიცავთ თქვენს პირად ინფორმაციას. ხელნაკეთი ნაწარმოებისა და ნახატების მარკეტპლეისი.",
+    url: "https://soulart.ge/privacy-policy",
+    siteName: "SoulArt",
     images: [
       {
         url: "/logo.png",
         width: 1200,
         height: 630,
-        alt: "MyHunter კონფიდენციალურობის პოლიტიკა",
+        alt: "SoulArt კონფიდენციალურობის პოლიტიკა",
       },
     ],
     locale: "ka_GE",
@@ -52,13 +55,13 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "კონფიდენციალურობის პოლიტიკა - MyHunter",
+    title: "კონფიდენციალურობის პოლიტიკა - SoulArt",
     description:
-      "გაეცანით MyHunter-ის კონფიდენციალურობის პოლიტიკას. როგორ ვიყენებთ და ვიცავთ თქვენს პირად ინფორმაციას.",
+      "გაეცანით SoulArt-ის კონფიდენციალურობის პოლიტიკას. როგორ ვიყენებთ და ვიცავთ თქვენს პირად ინფორმაციას.",
     images: ["/logo.png"],
   },
   alternates: {
-    canonical: "https://myhunter.ge/privacy-policy",
+    canonical: "https://soulart.ge/privacy-policy",
   },
 };
 

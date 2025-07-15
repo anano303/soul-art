@@ -13,7 +13,19 @@
   flex-direction: column;
   gap: 16px;
 }
-
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: #012645;
+}
+.checkbox-label .checkbox {
+  width: 10%;
+}
+.checkbox-label .checkbox-text {
+  white-space: nowrap;
+}
 .input-group {
   display: flex;
   flex-direction: column;
@@ -74,6 +86,13 @@ input:focus {
 .submit-btn:disabled {
   background-color: #aaa;
   cursor: not-allowed;
+  opacity: 0.6;
+  background: #ccc;
+}
+
+.submit-btn:disabled:hover {
+  background: #ccc;
+  transform: none;
 }
 
 .divider {
@@ -305,4 +324,55 @@ input:focus {
 .logo-upload-button:hover {
   background-position: left;
   transform: translateY(-2px);
+}
+
+/* Privacy Policy Checkbox */
+.privacy-policy-group {
+  margin: 1rem 0;
+}
+
+.privacy-policy-label {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  cursor: pointer;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.privacy-policy-checkbox {
+  width: 18px;
+  height: 18px;
+  margin-top: 2px;
+  accent-color: #7b5642;
+  cursor: pointer;
+}
+
+.privacy-policy-text {
+  color: #555;
+  flex: 1;
+}
+
+.privacy-policy-link {
+  color: #7b5642;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.3s ease;
+}
+
+.privacy-policy-link:hover {
+  color: #012645;
+  text-decoration: underline;
+}
+
+/* Disabled button state */
+.submit-btn.disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background-color: #ccc;
+  color: #666;
+}
+
+.submit-btn.disabled:hover {
+  background-color: #ccc;
 }

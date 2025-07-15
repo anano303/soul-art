@@ -42,6 +42,11 @@ export default function Footer() {
                 {t("navigation.auction")}
               </a>
             </li>
+            <li>
+              <a href="/privacy-policy" className="footer-link">
+                {t("footer.privacyPolicy")}
+              </a>
+            </li>
           </ul>
         </div>
         <div className="footer-section">
