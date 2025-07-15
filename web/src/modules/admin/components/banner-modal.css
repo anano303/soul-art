@@ -12,17 +12,17 @@
 }
 
 .modal-content {
-  background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
+  background: linear-gradient(135deg, #ffffff, #f8f9fa);
   padding: 2rem;
   border-radius: 12px;
   width: 90%;
   max-width: 600px;
   max-height: 90vh;
   overflow-y: auto;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
-  color: #e6cd9f;
+  box-shadow: 0 8px 32px rgba(1, 38, 69, 0.1);
+  color: #012645;
   font-family: "FiraGo-Enhanced", "FiraGo", "Noto Sans Georgian", sans-serif;
-  border: 2px solid #4b5320;
+  border: 2px solid #7b5642;
 }
 
 .modal-header {
@@ -30,14 +30,14 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 1.5rem;
-  border-bottom: 2px solid #4b5320;
+  border-bottom: 2px solid #7b5642;
   padding-bottom: 1rem;
 }
 
 .modal-title {
   font-size: 1.5rem;
   font-weight: 600;
-  color: #f48c06;
+  color: #012645;
   letter-spacing: 1px;
   font-family: "FiraGo-Enhanced", "FiraGo", "Noto Sans Georgian", sans-serif;
 }
@@ -47,15 +47,15 @@
   border: none;
   font-size: 1.5rem;
   cursor: pointer;
-  color: #e6cd9f;
+  color: #012645;
   padding: 0.25rem;
   border-radius: 4px;
   transition: all 0.2s ease;
 }
 
 .close-btn:hover {
-  background-color: rgba(244, 140, 6, 0.1);
-  color: #f48c06;
+  background-color: rgba(123, 86, 66, 0.1);
+  color: #7b5642;
 }
 
 .form-group {
@@ -66,27 +66,27 @@
   display: block;
   margin-bottom: 0.5rem;
   font-weight: 500;
-  color: #f48c06;
+  color: #7b5642;
   font-family: "FiraGo-Enhanced", "FiraGo", "Noto Sans Georgian", sans-serif;
 }
 
 .form-input {
   width: 100%;
   padding: 0.75rem;
-  border: 1px solid #4b5320;
+  border: 1px solid #7b5642;
   border-radius: 6px;
   font-size: 1rem;
   transition: border-color 0.2s ease;
   font-family: "FiraGo-Enhanced", "FiraGo", "Noto Sans Georgian", sans-serif;
   box-sizing: border-box;
-  background: linear-gradient(135deg, #2a2a2a, #3a3a3a);
-  color: #e6cd9f;
+  background: #ffffff;
+  color: #012645;
 }
 
 .form-input:focus {
   outline: none;
-  border-color: #f48c06;
-  box-shadow: 0 0 0 2px rgba(244, 140, 6, 0.2);
+  border-color: #012645;
+  box-shadow: 0 0 0 2px rgba(1, 38, 69, 0.2);
 }
 
 .form-textarea {
@@ -112,30 +112,30 @@
   justify-content: center;
   gap: 0.5rem;
   padding: 0.75rem;
-  border: 2px dashed #4b5320;
+  border: 2px dashed #7b5642;
   border-radius: 6px;
   cursor: pointer;
   transition: all 0.2s ease;
-  color: #e6cd9f;
-  background: linear-gradient(135deg, #2a2a2a, #3a3a3a);
+  color: #012645;
+  background: #ffffff;
 }
 
 .file-input-label:hover {
-  border-color: #f48c06;
-  background: linear-gradient(135deg, #3a3a3a, #4a4a4a);
-  color: #f48c06;
+  border-color: #012645;
+  background: #f8f9fa;
+  color: #012645;
 }
 
 .current-image {
   margin-top: 0.5rem;
   border-radius: 6px;
-  border: 1px solid #4b5320;
+  border: 1px solid #7b5642;
 }
 
 .image-preview {
   margin-top: 0.5rem;
   border-radius: 6px;
-  border: 1px solid #4b5320;
+  border: 1px solid #7b5642;
 }
 
 .checkbox-group {
@@ -155,7 +155,7 @@
   gap: 1rem;
   margin-top: 2rem;
   padding-top: 1rem;
-  border-top: 1px solid #4b5320;
+  border-top: 1px solid #7b5642;
 }
 
 .btn {
@@ -170,37 +170,37 @@
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, #4b5320, #5c6525);
-  color: #e6cd9f;
-  border: 1px solid #4b5320;
+  background: linear-gradient(135deg, #012645, #1a4a73);
+  color: #ffffff;
+  border: 1px solid #012645;
 }
 
 .btn-primary:hover {
-  background: linear-gradient(135deg, #5c6525, #4b5320);
+  background: linear-gradient(135deg, #1a4a73, #012645);
   transform: translateY(-2px);
-  box-shadow: 0 4px 16px rgba(244, 140, 6, 0.3);
-  color: #f48c06;
+  box-shadow: 0 4px 16px rgba(123, 86, 66, 0.3);
+  color: #ffffff;
 }
 
 .btn-primary:disabled {
-  background: #555;
+  background: #6c757d;
   cursor: not-allowed;
   transform: none;
   box-shadow: none;
-  color: #999;
+  color: #ffffff;
 }
 
 .btn-secondary {
-  background: linear-gradient(135deg, #333, #444);
-  color: #e6cd9f;
-  border: 1px solid #4b5320;
+  background: linear-gradient(135deg, #6c757d, #5a6268);
+  color: #ffffff;
+  border: 1px solid #6c757d;
 }
 
 .btn-secondary:hover {
-  background: linear-gradient(135deg, #444, #555);
+  background: linear-gradient(135deg, #5a6268, #6c757d);
   transform: translateY(-2px);
-  box-shadow: 0 4px 16px rgba(244, 140, 6, 0.2);
-  color: #f48c06;
+  box-shadow: 0 4px 16px rgba(123, 86, 66, 0.2);
+  color: #ffffff;
 }
 
 /* Responsive */
