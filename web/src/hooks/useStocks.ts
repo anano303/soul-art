@@ -1,8 +1,18 @@
 import { ProductFormData } from "@/modules/products/validation/product";
 import { useMemo, useEffect, useState, useCallback } from "react";
 
+// Extended interface for useStocks that includes variants
+interface ProductWithVariants extends ProductFormData {
+  variants?: Array<{
+    ageGroup?: string;
+    size?: string;
+    color?: string;
+    stock: number;
+  }>;
+}
+
 interface UseStocksProps {
-  initialData?: ProductFormData;
+  initialData?: ProductWithVariants;
   attributes: [string[], string[], string[]]; // [ageGroups, sizes, colors]
 }
 
