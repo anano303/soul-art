@@ -77,7 +77,7 @@ export function CreateProductForm({
       description: "",
       descriptionEn: "",
       images: [],
-      brand: "FishHunt", // Set default brand here
+      brand: "SoulArt", // Set default brand here
       category: "",
       subcategory: "",
       countInStock: 0,
@@ -98,8 +98,8 @@ export function CreateProductForm({
   const [availableSizes, setAvailableSizes] = useState<string[]>([]);
   const [availableColors, setAvailableColors] = useState<string[]>([]);
 
-  const [deliveryType, setDeliveryType] = useState<"SELLER" | "FishHunt">(
-    "FishHunt"
+  const [deliveryType, setDeliveryType] = useState<"SELLER" | "SoulArt">(
+    "SoulArt"
   );
   const [minDeliveryDays, setMinDeliveryDays] = useState("");
   const [maxDeliveryDays, setMaxDeliveryDays] = useState("");
@@ -222,7 +222,7 @@ export function CreateProductForm({
     if (user && isSeller && !isEdit) {
       setFormData((prevData) => ({
         ...prevData,
-        brand: user.name || user.storeName || "FishHunt",
+        brand: user.name || user.storeName || "SoulArt",
         brandLogo: user.storeLogo || undefined,
       }));
     }
@@ -240,7 +240,7 @@ export function CreateProductForm({
         _id: initialData._id,
         name: initialData.name || "",
         nameEn: initialData.nameEn || "",
-        brand: initialData.brand || "FishHunt",
+        brand: initialData.brand || "SoulArt",
         brandLogo:
           typeof initialData.brandLogo === "string"
             ? initialData.brandLogo
@@ -266,7 +266,7 @@ export function CreateProductForm({
       setHashtagsInput(hashtagsText);
 
       if (initialData.deliveryType) {
-        setDeliveryType(initialData.deliveryType as "SELLER" | "FishHunt");
+        setDeliveryType(initialData.deliveryType as "SELLER" | "SoulArt");
       }
       if (initialData.minDeliveryDays) {
         setMinDeliveryDays(initialData.minDeliveryDays.toString());
@@ -340,7 +340,7 @@ export function CreateProductForm({
       description: "",
       descriptionEn: "",
       images: [],
-      brand: "FishHunt", // Set default brand here too
+      brand: "SoulArt", // Set default brand here too
       category: "",
       subcategory: "",
       countInStock: 0,
@@ -361,7 +361,7 @@ export function CreateProductForm({
     setSelectedSizes([]);
     setSelectedColors([]);
 
-    setDeliveryType("FishHunt");
+    setDeliveryType("SoulArt");
     setMinDeliveryDays("");
     setMaxDeliveryDays("");
   };
@@ -674,14 +674,14 @@ export function CreateProductForm({
         formDataToSend.append("variants", JSON.stringify(stocks));
       }
 
-      // Handle brand name - ensure it's always set to FishHunt if empty
+      // Handle brand name - ensure it's always set to SoulArt if empty
       if (isSeller) {
         formDataToSend.append(
           "brand",
-          user?.name || user?.storeName || formData.brand || "FishHunt"
+          user?.name || user?.storeName || formData.brand || "SoulArt"
         );
       } else {
-        formDataToSend.append("brand", formData.brand || "FishHunt");
+        formDataToSend.append("brand", formData.brand || "SoulArt");
       }
 
       // SIMPLIFIED logo handling - THIS IS THE FIX
@@ -1229,11 +1229,11 @@ export function CreateProductForm({
               <input
                 type="radio"
                 name="deliveryType"
-                value="FishHunt"
-                checked={deliveryType === "FishHunt"}
-                onChange={() => setDeliveryType("FishHunt")}
+                value="SoulArt"
+                checked={deliveryType === "SoulArt"}
+                onChange={() => setDeliveryType("SoulArt")}
               />
-              <span>FishHunt მიწოდება</span>
+              <span>SoulArt მიწოდება</span>
             </label>
             <label>
               <input

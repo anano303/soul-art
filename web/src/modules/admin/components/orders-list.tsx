@@ -4,9 +4,10 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { fetchWithAuth } from "@/lib/fetch-with-auth";
 import Link from "next/link";
-import { CheckCircle2, XCircle, Truck, Store } from "lucide-react";
+import { CheckCircle2, Store, Truck, XCircle } from "lucide-react";
 import { Order } from "@/types/order";
 import "./ordersList.css";
+import HeartLoading from "@/components/HeartLoading/HeartLoading";
 
 export function OrdersList() {
   const [page, setPage] = useState(1);
@@ -25,7 +26,9 @@ export function OrdersList() {
   });
 
   if (isLoading) {
-    return <div className="orders-container">Loading...</div>;
+    return (
+      <div className="orders-container">{<HeartLoading size="medium" />}</div>
+    );
   }
 
   const orders = data?.items || [];
@@ -61,7 +64,7 @@ export function OrdersList() {
                   <td>{order.user.email}</td>
                   <td>{new Date(order.createdAt).toLocaleDateString()}</td>
                   <td>${order.totalPrice.toFixed(2)}</td>
-                  <td>
+                 <td>
                     {order.orderItems.some(item => 
                       item.product && String(item.product.deliveryType) === "SELLER"
                     ) ? (
@@ -81,12 +84,17 @@ export function OrdersList() {
                     ) : (
                       <span className="delivery-badge soulart">
                         <Truck className="icon" />
-                        SoulArt-ის კურიერი
+                        soulart-ის კურიერი
                       </span>
                     )}
-                  </td>
+                  </td> 
                   <td>
-                    {order.isPaid ? (
+                    {order.status === "cancelled" ? (
+                      <span className="status-badge cancelled">
+                        <XCircle className="icon" />
+                        Cancelled
+                      </span>
+                    ) : order.status === "paid" || order.isPaid ? (
                       <span className="status-badge success">
                         <CheckCircle2 className="icon" />
                         {order.paidAt &&

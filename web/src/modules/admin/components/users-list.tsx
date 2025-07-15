@@ -17,6 +17,7 @@ import "./usersList.css";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { getUsers } from "../api/get-users";
 import { CreateUserModal } from "./create-user-modal";
+import HeartLoading from "@/components/HeartLoading/HeartLoading";
 // import { CreateUserModal } from "./create-user-modal";
 
 export function UsersList() {
@@ -52,7 +53,7 @@ export function UsersList() {
     }
   };
 
-  if (isLoading) return <div>Loading...</div>;
+  if (isLoading) return <div>{<HeartLoading size="medium" />}</div>;
   if (error) return null;
 
   return (
