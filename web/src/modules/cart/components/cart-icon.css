@@ -11,26 +11,23 @@
 
 .cartIconsSpan {
   position: relative;
-  top: -36px; 
-  right: -52px; 
-  border-radius: 20%; 
+  top: -36px;
+  right: -52px;
+  border-radius: 20%;
   /* background-color: white; */
-  font-size: 24px; 
+  font-size: 24px;
   font-style: bold;
-  color: #2A5530;
+  color: #012645;
   padding: 2px 4px;
-  
-  /* border: 2px solid green; */
+  font-family: "FiraGo", "Noto Sans Georgian", sans-serif;
 
+  /* border: 2px solid green; */
 }
 @media screen and (max-width: 1000px) {
-  
-  .cartIconsSpan{
+  .cartIconsSpan {
     right: 0;
     top: -20px;
-   
+
     left: 32px;
-   
   }
-  
 }

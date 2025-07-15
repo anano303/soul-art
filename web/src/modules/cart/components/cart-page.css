@@ -2,7 +2,7 @@
   padding-bottom: 40px;
   padding-top: 24px;
   margin-top: 0;
-  space-y: 32px;
+  /* space-y: 32px; */
 }
 
 .cart-header {
@@ -14,10 +14,12 @@
 .cart-title {
   font-size: 2rem;
   font-weight: bold;
+  color: #012645;
+  font-family: "FiraGo", "Noto Sans Georgian", sans-serif;
 }
 
 .cart-items-count {
-  color: #6c6c6c;
+  color: #7b5642;
 }
 
 .cart-content {
@@ -44,6 +46,8 @@
 .summary-title {
   font-size: 1.25rem;
   font-weight: 600;
+  color: #012645;
+  font-family: "FiraGo", "Noto Sans Georgian", sans-serif;
 }
 
 .summary-details {
@@ -57,31 +61,35 @@
 }
 
 .summary-label {
-  color: #6c6c6c;
+  color: #7b5642;
 }
 
 .separator {
-  border-top: 1px solid #e5e5e5;
+  border-top: 1px solid #e0e0e0;
   margin: 16px 0;
 }
 
 .total {
   font-weight: 500;
+  color: #012645;
 }
 
 .checkout-button {
   width: 100%;
   padding: 12px;
   font-size: 1rem;
-  background-color: #000;
+  background: linear-gradient(135deg, #012645, #1a4a73);
   color: #fff;
   border: none;
   border-radius: 8px;
   cursor: pointer;
+  font-family: "FiraGo", "Noto Sans Georgian", sans-serif;
+  transition: all 0.3s ease;
 }
 
 .checkout-button:hover {
-  background-color: #333;
+  background: linear-gradient(135deg, #1a4a73, #012645);
+  transform: translateY(-2px);
 }
 
 /* Mobile responsiveness */
