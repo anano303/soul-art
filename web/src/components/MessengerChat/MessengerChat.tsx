@@ -5,6 +5,7 @@ import "./MessengerChat.css";
 
 const MessengerChat = () => {
   const handleChatClick = () => {
+    // Facebook Messenger ლინკი უბრალოდ
     window.open("https://m.me/61574985443236", "_blank");
   };
 

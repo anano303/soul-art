@@ -910,11 +910,7 @@
 /* დესკტოპზე "ნახე ყველა" ღილაკების დამალვა */
 @media (min-width: 769px) {
   .see-more-desktop {
-    display: none;
-  }
-
-  .see-more-mobile {
-    display: none;
+    display: none !important;
   }
 }
 
