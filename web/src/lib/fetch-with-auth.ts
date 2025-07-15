@@ -25,10 +25,8 @@ export async function fetchWithAuth(url: string, config: RequestInit = {}) {
       mode: "cors",
     });
   };
-
   try {
     let response = await makeRequest();
-    console.log(`[fetchWithAuth] ${url} - Status: ${response.status}`);
 
     // Handle 401 Unauthorized - try to refresh token
     if (response.status === 401) {

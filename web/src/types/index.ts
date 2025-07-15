@@ -4,13 +4,67 @@ import { Role } from "./role";
 export enum MainCategory {
   PAINTINGS = "PAINTINGS",
   HANDMADE = "HANDMADE",
+  CLOTHING = "CLOTHING",
+  ACCESSORIES = "ACCESSORIES",
+  FOOTWEAR = "FOOTWEAR",
+  SWIMWEAR = "SWIMWEAR",
+}
+
+export enum AgeGroup {
+  ADULTS = "ADULTS",
+  KIDS = "KIDS",
+}
+
+// Standardized category interfaces
+export interface Category {
+  id: string;
+  _id?: string;
+  name: string;
+  nameEn?: string;
+  description?: string;
+  isActive: boolean;
+}
+
+export interface SubCategory {
+  id: string;
+  _id?: string;
+  name: string;
+  nameEn?: string;
+  categoryId: string;
+  ageGroups: string[];
+  sizes: string[];
+  colors: string[];
+  isActive: boolean;
 }
 
 export interface CategoryStructure {
-  main: MainCategory;
+  main: string;
   sub: string;
+  ageGroup?: AgeGroup;
 }
 
+export interface ProductVariant {
+  ageGroup?: string;
+  size?: string;
+  color?: string;
+  stock: number;
+}
+
+export interface Color {
+  _id: string;
+  name: string;
+  nameEn?: string;
+  isActive: boolean;
+}
+
+export interface AgeGroupItem {
+  _id: string;
+  name: string;
+  nameEn?: string;
+  ageRange?: string;
+  description?: string;
+  isActive: boolean;
+}
 export interface Product {
   _id: string;
   user: User;
@@ -21,8 +75,13 @@ export interface Product {
   descriptionEn?: string;
   brand: string;
   brandLogo: string;
-  category: string; // For backward compatibility
-  categoryStructure?: CategoryStructure; // New structured category
+  category: string | { name: string; _id?: string; id?: string };
+  subCategory?: string | { name: string; _id?: string; id?: string };
+  mainCategory?: string | { name: string; _id?: string; id?: string };
+  ageGroups?: string[];
+  sizes?: string[];
+  colors?: string[];
+  categoryStructure?: CategoryStructure;
   price: number;
   countInStock: number;
   rating: number;
@@ -32,14 +91,21 @@ export interface Product {
   updatedAt: string;
   status: ProductStatus;
   rejectionReason?: string;
-  deliveryType?: "SELLER" | "SoulArt"; // Corrected from 'SOULART' to 'SoulArt'
+  deliveryType?: "SELLER" | "SoulArt";
   minDeliveryDays?: number;
   maxDeliveryDays?: number;
+  hashtags?: string[]; // Added hashtags for SEO
   dimensions?: {
     width?: number;
     height?: number;
     depth?: number;
   };
+  variants?: ProductVariant[];
+  videoDescription?: string; // YouTube embed code or URL
+  // Discount functionality
+  discountPercentage?: number;
+  discountStartDate?: string;
+  discountEndDate?: string;
 }
 
 export enum ProductStatus {
@@ -70,6 +136,8 @@ export interface User {
   profileImage?: string;
   phoneNumber: string;
   role: Role;
+  storeName?: string;
+  storeLogo?: string;
   seller?: {
     storeName: string;
     storeLogo?: string;

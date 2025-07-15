@@ -1,4 +1,4 @@
-import {  setupResponseInterceptors } from "./api-client";
+import { setupResponseInterceptors } from "./api-client";
 import {
   getRefreshToken,
   getAccessToken,
@@ -41,13 +41,10 @@ export const refreshAuthToken = async (): Promise<boolean> => {
         });
       });
     }
-    
     isRefreshing = true;
-    console.log("📡 Attempting to refresh token");
 
     const refreshToken = getRefreshToken();
     if (!refreshToken) {
-      console.log("❌ No refresh token found");
       clearTokens();
       resetRefreshState();
       return false;
@@ -64,18 +61,15 @@ export const refreshAuthToken = async (): Promise<boolean> => {
         body: JSON.stringify({ refreshToken }),
       }
     );
-    
     const data = await response.json();
 
     if (data.tokens && data.tokens.accessToken && data.tokens.refreshToken) {
-      console.log("✅ Token refresh successful");
       storeTokens(data.tokens.accessToken, data.tokens.refreshToken);
       processQueue(null, data.tokens.accessToken);
       resetRefreshState();
       return true;
     }
-    
-    console.log("❌ Invalid response format from refresh endpoint");
+
     clearTokens();
     processQueue(new Error("Invalid response format"));
     resetRefreshState();
