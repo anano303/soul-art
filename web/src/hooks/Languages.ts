@@ -477,6 +477,65 @@ export const TRANSLATIONS: Translations = {
       },
     },
 
+    // Admin Categories
+    adminCategories: {
+      title: "კატეგორიების მართვა",
+      categories: "კატეგორიები",
+      attributes: "ატრიბუტები",
+      subcategories: "ქვეკატეგორიები",
+      add: "დამატება",
+      edit: "რედაქტირება",
+      delete: "წაშლა",
+      update: "განახლება",
+      cancel: "გაუქმება",
+      save: "შენახვა",
+      loading: "იტვირთება",
+      retry: "თავიდან ცდა",
+      errorLoading: "ჩატვირთვა ვერ მოხერხდა",
+
+      // Category fields
+      nameGe: "სახელი (ქართული)",
+      nameEn: "სახელი (ინგლისური)",
+      descriptionGe: "აღწერა (ქართული)",
+      descriptionEn: "აღწერა (ინგლისური)",
+      active: "აქტიური",
+      inactive: "არააქტიური",
+      showInactive: "არააქტიურების ჩვენება",
+
+      // Category actions
+      addNewCategory: "ახალი კატეგორიის დამატება",
+      confirmDeleteCategory:
+        "დარწმუნებული ხართ, რომ გსურთ ამ კატეგორიის წაშლა?",
+      noCategoriesFound: "კატეგორიები ვერ მოიძებნა",
+
+      // Subcategory actions
+      addNewSubcategory: "ახალი ქვეკატეგორიის დამატება",
+      confirmDeleteSubcategory:
+        "დარწმუნებული ხართ, რომ გსურთ ამ ქვეკატეგორიის წაშლა?",
+      noSubcategoriesFound: "ქვეკატეგორიები ვერ მოიძებნა",
+
+      // Attribute management
+      colors: "ფერები",
+      sizes: "ზომები",
+      ageGroups: "ასაკობრივი ჯგუფები",
+      newValue: "ახალი მნიშვნელობა",
+      editValue: "მნიშვნელობის რედაქტირება",
+      georgian: "ქართული",
+      english: "ინგლისური",
+      enterColor: "შეიყვანეთ ფერი",
+      enterColorEnglish: "შეიყვანეთ ფერი ინგლისურად",
+      enterSize: "შეიყვანეთ ზომა",
+      enterAgeGroup: "შეიყვანეთ ასაკობრივი ჯგუფი",
+      enterAgeGroupEnglish: "შეიყვანეთ ასაკობრივი ჯგუფი ინგლისურად",
+      confirmDelete: "დარწმუნებული ხართ, რომ გსურთ წაშლა?",
+      noDataFound: "მონაცემები ვერ მოიძებნა",
+
+      // Error messages
+      createError: "შექმნა ვერ მოხერხდა",
+      updateError: "განახლება ვერ მოხერხდა",
+      deleteError: "წაშლა ვერ მოხერხდა",
+    },
+
     // Categories translations
     productCategories: {
       // Painting subcategories
@@ -961,6 +1020,64 @@ export const TRANSLATIONS: Translations = {
         paintings: "Paintings",
         other: "Other",
       },
+    },
+
+    // Admin Categories
+    adminCategories: {
+      title: "Category Management",
+      categories: "Categories",
+      attributes: "Attributes",
+      subcategories: "Subcategories",
+      add: "Add",
+      edit: "Edit",
+      delete: "Delete",
+      update: "Update",
+      cancel: "Cancel",
+      save: "Save",
+      loading: "Loading",
+      retry: "Retry",
+      errorLoading: "Failed to load",
+
+      // Category fields
+      nameGe: "Name (Georgian)",
+      nameEn: "Name (English)",
+      descriptionGe: "Description (Georgian)",
+      descriptionEn: "Description (English)",
+      active: "Active",
+      inactive: "Inactive",
+      showInactive: "Show Inactive",
+
+      // Category actions
+      addNewCategory: "Add New Category",
+      confirmDeleteCategory: "Are you sure you want to delete this category?",
+      noCategoriesFound: "No categories found",
+
+      // Subcategory actions
+      addNewSubcategory: "Add New Subcategory",
+      confirmDeleteSubcategory:
+        "Are you sure you want to delete this subcategory?",
+      noSubcategoriesFound: "No subcategories found",
+
+      // Attribute management
+      colors: "Colors",
+      sizes: "Sizes",
+      ageGroups: "Age Groups",
+      newValue: "New Value",
+      editValue: "Edit Value",
+      georgian: "Georgian",
+      english: "English",
+      enterColor: "Enter color",
+      enterColorEnglish: "Enter color in English",
+      enterSize: "Enter size",
+      enterAgeGroup: "Enter age group",
+      enterAgeGroupEnglish: "Enter age group in English",
+      confirmDelete: "Are you sure you want to delete this?",
+      noDataFound: "No data found",
+
+      // Error messages
+      createError: "Failed to create",
+      updateError: "Failed to update",
+      deleteError: "Failed to delete",
     },
 
     // Categories translations
