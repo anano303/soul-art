@@ -1,0 +1,239 @@
+.brand-logos-section {
+  padding: 60px 0;
+  background-color: #121212;
+  position: relative;
+  overflow: hidden;
+  margin-top: 40px;
+}
+
+.brand-logos-section::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(75, 83, 32, 0.6),
+    transparent
+  );
+}
+
+.brand-logos-header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.brand-logos-title {
+  font-family: "FiraGo", sans-serif;
+  font-size: 32px;
+  color: #e6cd9f;
+  margin-bottom: 10px;
+  position: relative;
+  display: inline-block;
+}
+
+.brand-logos-title::after {
+  content: "";
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80px;
+  height: 3px;
+  background-color: #4b5320;
+}
+
+.brand-logos-subtitle {
+  font-family: "FiraGo", sans-serif;
+  font-size: 16px;
+  color: #a99c7a;
+  max-width: 600px;
+  margin: 0 auto;
+  margin-top: 20px;
+}
+
+.brand-logos-container {
+  width: 100%;
+  overflow: hidden;
+  position: relative;
+}
+
+.brand-logos-container::before,
+.brand-logos-container::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  width: 100px;
+  height: 100%;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.brand-logos-container::before {
+  left: 0;
+  background: linear-gradient(90deg, #121212, transparent);
+}
+
+.brand-logos-container::after {
+  right: 0;
+  background: linear-gradient(-90deg, #121212, transparent);
+}
+
+.brand-logos-slider {
+  display: flex;
+  animation: slideLogos 40s linear infinite;
+  width: max-content;
+}
+
+.brand-logos-container.paused .brand-logos-slider {
+  animation-play-state: paused;
+}
+
+.brand-logos-container.animate .brand-logos-slider {
+  animation-play-state: running;
+}
+
+@keyframes slideLogos {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.brand-logo-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0 30px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  cursor: pointer; /* Added cursor to indicate clickable */
+}
+
+.brand-logo-item:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+.brand-logo-wrapper {
+  background-color: rgba(30, 30, 30, 0.7);
+  padding: 20px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 140px;
+  height: 80px;
+  margin-bottom: 15px;
+  border: 1px solid rgba(75, 83, 32, 0.3);
+  transition: all 0.3s ease;
+}
+
+.brand-logo-item:hover .brand-logo-wrapper {
+  background-color: rgba(40, 40, 40, 0.9);
+  border-color: rgba(75, 83, 32, 0.7);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.brand-logo-image {
+  max-width: 100%;
+  height: auto;
+  object-fit: contain;
+  filter: brightness(0.9) grayscale(0.5);
+  transition: all 0.3s ease;
+  max-height: 100%;
+}
+
+.brand-logo-item:hover .brand-logo-image {
+  filter: brightness(1) grayscale(0);
+}
+
+.brand-name {
+  font-family: "FiraGo", sans-serif;
+  font-size: 14px;
+  color: #a99c7a;
+  margin-top: 5px;
+  text-align: center;
+  transition: color 0.3s ease;
+  position: relative;
+}
+
+.brand-name::after {
+  content: "";
+  position: absolute;
+  bottom: -4px;
+  left: 50%;
+  width: 0;
+  height: 1px;
+  background-color: #e6cd9f;
+  transform: translateX(-50%);
+  transition: width 0.3s ease;
+}
+
+.brand-logo-item:hover .brand-name {
+  color: #e6cd9f;
+}
+
+.brand-logo-item:hover .brand-name::after {
+  width: 80%; /* Underline appears on hover */
+}
+
+.brand-logos-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 140px;
+  font-family: "FiraGo", sans-serif;
+  color: #a99c7a;
+  font-size: 16px;
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+  .brand-logos-section {
+    padding: 40px 0;
+  }
+
+  .brand-logos-title {
+    font-size: 24px;
+  }
+
+  .brand-logos-subtitle {
+    font-size: 14px;
+    padding: 0 20px;
+  }
+
+  .brand-logo-wrapper {
+    width: 100px;
+    height: 60px;
+    padding: 15px;
+  }
+
+  .brand-logo-item {
+    padding: 0 20px;
+  }
+
+  .brand-name {
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .brand-logos-title {
+    font-size: 22px;
+  }
+
+  .brand-logo-wrapper {
+    width: 80px;
+    height: 50px;
+    padding: 10px;
+  }
+
+  .brand-logo-item {
+    padding: 0 15px;
+  }
+}

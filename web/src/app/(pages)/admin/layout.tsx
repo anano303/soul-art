@@ -1,11 +1,9 @@
 "use client";
 
-
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { isAuthenticated } from "@/lib/api-client";
 import { getUserData } from "@/lib/auth";
-import { Role } from "@/types/role";
 import { Sidebar } from "lucide-react";
 
 export default function AdminLayout({
@@ -35,8 +33,13 @@ export default function AdminLayout({
           return;
         }
 
-        // Check if user has admin or seller role
-        if (userData.role !== Role.Admin && userData.role !== Role.Seller) {
+        console.log("Current user role:", userData.role);
+
+        // Check if user has admin role (case-insensitive)
+        if (
+          userData.role?.toLowerCase() !== "admin" &&
+          userData.role?.toLowerCase() !== "seller"
+        ) {
           console.log("User doesn't have admin permissions");
           router.push("/");
           return;

@@ -1,82 +1,168 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import "../styles/performance.css";
 import { Providers } from "./providers";
 // import { Toaster } from "@/components/ui/toaster";
 import { AuthProvider } from "@/components/auth-provider";
-import { CartProvider } from "@/modules/cart/context/cart-context";
-import { CheckoutProvider } from "@/modules/checkout/context/checkout-context";
+
 import { satoshi } from "./(pages)/fonts";
 import Footer from "@/components/footer/footer";
 import { LanguageProvider } from "@/hooks/LanguageContext";
 import Header from "@/components/header/header";
-import SiteTimer from "@/components/SiteTimer/SiteTimer";
+import MessengerChatWrapper from "@/components/MessengerChat/MessengerChatWrapper";
+import { CartProvider } from "@/modules/cart/context/cart-context";
+import { CheckoutProvider } from "@/modules/checkout/context/checkout-context";
+import {
+  organizationSchema,
+  websiteSchema,
+  storeSchema,
+} from "@/lib/structured-data";
+import GoogleAnalytics from "@/components/GoogleAnalytics";
 
 export const metadata: Metadata = {
   metadataBase: new URL(
-    process.env.NEXT_PUBLIC_CLIENT_URL || "https://soulart.ge"
+    process.env.NEXT_PUBLIC_CLIENT_URL || "https://Soulart.ge"
   ),
-  title: "SoulArt",
+  title: "Soulart - სანადირო და სათევზაო აღჭურვილობის მაღაზია საქართველოში",
   description:
-    "SoulArt - ნახატების ონლაინ პლატფორმა, სადაც შეგიძლიათ გაყიდოთ და შეიძინოთ უნიკალური ხელოვნების ნიმუშები. შექმენით პირადი გალერეა და გახდით მხატვარი ან კოლექციონერი.",
+    "საუკეთესო სანადირო და სათევზაო აღჭურვილობა, თოვლისთვის, შოტლანდისთვის, ნაცარი პროდუქტები. ხარისხი, სანდოობა, ფასი. Best hunting and fishing equipment in Georgia",
+  keywords: [
+    "სანადირო",
+    "სათევზაო",
+    "აღჭურვილობა",
+    "მაღაზია",
+    "Soulart",
+    "მაიჰანტერი",
+    "საქართველო",
+    "hunting",
+    "fishing",
+    "equipment",
+    "store",
+    "Georgia",
+    "outdoor",
+    "gear",
+  ],
+  authors: [{ name: "Soulart" }],
+  creator: "Soulart",
+  publisher: "Soulart",
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+      "max-video-preview": -1,
+    },
+  },
+  verification: {
+    google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION || undefined,
+  },
+  other: {
+    "google-site-verification":
+      process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION || "", // backup
+    "geo.region": "GE",
+    "geo.placename": "Georgia",
+    "geo.position": "41.7151;44.8271", // თბილისის კოორდინატები
+    ICBM: "41.7151, 44.8271",
+  },
   openGraph: {
     type: "website",
     locale: "ka_GE",
-    url: "https://soulart.ge/",
-    siteName: "soulart",
-    title: "soulart",
+    url: "https://Soulart.ge/",
+    siteName: "Soulart",
+    title: "Soulart - სანადირო და სათევზაო აღჭურვილობის მაღაზია საქართველოში",
+    description:
+      "საუკეთესო სანადირო და სათევზაო აღჭურვილობა, თოვლისთვის, შოტლანდიისთვის, ნაცარი პროდუქტები. ხარისხი, სანდოობა, ფასი",
     images: [
       {
-        url: "/van%20gog.jpg",
+        url: "/logo.png",
         width: 1200,
         height: 630,
-        alt: "SoulArt Sharing Image",
+        alt: "Soulart - სანადირო და სათევზაო აღჭურვილობის მაღაზია",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "SoulArt",
+    title: "Soulart - სანადირო და სათევზაო აღჭურვილობის მაღაზია",
     description:
-      "SoulArt - ნახატების ონლაინ პლატფორმა უნიკალური ხელოვნების ნიმუშებისთვის.",
-    images: ["/van%20gog.jpg"],
+      "სანადირო და სათევზაო აღჭურვილობის საუკეთესო არჩევანი საქართველოში",
+    images: ["/logo.png"],
   },
 };
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
     <html lang="en">
       <head>
-        {/* Facebook SDK - Use data-appid instead of appId for HTML attribute compatibility */}
+        {/* Favicon links */}
+        <link rel="icon" href="/logo.png" />
+        <link rel="apple-touch-icon" href="/logo.png" />
+        <link rel="shortcut icon" href="/logo.png" />
+        <link rel="mask-icon" href="/logo.png" color="#000000" />
+        <meta name="msapplication-TileImage" content="/logo.png" />
+        {/* Facebook SDK - Fix appId to lowercase appid */}
         <script
           async
           defer
           crossOrigin="anonymous"
-          src={`https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v13.0&appId=${process.env.NEXT_PUBLIC_FACEBOOK_APP_ID}&autoLogAppEvents=1`}
-          data-appid={process.env.NEXT_PUBLIC_FACEBOOK_APP_ID}
+          src={`https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v13.0&appid=${process.env.NEXT_PUBLIC_FACEBOOK_APP_ID}&autoLogAppEvents=1`}
         />
         {/* Remove the problematic prefetch links */}
+        {/* Add Google Fonts link */}
+        {/* <link
+          href="https://fonts.googleapis.com/css2?family=Fira+Sans:wght@400;500;600;700&display=swap"
+          rel="stylesheet"
+        /> */}
       </head>
       <body
-        className={`${satoshi.variable} antialiased min-h-screen flex flex-col`}
+        className={`${satoshi.variable} antialiased min-h-screen flex flex-col overflow-x-hidden`}
+        style={{ maxWidth: "100vw" }}
       >
+        {/* <LandingPage /> */}
         <Providers>
           <AuthProvider>
             <CartProvider>
               <CheckoutProvider>
                 <LanguageProvider>
-                  <SiteTimer />
                   <Header />
-                  <main className="flex-1">{children}</main>
+                  {children}
                   <Footer />
                 </LanguageProvider>
               </CheckoutProvider>
             </CartProvider>
           </AuthProvider>
         </Providers>
+        <MessengerChatWrapper />
+
+        {/* Google Analytics */}
+        <GoogleAnalytics />
+
+        {/* Structured Data */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(organizationSchema),
+          }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(websiteSchema),
+          }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(storeSchema),
+          }}
+        />
       </body>
     </html>
   );

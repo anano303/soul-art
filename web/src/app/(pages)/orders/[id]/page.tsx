@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { fetchWithAuth } from "@/lib/fetch-with-auth";
 import { useParams } from "next/navigation";
 import { OrderDetails } from "@/modules/orders/components/order-details";
+import HeartLoading from "@/components/HeartLoading/HeartLoading";
 
 export default function OrderPage() {
   const params = useParams();
@@ -18,7 +19,7 @@ export default function OrderPage() {
   });
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return <HeartLoading size="medium" />;
   }
 
   if (!order) {
