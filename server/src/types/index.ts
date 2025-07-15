@@ -1,14 +1,35 @@
 import { Role } from './role.enum';
 
 export enum MainCategory {
-  PAINTINGS = 'PAINTINGS',
-  HANDMADE = 'HANDMADE',
+  CLOTHING = 'CLOTHING',
+  ACCESSORIES = 'ACCESSORIES',
+  FOOTWEAR = 'FOOTWEAR',
+  SWIMWEAR = 'SWIMWEAR',
+}
+
+export enum AgeGroup {
+  ADULTS = 'ADULTS',
+  KIDS = 'KIDS',
 }
 
 export interface CategoryStructure {
   main: MainCategory;
   sub: string;
+  subEn?: string; // English translation of sub category
+  ageGroup?: string;
+  size?: string;
+  color?: string;
+  colorEn?: string; // English translation of color
 }
+
+export interface ProductVariant {
+  size: string;
+  color: string;
+  colorEn?: string; // English translation of color
+  stock: number;
+  sku?: string;
+}
+
 export interface Product {
   _id: string;
   user: User;
@@ -17,11 +38,22 @@ export interface Product {
   images: string[];
   description: string;
   descriptionEn?: string;
-  brand: string;
+  hashtags?: string[]; // SEO hashtags for better search visibility
+  brand?: string;
   brandLogo: string;
-  category: string; // Make sure this exists
+  category: string; // Legacy field  // New category system fields
+  mainCategory?: string | any; // Reference to Category
+  mainCategoryEn?: string | any; // English translation of mainCategory
+  subCategory?: string | any; // Reference to SubCategory
+  subCategoryEn?: string | any; // English translation of subCategory
+  ageGroup?: string;
+  size?: string;
+  color?: string;
+  colorEn?: string; // English translation of color
+  categoryStructure?: CategoryStructure; // Legacy field
   price: number;
-  countInStock: number;
+  countInStock: number; // Legacy field
+  variants?: ProductVariant[]; // New field for inventory by size/color
   rating: number;
   numReviews: number;
   reviews: Review[];
@@ -32,6 +64,7 @@ export interface Product {
   deliveryType?: 'SELLER' | 'SoulArt'; // Corrected from 'SOULART' to 'SoulArt'
   minDeliveryDays?: number;
   maxDeliveryDays?: number;
+  videoDescription?: string; // YouTube embed code or URL
   dimensions?: {
     width?: number;
     height?: number;

@@ -430,6 +430,15 @@ export class UsersService {
     }
   }
 
+  async uploadImage(filePath: string, fileBuffer: Buffer): Promise<string> {
+    try {
+      return await this.awsS3Service.uploadImage(filePath, fileBuffer);
+    } catch (error) {
+      this.logger.error(`Failed to upload image: ${error.message}`);
+      throw new BadRequestException('Failed to upload image: ' + error.message);
+    }
+  }
+
   async getProfileData(userId: string) {
     const user = await this.userModel.findById(userId, { password: 0 });
 

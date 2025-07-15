@@ -9,25 +9,20 @@ import {
   Query,
   UseGuards,
   UseInterceptors,
-  UploadedFile,
   UploadedFiles,
-  Res,
   BadRequestException,
   InternalServerErrorException,
   UnauthorizedException,
+  Res,
 } from '@nestjs/common';
 import { RolesGuard } from '@/guards/roles.guard';
 import { JwtAuthGuard } from '@/guards/jwt-auth.guard';
-import { ProductDto } from '../dtos/product.dto';
+import { ProductDto, FindAllProductsDto } from '../dtos/product.dto';
 import { ReviewDto } from '../dtos/review.dto';
 import { ProductsService } from '../services/products.service';
 import { UserDocument } from '@/users/schemas/user.schema';
 import { CurrentUser } from '@/decorators/current-user.decorator';
-import {
-  FileFieldsInterceptor,
-  FileInterceptor,
-  FilesInterceptor,
-} from '@nestjs/platform-express';
+import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { AppService } from '@/app/services/app.service';
 import { ProductExpertAgent } from '@/ai/agents/product-expert.agent';
 import { Response } from 'express';
@@ -35,8 +30,10 @@ import { ChatRequest } from '@/types/agents';
 import { Roles } from '@/decorators/roles.decorator';
 import { Role } from '@/types/role.enum';
 import { ProductStatus } from '../schemas/product.schema';
-import { MainCategory } from '@/types';
+import { AgeGroup } from '@/types';
+import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
 
+@ApiTags('products')
 @Controller('products')
 export class ProductsController {
   constructor(
@@ -46,6 +43,7 @@ export class ProductsController {
   ) {}
 
   @Get()
+  @ApiOperation({ summary: 'Get products with filters' })
   getProducts(
     @Query('keyword') keyword: string,
     @Query('page') page: string,
@@ -55,20 +53,37 @@ export class ProductsController {
     @Query('subCategory') subCategory: string,
     @Query('sortBy') sortBy: string,
     @Query('sortDirection') sortDirection: 'asc' | 'desc',
+    @Query('ageGroup') ageGroup: string,
+    @Query('size') size: string,
+    @Query('color') color: string,
+    @Query('discounted') discounted: string,
+    @Query('includeVariants') includeVariants: string,
   ) {
-    console.log('Getting products with mainCategory:', mainCategory);
-    return this.productsService.findMany(
+    console.log('Getting products with filters:', {
+      mainCategory,
+      subCategory,
+      ageGroup,
+      size,
+      color,
+      discounted,
+    });
+
+    return this.productsService.findMany({
       keyword,
       page,
       limit,
-      undefined,
-      ProductStatus.APPROVED,
+      status: ProductStatus.APPROVED,
       brand,
       mainCategory,
       subCategory,
       sortBy,
       sortDirection,
-    );
+      ageGroup,
+      size,
+      color,
+      discounted: discounted === 'true',
+      includeVariants: includeVariants === 'true',
+    });
   }
 
   @Get('user')
@@ -80,12 +95,14 @@ export class ProductsController {
     @Query('page') page: string,
     @Query('limit') limit: string,
   ) {
-    return this.productsService.findMany(
+    return this.productsService.findMany({
       keyword,
       page,
       limit,
-      user.role === Role.Admin ? undefined : user,
-    );
+      user: user.role === Role.Admin ? undefined : user,
+      // Add this to ensure we get populated category data
+      includeVariants: true,
+    });
   }
 
   @Get('pending')
@@ -96,14 +113,66 @@ export class ProductsController {
     return this.productsService.findByStatus(ProductStatus.PENDING);
   }
 
+  @Get('brands')
+  @ApiOperation({ summary: 'Get all available brands' })
+  async getBrands() {
+    return this.productsService.findAllBrands();
+  }
+
   @Get('topRated')
-  getTopRatedProducts() {
-    return this.productsService.findTopRated();
+  async getTopRatedProducts() {
+    const products = await this.productsService.findTopRated();
+    // Return in a consistent format for the frontend
+    return {
+      items: products,
+      total: products.length,
+      page: 1,
+      pages: 1,
+    };
   }
 
   @Get(':id')
+  @ApiOperation({ summary: 'Get product by ID' })
+  @ApiParam({ name: 'id', description: 'Product ID' })
   getProduct(@Param('id') id: string) {
     return this.productsService.findById(id);
+  }
+
+  @Get(':id/variants')
+  @ApiOperation({ summary: 'Get available sizes and colors for a product' })
+  @ApiParam({ name: 'id', description: 'Product ID' })
+  @ApiResponse({
+    status: 200,
+    description: 'Returns available sizes, colors and variants',
+    schema: {
+      properties: {
+        sizes: { type: 'array', items: { type: 'string' } },
+        colors: { type: 'array', items: { type: 'string' } },
+        variants: {
+          type: 'array',
+          items: {
+            type: 'object',
+            properties: {
+              size: { type: 'string' },
+              color: { type: 'string' },
+              stock: { type: 'number' },
+              sku: { type: 'string' },
+            },
+          },
+        },
+        hasVariants: { type: 'boolean' },
+        countInStock: { type: 'number' },
+      },
+    },
+  })
+  @ApiResponse({ status: 404, description: 'Product not found' })
+  getProductVariants(@Param('id') id: string) {
+    return this.productsService.getProductVariants(id);
+  }
+
+  @Get('find-all')
+  async findAll(@Query() query: FindAllProductsDto) {
+    return this.productsService.findAll(query);
   }
 
   @UseGuards(RolesGuard)
@@ -118,14 +187,8 @@ export class ProductsController {
   @UseInterceptors(
     FileFieldsInterceptor(
       [
-        {
-          name: 'images',
-          maxCount: 10,
-        },
-        {
-          name: 'brandLogo',
-          maxCount: 1,
-        },
+        { name: 'images', maxCount: 10 },
+        { name: 'brandLogo', maxCount: 1 },
       ],
       {
         fileFilter: (req, file, cb) => {
@@ -154,9 +217,6 @@ export class ProductsController {
   ) {
     const files = allFiles.images;
     const { brandLogo } = allFiles;
-    console.log('Received files:', files);
-    console.log('Received brand logo:', brandLogo);
-    console.log('Received product data:', productData);
 
     if (!files || files.length === 0) {
       throw new BadRequestException('At least one image is required');
@@ -170,34 +230,80 @@ export class ProductsController {
       let brandLogoUrl = null;
 
       if (brandLogo && brandLogo.length > 0) {
-        console.log('Processing brand logo file upload');
         brandLogoUrl = await this.appService.uploadImageToCloudinary(
           brandLogo[0],
         );
       } else if (productData.brandLogoUrl) {
-        console.log('Using provided brand logo URL:', productData.brandLogoUrl);
         brandLogoUrl = productData.brandLogoUrl;
       }
 
-      console.log('Final brand logo URL:', brandLogoUrl);
-      console.log('Creating product with data:', {
-        ...productData,
-        user,
-        images: imageUrls,
-        brandLogo: brandLogoUrl,
-      });
+      // Parse JSON arrays for attributes if they're strings
+      let ageGroups = productData.ageGroups;
+      let sizes = productData.sizes;
+      let colors = productData.colors;
+      let hashtags = productData.hashtags;
 
+      if (typeof ageGroups === 'string') {
+        try {
+          ageGroups = JSON.parse(ageGroups);
+        } catch (e) {
+          ageGroups = [];
+        }
+      }
+
+      if (typeof sizes === 'string') {
+        try {
+          sizes = JSON.parse(sizes);
+        } catch (e) {
+          sizes = [];
+        }
+      }
+
+      if (typeof colors === 'string') {
+        try {
+          colors = JSON.parse(colors);
+        } catch (e) {
+          colors = [];
+        }
+      }
+
+      if (typeof hashtags === 'string') {
+        try {
+          hashtags = JSON.parse(hashtags);
+        } catch (e) {
+          hashtags = [];
+        }
+      }
+
+      console.log('Parsed hashtags:', hashtags);
+      console.log('ProductData hashtags:', productData.hashtags);
+
+      // Extract the main category data
+      const {
+        mainCategory,
+        subCategory,
+        videoDescription,
+        ...otherProductData
+      } = productData;
+
+      // Create the product with proper category references
       return this.productsService.create({
-        ...productData,
-        categoryStructure:
-          typeof productData.categoryStructure === 'string'
-            ? JSON.parse(productData.categoryStructure)
-            : productData.categoryStructure,
+        ...otherProductData,
+        // Keep legacy fields for backward compatibility
+        category: otherProductData.category || 'Other',
+        // New category system
+        mainCategory,
+        subCategory,
+        ageGroups,
+        sizes,
+        colors,
+        hashtags,
         user,
         images: imageUrls,
         brandLogo: brandLogoUrl,
+        videoDescription,
       });
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error creating product:', error);
       throw new InternalServerErrorException(
         'Failed to process images or create product ',
@@ -218,15 +324,14 @@ export class ProductsController {
   async updateProduct(
     @Param('id') id: string,
     @CurrentUser() user: UserDocument,
-    @Body() productData: Omit<ProductDto, 'images'>,
+    @Body()
+    productData: Omit<ProductDto, 'images'> & { existingImages?: string }, // Modified type to include existingImages
     @UploadedFiles()
     files: {
       images?: Express.Multer.File[];
       brandLogo?: Express.Multer.File[];
     },
   ) {
-    console.log('Update request received:', { id, productData, files });
-
     const product = await this.productsService.findById(id);
     if (
       user.role !== Role.Admin &&
@@ -255,33 +360,99 @@ export class ProductsController {
         brandLogoUrl = productData.brandLogoUrl;
       }
 
-      // Handle category structure if it exists in the request
-      let categoryStructure;
-      if (productData.categoryStructure) {
+      // Parse JSON arrays for attributes if they're strings
+      let ageGroups = productData.ageGroups;
+      let sizes = productData.sizes;
+      let colors = productData.colors;
+      let hashtags = productData.hashtags;
+
+      if (typeof ageGroups === 'string') {
         try {
-          // If it's a string (from form data), parse it
-          if (typeof productData.categoryStructure === 'string') {
-            categoryStructure = JSON.parse(productData.categoryStructure);
-          } else {
-            categoryStructure = productData.categoryStructure;
-          }
-        } catch (error) {
-          console.error('Error parsing category structure:', error);
+          ageGroups = JSON.parse(ageGroups);
+        } catch (e) {
+          ageGroups = [];
         }
       }
 
+      if (typeof sizes === 'string') {
+        try {
+          sizes = JSON.parse(sizes);
+        } catch (e) {
+          sizes = [];
+        }
+      }
+
+      if (typeof colors === 'string') {
+        try {
+          colors = JSON.parse(colors);
+        } catch (e) {
+          colors = [];
+        }
+      }
+
+      if (typeof hashtags === 'string') {
+        try {
+          hashtags = JSON.parse(hashtags);
+        } catch (e) {
+          hashtags = [];
+        }
+      }
+
+      // Handle existing images
+      let existingImages = [];
+      if (productData.existingImages) {
+        try {
+          existingImages = JSON.parse(productData.existingImages as string);
+        } catch (e) {
+          console.error('Error parsing existingImages:', e);
+        }
+      }
+
+      // Combine existing images with new uploads if any
+      const finalImages = imageUrls
+        ? [...existingImages, ...imageUrls]
+        : existingImages.length > 0
+          ? existingImages
+          : product.images; // Keep original images if no new ones provided
+
+      // Remove user property if it exists in productData to avoid schema conflicts
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const {
+        user: userFromData,
+        existingImages: _,
+        ...productDataWithoutUser
+      } = productData as any;
+
+      // Explicitly handle mainCategory and subCategory to ensure they are updated properly
+      const mainCategory =
+        productData.mainCategory !== undefined
+          ? productData.mainCategory
+          : product.mainCategory;
+
+      const subCategory =
+        productData.subCategory !== undefined
+          ? productData.subCategory
+          : product.subCategory;
+
+      const parseVariants =
+        typeof productData.variants === 'string'
+          ? JSON.parse(productData.variants)
+          : productData.variants;
+
+      // Create update data object
       const updateData = {
-        ...productData,
-        ...(imageUrls && { images: imageUrls }),
+        ...productDataWithoutUser,
+        mainCategory,
+        subCategory,
+        images: finalImages,
         ...(brandLogoUrl && { brandLogo: brandLogoUrl }),
-        ...(categoryStructure && { categoryStructure }),
         ...(user.role === Role.Seller && { status: ProductStatus.PENDING }),
       };
 
-      console.log('Updating product with data:', updateData);
+      console.log('UPDATING PRODUCT WITH DATA:', updateData);
       const updatedProduct = await this.productsService.update(id, updateData);
+      console.log('Updated product:', updatedProduct);
 
-      console.log('Product updated successfully:', updatedProduct);
       return updatedProduct;
     } catch (error) {
       console.error('Update error:', error);
@@ -294,12 +465,18 @@ export class ProductsController {
 
   @UseGuards(JwtAuthGuard)
   @Put(':id/review')
-  createReview(
+  async createReview(
     @Param('id') id: string,
     @Body() { rating, comment }: ReviewDto,
     @CurrentUser() user: UserDocument,
   ) {
-    return this.productsService.createReview(id, user, rating, comment);
+    try {
+      return await this.productsService.createReview(id, user, rating, comment);
+    } catch (error) {
+      console.log('Review error:', error);
+      // Re-throw the error to maintain the same behavior for the client
+      throw error;
+    }
   }
 
   @Post('agent/chat')
@@ -323,5 +500,47 @@ export class ProductsController {
     }: { status: ProductStatus; rejectionReason?: string },
   ) {
     return this.productsService.updateStatus(id, status, rejectionReason);
+  }
+
+  @Get('colors')
+  @ApiOperation({ summary: 'Get all unique colors used in products' })
+  @ApiResponse({
+    status: 200,
+    description: 'Returns all unique colors',
+    schema: {
+      type: 'array',
+      items: { type: 'string' },
+    },
+  })
+  getAllColors() {
+    return this.productsService.getAllColors();
+  }
+
+  @Get('sizes')
+  @ApiOperation({ summary: 'Get all unique sizes used in products' })
+  @ApiResponse({
+    status: 200,
+    description: 'Returns all unique sizes',
+    schema: {
+      type: 'array',
+      items: { type: 'string' },
+    },
+  })
+  getAllSizes() {
+    return this.productsService.getAllSizes();
+  }
+
+  @Get('age-groups')
+  @ApiOperation({ summary: 'Get all unique age groups used in products' })
+  @ApiResponse({
+    status: 200,
+    description: 'Returns all unique age groups',
+    schema: {
+      type: 'array',
+      items: { type: 'string' },
+    },
+  })
+  getAllAgeGroups() {
+    return this.productsService.getAllAgeGroups();
   }
 }

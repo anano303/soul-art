@@ -19,6 +19,9 @@ export class Order {
         qty: { required: true, type: Number },
         image: { required: true, type: String },
         price: { required: true, type: Number },
+        size: { required: false, type: String },
+        color: { required: false, type: String },
+        ageGroup: { required: false, type: String },
         productId: {
           type: mongoose.Schema.Types.ObjectId,
           required: true,
@@ -91,6 +94,29 @@ export class Order {
 
   @Prop({ required: false })
   deliveredAt!: string;
+
+  @Prop({ required: false })
+  cancelledAt!: Date;
+
+  @Prop({ required: false, unique: true, sparse: true })
+  externalOrderId!: string;
+
+  @Prop({
+    type: String,
+    enum: ['pending', 'paid', 'delivered', 'cancelled'],
+    default: 'pending',
+  })
+  status!: string;
+
+  @Prop({ required: false })
+  statusReason!: string;
+
+  @Prop({
+    type: Date,
+    default: () => new Date(Date.now() + 10 * 60 * 1000), // 10 minutes from now
+    // Removed TTL index - we handle expiration manually via cron job
+  })
+  stockReservationExpires!: Date;
 }
 
 export const OrderSchema = SchemaFactory.createForClass(Order);
