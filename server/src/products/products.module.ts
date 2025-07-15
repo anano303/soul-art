@@ -1,4 +1,4 @@
-import { Logger, Module, OnModuleInit } from '@nestjs/common';
+import { Logger, Module, OnModuleInit, forwardRef } from '@nestjs/common';
 import { ProductsService } from './services/products.service';
 import { ProductsController } from './controller/products.controller';
 import { InjectModel, MongooseModule, getModelToken } from '@nestjs/mongoose';
@@ -65,7 +65,6 @@ export class IndexCleanupService implements OnModuleInit {
   }
 }
 
-
 @Module({
   imports: [
     MongooseModule.forFeatureAsync([
@@ -91,8 +90,9 @@ export class IndexCleanupService implements OnModuleInit {
       },
     ]),
     CloudinaryModule,
+    forwardRef(() => AiModule),
   ],
-  providers: [ProductsService, AppService, IndexCleanupService, ProductExpertAgent],
+  providers: [ProductsService, AppService, IndexCleanupService],
   controllers: [ProductsController],
   exports: [
     ProductsService,
