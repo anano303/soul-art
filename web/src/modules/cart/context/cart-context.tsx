@@ -16,14 +16,32 @@ interface CartContextType {
   items: CartItem[];
   loading: boolean;
   addItem: (productId: string, qty: number) => Promise<void>;
-  removeItem: (productId: string) => Promise<void>;
-  updateQuantity: (productId: string, qty: number) => Promise<void>;
+  removeItem: (
+    productId: string,
+    size?: string,
+    color?: string,
+    ageGroup?: string
+  ) => Promise<void>;
+  updateQuantity: (
+    productId: string,
+    qty: number,
+    size?: string,
+    color?: string,
+    ageGroup?: string
+  ) => Promise<void>;
   clearCart: () => Promise<void>;
+  addToCart: (
+    productId: string,
+    quantity?: number,
+    size?: string,
+    color?: string,
+    ageGroup?: string,
+    price?: number
+  ) => Promise<void>;
+  totalItems: number;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
-
-const CART_STORAGE_KEY = "cart_items";
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
@@ -31,46 +49,44 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const { user } = useUser();
   const { toast } = useToast();
 
+  const totalItems = items.reduce((total, item) => total + item.qty, 0);
+
   const addItem = useCallback(
     async (productId: string, qty: number) => {
+      // თუ მომხმარებელი არაა ავტორიზებული, გადავიყვანოთ ლოგინ გვერდზე
+      if (!user) {
+        console.log("User not authenticated, redirecting to login");
+        window.location.href =
+          "/login?redirect=" + encodeURIComponent(window.location.pathname);
+        // Promise რომ არ გაგრძელდეს
+        throw new Error("User not authenticated");
+      }
+
       setLoading(true);
       try {
-        if (user) {
-          const { data } = await apiClient.post("/cart/items", {
-            productId,
-            qty,
-          });
-          setItems(data.items);
-          toast({
-            title: "Item added to cart",
-            description: "Your item has been added successfully.",
-          });
-        } else {
-          const response = await apiClient.get(`/products/${productId}`);
-          const product = response.data;
+        const { data } = await apiClient.post("/cart/items", {
+          productId,
+          qty,
+        });
+        setItems(data.items);
 
-          setItems((prevItems) => {
-            const existingItem = prevItems.find(
-              (item) => item.productId === productId
-            );
-            if (existingItem) {
-              return prevItems.map((item) =>
-                item.productId === productId ? { ...item, qty } : item
-              );
-            } else {
-              return [
-                ...prevItems,
-                { ...product, productId: product._id, qty },
-              ];
-            }
-          });
-
-          toast({
-            title: "Item added to cart",
-            description: "Your item has been saved locally.",
-          });
-        }
+        // მხოლოდ წარმატებული ოპერაციის შემდეგ ვაჩვენოთ toast
+        toast({
+          title: "პროდუქტი დაემატა",
+          description: "პროდუქტი წარმატებით დაემატა კალათაში",
+        });
       } catch (error) {
+        // თუ 401 შეცდომაა (არაავტორიზებული), გადავიყვანოთ ლოგინზე
+        if (
+          (error as { response?: { status?: number } })?.response?.status ===
+          401
+        ) {
+          console.log("Authentication error (401), redirecting to login");
+          window.location.href =
+            "/login?redirect=" + encodeURIComponent(window.location.pathname);
+          return;
+        }
+
         toast({
           title: "Error adding item",
           description: "There was a problem adding your item.",
@@ -84,52 +100,167 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     [user, toast]
   );
 
-  const updateQuantity = useCallback(
-    async (productId: string, qty: number) => {
+  const addToCart = useCallback(
+    async (
+      productId: string,
+      quantity = 1,
+      size = "",
+      color = "",
+      ageGroup = "",
+      price?: number
+    ) => {
+      // თუ მომხმარებელი არაა ავტორიზებული, გადავიყვანოთ ლოგინ გვერდზე
+      if (!user) {
+        console.log("User not authenticated, redirecting to login");
+        window.location.href =
+          "/login?redirect=" + encodeURIComponent(window.location.pathname);
+        // Promise რომ არ გაგრძელდეს
+        throw new Error("User not authenticated");
+      }
+
       setLoading(true);
       try {
-        if (user) {
-          const { data } = await apiClient.put(`/cart/items/${productId}`, {
-            qty,
-          });
-          setItems(data.items);
-        } else {
-          setItems((prevItems) =>
-            prevItems.map((item) =>
-              item.productId === productId ? { ...item, qty } : item
-            )
-          );
+        const requestData: {
+          productId: string;
+          qty: number;
+          size: string;
+          color: string;
+          ageGroup: string;
+          price?: number;
+        } = {
+          productId,
+          qty: quantity,
+          size,
+          color,
+          ageGroup,
+        };
+
+        // Add price if provided (discounted price)
+        if (price !== undefined) {
+          requestData.price = price;
         }
+
+        const { data } = await apiClient.post("/cart/items", requestData);
+        setItems(data.items);
+
+        // მხოლოდ წარმატებული ოპერაციის შემდეგ ვაჩვენოთ toast
+        toast({
+          title: "პროდუქტი დაემატა",
+          description: "პროდუქტი წარმატებით დაემატა კალათაში",
+        });
       } catch (error) {
-        console.error("Error updating cart item:", error);
+        // თუ 401 შეცდომაა (არაავტორიზებული), გადავიყვანოთ ლოგინზე
+        if (
+          (error as { response?: { status?: number } })?.response?.status ===
+          401
+        ) {
+          console.log("Authentication error (401), redirecting to login");
+          window.location.href =
+            "/login?redirect=" + encodeURIComponent(window.location.pathname);
+          return;
+        }
+
+        toast({
+          title: "Error",
+          description: "პროდუქტის დამატება ვერ მოხერხდა",
+          variant: "destructive",
+        });
+        console.error("Error adding item to cart:", error);
+        throw error;
       } finally {
         setLoading(false);
       }
     },
-    [user]
+    [user, toast]
+  );
+
+  const updateQuantity = useCallback(
+    async (
+      productId: string,
+      qty: number,
+      size?: string,
+      color?: string,
+      ageGroup?: string
+    ) => {
+      // თუ მომხმარებელი არაა ავტორიზებული, გადავიყვანოთ ლოგინ გვერდზე
+      if (!user) {
+        console.log("User not authenticated, redirecting to login");
+        window.location.href =
+          "/login?redirect=" + encodeURIComponent(window.location.pathname);
+        return;
+      }
+
+      setLoading(true);
+      try {
+        const { data } = await apiClient.put(`/cart/items/${productId}`, {
+          qty,
+          size,
+          color,
+          ageGroup,
+        });
+        setItems(data.items);
+      } catch (error) {
+        // თუ 401 შეცდომაა (არაავტორიზებული), გადავიყვანოთ ლოგინზე
+        if (
+          (error as { response?: { status?: number } })?.response?.status ===
+          401
+        ) {
+          console.log("Authentication error (401), redirecting to login");
+          window.location.href =
+            "/login?redirect=" + encodeURIComponent(window.location.pathname);
+          return;
+        }
+
+        console.error("Error updating item quantity:", error);
+        toast({
+          title: "Error",
+          description: "There was a problem updating your item quantity.",
+          variant: "destructive",
+        });
+      } finally {
+        setLoading(false);
+      }
+    },
+    [user, toast]
   );
 
   const removeItem = useCallback(
-    async (productId: string) => {
+    async (
+      productId: string,
+      size?: string,
+      color?: string,
+      ageGroup?: string
+    ) => {
+      // თუ მომხმარებელი არაა ავტორიზებული, გადავიყვანოთ ლოგინ გვერდზე
+      if (!user) {
+        console.log("User not authenticated, redirecting to login");
+        window.location.href =
+          "/login?redirect=" + encodeURIComponent(window.location.pathname);
+        return;
+      }
+
       setLoading(true);
       try {
-        if (user) {
-          const { data } = await apiClient.delete(`/cart/items/${productId}`);
-          setItems(data.items);
-        } else {
-          setItems((prevItems) =>
-            prevItems.filter((item) => item.productId !== productId)
-          );
-        }
-        toast({
-          title: "Item removed",
-          description: "The item has been removed from your cart.",
+        const { data } = await apiClient.delete(`/cart/items/${productId}`, {
+          data: { size, color, ageGroup },
         });
+        setItems(data.items);
       } catch (error) {
+        // თუ 401 შეცდომაა (არაავტორიზებული), გადავიყვანოთ ლოგინზე
+        if (
+          (error as { response?: { status?: number } })?.response?.status ===
+          401
+        ) {
+          console.log("Authentication error (401), redirecting to login");
+          window.location.href =
+            "/login?redirect=" + encodeURIComponent(window.location.pathname);
+          return;
+        }
+
         console.error("Error removing item from cart:", error);
         toast({
-          title: "Error removing item",
-          description: "There was a problem removing the item.",
+          title: "Error",
+          description: "There was a problem removing your item from the cart.",
           variant: "destructive",
         });
       } finally {
@@ -140,17 +271,33 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   );
 
   const clearCart = useCallback(async () => {
+    // თუ მომხმარებელი არაა ავტორიზებული, გადავიყვანოთ ლოგინ გვერდზე
+    if (!user) {
+      console.log("User not authenticated, redirecting to login");
+      window.location.href =
+        "/login?redirect=" + encodeURIComponent(window.location.pathname);
+      return;
+    }
+
     setLoading(true);
     try {
-      if (user) {
-        await apiClient.delete("/cart");
-      }
+      await apiClient.delete("/cart");
       setItems([]);
       toast({
         title: "Cart cleared",
         description: "All items have been removed from your cart.",
       });
     } catch (error) {
+      // თუ 401 შეცდომაა (არაავტორიზებული), გადავიყვანოთ ლოგინზე
+      if (
+        (error as { response?: { status?: number } })?.response?.status === 401
+      ) {
+        console.log("Authentication error (401), redirecting to login");
+        window.location.href =
+          "/login?redirect=" + encodeURIComponent(window.location.pathname);
+        return;
+      }
+
       console.error("Error clearing cart:", error);
       toast({
         title: "Error clearing cart",
@@ -162,76 +309,47 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     }
   }, [user, toast]);
 
-  const mergeCarts = useCallback(
-    async (localItems: CartItem[], serverItems: CartItem[]) => {
-      const serverItemsMap = new Map(
-        serverItems.map((item) => [item.productId, item])
-      );
-
-      for (const localItem of localItems) {
-        const serverItem = serverItemsMap.get(localItem.productId);
-        if (serverItem) {
-          await updateQuantity(
-            localItem.productId,
-            Math.max(localItem.qty, serverItem.qty)
-          );
-        } else {
-          await addItem(localItem.productId, localItem.qty);
-        }
-      }
-    },
-    [updateQuantity, addItem]
-  );
-
   useEffect(() => {
     const loadCart = async () => {
       setLoading(true);
       try {
         if (user) {
-          const localCart = localStorage.getItem(CART_STORAGE_KEY);
-          const localItems = localCart ? JSON.parse(localCart) : [];
-
+          // მხოლოდ ავტორიზებული მომხმარებლებისთვის ვტვირთავთ კალათას
           const { data } = await apiClient.get("/cart");
-
-          if (localItems.length > 0) {
-            toast({
-              title: "Syncing your cart...",
-              description: "We're adding your saved items to your account.",
-            });
-            await mergeCarts(localItems, data.items);
-            toast({
-              title: "Cart synced!",
-              description: "Your items have been saved to your account.",
-            });
-            localStorage.removeItem(CART_STORAGE_KEY);
-          } else {
-            setItems(data.items);
-          }
+          setItems(data.items || []);
         } else {
-          const storedCart = localStorage.getItem(CART_STORAGE_KEY);
-          if (storedCart) {
-            setItems(JSON.parse(storedCart));
-          }
+          // არაავტორიზებული მომხმარებლებისთვის კალათა ცარიელი უნდა იყოს
+          setItems([]);
         }
       } catch (error) {
         console.error("Error loading cart:", error);
+        // თუ 401 შეცდომაა, კალათა გავასუფთავოთ
+        if (
+          (error as { response?: { status?: number } })?.response?.status ===
+          401
+        ) {
+          setItems([]);
+        }
       } finally {
         setLoading(false);
       }
     };
 
     loadCart();
-  }, [user, mergeCarts, toast]);
-
-  useEffect(() => {
-    if (!user) {
-      localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(items));
-    }
-  }, [items, user]);
+  }, [user, toast]);
 
   return (
     <CartContext.Provider
-      value={{ items, loading, addItem, removeItem, updateQuantity, clearCart }}
+      value={{
+        items,
+        loading,
+        addItem,
+        removeItem,
+        updateQuantity,
+        clearCart,
+        addToCart,
+        totalItems,
+      }}
     >
       {children}
     </CartContext.Provider>

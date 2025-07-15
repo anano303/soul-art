@@ -1,61 +1,36 @@
 "use client";
 
 import { fetchWithAuth } from "@/lib/fetch-with-auth";
-import type { PaginatedResponse, Product } from "@/types";
+import type { Product } from "@/types";
+
+export interface ProductsResponse {
+  items?: Product[];
+  products?: Product[];
+  total: number;
+  page: number;
+  pages: number;
+}
 
 export async function getProducts(
-  page: number = 1,
-  limit: number = 10,
-  keyword?: string,
-  brand?: string,
-  mainCategory?: string,
-  subCategory?: string,
-  sortBy?: string,
-  sortDirection?: "asc" | "desc"
-): Promise<PaginatedResponse<Product>> {
-  try {
-    const searchParams = new URLSearchParams({
-      page: page.toString(),
-      limit: limit.toString(),
-    });
+  page = 1,
+  limit = 10,
+  params?: Record<string, string>
+): Promise<ProductsResponse> {
+  const searchParams = new URLSearchParams({
+    page: String(page),
+    limit: String(limit),
+    ...params,
+  });
 
-    if (keyword) {
-      searchParams.append("keyword", keyword);
-    }
+  const response = await fetchWithAuth(`/products?${searchParams.toString()}`);
+  const data = await response.json();
 
-    if (brand) {
-      searchParams.append("brand", brand);
-    }
-
-    if (mainCategory) {
-      searchParams.append("mainCategory", mainCategory);
-    }
-
-    if (subCategory) {
-      searchParams.append("subCategory", subCategory);
-    }
-
-    if (sortBy && sortDirection) {
-      searchParams.append("sortBy", sortBy);
-      searchParams.append("sortDirection", sortDirection);
-    }
-
-    const response = await fetchWithAuth(
-      `/products?${searchParams.toString()}`
-    );
-
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.message || "Failed to fetch products");
-    }
-    return response.json();
-  } catch (error) {
-    console.error("Error fetching products:", error);
-    return {
-      items: [],
-      total: 0,
-      page: 1,
-      pages: 1,
-    };
-  }
+  // Ensure consistent response structure
+  return {
+    items: data.items || data.products || [],
+    products: data.items || data.products || [],
+    total: data.total || 0,
+    page: data.page || 1,
+    pages: data.pages || 1,
+  };
 }

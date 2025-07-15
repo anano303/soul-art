@@ -1,8 +1,8 @@
 "use client";
 
 import { useCart } from "../context/cart-context";
-import { CartEmpty } from "./cart-empty";
-import { CartItem } from "./cart-item";
+import { CartEmpty } from "./components/cart-empty";
+import { CartItem } from "./components/cart-item";
 import { formatPrice } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import { useLanguage } from "@/hooks/LanguageContext";

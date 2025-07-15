@@ -2,18 +2,35 @@
   background-color: transparent;
   border: none;
   cursor: pointer;
-  font-size: 30px;
+  margin-top: 12px;
+}
+.cartIcon {
+  height: 50px;
+  width: 90px;
 }
 
 .cartIconsSpan {
   position: relative;
-  top: -23px;
-  right: -30px;
-  border-radius: 50%;
-  font-size: 22px;
+  top: -36px; 
+  right: -52px; 
+  border-radius: 20%; 
+  /* background-color: white; */
+  font-size: 24px; 
   font-style: bold;
-  color: yellow;
+  color: #2A5530;
   padding: 2px 4px;
+  
+  /* border: 2px solid green; */
 
-  border: 1px solid yellow;
+}
+@media screen and (max-width: 1000px) {
+  
+  .cartIconsSpan{
+    right: 0;
+    top: -20px;
+   
+    left: 32px;
+   
+  }
+  
 }

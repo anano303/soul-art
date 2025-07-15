@@ -7,12 +7,12 @@ import { useCheckout } from "../context/checkout-context";
 import { useRouter } from "next/navigation";
 import { apiClient } from "@/lib/api-client";
 import { useToast } from "@/hooks/use-toast";
-import { FaPaypal } from "react-icons/fa";
-import { CreditCard } from "lucide-react";
+// import { FaPaypal } from "react-icons/fa";
+// import { CreditCard } from "lucide-react";
 import "./payment-form.css";
 
 const formSchema = z.object({
-  paymentMethod: z.enum(["PayPal", "Stripe"], {
+  paymentMethod: z.enum(["PayPal", "Stripe", "BOG"], {
     required_error: "Please select a payment method.",
   }),
 });
@@ -25,7 +25,7 @@ export function PaymentForm() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      paymentMethod: "PayPal",
+      paymentMethod: "BOG",
     },
   });
 
@@ -62,8 +62,9 @@ export function PaymentForm() {
           <div className="form-item">
             <label className="form-label">Payment Method</label>
             <div className="form-control">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="form-item">
+              <div className="grid grid-cols-1 gap-4">
+                {/* PayPal Option - Temporarily Commented */}
+                {/* <div className="form-item">
                   <div className="form-control">
                     <label
                       htmlFor="PayPal"
@@ -74,7 +75,7 @@ export function PaymentForm() {
                         value="PayPal"
                         id="PayPal"
                         className="sr-only"
-                        onChange={form.register("paymentMethod").onChange}
+                        {...form.register("paymentMethod")}
                       />
                       <div className="flex flex-col items-center space-y-2">
                         <FaPaypal className="h-6 w-6" />
@@ -82,8 +83,10 @@ export function PaymentForm() {
                       </div>
                     </label>
                   </div>
-                </div>
-                <div className="form-item">
+                </div> */}
+
+                {/* Stripe Option - Temporarily Commented */}
+                {/* <div className="form-item">
                   <div className="form-control">
                     <label
                       htmlFor="Stripe"
@@ -94,11 +97,44 @@ export function PaymentForm() {
                         value="Stripe"
                         id="Stripe"
                         className="sr-only"
-                        onChange={form.register("paymentMethod").onChange}
+                        {...form.register("paymentMethod")}
                       />
                       <div className="flex flex-col items-center space-y-2">
                         <CreditCard className="h-6 w-6" />
                         <span className="text-sm font-medium">Card</span>
+                      </div>
+                    </label>
+                  </div>
+                </div> */}
+                <div className="form-item">
+                  <div className="form-control">
+                    <label
+                      htmlFor="BOG"
+                      className="border rounded-lg p-4 cursor-pointer hover:border-primary [&:has(:checked)]:border-primary [&:has(:checked)]:bg-gradient-to-r [&:has(:checked)]:from-red-600 [&:has(:checked)]:to-pink-600 [&:has(:checked)]:text-white block transition-all duration-300"
+                      style={{
+                        fontFamily: '"ALK Life", "Georgia", serif',
+                      }}
+                    >
+                      <input
+                        type="radio"
+                        value="BOG"
+                        id="BOG"
+                        className="sr-only"
+                        {...form.register("paymentMethod")}
+                      />
+                      <div className="flex flex-col items-center space-y-2">
+                        <svg
+                          className="h-6 w-6"
+                          viewBox="0 0 24 24"
+                          fill="green"
+                          width={20}
+                          height={20}
+                        >
+                          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
+                        </svg>
+                        <span className="text-sm font-medium">
+                         ბარათით გადახდა
+                        </span>
                       </div>
                     </label>
                   </div>

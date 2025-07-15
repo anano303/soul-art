@@ -1,15 +1,20 @@
+import React from "react";
 import "./ProductCardSkeleton.css";
 
 export function ProductCardSkeleton() {
   return (
-    <div className="product-card">
-      <div className="product-image">
-        <div className="skeleton square"></div>
+    <div className="product-card-skeleton">
+      <div className="product-image-skeleton" />
+      <div className="product-info-skeleton">
+        <div className="product-details-skeleton">
+          <div className="skeleton title" />
+          <div className="skeleton subtitle" />
+          <div className="skeleton price" />
+        </div>
       </div>
-      <div className="product-details">
-        <div className="skeleton text-large"></div>
-        <div className="skeleton text-medium"></div>
-        <div className="skeleton text-small"></div>
+      <div className="cart-actions-skeleton">
+        <div className="skeleton qty" />
+        <div className="skeleton button" />
       </div>
     </div>
   );
