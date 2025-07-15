@@ -1,45 +1,55 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Schema as MongooseSchema } from 'mongoose';
 import { User } from '../../users/schemas/user.schema';
-import { CartItem, ShippingDetails } from '../../interfaces';
+import {
+  CartItem as CartItemInterface,
+  ShippingDetails,
+} from '../../interfaces';
 
 export type CartDocument = Cart & Document;
+
+@Schema()
+export class CartItem {
+  @Prop({ required: true, type: String })
+  productId: string;
+
+  @Prop({ required: true })
+  name: string;
+
+  @Prop({ required: false })
+  nameEn?: string;
+
+  @Prop({ required: true })
+  image: string;
+
+  @Prop({ required: true, default: 0 })
+  price: number;
+
+  @Prop({ required: true, default: 0 })
+  countInStock: number;
+
+  @Prop({ required: true, default: 1 })
+  qty: number;
+
+  @Prop({ required: false, type: String })
+  size?: string;
+
+  @Prop({ required: false, type: String })
+  color?: string;
+
+  @Prop({ required: false, type: String })
+  ageGroup?: string;
+}
+
+export const CartItemSchema = SchemaFactory.createForClass(CartItem);
 
 @Schema({ timestamps: true })
 export class Cart {
   @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'User', required: true })
   userId!: User;
 
-  @Prop([
-    {
-      productId: {
-        type: MongooseSchema.Types.ObjectId,
-        ref: 'Product',
-        required: true,
-      },
-      name: { type: String, required: true },
-      nameEn: { type: String, required: false },
-      image: { type: String, required: true },
-      price: { type: Number, required: true },
-      countInStock: { type: Number, required: true },
-      qty: { type: Number, required: true },
-    },
-  ])
+  @Prop({ type: [CartItemSchema], default: [] })
   items!: CartItem[];
-
-  @Prop({
-    type: {
-      address: String,
-      city: String,
-      postalCode: String,
-      country: String,
-    },
-    required: false,
-  })
-  shippingDetails?: ShippingDetails;
-
-  @Prop({ default: 'PayPal' })
-  paymentMethod!: string;
 
   @Prop({ default: 0 })
   itemsPrice!: number;

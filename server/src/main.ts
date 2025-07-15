@@ -8,24 +8,56 @@ import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
 import { join } from 'path';
 import * as fs from 'fs';
+import * as express from 'express';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
     logger: ['error', 'warn', 'debug', 'log', 'verbose'],
   });
 
+  // Configure express middleware for larger file uploads
+  app.use(express.json({ limit: '50mb' }));
+  app.use(express.urlencoded({ limit: '50mb', extended: true }));
+  app.use(express.raw({ limit: '50mb' }));
+
   app.use(helmet());
   app.use(cookieParser());
   app.enableCors({
-    origin: [
-      'https://soulart.ge',
-      'https://www.soulart.ge',
-      'http://localhost:3000',
-      'https://localhost:3000', // Added HTTPS local frontend
-      'http://localhost:4000', // Added HTTP local backend
-      'https://localhost:4000', // Added HTTPS local backend
-      /localhost/, // Fallback pattern for any localhost
-    ],
+    origin: (origin, callback) => {
+      const allowedOrigins = [
+        'https://www.soulart.vercel.app',
+        'https://soulart.ge',
+        'https://www.soulart.ge',
+        'https://soulart.vercel.app',
+        'https://soulart.vercel.app/home',
+        'https://soulart-web.vercel.app',
+        'https://www.soulart-web.vercel.app',
+        'https://soulart-git-main-aberoshvilis-projects.vercel.app',
+        'https://soulart-aberoshvilis-projects.vercel.app',
+        'http://localhost:3000',
+        'https://localhost:3000',
+        'http://localhost:4000',
+        'https://localhost:4000',
+        // Add development URLs that might be used
+        'http://127.0.0.1:3000',
+        'https://127.0.0.1:3000',
+        'http://127.0.0.1:4000',
+        'https://127.0.0.1:4000',
+      ];
+
+      // Allow requests with no origin (like mobile apps, curl requests)
+      if (
+        !origin ||
+        allowedOrigins.indexOf(origin) !== -1 ||
+        origin.match(/localhost/) ||
+        origin.includes('.vercel.app') // Allow all Vercel domains
+      ) {
+        callback(null, true);
+      } else {
+        console.warn(`CORS blocked origin: ${origin}`);
+        callback(new Error('Not allowed by CORS'), false);
+      }
+    },
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     credentials: true,
     allowedHeaders: [
@@ -34,7 +66,13 @@ async function bootstrap() {
       'forum-id',
       'Origin',
       'Accept',
+      'X-Requested-With',
+      'Access-Control-Request-Method',
+      'Access-Control-Request-Headers',
     ],
+    exposedHeaders: ['Content-Length', 'X-Kuma-Revision'],
+    preflightContinue: false,
+    optionsSuccessStatus: 204,
   });
 
   app.enableVersioning({
@@ -72,8 +110,8 @@ async function bootstrap() {
   }
 
   const config = new DocumentBuilder()
-    .setTitle('SoulArt  API')
-    .setDescription('SoulArt E-commerce REST API')
+    .setTitle('soulart  API')
+    .setDescription('soulart E-commerce REST API')
     .setVersion('1.0')
     .addBearerAuth()
     .build();
@@ -88,4 +126,5 @@ async function bootstrap() {
 
   console.log(`Application is running on: ${await app.getUrl()}`);
 }
+
 bootstrap();

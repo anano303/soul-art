@@ -7,8 +7,10 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Cart, CartDocument } from '../schemas/cart.schema';
 import { ProductsService } from '@/products/services/products.service';
-import { CartItem, ShippingDetails } from '../../interfaces';
+// import { CartItem, ShippingDetails } from '../../interfaces';
 import { UserDocument } from '@/users/schemas/user.schema';
+import { CartItem } from '@/types/cart';
+import { ShippingDetails } from '@/types/shipping';
 
 @Injectable()
 export class CartService {
@@ -26,6 +28,24 @@ export class CartService {
         items: [],
       });
     }
+    const productIds = cart.items.map((item) => item.productId);
+    const products = await this.productsService.findByIds(productIds);
+    cart.items = cart.items.map((item) => {
+      const product = products.find(
+        (p) => p._id.toString() === item.productId.toString(),
+      );
+      if (product) {
+        item.qty = Math.min(item.qty, product.countInStock);
+        item.countInStock =
+          product.variants.find(
+            (v) =>
+              v.size === item.size &&
+              v.color === item.color &&
+              v.ageGroup === item.ageGroup,
+          )?.stock || product.countInStock;
+      }
+      return item;
+    });
 
     return cart;
   }
@@ -36,7 +56,7 @@ export class CartService {
       0,
     );
     cart.taxPrice = Number((0.02 * cart.itemsPrice).toFixed(2));
-    cart.shippingPrice = cart.itemsPrice > 100 ? 0 : 10;
+    cart.shippingPrice = cart.itemsPrice > 100 ? 0 : 0;
     cart.totalPrice = cart.itemsPrice + cart.taxPrice + cart.shippingPrice;
     return cart;
   }
@@ -84,26 +104,49 @@ export class CartService {
     productId: string,
     qty: number,
     user: UserDocument,
+    size?: string,
+    color?: string,
+    ageGroup?: string,
+    price?: number,
   ): Promise<CartDocument> {
     const product = await this.productsService.findById(productId);
     if (!product) throw new NotFoundException('Product not found');
 
     const cart = await this.getCart(user);
+
+    // Check if we have this exact variant in the cart
     const existingItem = cart.items.find(
-      (item) => item.productId.toString() === productId,
+      (item) =>
+        item.productId.toString() === productId &&
+        item.size === size &&
+        item.color === color &&
+        item.ageGroup === ageGroup,
     );
+
+    console.log('Existing item:', product.variants, size, color, ageGroup);
 
     if (existingItem) {
       existingItem.qty = qty;
+      // Update price if provided (to handle discount changes)
+      if (price !== undefined) {
+        existingItem.price = price;
+      }
     } else {
       const cartItem: CartItem = {
         productId: product._id.toString(),
         name: product.name,
-        nameEn: product.nameEn, // Add nameEn field
+        nameEn: product.nameEn,
         image: product.images[0],
-        price: product.price,
-        countInStock: product.countInStock,
+        price: price ?? product.price, // Use provided price (discounted) or fallback to product price
+        countInStock:
+          product.variants?.find(
+            (v) =>
+              v.size === size && v.color === color && v.ageGroup === ageGroup,
+          )?.stock || product.countInStock,
         qty,
+        size,
+        color,
+        ageGroup,
       };
       cart.items.push(cartItem);
     }
@@ -115,11 +158,23 @@ export class CartService {
   async removeCartItem(
     productId: string,
     user: UserDocument,
+    size?: string,
+    color?: string,
+    ageGroup?: string,
   ): Promise<CartDocument> {
     const cart = await this.getCart(user);
+
+    // Filter items to remove the specific variant
     cart.items = cart.items.filter(
-      (item) => item.productId.toString() !== productId,
+      (item) =>
+        !(
+          item.productId.toString() === productId &&
+          (!size || item.size === size) &&
+          (!color || item.color === color) &&
+          (!ageGroup || item.ageGroup === ageGroup)
+        ),
     );
+
     this.calculatePrices(cart);
     return cart.save();
   }
@@ -128,15 +183,36 @@ export class CartService {
     productId: string,
     qty: number,
     user: UserDocument,
+    size?: string,
+    color?: string,
   ): Promise<CartDocument> {
     const cart = await this.getCart(user);
     const item = cart.items.find(
-      (item) => item.productId.toString() === productId,
+      (item) =>
+        item.productId.toString() === productId &&
+        item.size === size &&
+        item.color === color,
     );
 
     if (!item) throw new NotFoundException('Item not found in cart');
-    if (qty > item.countInStock)
-      throw new BadRequestException('Not enough stock');
+
+    // For products with variants, we need to check stock differently
+    const product = await this.productsService.findById(productId);
+    if (!product) throw new NotFoundException('Product not found');
+
+    // Check stock for variant
+    if (size && color && product.variants && product.variants.length > 0) {
+      const variant = product.variants.find(
+        (v) => v.size === size && v.color === color,
+      );
+      if (!variant) throw new NotFoundException('Variant not found');
+      if (qty > variant.stock)
+        throw new BadRequestException('Not enough stock for this variant');
+    } else {
+      // Fall back to general stock check
+      if (qty > item.countInStock)
+        throw new BadRequestException('Not enough stock');
+    }
 
     item.qty = qty;
     this.calculatePrices(cart);
@@ -160,10 +236,22 @@ export class CartService {
   }
 
   validatePaymentMethod(paymentMethod: string): string {
-    const validMethods = ['PayPal', 'Stripe'];
+    console.log('Received payment method:', paymentMethod);
+    console.log('Type of payment method:', typeof paymentMethod);
+
+    const validMethods = ['PayPal', 'Stripe', 'BOG'];
+    console.log('Valid methods:', validMethods);
+    console.log(
+      'Is payment method in valid methods?',
+      validMethods.includes(paymentMethod),
+    );
+
     if (!validMethods.includes(paymentMethod)) {
+      console.log('Payment method validation failed!');
       throw new BadRequestException('Invalid payment method');
     }
+
+    console.log('Payment method validation passed!');
     return paymentMethod;
   }
 }
