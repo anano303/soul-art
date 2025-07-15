@@ -189,12 +189,29 @@ export default function HomePageShop() {
                 >
                   <div className="section-header">
                     <h2
-                      className="section-title"
+                      className={`section-title ${
+                        categoryData.category === "ხელნაკეთი" ||
+                        categoryData.category === "Handmade"
+                          ? "category-handmade"
+                          : categoryData.category === "ნახატები" ||
+                            categoryData.category === "Paintings"
+                          ? "category-paintings"
+                          : ""
+                      }`}
                       ref={(el) => {
                         titleRefs.current[index] = el;
                       }}
                     >
                       {categoryData.category}
+                      {/* ემოჯი ეფექტი */}
+                      {(categoryData.category === "ხელნაკეთი ნივთები" ||
+                        categoryData.category === "Handmades") && (
+                        <span className="category-emoji">🎨</span>
+                      )}
+                      {(categoryData.category === "ნახატები" ||
+                        categoryData.category === "Paintings") && (
+                        <span className="category-emoji">🖼️</span>
+                      )}
                     </h2>
 
                     <div className="see-more-desktop see-more">

@@ -21,6 +21,7 @@ export function RegisterForm() {
   const { mutate: register, isPending } = useRegister();
   const [registerError, setRegisterError] = useState<string | null>(null);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
 
   const {
     register: registerField,
@@ -80,6 +81,10 @@ export function RegisterForm() {
     setRegisterError(null);
     if (!isVerified) {
       setErrorMessage(t("auth.pleaseVerifyEmail"));
+      return;
+    }
+    if (!agreedToTerms) {
+      setErrorMessage(t("auth.pleaseAgreeToTerms"));
       return;
     }
     setErrorMessage("");
@@ -213,10 +218,27 @@ export function RegisterForm() {
           </div>
         )}
 
+        <div className="checkbox-group">
+          <label className="checkbox-label">
+            <input
+              type="checkbox"
+              checked={agreedToTerms}
+              onChange={(e) => setAgreedToTerms(e.target.checked)}
+              className="checkbox-input"
+            />
+            <span className="checkbox-text">
+              {t("auth.agreeToTerms")}{" "}
+              <Link href="/privacy-policy" className="privacy-link">
+                {t("auth.privacyPolicy")}
+              </Link>
+            </span>
+          </label>
+        </div>
+
         <button
           type="submit"
           className="submit-btn"
-          disabled={isPending || !isVerified}
+          disabled={isPending || !isVerified || !agreedToTerms}
         >
           {isPending ? t("auth.creatingAccount") : t("auth.createAccount")}
         </button>

@@ -21,8 +21,8 @@ export default function PrivacyPolicy() {
           </h2>
           <p>
             {language === "en"
-              ? "We collect information you provide directly to us, such as when you create an account, make a purchase, or contact us. This includes your name, email address, phone number, shipping address, and payment information."
-              : "თქვენგან ვაგროვებთ იმ ინფორმაციას, რომელსაც პირდაპირ გვაწვდით — მაგალითად, როცა ქმნით ანგარიშს, ასრულებთ შეძენას ან გვიკავშირდებით. ეს შეიძლება მოიცავდეს თქვენს სახელს, ელფოსტის მისამართს, ტელეფონის ნომერს, მიწოდების მისამართს და გადახდის ინფორმაციას."}
+              ? "We collect information you provide directly to us when you create an account, purchase handmade artworks or paintings, list your art for sale, or contact us. This includes your name, email address, phone number, shipping address, payment information, and artwork details."
+              : "თქვენგან ვაგროვებთ იმ ინფორმაციას, რომელსაც პირდაპირ გვაწვდით — როცა ქმნით ანგარიშს, ყიდულობთ ხელნაკეთ ნაწარმოებებს ან ნახატებს, იტვირთავთ თქვენს ნამუშევრებს გასაყიდად, ან გვიკავშირდებით. ეს შეიძლება მოიცავდეს თქვენს სახელს, ელფოსტის მისამართს, ტელეფონის ნომერს, მიწოდების მისამართს, გადახდის ინფორმაციას და ნამუშევრის დეტალებს."}
           </p>
         </div>
 
@@ -35,8 +35,13 @@ export default function PrivacyPolicy() {
           <ul>
             <li>
               {language === "en"
-                ? "Process and fulfill your orders"
-                : "თქვენი შეკვეთების დამუშავება და შესრულება"}
+                ? "Process and fulfill your orders for handmade artwork and paintings"
+                : "ხელნაკეთი ნაწარმოებისა და ნახატების შეკვეთების დამუშავება და შესრულება"}
+            </li>
+            <li>
+              {language === "en"
+                ? "Connect artists and buyers on our marketplace"
+                : "ხელოვანებისა და მყიდველების დაკავშირება ჩვენს მარკეტპლეისზე"}
             </li>
             <li>
               {language === "en"
@@ -45,18 +50,18 @@ export default function PrivacyPolicy() {
             </li>
             <li>
               {language === "en"
-                ? "Provide customer support"
-                : "მომხმარებლის მხარდაჭერის უზრუნველყოფა"}
+                ? "Provide customer support for both buyers and sellers"
+                : "მომხმარებლისა და მყიდველების მხარდაჭერის უზრუნველყოფა"}
             </li>
             <li>
               {language === "en"
-                ? "Improve our website and services"
-                : "ჩვენი ვებსაიტის და სერვისების გაუმჯობესება"}
+                ? "Improve our platform and art marketplace services"
+                : "ჩვენი პლატფორმისა და ხელოვნების მარკეტპლეისის სერვისების გაუმჯობესება"}
             </li>
             <li>
               {language === "en"
-                ? "Send promotional emails (with your consent)"
-                : "სარეკლამო ელფოსტების გაგზავნა (თქვენი თანხმობით)"}
+                ? "Send promotional emails about new artworks (with your consent)"
+                : "სარეკლამო ელფოსტების გაგზავნა ახალი ნამუშევრების შესახებ (თქვენი თანხმობით)"}
             </li>
           </ul>
         </div>
@@ -69,8 +74,8 @@ export default function PrivacyPolicy() {
           </h2>
           <p>
             {language === "en"
-              ? "We do not sell, trade, or rent your personal information to third parties. We may share your information with trusted service providers who help us operate our business, such as payment processors and shipping companies, but only to the extent necessary to provide our services."
-              : "ჩვენ არ ვყიდით, არ ვცვლით და არ ვაქირავებთ თქვენს პირად ინფორმაციას მესამე მხარეებისთვის. შეიძლება გავაზიაროთ თქვენი ინფორმაცია სანდო სერვის პროვაიდერებთან, რომლებიც გვეხმარებიან ჩვენი ბიზნესის მართვაში, როგორიცაა გადახდის დამუშავებისა და მიწოდების კომპანიები, მაგრამ მხოლოდ იმ ფარგლებში, რომელიც საჭიროა ჩვენი სერვისების უზრუნველსაყოფად."}
+              ? "We do not sell, trade, or rent your personal information to third parties. We may share your information with trusted service providers who help us operate our art marketplace, such as payment processors, shipping companies, and artwork authentication services, but only to the extent necessary to provide our services."
+              : "ჩვენ არ ვყიდით, არ ვცვლით და არ ვაქირავებთ თქვენს პირად ინფორმაციას მესამე მხარეებისთვის. შეიძლება გავაზიაროთ თქვენი ინფორმაცია სანდო სერვის პროვაიდერებთან, რომლებიც გვეხმარებიან ჩვენი ხელოვნების მარკეტპლეისის მართვაში, როგორიცაა გადახდის დამუშავების კომპანიები, მიწოდების სერვისები და ნამუშევრების ავთენტიფიკაციის სერვისები, მაგრამ მხოლოდ იმ ფარგლებში, რომელიც საჭიროა ჩვენი სერვისების უზრუნველსაყოფად."}
           </p>
         </div>
 
@@ -115,11 +120,11 @@ export default function PrivacyPolicy() {
               : "თუ გაქვთ რაიმე კითხვა ამ კონფიდენციალურობის პოლიტიკასთან დაკავშირებით, გთხოვთ დაგვიკავშირდეთ:"}
           </p>
           <div className="contact-info">
-            <p>Email: info@myhunter.ge</p>
+            <p>Email: info@soulart.ge</p>
             <p>
               {language === "en"
-                ? "Phone: +995 555 123 456"
-                : "ტელეფონი: +995 555 123 456"}
+                ? "Phone: +995 551 00 00 59"
+                : "ტელეფონი: +995 551 00 00 59"}
             </p>
             <p>
               {language === "en"
@@ -146,8 +151,8 @@ export default function PrivacyPolicy() {
           <p>
             <strong>
               {language === "en"
-                ? "Effective Date: January 1, 2025"
-                : "ამოქმედების თარიღი: 1 ივნისი, 2025"}
+                ? "Effective Date: July 15, 2025"
+                : "ამოქმედების თარიღი: 15 ივლისი, 2025"}
             </strong>
           </p>
         </div>
