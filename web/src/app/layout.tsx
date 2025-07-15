@@ -23,24 +23,25 @@ export const metadata: Metadata = {
   metadataBase: new URL(
     process.env.NEXT_PUBLIC_CLIENT_URL || "https://Soulart.ge"
   ),
-  title: "Soulart - სანადირო და სათევზაო აღჭურვილობის მაღაზია საქართველოში",
+  title: "Soulart - ხელნაკეთი ნივთების და ნახატების მაღაზია საქართველოში",
   description:
-    "საუკეთესო სანადირო და სათევზაო აღჭურვილობა, თოვლისთვის, შოტლანდისთვის, ნაცარი პროდუქტები. ხარისხი, სანდოობა, ფასი. Best hunting and fishing equipment in Georgia",
+    "უნიკალური ხელნაკეთი ნივთები, ნახატები, ხელოვნების ნამუშევრები. ხარისხი, სანდოობა, ფასი. Unique handmade items, paintings, artworks in Georgia",
   keywords: [
-    "სანადირო",
-    "სათევზაო",
-    "აღჭურვილობა",
+    "ხელნაკეთი",
+    "ნახატები",
+    "ხელოვნება",
+    "ნამუშევრები",
     "მაღაზია",
     "Soulart",
-    "მაიჰანტერი",
     "საქართველო",
-    "hunting",
-    "fishing",
-    "equipment",
+    "handmade",
+    "paintings",
+    "artworks",
+    "art",
     "store",
     "Georgia",
-    "outdoor",
-    "gear",
+    "crafts",
+    "gallery",
   ],
   authors: [{ name: "Soulart" }],
   creator: "Soulart",
@@ -72,24 +73,24 @@ export const metadata: Metadata = {
     locale: "ka_GE",
     url: "https://Soulart.ge/",
     siteName: "Soulart",
-    title: "Soulart - სანადირო და სათევზაო აღჭურვილობის მაღაზია საქართველოში",
+    title: "Soulart - ხელნაკეთი ნივთების და ნახატების მაღაზია საქართველოში",
     description:
-      "საუკეთესო სანადირო და სათევზაო აღჭურვილობა, თოვლისთვის, შოტლანდიისთვის, ნაცარი პროდუქტები. ხარისხი, სანდოობა, ფასი",
+      "უნიკალური ხელნაკეთი ნივთები, ნახატები, ხელოვნების ნამუშევრები. ხარისხი, სანდოობა, ფასი",
     images: [
       {
-        url: "/logo.png",
+        url: "/van gog.jpg",
         width: 1200,
         height: 630,
-        alt: "Soulart - სანადირო და სათევზაო აღჭურვილობის მაღაზია",
+        alt: "Soulart - ხელნაკეთი ნივთების და ნახატების მაღაზია",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Soulart - სანადირო და სათევზაო აღჭურვილობის მაღაზია",
+    title: "Soulart - ხელნაკეთი ნივთების და ნახატების მაღაზია",
     description:
-      "სანადირო და სათევზაო აღჭურვილობის საუკეთესო არჩევანი საქართველოში",
-    images: ["/logo.png"],
+      "ხელნაკეთი ნივთების და ნახატების საუკეთესო არჩევანი საქართველოში",
+    images: ["/van gog.jpg"],
   },
 };
 
@@ -102,11 +103,11 @@ export default function RootLayout({
     <html lang="en">
       <head>
         {/* Favicon links */}
-        <link rel="icon" href="/logo.png" />
-        <link rel="apple-touch-icon" href="/logo.png" />
-        <link rel="shortcut icon" href="/logo.png" />
-        <link rel="mask-icon" href="/logo.png" color="#000000" />
-        <meta name="msapplication-TileImage" content="/logo.png" />
+        <link rel="icon" href="/van gog.jpg" />
+        <link rel="apple-touch-icon" href="/van gog.jpg" />
+        <link rel="shortcut icon" href="/van gog.jpg" />
+        <link rel="mask-icon" href="/van gog.jpg" color="#000000" />
+        <meta name="msapplication-TileImage" content="/van gog.jpg" />
         {/* Facebook SDK - Fix appId to lowercase appid */}
         <script
           async

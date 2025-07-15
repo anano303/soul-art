@@ -15,28 +15,28 @@ export async function generateMetadata({
   const decodedKeyword = decodeURIComponent(keyword || "");
 
   return {
-    title: `ძიება: ${decodedKeyword} - MyHunter | Search: ${decodedKeyword}`,
-    description: `ძიების შედეგები "${decodedKeyword}" - სანადირო და სათევზაო აღჭურვილობა MyHunter-ში. Search results for "${decodedKeyword}" - hunting and fishing equipment at MyHunter.`,
+    title: `ძიება: ${decodedKeyword} - Soulart | Search: ${decodedKeyword}`,
+    description: `ძიების შედეგები "${decodedKeyword}" - ხელნაკეთი ნივთები და ნახატები Soulart-ში. Search results for "${decodedKeyword}" - handmade items and paintings at Soulart.`,
     keywords: [
       decodedKeyword,
       "ძიება",
-      "სანადირო",
-      "სათევზაო",
-      "აღჭურვილობა",
-      "პროდუქტები",
-      "MyHunter",
-      "მაიჰანტერი",
+      "ხელნაკეთი",
+      "ნახატები",
+      "ხელოვნება",
+      "ნამუშევრები",
+      "Soulart",
       "search",
-      "hunting",
-      "fishing",
-      "equipment",
-      "products",
+      "handmade",
+      "paintings",
+      "artworks",
+      "art",
+      "crafts",
       "find",
       "results",
     ],
-    authors: [{ name: "MyHunter" }],
-    creator: "MyHunter",
-    publisher: "MyHunter",
+    authors: [{ name: "Soulart" }],
+    creator: "Soulart",
+    publisher: "Soulart",
     robots: {
       index: true,
       follow: true,
@@ -48,16 +48,16 @@ export async function generateMetadata({
       },
     },
     openGraph: {
-      title: `ძიება: ${decodedKeyword} - MyHunter`,
-      description: `ძიების შედეგები "${decodedKeyword}" - სანადირო და სათევზაო აღჭურვილობა MyHunter-ში.`,
-      url: `https://myhunter.ge/search/${encodeURIComponent(decodedKeyword)}`,
-      siteName: "MyHunter",
+      title: `ძიება: ${decodedKeyword} - Soulart`,
+      description: `ძიების შედეგები "${decodedKeyword}" - ხელნაკეთი ნივთები და ნახატები Soulart-ში.`,
+      url: `https://soulart.ge/search/${encodeURIComponent(decodedKeyword)}`,
+      siteName: "Soulart",
       images: [
         {
-          url: "/logo.png",
+          url: "/van gog.jpg",
           width: 1200,
           height: 630,
-          alt: `MyHunter ძიება - ${decodedKeyword}`,
+          alt: `Soulart ძიება - ${decodedKeyword}`,
         },
       ],
       locale: "ka_GE",
@@ -65,12 +65,12 @@ export async function generateMetadata({
     },
     twitter: {
       card: "summary_large_image",
-      title: `ძიება: ${decodedKeyword} - MyHunter`,
-      description: `ძიების შედეგები "${decodedKeyword}" - სანადირო და სათევზაო აღჭურვილობა MyHunter-ში.`,
-      images: ["/logo.png"],
+      title: `ძიება: ${decodedKeyword} - Soulart`,
+      description: `ძიების შედეგები "${decodedKeyword}" - ხელნაკეთი ნივთები და ნახატები Soulart-ში.`,
+      images: ["/van gog.jpg"],
     },
     alternates: {
-      canonical: `https://myhunter.ge/search/${encodeURIComponent(
+      canonical: `https://soulart.ge/search/${encodeURIComponent(
         decodedKeyword
       )}`,
     },
