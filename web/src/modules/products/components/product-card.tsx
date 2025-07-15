@@ -22,6 +22,7 @@ export function ProductCard({
   theme = "default",
 }: ProductCardProps) {
   const { language } = useLanguage();
+
   // ვამოწმებთ სურათის ვალიდურობას
   const productImage = product.images?.[0] || noPhoto.src;
 
@@ -29,8 +30,54 @@ export function ProductCard({
   const displayName =
     language === "en" && product.nameEn ? product.nameEn : product.name;
 
+  // Check if product has active discount
+  const hasActiveDiscount = () => {
+    if (!product.discountPercentage || product.discountPercentage <= 0) {
+      return false;
+    }
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    // If no start/end dates specified, discount is always active
+    if (!product.discountStartDate && !product.discountEndDate) {
+      return true;
+    }
+
+    // Check date range if specified
+    const startDate = product.discountStartDate
+      ? new Date(product.discountStartDate)
+      : null;
+    const endDate = product.discountEndDate
+      ? new Date(product.discountEndDate)
+      : null;
+
+    if (startDate) startDate.setHours(0, 0, 0, 0);
+    if (endDate) endDate.setHours(23, 59, 59, 999);
+
+    const isAfterStart = !startDate || today >= startDate;
+    const isBeforeEnd = !endDate || today <= endDate;
+
+    return isAfterStart && isBeforeEnd;
+  };
+
+  // Calculate discounted price
+  const calculateDiscountedPrice = () => {
+    if (!hasActiveDiscount()) return product.price;
+    const discountAmount = (product.price * product.discountPercentage!) / 100;
+    return product.price - discountAmount;
+  };
+
+  const isDiscounted = hasActiveDiscount();
+  const discountedPrice = calculateDiscountedPrice();
+
   return (
     <div className={`product-card ${theme} ${className}`}>
+      {/* Discount badge */}
+      {isDiscounted && (
+        <div className="discount-badge">-{product.discountPercentage}%</div>
+      )}
+
       <Link href={`/products/${product._id}`}>
         <div className="product-image">
           <Image
@@ -65,13 +112,26 @@ export function ProductCard({
               color: theme === "handmade-theme" ? "#7d5a35" : "#153754",
             }}
           >
-            <span className="author">{language === "en" ? "Author: " : "ავტორი: "}</span>
+            <span className="author">
+              {language === "en" ? "Author: " : "ავტორი: "}
+            </span>
             {product.brand}
           </p>
 
           <div className="product-details">
             <div className="priceAndRaiting">
-              <h3 className="product-price">{product.price} ₾ </h3>
+              {isDiscounted ? (
+                <div className="price-container">
+                  <span className="original-price">
+                    {product.price.toFixed(2)} ₾
+                  </span>
+                  <h3 className="product-price discounted-price">
+                    {discountedPrice.toFixed(2)} ₾
+                  </h3>
+                </div>
+              ) : (
+                <h3 className="product-price">{product.price} ₾</h3>
+              )}
             </div>
           </div>
         </div>

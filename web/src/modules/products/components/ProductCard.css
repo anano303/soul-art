@@ -265,6 +265,41 @@
   margin: 15px;
 }
 
+.discount-badge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background-color: #e74c3c;
+  color: white;
+  padding: 4px 8px;
+  font-weight: bold;
+  z-index: 2;
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
+
+.price-container {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.original-price {
+  text-decoration: line-through;
+  color: #999;
+  font-size: 0.9rem;
+  margin-right: 8px;
+}
+
+.discounted-price {
+  color: #e74c3c;
+}
+
+/* Handmade theme discounted price */
+.handmade-theme .discounted-price {
+  color: #9a6c40;
+}
+
 @media (max-width: 768px) {
   .priceAndRaiting {
     display: flex;

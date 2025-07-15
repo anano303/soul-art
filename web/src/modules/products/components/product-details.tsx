@@ -1,19 +1,224 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Image from "next/image";
-import { StarIcon } from "lucide-react";
+import { StarIcon, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ReviewForm } from "./review-form";
 import { ProductReviews } from "./product-reviews";
 import { useRouter } from "next/navigation";
 import "./productDetails.css";
+import "./videoTabs.css"; // Import new tabs styles
 import { Product } from "@/types";
-import { AddToCartButton } from "./AddToCartButton";
 import Link from "next/link";
 import { ShareButtons } from "@/components/share-buttons/share-buttons";
 import { RoomViewer } from "@/components/room-viewer/room-viewer";
 import { useLanguage } from "@/hooks/LanguageContext";
+import { useQuery } from "@tanstack/react-query";
+import { fetchWithAuth } from "@/lib/fetch-with-auth";
+import { Color, AgeGroupItem } from "@/types";
+import { toast } from "@/hooks/use-toast";
+import { Loader2 } from "lucide-react";
+import { ProductCard } from "./product-card";
+import { useCart } from "@/modules/cart/context/cart-context";
+import ProductSchema from "@/components/ProductSchema";
+
+// Enhanced AddToCartButton with variant support
+function EnhancedAddToCartButton({
+  productId,
+  countInStock = 0,
+  className = "",
+  selectedSize = "",
+  selectedColor = "",
+  selectedAgeGroup = "",
+  quantity = 1,
+  disabled = false,
+  price,
+}: {
+  productId: string;
+  countInStock?: number;
+  className?: string;
+  selectedSize?: string;
+  selectedColor?: string;
+  selectedAgeGroup?: string;
+  quantity?: number;
+  disabled?: boolean;
+  price?: number;
+}) {
+  const [pending, setPending] = useState(false);
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+  const { addToCart } = useCart();
+  const { t } = useLanguage();
+
+  const handleClick = async () => {
+    setPending(true);
+    try {
+      await addToCart(
+        productId,
+        quantity,
+        selectedSize,
+        selectedColor,
+        selectedAgeGroup,
+        price
+      );
+
+      setShowSuccessMessage(true);
+      setTimeout(() => setShowSuccessMessage(false), 3000);
+    } catch (error) {
+      console.error("Add to cart error:", error);
+      const errorMessage = error instanceof Error ? error.message : "";
+      if (errorMessage !== "User not authenticated") {
+        toast({
+          title: "Error",
+          description:
+            error instanceof Error ? error.message : "Failed to add to cart",
+          variant: "destructive",
+        });
+      }
+    } finally {
+      setPending(false);
+    }
+  };
+
+  if (countInStock === 0 || disabled) {
+    return (
+      <button
+        className={`add-to-cart-button out-of-stock ${className}`}
+        disabled
+      >
+        {t("shop.outOfStock") || "არ არის მარაგში"}
+      </button>
+    );
+  }
+
+  return (
+    <>
+      {showSuccessMessage && (
+        <div
+          style={{
+            position: "fixed",
+            top: "20px",
+            right: "20px",
+            backgroundColor: "#4CAF50",
+            color: "white",
+            padding: "15px 20px",
+            borderRadius: "8px",
+            boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+            zIndex: 9999,
+            fontSize: "16px",
+            fontWeight: "500",
+            animation: "slideIn 0.3s ease-out",
+          }}
+        >
+          ✅ {t("product.addToCartSuccess")}
+        </div>
+      )}
+
+      <button
+        className={`add-to-cart-button ${className}`}
+        onClick={handleClick}
+        disabled={pending}
+      >
+        {pending ? (
+          <Loader2 className="animate-spin" />
+        ) : (
+          t("cart.addToCart") || "კალათაში დამატება"
+        )}
+      </button>
+
+      <style jsx>{`
+        @keyframes slideIn {
+          from {
+            transform: translateX(100%);
+            opacity: 0;
+          }
+          to {
+            transform: translateX(0);
+            opacity: 1;
+          }
+        }
+      `}</style>
+    </>
+  );
+}
+
+// Similar Products Component
+function SimilarProducts({
+  currentProductId,
+  subCategoryId,
+}: {
+  currentProductId: string;
+  subCategoryId: string;
+}) {
+  const { t } = useLanguage();
+
+  const { data: productsResponse, isLoading } = useQuery({
+    queryKey: ["similarProducts", subCategoryId],
+    queryFn: async () => {
+      try {
+        if (!subCategoryId) {
+          return { items: [] };
+        }
+
+        const searchParams = new URLSearchParams({
+          page: "1",
+          limit: "10",
+          subCategory: subCategoryId,
+        });
+
+        const response = await fetchWithAuth(
+          `/products?${searchParams.toString()}`
+        );
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch products");
+        }
+
+        const data = await response.json();
+        return data;
+      } catch (error) {
+        console.error("Error fetching similar products:", error);
+        return { items: [] };
+      }
+    },
+    enabled: !!subCategoryId,
+    retry: 1,
+    refetchOnWindowFocus: false,
+  });
+
+  const allProducts = productsResponse?.items || [];
+  const similarProducts = allProducts
+    .filter((product: Product) => product._id !== currentProductId)
+    .slice(0, 3);
+
+  if (isLoading) {
+    return (
+      <div className="similar-products-section">
+        <h2 className="similar-products-title">
+          {t("product.similarProducts")}
+        </h2>
+        <div className="similar-products-loading">
+          <p>{t("shop.loading")}</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!subCategoryId || similarProducts.length === 0) {
+    return null;
+  }
+
+  return (
+    <div className="similar-products-section">
+      <h2 className="similar-products-title">{t("product.similarProducts")}</h2>
+      <div className="similar-products-grid">
+        {similarProducts.map((product: Product) => (
+          <ProductCard key={product._id} product={product} />
+        ))}
+      </div>
+    </div>
+  );
+}
 
 interface ProductDetailsProps {
   product: Product;
@@ -24,6 +229,10 @@ export function ProductDetails({ product }: ProductDetailsProps) {
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState("details");
   const [isRoomViewerOpen, setIsRoomViewerOpen] = useState(false);
+  const [isFullscreenOpen, setIsFullscreenOpen] = useState(false);
+  const [selectedSize, setSelectedSize] = useState<string>("");
+  const [selectedColor, setSelectedColor] = useState<string>("");
+  const [selectedAgeGroup, setSelectedAgeGroup] = useState<string>("");
   const [dimensions, setDimensions] = useState<{
     width?: number;
     height?: number;
@@ -31,6 +240,43 @@ export function ProductDetails({ product }: ProductDetailsProps) {
   } | null>(null);
   const router = useRouter();
   const { t, language } = useLanguage();
+
+  // Fetch colors and age groups for localization
+  const { data: availableColors = [] } = useQuery<Color[]>({
+    queryKey: ["colors"],
+    queryFn: async () => {
+      try {
+        const response = await fetchWithAuth("/categories/attributes/colors");
+        if (!response.ok) {
+          return [];
+        }
+        return response.json();
+      } catch {
+        return [];
+      }
+    },
+    retry: 1,
+    refetchOnWindowFocus: false,
+  });
+
+  const { data: availableAgeGroups = [] } = useQuery<AgeGroupItem[]>({
+    queryKey: ["ageGroups"],
+    queryFn: async () => {
+      try {
+        const response = await fetchWithAuth(
+          "/categories/attributes/age-groups"
+        );
+        if (!response.ok) {
+          return [];
+        }
+        return response.json();
+      } catch {
+        return [];
+      }
+    },
+    retry: 1,
+    refetchOnWindowFocus: false,
+  });
 
   // Display name and description based on selected language
   const displayName =
@@ -61,12 +307,115 @@ export function ProductDetails({ product }: ProductDetailsProps) {
     }
   }, [product.dimensions]);
 
+  // Initialize default selections based on product data
+  useEffect(() => {
+    if (product.sizes && product.sizes.length > 0) {
+      setSelectedSize(product.sizes[0]);
+    }
+    if (product.colors && product.colors.length > 0) {
+      setSelectedColor(product.colors[0]);
+    }
+    if (product.ageGroups && product.ageGroups.length > 0) {
+      setSelectedAgeGroup(product.ageGroups[0]);
+    }
+  }, [product]);
+
+  // Get localized color name
+  const getLocalizedColorName = (colorName: string): string => {
+    if (language === "en") {
+      const colorObj = availableColors.find(
+        (color) => color.name === colorName
+      );
+      return colorObj?.nameEn || colorName;
+    }
+    return colorName;
+  };
+
+  // Get localized age group name
+  const getLocalizedAgeGroupName = (ageGroupName: string): string => {
+    if (language === "en") {
+      const ageGroupObj = availableAgeGroups.find(
+        (ageGroup) => ageGroup.name === ageGroupName
+      );
+      return ageGroupObj?.nameEn || ageGroupName;
+    }
+    return ageGroupName;
+  };
+
+  // Check if product has active discount
+  const hasActiveDiscount = () => {
+    if (!product.discountPercentage || product.discountPercentage <= 0) {
+      return false;
+    }
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    if (!product.discountStartDate && !product.discountEndDate) {
+      return true;
+    }
+
+    const startDate = product.discountStartDate
+      ? new Date(product.discountStartDate)
+      : null;
+    const endDate = product.discountEndDate
+      ? new Date(product.discountEndDate)
+      : null;
+
+    if (startDate) startDate.setHours(0, 0, 0, 0);
+    if (endDate) endDate.setHours(23, 59, 59, 999);
+
+    const isAfterStart = !startDate || today >= startDate;
+    const isBeforeEnd = !endDate || today <= endDate;
+
+    return isAfterStart && isBeforeEnd;
+  };
+
+  // Calculate discounted price
+  const calculateDiscountedPrice = () => {
+    if (!hasActiveDiscount()) return product.price;
+    const discountAmount = (product.price * product.discountPercentage!) / 100;
+    return product.price - discountAmount;
+  };
+
+  const isDiscounted = hasActiveDiscount();
+  const finalPrice = calculateDiscountedPrice();
+
+  const availableQuantity = useMemo(() => {
+    let stock = product.countInStock || 0;
+
+    if (product.variants && product.variants.length > 0) {
+      const variant = product.variants.find(
+        (v) =>
+          (!v.size || v.size === selectedSize) &&
+          (!v.color || v.color === selectedColor) &&
+          (!v.ageGroup || v.ageGroup === selectedAgeGroup)
+      );
+      stock = variant ? variant.stock : 0;
+    }
+
+    return stock;
+  }, [selectedSize, selectedColor, selectedAgeGroup, product]);
+
   if (!product) return null;
 
-  const isOutOfStock = product.countInStock === 0;
+  const isOutOfStock = availableQuantity === 0;
+
+  // Function to open fullscreen image
+  const openFullscreen = () => {
+    setIsFullscreenOpen(true);
+  };
+
+  // Function to close fullscreen image
+  const closeFullscreen = () => {
+    setIsFullscreenOpen(false);
+  };
 
   return (
     <div className="container">
+      {/* SEO Product Schema */}
+      <ProductSchema product={product} productId={product._id} />
+
       <div className="grid">
         {/* Left Column - Images */}
         <div className="image-section">
@@ -79,6 +428,7 @@ export function ProductDetails({ product }: ProductDetailsProps) {
                 exit={{ opacity: 0, y: -20 }}
                 transition={{ duration: 0.2 }}
                 className="image-wrapper"
+                onClick={openFullscreen}
               >
                 <Image
                   src={product.images[currentImageIndex]}
@@ -171,9 +521,28 @@ export function ProductDetails({ product }: ProductDetailsProps) {
             </span>
           </div>
 
-          <div className="price">₾{product.price}</div>
+          {/* Price Section with Discount Support */}
+          <div className="price-section">
+            {isDiscounted ? (
+              <div className="price-container">
+                {product.discountPercentage && (
+                  <span className="discount-badge">
+                    -{product.discountPercentage}% OFF
+                  </span>
+                )}
+                <span className="original-price">
+                  ₾{product.price.toFixed(2)}
+                </span>
+                <span className="price discounted-price">
+                  ₾{finalPrice.toFixed(2)}
+                </span>
+              </div>
+            ) : (
+              <div className="price">₾{product.price}</div>
+            )}
+          </div>
 
-          {/* Product Dimensions - Fixed to handle string dimensions */}
+          {/* Product Dimensions */}
           {dimensions && (
             <div className="dimensions-info">
               <h3 className="info-title">{t("product.dimensions")}</h3>
@@ -207,6 +576,69 @@ export function ProductDetails({ product }: ProductDetailsProps) {
 
           <div className="separator"></div>
 
+          {/* Product Options */}
+          {!isOutOfStock && (
+            <div className="product-options-container">
+              {/* Age Group Selector */}
+              {product.ageGroups && product.ageGroups.length > 0 && (
+                <div className="select-container">
+                  <select
+                    className="option-select"
+                    value={selectedAgeGroup}
+                    onChange={(e) => setSelectedAgeGroup(e.target.value)}
+                    disabled={isOutOfStock}
+                  >
+                    <option value="">{t("product.selectAgeGroup")}</option>
+                    {product.ageGroups.map((ageGroup) => (
+                      <option key={ageGroup} value={ageGroup}>
+                        {getLocalizedAgeGroupName(ageGroup)}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
+              {/* Size Selector */}
+              {product.sizes && product.sizes.length > 0 && (
+                <div className="select-container">
+                  <select
+                    className="option-select"
+                    value={selectedSize}
+                    onChange={(e) => setSelectedSize(e.target.value)}
+                    disabled={isOutOfStock}
+                  >
+                    <option value="">{t("product.selectSize")}</option>
+                    {product.sizes.map((size) => (
+                      <option key={size} value={size}>
+                        {size}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
+              {/* Color Selector */}
+              {product.colors && product.colors.length > 0 && (
+                <div className="select-container">
+                  <select
+                    className="option-select"
+                    value={selectedColor}
+                    onChange={(e) => setSelectedColor(e.target.value)}
+                    disabled={isOutOfStock}
+                  >
+                    <option value="">{t("product.selectColor")}</option>
+                    {product.colors.map((color) => (
+                      <option key={color} value={color}>
+                        {getLocalizedColorName(color)}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Stock and Quantity */}
           <div className="stock-info">
             {isOutOfStock ? (
               <div className="text-red-500">{t("shop.outOfStock")}</div>
@@ -220,7 +652,7 @@ export function ProductDetails({ product }: ProductDetailsProps) {
                     onChange={(e) => setQuantity(Number(e.target.value))}
                   >
                     {Array.from(
-                      { length: product.countInStock },
+                      { length: availableQuantity },
                       (_, i) => i + 1
                     ).map((num) => (
                       <option key={num} value={num}>
@@ -233,10 +665,23 @@ export function ProductDetails({ product }: ProductDetailsProps) {
             )}
           </div>
 
-          <AddToCartButton
+          <EnhancedAddToCartButton
             productId={product._id}
-            countInStock={product.countInStock}
+            countInStock={availableQuantity}
             className="custom-style-2"
+            selectedSize={selectedSize}
+            selectedColor={selectedColor}
+            selectedAgeGroup={selectedAgeGroup}
+            quantity={quantity}
+            price={finalPrice}
+            disabled={
+              availableQuantity <= 0 ||
+              (product.sizes && product.sizes.length > 0 && !selectedSize) ||
+              (product.colors && product.colors.length > 0 && !selectedColor) ||
+              (product.ageGroups &&
+                product.ageGroups.length > 0 &&
+                !selectedAgeGroup)
+            }
           />
 
           <div className="tabs">
@@ -249,6 +694,16 @@ export function ProductDetails({ product }: ProductDetailsProps) {
               >
                 {t("product.details")}
               </button>
+              {product.videoDescription && (
+                <button
+                  className={`tabs-trigger ${
+                    activeTab === "video" ? "active" : ""
+                  }`}
+                  onClick={() => setActiveTab("video")}
+                >
+                  {language === "en" ? "Video" : "ვიდეო"}
+                </button>
+              )}
               <button
                 className={`tabs-trigger ${
                   activeTab === "reviews" ? "active" : ""
@@ -269,6 +724,22 @@ export function ProductDetails({ product }: ProductDetailsProps) {
               </div>
             </div>
 
+            {product.videoDescription && (
+              <div
+                className={`tab-content ${
+                  activeTab === "video" ? "active" : ""
+                }`}
+              >
+                <div className="video-container">
+                  <div
+                    dangerouslySetInnerHTML={{
+                      __html: product.videoDescription,
+                    }}
+                  />
+                </div>
+              </div>
+            )}
+
             <div
               className={`tab-content ${
                 activeTab === "reviews" ? "active" : ""
@@ -284,12 +755,51 @@ export function ProductDetails({ product }: ProductDetailsProps) {
         </div>
       </div>
 
+      {/* Fullscreen Image Modal */}
+      {isFullscreenOpen && (
+        <div className="fullscreen-modal" onClick={closeFullscreen}>
+          <button
+            className="fullscreen-close"
+            onClick={(e) => {
+              e.stopPropagation();
+              closeFullscreen();
+            }}
+          >
+            <X />
+          </button>
+          <div
+            className="fullscreen-image-container"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <Image
+              src={product.images[currentImageIndex]}
+              alt={displayName}
+              width={1200}
+              height={1200}
+              quality={100}
+              className="fullscreen-image"
+            />
+          </div>
+        </div>
+      )}
+
       {/* Room Viewer Modal */}
       <RoomViewer
         productImage={product.images[currentImageIndex]}
         isOpen={isRoomViewerOpen}
         onClose={() => setIsRoomViewerOpen(false)}
       />
+
+      {/* Similar Products Section */}
+      <SimilarProducts
+        currentProductId={product._id}
+        subCategoryId={
+          typeof product.subCategory === "string"
+            ? product.subCategory
+            : product.subCategory?.id || product.subCategory?._id || ""
+        }
+      />
     </div>
   );
 }
+
