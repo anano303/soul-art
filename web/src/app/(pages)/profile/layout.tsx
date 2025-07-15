@@ -2,7 +2,7 @@ import { ProtectedRoute } from "@/components/protected-route";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "პროფილი | მონადირე - My Hunter Profile",
+  title: "პროფილი | Soulart - Profile | Soulart",
   description:
     "მომხმარებლის პროფილი, შეკვეთების ისტორია და პერსონალური პარამეტრები. User profile, order history and personal settings.",
   keywords: [
@@ -18,31 +18,32 @@ export const metadata: Metadata = {
     "personal settings",
     "my account",
     "user dashboard",
-    "hunting gear profile",
-    "მონადირე პროფილი",
+    "artist profile",
+    "Soulart პროფილი",
+    "ხელოვანის პროფილი",
   ],
   openGraph: {
-    title: "პროფილი | მონადირე - My Hunter Profile",
+    title: "პროფილი | Soulart - Profile | Soulart",
     description:
       "მომხმარებლის პროფილი, შეკვეთების ისტორია და პერსონალური პარამეტრები",
     type: "website",
     url: "/profile",
-    siteName: "მონადირე - My Hunter",
+    siteName: "Soulart",
     images: [
       {
-        url: "/logo.png",
+        url: "/van gog.jpg",
         width: 1200,
         height: 630,
-        alt: "მონადირე - My Hunter Profile",
+        alt: "Soulart Profile",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "პროფილი | მონადირე - My Hunter Profile",
+    title: "პროფილი | Soulart - Profile | Soulart",
     description:
       "მომხმარებლის პროფილი, შეკვეთების ისტორია და პერსონალური პარამეტრები",
-    images: ["/logo.png"],
+    images: ["/van gog.jpg"],
   },
   robots: {
     index: false,

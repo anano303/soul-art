@@ -1,9 +1,9 @@
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "შეკვეთები | მონადირე - Orders | My Hunter",
+  title: "შეკვეთები | Soulart - Orders | Soulart",
   description:
-    "თქვენი შეკვეთების მდგომარეობა და დეტალები. მონადირეობის აღჭურვილობის შეკვეთების ისტორია. Your order status and details. Hunting equipment order history.",
+    "თქვენი შეკვეთების მდგომარეობა და დეტალები. ხელნაკეთი ნივთებისა და ნახატების შეკვეთების ისტორია. Your order status and details. Handmade items and paintings order history.",
   keywords: [
     "შეკვეთები",
     "შეკვეთის მდგომარეობა",
@@ -14,35 +14,37 @@ export const metadata: Metadata = {
     "order details",
     "order history",
     "order tracking",
-    "hunting equipment orders",
+    "handmade items orders",
+    "paintings orders",
     "my orders",
-    "მონადირეობის აღჭურვილობის შეკვეთები",
+    "ხელნაკეთი ნივთების შეკვეთები",
+    "ნახატების შეკვეთები",
     "შეკვეთის ტრეკინგი",
     "delivery status",
     "მიწოდების სტატუსი",
   ],
   openGraph: {
-    title: "შეკვეთები | მონადირე - Orders | My Hunter",
+    title: "შეკვეთები | Soulart - Orders | Soulart",
     description:
-      "თქვენი შეკვეთების მდგომარეობა და დეტალები. მონადირეობის აღჭურვილობის შეკვეთების ისტორია",
+      "თქვენი შეკვეთების მდგომარეობა და დეტალები. ხელნაკეთი ნივთებისა და ნახატების შეკვეთების ისტორია",
     type: "website",
     url: "/orders",
-    siteName: "მონადირე - My Hunter",
+    siteName: "Soulart",
     images: [
       {
-        url: "/logo.png",
+        url: "/van gog.jpg",
         width: 1200,
         height: 630,
-        alt: "მონადირე - My Hunter Orders",
+        alt: "Soulart Orders",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "შეკვეთები | მონადირე - Orders | My Hunter",
+    title: "შეკვეთები | Soulart - Orders | Soulart",
     description:
-      "თქვენი შეკვეთების მდგომარეობა და დეტალები. მონადირეობის აღჭურვილობის შეკვეთების ისტორია",
-    images: ["/logo.png"],
+      "თქვენი შეკვეთების მდგომარეობა და დეტალები. ხელნაკეთი ნივთებისა და ნახატების შეკვეთების ისტორია",
+    images: ["/van gog.jpg"],
   },
   robots: {
     index: false,
