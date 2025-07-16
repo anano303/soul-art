@@ -465,7 +465,7 @@
 .category-emoji {
   display: inline-block;
   margin-left: 20px;
-  font-size: 2em;
+  font-size: 1.2em;
   animation: gentleBounce 8s infinite;
   filter: drop-shadow(3px 3px 8px rgba(0, 0, 0, 0.8));
   transition: all 0.3s ease;
@@ -539,7 +539,7 @@
 
 .section-title.category-handmade:hover .category-emoji {
   animation: paintBrush 1s ease-in-out;
-  transform: scale(1.3);
+  transform: scale(1.1);
   opacity: 1;
   filter: drop-shadow(4px 4px 12px rgba(0, 0, 0, 0.8));
   text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.6);
@@ -606,7 +606,7 @@
 
 .section-title.category-paintings:hover .category-emoji {
   animation: frameGlow 1s ease-in-out;
-  transform: scale(1.3);
+  transform: scale(1.1);
   opacity: 1;
   filter: drop-shadow(4px 4px 12px rgba(0, 0, 0, 0.8));
   text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.6);
@@ -737,7 +737,7 @@
   }
 
   .category-emoji {
-    font-size: 1.5em;
+    font-size: 1.2em;
     margin-left: 15px;
     animation: gentleBounce 10s infinite;
     opacity: 1;
@@ -758,6 +758,7 @@
   .section-title.category-handmade:hover,
   .section-title.category-paintings:hover {
     transform: translateX(8px) scale(1.03);
+    margin-left: 20px;
   }
 
   .two-column-layout .product-columns {
