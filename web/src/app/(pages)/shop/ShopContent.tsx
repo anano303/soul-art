@@ -5,8 +5,10 @@ import { useEffect, useState, useRef, useCallback } from "react";
 import { ProductGrid } from "@/modules/products/components/product-grid";
 import { ProductFilters } from "@/modules/products/components/product-filters";
 import { getProducts } from "@/modules/products/api/get-products";
-import { Product } from "@/types";
+import { Product, Category } from "@/types";
 import { useLanguage } from "@/hooks/LanguageContext";
+import { useQuery } from "@tanstack/react-query";
+import { fetchWithAuth } from "@/lib/fetch-with-auth";
 import "./ShopPage.css";
 
 const ShopContent = () => {
@@ -37,6 +39,46 @@ const ShopContent = () => {
     field: "createdAt",
     direction: "desc",
   });
+
+  // Fetch categories to determine theme
+  const { data: categories = [] } = useQuery<Category[]>({
+    queryKey: ["categories"],
+    queryFn: async () => {
+      try {
+        const response = await fetchWithAuth(
+          "/categories?includeInactive=false"
+        );
+        return response.json();
+      } catch (err) {
+        console.error("Failed to fetch categories:", err);
+        return [];
+      }
+    },
+    refetchOnWindowFocus: false,
+  });
+
+  // Determine theme based on selected category
+  const getTheme = () => {
+    if (!selectedCategoryId || !categories.length) return "default";
+
+    const selectedCategory = categories.find(
+      (cat) => cat.id === selectedCategoryId || cat._id === selectedCategoryId
+    );
+
+    if (!selectedCategory) return "default";
+
+    // Check if it's handmade category
+    if (
+      selectedCategory.name === "ხელნაკეთი ნივთები" ||
+      selectedCategory.name === "ხელნაკეთი" ||
+      selectedCategory.nameEn === "Handmades" ||
+      selectedCategory.nameEn === "Handmade"
+    ) {
+      return "handmade-theme";
+    }
+
+    return "default";
+  };
 
   // Parse URL parameters on first load
   useEffect(() => {
@@ -341,7 +383,7 @@ const ShopContent = () => {
             ) : products.length > 0 ? (
               <ProductGrid
                 products={products}
-                theme="default"
+                theme={getTheme()}
                 currentPage={currentPage}
                 totalPages={totalPages}
                 onPageChange={handlePageChange}

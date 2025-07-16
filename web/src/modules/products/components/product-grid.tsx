@@ -53,7 +53,7 @@ interface ProductGridProps {
   currentPage?: number;
   totalPages?: number;
   onPageChange?: (page: number) => void;
-  theme?: "default";
+  theme?: "default" | "handmade-theme";
   isShopPage?: boolean;
   selectedAgeGroup?: string;
 }
