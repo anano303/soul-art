@@ -77,6 +77,20 @@ export function ProductFilters({
     }
   }, [selectedCategoryId]);
 
+  // Helper function to determine if selected category is handmade
+  const isHandmadeCategory = () => {
+    if (!selectedCategoryId || !categories.length) return false;
+    const selectedCategory = categories.find(
+      (cat) => cat._id === selectedCategoryId
+    );
+    if (!selectedCategory) return false;
+
+    return (
+      selectedCategory.nameEn === "Handmades" ||
+      selectedCategory.nameEn === "Handmade"
+    );
+  };
+
   // Fetch all categories with error handling
   const {
     data: categories = [],
@@ -949,7 +963,9 @@ export function ProductFilters({
           </div> */}
           <div className="sort-options">
             <select
-              className="sort-select"
+              className={`sort-select ${
+                isHandmadeCategory() ? "handmade-theme" : ""
+              }`}
               onChange={(e) => {
                 const value = e.target.value;
                 const [field, direction] = value.split("-");

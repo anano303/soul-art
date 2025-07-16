@@ -1,6 +1,6 @@
 /* მთავარი კონტეინერი */
 .product-filters {
-   font-family: firaGo;
+  font-family: firaGo;
   background: none;
   border: none;
   padding: 15px;
@@ -25,7 +25,7 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 12px;
-    font-family: firaGo;
+  font-family: firaGo;
 }
 
 .filter-title {
@@ -34,7 +34,7 @@
   color: #012645;
   margin: 0;
   text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
-    font-family: firaGo;
+  font-family: firaGo;
 }
 
 .filter-clear-btn {
@@ -48,7 +48,7 @@
   font-weight: 500;
   transition: all 0.3s ease;
   box-shadow: 0 4px 15px rgba(123, 86, 66, 0.3);
-    font-family: firaGo;
+  font-family: firaGo;
 }
 
 .filter-clear-btn:hover {
@@ -81,7 +81,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-    font-family: firaGo;
+  font-family: firaGo;
 }
 
 /* ძველი hover ეფექტები წავშალოთ */
@@ -100,7 +100,7 @@
   position: relative;
   z-index: 1;
   margin: 0;
-    font-family: firaGo;
+  font-family: firaGo;
 }
 
 .subcategory-name {
@@ -903,7 +903,11 @@
   font-weight: 500;
   cursor: pointer;
   width: 15%;
-    font-family: firaGo;
+  font-family: firaGo;
+}
+
+.sort-select.handmade-theme {
+  color: #7b5642;
 }
 
 .sort-select:focus {
@@ -912,10 +916,19 @@
   box-shadow: 0 0 10px rgba(123, 86, 66, 0.3);
 }
 
+.sort-select.handmade-theme:focus {
+  border-color: #7b5642;
+  box-shadow: 0 0 10px rgba(123, 86, 66, 0.5);
+}
+
 .sort-select option {
   background: white;
   color: #012645;
   padding: 10px;
+}
+
+.sort-select.handmade-theme option {
+  color: #7b5642;
 }
 
 /* responsive improvements */
