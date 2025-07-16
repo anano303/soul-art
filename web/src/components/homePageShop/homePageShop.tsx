@@ -191,7 +191,9 @@ export default function HomePageShop() {
                     <h2
                       className={`section-title ${
                         categoryData.category === "ხელნაკეთი" ||
-                        categoryData.category === "Handmade"
+                        categoryData.category === "Handmade" ||
+                        categoryData.category === "ხელნაკეთი ნივთები" ||
+                        categoryData.category === "Handmades"
                           ? "category-handmade"
                           : categoryData.category === "ნახატები" ||
                             categoryData.category === "Paintings"
@@ -205,12 +207,14 @@ export default function HomePageShop() {
                       {categoryData.category}
                       {/* ემოჯი ეფექტი */}
                       {(categoryData.category === "ხელნაკეთი ნივთები" ||
-                        categoryData.category === "Handmades") && (
-                        <span className="category-emoji">🎨</span>
+                        categoryData.category === "Handmades" ||
+                        categoryData.category === "ხელნაკეთი" ||
+                        categoryData.category === "Handmade") && (
+                        <span className="category-emoji">🧵</span>
                       )}
                       {(categoryData.category === "ნახატები" ||
                         categoryData.category === "Paintings") && (
-                        <span className="category-emoji">🖼️</span>
+                        <span className="category-emoji">🎨</span>
                       )}
                     </h2>
 
@@ -226,7 +230,14 @@ export default function HomePageShop() {
                   </div>
                   <ProductGrid
                     products={categoryData.products.slice(0, 3)} // Only take first 3 products
-                    theme="default"
+                    theme={
+                      categoryData.category === "ხელნაკეთი" ||
+                      categoryData.category === "Handmade" ||
+                      categoryData.category === "ხელნაკეთი ნივთები" ||
+                      categoryData.category === "Handmades"
+                        ? "handmade-theme"
+                        : "default"
+                    }
                     isShopPage={false}
                   />
                   <div className="see-more-mobile see-more">
