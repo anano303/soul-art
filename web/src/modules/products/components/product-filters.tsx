@@ -522,9 +522,13 @@ export function ProductFilters({
                             ? "selected"
                             : ""
                         } ${
-                          category.name === "ხელნაკეთი"
+                          category.name === "ხელნაკეთი ნივთები" ||
+                          category.name === "ხელნაკეთი" ||
+                          category.nameEn === "Handmades" ||
+                          category.nameEn === "Handmade"
                             ? "category-handmade"
-                            : category.name === "ნახატები"
+                            : category.name === "ნახატები" ||
+                              category.nameEn === "Paintings"
                             ? "category-paintings"
                             : ""
                         }`}
@@ -556,7 +560,38 @@ export function ProductFilters({
           </div>
 
           {showSubcategories && subcategories.length > 0 && (
-            <div className="subcategories-section">
+            <div
+              className="subcategories-section"
+              data-category={(() => {
+                const selectedCategory = categories.find(
+                  (cat) => (cat.id || cat._id) === selectedCategoryId
+                );
+                if (!selectedCategory) return "";
+
+                const categoryName = selectedCategory.name;
+                const categoryNameEn = selectedCategory.nameEn;
+
+                // Check for paintings category (Georgian or English)
+                if (
+                  categoryName === "ნახატები" ||
+                  categoryNameEn === "Paintings"
+                ) {
+                  return "paintings";
+                }
+
+                // Check for handmade category (Georgian or English)
+                if (
+                  categoryName === "ხელნაკეთი ნივთები" ||
+                  categoryName === "ხელნაკეთი" ||
+                  categoryNameEn === "Handmades" ||
+                  categoryNameEn === "Handmade"
+                ) {
+                  return "handmade";
+                }
+
+                return "";
+              })()}
+            >
               <h3 className="subcategories-title">
                 {t("shop.subcategories")} -{" "}
                 {getLocalizedName(
@@ -909,9 +944,9 @@ export function ProductFilters({
         </div>
 
         <div className="sort-section">
-          <div className="sort-header">
+          {/* <div className="sort-header">
             <h3 className="sort-title">{t("shop.sortBy")}</h3>
-          </div>
+          </div> */}
           <div className="sort-options">
             <select
               className="sort-select"

@@ -31,6 +31,7 @@ export const TRANSLATIONS: Translations = {
 
     // Shop
     shop: {
+      resetFilters: "ფილტრების გასუფთავება",
       allArtworks: "ყველა ნამუშევარი",
       artistWorks: "-ის ნამუშევრები",
       loading: "იტვირთება...",
@@ -56,7 +57,7 @@ export const TRANSLATIONS: Translations = {
       noCategoriesAvailable: "კატეგორიები მიუწვდომელია",
       subcategories: "ქვეკატეგორიები",
       filter: "ფილტრი",
-      filterToggle: "ფილტრების გახსნა",
+      filterToggle: "ფილტრი",
       closeFilters: "ფილტრების დახურვა",
       ageGroupFilter: "ასაკობრივი ჯგუფი",
       clearAgeGroupFilter: "ასაკობრივი ჯგუფის ფილტრის გასუფთავება",
@@ -580,6 +581,7 @@ export const TRANSLATIONS: Translations = {
 
     // Shop
     shop: {
+      resetFilters: "Reset Filters",
       allArtworks: "All Artworks",
       artistWorks: "'s Artworks",
       loading: "Loading...",
@@ -604,7 +606,7 @@ export const TRANSLATIONS: Translations = {
       noCategoriesAvailable: "No categories available",
       subcategories: "Subcategories",
       filter: "Filter",
-      filterToggle: "Open Filters",
+      filterToggle: "Filters",
       closeFilters: "Close Filters",
       ageGroupFilter: "Age Group",
       clearAgeGroupFilter: "Clear age group filter",
