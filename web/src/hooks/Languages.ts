@@ -88,6 +88,15 @@ export const TRANSLATIONS: Translations = {
       errorLoadingSubcategories: "ქვეკატეგორიების ჩატვირთვა ვერ მოხერხდა",
       close: "დახურვა",
       clear: "გასუფთავება",
+      // Search page translations
+      searchResults: "ძიების შედეგები",
+      backToHome: "მთავარზე დაბრუნება",
+      noResults: "შედეგი არ მოიძებნა",
+      noResultsMessage: "ძიების შედეგი არ მოიძებნა",
+      tryDifferent: "სცადეთ სხვა საძიებო სიტყვები",
+      browseAll: "ყველა პროდუქტის ნახვა",
+      errorTitle: "შეცდომა",
+      errorMessage: "მოხდა შეცდომა პროდუქტების ჩატვირთვისას",
     },
 
     // Product Details
@@ -104,6 +113,12 @@ export const TRANSLATIONS: Translations = {
       quantity: "რაოდენობა",
       details: "აღწერა",
       author: "ავტორი",
+      noImagesAvailable: "სურათები მიუწვდომელია",
+      similarProducts: "მსგავსი პროდუქტები",
+      selectAgeGroup: "აირჩიეთ ასაკობრივი ჯგუფი",
+      selectSize: "აირჩიეთ ზომა",
+      selectColor: "აირჩიეთ ფერი",
+      addToCartSuccess: "პროდუქტი წარმატებით დაემატა კალათაში",
     },
 
     // Room Viewer
@@ -637,6 +652,15 @@ export const TRANSLATIONS: Translations = {
       errorLoadingSubcategories: "Failed to load subcategories",
       close: "Close",
       clear: "Clear",
+      // Search page translations
+      searchResults: "Search Results",
+      backToHome: "Back to Home",
+      noResults: "No Results Found",
+      noResultsMessage: "No search results found",
+      tryDifferent: "Try different search terms",
+      browseAll: "Browse All Products",
+      errorTitle: "Error",
+      errorMessage: "An error occurred while loading products",
     },
 
     // Product Details
@@ -653,6 +677,12 @@ export const TRANSLATIONS: Translations = {
       quantity: "Quantity",
       details: "Description",
       author: "Author",
+      noImagesAvailable: "Images not available",
+      similarProducts: "Similar Products",
+      selectAgeGroup: "Select Age Group",
+      selectSize: "Select Size",
+      selectColor: "Select Color",
+      addToCartSuccess: "Product successfully added to cart",
     },
 
     // Room Viewer

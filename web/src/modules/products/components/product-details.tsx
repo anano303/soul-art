@@ -399,6 +399,21 @@ export function ProductDetails({ product }: ProductDetailsProps) {
 
   if (!product) return null;
 
+  // Safety check for images array
+  if (
+    !product.images ||
+    !Array.isArray(product.images) ||
+    product.images.length === 0
+  ) {
+    return (
+      <div className="container">
+        <div className="error-message">
+          <p>{t("product.noImagesAvailable") || "სურათები მიუწვდომელია"}</p>
+        </div>
+      </div>
+    );
+  }
+
   const isOutOfStock = availableQuantity === 0;
 
   // Function to open fullscreen image
@@ -430,36 +445,41 @@ export function ProductDetails({ product }: ProductDetailsProps) {
                 className="image-wrapper"
                 onClick={openFullscreen}
               >
-                <Image
-                  src={product.images[currentImageIndex]}
-                  alt={displayName}
-                  fill
-                  className="object-contain"
-                  priority
-                />
+                {product.images && product.images[currentImageIndex] && (
+                  <Image
+                    src={product.images[currentImageIndex]}
+                    alt={displayName}
+                    fill
+                    className="object-contain"
+                    priority
+                  />
+                )}
               </motion.div>
             </AnimatePresence>
           </div>
 
           <div className="thumbnail-container">
-            {product.images.map((image, index) => (
-              <motion.button
-                key={image}
-                onClick={() => setCurrentImageIndex(index)}
-                className={`thumbnail ${
-                  index === currentImageIndex ? "active" : ""
-                }`}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <Image
-                  src={image}
-                  alt={`${displayName} view ${index + 1}`}
-                  fill
-                  className="object-cover"
-                />
-              </motion.button>
-            ))}
+            {product.images?.map(
+              (image, index) =>
+                image && (
+                  <motion.button
+                    key={image}
+                    onClick={() => setCurrentImageIndex(index)}
+                    className={`thumbnail ${
+                      index === currentImageIndex ? "active" : ""
+                    }`}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    <Image
+                      src={image}
+                      alt={`${displayName} view ${index + 1}`}
+                      fill
+                      className="object-cover"
+                    />
+                  </motion.button>
+                )
+            )}
           </div>
 
           <div className="try-on-wall-container">
@@ -481,14 +501,16 @@ export function ProductDetails({ product }: ProductDetailsProps) {
               href={`/shop?brand=${encodeURIComponent(product.brand)}`}
               className="brand-details hover:opacity-75 transition-opacity"
             >
-              <div className="brand-logo">
-                <Image
-                  src={product.brandLogo}
-                  alt={product.brand}
-                  fill
-                  className="object-cover"
-                />
-              </div>
+              {product.brandLogo && (
+                <div className="brand-logo">
+                  <Image
+                    src={product.brandLogo}
+                    alt={product.brand}
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+              )}
               <span className="font-bold">{product.brand}</span>
             </Link>
             <span className="text-muted">
@@ -756,39 +778,43 @@ export function ProductDetails({ product }: ProductDetailsProps) {
       </div>
 
       {/* Fullscreen Image Modal */}
-      {isFullscreenOpen && (
-        <div className="fullscreen-modal" onClick={closeFullscreen}>
-          <button
-            className="fullscreen-close"
-            onClick={(e) => {
-              e.stopPropagation();
-              closeFullscreen();
-            }}
-          >
-            <X />
-          </button>
-          <div
-            className="fullscreen-image-container"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <Image
-              src={product.images[currentImageIndex]}
-              alt={displayName}
-              width={1200}
-              height={1200}
-              quality={100}
-              className="fullscreen-image"
-            />
+      {isFullscreenOpen &&
+        product.images &&
+        product.images[currentImageIndex] && (
+          <div className="fullscreen-modal" onClick={closeFullscreen}>
+            <button
+              className="fullscreen-close"
+              onClick={(e) => {
+                e.stopPropagation();
+                closeFullscreen();
+              }}
+            >
+              <X />
+            </button>
+            <div
+              className="fullscreen-image-container"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <Image
+                src={product.images[currentImageIndex]}
+                alt={displayName}
+                width={1200}
+                height={1200}
+                quality={100}
+                className="fullscreen-image"
+              />
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
       {/* Room Viewer Modal */}
-      <RoomViewer
-        productImage={product.images[currentImageIndex]}
-        isOpen={isRoomViewerOpen}
-        onClose={() => setIsRoomViewerOpen(false)}
-      />
+      {product.images && product.images[currentImageIndex] && (
+        <RoomViewer
+          productImage={product.images[currentImageIndex]}
+          isOpen={isRoomViewerOpen}
+          onClose={() => setIsRoomViewerOpen(false)}
+        />
+      )}
 
       {/* Similar Products Section */}
       <SimilarProducts
@@ -802,4 +828,3 @@ export function ProductDetails({ product }: ProductDetailsProps) {
     </div>
   );
 }
-
