@@ -30,7 +30,7 @@ const Banner = () => {
     loadBanners();
   }, []);
 
-  // Auto-advance banners every 6 seconds (pause on hover)
+  // Auto-advance banners every 8 seconds (pause on hover)
   useEffect(() => {
     if (banners.length <= 1 || isPaused) return;
 
@@ -39,8 +39,8 @@ const Banner = () => {
       setTimeout(() => {
         setCurrentBannerIndex((prev) => (prev + 1) % banners.length);
         setAnimationClass("fade-in");
-      }, 500);
-    }, 6000);
+      }, 2000); // Increased from 500ms to 800ms
+    }, 8000); // Increased from 6000ms to 8000ms
 
     return () => clearInterval(interval);
   }, [banners.length, isPaused]);
@@ -50,7 +50,7 @@ const Banner = () => {
     setTimeout(() => {
       setCurrentBannerIndex((prev) => (prev + 1) % banners.length);
       setAnimationClass("fade-in");
-    }, 300);
+    }, 600); // Increased from 300ms to 600ms
   }, [banners.length]);
 
   const prevBanner = useCallback(() => {
@@ -60,7 +60,7 @@ const Banner = () => {
         (prev) => (prev - 1 + banners.length) % banners.length
       );
       setAnimationClass("fade-in");
-    }, 300);
+    }, 600); // Increased from 300ms to 600ms
   }, [banners.length]);
 
   const goToBanner = useCallback(
@@ -72,7 +72,7 @@ const Banner = () => {
       setTimeout(() => {
         setCurrentBannerIndex(index);
         setAnimationClass("fade-in");
-      }, 300);
+      }, 600); // Increased from 300ms to 600ms
     },
     [currentBannerIndex]
   );
@@ -109,6 +109,51 @@ const Banner = () => {
       }
     });
   }, [banners]);
+
+  // Add touch swipe functionality for mobile
+  useEffect(() => {
+    if (!banners.length || banners.length <= 1) return;
+
+    let touchStartX = 0;
+    let touchEndX = 0;
+
+    const handleTouchStart = (e: Event) => {
+      const touchEvent = e as unknown as TouchEvent;
+      touchStartX = touchEvent.touches[0].clientX;
+    };
+
+    const handleTouchEnd = (e: Event) => {
+      const touchEvent = e as unknown as TouchEvent;
+      touchEndX = touchEvent.changedTouches[0].clientX;
+      handleSwipe();
+    };
+
+    const handleSwipe = () => {
+      // Determine swipe direction and minimum swipe distance (30px)
+      if (touchEndX < touchStartX - 30) {
+        // Swipe left - go to next banner
+        nextBanner();
+      } else if (touchEndX > touchStartX + 30) {
+        // Swipe right - go to previous banner
+        prevBanner();
+      }
+    };
+
+    const bannerContainer = document.querySelector(".banner-container");
+    if (bannerContainer) {
+      bannerContainer.addEventListener("touchstart", handleTouchStart, {
+        passive: true,
+      });
+      bannerContainer.addEventListener("touchend", handleTouchEnd, {
+        passive: true,
+      });
+
+      return () => {
+        bannerContainer.removeEventListener("touchstart", handleTouchStart);
+        bannerContainer.removeEventListener("touchend", handleTouchEnd);
+      };
+    }
+  }, [banners.length, nextBanner, prevBanner]);
 
   if (!isLoaded || banners.length === 0) {
     return null; // Don't render anything if no banners
@@ -183,4 +228,3 @@ const Banner = () => {
 };
 
 export default Banner;
-

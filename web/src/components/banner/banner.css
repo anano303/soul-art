@@ -16,7 +16,7 @@
   width: 100%;
   height: 100%;
   opacity: 0;
-  transition: opacity 0.8s ease-in-out, transform 1.2s ease-in-out;
+  transition: opacity 1s ease-in-out, transform 1.5s ease-in-out;
   transform: scale(1.05);
   background-size: cover;
   background-position: center;
@@ -76,7 +76,7 @@
   display: inline-block;
   padding: 14px 32px;
   margin-top: 20px;
-  background: linear-gradient(135deg, #012645 0%, #01456b 100%);
+  background: linear-gradient(to left, #012645, #1b055b);
   color: white;
   font-weight: 600;
   text-decoration: none;
@@ -176,6 +176,8 @@
   border: none;
   cursor: pointer;
   transition: all 0.3s ease;
+  /* Add a subtle border to make indicators more visible */
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.1);
 }
 
 .indicator.active {
@@ -196,19 +198,19 @@
 }
 
 .fade-in {
-  animation: fadeIn 0.5s ease-in-out forwards;
+  animation: fadeIn 0.8s ease-in-out forwards;
 }
 
 .fade-out {
-  animation: fadeOut 0.5s ease-in-out forwards;
+  animation: fadeOut 0.8s ease-in-out forwards;
 }
 
 .slide-left {
-  animation: slideLeft 0.5s ease-in-out forwards;
+  animation: slideLeft 0.8s ease-in-out forwards;
 }
 
 .slide-right {
-  animation: slideRight 0.5s ease-in-out forwards;
+  animation: slideRight 0.8s ease-in-out forwards;
 }
 
 @keyframes fadeIn {
@@ -261,7 +263,7 @@
 
   .banner-content {
     left: 5%;
-    max-width: 90%;
+    max-width: 85%; /* Expanded since we're hiding the buttons */
     padding: 15px;
   }
 
@@ -273,10 +275,32 @@
     padding: 12px 24px;
   }
 
+  /* Hide carousel buttons on mobile */
   .carousel-btn {
-    width: 40px;
-    height: 40px;
-    font-size: 20px;
+    display: none;
+  }
+
+  /* Make indicators larger and more prominent on mobile */
+  .carousel-indicators {
+    bottom: 20px;
+    gap: 12px;
+  }
+
+  .indicator {
+    width: 14px;
+    height: 14px;
+    /* Add a small tap target padding without affecting visual size */
+    position: relative;
+  }
+
+  .indicator:after {
+    content: "";
+    position: absolute;
+    top: -8px;
+    left: -8px;
+    right: -8px;
+    bottom: -8px;
+    z-index: 1;
   }
 }
 
@@ -294,6 +318,7 @@
   .banner-content {
     padding: 10px;
     border-left-width: 3px;
+    max-width: 90%; /* Expanded even more on smaller screens */
   }
 
   .banner-cta-btn {
@@ -305,9 +330,20 @@
     font-size: 0.9rem;
   }
 
-  .carousel-btn {
-    width: 36px;
-    height: 36px;
-    font-size: 18px;
+  /* Further enhance indicators for small screens */
+  .carousel-indicators {
+    bottom: 15px;
+    gap: 10px;
+  }
+
+  .indicator {
+    width: 16px;
+    height: 16px;
+    background: rgba(255, 255, 255, 0.7);
+  }
+
+  .indicator.active {
+    transform: scale(1.3);
+    box-shadow: 0 0 12px rgba(123, 86, 66, 0.9);
   }
 }
