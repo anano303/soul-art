@@ -877,7 +877,7 @@ body {
 
   .similar-products-grid > div {
     flex: 0 0 100%;
-    max-width: 100%;
+    max-width: 90%;
   }
 
   .similar-products-title {
