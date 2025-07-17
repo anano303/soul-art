@@ -30,9 +30,9 @@ export function LanguageSwitcher({ onNavigate }: { onNavigate?: () => void }) {
     };
   }, []);
 
-  // Track if we're on mobile
+  // Track if we're on mobile - use a more aggressive threshold to ensure dropdown shows above
   const [isMobile, setIsMobile] = useState(
-    typeof window !== "undefined" ? window.innerWidth <= 768 : false
+    typeof window !== "undefined" ? window.innerWidth <= 900 : false
   );
 
   // Update mobile status on window resize
@@ -40,7 +40,7 @@ export function LanguageSwitcher({ onNavigate }: { onNavigate?: () => void }) {
     if (typeof window === "undefined") return;
 
     const handleResize = () => {
-      setIsMobile(window.innerWidth <= 768);
+      setIsMobile(window.innerWidth <= 900);
     };
 
     window.addEventListener("resize", handleResize);
