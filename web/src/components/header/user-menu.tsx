@@ -60,10 +60,7 @@ export default function UserMenu({ onNavigate }: { onNavigate?: () => void }) {
     return (
       <Link href="/login" className="button" onClick={handleLinkClick}>
         🎭
-        <span className="icon" onClick={handleLinkClick}>
-          {" "}
-          {t("navigation.login")}
-        </span>
+        <span className="icon"> {t("navigation.login")}</span>
       </Link>
     );
   }

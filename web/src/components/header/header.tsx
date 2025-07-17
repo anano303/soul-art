@@ -31,6 +31,10 @@ export default function Header() {
     }
   };
 
+  const closeNav = () => {
+    setIsNavOpen(false);
+  };
+
   return (
     <header className={`header ${isNavOpen ? "mobile-nav-active" : ""}`}>
       <div className="logo">
@@ -52,6 +56,7 @@ export default function Header() {
                   ? "/admin/products"
                   : "/sellers-register"
               }
+              onClick={closeNav}
             >
               {user?.role === "seller"
                 ? t("navigation.myArtworks")
@@ -59,40 +64,52 @@ export default function Header() {
             </Link>
           </li>
           <li className="shop-dropdown">
-            <Link href="/shop?page=1">{t("navigation.shop")}</Link>
+            <Link href="/shop?page=1" onClick={closeNav}>
+              {t("navigation.shop")}
+            </Link>
             <div className="dropdown-menu">
-              <Link href="/auction">{t("navigation.auction")}</Link>
+              <Link href="/auction" onClick={closeNav}>
+                {t("navigation.auction")}
+              </Link>
             </div>
           </li>
           {/* Mobile-only auction link */}
           <li className="mobile-only-nav">
-            <Link href="/auction">{t("navigation.auction")}</Link>
+            <Link href="/auction" onClick={closeNav}>
+              {t("navigation.auction")}
+            </Link>
           </li>
           <li>
-            <a href="#" onClick={handleOrdersClick}>
+            <a
+              href="#"
+              onClick={(e) => {
+                handleOrdersClick(e);
+                closeNav();
+              }}
+            >
               {t("navigation.myOrders")}
             </a>
           </li>
           {/* Mobile-only auth, language and cart */}
           <li className="mobile-only-nav">
-            <UserMenu />
+            <UserMenu onNavigate={closeNav} />
           </li>
           <div className="flex">
             <li className="mobile-only-nav mobile-language">
-              <LanguageSwitcher />
+              <LanguageSwitcher onNavigate={closeNav} />
             </li>
             <li className="mobile-only-nav mobile-cart">
-              <CartIcon />
+              <CartIcon onNavigate={closeNav} />
             </li>
           </div>
         </ul>
       </nav>
       <div className="auth-cart desktop-only">
         <div className="language-switcher-container">
-          <LanguageSwitcher />
+          <LanguageSwitcher onNavigate={closeNav} />
         </div>
-        <UserMenu />
-        <CartIcon />
+        <UserMenu onNavigate={closeNav} />
+        <CartIcon onNavigate={closeNav} />
       </div>
 
       {/* Mobile Navigation */}

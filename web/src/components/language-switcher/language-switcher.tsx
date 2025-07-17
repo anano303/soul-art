@@ -4,7 +4,7 @@ import { useLanguage } from "@/hooks/LanguageContext";
 import { useState, useRef, useEffect } from "react";
 import "./language-switcher.css";
 
-export function LanguageSwitcher() {
+export function LanguageSwitcher({ onNavigate }: { onNavigate?: () => void }) {
   const { language, setLanguage } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
   const switcherRef = useRef<HTMLDivElement>(null);
@@ -30,9 +30,32 @@ export function LanguageSwitcher() {
     };
   }, []);
 
+  // Track if we're on mobile
+  const [isMobile, setIsMobile] = useState(
+    typeof window !== "undefined" ? window.innerWidth <= 768 : false
+  );
+
+  // Update mobile status on window resize
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   return (
-    <div className="language-switcher" ref={switcherRef}>
-      <button className="language-button" onClick={toggleDropdown}>
+    <div
+      className={`language-switcher ${isMobile ? "mobile-view" : ""}`}
+      ref={switcherRef}
+    >
+      <button
+        className={`language-button ${isOpen ? "active" : ""}`}
+        onClick={toggleDropdown}
+      >
         {language === "en" ? "ENG" : "ქარ"}
       </button>
 
@@ -40,13 +63,21 @@ export function LanguageSwitcher() {
         <div className="language-dropdown">
           <button
             className={`language-option ${language === "ge" ? "active" : ""}`}
-            onClick={() => setLanguage("ge")}
+            onClick={() => {
+              setLanguage("ge");
+              setIsOpen(false);
+              onNavigate?.();
+            }}
           >
             ქარ
           </button>
           <button
             className={`language-option ${language === "en" ? "active" : ""}`}
-            onClick={() => setLanguage("en")}
+            onClick={() => {
+              setLanguage("en");
+              setIsOpen(false);
+              onNavigate?.();
+            }}
           >
             ENG
           </button>
