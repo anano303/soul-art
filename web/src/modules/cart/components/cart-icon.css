@@ -12,12 +12,12 @@
 .cartIconsSpan {
   position: relative;
   top: -36px;
-  right: -52px;
+  /* right: -52px; */
   border-radius: 20%;
   /* background-color: white; */
   font-size: 24px;
   font-style: bold;
-  color: #012645;
+  color: yellow;
   padding: 2px 4px;
   font-family: "FiraGo", "Noto Sans Georgian", sans-serif;
 

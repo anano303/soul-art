@@ -8,6 +8,7 @@ import { ReviewForm } from "./review-form";
 import { ProductReviews } from "./product-reviews";
 import { useRouter } from "next/navigation";
 import "./productDetails.css";
+import "./ProductCard.css"; // Import ProductCard styles for button consistency
 import "./videoTabs.css"; // Import new tabs styles
 import { Product } from "@/types";
 import Link from "next/link";
@@ -82,10 +83,7 @@ function EnhancedAddToCartButton({
 
   if (countInStock === 0 || disabled) {
     return (
-      <button
-        className={`add-to-cart-button out-of-stock ${className}`}
-        disabled
-      >
+      <button className={`addButtonCart out-of-stock ${className}`} disabled>
         {t("shop.outOfStock") || "არ არის მარაგში"}
       </button>
     );
@@ -115,14 +113,17 @@ function EnhancedAddToCartButton({
       )}
 
       <button
-        className={`add-to-cart-button ${className}`}
+        className={`addButtonCart ${className}`}
         onClick={handleClick}
         disabled={pending}
       >
         {pending ? (
           <Loader2 className="animate-spin" />
         ) : (
-          t("cart.addToCart") || "კალათაში დამატება"
+          <>
+            <span>+</span>
+            {t("cart.addToCart") || "კალათაში დამატება"}
+          </>
         )}
       </button>
 
@@ -240,6 +241,27 @@ export function ProductDetails({ product }: ProductDetailsProps) {
   } | null>(null);
   const router = useRouter();
   const { t, language } = useLanguage();
+
+  // Determine theme based on product category
+  const getThemeClass = () => {
+    const categoryName =
+      typeof product.category === "string"
+        ? product.category
+        : product.category?.name || "";
+
+    if (
+      categoryName === "ხელნაკეთი ნივთები" ||
+      categoryName === "ხელნაკეთი" ||
+      categoryName === "Handmades" ||
+      categoryName === "Handmade"
+    ) {
+      return "handmade-theme";
+    }
+
+    return "default";
+  };
+
+  const themeClass = getThemeClass();
 
   // Fetch colors and age groups for localization
   const { data: availableColors = [] } = useQuery<Color[]>({
@@ -427,7 +449,7 @@ export function ProductDetails({ product }: ProductDetailsProps) {
   };
 
   return (
-    <div className="container">
+    <div className={`container ${themeClass}`}>
       {/* SEO Product Schema */}
       <ProductSchema product={product} productId={product._id} />
 
@@ -445,6 +467,11 @@ export function ProductDetails({ product }: ProductDetailsProps) {
                 className="image-wrapper"
                 onClick={openFullscreen}
               >
+                {isDiscounted && product.discountPercentage && (
+                  <span className="discount-badge">
+                    -{product.discountPercentage}% OFF
+                  </span>
+                )}
                 {product.images && product.images[currentImageIndex] && (
                   <Image
                     src={product.images[currentImageIndex]}
@@ -547,11 +574,11 @@ export function ProductDetails({ product }: ProductDetailsProps) {
           <div className="price-section">
             {isDiscounted ? (
               <div className="price-container">
-                {product.discountPercentage && (
+                {/* {product.discountPercentage && (
                   <span className="discount-badge">
                     -{product.discountPercentage}% OFF
                   </span>
-                )}
+                )} */}
                 <span className="original-price">
                   ₾{product.price.toFixed(2)}
                 </span>
@@ -781,12 +808,55 @@ export function ProductDetails({ product }: ProductDetailsProps) {
       {isFullscreenOpen &&
         product.images &&
         product.images[currentImageIndex] && (
-          <div className="fullscreen-modal" onClick={closeFullscreen}>
+          <div
+            className="fullscreen-modal"
+            onClick={closeFullscreen}
+            style={{
+              position: "fixed",
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: "rgba(0, 0, 0, 0.9)",
+              backdropFilter: "blur(20px)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              zIndex: 9999,
+              padding: "20px",
+            }}
+          >
             <button
               className="fullscreen-close"
               onClick={(e) => {
                 e.stopPropagation();
                 closeFullscreen();
+              }}
+              style={{
+                position: "absolute",
+                top: "20px",
+                right: "20px",
+                background: "rgba(255, 255, 255, 0.1)",
+                border: "none",
+                borderRadius: "50%",
+                width: "50px",
+                height: "50px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                cursor: "pointer",
+                color: "white",
+                fontSize: "24px",
+                transition: "all 0.3s ease",
+                zIndex: 10000,
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = "rgba(255, 255, 255, 0.2)";
+                e.currentTarget.style.transform = "scale(1.1)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = "rgba(255, 255, 255, 0.1)";
+                e.currentTarget.style.transform = "scale(1)";
               }}
             >
               <X />
@@ -794,6 +864,14 @@ export function ProductDetails({ product }: ProductDetailsProps) {
             <div
               className="fullscreen-image-container"
               onClick={(e) => e.stopPropagation()}
+              style={{
+                position: "relative",
+                maxWidth: "95vw",
+                maxHeight: "95vh",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
             >
               <Image
                 src={product.images[currentImageIndex]}
@@ -802,6 +880,15 @@ export function ProductDetails({ product }: ProductDetailsProps) {
                 height={1200}
                 quality={100}
                 className="fullscreen-image"
+                style={{
+                  maxWidth: "100%",
+                  maxHeight: "100%",
+                  width: "auto",
+                  height: "auto",
+                  objectFit: "contain",
+                  borderRadius: "12px",
+                  boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.5)",
+                }}
               />
             </div>
           </div>
