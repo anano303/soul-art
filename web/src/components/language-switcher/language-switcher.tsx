@@ -8,6 +8,8 @@ export function LanguageSwitcher({ onNavigate }: { onNavigate?: () => void }) {
   const { language, setLanguage } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
   const switcherRef = useRef<HTMLDivElement>(null);
+  // Initialize with null to avoid hydration mismatch
+  const [isMobile, setIsMobile] = useState<boolean | null>(null);
 
   const toggleDropdown = () => {
     setIsOpen(!isOpen);
@@ -30,17 +32,14 @@ export function LanguageSwitcher({ onNavigate }: { onNavigate?: () => void }) {
     };
   }, []);
 
-  // Track if we're on mobile - use a more aggressive threshold to ensure dropdown shows above
-  const [isMobile, setIsMobile] = useState(
-    typeof window !== "undefined" ? window.innerWidth <= 900 : false
-  );
-
-  // Update mobile status on window resize
+  // Set mobile status only on client-side after component mounts
   useEffect(() => {
-    if (typeof window === "undefined") return;
+    // Initial check for mobile
+    setIsMobile(window.innerWidth <= 992);
 
+    // Update on resize
     const handleResize = () => {
-      setIsMobile(window.innerWidth <= 900);
+      setIsMobile(window.innerWidth <= 992);
     };
 
     window.addEventListener("resize", handleResize);
@@ -49,7 +48,8 @@ export function LanguageSwitcher({ onNavigate }: { onNavigate?: () => void }) {
 
   return (
     <div
-      className={`language-switcher ${isMobile ? "mobile-view" : ""}`}
+      className="language-switcher"
+      data-mobile={isMobile === true ? "true" : "false"}
       ref={switcherRef}
     >
       <button
