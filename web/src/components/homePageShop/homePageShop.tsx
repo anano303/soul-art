@@ -172,7 +172,7 @@ const HomePageShop = () => {
         setCategoryProducts(updatedCategoryProducts);
       }
     }
-  }, [language, getCategoryName]);
+  }, [language, getCategoryName, categoryProducts, categories]);
 
   useEffect(() => {
     // Animation observer
