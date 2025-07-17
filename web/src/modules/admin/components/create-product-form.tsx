@@ -38,12 +38,6 @@ interface ProductFormData extends BaseProductFormData {
   discountPercentage?: number;
   discountStartDate?: string;
   discountEndDate?: string;
-  variants?: Array<{
-    ageGroup?: string;
-    size?: string;
-    color?: string;
-    stock: number;
-  }>; // Product variants with specific attributes and stock
 }
 
 interface CreateProductFormProps {
@@ -232,7 +226,6 @@ export function CreateProductForm({
     if (initialData) {
       console.log("InitialData received:", initialData);
       console.log("InitialData hashtags:", initialData.hashtags);
-      console.log("InitialData variants:", initialData.variants);
 
       // Basic form data setup
       setFormData((prev) => ({
@@ -1221,7 +1214,7 @@ export function CreateProductForm({
             <p className="create-product-error">{errors.countInStock}</p>
           )}
         </div>
-        Delivery Section
+        {/* Delivery Section
         <div className="delivery-section">
           <h3>მიწოდების ტიპი</h3>
           <div className="delivery-type-options">
@@ -1273,7 +1266,7 @@ export function CreateProductForm({
               </div>
             </div>
           )}
-        </div> 
+        </div> */}
         <div>
           <label htmlFor="brand">{t("adminProducts.brand")}</label>
           <input
