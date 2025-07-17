@@ -57,7 +57,7 @@
 }
 
 /* Styles for dropdown when in mobile view */
-.mobile-view .language-dropdown {
+.language-switcher[data-mobile="true"] .language-dropdown {
   top: auto;
   bottom: 100%;
   margin-top: 0;
@@ -140,7 +140,7 @@
   }
 
   /* Force dropdown to appear above on all mobile devices */
-  .language-dropdown {
+  .language-switcher[data-mobile="true"] .language-dropdown {
     top: auto !important;
     bottom: 100% !important;
     margin-top: 0 !important;
@@ -167,11 +167,11 @@
   }
 
   /* Always force dropdown to appear above on small screens */
-  .language-dropdown {
-    top: auto;
-    bottom: 100%;
-    margin-top: 0;
-    margin-bottom: 8px;
+  .language-switcher[data-mobile="true"] .language-dropdown {
+    top: auto !important;
+    bottom: 100% !important;
+    margin-top: 0 !important;
+    margin-bottom: 8px !important;
     transform-origin: bottom center;
     animation: dropdown-fade-mobile 0.2s ease;
   }
