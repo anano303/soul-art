@@ -1,11 +1,11 @@
 export const organizationSchema = {
   "@context": "https://schema.org",
   "@type": "Organization",
-  name: "MyHunter",
-  alternateName: "მაიჰანტერი",
-  url: "https://myhunter.ge",
-  logo: "https://myhunter.ge/logo.png",
-  description: "საუკეთესო სანადირო და სათევზაო აღჭურვილობა საქართველოში",
+  name: "SoulArt",
+  alternateName: "ნახატები და ხელნაკეთი ნივთები",
+  url: "https://SoulArt.ge",
+  logo: "https://SoulArt.ge/logo.png",
+  description: "ნახატები, ხელნაკეთი ნივთები და დეკორი",
   address: {
     "@type": "PostalAddress",
     streetAddress: "თქვენი მისამართი", // შეცვალეთ რეალური მისამართით
@@ -15,29 +15,29 @@ export const organizationSchema = {
   },
   contactPoint: {
     "@type": "ContactPoint",
-    telephone: "+995-XXX-XXX-XXX", // შეცვალეთ რეალური ნომრით
+    telephone: "+995-551-00-00-59", // შეცვალეთ რეალური ნომრით
     contactType: "customer service",
     availableLanguage: ["Georgian", "English"],
   },
   sameAs: [
-    "https://www.facebook.com/myhunter.ge", // შეცვალეთ რეალური სოციალური ქსელებით
-    "https://www.instagram.com/myhunter.ge",
+    "https://www.facebook.com/profile.php?id=61574985443236", // შეცვალეთ რეალური სოციალური ქსელებით
+    "https://www.instagram.com/SoulArt.ge",
   ],
 };
 
 export const websiteSchema = {
   "@context": "https://schema.org",
   "@type": "WebSite",
-  name: "MyHunter",
-  alternateName: "მაიჰანტერი",
-  url: "https://myhunter.ge",
-  description: "სანადირო და სათევზაო აღჭურვილობის ონლაინ მაღაზია",
+  name: "SoulArt",
+  alternateName: "SoulArt - ხელნაკეთი ნივთები და ნახატები",
+  url: "https://SoulArt.ge",
+  description: "ხელნაკეთი ნივთები და ნახატები",
   inLanguage: ["ka", "en"],
   potentialAction: {
     "@type": "SearchAction",
     target: {
       "@type": "EntryPoint",
-      urlTemplate: "https://myhunter.ge/search/{search_term_string}",
+      urlTemplate: "https://SoulArt.ge/search/{search_term_string}",
     },
     "query-input": "required name=search_term_string",
   },
@@ -46,10 +46,10 @@ export const websiteSchema = {
 export const storeSchema = {
   "@context": "https://schema.org",
   "@type": "Store",
-  name: "MyHunter",
-  description: "სანადირო და სათევზაო აღჭურვილობის მაღაზია",
-  url: "https://myhunter.ge",
-  telephone: "+995-XXX-XXX-XXX", // შეცვალეთ რეალური ნომრით
+  name: "SoulArt",
+  description: "ხელნაკეთი ნივთები და ნახატები",
+  url: "https://SoulArt.ge",
+  telephone: "+995-551-000-059", // შეცვალეთ რეალური ნომრით
   address: {
     "@type": "PostalAddress",
     streetAddress: "თქვენი მისამართი", // შეცვალეთ რეალური მისამართით

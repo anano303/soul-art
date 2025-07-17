@@ -17,14 +17,14 @@ export async function generateMetadata({
 
     if (!response.ok) {
       return {
-        title: "Product Not Found | MyHunter",
+        title: "Product Not Found | SoulArt",
         description: "The requested product could not be found.",
       };
     }
 
     const product = await response.json();
 
-    const title = `${product.name} - ${product.brand} | MyHunter`;
+    const title = `${product.name} - ${product.brand} | SoulArt`;
 
     let description =
       product.description?.slice(0, 160) ||
@@ -54,7 +54,7 @@ export async function generateMetadata({
       ...(product.hashtags || []),
       "საზაფხულო",
       "მაისური",
-      "MyHunter",
+      "SoulArt",
     ].join(", ");
 
     return {
@@ -77,7 +77,7 @@ export async function generateMetadata({
             : [],
         type: "website",
         locale: "ka_GE",
-        siteName: "myHunter",
+        siteName: "soulart",
       },
       twitter: {
         card: "summary_large_image",
@@ -86,14 +86,14 @@ export async function generateMetadata({
         images: product.images?.length > 0 ? [product.images[0]] : [],
       },
       alternates: {
-        canonical: `https://myHunter.ge/products/${params.id}`,
+        canonical: `https://soulart.ge/products/${params.id}`,
       },
     };
   } catch (error) {
     console.error("Error generating metadata:", error);
     return {
-      title: "Product | MyHunter",
-      description: "Discover products on MyHunter",
+      title: "Product | SoulArt",
+      description: "Discover unique artworks on SoulArt",
     };
   }
 }

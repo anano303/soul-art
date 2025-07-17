@@ -3,26 +3,34 @@ import ShopContent from "./ShopContent";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "მაღაზია - სანადირო და სათევზაო აღჭურვილობა | MyHunter",
+  title: "მაღაზია - ხელნაკეთი ნივთები და ნახატები | SoulArt",
   description:
-    "დაათვალიერეთ სანადირო და სათევზაო აღჭურვილობის ფართო არჩევანი მაიჰანტერის მაღაზიაში. ხარისხიანი პროდუქტები, საუკეთესო ფასები საქართველოში. Shop hunting and fishing equipment at MyHunter.",
+    "შეიძინეთ უნიკალური ხელნაკეთი ნივთები და ნახატები SoulArt-ის ონლაინ მაღაზიაში. ქართველი ხელოვანების ნამუშევრები, ხელნაკეთი სამკაულები, აქსესუარები და დეკორი. ხარისხიანი ნივთები საუკეთესო ფასად საქართველოში. Shop unique handmade items and paintings.",
   keywords: [
     "მაღაზია",
-    "სანადირო აღჭურვილობა",
-    "სათევზაო აღჭურვილობა",
-    "პროდუქტები",
-    "MyHunter",
-    "მაიჰანტერი",
+    "ხელნაკეთი ნივთები",
+    "ნახატები",
+    "ქართველი მხატვრები",
+    "SoulArt",
+    "ხელნაკეთი სამკაულები",
+    "ხელნაკეთი აქსესუარები",
+    "დეკორი",
+    "ხელოვნება",
     "shop",
-    "hunting equipment",
-    "fishing equipment",
-    "products",
+    "handmade items",
+    "paintings",
+    "georgian artists",
+    "handmade jewelry",
+    "handmade accessories",
+    "art",
+    "decor",
     "Georgia",
-    "outdoor gear",
+    "unique art",
+    "artisan crafts",
   ],
-  authors: [{ name: "MyHunter" }],
-  creator: "MyHunter",
-  publisher: "MyHunter",
+  authors: [{ name: "SoulArt" }],
+  creator: "SoulArt",
+  publisher: "SoulArt",
   robots: {
     index: true,
     follow: true,
@@ -34,17 +42,17 @@ export const metadata: Metadata = {
     },
   },
   openGraph: {
-    title: "მაღაზია - სანადირო და სათევზაო აღჭურვილობა | MyHunter",
+    title: "მაღაზია - ხელნაკეთი ნივთები და ნახატები | SoulArt",
     description:
-      "დაათვალიერეთ სანადირო და სათევზაო აღჭურვილობის ფართო არჩევანი მაიჰანტერის მაღაზიაში. ხარისხიანი პროდუქტები, საუკეთესო ფასები საქართველოში.",
-    url: "https://myhunter.ge/shop",
-    siteName: "MyHunter",
+      "შეიძინეთ უნიკალური ხელნაკეთი ნივთები და ნახატები SoulArt-ის ონლაინ მაღაზიაში. ქართველი ხელოვანების ნამუშევრები, სამკაულები, აქსესუარები და დეკორი.",
+    url: "https://soulart.ge/shop",
+    siteName: "SoulArt",
     images: [
       {
         url: "/logo.png",
         width: 1200,
         height: 630,
-        alt: "MyHunter მაღაზია",
+        alt: "SoulArt მაღაზია - ხელნაკეთი ნივთები და ნახატები",
       },
     ],
     locale: "ka_GE",
@@ -52,13 +60,13 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "მაღაზია - სანადირო და სათევზაო აღჭურვილობა | MyHunter",
+    title: "მაღაზია - ხელნაკეთი ნივთები და ნახატები | SoulArt",
     description:
-      "დაათვალიერეთ სანადირო და სათევზაო აღჭურვილობის ფართო არჩევანი მაიჰანტერის მაღაზიაში.",
+      "შეიძინეთ უნიკალური ხელნაკეთი ნივთები და ნახატები SoulArt-ის ონლაინ მაღაზიაში. ქართველი ხელოვანების ნამუშევრები.",
     images: ["/logo.png"],
   },
   alternates: {
-    canonical: "https://myhunter.ge/shop",
+    canonical: "https://soulart.ge/shop",
   },
 };
 

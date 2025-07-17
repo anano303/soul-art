@@ -49,7 +49,7 @@ async function getCategories() {
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl =
-    process.env.NEXT_PUBLIC_PRODUCTION_URL || "https://myhunter.ge";
+    process.env.NEXT_PUBLIC_PRODUCTION_URL || "https://soulart.ge";
 
   // ძირითადი გვერდები
   const staticPages = [

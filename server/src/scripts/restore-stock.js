@@ -4,7 +4,7 @@ const { MongoClient } = require('mongodb');
 
 async function restoreStock() {
   const client = new MongoClient(
-    process.env.MONGODB_URL || 'mongodb://localhost:27017/myhunter',
+    process.env.MONGODB_URL || 'mongodb://localhost:27017/soulart',
   );
 
   try {
