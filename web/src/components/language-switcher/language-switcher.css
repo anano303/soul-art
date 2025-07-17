@@ -1,7 +1,7 @@
 .language-switcher {
   position: relative;
   display: inline-block;
-  z-index: 1000;
+  z-index: 2000;
 }
 
 .language-button {
@@ -47,7 +47,7 @@
   background-color: white;
   border-radius: 8px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
-  z-index: 1000;
+  z-index: 2000;
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -64,6 +64,8 @@
   margin-bottom: 8px;
   transform-origin: bottom center;
   animation: dropdown-fade-mobile 0.2s ease;
+  right: 0; /* Ensure alignment with the button */
+  min-width: 100%; /* Make dropdown at least as wide as the button */
 }
 
 @keyframes dropdown-fade {
@@ -120,7 +122,7 @@
 }
 
 /* Mobile styles */
-@media (max-width: 768px) {
+@media (max-width: 992px) {
   .language-button {
     font-size: 0.8rem;
     padding: 5px 10px;
@@ -135,6 +137,14 @@
   .language-option {
     padding: 8px 10px;
     font-size: 0.85rem;
+  }
+
+  /* Force dropdown to appear above on all mobile devices */
+  .language-dropdown {
+    top: auto !important;
+    bottom: 100% !important;
+    margin-top: 0 !important;
+    margin-bottom: 8px !important;
   }
 }
 
@@ -154,6 +164,16 @@
   .language-dropdown {
     right: 0;
     min-width: 60px;
+  }
+
+  /* Always force dropdown to appear above on small screens */
+  .language-dropdown {
+    top: auto;
+    bottom: 100%;
+    margin-top: 0;
+    margin-bottom: 8px;
+    transform-origin: bottom center;
+    animation: dropdown-fade-mobile 0.2s ease;
   }
 
   .language-option {
