@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import Link from "next/link";
 import "./homePageShop.css";
 import "../../app/(pages)/shop/ShopPage.css";
@@ -19,7 +19,7 @@ interface CategoryProducts {
   products: Product[];
 }
 
-export default function HomePageShop() {
+const HomePageShop = () => {
   const { t, language } = useLanguage();
   const [isLoading, setIsLoading] = useState(true);
   const [categoryProducts, setCategoryProducts] = useState<CategoryProducts[]>(
@@ -30,94 +30,149 @@ export default function HomePageShop() {
   const titleRefs = useRef<(HTMLHeadingElement | null)[]>([]);
 
   // Fetch all categories first
-  const { data: categories = [] } = useQuery<Category[]>({
-    queryKey: ["home-categories"],
+  const { data: categories = [], refetch } = useQuery<Category[]>({
+    queryKey: ["home-categories", language],
     queryFn: async () => {
       try {
         const response = await fetchWithAuth(
           "/categories?includeInactive=false"
         );
-        return response.json();
+        const data = await response.json();
+        return data;
       } catch (err) {
         console.error("Failed to fetch categories:", err);
         return [];
       }
     },
     refetchOnWindowFocus: false,
+    staleTime: 0, // Consider data always stale to force refresh
+    gcTime: 0, // Don't cache between language switches (v4+ of react-query uses gcTime instead of cacheTime)
   });
 
+  // Force refetch when language changes
   useEffect(() => {
-    async function fetchProducts() {
-      try {
-        setIsLoading(true);
+    refetch();
+  }, [language, refetch]);
 
-        // First fetch all products
-        const response = await getProducts(1, 50); // Fetch more to have enough for each category
-        const allProducts = response.items || [];
+  // Define a memoized function to get the correct category name based on language
+  const getCategoryName = useCallback(
+    (category: Category) => {
+      return language === "en" && category.nameEn
+        ? category.nameEn
+        : category.name;
+    },
+    [language]
+  );
 
-        if (!categories || categories.length === 0) {
-          setIsLoading(false);
-          return;
-        }
+  // Function to process categories and products
+  const processCategoriesAndProducts = useCallback(async () => {
+    try {
+      setIsLoading(true);
 
-        // Group products by category
-        const productsByCategory: CategoryProducts[] = [];
+      if (!categories || categories.length === 0) {
+        setIsLoading(false);
+        return;
+      }
 
-        // Process each category
-        for (const category of categories) {
-          // If category has an ID, use it to filter products
-          if (category.id || category._id) {
-            const categoryId = category.id || category._id || "";
+      // Fetch products
+      const response = await getProducts(1, 50);
+      const allProducts = response.items || [];
 
-            // Filter products that belong to this category
-            const categoryProds = allProducts
-              .filter((product) => {
-                // Check mainCategory field
-                if (
-                  typeof product.mainCategory === "object" &&
-                  product.mainCategory
-                ) {
-                  return (
-                    product.mainCategory.id === categoryId ||
-                    product.mainCategory._id === categoryId
-                  );
-                }
+      // Group products by category
+      const productsByCategory: CategoryProducts[] = [];
 
-                // If mainCategory is a string, compare directly
-                if (typeof product.mainCategory === "string") {
-                  return product.mainCategory === categoryId;
-                }
+      // Process each category
+      for (const category of categories) {
+        if (category.id || category._id) {
+          const categoryId = category.id || category._id || "";
+          // Get the category name based on current language
+          const categoryName = getCategoryName(category);
 
-                return false;
-              })
-              .slice(0, 6); // Take only 6 products per category
+          // Filter products for this category
+          const categoryProds = allProducts
+            .filter((product) => {
+              if (
+                typeof product.mainCategory === "object" &&
+                product.mainCategory
+              ) {
+                return (
+                  product.mainCategory.id === categoryId ||
+                  product.mainCategory._id === categoryId
+                );
+              }
+              if (typeof product.mainCategory === "string") {
+                return product.mainCategory === categoryId;
+              }
+              return false;
+            })
+            .slice(0, 6);
 
-            // Only add categories that have products
-            if (categoryProds.length > 0) {
-              productsByCategory.push({
-                category:
-                  language === "en" && category.nameEn
-                    ? category.nameEn
-                    : category.name,
-                categoryId: categoryId,
-                products: categoryProds,
-              });
-            }
+          // Only add categories with products
+          if (categoryProds.length > 0) {
+            productsByCategory.push({
+              category: categoryName,
+              categoryId: categoryId,
+              products: categoryProds,
+            });
           }
         }
+      }
 
-        setCategoryProducts(productsByCategory);
-        setIsLoading(false);
-      } catch (error) {
-        console.error("Error fetching products:", error);
-        setIsLoading(false);
+      setCategoryProducts(productsByCategory);
+      setIsLoading(false);
+    } catch (error) {
+      console.error("Error processing categories and products:", error);
+      setIsLoading(false);
+    }
+  }, [categories, getCategoryName]);
+
+  // Process categories and products when categories or getCategoryName changes
+  useEffect(() => {
+    if (categories && Array.isArray(categories) && categories.length > 0) {
+      // When language changes, getCategoryName will change, triggering this effect
+      processCategoriesAndProducts();
+    }
+  }, [categories, getCategoryName, processCategoriesAndProducts]);
+
+  // Direct effect to update category names when language changes
+  useEffect(() => {
+    // Skip on initial render or if there's no data yet
+    if (categoryProducts.length > 0 && categories.length > 0) {
+      // Using a reference comparison to avoid unnecessary updates
+      const currentCategoryNames = categoryProducts
+        .map((cp) => cp.category)
+        .join(",");
+
+      // Update category names based on current language
+      const updatedCategoryProducts = categoryProducts.map(
+        (categoryProduct) => {
+          // Find the category
+          const category = categories.find(
+            (c) =>
+              c.id === categoryProduct.categoryId ||
+              c._id === categoryProduct.categoryId
+          );
+
+          if (category) {
+            // Update the category name
+            return {
+              ...categoryProduct,
+              category: getCategoryName(category),
+            };
+          }
+          return categoryProduct;
+        }
+      );
+
+      // Only update if names actually changed
+      const updatedCategoryNames = updatedCategoryProducts
+        .map((cp) => cp.category)
+        .join(",");
+      if (currentCategoryNames !== updatedCategoryNames) {
+        setCategoryProducts(updatedCategoryProducts);
       }
     }
-
-    if (categories && categories.length > 0) {
-      fetchProducts();
-    }
-  }, [categories, language]);
+  }, [language, getCategoryName]);
 
   useEffect(() => {
     // Animation observer
@@ -137,12 +192,20 @@ export default function HomePageShop() {
 
       // Observe section elements
       sectionRefs.current.forEach((el) => {
-        if (el) observer.observe(el);
+        if (el) {
+          // Reset animation classes first
+          el.classList.remove("animate-visible");
+          observer.observe(el);
+        }
       });
 
       // Observe title elements separately for different animation
       titleRefs.current.forEach((el) => {
-        if (el) observer.observe(el);
+        if (el) {
+          // Reset animation classes first
+          el.classList.remove("animate-visible");
+          observer.observe(el);
+        }
       });
 
       return observer;
@@ -153,25 +216,14 @@ export default function HomePageShop() {
     return () => {
       observer.disconnect();
     };
-  }, [categoryProducts.length]);
+  }, [categoryProducts.length, language]);
 
   return (
-    <div className="container shop-container">
+    <div
+      className="container shop-container"
+      key={`shop-container-${language}`}
+    >
       <div className="content">
-        {/* <div style={{ display: "flex", alignItems: "center", gap: 10 }}> */}
-        {/* <h1
-            className="title"
-            style={{
-              marginBottom: 40,
-              marginTop: 70,
-              zIndex: 9,
-              textAlign: "left",
-            }}
-          > */}
-        {/* {t("shop.allArtworks")} */}
-        {/* </h1> */}
-        {/* </div> */}
-
         {isLoading ? (
           <div className="loading-container">
             <p>{t("shop.loading")}</p>
@@ -181,7 +233,7 @@ export default function HomePageShop() {
             {categoryProducts.length > 0 ? (
               categoryProducts.map((categoryData, index) => (
                 <div
-                  key={index}
+                  key={`${categoryData.categoryId}-${language}-${index}`}
                   className="product-section"
                   ref={(el) => {
                     sectionRefs.current[index] = el;
@@ -261,4 +313,7 @@ export default function HomePageShop() {
       </div>
     </div>
   );
-}
+};
+
+// Remove memo to ensure component re-renders when language changes
+export default HomePageShop;
