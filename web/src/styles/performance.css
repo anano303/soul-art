@@ -122,7 +122,7 @@
 
 /* Critical CSS for above-the-fold content */
 .hero-section {
-  min-height: 60vh;
+  min-height: 40vh;
   display: flex;
   align-items: center;
   justify-content: center;
