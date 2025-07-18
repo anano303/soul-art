@@ -14,6 +14,8 @@ import { StockReservationService } from '../services/stock-reservation.service';
 import { UserDocument } from '@/users/schemas/user.schema';
 import { CurrentUser } from '@/decorators/current-user.decorator';
 import { JwtAuthGuard } from '@/guards/jwt-auth.guard';
+import { Roles } from '@/decorators/roles.decorator';
+import { Role } from '@/types/role.enum';
 
 @Controller('orders')
 export class OrdersController {
@@ -28,10 +30,21 @@ export class OrdersController {
     return this.ordersService.create(body, user._id.toString());
   }
 
-  @UseGuards(RolesGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.Admin, Role.Seller)
   @Get()
-  async getOrders() {
-    return this.ordersService.findAll();
+  async getOrders(@CurrentUser() user: UserDocument) {
+    console.log('Getting orders for user:', user.email, 'Role:', user.role);
+
+    // If user is an admin, return all orders
+    if (user.role === Role.Admin) {
+      console.log('User is admin, fetching all orders');
+      return this.ordersService.findAll();
+    }
+
+    // If user is a seller, return only orders containing their products
+    console.log('User is seller, fetching orders with seller products');
+    return this.ordersService.findOrdersBySeller(user._id.toString());
   }
 
   @UseGuards(JwtAuthGuard)
@@ -41,7 +54,10 @@ export class OrdersController {
     @Query('status') status?: string,
   ) {
     if (status) {
-      return this.ordersService.findUserOrdersByStatus(user._id.toString(), status);
+      return this.ordersService.findUserOrdersByStatus(
+        user._id.toString(),
+        status,
+      );
     }
     return this.ordersService.findUserOrders(user._id.toString());
   }
