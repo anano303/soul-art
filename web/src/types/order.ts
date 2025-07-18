@@ -8,7 +8,7 @@ export interface OrderItem {
   qty: number;
   image: string;
   price: number;
-  productId: string;
+  productId: string | Product; // Can be string or populated Product
   product?: Product;
   size?: string;
   color?: string;

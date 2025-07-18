@@ -165,12 +165,23 @@ export class OrdersService {
   }
 
   async findAll(): Promise<OrderDocument[]> {
+    console.log('Finding all orders for admin');
+
     // Sort by createdAt in descending order (newest first)
     const orders = await this.orderModel
       .find()
       .populate('user', 'name email')
+      .populate({
+        path: 'orderItems.productId',
+        select: 'name user deliveryType minDeliveryDays maxDeliveryDays',
+        populate: {
+          path: 'user',
+          select: '_id name email',
+        },
+      })
       .sort({ createdAt: -1 });
 
+    console.log('Total orders found for admin:', orders.length);
     return orders;
   }
 
@@ -590,5 +601,80 @@ export class OrdersService {
 
       await product.save({ session });
     }
+  }
+
+  async findOrdersBySeller(sellerId: string): Promise<OrderDocument[]> {
+    console.log('Finding orders for seller:', sellerId);
+
+    // Find all orders that contain products created by this seller
+    const orders = await this.orderModel
+      .find()
+      .populate('user', 'name email')
+      .populate({
+        path: 'orderItems.productId',
+        select: 'name user deliveryType minDeliveryDays maxDeliveryDays',
+        populate: {
+          path: 'user',
+          select: '_id',
+        },
+      })
+      .sort({ createdAt: -1 });
+
+    console.log('Total orders found:', orders.length);
+
+    // Filter orders to only include those containing seller's products
+    const sellerOrders = orders.filter((order) => {
+      console.log(
+        'Checking order:',
+        order._id,
+        'Items count:',
+        order.orderItems?.length,
+      );
+
+      const hasSellerProduct =
+        order.orderItems &&
+        order.orderItems.some((item, index) => {
+          console.log(`Item ${index}:`, {
+            hasProductId: !!item.productId,
+            productIdType: typeof item.productId,
+            productId: item.productId
+              ? (item.productId as any)._id
+              : 'no productId',
+            hasUser: !!(item.productId as any)?.user,
+            userType: typeof (item.productId as any)?.user,
+            userId:
+              (item.productId as any)?.user?._id ||
+              (item.productId as any)?.user,
+          });
+
+          if (!item.productId || !(item.productId as any).user) return false;
+          const productUserId =
+            typeof (item.productId as any).user === 'string'
+              ? (item.productId as any).user
+              : (item.productId as any).user._id?.toString();
+          const isMatch = productUserId === sellerId;
+          console.log(
+            'Comparing:',
+            productUserId,
+            'vs',
+            sellerId,
+            'Match:',
+            isMatch,
+          );
+          if (isMatch) {
+            console.log(
+              'Found order with seller product:',
+              order._id,
+              'Product user:',
+              productUserId,
+            );
+          }
+          return isMatch;
+        });
+      return hasSellerProduct;
+    });
+
+    console.log('Filtered seller orders:', sellerOrders.length);
+    return sellerOrders;
   }
 }

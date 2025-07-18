@@ -121,7 +121,7 @@ export default function UserMenu({ onNavigate }: { onNavigate?: () => void }) {
                 </Link>
               </>
             )}
-            {(user.role === Role.Admin || user.role === Role.Seller) && (
+            {user.role === Role.Admin && (
               <>
                 <Link
                   href="/admin/banners"
@@ -149,14 +149,17 @@ export default function UserMenu({ onNavigate }: { onNavigate?: () => void }) {
                 >
                   {t("navigation.users")}
                 </Link>
-                <Link
-                  href="/admin/orders"
-                  className="dropdown-item"
-                  onClick={handleLinkClick}
-                >
-                  {t("navigation.orders")}
-                </Link>
               </>
+            )}
+
+            {(user.role === Role.Admin || user.role === Role.Seller) && (
+              <Link
+                href="/admin/orders"
+                className="dropdown-item"
+                onClick={handleLinkClick}
+              >
+                {t("navigation.orders")}
+              </Link>
             )}
 
             <hr />

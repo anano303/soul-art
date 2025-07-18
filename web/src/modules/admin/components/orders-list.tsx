@@ -1,28 +1,56 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { fetchWithAuth } from "@/lib/fetch-with-auth";
 import Link from "next/link";
 import { CheckCircle2, Store, Truck, XCircle } from "lucide-react";
 import { Order } from "@/types/order";
+import { Product } from "@/types";
 import "./ordersList.css";
 import HeartLoading from "@/components/HeartLoading/HeartLoading";
+import { getUserData } from "@/lib/auth";
 
 export function OrdersList() {
   const [page, setPage] = useState(1);
+  const [userRole, setUserRole] = useState<string | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const userData = getUserData();
+    if (userData) {
+      setUserRole(userData.role);
+      setUserId(userData._id);
+    }
+  }, []);
 
   const { data, isLoading } = useQuery({
-    queryKey: ["orders", page],
+    queryKey: ["orders", page, userRole, userId],
     queryFn: async () => {
-      const response = await fetchWithAuth(`/orders?page=${page}&limit=8`);
-      const data = await response.json();
-      console.log("Orders data:", data);
-      return {
-        items: Array.isArray(data) ? data : [],
-        pages: Math.ceil((Array.isArray(data) ? data.length : 0) / 8),
-      };
+      try {
+        // Backend now handles role-based filtering
+        const response = await fetchWithAuth(`/orders?page=${page}&limit=50`);
+        if (!response.ok) {
+          console.error("Failed to fetch orders:", response.statusText);
+          return { items: [], pages: 0 };
+        }
+
+        const orders = await response.json();
+        console.log("Orders data:", orders);
+
+        // Orders are already filtered by the backend based on user role
+        const filteredOrders = Array.isArray(orders) ? orders : [];
+
+        return {
+          items: filteredOrders,
+          pages: Math.ceil(filteredOrders.length / 8),
+        };
+      } catch (error) {
+        console.error("Error fetching orders:", error);
+        return { items: [], pages: 0 };
+      }
     },
+    enabled: userRole !== null, // Only run query when we have user role
   });
 
   if (isLoading) {
@@ -61,25 +89,47 @@ export function OrdersList() {
               {orders.map((order: Order) => (
                 <tr key={order._id}>
                   <td>#{order._id}</td>
-                  <td>{order.user.email}</td>
-                  <td>{new Date(order.createdAt).toLocaleDateString()}</td>
-                  <td>${order.totalPrice.toFixed(2)}</td>
-                 <td>
-                    {order.orderItems.some(item => 
-                      item.product && String(item.product.deliveryType) === "SELLER"
+                  <td>
+                    {order.user && order.user.email
+                      ? order.user.email
+                      : "Unknown"}
+                  </td>
+                  <td>
+                    {order.createdAt
+                      ? new Date(order.createdAt).toLocaleDateString()
+                      : "Unknown"}
+                  </td>
+                  <td>
+                    ${order.totalPrice ? order.totalPrice.toFixed(2) : "0.00"}
+                  </td>
+                  <td>
+                    {order.orderItems &&
+                    order.orderItems.some(
+                      (item) =>
+                        typeof item.productId === "object" &&
+                        item.productId.deliveryType &&
+                        String(item.productId.deliveryType) === "SELLER"
                     ) ? (
                       <span className="delivery-badge seller">
                         <Store className="icon" />
                         აგზავნის ავტორი
                         {order.orderItems
-                          .filter(item => item.product && String(item.product.deliveryType) === "SELLER")
-                          .map(item => (
-                            item.product?.minDeliveryDays && item.product?.maxDeliveryDays ? (
+                          .filter(
+                            (item) =>
+                              typeof item.productId === "object" &&
+                              item.productId.deliveryType &&
+                              String(item.productId.deliveryType) === "SELLER"
+                          )
+                          .map((item) => {
+                            const product = item.productId as Product;
+                            return product?.minDeliveryDays &&
+                              product?.maxDeliveryDays ? (
                               <span className="delivery-time" key={item._id}>
-                                {item.product.minDeliveryDays}-{item.product.maxDeliveryDays} დღე
+                                {product.minDeliveryDays}-
+                                {product.maxDeliveryDays} დღე
                               </span>
-                            ) : null
-                          ))}
+                            ) : null;
+                          })}
                       </span>
                     ) : (
                       <span className="delivery-badge soulart">
@@ -87,7 +137,7 @@ export function OrdersList() {
                         soulart-ის კურიერი
                       </span>
                     )}
-                  </td> 
+                  </td>
                   <td>
                     {order.status === "cancelled" ? (
                       <span className="status-badge cancelled">

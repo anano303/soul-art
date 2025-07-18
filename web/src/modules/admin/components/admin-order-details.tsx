@@ -11,6 +11,8 @@ import { useLanguage } from "@/hooks/LanguageContext";
 import { useQuery } from "@tanstack/react-query";
 import { fetchWithAuth } from "@/lib/fetch-with-auth";
 import { Color, AgeGroupItem } from "@/types";
+import { getUserData } from "@/lib/auth";
+import { Role } from "@/types/role";
 import "./AdminOrderDetails.css";
 
 interface AdminOrderDetailsProps {
@@ -21,6 +23,10 @@ export function AdminOrderDetails({ order }: AdminOrderDetailsProps) {
   const { toast } = useToast();
   const router = useRouter();
   const { language, t } = useLanguage();
+
+  // Check user role to determine what information to show
+  const userData = getUserData();
+  const isAdmin = userData?.role === Role.Admin;
 
   // Fetch all colors for proper nameEn support
   const { data: availableColors = [] } = useQuery<Color[]>({
@@ -110,10 +116,14 @@ export function AdminOrderDetails({ order }: AdminOrderDetailsProps) {
     (item) => !item.product || String(item.product.deliveryType) !== "SELLER"
   );
 
-  // Fetch seller info for each product
+  // Fetch seller info for each product - only for admins
   const { data: sellerInfo = [], isLoading: isLoadingSellerInfo } = useQuery({
     queryKey: ["sellerInfo", order.orderItems.map((item) => item.productId)],
     queryFn: async () => {
+      if (!isAdmin) {
+        return []; // Don't fetch seller info for non-admin users
+      }
+
       try {
         // Get unique product IDs to avoid duplicate requests
         const productIds = [
@@ -158,6 +168,7 @@ export function AdminOrderDetails({ order }: AdminOrderDetailsProps) {
         return [];
       }
     },
+    enabled: isAdmin, // Only enable for admins
     retry: 0, // Don't retry since we're handling 404s explicitly
     refetchOnWindowFocus: false,
   });
@@ -283,172 +294,78 @@ export function AdminOrderDetails({ order }: AdminOrderDetailsProps) {
               </span>
             </div>
           </div>
-          {/* Seller Information - Added section for seller details */}
-          <div className="card">
-            <h2>{t("adminOrders.sellerInfo")}</h2>
+          {/* Seller Information - Only show for admins */}
+          {isAdmin && (
+            <div className="card">
+              <h2>{t("adminOrders.sellerInfo")}</h2>
 
-            {isLoadingSellerInfo ? (
-              <div className="loading-state">
-                <p>{t("adminOrders.loading")}</p>
-              </div>
-            ) : sellerInfo.length > 0 &&
-              sellerInfo.some((info) => info.endpointMissing) ? (
-              <div className="notice-state">
-                <p>{t("adminOrders.sellerEndpointMissing")}</p>
-                <p className="notice-info">
-                  {t("adminOrders.pleaseCheckBackLater")}
-                </p>
-              </div>
-            ) : (
-              order.orderItems.map((item) => {
-                // Find seller info for this product if available
-                const productSellerInfo = sellerInfo.find(
-                  (info) => info.productId === item.productId
-                )?.seller;
+              {isLoadingSellerInfo ? (
+                <div className="loading-state">
+                  <p>{t("adminOrders.loading")}</p>
+                </div>
+              ) : sellerInfo.length > 0 &&
+                sellerInfo.some((info) => info.endpointMissing) ? (
+                <div className="notice-state">
+                  <p>{t("adminOrders.sellerEndpointMissing")}</p>
+                  <p className="notice-info">
+                    {t("adminOrders.pleaseCheckBackLater")}
+                  </p>
+                </div>
+              ) : (
+                order.orderItems.map((item) => {
+                  // Find seller info for this product if available
+                  const productId =
+                    typeof item.productId === "string"
+                      ? item.productId
+                      : item.productId._id;
+                  const productSellerInfo = sellerInfo.find(
+                    (info) => info.productId === productId
+                  )?.seller;
 
-                return (
-                  <div key={`seller-${item.productId}`} className="seller-info">
-                    <h3>{item.name}</h3>
-                    <div className="seller-details-grid">
-                      <p>
-                        <strong>{t("adminOrders.productId")}:</strong>{" "}
-                        {item.productId}
-                      </p>
-
-                      {/* Show product info */}
-                      {item.product?.deliveryType && (
+                  return (
+                    <div key={`seller-${productId}`} className="seller-info">
+                      <h3>{item.name}</h3>
+                      <div className="seller-details-grid">
                         <p>
-                          <strong>{t("adminOrders.deliveryType")}:</strong>{" "}
-                          {item.product.deliveryType}
+                          <strong>{t("adminOrders.productId")}:</strong>{" "}
+                          {typeof item.productId === "string"
+                            ? item.productId
+                            : item.productId._id}
                         </p>
-                      )}
-                      {item.product?.brand && (
+
+                        {/* Show product info */}
+                        {item.product?.deliveryType && (
+                          <p>
+                            <strong>{t("adminOrders.deliveryType")}:</strong>{" "}
+                            {item.product.deliveryType}
+                          </p>
+                        )}
+                        {item.product?.brand && (
+                          <p>
+                            <strong>{t("adminOrders.brand")}:</strong>{" "}
+                            {item.product.brand}
+                          </p>
+                        )}
                         <p>
-                          <strong>{t("adminOrders.brand")}:</strong>{" "}
-                          {item.product.brand}
+                          <strong>{t("adminOrders.price")}:</strong>{" "}
+                          {item.price.toFixed(2)} ₾
                         </p>
-                      )}
-                      <p>
-                        <strong>{t("adminOrders.price")}:</strong>{" "}
-                        {item.price.toFixed(2)} ₾
-                      </p>
-                      <p>
-                        <strong>{t("adminOrders.quantity")}:</strong> {item.qty}
-                      </p>
+                        <p>
+                          <strong>{t("adminOrders.quantity")}:</strong>{" "}
+                          {item.qty}
+                        </p>
 
-                      {/* Show seller registration details if available */}
-                      {productSellerInfo && (
-                        <>
-                          {/* Display Admin information if the product is created by an Admin */}
-                          {productSellerInfo.role === "admin" && (
-                            <>
-                              <p className="admin-seller-tag">
-                                <strong>{t("adminOrders.adminProduct")}</strong>
-                              </p>
-                              {productSellerInfo.profileImagePath && (
-                                <div className="seller-profile-image">
-                                  <Image
-                                    src={getImageSrc(
-                                      productSellerInfo.profileImagePath
-                                    )}
-                                    alt={productSellerInfo.name}
-                                    width={80}
-                                    height={80}
-                                    className="profile-avatar"
-                                  />
-                                </div>
-                              )}
-                              <p>
-                                <strong>{t("adminOrders.adminName")}:</strong>{" "}
-                                {productSellerInfo.name}
-                              </p>
-                              <p>
-                                <strong>{t("adminOrders.adminEmail")}:</strong>{" "}
-                                {productSellerInfo.email}
-                              </p>
-                              {productSellerInfo.phoneNumber && (
-                                <p>
-                                  <strong>
-                                    {t("adminOrders.adminPhone")}:
-                                  </strong>{" "}
-                                  {productSellerInfo.phoneNumber}
-                                </p>
-                              )}
-                            </>
-                          )}
-
-                          {/* Display Seller information if the product is created by a Seller */}
-                          {productSellerInfo.role === "seller" && (
-                            <>
-                              {productSellerInfo.profileImagePath && (
-                                <div className="seller-profile-image">
-                                  <Image
-                                    src={getImageSrc(
-                                      productSellerInfo.profileImagePath
-                                    )}
-                                    alt={
-                                      productSellerInfo.storeName ||
-                                      productSellerInfo.name
-                                    }
-                                    width={80}
-                                    height={80}
-                                    className="profile-avatar"
-                                  />
-                                </div>
-                              )}
-                              {productSellerInfo.storeName && (
-                                <p>
-                                  <strong>{t("adminOrders.storeName")}:</strong>{" "}
-                                  {productSellerInfo.storeName}
-                                </p>
-                              )}
-                              {productSellerInfo.ownerFirstName && (
-                                <p>
-                                  <strong>{t("adminOrders.ownerName")}:</strong>{" "}
-                                  {`${productSellerInfo.ownerFirstName} ${
-                                    productSellerInfo.ownerLastName || ""
-                                  }`}
-                                </p>
-                              )}
-                              {productSellerInfo.email && (
-                                <p>
-                                  <strong>
-                                    {t("adminOrders.sellerEmail")}:
-                                  </strong>{" "}
-                                  {productSellerInfo.email}
-                                </p>
-                              )}
-                              {productSellerInfo.phoneNumber && (
-                                <p>
-                                  <strong>
-                                    {t("adminOrders.sellerPhone")}:
-                                  </strong>{" "}
-                                  {productSellerInfo.phoneNumber}
-                                </p>
-                              )}
-                              {productSellerInfo.identificationNumber && (
-                                <p>
-                                  <strong>
-                                    {t("adminOrders.identificationNumber")}:
-                                  </strong>{" "}
-                                  {productSellerInfo.identificationNumber}
-                                </p>
-                              )}
-                              {productSellerInfo.accountNumber && (
-                                <p>
-                                  <strong>
-                                    {t("adminOrders.accountNumber")}:
-                                  </strong>{" "}
-                                  {productSellerInfo.accountNumber}
-                                </p>
-                              )}
-                            </>
-                          )}
-
-                          {/* If role is neither admin nor seller, display available information */}
-                          {productSellerInfo.role !== "admin" &&
-                            productSellerInfo.role !== "seller" && (
+                        {/* Show seller registration details if available */}
+                        {productSellerInfo && (
+                          <>
+                            {/* Display Admin information if the product is created by an Admin */}
+                            {productSellerInfo.role === "admin" && (
                               <>
+                                <p className="admin-seller-tag">
+                                  <strong>
+                                    {t("adminOrders.adminProduct")}
+                                  </strong>
+                                </p>
                                 {productSellerInfo.profileImagePath && (
                                   <div className="seller-profile-image">
                                     <Image
@@ -463,11 +380,63 @@ export function AdminOrderDetails({ order }: AdminOrderDetailsProps) {
                                   </div>
                                 )}
                                 <p>
-                                  <strong>
-                                    {t("adminOrders.sellerName")}:
-                                  </strong>{" "}
+                                  <strong>{t("adminOrders.adminName")}:</strong>{" "}
                                   {productSellerInfo.name}
                                 </p>
+                                <p>
+                                  <strong>
+                                    {t("adminOrders.adminEmail")}:
+                                  </strong>{" "}
+                                  {productSellerInfo.email}
+                                </p>
+                                {productSellerInfo.phoneNumber && (
+                                  <p>
+                                    <strong>
+                                      {t("adminOrders.adminPhone")}:
+                                    </strong>{" "}
+                                    {productSellerInfo.phoneNumber}
+                                  </p>
+                                )}
+                              </>
+                            )}
+
+                            {/* Display Seller information if the product is created by a Seller */}
+                            {productSellerInfo.role === "seller" && (
+                              <>
+                                {productSellerInfo.profileImagePath && (
+                                  <div className="seller-profile-image">
+                                    <Image
+                                      src={getImageSrc(
+                                        productSellerInfo.profileImagePath
+                                      )}
+                                      alt={
+                                        productSellerInfo.storeName ||
+                                        productSellerInfo.name
+                                      }
+                                      width={80}
+                                      height={80}
+                                      className="profile-avatar"
+                                    />
+                                  </div>
+                                )}
+                                {productSellerInfo.storeName && (
+                                  <p>
+                                    <strong>
+                                      {t("adminOrders.storeName")}:
+                                    </strong>{" "}
+                                    {productSellerInfo.storeName}
+                                  </p>
+                                )}
+                                {productSellerInfo.ownerFirstName && (
+                                  <p>
+                                    <strong>
+                                      {t("adminOrders.ownerName")}:
+                                    </strong>{" "}
+                                    {`${productSellerInfo.ownerFirstName} ${
+                                      productSellerInfo.ownerLastName || ""
+                                    }`}
+                                  </p>
+                                )}
                                 {productSellerInfo.email && (
                                   <p>
                                     <strong>
@@ -484,28 +453,87 @@ export function AdminOrderDetails({ order }: AdminOrderDetailsProps) {
                                     {productSellerInfo.phoneNumber}
                                   </p>
                                 )}
+                                {productSellerInfo.identificationNumber && (
+                                  <p>
+                                    <strong>
+                                      {t("adminOrders.identificationNumber")}:
+                                    </strong>{" "}
+                                    {productSellerInfo.identificationNumber}
+                                  </p>
+                                )}
+                                {productSellerInfo.accountNumber && (
+                                  <p>
+                                    <strong>
+                                      {t("adminOrders.accountNumber")}:
+                                    </strong>{" "}
+                                    {productSellerInfo.accountNumber}
+                                  </p>
+                                )}
                               </>
                             )}
-                        </>
-                      )}
 
-                      {/* Show delivery time if available */}
-                      {item.product?.minDeliveryDays &&
-                        item.product?.maxDeliveryDays && (
-                          <p>
-                            <strong>{t("adminOrders.deliveryTime")}:</strong>{" "}
-                            {item.product.minDeliveryDays}-
-                            {item.product.maxDeliveryDays}{" "}
-                            {t("adminOrders.days")}
-                          </p>
+                            {/* If role is neither admin nor seller, display available information */}
+                            {productSellerInfo.role !== "admin" &&
+                              productSellerInfo.role !== "seller" && (
+                                <>
+                                  {productSellerInfo.profileImagePath && (
+                                    <div className="seller-profile-image">
+                                      <Image
+                                        src={getImageSrc(
+                                          productSellerInfo.profileImagePath
+                                        )}
+                                        alt={productSellerInfo.name}
+                                        width={80}
+                                        height={80}
+                                        className="profile-avatar"
+                                      />
+                                    </div>
+                                  )}
+                                  <p>
+                                    <strong>
+                                      {t("adminOrders.sellerName")}:
+                                    </strong>{" "}
+                                    {productSellerInfo.name}
+                                  </p>
+                                  {productSellerInfo.email && (
+                                    <p>
+                                      <strong>
+                                        {t("adminOrders.sellerEmail")}:
+                                      </strong>{" "}
+                                      {productSellerInfo.email}
+                                    </p>
+                                  )}
+                                  {productSellerInfo.phoneNumber && (
+                                    <p>
+                                      <strong>
+                                        {t("adminOrders.sellerPhone")}:
+                                      </strong>{" "}
+                                      {productSellerInfo.phoneNumber}
+                                    </p>
+                                  )}
+                                </>
+                              )}
+                          </>
                         )}
+
+                        {/* Show delivery time if available */}
+                        {item.product?.minDeliveryDays &&
+                          item.product?.maxDeliveryDays && (
+                            <p>
+                              <strong>{t("adminOrders.deliveryTime")}:</strong>{" "}
+                              {item.product.minDeliveryDays}-
+                              {item.product.maxDeliveryDays}{" "}
+                              {t("adminOrders.days")}
+                            </p>
+                          )}
+                      </div>
                     </div>
-                  </div>
-                );
-              })
-            )}
-          </div>
-          {/* Order Items - Now grouped by delivery type with fixed logic */}{" "}
+                  );
+                })
+              )}
+            </div>
+          )}
+          {/* Order Items - Now grouped by delivery type with fixed logic */}
           <div className="card">
             <h2>{t("adminOrders.orderItems")}</h2>
             {sellerDeliveryItems.length > 0 && (
@@ -515,7 +543,14 @@ export function AdminOrderDetails({ order }: AdminOrderDetailsProps) {
                   <h3>აგზავნის ავტორი</h3>
                 </div>
                 {sellerDeliveryItems.map((item) => (
-                  <div key={item.productId} className="order-item">
+                  <div
+                    key={
+                      typeof item.productId === "string"
+                        ? item.productId
+                        : item.productId._id
+                    }
+                    className="order-item"
+                  >
                     <Image
                       src={getImageSrc(item.image)}
                       alt={getDisplayName(item)}
@@ -579,7 +614,14 @@ export function AdminOrderDetails({ order }: AdminOrderDetailsProps) {
                   {/* <h3>soulart-ის კურიერი</h3> */}
                 </div>{" "}
                 {soulartDeliveryItems.map((item) => (
-                  <div key={item.productId} className="order-item">
+                  <div
+                    key={
+                      typeof item.productId === "string"
+                        ? item.productId
+                        : item.productId._id
+                    }
+                    className="order-item"
+                  >
                     <Image
                       src={getImageSrc(item.image)}
                       alt={getDisplayName(item)}
@@ -629,7 +671,14 @@ export function AdminOrderDetails({ order }: AdminOrderDetailsProps) {
             {sellerDeliveryItems.length === 0 &&
               soulartDeliveryItems.length === 0 &&
               order.orderItems.map((item) => (
-                <div key={item.productId} className="order-item">
+                <div
+                  key={
+                    typeof item.productId === "string"
+                      ? item.productId
+                      : item.productId._id
+                  }
+                  className="order-item"
+                >
                   <Image
                     src={getImageSrc(item.image)}
                     alt={getDisplayName(item)}
