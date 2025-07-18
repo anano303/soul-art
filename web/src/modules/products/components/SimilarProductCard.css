@@ -1,0 +1,265 @@
+/* Similar Product Card Styles - Based on ProductCard.css but with unique class names */
+
+.similar-product-card {
+  font-family: firaGo, sans-serif;
+  display: flex;
+  flex-direction: column;
+  width: auto;
+  min-width: 250px;
+  overflow: hidden;
+  box-shadow: 0 4px 10px #012645;
+  transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+  text-decoration: none;
+  margin: 0px;
+  position: relative;
+  justify-content: space-between;
+  height: 100%;
+  background: #fff;
+}
+
+/* Handmade theme styles */
+.similar-product-card.handmade-theme {
+  box-shadow: 0 4px 10px #7d5a35;
+}
+
+.similar-product-card.handmade-theme:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 15px #9a6c40;
+}
+
+.similar-product-card a {
+  text-decoration: none;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.similar-product-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 15px #043761;
+}
+
+.similar-product-image {
+  position: relative;
+  width: 100%;
+  height: 300px; /* Fixed height to ensure consistency */
+  overflow: hidden;
+  clip-path: polygon(
+    5% 0%,
+    5% 5%,
+    5% 0%,
+    20% 5%,
+    25% 0%,
+    30% 5%,
+    55% 0%,
+    30% 5%,
+    35% 0%,
+    30% 5%,
+    35% 0%,
+    60% 5%,
+    75% 0%,
+    60% 5%,
+    65% 0%,
+    80% 5%,
+    85% 1%,
+    90% 5%,
+    95% 0%,
+    100% 1%,
+    100% 95%,
+    95% 100%,
+    90% 95%,
+    65% 100%,
+    80% 95%,
+    65% 100%,
+    70% 95%,
+    65% 100%,
+    50% 95%,
+    45% 100%,
+    50% 95%,
+    45% 100%,
+    30% 95%,
+    15% 100%,
+    30% 95%,
+    15% 100%,
+    20% 95%,
+    15% 100%,
+    10% 95%,
+    5% 100%,
+    0% 95%,
+    0% 5%
+  );
+}
+
+.similar-image {
+  object-fit: cover !important;
+  width: 100% !important;
+  height: 100% !important;
+  position: relative !important;
+  transition: transform 0.5s ease;
+  background-color: #012645;
+}
+
+.handmade-theme .similar-product-image img {
+  background-color: #7d5a35;
+}
+
+.similar-product-card:hover .similar-image {
+  transform: scale(1.1); /* Zoom in effect on hover */
+}
+
+.similar-product-name-rating {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 0 15px;
+}
+
+.similar-product-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0px;
+  flex: 1;
+}
+
+.similar-product-name {
+  font-size: 1.2rem;
+  font-weight: bold;
+  margin: 5px 0;
+  color: #012645;
+  text-align: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+/* Handmade theme name color */
+.handmade-theme .similar-product-name {
+  color: #7d5a35;
+}
+
+.similar-product-details {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  font-size: 1rem;
+  color: #fff;
+  margin-top: auto;
+}
+
+.similar-priceAndRaiting {
+  display: flex;
+  gap: 40%;
+}
+
+.similar-product-price {
+  font-weight: 900;
+  color: #012645;
+  white-space: nowrap;
+  margin: 0 15px 10px;
+}
+
+/* Handmade theme price color */
+.handmade-theme .similar-product-price {
+  color: #7d5a35;
+}
+
+.similar-product-rating {
+  display: flex;
+  align-items: center;
+  color: #012645;
+  background: #f5f5f5;
+  padding: 5px;
+  font-size: 0.9rem;
+}
+
+/* Handmade theme rating color */
+.handmade-theme .similar-product-rating {
+  color: #7d5a35;
+}
+
+.similar-price-container {
+  display: flex;
+  flex-direction: column;
+  margin: 0 15px 10px;
+}
+
+.similar-original-price {
+  text-decoration: line-through;
+  color: #888;
+  font-size: 0.9rem;
+}
+
+.similar-discounted-price {
+  color: #d32f2f;
+}
+
+.similar-discount-badge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background-color: #d32f2f;
+  color: white;
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-weight: bold;
+  font-size: 0.9rem;
+  z-index: 10;
+}
+
+.similar-product-author {
+  font-size: 0.9rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.similar-addButtonCart {
+  width: 100%;
+  padding: 8px 12px;
+  background-color: #012645;
+  color: white;
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+}
+
+.similar-addButtonCart:hover {
+  background-color: #043761;
+}
+
+.handmade-theme .similar-addButtonCart {
+  background-color: #7d5a35;
+}
+
+.handmade-theme .similar-addButtonCart:hover {
+  background-color: #9a6c40;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  /* .similar-product-image {
+    height: 180px;
+  } */
+
+  .similar-product-name {
+    font-size: 1.1rem;
+  }
+
+  .similar-product-price {
+    font-size: 0.95rem;
+  }
+}
+
+@media (max-width: 480px) {
+  /* .similar-product-image {
+    height: 160px;
+  } */
+}
