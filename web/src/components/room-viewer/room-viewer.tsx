@@ -46,7 +46,7 @@ export function RoomViewer({ productImage, isOpen, onClose }: RoomViewerProps) {
   const [currentRoom, setCurrentRoom] = useState<RoomType>("living");
   const [wallColor, setWallColor] = useState("#FFFFFF");
   const [productPosition, setProductPosition] = useState({ x: 0, y: 0 });
-  const [productSize, setProductSize] = useState(30); // percentage of container height
+  const [productSize, setProductSize] = useState(45); // increased from 30 to 45 percentage of container height
   const [roomImagesLoaded, setRoomImagesLoaded] = useState(false);
   const [productLoaded, setProductLoaded] = useState(false);
   const { t } = useLanguage();
@@ -87,7 +87,7 @@ export function RoomViewer({ productImage, isOpen, onClose }: RoomViewerProps) {
       // Reset position and size when product changes
       setProductPosition({ x: 0, y: 0 });
       // Set a reasonable default size
-      setProductSize(30);
+      setProductSize(45);
     }
   }, [productImage]);
 
@@ -156,8 +156,8 @@ export function RoomViewer({ productImage, isOpen, onClose }: RoomViewerProps) {
             </label>
             <input
               type="range"
-              min="10"
-              max="60"
+              min="15"
+              max="70"
               value={productSize}
               onChange={handleSizeChange}
             />
@@ -207,8 +207,8 @@ export function RoomViewer({ productImage, isOpen, onClose }: RoomViewerProps) {
                 height: `${productSize}%`,
                 width: "auto",
                 position: "absolute",
-                top: "30%",
-                left: "40%",
+                top: "40%",
+                left: "50%",
                 transform: "translate(-50%, -50%)",
                 x: productPosition.x,
                 y: productPosition.y,
