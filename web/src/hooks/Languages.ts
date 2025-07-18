@@ -29,6 +29,18 @@ export const TRANSLATIONS: Translations = {
       logout: "გასვლა",
     },
 
+    // Error messages
+    errors: {
+      unauthorized: "არაავტორიზებული მოქმედება",
+      pleaseLoginOrRegister:
+        "გთხოვთ, გაიაროთ ავტორიზაცია ან დარეგისტრირდეთ ამ გვერდის სანახავად",
+      generic: "დაფიქსირდა შეცდომა",
+      tryAgain: "გთხოვთ, სცადოთ მოგვიანებით",
+      notFound: "გვერდი ვერ მოიძებნა",
+      serverError: "სერვერის შეცდომა",
+      forbidden: "წვდომა აკრძალულია",
+    },
+
     // Shop
     shop: {
       resetFilters: "ფილტრების გასუფთავება",
@@ -594,6 +606,17 @@ export const TRANSLATIONS: Translations = {
       logout: "Logout",
     },
 
+    // Error messages
+    errors: {
+      unauthorized: "Unauthorized Access",
+      pleaseLoginOrRegister: "Please login or register to view this page",
+      generic: "An error occurred",
+      tryAgain: "Please try again later",
+      notFound: "Page not found",
+      serverError: "Server error",
+      forbidden: "Access forbidden",
+    },
+
     // Shop
     shop: {
       resetFilters: "Reset Filters",
@@ -857,6 +880,8 @@ export const TRANSLATIONS: Translations = {
       heroTitle: "Discover artworks by artists or sell your own 🖌️",
       heroSubtitle: "Personalized and handmade creations by Georgian artists",
     },
+
+ 
 
     // Timer translations
     timer: {

@@ -1,0 +1,125 @@
+.unauthorized-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  padding: 2rem;
+  text-align: center;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(1, 38, 69, 0.1);
+  margin: 2rem auto;
+  max-width: 600px;
+}
+
+.unauthorized-title {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  color: #012645;
+  position: relative;
+}
+
+.unauthorized-title:after {
+  content: "";
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60px;
+  height: 3px;
+  background: #012645;
+  border-radius: 3px;
+}
+
+.unauthorized-message {
+  margin-bottom: 2rem;
+  color: #555;
+  font-size: 1.1rem;
+  line-height: 1.5;
+  max-width: 80%;
+}
+
+.auth-buttons-container {
+  display: flex;
+  gap: 1.5rem;
+  margin-top: 1rem;
+}
+
+.login-button {
+  background-color: #012645 !important;
+  color: white !important;
+  padding: 0.75rem 2rem !important;
+  border-radius: 0.5rem !important;
+  font-weight: 600 !important;
+  transition: all 0.3s ease !important;
+  box-shadow: 0 4px 6px rgba(1, 38, 69, 0.2) !important;
+}
+
+.login-button:hover {
+  background-color: #043761 !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 8px rgba(1, 38, 69, 0.3) !important;
+}
+
+.register-button {
+  background-color: #043761 !important;
+  color: white !important;
+  padding: 0.75rem 2rem !important;
+  border-radius: 0.5rem !important;
+  font-weight: 600 !important;
+  transition: all 0.3s ease !important;
+  box-shadow: 0 4px 6px rgba(4, 55, 97, 0.2) !important;
+}
+
+.register-button:hover {
+  background-color: #054b80 !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 8px rgba(4, 55, 97, 0.3) !important;
+}
+
+.unauthorized-icon {
+  font-size: 5rem;
+  color: #012645;
+  margin-bottom: 1.5rem;
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+  .unauthorized-container {
+    padding: 1.5rem;
+    margin: 1rem;
+  }
+
+  .unauthorized-title {
+    font-size: 1.75rem;
+  }
+
+  .unauthorized-message {
+    font-size: 1rem;
+    max-width: 100%;
+  }
+
+  .auth-buttons-container {
+    flex-direction: column;
+    gap: 1rem;
+    width: 100%;
+    max-width: 250px;
+  }
+
+  .login-button,
+  .register-button {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .unauthorized-container {
+    padding: 1rem;
+  }
+
+  .unauthorized-title {
+    font-size: 1.5rem;
+  }
+}
