@@ -313,8 +313,14 @@ export class UsersService {
             logoFile.buffer,
           );
 
-          // Update the seller record with the logo path
-          await this.userModel.findByIdAndUpdate(seller._id, { storeLogoPath });
+          // Get the complete URL for the logo
+          const logoUrl =
+            await this.awsS3Service.getImageByFileId(storeLogoPath);
+
+          // Update the seller record with the logo URL
+          await this.userModel.findByIdAndUpdate(seller._id, {
+            storeLogoPath: logoUrl,
+          });
 
           this.logger.log(`Logo uploaded for seller ${seller._id}`);
         } catch (error) {
@@ -350,9 +356,12 @@ export class UsersService {
       // Delete old image if it exists
       if (user.profileImagePath) {
         try {
-          await this.awsS3Service.deleteImageByFileId(
-            user.profileImagePath as string,
-          );
+          // Only delete from S3 if it's a file path, not a URL
+          if (!user.profileImagePath.startsWith('http')) {
+            await this.awsS3Service.deleteImageByFileId(
+              user.profileImagePath as string,
+            );
+          }
         } catch (error) {
           console.error('Failed to delete old profile image', error);
           // Continue even if deletion fails
@@ -365,12 +374,14 @@ export class UsersService {
         fileBuffer,
       );
 
-      // Update user record
-      await this.userModel.findByIdAndUpdate(userId, { profileImagePath });
-
       // Get image URL
       const imageUrl =
         await this.awsS3Service.getImageByFileId(profileImagePath);
+
+      // Update user record with the full URL instead of just the path
+      await this.userModel.findByIdAndUpdate(userId, {
+        profileImagePath: imageUrl,
+      });
 
       return {
         message: 'Profile image updated successfully',
@@ -398,9 +409,12 @@ export class UsersService {
       // Delete old logo if it exists
       if (user.storeLogoPath) {
         try {
-          await this.awsS3Service.deleteImageByFileId(
-            user.storeLogoPath as string,
-          );
+          // Only delete from S3 if it's a file path, not a URL
+          if (!user.storeLogoPath.startsWith('http')) {
+            await this.awsS3Service.deleteImageByFileId(
+              user.storeLogoPath as string,
+            );
+          }
         } catch (error) {
           console.error('Failed to delete old store logo', error);
           // Continue even if deletion fails
@@ -413,11 +427,13 @@ export class UsersService {
         fileBuffer,
       );
 
-      // Update user record
-      await this.userModel.findByIdAndUpdate(userId, { storeLogoPath });
-
       // Get logo URL
       const logoUrl = await this.awsS3Service.getImageByFileId(storeLogoPath);
+
+      // Update user record with the full URL instead of just the path
+      await this.userModel.findByIdAndUpdate(userId, {
+        storeLogoPath: logoUrl,
+      });
 
       return {
         message: 'Store logo updated successfully',
@@ -449,17 +465,29 @@ export class UsersService {
     // Get profile image URL if it exists
     let profileImage = null;
     if (user.profileImagePath) {
-      profileImage = await this.awsS3Service.getImageByFileId(
-        user.profileImagePath as string,
-      );
+      // Check if profileImagePath is already a full URL
+      if (user.profileImagePath.startsWith('http')) {
+        profileImage = user.profileImagePath;
+      } else {
+        // Otherwise get a signed URL from S3
+        profileImage = await this.awsS3Service.getImageByFileId(
+          user.profileImagePath as string,
+        );
+      }
     }
 
     // If user is a seller, get store logo URL
     let storeLogo = null;
     if (user.role === Role.Seller && user.storeLogoPath) {
-      storeLogo = await this.awsS3Service.getImageByFileId(
-        user.storeLogoPath as string,
-      );
+      // Check if storeLogoPath is already a full URL
+      if (user.storeLogoPath.startsWith('http')) {
+        storeLogo = user.storeLogoPath;
+      } else {
+        // Otherwise get a signed URL from S3
+        storeLogo = await this.awsS3Service.getImageByFileId(
+          user.storeLogoPath as string,
+        );
+      }
     }
 
     return {

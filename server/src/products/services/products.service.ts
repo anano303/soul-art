@@ -849,7 +849,7 @@ export class ProductsService {
       .populate({
         path: 'user',
         select:
-          'name email storeName ownerFirstName ownerLastName phoneNumber identificationNumber accountNumber role',
+          'name email storeName ownerFirstName ownerLastName phoneNumber identificationNumber accountNumber role profileImagePath storeLogoPath',
       })
       .exec();
 
@@ -863,7 +863,7 @@ export class ProductsService {
       );
     }
 
-    // Return seller information
+    // Return seller information directly
     return product.user;
   }
 
