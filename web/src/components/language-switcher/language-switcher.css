@@ -56,16 +56,36 @@
   transform-origin: top center;
 }
 
-/* Styles for dropdown when in mobile view */
-.language-switcher[data-mobile="true"] .language-dropdown {
-  top: auto;
-  bottom: 100%;
-  margin-top: 0;
-  margin-bottom: 8px;
-  transform-origin: bottom center;
-  animation: dropdown-fade-mobile 0.2s ease;
-  right: 0; /* Ensure alignment with the button */
-  min-width: 100%; /* Make dropdown at least as wide as the button */
+/* Base dropdown styles - Always open downward by default */
+.language-dropdown {
+  position: absolute;
+  top: 100%;
+  bottom: auto;
+  right: 0;
+  margin-top: 8px;
+  margin-bottom: 0;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  z-index: 2000;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-width: 80px;
+  animation: dropdown-fade 0.2s ease;
+  transform-origin: top center;
+}
+
+/* Mobile-specific styles - Override to open upward ONLY on mobile */
+@media (max-width: 900px) {
+  .language-switcher[data-mobile="true"] .language-dropdown {
+    top: auto;
+    bottom: 100%;
+    margin-top: 0;
+    margin-bottom: 8px;
+    transform-origin: bottom center;
+    animation: dropdown-fade-mobile 0.2s ease;
+  }
 }
 
 @keyframes dropdown-fade {
@@ -139,12 +159,14 @@
     font-size: 0.85rem;
   }
 
-  /* Force dropdown to appear above on all mobile devices */
-  .language-switcher[data-mobile="true"] .language-dropdown {
-    top: auto !important;
-    bottom: 100% !important;
-    margin-top: 0 !important;
-    margin-bottom: 8px !important;
+  /* Mobile dropdown positioning */
+  .language-dropdown {
+    top: auto;
+    bottom: 100%;
+    margin-top: 0;
+    margin-bottom: 8px;
+    transform-origin: bottom center;
+    animation: dropdown-fade-mobile 0.2s ease;
   }
 }
 
@@ -164,16 +186,6 @@
   .language-dropdown {
     right: 0;
     min-width: 60px;
-  }
-
-  /* Always force dropdown to appear above on small screens */
-  .language-switcher[data-mobile="true"] .language-dropdown {
-    top: auto !important;
-    bottom: 100% !important;
-    margin-top: 0 !important;
-    margin-bottom: 8px !important;
-    transform-origin: bottom center;
-    animation: dropdown-fade-mobile 0.2s ease;
   }
 
   .language-option {

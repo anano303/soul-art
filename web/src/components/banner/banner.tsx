@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useRef } from "react";
 import Link from "next/link";
 import { useLanguage } from "@/hooks/LanguageContext";
 import { fetchActiveBanners } from "@/lib/banner-api";
@@ -10,10 +10,11 @@ import "./banner.css";
 const Banner = () => {
   const { language } = useLanguage();
   const [banners, setBanners] = useState<BannerType[]>([]);
-  const [currentBannerIndex, setCurrentBannerIndex] = useState(0);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [previousIndex, setPreviousIndex] = useState(-1);
   const [isPaused, setIsPaused] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
-  const [animationClass, setAnimationClass] = useState("");
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     const loadBanners = async () => {
@@ -30,52 +31,58 @@ const Banner = () => {
     loadBanners();
   }, []);
 
-  // Auto-advance banners every 8 seconds (pause on hover)
+  // Preload all banner images once they're fetched
   useEffect(() => {
-    if (banners.length <= 1 || isPaused) return;
+    if (!banners.length) return;
 
-    const interval = setInterval(() => {
-      setAnimationClass("fade-out");
-      setTimeout(() => {
-        setCurrentBannerIndex((prev) => (prev + 1) % banners.length);
-        setAnimationClass("fade-in");
-      }, 2000); // Increased from 500ms to 800ms
-    }, 8000); // Increased from 6000ms to 8000ms
+    banners.forEach((banner) => {
+      if (banner.imageUrl) {
+        const img = new Image();
+        img.src = banner.imageUrl;
+      }
+    });
+  }, [banners]);
 
-    return () => clearInterval(interval);
-  }, [banners.length, isPaused]);
+  const changeBanner = useCallback(
+    (newIndex: number) => {
+      if (newIndex === currentIndex || newIndex >= banners.length) return;
+
+      // Store current index as previous before changing
+      setPreviousIndex(currentIndex);
+      setCurrentIndex(newIndex);
+    },
+    [currentIndex, banners.length]
+  );
+
+  // Auto-advance banners
+  useEffect(() => {
+    if (banners.length <= 1 || isPaused) {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
+      return;
+    }
+
+    intervalRef.current = setInterval(() => {
+      changeBanner((currentIndex + 1) % banners.length);
+    }, 8000);
+
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
+    };
+  }, [banners.length, isPaused, currentIndex, changeBanner]);
 
   const nextBanner = useCallback(() => {
-    setAnimationClass("slide-left");
-    setTimeout(() => {
-      setCurrentBannerIndex((prev) => (prev + 1) % banners.length);
-      setAnimationClass("fade-in");
-    }, 600); // Increased from 300ms to 600ms
-  }, [banners.length]);
+    changeBanner((currentIndex + 1) % banners.length);
+  }, [changeBanner, currentIndex, banners.length]);
 
   const prevBanner = useCallback(() => {
-    setAnimationClass("slide-right");
-    setTimeout(() => {
-      setCurrentBannerIndex(
-        (prev) => (prev - 1 + banners.length) % banners.length
-      );
-      setAnimationClass("fade-in");
-    }, 600); // Increased from 300ms to 600ms
-  }, [banners.length]);
-
-  const goToBanner = useCallback(
-    (index: number) => {
-      if (index === currentBannerIndex) return;
-      setAnimationClass(
-        index > currentBannerIndex ? "slide-left" : "slide-right"
-      );
-      setTimeout(() => {
-        setCurrentBannerIndex(index);
-        setAnimationClass("fade-in");
-      }, 600); // Increased from 300ms to 600ms
-    },
-    [currentBannerIndex]
-  );
+    changeBanner((currentIndex - 1 + banners.length) % banners.length);
+  }, [changeBanner, currentIndex, banners.length]);
 
   // Keyboard navigation
   useEffect(() => {
@@ -97,18 +104,6 @@ const Banner = () => {
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [nextBanner, prevBanner, banners.length]);
-
-  // Preload images for better performance
-  useEffect(() => {
-    if (!banners.length) return;
-
-    banners.forEach((banner) => {
-      if (banner.imageUrl) {
-        const img = new Image();
-        img.src = banner.imageUrl;
-      }
-    });
-  }, [banners]);
 
   // Add touch swipe functionality for mobile
   useEffect(() => {
@@ -165,31 +160,40 @@ const Banner = () => {
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >
-      {banners.map((banner, index) => (
-        <div
-          key={banner._id || index}
-          className={`banner-slide ${
-            index === currentBannerIndex ? "active" : ""
-          } ${animationClass}`}
-          style={{
-            backgroundImage: `url(${banner.imageUrl})`,
-          }}
-        >
-          <div className="banner-overlay"></div>
-          <div className="banner-content">
-            <h1 className="banner-title">
-              {language === "en" ? banner.titleEn : banner.title}
-            </h1>
-            {banner.buttonText && banner.buttonLink && (
-              <Link href={banner.buttonLink} className="banner-cta-btn">
-                <span className="btn-text">
-                  {language === "en" ? banner.buttonTextEn : banner.buttonText}
-                </span>
-              </Link>
-            )}
+      {banners.map((banner, index) => {
+        const isActive = index === currentIndex;
+        const isPrevious = index === previousIndex;
+
+        if (!isActive && !isPrevious) return null;
+
+        return (
+          <div
+            key={banner._id || index}
+            className={`banner-slide ${isActive ? "active" : ""} ${
+              isPrevious ? "previous" : ""
+            }`}
+            style={{
+              backgroundImage: `url(${banner.imageUrl})`,
+            }}
+          >
+            <div className="banner-overlay"></div>
+            <div className="banner-content">
+              <h1 className="banner-title">
+                {language === "en" ? banner.titleEn : banner.title}
+              </h1>
+              {banner.buttonText && banner.buttonLink && (
+                <Link href={banner.buttonLink} className="banner-cta-btn">
+                  <span className="btn-text">
+                    {language === "en"
+                      ? banner.buttonTextEn
+                      : banner.buttonText}
+                  </span>
+                </Link>
+              )}
+            </div>
           </div>
-        </div>
-      ))}
+        );
+      })}
 
       {/* Carousel navigation (only show if multiple banners) */}
       {banners.length > 1 && (
@@ -214,9 +218,9 @@ const Banner = () => {
               <button
                 key={index}
                 className={`indicator ${
-                  index === currentBannerIndex ? "active" : ""
+                  index === currentIndex ? "active" : ""
                 }`}
-                onClick={() => goToBanner(index)}
+                onClick={() => changeBanner(index)}
                 aria-label={`Go to banner ${index + 1}`}
               />
             ))}

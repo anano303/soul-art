@@ -34,12 +34,14 @@ export function LanguageSwitcher({ onNavigate }: { onNavigate?: () => void }) {
 
   // Set mobile status only on client-side after component mounts
   useEffect(() => {
-    // Initial check for mobile
-    setIsMobile(window.innerWidth <= 992);
+    // Initial check for mobile - 900px is the threshold
+    const isMobileView = window.innerWidth <= 900;
+    setIsMobile(isMobileView);
 
     // Update on resize
     const handleResize = () => {
-      setIsMobile(window.innerWidth <= 992);
+      const newIsMobile = window.innerWidth <= 900;
+      setIsMobile(newIsMobile);
     };
 
     window.addEventListener("resize", handleResize);
@@ -55,6 +57,7 @@ export function LanguageSwitcher({ onNavigate }: { onNavigate?: () => void }) {
       <button
         className={`language-button ${isOpen ? "active" : ""}`}
         onClick={toggleDropdown}
+        aria-expanded={isOpen}
       >
         {language === "en" ? "ENG" : "ქარ"}
       </button>
