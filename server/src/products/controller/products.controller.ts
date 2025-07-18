@@ -138,6 +138,13 @@ export class ProductsController {
     return this.productsService.findById(id);
   }
 
+  @Get(':id/seller')
+  @ApiOperation({ summary: 'Get seller information for a product' })
+  @ApiParam({ name: 'id', description: 'Product ID' })
+  async getProductSellerInfo(@Param('id') id: string) {
+    return this.productsService.getProductSellerInfo(id);
+  }
+
   @Get(':id/variants')
   @ApiOperation({ summary: 'Get available sizes and colors for a product' })
   @ApiParam({ name: 'id', description: 'Product ID' })
