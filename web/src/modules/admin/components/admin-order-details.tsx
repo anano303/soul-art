@@ -177,6 +177,12 @@ export function AdminOrderDetails({ order }: AdminOrderDetailsProps) {
     }
   };
 
+  // Helper function to ensure image paths are properly formatted
+  const getImageSrc = (imagePath: string) => {
+    if (!imagePath) return "";
+    return imagePath.startsWith("http") ? imagePath : `/api/${imagePath}`;
+  };
+
   return (
     <div className="admin-order-details">
       <div className="headerOrders">
@@ -339,6 +345,19 @@ export function AdminOrderDetails({ order }: AdminOrderDetailsProps) {
                               <p className="admin-seller-tag">
                                 <strong>{t("adminOrders.adminProduct")}</strong>
                               </p>
+                              {productSellerInfo.profileImagePath && (
+                                <div className="seller-profile-image">
+                                  <Image
+                                    src={getImageSrc(
+                                      productSellerInfo.profileImagePath
+                                    )}
+                                    alt={productSellerInfo.name}
+                                    width={80}
+                                    height={80}
+                                    className="profile-avatar"
+                                  />
+                                </div>
+                              )}
                               <p>
                                 <strong>{t("adminOrders.adminName")}:</strong>{" "}
                                 {productSellerInfo.name}
@@ -361,6 +380,22 @@ export function AdminOrderDetails({ order }: AdminOrderDetailsProps) {
                           {/* Display Seller information if the product is created by a Seller */}
                           {productSellerInfo.role === "seller" && (
                             <>
+                              {productSellerInfo.profileImagePath && (
+                                <div className="seller-profile-image">
+                                  <Image
+                                    src={getImageSrc(
+                                      productSellerInfo.profileImagePath
+                                    )}
+                                    alt={
+                                      productSellerInfo.storeName ||
+                                      productSellerInfo.name
+                                    }
+                                    width={80}
+                                    height={80}
+                                    className="profile-avatar"
+                                  />
+                                </div>
+                              )}
                               {productSellerInfo.storeName && (
                                 <p>
                                   <strong>{t("adminOrders.storeName")}:</strong>{" "}
@@ -414,6 +449,19 @@ export function AdminOrderDetails({ order }: AdminOrderDetailsProps) {
                           {productSellerInfo.role !== "admin" &&
                             productSellerInfo.role !== "seller" && (
                               <>
+                                {productSellerInfo.profileImagePath && (
+                                  <div className="seller-profile-image">
+                                    <Image
+                                      src={getImageSrc(
+                                        productSellerInfo.profileImagePath
+                                      )}
+                                      alt={productSellerInfo.name}
+                                      width={80}
+                                      height={80}
+                                      className="profile-avatar"
+                                    />
+                                  </div>
+                                )}
                                 <p>
                                   <strong>
                                     {t("adminOrders.sellerName")}:
@@ -469,7 +517,7 @@ export function AdminOrderDetails({ order }: AdminOrderDetailsProps) {
                 {sellerDeliveryItems.map((item) => (
                   <div key={item.productId} className="order-item">
                     <Image
-                      src={item.image}
+                      src={getImageSrc(item.image)}
                       alt={getDisplayName(item)}
                       width={80}
                       height={80}
@@ -533,7 +581,7 @@ export function AdminOrderDetails({ order }: AdminOrderDetailsProps) {
                 {soulartDeliveryItems.map((item) => (
                   <div key={item.productId} className="order-item">
                     <Image
-                      src={item.image}
+                      src={getImageSrc(item.image)}
                       alt={getDisplayName(item)}
                       width={80}
                       height={80}
@@ -583,7 +631,7 @@ export function AdminOrderDetails({ order }: AdminOrderDetailsProps) {
               order.orderItems.map((item) => (
                 <div key={item.productId} className="order-item">
                   <Image
-                    src={item.image}
+                    src={getImageSrc(item.image)}
                     alt={getDisplayName(item)}
                     width={80}
                     height={80}

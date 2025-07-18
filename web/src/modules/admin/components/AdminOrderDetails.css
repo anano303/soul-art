@@ -339,6 +339,19 @@
   min-width: auto;
 }
 
+/* Profile image styling */
+.seller-profile-image {
+  margin-bottom: 15px;
+  display: flex;
+  justify-content: center;
+}
+
+.profile-avatar {
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #012645;
+}
+
 /* Loading state for seller info */
 .loading-state {
   padding: 16px;

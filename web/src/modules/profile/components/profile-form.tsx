@@ -24,6 +24,8 @@ const formSchema = z
       .or(z.literal("")),
     confirmPassword: z.string().optional().or(z.literal("")),
     storeName: z.string().optional(),
+    ownerFirstName: z.string().optional(),
+    ownerLastName: z.string().optional(),
     phoneNumber: z.string().optional(),
     identificationNumber: z.string().optional(),
     accountNumber: z.string().optional(),
@@ -79,10 +81,13 @@ export function ProfileForm() {
         hasProfileImage: !!user.profileImage,
         hasStoreLogo: !!user.storeLogo,
         storeLogo: user.storeLogo,
+        ownerFirstName: user.ownerFirstName,
+        ownerLastName: user.ownerLastName,
       });
 
       if (user.profileImage) {
-        setProfileImage(`${user.profileImage}`);
+        console.log("Setting profile image from user data:", user.profileImage);
+        setProfileImage(user.profileImage);
       }
 
       setIsSellerAccount(user.role?.toUpperCase() === "SELLER");
@@ -90,7 +95,7 @@ export function ProfileForm() {
       if (user.storeLogo) {
         setLogoError(false);
         console.log("Setting store logo:", user.storeLogo);
-        setStoreLogo(user.storeLogo);
+        setStoreLogo(getImageSrc(user.storeLogo) || user.storeLogo);
       } else {
         console.log("No store logo found in user data");
         setStoreLogo(null);
@@ -106,6 +111,8 @@ export function ProfileForm() {
       password: "",
       confirmPassword: "",
       storeName: user?.storeName || "",
+      ownerFirstName: user?.ownerFirstName || "",
+      ownerLastName: user?.ownerLastName || "",
       phoneNumber: user?.phoneNumber || "",
       identificationNumber: user?.identificationNumber || "",
       accountNumber: user?.accountNumber || "",
@@ -135,6 +142,20 @@ export function ProfileForm() {
             values.storeName !== user?.storeName
           ) {
             payload.storeName = values.storeName;
+          }
+
+          if (
+            values.ownerFirstName !== undefined &&
+            values.ownerFirstName !== user?.ownerFirstName
+          ) {
+            payload.ownerFirstName = values.ownerFirstName;
+          }
+
+          if (
+            values.ownerLastName !== undefined &&
+            values.ownerLastName !== user?.ownerLastName
+          ) {
+            payload.ownerLastName = values.ownerLastName;
           }
 
           if (
@@ -354,6 +375,27 @@ export function ProfileForm() {
     );
   };
 
+  // Helper function to ensure we can handle both existing uploads and new ones
+  const getImageSrc = (imagePath: string | null) => {
+    if (!imagePath) return null;
+
+    // If already a URL, return it directly
+    if (imagePath.startsWith("http")) {
+      console.log("Image is already a URL:", imagePath);
+      return imagePath;
+    }
+
+    // Don't append /api/ if the path already contains it
+    if (imagePath.startsWith("/api/")) {
+      console.log("Path already has /api/ prefix:", imagePath);
+      return imagePath;
+    }
+
+    // Otherwise add API prefix
+    console.log("Converting image path to URL:", `/api/${imagePath}`);
+    return `/api/${imagePath}`;
+  };
+
   if (!shouldFetchUser || isLoading) {
     return <div className="loading-container">{t("profile.loading")}</div>;
   }
@@ -373,6 +415,7 @@ export function ProfileForm() {
                 height={150}
                 className="profile-image"
                 unoptimized
+                key={`profile-${new Date().getTime()}`} // Add key for cache busting
               />
             </div>
           ) : (
@@ -505,6 +548,8 @@ export function ProfileForm() {
                             objectFit: "cover",
                             borderRadius: "50%",
                           }}
+                          key={`logo-${new Date().getTime()}`} // Add key for cache busting
+                          unoptimized
                           onError={() => {
                             console.error("Logo failed to load:", storeLogo);
                             setLogoError(true);
@@ -615,6 +660,38 @@ export function ProfileForm() {
                   {form.formState.errors.accountNumber && (
                     <span className="error-message">
                       {form.formState.errors.accountNumber.message}
+                    </span>
+                  )}
+                </div>
+
+                <div className="form-field">
+                  <label htmlFor="ownerFirstName" className="label">
+                    {t("profile.ownerFirstName")}
+                  </label>
+                  <input
+                    id="ownerFirstName"
+                    {...form.register("ownerFirstName")}
+                    className="input"
+                  />
+                  {form.formState.errors.ownerFirstName && (
+                    <span className="error-message">
+                      {form.formState.errors.ownerFirstName.message}
+                    </span>
+                  )}
+                </div>
+
+                <div className="form-field">
+                  <label htmlFor="ownerLastName" className="label">
+                    {t("profile.ownerLastName")}
+                  </label>
+                  <input
+                    id="ownerLastName"
+                    {...form.register("ownerLastName")}
+                    className="input"
+                  />
+                  {form.formState.errors.ownerLastName && (
+                    <span className="error-message">
+                      {form.formState.errors.ownerLastName.message}
                     </span>
                   )}
                 </div>

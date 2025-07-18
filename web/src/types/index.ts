@@ -138,6 +138,10 @@ export interface User {
   role: Role;
   storeName?: string;
   storeLogo?: string;
+  ownerFirstName?: string;
+  ownerLastName?: string;
+  identificationNumber?: string;
+  accountNumber?: string;
   seller?: {
     storeName: string;
     storeLogo?: string;
