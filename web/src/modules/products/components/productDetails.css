@@ -811,13 +811,14 @@ body {
   width: 100%;
   max-width: 100%;
   overflow-x: hidden;
+  padding: 0 20px;
 }
 
 .similar-products-title {
   font-size: 24px;
   font-weight: 700;
   color: #012645;
-  margin-bottom: 24px;
+  margin-bottom: 30px;
   text-align: center;
 }
 
@@ -831,7 +832,8 @@ body {
 .similar-products-grid > div {
   flex: 0 0 calc(33.333% - 20px);
   min-width: 250px;
-  max-width: 400px;
+  max-width: 350px;
+  height: 100%;
 }
 
 .similar-products-loading {
@@ -864,6 +866,7 @@ body {
   .similar-products-grid > div {
     flex: 0 0 calc(50% - 10px);
     min-width: 200px;
+    max-width: none;
   }
 
   .similar-products-title {
@@ -874,11 +877,13 @@ body {
 @media (max-width: 480px) {
   .similar-products-section {
     margin-top: 30px;
+    padding: 0 10px;
   }
 
   .similar-products-grid > div {
     flex: 0 0 100%;
-    max-width: 90%;
+    max-width: 320px;
+    margin: 0 auto;
   }
 
   .similar-products-title {

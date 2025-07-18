@@ -20,7 +20,8 @@ import { fetchWithAuth } from "@/lib/fetch-with-auth";
 import { Color, AgeGroupItem } from "@/types";
 import { toast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
-import { ProductCard } from "./product-card";
+
+import { SimilarProductCard } from "./similar-product-card";
 import { useCart } from "@/modules/cart/context/cart-context";
 import ProductSchema from "@/components/ProductSchema";
 
@@ -199,7 +200,30 @@ function SimilarProducts({
           {t("product.similarProducts")}
         </h2>
         <div className="similar-products-loading">
-          <p>{t("shop.loading")}</p>
+          <div
+            className="loading-spinner"
+            style={{ margin: "20px auto", textAlign: "center" }}
+          >
+            <div
+              className="spinner"
+              style={{
+                width: "40px",
+                height: "40px",
+                borderRadius: "50%",
+                border: "3px solid rgba(1, 38, 69, 0.1)",
+                borderTopColor: "#012645",
+                animation: "spin 1s linear infinite",
+                margin: "0 auto",
+              }}
+            ></div>
+            <style jsx>{`
+              @keyframes spin {
+                to {
+                  transform: rotate(360deg);
+                }
+              }
+            `}</style>
+          </div>
         </div>
       </div>
     );
@@ -214,7 +238,7 @@ function SimilarProducts({
       <h2 className="similar-products-title">{t("product.similarProducts")}</h2>
       <div className="similar-products-grid">
         {similarProducts.map((product: Product) => (
-          <ProductCard key={product._id} product={product} />
+          <SimilarProductCard key={product._id} product={product} />
         ))}
       </div>
     </div>
