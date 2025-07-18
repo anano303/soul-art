@@ -224,7 +224,7 @@
   }
 
   .banner-content {
-    left: 5%;
+    left: 1%;
     max-width: 85%; /* Expanded since we're hiding the buttons */
     padding: 15px;
   }
