@@ -836,6 +836,38 @@ export class ProductsService {
   }
 
   /**
+   * Get seller information for a specific product
+   * This retrieves the seller/user registration details for a product
+   */
+  async getProductSellerInfo(productId: string): Promise<any> {
+    if (!Types.ObjectId.isValid(productId)) {
+      throw new BadRequestException('Invalid product ID');
+    }
+
+    const product = await this.productModel
+      .findById(productId)
+      .populate({
+        path: 'user',
+        select:
+          'name email storeName ownerFirstName ownerLastName phoneNumber identificationNumber accountNumber role',
+      })
+      .exec();
+
+    if (!product) {
+      throw new NotFoundException('Product not found');
+    }
+
+    if (!product.user) {
+      throw new NotFoundException(
+        'Seller information not found for this product',
+      );
+    }
+
+    // Return seller information
+    return product.user;
+  }
+
+  /**
    * Update product stock when an order is paid
    * @param productId - The ID of the product
    * @param qty - The quantity to subtract from stock
