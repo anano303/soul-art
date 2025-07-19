@@ -6,7 +6,6 @@ import { fetchWithAuth } from "@/lib/fetch-with-auth";
 import Link from "next/link";
 import { CheckCircle2, Store, Truck, XCircle } from "lucide-react";
 import { Order } from "@/types/order";
-import { Product } from "@/types";
 import "./ordersList.css";
 import HeartLoading from "@/components/HeartLoading/HeartLoading";
 import { getUserData } from "@/lib/auth";
@@ -100,12 +99,13 @@ export function OrdersList() {
                       : "Unknown"}
                   </td>
                   <td>
-                    ${order.totalPrice ? order.totalPrice.toFixed(2) : "0.00"}
+                    {order.totalPrice ? order.totalPrice.toFixed(2) : "0.00"} ₾
                   </td>
                   <td>
                     {order.orderItems &&
                     order.orderItems.some(
                       (item) =>
+                        item.productId &&
                         typeof item.productId === "object" &&
                         item.productId.deliveryType &&
                         String(item.productId.deliveryType) === "SELLER"
@@ -116,20 +116,22 @@ export function OrdersList() {
                         {order.orderItems
                           .filter(
                             (item) =>
+                              item.productId &&
                               typeof item.productId === "object" &&
                               item.productId.deliveryType &&
                               String(item.productId.deliveryType) === "SELLER"
                           )
-                          .map((item) => {
-                            const product = item.productId as Product;
-                            return product?.minDeliveryDays &&
-                              product?.maxDeliveryDays ? (
+                          .map((item) =>
+                            item.productId &&
+                            typeof item.productId === "object" &&
+                            item.productId.minDeliveryDays &&
+                            item.productId.maxDeliveryDays ? (
                               <span className="delivery-time" key={item._id}>
-                                {product.minDeliveryDays}-
-                                {product.maxDeliveryDays} დღე
+                                {item.productId.minDeliveryDays}-
+                                {item.productId.maxDeliveryDays} დღე
                               </span>
-                            ) : null;
-                          })}
+                            ) : null
+                          )}
                       </span>
                     ) : (
                       <span className="delivery-badge soulart">
