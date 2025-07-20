@@ -17,6 +17,7 @@ import { Role } from '@/types/role.enum';
 import { SellerRegisterDto } from '../dtos/seller-register.dto';
 import { AdminProfileDto } from '../dtos/admin.profile.dto';
 import { AwsS3Service } from '@/aws-s3/aws-s3.service';
+import { UserCloudinaryService } from './user-cloudinary.service';
 
 @Injectable()
 export class UsersService {
@@ -25,6 +26,7 @@ export class UsersService {
   constructor(
     @InjectModel(User.name) private userModel: Model<User>,
     private readonly awsS3Service: AwsS3Service,
+    private readonly userCloudinaryService: UserCloudinaryService,
   ) {}
 
   async findByEmail(email: string) {
@@ -353,32 +355,25 @@ export class UsersService {
         throw new NotFoundException('User not found');
       }
 
-      // Delete old image if it exists
-      if (user.profileImagePath) {
-        try {
-          // Only delete from S3 if it's a file path, not a URL
-          if (!user.profileImagePath.startsWith('http')) {
-            await this.awsS3Service.deleteImageByFileId(
-              user.profileImagePath as string,
-            );
-          }
-        } catch (error) {
-          console.error('Failed to delete old profile image', error);
-          // Continue even if deletion fails
-        }
-      }
+      // Create a multer file object from buffer for Cloudinary service
+      const file: Express.Multer.File = {
+        fieldname: 'file',
+        originalname: filePath.split('/').pop() || 'profile-image.jpg',
+        encoding: '7bit',
+        mimetype: 'image/jpeg', // Default, will be detected by Cloudinary
+        buffer: fileBuffer,
+        size: fileBuffer.length,
+        destination: '',
+        filename: '',
+        path: '',
+        stream: null as any,
+      };
 
-      // Upload new image
-      const profileImagePath = await this.awsS3Service.uploadImage(
-        filePath,
-        fileBuffer,
-      );
-
-      // Get image URL
+      // Upload to Cloudinary
       const imageUrl =
-        await this.awsS3Service.getImageByFileId(profileImagePath);
+        await this.userCloudinaryService.uploadProfileImage(file);
 
-      // Update user record with the full URL instead of just the path
+      // Store the full Cloudinary URL
       await this.userModel.findByIdAndUpdate(userId, {
         profileImagePath: imageUrl,
       });
@@ -406,31 +401,24 @@ export class UsersService {
         throw new BadRequestException('Only sellers can update store logos');
       }
 
-      // Delete old logo if it exists
-      if (user.storeLogoPath) {
-        try {
-          // Only delete from S3 if it's a file path, not a URL
-          if (!user.storeLogoPath.startsWith('http')) {
-            await this.awsS3Service.deleteImageByFileId(
-              user.storeLogoPath as string,
-            );
-          }
-        } catch (error) {
-          console.error('Failed to delete old store logo', error);
-          // Continue even if deletion fails
-        }
-      }
+      // Create a multer file object from buffer for Cloudinary service
+      const file: Express.Multer.File = {
+        fieldname: 'file',
+        originalname: filePath.split('/').pop() || 'store-logo.jpg',
+        encoding: '7bit',
+        mimetype: 'image/jpeg', // Default, will be detected by Cloudinary
+        buffer: fileBuffer,
+        size: fileBuffer.length,
+        destination: '',
+        filename: '',
+        path: '',
+        stream: null as any,
+      };
 
-      // Upload new logo
-      const storeLogoPath = await this.awsS3Service.uploadImage(
-        filePath,
-        fileBuffer,
-      );
+      // Upload to Cloudinary
+      const logoUrl = await this.userCloudinaryService.uploadSellerLogo(file);
 
-      // Get logo URL
-      const logoUrl = await this.awsS3Service.getImageByFileId(storeLogoPath);
-
-      // Update user record with the full URL instead of just the path
+      // Store the full Cloudinary URL
       await this.userModel.findByIdAndUpdate(userId, {
         storeLogoPath: logoUrl,
       });
@@ -465,13 +453,23 @@ export class UsersService {
     // Get profile image URL if it exists
     let profileImage = null;
     if (user.profileImagePath) {
-      // Check if profileImagePath is already a full URL
+      // For Cloudinary and other HTTP URLs, use directly
       if (user.profileImagePath.startsWith('http')) {
         profileImage = user.profileImagePath;
       } else {
-        // Otherwise get a signed URL from S3
+        // For backward compatibility with S3 paths
         profileImage = await this.awsS3Service.getImageByFileId(
           user.profileImagePath as string,
+        );
+      }
+    } else if (user.role === Role.Seller && user.storeLogoPath) {
+      // If user is a seller and has no profile image but has a store logo,
+      // use the store logo as the profile image
+      if (user.storeLogoPath.startsWith('http')) {
+        profileImage = user.storeLogoPath;
+      } else {
+        profileImage = await this.awsS3Service.getImageByFileId(
+          user.storeLogoPath as string,
         );
       }
     }
@@ -479,11 +477,11 @@ export class UsersService {
     // If user is a seller, get store logo URL
     let storeLogo = null;
     if (user.role === Role.Seller && user.storeLogoPath) {
-      // Check if storeLogoPath is already a full URL
+      // For Cloudinary and other HTTP URLs, use directly
       if (user.storeLogoPath.startsWith('http')) {
         storeLogo = user.storeLogoPath;
       } else {
-        // Otherwise get a signed URL from S3
+        // For backward compatibility with S3 paths
         storeLogo = await this.awsS3Service.getImageByFileId(
           user.storeLogoPath as string,
         );
@@ -500,6 +498,17 @@ export class UsersService {
   async getProfileImageUrl(profileImagePath: string): Promise<string | null> {
     if (!profileImagePath) return null;
     try {
+      // If it's already a Cloudinary URL, return it directly
+      if (profileImagePath.includes('cloudinary.com')) {
+        return profileImagePath;
+      }
+
+      // If it's already a full URL, return it
+      if (profileImagePath.startsWith('http')) {
+        return profileImagePath;
+      }
+
+      // Otherwise, try to get from S3 (for backward compatibility with existing images)
       return await this.awsS3Service.getImageByFileId(profileImagePath);
     } catch (error) {
       this.logger.error(`Failed to get image URL: ${error.message}`);

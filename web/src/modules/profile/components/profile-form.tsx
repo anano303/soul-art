@@ -58,10 +58,62 @@ export function ProfileForm() {
   const { user, isLoading } = useUser();
   const { t } = useLanguage();
 
+  // Helper function to check if URL is from Cloudinary
+  const isCloudinaryUrl = useCallback((url: string): boolean => {
+    return typeof url === "string" && url.includes("cloudinary.com");
+  }, []);
+
+  // Helper function to ensure we can handle both existing uploads and new ones
+  const getImageSrc = useCallback(
+    (imagePath: string | null) => {
+      if (!imagePath) return null;
+
+      // If it's a Cloudinary URL, return it directly without modifications
+      if (isCloudinaryUrl(imagePath)) {
+        console.log("Using Cloudinary image directly:", imagePath);
+        return imagePath;
+      }
+
+      // If already a URL, return it directly
+      if (imagePath.startsWith("http")) {
+        console.log("Image is already a URL:", imagePath);
+        return imagePath;
+      }
+
+      // Don't append /api/ if the path already contains it
+      if (imagePath.startsWith("/api/")) {
+        console.log("Path already has /api/ prefix:", imagePath);
+        return imagePath;
+      }
+
+      // Otherwise add API prefix
+      console.log("Converting image path to URL:", `/api/${imagePath}`);
+      return `/api/${imagePath}`;
+    },
+    [isCloudinaryUrl]
+  );
+
   // Use manual invalidation instead of refetch
   const refreshUserData = useCallback(() => {
     queryClient.invalidateQueries({ queryKey: ["user"] });
   }, [queryClient]);
+
+  // Define form before using it in useEffect
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      name: user?.name || "",
+      email: user?.email || "",
+      password: "",
+      confirmPassword: "",
+      storeName: user?.storeName || "",
+      ownerFirstName: user?.ownerFirstName || "",
+      ownerLastName: user?.ownerLastName || "",
+      phoneNumber: user?.phoneNumber || "",
+      identificationNumber: user?.identificationNumber || "",
+      accountNumber: user?.accountNumber || "",
+    },
+  });
 
   useEffect(() => {
     setShouldFetchUser(true);
@@ -85,9 +137,18 @@ export function ProfileForm() {
         ownerLastName: user.ownerLastName,
       });
 
+      // For profile image:
+      // 1. Use profile image if exists
+      // 2. If user is a seller without profile image, use store logo as profile image
+      // 3. Otherwise, no image (will show initials)
       if (user.profileImage) {
         console.log("Setting profile image from user data:", user.profileImage);
         setProfileImage(user.profileImage);
+      } else if (user.role?.toUpperCase() === "SELLER" && user.storeLogo) {
+        console.log("Using store logo as profile image:", user.storeLogo);
+        setProfileImage(user.storeLogo);
+      } else {
+        setProfileImage(null);
       }
 
       setIsSellerAccount(user.role?.toUpperCase() === "SELLER");
@@ -100,24 +161,22 @@ export function ProfileForm() {
         console.log("No store logo found in user data");
         setStoreLogo(null);
       }
-    }
-  }, [user]);
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      name: user?.name || "",
-      email: user?.email || "",
-      password: "",
-      confirmPassword: "",
-      storeName: user?.storeName || "",
-      ownerFirstName: user?.ownerFirstName || "",
-      ownerLastName: user?.ownerLastName || "",
-      phoneNumber: user?.phoneNumber || "",
-      identificationNumber: user?.identificationNumber || "",
-      accountNumber: user?.accountNumber || "",
-    },
-  });
+      // Reset form with current user data
+      form.reset({
+        name: user.name || "",
+        email: user.email || "",
+        password: "",
+        confirmPassword: "",
+        storeName: user.storeName || "",
+        ownerFirstName: user.ownerFirstName || "",
+        ownerLastName: user.ownerLastName || "",
+        phoneNumber: user.phoneNumber || "",
+        identificationNumber: user.identificationNumber || "",
+        accountNumber: user.accountNumber || "",
+      });
+    }
+  }, [user, getImageSrc, form]);
 
   const updateProfile = useMutation({
     mutationFn: async (values: z.infer<typeof formSchema>) => {
@@ -375,27 +434,6 @@ export function ProfileForm() {
     );
   };
 
-  // Helper function to ensure we can handle both existing uploads and new ones
-  const getImageSrc = (imagePath: string | null) => {
-    if (!imagePath) return null;
-
-    // If already a URL, return it directly
-    if (imagePath.startsWith("http")) {
-      console.log("Image is already a URL:", imagePath);
-      return imagePath;
-    }
-
-    // Don't append /api/ if the path already contains it
-    if (imagePath.startsWith("/api/")) {
-      console.log("Path already has /api/ prefix:", imagePath);
-      return imagePath;
-    }
-
-    // Otherwise add API prefix
-    console.log("Converting image path to URL:", `/api/${imagePath}`);
-    return `/api/${imagePath}`;
-  };
-
   if (!shouldFetchUser || isLoading) {
     return <div className="loading-container">{t("profile.loading")}</div>;
   }
@@ -416,6 +454,10 @@ export function ProfileForm() {
                 className="profile-image"
                 unoptimized
                 key={`profile-${new Date().getTime()}`} // Add key for cache busting
+                onError={() => {
+                  console.error("Profile image failed to load:", profileImage);
+                  setProfileImage(null); // Show initials on error
+                }}
               />
             </div>
           ) : (
