@@ -35,8 +35,7 @@ export function AddToCartButton({
 
     try {
       await addItem(productId, quantity);
-    } catch (error) {
-      console.log(error);
+    } catch {
       toast({
         title: t("cart.error"),
         description: t("cart.failedToAdd"),

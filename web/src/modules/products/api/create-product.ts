@@ -56,10 +56,6 @@ export async function createProduct(
       method: "POST",
       body: formData, // ჩვენ უკვე ვგზავნით formData-ს, რომელიც შეიცავს სურათებს
     });
-    console.log(
-      "Final API Request URL:",
-      `${process.env.NEXT_PUBLIC_API_URL}/products`
-    );
 
     if (!response.ok) {
       const error = await response.json();
