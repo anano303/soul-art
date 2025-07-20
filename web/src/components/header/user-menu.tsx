@@ -27,15 +27,29 @@ export default function UserMenu({ onNavigate }: { onNavigate?: () => void }) {
     onNavigate?.();
   };
 
+  // Check if URL is from Cloudinary
+  const isCloudinaryUrl = (url: string): boolean => {
+    return url.includes("cloudinary.com");
+  };
+
   // Update profile image when user changes
   useEffect(() => {
     if (user?.profileImage) {
-      setProfileImage(user.profileImage);
+      // For Cloudinary images, we can use them directly without validation
+      if (isCloudinaryUrl(user.profileImage)) {
+        console.log(
+          "Using Cloudinary profile image directly:",
+          user.profileImage
+        );
+        setProfileImage(user.profileImage);
+      } else {
+        // For other sources like S3, set immediately but validate in the background
+        setProfileImage(user.profileImage);
+      }
     } else {
       setProfileImage("/avatar.jpg");
     }
 
-    // დავამატოთ ლოგი დებაგისთვის
     console.log("User profile updated:", user);
   }, [user]);
 
@@ -80,6 +94,45 @@ export default function UserMenu({ onNavigate }: { onNavigate?: () => void }) {
               width={32}
               height={32}
               className="avatar-image"
+              loading="eager"
+              unoptimized
+              key={`avatar-${
+                user?.profileImage ? "profile" : "default"
+              }-${new Date().getTime()}`}
+              onError={(e) => {
+                console.warn("Failed to load profile image, retrying...");
+
+                // Function to clean S3 URLs
+                const cleanS3Url = (url: string): string => {
+                  if (url.includes("amazonaws.com") && url.includes("?")) {
+                    return url.split("?")[0];
+                  }
+                  return url;
+                };
+
+                // Add retry logic
+                setTimeout(() => {
+                  const imgElement = e.currentTarget as HTMLImageElement;
+
+                  // If it's an AWS S3 URL, try with a cleaned version
+                  if (
+                    user?.profileImage &&
+                    user.profileImage.includes("amazonaws.com")
+                  ) {
+                    const cleanedUrl = cleanS3Url(user.profileImage);
+                    const newSrc = `${cleanedUrl}?retry=${new Date().getTime()}`;
+                    imgElement.src = newSrc;
+                  } else if (user?.profileImage) {
+                    // Otherwise add regular cache busting
+                    const newSrc = `${user.profileImage}${
+                      user.profileImage.includes("?") ? "&" : "?"
+                    }retry=${new Date().getTime()}`;
+                    imgElement.src = newSrc;
+                  } else {
+                    setProfileImage("/avatar.jpg");
+                  }
+                }, 500);
+              }}
             />
           </div>
           <span className="username">

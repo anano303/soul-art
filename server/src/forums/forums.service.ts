@@ -81,10 +81,30 @@ export class ForumsService {
         let userProfileImage = null;
         const populatedUser = forum.user as any; // Cast to any to access properties
 
-        if (populatedUser && populatedUser.profileImagePath) {
-          userProfileImage = await this.awsS3Service.getImageByFileId(
-            populatedUser.profileImagePath as string,
-          );
+        if (populatedUser) {
+          if (populatedUser.profileImagePath) {
+            // If it's already a full URL (Cloudinary or other direct URL)
+            if (populatedUser.profileImagePath.startsWith('http')) {
+              userProfileImage = populatedUser.profileImagePath;
+            } else {
+              // Use S3 for backward compatibility
+              userProfileImage = await this.awsS3Service.getImageByFileId(
+                populatedUser.profileImagePath as string,
+              );
+            }
+          } else if (
+            populatedUser.role === 'seller' &&
+            populatedUser.storeLogoPath
+          ) {
+            // If seller has no profile image but has store logo, use the logo
+            if (populatedUser.storeLogoPath.startsWith('http')) {
+              userProfileImage = populatedUser.storeLogoPath;
+            } else {
+              userProfileImage = await this.awsS3Service.getImageByFileId(
+                populatedUser.storeLogoPath as string,
+              );
+            }
+          }
         }
 
         // Create a safe user object
@@ -101,11 +121,33 @@ export class ForumsService {
             let commentUserProfileImage = null;
             const populatedCommentUser = comment.user as any; // Cast to any
 
-            if (populatedCommentUser && populatedCommentUser.profileImagePath) {
-              commentUserProfileImage =
-                await this.awsS3Service.getImageByFileId(
-                  populatedCommentUser.profileImagePath as string,
-                );
+            if (populatedCommentUser) {
+              if (populatedCommentUser.profileImagePath) {
+                // If it's already a full URL (Cloudinary or other direct URL)
+                if (populatedCommentUser.profileImagePath.startsWith('http')) {
+                  commentUserProfileImage =
+                    populatedCommentUser.profileImagePath;
+                } else {
+                  // Use S3 for backward compatibility
+                  commentUserProfileImage =
+                    await this.awsS3Service.getImageByFileId(
+                      populatedCommentUser.profileImagePath as string,
+                    );
+                }
+              } else if (
+                populatedCommentUser.role === 'seller' &&
+                populatedCommentUser.storeLogoPath
+              ) {
+                // If seller has no profile image but has store logo, use the logo
+                if (populatedCommentUser.storeLogoPath.startsWith('http')) {
+                  commentUserProfileImage = populatedCommentUser.storeLogoPath;
+                } else {
+                  commentUserProfileImage =
+                    await this.awsS3Service.getImageByFileId(
+                      populatedCommentUser.storeLogoPath as string,
+                    );
+                }
+              }
             }
 
             // Create a safe comment user object

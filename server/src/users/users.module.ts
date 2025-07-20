@@ -11,7 +11,9 @@ import { JwtStrategy } from 'src/strategies/jwt.strategy';
 import { UsersController } from './controller/users.controller';
 import { GoogleStrategy } from '@/strategies/google.strategy';
 import { EmailService } from '@/email/services/email.services';
-import { AwsS3Module } from '@/aws-s3/aws-s3.module'; // Import the AwsS3Module
+import { AwsS3Module } from '@/aws-s3/aws-s3.module';
+import { CloudinaryModule } from '@/cloudinary/cloudinary.module';
+import { UserCloudinaryService } from './services/user-cloudinary.service';
 
 @Module({
   imports: [
@@ -27,7 +29,8 @@ import { AwsS3Module } from '@/aws-s3/aws-s3.module'; // Import the AwsS3Module
       secret: process.env.JWT_ACCESS_SECRET,
       signOptions: { expiresIn: '10m' },
     }),
-    AwsS3Module, // Add this line to import AwsS3Module
+    AwsS3Module,
+    CloudinaryModule, // Add Cloudinary module
   ],
   controllers: [AuthController, UsersController],
   providers: [
@@ -38,6 +41,7 @@ import { AwsS3Module } from '@/aws-s3/aws-s3.module'; // Import the AwsS3Module
     AuthService,
     GoogleStrategy,
     EmailService,
+    UserCloudinaryService, // Add our new service
   ],
   exports: [UsersService],
 })

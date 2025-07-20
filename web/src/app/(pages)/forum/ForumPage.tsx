@@ -142,7 +142,7 @@ const ForumPage = () => {
                     name: forum.user.name,
                     _id: forum.user._id,
                     avatar: "/avatar.jpg",
-                    profileImage: forum.user.profileImage,
+                    profileImage: forum.user.profileImage || undefined,
                     role: forum.user.role,
                   }}
                   currentUser={

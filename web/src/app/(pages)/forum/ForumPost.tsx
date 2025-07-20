@@ -692,11 +692,22 @@ const ForumPost = ({
       >
         <div className="comment-header">
           <Image
-            src={comment.author.profileImage || comment.author.avatar}
+            src={comment.author.profileImage || "/avatar.jpg"}
             alt={comment.author.name}
             width={25}
             height={25}
             className="comment-avatar"
+            unoptimized
+            key={`comment-author-${comment.author._id}-${new Date().getTime()}`}
+            onError={(e) => {
+              console.warn(
+                "Failed to load comment author image:",
+                comment.author.profileImage
+              );
+              // Fallback to default avatar
+              const imgElement = e.currentTarget as HTMLImageElement;
+              imgElement.src = "/avatar.jpg";
+            }}
           />
           <span className="comment-author">{comment.author.name}</span>
         </div>
@@ -809,6 +820,40 @@ const ForumPost = ({
             width={30}
             height={30}
             className="forum-post-avatar"
+            unoptimized
+            key={`author-${author._id}-${new Date().getTime()}`}
+            onError={(e) => {
+              console.warn(
+                "Failed to load forum author image:",
+                author.profileImage
+              );
+              // Retry with cache busting
+              const imgElement = e.currentTarget as HTMLImageElement;
+
+              // Function to clean S3 URLs
+              const cleanS3Url = (url: string): string => {
+                if (url && url.includes("amazonaws.com") && url.includes("?")) {
+                  return url.split("?")[0];
+                }
+                return url;
+              };
+
+              if (author.profileImage) {
+                if (author.profileImage.includes("amazonaws.com")) {
+                  // Clean up S3 URLs
+                  const cleanedUrl = cleanS3Url(author.profileImage);
+                  imgElement.src = `${cleanedUrl}?retry=${new Date().getTime()}`;
+                } else {
+                  // Add cache busting for other URLs
+                  imgElement.src = `${author.profileImage}${
+                    author.profileImage.includes("?") ? "&" : "?"
+                  }retry=${new Date().getTime()}`;
+                }
+              } else {
+                // Use default avatar if all else fails
+                imgElement.src = "/avatar.jpg";
+              }
+            }}
           />
           <span className="forum-post-author-name">{author.name}</span>
           {isAuthorized && canModifyPost && (
