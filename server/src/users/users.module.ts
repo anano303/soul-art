@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { AuthController } from './controller/auth.controller';
 import { User, UserSchema } from './schemas/user.schema';
+import { Product, ProductSchema } from '../products/schemas/product.schema';
 import { UsersService } from './services/users.service';
 import { AuthService } from './services/auth.service';
 import { JwtModule } from '@nestjs/jwt';
@@ -21,6 +22,10 @@ import { UserCloudinaryService } from './services/user-cloudinary.service';
       {
         name: User.name,
         schema: UserSchema,
+      },
+      {
+        name: Product.name,
+        schema: ProductSchema,
       },
     ]),
     PassportModule.register({ defaultStrategy: 'google' }),

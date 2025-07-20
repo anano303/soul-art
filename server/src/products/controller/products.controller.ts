@@ -59,15 +59,6 @@ export class ProductsController {
     @Query('discounted') discounted: string,
     @Query('includeVariants') includeVariants: string,
   ) {
-    console.log('Getting products with filters:', {
-      mainCategory,
-      subCategory,
-      ageGroup,
-      size,
-      color,
-      discounted,
-    });
-
     return this.productsService.findMany({
       keyword,
       page,
@@ -109,7 +100,6 @@ export class ProductsController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.Admin)
   async getPendingProducts() {
-    console.log('Getting pending products');
     return this.productsService.findByStatus(ProductStatus.PENDING);
   }
 
@@ -284,9 +274,6 @@ export class ProductsController {
           hashtags = [];
         }
       }
-
-      console.log('Parsed hashtags:', hashtags);
-      console.log('ProductData hashtags:', productData.hashtags);
 
       // Extract the main category data
       const {
@@ -490,9 +477,7 @@ export class ProductsController {
           : undefined,
       };
 
-      console.log('UPDATING PRODUCT WITH DATA:', updateData);
       const updatedProduct = await this.productsService.update(id, updateData);
-      console.log('Updated product:', updatedProduct);
 
       return updatedProduct;
     } catch (error) {
@@ -514,7 +499,7 @@ export class ProductsController {
     try {
       return await this.productsService.createReview(id, user, rating, comment);
     } catch (error) {
-      console.log('Review error:', error);
+      console.error('Review error:', error);
       // Re-throw the error to maintain the same behavior for the client
       throw error;
     }

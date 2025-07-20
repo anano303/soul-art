@@ -70,24 +70,20 @@ export function ProfileForm() {
 
       // If it's a Cloudinary URL, return it directly without modifications
       if (isCloudinaryUrl(imagePath)) {
-        console.log("Using Cloudinary image directly:", imagePath);
         return imagePath;
       }
 
       // If already a URL, return it directly
       if (imagePath.startsWith("http")) {
-        console.log("Image is already a URL:", imagePath);
         return imagePath;
       }
 
       // Don't append /api/ if the path already contains it
       if (imagePath.startsWith("/api/")) {
-        console.log("Path already has /api/ prefix:", imagePath);
         return imagePath;
       }
 
       // Otherwise add API prefix
-      console.log("Converting image path to URL:", `/api/${imagePath}`);
       return `/api/${imagePath}`;
     },
     [isCloudinaryUrl]
@@ -127,25 +123,13 @@ export function ProfileForm() {
 
   useEffect(() => {
     if (user) {
-      console.log("User data loaded:", {
-        name: user.name,
-        role: user.role,
-        hasProfileImage: !!user.profileImage,
-        hasStoreLogo: !!user.storeLogo,
-        storeLogo: user.storeLogo,
-        ownerFirstName: user.ownerFirstName,
-        ownerLastName: user.ownerLastName,
-      });
-
       // For profile image:
       // 1. Use profile image if exists
       // 2. If user is a seller without profile image, use store logo as profile image
       // 3. Otherwise, no image (will show initials)
       if (user.profileImage) {
-        console.log("Setting profile image from user data:", user.profileImage);
         setProfileImage(user.profileImage);
       } else if (user.role?.toUpperCase() === "SELLER" && user.storeLogo) {
-        console.log("Using store logo as profile image:", user.storeLogo);
         setProfileImage(user.storeLogo);
       } else {
         setProfileImage(null);
@@ -155,10 +139,8 @@ export function ProfileForm() {
 
       if (user.storeLogo) {
         setLogoError(false);
-        console.log("Setting store logo:", user.storeLogo);
         setStoreLogo(getImageSrc(user.storeLogo) || user.storeLogo);
       } else {
-        console.log("No store logo found in user data");
         setStoreLogo(null);
       }
 
@@ -254,6 +236,15 @@ export function ProfileForm() {
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["user"] });
+
+      // If this is a seller and we're potentially updating logo-related data,
+      // invalidate product queries as well
+      if (user?.role?.toUpperCase() === "SELLER") {
+        queryClient.invalidateQueries({ queryKey: ["products"] });
+        queryClient.invalidateQueries({ queryKey: ["product"] });
+        queryClient.invalidateQueries({ queryKey: ["similarProducts"] });
+      }
+
       form.reset({ password: "", confirmPassword: "" });
 
       toast({
@@ -305,8 +296,7 @@ export function ProfileForm() {
       queryClient.invalidateQueries({ queryKey: ["user"] });
 
       setUploadSuccess(true);
-    } catch (error) {
-      console.error("Error uploading profile image:", error);
+    } catch {
       toast({
         title: t("profile.uploadError"),
         description: t("profile.uploadErrorDescription"),
@@ -328,23 +318,23 @@ export function ProfileForm() {
       const formData = new FormData();
       formData.append("file", file);
 
-      console.log("Uploading logo file:", file.name);
-
       const response = await apiClient.post("/users/seller-logo", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
       });
 
-      console.log("Logo upload response:", response.data);
-
       if (response.data && response.data.logoUrl) {
-        console.log("Setting new logo URL:", response.data.logoUrl);
         setStoreLogo(response.data.logoUrl);
         setUploadSuccess(true);
 
         // Use the refreshUserData function instead of refetch
         refreshUserData();
+
+        // Invalidate product queries to refresh brand logos on product pages
+        queryClient.invalidateQueries({ queryKey: ["products"] });
+        queryClient.invalidateQueries({ queryKey: ["product"] });
+        queryClient.invalidateQueries({ queryKey: ["similarProducts"] });
 
         toast({
           title: t("profile.logoUploadSuccess"),
@@ -353,8 +343,7 @@ export function ProfileForm() {
       } else {
         throw new Error("Logo URL not found in response");
       }
-    } catch (error) {
-      console.error("Error uploading store logo:", error);
+    } catch {
       setLogoError(true);
       toast({
         title: t("profile.logoUploadError"),
@@ -455,7 +444,6 @@ export function ProfileForm() {
                 unoptimized
                 key={`profile-${new Date().getTime()}`} // Add key for cache busting
                 onError={() => {
-                  console.error("Profile image failed to load:", profileImage);
                   setProfileImage(null); // Show initials on error
                 }}
               />
@@ -593,7 +581,6 @@ export function ProfileForm() {
                           key={`logo-${new Date().getTime()}`} // Add key for cache busting
                           unoptimized
                           onError={() => {
-                            console.error("Logo failed to load:", storeLogo);
                             setLogoError(true);
                           }}
                         />
