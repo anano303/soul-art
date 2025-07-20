@@ -30,8 +30,7 @@ function PayPalButtonWrapper({ orderId, amount }: PayPalButtonProps) {
         description: "Your order has been paid successfully.",
       });
       router.refresh();
-    } catch (error) {
-      console.log(error);
+    } catch {
       toast({
         title: "Payment Error",
         description: "There was an error processing your payment.",

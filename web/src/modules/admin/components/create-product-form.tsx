@@ -64,9 +64,6 @@ export function CreateProductForm({
     user?.role === "SELLER";
 
   // Debug logging
-  console.log("User:", user);
-  console.log("User role:", user?.role);
-  console.log("isSeller:", isSeller);
 
   const [errors, setErrors] = useState<
     Partial<Record<keyof ProductFormData, string>>
@@ -232,9 +229,6 @@ export function CreateProductForm({
 
   useEffect(() => {
     if (initialData) {
-      console.log("InitialData received:", initialData);
-      console.log("InitialData hashtags:", initialData.hashtags);
-
       // Basic form data setup
       setFormData((prev) => ({
         ...prev,
@@ -671,7 +665,6 @@ export function CreateProductForm({
       }
 
       if (stocks.length > 0) {
-        console.log("Sending stocks:", stocks);
         formDataToSend.append("variants", JSON.stringify(stocks));
       }
 
