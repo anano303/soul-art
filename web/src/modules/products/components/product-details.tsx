@@ -552,7 +552,7 @@ export function ProductDetails({ product }: ProductDetailsProps) {
               href={`/shop?brand=${encodeURIComponent(product.brand)}`}
               className="brand-details hover:opacity-75 transition-opacity"
             >
-              {product.brandLogo && (
+              {product.brandLogo && product.brandLogo.trim() !== "" ? (
                 <div className="brand-logo">
                   <Image
                     src={product.brandLogo}
@@ -560,6 +560,18 @@ export function ProductDetails({ product }: ProductDetailsProps) {
                     fill
                     className="object-cover"
                   />
+                </div>
+              ) : (
+                <div
+                  style={{
+                    padding: "4px 8px",
+                    backgroundColor: "#f0f0f0",
+                    borderRadius: "4px",
+                    fontSize: "12px",
+                    color: "#666",
+                  }}
+                >
+                  No Logo
                 </div>
               )}
               <span className="font-bold">{product.brand}</span>

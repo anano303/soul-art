@@ -165,7 +165,7 @@ export class OrdersService {
   }
 
   async findAll(): Promise<OrderDocument[]> {
-    console.log('Finding all orders for admin');
+    
 
     // Sort by createdAt in descending order (newest first)
     const orders = await this.orderModel
@@ -181,7 +181,7 @@ export class OrdersService {
       })
       .sort({ createdAt: -1 });
 
-    console.log('Total orders found for admin:', orders.length);
+    
     return orders;
   }
 
@@ -335,13 +335,13 @@ export class OrdersService {
     externalOrderId: string,
     paymentResult: PaymentResult,
   ): Promise<OrderDocument> {
-    console.log(`Updating order by external ID: ${externalOrderId}`);
-    console.log('Payment result:', JSON.stringify(paymentResult, null, 2));
+    
+    
 
     const order = await this.orderModel.findOne({ externalOrderId });
 
     if (!order) {
-      console.log(`Order with external ID ${externalOrderId} not found`);
+      
       throw new NotFoundException(
         `Order with external ID ${externalOrderId} not found`,
       );
@@ -353,13 +353,13 @@ export class OrdersService {
 
     // Check if order is already paid
     if (order.isPaid) {
-      console.log('Order is already paid, skipping update');
+      
       throw new BadRequestException('Order is already paid.');
     }
 
     // შეამოწმოს თუ შეკვეთა cancelled სტატუსშია, მაშინ არ დაუშვას გადახდა
     if (order.status === 'cancelled') {
-      console.log('Order is cancelled, cannot process payment');
+      
       throw new BadRequestException(
         'Cannot pay for cancelled order. Please create a new order.',
       );
@@ -420,7 +420,7 @@ export class OrdersService {
       }
     }
 
-    console.log('Setting order as paid');
+    
     order.isPaid = true;
     order.paidAt = new Date().toISOString();
     order.paymentResult = paymentResult;
@@ -432,7 +432,7 @@ export class OrdersService {
     // Note: Stock is already reduced during order creation
     // No need to reduce stock again here to prevent double reduction
 
-    console.log('Saving updated order...');
+    
     const updatedOrder = await order.save();
     console.log(
       `Order ${externalOrderId} successfully updated. New isPaid: ${updatedOrder.isPaid}, new status: ${updatedOrder.status}`,
@@ -604,7 +604,7 @@ export class OrdersService {
   }
 
   async findOrdersBySeller(sellerId: string): Promise<OrderDocument[]> {
-    console.log('Finding orders for seller:', sellerId);
+    
 
     // Find all orders that contain products created by this seller
     const orders = await this.orderModel
@@ -620,7 +620,7 @@ export class OrdersService {
       })
       .sort({ createdAt: -1 });
 
-    console.log('Total orders found:', orders.length);
+    
 
     // Filter orders to only include those containing seller's products
     const sellerOrders = orders.filter((order) => {
@@ -674,7 +674,7 @@ export class OrdersService {
       return hasSellerProduct;
     });
 
-    console.log('Filtered seller orders:', sellerOrders.length);
+    
     return sellerOrders;
   }
 }

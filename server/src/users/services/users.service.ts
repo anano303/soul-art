@@ -10,6 +10,7 @@ import {
 } from '@nestjs/common';
 
 import { User, UserDocument } from '../schemas/user.schema';
+import { Product } from '../../products/schemas/product.schema';
 import { hashPassword } from '@/utils/password';
 import { generateUsers } from '@/utils/seed-users';
 import { PaginatedResponse } from '@/types';
@@ -25,6 +26,7 @@ export class UsersService {
 
   constructor(
     @InjectModel(User.name) private userModel: Model<User>,
+    @InjectModel(Product.name) private productModel: Model<Product>,
     private readonly awsS3Service: AwsS3Service,
     private readonly userCloudinaryService: UserCloudinaryService,
   ) {}
@@ -195,6 +197,31 @@ export class UsersService {
         throw new NotFoundException(`User with ID ${id} not found`);
       }
 
+      // If storeLogoPath was updated for a seller, also update their products
+      if (updateData.storeLogoPath && user.role === Role.Seller) {
+        try {
+          const updateResult = await this.productModel.updateMany(
+            {
+              user: id,
+              brand: user.name, // Only update products where brand matches seller name
+            },
+            {
+              brandLogo: updateData.storeLogoPath,
+            },
+          );
+
+          this.logger.log(
+            `Updated ${updateResult.modifiedCount} products with new logo for seller ${user.name}`,
+          );
+        } catch (error) {
+          this.logger.error(
+            `Failed to update products with new logo for seller ${user.name}:`,
+            error.message,
+          );
+          // Don't throw error here - user update was successful, product update is secondary
+        }
+      }
+
       this.logger.log(`User ${id} updated successfully`);
       return updatedUser;
     } catch (error: any) {
@@ -309,15 +336,9 @@ export class UsersService {
           const timestamp = Date.now();
           const filePath = `seller-logos/${timestamp}-${logoFile.originalname.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
 
-          // Upload logo to S3
-          const storeLogoPath = await this.awsS3Service.uploadImage(
-            filePath,
-            logoFile.buffer,
-          );
-
-          // Get the complete URL for the logo
+          // Upload logo to Cloudinary instead of S3
           const logoUrl =
-            await this.awsS3Service.getImageByFileId(storeLogoPath);
+            await this.userCloudinaryService.uploadSellerLogo(logoFile);
 
           // Update the seller record with the logo URL
           await this.userModel.findByIdAndUpdate(seller._id, {
@@ -422,6 +443,29 @@ export class UsersService {
       await this.userModel.findByIdAndUpdate(userId, {
         storeLogoPath: logoUrl,
       });
+
+      // Update all products of this seller to use the new logo
+      try {
+        const updateResult = await this.productModel.updateMany(
+          {
+            user: userId,
+            brand: user.name, // Only update products where brand matches seller name
+          },
+          {
+            brandLogo: logoUrl,
+          },
+        );
+
+        this.logger.log(
+          `Updated ${updateResult.modifiedCount} products with new logo for seller ${user.name}`,
+        );
+      } catch (error) {
+        this.logger.error(
+          `Failed to update products with new logo for seller ${user.name}:`,
+          error.message,
+        );
+        // Don't throw error here - seller logo update was successful, product update is secondary
+      }
 
       return {
         message: 'Store logo updated successfully',
@@ -540,5 +584,21 @@ export class UsersService {
 
     await this.userModel.findByIdAndDelete(id);
     return { message: 'User deleted successfully' };
+  }
+
+  // Migration helper methods
+  async findSellersWithS3Logos() {
+    return this.userModel
+      .find({
+        role: Role.Seller,
+        storeLogoPath: { $regex: 's3', $options: 'i' },
+      })
+      .exec();
+  }
+
+  async updateSellerLogoPath(userId: string, newLogoPath: string) {
+    return this.userModel.findByIdAndUpdate(userId, {
+      storeLogoPath: newLogoPath,
+    });
   }
 }

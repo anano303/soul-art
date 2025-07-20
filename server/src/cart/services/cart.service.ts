@@ -123,8 +123,6 @@ export class CartService {
         item.ageGroup === ageGroup,
     );
 
-    console.log('Existing item:', product.variants, size, color, ageGroup);
-
     if (existingItem) {
       existingItem.qty = qty;
       // Update price if provided (to handle discount changes)
@@ -236,22 +234,12 @@ export class CartService {
   }
 
   validatePaymentMethod(paymentMethod: string): string {
-    console.log('Received payment method:', paymentMethod);
-    console.log('Type of payment method:', typeof paymentMethod);
-
     const validMethods = ['PayPal', 'Stripe', 'BOG'];
-    console.log('Valid methods:', validMethods);
-    console.log(
-      'Is payment method in valid methods?',
-      validMethods.includes(paymentMethod),
-    );
 
     if (!validMethods.includes(paymentMethod)) {
-      console.log('Payment method validation failed!');
       throw new BadRequestException('Invalid payment method');
     }
 
-    console.log('Payment method validation passed!');
     return paymentMethod;
   }
 }
