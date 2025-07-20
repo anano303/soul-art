@@ -108,7 +108,34 @@ export class ProductsService {
     }
 
     if (brand) {
-      filter.brand = brand;
+      // Use case-insensitive regex for partial matching with special character handling
+      // First normalize the brand string and escape special regex characters
+      const normalizedBrand = brand.trim();
+
+      // Try to decode if it looks like it might be URL encoded
+      let decodedBrand = normalizedBrand;
+      try {
+        // Check if it contains URL encoding patterns
+        if (normalizedBrand.includes('%')) {
+          decodedBrand = decodeURIComponent(normalizedBrand);
+        }
+      } catch (error) {
+        console.warn('Could not decode brand parameter:', error);
+        decodedBrand = normalizedBrand; // Use original if decoding fails
+      }
+
+      const escapedBrand = decodedBrand.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      console.log(
+        'Brand filter - Original:',
+        brand,
+        'Normalized:',
+        normalizedBrand,
+        'Decoded:',
+        decodedBrand,
+        'Escaped:',
+        escapedBrand,
+      );
+      filter.brand = { $regex: escapedBrand, $options: 'i' };
     }
 
     // Handle category filtering with the new structure

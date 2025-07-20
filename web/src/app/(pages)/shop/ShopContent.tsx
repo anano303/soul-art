@@ -24,30 +24,37 @@ const ShopContent = () => {
 
   // New filter state
   const [selectedCategoryId, setSelectedCategoryId] = useState<string>("");
-  const [selectedSubCategoryId, setSelectedSubCategoryId] =
-    useState<string>("");
+  const [selectedSubCategoryId, setSelectedSubCategoryId] = useState<string>("");
   const [selectedAgeGroup, setSelectedAgeGroup] = useState<string>("");
   const [selectedSize, setSelectedSize] = useState<string>("");
   const [selectedColor, setSelectedColor] = useState<string>("");
-  const [selectedBrand, setSelectedBrand] = useState<string>("");
+  const initialBrand = (() => {
+  try {
+    const value = decodeURIComponent(searchParams.get("brand") || "").trim();
+    return value;
+  } catch {
+    return "";
+  }
+})();
+
+const [selectedBrand, setSelectedBrand] = useState<string>(initialBrand);
+
   const [showDiscountedOnly, setShowDiscountedOnly] = useState<boolean>(false);
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 1000]);
-  const [sorting, setSorting] = useState<{
-    field: string;
-    direction: "asc" | "desc";
-  }>({
+  const [sorting, setSorting] = useState<{ field: string; direction: "asc" | "desc" }>({
     field: "createdAt",
     direction: "desc",
   });
 
-  // Fetch categories to determine theme
+  useEffect(() => {
+    console.log("selectedBrand state changed to:", selectedBrand);
+  }, [selectedBrand]);
+
   const { data: categories = [] } = useQuery<Category[]>({
     queryKey: ["categories"],
     queryFn: async () => {
       try {
-        const response = await fetchWithAuth(
-          "/categories?includeInactive=false"
-        );
+        const response = await fetchWithAuth("/categories?includeInactive=false");
         return response.json();
       } catch (err) {
         console.error("Failed to fetch categories:", err);
@@ -57,7 +64,6 @@ const ShopContent = () => {
     refetchOnWindowFocus: false,
   });
 
-  // Determine theme based on selected category
   const getTheme = () => {
     if (!selectedCategoryId || !categories.length) return "default";
 
@@ -67,7 +73,6 @@ const ShopContent = () => {
 
     if (!selectedCategory) return "default";
 
-    // Check if it's handmade category
     if (
       selectedCategory.name === "ხელნაკეთი ნივთები" ||
       selectedCategory.name === "ხელნაკეთი" ||
@@ -80,41 +85,34 @@ const ShopContent = () => {
     return "default";
   };
 
-  // Parse URL parameters on first load
   useEffect(() => {
     if (initializedRef.current) return;
     initializedRef.current = true;
 
-    const pageParam = searchParams
-      ? parseInt(searchParams.get("page") || "1")
-      : 1;
-    const mainCategoryParam = searchParams
-      ? searchParams.get("mainCategory") || ""
-      : "";
-    const subCategoryParam = searchParams
-      ? searchParams.get("subCategory") || ""
-      : "";
-    const ageGroupParam = searchParams
-      ? searchParams.get("ageGroup") || ""
-      : "";
-    const sizeParam = searchParams ? searchParams.get("size") || "" : "";
-    const colorParam = searchParams ? searchParams.get("color") || "" : "";
-    const brandParam = searchParams ? searchParams.get("brand") || "" : "";
-    const discountParam = searchParams
-      ? searchParams.get("discountOnly") === "true"
-      : false;
-    const minPriceParam = searchParams
-      ? parseInt(searchParams.get("minPrice") || "0")
-      : 0;
-    const maxPriceParam = searchParams
-      ? parseInt(searchParams.get("maxPrice") || "1000")
-      : 1000;
-    const sortByParam = searchParams
-      ? searchParams.get("sortBy") || "createdAt"
-      : "createdAt";
-    const sortDirectionParam = searchParams
-      ? (searchParams.get("sortDirection") as "asc" | "desc") || "desc"
-      : "desc";
+    const pageParam = parseInt(searchParams.get("page") || "1");
+    const mainCategoryParam = searchParams.get("mainCategory") || "";
+    const subCategoryParam = searchParams.get("subCategory") || "";
+    const ageGroupParam = searchParams.get("ageGroup") || "";
+    const sizeParam = searchParams.get("size") || "";
+    const colorParam = searchParams.get("color") || "";
+    const brandParam = searchParams.get("brand") || "";
+
+    let decodedBrandParam = "";
+    if (brandParam) {
+      try {
+        decodedBrandParam = decodeURIComponent(brandParam).trim();
+        console.log("Brand parameter decoded:", brandParam, "->", decodedBrandParam);
+      } catch (error) {
+        console.error("Error decoding brand parameter:", error);
+        decodedBrandParam = brandParam.trim();
+      }
+    }
+
+    const discountParam = searchParams.get("discountOnly") === "true";
+    const minPriceParam = parseInt(searchParams.get("minPrice") || "0");
+    const maxPriceParam = parseInt(searchParams.get("maxPrice") || "1000");
+    const sortByParam = searchParams.get("sortBy") || "createdAt";
+    const sortDirectionParam = (searchParams.get("sortDirection") as "asc" | "desc") || "desc";
 
     setCurrentPage(pageParam);
     setSelectedCategoryId(mainCategoryParam);
@@ -122,7 +120,7 @@ const ShopContent = () => {
     setSelectedAgeGroup(ageGroupParam);
     setSelectedSize(sizeParam);
     setSelectedColor(colorParam);
-    setSelectedBrand(brandParam);
+    setSelectedBrand(decodedBrandParam);
     setShowDiscountedOnly(discountParam);
     setPriceRange([minPriceParam, maxPriceParam]);
     setSorting({ field: sortByParam, direction: sortDirectionParam });
@@ -131,46 +129,46 @@ const ShopContent = () => {
       page: pageParam,
       mainCategory: mainCategoryParam,
       subCategory: subCategoryParam,
+      brand: decodedBrandParam,
     });
-  }, [searchParams]);
+  }, []);
 
-  // Fetch products based on filters
-  const fetchProducts = useCallback(async () => {
+  useEffect(() => {
     if (!initializedRef.current) return;
 
-    setIsLoading(true);
+    const loadProducts = async () => {
+      setIsLoading(true);
+      try {
+        const params: Record<string, string> = {
+          page: currentPage.toString(),
+          limit: "20",
+          sortBy: sorting.field,
+          sortDirection: sorting.direction,
+        };
 
-    try {
-      // Build query parameters
-      const params: Record<string, string> = {
-        page: currentPage.toString(),
-        limit: "20",
-        sortBy: sorting.field,
-        sortDirection: sorting.direction,
-      };
+        if (selectedCategoryId) params.mainCategory = selectedCategoryId;
+        if (selectedSubCategoryId) params.subCategory = selectedSubCategoryId;
+        if (selectedAgeGroup) params.ageGroup = selectedAgeGroup;
+        if (selectedSize) params.size = selectedSize;
+        if (selectedColor) params.color = selectedColor;
+        if (selectedBrand) params.brand = selectedBrand;
+        if (priceRange[0] > 0) params.minPrice = priceRange[0].toString();
+        if (priceRange[1] < 1000) params.maxPrice = priceRange[1].toString();
+        if (showDiscountedOnly) params.discounted = "true";
 
-      if (selectedCategoryId) params.mainCategory = selectedCategoryId;
-      if (selectedSubCategoryId) params.subCategory = selectedSubCategoryId;
-      if (selectedAgeGroup) params.ageGroup = selectedAgeGroup;
-      if (selectedSize) params.size = selectedSize;
-      if (selectedColor) params.color = selectedColor;
-      if (selectedBrand) params.brand = selectedBrand;
-      if (priceRange[0] > 0) params.minPrice = priceRange[0].toString();
-      if (priceRange[1] < 1000) params.maxPrice = priceRange[1].toString();
-      if (showDiscountedOnly) params.discounted = "true";
+        const response = await getProducts(currentPage, 20, params);
+        setProducts(response.items || []);
+        setTotalPages(response.pages || 1);
+      } catch (error) {
+        console.error(`Failed to fetch products:`, error);
+        setProducts([]);
+        setTotalPages(1);
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-      const response = await getProducts(currentPage, 20, params);
-
-      setProducts(response.items || []);
-      setTotalPages(response.pages || 1);
-    } catch (error) {
-      console.error(`Failed to fetch products:`, error);
-      setProducts([]);
-      setTotalPages(1);
-      // You could add a toast notification here if you have a toast system
-    } finally {
-      setIsLoading(false);
-    }
+    loadProducts();
   }, [
     currentPage,
     selectedCategoryId,
@@ -184,37 +182,25 @@ const ShopContent = () => {
     showDiscountedOnly,
   ]);
 
-  // Fetch products when filters change
   useEffect(() => {
-    let mounted = true;
-    if (mounted) {
-      fetchProducts();
-    }
-    return () => {
-      mounted = false;
-    };
-  }, [fetchProducts]);
+    if (!initializedRef.current) return;
 
-  // Update URL when filters change
-  const updateUrl = useCallback(() => {
     const params = new URLSearchParams();
-
-    // Only add parameters that have values
     if (selectedCategoryId) params.set("mainCategory", selectedCategoryId);
     if (selectedSubCategoryId) params.set("subCategory", selectedSubCategoryId);
     if (selectedAgeGroup) params.set("ageGroup", selectedAgeGroup);
     if (selectedSize) params.set("size", selectedSize);
     if (selectedColor) params.set("color", selectedColor);
-    if (selectedBrand) params.set("brand", selectedBrand);
+    if (selectedBrand && selectedBrand.trim()) params.set("brand", selectedBrand.trim());
     if (priceRange[0] > 0) params.set("minPrice", priceRange[0].toString());
     if (priceRange[1] < 1000) params.set("maxPrice", priceRange[1].toString());
     if (sorting.field !== "createdAt") params.set("sortBy", sorting.field);
-    if (sorting.direction !== "desc")
-      params.set("sortDirection", sorting.direction);
+    if (sorting.direction !== "desc") params.set("sortDirection", sorting.direction);
     if (currentPage > 1) params.set("page", currentPage.toString());
     if (showDiscountedOnly) params.set("discounted", "true");
 
-    router.replace(`/shop?${params.toString()}`);
+    const urlString = `/shop?${params.toString()}`;
+    router.replace(urlString);
   }, [
     router,
     selectedCategoryId,
@@ -229,78 +215,33 @@ const ShopContent = () => {
     showDiscountedOnly,
   ]);
 
-  // Update URL when filters change
-  useEffect(() => {
-    // Skip the first render to avoid double navigation
-    if (!initializedRef.current) return;
-    updateUrl();
-  }, [
-    selectedCategoryId,
-    selectedSubCategoryId,
-    selectedAgeGroup,
-    selectedSize,
-    selectedColor,
-    selectedBrand,
-    priceRange,
-    sorting,
-    currentPage,
-    showDiscountedOnly,
-    updateUrl,
-  ]);
-
-  // Handle page change
   const handlePageChange = (page: number) => {
     if (page === currentPage || page < 1 || page > totalPages) return;
     setCurrentPage(page);
     window.scrollTo(0, 0);
   };
 
-  // Decorative elements and UI
-  // const renderAnimatedIcons = () => {
-  //   return (
-  //     <div className="shop-animated-icons modern">
-  //       <div className="icon clothing-icon">
-  //         <Shirt />
-  //       </div>
-  //       <div className="icon accessories-icon">
-  //         <ShoppingBag />
-  //       </div>
-  //     </div>
-  //   );
-  // };
+  const handleCategoryChange = useCallback((categoryId: string) => {
+    setCurrentPage(1);
+    setSelectedCategoryId(categoryId);
+    if (categoryId !== selectedCategoryId) {
+      setSelectedSubCategoryId("");
+      setSelectedAgeGroup("");
+      setSelectedSize("");
+      setSelectedColor("");
+    }
+  }, [selectedCategoryId]);
 
-  // Handle filter changes in a more robust way
-  const handleCategoryChange = useCallback(
-    (categoryId: string) => {
-      // Reset page when changing filters
-      setCurrentPage(1);
-      setSelectedCategoryId(categoryId);
-      // Clear dependent filters when changing parent filter
-      if (categoryId !== selectedCategoryId) {
-        setSelectedSubCategoryId("");
-        setSelectedAgeGroup("");
-        setSelectedSize("");
-        setSelectedColor("");
-      }
-    },
-    [selectedCategoryId]
-  );
+  const handleSubCategoryChange = useCallback((subcategoryId: string) => {
+    setCurrentPage(1);
+    setSelectedSubCategoryId(subcategoryId);
+    if (subcategoryId !== selectedSubCategoryId) {
+      setSelectedAgeGroup("");
+      setSelectedSize("");
+      setSelectedColor("");
+    }
+  }, [selectedSubCategoryId]);
 
-  const handleSubCategoryChange = useCallback(
-    (subcategoryId: string) => {
-      setCurrentPage(1);
-      setSelectedSubCategoryId(subcategoryId);
-      // Clear dependent filters when changing parent filter
-      if (subcategoryId !== selectedSubCategoryId) {
-        setSelectedAgeGroup("");
-        setSelectedSize("");
-        setSelectedColor("");
-      }
-    },
-    [selectedSubCategoryId]
-  );
-
-  // Simple filter handlers
   const handleAgeGroupChange = useCallback((ageGroup: string) => {
     setCurrentPage(1);
     setSelectedAgeGroup(ageGroup);
@@ -317,43 +258,29 @@ const ShopContent = () => {
   }, []);
 
   const handleBrandChange = useCallback((brand: string) => {
+    console.log("handleBrandChange called with:", brand, "previous brand:", selectedBrand);
     setCurrentPage(1);
     setSelectedBrand(brand);
-  }, []);
+  }, [selectedBrand]);
 
-  const handleDiscountFilterChange = useCallback(
-    (showDiscountedOnly: boolean) => {
-      setCurrentPage(1);
-      setShowDiscountedOnly(showDiscountedOnly);
-    },
-    []
-  );
+  const handleDiscountFilterChange = useCallback((showDiscountedOnly: boolean) => {
+    setCurrentPage(1);
+    setShowDiscountedOnly(showDiscountedOnly);
+  }, []);
 
   const handlePriceRangeChange = useCallback((range: [number, number]) => {
     setCurrentPage(1);
     setPriceRange(range);
   }, []);
 
-  const handleSortChange = useCallback(
-    (sortOption: { field: string; direction: "asc" | "desc" }) => {
-      setCurrentPage(1);
-      setSorting(sortOption);
-    },
-    []
-  );
+  const handleSortChange = useCallback((sortOption: { field: string; direction: "asc" | "desc" }) => {
+    setCurrentPage(1);
+    setSorting(sortOption);
+  }, []);
 
   return (
     <div className="shop-container default">
       <div className="content">
-        {/* <h1
-          className="title"
-          style={{ marginBottom: 40, marginTop: 70, zIndex: 9 }}
-        >
-          {selectedBrand
-            ? `${selectedBrand}${t("shop.artistWorks")}`
-            : t("shop.allArtworks")}
-        </h1> */}
-
         <div className="shop-layout">
           <div className="filters-sidebar">
             <ProductFilters
