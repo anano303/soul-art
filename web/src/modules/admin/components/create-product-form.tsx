@@ -58,7 +58,15 @@ export function CreateProductForm({
   const { language, t } = useLanguage();
   const router = useRouter();
   const { user } = useUser();
-  const isSeller = user?.role?.toLowerCase() === "seller";
+  const isSeller =
+    user?.role?.toLowerCase() === "seller" ||
+    user?.role === "Seller" ||
+    user?.role === "SELLER";
+
+  // Debug logging
+  console.log("User:", user);
+  console.log("User role:", user?.role);
+  console.log("isSeller:", isSeller);
 
   const [errors, setErrors] = useState<
     Partial<Record<keyof ProductFormData, string>>
@@ -1276,7 +1284,16 @@ export function CreateProductForm({
             onChange={handleChange}
             placeholder={t("adminProducts.enterBrandName")}
             className={"create-product-input"}
+            disabled={isSeller}
+            readOnly={isSeller}
           />
+          {isSeller && (
+            <p className="seller-info-text">
+              {language === "en"
+                ? "Brand name is automatically set to your store name"
+                : "ბრენდის სახელი ავტომატურად დაყენებულია თქვენი მაღაზიის სახელზე"}
+            </p>
+          )}
           {errors.brand && (
             <p className="create-product-error">{errors.brand}</p>
           )}
@@ -1408,21 +1425,30 @@ export function CreateProductForm({
                 />
               </div>
             )}
-            <input
-              id="brandLogo"
-              name="brandLogo"
-              type="file"
-              accept="image/*"
-              onChange={(e) => {
-                if (e.target.files?.[0]) {
-                  setFormData((prev) => ({
-                    ...prev,
-                    brandLogo: e.target.files?.[0],
-                  }));
-                }
-              }}
-              className="create-product-file"
-            />
+            {!isSeller && (
+              <input
+                id="brandLogo"
+                name="brandLogo"
+                type="file"
+                accept="image/*"
+                onChange={(e) => {
+                  if (e.target.files?.[0]) {
+                    setFormData((prev) => ({
+                      ...prev,
+                      brandLogo: e.target.files?.[0],
+                    }));
+                  }
+                }}
+                className="create-product-file"
+              />
+            )}
+            {isSeller && (
+              <p className="seller-info-text">
+                {language === "en"
+                  ? "Brand logo is automatically set to your store logo. To change it, update your profile."
+                  : "ბრენდის ლოგო ავტომატურად დაყენებულია თქვენი მაღაზიის ლოგოზე. შესაცვლელად განაახლეთ თქვენი პროფილი."}
+              </p>
+            )}
           </div>
           {errors.brandLogo && (
             <p className="create-product-error">{errors.brandLogo}</p>
