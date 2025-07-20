@@ -131,7 +131,7 @@ const [selectedBrand, setSelectedBrand] = useState<string>(initialBrand);
       subCategory: subCategoryParam,
       brand: decodedBrandParam,
     });
-  }, []);
+  }, [searchParams]);
 
   useEffect(() => {
     if (!initializedRef.current) return;
