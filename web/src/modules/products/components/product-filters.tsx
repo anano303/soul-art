@@ -172,9 +172,12 @@ export function ProductFilters({
                 .filter(Boolean)
             ),
           ];
+          console.log("Fallback brands from products:", brands);
           return brands;
         }
-        return response.json();
+        const brands = await response.json();
+        console.log("Fetched brands from API:", brands);
+        return brands;
       } catch (err) {
         console.error("Failed to fetch brands:", err);
         return [];
@@ -263,17 +266,35 @@ export function ProductFilters({
     return ageGroupName;
   };
 
-  // Filter brands based on search term
+  // Filter brands based on search term with enhanced matching
   const getFilteredBrands = (): string[] => {
+    console.log(
+      "getFilteredBrands called with availableBrands:",
+      availableBrands,
+      "searchTerm:",
+      brandSearchTerm
+    );
     if (!brandSearchTerm.trim()) {
       return availableBrands;
     }
     const searchTerm = brandSearchTerm.toLowerCase().trim();
-    return availableBrands.filter(
-      (brand) =>
-        brand.toLowerCase().includes(searchTerm) ||
-        brand.toLowerCase().startsWith(searchTerm)
-    );
+    const filtered = availableBrands.filter((brand) => {
+      const brandLower = brand.toLowerCase();
+      return (
+        brandLower.includes(searchTerm) ||
+        brandLower.startsWith(searchTerm) ||
+        // Handle Georgian special characters and spaces
+        brandLower
+          .replace(/\s+/g, "")
+          .includes(searchTerm.replace(/\s+/g, "")) ||
+        // Also search by removing common Georgian prefixes/suffixes
+        brandLower
+          .replace(/^და\s+|ების$|ის$|\s+/g, "")
+          .includes(searchTerm.replace(/^და\s+|ების$|ის$|\s+/g, ""))
+      );
+    });
+    console.log("Filtered brands result:", filtered);
+    return filtered;
   };
 
   // Handle price range changes with validation
@@ -354,6 +375,12 @@ export function ProductFilters({
 
   // Handle brand selection from dropdown
   const handleBrandSelect = (brand: string) => {
+    console.log(
+      "handleBrandSelect called with:",
+      brand,
+      "current selectedBrand:",
+      selectedBrand
+    );
     onBrandChange(brand === selectedBrand ? "" : brand);
     setBrandSearchTerm("");
     setShowBrandsDropdown(false);
