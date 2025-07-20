@@ -242,6 +242,9 @@ export class ProductsController {
         );
       } else if (productData.brandLogoUrl) {
         brandLogoUrl = productData.brandLogoUrl;
+      } else if (user.role === Role.Seller && user.storeLogoPath) {
+        // Use seller's store logo if no brand logo is provided
+        brandLogoUrl = user.storeLogoPath;
       }
 
       // Parse JSON arrays for attributes if they're strings
@@ -296,6 +299,10 @@ export class ProductsController {
       // Create the product with proper category references
       return this.productsService.create({
         ...otherProductData,
+        // Set brand name to seller's store name if not provided
+        brand:
+          otherProductData.brand ||
+          (user.role === Role.Seller ? user.name : undefined),
         // Keep legacy fields for backward compatibility
         category: otherProductData.category || 'Other',
         // New category system
@@ -365,6 +372,13 @@ export class ProductsController {
         );
       } else if (productData.brandLogoUrl) {
         brandLogoUrl = productData.brandLogoUrl;
+      } else if (
+        user.role === Role.Seller &&
+        user.storeLogoPath &&
+        !productData.brandLogo
+      ) {
+        // Use seller's store logo if no brand logo is provided
+        brandLogoUrl = user.storeLogoPath;
       }
 
       // Parse JSON arrays for attributes if they're strings
@@ -449,6 +463,10 @@ export class ProductsController {
       // Create update data object
       const updateData = {
         ...productDataWithoutUser,
+        // Set brand name to seller's store name if not provided
+        brand:
+          productDataWithoutUser.brand ||
+          (user.role === Role.Seller ? user.name : product.brand),
         mainCategory,
         subCategory,
         images: finalImages,
