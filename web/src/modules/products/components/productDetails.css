@@ -167,7 +167,7 @@ body {
   margin-bottom: 8px;
   color: #012645 !important;
   line-height: 1.2;
-  font-family: "Georgia", serif;
+  font-family: FiraGo, serif;
 }
 
 .rating-container {
@@ -222,7 +222,7 @@ body {
   color: #012645 !important;
   border-bottom: 2px solid rgba(1, 38, 69, 0.15);
   padding-bottom: 10px;
-  font-family: "Georgia", serif;
+  font-family: FiraGo, serif;
 }
 
 .dimensions-details,
@@ -430,7 +430,7 @@ body {
   position: relative;
   overflow: hidden;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  font-family: "Georgia", serif;
+  font-family: FiraGo, serif;
   letter-spacing: 0.5px;
 }
 

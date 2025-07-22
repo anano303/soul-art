@@ -112,7 +112,7 @@ export function PaymentForm() {
                       htmlFor="BOG"
                       className="border rounded-lg p-4 cursor-pointer hover:border-primary [&:has(:checked)]:border-primary [&:has(:checked)]:bg-gradient-to-r [&:has(:checked)]:from-red-600 [&:has(:checked)]:to-pink-600 [&:has(:checked)]:text-white block transition-all duration-300"
                       style={{
-                        fontFamily: '"ALK Life", "Georgia", serif',
+                        fontFamily: 'FiraGo, serif',
                       }}
                     >
                       <input

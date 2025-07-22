@@ -4,7 +4,7 @@
   max-width: 1200px;
   margin: 0 auto;
   width: 100%;
-  font-family: "ALK Life", "Georgia", serif;
+  font-family: FiraGo, serif;
   background-color: #161616;
   color: #ffffff;
 }
@@ -18,7 +18,7 @@
 }
 
 .categories-manager {
-  font-family: "ALK Life", "Georgia", serif;
+  font-family: FiraGo, serif;
   background-color: #161616;
 }
 
