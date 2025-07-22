@@ -1198,7 +1198,7 @@
 }
 
 .main-category-option:last-child .category-name::after {
- content: "";
+  content: "";
   display: inline-block;
   width: 30px;
   height: 30px;
@@ -1206,6 +1206,5 @@
   background-image: url("/handmade.png");
   background-size: contain;
   background-repeat: no-repeat;
-  transform: rotate(180deg);
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
 }
