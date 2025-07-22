@@ -11,6 +11,7 @@ import { Category, Product } from "@/types";
 import { useLanguage } from "@/hooks/LanguageContext";
 import { useQuery } from "@tanstack/react-query";
 import { fetchWithAuth } from "@/lib/fetch-with-auth";
+import Image from "next/image";
 // import { Shirt, ShoppingBag, Footprints } from "lucide-react";
 
 interface CategoryProducts {
@@ -262,11 +263,15 @@ const HomePageShop = () => {
                         categoryData.category === "Handmades" ||
                         categoryData.category === "ხელნაკეთი" ||
                         categoryData.category === "Handmade") && (
-                        <span className="category-emoji">🧵</span>
+                        <span className="category-emoji">
+                          <Image src="/handmade.png" alt="Handmade" width={30} height={30} />
+                        </span>
                       )}
                       {(categoryData.category === "ნახატები" ||
                         categoryData.category === "Paintings") && (
-                        <span className="category-emoji">🎨</span>
+                        <span className="category-emoji">
+                          <Image src="/loading.png" alt="Paintings" width={30} height={30} />
+                        </span>
                       )}
                     </h2>
 
