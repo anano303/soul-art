@@ -1082,6 +1082,9 @@
 .main-category-option:first-child .category-name {
   color: white;
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .main-category-option:first-child::before {
@@ -1123,6 +1126,9 @@
 .main-category-option:last-child .category-name {
   color: white;
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .main-category-option:last-child::before {
@@ -1162,10 +1168,10 @@
 @keyframes selectedPulse {
   0%,
   100% {
-    transform: translateY(-5px) scale(1.05);
+    transform: translateY(0px) scale(1.05);
   }
   50% {
-    transform: translateY(-8px) scale(1.08);
+    transform: translateY(-2px) scale(1.08);
   }
 }
 
@@ -1179,15 +1185,27 @@
 
 /* ემოჯიები */
 .main-category-option:first-child .category-name::after {
-  content: " 🎨";
-  font-size: 1.3em;
+  content: "";
+  display: inline-block;
+  width: 30px;
+  height: 30px;
   margin-left: 8px;
+  background-image: url("/loading.png");
+  background-size: contain;
+  background-repeat: no-repeat;
+  transform: rotate(180deg);
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
 }
 
 .main-category-option:last-child .category-name::after {
-  content: " 🧵";
-  font-size: 1.3em;
+ content: "";
+  display: inline-block;
+  width: 30px;
+  height: 30px;
   margin-left: 8px;
+  background-image: url("/handmade.png");
+  background-size: contain;
+  background-repeat: no-repeat;
+  transform: rotate(180deg);
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
 }

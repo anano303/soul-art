@@ -467,7 +467,7 @@
   margin-left: 16px;
   font-size: 1.8em;
   animation: gentleBounce 3s infinite;
-  filter: drop-shadow(3px 3px 6px rgba(0, 0, 0, 0.3));
+  /* filter: drop-shadow(3px 3px 6px rgba(0, 0, 0, 0.3)); */
   transition: all 0.3s ease;
 }
 
@@ -560,7 +560,7 @@
   position: relative;
   color: #012645;
   font-weight: 900;
-  text-shadow: 3px 3px 8px rgba(1, 38, 69, 0.4), 0 0 20px rgba(1, 38, 69, 0.2);
+  /* text-shadow: 3px 3px 8px rgba(1, 38, 69, 0.4), 0 0 20px rgba(1, 38, 69, 0.2); */
 }
 
 @keyframes paintingsTextGradient {
@@ -580,7 +580,7 @@
   background: linear-gradient(90deg, #012645, #01456b, #003055, #2a5a7a);
   background-size: 300% 100%;
   animation: paintingsGradient 6s ease-in-out infinite;
-  box-shadow: 0 0 20px rgba(1, 38, 69, 0.4);
+  /* box-shadow: 0 0 20px rgba(1, 38, 69, 0.4); */
 }
 
 @keyframes paintingsGradient {
@@ -654,16 +654,16 @@
   transform: translateX(15px) scale(1.05);
   filter: drop-shadow(4px 4px 12px rgba(123, 86, 66, 0.5));
   transition: all 0.5s ease;
-  text-shadow: 4px 4px 12px rgba(123, 86, 66, 0.6),
-    0 0 30px rgba(123, 86, 66, 0.4), 0 0 40px rgba(160, 117, 77, 0.3);
+  /* text-shadow: 4px 4px 12px rgba(123, 86, 66, 0.6),
+    0 0 30px rgba(123, 86, 66, 0.4), 0 0 40px rgba(160, 117, 77, 0.3); */
 }
 
 .section-title.category-paintings:hover {
   transform: translateX(15px) scale(1.05);
   filter: drop-shadow(4px 4px 12px rgba(1, 38, 69, 0.5));
   transition: all 0.5s ease;
-  text-shadow: 4px 4px 12px rgba(1, 38, 69, 0.6), 0 0 30px rgba(1, 38, 69, 0.4),
-    0 0 40px rgba(42, 90, 122, 0.3);
+  /* text-shadow: 4px 4px 12px rgba(1, 38, 69, 0.6), 0 0 30px rgba(1, 38, 69, 0.4),
+    0 0 40px rgba(42, 90, 122, 0.3); */
 }
 .section-title {
   font-family: FiraGo;
@@ -728,6 +728,7 @@
   .category-emoji {
     font-size: 1.5em;
     margin-left: 12px;
+    padding-top: 7px;
   }
 
   .section-title::before {
@@ -883,10 +884,18 @@
 /* კატეგორიების მონაცვლეობითი ფერები */
 .product-section:nth-child(odd) .section-title {
   color: #012645; /* ლურჯი - ნახატები */
+  padding-left: 5px;
+  padding-top: 5px;
+  display: flex;
+  align-items: center;
 }
 
 .product-section:nth-child(even) .section-title {
   color: #7b5642; /* ყავისფერი - ხელნაკეთი */
+  padding-left: 5px;
+  padding-top: 5px;
+  display: flex;
+  align-items: center;
 }
 
 .product-section:nth-child(odd) .see-more-btn {
@@ -940,7 +949,7 @@
 
 /* ღილაკების ნაცრისფერი ტექსტი */
 .shop-container .see-more-btn {
-  font-family: "Georgia", serif;
+  font-family: "FiraGo", serif;
   text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
 }
 
@@ -994,8 +1003,11 @@
   box-shadow: 0 6px 20px rgba(123, 86, 66, 0.4);
   animation: brownPulse 2s infinite;
 }
+.section-title {
+  font-size: 24px !important;
+}
 
-@keyframes bluePulse {
+/* @keyframes bluePulse {
   0% {
     box-shadow: 0 6px 20px rgba(1, 38, 69, 0.4);
   }
@@ -1004,9 +1016,9 @@
   }
   100% {
     box-shadow: 0 6px 20px rgba(1, 38, 69, 0.4);
-  }
-}
-
+  } 
+}*/
+/* 
 @keyframes brownPulse {
   0% {
     box-shadow: 0 6px 20px rgba(123, 86, 66, 0.4);
@@ -1017,4 +1029,4 @@
   100% {
     box-shadow: 0 6px 20px rgba(123, 86, 66, 0.4);
   }
-}
+} */
