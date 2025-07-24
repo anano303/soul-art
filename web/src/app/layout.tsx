@@ -23,7 +23,7 @@ export const metadata: Metadata = {
   metadataBase: new URL(
     process.env.NEXT_PUBLIC_CLIENT_URL || "https://Soulart.ge"
   ),
-  title: "Soulart - ხელნაკეთი ნივთების და ნახატების მაღაზია საქართველოში",
+  title: "Soulart - ნახატების და ხელნაკეთი ნივთების პირველი ონლაინ პლატფორმა   საქართველოში",
   description:
     "უნიკალური ხელნაკეთი ნივთები, ნახატები, ხელოვნების ნამუშევრები. ხარისხი, სანდოობა, ფასი. Unique handmade items, paintings, artworks in Georgia",
   keywords: [
@@ -68,12 +68,22 @@ export const metadata: Metadata = {
     "geo.position": "41.7151;44.8271", // თბილისის კოორდინატები
     ICBM: "41.7151, 44.8271",
   },
+  icons: {
+    icon: "/logo.png",
+    shortcut: "/logo.png",
+    apple: "/logo.png",
+    other: [
+      { rel: "icon", url: "/logo.png" },
+      { rel: "apple-touch-icon", url: "/logo.png" },
+      { rel: "mask-icon", url: "/logo.png" },
+    ],
+  },
   openGraph: {
     type: "website",
     locale: "ka_GE",
     url: "https://Soulart.ge/",
     siteName: "Soulart",
-    title: "Soulart - ხელნაკეთი ნივთების და ნახატების მაღაზია საქართველოში",
+    title: "Soulart - ნახატების და ხელნაკეთი ნივთების   პირველი ონლაინ პლატფორმა საქართველოში",
     description:
       "უნიკალური ხელნაკეთი ნივთები, ნახატები, ხელოვნების ნამუშევრები. ხარისხი, სანდოობა, ფასი",
     images: [
@@ -81,13 +91,13 @@ export const metadata: Metadata = {
         url: "/van gog.jpg",
         width: 1200,
         height: 630,
-        alt: "Soulart - ხელნაკეთი ნივთების და ნახატების მაღაზია",
+        alt: "Soulart - ნახატების და ხელნაკეთი ნივთების   პირველი ონლაინ პლატფორმა საქართველოში",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Soulart - ხელნაკეთი ნივთების და ნახატების მაღაზია",
+    title: "Soulart - ნახატების და ხელნაკეთი ნივთების   პირველი ონლაინ პლატფორმა საქართველოში",
     description:
       "ხელნაკეთი ნივთების და ნახატების საუკეთესო არჩევანი საქართველოში",
     images: ["/van gog.jpg"],
@@ -103,11 +113,11 @@ export default function RootLayout({
     <html lang="en">
       <head>
         {/* Favicon links */}
-        <link rel="icon" href="/van gog.jpg" />
-        <link rel="apple-touch-icon" href="/van gog.jpg" />
-        <link rel="shortcut icon" href="/van gog.jpg" />
-        <link rel="mask-icon" href="/van gog.jpg" color="#000000" />
-        <meta name="msapplication-TileImage" content="/van gog.jpg" />
+        <link rel="icon" href="/logo.png" />
+        <link rel="apple-touch-icon" href="/logo.png" />
+        <link rel="shortcut icon" href="/logo.png" />
+        <link rel="mask-icon" href="/logo.png" color="#000000" />
+        <meta name="msapplication-TileImage" content="/logo.png" />
         {/* Facebook SDK - Fix appId to lowercase appid */}
         <script
           async
