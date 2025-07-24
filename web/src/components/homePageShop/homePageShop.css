@@ -283,6 +283,7 @@
 .section-title:hover::before {
   width: 250px;
   height: 8px;
+  margin-left: 15px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
 }
 /* 
@@ -470,6 +471,7 @@
   animation: gentleBounce 3s infinite;
   /* filter: drop-shadow(3px 3px 6px rgba(0, 0, 0, 0.3)); */
   transition: all 0.3s ease;
+  padding-top: 8px;
 }
 
 @keyframes gentleBounce {
@@ -652,7 +654,7 @@
 
 /* ღია ეფექტები hover-ზე */
 .section-title.category-handmade:hover {
-  transform: translateX(15px) scale(1.05);
+  transform: translateX(50px) scale(1.05);
   filter: drop-shadow(4px 4px 12px rgba(123, 86, 66, 0.5));
   transition: all 0.5s ease;
   /* text-shadow: 4px 4px 12px rgba(123, 86, 66, 0.6),
@@ -660,7 +662,7 @@
 }
 
 .section-title.category-paintings:hover {
-  transform: translateX(15px) scale(1.05);
+  transform: translateX(50px) scale(1.05);
   filter: drop-shadow(4px 4px 12px rgba(1, 38, 69, 0.5));
   transition: all 0.5s ease;
   /* text-shadow: 4px 4px 12px rgba(1, 38, 69, 0.6), 0 0 30px rgba(1, 38, 69, 0.4),
