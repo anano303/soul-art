@@ -68,7 +68,6 @@ export function OrdersList() {
 
   const orders = data?.items || [];
   const totalPages = data?.pages || 0;
-  console.log("Rendered orders:", orders);
 
   return (
     <div className="orders-container">
@@ -111,39 +110,64 @@ export function OrdersList() {
                 <tr key={order._id}>
                   <td>#{order._id}</td>
                   <td>
-                    {order.user && order.user.email
-                      ? order.user.email
-                      : "Unknown"}
+                    {order.user ? (
+                      <div className="user-info">
+                        <div className="user-name">
+                          {order.user.name || "Unknown User"}
+                        </div>
+                        {order.user.phoneNumber && (
+                          <div className="user-phone">
+                            📞 {order.user.phoneNumber}
+                          </div>
+                        )}
+                        <div className="user-email">
+                          📧 {order.user.email || "No email"}
+                        </div>
+                      </div>
+                    ) : (
+                      "Unknown"
+                    )}
                   </td>
                   <td>
-                    {/* Show first product's seller info if available */}
+                    {/* Show seller info from first product */}
                     {order.orderItems && order.orderItems.length > 0 ? (
-                      order.orderItems.map((item, index) => {
-                        // Get brand info from product or show multiple sellers indicator
-                        const productData = item.productId;
+                      (() => {
+                        const firstProductData = order.orderItems[0].productId;
                         if (
-                          typeof productData === "object" &&
-                          productData?.brand
+                          typeof firstProductData === "object" &&
+                          firstProductData?.user
                         ) {
+                          const seller = firstProductData.user;
                           return (
-                            <div key={index} className="seller-badge">
-                              <Store className="icon" size={14} />
-                              {productData.brand}
+                            <div className="seller-info">
+                              <div className="seller-name">
+                                <Store className="icon" size={14} />
+                                {seller.storeName ||
+                                  seller.name ||
+                                  "Unknown Seller"}
+                              </div>
+                              {seller.phoneNumber && (
+                                <div className="seller-phone">
+                                  📞 {seller.phoneNumber}
+                                </div>
+                              )}
+                              {firstProductData.brand && (
+                                <div className="seller-brand">
+                                  🏷️ {firstProductData.brand}
+                                </div>
+                              )}
                             </div>
                           );
                         }
-                        return index === 0 ? (
-                          <div
-                            key={`unknown-${index}`}
-                            className="seller-badge unknown"
-                          >
+                        return (
+                          <div className="seller-badge unknown">
                             <Store className="icon" size={14} />
-                            Mix Products
+                            No seller info
                           </div>
-                        ) : null;
-                      })
+                        );
+                      })()
                     ) : (
-                      <span className="text-muted">No seller info</span>
+                      <span className="text-muted">No products</span>
                     )}
                   </td>
                   <td>

@@ -284,3 +284,42 @@
 .balance-zero {
   color: #999;
 }
+
+/* User and Seller Info Styles */
+.user-info,
+.seller-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.875rem;
+}
+
+.user-name,
+.seller-name {
+  font-weight: 600;
+  color: #012645;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.user-phone,
+.seller-phone {
+  color: #666;
+  font-size: 0.8rem;
+}
+
+.user-email {
+  color: #999;
+  font-size: 0.8rem;
+}
+
+.seller-brand {
+  color: #7a5e41;
+  font-size: 0.8rem;
+  font-style: italic;
+}
+
+.seller-info .icon {
+  color: #012645;
+}

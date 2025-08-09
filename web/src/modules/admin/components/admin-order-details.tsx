@@ -279,33 +279,24 @@ export function AdminOrderDetails({ order }: AdminOrderDetailsProps) {
     storeName?: string;
     ownerFirstName?: string;
   }) => {
-    console.log("Getting seller image for:", sellerInfo);
-
     // Priority: profileImage > profileImagePath > storeLogo > storeLogoPath > brandLogo
     if (sellerInfo.profileImage) {
-      console.log("Using profileImage:", sellerInfo.profileImage);
       return getImageSrc(sellerInfo.profileImage);
     }
     if (sellerInfo.profileImagePath) {
-      console.log("Using profileImagePath:", sellerInfo.profileImagePath);
       return getImageSrc(sellerInfo.profileImagePath);
     }
     if (sellerInfo.storeLogo) {
-      console.log("Using storeLogo:", sellerInfo.storeLogo);
       return getImageSrc(sellerInfo.storeLogo);
     }
     if (sellerInfo.storeLogoPath) {
-      console.log("Using storeLogoPath:", sellerInfo.storeLogoPath);
       return getImageSrc(sellerInfo.storeLogoPath);
     }
     if (sellerInfo.brandLogo) {
-      console.log("Using brandLogo:", sellerInfo.brandLogo);
       return getImageSrc(sellerInfo.brandLogo);
     }
-    console.log("No image found for seller");
     return null;
   };
-
   return (
     <div className="admin-order-details">
       <div className="headerOrders">
