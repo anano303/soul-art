@@ -10,7 +10,6 @@
     "prebuild": "rimraf dist",
     "seed": "ts-node -r tsconfig-paths/register src/cli.ts",
     "migrate:balance": "ts-node -r tsconfig-paths/register src/scripts/migrate-total-withdrawn.ts",
-    "check:withdrawal-types": "ts-node -r tsconfig-paths/register src/scripts/check-withdrawal-types.ts",
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "node dist/main.js",
