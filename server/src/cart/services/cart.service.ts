@@ -225,9 +225,9 @@ export class CartService {
   }
 
   validateShippingDetails(shippingDetails: ShippingDetails): ShippingDetails {
-    const { address, city, postalCode, country } = shippingDetails;
+    const { address, city, postalCode, country, phoneNumber } = shippingDetails;
 
-    if (!address || !city || !postalCode || !country) {
+    if (!address || !city || !postalCode || !country || !phoneNumber) {
       throw new BadRequestException('All shipping fields are required');
     }
     return shippingDetails;

@@ -24,6 +24,10 @@ export function AdminOrderDetails({ order }: AdminOrderDetailsProps) {
   const router = useRouter();
   const { language, t } = useLanguage();
 
+  // Debug: Log order shipping details
+  console.log("Order shipping details:", order.shippingDetails);
+  console.log("Order user phone:", order.user.phoneNumber);
+
   // Check user role to determine what information to show
   const userData = getUserData();
   const isAdmin = userData?.role === Role.Admin;
@@ -95,18 +99,6 @@ export function AdminOrderDetails({ order }: AdminOrderDetailsProps) {
     return language === "en" && item.nameEn ? item.nameEn : item.name;
   };
 
-  // Debug the full order object to see what's available
-  console.log("Full order object:", order);
-  console.log(
-    "All order items with product details:",
-    order.orderItems.map((item) => ({
-      productId: item.productId,
-      product: item.product,
-      brand: item.product?.brand,
-      user: item.product?.user,
-    }))
-  );
-
   // Group order items by delivery type with fixed logic for string comparison
   const sellerDeliveryItems = order.orderItems.filter(
     (item) => item.product && String(item.product.deliveryType) === "SELLER"
@@ -151,6 +143,7 @@ export function AdminOrderDetails({ order }: AdminOrderDetailsProps) {
               }
 
               const data = await response.json();
+              console.log(`Seller data for product ${productId}:`, data);
               return { productId, seller: data };
             } catch (error) {
               console.error(
@@ -188,10 +181,129 @@ export function AdminOrderDetails({ order }: AdminOrderDetailsProps) {
     }
   };
 
+  // Helper function to get color from name for avatar
+  const getColorFromName = (name: string): string => {
+    const colors = [
+      "#FF6B6B",
+      "#4ECDC4",
+      "#45B7D1",
+      "#9370DB",
+      "#48A36D",
+      "#F9A03F",
+      "#D46A6A",
+      "#4A90E2",
+      "#9C27B0",
+      "#673AB7",
+      "#3F51B5",
+      "#2196F3",
+      "#009688",
+      "#4CAF50",
+      "#8BC34A",
+      "#CDDC39",
+    ];
+
+    if (!name) return colors[0];
+
+    let sum = 0;
+    for (let i = 0; i < name.length; i++) {
+      sum += name.charCodeAt(i);
+    }
+
+    return colors[sum % colors.length];
+  };
+
+  // Avatar component for fallback when no image is available
+  const AvatarInitial = ({
+    name,
+    size = 80,
+  }: {
+    name: string;
+    size?: number;
+  }) => {
+    const initial = name ? name.charAt(0).toUpperCase() : "?";
+    const bgColor = getColorFromName(name);
+
+    return (
+      <div
+        className="avatar-initial"
+        style={{
+          backgroundColor: bgColor,
+          width: `${size}px`,
+          height: `${size}px`,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          borderRadius: "50%",
+          fontSize: `${size / 3}px`,
+          fontWeight: "bold",
+          color: "white",
+          textTransform: "uppercase",
+          border: "3px solid #012645",
+        }}
+      >
+        {initial}
+      </div>
+    );
+  };
+
   // Helper function to ensure image paths are properly formatted
   const getImageSrc = (imagePath: string) => {
     if (!imagePath) return "";
-    return imagePath.startsWith("http") ? imagePath : `/api/${imagePath}`;
+
+    // If it's a Cloudinary URL, return it directly
+    if (imagePath.includes("cloudinary.com")) {
+      return imagePath;
+    }
+
+    // If already a full URL, return it directly
+    if (imagePath.startsWith("http")) {
+      return imagePath;
+    }
+
+    // For product images that use API endpoints
+    if (!imagePath.startsWith("/api/")) {
+      return `/api/${imagePath}`;
+    }
+
+    return imagePath;
+  };
+
+  // Helper function to get seller image with fallback logic
+  const getSellerImage = (sellerInfo: {
+    storeLogoPath?: string;
+    profileImagePath?: string;
+    storeLogo?: string;
+    profileImage?: string;
+    brandLogo?: string;
+    name?: string;
+    storeName?: string;
+    ownerFirstName?: string;
+  }) => {
+    console.log("Getting seller image for:", sellerInfo);
+
+    // Priority: profileImage > profileImagePath > storeLogo > storeLogoPath > brandLogo
+    if (sellerInfo.profileImage) {
+      console.log("Using profileImage:", sellerInfo.profileImage);
+      return getImageSrc(sellerInfo.profileImage);
+    }
+    if (sellerInfo.profileImagePath) {
+      console.log("Using profileImagePath:", sellerInfo.profileImagePath);
+      return getImageSrc(sellerInfo.profileImagePath);
+    }
+    if (sellerInfo.storeLogo) {
+      console.log("Using storeLogo:", sellerInfo.storeLogo);
+      return getImageSrc(sellerInfo.storeLogo);
+    }
+    if (sellerInfo.storeLogoPath) {
+      console.log("Using storeLogoPath:", sellerInfo.storeLogoPath);
+      return getImageSrc(sellerInfo.storeLogoPath);
+    }
+    if (sellerInfo.brandLogo) {
+      console.log("Using brandLogo:", sellerInfo.brandLogo);
+      return getImageSrc(sellerInfo.brandLogo);
+    }
+    console.log("No image found for seller");
+    return null;
   };
 
   return (
@@ -242,6 +354,13 @@ export function AdminOrderDetails({ order }: AdminOrderDetailsProps) {
                 {order.user.phoneNumber}
               </p>
             )}
+            {order.shippingDetails.phoneNumber &&
+              order.shippingDetails.phoneNumber !== order.user.phoneNumber && (
+                <p>
+                  <strong>{t("adminOrders.shippingPhone")}:</strong>{" "}
+                  {order.shippingDetails.phoneNumber}
+                </p>
+              )}
             <p>
               <strong>{t("adminOrders.address")}:</strong>{" "}
               {order.shippingDetails.address}, {order.shippingDetails.city},{" "}
@@ -368,47 +487,45 @@ export function AdminOrderDetails({ order }: AdminOrderDetailsProps) {
                                 </p>
                                 {/* Show admin profile image or fallback */}
                                 <div className="seller-profile-image">
-                                  {productSellerInfo.profileImagePath ? (
-                                    <Image
-                                      src={getImageSrc(
-                                        productSellerInfo.profileImagePath
-                                      )}
-                                      alt={productSellerInfo.name}
-                                      width={80}
-                                      height={80}
-                                      className="profile-avatar"
-                                      onError={(e) => {
-                                        const target =
-                                          e.target as HTMLImageElement;
-                                        target.style.display = "none";
-                                        const fallback =
-                                          target.parentElement?.querySelector(
-                                            ".fallback-icon"
-                                          ) as HTMLElement;
-                                        if (fallback)
-                                          fallback.style.display = "flex";
-                                      }}
-                                    />
-                                  ) : null}
+                                  {(() => {
+                                    const imageUrl =
+                                      getSellerImage(productSellerInfo);
+                                    if (imageUrl) {
+                                      return (
+                                        <Image
+                                          src={imageUrl}
+                                          alt={productSellerInfo.name}
+                                          width={80}
+                                          height={80}
+                                          className="profile-avatar"
+                                          onError={(e) => {
+                                            const target =
+                                              e.target as HTMLImageElement;
+                                            target.style.display = "none";
+                                            const fallback =
+                                              target.parentElement?.querySelector(
+                                                ".avatar-fallback"
+                                              ) as HTMLElement;
+                                            if (fallback)
+                                              fallback.style.display = "flex";
+                                          }}
+                                        />
+                                      );
+                                    }
+                                    return null;
+                                  })()}
                                   <div
-                                    className="fallback-icon"
+                                    className="avatar-fallback"
                                     style={{
-                                      display:
-                                        productSellerInfo.profileImagePath
-                                          ? "none"
-                                          : "flex",
-                                      width: "80px",
-                                      height: "80px",
-                                      backgroundColor: "#012645",
-                                      borderRadius: "50%",
-                                      alignItems: "center",
-                                      justifyContent: "center",
-                                      color: "white",
-                                      fontSize: "24px",
-                                      fontWeight: "bold",
+                                      display: getSellerImage(productSellerInfo)
+                                        ? "none"
+                                        : "flex",
                                     }}
                                   >
-                                    A
+                                    <AvatarInitial
+                                      name={productSellerInfo.name || "Admin"}
+                                      size={80}
+                                    />
                                   </div>
                                 </div>
                                 <p>
@@ -436,63 +553,60 @@ export function AdminOrderDetails({ order }: AdminOrderDetailsProps) {
                             {productSellerInfo.role === "seller" && (
                               <>
                                 {/* Show store logo if available, otherwise profile image */}
-                                {(productSellerInfo.storeLogoPath ||
-                                  productSellerInfo.profileImagePath) && (
-                                  <div className="seller-profile-image">
-                                    <Image
-                                      src={getImageSrc(
-                                        productSellerInfo.storeLogoPath ||
-                                          productSellerInfo.profileImagePath
-                                      )}
-                                      alt={
-                                        productSellerInfo.storeName ||
-                                        productSellerInfo.name
-                                      }
-                                      width={80}
-                                      height={80}
-                                      className={
-                                        productSellerInfo.storeLogoPath
-                                          ? "store-logo"
-                                          : "profile-avatar"
-                                      }
-                                      onError={(e) => {
-                                        // Fallback to default brand icon if image fails to load
-                                        const target =
-                                          e.target as HTMLImageElement;
-                                        target.style.display = "none";
-                                        const fallback =
-                                          target.parentElement?.querySelector(
-                                            ".fallback-icon"
-                                          ) as HTMLElement;
-                                        if (fallback)
-                                          fallback.style.display = "flex";
-                                      }}
-                                    />
-                                    <div
-                                      className="fallback-icon"
-                                      style={{
-                                        display: "none",
-                                        width: "80px",
-                                        height: "80px",
-                                        backgroundColor: "#012645",
-                                        borderRadius: "50%",
-                                        alignItems: "center",
-                                        justifyContent: "center",
-                                        color: "white",
-                                        fontSize: "24px",
-                                        fontWeight: "bold",
-                                      }}
-                                    >
-                                      {(
+                                <div className="seller-profile-image">
+                                  {(() => {
+                                    const imageUrl =
+                                      getSellerImage(productSellerInfo);
+                                    if (imageUrl) {
+                                      return (
+                                        <Image
+                                          src={imageUrl}
+                                          alt={
+                                            productSellerInfo.storeName ||
+                                            productSellerInfo.name
+                                          }
+                                          width={80}
+                                          height={80}
+                                          className={
+                                            productSellerInfo.storeLogoPath
+                                              ? "store-logo"
+                                              : "profile-avatar"
+                                          }
+                                          onError={(e) => {
+                                            const target =
+                                              e.target as HTMLImageElement;
+                                            target.style.display = "none";
+                                            const fallback =
+                                              target.parentElement?.querySelector(
+                                                ".avatar-fallback"
+                                              ) as HTMLElement;
+                                            if (fallback)
+                                              fallback.style.display = "flex";
+                                          }}
+                                        />
+                                      );
+                                    }
+                                    return null;
+                                  })()}
+                                  <div
+                                    className="avatar-fallback"
+                                    style={{
+                                      display: getSellerImage(productSellerInfo)
+                                        ? "none"
+                                        : "flex",
+                                    }}
+                                  >
+                                    <AvatarInitial
+                                      name={
                                         productSellerInfo.storeName ||
                                         productSellerInfo.ownerFirstName ||
-                                        "S"
-                                      )
-                                        .charAt(0)
-                                        .toUpperCase()}
-                                    </div>
+                                        productSellerInfo.name ||
+                                        "Seller"
+                                      }
+                                      size={80}
+                                    />
                                   </div>
-                                )}
+                                </div>
                                 {productSellerInfo.storeName && (
                                   <p>
                                     <strong>
@@ -551,49 +665,47 @@ export function AdminOrderDetails({ order }: AdminOrderDetailsProps) {
                               productSellerInfo.role !== "seller" && (
                                 <>
                                   <div className="seller-profile-image">
-                                    {productSellerInfo.profileImagePath ? (
-                                      <Image
-                                        src={getImageSrc(
-                                          productSellerInfo.profileImagePath
-                                        )}
-                                        alt={productSellerInfo.name}
-                                        width={80}
-                                        height={80}
-                                        className="profile-avatar"
-                                        onError={(e) => {
-                                          const target =
-                                            e.target as HTMLImageElement;
-                                          target.style.display = "none";
-                                          const fallback =
-                                            target.parentElement?.querySelector(
-                                              ".fallback-icon"
-                                            ) as HTMLElement;
-                                          if (fallback)
-                                            fallback.style.display = "flex";
-                                        }}
-                                      />
-                                    ) : null}
+                                    {(() => {
+                                      const imageUrl =
+                                        getSellerImage(productSellerInfo);
+                                      if (imageUrl) {
+                                        return (
+                                          <Image
+                                            src={imageUrl}
+                                            alt={productSellerInfo.name}
+                                            width={80}
+                                            height={80}
+                                            className="profile-avatar"
+                                            onError={(e) => {
+                                              const target =
+                                                e.target as HTMLImageElement;
+                                              target.style.display = "none";
+                                              const fallback =
+                                                target.parentElement?.querySelector(
+                                                  ".avatar-fallback"
+                                                ) as HTMLElement;
+                                              if (fallback)
+                                                fallback.style.display = "flex";
+                                            }}
+                                          />
+                                        );
+                                      }
+                                      return null;
+                                    })()}
                                     <div
-                                      className="fallback-icon"
+                                      className="avatar-fallback"
                                       style={{
-                                        display:
-                                          productSellerInfo.profileImagePath
-                                            ? "none"
-                                            : "flex",
-                                        width: "80px",
-                                        height: "80px",
-                                        backgroundColor: "#012645",
-                                        borderRadius: "50%",
-                                        alignItems: "center",
-                                        justifyContent: "center",
-                                        color: "white",
-                                        fontSize: "24px",
-                                        fontWeight: "bold",
+                                        display: getSellerImage(
+                                          productSellerInfo
+                                        )
+                                          ? "none"
+                                          : "flex",
                                       }}
                                     >
-                                      {(productSellerInfo.name || "U")
-                                        .charAt(0)
-                                        .toUpperCase()}
+                                      <AvatarInitial
+                                        name={productSellerInfo.name || "User"}
+                                        size={80}
+                                      />
                                     </div>
                                   </div>
                                   <p>

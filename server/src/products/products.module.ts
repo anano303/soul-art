@@ -6,6 +6,7 @@ import { Product, ProductSchema } from './schemas/product.schema';
 import { AppService } from '@/app/services/app.service';
 import { CloudinaryModule } from '@/cloudinary/cloudinary.module';
 import { AiModule } from '@/ai/ai.module';
+import { UsersModule } from '@/users/users.module';
 import { ProductExpertAgent } from '@/ai/agents/product-expert.agent';
 import { Order } from '@/orders/schemas/order.schema';
 import { OrderSchema } from '@/orders/schemas/order.schema';
@@ -91,6 +92,7 @@ export class IndexCleanupService implements OnModuleInit {
     ]),
     CloudinaryModule,
     forwardRef(() => AiModule),
+    forwardRef(() => UsersModule),
   ],
   providers: [ProductsService, AppService, IndexCleanupService],
   controllers: [ProductsController],

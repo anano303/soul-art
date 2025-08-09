@@ -133,7 +133,10 @@ export function OrdersList() {
                           );
                         }
                         return index === 0 ? (
-                          <div className="seller-badge unknown">
+                          <div
+                            key={`unknown-${index}`}
+                            className="seller-badge unknown"
+                          >
                             <Store className="icon" size={14} />
                             Mix Products
                           </div>
@@ -171,12 +174,15 @@ export function OrdersList() {
                               item.productId.deliveryType &&
                               String(item.productId.deliveryType) === "SELLER"
                           )
-                          .map((item) =>
+                          .map((item, itemIndex) =>
                             item.productId &&
                             typeof item.productId === "object" &&
                             item.productId.minDeliveryDays &&
                             item.productId.maxDeliveryDays ? (
-                              <span className="delivery-time" key={item._id}>
+                              <span
+                                className="delivery-time"
+                                key={`${item._id || itemIndex}-delivery`}
+                              >
                                 {item.productId.minDeliveryDays}-
                                 {item.productId.maxDeliveryDays} დღე
                               </span>
