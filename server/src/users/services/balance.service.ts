@@ -215,7 +215,7 @@ export class BalanceService {
       `Processing withdrawal request for seller: ${sellerId}, amount: ${amount}`,
     );
 
-    // მინიმუმ თანხის შემოწმება (1 ლარი)
+    // მინიმუმ თანხის შემოწმება (0.1 ლარი ტესტისთვის)
     if (amount < 1) {
       throw new Error('მინიმალური გასატანი თანხაა 1 ლარი');
     }
@@ -235,15 +235,6 @@ export class BalanceService {
 
     // სელერის ანგარიშის ნომრის მიღება
     const seller = await this.userModel.findById(sellerId);
-    this.logger.log(`Seller found: ${seller ? 'Yes' : 'No'}`);
-    if (seller) {
-      this.logger.log(
-        `Seller account number: ${seller.accountNumber ? 'Exists' : 'Missing'}`,
-      );
-      if (seller.accountNumber) {
-        this.logger.log(`Account number value: ${seller.accountNumber}`);
-      }
-    }
 
     if (!seller || !seller.accountNumber) {
       throw new Error(
@@ -254,12 +245,10 @@ export class BalanceService {
     // ანგარიშის ნომრის ვალიდაცია
     const formattedAccountNumber =
       this.bankIntegrationService.formatAccountNumber(seller.accountNumber);
-    this.logger.log(`Formatted account number: ${formattedAccountNumber}`);
 
     const isValid = this.bankIntegrationService.validateAccountNumber(
       formattedAccountNumber,
     );
-    this.logger.log(`Account validation result: ${isValid}`);
 
     if (!isValid) {
       throw new Error('არასწორი ბანკის ანგარიშის ფორმატი');
