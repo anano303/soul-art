@@ -3,6 +3,7 @@ export interface ShippingDetails {
   city: string;
   postalCode: string;
   country: string;
+  phoneNumber: string;
 }
 
 export interface PaymentResult {

@@ -503,10 +503,19 @@ export class UsersService {
       if (user.profileImagePath.startsWith('http')) {
         profileImage = user.profileImagePath;
       } else {
-        // For backward compatibility with S3 paths
-        profileImage = await this.awsS3Service.getImageByFileId(
-          user.profileImagePath as string,
-        );
+        // All new uploads should be Cloudinary URLs, but for backward compatibility
+        // try to get from S3 first, if that fails, assume it's a legacy local file
+        try {
+          profileImage = await this.awsS3Service.getImageByFileId(
+            user.profileImagePath as string,
+          );
+        } catch (error) {
+          // If S3 fails, it might be a legacy local file
+          this.logger.warn(
+            `Could not get image from S3: ${error.message}. Assuming legacy local file.`,
+          );
+          profileImage = null; // Don't use local files anymore
+        }
       }
     } else if (user.role === Role.Seller && user.storeLogoPath) {
       // If user is a seller and has no profile image but has a store logo,
@@ -514,9 +523,18 @@ export class UsersService {
       if (user.storeLogoPath.startsWith('http')) {
         profileImage = user.storeLogoPath;
       } else {
-        profileImage = await this.awsS3Service.getImageByFileId(
-          user.storeLogoPath as string,
-        );
+        // All new uploads should be Cloudinary URLs, but for backward compatibility
+        try {
+          profileImage = await this.awsS3Service.getImageByFileId(
+            user.storeLogoPath as string,
+          );
+        } catch (error) {
+          // If S3 fails, it might be a legacy local file
+          this.logger.warn(
+            `Could not get store logo from S3: ${error.message}. Assuming legacy local file.`,
+          );
+          profileImage = null; // Don't use local files anymore
+        }
       }
     }
 
@@ -527,10 +545,18 @@ export class UsersService {
       if (user.storeLogoPath.startsWith('http')) {
         storeLogo = user.storeLogoPath;
       } else {
-        // For backward compatibility with S3 paths
-        storeLogo = await this.awsS3Service.getImageByFileId(
-          user.storeLogoPath as string,
-        );
+        // All new uploads should be Cloudinary URLs, but for backward compatibility
+        try {
+          storeLogo = await this.awsS3Service.getImageByFileId(
+            user.storeLogoPath as string,
+          );
+        } catch (error) {
+          // If S3 fails, it might be a legacy local file
+          this.logger.warn(
+            `Could not get store logo from S3: ${error.message}. Assuming legacy local file.`,
+          );
+          storeLogo = null; // Don't use local files anymore
+        }
       }
     }
 

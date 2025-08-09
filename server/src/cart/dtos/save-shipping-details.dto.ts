@@ -12,4 +12,7 @@ export class SaveShippingDetailsDto {
 
   @IsString()
   country!: string;
+
+  @IsString()
+  phoneNumber!: string;
 }

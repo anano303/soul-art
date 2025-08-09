@@ -210,6 +210,27 @@ export const TRANSLATIONS: Translations = {
       outOfStock: "არ არის მარაგში",
     },
 
+    // Checkout
+    checkout: {
+      shippingAddress: "მიწოდების მისამართი",
+      enterShippingDetails: "შეიყვანეთ მიწოდების დეტალები",
+      streetAddress: "ქუჩისა და სახლის მისამართი",
+      addressRequired: "მისამართი აუცილებელია",
+      addressPlaceholder: "მაგ: ვაჟა-ფშაველას 25",
+      city: "ქალაქი",
+      cityRequired: "ქალაქი აუცილებელია",
+      cityPlaceholder: "მაგ: თბილისი",
+      postalCode: "საფოსტო კოდი",
+      postalCodeRequired: "საფოსტო კოდი აუცილებელია",
+      postalCodePlaceholder: "მაგ: 0102",
+      country: "ქვეყანა",
+      countryRequired: "ქვეყნის არჩევა აუცილებელია",
+      selectCountry: "აირჩიეთ ქვეყანა",
+      continueToPayment: "გადახდის გვერდზე გადასვლა",
+      errorSavingShipping: "მიწოდების დეტალების შენახვა ვერ მოხერხდა",
+      tryAgain: "გთხოვთ, სცადოთ მოგვიანებით",
+    },
+
     // About page
     about: {
       title: "ჩვენს შესახებ",
@@ -600,6 +621,7 @@ export const TRANSLATIONS: Translations = {
       firstName: "სახელი",
       lastName: "გვარი",
       phone: "ტელეფონის ნომერი",
+      shippingPhone: "მიწოდების ტელეფონი",
       accountNumber: "საბანკო ანგარიშის ნომერი",
       sellerInfo: "გამყიდველის ინფორმაცია",
       address: "მისამართი",
@@ -839,6 +861,27 @@ export const TRANSLATIONS: Translations = {
       addToCart: "Add to Cart",
       adding: "Adding...",
       outOfStock: "Out of Stock",
+    },
+
+    // Checkout
+    checkout: {
+      shippingAddress: "Shipping Address",
+      enterShippingDetails: "Enter your shipping details",
+      streetAddress: "Street Address",
+      addressRequired: "Address is required",
+      addressPlaceholder: "e.g: 123 Main St",
+      city: "City",
+      cityRequired: "City is required",
+      cityPlaceholder: "e.g: New York",
+      postalCode: "Postal Code",
+      postalCodeRequired: "Postal code is required",
+      postalCodePlaceholder: "e.g: 10001",
+      country: "Country",
+      countryRequired: "Country is required",
+      selectCountry: "Select a country",
+      continueToPayment: "Continue to Payment",
+      errorSavingShipping: "Error saving shipping details",
+      tryAgain: "Please try again.",
     },
 
     // About page
@@ -1206,6 +1249,7 @@ export const TRANSLATIONS: Translations = {
       firstName: "First Name",
       lastName: "Last Name",
       phone: "Phone Number",
+      shippingPhone: "Shipping Phone",
       accountNumber: "Bank Account Number",
       sellerInfo: "Seller Information",
       address: "Address",

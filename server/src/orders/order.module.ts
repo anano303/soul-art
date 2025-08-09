@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { OrdersController } from './controller/orders.controller';
 import { Order, OrderSchema } from './schemas/order.schema';
@@ -20,8 +20,8 @@ import { UsersModule } from '@/users/users.module';
         schema: UserSchema,
       },
     ]),
-    ProductsModule, // This will make the Product model available in the OrdersService
-    UsersModule, // This will make BalanceService available
+    forwardRef(() => ProductsModule), // This will make the Product model available in the OrdersService
+    forwardRef(() => UsersModule), // This will make BalanceService available
   ],
   controllers: [OrdersController],
   providers: [OrdersService, StockReservationService],

@@ -53,6 +53,7 @@ export class Order {
       city: { required: true, type: String },
       postalCode: { required: true, type: String },
       country: { required: true, type: String },
+      phoneNumber: { required: false, type: String },
     },
   })
   shippingDetails!: ShippingDetails;

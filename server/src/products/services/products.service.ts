@@ -2,10 +2,13 @@ import {
   BadRequestException,
   Injectable,
   NotFoundException,
+  Inject,
+  forwardRef,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { UserDocument } from 'src/users/schemas/user.schema';
+import { UsersService } from 'src/users/services/users.service';
 import {
   Product,
   ProductDocument,
@@ -52,6 +55,8 @@ export class ProductsService {
   constructor(
     @InjectModel(Product.name) private productModel: Model<ProductDocument>,
     @InjectModel(Order.name) private orderModel: Model<Order>,
+    @Inject(forwardRef(() => UsersService))
+    private usersService: UsersService,
   ) {}
 
   async findTopRated(): Promise<ProductDocument[]> {
@@ -890,8 +895,29 @@ export class ProductsService {
       );
     }
 
-    // Return seller information directly
-    return product.user;
+    // Get full user data with properly formatted image URLs using UsersService
+    try {
+      const fullUserData = await this.usersService.getProfileData(
+        (product.user as any)._id.toString(),
+      );
+
+      // Include brand information from the product
+      return {
+        ...fullUserData,
+        brand: product.brand,
+        brandLogo: product.brandLogo,
+      };
+    } catch (error) {
+      // If getProfileData fails, return basic user info without images
+      const sellerInfo = (product.user as any).toObject();
+      return {
+        ...sellerInfo,
+        profileImage: null,
+        storeLogo: null,
+        brand: product.brand,
+        brandLogo: product.brandLogo,
+      };
+    }
   }
 
   /**
