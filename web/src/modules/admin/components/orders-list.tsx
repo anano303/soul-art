@@ -4,11 +4,12 @@ import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { fetchWithAuth } from "@/lib/fetch-with-auth";
 import Link from "next/link";
-import { CheckCircle2, Store, Truck, XCircle } from "lucide-react";
+import { CheckCircle2, Store, Truck, XCircle, Wallet } from "lucide-react";
 import { Order } from "@/types/order";
 import "./ordersList.css";
 import HeartLoading from "@/components/HeartLoading/HeartLoading";
 import { getUserData } from "@/lib/auth";
+import { getSellerBalance } from "@/modules/balance/api/balance-api";
 
 export function OrdersList() {
   const [page, setPage] = useState(1);
@@ -22,6 +23,13 @@ export function OrdersList() {
       setUserId(userData._id);
     }
   }, []);
+
+  // Fetch seller balance if user is a seller
+  const { data: balance } = useQuery({
+    queryKey: ["seller-balance"],
+    queryFn: getSellerBalance,
+    enabled: userRole === "seller",
+  });
 
   const { data, isLoading } = useQuery({
     queryKey: ["orders", page, userRole, userId],
@@ -65,7 +73,20 @@ export function OrdersList() {
   return (
     <div className="orders-container">
       <div className="orders-header">
-        <h1 className="orders-title">Orders</h1>
+        <div className="orders-header-left">
+          <h1 className="orders-title">Orders</h1>
+        </div>
+        {userRole === "seller" && (
+          <div className="orders-header-right">
+            <Link href="/profile/balance" className="balance-summary-link">
+              <Wallet className="balance-icon" />
+              <span>
+                შენი ჯამური ბალანსია:{" "}
+                {balance?.totalBalance?.toFixed(2) || "0.00"} ₾
+              </span>
+            </Link>
+          </div>
+        )}
       </div>
       {!orders || orders.length === 0 ? (
         <p>No orders found</p>
@@ -76,6 +97,7 @@ export function OrdersList() {
               <tr>
                 <th>ID</th>
                 <th>USER</th>
+                <th>SELLER</th>
                 <th>DATE</th>
                 <th>TOTAL</th>
                 <th>DELIVERY TYPE</th>
@@ -92,6 +114,34 @@ export function OrdersList() {
                     {order.user && order.user.email
                       ? order.user.email
                       : "Unknown"}
+                  </td>
+                  <td>
+                    {/* Show first product's seller info if available */}
+                    {order.orderItems && order.orderItems.length > 0 ? (
+                      order.orderItems.map((item, index) => {
+                        // Get brand info from product or show multiple sellers indicator
+                        const productData = item.productId;
+                        if (
+                          typeof productData === "object" &&
+                          productData?.brand
+                        ) {
+                          return (
+                            <div key={index} className="seller-badge">
+                              <Store className="icon" size={14} />
+                              {productData.brand}
+                            </div>
+                          );
+                        }
+                        return index === 0 ? (
+                          <div className="seller-badge unknown">
+                            <Store className="icon" size={14} />
+                            Mix Products
+                          </div>
+                        ) : null;
+                      })
+                    ) : (
+                      <span className="text-muted">No seller info</span>
+                    )}
                   </td>
                   <td>
                     {order.createdAt

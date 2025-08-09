@@ -67,6 +67,10 @@ export class User {
 
   @Prop({ type: String, default: null })
   profileImagePath: string;
+
+  // სელერის ბალანსი
+  @Prop({ type: Number, default: 0 })
+  balance?: number;
 }
 
 export type UserDocument = User & Document;

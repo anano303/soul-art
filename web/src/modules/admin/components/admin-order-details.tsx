@@ -366,8 +366,9 @@ export function AdminOrderDetails({ order }: AdminOrderDetailsProps) {
                                     {t("adminOrders.adminProduct")}
                                   </strong>
                                 </p>
-                                {productSellerInfo.profileImagePath && (
-                                  <div className="seller-profile-image">
+                                {/* Show admin profile image or fallback */}
+                                <div className="seller-profile-image">
+                                  {productSellerInfo.profileImagePath ? (
                                     <Image
                                       src={getImageSrc(
                                         productSellerInfo.profileImagePath
@@ -376,9 +377,40 @@ export function AdminOrderDetails({ order }: AdminOrderDetailsProps) {
                                       width={80}
                                       height={80}
                                       className="profile-avatar"
+                                      onError={(e) => {
+                                        const target =
+                                          e.target as HTMLImageElement;
+                                        target.style.display = "none";
+                                        const fallback =
+                                          target.parentElement?.querySelector(
+                                            ".fallback-icon"
+                                          ) as HTMLElement;
+                                        if (fallback)
+                                          fallback.style.display = "flex";
+                                      }}
                                     />
+                                  ) : null}
+                                  <div
+                                    className="fallback-icon"
+                                    style={{
+                                      display:
+                                        productSellerInfo.profileImagePath
+                                          ? "none"
+                                          : "flex",
+                                      width: "80px",
+                                      height: "80px",
+                                      backgroundColor: "#012645",
+                                      borderRadius: "50%",
+                                      alignItems: "center",
+                                      justifyContent: "center",
+                                      color: "white",
+                                      fontSize: "24px",
+                                      fontWeight: "bold",
+                                    }}
+                                  >
+                                    A
                                   </div>
-                                )}
+                                </div>
                                 <p>
                                   <strong>{t("adminOrders.adminName")}:</strong>{" "}
                                   {productSellerInfo.name}
@@ -403,11 +435,14 @@ export function AdminOrderDetails({ order }: AdminOrderDetailsProps) {
                             {/* Display Seller information if the product is created by a Seller */}
                             {productSellerInfo.role === "seller" && (
                               <>
-                                {productSellerInfo.profileImagePath && (
+                                {/* Show store logo if available, otherwise profile image */}
+                                {(productSellerInfo.storeLogoPath ||
+                                  productSellerInfo.profileImagePath) && (
                                   <div className="seller-profile-image">
                                     <Image
                                       src={getImageSrc(
-                                        productSellerInfo.profileImagePath
+                                        productSellerInfo.storeLogoPath ||
+                                          productSellerInfo.profileImagePath
                                       )}
                                       alt={
                                         productSellerInfo.storeName ||
@@ -415,8 +450,47 @@ export function AdminOrderDetails({ order }: AdminOrderDetailsProps) {
                                       }
                                       width={80}
                                       height={80}
-                                      className="profile-avatar"
+                                      className={
+                                        productSellerInfo.storeLogoPath
+                                          ? "store-logo"
+                                          : "profile-avatar"
+                                      }
+                                      onError={(e) => {
+                                        // Fallback to default brand icon if image fails to load
+                                        const target =
+                                          e.target as HTMLImageElement;
+                                        target.style.display = "none";
+                                        const fallback =
+                                          target.parentElement?.querySelector(
+                                            ".fallback-icon"
+                                          ) as HTMLElement;
+                                        if (fallback)
+                                          fallback.style.display = "flex";
+                                      }}
                                     />
+                                    <div
+                                      className="fallback-icon"
+                                      style={{
+                                        display: "none",
+                                        width: "80px",
+                                        height: "80px",
+                                        backgroundColor: "#012645",
+                                        borderRadius: "50%",
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                        color: "white",
+                                        fontSize: "24px",
+                                        fontWeight: "bold",
+                                      }}
+                                    >
+                                      {(
+                                        productSellerInfo.storeName ||
+                                        productSellerInfo.ownerFirstName ||
+                                        "S"
+                                      )
+                                        .charAt(0)
+                                        .toUpperCase()}
+                                    </div>
                                   </div>
                                 )}
                                 {productSellerInfo.storeName && (
@@ -476,8 +550,8 @@ export function AdminOrderDetails({ order }: AdminOrderDetailsProps) {
                             {productSellerInfo.role !== "admin" &&
                               productSellerInfo.role !== "seller" && (
                                 <>
-                                  {productSellerInfo.profileImagePath && (
-                                    <div className="seller-profile-image">
+                                  <div className="seller-profile-image">
+                                    {productSellerInfo.profileImagePath ? (
                                       <Image
                                         src={getImageSrc(
                                           productSellerInfo.profileImagePath
@@ -486,9 +560,42 @@ export function AdminOrderDetails({ order }: AdminOrderDetailsProps) {
                                         width={80}
                                         height={80}
                                         className="profile-avatar"
+                                        onError={(e) => {
+                                          const target =
+                                            e.target as HTMLImageElement;
+                                          target.style.display = "none";
+                                          const fallback =
+                                            target.parentElement?.querySelector(
+                                              ".fallback-icon"
+                                            ) as HTMLElement;
+                                          if (fallback)
+                                            fallback.style.display = "flex";
+                                        }}
                                       />
+                                    ) : null}
+                                    <div
+                                      className="fallback-icon"
+                                      style={{
+                                        display:
+                                          productSellerInfo.profileImagePath
+                                            ? "none"
+                                            : "flex",
+                                        width: "80px",
+                                        height: "80px",
+                                        backgroundColor: "#012645",
+                                        borderRadius: "50%",
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                        color: "white",
+                                        fontSize: "24px",
+                                        fontWeight: "bold",
+                                      }}
+                                    >
+                                      {(productSellerInfo.name || "U")
+                                        .charAt(0)
+                                        .toUpperCase()}
                                     </div>
-                                  )}
+                                  </div>
                                   <p>
                                     <strong>
                                       {t("adminOrders.sellerName")}:

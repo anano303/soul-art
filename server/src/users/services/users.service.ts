@@ -19,6 +19,7 @@ import { SellerRegisterDto } from '../dtos/seller-register.dto';
 import { AdminProfileDto } from '../dtos/admin.profile.dto';
 import { AwsS3Service } from '@/aws-s3/aws-s3.service';
 import { UserCloudinaryService } from './user-cloudinary.service';
+import { BalanceService } from './balance.service';
 
 @Injectable()
 export class UsersService {
@@ -29,6 +30,7 @@ export class UsersService {
     @InjectModel(Product.name) private productModel: Model<Product>,
     private readonly awsS3Service: AwsS3Service,
     private readonly userCloudinaryService: UserCloudinaryService,
+    private readonly balanceService: BalanceService,
   ) {}
 
   async findByEmail(email: string) {
@@ -536,7 +538,33 @@ export class UsersService {
       ...user.toObject(),
       profileImage,
       storeLogo,
+      balance:
+        user.role === Role.Seller
+          ? await this.getSellerBalanceInfo(userId)
+          : null,
     };
+  }
+
+  async getSellerBalanceInfo(sellerId: string) {
+    try {
+      const balance = await this.balanceService.getSellerBalance(sellerId);
+      return (
+        balance || {
+          totalBalance: 0,
+          totalEarnings: 0,
+          pendingWithdrawals: 0,
+          totalWithdrawn: 0,
+        }
+      );
+    } catch (error) {
+      this.logger.error(`Failed to get seller balance: ${error.message}`);
+      return {
+        totalBalance: 0,
+        totalEarnings: 0,
+        pendingWithdrawals: 0,
+        totalWithdrawn: 0,
+      };
+    }
   }
 
   async getProfileImageUrl(profileImagePath: string): Promise<string | null> {

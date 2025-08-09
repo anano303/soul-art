@@ -352,6 +352,16 @@
   border: 3px solid #012645;
 }
 
+.store-logo {
+  border-radius: 8px;
+  object-fit: cover;
+  border: 2px solid #012645;
+}
+
+.fallback-icon {
+  border: 3px solid #012645;
+}
+
 /* Loading state for seller info */
 .loading-state {
   padding: 16px;
