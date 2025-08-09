@@ -11,6 +11,7 @@ import {
 import { RolesGuard } from '@/guards/roles.guard';
 import { OrdersService } from '../services/orders.service';
 import { StockReservationService } from '../services/stock-reservation.service';
+import { BalanceService } from '../../users/services/balance.service';
 import { UserDocument } from '@/users/schemas/user.schema';
 import { CurrentUser } from '@/decorators/current-user.decorator';
 import { JwtAuthGuard } from '@/guards/jwt-auth.guard';
@@ -22,6 +23,7 @@ export class OrdersController {
   constructor(
     private ordersService: OrdersService,
     private stockReservationService: StockReservationService,
+    private balanceService: BalanceService,
   ) {}
 
   @UseGuards(JwtAuthGuard)
@@ -98,5 +100,56 @@ export class OrdersController {
   async releaseExpiredStock() {
     await this.stockReservationService.releaseExpiredStockReservations();
     return { message: 'Expired stock reservations released' };
+  }
+
+  /**
+   * ადმინისთვის - შეკვეთისა და ბალანსის ინფორმაცია
+   */
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.Admin)
+  @Get(':id/balance-info')
+  async getOrderBalanceInfo(@Param('id') orderId: string) {
+    const order = await this.ordersService.findById(orderId);
+
+    if (!order.isDelivered) {
+      return {
+        order,
+        message: 'შეკვეთა ჯერ არ არის მიტანილი, ბალანსი არ არის განახლებული',
+      };
+    }
+
+    // ყველა seller-ისთვის ამ შეკვეთიდან
+    const sellerBalances = [];
+
+    for (const item of order.orderItems) {
+      // მივიღოთ პროდუქტის ინფორმაცია და seller
+      const product = await this.balanceService.getProductDetails(
+        item.productId,
+      );
+      if (product && product.user) {
+        const sellerId = (product.user as any)._id.toString();
+        const sellerBalance =
+          await this.balanceService.getSellerBalance(sellerId);
+        const sellerTransactions =
+          await this.balanceService.getSellerTransactions(sellerId, 1, 5);
+
+        sellerBalances.push({
+          seller: product.user,
+          product: {
+            name: item.name,
+            price: item.price,
+            qty: item.qty,
+            totalPrice: item.price * item.qty,
+          },
+          balance: sellerBalance,
+          recentTransactions: sellerTransactions.transactions,
+        });
+      }
+    }
+
+    return {
+      order,
+      sellerBalances,
+    };
   }
 }

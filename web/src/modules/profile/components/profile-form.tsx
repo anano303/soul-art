@@ -12,6 +12,7 @@ import "./ProfileForm.css";
 import { useEffect, useState, useRef, useCallback } from "react";
 import Image from "next/image";
 import { useLanguage } from "@/hooks/LanguageContext";
+import { SellerBalanceWidget } from "@/modules/balance/components/seller-balance-widget";
 
 const formSchema = z
   .object({
@@ -430,6 +431,11 @@ export function ProfileForm() {
   return (
     <div className="card">
       <h2>{t("profile.title")}</h2>
+
+      {/* Balance widget only for sellers, not admins */}
+      {user?.role?.toUpperCase() === "SELLER" && user._id && (
+        <SellerBalanceWidget userId={user._id} />
+      )}
 
       <div className="profile-images-container">
         <div className="profile-image-section">

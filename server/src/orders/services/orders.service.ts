@@ -9,7 +9,10 @@ import { Model, Types, ClientSession } from 'mongoose';
 import { PaymentResult } from 'src/interfaces';
 import { Order, OrderDocument } from '../schemas/order.schema';
 import { Product } from '../../products/schemas/product.schema';
+import { User } from '../../users/schemas/user.schema';
 import { ProductsService } from '@/products/services/products.service';
+import { BalanceService } from '../../users/services/balance.service';
+import { EmailService } from '../../email/services/email.services';
 import { InjectConnection } from '@nestjs/mongoose';
 import { Connection } from 'mongoose';
 @Injectable()
@@ -18,7 +21,10 @@ export class OrdersService {
   constructor(
     @InjectModel(Order.name) private orderModel: Model<Order>,
     @InjectModel(Product.name) private productModel: Model<Product>,
+    @InjectModel(User.name) private userModel: Model<User>,
     private productsService: ProductsService,
+    private balanceService: BalanceService,
+    private emailService: EmailService,
     @InjectConnection() private connection: Connection,
   ) {}
   async create(
@@ -250,6 +256,76 @@ export class OrdersService {
     // Note: Stock is already reduced during order creation
     // No need to reduce stock again here to prevent double reduction
     const updatedOrder = await order.save();
+
+    // Email notifications after successful payment
+    try {
+      // Get order with populated user and product data
+      const orderWithData = await this.orderModel
+        .findById(order._id)
+        .populate('user', 'email ownerFirstName ownerLastName')
+        .populate('orderItems.productId', 'name ownerId');
+
+      if (orderWithData?.user?.email) {
+        // Send confirmation to customer
+        await this.emailService.sendOrderConfirmation(
+          orderWithData.user.email,
+          `${orderWithData.user.ownerFirstName} ${orderWithData.user.ownerLastName}`,
+          orderWithData._id.toString(),
+          orderWithData.orderItems.map((item) => ({
+            name: item.name,
+            quantity: item.qty,
+            price: item.price,
+          })),
+          orderWithData.totalPrice,
+          `${orderWithData.shippingDetails.address}, ${orderWithData.shippingDetails.city}`,
+        );
+
+        // Send notifications to sellers
+        const sellerNotifications = new Map();
+
+        for (const item of orderWithData.orderItems) {
+          const productData = item.productId as any; // After populate, it becomes an object
+          if (productData?.ownerId) {
+            const sellerId = productData.ownerId.toString();
+            if (!sellerNotifications.has(sellerId)) {
+              sellerNotifications.set(sellerId, []);
+            }
+            sellerNotifications.get(sellerId).push({
+              name: item.name,
+              quantity: item.qty,
+              price: item.price,
+            });
+          }
+        }
+
+        // Send email to each seller
+        for (const [sellerId, items] of sellerNotifications) {
+          const seller = await this.userModel
+            .findById(sellerId)
+            .select('email ownerFirstName ownerLastName');
+
+          if (seller?.email) {
+            const totalAmount = items.reduce(
+              (sum, item) => sum + item.price * item.quantity,
+              0,
+            );
+
+            await this.emailService.sendNewOrderNotificationToSeller(
+              seller.email,
+              `${seller.ownerFirstName} ${seller.ownerLastName}`,
+              orderWithData._id.toString(),
+              `${orderWithData.user.ownerFirstName} ${orderWithData.user.ownerLastName}`,
+              items,
+              totalAmount,
+            );
+          }
+        }
+      }
+    } catch (error) {
+      this.logger.error('Failed to send order confirmation emails:', error);
+      // Don't throw error for email failures - order payment should still succeed
+    }
+
     return updatedOrder;
   }
   async updateDelivered(id: string): Promise<OrderDocument> {
@@ -261,6 +337,37 @@ export class OrdersService {
     order.deliveredAt = Date();
     order.status = 'delivered'; // Update status to delivered
     const updatedOrder = await order.save();
+
+    // სელერის ბალანსის განახლება როდესაც შეკვეთა მიტანილია
+    try {
+      await this.balanceService.processOrderEarnings(updatedOrder);
+      this.logger.log(`Balance processed for delivered order: ${id}`);
+    } catch (error) {
+      this.logger.error(`Failed to process balance for order ${id}:`, error);
+    }
+
+    // Send delivery confirmation email to customer
+    try {
+      const orderWithData = await this.orderModel
+        .findById(id)
+        .populate('user', 'email ownerFirstName ownerLastName');
+
+      if (orderWithData?.user?.email) {
+        await this.emailService.sendDeliveryConfirmation(
+          orderWithData.user.email,
+          `${orderWithData.user.ownerFirstName} ${orderWithData.user.ownerLastName}`,
+          orderWithData._id.toString(),
+          orderWithData.orderItems.map((item) => ({
+            name: item.name,
+            quantity: item.qty,
+          })),
+        );
+      }
+    } catch (error) {
+      this.logger.error('Failed to send delivery confirmation email:', error);
+      // Don't throw error for email failures
+    }
+
     return updatedOrder;
   }
   async findUserOrders(userId: string) {

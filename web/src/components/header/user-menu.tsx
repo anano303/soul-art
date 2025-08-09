@@ -215,6 +215,27 @@ export default function UserMenu({ onNavigate }: { onNavigate?: () => void }) {
               </Link>
             )}
 
+            {/* Balance links */}
+            {user.role === Role.Admin && (
+              <Link
+                href="/admin/balances"
+                className="dropdown-item"
+                onClick={handleLinkClick}
+              >
+                სელერების ბალანსები
+              </Link>
+            )}
+
+            {user.role === Role.Seller && (
+              <Link
+                href="/profile/balance"
+                className="dropdown-item"
+                onClick={handleLinkClick}
+              >
+                ჩემი ბალანსი
+              </Link>
+            )}
+
             <hr />
             <button
               onClick={() => {
