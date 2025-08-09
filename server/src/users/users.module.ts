@@ -3,6 +3,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { AuthController } from './controller/auth.controller';
 import { User, UserSchema } from './schemas/user.schema';
 import { Product, ProductSchema } from '../products/schemas/product.schema';
+import { Order, OrderSchema } from '../orders/schemas/order.schema';
 import {
   SellerBalance,
   SellerBalanceSchema,
@@ -14,6 +15,7 @@ import {
 import { UsersService } from './services/users.service';
 import { AuthService } from './services/auth.service';
 import { BalanceService } from './services/balance.service';
+import { BalanceMigrationService } from './services/balance-migration.service';
 import { BankIntegrationService } from './services/bog-bank-integration.service';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
@@ -39,6 +41,10 @@ import { UserCloudinaryService } from './services/user-cloudinary.service';
         schema: ProductSchema,
       },
       {
+        name: Order.name,
+        schema: OrderSchema,
+      },
+      {
         name: SellerBalance.name,
         schema: SellerBalanceSchema,
       },
@@ -61,6 +67,7 @@ import { UserCloudinaryService } from './services/user-cloudinary.service';
     UsersService,
     AuthService,
     BalanceService,
+    BalanceMigrationService,
     BankIntegrationService,
     LocalStrategy,
     JwtStrategy,
@@ -69,6 +76,11 @@ import { UserCloudinaryService } from './services/user-cloudinary.service';
     EmailService,
     UserCloudinaryService, // Add our new service
   ],
-  exports: [UsersService, BalanceService, EmailService],
+  exports: [
+    UsersService,
+    BalanceService,
+    BalanceMigrationService,
+    EmailService,
+  ],
 })
 export class UsersModule {}

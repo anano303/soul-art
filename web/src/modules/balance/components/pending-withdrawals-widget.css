@@ -1,0 +1,323 @@
+.pending-withdrawals-widget {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e5e7eb;
+}
+
+.widget-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.widget-icon {
+  width: 24px;
+  height: 24px;
+  color: #f59e0b;
+}
+
+.widget-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #111827;
+  margin: 0;
+}
+
+.pending-count {
+  background: #fef3c7;
+  color: #d97706;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 8px;
+  border-radius: 12px;
+  margin-left: auto;
+}
+
+.notification-badge {
+  background: #fef3c7;
+  color: #d97706;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 8px;
+  border-radius: 12px;
+  margin-left: auto;
+}
+
+.withdrawals-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.requests-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.more-requests {
+  text-align: center;
+  padding: 12px;
+  color: #6b7280;
+  font-size: 13px;
+  font-style: italic;
+}
+
+.withdrawal-item {
+  background: #f9fafb;
+  border-radius: 8px;
+  padding: 16px;
+  border-left: 4px solid #f59e0b;
+}
+
+.request-item {
+  background: #f9fafb;
+  border-radius: 8px;
+  padding: 16px;
+  border-left: 4px solid #f59e0b;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.request-info {
+  flex: 1;
+}
+
+.request-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 200px;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.approve-btn {
+  background: #22c55e;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: background-color 0.2s;
+}
+
+.approve-btn:hover:not(:disabled) {
+  background: #16a34a;
+}
+
+.approve-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.reject-btn {
+  background: #ef4444;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: background-color 0.2s;
+}
+
+.reject-btn:hover {
+  background: #dc2626;
+}
+
+.action-icon {
+  width: 14px;
+  height: 14px;
+}
+
+.reject-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+.reject-reason-input {
+  padding: 8px;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  font-size: 12px;
+  width: 100%;
+}
+
+.reject-form-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.confirm-reject-btn {
+  background: #ef4444;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  cursor: pointer;
+  flex: 1;
+}
+
+.confirm-reject-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.cancel-reject-btn {
+  background: #6b7280;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  cursor: pointer;
+  flex: 1;
+}
+
+.cancel-reject-btn:hover {
+  background: #4b5563;
+}
+
+.withdrawal-header {
+  display: flex;
+  justify-content: between;
+  align-items: flex-start;
+  margin-bottom: 8px;
+}
+
+.withdrawal-user {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+  color: #374151;
+}
+
+.user-icon {
+  width: 16px;
+  height: 16px;
+  color: #6b7280;
+}
+
+.withdrawal-amount {
+  font-size: 18px;
+  font-weight: 700;
+  color: #059669;
+}
+
+.withdrawal-details {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.detail-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.detail-icon {
+  width: 14px;
+  height: 14px;
+}
+
+.no-withdrawals {
+  text-align: center;
+  padding: 32px 16px;
+  color: #6b7280;
+}
+
+.no-withdrawals-icon {
+  width: 48px;
+  height: 48px;
+  color: #d1d5db;
+  margin: 0 auto 12px;
+}
+
+.no-requests {
+  text-align: center;
+  padding: 32px 16px;
+  color: #6b7280;
+}
+
+.empty-icon {
+  width: 48px;
+  height: 48px;
+  color: #d1d5db;
+  margin: 0 auto 12px;
+}
+
+.loading-state {
+  text-align: center;
+  padding: 32px 16px;
+  color: #6b7280;
+}
+
+.error-state {
+  text-align: center;
+  padding: 32px 16px;
+  color: #dc2626;
+  background: #fef2f2;
+  border-radius: 8px;
+  border: 1px solid #fecaca;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .pending-withdrawals-widget {
+    padding: 16px;
+  }
+
+  .withdrawal-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .withdrawal-details {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .request-item {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .request-actions {
+    min-width: auto;
+  }
+
+  .action-buttons {
+    justify-content: stretch;
+  }
+
+  .approve-btn,
+  .reject-btn {
+    flex: 1;
+    justify-content: center;
+  }
+}

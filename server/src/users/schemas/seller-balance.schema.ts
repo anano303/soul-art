@@ -43,10 +43,10 @@ export class BalanceTransaction {
 
   @Prop({
     type: mongoose.Schema.Types.ObjectId,
-    required: true,
+    required: false, // Make optional for withdrawal transactions
     ref: 'Order',
   })
-  order!: Order;
+  order?: Order;
 
   @Prop({ required: true })
   amount!: number; // ტრანზაქციის თანხა

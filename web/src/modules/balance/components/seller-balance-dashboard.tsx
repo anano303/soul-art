@@ -64,6 +64,15 @@ export function SellerBalanceDashboard() {
       return;
     }
 
+    if (parseFloat(withdrawalAmount) < 1) {
+      toast({
+        title: "შეცდომა",
+        description: "მინიმალური გასატანი თანხაა 1 ლარი",
+        variant: "destructive",
+      });
+      return;
+    }
+
     if (!balance || parseFloat(withdrawalAmount) > balance.totalBalance) {
       toast({
         title: "შეცდომა",
@@ -183,14 +192,14 @@ export function SellerBalanceDashboard() {
               onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                 setWithdrawalAmount(e.target.value)
               }
-              placeholder="შეიყვანეთ თანხა"
+              placeholder="შეიყვანეთ თანხა (მინიმუმ 1 ₾)"
               min="1"
               max={balance?.totalBalance || 0}
               className="withdrawal-input"
             />
             <button
               onClick={handleWithdrawal}
-              disabled={isWithdrawing || !balance || balance.totalBalance <= 0}
+              disabled={isWithdrawing || !balance || balance.totalBalance < 1}
               className="withdrawal-button"
             >
               {isWithdrawing
@@ -202,6 +211,15 @@ export function SellerBalanceDashboard() {
             <p>
               ხელმისაწვდომი ბალანსი:{" "}
               <strong>{balance?.totalBalance?.toFixed(2) || "0.00"} ₾</strong>
+            </p>
+            <p className="withdrawal-note withdrawal-note-highlight">
+              📋 <strong>მინიმალური გასატანი თანხა: 1 ₾</strong>
+            </p>
+            <p className="withdrawal-note">
+              ⏰ თანხა ჩაირიცხება <strong>5 სამუშაო დღის განმავლობაში</strong>
+            </p>
+            <p className="withdrawal-note">
+              🏦 საჭიროა <strong>ანგარიშის ნომრის</strong> მითითება პროფილში
             </p>
             <p className="withdrawal-note">
               * თანხის გატანა შესაძლებელია მხოლოდ იმ შემთხვევაში, როცა შეკვეთის

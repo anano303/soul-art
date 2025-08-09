@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import "../styles/performance.css";
 import { Providers } from "./providers";
-// import { Toaster } from "@/components/ui/toaster";
+import { Toaster } from "@/components/ui/toaster";
 import { AuthProvider } from "@/components/auth-provider";
 
 import { satoshi } from "./(pages)/fonts";
@@ -23,7 +23,8 @@ export const metadata: Metadata = {
   metadataBase: new URL(
     process.env.NEXT_PUBLIC_CLIENT_URL || "https://Soulart.ge"
   ),
-  title: "Soulart - ნახატების და ხელნაკეთი ნივთების პირველი ონლაინ პლატფორმა   საქართველოში",
+  title:
+    "Soulart - ნახატების და ხელნაკეთი ნივთების პირველი ონლაინ პლატფორმა   საქართველოში",
   description:
     "უნიკალური ხელნაკეთი ნივთები, ნახატები, ხელოვნების ნამუშევრები. ხარისხი, სანდოობა, ფასი. Unique handmade items, paintings, artworks in Georgia",
   keywords: [
@@ -83,7 +84,8 @@ export const metadata: Metadata = {
     locale: "ka_GE",
     url: "https://Soulart.ge/",
     siteName: "Soulart",
-    title: "Soulart - ნახატების და ხელნაკეთი ნივთების   პირველი ონლაინ პლატფორმა საქართველოში",
+    title:
+      "Soulart - ნახატების და ხელნაკეთი ნივთების   პირველი ონლაინ პლატფორმა საქართველოში",
     description:
       "უნიკალური ხელნაკეთი ნივთები, ნახატები, ხელოვნების ნამუშევრები. ხარისხი, სანდოობა, ფასი",
     images: [
@@ -97,7 +99,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Soulart - ნახატების და ხელნაკეთი ნივთების   პირველი ონლაინ პლატფორმა საქართველოში",
+    title:
+      "Soulart - ნახატების და ხელნაკეთი ნივთების   პირველი ონლაინ პლატფორმა საქართველოში",
     description:
       "ხელნაკეთი ნივთების და ნახატების საუკეთესო არჩევანი საქართველოში",
     images: ["/van gog.jpg"],
@@ -157,6 +160,9 @@ export default function RootLayout({
 
         {/* Google Analytics */}
         <GoogleAnalytics />
+
+        {/* Toast notifications */}
+        <Toaster />
 
         {/* Structured Data */}
         <script

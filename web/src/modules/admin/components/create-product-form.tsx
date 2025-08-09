@@ -1215,7 +1215,7 @@ export function CreateProductForm({
             <p className="create-product-error">{errors.countInStock}</p>
           )}
         </div>
-        {/* Delivery Section
+        Delivery Section
         <div className="delivery-section">
           <h3>მიწოდების ტიპი</h3>
           <div className="delivery-type-options">
@@ -1267,7 +1267,7 @@ export function CreateProductForm({
               </div>
             </div>
           )}
-        </div> */}
+        </div>
         <div>
           <label htmlFor="brand">{t("adminProducts.brand")}</label>
           <input
