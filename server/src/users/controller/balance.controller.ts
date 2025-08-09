@@ -105,6 +105,66 @@ export class BalanceController {
   }
 
   /**
+   * Pending withdrawal requests (ადმინისთვის)
+   */
+  @Get('admin/pending-withdrawals')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.Admin)
+  async getPendingWithdrawals() {
+    return this.balanceService.getPendingWithdrawalRequests();
+  }
+
+  /**
+   * Withdrawal-ის დადასტურება (ადმინისთვის)
+   */
+  @Post('admin/withdrawal/:transactionId/approve')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.Admin)
+  async approveWithdrawal(
+    @Param('transactionId') transactionId: string,
+    @CurrentUser() admin: UserDocument,
+  ) {
+    try {
+      await this.balanceService.approveWithdrawal(
+        transactionId,
+        admin._id.toString(),
+      );
+      return {
+        success: true,
+        message: 'თანხის გატანა წარმატებით დადასტურდა',
+      };
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
+  }
+
+  /**
+   * Withdrawal-ის უარყოფა (ადმინისთვის)
+   */
+  @Post('admin/withdrawal/:transactionId/reject')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.Admin)
+  async rejectWithdrawal(
+    @Param('transactionId') transactionId: string,
+    @Body() rejectDto: { reason?: string },
+    @CurrentUser() admin: UserDocument,
+  ) {
+    try {
+      await this.balanceService.rejectWithdrawal(
+        transactionId,
+        admin._id.toString(),
+        rejectDto.reason,
+      );
+      return {
+        success: true,
+        message: 'თანხის გატანა უარყოფილია',
+      };
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
+  }
+
+  /**
    * თანხის გატანის მოთხოვნა
    */
   @Post('withdrawal/request')
@@ -121,11 +181,27 @@ export class BalanceController {
       throw new BadRequestException('თანხა უნდა იყოს დადებითი რიცხვი');
     }
 
-    await this.balanceService.requestWithdrawal(sellerId, amount);
+    if (amount < 1) {
+      throw new BadRequestException('მინიმალური გასატანი თანხაა 1 ლარი');
+    }
 
-    return {
-      success: true,
-      message: 'თანხის გატანის მოთხოვნა წარმატებით გაიგზავნა',
-    };
+    try {
+      await this.balanceService.requestWithdrawal(sellerId, amount);
+
+      return {
+        success: true,
+        message:
+          'თანხის გატანის მოთხოვნა წარმატებით მიღებულია. თანხა ჩაირიცხება 5 სამუშაო დღის განმავლობაში.',
+      };
+    } catch (error) {
+      if (
+        error.message.includes('ბანკის ანგარიშის ნომერი არ არის მითითებული')
+      ) {
+        throw new BadRequestException(
+          'ბანკის ანგარიშის ნომერი არ არის მითითებული. გთხოვთ დაამატოთ ანგარიშის ნომერი პროფილის გვერდიდან.',
+        );
+      }
+      throw new BadRequestException(error.message);
+    }
   }
 }

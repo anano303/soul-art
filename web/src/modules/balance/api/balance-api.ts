@@ -6,6 +6,8 @@ interface SellerUser {
   name: string;
   email: string;
   storeName?: string;
+  ownerFirstName?: string;
+  ownerLastName?: string;
 }
 
 // Order interface for transaction reference
@@ -123,6 +125,23 @@ export async function getAllSellerBalances(
   }
 }
 
+// Get pending withdrawal requests (Admin only)
+export async function getPendingWithdrawals(): Promise<{
+  count: number;
+  requests: BalanceTransaction[];
+}> {
+  try {
+    const response = await fetchWithAuth("/balance/admin/pending-withdrawals");
+    if (!response.ok) {
+      throw new Error("Failed to fetch pending withdrawals");
+    }
+    return response.json();
+  } catch (error) {
+    console.error("Error fetching pending withdrawals:", error);
+    throw error;
+  }
+}
+
 export async function getSellerBalanceByAdmin(
   sellerId: string
 ): Promise<SellerBalance | null> {
@@ -135,6 +154,55 @@ export async function getSellerBalanceByAdmin(
     return response.json();
   } catch (error) {
     console.error("Error fetching seller balance:", error);
+    throw error;
+  }
+}
+
+export async function approveWithdrawal(transactionId: string): Promise<{
+  success: boolean;
+  message: string;
+}> {
+  try {
+    const response = await fetchWithAuth(
+      `/balance/admin/withdrawal/${transactionId}/approve`,
+      {
+        method: "POST",
+      }
+    );
+    if (!response.ok) {
+      throw new Error("Failed to approve withdrawal");
+    }
+    return response.json();
+  } catch (error) {
+    console.error("Error approving withdrawal:", error);
+    throw error;
+  }
+}
+
+export async function rejectWithdrawal(
+  transactionId: string,
+  reason?: string
+): Promise<{
+  success: boolean;
+  message: string;
+}> {
+  try {
+    const response = await fetchWithAuth(
+      `/balance/admin/withdrawal/${transactionId}/reject`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ reason }),
+      }
+    );
+    if (!response.ok) {
+      throw new Error("Failed to reject withdrawal");
+    }
+    return response.json();
+  } catch (error) {
+    console.error("Error rejecting withdrawal:", error);
     throw error;
   }
 }

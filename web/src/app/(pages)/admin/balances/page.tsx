@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { getAllSellerBalances } from "@/modules/balance/api/balance-api";
 import { ProtectedRoute } from "@/components/protected-route";
 import { Wallet, User, TrendingUp, ArrowDownCircle } from "lucide-react";
+import { PendingWithdrawalsWidget } from "@/modules/balance/components/pending-withdrawals-widget";
 import "./admin-balances.css";
 
 export default function AdminBalancesPage() {
@@ -35,6 +36,9 @@ export default function AdminBalancesPage() {
             <Wallet className="title-icon" />
             სელერების ბალანსები
           </h1>
+
+          {/* Pending Withdrawals Widget */}
+          <PendingWithdrawalsWidget />
         </div>
 
         {balances.length === 0 ? (

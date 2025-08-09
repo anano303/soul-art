@@ -189,8 +189,8 @@ export class BankIntegrationService {
    * ანგარიშის ნომრის ვალიდაცია (Georgian IBAN)
    */
   validateAccountNumber(accountNumber: string): boolean {
-    // Georgian bank account format: GE##BANK################
-    const georgianAccountRegex = /^GE\d{2}[A-Z]{4}\d{16}$/;
+    // Georgian bank account format: GE##BANK################ (2-4 letters for bank code, then 14-18 digits)
+    const georgianAccountRegex = /^GE\d{2}[A-Z]{2,4}\d{14,18}$/;
     return georgianAccountRegex.test(accountNumber);
   }
 

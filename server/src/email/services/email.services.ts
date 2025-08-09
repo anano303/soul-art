@@ -85,6 +85,54 @@ export class EmailService {
   }
 
   /**
+   * სელერისთვის pending withdrawal notification
+   */
+  async sendWithdrawalPendingNotification(
+    to: string,
+    sellerName: string,
+    amount: number,
+    accountNumber: string,
+  ) {
+    const mailOptions = {
+      from: emailConfig.from,
+      to,
+      subject: 'თანხის გატანის მოთხოვნა მიღებულია - SoulArt',
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h2 style="color: #012645;">მოგესალმებით ${sellerName}!</h2>
+          
+          <p>თქვენი თანხის გატანის მოთხოვნა წარმატებით მიღებულია და მუშავდება.</p>
+          
+          <div style="background: #fff3cd; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #ffc107;">
+            <h3 style="color: #856404; margin-top: 0;">მოთხოვნის დეტალები:</h3>
+            <p><strong>თანხა:</strong> ${amount.toFixed(2)} ₾</p>
+            <p><strong>ანგარიშის ნომერი:</strong> ${accountNumber}</p>
+            <p><strong>მოთხოვნის თარიღი:</strong> ${new Date().toLocaleDateString('ka-GE')}</p>
+            <p><strong>გადარიცხვის ვადა:</strong> 5 სამუშაო დღე</p>
+          </div>
+          
+          <div style="background: #d1ecf1; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #17a2b8;">
+            <p style="margin: 0; color: #0c5460;">
+              <strong>📅 მნიშვნელოვანი:</strong> თანხა ჩაირიცხება თქვენს ანგარიშზე 5 სამუშაო დღის განმავლობაში. 
+              გადარიცხვა ხორციელდება ბანკის სამუშაო საათებში.
+            </p>
+          </div>
+          
+          <p style="color: #666; font-size: 14px;">
+            თანხის გატანის ისტორია შეგიძლიათ ნახოთ 
+            <a href="${process.env.ALLOWED_ORIGINS}/profile/balance" style="color: #012645;">ჩემი ბალანსი</a> გვერდზე.
+          </p>
+          
+          <hr style="margin: 30px 0; border: none; border-top: 1px solid #e5e7eb;">
+          <p style="color: #999; font-size: 12px;">SoulArt Team</p>
+        </div>
+      `,
+    };
+
+    await this.transporter.sendMail(mailOptions);
+  }
+
+  /**
    * ადმინისთვის withdrawal request notification
    */
   async sendWithdrawalAdminNotification(
@@ -279,6 +327,129 @@ export class EmailService {
           
           <hr style="margin: 30px 0; border: none; border-top: 1px solid #e5e7eb;">
           <p style="color: #999; font-size: 12px;">SoulArt Team</p>
+        </div>
+      `,
+    };
+
+    await this.transporter.sendMail(mailOptions);
+  }
+
+  /**
+   * სელერისთვის withdrawal completion notification
+   */
+  async sendWithdrawalCompletedNotification(
+    to: string,
+    sellerName: string,
+    amount: number,
+  ) {
+    const mailOptions = {
+      from: emailConfig.from,
+      to,
+      subject: 'თანხის გატანა დასრულდა - SoulArt',
+      html: `
+        <div style="max-width: 600px; margin: 0 auto; font-family: 'Segoe UI', Arial, sans-serif;">
+          <div style="background: linear-gradient(135deg, #22c55e, #16a34a); padding: 30px; text-align: center; border-radius: 8px 8px 0 0;">
+            <h1 style="color: white; margin: 0; font-size: 24px;">✅ თანხის გატანა დასრულდა</h1>
+          </div>
+          
+          <div style="padding: 30px; background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 0 0 8px 8px;">
+            <p style="font-size: 16px; color: #374151; margin-bottom: 20px;">
+              გამარჯობა <strong>${sellerName}</strong>,
+            </p>
+            
+            <p style="color: #374151; line-height: 1.6;">
+              თქვენი თანხის გატანის მოთხოვნა წარმატებით დასრულდა!
+            </p>
+            
+            <div style="background: white; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #22c55e;">
+              <p style="margin: 0; font-size: 18px; color: #374151;">
+                <strong>გადარიცხული თანხა: ${amount} ₾</strong>
+              </p>
+            </div>
+            
+            <p style="color: #6b7280; font-size: 14px; line-height: 1.6;">
+              თანხა გადარიცხულია თქვენს მითითებულ ბანკის ანგარიშზე. 
+              გადარიცხვის ნახვა შეგიძლიათ 1-2 სამუშაო დღის განმავლობაში.
+            </p>
+            
+            <p style="color: #374151; margin-top: 20px;">
+              გმადლობთ SoulArt-ზე თანამშრომლობისთვის!
+            </p>
+            
+            <div style="text-align: center; margin-top: 30px;">
+              <a href="${process.env.ALLOWED_ORIGINS}/seller/balance" 
+                 style="background: #22c55e; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">
+                ბალანსის გვერდზე გადასვლა
+              </a>
+            </div>
+          </div>
+          
+          <hr style="margin: 30px 0; border: none; border-top: 1px solid #e5e7eb;">
+          <p style="color: #999; font-size: 12px; text-align: center;">SoulArt Team</p>
+        </div>
+      `,
+    };
+
+    await this.transporter.sendMail(mailOptions);
+  }
+
+  /**
+   * სელერისთვის withdrawal rejection notification
+   */
+  async sendWithdrawalRejectedNotification(
+    to: string,
+    sellerName: string,
+    amount: number,
+    reason: string,
+  ) {
+    const mailOptions = {
+      from: emailConfig.from,
+      to,
+      subject: 'თანხის გატანა უარყოფილია - SoulArt',
+      html: `
+        <div style="max-width: 600px; margin: 0 auto; font-family: 'Segoe UI', Arial, sans-serif;">
+          <div style="background: linear-gradient(135deg, #ef4444, #dc2626); padding: 30px; text-align: center; border-radius: 8px 8px 0 0;">
+            <h1 style="color: white; margin: 0; font-size: 24px;">❌ თანხის გატანა უარყოფილია</h1>
+          </div>
+          
+          <div style="padding: 30px; background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 0 0 8px 8px;">
+            <p style="font-size: 16px; color: #374151; margin-bottom: 20px;">
+              გამარჯობა <strong>${sellerName}</strong>,
+            </p>
+            
+            <p style="color: #374151; line-height: 1.6;">
+              სამწუხაროდ, თქვენი თანხის გატანის მოთხოვნა უარყოფილია.
+            </p>
+            
+            <div style="background: white; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #ef4444;">
+              <p style="margin: 0 0 10px 0; font-size: 16px; color: #374151;">
+                <strong>თანხა: ${amount} ₾</strong>
+              </p>
+              <p style="margin: 0; color: #6b7280; font-size: 14px;">
+                <strong>მიზეზი:</strong> ${reason}
+              </p>
+            </div>
+            
+            <div style="background: #fef3c7; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #f59e0b;">
+              <p style="margin: 0; color: #92400e; font-size: 14px;">
+                ⚠️ თანხა დაბრუნებულია თქვენს ბალანსზე და შეგიძლიათ ხელახლა მოითხოვოთ გატანა.
+              </p>
+            </div>
+            
+            <p style="color: #6b7280; font-size: 14px; line-height: 1.6;">
+              თუ კითხვები გაქვთ, გთხოვთ დაუკავშირდეთ ჩვენს მხარდაჭერის გუნდს.
+            </p>
+            
+            <div style="text-align: center; margin-top: 30px;">
+              <a href="${process.env.ALLOWED_ORIGINS}/seller/balance" 
+                 style="background: #3b82f6; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">
+                ბალანსის გვერდზე გადასვლა
+              </a>
+            </div>
+          </div>
+          
+          <hr style="margin: 30px 0; border: none; border-top: 1px solid #e5e7eb;">
+          <p style="color: #999; font-size: 12px; text-align: center;">SoulArt Team</p>
         </div>
       `,
     };

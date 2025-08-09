@@ -2,7 +2,7 @@ import { IsNumber, IsOptional, IsString, Min } from 'class-validator';
 
 export class WithdrawalRequestDto {
   @IsNumber()
-  @Min(1, { message: 'თანხა უნდა იყოს მინიმუმ 1 ლარი' })
+  @Min(1, { message: 'მინიმალური გასატანი თანხაა 1 ლარი' })
   amount: number;
 }
 
