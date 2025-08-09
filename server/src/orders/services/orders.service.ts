@@ -157,16 +157,17 @@ export class OrdersService {
     // Sort by createdAt in descending order (newest first)
     const orders = await this.orderModel
       .find()
-      .populate('user', 'name email')
+      .populate('user', 'name email phoneNumber')
       .populate({
         path: 'orderItems.productId',
-        select: 'name user deliveryType minDeliveryDays maxDeliveryDays',
+        select: 'name user deliveryType minDeliveryDays maxDeliveryDays brand',
         populate: {
           path: 'user',
-          select: '_id name email',
+          select: '_id name email phoneNumber storeName',
         },
       })
       .sort({ createdAt: -1 });
+
     return orders;
   }
   async findById(id: string): Promise<OrderDocument> {
@@ -611,13 +612,13 @@ export class OrdersService {
     // Find all orders that contain products created by this seller
     const orders = await this.orderModel
       .find()
-      .populate('user', 'name email')
+      .populate('user', 'name email phoneNumber')
       .populate({
         path: 'orderItems.productId',
-        select: 'name user deliveryType minDeliveryDays maxDeliveryDays',
+        select: 'name user deliveryType minDeliveryDays maxDeliveryDays brand',
         populate: {
           path: 'user',
-          select: '_id',
+          select: '_id name email phoneNumber storeName',
         },
       })
       .sort({ createdAt: -1 });
