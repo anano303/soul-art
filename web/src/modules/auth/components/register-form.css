@@ -376,3 +376,212 @@ input:focus {
 .submit-btn.disabled:hover {
   background-color: #ccc;
 }
+
+/* Contract Policy Styles */
+.contract-policy-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 8px;
+}
+
+.contract-link {
+  background: none;
+  border: none;
+  color: #7b5642;
+  text-decoration: underline;
+  cursor: pointer;
+  font-weight: 500;
+  transition: color 0.3s ease;
+}
+
+.contract-link:hover {
+  color: #012645;
+}
+
+/* Contract Modal Styles */
+.contract-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10000;
+  padding: 20px;
+}
+
+.contract-modal {
+  background: white;
+  border-radius: 12px;
+  max-width: 800px;
+  max-height: 90vh;
+  width: 100%;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.contract-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  border-bottom: 1px solid #e0e0e0;
+  background: #f8f9fa;
+}
+
+.contract-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.contract-download-btn {
+  background: #7b5642;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.contract-download-btn:hover {
+  background: #012645;
+}
+
+.contract-header h3 {
+  margin: 0;
+  color: #012645;
+  font-size: 1.4rem;
+  font-weight: 600;
+}
+
+.contract-close-btn {
+  background: none;
+  border: none;
+  font-size: 28px;
+  cursor: pointer;
+  color: #666;
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+}
+
+.contract-close-btn:hover {
+  background: #e9ecef;
+  color: #012645;
+}
+
+.contract-content {
+  padding: 24px;
+  max-height: 60vh;
+  overflow-y: auto;
+  font-size: 14px;
+  line-height: 1.6;
+  color: #333;
+}
+
+.contract-subtitle {
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.contract-subtitle h4 {
+  color: #012645;
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.contract-section {
+  margin-bottom: 24px;
+}
+
+.contract-section h4 {
+  color: #012645;
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 12px;
+  border-bottom: 2px solid #7b5642;
+  padding-bottom: 4px;
+}
+
+.contract-section p {
+  margin-bottom: 8px;
+  text-align: justify;
+}
+
+.contract-section ul {
+  margin: 8px 0;
+  padding-left: 20px;
+}
+
+.contract-section li {
+  margin-bottom: 4px;
+}
+
+.contract-section strong {
+  color: #012645;
+  font-weight: 600;
+}
+
+.contract-footer {
+  padding: 20px 24px;
+  border-top: 1px solid #e0e0e0;
+  background: #f8f9fa;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.contract-accept-btn {
+  background: #7b5642;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.contract-accept-btn:hover {
+  background: #012645;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(123, 86, 66, 0.3);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .contract-modal {
+    margin: 10px;
+    max-height: 95vh;
+  }
+
+  .contract-content {
+    padding: 16px;
+    max-height: 70vh;
+  }
+
+  .contract-header {
+    padding: 16px;
+  }
+
+  .contract-footer {
+    padding: 16px;
+  }
+
+  .contract-section h4 {
+    font-size: 1rem;
+  }
+}
