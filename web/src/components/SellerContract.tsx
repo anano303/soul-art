@@ -20,161 +20,100 @@ export function SellerContract({
   if (!isOpen) return null;
 
   const handleDownload = () => {
-    const element = document.createElement("a");
-    const contractContent =
-      language === "ge"
-        ? `საჯარო ხელშეკრულება გამყიდველებისთვის
-SoulArt.ge პლატფორმის გამოყენების პირობები
+    // შევქმნათ print-ისთვის განკუთვნილი ფანჯარა
+    const printWindow = window.open("", "_blank");
+    const contractContent = document.querySelector(".contract-content");
 
-1. ზოგადი დებულებები
-1.1. წინამდებარე საჯარო ხელშეკრულება ("ხელშეკრულება") წარმოადგენს იურიდიულ შეთავაზებას SoulArt პლატფორმის ("პლატფორმა") და ნებისმიერი რეგისტრირებული გამყიდველის ("გამყიდველი") შორის.
-1.2. ხელშეკრულება ძალაში შედის გამყიდველის რეგისტრაციისა და პირობებზე ელექტრონული თანხმობის დადასტურების მომენტიდან.
-1.3. პლატფორმა მოქმედებს, როგორც შუამავალი გამყიდველსა და მყიდველს შორის და უზრუნველყოფს მხოლოდ ტექნიკურ და სერვისულ მხარდაჭერას.
-1.4. ხელშეკრულება რეგულირდება საქართველოს კანონმდებლობით.
+    if (printWindow && contractContent) {
+      printWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>${
+            language === "ge"
+              ? "სელერის ხელშეკრულება - SoulArt.ge"
+              : "Seller Contract - SoulArt.ge"
+          }</title>
+          <style>
+            body {
+              font-family: Arial, sans-serif;
+              line-height: 1.6;
+              margin: 20px;
+              color: #333;
+            }
+            h1, h2, h3, h4 {
+              color: #2c3e50;
+              margin-top: 20px;
+              margin-bottom: 10px;
+            }
+            h1 {
+              text-align: center;
+              font-size: 24px;
+              border-bottom: 2px solid #3498db;
+              padding-bottom: 10px;
+            }
+            h4 {
+              font-size: 16px;
+              font-weight: bold;
+            }
+            p {
+              margin-bottom: 10px;
+              text-align: justify;
+            }
+            ul {
+              margin: 10px 0;
+              padding-left: 20px;
+            }
+            li {
+              margin-bottom: 5px;
+            }
+            strong {
+              font-weight: bold;
+            }
+            .header-info {
+              text-align: center;
+              margin-bottom: 30px;
+              font-size: 12px;
+              color: #666;
+            }
+            @media print {
+              body { margin: 0; }
+              .no-print { display: none; }
+            }
+          </style>
+        </head>
+        <body>
+          <h1>${
+            language === "ge"
+              ? "საჯარო ხელშეკრულება გამყიდველებისთვის"
+              : "Public Agreement for Sellers"
+          }</h1>
+          <div class="header-info">
+            <p><strong>SoulArt.ge</strong> - ${
+              language === "ge"
+                ? "პლატფორმის გამოყენების პირობები"
+                : "Platform Terms of Use"
+            }</p>
+            <p>${
+              language === "ge" ? "ბოლო განახლების თარიღი:" : "Last updated:"
+            } ${new Date().toLocaleDateString(
+        language === "ge" ? "ka-GE" : "en-US"
+      )}</p>
+          </div>
+          ${contractContent.innerHTML}
+        </body>
+        </html>
+      `);
 
-2. საკომისიო და გადახდის პირობები
-2.1. პლატფორმის საკომისიო შეადგენს გაყიდული პროდუქტის ღირებულების 10%, თუ სხვა რამ არ არის ინდივიდუალურად შეთანხმებული წერილობით.
-2.2. გამყიდველს თანხა ჩაერიცხება ყოველი მომდევნო თვის 10 რიცხვამდე, თვეში ერთხელ, იმ შეკვეთების მიხედვით, რომლებიც წარმატებით ჩაბარდა მყიდველს.
-2.3. ვადაზე ადრე თანხის გატანის მოთხოვნის შემთხვევაში, გამყიდველს შეუძლია პლატფორმის პროფილიდან მოითხოვოს თანხის გადმორიცხვა.
-2.4. SoulArt-ის მიტანის სერვისის გამოყენების შემთხვევაში:
-• საფასური შეადგენს პროდუქტის ღირებულების 5%-ს, მინიმუმ 10 ლარი
-• მაქსიმალური საფასური – 50 ლარი
+      printWindow.document.close();
+      printWindow.focus();
 
-3. პროდუქციის მიწოდება და ხარისხი
-3.1. გამყიდველი ვალდებულია ჩააბაროს პროდუქცია მყიდველს მითითებულ ვადებში და პირობებში.
-3.2. თანხის ჩარიცხვა გამყიდველზე ხდება მხოლოდ იმ შემთხვევაში, თუ შეკვეთა წარმატებით ჩაბარდა მყიდველს.
-3.3. პროდუქცია უნდა შეესაბამებოდეს პლატფორმაზე მითითებულ აღწერილობას, ფოტოებსა და ხარისხობრივ სტანდარტებს.
-3.4. გამყიდველი პასუხისმგებელია, რომ პროდუქტი არ არღვევს საქართველოს კანონმდებლობას და მესამე პირების ინტელექტუალურ საკუთრებას.
-
-4. დაბრუნება და ანაზღაურება
-4.1. ხელნაკეთი ნაწარმისა და ნახატების სპეციფიკიდან გამომდინარე, დაბრუნება შესაძლებელია მხოლოდ შემდეგ შემთხვევებში:
-• პროდუქცია მნიშვნელოვნად განსხვავდება აღწერილობისგან
-• პროდუქტი არის დაზიანებული ან ბრაკი
-• პროდუქტი არ ჩაბარდა დადგენილ ვადებში
-4.2. დაბრუნების მოთხოვნა უნდა წარედგინოს ჩაბარებიდან 7 კალენდარული დღის განმავლობაში.
-4.3. დაბრუნების შემთხვევაში, გამყიდველი ვალდებულია დააბრუნოს მყიდველისთვის პროდუქტის სრული ღირებულება.
-
-5. პასუხისმგებლობა
-5.1. გამყიდველი სრულად არის პასუხისმგებელი:
-• პროდუქციის ხარისხსა და შესაბამისობაზე
-• პროდუქტის უსაფრთხოებაზე
-• ყველა იურიდიულ საკითხზე, დაკავშირებულ მის პროდუქციასთან
-• ავტორის უფლებებთან დაკავშირებულ საკითხებზე
-• მყიდველთან კომუნიკაციაზე და სერვისის გაწევაზე
-5.2. პლატფორმა არ არის პასუხისმგებელი:
-• გამყიდველის მიერ მიწოდებული პროდუქციის ხარისხზე
-• გამყიდველსა და მყიდველს შორის წარმოშობილ დავებზე
-• გამყიდველის ქმედებებზე, რომლებიც არღვევს კანონმდებლობას
-
-6. ხელშეკრულების შეწყვეტა
-6.1. პლატფორმას უფლება აქვს შეწყვიტოს გამყიდველის ხელშეკრულება ნებისმიერ დროს შემდეგ შემთხვევებში:
-• ხელშეკრულების პირობების ხშირი დარღვევა
-• მყიდველების მხრიდან სისტემატური საჩივრები
-• ყალბი ან არაკანონიერი პროდუქციის განთავსება
-• ინტელექტუალური საკუთრების დარღვევა
-6.2. შეწყვეტისას პლატფორმას უფლება აქვს შეაჩეროს გამყიდველის პროფილი და შეინარჩუნოს მყოფი თანხები მანამ, სანამ ყველა დავა არ მოგვარდება.
-
-7. დავების გადაწყვეტა
-7.1. ყველა დავა, რაც შეიძლება წარმოიშვას ხელშეკრულების საფუძველზე, გადაწყდება მოლაპარაკების გზით.
-7.2. შეთანხმების მიღწევის შეუძლებლობის შემთხვევაში, დავა გადაიჭრება საქართველოს სასამართლოში, საქართველოს კანონმდებლობის შესაბამისად.
-
-8. ცვლილებები
-8.1. პლატფორმას უფლება აქვს შეცვალოს ხელშეკრულების პირობები, რაზეც გამყიდველს ეცნობება ელექტრონული ფოსტით ან პლატფორმაზე შეტყობინების განთავსებით.
-8.2. ცვლილებების ძალაში შესვლის შემდეგ პლატფორმის გამოყენების გაგრძელება ითვლება ცვლილებებზე გამყიდველის თანხმობად.
-
-9. საბოლოო დებულებები
-9.1. ხელშეკრულება ძალაში შედის გამყიდველის რეგისტრაციის მომენტიდან.
-9.2. ხელშეკრულება შედგენილია ქართულ ენაზე და რეგულირდება საქართველოს კანონმდებლობით.
-9.3. ნებისმიერი საკითხი, რომელიც არ არის გაწერილი ამ ხელშეკრულებაში, რეგულირდება საქართველოს მოქმედი კანონმდებლობით.
-
-10. თანხმობის შედეგები
-10.1. პლატფორმაზე რეგისტრაციით და ამ ხელშეკრულების პირობებზე თანხმობის დადასტურებით, გამყიდველი ადასტურებს, რომ:
-• სრულად გაეცნო ხელშეკრულების ყველა პუნქტს
-• იღებს ყველა ვალდებულებას, რომელიც დადგენილია ხელშეკრულებაში
-• თანახმაა პლატფორმის პოლიტიკასა და წესებზე
-• იცის, რომ პირობების დარღვევა შეიძლება გამოიწვიოს ანგარიშის დაბლოკვა ან ხელშეკრულების შეწყვეტა პლატფორმის მხრიდან`
-        : `Public Agreement for Sellers
-SoulArt.ge Platform Terms of Use
-
-1. General Provisions
-1.1. This public agreement ("Agreement") represents a legal offer between the SoulArt platform ("Platform") and any registered seller ("Seller").
-1.2. The agreement comes into force from the moment of seller registration and confirmation of electronic consent to the terms.
-1.3. The platform acts as an intermediary between sellers and buyers and provides only technical and service support.
-1.4. The agreement is governed by Georgian legislation.
-
-2. Commission and Payment Terms
-2.1. The platform commission is 10% of the sold product value, unless otherwise individually agreed in writing.
-2.2. Funds are credited to the seller by the 10th of each following month, once a month, based on orders successfully delivered to buyers.
-2.3. In case of early withdrawal request, the seller can request fund transfer from the platform profile.
-2.4. When using SoulArt delivery service:
-• Fee is 5% of product value, minimum 10 GEL
-• Maximum fee – 50 GEL
-
-3. Product Delivery and Quality
-3.1. The seller must deliver products to buyers within specified times and conditions.
-3.2. Funds are credited to the seller only if the order is successfully delivered to the buyer.
-3.3. Products must comply with descriptions, photos, and quality standards indicated on the platform.
-3.4. The seller is responsible that the product does not violate Georgian legislation and third party intellectual property.
-
-4. Returns and Refunds
-4.1. Due to the specificity of handmade items and paintings, returns are possible only in the following cases:
-• Product significantly differs from description
-• Product is damaged or defective
-• Product was not delivered within specified time
-4.2. Return request must be submitted within 7 calendar days from delivery.
-4.3. In case of return, the seller must refund the full product value to the buyer.
-
-5. Responsibility
-5.1. The seller is fully responsible for:
-• Product quality and compliance
-• Product safety
-• All legal issues related to their products
-• Copyright and authorship issues
-• Communication with buyers and service provision
-5.2. The platform is not responsible for:
-• Quality of products provided by sellers
-• Disputes arising between sellers and buyers
-• Seller actions that violate legislation
-
-6. Contract Termination
-6.1. The platform has the right to terminate the seller's contract at any time in the following cases:
-• Frequent violation of contract terms
-• Systematic complaints from buyers
-• Placement of fake or illegal products
-• Intellectual property violations
-6.2. Upon termination, the platform has the right to suspend the seller's profile and retain available funds until all disputes are resolved.
-
-7. Dispute Resolution
-7.1. All disputes that may arise on the basis of the contract shall be resolved through negotiations.
-7.2. In case of inability to reach an agreement, the dispute will be resolved in a Georgian court, in accordance with Georgian legislation.
-
-8. Changes
-8.1. The platform has the right to change the terms of the contract, which will be communicated to the seller by email or by posting a notification on the platform.
-8.2. Continued use of the platform after changes come into effect is considered the seller's consent to the changes.
-
-9. Final Provisions
-9.1. The contract comes into force from the moment of seller registration.
-9.2. The contract is concluded in Georgian and is governed by Georgian legislation.
-9.3. Any issue not covered in this contract is governed by the current legislation of Georgia.
-
-10. Consent Consequences
-10.1. By registering on the platform and confirming consent to the terms of this contract, the seller confirms that:
-• Has fully reviewed all points of the contract
-• Accepts all obligations established in the contract
-• Agrees to the platform's policies and rules
-• Knows that violation of terms may result in account blocking or contract termination by the platform`;
-
-    const file = new Blob([contractContent], {
-      type: "text/plain;charset=utf-8",
-    });
-    element.href = URL.createObjectURL(file);
-    element.download =
-      language === "ge"
-        ? "სელერის_ხელშეკრულება_SoulArt.txt"
-        : "Seller_Contract_SoulArt.txt";
-    document.body.appendChild(element);
-    element.click();
-    document.body.removeChild(element);
+      // ცოტა დავლოდოთ რომ კონტენტი ჩაიტვირთოს
+      setTimeout(() => {
+        printWindow.print();
+        printWindow.close();
+      }, 500);
+    }
   };
 
   return (
