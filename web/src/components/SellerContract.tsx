@@ -51,15 +51,32 @@ export function SellerContract({
 
   const handleDownload = () => {
     try {
-      // შევქმნათ print-ისთვის განკუთვნილი ფანჯარა
-      const printWindow = window.open("", "_blank");
+      // Mobile device detection
+      const isMobile =
+        /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+          navigator.userAgent
+        );
+
       const contractContent = document.querySelector(".contract-content");
 
-      if (printWindow && contractContent) {
-        printWindow.document.write(`
+      if (!contractContent) {
+        console.error("Could not find contract content");
+        alert(
+          language === "ge"
+            ? "შეცდომა: კონტენტი ვერ მოიძებნა"
+            : "Error: Content not found"
+        );
+        return;
+      }
+
+      if (isMobile) {
+        // Mobile-specific handling
+        const printContent = `
           <!DOCTYPE html>
           <html>
           <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <title>${
               language === "ge"
                 ? "სელერის ხელშეკრულება - SoulArt.ge"
@@ -69,47 +86,44 @@ export function SellerContract({
               body {
                 font-family: Arial, sans-serif;
                 line-height: 1.6;
-                margin: 20px;
+                margin: 10px;
                 color: #333;
+                font-size: 14px;
               }
               h1, h2, h3, h4 {
                 color: #2c3e50;
-                margin-top: 20px;
-                margin-bottom: 10px;
+                margin-top: 15px;
+                margin-bottom: 8px;
               }
               h1 {
                 text-align: center;
-                font-size: 24px;
+                font-size: 20px;
                 border-bottom: 2px solid #3498db;
-                padding-bottom: 10px;
+                padding-bottom: 8px;
               }
               h4 {
-                font-size: 16px;
+                font-size: 14px;
                 font-weight: bold;
               }
               p {
-                margin-bottom: 10px;
+                margin-bottom: 8px;
                 text-align: justify;
               }
               ul {
-                margin: 10px 0;
-                padding-left: 20px;
+                margin: 8px 0;
+                padding-left: 15px;
               }
               li {
-                margin-bottom: 5px;
+                margin-bottom: 4px;
               }
               strong {
                 font-weight: bold;
               }
               .header-info {
                 text-align: center;
-                margin-bottom: 30px;
-                font-size: 12px;
+                margin-bottom: 20px;
+                font-size: 11px;
                 color: #666;
-              }
-              @media print {
-                body { margin: 0; }
-                .no-print { display: none; }
               }
             </style>
           </head>
@@ -134,18 +148,151 @@ export function SellerContract({
             ${contractContent.innerHTML}
           </body>
           </html>
-        `);
+        `;
 
-        printWindow.document.close();
-        printWindow.focus();
+        // Create blob and download link for mobile
+        const blob = new Blob([printContent], { type: "text/html" });
+        const url = URL.createObjectURL(blob);
 
-        // მხოლოდ ფანჯარის გახსნა, print dialog-ის გარეშე
-        // მომხმარებელი თვითონ აირჩევს Ctrl+P ან File -> Print
+        // Try to open in new tab/window
+        const newWindow = window.open();
+        if (newWindow) {
+          newWindow.document.open();
+          newWindow.document.write(printContent);
+          newWindow.document.close();
+
+          // For mobile, show instructions
+          setTimeout(() => {
+            if (newWindow && !newWindow.closed) {
+              alert(
+                language === "ge"
+                  ? "მენიუ (⋮) → ბეჭდვა ან გაზიარება → PDF-ად შენახვა"
+                  : "Menu (⋮) → Print or Share → Save as PDF"
+              );
+            }
+          }, 1000);
+        } else {
+          // Fallback: create download link
+          const link = document.createElement("a");
+          link.href = url;
+          link.download = `SoulArt_Contract_${
+            new Date().toISOString().split("T")[0]
+          }.html`;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          URL.revokeObjectURL(url);
+        }
       } else {
-        console.error("Could not open print window or find contract content");
+        // Desktop handling (original code)
+        const printWindow = window.open("", "_blank");
+
+        if (printWindow) {
+          printWindow.document.write(`
+            <!DOCTYPE html>
+            <html>
+            <head>
+              <title>${
+                language === "ge"
+                  ? "სელერის ხელშეკრულება - SoulArt.ge"
+                  : "Seller Contract - SoulArt.ge"
+              }</title>
+              <style>
+                body {
+                  font-family: Arial, sans-serif;
+                  line-height: 1.6;
+                  margin: 20px;
+                  color: #333;
+                }
+                h1, h2, h3, h4 {
+                  color: #2c3e50;
+                  margin-top: 20px;
+                  margin-bottom: 10px;
+                }
+                h1 {
+                  text-align: center;
+                  font-size: 24px;
+                  border-bottom: 2px solid #3498db;
+                  padding-bottom: 10px;
+                }
+                h4 {
+                  font-size: 16px;
+                  font-weight: bold;
+                }
+                p {
+                  margin-bottom: 10px;
+                  text-align: justify;
+                }
+                ul {
+                  margin: 10px 0;
+                  padding-left: 20px;
+                }
+                li {
+                  margin-bottom: 5px;
+                }
+                strong {
+                  font-weight: bold;
+                }
+                .header-info {
+                  text-align: center;
+                  margin-bottom: 30px;
+                  font-size: 12px;
+                  color: #666;
+                }
+                @media print {
+                  body { margin: 0; }
+                  .no-print { display: none; }
+                }
+              </style>
+            </head>
+            <body>
+              <h1>${
+                language === "ge"
+                  ? "საჯარო ხელშეკრულება გამყიდველებისთვის"
+                  : "Public Agreement for Sellers"
+              }</h1>
+              <div class="header-info">
+                <p><strong>SoulArt.ge</strong> - ${
+                  language === "ge"
+                    ? "პლატფორმის გამოყენების პირობები"
+                    : "Platform Terms of Use"
+                }</p>
+                <p>${
+                  language === "ge"
+                    ? "ბოლო განახლების თარიღი:"
+                    : "Last updated:"
+                } ${new Date().toLocaleDateString(
+            language === "ge" ? "ka-GE" : "en-US"
+          )}</p>
+              </div>
+              ${contractContent.innerHTML}
+            </body>
+            </html>
+          `);
+
+          printWindow.document.close();
+          printWindow.focus();
+
+          // Print dialog for desktop
+          setTimeout(() => {
+            printWindow.print();
+          }, 100);
+        } else {
+          console.error("Could not open print window");
+          alert(
+            language === "ge"
+              ? "შეცდომა: ფანჯარა ვერ გაიხსნა"
+              : "Error: Could not open window"
+          );
+        }
       }
     } catch (error) {
       console.error("Error in handleDownload:", error);
+      alert(
+        language === "ge"
+          ? "შეცდომა ბეჭდვისას. გთხოვთ სცადოთ მოგვიანებით."
+          : "Error during print. Please try again later."
+      );
     }
   };
 
