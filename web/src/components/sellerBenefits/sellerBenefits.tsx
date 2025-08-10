@@ -15,7 +15,7 @@ export default function SellerBenefits() {
       <div className="grid">
         <div className="benefits">
           <h3 className="section-title">
-            {t("sellerBenefits.benefits.title")}
+            🌟{t("sellerBenefits.benefits.title")}
           </h3>
           <ul className="list">
             {[...Array(7)].map((_, i) => (
@@ -26,7 +26,7 @@ export default function SellerBenefits() {
 
         <div className="shipping">
           <h3 className="section-title">
-            {t("sellerBenefits.shipping.title")}
+            🚚 {t("sellerBenefits.shipping.title")}
           </h3>
           <ul className="list">
             {[...Array(5)].map((_, i) => (
@@ -37,7 +37,7 @@ export default function SellerBenefits() {
       </div>
 
       <div className="cta">
-        <p className="cta-text">{t("sellerBenefits.cta.text")}</p>
+        <p className="cta-text">✨{t("sellerBenefits.cta.text")}</p>
         <a href="#seller-register-form" className="cta-button">
           {t("sellerBenefits.cta.button")}
         </a>
