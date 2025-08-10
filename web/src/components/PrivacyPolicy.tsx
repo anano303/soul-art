@@ -51,32 +51,15 @@ export function PrivacyPolicy({
 
   const handleDownload = () => {
     try {
-      // Mobile device detection
-      const isMobile =
-        /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-          navigator.userAgent
-        );
-
+      // შევქმნათ print-ისთვის განკუთვნილი ფანჯარა
+      const printWindow = window.open("", "_blank");
       const contractContent = document.querySelector(".privacy-content");
 
-      if (!contractContent) {
-        console.error("Could not find privacy content");
-        alert(
-          language === "ge"
-            ? "შეცდომა: კონტენტი ვერ მოიძებნა"
-            : "Error: Content not found"
-        );
-        return;
-      }
-
-      if (isMobile) {
-        // Mobile-specific handling
-        const printContent = `
+      if (printWindow && contractContent) {
+        printWindow.document.write(`
           <!DOCTYPE html>
           <html>
           <head>
-            <meta charset="UTF-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <title>${
               language === "ge"
                 ? "კონფიდენციალურობის პოლიტიკა - SoulArt.ge"
@@ -86,50 +69,53 @@ export function PrivacyPolicy({
               body {
                 font-family: Arial, sans-serif;
                 line-height: 1.6;
-                margin: 10px;
+                margin: 20px;
                 color: #333;
-                font-size: 14px;
               }
               h1, h2, h3, h4 {
                 color: #2c3e50;
-                margin-top: 15px;
-                margin-bottom: 8px;
+                margin-top: 20px;
+                margin-bottom: 10px;
               }
               h1 {
                 text-align: center;
-                font-size: 20px;
+                font-size: 24px;
                 border-bottom: 2px solid #3498db;
-                padding-bottom: 8px;
+                padding-bottom: 10px;
               }
               h4 {
-                font-size: 14px;
+                font-size: 16px;
                 font-weight: bold;
               }
               p {
-                margin-bottom: 8px;
+                margin-bottom: 10px;
                 text-align: justify;
               }
               ul {
-                margin: 8px 0;
-                padding-left: 15px;
+                margin: 10px 0;
+                padding-left: 20px;
               }
               li {
-                margin-bottom: 4px;
+                margin-bottom: 5px;
               }
               strong {
                 font-weight: bold;
               }
               .header-info {
                 text-align: center;
-                margin-bottom: 20px;
-                font-size: 11px;
+                margin-bottom: 30px;
+                font-size: 12px;
                 color: #666;
               }
               .contact-info {
                 background: #f8f9fa;
-                padding: 10px;
-                border-radius: 6px;
-                border-left: 3px solid #7b5642;
+                padding: 15px;
+                border-radius: 8px;
+                border-left: 4px solid #7b5642;
+              }
+              @media print {
+                body { margin: 0; }
+                .no-print { display: none; }
               }
             </style>
           </head>
@@ -154,155 +140,18 @@ export function PrivacyPolicy({
             ${contractContent.innerHTML}
           </body>
           </html>
-        `;
+        `);
 
-        // Create blob and download link for mobile
-        const blob = new Blob([printContent], { type: "text/html" });
-        const url = URL.createObjectURL(blob);
+        printWindow.document.close();
+        printWindow.focus();
 
-        // Try to open in new tab/window
-        const newWindow = window.open();
-        if (newWindow) {
-          newWindow.document.open();
-          newWindow.document.write(printContent);
-          newWindow.document.close();
-
-          // For mobile, show instructions
-          setTimeout(() => {
-            if (newWindow && !newWindow.closed) {
-              alert(
-                language === "ge"
-                  ? "მენიუ (⋮) → ბეჭდვა ან გაზიარება → PDF-ად შენახვა"
-                  : "Menu (⋮) → Print or Share → Save as PDF"
-              );
-            }
-          }, 1000);
-        } else {
-          // Fallback: create download link
-          const link = document.createElement("a");
-          link.href = url;
-          link.download = `SoulArt_Privacy_Policy_${
-            new Date().toISOString().split("T")[0]
-          }.html`;
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
-          URL.revokeObjectURL(url);
-        }
+        // მხოლოდ ფანჯარის გახსნა, print dialog-ის გარეშე
+        // მომხმარებელი თვითონ აირჩევს Ctrl+P ან File -> Print
       } else {
-        // Desktop handling (original code)
-        const printWindow = window.open("", "_blank");
-
-        if (printWindow) {
-          printWindow.document.write(`
-            <!DOCTYPE html>
-            <html>
-            <head>
-              <title>${
-                language === "ge"
-                  ? "კონფიდენციალურობის პოლიტიკა - SoulArt.ge"
-                  : "Privacy Policy - SoulArt.ge"
-              }</title>
-              <style>
-                body {
-                  font-family: Arial, sans-serif;
-                  line-height: 1.6;
-                  margin: 20px;
-                  color: #333;
-                }
-                h1, h2, h3, h4 {
-                  color: #2c3e50;
-                  margin-top: 20px;
-                  margin-bottom: 10px;
-                }
-                h1 {
-                  text-align: center;
-                  font-size: 24px;
-                  border-bottom: 2px solid #3498db;
-                  padding-bottom: 10px;
-                }
-                h4 {
-                  font-size: 16px;
-                  font-weight: bold;
-                }
-                p {
-                  margin-bottom: 10px;
-                  text-align: justify;
-                }
-                ul {
-                  margin: 10px 0;
-                  padding-left: 20px;
-                }
-                li {
-                  margin-bottom: 5px;
-                }
-                strong {
-                  font-weight: bold;
-                }
-                .header-info {
-                  text-align: center;
-                  margin-bottom: 30px;
-                  font-size: 12px;
-                  color: #666;
-                }
-                .contact-info {
-                  background: #f8f9fa;
-                  padding: 15px;
-                  border-radius: 8px;
-                  border-left: 4px solid #7b5642;
-                }
-                @media print {
-                  body { margin: 0; }
-                  .no-print { display: none; }
-                }
-              </style>
-            </head>
-            <body>
-              <h1>${
-                language === "ge"
-                  ? "კონფიდენციალურობის პოლიტიკა"
-                  : "Privacy Policy"
-              }</h1>
-              <div class="header-info">
-                <p><strong>SoulArt.ge</strong> - ${
-                  language === "ge"
-                    ? "პლატფორმის კონფიდენციალურობის პოლიტიკა"
-                    : "Platform Privacy Policy"
-                }</p>
-                <p>${
-                  language === "ge"
-                    ? "ამოქმედების თარიღი: 15 ივლისი, 2025"
-                    : "Effective Date: July 15, 2025"
-                }</p>
-              </div>
-              ${contractContent.innerHTML}
-            </body>
-            </html>
-          `);
-
-          printWindow.document.close();
-          printWindow.focus();
-
-          // Print dialog for desktop
-          setTimeout(() => {
-            printWindow.print();
-          }, 100);
-        } else {
-          console.error("Could not open print window");
-          alert(
-            language === "ge"
-              ? "შეცდომა: ფანჯარა ვერ გაიხსნა"
-              : "Error: Could not open window"
-          );
-        }
+        console.error("Could not open print window or find privacy content");
       }
     } catch (error) {
       console.error("Error in handleDownload:", error);
-      alert(
-        language === "ge"
-          ? "შეცდომა ბეჭდვისას. გთხოვთ სცადოთ მოგვიანებით."
-          : "Error during print. Please try again later."
-      );
     }
   };
 
