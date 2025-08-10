@@ -419,6 +419,7 @@ input:focus {
   align-items: center;
   z-index: 10000;
   padding: 20px;
+  color: #012645;
 }
 
 .contract-modal {
