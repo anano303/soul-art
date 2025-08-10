@@ -139,8 +139,10 @@ export function TermsAndConditions({
         printWindow.document.close();
         printWindow.focus();
 
-        // მხოლოდ ფანჯარის გახსნა, print dialog-ის გარეშე
-        // მომხმარებელი თვითონ აირჩევს Ctrl+P ან File -> Print
+        // Print dialog-ის ავტომატური გაშვება
+        setTimeout(() => {
+          printWindow.print();
+        }, 100);
       } else {
         console.error("Could not open print window or find contract content");
       }
