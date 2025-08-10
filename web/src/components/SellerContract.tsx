@@ -1,6 +1,7 @@
 "use client";
 
 import { useLanguage } from "@/hooks/LanguageContext";
+import { useEffect } from "react";
 
 interface SellerContractProps {
   isOpen: boolean;
@@ -17,107 +18,154 @@ export function SellerContract({
 }: SellerContractProps) {
   const { language } = useLanguage();
 
+  // Modal-ის დახურვისთვის როცა component unmount-ხდება
+  useEffect(() => {
+    return () => {
+      // Cleanup function - დამატებითი უსაფრთხოება
+      if (isOpen) {
+        document.body.style.overflow = "unset";
+      }
+    };
+  }, [isOpen]);
+
+  // ESC ღილაკით დახურვისთვის
+  useEffect(() => {
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape" && isOpen) {
+        onClose();
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener("keydown", handleEscape);
+      document.body.style.overflow = "hidden"; // Background scroll-ის აღკვეთა
+    }
+
+    return () => {
+      document.removeEventListener("keydown", handleEscape);
+      document.body.style.overflow = "unset";
+    };
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   const handleDownload = () => {
-    // შევქმნათ print-ისთვის განკუთვნილი ფანჯარა
-    const printWindow = window.open("", "_blank");
-    const contractContent = document.querySelector(".contract-content");
+    try {
+      // შევქმნათ print-ისთვის განკუთვნილი ფანჯარა
+      const printWindow = window.open("", "_blank");
+      const contractContent = document.querySelector(".contract-content");
 
-    if (printWindow && contractContent) {
-      printWindow.document.write(`
-        <!DOCTYPE html>
-        <html>
-        <head>
-          <title>${
-            language === "ge"
-              ? "სელერის ხელშეკრულება - SoulArt.ge"
-              : "Seller Contract - SoulArt.ge"
-          }</title>
-          <style>
-            body {
-              font-family: Arial, sans-serif;
-              line-height: 1.6;
-              margin: 20px;
-              color: #333;
-            }
-            h1, h2, h3, h4 {
-              color: #2c3e50;
-              margin-top: 20px;
-              margin-bottom: 10px;
-            }
-            h1 {
-              text-align: center;
-              font-size: 24px;
-              border-bottom: 2px solid #3498db;
-              padding-bottom: 10px;
-            }
-            h4 {
-              font-size: 16px;
-              font-weight: bold;
-            }
-            p {
-              margin-bottom: 10px;
-              text-align: justify;
-            }
-            ul {
-              margin: 10px 0;
-              padding-left: 20px;
-            }
-            li {
-              margin-bottom: 5px;
-            }
-            strong {
-              font-weight: bold;
-            }
-            .header-info {
-              text-align: center;
-              margin-bottom: 30px;
-              font-size: 12px;
-              color: #666;
-            }
-            @media print {
-              body { margin: 0; }
-              .no-print { display: none; }
-            }
-          </style>
-        </head>
-        <body>
-          <h1>${
-            language === "ge"
-              ? "საჯარო ხელშეკრულება გამყიდველებისთვის"
-              : "Public Agreement for Sellers"
-          }</h1>
-          <div class="header-info">
-            <p><strong>SoulArt.ge</strong> - ${
+      if (printWindow && contractContent) {
+        printWindow.document.write(`
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <title>${
               language === "ge"
-                ? "პლატფორმის გამოყენების პირობები"
-                : "Platform Terms of Use"
-            }</p>
-            <p>${
-              language === "ge" ? "ბოლო განახლების თარიღი:" : "Last updated:"
-            } ${new Date().toLocaleDateString(
-        language === "ge" ? "ka-GE" : "en-US"
-      )}</p>
-          </div>
-          ${contractContent.innerHTML}
-        </body>
-        </html>
-      `);
+                ? "სელერის ხელშეკრულება - SoulArt.ge"
+                : "Seller Contract - SoulArt.ge"
+            }</title>
+            <style>
+              body {
+                font-family: Arial, sans-serif;
+                line-height: 1.6;
+                margin: 20px;
+                color: #333;
+              }
+              h1, h2, h3, h4 {
+                color: #2c3e50;
+                margin-top: 20px;
+                margin-bottom: 10px;
+              }
+              h1 {
+                text-align: center;
+                font-size: 24px;
+                border-bottom: 2px solid #3498db;
+                padding-bottom: 10px;
+              }
+              h4 {
+                font-size: 16px;
+                font-weight: bold;
+              }
+              p {
+                margin-bottom: 10px;
+                text-align: justify;
+              }
+              ul {
+                margin: 10px 0;
+                padding-left: 20px;
+              }
+              li {
+                margin-bottom: 5px;
+              }
+              strong {
+                font-weight: bold;
+              }
+              .header-info {
+                text-align: center;
+                margin-bottom: 30px;
+                font-size: 12px;
+                color: #666;
+              }
+              @media print {
+                body { margin: 0; }
+                .no-print { display: none; }
+              }
+            </style>
+          </head>
+          <body>
+            <h1>${
+              language === "ge"
+                ? "საჯარო ხელშეკრულება გამყიდველებისთვის"
+                : "Public Agreement for Sellers"
+            }</h1>
+            <div class="header-info">
+              <p><strong>SoulArt.ge</strong> - ${
+                language === "ge"
+                  ? "პლატფორმის გამოყენების პირობები"
+                  : "Platform Terms of Use"
+              }</p>
+              <p>${
+                language === "ge" ? "ბოლო განახლების თარიღი:" : "Last updated:"
+              } ${new Date().toLocaleDateString(
+          language === "ge" ? "ka-GE" : "en-US"
+        )}</p>
+            </div>
+            ${contractContent.innerHTML}
+          </body>
+          </html>
+        `);
 
-      printWindow.document.close();
-      printWindow.focus();
+        printWindow.document.close();
+        printWindow.focus();
 
-      // ცოტა დავლოდოთ რომ კონტენტი ჩაიტვირთოს
-      setTimeout(() => {
-        printWindow.print();
-        printWindow.close();
-      }, 500);
+        // მხოლოდ ფანჯარის გახსნა, print dialog-ის გარეშე
+        // მომხმარებელი თვითონ აირჩევს Ctrl+P ან File -> Print
+      } else {
+        console.error("Could not open print window or find contract content");
+      }
+    } catch (error) {
+      console.error("Error in handleDownload:", error);
     }
   };
 
   return (
-    <div className="contract-modal-overlay" onClick={onClose}>
+    <div
+      className="contract-modal-overlay"
+      onClick={onClose}
+      style={{
+        position: "fixed",
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: "rgba(0, 0, 0, 0.5)",
+        zIndex: 999,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+      }}
+    >
       <div
         className="contract-modal"
         onClick={(e) => e.stopPropagation()}
@@ -165,7 +213,7 @@ export function SellerContract({
                 marginRight: "10px",
               }}
             >
-              📄 {language === "ge" ? "PDF გადმოწერა" : "Download PDF"}
+              📄 {language === "ge" ? "ბეჭდვა/გადმოწერა" : "Print/Download"}
             </button>
             <button
               onClick={onClose}
