@@ -12,6 +12,8 @@ import { useRouter } from "next/navigation";
 import { toast } from "@/hooks/use-toast";
 import Image from "next/image";
 import { useLanguage } from "@/hooks/LanguageContext";
+import { SellerContract } from "@/components/SellerContract";
+import { TermsAndConditions } from "@/components/TermsAndConditions";
 
 type SellerRegisterFormData = z.infer<typeof sellerRegisterSchema>;
 
@@ -27,6 +29,12 @@ export function SellerRegisterForm() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [privacyAgreed, setPrivacyAgreed] = useState(false);
   const [privacyError, setPrivacyError] = useState<string | null>(null);
+  const [contractAgreed, setContractAgreed] = useState(false);
+  const [contractError, setContractError] = useState<string | null>(null);
+  const [showContract, setShowContract] = useState(false);
+  const [termsAgreed, setTermsAgreed] = useState(false);
+  const [termsError, setTermsError] = useState<string | null>(null);
+  const [showTerms, setShowTerms] = useState(false);
 
   const {
     register: registerField,
@@ -52,10 +60,24 @@ export function SellerRegisterForm() {
   const onSubmit = handleSubmit((data) => {
     setRegistrationError(null);
     setPrivacyError(null);
+    setContractError(null);
+    setTermsError(null);
 
     // Check if privacy policy is agreed
     if (!privacyAgreed) {
       setPrivacyError(t("auth.privacyPolicyRequired"));
+      return;
+    }
+
+    // Check if seller contract is agreed
+    if (!contractAgreed) {
+      setContractError(t("auth.sellerContractRequired"));
+      return;
+    }
+
+    // Check if terms and conditions are agreed
+    if (!termsAgreed) {
+      setTermsError(t("auth.termsAndConditionsRequired"));
       return;
     }
 
@@ -284,10 +306,98 @@ export function SellerRegisterForm() {
           {privacyError && <p className="error-text">{privacyError}</p>}
         </div>
 
+        {/* Seller Contract Agreement */}
+        <div className="contract-policy-group">
+          <label className="privacy-policy-label">
+            <input
+              type="checkbox"
+              checked={contractAgreed}
+              onChange={(e) => setContractAgreed(e.target.checked)}
+              className="privacy-policy-checkbox"
+            />
+            <span className="privacy-policy-text">
+              {t("auth.agreeToSellerContract")}{" "}
+              <button
+                type="button"
+                onClick={() => setShowContract(true)}
+                className="contract-link"
+                style={{
+                  background: "none",
+                  border: "none",
+                  color: "#007bff",
+                  textDecoration: "underline",
+                  cursor: "pointer",
+                }}
+              >
+                {t("auth.sellerContract")}
+              </button>{" "}
+              {t("auth.terms")}
+            </span>
+          </label>
+          {contractError && <p className="error-text">{contractError}</p>}
+        </div>
+
+        {/* Terms and Conditions Agreement */}
+        <div className="contract-policy-group">
+          <label className="privacy-policy-label">
+            <input
+              type="checkbox"
+              checked={termsAgreed}
+              onChange={(e) => setTermsAgreed(e.target.checked)}
+              className="privacy-policy-checkbox"
+            />
+            <span className="privacy-policy-text">
+              {t("auth.agreeToGeneralTerms")}{" "}
+              <button
+                type="button"
+                onClick={() => setShowTerms(true)}
+                className="contract-link"
+                style={{
+                  background: "none",
+                  border: "none",
+                  color: "#007bff",
+                  textDecoration: "underline",
+                  cursor: "pointer",
+                }}
+              >
+                {t("auth.generalTermsAndConditions")}
+              </button>{" "}
+              {t("auth.provisions")}
+            </span>
+          </label>
+          {termsError && <p className="error-text">{termsError}</p>}
+        </div>
+
+        {/* Contract Modal */}
+        <SellerContract
+          isOpen={showContract}
+          onClose={() => setShowContract(false)}
+          onAccept={() => {
+            setContractAgreed(true);
+            setShowContract(false);
+          }}
+          showAcceptButton={true}
+        />
+
+        {/* Terms and Conditions Modal */}
+        <TermsAndConditions
+          isOpen={showTerms}
+          onClose={() => setShowTerms(false)}
+          onAccept={() => {
+            setTermsAgreed(true);
+            setShowTerms(false);
+          }}
+          showAcceptButton={true}
+        />
+
         <button
           type="submit"
-          className={`submit-btn ${!privacyAgreed ? "disabled" : ""}`}
-          disabled={isPending || !privacyAgreed}
+          className={`submit-btn ${
+            !privacyAgreed || !contractAgreed || !termsAgreed ? "disabled" : ""
+          }`}
+          disabled={
+            isPending || !privacyAgreed || !contractAgreed || !termsAgreed
+          }
         >
           {isPending ? t("auth.registering") : t("auth.register")}
         </button>

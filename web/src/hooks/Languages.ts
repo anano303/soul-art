@@ -292,7 +292,7 @@ export const TRANSLATIONS: Translations = {
         items: [
           "მიწოდების ტიპს თავად ირჩევთ პროდუქტის ატვირთვისას",
           "პირადი მიწოდების შემთხვევაში - დამატებითი გადასახადი არ არის",
-          "Soulart-ის კურიერის სერვისით სარგებლობისას დაემატება მხოლოდ 4% ლოჯისტიკური საკომისიო",
+          "Soulart-ის კურიერის სერვისით სარგებლობისას დაემატება მხოლოდ 5% ლოჯისტიკური საკომისიო, მინიმუმ 10 ლარი",
           "მიწოდების ვარიანტები ავტომატურად ჩანს თქვენს პანელში და მარტივად იმართება",
           "უსაფრთხო ტრანზაქციები და მყიდველებთან კომუნიკაცია პლატფორმის შიგნით",
         ],
@@ -433,6 +433,29 @@ export const TRANSLATIONS: Translations = {
       agreeToPrivacyPolicy: "ვეთანხმები",
       privacyPolicyRequired:
         "კონფიდენციალურობის პოლიტიკასთან დათანხმება აუცილებელია",
+      // Email verification
+      sendVerificationCode: "გადაგზავნა ვერიფიკაციის კოდი",
+      verificationCode: "ვერიფიკაციის კოდი",
+      verify: "ვერიფიკაცია",
+      pleaseVerifyEmail: "გთხოვთ დაადასტურეთ ელ-ფოსტა",
+      invalidVerificationCode: "არასწორი ვერიფიკაციის კოდი",
+      // Terms and agreements
+      agreeToTermsAndConditions: "ვეთანხმები",
+      termsAndConditions: "საიტის გამოყენების წესებსა და პირობებს",
+      and: "და",
+      // Creating account
+      creatingAccount: "ანგარიშის შექმნა...",
+      // Seller registration specific
+      agreeToSellerContract: "ვეთანხმები",
+      sellerContract: "გამყიდველის ხელშეკრულების",
+      terms: "პირობებს",
+      agreeToGeneralTerms: "ვეთანხმები",
+      generalTermsAndConditions: "ზოგადი წესები პირობების",
+      provisions: "დადებულებებს",
+      // Error messages
+      sellerContractRequired: "სელერის ხელშეკრულების დადასტურება აუცილებელია",
+      termsAndConditionsRequired:
+        "წესების და პირობების დადასტურება აუცილებელია",
     },
 
     // Contact form
@@ -945,7 +968,7 @@ export const TRANSLATIONS: Translations = {
         items: [
           "You choose the delivery type when uploading products",
           "For personal delivery - no additional fees",
-          "Using SoulArt's courier service adds only 4% logistics commission",
+          "Using SoulArt's courier service adds only 5% logistics commission min. 10 Gel",
           "Delivery options are automatically displayed in your panel and easily managed",
           "Secure transactions and communication with buyers within the platform",
         ],
@@ -1083,6 +1106,29 @@ export const TRANSLATIONS: Translations = {
       pleaseAgreeToTerms: "Please agree to the Privacy Policy",
       agreeToPrivacyPolicy: "I agree to the",
       privacyPolicyRequired: "Privacy Policy agreement is required",
+      // Email verification
+      sendVerificationCode: "Send Verification Code",
+      verificationCode: "Verification Code",
+      verify: "Verify",
+      pleaseVerifyEmail: "Please verify your email",
+      invalidVerificationCode: "Invalid verification code",
+      // Terms and agreements
+      agreeToTermsAndConditions: "I agree to",
+      termsAndConditions: "Terms and Conditions",
+      and: "and",
+      // Creating account
+      creatingAccount: "Creating Account...",
+      // Seller registration specific
+      agreeToSellerContract: "I agree to",
+      sellerContract: "seller contract",
+      terms: "terms",
+      agreeToGeneralTerms: "I agree to",
+      generalTermsAndConditions: "general terms and conditions",
+      provisions: "provisions",
+      // Error messages
+      sellerContractRequired: "Seller contract confirmation is required",
+      termsAndConditionsRequired:
+        "Terms and conditions confirmation is required",
     },
 
     // Contact form

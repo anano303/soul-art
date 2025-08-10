@@ -12,6 +12,7 @@ import "./register-form.css";
 import type * as z from "zod";
 import { useState, useEffect } from "react";
 import { useLanguage } from "@/hooks/LanguageContext";
+import { TermsAndConditions } from "@/components/TermsAndConditions";
 
 type RegisterFormData = z.infer<typeof registerSchema>;
 
@@ -22,6 +23,7 @@ export function RegisterForm() {
   const [registerError, setRegisterError] = useState<string | null>(null);
   const [isSuccess, setIsSuccess] = useState(false);
   const [agreedToTerms, setAgreedToTerms] = useState(false);
+  const [showTerms, setShowTerms] = useState(false);
 
   const {
     register: registerField,
@@ -227,13 +229,39 @@ export function RegisterForm() {
               className="checkbox-input"
             />
             <span className="checkbox-text">
-              {t("auth.agreeToTerms")}{" "}
+              {t("auth.agreeToTermsAndConditions")}{" "}
+              <button
+                type="button"
+                onClick={() => setShowTerms(true)}
+                className="contract-link"
+                style={{
+                  background: "none",
+                  border: "none",
+                  color: "#007bff",
+                  textDecoration: "underline",
+                  cursor: "pointer",
+                }}
+              >
+                {t("auth.termsAndConditions")}
+              </button>{" "}
+              {t("auth.and")}{" "}
               <Link href="/privacy-policy" className="privacy-link">
                 {t("auth.privacyPolicy")}
               </Link>
             </span>
           </label>
         </div>
+
+        {/* Terms and Conditions Modal */}
+        <TermsAndConditions
+          isOpen={showTerms}
+          onClose={() => setShowTerms(false)}
+          onAccept={() => {
+            setAgreedToTerms(true);
+            setShowTerms(false);
+          }}
+          showAcceptButton={true}
+        />
 
         <button
           type="submit"
