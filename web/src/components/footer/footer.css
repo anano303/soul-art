@@ -2,7 +2,7 @@
   background: linear-gradient(135deg, #012645, #014f86);
   color: #f8f9fa;
   padding: 2rem 1rem;
-  font-family: 'Satoshi', sans-serif;
+  font-family: "Satoshi", sans-serif;
 }
 
 .footer-content {
@@ -123,13 +123,17 @@
   }
 } */
 
-@media (max-width:1030px) {
+@media (max-width: 1030px) {
   .footer-content {
     flex-direction: column;
     align-items: center;
     text-align: center;
   }
-
+  .footer-links {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
   .footer-section {
     min-width: 100%;
     margin-bottom: 1.5rem;
