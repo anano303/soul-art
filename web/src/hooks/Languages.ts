@@ -435,8 +435,8 @@ export const TRANSLATIONS: Translations = {
       privacyPolicyRequired:
         "კონფიდენციალურობის პოლიტიკასთან დათანხმება აუცილებელია",
       // Email verification
-      sendVerificationCode: "გადაგზავნა ვერიფიკაციის კოდი",
-      verificationCode: "ვერიფიკაციის კოდი",
+      sendVerificationCode: "ვერიფ. კოდი",
+      verificationCode: "ვერიფ. კოდი",
       verify: "ვერიფიკაცია",
       pleaseVerifyEmail: "გთხოვთ დაადასტურეთ ელ-ფოსტა",
       invalidVerificationCode: "არასწორი ვერიფიკაციის კოდი",

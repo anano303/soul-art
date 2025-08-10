@@ -228,7 +228,7 @@ export function RegisterForm() {
               type="checkbox"
               checked={agreedToTerms}
               onChange={(e) => setAgreedToTerms(e.target.checked)}
-              className="checkbox-input"
+              className="checkbox-input checkbox"
             />
             <span className="checkbox-text">
               {t("auth.agreeToTermsAndConditions")}{" "}
@@ -240,8 +240,10 @@ export function RegisterForm() {
                   background: "none",
                   border: "none",
                   color: "#007bff",
-                  textDecoration: "underline",
+                  textDecoration: "none",
                   cursor: "pointer",
+                  font: "inherit",
+                  padding: 0,
                 }}
               >
                 {t("auth.termsAndConditions")}
@@ -255,8 +257,10 @@ export function RegisterForm() {
                   background: "none",
                   border: "none",
                   color: "#007bff",
-                  textDecoration: "underline",
+                  textDecoration: "none",
                   cursor: "pointer",
+                  font: "inherit",
+                  padding: 0,
                 }}
               >
                 {t("auth.privacyPolicy")}
