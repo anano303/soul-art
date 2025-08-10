@@ -133,6 +133,7 @@ export function SellerContract({
           width: "90%",
           maxHeight: "90vh",
           zIndex: 1000,
+          color: "#012645",
         }}
       >
         <div
