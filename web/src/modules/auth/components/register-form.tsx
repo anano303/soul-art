@@ -13,6 +13,7 @@ import type * as z from "zod";
 import { useState, useEffect } from "react";
 import { useLanguage } from "@/hooks/LanguageContext";
 import { TermsAndConditions } from "@/components/TermsAndConditions";
+import { PrivacyPolicy } from "@/components/PrivacyPolicy";
 
 type RegisterFormData = z.infer<typeof registerSchema>;
 
@@ -24,6 +25,7 @@ export function RegisterForm() {
   const [isSuccess, setIsSuccess] = useState(false);
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [showTerms, setShowTerms] = useState(false);
+  const [showPrivacyPolicy, setShowPrivacyPolicy] = useState(false);
 
   const {
     register: registerField,
@@ -245,9 +247,20 @@ export function RegisterForm() {
                 {t("auth.termsAndConditions")}
               </button>{" "}
               {t("auth.and")}{" "}
-              <Link href="/privacy-policy" className="privacy-link">
+              <button
+                type="button"
+                onClick={() => setShowPrivacyPolicy(true)}
+                className="contract-link"
+                style={{
+                  background: "none",
+                  border: "none",
+                  color: "#007bff",
+                  textDecoration: "underline",
+                  cursor: "pointer",
+                }}
+              >
                 {t("auth.privacyPolicy")}
-              </Link>
+              </button>
             </span>
           </label>
         </div>
@@ -261,6 +274,13 @@ export function RegisterForm() {
             setShowTerms(false);
           }}
           showAcceptButton={true}
+        />
+
+        {/* Privacy Policy Modal */}
+        <PrivacyPolicy
+          isOpen={showPrivacyPolicy}
+          onClose={() => setShowPrivacyPolicy(false)}
+          showAcceptButton={false}
         />
 
         <button

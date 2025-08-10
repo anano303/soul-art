@@ -1,11 +1,17 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import "./footer.css";
 import { useLanguage } from "@/hooks/LanguageContext";
+import { TermsAndConditions } from "@/components/TermsAndConditions";
+import { SellerContract } from "@/components/SellerContract";
+import { PrivacyPolicy } from "@/components/PrivacyPolicy";
 
 export default function Footer() {
   const { t } = useLanguage();
+  const [showTerms, setShowTerms] = useState(false);
+  const [showContract, setShowContract] = useState(false);
+  const [showPrivacy, setShowPrivacy] = useState(false);
 
   return (
     <footer className="footer-container">
@@ -43,9 +49,30 @@ export default function Footer() {
               </a>
             </li>
             <li>
-              <a href="/privacy-policy" className="footer-link">
+              <button
+                onClick={() => setShowPrivacy(true)}
+                className="footer-link"
+                style={{
+                  background: "none",
+                  border: "none",
+                  paddingLeft: 0,
+                }}
+              >
                 {t("footer.privacyPolicy")}
-              </a>
+              </button>
+            </li>
+            <li>
+              <button
+                onClick={() => setShowTerms(true)}
+                className="footer-link"
+                style={{
+                  background: "none",
+                  border: "none",
+                  paddingLeft: 0,
+                }}
+              >
+                {t("footer.termsAndConditions")}
+              </button>
             </li>
           </ul>
         </div>
@@ -82,6 +109,25 @@ export default function Footer() {
       <div className="footer-bottom">
         <p>{t("footer.copyright", { year: new Date().getFullYear() })}</p>
       </div>
+
+      {/* Modals */}
+      <TermsAndConditions
+        isOpen={showTerms}
+        onClose={() => setShowTerms(false)}
+        showAcceptButton={false}
+      />
+
+      <PrivacyPolicy
+        isOpen={showPrivacy}
+        onClose={() => setShowPrivacy(false)}
+        showAcceptButton={false}
+      />
+
+      <SellerContract
+        isOpen={showContract}
+        onClose={() => setShowContract(false)}
+        showAcceptButton={false}
+      />
     </footer>
   );
 }

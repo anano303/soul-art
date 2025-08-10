@@ -14,6 +14,7 @@ import Image from "next/image";
 import { useLanguage } from "@/hooks/LanguageContext";
 import { SellerContract } from "@/components/SellerContract";
 import { TermsAndConditions } from "@/components/TermsAndConditions";
+import { PrivacyPolicy } from "@/components/PrivacyPolicy";
 
 type SellerRegisterFormData = z.infer<typeof sellerRegisterSchema>;
 
@@ -35,6 +36,7 @@ export function SellerRegisterForm() {
   const [termsAgreed, setTermsAgreed] = useState(false);
   const [termsError, setTermsError] = useState<string | null>(null);
   const [showTerms, setShowTerms] = useState(false);
+  const [showPrivacyPolicy, setShowPrivacyPolicy] = useState(false);
 
   const {
     register: registerField,
@@ -298,9 +300,20 @@ export function SellerRegisterForm() {
             />
             <span className="privacy-policy-text">
               {t("auth.agreeToPrivacyPolicy")}{" "}
-              <Link href="/privacy-policy" className="privacy-policy-link">
+              <button
+                type="button"
+                onClick={() => setShowPrivacyPolicy(true)}
+                className="contract-link"
+                style={{
+                  background: "none",
+                  border: "none",
+                  color: "#007bff",
+                  textDecoration: "underline",
+                  cursor: "pointer",
+                }}
+              >
                 {t("privacyPolicy.title")}
-              </Link>
+              </button>
             </span>
           </label>
           {privacyError && <p className="error-text">{privacyError}</p>}
@@ -386,6 +399,17 @@ export function SellerRegisterForm() {
           onAccept={() => {
             setTermsAgreed(true);
             setShowTerms(false);
+          }}
+          showAcceptButton={true}
+        />
+
+        {/* Privacy Policy Modal */}
+        <PrivacyPolicy
+          isOpen={showPrivacyPolicy}
+          onClose={() => setShowPrivacyPolicy(false)}
+          onAccept={() => {
+            setPrivacyAgreed(true);
+            setShowPrivacyPolicy(false);
           }}
           showAcceptButton={true}
         />
