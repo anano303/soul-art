@@ -311,7 +311,7 @@ export default function ReferralsPage() {
 
         <div className="bg-white p-6 rounded-lg shadow border">
           <h3 className="text-lg font-semibold text-gray-700 mb-2">
-            მოწვეული სელერები
+            მოწვეული პირები
           </h3>
           <p className="text-3xl font-bold text-blue-600">
             {stats.totalReferrals}
@@ -578,17 +578,17 @@ export default function ReferralsPage() {
         </div>
       )}
 
-      {/* მოწვეული სელერების სია */}
+      {/* მოწვეული პირების სია */}
       <div className="bg-white rounded-lg shadow border mb-8">
         <div className="p-6 border-b">
-          <h3 className="text-xl font-semibold">მოწვეული სელერები</h3>
+          <h3 className="text-xl font-semibold">მოწვეული პირები</h3>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                  სელერი
+                  პირი
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                   ტიპი
