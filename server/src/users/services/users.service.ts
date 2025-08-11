@@ -46,7 +46,7 @@ export class UsersService {
   }
 
   async create(
-    user: Partial<User> & { referralCode?: string },
+    user: Partial<User> & { invitationCode?: string },
   ): Promise<UserDocument> {
     try {
       const existingUser = await this.findByEmail(
@@ -68,15 +68,22 @@ export class UsersService {
       });
 
       // რეფერალური კოდით რეგისტრაცია
-      if (user.referralCode && this.referralsService) {
+      if (user.invitationCode && this.referralsService) {
+        this.logger.log(
+          `მუშაობს რეფერალური კოდით: ${user.invitationCode} მომხმარებლისთვის: ${newUser.email}`,
+        );
         try {
           await this.referralsService.registerWithReferralCode(
             newUser._id.toString(),
-            user.referralCode,
+            user.invitationCode,
+          );
+          this.logger.log(
+            `რეფერალური კოდი წარმატებით დამუშავდა: ${user.invitationCode}`,
           );
         } catch (error) {
-          this.logger.warn(
+          this.logger.error(
             `რეფერალური კოდის დამუშავების შეცდომა: ${error.message}`,
+            error.stack,
           );
           // არ ვაჩერებთ რეგისტრაციას რეფერალური კოდის შეცდომის გამო
         }

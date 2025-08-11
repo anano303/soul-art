@@ -52,7 +52,7 @@ export function RegisterForm() {
   useEffect(() => {
     const refCode = searchParams.get("ref");
     if (refCode) {
-      setValue("referralCode", refCode);
+      setValue("invitationCode", refCode);
     }
   }, [searchParams, setValue]);
 
@@ -227,15 +227,15 @@ export function RegisterForm() {
         </div>
 
         <div className="input-group">
-          <label htmlFor="referralCode">რეფერალური კოდი (არაუცილებელო)</label>
+          <label htmlFor="invitationCode">რეფერალური კოდი (არაუცილებელო)</label>
           <input
-            id="referralCode"
+            id="invitationCode"
             type="text"
             placeholder="ABC12345"
-            {...registerField("referralCode")}
+            {...registerField("invitationCode")}
           />
-          {errors.referralCode && (
-            <p className="error-text">{errors.referralCode.message}</p>
+          {errors.invitationCode && (
+            <p className="error-text">{errors.invitationCode.message}</p>
           )}
           <p className="input-hint">თუ გაქვთ რეფერალური კოდი, შეიყვანეთ აქ</p>
         </div>

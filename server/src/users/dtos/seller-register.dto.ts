@@ -101,5 +101,5 @@ export class SellerRegisterDto {
   })
   @IsOptional()
   @IsString()
-  referralCode?: string;
+  invitationCode?: string; // რეფერალური კოდი რომლითაც რეგისტრირდება
 }

@@ -54,7 +54,7 @@ export function SellerRegisterForm() {
     const refCode = urlParams.get("ref");
     if (refCode) {
       setReferralCode(refCode);
-      setValue("referralCode", refCode);
+      setValue("invitationCode", refCode);
     }
   }, [setValue]);
 
@@ -295,19 +295,19 @@ export function SellerRegisterForm() {
         </div>
 
         <div className="input-group">
-          <label htmlFor="referralCode">რეფერალური კოდი (არჩევითი)</label>
+          <label htmlFor="invitationCode">რეფერალური კოდი (არჩევითი)</label>
           <input
-            id="referralCode"
+            id="invitationCode"
             type="text"
             placeholder="მიუთითეთ რეფერალური კოდი თუ გყავთ"
             value={referralCode}
             onChange={(e) => {
               setReferralCode(e.target.value);
-              setValue("referralCode", e.target.value);
+              setValue("invitationCode", e.target.value);
             }}
           />
-          {errors.referralCode && (
-            <p className="error-text">{errors.referralCode.message}</p>
+          {errors.invitationCode && (
+            <p className="error-text">{errors.invitationCode.message}</p>
           )}
         </div>
 
