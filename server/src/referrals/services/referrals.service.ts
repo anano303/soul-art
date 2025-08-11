@@ -227,12 +227,12 @@ export class ReferralsService {
       throw new NotFoundException('მომხმარებელი ვერ მოიძებნა');
     }
 
-    const balanceBefore = user.balance || 0;
+    const balanceBefore = user.referralBalance || 0;
     const balanceAfter = balanceBefore + amount;
 
-    // ვაფდეითებთ მომხმარებლის ბალანსს
+    // ვაფდეითებთ მომხმარებლის რეფერალების ბალანსს
     await this.userModel.findByIdAndUpdate(userId, {
-      balance: balanceAfter,
+      referralBalance: balanceAfter,
       $inc: {
         totalReferrals: type === TransactionType.REFERRAL_BONUS ? 1 : 0,
         totalEarnings: amount,
@@ -264,9 +264,9 @@ export class ReferralsService {
       throw new NotFoundException('მომხმარებელი ვერ მოიძებნა');
     }
 
-    // შევამოწმოთ ბალანსი
-    if (user.balance < createWithdrawalDto.amount) {
-      throw new BadRequestException('არასაკმარისი ბალანსი');
+    // შევამოწმოთ რეფერალების ბალანსი
+    if ((user.referralBalance || 0) < createWithdrawalDto.amount) {
+      throw new BadRequestException('არასაკმარისი რეფერალების ბალანსი');
     }
 
     // შევამოწმოთ მინიმუმ თანხა
@@ -344,9 +344,11 @@ export class ReferralsService {
     if (processWithdrawalDto.status === 'APPROVED') {
       const user = request.user as UserDocument;
 
-      // შევამოწმოთ ბალანსი ისევ
-      if (user.balance < request.amount) {
-        throw new BadRequestException('მომხმარებელს არასაკმარისი ბალანსი აქვს');
+      // შევამოწმოთ რეფერალების ბალანსი ისევ
+      if ((user.referralBalance || 0) < request.amount) {
+        throw new BadRequestException(
+          'მომხმარებელს არასაკმარისი რეფერალების ბალანსი აქვს',
+        );
       }
 
       // ვაკლებთ თანხას ბალანსიდან
@@ -389,16 +391,16 @@ export class ReferralsService {
       throw new NotFoundException('მომხმარებელი ვერ მოიძებნა');
     }
 
-    const balanceBefore = user.balance || 0;
+    const balanceBefore = user.referralBalance || 0;
     const balanceAfter = balanceBefore - amount;
 
     if (balanceAfter < 0) {
-      throw new BadRequestException('არასაკმარისი ბალანსი');
+      throw new BadRequestException('არასაკმარისი რეფერალების ბალანსი');
     }
 
-    // ვაფდეითებთ მომხმარებლის ბალანსს
+    // ვაფდეითებთ მომხმარებლის რეფერალების ბალანსს
     await this.userModel.findByIdAndUpdate(userId, {
-      balance: balanceAfter,
+      referralBalance: balanceAfter,
     });
 
     // ვქმნით ტრანზაქციის ჩანაწერს
@@ -441,7 +443,7 @@ export class ReferralsService {
 
     return {
       referralCode: user.referralCode,
-      balance: user.balance,
+      balance: user.referralBalance || 0, // რეფერალების ბალანსი
       totalReferrals: referrals.length,
       approvedReferrals: referrals.filter(
         (r) => r.status === ReferralStatus.APPROVED,

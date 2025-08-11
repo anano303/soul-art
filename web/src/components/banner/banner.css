@@ -1,11 +1,10 @@
 .banner-container {
   position: relative;
   width: 100%;
-  max-width: 1400px;
+
   height: 500px;
   overflow: hidden;
-  margin: 40px auto;
-  border-radius: 12px;
+
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
   background-color: #012645; /* Add background color to match the gradient */
 }
@@ -220,7 +219,6 @@
   .banner-container {
     height: 400px;
     margin: 20px auto;
-    border-radius: 8px;
   }
 
   .banner-content {
@@ -269,7 +267,6 @@
 @media (max-width: 480px) {
   .banner-container {
     height: 350px;
-    border-radius: 8px;
     margin: 15px auto;
   }
 

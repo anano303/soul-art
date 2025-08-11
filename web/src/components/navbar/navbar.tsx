@@ -13,6 +13,7 @@ import shopping from "../../assets/icons/shopping.png";
 import video from "../../assets/icons/video.png";
 import forum from "../../assets/icons/forum.png";
 import about from "../../assets/icons/about.png";
+import { useAuth } from "@/hooks/use-auth";
 
 interface MenuItem {
   href: string;
@@ -22,6 +23,7 @@ interface MenuItem {
 
 const Navbar: React.FC = () => {
   const { t } = useLanguage();
+  const { user } = useAuth();
   const [activeItem, setActiveItem] = useState<number | null>(null);
   const router = useRouter();
 
@@ -32,6 +34,14 @@ const Navbar: React.FC = () => {
     { href: "/forum", textKey: "navigation.forum", icon: forum },
     { href: "/about", textKey: "navigation.about", icon: about },
   ];
+
+  // Add referral info only for non-logged users
+  const allMenuItems = user
+    ? menuItems
+    : [
+        ...menuItems,
+        { href: "/referral-info", textKey: "რეფერალები 💰", icon: shopping },
+      ];
 
   const handleClick = (e: React.MouseEvent, index: number, href: string) => {
     e.preventDefault();
@@ -47,7 +57,7 @@ const Navbar: React.FC = () => {
   return (
     <div className="NavCont">
       <ul className="UlCont">
-        {menuItems.map((item, index) => (
+        {allMenuItems.map((item, index) => (
           <li key={index}>
             <Link
               href={item.href}
@@ -61,7 +71,12 @@ const Navbar: React.FC = () => {
                 height={20}
                 className="icon"
               />
-              <span>{t(item.textKey)}</span>
+              <span>
+                {typeof item.textKey === "string" &&
+                item.textKey.startsWith("navigation.")
+                  ? t(item.textKey)
+                  : item.textKey}
+              </span>
             </Link>
           </li>
         ))}

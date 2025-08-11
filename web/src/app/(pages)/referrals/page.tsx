@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { getAccessToken } from "@/lib/auth";
 import { toast } from "react-hot-toast";
+import "./referrals.css";
 
 interface ReferralStats {
   referralCode: string;
@@ -15,6 +16,17 @@ interface ReferralStats {
   pendingEarnings: number;
   monthlyWithdrawals: number;
   referrals: Referral[];
+}
+
+interface BalanceTransaction {
+  id: string;
+  type: string;
+  amount: number;
+  balanceBefore: number;
+  balanceAfter: number;
+  status: string;
+  description: string;
+  createdAt: string;
 }
 
 interface Referral {
@@ -46,11 +58,15 @@ interface WithdrawalRequest {
 export default function ReferralsPage() {
   const { user } = useAuth();
   const [stats, setStats] = useState<ReferralStats | null>(null);
+  const [balanceHistory, setBalanceHistory] = useState<BalanceTransaction[]>(
+    []
+  );
   const [withdrawalRequests, setWithdrawalRequests] = useState<
     WithdrawalRequest[]
   >([]);
   const [loading, setLoading] = useState(true);
   const [showWithdrawalForm, setShowWithdrawalForm] = useState(false);
+  const [showBalanceHistory, setShowBalanceHistory] = useState(false);
   const [withdrawalForm, setWithdrawalForm] = useState({
     amount: "",
     method: "BANK",
@@ -60,11 +76,14 @@ export default function ReferralsPage() {
   const fetchReferralStats = useCallback(async () => {
     const token = getAccessToken();
     try {
-      const response = await fetch("/api/referrals/stats", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/referrals/stats`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
       if (response.ok) {
         const data = await response.json();
@@ -80,11 +99,14 @@ export default function ReferralsPage() {
   const fetchWithdrawalRequests = useCallback(async () => {
     const token = getAccessToken();
     try {
-      const response = await fetch("/api/referrals/withdrawal/my-requests", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/referrals/withdrawal/my-requests`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
       if (response.ok) {
         const data = await response.json();
@@ -92,6 +114,27 @@ export default function ReferralsPage() {
       }
     } catch (error) {
       console.error("Failed to fetch withdrawal requests:", error);
+    }
+  }, []);
+
+  const fetchBalanceHistory = useCallback(async () => {
+    const token = getAccessToken();
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/referrals/balance/history`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        setBalanceHistory(data);
+      }
+    } catch (error) {
+      console.error("Failed to fetch balance history:", error);
     }
   }, []);
 
@@ -121,18 +164,21 @@ export default function ReferralsPage() {
 
     const token = getAccessToken();
     try {
-      const response = await fetch("/api/referrals/withdrawal", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          amount: parseFloat(withdrawalForm.amount),
-          method: withdrawalForm.method,
-          accountDetails: withdrawalForm.accountDetails,
-        }),
-      });
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/referrals/withdrawal`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            amount: parseFloat(withdrawalForm.amount),
+            method: withdrawalForm.method,
+            accountDetails: withdrawalForm.accountDetails,
+          }),
+        }
+      );
 
       if (response.ok) {
         toast.success("გატანის მოთხოვნა წარმატებით გაიგზავნა!");
@@ -199,6 +245,36 @@ export default function ReferralsPage() {
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold mb-8">რეფერალების სისტემა</h1>
 
+      {/* Info Alert for Sellers */}
+      {user?.role === "seller" && (
+        <div
+          className="info-alert"
+          style={{
+            background: "#e8f5e8",
+            border: "1px solid #4caf50",
+            borderRadius: "8px",
+            padding: "16px",
+            marginBottom: "24px",
+            display: "flex",
+            alignItems: "center",
+            gap: "12px",
+          }}
+        >
+          <span style={{ fontSize: "20px" }}>💡</span>
+          <div>
+            <strong>სელერებისთვის:</strong> ეს არის თქვენი რეფერალების ბალანსი.
+            სელერის ბალანსი (გაყიდვებიდან) ცალკეა და შეგიძლიათ ნახოთ{" "}
+            <a
+              href="/profile/balance"
+              style={{ color: "#4caf50", textDecoration: "underline" }}
+            >
+              ბალანსის გვერდზე
+            </a>
+            .
+          </div>
+        </div>
+      )}
+
       {/* მთავარი სტატისტიკა */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
         <div className="bg-white p-6 rounded-lg shadow border">
@@ -206,6 +282,17 @@ export default function ReferralsPage() {
           <p className="text-3xl font-bold text-green-600">
             {stats.balance.toFixed(2)} ლარი
           </p>
+          <button
+            onClick={() => {
+              setShowBalanceHistory(!showBalanceHistory);
+              if (!showBalanceHistory) {
+                fetchBalanceHistory();
+              }
+            }}
+            className="text-sm text-blue-600 hover:text-blue-800 mt-2"
+          >
+            {showBalanceHistory ? "დამალვა" : "ისტორია"}
+          </button>
         </div>
 
         <div className="bg-white p-6 rounded-lg shadow border">
@@ -264,6 +351,74 @@ export default function ReferralsPage() {
           სელერისთვის მიიღებთ 5 ლარს.
         </p>
       </div>
+
+      {/* ბალანსის ისტორია */}
+      {showBalanceHistory && (
+        <div className="bg-white p-6 rounded-lg shadow border mb-8">
+          <h3 className="text-xl font-semibold mb-4">ბალანსის ისტორია</h3>
+          {balanceHistory.length > 0 ? (
+            <div className="overflow-x-auto">
+              <table className="table">
+                <thead>
+                  <tr>
+                    <th>თარიღი</th>
+                    <th>ტიპი</th>
+                    <th>თანხა</th>
+                    <th>ბალანსი მანამდე</th>
+                    <th>ბალანსი მერე</th>
+                    <th>აღწერა</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {balanceHistory.map((transaction) => (
+                    <tr key={transaction.id}>
+                      <td>
+                        {new Date(transaction.createdAt).toLocaleDateString(
+                          "ka-GE"
+                        )}
+                      </td>
+                      <td>
+                        <span
+                          className={`status-badge ${
+                            transaction.type === "REFERRAL_BONUS"
+                              ? "status-approved"
+                              : transaction.type === "WITHDRAWAL"
+                              ? "status-pending"
+                              : "status-rejected"
+                          }`}
+                        >
+                          {transaction.type === "REFERRAL_BONUS"
+                            ? "რეფ. ბონუსი"
+                            : transaction.type === "WITHDRAWAL"
+                            ? "გატანა"
+                            : transaction.type}
+                        </span>
+                      </td>
+                      <td
+                        className={
+                          transaction.amount > 0
+                            ? "text-green-600"
+                            : "text-red-600"
+                        }
+                      >
+                        {transaction.amount > 0 ? "+" : ""}
+                        {transaction.amount.toFixed(2)} ₾
+                      </td>
+                      <td>{transaction.balanceBefore.toFixed(2)} ₾</td>
+                      <td>{transaction.balanceAfter.toFixed(2)} ₾</td>
+                      <td className="text-sm text-gray-600">
+                        {transaction.description}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <p className="text-gray-500">ბალანსის ისტორია არ არის</p>
+          )}
+        </div>
+      )}
 
       {/* გატანის ღილაკი */}
       <div className="bg-white p-6 rounded-lg shadow border mb-8">

@@ -68,9 +68,13 @@ export class User {
   @Prop({ type: String, default: null })
   profileImagePath: string;
 
-  // სელერის ბალანსი
+  // სელერის ბალანსი (გაყიდვებიდან)
   @Prop({ type: Number, default: 0 })
   balance?: number;
+
+  // რეფერალების ბალანსი (ცალკე სელერის ბალანსისგან)
+  @Prop({ type: Number, default: 0 })
+  referralBalance?: number;
 
   // რეფერალების სისტემა
   @Prop({ type: String, unique: true, sparse: true })

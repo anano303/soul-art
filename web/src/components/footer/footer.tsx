@@ -49,6 +49,11 @@ export default function Footer() {
               </a>
             </li>
             <li>
+              <a href="/referral-info" className="footer-link">
+                რეფერალები - გამოიმუშავე ფული
+              </a>
+            </li>
+            <li>
               <button
                 onClick={() => setShowPrivacy(true)}
                 className="footer-link"
