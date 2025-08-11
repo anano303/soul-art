@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { getAccessToken } from "@/lib/auth";
 import { toast } from "react-hot-toast";
-import "../../../referrals/referrals.css";
+import "./referrals.css";
 
 interface WithdrawalRequest {
   id: string;
