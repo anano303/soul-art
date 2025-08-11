@@ -7,7 +7,7 @@ import { useSellerRegister } from "../hooks/use-auth";
 import Link from "next/link";
 import "./register-form.css";
 import type * as z from "zod";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "@/hooks/use-toast";
 import Image from "next/image";
@@ -37,14 +37,26 @@ export function SellerRegisterForm() {
   const [termsError, setTermsError] = useState<string | null>(null);
   const [showTerms, setShowTerms] = useState(false);
   const [showPrivacyPolicy, setShowPrivacyPolicy] = useState(false);
+  const [referralCode, setReferralCode] = useState<string>("");
 
   const {
     register: registerField,
     handleSubmit,
+    setValue,
     formState: { errors },
   } = useForm<SellerRegisterFormData>({
     resolver: zodResolver(sellerRegisterSchema),
   });
+
+  // Get referral code from URL parameters
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const refCode = urlParams.get("ref");
+    if (refCode) {
+      setReferralCode(refCode);
+      setValue("referralCode", refCode);
+    }
+  }, [setValue]);
 
   const handleLogoChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files[0]) {
@@ -279,6 +291,23 @@ export function SellerRegisterForm() {
           />
           {errors.accountNumber && (
             <p className="error-text">{errors.accountNumber.message}</p>
+          )}
+        </div>
+
+        <div className="input-group">
+          <label htmlFor="referralCode">რეფერალური კოდი (არჩევითი)</label>
+          <input
+            id="referralCode"
+            type="text"
+            placeholder="მიუთითეთ რეფერალური კოდი თუ გყავთ"
+            value={referralCode}
+            onChange={(e) => {
+              setReferralCode(e.target.value);
+              setValue("referralCode", e.target.value);
+            }}
+          />
+          {errors.referralCode && (
+            <p className="error-text">{errors.referralCode.message}</p>
           )}
         </div>
 

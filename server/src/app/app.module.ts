@@ -23,6 +23,7 @@ import {
 import { CategoriesModule } from '@/categories/categories.module';
 import { BannerModule } from '@/banners/banner.module';
 import { SharedServicesModule } from './shared-services.module';
+import { ReferralsModule } from '../referrals/referrals.module';
 
 @Module({
   imports: [
@@ -48,6 +49,7 @@ import { SharedServicesModule } from './shared-services.module';
     ForumsModule,
     CategoriesModule,
     BannerModule,
+    ReferralsModule,
   ],
   controllers: [AppController],
   providers: [AppService, GoogleStrategy, IndexCleanupService],

@@ -71,6 +71,28 @@ export class User {
   // სელერის ბალანსი
   @Prop({ type: Number, default: 0 })
   balance?: number;
+
+  // რეფერალების სისტემა
+  @Prop({ type: String, unique: true, sparse: true })
+  referralCode?: string; // უნიკალური რეფერალური კოდი
+
+  @Prop({ type: String, default: null })
+  referredBy?: string; // ვისი რეფერალური კოდით დარეგისტრირდა
+
+  @Prop({ type: Date, default: null })
+  sellerApprovedAt?: Date; // როდის დამტკიცდა სელერად
+
+  @Prop({ type: Number, default: 0 })
+  totalReferrals?: number; // მოწვეული სელერების რაოდენობა
+
+  @Prop({ type: Number, default: 0 })
+  totalEarnings?: number; // მიღებული ბონუსების ჯამი
+
+  @Prop({ type: Number, default: 0 })
+  monthlyWithdrawals?: number; // ამ თვეში გატანილი თანხების რაოდენობა
+
+  @Prop({ type: Date, default: null })
+  lastWithdrawalReset?: Date; // ბოლო თვიური რესეტის თარიღი
 }
 
 export type UserDocument = User & Document;

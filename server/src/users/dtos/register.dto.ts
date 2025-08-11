@@ -3,6 +3,7 @@ import {
   IsString,
   MinLength,
   MaxLength,
+  IsOptional,
 } from 'class-validator';
 import { Transform } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
@@ -34,4 +35,13 @@ export class RegisterDto {
   @MinLength(5, { message: 'Password is too short.' })
   @MaxLength(20, { message: 'Password is too long.' })
   password!: string;
+
+  @ApiProperty({
+    example: 'ABC12345',
+    description: 'რეფერალური კოდი (არაუცილებელო)',
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  referralCode?: string;
 }

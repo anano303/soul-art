@@ -93,4 +93,13 @@ export class SellerRegisterDto {
   @IsNotEmpty()
   @IsString()
   accountNumber: string;
+
+  @ApiProperty({
+    example: 'ABC12345',
+    description: 'რეფერალური კოდი (არაუცილებელო)',
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  referralCode?: string;
 }
