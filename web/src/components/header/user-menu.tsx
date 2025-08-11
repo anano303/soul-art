@@ -159,6 +159,15 @@ export default function UserMenu({ onNavigate }: { onNavigate?: () => void }) {
               {t("navigation.orders")}
             </Link>
 
+            {/* რეფერალების ლინკი ყველა ავტორიზებული მომხმარებლისთვის */}
+            <Link
+              href="/referrals"
+              className="dropdown-item"
+              onClick={handleLinkClick}
+            >
+              რეფერალები
+            </Link>
+
             {(user.role === Role.Admin || user.role === Role.Seller) && (
               <>
                 <hr />
@@ -182,6 +191,13 @@ export default function UserMenu({ onNavigate }: { onNavigate?: () => void }) {
                   onClick={handleLinkClick}
                 >
                   ბანერები
+                </Link>
+                <Link
+                  href="/admin/referrals"
+                  className="dropdown-item"
+                  onClick={handleLinkClick}
+                >
+                  რეფერალების მართვა
                 </Link>
               </>
             )}

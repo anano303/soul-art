@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { getAccessToken } from "@/lib/auth";
 import { toast } from "react-hot-toast";
+import "../../../referrals/referrals.css";
 
 interface WithdrawalRequest {
   id: string;
@@ -43,8 +44,8 @@ export default function AdminReferralsPage() {
     const token = getAccessToken();
     try {
       const url = selectedStatus
-        ? `/api/referrals/admin/withdrawal/requests?status=${selectedStatus}`
-        : "/api/referrals/admin/withdrawal/requests";
+        ? `${process.env.NEXT_PUBLIC_API_URL}/referrals/admin/withdrawal/requests?status=${selectedStatus}`
+        : `${process.env.NEXT_PUBLIC_API_URL}/referrals/admin/withdrawal/requests`;
 
       const response = await fetch(url, {
         headers: {
@@ -73,7 +74,7 @@ export default function AdminReferralsPage() {
     const token = getAccessToken();
     try {
       const response = await fetch(
-        `/api/referrals/admin/withdrawal/${requestId}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/referrals/admin/withdrawal/${requestId}`,
         {
           method: "PATCH",
           headers: {

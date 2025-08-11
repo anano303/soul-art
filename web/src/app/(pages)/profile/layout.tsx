@@ -1,4 +1,5 @@
 import { ProtectedRoute } from "@/components/protected-route";
+
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -59,5 +60,13 @@ export default function ProfileLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return <ProtectedRoute>{children}</ProtectedRoute>;
+  return (
+    <ProtectedRoute>
+      <div className="container mx-auto px-4 py-8">
+        <div className="flex gap-6">
+          <div className="flex-1">{children}</div>
+        </div>
+      </div>
+    </ProtectedRoute>
+  );
 }

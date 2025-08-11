@@ -1,0 +1,227 @@
+/* Small Moving Text Banner - Dark blue background with bright yellow text */
+.soulart-referral-promo {
+  background: #012645;
+  color: #ffff00;
+  padding: 12px 0;
+  margin: 16px 0;
+  position: relative;
+  overflow: hidden;
+  height: 70px;
+  display: flex;
+  align-items: center;
+  box-shadow: 0 4px 12px rgba(1, 38, 69, 0.4);
+  border: 2px solid rgba(255, 255, 0, 0.6);
+}
+
+@keyframes soulart-background-move {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes soulart-referral-stripe-move {
+  0% {
+    transform: translateX(-50%);
+  }
+  100% {
+    transform: translateX(0%);
+  }
+}
+
+.soulart-promo-content {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  white-space: nowrap;
+  animation: soulart-text-scroll 30s linear infinite;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+@keyframes soulart-text-scroll {
+  0% {
+    transform: translateX(100%);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
+.soulart-promo-main {
+  display: inline-flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.soulart-promo-title {
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin: 0;
+  display: inline;
+  color: #ffff00;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+  letter-spacing: 0.5px;
+}
+
+.soulart-promo-description {
+  font-size: 1.1rem;
+  margin: 0;
+  opacity: 1;
+  display: inline;
+  color: #ffff00;
+  font-weight: 500;
+}
+
+.soulart-stats-container {
+  display: inline-flex;
+  gap: 15px;
+  align-items: center;
+}
+
+.soulart-stat-card {
+  background: rgba(255, 255, 0, 0.2);
+  border-radius: 10px;
+  padding: 6px 12px;
+  font-size: 0.9rem;
+  text-align: center;
+  min-width: 70px;
+  border: 2px solid rgba(255, 255, 0, 0.4);
+  color: #ffff00;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+.soulart-stat-label {
+  font-size: 0.8rem;
+  opacity: 1;
+  margin-bottom: 2px;
+  color: #ffff00;
+  font-weight: 500;
+}
+
+.soulart-stat-value {
+  font-size: 1rem;
+  font-weight: 700;
+  margin: 0;
+  color: #ffff00;
+}
+
+.soulart-promo-actions {
+  display: inline-flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.soulart-btn-primary,
+.soulart-btn-secondary {
+  padding: 8px 20px;
+  border-radius: 10px;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 1rem;
+  white-space: nowrap;
+  transition: all 0.3s ease;
+  border: none;
+  cursor: pointer;
+}
+
+.soulart-btn-primary {
+  background: rgba(255, 255, 0, 0.9);
+  color: #012645;
+  box-shadow: 0 3px 6px rgba(255, 255, 0, 0.4);
+  border: 2px solid #ffff00;
+}
+
+.soulart-btn-primary:hover {
+  background: rgba(255, 255, 0, 1);
+  text-decoration: none;
+  color: #012645;
+  box-shadow: 0 6px 12px rgba(255, 255, 0, 0.6);
+  transform: translateY(-2px);
+}
+
+.soulart-btn-secondary {
+  background: rgba(255, 255, 255, 0.9);
+  color: #012645;
+  border: 2px solid rgba(255, 255, 0, 0.6);
+}
+
+.soulart-btn-secondary:hover {
+  background: rgba(255, 255, 255, 1);
+  color: #012645;
+  border-color: #ffff00;
+  box-shadow: 0 3px 6px rgba(255, 255, 0, 0.2);
+}
+
+.soulart-promo-close {
+  position: absolute;
+  right: 1px;
+  top: 0px;
+  background: rgba(255, 255, 0, 0.9);
+  border: 2px solid #ffff00;
+  color: #012645;
+  font-size: 1.4rem;
+  cursor: pointer;
+  z-index: 10;
+  width: 25px;
+  height: 25px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-weight: bold;
+  line-height: 1;
+}
+
+.soulart-promo-close:hover {
+  color: #012645;
+  background: rgba(255, 255, 0, 1);
+  box-shadow: 0 3px 8px rgba(255, 255, 0, 0.6);
+  transform: scale(1.1);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .soulart-referral-promo {
+    height: 60px;
+    padding: 8px 0;
+  }
+
+  .soulart-promo-title {
+    font-size: 1.1rem;
+  }
+
+  .soulart-promo-description {
+    font-size: 0.9rem;
+  }
+
+  .soulart-stat-card {
+    padding: 4px 8px;
+    min-width: 55px;
+  }
+
+  .soulart-stat-label {
+    font-size: 0.7rem;
+  }
+
+  .soulart-stat-value {
+    font-size: 0.9rem;
+  }
+
+  .soulart-btn-primary,
+  .soulart-btn-secondary {
+    padding: 6px 16px;
+    font-size: 0.9rem;
+  }
+
+  .soulart-promo-close {
+    right: 0px;
+    top: 0px;
+    width: 18px;
+    height: 18px;
+    font-size: 1.2rem;
+  }
+}

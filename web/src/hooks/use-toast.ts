@@ -4,7 +4,7 @@
 import * as React from "react";
 
 const TOAST_LIMIT = 1;
-const TOAST_REMOVE_DELAY = 6000; // 6 წამი
+const TOAST_REMOVE_DELAY = 1000; // 1 წამი
 
 // Toast-ის ტიპი, CSS-ის მხარდაჭერით
 type ToasterToast = {

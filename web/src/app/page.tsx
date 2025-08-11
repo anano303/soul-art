@@ -5,6 +5,8 @@ import HomePagesHead from "@/components/homePagesHead/homePagesHead";
 import HomePageShop from "@/components/homePageShop/homePageShop";
 import Banner from "@/components/banner/banner";
 import TopItems from "@/components/TopItems/TopItems";
+import { ReferralPromoBanner } from "@/components/referral-promo-banner";
+import { GuestReferralBanner } from "@/components/guest-referral-banner";
 import { useLanguage } from "@/hooks/LanguageContext";
 
 const Home = () => {
@@ -13,6 +15,10 @@ const Home = () => {
   return (
     <div>
       <HomePagesHead />
+      <div className="container mx-auto px-4">
+        <GuestReferralBanner />
+        <ReferralPromoBanner />
+      </div>
       <TopItems />
       <Banner />
       {/* Forcing a full remount of HomePageShop when language changes */}

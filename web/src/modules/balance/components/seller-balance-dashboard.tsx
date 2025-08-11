@@ -115,6 +115,34 @@ export function SellerBalanceDashboard() {
     <div className="balance-dashboard">
       <h1 className="dashboard-title">ჩემი ბალანსი</h1>
 
+      {/* Info Alert */}
+      <div
+        className="info-alert"
+        style={{
+          background: "#e3f2fd",
+          border: "1px solid #2196f3",
+          borderRadius: "8px",
+          padding: "16px",
+          marginBottom: "24px",
+          display: "flex",
+          alignItems: "center",
+          gap: "12px",
+        }}
+      >
+        <span style={{ fontSize: "20px" }}>ℹ️</span>
+        <div>
+          <strong>მნიშვნელოვანი:</strong> ეს არის თქვენი სელერის ბალანსი
+          (გაყიდვებიდან). რეფერალების ბალანსი ცალკეა და შეგიძლიათ ნახოთ{" "}
+          <a
+            href="/referrals"
+            style={{ color: "#2196f3", textDecoration: "underline" }}
+          >
+            რეფერალების გვერდზე
+          </a>
+          .
+        </div>
+      </div>
+
       {/* Balance Cards */}
       <div className="balance-cards-grid">
         <div className="balance-card">
