@@ -112,13 +112,13 @@ export default function AdminReferralsPage() {
   const getStatusColor = (status: string) => {
     switch (status) {
       case "PROCESSED":
-        return "text-green-600 bg-green-100";
+        return "admin-ref-status-processed";
       case "PENDING":
-        return "text-yellow-600 bg-yellow-100";
+        return "admin-ref-status-pending";
       case "REJECTED":
-        return "text-red-600 bg-red-100";
+        return "admin-ref-status-rejected";
       default:
-        return "text-gray-600 bg-gray-100";
+        return "admin-ref-text-gray-600 admin-ref-bg-gray-100";
     }
   };
 
@@ -137,230 +137,240 @@ export default function AdminReferralsPage() {
 
   if (!user || user.role !== "admin") {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <p>უფლება არ გაქვთ ამ გვერდის ნახვისა</p>
+      <div className="admin-referrals-page">
+        <div className="admin-ref-container admin-ref-py-8">
+          <p className="admin-ref-text-red-600 admin-ref-text-xl admin-ref-font-semibold">
+            უფლება არ გაქვთ ამ გვერდის ნახვისა
+          </p>
+        </div>
       </div>
     );
   }
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      <div className="admin-referrals-page">
+        <div className="admin-ref-flex admin-ref-justify-center admin-ref-items-center admin-ref-min-h-screen">
+          <div className="admin-ref-animate-spin admin-ref-rounded-full admin-ref-w-12 admin-ref-h-12 admin-ref-border-b-2 admin-ref-border-blue-600"></div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold">რეფერალების მართვა</h1>
+    <div className="admin-referrals-page">
+      <div className="admin-ref-container admin-ref-py-8">
+        <div className="admin-ref-flex admin-ref-justify-between admin-ref-items-center admin-ref-mb-8 admin-ref-flex-mobile">
+          <h1 className="admin-ref-text-3xl admin-ref-font-bold admin-ref-text-gray-900">
+            რეფერალების მართვა
+          </h1>
 
-        <div className="flex items-center gap-4">
-          <select
-            value={selectedStatus}
-            onChange={(e) => setSelectedStatus(e.target.value)}
-            className="px-4 py-2 border rounded-lg"
-          >
-            <option value="">ყველა მოთხოვნა</option>
-            <option value="PENDING">მოლოდინში</option>
-            <option value="PROCESSED">დამუშავებული</option>
-            <option value="REJECTED">უარყოფილი</option>
-          </select>
-        </div>
-      </div>
-
-      {/* გატანის მოთხოვნები */}
-      <div className="bg-white rounded-lg shadow border">
-        <div className="p-6 border-b">
-          <h3 className="text-xl font-semibold">ბალანსის გატანის მოთხოვნები</h3>
-        </div>
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                  მომხმარებელი
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                  თანხა
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                  მეთოდი
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                  ანგარიშის დეტალები
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                  სტატუსი
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                  თარიღი
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                  მოქმედება
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200">
-              {withdrawalRequests.map((request) => (
-                <tr key={request.id}>
-                  <td className="px-6 py-4">
-                    <div>
-                      <div className="font-medium">{request.user.name}</div>
-                      <div className="text-sm text-gray-500">
-                        {request.user.email}
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 text-sm font-medium text-gray-900">
-                    {request.amount.toFixed(2)} ლარი
-                  </td>
-                  <td className="px-6 py-4 text-sm text-gray-900">
-                    {request.method === "BANK" ? "ბანკი" : "პეიბოქსი"}
-                  </td>
-                  <td className="px-6 py-4 text-sm text-gray-900 font-mono">
-                    {request.accountDetails}
-                  </td>
-                  <td className="px-6 py-4">
-                    <span
-                      className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(
-                        request.status
-                      )}`}
-                    >
-                      {getStatusText(request.status)}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-sm text-gray-500">
-                    {new Date(request.createdAt).toLocaleDateString("ka-GE")}
-                  </td>
-                  <td className="px-6 py-4">
-                    {request.status === "PENDING" && (
-                      <button
-                        onClick={() => openProcessModal(request.id)}
-                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-sm"
-                      >
-                        დამუშავება
-                      </button>
-                    )}
-                    {request.status === "PROCESSED" && request.processedBy && (
-                      <div className="text-sm text-green-600">
-                        დამუშავდა: {request.processedBy.name}
-                      </div>
-                    )}
-                    {request.status === "REJECTED" && (
-                      <div className="text-sm text-red-600">
-                        უარყოფილი
-                        {request.rejectionReason && (
-                          <div className="text-xs text-gray-500 mt-1">
-                            მიზეზი: {request.rejectionReason}
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      {/* დამუშავების მოდალი */}
-      {showProcessModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-8 rounded-lg shadow-lg max-w-md w-full mx-4">
-            <h3 className="text-xl font-semibold mb-4">მოთხოვნის დამუშავება</h3>
-
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                სტატუსი
-              </label>
-              <select
-                value={processForm.status}
-                onChange={(e) =>
-                  setProcessForm({
-                    ...processForm,
-                    status: e.target.value as "APPROVED" | "REJECTED",
-                  })
-                }
-                className="w-full p-3 border rounded-lg"
-              >
-                <option value="APPROVED">დამტკიცება</option>
-                <option value="REJECTED">უარყოფა</option>
-              </select>
-            </div>
-
-            {processForm.status === "APPROVED" && (
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  ტრანზაქციის ID (არაუცილებელო)
-                </label>
-                <input
-                  type="text"
-                  value={processForm.transactionId}
-                  onChange={(e) =>
-                    setProcessForm({
-                      ...processForm,
-                      transactionId: e.target.value,
-                    })
-                  }
-                  className="w-full p-3 border rounded-lg"
-                  placeholder="ბანკის ტრანზაქციის ID"
-                />
-              </div>
-            )}
-
-            {processForm.status === "REJECTED" && (
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  უარყოფის მიზეზი
-                </label>
-                <textarea
-                  value={processForm.rejectionReason}
-                  onChange={(e) =>
-                    setProcessForm({
-                      ...processForm,
-                      rejectionReason: e.target.value,
-                    })
-                  }
-                  className="w-full p-3 border rounded-lg"
-                  rows={3}
-                  placeholder="მიუთითეთ უარყოფის მიზეზი"
-                  required
-                />
-              </div>
-            )}
-
-            <div className="flex gap-4">
-              <button
-                type="button"
-                onClick={() => {
-                  setShowProcessModal(false);
-                  setProcessingId(null);
-                  setProcessForm({
-                    status: "APPROVED",
-                    rejectionReason: "",
-                    transactionId: "",
-                  });
-                }}
-                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition"
-              >
-                გაუქმება
-              </button>
-              <button
-                type="button"
-                onClick={() =>
-                  processingId && processWithdrawalRequest(processingId)
-                }
-                className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
-              >
-                დამუშავება
-              </button>
-            </div>
+          <div className="admin-ref-flex admin-ref-items-center admin-ref-gap-4">
+            <select
+              value={selectedStatus}
+              onChange={(e) => setSelectedStatus(e.target.value)}
+              className="admin-ref-form-select"
+            >
+              <option value="">ყველა მოთხოვნა</option>
+              <option value="PENDING">მოლოდინში</option>
+              <option value="PROCESSED">დამუშავებული</option>
+              <option value="REJECTED">უარყოფილი</option>
+            </select>
           </div>
         </div>
-      )}
+
+        {/* გატანის მოთხოვნები */}
+        <div className="admin-ref-card">
+          <div className="admin-ref-p-6 admin-ref-border-b">
+            <h3 className="admin-ref-text-xl admin-ref-font-semibold admin-ref-text-gray-900">
+              ბალანსის გატანის მოთხოვნები
+            </h3>
+          </div>
+          <div className="admin-ref-table-container">
+            <table className="admin-ref-table">
+              <thead>
+                <tr>
+                  <th>მომხმარებელი</th>
+                  <th>თანხა</th>
+                  <th>მეთოდი</th>
+                  <th>ანგარიშის დეტალები</th>
+                  <th>სტატუსი</th>
+                  <th>თარიღი</th>
+                  <th>მოქმედება</th>
+                </tr>
+              </thead>
+              <tbody>
+                {withdrawalRequests.map((request) => (
+                  <tr key={request.id}>
+                    <td>
+                      <div className="admin-ref-user-info">
+                        <div className="admin-ref-user-name">
+                          {request.user.name}
+                        </div>
+                        <div className="admin-ref-user-email">
+                          {request.user.email}
+                        </div>
+                      </div>
+                    </td>
+                    <td>
+                      <span className="admin-ref-money">
+                        {request.amount.toFixed(2)} ლარი
+                      </span>
+                    </td>
+                    <td className="admin-ref-text-gray-900">
+                      {request.method === "BANK" ? "ბანკი" : "პეიბოქსი"}
+                    </td>
+                    <td>
+                      <div className="admin-ref-account-details">
+                        {request.accountDetails}
+                      </div>
+                    </td>
+                    <td>
+                      <span
+                        className={`admin-ref-status-badge ${getStatusColor(
+                          request.status
+                        )}`}
+                      >
+                        {getStatusText(request.status)}
+                      </span>
+                    </td>
+                    <td className="admin-ref-text-gray-500">
+                      {new Date(request.createdAt).toLocaleDateString("ka-GE")}
+                    </td>
+                    <td>
+                      {request.status === "PENDING" && (
+                        <button
+                          onClick={() => openProcessModal(request.id)}
+                          className="admin-ref-btn admin-ref-btn-primary"
+                        >
+                          დამუშავება
+                        </button>
+                      )}
+                      {request.status === "PROCESSED" &&
+                        request.processedBy && (
+                          <div className="admin-ref-processed-info">
+                            <div className="admin-ref-font-medium">
+                              დამუშავდა
+                            </div>
+                            <div className="admin-ref-text-sm">
+                              {request.processedBy.name}
+                            </div>
+                          </div>
+                        )}
+                      {request.status === "REJECTED" && (
+                        <div className="admin-ref-rejected-info">
+                          <div className="admin-ref-font-medium">უარყოფილი</div>
+                          {request.rejectionReason && (
+                            <div className="admin-ref-rejection-reason">
+                              მიზეზი: {request.rejectionReason}
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* დამუშავების მოდალი */}
+        {showProcessModal && (
+          <div className="admin-ref-modal-overlay">
+            <div className="admin-ref-modal admin-ref-p-8">
+              <h3 className="admin-ref-text-xl admin-ref-font-semibold admin-ref-mb-4 admin-ref-text-gray-900">
+                მოთხოვნის დამუშავება
+              </h3>
+
+              <div className="admin-ref-mb-4">
+                <label className="admin-ref-form-label">სტატუსი</label>
+                <select
+                  value={processForm.status}
+                  onChange={(e) =>
+                    setProcessForm({
+                      ...processForm,
+                      status: e.target.value as "APPROVED" | "REJECTED",
+                    })
+                  }
+                  className="admin-ref-form-select"
+                >
+                  <option value="APPROVED">დამტკიცება</option>
+                  <option value="REJECTED">უარყოფა</option>
+                </select>
+              </div>
+
+              {processForm.status === "APPROVED" && (
+                <div className="admin-ref-mb-4">
+                  <label className="admin-ref-form-label">
+                    ტრანზაქციის ID (არაუცილებელო)
+                  </label>
+                  <input
+                    type="text"
+                    value={processForm.transactionId}
+                    onChange={(e) =>
+                      setProcessForm({
+                        ...processForm,
+                        transactionId: e.target.value,
+                      })
+                    }
+                    className="admin-ref-form-input"
+                    placeholder="ბანკის ტრანზაქციის ID"
+                  />
+                </div>
+              )}
+
+              {processForm.status === "REJECTED" && (
+                <div className="admin-ref-mb-4">
+                  <label className="admin-ref-form-label">
+                    უარყოფის მიზეზი
+                  </label>
+                  <textarea
+                    value={processForm.rejectionReason}
+                    onChange={(e) =>
+                      setProcessForm({
+                        ...processForm,
+                        rejectionReason: e.target.value,
+                      })
+                    }
+                    className="admin-ref-form-textarea"
+                    rows={3}
+                    placeholder="მიუთითეთ უარყოფის მიზეზი"
+                    required
+                  />
+                </div>
+              )}
+
+              <div className="admin-ref-flex admin-ref-gap-4">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowProcessModal(false);
+                    setProcessingId(null);
+                    setProcessForm({
+                      status: "APPROVED",
+                      rejectionReason: "",
+                      transactionId: "",
+                    });
+                  }}
+                  className="admin-ref-btn admin-ref-btn-secondary admin-ref-flex-1"
+                >
+                  გაუქმება
+                </button>
+                <button
+                  type="button"
+                  onClick={() =>
+                    processingId && processWithdrawalRequest(processingId)
+                  }
+                  className="admin-ref-btn admin-ref-btn-primary admin-ref-flex-1"
+                >
+                  დამუშავება
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
