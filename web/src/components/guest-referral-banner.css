@@ -1,8 +1,8 @@
 /* Small Moving Text Banner for Guests - Dark blue background with bright yellow text */
 .soulart-guest-banner {
-  background: #012645;
+  background: #012645e6;
   color: #ffff00;
-  padding: 12px 0;
+
   margin: 16px 0;
   position: relative;
   overflow: hidden;
@@ -10,7 +10,7 @@
   display: flex;
   align-items: center;
   box-shadow: 0 4px 12px rgba(1, 38, 69, 0.4);
-  border: 2px solid rgba(255, 255, 0, 0.6);
+  margin-top: -35px;
 }
 
 @keyframes soulart-guest-background-move {
@@ -152,7 +152,6 @@
 @media (max-width: 768px) {
   .soulart-guest-banner {
     height: 60px;
-    padding: 8px 0;
   }
 
   .soulart-guest-title {
