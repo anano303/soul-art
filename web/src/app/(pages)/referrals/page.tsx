@@ -67,6 +67,7 @@ export default function ReferralsPage() {
   const [loading, setLoading] = useState(true);
   const [showWithdrawalForm, setShowWithdrawalForm] = useState(false);
   const [showBalanceHistory, setShowBalanceHistory] = useState(false);
+  const [copiedButton, setCopiedButton] = useState<string | null>(null);
   const [withdrawalForm, setWithdrawalForm] = useState({
     amount: "",
     method: "BANK",
@@ -170,6 +171,11 @@ export default function ReferralsPage() {
     const link = generateReferralLink(type);
     navigator.clipboard.writeText(link);
     const linkType = type === "seller" ? "სელერის" : "მომხმარებლის";
+
+    // Set copied state for visual feedback
+    setCopiedButton(type);
+    setTimeout(() => setCopiedButton(null), 2000);
+
     toast.success(`${linkType} რეფერალური ლინკი კოპირებულია!`);
   };
 
@@ -213,13 +219,13 @@ export default function ReferralsPage() {
     switch (status) {
       case "APPROVED":
       case "PROCESSED":
-        return "text-green-600 bg-green-100";
+        return "ref-text-green-600 ref-bg-green-100";
       case "PENDING":
-        return "text-yellow-600 bg-yellow-100";
+        return "ref-text-yellow-600 ref-bg-yellow-100";
       case "REJECTED":
-        return "text-red-600 bg-red-100";
+        return "ref-text-red-600 ref-bg-red-100";
       default:
-        return "text-gray-600 bg-gray-100";
+        return "ref-text-gray-600 ref-bg-gray-100";
     }
   };
 
@@ -240,456 +246,482 @@ export default function ReferralsPage() {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      <div className="referrals-page">
+        <div className="ref-flex ref-justify-center ref-items-center ref-min-h-screen">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        </div>
       </div>
     );
   }
 
   if (!stats) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <h1 className="text-2xl font-bold mb-6">რეფერალების სისტემა</h1>
-        <p>რეფერალების ინფორმაცია ვერ ჩაიტვირთა</p>
+      <div className="referrals-page">
+        <div className="ref-container mx-auto ref-px-4 py-8">
+          <h1 className="ref-text-2xl ref-font-bold ref-mb-6">
+            რეფერალების სისტემა
+          </h1>
+          <p className="ref-text-gray-600">
+            რეფერალების ინფორმაცია ვერ ჩაიტვირთა
+          </p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-8">რეფერალების სისტემა</h1>
+    <div className="referrals-page">
+      <div className="ref-container mx-auto ref-px-4 py-8">
+        <h1 className="ref-text-3xl ref-font-bold ref-mb-8 ref-text-gray-800">
+          რეფერალების სისტემა
+        </h1>
 
-      {/* Info Alert for Sellers */}
-      {user?.role === "seller" && (
+        {/* Info Alert for Sellers */}
+        {user?.role === "seller" && (
+          <div
+            className="ref-card"
+            style={{
+              background: "linear-gradient(135deg, #e8f5e8, #f0fdf4)",
+              border: "2px solid #10b981",
+              borderRadius: "12px",
+              padding: "20px",
+              marginBottom: "32px",
+              display: "flex",
+              alignItems: "center",
+              gap: "16px",
+              boxShadow: "0 4px 12px rgba(16, 185, 129, 0.15)",
+            }}
+          >
+            <span style={{ fontSize: "24px" }}>💡</span>
+            <div style={{ color: "#065f46" }}>
+              <strong>სელერებისთვის:</strong> ეს არის თქვენი რეფერალების
+              ბალანსი. სელერის ბალანსი (გაყიდვებიდან) ცალკეა და შეგიძლიათ ნახოთ{" "}
+              <a
+                href="/profile/balance"
+                style={{
+                  color: "#059669",
+                  textDecoration: "underline",
+                  fontWeight: "600",
+                }}
+              >
+                ბალანსის გვერდზე
+              </a>
+              .
+            </div>
+          </div>
+        )}
+
+        {/* მთავარი სტატისტიკა */}
         <div
-          className="info-alert"
+          className="ref-grid ref-grid-cols-1 ref-md-grid-cols-4 ref-gap-6 ref-mb-8 ref-stats-grid"
           style={{
-            background: "#e8f5e8",
-            border: "1px solid #4caf50",
-            borderRadius: "8px",
-            padding: "16px",
-            marginBottom: "24px",
-            display: "flex",
-            alignItems: "center",
-            gap: "12px",
+            gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
           }}
         >
-          <span style={{ fontSize: "20px" }}>💡</span>
-          <div>
-            <strong>სელერებისთვის:</strong> ეს არის თქვენი რეფერალების ბალანსი.
-            სელერის ბალანსი (გაყიდვებიდან) ცალკეა და შეგიძლიათ ნახოთ{" "}
-            <a
-              href="/profile/balance"
-              style={{ color: "#4caf50", textDecoration: "underline" }}
-            >
-              ბალანსის გვერდზე
-            </a>
-            .
-          </div>
-        </div>
-      )}
-
-      {/* მთავარი სტატისტიკა */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-        <div className="bg-white p-6 rounded-lg shadow border">
-          <h3 className="text-lg font-semibold text-gray-700 mb-2">ბალანსი</h3>
-          <p className="text-3xl font-bold text-green-600">
-            {stats.balance.toFixed(2)} ლარი
-          </p>
-          <button
-            onClick={() => {
-              setShowBalanceHistory(!showBalanceHistory);
-              if (!showBalanceHistory) {
-                fetchBalanceHistory();
-              }
-            }}
-            className="text-sm text-blue-600 hover:text-blue-800 mt-2"
-          >
-            {showBalanceHistory ? "დამალვა" : "ისტორია"}
-          </button>
-        </div>
-
-        <div className="bg-white p-6 rounded-lg shadow border">
-          <h3 className="text-lg font-semibold text-gray-700 mb-2">
-            მოწვეული პირები
-          </h3>
-          <p className="text-3xl font-bold text-blue-600">
-            {stats.totalReferrals}
-          </p>
-          <p className="text-sm text-gray-500">
-            დამტკიცებული: {stats.approvedReferrals}
-          </p>
-        </div>
-
-        <div className="bg-white p-6 rounded-lg shadow border">
-          <h3 className="text-lg font-semibold text-gray-700 mb-2">
-            მიღებული ბონუსი
-          </h3>
-          <p className="text-3xl font-bold text-purple-600">
-            {stats.totalEarnings.toFixed(2)} ლარი
-          </p>
-        </div>
-
-        <div className="bg-white p-6 rounded-lg shadow border">
-          <h3 className="text-lg font-semibold text-gray-700 mb-2">
-            მოლოდინში
-          </h3>
-          <p className="text-3xl font-bold text-orange-600">
-            {stats.pendingEarnings.toFixed(2)} ლარი
-          </p>
-          <p className="text-sm text-gray-500">
-            მოლოდინში: {stats.pendingReferrals}
-          </p>
-        </div>
-      </div>
-
-      {/* რეფერალური ლინკები */}
-      <div className="bg-white p-6 rounded-lg shadow border mb-8">
-        <h3 className="text-xl font-semibold mb-4">
-          თქვენი რეფერალური ლინკები
-        </h3>
-
-        {/* სელერის რეფერალური ლინკი */}
-        <div className="mb-6">
-          <h4 className="text-lg font-medium mb-2">
-            სელერის რეგისტრაცია (5 ლარი)
-          </h4>
-          <div className="flex items-center gap-4">
-            <input
-              type="text"
-              value={generateReferralLink("seller")}
-              readOnly
-              className="flex-1 p-3 border rounded-lg bg-gray-50"
-            />
+          <div className="ref-bg-white ref-p-6 ref-card">
+            <h3 className="ref-text-lg ref-font-semibold ref-text-gray-700 ref-mb-2">
+              ბალანსი
+            </h3>
+            <p className="ref-text-3xl ref-font-bold ref-text-green-600">
+              {stats.balance.toFixed(2)} ლარი
+            </p>
             <button
-              onClick={() => copyReferralLink("seller")}
-              className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+              onClick={() => {
+                setShowBalanceHistory(!showBalanceHistory);
+                if (!showBalanceHistory) {
+                  fetchBalanceHistory();
+                }
+              }}
+              className="ref-text-sm ref-text-blue-600 ref-mt-4"
             >
-              კოპირება
+              {showBalanceHistory ? "დამალვა" : "ისტორია"}
             </button>
           </div>
-          <p className="text-sm text-gray-600 mt-2">
-            გაუზიარეთ ეს ლინკი სელერებს რეგისტრაციისთვის. თითოეული დამტკიცებული
-            სელერისთვის მიიღებთ 5 ლარს.
-          </p>
-        </div>
 
-        {/* მომხმარებლის რეფერალური ლინკი */}
-        <div>
-          <h4 className="text-lg font-medium mb-2">
-            მომხმარებლის რეგისტრაცია (0.20 ლარი)
-          </h4>
-          <div className="flex items-center gap-4">
-            <input
-              type="text"
-              value={generateReferralLink("user")}
-              readOnly
-              className="flex-1 p-3 border rounded-lg bg-gray-50"
-            />
-            <button
-              onClick={() => copyReferralLink("user")}
-              className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
-            >
-              კოპირება
-            </button>
-          </div>
-          <p className="text-sm text-gray-600 mt-2">
-            გაუზიარეთ ეს ლინკი ჩვეულებრივ მომხმარებლებს რეგისტრაციისთვის.
-            თითოეული რეგისტრირებული მომხმარებლისთვის მიიღებთ 0.20 ლარს.
-          </p>
-        </div>
-      </div>
-
-      {/* ბალანსის ისტორია */}
-      {showBalanceHistory && (
-        <div className="bg-white p-6 rounded-lg shadow border mb-8">
-          <h3 className="text-xl font-semibold mb-4">ბალანსის ისტორია</h3>
-          {balanceHistory.length > 0 ? (
-            <div className="overflow-x-auto">
-              <table className="table">
-                <thead>
-                  <tr>
-                    <th>თარიღი</th>
-                    <th>ტიპი</th>
-                    <th>თანხა</th>
-                    <th>ბალანსი მანამდე</th>
-                    <th>ბალანსი მერე</th>
-                    <th>აღწერა</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {balanceHistory.map((transaction) => (
-                    <tr key={transaction.id}>
-                      <td>
-                        {new Date(transaction.createdAt).toLocaleDateString(
-                          "ka-GE"
-                        )}
-                      </td>
-                      <td>
-                        <span
-                          className={`status-badge ${
-                            transaction.type === "REFERRAL_BONUS"
-                              ? "status-approved"
-                              : transaction.type === "WITHDRAWAL"
-                              ? "status-pending"
-                              : "status-rejected"
-                          }`}
-                        >
-                          {transaction.type === "REFERRAL_BONUS"
-                            ? "რეფ. ბონუსი"
-                            : transaction.type === "WITHDRAWAL"
-                            ? "გატანა"
-                            : transaction.type}
-                        </span>
-                      </td>
-                      <td
-                        className={
-                          transaction.amount > 0
-                            ? "text-green-600"
-                            : "text-red-600"
-                        }
-                      >
-                        {transaction.amount > 0 ? "+" : ""}
-                        {transaction.amount.toFixed(2)} ₾
-                      </td>
-                      <td>{transaction.balanceBefore.toFixed(2)} ₾</td>
-                      <td>{transaction.balanceAfter.toFixed(2)} ₾</td>
-                      <td className="text-sm text-gray-600">
-                        {transaction.description}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          ) : (
-            <p className="text-gray-500">ბალანსის ისტორია არ არის</p>
-          )}
-        </div>
-      )}
-
-      {/* გატანის ღილაკი */}
-      <div className="bg-white p-6 rounded-lg shadow border mb-8">
-        <div className="flex justify-between items-center">
-          <div>
-            <h3 className="text-xl font-semibold">ბალანსის გატანა</h3>
-            <p className="text-sm text-gray-600">
-              მინიმუმ: 50 ლარი | თვიური ლიმიტი: 2 გატანა | ამ თვეში
-              გამოყენებული: {stats.monthlyWithdrawals}/2
+          <div className="ref-bg-white ref-p-6 ref-card">
+            <h3 className="ref-text-lg ref-font-semibold ref-text-gray-700 ref-mb-2">
+              მოწვეული პირები
+            </h3>
+            <p className="ref-text-3xl ref-font-bold ref-text-blue-600">
+              {stats.totalReferrals}
+            </p>
+            <p className="ref-text-sm ref-text-gray-500">
+              დამტკიცებული: {stats.approvedReferrals}
             </p>
           </div>
-          <button
-            onClick={() => setShowWithdrawalForm(true)}
-            disabled={stats.balance < 50 || stats.monthlyWithdrawals >= 2}
-            className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition disabled:bg-gray-400 disabled:cursor-not-allowed"
-          >
-            გატანის მოთხოვნა
-          </button>
-        </div>
-      </div>
 
-      {/* გატანის ფორმა */}
-      {showWithdrawalForm && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-8 rounded-lg shadow-lg max-w-md w-full mx-4">
-            <h3 className="text-xl font-semibold mb-4">ბალანსის გატანა</h3>
-            <form onSubmit={submitWithdrawalRequest}>
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  თანხა (ლარი)
-                </label>
-                <input
-                  type="number"
-                  min="50"
-                  max={stats.balance}
-                  value={withdrawalForm.amount}
-                  onChange={(e) =>
-                    setWithdrawalForm({
-                      ...withdrawalForm,
-                      amount: e.target.value,
-                    })
-                  }
-                  className="w-full p-3 border rounded-lg"
-                  required
-                />
-              </div>
+          <div className="ref-bg-white ref-p-6 ref-card">
+            <h3 className="ref-text-lg ref-font-semibold ref-text-gray-700 ref-mb-2">
+              მიღებული ბონუსი
+            </h3>
+            <p className="ref-text-3xl ref-font-bold ref-text-purple-600">
+              {stats.totalEarnings.toFixed(2)} ლარი
+            </p>
+          </div>
 
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  გადახდის მეთოდი
-                </label>
-                <select
-                  value={withdrawalForm.method}
-                  onChange={(e) =>
-                    setWithdrawalForm({
-                      ...withdrawalForm,
-                      method: e.target.value,
-                    })
-                  }
-                  className="w-full p-3 border rounded-lg"
-                >
-                  <option value="BANK">ბანკი</option>
-                  <option value="PAYBOX">პეიბოქსი</option>
-                </select>
-              </div>
-
-              <div className="mb-6">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {withdrawalForm.method === "BANK"
-                    ? "ბანკის ანგარიში (IBAN)"
-                    : "პეიბოქსის ნომერი"}
-                </label>
-                <input
-                  type="text"
-                  value={withdrawalForm.accountDetails}
-                  onChange={(e) =>
-                    setWithdrawalForm({
-                      ...withdrawalForm,
-                      accountDetails: e.target.value,
-                    })
-                  }
-                  className="w-full p-3 border rounded-lg"
-                  placeholder={
-                    withdrawalForm.method === "BANK"
-                      ? "GE29TB7777777777777777"
-                      : "+995555123456"
-                  }
-                  required
-                />
-              </div>
-
-              <div className="flex gap-4">
-                <button
-                  type="button"
-                  onClick={() => setShowWithdrawalForm(false)}
-                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition"
-                >
-                  გაუქმება
-                </button>
-                <button
-                  type="submit"
-                  className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
-                >
-                  გაგზავნა
-                </button>
-              </div>
-            </form>
+          <div className="ref-bg-white ref-p-6 ref-card">
+            <h3 className="ref-text-lg ref-font-semibold ref-text-gray-700 ref-mb-2">
+              მოლოდინში
+            </h3>
+            <p className="ref-text-3xl ref-font-bold ref-text-orange-600">
+              {stats.pendingEarnings.toFixed(2)} ლარი
+            </p>
+            <p className="ref-text-sm ref-text-gray-500">
+              მოლოდინში: {stats.pendingReferrals}
+            </p>
           </div>
         </div>
-      )}
 
-      {/* მოწვეული პირების სია */}
-      <div className="bg-white rounded-lg shadow border mb-8">
-        <div className="p-6 border-b">
-          <h3 className="text-xl font-semibold">მოწვეული პირები</h3>
-        </div>
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                  პირი
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                  ტიპი
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                  სტატუსი
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                  ბონუსი
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                  თარიღი
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200">
-              {stats.referrals.map((referral) => (
-                <tr key={referral.id}>
-                  <td className="px-6 py-4">
-                    <div>
-                      <div className="font-medium">
-                        {referral.referred.name}
-                      </div>
-                      <div className="text-sm text-gray-500">
-                        {referral.referred.email}
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 text-sm text-gray-900">
-                    {referral.type === "SELLER" ? "სელერი" : "მომხმარებელი"}
-                  </td>
-                  <td className="px-6 py-4">
-                    <span
-                      className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(
-                        referral.status
-                      )}`}
-                    >
-                      {getStatusText(referral.status)}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-sm text-gray-900">
-                    {referral.bonusAmount.toFixed(2)} ლარი
-                  </td>
-                  <td className="px-6 py-4 text-sm text-gray-500">
-                    {new Date(referral.createdAt).toLocaleDateString("ka-GE")}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
+        {/* რეფერალური ლინკები */}
+        <div className="ref-bg-white ref-p-6 ref-card ref-mb-8">
+          <h3 className="ref-text-xl ref-font-semibold ref-mb-4 ref-text-gray-800">
+            თქვენი რეფერალური ლინკები
+          </h3>
 
-      {/* გატანის მოთხოვნები */}
-      <div className="bg-white rounded-lg shadow border">
-        <div className="p-6 border-b">
-          <h3 className="text-xl font-semibold">გატანის მოთხოვნები</h3>
+          {/* სელერის რეფერალური ლინკი */}
+          <div className="ref-mb-6">
+            <h4 className="ref-text-lg ref-font-medium ref-mb-2 ref-text-gray-700">
+              სელერის რეგისტრაცია (5 ლარი)
+            </h4>
+            <div className="ref-flex ref-items-center ref-gap-4 ref-input-group">
+              <input
+                type="text"
+                value={generateReferralLink("seller")}
+                readOnly
+                className="ref-form-input ref-bg-gray-50 ref-text-gray-700"
+                style={{
+                  minHeight: "44px",
+                  fontFamily: "monospace",
+                  fontSize: "14px",
+                }}
+              />
+              <button
+                onClick={() => copyReferralLink("seller")}
+                className={`ref-btn ref-btn-primary ref-btn-copy ${
+                  copiedButton === "seller" ? "copied" : ""
+                }`}
+              >
+                📋 კოპირება
+              </button>
+            </div>
+            <p className="ref-text-sm ref-text-gray-600 ref-mt-4">
+              გაუზიარეთ ეს ლინკი სელერებს რეგისტრაციისთვის. თითოეული
+              დამტკიცებული სელერისთვის მიიღებთ 5 ლარს.
+            </p>
+          </div>
+
+          {/* მომხმარებლის რეფერალური ლინკი */}
+          <div>
+            <h4 className="ref-text-lg ref-font-medium ref-mb-2 ref-text-gray-700">
+              მომხმარებლის რეგისტრაცია (0.20 ლარი)
+            </h4>
+            <div className="ref-flex ref-items-center ref-gap-4 ref-input-group">
+              <input
+                type="text"
+                value={generateReferralLink("user")}
+                readOnly
+                className="ref-form-input ref-bg-gray-50 ref-text-gray-700"
+                style={{
+                  minHeight: "44px",
+                  fontFamily: "monospace",
+                  fontSize: "14px",
+                }}
+              />
+              <button
+                onClick={() => copyReferralLink("user")}
+                className={`ref-btn ref-btn-success ref-btn-copy ${
+                  copiedButton === "user" ? "copied" : ""
+                }`}
+              >
+                📋 კოპირება
+              </button>
+            </div>
+            <p className="ref-text-sm ref-text-gray-600 ref-mt-4">
+              გაუზიარეთ ეს ლინკი ჩვეულებრივ მომხმარებლებს რეგისტრაციისთვის.
+              თითოეული რეგისტრირებული მომხმარებლისთვის მიიღებთ 0.20 ლარს.
+            </p>
+          </div>
         </div>
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                  თანხა
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                  მეთოდი
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                  სტატუსი
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                  თარიღი
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200">
-              {withdrawalRequests.map((request) => (
-                <tr key={request.id}>
-                  <td className="px-6 py-4 text-sm font-medium text-gray-900">
-                    {request.amount.toFixed(2)} ლარი
-                  </td>
-                  <td className="px-6 py-4 text-sm text-gray-900">
-                    {request.method === "BANK" ? "ბანკი" : "პეიბოქსი"}
-                  </td>
-                  <td className="px-6 py-4">
-                    <span
-                      className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(
-                        request.status
-                      )}`}
-                    >
-                      {getStatusText(request.status)}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-sm text-gray-500">
-                    {new Date(request.createdAt).toLocaleDateString("ka-GE")}
-                  </td>
+
+        {/* ბალანსის ისტორია */}
+        {showBalanceHistory && (
+          <div className="ref-bg-white ref-p-6 ref-card ref-mb-8">
+            <h3 className="ref-text-xl ref-font-semibold ref-mb-4 ref-text-gray-800">
+              ბალანსის ისტორია
+            </h3>
+            {balanceHistory.length > 0 ? (
+              <div className="ref-table-container">
+                <table className="ref-table">
+                  <thead>
+                    <tr>
+                      <th>თარიღი</th>
+                      <th>ტიპი</th>
+                      <th>თანხა</th>
+                      <th>ბალანსი მანამდე</th>
+                      <th>ბალანსი მერე</th>
+                      <th>აღწერა</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {balanceHistory.map((transaction) => (
+                      <tr key={transaction.id}>
+                        <td>
+                          {new Date(transaction.createdAt).toLocaleDateString(
+                            "ka-GE"
+                          )}
+                        </td>
+                        <td>
+                          <span
+                            className={`status-badge ${
+                              transaction.type === "REFERRAL_BONUS"
+                                ? "status-approved"
+                                : transaction.type === "WITHDRAWAL"
+                                ? "status-pending"
+                                : "status-rejected"
+                            }`}
+                          >
+                            {transaction.type === "REFERRAL_BONUS"
+                              ? "რეფ. ბონუსი"
+                              : transaction.type === "WITHDRAWAL"
+                              ? "გატანა"
+                              : transaction.type}
+                          </span>
+                        </td>
+                        <td
+                          className={
+                            transaction.amount > 0
+                              ? "ref-text-green-600"
+                              : "ref-text-red-600"
+                          }
+                        >
+                          {transaction.amount > 0 ? "+" : ""}
+                          {transaction.amount.toFixed(2)} ₾
+                        </td>
+                        <td>{transaction.balanceBefore.toFixed(2)} ₾</td>
+                        <td>{transaction.balanceAfter.toFixed(2)} ₾</td>
+                        <td className="ref-text-sm ref-text-gray-600">
+                          {transaction.description}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <p className="ref-text-gray-500">ბალანსის ისტორია არ არის</p>
+            )}
+          </div>
+        )}
+
+        {/* გატანის ღილაკი */}
+        <div className="ref-card ref-p-6 ref-mb-8">
+          <div className="ref-flex ref-justify-between ref-items-center ref-withdrawal-section">
+            <div>
+              <h3 className="ref-text-xl ref-font-semibold ref-text-gray-800">
+                ბალანსის გატანა
+              </h3>
+              <p className="ref-text-sm ref-text-gray-600 ref-mt-2">
+                მინიმუმ: 50 ლარი | თვიური ლიმიტი: 2 გატანა | ამ თვეში
+                გამოყენებული: {stats.monthlyWithdrawals}/2
+              </p>
+            </div>
+            <button
+              onClick={() => setShowWithdrawalForm(true)}
+              disabled={stats.balance < 50 || stats.monthlyWithdrawals >= 2}
+              className="ref-btn ref-btn-success"
+            >
+              💰 გატანის მოთხოვნა
+            </button>
+          </div>
+        </div>
+
+        {/* გატანის ფორმა */}
+        {showWithdrawalForm && (
+          <div className="ref-modal-overlay">
+            <div className="ref-modal ref-modal-md">
+              <h3 className="ref-text-xl ref-font-semibold ref-mb-4 ref-text-gray-800">
+                ბალანსის გატანა
+              </h3>
+              <form onSubmit={submitWithdrawalRequest}>
+                <div className="ref-form-group">
+                  <label className="ref-form-label">თანხა (ლარი)</label>
+                  <input
+                    type="number"
+                    min="50"
+                    max={stats.balance}
+                    value={withdrawalForm.amount}
+                    onChange={(e) =>
+                      setWithdrawalForm({
+                        ...withdrawalForm,
+                        amount: e.target.value,
+                      })
+                    }
+                    className="ref-form-input"
+                    required
+                  />
+                </div>
+
+                <div className="ref-form-group">
+                  <label className="ref-form-label">გადახდის მეთოდი</label>
+                  <select
+                    value={withdrawalForm.method}
+                    onChange={(e) =>
+                      setWithdrawalForm({
+                        ...withdrawalForm,
+                        method: e.target.value,
+                      })
+                    }
+                    className="ref-form-input"
+                  >
+                    <option value="BANK">ბანკი</option>
+                    <option value="PAYBOX">პეიბოქსი</option>
+                  </select>
+                </div>
+
+                <div className="ref-form-group">
+                  <label className="ref-form-label">
+                    {withdrawalForm.method === "BANK"
+                      ? "ბანკის ანგარიში (IBAN)"
+                      : "პეიბოქსის ნომერი"}
+                  </label>
+                  <input
+                    type="text"
+                    value={withdrawalForm.accountDetails}
+                    onChange={(e) =>
+                      setWithdrawalForm({
+                        ...withdrawalForm,
+                        accountDetails: e.target.value,
+                      })
+                    }
+                    className="ref-form-input"
+                    placeholder={
+                      withdrawalForm.method === "BANK"
+                        ? "GE29TB7777777777777777"
+                        : "+995555123456"
+                    }
+                    required
+                  />
+                </div>
+
+                <div className="ref-flex ref-gap-4 ref-mt-6">
+                  <button
+                    type="button"
+                    onClick={() => setShowWithdrawalForm(false)}
+                    className="ref-btn ref-btn-secondary ref-flex-1"
+                  >
+                    გაუქმება
+                  </button>
+                  <button
+                    type="submit"
+                    className="ref-btn ref-btn-success ref-flex-1"
+                  >
+                    გაგზავნა
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+
+        {/* მოწვეული პირების სია */}
+        <div className="ref-bg-white ref-card ref-mb-8">
+          <div className="ref-p-6 ref-border-b">
+            <h3 className="ref-text-xl ref-font-semibold ref-text-gray-800">
+              მოწვეული პირები
+            </h3>
+          </div>
+          <div className="ref-table-container">
+            <table className="ref-table">
+              <thead>
+                <tr>
+                  <th>პირი</th>
+                  <th>ტიპი</th>
+                  <th>სტატუსი</th>
+                  <th>ბონუსი</th>
+                  <th>თარიღი</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {stats.referrals.map((referral) => (
+                  <tr key={referral.id}>
+                    <td>
+                      <div>
+                        <div className="ref-font-medium ref-text-gray-900">
+                          {referral.referred.name}
+                        </div>
+                        <div className="ref-text-sm ref-text-gray-500">
+                          {referral.referred.email}
+                        </div>
+                      </div>
+                    </td>
+                    <td className="ref-text-sm ref-text-gray-900">
+                      {referral.type === "SELLER" ? "სელერი" : "მომხმარებელი"}
+                    </td>
+                    <td>
+                      <span
+                        className={`ref-inline-flex ref-status-badge ${getStatusColor(
+                          referral.status
+                        )}`}
+                      >
+                        {getStatusText(referral.status)}
+                      </span>
+                    </td>
+                    <td className="ref-text-sm ref-text-gray-900 ref-font-medium">
+                      {referral.bonusAmount.toFixed(2)} ლარი
+                    </td>
+                    <td className="ref-text-sm ref-text-gray-500">
+                      {new Date(referral.createdAt).toLocaleDateString("ka-GE")}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* გატანის მოთხოვნები */}
+        <div className="ref-bg-white ref-card">
+          <div className="ref-p-6 ref-border-b">
+            <h3 className="ref-text-xl ref-font-semibold ref-text-gray-800">
+              გატანის მოთხოვნები
+            </h3>
+          </div>
+          <div className="ref-table-container">
+            <table className="ref-table">
+              <thead>
+                <tr>
+                  <th>თანხა</th>
+                  <th>მეთოდი</th>
+                  <th>სტატუსი</th>
+                  <th>თარიღი</th>
+                </tr>
+              </thead>
+              <tbody>
+                {withdrawalRequests.map((request) => (
+                  <tr key={request.id}>
+                    <td className="ref-text-sm ref-font-medium ref-text-gray-900">
+                      {request.amount.toFixed(2)} ლარი
+                    </td>
+                    <td className="ref-text-sm ref-text-gray-900">
+                      {request.method === "BANK" ? "ბანკი" : "პეიბოქსი"}
+                    </td>
+                    <td>
+                      <span
+                        className={`ref-inline-flex ref-status-badge ${getStatusColor(
+                          request.status
+                        )}`}
+                      >
+                        {getStatusText(request.status)}
+                      </span>
+                    </td>
+                    <td className="ref-text-sm ref-text-gray-500">
+                      {new Date(request.createdAt).toLocaleDateString("ka-GE")}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>
