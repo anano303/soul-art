@@ -7,6 +7,9 @@ import {
   Logger,
   NotFoundException,
   ConflictException,
+  Inject,
+  forwardRef,
+  Optional,
 } from '@nestjs/common';
 
 import { User, UserDocument } from '../schemas/user.schema';
@@ -31,6 +34,9 @@ export class UsersService {
     private readonly awsS3Service: AwsS3Service,
     private readonly userCloudinaryService: UserCloudinaryService,
     private readonly balanceService: BalanceService,
+    @Optional()
+    @Inject(forwardRef(() => 'ReferralsService'))
+    private readonly referralsService?: any, // ტიპი ასე დავტოვოთ circular dependency-ის გამო
   ) {}
 
   async findByEmail(email: string) {
@@ -39,7 +45,9 @@ export class UsersService {
     return this.userModel.findOne({ email: lowercaseEmail }).exec();
   }
 
-  async create(user: Partial<User>): Promise<UserDocument> {
+  async create(
+    user: Partial<User> & { referralCode?: string },
+  ): Promise<UserDocument> {
     try {
       const existingUser = await this.findByEmail(
         user.email?.toLowerCase() ?? '',
@@ -52,12 +60,29 @@ export class UsersService {
       const hashedPassword = await hashPassword(user.password ?? '');
 
       // Store email in lowercase
-      return await this.userModel.create({
+      const newUser = await this.userModel.create({
         ...user,
         email: user.email?.toLowerCase(),
         password: hashedPassword,
         role: user.role ?? Role.User,
       });
+
+      // რეფერალური კოდით რეგისტრაცია
+      if (user.referralCode && this.referralsService) {
+        try {
+          await this.referralsService.registerWithReferralCode(
+            newUser._id.toString(),
+            user.referralCode,
+          );
+        } catch (error) {
+          this.logger.warn(
+            `რეფერალური კოდის დამუშავების შეცდომა: ${error.message}`,
+          );
+          // არ ვაჩერებთ რეგისტრაციას რეფერალური კოდის შეცდომის გამო
+        }
+      }
+
+      return newUser;
     } catch (error: any) {
       this.logger.error(`Failed to create user: ${error.message}`);
 

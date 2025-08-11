@@ -4,6 +4,7 @@ import {
   NotFoundException,
   Inject,
   forwardRef,
+  Optional,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
@@ -57,6 +58,9 @@ export class ProductsService {
     @InjectModel(Order.name) private orderModel: Model<Order>,
     @Inject(forwardRef(() => UsersService))
     private usersService: UsersService,
+    @Optional()
+    @Inject(forwardRef(() => 'ReferralsService'))
+    private referralsService?: any, // ტიპი ასე დავტოვოთ circular dependency-ის გამო
   ) {}
 
   async findTopRated(): Promise<ProductDocument[]> {
@@ -471,14 +475,41 @@ export class ProductsService {
     status: ProductStatus,
     rejectionReason?: string,
   ): Promise<ProductDocument> {
-    const product = await this.findById(id);
+    const product = await this.productModel.findById(id).populate('user');
+    if (!product) {
+      throw new NotFoundException('პროდუქტი ვერ მოიძებნა');
+    }
 
+    const oldStatus = product.status;
     product.status = status;
     if (rejectionReason) {
       product.rejectionReason = rejectionReason;
     }
 
-    return product.save();
+    const updatedProduct = await product.save();
+
+    // თუ პროდუქტი პირველად დამტკიცდა და სელერისაა
+    if (
+      oldStatus !== ProductStatus.APPROVED &&
+      status === ProductStatus.APPROVED &&
+      product.user &&
+      (product.user as any).role === 'seller' &&
+      this.referralsService
+    ) {
+      try {
+        // შევამოწმოთ და გადავცეთ რეფერალური ბონუსი
+        await this.referralsService.approveSellerAndPayBonus(
+          (product.user as any)._id.toString(),
+        );
+      } catch (error) {
+        console.warn(
+          `რეფერალური ბონუსის დამუშავების შეცდომა: ${error.message}`,
+        );
+        // არ ვაჩერებთ პროდუქტის დამტკიცებას რეფერალური ბონუსის შეცდომის გამო
+      }
+    }
+
+    return updatedProduct;
   }
 
   async findByStatus(status: ProductStatus): Promise<Product[]> {
@@ -981,5 +1012,17 @@ export class ProductsService {
     }
 
     await product.save();
+  }
+
+  // რეფერალების სისტემისთვის - მომხმარებლის პროდუქტების რაოდენობის დათვლა
+  async countUserProducts(
+    userId: string,
+    status?: ProductStatus,
+  ): Promise<number> {
+    const filter: any = { user: userId };
+    if (status) {
+      filter.status = status;
+    }
+    return await this.productModel.countDocuments(filter);
   }
 }

@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
+import { forwardRef } from '@nestjs/common';
 import { AuthController } from './controller/auth.controller';
 import { User, UserSchema } from './schemas/user.schema';
 import { Product, ProductSchema } from '../products/schemas/product.schema';
@@ -28,6 +29,7 @@ import { EmailService } from '@/email/services/email.services';
 import { AwsS3Module } from '@/aws-s3/aws-s3.module';
 import { CloudinaryModule } from '@/cloudinary/cloudinary.module';
 import { UserCloudinaryService } from './services/user-cloudinary.service';
+import { ReferralsModule } from '../referrals/referrals.module';
 
 @Module({
   imports: [
@@ -61,6 +63,7 @@ import { UserCloudinaryService } from './services/user-cloudinary.service';
     }),
     AwsS3Module,
     CloudinaryModule, // Add Cloudinary module
+    forwardRef(() => ReferralsModule), // Add ReferralsModule for dependency injection
   ],
   controllers: [AuthController, UsersController, BalanceController],
   providers: [
@@ -81,6 +84,7 @@ import { UserCloudinaryService } from './services/user-cloudinary.service';
     BalanceService,
     BalanceMigrationService,
     EmailService,
+    MongooseModule, // Export MongooseModule for User model access
   ],
 })
 export class UsersModule {}

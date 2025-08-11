@@ -11,6 +11,7 @@ import { ProductExpertAgent } from '@/ai/agents/product-expert.agent';
 import { Order } from '@/orders/schemas/order.schema';
 import { OrderSchema } from '@/orders/schemas/order.schema';
 import { Model } from 'mongoose';
+import { ReferralsModule } from '@/referrals/referrals.module';
 
 // Add a provider to manually drop the problematic index on module initialization
 export class IndexCleanupService implements OnModuleInit {
@@ -93,6 +94,7 @@ export class IndexCleanupService implements OnModuleInit {
     CloudinaryModule,
     forwardRef(() => AiModule),
     forwardRef(() => UsersModule),
+    forwardRef(() => ReferralsModule), // Add ReferralsModule
   ],
   providers: [ProductsService, AppService, IndexCleanupService],
   controllers: [ProductsController],

@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { registerSchema } from "../validation";
 import { useRegister } from "../hooks/use-auth";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "@/hooks/use-toast";
 import "./register-form.css";
 import type * as z from "zod";
@@ -20,6 +20,7 @@ type RegisterFormData = z.infer<typeof registerSchema>;
 export function RegisterForm() {
   const { t } = useLanguage();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { mutate: register, isPending } = useRegister();
   const [registerError, setRegisterError] = useState<string | null>(null);
   const [isSuccess, setIsSuccess] = useState(false);
@@ -31,6 +32,7 @@ export function RegisterForm() {
     register: registerField,
     handleSubmit,
     formState: { errors },
+    setValue,
   } = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
   });
@@ -45,6 +47,14 @@ export function RegisterForm() {
   useEffect(() => {
     setCanSendEmail(email.trim().length > 0);
   }, [email]);
+
+  // რეფერალური კოდის URL-დან ავტომატური შევსება
+  useEffect(() => {
+    const refCode = searchParams.get("ref");
+    if (refCode) {
+      setValue("referralCode", refCode);
+    }
+  }, [searchParams, setValue]);
 
   const sendVerificationEmail = async () => {
     if (!email) return;
@@ -214,6 +224,20 @@ export function RegisterForm() {
           {errors.password && (
             <p className="error-text">{errors.password.message}</p>
           )}
+        </div>
+
+        <div className="input-group">
+          <label htmlFor="referralCode">რეფერალური კოდი (არაუცილებელო)</label>
+          <input
+            id="referralCode"
+            type="text"
+            placeholder="ABC12345"
+            {...registerField("referralCode")}
+          />
+          {errors.referralCode && (
+            <p className="error-text">{errors.referralCode.message}</p>
+          )}
+          <p className="input-hint">თუ გაქვთ რეფერალური კოდი, შეიყვანეთ აქ</p>
         </div>
 
         {registerError && (
