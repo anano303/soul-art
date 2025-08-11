@@ -3,6 +3,7 @@
 import { RegisterForm } from "@/modules/auth/components/register-form";
 import { AuthLayout } from "@/modules/auth/layouts/auth-layout";
 import { useLanguage } from "@/hooks/LanguageContext";
+import { Suspense } from "react";
 
 export default function RegisterPage() {
   const { t } = useLanguage();
@@ -12,7 +13,9 @@ export default function RegisterPage() {
       title={t("auth.registerWelcome")}
       subtitle={t("auth.registerSubtitle")}
     >
-      <RegisterForm />
+      <Suspense fallback={<div>Loading...</div>}>
+        <RegisterForm />
+      </Suspense>
     </AuthLayout>
   );
 }
