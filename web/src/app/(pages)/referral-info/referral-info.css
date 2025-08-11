@@ -1,14 +1,23 @@
 /* Referral Info Page Styles */
 
+/* Reset and base styles */
+* {
+  box-sizing: border-box;
+}
+
 .referral-info-container {
   min-height: 100vh;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   padding: 0;
+  overflow-x: hidden;
+  width: 100%;
 }
 
 .referral-info-content {
   max-width: 1200px;
   margin: 0 auto;
+  width: 100%;
+  padding: 0 20px;
 }
 
 /* Hero Section */
@@ -17,31 +26,39 @@
   color: white;
   padding: 80px 20px;
   text-align: center;
+  width: 100%;
+  overflow: hidden;
 }
 
 .hero-content {
   max-width: 800px;
   margin: 0 auto;
+  width: 100%;
 }
 
 .hero-title {
-  font-size: 3rem;
+  font-size: clamp(2rem, 5vw, 3rem);
   font-weight: bold;
   margin-bottom: 20px;
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .hero-subtitle {
-  font-size: 1.25rem;
+  font-size: clamp(1rem, 2.5vw, 1.25rem);
   margin-bottom: 40px;
   opacity: 0.9;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .hero-stats {
   display: flex;
   justify-content: center;
-  gap: 40px;
+  gap: clamp(20px, 5vw, 40px);
   margin-top: 40px;
+  flex-wrap: wrap;
 }
 
 .stat-item {
@@ -49,16 +66,18 @@
 }
 
 .stat-amount {
-  font-size: 2.5rem;
+  font-size: clamp(2rem, 4vw, 2.5rem);
   font-weight: bold;
   color: #ffd700;
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+  word-wrap: break-word;
 }
 
 .stat-label {
-  font-size: 0.9rem;
+  font-size: clamp(0.8rem, 1.5vw, 0.9rem);
   margin-top: 8px;
   opacity: 0.8;
+  word-wrap: break-word;
 }
 
 /* Sections */
@@ -70,6 +89,8 @@
 .faq-section {
   padding: 60px 20px;
   background: white;
+  width: 100%;
+  overflow: hidden;
 }
 
 .how-it-works {
@@ -77,20 +98,23 @@
 }
 
 .section-title {
-  font-size: 2.5rem;
+  font-size: clamp(2rem, 4vw, 2.5rem);
   font-weight: bold;
   text-align: center;
   margin-bottom: 50px;
   color: #1a202c;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 /* Steps Grid */
 .steps-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
   gap: 30px;
   max-width: 1000px;
   margin: 0 auto;
+  width: 100%;
 }
 
 .step-card {
@@ -98,6 +122,8 @@
   padding: 30px;
   border-radius: 15px;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  overflow: hidden;
   text-align: center;
   transition: transform 0.3s;
 }
@@ -121,24 +147,29 @@
 }
 
 .step-title {
-  font-size: 1.5rem;
+  font-size: clamp(1.3rem, 2.5vw, 1.5rem);
   font-weight: bold;
   margin-bottom: 15px;
   color: #2d3748;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .step-description {
   color: #4a5568;
   line-height: 1.6;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 /* Benefits Grid */
 .benefits-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr));
   gap: 30px;
   max-width: 1000px;
   margin: 0 auto;
+  width: 100%;
 }
 
 .benefit-card {
@@ -148,6 +179,8 @@
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
   text-align: center;
   transition: transform 0.3s;
+  width: 100%;
+  overflow: hidden;
 }
 
 .benefit-card:hover {
@@ -155,26 +188,31 @@
 }
 
 .benefit-icon {
-  font-size: 3rem;
+  font-size: clamp(2.5rem, 5vw, 3rem);
   margin-bottom: 20px;
 }
 
 .benefit-title {
-  font-size: 1.3rem;
+  font-size: clamp(1.2rem, 2.5vw, 1.3rem);
   font-weight: bold;
   margin-bottom: 15px;
   color: #2d3748;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .benefit-description {
   color: #4a5568;
   line-height: 1.6;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 /* Earnings Calculator */
 .earnings-calculator {
   max-width: 600px;
   margin: 0 auto;
+  width: 100%;
 }
 
 .calculator-card {
@@ -183,11 +221,15 @@
   padding: 40px;
   border-radius: 20px;
   text-align: center;
+  width: 100%;
+  overflow: hidden;
 }
 
 .calculator-card h3 {
-  font-size: 1.5rem;
+  font-size: clamp(1.3rem, 2.5vw, 1.5rem);
   margin-bottom: 30px;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .calculation-row {
@@ -198,33 +240,39 @@
   padding: 15px;
   background: rgba(255, 255, 255, 0.1);
   border-radius: 10px;
+  flex-wrap: wrap;
+  gap: 10px;
 }
 
 .arrow {
-  font-size: 1.2rem;
+  font-size: clamp(1rem, 2vw, 1.2rem);
   font-weight: bold;
 }
 
 .earning {
-  font-size: 1.3rem;
+  font-size: clamp(1.2rem, 2.5vw, 1.3rem);
   font-weight: bold;
   color: #ffd700;
+  word-wrap: break-word;
 }
 
 .calculator-note {
   margin-top: 20px;
-  font-size: 0.9rem;
+  font-size: clamp(0.8rem, 1.5vw, 0.9rem);
   opacity: 0.8;
   font-style: italic;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 /* Rules Grid */
 .rules-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 1fr));
   gap: 30px;
   max-width: 1000px;
   margin: 0 auto;
+  width: 100%;
 }
 
 .rule-card {
@@ -233,13 +281,17 @@
   border-radius: 15px;
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
   border-left: 5px solid #667eea;
+  width: 100%;
+  overflow: hidden;
 }
 
 .rule-card h4 {
-  font-size: 1.3rem;
+  font-size: clamp(1.2rem, 2.5vw, 1.3rem);
   font-weight: bold;
   margin-bottom: 20px;
   color: #2d3748;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .rule-card ul {
@@ -252,6 +304,8 @@
   color: #4a5568;
   position: relative;
   padding-left: 20px;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .rule-card li:before {
@@ -267,19 +321,25 @@
   background: linear-gradient(135deg, #667eea, #764ba2);
   color: white;
   text-align: center;
+  width: 100%;
+  overflow: hidden;
 }
 
 .cta-title {
-  font-size: 2.5rem;
+  font-size: clamp(2rem, 4vw, 2.5rem);
   font-weight: bold;
   margin-bottom: 20px;
   color: white;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .cta-description {
-  font-size: 1.2rem;
+  font-size: clamp(1rem, 2.5vw, 1.2rem);
   margin-bottom: 40px;
   opacity: 0.9;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .cta-buttons {
@@ -296,6 +356,8 @@
   font-weight: bold;
   text-decoration: none;
   border: none;
+  min-width: 200px;
+  word-wrap: break-word;
   cursor: pointer;
   font-size: 1.1rem;
   transition: all 0.3s;
@@ -341,15 +403,18 @@
 .share-section p {
   margin-bottom: 15px;
   opacity: 0.9;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 /* FAQ Grid */
 .faq-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(350px, 100%), 1fr));
   gap: 30px;
   max-width: 1000px;
   margin: 0 auto;
+  width: 100%;
 }
 
 .faq-item {
@@ -357,13 +422,24 @@
   padding: 25px;
   border-radius: 10px;
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+  width: 100%;
+  overflow: hidden;
 }
 
 .faq-item h4 {
-  font-size: 1.2rem;
+  font-size: clamp(1.1rem, 2vw, 1.2rem);
   font-weight: bold;
   margin-bottom: 15px;
   color: #2d3748;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+.faq-item p {
+  color: #4a5568;
+  line-height: 1.6;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .faq-item p {
@@ -373,8 +449,18 @@
 
 /* Responsive Design */
 @media (max-width: 768px) {
-  .hero-title {
-    font-size: 2rem;
+  .referral-info-content {
+    padding: 0 15px;
+  }
+
+  .hero-section,
+  .how-it-works,
+  .benefits-section,
+  .earnings-section,
+  .rules-section,
+  .cta-section,
+  .faq-section {
+    padding: 40px 15px;
   }
 
   .hero-stats {
@@ -382,15 +468,12 @@
     gap: 20px;
   }
 
-  .section-title {
-    font-size: 2rem;
-  }
-
   .steps-grid,
   .benefits-grid,
   .rules-grid,
   .faq-grid {
     grid-template-columns: 1fr;
+    gap: 20px;
   }
 
   .calculation-row {
@@ -402,15 +485,32 @@
   .cta-buttons {
     flex-direction: column;
     align-items: center;
+    gap: 15px;
   }
 
   .btn {
     width: 100%;
     max-width: 300px;
+    min-width: auto;
+  }
+
+  .calculator-card {
+    padding: 30px 20px;
+  }
+
+  .step-card,
+  .benefit-card,
+  .rule-card,
+  .faq-item {
+    padding: 20px;
   }
 }
 
 @media (max-width: 480px) {
+  .referral-info-content {
+    padding: 0 10px;
+  }
+
   .hero-section,
   .how-it-works,
   .benefits-section,
@@ -418,14 +518,40 @@
   .rules-section,
   .cta-section,
   .faq-section {
-    padding: 40px 15px;
+    padding: 30px 10px;
   }
 
-  .hero-title {
-    font-size: 1.5rem;
+  .calculator-card {
+    padding: 20px 15px;
   }
 
-  .section-title {
-    font-size: 1.5rem;
+  .step-card,
+  .benefit-card,
+  .rule-card,
+  .faq-item {
+    padding: 15px;
   }
+
+  .steps-grid,
+  .benefits-grid,
+  .rules-grid,
+  .faq-grid {
+    gap: 15px;
+  }
+
+  .btn {
+    padding: 12px 20px;
+    font-size: 0.9rem;
+  }
+}
+
+/* Ensure no horizontal overflow */
+html,
+body {
+  overflow-x: hidden;
+  max-width: 100%;
+}
+
+.referral-info-container * {
+  max-width: 100%;
 }
