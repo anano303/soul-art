@@ -38,10 +38,10 @@ export class RegisterDto {
 
   @ApiProperty({
     example: 'ABC12345',
-    description: 'რეფერალური კოდი (არაუცილებელო)',
+    description: 'რეფერალური კოდი რომლითაც რეგისტრირდება (არაუცილებელო)',
     required: false,
   })
   @IsOptional()
   @IsString()
-  referralCode?: string;
+  invitationCode?: string; // რეფერალური კოდი რომლითაც რეგისტრირდება
 }

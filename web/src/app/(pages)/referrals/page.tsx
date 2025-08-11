@@ -75,6 +75,7 @@ export default function ReferralsPage() {
 
   const fetchReferralStats = useCallback(async () => {
     const token = getAccessToken();
+    console.log("Token:", token); // Debug log
     try {
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/referrals/stats`,
@@ -85,9 +86,13 @@ export default function ReferralsPage() {
         }
       );
 
+      console.log("Response status:", response.status); // Debug log
       if (response.ok) {
         const data = await response.json();
+        console.log("Stats data:", data); // Debug log
         setStats(data);
+      } else {
+        console.error("Response not ok:", response.status, response.statusText);
       }
     } catch (error) {
       console.error("Failed to fetch referral stats:", error);
@@ -145,18 +150,27 @@ export default function ReferralsPage() {
     }
   }, [user, fetchReferralStats, fetchWithdrawalRequests]);
 
-  const generateReferralLink = () => {
+  const generateReferralLink = (type: "user" | "seller" = "user") => {
+    console.log("Generating referral link, stats:", stats, "type:", type); // Debug log
     if (stats?.referralCode) {
       const baseUrl = window.location.origin;
-      return `${baseUrl}/auth/register?ref=${stats.referralCode}`;
+      const path =
+        type === "seller"
+          ? "/sellers-register#seller-register-form"
+          : "/register";
+      const link = `${baseUrl}${path}?ref=${stats.referralCode}`;
+      console.log("Generated link:", link); // Debug log
+      return link;
     }
+    console.log("No referral code found"); // Debug log
     return "";
   };
 
-  const copyReferralLink = () => {
-    const link = generateReferralLink();
+  const copyReferralLink = (type: "user" | "seller" = "user") => {
+    const link = generateReferralLink(type);
     navigator.clipboard.writeText(link);
-    toast.success("რეფერალური ლინკი კოპირებულია!");
+    const linkType = type === "seller" ? "სელერის" : "მომხმარებლის";
+    toast.success(`${linkType} რეფერალური ლინკი კოპირებულია!`);
   };
 
   const submitWithdrawalRequest = async (e: React.FormEvent) => {
@@ -329,27 +343,61 @@ export default function ReferralsPage() {
         </div>
       </div>
 
-      {/* რეფერალური ლინკი */}
+      {/* რეფერალური ლინკები */}
       <div className="bg-white p-6 rounded-lg shadow border mb-8">
-        <h3 className="text-xl font-semibold mb-4">თქვენი რეფერალური ლინკი</h3>
-        <div className="flex items-center gap-4">
-          <input
-            type="text"
-            value={generateReferralLink()}
-            readOnly
-            className="flex-1 p-3 border rounded-lg bg-gray-50"
-          />
-          <button
-            onClick={copyReferralLink}
-            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
-          >
-            კოპირება
-          </button>
+        <h3 className="text-xl font-semibold mb-4">
+          თქვენი რეფერალური ლინკები
+        </h3>
+
+        {/* სელერის რეფერალური ლინკი */}
+        <div className="mb-6">
+          <h4 className="text-lg font-medium mb-2">
+            სელერის რეგისტრაცია (5 ლარი)
+          </h4>
+          <div className="flex items-center gap-4">
+            <input
+              type="text"
+              value={generateReferralLink("seller")}
+              readOnly
+              className="flex-1 p-3 border rounded-lg bg-gray-50"
+            />
+            <button
+              onClick={() => copyReferralLink("seller")}
+              className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+            >
+              კოპირება
+            </button>
+          </div>
+          <p className="text-sm text-gray-600 mt-2">
+            გაუზიარეთ ეს ლინკი სელერებს რეგისტრაციისთვის. თითოეული დამტკიცებული
+            სელერისთვის მიიღებთ 5 ლარს.
+          </p>
         </div>
-        <p className="text-sm text-gray-600 mt-2">
-          გაუზიარეთ ეს ლინკი სელერებს რეგისტრაციისთვის. თითოეული დამტკიცებული
-          სელერისთვის მიიღებთ 5 ლარს.
-        </p>
+
+        {/* მომხმარებლის რეფერალური ლინკი */}
+        <div>
+          <h4 className="text-lg font-medium mb-2">
+            მომხმარებლის რეგისტრაცია (0.20 ლარი)
+          </h4>
+          <div className="flex items-center gap-4">
+            <input
+              type="text"
+              value={generateReferralLink("user")}
+              readOnly
+              className="flex-1 p-3 border rounded-lg bg-gray-50"
+            />
+            <button
+              onClick={() => copyReferralLink("user")}
+              className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
+            >
+              კოპირება
+            </button>
+          </div>
+          <p className="text-sm text-gray-600 mt-2">
+            გაუზიარეთ ეს ლინკი ჩვეულებრივ მომხმარებლებს რეგისტრაციისთვის.
+            თითოეული რეგისტრირებული მომხმარებლისთვის მიიღებთ 0.20 ლარს.
+          </p>
+        </div>
       </div>
 
       {/* ბალანსის ისტორია */}

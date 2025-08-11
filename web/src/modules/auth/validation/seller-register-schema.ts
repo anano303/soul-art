@@ -20,5 +20,5 @@ export const sellerRegisterSchema = z.object({
     .string()
     .regex(/^GE[0-9]{2}[A-Z0-9]{18}$/, "არასწორი IBAN ფორმატი")
     .refine((value) => value.length === 22, "IBAN უნდა შეიცავდეს 22 სიმბოლოს"),
-  referralCode: z.string().optional(),
+  invitationCode: z.string().optional(), // renamed from referralCode
 });

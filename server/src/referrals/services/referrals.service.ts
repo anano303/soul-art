@@ -98,7 +98,14 @@ export class ReferralsService {
     referredUserId: string,
     referralCode: string,
   ): Promise<void> {
-    if (!referralCode) return;
+    this.logger.log(
+      `registerWithReferralCode started: userId=${referredUserId}, code=${referralCode}`,
+    );
+
+    if (!referralCode) {
+      this.logger.log('No referral code provided, skipping');
+      return;
+    }
 
     const referrer = await this.userModel.findOne({ referralCode });
     if (!referrer) {
@@ -106,13 +113,32 @@ export class ReferralsService {
       return;
     }
 
+    this.logger.log(`Referrer found: ${referrer.email}`);
+
     const referredUser = await this.userModel.findById(referredUserId);
     if (!referredUser) {
+      this.logger.error(
+        `მოწვეული მომხმარებელი ვერ მოიძებნა: ${referredUserId}`,
+      );
       throw new NotFoundException('მოწვეული მომხმარებელი ვერ მოიძებნა');
+    }
+
+    this.logger.log(`Referred user found: ${referredUser.email}`);
+
+    // შევამოწმოთ არ არსებობს თუ არა ხელახლა რეფერალი ამ მომხმარებლისთვის
+    const existingReferral = await this.referralModel.findOne({
+      referred: referredUserId,
+    });
+    if (existingReferral) {
+      this.logger.warn(
+        `Referral already exists for user: ${referredUser.email}`,
+      );
+      return; // არ შევქმნით ახალ რეფერალს
     }
 
     // შეამოწმოთ, რომ იგივე პირი არ მოიწვიოს თავის თავს
     if (referrer._id.toString() === referredUserId) {
+      this.logger.error(`Self-referral attempt: ${referrer.email}`);
       throw new BadRequestException('თავის თავის მოწვევა არ შეიძლება');
     }
 
@@ -123,6 +149,10 @@ export class ReferralsService {
         : ReferralType.USER;
     const bonusAmount = referralType === ReferralType.SELLER ? 5 : 0.2; // 5 ლარი ან 20 თეთრი
 
+    this.logger.log(
+      `Creating referral: type=${referralType}, bonus=${bonusAmount}`,
+    );
+
     // შევქმნათ რეფერალის ჩანაწერი
     const referral = new this.referralModel({
       referrer: referrer._id,
@@ -132,12 +162,26 @@ export class ReferralsService {
       status: ReferralStatus.PENDING,
     });
 
-    await referral.save();
+    try {
+      await referral.save();
+      this.logger.log(`Referral saved successfully`);
+    } catch (error) {
+      this.logger.error(`Failed to save referral: ${error.message}`);
+      throw error;
+    }
 
     // ავფეიროთ მოწვეული მომხმარებლის ველი
-    await this.userModel.findByIdAndUpdate(referredUserId, {
-      referredBy: referralCode,
-    });
+    try {
+      await this.userModel.findByIdAndUpdate(referredUserId, {
+        referredBy: referralCode,
+      });
+      this.logger.log(`User updated with referral code`);
+    } catch (error) {
+      this.logger.error(
+        `Failed to update user with referral code: ${error.message}`,
+      );
+      throw error;
+    }
 
     this.logger.log(
       `რეფერალი შექმნილია: ${referrer.email} -> ${referredUser.email} (${referralType})`,
@@ -424,6 +468,12 @@ export class ReferralsService {
       throw new NotFoundException('მომხმარებელი ვერ მოიძებნა');
     }
 
+    // თუ მომხმარებელს არ აქვს რეფერალური კოდი, შევქმნათ
+    let referralCode = user.referralCode;
+    if (!referralCode) {
+      referralCode = await this.generateUserReferralCode(userId);
+    }
+
     const referrals = await this.referralModel
       .find({ referrer: userId })
       .populate('referred', 'name email role createdAt')
@@ -442,7 +492,7 @@ export class ReferralsService {
       .reduce((sum, r) => sum + r.bonusAmount, 0);
 
     return {
-      referralCode: user.referralCode,
+      referralCode: referralCode,
       balance: user.referralBalance || 0, // რეფერალების ბალანსი
       totalReferrals: referrals.length,
       approvedReferrals: referrals.filter(
