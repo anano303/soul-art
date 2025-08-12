@@ -488,9 +488,8 @@ export class ProductsService {
 
     const updatedProduct = await product.save();
 
-    // თუ პროდუქტი პირველად დამტკიცდა და სელერისაა
+    // თუ პროდუქტი დამტკიცდა და სელერისაა — ყოველი approve-ზე ვცდილობთ ტრიგერს (იდემპოტენტურია)
     if (
-      oldStatus !== ProductStatus.APPROVED &&
       status === ProductStatus.APPROVED &&
       product.user &&
       (product.user as any).role === 'seller' &&
