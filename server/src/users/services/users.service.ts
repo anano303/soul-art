@@ -23,6 +23,7 @@ import { AdminProfileDto } from '../dtos/admin.profile.dto';
 import { AwsS3Service } from '@/aws-s3/aws-s3.service';
 import { UserCloudinaryService } from './user-cloudinary.service';
 import { BalanceService } from './balance.service';
+import { ReferralsService } from '@/referrals/services/referrals.service';
 
 @Injectable()
 export class UsersService {
@@ -35,8 +36,8 @@ export class UsersService {
     private readonly userCloudinaryService: UserCloudinaryService,
     private readonly balanceService: BalanceService,
     @Optional()
-    @Inject(forwardRef(() => 'ReferralsService'))
-    private readonly referralsService?: any, // ტიპი ასე დავტოვოთ circular dependency-ის გამო
+    @Inject(forwardRef(() => ReferralsService))
+    private readonly referralsService?: ReferralsService,
   ) {}
 
   async findByEmail(email: string) {

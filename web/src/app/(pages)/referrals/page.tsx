@@ -155,11 +155,12 @@ export default function ReferralsPage() {
     console.log("Generating referral link, stats:", stats, "type:", type); // Debug log
     if (stats?.referralCode) {
       const baseUrl = window.location.origin;
-      const path =
-        type === "seller"
-          ? "/sellers-register#seller-register-form"
-          : "/register";
-      const link = `${baseUrl}${path}?ref=${stats.referralCode}`;
+      if (type === "seller") {
+        const link = `${baseUrl}/sellers-register?ref=${stats.referralCode}#seller-register-form`;
+        console.log("Generated link:", link); // Debug log
+        return link;
+      }
+      const link = `${baseUrl}/register?ref=${stats.referralCode}`;
       console.log("Generated link:", link); // Debug log
       return link;
     }

@@ -33,6 +33,7 @@ import {
 } from '../dtos/referral.dto';
 import { ProductStatus } from '../../products/schemas/product.schema';
 import { Role } from '../../types/role.enum';
+import { ProductsService } from '@/products/services/products.service';
 
 @Injectable()
 export class ReferralsService {
@@ -46,8 +47,8 @@ export class ReferralsService {
     @InjectModel(WithdrawalRequest.name)
     private withdrawalRequestModel: Model<WithdrawalRequestDocument>,
     @Optional()
-    @Inject(forwardRef(() => 'ProductsService'))
-    private readonly productsService?: any, // ტიპი ასე დავტოვოთ circular dependency-ის გამო
+    @Inject(forwardRef(() => ProductsService))
+    private readonly productsService?: ProductsService,
   ) {}
 
   // რეფერალური კოდის გენერაცია
