@@ -47,11 +47,9 @@ export function ReferralPromoBanner() {
   };
 
   const generateReferralLink = () => {
-    if (stats?.referralCode) {
-      const baseUrl = window.location.origin;
-      return `${baseUrl}/auth/register?ref=${stats.referralCode}`;
-    }
-    return "";
+    if (!stats?.referralCode) return "";
+    const baseUrl = window.location.origin;
+    return `${baseUrl}/register?ref=${stats.referralCode}`;
   };
 
   const copyLink = () => {
