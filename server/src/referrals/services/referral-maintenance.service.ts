@@ -29,6 +29,7 @@ export class ReferralMaintenanceService implements OnApplicationBootstrap {
   async onApplicationBootstrap(): Promise<void> {
     try {
       await this.normalizeSellerReferrals();
+      await this.normalizeUserReferrals(); // Add this line
       await this.recalculateReferralBalances();
     } catch (e) {
       this.logger.warn(`Maintenance failed: ${e?.message || e}`);
@@ -58,6 +59,43 @@ export class ReferralMaintenanceService implements OnApplicationBootstrap {
       await this.referralModel.deleteMany({ _id: { $in: remove } });
       this.logger.log(
         `Deleted ${remove.length} duplicate seller referrals for referred=${referredId}`,
+      );
+      // Ensure status consistency: if any duplicate had APPROVED, mark kept as APPROVED
+      const anyApproved = refs.some(
+        (r) => r.status === ReferralStatus.APPROVED,
+      );
+      if (anyApproved) {
+        await this.referralModel.updateOne(
+          { _id: keep._id },
+          { status: ReferralStatus.APPROVED, approvedAt: new Date() },
+        );
+      }
+    }
+  }
+
+  // Keep one USER referral per referred user; delete duplicates; set APPROVED if any was approved
+  private async normalizeUserReferrals(): Promise<void> {
+    const userRefs = await this.referralModel
+      .find({ type: ReferralType.USER })
+      .sort({ createdAt: 1 })
+      .lean();
+
+    const byReferred = new Map<string, ReferralDocument[]>();
+    for (const r of userRefs as any[]) {
+      const key = r.referred.toString();
+      const list = byReferred.get(key) || [];
+      list.push(r as any);
+      byReferred.set(key, list);
+    }
+
+    for (const [referredId, refs] of byReferred.entries()) {
+      if (refs.length <= 1) continue;
+      // Keep the first (oldest), delete others
+      const keep = refs[0];
+      const remove = refs.slice(1).map((r) => r._id);
+      await this.referralModel.deleteMany({ _id: { $in: remove } });
+      this.logger.log(
+        `Deleted ${remove.length} duplicate user referrals for referred=${referredId}`,
       );
       // Ensure status consistency: if any duplicate had APPROVED, mark kept as APPROVED
       const anyApproved = refs.some(

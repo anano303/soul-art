@@ -680,15 +680,16 @@ export class ReferralsService {
       // For sellers, check if they should actually be approved
       let status = ReferralStatus.PENDING;
       let approvedAt = undefined;
-      
+
       if (iu.role === Role.Seller) {
         // Check if seller has 5+ approved products
         if (this.productsService) {
           try {
-            const approvedProductsCount = await this.productsService.countUserProducts(
-              invitedId,
-              ProductStatus.APPROVED,
-            );
+            const approvedProductsCount =
+              await this.productsService.countUserProducts(
+                invitedId,
+                ProductStatus.APPROVED,
+              );
             if (approvedProductsCount >= 5) {
               status = ReferralStatus.APPROVED;
               approvedAt = new Date();
