@@ -23,6 +23,7 @@ import { Roles } from '../../decorators/roles.decorator';
 import { CurrentUser } from '../../decorators/current-user.decorator';
 import { Role } from '../../types/role.enum';
 import { WithdrawalStatus } from '../schemas/withdrawal-request.schema';
+import { ReferralStatus } from '../schemas/referral.schema';
 import { UserDocument } from '../../users/schemas/user.schema';
 
 @Controller('referrals')
@@ -91,6 +92,14 @@ export class ReferralsController {
   @Roles(Role.Admin)
   async getAllWithdrawalRequests(@Query('status') status?: WithdrawalStatus) {
     return await this.referralsService.getWithdrawalRequests(status);
+  }
+
+  // ყველა რეფერალი (ადმინისთვის)
+  @Get('admin/referrals')
+  @UseGuards(RolesGuard)
+  @Roles(Role.Admin)
+  async getAllReferrals(@Query('status') status?: ReferralStatus) {
+    return await this.referralsService.getAllReferrals(status);
   }
 
   // გატანის მოთხოვნის დამუშავება (ადმინისთვის)

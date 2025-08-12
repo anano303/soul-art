@@ -25,6 +25,16 @@ interface WithdrawalRequest {
   rejectionReason?: string;
 }
 
+interface AdminReferralItem {
+  id: string;
+  referrer: { name: string; email: string };
+  referred: { name: string; email: string; role: string; createdAt: string };
+  type: string;
+  status: string;
+  bonusAmount: number;
+  createdAt: string;
+}
+
 export default function AdminReferralsPage() {
   const { user } = useAuth();
   const [withdrawalRequests, setWithdrawalRequests] = useState<
@@ -34,6 +44,10 @@ export default function AdminReferralsPage() {
   const [selectedStatus, setSelectedStatus] = useState<string>("");
   const [processingId, setProcessingId] = useState<string | null>(null);
   const [showProcessModal, setShowProcessModal] = useState(false);
+  const [referrals, setReferrals] = useState<AdminReferralItem[]>([]);
+  const [approvingSellerId, setApprovingSellerId] = useState<string | null>(
+    null
+  );
   const [processForm, setProcessForm] = useState({
     status: "APPROVED" as "APPROVED" | "REJECTED",
     rejectionReason: "",
@@ -64,11 +78,30 @@ export default function AdminReferralsPage() {
     }
   }, [selectedStatus]);
 
+  const fetchReferrals = useCallback(async () => {
+    const token = getAccessToken();
+    try {
+      const url = selectedStatus
+        ? `${process.env.NEXT_PUBLIC_API_URL}/referrals/admin/referrals?status=${selectedStatus}`
+        : `${process.env.NEXT_PUBLIC_API_URL}/referrals/admin/referrals`;
+      const response = await fetch(url, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setReferrals(data);
+      }
+    } catch (e) {
+      console.error("Failed to fetch referrals", e);
+    }
+  }, [selectedStatus]);
+
   useEffect(() => {
     if (user && user.role === "admin") {
       fetchWithdrawalRequests();
+      fetchReferrals();
     }
-  }, [user, fetchWithdrawalRequests]);
+  }, [user, fetchWithdrawalRequests, fetchReferrals]);
 
   const processWithdrawalRequest = async (requestId: string) => {
     const token = getAccessToken();
@@ -171,11 +204,120 @@ export default function AdminReferralsPage() {
               onChange={(e) => setSelectedStatus(e.target.value)}
               className="admin-ref-form-select"
             >
-              <option value="">ყველა მოთხოვნა</option>
+              <option value="">ყველა სტატუსი</option>
               <option value="PENDING">მოლოდინში</option>
-              <option value="PROCESSED">დამუშავებული</option>
+              <option value="PRODUCTS_UPLOADED">ატვირთულია ≥5 პროდუქტი</option>
+              <option value="APPROVED">დამტკიცებული</option>
               <option value="REJECTED">უარყოფილი</option>
             </select>
+          </div>
+        </div>
+
+        {/* რეფერალები */}
+        <div className="admin-ref-card admin-ref-mb-8">
+          <div className="admin-ref-p-6 admin-ref-border-b">
+            <h3 className="admin-ref-text-xl admin-ref-font-semibold admin-ref-text-gray-900">
+              რეფერალები
+            </h3>
+          </div>
+          <div className="admin-ref-table-container">
+            <table className="admin-ref-table">
+              <thead>
+                <tr>
+                  <th>ვინც მოიწვია</th>
+                  <th>მოწვეული</th>
+                  <th>ტიპი</th>
+                  <th>სტატუსი</th>
+                  <th>ბონუსი</th>
+                  <th>თარიღი</th>
+                </tr>
+              </thead>
+              <tbody>
+                {referrals.map((r) => (
+                  <tr key={r.id}>
+                    <td>
+                      <div className="admin-ref-user-name">
+                        {r.referrer?.name}
+                      </div>
+                      <div className="admin-ref-user-email">
+                        {r.referrer?.email}
+                      </div>
+                    </td>
+                    <td>
+                      <div className="admin-ref-user-name">
+                        {r.referred?.name}
+                      </div>
+                      <div className="admin-ref-user-email">
+                        {r.referred?.email}
+                      </div>
+                    </td>
+                    <td>{r.type === "SELLER" ? "სელერი" : "მომხმარებელი"}</td>
+                    <td>{r.status}</td>
+                    <td>{r.bonusAmount.toFixed(2)} ₾</td>
+                    <td className="admin-ref-text-gray-500">
+                      {new Date(r.createdAt).toLocaleDateString("ka-GE")}
+                    </td>
+                    <td>
+                      {r.type === "SELLER" &&
+                        (r.status === "PENDING" ||
+                          r.status === "PRODUCTS_UPLOADED") && (
+                          <button
+                            disabled={
+                              approvingSellerId ===
+                              (r.referred as unknown as { id?: string }).id
+                            }
+                            onClick={async () => {
+                              const referredObj = r.referred as unknown as {
+                                id?: string;
+                                _id?: string;
+                              };
+                              const sellerId =
+                                referredObj.id || referredObj._id;
+                              if (!sellerId) return;
+                              setApprovingSellerId(sellerId);
+                              const token = getAccessToken();
+                              try {
+                                const res = await fetch(
+                                  `${process.env.NEXT_PUBLIC_API_URL}/referrals/admin/approve-seller`,
+                                  {
+                                    method: "POST",
+                                    headers: {
+                                      "Content-Type": "application/json",
+                                      Authorization: `Bearer ${token}`,
+                                    },
+                                    body: JSON.stringify({ sellerId }),
+                                  }
+                                );
+                                if (res.ok) {
+                                  toast.success(
+                                    "სელერი დამტკიცდა და ბონუსი გადაცემულია"
+                                  );
+                                  fetchReferrals();
+                                } else {
+                                  const err = await res.json();
+                                  toast.error(
+                                    err.message || "დამტკიცება ვერ მოხერხდა"
+                                  );
+                                }
+                              } catch {
+                                toast.error("შეცდომა მოხდა");
+                              } finally {
+                                setApprovingSellerId(null);
+                              }
+                            }}
+                            className="admin-ref-btn admin-ref-btn-primary"
+                          >
+                            {approvingSellerId ===
+                            (r.referred as unknown as { id?: string }).id
+                              ? "მ işlება..."
+                              : "სელერის დამტკიცება"}
+                          </button>
+                        )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </div>
 
