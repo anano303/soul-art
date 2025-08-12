@@ -36,10 +36,12 @@
   z-index: 2;
   width: 100%;
   white-space: nowrap;
-  animation: soulart-text-scroll 30s linear infinite;
+  animation: soulart-text-scroll 8s linear infinite;
   display: flex;
   align-items: center;
   gap: 20px;
+  animation-fill-mode: forwards;
+  animation-delay: 2s;
 }
 
 @keyframes soulart-text-scroll {
@@ -187,6 +189,10 @@
 @media (max-width: 768px) {
   .soulart-referral-promo {
     height: 60px;
+  }
+
+  .soulart-promo-content {
+    animation: soulart-text-scroll 8s linear infinite;
   }
 
   .soulart-promo-title {
