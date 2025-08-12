@@ -17,8 +17,8 @@ import {
   ReferralType,
 } from '../schemas/referral.schema';
 import {
-  BalanceTransaction,
-  BalanceTransactionDocument,
+  ReferralBalanceTransaction,
+  ReferralBalanceTransactionDocument,
   TransactionType,
   TransactionStatus,
 } from '../schemas/balance-transaction.schema';
@@ -42,8 +42,8 @@ export class ReferralsService {
   constructor(
     @InjectModel(User.name) private userModel: Model<UserDocument>,
     @InjectModel(Referral.name) private referralModel: Model<ReferralDocument>,
-    @InjectModel(BalanceTransaction.name)
-    private balanceTransactionModel: Model<BalanceTransactionDocument>,
+    @InjectModel(ReferralBalanceTransaction.name)
+    private balanceTransactionModel: Model<ReferralBalanceTransactionDocument>,
     @InjectModel(WithdrawalRequest.name)
     private withdrawalRequestModel: Model<WithdrawalRequestDocument>,
     @Optional()
@@ -217,6 +217,7 @@ export class ReferralsService {
 
   // სელერის დამტკიცება და ბონუსის გადაცემა
   async approveSellerAndPayBonus(sellerId: string): Promise<void> {
+    this.logger.log(`[approveSellerAndPayBonus] start sellerId=${sellerId}`);
     const seller = await this.userModel.findById(sellerId);
     if (!seller || seller.role !== Role.Seller) {
       throw new NotFoundException('სელერი ვერ მოიძებნა');
@@ -230,6 +231,9 @@ export class ReferralsService {
           sellerId,
           ProductStatus.APPROVED,
         );
+        this.logger.log(
+          `[approveSellerAndPayBonus] approvedProducts=${approvedProductsCount} for seller=${seller.email}`,
+        );
       } catch (error) {
         this.logger.warn(
           `პროდუქტების რაოდენობის დათვლის შეცდომა: ${error.message}`,
@@ -242,41 +246,100 @@ export class ReferralsService {
     }
 
     if (approvedProductsCount < 5) {
-      throw new BadRequestException(
-        'სელერს უნდა ჰქონდეს მინიმუმ 5 დამტკიცებული პროდუქტი',
+      // საკმარისი დამტკიცებული პროდუქტი ჯერ არ აქვს — უბრალოდ დავბრუნდეთ უხმაუროდ
+      this.logger.log(
+        `Seller ${seller.email} has ${approvedProductsCount} approved products (<5). Skipping approval for now.`,
       );
+      return;
     }
 
-    // ვეძებთ ამ სელერის რეფერალს
-    const referral = await this.referralModel
-      .findOne({
+    // ვეძებთ ამ სელერის ყველა რეფერალს (დუბლიკატების შემთხვევისთვისაც)
+    let referrals = await this.referralModel
+      .find({
         referred: sellerId,
         type: ReferralType.SELLER,
-        status: {
-          $in: [ReferralStatus.PENDING, ReferralStatus.PRODUCTS_UPLOADED],
-        },
       })
       .populate('referrer');
 
-    if (referral) {
-      // ვაფდეითებთ რეფერალის სტატუსს
-      referral.status = ReferralStatus.APPROVED;
-      referral.approvedAt = new Date();
-      await referral.save();
+    if (!referrals || referrals.length === 0) {
+      this.logger.warn(
+        `[approveSellerAndPayBonus] referral not found for sellerId=${sellerId}. Will backfill from user.referredBy if possible.`,
+      );
+      // Backfill referral from referrer code if present
+      if (seller.referredBy) {
+        const referrer = await this.userModel.findOne({
+          referralCode: seller.referredBy,
+        });
+        if (referrer) {
+          const referral = new this.referralModel({
+            referrer: referrer._id,
+            referred: seller._id,
+            type: ReferralType.SELLER,
+            bonusAmount: 5,
+            status: ReferralStatus.PENDING,
+          });
+          await referral.save();
+          this.logger.log(
+            '[approveSellerAndPayBonus] backfilled seller referral',
+          );
+          const populated = await this.referralModel
+            .findById(referral._id)
+            .populate('referrer');
+          referrals.push(populated as any);
+        } else {
+          this.logger.warn(
+            `[approveSellerAndPayBonus] referrer not found by code=${seller.referredBy}`,
+          );
+        }
+      }
+      if (!referrals || referrals.length === 0) return;
+    }
 
-      // ვუმატებთ ბონუსს მოწვეულს
-      const referrer = referral.referrer as UserDocument;
+    // დუბლიკატების გაწმენდა: დავტოვოთ ყველაზე ძველი referral, სხვები წავშალოთ
+    referrals = referrals.sort(
+      (a: any, b: any) =>
+        new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
+    );
+    const primaryReferral = referrals[0];
+    const duplicateIds = referrals.slice(1).map((r) => r._id);
+    if (duplicateIds.length > 0) {
+      await this.referralModel.deleteMany({ _id: { $in: duplicateIds } });
+      this.logger.log(
+        `[approveSellerAndPayBonus] removed ${duplicateIds.length} duplicate seller referrals`,
+      );
+    }
+
+    // მთავარის სტატუსი გადავიყვანოთ APPROVED-ზე
+    const now = new Date();
+    if (primaryReferral.status !== ReferralStatus.APPROVED) {
+      primaryReferral.status = ReferralStatus.APPROVED;
+      primaryReferral.approvedAt = now;
+      await primaryReferral.save();
+    }
+
+    // ბონუსის ჩარიცხვა მხოლოდ ერთხელ, თუ ჯერ არ ჩარიცხულა
+    const anyReferral = primaryReferral;
+    const referrer = primaryReferral.referrer as UserDocument;
+    const existingTx = await this.balanceTransactionModel.findOne({
+      user: referrer._id,
+      type: TransactionType.REFERRAL_BONUS,
+      referralId: anyReferral._id,
+    });
+
+    if (!existingTx) {
       await this.addBalance(
         referrer._id.toString(),
-        referral.bonusAmount,
+        anyReferral.bonusAmount,
         TransactionType.REFERRAL_BONUS,
         `რეფერალური ბონუსი სელერისთვის: ${seller.email}`,
-        referral._id.toString(),
+        anyReferral._id.toString(),
       );
 
       this.logger.log(
-        `რეფერალური ბონუსი გადაცემულია: ${referrer.email} -> ${referral.bonusAmount} ლარი`,
+        `რეფერალური ბონუსი გადაცემულია: ${referrer.email} -> ${anyReferral.bonusAmount} ლარი`,
       );
+    } else {
+      this.logger.log('ბონუსი უკვე ჩარიცხულია, ვტოვებთ როგორც არის');
     }
 
     // ვაფდეითებთ სელერის დამტკიცების თარიღს
@@ -507,56 +570,162 @@ export class ReferralsService {
       .populate('referred', 'name email role createdAt')
       .sort({ createdAt: -1 });
 
-    // დამატებითი უსაფრთხო ფოლბექი: მოძებნოთ მომხმარებლები, ვისაც referralCode მიეთითა
-    // ეს ფოლბექი დაფარავს შემთხვევებს, როცა რატომღაც Referral ჩანაწერი ვერ შეიქმნა, მაგრამ
-    // user.referredBy დაყენებულია
-    const invitedUsers = await this.userModel
-      .find({ referredBy: referralCode })
-      .select('name email role createdAt _id');
-
-    // ავაგოთ არსებული Referral-ების რუკა, რათა დუბლიკატები არ ჩავსვათ
-    const referredIdToReferral = new Map<string, any>();
+    this.logger.log(
+      `[getUserReferralStats] Found ${referrals.length} real referrals for user ${userId}`,
+    );
     for (const r of referrals) {
-      const referredId =
-        (r.referred as any)?._id?.toString?.() ?? r.referred?.toString?.();
-      if (referredId) {
-        referredIdToReferral.set(referredId, r);
-      }
+      this.logger.log(
+        `[getUserReferralStats] Referral ${r._id}: type=${r.type}, status=${r.status}, referred=${(r.referred as any)?._id || r.referred}`,
+      );
     }
 
-    // მოვამზადოთ სინთეზური Referral ჩანაწერები იმ მოწვეულებისთვის, ვისთვისაც რეალური Referral არ არსებობს
-    const syntheticReferrals = invitedUsers
-      .filter((invited) => !referredIdToReferral.has(invited._id.toString()))
-      .map((invited) => ({
-        id: invited._id.toString(),
-        referrer: userId as any,
-        referred: invited as any,
-        type:
-          invited.role === Role.Seller
-            ? ReferralType.SELLER
-            : ReferralType.USER,
-        // USER შემთხვევაზე ჩავთვალოთ, რომ ავტომატურად დამტკიცებულია (ბონუსი მაინც აისახება მხოლოდ რეალურ ტრანზაქციაზე)
-        status:
-          invited.role === Role.Seller
-            ? ReferralStatus.PENDING
-            : ReferralStatus.APPROVED,
-        bonusAmount: invited.role === Role.Seller ? 5 : 0.2,
-        createdAt: invited.createdAt,
-        approvedAt: undefined,
-      }));
+    // უზრუნველვყოთ, რომ USER ტიპის APPROVED რეფერალებზე ბონუსი ჩაირიცხოს
+    try {
+      const approvedUserReferrals = referrals.filter(
+        (r) =>
+          r.status === ReferralStatus.APPROVED && r.type === ReferralType.USER,
+      );
 
-    const combinedReferrals = [
-      ...referrals.map((r) => ({
+      if (approvedUserReferrals.length > 0) {
+        const paidTx = await this.balanceTransactionModel
+          .find({
+            user: userId,
+            type: TransactionType.REFERRAL_BONUS,
+            referralId: { $ne: null },
+          })
+          .select('referralId')
+          .lean();
+
+        const paidReferralIds = new Set<string>(
+          paidTx
+            .map((t: any) => (t.referralId || '').toString())
+            .filter(Boolean),
+        );
+
+        for (const r of approvedUserReferrals) {
+          const rid = (r._id || '').toString();
+          if (!paidReferralIds.has(rid)) {
+            await this.addBalance(
+              userId,
+              r.bonusAmount,
+              TransactionType.REFERRAL_BONUS,
+              `რეფერალური ბონუსი მომხმარებლისთვის: ${(r.referred as any)?.email || ''}`,
+              rid,
+            );
+            paidReferralIds.add(rid);
+          }
+        }
+      }
+    } catch (e) {
+      this.logger.warn(
+        `Auto-credit for approved USER referrals failed: ${e?.message || e}`,
+      );
+    }
+
+    // მოვძებნოთ მომხმარებლები, ვისაც მითითებული აქვს ეს referralCode
+    const invitedUsers = await this.userModel
+      .find({ referredBy: referralCode })
+      .select('name email role createdAt _id')
+      .lean();
+
+    this.logger.log(
+      `[getUserReferralStats] Found ${invitedUsers.length} invited users with referralCode ${referralCode}`,
+    );
+    for (const iu of invitedUsers) {
+      this.logger.log(
+        `[getUserReferralStats] Invited user ${iu._id}: role=${iu.role}, email=${iu.email}`,
+      );
+    }
+
+    // ავაგოთ საბოლოო სია: რეალური Referral-ები + სინთეზური მხოლოდ მათზე, ვისაც რეალური არ აქვს
+    const realReferralIds = new Set(
+      referrals
+        .map((r) => {
+          const referredValue: any = (r as any).referred;
+          // Handle both populated and unpopulated referred fields
+          if (
+            referredValue &&
+            typeof referredValue === 'object' &&
+            referredValue._id
+          ) {
+            return referredValue._id.toString();
+          } else if (referredValue) {
+            return referredValue.toString();
+          }
+          return null;
+        })
+        .filter(Boolean),
+    );
+
+    const merged: any[] = [];
+
+    // 1. დავამატოთ ყველა რეალური Referral
+    for (const r of referrals) {
+      merged.push({
         id: r._id.toString(),
-        referred: r.referred,
+        referred: r.referred as any,
         type: r.type,
         status: r.status,
         bonusAmount: r.bonusAmount,
         createdAt: r.createdAt,
         approvedAt: r.approvedAt,
-      })),
-      ...syntheticReferrals,
-    ];
+      });
+    }
+
+    // 2. დავამატოთ სინთეზური მხოლოდ მათზე, ვისაც რეალური არ აქვს
+    for (const iu of invitedUsers) {
+      const invitedId = iu._id.toString();
+      if (realReferralIds.has(invitedId)) continue;
+
+      // For sellers, check if they should actually be approved
+      let status = ReferralStatus.PENDING;
+      let approvedAt = undefined;
+      
+      if (iu.role === Role.Seller) {
+        // Check if seller has 5+ approved products
+        if (this.productsService) {
+          try {
+            const approvedProductsCount = await this.productsService.countUserProducts(
+              invitedId,
+              ProductStatus.APPROVED,
+            );
+            if (approvedProductsCount >= 5) {
+              status = ReferralStatus.APPROVED;
+              approvedAt = new Date();
+            }
+          } catch (error) {
+            this.logger.warn(
+              `Failed to check seller approval status for ${iu.email}: ${error.message}`,
+            );
+          }
+        }
+      } else {
+        // Users are automatically approved
+        status = ReferralStatus.APPROVED;
+        approvedAt = iu.createdAt;
+      }
+
+      merged.push({
+        id: invitedId,
+        referred: iu as any,
+        type: iu.role === Role.Seller ? ReferralType.SELLER : ReferralType.USER,
+        status,
+        bonusAmount: iu.role === Role.Seller ? 5 : 0.2,
+        createdAt: iu.createdAt,
+        approvedAt,
+      });
+    }
+
+    const combinedReferrals = merged;
+
+    this.logger.log(
+      `[getUserReferralStats] Final combined referrals: ${combinedReferrals.length}`,
+    );
+    for (const r of combinedReferrals) {
+      this.logger.log(
+        `[getUserReferralStats] Combined referral ${r.id}: type=${r.type}, status=${r.status}, bonusAmount=${r.bonusAmount}`,
+      );
+    }
 
     // თანხების გამოთვლა მხოლოდ რეალურად დამტკიცებულ რეფერალებზე
     const totalEarnings = combinedReferrals
@@ -571,9 +740,21 @@ export class ReferralsService {
       )
       .reduce((sum, r) => sum + r.bonusAmount, 0);
 
+    // ბალანსი = დამტკიცებული ბონუსების ჯამი - გატანები (დუბლიკატების იგნორი)
+    const txs = await this.balanceTransactionModel
+      .find({ user: userId, status: TransactionStatus.COMPLETED })
+      .lean();
+    const withdrawals = txs
+      .filter((t: any) => (t.amount || 0) < 0)
+      .reduce((sum, t: any) => sum + (t.amount || 0), 0);
+    const approvedEarnings = combinedReferrals
+      .filter((r) => r.status === ReferralStatus.APPROVED)
+      .reduce((sum, r) => sum + (r.bonusAmount || 0), 0);
+    const computedBalance = approvedEarnings + withdrawals;
+
     return {
       referralCode: referralCode,
-      balance: user.referralBalance || 0, // რეფერალების ბალანსი
+      balance: computedBalance, // ტრანზაქციებიდან დათვლილი ბალანსი
       totalReferrals: combinedReferrals.length,
       approvedReferrals: combinedReferrals.filter(
         (r) => r.status === ReferralStatus.APPROVED,
@@ -604,7 +785,7 @@ export class ReferralsService {
   async getUserBalanceHistory(
     userId: string,
     limit = 50,
-  ): Promise<BalanceTransaction[]> {
+  ): Promise<ReferralBalanceTransaction[]> {
     return await this.balanceTransactionModel
       .find({ user: userId })
       .sort({ createdAt: -1 })

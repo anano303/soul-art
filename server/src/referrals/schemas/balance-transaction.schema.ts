@@ -25,7 +25,7 @@ export enum TransactionStatus {
     },
   },
 })
-export class BalanceTransaction {
+export class ReferralBalanceTransaction {
   @Prop({
     type: Types.ObjectId,
     ref: 'User',
@@ -96,11 +96,13 @@ export class BalanceTransaction {
   updatedAt?: Date;
 }
 
-export type BalanceTransactionDocument = BalanceTransaction & Document;
-export const BalanceTransactionSchema =
-  SchemaFactory.createForClass(BalanceTransaction);
+export type ReferralBalanceTransactionDocument = ReferralBalanceTransaction &
+  Document;
+export const ReferralBalanceTransactionSchema = SchemaFactory.createForClass(
+  ReferralBalanceTransaction,
+);
 
 // ინდექსები
-BalanceTransactionSchema.index({ user: 1, createdAt: -1 });
-BalanceTransactionSchema.index({ type: 1, status: 1 });
-BalanceTransactionSchema.index({ referralId: 1 });
+ReferralBalanceTransactionSchema.index({ user: 1, createdAt: -1 });
+ReferralBalanceTransactionSchema.index({ type: 1, status: 1 });
+ReferralBalanceTransactionSchema.index({ referralId: 1 });
