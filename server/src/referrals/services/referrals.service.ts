@@ -149,6 +149,10 @@ export class ReferralsService {
         ? ReferralType.SELLER
         : ReferralType.USER;
     const bonusAmount = referralType === ReferralType.SELLER ? 5 : 0.2; // 5 ლარი ან 20 თეთრი
+    const initialStatus =
+      referralType === ReferralType.USER
+        ? ReferralStatus.APPROVED // მომხმარებლის შემთხვევაში პირდაპირ ვამტკიცებთ
+        : ReferralStatus.PENDING;
 
     this.logger.log(
       `Creating referral: type=${referralType}, bonus=${bonusAmount}`,
@@ -160,7 +164,9 @@ export class ReferralsService {
       referred: referredUser._id,
       type: referralType,
       bonusAmount,
-      status: ReferralStatus.PENDING,
+      status: initialStatus,
+      approvedAt:
+        initialStatus === ReferralStatus.APPROVED ? new Date() : undefined,
     });
 
     try {
@@ -187,6 +193,26 @@ export class ReferralsService {
     this.logger.log(
       `რეფერალი შექმნილია: ${referrer.email} -> ${referredUser.email} (${referralType})`,
     );
+
+    // თუ ტიპი USER იყო, ბონუსი დაუყოვნებლივ ჩაირიცხოს
+    if (initialStatus === ReferralStatus.APPROVED) {
+      try {
+        await this.addBalance(
+          referrer._id.toString(),
+          bonusAmount,
+          TransactionType.REFERRAL_BONUS,
+          `რეფერალური ბონუსი მომხმარებლისთვის: ${referredUser.email}`,
+          referral._id.toString(),
+        );
+        this.logger.log(
+          `რეფერალური ბონუსი (USER) გადაცემულია: ${referrer.email} -> ${bonusAmount} ლარი`,
+        );
+      } catch (error) {
+        this.logger.error(
+          `USER ბონუსის ჩარიცხვის შეცდომა: ${error?.message || error}`,
+        );
+      }
+    }
   }
 
   // სელერის დამტკიცება და ბონუსის გადაცემა
@@ -475,16 +501,69 @@ export class ReferralsService {
       referralCode = await this.generateUserReferralCode(userId);
     }
 
+    // ძირითადი წყარო: რეფერალების კოლექცია
     const referrals = await this.referralModel
       .find({ referrer: userId })
       .populate('referred', 'name email role createdAt')
       .sort({ createdAt: -1 });
 
-    const totalEarnings = referrals
+    // დამატებითი უსაფრთხო ფოლბექი: მოძებნოთ მომხმარებლები, ვისაც referralCode მიეთითა
+    // ეს ფოლბექი დაფარავს შემთხვევებს, როცა რატომღაც Referral ჩანაწერი ვერ შეიქმნა, მაგრამ
+    // user.referredBy დაყენებულია
+    const invitedUsers = await this.userModel
+      .find({ referredBy: referralCode })
+      .select('name email role createdAt _id');
+
+    // ავაგოთ არსებული Referral-ების რუკა, რათა დუბლიკატები არ ჩავსვათ
+    const referredIdToReferral = new Map<string, any>();
+    for (const r of referrals) {
+      const referredId =
+        (r.referred as any)?._id?.toString?.() ?? r.referred?.toString?.();
+      if (referredId) {
+        referredIdToReferral.set(referredId, r);
+      }
+    }
+
+    // მოვამზადოთ სინთეზური Referral ჩანაწერები იმ მოწვეულებისთვის, ვისთვისაც რეალური Referral არ არსებობს
+    const syntheticReferrals = invitedUsers
+      .filter((invited) => !referredIdToReferral.has(invited._id.toString()))
+      .map((invited) => ({
+        id: invited._id.toString(),
+        referrer: userId as any,
+        referred: invited as any,
+        type:
+          invited.role === Role.Seller
+            ? ReferralType.SELLER
+            : ReferralType.USER,
+        // USER შემთხვევაზე ჩავთვალოთ, რომ ავტომატურად დამტკიცებულია (ბონუსი მაინც აისახება მხოლოდ რეალურ ტრანზაქციაზე)
+        status:
+          invited.role === Role.Seller
+            ? ReferralStatus.PENDING
+            : ReferralStatus.APPROVED,
+        bonusAmount: invited.role === Role.Seller ? 5 : 0.2,
+        createdAt: invited.createdAt,
+        approvedAt: undefined,
+      }));
+
+    const combinedReferrals = [
+      ...referrals.map((r) => ({
+        id: r._id.toString(),
+        referred: r.referred,
+        type: r.type,
+        status: r.status,
+        bonusAmount: r.bonusAmount,
+        createdAt: r.createdAt,
+        approvedAt: r.approvedAt,
+      })),
+      ...syntheticReferrals,
+    ];
+
+    // თანხების გამოთვლა მხოლოდ რეალურად დამტკიცებულ რეფერალებზე
+    const totalEarnings = combinedReferrals
       .filter((r) => r.status === ReferralStatus.APPROVED)
       .reduce((sum, r) => sum + r.bonusAmount, 0);
 
-    const pendingEarnings = referrals
+    const pendingEarnings = combinedReferrals
       .filter(
         (r) =>
           r.status === ReferralStatus.PENDING ||
@@ -495,11 +574,11 @@ export class ReferralsService {
     return {
       referralCode: referralCode,
       balance: user.referralBalance || 0, // რეფერალების ბალანსი
-      totalReferrals: referrals.length,
-      approvedReferrals: referrals.filter(
+      totalReferrals: combinedReferrals.length,
+      approvedReferrals: combinedReferrals.filter(
         (r) => r.status === ReferralStatus.APPROVED,
       ).length,
-      pendingReferrals: referrals.filter(
+      pendingReferrals: combinedReferrals.filter(
         (r) =>
           r.status !== ReferralStatus.APPROVED &&
           r.status !== ReferralStatus.REJECTED,
@@ -507,16 +586,18 @@ export class ReferralsService {
       totalEarnings,
       pendingEarnings,
       monthlyWithdrawals: user.monthlyWithdrawals || 0,
-      referrals: referrals.map((r) => ({
-        id: r._id,
-        referred: r.referred,
-        type: r.type,
-        status: r.status,
-        bonusAmount: r.bonusAmount,
-        createdAt: r.createdAt,
-        approvedAt: r.approvedAt,
-      })),
+      referrals: combinedReferrals,
     };
+  }
+
+  // ყველა რეფერალი ადმინისთვის
+  async getAllReferrals(status?: ReferralStatus): Promise<Referral[]> {
+    const filter = status ? { status } : {};
+    return this.referralModel
+      .find(filter)
+      .populate('referrer', 'name email')
+      .populate('referred', 'name email role createdAt')
+      .sort({ createdAt: -1 });
   }
 
   // მომხმარებლის ბალანსის ისტორია

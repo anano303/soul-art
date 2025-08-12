@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/hooks/use-auth";
-import { getAccessToken } from "@/lib/auth";
+import { fetchWithAuth } from "@/lib/fetch-with-auth";
 import { toast } from "react-hot-toast";
 import "./referrals.css";
 
@@ -75,26 +75,12 @@ export default function ReferralsPage() {
   });
 
   const fetchReferralStats = useCallback(async () => {
-    const token = getAccessToken();
-    console.log("Token:", token); // Debug log
     try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/referrals/stats`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      console.log("Response status:", response.status); // Debug log
-      if (response.ok) {
-        const data = await response.json();
-        console.log("Stats data:", data); // Debug log
-        setStats(data);
-      } else {
-        console.error("Response not ok:", response.status, response.statusText);
-      }
+      const res = await fetchWithAuth(`/referrals/stats`, {
+        cache: "no-store",
+      });
+      const data: ReferralStats = await res.json();
+      setStats(data);
     } catch (error) {
       console.error("Failed to fetch referral stats:", error);
     } finally {
@@ -103,42 +89,24 @@ export default function ReferralsPage() {
   }, []);
 
   const fetchWithdrawalRequests = useCallback(async () => {
-    const token = getAccessToken();
     try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/referrals/withdrawal/my-requests`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      if (response.ok) {
-        const data = await response.json();
-        setWithdrawalRequests(data);
-      }
+      const res = await fetchWithAuth(`/referrals/withdrawal/my-requests`, {
+        cache: "no-store",
+      });
+      const data: WithdrawalRequest[] = await res.json();
+      setWithdrawalRequests(data);
     } catch (error) {
       console.error("Failed to fetch withdrawal requests:", error);
     }
   }, []);
 
   const fetchBalanceHistory = useCallback(async () => {
-    const token = getAccessToken();
     try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/referrals/balance/history`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      if (response.ok) {
-        const data = await response.json();
-        setBalanceHistory(data);
-      }
+      const res = await fetchWithAuth(`/referrals/balance/history`, {
+        cache: "no-store",
+      });
+      const data: BalanceTransaction[] = await res.json();
+      setBalanceHistory(data);
     } catch (error) {
       console.error("Failed to fetch balance history:", error);
     }
@@ -183,36 +151,26 @@ export default function ReferralsPage() {
   const submitWithdrawalRequest = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const token = getAccessToken();
     try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/referrals/withdrawal`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            amount: parseFloat(withdrawalForm.amount),
-            method: withdrawalForm.method,
-            accountDetails: withdrawalForm.accountDetails,
-          }),
-        }
-      );
-
-      if (response.ok) {
-        toast.success("გატანის მოთხოვნა წარმატებით გაიგზავნა!");
-        setShowWithdrawalForm(false);
-        setWithdrawalForm({ amount: "", method: "BANK", accountDetails: "" });
-        fetchWithdrawalRequests();
-        fetchReferralStats();
-      } else {
-        const error = await response.json();
-        toast.error(error.message || "გატანის მოთხოვნის გაგზავნა ვერ მოხერხდა");
-      }
-    } catch {
-      toast.error("შეცდომა მოხდა");
+      await fetchWithAuth(`/referrals/withdrawal`, {
+        method: "POST",
+        body: JSON.stringify({
+          amount: parseFloat(withdrawalForm.amount),
+          method: withdrawalForm.method,
+          accountDetails: withdrawalForm.accountDetails,
+        }),
+      });
+      toast.success("გატანის მოთხოვნა წარმატებით გაიგზავნა!");
+      setShowWithdrawalForm(false);
+      setWithdrawalForm({ amount: "", method: "BANK", accountDetails: "" });
+      fetchWithdrawalRequests();
+      fetchReferralStats();
+    } catch (err) {
+      const message =
+        err instanceof Error
+          ? err.message
+          : "გატანის მოთხოვნის გაგზავნა ვერ მოხერხდა";
+      toast.error(message);
     }
   };
 

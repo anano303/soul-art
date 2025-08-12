@@ -66,6 +66,7 @@ async function bootstrap() {
       'forum-id',
       'Origin',
       'Accept',
+      'Cache-Control',
       'X-Requested-With',
       'Access-Control-Request-Method',
       'Access-Control-Request-Headers',
