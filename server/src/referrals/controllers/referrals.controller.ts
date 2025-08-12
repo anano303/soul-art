@@ -129,4 +129,22 @@ export class ReferralsController {
     );
     return { message: 'სელერი წარმატებით დამტკიცდა და ბონუსი გადაცემულია' };
   }
+
+  // მოვაგვაროთ დუბლიკატი რეფერალები (ადმინისთვის)
+  @Post('admin/maintenance')
+  @UseGuards(RolesGuard)
+  @Roles(Role.Admin)
+  @HttpCode(HttpStatus.OK)
+  async triggerMaintenance() {
+    // Import the maintenance service here to avoid circular dependency
+    const { ReferralMaintenanceService } = await import('../services/referral-maintenance.service');
+    const maintenanceService = new ReferralMaintenanceService(
+      this.referralsService['userModel'],
+      this.referralsService['referralModel'],
+      this.referralsService['balanceTransactionModel'],
+    );
+    
+    await maintenanceService.onApplicationBootstrap();
+    return { message: 'რეფერალების მოვაგვარება დასრულდა' };
+  }
 }
