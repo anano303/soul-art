@@ -1,6 +1,6 @@
 "use client";
 
-import { BannerList } from "@/modules/admin/components/banner-list";
+
 
 export interface TranslationContent {
   [key: string]: string | string[] | TranslationContent;
@@ -977,7 +977,7 @@ export const TRANSLATIONS: Translations = {
       referrals: "Referrals",
       adminReferrals: "Manage Referrals",
       categories: "Categories",
-      Banners: "Banners"
+      banners: "Banners",
     },
 
     // Error messages
