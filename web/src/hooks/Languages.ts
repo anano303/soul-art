@@ -10,6 +10,134 @@ export interface Translations {
 
 export const TRANSLATIONS: Translations = {
   ge: {
+    // Referral Page
+    referral: {
+      title: "🎨 გამოიმუშავე ფული SoulArt.ge-ზე!",
+      subtitle:
+        "მოიწვიე მეგობრები და მიიღე ფულადი ბონუსები ყველა წარმატებული რეფერალისთვის",
+      sellerBonus: "სელერის რეფერალისთვის",
+      userBonus: "ჩვეულებრივი მომხმარებლისთვის",
+      howItWorks: "როგორ მუშაობს?",
+
+      steps: {
+        register: {
+          title: "დარეგისტრირდი",
+          description:
+            "შექმენი ანგარიში SoulArt.ge-ზე და მიიღე შენი უნიკალური რეფერალური ლინკი",
+        },
+        invite: {
+          title: "მოიწვიე მეგობრები",
+          description:
+            "გაუზიარე შენი რეფერალური ლინკი მეგობრებს, ოჯახის წევრებს და ნაცნობებს",
+        },
+        receive: {
+          title: "მიიღე ბონუსები",
+          description:
+            "ყველა წარმატებული რეგისტრაციისთვის მიიღებ ფულად ბონუსს შენს ანგარიშზე",
+        },
+        withdraw: {
+          title: "გაიტანე თანხა",
+          description:
+            "50 ლარის მოგროვების შემდეგ შეგიძლია ფულის გატანა ბანკის ანგარიშზე",
+        },
+      },
+      whyUs: {
+        title: "რატომ SoulArt.ge?",
+        benefits: {
+          art: {
+            title: "ქართული ხელოვნება",
+            description:
+              "ქართველი მხატვრების და ხელოვანების უნიკალური ნამუშევრების პლატფორმა",
+          },
+          earnings: {
+            title: "გამომუშავების შესაძლებლობა",
+            description: "რეფერალების სისტემით შეგიძლია ფულის გამომუშავება",
+          },
+          community: {
+            title: "საზოგადოება",
+            description: "ხელოვნების მოყვარულთა აქტიური კომუნიკაცია",
+          },
+          easy: {
+            title: "იოლი გამოყენება",
+            description: "მარტივი და მოსახერხებელი ინტერფეისი",
+          },
+        },
+      },
+      earnings: {
+        title: "გამომუშავების პოტენციალი",
+        ifInvite: "თუ მოიწვევ:",
+        sellers: "სელერს",
+        note: "* სელერმა უნდა ატვირთოს მინიმუმ 5 პროდუქტი ბონუსის მისაღებად",
+      },
+      rules: {
+        title: "წესები და პირობები",
+        seller: {
+          title: "სელერის რეფერალი",
+          items: [
+            "5 ლარი ყველა მოწვეული სელერისთვის(გამყიდველისთვის)",
+            "სელერმა უნდა ატვირთოს მინიმუმ 5 პროდუქტი",
+            "ადმინისტრაციის დადასტურება სავალდებულოა",
+          ],
+        },
+        regular: {
+          title: "ჩვეულებრივი რეფერალი",
+          items: [
+            "20 თეთრი ყველა რეგისტრირებული მომხმარებლისთვის",
+            "დამატებითი პირობები არ არის",
+          ],
+        },
+        withdrawal: {
+          title: "ფულის გატანა",
+          items: [
+            "მინიმუმ 50 ლარი",
+            "მაქსიმუმ 2-ჯერ თვეში",
+            "ბანკის ანგარიშზე გადარიცხვა",
+          ],
+        },
+      },
+      cta: {
+        title: "მზად ხარ დასაწყებად?",
+        description: "დარეგისტრირდი ახლავე და დაიწყე ფულის გამომუშავება!",
+        sellerRegister: "რეგისტრაცია სელერად",
+        regularRegister: "ჩვეულებრივი რეგისტრაცია",
+        share: "ან გაუზიარე ეს ინფორმაცია მეგობრებს:",
+        shareButton: "გაზიარება/კოპირება 📋",
+        copied: "დაკოპირდა! ✅",
+      },
+      faq: {
+        title: "ხშირად დასმული კითხვები",
+        items: {
+          whenBonus: {
+            question: "რამდენ ხანში მივიღებ ბონუსს?",
+            answer:
+              "სელერის რეფერალისთვის ბონუსი ირიცხება მას შემდეგ, რაც ის ატვირთავს 5 პროდუქტს და ადმინისტრაცია დაამტკიცებს მას.",
+          },
+          selfRegister: {
+            question: "შემიძლია თუ არა საკუთარი რეფერალური ლინკით რეგისტრაცია?",
+            answer:
+              "არა, საკუთარი რეფერალური ლინკით რეგისტრაცია არ არის შესაძლებელი.",
+          },
+          withdrawMethods: {
+            question: "რა მეთოდებით შემიძლია ფულის გატანა?",
+            answer: "ფულის გატანა შესაძლებელია ბანკის ანგარიშზე გადარიცხვით.",
+          },
+          referralLimit: {
+            question: "არის თუ არა ლიმიტი რეფერალების რაოდენობაზე?",
+            answer: "არა, შეგიძლია მოიწვიო რამდენიც მეგობარი გსურს.",
+          },
+        },
+      },
+      shareText: `🎨 SoulArt.ge-ზე შეგიძლია გამოიმუშავო თანხა!
+
+🎯 რეფერალების სისტემა:
+• მოიწვიე სელერები - მიიღე 5 ლარი
+• მოიწვიე ჩვეულებრივი მომხმარებლები - მიიღე 20 თეთრი
+• მინიმუმ 5 პროდუქტი სჭირდება სელერს ბონუსისთვის
+• როცა ბონუსი მიაღწევს 50 ლარს შეგიძლია გამოიტანო`,
+      pageTitle: "რეფერალური სისტემა | SoulArt.ge",
+      pageDescription:
+        "გამოიმუშავე ფული SoulArt.ge-ზე! მოიწვიე მეგობრები და მიიღე ფულადი ბონუსები ყველა წარმატებული რეფერალისთვის.",
+    },
     // Navigation
     navigation: {
       home: "მთავარი",
@@ -689,6 +817,135 @@ export const TRANSLATIONS: Translations = {
   },
 
   en: {
+    // Referral Page
+    referral: {
+      title: "🎨 Earn Money on SoulArt.ge!",
+      subtitle:
+        "Invite friends and receive cash bonuses for every successful referral",
+      sellerBonus: "For seller referral",
+      userBonus: "For regular user",
+      howItWorks: "How does it work?",
+
+      steps: {
+        register: {
+          title: "Register",
+          description:
+            "Create an account on SoulArt.ge and get your unique referral link",
+        },
+        invite: {
+          title: "Invite Friends",
+          description:
+            "Share your referral link with friends, family members and acquaintances",
+        },
+        receive: {
+          title: "Receive Bonuses",
+          description:
+            "Get a cash bonus to your account for every successful registration",
+        },
+        withdraw: {
+          title: "Withdraw Money",
+          description:
+            "Once you collect 50 GEL, you can withdraw money to your bank account",
+        },
+      },
+      whyUs: {
+        title: "Why SoulArt.ge?",
+        benefits: {
+          art: {
+            title: "Georgian Art",
+            description:
+              "A platform for unique works by Georgian artists and artisans",
+          },
+          earnings: {
+            title: "Earning Opportunity",
+            description: "You can earn money through the referral system",
+          },
+          community: {
+            title: "Community",
+            description: "Active communication among art enthusiasts",
+          },
+          easy: {
+            title: "Easy to Use",
+            description: "Simple and convenient interface",
+          },
+        },
+      },
+      earnings: {
+        title: "Earning Potential",
+        ifInvite: "If you invite:",
+        sellers: "sellers",
+        note: "* Seller must upload at least 5 products to receive the bonus",
+      },
+      rules: {
+        title: "Rules and Conditions",
+        seller: {
+          title: "Seller Referral",
+          items: [
+            "5 GEL for each invited seller",
+            "Seller must upload at least 5 products",
+            "Admin approval is required",
+          ],
+        },
+        regular: {
+          title: "Regular Referral",
+          items: [
+            "0.20 GEL for each registered user",
+            "No additional conditions",
+          ],
+        },
+        withdrawal: {
+          title: "Money Withdrawal",
+          items: [
+            "Minimum 50 GEL",
+            "Maximum 2 times per month",
+            "Bank account transfer",
+          ],
+        },
+      },
+      cta: {
+        title: "Ready to Start?",
+        description: "Register now and start earning money!",
+        sellerRegister: "Register as Seller",
+        regularRegister: "Regular Registration",
+        share: "Or share this information with friends:",
+        shareButton: "Share/Copy 📋",
+        copied: "Copied! ✅",
+      },
+      faq: {
+        title: "Frequently Asked Questions",
+        items: {
+          whenBonus: {
+            question: "When will I receive the bonus?",
+            answer:
+              "For seller referrals, the bonus is credited after they upload 5 products and receive admin approval.",
+          },
+          selfRegister: {
+            question: "Can I register using my own referral link?",
+            answer:
+              "No, registration using your own referral link is not possible.",
+          },
+          withdrawMethods: {
+            question: "What methods can I use to withdraw money?",
+            answer: "Money can be withdrawn via bank account transfer.",
+          },
+          referralLimit: {
+            question: "Is there a limit on the number of referrals?",
+            answer: "No, you can invite as many friends as you want.",
+          },
+        },
+      },
+      shareText: `🎨 You can earn money on SoulArt.ge!
+
+🎯 Referral system:
+• Invite sellers - Get 5 GEL
+• Invite regular users - Get 0.20 GEL
+• Seller needs minimum 5 products for bonus
+• You can withdraw when bonus reaches 50 GEL`,
+      pageTitle: "Referral System | SoulArt.ge",
+      pageDescription:
+        "Earn money on SoulArt.ge! Invite friends and receive cash bonuses for every successful referral.",
+    },
+
     // Navigation
     navigation: {
       home: "Home",
