@@ -50,7 +50,7 @@ export default function Footer() {
             </li>
             <li>
               <a href="/referral-info" className="footer-link">
-                რეფერალები - გამოიმუშავე ფული
+              {t("footer.referralInfo")}
               </a>
             </li>
             <li>

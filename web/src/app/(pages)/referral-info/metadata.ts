@@ -1,33 +1,38 @@
 import { Metadata } from "next";
-import { TRANSLATIONS, TranslationContent } from "@/hooks/Languages";
 
 export function generateMetadata(locale = "ge"): Metadata {
-  const t = (key: string) => {
-    const parts = key.split(".");
-    let result: TranslationContent | string = TRANSLATIONS[locale];
-    for (const part of parts) {
-      if (!result || typeof result !== "object") return key;
-      result = result[part] as TranslationContent | string;
-    }
-    return typeof result === "string" ? result : key;
+  const metadata = {
+    ge: {
+      title: "რეფერალური სისტემა | SoulArt.ge",
+      description:
+        "გამოიმუშავე ფული SoulArt.ge-ზე! მოიწვიე მეგობრები და მიიღე ფულადი ბონუსები ყველა წარმატებული რეფერალისთვის.",
+    },
+    en: {
+      title: "Referral System | SoulArt.ge",
+      description:
+        "Earn money on SoulArt.ge! Invite friends and receive cash bonuses for every successful referral.",
+    },
   };
+
+  const content = metadata[locale as keyof typeof metadata] || metadata.ge;
 
   return {
     title: {
-      default: t("referral.pageTitle"),
+      default: content.title,
       template: "%s | SoulArt.ge",
     },
-    description: t("referral.pageDescription"),
+    description: content.description,
     openGraph: {
-      title: t("referral.pageTitle"),
-      description: t("referral.pageDescription"),
+      title: content.title,
+      description: content.description,
       images: "/referral-banner.jpg",
     },
     twitter: {
       card: "summary_large_image",
-      title: t("referral.pageTitle"),
-      description: t("referral.pageDescription"),
+      title: content.title,
+      description: content.description,
       images: "/referral-banner.jpg",
     },
   };
 }
+
