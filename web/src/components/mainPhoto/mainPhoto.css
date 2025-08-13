@@ -46,6 +46,7 @@
   margin: 0 auto;
   gap: 10px;
   width: 50vw;
+  margin-bottom: 20%;
 }
 
 .search-bar input {
@@ -63,7 +64,7 @@
   background-color: transparent;
   border: none;
   border-radius: 10px;
-  cursor: url('/brush.png'), pointer; 
+  cursor: url("/brush.png"), pointer;
   transition: 0.6s ease-out;
 }
 
