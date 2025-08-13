@@ -450,6 +450,7 @@ export const TRANSLATIONS: Translations = {
       subscribePrompt: "გამოიწერეთ სიახლეები და მიიღეთ განახლებები",
       subscribe: "გამოწერა",
       emailPlaceholder: "შეიყვანეთ თქვენი ელფოსტა",
+      referralInfo: "რეფერალები - გამოიმუშავე ფული",
     },
 
     // Home page
@@ -1256,6 +1257,7 @@ export const TRANSLATIONS: Translations = {
       subscribePrompt: "Subscribe to our newsletter for updates",
       subscribe: "Subscribe",
       emailPlaceholder: "Enter your email",
+      referralInfo: "Referrals - Earn money",
     },
 
     // Home page
