@@ -5,8 +5,8 @@ import HomePagesHead from "@/components/homePagesHead/homePagesHead";
 import HomePageShop from "@/components/homePageShop/homePageShop";
 import Banner from "@/components/banner/banner";
 import TopItems from "@/components/TopItems/TopItems";
-import { ReferralPromoBanner } from "@/components/referral-promo-banner";
-import { GuestReferralBanner } from "@/components/guest-referral-banner";
+import { GuestReferralBanner } from "@/components/referralBanners/guest-referral-banner";
+import { ReferralPromoBanner } from "@/components/referralBanners/referral-promo-banner";
 import { useLanguage } from "@/hooks/LanguageContext";
 
 const Home = () => {
