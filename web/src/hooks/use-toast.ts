@@ -5,6 +5,7 @@ import * as React from "react";
 
 const TOAST_LIMIT = 1;
 const TOAST_REMOVE_DELAY = 1000; // 1 წამი
+const TOAST_AUTO_CLOSE_DELAY = 3000; // 3 წამი ავტომატური დახურვისთვის
 
 // Toast-ის ტიპი, CSS-ის მხარდაჭერით
 type ToasterToast = {
@@ -119,6 +120,9 @@ function toast(props: Toast) {
 
   const dismiss = () =>
     dispatch({ type: actionTypes.DISMISS_TOAST, toastId: id });
+
+  // Auto dismiss after 3 seconds
+  setTimeout(dismiss, TOAST_AUTO_CLOSE_DELAY);
 
   dispatch({
     type: actionTypes.ADD_TOAST,

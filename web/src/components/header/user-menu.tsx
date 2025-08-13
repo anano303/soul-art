@@ -165,7 +165,7 @@ export default function UserMenu({ onNavigate }: { onNavigate?: () => void }) {
               className="dropdown-item"
               onClick={handleLinkClick}
             >
-              რეფერალები
+              {t("navigation.referrals")}
             </Link>
 
             {(user.role === Role.Admin || user.role === Role.Seller) && (
@@ -190,14 +190,14 @@ export default function UserMenu({ onNavigate }: { onNavigate?: () => void }) {
                   className="dropdown-item"
                   onClick={handleLinkClick}
                 >
-                  ბანერები
+                  {t("navigation.banners")}
                 </Link>
                 <Link
                   href="/admin/referrals"
                   className="dropdown-item"
                   onClick={handleLinkClick}
                 >
-                  რეფერალების მართვა
+                  {t("navigation.adminReferrals")}
                 </Link>
               </>
             )}
@@ -209,7 +209,7 @@ export default function UserMenu({ onNavigate }: { onNavigate?: () => void }) {
                   className="dropdown-item"
                   onClick={handleLinkClick}
                 >
-                  კატეგორიები
+                  {t("navigation.categories")}
                 </Link>
                 <Link
                   href="/admin/users"
@@ -238,7 +238,7 @@ export default function UserMenu({ onNavigate }: { onNavigate?: () => void }) {
                 className="dropdown-item"
                 onClick={handleLinkClick}
               >
-                სელერების ბალანსები
+                {t("navigation.balances")}
               </Link>
             )}
 
@@ -248,7 +248,7 @@ export default function UserMenu({ onNavigate }: { onNavigate?: () => void }) {
                 className="dropdown-item"
                 onClick={handleLinkClick}
               >
-                ჩემი ბალანსი
+                {t("navigation.myBalance")}
               </Link>
             )}
 

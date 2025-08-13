@@ -1,5 +1,7 @@
 "use client";
 
+import { BannerList } from "@/modules/admin/components/banner-list";
+
 export interface TranslationContent {
   [key: string]: string | string[] | TranslationContent;
 }
@@ -155,6 +157,12 @@ export const TRANSLATIONS: Translations = {
       products: "პროდუქტები",
       users: "მომხმარებლები",
       logout: "გასვლა",
+      balances: "სელერების ბალანსები",
+      myBalance: "ჩემი ბალანსი",
+      categories: "კატეგორიები",
+      referrals: "რეფერალები",
+      adminReferrals: "რეფერალების მართვა",
+      banners: "ბანერები"
     },
 
     // Error messages
@@ -964,6 +972,12 @@ export const TRANSLATIONS: Translations = {
       products: "Products",
       users: "Users",
       logout: "Logout",
+      balances: "Balances",
+      myBalance: "My Balance",
+      referrals: "Referrals",
+      adminReferrals: "Manage Referrals",
+      categories: "Categories",
+      Banners: "Banners"
     },
 
     // Error messages
