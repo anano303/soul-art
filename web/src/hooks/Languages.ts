@@ -175,6 +175,8 @@ export const TRANSLATIONS: Translations = {
       notFound: "გვერდი ვერ მოიძებნა",
       serverError: "სერვერის შეცდომა",
       forbidden: "წვდომა აკრძალულია",
+      errorTitle: "შეცდომა",
+      rateLimitExceeded: "ძალიან ბევრი მოთხოვნა. გთხოვთ, სცადოთ რამდენიმე წუთის შემდეგ",
     },
 
     // Shop
@@ -562,6 +564,7 @@ export const TRANSLATIONS: Translations = {
       loginSuccess: "წარმატებით შეხვედით",
       loginFailed: "შესვლა ვერ მოხერხდა",
       registrationFailed: "რეგისტრაცია ვერ მოხერხდა",
+      passwordResetFailed: "პაროლის აღდგენა ვერ მოხერხდა",
       orContinueWith: "ან გააგრძელეთ",
       forgotPasswordTitle: "განაახლეთ პაროლი",
       forgotPasswordSubtitle: "გთხოვთ, შეავსოთ პაროლის აღდგენის ფორმა",
@@ -747,6 +750,10 @@ export const TRANSLATIONS: Translations = {
       createError: "შექმნა ვერ მოხერხდა",
       updateError: "განახლება ვერ მოხერხდა",
       deleteError: "წაშლა ვერ მოხერხდა",
+      categoryCreateError: "კატეგორიის დამატება ვერ მოხერხდა", 
+      categoryUpdateError: "კატეგორიის განახლება ვერ მოხერხდა",
+      categoryDeleteError: "კატეგორიის წაშლა ვერ მოხერხდა",
+      subcategoryCreateError: "ქვეკატეგორიის დამატება ვერ მოხერხდა",
     },
 
     // Categories translations
@@ -989,6 +996,8 @@ export const TRANSLATIONS: Translations = {
       notFound: "Page not found",
       serverError: "Server error",
       forbidden: "Access forbidden",
+      errorTitle: "Error",
+      rateLimitExceeded: "Too many requests. Please try again in a few minutes",
     },
 
     // Shop
@@ -1373,6 +1382,7 @@ export const TRANSLATIONS: Translations = {
       loginSuccess: "Login Successful",
       loginFailed: "Login Failed",
       registrationFailed: "Registration Failed",
+      passwordResetFailed: "Password Reset Failed",
       orContinueWith: "or continue with",
       forgotPasswordTitle: "Reset Your Password",
       forgotPasswordSubtitle: "Please fill in the password recovery form",
@@ -1554,8 +1564,12 @@ export const TRANSLATIONS: Translations = {
 
       // Error messages
       createError: "Failed to create",
-      updateError: "Failed to update",
+      updateError: "Failed to update", 
       deleteError: "Failed to delete",
+      categoryCreateError: "Failed to create category",
+      categoryUpdateError: "Failed to update category",
+      categoryDeleteError: "Failed to delete category",
+      subcategoryCreateError: "Failed to create subcategory",
     },
 
     // Admin Orders

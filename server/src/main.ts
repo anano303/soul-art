@@ -9,6 +9,7 @@ import cookieParser from 'cookie-parser';
 import { join } from 'path';
 import * as fs from 'fs';
 import * as express from 'express';
+import { apiRateLimit } from './middleware/security.middleware';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
@@ -21,6 +22,7 @@ async function bootstrap() {
   app.use(express.raw({ limit: '50mb' }));
 
   app.use(helmet());
+  app.use(apiRateLimit); // Apply global rate limiting
   app.use(cookieParser());
   app.enableCors({
     origin: (origin, callback) => {

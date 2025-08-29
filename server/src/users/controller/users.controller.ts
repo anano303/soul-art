@@ -25,6 +25,8 @@ import { JwtAuthGuard } from '@/guards/jwt-auth.guard';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { CurrentUser } from '@/decorators/current-user.decorator';
 import { User } from '../schemas/user.schema';
+import { uploadRateLimit } from '@/middleware/security.middleware';
+import { createRateLimitInterceptor } from '@/interceptors/rate-limit.interceptor';
 
 @Controller('users')
 export class UsersController {
@@ -97,6 +99,7 @@ export class UsersController {
   @Post('profile-image')
   @UseGuards(JwtAuthGuard)
   @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(createRateLimitInterceptor(uploadRateLimit))
   async uploadProfileImage(
     @CurrentUser() user: User,
     @UploadedFile() file: Express.Multer.File,
@@ -144,6 +147,7 @@ export class UsersController {
   @Post('seller-logo')
   @UseGuards(JwtAuthGuard)
   @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(createRateLimitInterceptor(uploadRateLimit))
   async uploadSellerLogo(
     @CurrentUser() user: User,
     @UploadedFile() file: Express.Multer.File,

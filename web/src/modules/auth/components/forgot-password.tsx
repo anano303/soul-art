@@ -2,8 +2,9 @@
 
 import { useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
-import axios, { AxiosError } from "axios";
+import axios from "axios";
 import { useToast } from "@/hooks/use-toast";
+import { useErrorHandler } from "@/hooks/use-error-handler";
 import "./reset-password.css";
 import { useLanguage } from "@/hooks/LanguageContext";
 
@@ -15,6 +16,7 @@ interface ForgotPasswordFormData {
 
 export function ForgotPasswordForm() {
   const { t } = useLanguage();
+  const errorHandler = useErrorHandler();
   const {
     register,
     handleSubmit,
@@ -35,13 +37,7 @@ export function ForgotPasswordForm() {
         description: t("auth.checkEmailForResetLink"),
       });
     } catch (error: unknown) {
-      const err = error as AxiosError<{ message: string }>;
-      toast({
-        title: t("auth.error"),
-        description:
-          err.response?.data?.message || t("auth.somethingWentWrong"),
-        variant: "destructive",
-      });
+      errorHandler.showToast(error, t("auth.passwordResetFailed"));
     } finally {
       setLoading(false);
     }

@@ -8,6 +8,7 @@ import { useRegister } from "../hooks/use-auth";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "@/hooks/use-toast";
+import { useErrorHandler } from "@/hooks/use-error-handler";
 import "./register-form.css";
 import type * as z from "zod";
 import { useState, useEffect } from "react";
@@ -19,6 +20,7 @@ type RegisterFormData = z.infer<typeof registerSchema>;
 
 export function RegisterForm() {
   const { t } = useLanguage();
+  const errorHandler = useErrorHandler();
   const router = useRouter();
   const searchParams = useSearchParams();
   const { mutate: register, isPending } = useRegister();
@@ -118,15 +120,8 @@ export function RegisterForm() {
         }, 2000);
       },
       onError: (error) => {
-        // Display the error from the backend
-        const errorMessage = error.message;
-        setRegisterError(errorMessage);
-
-        toast({
-          title: t("auth.registrationFailed"),
-          description: errorMessage,
-          variant: "destructive",
-        });
+        errorHandler.showToast(error, t("auth.registrationFailed"));
+        setRegisterError(errorHandler.handle(error).message);
       },
     });
   };

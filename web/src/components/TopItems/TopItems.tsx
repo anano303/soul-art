@@ -10,6 +10,7 @@ import { fetchWithAuth } from "@/lib/fetch-with-auth";
 import { Product } from "@/types";
 import LoadingAnim from "../loadingAnim/loadingAnim";
 import BrushTrail from "../BrushTrail/BrushTrail";
+import { memoryCache } from "@/lib/cache";
 
 const TopItems: React.FC = () => {
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -17,6 +18,14 @@ const TopItems: React.FC = () => {
   const { data: topProducts, isLoading } = useQuery({
     queryKey: ["topProducts"],
     queryFn: async () => {
+      const cacheKey = "topProducts-rating";
+      
+      // Try cache first (10 minutes cache)
+      const cached = memoryCache.get(cacheKey);
+      if (cached) {
+        return cached;
+      }
+
       const searchParams = new URLSearchParams({
         page: "1",
         limit: "20",
@@ -26,8 +35,13 @@ const TopItems: React.FC = () => {
         `/products?${searchParams.toString()}`
       );
       const data = await response.json();
-      return data.items.slice(0, 7);
+      const topItems = data.items.slice(0, 7);
+      
+      // Cache for 10 minutes
+      memoryCache.set(cacheKey, topItems, 10 * 60 * 1000);
+      return topItems;
     },
+    staleTime: 10 * 60 * 1000, // 10 minutes
   });
 
   useEffect(() => {

@@ -18,6 +18,8 @@ import { CreateBannerDto, UpdateBannerDto } from '../dtos/banner.dto';
 import { JwtAuthGuard } from '../../guards/jwt-auth.guard';
 import { RolesGuard } from '../../guards/roles.guard';
 import { Roles } from '../../decorators/roles.decorator';
+import { uploadRateLimit } from '@/middleware/security.middleware';
+import { createRateLimitInterceptor } from '@/interceptors/rate-limit.interceptor';
 import { Role } from '../../types/role.enum';
 import { AppService } from '../../app/services/app.service';
 
@@ -32,6 +34,7 @@ export class BannerController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.Admin)
   @UseInterceptors(FilesInterceptor('images', 1)) // Allow only 1 image per banner
+  @UseInterceptors(createRateLimitInterceptor(uploadRateLimit))
   async create(
     @Body() createBannerDto: CreateBannerDto,
     @UploadedFiles() images?: Express.Multer.File[],
@@ -79,6 +82,7 @@ export class BannerController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.Admin)
   @UseInterceptors(FilesInterceptor('images', 1)) // Allow only 1 image per banner
+  @UseInterceptors(createRateLimitInterceptor(uploadRateLimit))
   async update(
     @Param('id') id: string,
     @Body() updateBannerDto: UpdateBannerDto,

@@ -7,10 +7,10 @@ import { useLogin } from "../hooks/use-auth";
 import { FaGoogle } from "react-icons/fa";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import "./login-form.css";
 import { useState, useEffect } from "react";
 import { toast } from "@/hooks/use-toast";
 import { useLanguage } from "@/hooks/LanguageContext";
+import { useErrorHandler } from "@/hooks/use-error-handler";
 
 import type * as z from "zod";
 
@@ -18,6 +18,7 @@ type LoginFormData = z.infer<typeof loginSchema>;
 
 export function LoginForm() {
   const { t } = useLanguage();
+  const errorHandler = useErrorHandler();
   const { mutate: login, isLoading, error: hookError } = useLogin();
   const [loginError, setLoginError] = useState<string | null>(null);
   const router = useRouter();
@@ -74,33 +75,15 @@ export function LoginForm() {
           }
         },
         onError: (error) => {
-          // Display detailed error message from backend
-          const errorMessage =
-            error instanceof Error ? error.message : "ავტორიზაცია ვერ მოხერხდა";
-
-          setLoginError(errorMessage);
-
-          toast({
-            title: "ავტორიზაციის შეცდომა",
-            description: errorMessage,
-            variant: "destructive",
-          });
+          // Use centralized error handler with translations
+          errorHandler.showToast(error, t("auth.loginFailed"));
+          setLoginError(errorHandler.handle(error).message);
         },
       });
     } catch (error) {
-      // Handle unexpected client-side errors
-      const errorMessage =
-        error instanceof Error
-          ? error.message
-          : "სისტემური შეცდომა, გთხოვთ სცადოთ მოგვიანებით";
-
-      setLoginError(errorMessage);
-
-      toast({
-        title: "ავტორიზაციის შეცდომა",
-        description: errorMessage,
-        variant: "destructive",
-      });
+      // Use centralized error handler for unexpected errors too
+      errorHandler.showToast(error, t("errors.generic"));
+      setLoginError(errorHandler.handle(error).message);
     }
   };
 

@@ -1,6 +1,8 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiClient } from "@/lib/api-client";
 import { toast } from "react-hot-toast";
+import { ErrorHandler } from "@/lib/error-handler";
+import { memoryCache } from "@/lib/cache";
 
 // Types for categories
 export interface Category {
@@ -96,16 +98,27 @@ export const useCategories = (includeInactive = false) => {
     queryKey: ["categories", { includeInactive }],
     queryFn: async () => {
       try {
+        const cacheKey = `categories-${includeInactive}`;
+        
+        // Try cache first
+        const cached = memoryCache.get(cacheKey);
+        if (cached) {
+          return cached;
+        }
+
         const response = await apiClient.get(
           `/categories?includeInactive=${includeInactive}`
         );
+        
+        // Cache for 5 minutes
+        memoryCache.set(cacheKey, response.data, 5 * 60 * 1000);
         return response.data;
       } catch (error) {
         console.error("Error fetching categories:", error);
         throw error;
       }
     },
-    staleTime: 1000, // Consider data stale after 1 second
+    staleTime: 5 * 60 * 1000, // 5 minutes - increased from 1 second since we have cache
     refetchOnMount: "always", // Always refetch when the component mounts
     refetchOnWindowFocus: true, // Refetch when window regains focus
     retry: 2, // Retry failed requests up to 2 times
@@ -127,7 +140,7 @@ export const useCategory = (id: string) => {
 };
 
 // Create a new category
-export const useCreateCategory = () => {
+export const useCreateCategory = (errorMessage?: string) => {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -137,19 +150,18 @@ export const useCreateCategory = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["categories"] });
+      // Clear cache when categories are modified
+      memoryCache.clear(); // Clear all cache since categories affect many things
       toast.success("კატეგორია წარმატებით დაემატა");
     },
     onError: (error: unknown) => {
-      const err = error as ApiError;
-      toast.error(
-        err.response?.data?.message || "კატეგორიის დამატება ვერ მოხერხდა"
-      );
+      ErrorHandler.showToast(error, errorMessage || "კატეგორიის დამატება ვერ მოხერხდა");
     },
   });
 };
 
 // Update a category
-export const useUpdateCategory = () => {
+export const useUpdateCategory = (errorMessage?: string) => {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -166,13 +178,12 @@ export const useUpdateCategory = () => {
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["categories"] });
       queryClient.invalidateQueries({ queryKey: ["categories", variables.id] });
+      // Clear cache when categories are modified
+      memoryCache.clear();
       toast.success("კატეგორია წარმატებით განახლდა");
     },
     onError: (error: unknown) => {
-      const err = error as ApiError;
-      toast.error(
-        err.response?.data?.message || "კატეგორიის განახლება ვერ მოხერხდა"
-      );
+      ErrorHandler.showToast(error, errorMessage || "კატეგორიის განახლება ვერ მოხერხდა");
     },
   });
 };
@@ -188,13 +199,12 @@ export const useDeleteCategory = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["categories"] });
+      // Clear cache when categories are modified
+      memoryCache.clear();
       toast.success("კატეგორია წარმატებით წაიშალა");
     },
     onError: (error: unknown) => {
-      const err = error as ApiError;
-      toast.error(
-        err.response?.data?.message || "კატეგორიის წაშლა ვერ მოხერხდა"
-      );
+      ErrorHandler.showToast(error, "კატეგორიის წაშლა ვერ მოხერხდა");
     },
   });
 };
@@ -329,11 +339,8 @@ export const useCreateSubCategory = () => {
       toast.success("ქვეკატეგორია წარმატებით დაემატა");
     },
     onError: (error: unknown) => {
-      const err = error as ApiError;
-      console.error("Error creating subcategory:", err);
-      toast.error(
-        err.response?.data?.message || "ქვეკატეგორიის დამატება ვერ მოხერხდა"
-      );
+      console.error("Error creating subcategory:", error);
+      ErrorHandler.showToast(error, "ქვეკატეგორიის დამატება ვერ მოხერხდა");
     },
   });
 };
@@ -530,10 +537,7 @@ export const useUpdateColor = () => {
       toast.success("ფერი წარმატებით განახლდა");
     },
     onError: (error: unknown) => {
-      const err = error as ApiError;
-      toast.error(
-        err.response?.data?.message || "ფერის განახლება ვერ მოხერხდა"
-      );
+      ErrorHandler.showToast(error, "ფერის განახლება ვერ მოხერხდა");
     },
   });
 };
