@@ -23,25 +23,25 @@ export const createRateLimit = (windowMs: number, max: number, message?: string)
 // Different rate limits for different operations
 export const authRateLimit = createRateLimit(
   15 * 60 * 1000, // 15 minutes
-  5, // max 5 attempts per window
+  10, // max 10 attempts per window
   'Too many authentication attempts from this IP, please try again after 15 minutes.'
 );
 
 export const apiRateLimit = createRateLimit(
   15 * 60 * 1000, // 15 minutes
-  100, // max 100 requests per window
+  200, // max 200 requests per window
   'Too many API requests from this IP, please try again later.'
 );
 
 export const uploadRateLimit = createRateLimit(
   60 * 60 * 1000, // 1 hour
-  10, // max 10 uploads per hour
+  50, // max 50 uploads per hour
   'Too many upload attempts from this IP, please try again after 1 hour.'
 );
 
 export const paymentRateLimit = createRateLimit(
   60 * 60 * 1000, // 1 hour
-  5, // max 5 payment attempts per hour
+  20, // max 20 payment attempts per hour
   'Too many payment attempts from this IP, please try again after 1 hour.'
 );
 
