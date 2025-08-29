@@ -23,6 +23,8 @@ import { JwtAuthGuard } from '@/guards/jwt-auth.guard';
 import { CurrentUser } from '@/decorators/current-user.decorator';
 import { User } from '@/types';
 import { AddReplyDto } from './dto/addReply.dto';
+import { uploadRateLimit } from '@/middleware/security.middleware';
+import { createRateLimitInterceptor } from '@/interceptors/rate-limit.interceptor';
 // import { AddReplyDto } from './dto/addReply.dto';
 
 @Controller('forums')
@@ -32,6 +34,7 @@ export class ForumsController {
   @Post()
   @UseGuards(JwtAuthGuard)
   @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(createRateLimitInterceptor(uploadRateLimit))
   create(
     @UploadedFile() file: Express.Multer.File,
     @CurrentUser() user: User,
@@ -221,6 +224,7 @@ export class ForumsController {
   @Put(':id')
   @UseGuards(JwtAuthGuard)
   @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(createRateLimitInterceptor(uploadRateLimit))
   update(
     @CurrentUser() user: User,
     @Param('id') id: string,

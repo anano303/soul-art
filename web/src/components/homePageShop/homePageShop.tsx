@@ -11,6 +11,7 @@ import { Category, Product } from "@/types";
 import { useLanguage } from "@/hooks/LanguageContext";
 import { useQuery } from "@tanstack/react-query";
 import { fetchWithAuth } from "@/lib/fetch-with-auth";
+import { memoryCache } from "@/lib/cache";
 import Image from "next/image";
 // import { Shirt, ShoppingBag, Footprints } from "lucide-react";
 
@@ -35,10 +36,21 @@ const HomePageShop = () => {
     queryKey: ["home-categories", language],
     queryFn: async () => {
       try {
+        const cacheKey = `home-categories-${language}`;
+        
+        // Try cache first
+        const cached = memoryCache.get(cacheKey);
+        if (cached) {
+          return cached;
+        }
+
         const response = await fetchWithAuth(
           "/categories?includeInactive=false"
         );
         const data = await response.json();
+        
+        // Cache for 5 minutes (language-specific)
+        memoryCache.set(cacheKey, data, 5 * 60 * 1000);
         return data;
       } catch (err) {
         console.error("Failed to fetch categories:", err);
@@ -46,8 +58,7 @@ const HomePageShop = () => {
       }
     },
     refetchOnWindowFocus: false,
-    staleTime: 0, // Consider data always stale to force refresh
-    gcTime: 0, // Don't cache between language switches (v4+ of react-query uses gcTime instead of cacheTime)
+    staleTime: 5 * 60 * 1000, // 5 minutes - increased since we have cache
   });
 
   // Force refetch when language changes

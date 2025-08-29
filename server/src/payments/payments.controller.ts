@@ -1,10 +1,13 @@
-import { Controller, Post, Body, Get, Param } from '@nestjs/common';
+import { Controller, Post, Body, Get, Param, UseInterceptors } from '@nestjs/common';
 import { PaymentsService } from './payments.service';
+import { paymentRateLimit } from '@/middleware/security.middleware';
+import { createRateLimitInterceptor } from '@/interceptors/rate-limit.interceptor';
 
 @Controller('payments')
 export class PaymentsController {
   constructor(private readonly paymentsService: PaymentsService) {}
 
+  @UseInterceptors(createRateLimitInterceptor(paymentRateLimit))
   @Post('bog/create')
   async createBogPayment(@Body() data: any) {
     try {
@@ -35,6 +38,7 @@ export class PaymentsController {
     return this.paymentsService.getPaymentStatus(orderId);
   }
 
+  @UseInterceptors(createRateLimitInterceptor(paymentRateLimit))
   @Post('bog/callback')
   async handleBogCallback(@Body() data: any) {
     console.log('BOG Payment Callback endpoint hit');

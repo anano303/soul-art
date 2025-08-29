@@ -43,6 +43,8 @@ import { ResetPasswordDto } from '../dtos/reset-password.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
+import { authRateLimit, uploadRateLimit } from '@/middleware/security.middleware';
+import { createRateLimitInterceptor } from '@/interceptors/rate-limit.interceptor';
 
 @ApiTags('Authentication')
 @Controller('auth')
@@ -62,6 +64,7 @@ export class AuthController {
     description: 'Invalid credentials',
   })
   @UseGuards(NotAuthenticatedGuard, LocalAuthGuard)
+  @UseInterceptors(createRateLimitInterceptor(authRateLimit))
   @Post('login')
   async login(@Body() loginDto: LoginDto) {
     const user = await this.authService.validateUser(
@@ -93,6 +96,7 @@ export class AuthController {
     return this.usersService.getProfileData(user._id.toString());
   }
 
+  @UseInterceptors(createRateLimitInterceptor(authRateLimit))
   @Post('refresh')
   async refresh(@Body() body: { refreshToken: string }) {
     if (!body.refreshToken) {
@@ -146,6 +150,7 @@ export class AuthController {
     status: 400,
     description: 'Bad request - validation error',
   })
+  @UseInterceptors(createRateLimitInterceptor(authRateLimit))
   @Post('register')
   async register(@Body() registerDto: RegisterDto) {
     const user = await this.usersService.create(registerDto);
@@ -204,6 +209,7 @@ export class AuthController {
   })
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(FileInterceptor('logoFile'))
+  @UseInterceptors(createRateLimitInterceptor(uploadRateLimit))
   @Post('sellers-register')
   async registerSeller(
     @Body() sellerRegisterDto: SellerRegisterDto,
@@ -225,6 +231,7 @@ export class AuthController {
     }
   }
 
+  @UseInterceptors(createRateLimitInterceptor(authRateLimit))
   @Post('forgot-password')
   async forgotPassword(@Body() { email }: ForgotPasswordDto) {
     await this.authService.requestPasswordReset(email);
@@ -233,6 +240,7 @@ export class AuthController {
         'თუ თქვენი მეილი სისტემაში არსებობს, პაროლის აღდგენის ბმული გამოგეგზავნებათ.',
     };
   }
+  @UseInterceptors(createRateLimitInterceptor(authRateLimit))
   @Post('reset-password')
   async resetPassword(@Body() { token, newPassword }: ResetPasswordDto) {
     await this.authService.resetPassword(token, newPassword);
