@@ -11,6 +11,7 @@ import { useState, useEffect } from "react";
 import { toast } from "@/hooks/use-toast";
 import { useLanguage } from "@/hooks/LanguageContext";
 import { useErrorHandler } from "@/hooks/use-error-handler";
+import "./login-form.css";
 
 import type * as z from "zod";
 
