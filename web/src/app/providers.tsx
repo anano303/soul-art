@@ -3,7 +3,6 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import "@/lib/process-refresh";
-import { initializeAuth } from "@/lib/auth";
 import { useEffect } from "react";
 import { checkAndRefreshAuth } from "@/lib/process-refresh";
 
@@ -42,7 +41,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const initAuth = async () => {
       console.log("🚀 Initializing auth...");
-      initializeAuth();
+      // With HTTP-only cookies, no initialization needed
 
       // Check if we have tokens and potentially refresh them
       const isAuthed = await checkAndRefreshAuth();

@@ -1,6 +1,5 @@
 import { fetchWithAuth } from "@/lib/fetch-with-auth";
 import { Banner, CreateBannerData } from "@/types/banner";
-import { getAccessToken } from "@/lib/auth";
 
 export async function getBanners(): Promise<{
   success: boolean;
@@ -62,13 +61,12 @@ export async function createBanner(
     }
 
     // Use native fetch for FormData to avoid Content-Type issues
-    const accessToken = getAccessToken();
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/banners`, {
       method: "POST",
       body: formData,
       headers: {
-        ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
         // Don't set Content-Type - browser will set it automatically for FormData
+        // Don't set Authorization - HTTP-only cookies are included automatically
       },
       credentials: "include",
       mode: "cors",
@@ -111,15 +109,14 @@ export async function updateBanner(
     }
 
     // Use native fetch for FormData to avoid Content-Type issues
-    const accessToken = getAccessToken();
     const response = await fetch(
       `${process.env.NEXT_PUBLIC_API_URL}/banners/${id}`,
       {
         method: "PATCH",
         body: formData,
         headers: {
-          ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
           // Don't set Content-Type - browser will set it automatically for FormData
+          // Don't set Authorization - HTTP-only cookies are included automatically
         },
         credentials: "include",
         mode: "cors",

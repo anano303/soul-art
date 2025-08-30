@@ -1,5 +1,4 @@
 import axios from "axios";
-import { getAccessToken } from "./auth";
 import type {
   AxiosError,
   AxiosResponse,
@@ -16,14 +15,11 @@ export const apiClient = axios.create({
   withCredentials: true,
 });
 
-// Add a request interceptor to add auth token
+// Add a request interceptor for HTTP-only cookies
 apiClient.interceptors.request.use(
   (config) => {
-    const token = getAccessToken();
-    if (token) {
-      // Set the Authorization header for every request if token exists
-      config.headers.Authorization = `Bearer ${token}`;
-    }
+    // With HTTP-only cookies, no need to manually add Authorization header
+    // Cookies are automatically included with withCredentials: true
     return config;
   },
   (error) => Promise.reject(error)
@@ -59,7 +55,10 @@ apiClient.interceptors.response.use(
 
 // Helper function to check if user is authenticated
 export const isAuthenticated = () => {
-  return !!getAccessToken();
+  // With HTTP-only cookies, we can't check tokens client-side
+  // This function might not be reliable anymore
+  console.warn("isAuthenticated() is deprecated with HTTP-only cookies. Use server-side auth checks.");
+  return false; // Always return false since we can't check client-side
 };
 
 // We'll add the response interceptor later in a separate function that will be called from process-refresh.ts
@@ -104,18 +103,12 @@ export const setupResponseInterceptors = (
         return Promise.reject(error);
       }
 
-      // If there's no access token or refresh token, reject immediately
-      const token = getAccessToken();
-      if (!token) {
-        return Promise.reject(error);
-      }
-
       originalRequest._retry = true;
 
       try {
         await refreshAuthTokenFn();
-        // Update the Authorization header with new token
-        originalRequest.headers.Authorization = `Bearer ${getAccessToken()}`;
+        // With HTTP-only cookies, no need to update Authorization header
+        // Cookies will be included automatically on retry
         return apiClient(originalRequest);
       } catch (refreshError: unknown) {
         console.error("❌ Error during refresh:", refreshError);

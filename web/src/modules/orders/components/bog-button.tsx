@@ -1,5 +1,4 @@
 import React from "react";
-import { getAccessToken } from "@/lib/auth";
 
 interface BOGButtonProps {
   orderId: string;
@@ -9,15 +8,11 @@ interface BOGButtonProps {
 export function BOGButton({ orderId, amount }: BOGButtonProps) {
   const handleBOGPayment = async () => {
     try {
-      const token = getAccessToken();
-
-      // Get order details first with authentication
+      // Get order details first with HTTP-only cookie authentication
       const orderResponse = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/orders/${orderId}`,
         {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          credentials: "include", // Use HTTP-only cookies
         }
       );
 
@@ -54,8 +49,8 @@ export function BOGButton({ orderId, amount }: BOGButtonProps) {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
           },
+          credentials: "include", // Use HTTP-only cookies
           body: JSON.stringify(paymentData),
         }
       );

@@ -1,5 +1,5 @@
-import { fetchWithAuth } from "@/lib/fetch-with-auth";
-import { getDeviceFingerprint, storeTokens } from "@/lib/auth";
+import { fetchWithAuth } from "@/lib/fetch-with-auth-cookies";
+import { getDeviceFingerprint } from "@/lib/auth-cookies";
 
 export interface Device {
   fingerprint: string;
@@ -37,13 +37,11 @@ export async function trustCurrentDevice(): Promise<boolean> {
     });
     const data = await response.json();
     
-    // If new tokens are returned, store them
-    if (data.tokens) {
-      const { accessToken, refreshToken, sessionToken } = data.tokens;
-      storeTokens(accessToken, refreshToken, sessionToken);
+    if (data.success) {
+      // HTTP-only cookies are automatically set by the server
+      return true;
     }
-    
-    return data.success || false;
+    return false;
   } catch (error) {
     console.error('Failed to trust device:', error);
     return false;

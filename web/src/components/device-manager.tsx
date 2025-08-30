@@ -10,7 +10,7 @@ import {
   removeAllDevices,
   Device 
 } from '@/modules/auth/api/device-management';
-import { getDeviceFingerprint, hasValidSessionToken } from '@/lib/auth';
+import { getDeviceFingerprint, isLoggedIn } from '@/lib/auth';
 import { useToast } from '@/hooks/use-toast';
 import { useLanguage } from '@/hooks/LanguageContext';
 
@@ -201,8 +201,8 @@ export default function DeviceManager() {
               }
             </p>
             {isCurrentTrusted && (
-              <p className={`text-xs ${hasValidSessionToken() ? 'text-green-500' : 'text-orange-500'}`}>
-                {hasValidSessionToken() 
+              <p className={`text-xs ${isLoggedIn() ? 'text-green-500' : 'text-orange-500'}`}>
+                {isLoggedIn() 
                   ? t('deviceManager.extendedSessionActive')
                   : t('deviceManager.extendedSessionExpired')
                 }

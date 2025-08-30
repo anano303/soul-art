@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/hooks/use-auth";
-import { getAccessToken } from "@/lib/auth";
 import { toast } from "react-hot-toast";
 import "./referrals.css";
 
@@ -54,18 +53,18 @@ export default function AdminReferralsPage() {
     transactionId: "",
   });
 
-  const fetchWithdrawalRequests = useCallback(async () => {
-    const token = getAccessToken();
-    try {
-      const url = selectedStatus
-        ? `${process.env.NEXT_PUBLIC_API_URL}/referrals/admin/withdrawal/requests?status=${selectedStatus}`
-        : `${process.env.NEXT_PUBLIC_API_URL}/referrals/admin/withdrawal/requests`;
+    const fetchWithdrawals = useCallback(async () => {
+    if (!user) return;
 
-      const response = await fetch(url, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+    try {
+      const response = await fetch(
+        selectedStatus
+          ? `${process.env.NEXT_PUBLIC_API_URL}/referrals/admin/withdrawal/requests?status=${selectedStatus}`
+          : `${process.env.NEXT_PUBLIC_API_URL}/referrals/admin/withdrawal/requests`,
+        {
+          credentials: "include", // Use HTTP-only cookies
+        }
+      );
 
       if (response.ok) {
         const data = await response.json();
@@ -76,16 +75,16 @@ export default function AdminReferralsPage() {
     } finally {
       setLoading(false);
     }
-  }, [selectedStatus]);
+  }, [selectedStatus, user]);
 
   const fetchReferrals = useCallback(async () => {
-    const token = getAccessToken();
+    
     try {
       const url = selectedStatus
         ? `${process.env.NEXT_PUBLIC_API_URL}/referrals/admin/referrals?status=${selectedStatus}`
         : `${process.env.NEXT_PUBLIC_API_URL}/referrals/admin/referrals`;
       const response = await fetch(url, {
-        headers: { Authorization: `Bearer ${token}` },
+        credentials: "include", // Use HTTP-only cookies
       });
       if (response.ok) {
         const data = await response.json();
@@ -98,21 +97,22 @@ export default function AdminReferralsPage() {
 
   useEffect(() => {
     if (user && user.role === "admin") {
-      fetchWithdrawalRequests();
+      fetchWithdrawals();
       fetchReferrals();
     }
-  }, [user, fetchWithdrawalRequests, fetchReferrals]);
+  }, [user, fetchWithdrawals, fetchReferrals]);
 
   const processWithdrawalRequest = async (requestId: string) => {
-    const token = getAccessToken();
+    
     try {
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/referrals/admin/withdrawal/${requestId}`,
         {
           method: "PATCH",
+          credentials: "include", // Use HTTP-only cookies
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
+            
           },
           body: JSON.stringify(processForm),
         }
@@ -127,7 +127,7 @@ export default function AdminReferralsPage() {
           rejectionReason: "",
           transactionId: "",
         });
-        fetchWithdrawalRequests();
+        fetchWithdrawals();
       } else {
         const error = await response.json();
         toast.error(error.message || "დამუშავება ვერ მოხერხდა");
@@ -275,15 +275,16 @@ export default function AdminReferralsPage() {
                                 referredObj.id || referredObj._id;
                               if (!sellerId) return;
                               setApprovingSellerId(sellerId);
-                              const token = getAccessToken();
+                              
                               try {
                                 const res = await fetch(
                                   `${process.env.NEXT_PUBLIC_API_URL}/referrals/admin/approve-seller`,
                                   {
                                     method: "POST",
-                                    headers: {
+                                    credentials: "include", // Use HTTP-only cookies
+          headers: {
                                       "Content-Type": "application/json",
-                                      Authorization: `Bearer ${token}`,
+                                      
                                     },
                                     body: JSON.stringify({ sellerId }),
                                   }

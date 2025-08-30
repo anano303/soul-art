@@ -1,9 +1,7 @@
 import { useState, useEffect } from 'react';
 import { 
-  getAccessToken, 
-  hasValidSessionToken, 
-  isDeviceTrusted,
-  getUserData 
+  getUserData,
+  isLoggedIn
 } from '@/lib/auth';
 import { User } from '@/types';
 
@@ -27,17 +25,14 @@ export const useAuth = (): AuthState => {
   useEffect(() => {
     const checkAuthStatus = () => {
       try {
-        const accessToken = getAccessToken();
         const userData = getUserData();
         
-        const isAuthenticated = !!accessToken;
-        const isSessionValid = hasValidSessionToken();
-        const deviceTrusted = isDeviceTrusted();
+        const authenticated = isLoggedIn();
 
         setAuthState({
-          isAuthenticated,
-          isSessionValid,
-          isDeviceTrusted: deviceTrusted,
+          isAuthenticated: authenticated,
+          isSessionValid: authenticated, // Same as isAuthenticated with HTTP-only cookies
+          isDeviceTrusted: true, // Always true with HTTP-only cookies
           user: userData,
           loading: false,
         });
