@@ -27,6 +27,27 @@ export const authRateLimit = createRateLimit(
   'Too many authentication attempts from this IP, please try again after 15 minutes.'
 );
 
+// More lenient rate limit for token refresh operations
+export const refreshRateLimit = createRateLimit(
+  15 * 60 * 1000, // 15 minutes
+  100, // max 100 refresh attempts per window (since tokens expire frequently)
+  'Too many token refresh attempts from this IP, please try again later.'
+);
+
+// Rate limit for password reset operations (more restrictive)
+export const passwordResetRateLimit = createRateLimit(
+  60 * 60 * 1000, // 1 hour
+  5, // max 5 password reset attempts per hour
+  'Too many password reset attempts from this IP, please try again after 1 hour.'
+);
+
+// Rate limit for device management operations
+export const deviceManagementRateLimit = createRateLimit(
+  15 * 60 * 1000, // 15 minutes
+  30, // max 30 device operations per window
+  'Too many device management requests from this IP, please try again later.'
+);
+
 export const apiRateLimit = createRateLimit(
   15 * 60 * 1000, // 15 minutes
   200, // max 200 requests per window
