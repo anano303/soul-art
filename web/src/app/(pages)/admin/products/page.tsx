@@ -3,7 +3,7 @@
 import { ProductsList } from "@/modules/admin/components/products-list";
 import "./adminProduct.css";
 import { useEffect, useState } from "react";
-import { isAuthenticated } from "@/lib/api-client";
+import { isLoggedIn } from "@/lib/auth";
 import { useRouter } from "next/navigation";
 
 export default function AdminProductsPage() {
@@ -12,7 +12,7 @@ export default function AdminProductsPage() {
 
   useEffect(() => {
     // Check if user is authenticated before rendering
-    if (!isAuthenticated()) {
+    if (!isLoggedIn()) {
       router.push("/login?redirect=/admin/products");
       return;
     }

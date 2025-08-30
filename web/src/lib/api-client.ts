@@ -53,14 +53,6 @@ apiClient.interceptors.response.use(
   }
 );
 
-// Helper function to check if user is authenticated
-export const isAuthenticated = () => {
-  // With HTTP-only cookies, we can't check tokens client-side
-  // This function might not be reliable anymore
-  console.warn("isAuthenticated() is deprecated with HTTP-only cookies. Use server-side auth checks.");
-  return false; // Always return false since we can't check client-side
-};
-
 // We'll add the response interceptor later in a separate function that will be called from process-refresh.ts
 // Define interface for the refresh function
 interface RefreshAuthTokenFunction {

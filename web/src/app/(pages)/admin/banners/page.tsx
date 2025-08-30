@@ -2,8 +2,8 @@
 
 import { BannerList } from "@/modules/admin/components/banner-list";
 import { useEffect, useState } from "react";
-import { isAuthenticated } from "@/lib/api-client";
 import { useRouter } from "next/navigation";
+import { isLoggedIn } from "@/lib/auth";
 import { getUserData } from "@/lib/auth";
 import { Role } from "@/types/role";
 
@@ -13,7 +13,7 @@ export default function AdminBannersPage() {
 
   useEffect(() => {
     // Check if user is authenticated before rendering
-    if (!isAuthenticated()) {
+    if (!isLoggedIn()) {
       router.push("/login?redirect=/admin/banners");
       return;
     }

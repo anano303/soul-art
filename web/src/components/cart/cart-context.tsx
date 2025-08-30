@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { apiClient, isAuthenticated } from '@/lib/api-client';
+import { apiClient } from '@/lib/api-client';
+import { isLoggedIn as isAuthenticated } from '@/lib/auth';
 import { useAuth } from '@/hooks/use-auth';
 import { CartItem } from '@/types/cart';
 import { AxiosError } from 'axios';
