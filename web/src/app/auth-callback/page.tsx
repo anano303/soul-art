@@ -13,28 +13,27 @@ export default function AuthCallback() {
   useEffect(() => {
     // Parse tokens from hash and store them
     try {
-      console.log('🔄 Processing authentication callback...');
       const { accessToken, refreshToken, userData } = parseTokensFromHash();
       
       if (accessToken && refreshToken) {
-        console.log('✅ Authentication successful');
-        
         // Update user data in React Query
         if (userData) {
           queryClient.setQueryData(["user"], userData);
         }
         
+        // Clear the hash from URL
+        window.history.replaceState(null, '', window.location.pathname);
+        
         // Successfully authenticated
         router.push('/');
       } else {
-        console.log('❌ Missing tokens in callback');
         setError('Authentication failed. Please try again.');
         setTimeout(() => {
           router.push('/login?error=auth_failed');
         }, 2000);
       }
     } catch (error) {
-      console.error('❌ Error processing auth callback:', error);
+      console.error('Error processing authentication callback:', error);
       setError('An unexpected error occurred. Please try again.');
       setTimeout(() => {
         router.push('/login?error=auth_failed');

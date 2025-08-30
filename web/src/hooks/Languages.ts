@@ -599,6 +599,51 @@ export const TRANSLATIONS: Translations = {
         "წესების და პირობების დადასტურება აუცილებელია",
     },
 
+    // Device Manager for Hybrid Auth
+    deviceManager: {
+      title: "მოწყობილობების მართვა",
+      currentDevice: "მიმდინარე მოწყობილობა",
+      deviceId: "მოწყობილობის ID",
+      trusted: "სანდო",
+      untrusted: "არასანდო",
+      trustDevice: "სანდოს სტატუსის მინიჭება",
+      trustedDevices: "სანდო მოწყობილობები",
+      noTrustedDevices: "სანდო მოწყობილობები არ არის",
+      thisDevice: "ეს მოწყობილობა",
+      lastSeen: "ბოლო ვიზიტი",
+      remove: "წაშლა",
+      deviceTrusted: "მოწყობილობას მიენიჭა სანდოს სტატუსი",
+      extendedSessionEnabled: "გაგრძელებული სესია ჩართულია",
+      extendedSessionActive: "✓ გაგრძელებული სესია აქტიურია",
+      extendedSessionExpired: "⚠ გაგრძელებული სესია გაუქმდა",
+      deviceRemoved: "მოწყობილობა წაიშალა",
+      deviceRemovedSuccessfully: "მოწყობილობა წარმატებით წაიშალა",
+      error: "შეცდომა",
+      failedToTrustDevice: "მოწყობილობისთვის სანდოს სტატუსის მინიჭება ვერ მოხერხდა",
+      failedToRemoveDevice: "მოწყობილობის წაშლა ვერ მოხერხდა",
+      cleanupDuplicates: "დუბლიკატების გასუფთავება",
+      duplicatesCleanedUp: "დუბლიკატები გასუფთავდა",
+      duplicatesCleanedUpSuccessfully: "მოწყობილობის დუბლიკატები წარმატებით გასუფთავდა",
+      failedToCleanupDuplicates: "დუბლიკატების გასუფთავება ვერ მოხერხდა",
+      removeAll: "ყველას წაშლა",
+      confirmRemoveAll: "დარწმუნებული ხართ, რომ გსურთ ყველა სანდო მოწყობილობის წაშლა?",
+      allDevicesRemoved: "ყველა მოწყობილობა წაიშალა",
+      allDevicesRemovedSuccessfully: "ყველა სანდო მოწყობილობა წარმატებით წაიშალა",
+      failedToRemoveAllDevices: "ყველა მოწყობილობის წაშლა ვერ მოხერხდა",
+      infoTitle: "ინფორმაცია",
+      infoText: "სანდო მოწყობილობები მეტი დროით რჩება შესული და გთავაზობთ გაუმჯობესებულ გამოცდილებას.",
+    },
+
+    // Profile Navigation
+    profileNav: {
+      title: "პროფილი",
+      profile: "პროფილი",
+      orders: "შეკვეთები",
+      balance: "ბალანსი",
+      devices: "მოწყობილობები",
+      settings: "პარამეტრები",
+    },
+
     // Contact form
     contact: {
       title: "კონტაქტი",
@@ -1414,6 +1459,51 @@ export const TRANSLATIONS: Translations = {
       sellerContractRequired: "Seller contract confirmation is required",
       termsAndConditionsRequired:
         "Terms and conditions confirmation is required",
+    },
+
+    // Device Manager for Hybrid Auth
+    deviceManager: {
+      title: "Device Management",
+      currentDevice: "Current Device",
+      deviceId: "Device ID",
+      trusted: "Trusted",
+      untrusted: "Untrusted",
+      trustDevice: "Trust Device",
+      trustedDevices: "Trusted Devices",
+      noTrustedDevices: "No trusted devices",
+      thisDevice: "This Device",
+      lastSeen: "Last seen",
+      remove: "Remove",
+      deviceTrusted: "Device Trusted",
+      extendedSessionEnabled: "Extended session enabled",
+      extendedSessionActive: "✓ Extended session active",
+      extendedSessionExpired: "⚠ Extended session expired",
+      deviceRemoved: "Device Removed",
+      deviceRemovedSuccessfully: "Device removed successfully",
+      error: "Error",
+      failedToTrustDevice: "Failed to trust device",
+      failedToRemoveDevice: "Failed to remove device",
+      cleanupDuplicates: "Cleanup Duplicates",
+      duplicatesCleanedUp: "Duplicates Cleaned Up",
+      duplicatesCleanedUpSuccessfully: "Device duplicates were successfully cleaned up",
+      failedToCleanupDuplicates: "Failed to cleanup duplicate devices",
+      removeAll: "Remove All",
+      confirmRemoveAll: "Are you sure you want to remove all trusted devices?",
+      allDevicesRemoved: "All Devices Removed",
+      allDevicesRemovedSuccessfully: "All trusted devices were successfully removed",
+      failedToRemoveAllDevices: "Failed to remove all devices",
+      infoTitle: "Info",
+      infoText: "Trusted devices stay logged in longer and provide an improved user experience.",
+    },
+
+    // Profile Navigation
+    profileNav: {
+      title: "Profile",
+      profile: "Profile",
+      orders: "Orders",
+      balance: "Balance",
+      devices: "Devices",
+      settings: "Settings",
     },
 
     // Contact form

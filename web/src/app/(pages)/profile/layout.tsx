@@ -1,5 +1,5 @@
 import { ProtectedRoute } from "@/components/protected-route";
-
+import { ProfileNavigation, MobileProfileNavigation } from "@/components/profile-navigation";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -62,9 +62,13 @@ export default function ProfileLayout({
 }) {
   return (
     <ProtectedRoute>
-      <div className="container mx-auto px-4 py-8">
+      <div className="container pb-8">
+        <MobileProfileNavigation />
         <div className="flex gap-6">
-          <div className="flex-1">{children}</div>
+          <ProfileNavigation />
+          <div className="flex-1 min-w-0">
+            {children}
+          </div>
         </div>
       </div>
     </ProtectedRoute>

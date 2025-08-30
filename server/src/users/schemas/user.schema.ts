@@ -34,6 +34,31 @@ export class User {
   @Prop({ type: String, default: null })
   refreshToken?: string | null;
 
+  // Session and device tracking for hybrid auth
+  @Prop({ type: String, default: null })
+  sessionId?: string;
+
+  @Prop({ type: Date, default: Date.now })
+  lastActivity?: Date;
+
+  @Prop({
+    type: [{
+      fingerprint: { type: String, required: true },
+      userAgent: { type: String, required: true },
+      lastSeen: { type: Date, default: Date.now },
+      trusted: { type: Boolean, default: false },
+      sessionId: { type: String, required: true },
+    }],
+    default: []
+  })
+  knownDevices?: Array<{
+    fingerprint: string;
+    userAgent: string;
+    lastSeen: Date;
+    trusted: boolean;
+    sessionId: string;
+  }>;
+
   // 👇 **ეს ველები მხოლოდ Seller-ს დასჭირდება, ამიტომ `required: false` ვუტოვებთ**
   @Prop({ type: String, default: null })
   storeName?: string;

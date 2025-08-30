@@ -46,9 +46,9 @@ export async function login(data: LoginData) {
     const responseData = await response.json();
     
     if (responseData?.tokens?.accessToken && responseData?.tokens?.refreshToken && responseData?.user) {
-      const { accessToken, refreshToken } = responseData.tokens;
+      const { accessToken, refreshToken, sessionToken } = responseData.tokens;
       console.log('✅ Login successful, storing tokens');
-      storeTokens(accessToken, refreshToken);
+      storeTokens(accessToken, refreshToken, sessionToken);
       storeUserData(responseData.user);
       return { success: true, user: responseData.user };
     }
