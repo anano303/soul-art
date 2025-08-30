@@ -2,8 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { isAuthenticated } from "@/lib/api-client";
-import { getUserData } from "@/lib/auth";
+import { getUserData, isLoggedIn } from "@/lib/auth";
 import { Sidebar } from "lucide-react";
 
 export default function AdminLayout({
@@ -18,8 +17,8 @@ export default function AdminLayout({
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        // Check if user is authenticated
-        if (!isAuthenticated()) {
+        // Check if user is authenticated using the correct function
+        if (!isLoggedIn()) {
           console.log("Not authenticated, redirecting to login");
           router.push("/login?redirect=/admin");
           return;
@@ -35,17 +34,18 @@ export default function AdminLayout({
 
         console.log("Current user role:", userData.role);
 
-        // Check if user has admin role (case-insensitive)
+        // Check if user has admin or seller role (case-insensitive)
         if (
           userData.role?.toLowerCase() !== "admin" &&
           userData.role?.toLowerCase() !== "seller"
         ) {
-          console.log("User doesn't have admin permissions");
+          console.log("User doesn't have admin/seller permissions, role:", userData.role);
           router.push("/");
           return;
         }
 
         // User is authenticated and authorized
+        console.log("✅ Admin/Seller authentication successful");
         setAuthorized(true);
       } catch (error) {
         console.error("Error checking auth:", error);

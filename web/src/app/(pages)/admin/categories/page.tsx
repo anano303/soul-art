@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { isAuthenticated } from "@/lib/api-client";
+import { isLoggedIn } from "@/lib/auth";
 import { useRouter } from "next/navigation";
 import { Loader } from "lucide-react";
 import "@/styles/admin-categories.css"; // Import the new CSS file
@@ -13,7 +13,7 @@ export default function AdminCategoriesPage() {
 
   useEffect(() => {
     // Check if user is authenticated before rendering
-    if (!isAuthenticated()) {
+    if (!isLoggedIn()) {
       router.push("/login?redirect=/admin/categories");
       return;
     }

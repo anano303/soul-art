@@ -2,7 +2,7 @@
 
 import { OrdersList } from "@/modules/admin/components/orders-list";
 import { useEffect, useState } from "react";
-import { isAuthenticated } from "@/lib/api-client";
+import { isLoggedIn } from "@/lib/auth";
 import { useRouter } from "next/navigation";
 import { getUserData } from "@/lib/auth";
 import { Role } from "@/types/role";
@@ -13,7 +13,7 @@ export default function AdminOrdersPage() {
 
   useEffect(() => {
     // Check if user is authenticated before rendering
-    if (!isAuthenticated()) {
+    if (!isLoggedIn()) {
       router.push("/login?redirect=/admin/orders");
       return;
     }
