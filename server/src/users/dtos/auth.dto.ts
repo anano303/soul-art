@@ -30,6 +30,13 @@ export class TokensDto {
   })
   @IsString()
   refreshToken!: string;
+
+  @ApiProperty({
+    example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
+    description: 'JWT session token for device trust',
+  })
+  @IsString()
+  sessionToken!: string;
 }
 
 export interface TokenPayload {
@@ -37,8 +44,10 @@ export interface TokenPayload {
   email: string;
   // isAdmin: boolean;
   role?: Role;
-  type: 'access' | 'refresh';
+  type: 'access' | 'refresh' | 'session';
   jti?: string; // Add this for refresh tokens
+  sessionId?: string; // Add session tracking
+  deviceTrusted?: boolean; // Add device trust info
 }
 
 export class UserResponseDto {

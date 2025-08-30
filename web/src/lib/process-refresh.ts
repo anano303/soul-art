@@ -4,6 +4,7 @@ import {
   getAccessToken,
   storeTokens,
   clearTokens,
+  getDeviceFingerprint,
 } from "./auth";
 
 let isRefreshing = false;
@@ -58,7 +59,13 @@ export const refreshAuthToken = async (): Promise<boolean> => {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ refreshToken }),
+        body: JSON.stringify({ 
+          refreshToken,
+          deviceInfo: {
+            fingerprint: getDeviceFingerprint(),
+            userAgent: typeof window !== "undefined" ? navigator.userAgent : "",
+          }
+        }),
       }
     );
     const data = await response.json();

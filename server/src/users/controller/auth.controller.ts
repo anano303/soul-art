@@ -4,9 +4,11 @@ import {
   Get,
   Post,
   Put,
+  Delete,
   UseGuards,
   Res,
   Req,
+  Param,
   UnauthorizedException,
   ConflictException,
   BadRequestException,
@@ -98,12 +100,18 @@ export class AuthController {
 
   @UseInterceptors(createRateLimitInterceptor(authRateLimit))
   @Post('refresh')
-  async refresh(@Body() body: { refreshToken: string }) {
+  async refresh(@Body() body: { refreshToken: string, deviceInfo?: { fingerprint?: string, userAgent?: string } }, @Req() req: Request) {
     if (!body.refreshToken) {
       throw new UnauthorizedException('No refresh token');
     }
 
-    const tokens = await this.authService.refresh(body.refreshToken);
+    // Extract device information for context
+    const deviceInfo = {
+      fingerprint: body.deviceInfo?.fingerprint || this.generateDeviceFingerprint(req),
+      userAgent: body.deviceInfo?.userAgent || req.headers['user-agent'] || '',
+    };
+
+    const tokens = await this.authService.refresh(body.refreshToken, deviceInfo);
     return { tokens, success: true };
   }
 
@@ -140,6 +148,66 @@ export class AuthController {
 
     return { success: true };
   }
+
+  @Get('devices')
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Get user trusted devices' })
+  async getUserDevices(@CurrentUser() user: UserDocument) {
+    const devices = await this.authService.getUserDevices(user._id.toString());
+    return { devices };
+  }
+
+  @Post('devices/trust')
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Trust current device for extended sessions' })
+  async trustDevice(@CurrentUser() user: UserDocument, @Req() req: Request, @Body() body: any) {
+    // Use frontend fingerprint if provided, otherwise fallback to server-generated
+    const deviceFingerprint = body.deviceInfo?.fingerprint || this.generateDeviceFingerprint(req);
+    
+    // Trust the device and generate new tokens in one operation
+    const tokens = await this.authService.trustDeviceAndGenerateTokens(
+      user,
+      deviceFingerprint,
+      req.headers['user-agent'] || ''
+    );
+    
+    // Clean up duplicates after trusting device
+    await this.authService.cleanupDuplicateDevices(user._id.toString());
+    
+    return { 
+      success: true, 
+      message: 'Device trusted successfully',
+      tokens 
+    };
+  }
+
+  @Delete('devices/:fingerprint')
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Remove a trusted device' })
+  async removeDevice(
+    @CurrentUser() user: UserDocument,
+    @Param('fingerprint') fingerprint: string
+  ) {
+    await this.authService.removeDevice(user._id.toString(), fingerprint);
+    return { success: true, message: 'Device removed successfully' };
+  }
+
+  @Post('devices/cleanup')
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Clean up duplicate devices' })
+  async cleanupDevices(@CurrentUser() user: UserDocument) {
+    await this.authService.cleanupDuplicateDevices(user._id.toString());
+    return { success: true, message: 'Duplicate devices cleaned up successfully' };
+  }
+
+  @Delete('devices/all')
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Remove all trusted devices' })
+  async removeAllDevices(@CurrentUser() user: UserDocument) {
+    await this.authService.removeAllDevices(user._id.toString());
+    return { success: true, message: 'All devices removed successfully' };
+  }
+
   @ApiOperation({ summary: 'Register a new user' })
   @ApiResponse({
     status: 201,
@@ -245,5 +313,18 @@ export class AuthController {
   async resetPassword(@Body() { token, newPassword }: ResetPasswordDto) {
     await this.authService.resetPassword(token, newPassword);
     return { message: 'Password reset successful. You can now log in.' };
+  }
+
+  // Helper method to generate device fingerprint
+  private generateDeviceFingerprint(req: Request): string {
+    const crypto = require('crypto');
+    const components = [
+      req.headers['user-agent'] || '',
+      req.headers['accept-language'] || '',
+      req.ip || '',
+      req.headers['accept-encoding'] || '',
+    ].join('|');
+    
+    return crypto.createHash('sha256').update(components).digest('hex').substring(0, 16);
   }
 }

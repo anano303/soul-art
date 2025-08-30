@@ -3,6 +3,7 @@ import {
   getRefreshToken,
   storeTokens,
   clearTokens,
+  getDeviceFingerprint,
 } from "./auth";
 
 export async function fetchWithAuth(url: string, config: RequestInit = {}) {
@@ -46,7 +47,13 @@ export async function fetchWithAuth(url: string, config: RequestInit = {}) {
             headers: {
               "Content-Type": "application/json",
             },
-            body: JSON.stringify({ refreshToken }),
+            body: JSON.stringify({ 
+              refreshToken,
+              deviceInfo: {
+                fingerprint: getDeviceFingerprint(),
+                userAgent: typeof window !== "undefined" ? navigator.userAgent : "",
+              }
+            }),
           }
         );
 
@@ -57,7 +64,8 @@ export async function fetchWithAuth(url: string, config: RequestInit = {}) {
 
         const data = await refreshResponse.json();
         if (data.tokens?.accessToken && data.tokens?.refreshToken) {
-          storeTokens(data.tokens.accessToken, data.tokens.refreshToken);
+          const { accessToken, refreshToken, sessionToken } = data.tokens;
+          storeTokens(accessToken, refreshToken, sessionToken);
           // Retry the original request with new token
           response = await makeRequest();
         } else {

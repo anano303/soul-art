@@ -1,5 +1,6 @@
 import { axios } from "@/lib/axios";
 import { User } from "@/types";
+import { storeTokens, storeUserData, clearTokens } from "@/lib/auth";
 
 interface LoginCredentials {
   email: string;
@@ -7,8 +8,11 @@ interface LoginCredentials {
 }
 
 interface AuthResponse {
-  accessToken: string;
-  refreshToken: string;
+  tokens: {
+    accessToken: string;
+    refreshToken: string;
+    sessionToken?: string;
+  };
   user: User;
 }
 
@@ -29,9 +33,10 @@ export const authApi = {
   login: async (credentials: LoginCredentials) => {
     const response = await axios.post<AuthResponse>("/auth/login", credentials);
     
-    if (response.data.accessToken && response.data.refreshToken) {
-      localStorage.setItem('accessToken', response.data.accessToken);
-      localStorage.setItem('refreshToken', response.data.refreshToken);
+    if (response.data.tokens) {
+      const { accessToken, refreshToken, sessionToken } = response.data.tokens;
+      storeTokens(accessToken, refreshToken, sessionToken);
+      storeUserData(response.data.user);
     }
     
     return response.data;
@@ -52,11 +57,11 @@ export const authApi = {
     // Send seller registration data directly to the API
     const response = await axios.post<AuthResponse>("/auth/sellers-register", data);
     
-    // Store tokens and return the response
-    if (response.data.accessToken && response.data.refreshToken) {
-      const { accessToken, refreshToken } = response.data;
-      localStorage.setItem('accessToken', accessToken);
-      localStorage.setItem('refreshToken', refreshToken);
+    // Store tokens using hybrid auth system
+    if (response.data.tokens) {
+      const { accessToken, refreshToken, sessionToken } = response.data.tokens;
+      storeTokens(accessToken, refreshToken, sessionToken);
+      storeUserData(response.data.user);
     }
     
     return response.data;
@@ -71,8 +76,7 @@ export const authApi = {
     try {
       await axios.post("/auth/logout");
     } finally {
-      localStorage.removeItem('accessToken');
-      localStorage.removeItem('refreshToken');
+      clearTokens();
     }
   },
 };

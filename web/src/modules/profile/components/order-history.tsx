@@ -30,7 +30,7 @@ interface OrderHistoryProps {
 export function OrderHistory({ orders }: OrderHistoryProps) {
   if (!orders || orders.length === 0) {
     return (
-      <div className="order-history">
+      <div className="order-history mt-6">
         <div className="header">
           <h2 className="title">My Orders</h2>
         </div>
@@ -40,7 +40,7 @@ export function OrderHistory({ orders }: OrderHistoryProps) {
   }
 
   return (
-    <div className="order-history">
+    <div className="order-history mt-6">
       <div className="header">
         <h2 className="title">My Orders</h2>
       </div>
