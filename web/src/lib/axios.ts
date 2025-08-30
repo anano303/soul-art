@@ -1,5 +1,5 @@
 import axios from "axios";
-import { getAccessToken, clearTokens, refreshAccessToken } from "./auth";
+import { clearUserData, refreshTokens } from "./auth";
 
 export const axiosInstance = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/v1",
@@ -26,13 +26,12 @@ const publicRoutes = [
   "product/:id",
 ];
 
-// Request interceptor using hybrid auth system
+// Request interceptor for HTTP-only cookie system
 axiosInstance.interceptors.request.use(
   (config) => {
-    const token = getAccessToken();
-    if (token && config.headers) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
+    // With HTTP-only cookies, no need to manually add Authorization header
+    // Cookies are automatically included with credentials: 'include'
+    config.withCredentials = true;
     return config;
   },
   (error) => {
@@ -95,18 +94,15 @@ axiosInstance.interceptors.response.use(
       isRefreshing = true;
 
       try {
-        const newTokens = await refreshAccessToken();
+        await refreshTokens();
         
-        if (newTokens) {
-          processQueue(null, newTokens.accessToken);
-          originalRequest.headers.Authorization = `Bearer ${newTokens.accessToken}`;
-          return axiosInstance(originalRequest);
-        } else {
-          throw new Error("Token refresh failed");
-        }
+        // With HTTP-only cookies, no need to update Authorization header
+        // Just retry the request, cookies will be included automatically
+        processQueue(null, 'refreshed');
+        return axiosInstance(originalRequest);
       } catch (refreshError) {
         processQueue(refreshError instanceof Error ? refreshError : new Error('Token refresh failed'), null);
-        clearTokens();
+        clearUserData();
         window.location.href = "/login";
         return Promise.reject(refreshError);
       } finally {

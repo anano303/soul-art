@@ -65,10 +65,10 @@ export class AuthController {
     status: 401,
     description: 'Invalid credentials',
   })
-  @UseGuards(NotAuthenticatedGuard, LocalAuthGuard)
+  @UseGuards(LocalAuthGuard)
   @UseInterceptors(createRateLimitInterceptor(authRateLimit))
   @Post('login')
-  async login(@Body() loginDto: LoginDto) {
+  async login(@Body() loginDto: LoginDto, @Res({ passthrough: true }) res: Response) {
     const user = await this.authService.validateUser(
       loginDto.email,
       loginDto.password,
@@ -83,8 +83,12 @@ export class AuthController {
 
     const { tokens, user: userData } = await this.authService.login(user);
 
+    // Set HTTP-only cookies instead of returning tokens in response
+    res.cookie(cookieConfig.access.name, tokens.accessToken, cookieConfig.access.options);
+    res.cookie(cookieConfig.refresh.name, tokens.refreshToken, cookieConfig.refresh.options);
+
+    // Return user data without tokens
     return {
-      tokens,
       user: {
         ...userData,
         profileImage,
@@ -100,8 +104,14 @@ export class AuthController {
 
   @UseInterceptors(createRateLimitInterceptor(authRateLimit))
   @Post('refresh')
-  async refresh(@Body() body: { refreshToken: string, deviceInfo?: { fingerprint?: string, userAgent?: string } }, @Req() req: Request) {
-    if (!body.refreshToken) {
+  async refresh(
+    @Body() body: { deviceInfo?: { fingerprint?: string, userAgent?: string } }, 
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response
+  ) {
+    // Get refresh token from HTTP-only cookie
+    const refreshToken = req.cookies?.[cookieConfig.refresh.name];
+    if (!refreshToken) {
       throw new UnauthorizedException('No refresh token');
     }
 
@@ -111,8 +121,13 @@ export class AuthController {
       userAgent: body.deviceInfo?.userAgent || req.headers['user-agent'] || '',
     };
 
-    const tokens = await this.authService.refresh(body.refreshToken, deviceInfo);
-    return { tokens, success: true };
+    const tokens = await this.authService.refresh(refreshToken, deviceInfo);
+    
+    // Set new HTTP-only cookies
+    res.cookie(cookieConfig.access.name, tokens.accessToken, cookieConfig.access.options);
+    res.cookie(cookieConfig.refresh.name, tokens.refreshToken, cookieConfig.refresh.options);
+    
+    return { success: true };
   }
 
   @Get('google')
@@ -123,28 +138,43 @@ export class AuthController {
   @UseGuards(GoogleAuthGuard)
   async googleAuthRedirect(@Req() req, @Res() res: Response) {
     try {
+      console.log('🔍 Google OAuth callback received');
       const { tokens, user } = await this.authService.singInWithGoogle({
         email: req.user.email,
         name: req.user.name || 'Google User',
         id: req.user.id,
       });
-      console.log('✅ Google auth successful, redirecting with tokens');
+      console.log('✅ Google auth successful, setting HTTP-only cookies');
+      console.log('🍪 Setting cookies with config:', cookieConfig);
 
-      const encodedUserData = encodeURIComponent(JSON.stringify(user));
+      // Set HTTP-only cookies instead of URL hash tokens
+      res.cookie(cookieConfig.access.name, tokens.accessToken, cookieConfig.access.options);
+      res.cookie(cookieConfig.refresh.name, tokens.refreshToken, cookieConfig.refresh.options);
+      
+      console.log('🔄 Redirecting to:', `${process.env.ALLOWED_ORIGINS}/auth-callback?success=true`);
 
-      res.redirect(
-        `${process.env.ALLOWED_ORIGINS}/auth-callback#accessToken=${tokens.accessToken}&refreshToken=${tokens.refreshToken}&userData=${encodedUserData}`,
-      );
+      // Redirect to auth callback page with success parameter
+      res.redirect(`${process.env.ALLOWED_ORIGINS}/auth-callback?success=true`);
     } catch (error) {
-      console.error('Google auth error:', error);
+      console.error('❌ Google auth error:', error);
       res.redirect(`${process.env.ALLOWED_ORIGINS}/login?error=auth_failed`);
     }
   }
 
   @Post('logout')
   @UseGuards(JwtAuthGuard)
-  async logout(@CurrentUser() user: UserDocument) {
+  async logout(@CurrentUser() user: UserDocument, @Res({ passthrough: true }) res: Response) {
     await this.authService.logout(user._id.toString());
+
+    // Clear HTTP-only cookies
+    res.clearCookie(cookieConfig.access.name, { 
+      ...cookieConfig.access.options, 
+      maxAge: 0 
+    });
+    res.clearCookie(cookieConfig.refresh.name, { 
+      ...cookieConfig.refresh.options, 
+      maxAge: 0 
+    });
 
     return { success: true };
   }
@@ -160,7 +190,12 @@ export class AuthController {
   @Post('devices/trust')
   @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Trust current device for extended sessions' })
-  async trustDevice(@CurrentUser() user: UserDocument, @Req() req: Request, @Body() body: any) {
+  async trustDevice(
+    @CurrentUser() user: UserDocument, 
+    @Req() req: Request, 
+    @Body() body: any,
+    @Res({ passthrough: true }) res: Response
+  ) {
     // Use frontend fingerprint if provided, otherwise fallback to server-generated
     const deviceFingerprint = body.deviceInfo?.fingerprint || this.generateDeviceFingerprint(req);
     
@@ -174,10 +209,22 @@ export class AuthController {
     // Clean up duplicates after trusting device
     await this.authService.cleanupDuplicateDevices(user._id.toString());
     
+    // Set new HTTP-only cookies with trusted tokens
+    res.cookie(cookieConfig.access.name, tokens.accessToken, cookieConfig.access.options);
+    res.cookie(cookieConfig.refresh.name, tokens.refreshToken, cookieConfig.refresh.options);
+    if (tokens.sessionToken) {
+      // Add session token cookie config if needed
+      res.cookie('session_token', tokens.sessionToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      });
+    }
+    
     return { 
       success: true, 
-      message: 'Device trusted successfully',
-      tokens 
+      message: 'Device trusted successfully'
     };
   }
 
@@ -220,9 +267,16 @@ export class AuthController {
   })
   @UseInterceptors(createRateLimitInterceptor(authRateLimit))
   @Post('register')
-  async register(@Body() registerDto: RegisterDto) {
+  async register(@Body() registerDto: RegisterDto, @Res({ passthrough: true }) res: Response) {
     const user = await this.usersService.create(registerDto);
-    return this.authService.login(user);
+    const { tokens, user: userData } = await this.authService.login(user);
+    
+    // Set HTTP-only cookies
+    res.cookie(cookieConfig.access.name, tokens.accessToken, cookieConfig.access.options);
+    res.cookie(cookieConfig.refresh.name, tokens.refreshToken, cookieConfig.refresh.options);
+    
+    // Return user data without tokens
+    return { user: userData };
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
@@ -282,6 +336,7 @@ export class AuthController {
   async registerSeller(
     @Body() sellerRegisterDto: SellerRegisterDto,
     @UploadedFile() logoFile: Express.Multer.File,
+    @Res({ passthrough: true }) res: Response,
   ) {
     try {
       const seller = await this.usersService.createSellerWithLogo(
@@ -290,7 +345,12 @@ export class AuthController {
       );
       const { tokens, user } = await this.authService.login(seller);
 
-      return { tokens, user };
+      // Set HTTP-only cookies
+      res.cookie(cookieConfig.access.name, tokens.accessToken, cookieConfig.access.options);
+      res.cookie(cookieConfig.refresh.name, tokens.refreshToken, cookieConfig.refresh.options);
+
+      // Return user data without tokens
+      return { user };
     } catch (error) {
       if (error instanceof ConflictException) {
         throw new ConflictException(error.message);

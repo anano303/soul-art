@@ -1,6 +1,6 @@
 import { axios } from "@/lib/axios";
 import { User } from "@/types";
-import { storeTokens, storeUserData, clearTokens } from "@/lib/auth";
+import { storeUserData, clearUserData } from "@/lib/auth";
 
 interface LoginCredentials {
   email: string;
@@ -33,9 +33,9 @@ export const authApi = {
   login: async (credentials: LoginCredentials) => {
     const response = await axios.post<AuthResponse>("/auth/login", credentials);
     
-    if (response.data.tokens) {
-      const { accessToken, refreshToken, sessionToken } = response.data.tokens;
-      storeTokens(accessToken, refreshToken, sessionToken);
+    if (response.data.user) {
+      // With HTTP-only cookies, tokens are handled automatically by the server
+      // We only need to store user data
       storeUserData(response.data.user);
     }
     
@@ -57,10 +57,10 @@ export const authApi = {
     // Send seller registration data directly to the API
     const response = await axios.post<AuthResponse>("/auth/sellers-register", data);
     
-    // Store tokens using hybrid auth system
-    if (response.data.tokens) {
-      const { accessToken, refreshToken, sessionToken } = response.data.tokens;
-      storeTokens(accessToken, refreshToken, sessionToken);
+    // Store user data (tokens handled automatically by server with HTTP-only cookies)
+    if (response.data.user) {
+      // With HTTP-only cookies, tokens are handled automatically by the server
+      // We only need to store user data
       storeUserData(response.data.user);
     }
     
@@ -76,7 +76,7 @@ export const authApi = {
     try {
       await axios.post("/auth/logout");
     } finally {
-      clearTokens();
+      clearUserData();
     }
   },
 };

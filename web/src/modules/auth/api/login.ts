@@ -1,4 +1,4 @@
-import { storeTokens, storeUserData } from "@/lib/auth";
+import { storeUserData } from "@/lib/auth";
 
 export type LoginData = {
   email: string;
@@ -45,15 +45,15 @@ export async function login(data: LoginData) {
     // Handle successful response
     const responseData = await response.json();
     
-    if (responseData?.tokens?.accessToken && responseData?.tokens?.refreshToken && responseData?.user) {
-      const { accessToken, refreshToken, sessionToken } = responseData.tokens;
-      console.log('✅ Login successful, storing tokens');
-      storeTokens(accessToken, refreshToken, sessionToken);
+    if (responseData?.user) {
+      console.log('✅ Login successful, user data received');
+      // With HTTP-only cookies, tokens are handled automatically by the server
+      // We only need to store the user data
       storeUserData(responseData.user);
       return { success: true, user: responseData.user };
     }
     
-    console.log('❌ Login response missing tokens or user data');
+    console.log('❌ Login response missing user data');
     return { success: false, error: "ავტორიზაცია ვერ მოხერხდა - არასწორი პასუხი სერვერიდან" };
   } catch (error) {
     console.error('❌ Login error:', error);

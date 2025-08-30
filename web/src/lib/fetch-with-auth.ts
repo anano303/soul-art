@@ -1,9 +1,6 @@
 import {
-  getAccessToken,
-  getRefreshToken,
-  storeTokens,
-  clearTokens,
-  getDeviceFingerprint,
+  clearUserData,
+  refreshTokens,
 } from "./auth";
 
 export async function fetchWithAuth(url: string, config: RequestInit = {}) {
@@ -14,15 +11,14 @@ export async function fetchWithAuth(url: string, config: RequestInit = {}) {
   }
 
   const makeRequest = async () => {
-    const accessToken = getAccessToken();
+    // With HTTP-only cookies, no need for Authorization header
     return fetch(`${process.env.NEXT_PUBLIC_API_URL}${url}`, {
       ...rest,
       headers: {
         ...headers,
         "Content-Type": "application/json",
-        ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
       },
-      credentials: "include",
+      credentials: "include", // Always include cookies
       mode: "cors",
     });
   };
@@ -31,53 +27,24 @@ export async function fetchWithAuth(url: string, config: RequestInit = {}) {
 
     // Handle 401 Unauthorized - try to refresh token
     if (response.status === 401) {
-      const refreshToken = getRefreshToken();
-
-      if (!refreshToken) {
-        clearTokens();
-        throw new Error("ავტორიზაცია საჭიროა");
-      }
-
       try {
-        // Attempt to refresh the token
-        const refreshResponse = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/auth/refresh`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ 
-              refreshToken,
-              deviceInfo: {
-                fingerprint: getDeviceFingerprint(),
-                userAgent: typeof window !== "undefined" ? navigator.userAgent : "",
-              }
-            }),
-          }
-        );
-
-        if (!refreshResponse.ok) {
-          clearTokens();
-          throw new Error("სესია ვადაგასულია, გთხოვთ თავიდან შეხვიდეთ");
+        // Attempt to refresh the token via HTTP-only cookies
+        await refreshTokens();
+        
+        // Retry the original request
+        response = await makeRequest();
+      } catch {
+        // Refresh failed, clear user data and redirect to login
+        clearUserData();
+        
+        // Check if we're not already on a public page
+        if (typeof window !== "undefined" && 
+            !window.location.pathname.includes("/login") && 
+            !window.location.pathname.includes("/register")) {
+          window.location.href = "/login";
         }
-
-        const data = await refreshResponse.json();
-        if (data.tokens?.accessToken && data.tokens?.refreshToken) {
-          const { accessToken, refreshToken, sessionToken } = data.tokens;
-          storeTokens(accessToken, refreshToken, sessionToken);
-          // Retry the original request with new token
-          response = await makeRequest();
-        } else {
-          clearTokens();
-          throw new Error("ტოკენის განახლება ვერ მოხერხდა");
-        }
-      } catch (refreshError) {
-        clearTokens();
-        if (refreshError instanceof Error) {
-          throw refreshError;
-        }
-        throw new Error("ავტორიზაციის შეცდომა");
+        
+        throw new Error("სესია ვადაგასულია, გთხოვთ თავიდან შეხვიდეთ");
       }
     }
 

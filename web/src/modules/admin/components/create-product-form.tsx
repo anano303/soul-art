@@ -11,7 +11,6 @@ import { fetchWithAuth } from "@/lib/fetch-with-auth";
 import { Color, AgeGroupItem } from "@/types";
 import "./CreateProductForm.css";
 import Image from "next/image";
-import { getAccessToken } from "@/lib/auth";
 import { useUser } from "@/modules/auth/hooks/use-user";
 import { Category, SubCategory } from "@/types";
 import { useStocks } from "@/hooks/useStocks";
@@ -616,16 +615,9 @@ export function CreateProductForm({
         }
       }
 
-      const token = getAccessToken();
-      if (!token) {
-        setServerError(t("adminProducts.authError"));
-        setPending(false);
-        setTimeout(() => {
-          window.location.href = "/login?redirect=/admin/products";
-        }, 2000);
-        return;
-      }
-
+      // With HTTP-only cookies, no need to check token manually
+      // Server will handle authentication automatically
+      
       const formDataToSend = new FormData();
 
       // Add basic form fields
@@ -767,9 +759,7 @@ export function CreateProductForm({
         {
           method,
           body: formDataToSend,
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          credentials: "include", // Use HTTP-only cookies for authentication
         }
       );
 

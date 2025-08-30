@@ -1,10 +1,7 @@
 import { setupResponseInterceptors } from "./api-client";
 import {
-  getRefreshToken,
-  getAccessToken,
-  storeTokens,
-  clearTokens,
-  getDeviceFingerprint,
+  clearUserData,
+  refreshTokens,
 } from "./auth";
 
 let isRefreshing = false;
@@ -44,46 +41,23 @@ export const refreshAuthToken = async (): Promise<boolean> => {
     }
     isRefreshing = true;
 
-    const refreshToken = getRefreshToken();
-    if (!refreshToken) {
-      clearTokens();
+    try {
+      await refreshTokens();
+      
+      // With HTTP-only cookies, we don't get specific token values
+      // Just signal that refresh was successful
+      processQueue(null, 'refreshed');
+      resetRefreshState();
+      return true;
+    } catch (refreshError) {
+      clearUserData();
+      processQueue(refreshError instanceof Error ? refreshError : new Error("Token refresh failed"));
       resetRefreshState();
       return false;
     }
-
-    // Using fetch directly to avoid interceptors
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/auth/refresh`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ 
-          refreshToken,
-          deviceInfo: {
-            fingerprint: getDeviceFingerprint(),
-            userAgent: typeof window !== "undefined" ? navigator.userAgent : "",
-          }
-        }),
-      }
-    );
-    const data = await response.json();
-
-    if (data.tokens && data.tokens.accessToken && data.tokens.refreshToken) {
-      storeTokens(data.tokens.accessToken, data.tokens.refreshToken);
-      processQueue(null, data.tokens.accessToken);
-      resetRefreshState();
-      return true;
-    }
-
-    clearTokens();
-    processQueue(new Error("Invalid response format"));
-    resetRefreshState();
-    return false;
   } catch (error) {
     console.error("❌ Token refresh error:", error);
-    clearTokens();
+    clearUserData();
     processQueue(error);
     resetRefreshState();
     return false;
@@ -92,14 +66,8 @@ export const refreshAuthToken = async (): Promise<boolean> => {
 
 // Check and refresh auth if needed
 export const checkAndRefreshAuth = async (): Promise<boolean> => {
-  const accessToken = getAccessToken();
-  const refreshToken = getRefreshToken();
-
-  if (!accessToken || !refreshToken) {
-    return false;
-  }
-
-  // If token is about to expire or we just want to refresh on startup
+  // With HTTP-only cookies, we don't need to check tokens client-side
+  // The server will handle token validation automatically
   try {
     const success = await refreshAuthToken();
     return success;

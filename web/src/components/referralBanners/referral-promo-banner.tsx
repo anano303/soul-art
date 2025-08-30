@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useAuth } from "@/hooks/use-auth";
-import { getAccessToken } from "@/lib/auth";
+// Referral promo banner component
 import "./referral-promo-banner.css";
 
 interface ReferralStats {
@@ -27,13 +27,10 @@ export function ReferralPromoBanner() {
 
   const fetchStats = async () => {
     try {
-      const token = getAccessToken();
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/referrals/stats`,
         {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          credentials: "include", // Include HTTP-only cookies
         }
       );
 

@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiClient } from "@/lib/api-client";
 import { login as loginApi, LoginData } from "@/modules/auth/api/login";
 import { logout as logoutApi } from "@/modules/auth/api/logout";
-import { isLoggedIn, getUserData, clearTokens } from "@/lib/auth";
+import { isLoggedIn, getUserData, clearUserData } from "@/lib/auth";
 
 export function useAuth() {
   const queryClient = useQueryClient();
@@ -27,12 +27,12 @@ export function useAuth() {
       } catch (error) {
         console.error("Error fetching user profile:", error);
 
-        // If unauthorized, clear tokens
+        // If unauthorized, clear user data
         if (
           (error as { response?: { status?: number } })?.response?.status ===
           401
         ) {
-          clearTokens();
+          clearUserData();
           return null;
         }
 
