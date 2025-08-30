@@ -12,6 +12,7 @@ import Header from "@/components/header/header";
 import MessengerChatWrapper from "@/components/MessengerChat/MessengerChatWrapper";
 import { CartProvider } from "@/modules/cart/context/cart-context";
 import { CheckoutProvider } from "@/modules/checkout/context/checkout-context";
+import DynamicFavicon from "@/components/dynamic-favicon";
 import {
   organizationSchema,
   websiteSchema,
@@ -70,13 +71,14 @@ export const metadata: Metadata = {
     ICBM: "41.7151, 44.8271",
   },
   icons: {
-    icon: "/logo.png",
-    shortcut: "/logo.png",
-    apple: "/logo.png",
+    icon: "/soulart_icon_blue_fullsizes.ico",
+    shortcut: "/soulart_icon_blue_fullsizes.ico",
+    apple: "/soulart_icon_blue_fullsizes.ico",
     other: [
-      { rel: "icon", url: "/logo.png" },
-      { rel: "apple-touch-icon", url: "/logo.png" },
-      { rel: "mask-icon", url: "/logo.png" },
+      { rel: "icon", url: "/soulart_icon_blue_fullsizes.ico", type: "image/x-icon" },
+      { rel: "shortcut icon", url: "/soulart_icon_blue_fullsizes.ico", type: "image/x-icon" },
+      { rel: "apple-touch-icon", url: "/soulart_icon_blue_fullsizes.ico" },
+      { rel: "mask-icon", url: "/soulart_icon_blue_fullsizes.ico", color: "#012645" },
     ],
   },
   openGraph: {
@@ -116,11 +118,14 @@ export default function RootLayout({
     <html lang="en">
       <head>
         {/* Favicon links */}
-        <link rel="icon" href="/logo.png" />
-        <link rel="apple-touch-icon" href="/logo.png" />
-        <link rel="shortcut icon" href="/logo.png" />
-        <link rel="mask-icon" href="/logo.png" color="#000000" />
-        <meta name="msapplication-TileImage" content="/logo.png" />
+        <link rel="icon" href="/soulart_icon_blue_fullsizes.ico" type="image/x-icon" />
+        <link rel="apple-touch-icon" href="/soulart_icon_blue_fullsizes.ico" />
+        <link rel="shortcut icon" href="/soulart_icon_blue_fullsizes.ico" type="image/x-icon" />
+        <link rel="mask-icon" href="/soulart_icon_blue_fullsizes.ico" color="#012645" />
+        <meta name="msapplication-TileImage" content="/soulart_icon_blue_fullsizes.ico" />
+        {/* Chrome-specific meta tags for better shortcut support */}
+        <meta name="theme-color" content="#012645" />
+        <meta name="msapplication-TileColor" content="#012645" />
         {/* Facebook SDK - Fix appId to lowercase appid */}
         <script
           async
@@ -139,6 +144,9 @@ export default function RootLayout({
         className={`${satoshi.variable} antialiased min-h-screen flex flex-col overflow-x-hidden`}
         style={{ maxWidth: "100vw" }}
       >
+        {/* Dynamic Favicon Handler */}
+        <DynamicFavicon />
+        
         <Providers>
           <AuthProvider>
             <CartProvider>
