@@ -152,9 +152,13 @@ export default function RootLayout({
             <CartProvider>
               <CheckoutProvider>
                 <LanguageProvider>
-                  <Header />
-                  {children}
-                  <Footer />
+                  <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+                    <Header />
+                    <div style={{ flex: 1 }}>
+                      {children}
+                    </div>
+                    <Footer />
+                  </div>
                 </LanguageProvider>
               </CheckoutProvider>
             </CartProvider>
