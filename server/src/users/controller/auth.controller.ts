@@ -45,7 +45,7 @@ import { ResetPasswordDto } from '../dtos/reset-password.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
-import { authRateLimit, uploadRateLimit } from '@/middleware/security.middleware';
+import { authRateLimit, uploadRateLimit, refreshRateLimit, passwordResetRateLimit, deviceManagementRateLimit } from '@/middleware/security.middleware';
 import { createRateLimitInterceptor } from '@/interceptors/rate-limit.interceptor';
 
 @ApiTags('Authentication')
@@ -102,7 +102,7 @@ export class AuthController {
     return this.usersService.getProfileData(user._id.toString());
   }
 
-  @UseInterceptors(createRateLimitInterceptor(authRateLimit))
+  @UseInterceptors(createRateLimitInterceptor(refreshRateLimit))
   @Post('refresh')
   async refresh(
     @Body() body: { deviceInfo?: { fingerprint?: string, userAgent?: string } }, 
@@ -181,6 +181,7 @@ export class AuthController {
 
   @Get('devices')
   @UseGuards(JwtAuthGuard)
+  @UseInterceptors(createRateLimitInterceptor(deviceManagementRateLimit))
   @ApiOperation({ summary: 'Get user trusted devices' })
   async getUserDevices(@CurrentUser() user: UserDocument) {
     const devices = await this.authService.getUserDevices(user._id.toString());
@@ -189,6 +190,7 @@ export class AuthController {
 
   @Post('devices/trust')
   @UseGuards(JwtAuthGuard)
+  @UseInterceptors(createRateLimitInterceptor(deviceManagementRateLimit))
   @ApiOperation({ summary: 'Trust current device for extended sessions' })
   async trustDevice(
     @CurrentUser() user: UserDocument, 
@@ -230,6 +232,7 @@ export class AuthController {
 
   @Delete('devices/:fingerprint')
   @UseGuards(JwtAuthGuard)
+  @UseInterceptors(createRateLimitInterceptor(deviceManagementRateLimit))
   @ApiOperation({ summary: 'Remove a trusted device' })
   async removeDevice(
     @CurrentUser() user: UserDocument,
@@ -241,6 +244,7 @@ export class AuthController {
 
   @Post('devices/cleanup')
   @UseGuards(JwtAuthGuard)
+  @UseInterceptors(createRateLimitInterceptor(deviceManagementRateLimit))
   @ApiOperation({ summary: 'Clean up duplicate devices' })
   async cleanupDevices(@CurrentUser() user: UserDocument) {
     await this.authService.cleanupDuplicateDevices(user._id.toString());
@@ -249,6 +253,7 @@ export class AuthController {
 
   @Delete('devices/all')
   @UseGuards(JwtAuthGuard)
+  @UseInterceptors(createRateLimitInterceptor(deviceManagementRateLimit))
   @ApiOperation({ summary: 'Remove all trusted devices' })
   async removeAllDevices(@CurrentUser() user: UserDocument) {
     await this.authService.removeAllDevices(user._id.toString());
@@ -359,7 +364,7 @@ export class AuthController {
     }
   }
 
-  @UseInterceptors(createRateLimitInterceptor(authRateLimit))
+  @UseInterceptors(createRateLimitInterceptor(passwordResetRateLimit))
   @Post('forgot-password')
   async forgotPassword(@Body() { email }: ForgotPasswordDto) {
     await this.authService.requestPasswordReset(email);
@@ -368,7 +373,7 @@ export class AuthController {
         'თუ თქვენი მეილი სისტემაში არსებობს, პაროლის აღდგენის ბმული გამოგეგზავნებათ.',
     };
   }
-  @UseInterceptors(createRateLimitInterceptor(authRateLimit))
+  @UseInterceptors(createRateLimitInterceptor(passwordResetRateLimit))
   @Post('reset-password')
   async resetPassword(@Body() { token, newPassword }: ResetPasswordDto) {
     await this.authService.resetPassword(token, newPassword);
