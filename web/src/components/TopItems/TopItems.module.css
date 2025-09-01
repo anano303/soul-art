@@ -111,13 +111,13 @@
 .itemLink:hover .easel {
   transform: translateY(-10px);
   transform: scale(1.2);
-  transition: transform 0.4s ease-in-out;
 }
 
 .easel {
   position: relative;
   width: 150px;
   height: 200px;
+  transition: transform 0.4s ease-in-out;
 }
 
 .easel:nth-of-type(2n) {
