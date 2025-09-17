@@ -46,6 +46,17 @@
   color: #402000;
 }
 
+.forum-post-link {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+}
+
+.forum-post-link:hover .forum-post-text {
+  color: #012645;
+  transition: color 0.2s ease;
+}
+
 .forum-post-footer {
   display: flex;
   align-items: center;

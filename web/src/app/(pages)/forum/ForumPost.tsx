@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useLanguage } from "@/hooks/LanguageContext";
 import "./ForumPost.css";
 import Image from "next/image";
+import Link from "next/link";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "@/hooks/use-toast";
 import { fetchWithAuth } from "@/lib/fetch-with-auth";
@@ -960,7 +961,9 @@ const ForumPost = ({
             </div>
           </div>
         ) : (
-          <p className="forum-post-text">{text}</p>
+          <Link href={`/forum/${id}`} className="forum-post-link">
+            <p className="forum-post-text">{text}</p>
+          </Link>
         )}
 
         <div className="forum-post-footer">
