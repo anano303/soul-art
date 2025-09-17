@@ -2,17 +2,127 @@
   padding: 5%;
 }
 
+.forum-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.search-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex: 1;
+  max-width: 400px;
+}
+
+.search-input {
+  width: 100%;
+  padding: 12px 15px;
+  padding-right: 80px; /* More space for loading indicator */
+  border: 2px solid #ddd;
+  border-radius: 25px;
+  font-size: 16px;
+  outline: none;
+  transition: border-color 0.3s ease;
+}
+
+.search-loading {
+  position: absolute;
+  right: 45px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 12px;
+  color: #666;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 1; }
+}
+
+.search-input:focus {
+  border-color: #012645;
+}
+
+.search-input::placeholder {
+  color: #999;
+  font-style: italic;
+}
+
+.clear-search-btn {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  font-size: 16px;
+  color: #999;
+  cursor: pointer;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+}
+
+.clear-search-btn:hover {
+  background-color: #f0f0f0;
+  color: #666;
+}
+
+.search-info {
+  margin-bottom: 15px;
+  padding: 10px 15px;
+  background-color: #f8f9fa;
+  border-left: 4px solid #012645;
+  border-radius: 4px;
+  font-style: italic;
+  color: #666;
+}
+
+.no-results {
+  color: #dc3545;
+  font-weight: 500;
+}
+
 .create-post-button {
   background: #012645;
   border: none;
   border-radius: 5px;
-  margin-bottom: 15px;
-  padding: 15px 50px;
+  padding: 15px 30px;
   color: white;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
 }
 
 .create-post-button:hover {
   background: #093f6b;
+}
+
+@media (max-width: 768px) {
+  .forum-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .search-container {
+    max-width: none;
+    order: -1;
+  }
+  
+  .create-post-button {
+    align-self: center;
+    padding: 12px 25px;
+  }
 }
 .delete-post-button {
   background: red;

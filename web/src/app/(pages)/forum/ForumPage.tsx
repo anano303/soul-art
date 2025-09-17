@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import ForumPost from "./ForumPost";
 import "./ForumPage.css";
@@ -45,7 +45,22 @@ const ForumPage = () => {
   const { t } = useLanguage();
   const { user, isLoading: isUserLoading } = useUser();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
+  const [inputValue, setInputValue] = useState("");
+  const [isSearching, setIsSearching] = useState(false);
   const router = useRouter();
+
+  // Debounce search input
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchQuery(inputValue);
+      setSearchQuery(inputValue);
+      setIsSearching(inputValue.length > 0);
+    }, 1000); // Wait 1 second after user stops typing
+
+    return () => clearTimeout(timer);
+  }, [inputValue]);
 
   const {
     data,
@@ -55,9 +70,13 @@ const ForumPage = () => {
     isLoading: isForumsLoading,
   } = useInfiniteQuery<Forum[], Error>({
     initialPageParam: 1,
-    queryKey: ["forums"],
+    queryKey: ["forums", debouncedSearchQuery],
     queryFn: async ({ pageParam = 1 }) => {
-      const response = await fetchWithAuth(`/forums?page=${pageParam}`, {
+      const endpoint = debouncedSearchQuery 
+        ? `/forums/search?query=${encodeURIComponent(debouncedSearchQuery)}&page=${pageParam}` 
+        : `/forums?page=${pageParam}`;
+      
+      const response = await fetchWithAuth(endpoint, {
         method: "GET",
         credentials: "include",
       });
@@ -98,6 +117,18 @@ const ForumPage = () => {
     }
   };
 
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setInputValue(value);
+  };
+
+  const clearSearch = () => {
+    setInputValue("");
+    setSearchQuery("");
+    setDebouncedSearchQuery("");
+    setIsSearching(false);
+  };
+
   if (isUserLoading || isForumsLoading) {
     return (
       <div>
@@ -116,9 +147,43 @@ const ForumPage = () => {
         </div>
       ) : (
         <>
-          <button className="create-post-button" onClick={handleAddPostClick}>
-            {t("forum.addNewPost")}
-          </button>
+          <div className="forum-header">
+            <button className="create-post-button" onClick={handleAddPostClick}>
+              {t("forum.addNewPost")}
+            </button>
+
+            <div className="search-container">
+              <input
+                type="text"
+                placeholder={t("forum.searchPlaceholder") || "ძიება..."}
+                value={inputValue}
+                onChange={handleSearchChange}
+                className="search-input"
+              />
+              {inputValue && (
+                <button onClick={clearSearch} className="clear-search-btn">
+                  ✕
+                </button>
+              )}
+              {inputValue !== debouncedSearchQuery && inputValue.length > 0 && (
+                <div className="search-loading">
+                  <span>•••</span>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {isSearching && (
+            <div className="search-info">
+              {t("forum.searchResults") || "ძიების შედეგები"}: "{debouncedSearchQuery}"
+              {data?.pages[0]?.length === 0 && (
+                <span className="no-results">
+                  {" "}
+                  - {t("forum.noResults") || "შედეგი არ მოიძებნა"}
+                </span>
+              )}
+            </div>
+          )}
 
           <CreateForumModal
             isOpen={isModalOpen}

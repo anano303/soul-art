@@ -23,6 +23,7 @@ import { JwtAuthGuard } from '@/guards/jwt-auth.guard';
 import { CurrentUser } from '@/decorators/current-user.decorator';
 import { User } from '@/types';
 import { AddReplyDto } from './dto/addReply.dto';
+import { SearchForumDto } from './dto/search-forum.dto';
 import { uploadRateLimit } from '@/middleware/security.middleware';
 import { createRateLimitInterceptor } from '@/interceptors/rate-limit.interceptor';
 // import { AddReplyDto } from './dto/addReply.dto';
@@ -93,6 +94,11 @@ export class ForumsController {
   @Get()
   findAll(@Query() queryParams: queryParamsDto) {
     return this.forumsService.findAll(queryParams);
+  }
+
+  @Get('search')
+  searchForums(@Query() searchParams: SearchForumDto) {
+    return this.forumsService.searchForums(searchParams);
   }
 
   @Post('add-comment')
