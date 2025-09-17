@@ -378,8 +378,121 @@ export class ForumsService {
     return { message: 'forum disliked' };
   }
 
-  findOne(id: string) {
-    return `This action returns a #${id} forum`;
+  async findOne(id: string) {
+    if (!isValidObjectId(id)) {
+      throw new BadRequestException('Invalid forum ID');
+    }
+
+    const forum = await this.forumModel
+      .findById(id)
+      .populate('user', 'name _id role profileImagePath')
+      .populate({
+        path: 'comments',
+        populate: {
+          path: 'user',
+          select: 'name _id profileImagePath',
+        },
+      });
+
+    if (!forum) {
+      throw new NotFoundException('Forum post not found');
+    }
+
+    // Get forum post image
+    const imageUrl = await this.awsS3Service.getImageByFileId(forum.imagePath);
+
+    // Get user profile image
+    let userProfileImage = null;
+    const populatedUser = forum.user as any;
+
+    if (populatedUser) {
+      if (populatedUser.profileImagePath) {
+        if (populatedUser.profileImagePath.startsWith('http')) {
+          userProfileImage = populatedUser.profileImagePath;
+        } else {
+          userProfileImage = await this.awsS3Service.getImageByFileId(
+            populatedUser.profileImagePath as string,
+          );
+        }
+      } else if (
+        populatedUser.role === 'seller' &&
+        populatedUser.storeLogoPath
+      ) {
+        if (populatedUser.storeLogoPath.startsWith('http')) {
+          userProfileImage = populatedUser.storeLogoPath;
+        } else {
+          userProfileImage = await this.awsS3Service.getImageByFileId(
+            populatedUser.storeLogoPath as string,
+          );
+        }
+      }
+    }
+
+    const userObj =
+      typeof populatedUser === 'string'
+        ? { _id: populatedUser, name: 'Unknown', role: 'user' }
+        : populatedUser && typeof populatedUser.toObject === 'function'
+          ? populatedUser.toObject()
+          : populatedUser;
+
+    // Get comment authors profile images
+    const commentsWithProfileImages = await Promise.all(
+      forum.comments.map(async (comment) => {
+        let commentUserProfileImage = null;
+        const populatedCommentUser = comment.user as any;
+
+        if (populatedCommentUser) {
+          if (populatedCommentUser.profileImagePath) {
+            if (populatedCommentUser.profileImagePath.startsWith('http')) {
+              commentUserProfileImage = populatedCommentUser.profileImagePath;
+            } else {
+              commentUserProfileImage =
+                await this.awsS3Service.getImageByFileId(
+                  populatedCommentUser.profileImagePath as string,
+                );
+            }
+          } else if (
+            populatedCommentUser.role === 'seller' &&
+            populatedCommentUser.storeLogoPath
+          ) {
+            if (populatedCommentUser.storeLogoPath.startsWith('http')) {
+              commentUserProfileImage = populatedCommentUser.storeLogoPath;
+            } else {
+              commentUserProfileImage =
+                await this.awsS3Service.getImageByFileId(
+                  populatedCommentUser.storeLogoPath as string,
+                );
+            }
+          }
+        }
+
+        const commentUserObj =
+          typeof populatedCommentUser === 'string'
+            ? { _id: populatedCommentUser, name: 'Unknown' }
+            : populatedCommentUser &&
+                typeof populatedCommentUser.toObject === 'function'
+              ? populatedCommentUser.toObject()
+              : populatedCommentUser;
+
+        return {
+          ...comment.toObject(),
+          user: {
+            ...commentUserObj,
+            profileImage: commentUserProfileImage,
+          },
+        };
+      }),
+    );
+
+    return {
+      ...forum.toObject(),
+      image: imageUrl,
+      user: {
+        ...userObj,
+        profileImage: userProfileImage,
+      },
+      comments: commentsWithProfileImages,
+    };
   }
 
   async update(

@@ -47,6 +47,28 @@ async function getCategories() {
   }
 }
 
+// ფორუმის პოსტების მოტანა
+async function getForumPosts() {
+  try {
+    const apiUrl =
+      process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/v1";
+    const response = await fetch(`${apiUrl}/forums?page=1&take=1000`, {
+      next: { revalidate: 3600 }, // 1 საათი cache
+    });
+
+    if (!response.ok) {
+      console.error("Failed to fetch forum posts for sitemap");
+      return [];
+    }
+
+    const data = await response.json();
+    return data || [];
+  } catch (error) {
+    console.error("Error fetching forum posts for sitemap:", error);
+    return [];
+  }
+}
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl =
     process.env.NEXT_PUBLIC_PRODUCTION_URL || "https://soulart.ge";
@@ -63,6 +85,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       url: `${baseUrl}/shop`,
       lastModified: new Date(),
       changeFrequency: "daily" as const,
+      priority: 0.9,
+    },
+    {
+      url: `${baseUrl}/forum`,
+      lastModified: new Date(),
+      changeFrequency: "hourly" as const,
       priority: 0.9,
     },
     {
@@ -113,5 +141,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     })
   );
 
-  return [...staticPages, ...productPages, ...categoryPages];
+  // ფორუმის პოსტების გვერდები
+  const forumPosts = await getForumPosts();
+  const forumPages = forumPosts.map(
+    (post: { _id: string; createdAt: string }) => ({
+      url: `${baseUrl}/forum/${post._id}`,
+      lastModified: new Date(post.createdAt),
+      changeFrequency: "weekly" as const,
+      priority: 0.8,
+    })
+  );
+
+  return [...staticPages, ...productPages, ...categoryPages, ...forumPages];
 }
