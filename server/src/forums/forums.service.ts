@@ -13,6 +13,7 @@ import { UsersService } from '@/users/services/users.service';
 import { queryParamsDto } from './dto/queryParams.dto';
 import { AwsS3Service } from '@/aws-s3/aws-s3.service';
 import { AddCommentDto } from './dto/addComment.dto';
+import { SearchForumDto } from './dto/search-forum.dto';
 import * as mongoose from 'mongoose';
 
 @Injectable()
@@ -151,6 +152,144 @@ export class ForumsService {
             }
 
             // Create a safe comment user object
+            const commentUserObj =
+              typeof populatedCommentUser === 'string'
+                ? { _id: populatedCommentUser, name: 'Unknown' }
+                : populatedCommentUser &&
+                    typeof populatedCommentUser.toObject === 'function'
+                  ? populatedCommentUser.toObject()
+                  : populatedCommentUser;
+
+            return {
+              ...comment.toObject(),
+              user: {
+                ...commentUserObj,
+                profileImage: commentUserProfileImage,
+              },
+            };
+          }),
+        );
+
+        return {
+          ...forum.toObject(),
+          image: imageUrl,
+          user: {
+            ...userObj,
+            profileImage: userProfileImage,
+          },
+          comments: commentsWithProfileImages,
+        };
+      }),
+    );
+
+    return forumDataWithImages;
+  }
+
+  async searchForums(searchParams: SearchForumDto) {
+    const { query, page = 1, take = 20 } = searchParams;
+    const limit = Math.min(take, 20);
+
+    // If no query, return regular forum list
+    if (!query || query.trim() === '') {
+      return this.findAll({ page, take });
+    }
+
+    // Create search filter for content and comments
+    const searchFilter = {
+      $or: [
+        { content: { $regex: query, $options: 'i' } },
+        { 'comments.content': { $regex: query, $options: 'i' } }
+      ]
+    };
+
+    const forumData = await this.forumModel
+      .find(searchFilter)
+      .sort({ createdAt: -1 })
+      .skip((page - 1) * limit)
+      .limit(limit)
+      .populate('user', 'name _id role profileImagePath')
+      .populate({
+        path: 'comments',
+        populate: {
+          path: 'user',
+          select: 'name _id profileImagePath',
+        },
+      });
+
+    // Process images same as findAll method
+    const forumDataWithImages = await Promise.all(
+      forumData.map(async (forum) => {
+        // Get forum post image
+        const imageUrl = await this.awsS3Service.getImageByFileId(
+          forum.imagePath,
+        );
+
+        // Get user profile image if available
+        let userProfileImage = null;
+        const populatedUser = forum.user as any;
+
+        if (populatedUser) {
+          if (populatedUser.profileImagePath) {
+            if (populatedUser.profileImagePath.startsWith('http')) {
+              userProfileImage = populatedUser.profileImagePath;
+            } else {
+              userProfileImage = await this.awsS3Service.getImageByFileId(
+                populatedUser.profileImagePath as string,
+              );
+            }
+          } else if (
+            populatedUser.role === 'seller' &&
+            populatedUser.storeLogoPath
+          ) {
+            if (populatedUser.storeLogoPath.startsWith('http')) {
+              userProfileImage = populatedUser.storeLogoPath;
+            } else {
+              userProfileImage = await this.awsS3Service.getImageByFileId(
+                populatedUser.storeLogoPath as string,
+              );
+            }
+          }
+        }
+
+        const userObj =
+          typeof populatedUser === 'string'
+            ? { _id: populatedUser, name: 'Unknown', role: 'user' }
+            : populatedUser && typeof populatedUser.toObject === 'function'
+              ? populatedUser.toObject()
+              : populatedUser;
+
+        // Get comment authors profile images
+        const commentsWithProfileImages = await Promise.all(
+          forum.comments.map(async (comment) => {
+            let commentUserProfileImage = null;
+            const populatedCommentUser = comment.user as any;
+
+            if (populatedCommentUser) {
+              if (populatedCommentUser.profileImagePath) {
+                if (populatedCommentUser.profileImagePath.startsWith('http')) {
+                  commentUserProfileImage =
+                    populatedCommentUser.profileImagePath;
+                } else {
+                  commentUserProfileImage =
+                    await this.awsS3Service.getImageByFileId(
+                      populatedCommentUser.profileImagePath as string,
+                    );
+                }
+              } else if (
+                populatedCommentUser.role === 'seller' &&
+                populatedCommentUser.storeLogoPath
+              ) {
+                if (populatedCommentUser.storeLogoPath.startsWith('http')) {
+                  commentUserProfileImage = populatedCommentUser.storeLogoPath;
+                } else {
+                  commentUserProfileImage =
+                    await this.awsS3Service.getImageByFileId(
+                      populatedCommentUser.storeLogoPath as string,
+                    );
+                }
+              }
+            }
+
             const commentUserObj =
               typeof populatedCommentUser === 'string'
                 ? { _id: populatedCommentUser, name: 'Unknown' }
