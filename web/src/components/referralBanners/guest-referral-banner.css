@@ -1,7 +1,7 @@
 /* Small Moving Text Banner for Guests - Dark blue background with bright yellow text */
 .soulart-guest-banner {
-  background: #012645e6;
-  color: #ffff00;
+  background:#faf3cbd9;
+  color: #012645;
 
   margin: 16px 0;
   position: relative;
@@ -9,7 +9,6 @@
   height: 70px;
   display: flex;
   align-items: center;
-  box-shadow: 0 4px 12px rgba(1, 38, 69, 0.4);
   margin-top: -35px;
 }
 
@@ -64,18 +63,17 @@
   font-weight: 700;
   margin: 0;
   display: inline;
-  color: #ffff00;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
-  letter-spacing: 0.5px;
+  color: #012645;
 }
 
 .soulart-guest-description {
   font-size: 1.1rem;
+  font-weight: bold;
   margin: 0;
   opacity: 1;
   display: inline;
-  color: #ffff00;
-  font-weight: 500;
+  color: #012645;
+  
 }
 
 .soulart-guest-actions {
@@ -87,7 +85,6 @@
 .soulart-guest-btn-learn,
 .soulart-guest-btn-register {
   padding: 8px 20px;
-  border-radius: 10px;
   text-decoration: none;
   font-weight: 600;
   font-size: 1rem;
@@ -98,31 +95,29 @@
 }
 
 .soulart-guest-btn-learn {
-  background: rgba(255, 255, 0, 0.9);
-  color: #012645;
-  box-shadow: 0 3px 6px rgba(255, 255, 0, 0.4);
-  border: 2px solid #ffff00;
+  background: #012645;
+  color: #faf3cbd9;
+  border: 2px solid #012645;
 }
 
 .soulart-guest-btn-learn:hover {
-  background: rgba(255, 255, 0, 1);
+  background: #faf3cbd9;
   text-decoration: none;
   color: #012645;
-  box-shadow: 0 6px 12px rgba(255, 255, 0, 0.6);
+  box-shadow: 0 6px 12px #faf3cbd9;
   transform: translateY(-2px);
 }
 
 .soulart-guest-btn-register {
-  background: rgba(255, 255, 255, 0.9);
   color: #012645;
-  border: 2px solid rgba(255, 255, 0, 0.6);
+  border: 2px solid #012645;
 }
 
 .soulart-guest-btn-register:hover {
-  background: rgba(255, 255, 255, 1);
-  color: #012645;
-  border-color: #ffff00;
-  box-shadow: 0 3px 6px rgba(255, 255, 0, 0.2);
+    background: #012645;
+  color: #faf3cbd9;
+ border: 2px solid #012645;
+  box-shadow: 0 3px 6px #012645;
 }
 
 .soulart-guest-close {
@@ -130,8 +125,8 @@
   right: 12px;
   top: 50%;
   transform: translateY(-50%);
-  background: rgba(255, 255, 0, 0.8);
-  border: 2px solid #ffff00;
+  background: transparent;
+  border: 2px solid #faf3cbd9;
   color: #012645;
   font-size: 1.4rem;
   cursor: pointer;
@@ -146,8 +141,8 @@
 
 .soulart-guest-close:hover {
   color: #012645;
-  background: rgba(255, 255, 0, 1);
-  box-shadow: 0 2px 6px rgba(255, 255, 0, 0.5);
+  background: #faf3cbd9;
+  box-shadow: 0 2px 6px #faf3cbd9;
 }
 
 /* Responsive Design */
