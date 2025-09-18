@@ -36,20 +36,26 @@
   z-index: 2;
   width: 100%;
   white-space: nowrap;
-  animation: soulart-text-scroll 15s linear infinite;
+  animation: soulart-text-scroll 20s linear infinite;
   display: flex;
   align-items: center;
   gap: 20px;
-  animation-fill-mode: forwards;
-  animation-delay: 2s;
+}
+
+/* Pause animation on hover */
+.soulart-referral-promo:hover .soulart-promo-content {
+  animation-play-state: paused;
 }
 
 @keyframes soulart-text-scroll {
   0% {
     transform: translateX(100%);
   }
+  30% {
+    transform: translateX(0%);
+  }
   100% {
-    transform: translateX(-100%);
+    transform: translateX(-200%);
   }
 }
 
@@ -192,7 +198,7 @@
   }
 
   .soulart-promo-content {
-    animation: soulart-text-scroll 8s linear infinite;
+    animation: soulart-text-scroll 25s linear infinite;
   }
 
   .soulart-promo-title {
