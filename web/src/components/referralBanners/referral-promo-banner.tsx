@@ -93,14 +93,14 @@ export function ReferralPromoBanner() {
                   {stats.totalEarnings} ₾
                 </div>
               </div>
-              <div className="soulart-stat-card">
+              {/* <div className="soulart-stat-card">
                 <div className="soulart-stat-label">
                   {t("referral.promoBanner.balance")}
                 </div>
                 <div className="soulart-stat-value">
                   {stats.availableBalance} ₾
                 </div>
-              </div>
+              </div> */}
             </div>
           )}
 
