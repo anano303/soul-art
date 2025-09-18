@@ -82,7 +82,7 @@ export function ReferralPromoBanner() {
                 <div className="soulart-stat-value">{stats.totalReferrals}</div>
               </div>
               <div className="soulart-stat-card">
-                <div className="soulart-stat-label">გამოშოვებული</div>
+                <div className="soulart-stat-label">გამომუშავებული</div>
                 <div className="soulart-stat-value">
                   {stats.totalEarnings} ₾
                 </div>

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/hooks/use-auth";
+import { useLanguage } from "@/hooks/LanguageContext";
 import { toast } from "react-hot-toast";
 import "./referrals.css";
 
@@ -36,6 +37,7 @@ interface AdminReferralItem {
 
 export default function AdminReferralsPage() {
   const { user } = useAuth();
+  const { t } = useLanguage();
   const [withdrawalRequests, setWithdrawalRequests] = useState<
     WithdrawalRequest[]
   >([]);
@@ -53,7 +55,7 @@ export default function AdminReferralsPage() {
     transactionId: "",
   });
 
-    const fetchWithdrawals = useCallback(async () => {
+  const fetchWithdrawals = useCallback(async () => {
     if (!user) return;
 
     try {
@@ -78,7 +80,6 @@ export default function AdminReferralsPage() {
   }, [selectedStatus, user]);
 
   const fetchReferrals = useCallback(async () => {
-    
     try {
       const url = selectedStatus
         ? `${process.env.NEXT_PUBLIC_API_URL}/referrals/admin/referrals?status=${selectedStatus}`
@@ -103,7 +104,6 @@ export default function AdminReferralsPage() {
   }, [user, fetchWithdrawals, fetchReferrals]);
 
   const processWithdrawalRequest = async (requestId: string) => {
-    
     try {
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/referrals/admin/withdrawal/${requestId}`,
@@ -112,14 +112,13 @@ export default function AdminReferralsPage() {
           credentials: "include", // Use HTTP-only cookies
           headers: {
             "Content-Type": "application/json",
-            
           },
           body: JSON.stringify(processForm),
         }
       );
 
       if (response.ok) {
-        toast.success("მოთხოვნა წარმატებით დამუშავდა!");
+        toast.success(t("adminReferrals.processSuccess"));
         setShowProcessModal(false);
         setProcessingId(null);
         setProcessForm({
@@ -130,10 +129,10 @@ export default function AdminReferralsPage() {
         fetchWithdrawals();
       } else {
         const error = await response.json();
-        toast.error(error.message || "დამუშავება ვერ მოხერხდა");
+        toast.error(error.message || t("adminReferrals.processFailed"));
       }
     } catch {
-      toast.error("შეცდომა მოხდა");
+      toast.error(t("adminReferrals.errorOccurred"));
     }
   };
 
@@ -158,11 +157,11 @@ export default function AdminReferralsPage() {
   const getStatusText = (status: string) => {
     switch (status) {
       case "PENDING":
-        return "მოლოდინში";
+        return t("adminReferrals.pending");
       case "PROCESSED":
-        return "დამუშავებული";
+        return t("adminReferrals.processed");
       case "REJECTED":
-        return "უარყოფილი";
+        return t("adminReferrals.rejected");
       default:
         return status;
     }
@@ -173,7 +172,7 @@ export default function AdminReferralsPage() {
       <div className="admin-referrals-page">
         <div className="admin-ref-container admin-ref-py-8">
           <p className="admin-ref-text-red-600 admin-ref-text-xl admin-ref-font-semibold">
-            უფლება არ გაქვთ ამ გვერდის ნახვისა
+            {t("adminReferrals.noAccess")}
           </p>
         </div>
       </div>
@@ -195,7 +194,7 @@ export default function AdminReferralsPage() {
       <div className="admin-ref-container admin-ref-py-8">
         <div className="admin-ref-flex admin-ref-justify-between admin-ref-items-center admin-ref-mb-8 admin-ref-flex-mobile">
           <h1 className="admin-ref-text-3xl admin-ref-font-bold admin-ref-text-gray-900">
-            რეფერალების მართვა
+            {t("adminReferrals.title")}
           </h1>
 
           <div className="admin-ref-flex admin-ref-items-center admin-ref-gap-4">
@@ -204,11 +203,13 @@ export default function AdminReferralsPage() {
               onChange={(e) => setSelectedStatus(e.target.value)}
               className="admin-ref-form-select"
             >
-              <option value="">ყველა სტატუსი</option>
-              <option value="PENDING">მოლოდინში</option>
-              <option value="PRODUCTS_UPLOADED">ატვირთულია ≥5 პროდუქტი</option>
-              <option value="APPROVED">დამტკიცებული</option>
-              <option value="REJECTED">უარყოფილი</option>
+              <option value="">{t("adminReferrals.allStatuses")}</option>
+              <option value="PENDING">{t("adminReferrals.pending")}</option>
+              <option value="PRODUCTS_UPLOADED">
+                {t("adminReferrals.productsUploaded")}
+              </option>
+              <option value="APPROVED">{t("adminReferrals.approved")}</option>
+              <option value="REJECTED">{t("adminReferrals.rejected")}</option>
             </select>
           </div>
         </div>
@@ -217,19 +218,19 @@ export default function AdminReferralsPage() {
         <div className="admin-ref-card admin-ref-mb-8">
           <div className="admin-ref-p-6 admin-ref-border-b">
             <h3 className="admin-ref-text-xl admin-ref-font-semibold admin-ref-text-gray-900">
-              რეფერალები
+              {t("adminReferrals.referralsTitle")}
             </h3>
           </div>
           <div className="admin-ref-table-container">
             <table className="admin-ref-table">
               <thead>
                 <tr>
-                  <th>ვინც მოიწვია</th>
-                  <th>მოწვეული</th>
-                  <th>ტიპი</th>
-                  <th>სტატუსი</th>
-                  <th>ბონუსი</th>
-                  <th>თარიღი</th>
+                  <th>{t("adminReferrals.invitedBy")}</th>
+                  <th>{t("adminReferrals.invited")}</th>
+                  <th>{t("adminReferrals.type")}</th>
+                  <th>{t("adminReferrals.status")}</th>
+                  <th>{t("adminReferrals.bonus")}</th>
+                  <th>{t("adminReferrals.date")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -251,7 +252,11 @@ export default function AdminReferralsPage() {
                         {r.referred?.email}
                       </div>
                     </td>
-                    <td>{r.type === "SELLER" ? "სელერი" : "მომხმარებელი"}</td>
+                    <td>
+                      {r.type === "SELLER"
+                        ? t("adminReferrals.seller")
+                        : t("adminReferrals.user")}
+                    </td>
                     <td>{r.status}</td>
                     <td>{r.bonusAmount.toFixed(2)} ₾</td>
                     <td className="admin-ref-text-gray-500">
@@ -275,33 +280,33 @@ export default function AdminReferralsPage() {
                                 referredObj.id || referredObj._id;
                               if (!sellerId) return;
                               setApprovingSellerId(sellerId);
-                              
+
                               try {
                                 const res = await fetch(
                                   `${process.env.NEXT_PUBLIC_API_URL}/referrals/admin/approve-seller`,
                                   {
                                     method: "POST",
                                     credentials: "include", // Use HTTP-only cookies
-          headers: {
+                                    headers: {
                                       "Content-Type": "application/json",
-                                      
                                     },
                                     body: JSON.stringify({ sellerId }),
                                   }
                                 );
                                 if (res.ok) {
                                   toast.success(
-                                    "სელერი დამტკიცდა და ბონუსი გადაცემულია"
+                                    t("adminReferrals.sellerApproved")
                                   );
                                   fetchReferrals();
                                 } else {
                                   const err = await res.json();
                                   toast.error(
-                                    err.message || "დამტკიცება ვერ მოხერხდა"
+                                    err.message ||
+                                      t("adminReferrals.approvalFailed")
                                   );
                                 }
                               } catch {
-                                toast.error("შეცდომა მოხდა");
+                                toast.error(t("adminReferrals.errorOccurred"));
                               } finally {
                                 setApprovingSellerId(null);
                               }
@@ -310,8 +315,8 @@ export default function AdminReferralsPage() {
                           >
                             {approvingSellerId ===
                             (r.referred as unknown as { id?: string }).id
-                              ? "მ işlება..."
-                              : "სელერის დამტკიცება"}
+                              ? t("adminReferrals.approving")
+                              : t("adminReferrals.approveSeller")}
                           </button>
                         )}
                     </td>
@@ -326,20 +331,20 @@ export default function AdminReferralsPage() {
         <div className="admin-ref-card">
           <div className="admin-ref-p-6 admin-ref-border-b">
             <h3 className="admin-ref-text-xl admin-ref-font-semibold admin-ref-text-gray-900">
-              ბალანსის გატანის მოთხოვნები
+              {t("adminReferrals.withdrawalRequestsTitle")}
             </h3>
           </div>
           <div className="admin-ref-table-container">
             <table className="admin-ref-table">
               <thead>
                 <tr>
-                  <th>მომხმარებელი</th>
-                  <th>თანხა</th>
-                  <th>მეთოდი</th>
-                  <th>ანგარიშის დეტალები</th>
-                  <th>სტატუსი</th>
-                  <th>თარიღი</th>
-                  <th>მოქმედება</th>
+                  <th>{t("adminReferrals.customer")}</th>
+                  <th>{t("adminReferrals.amount")}</th>
+                  <th>{t("adminReferrals.method")}</th>
+                  <th>{t("adminReferrals.accountDetails")}</th>
+                  <th>{t("adminReferrals.status")}</th>
+                  <th>{t("adminReferrals.date")}</th>
+                  <th>{t("adminReferrals.action")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -357,11 +362,13 @@ export default function AdminReferralsPage() {
                     </td>
                     <td>
                       <span className="admin-ref-money">
-                        {request.amount.toFixed(2)} ლარი
+                        {request.amount.toFixed(2)} {t("adminReferrals.lari")}
                       </span>
                     </td>
                     <td className="admin-ref-text-gray-900">
-                      {request.method === "BANK" ? "ბანკი" : "პეიბოქსი"}
+                      {request.method === "BANK"
+                        ? t("adminReferrals.bank")
+                        : t("adminReferrals.paybox")}
                     </td>
                     <td>
                       <div className="admin-ref-account-details">
@@ -386,14 +393,14 @@ export default function AdminReferralsPage() {
                           onClick={() => openProcessModal(request.id)}
                           className="admin-ref-btn admin-ref-btn-primary"
                         >
-                          დამუშავება
+                          {t("adminReferrals.process")}
                         </button>
                       )}
                       {request.status === "PROCESSED" &&
                         request.processedBy && (
                           <div className="admin-ref-processed-info">
                             <div className="admin-ref-font-medium">
-                              დამუშავდა
+                              {t("adminReferrals.processedBy")}
                             </div>
                             <div className="admin-ref-text-sm">
                               {request.processedBy.name}
@@ -402,10 +409,13 @@ export default function AdminReferralsPage() {
                         )}
                       {request.status === "REJECTED" && (
                         <div className="admin-ref-rejected-info">
-                          <div className="admin-ref-font-medium">უარყოფილი</div>
+                          <div className="admin-ref-font-medium">
+                            {t("adminReferrals.rejected")}
+                          </div>
                           {request.rejectionReason && (
                             <div className="admin-ref-rejection-reason">
-                              მიზეზი: {request.rejectionReason}
+                              {t("adminReferrals.rejectedReason")}:{" "}
+                              {request.rejectionReason}
                             </div>
                           )}
                         </div>
@@ -423,11 +433,13 @@ export default function AdminReferralsPage() {
           <div className="admin-ref-modal-overlay">
             <div className="admin-ref-modal admin-ref-p-8">
               <h3 className="admin-ref-text-xl admin-ref-font-semibold admin-ref-mb-4 admin-ref-text-gray-900">
-                მოთხოვნის დამუშავება
+                {t("adminReferrals.processRequestTitle")}
               </h3>
 
               <div className="admin-ref-mb-4">
-                <label className="admin-ref-form-label">სტატუსი</label>
+                <label className="admin-ref-form-label">
+                  {t("adminReferrals.status")}
+                </label>
                 <select
                   value={processForm.status}
                   onChange={(e) =>
@@ -438,15 +450,17 @@ export default function AdminReferralsPage() {
                   }
                   className="admin-ref-form-select"
                 >
-                  <option value="APPROVED">დამტკიცება</option>
-                  <option value="REJECTED">უარყოფა</option>
+                  <option value="APPROVED">
+                    {t("adminReferrals.approve")}
+                  </option>
+                  <option value="REJECTED">{t("adminReferrals.reject")}</option>
                 </select>
               </div>
 
               {processForm.status === "APPROVED" && (
                 <div className="admin-ref-mb-4">
                   <label className="admin-ref-form-label">
-                    ტრანზაქციის ID (არაუცილებელო)
+                    {t("adminReferrals.transactionId")}
                   </label>
                   <input
                     type="text"
@@ -458,7 +472,7 @@ export default function AdminReferralsPage() {
                       })
                     }
                     className="admin-ref-form-input"
-                    placeholder="ბანკის ტრანზაქციის ID"
+                    placeholder={t("adminReferrals.transactionIdPlaceholder")}
                   />
                 </div>
               )}
@@ -466,7 +480,7 @@ export default function AdminReferralsPage() {
               {processForm.status === "REJECTED" && (
                 <div className="admin-ref-mb-4">
                   <label className="admin-ref-form-label">
-                    უარყოფის მიზეზი
+                    {t("adminReferrals.rejectionReason")}
                   </label>
                   <textarea
                     value={processForm.rejectionReason}
@@ -478,7 +492,7 @@ export default function AdminReferralsPage() {
                     }
                     className="admin-ref-form-textarea"
                     rows={3}
-                    placeholder="მიუთითეთ უარყოფის მიზეზი"
+                    placeholder={t("adminReferrals.rejectionReasonPlaceholder")}
                     required
                   />
                 </div>
@@ -498,7 +512,7 @@ export default function AdminReferralsPage() {
                   }}
                   className="admin-ref-btn admin-ref-btn-secondary admin-ref-flex-1"
                 >
-                  გაუქმება
+                  {t("adminReferrals.cancel")}
                 </button>
                 <button
                   type="button"
@@ -507,7 +521,7 @@ export default function AdminReferralsPage() {
                   }
                   className="admin-ref-btn admin-ref-btn-primary admin-ref-flex-1"
                 >
-                  დამუშავება
+                  {t("adminReferrals.process")}
                 </button>
               </div>
             </div>

@@ -917,6 +917,60 @@ export const TRANSLATIONS: Translations = {
       adminPhone: "ადმინის ტელეფონი",
       sellerName: "გამყიდველის სახელი",
     },
+
+    // Admin Referrals
+    adminReferrals: {
+      title: "რეფერალების მართვა",
+      noAccess: "უფლება არ გაქვთ ამ გვერდის ნახვისა",
+      allStatuses: "ყველა სტატუსი",
+      pending: "მოლოდინში",
+      productsUploaded: "ატვირთულია ≥5 პროდუქტი",
+      approved: "დამტკიცებული",
+      rejected: "უარყოფილი",
+      processed: "დამუშავებული",
+
+      // Referrals table
+      referralsTitle: "რეფერალები",
+      invitedBy: "ვინც მოიწვია",
+      invited: "მოწვეული",
+      type: "ტიპი",
+      status: "სტატუსი",
+      bonus: "ბონუსი",
+      date: "თარიღი",
+      seller: "სელერი",
+      user: "მომხმარებელი",
+      approveSeller: "სელერის დამტკიცება",
+      approving: "მუშავდება...",
+      sellerApproved: "სელერი დამტკიცდა და ბონუსი გადაცემულია",
+      approvalFailed: "დამტკიცება ვერ მოხერხდა",
+      errorOccurred: "შეცდომა მოხდა",
+
+      // Withdrawal requests table
+      withdrawalRequestsTitle: "ბალანსის გატანის მოთხოვნები",
+      customer: "მომხმარებელი",
+      amount: "თანხა",
+      method: "მეთოდი",
+      accountDetails: "ანგარიშის დეტალები",
+      lari: "ლარი",
+      bank: "ბანკი",
+      paybox: "პეიბოქსი",
+      action: "მოქმედება",
+      process: "დამუშავება",
+      processedBy: "დამუშავდა",
+      rejectedReason: "უარყოფის მიზეზი",
+
+      // Process modal
+      processRequestTitle: "მოთხოვნის დამუშავება",
+      approve: "დამტკიცება",
+      reject: "უარყოფა",
+      transactionId: "ტრანზაქციის ID (არაუცილებელო)",
+      transactionIdPlaceholder: "ბანკის ტრანზაქციის ID",
+      rejectionReason: "უარყოფის მიზეზი",
+      rejectionReasonPlaceholder: "მიუთითეთ უარყოფის მიზეზი",
+      cancel: "გაუქმება",
+      processSuccess: "მოთხოვნა წარმატებით დამუშავდა!",
+      processFailed: "დამუშავება ვერ მოხერხდა",
+    },
   },
 
   en: {
@@ -1798,6 +1852,60 @@ export const TRANSLATIONS: Translations = {
       adminEmail: "Admin Email",
       adminPhone: "Admin Phone",
       sellerName: "Seller Name",
+    },
+
+    // Admin Referrals
+    adminReferrals: {
+      title: "Manage Referrals",
+      noAccess: "You don't have permission to view this page",
+      allStatuses: "All Statuses",
+      pending: "Pending",
+      productsUploaded: "≥5 Products Uploaded",
+      approved: "Approved",
+      rejected: "Rejected",
+      processed: "Processed",
+
+      // Referrals table
+      referralsTitle: "Referrals",
+      invitedBy: "Invited By",
+      invited: "Invited",
+      type: "Type",
+      status: "Status",
+      bonus: "Bonus",
+      date: "Date",
+      seller: "Seller",
+      user: "User",
+      approveSeller: "Approve Seller",
+      approving: "Processing...",
+      sellerApproved: "Seller approved and bonus transferred",
+      approvalFailed: "Approval failed",
+      errorOccurred: "Error occurred",
+
+      // Withdrawal requests table
+      withdrawalRequestsTitle: "Balance Withdrawal Requests",
+      customer: "Customer",
+      amount: "Amount",
+      method: "Method",
+      accountDetails: "Account Details",
+      lari: "GEL",
+      bank: "Bank",
+      paybox: "Paybox",
+      action: "Action",
+      process: "Process",
+      processedBy: "Processed by",
+      rejectedReason: "Rejection Reason",
+
+      // Process modal
+      processRequestTitle: "Process Request",
+      approve: "Approve",
+      reject: "Reject",
+      transactionId: "Transaction ID (optional)",
+      transactionIdPlaceholder: "Bank transaction ID",
+      rejectionReason: "Rejection Reason",
+      rejectionReasonPlaceholder: "Specify rejection reason",
+      cancel: "Cancel",
+      processSuccess: "Request processed successfully!",
+      processFailed: "Processing failed",
     },
 
     // Categories translations
