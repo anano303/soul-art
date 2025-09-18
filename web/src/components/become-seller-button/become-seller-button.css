@@ -1,0 +1,97 @@
+.become-seller-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 1.5rem;
+  background: linear-gradient(90deg, #012645, #093d67);
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  font-size: 1.05rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(1, 38, 69, 0.2);
+  text-decoration: none;
+  text-align: center;
+  min-width: 200px;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  margin-top: 1rem;
+}
+
+.become-seller-button::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
+  transition: all 0.6s ease;
+}
+
+.become-seller-button:hover::before {
+  left: 100%;
+}
+
+.become-seller-button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 15px rgba(1, 38, 69, 0.3);
+  background: linear-gradient(90deg, #093d67, #012645);
+}
+
+.become-seller-button:active {
+  transform: translateY(1px);
+}
+
+.become-seller-button:disabled {
+  background: #8aa1b6;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.button-icon {
+  font-size: 1.3rem;
+  line-height: 1;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
+}
+
+.button-text {
+  font-family: "FiraGo", serif;
+  letter-spacing: 0.3px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .become-seller-button {
+    width: 100%;
+    min-width: auto;
+    padding: 1rem 1.5rem;
+    font-size: 1rem;
+  }
+}
+
+/* Animation when appearing */
+.become-seller-button {
+  animation: fadeInUp 0.5s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

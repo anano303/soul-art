@@ -13,6 +13,7 @@ import { useEffect, useState, useRef, useCallback } from "react";
 import Image from "next/image";
 import { useLanguage } from "@/hooks/LanguageContext";
 import { SellerBalanceWidget } from "@/modules/balance/components/seller-balance-widget";
+import { BecomeSellerButton } from "@/components/become-seller-button/become-seller-button";
 
 const formSchema = z
   .object({
@@ -116,11 +117,12 @@ export function ProfileForm() {
     setShouldFetchUser(true);
   }, []);
 
-  useEffect(() => {
-    if (shouldFetchUser) {
-      refreshUserData();
-    }
-  }, [shouldFetchUser, refreshUserData]);
+  // Remove the automatic refresh when shouldFetchUser changes to prevent loops
+  // useEffect(() => {
+  //   if (shouldFetchUser) {
+  //     refreshUserData();
+  //   }
+  // }, [shouldFetchUser, refreshUserData]);
 
   useEffect(() => {
     if (user) {
@@ -430,7 +432,22 @@ export function ProfileForm() {
 
   return (
     <div className="card">
-      <h2>{t("profile.title")}</h2>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          marginBottom: "1rem",
+        }}
+      >
+        <h2>{t("profile.title")}</h2>
+        {/* Show become seller button only for non-seller users */}
+        {user &&
+          user.role?.toUpperCase() !== "SELLER" &&
+          user.role?.toUpperCase() !== "ADMIN" && (
+            <BecomeSellerButton userPhone={user.phoneNumber} />
+          )}
+      </div>
 
       {/* Balance widget only for sellers, not admins */}
       {user?.role?.toUpperCase() === "SELLER" && user._id && (
