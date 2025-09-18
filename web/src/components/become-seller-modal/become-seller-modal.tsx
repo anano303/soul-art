@@ -142,25 +142,8 @@ export function BecomeSellerModal({
   if (!mounted || !isOpen) return null;
 
   const modalContent = (
-    <div
-      className="modal-overlay"
-      onClick={handleClose}
-      style={{
-        position: "fixed",
-        top: 0,
-        left: 0,
-        width: "100vw",
-        height: "100vh",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-      }}
-    >
-      <div
-        className="modal-content"
-        onClick={(e) => e.stopPropagation()}
-        style={{ position: "relative" }}
-      >
+    <div className="seller-modal-overlay" onClick={handleClose}>
+      <div className="modal-content" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
           <h2>{t("profile.becomeSeller")}</h2>
           <button

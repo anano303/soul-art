@@ -435,6 +435,7 @@ export function ProfileForm() {
       <div
         style={{
           display: "flex",
+          flexDirection: "column",
           justifyContent: "space-between",
           alignItems: "center",
           marginBottom: "1rem",
