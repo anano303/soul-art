@@ -50,7 +50,7 @@ export function RegisterForm() {
     setCanSendEmail(email.trim().length > 0);
   }, [email]);
 
-  // რეფერალური კოდის URL-დან ავტომატური შევსება
+  // Auto-fill referral code from URL parameters
   useEffect(() => {
     const refCode = searchParams.get("ref");
     if (refCode) {
@@ -222,7 +222,7 @@ export function RegisterForm() {
         </div>
 
         <div className="input-group">
-          <label htmlFor="invitationCode">რეფერალური კოდი (არაუცილებელო)</label>
+          <label htmlFor="invitationCode">{t("auth.referralCodeOptional")}</label>
           <input
             id="invitationCode"
             type="text"
@@ -232,7 +232,7 @@ export function RegisterForm() {
           {errors.invitationCode && (
             <p className="error-text">{errors.invitationCode.message}</p>
           )}
-          <p className="input-hint">თუ გაქვთ რეფერალური კოდი, შეიყვანეთ აქ</p>
+          <p className="input-hint">{t("auth.referralCodeHint")}</p>
         </div>
 
         {registerError && (
