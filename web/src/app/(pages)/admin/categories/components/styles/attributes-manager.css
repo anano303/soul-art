@@ -6,7 +6,7 @@
 .attributes-tabs {
   display: flex;
   margin-bottom: 24px;
-  border-bottom: 2px solid #333333;
+  border-bottom: 2px solid #e2e8f0;
 }
 
 .attributes-tabs .tab-button {
@@ -16,14 +16,14 @@
   cursor: pointer;
   font-size: 16px;
   font-weight: 500;
-  color: #cccccc;
+  color: #4a5568;
   position: relative;
   transition: all 0.2s ease;
   font-family: "FiraGO", sans-serif;
 }
 
 .attributes-tabs .tab-button.active {
-  color: #f48c06;
+  color: #ffd700;
   font-weight: 600;
 }
 
@@ -34,11 +34,11 @@
   left: 0;
   width: 100%;
   height: 2px;
-  background-color: #f48c06;
+  background-color: #ffd700;
 }
 
 .attributes-tabs .tab-button:hover {
-  color: #f48c06;
+  color: #ffd700;
 }
 
 .attributes-header {
@@ -51,14 +51,14 @@
 .attributes-title {
   font-size: 22px;
   font-weight: 500;
-  color: #ffffff;
+  color: #2d3748;
   margin: 0;
   font-family: "FiraGO", sans-serif;
 }
 
 .attributes-content .btn-add {
-  background-color: #f48c06;
-  color: #fff;
+  background-color: #ffd700;
+  color: #1a202c;
   border: none;
   padding: 10px 18px;
   border-radius: 6px;
@@ -67,21 +67,21 @@
   font-weight: 500;
   font-family: "FiraGO", sans-serif;
   transition: background-color 0.2s ease;
-  box-shadow: 0 2px 4px rgba(75, 83, 32, 0.3);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .attributes-content .btn-add:hover {
-  background-color: #a96205;
-  box-shadow: 0 4px 8px rgba(75, 83, 32, 0.4);
+  background-color: #ffed4a;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
 .attribute-form {
-  background-color: #222222;
+  background-color: white;
   padding: 24px;
   border-radius: 8px;
   margin-bottom: 24px;
-  border: 1px solid #333333;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .attribute-form .form-group {
@@ -93,26 +93,26 @@
 
 .attribute-form .form-group label {
   font-size: 15px;
-  color: #cccccc;
+  color: #4a5568;
   font-weight: 500;
   font-family: "FiraGO", sans-serif;
 }
 
 .attribute-form .form-group input[type="text"] {
   padding: 12px 14px;
-  border: 1px solid #444444;
+  border: 1px solid #e2e8f0;
   border-radius: 6px;
   font-size: 15px;
   width: 100%;
-  background-color: #333333;
-  color: #ffffff;
+  background-color: white;
+  color: #2d3748;
   font-family: "FiraGO", sans-serif;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .attribute-form .form-group input[type="text"]:focus {
-  border-color: #4b5320;
-  box-shadow: 0 0 0 2px rgba(75, 83, 32, 0.2);
+  border-color: #ffd700;
+  box-shadow: 0 0 0 2px rgba(255, 215, 0, 0.2);
   outline: none;
 }
 
@@ -123,7 +123,7 @@
 }
 
 .attribute-form .btn-submit {
-  background-color: #4b5320;
+  background-color: #48bb78;
   color: #fff;
   border: none;
   padding: 10px 20px;
@@ -137,21 +137,21 @@
 }
 
 .attribute-form .btn-submit:hover {
-  background-color: #5c6525;
-  box-shadow: 0 2px 6px rgba(75, 83, 32, 0.3);
+  background-color: #38a169;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
 }
 
 .attribute-form .btn-submit:disabled {
-  background-color: #3a4119;
+  background-color: #a0aec0;
   cursor: not-allowed;
   box-shadow: none;
   opacity: 0.7;
 }
 
 .attribute-form .btn-cancel {
-  background-color: #333333;
-  color: #cccccc;
-  border: 1px solid #444444;
+  background-color: #e2e8f0;
+  color: #4a5568;
+  border: 1px solid #cbd5e0;
   padding: 10px 20px;
   border-radius: 6px;
   cursor: pointer;
@@ -162,7 +162,7 @@
 }
 
 .attribute-form .btn-cancel:hover {
-  background-color: #3a3a3a;
+  background-color: #cbd5e0;
 }
 
 .attributes-list {
@@ -176,21 +176,21 @@
   justify-content: space-between;
   align-items: center;
   padding: 14px 18px;
-  background-color: #222222;
-  border: 1px solid #333333;
+  background-color: white;
+  border: 1px solid #e2e8f0;
   border-radius: 6px;
   transition: all 0.2s ease;
 }
 
 .attribute-item:hover {
-  background-color: #2a2a2a;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-  border-color: #4b5320;
+  background-color: #f7fafc;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  border-color: #ffd700;
 }
 
 .attribute-value {
   font-size: 16px;
-  color: #ffffff;
+  color: #2d3748;
   font-weight: 500;
   font-family: "FiraGO", sans-serif;
 }
@@ -201,9 +201,9 @@
 }
 
 .attribute-actions .btn-edit {
-  background-color: #333333;
-  color: #cccccc;
-  border: 1px solid #444444;
+  background-color: #e2e8f0;
+  color: #4a5568;
+  border: 1px solid #cbd5e0;
   padding: 8px 14px;
   border-radius: 6px;
   cursor: pointer;
@@ -214,7 +214,7 @@
 }
 
 .attribute-actions .btn-edit:hover {
-  background-color: #3a3a3a;
+  background-color: #cbd5e0;
 }
 
 .attribute-actions .btn-edit:disabled {
@@ -223,9 +223,9 @@
 }
 
 .attribute-actions .btn-delete {
-  background-color: #222222;
-  color: #ff6b6b;
-  border: 1px solid #333333;
+  background-color: #fed7d7;
+  color: #e53e3e;
+  border: 1px solid #feb2b2;
   padding: 8px 14px;
   border-radius: 6px;
   cursor: pointer;
@@ -236,8 +236,8 @@
 }
 
 .attribute-actions .btn-delete:hover {
-  background-color: #2a2a2a;
-  border-color: #ff6b6b;
+  background-color: #feb2b2;
+  border-color: #e53e3e;
 }
 
 .attribute-actions .btn-delete:disabled {
@@ -248,11 +248,11 @@
 .no-attributes {
   text-align: center;
   padding: 40px 0;
-  color: #888888;
+  color: #4a5568;
   font-size: 16px;
-  background-color: #222222;
+  background-color: white;
   border-radius: 8px;
-  border: 1px dashed #333333;
+  border: 1px dashed #e2e8f0;
   font-family: "FiraGO", sans-serif;
 }
 
@@ -260,7 +260,7 @@
   display: flex;
   justify-content: center;
   padding: 60px 0;
-  color: #4b5320;
+  color: #ffd700;
 }
 
 @media (max-width: 768px) {

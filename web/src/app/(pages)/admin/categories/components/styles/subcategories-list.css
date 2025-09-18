@@ -11,12 +11,12 @@
   align-items: center;
   margin-bottom: 20px;
   padding-bottom: 12px;
-  border-bottom: 1px solid #333333;
+  border-bottom: 1px solid #e2e8f0;
 }
 
 .subcategories-title {
   font-size: 1.3rem;
-  color: #f48c06;
+  color: #ffd700;
   margin: 0;
   font-weight: 500;
   letter-spacing: 0.5px;
@@ -30,16 +30,16 @@
 }
 
 .subcategory-form-container {
-  background-color: #222222;
+  background-color: white;
   padding: 20px;
   border-radius: 8px;
   margin-bottom: 20px;
-  border: 1px solid #333333;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .subcategory-form-container h4 {
-  color: #4b5320;
+  color: #ffd700;
   margin-top: 0;
   margin-bottom: 16px;
   font-size: 1.2rem;
@@ -55,17 +55,17 @@
 }
 
 .attributes-section {
-  background-color: #222222;
+  background-color: #f8f9fb;
   padding: 16px;
   border-radius: 8px;
-  border: 1px solid #333333;
+  border: 1px solid #e2e8f0;
   margin-bottom: 16px;
 }
 
 .attributes-section h5 {
   margin-top: 0;
   margin-bottom: 16px;
-  color: #4b5320;
+  color: #ffd700;
   font-size: 1.1rem;
   font-weight: 500;
   letter-spacing: 0.5px;
@@ -84,7 +84,7 @@
   margin-top: 0;
   margin-bottom: 12px;
   font-size: 1rem;
-  color: #cccccc;
+  color: #2d3748;
   font-weight: 500;
   font-family: "FiraGO", sans-serif;
 }
@@ -101,23 +101,23 @@
   align-items: center;
   gap: 8px;
   font-size: 14px;
-  color: #cccccc;
-  background-color: #333333;
+  color: #4a5568;
+  background-color: white;
   padding: 6px 12px;
   border-radius: 6px;
-  border: 1px solid #444444;
+  border: 1px solid #e2e8f0;
   transition: all 0.2s;
   font-family: "FiraGO", sans-serif;
   cursor: pointer;
 }
 
 .attribute-option:hover {
-  background-color: #3a3a3a;
-  border-color: #4b5320;
+  background-color: #f7fafc;
+  border-color: #ffd700;
 }
 
 .attribute-option input[type="checkbox"] {
-  accent-color: #4b5320;
+  accent-color: #ffd700;
   width: 16px;
   height: 16px;
   cursor: pointer;
@@ -166,13 +166,13 @@
 }
 
 .subcategory-title-section:hover {
-  background-color: #2a2a2a;
+  background-color: #f7fafc;
 }
 
 .toggle-btn {
   background: none;
   border: none;
-  color: #4b5320;
+  color: #ffd700;
   cursor: pointer;
   padding: 0;
   display: flex;
@@ -182,12 +182,12 @@
 }
 
 .toggle-btn:hover {
-  color: #5c6525;
+  color: #ffed4a;
 }
 
 .subcategory-name {
   font-size: 1.1rem;
-  color: #f48c06;
+  color: #2d3748;
   margin: 0;
   font-weight: 500;
   font-family: "FiraGO", sans-serif;
@@ -202,22 +202,22 @@
   margin-top: 8px;
   margin-bottom: 12px;
   font-size: 14px;
-  color: #aaaaaa;
+  color: #4a5568;
   line-height: 1.5;
 }
 
 .subcategory-attributes {
   margin-top: 12px;
   font-size: 14px;
-  background-color: #333333;
+  background-color: #f8f9fb;
   padding: 12px;
   border-radius: 6px;
-  border: 1px solid #444444;
+  border: 1px solid #e2e8f0;
 }
 
 .attribute-list {
   margin-bottom: 8px;
-  color: #aaaaaa;
+  color: #4a5568;
   line-height: 1.5;
 }
 
@@ -226,25 +226,25 @@
 }
 
 .attribute-list strong {
-  color: #ffffff;
+  color: #2d3748;
   font-weight: bold;
 }
 
 .no-subcategories {
   text-align: center;
   padding: 30px 0;
-  color: #888888;
+  color: #4a5568;
   font-style: italic;
-  background-color: #222222;
+  background-color: white;
   border-radius: 8px;
-  border: 1px dashed #333333;
+  border: 1px dashed #e2e8f0;
 }
 
 .loading-container {
   display: flex;
   justify-content: center;
   padding: 40px 0;
-  color: #4b5320;
+  color: #ffd700;
 }
 
 .error-container {
@@ -253,22 +253,22 @@
   align-items: center;
   justify-content: center;
   padding: 30px 20px;
-  background-color: #2a2020;
-  border: 1px solid #553333;
+  background-color: #fed7d7;
+  border: 1px solid #feb2b2;
   border-radius: 8px;
   margin-bottom: 20px;
   text-align: center;
 }
 
 .error-message {
-  color: #ff6b6b;
+  color: #e53e3e;
   font-size: 16px;
   margin-bottom: 15px;
 }
 
 .btn-retry {
-  background-color: #4b5320;
-  color: white;
+  background-color: #ffd700;
+  color: #1a202c;
   border: none;
   padding: 8px 16px;
   border-radius: 4px;
@@ -278,7 +278,7 @@
 }
 
 .btn-retry:hover {
-  background-color: #5c6525;
+  background-color: #ffed4a;
 }
 
 /* Responsive adjustments */
