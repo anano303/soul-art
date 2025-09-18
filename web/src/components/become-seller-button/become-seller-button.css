@@ -3,15 +3,15 @@
   align-items: center;
   gap: 0.75rem;
   padding: 1rem 1.5rem;
-  background: linear-gradient(90deg, #012645, #093d67);
-  color: white;
-  border: none;
+  background: rgba(1, 38, 69, 0.1);
+  color: #012645;
+  border: 1px solid #d3d3d3;
   border-radius: 0.5rem;
   font-size: 1.05rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 12px rgba(1, 38, 69, 0.2);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
   text-decoration: none;
   text-align: center;
   min-width: 200px;
@@ -44,6 +44,7 @@
   transform: translateY(-3px);
   box-shadow: 0 6px 15px rgba(1, 38, 69, 0.3);
   background: linear-gradient(90deg, #093d67, #012645);
+  color: white;
 }
 
 .become-seller-button:active {
