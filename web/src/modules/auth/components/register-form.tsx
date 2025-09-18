@@ -222,7 +222,9 @@ export function RegisterForm() {
         </div>
 
         <div className="input-group">
-          <label htmlFor="invitationCode">{t("auth.referralCodeOptional")}</label>
+          <label htmlFor="invitationCode">
+            {t("auth.referralCodeOptional")}
+          </label>
           <input
             id="invitationCode"
             type="text"
