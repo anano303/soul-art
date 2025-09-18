@@ -2,7 +2,9 @@
 .referralsPage-container {
   min-height: 100vh;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background-attachment: fixed;
   padding: 2rem 1rem;
+  color: white;
 }
 
 .referralsPage-wrapper {
@@ -17,15 +19,16 @@
 
 .referralsPage-title {
   font-size: 3rem;
-  font-weight: 800;
+  font-weight: bold;
   color: white;
   margin-bottom: 1rem;
-  text-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 .referralsPage-subtitle {
   font-size: 1.2rem;
-  color: rgba(255, 255, 255, 0.9);
+  color: white;
+  opacity: 0.9;
   max-width: 600px;
   margin: 0 auto;
 }
@@ -38,23 +41,25 @@
   min-height: 50vh;
   color: white;
   font-size: 1.5rem;
+  font-weight: 600;
 }
 
 .referralsPage-error {
-  background: rgba(220, 38, 38, 0.1);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(220, 38, 38, 0.2);
-  border-radius: 16px;
-  padding: 2rem;
+  background: rgba(239, 68, 68, 0.2);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 20px;
+  padding: 2.5rem;
   text-align: center;
   color: white;
+  box-shadow: 0 8px 25px rgba(239, 68, 68, 0.2);
 }
 
 /* Alert Box */
 .referralsPage-alert {
-  background: rgba(16, 185, 129, 0.15);
+  background: rgba(255, 215, 0, 0.15);
   backdrop-filter: blur(10px);
-  border: 1px solid rgba(16, 185, 129, 0.3);
+  border: 1px solid rgba(255, 215, 0, 0.3);
   border-radius: 16px;
   padding: 1.5rem;
   margin-bottom: 2rem;
@@ -74,14 +79,14 @@
 }
 
 .referralsPage-alert-link {
-  color: #10b981;
+  color: #ffd700;
   text-decoration: underline;
   font-weight: 600;
   transition: color 0.3s ease;
 }
 
 .referralsPage-alert-link:hover {
-  color: #059669;
+  color: #ffed4a;
 }
 
 /* Stats Grid */
@@ -93,20 +98,19 @@
 }
 
 .referralsPage-stat-card {
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(20px);
-  border-radius: 20px;
-  padding: 2rem;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  background: white;
+  backdrop-filter: blur(15px);
+  border-radius: 15px;
+  padding: 30px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  border: none;
+  transition: transform 0.3s ease;
   position: relative;
   overflow: hidden;
 }
 
 .referralsPage-stat-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
 }
 
 .referralsPage-stat-card::before {
@@ -115,49 +119,52 @@
   top: 0;
   left: 0;
   right: 0;
-  height: 4px;
+  height: 3px;
   background: linear-gradient(90deg, #667eea, #764ba2);
+  border-radius: 15px 15px 0 0;
 }
 
 .referralsPage-stat-title {
-  font-size: 1rem;
-  font-weight: 600;
-  color: #374151;
-  margin-bottom: 0.5rem;
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: #2d3748;
+  margin-bottom: 15px;
 }
 
 .referralsPage-stat-value {
   font-size: 2.5rem;
-  font-weight: 800;
-  margin-bottom: 0.5rem;
+  font-weight: bold;
+  margin-bottom: 10px;
 }
 
 .referralsPage-stat-value.balance {
-  color: #10b981;
+  color: #ffd700;
 }
 
 .referralsPage-stat-value.referrals {
-  color: #3b82f6;
+  color: #667eea;
 }
 
 .referralsPage-stat-value.earnings {
-  color: #8b5cf6;
+  color: #48bb78;
 }
 
 .referralsPage-stat-value.pending {
-  color: #f59e0b;
+  color: #ed8936;
 }
 
 .referralsPage-stat-subtitle {
-  font-size: 0.875rem;
-  color: #6b7280;
+  font-size: 0.9rem;
+  color: #4a5568;
+  font-weight: 500;
 }
 
 .referralsPage-history-btn {
-  background: none;
+  background: #ffd700;
   border: none;
-  color: #3b82f6;
+  color: #1a202c;
   font-size: 0.875rem;
+  font-weight: bold;
   cursor: pointer;
   margin-top: 1rem;
   padding: 0.5rem 1rem;
@@ -166,36 +173,42 @@
 }
 
 .referralsPage-history-btn:hover {
-  background: rgba(59, 130, 246, 0.1);
-  color: #1d4ed8;
+  background: #ffed4a;
+  transform: translateY(-1px);
 }
 
 /* Content Cards */
 .referralsPage-card {
-  background: rgba(255, 255, 255, 0.95);
+  background: white;
   backdrop-filter: blur(20px);
-  border-radius: 20px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 15px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  border: none;
   margin-bottom: 2rem;
   overflow: hidden;
+  transition: transform 0.3s ease;
+}
+
+.referralsPage-card:hover {
+  transform: translateY(-3px);
 }
 
 .referralsPage-card-header {
-  padding: 2rem 2rem 0 2rem;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  padding: 25px;
+  border-bottom: 1px solid #e2e8f0;
   margin-bottom: 0;
+  background: #f8fafc;
 }
 
 .referralsPage-card-title {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: #1f2937;
-  margin-bottom: 1.5rem;
+  font-size: 1.3rem;
+  font-weight: bold;
+  color: #2d3748;
+  margin: 0;
 }
 
 .referralsPage-card-content {
-  padding: 2rem;
+  padding: 30px;
 }
 
 /* Referral Links Section */
@@ -204,10 +217,11 @@
 }
 
 .referralsPage-link-title {
-  font-size: 1.125rem;
+  font-size: 1.1rem;
   font-weight: 600;
-  color: #374151;
+  color: #2d3748;
   margin-bottom: 1rem;
+  text-shadow: none;
 }
 
 .referralsPage-input-group {
@@ -219,25 +233,30 @@
 .referralsPage-input {
   flex: 1;
   padding: 1rem;
-  border: 2px solid #e5e7eb;
+  border: 2px solid rgba(203, 213, 224, 0.6);
   border-radius: 12px;
   font-family: "Monaco", "Menlo", monospace;
   font-size: 0.875rem;
-  background: #f9fafb;
-  transition: border-color 0.3s ease;
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(10px);
+  color: #2d3748;
+  font-weight: 500;
+  transition: all 0.3s ease;
 }
 
 .referralsPage-input:focus {
   outline: none;
   border-color: #667eea;
-  background: white;
+  background: rgba(255, 255, 255, 0.9);
+  transform: none;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
 }
 
 .referralsPage-copy-btn {
   padding: 1rem 1.5rem;
   border: none;
-  border-radius: 12px;
-  font-weight: 600;
+  border-radius: 10px;
+  font-weight: bold;
   cursor: pointer;
   transition: all 0.3s ease;
   display: flex;
@@ -247,23 +266,23 @@
 }
 
 .referralsPage-copy-btn.primary {
-  background: linear-gradient(135deg, #667eea, #764ba2);
-  color: white;
+  background: #ffd700;
+  color: #1a202c;
 }
 
 .referralsPage-copy-btn.primary:hover {
+  background: #ffed4a;
   transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
 }
 
 .referralsPage-copy-btn.success {
-  background: linear-gradient(135deg, #10b981, #059669);
+  background: #48bb78;
   color: white;
 }
 
 .referralsPage-copy-btn.success:hover {
+  background: #38a169;
   transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
 }
 
 .referralsPage-copy-btn.copied {
@@ -273,17 +292,19 @@
 
 .referralsPage-link-description {
   font-size: 0.875rem;
-  color: #6b7280;
+  color: #4a5568;
+  font-weight: 400;
   margin-top: 1rem;
   line-height: 1.5;
+  text-shadow: none;
 }
 
 /* Tables */
 .referralsPage-table-container {
   overflow: hidden;
-  border-radius: 12px;
+  border-radius: 10px;
   background: white;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
 }
 
 .referralsPage-table {
@@ -295,20 +316,22 @@
   background: #f8fafc;
   padding: 1rem;
   text-align: left;
-  font-weight: 600;
-  color: #374151;
-  border-bottom: 2px solid #e5e7eb;
+  font-weight: bold;
+  color: #2d3748;
+  border-bottom: 1px solid #e2e8f0;
   font-size: 0.875rem;
 }
 
 .referralsPage-table td {
   padding: 1rem;
-  border-bottom: 1px solid #f3f4f6;
+  border-bottom: 1px solid #e2e8f0;
   vertical-align: middle;
+  color: #2d3748;
+  font-weight: 500;
 }
 
 .referralsPage-table tbody tr:hover {
-  background: rgba(102, 126, 234, 0.05);
+  background: #f7fafc;
 }
 
 .referralsPage-table tbody tr:last-child td {
@@ -376,20 +399,21 @@
   padding: 1rem 2rem;
   border: none;
   border-radius: 12px;
-  font-weight: 600;
+  font-weight: bold;
   cursor: pointer;
   transition: all 0.3s ease;
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  background: linear-gradient(135deg, #10b981, #059669);
-  color: white;
+  background: #ffd700;
+  color: #1a202c;
   font-size: 1rem;
 }
 
 .referralsPage-withdrawal-btn:hover:not(:disabled) {
+  background: #ffed4a;
   transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
+  box-shadow: 0 8px 25px rgba(255, 215, 0, 0.4);
 }
 
 .referralsPage-withdrawal-btn:disabled {
@@ -491,13 +515,14 @@
 }
 
 .referralsPage-btn-primary {
-  background: linear-gradient(135deg, #667eea, #764ba2);
-  color: white;
+  background: #ffd700;
+  color: #1a202c;
 }
 
 .referralsPage-btn-primary:hover {
+  background: #ffed4a;
   transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+  box-shadow: 0 8px 25px rgba(255, 215, 0, 0.4);
 }
 
 /* User Info */
@@ -521,7 +546,8 @@
 .referralsPage-empty {
   text-align: center;
   padding: 3rem 1rem;
-  color: #6b7280;
+  color: #4a5568;
+  font-style: italic;
 }
 
 /* Responsive Design */

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { useLanguage } from "@/hooks/LanguageContext";
 import { fetchWithAuth } from "@/lib/fetch-with-auth";
@@ -59,6 +59,7 @@ interface WithdrawalRequest {
 export default function ReferralsPage() {
   const { user } = useAuth();
   const { t } = useLanguage();
+  const balanceHistoryRef = useRef<HTMLDivElement>(null);
   const [stats, setStats] = useState<ReferralStats | null>(null);
   const [balanceHistory, setBalanceHistory] = useState<BalanceTransaction[]>(
     []
@@ -266,6 +267,13 @@ export default function ReferralsPage() {
                 setShowBalanceHistory(!showBalanceHistory);
                 if (!showBalanceHistory) {
                   fetchBalanceHistory();
+                  // Scroll to balance history section after a short delay to allow rendering
+                  setTimeout(() => {
+                    balanceHistoryRef.current?.scrollIntoView({
+                      behavior: "smooth",
+                      block: "start",
+                    });
+                  }, 100);
                 }
               }}
               className="referralsPage-history-btn"
@@ -377,7 +385,7 @@ export default function ReferralsPage() {
 
         {/* Balance History */}
         {showBalanceHistory && (
-          <div className="referralsPage-card">
+          <div ref={balanceHistoryRef} className="referralsPage-card">
             <div className="referralsPage-card-header">
               <h3 className="referralsPage-card-title">
                 {t("referral.history.title")}
