@@ -10,11 +10,11 @@ export default function SellerBenefits() {
     <section className="seller-benefits">
       <h2 className="SellerTitle">{t("sellerBenefits.title")}</h2>
 
-      <p className="subtitle">{t("sellerBenefits.subtitle")}</p>
+      <p className="Seller-subtitle">{t("sellerBenefits.subtitle")}</p>
 
       <div className="grid">
-        <div className="benefits">
-          <h3 className="section-title">
+        <div className="benefitsForSellers">
+          <h3 className="seller-section-title">
             🌟{t("sellerBenefits.benefits.title")}
           </h3>
           <ul className="list">
@@ -25,7 +25,7 @@ export default function SellerBenefits() {
         </div>
 
         <div className="shipping">
-          <h3 className="section-title">
+          <h3 className="seller-section-title">
             🚚 {t("sellerBenefits.shipping.title")}
           </h3>
           <ul className="list">
