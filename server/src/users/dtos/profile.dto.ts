@@ -24,6 +24,7 @@ export class ProfileDto {
   @MaxLength(20, { message: 'Password must not exceed 20 characters' })
   password?: string;
 
+  // Seller specific fields
   @IsOptional()
   @IsString()
   storeName?: string;
@@ -39,4 +40,8 @@ export class ProfileDto {
   @IsOptional()
   @IsString()
   accountNumber?: string;
+
+  @IsOptional()
+  @IsString()
+  storeLogo?: string;
 }

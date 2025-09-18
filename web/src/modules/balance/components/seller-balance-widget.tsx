@@ -1,7 +1,7 @@
 import React from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getSellerBalance } from "@/modules/balance/api/balance-api";
-import { Wallet, TrendingUp, DollarSign } from "lucide-react";
+import { Wallet, TrendingUp, DollarSign, RefreshCw } from "lucide-react";
 import "./balance-widget.css";
 
 interface SellerBalanceWidgetProps {
@@ -9,10 +9,20 @@ interface SellerBalanceWidgetProps {
 }
 
 export function SellerBalanceWidget({ userId }: SellerBalanceWidgetProps) {
-  const { data: balance, isLoading } = useQuery({
+  const {
+    data: balance,
+    isLoading,
+    refetch,
+  } = useQuery({
     queryKey: ["seller-balance", userId],
     queryFn: () => getSellerBalance(),
-    refetchInterval: 30000, // Refresh every 30 seconds
+    // Only fetch once when component mounts
+    staleTime: 10 * 60 * 1000, // Consider data fresh for 10 minutes
+    gcTime: 15 * 60 * 1000, // Keep in cache for 15 minutes
+    // No automatic refetch - balance updates only when:
+    // 1. User manually refreshes page
+    // 2. After making a transaction
+    // 3. User clicks refresh button
   });
 
   if (isLoading) {
@@ -32,6 +42,16 @@ export function SellerBalanceWidget({ userId }: SellerBalanceWidgetProps) {
       <div className="balance-widget-title">
         <Wallet className="balance-widget-icon" />
         <span>ჩემი ბალანსი</span>
+        <button
+          onClick={() => refetch()}
+          className="balance-refresh-btn"
+          disabled={isLoading}
+          title="ბალანსის განახლება"
+        >
+          <RefreshCw
+            className={`refresh-icon ${isLoading ? "spinning" : ""}`}
+          />
+        </button>
       </div>
 
       <div className="balance-widget-content">

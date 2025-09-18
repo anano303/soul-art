@@ -19,6 +19,7 @@ import { generateUsers } from '@/utils/seed-users';
 import { PaginatedResponse } from '@/types';
 import { Role } from '@/types/role.enum';
 import { SellerRegisterDto } from '../dtos/seller-register.dto';
+import { BecomeSellerDto } from '../dtos/become-seller.dto';
 import { AdminProfileDto } from '../dtos/admin.profile.dto';
 import { AwsS3Service } from '@/aws-s3/aws-s3.service';
 import { UserCloudinaryService } from './user-cloudinary.service';
@@ -687,5 +688,150 @@ export class UsersService {
     return this.userModel.findByIdAndUpdate(userId, {
       storeLogoPath: newLogoPath,
     });
+  }
+
+  async upgradeToSeller(
+    userId: string,
+    becomeSellerDto: BecomeSellerDto,
+    logoFile?: Express.Multer.File,
+  ): Promise<UserDocument> {
+    try {
+      const user = await this.findById(userId);
+
+      if (!user) {
+        throw new NotFoundException('User not found');
+      }
+
+      if (user.role === Role.Seller) {
+        throw new ConflictException('User is already a seller');
+      }
+
+      // Prepare update data with existing user data
+      const updateData: Partial<User> = {
+        role: Role.Seller,
+        storeName: becomeSellerDto.storeName,
+        identificationNumber: becomeSellerDto.identificationNumber,
+        accountNumber: becomeSellerDto.accountNumber,
+      };
+
+      // Auto-populate owner first and last name from existing user name
+      if (user.name) {
+        const nameParts = user.name.trim().split(/\s+/);
+        updateData.ownerFirstName = nameParts[0] || '';
+        updateData.ownerLastName = nameParts.slice(1).join(' ') || '';
+
+        this.logger.log(
+          `Auto-populated owner names: ${updateData.ownerFirstName} ${updateData.ownerLastName}`,
+        );
+      }
+
+      // Only update phone number if provided and different from existing
+      if (
+        becomeSellerDto.phoneNumber &&
+        becomeSellerDto.phoneNumber !== user.phoneNumber
+      ) {
+        updateData.phoneNumber = becomeSellerDto.phoneNumber;
+      }
+
+      // Handle logo upload if provided
+      if (logoFile) {
+        // Validate file type and size (same as existing logic)
+        const validMimeTypes = [
+          'image/jpeg',
+          'image/jpg',
+          'image/png',
+          'image/gif',
+          'image/webp',
+          'image/heic',
+          'image/heif',
+        ];
+
+        if (!validMimeTypes.includes(logoFile.mimetype.toLowerCase())) {
+          throw new BadRequestException(
+            `Unsupported file type: ${logoFile.mimetype}. Supported types: JPEG, PNG, GIF, WEBP.`,
+          );
+        }
+
+        const filesSizeInMb = Number(
+          (logoFile.size / (1024 * 1024)).toFixed(1),
+        );
+        if (filesSizeInMb > 5) {
+          throw new BadRequestException('The file must be less than 5 MB.');
+        }
+
+        const timestamp = Date.now();
+        const filePath = `seller-logos/${timestamp}-${logoFile.originalname.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
+
+        try {
+          // Upload logo to cloud storage
+          const logoUrl = await this.uploadImage(filePath, logoFile.buffer);
+          updateData.storeLogoPath = filePath;
+          updateData.storeLogo = logoUrl;
+        } catch (uploadError) {
+          this.logger.error('Failed to upload seller logo:', uploadError);
+          throw new BadRequestException('Failed to upload store logo');
+        }
+      } else if (becomeSellerDto.storeLogo) {
+        // If logo URL is provided instead of file
+        updateData.storeLogo = becomeSellerDto.storeLogo;
+      }
+
+      // Handle referral code if provided (simplified)
+      if (becomeSellerDto.invitationCode && this.referralsService) {
+        try {
+          // TODO: Add referral code processing logic here if needed
+          this.logger.log(
+            `Referral code provided: ${becomeSellerDto.invitationCode}`,
+          );
+        } catch (referralError) {
+          this.logger.warn(
+            `Referral code processing failed: ${referralError.message}`,
+          );
+        }
+      }
+
+      // Update user in database
+      const updatedUser = await this.userModel.findByIdAndUpdate(
+        userId,
+        updateData,
+        { new: true },
+      );
+
+      if (!updatedUser) {
+        throw new NotFoundException('User not found during update');
+      }
+
+      // Create balance account for new seller (if balance service is available)
+      if (this.balanceService) {
+        try {
+          // TODO: Implement balance creation logic if needed
+          this.logger.log(
+            `Balance account creation pending for new seller: ${userId}`,
+          );
+        } catch (balanceError) {
+          this.logger.warn(
+            `Balance setup note for seller ${userId}:`,
+            balanceError,
+          );
+        }
+      }
+
+      this.logger.log(`User ${userId} successfully upgraded to seller`);
+      return updatedUser;
+    } catch (error: any) {
+      this.logger.error(`Failed to upgrade user ${userId} to seller:`, error);
+
+      if (
+        error instanceof NotFoundException ||
+        error instanceof ConflictException ||
+        error instanceof BadRequestException
+      ) {
+        throw error;
+      }
+
+      throw new BadRequestException(
+        `Failed to upgrade to seller: ${error.message}`,
+      );
+    }
   }
 }

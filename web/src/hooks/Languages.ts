@@ -1,7 +1,5 @@
 "use client";
 
-
-
 export interface TranslationContent {
   [key: string]: string | string[] | TranslationContent;
 }
@@ -162,7 +160,7 @@ export const TRANSLATIONS: Translations = {
       categories: "კატეგორიები",
       referrals: "რეფერალები",
       adminReferrals: "რეფერალების მართვა",
-      banners: "ბანერები"
+      banners: "ბანერები",
     },
 
     // Error messages
@@ -176,7 +174,8 @@ export const TRANSLATIONS: Translations = {
       serverError: "სერვერის შეცდომა",
       forbidden: "წვდომა აკრძალულია",
       errorTitle: "შეცდომა",
-      rateLimitExceeded: "ძალიან ბევრი მოთხოვნა. გთხოვთ, სცადოთ რამდენიმე წუთის შემდეგ",
+      rateLimitExceeded:
+        "ძალიან ბევრი მოთხოვნა. გთხოვთ, სცადოთ რამდენიმე წუთის შემდეგ",
     },
 
     // Shop
@@ -329,6 +328,35 @@ export const TRANSLATIONS: Translations = {
       passwordChanged: "პაროლი შეიცვალა",
       passwordChangedDescription: "თქვენი პაროლი წარმატებით შეიცვალა.",
       updateSuccessDescription: "თქვენი პროფილი წარმატებით განახლდა.",
+
+      // Become Seller
+      becomeSeller: "სელერად გახდომა",
+      becomeSellerTitle: "გახდი სელერი",
+      becomeSellerDescription: "შეავსე საჭირო ინფორმაცია და დაიწყე გაყიდვები",
+      becomeSellerSuccess: "წარმატება!",
+      becomeSellerSuccessDescription:
+        "შენ წარმატებით გახდი სელერი. ახლა შეგიძლია დაიწყო პროდუქტების ატვირთვა.",
+      becomeSellerError: "შეცდომა",
+      becomeSellerErrorDescription:
+        "სელერად გადაქცევა ვერ მოხერხდა. გთხოვთ, სცადოთ მოგვიანებით.",
+      becomeSellerSubmitting: "იგზავნება...",
+
+      // Seller Form Fields
+      sellerStoreName: "მაღაზიის სახელი",
+      sellerStoreNamePlaceholder: "შეიყვანეთ მაღაზიის სახელი",
+      sellerStoreNameRequired: "მაღაზიის სახელი საჭიროა",
+      sellerIdNumber: "პირადი ნომერი/საიდენტ. კოდი",
+      sellerIdNumberPlaceholder: "შეიყვანეთ პირადი ნომერი",
+      sellerIdNumberRequired: "პირადი ნომერი საჭიროა",
+      sellerAccountNumber: "საბანკო ანგარიშის ნომერი",
+      sellerAccountNumberPlaceholder: "GE...",
+      sellerAccountNumberRequired: "ანგარიშის ნომერი საჭიროა",
+      sellerLogo: "მაღაზიის ლოგო (არასავალდებულო)",
+      sellerLogoUpload: "ლოგოს ატვირთვა",
+      sellerLogoChoose: "ფაილის არჩევა",
+      sellerLogoSelected: "ფაილი არჩეულია",
+      sellerSubmit: "სელერად გახდომა",
+      sellerCancel: "გაუქმება",
     },
 
     // Cart & Checkout
@@ -553,6 +581,9 @@ export const TRANSLATIONS: Translations = {
       enterCompanyName: "შეიყვანეთ კომპანიის სახელი",
       logoPreview: "ლოგოს პრევიუ",
       changeLogo: "ლოგოს შეცვლა",
+      chooseLogo: "ლოგოს არჩევა",
+      bankAccount: "საბანკო ანგარიშის ნომერი",
+      referralCode: "რეფერალის კოდი (არასავალდებულო)",
       emailRequired: "ელ-ფოსტის მითითება აუცილებელია",
       enterNewPassword: "შეიყვანეთ ახალი პაროლი",
       confirmNewPassword: "დაადასტურეთ ახალი პაროლი",
@@ -619,19 +650,24 @@ export const TRANSLATIONS: Translations = {
       deviceRemoved: "მოწყობილობა წაიშალა",
       deviceRemovedSuccessfully: "მოწყობილობა წარმატებით წაიშალა",
       error: "შეცდომა",
-      failedToTrustDevice: "მოწყობილობისთვის სანდოს სტატუსის მინიჭება ვერ მოხერხდა",
+      failedToTrustDevice:
+        "მოწყობილობისთვის სანდოს სტატუსის მინიჭება ვერ მოხერხდა",
       failedToRemoveDevice: "მოწყობილობის წაშლა ვერ მოხერხდა",
       cleanupDuplicates: "დუბლიკატების გასუფთავება",
       duplicatesCleanedUp: "დუბლიკატები გასუფთავდა",
-      duplicatesCleanedUpSuccessfully: "მოწყობილობის დუბლიკატები წარმატებით გასუფთავდა",
+      duplicatesCleanedUpSuccessfully:
+        "მოწყობილობის დუბლიკატები წარმატებით გასუფთავდა",
       failedToCleanupDuplicates: "დუბლიკატების გასუფთავება ვერ მოხერხდა",
       removeAll: "ყველას წაშლა",
-      confirmRemoveAll: "დარწმუნებული ხართ, რომ გსურთ ყველა სანდო მოწყობილობის წაშლა?",
+      confirmRemoveAll:
+        "დარწმუნებული ხართ, რომ გსურთ ყველა სანდო მოწყობილობის წაშლა?",
       allDevicesRemoved: "ყველა მოწყობილობა წაიშალა",
-      allDevicesRemovedSuccessfully: "ყველა სანდო მოწყობილობა წარმატებით წაიშალა",
+      allDevicesRemovedSuccessfully:
+        "ყველა სანდო მოწყობილობა წარმატებით წაიშალა",
       failedToRemoveAllDevices: "ყველა მოწყობილობის წაშლა ვერ მოხერხდა",
       infoTitle: "ინფორმაცია",
-      infoText: "სანდო მოწყობილობები მეტი დროით რჩება შესული და გთავაზობთ გაუმჯობესებულ გამოცდილებას.",
+      infoText:
+        "სანდო მოწყობილობები მეტი დროით რჩება შესული და გთავაზობთ გაუმჯობესებულ გამოცდილებას.",
     },
 
     // Profile Navigation
@@ -801,7 +837,7 @@ export const TRANSLATIONS: Translations = {
       createError: "შექმნა ვერ მოხერხდა",
       updateError: "განახლება ვერ მოხერხდა",
       deleteError: "წაშლა ვერ მოხერხდა",
-      categoryCreateError: "კატეგორიის დამატება ვერ მოხერხდა", 
+      categoryCreateError: "კატეგორიის დამატება ვერ მოხერხდა",
       categoryUpdateError: "კატეგორიის განახლება ვერ მოხერხდა",
       categoryDeleteError: "კატეგორიის წაშლა ვერ მოხერხდა",
       subcategoryCreateError: "ქვეკატეგორიის დამატება ვერ მოხერხდა",
@@ -1200,6 +1236,36 @@ export const TRANSLATIONS: Translations = {
       passwordChangedDescription:
         "Your password has been changed successfully.",
       updateSuccessDescription: "Your profile has been updated successfully.",
+
+      // Become Seller
+      becomeSeller: "Become Seller",
+      becomeSellerTitle: "Become a Seller",
+      becomeSellerDescription:
+        "Fill out the required information to start selling",
+      becomeSellerSuccess: "Success!",
+      becomeSellerSuccessDescription:
+        "You have successfully become a seller. You can now start uploading products.",
+      becomeSellerError: "Error",
+      becomeSellerErrorDescription:
+        "Failed to become a seller. Please try again later.",
+      becomeSellerSubmitting: "Submitting...",
+
+      // Seller Form Fields
+      sellerStoreName: "Store Name",
+      sellerStoreNamePlaceholder: "Enter store name",
+      sellerStoreNameRequired: "Store name is required",
+      sellerIdNumber: "ID Number/Company ID",
+      sellerIdNumberPlaceholder: "Enter ID number",
+      sellerIdNumberRequired: "ID number is required",
+      sellerAccountNumber: "Bank Account Number",
+      sellerAccountNumberPlaceholder: "GE...",
+      sellerAccountNumberRequired: "Account number is required",
+      sellerLogo: "Store Logo (Optional)",
+      sellerLogoUpload: "Upload Logo",
+      sellerLogoChoose: "Choose File",
+      sellerLogoSelected: "File Selected",
+      sellerSubmit: "Become Seller",
+      sellerCancel: "Cancel",
     },
 
     // Cart & Checkout
@@ -1423,6 +1489,9 @@ export const TRANSLATIONS: Translations = {
       enterCompanyName: "Enter company name",
       logoPreview: "Logo Preview",
       changeLogo: "Change Logo",
+      chooseLogo: "Choose Logo",
+      bankAccount: "Bank Account Number",
+      referralCode: "Referral Code (Optional)",
       emailRequired: "Email is required",
       enterNewPassword: "Enter new password",
       confirmNewPassword: "Confirm new password",
@@ -1491,15 +1560,18 @@ export const TRANSLATIONS: Translations = {
       failedToRemoveDevice: "Failed to remove device",
       cleanupDuplicates: "Cleanup Duplicates",
       duplicatesCleanedUp: "Duplicates Cleaned Up",
-      duplicatesCleanedUpSuccessfully: "Device duplicates were successfully cleaned up",
+      duplicatesCleanedUpSuccessfully:
+        "Device duplicates were successfully cleaned up",
       failedToCleanupDuplicates: "Failed to cleanup duplicate devices",
       removeAll: "Remove All",
       confirmRemoveAll: "Are you sure you want to remove all trusted devices?",
       allDevicesRemoved: "All Devices Removed",
-      allDevicesRemovedSuccessfully: "All trusted devices were successfully removed",
+      allDevicesRemovedSuccessfully:
+        "All trusted devices were successfully removed",
       failedToRemoveAllDevices: "Failed to remove all devices",
       infoTitle: "Info",
-      infoText: "Trusted devices stay logged in longer and provide an improved user experience.",
+      infoText:
+        "Trusted devices stay logged in longer and provide an improved user experience.",
     },
 
     // Profile Navigation
@@ -1666,7 +1738,7 @@ export const TRANSLATIONS: Translations = {
 
       // Error messages
       createError: "Failed to create",
-      updateError: "Failed to update", 
+      updateError: "Failed to update",
       deleteError: "Failed to delete",
       categoryCreateError: "Failed to create category",
       categoryUpdateError: "Failed to update category",
