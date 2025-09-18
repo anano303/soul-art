@@ -5,7 +5,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { useLanguage } from "@/hooks/LanguageContext";
 import { fetchWithAuth } from "@/lib/fetch-with-auth";
 import { toast } from "react-hot-toast";
-import "./referrals.css";
+import "./referrals-new.css";
 
 interface ReferralStats {
   referralCode: string;
@@ -206,9 +206,10 @@ export default function ReferralsPage() {
 
   if (loading) {
     return (
-      <div className="referrals-page">
-        <div className="ref-flex ref-justify-center ref-items-center ref-min-h-screen">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      <div className="referralsPage-container">
+        <div className="referralsPage-loading">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white"></div>
+          <span className="ml-4">{t("loading") || "იტვირთება..."}</span>
         </div>
       </div>
     );
@@ -216,51 +217,33 @@ export default function ReferralsPage() {
 
   if (!stats) {
     return (
-      <div className="referrals-page">
-        <div className="ref-container mx-auto ref-px-4 py-8">
-          <h1 className="ref-text-2xl ref-font-bold ref-mb-6">
-            {t("referral.systemTitle")}
-          </h1>
-          <p className="ref-text-gray-600">{t("referral.loadError")}</p>
+      <div className="referralsPage-container">
+        <div className="referralsPage-wrapper">
+          <div className="referralsPage-error">
+            <h1 className="referralsPage-title">{t("referral.systemTitle")}</h1>
+            <p>{t("referral.loadError")}</p>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="referrals-page">
-      <div className="ref-container mx-auto ref-px-4 py-8">
-        <h1 className="ref-text-3xl ref-font-bold ref-mb-8 ref-text-gray-800">
-          {t("referral.systemTitle")}
-        </h1>
+    <div className="referralsPage-container">
+      <div className="referralsPage-wrapper">
+        {/* Header */}
+        <div className="referralsPage-header">
+          <h1 className="referralsPage-title">{t("referral.systemTitle")}</h1>
+          <p className="referralsPage-subtitle">{t("referral.subtitle")}</p>
+        </div>
 
         {/* Info Alert for Sellers */}
         {user?.role === "seller" && (
-          <div
-            className="ref-card"
-            style={{
-              background: "linear-gradient(135deg, #e8f5e8, #f0fdf4)",
-              border: "2px solid #10b981",
-              borderRadius: "12px",
-              padding: "20px",
-              marginBottom: "32px",
-              display: "flex",
-              alignItems: "center",
-              gap: "16px",
-              boxShadow: "0 4px 12px rgba(16, 185, 129, 0.15)",
-            }}
-          >
-            <span style={{ fontSize: "24px" }}>💡</span>
-            <div style={{ color: "#065f46" }}>
+          <div className="referralsPage-alert">
+            <div className="referralsPage-alert-icon">💡</div>
+            <div className="referralsPage-alert-content">
               {t("referral.sellerInfo")}{" "}
-              <a
-                href="/profile/balance"
-                style={{
-                  color: "#059669",
-                  textDecoration: "underline",
-                  fontWeight: "600",
-                }}
-              >
+              <a href="/profile/balance" className="referralsPage-alert-link">
                 {t("referral.balancePage")}
               </a>
               .
@@ -268,19 +251,15 @@ export default function ReferralsPage() {
           </div>
         )}
 
-        {/* მთავარი სტატისტიკა */}
-        <div
-          className="ref-grid ref-grid-cols-1 ref-md-grid-cols-4 ref-gap-6 ref-mb-8 ref-stats-grid"
-          style={{
-            gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
-          }}
-        >
-          <div className="ref-bg-white ref-p-6 ref-card">
-            <h3 className="ref-text-lg ref-font-semibold ref-text-gray-700 ref-mb-2">
+        {/* Statistics Cards */}
+        <div className="referralsPage-stats-grid">
+          {/* Balance Card */}
+          <div className="referralsPage-stat-card">
+            <h3 className="referralsPage-stat-title">
               {t("referral.balance")}
             </h3>
-            <p className="ref-text-3xl ref-font-bold ref-text-green-600">
-              {stats.balance.toFixed(2)} ლარი
+            <p className="referralsPage-stat-value balance">
+              {stats.balance.toFixed(2)} ₾
             </p>
             <button
               onClick={() => {
@@ -289,7 +268,7 @@ export default function ReferralsPage() {
                   fetchBalanceHistory();
                 }
               }}
-              className="ref-text-sm ref-text-blue-600 ref-mt-4"
+              className="referralsPage-history-btn"
             >
               {showBalanceHistory
                 ? t("referral.hideHistory")
@@ -297,167 +276,354 @@ export default function ReferralsPage() {
             </button>
           </div>
 
-          <div className="ref-bg-white ref-p-6 ref-card">
-            <h3 className="ref-text-lg ref-font-semibold ref-text-gray-700 ref-mb-2">
+          {/* Invited People Card */}
+          <div className="referralsPage-stat-card">
+            <h3 className="referralsPage-stat-title">
               {t("referral.invitedPeople")}
             </h3>
-            <p className="ref-text-3xl ref-font-bold ref-text-blue-600">
+            <p className="referralsPage-stat-value referrals">
               {stats.totalReferrals}
             </p>
-            <p className="ref-text-sm ref-text-gray-500">
+            <p className="referralsPage-stat-subtitle">
               {t("referral.approved")}: {stats.approvedReferrals}
             </p>
           </div>
 
-          <div className="ref-bg-white ref-p-6 ref-card">
-            <h3 className="ref-text-lg ref-font-semibold ref-text-gray-700 ref-mb-2">
+          {/* Received Bonus Card */}
+          <div className="referralsPage-stat-card">
+            <h3 className="referralsPage-stat-title">
               {t("referral.receivedBonus")}
             </h3>
-            <p className="ref-text-3xl ref-font-bold ref-text-purple-600">
-              {stats.totalEarnings.toFixed(2)} ლარი
+            <p className="referralsPage-stat-value earnings">
+              {stats.totalEarnings.toFixed(2)} ₾
             </p>
           </div>
 
-          <div className="ref-bg-white ref-p-6 ref-card">
-            <h3 className="ref-text-lg ref-font-semibold ref-text-gray-700 ref-mb-2">
+          {/* Pending Amount Card */}
+          <div className="referralsPage-stat-card">
+            <h3 className="referralsPage-stat-title">
               {t("referral.pendingAmount")}
             </h3>
-            <p className="ref-text-3xl ref-font-bold ref-text-orange-600">
-              {stats.pendingEarnings.toFixed(2)} ლარი
+            <p className="referralsPage-stat-value pending">
+              {stats.pendingEarnings.toFixed(2)} ₾
             </p>
-            <p className="ref-text-sm ref-text-gray-500">
+            <p className="referralsPage-stat-subtitle">
               {t("referral.pending")}: {stats.pendingReferrals}
             </p>
           </div>
         </div>
 
-        {/* რეფერალური ლინკები */}
-        <div className="ref-bg-white ref-p-6 ref-card ref-mb-8">
-          <h3 className="ref-text-xl ref-font-semibold ref-mb-4 ref-text-gray-800">
-            {t("referral.referralLinks")}
-          </h3>
-
-          {/* სელერის რეფერალური ლინკი */}
-          <div className="ref-mb-6">
-            <h4 className="ref-text-lg ref-font-medium ref-mb-2 ref-text-gray-700">
-              {t("referral.sellerRegistration")}
-            </h4>
-            <div className="ref-flex ref-items-center ref-gap-4 ref-input-group">
-              <input
-                type="text"
-                value={generateReferralLink("seller")}
-                readOnly
-                className="ref-form-input ref-bg-gray-50 ref-text-gray-700"
-                style={{
-                  minHeight: "44px",
-                  fontFamily: "monospace",
-                  fontSize: "14px",
-                }}
-              />
-              <button
-                onClick={() => copyReferralLink("seller")}
-                className={`ref-btn ref-btn-primary ref-btn-copy ${
-                  copiedButton === "seller" ? "copied" : ""
-                }`}
-              >
-                📋 {t("referral.copy")}
-              </button>
-            </div>
-            <p className="ref-text-sm ref-text-gray-600 ref-mt-4">
-              {t("referral.sellerLinkDescription")}
-            </p>
+        {/* Referral Links Section */}
+        <div className="referralsPage-card">
+          <div className="referralsPage-card-header">
+            <h3 className="referralsPage-card-title">
+              {t("referral.referralLinks")}
+            </h3>
           </div>
-
-          {/* მომხმარებლის რეფერალური ლინკი */}
-          <div>
-            <h4 className="ref-text-lg ref-font-medium ref-mb-2 ref-text-gray-700">
-              {t("referral.userRegistration")}
-            </h4>
-            <div className="ref-flex ref-items-center ref-gap-4 ref-input-group">
-              <input
-                type="text"
-                value={generateReferralLink("user")}
-                readOnly
-                className="ref-form-input ref-bg-gray-50 ref-text-gray-700"
-                style={{
-                  minHeight: "44px",
-                  fontFamily: "monospace",
-                  fontSize: "14px",
-                }}
-              />
-              <button
-                onClick={() => copyReferralLink("user")}
-                className={`ref-btn ref-btn-success ref-btn-copy ${
-                  copiedButton === "user" ? "copied" : ""
-                }`}
-              >
-                📋 {t("referral.copy")}
-              </button>
+          <div className="referralsPage-card-content">
+            {/* Seller Link */}
+            <div className="referralsPage-link-section">
+              <h4 className="referralsPage-link-title">
+                {t("referral.sellerRegistration")}
+              </h4>
+              <div className="referralsPage-input-group">
+                <input
+                  type="text"
+                  value={generateReferralLink("seller")}
+                  readOnly
+                  className="referralsPage-input"
+                />
+                <button
+                  onClick={() => copyReferralLink("seller")}
+                  className={`referralsPage-copy-btn primary ${
+                    copiedButton === "seller" ? "copied" : ""
+                  }`}
+                >
+                  📋 {t("referral.copy")}
+                </button>
+              </div>
+              <p className="referralsPage-link-description">
+                {t("referral.sellerLinkDescription")}
+              </p>
             </div>
-            <p className="ref-text-sm ref-text-gray-600 ref-mt-4">
-              {t("referral.userLinkDescription")}
-            </p>
+
+            {/* User Link */}
+            <div className="referralsPage-link-section">
+              <h4 className="referralsPage-link-title">
+                {t("referral.userRegistration")}
+              </h4>
+              <div className="referralsPage-input-group">
+                <input
+                  type="text"
+                  value={generateReferralLink("user")}
+                  readOnly
+                  className="referralsPage-input"
+                />
+                <button
+                  onClick={() => copyReferralLink("user")}
+                  className={`referralsPage-copy-btn success ${
+                    copiedButton === "user" ? "copied" : ""
+                  }`}
+                >
+                  📋 {t("referral.copy")}
+                </button>
+              </div>
+              <p className="referralsPage-link-description">
+                {t("referral.userLinkDescription")}
+              </p>
+            </div>
           </div>
         </div>
 
-        {/* ბალანსის ისტორია */}
+        {/* Balance History */}
         {showBalanceHistory && (
-          <div className="ref-bg-white ref-p-6 ref-card ref-mb-8">
-            <h3 className="ref-text-xl ref-font-semibold ref-mb-4 ref-text-gray-800">
-              {t("referral.history.title")}
+          <div className="referralsPage-card">
+            <div className="referralsPage-card-header">
+              <h3 className="referralsPage-card-title">
+                {t("referral.history.title")}
+              </h3>
+            </div>
+            <div className="referralsPage-card-content">
+              {balanceHistory.length > 0 ? (
+                <div className="referralsPage-table-container">
+                  <table className="referralsPage-table">
+                    <thead>
+                      <tr>
+                        <th>{t("referral.history.date")}</th>
+                        <th>{t("referral.history.type")}</th>
+                        <th>{t("referral.history.amount")}</th>
+                        <th>{t("referral.history.beforeBalance")}</th>
+                        <th>{t("referral.history.afterBalance")}</th>
+                        <th>{t("referral.history.description")}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {balanceHistory.map((transaction) => (
+                        <tr key={transaction.id}>
+                          <td>
+                            {new Date(transaction.createdAt).toLocaleDateString(
+                              "ka-GE"
+                            )}
+                          </td>
+                          <td>
+                            <span
+                              className={`referralsPage-status-badge ${
+                                transaction.type === "REFERRAL_BONUS"
+                                  ? "referralsPage-status-approved"
+                                  : transaction.type === "WITHDRAWAL"
+                                  ? "referralsPage-status-pending"
+                                  : "referralsPage-status-rejected"
+                              }`}
+                            >
+                              {transaction.type === "REFERRAL_BONUS"
+                                ? "რეფ. ბონუსი"
+                                : transaction.type === "WITHDRAWAL"
+                                ? "გატანა"
+                                : transaction.type}
+                            </span>
+                          </td>
+                          <td
+                            style={{
+                              color:
+                                transaction.amount > 0 ? "#10b981" : "#ef4444",
+                              fontWeight: "600",
+                            }}
+                          >
+                            {transaction.amount > 0 ? "+" : ""}
+                            {transaction.amount.toFixed(2)} ₾
+                          </td>
+                          <td>{transaction.balanceBefore.toFixed(2)} ₾</td>
+                          <td>{transaction.balanceAfter.toFixed(2)} ₾</td>
+                          <td
+                            style={{ fontSize: "0.875rem", color: "#6b7280" }}
+                          >
+                            {transaction.description}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <p className="referralsPage-empty">
+                  {t("referral.history.empty")}
+                </p>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Withdrawal Section */}
+        <div className="referralsPage-card">
+          <div className="referralsPage-card-content">
+            <div className="referralsPage-withdrawal-section">
+              <div className="referralsPage-withdrawal-info">
+                <h3>{t("referral.withdrawal.title")}</h3>
+                <p className="referralsPage-withdrawal-limits">
+                  {t("referral.withdrawalLimits")} {stats.monthlyWithdrawals}/2
+                </p>
+              </div>
+              <button
+                onClick={() => setShowWithdrawalForm(true)}
+                disabled={stats.balance < 50 || stats.monthlyWithdrawals >= 2}
+                className="referralsPage-withdrawal-btn"
+              >
+                💰 {t("referral.withdrawalRequest")}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* გატანის ფორმა */}
+        {showWithdrawalForm && (
+          <div className="referralsPage-modal-overlay">
+            <div className="referralsPage-modal">
+              <div className="referralsPage-modal-content">
+                <h3>{t("referral.withdrawal.title")}</h3>
+                <form onSubmit={submitWithdrawalRequest}>
+                  <div className="referralsPage-form-group">
+                    <label className="referralsPage-form-label">
+                      {t("referral.amountLabel")}
+                    </label>
+                    <input
+                      type="number"
+                      min="50"
+                      max={stats.balance}
+                      value={withdrawalForm.amount}
+                      onChange={(e) =>
+                        setWithdrawalForm({
+                          ...withdrawalForm,
+                          amount: e.target.value,
+                        })
+                      }
+                      className="referralsPage-form-input"
+                      required
+                    />
+                  </div>
+
+                  <div className="referralsPage-form-group">
+                    <label className="referralsPage-form-label">
+                      {t("referral.paymentMethod")}
+                    </label>
+                    <select
+                      value={withdrawalForm.method}
+                      onChange={(e) =>
+                        setWithdrawalForm({
+                          ...withdrawalForm,
+                          method: e.target.value,
+                        })
+                      }
+                      className="referralsPage-form-input"
+                    >
+                      <option value="BANK">{t("referral.bank")}</option>
+                      <option value="PAYBOX">{t("referral.paybox")}</option>
+                    </select>
+                  </div>
+
+                  <div className="referralsPage-form-group">
+                    <label className="referralsPage-form-label">
+                      {withdrawalForm.method === "BANK"
+                        ? t("referral.bankAccount")
+                        : t("referral.payboxNumber")}
+                    </label>
+                    <input
+                      type="text"
+                      value={withdrawalForm.accountDetails}
+                      onChange={(e) =>
+                        setWithdrawalForm({
+                          ...withdrawalForm,
+                          accountDetails: e.target.value,
+                        })
+                      }
+                      className="referralsPage-form-input"
+                      placeholder={
+                        withdrawalForm.method === "BANK"
+                          ? "GE29TB7777777777777777"
+                          : "+995555123456"
+                      }
+                      required
+                    />
+                  </div>
+
+                  <div className="referralsPage-form-actions">
+                    <button
+                      type="button"
+                      onClick={() => setShowWithdrawalForm(false)}
+                      className="referralsPage-btn referralsPage-btn-secondary"
+                    >
+                      {t("referral.cancel")}
+                    </button>
+                    <button
+                      type="submit"
+                      className="referralsPage-btn referralsPage-btn-primary"
+                    >
+                      {t("referral.submit")}
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* მოწვეული პირების სია */}
+        <div className="referralsPage-card">
+          <div className="referralsPage-card-header">
+            <h3 className="referralsPage-card-title">
+              {t("referral.invitedPeopleList")}
             </h3>
-            {balanceHistory.length > 0 ? (
-              <div className="ref-table-container">
-                <table className="ref-table">
+          </div>
+          <div className="referralsPage-card-content">
+            {stats.referrals.length > 0 ? (
+              <div className="referralsPage-table-container">
+                <table className="referralsPage-table">
                   <thead>
                     <tr>
-                      <th>{t("referral.history.date")}</th>
-                      <th>{t("referral.history.type")}</th>
-                      <th>{t("referral.history.amount")}</th>
-                      <th>{t("referral.history.beforeBalance")}</th>
-                      <th>{t("referral.history.afterBalance")}</th>
-                      <th>{t("referral.history.description")}</th>
+                      <th>{t("referral.person")}</th>
+                      <th>{t("referral.typeColumn")}</th>
+                      <th>{t("referral.statusColumn")}</th>
+                      <th>{t("referral.bonus")}</th>
+                      <th>{t("referral.dateColumn")}</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {balanceHistory.map((transaction) => (
-                      <tr key={transaction.id}>
+                    {stats.referrals.map((referral) => (
+                      <tr key={referral.id}>
                         <td>
-                          {new Date(transaction.createdAt).toLocaleDateString(
-                            "ka-GE"
-                          )}
+                          <div className="referralsPage-user-info">
+                            <div className="referralsPage-user-name">
+                              {referral.referred.name}
+                            </div>
+                            <div className="referralsPage-user-email">
+                              {referral.referred.email}
+                            </div>
+                          </div>
+                        </td>
+                        <td>
+                          {referral.type === "SELLER"
+                            ? t("referral.seller")
+                            : t("referral.user")}
                         </td>
                         <td>
                           <span
-                            className={`status-badge ${
-                              transaction.type === "REFERRAL_BONUS"
-                                ? "status-approved"
-                                : transaction.type === "WITHDRAWAL"
-                                ? "status-pending"
-                                : "status-rejected"
+                            className={`referralsPage-status-badge ${
+                              referral.status === "APPROVED"
+                                ? "referralsPage-status-approved"
+                                : referral.status === "PENDING"
+                                ? "referralsPage-status-pending"
+                                : "referralsPage-status-rejected"
                             }`}
                           >
-                            {transaction.type === "REFERRAL_BONUS"
-                              ? "რეფ. ბონუსი"
-                              : transaction.type === "WITHDRAWAL"
-                              ? "გატანა"
-                              : transaction.type}
+                            {getStatusText(referral.status)}
                           </span>
                         </td>
-                        <td
-                          className={
-                            transaction.amount > 0
-                              ? "ref-text-green-600"
-                              : "ref-text-red-600"
-                          }
-                        >
-                          {transaction.amount > 0 ? "+" : ""}
-                          {transaction.amount.toFixed(2)} ₾
+                        <td style={{ fontWeight: "600" }}>
+                          {referral.bonusAmount.toFixed(2)} ლარი
                         </td>
-                        <td>{transaction.balanceBefore.toFixed(2)} ₾</td>
-                        <td>{transaction.balanceAfter.toFixed(2)} ₾</td>
-                        <td className="ref-text-sm ref-text-gray-600">
-                          {transaction.description}
+                        <td style={{ fontSize: "0.875rem", color: "#6b7280" }}>
+                          {new Date(referral.createdAt).toLocaleDateString(
+                            "ka-GE"
+                          )}
                         </td>
                       </tr>
                     ))}
@@ -465,226 +631,72 @@ export default function ReferralsPage() {
                 </table>
               </div>
             ) : (
-              <p className="ref-text-gray-500">{t("referral.history.empty")}</p>
-            )}
-          </div>
-        )}
-
-        {/* გატანის ღილაკი */}
-        <div className="ref-card ref-p-6 ref-mb-8">
-          <div className="ref-flex ref-justify-between ref-items-center ref-withdrawal-section">
-            <div>
-              <h3 className="ref-text-xl ref-font-semibold ref-text-gray-800">
-                {t("referral.withdrawal.title")}
-              </h3>
-              <p className="ref-text-sm ref-text-gray-600 ref-mt-2">
-                {t("referral.withdrawalLimits")} {stats.monthlyWithdrawals}/2
+              <p className="referralsPage-empty">
+                არავინ არ გაქვს მოწვეული ჯერ
               </p>
-            </div>
-            <button
-              onClick={() => setShowWithdrawalForm(true)}
-              disabled={stats.balance < 50 || stats.monthlyWithdrawals >= 2}
-              className="ref-btn ref-btn-success"
-            >
-              💰 {t("referral.withdrawalRequest")}
-            </button>
-          </div>
-        </div>
-
-        {/* გატანის ფორმა */}
-        {showWithdrawalForm && (
-          <div className="ref-modal-overlay">
-            <div className="ref-modal ref-modal-md">
-              <h3 className="ref-text-xl ref-font-semibold ref-mb-4 ref-text-gray-800">
-                {t("referral.withdrawal.title")}
-              </h3>
-              <form onSubmit={submitWithdrawalRequest}>
-                <div className="ref-form-group">
-                  <label className="ref-form-label">
-                    {t("referral.amountLabel")}
-                  </label>
-                  <input
-                    type="number"
-                    min="50"
-                    max={stats.balance}
-                    value={withdrawalForm.amount}
-                    onChange={(e) =>
-                      setWithdrawalForm({
-                        ...withdrawalForm,
-                        amount: e.target.value,
-                      })
-                    }
-                    className="ref-form-input"
-                    required
-                  />
-                </div>
-
-                <div className="ref-form-group">
-                  <label className="ref-form-label">
-                    {t("referral.paymentMethod")}
-                  </label>
-                  <select
-                    value={withdrawalForm.method}
-                    onChange={(e) =>
-                      setWithdrawalForm({
-                        ...withdrawalForm,
-                        method: e.target.value,
-                      })
-                    }
-                    className="ref-form-input"
-                  >
-                    <option value="BANK">{t("referral.bank")}</option>
-                    <option value="PAYBOX">{t("referral.paybox")}</option>
-                  </select>
-                </div>
-
-                <div className="ref-form-group">
-                  <label className="ref-form-label">
-                    {withdrawalForm.method === "BANK"
-                      ? t("referral.bankAccount")
-                      : t("referral.payboxNumber")}
-                  </label>
-                  <input
-                    type="text"
-                    value={withdrawalForm.accountDetails}
-                    onChange={(e) =>
-                      setWithdrawalForm({
-                        ...withdrawalForm,
-                        accountDetails: e.target.value,
-                      })
-                    }
-                    className="ref-form-input"
-                    placeholder={
-                      withdrawalForm.method === "BANK"
-                        ? "GE29TB7777777777777777"
-                        : "+995555123456"
-                    }
-                    required
-                  />
-                </div>
-
-                <div className="ref-flex ref-gap-4 ref-mt-6">
-                  <button
-                    type="button"
-                    onClick={() => setShowWithdrawalForm(false)}
-                    className="ref-btn ref-btn-secondary ref-flex-1"
-                  >
-                    {t("referral.cancel")}
-                  </button>
-                  <button
-                    type="submit"
-                    className="ref-btn ref-btn-success ref-flex-1"
-                  >
-                    {t("referral.submit")}
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        )}
-
-        {/* მოწვეული პირების სია */}
-        <div className="ref-bg-white ref-card ref-mb-8">
-          <div className="ref-p-6 ref-border-b">
-            <h3 className="ref-text-xl ref-font-semibold ref-text-gray-800">
-              {t("referral.invitedPeopleList")}
-            </h3>
-          </div>
-          <div className="ref-table-container">
-            <table className="ref-table">
-              <thead>
-                <tr>
-                  <th>{t("referral.person")}</th>
-                  <th>{t("referral.typeColumn")}</th>
-                  <th>{t("referral.statusColumn")}</th>
-                  <th>{t("referral.bonus")}</th>
-                  <th>{t("referral.dateColumn")}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {stats.referrals.map((referral) => (
-                  <tr key={referral.id}>
-                    <td>
-                      <div>
-                        <div className="ref-font-medium ref-text-gray-900">
-                          {referral.referred.name}
-                        </div>
-                        <div className="ref-text-sm ref-text-gray-500">
-                          {referral.referred.email}
-                        </div>
-                      </div>
-                    </td>
-                    <td className="ref-text-sm ref-text-gray-900">
-                      {referral.type === "SELLER"
-                        ? t("referral.seller")
-                        : t("referral.user")}
-                    </td>
-                    <td>
-                      <span
-                        className={`ref-inline-flex ref-status-badge ${getStatusColor(
-                          referral.status
-                        )}`}
-                      >
-                        {getStatusText(referral.status)}
-                      </span>
-                    </td>
-                    <td className="ref-text-sm ref-text-gray-900 ref-font-medium">
-                      {referral.bonusAmount.toFixed(2)} ლარი
-                    </td>
-                    <td className="ref-text-sm ref-text-gray-500">
-                      {new Date(referral.createdAt).toLocaleDateString("ka-GE")}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            )}
           </div>
         </div>
 
         {/* გატანის მოთხოვნები */}
-        <div className="ref-bg-white ref-card">
-          <div className="ref-p-6 ref-border-b">
-            <h3 className="ref-text-xl ref-font-semibold ref-text-gray-800">
+        <div className="referralsPage-card">
+          <div className="referralsPage-card-header">
+            <h3 className="referralsPage-card-title">
               {t("referral.withdrawalRequests")}
             </h3>
           </div>
-          <div className="ref-table-container">
-            <table className="ref-table">
-              <thead>
-                <tr>
-                  <th>{t("referral.amount")}</th>
-                  <th>{t("referral.method")}</th>
-                  <th>{t("referral.statusColumn")}</th>
-                  <th>{t("referral.dateColumn")}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {withdrawalRequests.map((request) => (
-                  <tr key={request.id}>
-                    <td className="ref-text-sm ref-font-medium ref-text-gray-900">
-                      {request.amount.toFixed(2)} ლარი
-                    </td>
-                    <td className="ref-text-sm ref-text-gray-900">
-                      {request.method === "BANK"
-                        ? t("referral.bank")
-                        : t("referral.paybox")}
-                    </td>
-                    <td>
-                      <span
-                        className={`ref-inline-flex ref-status-badge ${getStatusColor(
-                          request.status
-                        )}`}
-                      >
-                        {getStatusText(request.status)}
-                      </span>
-                    </td>
-                    <td className="ref-text-sm ref-text-gray-500">
-                      {new Date(request.createdAt).toLocaleDateString("ka-GE")}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div className="referralsPage-card-content">
+            {withdrawalRequests.length > 0 ? (
+              <div className="referralsPage-table-container">
+                <table className="referralsPage-table">
+                  <thead>
+                    <tr>
+                      <th>{t("referral.amount")}</th>
+                      <th>{t("referral.method")}</th>
+                      <th>{t("referral.statusColumn")}</th>
+                      <th>{t("referral.dateColumn")}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {withdrawalRequests.map((request) => (
+                      <tr key={request.id}>
+                        <td style={{ fontWeight: "600" }}>
+                          {request.amount.toFixed(2)} ლარი
+                        </td>
+                        <td>
+                          {request.method === "BANK"
+                            ? t("referral.bank")
+                            : t("referral.paybox")}
+                        </td>
+                        <td>
+                          <span
+                            className={`referralsPage-status-badge ${
+                              request.status === "APPROVED" ||
+                              request.status === "PROCESSED"
+                                ? "referralsPage-status-approved"
+                                : request.status === "PENDING"
+                                ? "referralsPage-status-pending"
+                                : "referralsPage-status-rejected"
+                            }`}
+                          >
+                            {getStatusText(request.status)}
+                          </span>
+                        </td>
+                        <td style={{ fontSize: "0.875rem", color: "#6b7280" }}>
+                          {new Date(request.createdAt).toLocaleDateString(
+                            "ka-GE"
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <p className="referralsPage-empty">
+                ჯერ არ გაქვს გატანის მოთხოვნები
+              </p>
+            )}
           </div>
         </div>
       </div>
