@@ -162,6 +162,10 @@ export default function AdminReferralsPage() {
         return t("adminReferrals.processed");
       case "REJECTED":
         return t("adminReferrals.rejected");
+      case "APPROVED":
+        return t("adminReferrals.approved");
+      case "PRODUCTS_UPLOADED":
+        return t("adminReferrals.productsUploaded");
       default:
         return status;
     }
@@ -257,7 +261,7 @@ export default function AdminReferralsPage() {
                         ? t("adminReferrals.seller")
                         : t("adminReferrals.user")}
                     </td>
-                    <td>{r.status}</td>
+                    <td>{getStatusText(r.status)}</td>
                     <td>{r.bonusAmount.toFixed(2)} ₾</td>
                     <td className="admin-ref-text-gray-500">
                       {new Date(r.createdAt).toLocaleDateString("ka-GE")}
