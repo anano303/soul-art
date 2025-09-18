@@ -295,11 +295,11 @@ export function SellerRegisterForm() {
         </div>
 
         <div className="input-group">
-          <label htmlFor="invitationCode">რეფერალური კოდი (არჩევითი)</label>
+          <label htmlFor="invitationCode">{t("auth.referralCodeLabel")}</label>
           <input
             id="invitationCode"
             type="text"
-            placeholder="მიუთითეთ რეფერალური კოდი თუ გყავთ"
+            placeholder={t("auth.referralCodePlaceholder")}
             value={referralCode}
             onChange={(e) => {
               setReferralCode(e.target.value);

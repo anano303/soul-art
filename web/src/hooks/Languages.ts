@@ -729,6 +729,13 @@ export const TRANSLATIONS: Translations = {
       sellerContractRequired: "სელერის ხელშეკრულების დადასტურება აუცილებელია",
       termsAndConditionsRequired:
         "წესების და პირობების დადასტურება აუცილებელია",
+      // New missing translations
+      registering: "რეგისტრაცია მიმდინარეობს...",
+      referralCodeLabel: "რეფერალური კოდი (არჩევითი)",
+      referralCodePlaceholder: "მიუთითეთ რეფერალური კოდი თუ გყავთ",
+      referralCodeOptional: "რეფერალური კოდი (არაუცილებელო)",
+      referralCodeHint: "თუ გაქვთ რეფერალური კოდი, შეიყვანეთ აქ",
+      resendCode: "კოდის ხელახლა გაგზავნა",
     },
 
     // Device Manager for Hybrid Auth
@@ -1789,6 +1796,13 @@ export const TRANSLATIONS: Translations = {
       sellerContractRequired: "Seller contract confirmation is required",
       termsAndConditionsRequired:
         "Terms and conditions confirmation is required",
+      // New missing translations
+      registering: "Registering...",
+      referralCodeLabel: "Referral Code (Optional)",
+      referralCodePlaceholder: "Enter referral code if you have one",
+      referralCodeOptional: "Referral Code (Optional)",
+      referralCodeHint: "If you have a referral code, enter it here",
+      resendCode: "Resend Code",
     },
 
     // Device Manager for Hybrid Auth
