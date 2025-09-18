@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useAuth } from "@/hooks/use-auth";
+import { useLanguage } from "@/hooks/LanguageContext";
 // Referral promo banner component
 import "./referral-promo-banner.css";
 
@@ -16,6 +17,7 @@ interface ReferralStats {
 
 export function ReferralPromoBanner() {
   const { user } = useAuth();
+  const { t } = useLanguage();
   const [stats, setStats] = useState<ReferralStats | null>(null);
   const [isVisible, setIsVisible] = useState(true);
 
@@ -52,7 +54,7 @@ export function ReferralPromoBanner() {
   const copyLink = () => {
     const link = generateReferralLink();
     navigator.clipboard.writeText(link);
-    alert("რეფერალური ლინკი კოპირებულია!");
+    alert(t("referral.promoBanner.linkCopied"));
   };
 
   if (!user || !isVisible) return null;
@@ -62,33 +64,39 @@ export function ReferralPromoBanner() {
       <button
         onClick={() => setIsVisible(false)}
         className="soulart-promo-close"
-        aria-label="დახურვა"
+        aria-label={t("referral.promoBanner.close")}
       >
         ×
       </button>
       <div className="soulart-promo-content">
         <div className="soulart-promo-main">
           <h3 className="soulart-promo-title">
-            🎉 მოიწვიე მეგობრები და გამოიმუშავე ფული!
+            🎉 {t("referral.promoBanner.title")}
           </h3>
           <p className="soulart-promo-description">
-            მოიწვიე სელერები და მიიღე 5 ლარი ყველა დამტკიცებული სელერისთვის
+            {t("referral.promoBanner.description")}
           </p>
 
           {stats && (
             <div className="soulart-stats-container">
               <div className="soulart-stat-card">
-                <div className="soulart-stat-label">მოწვეული</div>
+                <div className="soulart-stat-label">
+                  {t("referral.promoBanner.invited")}
+                </div>
                 <div className="soulart-stat-value">{stats.totalReferrals}</div>
               </div>
               <div className="soulart-stat-card">
-                <div className="soulart-stat-label">გამომუშავებული</div>
+                <div className="soulart-stat-label">
+                  {t("referral.promoBanner.earned")}
+                </div>
                 <div className="soulart-stat-value">
                   {stats.totalEarnings} ₾
                 </div>
               </div>
               <div className="soulart-stat-card">
-                <div className="soulart-stat-label">ბალანსი</div>
+                <div className="soulart-stat-label">
+                  {t("referral.promoBanner.balance")}
+                </div>
                 <div className="soulart-stat-value">
                   {stats.availableBalance} ₾
                 </div>
@@ -98,11 +106,11 @@ export function ReferralPromoBanner() {
 
           <div className="soulart-promo-actions">
             <Link href="/referrals" className="soulart-btn-primary">
-              რეფერალები
+              {t("referral.promoBanner.referrals")}
             </Link>
             {stats?.referralCode && (
               <button onClick={copyLink} className="soulart-btn-secondary">
-                ლინკის კოპირება
+                {t("referral.promoBanner.copyLink")}
               </button>
             )}
           </div>

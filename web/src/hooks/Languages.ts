@@ -137,6 +137,27 @@ export const TRANSLATIONS: Translations = {
       pageTitle: "რეფერალური სისტემა | SoulArt.ge",
       pageDescription:
         "გამოიმუშავე ფული SoulArt.ge-ზე! მოიწვიე მეგობრები და მიიღე ფულადი ბონუსები ყველა წარმატებული რეფერალისთვის.",
+
+      // Banners
+      guestBanner: {
+        title: "გამოიმუშავე ფული მეგობრების მოწვევით!",
+        description:
+          "დარეგისტრირდი და მიიღე ფულადი ბონუსები ყველა რეფერალისთვის",
+        learnMore: "გაიგე მეტი",
+        register: "რეგისტრაცია",
+      },
+      promoBanner: {
+        title: "მოიწვიე მეგობრები და გამოიმუშავე ფული!",
+        description:
+          "მოიწვიე სელერები და მიიღე 5 ლარი ყველა დამტკიცებული სელერისთვის",
+        invited: "მოწვეული",
+        earned: "გამომუშავებული",
+        balance: "ბალანსი",
+        referrals: "რეფერალები",
+        copyLink: "ლინკის კოპირება",
+        linkCopied: "რეფერალური ლინკი კოპირებულია!",
+        close: "დახურვა",
+      },
     },
     // Navigation
     navigation: {
@@ -1101,6 +1122,26 @@ export const TRANSLATIONS: Translations = {
       pageTitle: "Referral System | SoulArt.ge",
       pageDescription:
         "Earn money on SoulArt.ge! Invite friends and receive cash bonuses for every successful referral.",
+
+      // Banners
+      guestBanner: {
+        title: "Earn Money by Inviting Friends!",
+        description: "Register and receive cash bonuses for all referrals",
+        learnMore: "Learn More",
+        register: "Register",
+      },
+      promoBanner: {
+        title: "Invite Friends and Earn Money!",
+        description:
+          "Invite sellers and receive 5 GEL for every approved seller",
+        invited: "Invited",
+        earned: "Earned",
+        balance: "Balance",
+        referrals: "Referrals",
+        copyLink: "Copy Link",
+        linkCopied: "Referral link copied!",
+        close: "Close",
+      },
     },
 
     // Navigation
