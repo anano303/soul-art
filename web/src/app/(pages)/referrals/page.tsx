@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/hooks/use-auth";
+import { useLanguage } from "@/hooks/LanguageContext";
 import { fetchWithAuth } from "@/lib/fetch-with-auth";
 import { toast } from "react-hot-toast";
 import "./referrals.css";
@@ -57,6 +58,7 @@ interface WithdrawalRequest {
 
 export default function ReferralsPage() {
   const { user } = useAuth();
+  const { t } = useLanguage();
   const [stats, setStats] = useState<ReferralStats | null>(null);
   const [balanceHistory, setBalanceHistory] = useState<BalanceTransaction[]>(
     []
@@ -139,13 +141,14 @@ export default function ReferralsPage() {
   const copyReferralLink = (type: "user" | "seller" = "user") => {
     const link = generateReferralLink(type);
     navigator.clipboard.writeText(link);
-    const linkType = type === "seller" ? "სელერის" : "მომხმარებლის";
+    const linkType =
+      type === "seller" ? t("referral.sellerType") : t("referral.userType");
 
     // Set copied state for visual feedback
     setCopiedButton(type);
     setTimeout(() => setCopiedButton(null), 2000);
 
-    toast.success(`${linkType} რეფერალური ლინკი კოპირებულია!`);
+    toast.success(`${linkType} ${t("referral.linkCopied")}`);
   };
 
   const submitWithdrawalRequest = async (e: React.FormEvent) => {
@@ -160,16 +163,14 @@ export default function ReferralsPage() {
           accountDetails: withdrawalForm.accountDetails,
         }),
       });
-      toast.success("გატანის მოთხოვნა წარმატებით გაიგზავნა!");
+      toast.success(t("referral.withdrawalSuccess"));
       setShowWithdrawalForm(false);
       setWithdrawalForm({ amount: "", method: "BANK", accountDetails: "" });
       fetchWithdrawalRequests();
       fetchReferralStats();
     } catch (err) {
       const message =
-        err instanceof Error
-          ? err.message
-          : "გატანის მოთხოვნის გაგზავნა ვერ მოხერხდა";
+        err instanceof Error ? err.message : t("referral.withdrawalError");
       toast.error(message);
     }
   };
@@ -191,13 +192,13 @@ export default function ReferralsPage() {
   const getStatusText = (status: string) => {
     switch (status) {
       case "PENDING":
-        return "მოლოდინში";
+        return t("referral.status.pending");
       case "APPROVED":
-        return "დამტკიცებული";
+        return t("referral.status.approved");
       case "REJECTED":
-        return "უარყოფილი";
+        return t("referral.status.rejected");
       case "PROCESSED":
-        return "დამუშავებული";
+        return t("referral.status.processed");
       default:
         return status;
     }
@@ -218,11 +219,9 @@ export default function ReferralsPage() {
       <div className="referrals-page">
         <div className="ref-container mx-auto ref-px-4 py-8">
           <h1 className="ref-text-2xl ref-font-bold ref-mb-6">
-            რეფერალების სისტემა
+            {t("referral.systemTitle")}
           </h1>
-          <p className="ref-text-gray-600">
-            რეფერალების ინფორმაცია ვერ ჩაიტვირთა
-          </p>
+          <p className="ref-text-gray-600">{t("referral.loadError")}</p>
         </div>
       </div>
     );
@@ -232,7 +231,7 @@ export default function ReferralsPage() {
     <div className="referrals-page">
       <div className="ref-container mx-auto ref-px-4 py-8">
         <h1 className="ref-text-3xl ref-font-bold ref-mb-8 ref-text-gray-800">
-          რეფერალების სისტემა
+          {t("referral.systemTitle")}
         </h1>
 
         {/* Info Alert for Sellers */}
@@ -253,8 +252,7 @@ export default function ReferralsPage() {
           >
             <span style={{ fontSize: "24px" }}>💡</span>
             <div style={{ color: "#065f46" }}>
-              <strong>სელერებისთვის:</strong> ეს არის თქვენი რეფერალების
-              ბალანსი. სელერის ბალანსი (გაყიდვებიდან) ცალკეა და შეგიძლიათ ნახოთ{" "}
+              {t("referral.sellerInfo")}{" "}
               <a
                 href="/profile/balance"
                 style={{
@@ -263,7 +261,7 @@ export default function ReferralsPage() {
                   fontWeight: "600",
                 }}
               >
-                ბალანსის გვერდზე
+                {t("referral.balancePage")}
               </a>
               .
             </div>
@@ -279,7 +277,7 @@ export default function ReferralsPage() {
         >
           <div className="ref-bg-white ref-p-6 ref-card">
             <h3 className="ref-text-lg ref-font-semibold ref-text-gray-700 ref-mb-2">
-              ბალანსი
+              {t("referral.balance")}
             </h3>
             <p className="ref-text-3xl ref-font-bold ref-text-green-600">
               {stats.balance.toFixed(2)} ლარი
@@ -293,25 +291,27 @@ export default function ReferralsPage() {
               }}
               className="ref-text-sm ref-text-blue-600 ref-mt-4"
             >
-              {showBalanceHistory ? "დამალვა" : "ისტორია"}
+              {showBalanceHistory
+                ? t("referral.hideHistory")
+                : t("referral.showHistory")}
             </button>
           </div>
 
           <div className="ref-bg-white ref-p-6 ref-card">
             <h3 className="ref-text-lg ref-font-semibold ref-text-gray-700 ref-mb-2">
-              მოწვეული პირები
+              {t("referral.invitedPeople")}
             </h3>
             <p className="ref-text-3xl ref-font-bold ref-text-blue-600">
               {stats.totalReferrals}
             </p>
             <p className="ref-text-sm ref-text-gray-500">
-              დამტკიცებული: {stats.approvedReferrals}
+              {t("referral.approved")}: {stats.approvedReferrals}
             </p>
           </div>
 
           <div className="ref-bg-white ref-p-6 ref-card">
             <h3 className="ref-text-lg ref-font-semibold ref-text-gray-700 ref-mb-2">
-              მიღებული ბონუსი
+              {t("referral.receivedBonus")}
             </h3>
             <p className="ref-text-3xl ref-font-bold ref-text-purple-600">
               {stats.totalEarnings.toFixed(2)} ლარი
@@ -320,13 +320,13 @@ export default function ReferralsPage() {
 
           <div className="ref-bg-white ref-p-6 ref-card">
             <h3 className="ref-text-lg ref-font-semibold ref-text-gray-700 ref-mb-2">
-              მოლოდინში
+              {t("referral.pendingAmount")}
             </h3>
             <p className="ref-text-3xl ref-font-bold ref-text-orange-600">
               {stats.pendingEarnings.toFixed(2)} ლარი
             </p>
             <p className="ref-text-sm ref-text-gray-500">
-              მოლოდინში: {stats.pendingReferrals}
+              {t("referral.pending")}: {stats.pendingReferrals}
             </p>
           </div>
         </div>
@@ -334,13 +334,13 @@ export default function ReferralsPage() {
         {/* რეფერალური ლინკები */}
         <div className="ref-bg-white ref-p-6 ref-card ref-mb-8">
           <h3 className="ref-text-xl ref-font-semibold ref-mb-4 ref-text-gray-800">
-            თქვენი რეფერალური ლინკები
+            {t("referral.referralLinks")}
           </h3>
 
           {/* სელერის რეფერალური ლინკი */}
           <div className="ref-mb-6">
             <h4 className="ref-text-lg ref-font-medium ref-mb-2 ref-text-gray-700">
-              სელერის რეგისტრაცია (5 ლარი)
+              {t("referral.sellerRegistration")}
             </h4>
             <div className="ref-flex ref-items-center ref-gap-4 ref-input-group">
               <input
@@ -360,19 +360,18 @@ export default function ReferralsPage() {
                   copiedButton === "seller" ? "copied" : ""
                 }`}
               >
-                📋 კოპირება
+                📋 {t("referral.copy")}
               </button>
             </div>
             <p className="ref-text-sm ref-text-gray-600 ref-mt-4">
-              გაუზიარეთ ეს ლინკი სელერებს რეგისტრაციისთვის. თითოეული
-              დამტკიცებული სელერისთვის მიიღებთ 5 ლარს.
+              {t("referral.sellerLinkDescription")}
             </p>
           </div>
 
           {/* მომხმარებლის რეფერალური ლინკი */}
           <div>
             <h4 className="ref-text-lg ref-font-medium ref-mb-2 ref-text-gray-700">
-              მომხმარებლის რეგისტრაცია (0.20 ლარი)
+              {t("referral.userRegistration")}
             </h4>
             <div className="ref-flex ref-items-center ref-gap-4 ref-input-group">
               <input
@@ -392,12 +391,11 @@ export default function ReferralsPage() {
                   copiedButton === "user" ? "copied" : ""
                 }`}
               >
-                📋 კოპირება
+                📋 {t("referral.copy")}
               </button>
             </div>
             <p className="ref-text-sm ref-text-gray-600 ref-mt-4">
-              გაუზიარეთ ეს ლინკი ჩვეულებრივ მომხმარებლებს რეგისტრაციისთვის.
-              თითოეული რეგისტრირებული მომხმარებლისთვის მიიღებთ 0.20 ლარს.
+              {t("referral.userLinkDescription")}
             </p>
           </div>
         </div>
@@ -406,19 +404,19 @@ export default function ReferralsPage() {
         {showBalanceHistory && (
           <div className="ref-bg-white ref-p-6 ref-card ref-mb-8">
             <h3 className="ref-text-xl ref-font-semibold ref-mb-4 ref-text-gray-800">
-              ბალანსის ისტორია
+              {t("referral.history.title")}
             </h3>
             {balanceHistory.length > 0 ? (
               <div className="ref-table-container">
                 <table className="ref-table">
                   <thead>
                     <tr>
-                      <th>თარიღი</th>
-                      <th>ტიპი</th>
-                      <th>თანხა</th>
-                      <th>ბალანსი მანამდე</th>
-                      <th>ბალანსი მერე</th>
-                      <th>აღწერა</th>
+                      <th>{t("referral.history.date")}</th>
+                      <th>{t("referral.history.type")}</th>
+                      <th>{t("referral.history.amount")}</th>
+                      <th>{t("referral.history.beforeBalance")}</th>
+                      <th>{t("referral.history.afterBalance")}</th>
+                      <th>{t("referral.history.description")}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -467,7 +465,7 @@ export default function ReferralsPage() {
                 </table>
               </div>
             ) : (
-              <p className="ref-text-gray-500">ბალანსის ისტორია არ არის</p>
+              <p className="ref-text-gray-500">{t("referral.history.empty")}</p>
             )}
           </div>
         )}
@@ -477,11 +475,10 @@ export default function ReferralsPage() {
           <div className="ref-flex ref-justify-between ref-items-center ref-withdrawal-section">
             <div>
               <h3 className="ref-text-xl ref-font-semibold ref-text-gray-800">
-                ბალანსის გატანა
+                {t("referral.withdrawal.title")}
               </h3>
               <p className="ref-text-sm ref-text-gray-600 ref-mt-2">
-                მინიმუმ: 50 ლარი | თვიური ლიმიტი: 2 გატანა | ამ თვეში
-                გამოყენებული: {stats.monthlyWithdrawals}/2
+                {t("referral.withdrawalLimits")} {stats.monthlyWithdrawals}/2
               </p>
             </div>
             <button
@@ -489,7 +486,7 @@ export default function ReferralsPage() {
               disabled={stats.balance < 50 || stats.monthlyWithdrawals >= 2}
               className="ref-btn ref-btn-success"
             >
-              💰 გატანის მოთხოვნა
+              💰 {t("referral.withdrawalRequest")}
             </button>
           </div>
         </div>
@@ -499,11 +496,13 @@ export default function ReferralsPage() {
           <div className="ref-modal-overlay">
             <div className="ref-modal ref-modal-md">
               <h3 className="ref-text-xl ref-font-semibold ref-mb-4 ref-text-gray-800">
-                ბალანსის გატანა
+                {t("referral.withdrawal.title")}
               </h3>
               <form onSubmit={submitWithdrawalRequest}>
                 <div className="ref-form-group">
-                  <label className="ref-form-label">თანხა (ლარი)</label>
+                  <label className="ref-form-label">
+                    {t("referral.amountLabel")}
+                  </label>
                   <input
                     type="number"
                     min="50"
@@ -521,7 +520,9 @@ export default function ReferralsPage() {
                 </div>
 
                 <div className="ref-form-group">
-                  <label className="ref-form-label">გადახდის მეთოდი</label>
+                  <label className="ref-form-label">
+                    {t("referral.paymentMethod")}
+                  </label>
                   <select
                     value={withdrawalForm.method}
                     onChange={(e) =>
@@ -532,16 +533,16 @@ export default function ReferralsPage() {
                     }
                     className="ref-form-input"
                   >
-                    <option value="BANK">ბანკი</option>
-                    <option value="PAYBOX">პეიბოქსი</option>
+                    <option value="BANK">{t("referral.bank")}</option>
+                    <option value="PAYBOX">{t("referral.paybox")}</option>
                   </select>
                 </div>
 
                 <div className="ref-form-group">
                   <label className="ref-form-label">
                     {withdrawalForm.method === "BANK"
-                      ? "ბანკის ანგარიში (IBAN)"
-                      : "პეიბოქსის ნომერი"}
+                      ? t("referral.bankAccount")
+                      : t("referral.payboxNumber")}
                   </label>
                   <input
                     type="text"
@@ -568,13 +569,13 @@ export default function ReferralsPage() {
                     onClick={() => setShowWithdrawalForm(false)}
                     className="ref-btn ref-btn-secondary ref-flex-1"
                   >
-                    გაუქმება
+                    {t("referral.cancel")}
                   </button>
                   <button
                     type="submit"
                     className="ref-btn ref-btn-success ref-flex-1"
                   >
-                    გაგზავნა
+                    {t("referral.submit")}
                   </button>
                 </div>
               </form>
@@ -586,18 +587,18 @@ export default function ReferralsPage() {
         <div className="ref-bg-white ref-card ref-mb-8">
           <div className="ref-p-6 ref-border-b">
             <h3 className="ref-text-xl ref-font-semibold ref-text-gray-800">
-              მოწვეული პირები
+              {t("referral.invitedPeopleList")}
             </h3>
           </div>
           <div className="ref-table-container">
             <table className="ref-table">
               <thead>
                 <tr>
-                  <th>პირი</th>
-                  <th>ტიპი</th>
-                  <th>სტატუსი</th>
-                  <th>ბონუსი</th>
-                  <th>თარიღი</th>
+                  <th>{t("referral.person")}</th>
+                  <th>{t("referral.typeColumn")}</th>
+                  <th>{t("referral.statusColumn")}</th>
+                  <th>{t("referral.bonus")}</th>
+                  <th>{t("referral.dateColumn")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -614,7 +615,9 @@ export default function ReferralsPage() {
                       </div>
                     </td>
                     <td className="ref-text-sm ref-text-gray-900">
-                      {referral.type === "SELLER" ? "სელერი" : "მომხმარებელი"}
+                      {referral.type === "SELLER"
+                        ? t("referral.seller")
+                        : t("referral.user")}
                     </td>
                     <td>
                       <span
@@ -642,17 +645,17 @@ export default function ReferralsPage() {
         <div className="ref-bg-white ref-card">
           <div className="ref-p-6 ref-border-b">
             <h3 className="ref-text-xl ref-font-semibold ref-text-gray-800">
-              გატანის მოთხოვნები
+              {t("referral.withdrawalRequests")}
             </h3>
           </div>
           <div className="ref-table-container">
             <table className="ref-table">
               <thead>
                 <tr>
-                  <th>თანხა</th>
-                  <th>მეთოდი</th>
-                  <th>სტატუსი</th>
-                  <th>თარიღი</th>
+                  <th>{t("referral.amount")}</th>
+                  <th>{t("referral.method")}</th>
+                  <th>{t("referral.statusColumn")}</th>
+                  <th>{t("referral.dateColumn")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -662,7 +665,9 @@ export default function ReferralsPage() {
                       {request.amount.toFixed(2)} ლარი
                     </td>
                     <td className="ref-text-sm ref-text-gray-900">
-                      {request.method === "BANK" ? "ბანკი" : "პეიბოქსი"}
+                      {request.method === "BANK"
+                        ? t("referral.bank")
+                        : t("referral.paybox")}
                     </td>
                     <td>
                       <span
