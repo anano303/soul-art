@@ -330,7 +330,7 @@ export const TRANSLATIONS: Translations = {
       updateSuccessDescription: "თქვენი პროფილი წარმატებით განახლდა.",
 
       // Become Seller
-      becomeSeller: "სელერად გახდომა",
+      becomeSeller: "გახდი სელერი",
       becomeSellerTitle: "გახდი სელერი",
       becomeSellerDescription: "შეავსე საჭირო ინფორმაცია და დაიწყე გაყიდვები",
       becomeSellerSuccess: "წარმატება!",
@@ -342,20 +342,20 @@ export const TRANSLATIONS: Translations = {
       becomeSellerSubmitting: "იგზავნება...",
 
       // Seller Form Fields
-      sellerStoreName: "მაღაზიის სახელი",
-      sellerStoreNamePlaceholder: "შეიყვანეთ მაღაზიის სახელი",
-      sellerStoreNameRequired: "მაღაზიის სახელი საჭიროა",
+      sellerStoreName: "ბიზნესის სახელი",
+      sellerStoreNamePlaceholder: "შეიყვანეთ ბიზნესის სახელი",
+      sellerStoreNameRequired: "ბიზნესის სახელი საჭიროა",
       sellerIdNumber: "პირადი ნომერი/საიდენტ. კოდი",
-      sellerIdNumberPlaceholder: "შეიყვანეთ პირადი ნომერი",
-      sellerIdNumberRequired: "პირადი ნომერი საჭიროა",
+      sellerIdNumberPlaceholder: "შეიყვანეთ საიდენტ. ნომერი",
+      sellerIdNumberRequired: "პირადი ან საიდენტ. ნომერი საჭიროა",
       sellerAccountNumber: "საბანკო ანგარიშის ნომერი",
       sellerAccountNumberPlaceholder: "GE...",
       sellerAccountNumberRequired: "ანგარიშის ნომერი საჭიროა",
-      sellerLogo: "მაღაზიის ლოგო (არასავალდებულო)",
+      sellerLogo: "ბიზნესის ლოგო (არასავალდებულო)",
       sellerLogoUpload: "ლოგოს ატვირთვა",
       sellerLogoChoose: "ფაილის არჩევა",
       sellerLogoSelected: "ფაილი არჩეულია",
-      sellerSubmit: "სელერად გახდომა",
+      sellerSubmit: "გახდი სელერი",
       sellerCancel: "გაუქმება",
     },
 
