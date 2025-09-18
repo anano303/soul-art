@@ -13,7 +13,7 @@ import { StripeButton } from "./stripe-button";
 import { BOGButton } from "./bog-button";
 import "./order-details.css";
 
-// ლარი დოლარში გადამყვანი კურსი (1 ლარი = ~0.37 დოლარი)
+// GEL to USD conversion rate (1 GEL = ~0.37 USD)
 const GEL_TO_USD_RATE = 2.8;
 
 interface OrderDetailsProps {
@@ -31,12 +31,12 @@ export function OrderDetails({ order }: OrderDetailsProps) {
   // Get order status display
   const getOrderStatusDisplay = () => {
     if (order.status === "cancelled") {
-      return { text: t("Cancelled"), className: "cancelled" };
+      return { text: t("order.cancelled"), className: "cancelled" };
     }
     if (order.isPaid) {
-      return { text: t("Paid"), className: "paid" };
+      return { text: t("order.paid"), className: "paid" };
     }
-    return { text: t("Pending Payment"), className: "pending" };
+    return { text: t("order.pendingPayment"), className: "pending" };
   };
 
   const orderStatus = getOrderStatusDisplay();
@@ -112,7 +112,7 @@ export function OrderDetails({ order }: OrderDetailsProps) {
     (item) => !item.product || String(item.product.deliveryType) !== "SELLER"
   );
 
-  // ლარის დოლარში გადაყვანა გადახდისთვის
+  // Convert GEL to USD for payment
   const totalPriceInUSD = +(order.totalPrice / GEL_TO_USD_RATE).toFixed(2);
 
   // Helper function to get display name based on language
@@ -124,7 +124,7 @@ export function OrderDetails({ order }: OrderDetailsProps) {
     <div className="order-container">
       <div className="order-header">
         <h1 className="order-title">
-          {t("Order")} #{order._id}
+          {t("order.order")} #{order._id}
         </h1>
         <span className={`order-badge ${orderStatus.className}`}>
           {orderStatus.text}
@@ -135,9 +135,9 @@ export function OrderDetails({ order }: OrderDetailsProps) {
         <div className="order-left">
           {/* Shipping Info */}
           <div className="order-card">
-            <h2 className="order-subtitle">{t("Shipping")}</h2>
+            <h2 className="order-subtitle">{t("order.shipping")}</h2>
             <p>
-              <span className="font-medium">{t("Address")}: </span>
+              <span className="font-medium">{t("order.address")}: </span>
               {order.shippingDetails.address}, {order.shippingDetails.city},{" "}
               {order.shippingDetails.postalCode},{" "}
               {order.shippingDetails.country}
@@ -150,19 +150,19 @@ export function OrderDetails({ order }: OrderDetailsProps) {
               )}
               <span>
                 {order.isDelivered
-                  ? `${t("Delivered on")} ${new Date(
+                  ? `${t("order.deliveredOn")} ${new Date(
                       order.deliveredAt!
                     ).toLocaleDateString()}`
-                  : t("Not Delivered")}
+                  : t("order.notDelivered")}
               </span>
             </div>
           </div>
 
           {/* Payment Info */}
           <div className="order-card">
-            <h2 className="order-subtitle">{t("Payment")}</h2>
+            <h2 className="order-subtitle">{t("order.payment")}</h2>
             <p>
-              <span className="font-medium">{t("Method")}: </span>
+              <span className="font-medium">{t("order.method")}: </span>
               {order.paymentMethod}
             </p>
             <div className={`alert ${order.isPaid ? "success" : "error"}`}>
@@ -173,23 +173,23 @@ export function OrderDetails({ order }: OrderDetailsProps) {
               )}
               <span>
                 {order.isPaid
-                  ? `${t("Paid on")} ${new Date(
+                  ? `${t("order.paidOn")} ${new Date(
                       order.paidAt!
                     ).toLocaleDateString()}`
-                  : t("Not Paid")}
+                  : t("order.notPaid")}
               </span>
             </div>
           </div>
 
           {/* Order Items - Grouped by delivery type with fixed string comparison */}
           <div className="order-card">
-            <h2 className="order-subtitle">{t("Order Items")}</h2>
+            <h2 className="order-subtitle">{t("order.orderItems")}</h2>
 
             {sellerDeliveryItems.length > 0 && (
               <div className="delivery-group">
                 <div className="delivery-group-header">
                   <Store className="icon" />
-                  <h3>{t("Seller Delivery")}</h3>
+                  <h3>{t("order.sellerDelivery")}</h3>
                 </div>
                 {sellerDeliveryItems.map((item) => (
                   <div
@@ -242,8 +242,9 @@ export function OrderDetails({ order }: OrderDetailsProps) {
                       {item.product?.minDeliveryDays &&
                         item.product?.maxDeliveryDays && (
                           <p className="delivery-time">
-                            {t("Delivery Time")}: {item.product.minDeliveryDays}
-                            -{item.product.maxDeliveryDays} {t("days")}
+                            {t("order.deliveryTime")}:{" "}
+                            {item.product.minDeliveryDays}-
+                            {item.product.maxDeliveryDays} {t("order.days")}
                           </p>
                         )}
                     </div>
@@ -317,33 +318,33 @@ export function OrderDetails({ order }: OrderDetailsProps) {
         {/* Order Summary */}
         <div className="order-right">
           <div className="order-card">
-            <h2 className="order-subtitle">{t("Order Summary")}</h2>
+            <h2 className="order-subtitle">{t("order.orderSummary")}</h2>
             <div className="order-summary">
               <div className="summary-item">
-                <span>{t("Items")}</span>
+                <span>{t("order.items")}</span>
                 <span>{order.itemsPrice.toFixed(2)} ₾</span>
               </div>
               <div className="summary-item">
-                <span>{t("Shipping")}</span>
+                <span>{t("order.shipping")}</span>
                 <span>
                   {order.shippingPrice === 0
-                    ? t("Free")
+                    ? t("order.free")
                     : `${order.shippingPrice.toFixed(2)} ₾`}
                 </span>
               </div>
               <div className="summary-item">
-                <span>{t("Tax")}</span>
+                <span>{t("order.tax")}</span>
                 <span>{order.taxPrice.toFixed(2)} ₾</span>
               </div>
               <hr />
               <div className="summary-total">
-                <span>{t("Total")}</span>
+                <span>{t("order.total")}</span>
                 <span>{order.totalPrice.toFixed(2)} ₾</span>
               </div>
 
-              {/* დავამატოთ დოლარის ეკვივალენტი */}
+              {/* Add USD equivalent */}
               <div className="summary-total-usd">
-                <span>{t("Total (USD)")}</span>
+                <span>{t("order.totalUSD")}</span>
                 <span>${totalPriceInUSD}</span>
               </div>
 
@@ -351,11 +352,7 @@ export function OrderDetails({ order }: OrderDetailsProps) {
               {!order.isPaid && isStockExpired && (
                 <div className="alert error" style={{ marginBottom: "1rem" }}>
                   <XCircle className="icon" />
-                  <span>
-                    {t(
-                      "Stock reservation has expired. Please create a new order."
-                    )}
-                  </span>
+                  <span>{t("order.stockExpired")}</span>
                 </div>
               )}
 
@@ -364,7 +361,7 @@ export function OrderDetails({ order }: OrderDetailsProps) {
                 <div className="alert error" style={{ marginBottom: "1rem" }}>
                   <XCircle className="icon" />
                   <span>
-                    {t("Order has been cancelled")}
+                    {t("order.orderCancelled")}
                     {order.statusReason && ` - ${order.statusReason}`}
                   </span>
                 </div>
@@ -380,7 +377,7 @@ export function OrderDetails({ order }: OrderDetailsProps) {
                     style={{ marginBottom: "1rem" }}
                   >
                     <span>
-                      {t("Stock reserved until")}:{" "}
+                      {t("order.stockReserved")}:{" "}
                       {new Date(order.stockReservationExpires).toLocaleString()}
                     </span>
                   </div>
