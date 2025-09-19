@@ -39,8 +39,10 @@ const config = {
         }
       },
       fontFamily: {
-        'firago': ['FiraGO', 'sans-serif'],
+        'firago': ['"Noto Sans Georgian"', '"Fira Sans"', 'system-ui', 'sans-serif'],
+        'fira': ['"Fira Sans"', 'system-ui', 'sans-serif'],
         'satoshi': ['Satoshi', 'sans-serif'],
+        'sans': ['"Noto Sans Georgian"', '"Fira Sans"', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
       },
     },
   },
