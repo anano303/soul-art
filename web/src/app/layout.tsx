@@ -133,11 +133,12 @@ export default function RootLayout({
           crossOrigin="anonymous"
           src={`https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v13.0&appid=${process.env.NEXT_PUBLIC_FACEBOOK_APP_ID}&autoLogAppEvents=1`}
         />
-        {/* Add optimized font loading without preload warnings */}
-        <link
-          href="https://fonts.googleapis.com/css2?family=Fira+Go:wght@300;400;500;600;700&display=swap"
+        {/* Remove the problematic prefetch links */}
+        {/* Add Google Fonts link */}
+        {/* <link
+          href="https://fonts.googleapis.com/css2?family=Fira+Sans:wght@400;500;600;700&display=swap"
           rel="stylesheet"
-        />
+        /> */}
       </head>
       <body
         className={`${satoshi.variable} antialiased min-h-screen flex flex-col overflow-x-hidden`}
