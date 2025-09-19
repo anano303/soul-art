@@ -8,7 +8,7 @@ const MainPhoto = () => {
 
   return (
     <div className="home-container">
-      <div className="hero-section">
+      <div className="main-hero-section">
         <div className="hero-text">
           <h2>{t("home.heroTitle")}</h2>
           <p>{t("home.heroSubtitle")}</p>
