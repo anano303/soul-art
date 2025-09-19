@@ -173,7 +173,8 @@
 
 .profile-image {
   width: 150px;
-  height: 150px;
+  height: auto; /* Maintain aspect ratio as recommended by Next.js */
+  min-height: 150px; /* Ensure consistent visual appearance */
   border-radius: 50%;
   object-fit: cover;
   border: 5px solid #012645;
