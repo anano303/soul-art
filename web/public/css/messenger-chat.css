@@ -1,0 +1,135 @@
+.custom-messenger-button {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 1000;
+  cursor: pointer;
+  border-radius: 50%;
+  background-color: #012645 !important;
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s ease;
+  /* Add more prominent styling */
+  border: 2px solid white;
+}
+
+.custom-messenger-button:hover {
+  background-color: #012645 !important;
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+}
+
+.custom-messenger-button:active {
+  transform: translateY(0) scale(0.95);
+  background-color: #012645 !important;
+}
+
+.messenger-icon-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 35px;
+  height: 35px;
+}
+
+.messenger-icon {
+  width: 100%;
+  height: 100%;
+  fill: white;
+}
+
+/* Hide Facebook's default buttons if they exist */
+.fb_dialog,
+.fb_dialog_advanced,
+.fb_customer_chat_icon,
+iframe[data-testid="bubble_iframe"] {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+/* Animation for the messenger button */
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(91, 108, 24, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(91, 108, 24, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(91, 108, 24, 0);
+  }
+}
+
+.custom-messenger-button {
+  animation: pulse 2s infinite;
+}
+
+/* Add a tooltip to make it clear what the button does */
+.custom-messenger-button::after {
+  content: "მოგვწერეთ";
+  position: absolute;
+  top: -40px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #333;
+  color: white;
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-size: 14px;
+  opacity: 0;
+  transition: opacity 0.3s;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.custom-messenger-button:hover::after {
+  opacity: 1;
+}
+
+/* Media query for smaller screens */
+@media (max-width: 768px) {
+  .custom-messenger-button {
+    width: 50px;
+    height: 50px;
+    bottom: 15px;
+    right: 15px;
+  }
+
+  .messenger-icon-wrapper {
+    width: 30px;
+    height: 30px;
+  }
+
+  .chatIcon {
+    width: 50px !important;
+    height: 50px !important;
+    bottom: 20px !important;
+    right: 20px !important;
+    z-index: 99999 !important;
+    background-color: #012645 !important;
+  }
+
+  .chatIcon svg {
+    width: 28px;
+    height: 28px;
+  }
+}
+
+/* Additional styles for chatIcon class */
+.chatIcon {
+  background-color: #012645 !important;
+}
+
+.chatIcon:hover {
+  background-color: #012645 !important;
+}
+
+.chatIcon:active {
+  background-color: #012645 !important;
+}
