@@ -41,7 +41,7 @@
   /* background: rgba(253, 245, 236, 0.52); */
   padding: 2rem;
   border-radius: 30px;
-  box-shadow: 0 4px 10px var(--primary-color)b5;
+  box-shadow: 0 4px 10px rgba(1, 38, 69, 0.75);
   /* backdrop-filter: blur(10px); 
   -webkit-backdrop-filter: blur(10px);  */
 }
@@ -63,7 +63,7 @@
 
 .auth-layout-subtitle {
   font-size: 0.875rem; /* text-sm */
-  color: var(--primary-color)b2;
+  color: rgba(1, 38, 69, 0.7);
 }
 
 .auth-layout-children {
