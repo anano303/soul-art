@@ -357,6 +357,14 @@
   transition: all 0.3s ease;
   box-shadow: 0 5px 20px var(--secondary-color);
   font-family: firaGo;
+  /* საწყისი პოზიცია - JavaScript-ი მართავს sticky ქცევას */
+  position: relative;
+}
+
+/* Fixed მდგომარეობის სტილები */
+.filter-toggle-btn.fixed {
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+  transform: scale(1.05);
 }
 
 .filter-toggle-btn:hover {
@@ -1276,4 +1284,21 @@
   background-size: contain;
   background-repeat: no-repeat;
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+}
+
+/* Smooth scroll behavior for filter opening */
+.additional-filters {
+  scroll-margin-top: 120px; /* Account for fixed header + some padding */
+  transition: all 0.3s ease;
+}
+
+/* Enhanced button hover effect when not fixed */
+.filter-toggle-btn:not(.fixed):hover {
+  transform: scale(1.05) translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+}
+
+/* Smooth scroll behavior */
+html {
+  scroll-behavior: smooth;
 }

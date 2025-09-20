@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { fetchWithAuth } from "@/lib/fetch-with-auth";
 import "./product-filters.css";
@@ -61,6 +61,10 @@ export function ProductFilters({
   const [brandSearchTerm, setBrandSearchTerm] = useState<string>("");
   const [hasHorizontalScroll, setHasHorizontalScroll] = useState(false);
   const [showBrandsDropdown, setShowBrandsDropdown] = useState(false);
+
+  // Refs for scroll and positioning
+  const filterButtonRef = useRef<HTMLButtonElement>(null);
+  const filterContainerRef = useRef<HTMLDivElement>(null);
 
   // Update local state when props change
   useEffect(() => {
@@ -393,6 +397,33 @@ export function ProductFilters({
     return "";
   };
 
+  const handleFilterToggle = () => {
+    setShowFilters(true);
+
+    // Reset button position when opening filters
+    if (filterButtonRef.current) {
+      filterButtonRef.current.style.position = "relative";
+      filterButtonRef.current.style.top = "auto";
+      filterButtonRef.current.classList.remove("fixed");
+    }
+
+    // Scroll to filter section after a short delay to allow it to render
+    setTimeout(() => {
+      if (filterContainerRef.current) {
+        const containerRect =
+          filterContainerRef.current.getBoundingClientRect();
+        const scrollTop =
+          window.pageYOffset || document.documentElement.scrollTop;
+        const targetY = scrollTop + containerRect.top - 120; // 120px offset from top for better visibility
+
+        window.scrollTo({
+          top: targetY,
+          behavior: "smooth",
+        });
+      }
+    }, 150); // Slightly longer delay to ensure filters are rendered
+  };
+
   const handleClose = () => {
     setIsClosing(true);
     setTimeout(() => {
@@ -516,6 +547,45 @@ export function ProductFilters({
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [showSubcategories]);
+
+  // Handle filter toggle button sticky behavior on scroll
+  useEffect(() => {
+    const handleScroll = () => {
+      const filterButton = filterButtonRef.current;
+      if (filterButton && !showFilters) {
+        const buttonRect = filterButton.getBoundingClientRect();
+        const buttonTop = buttonRect.top;
+
+        // If button is about to scroll out of view (within 100px of top), make it sticky
+        if (buttonTop <= 100 && !filterButton.classList.contains("fixed")) {
+          filterButton.classList.add("fixed");
+          filterButton.style.position = "fixed";
+          filterButton.style.top = "20px";
+          filterButton.style.zIndex = "1000";
+          filterButton.style.width = `${buttonRect.width}px`; // Preserve width
+        } else if (
+          buttonTop > 100 &&
+          filterButton.classList.contains("fixed")
+        ) {
+          // Reset to original position when scrolling back up
+          filterButton.classList.remove("fixed");
+          filterButton.style.position = "relative";
+          filterButton.style.top = "auto";
+          filterButton.style.width = "auto";
+        }
+      }
+    };
+
+    // Add scroll listener
+    window.addEventListener("scroll", handleScroll);
+
+    // Initial check
+    handleScroll();
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, [showFilters]);
 
   return (
     <div className="product-filters-container">
@@ -679,8 +749,9 @@ export function ProductFilters({
 
           {!showFilters && (
             <button
+              ref={filterButtonRef}
               className="filter-toggle-btn"
-              onClick={() => setShowFilters(true)}
+              onClick={handleFilterToggle}
             >
               <Image
                 src="/filter.png"
@@ -694,7 +765,10 @@ export function ProductFilters({
           )}
 
           {showFilters && (
-            <div className={`additional-filters ${isClosing ? "closing" : ""}`}>
+            <div
+              ref={filterContainerRef}
+              className={`additional-filters ${isClosing ? "closing" : ""}`}
+            >
               <div className="filters-header">
                 <button
                   className="filters-close-btn"
