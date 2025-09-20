@@ -74,6 +74,9 @@ export function middleware(request: NextRequest) {
     response.cookies.delete("__cfruid");
     response.cookies.delete("cf_clearance");
 
+    // Set secure cookie attributes for development
+    response.headers.set("Set-Cookie", "SameSite=None; Secure");
+
     return response;
   }
 
