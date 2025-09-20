@@ -24,6 +24,9 @@ export default function GoogleAnalytics() {
             gtag('config', '${GA_MEASUREMENT_ID}', {
               page_title: document.title,
               page_location: window.location.href,
+              cookie_flags: 'SameSite=Lax;Secure',
+              cookie_expires: 63072000,
+              anonymize_ip: true,
             });
           `,
         }}
