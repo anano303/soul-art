@@ -5,7 +5,7 @@
   box-shadow: 0 8px 32px rgba(1, 38, 69, 0.1);
   color: var(--primary-color);
   font-family: "FiraGo-Enhanced", "FiraGo", "Noto Sans Georgian", sans-serif;
-  border: 2px solid #7b5642;
+  border: 2px solid var(--secondary-color);
 }
 
 .banner-admin-header {
@@ -13,7 +13,7 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 2rem;
-  border-bottom: 2px solid #7b5642;
+  border-bottom: 2px solid var(--secondary-color);
   padding-bottom: 1rem;
 }
 
@@ -54,7 +54,7 @@
   overflow: hidden;
   margin-bottom: 1.5rem;
   box-shadow: 0 4px 16px rgba(1, 38, 69, 0.1);
-  border: 1px solid #7b5642;
+  border: 1px solid var(--secondary-color);
 }
 
 .banner-thead-row {
@@ -66,7 +66,7 @@
   padding: 12px 16px;
   font-weight: 600;
   color: #ffffff;
-  border-bottom: 2px solid #7b5642;
+  border-bottom: 2px solid var(--secondary-color);
   font-family: "FiraGo-Enhanced", "FiraGo", "Noto Sans Georgian", sans-serif;
 }
 
@@ -86,7 +86,7 @@
 
 .banner-td {
   padding: 12px 16px;
-  border-bottom: 1px solid #7b5642;
+  border-bottom: 1px solid var(--secondary-color);
   color: var(--primary-color);
   font-family: "FiraGo-Enhanced", "FiraGo", "Noto Sans Georgian", sans-serif;
 }
@@ -96,7 +96,7 @@
   height: 50px;
   object-fit: cover;
   border-radius: 4px;
-  border: 1px solid #7b5642;
+  border: 1px solid var(--secondary-color);
 }
 
 .banner-status {
@@ -111,7 +111,7 @@
 
 .banner-status.active {
   background-color: rgba(123, 86, 66, 0.2);
-  color: #7b5642;
+  color: var(--secondary-color);
   border: 1px solid rgba(123, 86, 66, 0.5);
 }
 
@@ -167,7 +167,7 @@
   justify-content: center;
   align-items: center;
   padding: 2rem;
-  color: #7b5642;
+  color: var(--secondary-color);
 }
 
 .error-message {

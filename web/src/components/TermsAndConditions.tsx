@@ -190,7 +190,7 @@ export function TermsAndConditions({
             <button
               onClick={handleDownload}
               style={{
-                background: "#7b5642",
+                background: "var(--secondary-color)",
                 color: "white",
                 border: "none",
                 padding: "8px 12px",
@@ -603,7 +603,7 @@ export function TermsAndConditions({
             <button
               onClick={onAccept}
               style={{
-                background: "#7b5642",
+                background: "var(--secondary-color)",
                 color: "white",
                 border: "none",
                 padding: "12px 24px",

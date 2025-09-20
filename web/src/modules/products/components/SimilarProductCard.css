@@ -19,7 +19,7 @@
 
 /* Handmade theme styles */
 .similar-product-card.handmade-theme {
-  box-shadow: 0 4px 10px #7d5a35;
+  box-shadow: 0 4px 10px var(--secondary-color);
 }
 
 .similar-product-card.handmade-theme:hover {
@@ -100,7 +100,7 @@
 }
 
 .handmade-theme .similar-product-image img {
-  background-color: #7d5a35;
+  background-color: var(--secondary-color);
 }
 
 .similar-product-card:hover .similar-image {
@@ -137,7 +137,7 @@
 
 /* Handmade theme name color */
 .handmade-theme .similar-product-name {
-  color: #7d5a35;
+  color: var(--secondary-color);
 }
 
 .similar-product-details {
@@ -163,7 +163,7 @@
 
 /* Handmade theme price color */
 .handmade-theme .similar-product-price {
-  color: #7d5a35;
+  color: var(--secondary-color);
 }
 
 .similar-product-rating {
@@ -177,7 +177,7 @@
 
 /* Handmade theme rating color */
 .handmade-theme .similar-product-rating {
-  color: #7d5a35;
+  color: var(--secondary-color);
 }
 
 .similar-price-container {
@@ -236,7 +236,7 @@
 }
 
 .handmade-theme .similar-addButtonCart {
-  background-color: #7d5a35;
+  background-color: var(--secondary-color);
 }
 
 .handmade-theme .similar-addButtonCart:hover {

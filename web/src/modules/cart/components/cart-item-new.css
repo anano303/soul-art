@@ -1,7 +1,7 @@
 .cart-item {
   display: flex;
   gap: 16px;
-  border-bottom: 2px solid #7b5642;
+  border-bottom: 2px solid var(--secondary-color);
   margin-bottom: 70px;
   padding: 30px;
   padding-bottom: 70px;
@@ -45,7 +45,7 @@
 
 .cart-item-price {
   font-size: 20px;
-  color: #7b5642;
+  color: var(--secondary-color);
 }
 
 .cart-item-actions {
@@ -60,7 +60,7 @@
   font-weight: bold;
   font-family: "FiraGo", "Noto Sans Georgian", sans-serif;
   color: var(--primary-color);
-  border: 2px solid #7b5642;
+  border: 2px solid var(--secondary-color);
   outline: none;
   border-radius: 4px;
   cursor: pointer;
@@ -121,7 +121,7 @@
   left: -5px;
   width: 8px;
   height: 8px;
-  background-color: #7b5642;
+  background-color: var(--secondary-color);
   transform: rotate(45deg);
   z-index: 2;
 }
@@ -134,7 +134,7 @@
   right: -5px;
   width: 8px;
   height: 8px;
-  background-color: #7b5642;
+  background-color: var(--secondary-color);
   transform: rotate(45deg);
   z-index: 2;
 }

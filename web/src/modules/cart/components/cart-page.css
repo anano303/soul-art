@@ -19,7 +19,7 @@
 }
 
 .cart-items-count {
-  color: #7b5642;
+  color: var(--secondary-color);
 }
 
 .cart-content {
@@ -61,7 +61,7 @@
 }
 
 .summary-label {
-  color: #7b5642;
+  color: var(--secondary-color);
 }
 
 .separator {
@@ -102,4 +102,3 @@
     margin-top: 24px;
   }
 }
-

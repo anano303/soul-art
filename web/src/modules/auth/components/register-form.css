@@ -351,7 +351,7 @@ input:focus {
   width: 18px;
   height: 18px;
   margin-top: 2px;
-  accent-color: #7b5642;
+  accent-color: var(--secondary-color);
   cursor: pointer;
 }
 
@@ -361,7 +361,7 @@ input:focus {
 }
 
 .privacy-policy-link {
-  color: #7b5642;
+  color: var(--secondary-color);
   text-decoration: none;
   font-weight: 500;
   transition: color 0.3s ease;
@@ -395,7 +395,7 @@ input:focus {
 .contract-link {
   background: none;
   border: none;
-  color: #7b5642;
+  color: var(--secondary-color);
   text-decoration: underline;
   cursor: pointer;
   font-weight: 500;
@@ -448,7 +448,7 @@ input:focus {
 }
 
 .contract-download-btn {
-  background: #7b5642;
+  background: var(--secondary-color);
   color: white;
   border: none;
   padding: 8px 12px;
@@ -520,7 +520,7 @@ input:focus {
   font-size: 1.1rem;
   font-weight: 600;
   margin-bottom: 12px;
-  border-bottom: 2px solid #7b5642;
+  border-bottom: 2px solid var(--secondary-color);
   padding-bottom: 4px;
 }
 
@@ -552,7 +552,7 @@ input:focus {
 }
 
 .contract-accept-btn {
-  background: #7b5642;
+  background: var(--secondary-color);
   color: white;
   border: none;
   padding: 12px 24px;

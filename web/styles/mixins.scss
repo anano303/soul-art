@@ -1,5 +1,5 @@
 $primary-color: #012645;
-$secondary-color: #7b5642; // Handmade theme color
+$secondary-color: var(--secondary-color, #452001); // Handmade theme color
 $accent-color: #f48c06; // Orange accent
 
 @mixin flexCenter {
