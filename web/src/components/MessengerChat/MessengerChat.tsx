@@ -1,12 +1,9 @@
 "use client";
 
-import React, { useEffect } from "react";
-import { useLazyCSS } from "@/hooks/use-lazy-css";
+import React from "react";
+import "./MessengerChat.css";
 
 const MessengerChat = () => {
-  // Load CSS only when this component is actually rendered
-  useLazyCSS("/css/messenger-chat.css", true);
-
   const handleChatClick = () => {
     // Facebook Messenger ლინკი უბრალოდ
     window.open("https://m.me/61574985443236", "_blank");
