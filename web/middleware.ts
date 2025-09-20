@@ -69,13 +69,29 @@ export function middleware(request: NextRequest) {
   if (process.env.NODE_ENV === "development") {
     const response = NextResponse.next();
 
-    // Remove problematic Cloudflare cookies
+    // Check if it's Firefox (Mozilla) which is more strict with cookies
+    const userAgent = request.headers.get("user-agent") || "";
+    const isFirefox =
+      userAgent.includes("Firefox") || userAgent.includes("Mozilla");
+
+    // Remove problematic Cloudflare cookies - more aggressively in Firefox
     response.cookies.delete("__cf_bm");
     response.cookies.delete("__cfruid");
     response.cookies.delete("cf_clearance");
 
-    // Set secure cookie attributes for development
-    response.headers.set("Set-Cookie", "SameSite=None; Secure");
+    // For Firefox, also set headers to prevent cookie warnings
+    if (isFirefox) {
+      // Set secure cookie attributes for development in Firefox
+      response.headers.set("Set-Cookie", "SameSite=None; Secure");
+
+      // Clear any existing CF cookies from the request
+      const existingCookies = request.cookies.getAll();
+      existingCookies.forEach((cookie) => {
+        if (cookie.name.includes("cf_") || cookie.name.includes("__cf")) {
+          response.cookies.delete(cookie.name);
+        }
+      });
+    }
 
     return response;
   }
