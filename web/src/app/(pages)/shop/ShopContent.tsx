@@ -12,8 +12,6 @@ import { fetchWithAuth } from "@/lib/fetch-with-auth";
 import "./ShopPage.css";
 import Image from "next/image";
 
-
-
 const ShopContent = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -315,12 +313,14 @@ const ShopContent = () => {
     []
   );
 
-   const brandInfo = selectedBrand && products.length > 0
-    ? {
-        name: selectedBrand,
-        logo: products.find(p => p.brand === selectedBrand)?.brandLogo || ""
-      }
-    : null;
+  const brandInfo =
+    selectedBrand && products.length > 0
+      ? {
+          name: selectedBrand,
+          logo:
+            products.find((p) => p.brand === selectedBrand)?.brandLogo || "",
+        }
+      : null;
 
   return (
     <div className="shop-container default">
@@ -348,14 +348,22 @@ const ShopContent = () => {
             />
           </div>
 
-             {brandInfo && (
-        <div className="brand-info">
-          {brandInfo.logo && (
-            <Image src={brandInfo.logo} alt={brandInfo.name} width={100} height={50} />
+          {brandInfo && (
+            <div className="brand-info">
+              {brandInfo.logo && (
+                <Image
+                  src={brandInfo.logo}
+                  alt={brandInfo.name}
+                  width={50}
+                  height={50}
+                  style={{ width: "auto", height: "auto" }}
+                />
+              )}
+              <h2 style={{ color: "#012645" }}>
+                {brandInfo.name}-ის ნამუშევრები{" "}
+              </h2>
+            </div>
           )}
-          <h2 style={{ color: "#012645" }}>{brandInfo.name}-ის ნამუშევრები </h2>
-        </div>
-      )}
 
           <div className="products-area">
             {isLoading ? (

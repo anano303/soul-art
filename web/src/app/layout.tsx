@@ -170,10 +170,6 @@ export default function RootLayout({
           crossOrigin="anonymous"
         />
 
-        {/* Preload critical images */}
-        <link rel="preload" href="/logo.png" as="image" type="image/png" />
-        <link rel="preload" href="/brush.png" as="image" type="image/png" />
-
         {/* DNS prefetch for external resources */}
         <link rel="dns-prefetch" href="//connect.facebook.net" />
         <link rel="dns-prefetch" href="//www.googletagmanager.com" />

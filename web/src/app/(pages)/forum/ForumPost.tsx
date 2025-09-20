@@ -809,8 +809,8 @@ const ForumPost = ({
       <Image
         src={image}
         alt="post image"
-        width={150}
-        height={100}
+        width={80}
+        height={80}
         className="forum-post-image"
       />
       <div className="forum-post-content">

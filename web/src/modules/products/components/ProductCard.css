@@ -46,7 +46,7 @@
 .product-image {
   position: relative;
   width: 100%;
-height: auto;
+  height: 200px; /* Fixed height for consistent layout */
   /* border-radius: 8px; */
   overflow: hidden;
   clip-path: polygon(
