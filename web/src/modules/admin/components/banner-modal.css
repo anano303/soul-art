@@ -22,7 +22,7 @@
   box-shadow: 0 8px 32px rgba(1, 38, 69, 0.1);
   color: var(--primary-color, #012645);
   font-family: "FiraGo-Enhanced", "FiraGo", "Noto Sans Georgian", sans-serif;
-  border: 2px solid #7b5642;
+  border: 2px solid var(--secondary-color);
 }
 
 .modal-header {
@@ -30,7 +30,7 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 1.5rem;
-  border-bottom: 2px solid #7b5642;
+  border-bottom: 2px solid var(--secondary-color);
   padding-bottom: 1rem;
 }
 
@@ -55,7 +55,7 @@
 
 .close-btn:hover {
   background-color: rgba(123, 86, 66, 0.1);
-  color: #7b5642;
+  color: var(--secondary-color);
 }
 
 .form-group {
@@ -66,14 +66,14 @@
   display: block;
   margin-bottom: 0.5rem;
   font-weight: 500;
-  color: #7b5642;
+  color: var(--secondary-color);
   font-family: "FiraGo-Enhanced", "FiraGo", "Noto Sans Georgian", sans-serif;
 }
 
 .form-input {
   width: 100%;
   padding: 0.75rem;
-  border: 1px solid #7b5642;
+  border: 1px solid var(--secondary-color);
   border-radius: 6px;
   font-size: 1rem;
   transition: border-color 0.2s ease;
@@ -112,7 +112,7 @@
   justify-content: center;
   gap: 0.5rem;
   padding: 0.75rem;
-  border: 2px dashed #7b5642;
+  border: 2px dashed var(--secondary-color);
   border-radius: 6px;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -129,13 +129,13 @@
 .current-image {
   margin-top: 0.5rem;
   border-radius: 6px;
-  border: 1px solid #7b5642;
+  border: 1px solid var(--secondary-color);
 }
 
 .image-preview {
   margin-top: 0.5rem;
   border-radius: 6px;
-  border: 1px solid #7b5642;
+  border: 1px solid var(--secondary-color);
 }
 
 .checkbox-group {
@@ -155,7 +155,7 @@
   gap: 1rem;
   margin-top: 2rem;
   padding-top: 1rem;
-  border-top: 1px solid #7b5642;
+  border-top: 1px solid var(--secondary-color);
 }
 
 .btn {

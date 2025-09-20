@@ -109,7 +109,10 @@ export function ProductCard({
           <p
             style={{
               margin: "5px 15px 0px 15px",
-              color: theme === "handmade-theme" ? "#7d5a35" : "#153754",
+              color:
+                theme === "handmade-theme"
+                  ? "var(--secondary-color)"
+                  : "#153754",
             }}
           >
             <span className="author">

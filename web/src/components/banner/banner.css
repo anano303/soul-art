@@ -184,7 +184,7 @@
 }
 
 .indicator.active {
-  background: #7b5642;
+  background: var(--secondary-color);
   transform: scale(1.2);
   box-shadow: 0 0 10px rgba(123, 86, 66, 0.8);
 }

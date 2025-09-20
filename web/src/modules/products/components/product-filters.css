@@ -38,7 +38,12 @@
 }
 
 .filter-clear-btn {
-  background: linear-gradient(45deg, #7b5642, var(--primary-color));
+  background: linear-gradient(
+    45deg,
+    var(--secondary-color, #452001
+),
+    var(--primary-color)
+  );
   color: white;
   border: none;
   padding: 8px 16px;
@@ -52,7 +57,12 @@
 }
 
 .filter-clear-btn:hover {
-  background: linear-gradient(45deg, var(--primary-color), #7b5642);
+  background: linear-gradient(
+    45deg,
+    var(--primary-color),
+    var(--secondary-color, #452001
+)
+  );
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(123, 86, 66, 0.4);
 }
@@ -69,7 +79,8 @@
 .main-category-option {
   position: relative;
   background: linear-gradient(135deg, #fff 0%, #f8f6f0 100%);
-  border: 3px solid #7b5642;
+  border: 3px solid var(--secondary-color, #452001
+);
   border-radius: 20px;
   padding: 15px 10px;
   text-align: center;
@@ -140,11 +151,14 @@
   height: 4px;
   background: linear-gradient(
     90deg,
-    #7b5642,
+    var(--secondary-color, #452001
+),
     var(--primary-color),
-    #7b5642,
+    var(--secondary-color, #452001
+),
     var(--primary-color),
-    #7b5642
+    var(--secondary-color, #452001
+)
   );
   background-size: 200% 100%;
   animation: gradientMove 3s ease-in-out infinite;
@@ -182,12 +196,19 @@
 /* ხელნაკეთი ნივთების კატეგორიისთვის ყავისფერი ქვეკატეგორიები */
 .subcategories-section[data-category="handmade"] .subcategory-option {
   /* background: linear-gradient(135deg, #f3e5ab 0%, #f8f0d0 100%); */
-  border: 2px solid #7b5642;
-  color: #7b5642;
+  border: 2px solid var(--secondary-color, #452001
+);
+  color: var(--secondary-color, #452001
+);
 }
 
 .subcategories-section[data-category="handmade"] .subcategory-option:hover {
-  background: linear-gradient(135deg, #7b5642 0%, #654932 100%);
+  background: linear-gradient(
+    135deg,
+    var(--secondary-color, #452001
+) 0%,
+    #654932 100%
+  );
   border-color: #5d3e2b;
   color: white;
   transform: translateY(-3px) scale(1.05);
@@ -195,7 +216,12 @@
 }
 
 .subcategories-section[data-category="handmade"] .subcategory-option.selected {
-  background: linear-gradient(135deg, #7b5642 0%, #654932 100%);
+  background: linear-gradient(
+    135deg,
+    var(--secondary-color, #452001
+) 0%,
+    #654932 100%
+  );
   color: white;
   border-color: #5d3e2b;
   transform: translateY(-2px) scale(1.05);
@@ -218,7 +244,8 @@
 
 /* handmade კატეგორიისთვის სათაურის ფერი */
 .subcategories-section[data-category="handmade"] .subcategories-title {
-  color: #7b5642;
+  color: var(--secondary-color, #452001
+);
   text-shadow: 1px 1px 2px rgba(123, 86, 66, 0.2);
 }
 
@@ -267,18 +294,29 @@
 }
 
 .subcategories-grid::-webkit-scrollbar-thumb {
-  background: linear-gradient(45deg, #7b5642, var(--primary-color));
+  background: linear-gradient(
+    45deg,
+    var(--secondary-color, #452001
+),
+    var(--primary-color)
+  );
   border-radius: 10px;
 }
 
 .subcategories-grid::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(45deg, var(--primary-color), #7b5642);
+  background: linear-gradient(
+    45deg,
+    var(--primary-color),
+    var(--secondary-color, #452001
+)
+  );
 }
 
 .subcategory-option {
   position: relative;
   background: linear-gradient(135deg, #fff 0%, #f8f6f0 100%);
-  border: 2px solid #7b5642;
+  border: 2px solid var(--secondary-color, #452001
+);
   border-radius: 25px;
   padding: 12px 20px;
   text-align: center;
@@ -300,7 +338,12 @@
 
 /* ზოგადი ქვეკატეგორიების selected (თუ არ არის სპეციალური კატეგორია) */
 .subcategory-option.selected {
-  background: linear-gradient(135deg, #7b5642 0%, var(--primary-color) 100%);
+  background: linear-gradient(
+    135deg,
+    var(--secondary-color, #452001
+) 0%,
+    var(--primary-color) 100%
+  );
   color: white;
   border-color: var(--primary-color);
   transform: translateY(-2px) scale(1.05);
@@ -318,7 +361,12 @@
 
 /* ფილტრების ტოგლი */
 .filter-toggle-btn {
-  background: linear-gradient(45deg, #7b5642, var(--primary-color));
+  background: linear-gradient(
+    45deg,
+    var(--secondary-color, #452001
+),
+    var(--primary-color)
+  );
   color: white;
   border: none;
   padding: 5px 15px;
@@ -336,7 +384,12 @@
 }
 
 .filter-toggle-btn:hover {
-  background: linear-gradient(45deg, var(--primary-color), #7b5642);
+  background: linear-gradient(
+    45deg,
+    var(--primary-color),
+    var(--secondary-color, #452001
+)
+  );
   transform: translateY(-2px);
   box-shadow: 0 8px 25px rgba(123, 86, 66, 0.4);
 }
@@ -348,7 +401,8 @@
 /* დამატებითი ფილტრები */
 .additional-filters {
   background: linear-gradient(135deg, #fff 0%, #f8f6f0 100%);
-  border: 2px solid #7b5642;
+  border: 2px solid var(--secondary-color, #452001
+);
   border-radius: 15px;
   padding: 20px;
   margin-top: 15px;
@@ -366,7 +420,14 @@
   left: 0;
   right: 0;
   height: 3px;
-  background: linear-gradient(90deg, #7b5642, var(--primary-color), #7b5642);
+  background: linear-gradient(
+    90deg,
+    var(--secondary-color, #452001
+),
+    var(--primary-color),
+    var(--secondary-color, #452001
+)
+  );
   background-size: 200% 100%;
   animation: gradientMove 3s ease-in-out infinite;
 }
@@ -438,7 +499,8 @@
 
 .filter-option {
   background: linear-gradient(135deg, #fff 0%, #f8f6f0 100%);
-  border: 2px solid #7b5642;
+  border: 2px solid var(--secondary-color, #452001
+);
   border-radius: 8px;
   padding: 8px 12px;
   cursor: pointer;
@@ -455,7 +517,8 @@
 }
 
 .filter-option.selected {
-  background: linear-gradient(135deg, #7b5642 0%, var(--primary-color) 100%);
+  background: linear-gradient(135deg, #452001
+ 0%, var(--primary-color) 100%);
   color: white;
   border-color: var(--primary-color);
   box-shadow: 0 4px 15px rgba(123, 86, 66, 0.4);
@@ -472,7 +535,8 @@
 .price-input {
   flex: 1;
   padding: 10px 12px;
-  border: 2px solid #7b5642;
+  border: 2px solid #452001
+;
   border-radius: 8px;
   font-size: 0.9rem;
   background: linear-gradient(135deg, #fff 0%, #f8f6f0 100%);
@@ -487,7 +551,8 @@
 }
 
 .price-apply-btn {
-  background: linear-gradient(45deg, #7b5642, var(--primary-color));
+  background: linear-gradient(45deg, #452001
+, var(--primary-color));
   color: white;
   border: none;
   padding: 10px 16px;
@@ -500,7 +565,8 @@
 }
 
 .price-apply-btn:hover {
-  background: linear-gradient(45deg, var(--primary-color), #7b5642);
+  background: linear-gradient(45deg, var(--primary-color), #452001
+);
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(123, 86, 66, 0.4);
 }
@@ -527,7 +593,8 @@
 .brand-search-input {
   width: 80%;
   padding: 12px 45px 12px 15px;
-  border: 2px solid #7b5642;
+  border: 2px solid #452001
+;
   border-radius: 10px;
   font-size: 1rem;
   background: linear-gradient(135deg, #fff 0%, #f8f6f0 100%);
@@ -556,7 +623,8 @@
   left: 0;
   right: 0;
   background: white;
-  border: 2px solid #7b5642;
+  border: 2px solid #452001
+;
   border-top: none;
   border-radius: 0 0 10px 10px;
   max-height: 200px;
@@ -576,7 +644,8 @@
 }
 
 .brands-dropdown::-webkit-scrollbar-thumb {
-  background: linear-gradient(45deg, #7b5642, var(--primary-color));
+  background: linear-gradient(45deg, #452001
+, var(--primary-color));
   border-radius: 10px;
 }
 
@@ -613,7 +682,8 @@
 }
 
 .brand-dropdown-item.selected {
-  background: linear-gradient(135deg, #7b5642 0%, var(--primary-color) 100%);
+  background: linear-gradient(135deg, #452001
+ 0%, var(--primary-color) 100%);
   color: white;
   font-weight: 600;
   transform: translateX(0);
@@ -627,7 +697,8 @@
 }
 
 .brand-dropdown-item.no-brands-message {
-  color: #7b5642;
+  color: #452001
+;
   font-style: italic;
   cursor: default;
   text-align: center;
@@ -673,7 +744,8 @@
 
 .sort-option {
   background: linear-gradient(135deg, #fff 0%, #f8f6f0 100%);
-  border: 2px solid #7b5642;
+  border: 2px solid #452001
+;
   border-radius: 10px;
   padding: 12px 18px;
   cursor: pointer;
@@ -690,7 +762,8 @@
 }
 
 .sort-option.selected {
-  background: linear-gradient(135deg, #7b5642 0%, var(--primary-color) 100%);
+  background: linear-gradient(135deg, #452001
+ 0%, var(--primary-color) 100%);
   color: white;
   border-color: var(--primary-color);
   box-shadow: 0 4px 15px rgba(123, 86, 66, 0.4);
@@ -851,7 +924,8 @@
 }
 
 .brands-scrollable::-webkit-scrollbar-thumb {
-  background: linear-gradient(45deg, #7b5642, var(--primary-color));
+  background: linear-gradient(45deg, #452001
+, var(--primary-color));
   border-radius: 10px;
 }
 
@@ -895,7 +969,8 @@
 
 /* სორტირების select */
 .sort-select {
-  border: 2px solid #7b5642;
+  border: 2px solid #452001
+;
   border-radius: 10px;
   font-size: 1rem;
   background: linear-gradient(135deg, #fff 0%, #f8f6f0 100%);
@@ -907,7 +982,8 @@
 }
 
 .sort-select.handmade-theme {
-  color: #7b5642;
+  color: #452001
+;
 }
 
 .sort-select:focus {
@@ -917,7 +993,8 @@
 }
 
 .sort-select.handmade-theme:focus {
-  border-color: #7b5642;
+  border-color: #452001
+;
   box-shadow: 0 0 10px rgba(123, 86, 66, 0.5);
 }
 
@@ -928,7 +1005,8 @@
 }
 
 .sort-select.handmade-theme option {
-  color: #7b5642;
+  color: #452001
+;
 }
 
 /* responsive improvements */
@@ -1094,7 +1172,13 @@
   left: -2px;
   right: -2px;
   bottom: -2px;
-  background: linear-gradient(45deg, var(--primary-color), #01456b, #003055, var(--primary-color));
+  background: linear-gradient(
+    45deg,
+    var(--primary-color),
+    #01456b,
+    #003055,
+    var(--primary-color)
+  );
   border-radius: 22px;
   z-index: -1;
   animation: blueGlow 4s linear infinite;
@@ -1117,8 +1201,10 @@
 
 /* ყავისფერი კატეგორიისთვის სპეციალური ეფექტები */
 .main-category-option:last-child {
-  background: linear-gradient(135deg, #7b5642 0%, #654932 100%);
-  border-color: #7b5642;
+  background: linear-gradient(135deg, #452001
+ 0%, #654932 100%);
+  border-color: #452001
+;
   color: white;
   box-shadow: 0 8px 30px rgba(123, 86, 66, 0.3);
 }
@@ -1138,7 +1224,9 @@
   left: -2px;
   right: -2px;
   bottom: -2px;
-  background: linear-gradient(45deg, #7b5642, #654932, #5d3e2b, #7b5642);
+  background: linear-gradient(45deg, #452001
+, #654932, #5d3e2b, #452001
+);
   border-radius: 22px;
   z-index: -1;
   animation: brownGlow 4s linear infinite;

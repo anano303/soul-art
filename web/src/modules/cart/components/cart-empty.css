@@ -13,7 +13,7 @@
   font-family: "FiraGo-Enhanced", "FiraGo", "Noto Sans Georgian", sans-serif;
   border-radius: 12px;
   box-shadow: 0 8px 20px rgba(1, 38, 69, 0.1);
-  border: 2px solid #7b5642;
+  border: 2px solid var(--secondary-color);
   position: relative;
   overflow: hidden;
   margin-top: 5%;
@@ -46,7 +46,7 @@
 
 .cart-empty-icon {
   position: relative;
-  color: #7b5642;
+  color: var(--secondary-color);
   margin-bottom: 1.5rem;
   opacity: 0.8;
 }

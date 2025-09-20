@@ -32,7 +32,8 @@
   padding: 1.5rem;
   background: linear-gradient(135deg, #f8f6f0 0%, #e8e3d8 100%);
   border-radius: 12px;
-  border-left: 4px solid #7b5642;
+  border-left: 4px solid var(--secondary-color, #452001
+);
 }
 
 .privacy-intro p {
@@ -47,7 +48,8 @@
 }
 
 .view-policy-btn {
-  background: linear-gradient(135deg, #7b5642 0%, #9d6f57 100%);
+  background: linear-gradient(135deg, var(--secondary-color, #452001
+) 0%, #9d6f57 100%);
   color: white;
   border: none;
   padding: 1rem 2rem;
@@ -62,7 +64,8 @@
 .view-policy-btn:hover {
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(123, 86, 66, 0.4);
-  background: linear-gradient(135deg, #9d6f57 0%, #7b5642 100%);
+  background: linear-gradient(135deg, #9d6f57 0%, var(--secondary-color, #452001
+) 100%);
 }
 
 .policy-summary {
@@ -72,7 +75,8 @@
 .policy-summary h2 {
   font-family: "FiraGo", serif;
   font-size: 1.8rem;
-  color: #7b5642;
+  color: var(--secondary-color, #452001
+);
   margin-bottom: 1.5rem;
   font-weight: 600;
   text-align: center;
@@ -117,14 +121,16 @@
   background: linear-gradient(135deg, #f8f6f0 0%, #e8e3d8 100%);
   padding: 2rem;
   border-radius: 12px;
-  border-left: 4px solid #7b5642;
+  border-left: 4px solid var(--secondary-color, #452001
+);
   text-align: center;
 }
 
 .contact-section h2 {
   font-family: "FiraGo", serif;
   font-size: 1.5rem;
-  color: #7b5642;
+  color: var(--secondary-color, #452001
+);
   margin-bottom: 1rem;
   font-weight: 600;
 }
@@ -166,7 +172,8 @@
 .privacy-section h2 {
   font-family: "FiraGo", serif;
   font-size: 1.5rem;
-  color: #7b5642;
+  color: var(--secondary-color, #452001
+);
   margin-bottom: 1rem;
   font-weight: 600;
 }

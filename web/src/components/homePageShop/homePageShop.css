@@ -265,7 +265,7 @@
   height: 6px;
   background: linear-gradient(
     90deg,
-    #7b5642,
+    var(--secondary-color, var(--secondary-color)),
     var(--primary-color, #012645),
     #f48c06
   );
@@ -299,7 +299,7 @@
   left: 0;
   width: 60%;
   height: 2px;
-  background: linear-gradient(90deg, #7b5642, #f48c06, transparent);
+  background: linear-gradient(90deg, var(--secondary-color), #f48c06, transparent);
   opacity: 0.4;
   animation: afterGlow 3s ease-in-out infinite;
 } */
@@ -325,7 +325,7 @@
 }
 
 .section-title:last-child {
-  background: linear-gradient(135deg, #7b5642, #654932);
+  background: linear-gradient(135deg, var(--secondary-color), #654932);
   -webkit-background-clip: text;
   /* -webkit-text-fill-color: transparent; */
   background-clip: text;
@@ -376,7 +376,7 @@
 }
 
 .section-title:last-of-type::before {
-  background: linear-gradient(90deg, #7b5642, #654932, #5d3e2b);
+  background: linear-gradient(90deg, var(--secondary-color), #654932, #5d3e2b);
   background-size: 200% 100%;
   animation: brownGradient 3s ease-in-out infinite;
 }
@@ -418,7 +418,11 @@
 }
 
 .shop-container .see-more-btn {
-  background: linear-gradient(135deg, #7b5642, var(--primary-color, #012645));
+  background: linear-gradient(
+    135deg,
+    var(--secondary-color),
+    var(--primary-color, #012645)
+  );
   color: white;
   padding: 3px;
   border: none;
@@ -503,7 +507,7 @@
 /* ხელნაკეთი კატეგორიისთვის სპეციალური ეფექტები - ყავისფერი */
 .section-title.category-handmade {
   position: relative;
-  color: #7b5642;
+  color: var(--secondary-color);
   font-weight: 900;
   text-shadow: 3px 3px 8px rgba(123, 86, 66, 0.4),
     0 0 20px rgba(123, 86, 66, 0.2);
@@ -523,7 +527,13 @@
 }
 
 .section-title.category-handmade::before {
-  background: linear-gradient(90deg, #7b5642, #8b6f47, #654932, #a0754d);
+  background: linear-gradient(
+    90deg,
+    var(--secondary-color),
+    #8b6f47,
+    #654932,
+    #a0754d
+  );
   background-size: 300% 100%;
   animation: handmadeGradient 6s ease-in-out infinite;
   box-shadow: 0 0 20px rgba(123, 86, 66, 0.4);
@@ -690,7 +700,7 @@
 
 /* დამატებითი ეფექტები */
 /* .section-title.category-handmade::after {
-  background: linear-gradient(90deg, #7b5642, #a0754d, transparent);
+  background: linear-gradient(90deg, var(--secondary-color), #a0754d, transparent);
 }
 
 .section-title.category-paintings::after {
@@ -910,7 +920,7 @@
 }
 
 .product-section:nth-child(even) .section-title {
-  color: #7b5642; /* ყავისფერი - ხელნაკეთი */
+  color: var(--secondary-color); /* ყავისფერი - ხელნაკეთი */
   padding-left: 5px;
   padding-top: 5px;
   display: flex;
@@ -927,11 +937,11 @@
 }
 
 .product-section:nth-child(even) .see-more-btn {
-  background: linear-gradient(135deg, #7b5642, #8b6f47);
+  background: linear-gradient(135deg, var(--secondary-color), #8b6f47);
 }
 
 .product-section:nth-child(even) .see-more-btn:hover {
-  background: linear-gradient(135deg, #8b6f47, #7b5642);
+  background: linear-gradient(135deg, #8b6f47, var(--secondary-color));
   box-shadow: 0 6px 20px rgba(123, 86, 66, 0.4);
 }
 
@@ -1007,7 +1017,7 @@
 }
 
 .product-section:nth-child(even) .see-more-btn {
-  background: linear-gradient(135deg, #7b5642, #8b6f47);
+  background: linear-gradient(135deg, var(--secondary-color), #8b6f47);
   box-shadow: 0 4px 15px rgba(123, 86, 66, 0.3);
 }
 
@@ -1018,7 +1028,7 @@
 }
 
 .product-section:nth-child(even) .see-more-btn:hover {
-  background: linear-gradient(135deg, #8b6f47, #7b5642);
+  background: linear-gradient(135deg, #8b6f47, var(--secondary-color));
   box-shadow: 0 6px 20px rgba(123, 86, 66, 0.4);
   animation: brownPulse 2s infinite;
 }
