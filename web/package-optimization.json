@@ -1,9 +1,0 @@
-{
-  "scripts": {
-    "build:analyze": "cross-env ANALYZE=true next build",
-    "build:optimize": "next build && npm run css:analyze",
-    "css:analyze": "node scripts/analyze-css.js",
-    "dev:performance": "cross-env NODE_ENV=development next dev --turbo",
-    "lighthouse": "lighthouse http://localhost:3000 --output-path=./lighthouse-report.html --view"
-  }
-}
