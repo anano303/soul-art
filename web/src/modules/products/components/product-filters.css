@@ -76,7 +76,11 @@
 
 .main-category-option {
   position: relative;
-  background: linear-gradient(135deg, #fff 0%, #f8f6f0 100%);
+  background: linear-gradient(
+    135deg,
+    var(--primary-color) 0%,
+    var(--secondary-color) 100%
+  );
   border: 3px solid var(--secondary-color);
   border-radius: 20px;
   padding: 15px 10px;
@@ -90,6 +94,7 @@
   align-items: center;
   justify-content: center;
   font-family: firaGo;
+  color: white;
 }
 
 /* ძველი hover ეფექტები წავშალოთ */
@@ -133,7 +138,7 @@
   margin-top: 20px;
 
   position: relative;
-  overflow: hidden;
+  overflow: visible; /* ცვლილება: visible რომ hover ეფექტები არ იჭრებოდეს */
   justify-self: center;
   align-self: center;
   font-family: firaGo;
@@ -160,24 +165,29 @@
 
 /* ნახატების კატეგორიისთვის ლურჯი ქვეკატეგორიები */
 .subcategories-section[data-category="paintings"] .subcategory-option {
-  background: linear-gradient(135deg, #e3f2fd 0%, #f1f8ff 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(1, 38, 69, 0.1) 0%,
+    rgba(1, 38, 69, 0.05) 100%
+  );
   border: 2px solid var(--primary-color);
   color: var(--primary-color);
 }
 
 .subcategories-section[data-category="paintings"] .subcategory-option:hover {
-  background: linear-gradient(135deg, #bbdefb 0%, #e3f2fd 100%);
-  border-color: #01456b;
+  background: var(--primary-color);
+  border-color: var(--primary-color);
+  color: white;
   transform: translateY(-3px) scale(1.05);
-  box-shadow: 0 8px 25px rgba(1, 38, 69, 0.4);
+  box-shadow: 0 3px 10px var(--primary-color);
 }
 
 .subcategories-section[data-category="paintings"] .subcategory-option.selected {
   background: linear-gradient(135deg, var(--primary-color) 0%, #01456b 100%);
   color: white;
-  border-color: #003055;
+  border-color: var(--primary-color);
   transform: translateY(-2px) scale(1.05);
-  box-shadow: 0 8px 25px rgba(1, 38, 69, 0.6);
+  box-shadow: 0 8px 25px var(--primary-color);
 }
 
 .subcategories-section[data-category="paintings"]
@@ -189,21 +199,29 @@
 
 /* ხელნაკეთი ნივთების კატეგორიისთვის ყავისფერი ქვეკატეგორიები */
 .subcategories-section[data-category="handmade"] .subcategory-option {
-  /* background: linear-gradient(135deg, #f3e5ab 0%, #f8f0d0 100%); */
+  background: linear-gradient(
+    135deg,
+    rgba(69, 32, 1, 0.1) 0%,
+    rgba(69, 32, 1, 0.05) 100%
+  );
   border: 2px solid var(--secondary-color);
   color: var(--secondary-color);
 }
 
 .subcategories-section[data-category="handmade"] .subcategory-option:hover {
-  background: linear-gradient(135deg, var(--secondary-color) 0%, #2c1401 100%);
+  background: var(--secondary-color);
   border-color: var(--secondary-color);
   color: white;
   transform: translateY(-3px) scale(1.05);
-  box-shadow: 0 8px 25px var(--secondary-color);
+  box-shadow: 0 3px 10px var(--secondary-color);
 }
 
 .subcategories-section[data-category="handmade"] .subcategory-option.selected {
-  background: linear-gradient(135deg, var(--secondary-color) 0%, #2c1401 100%);
+  background: linear-gradient(
+    135deg,
+    var(--secondary-color) 0%,
+    rgba(69, 32, 1, 0.8) 100%
+  );
   color: white;
   border-color: var(--secondary-color);
   transform: translateY(-2px) scale(1.05);
@@ -257,43 +275,27 @@
 
 .subcategories-grid {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap; /* ერთ ხაზზე */
   gap: 12px;
-
-  max-height: none;
-  overflow: visible;
-  padding: 0;
+  overflow-x: auto; /* ჰორიზონტალური სქროლი */
+  overflow-y: visible; /* ცვლილება: visible რომ hover ეფექტები არ იჭრებოდეს */
+  padding: 10px 0; /* ზედა და ქვედა padding hover ეფექტებისთვის */
+  scrollbar-width: none; /* Firefox-ში სქროლის დამალვა */
+  -ms-overflow-style: none; /* IE/Edge-ში სქროლის დამალვა */
+  scroll-behavior: smooth; /* smooth სქროლინგი */
 }
 
 .subcategories-grid::-webkit-scrollbar {
-  width: 8px;
-}
-
-.subcategories-grid::-webkit-scrollbar-track {
-  background: #f1f1f1;
-  border-radius: 10px;
-}
-
-.subcategories-grid::-webkit-scrollbar-thumb {
-  background: linear-gradient(
-    10deg,
-    var(--secondary-color),
-    var(--primary-color)
-  );
-  border-radius: 10px;
-}
-
-.subcategories-grid::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(
-    10deg,
-    var(--primary-color),
-    var(--secondary-color)
-  );
+  display: none; /* Webkit ბრაუზერებში სქროლის დამალვა */
 }
 
 .subcategory-option {
   position: relative;
-  background: linear-gradient(135deg, #fff 0%, #f8f6f0 100%);
+  background: linear-gradient(
+    135deg,
+    var(--primary-color) 0%,
+    var(--secondary-color) 100%
+  );
   border: 2px solid var(--secondary-color);
   border-radius: 25px;
   padding: 12px 20px;
@@ -305,6 +307,7 @@
   font-size: 0.9rem;
   min-width: 100px;
   flex-shrink: 0;
+  color: white;
 }
 
 /* ზოგადი ქვეკატეგორიების hover (თუ არ არის სპეციალური კატეგორია) */
@@ -1013,7 +1016,15 @@
 
   .subcategories-grid {
     gap: 8px;
-    justify-content: flex-start;
+    padding: 8px 8px; /* ზედა და ქვედა padding hover ეფექტებისთვის */
+    overflow-x: auto;
+    overflow-y: visible; /* ცვლილება: visible რომ hover ეფექტები არ იჭრებოდეს */
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .subcategories-grid::-webkit-scrollbar {
+    display: none;
   }
 
   .subcategory-option {
@@ -1057,7 +1068,7 @@
   }
 
   .subcategories-section {
-    padding: 15px;
+    padding-top: 15px;
   }
 
   .subcategories-grid {
@@ -1101,7 +1112,7 @@
   }
 
   .subcategories-section {
-    padding: 20px;
+    padding-top: 20px;
   }
 }
 
@@ -1115,7 +1126,7 @@
   }
 
   .subcategories-section {
-    padding: 20px;
+    padding-top: 20px;
   }
 }
 
@@ -1128,7 +1139,7 @@
   }
 
   .subcategories-section {
-    padding: 15px;
+    padding-top: 15px;
   }
 
   .subcategories-title {

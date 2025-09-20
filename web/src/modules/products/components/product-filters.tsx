@@ -715,7 +715,7 @@ export function ProductFilters({
                 return "";
               })()}
             >
-              <h3 className="subcategories-title">
+              {/* <h3 className="subcategories-title">
                 {t("shop.subcategories")} -{" "}
                 {getLocalizedName(
                   categories.find(
@@ -725,7 +725,7 @@ export function ProductFilters({
                     (cat) => (cat.id || cat._id) === selectedCategoryId
                   )
                 )}
-              </h3>
+              </h3> */}
               <div className="subcategories-grid">
                 {isSubcategoriesLoading ? (
                   <div className="loading">
