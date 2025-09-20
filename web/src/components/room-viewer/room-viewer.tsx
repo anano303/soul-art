@@ -237,7 +237,7 @@ export function RoomViewer({ productImage, isOpen, onClose }: RoomViewerProps) {
                       WebkitClipPath: "none",
                     }}
                     unoptimized={true} // Use original image without Next.js optimization
-                    priority
+                    loading="eager"
                     onLoad={() => setProductLoaded(true)}
                     onError={(e) => {
                       console.error("Error loading product image:", e);

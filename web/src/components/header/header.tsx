@@ -39,16 +39,20 @@ export default function Header() {
     <header className={`header ${isNavOpen ? "mobile-nav-active" : ""}`}>
       <div className="logo">
         <Link href="/">
-          <div style={{ position: "relative", width: "200px", height: "50px" }}>
-            <Image
-              src={logo}
-              alt="logo soulArt"
-              fill
-              sizes="(max-width: 480px) 160px, 200px"
-              priority
-              style={{ objectFit: "contain" }}
-            />
-          </div>
+          <Image
+            src={logo}
+            alt="logo soulArt"
+            width={200}
+            height={50}
+            sizes="(max-width: 480px) 160px, 200px"
+            style={{
+              objectFit: "contain",
+              width: "auto",
+              height: "auto",
+              maxWidth: "100%",
+              maxHeight: "100%",
+            }}
+          />
         </Link>
       </div>
       <nav className="main-nav">
