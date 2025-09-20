@@ -120,30 +120,6 @@ const nextConfig: NextConfig = {
           linkType: false,
         };
       }
-
-      // Custom plugin to reduce CSS preloading for specific components
-      config.plugins.push({
-        apply: (compiler: any) => {
-          compiler.hooks.compilation.tap('ReduceCSSPreload', (compilation: any) => {
-            compilation.hooks.htmlWebpackPluginAlterAssetTags &&
-            compilation.hooks.htmlWebpackPluginAlterAssetTags.tap('ReduceCSSPreload', (data: any) => {
-              // Filter out preload tags for specific CSS files
-              data.assetTags.styles = data.assetTags.styles.filter((tag: any) => {
-                if (tag.attributes && tag.attributes.rel === 'preload') {
-                  const href = tag.attributes.href;
-                  // Remove preloads for MessengerChat and other dynamic components
-                  if (href && (href.includes('MessengerChat') || href.includes('_app-pages-browser_src_components_'))) {
-                    console.log('Preventing CSS preload for:', href);
-                    return false;
-                  }
-                }
-                return true;
-              });
-              return data;
-            });
-          });
-        }
-      });
     }
 
     return config;

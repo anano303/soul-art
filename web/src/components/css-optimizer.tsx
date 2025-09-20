@@ -25,35 +25,23 @@ export default function CSSOptimizer() {
     // Load performance CSS after initial render
     setTimeout(loadPerformanceCSS, 100);
 
-    // Optimize CSS preloading with specific focus on chat components
+    // Optimize CSS preloading
     const optimizePreloads = () => {
       // Remove rel="preload" from CSS links that haven't been used
       const preloads = document.querySelectorAll(
         'link[rel="preload"][as="style"]'
       );
-      
       preloads.forEach((link) => {
         const href = link.getAttribute("href");
         if (href) {
-          // Special handling for MessengerChat and other dynamic components
-          const isMessengerChat = href.includes("MessengerChat");
-          const isDynamicComponent = href.includes("_app-pages-browser_src_components_");
-          
           // Check if the actual stylesheet exists
           const stylesheet = document.querySelector(
             `link[rel="stylesheet"][href="${href}"]`
           );
-          
           if (!stylesheet) {
-            // For dynamic components, remove the preload entirely
-            if (isMessengerChat || isDynamicComponent) {
-              console.log("Removing unused CSS preload:", href);
-              link.remove();
-            } else {
-              // For other components, convert preload to regular link
-              link.setAttribute("rel", "stylesheet");
-              link.removeAttribute("as");
-            }
+            // Convert preload to regular link to avoid the warning
+            link.setAttribute("rel", "stylesheet");
+            link.removeAttribute("as");
           }
         }
       });
