@@ -19,6 +19,7 @@ import {
   storeSchema,
 } from "@/lib/structured-data";
 import GoogleAnalytics from "@/components/GoogleAnalytics";
+import "@/lib/cloudflare-cleanup"; // Auto-cleanup Cloudflare cookies in development
 
 export const metadata: Metadata = {
   metadataBase: new URL(
@@ -75,10 +76,22 @@ export const metadata: Metadata = {
     shortcut: "/soulart_icon_blue_fullsizes.ico",
     apple: "/soulart_icon_blue_fullsizes.ico",
     other: [
-      { rel: "icon", url: "/soulart_icon_blue_fullsizes.ico", type: "image/x-icon" },
-      { rel: "shortcut icon", url: "/soulart_icon_blue_fullsizes.ico", type: "image/x-icon" },
+      {
+        rel: "icon",
+        url: "/soulart_icon_blue_fullsizes.ico",
+        type: "image/x-icon",
+      },
+      {
+        rel: "shortcut icon",
+        url: "/soulart_icon_blue_fullsizes.ico",
+        type: "image/x-icon",
+      },
       { rel: "apple-touch-icon", url: "/soulart_icon_blue_fullsizes.ico" },
-      { rel: "mask-icon", url: "/soulart_icon_blue_fullsizes.ico", color: "#012645" },
+      {
+        rel: "mask-icon",
+        url: "/soulart_icon_blue_fullsizes.ico",
+        color: "#012645",
+      },
     ],
   },
   openGraph: {
@@ -92,7 +105,7 @@ export const metadata: Metadata = {
       "უნიკალური ხელნაკეთი ნივთები, ნახატები, ხელოვნების ნამუშევრები. ხარისხი, სანდოობა, ფასი",
     images: [
       {
-        url: "/van gog.jpg",
+        url: "/van-gogh.jpg",
         width: 1200,
         height: 630,
         alt: "Soulart - ნახატების და ხელნაკეთი ნივთების   პირველი ონლაინ პლატფორმა საქართველოში",
@@ -105,7 +118,7 @@ export const metadata: Metadata = {
       "Soulart - ნახატების და ხელნაკეთი ნივთების   პირველი ონლაინ პლატფორმა საქართველოში",
     description:
       "ხელნაკეთი ნივთების და ნახატების საუკეთესო არჩევანი საქართველოში",
-    images: ["/van gog.jpg"],
+    images: ["/van-gogh.jpg"],
   },
 };
 
@@ -118,11 +131,26 @@ export default function RootLayout({
     <html lang="en">
       <head>
         {/* Favicon links */}
-        <link rel="icon" href="/soulart_icon_blue_fullsizes.ico" type="image/x-icon" />
+        <link
+          rel="icon"
+          href="/soulart_icon_blue_fullsizes.ico"
+          type="image/x-icon"
+        />
         <link rel="apple-touch-icon" href="/soulart_icon_blue_fullsizes.ico" />
-        <link rel="shortcut icon" href="/soulart_icon_blue_fullsizes.ico" type="image/x-icon" />
-        <link rel="mask-icon" href="/soulart_icon_blue_fullsizes.ico" color="#012645" />
-        <meta name="msapplication-TileImage" content="/soulart_icon_blue_fullsizes.ico" />
+        <link
+          rel="shortcut icon"
+          href="/soulart_icon_blue_fullsizes.ico"
+          type="image/x-icon"
+        />
+        <link
+          rel="mask-icon"
+          href="/soulart_icon_blue_fullsizes.ico"
+          color="#012645"
+        />
+        <meta
+          name="msapplication-TileImage"
+          content="/soulart_icon_blue_fullsizes.ico"
+        />
         {/* Chrome-specific meta tags for better shortcut support */}
         <meta name="theme-color" content="#012645" />
         <meta name="msapplication-TileColor" content="#012645" />
@@ -146,17 +174,21 @@ export default function RootLayout({
       >
         {/* Dynamic Favicon Handler */}
         <DynamicFavicon />
-        
+
         <Providers>
           <AuthProvider>
             <CartProvider>
               <CheckoutProvider>
                 <LanguageProvider>
-                  <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+                  <div
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      minHeight: "100vh",
+                    }}
+                  >
                     <Header />
-                    <div style={{ flex: 1 }}>
-                      {children}
-                    </div>
+                    <div style={{ flex: 1 }}>{children}</div>
                     <Footer />
                   </div>
                 </LanguageProvider>

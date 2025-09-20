@@ -54,7 +54,7 @@ export async function generateMetadata({
       siteName: "Soulart",
       images: [
         {
-          url: "/van gog.jpg",
+          url: "/van-gogh.jpg",
           width: 1200,
           height: 630,
           alt: `Soulart ძიება - ${decodedKeyword}`,
@@ -67,7 +67,7 @@ export async function generateMetadata({
       card: "summary_large_image",
       title: `ძიება: ${decodedKeyword} - Soulart`,
       description: `ძიების შედეგები "${decodedKeyword}" - ხელნაკეთი ნივთები და ნახატები Soulart-ში.`,
-      images: ["/van gog.jpg"],
+      images: ["/van-gogh.jpg"],
     },
     alternates: {
       canonical: `https://soulart.ge/search/${encodeURIComponent(

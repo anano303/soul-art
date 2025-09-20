@@ -58,8 +58,23 @@ export function middleware(request: NextRequest) {
       return isProtected;
     })
   ) {
-    console.log("🚨 Redirecting unauthenticated user to /login from:", pathname);
+    console.log(
+      "🚨 Redirecting unauthenticated user to /login from:",
+      pathname
+    );
     return NextResponse.redirect(new URL("/login", request.url));
+  }
+
+  // Filter out Cloudflare cookies in development mode to prevent domain mismatch
+  if (process.env.NODE_ENV === "development") {
+    const response = NextResponse.next();
+
+    // Remove problematic Cloudflare cookies
+    response.cookies.delete("__cf_bm");
+    response.cookies.delete("__cfruid");
+    response.cookies.delete("cf_clearance");
+
+    return response;
   }
 
   return NextResponse.next();

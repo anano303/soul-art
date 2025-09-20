@@ -1,5 +1,8 @@
 import { ProtectedRoute } from "@/components/protected-route";
-import { ProfileNavigation, MobileProfileNavigation } from "@/components/profile-navigation";
+import {
+  ProfileNavigation,
+  MobileProfileNavigation,
+} from "@/components/profile-navigation";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -32,7 +35,7 @@ export const metadata: Metadata = {
     siteName: "Soulart",
     images: [
       {
-        url: "/van gog.jpg",
+        url: "/van-gogh.jpg",
         width: 1200,
         height: 630,
         alt: "Soulart Profile",
@@ -44,7 +47,7 @@ export const metadata: Metadata = {
     title: "პროფილი | Soulart - Profile | Soulart",
     description:
       "მომხმარებლის პროფილი, შეკვეთების ისტორია და პერსონალური პარამეტრები",
-    images: ["/van gog.jpg"],
+    images: ["/van-gogh.jpg"],
   },
   robots: {
     index: false,
@@ -66,9 +69,7 @@ export default function ProfileLayout({
         <MobileProfileNavigation />
         <div className="flex gap-6">
           <ProfileNavigation />
-          <div className="flex-1 min-w-0">
-            {children}
-          </div>
+          <div className="flex-1 min-w-0">{children}</div>
         </div>
       </div>
     </ProtectedRoute>
