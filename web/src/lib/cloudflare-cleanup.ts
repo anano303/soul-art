@@ -46,49 +46,33 @@ if (process.env.NODE_ENV === "development") {
 
     // Function to check if message should be filtered
     const shouldFilter = (message: string) => {
-      // Mozilla specific patterns (exact matches from console)
-      if (
-        message.includes(
-          'Cookie "__cf_bm" has been rejected for invalid domain'
-        )
-      ) {
-        return true;
-      }
-
-      // Comment likes logs
-      if (message.includes("Comment likes initialized")) {
-        return true;
-      }
-
       const filterKeywords = [
         // React DevTools
         "Download the React DevTools",
         "react-devtools",
-
+        
         // User Profile
         "User profile updated",
-
+        
         // LCP Warnings
         "Largest Contentful Paint",
         "LCP",
         "priority property",
         "above the fold",
-
+        
         // Cookies
         "_ga_",
         "__cf_bm",
-        "__cfruid",
+        "__cfruid", 
         "cf_clearance",
         "cookie",
-        "Cookie",
-        "rejected",
-        "invalid domain",
         "expires",
         "overwritten",
+        "rejected for invalid domain",
         "Partitioned",
         "access_token",
         "refresh_token",
-
+        
         // Preload/CSS
         "preloaded with link preload",
         "preload tag",
@@ -98,86 +82,66 @@ if (process.env.NODE_ENV === "development") {
         "preloaded using link preload",
         "appropriate `as` value",
         "window's load event",
-
+        
         // Images
         "logo-white",
         "warn-once.ts",
         "width or height modified",
         "aspect ratio",
         "S3",
-        "amazonaws.com",
+        "amazonaws.com"
       ];
-
-      return filterKeywords.some((keyword) =>
-        message.toLowerCase().includes(keyword.toLowerCase())
-      );
+      
+      return filterKeywords.some(keyword => message.toLowerCase().includes(keyword.toLowerCase()));
     };
 
     console.log = (...args) => {
-      const message = String(args.join(" "));
+      const message = args.join(" ");
       if (shouldFilter(message)) return;
       originalConsoleLog.apply(console, args);
     };
-
+    
     console.warn = (...args) => {
-      const message = String(args.join(" "));
+      const message = args.join(" ");
       if (shouldFilter(message)) return;
       originalConsoleWarn.apply(console, args);
     };
 
     console.error = (...args) => {
-      const message = String(args.join(" "));
-      if (
-        message.includes("401") ||
-        message.includes("Session expired") ||
-        message.includes("auth/refresh") ||
-        shouldFilter(message)
-      ) {
-        // Convert expected auth errors to debug messages
-        console.debug("🔐 Auth check:", message);
-        return;
-      }
+      const message = args.join(" ");
+      if (shouldFilter(message)) return;
       originalConsoleError.apply(console, args);
     };
-
+    
     console.info = (...args) => {
-      const message = String(args.join(" "));
+      const message = args.join(" ");
       if (shouldFilter(message)) return;
       originalConsoleInfo.apply(console, args);
     };
-
+    
     console.debug = (...args) => {
-      const message = String(args.join(" "));
+      const message = args.join(" ");
       if (shouldFilter(message)) return;
       originalConsoleDebug.apply(console, args);
     };
 
     // Also try to intercept browser's native resource warnings
     const originalAddEventListener = window.addEventListener;
-    window.addEventListener = function (
-      type: string,
-      listener: EventListenerOrEventListenerObject | null,
-      options?: boolean | AddEventListenerOptions
-    ) {
-      if (type === "error" || type === "warning") {
+    window.addEventListener = function(type: string, listener: EventListenerOrEventListenerObject | null, options?: boolean | AddEventListenerOptions) {
+      if (type === 'error' || type === 'warning') {
         // Filter resource loading errors/warnings
-        const wrappedListener = function (this: any, event: any) {
+        const wrappedListener = function(this: any, event: any) {
           if (event.message && shouldFilter(event.message)) {
             event.preventDefault?.();
             return false;
           }
-          if (typeof listener === "function") {
+          if (typeof listener === 'function') {
             return listener.call(this, event);
-          } else if (listener && typeof listener.handleEvent === "function") {
+          } else if (listener && typeof listener.handleEvent === 'function') {
             return listener.handleEvent(event);
           }
         };
-        return originalAddEventListener.call(
-          this,
-          type,
-          wrappedListener,
-          options
-        );
+        return originalAddEventListener.call(this, type, wrappedListener, options);
       }
       if (listener) {
         return originalAddEventListener.call(this, type, listener, options);

@@ -123,7 +123,16 @@ const ForumPost = ({
       setCommentLikes(likesMap);
       setLikedComments(likedMap);
 
-      // Development console debug removed
+      console.log("Comment likes initialized:", {
+        likesMap,
+        likedMap,
+        currentUserId: currentUser?._id,
+        comments: comments.map((c) => ({
+          id: c.id,
+          likesArray: c.likesArray,
+          hasCurrentUserLike: c.likesArray?.includes(currentUser?._id || ""),
+        })),
+      });
     }
   }, [comments, currentUser]);
 
