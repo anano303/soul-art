@@ -1,11 +1,9 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import "../styles/performance.css";
 import { Providers } from "./providers";
 import { Toaster } from "@/components/ui/toaster";
 import { AuthProvider } from "@/components/auth-provider";
 
-import { satoshi } from "./(pages)/fonts";
 import Footer from "@/components/footer/footer";
 import { LanguageProvider } from "@/hooks/LanguageContext";
 import Header from "@/components/header/header";
@@ -154,6 +152,33 @@ export default function RootLayout({
         {/* Chrome-specific meta tags for better shortcut support */}
         <meta name="theme-color" content="#012645" />
         <meta name="msapplication-TileColor" content="#012645" />
+
+        {/* Resource preloading for better performance */}
+        <link
+          rel="preconnect"
+          href="https://fonts.googleapis.com"
+          crossOrigin="anonymous"
+        />
+        <link
+          rel="preconnect"
+          href="https://fonts.gstatic.com"
+          crossOrigin="anonymous"
+        />
+        <link
+          rel="preconnect"
+          href="https://res.cloudinary.com"
+          crossOrigin="anonymous"
+        />
+
+        {/* Preload critical images */}
+        <link rel="preload" href="/logo.png" as="image" type="image/png" />
+        <link rel="preload" href="/brush.png" as="image" type="image/png" />
+
+        {/* DNS prefetch for external resources */}
+        <link rel="dns-prefetch" href="//connect.facebook.net" />
+        <link rel="dns-prefetch" href="//www.googletagmanager.com" />
+        <link rel="dns-prefetch" href="//www.google-analytics.com" />
+
         {/* Facebook SDK - Fix appId to lowercase appid */}
         <script
           async
@@ -169,7 +194,7 @@ export default function RootLayout({
         /> */}
       </head>
       <body
-        className={`${satoshi.variable} antialiased min-h-screen flex flex-col overflow-x-hidden`}
+        className="antialiased min-h-screen flex flex-col overflow-x-hidden"
         style={{ maxWidth: "100vw" }}
       >
         {/* Dynamic Favicon Handler */}
