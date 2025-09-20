@@ -42,11 +42,9 @@ export default function Header() {
           <Image
             src={logo}
             width={200}
-            height={0}
-            style={{ width: "200px", height: "auto" }}
+            style={{ height: "auto" }}
             alt="logo soulArt"
             priority
-            sizes="200px"
           />
         </Link>
       </div>
