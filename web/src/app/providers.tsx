@@ -40,14 +40,14 @@ export function Providers({ children }: { children: React.ReactNode }) {
   // Initialize auth when the app starts
   useEffect(() => {
     const initAuth = async () => {
-      if (process.env.NODE_ENV === "development") {
+      if (process.env.NODE_ENV === 'development') {
         console.log("🚀 Initializing auth...");
       }
       // With HTTP-only cookies, no initialization needed
 
       // Check if we have tokens and potentially refresh them
       const isAuthed = await checkAndRefreshAuth();
-      if (process.env.NODE_ENV === "development") {
+      if (process.env.NODE_ENV === 'development') {
         console.log(
           `🔒 Auth initialized, user is ${
             isAuthed ? "authenticated" : "not authenticated"

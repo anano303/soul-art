@@ -4,7 +4,7 @@ export default function GoogleAnalytics() {
   const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
 
   // Don't load Google Analytics in development to avoid cookie warnings
-  if (!GA_MEASUREMENT_ID || process.env.NODE_ENV === "development") {
+  if (!GA_MEASUREMENT_ID || process.env.NODE_ENV === 'development') {
     return null;
   }
 
