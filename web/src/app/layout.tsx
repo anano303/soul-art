@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
-// Lazy load performance CSS only when needed
-// import "../styles/performance.css";
+import "../styles/performance.css";
 import { Providers } from "./providers";
 import { Toaster } from "@/components/ui/toaster";
 import { AuthProvider } from "@/components/auth-provider";
@@ -20,7 +19,6 @@ import {
   storeSchema,
 } from "@/lib/structured-data";
 import GoogleAnalytics from "@/components/GoogleAnalytics";
-import CSSOptimizer from "@/components/css-optimizer";
 
 export const metadata: Metadata = {
   metadataBase: new URL(
@@ -77,22 +75,10 @@ export const metadata: Metadata = {
     shortcut: "/soulart_icon_blue_fullsizes.ico",
     apple: "/soulart_icon_blue_fullsizes.ico",
     other: [
-      {
-        rel: "icon",
-        url: "/soulart_icon_blue_fullsizes.ico",
-        type: "image/x-icon",
-      },
-      {
-        rel: "shortcut icon",
-        url: "/soulart_icon_blue_fullsizes.ico",
-        type: "image/x-icon",
-      },
+      { rel: "icon", url: "/soulart_icon_blue_fullsizes.ico", type: "image/x-icon" },
+      { rel: "shortcut icon", url: "/soulart_icon_blue_fullsizes.ico", type: "image/x-icon" },
       { rel: "apple-touch-icon", url: "/soulart_icon_blue_fullsizes.ico" },
-      {
-        rel: "mask-icon",
-        url: "/soulart_icon_blue_fullsizes.ico",
-        color: "#012645",
-      },
+      { rel: "mask-icon", url: "/soulart_icon_blue_fullsizes.ico", color: "#012645" },
     ],
   },
   openGraph: {
@@ -132,26 +118,11 @@ export default function RootLayout({
     <html lang="en">
       <head>
         {/* Favicon links */}
-        <link
-          rel="icon"
-          href="/soulart_icon_blue_fullsizes.ico"
-          type="image/x-icon"
-        />
+        <link rel="icon" href="/soulart_icon_blue_fullsizes.ico" type="image/x-icon" />
         <link rel="apple-touch-icon" href="/soulart_icon_blue_fullsizes.ico" />
-        <link
-          rel="shortcut icon"
-          href="/soulart_icon_blue_fullsizes.ico"
-          type="image/x-icon"
-        />
-        <link
-          rel="mask-icon"
-          href="/soulart_icon_blue_fullsizes.ico"
-          color="#012645"
-        />
-        <meta
-          name="msapplication-TileImage"
-          content="/soulart_icon_blue_fullsizes.ico"
-        />
+        <link rel="shortcut icon" href="/soulart_icon_blue_fullsizes.ico" type="image/x-icon" />
+        <link rel="mask-icon" href="/soulart_icon_blue_fullsizes.ico" color="#012645" />
+        <meta name="msapplication-TileImage" content="/soulart_icon_blue_fullsizes.ico" />
         {/* Chrome-specific meta tags for better shortcut support */}
         <meta name="theme-color" content="#012645" />
         <meta name="msapplication-TileColor" content="#012645" />
@@ -175,24 +146,17 @@ export default function RootLayout({
       >
         {/* Dynamic Favicon Handler */}
         <DynamicFavicon />
-
-        {/* CSS Loading Optimizer */}
-        <CSSOptimizer />
-
+        
         <Providers>
           <AuthProvider>
             <CartProvider>
               <CheckoutProvider>
                 <LanguageProvider>
-                  <div
-                    style={{
-                      display: "flex",
-                      flexDirection: "column",
-                      minHeight: "100vh",
-                    }}
-                  >
+                  <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
                     <Header />
-                    <div style={{ flex: 1 }}>{children}</div>
+                    <div style={{ flex: 1 }}>
+                      {children}
+                    </div>
                     <Footer />
                   </div>
                 </LanguageProvider>
