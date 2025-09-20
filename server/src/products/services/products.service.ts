@@ -48,6 +48,8 @@ interface FindManyParams {
   size?: string;
   color?: string;
   discounted?: boolean;
+  minPrice?: string;
+  maxPrice?: string;
   includeVariants?: boolean;
 }
 
@@ -88,6 +90,8 @@ export class ProductsService {
       size,
       color,
       discounted,
+      minPrice,
+      maxPrice,
       includeVariants = false,
     } = params;
 
@@ -199,6 +203,29 @@ export class ProductsService {
           ],
         },
       ];
+    }
+
+    // Filter by price range
+    if (minPrice || maxPrice) {
+      const priceFilter: any = {};
+
+      if (minPrice) {
+        const minPriceNum = parseFloat(minPrice);
+        if (!isNaN(minPriceNum)) {
+          priceFilter.$gte = minPriceNum;
+        }
+      }
+
+      if (maxPrice) {
+        const maxPriceNum = parseFloat(maxPrice);
+        if (!isNaN(maxPriceNum)) {
+          priceFilter.$lte = maxPriceNum;
+        }
+      }
+
+      if (Object.keys(priceFilter).length > 0) {
+        filter.price = priceFilter;
+      }
     }
 
     const sort: any = {};

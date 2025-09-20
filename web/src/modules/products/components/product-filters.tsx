@@ -72,6 +72,18 @@ export function ProductFilters({
     setMaxPrice(priceRange[1]);
   }, [priceRange]);
 
+  // Auto-apply price filter when values change (with debounce)
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      // Only apply if values are valid
+      if (minPrice >= 0 && maxPrice >= minPrice) {
+        onPriceRangeChange([minPrice, maxPrice]);
+      }
+    }, 500); // 500ms debounce
+
+    return () => clearTimeout(timeoutId);
+  }, [minPrice, maxPrice, onPriceRangeChange]);
+
   // Auto-show subcategories when category is selected
   useEffect(() => {
     if (selectedCategoryId) {

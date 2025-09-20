@@ -167,8 +167,13 @@ const ShopContent = () => {
         if (selectedSize) params.size = selectedSize;
         if (selectedColor) params.color = selectedColor;
         if (selectedBrand) params.brand = selectedBrand;
-        if (priceRange[0] > 0) params.minPrice = priceRange[0].toString();
-        if (priceRange[1] < 1000) params.maxPrice = priceRange[1].toString();
+
+        // Always send price parameters if they differ from defaults
+        if (priceRange[0] !== 0 || priceRange[1] !== 1000) {
+          params.minPrice = priceRange[0].toString();
+          params.maxPrice = priceRange[1].toString();
+        }
+
         if (showDiscountedOnly) params.discounted = "true";
 
         const response = await getProducts(currentPage, 20, params);
@@ -208,8 +213,13 @@ const ShopContent = () => {
     if (selectedColor) params.set("color", selectedColor);
     if (selectedBrand && selectedBrand.trim())
       params.set("brand", selectedBrand.trim());
-    if (priceRange[0] > 0) params.set("minPrice", priceRange[0].toString());
-    if (priceRange[1] < 1000) params.set("maxPrice", priceRange[1].toString());
+
+    // Always set price parameters if they differ from defaults
+    if (priceRange[0] !== 0 || priceRange[1] !== 1000) {
+      params.set("minPrice", priceRange[0].toString());
+      params.set("maxPrice", priceRange[1].toString());
+    }
+
     if (sorting.field !== "createdAt") params.set("sortBy", sorting.field);
     if (sorting.direction !== "desc")
       params.set("sortDirection", sorting.direction);

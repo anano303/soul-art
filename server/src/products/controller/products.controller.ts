@@ -57,6 +57,8 @@ export class ProductsController {
     @Query('size') size: string,
     @Query('color') color: string,
     @Query('discounted') discounted: string,
+    @Query('minPrice') minPrice: string,
+    @Query('maxPrice') maxPrice: string,
     @Query('includeVariants') includeVariants: string,
   ) {
     return this.productsService.findMany({
@@ -73,6 +75,8 @@ export class ProductsController {
       size,
       color,
       discounted: discounted === 'true',
+      minPrice,
+      maxPrice,
       includeVariants: includeVariants === 'true',
     });
   }
