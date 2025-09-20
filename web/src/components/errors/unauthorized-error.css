@@ -17,7 +17,7 @@
   font-size: 2rem;
   font-weight: 700;
   margin-bottom: 1.5rem;
-  color: #012645;
+  color: var(--primary-color);
   position: relative;
 }
 
@@ -29,7 +29,7 @@
   transform: translateX(-50%);
   width: 60px;
   height: 3px;
-  background: #012645;
+  background: var(--primary-color);
   border-radius: 3px;
 }
 
@@ -48,7 +48,7 @@
 }
 
 .login-button {
-  background-color: #012645 !important;
+  background-color: var(--primary-color) !important;
   color: white !important;
   padding: 0.75rem 2rem !important;
   border-radius: 0.5rem !important;
@@ -81,7 +81,7 @@
 
 .unauthorized-icon {
   font-size: 5rem;
-  color: #012645;
+  color: var(--primary-color);
   margin-bottom: 1.5rem;
 }
 

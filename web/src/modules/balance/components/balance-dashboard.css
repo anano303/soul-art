@@ -11,7 +11,7 @@
   font-weight: bold;
   text-align: center;
   margin-bottom: 2rem;
-  color: #012645;
+  color: var(--primary-color);
 }
 
 .balance-loading {
@@ -58,13 +58,13 @@
 .balance-icon {
   width: 20px;
   height: 20px;
-  color: #012645;
+  color: var(--primary-color);
 }
 
 .balance-amount {
   font-size: 2rem;
   font-weight: bold;
-  color: #012645;
+  color: var(--primary-color);
   margin-top: 0.5rem;
 }
 
@@ -86,7 +86,7 @@
 
 .withdrawal-input:focus {
   outline: none;
-  border-color: #012645;
+  border-color: var(--primary-color);
   box-shadow: 0 0 0 3px rgba(1, 38, 69, 0.1);
 }
 
@@ -109,7 +109,7 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  color: #012645;
+  color: var(--primary-color);
 }
 
 .withdrawal-content {
@@ -127,7 +127,7 @@
 }
 
 .withdrawal-button {
-  background-color: #012645;
+  background-color: var(--primary-color);
   color: white;
   padding: 0.75rem 1.5rem;
   border-radius: 8px;
@@ -148,7 +148,7 @@
   background: #f8f9fa;
   padding: 1.5rem;
   border-radius: 8px;
-  border-left: 4px solid #012645;
+  border-left: 4px solid var(--primary-color);
 }
 
 .withdrawal-info p {
@@ -182,7 +182,7 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  color: #012645;
+  color: var(--primary-color);
 }
 
 .transactions-loading {

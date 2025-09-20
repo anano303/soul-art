@@ -3,7 +3,7 @@
   margin: 0 auto;
   padding: 2rem;
   font-family: 'firaGo', sans-serif;
-  color: #012645;
+  color: var(--primary-color);
   background: #f8f9fa;
   border-radius: 10px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
@@ -25,7 +25,7 @@
   font-size: 1.5rem;
   font-weight: 600;
   margin-bottom: 1rem;
-  color: #012645;
+  color: var(--primary-color);
 }
 
 .about-description {
@@ -35,7 +35,7 @@
 }
 
 .about-highlight {
-  background: linear-gradient(135deg, #014f86, #012645);
+  background: linear-gradient(135deg, #014f86, var(--primary-color));
   color: #f8f9fa;
   padding: 1.5rem;
   border-radius: 8px;
@@ -58,7 +58,7 @@
 }
 
 .about-seller-button:hover {
-  background: #012645;
+  background: var(--primary-color);
 }
 
 .about-shop-button {

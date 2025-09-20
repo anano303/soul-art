@@ -1,7 +1,7 @@
 /* Small Moving Text Banner for Guests - Dark blue background with bright yellow text */
 .soulart-guest-banner {
   background: #faf3cbd9;
-  color: #012645;
+  color: var(--primary-color);
   .soulart-guest-content {
     animation: soulart-guest-text-scroll 25s linear infinite;
   }
@@ -71,7 +71,7 @@
   font-weight: 700;
   margin: 0;
   display: inline;
-  color: #012645;
+  color: var(--primary-color);
 }
 
 .soulart-guest-description {
@@ -80,7 +80,7 @@
   margin: 0;
   opacity: 1;
   display: inline;
-  color: #012645;
+  color: var(--primary-color);
 }
 
 .soulart-guest-actions {
@@ -102,29 +102,29 @@
 }
 
 .soulart-guest-btn-learn {
-  background: #012645;
+  background: var(--primary-color);
   color: #faf3cbd9;
-  border: 2px solid #012645;
+  border: 2px solid var(--primary-color);
 }
 
 .soulart-guest-btn-learn:hover {
   background: #faf3cbd9;
   text-decoration: none;
-  color: #012645;
+  color: var(--primary-color);
   box-shadow: 0 6px 12px #faf3cbd9;
   transform: translateY(-2px);
 }
 
 .soulart-guest-btn-register {
-  color: #012645;
-  border: 2px solid #012645;
+  color: var(--primary-color);
+  border: 2px solid var(--primary-color);
 }
 
 .soulart-guest-btn-register:hover {
-  background: #012645;
+  background: var(--primary-color);
   color: #faf3cbd9;
-  border: 2px solid #012645;
-  box-shadow: 0 3px 6px #012645;
+  border: 2px solid var(--primary-color);
+  box-shadow: 0 3px 6px var(--primary-color);
 }
 
 .soulart-guest-close {
@@ -134,7 +134,7 @@
   transform: translateY(-50%);
   background: transparent;
   border: 2px solid #faf3cbd9;
-  color: #012645;
+  color: var(--primary-color);
   font-size: 1.4rem;
   cursor: pointer;
   z-index: 3;
@@ -147,7 +147,7 @@
 }
 
 .soulart-guest-close:hover {
-  color: #012645;
+  color: var(--primary-color);
   background: #faf3cbd9;
   box-shadow: 0 2px 6px #faf3cbd9;
 }

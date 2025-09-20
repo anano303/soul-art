@@ -8,6 +8,8 @@ import { ReviewForm } from "./review-form";
 import { ProductReviews } from "./product-reviews";
 import { useRouter } from "next/navigation";
 import "./productDetails.css";
+
+const PRIMARY_COLOR = "#012645";
 import "./ProductCard.css"; // Import ProductCard styles for button consistency
 import "./videoTabs.css"; // Import new tabs styles
 import { Product } from "@/types";
@@ -211,7 +213,7 @@ function SimilarProducts({
                 height: "40px",
                 borderRadius: "50%",
                 border: "3px solid rgba(1, 38, 69, 0.1)",
-                borderTopColor: "#012645",
+                borderTopColor: PRIMARY_COLOR,
                 animation: "spin 1s linear infinite",
                 margin: "0 auto",
               }}

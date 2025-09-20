@@ -9,7 +9,7 @@
   max-width: 600px;
   text-align: center;
   background: linear-gradient(135deg, #ffffff, #f8f9fa);
-  color: #012645;
+  color: var(--primary-color);
   font-family: "FiraGo-Enhanced", "FiraGo", "Noto Sans Georgian", sans-serif;
   border-radius: 12px;
   box-shadow: 0 8px 20px rgba(1, 38, 69, 0.1);
@@ -72,7 +72,7 @@
   font-size: 2rem;
   font-weight: 500;
   margin-bottom: 1rem;
-  color: #012645;
+  color: var(--primary-color);
   font-family: "FiraGo-Enhanced", "FiraGo", "Noto Sans Georgian", sans-serif;
   letter-spacing: 1px;
 }
@@ -85,7 +85,7 @@
 }
 
 .continue-shopping-button {
-  background: linear-gradient(135deg, #012645, #1a4a73);
+  background: linear-gradient(135deg, var(--primary-color), #1a4a73);
   color: #ffffff;
   border: none;
   border-radius: 8px;
@@ -100,7 +100,7 @@
 }
 
 .continue-shopping-button:hover {
-  background: linear-gradient(135deg, #1a4a73, #012645);
+  background: linear-gradient(135deg, #1a4a73, var(--primary-color));
   transform: translateY(-2px);
   box-shadow: 0 6px 12px rgba(123, 86, 66, 0.3);
   color: #ffffff;

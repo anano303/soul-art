@@ -44,7 +44,7 @@
   top: 100%;
   right: 0;
   width: 200px;
-  background: linear-gradient(135deg, #012645, #093d67);
+  background: linear-gradient(135deg, var(--primary-color), #093d67);
   border: 2px solid #e0d849;
   border-radius: 12px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
@@ -60,7 +60,7 @@
   padding: 8px 16px;
   text-decoration: none;
   cursor: pointer;
-  background: #012645;
+  background: var(--primary-color);
   border-radius: 5px;
   color: white;
   margin-left: 5%;
@@ -79,7 +79,7 @@
   width: 20px;
   height: 20px;
   border: 2px solid #ddd;
-  border-top: 2px solid #012645;
+  border-top: 2px solid var(--primary-color);
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }

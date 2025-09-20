@@ -238,7 +238,7 @@ export function AdminOrderDetails({ order }: AdminOrderDetailsProps) {
           fontWeight: "bold",
           color: "white",
           textTransform: "uppercase",
-          border: "3px solid #012645",
+          border: "3px solid var(--primary-color, #012645)",
         }}
       >
         {initial}

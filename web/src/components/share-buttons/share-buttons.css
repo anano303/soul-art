@@ -44,7 +44,7 @@
 }
 
 .more {
-  background-color: #012645;
+  background-color: var(--primary-color);
 }
 
 .social-menu {

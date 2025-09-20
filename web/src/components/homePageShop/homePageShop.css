@@ -25,7 +25,7 @@
 .see-more-btn {
   border: none;
   background: transparent;
-  color: #012645;
+  color: var(--primary-color, #012645);
   font-weight: bold;
   float: right;
   transition: all 0.3s ease-in-out;
@@ -247,7 +247,7 @@
   margin-bottom: 2.5rem;
   text-align: left;
   position: relative;
-  color: #012645;
+  color: var(--primary-color, #012645);
   font-family: FiraGo;
   text-shadow: 3px 3px 8px rgba(0, 0, 0, 0.2);
   padding-bottom: 1.5rem;
@@ -263,7 +263,12 @@
   left: 0;
   width: 120px;
   height: 6px;
-  background: linear-gradient(90deg, #7b5642, #012645, #f48c06);
+  background: linear-gradient(
+    90deg,
+    #7b5642,
+    var(--primary-color, #012645),
+    #f48c06
+  );
   border-radius: 3px;
   transition: all 0.8s ease;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
@@ -313,7 +318,7 @@
 
 /* კატეგორიების სპეციფიური ეფექტები */
 .section-title:first-child {
-  background: linear-gradient(135deg, #012645, #01456b);
+  background: linear-gradient(135deg, var(--primary-color, #012645), #01456b);
   -webkit-background-clip: text;
   /* -webkit-text-fill-color: transparent; */
   background-clip: text;
@@ -350,7 +355,12 @@
 }
 
 .section-title:first-of-type::before {
-  background: linear-gradient(90deg, #012645, #01456b, #003055);
+  background: linear-gradient(
+    90deg,
+    var(--primary-color, #012645),
+    #01456b,
+    #003055
+  );
   background-size: 200% 100%;
   animation: blueGradient 3s ease-in-out infinite;
 }
@@ -408,7 +418,7 @@
 }
 
 .shop-container .see-more-btn {
-  background: linear-gradient(135deg, #7b5642, #012645);
+  background: linear-gradient(135deg, #7b5642, var(--primary-color, #012645));
   color: white;
   padding: 3px;
   border: none;
@@ -466,8 +476,8 @@
 .category-emoji {
   display: inline-block;
   margin-left: 16px;
- width: 40px;
- height: 40px;
+  width: 40px;
+  height: 40px;
   animation: gentleBounce 3s infinite;
   /* filter: drop-shadow(3px 3px 6px rgba(0, 0, 0, 0.3)); */
   transition: all 0.3s ease;
@@ -561,7 +571,7 @@
 /* ნახატების კატეგორიისთვის სპეციალური ეფექტები - ლურჯი */
 .section-title.category-paintings {
   position: relative;
-  color: #012645;
+  color: var(--primary-color, #012645);
   font-weight: 900;
   /* text-shadow: 3px 3px 8px rgba(1, 38, 69, 0.4), 0 0 20px rgba(1, 38, 69, 0.2); */
 }
@@ -580,7 +590,13 @@
 }
 
 .section-title.category-paintings::before {
-  background: linear-gradient(90deg, #012645, #01456b, #003055, #2a5a7a);
+  background: linear-gradient(
+    90deg,
+    var(--primary-color, #012645),
+    #01456b,
+    #003055,
+    #2a5a7a
+  );
   background-size: 300% 100%;
   animation: paintingsGradient 6s ease-in-out infinite;
   /* box-shadow: 0 0 20px rgba(1, 38, 69, 0.4); */
@@ -678,7 +694,7 @@
 }
 
 .section-title.category-paintings::after {
-  background: linear-gradient(90deg, #012645, #2a5a7a, transparent);
+  background: linear-gradient(90deg, var(--primary-color), #2a5a7a, transparent);
 } */
 
 /* არტისტული ეფექტები */
@@ -886,7 +902,7 @@
 
 /* კატეგორიების მონაცვლეობითი ფერები */
 .product-section:nth-child(odd) .section-title {
-  color: #012645; /* ლურჯი - ნახატები */
+  color: var(--primary-color, #012645); /* ლურჯი - ნახატები */
   padding-left: 5px;
   padding-top: 5px;
   display: flex;
@@ -902,11 +918,11 @@
 }
 
 .product-section:nth-child(odd) .see-more-btn {
-  background: linear-gradient(135deg, #012645, #01456b);
+  background: linear-gradient(135deg, var(--primary-color, #012645), #01456b);
 }
 
 .product-section:nth-child(odd) .see-more-btn:hover {
-  background: linear-gradient(135deg, #01456b, #012645);
+  background: linear-gradient(135deg, #01456b, var(--primary-color, #012645));
   box-shadow: 0 6px 20px rgba(1, 38, 69, 0.4);
 }
 
@@ -986,7 +1002,7 @@
 
 /* კატეგორიის მიხედვით ღილაკების სპეციფიური ეფექტები */
 .product-section:nth-child(odd) .see-more-btn {
-  background: linear-gradient(135deg, #012645, #01456b);
+  background: linear-gradient(135deg, var(--primary-color, #012645), #01456b);
   box-shadow: 0 4px 15px rgba(1, 38, 69, 0.3);
 }
 
@@ -996,7 +1012,7 @@
 }
 
 .product-section:nth-child(odd) .see-more-btn:hover {
-  background: linear-gradient(135deg, #01456b, #012645);
+  background: linear-gradient(135deg, #01456b, var(--primary-color, #012645));
   box-shadow: 0 6px 20px rgba(1, 38, 69, 0.4);
   animation: bluePulse 2s infinite;
 }

@@ -35,7 +35,7 @@
   align-items: center;
   gap: 8px;
   padding: 12px 20px;
-  background: linear-gradient(135deg, #012645, #01456b);
+  background: linear-gradient(135deg, var(--primary-color, #012645), #01456b);
   color: #ffffff;
   text-decoration: none;
   border-radius: 12px;
@@ -57,7 +57,7 @@
 .search-title {
   font-size: 36px;
   font-weight: 600;
-  color: #012645;
+  color: var(--primary-color, #012645);
   margin: 0;
   line-height: 110%;
   letter-spacing: 0.5px;
@@ -87,7 +87,7 @@
 
 .search-results-count {
   font-size: 18px;
-  color: #012645;
+  color: var(--primary-color, #012645);
   margin: 0;
   font-weight: 500;
 }
@@ -95,7 +95,7 @@
 .search-results-count .highlight {
   color: #ffffff;
   font-weight: 600;
-  background: linear-gradient(135deg, #012645, #01456b);
+  background: linear-gradient(135deg, var(--primary-color, #012645), #01456b);
   padding: 4px 8px;
   border-radius: 6px;
 }
@@ -126,7 +126,7 @@
 
 .search-error-title {
   font-size: 24px;
-  color: #012645;
+  color: var(--primary-color, #012645);
   margin-bottom: 16px;
   font-weight: 600;
 }
@@ -160,7 +160,7 @@
 
 .search-no-results-title {
   font-size: 28px;
-  color: #012645;
+  color: var(--primary-color, #012645);
   margin-bottom: 16px;
   font-weight: 600;
 }
@@ -175,7 +175,7 @@
 .search-browse-button {
   display: inline-block;
   padding: 16px 32px;
-  background: linear-gradient(135deg, #012645, #01456b);
+  background: linear-gradient(135deg, var(--primary-color, #012645), #01456b);
   color: #ffffff;
   text-decoration: none;
   border-radius: 12px;

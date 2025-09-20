@@ -20,7 +20,7 @@
   max-height: 90vh;
   overflow-y: auto;
   box-shadow: 0 8px 32px rgba(1, 38, 69, 0.1);
-  color: #012645;
+  color: var(--primary-color, #012645);
   font-family: "FiraGo-Enhanced", "FiraGo", "Noto Sans Georgian", sans-serif;
   border: 2px solid #7b5642;
 }
@@ -37,7 +37,7 @@
 .modal-title {
   font-size: 1.5rem;
   font-weight: 600;
-  color: #012645;
+  color: var(--primary-color, #012645);
   letter-spacing: 1px;
   font-family: "FiraGo-Enhanced", "FiraGo", "Noto Sans Georgian", sans-serif;
 }
@@ -47,7 +47,7 @@
   border: none;
   font-size: 1.5rem;
   cursor: pointer;
-  color: #012645;
+  color: var(--primary-color, #012645);
   padding: 0.25rem;
   border-radius: 4px;
   transition: all 0.2s ease;
@@ -80,12 +80,12 @@
   font-family: "FiraGo-Enhanced", "FiraGo", "Noto Sans Georgian", sans-serif;
   box-sizing: border-box;
   background: #ffffff;
-  color: #012645;
+  color: var(--primary-color, #012645);
 }
 
 .form-input:focus {
   outline: none;
-  border-color: #012645;
+  border-color: var(--primary-color, #012645);
   box-shadow: 0 0 0 2px rgba(1, 38, 69, 0.2);
 }
 
@@ -116,14 +116,14 @@
   border-radius: 6px;
   cursor: pointer;
   transition: all 0.2s ease;
-  color: #012645;
+  color: var(--primary-color);
   background: #ffffff;
 }
 
 .file-input-label:hover {
-  border-color: #012645;
+  border-color: var(--primary-color);
   background: #f8f9fa;
-  color: #012645;
+  color: var(--primary-color);
 }
 
 .current-image {
@@ -170,13 +170,13 @@
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, #012645, #1a4a73);
+  background: linear-gradient(135deg, var(--primary-color), #1a4a73);
   color: #ffffff;
-  border: 1px solid #012645;
+  border: 1px solid var(--primary-color);
 }
 
 .btn-primary:hover {
-  background: linear-gradient(135deg, #1a4a73, #012645);
+  background: linear-gradient(135deg, #1a4a73, var(--primary-color));
   transform: translateY(-2px);
   box-shadow: 0 4px 16px rgba(123, 86, 66, 0.3);
   color: #ffffff;

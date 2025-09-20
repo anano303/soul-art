@@ -11,7 +11,7 @@
   position: absolute;
   top: -10px;
   right: -5px;
-  background-color: #012645;
+  background-color: var(--primary-color);
   color: yellow;
   font-size: 14px;
   font-weight: bold;

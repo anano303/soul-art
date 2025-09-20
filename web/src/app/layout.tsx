@@ -8,6 +8,8 @@ import Footer from "@/components/footer/footer";
 import { LanguageProvider } from "@/hooks/LanguageContext";
 import Header from "@/components/header/header";
 import MessengerChatWrapper from "@/components/MessengerChat/MessengerChatWrapper";
+
+const PRIMARY_COLOR = "#012645";
 import { CartProvider } from "@/modules/cart/context/cart-context";
 import { CheckoutProvider } from "@/modules/checkout/context/checkout-context";
 import DynamicFavicon from "@/components/dynamic-favicon";
@@ -88,7 +90,7 @@ export const metadata: Metadata = {
       {
         rel: "mask-icon",
         url: "/soulart_icon_blue_fullsizes.ico",
-        color: "#012645",
+        color: PRIMARY_COLOR,
       },
     ],
   },
@@ -143,14 +145,14 @@ export default function RootLayout({
         <link
           rel="mask-icon"
           href="/soulart_icon_blue_fullsizes.ico"
-          color="#012645"
+          color={PRIMARY_COLOR}
         />
         <meta
           name="msapplication-TileImage"
           content="/soulart_icon_blue_fullsizes.ico"
         />
         {/* Chrome-specific meta tags for better shortcut support */}
-        <meta name="theme-color" content="#012645" />
+        <meta name="theme-color" content={PRIMARY_COLOR} />
         <meta name="msapplication-TileColor" content="#012645" />
 
         {/* Resource preloading for better performance */}
