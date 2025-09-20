@@ -1,6 +1,6 @@
 /* Small Moving Text Banner - Dark blue background with bright yellow text */
 .soulart-referral-promo {
-  background: var(--primary-color)e6;
+  background: rgba(1, 38, 69, 0.9);
   color: #ffff00;
 
   margin: 16px 0;
