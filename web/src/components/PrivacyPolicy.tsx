@@ -111,8 +111,7 @@ export function PrivacyPolicy({
                 background: #f8f9fa;
                 padding: 15px;
                 border-radius: 8px;
-                border-left: 4px solid var(--secondary-color, #452001
-);
+                border-left: 4px solid #7b5642;
               }
               @media print {
                 body { margin: 0; }
@@ -212,8 +211,7 @@ export function PrivacyPolicy({
             <button
               onClick={handleDownload}
               style={{
-                background: "var(--secondary-color, #452001
-)",
+                background: "#7b5642",
                 color: "white",
                 border: "none",
                 padding: "8px 12px",
@@ -356,8 +354,7 @@ export function PrivacyPolicy({
                     background: "#f8f9fa",
                     padding: "15px",
                     borderRadius: "8px",
-                    borderLeft: "4px solid var(--secondary-color, #452001
-)",
+                    borderLeft: "4px solid var(--secondary-color, #452001)",
                     marginTop: "10px",
                   }}
                 >
@@ -462,8 +459,7 @@ export function PrivacyPolicy({
                     background: "#f8f9fa",
                     padding: "15px",
                     borderRadius: "8px",
-                    borderLeft: "4px solid var(--secondary-color, #452001
-)",
+                    borderLeft: "4px solid #7b5642",
                     marginTop: "10px",
                   }}
                 >
@@ -497,8 +493,7 @@ export function PrivacyPolicy({
             <button
               onClick={onAccept}
               style={{
-                background: "var(--secondary-color, #452001
-)",
+                background: "#7b5642",
                 color: "white",
                 border: "none",
                 padding: "12px 24px",
