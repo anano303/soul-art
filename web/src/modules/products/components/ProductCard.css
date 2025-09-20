@@ -25,14 +25,14 @@
 }
 
 /* Handmade theme styles */
-.product-card.handmade-theme {
-  /* box-shadow: 0 4px 10px var(--secondary-color); */
-  /* box-shadow: inset -3px 0px 20px 0px var(--secondary-color); */
-}
+/* .product-card.handmade-theme {
+  box-shadow: 0 4px 10px var(--secondary-color);
+  box-shadow: inset -3px 0px 20px 0px var(--secondary-color);
+} */
 
 .product-card.handmade-theme:hover {
   transform: translateY(-5px);
-  box-shadow: inset -3px 0px 20px 0px #9a6c40;
+  box-shadow: inset -3px 0px 20px 0px var(--secondary-color);
 }
 
 .product-card a {
