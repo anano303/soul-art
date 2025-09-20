@@ -45,7 +45,7 @@ export default function Header() {
               alt="logo soulArt"
               fill
               sizes="(max-width: 480px) 160px, 200px"
-              loading="eager"
+              priority
               style={{ objectFit: "contain" }}
             />
           </div>
