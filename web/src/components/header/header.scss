@@ -127,7 +127,7 @@ header {
     .main-nav ul {
       display: flex;
       flex-direction: column;
-      background-color: $primary-color + cc;
+      background-color: rgba($primary-color, 0.95);
       position: absolute;
       top: 100%; /* Default position for mobile */
       left: 0;
