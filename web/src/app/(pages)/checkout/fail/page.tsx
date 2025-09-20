@@ -11,8 +11,10 @@ function CheckoutFailContent() {
   const [orderId, setOrderId] = useState<string | null>(null);
 
   useEffect(() => {
-    const orderIdParam = searchParams.get("orderId");
-    setOrderId(orderIdParam);
+    if (searchParams) {
+      const orderIdParam = searchParams.get("orderId");
+      setOrderId(orderIdParam);
+    }
   }, [searchParams]);
 
   const handleRetryPayment = () => {
