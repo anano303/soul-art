@@ -4,6 +4,7 @@
   flex-direction: column;
   width: auto;
   min-width: 300px;
+  max-width: 25%;
   /* padding: 15px; */
   /* border-radius: 8px; */
   overflow: hidden;
@@ -308,16 +309,15 @@
     display: flex;
     gap: 20%;
   }
-  /* .product-card {
-    min-width: 250px;
-    margin: 0 auto;
+  .product-card {
+    max-width: 50%;
   }
-   */
 }
 @media (max-width: 634px) {
   .product-card {
     width: 80vw;
     min-width: 250px;
+    max-width: 100%;
     margin: 0 auto;
   }
 }
