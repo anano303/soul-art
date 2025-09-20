@@ -314,8 +314,9 @@
   }
    */
 }
-@media (max-width: 605px) {
+@media (max-width: 634px) {
   .product-card {
+    width: 80vw;
     min-width: 250px;
     margin: 0 auto;
   }

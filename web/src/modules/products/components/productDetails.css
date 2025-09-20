@@ -827,6 +827,7 @@ body {
   flex-wrap: wrap;
   gap: 30px;
   justify-content: center;
+  margin-bottom: 50px;
 }
 
 .similar-products-grid > div {
