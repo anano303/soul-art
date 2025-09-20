@@ -502,7 +502,7 @@ export function ProductDetails({ product }: ProductDetailsProps) {
                     alt={displayName}
                     fill
                     className="object-contain"
-                    priority
+                    loading="eager"
                   />
                 )}
               </motion.div>
