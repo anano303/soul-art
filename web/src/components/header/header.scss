@@ -221,8 +221,9 @@ header {
 
 @media screen and (max-width: 480px) {
   .logo {
-    img {
-      width: 160px;
+    > div {
+      width: 160px !important;
+      height: 40px !important;
     }
   }
 }
