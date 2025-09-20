@@ -10,7 +10,7 @@ const DEVICE_FINGERPRINT_KEY = "soulart_device_fp";
 // Generate device fingerprint for hybrid auth
 export const generateDeviceFingerprint = (): string => {
   if (typeof window === "undefined") return "";
-  
+
   try {
     const components = [
       navigator.userAgent || "",
@@ -19,15 +19,15 @@ export const generateDeviceFingerprint = (): string => {
       Intl.DateTimeFormat().resolvedOptions().timeZone || "",
       navigator.platform || "",
     ].join("|");
-    
+
     // Simple hash function (for production, use a crypto library)
     let hash = 0;
     for (let i = 0; i < components.length; i++) {
       const char = components.charCodeAt(i);
-      hash = ((hash << 5) - hash) + char;
+      hash = (hash << 5) - hash + char;
       hash = hash & hash; // Convert to 32-bit integer
     }
-    
+
     const fingerprint = Math.abs(hash).toString(16);
     localStorage.setItem(DEVICE_FINGERPRINT_KEY, fingerprint);
     return fingerprint;
@@ -40,7 +40,7 @@ export const generateDeviceFingerprint = (): string => {
 // Get device fingerprint
 export const getDeviceFingerprint = (): string => {
   if (typeof window === "undefined") return "";
-  
+
   try {
     let fingerprint = localStorage.getItem(DEVICE_FINGERPRINT_KEY);
     if (!fingerprint) {
@@ -95,14 +95,17 @@ export const isLoggedIn = (): boolean => {
 
 // Login function - now expects server to set HTTP-only cookies
 export const login = async (email: string, password: string) => {
-  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/login`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    credentials: "include", // Include cookies in requests
-    body: JSON.stringify({ email, password }),
-  });
+  const response = await fetch(
+    `${process.env.NEXT_PUBLIC_API_URL}/auth/login`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include", // Include cookies in requests
+      body: JSON.stringify({ email, password }),
+    }
+  );
 
   if (!response.ok) {
     const errorData = await response.json();
@@ -110,7 +113,7 @@ export const login = async (email: string, password: string) => {
   }
 
   const data = await response.json();
-  
+
   // Store user data (server sets HTTP-only cookies)
   if (data.user) {
     storeUserData(data.user);
@@ -127,14 +130,17 @@ export const register = async (userData: {
   password: string;
   phoneNumber?: string;
 }) => {
-  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/register`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    credentials: "include", // Include cookies in requests
-    body: JSON.stringify(userData),
-  });
+  const response = await fetch(
+    `${process.env.NEXT_PUBLIC_API_URL}/auth/register`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include", // Include cookies in requests
+      body: JSON.stringify(userData),
+    }
+  );
 
   if (!response.ok) {
     const errorData = await response.json();
@@ -142,7 +148,7 @@ export const register = async (userData: {
   }
 
   const data = await response.json();
-  
+
   // Store user data (server sets HTTP-only cookies)
   if (data.user) {
     storeUserData(data.user);
@@ -161,30 +167,39 @@ export const logout = async () => {
   } catch (error) {
     console.error("Logout request failed:", error);
   }
-  
+
   // Clear user data
   clearUserData();
 };
 
 // Refresh tokens - server handles HTTP-only cookies
 export const refreshTokens = async () => {
-  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/refresh`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    credentials: "include", // Include cookies in requests
-    body: JSON.stringify({
-      deviceInfo: {
-        fingerprint: getDeviceFingerprint(),
+  const response = await fetch(
+    `${process.env.NEXT_PUBLIC_API_URL}/auth/refresh`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
       },
-    }),
-  });
+      credentials: "include", // Include cookies in requests
+      body: JSON.stringify({
+        deviceInfo: {
+          fingerprint: getDeviceFingerprint(),
+        },
+      }),
+    }
+  );
 
   if (!response.ok) {
     if (response.status === 401) {
       // Refresh token is invalid, user needs to login again
       clearUserData();
+      // Don't log 401 errors as they're expected when user is not authenticated
+      if (process.env.NODE_ENV === "development") {
+        console.debug(
+          "🔐 No valid refresh token found - user not authenticated"
+        );
+      }
       throw new Error("Session expired. Please login again.");
     }
     throw new Error("Failed to refresh tokens");
@@ -194,13 +209,19 @@ export const refreshTokens = async () => {
 };
 
 // Check authentication status - simplified since server handles tokens
-export const checkAuthStatus = async (): Promise<{ isAuthenticated: boolean; user?: User }> => {
+export const checkAuthStatus = async (): Promise<{
+  isAuthenticated: boolean;
+  user?: User;
+}> => {
   try {
     // Try to get current user info from server
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/profile`, {
-      method: "GET",
-      credentials: "include", // Include cookies in requests
-    });
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/auth/profile`,
+      {
+        method: "GET",
+        credentials: "include", // Include cookies in requests
+      }
+    );
 
     if (response.ok) {
       const userData = await response.json();
@@ -211,11 +232,14 @@ export const checkAuthStatus = async (): Promise<{ isAuthenticated: boolean; use
       try {
         await refreshTokens();
         // Try again after refresh
-        const retryResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/profile`, {
-          method: "GET",
-          credentials: "include",
-        });
-        
+        const retryResponse = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/auth/profile`,
+          {
+            method: "GET",
+            credentials: "include",
+          }
+        );
+
         if (retryResponse.ok) {
           const userData = await retryResponse.json();
           storeUserData(userData);
