@@ -24,7 +24,7 @@
 
 .similar-product-card.handmade-theme:hover {
   transform: translateY(-5px);
-  box-shadow: 0 6px 15px #9a6c40;
+  box-shadow: 0 6px 15px var(--secondary-color);
 }
 
 .similar-product-card a {
@@ -36,7 +36,7 @@
 
 .similar-product-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 6px 15px #043761;
+  box-shadow: 0 6px 15px var(--primary-color);
 }
 
 .similar-product-image {

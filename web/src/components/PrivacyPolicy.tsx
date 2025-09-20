@@ -354,7 +354,7 @@ export function PrivacyPolicy({
                     background: "#f8f9fa",
                     padding: "15px",
                     borderRadius: "8px",
-                    borderLeft: "4px solid var(--secondary-color, #452001)",
+                    borderLeft: "4px solid var(--secondary-color)",
                     marginTop: "10px",
                   }}
                 >

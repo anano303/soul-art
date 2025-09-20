@@ -8,7 +8,7 @@
   /* border-radius: 8px; */
   overflow: hidden;
   /* background-color: var(--primary-color); */
-  box-shadow: 0 4px 10px var(--primary-color, #012645);
+  box-shadow: inset -3px 0px 20px 0px var(--primary-color, #012645);
   transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
   text-decoration: none;
   margin: 0px;
@@ -26,12 +26,13 @@
 
 /* Handmade theme styles */
 .product-card.handmade-theme {
-  box-shadow: 0 4px 10px var(--secondary-color);
+  /* box-shadow: 0 4px 10px var(--secondary-color); */
+  /* box-shadow: inset -3px 0px 20px 0px var(--secondary-color); */
 }
 
 .product-card.handmade-theme:hover {
   transform: translateY(-5px);
-  box-shadow: 0 6px 15px #9a6c40;
+  box-shadow: inset -3px 0px 20px 0px #9a6c40;
 }
 
 .product-card a {
@@ -40,7 +41,7 @@
 
 .product-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 6px 15px #043761;
+  box-shadow: inset -3px 0px 20px 0px var(--primary-color);
 }
 
 .product-image {
@@ -236,7 +237,7 @@
 
 /* Handmade theme button */
 .handmade-theme .addButtonCart {
-  background: linear-gradient(to left, var(--secondary-color), #a67c52);
+  background: linear-gradient(to left, var(--secondary-color));
 }
 
 .handmade-theme .addButtonCart:hover:not(:disabled) {
@@ -299,7 +300,7 @@
 
 /* Handmade theme discounted price */
 .handmade-theme .discounted-price {
-  color: #9a6c40;
+  color: var(--secondary-color);
 }
 
 @media (max-width: 768px) {
