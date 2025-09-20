@@ -20,7 +20,7 @@
 .headerOrders h1 {
   font-size: 28px;
   font-weight: bold;
-  color: #012645;
+  color: var(--primary-color);
   text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
   margin: 0;
 }
@@ -43,13 +43,13 @@
 }
 
 .badge.paid {
-  background: linear-gradient(135deg, #012645, #043761);
+  background: linear-gradient(135deg, var(--primary-color), #043761);
   color: #ffffff;
 }
 
 .badge.pending {
   background: linear-gradient(135deg, #e0d849, #fceb88);
-  color: #012645;
+  color: var(--primary-color);
 }
 
 .badge.cancelled {
@@ -58,7 +58,7 @@
 }
 
 .deliver-btn {
-  background: #012645;
+  background: var(--primary-color);
   color: white;
   border: none;
   border-radius: 8px;
@@ -100,7 +100,7 @@
 .card h2 {
   font-size: 20px;
   margin-bottom: 16px;
-  color: #012645;
+  color: var(--primary-color);
   padding-bottom: 10px;
   border-bottom: 2px solid #f0f0f0;
 }
@@ -179,7 +179,7 @@
 
 .item-name {
   font-weight: bold;
-  color: #012645;
+  color: var(--primary-color);
   text-decoration: none;
   display: block;
   margin-bottom: 8px;
@@ -223,7 +223,7 @@
   margin-top: 16px;
   padding-top: 16px;
   border-top: 2px solid #f0f0f0;
-  color: #012645;
+  color: var(--primary-color);
 }
 
 .delivery-group {
@@ -256,7 +256,7 @@
   margin: 0;
   font-weight: 600;
   font-size: 16px;
-  color: #012645;
+  color: var(--primary-color);
 }
 
 .delivery-time {
@@ -275,7 +275,7 @@
   padding: 12px;
   background-color: #f9f9f9;
   border-radius: 8px;
-  border-left: 3px solid #012645;
+  border-left: 3px solid var(--primary-color);
 }
 
 .buyer-info p {
@@ -283,7 +283,7 @@
 }
 
 .buyer-info strong {
-  color: #012645;
+  color: var(--primary-color);
   display: inline-block;
   width: 120px;
 }
@@ -293,12 +293,12 @@
   padding: 16px;
   background-color: #f8f9fa;
   border-radius: 8px;
-  border-left: 4px solid #012645;
+  border-left: 4px solid var(--primary-color);
 }
 
 .seller-info h3 {
   margin: 0 0 12px 0;
-  color: #012645;
+  color: var(--primary-color);
   font-size: 18px;
   font-weight: 600;
 }
@@ -318,14 +318,14 @@
 }
 
 .seller-details-grid strong {
-  color: #012645;
+  color: var(--primary-color);
   display: inline-block;
   min-width: 140px;
 }
 
 /* Admin seller tag styling */
 .admin-seller-tag {
-  background-color: #012645;
+  background-color: var(--primary-color);
   color: white;
   padding: 6px 12px;
   border-radius: 6px;
@@ -349,17 +349,17 @@
 .profile-avatar {
   border-radius: 50%;
   object-fit: cover;
-  border: 3px solid #012645;
+  border: 3px solid var(--primary-color);
 }
 
 .store-logo {
   border-radius: 8px;
   object-fit: cover;
-  border: 2px solid #012645;
+  border: 2px solid var(--primary-color);
 }
 
 .fallback-icon {
-  border: 3px solid #012645;
+  border: 3px solid var(--primary-color);
 }
 
 /* Loading state for seller info */

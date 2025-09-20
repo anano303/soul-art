@@ -1,5 +1,5 @@
 .footer-container {
-  background: linear-gradient(135deg, #012645, #014f86);
+  background: linear-gradient(135deg, var(--primary-color), #014f86);
   color: #f8f9fa;
   padding: 2rem 1rem;
   font-family: "firaGo", sans-serif;
@@ -74,7 +74,7 @@
 
 .social-icon:hover {
   background: #f8f9fa;
-  color: #012645;
+  color: var(--primary-color);
 }
 
 .footer-bottom {

@@ -21,7 +21,7 @@ const MessengerChat = () => {
         width: "60px",
         height: "60px",
         borderRadius: "50%",
-        backgroundColor: "#012645",
+        backgroundColor: "var(--primary-color, #012645)",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",

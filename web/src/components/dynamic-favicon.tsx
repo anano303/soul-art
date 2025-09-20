@@ -28,7 +28,7 @@ export default function DynamicFavicon() {
         
         // Add color attribute for mask-icon
         if (iconType.rel === 'mask-icon') {
-          link.setAttribute('color', isDark ? '#FFFFFF' : '#012645');
+          link.setAttribute('color', isDark ? '#FFFFFF' : 'var(--primary-color, #012645)');
         }
         
         document.head.appendChild(link);

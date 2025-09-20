@@ -56,12 +56,12 @@ export class EmailService {
       subject: 'თანხის გადარიცხვა - SoulArt',
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <h2 style="color: #012645;">მოგესალმებით ${sellerName}!</h2>
+          <h2 style="color: var(--primary-color, #012645);">მოგესალმებით ${sellerName}!</h2>
           
           <p>წარმატებით გადაირიცხა თანხა თქვენს ბანკის ანგარიშზე:</p>
           
           <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
-            <h3 style="color: #012645; margin-top: 0;">გადარიცხვის დეტალები:</h3>
+            <h3 style="color: var(--primary-color, #012645); margin-top: 0;">გადარიცხვის დეტალები:</h3>
             <p><strong>თანხა:</strong> ${amount.toFixed(2)} ₾</p>
             <p><strong>ანგარიშის ნომერი:</strong> ${accountNumber}</p>
             <p><strong>ტრანზაქციის ID:</strong> ${transactionId}</p>
@@ -72,7 +72,7 @@ export class EmailService {
           
           <p style="color: #666; font-size: 14px;">
             შენარჩუნებული შემოსავლების ისტორია შეგიძლიათ ნახოთ 
-            <a href="${process.env.ALLOWED_ORIGINS}/profile/balance" style="color: #012645;">ჩემი ბალანსი</a> გვერდზე.
+            <a href="${process.env.ALLOWED_ORIGINS}/profile/balance" style="color: var(--primary-color, #012645);">ჩემი ბალანსი</a> გვერდზე.
           </p>
           
           <hr style="margin: 30px 0; border: none; border-top: 1px solid #e5e7eb;">
@@ -99,7 +99,7 @@ export class EmailService {
       subject: 'თანხის გატანის მოთხოვნა მიღებულია - SoulArt',
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <h2 style="color: #012645;">მოგესალმებით ${sellerName}!</h2>
+          <h2 style="color: var(--primary-color, #012645);">მოგესალმებით ${sellerName}!</h2>
           
           <p>თქვენი თანხის გატანის მოთხოვნა წარმატებით მიღებულია და მუშავდება.</p>
           
@@ -120,7 +120,7 @@ export class EmailService {
           
           <p style="color: #666; font-size: 14px;">
             თანხის გატანის ისტორია შეგიძლიათ ნახოთ 
-            <a href="${process.env.ALLOWED_ORIGINS}/profile/balance" style="color: #012645;">ჩემი ბალანსი</a> გვერდზე.
+            <a href="${process.env.ALLOWED_ORIGINS}/profile/balance" style="color: var(--primary-color, #012645);">ჩემი ბალანსი</a> გვერდზე.
           </p>
           
           <hr style="margin: 30px 0; border: none; border-top: 1px solid #e5e7eb;">
@@ -149,10 +149,10 @@ export class EmailService {
       subject: `ახალი თანხის გადარიცხვა - ${sellerName}`,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <h2 style="color: #012645;">ახალი თანხის გადარიცხვა</h2>
+          <h2 style="color: var(--primary-color, #012645);">ახალი თანხის გადარიცხვა</h2>
           
           <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
-            <h3 style="color: #012645; margin-top: 0;">სელერის ინფორმაცია:</h3>
+            <h3 style="color: var(--primary-color, #012645); margin-top: 0;">სელერის ინფორმაცია:</h3>
             <p><strong>სახელი:</strong> ${sellerName}</p>
             <p><strong>ელ-ფოსტა:</strong> ${sellerEmail}</p>
             <p><strong>თანხა:</strong> ${amount.toFixed(2)} ₾</p>
@@ -196,24 +196,24 @@ export class EmailService {
       subject: `შეკვეთის დადასტურება #${orderId} - SoulArt`,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <h2 style="color: #012645;">მადლობა შეკვეთისთვის, ${customerName}!</h2>
+          <h2 style="color: var(--primary-color, #012645);">მადლობა შეკვეთისთვის, ${customerName}!</h2>
           
           <p>თქვენი შეკვეთა წარმატებით დადასტურდა და დამუშავების პროცესშია.</p>
           
           <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
-            <h3 style="color: #012645; margin-top: 0;">შეკვეთის დეტალები:</h3>
+            <h3 style="color: var(--primary-color, #012645); margin-top: 0;">შეკვეთის დეტალები:</h3>
             <p><strong>შეკვეთის ნომერი:</strong> #${orderId}</p>
             <p><strong>სრული ღირებულება:</strong> ${totalPrice.toFixed(2)} ₾</p>
             <p><strong>მიტანის მისამართი:</strong> ${shippingAddress}</p>
             
-            <h4 style="color: #012645;">შეკვეთილი პროდუქტები:</h4>
+            <h4 style="color: var(--primary-color, #012645);">შეკვეთილი პროდუქტები:</h4>
             <ul style="list-style-type: none; padding: 0;">
               ${itemsList}
             </ul>
           </div>
           
           <p>შეკვეთის სტატუსი შეგიძლიათ ნახოთ თქვენს 
-            <a href="${process.env.ALLOWED_ORIGINS}/profile/orders" style="color: #012645;">პირად კაბინეტში</a>.
+            <a href="${process.env.ALLOWED_ORIGINS}/profile/orders" style="color: var(--primary-color, #012645);">პირად კაბინეტში</a>.
           </p>
           
           <p style="color: #666; font-size: 14px;">
@@ -253,17 +253,17 @@ export class EmailService {
       subject: `ახალი შეკვეთა #${orderId} - SoulArt`,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <h2 style="color: #012645;">მოგესალმებით ${sellerName}!</h2>
+          <h2 style="color: var(--primary-color, #012645);">მოგესალმებით ${sellerName}!</h2>
           
           <p>თქვენს პროდუქცია/პროდუქტები შეიძინეს!</p>
           
           <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
-            <h3 style="color: #012645; margin-top: 0;">შეკვეთის ინფორმაცია:</h3>
+            <h3 style="color: var(--primary-color, #012645); margin-top: 0;">შეკვეთის ინფორმაცია:</h3>
             <p><strong>შეკვეთის ნომერი:</strong> #${orderId}</p>
             <p><strong>მყიდველი:</strong> ${customerName}</p>
             <p><strong>თქვენი შემოსავალი:</strong> ${totalAmount.toFixed(2)} ₾</p>
             
-            <h4 style="color: #012645;">შეძენილი პროდუქტები:</h4>
+            <h4 style="color: var(--primary-color, #012645);">შეძენილი პროდუქტები:</h4>
             <ul style="list-style-type: none; padding: 0;">
               ${itemsList}
             </ul>
@@ -273,7 +273,7 @@ export class EmailService {
           
           <p style="color: #666; font-size: 14px;">
             შეკვეთების მენეჯმენტი და ბალანსი ხელმისაწვდომია 
-            <a href="${process.env.ALLOWED_ORIGINS}/profile/balance" style="color: #012645;">თქვენს პირად კაბინეტში</a>.
+            <a href="${process.env.ALLOWED_ORIGINS}/profile/balance" style="color: var(--primary-color, #012645);">თქვენს პირად კაბინეტში</a>.
           </p>
           
           <hr style="margin: 30px 0; border: none; border-top: 1px solid #e5e7eb;">
@@ -304,12 +304,12 @@ export class EmailService {
       subject: `შეკვეთა მიტანილია #${orderId} - SoulArt`,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <h2 style="color: #012645;">მადლობა ${customerName}!</h2>
+          <h2 style="color: var(--primary-color, #012645);">მადლობა ${customerName}!</h2>
           
           <p>თქვენი შეკვეთა წარმატებით მიტანილია.</p>
           
           <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
-            <h3 style="color: #012645; margin-top: 0;">მიტანილი პროდუქტები:</h3>
+            <h3 style="color: var(--primary-color, #012645); margin-top: 0;">მიტანილი პროდუქტები:</h3>
             <p><strong>შეკვეთის ნომერი:</strong> #${orderId}</p>
             
             <ul style="list-style-type: none; padding: 0;">
@@ -321,7 +321,7 @@ export class EmailService {
           
           <p style="color: #666; font-size: 14px;">
             გთხოვთ, შეაფასოთ პროდუქტები თქვენს 
-            <a href="${process.env.ALLOWED_ORIGINS}/profile/orders" style="color: #012645;">პირად კაბინეტში</a>
+            <a href="${process.env.ALLOWED_ORIGINS}/profile/orders" style="color: var(--primary-color, #012645);">პირად კაბინეტში</a>
             და გაუზიაროთ თქვენი გამოცდილება სხვა მყიდველებს.
           </p>
           

@@ -22,7 +22,7 @@
   
   .loading-text {
     font-size: 18px;
-    color: #012645b2;
+    color: var(--primary-color)b2;
     font-weight: bold;
     display: flex;
     align-items: center;

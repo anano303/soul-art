@@ -3,7 +3,7 @@
   flex-direction: column;
   gap: 16px;
   width: 100%;
-  color: #012645;
+  color: var(--primary-color);
 }
 
 .login-form {
@@ -25,7 +25,7 @@ label {
 
 input {
   padding: 8px;
-  border: 1px solid #012645;
+  border: 1px solid var(--primary-color);
   border-radius: 4px;
   font-size: 14px;
   transition: border 0.3s ease-in-out;
@@ -33,7 +33,7 @@ input {
 }
 
 input:focus {
-  border: 2px solid #012645; /* უფრო სქელი და იგივე ფერის ბორდერი */
+  border: 2px solid var(--primary-color); /* უფრო სქელი და იგივე ფერის ბორდერი */
 }
 
 .error-text {
@@ -58,7 +58,7 @@ input:focus {
 
 .login-button {
   padding: 10px 20px;
-  background: linear-gradient(to left, #03214b, #012645);
+  background: linear-gradient(to left, #03214b, var(--primary-color));
   background-size: 130% 100%; /* გრადიენტის ზომა */
   color: white;
   border: none;
@@ -104,7 +104,7 @@ input:focus {
   display: block;
   width: 100%;
   height: 1px;
-  background-color: #012645b2;
+  background-color: var(--primary-color)b2;
   position: absolute;
   top: 50%;
   left: 0;
@@ -116,7 +116,7 @@ input:focus {
   position: relative;
   z-index: 1;
   font-size: 12px;
-  color: #012645b2;
+  color: var(--primary-color)b2;
 }
 
 .social-buttons {
@@ -147,7 +147,7 @@ input:focus {
   inset: 0;
   border-radius: 4px;
   padding: 1px; /* ბორდერის სისქე */
-  background: linear-gradient(to right, #012645, #03214b);
+  background: linear-gradient(to right, var(--primary-color), #03214b);
   mask: linear-gradient(white, white) content-box, linear-gradient(white, white);
   mask-composite: exclude;
   -webkit-mask: linear-gradient(white, white) content-box,
@@ -158,7 +158,7 @@ input:focus {
 }
 
 .social-button:hover::before {
-  background: linear-gradient(to left, #012645, #03214b);
+  background: linear-gradient(to left, var(--primary-color), #03214b);
 }
 
 .social-button.google-btn {
@@ -219,11 +219,11 @@ input:focus {
 .signup-text {
   text-align: center;
   font-size: 14px;
-  color: #012645b2;
+  color: var(--primary-color)b2;
 }
 
 .signup-link {
-  color: #012645;
+  color: var(--primary-color);
   text-decoration: none;
   font-weight: 600;
 }

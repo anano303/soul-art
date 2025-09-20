@@ -3,7 +3,7 @@
   justify-content: center;
   align-items: center;
   width: 100%;
-  color: #012645;
+  color: var(--primary-color);
 }
 
 .form {
@@ -18,7 +18,7 @@
   align-items: flex-start;
   gap: 8px;
   font-size: 12px;
-  color: #012645;
+  color: var(--primary-color);
   line-height: 1.4;
 }
 .checkbox-label .checkbox {
@@ -46,7 +46,7 @@
 
 input {
   padding: 8px;
-  border: 1px solid #012645;
+  border: 1px solid var(--primary-color);
   border-radius: 4px;
   font-size: 14px;
   transition: border 0.3s ease-in-out;
@@ -55,7 +55,7 @@ input {
 }
 
 input:focus {
-  border: 2px solid #012645; /* უფრო სქელი და იგივე ფერის ბორდერი */
+  border: 2px solid var(--primary-color); /* უფრო სქელი და იგივე ფერის ბორდერი */
 }
 
 .error-message {
@@ -75,7 +75,7 @@ input:focus {
 
 .submit-btn {
   padding: 10px 20px;
-  background: linear-gradient(to left, #03214b, #012645);
+  background: linear-gradient(to left, #03214b, var(--primary-color));
   background-size: 130% 100%; /* გრადიენტის ზომა */
   color: white;
   border: none;
@@ -113,7 +113,7 @@ input:focus {
   display: block;
   width: 100%;
   height: 1px;
-  background-color: #012645;
+  background-color: var(--primary-color);
   position: absolute;
   top: 50%;
   left: 0;
@@ -125,7 +125,7 @@ input:focus {
   position: relative;
   z-index: 1;
   font-size: 12px;
-  color: #012645;
+  color: var(--primary-color);
 }
 
 .social-buttons {
@@ -157,7 +157,7 @@ input:focus {
   inset: 0;
   border-radius: 4px;
   padding: 1px; /* ბორდერის სისქე */
-  background: linear-gradient(to right, #012645, #03214b);
+  background: linear-gradient(to right, var(--primary-color), #03214b);
   mask: linear-gradient(white, white) content-box, linear-gradient(white, white);
   mask-composite: exclude;
   -webkit-mask: linear-gradient(white, white) content-box,
@@ -168,7 +168,7 @@ input:focus {
 }
 
 .social-btn:hover::before {
-  background: linear-gradient(to left, #012645, #03214b);
+  background: linear-gradient(to left, var(--primary-color), #03214b);
 }
 
 .social-btn.google-btn {
@@ -229,11 +229,11 @@ input:focus {
 .text-center {
   text-align: center;
   font-size: 14px;
-  color: #012645;
+  color: var(--primary-color);
 }
 
 .login-link {
-  color: #012645;
+  color: var(--primary-color);
   text-decoration: none;
   font-weight: 600;
 }
@@ -243,8 +243,8 @@ input:focus {
 }
 .verifBtn {
   background-color: transparent;
-  color: #012645;
-  border: 1px solid #012645;
+  color: var(--primary-color);
+  border: 1px solid var(--primary-color);
   width: 30%;
   border-radius: 3px;
   cursor: pointer;
@@ -258,7 +258,7 @@ input:focus {
   padding: 20px;
   margin: 20px 0;
   text-align: center;
-  color: #012645;
+  color: var(--primary-color);
 }
 
 .success-message h3 {
@@ -307,7 +307,7 @@ input:focus {
   height: 100px;
   border-radius: 8px;
   overflow: hidden;
-  border: 2px solid #012645;
+  border: 2px solid var(--primary-color);
   position: relative;
 }
 
@@ -318,7 +318,7 @@ input:focus {
 }
 
 .logo-upload-button {
-  background: linear-gradient(to left, #03214b, #012645);
+  background: linear-gradient(to left, #03214b, var(--primary-color));
   color: white;
   border: none;
   border-radius: 4px;
@@ -368,7 +368,7 @@ input:focus {
 }
 
 .privacy-policy-link:hover {
-  color: #012645;
+  color: var(--primary-color);
   text-decoration: underline;
 }
 
@@ -403,7 +403,7 @@ input:focus {
 }
 
 .contract-link:hover {
-  color: #012645;
+  color: var(--primary-color);
 }
 
 /* Contract Modal Styles */
@@ -419,7 +419,7 @@ input:focus {
   align-items: center;
   z-index: 10000;
   padding: 20px;
-  color: #012645;
+  color: var(--primary-color);
 }
 
 .contract-modal {
@@ -459,12 +459,12 @@ input:focus {
 }
 
 .contract-download-btn:hover {
-  background: #012645;
+  background: var(--primary-color);
 }
 
 .contract-header h3 {
   margin: 0;
-  color: #012645;
+  color: var(--primary-color);
   font-size: 1.4rem;
   font-weight: 600;
 }
@@ -487,7 +487,7 @@ input:focus {
 
 .contract-close-btn:hover {
   background: #e9ecef;
-  color: #012645;
+  color: var(--primary-color);
 }
 
 .contract-content {
@@ -505,7 +505,7 @@ input:focus {
 }
 
 .contract-subtitle h4 {
-  color: #012645;
+  color: var(--primary-color);
   font-size: 1.2rem;
   font-weight: 600;
   margin-bottom: 8px;
@@ -516,7 +516,7 @@ input:focus {
 }
 
 .contract-section h4 {
-  color: #012645;
+  color: var(--primary-color);
   font-size: 1.1rem;
   font-weight: 600;
   margin-bottom: 12px;
@@ -539,7 +539,7 @@ input:focus {
 }
 
 .contract-section strong {
-  color: #012645;
+  color: var(--primary-color);
   font-weight: 600;
 }
 
@@ -564,7 +564,7 @@ input:focus {
 }
 
 .contract-accept-btn:hover {
-  background: #012645;
+  background: var(--primary-color);
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(123, 86, 66, 0.3);
 }

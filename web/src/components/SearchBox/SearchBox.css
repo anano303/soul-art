@@ -36,7 +36,7 @@
 }
 
 .search-input:focus {
-  border-color: #012645;
+  border-color: var(--primary-color);
   background: rgba(1, 38, 69, 0.02);
 }
 

@@ -14,7 +14,7 @@
 .cart-title {
   font-size: 2rem;
   font-weight: bold;
-  color: #012645;
+  color: var(--primary-color);
   font-family: "FiraGo", "Noto Sans Georgian", sans-serif;
 }
 
@@ -46,7 +46,7 @@
 .summary-title {
   font-size: 1.25rem;
   font-weight: 600;
-  color: #012645;
+  color: var(--primary-color);
   font-family: "FiraGo", "Noto Sans Georgian", sans-serif;
 }
 
@@ -71,14 +71,14 @@
 
 .total {
   font-weight: 500;
-  color: #012645;
+  color: var(--primary-color);
 }
 
 .checkout-button {
   width: 100%;
   padding: 12px;
   font-size: 1rem;
-  background: linear-gradient(135deg, #012645, #1a4a73);
+  background: linear-gradient(135deg, var(--primary-color), #1a4a73);
   color: #fff;
   border: none;
   border-radius: 8px;
@@ -88,7 +88,7 @@
 }
 
 .checkout-button:hover {
-  background: linear-gradient(135deg, #1a4a73, #012645);
+  background: linear-gradient(135deg, #1a4a73, var(--primary-color));
   transform: translateY(-2px);
 }
 
@@ -102,3 +102,4 @@
     margin-top: 24px;
   }
 }
+

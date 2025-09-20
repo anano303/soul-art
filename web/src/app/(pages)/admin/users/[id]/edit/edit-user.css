@@ -57,7 +57,7 @@
 }
 
 .password-button {
-  background: #012645;
+  background: var(--primary-color, #012645);
   color: white;
   border: none;
   padding: 8px 16px;

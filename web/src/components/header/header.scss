@@ -1,11 +1,12 @@
 /* styles/Header.scss */
+@use "/styles/mixins" as *;
 
 header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 10px 20px;
-  background-color: #012645;
+  background-color: $primary-color;
   position: sticky;
   top: 0;
   z-index: 10000;
@@ -75,7 +76,7 @@ header {
       position: absolute;
       top: 100%;
       left: 0;
-      background: #012645;
+      background: $primary-color;
       min-width: 180px;
       border-radius: 0 0 8px 8px;
       box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
@@ -126,7 +127,7 @@ header {
     .main-nav ul {
       display: flex;
       flex-direction: column;
-      background-color: #012645 + cc;
+      background-color: $primary-color + cc;
       position: absolute;
       top: 100%; /* Default position for mobile */
       left: 0;

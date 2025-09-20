@@ -5,7 +5,7 @@
   z-index: 1000;
   cursor: pointer;
   border-radius: 50%;
-  background-color: #012645 !important;
+  background-color: var(--primary-color) !important;
   width: 60px;
   height: 60px;
   display: flex;
@@ -18,14 +18,14 @@
 }
 
 .custom-messenger-button:hover {
-  background-color: #012645 !important;
+  background-color: var(--primary-color) !important;
   transform: translateY(-2px) scale(1.05);
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
 }
 
 .custom-messenger-button:active {
   transform: translateY(0) scale(0.95);
-  background-color: #012645 !important;
+  background-color: var(--primary-color) !important;
 }
 
 .messenger-icon-wrapper {
@@ -112,7 +112,7 @@ iframe[data-testid="bubble_iframe"] {
     bottom: 20px !important;
     right: 20px !important;
     z-index: 99999 !important;
-    background-color: #012645 !important;
+    background-color: var(--primary-color) !important;
   }
 
   .chatIcon svg {
@@ -123,13 +123,13 @@ iframe[data-testid="bubble_iframe"] {
 
 /* Additional styles for chatIcon class */
 .chatIcon {
-  background-color: #012645 !important;
+  background-color: var(--primary-color) !important;
 }
 
 .chatIcon:hover {
-  background-color: #012645 !important;
+  background-color: var(--primary-color) !important;
 }
 
 .chatIcon:active {
-  background-color: #012645 !important;
+  background-color: var(--primary-color) !important;
 }

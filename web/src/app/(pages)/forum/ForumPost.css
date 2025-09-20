@@ -56,7 +56,7 @@
 }
 
 .forum-post-link:hover .forum-post-text {
-  color: #012645;
+  color: var(--primary-color, #012645);
   transition: color 0.2s ease;
 }
 
@@ -74,7 +74,7 @@
 }
 
 .forum-post-category {
-  background: #012645;
+  background: var(--primary-color, #012645);
   color: #fff;
   padding: 5px 10px;
   border-radius: 6px;
@@ -84,7 +84,7 @@
 .forum-post-time,
 .forum-post-favorite {
   font-size: 14px;
-  color: #012645;
+  color: var(--primary-color, #012645);
 }
 
 .forum-post-favorite {
@@ -100,7 +100,7 @@
 }
 
 .forum-post-favorite.favorited {
-  color: #012645;
+  color: var(--primary-color, #012645);
   font-weight: 600;
 }
 
@@ -124,7 +124,7 @@
 }
 
 .comment-item {
-  border-left: 1px solid #012645a5;
+  border-left: 1px solid var(--primary-color, #012645) a5;
   padding: 10px;
   border-radius: 12px;
   margin-top: 10px;
@@ -161,7 +161,7 @@
   display: flex;
   align-items: center;
   gap: 4px;
-  color: #012645;
+  color: var(--primary-color, #012645);
   padding: 5px;
   border-radius: 4px;
   margin-right: 8px;
@@ -169,7 +169,7 @@
 
 .comment-like-button.liked {
   font-weight: 600;
-  color: #012645;
+  color: var(--primary-color, #012645);
 }
 
 .comment-like-button:hover {
@@ -241,7 +241,7 @@
 }
 
 .main-comment-container button {
-  background: linear-gradient(to left, #012645, #080866);
+  background: linear-gradient(to left, var(--primary-color, #012645), #080866);
   color: white;
   margin-top: 10px;
   padding: 10px 20px;
@@ -288,7 +288,7 @@
 
 .forum-post-comments {
   font-size: 14px;
-  color: #012645;
+  color: var(--primary-color, #012645);
   cursor: pointer;
 }
 
@@ -317,7 +317,7 @@
 }
 
 .reply-section button {
-  background-color: #012645;
+  background-color: var(--primary-color, #012645);
   color: white;
   padding: 5px 10px;
   border: none;
@@ -328,7 +328,7 @@
 }
 
 .reply-section button:hover {
-  background-color: #012645;
+  background-color: var(--primary-color, #012645);
 }
 
 .comment-actions {
@@ -340,7 +340,7 @@
 .edit-button,
 .delete-button {
   font-size: 13px;
-  color: #012645;
+  color: var(--primary-color, #012645);
   border: none;
   background-color: inherit;
   cursor: pointer;
@@ -360,7 +360,7 @@
 }
 
 .edit-button:hover {
-  color: #012645;
+  color: var(--primary-color, #012645);
   background-color: rgba(42, 85, 48, 0.1);
 }
 
@@ -382,7 +382,7 @@
 }
 
 .edit-comment-section button {
-  background-color: #012645;
+  background-color: var(--primary-color, #012645);
   color: white;
   padding: 5px 10px;
   border: none;
@@ -434,7 +434,7 @@
 }
 
 .edit-post-buttons button:first-child {
-  background-color: #012645;
+  background-color: var(--primary-color, #012645);
   color: white;
 }
 

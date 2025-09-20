@@ -27,14 +27,14 @@
   gap: 0.75rem;
   font-size: 2rem;
   font-weight: bold;
-  color: #012645;
+  color: var(--primary-color);
   flex: 1;
 }
 
 .title-icon {
   width: 32px;
   height: 32px;
-  color: #012645;
+  color: var(--primary-color);
 }
 
 .no-balances {
@@ -76,7 +76,7 @@
 .seller-icon {
   width: 40px;
   height: 40px;
-  color: #012645;
+  color: var(--primary-color);
   background: #f0f9ff;
   padding: 8px;
   border-radius: 50%;
@@ -89,7 +89,7 @@
 .seller-name {
   font-size: 1.1rem;
   font-weight: 600;
-  color: #012645;
+  color: var(--primary-color);
 }
 
 .seller-email {
@@ -113,7 +113,7 @@
 .stat-icon {
   width: 20px;
   height: 20px;
-  color: #012645;
+  color: var(--primary-color);
 }
 
 .stat-label {
@@ -124,7 +124,7 @@
 .stat-value {
   font-size: 1.25rem;
   font-weight: bold;
-  color: #012645;
+  color: var(--primary-color);
 }
 
 .balance-dates {
@@ -147,7 +147,7 @@
 }
 
 .pagination-btn {
-  background: #012645;
+  background: var(--primary-color);
   color: white;
   border: none;
   padding: 0.75rem 1.5rem;
@@ -168,7 +168,7 @@
 
 .pagination-info {
   font-weight: 500;
-  color: #012645;
+  color: var(--primary-color);
 }
 
 /* Responsive */

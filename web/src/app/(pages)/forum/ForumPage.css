@@ -46,7 +46,7 @@
 }
 
 .search-input:focus {
-  border-color: #012645;
+  border-color: var(--primary-color);
 }
 
 .search-input::placeholder {
@@ -82,7 +82,7 @@
   margin-bottom: 15px;
   padding: 10px 15px;
   background-color: #f8f9fa;
-  border-left: 4px solid #012645;
+  border-left: 4px solid var(--primary-color);
   border-radius: 4px;
   font-style: italic;
   color: #666;
@@ -94,7 +94,7 @@
 }
 
 .create-post-button {
-  background: #012645;
+  background: var(--primary-color);
   border: none;
   border-radius: 5px;
   padding: 15px 30px;

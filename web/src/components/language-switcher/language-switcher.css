@@ -5,7 +5,7 @@
 }
 
 .language-button {
-  background: linear-gradient(135deg, #012645 0%, #034b8a 100%);
+  background: linear-gradient(135deg, var(--primary-color) 0%, #034b8a 100%);
   border: none;
   color: white;
   padding: 1px;
@@ -117,7 +117,7 @@
   cursor: pointer;
   transition: all 0.2s;
   font-size: 0.9rem;
-  color: #012645;
+  color: var(--primary-color);
   font-weight: 500;
 }
 
@@ -129,7 +129,7 @@
 .language-option.active {
   background-color: rgba(1, 38, 69, 0.12);
   font-weight: 700;
-  color: #012645;
+  color: var(--primary-color);
   position: relative;
 }
 
@@ -137,7 +137,7 @@
   content: "•";
   position: absolute;
   left: 6px;
-  color: #012645;
+  color: var(--primary-color);
 }
 
 /* Mobile styles */

@@ -137,7 +137,7 @@ export default function SingleForumPost({ postId }: SingleForumPostProps) {
         <h1>{t('forum.postNotFound') || 'პოსტი ვერ მოიძებნა'}</h1>
         <p>{error || 'The requested forum post could not be found.'}</p>
         <Link href="/forum" style={{ 
-          color: '#012645', 
+          color: 'var(--primary-color, #012645)',
           textDecoration: 'underline',
           fontSize: '18px'
         }}>
@@ -156,7 +156,7 @@ export default function SingleForumPost({ postId }: SingleForumPostProps) {
       {/* Breadcrumb navigation */}
       <div style={{ marginBottom: '20px' }}>
         <Link href="/forum" style={{ 
-          color: '#012645', 
+          color: 'var(--primary-color, #012645)', 
           textDecoration: 'none',
           fontSize: '16px'
         }}>

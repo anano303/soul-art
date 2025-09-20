@@ -1,6 +1,6 @@
 /* Small Moving Text Banner - Dark blue background with bright yellow text */
 .soulart-referral-promo {
-  background: #012645e6;
+  background: var(--primary-color)e6;
   color: #ffff00;
 
   margin: 16px 0;
@@ -138,7 +138,7 @@
 
 .soulart-btn-primary {
   background: rgba(255, 255, 0, 0.9);
-  color: #012645;
+  color: var(--primary-color);
   box-shadow: 0 3px 6px rgba(255, 255, 0, 0.4);
   border: 2px solid #ffff00;
 }
@@ -146,20 +146,20 @@
 .soulart-btn-primary:hover {
   background: rgba(255, 255, 0, 1);
   text-decoration: none;
-  color: #012645;
+  color: var(--primary-color);
   box-shadow: 0 6px 12px rgba(255, 255, 0, 0.6);
   transform: translateY(-2px);
 }
 
 .soulart-btn-secondary {
   background: rgba(255, 255, 255, 0.9);
-  color: #012645;
+  color: var(--primary-color);
   border: 2px solid rgba(255, 255, 0, 0.6);
 }
 
 .soulart-btn-secondary:hover {
   background: rgba(255, 255, 255, 1);
-  color: #012645;
+  color: var(--primary-color);
   border-color: #ffff00;
   box-shadow: 0 3px 6px rgba(255, 255, 0, 0.2);
 }
@@ -170,7 +170,7 @@
   top: 0px;
   background: rgba(255, 255, 0, 0.9);
   border: 2px solid #ffff00;
-  color: #012645;
+  color: var(--primary-color);
   font-size: 1.4rem;
   cursor: pointer;
   z-index: 10;
@@ -185,7 +185,7 @@
 }
 
 .soulart-promo-close:hover {
-  color: #012645;
+  color: var(--primary-color);
   background: rgba(255, 255, 0, 1);
   box-shadow: 0 3px 8px rgba(255, 255, 0, 0.6);
   transform: scale(1.1);

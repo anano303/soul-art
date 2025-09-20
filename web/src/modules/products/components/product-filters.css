@@ -31,14 +31,14 @@
 .filter-title {
   font-size: 1.2rem;
   font-weight: 600;
-  color: #012645;
+  color: var(--primary-color);
   margin: 0;
   text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
   font-family: firaGo;
 }
 
 .filter-clear-btn {
-  background: linear-gradient(45deg, #7b5642, #012645);
+  background: linear-gradient(45deg, #7b5642, var(--primary-color));
   color: white;
   border: none;
   padding: 8px 16px;
@@ -52,7 +52,7 @@
 }
 
 .filter-clear-btn:hover {
-  background: linear-gradient(45deg, #012645, #7b5642);
+  background: linear-gradient(45deg, var(--primary-color), #7b5642);
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(123, 86, 66, 0.4);
 }
@@ -120,7 +120,7 @@
 /* ქვეკატეგორიების განყოფილება */
 .subcategories-section {
   width: 96%;
-  color: #012645;
+  color: var(--primary-color);
   padding: 25px;
   margin-top: 20px;
 
@@ -141,9 +141,9 @@
   background: linear-gradient(
     90deg,
     #7b5642,
-    #012645,
+    var(--primary-color),
     #7b5642,
-    #012645,
+    var(--primary-color),
     #7b5642
   );
   background-size: 200% 100%;
@@ -153,8 +153,8 @@
 /* ნახატების კატეგორიისთვის ლურჯი ქვეკატეგორიები */
 .subcategories-section[data-category="paintings"] .subcategory-option {
   background: linear-gradient(135deg, #e3f2fd 0%, #f1f8ff 100%);
-  border: 2px solid #012645;
-  color: #012645;
+  border: 2px solid var(--primary-color);
+  color: var(--primary-color);
 }
 
 .subcategories-section[data-category="paintings"] .subcategory-option:hover {
@@ -165,7 +165,7 @@
 }
 
 .subcategories-section[data-category="paintings"] .subcategory-option.selected {
-  background: linear-gradient(135deg, #012645 0%, #01456b 100%);
+  background: linear-gradient(135deg, var(--primary-color) 0%, #01456b 100%);
   color: white;
   border-color: #003055;
   transform: translateY(-2px) scale(1.05);
@@ -224,7 +224,7 @@
 
 /* paintings კატეგორიისთვის სათაურის ფერი */
 .subcategories-section[data-category="paintings"] .subcategories-title {
-  color: #012645;
+  color: var(--primary-color);
   text-shadow: 1px 1px 2px rgba(1, 38, 69, 0.2);
 }
 
@@ -240,7 +240,7 @@
 
 .subcategories-title {
   position: relative;
-  color: #012645;
+  color: var(--primary-color);
 
   font-size: 1.3rem;
   margin-bottom: 20px;
@@ -267,12 +267,12 @@
 }
 
 .subcategories-grid::-webkit-scrollbar-thumb {
-  background: linear-gradient(45deg, #7b5642, #012645);
+  background: linear-gradient(45deg, #7b5642, var(--primary-color));
   border-radius: 10px;
 }
 
 .subcategories-grid::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(45deg, #012645, #7b5642);
+  background: linear-gradient(45deg, var(--primary-color), #7b5642);
 }
 
 .subcategory-option {
@@ -295,14 +295,14 @@
 .subcategory-option:hover {
   transform: translateY(-3px) scale(1.05);
   box-shadow: 0 8px 25px rgba(123, 86, 66, 0.4);
-  border-color: #012645;
+  border-color: var(--primary-color);
 }
 
 /* ზოგადი ქვეკატეგორიების selected (თუ არ არის სპეციალური კატეგორია) */
 .subcategory-option.selected {
-  background: linear-gradient(135deg, #7b5642 0%, #012645 100%);
+  background: linear-gradient(135deg, #7b5642 0%, var(--primary-color) 100%);
   color: white;
-  border-color: #012645;
+  border-color: var(--primary-color);
   transform: translateY(-2px) scale(1.05);
   box-shadow: 0 8px 25px rgba(123, 86, 66, 0.5);
 }
@@ -318,7 +318,7 @@
 
 /* ფილტრების ტოგლი */
 .filter-toggle-btn {
-  background: linear-gradient(45deg, #7b5642, #012645);
+  background: linear-gradient(45deg, #7b5642, var(--primary-color));
   color: white;
   border: none;
   padding: 5px 15px;
@@ -336,7 +336,7 @@
 }
 
 .filter-toggle-btn:hover {
-  background: linear-gradient(45deg, #012645, #7b5642);
+  background: linear-gradient(45deg, var(--primary-color), #7b5642);
   transform: translateY(-2px);
   box-shadow: 0 8px 25px rgba(123, 86, 66, 0.4);
 }
@@ -366,7 +366,7 @@
   left: 0;
   right: 0;
   height: 3px;
-  background: linear-gradient(90deg, #7b5642, #012645, #7b5642);
+  background: linear-gradient(90deg, #7b5642, var(--primary-color), #7b5642);
   background-size: 200% 100%;
   animation: gradientMove 3s ease-in-out infinite;
 }
@@ -445,19 +445,19 @@
   transition: all 0.3s ease;
   font-size: 0.9rem;
   font-weight: 500;
-  color: #012645;
+  color: var(--primary-color);
 }
 
 .filter-option:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 15px rgba(123, 86, 66, 0.3);
-  border-color: #012645;
+  border-color: var(--primary-color);
 }
 
 .filter-option.selected {
-  background: linear-gradient(135deg, #7b5642 0%, #012645 100%);
+  background: linear-gradient(135deg, #7b5642 0%, var(--primary-color) 100%);
   color: white;
-  border-color: #012645;
+  border-color: var(--primary-color);
   box-shadow: 0 4px 15px rgba(123, 86, 66, 0.4);
 }
 
@@ -476,18 +476,18 @@
   border-radius: 8px;
   font-size: 0.9rem;
   background: linear-gradient(135deg, #fff 0%, #f8f6f0 100%);
-  color: #012645;
+  color: var(--primary-color);
   font-weight: 500;
 }
 
 .price-input:focus {
   outline: none;
-  border-color: #012645;
+  border-color: var(--primary-color);
   box-shadow: 0 0 10px rgba(123, 86, 66, 0.3);
 }
 
 .price-apply-btn {
-  background: linear-gradient(45deg, #7b5642, #012645);
+  background: linear-gradient(45deg, #7b5642, var(--primary-color));
   color: white;
   border: none;
   padding: 10px 16px;
@@ -500,7 +500,7 @@
 }
 
 .price-apply-btn:hover {
-  background: linear-gradient(45deg, #012645, #7b5642);
+  background: linear-gradient(45deg, var(--primary-color), #7b5642);
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(123, 86, 66, 0.4);
 }
@@ -531,7 +531,7 @@
   border-radius: 10px;
   font-size: 1rem;
   background: linear-gradient(135deg, #fff 0%, #f8f6f0 100%);
-  color: #012645;
+  color: var(--primary-color);
   font-weight: 500;
   transition: all 0.3s ease;
   box-shadow: 0 2px 8px rgba(123, 86, 66, 0.1);
@@ -539,13 +539,13 @@
 
 .brand-search-input:focus {
   outline: none;
-  border-color: #012645;
+  border-color: var(--primary-color);
   box-shadow: 0 0 15px rgba(123, 86, 66, 0.3);
   transform: translateY(-1px);
 }
 
 .brand-search-input::placeholder {
-  color: #012645;
+  color: var(--primary-color);
   opacity: 0.7;
 }
 
@@ -576,7 +576,7 @@
 }
 
 .brands-dropdown::-webkit-scrollbar-thumb {
-  background: linear-gradient(45deg, #7b5642, #012645);
+  background: linear-gradient(45deg, #7b5642, var(--primary-color));
   border-radius: 10px;
 }
 
@@ -585,7 +585,7 @@
   cursor: pointer;
   border-bottom: 1px solid #eee;
   transition: all 0.2s ease;
-  color: #012645;
+  color: var(--primary-color);
   font-weight: 500;
   position: relative;
 }
@@ -613,7 +613,7 @@
 }
 
 .brand-dropdown-item.selected {
-  background: linear-gradient(135deg, #7b5642 0%, #012645 100%);
+  background: linear-gradient(135deg, #7b5642 0%, var(--primary-color) 100%);
   color: white;
   font-weight: 600;
   transform: translateX(0);
@@ -680,19 +680,19 @@
   transition: all 0.3s ease;
   font-size: 0.95rem;
   font-weight: 500;
-  color: #012645;
+  color: var(--primary-color);
 }
 
 .sort-option:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 15px rgba(123, 86, 66, 0.3);
-  border-color: #012645;
+  border-color: var(--primary-color);
 }
 
 .sort-option.selected {
-  background: linear-gradient(135deg, #7b5642 0%, #012645 100%);
+  background: linear-gradient(135deg, #7b5642 0%, var(--primary-color) 100%);
   color: white;
-  border-color: #012645;
+  border-color: var(--primary-color);
   box-shadow: 0 4px 15px rgba(123, 86, 66, 0.4);
 }
 
@@ -776,7 +776,7 @@
 .no-categories {
   text-align: center;
   padding: 40px 20px;
-  color: #012645;
+  color: var(--primary-color);
   font-style: italic;
 }
 
@@ -851,14 +851,14 @@
 }
 
 .brands-scrollable::-webkit-scrollbar-thumb {
-  background: linear-gradient(45deg, #7b5642, #012645);
+  background: linear-gradient(45deg, #7b5642, var(--primary-color));
   border-radius: 10px;
 }
 
 .no-brands-message {
   text-align: center;
   padding: 20px;
-  color: #012645;
+  color: var(--primary-color);
   font-style: italic;
 }
 
@@ -888,7 +888,7 @@
 }
 
 .price-separator {
-  color: #012645;
+  color: var(--primary-color);
   font-weight: bold;
   font-size: 1.2rem;
 }
@@ -899,7 +899,7 @@
   border-radius: 10px;
   font-size: 1rem;
   background: linear-gradient(135deg, #fff 0%, #f8f6f0 100%);
-  color: #012645;
+  color: var(--primary-color);
   font-weight: 500;
   cursor: pointer;
   width: 15%;
@@ -912,7 +912,7 @@
 
 .sort-select:focus {
   outline: none;
-  border-color: #012645;
+  border-color: var(--primary-color);
   box-shadow: 0 0 10px rgba(123, 86, 66, 0.3);
 }
 
@@ -923,7 +923,7 @@
 
 .sort-select option {
   background: white;
-  color: #012645;
+  color: var(--primary-color);
   padding: 10px;
 }
 
@@ -1073,8 +1073,8 @@
 
 /* ლურჯი კატეგორიისთვის სპეციალური ეფექტები */
 .main-category-option:first-child {
-  background: linear-gradient(135deg, #012645 0%, #01456b 100%);
-  border-color: #012645;
+  background: linear-gradient(135deg, var(--primary-color) 0%, #01456b 100%);
+  border-color: var(--primary-color);
   color: white;
   box-shadow: 0 8px 30px rgba(1, 38, 69, 0.3);
 }
@@ -1094,7 +1094,7 @@
   left: -2px;
   right: -2px;
   bottom: -2px;
-  background: linear-gradient(45deg, #012645, #01456b, #003055, #012645);
+  background: linear-gradient(45deg, var(--primary-color), #01456b, #003055, var(--primary-color));
   border-radius: 22px;
   z-index: -1;
   animation: blueGlow 4s linear infinite;

@@ -40,7 +40,7 @@
   font-family: "FiraGo", "Noto Sans Georgian", sans-serif;
   font-weight: 400;
   font-size: 24px;
-  color: #012645;
+  color: var(--primary-color);
 }
 
 .cart-item-price {
@@ -59,7 +59,7 @@
   font-size: 18px;
   font-weight: bold;
   font-family: "FiraGo", "Noto Sans Georgian", sans-serif;
-  color: #012645;
+  color: var(--primary-color);
   border: 2px solid #7b5642;
   outline: none;
   border-radius: 4px;
@@ -71,7 +71,7 @@
 
 /* Styling the dropdown arrow */
 .cart-item-quantity select::-ms-expand {
-  color: #012645;
+  color: var(--primary-color);
 }
 
 .cart-item-quantity select {
@@ -93,7 +93,7 @@
 .cart-item-total-price {
   font-size: 24px;
   font-family: "FiraGo", "Noto Sans Georgian", sans-serif;
-  color: #012645;
+  color: var(--primary-color);
   text-align: start;
 }
 

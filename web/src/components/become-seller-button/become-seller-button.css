@@ -4,7 +4,7 @@
   gap: 0.75rem;
   padding: 1rem 1.5rem;
   background: rgba(1, 38, 69, 0.1);
-  color: #012645;
+  color: var(--primary-color);
   border: 1px solid #d3d3d3;
   border-radius: 0.5rem;
   font-size: 1.05rem;
@@ -43,7 +43,7 @@
 .become-seller-button:hover {
   transform: translateY(-3px);
   box-shadow: 0 6px 15px rgba(1, 38, 69, 0.3);
-  background: linear-gradient(90deg, #093d67, #012645);
+  background: linear-gradient(90deg, #093d67, var(--primary-color));
   color: white;
 }
 

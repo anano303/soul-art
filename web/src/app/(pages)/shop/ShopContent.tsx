@@ -8,6 +8,8 @@ import { getProducts } from "@/modules/products/api/get-products";
 import { Product, Category } from "@/types";
 import { useLanguage } from "@/hooks/LanguageContext";
 import { useQuery } from "@tanstack/react-query";
+
+const PRIMARY_COLOR = "#012645";
 import { fetchWithAuth } from "@/lib/fetch-with-auth";
 import "./ShopPage.css";
 import Image from "next/image";
@@ -359,7 +361,7 @@ const ShopContent = () => {
                   style={{ width: "auto", height: "auto" }}
                 />
               )}
-              <h2 style={{ color: "#012645" }}>
+              <h2 style={{ color: PRIMARY_COLOR }}>
                 {brandInfo.name}-ის ნამუშევრები{" "}
               </h2>
             </div>

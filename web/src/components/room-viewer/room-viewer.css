@@ -55,7 +55,7 @@
   font-size: 28px;
   margin: 10px 0 25px;
   text-align: center;
-  color: #012645;
+  color: var(--primary-color);
   font-weight: 600;
   border-bottom: 2px solid #f0f0f0;
   padding-bottom: 15px;
@@ -82,7 +82,7 @@
 .color-selector label,
 .product-size-control label {
   font-weight: 500;
-  color: #012645;
+  color: var(--primary-color);
   margin-bottom: 8px;
   display: block;
 }
@@ -110,9 +110,9 @@
 }
 
 .room-buttons button.active {
-  background-color: #012645;
+  background-color: var(--primary-color);
   color: white;
-  border-color: #012645;
+  border-color: var(--primary-color);
   box-shadow: 0 2px 5px rgba(1, 38, 69, 0.2);
 }
 
@@ -139,7 +139,7 @@
 }
 
 .color-option.active {
-  border: 2px solid #012645;
+  border: 2px solid var(--primary-color);
   transform: scale(1.1);
   box-shadow: 0 0 0 2px rgba(1, 38, 69, 0.3);
 }
@@ -246,7 +246,7 @@
   width: 18px;
   height: 18px;
   border-radius: 50%;
-  background: #012645;
+  background: var(--primary-color);
   cursor: url("/brush.png"), pointer;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 }
@@ -255,7 +255,7 @@
   width: 18px;
   height: 18px;
   border-radius: 50%;
-  background: #012645;
+  background: var(--primary-color);
   cursor: url("/brush.png"), pointer;
   border: none;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
@@ -280,7 +280,7 @@
   justify-content: center;
   padding: 20px;
   font-size: 16px;
-  color: #012645;
+  color: var(--primary-color);
   background: rgba(255, 255, 255, 0.8);
   border-radius: 8px;
 }
