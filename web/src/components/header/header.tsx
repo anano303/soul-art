@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import logo from "../../assets/Images/logo-white.png";
+import logo from "@/../../public/logo-white.png";
 import { CartIcon } from "@/modules/cart/components/cart-icon";
 import "./header.scss";
 import UserMenu from "./user-menu";
@@ -39,13 +39,16 @@ export default function Header() {
     <header className={`header ${isNavOpen ? "mobile-nav-active" : ""}`}>
       <div className="logo">
         <Link href="/">
-          <Image
-            src={logo}
-            width={200}
-            style={{ height: "auto" }}
-            alt="logo soulArt"
-            priority
-          />
+          <div style={{ position: "relative", width: "200px", height: "50px" }}>
+            <Image
+              src={logo}
+              alt="logo soulArt"
+              fill
+              sizes="(max-width: 480px) 160px, 200px"
+              loading="eager"
+              style={{ objectFit: "contain" }}
+            />
+          </div>
         </Link>
       </div>
       <nav className="main-nav">
