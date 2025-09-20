@@ -32,7 +32,7 @@ const ShopContent = () => {
   const [selectedColor, setSelectedColor] = useState<string>("");
   const initialBrand = (() => {
     try {
-      const value = decodeURIComponent(searchParams.get("brand") || "").trim();
+      const value = decodeURIComponent(searchParams?.get("brand") || "").trim();
       return value;
     } catch {
       return "";
@@ -96,13 +96,13 @@ const ShopContent = () => {
     if (initializedRef.current) return;
     initializedRef.current = true;
 
-    const pageParam = parseInt(searchParams.get("page") || "1");
-    const mainCategoryParam = searchParams.get("mainCategory") || "";
-    const subCategoryParam = searchParams.get("subCategory") || "";
-    const ageGroupParam = searchParams.get("ageGroup") || "";
-    const sizeParam = searchParams.get("size") || "";
-    const colorParam = searchParams.get("color") || "";
-    const brandParam = searchParams.get("brand") || "";
+    const pageParam = parseInt(searchParams?.get("page") || "1");
+    const mainCategoryParam = searchParams?.get("mainCategory") || "";
+    const subCategoryParam = searchParams?.get("subCategory") || "";
+    const ageGroupParam = searchParams?.get("ageGroup") || "";
+    const sizeParam = searchParams?.get("size") || "";
+    const colorParam = searchParams?.get("color") || "";
+    const brandParam = searchParams?.get("brand") || "";
 
     let decodedBrandParam = "";
     if (brandParam) {
@@ -120,12 +120,12 @@ const ShopContent = () => {
       }
     }
 
-    const discountParam = searchParams.get("discountOnly") === "true";
-    const minPriceParam = parseInt(searchParams.get("minPrice") || "0");
-    const maxPriceParam = parseInt(searchParams.get("maxPrice") || "1000");
-    const sortByParam = searchParams.get("sortBy") || "createdAt";
+    const discountParam = searchParams?.get("discountOnly") === "true";
+    const minPriceParam = parseInt(searchParams?.get("minPrice") || "0");
+    const maxPriceParam = parseInt(searchParams?.get("maxPrice") || "1000");
+    const sortByParam = searchParams?.get("sortBy") || "createdAt";
     const sortDirectionParam =
-      (searchParams.get("sortDirection") as "asc" | "desc") || "desc";
+      (searchParams?.get("sortDirection") as "asc" | "desc") || "desc";
 
     setCurrentPage(pageParam);
     setSelectedCategoryId(mainCategoryParam);
