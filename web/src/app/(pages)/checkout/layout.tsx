@@ -31,7 +31,7 @@ export const metadata: Metadata = {
     siteName: "Soulart",
     images: [
       {
-        url: "/van gog.jpg",
+        url: "/van-gogh.jpg",
         width: 1200,
         height: 630,
         alt: "Soulart Checkout",
@@ -43,7 +43,7 @@ export const metadata: Metadata = {
     title: "გადახდა | Soulart - Checkout | Soulart",
     description:
       "უსაფრთხო გადახდა ხელნაკეთი ნივთებისა და ნახატებისთვის. ონლაინ შეკვეთის დასრულება",
-    images: ["/van gog.jpg"],
+    images: ["/van-gogh.jpg"],
   },
   robots: {
     index: false,

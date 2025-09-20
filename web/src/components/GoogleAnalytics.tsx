@@ -21,13 +21,7 @@ export default function GoogleAnalytics() {
             window.dataLayer = window.dataLayer || [];
             function gtag(){dataLayer.push(arguments);}
             gtag('js', new Date());
-            gtag('config', '${GA_MEASUREMENT_ID}', {
-              page_title: document.title,
-              page_location: window.location.href,
-              cookie_flags: 'SameSite=Lax;Secure',
-              cookie_expires: 63072000,
-              anonymize_ip: true,
-            });
+            gtag('config', '${GA_MEASUREMENT_ID}');
           `,
         }}
       />
