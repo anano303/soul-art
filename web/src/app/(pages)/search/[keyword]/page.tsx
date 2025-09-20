@@ -22,8 +22,8 @@ export default function SearchPage() {
   const searchParams = useSearchParams();
   const { language, t } = useLanguage();
 
-  const keyword = params.keyword as string;
-  const currentPage = Number(searchParams.get("page")) || 1;
+  const keyword = (params?.keyword as string) || "";
+  const currentPage = Number(searchParams?.get("page")) || 1;
 
   console.log("Raw keyword from URL:", keyword);
   console.log("URL-decoded keyword:", decodeURIComponent(keyword || ""));

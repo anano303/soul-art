@@ -52,9 +52,11 @@ export function RegisterForm() {
 
   // Auto-fill referral code from URL parameters
   useEffect(() => {
-    const refCode = searchParams.get("ref");
-    if (refCode) {
-      setValue("invitationCode", refCode);
+    if (searchParams) {
+      const refCode = searchParams.get("ref");
+      if (refCode) {
+        setValue("invitationCode", refCode);
+      }
     }
   }, [searchParams, setValue]);
 
