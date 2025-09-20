@@ -46,14 +46,13 @@ if (process.env.NODE_ENV === "development") {
       const message = args.join(" ");
       if (
         message.includes("Download the React DevTools") ||
-        message.includes("react-devtools") ||
-        message.includes("User profile updated")
+        message.includes("react-devtools")
       ) {
-        return; // Skip React DevTools and user profile messages
+        return; // Skip React DevTools messages
       }
       originalConsoleLog.apply(console, args);
     };
-
+    
     console.warn = (...args) => {
       const message = args.join(" ");
       if (
@@ -67,9 +66,7 @@ if (process.env.NODE_ENV === "development") {
         message.includes("access_token") ||
         message.includes("refresh_token") ||
         message.includes("preloaded with link preload") ||
-        message.includes("preload tag") ||
-        message.includes("logo-white") ||
-        message.includes("_next/static/media")
+        message.includes("preload tag")
       ) {
         return; // Skip cookie and preload warnings in development
       }
