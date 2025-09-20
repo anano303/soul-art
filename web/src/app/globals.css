@@ -1,27 +1,114 @@
 @import "tailwindcss";
 
-@import "@fontsource/firago";
+/* Import only the necessary FiraGO weights for better performance */
+@import "@fontsource/firago/400.css"; /* Regular */
+@import "@fontsource/firago/500.css"; /* Medium */
+@import "@fontsource/firago/600.css"; /* SemiBold */
+@import "@fontsource/firago/700.css"; /* Bold */
+
+/* Performance optimized CSS */
+:root {
+  --font-firago: "FiraGO", system-ui, -apple-system, BlinkMacSystemFont,
+    "Segoe UI", Roboto, sans-serif;
+}
 
 body {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  /* background-color: #f9f9f9;
-  color: #333; */
-  font-family: "firaGo", sans-serif;
+  font-family: var(--font-firago);
   font-style: normal;
   cursor: url("/brush.png"), auto;
   overflow-x: hidden;
   display: flex;
   flex-direction: column;
+  font-display: swap;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
+
+/* Performance optimization styles merged from performance.css */
+
+/* Prevent layout shift for images */
+.image-container {
+  position: relative;
+  width: 100%;
+  height: 0;
+  overflow: hidden;
+}
+
+.image-container.aspect-square {
+  padding-bottom: 100%;
+}
+
+.image-container.aspect-video {
+  padding-bottom: 56.25%;
+}
+
+.image-container.aspect-product {
+  padding-bottom: 75%;
+}
+
+/* Skeleton loading states */
+.skeleton {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s infinite;
+}
+
+@keyframes skeleton-loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* Optimize critical rendering path */
+.critical-resource {
+  content-visibility: auto;
+  contain-intrinsic-size: 300px;
+}
+
+/* Lazy loading images */
+.lazy-image {
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.lazy-image.loaded {
+  opacity: 1;
+}
+
+/* Web vitals optimization */
+.web-vitals-optimized {
+  will-change: transform;
+  transform: translateZ(0);
+}
+
+/* Reduce paint area */
+.paint-optimized {
+  contain: layout style paint;
+}
+
+/* Improve scroll performance */
+.scroll-optimized {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+
+/* Original layout styles */
 main {
   min-height: 100vh;
   max-width: 100%;
 }
+
 .container {
   width: 100%;
 }
+
 .flex-col {
   display: flex;
   flex-direction: column;
@@ -31,6 +118,75 @@ main {
   display: flex;
   flex-direction: column;
   gap: 20px;
+}
+
+.title {
+  color: #012645;
+  font-size: 24px;
+  font-weight: bold;
+  text-align: center;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.pagination-button {
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  text-decoration: none;
+  color: #333;
+  font-size: 14px;
+  transition: background 0.3s;
+}
+
+.pagination-button:hover {
+  background: #f0f0f0;
+}
+
+.pagination-button.active {
+  background: #0070f3;
+  color: white;
+  border-color: #0070f3;
+}
+
+.pagination-button.disabled {
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+.pagination-ellipsis {
+  font-size: 14px;
+  color: #888;
+}
+
+.paint-trail {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background: radial-gradient(
+    circle,
+    rgba(255, 0, 0, 1),
+    rgba(255, 255, 0, 0.5)
+  );
+  border-radius: 50%;
+  pointer-events: none;
+  animation: fadeOut 1s forwards;
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.5);
+  }
 }
 
 .title {

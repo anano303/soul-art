@@ -5,6 +5,13 @@ const nextConfig: NextConfig = {
     serverActions: {
       bodySizeLimit: "50mb",
     },
+    // Optimize bundling and loading
+    optimizeCss: true,
+    optimizeServerReact: true,
+  },
+  // Optimize compilation
+  compiler: {
+    removeConsole: process.env.NODE_ENV === "production",
   },
   serverExternalPackages: [],
   images: {
@@ -29,16 +36,17 @@ const nextConfig: NextConfig = {
         pathname: "**",
       },
     ],
-    // Disable image optimization completely in development
-    unoptimized: true,
-    // Add a larger deviceSizes array for better responsive images
+    // Optimize image loading
+    unoptimized: false, // Enable image optimization in production
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
+    formats: ["image/webp", "image/avif"], // Modern image formats
   },
   reactStrictMode: true,
   poweredByHeader: false,
   output: "standalone",
   distDir: ".next",
+  // Optimize bundle splitting
   webpack: (config, { isServer }) => {
     if (!isServer) {
       config.resolve.fallback = {
@@ -46,6 +54,48 @@ const nextConfig: NextConfig = {
         fs: false,
       };
     }
+
+    // Optimize chunks
+    config.optimization = {
+      ...config.optimization,
+      splitChunks: {
+        chunks: "all",
+        cacheGroups: {
+          default: false,
+          vendors: false,
+          framework: {
+            chunks: "all",
+            name: "framework",
+            test: /(?<!node_modules.*)[\\/]node_modules[\\/](react|react-dom|scheduler|prop-types|use-subscription)[\\/]/,
+            priority: 40,
+            enforce: true,
+          },
+          lib: {
+            test(module: any) {
+              return (
+                module.size() > 160000 &&
+                /node_modules[/\\]/.test(module.identifier())
+              );
+            },
+            name: "lib",
+            priority: 30,
+            minChunks: 1,
+            reuseExistingChunk: true,
+          },
+          commons: {
+            name: "commons",
+            minChunks: 2,
+            priority: 20,
+          },
+          shared: {
+            name: false,
+            priority: 10,
+            minChunks: 2,
+          },
+        },
+      },
+    };
+
     return config;
   },
 };

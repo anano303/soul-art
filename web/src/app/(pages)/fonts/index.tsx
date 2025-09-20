@@ -1,14 +1,8 @@
-import localFont from "next/font/local";
+// Since FiraGO is not available in Google Fonts, we'll optimize @fontsource usage
+// Remove all font imports from this file and handle in globals.css with @fontsource/firago
 
-export const satoshi = localFont({
-  src: [
-    {
-      path: "./Satoshi-Variable.woff2",
-      weight: "100 900",
-      style: "normal",
-    },
-  ],
-  variable: "--font-satoshi",
-  display: "swap",
-  fallback: ["system-ui", "arial"],
-});
+// Export a variable name for consistency, but actual font loading happens in CSS
+export const firago = {
+  variable: "--font-firago",
+  className: "font-firago",
+};
