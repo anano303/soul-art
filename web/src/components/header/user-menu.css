@@ -105,6 +105,7 @@
   .dropdown-menu {
     position: static;
     transform: translateY(-45%);
+    width: 300px;
   }
   .icon {
     z-index: 0;
