@@ -37,11 +37,8 @@ if (process.env.NODE_ENV === "development") {
     // Clean up periodically
     setInterval(cleanup, 10000); // Every 10 seconds
 
-    // Filter out React DevTools recommendation message and auth errors
+    // Filter out React DevTools recommendation message
     const originalConsoleLog = console.log;
-    const originalConsoleError = console.error;
-    const originalConsoleWarn = console.warn;
-
     console.log = (...args) => {
       const message = args.join(" ");
       if (
@@ -51,40 +48,6 @@ if (process.env.NODE_ENV === "development") {
         return; // Skip React DevTools messages
       }
       originalConsoleLog.apply(console, args);
-    };
-    
-    console.warn = (...args) => {
-      const message = args.join(" ");
-      if (
-        message.includes("_ga_") ||
-        message.includes("__cf_bm") ||
-        message.includes("cookie") ||
-        message.includes("expires") ||
-        message.includes("overwritten") ||
-        message.includes("rejected for invalid domain") ||
-        message.includes("Partitioned") ||
-        message.includes("access_token") ||
-        message.includes("refresh_token") ||
-        message.includes("preloaded with link preload") ||
-        message.includes("preload tag")
-      ) {
-        return; // Skip cookie and preload warnings in development
-      }
-      originalConsoleWarn.apply(console, args);
-    };
-
-    console.error = (...args) => {
-      const message = args.join(" ");
-      if (
-        message.includes("401") ||
-        message.includes("Session expired") ||
-        message.includes("auth/refresh")
-      ) {
-        // Convert expected auth errors to debug messages
-        console.debug("🔐 Auth check:", message);
-        return;
-      }
-      originalConsoleError.apply(console, args);
     };
   }
 }

@@ -50,10 +50,7 @@ export default function UserMenu({ onNavigate }: { onNavigate?: () => void }) {
       setProfileImage("/avatar.jpg");
     }
 
-    // Only log in development and when user actually exists
-    if (process.env.NODE_ENV === 'development' && user) {
-      console.log("User profile updated:", user);
-    }
+    console.log("User profile updated:", user);
   }, [user]);
 
   useEffect(() => {
