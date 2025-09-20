@@ -26,6 +26,7 @@
   align-items: center;
   margin-bottom: 12px;
   font-family: firaGo;
+  margin-top: 30px;
 }
 
 .filter-title {
@@ -1139,6 +1140,7 @@
 
   .subcategories-section {
     padding-top: 15px;
+    width: 100%;
   }
 
   .subcategories-title {
