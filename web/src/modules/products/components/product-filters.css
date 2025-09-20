@@ -178,7 +178,7 @@
   border-color: var(--primary-color);
   color: white;
   transform: translateY(-3px) scale(1.05);
-  box-shadow: 0 3px 10px var(--primary-color);
+  box-shadow: 0 3px 5px var(--primary-color);
 }
 
 .subcategories-section[data-category="paintings"] .subcategory-option.selected {
@@ -186,7 +186,7 @@
   color: white;
   border-color: var(--primary-color);
   transform: translateY(-2px) scale(1.05);
-  box-shadow: 0 8px 25px var(--primary-color);
+  box-shadow: 0 3px 10px var(--primary-color);
 }
 
 .subcategories-section[data-category="paintings"]
@@ -224,7 +224,7 @@
   color: white;
   border-color: var(--secondary-color);
   transform: translateY(-2px) scale(1.05);
-  box-shadow: 0 8px 25px var(--secondary-color);
+  box-shadow: 0 3px 10px var(--secondary-color);
 }
 
 .subcategories-section[data-category="handmade"]
