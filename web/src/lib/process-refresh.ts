@@ -1,8 +1,5 @@
 import { setupResponseInterceptors } from "./api-client";
-import {
-  clearUserData,
-  refreshTokens,
-} from "./auth";
+import { clearUserData, refreshTokens } from "./auth";
 
 let isRefreshing = false;
 let failedQueue: Array<{
@@ -43,20 +40,43 @@ export const refreshAuthToken = async (): Promise<boolean> => {
 
     try {
       await refreshTokens();
-      
+
       // With HTTP-only cookies, we don't get specific token values
       // Just signal that refresh was successful
-      processQueue(null, 'refreshed');
+      processQueue(null, "refreshed");
       resetRefreshState();
       return true;
     } catch (refreshError) {
       clearUserData();
-      processQueue(refreshError instanceof Error ? refreshError : new Error("Token refresh failed"));
+      // Don't log expected 401 errors in development
+      if (
+        process.env.NODE_ENV === "development" &&
+        refreshError instanceof Error &&
+        refreshError.message.includes("Session expired")
+      ) {
+        // Silent handling for expected auth failures
+      } else {
+        console.error("❌ Unexpected refresh error:", refreshError);
+      }
+      processQueue(
+        refreshError instanceof Error
+          ? refreshError
+          : new Error("Token refresh failed")
+      );
       resetRefreshState();
       return false;
     }
   } catch (error) {
-    console.error("❌ Token refresh error:", error);
+    // Don't log routine auth check failures in development
+    if (
+      process.env.NODE_ENV === "development" &&
+      error instanceof Error &&
+      error.message.includes("Session expired")
+    ) {
+      // Silent handling for expected auth failures
+    } else {
+      console.error("❌ Token refresh error:", error);
+    }
     clearUserData();
     processQueue(error);
     resetRefreshState();
@@ -72,7 +92,14 @@ export const checkAndRefreshAuth = async (): Promise<boolean> => {
     const success = await refreshAuthToken();
     return success;
   } catch (error) {
-    console.error("Failed to refresh token during init:", error);
+    // Don't log expected auth failures - user is simply not logged in
+    if (error instanceof Error && error.message.includes("Session expired")) {
+      if (process.env.NODE_ENV === "development") {
+        console.debug("🔐 User is not authenticated - this is normal");
+      }
+    } else {
+      console.error("Failed to refresh token during init:", error);
+    }
     return false;
   }
 };
