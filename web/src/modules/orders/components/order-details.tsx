@@ -1,12 +1,13 @@
 "use client";
 
-import { CheckCircle2, XCircle, Store } from "lucide-react";
+import { CheckCircle2, XCircle, Store, ArrowLeft } from "lucide-react";
 import { useLanguage } from "@/hooks/LanguageContext";
 import { useQuery } from "@tanstack/react-query";
 import { fetchWithAuth } from "@/lib/fetch-with-auth";
 import { Color, AgeGroupItem } from "@/types";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Order, OrderItem } from "@/types/order";
 import { PayPalButton } from "./paypal-button";
 import { StripeButton } from "./stripe-button";
@@ -22,6 +23,7 @@ interface OrderDetailsProps {
 
 export function OrderDetails({ order }: OrderDetailsProps) {
   const { t, language } = useLanguage();
+  const router = useRouter();
 
   // Check if stock reservation has expired
   const isStockExpired = order.stockReservationExpires
@@ -122,6 +124,16 @@ export function OrderDetails({ order }: OrderDetailsProps) {
 
   return (
     <div className="order-container">
+      {/* Back Button */}
+      <button
+        onClick={() => router.back()}
+        className="back-button"
+        aria-label="Go back"
+      >
+        <ArrowLeft className="back-icon" />
+        {t("back")}
+      </button>
+
       <div className="order-header">
         <h1 className="order-title">
           {t("order.order")} #{order._id}
