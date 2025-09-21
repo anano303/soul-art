@@ -7,6 +7,7 @@ import {
   Put,
   UseGuards,
   Query,
+  BadRequestException,
 } from '@nestjs/common';
 import { RolesGuard } from '@/guards/roles.guard';
 import { OrdersService } from '../services/orders.service';
@@ -29,7 +30,32 @@ export class OrdersController {
   @UseGuards(JwtAuthGuard)
   @Post()
   async createOrder(@Body() body: any, @CurrentUser() user: UserDocument) {
-    return this.ordersService.create(body, user._id.toString());
+    try {
+      return await this.ordersService.create(body, user._id.toString());
+    } catch (error) {
+      // If stock related error, format it properly for frontend
+      if (error.message?.includes('Not enough stock')) {
+        // Parse error message to extract product info
+        const unavailableItems = this.parseStockError(error.message);
+
+        throw new BadRequestException({
+          message: 'ITEMS_UNAVAILABLE',
+          unavailableItems,
+        });
+      }
+      throw error;
+    }
+  }
+
+  private parseStockError(errorMessage: string) {
+    // Simple parsing - in real app you'd want more sophisticated parsing
+    // For now, return a generic unavailable item structure
+    return [
+      {
+        productId: null, // Would need to extract from error
+        reason: 'insufficient_stock',
+      },
+    ];
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)

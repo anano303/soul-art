@@ -1,7 +1,7 @@
 "use client";
 
 import { useCheckout } from "../context/checkout-context";
-
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import { apiClient } from "@/lib/api-client";
@@ -9,6 +9,7 @@ import { TAX_RATE } from "@/config/constants";
 import { useLanguage } from "@/hooks/LanguageContext";
 import Image from "next/image";
 import Link from "next/link";
+import { AlertTriangle } from "lucide-react";
 import "./order-review.css";
 import { useCart } from "@/modules/cart/context/cart-context";
 
@@ -18,6 +19,14 @@ export function OrderReview() {
   const router = useRouter();
   const { toast } = useToast();
   const { language } = useLanguage();
+  const [isValidating, setIsValidating] = useState(false);
+  const [unavailableItems, setUnavailableItems] = useState<
+    Array<{
+      productId: string;
+      name: string;
+      reason: string;
+    }>
+  >([]);
 
   const itemsPrice = items.reduce(
     (acc, item) => acc + item.price * item.qty,
@@ -27,8 +36,67 @@ export function OrderReview() {
   const taxPrice = Number((itemsPrice * TAX_RATE).toFixed(2));
   const totalPrice = itemsPrice + shippingPrice + taxPrice;
 
-  const handlePlaceOrder = async () => {
+  // ფუნქცია პროდუქტების მარაგის შესამოწმებლად
+  const validateCartItems = async () => {
     try {
+      const itemsToValidate = items.map((item) => ({
+        productId: item.productId,
+        quantity: item.qty,
+        size: item.size,
+        color: item.color,
+        ageGroup: item.ageGroup,
+      }));
+
+      const response = await apiClient.post("/cart/validate", {
+        items: itemsToValidate,
+      });
+
+      return response.data;
+    } catch (error) {
+      console.error("Validation error:", error);
+      throw error;
+    }
+  };
+
+  const handlePlaceOrder = async () => {
+    setIsValidating(true);
+    setUnavailableItems([]);
+
+    try {
+      // ჯერ ვალიდაცია
+      const validationResult = await validateCartItems();
+
+      if (!validationResult.isValid) {
+        // თუ რამე პროდუქტი მიუწვდომელია
+        const unavailable = validationResult.unavailableItems.map(
+          (item: any) => ({
+            productId: item.productId,
+            name:
+              items.find((cartItem) => cartItem.productId === item.productId)
+                ?.name || "პროდუქტი",
+            reason:
+              item.reason === "out_of_stock"
+                ? "არ არის მარაგში"
+                : item.reason === "not_found"
+                ? "აღარ არსებობს"
+                : item.reason === "insufficient_stock"
+                ? `მარაგში მხოლოდ ${item.availableQuantity} ცალია`
+                : "მიუწვდომელია",
+          })
+        );
+
+        setUnavailableItems(unavailable);
+
+        toast({
+          title: "შეკვეთის შეცდომა",
+          description: `ზოგი პროდუქტი მიუწვდომელია. გთხოვთ, შეამოწმოთ ქვემოთ`,
+          variant: "destructive",
+        });
+
+        return;
+      }
+
+      // თუ ყველაფერი ok-ია, შეკვეთის შექმნა
       const orderItems = items.map((item) => ({
         name: item.name,
         nameEn: item.nameEn,
@@ -53,18 +121,100 @@ export function OrderReview() {
 
       await clearCart();
       router.push(`/orders/${response.data._id}`);
-    } catch (error) {
-      console.log(error);
-      toast({
-        title: "Error placing order",
-        description: "Please try again.",
-        variant: "destructive",
-      });
+    } catch (error: any) {
+      console.error("Order error:", error);
+
+      // თუ backend-იდან სპეციალური ერორი მოვა
+      if (error?.response?.data?.message === "ITEMS_UNAVAILABLE") {
+        const unavailableFromServer =
+          error.response.data.unavailableItems || [];
+        const unavailable = unavailableFromServer.map((item: any) => ({
+          productId: item.productId,
+          name:
+            items.find((cartItem) => cartItem.productId === item.productId)
+              ?.name || "პროდუქტი",
+          reason:
+            item.reason === "out_of_stock"
+              ? "არ არის მარაგში"
+              : item.reason === "not_found"
+              ? "აღარ არსებობს"
+              : item.reason === "insufficient_stock"
+              ? `მარაგში მხოლოდ ${item.availableQuantity} ცალია`
+              : "მიუწვდომელია",
+        }));
+
+        setUnavailableItems(unavailable);
+
+        toast({
+          title: "შეკვეთის შეცდომა",
+          description: "ზოგი პროდუქტი მიუწვდომელია",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "შეკვეთის შეცდომა",
+          description: "გთხოვთ, სცადოთ ხელახლა",
+          variant: "destructive",
+        });
+      }
+    } finally {
+      setIsValidating(false);
     }
   };
 
   return (
     <div className="order-review-grid">
+      {/* Unavailable Items Error Display */}
+      {unavailableItems.length > 0 && (
+        <div className="col-span-12 bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+          <div className="flex items-start">
+            <AlertTriangle className="h-5 w-5 text-red-500 mt-0.5 mr-3 flex-shrink-0" />
+            <div className="flex-1">
+              <h3 className="text-red-800 font-semibold mb-2">
+                მიუწვდომელი პროდუქტები
+              </h3>
+              <p className="text-red-700 text-sm mb-3">
+                შემდეგი პროდუქტები აღარ არის ხელმისაწვდომი:
+              </p>
+              <ul className="space-y-2">
+                {unavailableItems.map((item) => (
+                  <li
+                    key={item.productId}
+                    className="flex items-center justify-between bg-white px-3 py-2 rounded border"
+                  >
+                    <span className="font-medium text-gray-900">
+                      {item.name}
+                    </span>
+                    <span className="text-sm text-red-600">{item.reason}</span>
+                  </li>
+                ))}
+              </ul>
+              <p className="text-red-700 text-sm mt-3">
+                გთხოვთ, წაშალოთ ეს პროდუქტები კალათიდან ან შეცვალოთ რაოდენობა
+              </p>
+              <div className="flex gap-2 mt-4">
+                <button
+                  onClick={() => router.push("/cart")}
+                  className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors text-sm"
+                >
+                  კალათში დაბრუნება
+                </button>
+                <button
+                  onClick={() => {
+                    setUnavailableItems([]);
+                    validateCartItems();
+                  }}
+                  className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700 transition-colors text-sm"
+                  disabled={isValidating}
+                >
+                  {isValidating ? "შემოწმება..." : "თავიდან შემოწმება"}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="order-details col-span-8 space-y-6">
         {/* Shipping Address */}
         <div className="card p-6">
@@ -156,8 +306,18 @@ export function OrderReview() {
             <button
               className="place-order-button w-full"
               onClick={handlePlaceOrder}
+              disabled={isValidating || unavailableItems.length > 0}
             >
-              Place Order
+              {isValidating ? (
+                <div className="flex items-center justify-center">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  შემოწმება...
+                </div>
+              ) : unavailableItems.length > 0 ? (
+                "პროდუქტები მიუწვდომელია"
+              ) : (
+                "შეკვეთის გაფორმება"
+              )}
             </button>
           </div>
         </div>

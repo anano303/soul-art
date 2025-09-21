@@ -104,4 +104,9 @@ export class CartController {
   clearCart(@CurrentUser() user: UserDocument) {
     return this.cartService.clearCart(user);
   }
+
+  @Post('validate')
+  async validateCart(@CurrentUser() user: UserDocument) {
+    return this.cartService.validateCartItems(user);
+  }
 }
