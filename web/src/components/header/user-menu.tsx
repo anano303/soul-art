@@ -7,6 +7,20 @@ import "./user-menu.css";
 import { Role } from "@/types/role";
 import { useAuth } from "@/hooks/use-auth";
 import { useLanguage } from "@/hooks/LanguageContext";
+import {
+  ChevronDown,
+  X,
+  User,
+  ShoppingBag,
+  Users,
+  Package,
+  Tag,
+  Settings,
+  DollarSign,
+  LogOut,
+  Theater,
+  Gift,
+} from "lucide-react";
 
 // Add a style object for the FiraGo font
 const userMenuStyles = {
@@ -74,6 +88,7 @@ export default function UserMenu({ onNavigate }: { onNavigate?: () => void }) {
     return (
       <Link href="/login" className="button" onClick={handleLinkClick}>
         🎭
+        {/* <Theater size={20} />  */}
         <span className="icon"> {t("navigation.login")}</span>
       </Link>
     );
@@ -81,7 +96,7 @@ export default function UserMenu({ onNavigate }: { onNavigate?: () => void }) {
 
   return (
     <div className="user-menu-container" style={userMenuStyles}>
-      <div className="dropdown" ref={menuRef}>
+      <div className={`dropdown ${isOpen ? "open" : ""}`} ref={menuRef}>
         <button
           onClick={() => setIsOpen(!isOpen)}
           className="button"
@@ -138,7 +153,8 @@ export default function UserMenu({ onNavigate }: { onNavigate?: () => void }) {
           <span className="username">
             {user.name || t("navigation.profile")}
           </span>
-          <span className="icon">▼</span>
+          <span className="icon chevron-icon">▼</span>
+          {/* <ChevronDown size={16} className="chevron-icon" /> */}
         </button>
         {isOpen && (
           <div className="dropdown-menu">
@@ -148,7 +164,7 @@ export default function UserMenu({ onNavigate }: { onNavigate?: () => void }) {
               onClick={() => setIsOpen(false)}
               aria-label="Close menu"
             >
-              ×
+              <X size={20} />
             </button>
 
             <div className="dropdown-label">{t("navigation.profile")}</div>
@@ -158,14 +174,16 @@ export default function UserMenu({ onNavigate }: { onNavigate?: () => void }) {
               className="dropdown-item"
               onClick={handleLinkClick}
             >
-              {t("navigation.profile")}
+              <User size={18} />
+              <span>{t("navigation.profile")}</span>
             </Link>
             <Link
               href="/profile/orders"
               className="dropdown-item"
               onClick={handleLinkClick}
             >
-              {t("navigation.orders")}
+              <ShoppingBag size={18} />
+              <span>{t("navigation.orders")}</span>
             </Link>
 
             {/* რეფერალების ლინკი ყველა ავტორიზებული მომხმარებლისთვის */}
@@ -174,7 +192,8 @@ export default function UserMenu({ onNavigate }: { onNavigate?: () => void }) {
               className="dropdown-item"
               onClick={handleLinkClick}
             >
-              {t("navigation.referrals")}
+              <Gift size={18} />
+              <span>{t("navigation.referrals")}</span>
             </Link>
 
             {(user.role === Role.Admin || user.role === Role.Seller) && (
@@ -188,7 +207,8 @@ export default function UserMenu({ onNavigate }: { onNavigate?: () => void }) {
                   className="dropdown-item"
                   onClick={handleLinkClick}
                 >
-                  {t("navigation.products")}
+                  <Package size={18} />
+                  <span>{t("navigation.products")}</span>
                 </Link>
               </>
             )}
@@ -199,14 +219,16 @@ export default function UserMenu({ onNavigate }: { onNavigate?: () => void }) {
                   className="dropdown-item"
                   onClick={handleLinkClick}
                 >
-                  {t("navigation.banners")}
+                  <Tag size={18} />
+                  <span>{t("navigation.banners")}</span>
                 </Link>
                 <Link
                   href="/admin/referrals"
                   className="dropdown-item"
                   onClick={handleLinkClick}
                 >
-                  {t("navigation.adminReferrals")}
+                  <Gift size={18} />
+                  <span>{t("navigation.adminReferrals")}</span>
                 </Link>
               </>
             )}
@@ -218,14 +240,16 @@ export default function UserMenu({ onNavigate }: { onNavigate?: () => void }) {
                   className="dropdown-item"
                   onClick={handleLinkClick}
                 >
-                  {t("navigation.categories")}
+                  <Settings size={18} />
+                  <span>{t("navigation.categories")}</span>
                 </Link>
                 <Link
                   href="/admin/users"
                   className="dropdown-item"
                   onClick={handleLinkClick}
                 >
-                  {t("navigation.users")}
+                  <Users size={18} />
+                  <span>{t("navigation.users")}</span>
                 </Link>
               </>
             )}
@@ -236,7 +260,8 @@ export default function UserMenu({ onNavigate }: { onNavigate?: () => void }) {
                 className="dropdown-item"
                 onClick={handleLinkClick}
               >
-                {t("navigation.orders")}
+                <ShoppingBag size={18} />
+                <span>{t("navigation.orders")}</span>
               </Link>
             )}
 
@@ -247,7 +272,8 @@ export default function UserMenu({ onNavigate }: { onNavigate?: () => void }) {
                 className="dropdown-item"
                 onClick={handleLinkClick}
               >
-                {t("navigation.balances")}
+                <DollarSign size={18} />
+                <span>{t("navigation.balances")}</span>
               </Link>
             )}
 
@@ -257,7 +283,8 @@ export default function UserMenu({ onNavigate }: { onNavigate?: () => void }) {
                 className="dropdown-item"
                 onClick={handleLinkClick}
               >
-                {t("navigation.myBalance")}
+                <DollarSign size={18} />
+                <span>{t("navigation.myBalance")}</span>
               </Link>
             )}
 
@@ -270,7 +297,8 @@ export default function UserMenu({ onNavigate }: { onNavigate?: () => void }) {
               }}
               className="dropdown-item logout-button"
             >
-              {t("navigation.logout")}
+              <LogOut size={18} />
+              <span>{t("navigation.logout")}</span>
             </button>
           </div>
         )}
