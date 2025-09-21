@@ -102,6 +102,14 @@
   background: transparent;
 }
 
+/* Firefox scrollbar styles */
+@supports (scrollbar-color: red blue) {
+  .dropdown-menu {
+    scrollbar-color: rgba(224, 216, 73, 0.4) rgba(255, 255, 255, 0.1);
+    scrollbar-width: thin;
+  }
+}
+
 /* Show dropdown when open */
 .dropdown.open .dropdown-menu {
   opacity: 1;
@@ -338,6 +346,14 @@
     );
     box-shadow: 0 0 10px rgba(224, 216, 73, 0.5),
       inset 0 0 3px rgba(0, 0, 0, 0.3);
+  }
+
+  /* Enhanced Firefox scrollbar for desktop */
+  @supports (scrollbar-color: red blue) {
+    .dropdown-menu {
+      scrollbar-color: rgba(224, 216, 73, 0.6) rgba(255, 255, 255, 0.1);
+      scrollbar-width: thin;
+    }
   }
 
   .dropdown.open .dropdown-menu {
