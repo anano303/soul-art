@@ -255,7 +255,7 @@
     max-height: 100vh;
     overflow-y: auto;
     transform: translateX(100%);
-    transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     z-index: 9999;
     padding: 80px 0 20px;
     border-radius: 0;
@@ -263,13 +263,36 @@
     border-top: none;
     border-right: none;
     border-bottom: none;
-    box-shadow: -5px 0 25px rgba(0, 0, 0, 0.3);
+    box-shadow: -8px 0 35px rgba(0, 0, 0, 0.4);
     opacity: 1;
     visibility: visible;
   }
 
   .dropdown.open .dropdown-menu {
     transform: translateX(0);
+  }
+
+  .dropdown.closing .dropdown-menu {
+    transform: translateX(100%);
+    transition: transform 0.5s cubic-bezier(0.55, 0.085, 0.68, 0.53);
+  }
+
+  .dropdown.closing .dropdown-item {
+    opacity: 0;
+    transform: translateX(50px);
+    transition: all 0.2s ease;
+  }
+
+  .dropdown.closing .dropdown-label {
+    opacity: 0;
+    transform: translateX(30px);
+    transition: all 0.2s ease;
+  }
+
+  .dropdown.closing .close-menu-btn {
+    opacity: 0;
+    transform: scale(0.8) rotate(90deg);
+    transition: all 0.3s ease;
   }
 
   .dropdown-item {
@@ -280,18 +303,64 @@
     backdrop-filter: blur(10px);
     border: 1px solid rgba(224, 216, 73, 0.2);
     width: calc(100% - 32px);
+    opacity: 0;
+    transform: translateX(30px);
+    transition: all 0.3s ease;
+    animation: slideInFromRight 0.8s ease forwards;
+  }
+
+  .dropdown.open .dropdown-item:nth-child(1) {
+    animation-delay: 0.1s;
+  }
+  .dropdown.open .dropdown-item:nth-child(2) {
+    animation-delay: 0.15s;
+  }
+  .dropdown.open .dropdown-item:nth-child(3) {
+    animation-delay: 0.2s;
+  }
+  .dropdown.open .dropdown-item:nth-child(4) {
+    animation-delay: 0.25s;
+  }
+  .dropdown.open .dropdown-item:nth-child(5) {
+    animation-delay: 0.3s;
+  }
+  .dropdown.open .dropdown-item:nth-child(6) {
+    animation-delay: 0.35s;
+  }
+  .dropdown.open .dropdown-item:nth-child(7) {
+    animation-delay: 0.4s;
+  }
+  .dropdown.open .dropdown-item:nth-child(8) {
+    animation-delay: 0.45s;
+  }
+  .dropdown.open .dropdown-item:nth-child(9) {
+    animation-delay: 0.5s;
+  }
+  .dropdown.open .dropdown-item:nth-child(10) {
+    animation-delay: 0.55s;
   }
 
   .dropdown-item:hover {
     background: rgba(224, 216, 73, 0.15);
-    transform: translateX(-4px);
+    transform: translateX(-8px) scale(1.02);
     border-color: rgba(224, 216, 73, 0.4);
+    box-shadow: 0 4px 15px rgba(224, 216, 73, 0.2);
   }
 
   .dropdown-label {
     padding: 20px 24px 12px;
     font-size: 16px;
     text-align: left;
+    opacity: 0;
+    transform: translateX(20px);
+    animation: slideInFromRight 0.6s ease forwards;
+  }
+
+  .dropdown.open .dropdown-label:nth-of-type(1) {
+    animation-delay: 0.05s;
+  }
+  .dropdown.open .dropdown-label:nth-of-type(2) {
+    animation-delay: 0.3s;
   }
 
   .close-menu-btn {
@@ -299,6 +368,10 @@
     position: absolute;
     top: 20px;
     right: 20px;
+    opacity: 0;
+    transform: scale(0.8) rotate(-90deg);
+    animation: scaleRotateIn 0.5s ease forwards;
+    animation-delay: 0.2s;
   }
 
   /* Background overlay for large screens */
@@ -309,9 +382,45 @@
     left: 0;
     width: 100vw;
     height: 100vh;
-    background: rgba(0, 0, 0, 0.4);
-    backdrop-filter: blur(2px);
+    background: rgba(0, 0, 0, 0);
+    backdrop-filter: blur(0px);
     z-index: 9998;
+    transition: all 0.4s ease;
+    animation: overlayFadeIn 0.5s ease forwards;
+  }
+
+  /* Keyframe animations */
+  @keyframes slideInFromRight {
+    from {
+      opacity: 0;
+      transform: translateX(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes scaleRotateIn {
+    from {
+      opacity: 0;
+      transform: scale(0.8) rotate(-90deg);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1) rotate(0deg);
+    }
+  }
+
+  @keyframes overlayFadeIn {
+    from {
+      background: rgba(0, 0, 0, 0);
+      backdrop-filter: blur(0px);
+    }
+    to {
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(3px);
+    }
   }
 }
 

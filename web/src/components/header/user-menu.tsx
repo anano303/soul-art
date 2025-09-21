@@ -30,6 +30,7 @@ const userMenuStyles = {
 export default function UserMenu({ onNavigate }: { onNavigate?: () => void }) {
   const { user, isLoading, logout } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
+  const [isClosing, setIsClosing] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const { t } = useLanguage();
 
@@ -37,8 +38,16 @@ export default function UserMenu({ onNavigate }: { onNavigate?: () => void }) {
   const [profileImage, setProfileImage] = useState<string | null>(null);
 
   const handleLinkClick = () => {
-    setIsOpen(false);
+    handleClose();
     onNavigate?.();
+  };
+
+  const handleClose = () => {
+    setIsClosing(true);
+    setTimeout(() => {
+      setIsOpen(false);
+      setIsClosing(false);
+    }, 400); // Delay to allow animation to complete
   };
 
   // Check if URL is from Cloudinary
@@ -70,7 +79,7 @@ export default function UserMenu({ onNavigate }: { onNavigate?: () => void }) {
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-        setIsOpen(false);
+        handleClose();
       }
     };
 
@@ -96,7 +105,12 @@ export default function UserMenu({ onNavigate }: { onNavigate?: () => void }) {
 
   return (
     <div className="user-menu-container" style={userMenuStyles}>
-      <div className={`dropdown ${isOpen ? "open" : ""}`} ref={menuRef}>
+      <div
+        className={`dropdown ${isOpen ? "open" : ""} ${
+          isClosing ? "closing" : ""
+        }`}
+        ref={menuRef}
+      >
         <button
           onClick={() => setIsOpen(!isOpen)}
           className="button"
@@ -161,7 +175,7 @@ export default function UserMenu({ onNavigate }: { onNavigate?: () => void }) {
             {/* Close button for mobile */}
             <button
               className="close-menu-btn"
-              onClick={() => setIsOpen(false)}
+              onClick={handleClose}
               aria-label="Close menu"
             >
               <X size={20} />
@@ -291,7 +305,7 @@ export default function UserMenu({ onNavigate }: { onNavigate?: () => void }) {
             <hr />
             <button
               onClick={() => {
-                setIsOpen(false);
+                handleClose();
                 onNavigate?.();
                 logout();
               }}
