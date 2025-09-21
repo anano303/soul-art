@@ -71,6 +71,35 @@
   visibility: hidden;
   transform: translateY(-10px);
   transition: all 0.3s ease;
+  overflow-y: auto;
+  max-height: 80vh;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(224, 216, 73, 0.3) transparent;
+}
+
+/* Webkit scrollbar styles for dropdown-menu */
+.dropdown-menu::-webkit-scrollbar {
+  width: 6px;
+}
+
+.dropdown-menu::-webkit-scrollbar-track {
+  background: transparent;
+  border-radius: 10px;
+}
+
+.dropdown-menu::-webkit-scrollbar-thumb {
+  background: rgba(224, 216, 73, 0.3);
+  border-radius: 10px;
+  transition: all 0.3s ease;
+}
+
+.dropdown-menu::-webkit-scrollbar-thumb:hover {
+  background: rgba(224, 216, 73, 0.6);
+  box-shadow: 0 0 8px rgba(224, 216, 73, 0.4);
+}
+
+.dropdown-menu::-webkit-scrollbar-corner {
+  background: transparent;
 }
 
 /* Show dropdown when open */
@@ -208,6 +237,14 @@
     border-radius: 0;
     opacity: 1;
     visibility: visible;
+    /* Mobile scrollbar styles */
+    scrollbar-width: none; /* Firefox - hide scrollbar completely */
+    -ms-overflow-style: none; /* IE and Edge - hide scrollbar */
+  }
+
+  /* Hide scrollbar on mobile for webkit browsers */
+  .dropdown-menu::-webkit-scrollbar {
+    display: none;
   }
 
   .dropdown-item {
@@ -266,6 +303,41 @@
     box-shadow: -8px 0 35px rgba(0, 0, 0, 0.4);
     opacity: 1;
     visibility: visible;
+    /* Custom desktop scrollbar styles */
+    scrollbar-width: thin;
+    scrollbar-color: rgba(224, 216, 73, 0.4) rgba(255, 255, 255, 0.1);
+  }
+
+  /* Enhanced webkit scrollbar for desktop */
+  .dropdown-menu::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  .dropdown-menu::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+    margin: 10px 0;
+  }
+
+  .dropdown-menu::-webkit-scrollbar-thumb {
+    background: linear-gradient(
+      180deg,
+      rgba(224, 216, 73, 0.6),
+      rgba(224, 216, 73, 0.3)
+    );
+    border-radius: 10px;
+    transition: all 0.3s ease;
+    box-shadow: inset 0 0 3px rgba(0, 0, 0, 0.3);
+  }
+
+  .dropdown-menu::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(
+      180deg,
+      rgba(224, 216, 73, 0.8),
+      rgba(224, 216, 73, 0.5)
+    );
+    box-shadow: 0 0 10px rgba(224, 216, 73, 0.5),
+      inset 0 0 3px rgba(0, 0, 0, 0.3);
   }
 
   .dropdown.open .dropdown-menu {
