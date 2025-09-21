@@ -142,6 +142,15 @@ export default function UserMenu({ onNavigate }: { onNavigate?: () => void }) {
         </button>
         {isOpen && (
           <div className="dropdown-menu">
+            {/* Close button for mobile */}
+            <button
+              className="close-menu-btn"
+              onClick={() => setIsOpen(false)}
+              aria-label="Close menu"
+            >
+              ×
+            </button>
+
             <div className="dropdown-label">{t("navigation.profile")}</div>
             <hr />
             <Link

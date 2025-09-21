@@ -49,7 +49,7 @@
   border-radius: 12px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
   padding: 12px 0;
-  font-family: 'Courier New', Courier, monospace;
+  font-family: firaGo, sans-serif;
   color: #ffffff;
   animation: fadeIn 0.3s ease-in-out;
   z-index: 999;
@@ -101,13 +101,79 @@
   }
 }
 
-@media screen and (max-width: 768px) {
+/* Close button for mobile menu */
+.close-menu-btn {
+  position: absolute;
+  top: 15px;
+  right: 20px;
+  background: transparent;
+  border: 2px solid #e0d849;
+  color: #e0d849;
+  font-size: 24px;
+  font-weight: bold;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1001;
+  transition: all 0.2s ease;
+}
+
+.close-menu-btn:hover {
+  background: #e0d849;
+  color: var(--primary-color);
+  transform: scale(1.1);
+}
+
+@media screen and (max-width: 900px) {
   .dropdown-menu {
-    position: static;
-    transform: translateY(-45%);
-    width: 300px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    transform: none;
+    z-index: 9999;
+    overflow-y: auto;
+    padding: 20px;
+    padding-top: 70px; /* Space for close button */
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: stretch;
   }
+
+  .dropdown-item {
+    margin-left: 0;
+    margin-bottom: 10px;
+    padding: 15px 20px;
+    text-align: center;
+    font-size: 16px;
+  }
+
+  .dropdown-label {
+    padding: 15px 20px;
+    text-align: center;
+    font-size: 18px;
+    margin-bottom: 10px;
+  }
+
   .icon {
     z-index: 0;
+  }
+
+  .close-menu-btn {
+    display: flex;
+  }
+}
+
+/* Hide close button on desktop */
+@media screen and (min-width: 900px) {
+  .close-menu-btn {
+    display: none;
   }
 }
