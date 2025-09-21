@@ -3,7 +3,16 @@
   max-width: 900px;
   margin: 2rem auto;
   padding: 0 1rem;
-  font-family: 'Georgia', serif;
+  font-family: var(--font-firago), system-ui, sans-serif;
+  background: linear-gradient(
+    135deg,
+    rgba(1, 38, 69, 0.03),
+    rgba(1, 38, 69, 0.05)
+  );
+  border-radius: 16px;
+  padding: 2rem 1rem;
+  box-shadow: 0 8px 32px rgba(1, 38, 69, 0.1);
+  border: 1px solid rgba(1, 38, 69, 0.2);
 }
 
 .steps-list {
@@ -11,6 +20,14 @@
   align-items: center;
   justify-content: space-between;
   position: relative;
+  background: linear-gradient(
+    90deg,
+    rgba(1, 38, 69, 0.05),
+    rgba(1, 38, 69, 0.03)
+  );
+  border-radius: 12px;
+  padding: 1.5rem 1rem;
+  backdrop-filter: blur(8px);
 }
 
 .step-item {
@@ -18,19 +35,27 @@
   z-index: 2;
 }
 
-.step-item.with-connector::after {
+/* .step-item.with-connector::after {
   content: "";
   position: absolute;
   top: 16px;
   left: 45px;
   width: calc(100% - 20px);
-  height: 2px;
-  background: #e0d5c8;
+  height: 3px;
+  background: linear-gradient(
+    90deg,
+    rgba(1, 38, 69, 0.2),
+    rgba(1, 38, 69, 0.1)
+  );
   z-index: 1;
-}
+  border-radius: 2px;
+  transition: all 0.4s ease;
+} */
 
 .step-item.with-connector:has(.completed + .step-label)::after {
-  background: #8d6e63;
+  background: var(--primary-color);
+  box-shadow: 0 2px 8px rgba(1, 38, 69, 0.3);
+  height: 4px;
 }
 
 .step-content {
@@ -44,99 +69,222 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
-  transition: all 0.3s ease;
+  transition: all 0.4s ease;
+  position: relative;
+  backdrop-filter: blur(10px);
 }
 
 .step-indicator.completed {
-  background-color: #8d6e63;
+  background: var(--primary-color);
   color: #fff;
-  box-shadow: 0 2px 8px rgba(141, 110, 99, 0.3);
+  box-shadow: 0 4px 16px rgba(1, 38, 69, 0.4);
+  border: 2px solid rgba(1, 38, 69, 0.6);
+  transform: scale(1.05);
+}
+
+.step-indicator.completed::before {
+  content: "";
+  position: absolute;
+  top: -3px;
+  left: -3px;
+  right: -3px;
+  bottom: -3px;
+  border-radius: 50%;
+  background: rgba(1, 38, 69, 0.2);
+  z-index: -1;
+  animation: pulse 2s infinite;
 }
 
 .step-indicator.current {
-  background-color: #faf6f2;
-  border: 2px solid #8d6e63;
-  color: #8d6e63;
-  box-shadow: 0 2px 8px rgba(141, 110, 99, 0.15);
+  background: rgba(1, 38, 69, 0.1);
+  border: 3px solid var(--primary-color);
+  color: var(--primary-color);
+  box-shadow: 0 4px 16px rgba(1, 38, 69, 0.25),
+    inset 0 2px 4px rgba(1, 38, 69, 0.1);
+  transform: scale(1.1);
+  animation: glow 1.5s ease-in-out infinite alternate;
 }
 
 .step-indicator.upcoming {
-  background-color: #faf6f2;
-  border: 2px solid #e0d5c8;
-  color: #7d6e63;
+  background: rgba(1, 38, 69, 0.05);
+  border: 2px solid rgba(1, 38, 69, 0.3);
+  color: var(--primary-color);
+  transition: all 0.3s ease;
+}
+
+.step-indicator.upcoming:hover {
+  background: rgba(1, 38, 69, 0.1);
+  border-color: rgba(1, 38, 69, 0.4);
+  transform: scale(1.05);
 }
 
 .step-icon {
-  width: 16px;
-  height: 16px;
+  width: 18px;
+  height: 18px;
 }
 
 .step-number {
-  font-size: 0.9rem;
-  font-weight: 600;
+  font-size: 1rem;
+  font-weight: 700;
 }
 
 .step-label {
-  font-size: 0.95rem;
+  font-size: 1rem;
   text-align: center;
   letter-spacing: 0.5px;
+  margin-top: 0.75rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
 }
 
 .step-label.completed {
-  color: #5d4037;
-  font-weight: 600;
+  color: var(--primary-color);
+  font-weight: 700;
+  text-shadow: 0 1px 2px rgba(1, 38, 69, 0.2);
 }
 
 .step-label.current {
-  color: #8d6e63;
-  font-weight: 600;
+  color: var(--primary-color);
+  font-weight: 700;
+  text-shadow: 0 1px 3px rgba(1, 38, 69, 0.3);
+  animation: textGlow 1.5s ease-in-out infinite alternate;
 }
 
 .step-label.upcoming {
-  color: #7d6e63;
+  color: rgba(1, 38, 69, 0.6);
+  font-weight: 500;
+}
+
+/* Animations */
+@keyframes pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.7;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 1;
+  }
+}
+
+@keyframes glow {
+  0% {
+    box-shadow: 0 4px 16px rgba(1, 38, 69, 0.25),
+      inset 0 2px 4px rgba(1, 38, 69, 0.1);
+  }
+  100% {
+    box-shadow: 0 6px 24px rgba(1, 38, 69, 0.4),
+      inset 0 2px 6px rgba(1, 38, 69, 0.2);
+  }
+}
+
+@keyframes textGlow {
+  0% {
+    text-shadow: 0 1px 3px rgba(1, 38, 69, 0.3);
+  }
+  100% {
+    text-shadow: 0 2px 6px rgba(1, 38, 69, 0.5);
+  }
 }
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
+  .checkout-steps-container {
+    padding: 1.5rem 0.75rem;
+    margin: 1rem auto;
+  }
+
   .steps-list {
     flex-direction: column;
-    gap: 1.5rem;
+    gap: 2rem;
     align-items: flex-start;
+    padding: 1rem 0.75rem;
+    background: linear-gradient(
+      180deg,
+      rgba(1, 38, 69, 0.05),
+      rgba(1, 38, 69, 0.03)
+    );
   }
-  
+
   .step-item {
     width: 100%;
+    position: relative;
   }
-  
+
   .step-content {
     flex-direction: row;
-    gap: 1rem;
+    gap: 1.25rem;
     align-items: center;
+    justify-content: flex-start;
   }
-  
+
   .step-item.with-connector::after {
-    left: 16px;
-    top: 40px;
-    width: 2px;
-    height: calc(100% + 1rem);
+    left: 20px;
+    top: 50px;
+    width: 3px;
+    height: calc(100% + 1.5rem);
+    background: linear-gradient(
+      180deg,
+      rgba(1, 38, 69, 0.2),
+      rgba(1, 38, 69, 0.1)
+    );
+  }
+
+  .step-item:last-child.with-connector::after {
+    display: none;
+  }
+
+  .step-item.with-connector:has(.completed + .step-label)::after {
+    background: var(--primary-color);
+    box-shadow: 2px 0 8px rgba(1, 38, 69, 0.3);
+  }
+
+  .step-indicator {
+    width: 36px;
+    height: 36px;
+  }
+
+  .step-icon {
+    width: 16px;
+    height: 16px;
+  }
+
+  .step-label {
+    text-align: left;
+    margin-top: 0;
+    font-size: 1.1rem;
   }
 }
 
 @media (max-width: 480px) {
+  .checkout-steps-container {
+    padding: 1rem 0.5rem;
+  }
+
+  .steps-list {
+    gap: 1.5rem;
+    padding: 0.75rem 0.5rem;
+  }
+
   .step-label {
-    font-size: 0.85rem;
+    font-size: 0.95rem;
   }
-  
+
   .step-indicator {
-    width: 28px;
-    height: 28px;
+    width: 32px;
+    height: 32px;
   }
-  
+
   .step-icon {
     width: 14px;
     height: 14px;
+  }
+
+  .step-content {
+    gap: 1rem;
   }
 }

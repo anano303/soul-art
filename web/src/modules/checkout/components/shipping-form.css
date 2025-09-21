@@ -1,77 +1,180 @@
 .shipping-form-card {
-  padding: 2rem;
+  padding: 2.5rem;
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
-  border-radius: 12px;
-  box-shadow: 0 8px 20px rgba(122, 94, 65, 0.08);
-  background-color: #faf6f2;
-  color: #4a3f35;
-  font-family: 'Georgia', serif;
+  gap: 1.5rem;
+  border-radius: 20px;
+  box-shadow: 0 12px 40px rgba(1, 38, 69, 0.15);
+  background: linear-gradient(
+    135deg,
+    rgba(1, 38, 69, 0.03),
+    rgba(1, 38, 69, 0.02)
+  );
+  color: var(--primary-color);
+  font-family: var(--font-firago), system-ui, sans-serif;
   max-width: 800px;
   margin: 0 auto;
+  border: 2px solid rgba(1, 38, 69, 0.2);
+  backdrop-filter: blur(10px);
+  position: relative;
+  overflow: hidden;
+}
+
+.shipping-form-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: var(--primary-color);
+  border-radius: 20px 20px 0 0;
+}
+
+.back-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(1, 38, 69, 0.1);
+  border: 2px solid rgba(1, 38, 69, 0.2);
+  color: var(--primary-color);
+  padding: 0.75rem 1rem;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  margin-bottom: 1.5rem;
+  font-family: inherit;
+}
+
+.back-button:hover {
+  background: rgba(1, 38, 69, 0.15);
+  border-color: var(--primary-color);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(1, 38, 69, 0.2);
 }
 
 .shipping-form-header h1 {
-  font-size: 2rem;
-  font-weight: normal;
-  color: #5d4037;
-  letter-spacing: 1px;
-  font-family: 'Playfair Display', serif;
-  margin-bottom: 0.5rem;
-  border-bottom: 2px solid #e0d5c8;
-  padding-bottom: 0.75rem;
+  font-size: 2.25rem;
+  font-weight: 700;
+  color: var(--primary-color);
+  letter-spacing: 0.5px;
+  font-family: var(--font-firago), system-ui, sans-serif;
+  margin-bottom: 0.75rem;
+  border-bottom: 3px solid transparent;
+  border-image: linear-gradient(
+      90deg,
+      var(--primary-color),
+      rgba(1, 38, 69, 0.3)
+    )
+    1;
+  padding-bottom: 1rem;
+  text-shadow: 0 2px 4px rgba(1, 38, 69, 0.1);
 }
 
 .shipping-form-header p {
-  font-size: 1rem;
-  color: #7d6e63;
+  font-size: 1.1rem;
+  color: rgba(1, 38, 69, 0.7);
+  font-weight: 500;
+  line-height: 1.6;
 }
 
 .shipping-form {
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
+  gap: 1.5rem;
 }
 
 .shipping-form label {
   display: block;
-  font-weight: 500;
-  margin-bottom: 0.5rem;
-  color: #6d4c41;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+  color: var(--primary-color);
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .shipping-form input {
   width: 100%;
-  padding: 0.75rem;
-  border: 1px solid #e0d5c8;
-  border-radius: 6px;
-  background-color: #f9f5f0;
-  color: #4a3f35;
+  padding: 1rem 1.25rem;
+  border: 2px solid rgba(1, 38, 69, 0.2);
+  border-radius: 12px;
+  background: linear-gradient(
+    135deg,
+    rgba(1, 38, 69, 0.05),
+    rgba(1, 38, 69, 0.02)
+  );
+  color: var(--primary-color);
   font-family: inherit;
-  transition: border-color 0.2s, box-shadow 0.2s;
+  font-size: 1rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  box-shadow: inset 0 2px 4px rgba(1, 38, 69, 0.05);
 }
 
 .shipping-form input:focus {
   outline: none;
-  border-color: #8d6e63;
-  box-shadow: 0 0 0 2px rgba(141, 110, 99, 0.2);
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(1, 38, 69, 0.2),
+    inset 0 2px 4px rgba(1, 38, 69, 0.1);
+  background: linear-gradient(
+    135deg,
+    rgba(1, 38, 69, 0.1),
+    rgba(1, 38, 69, 0.03)
+  );
+  transform: translateY(-1px);
+}
+
+.shipping-form input:hover {
+  border-color: rgba(1, 38, 69, 0.4);
+  box-shadow: 0 4px 12px rgba(1, 38, 69, 0.08),
+    inset 0 2px 4px rgba(1, 38, 69, 0.05);
 }
 
 .shipping-form select {
   width: 100%;
-  padding: 0.75rem;
-  border: 1px solid #e0d5c8;
-  border-radius: 6px;
-  background-color: #f9f5f0;
-  color: #4a3f35;
+  padding: 1rem 1.25rem;
+  border: 2px solid rgba(1, 38, 69, 0.2);
+  border-radius: 12px;
+  background: linear-gradient(
+    135deg,
+    rgba(224, 216, 73, 0.05),
+    rgba(1, 38, 69, 0.02)
+  );
+  color: #012645;
   font-family: inherit;
+  font-size: 1rem;
+  font-weight: 500;
   max-height: 300px;
   background-size: 12px;
   max-width: 100%;
   height: auto;
-  appearance: menulist-button; /* Standard appearance for select */
+  appearance: menulist-button;
   box-sizing: border-box;
+  transition: all 0.3s ease;
+  box-shadow: inset 0 2px 4px rgba(1, 38, 69, 0.05);
+  cursor: pointer;
+}
+
+.shipping-form select:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(1, 38, 69, 0.2),
+    inset 0 2px 4px rgba(1, 38, 69, 0.1);
+  background: linear-gradient(
+    135deg,
+    rgba(1, 38, 69, 0.1),
+    rgba(1, 38, 69, 0.03)
+  );
+  transform: translateY(-1px);
+}
+
+.shipping-form select:hover {
+  border-color: rgba(1, 38, 69, 0.4);
+  box-shadow: 0 4px 12px rgba(1, 38, 69, 0.08),
+    inset 0 2px 4px rgba(1, 38, 69, 0.05);
 }
 
 /* Control the dropdown width specifically */
@@ -84,14 +187,20 @@
 
 /* Ensure dropdown options don't exceed the width of the select element */
 .shipping-form select option {
-  padding: 8px;
-  font-size: 0.95rem;
+  padding: 10px;
+  font-size: 1rem;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   max-width: 100%;
   width: 100%;
   box-sizing: border-box;
+  background: linear-gradient(
+    135deg,
+    rgba(1, 38, 69, 0.05),
+    rgba(1, 38, 69, 0.02)
+  );
+  color: var(--primary-color);
 }
 
 /* Remove the browser-specific styles that were targeting height */
@@ -102,7 +211,7 @@
   }
 }
 
-@supports (-ms-ime-align:auto) {
+@supports (-ms-ime-align: auto) {
   .shipping-form select[name="country"] {
     max-width: 100%;
     width: 100%;
@@ -124,69 +233,125 @@
 
 .shipping-form .error-text {
   font-size: 0.9rem;
-  color: #a65d5d;
+  color: #d32f2f;
+  font-weight: 500;
+  margin-top: 0.25rem;
 }
 
 .shipping-form-button {
   width: 100%;
-  padding: 0.75rem;
-  background-color: #8d6e63;
+  padding: 1rem 1.5rem;
+  background: var(--primary-color);
   color: white;
-  font-size: 1rem;
-  font-weight: 500;
-  border-radius: 6px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  border-radius: 14px;
   text-align: center;
   border: none;
   cursor: pointer;
-  transition: all 0.3s ease;
-  margin-top: 0.5rem;
+  transition: all 0.4s ease;
+  margin-top: 1rem;
+  box-shadow: 0 6px 20px rgba(1, 38, 69, 0.3);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  position: relative;
+  overflow: hidden;
 }
 
-.shipping-form-button:disabled {
-  opacity: 0.7;
-  cursor: not-allowed;
+.shipping-form-button::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    135deg,
+    rgba(1, 38, 69, 0.3),
+    rgba(1, 38, 69, 0.2)
+  );
+  transition: left 0.5s ease;
+}
+
+.shipping-form-button:hover::before {
+  left: 0;
 }
 
 .shipping-form-button:hover:not(:disabled) {
-  background-color: #6d4c41;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(109, 76, 65, 0.3);
+  background: rgba(1, 38, 69, 0.9);
+  transform: translateY(-3px);
+  box-shadow: 0 10px 30px rgba(1, 38, 69, 0.4);
+}
+
+.shipping-form-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: 0 2px 8px rgba(1, 38, 69, 0.1);
+}
+
+.shipping-form-button:disabled:hover {
+  transform: none;
+  box-shadow: 0 2px 8px rgba(1, 38, 69, 0.1);
 }
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .shipping-form-card {
-    padding: 1.5rem;
-    border-radius: 8px;
+    padding: 2rem 1.5rem;
+    border-radius: 16px;
+    margin: 1rem;
   }
-  
+
   .shipping-form-header h1 {
-    font-size: 1.75rem;
+    font-size: 2rem;
+  }
+
+  .shipping-form {
+    gap: 1.25rem;
+  }
+
+  .shipping-form input,
+  .shipping-form select {
+    padding: 0.875rem 1rem;
+    font-size: 0.95rem;
+  }
+
+  .shipping-form-button {
+    padding: 0.875rem 1.25rem;
+    font-size: 1rem;
   }
 }
 
 @media (max-width: 480px) {
   .shipping-form-card {
-    padding: 1rem;
+    padding: 1.5rem 1rem;
+    border-radius: 12px;
   }
-  
+
   .shipping-form-header h1 {
-    font-size: 1.5rem;
+    font-size: 1.75rem;
   }
-  
+
   .shipping-form input,
   .shipping-form select,
   .shipping-form-button {
-    padding: 0.6rem;
+    padding: 0.75rem 1rem;
+    font-size: 0.9rem;
   }
-  
+
   .shipping-form select {
     font-size: 14px;
-    padding: 0.5rem;
+    padding: 0.75rem 1rem;
   }
-  
+
   .shipping-form select option {
-    padding: 6px;
+    padding: 8px;
     font-size: 0.9rem;
+  }
+
+  .shipping-form label {
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
   }
 }

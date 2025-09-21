@@ -7,6 +7,7 @@ import { useCheckout } from "../context/checkout-context";
 import { useRouter } from "next/navigation";
 import { apiClient } from "@/lib/api-client";
 import { useToast } from "@/hooks/use-toast";
+import { ArrowLeft } from "lucide-react";
 // import { FaPaypal } from "react-icons/fa";
 // import { CreditCard } from "lucide-react";
 import "./payment-form.css";
@@ -52,6 +53,14 @@ export function PaymentForm() {
     <div className="card p-6">
       <div className="space-y-6">
         <div>
+          <button
+            type="button"
+            onClick={() => router.back()}
+            className="back-button"
+          >
+            <ArrowLeft size={20} />
+            უკან დაბრუნება
+          </button>
           <h1 className="text-2xl font-semibold">Payment Method</h1>
           <p className="text-sm text-muted-foreground">
             Choose how you would like to pay
@@ -112,7 +121,7 @@ export function PaymentForm() {
                       htmlFor="BOG"
                       className="border rounded-lg p-4 cursor-pointer hover:border-primary [&:has(:checked)]:border-primary [&:has(:checked)]:bg-gradient-to-r [&:has(:checked)]:from-red-600 [&:has(:checked)]:to-pink-600 [&:has(:checked)]:text-white block transition-all duration-300"
                       style={{
-                        fontFamily: 'FiraGo, serif',
+                        fontFamily: "FiraGo, serif",
                       }}
                     >
                       <input
@@ -133,7 +142,7 @@ export function PaymentForm() {
                           <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
                         </svg>
                         <span className="text-sm font-medium">
-                         ბარათით გადახდა
+                          ბარათით გადახდა
                         </span>
                       </div>
                     </label>

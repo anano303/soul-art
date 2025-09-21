@@ -9,7 +9,7 @@ import { TAX_RATE } from "@/config/constants";
 import { useLanguage } from "@/hooks/LanguageContext";
 import Image from "next/image";
 import Link from "next/link";
-import { AlertTriangle } from "lucide-react";
+import { AlertTriangle, ArrowLeft } from "lucide-react";
 import "./order-review.css";
 import { useCart } from "@/modules/cart/context/cart-context";
 
@@ -164,6 +164,18 @@ export function OrderReview() {
 
   return (
     <div className="order-review-grid">
+      {/* Back Button */}
+      <div className="col-span-12">
+        <button
+          type="button"
+          onClick={() => router.back()}
+          className="back-button"
+        >
+          <ArrowLeft size={20} />
+          უკან დაბრუნება
+        </button>
+      </div>
+
       {/* Unavailable Items Error Display */}
       {unavailableItems.length > 0 && (
         <div className="col-span-12 bg-red-50 border border-red-200 rounded-lg p-4 mb-6">

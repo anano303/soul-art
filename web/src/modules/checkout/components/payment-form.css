@@ -1,32 +1,81 @@
 .card {
-  padding: 2rem;
-  background-color: #faf6f2;
-  border-radius: 12px;
-  box-shadow: 0 8px 20px rgba(122, 94, 65, 0.08);
-  border: 1px solid #e0d5c8;
-  font-family: 'Georgia', serif;
-  color: #4a3f35;
+  padding: 2.5rem;
+  background: linear-gradient(
+    135deg,
+    rgba(1, 38, 69, 0.03),
+    rgba(1, 38, 69, 0.02)
+  );
+  border-radius: 20px;
+  box-shadow: 0 12px 40px rgba(1, 38, 69, 0.15);
+  border: 2px solid rgba(1, 38, 69, 0.2);
+  font-family: var(--font-firago), system-ui, sans-serif;
+  color: var(--primary-color);
   max-width: 800px;
   margin: 0 auto;
+  backdrop-filter: blur(10px);
+  position: relative;
+  overflow: hidden;
+}
+
+.card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: var(--primary-color);
+  border-radius: 20px 20px 0 0;
+}
+
+.back-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(1, 38, 69, 0.1);
+  border: 2px solid rgba(1, 38, 69, 0.2);
+  color: var(--primary-color);
+  padding: 0.75rem 1rem;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  margin-bottom: 1.5rem;
+  font-family: inherit;
+}
+
+.back-button:hover {
+  background: rgba(1, 38, 69, 0.15);
+  border-color: var(--primary-color);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(1, 38, 69, 0.2);
 }
 
 .text-2xl {
-  font-size: 2rem;
-  font-weight: normal;
-  color: #5d4037;
-  letter-spacing: 1px;
-  font-family: 'Playfair Display', serif;
-  margin-bottom: 0.5rem;
-  border-bottom: 2px solid #e0d5c8;
-  padding-bottom: 0.75rem;
+  font-size: 2.25rem;
+  font-weight: 700;
+  color: var(--primary-color);
+  letter-spacing: 0.5px;
+  font-family: var(--font-firago), system-ui, sans-serif;
+  margin-bottom: 0.75rem;
+  border-bottom: 3px solid transparent;
+  border-image: linear-gradient(
+      90deg,
+      var(--primary-color),
+      rgba(1, 38, 69, 0.3)
+    )
+    1;
+  padding-bottom: 1rem;
+  text-shadow: 0 2px 4px rgba(1, 38, 69, 0.1);
 }
 
 .font-semibold {
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .text-muted-foreground {
-  color: #7d6e63;
+  color: rgba(1, 38, 69, 0.7);
 }
 
 .space-y-6 > * + * {
@@ -39,9 +88,12 @@
 
 .form-label {
   display: block;
-  font-weight: 500;
-  margin-bottom: 0.5rem;
-  color: #6d4c41;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+  color: var(--primary-color);
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .form-control {
@@ -65,37 +117,61 @@ input[type="radio"].sr-only {
 }
 
 .btn {
-  padding: 0.75rem;
-  font-size: 1rem;
-  border-radius: 6px;
+  padding: 1rem 1.5rem;
+  font-size: 1.1rem;
+  border-radius: 14px;
   cursor: pointer;
   border: none;
-  font-weight: 500;
-  transition: all 0.3s ease;
+  font-weight: 700;
+  transition: all 0.4s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    135deg,
+    rgba(1, 38, 69, 0.3),
+    rgba(1, 38, 69, 0.2)
+  );
+  transition: left 0.5s ease;
+}
+
+.btn:hover::before {
+  left: 0;
 }
 
 .btn-primary {
-  background-color: #8d6e63;
+  background: var(--primary-color);
   color: white;
   width: 100%;
+  box-shadow: 0 6px 20px rgba(1, 38, 69, 0.3);
 }
 
 .btn-primary:hover {
-  background-color: #6d4c41;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(109, 76, 65, 0.3);
+  background: rgba(1, 38, 69, 0.9);
+  transform: translateY(-3px);
+  box-shadow: 0 10px 30px rgba(1, 38, 69, 0.4);
 }
 
 .border {
-  border: 1px solid #e0d5c8;
+  border: 2px solid rgba(1, 38, 69, 0.2);
 }
 
 .rounded-lg {
-  border-radius: 8px;
+  border-radius: 12px;
 }
 
 .p-4 {
-  padding: 1rem;
+  padding: 1.25rem;
 }
 
 .cursor-pointer {
@@ -103,8 +179,9 @@ input[type="radio"].sr-only {
 }
 
 .hover\:border-primary:hover {
-  border-color: #8d6e63;
-  box-shadow: 0 0 0 2px rgba(141, 110, 99, 0.1);
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(1, 38, 69, 0.2);
+  transform: translateY(-2px);
 }
 
 .block {
@@ -125,27 +202,48 @@ input[type="radio"].sr-only {
 
 /* Payment method options */
 .payment-option {
-  background-color: #f5f0e9;
-  transition: all 0.3s ease;
+  background: linear-gradient(
+    135deg,
+    rgba(1, 38, 69, 0.05),
+    rgba(1, 38, 69, 0.03)
+  );
+  transition: all 0.4s ease;
+  border: 2px solid rgba(1, 38, 69, 0.1);
+  box-shadow: 0 2px 8px rgba(1, 38, 69, 0.05);
 }
 
 .payment-option:hover {
-  background-color: #efe6da;
+  background: linear-gradient(
+    135deg,
+    rgba(1, 38, 69, 0.1),
+    rgba(1, 38, 69, 0.05)
+  );
+  border-color: rgba(1, 38, 69, 0.4);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(1, 38, 69, 0.15);
 }
 
 .payment-option.selected {
-  background-color: #e0d5c8;
-  border-color: #8d6e63;
+  background: linear-gradient(
+    135deg,
+    rgba(1, 38, 69, 0.15),
+    rgba(1, 38, 69, 0.08)
+  );
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(1, 38, 69, 0.2), 0 4px 16px rgba(1, 38, 69, 0.2);
+  transform: translateY(-1px);
 }
 
 .payment-option-title {
-  color: #5d4037;
-  font-weight: 600;
+  color: var(--primary-color);
+  font-weight: 700;
+  font-size: 1.1rem;
 }
 
 .payment-option-description {
-  color: #7d6e63;
-  font-size: 0.9rem;
+  color: rgba(1, 38, 69, 0.7);
+  font-size: 0.95rem;
+  font-weight: 500;
 }
 
 /* Responsive adjustments */
@@ -153,11 +251,11 @@ input[type="radio"].sr-only {
   .card {
     padding: 1.5rem;
   }
-  
+
   .text-2xl {
     font-size: 1.75rem;
   }
-  
+
   .grid-cols-2 {
     grid-template-columns: 1fr;
   }
@@ -167,11 +265,11 @@ input[type="radio"].sr-only {
   .card {
     padding: 1rem;
   }
-  
+
   .text-2xl {
     font-size: 1.5rem;
   }
-  
+
   .btn {
     padding: 0.6rem;
   }

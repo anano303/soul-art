@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { useCheckout } from "../context/checkout-context";
 import { getCountries } from "@/lib/countries";
 import { useLanguage } from "@/hooks/LanguageContext";
+import { ArrowLeft } from "lucide-react";
 
 import "./shipping-form.css";
 
@@ -50,6 +51,14 @@ export function ShippingForm() {
   return (
     <div className="shipping-form-card">
       <div className="shipping-form-header">
+        <button
+          type="button"
+          onClick={() => router.back()}
+          className="back-button"
+        >
+          <ArrowLeft size={20} />
+          უკან დაბრუნება
+        </button>
         <h1>{t("checkout.shippingAddress")}</h1>
         <p>{t("checkout.enterShippingDetails")}</p>
       </div>
@@ -99,7 +108,7 @@ export function ShippingForm() {
             {...register("phoneNumber", {
               required: t("auth.phoneNumberRequired"),
             })}
-            placeholder={t("auth.phoneNumberPlaceholder")}
+            placeholder={"+995555555555"}
           />
           {errors.phoneNumber && (
             <p className="error-text">{errors.phoneNumber.message}</p>
