@@ -219,6 +219,7 @@ export function PrivacyPolicy({
                 fontSize: "12px",
                 cursor: "pointer",
                 marginRight: "10px",
+                display: "flex",
               }}
             >
               📄 {language === "ge" ? "ბეჭდვა/გადმოწერა" : "Print/Download"}

@@ -70,6 +70,14 @@ body {
 ::-webkit-scrollbar-corner {
   background: rgba(1, 38, 69, 0.1);
 }
+.contract-header {
+  flex-wrap: wrap;
+  /* align-items: end; */
+}
+.contract-header-actions {
+  display: flex;
+  justify-self: flex-end;
+}
 
 /* For Firefox */
 @supports (scrollbar-color: red blue) {
