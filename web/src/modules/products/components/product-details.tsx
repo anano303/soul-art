@@ -26,125 +26,7 @@ import { Loader2 } from "lucide-react";
 import { SimilarProductCard } from "./similar-product-card";
 import { useCart } from "@/modules/cart/context/cart-context";
 import ProductSchema from "@/components/ProductSchema";
-
-// Enhanced AddToCartButton with variant support
-function EnhancedAddToCartButton({
-  productId,
-  countInStock = 0,
-  className = "",
-  selectedSize = "",
-  selectedColor = "",
-  selectedAgeGroup = "",
-  quantity = 1,
-  disabled = false,
-  price,
-}: {
-  productId: string;
-  countInStock?: number;
-  className?: string;
-  selectedSize?: string;
-  selectedColor?: string;
-  selectedAgeGroup?: string;
-  quantity?: number;
-  disabled?: boolean;
-  price?: number;
-}) {
-  const [pending, setPending] = useState(false);
-  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
-  const { addToCart } = useCart();
-  const { t } = useLanguage();
-
-  const handleClick = async () => {
-    setPending(true);
-    try {
-      await addToCart(
-        productId,
-        quantity,
-        selectedSize,
-        selectedColor,
-        selectedAgeGroup,
-        price
-      );
-
-      setShowSuccessMessage(true);
-      setTimeout(() => setShowSuccessMessage(false), 3000);
-    } catch (error) {
-      console.error("Add to cart error:", error);
-      const errorMessage = error instanceof Error ? error.message : "";
-      if (errorMessage !== "User not authenticated") {
-        toast({
-          title: "Error",
-          description:
-            error instanceof Error ? error.message : "Failed to add to cart",
-          variant: "destructive",
-        });
-      }
-    } finally {
-      setPending(false);
-    }
-  };
-
-  if (countInStock === 0 || disabled) {
-    return (
-      <button className={`addButtonCart out-of-stock ${className}`} disabled>
-        {t("shop.outOfStock") || "არ არის მარაგში"}
-      </button>
-    );
-  }
-
-  return (
-    <>
-      {showSuccessMessage && (
-        <div
-          style={{
-            position: "fixed",
-            top: "20px",
-            right: "20px",
-            backgroundColor: "#4CAF50",
-            color: "white",
-            padding: "15px 20px",
-            borderRadius: "8px",
-            boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
-            zIndex: 9999,
-            fontSize: "16px",
-            fontWeight: "500",
-            animation: "slideIn 0.3s ease-out",
-          }}
-        >
-          ✅ {t("product.addToCartSuccess")}
-        </div>
-      )}
-
-      <button
-        className={`addButtonCart ${className}`}
-        onClick={handleClick}
-        disabled={pending}
-      >
-        {pending ? (
-          <Loader2 className="animate-spin" />
-        ) : (
-          <>
-            <span>+</span>
-            {t("cart.addToCart") || "კალათაში დამატება"}
-          </>
-        )}
-      </button>
-
-      <style jsx>{`
-        @keyframes slideIn {
-          from {
-            transform: translateX(100%);
-            opacity: 0;
-          }
-          to {
-            transform: translateX(0);
-            opacity: 1;
-          }
-        }
-      `}</style>
-    </>
-  );
-}
+import { AddToCartButton } from "./AddToCartButton";
 
 // Similar Products Component
 function SimilarProducts({
@@ -752,7 +634,7 @@ export function ProductDetails({ product }: ProductDetailsProps) {
             )}
           </div>
 
-          <EnhancedAddToCartButton
+          <AddToCartButton
             productId={product._id}
             countInStock={availableQuantity}
             className="custom-style-2"
@@ -761,14 +643,6 @@ export function ProductDetails({ product }: ProductDetailsProps) {
             selectedAgeGroup={selectedAgeGroup}
             quantity={quantity}
             price={finalPrice}
-            disabled={
-              availableQuantity <= 0 ||
-              (product.sizes && product.sizes.length > 0 && !selectedSize) ||
-              (product.colors && product.colors.length > 0 && !selectedColor) ||
-              (product.ageGroups &&
-                product.ageGroups.length > 0 &&
-                !selectedAgeGroup)
-            }
           />
 
           <div className="tabs">

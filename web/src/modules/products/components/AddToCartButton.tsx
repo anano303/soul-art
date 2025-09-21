@@ -11,43 +11,162 @@ interface AddToCartButtonProps {
   productId: string;
   countInStock: number;
   className?: string;
+  selectedSize?: string;
+  selectedColor?: string;
+  selectedAgeGroup?: string;
+  quantity?: number;
+  price?: number;
 }
 
 export function AddToCartButton({
   productId,
   countInStock,
   className,
+  selectedSize = "",
+  selectedColor = "",
+  selectedAgeGroup = "",
+  quantity: externalQuantity,
+  price,
 }: AddToCartButtonProps) {
   const { t } = useLanguage();
-  const { addItem } = useCart();
+  const { addToCart, isItemInCart, getItemQuantity, updateQuantity } =
+    useCart();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
-  const [quantity, setQuantity] = useState(1);
+  const [quantity, setQuantity] = useState(externalQuantity || 1);
 
   const isOutOfStock = countInStock === 0;
+  const isInCart = isItemInCart(
+    productId,
+    selectedSize,
+    selectedColor,
+    selectedAgeGroup
+  );
+  const currentQuantity = getItemQuantity(
+    productId,
+    selectedSize,
+    selectedColor,
+    selectedAgeGroup
+  );
 
   const handleAddToCart = async () => {
-    setLoading(true);
-    toast({
-      title: t("cart.addingToCart"),
-      description: t("cart.pleaseWait"),
-    });
-
-    try {
-      await addItem(productId, quantity);
-    } catch {
+    // ვამოწმებთ მარაგის ლიმიტს
+    const totalRequestedQuantity = isInCart
+      ? currentQuantity + quantity
+      : quantity;
+    if (totalRequestedQuantity > countInStock) {
       toast({
         title: t("cart.error"),
-        description: t("cart.failedToAdd"),
+        description: `მარაგში დარჩენილია მხოლოდ ${countInStock} ცალი`,
         variant: "destructive",
       });
-    } finally {
-      setLoading(false);
+      return;
     }
+
+    setLoading(true);
+
+    if (isInCart) {
+      // თუ უკვე კალათაშია, რაოდენობა განვაახლოთ updateQuantity-ით
+      toast({
+        title: t("cart.updatingQuantity"),
+        description: t("cart.pleaseWait"),
+      });
+
+      try {
+        const newQuantity = currentQuantity + quantity;
+        await updateQuantity(
+          productId,
+          newQuantity,
+          selectedSize,
+          selectedColor,
+          selectedAgeGroup
+        );
+        toast({
+          title: t("cart.quantityUpdated"),
+          description: `${t("cart.newQuantity")}: ${newQuantity}`,
+        });
+      } catch (error) {
+        console.error("Update quantity error:", error);
+        toast({
+          title: t("cart.error"),
+          description: t("cart.failedToUpdate"),
+          variant: "destructive",
+        });
+      }
+    } else {
+      // ახალი პროდუქტი - მაგრამ ჯერ კვლავ ვამოწმებთ
+      const doubleCheck = isItemInCart(
+        productId,
+        selectedSize,
+        selectedColor,
+        selectedAgeGroup
+      );
+      if (doubleCheck) {
+        // თუ ამ დროს უკვე კალათაშია (race condition), განვაახლოთ რაოდენობა
+        try {
+          const currentQty = getItemQuantity(
+            productId,
+            selectedSize,
+            selectedColor,
+            selectedAgeGroup
+          );
+          const newQuantity = currentQty + quantity;
+          await updateQuantity(
+            productId,
+            newQuantity,
+            selectedSize,
+            selectedColor,
+            selectedAgeGroup
+          );
+          toast({
+            title: t("cart.quantityUpdated"),
+            description: `${t("cart.newQuantity")}: ${newQuantity}`,
+          });
+        } catch (error) {
+          console.error("Update quantity error:", error);
+          toast({
+            title: t("cart.error"),
+            description: t("cart.failedToUpdate"),
+            variant: "destructive",
+          });
+        }
+      } else {
+        // ნამდვილად ახალი პროდუქტი
+        toast({
+          title: t("cart.addingToCart"),
+          description: t("cart.pleaseWait"),
+        });
+
+        try {
+          await addToCart(
+            productId,
+            quantity,
+            selectedSize,
+            selectedColor,
+            selectedAgeGroup,
+            price
+          );
+          toast({
+            title: t("cart.addedToCart"),
+            description: t("cart.productAdded"),
+          });
+        } catch (error) {
+          console.error("Add to cart error:", error);
+          toast({
+            title: t("cart.error"),
+            description: t("cart.failedToAdd"),
+            variant: "destructive",
+          });
+        }
+      }
+    }
+
+    setLoading(false);
   };
 
   const increaseQuantity = () => {
-    if (quantity < countInStock) setQuantity(quantity + 1);
+    const maxAllowed = isInCart ? countInStock - currentQuantity : countInStock;
+    if (quantity < maxAllowed) setQuantity(quantity + 1);
   };
 
   const decreaseQuantity = () => {
@@ -68,15 +187,23 @@ export function AddToCartButton({
         <button
           className="quantity-button"
           onClick={increaseQuantity}
-          disabled={quantity >= countInStock}
+          disabled={
+            isInCart
+              ? quantity >= countInStock - currentQuantity
+              : quantity >= countInStock
+          }
         >
           +
         </button>
       </div>
 
       <button
-        className={`addButtonCart ${className}`}
-        disabled={isOutOfStock || loading}
+        className={`addButtonCart ${className} ${isInCart ? "in-cart" : ""}`}
+        disabled={
+          isOutOfStock ||
+          loading ||
+          (isInCart && currentQuantity + quantity > countInStock)
+        }
         onClick={handleAddToCart}
       >
         {/* <span>🛒</span> */}
@@ -84,6 +211,8 @@ export function AddToCartButton({
           ? t("cart.outOfStock")
           : loading
           ? t("cart.adding")
+          : isInCart
+          ? `${t("cart.inCart")} (${currentQuantity})`
           : t("cart.addToCart")}
       </button>
     </div>

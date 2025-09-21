@@ -39,6 +39,18 @@ interface CartContextType {
     price?: number
   ) => Promise<void>;
   totalItems: number;
+  getItemQuantity: (
+    productId: string,
+    size?: string,
+    color?: string,
+    ageGroup?: string
+  ) => number;
+  isItemInCart: (
+    productId: string,
+    size?: string,
+    color?: string,
+    ageGroup?: string
+  ) => boolean;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -50,6 +62,45 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const { toast } = useToast();
 
   const totalItems = items.reduce((total, item) => total + item.qty, 0);
+
+  // ფუნქცია რომ შევამოწმოთ არის თუ არა პროდუქტი კალათაში
+  const isItemInCart = useCallback(
+    (
+      productId: string,
+      size?: string,
+      color?: string,
+      ageGroup?: string
+    ): boolean => {
+      return items.some(
+        (item) =>
+          item.productId === productId &&
+          (item.size || "") === (size || "") &&
+          (item.color || "") === (color || "") &&
+          (item.ageGroup || "") === (ageGroup || "")
+      );
+    },
+    [items]
+  );
+
+  // ფუნქცია რაოდენობის მისაღებად
+  const getItemQuantity = useCallback(
+    (
+      productId: string,
+      size?: string,
+      color?: string,
+      ageGroup?: string
+    ): number => {
+      const item = items.find(
+        (item) =>
+          item.productId === productId &&
+          (item.size || "") === (size || "") &&
+          (item.color || "") === (color || "") &&
+          (item.ageGroup || "") === (ageGroup || "")
+      );
+      return item ? item.qty : 0;
+    },
+    [items]
+  );
 
   const addItem = useCallback(
     async (productId: string, qty: number) => {
@@ -349,6 +400,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         clearCart,
         addToCart,
         totalItems,
+        getItemQuantity,
+        isItemInCart,
       }}
     >
       {children}
