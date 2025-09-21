@@ -19,6 +19,7 @@ import {
   storeSchema,
 } from "@/lib/structured-data";
 import GoogleAnalytics from "@/components/GoogleAnalytics";
+import { FloatingCartIcon } from "@/components/floating-cart-icon/floating-cart-icon";
 import "@/lib/cloudflare-cleanup"; // Auto-cleanup Cloudflare cookies in development
 
 export const metadata: Metadata = {
@@ -213,6 +214,7 @@ export default function RootLayout({
                     <Header />
                     <div style={{ flex: 1 }}>{children}</div>
                     <Footer />
+                    <FloatingCartIcon />
                   </div>
                 </LanguageProvider>
               </CheckoutProvider>
