@@ -459,6 +459,18 @@ export const TRANSLATIONS: Translations = {
       sellerCancel: "გაუქმება",
     },
 
+    // Validation messages
+    validation: {
+      nameRequired: "სახელის შეყვანა აუცილებელია",
+      emailInvalid: "არასწორი ელ-ფოსტის ფორმატი",
+      passwordMinLength: "პაროლი უნდა შეიცავდეს მინიმუმ 6 სიმბოლოს",
+      passwordsMismatch: "პაროლები არ ემთხვევა",
+      loginFailed: "ავტორიზაცია ვერ მოხერხდა",
+      loginSuccess: "წარმატებული ავტორიზაცია",
+      welcomeBack: "კეთილი იყოს თქვენი დაბრუნება!",
+      loginError: "ავტორიზაციის შეცდომა",
+    },
+
     // Cart & Checkout
     cart: {
       yourCart: "თქვენი კალათა",
@@ -490,6 +502,12 @@ export const TRANSLATIONS: Translations = {
 
     // Checkout
     checkout: {
+      steps: {
+        authorization: "ავტორიზაცია",
+        shipping: "მიწოდება",
+        payment: "გადახდა",
+        order: "შეკვეთა",
+      },
       shippingAddress: "მიწოდების მისამართი",
       enterShippingDetails: "შეიყვანეთ მიწოდების დეტალები",
       streetAddress: "ქუჩისა და სახლის მისამართი",
@@ -1580,6 +1598,18 @@ export const TRANSLATIONS: Translations = {
       sellerCancel: "Cancel",
     },
 
+    // Validation messages
+    validation: {
+      nameRequired: "Name is required",
+      emailInvalid: "Invalid email format",
+      passwordMinLength: "Password must contain at least 6 characters",
+      passwordsMismatch: "Passwords don't match",
+      loginFailed: "Login failed",
+      loginSuccess: "Successful login",
+      welcomeBack: "Welcome back!",
+      loginError: "Login error",
+    },
+
     // Cart & Checkout
     cart: {
       yourCart: "Your Cart",
@@ -1611,6 +1641,12 @@ export const TRANSLATIONS: Translations = {
 
     // Checkout
     checkout: {
+      steps: {
+        authorization: "Authorization",
+        shipping: "Shipping",
+        payment: "Payment",
+        order: "Order",
+      },
       shippingAddress: "Shipping Address",
       enterShippingDetails: "Enter your shipping details",
       streetAddress: "Street Address",
