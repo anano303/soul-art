@@ -33,7 +33,7 @@ body {
 /* Global Custom Scrollbar Styles */
 /* For Webkit browsers (Chrome, Safari, Edge) */
 ::-webkit-scrollbar {
-  width: 12px;
+  width: 8px;
 }
 
 ::-webkit-scrollbar-track {
@@ -52,7 +52,7 @@ body {
     rgba(224, 216, 73, 0.4)
   );
   border-radius: 10px;
-  border: 2px solid rgba(1, 38, 69, 0.1);
+  border: 1px solid rgba(1, 38, 69, 0.1);
   transition: all 0.3s ease;
 }
 
@@ -62,9 +62,9 @@ body {
     rgba(224, 216, 73, 1),
     rgba(224, 216, 73, 0.7)
   );
-  border: 2px solid rgba(224, 216, 73, 0.3);
-  box-shadow: 0 0 15px rgba(224, 216, 73, 0.5);
-  transform: scale(1.05);
+  border: 1px solid rgba(224, 216, 73, 0.3);
+  box-shadow: 0 0 12px rgba(224, 216, 73, 0.4);
+  transform: scale(1.02);
 }
 
 ::-webkit-scrollbar-corner {
@@ -124,7 +124,7 @@ body {
 /* Tablet scrollbar styles */
 @media screen and (min-width: 769px) and (max-width: 1024px) {
   ::-webkit-scrollbar {
-    width: 10px;
+    width: 7px;
   }
 
   ::-webkit-scrollbar-thumb {
@@ -139,16 +139,14 @@ body {
 /* Desktop enhanced scrollbar styles */
 @media screen and (min-width: 1025px) {
   ::-webkit-scrollbar {
-    width: 14px;
+    width: 9px;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    transform: scale(1.1);
-    box-shadow: 0 0 20px rgba(224, 216, 73, 0.7);
+    transform: scale(1.05);
+    box-shadow: 0 0 15px rgba(224, 216, 73, 0.6);
   }
-}
-
-/* Performance optimization styles merged from performance.css */
+} /* Performance optimization styles merged from performance.css */
 
 /* Prevent layout shift for images */
 .image-container {
