@@ -44,7 +44,8 @@ export function ProductsList() {
       const response = await fetchWithAuth(
         `/products/user?page=${page}&limit=8`
       );
-      return response.json();
+      const result = await response.json();
+      return result;
     },
   });
 
@@ -478,15 +479,25 @@ export function ProductsList() {
                     )}
                 </div>
               </td>
-               <td className="prd-td">
+              <td className="prd-td">
                 <div className="seller-info">
-                  <p className="font-medium">{product.user?.name || "N/A"}</p>
-                  <p className="text-sm text-gray-500">
-                    {product.user?.email || "N/A"}
+                  <p className="font-medium">
+                    {product.user?.name ||
+                      product.user?.storeName ||
+                      "უცნობი მოხმარებელი"}
                   </p>
                   <p className="text-sm text-gray-500">
-                    {product.user?.phoneNumber || "N/A"}
+                    {product.user?.email || "ელ-ფოსტა არ არის მითითებული"}
                   </p>
+                  <p className="text-sm text-gray-500">
+                    {product.user?.phoneNumber || "ტელეფონი არ არის მითითებული"}
+                  </p>
+                  {product.user?.storeName &&
+                    product.user?.storeName !== product.user?.name && (
+                      <p className="text-xs text-blue-600">
+                        მაღაზია: {product.user.storeName}
+                      </p>
+                    )}
                 </div>
               </td>
               <td className="prd-td prd-td-right">

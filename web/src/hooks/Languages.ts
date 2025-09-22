@@ -917,6 +917,67 @@ export const TRANSLATIONS: Translations = {
       },
     },
 
+    // Admin Products
+    adminProducts: {
+      // Form labels
+      productNameGe: "პროდუქტის სახელი (ქართული)",
+      productNameEn: "პროდუქტის სახელი (ინგლისური)",
+      productNameEnPlaceholder: "შეიყვანეთ პროდუქტის სახელი ინგლისურად",
+      descriptionGe: "აღწერა (ქართული)",
+      descriptionEn: "აღწერა (ინგლისური)",
+      descriptionEnPlaceholder: "შეიყვანეთ პროდუქტის აღწერა ინგლისურად",
+      price: "ფასი",
+      category: "კატეგორია",
+      subcategory: "ქვეკატეგორია",
+      ageGroups: "ასაკობრივი ჯგუფები",
+      sizes: "ზომები",
+      colors: "ფერები",
+      stock: "საცავში",
+      brand: "ბრენდი",
+      images: "სურათები",
+      brandLogo: "ბრენდის ლოგო",
+      enterBrandName: "შეიყვანეთ ბრენდის სახელი",
+      uploadReminder: "გთხოვთ ატვირთოთ მინიმუმ ერთი სურათი",
+
+      // Dropdown options
+      loading: "იტვირთება...",
+      selectCategory: "აირჩიეთ კატეგორია",
+      selectSubcategory: "აირჩიეთ ქვეკატეგორია",
+
+      // Validation messages
+      productNameRequired: "პროდუქტის სახელი აუცილებელია",
+      productNameInvalid:
+        "პროდუქტის სახელი უნდა შედგებოდეს მინიმუმ 2 სიმბოლოსგან",
+      priceRequired: "ფასის მითითება აუცილებელია",
+      priceInvalid: "ფასი უნდა იყოს დადებითი რიცხვი",
+      descriptionRequired: "აღწერა აუცილებელია",
+      descriptionInvalid: "აღწერა უნდა შედგებოდეს მინიმუმ 10 სიმბოლოსგან",
+      brandRequired: "ბრენდის სახელი აუცილებელია",
+      brandInvalid: "ბრენდის სახელი უნდა შედგებოდეს მინიმუმ 2 სიმბოლოსგან",
+      selectCategoryError: "კატეგორიის არჩევა აუცილებელია",
+      selectSubcategoryError: "ქვეკატეგორიის არჩევა აუცილებელია",
+      invalidImageFormat:
+        "მხოლოდ JPG, PNG და JPEG ფორმატის სურათებია ნებადართული",
+      noImageSelected: "მინიმუმ ერთი სურათის ატვირთვა აუცილებელია",
+      deliveryDaysRequired:
+        "მიწოდების დღეების მითითება აუცილებელია სელერის მიწოდების შემთხვევაში",
+
+      // Form actions
+      createProduct: "პროდუქტის შექმნა",
+      updateProduct: "პროდუქტის განახლება",
+      fixErrorsBeforeSubmit: "გთხოვთ გაასწოროთ შეცდომები გაგზავნამდე",
+      requiredFields: "საჭირო ველები",
+
+      // Success/Error messages
+      productAddedSuccess: "პროდუქტი წარმატებით დაემატა!",
+      productUpdatedSuccess: "პროდუქტი წარმატებით განახლდა!",
+      productCreatedToast: "პროდუქტი შეიქმნა",
+      productUpdatedToast: "პროდუქტი განახლდა",
+      successTitle: "წარმატება",
+      createUpdateError: "შეცდომა პროდუქტის შექმნა/განახლებაში",
+      generalError: "ზოგადი შეცდომა მოხდა",
+    },
+
     // Admin Categories
     adminCategories: {
       title: "კატეგორიების მართვა",
@@ -2049,6 +2110,65 @@ export const TRANSLATIONS: Translations = {
         paintings: "Paintings",
         other: "Other",
       },
+    },
+
+    // Admin Products
+    adminProducts: {
+      // Form labels
+      productNameGe: "Product Name (Georgian)",
+      productNameEn: "Product Name (English)",
+      productNameEnPlaceholder: "Enter product name in English",
+      descriptionGe: "Description (Georgian)",
+      descriptionEn: "Description (English)",
+      descriptionEnPlaceholder: "Enter product description in English",
+      price: "Price",
+      category: "Category",
+      subcategory: "Subcategory",
+      ageGroups: "Age Groups",
+      sizes: "Sizes",
+      colors: "Colors",
+      stock: "Stock",
+      brand: "Brand",
+      images: "Images",
+      brandLogo: "Brand Logo",
+      enterBrandName: "Enter brand name",
+      uploadReminder: "Please upload at least one image",
+
+      // Dropdown options
+      loading: "Loading...",
+      selectCategory: "Select Category",
+      selectSubcategory: "Select Subcategory",
+
+      // Validation messages
+      productNameRequired: "Product name is required",
+      productNameInvalid: "Product name must be at least 2 characters long",
+      priceRequired: "Price is required",
+      priceInvalid: "Price must be a positive number",
+      descriptionRequired: "Description is required",
+      descriptionInvalid: "Description must be at least 10 characters long",
+      brandRequired: "Brand name is required",
+      brandInvalid: "Brand name must be at least 2 characters long",
+      selectCategoryError: "Category selection is required",
+      selectSubcategoryError: "Subcategory selection is required",
+      invalidImageFormat: "Only JPG, PNG and JPEG image formats are allowed",
+      noImageSelected: "At least one image upload is required",
+      deliveryDaysRequired:
+        "Delivery days specification is required for seller delivery",
+
+      // Form actions
+      createProduct: "Create Product",
+      updateProduct: "Update Product",
+      fixErrorsBeforeSubmit: "Please fix errors before submitting",
+      requiredFields: "Required Fields",
+
+      // Success/Error messages
+      productAddedSuccess: "Product successfully added!",
+      productUpdatedSuccess: "Product successfully updated!",
+      productCreatedToast: "Product Created",
+      productUpdatedToast: "Product Updated",
+      successTitle: "Success",
+      createUpdateError: "Error creating/updating product",
+      generalError: "A general error occurred",
     },
 
     // Admin Categories

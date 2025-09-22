@@ -235,7 +235,7 @@ export class ProductsService {
     const productQuery = this.productModel
       .find(filter)
       .sort(sort)
-      .populate('user', 'name')
+      .populate('user', 'name email phoneNumber storeName')
       // Ensure we populate all fields from category objects
       .populate('mainCategory')
       .populate('subCategory')
@@ -541,7 +541,7 @@ export class ProductsService {
   async findByStatus(status: ProductStatus): Promise<Product[]> {
     return this.productModel
       .find({ status })
-      .populate('user', 'name')
+      .populate('user', 'name email phoneNumber storeName')
       .populate('mainCategory', 'name')
       .populate('subCategory', 'name ageGroups sizes colors')
       .sort({ createdAt: -1 })

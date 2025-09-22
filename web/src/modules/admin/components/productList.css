@@ -8,7 +8,7 @@
   font-family: var(--font-firago);
   border: 1px solid rgba(1, 38, 69, 0.1);
   position: relative;
-  overflow: hidden;
+  /* overflow: hidden; */
 }
 
 .prd-card::before {
