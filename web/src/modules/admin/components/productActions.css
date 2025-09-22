@@ -1,8 +1,79 @@
 .space-x-2 {
   display: flex;
-  gap: 5px;
+  gap: 8px;
+  align-items: center;
 }
+
 .space-x-2 button {
-  background-color: transparent;
-border: none;
+  background: transparent;
+  border: 2px solid rgba(1, 38, 69, 0.2);
+  border-radius: 8px;
+  padding: 0.5rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: var(--primary-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 40px;
+  min-height: 40px;
+}
+
+.space-x-2 button:hover {
+  background: linear-gradient(
+    135deg,
+    rgba(1, 38, 69, 0.1),
+    rgba(123, 86, 66, 0.05)
+  );
+  border-color: var(--primary-color);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(1, 38, 69, 0.15);
+}
+
+.space-x-2 button:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 6px rgba(1, 38, 69, 0.2);
+}
+
+/* Different button types */
+.space-x-2 button.edit-btn {
+  color: #28a745;
+  border-color: rgba(40, 167, 69, 0.3);
+}
+
+.space-x-2 button.edit-btn:hover {
+  background: linear-gradient(
+    135deg,
+    rgba(40, 167, 69, 0.1),
+    rgba(40, 167, 69, 0.05)
+  );
+  border-color: #28a745;
+}
+
+.space-x-2 button.delete-btn {
+  color: #dc3545;
+  border-color: rgba(220, 53, 69, 0.3);
+}
+
+.space-x-2 button.delete-btn:hover {
+  background: linear-gradient(
+    135deg,
+    rgba(220, 53, 69, 0.1),
+    rgba(220, 53, 69, 0.05)
+  );
+  border-color: #dc3545;
+}
+
+.space-x-2 button.view-btn {
+  color: #17a2b8;
+  border-color: rgba(23, 162, 184, 0.3);
+}
+
+.space-x-2 button.view-btn:hover {
+  background: linear-gradient(
+    135deg,
+    rgba(23, 162, 184, 0.1),
+    rgba(23, 162, 184, 0.05)
+  );
+  border-color: #17a2b8;
 }

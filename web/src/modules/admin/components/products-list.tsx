@@ -422,7 +422,7 @@ export function ProductsList() {
               </td>
               <td className="prd-td">{getDisplayName(product)}</td>
               <td className="prd-td">
-                <StatusBadge status={product.status} />
+                {/* <StatusBadge status={product.status} /> */}
                 {hasActiveDiscount(product) ? (
                   <div className="price-display">
                     <span
