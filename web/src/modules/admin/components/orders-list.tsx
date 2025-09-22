@@ -6,7 +6,7 @@ import { fetchWithAuth } from "@/lib/fetch-with-auth";
 import Link from "next/link";
 import { CheckCircle2, Store, Truck, XCircle, Wallet } from "lucide-react";
 import { Order } from "@/types/order";
-import "./ordersList.css";
+import "./orders-list.css";
 import HeartLoading from "@/components/HeartLoading/HeartLoading";
 import { getUserData } from "@/lib/auth";
 import { getSellerBalance } from "@/modules/balance/api/balance-api";
