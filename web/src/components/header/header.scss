@@ -72,9 +72,9 @@ header {
   .shop-dropdown {
     position: relative;
 
-    .dropdown-menu {
+    .shop-dropdown-menu {
       position: absolute;
-      top: 100%;
+      bottom: -70px;
       left: 0;
       background: $primary-color;
       min-width: 180px;
@@ -104,10 +104,10 @@ header {
       }
     }
 
-    &:hover .dropdown-menu {
+    &:hover .shop-dropdown-menu {
       opacity: 1;
       visibility: visible;
-      transform: translateY(0);
+      // transform: translateY(0);
     }
   }
 

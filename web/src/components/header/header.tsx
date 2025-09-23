@@ -75,7 +75,7 @@ export default function Header() {
             <Link href="/shop?page=1" onClick={closeNav}>
               {t("navigation.shop")}
             </Link>
-            <div className="dropdown-menu">
+            <div className="shop-dropdown-menu">
               <Link href="/auction" onClick={closeNav}>
                 {t("navigation.auction")}
               </Link>
