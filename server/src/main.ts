@@ -45,6 +45,8 @@ async function bootstrap() {
         'https://127.0.0.1:3000',
         'http://127.0.0.1:4000',
         'https://127.0.0.1:4000',
+        'https://ondigitalocean.app',
+        'https://seal-app-tilvb.ondigitalocean.app',
       ];
 
       // Allow requests with no origin (like mobile apps, curl requests)
