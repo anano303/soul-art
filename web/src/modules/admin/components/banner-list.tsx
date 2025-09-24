@@ -8,6 +8,7 @@ import { Pencil, Trash2, Plus, Eye, EyeOff } from "lucide-react";
 import Image from "next/image";
 import HeartLoading from "@/components/HeartLoading/HeartLoading";
 import { toast } from "@/hooks/use-toast";
+import { useLanguage } from "@/hooks/LanguageContext";
 
 import "./banner-list.css";
 import { BannerModal } from "./banner-modal";

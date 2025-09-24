@@ -40,15 +40,15 @@ export function BannerModal({ banner, onClose, onSuccess }: BannerModalProps) {
       createBanner(data, image),
     onSuccess: () => {
       toast({
-        title: "✅ ბანერი შეიქმნა!",
-        description: "ბანერი წარმატებით აიტვირთა და შეიქმნა.",
+        title: t("adminBanners.createSuccess"),
+        description: t("adminBanners.createSuccessDescription"),
       });
       onSuccess();
     },
     onError: (error) => {
       toast({
-        title: "❌ შეცდომა",
-        description: "ბანერის შექმნისას მოხდა შეცდომა. სცადეთ ხელახლა.",
+        title: t("adminBanners.createError"),
+        description: t("adminBanners.createErrorDescription"),
         variant: "destructive",
       });
     },
@@ -64,15 +64,15 @@ export function BannerModal({ banner, onClose, onSuccess }: BannerModalProps) {
     }) => updateBanner(banner!._id, data, image),
     onSuccess: () => {
       toast({
-        title: "✅ ბანერი განახლდა!",
-        description: "ბანერი წარმატებით განახლდა.",
+        title: t("adminBanners.updateSuccess"),
+        description: t("adminBanners.updateSuccessDescription"),
       });
       onSuccess();
     },
     onError: (error) => {
       toast({
-        title: "❌ შეცდომა",
-        description: "ბანერის განახლებისას მოხდა შეცდომა. სცადეთ ხელახლა.",
+        title: t("adminBanners.createError"),
+        description: t("adminBanners.updateErrorDescription"),
         variant: "destructive",
       });
     },

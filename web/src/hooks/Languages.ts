@@ -1041,6 +1041,46 @@ export const TRANSLATIONS: Translations = {
       subcategoryCreateError: "ქვეკატეგორიის დამატება ვერ მოხერხდა",
     },
 
+    // Admin Banners
+    adminBanners: {
+      title: "ბანერების მართვა",
+      createNew: "ახალი ბანერის შექმნა",
+      edit: "რედაქტირება",
+      delete: "წაშლა",
+      bannerTitle: "ბანერის სათაური",
+      bannerTitleEn: "ბანერის სათაური (ინგლისური)",
+      buttonText: "ღილაკის ტექსტი",
+      buttonTextEn: "ღილაკის ტექსტი (ინგლისური)",
+      buttonLink: "ღილაკის ლინკი",
+      image: "სურათი",
+      imageUpload: "სურათის ატვირთვა",
+      sortOrder: "რიგითობა",
+      isActive: "აქტიური",
+      save: "შენახვა",
+      cancel: "გაუქმება",
+      creating: "იქმნება...",
+      updating: "განახლდება...",
+
+      // Success messages
+      createSuccess: "ბანერი შეიქმნა!",
+      createSuccessDescription: "ბანერი წარმატებით აიტვირთა და შეიქმნა.",
+      updateSuccess: "ბანერი განახლდა!",
+      updateSuccessDescription: "ბანერი წარმატებით განახლდა.",
+      deleteSuccess: "ბანერი წაიშალა!",
+      deleteSuccessDescription: "ბანერი წარმატებით წაიშალა.",
+
+      // Error messages
+      createError: "შეცდომა",
+      createErrorDescription:
+        "ბანერის შექმნისას მოხდა შეცდომა. სცადეთ ხელახლა.",
+      updateErrorDescription:
+        "ბანერის განახლებისას მოხდა შეცდომა. სცადეთ ხელახლა.",
+      deleteErrorDescription: "ბანერის წაშლისას მოხდა შეცდომა. სცადეთ ხელახლა.",
+
+      confirmDelete: "ნამდვილად გსურთ ამ ბანერის წაშლა?",
+      noBanners: "ბანერები არ მოიძებნა",
+    },
+
     // Categories translations
     productCategories: {
       // Painting subcategories
