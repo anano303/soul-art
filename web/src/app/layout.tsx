@@ -20,9 +20,6 @@ import {
 } from "@/lib/structured-data";
 import GoogleAnalytics from "@/components/GoogleAnalytics";
 import { FloatingCartIcon } from "@/components/floating-cart-icon/floating-cart-icon";
-import PWAInstallPrompt from "@/components/pwa-install-prompt";
-import PWAInstallBar from "@/components/pwa-install-bar";
-import PWAProvider from "@/components/pwa-provider";
 import "@/lib/cloudflare-cleanup"; // Auto-cleanup Cloudflare cookies in development
 
 export const metadata: Metadata = {
@@ -95,18 +92,6 @@ export const metadata: Metadata = {
         rel: "mask-icon",
         url: "/soulart_icon_blue_fullsizes.ico",
         color: PRIMARY_COLOR,
-      },
-    ],
-  },
-  manifest: "/manifest.json",
-  appleWebApp: {
-    capable: true,
-    statusBarStyle: "default",
-    title: "SoulArt",
-    startupImage: [
-      {
-        url: "/soulart_icon_blue_fullsizes.ico",
-        media: "(device-width: 768px) and (device-height: 1024px)",
       },
     ],
   },
@@ -219,31 +204,23 @@ export default function RootLayout({
             <CartProvider>
               <CheckoutProvider>
                 <LanguageProvider>
-                  <PWAProvider>
-                    <div
-                      style={{
-                        display: "flex",
-                        flexDirection: "column",
-                        minHeight: "100vh",
-                      }}
-                    >
-                      <Header />
-                      <div style={{ flex: 1 }}>{children}</div>
-                      <Footer />
-                      <FloatingCartIcon />
-                    </div>
-                  </PWAProvider>
+                  <div
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      minHeight: "100vh",
+                    }}
+                  >
+                    <Header />
+                    <div style={{ flex: 1 }}>{children}</div>
+                    <Footer />
+                    <FloatingCartIcon />
+                  </div>
                 </LanguageProvider>
               </CheckoutProvider>
             </CartProvider>
           </AuthProvider>
         </Providers>
-
-        {/* PWA Install Bar */}
-        <PWAInstallBar />
-
-        {/* PWA Install Prompt */}
-        <PWAInstallPrompt />
 
         {/* Wrap in error boundary */}
         <ErrorBoundary>
