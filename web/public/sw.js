@@ -1,3 +1,6 @@
+// This is required for next-pwa to inject the manifest
+self.__WB_MANIFEST;
+
 const CACHE_VERSION = "v5";
 const CACHE_PREFIX = "soulart-";
 
@@ -5,7 +8,7 @@ const CACHE_PREFIX = "soulart-";
 const CACHES = {
   static: `${CACHE_PREFIX}static-${CACHE_VERSION}`,
   dynamic: `${CACHE_PREFIX}dynamic-${CACHE_VERSION}`,
-  api: `${CACHE_PREFIX}api-${CACHE_VERSION}`
+  api: `${CACHE_PREFIX}api-${CACHE_VERSION}`,
 };
 
 // Runtime caching duration in seconds
@@ -70,7 +73,9 @@ self.addEventListener("fetch", (event) => {
   // Handle different types of requests with appropriate strategies
   if (isApiRequest(url)) {
     // API requests - stale-while-revalidate with short TTL
-    event.respondWith(staleWhileRevalidateStrategy(request, CACHES.api, 5 * 60)); // 5 minutes TTL
+    event.respondWith(
+      staleWhileRevalidateStrategy(request, CACHES.api, 5 * 60)
+    ); // 5 minutes TTL
   } else if (isStaticAsset(url)) {
     // Static assets - cache first with long TTL
     event.respondWith(cacheFirstStrategy(request, CACHES.static));
@@ -291,7 +296,9 @@ self.addEventListener("activate", (event) => {
 
         // Delete old cache versions
         const oldCaches = cacheNames.filter(
-          (name) => name.startsWith(CACHE_PREFIX) && !Object.values(CACHES).includes(name)
+          (name) =>
+            name.startsWith(CACHE_PREFIX) &&
+            !Object.values(CACHES).includes(name)
         );
 
         if (oldCaches.length > 0) {
@@ -365,7 +372,8 @@ async function doBackgroundSync() {
               const store = transaction.objectStore(storeName);
               const request = store.delete(req.id);
 
-              request.onerror = () => reject(new Error("Failed to delete request"));
+              request.onerror = () =>
+                reject(new Error("Failed to delete request"));
               request.onsuccess = () => resolve();
             });
 

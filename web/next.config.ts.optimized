@@ -6,7 +6,7 @@ const withPWA = require('next-pwa')({
   skipWaiting: true,
   disable: process.env.NODE_ENV === 'development',
   // Use our custom service worker
-  swSrc: './public/sw.js.optimized',
+  swSrc: './public/sw.js',
   swDest: './public/sw.js'
 });
 

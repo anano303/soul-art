@@ -4,8 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "set NODE_OPTIONS=--max-old-space-size=3000 && next dev",
-    "build": "next build --no-lint",
-    "build:analyze": "set ANALYZE=true && next build --no-lint",
+    "build": "node prepare-pwa-build.js && next build --no-lint",
+    "build:analyze": "set ANALYZE=true && node prepare-pwa-build.js && next build --no-lint",
     "start": "next start",
     "lint": "next lint",
     "generate-apk": "powershell -ExecutionPolicy Bypass -File generate-apk.ps1",
@@ -15,7 +15,8 @@
     "pwa-audit": "lighthouse http://localhost:3000 --only-categories=pwa --chrome-flags=\"--headless\"",
     "install-bubblewrap": "npm install -g @bubblewrap/cli",
     "pwa-test": "npm run build && npm run start & npm run pwa-audit",
-    "optimize-pwa": "powershell -Command \"Copy-Item -Path 'next.config.ts.optimized' -Destination 'next.config.ts' -Force; Copy-Item -Path 'public/sw.js.optimized' -Destination 'public/sw.js' -Force; Copy-Item -Path 'src/hooks/use-service-worker.ts.optimized' -Destination 'src/hooks/use-service-worker.ts' -Force; Copy-Item -Path 'public/manifest.json.optimized' -Destination 'public/manifest.json' -Force; Write-Host 'PWA optimization complete!' -ForegroundColor Green\""
+    "optimize-pwa": "powershell -Command \"Copy-Item -Path 'next.config.ts.optimized' -Destination 'next.config.ts' -Force; Copy-Item -Path 'public/sw.js.optimized' -Destination 'public/sw.js' -Force; Copy-Item -Path 'src/hooks/use-service-worker.ts.optimized' -Destination 'src/hooks/use-service-worker.ts' -Force; Copy-Item -Path 'public/manifest.json.optimized' -Destination 'public/manifest.json' -Force; Write-Host 'PWA optimization complete!' -ForegroundColor Green\"",
+    "prepare-pwa": "node prepare-pwa-build.js"
   },
   "dependencies": {
     "@fontsource/firago": "^5.2.5",

@@ -14,6 +14,7 @@ mkdir -p public/pwa-screenshots
 You need to add the following screenshots with the exact names and sizes:
 
 1. **Desktop Screenshots (1280x720)**:
+
    - `desktop-home.png`: Screenshot of the home page in desktop view
    - `desktop-shop.png`: Screenshot of the shop page in desktop view
 
