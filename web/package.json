@@ -11,7 +11,6 @@
     "generate-apk": "powershell -ExecutionPolicy Bypass -File generate-apk.ps1",
     "generate-apk-bash": "bash generate-apk.sh",
     "convert-icons": "powershell -ExecutionPolicy Bypass -File convert-icons.ps1",
-    "generate-icons": "node enhanced-icon-generator.js",
     "pwa-audit": "lighthouse http://localhost:3000 --only-categories=pwa --chrome-flags=\"--headless\"",
     "install-bubblewrap": "npm install -g @bubblewrap/cli",
     "pwa-test": "npm run build && npm run start & npm run pwa-audit"
@@ -36,7 +35,6 @@
     "dotenv": "^16.4.7",
     "framer-motion": "^12.4.1",
     "html2canvas": "^1.4.1",
-    "jimp": "^1.6.0",
     "jsonwebtoken": "^9.0.2",
     "jspdf": "^3.0.1",
     "lucide-react": "^0.474.0",
