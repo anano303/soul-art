@@ -108,32 +108,18 @@
   ],
   "screenshots": [
     {
-      "src": "/pwa-screenshots/desktop-home.png",
+      "src": "/logo.png",
       "sizes": "1280x720",
       "type": "image/png",
       "platform": "wide",
       "label": "SoulArt Homepage"
     },
     {
-      "src": "/pwa-screenshots/desktop-shop.png", 
-      "sizes": "1280x720",
-      "type": "image/png",
-      "platform": "wide",
-      "label": "SoulArt Shop"
-    },
-    {
-      "src": "/pwa-screenshots/mobile-home.png",
+      "src": "/logo.png",
       "sizes": "720x1280",
       "type": "image/png",
       "platform": "narrow",
-      "label": "SoulArt Mobile Home"
-    },
-    {
-      "src": "/pwa-screenshots/mobile-shop.png",
-      "sizes": "720x1280",
-      "type": "image/png",
-      "platform": "narrow",
-      "label": "SoulArt Mobile Shop"
+      "label": "SoulArt Mobile View"
     }
   ]
 }

@@ -14,8 +14,7 @@
     "generate-icons": "node enhanced-icon-generator.js",
     "pwa-audit": "lighthouse http://localhost:3000 --only-categories=pwa --chrome-flags=\"--headless\"",
     "install-bubblewrap": "npm install -g @bubblewrap/cli",
-    "pwa-test": "npm run build && npm run start & npm run pwa-audit",
-    "optimize-pwa": "powershell -Command \"Copy-Item -Path 'next.config.ts.optimized' -Destination 'next.config.ts' -Force; Copy-Item -Path 'public/sw.js.optimized' -Destination 'public/sw.js' -Force; Copy-Item -Path 'src/hooks/use-service-worker.ts.optimized' -Destination 'src/hooks/use-service-worker.ts' -Force; Copy-Item -Path 'public/manifest.json.optimized' -Destination 'public/manifest.json' -Force; Write-Host 'PWA optimization complete!' -ForegroundColor Green\""
+    "pwa-test": "npm run build && npm run start & npm run pwa-audit"
   },
   "dependencies": {
     "@fontsource/firago": "^5.2.5",
