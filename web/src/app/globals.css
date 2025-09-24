@@ -27,6 +27,35 @@ body {
   font-display: swap;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
+}
+
+/* PWA-specific styles */
+.pwa-mode {
+  user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+/* Safe area handling for PWA */
+@supports (padding: max(0px)) {
+  .pwa-safe-area {
+    padding-top: max(var(--safe-area-inset-top, 0px), 20px);
+    padding-bottom: max(var(--safe-area-inset-bottom, 0px), 20px);
+  }
+}
+
+/* PWA navigation optimization */
+.pwa-mode * {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* PWA scrolling optimization */
+.pwa-mode {
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
   -moz-osx-font-smoothing: grayscale;
 }
 
