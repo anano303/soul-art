@@ -109,15 +109,54 @@ export default withPWA({
   disable: false, // PWA ყოველთვის ჩართული
   sw: "sw.js",
   runtimeCaching: [
+    // API calls - always try network first, short cache
     {
-      urlPattern: /^https?.*/,
+      urlPattern: /^https?.*\/api\/.*/,
       handler: "NetworkFirst",
       options: {
-        cacheName: "offlineCache",
+        cacheName: "api-cache",
+        expiration: {
+          maxEntries: 100,
+          maxAgeSeconds: 5 * 60, // 5 minutes only
+        },
+        networkTimeoutSeconds: 3,
+      },
+    },
+    // Images - cache first for performance
+    {
+      urlPattern: /\.(?:png|jpg|jpeg|svg|gif|webp|avif)$/,
+      handler: "CacheFirst",
+      options: {
+        cacheName: "images-cache",
+        expiration: {
+          maxEntries: 300,
+          maxAgeSeconds: 7 * 24 * 60 * 60, // 7 days
+        },
+      },
+    },
+    // Static assets - cache first
+    {
+      urlPattern: /\.(?:js|css|woff2?|ttf|eot)$/,
+      handler: "CacheFirst",
+      options: {
+        cacheName: "static-cache",
         expiration: {
           maxEntries: 200,
-          maxAgeSeconds: 24 * 60 * 60, // 24 hours
+          maxAgeSeconds: 7 * 24 * 60 * 60, // 7 days
         },
+      },
+    },
+    // Pages - network first with short timeout
+    {
+      urlPattern: /^https?.*\/.*$/,
+      handler: "NetworkFirst",
+      options: {
+        cacheName: "pages-cache",
+        expiration: {
+          maxEntries: 100,
+          maxAgeSeconds: 10 * 60, // 10 minutes
+        },
+        networkTimeoutSeconds: 3,
       },
     },
   ],

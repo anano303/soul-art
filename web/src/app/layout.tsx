@@ -23,6 +23,7 @@ import { FloatingCartIcon } from "@/components/floating-cart-icon/floating-cart-
 import { PWAInstallPrompt } from "@/components/pwa-install-prompt/pwa-install-prompt";
 import { NetworkStatus } from "@/components/network-status/network-status";
 import { PushNotificationManager } from "@/components/push-notifications/push-notifications";
+import { CacheManager } from "@/components/cache-manager/cache-manager";
 import "@/lib/cloudflare-cleanup"; // Auto-cleanup Cloudflare cookies in development
 
 export const metadata: Metadata = {
@@ -276,6 +277,11 @@ export default function RootLayout({
 
         {/* Push Notifications */}
         <PushNotificationManager />
+
+        {/* Cache Manager - მხოლოდ development-ში */}
+        {process.env.NODE_ENV === "development" && (
+          <CacheManager position="fixed" size="small" />
+        )}
 
         {/* Google Analytics */}
         <GoogleAnalytics />

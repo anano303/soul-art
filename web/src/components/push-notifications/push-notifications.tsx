@@ -8,6 +8,7 @@ export function PushNotificationManager() {
     useState<NotificationPermission>("default");
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [showPermissionPrompt, setShowPermissionPrompt] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   useEffect(() => {
     // Check current permission status
@@ -128,6 +129,25 @@ export function PushNotificationManager() {
     localStorage.setItem("push-notification-dismissed", Date.now().toString());
   };
 
+  const refreshCache = async () => {
+    if (!("serviceWorker" in navigator)) return;
+
+    setIsRefreshing(true);
+    try {
+      // Clear all caches
+      const cacheNames = await caches.keys();
+      await Promise.all(
+        cacheNames.map((cacheName) => caches.delete(cacheName))
+      );
+
+      // Force refresh the page
+      window.location.reload();
+    } catch (error) {
+      console.error("Error clearing cache:", error);
+      setIsRefreshing(false);
+    }
+  };
+
   if (!showPermissionPrompt || permission === "granted" || isSubscribed) {
     return null;
   }
@@ -167,8 +187,16 @@ export function PushNotificationManager() {
             <button className="push-allow-btn" onClick={requestPermission}>
               ნების დართვა
             </button>
+            <button
+              className="push-refresh-btn"
+              onClick={refreshCache}
+              disabled={isRefreshing}
+              title="ახალი მონაცემების სინქრონიზაცია"
+            >
+              {isRefreshing ? "🔄" : "🔄"} განახლება
+            </button>
             <button className="push-dismiss-btn" onClick={handleDismiss}>
-              არა, გმადლობთ
+              დახურვა
             </button>
           </div>
         </div>
