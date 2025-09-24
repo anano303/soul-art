@@ -1,6 +1,3 @@
-// This is required for next-pwa to inject the manifest
-self.__WB_MANIFEST;
-
 const CACHE_VERSION = "v5";
 const CACHE_PREFIX = "soulart-";
 
