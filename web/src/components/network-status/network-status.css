@@ -1,0 +1,153 @@
+/* Network Status Component Styles */
+.network-status {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9998;
+  font-family: var(--font-firago), sans-serif;
+  animation: slideDown 0.4s ease-out;
+  pointer-events: none;
+}
+
+.network-status-content {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1.25rem;
+  border-radius: 12px;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  min-width: 200px;
+}
+
+.network-status.online .network-status-content {
+  background: rgba(34, 197, 94, 0.9);
+  color: white;
+}
+
+.network-status.offline .network-status-content {
+  background: rgba(239, 68, 68, 0.9);
+  color: white;
+}
+
+.network-icon {
+  flex-shrink: 0;
+}
+
+.wifi-connected,
+.wifi-disconnected {
+  position: relative;
+  width: 24px;
+  height: 18px;
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+}
+
+.wifi-bar {
+  background: currentColor;
+  border-radius: 1px;
+  opacity: 0.8;
+}
+
+.wifi-connected .wifi-bar:nth-child(1) {
+  width: 4px;
+  height: 6px;
+}
+
+.wifi-connected .wifi-bar:nth-child(2) {
+  width: 4px;
+  height: 12px;
+}
+
+.wifi-connected .wifi-bar:nth-child(3) {
+  width: 4px;
+  height: 18px;
+}
+
+.wifi-disconnected .wifi-bar {
+  opacity: 0.3;
+}
+
+.wifi-disconnected .wifi-bar:nth-child(1) {
+  width: 4px;
+  height: 6px;
+}
+
+.wifi-disconnected .wifi-bar:nth-child(2) {
+  width: 4px;
+  height: 12px;
+}
+
+.wifi-disconnected .wifi-bar:nth-child(3) {
+  width: 4px;
+  height: 18px;
+}
+
+.wifi-slash {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 20px;
+  height: 2px;
+  background: currentColor;
+  transform: translate(-50%, -50%) rotate(-45deg);
+  border-radius: 1px;
+}
+
+.network-message {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  flex: 1;
+}
+
+.status-text {
+  font-weight: 600;
+  font-size: 0.875rem;
+  line-height: 1.2;
+}
+
+.status-sub {
+  font-size: 0.75rem;
+  opacity: 0.9;
+  line-height: 1.1;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -20px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+/* Mobile responsive */
+@media (max-width: 640px) {
+  .network-status {
+    top: 10px;
+    left: 10px;
+    right: 10px;
+    transform: none;
+    width: auto;
+  }
+
+  .network-status-content {
+    padding: 0.625rem 1rem;
+    min-width: auto;
+    width: 100%;
+  }
+
+  .status-text {
+    font-size: 0.8rem;
+  }
+
+  .status-sub {
+    font-size: 0.7rem;
+  }
+}

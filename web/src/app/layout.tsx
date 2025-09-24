@@ -20,6 +20,8 @@ import {
 } from "@/lib/structured-data";
 import GoogleAnalytics from "@/components/GoogleAnalytics";
 import { FloatingCartIcon } from "@/components/floating-cart-icon/floating-cart-icon";
+import { PWAInstallPrompt } from "@/components/pwa-install-prompt/pwa-install-prompt";
+import { NetworkStatus } from "@/components/network-status/network-status";
 import "@/lib/cloudflare-cleanup"; // Auto-cleanup Cloudflare cookies in development
 
 export const metadata: Metadata = {
@@ -152,9 +154,47 @@ export default function RootLayout({
           name="msapplication-TileImage"
           content="/soulart_icon_blue_fullsizes.ico"
         />
-        {/* Chrome-specific meta tags for better shortcut support */}
+        {/* PWA Meta Tags */}
         <meta name="theme-color" content={PRIMARY_COLOR} />
         <meta name="msapplication-TileColor" content="#012645" />
+        <meta name="mobile-web-app-capable" content="yes" />
+        <meta name="application-name" content="Soulart" />
+
+        {/* iOS Specific Meta Tags */}
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta
+          name="apple-mobile-web-app-status-bar-style"
+          content="black-translucent"
+        />
+        <meta name="apple-mobile-web-app-title" content="Soulart" />
+
+        {/* Windows Meta Tags */}
+        <meta name="msapplication-starturl" content="/" />
+        <meta name="msapplication-config" content="/browserconfig.xml" />
+
+        {/* Manifest */}
+        <link rel="manifest" href="/manifest.json" />
+
+        {/* Preload critical resources - only existing resources */}
+
+        {/* PWA Install Detection */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              if ('serviceWorker' in navigator) {
+                window.addEventListener('load', () => {
+                  navigator.serviceWorker.register('/sw.js')
+                    .then((registration) => {
+                      console.log('SW registered: ', registration);
+                    })
+                    .catch((registrationError) => {
+                      console.log('SW registration failed: ', registrationError);
+                    });
+                });
+              }
+            `,
+          }}
+        />
 
         {/* Resource preloading for better performance */}
         <link
@@ -226,6 +266,12 @@ export default function RootLayout({
         <ErrorBoundary>
           <MessengerChatWrapper />
         </ErrorBoundary>
+
+        {/* Network Status Indicator */}
+        <NetworkStatus />
+
+        {/* PWA Install Prompt */}
+        <PWAInstallPrompt />
 
         {/* Google Analytics */}
         <GoogleAnalytics />

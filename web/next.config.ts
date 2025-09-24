@@ -1,4 +1,6 @@
 import type { NextConfig } from "next";
+// @ts-ignore - next-pwa doesn't have official TypeScript declarations
+import withPWA from "next-pwa";
 
 const nextConfig: NextConfig = {
   experimental: {
@@ -100,4 +102,22 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+export default withPWA({
+  dest: "public",
+  register: true,
+  skipWaiting: true,
+  disable: process.env.NODE_ENV === "development",
+  runtimeCaching: [
+    {
+      urlPattern: /^https?.*/,
+      handler: "NetworkFirst",
+      options: {
+        cacheName: "offlineCache",
+        expiration: {
+          maxEntries: 200,
+          maxAgeSeconds: 24 * 60 * 60, // 24 hours
+        },
+      },
+    },
+  ],
+})(nextConfig);
