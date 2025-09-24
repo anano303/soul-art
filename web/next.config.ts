@@ -1,12 +1,14 @@
 import type { NextConfig } from "next";
 
-// Using our custom service worker for now
-// const withPWA = require('next-pwa')({
-//   dest: 'public',
-//   register: true,
-//   skipWaiting: true,
-//   disable: process.env.NODE_ENV === 'development',
-// });
+const withPWA = require('next-pwa')({
+  dest: 'public',
+  register: true,
+  skipWaiting: true,
+  disable: process.env.NODE_ENV === 'development',
+  // Use our custom service worker
+  swSrc: './public/sw.js.optimized',
+  swDest: './public/sw.js'
+});
 
 const nextConfig: NextConfig = {
   experimental: {
@@ -108,5 +110,5 @@ const nextConfig: NextConfig = {
   },
 };
 
-// Using our custom service worker for enhanced performance
-export default nextConfig;
+// Using next-pwa for enhanced PWA experience
+export default withPWA(nextConfig);

@@ -89,89 +89,92 @@ export function useServiceWorker() {
     window.addEventListener("offline", updateOnlineStatus);
     updateOnlineStatus();
 
-    // Enhanced resource loading strategy
-    const optimizeResourceLoading = () => {
-      // Critical resources for immediate loading (high priority)
-      const criticalResources = [
-        { url: "/", type: "document" },
-        { url: "/logo.png", type: "image" },
-        { url: "/soulart_icon_blue_fullsizes.ico", type: "image" },
-        { url: "/_next/static/chunks/main", type: "script" },
-        { url: "/_next/static/chunks/framework", type: "script" },
-        { url: "/_next/static/chunks/app/layout", type: "script" },
-      ];
-
-      // Important but not critical resources (medium priority)
-      const importantResources = [
-        { url: "/shop", type: "document" },
-        { url: "/cart", type: "document" },
-        { url: "/logo-white.png", type: "image" },
-      ];
-
-      // Future navigation resources (low priority)
-      const futureResources = [
-        { url: "/forum", type: "document" },
-        { url: "/about", type: "document" },
-        { url: "/offline", type: "document" },
-      ];
-
-      // Preload critical resources (high priority) - loads immediately
-      criticalResources.forEach(({ url, type }) => {
-        const link = document.createElement("link");
-        link.rel = "preload"; // Higher priority than prefetch
-        link.href = url;
-        link.as = type;
-        document.head.appendChild(link);
-      });
-
-      // Prefetch important resources - loads after critical resources
-      // These will be cached by the browser but won't block render
-      importantResources.forEach(({ url, type }) => {
-        const link = document.createElement("link");
-        link.rel = "prefetch";
-        link.href = url;
-        link.as = type;
-        document.head.appendChild(link);
-      });
-
-      // Preconnect to critical origins
-      const origins = [
-        "https://res.cloudinary.com",
-        "https://fish-hunt.s3.eu-north-1.amazonaws.com",
-        location.origin,
-      ];
-
-      origins.forEach((origin) => {
-        const link = document.createElement("link");
-        link.rel = "preconnect";
-        link.href = origin;
-        link.crossOrigin = "anonymous";
-        document.head.appendChild(link);
-      });
-
-      // Use requestIdleCallback to load future resources when browser is idle
-      if ("requestIdleCallback" in window) {
-        window.requestIdleCallback(
-          () => {
-            futureResources.forEach(({ url, type }) => {
-              const link = document.createElement("link");
-              link.rel = "prefetch";
-              link.href = url;
-              link.as = type;
-              document.head.appendChild(link);
-            });
-          },
-          { timeout: 5000 }
-        );
-      }
-    }; // Initialize
+    // Enhanced resource loading strategy - moved outside useEffect
     registerSW();
-    optimizeResourceLoading();
 
     return () => {
       window.removeEventListener("online", updateOnlineStatus);
       window.removeEventListener("offline", updateOnlineStatus);
     };
+  }, []);
+  
+  // Implement optimized resource loading outside useEffect
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    
+    // Critical resources for immediate loading (high priority)
+    const criticalResources = [
+      { url: "/", type: "document" },
+      { url: "/logo.png", type: "image" },
+      { url: "/soulart_icon_blue_fullsizes.ico", type: "image" },
+      { url: "/_next/static/chunks/main", type: "script" },
+      { url: "/_next/static/chunks/framework", type: "script" },
+      { url: "/_next/static/chunks/app/layout", type: "script" },
+    ];
+
+    // Important but not critical resources (medium priority)
+    const importantResources = [
+      { url: "/shop", type: "document" },
+      { url: "/cart", type: "document" },
+      { url: "/logo-white.png", type: "image" },
+    ];
+
+    // Future navigation resources (low priority)
+    const futureResources = [
+      { url: "/forum", type: "document" },
+      { url: "/about", type: "document" },
+      { url: "/offline", type: "document" },
+    ];
+
+    // Preload critical resources (high priority) - loads immediately
+    criticalResources.forEach(({ url, type }) => {
+      const link = document.createElement("link");
+      link.rel = "preload"; // Higher priority than prefetch
+      link.href = url;
+      link.as = type;
+      document.head.appendChild(link);
+    });
+
+    // Prefetch important resources - loads after critical resources
+    // These will be cached by the browser but won't block render
+    importantResources.forEach(({ url, type }) => {
+      const link = document.createElement("link");
+      link.rel = "prefetch";
+      link.href = url;
+      link.as = type;
+      document.head.appendChild(link);
+    });
+
+    // Preconnect to critical origins
+    const origins = [
+      "https://res.cloudinary.com",
+      "https://fish-hunt.s3.eu-north-1.amazonaws.com",
+      location.origin,
+    ];
+
+    origins.forEach((origin) => {
+      const link = document.createElement("link");
+      link.rel = "preconnect";
+      link.href = origin;
+      link.crossOrigin = "anonymous";
+      document.head.appendChild(link);
+    });
+
+    // Use requestIdleCallback to load future resources when browser is idle
+    if ("requestIdleCallback" in window) {
+      window.requestIdleCallback(
+        () => {
+          futureResources.forEach(({ url, type }) => {
+            const link = document.createElement("link");
+            link.rel = "prefetch";
+            link.href = url;
+            link.as = type;
+            document.head.appendChild(link);
+          });
+        },
+        { timeout: 5000 }
+      );
+    }
   }, []);
 
   // Expose update function

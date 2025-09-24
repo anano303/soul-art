@@ -1,8 +1,12 @@
-const CACHE_NAME = "soulart-v4";
-const STATIC_CACHE = "soulart-static-v4";
-const DYNAMIC_CACHE = "soulart-dynamic-v4";
-const IMAGE_CACHE = "soulart-images-v4";
-const API_CACHE = "soulart-api-v4";
+const CACHE_VERSION = "v5";
+const CACHE_PREFIX = "soulart-";
+
+// Cache names with improved structure
+const CACHES = {
+  static: `${CACHE_PREFIX}static-${CACHE_VERSION}`,
+  dynamic: `${CACHE_PREFIX}dynamic-${CACHE_VERSION}`,
+  api: `${CACHE_PREFIX}api-${CACHE_VERSION}`
+};
 
 // Runtime caching duration in seconds
 const HOUR = 60 * 60;
@@ -39,14 +43,10 @@ self.addEventListener("install", (event) => {
   event.waitUntil(
     (async () => {
       try {
-        // Cache app shell first - this is critical for performance
-        const shellCache = await caches.open(STATIC_CACHE);
-        console.log("SW: Caching app shell");
-
-        // Cache core resources - most critical for offline functionality
-        const staticCache = await caches.open(STATIC_CACHE);
-        console.log("SW: Caching core resources");
-        await staticCache.addAll(CORE_CACHE_URLS);
+        // Cache static resources (app shell and core resources)
+        const staticCache = await caches.open(CACHES.static);
+        console.log("SW: Caching app shell and core resources");
+        await staticCache.addAll([...APP_SHELL, ...CORE_CACHE_URLS]);
 
         console.log("SW: Core resources cached");
         self.skipWaiting(); // Activate immediately for better UX
@@ -70,19 +70,19 @@ self.addEventListener("fetch", (event) => {
   // Handle different types of requests with appropriate strategies
   if (isApiRequest(url)) {
     // API requests - stale-while-revalidate with short TTL
-    event.respondWith(staleWhileRevalidateStrategy(request, API_CACHE, 5 * 60)); // 5 minutes TTL
+    event.respondWith(staleWhileRevalidateStrategy(request, CACHES.api, 5 * 60)); // 5 minutes TTL
   } else if (isStaticAsset(url)) {
     // Static assets - cache first with long TTL
-    event.respondWith(cacheFirstStrategy(request, STATIC_CACHE));
+    event.respondWith(cacheFirstStrategy(request, CACHES.static));
   } else if (isImage(url)) {
     // Images - cache first strategy with background updates
-    event.respondWith(cacheFirstStrategy(request, IMAGE_CACHE, true));
+    event.respondWith(cacheFirstStrategy(request, CACHES.static, true));
   } else if (isHtmlNavigation(request)) {
     // HTML Navigation - network first with faster timeout and offline fallback
     event.respondWith(networkFirstWithFastTimeout(request));
   } else if (url.origin === self.location.origin) {
     // Other same-origin requests - stale-while-revalidate
-    event.respondWith(staleWhileRevalidateStrategy(request, DYNAMIC_CACHE));
+    event.respondWith(staleWhileRevalidateStrategy(request, CACHES.dynamic));
   }
   // Let browser handle everything else normally
 });
@@ -158,7 +158,7 @@ async function networkFirstWithFastTimeout(request) {
 
     if (networkResponse.ok) {
       // Cache successful responses
-      const cache = await caches.open(DYNAMIC_CACHE);
+      const cache = await caches.open(CACHES.dynamic);
       await cache.put(request, networkResponse.clone());
       return networkResponse;
     }
@@ -249,50 +249,61 @@ async function staleWhileRevalidateStrategy(
 
   // If we have any cached response, return it (fresh or stale)
   if (cachedResponse) {
-    fetchPromise.catch(() => {}); // Ensure fetch promise doesn't cause unhandled rejection
+    // Still revalidate in the background
+    fetchPromise.catch(() => {});
     return cachedResponse;
   }
 
-  // If we have no cached response, wait for the network response
-  return fetchPromise;
-}
-
-// Update cache in background
-async function updateCacheInBackground(request, cacheName) {
+  // If we don't have a cached response, wait for the network
   try {
-    const response = await fetch(request);
-    if (response.ok) {
-      const cache = await caches.open(cacheName);
-      await cache.put(request, response.clone());
-    }
+    return await fetchPromise;
   } catch (error) {
-    // Silent fail for background updates
+    // Last resort fallback
+    return new Response("Network error", {
+      status: 408,
+      statusText: "Request Timeout",
+    });
   }
 }
 
-// Activate event - clean up old caches and take control
+// Background fetch to update cache without blocking
+async function updateCacheInBackground(request, cacheName) {
+  try {
+    const cache = await caches.open(cacheName);
+    const response = await fetch(request);
+    if (response.ok) {
+      await cache.put(request, response);
+      console.log("SW: Updated cache in background for", request.url);
+    }
+  } catch (error) {
+    console.warn("SW: Background update failed for", request.url);
+  }
+}
+
+// Activate event - clean up old caches
 self.addEventListener("activate", (event) => {
   console.log("SW: Activating...");
-  const cacheWhitelist = [STATIC_CACHE, DYNAMIC_CACHE, IMAGE_CACHE];
-
   event.waitUntil(
     (async () => {
       try {
-        // Clean up old caches
+        // Get all cache keys
         const cacheNames = await caches.keys();
-        const deletePromises = cacheNames
-          .filter((cacheName) => !cacheWhitelist.includes(cacheName))
-          .map((cacheName) => {
-            console.log("SW: Deleting old cache:", cacheName);
-            return caches.delete(cacheName);
-          });
 
-        await Promise.all(deletePromises);
-        console.log("SW: Old caches cleaned up");
+        // Delete old cache versions
+        const oldCaches = cacheNames.filter(
+          (name) => name.startsWith(CACHE_PREFIX) && !Object.values(CACHES).includes(name)
+        );
 
-        // Take control of all clients
-        await self.clients.claim();
-        console.log("SW: Activated and claimed clients");
+        if (oldCaches.length > 0) {
+          console.log("SW: Deleting old caches:", oldCaches);
+          await Promise.all(oldCaches.map((name) => caches.delete(name)));
+        }
+
+        // Tell clients about the activation
+        if (self.clients && self.clients.claim) {
+          await self.clients.claim();
+          console.log("SW: Claimed all clients");
+        }
       } catch (error) {
         console.error("SW: Activation failed", error);
       }
@@ -354,49 +365,20 @@ async function doBackgroundSync() {
               const store = transaction.objectStore(storeName);
               const request = store.delete(req.id);
 
-              request.onerror = () =>
-                reject(new Error(`Failed to delete request ${req.id}`));
+              request.onerror = () => reject(new Error("Failed to delete request"));
               request.onsuccess = () => resolve();
             });
 
-            return {
-              success: true,
-              id: req.id,
-              status: response.status,
-            };
+            return { success: true, id: req.id };
           }
-
-          return {
-            success: false,
-            id: req.id,
-            error: `Server returned ${response.status} ${response.statusText}`,
-          };
+          return { success: false, id: req.id, error: "Response not OK" };
         } catch (error) {
-          return {
-            success: false,
-            id: req.id,
-            error: error instanceof Error ? error.message : "Unknown error",
-          };
+          return { success: false, id: req.id, error: error.message };
         }
       })
     );
 
-    // Show notification if there were results
-    if (pendingRequests.length > 0) {
-      const succeeded = results.filter(
-        (r) => r.status === "fulfilled" && r.value.success
-      ).length;
-
-      if (self.registration.showNotification) {
-        await self.registration.showNotification("SoulArt სინქრონიზაცია", {
-          body: `${succeeded} / ${pendingRequests.length} მოთხოვნა წარმატებით დასინქრონდა`,
-          icon: "/soulart_icon_blue_fullsizes.ico",
-          badge: "/soulart_icon_blue_fullsizes.ico",
-          tag: "background-sync-complete",
-        });
-      }
-    }
-
+    // Report results
     return {
       total: pendingRequests.length,
       succeeded: results.filter(
@@ -416,7 +398,7 @@ self.addEventListener("push", (event) => {
   const options = {
     body: event.data ? event.data.text() : "New update available!",
     icon: "/soulart_icon_blue_fullsizes.ico",
-    badge: "/soulart_icon_blue_fullsizes.ico",
+    badge: "/android-icon-96x96.png", // Using a better badge size
     vibrate: [100, 50, 100],
     data: {
       dateOfArrival: Date.now(),
@@ -446,5 +428,12 @@ self.addEventListener("notificationclick", (event) => {
   if (event.action === "explore") {
     // Open the app when notification is clicked
     event.waitUntil(clients.openWindow("/"));
+  }
+});
+
+// Listen for messages from clients
+self.addEventListener("message", (event) => {
+  if (event.data && event.data.type === "SKIP_WAITING") {
+    self.skipWaiting();
   }
 });
