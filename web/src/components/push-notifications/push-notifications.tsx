@@ -171,11 +171,8 @@ export function PushNotificationManager() {
               არა, გმადლობთ
             </button>
           </div>
-
-
         </div>
       </div>
-
     </>
   );
 }
