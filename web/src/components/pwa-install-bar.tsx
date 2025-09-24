@@ -114,13 +114,13 @@ export default function PWAInstallBar() {
     <div
       className="fixed bottom-4 left-4 right-4 z-50 mx-auto max-w-md md:max-w-lg rounded-2xl border-0"
       style={{
-        background: isDark 
+        background: isDark
           ? "linear-gradient(135deg, rgba(1, 38, 69, 0.95) 0%, rgba(1, 79, 134, 0.95) 100%)"
           : "linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.95) 100%)",
         backdropFilter: "blur(20px)",
         boxShadow: isDark
           ? "0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.1)"
-          : "0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(1, 38, 69, 0.1)"
+          : "0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(1, 38, 69, 0.1)",
       }}
     >
       <div className="p-5">
@@ -129,13 +129,15 @@ export default function PWAInstallBar() {
             <div
               className="w-14 h-14 rounded-2xl flex items-center justify-center relative overflow-hidden"
               style={{
-                background: isDark 
+                background: isDark
                   ? "linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%)"
                   : "linear-gradient(135deg, rgba(1, 38, 69, 0.1) 0%, rgba(1, 79, 134, 0.05) 100%)",
-                border: `1.5px solid ${isDark ? "rgba(255, 255, 255, 0.2)" : "rgba(1, 38, 69, 0.2)"}`,
-                boxShadow: isDark 
+                border: `1.5px solid ${
+                  isDark ? "rgba(255, 255, 255, 0.2)" : "rgba(1, 38, 69, 0.2)"
+                }`,
+                boxShadow: isDark
                   ? "inset 0 2px 4px rgba(255, 255, 255, 0.1)"
-                  : "inset 0 2px 4px rgba(1, 38, 69, 0.1)"
+                  : "inset 0 2px 4px rgba(1, 38, 69, 0.1)",
               }}
             >
               <div
@@ -150,7 +152,9 @@ export default function PWAInstallBar() {
                   backgroundSize: "contain",
                   backgroundRepeat: "no-repeat",
                   backgroundPosition: "center",
-                  filter: isDark ? "drop-shadow(0 2px 4px rgba(255, 255, 255, 0.1))" : "drop-shadow(0 2px 4px rgba(1, 38, 69, 0.2))"
+                  filter: isDark
+                    ? "drop-shadow(0 2px 4px rgba(255, 255, 255, 0.1))"
+                    : "drop-shadow(0 2px 4px rgba(1, 38, 69, 0.2))",
                 }}
                 aria-label="SoulArt"
               />
@@ -161,12 +165,12 @@ export default function PWAInstallBar() {
                   isDark ? "text-white" : "text-gray-900"
                 }`}
                 style={{
-                  background: isDark 
+                  background: isDark
                     ? "linear-gradient(135deg, #ffffff 0%, #e2e8f0 100%)"
                     : "linear-gradient(135deg, #012645 0%, #014f86 100%)",
                   WebkitBackgroundClip: "text",
                   WebkitTextFillColor: isDark ? "transparent" : "transparent",
-                  color: isDark ? "#ffffff" : "#012645"
+                  color: isDark ? "#ffffff" : "#012645",
                 }}
               >
                 {isIOS
@@ -179,7 +183,7 @@ export default function PWAInstallBar() {
                 }`}
                 style={{
                   fontWeight: "500",
-                  lineHeight: "1.4"
+                  lineHeight: "1.4",
                 }}
               >
                 {isIOS
@@ -196,16 +200,21 @@ export default function PWAInstallBar() {
               style={{
                 background: "linear-gradient(135deg, #012645 0%, #014f86 100%)",
                 color: "white",
-                boxShadow: "0 8px 25px rgba(1, 38, 69, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2)",
-                border: "1px solid rgba(255, 255, 255, 0.1)"
+                boxShadow:
+                  "0 8px 25px rgba(1, 38, 69, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2)",
+                border: "1px solid rgba(255, 255, 255, 0.1)",
               }}
               onMouseOver={(e) => {
-                e.currentTarget.style.background = "linear-gradient(135deg, #023a6b 0%, #0369a1 100%)";
-                e.currentTarget.style.boxShadow = "0 12px 35px rgba(1, 38, 69, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.3)";
+                e.currentTarget.style.background =
+                  "linear-gradient(135deg, #023a6b 0%, #0369a1 100%)";
+                e.currentTarget.style.boxShadow =
+                  "0 12px 35px rgba(1, 38, 69, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.3)";
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.background = "linear-gradient(135deg, #012645 0%, #014f86 100%)";
-                e.currentTarget.style.boxShadow = "0 8px 25px rgba(1, 38, 69, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2)";
+                e.currentTarget.style.background =
+                  "linear-gradient(135deg, #012645 0%, #014f86 100%)";
+                e.currentTarget.style.boxShadow =
+                  "0 8px 25px rgba(1, 38, 69, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2)";
               }}
             >
               {isIOS ? (

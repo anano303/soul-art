@@ -2,7 +2,10 @@
 
 export default function Offline() {
   return (
-    <div className="min-h-screen flex items-center justify-center" style={{ background: "linear-gradient(135deg, #012645, #014f86)" }}>
+    <div
+      className="min-h-screen flex items-center justify-center"
+      style={{ background: "linear-gradient(135deg, #012645, #014f86)" }}
+    >
       <div className="max-w-md w-full bg-white rounded-lg shadow-2xl p-8 text-center mx-4">
         <div className="mb-6">
           <div className="mx-auto w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mb-4">
@@ -22,20 +25,22 @@ export default function Offline() {
           </div>
         </div>
 
-        <h1 className="text-2xl font-bold mb-4" style={{ color: "#012645" }}>📱 ოფლაინ რეჟიმი</h1>
+        <h1 className="text-2xl font-bold mb-4" style={{ color: "#012645" }}>
+          📱 ოფლაინ რეჟიმი
+        </h1>
 
         <p className="text-gray-600 mb-6 leading-relaxed">
-          🌐 თქვენ ოფლაინ რეჟიმში ხართ. გთხოვთ შეამოწმოთ ინტერნეტ კავშირი და სცადოთ
-          ხელახლა.
+          🌐 თქვენ ოფლაინ რეჟიმში ხართ. გთხოვთ შეამოწმოთ ინტერნეტ კავშირი და
+          სცადოთ ხელახლა.
         </p>
 
         <div className="space-y-3">
           <button
             onClick={() => window.location.reload()}
             className="w-full text-white px-6 py-3 rounded-lg font-semibold transition-all duration-300 transform hover:scale-105"
-            style={{ 
+            style={{
               background: "linear-gradient(135deg, #012645, #014f86)",
-              boxShadow: "0 4px 15px rgba(1, 38, 69, 0.3)"
+              boxShadow: "0 4px 15px rgba(1, 38, 69, 0.3)",
             }}
           >
             🔄 კვლავ ცდა

@@ -3,13 +3,15 @@
 import { useEffect, useState } from "react";
 import useServiceWorker from "@/hooks/use-service-worker";
 import DynamicManifest from "./dynamic-manifest";
+import { initPwaPerformance, isPwaMode } from "@/lib/pwa-performance";
 
 interface PWAProviderProps {
   children: React.ReactNode;
 }
 
 export function PWAProvider({ children }: PWAProviderProps) {
-  const { isOffline, updateAvailable, updateServiceWorker } = useServiceWorker();
+  const { isOffline, updateAvailable, updateServiceWorker } =
+    useServiceWorker();
   const [showUpdatePrompt, setShowUpdatePrompt] = useState(false);
 
   useEffect(() => {
@@ -21,6 +23,9 @@ export function PWAProvider({ children }: PWAProviderProps) {
   useEffect(() => {
     // Optimize for PWA environment
     if (typeof window !== "undefined") {
+      // Initialize all PWA performance optimizations
+      initPwaPerformance();
+
       // Enhanced viewport for PWA
       const viewport = document.querySelector('meta[name="viewport"]');
       if (!viewport) {
@@ -34,12 +39,18 @@ export function PWAProvider({ children }: PWAProviderProps) {
       // iOS Safari PWA optimizations
       const iosMetaTags = [
         { name: "apple-mobile-web-app-capable", content: "yes" },
-        { name: "apple-mobile-web-app-status-bar-style", content: "black-translucent" },
+        {
+          name: "apple-mobile-web-app-status-bar-style",
+          content: "black-translucent",
+        },
         { name: "apple-mobile-web-app-title", content: "SoulArt" },
         { name: "mobile-web-app-capable", content: "yes" },
         { name: "theme-color", content: "#012645" },
         { name: "msapplication-navbutton-color", content: "#012645" },
-        { name: "apple-mobile-web-app-status-bar-style", content: "black-translucent" },
+        {
+          name: "apple-mobile-web-app-status-bar-style",
+          content: "black-translucent",
+        },
       ];
 
       iosMetaTags.forEach(({ name, content }) => {
@@ -54,37 +65,43 @@ export function PWAProvider({ children }: PWAProviderProps) {
         }
       });
 
-      // Preload critical resources for better performance
-      const criticalResources = [
-        { href: "/", as: "document" },
-        { href: "/soulart_icon_blue_fullsizes.ico", as: "image" },
-        { href: "/logo.png", as: "image" }
-      ];
+      // Dynamically add preload hints for JavaScript and CSS
+      if (isPwaMode()) {
+        // For PWA mode, aggressively preload critical resources
+        const mainScriptElements = document.querySelectorAll(
+          'script[src^="/_next/static/chunks/main"]'
+        );
+        const frameworkScriptElements = document.querySelectorAll(
+          'script[src^="/_next/static/chunks/framework"]'
+        );
 
-      criticalResources.forEach(({ href, as }) => {
-        if (!document.querySelector(`link[href="${href}"]`)) {
-          const link = document.createElement("link");
-          link.rel = "preload";
-          link.href = href;
-          link.as = as;
-          document.head.appendChild(link);
+        // Preload main scripts if they're not already loading
+        if (mainScriptElements.length > 0) {
+          const mainSrc = mainScriptElements[0].getAttribute("src");
+          if (mainSrc && !document.querySelector(`link[href="${mainSrc}"]`)) {
+            const link = document.createElement("link");
+            link.rel = "preload";
+            link.href = mainSrc;
+            link.as = "script";
+            document.head.appendChild(link);
+          }
         }
-      });
 
-      // PWA-specific optimizations
-      if (window.matchMedia('(display-mode: standalone)').matches) {
-        // Running as PWA - apply PWA-specific styles
-        document.body.classList.add('pwa-mode');
-        
-        // Prevent pull-to-refresh in PWA
-        document.body.style.overscrollBehavior = 'none';
-        
-        // Handle safe area insets for notched devices
-        document.documentElement.style.setProperty('--safe-area-inset-top', 'env(safe-area-inset-top)');
-        document.documentElement.style.setProperty('--safe-area-inset-bottom', 'env(safe-area-inset-bottom)');
+        // Preload framework scripts if they're not already loading
+        if (frameworkScriptElements.length > 0) {
+          const frameworkSrc = frameworkScriptElements[0].getAttribute("src");
+          if (
+            frameworkSrc &&
+            !document.querySelector(`link[href="${frameworkSrc}"]`)
+          ) {
+            const link = document.createElement("link");
+            link.rel = "preload";
+            link.href = frameworkSrc;
+            link.as = "script";
+            document.head.appendChild(link);
+          }
+        }
       }
-
-      // Handle iOS Safari navigation gestures - with passive listeners for better performance
       const handleTouch = () => {};
       document.addEventListener("touchstart", handleTouch, { passive: true });
       document.addEventListener("touchmove", handleTouch, { passive: true });
@@ -100,7 +117,7 @@ export function PWAProvider({ children }: PWAProviderProps) {
   return (
     <>
       <DynamicManifest />
-      
+
       {/* Update notification */}
       {showUpdatePrompt && (
         <div className="fixed top-4 right-4 z-50 bg-blue-600 text-white p-4 rounded-lg shadow-lg">

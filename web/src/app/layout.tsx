@@ -23,6 +23,7 @@ import { FloatingCartIcon } from "@/components/floating-cart-icon/floating-cart-
 import PWAInstallPrompt from "@/components/pwa-install-prompt";
 import PWAInstallBar from "@/components/pwa-install-bar";
 import PWAProvider from "@/components/pwa-provider";
+import AppShellLoader from "@/components/app-shell-loader";
 import "@/lib/cloudflare-cleanup"; // Auto-cleanup Cloudflare cookies in development
 
 export const metadata: Metadata = {
@@ -228,7 +229,9 @@ export default function RootLayout({
                       }}
                     >
                       <Header />
-                      <div style={{ flex: 1 }}>{children}</div>
+                      <div style={{ flex: 1 }}>
+                        <AppShellLoader>{children}</AppShellLoader>
+                      </div>
                       <Footer />
                       <FloatingCartIcon />
                     </div>
