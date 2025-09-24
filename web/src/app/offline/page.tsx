@@ -1,9 +1,4 @@
-import { Metadata } from "next";
-
-export const metadata: Metadata = {
-  title: "ოფლაინ რეჟიმი - SoulArt | Offline",
-  description: "თქვენ ოფლაინ რეჟიმში ხართ. გთხოვთ შეამოწმოთ ინტერნეტ კავშირი.",
-};
+'use client';
 
 export default function Offline() {
   return (
