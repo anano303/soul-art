@@ -8,7 +8,7 @@ const CACHE_PREFIX = "soulart-";
 const CACHES = {
   static: `${CACHE_PREFIX}static-${CACHE_VERSION}`,
   dynamic: `${CACHE_PREFIX}dynamic-${CACHE_VERSION}`,
-  api: `${CACHE_PREFIX}api-${CACHE_VERSION}`
+  api: `${CACHE_PREFIX}api-${CACHE_VERSION}`,
 };
 
 // Runtime caching duration in seconds
@@ -73,7 +73,9 @@ self.addEventListener("fetch", (event) => {
   // Handle different types of requests with appropriate strategies
   if (isApiRequest(url)) {
     // API requests - stale-while-revalidate with short TTL
-    event.respondWith(staleWhileRevalidateStrategy(request, CACHES.api, 5 * 60)); // 5 minutes TTL
+    event.respondWith(
+      staleWhileRevalidateStrategy(request, CACHES.api, 5 * 60)
+    ); // 5 minutes TTL
   } else if (isStaticAsset(url)) {
     // Static assets - cache first with long TTL
     event.respondWith(cacheFirstStrategy(request, CACHES.static));
@@ -148,54 +150,31 @@ async function cacheFirstStrategy(
   }
 }
 
-// Ultra-fast navigation with instant cache fallback (200ms timeout)
+// Improved network-first strategy with faster timeout (800ms)
 async function networkFirstWithFastTimeout(request) {
-  const cache = await caches.open(CACHES.dynamic);
-  const cachedResponse = await cache.match(request);
-  
   try {
-    // Start network request immediately
-    const networkPromise = fetch(request);
-    
-    // If we have cached content, use it immediately for navigation requests
-    if (cachedResponse && request.mode === "navigate") {
-      // Update cache in background but serve cached content instantly
-      networkPromise.then(async (networkResponse) => {
-        if (networkResponse.ok) {
-          await cache.put(request, networkResponse.clone());
-        }
-      }).catch(console.warn);
-      
-      return cachedResponse;
-    }
-    
-    // For non-cached navigation requests, use very short timeout (200ms)
+    // Try network first with a much shorter timeout (800ms is the perceived loading threshold)
     const networkResponse = await Promise.race([
-      networkPromise,
+      fetch(request),
       new Promise((_, reject) =>
-        setTimeout(() => reject(new Error("Network timeout")), 200)
+        setTimeout(() => reject(new Error("Network timeout")), 800)
       ),
     ]);
 
     if (networkResponse.ok) {
       // Cache successful responses
+      const cache = await caches.open(CACHES.dynamic);
       await cache.put(request, networkResponse.clone());
       return networkResponse;
     }
 
     throw new Error("Network response was not OK");
   } catch (error) {
-    console.warn("SW: Network failed for", request.url, "using cache");
+    console.warn("SW: Network failed for", request.url, "trying cache");
 
-    // Fallback to cache
+    // Fallback to cache immediately
+    const cachedResponse = await caches.match(request);
     if (cachedResponse) {
-      // Update cache in background
-      fetch(request).then(async (networkResponse) => {
-        if (networkResponse.ok) {
-          await cache.put(request, networkResponse.clone());
-        }
-      }).catch(console.warn);
-      
       return cachedResponse;
     }
 
@@ -317,7 +296,9 @@ self.addEventListener("activate", (event) => {
 
         // Delete old cache versions
         const oldCaches = cacheNames.filter(
-          (name) => name.startsWith(CACHE_PREFIX) && !Object.values(CACHES).includes(name)
+          (name) =>
+            name.startsWith(CACHE_PREFIX) &&
+            !Object.values(CACHES).includes(name)
         );
 
         if (oldCaches.length > 0) {
@@ -391,7 +372,8 @@ async function doBackgroundSync() {
               const store = transaction.objectStore(storeName);
               const request = store.delete(req.id);
 
-              request.onerror = () => reject(new Error("Failed to delete request"));
+              request.onerror = () =>
+                reject(new Error("Failed to delete request"));
               request.onsuccess = () => resolve();
             });
 

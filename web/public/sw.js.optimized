@@ -148,54 +148,31 @@ async function cacheFirstStrategy(
   }
 }
 
-// Ultra-fast navigation with instant cache fallback (200ms timeout)
+// Improved network-first strategy with faster timeout (800ms)
 async function networkFirstWithFastTimeout(request) {
-  const cache = await caches.open(CACHES.dynamic);
-  const cachedResponse = await cache.match(request);
-  
   try {
-    // Start network request immediately
-    const networkPromise = fetch(request);
-    
-    // If we have cached content, use it immediately for navigation requests
-    if (cachedResponse && request.mode === "navigate") {
-      // Update cache in background but serve cached content instantly
-      networkPromise.then(async (networkResponse) => {
-        if (networkResponse.ok) {
-          await cache.put(request, networkResponse.clone());
-        }
-      }).catch(console.warn);
-      
-      return cachedResponse;
-    }
-    
-    // For non-cached navigation requests, use very short timeout (200ms)
+    // Try network first with a much shorter timeout (800ms is the perceived loading threshold)
     const networkResponse = await Promise.race([
-      networkPromise,
+      fetch(request),
       new Promise((_, reject) =>
-        setTimeout(() => reject(new Error("Network timeout")), 200)
+        setTimeout(() => reject(new Error("Network timeout")), 800)
       ),
     ]);
 
     if (networkResponse.ok) {
       // Cache successful responses
+      const cache = await caches.open(CACHES.dynamic);
       await cache.put(request, networkResponse.clone());
       return networkResponse;
     }
 
     throw new Error("Network response was not OK");
   } catch (error) {
-    console.warn("SW: Network failed for", request.url, "using cache");
+    console.warn("SW: Network failed for", request.url, "trying cache");
 
-    // Fallback to cache
+    // Fallback to cache immediately
+    const cachedResponse = await caches.match(request);
     if (cachedResponse) {
-      // Update cache in background
-      fetch(request).then(async (networkResponse) => {
-        if (networkResponse.ok) {
-          await cache.put(request, networkResponse.clone());
-        }
-      }).catch(console.warn);
-      
       return cachedResponse;
     }
 
