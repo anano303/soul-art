@@ -1,11 +1,35 @@
 import type { NextConfig } from "next";
 
-// Using our custom service worker for now
+// Note: Install next-pwa with: npm install next-pwa
 // const withPWA = require('next-pwa')({
 //   dest: 'public',
 //   register: true,
 //   skipWaiting: true,
 //   disable: process.env.NODE_ENV === 'development',
+//   runtimeCaching: [
+//     {
+//       urlPattern: /^https:\/\/res\.cloudinary\.com\/.*/i,
+//       handler: 'CacheFirst',
+//       options: {
+//         cacheName: 'cloudinary-images',
+//         expiration: {
+//           maxEntries: 100,
+//           maxAgeSeconds: 60 * 60 * 24 * 30, // 30 days
+//         },
+//       },
+//     },
+//     {
+//       urlPattern: /^https:\/\/fish-hunt\.s3\.eu-north-1\.amazonaws\.com\/.*/i,
+//       handler: 'CacheFirst',
+//       options: {
+//         cacheName: 'aws-s3-images',
+//         expiration: {
+//           maxEntries: 100,
+//           maxAgeSeconds: 60 * 60 * 24 * 30, // 30 days
+//         },
+//       },
+//     },
+//   ],
 // });
 
 const nextConfig: NextConfig = {
@@ -108,5 +132,7 @@ const nextConfig: NextConfig = {
   },
 };
 
-// Using our custom service worker for enhanced performance
+// For now, we'll use our custom service worker
+// To enable automatic PWA generation, install next-pwa and uncomment the withPWA wrapper
 export default nextConfig;
+// export default withPWA(nextConfig);

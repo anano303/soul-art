@@ -112,36 +112,29 @@ export default function PWAInstallBar() {
 
   return (
     <div
-      className="fixed bottom-4 left-4 right-4 z-50 mx-auto max-w-md md:max-w-lg rounded-2xl border-0"
+      className={`fixed bottom-4 left-4 right-4 z-50 mx-auto max-w-md md:max-w-lg shadow-2xl rounded-xl border ${
+        isDark ? "bg-gray-800 border-gray-600" : "bg-white border-gray-200"
+      }`}
       style={{
-        background: isDark 
-          ? "linear-gradient(135deg, rgba(1, 38, 69, 0.95) 0%, rgba(1, 79, 134, 0.95) 100%)"
-          : "linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.95) 100%)",
-        backdropFilter: "blur(20px)",
-        boxShadow: isDark
-          ? "0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.1)"
-          : "0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(1, 38, 69, 0.1)"
+        backdropFilter: "blur(10px)",
+        background: isDark
+          ? "rgba(31, 41, 55, 0.95)"
+          : "rgba(255, 255, 255, 0.95)",
       }}
     >
-      <div className="p-5">
+      <div className="p-4">
         <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-3">
             <div
-              className="w-14 h-14 rounded-2xl flex items-center justify-center relative overflow-hidden"
-              style={{
-                background: isDark 
-                  ? "linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%)"
-                  : "linear-gradient(135deg, rgba(1, 38, 69, 0.1) 0%, rgba(1, 79, 134, 0.05) 100%)",
-                border: `1.5px solid ${isDark ? "rgba(255, 255, 255, 0.2)" : "rgba(1, 38, 69, 0.2)"}`,
-                boxShadow: isDark 
-                  ? "inset 0 2px 4px rgba(255, 255, 255, 0.1)"
-                  : "inset 0 2px 4px rgba(1, 38, 69, 0.1)"
-              }}
+              className={`w-12 h-12 rounded-xl flex items-center justify-center ${
+                isDark ? "bg-blue-900" : "bg-blue-50"
+              }`}
+              style={{ backgroundColor: isDark ? "#1e3a8a" : "#eff6ff" }}
             >
               <div
                 style={{
-                  width: "32px",
-                  height: "32px",
+                  width: "28px",
+                  height: "28px",
                   backgroundImage: `url(${
                     isDark
                       ? "/soulart_icon_white_fullsizes.ico"
@@ -150,62 +143,45 @@ export default function PWAInstallBar() {
                   backgroundSize: "contain",
                   backgroundRepeat: "no-repeat",
                   backgroundPosition: "center",
-                  filter: isDark ? "drop-shadow(0 2px 4px rgba(255, 255, 255, 0.1))" : "drop-shadow(0 2px 4px rgba(1, 38, 69, 0.2))"
                 }}
                 aria-label="SoulArt"
               />
             </div>
             <div className="flex-1">
               <p
-                className={`text-sm font-bold tracking-wide ${
+                className={`text-sm font-semibold ${
                   isDark ? "text-white" : "text-gray-900"
                 }`}
-                style={{
-                  background: isDark 
-                    ? "linear-gradient(135deg, #ffffff 0%, #e2e8f0 100%)"
-                    : "linear-gradient(135deg, #012645 0%, #014f86 100%)",
-                  WebkitBackgroundClip: "text",
-                  WebkitTextFillColor: isDark ? "transparent" : "transparent",
-                  color: isDark ? "#ffffff" : "#012645"
-                }}
               >
                 {isIOS
-                  ? "📱 დაამატეთ SoulArt-ი მთავარ ეკრანზე"
-                  : "🎨 დააყენეთ SoulArt აპლიკაცია"}
+                  ? "📱 დაამატეთ SoulArt მთავარ ეკრანზე"
+                  : "🚀 დააყენეთ SoulArt აპლიკაცია"}
               </p>
               <p
-                className={`text-xs mt-1 ${
-                  isDark ? "text-blue-200" : "text-blue-700"
+                className={`text-xs ${
+                  isDark ? "text-gray-300" : "text-gray-600"
                 }`}
-                style={{
-                  fontWeight: "500",
-                  lineHeight: "1.4"
-                }}
               >
                 {isIOS
-                  ? "Safari → Share ღილაკი → 'Add to Home Screen'"
-                  : "⚡ სწრაფი წვდომა • 📢 Push ნოტიფიკაციები • 📱 ოფლაინ მუშაობა"}
+                  ? "Safari-დან გამოიყენეთ Share → 'Add to Home Screen'"
+                  : "სწრაფი წვდომა • Push ნოტიფიკაციები • ოფლაინ მუშაობა"}
               </p>
             </div>
           </div>
 
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-2">
             <button
               onClick={handleInstallClick}
-              className="px-5 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 flex items-center space-x-2 transform hover:scale-105 active:scale-95"
+              className="px-4 py-2 rounded-lg text-sm font-semibold transition-colors flex items-center space-x-2"
               style={{
-                background: "linear-gradient(135deg, #012645 0%, #014f86 100%)",
+                backgroundColor: "#012645",
                 color: "white",
-                boxShadow: "0 8px 25px rgba(1, 38, 69, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2)",
-                border: "1px solid rgba(255, 255, 255, 0.1)"
               }}
               onMouseOver={(e) => {
-                e.currentTarget.style.background = "linear-gradient(135deg, #023a6b 0%, #0369a1 100%)";
-                e.currentTarget.style.boxShadow = "0 12px 35px rgba(1, 38, 69, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.3)";
+                e.currentTarget.style.backgroundColor = "#023a6b";
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.background = "linear-gradient(135deg, #012645 0%, #014f86 100%)";
-                e.currentTarget.style.boxShadow = "0 8px 25px rgba(1, 38, 69, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2)";
+                e.currentTarget.style.backgroundColor = "#012645";
               }}
             >
               {isIOS ? (
@@ -213,14 +189,14 @@ export default function PWAInstallBar() {
               ) : (
                 <Download className="h-4 w-4" />
               )}
-              <span>{isIOS ? "ნახვა" : "დაყენება"}</span>
+              <span>{isIOS ? "ინსტრუქცია" : "დაყენება"}</span>
             </button>
             <button
               onClick={handleDismiss}
-              className={`transition-all duration-300 p-2.5 rounded-xl hover:scale-110 active:scale-95 ${
+              className={`transition-colors p-2 rounded-lg ${
                 isDark
-                  ? "text-gray-300 hover:text-white hover:bg-white/10"
-                  : "text-gray-500 hover:text-gray-700 hover:bg-gray-100"
+                  ? "text-gray-400 hover:text-gray-200"
+                  : "text-gray-500 hover:text-gray-700"
               }`}
             >
               <X className="h-5 w-5" />
