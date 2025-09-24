@@ -68,6 +68,8 @@ export function AdminOrderDetails({ order }: AdminOrderDetailsProps) {
     },
     retry: 1,
     refetchOnWindowFocus: false,
+    staleTime: 10 * 60 * 1000, // Cache for 10 minutes (age groups change rarely)
+    gcTime: 30 * 60 * 1000, // Keep in cache for 30 minutes
   });
 
   // Get localized color name based on current language

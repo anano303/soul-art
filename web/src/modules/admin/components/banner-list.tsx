@@ -7,6 +7,7 @@ import { Banner } from "@/types/banner";
 import { Pencil, Trash2, Plus, Eye, EyeOff } from "lucide-react";
 import Image from "next/image";
 import HeartLoading from "@/components/HeartLoading/HeartLoading";
+import { toast } from "@/hooks/use-toast";
 
 import "./banner-list.css";
 import { BannerModal } from "./banner-modal";
@@ -28,7 +29,18 @@ export function BannerList() {
   const deleteMutation = useMutation({
     mutationFn: deleteBanner,
     onSuccess: () => {
+      toast({
+        title: "✅ ბანერი წაიშალა!",
+        description: "ბანერი წარმატებით წაიშალა.",
+      });
       queryClient.invalidateQueries({ queryKey: ["banners"] });
+    },
+    onError: (error) => {
+      toast({
+        title: "❌ შეცდომა",
+        description: "ბანერის წაშლისას მოხდა შეცდომა. სცადეთ ხელახლა.",
+        variant: "destructive",
+      });
     },
   });
 

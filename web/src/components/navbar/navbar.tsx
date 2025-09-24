@@ -44,14 +44,10 @@ const Navbar: React.FC = () => {
       ];
 
   const handleClick = (e: React.MouseEvent, index: number, href: string) => {
-    e.preventDefault();
-
-    if (activeItem === index) {
-      router.push(href);
-      setActiveItem(null);
-    } else {
-      setActiveItem(index);
-    }
+    // Remove preventDefault to allow normal navigation
+    // Set active state and navigate immediately
+    setActiveItem(index);
+    // Let Next.js Link handle the navigation naturally
   };
 
   return (

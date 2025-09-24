@@ -54,6 +54,19 @@ export class SubCategoriesController {
     console.log(
       `[SubCategoriesController] GET /categories/sub request. Query params -> categoryId: "${categoryId}", includeInactive: "${includeInactive}"`,
     );
+
+    // Early validation to prevent unnecessary processing
+    if (
+      categoryId === 'undefined' ||
+      categoryId === 'null' ||
+      categoryId === ''
+    ) {
+      console.warn(
+        `[SubCategoriesController] Invalid categoryId received: "${categoryId}". Returning empty array.`,
+      );
+      return [];
+    }
+
     try {
       // The service method is async, so this will return a Promise
       const subcategoriesPromise = this.subCategoryService.findAll(

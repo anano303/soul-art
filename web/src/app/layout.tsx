@@ -180,75 +180,9 @@ export default function RootLayout({
 
         {/* Preload critical resources - only existing resources */}
 
-        {/* Conditional PWA Registration - Only for installed apps on mobile */}
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              // PWA Detection Functions
-              function isRunningAsInstalledPWA() {
-                const isStandalone = window.matchMedia && window.matchMedia('(display-mode: standalone)').matches;
-                const isFullscreen = window.matchMedia && window.matchMedia('(display-mode: fullscreen)').matches;
-                const isMinimalUi = window.matchMedia && window.matchMedia('(display-mode: minimal-ui)').matches;
-                const isIOSStandalone = 'standalone' in window.navigator && window.navigator.standalone;
-                const isFromHomescreen = window.location.search.includes('utm_source=homescreen');
-                
-                return isStandalone || isFullscreen || isMinimalUi || isIOSStandalone || isFromHomescreen;
-              }
+        {/* PWA will be handled by next-pwa and PWAManager component */}
 
-              function isMobileDevice() {
-                const userAgent = navigator.userAgent || navigator.vendor || window.opera;
-                const mobilePatterns = [/Android/i, /webOS/i, /iPhone/i, /iPad/i, /iPod/i, /BlackBerry/i, /Windows Phone/i, /Mobile/i];
-                return mobilePatterns.some(pattern => pattern.test(userAgent));
-              }
-
-              // Conditional Service Worker Registration
-              if ('serviceWorker' in navigator) {
-                window.addEventListener('load', () => {
-                  const isInstalled = isRunningAsInstalledPWA();
-                  const isMobile = isMobileDevice();
-                  const isProduction = '${process.env.NODE_ENV}' === 'production';
-                  
-                  if (isInstalled && isMobile && isProduction) {
-                    // Register service worker for installed PWA on mobile
-                    navigator.serviceWorker.register('/sw.js')
-                      .then((registration) => {
-                        console.log('SW registered for installed PWA: ', registration);
-                      })
-                      .catch((registrationError) => {
-                        console.log('SW registration failed: ', registrationError);
-                      });
-                  } else {
-                    // Unregister any existing service workers if conditions not met
-                    navigator.serviceWorker.getRegistrations().then(function(registrations) {
-                      for(let registration of registrations) {
-                        registration.unregister();
-                        console.log('SW unregistered - not running as installed PWA or not mobile');
-                      }
-                    });
-                  }
-
-                  // Listen for display mode changes
-                  if (window.matchMedia) {
-                    const mediaQuery = window.matchMedia('(display-mode: standalone)');
-                    mediaQuery.addListener ? mediaQuery.addListener((e) => {
-                      if (e.matches && isMobile && isProduction) {
-                        console.log('App switched to standalone mode');
-                        navigator.serviceWorker.register('/sw.js');
-                      }
-                    }) : mediaQuery.addEventListener('change', (e) => {
-                      if (e.matches && isMobile && isProduction) {
-                        console.log('App switched to standalone mode');
-                        navigator.serviceWorker.register('/sw.js');
-                      }
-                    });
-                  }
-                });
-              }
-            `,
-          }}
-        />
-
-        {/* Resource preloading for better performance */}
+        {/* Optimized resource hints */}
         <link
           rel="preconnect"
           href="https://fonts.googleapis.com"
@@ -265,7 +199,7 @@ export default function RootLayout({
           crossOrigin="anonymous"
         />
 
-        {/* DNS prefetch for external resources */}
+        {/* DNS prefetch for external resources only */}
         <link rel="dns-prefetch" href="//connect.facebook.net" />
         <link rel="dns-prefetch" href="//www.googletagmanager.com" />
         <link rel="dns-prefetch" href="//www.google-analytics.com" />

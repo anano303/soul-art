@@ -58,19 +58,14 @@ export const isMobileDevice = (): boolean => {
 };
 
 /**
- * Registers service worker only if app is installed and on mobile
+ * Registers service worker conditionally - only in production when installed
  */
 export const registerServiceWorkerConditionally = async (): Promise<void> => {
-  // Only register if:
-  // 1. Browser supports service workers
-  // 2. App is running as installed PWA
-  // 3. Device is mobile
-  // 4. Not in development mode
+  // Only register in production for installed PWAs
   if (
     "serviceWorker" in navigator &&
-    isRunningAsInstalledPWA() &&
-    isMobileDevice() &&
-    process.env.NODE_ENV === "production"
+    process.env.NODE_ENV === "production" &&
+    isRunningAsInstalledPWA()
   ) {
     try {
       const registration = await navigator.serviceWorker.register("/sw.js", {
@@ -103,18 +98,22 @@ export const registerServiceWorkerConditionally = async (): Promise<void> => {
 };
 
 /**
- * Unregisters service worker if not running as installed PWA
+ * Unregisters service worker only if in browser mode and production
  */
 export const unregisterServiceWorkerIfNeeded = async (): Promise<void> => {
   if ("serviceWorker" in navigator) {
     const registrations = await navigator.serviceWorker.getRegistrations();
 
-    // If not running as installed PWA, unregister all service workers
-    if (!isRunningAsInstalledPWA() || !isMobileDevice()) {
+    // Only unregister in production if not installed PWA and not mobile
+    if (
+      process.env.NODE_ENV === "production" &&
+      !isRunningAsInstalledPWA() &&
+      !isMobileDevice()
+    ) {
       for (const registration of registrations) {
         await registration.unregister();
         console.log(
-          "Service worker unregistered - not running as installed PWA"
+          "Service worker unregistered - browser mode on desktop in production"
         );
       }
     }
@@ -126,22 +125,27 @@ export const unregisterServiceWorkerIfNeeded = async (): Promise<void> => {
  */
 export const initializePWA = (): void => {
   if (typeof window !== "undefined") {
-    // Register service worker conditionally
-    registerServiceWorkerConditionally();
+    // Only initialize in production to prevent development conflicts
+    if (process.env.NODE_ENV === "production") {
+      // Register service worker conditionally
+      registerServiceWorkerConditionally();
 
-    // Unregister if conditions not met
-    unregisterServiceWorkerIfNeeded();
+      // Unregister if conditions not met
+      unregisterServiceWorkerIfNeeded();
 
-    // Listen for display mode changes
-    const mediaQuery = window.matchMedia("(display-mode: standalone)");
-    mediaQuery.addEventListener("change", (e) => {
-      if (e.matches) {
-        console.log("App is running in standalone mode");
-        registerServiceWorkerConditionally();
-      } else {
-        console.log("App is running in browser mode");
-        unregisterServiceWorkerIfNeeded();
-      }
-    });
+      // Listen for display mode changes
+      const mediaQuery = window.matchMedia("(display-mode: standalone)");
+      mediaQuery.addEventListener("change", (e) => {
+        if (e.matches) {
+          console.log("App is running in standalone mode");
+          registerServiceWorkerConditionally();
+        } else {
+          console.log("App is running in browser mode");
+          unregisterServiceWorkerIfNeeded();
+        }
+      });
+    } else {
+      console.log("PWA initialization skipped in development mode");
+    }
   }
 };

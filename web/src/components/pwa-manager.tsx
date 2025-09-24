@@ -17,11 +17,21 @@ export default function PWAManager() {
     initializePWA();
 
     // Log current PWA status for debugging
-    if (process.env.NODE_ENV === "development") {
-      console.log("PWA Status:", {
-        isInstalled: isRunningAsInstalledPWA(),
-        isMobile: isMobileDevice(),
-        shouldEnablePWA: isRunningAsInstalledPWA() && isMobileDevice(),
+    console.log("PWA Manager initialized:", {
+      isInstalled: isRunningAsInstalledPWA(),
+      isMobile: isMobileDevice(),
+      environment: process.env.NODE_ENV,
+      serviceWorkerSupported: "serviceWorker" in navigator,
+      notificationSupported: "Notification" in window,
+    });
+
+    // Check if service worker is already registered
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.getRegistrations().then((registrations) => {
+        console.log("Current SW registrations:", registrations.length);
+        registrations.forEach((registration, index) => {
+          console.log(`SW ${index + 1}:`, registration.scope);
+        });
       });
     }
   }, []);

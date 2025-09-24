@@ -7,6 +7,8 @@ import { Banner, CreateBannerData } from "@/types/banner";
 import { X, Upload } from "lucide-react";
 import Image from "next/image";
 import HeartLoading from "@/components/HeartLoading/HeartLoading";
+import { toast } from "@/hooks/use-toast";
+import { useLanguage } from "@/hooks/LanguageContext";
 import "./banner-modal.css";
 
 interface BannerModalProps {
@@ -18,6 +20,7 @@ interface BannerModalProps {
 export function BannerModal({ banner, onClose, onSuccess }: BannerModalProps) {
   const isEditing = !!banner;
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { t } = useLanguage();
 
   const [formData, setFormData] = useState<CreateBannerData>({
     title: banner?.title || "",
@@ -36,7 +39,18 @@ export function BannerModal({ banner, onClose, onSuccess }: BannerModalProps) {
     mutationFn: ({ data, image }: { data: CreateBannerData; image?: File }) =>
       createBanner(data, image),
     onSuccess: () => {
+      toast({
+        title: "✅ ბანერი შეიქმნა!",
+        description: "ბანერი წარმატებით აიტვირთა და შეიქმნა.",
+      });
       onSuccess();
+    },
+    onError: (error) => {
+      toast({
+        title: "❌ შეცდომა",
+        description: "ბანერის შექმნისას მოხდა შეცდომა. სცადეთ ხელახლა.",
+        variant: "destructive",
+      });
     },
   });
 
@@ -49,7 +63,18 @@ export function BannerModal({ banner, onClose, onSuccess }: BannerModalProps) {
       image?: File;
     }) => updateBanner(banner!._id, data, image),
     onSuccess: () => {
+      toast({
+        title: "✅ ბანერი განახლდა!",
+        description: "ბანერი წარმატებით განახლდა.",
+      });
       onSuccess();
+    },
+    onError: (error) => {
+      toast({
+        title: "❌ შეცდომა",
+        description: "ბანერის განახლებისას მოხდა შეცდომა. სცადეთ ხელახლა.",
+        variant: "destructive",
+      });
     },
   });
 

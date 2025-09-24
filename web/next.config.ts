@@ -7,9 +7,22 @@ const nextConfig: NextConfig = {
     serverActions: {
       bodySizeLimit: "50mb",
     },
-    // Optimize bundling and loading
+    // Optimize bundling and loading only in production
     optimizeCss: process.env.NODE_ENV === "production",
     optimizeServerReact: process.env.NODE_ENV === "production",
+    // Improve CSS handling
+    cssChunking: true,
+    // Better caching
+    staleTimes: {
+      dynamic: 30,
+      static: 180,
+    },
+    // Reduce CSS warnings
+    turbo: {
+      rules: {
+        "*.css": ["css-loader"],
+      },
+    },
   },
   // Optimize compilation
   compiler: {
@@ -57,12 +70,56 @@ const nextConfig: NextConfig = {
       };
     }
 
-    // Improve Fast Refresh in development
+    // Improve development performance
     if (dev) {
+      // Faster rebuilds
       config.watchOptions = {
         poll: 1000,
         aggregateTimeout: 300,
+        ignored: /node_modules/,
       };
+
+      // Reduce chunk size in development for faster HMR
+      config.optimization = {
+        ...config.optimization,
+        splitChunks: {
+          chunks: "all",
+          cacheGroups: {
+            default: {
+              minChunks: 2,
+              priority: -20,
+              reuseExistingChunk: true,
+            },
+            vendor: {
+              test: /[\\/]node_modules[\\/]/,
+              priority: -10,
+              reuseExistingChunk: true,
+            },
+          },
+        },
+      };
+
+      // Optimize CSS loading for development
+      config.module.rules.forEach((rule: any) => {
+        if (rule.oneOf) {
+          rule.oneOf.forEach((oneOfRule: any) => {
+            if (oneOfRule.use && Array.isArray(oneOfRule.use)) {
+              oneOfRule.use.forEach((useItem: any) => {
+                if (
+                  typeof useItem === "object" &&
+                  useItem.loader &&
+                  useItem.loader.includes("css-loader")
+                ) {
+                  useItem.options = {
+                    ...useItem.options,
+                    sourceMap: false, // Disable source maps for faster builds
+                  };
+                }
+              });
+            }
+          });
+        }
+      });
     }
 
     // Optimize chunks
@@ -112,15 +169,10 @@ const nextConfig: NextConfig = {
 
 export default withPWA({
   dest: "public",
-  register: false, // Manual registration only when installed
-  skipWaiting: false, // Don't auto-activate, let user control
-  disable: process.env.NODE_ENV === "development", // PWA გამორთული development-ში
+  register: true,
+  skipWaiting: true,
+  disable: process.env.NODE_ENV === "development", // Disable in development to prevent errors
   sw: "sw.js",
-  // Prevent multiple service worker generation in development
-  ...(process.env.NODE_ENV === "development" && {
-    generateSW: false,
-    generateInDevMode: false,
-  }),
   runtimeCaching: [
     // API calls - always try network first, short cache
     {

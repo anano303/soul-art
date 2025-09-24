@@ -16,12 +16,19 @@ import { ReferralsModule } from '@/referrals/referrals.module';
 // Add a provider to manually drop the problematic index on module initialization
 export class IndexCleanupService implements OnModuleInit {
   private readonly logger = new Logger('IndexCleanupService');
+  private static hasRunOnce = false; // Flag to prevent multiple runs
 
   constructor(
     @InjectModel(Product.name) private productModel: Model<Product>,
   ) {}
 
   async onModuleInit() {
+    // Skip if already run during this application lifecycle
+    if (IndexCleanupService.hasRunOnce) {
+      this.logger.debug('Index cleanup already completed, skipping...');
+      return;
+    }
+
     try {
       this.logger.log('Checking for and removing problematic indexes...');
       const collection = this.productModel.collection;
@@ -32,6 +39,8 @@ export class IndexCleanupService implements OnModuleInit {
         `Found indexes: ${JSON.stringify(Object.keys(indexInfo))}`,
       );
 
+      let foundProblematicIndex = false;
+
       // Look for any index on both sizes and ageGroups
       for (const indexName of Object.keys(indexInfo)) {
         if (indexName !== '_id_') {
@@ -39,11 +48,7 @@ export class IndexCleanupService implements OnModuleInit {
           const indexKeys = indexInfo[indexName];
           const indexFields = indexKeys.map((pair) => pair[0]);
 
-          this.logger.log(
-            `Index ${indexName} has fields: ${indexFields.join(', ')}`,
-          );
-
-          // If this index contains both sizes and ageGroups, drop it
+          // If this index contains problematic parallel arrays, drop it
           if (
             (indexFields.includes('ageGroups') &&
               indexFields.includes('sizes')) ||
@@ -51,8 +56,9 @@ export class IndexCleanupService implements OnModuleInit {
               indexFields.includes('colors')) ||
             (indexFields.includes('sizes') && indexFields.includes('colors'))
           ) {
+            foundProblematicIndex = true;
             this.logger.warn(
-              `Dropping problematic parallel array index: ${indexName}`,
+              `Dropping problematic parallel array index: ${indexName} (fields: ${indexFields.join(', ')})`,
             );
             await collection.dropIndex(indexName);
             this.logger.log(`Successfully dropped index: ${indexName}`);
@@ -60,7 +66,12 @@ export class IndexCleanupService implements OnModuleInit {
         }
       }
 
+      if (!foundProblematicIndex) {
+        this.logger.log('No problematic indexes found');
+      }
+
       this.logger.log('Index cleanup completed');
+      IndexCleanupService.hasRunOnce = true; // Set flag to prevent future runs
     } catch (error) {
       this.logger.error('Error during index cleanup:', error);
     }

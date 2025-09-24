@@ -220,6 +220,8 @@ export function ProductFilters({
     },
     retry: 1,
     refetchOnWindowFocus: false,
+    staleTime: 10 * 60 * 1000, // Cache for 10 minutes (colors change rarely)
+    gcTime: 30 * 60 * 1000, // Keep in cache for 30 minutes
   });
   // Fetch all age groups for filtering with proper nameEn support
   const { data: availableAgeGroups = [] } = useQuery<AgeGroupItem[]>({
@@ -241,6 +243,8 @@ export function ProductFilters({
     },
     retry: 1,
     refetchOnWindowFocus: false,
+    staleTime: 10 * 60 * 1000, // Cache for 10 minutes (age groups change rarely)
+    gcTime: 30 * 60 * 1000, // Keep in cache for 30 minutes
   });
 
   // Get available attributes based on selected subcategory

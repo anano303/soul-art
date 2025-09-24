@@ -130,13 +130,23 @@ export function CreateProductForm({
   >({
     queryKey: ["subcategories", selectedCategory],
     queryFn: async () => {
-      if (!selectedCategory) return [];
+      if (
+        !selectedCategory ||
+        selectedCategory === "undefined" ||
+        selectedCategory === "null"
+      )
+        return [];
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/subcategories?categoryId=${selectedCategory}&includeInactive=false`
       );
       return response.json();
     },
-    enabled: !!selectedCategory,
+    enabled:
+      !!selectedCategory &&
+      selectedCategory !== "undefined" &&
+      selectedCategory !== "null",
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes to reduce API calls
+    gcTime: 10 * 60 * 1000, // Keep in cache for 10 minutes
   });
 
   // Fetch all colors for proper nameEn support
@@ -155,6 +165,8 @@ export function CreateProductForm({
     },
     retry: 1,
     refetchOnWindowFocus: false,
+    staleTime: 10 * 60 * 1000, // Cache for 10 minutes (colors change rarely)
+    gcTime: 30 * 60 * 1000, // Keep in cache for 30 minutes
   });
 
   // Fetch all age groups for proper nameEn support
@@ -175,6 +187,8 @@ export function CreateProductForm({
     },
     retry: 1,
     refetchOnWindowFocus: false,
+    staleTime: 10 * 60 * 1000, // Cache for 10 minutes (age groups change rarely)
+    gcTime: 30 * 60 * 1000, // Keep in cache for 30 minutes
   });
 
   // Get localized color name based on current language
@@ -295,9 +309,11 @@ export function CreateProductForm({
             ? initialData.mainCategory._id || initialData.mainCategory.id
             : initialData.mainCategory;
 
-        setSelectedCategory(String(categoryId || ""));
+        setSelectedCategory(categoryId ? String(categoryId) : "");
       } else if (initialData.categoryId) {
-        setSelectedCategory(String(initialData.categoryId || ""));
+        setSelectedCategory(
+          initialData.categoryId ? String(initialData.categoryId) : ""
+        );
       }
     }
   }, [initialData]);

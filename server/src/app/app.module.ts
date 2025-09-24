@@ -16,10 +16,7 @@ import { AwsS3Module } from '@/aws-s3/aws-s3.module';
 import { ForumsModule } from '@/forums/forums.module';
 import { GoogleStrategy } from '@/strategies/google.strategy';
 import { connectDB } from '@/utils/config';
-import {
-  IndexCleanupService,
-  ProductsModule,
-} from '@/products/products.module';
+import { ProductsModule } from '@/products/products.module';
 import { CategoriesModule } from '@/categories/categories.module';
 import { BannerModule } from '@/banners/banner.module';
 import { SharedServicesModule } from './shared-services.module';
@@ -52,7 +49,7 @@ import { ReferralsModule } from '../referrals/referrals.module';
     ReferralsModule,
   ],
   controllers: [AppController],
-  providers: [AppService, GoogleStrategy, IndexCleanupService],
+  providers: [AppService, GoogleStrategy],
   exports: [AppService],
 })
 export class AppModule {}

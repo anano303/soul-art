@@ -99,7 +99,7 @@ export const useCategories = (includeInactive = false) => {
     queryFn: async () => {
       try {
         const cacheKey = `categories-${includeInactive}`;
-        
+
         // Try cache first
         const cached = memoryCache.get(cacheKey);
         if (cached) {
@@ -109,7 +109,7 @@ export const useCategories = (includeInactive = false) => {
         const response = await apiClient.get(
           `/categories?includeInactive=${includeInactive}`
         );
-        
+
         // Cache for 5 minutes
         memoryCache.set(cacheKey, response.data, 5 * 60 * 1000);
         return response.data;
@@ -155,7 +155,10 @@ export const useCreateCategory = (errorMessage?: string) => {
       toast.success("კატეგორია წარმატებით დაემატა");
     },
     onError: (error: unknown) => {
-      ErrorHandler.showToast(error, errorMessage || "კატეგორიის დამატება ვერ მოხერხდა");
+      ErrorHandler.showToast(
+        error,
+        errorMessage || "კატეგორიის დამატება ვერ მოხერხდა"
+      );
     },
   });
 };
@@ -183,7 +186,10 @@ export const useUpdateCategory = (errorMessage?: string) => {
       toast.success("კატეგორია წარმატებით განახლდა");
     },
     onError: (error: unknown) => {
-      ErrorHandler.showToast(error, errorMessage || "კატეგორიის განახლება ვერ მოხერხდა");
+      ErrorHandler.showToast(
+        error,
+        errorMessage || "კატეგორიის განახლება ვერ მოხერხდა"
+      );
     },
   });
 };
@@ -284,10 +290,11 @@ export const useSubCategories = (
         throw queryError; // Rethrow the augmented error for React Query to handle
       }
     },
-    enabled: !!categoryId, // Query will only run if categoryId is truthy
+    enabled:
+      !!categoryId && categoryId !== "undefined" && categoryId !== "null", // Query will only run if categoryId is valid
     retry: 1, // Retry once on failure
-    // staleTime: 5 * 60 * 1000, // Optional: Data is fresh for 5 minutes
-    // cacheTime: 10 * 60 * 1000, // Optional: Cache data for 10 minutes
+    staleTime: 5 * 60 * 1000, // Data is fresh for 5 minutes to reduce API calls
+    gcTime: 10 * 60 * 1000, // Keep in cache for 10 minutes
   });
 };
 
@@ -478,6 +485,8 @@ export const useColors = () => {
       const response = await apiClient.get("/categories/attributes/colors");
       return response.data;
     },
+    staleTime: 10 * 60 * 1000, // Cache for 10 minutes (colors change rarely)
+    gcTime: 30 * 60 * 1000, // Keep in cache for 30 minutes
   });
 };
 
@@ -572,6 +581,8 @@ export const useSizes = () => {
       const response = await apiClient.get("/categories/attributes/sizes");
       return response.data;
     },
+    staleTime: 10 * 60 * 1000, // Cache for 10 minutes (sizes change rarely)
+    gcTime: 30 * 60 * 1000, // Keep in cache for 30 minutes
   });
 };
 
@@ -659,6 +670,8 @@ export const useAgeGroups = () => {
       const response = await apiClient.get("/categories/attributes/age-groups");
       return response.data;
     },
+    staleTime: 10 * 60 * 1000, // Cache for 10 minutes (age groups change rarely)
+    gcTime: 30 * 60 * 1000, // Keep in cache for 30 minutes
   });
 };
 
