@@ -6,7 +6,7 @@ import { useTheme } from "next-themes";
 // ფუნქცია რომელიც შექმნის SoulArt icons სხვადასხვა ზომებში
 const generateSoulArtIcons = (sourceIconPath: string) => {
   const sizes = [36, 48, 72, 96, 144, 192, 256, 512];
-
+  
   return sizes.map((size) => ({
     src: sourceIconPath,
     sizes: `${size}x${size}`,
