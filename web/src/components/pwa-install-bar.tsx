@@ -112,29 +112,18 @@ export default function PWAInstallBar() {
 
   return (
     <div
-      className={`fixed bottom-4 left-4 right-4 z-50 mx-auto max-w-md md:max-w-lg shadow-2xl rounded-xl border ${
-        isDark ? "bg-gray-800 border-gray-600" : "bg-white border-gray-200"
-      }`}
-      style={{
-        backdropFilter: "blur(10px)",
-        background: isDark
-          ? "rgba(31, 41, 55, 0.95)"
-          : "rgba(255, 255, 255, 0.95)",
-      }}
+      className={`fixed top-0 left-0 right-0 z-50 ${
+        isDark ? "bg-gray-900" : "bg-blue-600"
+      } text-white shadow-lg`}
     >
-      <div className="p-4">
+      <div className="max-w-7xl mx-auto px-4 py-2">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <div
-              className={`w-12 h-12 rounded-xl flex items-center justify-center ${
-                isDark ? "bg-blue-900" : "bg-blue-50"
-              }`}
-              style={{ backgroundColor: isDark ? "#1e3a8a" : "#eff6ff" }}
-            >
+            <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center">
               <div
                 style={{
-                  width: "28px",
-                  height: "28px",
+                  width: "24px",
+                  height: "24px",
                   backgroundImage: `url(${
                     isDark
                       ? "/soulart_icon_white_fullsizes.ico"
@@ -148,23 +137,15 @@ export default function PWAInstallBar() {
               />
             </div>
             <div className="flex-1">
-              <p
-                className={`text-sm font-semibold ${
-                  isDark ? "text-white" : "text-gray-900"
-                }`}
-              >
+              <p className="text-sm font-medium">
                 {isIOS
-                  ? "📱 დაამატეთ SoulArt მთავარ ეკრანზე"
-                  : "🚀 დააყენეთ SoulArt აპლიკაცია"}
+                  ? "დაამატეთ SoulArt მთავარ ეკრანზე"
+                  : "დააყენეთ SoulArt აპლიკაცია"}
               </p>
-              <p
-                className={`text-xs ${
-                  isDark ? "text-gray-300" : "text-gray-600"
-                }`}
-              >
+              <p className="text-xs opacity-90">
                 {isIOS
-                  ? "Safari-დან გამოიყენეთ Share → 'Add to Home Screen'"
-                  : "სწრაფი წვდომა • Push ნოტიფიკაციები • ოფლაინ მუშაობა"}
+                  ? "სწრაფი წვდომისთვის Safari-დან გამოიყენეთ Share → Add to Home Screen"
+                  : "მიიღეთ სწრაფი წვდომა, push ნოტიფიკაციები და ოფლაინ მუშაობა"}
               </p>
             </div>
           </div>
@@ -172,17 +153,7 @@ export default function PWAInstallBar() {
           <div className="flex items-center space-x-2">
             <button
               onClick={handleInstallClick}
-              className="px-4 py-2 rounded-lg text-sm font-semibold transition-colors flex items-center space-x-2"
-              style={{
-                backgroundColor: "#012645",
-                color: "white",
-              }}
-              onMouseOver={(e) => {
-                e.currentTarget.style.backgroundColor = "#023a6b";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = "#012645";
-              }}
+              className="bg-white text-blue-600 px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-100 transition-colors flex items-center space-x-2"
             >
               {isIOS ? (
                 <Share className="h-4 w-4" />
@@ -193,11 +164,7 @@ export default function PWAInstallBar() {
             </button>
             <button
               onClick={handleDismiss}
-              className={`transition-colors p-2 rounded-lg ${
-                isDark
-                  ? "text-gray-400 hover:text-gray-200"
-                  : "text-gray-500 hover:text-gray-700"
-              }`}
+              className="text-white hover:text-gray-300 transition-colors p-1"
             >
               <X className="h-5 w-5" />
             </button>
