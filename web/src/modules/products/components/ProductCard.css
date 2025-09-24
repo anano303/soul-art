@@ -239,7 +239,8 @@
 
 /* Handmade theme button */
 .handmade-theme .addButtonCart {
-  background: linear-gradient(to left, var(--secondary-color));
+  background: var(--secondary-color);
+  background: linear-gradient(135deg, var(--secondary-color) 0%, #5a2a01 100%);
 }
 
 .handmade-theme .addButtonCart:hover:not(:disabled) {
