@@ -170,6 +170,33 @@ export function AdminOrderDetails({ order }: AdminOrderDetailsProps) {
     try {
       await apiClient.put(`/orders/${order._id}/deliver`);
       toast({ title: "Success", description: "Order marked as delivered" });
+
+      // Send delivery notification to the customer
+      try {
+        await fetch("/api/push/order-status", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+          body: JSON.stringify({
+            userId: order.user._id,
+            orderId: order._id,
+            status: "delivered",
+            customerName: order.user.ownerFirstName || order.user.email,
+            message: `🎉 თქვენი შეკვეთა #${order._id.slice(
+              -6
+            )} წარმატებით მიღებულია!`,
+          }),
+        });
+        console.log("✅ Order delivery notification sent");
+      } catch (notificationError) {
+        console.error(
+          "❌ Failed to send delivery notification:",
+          notificationError
+        );
+      }
+
       router.refresh();
     } catch (error: unknown) {
       console.error(error);

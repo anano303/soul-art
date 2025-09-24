@@ -28,10 +28,16 @@ export function PWAInstallPrompt() {
   const [showInstructions, setShowInstructions] = useState(false);
 
   useEffect(() => {
-    // Detect device type
+    // Detect device type - only show on mobile
     const userAgent = navigator.userAgent.toLowerCase();
     const iOS = /iphone|ipad|ipod/.test(userAgent);
     const android = /android/.test(userAgent);
+    const isMobile = iOS || android || /mobile/i.test(userAgent);
+
+    // Don't show install prompt if not mobile
+    if (!isMobile) {
+      return;
+    }
 
     setIsIOS(iOS);
     setIsAndroid(android);
@@ -55,8 +61,8 @@ export function PWAInstallPrompt() {
       ? (Date.now() - dismissedDate.getTime()) / (1000 * 60 * 60 * 24)
       : Infinity;
 
-    // Show prompt if not dismissed recently (7 days)
-    if (!dismissed || daysSinceDismissal > 7) {
+    // Show prompt if not dismissed recently (7 days) and is mobile
+    if (isMobile && (!dismissed || daysSinceDismissal > 7)) {
       // For Android devices, wait for beforeinstallprompt event
       if (android) {
         const handleBeforeInstallPrompt = (e: BeforeInstallPromptEvent) => {

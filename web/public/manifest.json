@@ -8,6 +8,7 @@
   "theme_color": "#012645",
   "orientation": "portrait-primary",
   "scope": "/",
+  "display_override": ["standalone", "minimal-ui"],
   "lang": "ka",
   "dir": "ltr",
   "categories": ["shopping", "art", "lifestyle"],

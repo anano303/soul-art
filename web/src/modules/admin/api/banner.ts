@@ -81,6 +81,39 @@ export async function createBanner(
     }
 
     const data = await response.json();
+
+    // Send discount notification if banner is active and has discount keywords
+    if (
+      bannerData.isActive &&
+      (bannerData.title.toLowerCase().includes("ფასდაკლება") ||
+        bannerData.title.toLowerCase().includes("discount") ||
+        bannerData.title.toLowerCase().includes("აქცია") ||
+        bannerData.title.toLowerCase().includes("sale") ||
+        bannerData.buttonText.toLowerCase().includes("ფასდაკლება") ||
+        bannerData.buttonText.toLowerCase().includes("discount"))
+    ) {
+      try {
+        await fetch("/api/push/discount", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+          body: JSON.stringify({
+            title: bannerData.title,
+            message: `🔥 ${bannerData.title} - ახალი ფასდაკლება დაემატა!`,
+            url: bannerData.buttonLink || "/",
+          }),
+        });
+        console.log("✅ Discount notification sent for new banner");
+      } catch (notificationError) {
+        console.error(
+          "❌ Failed to send discount notification:",
+          notificationError
+        );
+      }
+    }
+
     return { success: true, data };
   } catch (error) {
     console.error("Error creating banner:", error);

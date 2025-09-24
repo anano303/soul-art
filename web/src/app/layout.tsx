@@ -24,6 +24,7 @@ import { PWAInstallPrompt } from "@/components/pwa-install-prompt/pwa-install-pr
 import { NetworkStatus } from "@/components/network-status/network-status";
 import { PushNotificationManager } from "@/components/push-notifications/push-notifications";
 import { CacheManager } from "@/components/cache-manager/cache-manager";
+import PWAManager from "@/components/pwa-manager";
 import "@/lib/cloudflare-cleanup"; // Auto-cleanup Cloudflare cookies in development
 
 export const metadata: Metadata = {
@@ -179,19 +180,68 @@ export default function RootLayout({
 
         {/* Preload critical resources - only existing resources */}
 
-        {/* PWA Install Detection */}
+        {/* Conditional PWA Registration - Only for installed apps on mobile */}
         <script
           dangerouslySetInnerHTML={{
             __html: `
+              // PWA Detection Functions
+              function isRunningAsInstalledPWA() {
+                const isStandalone = window.matchMedia && window.matchMedia('(display-mode: standalone)').matches;
+                const isFullscreen = window.matchMedia && window.matchMedia('(display-mode: fullscreen)').matches;
+                const isMinimalUi = window.matchMedia && window.matchMedia('(display-mode: minimal-ui)').matches;
+                const isIOSStandalone = 'standalone' in window.navigator && window.navigator.standalone;
+                const isFromHomescreen = window.location.search.includes('utm_source=homescreen');
+                
+                return isStandalone || isFullscreen || isMinimalUi || isIOSStandalone || isFromHomescreen;
+              }
+
+              function isMobileDevice() {
+                const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+                const mobilePatterns = [/Android/i, /webOS/i, /iPhone/i, /iPad/i, /iPod/i, /BlackBerry/i, /Windows Phone/i, /Mobile/i];
+                return mobilePatterns.some(pattern => pattern.test(userAgent));
+              }
+
+              // Conditional Service Worker Registration
               if ('serviceWorker' in navigator) {
                 window.addEventListener('load', () => {
-                  navigator.serviceWorker.register('/sw.js')
-                    .then((registration) => {
-                      console.log('SW registered: ', registration);
-                    })
-                    .catch((registrationError) => {
-                      console.log('SW registration failed: ', registrationError);
+                  const isInstalled = isRunningAsInstalledPWA();
+                  const isMobile = isMobileDevice();
+                  const isProduction = '${process.env.NODE_ENV}' === 'production';
+                  
+                  if (isInstalled && isMobile && isProduction) {
+                    // Register service worker for installed PWA on mobile
+                    navigator.serviceWorker.register('/sw.js')
+                      .then((registration) => {
+                        console.log('SW registered for installed PWA: ', registration);
+                      })
+                      .catch((registrationError) => {
+                        console.log('SW registration failed: ', registrationError);
+                      });
+                  } else {
+                    // Unregister any existing service workers if conditions not met
+                    navigator.serviceWorker.getRegistrations().then(function(registrations) {
+                      for(let registration of registrations) {
+                        registration.unregister();
+                        console.log('SW unregistered - not running as installed PWA or not mobile');
+                      }
                     });
+                  }
+
+                  // Listen for display mode changes
+                  if (window.matchMedia) {
+                    const mediaQuery = window.matchMedia('(display-mode: standalone)');
+                    mediaQuery.addListener ? mediaQuery.addListener((e) => {
+                      if (e.matches && isMobile && isProduction) {
+                        console.log('App switched to standalone mode');
+                        navigator.serviceWorker.register('/sw.js');
+                      }
+                    }) : mediaQuery.addEventListener('change', (e) => {
+                      if (e.matches && isMobile && isProduction) {
+                        console.log('App switched to standalone mode');
+                        navigator.serviceWorker.register('/sw.js');
+                      }
+                    });
+                  }
                 });
               }
             `,
@@ -277,6 +327,9 @@ export default function RootLayout({
 
         {/* Push Notifications */}
         <PushNotificationManager />
+
+        {/* PWA Manager - Conditional PWA functionality */}
+        <PWAManager />
 
         {/* Cache Manager - მხოლოდ development-ში */}
         {process.env.NODE_ENV === "development" && (

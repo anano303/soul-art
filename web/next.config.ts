@@ -8,8 +8,8 @@ const nextConfig: NextConfig = {
       bodySizeLimit: "50mb",
     },
     // Optimize bundling and loading
-    optimizeCss: true,
-    optimizeServerReact: true,
+    optimizeCss: process.env.NODE_ENV === "production",
+    optimizeServerReact: process.env.NODE_ENV === "production",
   },
   // Optimize compilation
   compiler: {
@@ -49,11 +49,19 @@ const nextConfig: NextConfig = {
   output: "standalone",
   distDir: ".next",
   // Optimize bundle splitting
-  webpack: (config, { isServer }) => {
+  webpack: (config, { isServer, dev }) => {
     if (!isServer) {
       config.resolve.fallback = {
         ...config.resolve.fallback,
         fs: false,
+      };
+    }
+
+    // Improve Fast Refresh in development
+    if (dev) {
+      config.watchOptions = {
+        poll: 1000,
+        aggregateTimeout: 300,
       };
     }
 
@@ -104,10 +112,15 @@ const nextConfig: NextConfig = {
 
 export default withPWA({
   dest: "public",
-  register: true,
-  skipWaiting: true,
-  disable: false, // PWA ყოველთვის ჩართული
+  register: false, // Manual registration only when installed
+  skipWaiting: false, // Don't auto-activate, let user control
+  disable: process.env.NODE_ENV === "development", // PWA გამორთული development-ში
   sw: "sw.js",
+  // Prevent multiple service worker generation in development
+  ...(process.env.NODE_ENV === "development" && {
+    generateSW: false,
+    generateInDevMode: false,
+  }),
   runtimeCaching: [
     // API calls - always try network first, short cache
     {

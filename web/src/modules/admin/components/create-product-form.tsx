@@ -617,7 +617,7 @@ export function CreateProductForm({
 
       // With HTTP-only cookies, no need to check token manually
       // Server will handle authentication automatically
-      
+
       const formDataToSend = new FormData();
 
       // Add basic form fields
@@ -786,6 +786,33 @@ export function CreateProductForm({
           : t("adminProducts.productCreatedToast"),
         description: t("adminProducts.successTitle"),
       });
+
+      // Send new product notification for new products only
+      if (!isEdit && data?._id) {
+        try {
+          await fetch("/api/push/new-product", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            credentials: "include",
+            body: JSON.stringify({
+              productId: data._id,
+              productName: formData.name,
+              productPrice: formData.price,
+              productImage: data.images?.[0] || null,
+              category: selectedCategory,
+              subCategory: selectedSubcategory,
+            }),
+          });
+          console.log("✅ New product notification sent:", formData.name);
+        } catch (notificationError) {
+          console.error(
+            "❌ Failed to send new product notification:",
+            notificationError
+          );
+        }
+      }
 
       if (!isEdit) {
         resetForm();
