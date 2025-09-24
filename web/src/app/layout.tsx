@@ -22,6 +22,7 @@ import GoogleAnalytics from "@/components/GoogleAnalytics";
 import { FloatingCartIcon } from "@/components/floating-cart-icon/floating-cart-icon";
 import { PWAInstallPrompt } from "@/components/pwa-install-prompt/pwa-install-prompt";
 import { NetworkStatus } from "@/components/network-status/network-status";
+import { PushNotificationManager } from "@/components/push-notifications/push-notifications";
 import "@/lib/cloudflare-cleanup"; // Auto-cleanup Cloudflare cookies in development
 
 export const metadata: Metadata = {
@@ -272,6 +273,9 @@ export default function RootLayout({
 
         {/* PWA Install Prompt */}
         <PWAInstallPrompt />
+
+        {/* Push Notifications */}
+        <PushNotificationManager />
 
         {/* Google Analytics */}
         <GoogleAnalytics />

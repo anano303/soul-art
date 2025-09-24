@@ -1,0 +1,196 @@
+/* Push Notifications Prompt Styles */
+.push-notification-prompt {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  right: 20px;
+  z-index: 9999;
+  font-family: var(--font-firago), sans-serif;
+  animation: slideUpNotification 0.4s ease-out;
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+@media (min-width: 768px) {
+  .push-notification-prompt {
+    left: auto;
+    right: 20px;
+    bottom: 20px;
+    margin: 0;
+  }
+}
+
+.push-prompt-content {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.98),
+    rgba(248, 249, 250, 0.98)
+  );
+  backdrop-filter: blur(12px);
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(1, 38, 69, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.push-icon {
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.bell-icon {
+  font-size: 2.5rem;
+  animation: bellRing 2s ease-in-out infinite;
+}
+
+@keyframes bellRing {
+  0%,
+  50%,
+  100% {
+    transform: rotate(0deg);
+  }
+  10%,
+  30% {
+    transform: rotate(-10deg);
+  }
+  20%,
+  40% {
+    transform: rotate(10deg);
+  }
+}
+
+.push-text h3 {
+  color: var(--primary-color, #012645);
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin: 0 0 0.75rem 0;
+  text-align: center;
+}
+
+.push-text p {
+  color: #6b7280;
+  font-size: 0.925rem;
+  line-height: 1.5;
+  margin: 0 0 1.25rem 0;
+  text-align: center;
+}
+
+.notification-types {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.notification-type {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  background: rgba(1, 38, 69, 0.05);
+  border-radius: 8px;
+  border: 1px solid rgba(1, 38, 69, 0.1);
+  font-size: 0.875rem;
+  color: #374151;
+}
+
+.type-icon {
+  font-size: 1.25rem;
+  flex-shrink: 0;
+}
+
+.push-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.push-allow-btn {
+  background: linear-gradient(135deg, var(--primary-color, #012645), #01456b);
+  color: white;
+  border: none;
+  padding: 1rem 1.5rem;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: inherit;
+  box-shadow: 0 4px 15px rgba(1, 38, 69, 0.3);
+}
+
+.push-allow-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(1, 38, 69, 0.4);
+  background: linear-gradient(135deg, #01456b, var(--primary-color, #012645));
+}
+
+.push-dismiss-btn {
+  background: transparent;
+  color: #6b7280;
+  border: 1px solid #e5e7eb;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 500;
+  font-size: 0.925rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: inherit;
+}
+
+.push-dismiss-btn:hover {
+  background: #f3f4f6;
+  border-color: #d1d5db;
+  color: #374151;
+}
+
+@keyframes slideUpNotification {
+  from {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Mobile responsive */
+@media (max-width: 640px) {
+  .push-notification-prompt {
+    left: 10px;
+    right: 10px;
+    bottom: 10px;
+  }
+
+  .push-prompt-content {
+    padding: 1.25rem;
+  }
+
+  .push-text h3 {
+    font-size: 1.125rem;
+  }
+
+  .push-text p {
+    font-size: 0.875rem;
+  }
+
+  .notification-type {
+    padding: 0.625rem;
+    font-size: 0.8rem;
+  }
+
+  .type-icon {
+    font-size: 1.125rem;
+  }
+
+  .push-allow-btn {
+    padding: 0.875rem 1.25rem;
+    font-size: 0.925rem;
+  }
+
+  .push-dismiss-btn {
+    padding: 0.625rem 1.25rem;
+    font-size: 0.875rem;
+  }
+}
