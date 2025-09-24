@@ -2,14 +2,12 @@
 
 import { useState, useEffect } from "react";
 import "./push-notifications.css";
-import PushTestPanel from "../push-test-panel/push-test-panel";
 
 export function PushNotificationManager() {
   const [permission, setPermission] =
     useState<NotificationPermission>("default");
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [showPermissionPrompt, setShowPermissionPrompt] = useState(false);
-  const [showTestPanel, setShowTestPanel] = useState(false);
 
   useEffect(() => {
     // Check current permission status
@@ -174,42 +172,10 @@ export function PushNotificationManager() {
             </button>
           </div>
 
-          {/* Admin Test Panel - Only in development */}
-          {process.env.NODE_ENV === "development" && (
-            <div
-              style={{
-                marginTop: "1rem",
-                paddingTop: "1rem",
-                borderTop: "1px solid #e5e7eb",
-              }}
-            >
-              <button
-                onClick={() => setShowTestPanel(true)}
-                style={{
-                  width: "100%",
-                  padding: "0.75rem",
-                  backgroundColor: "#8b5cf6",
-                  color: "white",
-                  border: "none",
-                  borderRadius: "8px",
-                  fontSize: "0.875rem",
-                  fontWeight: "600",
-                  cursor: "pointer",
-                  fontFamily: "inherit",
-                }}
-              >
-                🧪 Admin: ტესტური შეტყობინებები
-              </button>
-            </div>
-          )}
+
         </div>
       </div>
 
-      {/* Test Panel */}
-      <PushTestPanel
-        isOpen={showTestPanel}
-        onClose={() => setShowTestPanel(false)}
-      />
     </>
   );
 }
