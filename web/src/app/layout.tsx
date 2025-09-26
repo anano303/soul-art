@@ -19,6 +19,7 @@ import {
   storeSchema,
 } from "@/lib/structured-data";
 import GoogleAnalytics from "@/components/GoogleAnalytics";
+import VercelAnalytics from "@/components/VercelAnalytics";
 import { FloatingCartIcon } from "@/components/floating-cart-icon/floating-cart-icon";
 import { PWAInstallPrompt } from "@/components/pwa-install-prompt/pwa-install-prompt";
 import { NetworkStatus } from "@/components/network-status/network-status";
@@ -29,7 +30,7 @@ import "@/lib/cloudflare-cleanup"; // Auto-cleanup Cloudflare cookies in develop
 
 export const metadata: Metadata = {
   metadataBase: new URL(
-    process.env.NEXT_PUBLIC_CLIENT_URL || "https://Soulart.ge"
+    process.env.NEXT_PUBLIC_CLIENT_URL || "https://soulart.ge"
   ),
   title:
     "Soulart - ნახატების და ხელნაკეთი ნივთების პირველი ონლაინ პლატფორმა   საქართველოში",
@@ -41,7 +42,22 @@ export const metadata: Metadata = {
     "ხელოვნება",
     "ნამუშევრები",
     "მაღაზია",
+    "პირველი ონლაინ პლატფორმა",
+    "Georgia",
+    "handmade items",
+    "პირველი ნახატების ონლაინ პლატფორმა",
+    "პირველი ხელნაკეთი ნივთების ონლაინ პლატფორმა",
+    "first online platform for paintings",
+    "first online platform for handmade items",
     "Soulart",
+    "სოულარტ",
+    "სოულარტი",
+    "სოულართი",
+    "სოულართ",
+    "soul art",
+    "soulart",
+    "soul",
+    "soul-art",
     "საქართველო",
     "handmade",
     "paintings",
@@ -272,6 +288,9 @@ export default function RootLayout({
 
         {/* Google Analytics */}
         <GoogleAnalytics />
+
+        {/* Vercel Analytics - ვიზიტორების ტრაფიკი და Performance */}
+        <VercelAnalytics />
 
         {/* Toast notifications */}
         <Toaster />
