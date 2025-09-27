@@ -19,7 +19,7 @@ export const cookieConfig: Record<string, CookieConfig> = {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
-      maxAge: 10 * 60 * 1000, // 10 minutes
+      maxAge: 60 * 60 * 1000, // 1 hour
       path: '/',
     },
   },
@@ -29,7 +29,7 @@ export const cookieConfig: Record<string, CookieConfig> = {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
       path: '/',
     },
   },
