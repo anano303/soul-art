@@ -76,12 +76,13 @@ export class AuthController {
   @UseInterceptors(createRateLimitInterceptor(authRateLimit))
   @Post('login')
   async login(
-    @Body() loginDto: LoginDto,
+    @Body() body: LoginDto & { deviceInfo?: { fingerprint?: string; userAgent?: string; trusted?: boolean } },
     @Res({ passthrough: true }) res: Response,
+    @Req() req: Request,
   ) {
     const user = await this.authService.validateUser(
-      loginDto.email,
-      loginDto.password,
+      body.email,
+      body.password,
     );
 
     let profileImage = null;
@@ -91,7 +92,14 @@ export class AuthController {
       );
     }
 
-    const { tokens, user: userData } = await this.authService.login(user);
+    // Extract device info from request body or generate from request
+    const deviceInfo = {
+      fingerprint: body.deviceInfo?.fingerprint || this.generateDeviceFingerprint(req),
+      userAgent: body.deviceInfo?.userAgent || req.headers['user-agent'] || '',
+      trusted: body.deviceInfo?.trusted || false,
+    };
+
+    const { tokens, user: userData } = await this.authService.login(user, deviceInfo);
 
     // Set HTTP-only cookies instead of returning tokens in response
     res.cookie(
