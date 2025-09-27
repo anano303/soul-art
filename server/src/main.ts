@@ -16,14 +16,10 @@ async function bootstrap() {
     logger: ['error', 'warn', 'debug', 'log', 'verbose'],
   });
 
-  // Configure express middleware for larger file uploads
-  app.use(express.json({ limit: '50mb' }));
-  app.use(express.urlencoded({ limit: '50mb', extended: true }));
-  app.use(express.raw({ limit: '50mb' }));
+  // IMPORTANT: Trust proxy must be set FIRST
+  app.set('trust proxy', 1); // Trust first proxy
 
-  app.use(helmet());
-  app.use(apiRateLimit); // Apply global rate limiting
-  app.use(cookieParser());
+  // CORS must be enabled BEFORE other middleware
   app.enableCors({
     origin: (origin, callback) => {
       const allowedOrigins = [
@@ -79,6 +75,20 @@ async function bootstrap() {
     preflightContinue: false,
     optionsSuccessStatus: 204,
   });
+
+  // Configure express middleware for larger file uploads (after CORS)
+  app.use(express.json({ limit: '50mb' }));
+  app.use(express.urlencoded({ limit: '50mb', extended: true }));
+  app.use(express.raw({ limit: '50mb' }));
+
+  // Security middleware (configured to work with CORS)
+  app.use(helmet({
+    crossOriginEmbedderPolicy: false, // Disable COEP for CORS compatibility
+    crossOriginResourcePolicy: { policy: "cross-origin" }, // Allow cross-origin requests
+    contentSecurityPolicy: false, // Disable CSP for development
+  }));
+  app.use(apiRateLimit); // Apply global rate limiting
+  app.use(cookieParser());
 
   app.enableVersioning({
     type: VersioningType.URI,

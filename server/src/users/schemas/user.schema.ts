@@ -31,16 +31,17 @@ export class User {
   @Prop()
   updatedAt?: Date;
 
+  // Legacy fields - keep for backward compatibility during migration
   @Prop({ type: String, default: null })
   refreshToken?: string | null;
 
-  // Session and device tracking for hybrid auth
   @Prop({ type: String, default: null })
   sessionId?: string;
 
   @Prop({ type: Date, default: Date.now })
   lastActivity?: Date;
 
+  // Enhanced device tracking with per-device tokens
   @Prop({
     type: [{
       fingerprint: { type: String, required: true },
@@ -48,6 +49,9 @@ export class User {
       lastSeen: { type: Date, default: Date.now },
       trusted: { type: Boolean, default: false },
       sessionId: { type: String, required: true },
+      refreshToken: { type: String, required: true }, // Per-device refresh token
+      refreshTokenJti: { type: String, required: true }, // JTI for validation
+      isActive: { type: Boolean, default: true }, // Can revoke individual devices
     }],
     default: []
   })
@@ -57,6 +61,9 @@ export class User {
     lastSeen: Date;
     trusted: boolean;
     sessionId: string;
+    refreshToken: string;
+    refreshTokenJti: string;
+    isActive: boolean;
   }>;
 
   // 👇 **ეს ველები მხოლოდ Seller-ს დასჭირდება, ამიტომ `required: false` ვუტოვებთ**

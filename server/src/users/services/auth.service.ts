@@ -184,15 +184,15 @@ export class AuthService {
       ),
     ]);
 
-    // Update user with new token info and device tracking
-    const updateData: any = {
-      refreshToken: jti,
+    // Update user with global session info (for backward compatibility)
+    const globalUpdateData: any = {
+      refreshToken: jti, // Keep for legacy support
       sessionId,
       lastActivity: new Date(),
     };
 
-    // Handle device info if provided
-    if (deviceInfo) {
+    // Handle device info if provided - store per-device tokens
+    if (deviceInfo?.fingerprint) {
       // Check if device already exists
       const existingUser = await this.userModel.findById(user._id);
       const existingDevice = existingUser?.knownDevices?.find(
@@ -200,7 +200,7 @@ export class AuthService {
       );
 
       if (existingDevice) {
-        // Update existing device
+        // Update existing device with new tokens
         await this.userModel.findOneAndUpdate(
           { 
             _id: user._id,
@@ -208,30 +208,38 @@ export class AuthService {
           },
           {
             $set: {
-              ...updateData,
+              ...globalUpdateData,
               'knownDevices.$.userAgent': deviceInfo.userAgent,
               'knownDevices.$.lastSeen': new Date(),
               'knownDevices.$.trusted': deviceInfo.trusted || existingDevice.trusted,
               'knownDevices.$.sessionId': sessionId,
+              'knownDevices.$.refreshToken': refreshToken,
+              'knownDevices.$.refreshTokenJti': jti,
+              'knownDevices.$.isActive': true,
             }
           }
         );
       } else {
-        // Add new device
-        updateData.$push = {
-          knownDevices: {
-            fingerprint: deviceInfo.fingerprint,
-            userAgent: deviceInfo.userAgent,
-            lastSeen: new Date(),
-            trusted: deviceInfo.trusted || false,
-            sessionId,
+        // Add new device with its own tokens
+        await this.userModel.findByIdAndUpdate(user._id, {
+          ...globalUpdateData,
+          $push: {
+            knownDevices: {
+              fingerprint: deviceInfo.fingerprint,
+              userAgent: deviceInfo.userAgent,
+              lastSeen: new Date(),
+              trusted: deviceInfo.trusted || false,
+              sessionId,
+              refreshToken,
+              refreshTokenJti: jti,
+              isActive: true,
+            }
           }
-        };
-        await this.userModel.findByIdAndUpdate(user._id, updateData);
+        });
       }
     } else {
-      // No device info, just update tokens
-      await this.userModel.findByIdAndUpdate(user._id, updateData);
+      // No device info, just update global tokens (legacy mode)
+      await this.userModel.findByIdAndUpdate(user._id, globalUpdateData);
     }
 
     return {
@@ -258,48 +266,95 @@ export class AuthService {
       }
 
       const user = await this.userModel.findById(payload.sub);
-      if (!user || !user.refreshToken) {
+      if (!user) {
         throw new UnauthorizedException();
       }
 
-      if (user.refreshToken !== payload.jti) {
-        throw new UnauthorizedException('Invalid refresh token');
-      }
-
-      // Check if device is trusted for extended session
+      // Try to find the device-specific refresh token first
+      let validDevice = null;
       let deviceTrusted = false;
+      
       if (deviceInfo?.fingerprint) {
-        const knownDevice = user.knownDevices?.find(
-          device => device.fingerprint === deviceInfo.fingerprint
+        validDevice = user.knownDevices?.find(
+          device => device.fingerprint === deviceInfo.fingerprint && 
+                   device.refreshTokenJti === payload.jti &&
+                   device.isActive
         );
-        deviceTrusted = knownDevice?.trusted || false;
+        deviceTrusted = validDevice?.trusted || false;
       }
 
-      // Generate new tokens with device context (token rotation)
-      return this.generateTokens(user, { 
-        ...deviceInfo, 
-        trusted: deviceTrusted 
-      });
+      // Fallback to global refresh token for backward compatibility
+      if (!validDevice && user.refreshToken === payload.jti) {
+        console.log('🔄 Using legacy global refresh token');
+        // Generate new tokens with device context (token rotation)
+        return this.generateTokens(user, { 
+          ...deviceInfo, 
+          trusted: deviceTrusted 
+        });
+      }
+
+      // If device-specific token found, use it
+      if (validDevice) {
+        console.log('🔄 Using device-specific refresh token');
+        // Generate new tokens with device context (token rotation)
+        return this.generateTokens(user, { 
+          ...deviceInfo, 
+          trusted: deviceTrusted 
+        });
+      }
+
+      throw new UnauthorizedException('Invalid refresh token');
     } catch {
       throw new UnauthorizedException();
     }
   }
 
-  async logout(userId: string, sessionId?: string): Promise<void> {
-    const updateData: any = { refreshToken: null };
-    
-    if (sessionId) {
-      // Remove specific session/device
-      updateData.$pull = {
-        knownDevices: { sessionId }
-      };
+  async logout(userId: string, deviceInfo?: { fingerprint?: string; sessionId?: string }): Promise<void> {
+    if (deviceInfo?.fingerprint) {
+      // Logout specific device only
+      await this.userModel.findOneAndUpdate(
+        { 
+          _id: userId,
+          'knownDevices.fingerprint': deviceInfo.fingerprint 
+        },
+        {
+          $set: { 
+            'knownDevices.$.isActive': false,
+            'knownDevices.$.refreshToken': null,
+            'knownDevices.$.refreshTokenJti': null,
+          }
+        }
+      );
+      console.log(`🚪 Device ${deviceInfo.fingerprint} logged out`);
+    } else if (deviceInfo?.sessionId) {
+      // Logout by session ID
+      await this.userModel.findOneAndUpdate(
+        { 
+          _id: userId,
+          'knownDevices.sessionId': deviceInfo.sessionId 
+        },
+        {
+          $set: { 
+            'knownDevices.$.isActive': false,
+            'knownDevices.$.refreshToken': null,
+            'knownDevices.$.refreshTokenJti': null,
+          }
+        }
+      );
+      console.log(`🚪 Session ${deviceInfo.sessionId} logged out`);
     } else {
-      // Full logout - clear all sessions and devices
-      updateData.knownDevices = [];
-      updateData.sessionId = null;
+      // Full logout - deactivate all devices but keep them for history
+      await this.userModel.findByIdAndUpdate(userId, {
+        refreshToken: null,
+        sessionId: null,
+        $set: {
+          'knownDevices.$[].isActive': false,
+          'knownDevices.$[].refreshToken': null,
+          'knownDevices.$[].refreshTokenJti': null,
+        }
+      });
+      console.log(`🚪 Full logout for user ${userId} - all devices deactivated`);
     }
-
-    await this.userModel.findByIdAndUpdate(userId, updateData);
   }
 
   // Method to trust a device for extended sessions
@@ -314,6 +369,8 @@ export class AuthService {
       }
     );
   }
+
+
 
   // Method to trust device and generate new tokens atomically
   async trustDeviceAndGenerateTokens(user: UserDocument, deviceFingerprint: string, userAgent: string): Promise<TokensDto> {

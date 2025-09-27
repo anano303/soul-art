@@ -203,9 +203,20 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   async logout(
     @CurrentUser() user: UserDocument,
+    @Body() body: { deviceInfo?: { fingerprint?: string; logoutAllDevices?: boolean } },
+    @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
   ) {
-    await this.authService.logout(user._id.toString());
+    // Extract device fingerprint for per-device logout
+    const deviceFingerprint = body.deviceInfo?.fingerprint || this.generateDeviceFingerprint(req);
+    
+    if (body.deviceInfo?.logoutAllDevices) {
+      // Full logout from all devices
+      await this.authService.logout(user._id.toString());
+    } else {
+      // Logout only current device
+      await this.authService.logout(user._id.toString(), { fingerprint: deviceFingerprint });
+    }
 
     // Clear HTTP-only cookies
     res.clearCookie(cookieConfig.access.name, {
@@ -217,7 +228,10 @@ export class AuthController {
       maxAge: 0,
     });
 
-    return { success: true };
+    return { 
+      success: true,
+      message: body.deviceInfo?.logoutAllDevices ? 'Logged out from all devices' : 'Logged out from current device'
+    };
   }
 
   @Get('devices')

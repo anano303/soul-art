@@ -1,4 +1,4 @@
-import { storeUserData } from "@/lib/auth";
+import { storeUserData, getDeviceFingerprint } from "@/lib/auth";
 
 export type LoginData = {
   email: string;
@@ -9,13 +9,23 @@ export async function login(data: LoginData) {
   try {
     console.log('🔑 Attempting login...');
     
+    // Prepare login data with device info for multi-device support
+    const loginPayload = {
+      ...data,
+      deviceInfo: {
+        fingerprint: getDeviceFingerprint(),
+        userAgent: navigator.userAgent,
+        trusted: false, // Will be set to true when user explicitly trusts device
+      }
+    };
+    
     // Use fetch directly to avoid interceptors during login
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/login`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(data),
+      body: JSON.stringify(loginPayload),
       credentials: 'include',
     });
     

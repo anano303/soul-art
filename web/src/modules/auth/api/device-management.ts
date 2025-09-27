@@ -7,6 +7,9 @@ export interface Device {
   lastSeen: Date;
   trusted: boolean;
   sessionId: string;
+  refreshToken?: string;
+  refreshTokenJti?: string;
+  isActive?: boolean; // Added for backend compatibility
 }
 
 // Get user's trusted devices
