@@ -8,7 +8,6 @@ import { Role } from "@/types/role";
 import { useAuth } from "@/hooks/use-auth";
 import { useLanguage } from "@/hooks/LanguageContext";
 import {
-  ChevronDown,
   X,
   User,
   ShoppingBag,
@@ -18,7 +17,6 @@ import {
   Settings,
   DollarSign,
   LogOut,
-  Theater,
   Gift,
 } from "lucide-react";
 
@@ -307,7 +305,7 @@ export default function UserMenu({ onNavigate }: { onNavigate?: () => void }) {
               onClick={() => {
                 handleClose();
                 onNavigate?.();
-                logout();
+                logout(undefined, undefined);
               }}
               className="dropdown-item logout-button"
             >
