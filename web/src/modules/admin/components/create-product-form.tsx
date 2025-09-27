@@ -56,7 +56,7 @@ export function CreateProductForm({
 }: CreateProductFormProps) {
   const { language, t } = useLanguage();
   const router = useRouter();
-  const { user } = useUser();
+  const { user, isLoading: userLoading } = useUser();
   const isSeller =
     user?.role?.toLowerCase() === "seller" ||
     user?.role === "Seller" ||
@@ -110,6 +110,32 @@ export function CreateProductForm({
   const [pending, setPending] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+
+  // Authorization check - redirect if not authenticated or not authorized
+  useEffect(() => {
+    if (!userLoading && !user) {
+      toast({
+        title: language === "en" ? "Access Denied" : "წვდომა აკრძალულია",
+        description:
+          language === "en"
+            ? "You must be logged in to access this page"
+            : "ამ გვერდზე შესასვლელად საჭიროა ავტორიზაცია",
+        variant: "destructive",
+      });
+      router.push("/auth/login");
+    } else if (user && !isSeller && user.role?.toLowerCase() !== "admin") {
+      toast({
+        title: language === "en" ? "Access Denied" : "წვდომა აკრძალულია",
+        description:
+          language === "en"
+            ? "You don't have permission to access this page"
+            : "თქვენ არ გაქვთ ამ გვერდზე წვდომის ნებართვა",
+        variant: "destructive",
+      });
+      router.push("/");
+    }
+  }, [user, userLoading, router, language, toast, isSeller]);
 
   // Fetch categories
   const { data: categories, isLoading: isCategoriesLoading } = useQuery<
@@ -374,6 +400,12 @@ export function CreateProductForm({
     setDeliveryType("SoulArt");
     setMinDeliveryDays("");
     setMaxDeliveryDays("");
+    setDiscountPercentage("");
+    setDiscountStartDate("");
+    setDiscountEndDate("");
+
+    // Clear saved form data when resetting
+    clearFormFromStorage();
   };
   const validateField = (field: keyof ProductFormData, value: unknown) => {
     // All validation is handled with translation keys for consistent language support
@@ -499,6 +531,158 @@ export function CreateProductForm({
 
   // Add state for hashtags input text
   const [hashtagsInput, setHashtagsInput] = useState<string>("");
+
+  // Form data persistence key
+  const FORM_DATA_KEY = `product-form-${isEdit ? formData._id : "new"}`;
+
+  // Save form data to localStorage
+  const saveFormToStorage = (data: typeof formData) => {
+    try {
+      const formDataToSave = {
+        ...data,
+        // Convert File objects to null for localStorage (can't serialize File objects)
+        images: data.images.map((img) =>
+          typeof img === "string" ? img : null
+        ),
+        brandLogo: typeof data.brandLogo === "string" ? data.brandLogo : null,
+        // Include additional state
+        selectedCategory,
+        selectedSubcategory,
+        selectedAgeGroups,
+        selectedSizes,
+        selectedColors,
+        hashtagsInput,
+        deliveryType,
+        minDeliveryDays,
+        maxDeliveryDays,
+        discountPercentage,
+        discountStartDate,
+        discountEndDate,
+      };
+      localStorage.setItem(FORM_DATA_KEY, JSON.stringify(formDataToSave));
+    } catch (error) {
+      console.error("Error saving form to localStorage:", error);
+    }
+  };
+
+  // Load form data from localStorage
+  const loadFormFromStorage = () => {
+    try {
+      const savedData = localStorage.getItem(FORM_DATA_KEY);
+      if (savedData && !initialData) {
+        const parsedData = JSON.parse(savedData);
+
+        // Restore form data
+        setFormData((prev) => ({
+          ...prev,
+          ...parsedData,
+          // Filter out null images (File objects can't be restored)
+          images:
+            parsedData.images?.filter(
+              (img: string | null) => typeof img === "string"
+            ) || [],
+          brandLogo: parsedData.brandLogo || undefined,
+        }));
+
+        // Restore additional state
+        if (parsedData.selectedCategory)
+          setSelectedCategory(parsedData.selectedCategory);
+        if (parsedData.selectedSubcategory)
+          setSelectedSubcategory(parsedData.selectedSubcategory);
+        if (parsedData.selectedAgeGroups)
+          setSelectedAgeGroups(parsedData.selectedAgeGroups);
+        if (parsedData.selectedSizes)
+          setSelectedSizes(parsedData.selectedSizes);
+        if (parsedData.selectedColors)
+          setSelectedColors(parsedData.selectedColors);
+        if (parsedData.hashtagsInput)
+          setHashtagsInput(parsedData.hashtagsInput);
+        if (parsedData.deliveryType) setDeliveryType(parsedData.deliveryType);
+        if (parsedData.minDeliveryDays)
+          setMinDeliveryDays(parsedData.minDeliveryDays);
+        if (parsedData.maxDeliveryDays)
+          setMaxDeliveryDays(parsedData.maxDeliveryDays);
+        if (parsedData.discountPercentage)
+          setDiscountPercentage(parsedData.discountPercentage);
+        if (parsedData.discountStartDate)
+          setDiscountStartDate(parsedData.discountStartDate);
+        if (parsedData.discountEndDate)
+          setDiscountEndDate(parsedData.discountEndDate);
+
+        console.log("Form data restored from localStorage");
+      }
+    } catch (error) {
+      console.error("Error loading form from localStorage:", error);
+    }
+  };
+
+  // Clear saved form data
+  const clearFormFromStorage = () => {
+    try {
+      localStorage.removeItem(FORM_DATA_KEY);
+    } catch (error) {
+      console.error("Error clearing form from localStorage:", error);
+    }
+  };
+
+  // Load saved form data on component mount (only for new products)
+  useEffect(() => {
+    if (!isEdit) {
+      const savedData = localStorage.getItem(FORM_DATA_KEY);
+      if (savedData) {
+        try {
+          const parsedData = JSON.parse(savedData);
+          if (parsedData.name || parsedData.description) {
+            toast({
+              title:
+                language === "en"
+                  ? "Form Data Restored"
+                  : "ფორმის მონაცემები აღდგენილია",
+              description:
+                language === "en"
+                  ? "Your previously entered data has been restored"
+                  : "თქვენი წინათ შეყვანილი მონაცემები აღდგენილია",
+            });
+          }
+        } catch (error) {
+          console.error("Error parsing saved form data:", error);
+        }
+      }
+      loadFormFromStorage();
+    }
+  }, [isEdit, language, toast]);
+
+  // Save form data whenever it changes (debounced)
+  useEffect(() => {
+    if (!isEdit && formData.name) {
+      // Only save if there's meaningful data
+      setIsSaving(true);
+      const timeoutId = setTimeout(() => {
+        saveFormToStorage(formData);
+        setIsSaving(false);
+      }, 1000); // Debounce for 1 second
+
+      return () => {
+        clearTimeout(timeoutId);
+        setIsSaving(false);
+      };
+    }
+  }, [
+    formData,
+    selectedCategory,
+    selectedSubcategory,
+    selectedAgeGroups,
+    selectedSizes,
+    selectedColors,
+    hashtagsInput,
+    deliveryType,
+    minDeliveryDays,
+    maxDeliveryDays,
+    discountPercentage,
+    discountStartDate,
+    discountEndDate,
+    isEdit,
+  ]);
 
   // Hashtags handling functions
   const handleHashtagsChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -780,6 +964,23 @@ export function CreateProductForm({
       );
 
       if (!response.ok) {
+        // Handle authentication errors
+        if (response.status === 401 || response.status === 403) {
+          toast({
+            title:
+              language === "en"
+                ? "Authentication Required"
+                : "ავტორიზაცია საჭიროა",
+            description:
+              language === "en"
+                ? "Your session has expired. Please log in again."
+                : "თქვენი სესია ამოიწურა. გთხოვთ ხელახლა შეხვიდეთ სისტემაში.",
+            variant: "destructive",
+          });
+          router.push("/auth/login");
+          return;
+        }
+
         let errorMessage = t("adminProducts.createUpdateError");
         try {
           const errorData = await response.json();
@@ -829,6 +1030,9 @@ export function CreateProductForm({
           );
         }
       }
+
+      // Clear saved form data on successful submission
+      clearFormFromStorage();
 
       if (!isEdit) {
         resetForm();
@@ -907,10 +1111,61 @@ export function CreateProductForm({
     };
   }, []);
 
+  // Warn user before leaving page with unsaved data
+  useEffect(() => {
+    const hasUnsavedData =
+      !isEdit &&
+      (formData.name ||
+        formData.description ||
+        formData.images.length > 0 ||
+        selectedCategory ||
+        selectedSubcategory);
+
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (hasUnsavedData && !success) {
+        e.preventDefault();
+        e.returnValue =
+          language === "en"
+            ? "You have unsaved changes. Are you sure you want to leave?"
+            : "თქვენ გაქვთ შეუნახავი ცვლილებები. დარწმუნებული ხართ რომ გსურთ გვერდის დატოვება?";
+      }
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, [
+    formData,
+    selectedCategory,
+    selectedSubcategory,
+    isEdit,
+    success,
+    language,
+  ]);
+
   const { stocks, totalCount, setStockCount } = useStocks({
     initialData,
     attributes: [selectedAgeGroups, selectedSizes, selectedColors],
   });
+
+  // Don't render form if user is not authenticated and still loading
+  if (userLoading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <Loader2 className="h-8 w-8 animate-spin" />
+        <span className="ml-2">
+          {language === "en" ? "Loading..." : "იტვირთება..."}
+        </span>
+      </div>
+    );
+  }
+
+  // Don't render form if user is not authenticated or not authorized
+  if (!user || (!isSeller && user.role?.toLowerCase() !== "admin")) {
+    return null; // Component will redirect via useEffect
+  }
 
   return (
     <div className="create-product-form">
@@ -919,6 +1174,52 @@ export function CreateProductForm({
           <p className="text-center">{success}</p>
         </div>
       )}
+
+      {/* Auto-save indicator and clear button */}
+      {!isEdit && (
+        <div className="mb-4 flex items-center justify-between">
+          <div className="flex items-center space-x-2">
+            {isSaving && (
+              <div className="flex items-center text-sm text-blue-600">
+                <Loader2 className="h-3 w-3 animate-spin mr-1" />
+                {language === "en" ? "Saving..." : "ინახება..."}
+              </div>
+            )}
+            {!isSaving && formData.name && (
+              <div className="text-sm text-green-600">
+                ✓ {language === "en" ? "Auto-saved" : "ავტო-შენახვა"}
+              </div>
+            )}
+          </div>
+          <button
+            type="button"
+            onClick={() => {
+              if (
+                window.confirm(
+                  language === "en"
+                    ? "Are you sure you want to clear all form data?"
+                    : "დარწმუნებული ხართ რომ გსურთ ფორმის მონაცემების გასუფთავება?"
+                )
+              ) {
+                resetForm();
+                toast({
+                  title: language === "en" ? "Form Cleared" : "ფორმა გაიწმინდა",
+                  description:
+                    language === "en"
+                      ? "All form data has been cleared"
+                      : "ფორმის ყველა მონაცემი გაიწმინდა",
+                });
+              }
+            }}
+            className="text-sm text-gray-500 hover:text-gray-700 underline"
+          >
+            {language === "en"
+              ? "Clear saved form data"
+              : "შენახული მონაცემების გასუფთავება"}
+          </button>
+        </div>
+      )}
+
       <form onSubmit={handleSubmit} className="space-y-4">
         {serverError && (
           <div className="server-error">
