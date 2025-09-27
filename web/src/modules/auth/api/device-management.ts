@@ -1,5 +1,5 @@
-import { fetchWithAuth } from "@/lib/fetch-with-auth-cookies";
-import { getDeviceFingerprint } from "@/lib/auth-cookies";
+import { apiClient } from "@/lib/axios";
+import { getDeviceFingerprint } from "@/lib/auth";
 
 export interface Device {
   fingerprint: string;
@@ -15,9 +15,8 @@ export interface Device {
 // Get user's trusted devices
 export async function getUserDevices(): Promise<Device[]> {
   try {
-    const response = await fetchWithAuth('/auth/devices');
-    const data = await response.json();
-    return data.devices || [];
+    const response = await apiClient.get('/auth/devices');
+    return response.data.devices || [];
   } catch (error) {
     console.error('Failed to get user devices:', error);
     return [];
@@ -27,20 +26,13 @@ export async function getUserDevices(): Promise<Device[]> {
 // Trust current device for extended sessions
 export async function trustCurrentDevice(): Promise<boolean> {
   try {
-    const response = await fetchWithAuth('/auth/devices/trust', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        deviceInfo: {
-          fingerprint: getDeviceFingerprint()
-        }
-      })
+    const response = await apiClient.post('/auth/devices/trust', {
+      deviceInfo: {
+        fingerprint: getDeviceFingerprint()
+      }
     });
-    const data = await response.json();
     
-    if (data.success) {
+    if (response.data.success) {
       // HTTP-only cookies are automatically set by the server
       return true;
     }
@@ -54,11 +46,8 @@ export async function trustCurrentDevice(): Promise<boolean> {
 // Remove a trusted device
 export async function removeDevice(deviceFingerprint: string): Promise<boolean> {
   try {
-    const response = await fetchWithAuth(`/auth/devices/${deviceFingerprint}`, {
-      method: 'DELETE',
-    });
-    const data = await response.json();
-    return data.success || false;
+    const response = await apiClient.delete(`/auth/devices/${deviceFingerprint}`);
+    return response.data.success || false;
   } catch (error) {
     console.error('Failed to remove device:', error);
     return false;
@@ -68,11 +57,8 @@ export async function removeDevice(deviceFingerprint: string): Promise<boolean> 
 // Clean up duplicate devices
 export async function cleanupDuplicateDevices(): Promise<boolean> {
   try {
-    const response = await fetchWithAuth('/auth/devices/cleanup', {
-      method: 'POST'
-    });
-    const data = await response.json();
-    return data.success || false;
+    const response = await apiClient.post('/auth/devices/cleanup');
+    return response.data.success || false;
   } catch (error) {
     console.error('Failed to cleanup duplicate devices:', error);
     return false;
@@ -82,11 +68,8 @@ export async function cleanupDuplicateDevices(): Promise<boolean> {
 // Remove all trusted devices
 export async function removeAllDevices(): Promise<boolean> {
   try {
-    const response = await fetchWithAuth('/auth/devices/all', {
-      method: 'DELETE'
-    });
-    const data = await response.json();
-    return data.success || false;
+    const response = await apiClient.delete('/auth/devices/all');
+    return response.data.success || false;
   } catch (error) {
     console.error('Failed to remove all devices:', error);
     return false;
