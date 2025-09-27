@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { apiClient } from "@/lib/api-client";
+import { apiClient } from "@/lib/axios";
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/hooks/LanguageContext";
 

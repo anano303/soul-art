@@ -8,7 +8,7 @@ import {
   useCallback,
 } from "react";
 import { CartItem } from "@/types/cart";
-import { apiClient } from "@/lib/api-client";
+import { apiClient } from "@/lib/axios";
 import { useUser } from "@/modules/auth/hooks/use-user";
 import { useToast } from "@/hooks/use-toast";
 

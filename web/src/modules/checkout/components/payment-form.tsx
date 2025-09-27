@@ -5,7 +5,7 @@ import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { useCheckout } from "../context/checkout-context";
 import { useRouter } from "next/navigation";
-import { apiClient } from "@/lib/api-client";
+import { apiClient } from "@/lib/axios";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft } from "lucide-react";
 // import { FaPaypal } from "react-icons/fa";

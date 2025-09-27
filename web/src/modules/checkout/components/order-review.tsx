@@ -4,7 +4,7 @@ import { useCheckout } from "../context/checkout-context";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
-import { apiClient } from "@/lib/api-client";
+import { apiClient } from "@/lib/axios";
 import { TAX_RATE } from "@/config/constants";
 import { useLanguage } from "@/hooks/LanguageContext";
 import Image from "next/image";

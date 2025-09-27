@@ -6,7 +6,7 @@ import * as z from "zod";
 import { useToast } from "@/hooks/use-toast";
 import { useUser } from "@/modules/auth/hooks/use-user";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { apiClient } from "@/lib/api-client";
+import { apiClient } from "@/lib/axios";
 import { motion } from "framer-motion";
 import "./ProfileForm.css";
 import { useEffect, useState, useRef, useCallback } from "react";

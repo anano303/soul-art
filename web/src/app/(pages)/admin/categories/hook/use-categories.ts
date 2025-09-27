@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { apiClient } from "@/lib/api-client";
+import { apiClient } from "@/lib/axios";
 import { toast } from "react-hot-toast";
 import { ErrorHandler } from "@/lib/error-handler";
 import { memoryCache } from "@/lib/cache";

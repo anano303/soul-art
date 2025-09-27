@@ -2,8 +2,9 @@
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
-import { useEffect } from "react";
 import { usePerformanceOptimizations } from "@/hooks/usePerformanceOptimizations";
+// Initialize API client with interceptors by importing it
+import "@/lib/axios";
 
 // Declare global window property for query client access
 declare global {

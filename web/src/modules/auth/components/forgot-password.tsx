@@ -2,13 +2,11 @@
 
 import { useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
-import axios from "axios";
+import { apiClient } from "@/lib/axios";
 import { useToast } from "@/hooks/use-toast";
 import { useErrorHandler } from "@/hooks/use-error-handler";
 import "./reset-password.css";
 import { useLanguage } from "@/hooks/LanguageContext";
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 interface ForgotPasswordFormData {
   email: string;
@@ -28,7 +26,7 @@ export function ForgotPasswordForm() {
   const onSubmit: SubmitHandler<ForgotPasswordFormData> = async (data) => {
     setLoading(true);
     try {
-      await axios.post(`${API_BASE_URL}/auth/forgot-password`, {
+      await apiClient.post(`/auth/forgot-password`, {
         email: data.email,
       });
 

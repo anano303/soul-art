@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { OrderHistory } from "@/modules/profile/components/order-history";
-import { apiClient } from "@/lib/api-client";
+import { apiClient } from "@/lib/axios";
 import { useUser } from "@/modules/auth/hooks/use-user";
 import LoadingAnim from "@/components/loadingAnim/loadingAnim";
 

@@ -1,4 +1,5 @@
 import React from "react";
+import { apiClient } from "@/lib/axios";
 
 interface BOGButtonProps {
   orderId: string;
@@ -9,18 +10,8 @@ export function BOGButton({ orderId, amount }: BOGButtonProps) {
   const handleBOGPayment = async () => {
     try {
       // Get order details first with HTTP-only cookie authentication
-      const orderResponse = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/orders/${orderId}`,
-        {
-          credentials: "include", // Use HTTP-only cookies
-        }
-      );
-
-      if (!orderResponse.ok) {
-        throw new Error(`Failed to fetch order: ${orderResponse.status}`);
-      }
-
-      const order = await orderResponse.json();
+      const orderResponse = await apiClient.get(`/orders/${orderId}`);
+      const order = orderResponse.data;
 
       // Create payment request
       const paymentData = {
@@ -43,23 +34,8 @@ export function BOGButton({ orderId, amount }: BOGButtonProps) {
         failUrl: `${window.location.origin}/checkout/fail?orderId=${orderId}`,
       };
 
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/payments/bog/create`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          credentials: "include", // Use HTTP-only cookies
-          body: JSON.stringify(paymentData),
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error("Payment initiation failed");
-      }
-
-      const result = await response.json();
+      const response = await apiClient.post("/payments/bog/create", paymentData);
+      const result = response.data;
 
       if (result.redirect_url) {
         window.location.href = result.redirect_url;

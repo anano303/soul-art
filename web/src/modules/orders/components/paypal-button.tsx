@@ -5,7 +5,7 @@ import {
   PayPalScriptProvider,
   usePayPalScriptReducer,
 } from "@paypal/react-paypal-js";
-import { apiClient } from "@/lib/api-client";
+import { apiClient } from "@/lib/axios";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { StarIcon } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { apiClient } from "@/lib/api-client";
+import { apiClient } from "@/lib/axios";
 import "./ReviewForm.css";
 
 interface ReviewFormProps {

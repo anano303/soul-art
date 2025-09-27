@@ -1,7 +1,7 @@
 "use client";
 
 import { useForm, Controller } from "react-hook-form";
-import { apiClient } from "@/lib/api-client";
+import { apiClient } from "@/lib/axios";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 import { useCheckout } from "../context/checkout-context";

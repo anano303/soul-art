@@ -5,7 +5,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "@/hooks/use-toast";
 import imageCompression from "browser-image-compression";
 import "./CreateForumModal.css";
-import { apiClient } from "@/lib/api-client";
+import { apiClient } from "@/lib/axios";
 import { useLanguage } from "@/hooks/LanguageContext";
 
 // Tag mapping for translation (frontend tag keys -> backend tags)

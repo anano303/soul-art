@@ -1,4 +1,4 @@
-import { fetchWithAuth } from "@/lib/fetch-with-auth";
+import { apiClient } from "@/lib/axios";
 import { Banner, CreateBannerData } from "@/types/banner";
 
 export async function getBanners(): Promise<{
@@ -7,14 +7,8 @@ export async function getBanners(): Promise<{
   error?: string;
 }> {
   try {
-    const response = await fetchWithAuth(`/banners`);
-
-    if (!response.ok) {
-      return { success: false, error: "Failed to fetch banners" };
-    }
-
-    const data = await response.json();
-    return { success: true, data };
+    const response = await apiClient.get(`/banners`);
+    return { success: true, data: response.data };
   } catch (error) {
     console.error("Error fetching banners:", error);
     return { success: false, error: "Network error" };
@@ -27,14 +21,8 @@ export async function getActiveBanners(): Promise<{
   error?: string;
 }> {
   try {
-    const response = await fetchWithAuth(`/banners/active`);
-
-    if (!response.ok) {
-      return { success: false, error: "Failed to fetch active banners" };
-    }
-
-    const data = await response.json();
-    return { success: true, data };
+    const response = await apiClient.get(`/banners/active`);
+    return { success: true, data: response.data };
   } catch (error) {
     console.error("Error fetching active banners:", error);
     return { success: false, error: "Network error" };
@@ -60,27 +48,9 @@ export async function createBanner(
       formData.append("images", image);
     }
 
-    // Use native fetch for FormData to avoid Content-Type issues
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/banners`, {
-      method: "POST",
-      body: formData,
-      headers: {
-        // Don't set Content-Type - browser will set it automatically for FormData
-        // Don't set Authorization - HTTP-only cookies are included automatically
-      },
-      credentials: "include",
-      mode: "cors",
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      return {
-        success: false,
-        error: errorData.message || "Failed to create banner",
-      };
-    }
-
-    const data = await response.json();
+    // Use apiClient for FormData - it handles multipart correctly
+    const response = await apiClient.post("/banners", formData);
+    const data = response.data;
 
     // Send discount notification if banner is active and has discount keywords
     if (
@@ -141,31 +111,9 @@ export async function updateBanner(
       formData.append("images", image);
     }
 
-    // Use native fetch for FormData to avoid Content-Type issues
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/banners/${id}`,
-      {
-        method: "PATCH",
-        body: formData,
-        headers: {
-          // Don't set Content-Type - browser will set it automatically for FormData
-          // Don't set Authorization - HTTP-only cookies are included automatically
-        },
-        credentials: "include",
-        mode: "cors",
-      }
-    );
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      return {
-        success: false,
-        error: errorData.message || "Failed to update banner",
-      };
-    }
-
-    const data = await response.json();
-    return { success: true, data };
+    // Use apiClient for FormData - it handles multipart correctly
+    const response = await apiClient.patch(`/banners/${id}`, formData);
+    return { success: true, data: response.data };
   } catch (error) {
     console.error("Error updating banner:", error);
     return { success: false, error: "Network error" };
@@ -176,18 +124,7 @@ export async function deleteBanner(
   id: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    const response = await fetchWithAuth(`/banners/${id}`, {
-      method: "DELETE",
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      return {
-        success: false,
-        error: errorData.message || "Failed to delete banner",
-      };
-    }
-
+    await apiClient.delete(`/banners/${id}`);
     return { success: true };
   } catch (error) {
     console.error("Error deleting banner:", error);

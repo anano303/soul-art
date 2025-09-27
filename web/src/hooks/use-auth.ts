@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { apiClient } from "@/lib/api-client";
+import { apiClient } from "@/lib/axios";
 import { login as loginApi, LoginData } from "@/modules/auth/api/login";
 import { logout as logoutApi } from "@/modules/auth/api/logout";
 import { isLoggedIn, getUserData, clearUserData } from "@/lib/auth";

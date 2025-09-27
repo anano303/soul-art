@@ -6,7 +6,7 @@ import Link from "next/link";
 import { Order, OrderItem } from "@/types/order";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
-import { apiClient } from "@/lib/api-client";
+import { apiClient } from "@/lib/axios";
 import { useLanguage } from "@/hooks/LanguageContext";
 import { useQuery } from "@tanstack/react-query";
 import { fetchWithAuth } from "@/lib/fetch-with-auth";

@@ -9,7 +9,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "@/hooks/use-toast";
 import { fetchWithAuth } from "@/lib/fetch-with-auth";
 import imageCompression from "browser-image-compression";
-import { apiClient } from "@/lib/api-client";
+import { apiClient } from "@/lib/axios";
 
 interface Comment {
   id: string;
