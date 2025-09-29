@@ -19,7 +19,7 @@ interface ShippingFormData {
 }
 
 export function ShippingForm() {
-  const { setShippingAddress } = useCheckout();
+  const { shippingAddress, setShippingAddress } = useCheckout();
   const { toast } = useToast();
   const { t } = useLanguage();
 
@@ -29,7 +29,24 @@ export function ShippingForm() {
     formState: { errors, isSubmitting },
     control,
     watch,
-  } = useForm<ShippingFormData>();
+    reset,
+  } = useForm<ShippingFormData>({
+    defaultValues: shippingAddress || {
+      address: "",
+      city: "",
+      postalCode: "",
+      country: "",
+      phoneNumber: "",
+    },
+  });
+
+  // Update form when shippingAddress changes (e.g., from localStorage)
+  useEffect(() => {
+    console.log("Shipping form - shippingAddress changed:", shippingAddress);
+    if (shippingAddress) {
+      reset(shippingAddress);
+    }
+  }, [shippingAddress, reset]);
 
   const onSubmit = async (data: ShippingFormData) => {
     try {

@@ -525,6 +525,29 @@ export const TRANSLATIONS: Translations = {
       continueToPayment: "გადახდის გვერდზე გადასვლა",
       errorSavingShipping: "მიწოდების დეტალების შენახვა ვერ მოხერხდა",
       tryAgain: "გთხოვთ, სცადოთ მოგვიანებით",
+      stepIndicators: {
+        authorization: {
+          title: "ავტორიზაცია",
+          description: "გთხოვთ, გაიაროთ ავტორიზაცია შეკვეთის გასაგრძელებლად",
+        },
+        shipping: {
+          title: "მიწოდება",
+          description: "შეიყვანეთ მიწოდების მისამართი",
+        },
+        payment: {
+          title: "გადახდა",
+          description: "აირჩიეთ გადახდის მეთოდი",
+        },
+        review: {
+          title: "შეკვეთის გადახედვა",
+          description: "გადაამოწმეთ შეკვეთის დეტალები",
+        },
+      },
+      shippingSaved: "მიწოდების მისამართი შენახულია",
+      shippingDetailsSaved: "მიწოდების დეტალები წარმატებით შენახულია",
+      emptyCart: "თქვენი კალათა ცარიელია",
+      continueShopping: "განაგრძეთ შოპინგი",
+      backToCart: "უკან კალათაში",
     },
 
     // About page
@@ -595,7 +618,7 @@ export const TRANSLATIONS: Translations = {
       },
       cta: {
         text: " დაიწყეთ მოგზაურობა Soulart-ზე და მიეცით თქვენს ნამუშევრებს ის აუდიტორია, რომელსაც იმსახურებენ!",
-        button: "დარეგისტრირდი ახლავე",
+        button: "დარეგისტრიდი ახლავე",
       },
     },
 
@@ -1768,6 +1791,29 @@ export const TRANSLATIONS: Translations = {
       continueToPayment: "Continue to Payment",
       errorSavingShipping: "Error saving shipping details",
       tryAgain: "Please try again.",
+      stepIndicators: {
+        authorization: {
+          title: "Authorization",
+          description: "Please log in to continue with your order",
+        },
+        shipping: {
+          title: "Shipping",
+          description: "Enter your shipping address",
+        },
+        payment: {
+          title: "Payment",
+          description: "Choose your payment method",
+        },
+        review: {
+          title: "Order Review",
+          description: "Review your order details",
+        },
+      },
+      shippingSaved: "Shipping address saved",
+      shippingDetailsSaved: "Shipping details saved successfully",
+      emptyCart: "Your cart is empty",
+      continueShopping: "Continue Shopping",
+      backToCart: "Back to Cart",
     },
 
     // About page

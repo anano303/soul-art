@@ -1,4 +1,4 @@
-import { UnifiedCheckout } from "@/modules/checkout/components/unified-checkout";
+import { UnifiedCheckout } from "@/modules/checkout/components/unified-checkout.tsx";
 
 export default function UnifiedCheckoutPage() {
   return (

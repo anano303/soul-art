@@ -7,6 +7,7 @@ import * as z from "zod";
 import { useCheckout } from "../context/checkout-context";
 import { apiClient } from "@/lib/axios";
 import { useToast } from "@/hooks/use-toast";
+import { useLanguage } from "@/hooks/LanguageContext";
 // import { FaPaypal } from "react-icons/fa";
 // import { CreditCard } from "lucide-react";
 import "./payment-form.css";
@@ -21,6 +22,7 @@ export function PaymentForm() {
   const { setPaymentMethod, paymentMethod: currentPaymentMethod } =
     useCheckout();
   const { toast } = useToast();
+  const { t } = useLanguage();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -54,14 +56,14 @@ export function PaymentForm() {
       console.log(paymentMethod);
       setPaymentMethod(paymentMethod);
       toast({
-        title: "Payment method saved",
-        description: "Your payment method has been saved successfully.",
+        title: t("checkout.shippingSaved"),
+        description: t("checkout.shippingDetailsSaved"),
       });
     } catch (error) {
       console.log(error);
       toast({
-        title: "Error saving payment method",
-        description: "Please try again.",
+        title: t("checkout.errorSavingShipping"),
+        description: t("checkout.tryAgain"),
         variant: "destructive",
       });
     }
@@ -71,15 +73,17 @@ export function PaymentForm() {
     <div className="card p-6">
       <div className="space-y-6">
         <div>
-          <h1 className="text-2xl font-semibold">Payment Method</h1>
+          <h1 className="text-2xl font-semibold">
+            {t("checkout.steps.payment")}
+          </h1>
           <p className="text-sm text-muted-foreground">
-            Choose how you would like to pay
+            {t("checkout.stepIndicators.payment.description")}
           </p>
         </div>
 
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           <div className="form-item">
-            <label className="form-label">Payment Method</label>
+            <label className="form-label">{t("checkout.steps.payment")}</label>
             <div className="form-control">
               <div className="grid grid-cols-1 gap-4">
                 {/* PayPal Option - Temporarily Commented */}
@@ -152,7 +156,7 @@ export function PaymentForm() {
                           <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
                         </svg>
                         <span className="text-sm font-medium">
-                          ბარათით გადახდა
+                          {t("checkout.continueToPayment")}
                         </span>
                       </div>
                     </label>

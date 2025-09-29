@@ -14,11 +14,15 @@ import "./order-review.css";
 import { useCart } from "@/modules/cart/context/cart-context";
 
 export function OrderReview() {
-  const { shippingAddress: shippingDetails, paymentMethod } = useCheckout();
+  const {
+    shippingAddress: shippingDetails,
+    paymentMethod,
+    clearCheckout,
+  } = useCheckout();
   const { items, clearCart } = useCart();
   const router = useRouter();
   const { toast } = useToast();
-  const { language } = useLanguage();
+  const { language, t } = useLanguage();
   const [isValidating, setIsValidating] = useState(false);
   const [unavailableItems, setUnavailableItems] = useState<
     Array<{
@@ -120,6 +124,7 @@ export function OrderReview() {
       });
 
       await clearCart();
+      clearCheckout();
       router.push(`/orders/${response.data._id}`);
     } catch (error: any) {
       console.error("Order error:", error);
@@ -218,30 +223,32 @@ export function OrderReview() {
       <div className="order-details col-span-8 space-y-6">
         {/* Shipping Address */}
         <div className="card p-6">
-          <h2 className="section-title">Shipping</h2>
+          <h2 className="section-title">{t("checkout.shippingAddress")}</h2>
           <p className="address-details">
-            <strong>Address: </strong>
+            <strong>{t("checkout.streetAddress")}: </strong>
             {shippingDetails?.address}, {shippingDetails?.city},{" "}
             {shippingDetails?.postalCode}, {shippingDetails?.country}
           </p>
           <p className="address-details">
-            <strong>Phone: </strong>
+            <strong>{t("auth.phoneNumber")}: </strong>
             {shippingDetails?.phoneNumber}
           </p>
         </div>
 
         {/* Payment Method */}
         <div className="card p-6">
-          <h2 className="section-title">Payment</h2>
+          <h2 className="section-title">{t("checkout.steps.payment")}</h2>
           <p className="payment-method">
-            <strong>Method: </strong>
+            <strong>{t("checkout.stepIndicators.payment.title")}: </strong>
             {paymentMethod}
           </p>
         </div>
 
         {/* Order Items */}
         <div className="card p-6">
-          <h2 className="section-title">Order Items</h2>
+          <h2 className="section-title">
+            {t("checkout.stepIndicators.review.title")}
+          </h2>
           <div className="order-items space-y-4">
             {items.map((item) => {
               // Display name based on selected language
@@ -284,27 +291,33 @@ export function OrderReview() {
       {/* Order Summary */}
       <div className="order-summary col-span-4">
         <div className="card p-6">
-          <h2 className="section-title">Order Summary</h2>
+          <h2 className="section-title">{t("cart.total")}</h2>
           <div className="summary-details space-y-4">
             <div className="summary-row flex justify-between">
-              <span className="summary-label text-muted-foreground">Items</span>
+              <span className="summary-label text-muted-foreground">
+                {t("cart.items")}
+              </span>
               <span>{itemsPrice.toFixed(2)} ₾</span>
             </div>
             <div className="summary-row flex justify-between">
               <span className="summary-label text-muted-foreground">
-                Shipping
+                {t("cart.delivery")}
               </span>
               <span>
-                {shippingPrice === 0 ? "Free" : `${shippingPrice.toFixed(2)}₾`}
+                {shippingPrice === 0
+                  ? t("cart.free")
+                  : `${shippingPrice.toFixed(2)}₾`}
               </span>
             </div>
             <div className="summary-row flex justify-between">
-              <span className="summary-label text-muted-foreground">Tax</span>
+              <span className="summary-label text-muted-foreground">
+                {t("cart.commission")}
+              </span>
               <span>{taxPrice.toFixed(2)} ₾</span>
             </div>
             <div className="separator" />
             <div className="summary-row flex justify-between font-medium">
-              <span>Total</span>
+              <span>{t("cart.totalCost")}</span>
               <span>{totalPrice.toFixed(2)} ₾</span>
             </div>
             <button
