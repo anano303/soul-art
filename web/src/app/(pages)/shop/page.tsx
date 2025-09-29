@@ -5,12 +5,14 @@ import { Metadata } from "next";
 export async function generateMetadata({
   searchParams,
 }: {
-  searchParams?: { [key: string]: string | string[] | undefined };
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }): Promise<Metadata> {
   try {
+    // Await searchParams as it's now a Promise in Next.js 15+
+    const params = await searchParams;
+
     // Get brand from search params
-    const brand =
-      typeof searchParams?.brand === "string" ? searchParams.brand : "";
+    const brand = typeof params?.brand === "string" ? params.brand : "";
 
     let apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/products?page=1&limit=1&sort=createdAt&direction=desc`;
     if (brand) {
