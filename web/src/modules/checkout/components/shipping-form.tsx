@@ -154,7 +154,7 @@ export function ShippingForm() {
             control={control}
             rules={{ required: t("checkout.countryRequired") }}
             render={({ field }) => (
-              <select {...field} defaultValue="">
+              <select {...field}>
                 <option value="" disabled>
                   {t("checkout.selectCountry")}
                 </option>
