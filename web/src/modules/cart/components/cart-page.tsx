@@ -106,7 +106,7 @@ export function CartPage() {
               </div>
               <button
                 className="checkout-button"
-                onClick={() => router.push("/checkout/shipping")}
+                onClick={() => router.push("/checkout/unified")}
               >
                 {t("cart.checkout")}
               </button>

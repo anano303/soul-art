@@ -2,12 +2,11 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
+import { useEffect } from "react";
 import * as z from "zod";
 import { useCheckout } from "../context/checkout-context";
-import { useRouter } from "next/navigation";
 import { apiClient } from "@/lib/axios";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft } from "lucide-react";
 // import { FaPaypal } from "react-icons/fa";
 // import { CreditCard } from "lucide-react";
 import "./payment-form.css";
@@ -19,16 +18,32 @@ const formSchema = z.object({
 });
 
 export function PaymentForm() {
-  const { setPaymentMethod } = useCheckout();
-  const router = useRouter();
+  const { setPaymentMethod, paymentMethod: currentPaymentMethod } =
+    useCheckout();
   const { toast } = useToast();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      paymentMethod: "BOG",
+      paymentMethod:
+        (currentPaymentMethod as "PayPal" | "Stripe" | "BOG") || "BOG",
     },
   });
+
+  const watchedPaymentMethod = form.watch("paymentMethod");
+
+  useEffect(() => {
+    // Save initial value if not already set
+    if (!currentPaymentMethod && watchedPaymentMethod) {
+      form.handleSubmit(onSubmit)();
+    }
+  }, []);
+
+  useEffect(() => {
+    if (watchedPaymentMethod && watchedPaymentMethod !== currentPaymentMethod) {
+      form.handleSubmit(onSubmit)();
+    }
+  }, [watchedPaymentMethod]);
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
@@ -38,7 +53,10 @@ export function PaymentForm() {
       const paymentMethod = response.data;
       console.log(paymentMethod);
       setPaymentMethod(paymentMethod);
-      router.push("/checkout/review");
+      toast({
+        title: "Payment method saved",
+        description: "Your payment method has been saved successfully.",
+      });
     } catch (error) {
       console.log(error);
       toast({
@@ -53,14 +71,6 @@ export function PaymentForm() {
     <div className="card p-6">
       <div className="space-y-6">
         <div>
-          <button
-            type="button"
-            onClick={() => router.back()}
-            className="back-button"
-          >
-            <ArrowLeft size={20} />
-            უკან დაბრუნება
-          </button>
           <h1 className="text-2xl font-semibold">Payment Method</h1>
           <p className="text-sm text-muted-foreground">
             Choose how you would like to pay
@@ -151,10 +161,6 @@ export function PaymentForm() {
               </div>
             </div>
           </div>
-
-          <button type="submit" className="w-full btn btn-primary">
-            Continue to Review
-          </button>
         </form>
       </div>
     </div>

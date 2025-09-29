@@ -1,13 +1,12 @@
 "use client";
 
 import { useForm, Controller } from "react-hook-form";
+import { useEffect } from "react";
 import { apiClient } from "@/lib/axios";
 import { useToast } from "@/hooks/use-toast";
-import { useRouter } from "next/navigation";
 import { useCheckout } from "../context/checkout-context";
 import { getCountries } from "@/lib/countries";
 import { useLanguage } from "@/hooks/LanguageContext";
-import { ArrowLeft } from "lucide-react";
 
 import "./shipping-form.css";
 
@@ -21,7 +20,6 @@ interface ShippingFormData {
 
 export function ShippingForm() {
   const { setShippingAddress } = useCheckout();
-  const router = useRouter();
   const { toast } = useToast();
   const { t } = useLanguage();
 
@@ -30,6 +28,7 @@ export function ShippingForm() {
     handleSubmit,
     formState: { errors, isSubmitting },
     control,
+    watch,
   } = useForm<ShippingFormData>();
 
   const onSubmit = async (data: ShippingFormData) => {
@@ -37,7 +36,10 @@ export function ShippingForm() {
       const response = await apiClient.post("/cart/shipping", data);
       const shippingAddress = response.data;
       setShippingAddress(shippingAddress);
-      router.push("/checkout/payment");
+      toast({
+        title: t("checkout.shippingSaved"),
+        description: t("checkout.shippingDetailsSaved"),
+      });
     } catch (error) {
       console.log(error);
       toast({
@@ -48,17 +50,30 @@ export function ShippingForm() {
     }
   };
 
+  // Auto-save when form is valid
+  const watchedValues = watch();
+  const isFormValid =
+    watchedValues.address &&
+    watchedValues.city &&
+    watchedValues.postalCode &&
+    watchedValues.country &&
+    watchedValues.phoneNumber;
+
+  useEffect(() => {
+    if (isFormValid) {
+      handleSubmit(onSubmit)();
+    }
+  }, [
+    watchedValues.address,
+    watchedValues.city,
+    watchedValues.postalCode,
+    watchedValues.country,
+    watchedValues.phoneNumber,
+  ]);
+
   return (
     <div className="shipping-form-card">
       <div className="shipping-form-header">
-        <button
-          type="button"
-          onClick={() => router.back()}
-          className="back-button"
-        >
-          <ArrowLeft size={20} />
-          უკან დაბრუნება
-        </button>
         <h1>{t("checkout.shippingAddress")}</h1>
         <p>{t("checkout.enterShippingDetails")}</p>
       </div>
@@ -138,14 +153,6 @@ export function ShippingForm() {
             <p className="error-text">{errors.country.message}</p>
           )}
         </div>
-
-        <button
-          type="submit"
-          className="shipping-form-button"
-          disabled={isSubmitting}
-        >
-          {t("checkout.continueToPayment")}
-        </button>
       </form>
     </div>
   );
