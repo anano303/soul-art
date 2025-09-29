@@ -1355,6 +1355,16 @@ export function CreateProductForm({
             className="create-product-textarea"
             required
           />
+          <small
+            style={{
+              color: "#666",
+              fontSize: "0.9rem",
+              display: "block",
+              marginTop: "4px",
+            }}
+          >
+            {t("adminProducts.productDescriptionHint")}
+          </small>
           {errors.description && (
             <p className="create-product-error">{errors.description}</p>
           )}

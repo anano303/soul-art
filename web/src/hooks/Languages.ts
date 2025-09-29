@@ -964,6 +964,8 @@ export const TRANSLATIONS: Translations = {
       brandLogo: "ბრენდის ლოგო",
       enterBrandName: "შეიყვანეთ ბრენდის სახელი",
       uploadReminder: "გთხოვთ ატვირთოთ მინიმუმ ერთი სურათი",
+      productDescriptionHint:
+        "გთხოვთ მიუთითოთ დეტალური ინფორმაცია, მასალა და ზომები ორივე ენაზე",
 
       // Dropdown options
       loading: "იტვირთება...",
@@ -2225,6 +2227,8 @@ export const TRANSLATIONS: Translations = {
       brandLogo: "Brand Logo",
       enterBrandName: "Enter brand name",
       uploadReminder: "Please upload at least one image",
+      productDescriptionHint:
+        "Please provide detailed information, material and dimensions in both languages",
 
       // Dropdown options
       loading: "Loading...",
