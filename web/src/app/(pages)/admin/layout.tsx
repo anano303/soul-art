@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getUserData, isLoggedIn } from "@/lib/auth";
 import { Sidebar } from "lucide-react";
+import { CacheRefreshManager } from "@/components/cache-refresh-manager/cache-refresh-manager";
 
 export default function AdminLayout({
   children,
@@ -39,7 +40,10 @@ export default function AdminLayout({
           userData.role?.toLowerCase() !== "admin" &&
           userData.role?.toLowerCase() !== "seller"
         ) {
-          console.log("User doesn't have admin/seller permissions, role:", userData.role);
+          console.log(
+            "User doesn't have admin/seller permissions, role:",
+            userData.role
+          );
           router.push("/");
           return;
         }
@@ -72,6 +76,7 @@ export default function AdminLayout({
 
   return (
     <div className="flex">
+      <CacheRefreshManager />
       <Sidebar />
       <main className="flex-1">{children}</main>
     </div>

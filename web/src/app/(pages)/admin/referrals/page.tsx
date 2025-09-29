@@ -100,6 +100,14 @@ export default function AdminReferralsPage() {
     if (user && user.role === "admin") {
       fetchWithdrawals();
       fetchReferrals();
+
+      // Set up auto-refresh every 30 seconds for real-time updates
+      const interval = setInterval(() => {
+        fetchWithdrawals();
+        fetchReferrals();
+      }, 30 * 1000);
+
+      return () => clearInterval(interval);
     }
   }, [user, fetchWithdrawals, fetchReferrals]);
 

@@ -99,8 +99,7 @@ export class PaymentsService {
         payment_method: ['card'],
         ttl: 10,
         redirect_urls: {
-          success:
-            data.successUrl || 'https://soulart.ge/checkout/success',
+          success: data.successUrl || 'https://soulart.ge/checkout/success',
           fail: data.failUrl || 'https://soulart.ge/checkout/fail',
         },
       };
@@ -125,8 +124,28 @@ export class PaymentsService {
         uniqueId: externalOrderId,
       };
     } catch (error) {
-      console.error('BOG Service Error:', error.message);
-      throw error;
+      console.error('BOG Service Error:', error);
+
+      if (error.response) {
+        console.error('BOG API Response:', error.response.data);
+        console.error('BOG API Status:', error.response.status);
+
+        // Return more specific error messages
+        if (error.response.status === 401) {
+          throw new Error('BOG API authentication failed');
+        } else if (error.response.status === 400) {
+          throw new Error(
+            'Invalid payment data: ' +
+              (error.response.data?.message || 'Bad request'),
+          );
+        } else if (error.response.status >= 500) {
+          throw new Error(
+            'BOG service is temporarily unavailable. Please try again later.',
+          );
+        }
+      }
+
+      throw new Error(error.message || 'Payment service error');
     }
   }
 

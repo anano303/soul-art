@@ -47,6 +47,10 @@ export function ProductsList() {
       const result = await response.json();
       return result;
     },
+    staleTime: 30 * 1000, // 30 seconds instead of default 5 minutes
+    refetchInterval: isAdmin ? 60 * 1000 : undefined, // Auto-refresh every minute for admins
+    refetchIntervalInBackground: true, // Continue refreshing in background
+    refetchOnWindowFocus: true, // Refetch when user focuses window
   });
 
   // Add a function to directly fetch the updated product data after returning from an edit
@@ -96,6 +100,10 @@ export function ProductsList() {
     queryKey: ["pendingProducts", refreshKey],
     queryFn: fetchPendingProducts,
     enabled: isAdmin,
+    staleTime: 30 * 1000, // 30 seconds
+    refetchInterval: isAdmin ? 30 * 1000 : undefined, // Auto-refresh every 30 seconds for pending products
+    refetchIntervalInBackground: true,
+    refetchOnWindowFocus: true,
   });
 
   const handleProductDeleted = () => {
@@ -154,6 +162,8 @@ export function ProductsList() {
       const response = await fetchWithAuth(`/categories?includeInactive=false`);
       return response.json();
     },
+    staleTime: 5 * 60 * 1000, // 5 minutes for categories (they don't change often)
+    refetchOnWindowFocus: false,
   });
 
   const { data: subcategoriesData } = useQuery<SubCategory[]>({
@@ -164,6 +174,8 @@ export function ProductsList() {
       );
       return response.json();
     },
+    staleTime: 5 * 60 * 1000, // 5 minutes for subcategories
+    refetchOnWindowFocus: false,
   });
   // Helper functions to get category and subcategory names by ID with translation support
   function getCategoryNameById(categoryId: string): string {

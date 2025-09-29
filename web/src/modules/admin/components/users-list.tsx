@@ -30,6 +30,10 @@ export function UsersList() {
     queryKey: ["users", page],
     queryFn: () => getUsers(page, 8),
     retry: false,
+    staleTime: 30 * 1000, // 30 seconds
+    refetchInterval: 60 * 1000, // Auto-refresh every minute for new users
+    refetchIntervalInBackground: true,
+    refetchOnWindowFocus: true,
   });
 
   const handleDelete = async (userId: string) => {
