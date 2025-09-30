@@ -12,6 +12,7 @@ import { isValidObjectId, Model, Types } from 'mongoose';
 import { UsersService } from '@/users/services/users.service';
 import { queryParamsDto } from './dto/queryParams.dto';
 import { AwsS3Service } from '@/aws-s3/aws-s3.service';
+import { CloudinaryService } from '@/cloudinary/services/cloudinary.service';
 import { AddCommentDto } from './dto/addComment.dto';
 import { SearchForumDto } from './dto/search-forum.dto';
 import * as mongoose from 'mongoose';
@@ -23,7 +24,23 @@ export class ForumsService {
     @InjectModel(Comment.name) private commentModel: Model<Comment>,
     private userService: UsersService,
     private awsS3Service: AwsS3Service,
+    private cloudinaryService: CloudinaryService,
   ) {}
+
+  // Helper method to resolve image URLs (handles both Cloudinary URLs and AWS S3 paths)
+  private async resolveImageUrl(
+    imagePath: string | null,
+  ): Promise<string | null> {
+    if (!imagePath) return null;
+
+    // If it's already a full URL (Cloudinary or other direct URL)
+    if (imagePath.startsWith('http')) {
+      return imagePath;
+    }
+
+    // Use S3 for backward compatibility with existing images
+    return await this.awsS3Service.getImageByFileId(imagePath);
+  }
 
   async create(createForumDto: CreateForumDto, userId, filePath?, file?) {
     try {
@@ -38,11 +55,11 @@ export class ForumsService {
           });
           return forum;
         }
-        const imagePath = await this.awsS3Service.uploadImage(filePath, file);
+        const imagePath = await this.cloudinaryService.uploadImage(file);
         const forum = await this.forumModel.create({
           ...createForumDto,
           user: user._id,
-          imagePath,
+          imagePath: (imagePath as any).secure_url,
         });
         return forum;
       }
@@ -74,9 +91,7 @@ export class ForumsService {
     const forumDataWithImages = await Promise.all(
       forumData.map(async (forum) => {
         // Get forum post image
-        const imageUrl = await this.awsS3Service.getImageByFileId(
-          forum.imagePath,
-        );
+        const imageUrl = await this.resolveImageUrl(forum.imagePath);
 
         // Get user profile image if available
         let userProfileImage = null;
@@ -89,7 +104,7 @@ export class ForumsService {
               userProfileImage = populatedUser.profileImagePath;
             } else {
               // Use S3 for backward compatibility
-              userProfileImage = await this.awsS3Service.getImageByFileId(
+              userProfileImage = await this.resolveImageUrl(
                 populatedUser.profileImagePath as string,
               );
             }
@@ -101,7 +116,7 @@ export class ForumsService {
             if (populatedUser.storeLogoPath.startsWith('http')) {
               userProfileImage = populatedUser.storeLogoPath;
             } else {
-              userProfileImage = await this.awsS3Service.getImageByFileId(
+              userProfileImage = await this.resolveImageUrl(
                 populatedUser.storeLogoPath as string,
               );
             }
@@ -130,10 +145,9 @@ export class ForumsService {
                     populatedCommentUser.profileImagePath;
                 } else {
                   // Use S3 for backward compatibility
-                  commentUserProfileImage =
-                    await this.awsS3Service.getImageByFileId(
-                      populatedCommentUser.profileImagePath as string,
-                    );
+                  commentUserProfileImage = await this.resolveImageUrl(
+                    populatedCommentUser.profileImagePath as string,
+                  );
                 }
               } else if (
                 populatedCommentUser.role === 'seller' &&
@@ -143,10 +157,9 @@ export class ForumsService {
                 if (populatedCommentUser.storeLogoPath.startsWith('http')) {
                   commentUserProfileImage = populatedCommentUser.storeLogoPath;
                 } else {
-                  commentUserProfileImage =
-                    await this.awsS3Service.getImageByFileId(
-                      populatedCommentUser.storeLogoPath as string,
-                    );
+                  commentUserProfileImage = await this.resolveImageUrl(
+                    populatedCommentUser.storeLogoPath as string,
+                  );
                 }
               }
             }
@@ -198,8 +211,8 @@ export class ForumsService {
     const searchFilter = {
       $or: [
         { content: { $regex: query, $options: 'i' } },
-        { 'comments.content': { $regex: query, $options: 'i' } }
-      ]
+        { 'comments.content': { $regex: query, $options: 'i' } },
+      ],
     };
 
     const forumData = await this.forumModel
@@ -220,9 +233,7 @@ export class ForumsService {
     const forumDataWithImages = await Promise.all(
       forumData.map(async (forum) => {
         // Get forum post image
-        const imageUrl = await this.awsS3Service.getImageByFileId(
-          forum.imagePath,
-        );
+        const imageUrl = await this.resolveImageUrl(forum.imagePath);
 
         // Get user profile image if available
         let userProfileImage = null;
@@ -233,7 +244,7 @@ export class ForumsService {
             if (populatedUser.profileImagePath.startsWith('http')) {
               userProfileImage = populatedUser.profileImagePath;
             } else {
-              userProfileImage = await this.awsS3Service.getImageByFileId(
+              userProfileImage = await this.resolveImageUrl(
                 populatedUser.profileImagePath as string,
               );
             }
@@ -244,7 +255,7 @@ export class ForumsService {
             if (populatedUser.storeLogoPath.startsWith('http')) {
               userProfileImage = populatedUser.storeLogoPath;
             } else {
-              userProfileImage = await this.awsS3Service.getImageByFileId(
+              userProfileImage = await this.resolveImageUrl(
                 populatedUser.storeLogoPath as string,
               );
             }
@@ -270,10 +281,9 @@ export class ForumsService {
                   commentUserProfileImage =
                     populatedCommentUser.profileImagePath;
                 } else {
-                  commentUserProfileImage =
-                    await this.awsS3Service.getImageByFileId(
-                      populatedCommentUser.profileImagePath as string,
-                    );
+                  commentUserProfileImage = await this.resolveImageUrl(
+                    populatedCommentUser.profileImagePath as string,
+                  );
                 }
               } else if (
                 populatedCommentUser.role === 'seller' &&
@@ -282,10 +292,9 @@ export class ForumsService {
                 if (populatedCommentUser.storeLogoPath.startsWith('http')) {
                   commentUserProfileImage = populatedCommentUser.storeLogoPath;
                 } else {
-                  commentUserProfileImage =
-                    await this.awsS3Service.getImageByFileId(
-                      populatedCommentUser.storeLogoPath as string,
-                    );
+                  commentUserProfileImage = await this.resolveImageUrl(
+                    populatedCommentUser.storeLogoPath as string,
+                  );
                 }
               }
             }
@@ -399,7 +408,7 @@ export class ForumsService {
     }
 
     // Get forum post image
-    const imageUrl = await this.awsS3Service.getImageByFileId(forum.imagePath);
+    const imageUrl = await this.resolveImageUrl(forum.imagePath);
 
     // Get user profile image
     let userProfileImage = null;
@@ -410,7 +419,7 @@ export class ForumsService {
         if (populatedUser.profileImagePath.startsWith('http')) {
           userProfileImage = populatedUser.profileImagePath;
         } else {
-          userProfileImage = await this.awsS3Service.getImageByFileId(
+          userProfileImage = await this.resolveImageUrl(
             populatedUser.profileImagePath as string,
           );
         }
@@ -421,7 +430,7 @@ export class ForumsService {
         if (populatedUser.storeLogoPath.startsWith('http')) {
           userProfileImage = populatedUser.storeLogoPath;
         } else {
-          userProfileImage = await this.awsS3Service.getImageByFileId(
+          userProfileImage = await this.resolveImageUrl(
             populatedUser.storeLogoPath as string,
           );
         }
@@ -446,10 +455,9 @@ export class ForumsService {
             if (populatedCommentUser.profileImagePath.startsWith('http')) {
               commentUserProfileImage = populatedCommentUser.profileImagePath;
             } else {
-              commentUserProfileImage =
-                await this.awsS3Service.getImageByFileId(
-                  populatedCommentUser.profileImagePath as string,
-                );
+              commentUserProfileImage = await this.resolveImageUrl(
+                populatedCommentUser.profileImagePath as string,
+              );
             }
           } else if (
             populatedCommentUser.role === 'seller' &&
@@ -458,10 +466,9 @@ export class ForumsService {
             if (populatedCommentUser.storeLogoPath.startsWith('http')) {
               commentUserProfileImage = populatedCommentUser.storeLogoPath;
             } else {
-              commentUserProfileImage =
-                await this.awsS3Service.getImageByFileId(
-                  populatedCommentUser.storeLogoPath as string,
-                );
+              commentUserProfileImage = await this.resolveImageUrl(
+                populatedCommentUser.storeLogoPath as string,
+              );
             }
           }
         }

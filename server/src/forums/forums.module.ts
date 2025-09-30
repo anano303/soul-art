@@ -11,6 +11,7 @@ import {
 import { UsersService } from '@/users/services/users.service';
 import { UsersModule } from '@/users/users.module';
 import { AwsS3Module } from '@/aws-s3/aws-s3.module';
+import { CloudinaryModule } from '@/cloudinary/cloudinary.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { AwsS3Module } from '@/aws-s3/aws-s3.module';
     ]),
     UsersModule,
     AwsS3Module,
+    CloudinaryModule,
   ],
 
   controllers: [ForumsController],
