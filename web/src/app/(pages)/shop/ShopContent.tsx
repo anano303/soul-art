@@ -368,7 +368,6 @@ const ShopContent = () => {
                   alt={brandInfo.name}
                   width={50}
                   height={50}
-                  style={{ width: "auto", height: "auto" }}
                 />
               )}
               <h2 style={{ color: PRIMARY_COLOR }}>
