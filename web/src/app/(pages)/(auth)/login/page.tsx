@@ -4,6 +4,8 @@ import { LoginForm } from "@/modules/auth/components/login-form";
 import { AuthLayout } from "@/modules/auth/layouts/auth-layout";
 import { useLanguage } from "@/hooks/LanguageContext";
 
+export const dynamic = "force-dynamic";
+
 export default function LoginPage() {
   const { t } = useLanguage();
 

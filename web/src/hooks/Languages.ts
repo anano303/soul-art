@@ -1,5 +1,3 @@
-"use client";
-
 export interface TranslationContent {
   [key: string]: string | string[] | TranslationContent;
 }
