@@ -47,8 +47,6 @@ export default function Header() {
             sizes="(max-width: 480px) 160px, 200px"
             style={{
               objectFit: "contain",
-              width: "auto",
-              height: "auto",
               maxWidth: "100%",
               maxHeight: "100%",
             }}
