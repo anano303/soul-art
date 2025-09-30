@@ -812,7 +812,6 @@ const ForumPost = ({
         width={80}
         height={80}
         className="forum-post-image"
-        unoptimized
       />
       <div className="forum-post-content">
         <div className="forum-post-author">
