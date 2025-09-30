@@ -27,19 +27,15 @@ export class ForumsService {
     private cloudinaryService: CloudinaryService,
   ) {}
 
-  // Helper method to resolve image URLs (handles both Cloudinary URLs and AWS S3 paths)
+  // Helper method to resolve image URLs (all images are now on Cloudinary)
   private async resolveImageUrl(
     imagePath: string | null,
   ): Promise<string | null> {
-    if (!imagePath) return null;
-
-    // If it's already a full URL (Cloudinary or other direct URL)
-    if (imagePath.startsWith('http')) {
-      return imagePath;
+    // All images should now be Cloudinary URLs starting with http
+    if (!imagePath || !imagePath.startsWith('http')) {
+      return null;
     }
-
-    // Use S3 for backward compatibility with existing images
-    return await this.awsS3Service.getImageByFileId(imagePath);
+    return imagePath;
   }
 
   async create(createForumDto: CreateForumDto, userId, filePath?, file?) {

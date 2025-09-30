@@ -533,65 +533,28 @@ export class UsersService {
     // Get profile image URL if it exists
     let profileImage = null;
     if (user.profileImagePath) {
-      // For Cloudinary and other HTTP URLs, use directly
+      // All images should now be Cloudinary URLs
       if (user.profileImagePath.startsWith('http')) {
         profileImage = user.profileImagePath;
-      } else {
-        // All new uploads should be Cloudinary URLs, but for backward compatibility
-        // try to get from S3 first, if that fails, assume it's a legacy local file
-        try {
-          profileImage = await this.awsS3Service.getImageByFileId(
-            user.profileImagePath as string,
-          );
-        } catch (error) {
-          // If S3 fails, it might be a legacy local file
-          this.logger.warn(
-            `Could not get image from S3: ${error.message}. Assuming legacy local file.`,
-          );
-          profileImage = null; // Don't use local files anymore
-        }
       }
+      // If not an HTTP URL, skip (shouldn't happen after migration)
     } else if (user.role === Role.Seller && user.storeLogoPath) {
       // If user is a seller and has no profile image but has a store logo,
       // use the store logo as the profile image
       if (user.storeLogoPath.startsWith('http')) {
         profileImage = user.storeLogoPath;
-      } else {
-        // All new uploads should be Cloudinary URLs, but for backward compatibility
-        try {
-          profileImage = await this.awsS3Service.getImageByFileId(
-            user.storeLogoPath as string,
-          );
-        } catch (error) {
-          // If S3 fails, it might be a legacy local file
-          this.logger.warn(
-            `Could not get store logo from S3: ${error.message}. Assuming legacy local file.`,
-          );
-          profileImage = null; // Don't use local files anymore
-        }
       }
+      // If not an HTTP URL, skip (shouldn't happen after migration)
     }
 
     // If user is a seller, get store logo URL
     let storeLogo = null;
     if (user.role === Role.Seller && user.storeLogoPath) {
-      // For Cloudinary and other HTTP URLs, use directly
+      // All images should now be Cloudinary URLs
       if (user.storeLogoPath.startsWith('http')) {
         storeLogo = user.storeLogoPath;
-      } else {
-        // All new uploads should be Cloudinary URLs, but for backward compatibility
-        try {
-          storeLogo = await this.awsS3Service.getImageByFileId(
-            user.storeLogoPath as string,
-          );
-        } catch (error) {
-          // If S3 fails, it might be a legacy local file
-          this.logger.warn(
-            `Could not get store logo from S3: ${error.message}. Assuming legacy local file.`,
-          );
-          storeLogo = null; // Don't use local files anymore
-        }
       }
+      // If not an HTTP URL, skip (shouldn't happen after migration)
     }
 
     return {
@@ -629,23 +592,14 @@ export class UsersService {
 
   async getProfileImageUrl(profileImagePath: string): Promise<string | null> {
     if (!profileImagePath) return null;
-    try {
-      // If it's already a Cloudinary URL, return it directly
-      if (profileImagePath.includes('cloudinary.com')) {
-        return profileImagePath;
-      }
 
-      // If it's already a full URL, return it
-      if (profileImagePath.startsWith('http')) {
-        return profileImagePath;
-      }
-
-      // Otherwise, try to get from S3 (for backward compatibility with existing images)
-      return await this.awsS3Service.getImageByFileId(profileImagePath);
-    } catch (error) {
-      this.logger.error(`Failed to get image URL: ${error.message}`);
-      return null;
+    // All images should now be Cloudinary URLs
+    if (profileImagePath.startsWith('http')) {
+      return profileImagePath;
     }
+
+    // If not an HTTP URL, return null (shouldn't happen after migration)
+    return null;
   }
 
   async remove(id: string) {
