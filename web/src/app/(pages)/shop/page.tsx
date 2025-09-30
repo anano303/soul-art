@@ -7,6 +7,7 @@ export async function generateMetadata({
 }: {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }): Promise<Metadata> {
+  console.log("generateMetadata called");
   try {
     // Await searchParams as it's now a Promise in Next.js 15+
     const params = await searchParams;
@@ -14,7 +15,7 @@ export async function generateMetadata({
     // Get brand from search params
     const brand = typeof params?.brand === "string" ? params.brand : "";
 
-    let apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/products?page=1&limit=1&sort=createdAt&direction=desc`;
+    let apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/products?page=1&limit=1&sort=createdAt&direction=desc&populate=user&populate=images`;
     if (brand) {
       apiUrl += `&brand=${encodeURIComponent(brand)}`;
     }
@@ -24,37 +25,47 @@ export async function generateMetadata({
       cache: "no-store",
     });
 
+    console.log("API URL:", apiUrl);
+    console.log("Response status:", response.status);
+
     let representativeImage = "/logo.png"; // fallback to logo
-    let authorInfo = "SoulArt";
-    let title = "პირველი პლატფორმა საქართველოში - ხელნაკეთი ნივთები და ნახატები | SoulArt";
+    let authorInfo = brand || "SoulArt"; // Use brand as default author for brand pages
+    let title =
+      "პირველი პლატფორმა საქართველოში - ხელნაკეთი ნივთები და ნახატები | SoulArt";
     let description =
       "შეიძინეთ უნიკალური ხელნაკეთი ნივთები და ნახატები SoulArt-ის ონლაინ პლატფორმაზე. ქართველი ხელოვანების ნამუშევრები, ხელნაკეთი ნივთები, აქსესუარები და დეკორი. ხარისხიანი ნივთები საუკეთესო ფასად საქართველოში. Shop unique handmade items and paintings.";
 
     if (response.ok) {
       const data = await response.json();
-      if (data.products && data.products.length > 0) {
-        const latestProduct = data.products[0];
-        // Use the last added image of the most recent product
-        if (latestProduct.images && latestProduct.images.length > 0) {
-          representativeImage =
-            latestProduct.images[latestProduct.images.length - 1];
-        }
+      console.log("API Response:", data); // დამატება
+      if (data.items && data.items.length > 0) {
+        const latestProduct = data.items[0];
 
-        // Use author's information
-        if (latestProduct.user) {
+        // For brand pages, use the populated user information
+        if (brand && latestProduct.user) {
           authorInfo =
-            latestProduct.user.storeName ||
-            latestProduct.user.name ||
-            brand ||
-            "SoulArt";
+            latestProduct.user.name || latestProduct.user.storeName || brand;
         }
 
-        // Update title and description to include author info
-        if (brand) {
-          title = `${brand} - ხელნაკეთი ნივთები და ნახატები | SoulArt`;
-          description = `შეიძინეთ ${authorInfo}-ის უნიკალური ნამუშევრები SoulArt-ის ონლაინ პლატფორმაზე. ქართველი ხელოვანების ნამუშევრები, ნახატები,  ხელნაკეთი ნივთები.`;
+        // Use brandLogo as primary representative image for brand pages, fallback to product image
+        if (latestProduct.brandLogo) {
+          representativeImage = latestProduct.brandLogo;
+        } else if (latestProduct.images && latestProduct.images.length > 0) {
+          const imageUrl = latestProduct.images[0];
+          // Ensure the image URL is absolute for OpenGraph
+          representativeImage = imageUrl.startsWith("http")
+            ? imageUrl
+            : `https://soulart.ge${imageUrl}`;
         }
       }
+    } else {
+      console.log("API Error:", response.status); // დამატება
+    }
+
+    // Update title and description to include brand/author info (outside API check)
+    if (brand) {
+      title = `${authorInfo}'s Art Shop | SoulArt`;
+      description = `შეიძინეთ ${authorInfo}-ის უნიკალური ნამუშევრები SoulArt-ის ონლაინ პლატფორმაზე. ქართველი ხელოვანების ნამუშევრები, ნახატები,  ხელნაკეთი ნივთები.`;
     }
 
     return {
@@ -108,7 +119,7 @@ export async function generateMetadata({
             width: 1200,
             height: 630,
             alt: brand
-              ? `${brand} - SoulArt პლატფორმა`
+              ? `${authorInfo}'s Art Collection - SoulArt`
               : "SoulArt პლატფორმა - ხელნაკეთი ნივთები და ნახატები",
           },
         ],
