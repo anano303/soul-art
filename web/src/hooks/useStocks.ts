@@ -25,6 +25,8 @@ interface StockItem {
   stock: number;
 }
 
+const INITIAL_STOCK = 1;
+
 // Modified to create objects with named fields
 export const generateCombinations = (
   attrArrays: string[][],
@@ -121,7 +123,7 @@ export const useStocks = ({ initialData, attributes }: UseStocksProps) => {
             variant.size === combo.size &&
             variant.color === combo.color
         );
-        initialStock = matchingVariant?.stock || 0;
+        initialStock = matchingVariant?.stock || INITIAL_STOCK;
       }
 
       newStocks[key] = {

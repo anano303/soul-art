@@ -88,6 +88,7 @@ export function ProductCard({
             loading="lazy"
             className="image"
           />
+          <div className="product-card-overlay"></div>
         </div>
         <div className="product-info">
           <div className="product-name-rating">

@@ -9,7 +9,7 @@
   /* border-radius: 8px; */
   overflow: hidden;
   /* background-color: var(--primary-color); */
-  box-shadow: inset -3px 0px 20px 0px var(--primary-color, #012645);
+  box-shadow: 2px 9px 10px rgba(0, 0, 0, 0.1);
   transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
   text-decoration: none;
   margin: 0px;
@@ -34,7 +34,6 @@
 
 .product-card.handmade-theme:hover {
   transform: translateY(-5px);
-  box-shadow: inset -3px 0px 20px 0px var(--secondary-color);
 }
 
 .product-card a {
@@ -43,7 +42,16 @@
 
 .product-card:hover {
   transform: translateY(-5px);
-  box-shadow: inset -3px 0px 20px 0px var(--primary-color);
+}
+
+.product-card-overlay {
+  position: absolute;
+  transition: box-shadow .3s ease-in-out;
+  inset: 0;
+}
+
+.product-card:hover .product-card-overlay {
+  box-shadow: inset 0 0 20px 0 var(--primary-color);
 }
 
 .product-image {

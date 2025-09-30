@@ -1515,11 +1515,11 @@ export function CreateProductForm({
               className="stock-info"
             >
               {" "}
-              <label>
-                {stock.ageGroup ? getLocalizedAgeGroupName(stock.ageGroup) : ""}{" "}
-                - {stock.size || ""} -{" "}
+              {stocks.length > 1 ? (<label>
+                {stock.ageGroup ? getLocalizedAgeGroupName(stock.ageGroup) + ' - ' : ""}{" "}
+                {stock.size + ' - ' || ""}{" "}
                 {stock.color ? getLocalizedColorName(stock.color) : ""}
-              </label>
+              </label>) : <label htmlFor="countInStock">{t("adminProducts.stock")}</label>}
               <input
                 id="countInStock"
                 name="countInStock"
@@ -1531,7 +1531,7 @@ export function CreateProductForm({
               />
             </div>
           ))}{" "}
-        <div>
+        {stocks?.length > 1 && <div>
           <label htmlFor="countInStock">{t("adminProducts.stock")}</label>
           <input
             id="countInStock"
@@ -1558,31 +1558,35 @@ export function CreateProductForm({
           {errors.countInStock && (
             <p className="create-product-error">{errors.countInStock}</p>
           )}
-        </div>
-        Delivery Section
+        </div>}
+        <label>
+          {language === 'en' ? 'Delivery Section' : 'მიწოდების განყოფილება'}
+        </label>
         <div className="delivery-section">
           <h3>მიწოდების ტიპი</h3>
           <div className="delivery-type-options">
-            <label>
+            <div className="delivery-type-option">
+              <label htmlFor="soul-art-delivery">SoulArt მიწოდება</label>
               <input
                 type="radio"
                 name="deliveryType"
+                id="soul-art-delivery"
                 value="SoulArt"
                 checked={deliveryType === "SoulArt"}
                 onChange={() => setDeliveryType("SoulArt")}
               />
-              <span>SoulArt მიწოდება</span>
-            </label>
-            <label>
+            </div>
+            <div className="delivery-type-option">
+              <label htmlFor="seller-delivery">გამყიდველის მიწოდება</label>
               <input
                 type="radio"
                 name="deliveryType"
+                id="seller-delivery"
                 value="SELLER"
                 checked={deliveryType === "SELLER"}
                 onChange={() => setDeliveryType("SELLER")}
               />
-              <span>გამყიდველის მიწოდება</span>
-            </label>
+            </div>
           </div>
 
           {deliveryType === "SELLER" && (

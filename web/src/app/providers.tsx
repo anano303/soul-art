@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { usePerformanceOptimizations } from "@/hooks/usePerformanceOptimizations";
@@ -25,20 +26,22 @@ export const queryClient = new QueryClient({
   },
 });
 
-// Make queryClient globally accessible for auth reset during refresh failures
-if (typeof window !== "undefined") {
-  // Create a compatible object that satisfies the Window.queryClient type
-  window.queryClient = {
-    setQueryData: (key, data) => {
-      // Use a type assertion to handle the compatibility issue
-      queryClient.setQueryData(key, () => data);
-    },
-  };
-}
 
 export function Providers({ children }: { children: React.ReactNode }) {
   // Initialize performance optimizations
   usePerformanceOptimizations();
+
+  // Make queryClient globally accessible for auth reset during refresh failures
+  // Set up global queryClient access after hydration
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      window.queryClient = {
+        setQueryData: (key, data) => {
+          queryClient.setQueryData(key, () => data);
+        },
+      };
+    }
+  }, []);
 
   return (
     <QueryClientProvider client={queryClient}>

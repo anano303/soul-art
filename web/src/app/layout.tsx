@@ -237,6 +237,7 @@ export default function RootLayout({
       <body
         className="antialiased min-h-screen flex flex-col overflow-x-hidden"
         style={{ maxWidth: "100vw" }}
+        suppressHydrationWarning={true}
       >
         {/* Dynamic Favicon Handler */}
         <DynamicFavicon />
