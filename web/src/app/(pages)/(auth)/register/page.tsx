@@ -5,6 +5,8 @@ import { AuthLayout } from "@/modules/auth/layouts/auth-layout";
 import { useLanguage } from "@/hooks/LanguageContext";
 import { Suspense } from "react";
 
+export const dynamic = "force-dynamic";
+
 export default function RegisterPage() {
   const { t } = useLanguage();
 

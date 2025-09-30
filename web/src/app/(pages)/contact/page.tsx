@@ -4,6 +4,8 @@ import { useState } from "react";
 import "./contact.css";
 import { useLanguage } from "@/hooks/LanguageContext";
 
+export const dynamic = "force-dynamic";
+
 export default function ContactPage() {
   const { t } = useLanguage();
   const [formData, setFormData] = useState({
