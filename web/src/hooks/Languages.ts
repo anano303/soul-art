@@ -259,6 +259,7 @@ export const TRANSLATIONS: Translations = {
       referrals: "რეფერალები",
       adminReferrals: "რეფერალების მართვა",
       banners: "ბანერები",
+      analytics: "ანალიტიკა",
     },
 
     // Error messages
@@ -1529,6 +1530,7 @@ export const TRANSLATIONS: Translations = {
       adminReferrals: "Manage Referrals",
       categories: "Categories",
       banners: "Banners",
+      analytics: "Analytics",
     },
 
     // Error messages

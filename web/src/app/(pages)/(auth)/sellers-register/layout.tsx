@@ -44,14 +44,14 @@ export const metadata: Metadata = {
     },
   },
   openGraph: {
-    title: "გახდი გამყიდველი - დაიწყე გაყიდვა SoulArt-ზე",
+    title: "გახდი SoulArt-ის ნაწილი - დაიწყე გაყიდვა SoulArt-ზე",
     description:
       "შექმენი შენი ონლაინ მაღაზია SoulArt-ზე. გაყიდე შენი ნახატები და ხელნაკეთი ნივთები ფართო აუდიტორიასთან.",
     url: "https://soulart.ge/sellers-register",
     siteName: "SoulArt",
     images: [
       {
-        url: "/seller.jpg",
+        url: "/seller.png",
         width: 1200,
         height: 630,
         alt: "გახდი გამყიდველი SoulArt-ზე - დაიწყე გაყიდვა შენი ნახატებისა და ხელნაკეთი ნივთების",
@@ -62,10 +62,10 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "გახდი გამყიდველი - დაიწყე გაყიდვა SoulArt-ზე",
+    title: "გახდი SoulArt-ის ნაწილი - დაიწყე გაყიდვა SoulArt-ზე",
     description:
       "შექმენი შენი ონლაინ მაღაზია SoulArt-ზე. გაყიდე შენი ნახატები და ხელნაკეთი ნივთები.",
-    images: ["/seller.jpg"],
+    images: ["/seller.png"],
   },
   alternates: {
     canonical: "https://soulart.ge/sellers-register",

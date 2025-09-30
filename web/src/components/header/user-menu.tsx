@@ -18,6 +18,7 @@ import {
   DollarSign,
   LogOut,
   Gift,
+  BarChart3,
 } from "lucide-react";
 
 // Add a style object for the FiraGo font
@@ -286,6 +287,18 @@ export default function UserMenu({ onNavigate }: { onNavigate?: () => void }) {
               >
                 <DollarSign size={18} />
                 <span>{t("navigation.balances")}</span>
+              </Link>
+            )}
+
+            {/* Analytics link */}
+            {user.role === Role.Admin && (
+              <Link
+                href="/admin/analytics"
+                className="dropdown-item"
+                onClick={handleLinkClick}
+              >
+                <BarChart3 size={18} />
+                <span>{t("navigation.analytics")}</span>
               </Link>
             )}
 
