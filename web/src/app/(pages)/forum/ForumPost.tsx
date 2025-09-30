@@ -812,6 +812,7 @@ const ForumPost = ({
         width={80}
         height={80}
         className="forum-post-image"
+        unoptimized
       />
       <div className="forum-post-content">
         <div className="forum-post-author">
@@ -927,6 +928,7 @@ const ForumPost = ({
                   alt="current post image"
                   width={150}
                   height={100}
+                  unoptimized
                 />
               </div>
             ) : (
@@ -936,6 +938,7 @@ const ForumPost = ({
                   alt="current post image"
                   width={150}
                   height={100}
+                  unoptimized
                 />
               </div>
             )}
