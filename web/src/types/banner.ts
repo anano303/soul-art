@@ -18,7 +18,7 @@ export interface CreateBannerData {
   buttonText: string;
   buttonTextEn: string;
   buttonLink: string;
-  imageUrl?: string;
+  imageUrl: string;
   isActive?: boolean;
   sortOrder?: number;
 }

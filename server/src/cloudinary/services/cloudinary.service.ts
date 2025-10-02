@@ -8,7 +8,9 @@ export class CloudinaryService {
     file: Express.Multer.File,
   ): Promise<UploadApiResponse | UploadApiErrorResponse> {
     return new Promise((resolve, reject) => {
-      const upload = v2.uploader.upload_stream(
+      // Use upload instead of upload_stream for better compatibility
+      v2.uploader.upload(
+        `data:${file.mimetype};base64,${file.buffer.toString('base64')}`,
         { folder: 'ecommerce' },
         (error, result) => {
           if (error) {
@@ -18,14 +20,11 @@ export class CloudinaryService {
           resolve(result as any);
         },
       );
-
-      const stream = Readable.from(file.buffer);
-      stream.pipe(upload);
     });
   }
 
   async uploadImages(images: string[]): Promise<string[]> {
-    const uploadPromises = images.map(async imageUrl => {
+    const uploadPromises = images.map(async (imageUrl) => {
       const response = await fetch(imageUrl);
       const buffer = Buffer.from(await response.arrayBuffer());
 

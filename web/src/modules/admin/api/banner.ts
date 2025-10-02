@@ -1,4 +1,5 @@
 import { apiClient } from "@/lib/axios";
+import axios from "axios";
 import { Banner, CreateBannerData } from "@/types/banner";
 
 export async function getBanners(): Promise<{
@@ -32,7 +33,7 @@ export async function getActiveBanners(): Promise<{
 export async function createBanner(
   bannerData: CreateBannerData,
   image?: File
-): Promise<{ success: boolean; data?: Banner; error?: string }> {
+): Promise<Banner> {
   try {
     const formData = new FormData();
 
@@ -48,8 +49,17 @@ export async function createBanner(
       formData.append("images", image);
     }
 
-    // Use apiClient for FormData - it handles multipart correctly
-    const response = await apiClient.post("/banners", formData);
+    // Use axios directly for FormData to avoid default JSON content-type
+    const response = await axios.post(
+      `${apiClient.defaults.baseURL}/banners`,
+      formData,
+      {
+        headers: {
+          // Don't set Content-Type, let axios/browser handle multipart/form-data
+        },
+        withCredentials: true,
+      }
+    );
     const data = response.data;
 
     // Send discount notification if banner is active and has discount keywords
@@ -84,10 +94,10 @@ export async function createBanner(
       }
     }
 
-    return { success: true, data };
+    return data;
   } catch (error) {
     console.error("Error creating banner:", error);
-    return { success: false, error: "Network error" };
+    throw new Error("Failed to create banner");
   }
 }
 
@@ -95,7 +105,7 @@ export async function updateBanner(
   id: string,
   bannerData: Partial<CreateBannerData>,
   image?: File
-): Promise<{ success: boolean; data?: Banner; error?: string }> {
+): Promise<Banner> {
   try {
     const formData = new FormData();
 
@@ -111,23 +121,29 @@ export async function updateBanner(
       formData.append("images", image);
     }
 
-    // Use apiClient for FormData - it handles multipart correctly
-    const response = await apiClient.patch(`/banners/${id}`, formData);
-    return { success: true, data: response.data };
+    // Use axios directly for FormData to avoid default JSON content-type
+    const response = await axios.patch(
+      `${apiClient.defaults.baseURL}/banners/${id}`,
+      formData,
+      {
+        headers: {
+          // Don't set Content-Type, let axios/browser handle multipart/form-data
+        },
+        withCredentials: true,
+      }
+    );
+    return response.data;
   } catch (error) {
     console.error("Error updating banner:", error);
-    return { success: false, error: "Network error" };
+    throw new Error("Failed to update banner");
   }
 }
 
-export async function deleteBanner(
-  id: string
-): Promise<{ success: boolean; error?: string }> {
+export async function deleteBanner(id: string): Promise<void> {
   try {
     await apiClient.delete(`/banners/${id}`);
-    return { success: true };
   } catch (error) {
     console.error("Error deleting banner:", error);
-    return { success: false, error: "Network error" };
+    throw new Error("Failed to delete banner");
   }
 }

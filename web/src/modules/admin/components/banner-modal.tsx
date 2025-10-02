@@ -28,6 +28,7 @@ export function BannerModal({ banner, onClose, onSuccess }: BannerModalProps) {
     buttonText: banner?.buttonText || "",
     buttonTextEn: banner?.buttonTextEn || "",
     buttonLink: banner?.buttonLink || "",
+    imageUrl: banner?.imageUrl || "",
     isActive: banner?.isActive ?? true,
     sortOrder: banner?.sortOrder || 0,
   });
@@ -106,6 +107,16 @@ export function BannerModal({ banner, onClose, onSuccess }: BannerModalProps) {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
+    // Validate that image is selected for new banners
+    if (!isEditing && !selectedImage) {
+      toast({
+        title: "შეცდომა",
+        description: "გთხოვთ აირჩიოთ ბანერის სურათი",
+        variant: "destructive",
+      });
+      return;
+    }
+
     if (isEditing) {
       updateMutation.mutate({
         data: formData,
@@ -114,7 +125,7 @@ export function BannerModal({ banner, onClose, onSuccess }: BannerModalProps) {
     } else {
       createMutation.mutate({
         data: formData,
-        image: selectedImage || undefined,
+        image: selectedImage!,
       });
     }
   };

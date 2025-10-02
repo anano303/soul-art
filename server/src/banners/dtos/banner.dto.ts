@@ -17,8 +17,7 @@ export class CreateBannerDto {
   buttonLink: string;
 
   @IsString()
-  @IsOptional()
-  imageUrl?: string;
+  imageUrl: string;
 
   @IsBoolean()
   @IsOptional()
@@ -27,6 +26,10 @@ export class CreateBannerDto {
   @IsNumber()
   @IsOptional()
   sortOrder?: number;
+
+  // Allow images field for file upload (will be handled by interceptor)
+  @IsOptional()
+  images?: any;
 }
 
 export class UpdateBannerDto {
@@ -61,4 +64,8 @@ export class UpdateBannerDto {
   @IsNumber()
   @IsOptional()
   sortOrder?: number;
+
+  // Allow images field for file upload (will be handled by interceptor)
+  @IsOptional()
+  images?: any;
 }

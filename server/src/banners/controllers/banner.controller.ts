@@ -40,18 +40,41 @@ export class BannerController {
     @UploadedFiles() images?: Express.Multer.File[],
   ) {
     try {
+      console.log('Creating banner, received images:', images);
+      console.log('Images length:', images?.length);
+      console.log('CreateBannerDto:', createBannerDto);
+
+      // Validate that image is provided
+      if (!images || images.length === 0) {
+        console.log('No images provided, throwing error');
+        throw new HttpException(
+          'Banner image is required',
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+
       let imageUrl = '';
 
-      if (images && images.length > 0) {
+      try {
+        console.log('Uploading image to Cloudinary, file:', images[0]);
         // Upload image to Cloudinary with banner optimization
         imageUrl = await this.appService.uploadBannerImageToCloudinary(
           images[0],
         );
+        console.log('Image uploaded successfully, URL:', imageUrl);
+      } catch (uploadError) {
+        console.error('Failed to upload banner image:', uploadError);
+        throw new HttpException(
+          'Failed to upload banner image',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
       }
 
+      const { images: _, ...bannerData } = createBannerDto;
+
       const banner = await this.bannerService.create({
-        ...createBannerDto,
-        imageUrl: imageUrl,
+        ...bannerData,
+        imageUrl,
       });
 
       return banner;
@@ -98,8 +121,10 @@ export class BannerController {
         );
       }
 
+      const { images: _, ...updateData } = updateBannerDto;
+
       const banner = await this.bannerService.update(id, {
-        ...updateBannerDto,
+        ...updateData,
         imageUrl: imageUrl,
       });
 

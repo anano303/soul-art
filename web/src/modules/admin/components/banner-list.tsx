@@ -109,7 +109,7 @@ export function BannerList() {
               <tr key={banner._id} className="banner-tr">
                 <td className="banner-td">
                   <Image
-                    src={banner.imageUrl || ""}
+                    src={banner.imageUrl}
                     alt={banner.title}
                     width={80}
                     height={50}
