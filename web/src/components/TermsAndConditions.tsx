@@ -296,7 +296,7 @@ export function TermsAndConditions({
                 <ul>
                   <li>
                     <strong>
-                      SoulArt.ge (შემდგომში „ჩვენ", „ჩვენი", „ვებ-გვერდი")
+                      SoulArt.ge (შემდგომში „ჩვენ", „ჩვენი", „ვებ-გვერდი" , „პლატფორმა")
                     </strong>{" "}
                     - საქართველოს კანონმდებლობის შესაბამისად რეგისტრირებული
                     მცირე მეწარმე, საიდენტიფიკაციო კოდი 01030053649;
@@ -723,13 +723,6 @@ export function TermsAndConditions({
                   შეტყობინებების მიღებაზე.
                 </p>
                 <p>
-                  SoulArt.ge ვალდებულია მომხმარებლის მიერ თანხმობის გაცემისა და
-                  თანხმობის გამოხმობის დრო და ფაქტი აღრიცხოს და შეინახოს
-                  პირდაპირი მარკეტინგის განხორციელების ვადით და პირდაპირი
-                  მარკეტინგის განხორციელების შეწყვეტიდან 1 (ერთი) წლის
-                  განმავლობაში.
-                </p>
-                <p>
                   მომხმარებლის მიერ პირდაპირი მარკეტინგის შეწყვეტის თაობაზე
                   მოთხოვნა არ ავალდებულებს SoulArt.ge-ს შეწყვიტოს ინფორმაციის
                   მიწოდება განახლებებისა და ცვლილებების შესახებ.
@@ -743,8 +736,7 @@ export function TermsAndConditions({
                   ანიმაციური გამოსახულებები ექსკლუზიურად ეკუთვნის SoulArt.ge-ს.
                 </p>
                 <p>
-                  SoulArt.ge-ს სასაქონლო ნიშანი რეგისტრირებულია საქპატენტში და
-                  წარმოადგენს SoulArt.ge-ს საკუთრებას.
+                  SoulArt.ge-ს სასაქონლო ნიშანი წარმოადგენს SoulArt.ge-ს საკუთრებას.
                 </p>
                 <p>
                   SoulArt.ge-ს სასაქონლო ნიშნის ნებისმიერი სახით გამოყენება,
@@ -1288,12 +1280,6 @@ export function TermsAndConditions({
                   receiving SMS&Email notifications about news and offers.
                 </p>
                 <p>
-                  SoulArt.ge is obliged to record and store the time and fact of
-                  the user's consent and withdrawal of consent for the period of
-                  direct marketing implementation and for 1 (one) year after the
-                  cessation of direct marketing implementation.
-                </p>
-                <p>
                   The user's request to cease direct marketing does not oblige
                   SoulArt.ge to stop providing information about updates and
                   changes.
@@ -1307,8 +1293,7 @@ export function TermsAndConditions({
                   are exclusively owned by SoulArt.ge.
                 </p>
                 <p>
-                  SoulArt.ge's trademark is registered at Sakpatenti and is the
-                  property of SoulArt.ge.
+                  SoulArt.ge's trademark is the property of SoulArt.ge.
                 </p>
                 <p>
                   Any use of SoulArt.ge's trademark in any form without
