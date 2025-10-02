@@ -273,8 +273,11 @@ export function SellerContract({
                 <p>
                   <strong>1.1.</strong> წინამდებარე საჯარო ხელშეკრულება
                   (&quot;ხელშეკრულება&quot;) წარმოადგენს იურიდიულ შეთავაზებას
-                  SoulArt პლატფორმის (&quot;პლატფორმა&quot;) და ნებისმიერი
+                  SoulArt.ge-ს (&quot;პლატფორმა&quot;) და ნებისმიერი
                   რეგისტრირებული გამყიდველის (&quot;გამყიდველი&quot;) შორის.
+                  SoulArt.ge (ს.ნ. 01030053649) არის მცირე მეწარმე, რომელიც
+                  საქართველოს კანონმდებლობის შესაბამისად ახორციელებს
+                  საქმიანობას.
                 </p>
                 <p>
                   <strong>1.2.</strong> ხელშეკრულება ძალაში შედის გამყიდველის
@@ -296,8 +299,10 @@ export function SellerContract({
                 <p>
                   <strong>1.1.</strong> This public agreement
                   (&quot;Agreement&quot;) constitutes a legal offer between the
-                  SoulArt platform (&quot;Platform&quot;) and any registered
-                  seller (&quot;Seller&quot;).
+                  SoulArt.ge platform (&quot;Platform&quot;) and any registered
+                  seller (&quot;Seller&quot;). SoulArt.ge is a small
+                  entrepreneur registered in accordance with Georgian
+                  legislation, identification code 01030053649.
                 </p>
                 <p>
                   <strong>1.2.</strong> The Agreement becomes effective from the
@@ -393,8 +398,8 @@ export function SellerContract({
                   მყიდველს მითითებულ ვადებში და პირობებით.
                 </p>
                 <p>
-                  <strong>3.2.</strong> თანხის ჩარიცხვა გამყიდველისთვის ხდება მხოლოდ
-                  იმ შემთხვევაში, თუ შეკვეთა წარმატებით ჩაბარდა მყიდველს.
+                  <strong>3.2.</strong> თანხის ჩარიცხვა გამყიდველისთვის ხდება
+                  მხოლოდ იმ შემთხვევაში, თუ შეკვეთა წარმატებით ჩაბარდა მყიდველს.
                 </p>
                 <p>
                   <strong>3.3.</strong> პროდუქცია უნდა შეესაბამებოდეს
@@ -555,8 +560,8 @@ export function SellerContract({
                 </ul>
                 <p>
                   <strong>6.2.</strong> შეწყვეტისას პლატფორმას უფლება აქვს
-                  შეაჩეროს გამყიდველის პროფილი და შეინარჩუნოს არსებული გამომუშავებული თანხები
-                  მანამ, სანამ ყველა დავა არ მოგვარდება.
+                  შეაჩეროს გამყიდველის პროფილი და შეინარჩუნოს არსებული
+                  გამომუშავებული თანხები მანამ, სანამ ყველა დავა არ მოგვარდება.
                 </p>
               </>
             ) : (
