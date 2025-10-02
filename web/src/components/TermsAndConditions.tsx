@@ -299,7 +299,7 @@ export function TermsAndConditions({
                       SoulArt.ge (შემდგომში „ჩვენ", „ჩვენი", „ვებ-გვერდი" , „პლატფორმა")
                     </strong>{" "}
                     - საქართველოს კანონმდებლობის შესაბამისად რეგისტრირებული
-                    მცირე მეწარმე, საიდენტიფიკაციო კოდი 01030053649;
+                    მცირე მეწარმე, საიდენტიფიკაციო კოდი 01030053649; SoulArt.ge მოქმედებს მხოლოდ შუამავალი პლატფორმის როლში და არ არის პასუხისმგებელი პროდუქტებზე, ტრანზაქციებზე ან მომხმარებლებსა და გამყიდველებს შორის ურთიერთქმედებაზე.
                   </li>
                   <li>
                     <strong>მომხმარებელი</strong> - იურიდიული პირი ან 18 წელს
@@ -888,7 +888,7 @@ export function TermsAndConditions({
                   <li>
                     <strong>SoulArt.ge ("we", "our", "platform")</strong> -
                     Small entrepreneur registered in accordance with Georgian
-                    legislation, identification code 01030053649;
+                    legislation, identification code 01030053649; SoulArt.ge acts solely as an intermediary platform and bears no responsibility for the products, transactions, or interactions between users and sellers.
                   </li>
                   <li>
                     <strong>User</strong> - A legal entity or natural person
