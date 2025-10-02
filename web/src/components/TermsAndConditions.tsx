@@ -310,7 +310,11 @@ export function TermsAndConditions({
                   <li>
                     <strong>გამყიდველი</strong> - ფიზიკური ან იურიდიული პირი,
                     რომელიც თავის პროდუქტებს ყიდის SoulArt.ge-ს პლატფორმის
-                    მეშვეობით;
+                    მეშვეობით, არის 18 წელს მიღწეული ქმედუნარიანი პირი ან აქვს
+                    მეურვის უფლება, რომლის მეურვის უფლებაზეც პასუხისმგებელია
+                    მეურვე და არა SoulArt.ge. SoulArt.ge არ არის პასუხისმგებელი
+                    გამყიდველის მიერ მითითებული ანგარიშის ნომრის კუთვნილებასა და
+                    სისწორეზე;
                   </li>
                   <li>
                     <strong>მომხმარებლის თანხმობა</strong> - წინამდებარე
@@ -901,7 +905,11 @@ export function TermsAndConditions({
                   </li>
                   <li>
                     <strong>Seller</strong> - A natural or legal person who
-                    sells their products through the SoulArt.ge platform;
+                    sells their products through the SoulArt.ge platform, is an
+                    adult over 18 years of age or has legal capacity, for which
+                    legal capacity the seller is responsible and not SoulArt.ge.
+                    SoulArt.ge is not responsible for the ownership and accuracy
+                    of the account number provided by the seller;
                   </li>
                   <li>
                     <strong>User Consent</strong> - The user's consent to the
