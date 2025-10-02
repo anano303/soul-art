@@ -254,6 +254,11 @@ export function SellerContract({
                 language === "ge" ? "ge-GE" : "en-US"
               )}
             </p>
+            <p style={{ fontSize: "12px", color: "#666", margin: "5px 0 0 0" }}>
+              {language === "ge"
+                ? "კითხვებისთვის დაუკავშირდით: info@soulart.ge"
+                : "For questions contact: info@soulart.ge"}
+            </p>
           </div>
 
           {/* Contract content sections with multilingual support */}
