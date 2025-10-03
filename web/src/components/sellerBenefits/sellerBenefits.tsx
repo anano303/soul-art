@@ -18,7 +18,7 @@ export default function SellerBenefits() {
             🌟{t("sellerBenefits.benefits.title")}
           </h3>
           <ul className="list">
-            {[...Array(7)].map((_, i) => (
+            {[...Array(6)].map((_, i) => (
               <li key={i}>{t(`sellerBenefits.benefits.items.${i}`)}</li>
             ))}
           </ul>
