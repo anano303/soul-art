@@ -598,8 +598,7 @@ export const TRANSLATIONS: Translations = {
         items: [
           "სრულიად უფასო პირადი ონლაინ გალერეა ულიმიტო ნამუშევრებით",
           "მარტივი რეგისტრაცია და ნამუშევრების ატვირთვა",
-          "პირველი თვე - 0% საკომისიო გაყიდვებზე",
-          "შემდგომი პერიოდი - მხოლოდ 10% წარმატებული გაყიდვებიდან",
+          "საკომისიო - მხოლოდ 10% წარმატებული გაყიდვებიდან",
           "ანაზღაურების მომენტალური ჩარიცხვა მითითებულ ანგარიშზე, მას შემდეგ რაც მომხმარებელი დაადასტურებს რომ მიიღო შეკვეთა",
           "დეტალური სტატისტიკა და სრული კონტროლი თქვენს გაყიდვებზე",
           "თქვენი ნამუშევრების პოპულარიზაცია ფართო აუდიტორიაში",
@@ -1867,8 +1866,7 @@ export const TRANSLATIONS: Translations = {
         items: [
           "Completely free personal online gallery with unlimited artworks",
           "Easy registration and artwork upload",
-          "First month - 0% commission on sales",
-          "Subsequent period - only 10% from successful sales",
+          "Commission - only 10% from successful sales",
           "Instant payment to your specified account after customer confirms receipt",
           "Detailed statistics and complete control over your sales",
           "Promotion of your work to a wide audience",
