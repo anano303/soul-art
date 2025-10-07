@@ -32,10 +32,34 @@ export function ProductsList() {
     return 1;
   });
 
-  const [searchQuery, setSearchQuery] = useState("");
-  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState<string>("all");
-  const [categoryFilter, setCategoryFilter] = useState<string>("all");
+  // Restore search and filters from sessionStorage
+  const [searchQuery, setSearchQuery] = useState(() => {
+    if (typeof window !== "undefined") {
+      return sessionStorage.getItem("adminProductsSearch") || "";
+    }
+    return "";
+  });
+
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState(() => {
+    if (typeof window !== "undefined") {
+      return sessionStorage.getItem("adminProductsSearch") || "";
+    }
+    return "";
+  });
+
+  const [statusFilter, setStatusFilter] = useState<string>(() => {
+    if (typeof window !== "undefined") {
+      return sessionStorage.getItem("adminProductsStatusFilter") || "all";
+    }
+    return "all";
+  });
+
+  const [categoryFilter, setCategoryFilter] = useState<string>(() => {
+    if (typeof window !== "undefined") {
+      return sessionStorage.getItem("adminProductsCategoryFilter") || "all";
+    }
+    return "all";
+  });
 
   const { user } = useUser();
   const { language } = useLanguage();
@@ -66,6 +90,26 @@ export function ProductsList() {
       sessionStorage.setItem("adminProductsPage", page.toString());
     }
   }, [page]);
+
+  // Save search query to sessionStorage
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      sessionStorage.setItem("adminProductsSearch", searchQuery);
+    }
+  }, [searchQuery]);
+
+  // Save filters to sessionStorage
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      sessionStorage.setItem("adminProductsStatusFilter", statusFilter);
+    }
+  }, [statusFilter]);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      sessionStorage.setItem("adminProductsCategoryFilter", categoryFilter);
+    }
+  }, [categoryFilter]);
 
   // Add refetch capability to the query with a key to force updates
   const { data, isLoading, refetch } = useQuery({
@@ -113,8 +157,20 @@ export function ProductsList() {
   const refreshProductData = useCallback(async () => {
     try {
       console.log("Manually refreshing product data...");
+
+      // Build params with current filters
+      const params = new URLSearchParams({
+        page: page.toString(),
+        limit: "8",
+      });
+
+      if (debouncedSearchQuery) params.append("keyword", debouncedSearchQuery);
+      if (statusFilter !== "all") params.append("status", statusFilter);
+      if (categoryFilter !== "all")
+        params.append("mainCategory", categoryFilter);
+
       const response = await fetchWithAuth(
-        `/products/user?page=${page}&limit=8`
+        `/products/user?${params.toString()}`
       );
       const freshData = await response.json();
       return freshData;
@@ -122,7 +178,7 @@ export function ProductsList() {
       console.error("Error refreshing product data:", error);
       return null;
     }
-  }, [page]);
+  }, [page, debouncedSearchQuery, statusFilter, categoryFilter]);
 
   // Check if we just returned from the edit page
   useEffect(() => {
@@ -131,20 +187,13 @@ export function ProductsList() {
       // Clear the flag
       sessionStorage.removeItem("returnFromEdit");
 
-      // Force refresh the data with a direct API call
-      refreshProductData().then((freshData) => {
-        if (freshData) {
-          // Manually update the cache with the fresh data
-          queryClient.setQueryData(["products", page, refreshKey], freshData);
-        }
-        // Also trigger a normal refetch as a backup
-        setRefreshKey(Date.now());
-        refetch();
-      });
+      // Simply trigger a refetch - this will use current filters automatically
+      // Don't change refreshKey as it would invalidate the cache we're trying to update
+      refetch();
     }
-  }, [refetch, page, queryClient, refreshProductData, refreshKey]);
+  }, [refetch]);
 
-  const fetchPendingProducts = async () => {
+  const fetchPendingProducts = async (): Promise<Product[]> => {
     console.log("Fetching pending products...");
     const response = await fetchWithAuth("/products/pending");
     const data = await response.json();
@@ -356,7 +405,7 @@ export function ProductsList() {
   // Modify the table rows to use these functions correctly
   return (
     <div className="prd-card">
-      {isAdmin && pendingProducts?.length > 0 && (
+      {isAdmin && pendingProducts && pendingProducts.length > 0 && (
         <div className="pending-products mb-4">
           <h2 className="text-xl font-bold mb-4">Pending Approvals</h2>
           <table className="prd-table">
@@ -650,6 +699,13 @@ export function ProductsList() {
               setStatusFilter("all");
               setCategoryFilter("all");
               setPage(1);
+              // Clear from sessionStorage as well
+              if (typeof window !== "undefined") {
+                sessionStorage.removeItem("adminProductsSearch");
+                sessionStorage.setItem("adminProductsStatusFilter", "all");
+                sessionStorage.setItem("adminProductsCategoryFilter", "all");
+                sessionStorage.setItem("adminProductsPage", "1");
+              }
             }}
             style={{
               padding: "10px 20px",

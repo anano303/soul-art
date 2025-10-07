@@ -71,14 +71,14 @@ export function CreateProductForm({
     initialData || {
       name: "",
       nameEn: "",
-      price: 0,
+      price: 1,
       description: "",
       descriptionEn: "",
       images: [],
       brand: "SoulArt", // Set default brand here
       category: "",
       subcategory: "",
-      countInStock: 0,
+      countInStock: 1,
       hashtags: [],
       brandLogo: undefined,
       videoDescription: "",
@@ -284,7 +284,7 @@ export function CreateProductForm({
         description: initialData.description || "",
         descriptionEn: initialData.descriptionEn || "",
         price: initialData.price || 0,
-        countInStock: initialData.countInStock || 0,
+        countInStock: initialData.countInStock || 1,
         ageGroups: initialData.ageGroups || [],
         sizes: initialData.sizes || [],
         colors: initialData.colors || [],
@@ -379,7 +379,7 @@ export function CreateProductForm({
       brand: "SoulArt", // Set default brand here too
       category: "",
       subcategory: "",
-      countInStock: 0,
+      countInStock: 1,
       hashtags: [],
       ageGroups: [],
       sizes: [],
@@ -1515,52 +1515,60 @@ export function CreateProductForm({
               className="stock-info"
             >
               {" "}
-              {stocks.length > 1 ? (<label>
-                {stock.ageGroup ? getLocalizedAgeGroupName(stock.ageGroup) + ' - ' : ""}{" "}
-                {stock.size + ' - ' || ""}{" "}
-                {stock.color ? getLocalizedColorName(stock.color) : ""}
-              </label>) : <label htmlFor="countInStock">{t("adminProducts.stock")}</label>}
+              {stocks.length > 1 ? (
+                <label>
+                  {stock.ageGroup
+                    ? getLocalizedAgeGroupName(stock.ageGroup) + " - "
+                    : ""}{" "}
+                  {stock.size + " - " || ""}{" "}
+                  {stock.color ? getLocalizedColorName(stock.color) : ""}
+                </label>
+              ) : (
+                <label htmlFor="countInStock">{t("adminProducts.stock")}</label>
+              )}
               <input
                 id="countInStock"
                 name="countInStock"
                 type="number"
                 value={stock.stock}
                 onChange={(elem) => setStockCount(stock, +elem.target.value)}
-                min={0}
+                min={1}
                 required
               />
             </div>
           ))}{" "}
-        {stocks?.length > 1 && <div>
-          <label htmlFor="countInStock">{t("adminProducts.stock")}</label>
-          <input
-            id="countInStock"
-            name="countInStock"
-            type="number"
-            disabled
-            value={totalCount}
-            onChange={handleChange}
-            min={0}
-            required
-          />
-          <small
-            style={{
-              color: "#666",
-              fontSize: "0.9rem",
-              display: "block",
-              marginTop: "4px",
-            }}
-          >
-            {language === "en"
-              ? "Total stock calculated automatically from variants above."
-              : "მთლიანი მარაგი ავტომატურად ითვლება ზემოთ მითითებული ვარიანტებიდან."}
-          </small>
-          {errors.countInStock && (
-            <p className="create-product-error">{errors.countInStock}</p>
-          )}
-        </div>}
+        {stocks?.length > 1 && (
+          <div>
+            <label htmlFor="countInStock">{t("adminProducts.stock")}</label>
+            <input
+              id="countInStock"
+              name="countInStock"
+              type="number"
+              disabled
+              value={totalCount}
+              onChange={handleChange}
+              min={1}
+              required
+            />
+            <small
+              style={{
+                color: "#666",
+                fontSize: "0.9rem",
+                display: "block",
+                marginTop: "4px",
+              }}
+            >
+              {language === "en"
+                ? "Total stock calculated automatically from variants above."
+                : "მთლიანი მარაგი ავტომატურად ითვლება ზემოთ მითითებული ვარიანტებიდან."}
+            </small>
+            {errors.countInStock && (
+              <p className="create-product-error">{errors.countInStock}</p>
+            )}
+          </div>
+        )}
         <label>
-          {language === 'en' ? 'Delivery Section' : 'მიწოდების განყოფილება'}
+          {language === "en" ? "Delivery Section" : "მიწოდების განყოფილება"}
         </label>
         <div className="delivery-section">
           <h3>მიწოდების ტიპი</h3>
