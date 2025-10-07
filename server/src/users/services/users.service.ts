@@ -139,6 +139,27 @@ export class UsersService {
     return user;
   }
 
+  async findUsersByKeyword(keyword: string): Promise<UserDocument[]> {
+    if (!keyword || keyword.trim() === '') {
+      return [];
+    }
+
+    const users = await this.userModel
+      .find({
+        $or: [
+          { email: { $regex: keyword, $options: 'i' } },
+          { name: { $regex: keyword, $options: 'i' } },
+          { storeName: { $regex: keyword, $options: 'i' } },
+          { phoneNumber: { $regex: keyword, $options: 'i' } },
+        ],
+      })
+      .select('_id')
+      .limit(100) // Limit to avoid performance issues
+      .exec();
+
+    return users;
+  }
+
   async findAll(
     page: number = 1,
     limit: number = 20,

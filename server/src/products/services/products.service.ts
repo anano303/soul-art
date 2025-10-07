@@ -102,6 +102,10 @@ export class ProductsService {
     const filter: any = {};
 
     if (keyword) {
+      // First, find users matching the keyword (by email, name, or store name)
+      const matchingUsers = await this.usersService.findUsersByKeyword(keyword);
+      const userIds = matchingUsers.map((u) => u._id);
+
       filter.$or = [
         { name: { $regex: keyword, $options: 'i' } },
         { nameEn: { $regex: keyword, $options: 'i' } },
@@ -109,6 +113,8 @@ export class ProductsService {
         { descriptionEn: { $regex: keyword, $options: 'i' } },
         { brand: { $regex: keyword, $options: 'i' } },
         { hashtags: { $in: [new RegExp(keyword, 'i')] } },
+        // Search by seller information
+        ...(userIds.length > 0 ? [{ user: { $in: userIds } }] : []),
       ];
     }
 

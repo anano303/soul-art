@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Product, User, Category, SubCategory } from "@/types";
 import { ProductsActions } from "./products-actions";
-import { Plus, Sparkles } from "lucide-react";
+import { Plus, Sparkles, Search, Filter, X } from "lucide-react";
 import "./productList.css";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { fetchWithAuth } from "@/lib/fetch-with-auth";
@@ -14,6 +14,7 @@ import { StatusBadge } from "./status-badge";
 import { Role } from "@/types/role";
 import { useLanguage } from "@/hooks/LanguageContext";
 import HeartLoading from "@/components/HeartLoading/HeartLoading";
+import { ProductStatus } from "@/types";
 
 // Extended Product type to include mainCategory and subCategory properties
 interface ProductWithCategories extends Product {
@@ -22,7 +23,20 @@ interface ProductWithCategories extends Product {
 }
 
 export function ProductsList() {
-  const [page, setPage] = useState(1);
+  // Restore page from sessionStorage or default to 1
+  const [page, setPage] = useState(() => {
+    if (typeof window !== "undefined") {
+      const savedPage = sessionStorage.getItem("adminProductsPage");
+      return savedPage ? parseInt(savedPage, 10) : 1;
+    }
+    return 1;
+  });
+
+  const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [categoryFilter, setCategoryFilter] = useState<string>("all");
+
   const { user } = useUser();
   const { language } = useLanguage();
   const [refreshKey, setRefreshKey] = useState(Date.now());
@@ -37,14 +51,56 @@ export function ProductsList() {
 
   const queryClient = useQueryClient();
 
+  // Debounce search query - wait 500ms after user stops typing
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchQuery(searchQuery);
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  // Save page to sessionStorage whenever it changes
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      sessionStorage.setItem("adminProductsPage", page.toString());
+    }
+  }, [page]);
+
   // Add refetch capability to the query with a key to force updates
   const { data, isLoading, refetch } = useQuery({
-    queryKey: ["products", page, refreshKey],
+    queryKey: [
+      "products",
+      page,
+      refreshKey,
+      debouncedSearchQuery, // Use debounced query instead of immediate searchQuery
+      statusFilter,
+      categoryFilter,
+    ],
     queryFn: async () => {
+      const params = new URLSearchParams({
+        page: page.toString(),
+        limit: "8",
+      });
+
+      if (debouncedSearchQuery) params.append("keyword", debouncedSearchQuery); // Use debounced query
+      if (statusFilter !== "all") params.append("status", statusFilter);
+      if (categoryFilter !== "all")
+        params.append("mainCategory", categoryFilter);
+
+      console.log("Fetching products with params:", {
+        page: page.toString(),
+        keyword: debouncedSearchQuery,
+        status: statusFilter,
+        mainCategory: categoryFilter,
+        url: `/products/user?${params.toString()}`,
+      });
+
       const response = await fetchWithAuth(
-        `/products/user?page=${page}&limit=8`
+        `/products/user?${params.toString()}`
       );
       const result = await response.json();
+      console.log("Products fetch result:", result);
       return result;
     },
     staleTime: 30 * 1000, // 30 seconds instead of default 5 minutes
@@ -291,10 +347,11 @@ export function ProductsList() {
     return "";
   }
 
-  if (isLoading) return <HeartLoading size="medium" />;
-
   const products = data?.items || [];
   const totalPages = data?.pages || 1;
+
+  // Never show full page loading - always show the UI with loading indicator
+  // if (isLoading && !data) return <HeartLoading size="medium" />;
 
   // Modify the table rows to use these functions correctly
   return (
@@ -400,6 +457,229 @@ export function ProductsList() {
           </Link>
         </div>
       </div>
+
+      {/* Search and Filter Section */}
+      <div
+        className="search-filter-section"
+        style={{
+          display: "flex",
+          gap: "16px",
+          marginBottom: "20px",
+          padding: "16px",
+          backgroundColor: "#f8f9fa",
+          borderRadius: "8px",
+          flexWrap: "wrap",
+          position: "relative",
+        }}
+      >
+        {/* Loading Indicator */}
+        {isLoading && (
+          <div
+            style={{
+              position: "absolute",
+              top: "8px",
+              right: "8px",
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+              padding: "6px 12px",
+              background: "rgba(1, 38, 69, 0.05)",
+              borderRadius: "20px",
+              fontSize: "13px",
+              color: "#012645",
+              fontWeight: "500",
+            }}
+          >
+            <div
+              style={{
+                width: "16px",
+                height: "16px",
+                border: "2px solid rgba(1, 38, 69, 0.2)",
+                borderTopColor: "#012645",
+                borderRadius: "50%",
+                animation: "spin 0.8s linear infinite",
+              }}
+            />
+            {language === "en" ? "Loading..." : "იტვირთება..."}
+          </div>
+        )}
+
+        {/* Search Input */}
+        <div style={{ flex: "1", minWidth: "250px" }}>
+          <div style={{ position: "relative" }}>
+            <Search
+              style={{
+                position: "absolute",
+                left: "12px",
+                top: "50%",
+                transform: "translateY(-50%)",
+                color:
+                  searchQuery !== debouncedSearchQuery ? "#ffc107" : "#6c757d",
+                width: "18px",
+                height: "18px",
+                transition: "color 0.2s",
+              }}
+            />
+            <input
+              type="text"
+              placeholder={
+                language === "en" ? "Search products..." : "მოძებნე პროდუქტი..."
+              }
+              value={searchQuery}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setPage(1); // Reset to first page on search
+              }}
+              style={{
+                width: "100%",
+                padding: "10px 12px 10px 40px",
+                border: `1px solid ${
+                  searchQuery !== debouncedSearchQuery ? "#ffc107" : "#dee2e6"
+                }`,
+                borderRadius: "6px",
+                fontSize: "14px",
+                outline: "none",
+                transition: "border-color 0.2s",
+              }}
+              onFocus={(e) =>
+                (e.target.style.borderColor =
+                  searchQuery !== debouncedSearchQuery ? "#ffc107" : "#012645")
+              }
+              onBlur={(e) =>
+                (e.target.style.borderColor =
+                  searchQuery !== debouncedSearchQuery ? "#ffc107" : "#dee2e6")
+              }
+            />
+            {searchQuery && (
+              <button
+                onClick={() => {
+                  setSearchQuery("");
+                  setPage(1);
+                }}
+                style={{
+                  position: "absolute",
+                  right: "8px",
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  background: "none",
+                  border: "none",
+                  cursor: "pointer",
+                  padding: "4px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <X size={16} color="#6c757d" />
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Status Filter */}
+        <div style={{ minWidth: "150px" }}>
+          <select
+            value={statusFilter}
+            onChange={(e) => {
+              setStatusFilter(e.target.value);
+              setPage(1);
+            }}
+            style={{
+              width: "100%",
+              padding: "10px 12px",
+              border: "1px solid #dee2e6",
+              borderRadius: "6px",
+              fontSize: "14px",
+              outline: "none",
+              backgroundColor: "white",
+              cursor: "pointer",
+            }}
+          >
+            <option value="all">
+              {language === "en" ? "All Status" : "ყველა სტატუსი"}
+            </option>
+            <option value={ProductStatus.APPROVED}>
+              {language === "en" ? "Approved" : "დამტკიცებული"}
+            </option>
+            <option value={ProductStatus.PENDING}>
+              {language === "en" ? "Pending" : "მომლოდინე"}
+            </option>
+            <option value={ProductStatus.REJECTED}>
+              {language === "en" ? "Rejected" : "უარყოფილი"}
+            </option>
+          </select>
+        </div>
+
+        {/* Category Filter */}
+        <div style={{ minWidth: "180px" }}>
+          <select
+            value={categoryFilter}
+            onChange={(e) => {
+              setCategoryFilter(e.target.value);
+              setPage(1);
+            }}
+            style={{
+              width: "100%",
+              padding: "10px 12px",
+              border: "1px solid #dee2e6",
+              borderRadius: "6px",
+              fontSize: "14px",
+              outline: "none",
+              backgroundColor: "white",
+              cursor: "pointer",
+            }}
+          >
+            <option value="all">
+              {language === "en" ? "All Categories" : "ყველა კატეგორია"}
+            </option>
+            {categoriesData?.map((cat: Category) => (
+              <option key={cat._id || cat.id} value={cat._id || cat.id}>
+                {language === "en" && cat.nameEn ? cat.nameEn : cat.name}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* Clear Filters Button */}
+        {(searchQuery ||
+          statusFilter !== "all" ||
+          categoryFilter !== "all") && (
+          <button
+            onClick={() => {
+              setSearchQuery("");
+              setStatusFilter("all");
+              setCategoryFilter("all");
+              setPage(1);
+            }}
+            style={{
+              padding: "10px 20px",
+              border: "1px solid #dc3545",
+              borderRadius: "6px",
+              fontSize: "14px",
+              backgroundColor: "white",
+              color: "#dc3545",
+              cursor: "pointer",
+              fontWeight: "500",
+              display: "flex",
+              alignItems: "center",
+              gap: "6px",
+              transition: "all 0.2s",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = "#dc3545";
+              e.currentTarget.style.color = "white";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = "white";
+              e.currentTarget.style.color = "#dc3545";
+            }}
+          >
+            <X size={16} />
+            {language === "en" ? "Clear Filters" : "გასუფთავება"}
+          </button>
+        )}
+      </div>
+
       <table className="prd-table">
         <thead>
           <tr className="prd-thead-row">
@@ -417,110 +697,164 @@ export function ProductsList() {
           </tr>
         </thead>
         <tbody>
-          {products.map((product: ProductWithCategories & { user?: User }) => (
-            <tr key={product._id} className="prd-tr">
-              <td className="prd-td prd-td-bold">
-                {" "}
-                #{product._id ? product._id : "No ID"}
-              </td>
-              <td className="prd-td">
-                <div className="prd-img-wrapper">
-                  <Image
-                    src={product.images[0]}
-                    alt={getDisplayName(product)}
-                    fill
-                    className="prd-img"
+          {isLoading && products.length === 0 ? (
+            <tr>
+              <td colSpan={11} style={{ textAlign: "center", padding: "40px" }}>
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    gap: "16px",
+                  }}
+                >
+                  <div
+                    style={{
+                      width: "40px",
+                      height: "40px",
+                      border: "4px solid rgba(1, 38, 69, 0.2)",
+                      borderTopColor: "#012645",
+                      borderRadius: "50%",
+                      animation: "spin 0.8s linear infinite",
+                    }}
                   />
+                  <span
+                    style={{
+                      color: "#012645",
+                      fontSize: "16px",
+                      fontWeight: "500",
+                    }}
+                  >
+                    {language === "en"
+                      ? "Loading products..."
+                      : "პროდუქტები იტვირთება..."}
+                  </span>
                 </div>
-              </td>
-              <td className="prd-td">{getDisplayName(product)}</td>
-              <td className="prd-td">
-                {/* <StatusBadge status={product.status} /> */}
-                {hasActiveDiscount(product) ? (
-                  <div className="price-display">
-                    <span
-                      className="original-price"
-                      style={{
-                        textDecoration: "line-through",
-                        color: "#999",
-                        fontSize: "0.9em",
-                      }}
-                    >
-                      {product.price} ₾
-                    </span>
-                    <br />
-                    <span
-                      className="discounted-price"
-                      style={{ color: "#e74c3c", fontWeight: "bold" }}
-                    >
-                      {calculateDiscountedPrice(product).toFixed(2)} ₾
-                    </span>
-                    <span
-                      className="discount-badge"
-                      style={{
-                        backgroundColor: "#e74c3c",
-                        color: "white",
-                        padding: "2px 6px",
-                        borderRadius: "4px",
-                        fontSize: "0.8em",
-                        marginLeft: "8px",
-                      }}
-                    >
-                      -{product.discountPercentage}%
-                    </span>
-                  </div>
-                ) : (
-                  <span>{product.price} ₾</span>
-                )}
-              </td>
-              <td className="prd-td">{getCategoryDisplayName(product)}</td>
-              <td className="prd-td">{getSubcategoryDisplayName(product)}</td>
-              <td className="prd-td">{product.countInStock}</td>
-              <td className="prd-td">
-                <StatusBadge status={product.status} />
-              </td>
-              <td className="prd-td">
-                <div className="delivery-info">
-                  <span>{product.deliveryType || "SOULART"}</span>
-                  {product.deliveryType === "SELLER" &&
-                    product.minDeliveryDays &&
-                    product.maxDeliveryDays && (
-                      <p className="text-sm text-gray-500">
-                        {product.minDeliveryDays}-{product.maxDeliveryDays} დღე
-                      </p>
-                    )}
-                </div>
-              </td>
-              <td className="prd-td">
-                <div className="seller-info">
-                  <p className="font-medium">
-                    {product.user?.name ||
-                      product.user?.storeName ||
-                      "უცნობი მოხმარებელი"}
-                  </p>
-                  <p className="text-sm text-gray-500">
-                    {product.user?.email || "ელ-ფოსტა არ არის მითითებული"}
-                  </p>
-                  <p className="text-sm text-gray-500">
-                    {product.user?.phoneNumber || "ტელეფონი არ არის მითითებული"}
-                  </p>
-                  {product.user?.storeName &&
-                    product.user?.storeName !== product.user?.name && (
-                      <p className="text-xs text-blue-600">
-                        მაღაზია: {product.user.storeName}
-                      </p>
-                    )}
-                </div>
-              </td>
-              <td className="prd-td prd-td-right">
-                <ProductsActions
-                  product={product}
-                  onStatusChange={handleStatusChange}
-                  onDelete={handleProductDeleted}
-                />
               </td>
             </tr>
-          ))}
+          ) : products.length === 0 ? (
+            <tr>
+              <td
+                colSpan={11}
+                style={{
+                  textAlign: "center",
+                  padding: "40px",
+                  color: "#6c757d",
+                }}
+              >
+                {language === "en"
+                  ? "No products found"
+                  : "პროდუქტები ვერ მოიძებნა"}
+              </td>
+            </tr>
+          ) : (
+            products.map((product: ProductWithCategories & { user?: User }) => (
+              <tr key={product._id} className="prd-tr">
+                <td className="prd-td prd-td-bold">
+                  {" "}
+                  #{product._id ? product._id : "No ID"}
+                </td>
+                <td className="prd-td">
+                  <div className="prd-img-wrapper">
+                    <Image
+                      src={product.images[0]}
+                      alt={getDisplayName(product)}
+                      fill
+                      className="prd-img"
+                    />
+                  </div>
+                </td>
+                <td className="prd-td">{getDisplayName(product)}</td>
+                <td className="prd-td">
+                  {/* <StatusBadge status={product.status} /> */}
+                  {hasActiveDiscount(product) ? (
+                    <div className="price-display">
+                      <span
+                        className="original-price"
+                        style={{
+                          textDecoration: "line-through",
+                          color: "#999",
+                          fontSize: "0.9em",
+                        }}
+                      >
+                        {product.price} ₾
+                      </span>
+                      <br />
+                      <span
+                        className="discounted-price"
+                        style={{ color: "#e74c3c", fontWeight: "bold" }}
+                      >
+                        {calculateDiscountedPrice(product).toFixed(2)} ₾
+                      </span>
+                      <span
+                        className="discount-badge"
+                        style={{
+                          backgroundColor: "#e74c3c",
+                          color: "white",
+                          padding: "2px 6px",
+                          borderRadius: "4px",
+                          fontSize: "0.8em",
+                          marginLeft: "8px",
+                        }}
+                      >
+                        -{product.discountPercentage}%
+                      </span>
+                    </div>
+                  ) : (
+                    <span>{product.price} ₾</span>
+                  )}
+                </td>
+                <td className="prd-td">{getCategoryDisplayName(product)}</td>
+                <td className="prd-td">{getSubcategoryDisplayName(product)}</td>
+                <td className="prd-td">{product.countInStock}</td>
+                <td className="prd-td">
+                  <StatusBadge status={product.status} />
+                </td>
+                <td className="prd-td">
+                  <div className="delivery-info">
+                    <span>{product.deliveryType || "SOULART"}</span>
+                    {product.deliveryType === "SELLER" &&
+                      product.minDeliveryDays &&
+                      product.maxDeliveryDays && (
+                        <p className="text-sm text-gray-500">
+                          {product.minDeliveryDays}-{product.maxDeliveryDays}{" "}
+                          დღე
+                        </p>
+                      )}
+                  </div>
+                </td>
+                <td className="prd-td">
+                  <div className="seller-info">
+                    <p className="font-medium">
+                      {product.user?.name ||
+                        product.user?.storeName ||
+                        "უცნობი მოხმარებელი"}
+                    </p>
+                    <p className="text-sm text-gray-500">
+                      {product.user?.email || "ელ-ფოსტა არ არის მითითებული"}
+                    </p>
+                    <p className="text-sm text-gray-500">
+                      {product.user?.phoneNumber ||
+                        "ტელეფონი არ არის მითითებული"}
+                    </p>
+                    {product.user?.storeName &&
+                      product.user?.storeName !== product.user?.name && (
+                        <p className="text-xs text-blue-600">
+                          მაღაზია: {product.user.storeName}
+                        </p>
+                      )}
+                  </div>
+                </td>
+                <td className="prd-td prd-td-right">
+                  <ProductsActions
+                    product={product}
+                    onStatusChange={handleStatusChange}
+                    onDelete={handleProductDeleted}
+                  />
+                </td>
+              </tr>
+            ))
+          )}
         </tbody>
       </table>
 
@@ -543,6 +877,15 @@ export function ProductsList() {
           Next
         </button>
       </div>
+
+      {/* Add spinner animation */}
+      <style jsx>{`
+        @keyframes spin {
+          to {
+            transform: rotate(360deg);
+          }
+        }
+      `}</style>
     </div>
   );
 }

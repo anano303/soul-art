@@ -89,11 +89,15 @@ export class ProductsController {
     @Query('keyword') keyword: string,
     @Query('page') page: string,
     @Query('limit') limit: string,
+    @Query('status') status: string,
+    @Query('mainCategory') mainCategory: string,
   ) {
     return this.productsService.findMany({
       keyword,
       page,
       limit,
+      status: status as any, // Cast to ProductStatus enum
+      mainCategory,
       user: user.role === Role.Admin ? undefined : user,
       // Add this to ensure we get populated category data
       includeVariants: true,

@@ -93,7 +93,7 @@ export function ProductsActions({
             : "Product has been rejected",
       });
 
-      router.refresh();
+      // Don't use router.refresh() - let the parent component handle the update
     } catch (error) {
       console.log(error);
       toast({
