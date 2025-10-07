@@ -354,7 +354,7 @@ export const TRANSLATIONS: Translations = {
       dimensions: "ნამუშევრის ზომები",
       deliveryInfo: "მიწოდების ინფორმაცია",
       sellerDelivery: "მიწოდება ავტორისგან",
-      courierDelivery: "მიწოდება SoulArt-ის კურიერით",
+      courierDelivery: "მიწოდება უფასო, SoulArt-ის კურიერით, 1-2 დღეში",
       deliveryTime: "მიწოდების ვადა",
       days: "დღე",
       tryInRoom: "მოარგე ოთახს",
@@ -499,6 +499,18 @@ export const TRANSLATIONS: Translations = {
       failedToUpdate: "რაოდენობის განახლება ვერ მოხერხდა",
       addedToCart: "დაემატა კალათაში",
       productAdded: "პროდუქტი წარმატებით დაემატა",
+    },
+
+    // Share buttons
+    share: {
+      copyLink: "ლინკის კოპირება",
+      copied: "დაკოპირდა",
+      copiedSuccess: "წარმატებით დაკოპირდა",
+      linkCopied: "ლინკი დაკოპირდა",
+      error: "შეცდომა",
+      copyFailed: "კოპირება ვერ მოხერხდა",
+      showMore: "მეტის ჩვენება",
+      showLess: "ნაკლების ჩვენება",
     },
 
     // Checkout
@@ -1769,6 +1781,18 @@ export const TRANSLATIONS: Translations = {
       failedToUpdate: "Failed to update quantity",
       addedToCart: "Added to Cart",
       productAdded: "Product successfully added",
+    },
+
+    // Share buttons
+    share: {
+      copyLink: "Copy Link",
+      copied: "Copied",
+      copiedSuccess: "Successfully copied",
+      linkCopied: "Link copied",
+      error: "Error",
+      copyFailed: "Copy failed",
+      showMore: "Show more",
+      showLess: "Show less",
     },
 
     // Checkout

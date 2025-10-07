@@ -2,7 +2,15 @@
 
 import { useState, useEffect, useMemo } from "react";
 import Image from "next/image";
-import { StarIcon, X } from "lucide-react";
+import {
+  StarIcon,
+  X,
+  Truck,
+  Ruler,
+  CheckCircle,
+  Shield,
+  Share2,
+} from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ReviewForm } from "./review-form";
 import { ProductReviews } from "./product-reviews";
@@ -136,7 +144,7 @@ interface ProductDetailsProps {
 export function ProductDetails({ product }: ProductDetailsProps) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [quantity, setQuantity] = useState(1);
-  const [activeTab, setActiveTab] = useState("details");
+  const [activeTab, setActiveTab] = useState("reviews");
   const [isRoomViewerOpen, setIsRoomViewerOpen] = useState(false);
   const [isFullscreenOpen, setIsFullscreenOpen] = useState(false);
   const [selectedSize, setSelectedSize] = useState<string>("");
@@ -356,6 +364,34 @@ export function ProductDetails({ product }: ProductDetailsProps) {
     setIsFullscreenOpen(false);
   };
 
+  // Keyboard navigation for gallery
+  useEffect(() => {
+    const handleKeyPress = (e: KeyboardEvent) => {
+      if (!product.images || product.images.length <= 1) return;
+
+      if (e.key === "ArrowLeft") {
+        e.preventDefault();
+        setCurrentImageIndex(
+          currentImageIndex === 0
+            ? product.images.length - 1
+            : currentImageIndex - 1
+        );
+      } else if (e.key === "ArrowRight") {
+        e.preventDefault();
+        setCurrentImageIndex(
+          currentImageIndex === product.images.length - 1
+            ? 0
+            : currentImageIndex + 1
+        );
+      } else if (e.key === "Escape" && isFullscreenOpen) {
+        closeFullscreen();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyPress);
+    return () => window.removeEventListener("keydown", handleKeyPress);
+  }, [currentImageIndex, product.images, isFullscreenOpen]);
+
   return (
     <div className={`container ${themeClass}`}>
       {/* SEO Product Schema */}
@@ -388,6 +424,71 @@ export function ProductDetails({ product }: ProductDetailsProps) {
                     className="object-contain"
                     loading="eager"
                   />
+                )}
+
+                {/* Zoom Indicator */}
+                <div className="zoom-indicator">
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  >
+                    <circle cx="11" cy="11" r="8" />
+                    <path d="m21 21-4.35-4.35" />
+                    <path d="M11 8v6" />
+                    <path d="M8 11h6" />
+                  </svg>
+                  {language === "en" ? "Click to zoom" : "დააჭირე გასადიდებლად"}
+                </div>
+
+                {/* Gallery Navigation */}
+                {product.images && product.images.length > 1 && (
+                  <>
+                    <button
+                      className="gallery-navigation prev"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setCurrentImageIndex(
+                          currentImageIndex === 0
+                            ? product.images!.length - 1
+                            : currentImageIndex - 1
+                        );
+                      }}
+                      disabled={product.images.length <= 1}
+                    >
+                      <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                      >
+                        <polyline points="15,18 9,12 15,6" />
+                      </svg>
+                    </button>
+
+                    <button
+                      className="gallery-navigation next"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setCurrentImageIndex(
+                          currentImageIndex === product.images!.length - 1
+                            ? 0
+                            : currentImageIndex + 1
+                        );
+                      }}
+                      disabled={product.images.length <= 1}
+                    >
+                      <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                      >
+                        <polyline points="9,18 15,12 9,6" />
+                      </svg>
+                    </button>
+                  </>
                 )}
               </motion.div>
             </AnimatePresence>
@@ -431,131 +532,245 @@ export function ProductDetails({ product }: ProductDetailsProps) {
 
         {/* Right Column - Product Info */}
         <div className="product-info">
-          <div className="brand-container">
-            <Link
-              href={`/shop?brand=${encodeURIComponent(product.brand)}`}
-              className="brand-details hover:opacity-75 transition-opacity"
-            >
-              {product.brandLogo && product.brandLogo.trim() !== "" ? (
-                <div className="brand-logo">
-                  <Image
-                    src={product.brandLogo}
-                    alt={product.brand}
-                    fill
-                    className="object-cover"
-                  />
-                </div>
-              ) : (
-                <div
-                  style={{
-                    padding: "4px 8px",
-                    backgroundColor: "#f0f0f0",
-                    borderRadius: "4px",
-                    fontSize: "12px",
-                    color: "#666",
-                  }}
-                >
-                  No Logo
-                </div>
-              )}
-              <span className="font-bold">{product.brand}</span>
-            </Link>
-            <span className="text-muted">
-              {t("product.ref")} {product._id}
-            </span>
-          </div>
-
+          {/* Product Title - First for hierarchy */}
           <h1 className="product-title">{displayName}</h1>
 
-          <ShareButtons
-            url={typeof window !== "undefined" ? window.location.href : ""}
-            title={`Check out ${displayName} by ${product.brand} on SoulArt`}
-          />
-
-          <div className="rating-container">
-            <div className="rating-stars">
-              {Array.from({ length: 5 }).map((_, i) => (
-                <StarIcon
-                  key={i}
-                  className={`h-4 w-4 ${
-                    i < Math.floor(product.rating)
-                      ? "text-yellow-400 fill-yellow-400"
-                      : "text-gray-300"
-                  }`}
+          {/* Brand with hover tooltip - Compact under title */}
+          <Link
+            href={`/shop?brand=${encodeURIComponent(product.brand)}`}
+            className="brand-details"
+            title={
+              language === "en"
+                ? `View all products by ${product.brand}`
+                : `ნახე ${product.brand}-ის ყველა ნამუშევარი`
+            }
+          >
+            {product.brandLogo && product.brandLogo.trim() !== "" ? (
+              <div className="brand-logo-small">
+                <Image
+                  src={product.brandLogo}
+                  alt={product.brand}
+                  fill
+                  className="object-cover"
                 />
-              ))}
-            </div>
-            <span className="text-gray-400">
-              {product.numReviews} {t("product.reviews")}
-            </span>
-          </div>
-
-          {/* Price Section with Discount Support */}
-          <div className="price-section">
-            {isDiscounted ? (
-              <div className="price-container">
-                {/* {product.discountPercentage && (
-                  <span className="discount-badge">
-                    -{product.discountPercentage}% OFF
-                  </span>
-                )} */}
-                <span className="original-price">
-                  ₾{product.price.toFixed(2)}
-                </span>
-                <span className="price discounted-price">
-                  ₾{finalPrice.toFixed(2)}
-                </span>
               </div>
-            ) : (
-              <div className="price">₾{product.price}</div>
-            )}
-          </div>
+            ) : null}
+            <span className="brand-by-text">
+              {language === "en" ? "by" : "ავტორი"}
+            </span>
+            <span className="brand-name-text">{product.brand}</span>
+            <svg
+              className="brand-arrow-icon"
+              width="12"
+              height="12"
+              viewBox="0 0 16 16"
+              fill="none"
+            >
+              <path
+                d="M6 3L11 8L6 13"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </Link>
 
-          {/* Product Dimensions */}
-          {dimensions && (
-            <div className="dimensions-info">
-              <h3 className="info-title">{t("product.dimensions")}</h3>
-              <div className="dimensions-details">
-                {dimensions.width && <span>{dimensions.width} სმ *</span>}
-                {dimensions.height && <span> {dimensions.height} სმ *</span>}
-                {dimensions.depth && <span>{dimensions.depth} სმ</span>}
+          {/* Enhanced Rating Section */}
+          {product.numReviews > 0 && (
+            <div className="rating-enhanced">
+              <div className="rating-stars-enhanced">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <StarIcon
+                    key={i}
+                    className="star-enhanced"
+                    fill={i < Math.floor(product.rating) ? "#f59e0b" : "none"}
+                    stroke={
+                      i < Math.floor(product.rating) ? "#f59e0b" : "#d1d5db"
+                    }
+                  />
+                ))}
+              </div>
+              <div className="rating-text-enhanced">
+                <div className="rating-score">{product.rating.toFixed(1)}</div>
+                <div className="rating-reviews">
+                  {product.numReviews}{" "}
+                  {language === "en" ? "reviews" : "შეფასება"}
+                </div>
               </div>
             </div>
           )}
 
-          {/* Delivery Information */}
-          <div className="delivery-info">
-            <h3 className="info-title">{t("product.deliveryInfo")}</h3>
-            <div className="delivery-details">
-              {product.deliveryType === "SELLER" ? (
-                <div>
-                  <p>{t("product.sellerDelivery")}</p>
-                  {product.minDeliveryDays && product.maxDeliveryDays && (
-                    <p className="delivery-time">
-                      {t("product.deliveryTime")}: {product.minDeliveryDays}-
-                      {product.maxDeliveryDays} {t("product.days")}
-                    </p>
-                  )}
-                </div>
-              ) : (
-                <p>{t("product.courierDelivery")}</p>
-              )}
+          {/* Trust Badges */}
+          <div className="trust-badges">
+            <div className="trust-badge">
+              <CheckCircle className="trust-badge-icon" size={20} />
+              {language === "en" ? "Authentic Product" : "ორიგინალი ნაწარმი"}
+            </div>
+            <div className="trust-badge">
+              <Shield className="trust-badge-icon" size={20} />
+              {language === "en"
+                ? "Quality Guaranteed"
+                : "ხარისხი გარანტირებული"}
             </div>
           </div>
 
-          <div className="separator"></div>
+          {/* Description - Prominent with label */}
+          {product.description && (
+            <div className="description-section">
+              <h3 className="section-label">
+                {language === "en" ? "Description" : "აღწერა"}
+              </h3>
+              <div className="description-content">
+                <p>{product.description}</p>
+              </div>
+            </div>
+          )}
+
+          {/* Price Section - Eye-catching */}
+          <div className="price-section-modern">
+            {isDiscounted ? (
+              <div className="price-with-discount">
+                <div className="current-price">₾{finalPrice.toFixed(2)}</div>
+                <div className="price-comparison">
+                  <span className="original-price-strike">
+                    ₾{product.price.toFixed(2)}
+                  </span>
+                  <span className="discount-badge">
+                    -{product.discountPercentage}%
+                  </span>
+                </div>
+                <div className="savings-text">
+                  {language === "en" ? "You save" : "დაზოგავ"} ₾
+                  {(product.price - finalPrice).toFixed(2)}
+                </div>
+              </div>
+            ) : (
+              <div className="current-price">₾{product.price.toFixed(2)}</div>
+            )}
+          </div>
+
+          {/* Dimensions Information */}
+          {dimensions && (
+            <div className="dimensions-info">
+              <h3 className="info-title">{t("product.dimensions")}</h3>
+              <div className="dimensions-details">
+                {dimensions.width && (
+                  <span>
+                    {t("product.width")}: {dimensions.width}
+                    {t("product.cm")}
+                  </span>
+                )}
+                {dimensions.height && (
+                  <span>
+                    {t("product.height")}: {dimensions.height}
+                    {t("product.cm")}
+                  </span>
+                )}
+                {dimensions.depth && (
+                  <span>
+                    {t("product.depth")}: {dimensions.depth}
+                    {t("product.cm")}
+                  </span>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Delivery Information - Redesigned */}
+          <div className="info-section">
+            <div className="info-row">
+              <div className="info-icon-circle">
+                <Truck size={20} />
+              </div>
+              <div className="info-text-content">
+                <div className="info-label-text">
+                  {t("product.deliveryInfo")}
+                </div>
+                <div className="info-value-text">
+                  {product.deliveryType === "SELLER" ? (
+                    <>
+                      {t("product.sellerDelivery")}
+                      {product.minDeliveryDays && product.maxDeliveryDays && (
+                        <span className="delivery-days">
+                          {" • "}
+                          {product.minDeliveryDays}-{product.maxDeliveryDays}{" "}
+                          {t("product.days")}
+                        </span>
+                      )}
+                    </>
+                  ) : (
+                    t("product.courierDelivery")
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Dimensions Information - Redesigned */}
+          {dimensions && (
+            <div className="info-section">
+              <div className="info-row">
+                <div className="info-icon-circle">
+                  <Ruler size={20} />
+                </div>
+                <div className="info-text-content">
+                  <div className="info-label-text">
+                    {t("product.dimensions")}
+                  </div>
+                  <div className="info-value-text">
+                    {dimensions.width && `${dimensions.width} × `}
+                    {dimensions.height && `${dimensions.height}`}
+                    {dimensions.depth && ` × ${dimensions.depth}`}{" "}
+                    {t("product.cm")}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Enhanced Stock Indicator */}
+          <div
+            className={`stock-indicator ${
+              isOutOfStock
+                ? "out-of-stock"
+                : availableQuantity <= 5
+                ? "low-stock"
+                : "in-stock"
+            }`}
+          >
+            <div className="stock-dot"></div>
+            {isOutOfStock ? (
+              <span>{t("shop.outOfStock")}</span>
+            ) : (
+              <span>
+                {language === "en" ? "In Stock" : "მარაგშია"}:{" "}
+                {availableQuantity}
+              </span>
+            )}
+          </div>
+
+          {/* Separator - only show if product has options and is not out of stock */}
+          {!isOutOfStock &&
+            ((product.ageGroups && product.ageGroups.length > 0) ||
+              (product.sizes && product.sizes.length > 0) ||
+              (product.colors && product.colors.length > 0)) && (
+              <div className="separator-modern"></div>
+            )}
 
           {/* Product Options */}
           {!isOutOfStock && (
-            <div className="product-options-container">
+            <div className="options-section">
               {/* Age Group Selector */}
               {product.ageGroups && product.ageGroups.length > 0 && (
-                <div className="select-container">
+                <div className="option-selector-improved">
+                  <label className="option-label-modern">
+                    {t("product.selectAgeGroup")}
+                  </label>
                   <select
-                    className="option-select"
+                    className="option-select-improved"
                     value={selectedAgeGroup}
                     onChange={(e) => setSelectedAgeGroup(e.target.value)}
-                    disabled={isOutOfStock}
                   >
                     <option value="">{t("product.selectAgeGroup")}</option>
                     {product.ageGroups.map((ageGroup) => (
@@ -569,12 +784,14 @@ export function ProductDetails({ product }: ProductDetailsProps) {
 
               {/* Size Selector */}
               {product.sizes && product.sizes.length > 0 && (
-                <div className="select-container">
+                <div className="option-selector-improved">
+                  <label className="option-label-modern">
+                    {t("product.selectSize")}
+                  </label>
                   <select
-                    className="option-select"
+                    className="option-select-improved"
                     value={selectedSize}
                     onChange={(e) => setSelectedSize(e.target.value)}
-                    disabled={isOutOfStock}
                   >
                     <option value="">{t("product.selectSize")}</option>
                     {product.sizes.map((size) => (
@@ -588,12 +805,14 @@ export function ProductDetails({ product }: ProductDetailsProps) {
 
               {/* Color Selector */}
               {product.colors && product.colors.length > 0 && (
-                <div className="select-container">
+                <div className="option-selector-improved">
+                  <label className="option-label-modern">
+                    {t("product.selectColor")}
+                  </label>
                   <select
-                    className="option-select"
+                    className="option-select-improved"
                     value={selectedColor}
                     onChange={(e) => setSelectedColor(e.target.value)}
-                    disabled={isOutOfStock}
                   >
                     <option value="">{t("product.selectColor")}</option>
                     {product.colors.map((color) => (
@@ -607,54 +826,91 @@ export function ProductDetails({ product }: ProductDetailsProps) {
             </div>
           )}
 
-          {/* Stock and Quantity */}
-          <div className="stock-info">
-            {isOutOfStock ? (
-              <div className="text-red-500">{t("shop.outOfStock")}</div>
-            ) : (
-              <div>
-                <div className="text-green-600">{t("shop.inStock")}</div>
-                <label className="select-container">
-                  {t("product.quantity")}:
-                  <select
-                    value={quantity}
-                    onChange={(e) => setQuantity(Number(e.target.value))}
-                  >
-                    {Array.from(
-                      { length: availableQuantity },
-                      (_, i) => i + 1
-                    ).map((num) => (
-                      <option key={num} value={num}>
-                        {num}
-                      </option>
-                    ))}
-                  </select>
-                </label>
+          {/* Cart Actions - Quantity + Add to Cart Button */}
+          {!isOutOfStock && (
+            <div className="cart-actions-container">
+              {/* Quantity Selector */}
+              <div className="quantity-selector-wrapper">
+                <button
+                  type="button"
+                  className="qty-btn"
+                  onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                  disabled={quantity <= 1}
+                >
+                  −
+                </button>
+                <input
+                  type="number"
+                  className="qty-input"
+                  value={quantity}
+                  onChange={(e) => {
+                    const val = parseInt(e.target.value) || 1;
+                    setQuantity(Math.min(availableQuantity, Math.max(1, val)));
+                  }}
+                  min="1"
+                  max={availableQuantity}
+                />
+                <button
+                  type="button"
+                  className="qty-btn"
+                  onClick={() =>
+                    setQuantity(Math.min(availableQuantity, quantity + 1))
+                  }
+                  disabled={quantity >= availableQuantity}
+                >
+                  +
+                </button>
               </div>
-            )}
-          </div>
 
-          <AddToCartButton
-            productId={product._id}
-            countInStock={availableQuantity}
-            className="custom-style-2"
-            selectedSize={selectedSize}
-            selectedColor={selectedColor}
-            selectedAgeGroup={selectedAgeGroup}
-            quantity={quantity}
-            price={finalPrice}
-          />
+              {/* Add to Cart Button */}
+              <div className="add-to-cart-btn-wrapper">
+                <AddToCartButton
+                  productId={product._id}
+                  countInStock={availableQuantity}
+                  className="add-to-cart-btn"
+                  selectedSize={selectedSize}
+                  selectedColor={selectedColor}
+                  selectedAgeGroup={selectedAgeGroup}
+                  quantity={quantity}
+                  price={finalPrice}
+                  hideQuantity={true}
+                />
+              </div>
+            </div>
+          )}
+
+          {isOutOfStock && (
+            <AddToCartButton
+              productId={product._id}
+              countInStock={availableQuantity}
+              className="add-to-cart-btn"
+              selectedSize={selectedSize}
+              selectedColor={selectedColor}
+              selectedAgeGroup={selectedAgeGroup}
+              quantity={quantity}
+              price={finalPrice}
+              hideQuantity={true}
+            />
+          )}
+
+          {/* Share with Friends */}
+          <div className="share-section">
+            <div className="share-header">
+              <Share2 size={18} />
+              <span>
+                {language === "en"
+                  ? "Share with Friends"
+                  : "გაუზიარე მეგობრებს"}
+              </span>
+            </div>
+            <ShareButtons
+              url={typeof window !== "undefined" ? window.location.href : ""}
+              title={`${displayName} by ${product.brand}`}
+            />
+          </div>
 
           <div className="tabs">
             <div className="tabs-list">
-              <button
-                className={`tabs-trigger ${
-                  activeTab === "details" ? "active" : ""
-                }`}
-                onClick={() => setActiveTab("details")}
-              >
-                {t("product.details")}
-              </button>
               {product.videoDescription && (
                 <button
                   className={`tabs-trigger ${
@@ -673,16 +929,6 @@ export function ProductDetails({ product }: ProductDetailsProps) {
               >
                 {t("product.reviews")} ({product.numReviews})
               </button>
-            </div>
-
-            <div
-              className={`tab-content ${
-                activeTab === "details" ? "active" : ""
-              }`}
-            >
-              <div className="prose">
-                <p>{displayDescription}</p>
-              </div>
             </div>
 
             {product.videoDescription && (
