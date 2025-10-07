@@ -7,7 +7,7 @@
   max-width: 25%;
   /* padding: 15px; */
   /* border-radius: 8px; */
-  overflow: hidden;
+  overflow: visible; /* Changed to visible to show tooltip */
   /* background-color: var(--primary-color); */
   box-shadow: 2px 9px 10px rgba(0, 0, 0, 0.1);
   transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
@@ -46,7 +46,7 @@
 
 .product-card-overlay {
   position: absolute;
-  transition: box-shadow .3s ease-in-out;
+  transition: box-shadow 0.3s ease-in-out;
   inset: 0;
 }
 
@@ -127,21 +127,23 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin: 0 15px;
+  margin: 0 10px;
+  margin-top: 5px;
 }
 .product-info {
-  /* margin-top: 5%; */
   display: flex;
   flex-direction: column;
   gap: 0px;
+  padding-bottom: 5px;
 }
 
 .product-name {
-  font-size: 1.2rem;
+  font-size: 1rem;
   font-weight: bold;
-  margin: 5px 0;
+  margin: 3px 0;
   color: var(--primary-color, #012645);
   text-align: center;
+  line-height: 1.3;
 }
 
 /* Handmade theme name color */
@@ -153,8 +155,9 @@
   display: flex;
   justify-content: flex-start;
   align-items: center;
-  font-size: 1rem;
+  font-size: 0.9rem;
   color: #fff;
+  padding: 0 10px;
 }
 .priceAndRaiting {
   display: flex;
@@ -162,6 +165,7 @@
 }
 .product-price {
   font-weight: 900;
+  font-size: 1.1rem;
   color: var(--primary-color, #012645);
   white-space: nowrap;
 }
@@ -176,7 +180,8 @@
   align-items: center;
   color: var(--primary-color, #012645);
   background: #f5f5f5;
-  padding: 5px;
+  padding: 3px 5px;
+  font-size: 0.85rem;
 }
 
 /* Handmade theme rating color */
@@ -226,6 +231,283 @@
   border: none;
 }
 
+/* Buy button wrapper with tooltip - positioned above button */
+.buy-button-wrapper {
+  position: relative;
+  flex: 1;
+}
+
+.buy-button-wrapper::before {
+  content: attr(title);
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(1, 38, 69, 0.92);
+  color: white;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 11px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 100;
+  font-weight: 500;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(4px);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.buy-button-wrapper::after {
+  content: "";
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%) translateY(3px);
+  border: 5px solid transparent;
+  border-top-color: rgba(1, 38, 69, 0.92);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 100;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.product-card-actions-compact:hover .buy-button-wrapper::before,
+.product-card-actions-compact:hover .buy-button-wrapper::after {
+  opacity: 1;
+}
+
+/* Handmade theme tooltip */
+.handmade-theme .buy-button-wrapper::before {
+  background: rgba(125, 90, 53, 0.92);
+}
+
+.handmade-theme .buy-button-wrapper::after {
+  border-top-color: rgba(125, 90, 53, 0.92);
+}
+
+/* Mobile - adjust positioning and text */
+@media (max-width: 768px) {
+  .buy-button-wrapper::before {
+    font-size: 10px;
+    padding: 5px 10px;
+  }
+}
+
+/* Product Card Actions - Ultra Compact with Overlay */
+.product-card-actions-compact {
+  position: relative;
+  padding: 0 8px 8px 8px;
+}
+
+.product-card-actions-compact .cart-actions {
+  display: flex;
+  align-items: center;
+  gap: 0;
+}
+
+.product-card-actions-compact .addButtonCart {
+  width: 100%;
+  margin-top: 0;
+  font-size: 14px;
+  padding: 10px 16px;
+  height: 42px;
+  border-radius: 6px;
+}
+
+/* Overlay details button - positioned on top right of buy button */
+.btn-view-overlay {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  background: rgba(255, 255, 255, 0.95);
+  border: 2px solid var(--primary-color, #012645);
+  border-radius: 6px;
+  color: var(--primary-color, #012645);
+  text-decoration: none;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  z-index: 2;
+  backdrop-filter: blur(4px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.btn-view-overlay:hover {
+  background: var(--primary-color, #012645);
+  color: white;
+  transform: scale(1.08);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.btn-view-overlay svg {
+  flex-shrink: 0;
+}
+
+/* Handmade theme overlay button */
+.handmade-theme .btn-view-overlay {
+  border-color: var(--secondary-color);
+  color: var(--secondary-color);
+}
+
+.handmade-theme .btn-view-overlay:hover {
+  background: var(--secondary-color);
+  color: white;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .product-card-actions-compact {
+    padding: 0 6px 6px 6px;
+  }
+
+  .product-card-actions-compact .addButtonCart {
+    font-size: 13px;
+    padding: 9px 14px;
+    height: 38px;
+  }
+
+  .btn-view-overlay {
+    width: 38px;
+    height: 38px;
+    top: 6px;
+    right: 6px;
+  }
+
+  .btn-view-overlay svg {
+    width: 16px;
+    height: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .product-card-actions-compact {
+    padding: 0 5px 5px 5px;
+  }
+
+  .product-card-actions-compact .addButtonCart {
+    font-size: 12px;
+    padding: 8px 12px;
+    height: 36px;
+  }
+
+  .btn-view-overlay {
+    width: 36px;
+    height: 36px;
+    top: 5px;
+    right: 5px;
+  }
+
+  .btn-view-overlay svg {
+    width: 15px;
+    height: 15px;
+  }
+}
+
+/* Old styles - keep for backward compatibility but override */
+.product-card-actions {
+  display: flex;
+  gap: 6px;
+  padding: 0 10px 10px 10px;
+  align-items: center;
+}
+
+.product-card-actions .addButtonCart {
+  flex: 1;
+  margin-top: 0;
+  font-size: 14px;
+  padding: 8px 12px;
+  height: 40px;
+}
+
+/* Icon-only details button */
+.btn-view-details-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: transparent;
+  border: 2px solid var(--primary-color, #012645);
+  border-radius: 6px;
+  color: var(--primary-color, #012645);
+  text-decoration: none;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.btn-view-details-icon:hover {
+  background: var(--primary-color, #012645);
+  color: white;
+  transform: scale(1.05);
+}
+
+.btn-view-details-icon svg {
+  flex-shrink: 0;
+}
+
+/* Handmade theme icon button */
+.handmade-theme .btn-view-details-icon {
+  border-color: var(--secondary-color);
+  color: var(--secondary-color);
+}
+
+.handmade-theme .btn-view-details-icon:hover {
+  background: var(--secondary-color);
+  color: white;
+}
+
+/* Responsive adjustments for action buttons */
+@media (max-width: 768px) {
+  .product-card-actions {
+    gap: 5px;
+    padding: 0 8px 8px 8px;
+  }
+
+  .product-card-actions .addButtonCart {
+    font-size: 13px;
+    padding: 7px 10px;
+    height: 36px;
+  }
+
+  .btn-view-details-icon {
+    width: 36px;
+    height: 36px;
+  }
+
+  .btn-view-details-icon svg {
+    width: 18px;
+    height: 18px;
+  }
+}
+
+@media (max-width: 480px) {
+  .product-card-actions {
+    gap: 4px;
+    padding: 0 6px 6px 6px;
+  }
+
+  .product-card-actions .addButtonCart {
+    font-size: 12px;
+    padding: 6px 8px;
+    height: 34px;
+  }
+
+  .btn-view-details-icon {
+    width: 34px;
+    height: 34px;
+  }
+
+  .btn-view-details-icon svg {
+    width: 16px;
+    height: 16px;
+  }
+}
 .addButtonCart {
   font-family: firaGo, sans-serif;
   background: linear-gradient(to left, var(--primary-color, #012645), #1b055b);

@@ -109,7 +109,8 @@ export function ProductCard({
           </div>
           <p
             style={{
-              margin: "5px 15px 0px 15px",
+              margin: "3px 10px",
+              fontSize: "0.85rem",
               color:
                 theme === "handmade-theme"
                   ? "var(--secondary-color)"
@@ -126,7 +127,10 @@ export function ProductCard({
             <div className="priceAndRaiting">
               {isDiscounted ? (
                 <div className="price-container">
-                  <span className="original-price">
+                  <span
+                    className="original-price"
+                    style={{ fontSize: "0.8rem" }}
+                  >
                     {product.price.toFixed(2)} ₾
                   </span>
                   <h3 className="product-price discounted-price">
@@ -140,11 +144,46 @@ export function ProductCard({
           </div>
         </div>
       </Link>
-      <AddToCartButton
-        productId={product._id}
-        countInStock={product.countInStock}
-        className="addButtonCart"
-      />
+
+      {/* Compact card actions - single button with overlay icon */}
+      <div className="product-card-actions-compact">
+        <div
+          className="buy-button-wrapper"
+          title={
+            language === "en"
+              ? "Free delivery 1-2 days 🚚"
+              : "უფასო მიწოდება 1-2 დღეში 🚚"
+          }
+        >
+          <AddToCartButton
+            productId={product._id}
+            countInStock={product.countInStock}
+            className="addButtonCart btn-buy-compact"
+            hideQuantity={true}
+            openCartOnAdd={false}
+          />
+        </div>
+        <Link
+          href={`/products/${product._id}`}
+          className="btn-view-overlay"
+          title={language === "en" ? "View Details" : "დეტალურად"}
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+            <circle cx="12" cy="12" r="3" />
+          </svg>
+        </Link>
+      </div>
     </div>
   );
 }

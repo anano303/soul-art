@@ -16,6 +16,8 @@ interface AddToCartButtonProps {
   selectedAgeGroup?: string;
   quantity?: number;
   price?: number;
+  hideQuantity?: boolean; // New prop to hide quantity selector
+  openCartOnAdd?: boolean; // New prop to open cart after adding
 }
 
 export function AddToCartButton({
@@ -27,6 +29,8 @@ export function AddToCartButton({
   selectedAgeGroup = "",
   quantity: externalQuantity,
   price,
+  hideQuantity = false, // Default to false
+  openCartOnAdd = false, // Default to false
 }: AddToCartButtonProps) {
   const { t } = useLanguage();
   const { addToCart, isItemInCart, getItemQuantity, updateQuantity } =
@@ -150,6 +154,19 @@ export function AddToCartButton({
             title: t("cart.addedToCart"),
             description: t("cart.productAdded"),
           });
+
+          // Open cart if requested
+          if (openCartOnAdd) {
+            // Trigger cart open by clicking the cart button
+            setTimeout(() => {
+              const cartButton = document.querySelector(
+                "[data-cart-toggle]"
+              ) as HTMLElement;
+              if (cartButton) {
+                cartButton.click();
+              }
+            }, 300);
+          }
         } catch (error) {
           console.error("Add to cart error:", error);
           toast({
@@ -175,27 +192,29 @@ export function AddToCartButton({
 
   return (
     <div className="cart-actions">
-      <div className="quantity-container">
-        <button
-          className="quantity-button"
-          onClick={decreaseQuantity}
-          disabled={quantity <= 1}
-        >
-          -
-        </button>
-        <span className="quantity-input">{quantity}</span>
-        <button
-          className="quantity-button"
-          onClick={increaseQuantity}
-          disabled={
-            isInCart
-              ? quantity >= countInStock - currentQuantity
-              : quantity >= countInStock
-          }
-        >
-          +
-        </button>
-      </div>
+      {!hideQuantity && (
+        <div className="quantity-container">
+          <button
+            className="quantity-button"
+            onClick={decreaseQuantity}
+            disabled={quantity <= 1}
+          >
+            -
+          </button>
+          <span className="quantity-input">{quantity}</span>
+          <button
+            className="quantity-button"
+            onClick={increaseQuantity}
+            disabled={
+              isInCart
+                ? quantity >= countInStock - currentQuantity
+                : quantity >= countInStock
+            }
+          >
+            +
+          </button>
+        </div>
+      )}
 
       <button
         className={`addButtonCart ${className} ${isInCart ? "in-cart" : ""}`}
@@ -206,14 +225,29 @@ export function AddToCartButton({
         }
         onClick={handleAddToCart}
       >
-        {/* <span>🛒</span> */}
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="18"
+          height="18"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          style={{ flexShrink: 0 }}
+        >
+          <circle cx="9" cy="21" r="1" />
+          <circle cx="20" cy="21" r="1" />
+          <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
+        </svg>
         {isOutOfStock
           ? t("cart.outOfStock")
           : loading
           ? t("cart.adding")
           : isInCart
           ? `${t("cart.inCart")} (${currentQuantity})`
-          : t("cart.addToCart")}
+          : t("cart.buy")}
       </button>
     </div>
   );

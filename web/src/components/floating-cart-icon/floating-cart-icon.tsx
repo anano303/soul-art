@@ -22,6 +22,7 @@ export function FloatingCartIcon() {
   }
 
   const { items, totalItems } = cartData;
+  const [showTooltip, setShowTooltip] = useState(false);
 
   // ფუნქცია რომ განვსაზღვროთ არის თუ არა cart-related გვერდზე
   const isOnCartRelatedPage = () => {
@@ -39,6 +40,15 @@ export function FloatingCartIcon() {
   useEffect(() => {
     const shouldShow = totalItems > 0 && !isOnCartRelatedPage();
     setIsVisible(shouldShow);
+
+    // Show tooltip for 3 seconds when cart is updated
+    if (shouldShow && totalItems > 0) {
+      setShowTooltip(true);
+      const timer = setTimeout(() => {
+        setShowTooltip(false);
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
   }, [totalItems, pathname]);
   const handleClick = () => {
     router.push("/cart");
@@ -60,7 +70,22 @@ export function FloatingCartIcon() {
           onClick={handleClick}
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.9 }}
+          data-cart-toggle="true"
         >
+          {/* Tooltip */}
+          <AnimatePresence>
+            {showTooltip && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 10 }}
+                className="floating-cart-tooltip"
+              >
+                გადადი კალათში 🛒
+              </motion.div>
+            )}
+          </AnimatePresence>
+
           <div className="cart-icon-wrapper">
             <ShoppingCart className="cart-icon" />
             {totalItems > 0 && (
