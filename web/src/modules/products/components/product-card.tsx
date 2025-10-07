@@ -94,7 +94,7 @@ export function ProductCard({
           <div className="product-name-rating">
             <h3 className="product-name">{displayName}</h3>
             <div className="product-rating">
-              <span style={{ marginRight: "5px" }}>
+              <span style={{ marginRight: product.rating > 0 ? "5px" : "0" }}>
                 <Image
                   src={theme === "handmade-theme" ? Star2 : Star}
                   alt="rating star"
@@ -102,9 +102,11 @@ export function ProductCard({
                   height={16}
                 />
               </span>
-              <span className="rating-text" style={{ whiteSpace: "nowrap" }}>
-                {product.rating.toFixed(1)} ({product.numReviews})
-              </span>
+              {product.rating > 0 && (
+                <span className="rating-text" style={{ whiteSpace: "nowrap" }}>
+                  {product.rating.toFixed(1)} ({product.numReviews})
+                </span>
+              )}
             </div>
           </div>
           <p
