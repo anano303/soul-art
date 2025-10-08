@@ -19,6 +19,7 @@ import {
   LogOut,
   Gift,
   BarChart3,
+  Activity,
 } from "lucide-react";
 
 // Add a style object for the FiraGo font
@@ -299,6 +300,18 @@ export default function UserMenu({ onNavigate }: { onNavigate?: () => void }) {
               >
                 <BarChart3 size={18} />
                 <span>{t("navigation.analytics")}</span>
+              </Link>
+            )}
+
+            {/* Meta Pixel link - Only for Admin */}
+            {user.role === Role.Admin && (
+              <Link
+                href="/admin/meta-pixel"
+                className="dropdown-item"
+                onClick={handleLinkClick}
+              >
+                <Activity size={18} />
+                <span>Meta Pixel</span>
               </Link>
             )}
 
