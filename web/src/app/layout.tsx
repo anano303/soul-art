@@ -20,7 +20,7 @@ import {
 } from "@/lib/structured-data";
 import GoogleAnalytics from "@/components/GoogleAnalytics";
 import VercelAnalytics from "@/components/VercelAnalytics";
-import MetaPixel from "@/components/MetaPixel";
+import MetaPixelWrapper from "@/components/MetaPixelWrapper";
 import { FloatingCartIcon } from "@/components/floating-cart-icon/floating-cart-icon";
 import { PWAInstallPrompt } from "@/components/pwa-install-prompt/pwa-install-prompt";
 import { NetworkStatus } from "@/components/network-status/network-status";
@@ -326,7 +326,7 @@ export default function RootLayout({
         <GoogleAnalytics />
 
         {/* Meta Pixel - Facebook ვიზიტორების ტრაფიკი და კონვერსიები */}
-        <MetaPixel />
+        <MetaPixelWrapper />
 
         {/* Vercel Analytics - ვიზიტორების ტრაფიკი და Performance */}
         <VercelAnalytics />
