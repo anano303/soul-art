@@ -20,6 +20,7 @@ import {
 } from "@/lib/structured-data";
 import GoogleAnalytics from "@/components/GoogleAnalytics";
 import VercelAnalytics from "@/components/VercelAnalytics";
+import MetaPixel from "@/components/MetaPixel";
 import { FloatingCartIcon } from "@/components/floating-cart-icon/floating-cart-icon";
 import { PWAInstallPrompt } from "@/components/pwa-install-prompt/pwa-install-prompt";
 import { NetworkStatus } from "@/components/network-status/network-status";
@@ -220,6 +221,39 @@ export default function RootLayout({
         <link rel="dns-prefetch" href="//www.googletagmanager.com" />
         <link rel="dns-prefetch" href="//www.google-analytics.com" />
 
+        {/* Meta Pixel Code */}
+        <script
+          id="meta-pixel-script"
+          dangerouslySetInnerHTML={{
+            __html: `
+            !function(f,b,e,v,n,t,s)
+            {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+            n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+            if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+            n.queue=[];t=b.createElement(e);t.async=!0;
+            t.src=v;s=b.getElementsByTagName(e)[0];
+            s.parentNode.insertBefore(t,s)}(window, document,'script',
+            'https://connect.facebook.net/en_US/fbevents.js');
+            fbq('init', '${
+              process.env.NEXT_PUBLIC_META_PIXEL_ID || "1189697243076610"
+            }');
+            fbq('track', 'PageView');
+          `,
+          }}
+        />
+        <noscript>
+          <img
+            height="1"
+            width="1"
+            style={{ display: "none" }}
+            src={`https://www.facebook.com/tr?id=${
+              process.env.NEXT_PUBLIC_META_PIXEL_ID || "1189697243076610"
+            }&ev=PageView&noscript=1`}
+            alt=""
+          />
+        </noscript>
+        {/* End Meta Pixel Code */}
+
         {/* Facebook SDK - Fix appId to lowercase appid */}
         <script
           async
@@ -252,7 +286,7 @@ export default function RootLayout({
                       display: "flex",
                       flexDirection: "column",
                       minHeight: "100vh",
-                      backgroundColor: '#fefefe'
+                      backgroundColor: "#fefefe",
                     }}
                   >
                     <Header />
@@ -290,6 +324,9 @@ export default function RootLayout({
 
         {/* Google Analytics */}
         <GoogleAnalytics />
+
+        {/* Meta Pixel - Facebook ვიზიტორების ტრაფიკი და კონვერსიები */}
+        <MetaPixel />
 
         {/* Vercel Analytics - ვიზიტორების ტრაფიკი და Performance */}
         <VercelAnalytics />
