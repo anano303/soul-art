@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import "./globals.css";
 import { Providers } from "./providers";
 import { Toaster } from "@/components/ui/toaster";
@@ -326,7 +327,9 @@ export default function RootLayout({
         <GoogleAnalytics />
 
         {/* Meta Pixel - Facebook ვიზიტორების ტრაფიკი და კონვერსიები */}
-        <MetaPixel />
+        <Suspense fallback={null}>
+          <MetaPixel />
+        </Suspense>
 
         {/* Vercel Analytics - ვიზიტორების ტრაფიკი და Performance */}
         <VercelAnalytics />

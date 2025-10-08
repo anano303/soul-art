@@ -1,5 +1,6 @@
 "use client";
 
+import { Suspense } from "react";
 import { ProductGrid } from "@/modules/products/components/product-grid";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
@@ -17,7 +18,7 @@ interface ProductsResponse {
   totalItems: number;
 }
 
-export default function SearchPage() {
+function SearchPageContent() {
   const params = useParams();
   const searchParams = useSearchParams();
   const { language, t } = useLanguage();
@@ -176,5 +177,13 @@ export default function SearchPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function SearchPage() {
+  return (
+    <Suspense fallback={<HeartLoading size="large" />}>
+      <SearchPageContent />
+    </Suspense>
   );
 }

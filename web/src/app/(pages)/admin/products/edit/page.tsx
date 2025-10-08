@@ -1,13 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { CreateProductForm } from "@/modules/admin/components/create-product-form";
 import { fetchWithAuth } from "@/lib/fetch-with-auth";
 import { useQueryClient } from "@tanstack/react-query";
 import HeartLoading from "@/components/HeartLoading/HeartLoading";
 
-export default function EditProductPage() {
+function EditProductContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -37,7 +37,8 @@ export default function EditProductPage() {
     router.push("/admin/products");
   };
 
-  if (!product || Object.keys(product).length === 0) return <HeartLoading size="medium" />;
+  if (!product || Object.keys(product).length === 0)
+    return <HeartLoading size="medium" />;
 
   return (
     <div className="editProduct">
@@ -50,3 +51,12 @@ export default function EditProductPage() {
     </div>
   );
 }
+
+export default function EditProductPage() {
+  return (
+    <Suspense fallback={<HeartLoading size="medium" />}>
+      <EditProductContent />
+    </Suspense>
+  );
+}
+
