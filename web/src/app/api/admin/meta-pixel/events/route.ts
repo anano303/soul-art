@@ -21,43 +21,8 @@ export async function GET(request: NextRequest) {
     let finalData = null;
     let lastError = null;
 
-    // Method 1: Try pixel insights (most reliable)
-    try {
-      console.log("Attempting insights endpoint...");
-      const insightsResponse = await fetch(
-        `${GRAPH_API_URL}/${pixelId}/insights?access_token=${accessToken}&breakdowns=device_platform&date_preset=today`,
-        {
-          cache: "no-store",
-        }
-      );
-
-      if (insightsResponse.ok) {
-        const insightsData = await insightsResponse.json();
-        console.log("Insights success:", insightsData);
-        
-        finalData = {
-          success: true,
-          source: "insights",
-          data: insightsData,
-          eventSummary: {
-            summary: {},
-            recentEvents: [],
-            advancedMatchingData: [],
-            totalEvents: processInsightsData(insightsData).totalEvents || 0,
-            eventsWithMatching: 0,
-            matchingRate: 0
-          },
-          lastUpdated: new Date().toISOString()
-        };
-      } else {
-        const errorData = await insightsResponse.json();
-        console.log("Insights failed:", errorData);
-        lastError = errorData;
-      }
-    } catch (error) {
-      console.log("Insights endpoint error:", error);
-      lastError = error;
-    }
+    // Skip insights endpoint - it's not available for AdsPixel
+    console.log("Skipping insights endpoint (not available for AdsPixel)...");
 
     // Method 2: Try pixel stats endpoint
     if (!finalData) {
@@ -73,20 +38,22 @@ export async function GET(request: NextRequest) {
         if (statsResponse.ok) {
           const statsData = await statsResponse.json();
           console.log("Stats success:", statsData);
-          
+
+          const processedStats = processStatsData(statsData);
           finalData = {
             success: true,
             source: "stats",
             data: statsData,
             eventSummary: {
-              summary: {},
+              summary: processedStats.eventBreakdown || {},
               recentEvents: [],
               advancedMatchingData: [],
-              totalEvents: 0,
+              totalEvents: processedStats.totalEvents || 0,
               eventsWithMatching: 0,
-              matchingRate: 0
+              matchingRate: 0,
+              hourlyBreakdown: processedStats.hourlyBreakdown || {},
             },
-            lastUpdated: new Date().toISOString()
+            lastUpdated: new Date().toISOString(),
           };
         } else {
           const errorData = await statsResponse.json();
@@ -113,7 +80,7 @@ export async function GET(request: NextRequest) {
         if (pixelResponse.ok) {
           const pixelData = await pixelResponse.json();
           console.log("Basic pixel info success:", pixelData);
-          
+
           finalData = {
             success: true,
             source: "basic_info",
@@ -124,9 +91,9 @@ export async function GET(request: NextRequest) {
               advancedMatchingData: [],
               totalEvents: 0,
               eventsWithMatching: 0,
-              matchingRate: 0
+              matchingRate: 0,
             },
-            lastUpdated: new Date().toISOString()
+            lastUpdated: new Date().toISOString(),
           };
         } else {
           const errorData = await pixelResponse.json();
@@ -143,21 +110,24 @@ export async function GET(request: NextRequest) {
     if (!finalData) {
       console.error("All Facebook API methods failed. Last error:", lastError);
       return NextResponse.json(
-        { 
-          error: "Failed to fetch data from Facebook Graph API", 
+        {
+          error: "Failed to fetch data from Facebook Graph API",
           details: lastError,
-          suggestion: "The 'activities' endpoint has been deprecated. Try using Facebook Events Manager directly."
+          suggestion:
+            "The 'activities' endpoint has been deprecated. Try using Facebook Events Manager directly.",
         },
         { status: 400 }
       );
     }
 
     return NextResponse.json(finalData);
-    
   } catch (error) {
     console.error("Meta Pixel API Error:", error);
     return NextResponse.json(
-      { error: "Internal server error", details: error instanceof Error ? error.message : String(error) },
+      {
+        error: "Internal server error",
+        details: error instanceof Error ? error.message : String(error),
+      },
       { status: 500 }
     );
   }
@@ -168,19 +138,20 @@ function processInsightsData(data: any) {
   const summary = {
     totalEvents: 0,
     deviceBreakdown: {} as Record<string, number>,
-    hasData: false
+    hasData: false,
   };
 
   if (data?.data && Array.isArray(data.data)) {
     summary.hasData = data.data.length > 0;
-    
+
     data.data.forEach((insight: any) => {
       if (insight.impressions) {
         summary.totalEvents += parseInt(insight.impressions) || 0;
       }
-      
+
       if (insight.device_platform) {
-        summary.deviceBreakdown[insight.device_platform] = insight.impressions || 0;
+        summary.deviceBreakdown[insight.device_platform] =
+          insight.impressions || 0;
       }
     });
   }
@@ -193,12 +164,44 @@ function processStatsData(data: any) {
   const summary = {
     totalEvents: 0,
     hasData: false,
-    stats: data
+    stats: data,
+    hourlyBreakdown: {} as Record<string, number>,
+    eventBreakdown: {} as Record<string, number>,
   };
 
-  if (data && Object.keys(data).length > 0) {
+  if (data && data.data && Array.isArray(data.data)) {
     summary.hasData = true;
-    // Add specific stats processing if needed
+
+    // Process hourly stats
+    data.data.forEach((hour: any) => {
+      const startTime = hour.start_time;
+      let hourTotal = 0;
+
+      if (hour.data && Array.isArray(hour.data)) {
+        hour.data.forEach((event: any) => {
+          const eventName = event.value || "Unknown";
+          const count = parseInt(event.count) || 0;
+
+          // Add to hourly total
+          hourTotal += count;
+
+          // Add to event breakdown
+          if (summary.eventBreakdown[eventName]) {
+            summary.eventBreakdown[eventName] += count;
+          } else {
+            summary.eventBreakdown[eventName] = count;
+          }
+
+          // Add to total events
+          summary.totalEvents += count;
+        });
+      }
+
+      // Store hourly breakdown
+      if (startTime) {
+        summary.hourlyBreakdown[startTime] = hourTotal;
+      }
+    });
   }
 
   return summary;
@@ -211,8 +214,8 @@ function processBasicPixelData(data: any) {
     pixelName: data.name || "Pixel",
     creationTime: data.creation_time || null,
     lastFiredTime: data.last_fired_time || null,
-    hasData: !!(data.id),
-    isActive: !!(data.last_fired_time)
+    hasData: !!data.id,
+    isActive: !!data.last_fired_time,
   };
 
   return summary;
