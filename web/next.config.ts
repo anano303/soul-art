@@ -10,8 +10,8 @@ const nextConfig: NextConfig = {
     // Optimize bundling and loading only in production
     optimizeCss: process.env.NODE_ENV === "production",
     optimizeServerReact: process.env.NODE_ENV === "production",
-    // Improve CSS handling - disable CSS preloading to prevent warnings
-    cssChunking: false,
+    // Improve CSS handling
+    cssChunking: true,
     // Better caching
     staleTimes: {
       dynamic: 30,
@@ -23,8 +23,6 @@ const nextConfig: NextConfig = {
         "*.css": ["css-loader"],
       },
     },
-    // Disable CSS preload hints to prevent warnings
-    disableOptimizedLoading: true,
   },
   // Optimize compilation
   compiler: {
@@ -59,6 +57,7 @@ const nextConfig: NextConfig = {
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
     formats: ["image/webp", "image/avif"], // Modern image formats
   },
+  reactStrictMode: true,
   poweredByHeader: false,
   output: "standalone",
   distDir: ".next",
@@ -160,33 +159,16 @@ const nextConfig: NextConfig = {
             priority: 10,
             minChunks: 2,
           },
-          // Optimize CSS chunks to prevent preload warnings
-          styles: {
-            name: 'styles',
-            test: /\.css$/,
-            chunks: 'all',
-            enforce: true,
-            priority: 50,
-          },
         },
       },
     };
-
-    // Remove CSS preload hints to prevent warnings
-    if (!isServer) {
-      // Disable CSS preload hints by modifying the mini-css-extract-plugin
-      config.plugins.forEach((plugin: any) => {
-        if (plugin.constructor.name === 'MiniCssExtractPlugin') {
-          plugin.options.linkType = false;
-        }
-      });
-    }
 
     return config;
   },
 };
 
 export default withPWA({
+  dest: "public",
   register: true,
   skipWaiting: true,
   disable: process.env.NODE_ENV === "development", // Disable in development to prevent errors
