@@ -8,6 +8,7 @@ import { Role } from "@/types/role";
 import HeartLoading from "@/components/HeartLoading/HeartLoading";
 import { MetaPixelDashboard } from "@/modules/admin/components/meta-pixel-dashboard";
 
+
 export default function MetaPixelPage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
