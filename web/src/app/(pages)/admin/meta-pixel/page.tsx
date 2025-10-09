@@ -14,6 +14,23 @@ export default function MetaPixelPage() {
   const [isAuthorized, setIsAuthorized] = useState(false);
 
   useEffect(() => {
+    // Suppress CSS preload warnings immediately - comprehensive filtering
+    const originalWarn = console.warn;
+    console.warn = (...args) => {
+      const message = args.join(" ");
+      if (
+        message.includes("preload") ||
+        message.includes("CSS") ||
+        message.includes("chunk") ||
+        message.includes("link") ||
+        message.includes("seconds") ||
+        message.includes("was preloaded")
+      ) {
+        return;
+      }
+      originalWarn.apply(console, args);
+    };
+
     // Check if user is authenticated before rendering
     if (!isLoggedIn()) {
       router.push("/login?redirect=/admin/meta-pixel");

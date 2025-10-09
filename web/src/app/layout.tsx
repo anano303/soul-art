@@ -282,7 +282,12 @@ export default function RootLayout({
                 var originalWarn = console.warn;
                 console.warn = function() {
                   var message = Array.prototype.join.call(arguments, ' ');
-                  if (!message.includes('was preloaded using link preload but not used within a few seconds')) {
+                  if (!(message.includes('preload') ||
+                        message.includes('CSS') ||
+                        message.includes('chunk') ||
+                        message.includes('link') ||
+                        message.includes('seconds') ||
+                        message.includes('was preloaded'))) {
                     originalWarn.apply(console, arguments);
                   }
                 };
