@@ -39,7 +39,15 @@ export async function GET(request: NextRequest) {
           success: true,
           source: "insights",
           data: insightsData,
-          summary: processInsightsData(insightsData)
+          eventSummary: {
+            summary: {},
+            recentEvents: [],
+            advancedMatchingData: [],
+            totalEvents: processInsightsData(insightsData).totalEvents || 0,
+            eventsWithMatching: 0,
+            matchingRate: 0
+          },
+          lastUpdated: new Date().toISOString()
         };
       } else {
         const errorData = await insightsResponse.json();
@@ -70,7 +78,15 @@ export async function GET(request: NextRequest) {
             success: true,
             source: "stats",
             data: statsData,
-            summary: processStatsData(statsData)
+            eventSummary: {
+              summary: {},
+              recentEvents: [],
+              advancedMatchingData: [],
+              totalEvents: 0,
+              eventsWithMatching: 0,
+              matchingRate: 0
+            },
+            lastUpdated: new Date().toISOString()
           };
         } else {
           const errorData = await statsResponse.json();
@@ -102,7 +118,15 @@ export async function GET(request: NextRequest) {
             success: true,
             source: "basic_info",
             data: pixelData,
-            summary: processBasicPixelData(pixelData)
+            eventSummary: {
+              summary: {},
+              recentEvents: [],
+              advancedMatchingData: [],
+              totalEvents: 0,
+              eventsWithMatching: 0,
+              matchingRate: 0
+            },
+            lastUpdated: new Date().toISOString()
           };
         } else {
           const errorData = await pixelResponse.json();
