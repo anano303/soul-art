@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Test User Setup for MetaPixel</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        max-width: 600px;
+        margin: 50px auto;
+        padding: 20px;
+      }
+      button {
+        background: #007bff;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        margin: 10px 5px;
+        cursor: pointer;
+        border-radius: 5px;
+      }
+      button:hover {
+        background: #0056b3;
+      }
+      .info {
+        background: #f8f9fa;
+        border: 1px solid #dee2e6;
+        padding: 15px;
+        margin: 10px 0;
+        border-radius: 5px;
+      }
+      .output {
+        background: #f1f3f5;
+        border: 1px solid #ced4da;
+        padding: 10px;
+        margin: 10px 0;
+        border-radius: 3px;
+        font-family: monospace;
+        white-space: pre-wrap;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>🔧 Test User Setup for MetaPixel</h1>
+
+    <div class="info">
+      <h3>📝 Purpose</h3>
+      <p>
+        This page sets up test user data in localStorage to test MetaPixel user
+        identification.
+      </p>
+    </div>
+
+    <h3>🎯 Actions</h3>
+    <button onclick="setupAdminUser()">Setup Admin User</button>
+    <button onclick="setupRegularUser()">Setup Regular User</button>
+    <button onclick="clearUserData()">Clear User Data</button>
+    <button onclick="checkUserData()">Check Current Data</button>
+
+    <h3>📊 Current Status</h3>
+    <div id="output" class="output">
+      Click "Check Current Data" to see localStorage status...
+    </div>
+
+    <script>
+      function setupAdminUser() {
+        const adminUser = {
+          id: "admin123",
+          name: "ადმინისტრატორი ტესტი",
+          firstName: "ადმინისტრატორი",
+          lastName: "ტესტი",
+          email: "admin@soulart.ge",
+          phone: "+995555123456",
+          role: "Admin",
+          isEmailVerified: true,
+          profileImage: null,
+          createdAt: new Date().toISOString(),
+        };
+
+        localStorage.setItem("soulart_user_data", JSON.stringify(adminUser));
+        updateOutput(
+          "✅ Admin user set up successfully!\n" +
+            JSON.stringify(adminUser, null, 2)
+        );
+      }
+
+      function setupRegularUser() {
+        const regularUser = {
+          id: "user456",
+          name: "ნიკო გელაშვილი",
+          firstName: "ნიკო",
+          lastName: "გელაშვილი",
+          email: "niko@example.ge",
+          phone: "+995555654321",
+          role: "User",
+          isEmailVerified: true,
+          profileImage: null,
+          createdAt: new Date().toISOString(),
+        };
+
+        localStorage.setItem("soulart_user_data", JSON.stringify(regularUser));
+        updateOutput(
+          "✅ Regular user set up successfully!\n" +
+            JSON.stringify(regularUser, null, 2)
+        );
+      }
+
+      function clearUserData() {
+        localStorage.removeItem("soulart_user_data");
+        updateOutput("🗑️ User data cleared from localStorage");
+      }
+
+      function checkUserData() {
+        const userData = localStorage.getItem("soulart_user_data");
+        if (userData) {
+          try {
+            const parsed = JSON.parse(userData);
+            updateOutput(
+              "📦 Current user data found:\n" + JSON.stringify(parsed, null, 2)
+            );
+          } catch (error) {
+            updateOutput("❌ User data exists but invalid JSON:\n" + userData);
+          }
+        } else {
+          updateOutput("❌ No user data found in localStorage");
+        }
+      }
+
+      function updateOutput(text) {
+        document.getElementById("output").textContent = text;
+      }
+
+      // Check status on page load
+      window.onload = checkUserData;
+    </script>
+  </body>
+</html>

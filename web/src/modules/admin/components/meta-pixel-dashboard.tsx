@@ -20,6 +20,9 @@ import {
   Phone,
   Globe,
   AlertCircle,
+  User,
+  Monitor,
+  Smartphone,
 } from "lucide-react";
 import "./meta-pixel-dashboard.css";
 
@@ -63,7 +66,138 @@ interface EventData {
     eventsWithMatching: number;
     matchingRate: number;
   };
+  source?: string;
+  data?: any;
   lastUpdated: string;
+}
+
+// Real-time User Activity Component
+function RealtimeUserList() {
+  const [users, setUsers] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [lastUpdate, setLastUpdate] = useState<string>("");
+
+  const fetchUserActivity = async () => {
+    try {
+      const response = await fetch("/api/admin/user-activity?limit=10");
+      if (response.ok) {
+        const data = await response.json();
+        setUsers(data.summary.recentUsers || []);
+        setLastUpdate(data.lastUpdated);
+      }
+    } catch (error) {
+      console.error("Failed to fetch user activity:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchUserActivity();
+    // Auto-refresh every 5 seconds
+    const interval = setInterval(fetchUserActivity, 5000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const formatTimeAgo = (timestamp: string) => {
+    const now = new Date();
+    const time = new Date(timestamp);
+    const diffMs = now.getTime() - time.getTime();
+    const diffSecs = Math.floor(diffMs / 1000);
+
+    if (diffSecs < 60) return `${diffSecs} წამის წინ`;
+    const diffMins = Math.floor(diffSecs / 60);
+    if (diffMins < 60) return `${diffMins} წუთის წინ`;
+    const diffHours = Math.floor(diffMins / 60);
+    return `${diffHours} საათის წინ`;
+  };
+
+  if (loading) {
+    return (
+      <div className="user-activity-loading">
+        <RefreshCw className="spinning" size={24} />
+        <span>იტვირთება მომხმარებლები...</span>
+      </div>
+    );
+  }
+
+  return (
+    <div className="realtime-users-container">
+      <div className="users-header">
+        <div className="users-count">
+          <Activity size={16} />
+          <span>{users.length} აქტიური მომხმარებელი</span>
+        </div>
+        <div className="last-update">
+          ბოლო განახლება: {formatTimeAgo(lastUpdate)}
+        </div>
+      </div>
+
+      <div className="users-list">
+        {users.map((user, index) => (
+          <div key={index} className="user-activity-item">
+            <div className="user-info">
+              <div className="user-avatar">
+                <User size={20} />
+              </div>
+              <div className="user-details">
+                <div className="user-name">
+                  {user.name !== "Anonymous" ? user.name : "🔍 მომხმარებელი"}
+                  {user.hasAdvancedMatching && (
+                    <span className="verified-badge">✓ verified</span>
+                  )}
+                </div>
+                <div className="user-activity-info">
+                  <span className="activity-url">{user.url}</span>
+                  <span className="activity-time">
+                    {formatTimeAgo(user.timestamp)}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div className="user-meta">
+              <div className="device-info">
+                {user.device === "Mobile" ? (
+                  <Smartphone size={14} />
+                ) : (
+                  <Monitor size={14} />
+                )}
+                <span>{user.device}</span>
+              </div>
+
+              {user.email && (
+                <div className="contact-info">
+                  <Mail size={12} />
+                  <span>{user.email}</span>
+                </div>
+              )}
+
+              {user.phone && (
+                <div className="contact-info">
+                  <Phone size={12} />
+                  <span>{user.phone}</span>
+                </div>
+              )}
+
+              <div className="ip-info">
+                <Globe size={12} />
+                <span>{user.ip}</span>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {users.length === 0 && (
+        <div className="no-users">
+          <Users size={48} />
+          <p>მომხმარებლების აქტივობა არ მოიძებნა</p>
+          <span>დაელოდეთ ვიზიტორებს...</span>
+        </div>
+      )}
+    </div>
+  );
 }
 
 export function MetaPixelDashboard() {
@@ -89,7 +223,14 @@ export function MetaPixelDashboard() {
   const fetchEventData = async () => {
     try {
       setError(null);
-      const response = await fetch("/api/admin/meta-pixel/events");
+      // Add cache busting timestamp to avoid cache issues
+      const timestamp = new Date().getTime();
+      const response = await fetch(
+        `/api/admin/meta-pixel/events?t=${timestamp}`,
+        {
+          cache: "no-store",
+        }
+      );
 
       if (!response.ok) {
         throw new Error("Failed to fetch event data");
@@ -270,7 +411,9 @@ export function MetaPixelDashboard() {
                 <Activity className="icon" />
               </div>
               <div className="stat-content">
-                <div className="stat-value">{eventData.eventSummary.totalEvents}</div>
+                <div className="stat-value">
+                  {eventData.eventSummary.totalEvents}
+                </div>
                 <div className="stat-label">სულ ივენთი</div>
               </div>
             </div>
@@ -292,7 +435,9 @@ export function MetaPixelDashboard() {
                 <TrendingUp className="icon" />
               </div>
               <div className="stat-content">
-                <div className="stat-value">{eventData.eventSummary.matchingRate}%</div>
+                <div className="stat-value">
+                  {eventData.eventSummary.matchingRate}%
+                </div>
                 <div className="stat-label">Matching Rate</div>
               </div>
             </div>
@@ -455,7 +600,9 @@ export function MetaPixelDashboard() {
                   {event.name === "InitiateCheckout" && (
                     <CreditCard className="event-icon" />
                   )}
-                  {event.name === "Purchase" && <CreditCard className="event-icon" />}
+                  {event.name === "Purchase" && (
+                    <CreditCard className="event-icon" />
+                  )}
                   {event.name === "Search" && <Search className="event-icon" />}
                   {event.name === "SubscribedButtonClick" && (
                     <MousePointer className="event-icon" />
@@ -467,6 +614,18 @@ export function MetaPixelDashboard() {
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+
+        {/* Real-time User Activity */}
+        <div className="info-card">
+          <h2 className="card-title">
+            <Users className="card-icon" />
+            👥 Real-time მომხმარებლები (ვინ არის ონლაინ)
+          </h2>
+
+          <div className="realtime-users-section">
+            <RealtimeUserList />
           </div>
         </div>
 
@@ -527,7 +686,9 @@ export function MetaPixelDashboard() {
                   {event.browser && (
                     <div className="event-detail browser-info">
                       <span className="label">Browser:</span>
-                      <span className="value">{event.browser.substring(0, 50)}...</span>
+                      <span className="value">
+                        {event.browser.substring(0, 50)}...
+                      </span>
                     </div>
                   )}
                 </div>
@@ -581,7 +742,9 @@ export function MetaPixelDashboard() {
                   ნებართვების დაყენება ვებსაიტებიდან ივენთების მისაღებად
                 </p>
               </div>
-              <button className="setting-action-btn secondary">კონფიგურაცია</button>
+              <button className="setting-action-btn secondary">
+                კონფიგურაცია
+              </button>
             </div>
           </div>
         </div>

@@ -780,3 +780,168 @@
   font-weight: 600;
   border: 1px solid rgba(74, 222, 128, 0.3);
 }
+
+/* Real-time Users Styles */
+.realtime-users-container {
+  padding: 0;
+}
+
+.users-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #e0e7ff;
+}
+
+.users-count {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  color: #1877f2;
+}
+
+.last-update {
+  font-size: 0.875rem;
+  color: #666;
+}
+
+.users-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.user-activity-item {
+  background: #f8fafc;
+  border-radius: 12px;
+  padding: 1rem;
+  border-left: 4px solid #10b981;
+  transition: all 0.2s ease;
+}
+
+.user-activity-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.user-avatar {
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+}
+
+.user-details {
+  flex: 1;
+}
+
+.user-name {
+  font-weight: 600;
+  color: #1a1a1a;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.25rem;
+}
+
+.verified-badge {
+  background: #10b981;
+  color: white;
+  font-size: 0.75rem;
+  padding: 0.125rem 0.5rem;
+  border-radius: 12px;
+  font-weight: 500;
+}
+
+.user-activity-info {
+  display: flex;
+  gap: 1rem;
+  font-size: 0.875rem;
+}
+
+.activity-url {
+  color: #1877f2;
+  font-weight: 500;
+}
+
+.activity-time {
+  color: #666;
+}
+
+.user-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  font-size: 0.75rem;
+}
+
+.device-info,
+.contact-info,
+.ip-info {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  background: white;
+  padding: 0.25rem 0.5rem;
+  border-radius: 6px;
+  color: #666;
+}
+
+.device-info {
+  background: #e0e7ff;
+  color: #3730a3;
+}
+
+.contact-info {
+  background: #d1fae5;
+  color: #047857;
+}
+
+.ip-info {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.user-activity-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 2rem;
+  color: #666;
+}
+
+.no-users {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: #666;
+}
+
+.no-users svg {
+  color: #cbd5e1;
+  margin-bottom: 1rem;
+}
+
+.no-users p {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.no-users span {
+  font-size: 0.875rem;
+}

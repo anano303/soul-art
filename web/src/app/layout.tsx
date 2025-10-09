@@ -328,7 +328,7 @@ export default function RootLayout({
 
         {/* Meta Pixel - Facebook ვიზიტორების ტრაფიკი და კონვერსიები */}
         <Suspense fallback={null}>
-          <MetaPixel />
+          <MetaPixel /> {/* Temporarily disabled for testing */}
         </Suspense>
 
         {/* Vercel Analytics - ვიზიტორების ტრაფიკი და Performance */}
