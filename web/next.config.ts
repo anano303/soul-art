@@ -162,9 +162,9 @@ const nextConfig: NextConfig = {
           },
           // Optimize CSS chunks to prevent preload warnings
           styles: {
-            name: 'styles',
+            name: "styles",
             test: /\.css$/,
-            chunks: 'all',
+            chunks: "all",
             enforce: true,
             priority: 50,
           },
@@ -176,7 +176,7 @@ const nextConfig: NextConfig = {
     if (!isServer) {
       // Disable CSS preload hints by modifying the mini-css-extract-plugin
       config.plugins.forEach((plugin: any) => {
-        if (plugin.constructor.name === 'MiniCssExtractPlugin') {
+        if (plugin.constructor.name === "MiniCssExtractPlugin") {
           plugin.options.linkType = false;
         }
       });
