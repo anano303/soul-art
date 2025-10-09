@@ -274,6 +274,23 @@ export default function RootLayout({
         style={{ maxWidth: "100vw" }}
         suppressHydrationWarning={true}
       >
+        {/* Suppress CSS preload warnings */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                var originalWarn = console.warn;
+                console.warn = function() {
+                  var message = Array.prototype.join.call(arguments, ' ');
+                  if (!message.includes('was preloaded using link preload but not used within a few seconds')) {
+                    originalWarn.apply(console, arguments);
+                  }
+                };
+              })();
+            `,
+          }}
+        />
+
         {/* Dynamic Favicon Handler */}
         <DynamicFavicon />
 
