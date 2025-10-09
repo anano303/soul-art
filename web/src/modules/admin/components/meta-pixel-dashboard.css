@@ -720,7 +720,10 @@
 }
 
 .event-url {
-  word-break: break-all;
+  max-width: 250px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   color: #1877f2;
 }
 
@@ -876,6 +879,10 @@
 .activity-url {
   color: #1877f2;
   font-weight: 500;
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .activity-time {

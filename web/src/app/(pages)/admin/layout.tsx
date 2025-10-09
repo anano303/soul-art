@@ -60,6 +60,25 @@ export default function AdminLayout({
     };
 
     checkAuth();
+
+    // Disable CSS preload warnings for admin pages
+    const disableCssPreloadWarnings = () => {
+      // Override console.warn to filter out CSS preload warnings
+      const originalWarn = console.warn;
+      console.warn = function (...args) {
+        const message = args.join(" ");
+        if (
+          !message.includes(
+            "was preloaded using link preload but not used within a few seconds"
+          )
+        ) {
+          originalWarn.apply(console, args);
+        }
+      };
+    };
+
+    // Run after a short delay to ensure console is ready
+    setTimeout(disableCssPreloadWarnings, 100);
   }, [router]);
 
   if (loading) {
