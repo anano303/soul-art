@@ -37,22 +37,13 @@ export async function GET(request: NextRequest) {
         if (statsResponse.ok) {
           const statsData = await statsResponse.json();
 
-          // Check if data is empty (rate limited) and we have valid cached data
+          // Check if data is empty (rate limited) and we have cached data
           const hasData =
             statsData &&
             statsData.data &&
             Array.isArray(statsData.data) &&
             statsData.data.length > 0;
-          if (
-            !hasData &&
-            lastSuccessfulData &&
-            lastSuccessfulData.eventSummary?.totalEvents > 0
-          ) {
-            console.log(
-              "⚠️ Facebook API returned empty data, using cached data with",
-              lastSuccessfulData.eventSummary.totalEvents,
-              "events"
-            );
+          if (!hasData && lastSuccessfulData) {
             return NextResponse.json({
               ...lastSuccessfulData,
               source: "cached_stats",
@@ -61,64 +52,35 @@ export async function GET(request: NextRequest) {
             });
           }
 
-          // Only process and cache if we have actual data
-          if (hasData) {
-            const processedStats = processStatsData(statsData);
+          const processedStats = processStatsData(statsData);
 
-            finalData = {
-              success: true,
-              source: "stats",
-              data: statsData,
-              eventSummary: {
-                summary: processedStats.eventBreakdown || {},
-                recentEvents: [],
-                advancedMatchingData: [],
-                totalEvents: processedStats.totalEvents || 0,
-                eventsWithMatching: Math.floor(
-                  (processedStats.totalEvents || 0) * 0.15
-                ), // Estimate 15% have advanced matching
-                matchingRate:
-                  processedStats.totalEvents > 0
-                    ? Math.floor(
-                        ((processedStats.totalEvents * 0.15) /
-                          processedStats.totalEvents) *
-                          100
-                      )
-                    : 0,
-                hourlyBreakdown: processedStats.hourlyBreakdown || {},
-              },
-              lastUpdated: new Date().toISOString(),
-            };
+          finalData = {
+            success: true,
+            source: "stats",
+            data: statsData,
+            eventSummary: {
+              summary: processedStats.eventBreakdown || {},
+              recentEvents: [],
+              advancedMatchingData: [],
+              totalEvents: processedStats.totalEvents || 0,
+              eventsWithMatching: Math.floor(
+                (processedStats.totalEvents || 0) * 0.15
+              ), // Estimate 15% have advanced matching
+              matchingRate:
+                processedStats.totalEvents > 0
+                  ? Math.floor(
+                      ((processedStats.totalEvents * 0.15) /
+                        processedStats.totalEvents) *
+                        100
+                    )
+                  : 0,
+              hourlyBreakdown: processedStats.hourlyBreakdown || {},
+            },
+            lastUpdated: new Date().toISOString(),
+          };
 
-            // Cache successful data only when we have actual data
-            lastSuccessfulData = finalData;
-            console.log(
-              "💾 Cached successful API response with",
-              processedStats.totalEvents,
-              "events"
-            );
-          } else {
-            console.log("⚠️ Facebook API returned empty data, clearing cache");
-            // Clear cache when we get empty data to prevent returning empty cached data
-            lastSuccessfulData = null;
-            // Return empty response when no data and no valid cache
-            return NextResponse.json({
-              success: true,
-              source: "empty_stats",
-              data: statsData,
-              eventSummary: {
-                summary: {},
-                recentEvents: [],
-                advancedMatchingData: [],
-                totalEvents: 0,
-                eventsWithMatching: 0,
-                matchingRate: 0,
-                hourlyBreakdown: {},
-              },
-              lastUpdated: new Date().toISOString(),
-              note: "No data available from Facebook API",
-            });
-          }
+          // Cache successful data
+          lastSuccessfulData = finalData;
         } else {
           const errorData = await statsResponse.json();
           lastError = errorData;
