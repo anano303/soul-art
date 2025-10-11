@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import "./push-notifications.css";
+import { useUser } from "@/modules/auth/hooks/use-user";
 
 export function PushNotificationManager() {
   const [permission, setPermission] =
@@ -9,6 +10,7 @@ export function PushNotificationManager() {
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [showPermissionPrompt, setShowPermissionPrompt] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const { user } = useUser();
 
   useEffect(() => {
     // Check current permission status
@@ -81,13 +83,17 @@ export function PushNotificationManager() {
         applicationServerKey: urlBase64ToUint8Array(vapidPublicKey),
       });
 
-      // Send subscription to your server
-      await fetch("/api/push/subscribe", {
+      // Send subscription to the Nest.js backend
+      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/push/subscribe`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(subscription),
+        body: JSON.stringify({
+          subscription,
+          userId: user?._id,
+          userEmail: user?.email,
+        }),
       });
 
       setIsSubscribed(true);

@@ -26,17 +26,21 @@ import { AddReplyDto } from './dto/addReply.dto';
 import { SearchForumDto } from './dto/search-forum.dto';
 import { uploadRateLimit } from '@/middleware/security.middleware';
 import { createRateLimitInterceptor } from '@/interceptors/rate-limit.interceptor';
+import { PushNotificationService } from '@/push/services/push-notification.service';
 // import { AddReplyDto } from './dto/addReply.dto';
 
 @Controller('forums')
 export class ForumsController {
-  constructor(private readonly forumsService: ForumsService) {}
+  constructor(
+    private readonly forumsService: ForumsService,
+    private readonly pushNotificationService: PushNotificationService,
+  ) {}
 
   @Post()
   @UseGuards(JwtAuthGuard)
   @UseInterceptors(FileInterceptor('file'))
   @UseInterceptors(createRateLimitInterceptor(uploadRateLimit))
-  create(
+  async create(
     @UploadedFile() file: Express.Multer.File,
     @CurrentUser() user: User,
     @Body() createForumDto: CreateForumDto,
@@ -46,7 +50,22 @@ export class ForumsController {
     }
 
     if (!file) {
-      return this.forumsService.create(createForumDto, user._id);
+      const createdForum = await this.forumsService.create(
+        createForumDto,
+        user._id,
+      );
+
+      // Send push notification for new forum post (don't await to avoid blocking response)
+      this.sendNewForumPostPushNotification(createdForum, user).catch(
+        (error) => {
+          console.error(
+            'Failed to send push notification for new forum post:',
+            error,
+          );
+        },
+      );
+
+      return createdForum;
     }
 
     console.log('Received file:', {
@@ -83,12 +102,25 @@ export class ForumsController {
       throw new BadRequestException('The file must be less than 5 MB.');
     }
 
-    return this.forumsService.create(
-      createForumDto,
-      user._id,
-      filePath,
-      file, // Pass the entire file object, not just buffer
-    );
+    return this.forumsService
+      .create(
+        createForumDto,
+        user._id,
+        filePath,
+        file, // Pass the entire file object, not just buffer
+      )
+      .then((createdForum) => {
+        // Send push notification for new forum post (don't await to avoid blocking response)
+        this.sendNewForumPostPushNotification(createdForum, user).catch(
+          (error) => {
+            console.error(
+              'Failed to send push notification for new forum post:',
+              error,
+            );
+          },
+        );
+        return createdForum;
+      });
   }
 
   @Get()
@@ -311,5 +343,40 @@ export class ForumsController {
 
     // Pass user role to the service
     return this.forumsService.remove(id, user._id, user.role);
+  }
+
+  // Private method to send push notification for new forum post
+  private async sendNewForumPostPushNotification(forum: any, user: any) {
+    try {
+      const pushPayload = {
+        title: '💬 ახალი პოსტი ფორუმზე!',
+        body: `${user.name || 'ადმინისტრატორი'} დაამატა ახალი პოსტი: ${forum.title || 'უსათაურო პოსტი'}`,
+        icon: forum.imagePath || '/android-icon-192x192.png',
+        badge: '/favicon-96x96.png',
+        data: {
+          type: 'new_forum_post' as const,
+          url: `/forums/${forum._id}`,
+          id: forum._id,
+        },
+        tag: `new-forum-post-${forum._id}`,
+        requireInteraction: true,
+      };
+
+      console.log(
+        '📤 Sending push notification for new forum post:',
+        forum.title || 'უსათაურო პოსტი',
+      );
+
+      // Send push notification to all subscribers using the service
+      const results = await this.pushNotificationService.sendToAll(pushPayload);
+
+      console.log('✅ Push notification sent successfully:', {
+        sent: results.successful,
+        failed: results.failed,
+      });
+    } catch (error) {
+      console.error('❌ Failed to send push notification:', error.message);
+      // Don't throw error - push notification failure shouldn't break forum post creation
+    }
   }
 }

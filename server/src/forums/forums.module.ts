@@ -12,6 +12,7 @@ import { UsersService } from '@/users/services/users.service';
 import { UsersModule } from '@/users/users.module';
 import { AwsS3Module } from '@/aws-s3/aws-s3.module';
 import { CloudinaryModule } from '@/cloudinary/cloudinary.module';
+import { PushNotificationModule } from '@/push/push-notification.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { CloudinaryModule } from '@/cloudinary/cloudinary.module';
     UsersModule,
     AwsS3Module,
     CloudinaryModule,
+    PushNotificationModule,
   ],
 
   controllers: [ForumsController],

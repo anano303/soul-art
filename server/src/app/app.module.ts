@@ -21,6 +21,7 @@ import { CategoriesModule } from '@/categories/categories.module';
 import { BannerModule } from '@/banners/banner.module';
 import { SharedServicesModule } from './shared-services.module';
 import { ReferralsModule } from '../referrals/referrals.module';
+import { PushNotificationModule } from '../push/push-notification.module';
 
 @Module({
   imports: [
@@ -47,6 +48,7 @@ import { ReferralsModule } from '../referrals/referrals.module';
     CategoriesModule,
     BannerModule,
     ReferralsModule,
+    PushNotificationModule,
   ],
   controllers: [AppController],
   providers: [AppService, GoogleStrategy],

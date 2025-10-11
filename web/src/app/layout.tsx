@@ -321,6 +321,17 @@ export default function RootLayout({
               </CheckoutProvider>
             </CartProvider>
           </AuthProvider>
+
+          {/* Push Notifications - moved inside Providers for QueryClient access */}
+          <PushNotificationManager />
+
+          {/* PWA Manager - Conditional PWA functionality */}
+          <PWAManager />
+
+          {/* Cache Manager - მხოლოდ development-ში */}
+          {process.env.NODE_ENV === "development" && (
+            <CacheManager position="fixed" size="small" />
+          )}
         </Providers>
 
         {/* Wrap in error boundary */}
@@ -333,17 +344,6 @@ export default function RootLayout({
 
         {/* PWA Install Prompt */}
         <PWAInstallPrompt />
-
-        {/* Push Notifications */}
-        <PushNotificationManager />
-
-        {/* PWA Manager - Conditional PWA functionality */}
-        <PWAManager />
-
-        {/* Cache Manager - მხოლოდ development-ში */}
-        {process.env.NODE_ENV === "development" && (
-          <CacheManager position="fixed" size="small" />
-        )}
 
         {/* Google Analytics */}
         <GoogleAnalytics />

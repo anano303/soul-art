@@ -32,6 +32,8 @@ import { Role } from '@/types/role.enum';
 import { ProductStatus } from '../schemas/product.schema';
 import { AgeGroup } from '@/types';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
+import axios from 'axios';
+import { PushNotificationService } from '@/push/services/push-notification.service';
 
 @ApiTags('products')
 @Controller('products')
@@ -40,6 +42,7 @@ export class ProductsController {
     private productsService: ProductsService,
     private appService: AppService,
     private productExpertAgent: ProductExpertAgent,
+    private pushNotificationService: PushNotificationService,
   ) {}
 
   @Get()
@@ -314,7 +317,7 @@ export class ProductsController {
       } = productData;
 
       // Create the product with proper category references
-      return this.productsService.create({
+      const createdProduct = await this.productsService.create({
         ...otherProductData,
         // Set brand name to seller's store name if not provided
         brand:
@@ -334,6 +337,16 @@ export class ProductsController {
         brandLogo: brandLogoUrl,
         videoDescription,
       });
+
+      // Send push notification for new product (don't await to avoid blocking response)
+      this.sendNewProductPushNotification(createdProduct).catch((error) => {
+        console.error(
+          'Failed to send push notification for new product:',
+          error,
+        );
+      });
+
+      return createdProduct;
     } catch (error) {
       console.error('Error creating product:', error);
       throw new InternalServerErrorException(
@@ -555,7 +568,27 @@ export class ProductsController {
       rejectionReason,
     }: { status: ProductStatus; rejectionReason?: string },
   ) {
-    return this.productsService.updateStatus(id, status, rejectionReason);
+    const updatedProduct = await this.productsService.updateStatus(
+      id,
+      status,
+      rejectionReason,
+    );
+
+    // Send push notification to seller when product status changes
+    if (updatedProduct.user) {
+      this.sendProductStatusPushNotification(
+        updatedProduct,
+        status,
+        rejectionReason,
+      ).catch((error) => {
+        console.error(
+          'Failed to send product status push notification:',
+          error,
+        );
+      });
+    }
+
+    return updatedProduct;
   }
 
   @Get('colors')
@@ -618,5 +651,102 @@ export class ProductsController {
   })
   async fixHeicBrandLogos() {
     return this.productsService.fixHeicBrandLogos();
+  }
+
+  // Private method to send push notification for new product
+  private async sendNewProductPushNotification(product: any) {
+    try {
+      const pushPayload = {
+        title: '🆕 ახალი ნამუშევარი SoulArt-ზე!',
+        body: `${product.name || product.nameEn || 'ახალი ნამუშევარი'} - იხილეთ ახალი შემოთავაზება!`,
+        icon: product.images?.[0] || '/android-icon-192x192.png',
+        badge: '/favicon-96x96.png',
+        data: {
+          type: 'new_product' as const,
+          url: `/products/${product._id}`,
+          id: product._id,
+        },
+        tag: `new-product-${product._id}`,
+        requireInteraction: true,
+      };
+
+      console.log(
+        '📤 Sending push notification for new product:',
+        product.name || product.nameEn,
+      );
+
+      // Send push notification to all subscribers using the service
+      const results = await this.pushNotificationService.sendToAll(pushPayload);
+
+      console.log('✅ Push notification sent successfully:', {
+        sent: results.successful,
+        failed: results.failed,
+      });
+    } catch (error) {
+      console.error('❌ Failed to send push notification:', error.message);
+      // Don't throw error - push notification failure shouldn't break product creation
+    }
+  }
+
+  // Private method to send push notification for product status change to seller
+  private async sendProductStatusPushNotification(
+    product: any,
+    status: ProductStatus,
+    rejectionReason?: string,
+  ) {
+    try {
+      let title: string;
+      let body: string;
+      let notificationType: 'product_approved' | 'product_rejected';
+
+      if (status === ProductStatus.APPROVED) {
+        title = '🎉 თქვენი ნამუშევარი დამტკიცდა!';
+        body = `თქვენი ნამუშევარი "${product.name || product.nameEn}" წარმატებით დამტკიცდა და ახლა ხელმისაწვდომია მაღაზიაში.`;
+        notificationType = 'product_approved';
+      } else if (status === ProductStatus.REJECTED) {
+        title = '❌ თქვენი ნამუშევარი არ დამტკიცდა';
+        body = `თქვენი ნამუშევარი "${product.name || product.nameEn}" არ დამტკიცდა.${rejectionReason ? ` მიზეზი: ${rejectionReason}` : ''}`;
+        notificationType = 'product_rejected';
+      } else {
+        // For other status changes, don't send notification
+        return;
+      }
+
+      const pushPayload = {
+        title,
+        body,
+        icon: product.images?.[0] || '/android-icon-192x192.png',
+        badge: '/favicon-96x96.png',
+        data: {
+          type: notificationType,
+          url: `/products/${product._id}`,
+          id: product._id,
+        },
+        tag: `product-status-${product._id}`,
+        requireInteraction: true,
+      };
+
+      console.log(
+        `📤 Sending ${status.toLowerCase()} push notification to seller:`,
+        product.user._id,
+      );
+
+      // Send push notification to specific user using the service
+      const results = await this.pushNotificationService.sendToUser(
+        product.user._id.toString(),
+        pushPayload,
+      );
+
+      console.log(
+        `✅ Product ${status.toLowerCase()} push notification sent successfully:`,
+        { sent: results.successful, failed: results.failed },
+      );
+    } catch (error) {
+      console.error(
+        `❌ Failed to send product ${status.toLowerCase()} push notification:`,
+        error.message,
+      );
+      // Don't throw error - push notification failure shouldn't break product status update
+    }
   }
 }

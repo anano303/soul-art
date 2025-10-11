@@ -68,6 +68,24 @@ self.addEventListener("push", function (event) {
     });
   }
 
+  if (notificationData.data?.type === "product_approved") {
+    options.badge = "/android-icon-192x192.png";
+    options.actions.unshift({
+      action: "view_product",
+      title: "ნამუშევრის ნახვა",
+      icon: "/android-icon-48x48.png",
+    });
+  }
+
+  if (notificationData.data?.type === "product_rejected") {
+    options.badge = "/ms-icon-70x70.png"; // Different icon for rejection
+    options.actions.unshift({
+      action: "view_product",
+      title: "ნამუშევრის ნახვა",
+      icon: "/android-icon-48x48.png",
+    });
+  }
+
   event.waitUntil(
     self.registration
       .showNotification(title, options)
