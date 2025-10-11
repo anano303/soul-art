@@ -87,7 +87,7 @@ export class ForumsController {
       createForumDto,
       user._id,
       filePath,
-      file.buffer,
+      file, // Pass the entire file object, not just buffer
     );
   }
 

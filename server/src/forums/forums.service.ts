@@ -38,31 +38,50 @@ export class ForumsService {
     return imagePath;
   }
 
-  async create(createForumDto: CreateForumDto, userId, filePath?, file?) {
+  async create(createForumDto: CreateForumDto, userId, filePath?, file?: Express.Multer.File) {
     try {
       const user = await this.userService.findById(userId);
       if (!Object.keys(user).length)
         throw new BadRequestException('user not found');
       if ('_id' in user) {
-        if (!filePath && !file) {
+        // If no file buffer provided, create forum without image
+        if (!file) {
           const forum = await this.forumModel.create({
             ...createForumDto,
             user: user._id,
+            ...(filePath && { imagePath: filePath }), // Use provided filePath if exists
           });
           return forum;
         }
-        const imagePath = await this.cloudinaryService.uploadImage(file);
-        const forum = await this.forumModel.create({
-          ...createForumDto,
-          user: user._id,
-          imagePath: (imagePath as any).secure_url,
-        });
-        return forum;
+
+        // If file buffer provided, upload to Cloudinary
+        try {
+          console.log('Uploading image to Cloudinary...');
+          const uploadResult = await this.cloudinaryService.uploadImage(file);
+          console.log('Cloudinary upload result:', uploadResult);
+
+          if (!uploadResult || !uploadResult.secure_url) {
+            throw new BadRequestException('Failed to upload image to Cloudinary');
+          }
+
+          const forum = await this.forumModel.create({
+            ...createForumDto,
+            user: user._id,
+            imagePath: uploadResult.secure_url,
+          });
+          console.log('Forum created with image:', forum.imagePath);
+          return forum;
+        } catch (uploadError) {
+          console.error('Cloudinary upload failed:', uploadError);
+          throw new BadRequestException(`Image upload failed: ${uploadError.message}`);
+        }
       }
     } catch (error) {
+      console.error('Forum creation error:', error);
       if (error.name === 'ValidationError') {
         throw new BadRequestException(error.message);
       }
+      throw error;
     }
   }
 
