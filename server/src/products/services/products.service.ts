@@ -1057,4 +1057,52 @@ export class ProductsService {
     }
     return await this.productModel.countDocuments(filter);
   }
+
+  /**
+   * Utility method to fix HEIC brand logos by converting them to JPEG format
+   */
+  async fixHeicBrandLogos(): Promise<{ updated: number; errors: string[] }> {
+    const updated: number[] = [];
+    const errors: string[] = [];
+
+    try {
+      // Find all products with HEIC brand logos
+      const productsWithHeicLogos = await this.productModel.find({
+        brandLogo: { $regex: /\.heic$/i },
+      });
+
+      console.log(
+        `Found ${productsWithHeicLogos.length} products with HEIC brand logos`,
+      );
+
+      for (const product of productsWithHeicLogos) {
+        try {
+          if (product.brandLogo && product.brandLogo.includes('.heic')) {
+            // Convert HEIC URL to JPEG format
+            const jpegUrl = product.brandLogo
+              .replace(/\.heic$/i, '.jpg')
+              .replace('/upload/', '/upload/f_jpg,q_auto/');
+
+            await this.productModel.updateOne(
+              { _id: product._id },
+              { $set: { brandLogo: jpegUrl } },
+            );
+
+            updated.push(1);
+            console.log(
+              `Updated product ${product._id}: ${product.brandLogo} -> ${jpegUrl}`,
+            );
+          }
+        } catch (error) {
+          console.error(`Error updating product ${product._id}:`, error);
+          errors.push(`Product ${product._id}: ${error.message}`);
+        }
+      }
+
+      return { updated: updated.length, errors };
+    } catch (error) {
+      console.error('Error in fixHeicBrandLogos:', error);
+      return { updated: 0, errors: [error.message] };
+    }
+  }
 }
