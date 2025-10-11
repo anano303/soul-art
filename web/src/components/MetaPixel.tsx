@@ -26,17 +26,21 @@ export const pageview = () => {
     if (currentUser) {
       if (currentUser.email) {
         enhancedData.em = currentUser.email;
-        console.log(
-          "🔍 Meta Pixel: Adding email for advanced matching:",
-          currentUser.email
-        );
+        if (process.env.NODE_ENV === "development") {
+          console.log(
+            "🔍 Meta Pixel: Adding email for advanced matching:",
+            currentUser.email
+          );
+        }
       }
       if (currentUser.phoneNumber) {
         enhancedData.ph = currentUser.phoneNumber;
-        console.log(
-          "🔍 Meta Pixel: Adding phone for advanced matching:",
-          currentUser.phoneNumber
-        );
+        if (process.env.NODE_ENV === "development") {
+          console.log(
+            "🔍 Meta Pixel: Adding phone for advanced matching:",
+            currentUser.phoneNumber
+          );
+        }
       }
       if (currentUser.name) {
         const [firstName, ...lastNameParts] = currentUser.name.split(" ");
@@ -44,10 +48,12 @@ export const pageview = () => {
         if (lastNameParts.length > 0) {
           enhancedData.ln = lastNameParts.join(" ");
         }
-        console.log(
-          "🔍 Meta Pixel: Adding name for advanced matching:",
-          currentUser.name
-        );
+        if (process.env.NODE_ENV === "development") {
+          console.log(
+            "🔍 Meta Pixel: Adding name for advanced matching:",
+            currentUser.name
+          );
+        }
       } else if (currentUser.ownerFirstName && currentUser.ownerLastName) {
         enhancedData.fn = currentUser.ownerFirstName;
         enhancedData.ln = currentUser.ownerLastName;
@@ -80,13 +86,17 @@ export const pageview = () => {
 // Track user activity in our system
 const trackUserActivity = async (activityData: any) => {
   try {
-    console.log("🔥 Tracking Activity:", activityData);
+    if (process.env.NODE_ENV === "development") {
+      console.log("🔥 Tracking Activity:", activityData);
+    }
     const response = await fetch("/api/admin/user-activity", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(activityData),
     });
-    console.log("🔥 Activity API Response:", response.status, response.ok);
+    if (process.env.NODE_ENV === "development") {
+      console.log("🔥 Activity API Response:", response.status, response.ok);
+    }
   } catch (error) {
     console.log("🔥 Activity tracking failed:", error);
   }

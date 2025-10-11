@@ -32,7 +32,9 @@ export function usePerformanceOptimizations() {
 
     // Basic performance monitoring (simplified)
     if (process.env.NODE_ENV === "development") {
-      console.log("Performance optimizations applied");
+      if (process.env.NODE_ENV === "development") {
+        console.log("Performance optimizations applied");
+      }
     }
   }, []);
 }

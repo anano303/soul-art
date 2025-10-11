@@ -39,15 +39,19 @@ export function CheckoutProvider({ children }: { children: React.ReactNode }) {
       STORAGE_KEYS.PAYMENT_METHOD
     );
 
-    console.log("Loading from localStorage:", {
-      savedShippingAddress,
-      savedPaymentMethod,
-    });
+    if (process.env.NODE_ENV === "development") {
+      console.log("Loading from localStorage:", {
+        savedShippingAddress,
+        savedPaymentMethod,
+      });
+    }
 
     if (savedShippingAddress) {
       try {
         const parsed = JSON.parse(savedShippingAddress);
-        console.log("Parsed shipping address:", parsed);
+        if (process.env.NODE_ENV === "development") {
+          console.log("Parsed shipping address:", parsed);
+        }
         setShippingAddressState(parsed);
       } catch (error) {
         console.error("Error parsing saved shipping address:", error);
@@ -55,7 +59,9 @@ export function CheckoutProvider({ children }: { children: React.ReactNode }) {
     }
 
     if (savedPaymentMethod) {
-      console.log("Setting payment method:", savedPaymentMethod);
+      if (process.env.NODE_ENV === "development") {
+        console.log("Setting payment method:", savedPaymentMethod);
+      }
       setPaymentMethodState(savedPaymentMethod);
     }
   }, []);

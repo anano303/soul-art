@@ -69,7 +69,9 @@ export const registerServiceWorkerConditionally = async (): Promise<void> => {
       const registration = await navigator.serviceWorker.register("/sw.js", {
         scope: "/",
       });
-      console.log("SW registered with push support: ", registration);
+      if (process.env.NODE_ENV === "development") {
+        console.log("SW registered with push support: ", registration);
+      }
 
       // Handle service worker updates
       registration.addEventListener("updatefound", () => {
@@ -79,10 +81,14 @@ export const registerServiceWorkerConditionally = async (): Promise<void> => {
             if (newWorker.state === "installed") {
               if (navigator.serviceWorker.controller) {
                 // New update available
-                console.log("New content available; please refresh.");
+                if (process.env.NODE_ENV === "development") {
+                  console.log("New content available; please refresh.");
+                }
               } else {
                 // Content is cached for offline use
-                console.log("Content is cached for offline use.");
+                if (process.env.NODE_ENV === "development") {
+                  console.log("Content is cached for offline use.");
+                }
               }
             }
           });
@@ -90,12 +96,18 @@ export const registerServiceWorkerConditionally = async (): Promise<void> => {
       });
 
       // Log current registration status
-      console.log("Service Worker registered with push support");
+      if (process.env.NODE_ENV === "development") {
+        console.log("Service Worker registered with push support");
+      }
     } catch (error) {
-      console.error("Service Worker registration failed:", error);
+      if (process.env.NODE_ENV === "development") {
+        console.error("Service Worker registration failed:", error);
+      }
     }
   } else {
-    console.log("Service Worker or Notifications not supported");
+    if (process.env.NODE_ENV === "development") {
+      console.log("Service Worker or Notifications not supported");
+    }
   }
 };
 
@@ -135,16 +147,22 @@ export const initializePWA = (): void => {
       // Listen for display mode changes
       const mediaQuery = window.matchMedia("(display-mode: standalone)");
       mediaQuery.addEventListener("change", (e) => {
-        if (e.matches) {
-          console.log("App is running in standalone mode");
-        } else {
-          console.log("App is running in browser mode");
+        if (process.env.NODE_ENV === "development") {
+          if (e.matches) {
+            console.log("App is running in standalone mode");
+          } else {
+            console.log("App is running in browser mode");
+          }
         }
       });
 
-      console.log("PWA/Service Worker initialized for push notifications");
+      if (process.env.NODE_ENV === "development") {
+        console.log("PWA/Service Worker initialized for push notifications");
+      }
     } else {
-      console.log("Service Worker or Notifications not supported");
+      if (process.env.NODE_ENV === "development") {
+        console.log("Service Worker or Notifications not supported");
+      }
     }
   }
 };

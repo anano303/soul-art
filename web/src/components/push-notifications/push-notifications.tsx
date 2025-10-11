@@ -36,9 +36,11 @@ export function PushNotificationManager() {
         // Ensure service worker is registered
         let registration = await navigator.serviceWorker.getRegistration();
         if (!registration) {
-          console.log(
-            "Service worker not registered during status check, registering..."
-          );
+          if (process.env.NODE_ENV === "development") {
+            console.log(
+              "Service worker not registered during status check, registering..."
+            );
+          }
           registration = await navigator.serviceWorker.register("/sw.js", {
             scope: "/",
           });
@@ -99,7 +101,9 @@ export function PushNotificationManager() {
 
   const subscribeUserToPush = async () => {
     try {
-      console.log("🔄 Starting push subscription process...");
+      if (process.env.NODE_ENV === "development") {
+        console.log("🔄 Starting push subscription process...");
+      }
 
       // Check if service worker is available
       if (!("serviceWorker" in navigator)) {
@@ -109,37 +113,51 @@ export function PushNotificationManager() {
       // Check if service worker is already registered, if not register it
       let registration = await navigator.serviceWorker.getRegistration();
       if (!registration) {
-        console.log("📝 Service worker not registered, registering...");
+        if (process.env.NODE_ENV === "development") {
+          console.log("📝 Service worker not registered, registering...");
+        }
         registration = await navigator.serviceWorker.register("/sw.js", {
           scope: "/",
         });
-        console.log("✅ Service worker registered:", registration);
+        if (process.env.NODE_ENV === "development") {
+          console.log("✅ Service worker registered:", registration);
+        }
       }
 
-      console.log("📋 Waiting for service worker to be ready...");
+      if (process.env.NODE_ENV === "development") {
+        console.log("📋 Waiting for service worker to be ready...");
+      }
       const readyRegistration = await navigator.serviceWorker.ready;
-      console.log("✅ Service worker ready:", readyRegistration);
+      if (process.env.NODE_ENV === "development") {
+        console.log("✅ Service worker ready:", readyRegistration);
+      }
 
       // Generate VAPID key (you'll need to replace this with your actual VAPID public key)
       const vapidPublicKey =
         process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY ||
         "BMxYbPxp5WvZrF_2XQ4K7BzXu8TeYK5lDrFcH0Prf8J0FFJCNThE-MUHcJ3RnJSDtHzYN4RHjYx1fJyy4kJp0n8";
 
-      console.log(
-        "🔑 Using VAPID key:",
-        vapidPublicKey.substring(0, 20) + "..."
-      );
+      if (process.env.NODE_ENV === "development") {
+        console.log(
+          "🔑 Using VAPID key:",
+          vapidPublicKey.substring(0, 20) + "..."
+        );
+      }
 
       const subscription = await readyRegistration.pushManager.subscribe({
         userVisibleOnly: true,
         applicationServerKey: urlBase64ToUint8Array(vapidPublicKey),
       });
 
-      console.log("📨 Push subscription created:", subscription);
+      if (process.env.NODE_ENV === "development") {
+        console.log("📨 Push subscription created:", subscription);
+      }
 
       // Send subscription to the Nest.js backend
       const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/push/subscribe`;
-      console.log("🌐 Sending to API:", apiUrl);
+      if (process.env.NODE_ENV === "development") {
+        console.log("🌐 Sending to API:", apiUrl);
+      }
 
       const response = await fetch(apiUrl, {
         method: "POST",
@@ -153,7 +171,9 @@ export function PushNotificationManager() {
         }),
       });
 
-      console.log("📡 API response status:", response.status);
+      if (process.env.NODE_ENV === "development") {
+        console.log("📡 API response status:", response.status);
+      }
 
       if (!response.ok) {
         const errorText = await response.text();
@@ -163,14 +183,18 @@ export function PushNotificationManager() {
       }
 
       const result = await response.json();
-      console.log("✅ Subscription successful:", result);
+      if (process.env.NODE_ENV === "development") {
+        console.log("✅ Subscription successful:", result);
+      }
 
       setIsSubscribed(true);
       setShowPermissionPrompt(false);
 
       alert("✅ წარმატებით გამოიწერეთ შეტყობინებები!");
     } catch (error) {
-      console.error("❌ Failed to subscribe user:", error);
+      if (process.env.NODE_ENV === "development") {
+        console.error("❌ Failed to subscribe user:", error);
+      }
       alert(
         `❌ შეცდომა გამოწერისას: ${
           error instanceof Error ? error.message : String(error)
@@ -206,7 +230,9 @@ export function PushNotificationManager() {
         });
 
         setIsSubscribed(false);
-        console.log("User unsubscribed from push notifications");
+        if (process.env.NODE_ENV === "development") {
+          console.log("User unsubscribed from push notifications");
+        }
       }
     } catch (error) {
       console.error("Failed to unsubscribe user:", error);

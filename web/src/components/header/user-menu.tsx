@@ -60,10 +60,12 @@ export default function UserMenu({ onNavigate }: { onNavigate?: () => void }) {
     if (user?.profileImage) {
       // For Cloudinary images, we can use them directly without validation
       if (isCloudinaryUrl(user.profileImage)) {
-        console.log(
-          "Using Cloudinary profile image directly:",
-          user.profileImage
-        );
+        if (process.env.NODE_ENV === "development") {
+          console.log(
+            "Using Cloudinary profile image directly:",
+            user.profileImage
+          );
+        }
         setProfileImage(user.profileImage);
       } else {
         // For other sources like S3, set immediately but validate in the background
@@ -73,7 +75,9 @@ export default function UserMenu({ onNavigate }: { onNavigate?: () => void }) {
       setProfileImage("/avatar.jpg");
     }
 
-    console.log("User profile updated:", user);
+    if (process.env.NODE_ENV === "development") {
+      console.log("User profile updated:", user);
+    }
   }, [user]);
 
   useEffect(() => {
