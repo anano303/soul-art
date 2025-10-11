@@ -6,12 +6,19 @@ import { Readable } from 'stream';
 export class CloudinaryService {
   async uploadImage(
     file: Express.Multer.File,
+    options: any = {}
   ): Promise<UploadApiResponse | UploadApiErrorResponse> {
     return new Promise((resolve, reject) => {
+      // Merge default options with provided options
+      const uploadOptions = {
+        folder: 'ecommerce',
+        ...options
+      };
+
       // Use upload instead of upload_stream for better compatibility
       v2.uploader.upload(
         `data:${file.mimetype};base64,${file.buffer.toString('base64')}`,
-        { folder: 'ecommerce' },
+        uploadOptions,
         (error, result) => {
           if (error) {
             console.error('Cloudinary upload error:', error);

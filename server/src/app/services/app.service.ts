@@ -6,9 +6,23 @@ export class AppService {
   constructor(private cloudinary: CloudinaryService) {}
 
   async uploadImageToCloudinary(file: Express.Multer.File) {
-    const result = await this.cloudinary.uploadImage(file).catch((err) => {
-      console.log(err);
-      throw new BadRequestException('Invalid file type.');
+    // Check if it's HEIC/HEIF format and convert to JPEG
+    const isHeic = file.mimetype === 'image/heic' || file.mimetype === 'image/heif' ||
+                   file.originalname.toLowerCase().endsWith('.heic') ||
+                   file.originalname.toLowerCase().endsWith('.heif');
+
+    let uploadOptions: any = {};
+    if (isHeic) {
+      // Convert HEIC to JPEG for web compatibility
+      uploadOptions = {
+        format: 'jpg',
+        quality: 'auto',
+      };
+    }
+
+    const result = await this.cloudinary.uploadImage(file, uploadOptions).catch((err) => {
+      console.log('Cloudinary upload error:', err);
+      throw new BadRequestException('Invalid file type or upload failed.');
     });
 
     const optimizedUrl = result.secure_url.replace(
@@ -19,9 +33,23 @@ export class AppService {
   }
 
   async uploadBannerImageToCloudinary(file: Express.Multer.File) {
-    const result = await this.cloudinary.uploadImage(file).catch((err) => {
-      console.log(err);
-      throw new BadRequestException('Invalid file type.');
+    // Check if it's HEIC/HEIF format and convert to JPEG
+    const isHeic = file.mimetype === 'image/heic' || file.mimetype === 'image/heif' ||
+                   file.originalname.toLowerCase().endsWith('.heic') ||
+                   file.originalname.toLowerCase().endsWith('.heif');
+
+    let uploadOptions: any = {};
+    if (isHeic) {
+      // Convert HEIC to JPEG for web compatibility
+      uploadOptions = {
+        format: 'jpg',
+        quality: 'auto',
+      };
+    }
+
+    const result = await this.cloudinary.uploadImage(file, uploadOptions).catch((err) => {
+      console.log('Cloudinary banner upload error:', err);
+      throw new BadRequestException('Invalid file type or upload failed.');
     });
 
     // For banners, use higher quality and larger size

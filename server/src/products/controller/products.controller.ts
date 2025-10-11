@@ -202,9 +202,12 @@ export class ProductsController {
             'image/png',
             'image/jpg',
             'image/gif',
+            'image/webp',
+            'image/heic',
+            'image/heif',
           ];
-          if (!allowedMimeTypes.includes(file.mimetype)) {
-            return cb(new Error('Only image files are allowed!'), false);
+          if (!allowedMimeTypes.includes(file.mimetype.toLowerCase())) {
+            return cb(new Error(`Unsupported file type: ${file.mimetype}. Supported types: JPEG, PNG, GIF, WEBP, HEIC.`), false);
           }
           cb(null, true);
         },
@@ -576,5 +579,23 @@ export class ProductsController {
   })
   getAllAgeGroups() {
     return this.productsService.getAllAgeGroups();
+  }
+
+  @Post('fix-heic-logos')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.Admin)
+  @ApiOperation({ summary: 'Fix HEIC brand logos by converting to JPEG format (Admin only)' })
+  @ApiResponse({
+    status: 200,
+    description: 'Returns the number of updated products and any errors',
+    schema: {
+      properties: {
+        updated: { type: 'number' },
+        errors: { type: 'array', items: { type: 'string' } },
+      },
+    },
+  })
+  async fixHeicBrandLogos() {
+    return this.productsService.fixHeicBrandLogos();
   }
 }
