@@ -61,18 +61,15 @@ export const isMobileDevice = (): boolean => {
  * Registers service worker conditionally - only in production when installed
  */
 export const registerServiceWorkerConditionally = async (): Promise<void> => {
-  // Only register in production for installed PWAs
-  if (
-    "serviceWorker" in navigator &&
-    process.env.NODE_ENV === "production" &&
-    isRunningAsInstalledPWA()
-  ) {
+  // Register service worker if push notifications are supported
+  // This allows push notifications to work in both browser and PWA modes
+  if ("serviceWorker" in navigator && "Notification" in window) {
     try {
+      // Try to register sw.js first (includes both caching and push notifications)
       const registration = await navigator.serviceWorker.register("/sw.js", {
         scope: "/",
       });
-
-      console.log("SW registered: ", registration);
+      console.log("SW registered with push support: ", registration);
 
       // Handle service worker updates
       registration.addEventListener("updatefound", () => {
@@ -91,9 +88,14 @@ export const registerServiceWorkerConditionally = async (): Promise<void> => {
           });
         }
       });
+
+      // Log current registration status
+      console.log("Service Worker registered with push support");
     } catch (error) {
-      console.log("SW registration failed: ", error);
+      console.error("Service Worker registration failed:", error);
     }
+  } else {
+    console.log("Service Worker or Notifications not supported");
   }
 };
 
@@ -125,27 +127,24 @@ export const unregisterServiceWorkerIfNeeded = async (): Promise<void> => {
  */
 export const initializePWA = (): void => {
   if (typeof window !== "undefined") {
-    // Only initialize in production to prevent development conflicts
-    if (process.env.NODE_ENV === "production") {
-      // Register service worker conditionally
+    // Always register service worker if push notifications are supported
+    // This allows push notifications to work in both development and production
+    if ("serviceWorker" in navigator && "Notification" in window) {
       registerServiceWorkerConditionally();
-
-      // Unregister if conditions not met
-      unregisterServiceWorkerIfNeeded();
 
       // Listen for display mode changes
       const mediaQuery = window.matchMedia("(display-mode: standalone)");
       mediaQuery.addEventListener("change", (e) => {
         if (e.matches) {
           console.log("App is running in standalone mode");
-          registerServiceWorkerConditionally();
         } else {
           console.log("App is running in browser mode");
-          unregisterServiceWorkerIfNeeded();
         }
       });
+
+      console.log("PWA/Service Worker initialized for push notifications");
     } else {
-      console.log("PWA initialization skipped in development mode");
+      console.log("Service Worker or Notifications not supported");
     }
   }
 };

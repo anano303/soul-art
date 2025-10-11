@@ -20,6 +20,14 @@ export function PushNotificationManager() {
 
     // Check if service worker is registered and user is subscribed
     checkSubscriptionStatus();
+
+    // Also show permission prompt if notifications are supported but not requested yet
+    // This handles cases where PWA is disabled in development
+    if ("Notification" in window && Notification.permission === "default") {
+      setTimeout(() => {
+        setShowPermissionPrompt(true);
+      }, 5000); // Show after 5 seconds instead of 10
+    }
   }, []);
 
   const checkSubscriptionStatus = async () => {
@@ -29,13 +37,11 @@ export function PushNotificationManager() {
         const subscription = await registration.pushManager.getSubscription();
         setIsSubscribed(!!subscription);
 
-        // Show permission prompt if not subscribed and permission is default
-        if (!subscription && Notification.permission === "default") {
-          // Show after user has been on site for a bit
-          setTimeout(() => {
-            setShowPermissionPrompt(true);
-          }, 10000); // 10 seconds after page load
+        // Only hide permission prompt if user is already subscribed
+        if (subscription) {
+          setShowPermissionPrompt(false);
         }
+        // If not subscribed, let the useEffect handle showing the prompt
       } catch (error) {
         console.error("Error checking subscription status:", error);
       }
@@ -45,11 +51,15 @@ export function PushNotificationManager() {
   const requestPermission = async () => {
     if (!("Notification" in window)) {
       console.error("This browser does not support notifications");
+      alert("თქვენი ბრაუზერი არ მხარს უჭერს შეტყობინებებს");
       return false;
     }
 
     if (!("serviceWorker" in navigator)) {
       console.error("Service workers are not supported");
+      alert(
+        "თქვენი ბრაუზერი არ მხარს უჭერს service workers-ს, რომლებიც საჭიროა push შეტყობინებებისთვის"
+      );
       return false;
     }
 
@@ -60,11 +70,16 @@ export function PushNotificationManager() {
       if (permission === "granted") {
         await subscribeUserToPush();
         return true;
+      } else if (permission === "denied") {
+        alert(
+          "შეტყობინებები დაბლოკილია. გთხოვთ, ჩართოთ შეტყობინებები ბრაუზერის პარამეტრებში"
+        );
       }
 
       return false;
     } catch (error) {
       console.error("Error requesting notification permission:", error);
+      alert("შეცდომა შეტყობინებების ნებართვის მოთხოვნისას");
       return false;
     }
   };
@@ -84,24 +99,33 @@ export function PushNotificationManager() {
       });
 
       // Send subscription to the Nest.js backend
-      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/push/subscribe`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          subscription,
-          userId: user?._id,
-          userEmail: user?.email,
-        }),
-      });
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/push/subscribe`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            subscription,
+            userId: user?._id,
+            userEmail: user?.email,
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
 
       setIsSubscribed(true);
       setShowPermissionPrompt(false);
 
       console.log("User subscribed to push notifications");
+      alert("✅ წარმატებით გამოიწერეთ შეტყობინებები!");
     } catch (error) {
       console.error("Failed to subscribe user:", error);
+      alert("❌ შეცდომა გამოწერისას. გთხოვთ, სცადოთ თავიდან");
     }
   };
 
