@@ -171,7 +171,7 @@ export default withPWA({
   dest: "public",
   register: true,
   skipWaiting: true,
-  disable: false, // Enable PWA in all environments for push notifications
+  disable: process.env.NODE_ENV === "production" ? false : true, // Disable PWA in development to reduce logging
   sw: "sw.js",
   runtimeCaching: [
     // API calls - always try network first, short cache

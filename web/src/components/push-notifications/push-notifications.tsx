@@ -26,15 +26,28 @@ export function PushNotificationManager() {
     if ("Notification" in window && Notification.permission === "default") {
       setTimeout(() => {
         setShowPermissionPrompt(true);
-      }, 5000); // Show after 5 seconds instead of 10
+      }, 1000); // Show after 1 second for testing
     }
   }, []);
 
   const checkSubscriptionStatus = async () => {
     if ("serviceWorker" in navigator && "PushManager" in window) {
       try {
-        const registration = await navigator.serviceWorker.ready;
-        const subscription = await registration.pushManager.getSubscription();
+        // Ensure service worker is registered
+        let registration = await navigator.serviceWorker.getRegistration();
+        if (!registration) {
+          console.log(
+            "Service worker not registered during status check, registering..."
+          );
+          registration = await navigator.serviceWorker.register("/sw.js", {
+            scope: "/",
+          });
+        }
+
+        // Wait for service worker to be ready
+        const readyRegistration = await navigator.serviceWorker.ready;
+        const subscription =
+          await readyRegistration.pushManager.getSubscription();
         setIsSubscribed(!!subscription);
 
         // Only hide permission prompt if user is already subscribed
@@ -86,53 +99,99 @@ export function PushNotificationManager() {
 
   const subscribeUserToPush = async () => {
     try {
-      const registration = await navigator.serviceWorker.ready;
+      console.log("🔄 Starting push subscription process...");
+
+      // Check if service worker is available
+      if (!("serviceWorker" in navigator)) {
+        throw new Error("Service Worker not supported");
+      }
+
+      // Check if service worker is already registered, if not register it
+      let registration = await navigator.serviceWorker.getRegistration();
+      if (!registration) {
+        console.log("📝 Service worker not registered, registering...");
+        registration = await navigator.serviceWorker.register("/sw.js", {
+          scope: "/",
+        });
+        console.log("✅ Service worker registered:", registration);
+      }
+
+      console.log("📋 Waiting for service worker to be ready...");
+      const readyRegistration = await navigator.serviceWorker.ready;
+      console.log("✅ Service worker ready:", readyRegistration);
 
       // Generate VAPID key (you'll need to replace this with your actual VAPID public key)
       const vapidPublicKey =
         process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY ||
         "BMxYbPxp5WvZrF_2XQ4K7BzXu8TeYK5lDrFcH0Prf8J0FFJCNThE-MUHcJ3RnJSDtHzYN4RHjYx1fJyy4kJp0n8";
 
-      const subscription = await registration.pushManager.subscribe({
+      console.log(
+        "🔑 Using VAPID key:",
+        vapidPublicKey.substring(0, 20) + "..."
+      );
+
+      const subscription = await readyRegistration.pushManager.subscribe({
         userVisibleOnly: true,
         applicationServerKey: urlBase64ToUint8Array(vapidPublicKey),
       });
 
+      console.log("📨 Push subscription created:", subscription);
+
       // Send subscription to the Nest.js backend
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/push/subscribe`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            subscription,
-            userId: user?._id,
-            userEmail: user?.email,
-          }),
-        }
-      );
+      const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/push/subscribe`;
+      console.log("🌐 Sending to API:", apiUrl);
+
+      const response = await fetch(apiUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          subscription,
+          userId: user?._id,
+          userEmail: user?.email,
+        }),
+      });
+
+      console.log("📡 API response status:", response.status);
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const errorText = await response.text();
+        throw new Error(
+          `HTTP error! status: ${response.status}, message: ${errorText}`
+        );
       }
+
+      const result = await response.json();
+      console.log("✅ Subscription successful:", result);
 
       setIsSubscribed(true);
       setShowPermissionPrompt(false);
 
-      console.log("User subscribed to push notifications");
       alert("✅ წარმატებით გამოიწერეთ შეტყობინებები!");
     } catch (error) {
-      console.error("Failed to subscribe user:", error);
-      alert("❌ შეცდომა გამოწერისას. გთხოვთ, სცადოთ თავიდან");
+      console.error("❌ Failed to subscribe user:", error);
+      alert(
+        `❌ შეცდომა გამოწერისას: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
     }
   };
 
   const unsubscribe = async () => {
     try {
-      const registration = await navigator.serviceWorker.ready;
-      const subscription = await registration.pushManager.getSubscription();
+      // Ensure service worker is registered
+      let registration = await navigator.serviceWorker.getRegistration();
+      if (!registration) {
+        registration = await navigator.serviceWorker.register("/sw.js", {
+          scope: "/",
+        });
+      }
+
+      const readyRegistration = await navigator.serviceWorker.ready;
+      const subscription =
+        await readyRegistration.pushManager.getSubscription();
 
       if (subscription) {
         await subscription.unsubscribe();
@@ -179,7 +238,7 @@ export function PushNotificationManager() {
   };
 
   if (!showPermissionPrompt || permission === "granted" || isSubscribed) {
-    return null;
+    return null; // Don't show anything when subscribed or permission granted
   }
 
   return (
