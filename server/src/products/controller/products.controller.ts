@@ -136,6 +136,20 @@ export class ProductsController {
     return this.productsService.findById(id);
   }
 
+  @Post(':id/view')
+  @ApiOperation({ summary: 'Increment view count for a product' })
+  @ApiParam({ name: 'id', description: 'Product ID' })
+  @ApiResponse({
+    status: 200,
+    description: 'View count incremented successfully',
+  })
+  @ApiResponse({ status: 400, description: 'Invalid product ID' })
+  @ApiResponse({ status: 404, description: 'Product not found' })
+  async incrementView(@Param('id') id: string) {
+    await this.productsService.incrementViewCount(id);
+    return { message: 'View count incremented successfully' };
+  }
+
   @Get(':id/seller')
   @ApiOperation({ summary: 'Get seller information for a product' })
   @ApiParam({ name: 'id', description: 'Product ID' })
@@ -207,7 +221,12 @@ export class ProductsController {
             'image/heif',
           ];
           if (!allowedMimeTypes.includes(file.mimetype.toLowerCase())) {
-            return cb(new Error(`Unsupported file type: ${file.mimetype}. Supported types: JPEG, PNG, GIF, WEBP, HEIC.`), false);
+            return cb(
+              new Error(
+                `Unsupported file type: ${file.mimetype}. Supported types: JPEG, PNG, GIF, WEBP, HEIC.`,
+              ),
+              false,
+            );
           }
           cb(null, true);
         },
@@ -584,7 +603,9 @@ export class ProductsController {
   @Post('fix-heic-logos')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.Admin)
-  @ApiOperation({ summary: 'Fix HEIC brand logos by converting to JPEG format (Admin only)' })
+  @ApiOperation({
+    summary: 'Fix HEIC brand logos by converting to JPEG format (Admin only)',
+  })
   @ApiResponse({
     status: 200,
     description: 'Returns the number of updated products and any errors',

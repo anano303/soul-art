@@ -90,6 +90,7 @@ export interface Product {
   createdAt: string;
   updatedAt: string;
   status: ProductStatus;
+  viewCount?: number;
   rejectionReason?: string;
   deliveryType?: "SELLER" | "SoulArt";
   minDeliveryDays?: number;

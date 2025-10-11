@@ -327,6 +327,17 @@ export class ProductsService {
     return product;
   }
 
+  async incrementViewCount(id: string): Promise<void> {
+    if (!Types.ObjectId.isValid(id))
+      throw new BadRequestException('Invalid product ID.');
+
+    await this.productModel.findByIdAndUpdate(
+      id,
+      { $inc: { viewCount: 1 } },
+      { new: true },
+    );
+  }
+
   findByIds(productIds: string[]): Promise<ProductDocument[]> {
     if (!productIds || productIds.length === 0) {
       return Promise.resolve([]);

@@ -199,6 +199,9 @@ export class Product {
   @Prop({ required: true, default: ProductStatus.PENDING })
   status!: ProductStatus;
 
+  @Prop({ type: Number, default: 0 })
+  viewCount!: number;
+
   @Prop({ type: String })
   rejectionReason?: string;
 

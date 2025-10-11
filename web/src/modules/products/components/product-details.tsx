@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import Image from "next/image";
 import {
   StarIcon,
@@ -142,6 +142,7 @@ interface ProductDetailsProps {
 }
 
 export function ProductDetails({ product }: ProductDetailsProps) {
+  const [currentProduct, setCurrentProduct] = useState<Product>(product);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState("reviews");
@@ -155,6 +156,8 @@ export function ProductDetails({ product }: ProductDetailsProps) {
     height?: number;
     depth?: number;
   } | null>(null);
+  const isViewIncrementedRef = useRef(false);
+  const currentProductIdRef = useRef<string | null>(null);
   const router = useRouter();
   const { t, language } = useLanguage();
 
@@ -257,6 +260,67 @@ export function ProductDetails({ product }: ProductDetailsProps) {
       setSelectedAgeGroup(product.ageGroups[0]);
     }
   }, [product]);
+
+  // Increment view count when component mounts
+  useEffect(() => {
+    console.log("useEffect triggered for product:", product._id);
+
+    // Check if this product has already been viewed in this session (using sessionStorage)
+    const viewedProducts = new Set(
+      JSON.parse(sessionStorage.getItem("viewedProducts") || "[]")
+    );
+
+    // If already viewed in this session, skip entirely
+    if (viewedProducts.has(product._id)) {
+      console.log("Product already viewed in session, skipping");
+      return;
+    }
+
+    // Use a more robust check with a state variable to prevent double execution
+    const incrementKey = `incrementing_${product._id}`;
+    if (sessionStorage.getItem(incrementKey)) {
+      console.log("Already incrementing this product, skipping");
+      return;
+    }
+
+    // Mark as incrementing in sessionStorage (more persistent than ref)
+    sessionStorage.setItem(incrementKey, "true");
+
+    const incrementViewCount = async () => {
+      console.log("Calling incrementViewCount for product:", product._id);
+      try {
+        const response = await fetchWithAuth(`/products/${product._id}/view`, {
+          method: "POST",
+        });
+        console.log(
+          "View increment API call completed for product:",
+          product._id
+        );
+
+        // Mark this product as viewed in sessionStorage
+        viewedProducts.add(product._id);
+        sessionStorage.setItem(
+          "viewedProducts",
+          JSON.stringify([...viewedProducts])
+        );
+
+        // Remove the incrementing flag
+        sessionStorage.removeItem(incrementKey);
+
+        // Update local product state to reflect the new view count
+        setCurrentProduct((prev) => ({
+          ...prev,
+          viewCount: (prev.viewCount || 0) + 1,
+        }));
+      } catch (error) {
+        // Remove the incrementing flag on error
+        sessionStorage.removeItem(incrementKey);
+        console.warn("Failed to increment view count:", error);
+      }
+    };
+
+    incrementViewCount();
+  }, [product._id]);
 
   // Get localized color name
   const getLocalizedColorName = (colorName: string): string => {
@@ -600,6 +664,26 @@ export function ProductDetails({ product }: ProductDetailsProps) {
               </div>
             </div>
           )}
+
+          {/* View Counter */}
+          <div className="view-counter">
+            <svg
+              className="view-icon"
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+              <circle cx="12" cy="12" r="3" />
+            </svg>
+            <span className="view-text">
+              {currentProduct.viewCount || 0}{" "}
+              {language === "en" ? "views" : "ნახვა"}
+            </span>
+          </div>
 
           {/* Trust Badges */}
           <div className="trust-badges">

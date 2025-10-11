@@ -1240,6 +1240,40 @@ body {
   color: #6c757d;
 }
 
+/* View Counter */
+.view-counter {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 8px 0;
+  padding: 6px 12px;
+  background: linear-gradient(
+    135deg,
+    rgba(1, 43, 69, 0.08) 0%,
+    rgba(1, 43, 69, 0.12) 100%
+  );
+  border-radius: 10px;
+  border: 1px solid rgba(1, 43, 69, 0.2);
+  transition: all 0.3s ease;
+}
+
+.view-counter:hover {
+  border-color: rgba(1, 43, 69, 0.4);
+  box-shadow: 0 2px 8px rgba(1, 43, 69, 0.15);
+}
+
+.view-icon {
+  color: #012645;
+  opacity: 0.8;
+}
+
+.view-text {
+  font-size: 13px;
+  font-weight: 500;
+  color: #012645;
+  font-family: "FiraGo", sans-serif;
+}
+
 /* Product Description Preview */
 .product-description-preview {
   background: #f8f9fa;
