@@ -234,16 +234,27 @@ export class ForumsController {
   update(
     @CurrentUser() user: User,
     @Param('id') id: string,
-    @Body() updateForumDto: UpdateForumDto,
+    @Body() updateForumDto: any, // Temporarily disable strict typing
     @UploadedFile() file: Express.Multer.File,
   ) {
     if (!user) {
       throw new BadRequestException('User authentication required');
     }
 
+    // Manually parse FormData
+    const parsedDto: any = {};
+    if (updateForumDto.content) {
+      parsedDto.content = updateForumDto.content;
+    }
+    if (updateForumDto.tags && Array.isArray(updateForumDto.tags)) {
+      parsedDto.tags = updateForumDto.tags;
+    }
+
+    console.log('Parsed updateForumDto:', parsedDto);
+
     // Pass user role to the service
     if (!file) {
-      return this.forumsService.update(id, updateForumDto, user._id, user.role);
+      return this.forumsService.update(id, parsedDto, user._id, user.role);
     }
 
     console.log('Update request from:', {
@@ -274,15 +285,14 @@ export class ForumsController {
 
     const timestamp = Date.now();
     const filePath = `images/${timestamp}-${file.originalname.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
-    const fileBuffer = file.buffer;
 
     return this.forumsService.update(
       id,
-      updateForumDto,
+      parsedDto,
       user._id,
       user.role,
       filePath,
-      fileBuffer,
+      file, // Pass the entire file object, not just buffer
     );
   }
 

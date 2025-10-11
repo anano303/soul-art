@@ -38,7 +38,12 @@ export class ForumsService {
     return imagePath;
   }
 
-  async create(createForumDto: CreateForumDto, userId, filePath?, file?: Express.Multer.File) {
+  async create(
+    createForumDto: CreateForumDto,
+    userId,
+    filePath?,
+    file?: Express.Multer.File,
+  ) {
     try {
       const user = await this.userService.findById(userId);
       if (!Object.keys(user).length)
@@ -61,7 +66,9 @@ export class ForumsService {
           console.log('Cloudinary upload result:', uploadResult);
 
           if (!uploadResult || !uploadResult.secure_url) {
-            throw new BadRequestException('Failed to upload image to Cloudinary');
+            throw new BadRequestException(
+              'Failed to upload image to Cloudinary',
+            );
           }
 
           const forum = await this.forumModel.create({
@@ -73,7 +80,9 @@ export class ForumsService {
           return forum;
         } catch (uploadError) {
           console.error('Cloudinary upload failed:', uploadError);
-          throw new BadRequestException(`Image upload failed: ${uploadError.message}`);
+          throw new BadRequestException(
+            `Image upload failed: ${uploadError.message}`,
+          );
         }
       }
     } catch (error) {
@@ -519,11 +528,11 @@ export class ForumsService {
 
   async update(
     id: string,
-    updateForumDto: UpdateForumDto,
+    updateForumDto: any, // Accept any type since we're manually parsing
     userId: string,
     userRole: string,
     filePath?: string,
-    file?: Buffer,
+    file?: Express.Multer.File,
   ) {
     if (!isValidObjectId(id)) {
       throw new BadRequestException('Invalid forum ID');
@@ -551,8 +560,25 @@ export class ForumsService {
     }
 
     let imagePath = forum.imagePath;
-    if (filePath && file) {
-      imagePath = await this.awsS3Service.uploadImage(filePath, file);
+    if (file) {
+      // If file buffer provided, upload to Cloudinary
+      try {
+        console.log('Uploading updated image to Cloudinary...');
+        const uploadResult = await this.cloudinaryService.uploadImage(file);
+        console.log('Cloudinary update upload result:', uploadResult);
+
+        if (!uploadResult || !uploadResult.secure_url) {
+          throw new BadRequestException('Failed to upload image to Cloudinary');
+        }
+
+        imagePath = uploadResult.secure_url;
+        console.log('Forum updated with new image:', imagePath);
+      } catch (uploadError) {
+        console.error('Cloudinary upload failed:', uploadError);
+        throw new BadRequestException(
+          `Image upload failed: ${uploadError.message}`,
+        );
+      }
     }
 
     const updatedForum = await this.forumModel
