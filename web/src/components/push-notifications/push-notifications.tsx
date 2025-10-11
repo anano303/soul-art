@@ -133,16 +133,44 @@ export function PushNotificationManager() {
     }
 
     try {
+      // Check if we're in Edge and handle it differently
+      const isEdge = navigator.userAgent.indexOf("Edg") > -1;
+
+      if (process.env.NODE_ENV === "development") {
+        console.log("🔍 Browser detection - Edge:", isEdge);
+        console.log("🔍 Current permission:", Notification.permission);
+      }
+
+      // For Edge, try a more direct approach
+      if (isEdge && Notification.permission === "default") {
+        // Show a more explicit message for Edge users
+        const userConfirmed = confirm(
+          "თქვენ იყენებთ Microsoft Edge-ს. შეტყობინებების მისაღებად დააჭირეთ 'OK' და შემდეგ 'Allow' ღილაკს popup-ში."
+        );
+
+        if (!userConfirmed) {
+          return false;
+        }
+      }
+
       const permission = await Notification.requestPermission();
+
+      if (process.env.NODE_ENV === "development") {
+        console.log("🔔 Permission result:", permission);
+      }
+
       setPermission(permission);
 
       if (permission === "granted") {
         await subscribeUserToPush();
         return true;
       } else if (permission === "denied") {
-        alert(
-          "შეტყობინებები დაბლოკილია. გთხოვთ, ჩართოთ შეტყობინებები ბრაუზერის პარამეტრებში"
-        );
+        const message = isEdge
+          ? "შეტყობინებები დაბლოკილია Edge-ში. გახსენით Edge Settings > Cookies and site permissions > Notifications და დაუშვით localhost-ისთვის"
+          : "შეტყობინებები დაბლოკილია. გთხოვთ, ჩართოთ შეტყობინებები ბრაუზერის პარამეტრებში";
+        alert(message);
+      } else if (permission === "default") {
+        alert("გთხოვთ, გამოიყენოთ მეორე ღილაკი notification-ების ჩასართავად");
       }
 
       return false;
