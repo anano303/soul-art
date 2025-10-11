@@ -16,6 +16,9 @@ export function PushNotificationManager() {
     // Check current permission status
     if ("Notification" in window) {
       setPermission(Notification.permission);
+      if (process.env.NODE_ENV === "development") {
+        console.log("🔔 Notification permission:", Notification.permission);
+      }
     }
 
     // Check if service worker is registered and user is subscribed
@@ -56,32 +59,60 @@ export function PushNotificationManager() {
   const checkSubscriptionStatus = async () => {
     if ("serviceWorker" in navigator && "PushManager" in window) {
       try {
-        // Ensure service worker is registered
+        // Check if new service worker is already registered
         let registration = await navigator.serviceWorker.getRegistration();
-        if (!registration) {
+
+        // Only register if not already registered with the correct file
+        if (
+          !registration ||
+          !registration.active?.scriptURL.includes("sw-new.js")
+        ) {
           if (process.env.NODE_ENV === "development") {
-            console.log(
-              "Service worker not registered during status check, registering..."
-            );
+            console.log("🔄 Registering new service worker...");
           }
-          registration = await navigator.serviceWorker.register("/sw.js", {
+
+          // Unregister old service worker first if exists
+          if (
+            registration &&
+            !registration.active?.scriptURL.includes("sw-new.js")
+          ) {
+            await registration.unregister();
+            if (process.env.NODE_ENV === "development") {
+              console.log("🗑️ Old service worker unregistered");
+            }
+          }
+
+          registration = await navigator.serviceWorker.register("/sw-new.js", {
             scope: "/",
           });
+
+          if (process.env.NODE_ENV === "development") {
+            console.log("✅ New service worker registered:", registration);
+          }
         }
 
         // Wait for service worker to be ready
         const readyRegistration = await navigator.serviceWorker.ready;
+        if (process.env.NODE_ENV === "development") {
+          console.log("✅ SW Ready:", readyRegistration.active?.scriptURL);
+        }
+
         const subscription =
           await readyRegistration.pushManager.getSubscription();
+        if (process.env.NODE_ENV === "development") {
+          console.log("📨 Current push subscription:", !!subscription);
+        }
+
         setIsSubscribed(!!subscription);
 
         // Only hide permission prompt if user is already subscribed
         if (subscription) {
           setShowPermissionPrompt(false);
         }
-        // If not subscribed, let the useEffect handle showing the prompt
       } catch (error) {
-        console.error("Error checking subscription status:", error);
+        if (process.env.NODE_ENV === "development") {
+          console.error("❌ Error checking subscription status:", error);
+        }
       }
     }
   };
@@ -139,7 +170,7 @@ export function PushNotificationManager() {
         if (process.env.NODE_ENV === "development") {
           console.log("📝 Service worker not registered, registering...");
         }
-        registration = await navigator.serviceWorker.register("/sw.js", {
+        registration = await navigator.serviceWorker.register("/sw-new.js", {
           scope: "/",
         });
         if (process.env.NODE_ENV === "development") {
@@ -267,6 +298,42 @@ export function PushNotificationManager() {
     localStorage.setItem("push-notification-dismissed", Date.now().toString());
   };
 
+  const testPushNotification = async () => {
+    if (process.env.NODE_ENV === "development") {
+      console.log("🧪 Testing push notification...");
+
+      // Check service worker
+      if ("serviceWorker" in navigator) {
+        const registration = await navigator.serviceWorker.getRegistration();
+        console.log("🔍 SW Registration:", registration);
+
+        if (registration) {
+          const subscription = await registration.pushManager.getSubscription();
+          console.log("📨 Push Subscription:", subscription);
+
+          if (subscription) {
+            console.log("📨 Endpoint:", subscription.endpoint);
+
+            // Test notification locally
+            const testNotification = new Notification("Test Notification", {
+              body: "This is a test push notification",
+              icon: "/android-icon-192x192.png",
+              tag: "test-notification",
+            });
+
+            setTimeout(() => testNotification.close(), 3000);
+          } else {
+            console.log("❌ No push subscription found");
+          }
+        } else {
+          console.log("❌ No service worker registration found");
+        }
+      } else {
+        console.log("❌ Service Worker not supported");
+      }
+    }
+  };
+
   const refreshCache = async () => {
     if (!("serviceWorker" in navigator)) return;
 
@@ -333,6 +400,15 @@ export function PushNotificationManager() {
             >
               {isRefreshing ? "🔄" : "🔄"} განახლება
             </button>
+            {process.env.NODE_ENV === "development" && (
+              <button
+                className="push-test-btn"
+                onClick={testPushNotification}
+                title="ტესტი push notification"
+              >
+                🧪 ტესტი
+              </button>
+            )}
             <button className="push-dismiss-btn" onClick={handleDismiss}>
               დახურვა
             </button>

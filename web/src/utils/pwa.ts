@@ -66,9 +66,12 @@ export const registerServiceWorkerConditionally = async (): Promise<void> => {
   if ("serviceWorker" in navigator && "Notification" in window) {
     try {
       // Try to register sw.js first (includes both caching and push notifications)
-      const registration = await navigator.serviceWorker.register("/sw.js", {
-        scope: "/",
-      });
+      const registration = await navigator.serviceWorker.register(
+        "/sw-new.js",
+        {
+          scope: "/",
+        }
+      );
       if (process.env.NODE_ENV === "development") {
         console.log("SW registered with push support: ", registration);
       }

@@ -262,26 +262,42 @@ async function doBackgroundSync() {
   console.log("Soulart SW: Background sync triggered");
 }
 
-// Push notifications (if needed in the future)
+// Push notifications
 self.addEventListener("push", (event) => {
+  console.log("🔥 SW: Push event received:", event);
+
   if (event.data) {
     const data = event.data.json();
+    console.log("📨 SW: Push data:", data);
+
     const options = {
       body: data.body,
       icon: "/android-icon-192x192.png",
       badge: "/android-icon-96x96.png",
       data: data.url || "/",
       tag: "soulart-notification",
+      requireInteraction: true,
+      silent: false,
     };
 
+    console.log("🔔 SW: Showing notification with options:", options);
+
     event.waitUntil(
-      self.registration.showNotification(data.title || "Soulart", options)
+      self.registration
+        .showNotification(data.title || "Soulart", options)
+        .then(() => console.log("✅ SW: Notification shown successfully"))
+        .catch((error) =>
+          console.error("❌ SW: Failed to show notification:", error)
+        )
     );
+  } else {
+    console.log("⚠️ SW: Push event received but no data");
   }
 });
 
 // Handle notification clicks
 self.addEventListener("notificationclick", (event) => {
+  console.log("👆 SW: Notification clicked:", event);
   event.notification.close();
 
   const urlToOpen = event.notification.data || "/";
@@ -290,17 +306,24 @@ self.addEventListener("notificationclick", (event) => {
     clients
       .matchAll({ type: "window", includeUncontrolled: true })
       .then((clientList) => {
+        console.log("🔍 SW: Looking for existing clients:", clientList.length);
+
         // Check if there's already a window open
         for (const client of clientList) {
           if (client.url === urlToOpen && "focus" in client) {
+            console.log("🎯 SW: Focusing existing client");
             return client.focus();
           }
         }
 
         // Open new window if none found
         if (clients.openWindow) {
+          console.log("🆕 SW: Opening new window:", urlToOpen);
           return clients.openWindow(urlToOpen);
         }
       })
+      .catch((error) =>
+        console.error("❌ SW: Error handling notification click:", error)
+      )
   );
 });
