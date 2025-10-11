@@ -21,14 +21,37 @@ export function PushNotificationManager() {
     // Check if service worker is registered and user is subscribed
     checkSubscriptionStatus();
 
-    // Also show permission prompt if notifications are supported but not requested yet
-    // This handles cases where PWA is disabled in development
-    if ("Notification" in window && Notification.permission === "default") {
+    // Check if we should show permission prompt
+    const shouldShowPrompt = checkIfShouldShowPrompt();
+
+    if (shouldShowPrompt) {
       setTimeout(() => {
         setShowPermissionPrompt(true);
       }, 1000); // Show after 1 second for testing
     }
   }, []);
+
+  const checkIfShouldShowPrompt = () => {
+    if (!("Notification" in window)) return false;
+
+    // If already granted or denied, don't show
+    if (Notification.permission !== "default") return false;
+
+    // Check if user dismissed it recently
+    const dismissedAt = localStorage.getItem("push-notification-dismissed");
+    if (dismissedAt) {
+      const dismissedTime = parseInt(dismissedAt);
+      const now = Date.now();
+      const daysSinceDismissed = (now - dismissedTime) / (1000 * 60 * 60 * 24);
+
+      // Show again after 7 days
+      if (daysSinceDismissed < 7) {
+        return false;
+      }
+    }
+
+    return true;
+  };
 
   const checkSubscriptionStatus = async () => {
     if ("serviceWorker" in navigator && "PushManager" in window) {
