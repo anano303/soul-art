@@ -247,7 +247,7 @@ export function AddToCartButton({
           ? t("cart.adding")
           : isInCart
           ? `${t("cart.inCart")} (${currentQuantity})`
-          : t("cart.buy")}
+          : t("cart.addToCart")}
       </button>
     </div>
   );
