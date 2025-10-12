@@ -44,6 +44,16 @@ export class ArtistController {
     return this.usersService.isArtistSlugAvailable(slug, excludeId);
   }
 
+  @Get()
+  @ApiOperation({ summary: 'List public artist profiles' })
+  @ApiResponse({ status: 200, description: 'Public artist listings' })
+  async listArtists(@Query('limit') limit: string = '200') {
+    const parsedLimit = parseInt(limit, 10);
+    const normalizedLimit = Number.isFinite(parsedLimit) ? parsedLimit : 200;
+
+    return this.usersService.listPublicArtists(normalizedLimit);
+  }
+
   @Get(':identifier')
   @ApiOperation({ summary: 'Fetch artist profile by slug or ID' })
   @ApiResponse({

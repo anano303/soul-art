@@ -65,6 +65,28 @@ export class UsersService {
       : {};
   }
 
+  async listPublicArtists(limit: number = 200) {
+    const normalizedLimit = Math.min(Math.max(Number(limit) || 50, 1), 1000);
+
+    const artists = await this.userModel
+      .find({
+        role: Role.Seller,
+        artistSlug: { $exists: true, $nin: [null, ''] },
+      })
+      .sort({ updatedAt: -1 })
+      .limit(normalizedLimit)
+      .select(['artistSlug', 'storeName', 'name', 'updatedAt', 'createdAt'])
+      .lean();
+
+    return artists.map((artist) => ({
+      id: artist._id.toString(),
+      slug: artist.artistSlug ?? artist._id.toString(),
+      name: artist.storeName ?? artist.name,
+      updatedAt: artist.updatedAt ?? artist.createdAt ?? new Date(),
+      createdAt: artist.createdAt ?? null,
+    }));
+  }
+
   async isArtistSlugAvailable(slug: string, excludeUserId?: string) {
     const normalized = this.normalizeArtistSlug(slug);
 

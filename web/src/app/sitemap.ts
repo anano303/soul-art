@@ -111,6 +111,41 @@ async function getForumPosts() {
   }
 }
 
+// არტისტების მოტანა
+async function getArtists() {
+  try {
+    const apiUrl =
+      process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/v1";
+    const response = await fetch(`${apiUrl}/artists?limit=500`, {
+      next: { revalidate: 3600 },
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      console.error("Failed to fetch artists for sitemap", response.status);
+      return [];
+    }
+
+    const data = await response.json();
+    if (Array.isArray(data)) {
+      return data;
+    }
+
+    if (data && Array.isArray(data.items)) {
+      return data.items;
+    }
+
+    console.warn("Unexpected artists response format:", data);
+    return [];
+  } catch (error) {
+    console.error("Error fetching artists for sitemap:", error);
+    return [];
+  }
+}
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl =
     process.env.NEXT_PUBLIC_PRODUCTION_URL || "https://soulart.ge";
@@ -159,13 +194,73 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "weekly" as const,
       priority: 0.7,
     },
+    {
+      url: `${baseUrl}/auction`,
+      lastModified: new Date(),
+      changeFrequency: "monthly" as const,
+      priority: 0.6,
+    },
+    {
+      url: `${baseUrl}/referral-info`,
+      lastModified: new Date(),
+      changeFrequency: "monthly" as const,
+      priority: 0.7,
+    },
+    {
+      url: `${baseUrl}/cart`,
+      lastModified: new Date(),
+      changeFrequency: "weekly" as const,
+      priority: 0.6,
+    },
+    {
+      url: `${baseUrl}/checkout`,
+      lastModified: new Date(),
+      changeFrequency: "weekly" as const,
+      priority: 0.6,
+    },
+    {
+      url: `${baseUrl}/login`,
+      lastModified: new Date(),
+      changeFrequency: "monthly" as const,
+      priority: 0.6,
+    },
+    {
+      url: `${baseUrl}/register`,
+      lastModified: new Date(),
+      changeFrequency: "monthly" as const,
+      priority: 0.6,
+    },
+    {
+      url: `${baseUrl}/forgot-password`,
+      lastModified: new Date(),
+      changeFrequency: "monthly" as const,
+      priority: 0.4,
+    },
+    {
+      url: `${baseUrl}/reset-password`,
+      lastModified: new Date(),
+      changeFrequency: "monthly" as const,
+      priority: 0.4,
+    },
+    {
+      url: `${baseUrl}/sellers-register`,
+      lastModified: new Date(),
+      changeFrequency: "monthly" as const,
+      priority: 0.6,
+    },
   ];
 
   try {
+    const [products, categories, forumPosts, artists] = await Promise.all([
+      getProducts(),
+      getCategories(),
+      getForumPosts(),
+      getArtists(),
+    ]);
+
     // პროდუქტების გვერდები
-    const products = await getProducts();
     const productPages = products
-      .filter((product: any) => product && product._id) // Filter valid products
+      .filter((product: any) => product && product._id)
       .map(
         (product: { _id: string; updatedAt?: string; createdAt?: string }) => ({
           url: `${baseUrl}/products/${product._id}`,
@@ -178,9 +273,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       );
 
     // კატეგორიების გვერდები
-    const categories = await getCategories();
     const categoryPages = categories
-      .filter((category: any) => category && category._id) // Filter valid categories
+      .filter((category: any) => category && category._id)
       .map(
         (category: {
           _id: string;
@@ -196,10 +290,31 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         })
       );
 
+    // არტისტების გვერდები
+    const artistPages = artists
+      .map((artist: any) => {
+        const slug =
+          artist?.slug || artist?.artistSlug || artist?.id || artist?._id;
+
+        if (!slug) {
+          return null;
+        }
+
+        const lastModifiedValue =
+          artist?.updatedAt || artist?.createdAt || new Date();
+
+        return {
+          url: `${baseUrl}/artists/${slug}`,
+          lastModified: new Date(lastModifiedValue),
+          changeFrequency: "weekly" as const,
+          priority: 0.85,
+        };
+      })
+      .filter(Boolean) as MetadataRoute.Sitemap;
+
     // ფორუმის პოსტების გვერდები
-    const forumPosts = await getForumPosts();
     const forumPages = forumPosts
-      .filter((post: any) => post && post._id) // Filter valid posts
+      .filter((post: any) => post && post._id)
       .map((post: { _id: string; createdAt?: string }) => ({
         url: `${baseUrl}/forum/${post._id}`,
         lastModified: new Date(post.createdAt || new Date()),
@@ -207,7 +322,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         priority: 0.8,
       }));
 
-    return [...staticPages, ...productPages, ...categoryPages, ...forumPages];
+    return [
+      ...staticPages,
+      ...productPages,
+      ...categoryPages,
+      ...artistPages,
+      ...forumPages,
+    ];
   } catch (error) {
     console.error("Error generating sitemap:", error);
     // Return at least static pages if dynamic content fails
