@@ -208,28 +208,36 @@
 }
 
 .artist-chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 0.65rem 0.85rem;
 }
 
 .artist-chip {
   display: inline-flex;
-  padding: 0.55rem 1.1rem;
-  border-radius: 999px;
-  background: linear-gradient(
-    135deg,
-    rgba(1, 38, 69, 0.12),
-    rgba(69, 32, 1, 0.15)
-  );
-  color: #012645;
-  font-weight: 600;
-  letter-spacing: 0.02em;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem 0.9rem;
+  border-radius: 14px;
+  background: rgba(1, 38, 69, 0.06);
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  color: #0f172a;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  box-shadow: 0 16px 32px -28px rgba(15, 23, 42, 0.55);
+  backdrop-filter: blur(6px);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.artist-chip:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 18px 40px -26px rgba(15, 23, 42, 0.45);
 }
 
 .artist-chip--outline {
-  background: rgba(255, 255, 255, 0.2);
-  border: 1px solid rgba(1, 38, 69, 0.15);
+  background: rgba(255, 255, 255, 0.65);
+  border: 1px solid rgba(1, 38, 69, 0.1);
+  color: #1f2937;
 }
 
 .artist-grid {
