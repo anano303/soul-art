@@ -350,7 +350,7 @@ export class ForumsController {
     try {
       const pushPayload = {
         title: '💬 ახალი პოსტი ფორუმზე!',
-        body: `${user.name || 'ადმინისტრატორი'} დაამატა ახალი პოსტი: ${forum.title || 'უსათაურო პოსტი'}`,
+        body: `${user.name || 'ადმინისტრატორი'} დაამატა ახალი პოსტი: ${forum.content || 'უსათაურო პოსტი'}`,
         icon: forum.imagePath || '/android-icon-192x192.png',
         badge: '/favicon-96x96.png',
         data: {
@@ -364,7 +364,7 @@ export class ForumsController {
 
       console.log(
         '📤 Sending push notification for new forum post:',
-        forum.title || 'უსათაურო პოსტი',
+        forum.content || 'უსათაურო პოსტი',
       );
 
       // Send push notification to all subscribers using the service
