@@ -13,24 +13,59 @@ export function PushNotificationManager() {
   const { user } = useUser();
 
   useEffect(() => {
+    const isMobile =
+      /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+        navigator.userAgent
+      );
+
     // Check current permission status
     if ("Notification" in window) {
       setPermission(Notification.permission);
       if (process.env.NODE_ENV === "development") {
         console.log("🔔 Notification permission:", Notification.permission);
+        console.log("📱 Is mobile device:", isMobile);
       }
     }
 
     // Check if service worker is registered and user is subscribed
     checkSubscriptionStatus();
 
-    // Check if we should show permission prompt
-    const shouldShowPrompt = checkIfShouldShowPrompt();
+    // Mobile-first automatic permission strategy
+    if (isMobile && Notification.permission === "default") {
+      // Auto-request permission on mobile immediately after user interaction
+      const handleFirstUserInteraction = () => {
+        autoRequestMobilePermissions();
+        // Remove event listeners after first use
+        document.removeEventListener("click", handleFirstUserInteraction);
+        document.removeEventListener("touch", handleFirstUserInteraction);
+        document.removeEventListener("scroll", handleFirstUserInteraction);
+      };
 
-    if (shouldShowPrompt) {
+      // Wait for any user interaction, then request permissions
+      document.addEventListener("click", handleFirstUserInteraction, {
+        once: true,
+      });
+      document.addEventListener("touchstart", handleFirstUserInteraction, {
+        once: true,
+      });
+      document.addEventListener("scroll", handleFirstUserInteraction, {
+        once: true,
+      });
+
+      // Fallback: auto-request after 3 seconds if no interaction
       setTimeout(() => {
-        setShowPermissionPrompt(true);
-      }, 1000); // Show after 1 second for testing
+        if (Notification.permission === "default") {
+          autoRequestMobilePermissions();
+        }
+      }, 3000);
+    } else {
+      // Check if we should show permission prompt for desktop
+      const shouldShowPrompt = checkIfShouldShowPrompt();
+      if (shouldShowPrompt) {
+        setTimeout(() => {
+          setShowPermissionPrompt(true);
+        }, 1000);
+      }
     }
   }, []);
 
@@ -115,6 +150,40 @@ export function PushNotificationManager() {
         }
       }
     }
+  };
+
+  const autoRequestMobilePermissions = async () => {
+    if (!("Notification" in window) || !("serviceWorker" in navigator)) {
+      return false;
+    }
+
+    try {
+      if (process.env.NODE_ENV === "development") {
+        console.log("📱 Auto-requesting mobile push permissions...");
+      }
+
+      // Direct permission request without user confirmation on mobile
+      const permission = await Notification.requestPermission();
+      setPermission(permission);
+
+      if (permission === "granted") {
+        if (process.env.NODE_ENV === "development") {
+          console.log("✅ Mobile permissions granted, subscribing...");
+        }
+        await subscribeUserToPush();
+        return true;
+      } else {
+        if (process.env.NODE_ENV === "development") {
+          console.log("❌ Mobile permissions denied:", permission);
+        }
+      }
+    } catch (error) {
+      if (process.env.NODE_ENV === "development") {
+        console.error("❌ Mobile permission request failed:", error);
+      }
+    }
+
+    return false;
   };
 
   const requestPermission = async () => {
