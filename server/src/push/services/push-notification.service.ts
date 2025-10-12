@@ -106,6 +106,8 @@ export class PushNotificationService {
       return results;
     }
 
+    const subscriptionsToRemove: string[] = [];
+
     for (const [key, subscriptionData] of this.subscriptions) {
       try {
         await webpush.sendNotification(
@@ -118,7 +120,25 @@ export class PushNotificationService {
         const errorMessage = `Failed to send to subscription: ${error.message}`;
         results.errors.push(errorMessage);
         this.logger.error(errorMessage);
+
+        // Remove invalid subscriptions (410 Gone, 413 Payload Too Large, etc.)
+        if (
+          error.statusCode === 410 ||
+          error.statusCode === 413 ||
+          error.message.includes('unexpected response code')
+        ) {
+          subscriptionsToRemove.push(key);
+          this.logger.log(
+            `🗑️ Marking invalid subscription for removal: ${error.statusCode || 'Unknown error'}`,
+          );
+        }
       }
+    }
+
+    // Remove invalid subscriptions
+    for (const key of subscriptionsToRemove) {
+      this.subscriptions.delete(key);
+      this.logger.log(`🗑️ Removed invalid subscription`);
     }
 
     return results;
