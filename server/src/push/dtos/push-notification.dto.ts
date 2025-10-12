@@ -40,7 +40,8 @@ export class PushNotificationDto {
       | 'discount'
       | 'order_status'
       | 'product_approved'
-      | 'product_rejected';
+      | 'product_rejected'
+      | 'new_forum_post';
     id?: string;
   };
 

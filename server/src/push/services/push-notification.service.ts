@@ -43,6 +43,7 @@ interface NotificationPayload {
 export class PushNotificationService {
   private readonly logger = new Logger(PushNotificationService.name);
   private subscriptions: Map<string, PushSubscriptionWithUser> = new Map();
+  private subscriptionsLoaded = false;
 
   constructor(
     private configService: ConfigService,
@@ -78,6 +79,8 @@ export class PushNotificationService {
         })
         .exec();
 
+      this.subscriptions.clear();
+
       for (const sub of subscriptions) {
         const pushSubscription: PushSubscription = {
           endpoint: sub.endpoint,
@@ -98,8 +101,18 @@ export class PushNotificationService {
       this.logger.log(
         `📥 Loaded ${subscriptions.length} push subscriptions from database`,
       );
+      this.subscriptionsLoaded = true;
     } catch (error) {
       this.logger.error('Failed to load subscriptions from database:', error);
+    }
+  }
+
+  private async ensureSubscriptionsLoaded() {
+    if (this.subscriptions.size === 0 && !this.subscriptionsLoaded) {
+      this.logger.log(
+        '📦 No in-memory subscriptions found, loading from database',
+      );
+      await this.loadSubscriptionsFromDatabase();
     }
   }
 
@@ -147,6 +160,8 @@ export class PushNotificationService {
         userEmail,
       });
 
+      this.subscriptionsLoaded = true;
+
       this.logger.log(`💫 New push notification subscription registered`, {
         userId,
         userEmail,
@@ -177,6 +192,10 @@ export class PushNotificationService {
       const subscriptionKey = JSON.stringify(subscription);
       this.subscriptions.delete(subscriptionKey);
 
+      if (this.subscriptions.size === 0) {
+        this.subscriptionsLoaded = false;
+      }
+
       this.logger.log('🚫 Push notification subscription cancelled');
 
       return {
@@ -193,6 +212,8 @@ export class PushNotificationService {
   }
 
   async sendToAll(payload: NotificationPayload) {
+    await this.ensureSubscriptionsLoaded();
+
     const results = {
       successful: 0,
       failed: 0,
@@ -201,6 +222,13 @@ export class PushNotificationService {
 
     if (!this.isVAPIDConfigured()) {
       results.errors.push('VAPID keys არ არის კონფიგურირებული');
+      return results;
+    }
+
+    if (this.subscriptions.size === 0) {
+      this.logger.warn(
+        '📭 No active push subscriptions found when attempting broadcast',
+      );
       return results;
     }
 
@@ -243,6 +271,8 @@ export class PushNotificationService {
   }
 
   async sendToUser(userId: string, payload: NotificationPayload) {
+    await this.ensureSubscriptionsLoaded();
+
     const results = {
       successful: 0,
       failed: 0,
@@ -251,6 +281,13 @@ export class PushNotificationService {
 
     if (!this.isVAPIDConfigured()) {
       results.errors.push('VAPID keys არ არის კონფიგურირებული');
+      return results;
+    }
+
+    if (this.subscriptions.size === 0) {
+      this.logger.warn(
+        `📭 No active push subscriptions found when sending to user ${userId}`,
+      );
       return results;
     }
 
