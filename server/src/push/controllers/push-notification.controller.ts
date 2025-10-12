@@ -1,10 +1,11 @@
-import { Body, Controller, Get, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query, Req } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { PushNotificationService } from '../services/push-notification.service';
 import {
   PushSubscriptionDto,
   PushNotificationDto,
 } from '../dtos/push-notification.dto';
+import { Request } from 'express';
 
 @ApiTags('push-notifications')
 @Controller('push')
@@ -14,11 +15,19 @@ export class PushNotificationController {
   @Post('subscribe')
   @ApiOperation({ summary: 'Subscribe to push notifications' })
   @ApiResponse({ status: 200, description: 'Subscription successful' })
-  async subscribe(@Body() body: PushSubscriptionDto) {
+  async subscribe(@Body() body: PushSubscriptionDto, @Req() req: Request) {
+    const userAgent = req.headers['user-agent'] as string | undefined;
+    const forwardedFor = req.headers['x-forwarded-for'] as string | undefined;
+    const ipAddress = forwardedFor?.split(',')[0]?.trim() || req.ip;
+
     return this.pushService.subscribe(
       body.subscription,
       body.userId,
       body.userEmail,
+      {
+        userAgent,
+        ipAddress,
+      },
     );
   }
 

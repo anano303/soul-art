@@ -17,6 +17,8 @@ interface PushSubscriptionWithUser {
   subscription: PushSubscription;
   userId?: string;
   userEmail?: string;
+  userAgent?: string;
+  ipAddress?: string;
 }
 
 interface NotificationPayload {
@@ -95,6 +97,8 @@ export class PushNotificationService {
           subscription: pushSubscription,
           userId: sub.userId?.toString(),
           userEmail: sub.userEmail,
+          userAgent: sub.userAgent,
+          ipAddress: sub.ipAddress,
         });
       }
 
@@ -120,19 +124,30 @@ export class PushNotificationService {
     subscription: PushSubscription,
     userId?: string,
     userEmail?: string,
+    metadata?: { userAgent?: string; ipAddress?: string },
   ) {
     try {
+      let userAgentToStore = metadata?.userAgent;
+      let ipAddressToStore = metadata?.ipAddress;
+
       // Save to database
       const existingSubscription = await this.pushSubscriptionModel.findOne({
         endpoint: subscription.endpoint,
       });
 
       if (existingSubscription) {
+        userAgentToStore =
+          userAgentToStore ?? existingSubscription.userAgent ?? undefined;
+        ipAddressToStore =
+          ipAddressToStore ?? existingSubscription.ipAddress ?? undefined;
+
         // Update existing subscription
         existingSubscription.p256dh = subscription.keys.p256dh;
         existingSubscription.auth = subscription.keys.auth;
         existingSubscription.userId = userId ? (userId as any) : undefined;
         existingSubscription.userEmail = userEmail;
+        existingSubscription.userAgent = userAgentToStore;
+        existingSubscription.ipAddress = ipAddressToStore;
         existingSubscription.isActive = true;
         existingSubscription.lastUsed = new Date();
         await existingSubscription.save();
@@ -146,6 +161,8 @@ export class PushNotificationService {
           auth: subscription.keys.auth,
           userId: userId ? (userId as any) : undefined,
           userEmail,
+          userAgent: userAgentToStore,
+          ipAddress: ipAddressToStore,
           isActive: true,
         });
 
@@ -158,6 +175,8 @@ export class PushNotificationService {
         subscription,
         userId,
         userEmail,
+        userAgent: userAgentToStore,
+        ipAddress: ipAddressToStore,
       });
 
       this.subscriptionsLoaded = true;
