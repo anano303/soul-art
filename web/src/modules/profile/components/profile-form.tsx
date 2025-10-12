@@ -14,8 +14,7 @@ import Image from "next/image";
 import { useLanguage } from "@/hooks/LanguageContext";
 import { SellerBalanceWidget } from "@/modules/balance/components/seller-balance-widget";
 import { BecomeSellerButton } from "@/components/become-seller-button/become-seller-button";
-import { ArtistProfileSettings } from "./ArtistProfileSettings";
-
+const SLUG_PATTERN = /^[a-z0-9]*(?:-[a-z0-9]+)*$/;
 const formSchema = z
   .object({
     name: z.string().min(1, "სახელის შეყვანა აუცილებელია"),
@@ -59,7 +58,22 @@ export function ProfileForm() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const logoInputRef = useRef<HTMLInputElement>(null);
   const { user, isLoading } = useUser();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+  const [slugInput, setSlugInput] = useState("");
+  const [slugStatus, setSlugStatus] = useState<
+    "idle" | "checking" | "available" | "taken" | "error"
+  >("idle");
+  const [slugMessage, setSlugMessage] = useState<string>("");
+  const [copyState, setCopyState] = useState<"idle" | "copied">("idle");
+  const portfolioBaseUrl =
+    process.env.NEXT_PUBLIC_WEBSITE_URL || "https://soulart.ge";
+  const portfolioDisplayBase = portfolioBaseUrl
+    .replace(/^https?:\/\//, "")
+    .replace(/\/$/, "");
+  const slugDisplayPrefix = `${portfolioDisplayBase}/artists/`;
+  const portfolioLinkBase = portfolioBaseUrl.replace(/\/$/, "");
+  const buildPortfolioUrl = (slug: string) =>
+    `${portfolioLinkBase}/artists/${slug}`;
 
   // Helper function to check if URL is from Cloudinary
   const isCloudinaryUrl = useCallback((url: string): boolean => {
@@ -161,6 +175,17 @@ export function ProfileForm() {
         identificationNumber: user.identificationNumber || "",
         accountNumber: user.accountNumber || "",
       });
+
+      const existingSlug = user.artistSlug ?? "";
+      setSlugInput(existingSlug);
+      setCopyState("idle");
+      if (existingSlug) {
+        setSlugStatus("available");
+        setSlugMessage("");
+      } else {
+        setSlugStatus("idle");
+        setSlugMessage("");
+      }
     }
   }, [user, getImageSrc, form]);
 
@@ -275,6 +300,58 @@ export function ProfileForm() {
     },
   });
 
+  const slugMutation = useMutation({
+    mutationFn: async (slug: string) => {
+      const normalized = slug.trim().toLowerCase();
+      const payload = {
+        artistSlug: normalized.length > 0 ? normalized : null,
+      };
+      const response = await apiClient.patch("/artists/profile", payload);
+      return response.data;
+    },
+    onSuccess: (data, slug) => {
+      const normalized = slug.trim().toLowerCase();
+      const activeSlug: string | undefined =
+        data?.artist?.artistSlug ?? (normalized || undefined);
+
+      if (activeSlug) {
+        setSlugInput(activeSlug);
+        setSlugStatus("available");
+        setSlugMessage("");
+        toast({
+          title:
+            language === "en"
+              ? "Portfolio link saved"
+              : "პორტფოლიოს ბმული შენახულია",
+        });
+      } else {
+        setSlugStatus("idle");
+        setSlugMessage("");
+        toast({
+          title:
+            language === "en"
+              ? "Personal link removed"
+              : "პირადი ბმული გაუქმდა",
+        });
+      }
+
+      setCopyState("idle");
+      refreshUserData();
+      queryClient.invalidateQueries({ queryKey: ["user"] });
+    },
+    onError: (error) => {
+      const description = error instanceof Error ? error.message : undefined;
+      toast({
+        title:
+          language === "en"
+            ? "Failed to save portfolio link"
+            : "ბმულის შენახვა ვერ მოხერხდა",
+        description,
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -359,6 +436,107 @@ export function ProfileForm() {
     }
   };
 
+  const handleSlugCheck = async () => {
+    const slug = slugInput.trim().toLowerCase();
+
+    if (!slug) {
+      setSlugStatus("idle");
+      setSlugMessage("");
+      return;
+    }
+
+    if (slug.length > 40 || slug.length < 3 || !SLUG_PATTERN.test(slug)) {
+      setSlugStatus("error");
+      setSlugMessage(
+        language === "en"
+          ? "Use 3-40 lowercase letters or numbers. Hyphen allowed between words."
+          : "გამოიყენე 3-40 სიმბოლო: პატარა ასოები, რიცხვები და ჰიფენი სიტყვებს შორის."
+      );
+      return;
+    }
+
+    setSlugStatus("checking");
+    setSlugMessage(
+      language === "en"
+        ? "Checking availability..."
+        : "მიმდინარეობს თავისუფლების შემოწმება..."
+    );
+
+    try {
+      const { data } = await apiClient.get("/artists/slug/check", {
+        params: {
+          slug,
+          excludeId: user?._id,
+        },
+      });
+
+      if (data.available) {
+        setSlugStatus("available");
+        setSlugMessage(
+          language === "en"
+            ? `Great news! Your portfolio will be ${portfolioBaseUrl}/artists/${slug}`
+            : `სუპერ! შენი პორტფოლიო იქნება ${portfolioBaseUrl}/artists/${slug}`
+        );
+      } else {
+        setSlugStatus("taken");
+        setSlugMessage(
+          language === "en"
+            ? "Slug is already taken"
+            : "ეს სლაგი უკვე დაკავებულია"
+        );
+      }
+    } catch (error) {
+      console.error("Slug check failed", error);
+      setSlugStatus("error");
+      setSlugMessage(
+        language === "en"
+          ? "Couldn't verify slug. Try again later."
+          : "სლაგის შემოწმება ვერ მოხერხდა. სცადე მოგვიანებით."
+      );
+    }
+  };
+
+  const handleSlugSave = async () => {
+    const slug = slugInput.trim().toLowerCase();
+
+    if (!slug) {
+      slugMutation.mutate("");
+      return;
+    }
+
+    if (slug.length > 40 || slug.length < 3 || !SLUG_PATTERN.test(slug)) {
+      setSlugStatus("error");
+      setSlugMessage(
+        language === "en"
+          ? "Use 3-40 lowercase letters or numbers. Hyphen allowed between words."
+          : "გამოიყენე 3-40 სიმბოლო: პატარა ასოები, რიცხვები და ჰიფენი სიტყვებს შორის."
+      );
+      return;
+    }
+
+    slugMutation.mutate(slug);
+  };
+
+  const handleCopyPortfolioLink = async (link: string) => {
+    try {
+      await navigator.clipboard.writeText(link);
+      setCopyState("copied");
+      toast({
+        title: language === "en" ? "Link copied" : "ბმული წარმატებით დაკოპირდა",
+      });
+      setTimeout(() => setCopyState("idle"), 2000);
+    } catch (error) {
+      console.error("Copy link failed", error);
+      toast({
+        title:
+          language === "en"
+            ? "Couldn't copy link"
+            : "ბმულის დაკოპირება ვერ მოხერხდა",
+        variant: "destructive",
+      });
+    }
+  };
+
   const triggerFileInput = () => {
     if (fileInputRef.current) {
       fileInputRef.current.click();
@@ -426,6 +604,10 @@ export function ProfileForm() {
       </div>
     );
   };
+
+  const savedSlug = user?.artistSlug ?? "";
+  const savedPortfolioLink = savedSlug ? buildPortfolioUrl(savedSlug) : "";
+  const slugStatusClass = `seller-portfolio-cta__status seller-portfolio-cta__status--${slugStatus}`;
 
   if (!shouldFetchUser || isLoading) {
     return <div className="loading-container">{t("profile.loading")}</div>;
@@ -750,6 +932,116 @@ export function ProfileForm() {
                   )}
                 </div>
               </div>
+
+              <div className="seller-portfolio-cta">
+                <div className="seller-portfolio-cta__header">
+                  <h3>
+                    {language === "en" ? "Portfolio link" : "პორტფოლიოს ბმული"}
+                  </h3>
+                  <p>
+                    {language === "en"
+                      ? "Choose a short username to unlock your public artist page."
+                      : "აირჩიე მოკლე უზერნაიმი და გააქტიურე საჯარო არტისტის გვერდი."}
+                  </p>
+                </div>
+                <div className="seller-portfolio-cta__field">
+                  <label htmlFor="sellerSlug">
+                    {language === "en"
+                      ? "Choose your username"
+                      : "აირჩიე უზერნაიმი"}
+                  </label>
+                  <div className="seller-portfolio-cta__input">
+                    <span className="seller-portfolio-cta__prefix">
+                      {slugDisplayPrefix}
+                    </span>
+                    <input
+                      id="sellerSlug"
+                      type="text"
+                      value={slugInput}
+                      autoComplete="off"
+                      spellCheck={false}
+                      onChange={(event) => {
+                        const nextValue = event.target.value
+                          .toLowerCase()
+                          .replace(/[^a-z0-9-]/g, "");
+                        setSlugInput(nextValue);
+                        setSlugStatus("idle");
+                        setSlugMessage("");
+                      }}
+                      placeholder={language === "en" ? "username" : "უზერნაიმი"}
+                    />
+                  </div>
+                </div>
+                <div className="seller-portfolio-cta__actions">
+                  <button
+                    type="button"
+                    className="seller-portfolio-cta__button seller-portfolio-cta__button--ghost"
+                    onClick={handleSlugCheck}
+                    disabled={slugStatus === "checking"}
+                  >
+                    {slugStatus === "checking"
+                      ? language === "en"
+                        ? "Checking..."
+                        : "ვამოწმებ..."
+                      : language === "en"
+                      ? "Check availability"
+                      : "შეამოწმე"}
+                  </button>
+                  <button
+                    type="button"
+                    className="seller-portfolio-cta__button"
+                    onClick={handleSlugSave}
+                    disabled={slugMutation.isPending}
+                  >
+                    {slugMutation.isPending
+                      ? language === "en"
+                        ? "Saving..."
+                        : "ვინახავ..."
+                      : language === "en"
+                      ? "Save username"
+                      : "უზერნაიმის შენახვა"}
+                  </button>
+                </div>
+                {slugMessage && (
+                  <p className={slugStatusClass}>{slugMessage}</p>
+                )}
+                {savedPortfolioLink ? (
+                  <div className="seller-portfolio-cta__share">
+                    <p>
+                      {language === "en"
+                        ? "Your live page opens in a new tab. Edit all sections from there."
+                        : "შენი პორტფოლიო ახალ ტაბში გაიხსნება. იქიდან მართე ყველა განყოფილება."}
+                    </p>
+                    <div className="seller-portfolio-cta__share-actions">
+                      <a
+                        href={savedPortfolioLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="seller-portfolio-cta__button seller-portfolio-cta__button--ghost"
+                      >
+                        {language === "en"
+                          ? "Visit portfolio"
+                          : "პორტფოლიოს ნახვა"}
+                      </a>
+                      <button
+                        type="button"
+                        className="seller-portfolio-cta__button seller-portfolio-cta__button--outline"
+                        onClick={() =>
+                          handleCopyPortfolioLink(savedPortfolioLink)
+                        }
+                      >
+                        {copyState === "copied"
+                          ? language === "en"
+                            ? "Copied!"
+                            : "დაკოპირდა!"
+                          : language === "en"
+                          ? "Copy link"
+                          : "ბმულის დაკოპირება"}
+                      </button>
+                    </div>
+                  </div>
+                ) : null}
+              </div>
             </div>
           )}
 
@@ -763,9 +1055,6 @@ export function ProfileForm() {
             : t("profile.updateProfile")}
         </button>
       </form>
-      {user?.role?.toUpperCase() === "SELLER" && user && (
-        <ArtistProfileSettings user={user} refreshUserData={refreshUserData} />
-      )}
       {updateProfile.isSuccess && (
         <motion.div
           initial={{ opacity: 0, y: -10 }}

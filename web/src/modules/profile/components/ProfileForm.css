@@ -365,6 +365,159 @@ form {
   margin-top: 1rem;
 }
 
+.seller-portfolio-cta {
+  margin-top: 2.25rem;
+  border: 1px solid rgba(1, 38, 69, 0.12);
+  border-radius: 16px;
+  padding: 1.5rem;
+  background: linear-gradient(
+    135deg,
+    rgba(1, 38, 69, 0.04),
+    rgba(69, 32, 1, 0.035)
+  );
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.seller-portfolio-cta__header h3 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--primary-color, #012645);
+}
+
+.seller-portfolio-cta__header p {
+  margin: 0.4rem 0 0;
+  color: rgba(15, 23, 42, 0.65);
+  font-size: 0.95rem;
+}
+
+.seller-portfolio-cta__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.seller-portfolio-cta__field label {
+  font-weight: 600;
+  color: var(--primary-color, #012645);
+}
+
+.seller-portfolio-cta__input {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  border-radius: 12px;
+  border: 1px solid rgba(15, 23, 42, 0.16);
+  background: #ffffff;
+  padding: 0.65rem 0.85rem;
+  flex-wrap: wrap;
+}
+
+.seller-portfolio-cta__prefix {
+  color: rgba(15, 23, 42, 0.55);
+  font-size: 0.9rem;
+  white-space: nowrap;
+}
+
+.seller-portfolio-cta__input input {
+  border: none;
+  outline: none;
+  flex: 1 1 160px;
+  min-width: 120px;
+  font-size: 1rem;
+  font-family: inherit;
+}
+
+.seller-portfolio-cta__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.seller-portfolio-cta__button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.55rem 1.2rem;
+  border-radius: 10px;
+  border: none;
+  background: linear-gradient(135deg, #012645, #452001);
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+  transition: filter 0.2s ease, transform 0.2s ease;
+}
+
+.seller-portfolio-cta__button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.seller-portfolio-cta__button:not(:disabled):hover {
+  filter: brightness(1.08);
+  transform: translateY(-1px);
+}
+
+.seller-portfolio-cta__button--ghost {
+  background: transparent;
+  border: 1px solid rgba(1, 38, 69, 0.24);
+  color: var(--primary-color, #012645);
+}
+
+.seller-portfolio-cta__button--outline {
+  background: transparent;
+  border: 1px solid rgba(1, 38, 69, 0.24);
+  color: var(--primary-color, #012645);
+  box-shadow: none;
+}
+
+.seller-portfolio-cta__status {
+  margin: 0;
+  font-size: 0.9rem;
+  color: rgba(15, 23, 42, 0.6);
+}
+
+.seller-portfolio-cta__status--idle,
+.seller-portfolio-cta__status--checking {
+  color: rgba(15, 23, 42, 0.6);
+}
+
+.seller-portfolio-cta__status--available {
+  color: #0f9d58;
+}
+
+.seller-portfolio-cta__status--taken {
+  color: #d93025;
+}
+
+.seller-portfolio-cta__status--error {
+  color: #db8a00;
+}
+
+.seller-portfolio-cta__share {
+  border: 1px solid rgba(1, 38, 69, 0.12);
+  border-radius: 12px;
+  padding: 1rem;
+  background: rgba(1, 38, 69, 0.03);
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.seller-portfolio-cta__share p {
+  margin: 0;
+  color: rgba(15, 23, 42, 0.65);
+  font-size: 0.95rem;
+}
+
+.seller-portfolio-cta__share-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
 .avatar-initial {
   border: 5px solid var(--primary-color, #012645);
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
