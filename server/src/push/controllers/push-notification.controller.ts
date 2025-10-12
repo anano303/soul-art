@@ -14,7 +14,7 @@ export class PushNotificationController {
   @Post('subscribe')
   @ApiOperation({ summary: 'Subscribe to push notifications' })
   @ApiResponse({ status: 200, description: 'Subscription successful' })
-  subscribe(@Body() body: PushSubscriptionDto) {
+  async subscribe(@Body() body: PushSubscriptionDto) {
     return this.pushService.subscribe(
       body.subscription,
       body.userId,
@@ -25,7 +25,7 @@ export class PushNotificationController {
   @Post('unsubscribe')
   @ApiOperation({ summary: 'Unsubscribe from push notifications' })
   @ApiResponse({ status: 200, description: 'Unsubscription successful' })
-  unsubscribe(@Body() body: { subscription: any }) {
+  async unsubscribe(@Body() body: { subscription: any }) {
     return this.pushService.unsubscribe(body.subscription);
   }
 
