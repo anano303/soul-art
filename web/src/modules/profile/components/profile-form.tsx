@@ -941,14 +941,14 @@ export function ProfileForm() {
                   <p>
                     {language === "en"
                       ? "Choose a short username to unlock your public artist page."
-                      : "აირჩიე მოკლე უზერნაიმი და გააქტიურე საჯარო არტისტის გვერდი."}
+                      : "აირჩიე მოკლე მეტსახელი და გააქტიურე საჯარო არტისტის გვერდი."}
                   </p>
                 </div>
                 <div className="seller-portfolio-cta__field">
                   <label htmlFor="sellerSlug">
                     {language === "en"
                       ? "Choose your username"
-                      : "აირჩიე უზერნაიმი"}
+                      : "აირჩიე მეტსახელი"}
                   </label>
                   <div className="seller-portfolio-cta__input">
                     <span className="seller-portfolio-cta__prefix">
@@ -968,7 +968,7 @@ export function ProfileForm() {
                         setSlugStatus("idle");
                         setSlugMessage("");
                       }}
-                      placeholder={language === "en" ? "username" : "უზერნაიმი"}
+                      placeholder={language === "en" ? "username" : "მეტსახელი"}
                     />
                   </div>
                 </div>
@@ -999,7 +999,7 @@ export function ProfileForm() {
                         : "ვინახავ..."
                       : language === "en"
                       ? "Save username"
-                      : "უზერნაიმის შენახვა"}
+                      : "მეტსახელის შენახვა"}
                   </button>
                 </div>
                 {slugMessage && (
