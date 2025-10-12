@@ -264,8 +264,8 @@ self.addEventListener("notificationclick", (event) => {
         break;
       case "new_forum_post":
         urlToOpen = notificationData.id
-          ? `/forums/${notificationData.id}`
-          : "/forums";
+          ? `/forum/${notificationData.id}`
+          : "/forum";
         break;
       default:
         urlToOpen = "/";

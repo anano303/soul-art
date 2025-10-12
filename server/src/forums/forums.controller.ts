@@ -355,7 +355,7 @@ export class ForumsController {
         badge: '/favicon-96x96.png',
         data: {
           type: 'new_forum_post' as const,
-          url: `/forums/${forum._id}`,
+          url: `/forum/${forum._id}`,
           id: forum._id,
         },
         tag: `new-forum-post-${forum._id}`,
