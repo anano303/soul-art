@@ -1,5 +1,52 @@
 import { Role } from "./role";
 
+export interface ArtistSocialLinks {
+  instagram?: string;
+  facebook?: string;
+  behance?: string;
+  dribbble?: string;
+  website?: string;
+  tiktok?: string;
+  youtube?: string;
+  pinterest?: string;
+}
+
+export interface ArtistProfile {
+  id: string;
+  name: string;
+  storeName: string;
+  artistSlug: string | null;
+  artistBio: Record<string, string>;
+  artistCoverImage?: string | null;
+  artistDisciplines: string[];
+  artistLocation?: string | null;
+  artistOpenForCommissions: boolean;
+  artistSocials: ArtistSocialLinks;
+  artistHighlights: string[];
+  artistGallery: string[];
+  storeLogo?: string | null;
+}
+
+export interface ArtistProductSummary {
+  id: string;
+  name: string;
+  price: number;
+  images: string[];
+  brand?: string | null;
+  brandLogo?: string | null;
+  rating?: number;
+  numReviews?: number;
+  createdAt?: string | null;
+}
+
+export interface ArtistProfileResponse {
+  artist: ArtistProfile;
+  products: {
+    total: number;
+    items: ArtistProductSummary[];
+  };
+}
+
 // Adding category types for better organization
 export enum MainCategory {
   PAINTINGS = "PAINTINGS",
@@ -139,6 +186,15 @@ export interface User {
   role: Role;
   storeName?: string;
   storeLogo?: string;
+  artistSlug?: string | null;
+  artistBio?: Record<string, string> | Map<string, string> | null;
+  artistCoverImage?: string | null;
+  artistDisciplines?: string[];
+  artistLocation?: string | null;
+  artistOpenForCommissions?: boolean;
+  artistSocials?: ArtistSocialLinks;
+  artistHighlights?: string[];
+  artistGallery?: string[];
   ownerFirstName?: string;
   ownerLastName?: string;
   identificationNumber?: string;

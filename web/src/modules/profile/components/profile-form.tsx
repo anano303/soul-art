@@ -14,6 +14,7 @@ import Image from "next/image";
 import { useLanguage } from "@/hooks/LanguageContext";
 import { SellerBalanceWidget } from "@/modules/balance/components/seller-balance-widget";
 import { BecomeSellerButton } from "@/components/become-seller-button/become-seller-button";
+import { ArtistProfileSettings } from "./ArtistProfileSettings";
 
 const formSchema = z
   .object({
@@ -762,6 +763,9 @@ export function ProfileForm() {
             : t("profile.updateProfile")}
         </button>
       </form>
+      {user?.role?.toUpperCase() === "SELLER" && user && (
+        <ArtistProfileSettings user={user} refreshUserData={refreshUserData} />
+      )}
       {updateProfile.isSuccess && (
         <motion.div
           initial={{ opacity: 0, y: -10 }}

@@ -24,6 +24,7 @@ import { LocalStrategy } from '../strategies/local.strategy';
 import { JwtStrategy } from 'src/strategies/jwt.strategy';
 import { UsersController } from './controller/users.controller';
 import { BalanceController } from './controller/balance.controller';
+import { ArtistController } from './controller/artist.controller';
 import { GoogleStrategy } from '@/strategies/google.strategy';
 import { EmailService } from '@/email/services/email.services';
 import { AwsS3Module } from '@/aws-s3/aws-s3.module';
@@ -65,7 +66,12 @@ import { ReferralsModule } from '../referrals/referrals.module';
     CloudinaryModule, // Add Cloudinary module
     forwardRef(() => ReferralsModule), // Add ReferralsModule for dependency injection
   ],
-  controllers: [AuthController, UsersController, BalanceController],
+  controllers: [
+    AuthController,
+    UsersController,
+    BalanceController,
+    ArtistController,
+  ],
   providers: [
     UsersService,
     AuthService,

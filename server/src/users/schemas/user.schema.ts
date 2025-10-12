@@ -2,6 +2,17 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
 import { Role } from '@/types/role.enum';
 
+export interface ArtistSocialLinks {
+  instagram?: string;
+  facebook?: string;
+  behance?: string;
+  dribbble?: string;
+  website?: string;
+  tiktok?: string;
+  youtube?: string;
+  pinterest?: string;
+}
+
 @Schema({
   timestamps: true,
   toJSON: {
@@ -43,17 +54,19 @@ export class User {
 
   // Enhanced device tracking with per-device tokens
   @Prop({
-    type: [{
-      fingerprint: { type: String, required: true },
-      userAgent: { type: String, required: true },
-      lastSeen: { type: Date, default: Date.now },
-      trusted: { type: Boolean, default: false },
-      sessionId: { type: String, required: true },
-      refreshToken: { type: String, required: true }, // Per-device refresh token
-      refreshTokenJti: { type: String, required: true }, // JTI for validation
-      isActive: { type: Boolean, default: true }, // Can revoke individual devices
-    }],
-    default: []
+    type: [
+      {
+        fingerprint: { type: String, required: true },
+        userAgent: { type: String, required: true },
+        lastSeen: { type: Date, default: Date.now },
+        trusted: { type: Boolean, default: false },
+        sessionId: { type: String, required: true },
+        refreshToken: { type: String, required: true }, // Per-device refresh token
+        refreshTokenJti: { type: String, required: true }, // JTI for validation
+        isActive: { type: Boolean, default: true }, // Can revoke individual devices
+      },
+    ],
+    default: [],
   })
   knownDevices?: Array<{
     fingerprint: string;
@@ -129,6 +142,34 @@ export class User {
 
   @Prop({ type: Date, default: null })
   lastWithdrawalReset?: Date; // ბოლო თვიური რესეტის თარიღი
+
+  // Artist profile enhancements
+  @Prop({ type: String, unique: true, sparse: true, index: true })
+  artistSlug?: string | null;
+
+  @Prop({ type: Map, of: String, default: undefined })
+  artistBio?: Map<string, string>;
+
+  @Prop({ type: String, default: null })
+  artistCoverImage?: string | null;
+
+  @Prop({ type: [String], default: [] })
+  artistDisciplines?: string[];
+
+  @Prop({ type: String, default: null })
+  artistLocation?: string | null;
+
+  @Prop({ type: Boolean, default: false })
+  artistOpenForCommissions?: boolean;
+
+  @Prop({ type: Object, default: {} })
+  artistSocials?: ArtistSocialLinks;
+
+  @Prop({ type: [String], default: [] })
+  artistHighlights?: string[];
+
+  @Prop({ type: [String], default: [] })
+  artistGallery?: string[];
 }
 
 export type UserDocument = User & Document;

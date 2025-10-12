@@ -13,7 +13,7 @@ import {
 } from '@nestjs/common';
 
 import { User, UserDocument } from '../schemas/user.schema';
-import { Product } from '../../products/schemas/product.schema';
+import { Product, ProductStatus } from '../../products/schemas/product.schema';
 import { hashPassword } from '@/utils/password';
 import { generateUsers } from '@/utils/seed-users';
 import { PaginatedResponse } from '@/types';
@@ -25,6 +25,8 @@ import { AwsS3Service } from '@/aws-s3/aws-s3.service';
 import { UserCloudinaryService } from './user-cloudinary.service';
 import { BalanceService } from './balance.service';
 import { ReferralsService } from '@/referrals/services/referrals.service';
+import { UpdateArtistProfileDto } from '../dtos/update-artist-profile.dto';
+import { ArtistSocialLinks } from '../schemas/user.schema';
 
 @Injectable()
 export class UsersService {
@@ -40,6 +42,412 @@ export class UsersService {
     @Inject(forwardRef(() => ReferralsService))
     private readonly referralsService?: ReferralsService,
   ) {}
+
+  private normalizeArtistSlug(slug: string): string {
+    return slug.trim().toLowerCase();
+  }
+
+  private isCloudinaryUrl(url?: string | null): boolean {
+    if (!url) return false;
+    return /^https?:\/\/.+cloudinary\.com/.test(url.trim());
+  }
+
+  private sanitizeSocialLinks(links?: ArtistSocialLinks) {
+    if (!links) return undefined;
+
+    const sanitizedEntries = Object.entries(links);
+
+    return sanitizedEntries.length > 0
+      ? sanitizedEntries.reduce((acc, [key, value]) => {
+          acc[key as keyof ArtistSocialLinks] = value;
+          return acc;
+        }, {} as ArtistSocialLinks)
+      : {};
+  }
+
+  async isArtistSlugAvailable(slug: string, excludeUserId?: string) {
+    const normalized = this.normalizeArtistSlug(slug);
+
+    if (normalized.length === 0) {
+      return { available: true, reason: null };
+    }
+
+    if (normalized.length < 3 || normalized.length > 40) {
+      throw new BadRequestException(
+        'Slug length must be between 3 and 40 characters',
+      );
+    }
+
+    const reservedSlugs = new Set([
+      'artists',
+      'sellers',
+      'admin',
+      'profile',
+      'store',
+      'soulart',
+    ]);
+
+    if (reservedSlugs.has(normalized)) {
+      return { available: false, reason: 'reserved' };
+    }
+
+    const existing = await this.userModel.findOne({
+      artistSlug: normalized,
+      ...(excludeUserId
+        ? { _id: { $ne: new Types.ObjectId(excludeUserId) } }
+        : {}),
+    });
+
+    return { available: !existing, reason: existing ? 'taken' : null };
+  }
+
+  private validateImageFile(file: Express.Multer.File) {
+    if (!file) {
+      throw new BadRequestException('No file uploaded');
+    }
+
+    const validMimeTypes = [
+      'image/jpeg',
+      'image/jpg',
+      'image/png',
+      'image/gif',
+      'image/webp',
+      'image/heic',
+      'image/heif',
+    ];
+
+    if (
+      !validMimeTypes.includes(file.mimetype.toLowerCase()) &&
+      !file.mimetype.toLowerCase().startsWith('image/')
+    ) {
+      throw new BadRequestException(
+        `Unsupported file type: ${file.mimetype}. Supported types: JPEG, PNG, GIF, WEBP.`,
+      );
+    }
+
+    const filesSizeInMb = Number((file.size / (1024 * 1024)).toFixed(1));
+    if (filesSizeInMb > 10) {
+      throw new BadRequestException('The file must be less than 10 MB.');
+    }
+
+    if (!file.buffer || file.buffer.length === 0) {
+      throw new BadRequestException('Uploaded file is empty');
+    }
+  }
+
+  async uploadArtistCoverImage(userId: string, file: Express.Multer.File) {
+    const user = await this.userModel.findById(userId);
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    if (user.role !== Role.Seller) {
+      throw new BadRequestException('Only sellers can upload cover images');
+    }
+
+    this.validateImageFile(file);
+
+    const coverUrl =
+      await this.userCloudinaryService.uploadArtistCoverImage(file);
+
+    await this.userModel.findByIdAndUpdate(userId, {
+      artistCoverImage: coverUrl,
+    });
+
+    return {
+      message: 'Artist cover image updated successfully',
+      coverUrl,
+    };
+  }
+
+  async addArtistGalleryImage(userId: string, file: Express.Multer.File) {
+    const user = await this.userModel.findById(userId);
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    if (user.role !== Role.Seller) {
+      throw new BadRequestException('Only sellers can upload gallery images');
+    }
+
+    this.validateImageFile(file);
+
+    const currentGallery = Array.isArray(user.artistGallery)
+      ? [...user.artistGallery]
+      : [];
+
+    if (currentGallery.length >= 20) {
+      throw new BadRequestException(
+        'You can upload up to 20 gallery images. Please remove one before adding a new image.',
+      );
+    }
+
+    const imageUrl =
+      await this.userCloudinaryService.uploadArtistGalleryImage(file);
+
+    if (!this.isCloudinaryUrl(imageUrl)) {
+      throw new BadRequestException('Invalid gallery image URL');
+    }
+
+    if (currentGallery.includes(imageUrl)) {
+      return {
+        message: 'Image already exists in gallery',
+        imageUrl,
+        gallery: currentGallery,
+      };
+    }
+
+    currentGallery.push(imageUrl);
+
+    await this.userModel.findByIdAndUpdate(userId, {
+      artistGallery: currentGallery,
+    });
+
+    return {
+      message: 'Gallery image added successfully',
+      imageUrl,
+      gallery: currentGallery,
+    };
+  }
+
+  async removeArtistGalleryImage(userId: string, imageUrl: string) {
+    if (!imageUrl || !this.isCloudinaryUrl(imageUrl)) {
+      throw new BadRequestException('Invalid gallery image URL');
+    }
+
+    const user = await this.userModel.findById(userId);
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    if (user.role !== Role.Seller) {
+      throw new BadRequestException('Only sellers can update gallery images');
+    }
+
+    const currentGallery = Array.isArray(user.artistGallery)
+      ? [...user.artistGallery]
+      : [];
+
+    const updatedGallery = currentGallery.filter((url) => url !== imageUrl);
+
+    if (updatedGallery.length === currentGallery.length) {
+      throw new NotFoundException('Gallery image not found');
+    }
+
+    await this.userModel.findByIdAndUpdate(userId, {
+      artistGallery: updatedGallery,
+    });
+
+    return {
+      message: 'Gallery image removed successfully',
+      gallery: updatedGallery,
+    };
+  }
+
+  async updateArtistProfile(id: string, dto: UpdateArtistProfileDto) {
+    if (!Types.ObjectId.isValid(id)) {
+      throw new BadRequestException('Invalid user ID');
+    }
+
+    const user = await this.userModel.findById(id);
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    if (user.role !== Role.Seller) {
+      throw new BadRequestException('Only sellers can update artist profile');
+    }
+
+    const update: Partial<User> = {};
+
+    if (dto.artistSlug !== undefined) {
+      const rawSlug = dto.artistSlug ?? '';
+      const normalized =
+        typeof rawSlug === 'string' && rawSlug.length > 0
+          ? this.normalizeArtistSlug(rawSlug)
+          : '';
+
+      if (normalized.length > 0) {
+        const slugCheck = await this.isArtistSlugAvailable(normalized, id);
+        if (!slugCheck.available) {
+          throw new ConflictException(
+            slugCheck.reason === 'reserved'
+              ? 'This slug is reserved'
+              : 'This slug is already in use',
+          );
+        }
+        update.artistSlug = normalized;
+      } else {
+        update.artistSlug = null;
+      }
+    }
+
+    if (dto.artistCoverImage !== undefined) {
+      const cover = dto.artistCoverImage?.trim();
+      if (cover && cover.length > 0) {
+        if (!this.isCloudinaryUrl(cover)) {
+          throw new BadRequestException(
+            'Artist cover image must be a Cloudinary URL',
+          );
+        }
+        update.artistCoverImage = cover;
+      } else {
+        update.artistCoverImage = null;
+      }
+    }
+
+    if (dto.artistBio !== undefined) {
+      const sanitizedBioEntries = Object.entries(dto.artistBio || {})
+        .map(
+          ([locale, value]) =>
+            [locale.trim(), value?.trim()] as [string, string | undefined],
+        )
+        .filter(([locale, value]) => locale.length > 0 && !!value);
+
+      update.artistBio = new Map(sanitizedBioEntries as [string, string][]);
+    }
+
+    if (dto.artistDisciplines !== undefined) {
+      update.artistDisciplines = dto.artistDisciplines
+        ?.map((value) => value.trim())
+        .filter((value) => value.length > 0);
+    }
+
+    if (dto.artistLocation !== undefined) {
+      const location = dto.artistLocation?.trim();
+      update.artistLocation = location && location.length > 0 ? location : null;
+    }
+
+    if (dto.artistOpenForCommissions !== undefined) {
+      update.artistOpenForCommissions = dto.artistOpenForCommissions;
+    }
+
+    if (dto.artistSocials !== undefined) {
+      update.artistSocials = this.sanitizeSocialLinks(dto.artistSocials);
+    }
+
+    if (dto.artistHighlights !== undefined) {
+      update.artistHighlights = dto.artistHighlights
+        ?.map((value) => value.trim())
+        .filter((value) => value.length > 0);
+    }
+
+    if (dto.artistGallery !== undefined) {
+      update.artistGallery = dto.artistGallery
+        ?.map((value) => value.trim())
+        .filter((value) => value.length > 0 && this.isCloudinaryUrl(value));
+    }
+
+    Object.keys(update).forEach((key) => {
+      if (update[key] === undefined) {
+        delete update[key];
+      }
+    });
+
+    await this.userModel.findByIdAndUpdate(id, update, {
+      new: true,
+      runValidators: true,
+    });
+
+    return this.userModel.findById(id);
+  }
+
+  async getArtistProfile(identifier: string) {
+    if (!identifier) {
+      throw new BadRequestException('Identifier is required');
+    }
+
+    try {
+      const query = isValidObjectId(identifier)
+        ? { _id: new Types.ObjectId(identifier) }
+        : { artistSlug: this.normalizeArtistSlug(identifier) };
+
+      const artist = await this.userModel
+        .findOne({ ...query, role: Role.Seller })
+        .lean();
+
+      if (!artist) {
+        throw new NotFoundException('Artist profile not found');
+      }
+
+      const productsFilter = {
+        user: artist._id,
+        status: ProductStatus.APPROVED,
+      };
+
+      const [products, totalProducts] = await Promise.all([
+        this.productModel
+          .find(productsFilter)
+          .sort({ createdAt: -1 })
+          .limit(12)
+          .select([
+            'name',
+            'price',
+            'images',
+            'brand',
+            'brandLogo',
+            'rating',
+            'numReviews',
+            'createdAt',
+          ])
+          .lean(),
+        this.productModel.countDocuments(productsFilter),
+      ]);
+
+      const storeLogo = artist.storeLogoPath ?? artist.storeLogo ?? null;
+
+      const biography =
+        artist.artistBio instanceof Map
+          ? Object.fromEntries(artist.artistBio)
+          : typeof artist.artistBio === 'object' && artist.artistBio !== null
+            ? { ...artist.artistBio }
+            : {};
+
+      return {
+        artist: {
+          id: artist._id.toString(),
+          name: artist.name,
+          storeName: artist.storeName ?? artist.name,
+          artistSlug: artist.artistSlug ?? null,
+          artistBio: biography,
+          artistCoverImage: artist.artistCoverImage,
+          artistDisciplines: artist.artistDisciplines ?? [],
+          artistLocation: artist.artistLocation ?? null,
+          artistOpenForCommissions: artist.artistOpenForCommissions ?? false,
+          artistSocials: artist.artistSocials ?? {},
+          artistHighlights: artist.artistHighlights ?? [],
+          artistGallery: (artist.artistGallery ?? []).filter((url: string) =>
+            this.isCloudinaryUrl(url),
+          ),
+          storeLogo,
+        },
+        products: {
+          total: totalProducts,
+          items: products.map((product) => ({
+            id: product._id.toString(),
+            name: product.name,
+            price: product.price,
+            images: product.images,
+            brand: product.brand,
+            brandLogo: product.brandLogo ?? storeLogo,
+            rating: product.rating,
+            numReviews: product.numReviews,
+            createdAt: (product as any).createdAt ?? null,
+          })),
+        },
+      };
+    } catch (error) {
+      this.logger.error(
+        `Failed to load artist profile for identifier "${identifier}": ${error instanceof Error ? error.message : error}`,
+        error instanceof Error ? error.stack : undefined,
+      );
+      throw error;
+    }
+  }
 
   async findByEmail(email: string) {
     // Convert to lowercase to ensure case-insensitive matching

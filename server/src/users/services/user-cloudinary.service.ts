@@ -12,7 +12,9 @@ export class UserCloudinaryService {
    */
   async uploadProfileImage(file: Express.Multer.File): Promise<string> {
     try {
-      const result = await this.cloudinaryService.uploadImage(file);
+      const result = await this.cloudinaryService.uploadImage(file, {
+        folder: 'artists/profiles',
+      });
 
       // Return the secure URL
       return result.secure_url;
@@ -29,12 +31,46 @@ export class UserCloudinaryService {
    */
   async uploadSellerLogo(file: Express.Multer.File): Promise<string> {
     try {
-      const result = await this.cloudinaryService.uploadImage(file);
+      const result = await this.cloudinaryService.uploadImage(file, {
+        folder: 'artists/logos',
+      });
 
       // Return the secure URL
       return result.secure_url;
     } catch (error) {
       console.error('Error uploading seller logo to Cloudinary:', error);
+      throw error;
+    }
+  }
+
+  async uploadArtistCoverImage(file: Express.Multer.File): Promise<string> {
+    try {
+      const result = await this.cloudinaryService.uploadImage(file, {
+        folder: 'artists/covers',
+        transformation: [
+          { width: 1920, height: 1080, crop: 'fill', gravity: 'auto' },
+        ],
+      });
+
+      return result.secure_url;
+    } catch (error) {
+      console.error('Error uploading artist cover image to Cloudinary:', error);
+      throw error;
+    }
+  }
+
+  async uploadArtistGalleryImage(file: Express.Multer.File): Promise<string> {
+    try {
+      const result = await this.cloudinaryService.uploadImage(file, {
+        folder: 'artists/gallery',
+      });
+
+      return result.secure_url;
+    } catch (error) {
+      console.error(
+        'Error uploading artist gallery image to Cloudinary:',
+        error,
+      );
       throw error;
     }
   }
