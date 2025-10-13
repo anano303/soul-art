@@ -304,7 +304,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
           artist?.updatedAt || artist?.createdAt || new Date();
 
         return {
-          url: `${baseUrl}/artists/${slug}`,
+          url: `${baseUrl}/@${slug}`,
           lastModified: new Date(lastModifiedValue),
           changeFrequency: "weekly" as const,
           priority: 0.85,

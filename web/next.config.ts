@@ -57,6 +57,15 @@ const nextConfig: NextConfig = {
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
     formats: ["image/webp", "image/avif"], // Modern image formats
   },
+  async redirects() {
+    return [
+      {
+        source: "/artists/:slug",
+        destination: "/@:slug",
+        permanent: true,
+      },
+    ];
+  },
   reactStrictMode: true,
   poweredByHeader: false,
   output: "standalone",

@@ -429,7 +429,7 @@ export function ArtistProfileSettings({
   const portfolioBaseUrl =
     process.env.NEXT_PUBLIC_WEBSITE_URL || "https://soulart.ge";
   const buildPortfolioUrl = (slug: string) =>
-    `${portfolioBaseUrl}/artists/${slug}`;
+    `${portfolioBaseUrl}/@${slug}`;
 
   const slugField = form.register("artistSlug");
   const locationField = form.register("artistLocation");
@@ -971,7 +971,7 @@ export function ArtistProfileSettings({
             </label>
             <div className="artist-portfolio-cta__input">
               <span className="artist-portfolio-cta__prefix">
-                {portfolioBaseUrl.replace(/^https?:\/\//, "")}/artists/
+                {portfolioBaseUrl.replace(/^https?:\/\//, "")}/@
               </span>
               <input
                 id="artistSlug"

@@ -62,7 +62,7 @@ function resolveBiographyText(
 function buildAbsoluteUrl(path: string) {
   try {
     return new URL(path, SITE_BASE).toString();
-  } catch (error) {
+  } catch {
     return path;
   }
 }
@@ -80,7 +80,7 @@ export async function generateMetadata({
     const description = biography
       ? biography.slice(0, 180) + (biography.length > 180 ? "…" : "")
       : `${displayName} • SoulArt portfolio showcasing highlights and commissions.`;
-    const canonical = buildAbsoluteUrl(`/artists/${slug}`);
+    const canonical = buildAbsoluteUrl(`/@${slug}`);
 
     const logoUrl = artist.storeLogo || undefined;
     const imageUrl = logoUrl || artist.artistCoverImage || undefined;
@@ -112,8 +112,8 @@ export async function generateMetadata({
         images: images?.map((image) => image.url),
       },
     };
-  } catch (error) {
-    const canonical = buildAbsoluteUrl(`/artists/${slug}`);
+  } catch {
+    const canonical = buildAbsoluteUrl(`/@${slug}`);
     return {
       title: "SoulArt Artist Portfolio",
       description:
@@ -138,7 +138,13 @@ export async function generateMetadata({
 
 export default async function ArtistPage({ params }: ArtistPageProps) {
   const { slug } = await params;
-  const data = await fetchArtistProfile(slug.toLowerCase());
+  let startIndex = 0;
+  if (slug.includes('@')) {
+    startIndex = slug.indexOf('@') + 1;
+  } else if (slug.includes('%40')) {
+    startIndex = slug.indexOf('%40') + 3;
+  }
+  const data = await fetchArtistProfile(slug.toLowerCase().substring(startIndex));
 
   return (
     <main

@@ -70,10 +70,10 @@ export function ProfileForm() {
   const portfolioDisplayBase = portfolioBaseUrl
     .replace(/^https?:\/\//, "")
     .replace(/\/$/, "");
-  const slugDisplayPrefix = `${portfolioDisplayBase}/artists/`;
+  const slugDisplayPrefix = `${portfolioDisplayBase}/@`;
   const portfolioLinkBase = portfolioBaseUrl.replace(/\/$/, "");
   const buildPortfolioUrl = (slug: string) =>
-    `${portfolioLinkBase}/artists/${slug}`;
+    `${portfolioLinkBase}/@${slug}`;
 
   // Helper function to check if URL is from Cloudinary
   const isCloudinaryUrl = useCallback((url: string): boolean => {
@@ -474,8 +474,8 @@ export function ProfileForm() {
         setSlugStatus("available");
         setSlugMessage(
           language === "en"
-            ? `Great news! Your portfolio will be ${portfolioBaseUrl}/artists/${slug}`
-            : `სუპერ! შენი პორტფოლიო იქნება ${portfolioBaseUrl}/artists/${slug}`
+            ? `Great news! Your portfolio will be ${portfolioBaseUrl}/@${slug}`
+            : `სუპერ! შენი პორტფოლიო იქნება ${portfolioBaseUrl}/@${slug}`
         );
       } else {
         setSlugStatus("taken");
