@@ -156,7 +156,6 @@ export default async function ArtistPage({ params }: ArtistPageProps) {
   return (
     <main
       className="Container"
-      style={{ paddingTop: "2rem", paddingBottom: "4rem" }}
     >
       <ArtistProfileView data={data} />
     </main>
