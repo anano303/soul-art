@@ -6,6 +6,7 @@ import {
   isRunningAsInstalledPWA,
   isMobileDevice,
 } from "@/utils/pwa";
+import { PWALinkHandler } from "@/lib/pwa-link-handler";
 
 /**
  * PWA Manager Component
@@ -16,6 +17,10 @@ export default function PWAManager() {
     // Initialize PWA functionality
     initializePWA();
 
+    // Initialize PWA link handler
+    const linkHandler = PWALinkHandler.getInstance();
+    linkHandler.init();
+
     // Log current PWA status for debugging
     if (process.env.NODE_ENV === "development") {
       console.log("PWA Manager initialized:", {
@@ -24,6 +29,7 @@ export default function PWAManager() {
         environment: process.env.NODE_ENV,
         serviceWorkerSupported: "serviceWorker" in navigator,
         notificationSupported: "Notification" in window,
+        linkHandlerInitialized: true,
       });
     }
 

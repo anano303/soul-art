@@ -12,6 +12,17 @@
   "lang": "ka",
   "dir": "ltr",
   "categories": ["shopping", "art", "lifestyle"],
+  "url_handlers": [
+    {
+      "origin": "https://soulart.ge"
+    }
+  ],
+  "protocol_handlers": [
+    {
+      "protocol": "web+soulart",
+      "url": "/?action=%s"
+    }
+  ],
   "screenshots": [
     {
       "src": "/logo.png",
