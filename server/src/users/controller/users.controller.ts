@@ -39,11 +39,13 @@ export class UsersController {
   async getUsers(
     @Query('page') page: string = '1',
     @Query('limit') limit: string = '20',
+    @Query('search') search?: string,
+    @Query('role') role?: string,
   ) {
     const pageNumber = parseInt(page, 10);
     const limitNumber = parseInt(limit, 10);
 
-    return this.usersService.findAll(pageNumber, limitNumber);
+    return this.usersService.findAll(pageNumber, limitNumber, search, role);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)

@@ -226,4 +226,12 @@ export interface PaginatedResponse<T> {
   total: number;
   page: number;
   pages: number;
+  summary?: {
+    totalUsers: number;
+    roleCounts: {
+      admin: number;
+      seller: number;
+      user: number;
+    };
+  };
 }

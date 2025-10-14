@@ -1,4 +1,4 @@
-import { Model, Types, isValidObjectId } from 'mongoose';
+import { FilterQuery, Model, Types, isValidObjectId } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import * as bcrypt from 'bcrypt';
 import {
@@ -63,6 +63,10 @@ export class UsersService {
           return acc;
         }, {} as ArtistSocialLinks)
       : {};
+  }
+
+  private escapeRegex(text: string): string {
+    return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   }
 
   async listPublicArtists(limit: number = 200) {
@@ -593,24 +597,82 @@ export class UsersService {
   async findAll(
     page: number = 1,
     limit: number = 20,
-  ): Promise<PaginatedResponse<UserDocument>> {
-    const skip = (page - 1) * limit;
+    search?: string,
+    role?: string,
+  ): Promise<
+    PaginatedResponse<UserDocument> & {
+      summary: {
+        totalUsers: number;
+        roleCounts: Record<Role, number>;
+      };
+    }
+  > {
+    const safePage = Number.isFinite(page) && page > 0 ? Math.floor(page) : 1;
+    const safeLimit = Number.isFinite(limit) && limit > 0 ? Math.floor(limit) : 20;
+    const normalizedLimit = Math.min(safeLimit, 100);
+    const skip = (safePage - 1) * normalizedLimit;
 
-    const [users, total] = await Promise.all([
-      this.userModel
-        .find({})
-        .sort({ createdAt: -1 })
-        .skip(skip)
-        .limit(limit)
-        .exec(),
-      this.userModel.countDocuments({}),
-    ]);
+    const filters: FilterQuery<User> = {};
+
+    const normalizedRole = role?.toLowerCase();
+    if (normalizedRole && Object.values(Role).includes(normalizedRole as Role)) {
+      filters.role = normalizedRole as Role;
+    }
+
+    const trimmedSearch = search?.trim();
+    if (trimmedSearch && trimmedSearch.length > 0) {
+      const escapedKeyword = this.escapeRegex(trimmedSearch);
+      filters.$or = [
+        { email: { $regex: escapedKeyword, $options: 'i' } },
+        { name: { $regex: escapedKeyword, $options: 'i' } },
+        { storeName: { $regex: escapedKeyword, $options: 'i' } },
+        { phoneNumber: { $regex: escapedKeyword, $options: 'i' } },
+      ];
+    }
+
+    const [users, filteredTotal, overallTotal, roleAggregation] =
+      await Promise.all([
+        this.userModel
+          .find(filters)
+          .sort({ createdAt: -1 })
+          .skip(skip)
+          .limit(normalizedLimit)
+          .exec(),
+        this.userModel.countDocuments(filters),
+        this.userModel.countDocuments({}),
+        this.userModel.aggregate<{ _id: Role; count: number }>([
+          {
+            $group: {
+              _id: '$role',
+              count: { $sum: 1 },
+            },
+          },
+        ]),
+      ]);
+
+    const roleCounts: Record<Role, number> = {
+      [Role.Admin]: 0,
+      [Role.Seller]: 0,
+      [Role.User]: 0,
+    };
+
+    roleAggregation.forEach(({ _id, count }) => {
+      if (_id && Object.values(Role).includes(_id)) {
+        roleCounts[_id] = count;
+      }
+    });
+
+    const totalPages = Math.max(Math.ceil(filteredTotal / normalizedLimit), 1);
 
     return {
       items: users,
-      total,
-      page,
-      pages: Math.ceil(total / limit),
+      total: filteredTotal,
+      page: safePage,
+      pages: totalPages,
+      summary: {
+        totalUsers: overallTotal,
+        roleCounts,
+      },
     };
   }
 
