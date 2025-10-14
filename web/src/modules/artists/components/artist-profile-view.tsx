@@ -9,6 +9,7 @@ import { useLanguage } from "@/hooks/LanguageContext";
 import { useUser } from "@/modules/auth/hooks/use-user";
 import { CloudinaryImage } from "@/components/cloudinary-image";
 import { ArtistProfileSettings } from "@/modules/profile/components/ArtistProfileSettings";
+import { Grid3X3, ShoppingBag } from "lucide-react";
 import "./artist-profile-view.css";
 
 interface ArtistProfileViewProps {
@@ -56,10 +57,6 @@ function getSaleCopy(language: "en" | "ge") {
 
 function getGalleryCopy(language: "en" | "ge") {
   return language === "en" ? "Portfolio showcase" : "პორტფოლიოს ნამუშევრები";
-}
-
-function getHighlightsCopy(language: "en" | "ge") {
-  return language === "en" ? "Highlights" : "მთავარი ხაზები";
 }
 
 function getDisciplinesCopy(language: "en" | "ge") {
@@ -125,6 +122,7 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
   const queryClient = useQueryClient();
   const { artist, products } = data;
   const [showEditor, setShowEditor] = useState(false);
+  const [activeTab, setActiveTab] = useState<'sale' | 'gallery'>('sale');
 
   const handleSettingsClose = useCallback(() => {
     setShowEditor(false);
@@ -189,7 +187,32 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
             )}
           </div>
           <div className="artist-hero__info">
-            <h1>{artist.storeName || artist.name}</h1>
+            <div className="artist-hero__title-row">
+              <h1>{artist.storeName || artist.name}</h1>
+              {/* Social networks next to name */}
+              {anySocial && (
+                <div className="artist-socials">
+                  {socialOrder.map(({ key, label }) => {
+                    const value = artist.artistSocials?.[key];
+                    if (!value) return null;
+                    const href = value.startsWith("http")
+                      ? value
+                      : `https://${value}`;
+                    return (
+                      <a
+                        key={key}
+                        href={href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="artist-socials__link"
+                      >
+                        {label}
+                      </a>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
             {artist.artistLocation && (
               <p className="artist-hero__location">{artist.artistLocation}</p>
             )}
@@ -217,28 +240,27 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
               )}
             </p>
             {biography && <p className="artist-hero__bio">{biography}</p>}
-            {anySocial && (
-              <div className="artist-socials">
-                {socialOrder.map(({ key, label }) => {
-                  const value = artist.artistSocials?.[key];
-                  if (!value) return null;
-                  const href = value.startsWith("http")
-                    ? value
-                    : `https://${value}`;
-                  return (
-                    <a
-                      key={key}
-                      href={href}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="artist-socials__link"
-                    >
-                      {label}
-                    </a>
-                  );
-                })}
-              </div>
-            )}
+            
+            {/* Highlights and Disciplines - now in header */}
+            <div className="artist-hero__tags">
+              {(artist.artistDisciplines?.length ?? 0) > 0 && (
+                <div className="artist-hero__tag-group">
+                  <span className="artist-hero__tag-label">{getDisciplinesCopy(language)}</span>
+                  <div className="artist-hero__tags-list">
+                    {artist.artistDisciplines!.slice(0, 3).map((discipline) => (
+                      <span key={discipline} className="artist-hero__tag artist-hero__tag--outline">
+                        {discipline}
+                      </span>
+                    ))}
+                    {(artist.artistDisciplines?.length ?? 0) > 3 && (
+                      <span className="artist-hero__tag artist-hero__tag--outline artist-hero__tag--more">
+                        +{(artist.artistDisciplines?.length ?? 0) - 3}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </section>
@@ -257,80 +279,78 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
             />
           </section>
         )}
-        {(artist.artistHighlights?.length ?? 0) > 0 && (
-          <section className="artist-section">
-            <h2>{getHighlightsCopy(language)}</h2>
-            <div className="artist-chips">
-              {artist.artistHighlights!.map((highlight) => (
-                <span key={highlight} className="artist-chip">
-                  {highlight}
-                </span>
-              ))}
-            </div>
-          </section>
-        )}
-
-        {(artist.artistDisciplines?.length ?? 0) > 0 && (
-          <section className="artist-section">
-            <h2>{getDisciplinesCopy(language)}</h2>
-            <div className="artist-chips">
-              {artist.artistDisciplines!.map((discipline) => (
-                <span
-                  key={discipline}
-                  className="artist-chip artist-chip--outline"
-                >
-                  {discipline}
-                </span>
-              ))}
-            </div>
-          </section>
-        )}
-
-        <section className="artist-section">
-          <div className="artist-section__header">
-            <h2>{getSaleCopy(language)}</h2>
-            {products?.total ? (
-              <span className="artist-section__counter">{products.total}</span>
-            ) : null}
+        {/* Instagram-style tabs */}
+        <div className="artist-tabs">
+          <div className="artist-tabs__nav">
+            <button
+              type="button"
+              className={`artist-tabs__tab ${activeTab === 'sale' ? 'artist-tabs__tab--active' : ''}`}
+              onClick={() => setActiveTab('sale')}
+              title={getSaleCopy(language)}
+            >
+              <ShoppingBag className="artist-tabs__tab-icon" size={24} />
+            </button>
+            <button
+              type="button"
+              className={`artist-tabs__tab ${activeTab === 'gallery' ? 'artist-tabs__tab--active' : ''}`}
+              onClick={() => setActiveTab('gallery')}
+              title={getGalleryCopy(language)}
+            >
+              <Grid3X3 className="artist-tabs__tab-icon" size={24} />
+            </button>
           </div>
-          {productItems.length > 0 ? (
-            <div className="artist-grid artist-grid--products">
-              {productItems.map((product) => (
-                <ProductCard
-                  key={product.id}
-                  product={product}
-                  language={language}
-                />
-              ))}
-            </div>
-          ) : (
-            <p className="artist-empty">{noProductsCopy}</p>
-          )}
-        </section>
 
-        <section className="artist-section">
-          <h2>{getGalleryCopy(language)}</h2>
-          {galleryItems.length > 0 ? (
-            <div className="artist-grid artist-grid--gallery">
-              {galleryItems.map((url) => (
-                <div key={url} className="artist-gallery-card">
-                  <CloudinaryImage
-                    src={url}
-                    alt={`Gallery item by ${artist.storeName || artist.name}`}
-                    width={600}
-                    height={600}
-                    className="artist-gallery-card__image"
-                  />
-                  <span className="artist-gallery-card__badge">
-                    {language === "en" ? "Not for sale" : "არ იყიდება"}
-                  </span>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <p className="artist-empty">{galleryEmptyCopy}</p>
-          )}
-        </section>
+          <div className="artist-tabs__content">
+            {activeTab === 'sale' && (
+              <section className={`artist-tab-panel ${productItems.length > 0 ? 'artist-tab-panel--products' : 'artist-tab-panel--empty'}`}>
+                {productItems.length > 0 ? (
+                  <div className="artist-grid artist-grid--products">
+                    {productItems.map((product) => (
+                      <ProductCard
+                        key={product.id}
+                        product={product}
+                        language={language}
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="artist-empty-state">
+                    <div className="artist-empty-state__icon">🛒</div>
+                    <p className="artist-empty-state__text">{noProductsCopy}</p>
+                  </div>
+                )}
+              </section>
+            )}
+
+            {activeTab === 'gallery' && (
+              <section className={`artist-tab-panel ${galleryItems.length > 0 ? 'artist-tab-panel--gallery' : 'artist-tab-panel--empty'}`}>
+                {galleryItems.length > 0 ? (
+                  <div className="artist-grid artist-grid--gallery">
+                    {galleryItems.map((url) => (
+                      <div key={url} className="artist-gallery-card">
+                        <CloudinaryImage
+                          src={url}
+                          alt={`Gallery item by ${artist.storeName || artist.name}`}
+                          width={600}
+                          height={600}
+                          className="artist-gallery-card__image"
+                        />
+                        <span className="artist-gallery-card__badge">
+                          {language === "en" ? "Not for sale" : "არ იყიდება"}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="artist-empty-state">
+                    <div className="artist-empty-state__icon">🖼️</div>
+                    <p className="artist-empty-state__text">{galleryEmptyCopy}</p>
+                  </div>
+                )}
+              </section>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );
