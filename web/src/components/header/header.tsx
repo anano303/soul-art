@@ -36,94 +36,97 @@ export default function Header() {
   };
 
   return (
-    <header className={`header ${isNavOpen ? "mobile-nav-active" : ""}`}>
-      <div className="logo">
-        <Link href="/">
-          <Image
-            src={logo}
-            alt="logo soulArt"
-            width={200}
-            height={50}
-            sizes="(max-width: 480px) 160px, 200px"
-            style={{
-              objectFit: "contain",
-              maxWidth: "100%",
-              maxHeight: "100%",
-            }}
-          />
-        </Link>
-      </div>
-      <nav className="main-nav">
-        <ul>
-          <li>
-            <Link
-              href={
-                user?.role === "seller"
-                  ? "/admin/products"
-                  : "/sellers-register"
-              }
-              onClick={closeNav}
-            >
-              {user?.role === "seller"
-                ? t("navigation.myArtworks")
-                : t("navigation.sellArtwork")}
-            </Link>
-          </li>
-          <li className="shop-dropdown">
-            <Link href="/shop?page=1" onClick={closeNav}>
-              {t("navigation.shop")}
-            </Link>
-            <div className="shop-dropdown-menu">
+    <>
+      <div className="header-placeholder" />
+      <header className={`header ${isNavOpen ? "mobile-nav-active" : ""}`}>
+        <div className="logo">
+          <Link href="/">
+            <Image
+              src={logo}
+              alt="logo soulArt"
+              width={200}
+              height={50}
+              sizes="(max-width: 480px) 160px, 200px"
+              style={{
+                objectFit: "contain",
+                maxWidth: "100%",
+                maxHeight: "100%",
+              }}
+            />
+          </Link>
+        </div>
+        <nav className="main-nav">
+          <ul>
+            <li>
+              <Link
+                href={
+                  user?.role === "seller"
+                    ? "/admin/products"
+                    : "/sellers-register"
+                }
+                onClick={closeNav}
+              >
+                {user?.role === "seller"
+                  ? t("navigation.myArtworks")
+                  : t("navigation.sellArtwork")}
+              </Link>
+            </li>
+            <li className="shop-dropdown">
+              <Link href="/shop?page=1" onClick={closeNav}>
+                {t("navigation.shop")}
+              </Link>
+              <div className="shop-dropdown-menu">
+                <Link href="/auction" onClick={closeNav}>
+                  {t("navigation.auction")}
+                </Link>
+              </div>
+            </li>
+            {/* Mobile-only auction link */}
+            <li className="mobile-only-nav">
               <Link href="/auction" onClick={closeNav}>
                 {t("navigation.auction")}
               </Link>
+            </li>
+            <li>
+              <a
+                href="#"
+                onClick={(e) => {
+                  handleOrdersClick(e);
+                  closeNav();
+                }}
+              >
+                {t("navigation.myOrders")}
+              </a>
+            </li>
+            {/* Mobile-only auth, language and cart */}
+            <li className="mobile-only-nav">
+              <UserMenu onNavigate={closeNav} />
+            </li>
+            <div className="flex">
+              <li className="mobile-only-nav mobile-language">
+                <LanguageSwitcher onNavigate={closeNav} />
+              </li>
+              <li className="mobile-only-nav mobile-cart">
+                <CartIcon onNavigate={closeNav} />
+              </li>
             </div>
-          </li>
-          {/* Mobile-only auction link */}
-          <li className="mobile-only-nav">
-            <Link href="/auction" onClick={closeNav}>
-              {t("navigation.auction")}
-            </Link>
-          </li>
-          <li>
-            <a
-              href="#"
-              onClick={(e) => {
-                handleOrdersClick(e);
-                closeNav();
-              }}
-            >
-              {t("navigation.myOrders")}
-            </a>
-          </li>
-          {/* Mobile-only auth, language and cart */}
-          <li className="mobile-only-nav">
-            <UserMenu onNavigate={closeNav} />
-          </li>
-          <div className="flex">
-            <li className="mobile-only-nav mobile-language">
-              <LanguageSwitcher onNavigate={closeNav} />
-            </li>
-            <li className="mobile-only-nav mobile-cart">
-              <CartIcon onNavigate={closeNav} />
-            </li>
+          </ul>
+        </nav>
+        <div className="auth-cart desktop-only">
+          <div className="language-switcher-container">
+            <LanguageSwitcher onNavigate={closeNav} />
           </div>
-        </ul>
-      </nav>
-      <div className="auth-cart desktop-only">
-        <div className="language-switcher-container">
-          <LanguageSwitcher onNavigate={closeNav} />
+          <UserMenu onNavigate={closeNav} />
+          <CartIcon onNavigate={closeNav} />
         </div>
-        <UserMenu onNavigate={closeNav} />
-        <CartIcon onNavigate={closeNav} />
-      </div>
 
-      {/* Mobile Navigation */}
-      <div className="mobile-nav-btn" onClick={toggleNav}>
-        <span className={`hamburger-icon ${isNavOpen ? "close" : ""}`}>
-          {isNavOpen ? "×" : "☰"}
-        </span>
-      </div>
-    </header>
+        {/* Mobile Navigation */}
+        <div className="mobile-nav-btn" onClick={toggleNav}>
+          <span className={`hamburger-icon ${isNavOpen ? "close" : ""}`}>
+            {isNavOpen ? "×" : "☰"}
+          </span>
+        </div>
+      </header>
+    </>
   );
 }

@@ -1,15 +1,26 @@
 /* styles/Header.scss */
 @use "/styles/mixins" as *;
 
+.header-placeholder {
+  height: 65px;
+  position: sticky;
+  top: 0;
+  z-index: 9999;
+  width: 100%;
+  background-color: $primary-color;
+}
+
 header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 10px 20px;
   background-color: $primary-color;
-  position: sticky;
+  position: fixed;
+  width: 100%;
   top: 0;
   z-index: 10000;
+  height: 65px;
 
   /* Add .flex class */
   .flex {
