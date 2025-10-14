@@ -70,7 +70,14 @@ function buildAbsoluteUrl(path: string) {
 export async function generateMetadata({
   params,
 }: ArtistPageProps): Promise<Metadata> {
-  const { slug } = await params;
+  const { slug: originalSlug } = await params;
+  let startIndex = 0;
+  if (originalSlug.includes('@')) {
+    startIndex = originalSlug.indexOf('@') + 1;
+  } else if (originalSlug.includes('%40')) {
+    startIndex = originalSlug.indexOf('%40') + 3;
+  }
+  const slug = originalSlug.toLowerCase().substring(startIndex);
 
   try {
     const data = await fetchArtistProfile(slug.toLowerCase());
