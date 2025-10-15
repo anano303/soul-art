@@ -103,14 +103,9 @@ export default function SearchBox() {
           const ranking = await response.json();
           console.log('Search ranking:', ranking);
           
-          // Navigate based on recommended tab
-          if (ranking.recommendedTab === 'products') {
-            // Navigate to products search page (we'll need to create this route)
-            router.push(`/search/products/${keyword.trim()}`);
-          } else {
-            // Default to artists search page
-            router.push(`/search/users/${keyword.trim()}`);
-          }
+          // Navigate to search page with recommended tab as URL parameter
+          const recommendedTab = ranking.recommendedTab === 'products' ? 'products' : 'users';
+          router.push(`/search/users/${keyword.trim()}?tab=${recommendedTab}`);
         } else {
           // Fallback to default behavior if ranking fails
           router.push(`/search/users/${keyword.trim()}`);

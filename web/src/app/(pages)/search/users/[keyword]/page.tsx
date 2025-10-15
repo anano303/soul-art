@@ -71,14 +71,23 @@ function UsersSearchPageContent() {
     enabled: !!keyword,
   });
 
-  // Set initial active tab based on ranking recommendation
+  // Set initial active tab based on URL parameter or ranking recommendation
   useEffect(() => {
+    // First check if there's a tab parameter in the URL
+    const tabParam = searchParams?.get("tab");
+    if (tabParam && (tabParam === 'users' || tabParam === 'products')) {
+      setActiveTab(tabParam);
+      console.log(`Setting active tab to: ${tabParam} from URL parameter`);
+      return;
+    }
+    
+    // Otherwise use ranking recommendation
     if (rankingData && rankingData.recommendedTab) {
       const recommendedTab = rankingData.recommendedTab === 'artists' ? 'users' : 'products';
       setActiveTab(recommendedTab);
       console.log(`Setting active tab to: ${recommendedTab} based on ranking: ${rankingData.reasoning}`);
     }
-  }, [rankingData]);
+  }, [rankingData, searchParams]);
 
   // Use ranking data for users/artists
   const usersData = rankingData ? {
