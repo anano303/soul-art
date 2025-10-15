@@ -8,6 +8,7 @@ import { OrdersService } from './services/orders.service';
 import { StockReservationService } from './services/stock-reservation.service';
 import { ProductsModule } from '@/products/products.module';
 import { UsersModule } from '@/users/users.module';
+import { PushNotificationModule } from '@/push/push-notification.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { UsersModule } from '@/users/users.module';
     ]),
     forwardRef(() => ProductsModule), // This will make the Product model available in the OrdersService
     forwardRef(() => UsersModule), // This will make BalanceService available
+    PushNotificationModule,
   ],
   controllers: [OrdersController],
   providers: [OrdersService, StockReservationService],

@@ -21,7 +21,7 @@ interface PushSubscriptionWithUser {
   ipAddress?: string;
 }
 
-interface NotificationPayload {
+export interface NotificationPayload {
   title: string;
   body: string;
   icon: string;

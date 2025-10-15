@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import axios from 'axios';
 import { v4 as uuidv4 } from 'uuid';
@@ -19,6 +19,7 @@ interface BogPaymentResponse {
 
 @Injectable()
 export class PaymentsService {
+  private readonly logger = new Logger(PaymentsService.name);
   constructor(
     private readonly configService: ConfigService,
     private readonly ordersService: OrdersService,
@@ -253,6 +254,33 @@ export class PaymentsService {
         console.log(
           'Payment was not successful or external_order_id is missing',
         );
+
+        const failureIdentifier = external_order_id || order_id;
+        const failureStatus = paymentStatus?.status || status || 'unknown';
+        const failureReason =
+          paymentStatus?.status_description ||
+          paymentStatus?.message ||
+          callbackData?.body?.order_status?.description;
+
+        if (failureIdentifier) {
+          try {
+            await this.ordersService.handlePaymentFailureNotification(
+              failureIdentifier,
+              failureStatus,
+              failureReason,
+            );
+          } catch (notificationError) {
+            this.logger.error(
+              `Failed to notify about payment failure (${failureIdentifier}): ${notificationError.message}`,
+              notificationError.stack,
+            );
+          }
+        } else {
+          this.logger.warn(
+            'Payment failure callback did not include an order identifier',
+          );
+        }
+
         return {
           success: false,
           message: 'Payment was not successful',

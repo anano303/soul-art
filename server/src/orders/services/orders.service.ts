@@ -5,14 +5,19 @@ import {
   Logger,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, Types, ClientSession } from 'mongoose';
-import { PaymentResult } from 'src/interfaces';
+import { FilterQuery, Model, Types, ClientSession } from 'mongoose';
+import { PaymentResult, ShippingDetails } from 'src/interfaces';
 import { Order, OrderDocument } from '../schemas/order.schema';
-import { Product } from '../../products/schemas/product.schema';
+import { Product, DeliveryType } from '../../products/schemas/product.schema';
 import { User } from '../../users/schemas/user.schema';
 import { ProductsService } from '@/products/services/products.service';
 import { BalanceService } from '../../users/services/balance.service';
 import { EmailService } from '../../email/services/email.services';
+import {
+  PushNotificationService,
+  NotificationPayload,
+} from '@/push/services/push-notification.service';
+import { Role } from '@/types/role.enum';
 import { InjectConnection } from '@nestjs/mongoose';
 import { Connection } from 'mongoose';
 @Injectable()
@@ -25,8 +30,212 @@ export class OrdersService {
     private productsService: ProductsService,
     private balanceService: BalanceService,
     private emailService: EmailService,
+    private readonly pushNotificationService: PushNotificationService,
     @InjectConnection() private connection: Connection,
   ) {}
+
+  private getPrimaryAppUrl(): string {
+    const origins = process.env.ALLOWED_ORIGINS;
+    if (!origins) {
+      return 'https://soulart.ge';
+    }
+
+    const firstOrigin = origins
+      .split(',')
+      .map((value) => value.trim())
+      .find((value) => value.length > 0);
+
+    if (!firstOrigin) {
+      return 'https://soulart.ge';
+    }
+
+    return firstOrigin.replace(/\/$/, '');
+  }
+
+  private getAdminEmail(): string {
+    return process.env.ADMIN_NOTIFICATION_EMAIL || 'info@soulart.ge';
+  }
+
+  private formatShippingAddress(
+    shippingDetails?: Partial<ShippingDetails>,
+  ): string {
+    if (!shippingDetails) {
+      return '';
+    }
+
+    return [
+      shippingDetails.address,
+      shippingDetails.city,
+      shippingDetails.postalCode,
+      shippingDetails.country,
+    ]
+      .filter((value) => !!value)
+      .join(', ');
+  }
+
+  private getDisplayName(
+    user?: Partial<User> | any,
+    fallback?: string,
+  ): string {
+    if (!user) {
+      return fallback || 'მომხმარებელი';
+    }
+
+    const firstName = user.ownerFirstName || user.name;
+    const lastName = user.ownerLastName;
+
+    if (firstName && lastName) {
+      return `${firstName} ${lastName}`;
+    }
+
+    if (firstName) {
+      return firstName;
+    }
+
+    if (fallback) {
+      return fallback;
+    }
+
+    return user.email || 'მომხმარებელი';
+  }
+
+  private normalizeDeliveryDays(value?: number | null): number | undefined {
+    if (value === null || value === undefined) {
+      return undefined;
+    }
+
+    const parsed = Number(value);
+    if (!Number.isFinite(parsed) || parsed <= 0) {
+      return undefined;
+    }
+
+    return Math.round(parsed);
+  }
+
+  private buildDeliveryEstimate(info?: {
+    minDeliveryDays?: number | null;
+    maxDeliveryDays?: number | null;
+    deliveryType?: string | null;
+  }): {
+    label: string;
+    minDays?: number;
+    maxDays?: number;
+    deliveryType?: string;
+  } {
+    const minDays = this.normalizeDeliveryDays(info?.minDeliveryDays);
+    const maxDays = this.normalizeDeliveryDays(info?.maxDeliveryDays);
+    const deliveryType = info?.deliveryType ?? undefined;
+
+    if (minDays && maxDays) {
+      if (minDays === maxDays) {
+        return {
+          label: `${minDays} სამუშაო დღე`,
+          minDays,
+          maxDays,
+          deliveryType,
+        };
+      }
+
+      return {
+        label: `${minDays}-${maxDays} სამუშაო დღე`,
+        minDays,
+        maxDays,
+        deliveryType,
+      };
+    }
+
+    if (minDays) {
+      return {
+        label: `დაახლოებით ${minDays} სამუშაო დღე`,
+        minDays,
+        deliveryType,
+      };
+    }
+
+    if (maxDays) {
+      return {
+        label: `მაქსიმუმ ${maxDays} სამუშაო დღე`,
+        maxDays,
+        deliveryType,
+      };
+    }
+
+    if (deliveryType === DeliveryType.SELLER) {
+      return {
+        label: 'მიტანის ვადებს სელერი შეგითანხმებთ',
+        deliveryType,
+      };
+    }
+
+    if (deliveryType === DeliveryType.SoulArt) {
+      return {
+        label: 'SoulArt-ის სტანდარტული მიწოდება',
+        deliveryType,
+      };
+    }
+
+    return {
+      label: 'მიტანის დეტალები დაზუსტდება შეკვეთის დამუშავებისას',
+    };
+  }
+
+  private summarizeDeliveryWindow(
+    windows: Array<{
+      minDays?: number;
+      maxDays?: number;
+      deliveryType?: string;
+    }>,
+  ): string | undefined {
+    if (!windows || windows.length === 0) {
+      return undefined;
+    }
+
+    const minValues = windows
+      .map((window) => window.minDays)
+      .filter((value): value is number => typeof value === 'number');
+    const maxValues = windows
+      .map((window) => window.maxDays)
+      .filter((value): value is number => typeof value === 'number');
+
+    const minCombined =
+      minValues.length > 0 ? Math.min(...minValues) : undefined;
+    const maxCombined =
+      maxValues.length > 0 ? Math.max(...maxValues) : undefined;
+
+    if (minCombined !== undefined || maxCombined !== undefined) {
+      if (
+        minCombined !== undefined &&
+        maxCombined !== undefined &&
+        minCombined === maxCombined
+      ) {
+        return `${minCombined} სამუშაო დღე`;
+      }
+
+      if (minCombined !== undefined && maxCombined !== undefined) {
+        return `${minCombined}-${maxCombined} სამუშაო დღე`;
+      }
+
+      if (minCombined !== undefined) {
+        return `დაახლოებით ${minCombined} სამუშაო დღე`;
+      }
+
+      if (maxCombined !== undefined) {
+        return `მაქსიმუმ ${maxCombined} სამუშაო დღე`;
+      }
+    }
+
+    if (windows.some((window) => window.deliveryType === DeliveryType.SELLER)) {
+      return 'მიტანის ვადებს სელერი შეგითანხმებთ';
+    }
+
+    if (
+      windows.some((window) => window.deliveryType === DeliveryType.SoulArt)
+    ) {
+      return 'SoulArt-ის სტანდარტული მიწოდება';
+    }
+
+    return undefined;
+  }
   async create(
     orderAttrs: Partial<Order>,
     userId: string,
@@ -258,73 +467,13 @@ export class OrdersService {
     // No need to reduce stock again here to prevent double reduction
     const updatedOrder = await order.save();
 
-    // Email notifications after successful payment
     try {
-      // Get order with populated user and product data
-      const orderWithData = await this.orderModel
-        .findById(order._id)
-        .populate('user', 'email ownerFirstName ownerLastName')
-        .populate('orderItems.productId', 'name ownerId');
-
-      if (orderWithData?.user?.email) {
-        // Send confirmation to customer
-        await this.emailService.sendOrderConfirmation(
-          orderWithData.user.email,
-          `${orderWithData.user.ownerFirstName} ${orderWithData.user.ownerLastName}`,
-          orderWithData._id.toString(),
-          orderWithData.orderItems.map((item) => ({
-            name: item.name,
-            quantity: item.qty,
-            price: item.price,
-          })),
-          orderWithData.totalPrice,
-          `${orderWithData.shippingDetails.address}, ${orderWithData.shippingDetails.city}`,
-        );
-
-        // Send notifications to sellers
-        const sellerNotifications = new Map();
-
-        for (const item of orderWithData.orderItems) {
-          const productData = item.productId as any; // After populate, it becomes an object
-          if (productData?.ownerId) {
-            const sellerId = productData.ownerId.toString();
-            if (!sellerNotifications.has(sellerId)) {
-              sellerNotifications.set(sellerId, []);
-            }
-            sellerNotifications.get(sellerId).push({
-              name: item.name,
-              quantity: item.qty,
-              price: item.price,
-            });
-          }
-        }
-
-        // Send email to each seller
-        for (const [sellerId, items] of sellerNotifications) {
-          const seller = await this.userModel
-            .findById(sellerId)
-            .select('email ownerFirstName ownerLastName');
-
-          if (seller?.email) {
-            const totalAmount = items.reduce(
-              (sum, item) => sum + item.price * item.quantity,
-              0,
-            );
-
-            await this.emailService.sendNewOrderNotificationToSeller(
-              seller.email,
-              `${seller.ownerFirstName} ${seller.ownerLastName}`,
-              orderWithData._id.toString(),
-              `${orderWithData.user.ownerFirstName} ${orderWithData.user.ownerLastName}`,
-              items,
-              totalAmount,
-            );
-          }
-        }
-      }
+      await this.sendOrderPaidNotifications(updatedOrder._id.toString());
     } catch (error) {
-      this.logger.error('Failed to send order confirmation emails:', error);
-      // Don't throw error for email failures - order payment should still succeed
+      this.logger.error(
+        `Failed to dispatch post-payment notifications for order ${id}: ${error.message}`,
+        error.stack,
+      );
     }
 
     return updatedOrder;
@@ -470,7 +619,538 @@ export class OrdersService {
     console.log(
       `Order ${externalOrderId} successfully updated. New isPaid: ${updatedOrder.isPaid}, new status: ${updatedOrder.status}`,
     );
+    try {
+      await this.sendOrderPaidNotifications(updatedOrder._id.toString());
+    } catch (error) {
+      this.logger.error(
+        `Failed to dispatch post-payment notifications for external order ${externalOrderId}: ${error.message}`,
+        error.stack,
+      );
+    }
+
     return updatedOrder;
+  }
+
+  private async sendOrderPaidNotifications(orderId: string): Promise<void> {
+    try {
+      const orderWithData: any = await this.orderModel
+        .findById(orderId)
+        .populate({
+          path: 'user',
+          select: '_id email name ownerFirstName ownerLastName phoneNumber',
+        })
+        .populate({
+          path: 'orderItems.productId',
+          select:
+            'name user images deliveryType minDeliveryDays maxDeliveryDays',
+          populate: {
+            path: 'user',
+            select:
+              '_id email name ownerFirstName ownerLastName phoneNumber storeName',
+          },
+        })
+        .lean();
+
+      if (!orderWithData) {
+        this.logger.warn(
+          `Order ${orderId} not found while preparing notification payloads`,
+        );
+        return;
+      }
+
+      const customerName = this.getDisplayName(orderWithData.user);
+      const customerEmail = orderWithData.user?.email;
+      const customerPhone = orderWithData.user?.phoneNumber;
+      const shippingDetails = (orderWithData.shippingDetails ??
+        {}) as Partial<ShippingDetails>;
+      const baseUrl = this.getPrimaryAppUrl();
+      const totals = {
+        itemsPrice: orderWithData.itemsPrice ?? 0,
+        shippingPrice: orderWithData.shippingPrice ?? 0,
+        taxPrice: orderWithData.taxPrice ?? 0,
+        totalPrice: orderWithData.totalPrice ?? 0,
+      };
+      const customerContactPhone =
+        shippingDetails?.phoneNumber || customerPhone || undefined;
+      const customerOrderItems = orderWithData.orderItems.map((item: any) => {
+        const populatedProduct =
+          item.productId && typeof item.productId === 'object'
+            ? (item.productId as any)
+            : undefined;
+
+        const deliveryEstimate = this.buildDeliveryEstimate({
+          deliveryType:
+            item.product?.deliveryType ?? populatedProduct?.deliveryType,
+          minDeliveryDays:
+            item.product?.minDeliveryDays ?? populatedProduct?.minDeliveryDays,
+          maxDeliveryDays:
+            item.product?.maxDeliveryDays ?? populatedProduct?.maxDeliveryDays,
+        });
+
+        const variantDetails = [item.size, item.color, item.ageGroup]
+          .filter((value) => !!value)
+          .join(' • ');
+
+        return {
+          name: item.name,
+          quantity: item.qty,
+          price: item.price,
+          subtotal: (item.price || 0) * (item.qty || 0),
+          variantDetails: variantDetails || undefined,
+          delivery: deliveryEstimate,
+        };
+      });
+      const deliverySummary = this.summarizeDeliveryWindow(
+        customerOrderItems.map((item) => item.delivery),
+      );
+      const shippingAddressText =
+        this.formatShippingAddress(shippingDetails) ||
+        'მისამართი არ არის მითითებული';
+
+      if (customerEmail) {
+        try {
+          await this.emailService.sendOrderConfirmation(customerEmail, {
+            customerName,
+            orderId,
+            profileUrl: `${baseUrl}/profile/orders`,
+            shippingAddress: shippingAddressText,
+            contactPhone: customerContactPhone,
+            totals,
+            deliverySummary,
+            placedAt: orderWithData.createdAt,
+            orderItems: customerOrderItems,
+          });
+        } catch (error) {
+          this.logger.error(
+            `Failed to send customer confirmation email for order ${orderId}: ${error.message}`,
+            error.stack,
+          );
+        }
+      }
+
+      if (orderWithData.user?._id) {
+        try {
+          const buyerPayload: NotificationPayload = {
+            title: '🎉 შეკვეთა წარმატებით დადასტურდა',
+            body: `#${orderId} • ${orderWithData.orderItems.length} პროდუქტი • ${totals.totalPrice.toFixed(
+              2,
+            )} ₾`,
+            icon: `${baseUrl}/android-icon-192x192.png`,
+            badge: `${baseUrl}/android-icon-96x96.png`,
+            data: {
+              url: `${baseUrl}/profile/orders/${orderId}`,
+              type: 'order_status',
+              id: orderId,
+            },
+            tag: `order-success-${orderId}-buyer`,
+            requireInteraction: false,
+          };
+
+          await this.pushNotificationService.sendToUser(
+            orderWithData.user._id.toString(),
+            buyerPayload,
+          );
+        } catch (error) {
+          this.logger.error(
+            `Failed to send push notification to buyer for order ${orderId}: ${error.message}`,
+            error.stack,
+          );
+        }
+      }
+
+      const sellerItemsMap = new Map<
+        string,
+        {
+          seller: any;
+          items: Array<{
+            name: string;
+            quantity: number;
+            price: number;
+            size?: string;
+            color?: string;
+            ageGroup?: string;
+            subtotal: number;
+          }>;
+          subtotal: number;
+        }
+      >();
+
+      for (const item of orderWithData.orderItems) {
+        const productData: any = item.productId;
+        let sellerData: any = productData?.user;
+
+        if (sellerData && typeof sellerData === 'object' && !sellerData._id) {
+          sellerData._id = productData.user?._id;
+        }
+
+        if (!sellerData || typeof sellerData === 'string') {
+          const sellerIdCandidate =
+            typeof sellerData === 'string'
+              ? sellerData
+              : productData?.user?._id?.toString?.();
+          if (sellerIdCandidate && Types.ObjectId.isValid(sellerIdCandidate)) {
+            sellerData = await this.userModel
+              .findById(sellerIdCandidate)
+              .select(
+                '_id email name ownerFirstName ownerLastName phoneNumber storeName',
+              )
+              .lean();
+          }
+        }
+
+        if (!sellerData || !sellerData._id) {
+          continue;
+        }
+
+        const sellerId = sellerData._id.toString();
+        const summaryItem = {
+          name: item.name,
+          quantity: item.qty,
+          price: item.price,
+          size: item.size || undefined,
+          color: item.color || undefined,
+          ageGroup: item.ageGroup || undefined,
+          subtotal: (item.price || 0) * (item.qty || 0),
+        };
+
+        if (!sellerItemsMap.has(sellerId)) {
+          sellerItemsMap.set(sellerId, {
+            seller: sellerData,
+            items: [],
+            subtotal: 0,
+          });
+        }
+
+        const entry = sellerItemsMap.get(sellerId)!;
+        entry.items.push(summaryItem);
+        entry.subtotal += summaryItem.subtotal;
+        entry.seller = sellerData;
+      }
+      await Promise.all(
+        Array.from(sellerItemsMap.entries()).map(async ([sellerId, entry]) => {
+          const sellerEmail = entry.seller?.email;
+          if (sellerEmail) {
+            try {
+              await this.emailService.sendNewOrderNotificationToSeller(
+                sellerEmail,
+                this.getDisplayName(
+                  entry.seller,
+                  entry.seller?.storeName || 'სელერი',
+                ),
+                {
+                  orderId,
+                  customerName,
+                  customerEmail,
+                  customerPhone,
+                  shippingAddress: shippingDetails,
+                  paymentMethod: orderWithData.paymentMethod,
+                  totals: {
+                    ...totals,
+                    sellerSubtotal: entry.subtotal,
+                  },
+                  orderItems: entry.items,
+                },
+              );
+            } catch (error) {
+              this.logger.error(
+                `Failed to send seller email for order ${orderId} (seller ${sellerId}): ${error.message}`,
+                error.stack,
+              );
+            }
+          } else {
+            this.logger.warn(
+              `Seller ${sellerId} has no email configured. Skipping email notification for order ${orderId}.`,
+            );
+          }
+
+          try {
+            const sellerPayload: NotificationPayload = {
+              title: '🛒 ახალი შეკვეთა',
+              body: `${entry.items.length} პროდუქტი • ${entry.subtotal.toFixed(
+                2,
+              )} ₾`,
+              icon: `${baseUrl}/android-icon-192x192.png`,
+              badge: `${baseUrl}/android-icon-96x96.png`,
+              data: {
+                url: `${baseUrl}/seller/orders/${orderId}`,
+                type: 'order_status',
+                id: orderId,
+              },
+              tag: `order-paid-${orderId}-${sellerId}`,
+              requireInteraction: true,
+            };
+
+            await this.pushNotificationService.sendToUser(
+              sellerId,
+              sellerPayload,
+            );
+          } catch (error) {
+            this.logger.error(
+              `Failed to send push notification to seller ${sellerId} for order ${orderId}: ${error.message}`,
+              error.stack,
+            );
+          }
+        }),
+      );
+
+      const adminEmail = this.getAdminEmail();
+      const adminItems = orderWithData.orderItems.map((item: any) => {
+        const productData: any = item.productId;
+        const sellerData: any = productData?.user;
+
+        const sellerInfo =
+          sellerData && typeof sellerData === 'object'
+            ? {
+                name: this.getDisplayName(
+                  sellerData,
+                  sellerData.storeName || sellerData.name,
+                ),
+                email: sellerData.email,
+                phoneNumber: sellerData.phoneNumber,
+                storeName: sellerData.storeName,
+              }
+            : undefined;
+
+        return {
+          name: item.name,
+          quantity: item.qty,
+          price: item.price,
+          subtotal: (item.price || 0) * (item.qty || 0),
+          seller: sellerInfo,
+          size: item.size || undefined,
+          color: item.color || undefined,
+          ageGroup: item.ageGroup || undefined,
+        };
+      });
+
+      try {
+        await this.emailService.sendAdminOrderStatusEmail(adminEmail, {
+          orderId,
+          status: 'success',
+          statusLabel: 'გადახდა წარმატებით დასრულდა',
+          customer: {
+            name: customerName,
+            email: customerEmail,
+            phone: customerPhone,
+          },
+          shippingAddress: shippingDetails,
+          paymentMethod: orderWithData.paymentMethod,
+          totals,
+          createdAt: orderWithData.createdAt,
+          orderItems: adminItems,
+        });
+      } catch (error) {
+        this.logger.error(
+          `Failed to send admin email for order ${orderId}: ${error.message}`,
+          error.stack,
+        );
+      }
+
+      try {
+        const adminUsers = await this.userModel
+          .find({ role: Role.Admin })
+          .select('_id')
+          .lean();
+
+        if (adminUsers.length > 0) {
+          const adminPayload: NotificationPayload = {
+            title: '✅ ახალი გადახდილი შეკვეთა',
+            body: `#${orderId} • ${orderWithData.orderItems.length} პროდუქტი • ${totals.totalPrice.toFixed(
+              2,
+            )} ₾`,
+            icon: `${baseUrl}/android-icon-192x192.png`,
+            badge: `${baseUrl}/android-icon-96x96.png`,
+            data: {
+              url: `${baseUrl}/admin/orders/${orderId}`,
+              type: 'order_status',
+              id: orderId,
+            },
+            tag: `order-success-${orderId}`,
+            requireInteraction: true,
+          };
+
+          await Promise.all(
+            adminUsers.map((admin) =>
+              this.pushNotificationService
+                .sendToUser(admin._id.toString(), adminPayload)
+                .catch((error) =>
+                  this.logger.error(
+                    `Failed to send admin push notification (${admin._id}) for order ${orderId}: ${error.message}`,
+                    error.stack,
+                  ),
+                ),
+            ),
+          );
+        }
+      } catch (error) {
+        this.logger.error(
+          `Failed to send admin push notifications for order ${orderId}: ${error.message}`,
+          error.stack,
+        );
+      }
+    } catch (error) {
+      this.logger.error(
+        `Failed to prepare notification payloads for order ${orderId}: ${error.message}`,
+        error.stack,
+      );
+    }
+  }
+
+  async handlePaymentFailureNotification(
+    orderIdentifier: string,
+    status: string,
+    reason?: string,
+  ): Promise<void> {
+    try {
+      const filterOr: FilterQuery<Order>[] = [
+        { externalOrderId: orderIdentifier },
+      ];
+
+      if (Types.ObjectId.isValid(orderIdentifier)) {
+        filterOr.push({ _id: new Types.ObjectId(orderIdentifier) } as any);
+      }
+
+      const orderWithData: any = await this.orderModel
+        .findOne({ $or: filterOr })
+        .populate({
+          path: 'user',
+          select: 'email name ownerFirstName ownerLastName phoneNumber',
+        })
+        .populate({
+          path: 'orderItems.productId',
+          select: 'name user images',
+          populate: {
+            path: 'user',
+            select:
+              '_id email name ownerFirstName ownerLastName phoneNumber storeName',
+          },
+        })
+        .lean();
+
+      const orderIdForDisplay = orderWithData?._id
+        ? orderWithData._id.toString()
+        : orderIdentifier;
+
+      const adminEmail = this.getAdminEmail();
+      const baseUrl = this.getPrimaryAppUrl();
+
+      const totals = orderWithData
+        ? {
+            itemsPrice: orderWithData.itemsPrice ?? 0,
+            shippingPrice: orderWithData.shippingPrice ?? 0,
+            taxPrice: orderWithData.taxPrice ?? 0,
+            totalPrice: orderWithData.totalPrice ?? 0,
+          }
+        : {
+            itemsPrice: 0,
+            shippingPrice: 0,
+            taxPrice: 0,
+            totalPrice: 0,
+          };
+
+      const adminItems = orderWithData
+        ? orderWithData.orderItems.map((item: any) => {
+            const productData: any = item.productId;
+            const sellerData: any = productData?.user;
+
+            return {
+              name: item.name,
+              quantity: item.qty,
+              price: item.price,
+              subtotal: (item.price || 0) * (item.qty || 0),
+              seller:
+                sellerData && typeof sellerData === 'object'
+                  ? {
+                      name: this.getDisplayName(
+                        sellerData,
+                        sellerData.storeName || sellerData.name,
+                      ),
+                      email: sellerData.email,
+                      phoneNumber: sellerData.phoneNumber,
+                      storeName: sellerData.storeName,
+                    }
+                  : undefined,
+              size: item.size || undefined,
+              color: item.color || undefined,
+              ageGroup: item.ageGroup || undefined,
+            };
+          })
+        : [];
+
+      try {
+        await this.emailService.sendAdminOrderStatusEmail(adminEmail, {
+          orderId: orderIdForDisplay,
+          status: 'failure',
+          statusLabel: 'გადახდა ვერ შესრულდა',
+          reason: reason || status,
+          customer: {
+            name: this.getDisplayName(orderWithData?.user),
+            email: orderWithData?.user?.email,
+            phone: orderWithData?.user?.phoneNumber,
+          },
+          shippingAddress: orderWithData?.shippingDetails,
+          paymentMethod: orderWithData?.paymentMethod || 'უცნობი',
+          totals,
+          createdAt: orderWithData?.createdAt,
+          orderItems: adminItems,
+        });
+      } catch (error) {
+        this.logger.error(
+          `Failed to send admin payment failure email (${orderIdentifier}): ${error.message}`,
+          error.stack,
+        );
+      }
+
+      try {
+        const adminUsers = await this.userModel
+          .find({ role: Role.Admin })
+          .select('_id')
+          .lean();
+
+        if (adminUsers.length > 0) {
+          const orderUrl = orderWithData
+            ? `${baseUrl}/admin/orders/${orderIdForDisplay}`
+            : `${baseUrl}/admin/orders`;
+
+          const adminPayload: NotificationPayload = {
+            title: '❌ შეკვეთის გადახდა ვერ შესრულდა',
+            body: `#${orderIdForDisplay} • სტატუსი: ${status}`,
+            icon: `${baseUrl}/android-icon-192x192.png`,
+            badge: `${baseUrl}/android-icon-96x96.png`,
+            data: {
+              url: orderUrl,
+              type: 'order_status',
+              id: orderIdForDisplay,
+            },
+            tag: `order-failed-${orderIdForDisplay}`,
+            requireInteraction: true,
+          };
+
+          await Promise.all(
+            adminUsers.map((admin) =>
+              this.pushNotificationService
+                .sendToUser(admin._id.toString(), adminPayload)
+                .catch((error) =>
+                  this.logger.error(
+                    `Failed to send admin failure push (${admin._id}) for order ${orderIdentifier}: ${error.message}`,
+                    error.stack,
+                  ),
+                ),
+            ),
+          );
+        }
+      } catch (error) {
+        this.logger.error(
+          `Failed to send admin push notifications for failed order ${orderIdentifier}: ${error.message}`,
+          error.stack,
+        );
+      }
+    } catch (error) {
+      this.logger.error(
+        `Failed to handle payment failure notification for order ${orderIdentifier}: ${error.message}`,
+        error.stack,
+      );
+    }
   }
   /**
    * Refund stock if order is cancelled or payment fails

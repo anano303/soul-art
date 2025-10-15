@@ -1,7 +1,102 @@
 import { emailConfig } from '@/email.config';
 import { Injectable } from '@nestjs/common';
+import { ShippingDetails } from 'src/interfaces';
 
 import * as nodemailer from 'nodemailer';
+
+interface OrderConfirmationDelivery {
+  label: string;
+  minDays?: number;
+  maxDays?: number;
+  deliveryType?: string;
+}
+
+interface OrderConfirmationItem {
+  name: string;
+  quantity: number;
+  price: number;
+  subtotal: number;
+  variantDetails?: string;
+  delivery?: OrderConfirmationDelivery;
+}
+
+interface OrderConfirmationPayload {
+  customerName: string;
+  orderId: string;
+  profileUrl: string;
+  shippingAddress: string;
+  contactPhone?: string;
+  totals: {
+    itemsPrice: number;
+    taxPrice: number;
+    shippingPrice: number;
+    totalPrice: number;
+  };
+  orderItems: OrderConfirmationItem[];
+  deliverySummary?: string;
+  placedAt?: Date | string;
+}
+
+interface SellerOrderNotificationPayload {
+  orderId: string;
+  customerName: string;
+  customerEmail?: string;
+  customerPhone?: string;
+  shippingAddress: Partial<ShippingDetails>;
+  paymentMethod: string;
+  totals: {
+    itemsPrice: number;
+    taxPrice: number;
+    shippingPrice: number;
+    totalPrice: number;
+    sellerSubtotal: number;
+  };
+  orderItems: Array<{
+    name: string;
+    quantity: number;
+    price: number;
+    size?: string;
+    color?: string;
+    ageGroup?: string;
+    subtotal: number;
+  }>;
+}
+
+interface AdminOrderStatusPayload {
+  orderId: string;
+  status: 'success' | 'failure';
+  statusLabel: string;
+  reason?: string;
+  customer: {
+    name: string;
+    email?: string;
+    phone?: string;
+  };
+  shippingAddress?: Partial<ShippingDetails>;
+  paymentMethod: string;
+  totals: {
+    itemsPrice: number;
+    taxPrice: number;
+    shippingPrice: number;
+    totalPrice: number;
+  };
+  createdAt?: Date | string;
+  orderItems: Array<{
+    name: string;
+    quantity: number;
+    price: number;
+    subtotal: number;
+    seller?: {
+      name?: string;
+      email?: string;
+      phoneNumber?: string;
+      storeName?: string;
+    };
+    size?: string;
+    color?: string;
+    ageGroup?: string;
+  }>;
+}
 
 @Injectable()
 export class EmailService {
@@ -41,42 +136,120 @@ export class EmailService {
   }
 
   /**
-   * სელერისთვის balance withdrawal notification
+   * სელერისთვის ახალი შეკვეთის შეტყობინება
    */
-  async sendWithdrawalNotification(
+  async sendNewOrderNotificationToSeller(
     to: string,
     sellerName: string,
-    amount: number,
-    transactionId: string,
-    accountNumber: string,
+    payload: SellerOrderNotificationPayload,
   ) {
+    const {
+      orderId,
+      customerName,
+      customerEmail,
+      customerPhone,
+      shippingAddress,
+      paymentMethod,
+      totals,
+      orderItems,
+    } = payload;
+
+    const safeValue = (value: number) =>
+      typeof value === 'number' && Number.isFinite(value) ? value : 0;
+
+    const itemsList = orderItems.map((item) => {
+      const variantDetails = [item.size, item.color, item.ageGroup]
+        .filter((value) => !!value)
+        .join(' • ');
+
+      const variantHtml = variantDetails
+        ? `<div style="color:#6b7280; font-size: 13px; margin-top: 4px;">${variantDetails}</div>`
+        : '';
+
+      const quantity = safeValue(item.quantity);
+      const price = safeValue(item.price);
+      const subtotalSource =
+        typeof item.subtotal === 'number' && Number.isFinite(item.subtotal)
+          ? item.subtotal
+          : price * quantity;
+      const subtotal = safeValue(subtotalSource);
+
+      return `
+        <li style="margin-bottom: 16px;">
+          <div style="font-weight: 600; color: #012645;">${item.name}</div>
+          ${variantHtml}
+          <div style="margin-top: 6px; color: #374151;">
+            რაოდენობა: <strong>${quantity}</strong> • ერთეულის ფასი: <strong>${price.toFixed(2)} ₾</strong>
+          </div>
+          <div style="margin-top: 4px; color: #111827;">
+            სულ: <strong>${subtotal.toFixed(2)} ₾</strong>
+          </div>
+        </li>
+      `;
+    });
+
+    const itemsHtml = itemsList.length
+      ? itemsList.join('')
+      : `<li style="margin-bottom: 16px; color: #9ca3af;">პროდუქტები არ მოიძებნა.</li>`;
+
+    const shippingInfo = [
+      shippingAddress?.address,
+      shippingAddress?.city,
+      shippingAddress?.postalCode,
+      shippingAddress?.country,
+    ]
+      .filter((value) => !!value)
+      .join(', ');
+
     const mailOptions = {
       from: emailConfig.from,
       to,
-      subject: 'თანხის გადარიცხვა - SoulArt',
+      subject: `ახალი შეკვეთა #${orderId} - SoulArt`,
       html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <h2 style="color: var(--primary-color, #012645);">მოგესალმებით ${sellerName}!</h2>
-          
-          <p>წარმატებით გადაირიცხა თანხა თქვენს ბანკის ანგარიშზე:</p>
-          
-          <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
-            <h3 style="color: var(--primary-color, #012645); margin-top: 0;">გადარიცხვის დეტალები:</h3>
-            <p><strong>თანხა:</strong> ${amount.toFixed(2)} ₾</p>
-            <p><strong>ანგარიშის ნომერი:</strong> ${accountNumber}</p>
-            <p><strong>ტრანზაქციის ID:</strong> ${transactionId}</p>
-            <p><strong>თარიღი:</strong> ${new Date().toLocaleDateString('ka-GE')}</p>
-          </div>
-          
-          <p>თანხა 1-3 საბანკო დღეში გამოჩნდება თქვენს ანგარიშზე.</p>
-          
-          <p style="color: #666; font-size: 14px;">
-            შენარჩუნებული შემოსავლების ისტორია შეგიძლიათ ნახოთ 
-            <a href="${process.env.ALLOWED_ORIGINS}/profile/balance" style="color: var(--primary-color, #012645);">ჩემი ბალანსი</a> გვერდზე.
+        <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 640px; margin: 0 auto; color: #0f172a;">
+          <h2 style="color: #012645; margin-bottom: 8px;">მოგესალმებით ${sellerName}!</h2>
+          <p style="margin: 0 0 16px;">თქვენს პროდუქციაზე ახალი შეკვეთა დაფიქსირდა. იხილეთ დეტალები ქვემოთ:</p>
+
+          <section style="background: #f8fafc; border-radius: 12px; padding: 20px; margin-bottom: 20px;">
+            <h3 style="margin: 0 0 12px; color: #012645;">შეკვეთის ინფორმაცია</h3>
+            <p style="margin: 4px 0; color: #334155;">
+              <strong>შეკვეთის ნომერი:</strong> #${orderId}<br />
+              <strong>გადახდის მეთოდი:</strong> ${paymentMethod}<br />
+              <strong>თქვენი ჯამური გაყიდვა:</strong> ${safeValue(totals.sellerSubtotal).toFixed(2)} ₾
+            </p>
+          </section>
+
+          <section style="background: #f1f5f9; border-radius: 12px; padding: 20px; margin-bottom: 20px;">
+            <h3 style="margin: 0 0 12px; color: #012645;">მყიდველისა და მიტანის დეტალები</h3>
+            <p style="margin: 4px 0; color: #334155;">
+              <strong>მყიდველი:</strong> ${customerName}
+              ${customerEmail ? `<br /><strong>ელ-ფოსტა:</strong> ${customerEmail}` : ''}
+              ${customerPhone ? `<br /><strong>ტელეფონი:</strong> ${customerPhone}` : ''}
+              ${shippingAddress?.phoneNumber ? `<br /><strong>მიტანის ტელეფონი:</strong> ${shippingAddress.phoneNumber}` : ''}
+            </p>
+            ${shippingInfo ? `<p style="margin: 12px 0 0; color: #334155;"><strong>მისამართი:</strong> ${shippingInfo}</p>` : ''}
+          </section>
+
+          <section style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; margin-bottom: 24px;">
+            <h3 style="margin: 0 0 12px; color: #012645;">შეძენილი პროდუქტები</h3>
+            <ul style="list-style: none; padding: 0; margin: 0;">
+              ${itemsHtml}
+            </ul>
+          </section>
+
+          <section style="background: #f8fafc; border-radius: 12px; padding: 20px; margin-bottom: 24px;">
+           
+            <p style="margin: 12px 0 0; font-size: 13px; color: #475569;">
+              * საბოლოო დარიცხვა ბალანსზე მოხდება შეკვეთის წარმატებით ჩაბარების შემდეგ, soulart-ის საკომისიოს, და მიტანის საფასურის გამოკლებით (თუ ასეთი არსებობს).
+            </p>
+          </section>
+
+          <p style="color: #475569; font-size: 14px;">
+            სრული შეკვეთების ისტორია და სტატუსები ხელმისაწვდომია <a href="${process.env.ALLOWED_ORIGINS}/admin/orders" style="color: #012645; font-weight: 600;">თქვენს კაბინეტში</a>.
           </p>
-          
-          <hr style="margin: 30px 0; border: none; border-top: 1px solid #e5e7eb;">
-          <p style="color: #999; font-size: 12px;">SoulArt Team</p>
+
+          <hr style="margin: 30px 0; border: none; border-top: 1px solid #e2e8f0;" />
+          <p style="color: #94a3b8; font-size: 12px; text-align: center;">SoulArt Team</p>
         </div>
       `,
     };
@@ -175,109 +348,122 @@ export class EmailService {
   /**
    * მყიდველისთვის შეკვეთის დადასტურება
    */
-  async sendOrderConfirmation(
-    to: string,
-    customerName: string,
-    orderId: string,
-    orderItems: any[],
-    totalPrice: number,
-    shippingAddress: string,
-  ) {
-    const itemsList = orderItems
-      .map(
-        (item) =>
-          `<li>${item.name} x ${item.quantity} - ${(item.price * item.quantity).toFixed(2)} ₾</li>`,
-      )
-      .join('');
+  async sendOrderConfirmation(to: string, payload: OrderConfirmationPayload) {
+    const {
+      customerName,
+      orderId,
+      profileUrl,
+      shippingAddress,
+      contactPhone,
+      totals,
+      orderItems,
+      deliverySummary,
+      placedAt,
+    } = payload;
+
+    const safeTotal = (value: number) =>
+      typeof value === 'number' && Number.isFinite(value) ? value : 0;
+
+    const orderDate = placedAt
+      ? new Date(placedAt).toLocaleString('ka-GE', {
+          dateStyle: 'medium',
+          timeStyle: 'short',
+        })
+      : undefined;
+
+    const itemsList = (orderItems || []).map((item) => {
+      const quantity = safeTotal(item.quantity);
+      const price = safeTotal(item.price);
+      const subtotalSource =
+        typeof item.subtotal === 'number' && Number.isFinite(item.subtotal)
+          ? item.subtotal
+          : price * quantity;
+      const subtotal = safeTotal(subtotalSource);
+
+      const variantHtml = item.variantDetails
+        ? `<div style="color:#64748b; font-size: 13px; margin-top: 4px;">${item.variantDetails}</div>`
+        : '';
+
+      const deliveryHtml = item.delivery?.label
+        ? `<div style="margin-top: 6px; color: #0f172a;"><strong>მიტანის ვადა:</strong> ${item.delivery.label}</div>`
+        : '';
+
+      return `
+        <li style="padding: 12px 0; border-bottom: 1px solid #e2e8f0;">
+          <div style="font-weight: 600; color: #0f172a;">${item.name}</div>
+          ${variantHtml}
+          <div style="margin-top: 6px; color: #334155;">
+            რაოდენობა: <strong>${quantity}</strong> • ერთეულის ფასი: <strong>${price.toFixed(2)} ₾</strong>
+          </div>
+          <div style="margin-top: 4px; color: #111827;">
+            სულ: <strong>${subtotal.toFixed(2)} ₾</strong>
+          </div>
+          ${deliveryHtml}
+        </li>
+      `;
+    });
+
+    const itemsHtml = itemsList.length
+      ? itemsList.join('')
+      : `<li style="padding: 12px 0; color: #94a3b8;">შეკვეთილი პროდუქტები არ არის მითითებული.</li>`;
+
+    const totalsHtml = `
+      <p style="margin: 4px 0; color: #334155;">
+        <strong>პროდუქტების ღირებულება:</strong> ${safeTotal(totals.itemsPrice).toFixed(2)} ₾<br />
+        <strong>მიტანის ღირებულება:</strong> ${safeTotal(totals.shippingPrice).toFixed(2)} ₾<br />
+        <strong>გადასახადები:</strong> ${safeTotal(totals.taxPrice).toFixed(2)} ₾<br />
+        <strong>სრული თანხა:</strong> ${safeTotal(totals.totalPrice).toFixed(2)} ₾
+      </p>
+    `;
 
     const mailOptions = {
       from: emailConfig.from,
       to,
-      subject: `შეკვეთის დადასტურება #${orderId} - SoulArt`,
+      subject: `მადლობა შეძენისთვის #${orderId} - SoulArt`,
       html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <h2 style="color: var(--primary-color, #012645);">მადლობა შეკვეთისთვის, ${customerName}!</h2>
-          
-          <p>თქვენი შეკვეთა წარმატებით დადასტურდა და დამუშავების პროცესშია.</p>
-          
-          <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
-            <h3 style="color: var(--primary-color, #012645); margin-top: 0;">შეკვეთის დეტალები:</h3>
-            <p><strong>შეკვეთის ნომერი:</strong> #${orderId}</p>
-            <p><strong>სრული ღირებულება:</strong> ${totalPrice.toFixed(2)} ₾</p>
-            <p><strong>მიტანის მისამართი:</strong> ${shippingAddress}</p>
-            
-            <h4 style="color: var(--primary-color, #012645);">შეკვეთილი პროდუქტები:</h4>
-            <ul style="list-style-type: none; padding: 0;">
-              ${itemsList}
+        <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 640px; margin: 0 auto; color: #0f172a;">
+          <h2 style="color: #012645; margin-bottom: 12px;">მადლობა შეძენისთვის, ${customerName}!</h2>
+          <p style="margin: 0 0 16px; color: #334155;">
+            მადლობა შეძენისთვის, შეკვეთის დეტალები შეგიძლიათ აკონტროლოთ
+            <a href="${profileUrl}" style="color: #012645; font-weight: 600;">პროფილიდან</a>,
+            პრობლემების შემთხვევაში მოგვწერეთ.
+          </p>
+
+          <section style="background: #f8fafc; border-radius: 12px; padding: 20px; margin-bottom: 20px;">
+            <h3 style="margin: 0 0 12px; color: #012645;">შეკვეთის ინფორმაცია</h3>
+            <p style="margin: 4px 0; color: #334155;">
+              <strong>შეკვეთის ნომერი:</strong> #${orderId}<br />
+              ${orderDate ? `<strong>შეძენის თარიღი:</strong> ${orderDate}<br />` : ''}
+              <strong>მიტანის მისამართი:</strong> ${shippingAddress}
+              ${contactPhone ? `<br /><strong>საკონტაქტო ნომერი:</strong> ${contactPhone}` : ''}
+            </p>
+            ${deliverySummary ? `<p style="margin: 12px 0 0; color: #0f172a;"><strong>მიტანის საერთო ვადა:</strong> ${deliverySummary}</p>` : ''}
+          </section>
+
+          <section style="border-radius: 12px; padding: 20px; border: 1px solid #e2e8f0; margin-bottom: 24px;">
+            <h3 style="margin: 0 0 12px; color: #012645;">შეძენილი პროდუქტები</h3>
+            <ul style="list-style: none; padding: 0; margin: 0;">
+              ${itemsHtml}
             </ul>
+          </section>
+
+          <section style="background: #f8fafc; border-radius: 12px; padding: 20px; margin-bottom: 24px;">
+            <h3 style="margin: 0 0 12px; color: #012645;">ფინანსური შეჯამება</h3>
+            ${totalsHtml}
+          </section>
+
+          <div style="text-align: center; margin-bottom: 24px;">
+            <a href="${profileUrl}" style="display: inline-block; background: #012645; color: #ffffff; padding: 12px 24px; border-radius: 8px; text-decoration: none;">
+              ნახეთ შეკვეთა
+            </a>
           </div>
-          
-          <p>შეკვეთის სტატუსი შეგიძლიათ ნახოთ თქვენს 
-            <a href="${process.env.ALLOWED_ORIGINS}/profile/orders" style="color: var(--primary-color, #012645);">პირად კაბინეტში</a>.
-          </p>
-          
-          <p style="color: #666; font-size: 14px;">
-            თუ გაქვთ რაიმე კითხვა, მოგვწერეთ ელ-ფოსტაზე ან დაგვიკავშირდით საიტზე.
-          </p>
-          
-          <hr style="margin: 30px 0; border: none; border-top: 1px solid #e5e7eb;">
-          <p style="color: #999; font-size: 12px;">SoulArt Team</p>
-        </div>
-      `,
-    };
 
-    await this.transporter.sendMail(mailOptions);
-  }
-
-  /**
-   * სელერისთვის ახალი შეკვეთის შეტყობინება
-   */
-  async sendNewOrderNotificationToSeller(
-    to: string,
-    sellerName: string,
-    orderId: string,
-    customerName: string,
-    orderItems: any[],
-    totalAmount: number,
-  ) {
-    const itemsList = orderItems
-      .map(
-        (item) =>
-          `<li>${item.name} x ${item.quantity} - ${(item.price * item.quantity).toFixed(2)} ₾</li>`,
-      )
-      .join('');
-
-    const mailOptions = {
-      from: emailConfig.from,
-      to,
-      subject: `ახალი შეკვეთა #${orderId} - SoulArt`,
-      html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <h2 style="color: var(--primary-color, #012645);">მოგესალმებით ${sellerName}!</h2>
-          
-          <p>თქვენს პროდუქცია/პროდუქტები შეიძინეს!</p>
-          
-          <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
-            <h3 style="color: var(--primary-color, #012645); margin-top: 0;">შეკვეთის ინფორმაცია:</h3>
-            <p><strong>შეკვეთის ნომერი:</strong> #${orderId}</p>
-            <p><strong>მყიდველი:</strong> ${customerName}</p>
-            <p><strong>თქვენი შემოსავალი:</strong> ${totalAmount.toFixed(2)} ₾</p>
-            
-            <h4 style="color: var(--primary-color, #012645);">შეძენილი პროდუქტები:</h4>
-            <ul style="list-style-type: none; padding: 0;">
-              ${itemsList}
-            </ul>
-          </div>
-          
-          <p>მიტანის შემდეგ თანხა ავტომატურად ჩაირიცხება თქვენს ბალანსზე.</p>
-          
-          <p style="color: #666; font-size: 14px;">
-            შეკვეთების მენეჯმენტი და ბალანსი ხელმისაწვდომია 
-            <a href="${process.env.ALLOWED_ORIGINS}/profile/balance" style="color: var(--primary-color, #012645);">თქვენს პირად კაბინეტში</a>.
+          <p style="color: #64748b; font-size: 13px;">
+            თუ გესაჭიროებათ დახმარება, გვიპასუხეთ ამ წერილზე ან დაგვიკავშირდით SoulArt-ის ჩატიდან.
           </p>
-          
-          <hr style="margin: 30px 0; border: none; border-top: 1px solid #e5e7eb;">
-          <p style="color: #999; font-size: 12px;">SoulArt Team</p>
+
+          <hr style="margin: 30px 0; border: none; border-top: 1px solid #e2e8f0;" />
+          <p style="color: #94a3b8; font-size: 12px; text-align: center;">SoulArt Team</p>
         </div>
       `,
     };
@@ -306,7 +492,7 @@ export class EmailService {
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
           <h2 style="color: var(--primary-color, #012645);">მადლობა ${customerName}!</h2>
           
-          <p>თქვენი შეკვეთა წარმატებით მიტანილია.</p>
+          <p>თქვენი შეკვეთა  მიტანილია წარმატებით.</p>
           
           <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
             <h3 style="color: var(--primary-color, #012645); margin-top: 0;">მიტანილი პროდუქტები:</h3>
@@ -317,16 +503,177 @@ export class EmailService {
             </ul>
           </div>
           
-          <p>იმედს გამოვთქვამთ, რომ თქვენ ღირსეული ხარისხის პროდუქტები მიიღეთ!</p>
+          <p>იმედი გვაქვს, კმაყოფილი ხართ შენაძენით! ბედნიერი დღე !</p>
           
-          <p style="color: #666; font-size: 14px;">
-            გთხოვთ, შეაფასოთ პროდუქტები თქვენს 
-            <a href="${process.env.ALLOWED_ORIGINS}/profile/orders" style="color: var(--primary-color, #012645);">პირად კაბინეტში</a>
-            და გაუზიაროთ თქვენი გამოცდილება სხვა მყიდველებს.
-          </p>
+
           
           <hr style="margin: 30px 0; border: none; border-top: 1px solid #e5e7eb;">
           <p style="color: #999; font-size: 12px;">SoulArt Team</p>
+        </div>
+      `,
+    };
+
+    await this.transporter.sendMail(mailOptions);
+  }
+
+  async sendAdminOrderStatusEmail(
+    to: string,
+    payload: AdminOrderStatusPayload,
+  ) {
+    const {
+      orderId,
+      status,
+      statusLabel,
+      reason,
+      customer,
+      shippingAddress,
+      paymentMethod,
+      totals,
+      createdAt,
+      orderItems,
+    } = payload;
+
+    const safeTotal = (value: number) =>
+      typeof value === 'number' && Number.isFinite(value) ? value : 0;
+
+    const statusMeta =
+      status === 'success'
+        ? {
+            icon: '✅',
+            accent: '#16a34a',
+            background: '#dcfce7',
+          }
+        : {
+            icon: '⚠️',
+            accent: '#dc2626',
+            background: '#fee2e2',
+          };
+
+    const orderDate = createdAt
+      ? new Date(createdAt).toLocaleString('ka-GE', {
+          dateStyle: 'medium',
+          timeStyle: 'short',
+        })
+      : undefined;
+
+    const shippingLines = shippingAddress
+      ? [
+          shippingAddress.address,
+          shippingAddress.city,
+          shippingAddress.postalCode,
+          shippingAddress.country,
+        ]
+          .filter((value) => !!value)
+          .join(', ')
+      : undefined;
+    const shippingContact = shippingAddress?.phoneNumber || customer?.phone;
+
+    const itemsList = (orderItems || []).map((item, index) => {
+      const quantity = safeTotal(item.quantity);
+      const price = safeTotal(item.price);
+      const subtotalSource =
+        typeof item.subtotal === 'number' && Number.isFinite(item.subtotal)
+          ? item.subtotal
+          : price * quantity;
+      const subtotal = safeTotal(subtotalSource);
+
+      const sellerDetails = item.seller
+        ? `
+          <div style="margin-top: 6px; color: #475569; font-size: 13px;">
+            <strong>სელერი:</strong> ${item.seller.name || 'უცნობია'}
+            ${item.seller.email ? `<br /><strong>ელ-ფოსტა:</strong> ${item.seller.email}` : ''}
+            ${item.seller.phoneNumber ? `<br /><strong>ტელეფონი:</strong> ${item.seller.phoneNumber}` : ''}
+            ${item.seller.storeName ? `<br /><strong>მაღაზია:</strong> ${item.seller.storeName}` : ''}
+          </div>
+        `
+        : '';
+
+      const variants = [item.size, item.color, item.ageGroup]
+        .filter((value) => !!value)
+        .join(' • ');
+
+      const variantHtml = variants
+        ? `<div style="color:#6b7280; font-size: 13px; margin-top: 4px;">${variants}</div>`
+        : '';
+
+      return `
+        <li style="padding: 14px 0; border-bottom: 1px solid #e2e8f0;">
+          <div style="font-weight: 600; color: #0f172a;">${index + 1}. ${item.name}</div>
+          ${variantHtml}
+          <div style="margin-top: 6px; color: #334155;">
+            რაოდენობა: <strong>${quantity}</strong> • ერთეულის ფასი: <strong>${price.toFixed(2)} ₾</strong>
+          </div>
+          <div style="margin-top: 4px; color: #111827;">
+            სულ: <strong>${subtotal.toFixed(2)} ₾</strong>
+          </div>
+          ${sellerDetails}
+        </li>
+      `;
+    });
+
+    const itemsHtml = itemsList.length
+      ? itemsList.join('')
+      : `<li style="padding: 14px 0; color: #9ca3af;">პროდუქტები ვერ მოიძებნა.</li>`;
+
+    const mailOptions = {
+      from: emailConfig.from,
+      to,
+      subject: `${statusMeta.icon} შეკვეთის სტატუსი #${orderId} - ${statusLabel}`,
+      html: `
+        <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 720px; margin: 0 auto; color: #0f172a;">
+          <div style="background: ${statusMeta.background}; padding: 20px; border-radius: 12px; margin-bottom: 24px;">
+            <h2 style="color: ${statusMeta.accent}; margin: 0 0 8px;">${statusMeta.icon} ${statusLabel}</h2>
+            <p style="margin: 0; color: #334155;">
+              შეკვეთის ნომერი: <strong>#${orderId}</strong>
+              ${orderDate ? `<br />\n              შეძენის თარიღი: <strong>${orderDate}</strong>` : ''}
+            </p>
+          </div>
+
+          ${
+            reason
+              ? `
+            <section style="background: #fef3c7; border-left: 4px solid #f59e0b; border-radius: 12px; padding: 16px 20px; margin-bottom: 24px; color: #92400e;">
+              <strong>დეტალური მიზეზი:</strong> ${reason}
+            </section>
+          `
+              : ''
+          }
+
+          <section style="background: #f8fafc; border-radius: 12px; padding: 20px; margin-bottom: 20px;">
+            <h3 style="margin: 0 0 12px; color: #012645;">მყიდველის ინფორმაცია</h3>
+            <p style="margin: 4px 0; color: #334155;">
+              <strong>სახელი:</strong> ${customer?.name || 'უცნობია'}
+              ${customer?.email ? `<br />\n              <strong>ელ-ფოსტა:</strong> ${customer.email}` : ''}
+              ${customer?.phone ? `<br />\n              <strong>ტელეფონი:</strong> ${customer.phone}` : ''}
+            </p>
+            ${shippingLines ? `<p style="margin: 12px 0 0; color: #334155;"><strong>მიტანის მისამართი:</strong> ${shippingLines}</p>` : ''}
+            ${shippingContact ? `<p style="margin: 4px 0 0; color: #334155;"><strong>მიწოდების საკონტაქტო:</strong> ${shippingContact}</p>` : ''}
+          </section>
+
+          <section style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; margin-bottom: 24px;">
+            <h3 style="margin: 0 0 12px; color: #012645;">პროდუქტების დეტალები</h3>
+            <ul style="list-style: none; padding: 0; margin: 0;">
+              ${itemsHtml}
+            </ul>
+          </section>
+
+          <section style="background: #f8fafc; border-radius: 12px; padding: 20px; margin-bottom: 24px;">
+            <h3 style="margin: 0 0 12px; color: #012645;">ფინანსური შეჯამება</h3>
+            <p style="margin: 4px 0; color: #334155;">
+              <strong>პროდუქტების ღირებულება:</strong> ${safeTotal(totals.itemsPrice).toFixed(2)} ₾<br />
+              <strong>მიტანის ღირებულება:</strong> ${safeTotal(totals.shippingPrice).toFixed(2)} ₾<br />
+              <strong>გადასახადები:</strong> ${safeTotal(totals.taxPrice).toFixed(2)} ₾<br />
+              <strong>სრული თანხა:</strong> ${safeTotal(totals.totalPrice).toFixed(2)} ₾
+            </p>
+          </section>
+
+          <section style="border-radius: 12px; padding: 20px; border: 1px dashed ${statusMeta.accent};">
+            <h3 style="margin: 0 0 12px; color: ${statusMeta.accent};">გადახდის მეთოდი</h3>
+            <p style="margin: 0; color: #334155;">${paymentMethod}</p>
+          </section>
+
+          <hr style="margin: 30px 0; border: none; border-top: 1px solid #e2e8f0;" />
+          <p style="color: #94a3b8; font-size: 12px; text-align: center;">SoulArt Automations</p>
         </div>
       `,
     };
@@ -373,11 +720,11 @@ export class EmailService {
             </p>
             
             <p style="color: #374151; margin-top: 20px;">
-              გმადლობთ SoulArt-ზე თანამშრომლობისთვის!
+              გმადლობთ SoulArt-თან თანამშრომლობისთვის!
             </p>
             
             <div style="text-align: center; margin-top: 30px;">
-              <a href="${process.env.ALLOWED_ORIGINS}/seller/balance" 
+              <a href="${process.env.ALLOWED_ORIGINS}/profile/balance" 
                  style="background: #22c55e; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">
                 ბალანსის გვერდზე გადასვლა
               </a>
@@ -441,7 +788,7 @@ export class EmailService {
             </p>
             
             <div style="text-align: center; margin-top: 30px;">
-              <a href="${process.env.ALLOWED_ORIGINS}/seller/balance" 
+              <a href="${process.env.ALLOWED_ORIGINS}/profile/balance" 
                  style="background: #3b82f6; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">
                 ბალანსის გვერდზე გადასვლა
               </a>
