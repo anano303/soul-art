@@ -20,7 +20,6 @@ body {
   box-sizing: border-box;
   font-family: var(--font-firago);
   font-style: normal;
-  cursor: url("/brush.png"), auto;
   overflow-x: hidden;
   display: flex;
   flex-direction: column;

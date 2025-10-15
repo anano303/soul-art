@@ -18,6 +18,7 @@
   gap: 10%;
   justify-content: center;
   align-items: center;
+  cursor: url("/brush.png"), auto;
 }
 
 .hero-text {

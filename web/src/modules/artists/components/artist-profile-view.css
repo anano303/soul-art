@@ -19,6 +19,7 @@
   background-position: center;
   box-shadow: 0 -8px 32px -12px rgba(15, 23, 42, 0.15);
   margin-bottom: 0;
+  cursor: url("/brush.png"), auto;
 }
 
 .artist-hero__overlay {
