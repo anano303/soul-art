@@ -162,14 +162,14 @@ export class OrdersService {
 
     if (deliveryType === DeliveryType.SELLER) {
       return {
-        label: 'მიტანის ვადებს სელერი შეგითანხმებთ',
+        label: 'მიტანის ვადები იხილეთ შეკვეთების გვერდზე',
         deliveryType,
       };
     }
 
     if (deliveryType === DeliveryType.SoulArt) {
       return {
-        label: 'SoulArt-ის სტანდარტული მიწოდება',
+        label: 'SoulArt-ის სტანდარტული მიწოდება 1-3 სამუშაო დღე',
         deliveryType,
       };
     }
@@ -231,7 +231,7 @@ export class OrdersService {
     if (
       windows.some((window) => window.deliveryType === DeliveryType.SoulArt)
     ) {
-      return 'SoulArt-ის სტანდარტული მიწოდება';
+      return 'SoulArt-ის სტანდარტული მიწოდება 1-3 სამუშაო დღე';
     }
 
     return undefined;
