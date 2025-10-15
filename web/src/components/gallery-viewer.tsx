@@ -151,14 +151,12 @@ export function GalleryViewer({
                   <CloudinaryImage
                     src={imageUrl}
                     alt={`${artist.storeName || artist.name} - Image ${index + 1}`}
-                    width={400}
-                    height={400}
+                    width={800}
+                    height={600}
                     className="gallery-viewer__mobile-image"
                     style={{
                       width: '100%',
-                      height: 'auto',
-                      aspectRatio: '1',
-                      objectFit: 'cover'
+                      height: 'auto'
                     }}
                   />
                 </div>
