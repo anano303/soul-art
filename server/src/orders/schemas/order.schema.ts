@@ -51,7 +51,7 @@ export class Order {
     type: {
       address: { required: true, type: String },
       city: { required: true, type: String },
-      postalCode: { required: true, type: String },
+      postalCode: { required: false, type: String },
       country: { required: true, type: String },
       phoneNumber: { required: false, type: String },
     },

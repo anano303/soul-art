@@ -13,7 +13,7 @@ import "./shipping-form.css";
 interface ShippingFormData {
   address: string;
   city: string;
-  postalCode: string;
+  postalCode?: string;
   country: string;
   phoneNumber: string;
 }
@@ -72,7 +72,6 @@ export function ShippingForm() {
   const isFormValid =
     watchedValues.address &&
     watchedValues.city &&
-    watchedValues.postalCode &&
     watchedValues.country &&
     watchedValues.phoneNumber;
 
@@ -83,7 +82,6 @@ export function ShippingForm() {
   }, [
     watchedValues.address,
     watchedValues.city,
-    watchedValues.postalCode,
     watchedValues.country,
     watchedValues.phoneNumber,
   ]);
@@ -123,9 +121,7 @@ export function ShippingForm() {
           <label htmlFor="postalCode">{t("checkout.postalCode")}</label>
           <input
             id="postalCode"
-            {...register("postalCode", {
-              required: t("checkout.postalCodeRequired"),
-            })}
+            {...register("postalCode")}
             placeholder={t("checkout.postalCodePlaceholder")}
           />
           {errors.postalCode && (

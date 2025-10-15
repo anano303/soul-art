@@ -110,6 +110,15 @@ export function AdminOrderDetails({ order }: AdminOrderDetailsProps) {
     (item) => !item.product || String(item.product.deliveryType) !== "SELLER"
   );
 
+  const shippingSummary = [
+    order.shippingDetails.address,
+    order.shippingDetails.city,
+    order.shippingDetails.postalCode,
+    order.shippingDetails.country,
+  ]
+    .filter((value): value is string => Boolean(value))
+    .join(", ");
+
   // Fetch seller info for each product - only for admins
   const { data: sellerInfo = [], isLoading: isLoadingSellerInfo } = useQuery({
     queryKey: ["sellerInfo", order.orderItems.map((item) => item.productId)],
@@ -383,9 +392,7 @@ export function AdminOrderDetails({ order }: AdminOrderDetailsProps) {
               )}
             <p>
               <strong>{t("adminOrders.address")}:</strong>{" "}
-              {order.shippingDetails.address}, {order.shippingDetails.city},{" "}
-              {order.shippingDetails.postalCode},{" "}
-              {order.shippingDetails.country}
+              {shippingSummary}
             </p>
             <div className={`alert ${order.isDelivered ? "success" : "error"}`}>
               {order.isDelivered ? <CheckCircle2 /> : <XCircle />}

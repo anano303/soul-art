@@ -122,6 +122,15 @@ export function OrderDetails({ order }: OrderDetailsProps) {
     return language === "en" && item.nameEn ? item.nameEn : item.name;
   };
 
+  const shippingSummary = [
+    order.shippingDetails.address,
+    order.shippingDetails.city,
+    order.shippingDetails.postalCode,
+    order.shippingDetails.country,
+  ]
+    .filter((value): value is string => Boolean(value))
+    .join(", ");
+
   return (
     <div className="order-container">
       {/* Back Button */}
@@ -150,9 +159,7 @@ export function OrderDetails({ order }: OrderDetailsProps) {
             <h2 className="order-subtitle">{t("order.shipping")}</h2>
             <p>
               <span className="font-medium">{t("order.address")}: </span>
-              {order.shippingDetails.address}, {order.shippingDetails.city},{" "}
-              {order.shippingDetails.postalCode},{" "}
-              {order.shippingDetails.country}
+              {shippingSummary}
             </p>
             <div className={`alert ${order.isDelivered ? "success" : "error"}`}>
               {order.isDelivered ? (
