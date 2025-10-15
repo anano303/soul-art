@@ -54,6 +54,24 @@ export class ArtistController {
     return this.usersService.listPublicArtists(normalizedLimit);
   }
 
+  @Get('search')
+  @ApiOperation({ summary: 'Search public artists by keyword' })
+  @ApiResponse({ status: 200, description: 'Search results for artists' })
+  async searchArtists(@Query('q') keyword?: string, @Query('limit') limit: string = '20') {
+    try {
+      if (!keyword || keyword.trim().length < 2) {
+        return [];
+      }
+      const parsedLimit = parseInt(limit, 10);
+      const normalizedLimit = Number.isFinite(parsedLimit) ? parsedLimit : 20;
+      
+      return this.usersService.searchPublicArtists(keyword.trim(), normalizedLimit);
+    } catch (error) {
+      console.error('Search artists error:', error);
+      throw new BadRequestException('Failed to search artists');
+    }
+  }
+
   @Get(':identifier')
   @ApiOperation({ summary: 'Fetch artist profile by slug or ID' })
   @ApiResponse({

@@ -91,6 +91,49 @@ export class UsersService {
     }));
   }
 
+  async searchPublicArtists(keyword: string, limit: number = 20): Promise<any[]> {
+    if (!keyword || keyword.trim().length < 2) {
+      return [];
+    }
+
+    try {
+      // Sanitize the keyword to prevent regex injection
+      const sanitizedKeyword = keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const normalizedLimit = Math.min(Math.max(Number(limit) || 20, 1), 50);
+
+      const artists = await this.userModel
+        .find({
+          role: Role.Seller,
+          artistSlug: { $exists: true, $nin: [null, ''] },
+          $or: [
+            { name: { $regex: sanitizedKeyword, $options: 'i' } },
+            { storeName: { $regex: sanitizedKeyword, $options: 'i' } },
+            { artistSlug: { $regex: sanitizedKeyword, $options: 'i' } },
+          ],
+        })
+        .sort({ updatedAt: -1 })
+        .limit(normalizedLimit)
+        .select(['artistSlug', 'storeName', 'name', 'updatedAt', 'createdAt', 'artistCoverImage', 'storeLogo', 'storeLogoPath', 'profileImagePath'])
+        .lean();
+
+      return artists.map((artist) => ({
+        id: artist._id.toString(),
+        slug: artist.artistSlug ?? artist._id.toString(),
+        name: artist.storeName ?? artist.name,
+        updatedAt: artist.updatedAt ?? artist.createdAt ?? new Date(),
+        createdAt: artist.createdAt ?? null,
+        // Image fields - prioritize portfolio image (artistCoverImage), then store logo, then profile image
+        artistCoverImage: artist.artistCoverImage,
+        storeLogo: artist.storeLogo,
+        storeLogoPath: artist.storeLogoPath,
+        profileImagePath: artist.profileImagePath,
+      }));
+    } catch (error) {
+      console.error('Error searching artists:', error);
+      throw new BadRequestException('Failed to search artists');
+    }
+  }
+
   async isArtistSlugAvailable(slug: string, excludeUserId?: string) {
     const normalized = this.normalizeArtistSlug(slug);
 
