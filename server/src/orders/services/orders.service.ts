@@ -225,7 +225,7 @@ export class OrdersService {
     }
 
     if (windows.some((window) => window.deliveryType === DeliveryType.SELLER)) {
-      return 'მიტანის ვადებს სელერი შეგითანხმებთ';
+      return 'მიტანის ვადებს ხელოვანი შეგითანხმებთ';
     }
 
     if (
@@ -883,7 +883,7 @@ export class OrdersService {
                 sellerEmail,
                 this.getDisplayName(
                   entry.seller,
-                  entry.seller?.storeName || 'სელერი',
+                  entry.seller?.storeName || 'ხელოვანი',
                 ),
                 {
                   orderId,

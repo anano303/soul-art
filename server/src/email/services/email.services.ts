@@ -344,7 +344,7 @@ export class EmailService {
           <h2 style="color: var(--primary-color, #012645);">ახალი თანხის გადარიცხვა</h2>
           
           <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
-            <h3 style="color: var(--primary-color, #012645); margin-top: 0;">სელერის ინფორმაცია:</h3>
+            <h3 style="color: var(--primary-color, #012645); margin-top: 0;">ხელოვანის/ავტორის ინფორმაცია:</h3>
             <p><strong>სახელი:</strong> ${sellerName}</p>
             <p><strong>ელ-ფოსტა:</strong> ${sellerEmail}</p>
             <p><strong>თანხა:</strong> ${amount.toFixed(2)} ₾</p>
@@ -352,7 +352,7 @@ export class EmailService {
             <p><strong>თარიღი:</strong> ${new Date().toLocaleDateString('ka-GE')}</p>
           </div>
           
-          <p>თანხა წარმატებით გადაირიცხა სელერის ანგარიშზე BOG-ის API-ით.</p>
+          <p>თანხა წარმატებით გადაირიცხა ხელოვანის ანგარიშზე BOG-ის API-ით.</p>
           
           <p style="color: #666; font-size: 14px;">
             სრული ინფორმაცია ხელმისაწვდომია 
@@ -618,7 +618,7 @@ export class EmailService {
       const sellerDetails = item.seller
         ? `
           <div style="margin-top: 6px; color: #475569; font-size: 13px;">
-            <strong>სელერი:</strong> ${item.seller.name || 'უცნობია'}
+            <strong>ხელოვანი/ავტორი:</strong> ${item.seller.name || 'უცნობია'}
             ${item.seller.email ? `<br /><strong>ელ-ფოსტა:</strong> ${item.seller.email}` : ''}
             ${item.seller.phoneNumber ? `<br /><strong>ტელეფონი:</strong> ${item.seller.phoneNumber}` : ''}
             ${item.seller.storeName ? `<br /><strong>მაღაზია:</strong> ${item.seller.storeName}` : ''}
