@@ -90,12 +90,36 @@ export default function SearchBox() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (keyword.trim()) {
       setShowPopup(false);
-      // Default to users search page since users tab should be default
-      router.push(`/search/users/${keyword.trim()}`);
+      
+      try {
+        // Get search ranking to determine which tab to show first
+        const response = await fetchWithAuth(`/artists/search/ranking?q=${encodeURIComponent(keyword.trim())}`);
+        
+        if (response.ok) {
+          const ranking = await response.json();
+          console.log('Search ranking:', ranking);
+          
+          // Navigate based on recommended tab
+          if (ranking.recommendedTab === 'products') {
+            // Navigate to products search page (we'll need to create this route)
+            router.push(`/search/products/${keyword.trim()}`);
+          } else {
+            // Default to artists search page
+            router.push(`/search/users/${keyword.trim()}`);
+          }
+        } else {
+          // Fallback to default behavior if ranking fails
+          router.push(`/search/users/${keyword.trim()}`);
+        }
+      } catch (error) {
+        console.error('Error getting search ranking:', error);
+        // Fallback to default behavior
+        router.push(`/search/users/${keyword.trim()}`);
+      }
     }
   };
 

@@ -134,6 +134,165 @@ export class UsersService {
     }
   }
 
+  async getSearchRanking(keyword: string, limit: number = 20): Promise<{
+    recommendedTab: 'artists' | 'products';
+    artists: any[];
+    products: any[];
+    reasoning: string;
+  }> {
+    if (!keyword || keyword.trim().length < 2) {
+      return {
+        recommendedTab: 'artists',
+        artists: [],
+        products: [],
+        reasoning: 'Default to artists for empty search'
+      };
+    }
+
+    try {
+      const sanitizedKeyword = keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const normalizedLimit = Math.min(Math.max(Number(limit) || 20, 1), 50);
+
+      // Search artists and products in parallel
+      const [artists, products] = await Promise.all([
+        this.searchPublicArtists(keyword.trim(), normalizedLimit),
+        this.searchProducts(keyword.trim(), normalizedLimit)
+      ]);
+
+      // Determine which tab to show first
+      let recommendedTab: 'artists' | 'products' = 'artists';
+      let reasoning = 'Default to artists';
+
+      // 1. Check for exact matches (case-insensitive)
+      const lowerKeyword = keyword.trim().toLowerCase();
+      
+      const exactArtistMatch = artists.some(artist => 
+        artist.name.toLowerCase() === lowerKeyword || 
+        artist.slug.toLowerCase() === lowerKeyword
+      );
+      
+      const exactProductMatch = products.some(product => 
+        product.name?.toLowerCase() === lowerKeyword ||
+        product.nameEn?.toLowerCase() === lowerKeyword
+      );
+
+      if (exactArtistMatch && !exactProductMatch) {
+        recommendedTab = 'artists';
+        reasoning = 'Exact artist name/slug match found';
+      } else if (exactProductMatch && !exactArtistMatch) {
+        recommendedTab = 'products';
+        reasoning = 'Exact product name match found';
+      } else if (exactArtistMatch && exactProductMatch) {
+        // Both have exact matches, use count as tiebreaker
+        recommendedTab = artists.length >= products.length ? 'artists' : 'products';
+        reasoning = 'Both have exact matches, showing category with more results';
+      } else {
+        // 2. Check availability (no results in one category)
+        if (artists.length === 0 && products.length > 0) {
+          recommendedTab = 'products';
+          reasoning = 'No artists found, showing products';
+        } else if (products.length === 0 && artists.length > 0) {
+          recommendedTab = 'artists';
+          reasoning = 'No products found, showing artists';
+        } else if (artists.length === 0 && products.length === 0) {
+          recommendedTab = 'artists';
+          reasoning = 'No results found, defaulting to artists';
+        } else {
+          // 3. Use relevance scoring
+          const artistScore = this.calculateRelevanceScore(artists, keyword);
+          const productScore = this.calculateRelevanceScore(products, keyword);
+          
+          if (productScore > artistScore) {
+            recommendedTab = 'products';
+            reasoning = `Products more relevant (score: ${productScore} vs ${artistScore})`;
+          } else {
+            recommendedTab = 'artists';
+            reasoning = `Artists more relevant (score: ${artistScore} vs ${productScore})`;
+          }
+        }
+      }
+
+      return {
+        recommendedTab,
+        artists,
+        products,
+        reasoning
+      };
+    } catch (error) {
+      console.error('Error in search ranking:', error);
+      throw new BadRequestException('Failed to get search ranking');
+    }
+  }
+
+  private async searchProducts(keyword: string, limit: number): Promise<any[]> {
+    try {
+      const sanitizedKeyword = keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      
+      const products = await this.productModel
+        .find({
+          status: ProductStatus.APPROVED,
+          $or: [
+            { name: { $regex: sanitizedKeyword, $options: 'i' } },
+            { nameEn: { $regex: sanitizedKeyword, $options: 'i' } },
+            { description: { $regex: sanitizedKeyword, $options: 'i' } },
+            { brand: { $regex: sanitizedKeyword, $options: 'i' } },
+          ],
+        })
+        .sort({ createdAt: -1 })
+        .limit(limit)
+        .select(['name', 'nameEn', 'description', 'price', 'images'])
+        .lean();
+
+      return products.map((product) => ({
+        id: product._id.toString(),
+        name: product.name,
+        nameEn: product.nameEn,
+        description: product.description,
+        price: product.price,
+        images: product.images,
+      }));
+    } catch (error) {
+      console.error('Error searching products:', error);
+      return [];
+    }
+  }
+
+  private calculateRelevanceScore(results: any[], keyword: string): number {
+    if (!results.length) return 0;
+    
+    const lowerKeyword = keyword.toLowerCase();
+    let score = 0;
+    
+    results.forEach(item => {
+      const name = (item.name || '').toLowerCase();
+      const nameEn = (item.nameEn || '').toLowerCase();
+      const slug = (item.slug || '').toLowerCase();
+      
+      // Check all relevant fields for matches
+      const searchFields = [name, nameEn, slug].filter(field => field);
+      
+      for (const field of searchFields) {
+        // Exact match gets highest score
+        if (field === lowerKeyword) {
+          score += 10;
+          break; // Don't double-count for the same item
+        }
+        // Starts with keyword gets medium score
+        else if (field.startsWith(lowerKeyword)) {
+          score += 5;
+          break;
+        }
+        // Contains keyword gets low score
+        else if (field.includes(lowerKeyword)) {
+          score += 2;
+          break;
+        }
+      }
+    });
+    
+    return score;
+  }
+
   async isArtistSlugAvailable(slug: string, excludeUserId?: string) {
     const normalized = this.normalizeArtistSlug(slug);
 

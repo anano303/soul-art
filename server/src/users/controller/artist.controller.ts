@@ -72,6 +72,29 @@ export class ArtistController {
     }
   }
 
+  @Get('search/ranking')
+  @ApiOperation({ summary: 'Get search results with ranking for both artists and products' })
+  @ApiResponse({ status: 200, description: 'Search results with recommendation for which tab to show first' })
+  async getSearchRanking(@Query('q') keyword?: string, @Query('limit') limit: string = '20') {
+    try {
+      if (!keyword || keyword.trim().length < 2) {
+        return {
+          recommendedTab: 'artists',
+          artists: [],
+          products: [],
+          reasoning: 'Default to artists for empty search'
+        };
+      }
+      const parsedLimit = parseInt(limit, 10);
+      const normalizedLimit = Number.isFinite(parsedLimit) ? parsedLimit : 20;
+      
+      return this.usersService.getSearchRanking(keyword.trim(), normalizedLimit);
+    } catch (error) {
+      console.error('Search ranking error:', error);
+      throw new BadRequestException('Failed to get search ranking');
+    }
+  }
+
   @Get(':identifier')
   @ApiOperation({ summary: 'Fetch artist profile by slug or ID' })
   @ApiResponse({

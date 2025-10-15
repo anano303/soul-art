@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useState } from "react";
+import { Suspense, useState, useEffect } from "react";
 import Link from "next/link";
 import { ArrowLeft, User as UserIcon, Package } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
@@ -13,6 +13,7 @@ import { useRouter } from "next/navigation";
 import { ProductGrid } from "@/modules/products/components/product-grid";
 import { Product } from "@/types";
 import "./users-search-page.css";
+import Image from "next/image";
 
 interface User {
   id: string;
@@ -24,11 +25,6 @@ interface User {
   storeLogo?: string | null;
   storeLogoPath?: string | null;
   profileImagePath?: string | null;
-}
-
-interface UsersResponse {
-  users: User[];
-  total: number;
 }
 
 function UsersSearchPageContent() {
@@ -44,35 +40,56 @@ function UsersSearchPageContent() {
   console.log("Users search keyword:", keyword);
   console.log("URL-decoded keyword:", decodeURIComponent(keyword || ""));
 
-  // Fetch users based on the search keyword
-  const { data: usersData, isLoading: usersLoading, error: usersError } = useQuery<UsersResponse>({
-    queryKey: ["search-users", keyword, currentPage],
+  // Fetch search ranking to determine recommended tab and get both artists and products
+  const { data: rankingData } = useQuery<{
+    recommendedTab: 'artists' | 'products';
+    artists: User[];
+    products: Product[];
+    reasoning: string;
+  }>({
+    queryKey: ["search-ranking", keyword],
     queryFn: async () => {
       const decodedKeyword = decodeURIComponent(keyword || "");
-
       if (!decodedKeyword) {
-        return { users: [], total: 0 };
+        return {
+          recommendedTab: 'artists' as const,
+          artists: [],
+          products: [],
+          reasoning: 'Default to artists for empty search'
+        };
       }
 
-      console.log("Searching artists for:", decodedKeyword);
-
-      const response = await fetchWithAuth(`/artists/search?q=${encodeURIComponent(decodedKeyword)}`);
+      const response = await fetchWithAuth(`/artists/search/ranking?q=${encodeURIComponent(decodedKeyword)}`);
       if (!response.ok) {
-        throw new Error(`Error fetching artists: ${response.status}`);
+        throw new Error(`Error fetching search ranking: ${response.status}`);
       }
 
-      const users = await response.json();
-      console.log("Artists search response:", users);
-
-      return {
-        users: users || [],
-        total: users?.length || 0,
-      };
+      const data = await response.json();
+      console.log("Search ranking data:", data);
+      return data;
     },
-    enabled: !!keyword && activeTab === 'users',
+    enabled: !!keyword,
   });
 
-  // Fetch products based on the search keyword
+  // Set initial active tab based on ranking recommendation
+  useEffect(() => {
+    if (rankingData && rankingData.recommendedTab) {
+      const recommendedTab = rankingData.recommendedTab === 'artists' ? 'users' : 'products';
+      setActiveTab(recommendedTab);
+      console.log(`Setting active tab to: ${recommendedTab} based on ranking: ${rankingData.reasoning}`);
+    }
+  }, [rankingData]);
+
+  // Use ranking data for users/artists
+  const usersData = rankingData ? {
+    users: rankingData.artists || [],
+    total: rankingData.artists?.length || 0,
+  } : { users: [], total: 0 };
+  
+  const usersLoading = rankingData === undefined;
+  const usersError = null; // We'll handle errors in the ranking query
+
+  // Fetch products based on the search keyword (keep the existing complex query)
   const { data: productsData, isLoading: productsLoading, error: productsError } = useQuery<{items: Product[], pages: number, totalItems: number}>({
     queryKey: ["search-products", keyword, currentPage],
     queryFn: async () => {
@@ -286,7 +303,7 @@ function UsersSearchPageContent() {
                       >
                         <div className="users-search-card-image">
                           {getUserImage(user) ? (
-                            <img
+                            <Image
                               src={getUserImage(user)!}
                               alt={getUserDisplayName(user)}
                               width={60}
