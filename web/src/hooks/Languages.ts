@@ -773,7 +773,7 @@ export const TRANSLATIONS: Translations = {
       // Email verification
       sendVerificationCode: "ვერიფ. კოდი",
       verificationCode: "ვერიფ. კოდი",
-      verify: "ვერიფიკაცია",
+      verify: "დადასტურება",
       pleaseVerifyEmail: "გთხოვთ დაადასტურეთ ელ-ფოსტა",
       invalidVerificationCode: "არასწორი ვერიფიკაციის კოდი",
       // Terms and agreements
@@ -2052,7 +2052,7 @@ export const TRANSLATIONS: Translations = {
       // Email verification
       sendVerificationCode: "Send Verification Code",
       verificationCode: "Verification Code",
-      verify: "Verify",
+      verify: "Confirm",
       pleaseVerifyEmail: "Please verify your email",
       invalidVerificationCode: "Invalid verification code",
       // Terms and agreements
