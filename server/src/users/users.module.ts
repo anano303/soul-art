@@ -3,6 +3,8 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { forwardRef } from '@nestjs/common';
 import { AuthController } from './controller/auth.controller';
 import { User, UserSchema } from './schemas/user.schema';
+import { GalleryLike, GalleryLikeSchema } from './schemas/gallery-like.schema';
+import { GalleryComment, GalleryCommentSchema } from './schemas/gallery-comment.schema';
 import { Product, ProductSchema } from '../products/schemas/product.schema';
 import { Order, OrderSchema } from '../orders/schemas/order.schema';
 import {
@@ -18,6 +20,7 @@ import { AuthService } from './services/auth.service';
 import { BalanceService } from './services/balance.service';
 import { BalanceMigrationService } from './services/balance-migration.service';
 import { BankIntegrationService } from './services/bog-bank-integration.service';
+import { GalleryInteractionService } from './services/gallery-interaction.service';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { LocalStrategy } from '../strategies/local.strategy';
@@ -25,6 +28,7 @@ import { JwtStrategy } from 'src/strategies/jwt.strategy';
 import { UsersController } from './controller/users.controller';
 import { BalanceController } from './controller/balance.controller';
 import { ArtistController } from './controller/artist.controller';
+import { GalleryInteractionController } from './controller/gallery-interaction.controller';
 import { GoogleStrategy } from '@/strategies/google.strategy';
 import { EmailService } from '@/email/services/email.services';
 import { AwsS3Module } from '@/aws-s3/aws-s3.module';
@@ -38,6 +42,14 @@ import { ReferralsModule } from '../referrals/referrals.module';
       {
         name: User.name,
         schema: UserSchema,
+      },
+      {
+        name: GalleryLike.name,
+        schema: GalleryLikeSchema,
+      },
+      {
+        name: GalleryComment.name,
+        schema: GalleryCommentSchema,
       },
       {
         name: Product.name,
@@ -71,6 +83,7 @@ import { ReferralsModule } from '../referrals/referrals.module';
     UsersController,
     BalanceController,
     ArtistController,
+    GalleryInteractionController,
   ],
   providers: [
     UsersService,
@@ -78,6 +91,7 @@ import { ReferralsModule } from '../referrals/referrals.module';
     BalanceService,
     BalanceMigrationService,
     BankIntegrationService,
+    GalleryInteractionService,
     LocalStrategy,
     JwtStrategy,
     AuthService,

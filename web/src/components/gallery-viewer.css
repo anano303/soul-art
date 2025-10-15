@@ -1,0 +1,356 @@
+/* Gallery Viewer - Instagram Style */
+.gallery-viewer {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.9);
+  animation: fadeIn 0.2s ease-out;
+}
+
+.gallery-viewer__close {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  z-index: 1002;
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  color: white;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(10px);
+}
+
+.gallery-viewer__close:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(1.1);
+}
+
+.gallery-viewer__nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 1002;
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  color: white;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(10px);
+}
+
+.gallery-viewer__nav:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-50%) scale(1.1);
+}
+
+.gallery-viewer__nav--prev {
+  left: 20px;
+}
+
+.gallery-viewer__nav--next {
+  right: 20px;
+}
+
+.gallery-viewer__content {
+  display: flex;
+  width: 90%;
+  max-width: 1200px;
+  height: 80vh;
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+}
+
+.gallery-viewer__image-section {
+  flex: 1;
+  position: relative;
+  background: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.gallery-viewer__image-container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.gallery-viewer__image {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.gallery-viewer__mobile-overlay {
+  display: none;
+}
+
+.gallery-viewer__sidebar {
+  width: 350px;
+  display: flex;
+  flex-direction: column;
+  background: white;
+  border-left: 1px solid rgba(0, 0, 0, 0.1);
+  min-height: 0;
+  height: 100%;
+}
+
+.gallery-viewer__header {
+  padding: 1.5rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.gallery-viewer__artist-info {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.gallery-viewer__artist-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.gallery-viewer__artist-name {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.gallery-viewer__post-date {
+  margin: 0;
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+.gallery-viewer__stats {
+  padding: 0.75rem 1.5rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  display: flex;
+  gap: 1rem;
+}
+
+.gallery-viewer__stat {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #374151;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.gallery-viewer__stat--interactive {
+  padding: 0;
+}
+
+.gallery-viewer__stat--interactive .gallery-like-button {
+  background: transparent;
+  color: #374151;
+  border-radius: 6px;
+  padding: 0.5rem 0.75rem;
+  backdrop-filter: none;
+  font-size: 0.875rem;
+  font-weight: 500;
+  gap: 0.5rem;
+}
+
+.gallery-viewer__stat--interactive .gallery-like-button:hover {
+  background: #f3f4f6;
+  transform: none;
+}
+
+.gallery-viewer__stat--interactive .gallery-like-button--liked {
+  color: #dc2626;
+  background: transparent;
+}
+
+.gallery-viewer__stat--interactive .gallery-like-button--liked:hover {
+  background: #fef2f2;
+}
+
+.gallery-viewer__comments-section {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.gallery-viewer__comments-section .gallery-comments__toggle {
+  display: none;
+}
+
+.gallery-viewer__comments-section .gallery-comments__panel {
+  position: static !important;
+  background: transparent !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  border: none !important;
+  z-index: auto !important;
+  max-height: none !important;
+  overflow: hidden;
+  margin: 0 !important;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+
+
+.gallery-viewer__comments-section .gallery-comments__list-wrapper {
+  flex: 1;
+  overflow: hidden;
+}
+
+.gallery-viewer__comments-section .gallery-comments__list {
+  padding: 1.5rem;
+  overflow-y: auto;
+  max-height: none !important;
+  height: 100%;
+}
+
+.gallery-viewer__comments-section .gallery-comments__form {
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  border-bottom: none;
+  background: white;
+  flex-shrink: 0;
+}
+
+
+
+
+
+.gallery-viewer__counter {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1002;
+  background: rgba(0, 0, 0, 0.6);
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  backdrop-filter: blur(10px);
+}
+
+/* Mobile styles */
+@media (max-width: 768px) {
+  .gallery-viewer__content {
+    width: 95%;
+    height: 90vh;
+    flex-direction: column;
+  }
+
+  .gallery-viewer__sidebar {
+    display: none;
+  }
+
+  .gallery-viewer__mobile-overlay {
+    display: block;
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      180deg,
+      rgba(0, 0, 0, 0.6) 0%,
+      transparent 30%,
+      transparent 70%,
+      rgba(0, 0, 0, 0.6) 100%
+    );
+    pointer-events: none;
+  }
+
+  .gallery-viewer__mobile-header {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    padding: 1rem;
+    pointer-events: auto;
+  }
+
+  .gallery-viewer__mobile-overlay .gallery-viewer__artist-info {
+    background: rgba(0, 0, 0, 0.5);
+    padding: 0.75rem;
+    border-radius: 12px;
+    backdrop-filter: blur(10px);
+  }
+
+  .gallery-viewer__mobile-overlay .gallery-viewer__artist-avatar {
+    width: 32px;
+    height: 32px;
+  }
+
+  .gallery-viewer__mobile-overlay .gallery-viewer__artist-name {
+    color: white;
+    font-size: 0.875rem;
+  }
+
+  .gallery-viewer__mobile-overlay .gallery-viewer__post-date {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.75rem;
+  }
+
+  .gallery-viewer__mobile-actions {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 1rem;
+    display: flex;
+    justify-content: center;
+    pointer-events: auto;
+  }
+
+  .gallery-viewer__nav {
+    width: 40px;
+    height: 40px;
+  }
+
+  .gallery-viewer__nav--prev {
+    left: 15px;
+  }
+
+  .gallery-viewer__nav--next {
+    right: 15px;
+  }
+
+  .gallery-viewer__close {
+    top: 15px;
+    right: 15px;
+    width: 40px;
+    height: 40px;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}

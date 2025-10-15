@@ -9,8 +9,14 @@ import { useLanguage } from "@/hooks/LanguageContext";
 import { useUser } from "@/modules/auth/hooks/use-user";
 import { CloudinaryImage } from "@/components/cloudinary-image";
 import { ArtistProfileSettings } from "@/modules/profile/components/ArtistProfileSettings";
+import { GalleryLikeButton } from "@/components/gallery-like-button";
+import { GalleryComments } from "@/components/gallery-comments";
+import { GalleryViewer } from "@/components/gallery-viewer";
+import { useGalleryInteractions } from "@/hooks/useGalleryInteractions";
 import { Grid3X3, ShoppingBag } from "lucide-react";
 import "./artist-profile-view.css";
+import "@/components/gallery-interactions.css";
+import "@/components/gallery-viewer.css";
 
 interface ArtistProfileViewProps {
   data: ArtistProfileResponse;
@@ -84,7 +90,7 @@ function resolveBiography(
     return "";
   }
 
-  const isMapLike = typeof (bio as any)?.get === "function";
+  const isMapLike = typeof bio?.get === "function";
 
   if (isMapLike) {
     const map = bio as unknown as Map<string, string>;
@@ -123,6 +129,8 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
   const { artist, products } = data;
   const [showEditor, setShowEditor] = useState(false);
   const [activeTab, setActiveTab] = useState<'sale' | 'gallery'>('sale');
+  const [viewerOpen, setViewerOpen] = useState(false);
+  const [viewerIndex, setViewerIndex] = useState(0);
 
   const handleSettingsClose = useCallback(() => {
     setShowEditor(false);
@@ -137,9 +145,18 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
 
   const productItems = products?.items ?? [];
   const galleryItems = artist.artistGallery ?? [];
+  
+  // Debug logging
+  console.log('Gallery viewer state:', { viewerOpen, viewerIndex, galleryItemsCount: galleryItems.length });
 
   const anySocial = socialOrder.some(({ key }) => artist.artistSocials?.[key]);
   const isOwner = user?._id === artist.id;
+
+  // Gallery interactions
+  const { getStatsForImage, updateStats } = useGalleryInteractions(
+    artist.id,
+    galleryItems
+  );
 
   const refreshUserData = useCallback(() => {
     queryClient.invalidateQueries({ queryKey: ["user"] });
@@ -326,20 +343,56 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
               <section className={`artist-tab-panel ${galleryItems.length > 0 ? 'artist-tab-panel--gallery' : 'artist-tab-panel--empty'}`}>
                 {galleryItems.length > 0 ? (
                   <div className="artist-grid artist-grid--gallery">
-                    {galleryItems.map((url) => (
-                      <div key={url} className="artist-gallery-card">
-                        <CloudinaryImage
-                          src={url}
-                          alt={`Gallery item by ${artist.storeName || artist.name}`}
-                          width={600}
-                          height={600}
-                          className="artist-gallery-card__image"
-                        />
-                        <span className="artist-gallery-card__badge">
-                          {language === "en" ? "Not for sale" : "არ იყიდება"}
-                        </span>
-                      </div>
-                    ))}
+                    {galleryItems.map((url, index) => {
+                      const stats = getStatsForImage(url);
+                      return (
+                        <div 
+                          key={url} 
+                          className="artist-gallery-card"
+                          onClick={() => {
+                            console.log('Gallery image clicked, index:', index);
+                            setViewerIndex(index);
+                            setViewerOpen(true);
+                          }}
+                          style={{ cursor: 'pointer' }}
+                        >
+                          <CloudinaryImage
+                            src={url}
+                            alt={`Gallery item by ${artist.storeName || artist.name}`}
+                            width={600}
+                            height={600}
+                            className="artist-gallery-card__image"
+                          />
+                          <div className="artist-gallery-card__overlay">
+                            <span className="artist-gallery-card__badge">
+                              {language === "en" ? "Not for sale" : "არ იყიდება"}
+                            </span>
+                            <div 
+                              className="artist-gallery-card__interactions"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <GalleryLikeButton
+                                artistId={artist.id}
+                                imageUrl={url}
+                                initialLikesCount={stats.likesCount}
+                                initialIsLiked={stats.isLikedByUser}
+                                onLikeToggle={(isLiked, likesCount) => {
+                                  updateStats(url, { isLikedByUser: isLiked, likesCount });
+                                }}
+                              />
+                              <GalleryComments
+                                artistId={artist.id}
+                                imageUrl={url}
+                                initialCommentsCount={stats.commentsCount}
+                                onCommentsCountChange={(commentsCount) => {
+                                  updateStats(url, { commentsCount });
+                                }}
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
                 ) : (
                   <div className="artist-empty-state">
@@ -352,6 +405,23 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
           </div>
         </div>
       </div>
+
+      {/* Gallery Viewer Modal */}
+      <GalleryViewer
+        images={galleryItems}
+        currentIndex={viewerIndex}
+        artist={{
+          id: artist.id,
+          name: artist.name,
+          storeName: artist.storeName || undefined,
+          storeLogo: artist.storeLogo || undefined,
+        }}
+        isOpen={viewerOpen}
+        onClose={() => setViewerOpen(false)}
+        onIndexChange={setViewerIndex}
+        getStatsForImage={getStatsForImage}
+        updateStats={updateStats}
+      />
     </div>
   );
 }

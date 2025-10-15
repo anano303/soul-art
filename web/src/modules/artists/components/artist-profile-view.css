@@ -339,6 +339,8 @@
   aspect-ratio: 1;
 }
 
+
+
 .artist-gallery-card__image {
   display: block;
   width: 100%;
@@ -349,6 +351,25 @@
 
 .artist-gallery-card:hover .artist-gallery-card__image {
   transform: scale(1.02);
+}
+
+.artist-gallery-card__overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    transparent 60%,
+    rgba(0, 0, 0, 0.3) 100%
+  );
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  pointer-events: none;
+}
+
+.artist-gallery-card:hover .artist-gallery-card__overlay {
+  opacity: 1;
+  pointer-events: auto;
 }
 
 .artist-gallery-card__badge {
@@ -362,6 +383,15 @@
   font-size: 0.85rem;
   letter-spacing: 0.04em;
   text-transform: uppercase;
+}
+
+.artist-gallery-card__interactions {
+  position: absolute;
+  bottom: 16px;
+  right: 16px;
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
 }
 
 .artist-empty {
@@ -630,11 +660,22 @@
     min-height: 140px;
   }
   
+  .artist-gallery-card__overlay {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  
   .artist-gallery-card__badge {
     bottom: 8px;
     left: 8px;
     padding: 0.25rem 0.5rem;
     font-size: 0.7rem;
+  }
+  
+  .artist-gallery-card__interactions {
+    bottom: 8px;
+    right: 8px;
+    gap: 0.375rem;
   }
   
   .artist-tab-panel--products {
