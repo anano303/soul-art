@@ -216,7 +216,7 @@
 }
 
 .gallery-comments__list {
-  max-height: 250px;
+  max-height: calc(70vh - 70px);
   overflow-y: auto;
   padding: 1rem;
 }

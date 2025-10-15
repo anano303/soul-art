@@ -431,6 +431,101 @@
   max-height: none !important;
 }
 
+/* Mobile Comments Bottom Drawer */
+.gallery-viewer__mobile-comments-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+}
+
+.gallery-viewer__mobile-comments-drawer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: white;
+  border-radius: 20px 20px 0 0;
+  z-index: 1001;
+  max-height: calc(100vh - 70px);
+  display: flex;
+  flex-direction: column;
+  animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+.gallery-viewer__mobile-comments-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid #e5e7eb;
+  background: white;
+  border-radius: 20px 20px 0 0;
+}
+
+.gallery-viewer__mobile-comments-header h3 {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #111827;
+}
+
+.gallery-viewer__mobile-comments-close {
+  background: none;
+  border: none;
+  color: #6b7280;
+  cursor: pointer;
+  padding: 0.5rem;
+  margin: -0.5rem;
+  border-radius: 50%;
+  transition: background-color 0.2s;
+}
+
+.gallery-viewer__mobile-comments-close:hover {
+  background: #f3f4f6;
+}
+
+.gallery-viewer__mobile-comments-content {
+  flex: 1;
+  overflow: hidden;
+  padding: 0;
+}
+
+.gallery-viewer__mobile-comments-content .gallery-comments {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.gallery-viewer__mobile-comments-content .gallery-comments__panel {
+  position: static !important;
+  top: auto !important;
+  left: auto !important;
+  transform: none !important;
+  width: 100% !important;
+  max-width: none !important;
+  max-height: none !important;
+  border-radius: 0;
+  border: none;
+  box-shadow: none;
+  margin: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
 /* Hide desktop counter on mobile, show on desktop */
 .gallery-viewer__counter {
   display: none;

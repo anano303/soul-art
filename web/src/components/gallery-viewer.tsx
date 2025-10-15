@@ -38,6 +38,7 @@ export function GalleryViewer({
   const { language } = useLanguage();
   const [isMobile, setIsMobile] = useState(false);
   const mobileViewRef = useRef<HTMLDivElement>(null);
+  const [mobileCommentsOpen, setMobileCommentsOpen] = useState<{imageUrl: string; open: boolean} | null>(null);
 
   // Mobile detection
   useEffect(() => {
@@ -180,7 +181,7 @@ export function GalleryViewer({
                       className="gallery-viewer__mobile-comment-btn"
                       onClick={(e) => {
                         e.stopPropagation();
-                        // TODO: Open comments bottom overlay
+                        setMobileCommentsOpen({ imageUrl, open: true });
                       }}
                     >
                       <MessageCircle size={24} />
@@ -193,7 +194,7 @@ export function GalleryViewer({
                     className="gallery-viewer__mobile-comments-preview"
                     onClick={(e) => {
                       e.stopPropagation();
-                      // TODO: Open comments bottom overlay
+                      setMobileCommentsOpen({ imageUrl, open: true });
                     }}
                   >
                     <GalleryComments
@@ -214,6 +215,46 @@ export function GalleryViewer({
             );
           })}
         </div>
+
+        {/* Mobile Comments Bottom Drawer */}
+        {mobileCommentsOpen && (
+          <>
+            {/* Backdrop */}
+            <div 
+              className="gallery-viewer__mobile-comments-backdrop"
+              onClick={() => setMobileCommentsOpen(null)}
+            />
+            
+            {/* Drawer */}
+            <div className="gallery-viewer__mobile-comments-drawer">
+              <div className="gallery-viewer__mobile-comments-header">
+                <h3>Comments</h3>
+                <button
+                  type="button"
+                  className="gallery-viewer__mobile-comments-close"
+                  onClick={() => setMobileCommentsOpen(null)}
+                >
+                  <X size={24} />
+                </button>
+              </div>
+              
+              <div className="gallery-viewer__mobile-comments-content">
+                <GalleryComments
+                  artistId={artist.id}
+                  imageUrl={mobileCommentsOpen.imageUrl}
+                  initialCommentsCount={getStatsForImage(mobileCommentsOpen.imageUrl).commentsCount}
+                  onCommentsCountChange={(commentsCount) => {
+                    updateStats(mobileCommentsOpen.imageUrl, { commentsCount });
+                  }}
+                  autoExpanded={true}
+                  previewMode={false}
+                  showButton={false}
+                  iconSize={24}
+                />
+              </div>
+            </div>
+          </>
+        )}
       </div>
     );
   }
