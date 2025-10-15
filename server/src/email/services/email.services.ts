@@ -18,6 +18,7 @@ interface OrderConfirmationItem {
   subtotal: number;
   variantDetails?: string;
   delivery?: OrderConfirmationDelivery;
+  imageUrl?: string;
 }
 
 interface OrderConfirmationPayload {
@@ -59,6 +60,7 @@ interface SellerOrderNotificationPayload {
     color?: string;
     ageGroup?: string;
     subtotal: number;
+    imageUrl?: string;
   }>;
 }
 
@@ -95,6 +97,7 @@ interface AdminOrderStatusPayload {
     size?: string;
     color?: string;
     ageGroup?: string;
+    imageUrl?: string;
   }>;
 }
 
@@ -157,6 +160,9 @@ export class EmailService {
     const safeValue = (value: number) =>
       typeof value === 'number' && Number.isFinite(value) ? value : 0;
 
+    const sanitizeAttr = (value?: string) =>
+      typeof value === 'string' ? value.replace(/"/g, '&quot;') : '';
+
     const itemsList = orderItems.map((item) => {
       const variantDetails = [item.size, item.color, item.ageGroup]
         .filter((value) => !!value)
@@ -176,14 +182,27 @@ export class EmailService {
 
       return `
         <li style="margin-bottom: 16px;">
-          <div style="font-weight: 600; color: #012645;">${item.name}</div>
-          ${variantHtml}
-          <div style="margin-top: 6px; color: #374151;">
-            რაოდენობა: <strong>${quantity}</strong> • ერთეულის ფასი: <strong>${price.toFixed(2)} ₾</strong>
-          </div>
-          <div style="margin-top: 4px; color: #111827;">
-            სულ: <strong>${subtotal.toFixed(2)} ₾</strong>
-          </div>
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-spacing: 0; width: 100%;">
+            <tr>
+              ${
+                item.imageUrl
+                  ? `<td style="width: 96px; padding-right: 12px; vertical-align: top;">
+                      <img src="${sanitizeAttr(item.imageUrl)}" alt="${sanitizeAttr(item.name)}" style="display: block; width: 100%; max-width: 96px; height: auto; border-radius: 8px;" />
+                    </td>`
+                  : ''
+              }
+              <td style="vertical-align: top;">
+                <div style="font-weight: 600; color: #012645;">${item.name}</div>
+                ${variantHtml}
+                <div style="margin-top: 6px; color: #374151;">
+                  რაოდენობა: <strong>${quantity}</strong> • ერთეულის ფასი: <strong>${price.toFixed(2)} ₾</strong>
+                </div>
+                <div style="margin-top: 4px; color: #111827;">
+                  სულ: <strong>${subtotal.toFixed(2)} ₾</strong>
+                </div>
+              </td>
+            </tr>
+          </table>
         </li>
       `;
     });
@@ -371,6 +390,9 @@ export class EmailService {
         })
       : undefined;
 
+    const sanitizeAttr = (value?: string) =>
+      typeof value === 'string' ? value.replace(/"/g, '&quot;') : '';
+
     const itemsList = (orderItems || []).map((item) => {
       const quantity = safeTotal(item.quantity);
       const price = safeTotal(item.price);
@@ -390,15 +412,28 @@ export class EmailService {
 
       return `
         <li style="padding: 12px 0; border-bottom: 1px solid #e2e8f0;">
-          <div style="font-weight: 600; color: #0f172a;">${item.name}</div>
-          ${variantHtml}
-          <div style="margin-top: 6px; color: #334155;">
-            რაოდენობა: <strong>${quantity}</strong> • ერთეულის ფასი: <strong>${price.toFixed(2)} ₾</strong>
-          </div>
-          <div style="margin-top: 4px; color: #111827;">
-            სულ: <strong>${subtotal.toFixed(2)} ₾</strong>
-          </div>
-          ${deliveryHtml}
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-spacing: 0; width: 100%;">
+            <tr>
+              ${
+                item.imageUrl
+                  ? `<td style="width: 96px; padding-right: 12px; vertical-align: top;">
+                      <img src="${sanitizeAttr(item.imageUrl)}" alt="${sanitizeAttr(item.name)}" style="display: block; width: 100%; max-width: 96px; height: auto; border-radius: 8px;" />
+                    </td>`
+                  : ''
+              }
+              <td style="vertical-align: top;">
+                <div style="font-weight: 600; color: #0f172a;">${item.name}</div>
+                ${variantHtml}
+                <div style="margin-top: 6px; color: #334155;">
+                  რაოდენობა: <strong>${quantity}</strong> • ერთეულის ფასი: <strong>${price.toFixed(2)} ₾</strong>
+                </div>
+                <div style="margin-top: 4px; color: #111827;">
+                  სულ: <strong>${subtotal.toFixed(2)} ₾</strong>
+                </div>
+                ${deliveryHtml}
+              </td>
+            </tr>
+          </table>
         </li>
       `;
     });
@@ -568,6 +603,9 @@ export class EmailService {
       : undefined;
     const shippingContact = shippingAddress?.phoneNumber || customer?.phone;
 
+    const sanitizeAttr = (value?: string) =>
+      typeof value === 'string' ? value.replace(/"/g, '&quot;') : '';
+
     const itemsList = (orderItems || []).map((item, index) => {
       const quantity = safeTotal(item.quantity);
       const price = safeTotal(item.price);
@@ -598,15 +636,28 @@ export class EmailService {
 
       return `
         <li style="padding: 14px 0; border-bottom: 1px solid #e2e8f0;">
-          <div style="font-weight: 600; color: #0f172a;">${index + 1}. ${item.name}</div>
-          ${variantHtml}
-          <div style="margin-top: 6px; color: #334155;">
-            რაოდენობა: <strong>${quantity}</strong> • ერთეულის ფასი: <strong>${price.toFixed(2)} ₾</strong>
-          </div>
-          <div style="margin-top: 4px; color: #111827;">
-            სულ: <strong>${subtotal.toFixed(2)} ₾</strong>
-          </div>
-          ${sellerDetails}
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-spacing: 0; width: 100%;">
+            <tr>
+              ${
+                item.imageUrl
+                  ? `<td style="width: 96px; padding-right: 12px; vertical-align: top;">
+                      <img src="${sanitizeAttr(item.imageUrl)}" alt="${sanitizeAttr(item.name)}" style="display: block; width: 100%; max-width: 96px; height: auto; border-radius: 8px;" />
+                    </td>`
+                  : ''
+              }
+              <td style="vertical-align: top;">
+                <div style="font-weight: 600; color: #0f172a;">${index + 1}. ${item.name}</div>
+                ${variantHtml}
+                <div style="margin-top: 6px; color: #334155;">
+                  რაოდენობა: <strong>${quantity}</strong> • ერთეულის ფასი: <strong>${price.toFixed(2)} ₾</strong>
+                </div>
+                <div style="margin-top: 4px; color: #111827;">
+                  სულ: <strong>${subtotal.toFixed(2)} ₾</strong>
+                </div>
+                ${sellerDetails}
+              </td>
+            </tr>
+          </table>
         </li>
       `;
     });

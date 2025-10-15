@@ -236,6 +236,47 @@ export class OrdersService {
 
     return undefined;
   }
+
+  private resolveProductImageUrl(
+    orderItem: any,
+    productData: any,
+    baseUrl: string,
+  ): string | undefined {
+    const sources: Array<string | undefined> = [];
+
+    if (typeof orderItem?.image === 'string' && orderItem.image.trim().length) {
+      sources.push(orderItem.image.trim());
+    }
+
+    if (Array.isArray(productData?.images)) {
+      for (const image of productData.images) {
+        if (typeof image === 'string' && image.trim().length) {
+          sources.push(image.trim());
+          break;
+        }
+      }
+    }
+
+    const rawSource = sources.find((value) => !!value);
+    if (!rawSource) {
+      return undefined;
+    }
+
+    if (/^https?:\/\//i.test(rawSource)) {
+      return rawSource;
+    }
+
+    if (rawSource.startsWith('//')) {
+      return `https:${rawSource}`;
+    }
+
+    try {
+      return new URL(rawSource, baseUrl).toString();
+    } catch {
+      const normalizedBase = baseUrl.endsWith('/') ? baseUrl : `${baseUrl}/`;
+      return `${normalizedBase}${rawSource.replace(/^\//, '')}`;
+    }
+  }
   async create(
     orderAttrs: Partial<Order>,
     userId: string,
@@ -698,6 +739,11 @@ export class OrdersService {
           subtotal: (item.price || 0) * (item.qty || 0),
           variantDetails: variantDetails || undefined,
           delivery: deliveryEstimate,
+          imageUrl: this.resolveProductImageUrl(
+            item,
+            populatedProduct,
+            baseUrl,
+          ),
         };
       });
       const deliverySummary = this.summarizeDeliveryWindow(
@@ -770,6 +816,7 @@ export class OrdersService {
             color?: string;
             ageGroup?: string;
             subtotal: number;
+            imageUrl?: string;
           }>;
           subtotal: number;
         }
@@ -811,6 +858,7 @@ export class OrdersService {
           color: item.color || undefined,
           ageGroup: item.ageGroup || undefined,
           subtotal: (item.price || 0) * (item.qty || 0),
+          imageUrl: this.resolveProductImageUrl(item, productData, baseUrl),
         };
 
         if (!sellerItemsMap.has(sellerId)) {
@@ -872,7 +920,7 @@ export class OrdersService {
               icon: `${baseUrl}/android-icon-192x192.png`,
               badge: `${baseUrl}/android-icon-96x96.png`,
               data: {
-                url: `${baseUrl}/seller/orders/${orderId}`,
+                url: `${baseUrl}/admin/orders/${orderId}`,
                 type: 'order_status',
                 id: orderId,
               },
@@ -920,6 +968,7 @@ export class OrdersService {
           size: item.size || undefined,
           color: item.color || undefined,
           ageGroup: item.ageGroup || undefined,
+          imageUrl: this.resolveProductImageUrl(item, productData, baseUrl),
         };
       });
 
