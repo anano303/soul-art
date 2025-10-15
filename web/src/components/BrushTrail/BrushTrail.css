@@ -9,4 +9,5 @@
   touch-action: none;
   opacity: 0.9;
   filter: blur(1px); /* Reduced blur for better visibility */
+  z-index: 9999; /* Ensure it's above other elements */
 }

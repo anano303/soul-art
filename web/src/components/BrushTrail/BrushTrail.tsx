@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import "./BrushTrail.css";
 
 type BrushPoint = {
@@ -11,13 +11,54 @@ type BrushPoint = {
   width: number;
 };
 
-const BrushTrail = () => {
+interface BrushTrailProps {
+  containerRef?: React.RefObject<HTMLElement | null>;
+}
+
+const BrushTrail: React.FC<BrushTrailProps> = ({ containerRef }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const points = useRef<BrushPoint[]>([]);
   const currentHue = useRef(220);
   const lastMouse = useRef<{ x: number; y: number; time: number } | null>(null);
+  const [hasMouseDevice, setHasMouseDevice] = useState(false);
 
   useEffect(() => {
+    // Detect if device has mouse capabilities
+    const detectMouseDevice = () => {
+      // Check if device has fine pointer capability (mouse/trackpad)
+      const hasFinePointer = window.matchMedia("(pointer: fine)").matches;
+      
+      // For tablets/hybrids, also check if touch is the primary input
+      const primaryTouchDevice = window.matchMedia("(pointer: coarse)").matches && 
+                                 "ontouchstart" in window;
+      
+      // Show brush trail only if device has fine pointer and is not primarily touch-based
+      return hasFinePointer && !primaryTouchDevice;
+    };
+
+    const mouseCapable = detectMouseDevice();
+    setHasMouseDevice(mouseCapable);
+
+    // Listen for pointer capability changes (hybrid devices)
+    const handlePointerChange = () => {
+      const newMouseCapable = detectMouseDevice();
+      setHasMouseDevice(newMouseCapable);
+    };
+
+    const finePointerQuery = window.matchMedia("(pointer: fine)");
+    const coarsePointerQuery = window.matchMedia("(pointer: coarse)");
+    
+    finePointerQuery.addEventListener("change", handlePointerChange);
+    coarsePointerQuery.addEventListener("change", handlePointerChange);
+
+    // If no mouse device, don't initialize the canvas
+    if (!mouseCapable) {
+      return () => {
+        finePointerQuery.removeEventListener("change", handlePointerChange);
+        coarsePointerQuery.removeEventListener("change", handlePointerChange);
+      };
+    }
+
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext("2d", { alpha: true });
@@ -115,6 +156,23 @@ const BrushTrail = () => {
     const vanGoghHues = [220, 330, 180]; // Yellow and blue
 
     const handleMouseMove = (e: MouseEvent) => {
+      // Only track mouse movement if within the container
+      if (containerRef?.current) {
+        const containerRect = containerRef.current.getBoundingClientRect();
+        const mouseX = e.clientX;
+        const mouseY = e.clientY;
+        
+        // Check if mouse is within the container bounds
+        if (
+          mouseX < containerRect.left || 
+          mouseX > containerRect.right || 
+          mouseY < containerRect.top || 
+          mouseY > containerRect.bottom
+        ) {
+          return; // Don't draw if outside container
+        }
+      }
+
       const now = Date.now();
       const rect = canvas.getBoundingClientRect();
 
@@ -175,10 +233,18 @@ const BrushTrail = () => {
     return () => {
       window.removeEventListener("mousemove", handleMouseMove);
       window.removeEventListener("resize", handleResize);
+      finePointerQuery.removeEventListener("change", handlePointerChange);
+      coarsePointerQuery.removeEventListener("change", handlePointerChange);
     };
-  }, []);
+  }, [containerRef]);
 
-  return <canvas ref={canvasRef} className="brush-canvas" />;
+  return (
+    <canvas 
+      ref={canvasRef} 
+      className="brush-canvas" 
+      style={{ display: hasMouseDevice ? 'block' : 'none' }}
+    />
+  );
 };
 
 export default BrushTrail;

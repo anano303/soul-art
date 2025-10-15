@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState, useCallback } from "react";
+import { useMemo, useState, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import { ArtistProfileResponse, ArtistProductSummary, User } from "@/types";
@@ -14,6 +14,7 @@ import { GalleryComments } from "@/components/gallery-comments";
 import { GalleryViewer } from "@/components/gallery-viewer";
 import { useGalleryInteractions } from "@/hooks/useGalleryInteractions";
 import { Grid3X3, ShoppingBag } from "lucide-react";
+import BrushTrail from "@/components/BrushTrail/BrushTrail";
 import "./artist-profile-view.css";
 import "@/components/gallery-interactions.css";
 import "@/components/gallery-viewer.css";
@@ -131,6 +132,7 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
   const [activeTab, setActiveTab] = useState<'sale' | 'gallery'>('sale');
   const [viewerOpen, setViewerOpen] = useState(false);
   const [viewerIndex, setViewerIndex] = useState(0);
+  const heroRef = useRef<HTMLElement>(null);
 
   const handleSettingsClose = useCallback(() => {
     setShowEditor(false);
@@ -176,8 +178,10 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
 
   return (
     <div className="artist-profile">
+      <BrushTrail containerRef={heroRef} />
       <section
         className="artist-hero"
+        ref={heroRef}
         style={
           heroBackground
             ? { backgroundImage: `url(${heroBackground})` }
