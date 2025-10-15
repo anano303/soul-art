@@ -11,6 +11,9 @@ interface GalleryCommentsProps {
   initialCommentsCount: number;
   onCommentsCountChange?: (count: number) => void;
   autoExpanded?: boolean; // For gallery viewer
+  previewMode?: boolean; // For mobile preview (3 comments max)
+  maxComments?: number; // Maximum comments to show in preview
+  iconSize?: number; // Icon size (16 grid default, 24 viewer)
 }
 
 export function GalleryComments({
@@ -19,6 +22,9 @@ export function GalleryComments({
   initialCommentsCount,
   onCommentsCountChange,
   autoExpanded = false,
+  previewMode = false,
+  maxComments = 20,
+  iconSize = 16,
 }: GalleryCommentsProps) {
   const { user } = useUser();
   const [comments, setComments] = useState<GalleryComment[]>([]);
@@ -38,12 +44,12 @@ export function GalleryComments({
     setShowComments(autoExpanded);
   }, [artistId, imageUrl, initialCommentsCount, autoExpanded]);
 
-  // Auto-load comments if auto-expanded
+  // Auto-load comments if auto-expanded or in preview mode
   useEffect(() => {
-    if (autoExpanded && !hasLoadedComments) {
+    if ((autoExpanded || previewMode) && !hasLoadedComments) {
       loadComments();
     }
-  }, [autoExpanded, hasLoadedComments]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [autoExpanded, previewMode, hasLoadedComments]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Scroll to bottom when in viewer mode and comments change
   useEffect(() => {
@@ -64,7 +70,14 @@ export function GalleryComments({
     setIsLoading(true);
     try {
       const result = await galleryInteractionService.getComments(artistId, imageUrl);
-      setComments(result.comments.reverse()); // Reverse to show oldest first (Instagram-like)
+      let commentsToShow = result.comments.reverse(); // Reverse to show oldest first (Instagram-like)
+      
+      // Limit comments in preview mode
+      if (previewMode && maxComments) {
+        commentsToShow = commentsToShow.slice(0, maxComments);
+      }
+      
+      setComments(commentsToShow);
       setCommentsCount(result.total);
       setHasLoadedComments(true);
       onCommentsCountChange?.(result.total);
@@ -126,66 +139,92 @@ export function GalleryComments({
         className={`gallery-comments__toggle ${!autoExpanded ? 'gallery-comments__toggle--disabled' : ''}`}
         onClick={handleToggleComments}
       >
-        <MessageCircle className="gallery-comments__icon" size={16} />
+  <MessageCircle className="gallery-comments__icon" size={iconSize} />
         <span className="gallery-comments__count">{commentsCount}</span>
       </button>
 
-      {showComments && (
-        <div className="gallery-comments__panel">
-          <div className="gallery-comments__list-wrapper">
-            <div className="gallery-comments__list" ref={commentsListRef}>
-              {isLoading ? (
-                <div className="gallery-comments__loading">Loading comments...</div>
-              ) : comments.length > 0 ? (
-                comments.map((comment) => (
-                  <div key={comment.id} className="gallery-comment">
-                    <div className="gallery-comment__header">
-                      <span className="gallery-comment__author">
-                        {comment.user?.storeName || comment.user?.name || 'Anonymous'}
-                      </span>
-                      <span className="gallery-comment__date">
-                        {new Date(comment.createdAt).toLocaleDateString()}
-                      </span>
-                    </div>
-                    <p className="gallery-comment__text">{comment.comment}</p>
-                  </div>
-                ))
-              ) : (
-                <div className="gallery-comments__empty">
-                  No comments yet. Be the first to comment!
+      {previewMode ? (
+        // Preview mode: show limited comments inline
+        <div 
+          className="gallery-comments__preview"
+          onClick={handleToggleComments}
+        >
+          {isLoading ? (
+            <div className="gallery-comments__loading">Loading comments...</div>
+          ) : comments.length > 0 ? (
+            <>
+              {comments.map((comment) => (
+                <div key={comment.id} className="gallery-comment gallery-comment--preview">
+                  <p className="gallery-comment__text">
+                    <span className="gallery-comment__author">
+                      {comment.user?.storeName || comment.user?.name || 'Anonymous'}
+                    </span>
+                    {' '}
+                    {comment.comment}
+                  </p>
                 </div>
-              )}
-            </div>
-          </div>
-
-          {user && (
-            <div className="gallery-comments__form">
-              <textarea
-                value={newComment}
-                onChange={(e) => setNewComment(e.target.value)}
-                onKeyDown={handleKeyPress}
-                placeholder="Add a comment..."
-                className="gallery-comments__input"
-                rows={3}
-                maxLength={500}
-              />
-              <div className="gallery-comments__form-actions">
-                <span className="gallery-comments__char-count">
-                  {newComment.length}/500
-                </span>
-                <button
-                  type="button"
-                  className="gallery-comments__submit"
-                  onClick={handleAddComment}
-                  disabled={!newComment.trim() || isSubmitting}
-                >
-                  <Send size={16} />
-                  {isSubmitting ? 'Sending...' : 'Send'}
-                </button>
+              ))}
+            </>
+          ) : null}
+        </div>
+      ) : (
+        showComments && (
+          <div className="gallery-comments__panel">
+            <div className="gallery-comments__list-wrapper">
+              <div className="gallery-comments__list" ref={commentsListRef}>
+                {isLoading ? (
+                  <div className="gallery-comments__loading">Loading comments...</div>
+                ) : comments.length > 0 ? (
+                  comments.map((comment) => (
+                    <div key={comment.id} className="gallery-comment">
+                      <div className="gallery-comment__header">
+                        <span className="gallery-comment__author">
+                          {comment.user?.storeName || comment.user?.name || 'Anonymous'}
+                        </span>
+                        <span className="gallery-comment__date">
+                          {new Date(comment.createdAt).toLocaleDateString()}
+                        </span>
+                      </div>
+                      <p className="gallery-comment__text">{comment.comment}</p>
+                    </div>
+                  ))
+                ) : (
+                  <div className="gallery-comments__empty">
+                    No comments yet. Be the first to comment!
+                  </div>
+                )}
               </div>
             </div>
-          )}
-        </div>
+
+            {user && (
+              <div className="gallery-comments__form">
+                <textarea
+                  value={newComment}
+                  onChange={(e) => setNewComment(e.target.value)}
+                  onKeyDown={handleKeyPress}
+                  placeholder="Add a comment..."
+                  className="gallery-comments__input"
+                  rows={3}
+                  maxLength={500}
+                />
+                <div className="gallery-comments__form-actions">
+                  <span className="gallery-comments__char-count">
+                    {newComment.length}/500
+                  </span>
+                  <button
+                    type="button"
+                    className="gallery-comments__submit"
+                    onClick={handleAddComment}
+                    disabled={!newComment.trim() || isSubmitting}
+                  >
+                    <Send size={16} />
+                    {isSubmitting ? 'Sending...' : 'Send'}
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        )
       )}
     </div>
   );

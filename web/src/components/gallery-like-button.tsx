@@ -11,6 +11,10 @@ interface GalleryLikeButtonProps {
   initialLikesCount: number;
   initialIsLiked: boolean;
   onLikeToggle?: (isLiked: boolean, likesCount: number) => void;
+  /**
+   * Icon size in pixels. Grid (default) uses 16. Viewer uses 24.
+   */
+  iconSize?: number;
 }
 
 export function GalleryLikeButton({
@@ -19,6 +23,7 @@ export function GalleryLikeButton({
   initialLikesCount,
   initialIsLiked,
   onLikeToggle,
+  iconSize = 16,
 }: GalleryLikeButtonProps) {
   const { user } = useUser();
   const [isLiked, setIsLiked] = useState(initialIsLiked);
@@ -54,7 +59,7 @@ export function GalleryLikeButton({
   if (!user) {
     return (
       <div className="gallery-like-button gallery-like-button--disabled">
-        <Heart className="gallery-like-button__icon" size={16} />
+    <Heart className="gallery-like-button__icon" size={iconSize} />
         <span className="gallery-like-button__count">{likesCount}</span>
       </div>
     );
@@ -69,9 +74,9 @@ export function GalleryLikeButton({
       onClick={handleToggleLike}
       disabled={isLoading}
     >
-      <Heart 
-        className="gallery-like-button__icon" 
-        size={16} 
+      <Heart
+        className="gallery-like-button__icon"
+        size={iconSize}
         fill={isLiked ? 'currentColor' : 'none'}
       />
       <span className="gallery-like-button__count">{likesCount}</span>

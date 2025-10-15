@@ -146,7 +146,7 @@
 }
 
 .gallery-viewer__stats {
-  padding: 0.75rem 1.5rem;
+  padding: 0.25rem 0.5rem;
   border-bottom: 1px solid rgba(0, 0, 0, 0.1);
   display: flex;
   gap: 1rem;
@@ -254,10 +254,177 @@
   border-radius: 20px;
   font-size: 0.875rem;
   font-weight: 500;
-  backdrop-filter: blur(10px);
 }
 
-/* Mobile styles */
+/* Mobile Instagram-style layout */
+.gallery-viewer--mobile {
+  background: white;
+  align-items: flex-start;
+  justify-content: flex-start;
+  overflow-y: auto;
+  padding: 0;
+  flex-direction: column;
+}
+
+.gallery-viewer__mobile-header-bar {
+  position: sticky;
+  top: 0;
+  z-index: 1003;
+  background: white;
+  border-bottom: 1px solid #dbdbdb;
+  display: flex;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  width: 100%;
+}
+
+.gallery-viewer__back-btn {
+  background: none;
+  border: none;
+  padding: 0.5rem;
+  margin-left: -0.5rem;
+  cursor: pointer;
+  color: #262626;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.gallery-viewer__header-info {
+  flex: 1;
+  text-align: center;
+  margin: 0 1rem;
+}
+
+.gallery-viewer__header-title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #262626;
+  line-height: 1.2;
+}
+
+.gallery-viewer__header-subtitle {
+  margin: 0;
+  font-size: 0.875rem;
+  color: #8e8e8e;
+  line-height: 1.2;
+}
+
+.gallery-viewer__header-spacer {
+  width: 44px; /* Same width as back button for centering */
+}
+
+.gallery-viewer__mobile-feed {
+  width: 100%;
+  max-width: 100%;
+  flex: 1;
+}
+
+.gallery-viewer__mobile-item {
+  width: 100%;
+  background: white;
+  border-bottom: 1px solid #efefef;
+  padding-bottom: 1rem;
+}
+
+.gallery-viewer__mobile-header {
+  display: flex;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  gap: 0.75rem;
+}
+
+.gallery-viewer__mobile-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.gallery-viewer__mobile-user-info {
+  flex: 1;
+}
+
+.gallery-viewer__mobile-username {
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #262626;
+}
+
+.gallery-viewer__mobile-date {
+  margin: 0;
+  font-size: 0.75rem;
+  color: #8e8e8e;
+}
+
+.gallery-viewer__mobile-image-container {
+  width: 100%;
+  aspect-ratio: 1;
+  background: #f8f8f8;
+}
+
+.gallery-viewer__mobile-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.gallery-viewer__mobile-interactions {
+  padding: 0.25rem 0.25rem 0;
+}
+
+.gallery-viewer__mobile-actions {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+  flex-wrap: wrap;
+}
+
+
+
+.gallery-viewer__mobile-stats {
+  margin-bottom: 0.5rem;
+}
+
+.gallery-viewer__mobile-likes {
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #262626;
+}
+
+/* Hide desktop elements on mobile */
+@media (max-width: 768px) {
+  .gallery-viewer:not(.gallery-viewer--mobile) {
+    display: none !important;
+  }
+}
+
+/* Fix mobile gallery interactions */
+.gallery-viewer--mobile .gallery-comments__panel {
+  position: static !important;
+  top: auto !important;
+  left: auto !important;
+  transform: none !important;
+  width: 100% !important;
+  max-width: none !important;
+  max-height: none !important;
+}
+
+/* Hide desktop counter on mobile, show on desktop */
+.gallery-viewer__counter {
+  display: none;
+}
+
+@media (min-width: 769px) {
+  .gallery-viewer__counter {
+    display: block;
+  }
+}
 @media (max-width: 768px) {
   .gallery-viewer__content {
     width: 95%;
@@ -283,14 +450,7 @@
     pointer-events: none;
   }
 
-  .gallery-viewer__mobile-header {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    padding: 1rem;
-    pointer-events: auto;
-  }
+  /* Removed absolute positioning for mobile headers - now handled by Instagram-style layout */
 
   .gallery-viewer__mobile-overlay .gallery-viewer__artist-info {
     background: rgba(0, 0, 0, 0.5);
@@ -314,16 +474,7 @@
     font-size: 0.75rem;
   }
 
-  .gallery-viewer__mobile-actions {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    padding: 1rem;
-    display: flex;
-    justify-content: center;
-    pointer-events: auto;
-  }
+  /* Removed absolute positioning for mobile actions - now handled by Instagram-style layout */
 
   .gallery-viewer__nav {
     width: 40px;

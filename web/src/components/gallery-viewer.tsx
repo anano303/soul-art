@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { X, ChevronLeft, ChevronRight, MessageCircle } from 'lucide-react';
 import { CloudinaryImage } from '@/components/cloudinary-image';
 import { GalleryLikeButton } from '@/components/gallery-like-button';
@@ -36,6 +36,29 @@ export function GalleryViewer({
   updateStats,
 }: GalleryViewerProps) {
   const { language } = useLanguage();
+  const [isMobile, setIsMobile] = useState(false);
+  const mobileViewRef = useRef<HTMLDivElement>(null);
+
+  // Mobile detection
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  // Scroll to current image on mobile when opening or changing index
+  useEffect(() => {
+    if (isMobile && isOpen && mobileViewRef.current) {
+      const imageElement = mobileViewRef.current.children[currentIndex] as HTMLElement;
+      if (imageElement) {
+        imageElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }
+  }, [isMobile, isOpen, currentIndex]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -75,6 +98,107 @@ export function GalleryViewer({
   const stats = getStatsForImage(currentImage);
   const creationDate = new Date().toLocaleDateString(language === 'en' ? 'en-US' : 'ka-GE');
 
+  // Mobile Instagram-style feed
+  if (isMobile) {
+    return (
+      <div className="gallery-viewer gallery-viewer--mobile">
+        {/* Instagram-style header */}
+        <div className="gallery-viewer__mobile-header-bar">
+          <button 
+            className="gallery-viewer__back-btn"
+            onClick={onClose}
+            type="button"
+          >
+            <ChevronLeft size={24} />
+          </button>
+          <div className="gallery-viewer__header-info">
+            <h2 className="gallery-viewer__header-title">
+              {language === 'en' ? 'Portfolio' : 'პორტფოლიო'}
+            </h2>
+            <p className="gallery-viewer__header-subtitle">
+              {artist.storeName || artist.name}
+            </p>
+          </div>
+          <div className="gallery-viewer__header-spacer"></div>
+        </div>
+        
+        <div className="gallery-viewer__mobile-feed" ref={mobileViewRef}>
+          {images.map((imageUrl, index) => {
+            const imageStats = getStatsForImage(imageUrl);
+            return (
+              <div key={imageUrl} className="gallery-viewer__mobile-item">
+                {/* User info header */}
+                <div className="gallery-viewer__mobile-header">
+                  {artist.storeLogo && (
+                    <CloudinaryImage
+                      src={artist.storeLogo}
+                      alt={artist.storeName || artist.name}
+                      width={32}
+                      height={32}
+                      className="gallery-viewer__mobile-avatar"
+                    />
+                  )}
+                  <div className="gallery-viewer__mobile-user-info">
+                    <h3 className="gallery-viewer__mobile-username">
+                      {artist.storeName || artist.name}
+                    </h3>
+                    <p className="gallery-viewer__mobile-date">{creationDate}</p>
+                  </div>
+                </div>
+
+                {/* Image */}
+                <div className="gallery-viewer__mobile-image-container">
+                  <CloudinaryImage
+                    src={imageUrl}
+                    alt={`${artist.storeName || artist.name} - Image ${index + 1}`}
+                    width={400}
+                    height={400}
+                    className="gallery-viewer__mobile-image"
+                    style={{
+                      width: '100%',
+                      height: 'auto',
+                      aspectRatio: '1',
+                      objectFit: 'cover'
+                    }}
+                  />
+                </div>
+
+                {/* Interactions */}
+                <div className="gallery-viewer__mobile-interactions">
+                  <div className="gallery-viewer__mobile-actions">
+                    <GalleryLikeButton
+                      artistId={artist.id}
+                      imageUrl={imageUrl}
+                      initialLikesCount={imageStats.likesCount}
+                      initialIsLiked={imageStats.isLikedByUser}
+                      iconSize={24}
+                      onLikeToggle={(isLiked, likesCount) => {
+                        updateStats(imageUrl, { isLikedByUser: isLiked, likesCount });
+                      }}
+                    />
+                    <GalleryComments
+                      artistId={artist.id}
+                      imageUrl={imageUrl}
+                      initialCommentsCount={imageStats.commentsCount}
+                      onCommentsCountChange={(commentsCount) => {
+                        updateStats(imageUrl, { commentsCount });
+                      }}
+                      autoExpanded={false}
+                      previewMode={true}
+                      maxComments={3}
+                      iconSize={24}
+                    />
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  }
+
+  // Desktop modal view
   return (
     <div className="gallery-viewer" onClick={onClose}>
       {/* Close button */}
@@ -155,6 +279,7 @@ export function GalleryViewer({
                 imageUrl={currentImage}
                 initialLikesCount={stats.likesCount}
                 initialIsLiked={stats.isLikedByUser}
+                iconSize={24}
                 onLikeToggle={(isLiked, likesCount) => {
                   updateStats(currentImage, { isLikedByUser: isLiked, likesCount });
                 }}
@@ -194,13 +319,14 @@ export function GalleryViewer({
                 imageUrl={currentImage}
                 initialLikesCount={stats.likesCount}
                 initialIsLiked={stats.isLikedByUser}
+                iconSize={24}
                 onLikeToggle={(isLiked, likesCount) => {
                   updateStats(currentImage, { isLikedByUser: isLiked, likesCount });
                 }}
               />
             </div>
             <div className="gallery-viewer__stat">
-              <MessageCircle size={16} />
+              <MessageCircle size={24} />
               <span>{stats.commentsCount} {language === 'en' ? 'comments' : 'კომენტარი'}</span>
             </div>
           </div>
@@ -215,8 +341,11 @@ export function GalleryViewer({
                 updateStats(currentImage, { commentsCount });
               }}
               autoExpanded={true}
+              iconSize={24}
             />
           </div>
+
+
 
 
         </div>
