@@ -165,6 +165,7 @@ export function GalleryViewer({
 
                 {/* Interactions */}
                 <div className="gallery-viewer__mobile-interactions">
+                  {/* Action buttons row */}
                   <div className="gallery-viewer__mobile-actions">
                     <GalleryLikeButton
                       artistId={artist.id}
@@ -176,6 +177,27 @@ export function GalleryViewer({
                         updateStats(imageUrl, { isLikedByUser: isLiked, likesCount });
                       }}
                     />
+                    <button
+                      type="button"
+                      className="gallery-viewer__mobile-comment-btn"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        // TODO: Open comments bottom overlay
+                      }}
+                    >
+                      <MessageCircle size={24} />
+                      <span>{imageStats.commentsCount}</span>
+                    </button>
+                  </div>
+
+                  {/* Comments Preview (separate, up to 3) */}
+                  <div 
+                    className="gallery-viewer__mobile-comments-preview"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      // TODO: Open comments bottom overlay
+                    }}
+                  >
                     <GalleryComments
                       artistId={artist.id}
                       imageUrl={imageUrl}
@@ -186,7 +208,7 @@ export function GalleryViewer({
                       autoExpanded={false}
                       previewMode={true}
                       maxComments={3}
-                      iconSize={24}
+                      showButton={false}
                     />
                   </div>
                 </div>

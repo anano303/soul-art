@@ -271,6 +271,8 @@
 
 .gallery-comment--preview {
   margin-bottom: 0.25rem;
+  padding: 0;
+  border: none;
 }
 
 .gallery-comment--preview .gallery-comment__text {

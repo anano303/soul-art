@@ -14,6 +14,7 @@ interface GalleryCommentsProps {
   previewMode?: boolean; // For mobile preview (3 comments max)
   maxComments?: number; // Maximum comments to show in preview
   iconSize?: number; // Icon size (16 grid default, 24 viewer)
+  showButton?: boolean; // Whether to show the toggle button (default true)
 }
 
 export function GalleryComments({
@@ -25,6 +26,7 @@ export function GalleryComments({
   previewMode = false,
   maxComments = 20,
   iconSize = 16,
+  showButton = true,
 }: GalleryCommentsProps) {
   const { user } = useUser();
   const [comments, setComments] = useState<GalleryComment[]>([]);
@@ -134,14 +136,16 @@ export function GalleryComments({
 
   return (
     <div className="gallery-comments">
-      <button
-        type="button"
-        className={`gallery-comments__toggle ${!autoExpanded ? 'gallery-comments__toggle--disabled' : ''}`}
-        onClick={handleToggleComments}
-      >
-  <MessageCircle className="gallery-comments__icon" size={iconSize} />
-        <span className="gallery-comments__count">{commentsCount}</span>
-      </button>
+      {showButton && (
+        <button
+          type="button"
+          className={`gallery-comments__toggle ${!autoExpanded ? 'gallery-comments__toggle--disabled' : ''}`}
+          onClick={handleToggleComments}
+        >
+          <MessageCircle className="gallery-comments__icon" size={iconSize} />
+          <span className="gallery-comments__count">{commentsCount}</span>
+        </button>
+      )}
 
       {previewMode ? (
         // Preview mode: show limited comments inline

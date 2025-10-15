@@ -384,7 +384,25 @@
   flex-wrap: wrap;
 }
 
+.gallery-viewer__mobile-comment-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0.6rem;
+  border: none;
+  background: transparent;
+  color: #374151;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
 
+.gallery-viewer__mobile-comment-btn:hover {
+  background: #f3f4f6;
+  transform: none;
+}
 
 .gallery-viewer__mobile-stats {
   margin-bottom: 0.5rem;
