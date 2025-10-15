@@ -374,7 +374,7 @@
 
 .artist-gallery-card__badge {
   position: absolute;
-  bottom: 16px;
+  top: 16px;
   left: 16px;
   padding: 0.45rem 0.9rem;
   border-radius: 999px;
@@ -666,7 +666,7 @@
   }
   
   .artist-gallery-card__badge {
-    bottom: 8px;
+    top: 8px;
     left: 8px;
     padding: 0.25rem 0.5rem;
     font-size: 0.7rem;
