@@ -391,8 +391,7 @@ export function AdminOrderDetails({ order }: AdminOrderDetailsProps) {
                 </p>
               )}
             <p>
-              <strong>{t("adminOrders.address")}:</strong>{" "}
-              {shippingSummary}
+              <strong>{t("adminOrders.address")}:</strong> {shippingSummary}
             </p>
             <div className={`alert ${order.isDelivered ? "success" : "error"}`}>
               {order.isDelivered ? <CheckCircle2 /> : <XCircle />}

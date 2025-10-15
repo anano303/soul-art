@@ -228,7 +228,9 @@ export class CartService {
     const { address, city, country, phoneNumber } = shippingDetails;
 
     if (!address || !city || !country || !phoneNumber) {
-      throw new BadRequestException('Address, city, country and phone are required');
+      throw new BadRequestException(
+        'Address, city, country and phone are required',
+      );
     }
     return shippingDetails;
   }
