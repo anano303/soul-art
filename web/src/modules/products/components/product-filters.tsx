@@ -77,12 +77,19 @@ export function ProductFilters({
     const timeoutId = setTimeout(() => {
       // Only apply if values are valid
       if (minPrice >= 0 && maxPrice >= minPrice) {
+        const valuesUnchanged =
+          minPrice === priceRange[0] && maxPrice === priceRange[1];
+
+        if (valuesUnchanged) {
+          return;
+        }
+
         onPriceRangeChange([minPrice, maxPrice]);
       }
     }, 500); // 500ms debounce
 
     return () => clearTimeout(timeoutId);
-  }, [minPrice, maxPrice, onPriceRangeChange]);
+  }, [minPrice, maxPrice, onPriceRangeChange, priceRange]);
 
   // Auto-show subcategories when category is selected
   useEffect(() => {

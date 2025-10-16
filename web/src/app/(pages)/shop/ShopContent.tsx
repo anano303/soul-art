@@ -10,6 +10,7 @@ import { useLanguage } from "@/hooks/LanguageContext";
 import { useQuery } from "@tanstack/react-query";
 
 const PRIMARY_COLOR = "#012645";
+const SHOP_PAGE_STORAGE_KEY = "shopCurrentPage";
 import { fetchWithAuth } from "@/lib/fetch-with-auth";
 import "./ShopPage.css";
 import Image from "next/image";
@@ -20,6 +21,18 @@ const ShopContent = () => {
   const { t } = useLanguage();
 
   const initializedRef = useRef(false);
+  const pendingInitialStateRef = useRef<{
+    page: number;
+    mainCategory: string;
+    subCategory: string;
+    ageGroup: string;
+    size: string;
+    color: string;
+    brand: string;
+    showDiscountedOnly: boolean;
+    priceRange: [number, number];
+    sorting: { field: string; direction: "asc" | "desc" };
+  } | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [products, setProducts] = useState<Product[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
@@ -96,9 +109,26 @@ const ShopContent = () => {
 
   useEffect(() => {
     if (initializedRef.current) return;
-    initializedRef.current = true;
 
-    const pageParam = parseInt(searchParams?.get("page") || "1");
+    const pageParamRaw = searchParams?.get("page");
+    const parsedPageParam = pageParamRaw ? parseInt(pageParamRaw, 10) : NaN;
+    const hasValidPageParam =
+      typeof parsedPageParam === "number" &&
+      !Number.isNaN(parsedPageParam) &&
+      parsedPageParam > 0;
+
+    let storedPage = 1;
+    if (typeof window !== "undefined") {
+      const storedValue = window.localStorage.getItem(SHOP_PAGE_STORAGE_KEY);
+      if (storedValue) {
+        const parsedStored = parseInt(storedValue, 10);
+        if (!Number.isNaN(parsedStored) && parsedStored > 0) {
+          storedPage = parsedStored;
+        }
+      }
+    }
+
+    const initialPage = hasValidPageParam ? parsedPageParam : storedPage;
     const mainCategoryParam = searchParams?.get("mainCategory") || "";
     const subCategoryParam = searchParams?.get("subCategory") || "";
     const ageGroupParam = searchParams?.get("ageGroup") || "";
@@ -129,7 +159,20 @@ const ShopContent = () => {
     const sortDirectionParam =
       (searchParams?.get("sortDirection") as "asc" | "desc") || "desc";
 
-    setCurrentPage(pageParam);
+    pendingInitialStateRef.current = {
+      page: initialPage,
+      mainCategory: mainCategoryParam,
+      subCategory: subCategoryParam,
+      ageGroup: ageGroupParam,
+      size: sizeParam,
+      color: colorParam,
+      brand: decodedBrandParam,
+      showDiscountedOnly: discountParam,
+      priceRange: [minPriceParam, maxPriceParam],
+      sorting: { field: sortByParam, direction: sortDirectionParam },
+    };
+
+    setCurrentPage(initialPage);
     setSelectedCategoryId(mainCategoryParam);
     setSelectedSubCategoryId(subCategoryParam);
     setSelectedAgeGroup(ageGroupParam);
@@ -141,12 +184,62 @@ const ShopContent = () => {
     setSorting({ field: sortByParam, direction: sortDirectionParam });
 
     console.log("Initial setup with URL params:", {
-      page: pageParam,
+      page: initialPage,
       mainCategory: mainCategoryParam,
       subCategory: subCategoryParam,
       brand: decodedBrandParam,
     });
   }, [searchParams]);
+
+  useEffect(() => {
+    if (initializedRef.current) return;
+
+    const pending = pendingInitialStateRef.current;
+    if (!pending) return;
+
+    const priceMatches =
+      priceRange[0] === pending.priceRange[0] &&
+      priceRange[1] === pending.priceRange[1];
+
+    const sortingMatches =
+      sorting.field === pending.sorting.field &&
+      sorting.direction === pending.sorting.direction;
+
+    if (
+      currentPage === pending.page &&
+      selectedCategoryId === pending.mainCategory &&
+      selectedSubCategoryId === pending.subCategory &&
+      selectedAgeGroup === pending.ageGroup &&
+      selectedSize === pending.size &&
+      selectedColor === pending.color &&
+      selectedBrand === pending.brand &&
+      showDiscountedOnly === pending.showDiscountedOnly &&
+      priceMatches &&
+      sortingMatches
+    ) {
+      initializedRef.current = true;
+      pendingInitialStateRef.current = null;
+    }
+  }, [
+    currentPage,
+    selectedCategoryId,
+    selectedSubCategoryId,
+    selectedAgeGroup,
+    selectedSize,
+    selectedColor,
+    selectedBrand,
+    showDiscountedOnly,
+    priceRange,
+    sorting.field,
+    sorting.direction,
+  ]);
+
+  useEffect(() => {
+    if (!initializedRef.current) return;
+    if (typeof window === "undefined") return;
+
+    window.localStorage.setItem(SHOP_PAGE_STORAGE_KEY, currentPage.toString());
+  }, [currentPage]);
 
   useEffect(() => {
     if (!initializedRef.current) return;
@@ -313,8 +406,17 @@ const ShopContent = () => {
   );
 
   const handlePriceRangeChange = useCallback((range: [number, number]) => {
-    setCurrentPage(1);
-    setPriceRange(range);
+    setPriceRange((previousRange) => {
+      const hasChanged =
+        previousRange[0] !== range[0] || previousRange[1] !== range[1];
+
+      if (hasChanged) {
+        setCurrentPage(1);
+        return range;
+      }
+
+      return previousRange;
+    });
   }, []);
 
   const handleSortChange = useCallback(
