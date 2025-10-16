@@ -1233,7 +1233,7 @@ export const TRANSLATIONS: Translations = {
       actions: "მოქმედებები",
       viewDetails: "დეტალების ნახვა",
       authorDelivery: "მიწოდება ავტორისგან",
-      courierDelivery: "FishHunt-ის კურიერი",
+      courierDelivery: "SoulArt-ის კურიერი",
     },
 
     // Admin Referrals
@@ -2445,7 +2445,7 @@ export const TRANSLATIONS: Translations = {
       actions: "ACTIONS",
       viewDetails: "View Details",
       authorDelivery: "Delivery from Author",
-      courierDelivery: "FishHunt Courier",
+      courierDelivery: "SoulArt Courier",
     },
 
     // Admin Referrals

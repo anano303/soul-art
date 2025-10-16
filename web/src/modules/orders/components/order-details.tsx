@@ -110,7 +110,7 @@ export function OrderDetails({ order }: OrderDetailsProps) {
     (item) => item.product && String(item.product.deliveryType) === "SELLER"
   );
 
-  const fishhuntDeliveryItems = order.orderItems.filter(
+  const soulArtDeliveryItems = order.orderItems.filter(
     (item) => !item.product || String(item.product.deliveryType) !== "SELLER"
   );
 
@@ -272,13 +272,13 @@ export function OrderDetails({ order }: OrderDetailsProps) {
               </div>
             )}
 
-            {fishhuntDeliveryItems.length > 0 && (
+            {soulArtDeliveryItems.length > 0 && (
               <div className="delivery-group">
                 {/* <div className="delivery-group-header">
                   <Truck className="icon" />
-                  <h3>{t("fishhunt Courier")}</h3>
+                  <h3>{t("soulArt Courier")}</h3>
                 </div> */}
-                {fishhuntDeliveryItems.map((item) => (
+                {soulArtDeliveryItems.map((item) => (
                   <div
                     key={`${item.productId}-${item.color ?? "c"}-${
                       item.size ?? "s"

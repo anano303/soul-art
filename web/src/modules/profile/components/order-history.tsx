@@ -17,7 +17,7 @@ interface OrderType {
   orderItems: Array<{
     _id: string;
     product?: {
-      deliveryType?: "SELLER" | "FishHunt";
+      deliveryType?: "SELLER" | "SoulArt";
       minDeliveryDays?: number;
       maxDeliveryDays?: number;
     };
@@ -76,7 +76,7 @@ export function OrderHistory({ orders }: OrderHistoryProps) {
                     {t("order.authorDelivery")}
                   </span>
                 ) : (
-                  <span className="badge delivery-badge fishhunt">
+                  <span className="badge delivery-badge soulart">
                     <Truck size={14} />
                     {t("order.courierDelivery")}
                   </span>
