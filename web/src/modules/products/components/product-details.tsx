@@ -228,6 +228,58 @@ export function ProductDetails({ product }: ProductDetailsProps) {
       ? product.descriptionEn
       : product.description;
 
+  const getLocalizedName = (
+    value?:
+      | string
+      | {
+          name?: string | null;
+          nameEn?: string | null;
+        }
+      | null
+  ) => {
+    if (!value) return "";
+    if (typeof value === "string") return value;
+    return language === "en"
+      ? value.nameEn || value.name || ""
+      : value.name || value.nameEn || "";
+  };
+
+  const getRawName = (
+    value?:
+      | string
+      | {
+          name?: string | null;
+          nameEn?: string | null;
+        }
+      | null
+  ) => {
+    if (!value) return "";
+    if (typeof value === "string") return value;
+    return value.name || value.nameEn || "";
+  };
+
+  const categoryLabel =
+    getLocalizedName(product.subCategory) ||
+    getLocalizedName(product.category) ||
+    getLocalizedName(product.mainCategory);
+
+  const rawCategoryTokens = [
+    getRawName(product.category),
+    getRawName(product.mainCategory),
+    getRawName(product.subCategory),
+    getLocalizedName(product.category),
+    getLocalizedName(product.mainCategory),
+    getLocalizedName(product.subCategory),
+    product.categoryStructure?.main || "",
+    product.categoryStructure?.sub || "",
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
+
+  const isDigitalCategory =
+    rawCategoryTokens.includes("ციფრ") || rawCategoryTokens.includes("digital");
+
   // Parse dimensions if they are stored as a string
   useEffect(() => {
     if (!product.dimensions) {
@@ -475,6 +527,19 @@ export function ProductDetails({ product }: ProductDetailsProps) {
                 className="image-wrapper"
                 onClick={openFullscreen}
               >
+                {isDigitalCategory && categoryLabel && (
+                  <div className="digital-category-badge detail-view">
+                    <span
+                      className="digital-category-icon"
+                      aria-hidden="true"
+                    >
+                      ✨
+                    </span>
+                    <span className="digital-category-text">
+                      {categoryLabel}
+                    </span>
+                  </div>
+                )}
                 {isDiscounted && product.discountPercentage && (
                   <span className="discount-badge">
                     -{product.discountPercentage}% OFF
@@ -689,14 +754,14 @@ export function ProductDetails({ product }: ProductDetailsProps) {
           <div className="trust-badges">
             <div className="trust-badge">
               <CheckCircle className="trust-badge-icon" size={20} />
-              {language === "en" ? "Authentic Product" : "ორიგინალი ნაწარმი"}
+              {language === "en" ? "Authentic Product" : "ორიგინალი "}
             </div>
-            <div className="trust-badge">
+            {/* <div className="trust-badge">
               <Shield className="trust-badge-icon" size={20} />
               {language === "en"
                 ? "Quality Guaranteed"
                 : "ხარისხი გარანტირებული"}
-            </div>
+            </div> */}
           </div>
 
           {/* Description - Prominent with label */}
