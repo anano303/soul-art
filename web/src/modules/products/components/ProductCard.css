@@ -77,6 +77,20 @@
   box-shadow: 0 8px 20px rgba(125, 90, 53, 0.18);
 }
 
+@media (max-width: 768px) {
+  .digital-category-badge.detail-view {
+    top: 8px;
+    left: 8px;
+    padding: 6px 12px;
+    font-size: 0.72rem;
+    gap: 5px;
+  }
+
+  .digital-category-badge.detail-view .digital-category-icon {
+    font-size: 0.75rem;
+  }
+}
+
 /* Handmade theme styles */
 /* .product-card.handmade-theme {
   box-shadow: 0 4px 10px var(--secondary-color);

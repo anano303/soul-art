@@ -529,10 +529,7 @@ export function ProductDetails({ product }: ProductDetailsProps) {
               >
                 {isDigitalCategory && categoryLabel && (
                   <div className="digital-category-badge detail-view">
-                    <span
-                      className="digital-category-icon"
-                      aria-hidden="true"
-                    >
+                    <span className="digital-category-icon" aria-hidden="true">
                       ✨
                     </span>
                     <span className="digital-category-text">
@@ -1115,55 +1112,12 @@ export function ProductDetails({ product }: ProductDetailsProps) {
       {isFullscreenOpen &&
         product.images &&
         product.images[currentImageIndex] && (
-          <div
-            className="fullscreen-modal"
-            onClick={closeFullscreen}
-            style={{
-              position: "fixed",
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              backgroundColor: "rgba(0, 0, 0, 0.9)",
-              backdropFilter: "blur(20px)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              zIndex: 9999,
-              padding: "20px",
-            }}
-          >
+          <div className="fullscreen-modal" onClick={closeFullscreen}>
             <button
               className="fullscreen-close"
               onClick={(e) => {
                 e.stopPropagation();
                 closeFullscreen();
-              }}
-              style={{
-                position: "absolute",
-                top: "20px",
-                right: "20px",
-                background: "rgba(255, 255, 255, 0.1)",
-                border: "none",
-                borderRadius: "50%",
-                width: "50px",
-                height: "50px",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                cursor: "pointer",
-                color: "white",
-                fontSize: "24px",
-                transition: "all 0.3s ease",
-                zIndex: 10000,
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = "rgba(255, 255, 255, 0.2)";
-                e.currentTarget.style.transform = "scale(1.1)";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = "rgba(255, 255, 255, 0.1)";
-                e.currentTarget.style.transform = "scale(1)";
               }}
             >
               <X />
@@ -1171,14 +1125,6 @@ export function ProductDetails({ product }: ProductDetailsProps) {
             <div
               className="fullscreen-image-container"
               onClick={(e) => e.stopPropagation()}
-              style={{
-                position: "relative",
-                maxWidth: "95vw",
-                maxHeight: "95vh",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
             >
               <Image
                 src={product.images[currentImageIndex]}
@@ -1187,15 +1133,6 @@ export function ProductDetails({ product }: ProductDetailsProps) {
                 height={1200}
                 quality={100}
                 className="fullscreen-image"
-                style={{
-                  maxWidth: "100%",
-                  maxHeight: "100%",
-                  width: "auto",
-                  height: "auto",
-                  objectFit: "contain",
-                  borderRadius: "12px",
-                  boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.5)",
-                }}
               />
             </div>
           </div>
