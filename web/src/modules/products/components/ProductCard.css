@@ -26,6 +26,49 @@
   z-index: 1;
 }
 
+.digital-category-badge {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.95),
+    rgba(232, 242, 255, 0.95)
+  );
+  color: var(--primary-color, #012645);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  box-shadow: 0 8px 20px rgba(1, 38, 69, 0.14);
+  backdrop-filter: blur(6px);
+  z-index: 3;
+  text-transform: uppercase;
+}
+
+.digital-category-icon {
+  font-size: 0.85rem;
+}
+
+.digital-category-text {
+  display: inline-block;
+  transform: translateY(0.5px);
+}
+
+.handmade-theme .digital-category-badge {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 250, 244, 0.96),
+    rgba(255, 239, 224, 0.96)
+  );
+  color: var(--secondary-color, #7d5a35);
+  box-shadow: 0 8px 20px rgba(125, 90, 53, 0.18);
+}
+
 /* Handmade theme styles */
 /* .product-card.handmade-theme {
   box-shadow: 0 4px 10px var(--secondary-color);

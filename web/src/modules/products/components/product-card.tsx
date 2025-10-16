@@ -30,6 +30,58 @@ export function ProductCard({
   const displayName =
     language === "en" && product.nameEn ? product.nameEn : product.name;
 
+  const getLocalizedName = (
+    value?:
+      | string
+      | {
+          name?: string | null;
+          nameEn?: string | null;
+        }
+      | null
+  ) => {
+    if (!value) return "";
+    if (typeof value === "string") return value;
+    return language === "en"
+      ? value.nameEn || value.name || ""
+      : value.name || value.nameEn || "";
+  };
+
+  const getRawName = (
+    value?:
+      | string
+      | {
+          name?: string | null;
+          nameEn?: string | null;
+        }
+      | null
+  ) => {
+    if (!value) return "";
+    if (typeof value === "string") return value;
+    return value.name || value.nameEn || "";
+  };
+
+  const categoryLabel =
+    getLocalizedName(product.subCategory) ||
+    getLocalizedName(product.category) ||
+    getLocalizedName(product.mainCategory);
+
+  const rawCategoryTokens = [
+    getRawName(product.category),
+    getRawName(product.mainCategory),
+    getRawName(product.subCategory),
+    getLocalizedName(product.category),
+    getLocalizedName(product.mainCategory),
+    getLocalizedName(product.subCategory),
+    product.categoryStructure?.main || "",
+    product.categoryStructure?.sub || "",
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
+
+  const isDigitalCategory =
+    rawCategoryTokens.includes("ციფრ") || rawCategoryTokens.includes("digital");
+
   // Check if product has active discount
   const hasActiveDiscount = () => {
     if (!product.discountPercentage || product.discountPercentage <= 0) {
@@ -80,6 +132,14 @@ export function ProductCard({
 
       <Link href={`/products/${product._id}`}>
         <div className="product-image">
+          {isDigitalCategory && categoryLabel && (
+            <div className="digital-category-badge">
+              <span className="digital-category-icon" aria-hidden="true">
+                ✨
+              </span>
+              <span className="digital-category-text">{categoryLabel}</span>
+            </div>
+          )}
           <Image
             src={productImage}
             alt={displayName}
