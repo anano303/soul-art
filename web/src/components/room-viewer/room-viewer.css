@@ -312,9 +312,9 @@
     overflow: visible;
   }
 
-  .control-card {
+  /* .control-card {
     flex: 1 1 260px;
-  }
+  } */
 
   .room-viewer-close-mobile {
     display: block;
