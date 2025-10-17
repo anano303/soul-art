@@ -662,25 +662,15 @@ export const TRANSLATIONS: Translations = {
       heroTitle: "შეარჩიე ხელოვანების ნამუშევრები ან გაყიდე შენი 🖌️",
       heroSubtitle:
         "პერსონალური და ხელნაკეთი ნამუშევრები ქართველი ხელოვანებისგან",
-      deals: {
-        title: "აირჩიე შენი შემდეგი ხელოვნება საუკეთესო ფასად",
+      discountedRail: {
+        eyebrow: "ფასდაკლება",
+        title: "დღევანდელი შეთავაზებები",
         subtitle:
-          "ფრთხილად დაკომპლექტებული არჩევანი SoulArt-ის მიერ — ფასდაკლებული და ბიუჯეტური ნამუშევრები, რომლებიც მზადაა სახლამდე მისატანად",
-        viewAll: "ნახეთ მეტი",
-        discounted: {
-          title: "დღევანდელი ფასდაკლებები",
-          subtitle:
-            "შეარჩიე განსაკუთრებული ნამუშევრები შეღავათიან ფასად და არ გაუშვა დროებითი შეთავაზებები",
-          empty:
-            "ამ წუთისთვის ფასდაკლებული ნამუშევრები არ გვაქვს ხელმისაწვდომი",
-        },
-        budget: {
-          title: "ბიუჯეტური ხელოვნება {price} ₾-მდე",
-          subtitle:
-            "ხელნაკეთი და უნიკალური ნამუშევრები ყველასთვის ხელმისაწვდომ ფასში",
-          empty:
-            "ამჟამად {price} ₾-მდე ღირებულ ნამუშევრებს ვერ ვპოულობთ — შეამოწმე მოგვიანებით",
-        },
+          "მხოლოდ ამ კვირაში — ხელოვნების ნამუშევრები განსაკუთრებული ფასით",
+        badge: "მდე {discount}% ფასდაკლება",
+        viewAll: "ყველა შეთავაზება",
+        empty: "ამ დროისთვის ფასდაკლებული ნამუშევრები არ გვაქვს",
+        ariaLabel: "ფასდაკლებული ნამუშევრების სქროლი",
       },
     },
 
@@ -1964,24 +1954,14 @@ export const TRANSLATIONS: Translations = {
     home: {
       heroTitle: "Discover artworks by artists or sell your own 🖌️",
       heroSubtitle: "Personalized and handmade creations by Georgian artists",
-      deals: {
-        title: "Curated deals picked for your art journey",
-        subtitle:
-          "A spotlight on discounted and budget-friendly pieces — discover art you love without stretching the budget",
-        viewAll: "View all",
-        discounted: {
-          title: "Limited-time discounts",
-          subtitle:
-            "Handpicked artworks with active promotions — grab them before the offer expires",
-          empty: "No discounted artworks are available right now",
-        },
-        budget: {
-          title: "Budget-friendly finds under {price} ₾",
-          subtitle:
-            "Thoughtfully priced originals that let you bring art home without compromise",
-          empty:
-            "We couldn't find artworks under {price} ₾ at the moment — please check back soon",
-        },
+      discountedRail: {
+        eyebrow: "Sale",
+        title: "Today's deals",
+        subtitle: "This week only — artworks at special prices",
+        badge: "Up to {discount}% off",
+        viewAll: "All deals",
+        empty: "No discounted artworks are available right now",
+        ariaLabel: "Discounted artworks carousel",
       },
     },
 
