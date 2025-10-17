@@ -9,7 +9,14 @@ import { memoryCache } from "@/lib/cache";
 import { useLanguage } from "@/hooks/LanguageContext";
 import LoadingAnim from "@/components/loadingAnim/loadingAnim";
 import { ProductCard } from "@/modules/products/components/product-card";
-import { ArrowRight, ArrowLeft, ChevronLeft, ChevronRight, Sparkles, TicketPercent } from "lucide-react";
+import {
+  ArrowRight,
+  ArrowLeft,
+  ChevronLeft,
+  ChevronRight,
+  Sparkles,
+  TicketPercent,
+} from "lucide-react";
 import "./discountedRail.css";
 
 const DISCOUNT_RAIL_LIMIT = 12;
@@ -53,6 +60,8 @@ const DiscountedRail = () => {
   const scrollerRef = useRef<HTMLDivElement | null>(null);
   const [ctaVisible, setCtaVisible] = useState(false);
   const [hasOverflow, setHasOverflow] = useState(false);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
 
   const { data: discountedProducts = [], isLoading } = useQuery<Product[]>({
     queryKey: ["home", "discounted-rail", language],
@@ -111,6 +120,10 @@ const DiscountedRail = () => {
       const overflow = scrollWidth > clientWidth + 1;
       setHasOverflow(overflow);
 
+      // Scroll arrows visibility
+      setCanScrollLeft(scrollLeft > 5);
+      setCanScrollRight(scrollLeft + clientWidth < scrollWidth - 5);
+
       if (overflow) {
         // თუ overflow არსებობს, CTA გამოჩნდეს მხოლოდ მაშინ როცა ბოლომდე გავიდეთ
         const reachedEnd = scrollLeft + clientWidth >= scrollWidth - 10;
@@ -131,6 +144,53 @@ const DiscountedRail = () => {
       window.removeEventListener("resize", evaluateScroll);
     };
   }, [items.length]);
+
+  // Keyboard navigation
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      const scrollerEl = scrollerRef.current;
+      if (!scrollerEl || !hasOverflow) return;
+
+      if (event.key === "ArrowLeft" && canScrollLeft) {
+        event.preventDefault();
+        scrollLeft();
+      } else if (event.key === "ArrowRight" && canScrollRight) {
+        event.preventDefault();
+        scrollRight();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [canScrollLeft, canScrollRight, hasOverflow]);
+
+  const scrollLeft = () => {
+    const scrollerEl = scrollerRef.current;
+    if (!scrollerEl) return;
+
+    const cardWidth =
+      scrollerEl.querySelector(".discounted-rail__card")?.clientWidth || 250;
+    const scrollAmount = cardWidth * 2; // Scroll 2 cards at a time
+
+    scrollerEl.scrollBy({
+      left: -scrollAmount,
+      behavior: "smooth",
+    });
+  };
+
+  const scrollRight = () => {
+    const scrollerEl = scrollerRef.current;
+    if (!scrollerEl) return;
+
+    const cardWidth =
+      scrollerEl.querySelector(".discounted-rail__card")?.clientWidth || 250;
+    const scrollAmount = cardWidth * 2; // Scroll 2 cards at a time
+
+    scrollerEl.scrollBy({
+      left: scrollAmount,
+      behavior: "smooth",
+    });
+  };
 
   return (
     <section className="discounted-rail">
@@ -180,6 +240,28 @@ const DiscountedRail = () => {
               hasOverflow ? "has-overflow" : ""
             }`}
           >
+            {/* Left Arrow */}
+            {canScrollLeft && (
+              <button
+                className="discounted-rail__scroll-btn discounted-rail__scroll-btn--left"
+                onClick={scrollLeft}
+                aria-label="Scroll left"
+              >
+                <ChevronLeft size={20} />
+              </button>
+            )}
+
+            {/* Right Arrow */}
+            {canScrollRight && (
+              <button
+                className="discounted-rail__scroll-btn discounted-rail__scroll-btn--right"
+                onClick={scrollRight}
+                aria-label="Scroll right"
+              >
+                <ChevronRight size={20} />
+              </button>
+            )}
+
             <div
               ref={scrollerRef}
               className="discounted-rail__scroller"

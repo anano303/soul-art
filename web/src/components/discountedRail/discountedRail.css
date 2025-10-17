@@ -111,20 +111,38 @@
   position: relative;
 }
 
-.discounted-rail__scroller-shell.has-overflow::after {
-  content: "";
+.discounted-rail__scroll-btn {
   position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  width: 3rem;
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    rgba(255, 255, 255, 0.8) 100%
-  );
-  pointer-events: none;
-  z-index: 2;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.95);
+  color: var(--primary-color, #012645);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(8px);
+}
+
+.discounted-rail__scroll-btn:hover {
+  background: rgba(255, 255, 255, 1);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+  transform: translateY(-50%) scale(1.05);
+}
+
+.discounted-rail__scroll-btn--left {
+  left: 0.5rem;
+}
+
+.discounted-rail__scroll-btn--right {
+  right: 0.5rem;
 }
 
 .discounted-rail__scroller {
@@ -172,6 +190,12 @@
   .discounted-rail__cta {
     margin-top: 0;
     align-self: flex-start;
+  }
+}
+
+@media (max-width: 768px) {
+  .discounted-rail__scroll-btn {
+    display: none;
   }
 }
 
