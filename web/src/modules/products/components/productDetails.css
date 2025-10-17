@@ -488,6 +488,8 @@ body {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   font-family: FiraGo, serif;
   letter-spacing: 0.5px;
+  z-index: 0;
+  isolation: isolate;
 }
 
 .try-on-wall-btn::before {
@@ -499,7 +501,7 @@ body {
   bottom: -2px;
   border-radius: 12px;
   background: linear-gradient(45deg, #6a11cb, #2575fc, #ff758c, #ff7eb3);
-  z-index: 1;
+  z-index: -1;
   opacity: 0;
   transition: opacity 0.3s ease;
 }
@@ -592,6 +594,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
+  overflow-y: auto;
 }
 
 .fullscreen-image {

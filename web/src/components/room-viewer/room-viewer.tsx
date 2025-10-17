@@ -6,7 +6,6 @@ import { motion } from "framer-motion";
 import "./room-viewer.css";
 import { useLanguage } from "@/hooks/LanguageContext";
 
-// Import room images to ensure they're properly loaded
 import livingRoomImg from "@/assets/roomview/Living_Room-removebg-preview.png";
 import bedroomImg from "@/assets/roomview/bedroom-removebg-preview.png";
 import kitchenImg from "@/assets/roomview/dinning.png";
@@ -46,19 +45,16 @@ export function RoomViewer({ productImage, isOpen, onClose }: RoomViewerProps) {
   const [currentRoom, setCurrentRoom] = useState<RoomType>("living");
   const [wallColor, setWallColor] = useState("#FFFFFF");
   const [productPosition, setProductPosition] = useState({ x: 0, y: 0 });
-  const [productSize, setProductSize] = useState(45); // increased from 30 to 45 percentage of container height
+  const [productSize, setProductSize] = useState(45);
   const [roomImagesLoaded, setRoomImagesLoaded] = useState(false);
   const [productLoaded, setProductLoaded] = useState(false);
   const { t } = useLanguage();
 
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Verify room images are loaded properly
   useEffect(() => {
-    // Check if all room images exist and are loaded
     const checkImagesLoaded = async () => {
       try {
-        // Just verify the images exist
         if (livingRoomImg && bedroomImg && kitchenImg && hallImg) {
           setRoomImagesLoaded(true);
         }
@@ -70,30 +66,38 @@ export function RoomViewer({ productImage, isOpen, onClose }: RoomViewerProps) {
     checkImagesLoaded();
   }, []);
 
-  // Reset product position to center when room changes or modal opens
   useEffect(() => {
     setProductPosition({ x: 0, y: 0 });
   }, [currentRoom, isOpen]);
 
-  // Log when product image changes to help with debugging
   useEffect(() => {
-    console.log("Product image:", productImage);
     setProductLoaded(false);
   }, [productImage]);
 
-  // Fix the size calculation to ensure it's applying correctly
   useEffect(() => {
-    if (productImage) {
-      // Reset position and size when product changes
-      setProductPosition({ x: 0, y: 0 });
-      // Set a reasonable default size
-      setProductSize(45);
+    if (!productImage) {
+      return;
     }
+
+    setProductPosition({ x: 0, y: 0 });
+    setProductSize(45);
   }, [productImage]);
+
+  useEffect(() => {
+    if (typeof document === "undefined" || !isOpen) {
+      return;
+    }
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [isOpen]);
 
   const handleRoomChange = (room: RoomType) => {
     setCurrentRoom(room);
-    // Reset product position when room changes
     setProductPosition({ x: 0, y: 0 });
   };
 
@@ -101,161 +105,192 @@ export function RoomViewer({ productImage, isOpen, onClose }: RoomViewerProps) {
     setWallColor(color);
   };
 
-  // Handle size change with immediate feedback
-  const handleSizeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newSize = Number(e.target.value);
-    setProductSize(newSize);
-    console.log("Size changed to:", newSize);
+  const handleSizeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setProductSize(Number(event.target.value));
   };
 
-  if (!isOpen) return null;
+  if (!isOpen) {
+    return null;
+  }
 
   return (
-    <div className="room-viewer-overlay">
+    <div
+      className="room-viewer-overlay"
+      role="dialog"
+      aria-modal="true"
+      aria-label={t("roomViewer.title")}
+    >
       <div className="room-viewer-modal">
-        <button className="close-button" onClick={onClose}>
-          ×
-        </button>
-
-        <h2 className="room-viewer-title">{t("roomViewer.title")}</h2>
-
-        <div className="room-controls">
-          <div className="room-selector">
-            <label>{t("roomViewer.chooseRoom")}:</label>
-            <div className="room-buttons">
-              <button
-                className={currentRoom === "living" ? "active" : ""}
-                onClick={() => handleRoomChange("living")}
-              >
-                {t("roomViewer.livingRoom")}
-              </button>
-              <button
-                className={currentRoom === "bedroom" ? "active" : ""}
-                onClick={() => handleRoomChange("bedroom")}
-              >
-                {t("roomViewer.bedroom")}
-              </button>
-              <button
-                className={currentRoom === "kitchen" ? "active" : ""}
-                onClick={() => handleRoomChange("kitchen")}
-              >
-                {t("roomViewer.kitchen")}
-              </button>
-              <button
-                className={currentRoom === "hall" ? "active" : ""}
-                onClick={() => handleRoomChange("hall")}
-              >
-                {t("roomViewer.hall")}
-              </button>
-            </div>
-          </div>
-
-          <div className="product-size-control">
-            <label>
-              {t("roomViewer.artworkSize")}: {productSize}%
-            </label>
-            <input
-              type="range"
-              min="15"
-              max="70"
-              value={productSize}
-              onChange={handleSizeChange}
-            />
-          </div>
-
-          <div className="color-selector">
-            <label>{t("roomViewer.wallColor")}:</label>
-            <div className="color-options">
-              {colorOptions.map((color) => (
-                <button
-                  key={color.value}
-                  className={`color-option ${
-                    wallColor === color.value ? "active" : ""
-                  }`}
-                  style={{ backgroundColor: color.value }}
-                  onClick={() => handleColorChange(color.value)}
-                  title={color.name}
-                />
-              ))}
-            </div>
-          </div>
+        <div className="room-viewer-header">
+          <h2 className="room-viewer-title">{t("roomViewer.title")}</h2>
+          <button
+            type="button"
+            className="room-viewer-close"
+            onClick={onClose}
+            aria-label={t("roomViewer.close") || "Close"}
+          >
+            ×
+          </button>
         </div>
 
-        <div
-          className="room-view-container"
-          ref={containerRef}
-          style={{ backgroundColor: wallColor }}
-        >
-          <div className="room-image-wrapper">
-            {roomImagesLoaded ? (
-              <Image
-                src={rooms[currentRoom]}
-                alt={`${currentRoom} view`}
-                fill
-                className="room-image"
-              />
-            ) : (
-              <div className="loading-message">{t("roomViewer.loading")}</div>
-            )}
-
-            <motion.div
-              className="product-on-wall"
-              drag
-              dragConstraints={containerRef}
-              dragMomentum={false}
-              style={{
-                height: `${productSize}%`,
-                width: "auto",
-                position: "absolute",
-                top: "40%",
-                left: "50%",
-                transform: "translate(-50%, -50%)",
-                x: productPosition.x,
-                y: productPosition.y,
-              }}
-              onDragEnd={(event, info) => {
-                setProductPosition({
-                  x: productPosition.x + info.offset.x,
-                  y: productPosition.y + info.offset.y,
-                });
-              }}
+        <div className="room-viewer-body">
+          <div className="room-preview" aria-live="polite">
+            <div
+              className="room-view-container"
+              ref={containerRef}
+              style={{ backgroundColor: wallColor }}
             >
-              {productImage && (
-                <div className="product-image-container">
+              <div className="room-image-wrapper">
+                {roomImagesLoaded ? (
                   <Image
-                    src={productImage}
-                    alt="Product"
-                    width={300}
-                    height={300}
-                    className="room-product-image"
-                    style={{
-                      objectFit: "contain",
-                      width: "auto",
-                      height: "100%",
-                      border: "none",
-                      clipPath: "none",
-                      WebkitClipPath: "none",
-                    }}
-                    unoptimized={true} // Use original image without Next.js optimization
-                    loading="eager"
-                    onLoad={() => setProductLoaded(true)}
-                    onError={(e) => {
-                      console.error("Error loading product image:", e);
-                    }}
+                    src={rooms[currentRoom]}
+                    alt={`${currentRoom} view`}
+                    fill
+                    className="room-image"
+                    priority
                   />
-                  {!productLoaded && (
-                    <div className="product-loading">
-                      {t("roomViewer.artworkLoading")}
+                ) : (
+                  <div className="loading-message">
+                    {t("roomViewer.loading")}
+                  </div>
+                )}
+
+                <motion.div
+                  className="product-on-wall"
+                  drag
+                  dragConstraints={containerRef}
+                  dragMomentum={false}
+                  style={{
+                    height: `${productSize}%`,
+                    width: "auto",
+                    position: "absolute",
+                    top: "40%",
+                    left: "50%",
+                    transform: "translate(-50%, -50%)",
+                    x: productPosition.x,
+                    y: productPosition.y,
+                  }}
+                  onDragEnd={(event, info) => {
+                    setProductPosition({
+                      x: productPosition.x + info.offset.x,
+                      y: productPosition.y + info.offset.y,
+                    });
+                  }}
+                >
+                  {productImage && (
+                    <div className="product-image-container">
+                      <Image
+                        src={productImage}
+                        alt="Artwork"
+                        width={320}
+                        height={320}
+                        className="room-product-image"
+                        style={{
+                          objectFit: "contain",
+                          width: "auto",
+                          height: "100%",
+                          border: "none",
+                          clipPath: "none",
+                          WebkitClipPath: "none",
+                        }}
+                        unoptimized
+                        loading="eager"
+                        onLoad={() => setProductLoaded(true)}
+                        onError={(e) => {
+                          console.error("Error loading product image:", e);
+                        }}
+                      />
+                      {!productLoaded && (
+                        <div className="product-loading">
+                          {t("roomViewer.artworkLoading")}
+                        </div>
+                      )}
                     </div>
                   )}
-                </div>
-              )}
-            </motion.div>
+                </motion.div>
+              </div>
+            </div>
+            <div className="instructions">
+              <p>{t("roomViewer.instructions")}</p>
+            </div>
           </div>
-        </div>
 
-        <div className="instructions">
-          <p>{t("roomViewer.instructions")}</p>
+          <div className="room-controls-panel">
+            <div className="room-selector control-card">
+              <label>{t("roomViewer.chooseRoom")}</label>
+              <div className="room-buttons">
+                <button
+                  type="button"
+                  className={currentRoom === "living" ? "active" : ""}
+                  onClick={() => handleRoomChange("living")}
+                >
+                  {t("roomViewer.livingRoom")}
+                </button>
+                <button
+                  type="button"
+                  className={currentRoom === "bedroom" ? "active" : ""}
+                  onClick={() => handleRoomChange("bedroom")}
+                >
+                  {t("roomViewer.bedroom")}
+                </button>
+                <button
+                  type="button"
+                  className={currentRoom === "kitchen" ? "active" : ""}
+                  onClick={() => handleRoomChange("kitchen")}
+                >
+                  {t("roomViewer.kitchen")}
+                </button>
+                <button
+                  type="button"
+                  className={currentRoom === "hall" ? "active" : ""}
+                  onClick={() => handleRoomChange("hall")}
+                >
+                  {t("roomViewer.hall")}
+                </button>
+              </div>
+            </div>
+
+            <div className="product-size-control control-card">
+              <label htmlFor="artwork-size-slider">
+                {t("roomViewer.artworkSize")}: {productSize}%
+              </label>
+              <input
+                id="artwork-size-slider"
+                type="range"
+                min="15"
+                max="70"
+                value={productSize}
+                onChange={handleSizeChange}
+              />
+            </div>
+
+            <div className="color-selector control-card">
+              <label>{t("roomViewer.wallColor")}</label>
+              <div className="color-options">
+                {colorOptions.map((color) => (
+                  <button
+                    type="button"
+                    key={color.value}
+                    className={`color-option ${
+                      wallColor === color.value ? "active" : ""
+                    }`}
+                    style={{ backgroundColor: color.value }}
+                    onClick={() => handleColorChange(color.value)}
+                    title={color.name}
+                    aria-label={color.name}
+                  />
+                ))}
+              </div>
+            </div>
+
+            <button
+              type="button"
+              className="room-viewer-close-mobile"
+              onClick={onClose}
+            >
+              {t("roomViewer.close") || "Close"}
+            </button>
+          </div>
         </div>
       </div>
     </div>
