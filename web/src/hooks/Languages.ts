@@ -383,6 +383,7 @@ export const TRANSLATIONS: Translations = {
         "გადაიტანეთ არჩეული პროდუქტი კედელზე სასურველ პოზიციაზე. გამოიყენეთ ზომის რეგულატორი.",
       loading: "ოთახის სურათების ჩატვირთვა...",
       artworkLoading: "ნამუშევრების ჩატვირთვა...",
+      close: "დახურვა",
     },
 
     // Profile
@@ -1664,6 +1665,7 @@ export const TRANSLATIONS: Translations = {
         "Drag the selected product to the desired position on the wall. Use the size regulator.",
       loading: "Loading room images...",
       artworkLoading: "Loading artwork...",
+      close:"close",
     },
 
     // Profile
