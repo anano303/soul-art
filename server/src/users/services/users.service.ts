@@ -23,6 +23,7 @@ import { BecomeSellerDto } from '../dtos/become-seller.dto';
 import { AdminProfileDto } from '../dtos/admin.profile.dto';
 import { AwsS3Service } from '@/aws-s3/aws-s3.service';
 import { UserCloudinaryService } from './user-cloudinary.service';
+import { generateBaseArtistSlug } from '@/utils/slug-generator';
 import { BalanceService } from './balance.service';
 import { ReferralsService } from '@/referrals/services/referrals.service';
 import { UpdateArtistProfileDto } from '../dtos/update-artist-profile.dto';
@@ -1033,6 +1034,52 @@ export class UsersService {
     return this.createMany(generatedUsers);
   }
 
+  /**
+   * Generate a unique artist slug for a new seller
+   */
+  private async generateUniqueArtistSlug(
+    storeName?: string,
+    email?: string,
+    name?: string
+  ): Promise<string> {
+    // Generate base slug
+    const baseSlug = generateBaseArtistSlug(storeName, email, name);
+    
+    // If base slug is empty or too short, use a default
+    let slug = baseSlug || 'artist';
+    if (slug.length < 3) {
+      slug = 'artist';
+    }
+    
+    // Check if slug already exists
+    let counter = 1;
+    let uniqueSlug = slug;
+    
+    while (true) {
+      const existingUser = await this.userModel.findOne({ 
+        artistSlug: uniqueSlug 
+      }).lean();
+      
+      if (!existingUser) {
+        // Slug is unique, we can use it
+        break;
+      }
+      
+      // Slug exists, try with counter
+      uniqueSlug = `${slug}${counter}`;
+      counter++;
+      
+      // Safety check to prevent infinite loop
+      if (counter > 9999) {
+        uniqueSlug = `${slug}${Date.now()}`;
+        break;
+      }
+    }
+    
+    this.logger.log(`Generated unique artist slug: ${uniqueSlug} (base: ${baseSlug})`);
+    return uniqueSlug;
+  }
+
   async createSeller(dto: SellerRegisterDto): Promise<UserDocument> {
     try {
       const existingUser = await this.findByEmail(dto.email.toLowerCase());
@@ -1040,12 +1087,20 @@ export class UsersService {
         throw new ConflictException('User with this email already exists');
       }
 
+      // Generate unique artist slug
+      const artistSlug = await this.generateUniqueArtistSlug(
+        dto.storeName,
+        dto.email,
+        dto.storeName // Use storeName as fallback name
+      );
+
       const sellerData = {
         ...dto,
         name: dto.storeName,
         email: dto.email.toLowerCase(),
         role: Role.Seller,
         password: dto.password,
+        artistSlug, // Add the generated slug
       };
 
       return await this.create(sellerData);
@@ -1070,6 +1125,13 @@ export class UsersService {
         throw new ConflictException('User with this email already exists');
       }
 
+      // Generate unique artist slug
+      const artistSlug = await this.generateUniqueArtistSlug(
+        dto.storeName,
+        dto.email,
+        dto.ownerFirstName + ' ' + dto.ownerLastName // Use ownerFirstName and ownerLastName as fallback name
+      );
+
       // Create the seller account first
       const sellerData = {
         ...dto,
@@ -1077,6 +1139,7 @@ export class UsersService {
         email: dto.email.toLowerCase(),
         role: Role.Seller,
         password: dto.password,
+        artistSlug, // Add the generated slug
       };
 
       const seller = await this.create(sellerData);
