@@ -30,6 +30,15 @@ import { CacheManager } from "@/components/cache-manager/cache-manager";
 import PWAManager from "@/components/pwa-manager";
 import "@/lib/cloudflare-cleanup"; // Auto-cleanup Cloudflare cookies in development
 
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  // Also prevent zoom on input focus (iOS)
+  viewportFit: 'cover'
+}
+
 export const metadata: Metadata = {
   metadataBase: new URL(
     process.env.NEXT_PUBLIC_CLIENT_URL || "https://soulart.ge"
