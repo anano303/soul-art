@@ -36,10 +36,20 @@
   position: relative;
   z-index: 1;
   display: flex;
-  align-items: center;
-  gap: 2.5rem;
+  flex-direction: column;
+  gap: 1.5rem;
   padding: 3rem;
   color: #fff;
+}
+
+.artist-hero__main-row {
+  display: flex;
+  align-items: center;
+  gap: 2.5rem;
+}
+
+.artist-hero__bio-row {
+  width: 100%;
 }
 
 .artist-hero__avatar {
@@ -76,6 +86,20 @@
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
+}
+
+.artist-hero__title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.artist-hero__title-row h1 {
+  margin: 0;
+  flex: 1;
+  min-width: 200px;
 }
 
 .artist-hero__actions {
@@ -447,24 +471,37 @@
 }
 
 @media (max-width: 960px) {
-  .artist-hero__content {
-    flex-direction: column;
+  .artist-hero__main-row {
+    flex-direction: row;
     align-items: flex-start;
     text-align: left;
+    gap: 1.5rem;
   }
 
   .artist-hero__avatar {
     width: 120px;
     height: 120px;
+    flex-shrink: 0;
   }
 
   .artist-hero__info {
     max-width: 100%;
+    flex: 1;
   }
 
   .artist-hero__actions {
     width: 100%;
     justify-content: flex-start;
+  }
+
+  .artist-hero__bio-row {
+    margin-top: 1rem;
+    text-align: left;
+  }
+
+  .artist-hero__bio {
+    font-size: 0.9rem;
+    line-height: 1.5;
   }
 
   .artist-edit-button {
@@ -499,6 +536,12 @@
 
   .artist-hero__content {
     padding: 2rem 15px;
+    gap: 1rem;
+  }
+
+  .artist-hero__avatar {
+    width: 100px;
+    height: 100px;
   }
 }
 
@@ -526,6 +569,16 @@
   
   .artist-hero__stat-label {
     font-size: 0.75rem;
+  }
+
+  .artist-hero__title-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
+  .artist-hero__title-row h1 {
+    min-width: unset;
   }
 }
 
@@ -772,5 +825,125 @@
   .artist-gallery-card__image {
     width: 100%;
     max-width: 100%;
+  }
+}
+
+/* Info Tab Styles */
+.artist-tab-panel--info {
+  padding: 2rem;
+}
+
+.artist-info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 2rem;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.artist-info-section {
+  background: rgba(1, 38, 69, 0.02);
+  border: 1px solid rgba(1, 38, 69, 0.08);
+  border-radius: 12px;
+  padding: 1.5rem;
+  transition: all 0.2s ease;
+}
+
+.artist-info-section:hover {
+  background: rgba(1, 38, 69, 0.04);
+  border-color: rgba(1, 38, 69, 0.12);
+}
+
+.artist-info-section__title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #012645;
+  margin: 0 0 1rem 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.artist-info-text {
+  color: #475569;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.artist-info-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.artist-info-tag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem 1rem;
+  background: rgba(1, 38, 69, 0.08);
+  color: #012645;
+  border-radius: 20px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  border: 1px solid rgba(1, 38, 69, 0.12);
+  transition: all 0.2s ease;
+}
+
+.artist-info-tag:hover {
+  background: rgba(1, 38, 69, 0.12);
+  transform: translateY(-1px);
+}
+
+.artist-info-socials {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.artist-info-social-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 1.25rem;
+  background: linear-gradient(135deg, #012645, #452001);
+  color: white;
+  text-decoration: none;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
+}
+
+.artist-info-social-link:hover {
+  background: linear-gradient(135deg, #0f3c69, #6b2f01);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(1, 38, 69, 0.3);
+  color: white;
+}
+
+/* Mobile responsive for info tab */
+@media (max-width: 768px) {
+  .artist-tab-panel--info {
+    padding: 1rem;
+  }
+  
+  .artist-info-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .artist-info-section {
+    padding: 1rem;
+  }
+  
+  .artist-info-socials {
+    gap: 0.5rem;
+  }
+  
+  .artist-info-social-link {
+    padding: 0.6rem 1rem;
+    font-size: 0.8rem;
   }
 }

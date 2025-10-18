@@ -13,7 +13,7 @@ import { GalleryLikeButton } from "@/components/gallery-like-button";
 import { GalleryComments } from "@/components/gallery-comments";
 import { GalleryViewer } from "@/components/gallery-viewer";
 import { useGalleryInteractions } from "@/hooks/useGalleryInteractions";
-import { Grid3X3, ShoppingBag } from "lucide-react";
+import { Grid3X3, ShoppingBag, Info } from "lucide-react";
 import BrushTrail from "@/components/BrushTrail/BrushTrail";
 import { FollowButton } from "@/components/follow-button/follow-button";
 import { FollowersModal } from "@/components/followers-modal/followers-modal";
@@ -66,6 +66,10 @@ function getSaleCopy(language: "en" | "ge") {
 
 function getGalleryCopy(language: "en" | "ge") {
   return language === "en" ? "Portfolio showcase" : "პორტფოლიოს ნამუშევრები";
+}
+
+function getInfoCopy(language: "en" | "ge") {
+  return language === "en" ? "Artist info" : "არტისტის ინფორმაცია";
 }
 
 function getDisciplinesCopy(language: "en" | "ge") {
@@ -131,7 +135,7 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
   const queryClient = useQueryClient();
   const { artist, products } = data;
   const [showEditor, setShowEditor] = useState(false);
-  const [activeTab, setActiveTab] = useState<'sale' | 'gallery'>('sale');
+  const [activeTab, setActiveTab] = useState<'sale' | 'gallery' | 'info'>('sale');
   const [viewerOpen, setViewerOpen] = useState(false);
   const [viewerIndex, setViewerIndex] = useState(0);
   const [followersModalOpen, setFollowersModalOpen] = useState(false);
@@ -210,133 +214,87 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
       >
         <div className="artist-hero__overlay" />
         <div className="artist-hero__content">
-          <div className="artist-hero__avatar">
-            {avatar ? (
-              <CloudinaryImage
-                src={avatar}
-                alt={artist.storeName || artist.name}
-                width={150}
-                height={150}
-                className="artist-hero__avatar-img"
-              />
-            ) : (
-              <div className="artist-hero__avatar-placeholder">
-                {(artist.storeName || artist.name || "?")
-                  .charAt(0)
-                  .toUpperCase()}
-              </div>
-            )}
-          </div>
-          <div className="artist-hero__info">
-            <div className="artist-hero__title-row">
-              <h1>{artist.storeName || artist.name}</h1>
-              {/* Social networks next to name */}
-              {anySocial && (
-                <div className="artist-socials">
-                  {socialOrder.map(({ key, label }) => {
-                    const value = artist.artistSocials?.[key];
-                    if (!value) return null;
-                    const href = value.startsWith("http")
-                      ? value
-                      : `https://${value}`;
-                    return (
-                      <a
-                        key={key}
-                        href={href}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="artist-socials__link"
-                      >
-                        {label}
-                      </a>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-            {artist.artistLocation && (
-              <p className="artist-hero__location">{artist.artistLocation}</p>
-            )}
-            {isOwner && (
-              <div className="artist-hero__actions">
-                <button
-                  type="button"
-                  className="artist-edit-button"
-                  onClick={toggleEditor}
-                >
-                  {language === "en"
-                    ? showEditor
-                      ? "Hide editing"
-                      : "Edit artist page"
-                    : showEditor
-                    ? "დამალე რედაქტირება"
-                    : "რედაქტირება"}
-                </button>
-              </div>
-            )}
-            <p className="artist-hero__commissions">
-              {getCommissionsCopy(
-                language,
-                Boolean(artist.artistOpenForCommissions)
-              )}
-            </p>
-            {biography && <p className="artist-hero__bio">{biography}</p>}
-            
-            {/* Followers stats and Follow button */}
-            <div className="artist-hero__stats">
-              {isOwner ? (
-                <button
-                  type="button"
-                  className="artist-hero__stat-button"
-                  onClick={() => setFollowersModalOpen(true)}
-                >
-                  <span className="artist-hero__stat-number">
-                    {followersCount}
-                  </span>
-                  <span className="artist-hero__stat-label">
-                    {language === "en" ? "followers" : "მიმდევრები"}
-                  </span>
-                </button>
-              ) : (
-                <div className="artist-hero__stat">
-                  <span className="artist-hero__stat-number">
-                    {followersCount}
-                  </span>
-                  <span className="artist-hero__stat-label">
-                    {language === "en" ? "followers" : "მიმდევრები"}
-                  </span>
-                </div>
-              )}
-              {!isOwner && (
-                <FollowButton 
-                  targetUserId={artist.id} 
-                  targetUserName={artist.storeName || artist.name}
-                  onFollowChange={handleFollowChange}
+          {/* Top row: Avatar and main info */}
+          <div className="artist-hero__main-row">
+            <div className="artist-hero__avatar">
+              {avatar ? (
+                <CloudinaryImage
+                  src={avatar}
+                  alt={artist.storeName || artist.name}
+                  width={150}
+                  height={150}
+                  className="artist-hero__avatar-img"
                 />
-              )}
-            </div>
-            
-            {/* Highlights and Disciplines - now in header */}
-            <div className="artist-hero__tags">
-              {(artist.artistDisciplines?.length ?? 0) > 0 && (
-                <div className="artist-hero__tag-group">
-                  <span className="artist-hero__tag-label">{getDisciplinesCopy(language)}</span>
-                  <div className="artist-hero__tags-list">
-                    {artist.artistDisciplines!.slice(0, 3).map((discipline) => (
-                      <span key={discipline} className="artist-hero__tag artist-hero__tag--outline">
-                        {discipline}
-                      </span>
-                    ))}
-                    {(artist.artistDisciplines?.length ?? 0) > 3 && (
-                      <span className="artist-hero__tag artist-hero__tag--outline artist-hero__tag--more">
-                        +{(artist.artistDisciplines?.length ?? 0) - 3}
-                      </span>
-                    )}
-                  </div>
+              ) : (
+                <div className="artist-hero__avatar-placeholder">
+                  {(artist.storeName || artist.name || "?")
+                    .charAt(0)
+                    .toUpperCase()}
                 </div>
               )}
             </div>
+            <div className="artist-hero__info">
+              <div className="artist-hero__title-row">
+                <h1>{artist.storeName || artist.name}</h1>
+                {isOwner && (
+                  <button
+                    type="button"
+                    className="artist-edit-button"
+                    onClick={toggleEditor}
+                  >
+                    {language === "en"
+                      ? showEditor
+                        ? "Hide editing"
+                        : "Edit artist page"
+                      : showEditor
+                      ? "დამალე რედაქტირება"
+                      : "რედაქტირება"}
+                  </button>
+                )}
+              </div>
+              
+              {/* Followers stats and Follow button */}
+              <div className="artist-hero__stats">
+                {isOwner ? (
+                  <button
+                    type="button"
+                    className="artist-hero__stat-button"
+                    onClick={() => setFollowersModalOpen(true)}
+                  >
+                    <span className="artist-hero__stat-number">
+                      {followersCount}
+                    </span>
+                    <span className="artist-hero__stat-label">
+                      {language === "en" ? "followers" : "მიმდევრები"}
+                    </span>
+                  </button>
+                ) : (
+                  <div className="artist-hero__stat">
+                    <span className="artist-hero__stat-number">
+                      {followersCount}
+                    </span>
+                    <span className="artist-hero__stat-label">
+                      {language === "en" ? "followers" : "მიმდევრები"}
+                    </span>
+                  </div>
+                )}
+                {!isOwner && (
+                  <FollowButton 
+                    targetUserId={artist.id} 
+                    targetUserName={artist.storeName || artist.name}
+                    onFollowChange={handleFollowChange}
+                  />
+                )}
+              </div>
+            </div>
           </div>
+          
+          {/* Bottom row: Biography spanning full width */}
+          {biography && (
+            <div className="artist-hero__bio-row">
+              <p className="artist-hero__bio">{biography}</p>
+            </div>
+          )}
         </div>
       </section>
 
@@ -372,6 +330,14 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
               title={getGalleryCopy(language)}
             >
               <Grid3X3 className="artist-tabs__tab-icon" size={24} />
+            </button>
+            <button
+              type="button"
+              className={`artist-tabs__tab ${activeTab === 'info' ? 'artist-tabs__tab--active' : ''}`}
+              onClick={() => setActiveTab('info')}
+              title={getInfoCopy(language)}
+            >
+              <Info className="artist-tabs__tab-icon" size={24} />
             </button>
           </div>
 
@@ -458,6 +424,82 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
                     <p className="artist-empty-state__text">{galleryEmptyCopy}</p>
                   </div>
                 )}
+              </section>
+            )}
+
+            {activeTab === 'info' && (
+              <section className="artist-tab-panel artist-tab-panel--info">
+                <div className="artist-info-grid">
+                  
+                  {/* Creative Focus */}
+                  {(artist.artistDisciplines?.length ?? 0) > 0 && (
+                    <div className="artist-info-section">
+                      <h3 className="artist-info-section__title">
+                        {getDisciplinesCopy(language)}
+                      </h3>
+                      <div className="artist-info-tags">
+                        {artist.artistDisciplines!.map((discipline) => (
+                          <span key={discipline} className="artist-info-tag">
+                            {discipline}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Location */}
+                  {artist.artistLocation && (
+                    <div className="artist-info-section">
+                      <h3 className="artist-info-section__title">
+                        {language === "en" ? "Location" : "მდებარეობა"}
+                      </h3>
+                      <p className="artist-info-text">{artist.artistLocation}</p>
+                    </div>
+                  )}
+
+                  {/* Commissions */}
+                  <div className="artist-info-section">
+                    <h3 className="artist-info-section__title">
+                      {language === "en" ? "Custom Orders" : "ინდივიდუალური შეკვეთები"}
+                    </h3>
+                    <p className="artist-info-text">
+                      {getCommissionsCopy(
+                        language,
+                        Boolean(artist.artistOpenForCommissions)
+                      )}
+                    </p>
+                  </div>
+
+                  {/* Social Links */}
+                  {anySocial && (
+                    <div className="artist-info-section">
+                      <h3 className="artist-info-section__title">
+                        {language === "en" ? "Connect" : "დაკავშირება"}
+                      </h3>
+                      <div className="artist-info-socials">
+                        {socialOrder.map(({ key, label }) => {
+                          const value = artist.artistSocials?.[key];
+                          if (!value) return null;
+                          const href = value.startsWith("http")
+                            ? value
+                            : `https://${value}`;
+                          return (
+                            <a
+                              key={key}
+                              href={href}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="artist-info-social-link"
+                            >
+                              {label}
+                            </a>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+
+                </div>
               </section>
             )}
           </div>
