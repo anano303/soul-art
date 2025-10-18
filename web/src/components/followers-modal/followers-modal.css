@@ -1,0 +1,236 @@
+/* Followers Modal Styles */
+.followers-modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.followers-modal {
+  background: white;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 500px;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  overflow: hidden;
+}
+
+.followers-modal__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.followers-modal__title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 18px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.followers-modal__count {
+  color: #6b7280;
+  font-weight: 400;
+  font-size: 16px;
+}
+
+.followers-modal__close {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 6px;
+  color: #6b7280;
+  transition: all 0.2s ease;
+}
+
+.followers-modal__close:hover {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+.followers-modal__content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0;
+}
+
+.followers-modal__loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  color: #6b7280;
+}
+
+.followers-modal__empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 24px;
+  text-align: center;
+  color: #6b7280;
+}
+
+.followers-modal__empty svg {
+  margin-bottom: 12px;
+  opacity: 0.5;
+}
+
+.followers-modal__empty p {
+  font-size: 16px;
+  font-weight: 500;
+  margin: 0 0 4px 0;
+  color: #374151;
+}
+
+.followers-modal__empty span {
+  font-size: 14px;
+  color: #6b7280;
+}
+
+/* Followers List */
+.followers-list {
+  padding: 0;
+}
+
+.follower-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 24px;
+  transition: background-color 0.2s ease;
+}
+
+.follower-item:hover {
+  background: #f9fafb;
+}
+
+.follower-item__avatar {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  overflow: hidden;
+}
+
+.follower-item__image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.follower-item__placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  font-weight: 600;
+  font-size: 16px;
+}
+
+.follower-item__info {
+  flex: 1;
+  min-width: 0;
+}
+
+.follower-item__name {
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+  color: #111827;
+  margin-bottom: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.follower-item__name--link {
+  color: var(--primary-color, #012645);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.follower-item__name--link:hover {
+  color: var(--secondary-color, #452001);
+  text-decoration: underline;
+}
+
+.follower-item__email {
+  display: block;
+  font-size: 12px;
+  color: #6b7280;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Load More Button */
+.followers-modal__load-more {
+  display: block;
+  width: calc(100% - 48px);
+  margin: 16px 24px 24px 24px;
+  padding: 10px;
+  background: #f3f4f6;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  color: #374151;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.followers-modal__load-more:hover:not(:disabled) {
+  background: #e5e7eb;
+}
+
+.followers-modal__load-more:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .followers-modal-backdrop {
+    padding: 10px;
+  }
+
+  .followers-modal {
+    max-height: 90vh;
+  }
+
+  .followers-modal__header {
+    padding: 16px 20px;
+  }
+
+  .followers-modal__title {
+    font-size: 16px;
+  }
+
+  .follower-item {
+    padding: 10px 20px;
+  }
+
+  .followers-modal__load-more {
+    margin: 12px 20px 20px 20px;
+  }
+}

@@ -197,4 +197,77 @@ export class UsersController {
       file.buffer,
     );
   }
+
+  // ============================================
+  // FOLLOWER SYSTEM ENDPOINTS
+  // ============================================
+
+  @ApiOperation({ summary: 'Follow an artist' })
+  @UseGuards(JwtAuthGuard)
+  @Post(':userId/follow')
+  async followUser(
+    @Param('userId') targetUserId: string,
+    @CurrentUser() user: User,
+  ) {
+    await this.usersService.followUser(user['_id'] as string, targetUserId);
+    return { message: 'Successfully followed artist' };
+  }
+
+  @ApiOperation({ summary: 'Unfollow an artist' })
+  @UseGuards(JwtAuthGuard)
+  @Delete(':userId/follow')
+  async unfollowUser(
+    @Param('userId') targetUserId: string,
+    @CurrentUser() user: User,
+  ) {
+    await this.usersService.unfollowUser(user['_id'] as string, targetUserId);
+    return { message: 'Successfully unfollowed artist' };
+  }
+
+  @ApiOperation({ summary: 'Check if following an artist' })
+  @UseGuards(JwtAuthGuard)
+  @Get(':userId/following-status')
+  async getFollowingStatus(
+    @Param('userId') targetUserId: string,
+    @CurrentUser() user: User,
+  ) {
+    const isFollowing = await this.usersService.isFollowing(
+      user['_id'] as string,
+      targetUserId,
+    );
+    return { isFollowing };
+  }
+
+  @ApiOperation({ summary: 'Get followers list for an artist' })
+  @Get(':userId/followers')
+  async getFollowers(
+    @Param('userId') artistId: string,
+    @Query('page') page: string = '1',
+    @Query('limit') limit: string = '20',
+  ) {
+    const pageNumber = parseInt(page, 10);
+    const limitNumber = parseInt(limit, 10);
+    
+    return this.usersService.getFollowers(artistId, pageNumber, limitNumber);
+  }
+
+  @ApiOperation({ summary: 'Get following list for a user' })
+  @UseGuards(JwtAuthGuard)
+  @Get(':userId/following')
+  async getFollowing(
+    @Param('userId') userId: string,
+    @Query('page') page: string = '1',
+    @Query('limit') limit: string = '20',
+    @CurrentUser() user: User,
+  ) {
+    // Only allow users to see their own following list
+    if (userId !== (user['_id'] as string)) {
+      throw new BadRequestException('You can only view your own following list');
+    }
+
+    const pageNumber = parseInt(page, 10);
+    const limitNumber = parseInt(limit, 10);
+    
+    return this.usersService.getFollowing(userId, pageNumber, limitNumber);
+  }
 }

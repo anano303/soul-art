@@ -98,7 +98,52 @@
 
 .artist-edit-button:hover {
   background: rgba(15, 23, 42, 0.55);
+}
+
+/* Hero Stats Section */
+.artist-hero__stats {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.artist-hero__stat,
+.artist-hero__stat-button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.25rem;
+}
+
+.artist-hero__stat-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+  padding: 0.5rem;
+  border-radius: 8px;
+}
+
+.artist-hero__stat-button:hover {
+  background: rgba(255, 255, 255, 0.1);
   transform: translateY(-1px);
+}
+
+.artist-hero__stat-number {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1;
+}
+
+.artist-hero__stat-label {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.85);
+  line-height: 1;
 }
 
 .artist-hero__info h1 {
@@ -468,6 +513,19 @@
 
   .artist-hero__content {
     padding: 1.5rem 10px;
+  }
+
+  /* Responsive stats for mobile */
+  .artist-hero__stats {
+    gap: 1rem;
+  }
+  
+  .artist-hero__stat-number {
+    font-size: 1.25rem;
+  }
+  
+  .artist-hero__stat-label {
+    font-size: 0.75rem;
   }
 }
 

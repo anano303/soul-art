@@ -25,6 +25,8 @@ export interface ArtistProfile {
   artistHighlights: string[];
   artistGallery: string[];
   storeLogo?: string | null;
+  followersCount?: number;
+  followingCount?: number;
 }
 
 export interface ArtistProductSummary {

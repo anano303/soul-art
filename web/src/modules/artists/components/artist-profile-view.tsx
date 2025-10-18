@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState, useCallback, useRef } from "react";
+import { useMemo, useState, useCallback, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import { ArtistProfileResponse, ArtistProductSummary, User } from "@/types";
@@ -15,6 +15,8 @@ import { GalleryViewer } from "@/components/gallery-viewer";
 import { useGalleryInteractions } from "@/hooks/useGalleryInteractions";
 import { Grid3X3, ShoppingBag } from "lucide-react";
 import BrushTrail from "@/components/BrushTrail/BrushTrail";
+import { FollowButton } from "@/components/follow-button/follow-button";
+import { FollowersModal } from "@/components/followers-modal/followers-modal";
 import "./artist-profile-view.css";
 import "@/components/gallery-interactions.css";
 import "@/components/gallery-viewer.css";
@@ -132,6 +134,8 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
   const [activeTab, setActiveTab] = useState<'sale' | 'gallery'>('sale');
   const [viewerOpen, setViewerOpen] = useState(false);
   const [viewerIndex, setViewerIndex] = useState(0);
+  const [followersModalOpen, setFollowersModalOpen] = useState(false);
+  const [followersCount, setFollowersCount] = useState(artist.followersCount || 0);
   const heroRef = useRef<HTMLElement>(null);
 
   const handleSettingsClose = useCallback(() => {
@@ -164,6 +168,22 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
     queryClient.invalidateQueries({ queryKey: ["user"] });
     router.refresh();
   }, [queryClient, router]);
+
+  const handleFollowChange = useCallback((isFollowing: boolean) => {
+    setFollowersCount(prev => isFollowing ? prev + 1 : prev - 1);
+    
+    // Invalidate relevant queries to ensure fresh data on next load
+    queryClient.invalidateQueries({ queryKey: ["user"] });
+    queryClient.invalidateQueries({ queryKey: ["artist-profile"] });
+    
+    // Also refresh the router cache
+    router.refresh();
+  }, [queryClient, router]);
+
+  // Sync local follower count with artist data
+  useEffect(() => {
+    setFollowersCount(artist.followersCount || 0);
+  }, [artist.followersCount]);
 
   const toggleEditor = () => setShowEditor((prev) => !prev);
 
@@ -261,6 +281,40 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
               )}
             </p>
             {biography && <p className="artist-hero__bio">{biography}</p>}
+            
+            {/* Followers stats and Follow button */}
+            <div className="artist-hero__stats">
+              {isOwner ? (
+                <button
+                  type="button"
+                  className="artist-hero__stat-button"
+                  onClick={() => setFollowersModalOpen(true)}
+                >
+                  <span className="artist-hero__stat-number">
+                    {followersCount}
+                  </span>
+                  <span className="artist-hero__stat-label">
+                    {language === "en" ? "followers" : "მიმდევრები"}
+                  </span>
+                </button>
+              ) : (
+                <div className="artist-hero__stat">
+                  <span className="artist-hero__stat-number">
+                    {followersCount}
+                  </span>
+                  <span className="artist-hero__stat-label">
+                    {language === "en" ? "followers" : "მიმდევრები"}
+                  </span>
+                </div>
+              )}
+              {!isOwner && (
+                <FollowButton 
+                  targetUserId={artist.id} 
+                  targetUserName={artist.storeName || artist.name}
+                  onFollowChange={handleFollowChange}
+                />
+              )}
+            </div>
             
             {/* Highlights and Disciplines - now in header */}
             <div className="artist-hero__tags">
@@ -425,6 +479,14 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
         onIndexChange={setViewerIndex}
         getStatsForImage={getStatsForImage}
         updateStats={updateStats}
+      />
+
+      {/* Followers Modal */}
+      <FollowersModal
+        isOpen={followersModalOpen}
+        onClose={() => setFollowersModalOpen(false)}
+        artistId={artist.id}
+        artistName={artist.storeName || artist.name}
       />
     </div>
   );
