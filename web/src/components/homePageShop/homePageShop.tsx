@@ -37,7 +37,7 @@ const HomePageShop = () => {
     queryFn: async () => {
       try {
         const cacheKey = `home-categories-${language}`;
-        
+
         // Try cache first
         const cached = memoryCache.get(cacheKey);
         if (cached) {
@@ -48,7 +48,7 @@ const HomePageShop = () => {
           "/categories?includeInactive=false"
         );
         const data = await response.json();
-        
+
         // Cache for 5 minutes (language-specific)
         memoryCache.set(cacheKey, data, 5 * 60 * 1000);
         return data;
@@ -86,8 +86,8 @@ const HomePageShop = () => {
         return;
       }
 
-      // Fetch products
-      const response = await getProducts(1, 50);
+      // Fetch products - increased to get more products per category
+      const response = await getProducts(1, 100);
       const allProducts = response.items || [];
 
       // Group products by category
@@ -117,7 +117,12 @@ const HomePageShop = () => {
               }
               return false;
             })
-            .slice(0, 6);
+            .slice(0, 8);
+
+          // Debug logging
+          console.log(
+            `Category: ${categoryName}, Products found: ${categoryProds.length}`
+          );
 
           // Only add categories with products
           if (categoryProds.length > 0) {
@@ -275,13 +280,23 @@ const HomePageShop = () => {
                         categoryData.category === "ხელნაკეთი" ||
                         categoryData.category === "Handmade") && (
                         <span className="category-emoji">
-                          <Image src="/handmade.png" alt="Handmade" width={30} height={30} />
+                          <Image
+                            src="/handmade.png"
+                            alt="Handmade"
+                            width={30}
+                            height={30}
+                          />
                         </span>
                       )}
                       {(categoryData.category === "ნახატები" ||
                         categoryData.category === "Paintings") && (
                         <span className="category-emoji">
-                          <Image src="/loading.png" alt="Paintings" width={30} height={30} />
+                          <Image
+                            src="/loading.png"
+                            alt="Paintings"
+                            width={30}
+                            height={30}
+                          />
                         </span>
                       )}
                     </h2>
@@ -297,7 +312,7 @@ const HomePageShop = () => {
                     </div>
                   </div>
                   <ProductGrid
-                    products={categoryData.products.slice(0, 3)} // Only take first 3 products
+                    products={categoryData.products.slice(0, 8)} // Take first 8 products
                     theme={
                       categoryData.category === "ხელნაკეთი" ||
                       categoryData.category === "Handmade" ||
