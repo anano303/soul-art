@@ -23,6 +23,7 @@ import { BecomeSellerDto } from '../dtos/become-seller.dto';
 import { AdminProfileDto } from '../dtos/admin.profile.dto';
 import { AwsS3Service } from '@/aws-s3/aws-s3.service';
 import { UserCloudinaryService } from './user-cloudinary.service';
+import { generateBaseArtistSlug } from '@/utils/slug-generator';
 import { BalanceService } from './balance.service';
 import { ReferralsService } from '@/referrals/services/referrals.service';
 import { UpdateArtistProfileDto } from '../dtos/update-artist-profile.dto';
@@ -647,6 +648,8 @@ export class UsersService {
           artistLocation: artist.artistLocation ?? null,
           artistOpenForCommissions: artist.artistOpenForCommissions ?? false,
           artistSocials: artist.artistSocials ?? {},
+          followersCount: artist.followersCount ?? 0,
+          followingCount: artist.followingCount ?? 0,
           artistHighlights: artist.artistHighlights ?? [],
           artistGallery: (artist.artistGallery ?? []).filter((url: string) =>
             this.isCloudinaryUrl(url),
@@ -1033,6 +1036,52 @@ export class UsersService {
     return this.createMany(generatedUsers);
   }
 
+  /**
+   * Generate a unique artist slug for a new seller
+   */
+  private async generateUniqueArtistSlug(
+    storeName?: string,
+    email?: string,
+    name?: string
+  ): Promise<string> {
+    // Generate base slug
+    const baseSlug = generateBaseArtistSlug(storeName, email, name);
+    
+    // If base slug is empty or too short, use a default
+    let slug = baseSlug || 'artist';
+    if (slug.length < 3) {
+      slug = 'artist';
+    }
+    
+    // Check if slug already exists
+    let counter = 1;
+    let uniqueSlug = slug;
+    
+    while (true) {
+      const existingUser = await this.userModel.findOne({ 
+        artistSlug: uniqueSlug 
+      }).lean();
+      
+      if (!existingUser) {
+        // Slug is unique, we can use it
+        break;
+      }
+      
+      // Slug exists, try with counter
+      uniqueSlug = `${slug}${counter}`;
+      counter++;
+      
+      // Safety check to prevent infinite loop
+      if (counter > 9999) {
+        uniqueSlug = `${slug}${Date.now()}`;
+        break;
+      }
+    }
+    
+    this.logger.log(`Generated unique artist slug: ${uniqueSlug} (base: ${baseSlug})`);
+    return uniqueSlug;
+  }
+
   async createSeller(dto: SellerRegisterDto): Promise<UserDocument> {
     try {
       const existingUser = await this.findByEmail(dto.email.toLowerCase());
@@ -1040,12 +1089,20 @@ export class UsersService {
         throw new ConflictException('User with this email already exists');
       }
 
+      // Generate unique artist slug
+      const artistSlug = await this.generateUniqueArtistSlug(
+        dto.storeName,
+        dto.email,
+        dto.storeName // Use storeName as fallback name
+      );
+
       const sellerData = {
         ...dto,
         name: dto.storeName,
         email: dto.email.toLowerCase(),
         role: Role.Seller,
         password: dto.password,
+        artistSlug, // Add the generated slug
       };
 
       return await this.create(sellerData);
@@ -1070,6 +1127,13 @@ export class UsersService {
         throw new ConflictException('User with this email already exists');
       }
 
+      // Generate unique artist slug
+      const artistSlug = await this.generateUniqueArtistSlug(
+        dto.storeName,
+        dto.email,
+        dto.ownerFirstName + ' ' + dto.ownerLastName // Use ownerFirstName and ownerLastName as fallback name
+      );
+
       // Create the seller account first
       const sellerData = {
         ...dto,
@@ -1077,6 +1141,7 @@ export class UsersService {
         email: dto.email.toLowerCase(),
         role: Role.Seller,
         password: dto.password,
+        artistSlug, // Add the generated slug
       };
 
       const seller = await this.create(sellerData);
@@ -1502,5 +1567,259 @@ export class UsersService {
         `Failed to upgrade to seller: ${error.message}`,
       );
     }
+  }
+
+  // ============================================
+  // FOLLOWER SYSTEM METHODS
+  // ============================================
+
+  /**
+   * Follow an artist/seller
+   */
+  async followUser(followerId: string, targetUserId: string): Promise<void> {
+    if (followerId === targetUserId) {
+      throw new BadRequestException('You cannot follow yourself');
+    }
+
+    // Check if users exist
+    const [follower, target] = await Promise.all([
+      this.findById(followerId),
+      this.findById(targetUserId)
+    ]);
+
+    if (!follower || !target) {
+      throw new NotFoundException('User not found');
+    }
+
+    // Only allow following sellers (artists)
+    if (target.role !== Role.Seller) {
+      throw new BadRequestException('You can only follow artists');
+    }
+
+    // Check if already following
+    if (follower.following?.includes(targetUserId)) {
+      throw new BadRequestException('You are already following this artist');
+    }
+
+    // Update both users atomically
+    const session = await this.userModel.db.startSession();
+    
+    try {
+      await session.withTransaction(async () => {
+        // Add to follower's following list
+        await this.userModel.updateOne(
+          { _id: followerId },
+          { 
+            $addToSet: { following: targetUserId },
+            $inc: { followingCount: 1 }
+          },
+          { session }
+        );
+
+        // Add to target's followers list
+        await this.userModel.updateOne(
+          { _id: targetUserId },
+          { 
+            $addToSet: { followers: followerId },
+            $inc: { followersCount: 1 }
+          },
+          { session }
+        );
+      });
+
+      this.logger.log(`User ${followerId} followed artist ${targetUserId}`);
+    } finally {
+      await session.endSession();
+    }
+  }
+
+  /**
+   * Unfollow an artist/seller
+   */
+  async unfollowUser(followerId: string, targetUserId: string): Promise<void> {
+    if (followerId === targetUserId) {
+      throw new BadRequestException('Invalid operation');
+    }
+
+    // Check if users exist
+    const [follower, target] = await Promise.all([
+      this.findById(followerId),
+      this.findById(targetUserId)
+    ]);
+
+    if (!follower || !target) {
+      throw new NotFoundException('User not found');
+    }
+
+    // Check if currently following
+    if (!follower.following?.includes(targetUserId)) {
+      throw new BadRequestException('You are not following this artist');
+    }
+
+    // Update both users atomically
+    const session = await this.userModel.db.startSession();
+    
+    try {
+      await session.withTransaction(async () => {
+        // Remove from follower's following list
+        await this.userModel.updateOne(
+          { _id: followerId },
+          { 
+            $pull: { following: targetUserId },
+            $inc: { followingCount: -1 }
+          },
+          { session }
+        );
+
+        // Remove from target's followers list
+        await this.userModel.updateOne(
+          { _id: targetUserId },
+          { 
+            $pull: { followers: followerId },
+            $inc: { followersCount: -1 }
+          },
+          { session }
+        );
+      });
+
+      this.logger.log(`User ${followerId} unfollowed artist ${targetUserId}`);
+    } finally {
+      await session.endSession();
+    }
+  }
+
+  /**
+   * Check if user is following another user
+   */
+  async isFollowing(followerId: string, targetUserId: string): Promise<boolean> {
+    const follower = await this.userModel.findById(followerId).select('following').lean();
+    return follower?.following?.includes(targetUserId) || false;
+  }
+
+  /**
+   * Get followers list for an artist
+   */
+  async getFollowers(
+    artistId: string, 
+    page: number = 1, 
+    limit: number = 20
+  ): Promise<PaginatedResponse<any>> {
+    const artist = await this.findById(artistId);
+    if (!artist) {
+      throw new NotFoundException('Artist not found');
+    }
+
+    if (artist.role !== Role.Seller) {
+      throw new BadRequestException('Only artists have followers');
+    }
+
+    console.log('Artist found:', {
+      id: artist._id,
+      name: artist.name,
+      followersArray: artist.followers,
+      followersCount: artist.followersCount
+    });
+
+    const skip = (page - 1) * limit;
+
+    const followers = await this.userModel.aggregate([
+      { $match: { _id: new Types.ObjectId(artistId) } },
+      { $unwind: { path: '$followers', preserveNullAndEmptyArrays: false } },
+      { $skip: skip },
+      { $limit: limit },
+      {
+        $addFields: {
+          followerObjectId: { $toObjectId: '$followers' }
+        }
+      },
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'followerObjectId',
+          foreignField: '_id',
+          as: 'followerDetails'
+        }
+      },
+      { $unwind: '$followerDetails' },
+      {
+        $project: {
+          _id: '$followerDetails._id',
+          name: '$followerDetails.name',
+          email: '$followerDetails.email',
+          profileImagePath: '$followerDetails.profileImagePath',
+          role: '$followerDetails.role',
+          storeName: '$followerDetails.storeName',
+          artistSlug: '$followerDetails.artistSlug'
+        }
+      }
+    ]);
+
+    console.log('Aggregation result:', {
+      followersFound: followers.length,
+      followers: followers
+    });
+
+    const total = artist.followersCount || 0;
+    const totalPages = Math.ceil(total / limit);
+
+    return {
+      items: followers,
+      total,
+      page,
+      pages: totalPages
+    };
+  }
+
+  /**
+   * Get following list for a user
+   */
+  async getFollowing(
+    userId: string, 
+    page: number = 1, 
+    limit: number = 20
+  ): Promise<PaginatedResponse<any>> {
+    const user = await this.findById(userId);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    const skip = (page - 1) * limit;
+
+    const following = await this.userModel.aggregate([
+      { $match: { _id: new Types.ObjectId(userId) } },
+      { $unwind: { path: '$following', preserveNullAndEmptyArrays: false } },
+      { $skip: skip },
+      { $limit: limit },
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'following',
+          foreignField: '_id',
+          as: 'followingDetails'
+        }
+      },
+      { $unwind: '$followingDetails' },
+      {
+        $project: {
+          _id: '$followingDetails._id',
+          name: '$followingDetails.name',
+          storeName: '$followingDetails.storeName',
+          artistSlug: '$followingDetails.artistSlug',
+          profileImagePath: '$followingDetails.profileImagePath',
+          storeLogo: '$followingDetails.storeLogo',
+          artistCoverImage: '$followingDetails.artistCoverImage'
+        }
+      }
+    ]);
+
+    const total = user.followingCount || 0;
+    const totalPages = Math.ceil(total / limit);
+
+    return {
+      items: following,
+      total,
+      page,
+      pages: totalPages
+    };
   }
 }

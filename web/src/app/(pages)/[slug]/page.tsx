@@ -12,7 +12,7 @@ async function fetchArtistProfile(
   const response = await fetch(
     `${API_BASE}/artists/${encodeURIComponent(slug)}`,
     {
-      next: { revalidate: 60 },
+      next: { revalidate: 30 }, // Cache for 30 seconds instead of 60
       cache: "force-cache",
     }
   );

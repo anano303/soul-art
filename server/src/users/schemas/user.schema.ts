@@ -170,6 +170,25 @@ export class User {
 
   @Prop({ type: [String], default: [] })
   artistGallery?: string[];
+
+  // Follower system
+  @Prop({ 
+    type: [{ type: String, ref: 'User' }], 
+    default: [] 
+  })
+  followers?: string[]; // Array of user IDs who follow this user
+
+  @Prop({ 
+    type: [{ type: String, ref: 'User' }], 
+    default: [] 
+  })
+  following?: string[]; // Array of user IDs this user follows
+
+  @Prop({ type: Number, default: 0 })
+  followersCount?: number; // Cached count for performance
+
+  @Prop({ type: Number, default: 0 })
+  followingCount?: number; // Cached count for performance
 }
 
 export type UserDocument = User & Document;
