@@ -65,7 +65,7 @@ export class BalanceService {
       // მიტანის კომისია (თუ delivery type არის SoulArt)
       let deliveryCommission = 0;
       if (product.deliveryType === 'SoulArt') {
-        deliveryCommission = Math.max(itemTotalPrice * 0.05, 10); // 5% მინ. 10 ლარი
+        deliveryCommission = Math.min(Math.max(itemTotalPrice * 0.05, 10), 50); // 5% მინ. 10 ლარი, მაქს. 50 ლარი
       }
 
       const totalCommissions = siteCommission + deliveryCommission;

@@ -1,12 +1,13 @@
 "use client";
 
 import { useCheckout } from "../context/checkout-context";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import { apiClient } from "@/lib/axios";
 import { TAX_RATE } from "@/config/constants";
 import { useLanguage } from "@/hooks/LanguageContext";
+import { calculateShipping, getShippingRate } from "@/lib/shipping";
 import Image from "next/image";
 import Link from "next/link";
 import { AlertTriangle } from "lucide-react";
@@ -24,6 +25,7 @@ export function OrderReview() {
   const { toast } = useToast();
   const { language, t } = useLanguage();
   const [isValidating, setIsValidating] = useState(false);
+  const [forceUpdate, setForceUpdate] = useState(0);
   const [unavailableItems, setUnavailableItems] = useState<
     Array<{
       productId: string;
@@ -32,13 +34,63 @@ export function OrderReview() {
     }>
   >([]);
 
+  // Force re-render when shipping address changes
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const stored = localStorage.getItem("checkout_shipping_address");
+      if (stored) {
+        try {
+          const parsed = JSON.parse(stored);
+          if (parsed.country !== shippingDetails?.country) {
+            setForceUpdate((prev: number) => prev + 1);
+          }
+        } catch (e) {
+          // ignore
+        }
+      }
+    }, 500);
+
+    return () => clearInterval(interval);
+  }, [shippingDetails?.country]);
+
   const itemsPrice = items.reduce(
     (acc, item) => acc + item.price * item.qty,
     0
   );
-  const shippingPrice: number = itemsPrice > 100 ? 0 : 0;
+
+  // Calculate shipping based on selected country
+  // Get the latest shipping address from localStorage if context is stale
+  let currentShippingDetails = shippingDetails;
+  try {
+    const stored = localStorage.getItem("checkout_shipping_address");
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      if (parsed && parsed.country) {
+        currentShippingDetails = parsed;
+      }
+    }
+  } catch (e) {
+    // Use context fallback
+  }
+
+  const shippingCountry = currentShippingDetails?.country || "GE";
+  const shippingPrice = calculateShipping(shippingCountry);
+  const isShippingFree = shippingPrice === 0;
+  const showBothCurrencies = shippingCountry !== "GE";
+
   const taxPrice = Number((itemsPrice * TAX_RATE).toFixed(2));
   const totalPrice = itemsPrice + shippingPrice + taxPrice;
+
+  // USD conversion rate (1 GEL = 1/2.8 USD approximately)
+  const GEL_TO_USD = 1 / 2.8;
+
+  // Function to format price based on country selection
+  const formatPrice = (amount: number) => {
+    if (showBothCurrencies) {
+      return `${amount.toFixed(2)} ₾ ($${(amount * GEL_TO_USD).toFixed(2)})`;
+    }
+    return `${amount.toFixed(2)} ₾`;
+  };
 
   // ფუნქცია პროდუქტების მარაგის შესამოწმებლად
   const validateCartItems = async () => {
@@ -115,7 +167,7 @@ export function OrderReview() {
 
       const response = await apiClient.post("/orders", {
         orderItems,
-        shippingDetails,
+        shippingDetails: currentShippingDetails,
         paymentMethod,
         itemsPrice,
         taxPrice,
@@ -226,13 +278,27 @@ export function OrderReview() {
           <h2 className="section-title">{t("checkout.shippingAddress")}</h2>
           <p className="address-details">
             <strong>{t("checkout.streetAddress")}: </strong>
-            {shippingDetails?.address}, {shippingDetails?.city},{" "}
-            {shippingDetails?.postalCode}, {shippingDetails?.country}
+            {currentShippingDetails?.address}, {currentShippingDetails?.city},{" "}
+            {currentShippingDetails?.postalCode},{" "}
+            {currentShippingDetails?.country}
           </p>
           <p className="address-details">
             <strong>{t("auth.phoneNumber")}: </strong>
-            {shippingDetails?.phoneNumber}
+            {currentShippingDetails?.phoneNumber}
           </p>
+          {/* Shipping cost info */}
+          <div className="shipping-info mt-4 p-3 bg-gray-50 rounded-lg">
+            <p className="text-sm">
+              <strong>{t("cart.shippingCost")}: </strong>
+              {isShippingFree ? (
+                <span className="text-green-600">{t("cart.free")}</span>
+              ) : (
+                <span className="text-blue-600">
+                  {formatPrice(shippingPrice)}
+                </span>
+              )}
+            </p>
+          </div>
         </div>
 
         {/* Payment Method */}
@@ -278,7 +344,8 @@ export function OrderReview() {
                       {displayName}
                     </Link>
                     <p className="item-price text-sm text-muted-foreground">
-                      {item.qty} x {item.price} ₾ = {item.qty * item.price} ₾
+                      {item.qty} x {formatPrice(item.price)} ={" "}
+                      {formatPrice(item.qty * item.price)}
                     </p>
                   </div>
                 </div>
@@ -297,28 +364,26 @@ export function OrderReview() {
               <span className="summary-label text-muted-foreground">
                 {t("cart.items")}
               </span>
-              <span>{itemsPrice.toFixed(2)} ₾</span>
+              <span>{formatPrice(itemsPrice)}</span>
             </div>
             <div className="summary-row flex justify-between">
               <span className="summary-label text-muted-foreground">
                 {t("cart.delivery")}
               </span>
               <span>
-                {shippingPrice === 0
-                  ? t("cart.free")
-                  : `${shippingPrice.toFixed(2)}₾`}
+                {isShippingFree ? t("cart.free") : formatPrice(shippingPrice)}
               </span>
             </div>
             <div className="summary-row flex justify-between">
               <span className="summary-label text-muted-foreground">
                 {t("cart.commission")}
               </span>
-              <span>{taxPrice.toFixed(2)} ₾</span>
+              <span>{formatPrice(taxPrice)}</span>
             </div>
             <div className="separator" />
             <div className="summary-row flex justify-between font-medium">
               <span>{t("cart.totalCost")}</span>
-              <span>{totalPrice.toFixed(2)} ₾</span>
+              <span>{formatPrice(totalPrice)}</span>
             </div>
             <button
               className="place-order-button w-full"

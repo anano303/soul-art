@@ -7,6 +7,11 @@ import { useToast } from "@/hooks/use-toast";
 import { useCheckout } from "../context/checkout-context";
 import { getCountries } from "@/lib/countries";
 import { useLanguage } from "@/hooks/LanguageContext";
+import {
+  formatShippingCost,
+  isShippingSupported,
+  getShippingRate,
+} from "@/lib/shipping";
 
 import "./shipping-form.css";
 
@@ -164,6 +169,30 @@ export function ShippingForm() {
           />
           {errors.country && (
             <p className="error-text">{errors.country.message}</p>
+          )}
+
+          {/* Show shipping cost when country is selected */}
+          {watchedValues.country && (
+            <div className="shipping-cost-info">
+              {isShippingSupported(watchedValues.country) ? (
+                <p className="shipping-cost">
+                  <strong>{t("cart.shippingCost")}: </strong>
+                  {watchedValues.country === "GE"
+                    ? t("cart.free")
+                    : watchedValues.country !== "GE"
+                    ? `${
+                        getShippingRate(watchedValues.country)?.cost || 0
+                      } ₾ ($${
+                        getShippingRate(watchedValues.country)?.costUSD || 0
+                      })`
+                    : `${getShippingRate(watchedValues.country)?.cost || 0} ₾`}
+                </p>
+              ) : (
+                <p className="shipping-not-supported error-text">
+                  {t("cart.shippingNotSupported")}
+                </p>
+              )}
+            </div>
           )}
         </div>
       </form>

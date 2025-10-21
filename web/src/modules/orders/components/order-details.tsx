@@ -17,6 +17,19 @@ import "./order-details.css";
 // GEL to USD conversion rate (1 GEL = ~0.37 USD)
 const GEL_TO_USD_RATE = 2.8;
 
+// Format price based on shipping country (show dual currency for non-Georgia countries)
+const formatPrice = (priceInGel: number, shippingCountry?: string): string => {
+  const isGeorgia =
+    shippingCountry === "Georgia" || shippingCountry === "საქართველო";
+
+  if (isGeorgia) {
+    return `${priceInGel.toFixed(2)} ₾`;
+  } else {
+    const priceInUsd = (priceInGel / GEL_TO_USD_RATE).toFixed(2);
+    return `${priceInGel.toFixed(2)} ₾ ($${priceInUsd})`;
+  }
+};
+
 interface OrderDetailsProps {
   order: Order;
 }
@@ -255,8 +268,13 @@ export function OrderDetails({ order }: OrderDetailsProps) {
                         </div>
                       )}
                       <p>
-                        {item.qty} x {item.price.toFixed(2)} ₾ ={" "}
-                        {(item.qty * item.price).toFixed(2)} ₾
+                        {item.qty} x{" "}
+                        {formatPrice(item.price, order.shippingDetails.country)}{" "}
+                        ={" "}
+                        {formatPrice(
+                          item.qty * item.price,
+                          order.shippingDetails.country
+                        )}
                       </p>
                       {item.product?.minDeliveryDays &&
                         item.product?.maxDeliveryDays && (
@@ -323,8 +341,13 @@ export function OrderDetails({ order }: OrderDetailsProps) {
                         </div>
                       )}
                       <p>
-                        {item.qty} x {item.price.toFixed(2)} ₾={" "}
-                        {(item.qty * item.price).toFixed(2)} ₾
+                        {item.qty} x{" "}
+                        {formatPrice(item.price, order.shippingDetails.country)}
+                        ={" "}
+                        {formatPrice(
+                          item.qty * item.price,
+                          order.shippingDetails.country
+                        )}
                       </p>
                     </div>
                   </div>
@@ -341,32 +364,34 @@ export function OrderDetails({ order }: OrderDetailsProps) {
             <div className="order-summary">
               <div className="summary-item">
                 <span>{t("order.items")}</span>
-                <span>{order.itemsPrice.toFixed(2)} ₾</span>
+                <span>
+                  {formatPrice(order.itemsPrice, order.shippingDetails.country)}
+                </span>
               </div>
               <div className="summary-item">
                 <span>{t("order.shipping")}</span>
                 <span>
                   {order.shippingPrice === 0
                     ? t("order.free")
-                    : `${order.shippingPrice.toFixed(2)} ₾`}
+                    : formatPrice(
+                        order.shippingPrice,
+                        order.shippingDetails.country
+                      )}
                 </span>
               </div>
               <div className="summary-item">
                 <span>{t("order.tax")}</span>
-                <span>{order.taxPrice.toFixed(2)} ₾</span>
+                <span>
+                  {formatPrice(order.taxPrice, order.shippingDetails.country)}
+                </span>
               </div>
               <hr />
               <div className="summary-total">
                 <span>{t("order.total")}</span>
-                <span>{order.totalPrice.toFixed(2)} ₾</span>
+                <span>
+                  {formatPrice(order.totalPrice, order.shippingDetails.country)}
+                </span>
               </div>
-
-              {/* Add USD equivalent */}
-              <div className="summary-total-usd">
-                <span>{t("order.totalUSD")}</span>
-                <span>${totalPriceInUSD}</span>
-              </div>
-
               {/* Stock expiration warning */}
               {!order.isPaid && isStockExpired && (
                 <div className="alert error" style={{ marginBottom: "1rem" }}>

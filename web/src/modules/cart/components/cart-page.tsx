@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { useCart } from "../context/cart-context";
 import { CartEmpty } from "./cart-empty";
 import { CartItem } from "./cart-item";
@@ -8,6 +9,12 @@ import { useRouter } from "next/navigation";
 import { useLanguage } from "@/hooks/LanguageContext";
 import { useQuery } from "@tanstack/react-query";
 import { fetchWithAuth } from "@/lib/fetch-with-auth";
+import { useCheckout } from "@/modules/checkout/context/checkout-context";
+import {
+  calculateShipping,
+  formatShippingCost,
+  isShippingSupported,
+} from "@/lib/shipping";
 import "./cart-page.css";
 import { Color } from "@/types";
 
@@ -15,6 +22,38 @@ export function CartPage() {
   const { items, loading } = useCart();
   const router = useRouter();
   const { t, language } = useLanguage(); // Added language here
+  const { shippingAddress } = useCheckout();
+
+  // Force re-render when localStorage changes
+  const [forceUpdate, setForceUpdate] = useState(0);
+
+  useEffect(() => {
+    const handleStorageChange = () => {
+      setForceUpdate((prev: number) => prev + 1);
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+
+    // Also listen for checkout context changes
+    const interval = setInterval(() => {
+      const stored = localStorage.getItem("checkout_shipping_address");
+      if (stored) {
+        try {
+          const parsed = JSON.parse(stored);
+          if (parsed.country !== shippingAddress?.country) {
+            setForceUpdate((prev: number) => prev + 1);
+          }
+        } catch (e) {
+          // ignore
+        }
+      }
+    }, 1000);
+
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+      clearInterval(interval);
+    };
+  }, [shippingAddress?.country]);
 
   // Fetch all colors for proper nameEn support
   const { data: availableColors = [] } = useQuery<Color[]>({
@@ -53,9 +92,40 @@ export function CartPage() {
   }
 
   const subtotal = items.reduce((acc, item) => acc + item.price * item.qty, 0);
-  const shipping = subtotal > 100 ? 0 : 0;
+
+  // Calculate shipping based on selected country
+  // Get the latest shipping address from localStorage if context is stale
+  let currentShippingAddress = shippingAddress;
+  try {
+    const stored = localStorage.getItem("checkout_shipping_address");
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      if (parsed && parsed.country) {
+        currentShippingAddress = parsed;
+      }
+    }
+  } catch (e) {
+    // Use context fallback
+  }
+
+  const shippingCountry = currentShippingAddress?.country || "GE"; // Default to Georgia
+  const shippingCost = calculateShipping(shippingCountry);
+  const isShippingFree = shippingCost === 0;
+  const showBothCurrencies = shippingCountry !== "GE";
+
   const tax = Number((0.02 * subtotal).toFixed(2));
-  const total = subtotal + shipping + tax;
+  const total = subtotal + shippingCost + tax;
+
+  // USD conversion rate (1 GEL = 1/2.8 USD approximately)
+  const GEL_TO_USD = 1 / 2.8;
+
+  // Function to format price based on country selection
+  const formatPrice = (amount: number) => {
+    if (showBothCurrencies) {
+      return `${amount.toFixed(2)} ₾ ($${(amount * GEL_TO_USD).toFixed(2)})`;
+    }
+    return `${amount.toFixed(2)} ₾`;
+  };
 
   return (
     <div className="cart-page">
@@ -92,7 +162,7 @@ export function CartPage() {
               <div className="summary-row">
                 <span className="summary-label">{t("cart.delivery")}</span>
                 <span>
-                  {shipping === 0 ? t("cart.free") : formatPrice(shipping)}
+                  {isShippingFree ? t("cart.free") : formatPrice(shippingCost)}
                 </span>
               </div>
               <div className="summary-row">
