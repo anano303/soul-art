@@ -567,55 +567,6 @@ export function ProductDetails({ product }: ProductDetailsProps) {
                   </svg>
                   {language === "en" ? "Click to zoom" : "დააჭირე გასადიდებლად"}
                 </div>
-
-                {/* Gallery Navigation */}
-                {product.images && product.images.length > 1 && (
-                  <>
-                    <button
-                      className="gallery-navigation prev"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setCurrentImageIndex(
-                          currentImageIndex === 0
-                            ? product.images!.length - 1
-                            : currentImageIndex - 1
-                        );
-                      }}
-                      disabled={product.images.length <= 1}
-                    >
-                      <svg
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                      >
-                        <polyline points="15,18 9,12 15,6" />
-                      </svg>
-                    </button>
-
-                    <button
-                      className="gallery-navigation next"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setCurrentImageIndex(
-                          currentImageIndex === product.images!.length - 1
-                            ? 0
-                            : currentImageIndex + 1
-                        );
-                      }}
-                      disabled={product.images.length <= 1}
-                    >
-                      <svg
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                      >
-                        <polyline points="9,18 15,12 9,6" />
-                      </svg>
-                    </button>
-                  </>
-                )}
               </motion.div>
             </AnimatePresence>
           </div>
@@ -1134,6 +1085,57 @@ export function ProductDetails({ product }: ProductDetailsProps) {
                 quality={100}
                 className="fullscreen-image"
               />
+
+              {/* Gallery Navigation in Fullscreen */}
+              {product.images && product.images.length > 1 && (
+                <>
+                  <button
+                    className="fullscreen-gallery-nav prev"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setCurrentImageIndex(
+                        currentImageIndex === 0
+                          ? product.images!.length - 1
+                          : currentImageIndex - 1
+                      );
+                    }}
+                  >
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <polyline points="15,18 9,12 15,6" />
+                    </svg>
+                  </button>
+
+                  <button
+                    className="fullscreen-gallery-nav next"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setCurrentImageIndex(
+                        currentImageIndex === product.images!.length - 1
+                          ? 0
+                          : currentImageIndex + 1
+                      );
+                    }}
+                  >
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <polyline points="9,18 15,12 9,6" />
+                    </svg>
+                  </button>
+                </>
+              )}
             </div>
           </div>
         )}
