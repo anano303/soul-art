@@ -1,10 +1,14 @@
 "use client";
 
+import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import "./ProductCard.css";
 import { Product } from "@/types";
 import { AddToCartButton } from "./AddToCartButton";
+import { useCart } from "@/modules/cart/context/cart-context";
+import { useToast } from "@/hooks/use-toast";
 import noPhoto from "../../../assets/nophoto.webp";
 import Star from "../../../assets/Images/star.png";
 import Star2 from "../../../assets/Images/startHandMade.png";
@@ -22,6 +26,10 @@ export function ProductCard({
   theme = "default",
 }: ProductCardProps) {
   const { language } = useLanguage();
+  const router = useRouter();
+  const { addToCart } = useCart();
+  const { toast } = useToast();
+  const [isBuying, setIsBuying] = useState(false);
 
   // ვამოწმებთ სურათის ვალიდურობას
   const productImage = product.images?.[0] || noPhoto.src;
@@ -123,6 +131,58 @@ export function ProductCard({
   const isDiscounted = hasActiveDiscount();
   const discountedPrice = calculateDiscountedPrice();
 
+  // Handle Buy Now - Add to cart and redirect to checkout
+  const handleBuyNow = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (product.countInStock <= 0) {
+      toast({
+        title: language === "en" ? "Out of Stock" : "არ არის მარაგში",
+        description:
+          language === "en"
+            ? "This product is currently out of stock"
+            : "პროდუქტი ამჟამად არ არის მარაგში",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsBuying(true);
+
+    try {
+      // Add item to cart with discounted price if applicable
+      await addToCart(
+        product._id,
+        1,
+        undefined,
+        undefined,
+        undefined,
+        isDiscounted ? discountedPrice : product.price
+      );
+
+      // Small delay to ensure cart updates, then redirect
+      setTimeout(() => {
+        router.push("/checkout/streamlined");
+      }, 300);
+    } catch (error) {
+      console.error("Buy now error:", error);
+      setIsBuying(false);
+      // Error toast is already shown by addToCart if there's an issue
+      // Only show additional error if user is not being redirected to login
+      if (error instanceof Error && error.message !== "User not authenticated") {
+        toast({
+          title: language === "en" ? "Error" : "შეცდომა",
+          description:
+            language === "en"
+              ? "Failed to proceed to checkout"
+              : "გადახდის გვერდზე გადასვლა ვერ მოხერხდა",
+          variant: "destructive",
+        });
+      }
+    }
+  };
+
   return (
     <div className={`product-card ${theme} ${className}`}>
       {/* Discount badge */}
@@ -207,44 +267,64 @@ export function ProductCard({
         </div>
       </Link>
 
-      {/* Compact card actions - single button with overlay icon */}
-      <div className="product-card-actions-compact">
-        <div
-          className="buy-button-wrapper"
+      {/* Product card actions - Compact Add to Cart icon + Buy Now button */}
+      <div className="product-card-actions">
+        <AddToCartButton
+          productId={product._id}
+          countInStock={product.countInStock}
+          className="btn-add-to-cart-icon"
+          hideQuantity={true}
+          openCartOnAdd={false}
+          iconOnly={true}
+        />
+        <button
+          onClick={handleBuyNow}
+          disabled={product.countInStock <= 0 || isBuying}
+          className="btn-buy-now"
           title={
             language === "en"
-              ? "Free delivery 1-2 days 🚚"
-              : "უფასო მიწოდება 1-2 დღეში 🚚"
+              ? "Buy now - Direct to checkout"
+              : "იყიდე ახლავე - პირდაპირ გადახდაზე"
           }
         >
-          <AddToCartButton
-            productId={product._id}
-            countInStock={product.countInStock}
-            className="addButtonCart btn-buy-compact"
-            hideQuantity={true}
-            openCartOnAdd={false}
-          />
-        </div>
-        <Link
-          href={`/products/${product._id}`}
-          className="btn-view-overlay"
-          title={language === "en" ? "View Details" : "დეტალურად"}
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="18"
-            height="18"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-            <circle cx="12" cy="12" r="3" />
-          </svg>
-        </Link>
+          {isBuying ? (
+            <>
+              <svg
+                className="spinner-icon"
+                xmlns="http://www.w3.org/2000/svg"
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+              </svg>
+              <span>{language === "en" ? "Processing..." : "დამუშავება..."}</span>
+            </>
+          ) : (
+            <>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M5 12h14" />
+                <path d="m12 5 7 7-7 7" />
+              </svg>
+              <span>{language === "en" ? "Buy Now" : "იყიდე ახლავე"}</span>
+            </>
+          )}
+        </button>
       </div>
     </div>
   );

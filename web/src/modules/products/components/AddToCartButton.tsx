@@ -18,6 +18,7 @@ interface AddToCartButtonProps {
   price?: number;
   hideQuantity?: boolean; // New prop to hide quantity selector
   openCartOnAdd?: boolean; // New prop to open cart after adding
+  iconOnly?: boolean; // New prop to show only icon, no text
 }
 
 export function AddToCartButton({
@@ -31,6 +32,7 @@ export function AddToCartButton({
   price,
   hideQuantity = false, // Default to false
   openCartOnAdd = false, // Default to false
+  iconOnly = false, // Default to false
 }: AddToCartButtonProps) {
   const { t } = useLanguage();
   const { addToCart, isItemInCart, getItemQuantity, updateQuantity } =
@@ -217,13 +219,24 @@ export function AddToCartButton({
       )}
 
       <button
-        className={`addButtonCart ${className} ${isInCart ? "in-cart" : ""}`}
+        className={`addButtonCart ${className} ${isInCart ? "in-cart" : ""} ${iconOnly ? "icon-only" : ""}`}
         disabled={
           isOutOfStock ||
           loading ||
           (isInCart && currentQuantity + quantity > countInStock)
         }
         onClick={handleAddToCart}
+        title={
+          iconOnly
+            ? isOutOfStock
+              ? t("cart.outOfStock")
+              : loading
+              ? t("cart.adding")
+              : isInCart
+              ? `${t("cart.inCart")} (${currentQuantity})`
+              : t("cart.addToCart")
+            : undefined
+        }
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -241,13 +254,17 @@ export function AddToCartButton({
           <circle cx="20" cy="21" r="1" />
           <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
         </svg>
-        {isOutOfStock
-          ? t("cart.outOfStock")
-          : loading
-          ? t("cart.adding")
-          : isInCart
-          ? `${t("cart.inCart")} (${currentQuantity})`
-          : t("cart.addToCart")}
+        {!iconOnly && (
+          <span>
+            {isOutOfStock
+              ? t("cart.outOfStock")
+              : loading
+              ? t("cart.adding")
+              : isInCart
+              ? `${t("cart.inCart")} (${currentQuantity})`
+              : t("cart.addToCart")}
+          </span>
+        )}
       </button>
     </div>
   );

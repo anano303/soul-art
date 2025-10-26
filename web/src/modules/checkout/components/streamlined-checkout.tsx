@@ -36,6 +36,7 @@ export function StreamlinedCheckout() {
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [paymentUrl, setPaymentUrl] = useState<string>("");
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
 
   // Calculate totals
   const itemsPrice = items.reduce((acc, item) => acc + item.price * item.qty, 0);
@@ -43,8 +44,10 @@ export function StreamlinedCheckout() {
   const taxPrice = Number((itemsPrice * TAX_RATE).toFixed(2));
   const totalPrice = itemsPrice + shippingPrice + taxPrice;
 
-  // Auto-advance steps based on state
+  // Auto-advance steps based on state (but not when editing)
   useEffect(() => {
+    if (isEditing) return;
+    
     if (!user) {
       setCurrentStep("auth");
     } else if (!shippingAddress) {
@@ -56,7 +59,7 @@ export function StreamlinedCheckout() {
     } else {
       setCurrentStep("review");
     }
-  }, [user, shippingAddress, paymentMethod, setPaymentMethod]);
+  }, [user, shippingAddress, paymentMethod, setPaymentMethod, isEditing]);
 
   // Validate cart items
   const validateCartItems = async () => {
@@ -318,6 +321,18 @@ export function StreamlinedCheckout() {
                   {t("checkout.stepIndicators.shipping.description")}
                 </p>
                 <ShippingForm />
+                {shippingAddress && (
+                  <button
+                    onClick={() => {
+                      setIsEditing(false);
+                      setCurrentStep("payment");
+                    }}
+                    className="btn-primary btn-large content-action-btn"
+                    style={{ marginTop: "1rem" }}
+                  >
+                    გაგრძელება
+                  </button>
+                )}
               </div>
             )}
 
@@ -345,6 +360,18 @@ export function StreamlinedCheckout() {
                     </div>
                   </label>
                 </div>
+                {paymentMethod && (
+                  <button
+                    onClick={() => {
+                      setIsEditing(false);
+                      setCurrentStep("review");
+                    }}
+                    className="btn-primary btn-large content-action-btn"
+                    style={{ marginTop: "1rem" }}
+                  >
+                    გაგრძელება
+                  </button>
+                )}
               </div>
             )}
 
@@ -367,7 +394,10 @@ export function StreamlinedCheckout() {
                     <strong>{t("auth.phoneNumber")}:</strong> {shippingAddress.phoneNumber}
                   </p>
                   <button
-                    onClick={() => setCurrentStep("shipping")}
+                    onClick={() => {
+                      setIsEditing(true);
+                      setCurrentStep("shipping");
+                    }}
                     className="btn-link"
                   >
                     შეცვლა
@@ -379,7 +409,10 @@ export function StreamlinedCheckout() {
                   <h3>{t("checkout.steps.payment")}</h3>
                   <p>{paymentMethod}</p>
                   <button
-                    onClick={() => setCurrentStep("payment")}
+                    onClick={() => {
+                      setIsEditing(true);
+                      setCurrentStep("payment");
+                    }}
                     className="btn-link"
                   >
                     შეცვლა
@@ -419,7 +452,7 @@ export function StreamlinedCheckout() {
                 <button
                   onClick={handlePlaceOrder}
                   disabled={isValidating || unavailableItems.length > 0 || isProcessingPayment}
-                  className="btn-primary btn-large"
+                  className="btn-primary btn-large desktop-place-order"
                 >
                   {isValidating || isProcessingPayment ? (
                     <>
@@ -492,6 +525,50 @@ export function StreamlinedCheckout() {
                 <span className="total-amount">{totalPrice.toFixed(2)} ₾</span>
               </div>
             </div>
+
+            {/* Action Buttons in Sidebar */}
+            {currentStep === "shipping" && shippingAddress && (
+              <button
+                onClick={() => {
+                  setIsEditing(false);
+                  setCurrentStep("payment");
+                }}
+                className="btn-primary btn-large sidebar-action-btn"
+              >
+                გაგრძელება
+              </button>
+            )}
+
+            {currentStep === "payment" && paymentMethod && (
+              <button
+                onClick={() => {
+                  setIsEditing(false);
+                  setCurrentStep("review");
+                }}
+                className="btn-primary btn-large sidebar-action-btn"
+              >
+                გაგრძელება
+              </button>
+            )}
+
+            {currentStep === "review" && (
+              <button
+                onClick={handlePlaceOrder}
+                disabled={isValidating || unavailableItems.length > 0 || isProcessingPayment}
+                className="btn-primary btn-large sidebar-action-btn mobile-place-order"
+              >
+                {isValidating || isProcessingPayment ? (
+                  <>
+                    <div className="spinner" />
+                    {isProcessingPayment ? "გადახდის გვერდზე გადასვლა..." : "შემოწმება..."}
+                  </>
+                ) : unavailableItems.length > 0 ? (
+                  "პროდუქტები მიუწვდომელია"
+                ) : (
+                  `შეკვეთის გაფორმება - ${totalPrice.toFixed(2)} ₾`
+                )}
+              </button>
+            )}
           </div>
         </div>
       </div>

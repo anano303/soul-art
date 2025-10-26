@@ -1,27 +1,29 @@
 .streamlined-checkout {
   max-width: 1400px;
   margin: 0 auto;
-  padding: 2rem 1rem;
-}
-
-.back-button-wrapper {
-  margin-bottom: 2rem;
 }
 
 .back-button {
   display: inline-flex;
   align-items: center;
-  padding: 0.5rem 1rem;
-  background-color: #6c757d;
-  color: white;
+  gap: 0.4rem;
+  color: #012645;
   text-decoration: none;
-  border-radius: 4px;
   font-size: 0.9rem;
-  transition: background-color 0.2s;
+  font-weight: 500;
+  transition: all 0.2s;
+  padding: 0.4rem 0.75rem;
+  border-radius: 6px;
+  background: rgba(1, 38, 69, 0.05);
+  border: 1px solid rgba(1, 38, 69, 0.1);
+  margin-bottom: 0;
 }
 
 .back-button:hover {
-  background-color: #5a6268;
+  color: #012645;
+  background: rgba(1, 38, 69, 0.1);
+  border-color: rgba(1, 38, 69, 0.2);
+  transform: translateX(-2px);
 }
 
 .checkout-container {
@@ -339,6 +341,29 @@
   color: #007bff;
 }
 
+/* Sidebar Action Button */
+.sidebar-action-btn {
+  margin-top: 1.5rem;
+  width: 100%;
+}
+
+/* Button visibility controls */
+.desktop-place-order {
+  display: none !important;
+}
+
+.mobile-place-order {
+  display: none !important;
+}
+
+.content-action-btn {
+  display: none !important;
+}
+
+.sidebar-action-btn {
+  display: flex !important;
+}
+
 /* Buttons */
 .btn-primary {
   width: 100%;
@@ -556,7 +581,25 @@
 
   .order-summary-sidebar {
     position: static;
-    order: -1;
+    order: 2; /* Move sidebar to the end on mobile */
+  }
+
+  /* Keep sidebar buttons visible on mobile */
+  .content-action-btn {
+    display: none !important;
+  }
+
+  .sidebar-action-btn {
+    display: flex !important;
+  }
+
+  /* Show mobile place order button in sidebar */
+  .desktop-place-order {
+    display: none !important;
+  }
+
+  .mobile-place-order {
+    display: flex !important;
   }
 }
 

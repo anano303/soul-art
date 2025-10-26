@@ -1,10 +1,10 @@
 .shipping-form-card {
-  padding: 2.5rem;
+  padding: 1.5rem;
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
-  border-radius: 20px;
-  box-shadow: 0 12px 40px rgba(1, 38, 69, 0.15);
+  gap: 1rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(1, 38, 69, 0.1);
   background: linear-gradient(
     135deg,
     rgba(1, 38, 69, 0.03),
@@ -14,7 +14,7 @@
   font-family: var(--font-firago), system-ui, sans-serif;
   max-width: 800px;
   margin: 0 auto;
-  border: 2px solid rgba(1, 38, 69, 0.2);
+  border: 1px solid rgba(1, 38, 69, 0.15);
   backdrop-filter: blur(10px);
   position: relative;
   overflow: hidden;
@@ -56,51 +56,50 @@
 }
 
 .shipping-form-header h1 {
-  font-size: 2.25rem;
-  font-weight: 700;
+  font-size: 1.5rem;
+  font-weight: 600;
   color: var(--primary-color);
-  letter-spacing: 0.5px;
+  letter-spacing: 0.3px;
   font-family: var(--font-firago), system-ui, sans-serif;
-  margin-bottom: 0.75rem;
-  border-bottom: 3px solid transparent;
+  margin-bottom: 0.5rem;
+  border-bottom: 2px solid transparent;
   border-image: linear-gradient(
       90deg,
       var(--primary-color),
       rgba(1, 38, 69, 0.3)
     )
     1;
-  padding-bottom: 1rem;
-  text-shadow: 0 2px 4px rgba(1, 38, 69, 0.1);
+  padding-bottom: 0.5rem;
+  text-shadow: 0 1px 2px rgba(1, 38, 69, 0.1);
 }
 
 .shipping-form-header p {
-  font-size: 1.1rem;
-  color: rgba(1, 38, 69, 0.7);
-  font-weight: 500;
-  line-height: 1.6;
+  font-size: 0.9rem;
+  color: rgba(1, 38, 69, 0.6);
+  font-weight: 400;
+  line-height: 1.4;
 }
 
 .shipping-form {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 1rem;
 }
 
 .shipping-form label {
   display: block;
-  font-weight: 600;
-  margin-bottom: 0.75rem;
+  font-weight: 500;
+  margin-bottom: 0.4rem;
   color: var(--primary-color);
-  font-size: 1rem;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  font-size: 0.875rem;
+  letter-spacing: 0.3px;
 }
 
 .shipping-form input {
   width: 100%;
-  padding: 1rem 1.25rem;
-  border: 2px solid rgba(1, 38, 69, 0.2);
-  border-radius: 12px;
+  padding: 0.65rem 0.85rem;
+  border: 1px solid rgba(1, 38, 69, 0.2);
+  border-radius: 8px;
   background: linear-gradient(
     135deg,
     rgba(1, 38, 69, 0.05),
@@ -135,9 +134,9 @@
 
 .shipping-form select {
   width: 100%;
-  padding: 1rem 1.25rem;
-  border: 2px solid rgba(1, 38, 69, 0.2);
-  border-radius: 12px;
+  padding: 0.65rem 0.85rem;
+  border: 1px solid rgba(1, 38, 69, 0.2);
+  border-radius: 8px;
   background: linear-gradient(
     135deg,
     rgba(224, 216, 73, 0.05),
