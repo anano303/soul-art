@@ -14,6 +14,23 @@ function CheckoutSuccessContent() {
       const orderIdParam = searchParams.get("orderId");
       setOrderId(orderIdParam);
       
+      // Verify payment status with backend
+      if (orderIdParam) {
+        const verifyPayment = async () => {
+          try {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/payments/bog/verify/${orderIdParam}`, {
+              method: 'POST',
+              credentials: 'include',
+            });
+            const result = await response.json();
+            console.log('Payment verification result:', result);
+          } catch (error) {
+            console.error('Failed to verify payment:', error);
+          }
+        };
+        verifyPayment();
+      }
+      
       // Notify parent window (if opened in modal/popup)
       if (window.opener || window.parent !== window) {
         try {

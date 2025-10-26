@@ -118,6 +118,11 @@ export class PaymentsService {
         },
       );
 
+      console.log('BOG Payment Created Successfully:');
+      console.log('BOG Response ID:', response.data.id);
+      console.log('External Order ID we sent:', externalOrderId);
+      console.log('Full BOG Response:', JSON.stringify(response.data, null, 2));
+
       return {
         order_id: response.data.id,
         redirect_url: response.data._links.redirect.href,
@@ -202,23 +207,25 @@ export class PaymentsService {
           'Error fetching payment status from BOG API:',
           error.message,
         );
-        paymentStatus = { status };
+        paymentStatus = { order_status: { key: status } };
       }
 
-      const isPaymentSuccessful =
-        paymentStatus?.status === 'completed' || status === 'completed';
+      // BOG returns order_status.key = "completed"
+      const statusKey = paymentStatus?.order_status?.key?.toLowerCase() || status?.toLowerCase();
+
+      const isPaymentSuccessful = statusKey === 'completed';
 
       console.log(
-        `Payment successful: ${isPaymentSuccessful}, external_order_id: ${external_order_id}`,
+        `Payment successful: ${isPaymentSuccessful}, external_order_id: ${external_order_id}, statusKey: ${statusKey}`,
       );
 
       if (isPaymentSuccessful && external_order_id) {
         try {
           const paymentResult = {
             id: order_id || external_order_id,
-            status: paymentStatus?.status || status,
+            status: 'COMPLETED',
             update_time: new Date().toISOString(),
-            email_address: paymentStatus?.email || 'unknown@unknown.com',
+            email_address: paymentStatus?.buyer?.email || 'unknown@unknown.com',
           };
 
           console.log(

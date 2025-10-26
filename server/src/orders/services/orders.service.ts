@@ -672,6 +672,21 @@ export class OrdersService {
     return updatedOrder;
   }
 
+  async updateOrderPaymentInfo(
+    orderId: string,
+    paymentInfo: { id: string; status: string; update_time: string },
+  ): Promise<void> {
+    const order = await this.orderModel.findById(orderId);
+    if (order) {
+      order.paymentResult = {
+        ...paymentInfo,
+        email_address: 'pending@payment.com',
+      };
+      await order.save();
+      console.log(`Updated order ${orderId} with BOG payment info:`, paymentInfo);
+    }
+  }
+
   private async sendOrderPaidNotifications(orderId: string): Promise<void> {
     try {
       const orderWithData: any = await this.orderModel
