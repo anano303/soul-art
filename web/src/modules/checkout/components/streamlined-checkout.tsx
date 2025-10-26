@@ -55,14 +55,12 @@ export function StreamlinedCheckout() {
       setCurrentStep("auth");
     } else if (!shippingAddress) {
       setCurrentStep("shipping");
-    } else if (!paymentMethod) {
-      setCurrentStep("payment");
-      // Auto-set BOG as default
-      setPaymentMethod("BOG");
     } else {
       setCurrentStep("review");
+      // Auto-set BOG as default payment method
+      setPaymentMethod("BOG");
     }
-  }, [user, shippingAddress, paymentMethod, setPaymentMethod, isEditing]);
+  }, [user, shippingAddress, setPaymentMethod, isEditing]);
 
   // Validate cart items
   const validateCartItems = async () => {
@@ -348,14 +346,8 @@ export function StreamlinedCheckout() {
               </div>
               <span className="step-label">{t("checkout.steps.shipping")}</span>
             </div>
-            <div className={cn("step", currentStep === "payment" && "active", paymentMethod && "completed")}>
-              <div className="step-circle">
-                {paymentMethod ? <Check className="w-4 h-4" /> : "3"}
-              </div>
-              <span className="step-label">{t("checkout.steps.payment")}</span>
-            </div>
             <div className={cn("step", currentStep === "review" && "active")}>
-              <div className="step-circle">4</div>
+              <div className="step-circle">3</div>
               <span className="step-label">{t("checkout.steps.order")}</span>
             </div>
           </div>
@@ -405,45 +397,6 @@ export function StreamlinedCheckout() {
                   <button
                     onClick={() => {
                       setIsEditing(false);
-                      setCurrentStep("payment");
-                    }}
-                    className="btn-primary btn-large content-action-btn"
-                    style={{ marginTop: "1rem" }}
-                  >
-                    გაგრძელება
-                  </button>
-                )}
-              </div>
-            )}
-
-            {/* Step 3: Payment Method */}
-            {currentStep === "payment" && user && shippingAddress && (
-              <div className="step-section">
-                <h2>{t("checkout.stepIndicators.payment.title")}</h2>
-                <p className="step-description">
-                  {t("checkout.stepIndicators.payment.description")}
-                </p>
-                <div className="payment-method-card">
-                  <label className="payment-option selected">
-                    <input
-                      type="radio"
-                      name="payment"
-                      value="BOG"
-                      checked={paymentMethod === "BOG"}
-                      onChange={() => setPaymentMethod("BOG")}
-                    />
-                    <div className="payment-option-content">
-                      <svg className="payment-icon" viewBox="0 0 24 24" fill="green">
-                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
-                      </svg>
-                      <span className="payment-label">ბანკის ბარათით გადახდა (BOG)</span>
-                    </div>
-                  </label>
-                </div>
-                {paymentMethod && (
-                  <button
-                    onClick={() => {
-                      setIsEditing(false);
                       setCurrentStep("review");
                     }}
                     className="btn-primary btn-large content-action-btn"
@@ -455,8 +408,8 @@ export function StreamlinedCheckout() {
               </div>
             )}
 
-            {/* Step 4: Review & Place Order */}
-            {currentStep === "review" && user && shippingAddress && paymentMethod && (
+            {/* Step 3: Review & Place Order */}
+            {currentStep === "review" && user && shippingAddress && (
               <div className="step-section">
                 <h2>{t("checkout.stepIndicators.review.title")}</h2>
                 <p className="step-description">
@@ -477,21 +430,6 @@ export function StreamlinedCheckout() {
                     onClick={() => {
                       setIsEditing(true);
                       setCurrentStep("shipping");
-                    }}
-                    className="btn-link"
-                  >
-                    შეცვლა
-                  </button>
-                </div>
-
-                {/* Payment Method Review */}
-                <div className="review-card">
-                  <h3>{t("checkout.steps.payment")}</h3>
-                  <p>{paymentMethod}</p>
-                  <button
-                    onClick={() => {
-                      setIsEditing(true);
-                      setCurrentStep("payment");
                     }}
                     className="btn-link"
                   >
@@ -527,24 +465,6 @@ export function StreamlinedCheckout() {
                     })}
                   </div>
                 </div>
-
-                {/* Place Order Button */}
-                <button
-                  onClick={handlePlaceOrder}
-                  disabled={isValidating || unavailableItems.length > 0 || isProcessingPayment}
-                  className="btn-primary btn-large desktop-place-order"
-                >
-                  {isValidating || isProcessingPayment ? (
-                    <>
-                      <div className="spinner" />
-                      {isProcessingPayment ? "გადახდის გვერდზე გადასვლა..." : "შემოწმება..."}
-                    </>
-                  ) : unavailableItems.length > 0 ? (
-                    "პროდუქტები მიუწვდომელია"
-                  ) : (
-                    `შეკვეთის გაფორმება - ${totalPrice.toFixed(2)} ₾`
-                  )}
-                </button>
               </div>
             )}
           </div>
@@ -611,18 +531,6 @@ export function StreamlinedCheckout() {
               <button
                 onClick={() => {
                   setIsEditing(false);
-                  setCurrentStep("payment");
-                }}
-                className="btn-primary btn-large sidebar-action-btn"
-              >
-                გაგრძელება
-              </button>
-            )}
-
-            {currentStep === "payment" && paymentMethod && (
-              <button
-                onClick={() => {
-                  setIsEditing(false);
                   setCurrentStep("review");
                 }}
                 className="btn-primary btn-large sidebar-action-btn"
@@ -635,17 +543,24 @@ export function StreamlinedCheckout() {
               <button
                 onClick={handlePlaceOrder}
                 disabled={isValidating || unavailableItems.length > 0 || isProcessingPayment}
-                className="btn-primary btn-large sidebar-action-btn mobile-place-order"
+                className="btn-bog-payment sidebar-action-btn mobile-place-order"
               >
-                {isValidating || isProcessingPayment ? (
-                  <>
-                    <div className="spinner" />
-                    {isProcessingPayment ? "გადახდის გვერდზე გადასვლა..." : "შემოწმება..."}
-                  </>
-                ) : unavailableItems.length > 0 ? (
-                  "პროდუქტები მიუწვდომელია"
-                ) : (
-                  `შეკვეთის გაფორმება - ${totalPrice.toFixed(2)} ₾`
+                <div className="bog-payment-content">
+                  <div className="card-icon">
+                    <svg width="32" height="24" viewBox="0 0 32 24" fill="none">
+                      <rect x="1" y="1" width="30" height="22" rx="3" stroke="white" strokeWidth="2" fill="rgba(255,255,255,0.2)"/>
+                      <line x1="1" y1="7" x2="31" y2="7" stroke="white" strokeWidth="2"/>
+                      <rect x="4" y="14" width="10" height="4" rx="1" fill="white"/>
+                    </svg>
+                  </div>
+                  <div className="bog-payment-text">
+                    <span className="bog-payment-title">ბარათით გადახდა</span>
+                    <span className="bog-payment-subtitle">ყველა ბარათი მიიღება</span>
+                  </div>
+                  {(isValidating || isProcessingPayment) && <div className="spinner" />}
+                </div>
+                {!isValidating && !isProcessingPayment && (
+                  <span className="bog-payment-amount">{totalPrice.toFixed(2)} ₾</span>
                 )}
               </button>
             )}

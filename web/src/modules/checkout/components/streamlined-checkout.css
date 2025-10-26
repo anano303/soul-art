@@ -397,6 +397,97 @@
   font-size: 1.125rem;
 }
 
+/* BOG Payment Button */
+.btn-bog-payment {
+  width: 100%;
+  padding: 1.25rem 1.5rem;
+  background: linear-gradient(135deg, #00a651 0%, #008744 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  box-shadow: 0 2px 8px rgba(0, 166, 81, 0.2);
+}
+
+.btn-bog-payment:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0, 166, 81, 0.3);
+  background: linear-gradient(135deg, #00b85a 0%, #009450 100%);
+}
+
+.btn-bog-payment:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.bog-payment-content {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex: 1;
+}
+
+.bog-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+
+.bog-icon svg {
+  width: 20px;
+  height: 20px;
+  fill: white;
+}
+
+.card-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.card-icon svg {
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
+}
+
+.bog-payment-text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.15rem;
+}
+
+.bog-payment-title {
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.bog-payment-subtitle {
+  font-size: 0.875rem;
+  font-weight: 500;
+  opacity: 0.9;
+  line-height: 1.2;
+}
+
+.bog-payment-amount {
+  font-size: 1.25rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
 .btn-link {
   background: none;
   border: none;
