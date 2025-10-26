@@ -1822,4 +1822,150 @@ export class UsersService {
       pages: totalPages
     };
   }
+
+  // ============ Shipping Address Management ============
+
+  async getShippingAddresses(userId: string) {
+    const user = await this.findById(userId);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    return user.shippingAddresses || [];
+  }
+
+  async addShippingAddress(userId: string, addressData: any) {
+    const user = await this.findById(userId);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    const newAddress = {
+      _id: new Types.ObjectId().toString(),
+      label: addressData.label || 'Home',
+      address: addressData.address,
+      city: addressData.city,
+      postalCode: addressData.postalCode,
+      country: addressData.country,
+      phoneNumber: addressData.phoneNumber,
+      isDefault: addressData.isDefault || false,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+
+    // If this is set as default, unset all other defaults
+    if (newAddress.isDefault && user.shippingAddresses) {
+      user.shippingAddresses.forEach((addr) => {
+        addr.isDefault = false;
+      });
+    }
+
+    // If this is the first address, make it default
+    if (!user.shippingAddresses || user.shippingAddresses.length === 0) {
+      newAddress.isDefault = true;
+    }
+
+    if (!user.shippingAddresses) {
+      user.shippingAddresses = [];
+    }
+
+    user.shippingAddresses.push(newAddress);
+    await user.save();
+
+    return newAddress;
+  }
+
+  async updateShippingAddress(userId: string, addressId: string, addressData: any) {
+    const user = await this.findById(userId);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    if (!user.shippingAddresses) {
+      throw new NotFoundException('No addresses found');
+    }
+
+    const addressIndex = user.shippingAddresses.findIndex(
+      (addr) => addr._id === addressId
+    );
+
+    if (addressIndex === -1) {
+      throw new NotFoundException('Address not found');
+    }
+
+    // If setting as default, unset all other defaults
+    if (addressData.isDefault) {
+      user.shippingAddresses.forEach((addr) => {
+        addr.isDefault = false;
+      });
+    }
+
+    // Update the address
+    const updatedAddress = {
+      ...user.shippingAddresses[addressIndex],
+      ...addressData,
+      updatedAt: new Date(),
+    };
+
+    user.shippingAddresses[addressIndex] = updatedAddress;
+    await user.save();
+
+    return updatedAddress;
+  }
+
+  async deleteShippingAddress(userId: string, addressId: string) {
+    const user = await this.findById(userId);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    if (!user.shippingAddresses) {
+      throw new NotFoundException('No addresses found');
+    }
+
+    const initialLength = user.shippingAddresses.length;
+    user.shippingAddresses = user.shippingAddresses.filter(
+      (addr) => addr._id !== addressId
+    );
+
+    if (user.shippingAddresses.length === initialLength) {
+      throw new NotFoundException('Address not found');
+    }
+
+    // If we deleted the default address, make the first remaining address default
+    const hadDefault = user.shippingAddresses.some((addr) => addr.isDefault);
+    if (!hadDefault && user.shippingAddresses.length > 0) {
+      user.shippingAddresses[0].isDefault = true;
+    }
+
+    await user.save();
+
+    return { message: 'Address deleted successfully' };
+  }
+
+  async setDefaultAddress(userId: string, addressId: string) {
+    const user = await this.findById(userId);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    if (!user.shippingAddresses) {
+      throw new NotFoundException('No addresses found');
+    }
+
+    const address = user.shippingAddresses.find((addr) => addr._id === addressId);
+    if (!address) {
+      throw new NotFoundException('Address not found');
+    }
+
+    // Unset all defaults
+    user.shippingAddresses.forEach((addr) => {
+      addr.isDefault = false;
+    });
+
+    // Set the new default
+    address.isDefault = true;
+    await user.save();
+
+    return address;
+  }
 }

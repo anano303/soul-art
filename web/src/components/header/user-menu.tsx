@@ -20,6 +20,7 @@ import {
   Gift,
   BarChart3,
   Activity,
+  MapPin,
 } from "lucide-react";
 
 // Add a style object for the FiraGo font
@@ -194,6 +195,14 @@ export default function UserMenu({ onNavigate }: { onNavigate?: () => void }) {
             >
               <User size={18} />
               <span>{t("navigation.profile")}</span>
+            </Link>
+            <Link
+              href="/profile/addresses"
+              className="dropdown-item"
+              onClick={handleLinkClick}
+            >
+              <MapPin size={18} />
+              <span>{t("navigation.addresses")}</span>
             </Link>
             <Link
               href="/profile/orders"

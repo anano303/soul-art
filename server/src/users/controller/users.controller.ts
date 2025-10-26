@@ -27,6 +27,8 @@ import { CurrentUser } from '@/decorators/current-user.decorator';
 import { User } from '../schemas/user.schema';
 import { uploadRateLimit } from '@/middleware/security.middleware';
 import { createRateLimitInterceptor } from '@/interceptors/rate-limit.interceptor';
+import { CreateAddressDto } from '../dtos/create-address.dto';
+import { UpdateAddressDto } from '../dtos/update-address.dto';
 
 @Controller('users')
 export class UsersController {
@@ -269,5 +271,61 @@ export class UsersController {
     const limitNumber = parseInt(limit, 10);
     
     return this.usersService.getFollowing(userId, pageNumber, limitNumber);
+  }
+
+  // ============================================
+  // SHIPPING ADDRESS MANAGEMENT ENDPOINTS
+  // ============================================
+
+  @ApiOperation({ summary: 'Get all shipping addresses for current user' })
+  @UseGuards(JwtAuthGuard)
+  @Get('me/addresses')
+  async getMyAddresses(@CurrentUser() user: User) {
+    return this.usersService.getShippingAddresses(user['_id'] as string);
+  }
+
+  @ApiOperation({ summary: 'Add new shipping address' })
+  @UseGuards(JwtAuthGuard)
+  @Post('me/addresses')
+  async addAddress(
+    @CurrentUser() user: User,
+    @Body() addressData: CreateAddressDto,
+  ) {
+    return this.usersService.addShippingAddress(user['_id'] as string, addressData);
+  }
+
+  @ApiOperation({ summary: 'Update shipping address' })
+  @UseGuards(JwtAuthGuard)
+  @Put('me/addresses/:addressId')
+  async updateAddress(
+    @CurrentUser() user: User,
+    @Param('addressId') addressId: string,
+    @Body() addressData: UpdateAddressDto,
+  ) {
+    return this.usersService.updateShippingAddress(
+      user['_id'] as string,
+      addressId,
+      addressData,
+    );
+  }
+
+  @ApiOperation({ summary: 'Delete shipping address' })
+  @UseGuards(JwtAuthGuard)
+  @Delete('me/addresses/:addressId')
+  async deleteAddress(
+    @CurrentUser() user: User,
+    @Param('addressId') addressId: string,
+  ) {
+    return this.usersService.deleteShippingAddress(user['_id'] as string, addressId);
+  }
+
+  @ApiOperation({ summary: 'Set default shipping address' })
+  @UseGuards(JwtAuthGuard)
+  @Put('me/addresses/:addressId/default')
+  async setDefaultAddress(
+    @CurrentUser() user: User,
+    @Param('addressId') addressId: string,
+  ) {
+    return this.usersService.setDefaultAddress(user['_id'] as string, addressId);
   }
 }

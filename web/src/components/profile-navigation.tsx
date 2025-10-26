@@ -8,7 +8,8 @@ import {
   User, 
   ShoppingBag, 
   Wallet, 
-  Smartphone
+  Smartphone,
+  MapPin
 } from "lucide-react";
 
 const profileNavItems = [
@@ -17,6 +18,12 @@ const profileNavItems = [
     href: '/profile',
     icon: User,
     labelKey: 'profileNav.profile'
+  },
+  {
+    key: 'addresses',
+    href: '/profile/addresses',
+    icon: MapPin,
+    labelKey: 'profileNav.addresses'
   },
   {
     key: 'orders',

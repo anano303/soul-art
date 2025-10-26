@@ -248,6 +248,7 @@ export const TRANSLATIONS: Translations = {
       about: "ჩვენს შესახებ",
       login: "შესვლა",
       profile: "პროფილი",
+      addresses: "მისამართები",
       orders: "შეკვეთები",
       adminPanel: "გვერდის ადმინისთვის",
       products: "ატვირთეთ ნამუშევრები",
@@ -865,6 +866,7 @@ export const TRANSLATIONS: Translations = {
     profileNav: {
       title: "პროფილი",
       profile: "პროფილი",
+      addresses: "მისამართები",
       orders: "ჩემი შეკვეთები",
       balance: "ბალანსი",
       devices: "მოწყობილობები",
@@ -1548,6 +1550,7 @@ export const TRANSLATIONS: Translations = {
       about: "About",
       login: "Login",
       profile: "Profile",
+      addresses: "Addresses",
       orders: "Orders",
       adminPanel: "Admin Panel",
       products: "Create Products",
@@ -2157,6 +2160,7 @@ export const TRANSLATIONS: Translations = {
     profileNav: {
       title: "Profile",
       profile: "Profile",
+      addresses: "Addresses",
       orders: "Orders",
       balance: "Balance",
       devices: "Devices",

@@ -10,7 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { apiClient } from "@/lib/axios";
 import { TAX_RATE } from "@/config/constants";
 import { LoginForm } from "@/modules/auth/components/login-form";
-import { ShippingForm } from "./shipping-form";
+import { AddressSelector } from "./address-selector";
 import { Check, AlertTriangle } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -22,7 +22,7 @@ type CheckoutStep = "auth" | "shipping" | "payment" | "review";
 export function StreamlinedCheckout() {
   const { user } = useAuth();
   const { items, clearCart } = useCart();
-  const { shippingAddress, setPaymentMethod, paymentMethod, clearCheckout } =
+  const { shippingAddress, setShippingAddress, setPaymentMethod, paymentMethod, clearCheckout } =
     useCheckout();
   const { language, t } = useLanguage();
   const router = useRouter();
@@ -40,6 +40,7 @@ export function StreamlinedCheckout() {
   const [paymentWindowClosed, setPaymentWindowClosed] = useState(false);
   const [paymentWindowRef, setPaymentWindowRef] = useState<Window | null>(null);
   const [currentOrderId, setCurrentOrderId] = useState<string | null>(null);
+  const [addressesLoaded, setAddressesLoaded] = useState(false);
 
   // Calculate totals
   const itemsPrice = items.reduce((acc, item) => acc + item.price * item.qty, 0);
@@ -47,12 +48,39 @@ export function StreamlinedCheckout() {
   const taxPrice = Number((itemsPrice * TAX_RATE).toFixed(2));
   const totalPrice = itemsPrice + shippingPrice + taxPrice;
 
+  // Fetch saved addresses when user is authenticated
+  useEffect(() => {
+    const fetchSavedAddresses = async () => {
+      try {
+        const response = await apiClient.get("/users/me/addresses");
+        const addresses = response.data;
+        setAddressesLoaded(true);
+
+        // Auto-select default address if exists and no address is currently selected
+        const defaultAddress = addresses.find((addr: { isDefault?: boolean }) => addr.isDefault);
+        if (defaultAddress && !shippingAddress) {
+          setShippingAddress(defaultAddress);
+        }
+      } catch (error) {
+        console.error("Failed to fetch addresses:", error);
+        setAddressesLoaded(true);
+      }
+    };
+
+    if (user && !addressesLoaded) {
+      fetchSavedAddresses();
+    }
+  }, [user, addressesLoaded, shippingAddress, setShippingAddress]);
+
   // Auto-advance steps based on state (but not when editing)
   useEffect(() => {
     if (isEditing) return;
     
     if (!user) {
       setCurrentStep("auth");
+    } else if (!addressesLoaded) {
+      // Wait for addresses to load before deciding
+      return;
     } else if (!shippingAddress) {
       setCurrentStep("shipping");
     } else {
@@ -60,7 +88,7 @@ export function StreamlinedCheckout() {
       // Auto-set BOG as default payment method
       setPaymentMethod("BOG");
     }
-  }, [user, shippingAddress, setPaymentMethod, isEditing]);
+  }, [user, shippingAddress, setPaymentMethod, isEditing, addressesLoaded]);
 
   // Validate cart items
   const validateCartItems = async () => {
@@ -392,19 +420,11 @@ export function StreamlinedCheckout() {
                 <p className="step-description">
                   {t("checkout.stepIndicators.shipping.description")}
                 </p>
-                <ShippingForm />
-                {shippingAddress && (
-                  <button
-                    onClick={() => {
-                      setIsEditing(false);
-                      setCurrentStep("review");
-                    }}
-                    className="btn-primary btn-large content-action-btn"
-                    style={{ marginTop: "1rem" }}
-                  >
-                    გაგრძელება
-                  </button>
-                )}
+                <AddressSelector
+                  onAddressSelected={(address) => {
+                    setShippingAddress(address);
+                  }}
+                />
               </div>
             )}
 

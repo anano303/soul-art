@@ -189,6 +189,37 @@ export class User {
 
   @Prop({ type: Number, default: 0 })
   followingCount?: number; // Cached count for performance
+
+  // Shipping addresses
+  @Prop({
+    type: [
+      {
+        _id: { type: String, required: true },
+        label: { type: String, default: 'Home' },
+        address: { type: String, required: true },
+        city: { type: String, required: true },
+        postalCode: { type: String, required: false },
+        country: { type: String, required: true },
+        phoneNumber: { type: String, required: true },
+        isDefault: { type: Boolean, default: false },
+        createdAt: { type: Date, default: Date.now },
+        updatedAt: { type: Date, default: Date.now },
+      },
+    ],
+    default: [],
+  })
+  shippingAddresses?: Array<{
+    _id: string;
+    label?: string;
+    address: string;
+    city: string;
+    postalCode?: string;
+    country: string;
+    phoneNumber: string;
+    isDefault: boolean;
+    createdAt?: Date;
+    updatedAt?: Date;
+  }>;
 }
 
 export type UserDocument = User & Document;

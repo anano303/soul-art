@@ -1,89 +1,44 @@
 "use client";
 
-import { createContext, useContext, useState, useEffect } from "react";
+import { createContext, useContext, useState } from "react";
 
 interface CheckoutContextType {
   shippingAddress: ShippingAddress | null;
   paymentMethod: string | null;
-  setShippingAddress: (address: ShippingAddress) => void;
+  setShippingAddress: (address: ShippingAddress | null) => void;
   setPaymentMethod: (method: string) => void;
   clearCheckout: () => void;
 }
 
 interface ShippingAddress {
+  _id?: string;
+  label?: string;
   address: string;
   city: string;
   postalCode?: string;
   country: string;
   phoneNumber: string;
+  isDefault?: boolean;
 }
 
 const CheckoutContext = createContext<CheckoutContextType | null>(null);
-
-const STORAGE_KEYS = {
-  SHIPPING_ADDRESS: "checkout_shipping_address",
-  PAYMENT_METHOD: "checkout_payment_method",
-};
 
 export function CheckoutProvider({ children }: { children: React.ReactNode }) {
   const [shippingAddress, setShippingAddressState] =
     useState<ShippingAddress | null>(null);
   const [paymentMethod, setPaymentMethodState] = useState<string | null>(null);
 
-  // Load data from localStorage on mount
-  useEffect(() => {
-    const savedShippingAddress = localStorage.getItem(
-      STORAGE_KEYS.SHIPPING_ADDRESS
-    );
-    const savedPaymentMethod = localStorage.getItem(
-      STORAGE_KEYS.PAYMENT_METHOD
-    );
-
-    if (process.env.NODE_ENV === "development") {
-      console.log("Loading from localStorage:", {
-        savedShippingAddress,
-        savedPaymentMethod,
-      });
-    }
-
-    if (savedShippingAddress) {
-      try {
-        const parsed = JSON.parse(savedShippingAddress);
-        if (process.env.NODE_ENV === "development") {
-          console.log("Parsed shipping address:", parsed);
-        }
-        setShippingAddressState(parsed);
-      } catch (error) {
-        console.error("Error parsing saved shipping address:", error);
-      }
-    }
-
-    if (savedPaymentMethod) {
-      if (process.env.NODE_ENV === "development") {
-        console.log("Setting payment method:", savedPaymentMethod);
-      }
-      setPaymentMethodState(savedPaymentMethod);
-    }
-  }, []);
-
-  const setShippingAddress = (address: ShippingAddress) => {
+  const setShippingAddress = (address: ShippingAddress | null) => {
     setShippingAddressState(address);
-    localStorage.setItem(
-      STORAGE_KEYS.SHIPPING_ADDRESS,
-      JSON.stringify(address)
-    );
   };
 
   const setPaymentMethod = (method: string) => {
     setPaymentMethodState(method);
-    localStorage.setItem(STORAGE_KEYS.PAYMENT_METHOD, method);
   };
 
   const clearCheckout = () => {
     setShippingAddressState(null);
     setPaymentMethodState(null);
-    localStorage.removeItem(STORAGE_KEYS.SHIPPING_ADDRESS);
-    localStorage.removeItem(STORAGE_KEYS.PAYMENT_METHOD);
   };
 
   return (
