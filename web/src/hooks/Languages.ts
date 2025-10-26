@@ -570,6 +570,72 @@ export const TRANSLATIONS: Translations = {
       backToCart: "უკან კალათაში",
     },
 
+    // Addresses Management
+    addresses: {
+      title: "მიწოდების მისამართები",
+      loading: "იტვირთება...",
+      addNew: "ახალი მისამართი",
+      addNewAddress: "ახალი მისამართის დამატება",
+      selectAddress: "აირჩიეთ მიწოდების მისამართი",
+      anotherAddress: "სხვა მისამართი",
+      empty: {
+        title: "მისამართები არ არის დამატებული",
+        description: "დაამატეთ თქვენი მიწოდების მისამართი სწრაფი გაფორმებისთვის",
+      },
+      form: {
+        name: "სახელი",
+        namePlaceholder: "მაგ: სახლი, სამუშაო",
+        address: "მისამართი",
+        addressPlaceholder: "ქუჩა, შენობა, ბინა",
+        city: "ქალაქი",
+        cityPlaceholder: "მაგ: თბილისი",
+        postalCode: "საფოსტო კოდი",
+        postalCodePlaceholder: "მაგ: 0179",
+        country: "ქვეყანა",
+        countryGeorgia: "საქართველო",
+        phone: "ტელეფონი",
+        phonePlaceholder: "+995 XXX XX XX XX",
+        setAsDefault: "მთავარ მისამართად დაყენება",
+        saveToAddresses: "შენახვა ჩემს მისამართებში",
+      },
+      actions: {
+        add: "დამატება",
+        save: "შენახვა",
+        cancel: "გაუქმება",
+        edit: "რედაქტირება",
+        delete: "წაშლა",
+        setAsDefault: "მთავარად დაყენება",
+        use: "გამოყენება",
+      },
+      badges: {
+        default: "მთავარი",
+      },
+      confirmDelete: "დარწმუნებული ხართ, რომ გსურთ ამ მისამართის წაშლა?",
+    },
+
+    // Payment
+    payment: {
+      cardPayment: "ბარათით გადახდა",
+      allCardsAccepted: "ყველა ბარათი მიიღება",
+      completePayment: "გადახდის დასრულება",
+      enterCardDetails: "გადახდის გვერდზე შეიყვანეთ ბარათის მონაცემები და დაასრულეთ გადახდა",
+      success: {
+        title: "გადახდა წარმატებით დასრულდა!",
+        thanksForPurchase: "მადლობა შეძენისთვის !",
+        orderNumber: "შეკვეთის ნომერი:",
+        viewOrderDetails: "შეკვეთის დეტალების ნახვა",
+        viewOtherProducts: "სხვა პროდუქტების ნახვა",
+      },
+      fail: {
+        title: "გადახდა ვერ შესრულდა",
+        description: "გადახდის პროცესში რაღაც ხარვეზი მოხდა. გთხოვთ სცადოთ ხელახლა ან დაგვიკავშირდით მხარდაჭერის სამსახურთან.",
+        orderNumber: "შეკვეთის ნომერი:",
+        retry: "ხელახლა ცდა",
+        backToCart: "კალათაში დაბრუნება",
+        viewOtherProducts: "სხვა პროდუქტების ნახვა",
+      },
+    },
+
     // About page
     about: {
       title: "ჩვენს შესახებ",
@@ -1868,6 +1934,72 @@ export const TRANSLATIONS: Translations = {
       emptyCart: "Your cart is empty",
       continueShopping: "Continue Shopping",
       backToCart: "Back to Cart",
+    },
+
+    // Addresses Management
+    addresses: {
+      title: "Shipping Addresses",
+      loading: "Loading...",
+      addNew: "New Address",
+      addNewAddress: "Add New Address",
+      selectAddress: "Select shipping address",
+      anotherAddress: "Another Address",
+      empty: {
+        title: "No addresses added",
+        description: "Add your shipping address for faster checkout",
+      },
+      form: {
+        name: "Name",
+        namePlaceholder: "e.g: Home, Work",
+        address: "Address",
+        addressPlaceholder: "Street, Building, Apartment",
+        city: "City",
+        cityPlaceholder: "e.g: New York",
+        postalCode: "Postal Code",
+        postalCodePlaceholder: "e.g: 10001",
+        country: "Country",
+        countryGeorgia: "Georgia",
+        phone: "Phone",
+        phonePlaceholder: "+995 XXX XX XX XX",
+        setAsDefault: "Set as default address",
+        saveToAddresses: "Save to my addresses",
+      },
+      actions: {
+        add: "Add",
+        save: "Save",
+        cancel: "Cancel",
+        edit: "Edit",
+        delete: "Delete",
+        setAsDefault: "Set as Default",
+        use: "Use",
+      },
+      badges: {
+        default: "Default",
+      },
+      confirmDelete: "Are you sure you want to delete this address?",
+    },
+
+    // Payment
+    payment: {
+      cardPayment: "Card Payment",
+      allCardsAccepted: "All cards accepted",
+      completePayment: "Complete Payment",
+      enterCardDetails: "Enter your card details on the payment page and complete the payment",
+      success: {
+        title: "Payment Completed Successfully!",
+        thanksForPurchase: "Thank you for your purchase!",
+        orderNumber: "Order Number:",
+        viewOrderDetails: "View Order Details",
+        viewOtherProducts: "View Other Products",
+      },
+      fail: {
+        title: "Payment Failed",
+        description: "Something went wrong during the payment process. Please try again or contact support.",
+        orderNumber: "Order Number:",
+        retry: "Try Again",
+        backToCart: "Back to Cart",
+        viewOtherProducts: "View Other Products",
+      },
     },
 
     // About page

@@ -2,11 +2,13 @@
 
 import { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
+import { useLanguage } from "@/hooks/LanguageContext";
 import Link from "next/link";
 import "./page.css";
 
 function CheckoutSuccessContent() {
   const searchParams = useSearchParams();
+  const { t } = useLanguage();
   const [orderId, setOrderId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -54,17 +56,17 @@ function CheckoutSuccessContent() {
         <div className="success-card">
           {/* <Image src="/heartLast.png" alt="heartLogo" className="heartLast" width={500} height={700}/> */}
 
-          <h1 className="success-title">გადახდა წარმატებით დასრულდა!</h1>
+          <h1 className="success-title">{t("payment.success.title")}</h1>
           <div className="success-icon-container">
             <div className="success-icon">✓</div>
           </div>
 
-          <p className="success-description"> მადლობა შეძენისთვის ! </p>
+          <p className="success-description">{t("payment.success.thanksForPurchase")}</p>
 
           {orderId && (
             <div className="order-info">
               <p className="order-info-text">
-                <span className="order-info-label">შეკვეთის ნომერი:</span>{" "}
+                <span className="order-info-label">{t("payment.success.orderNumber")}</span>{" "}
                 {orderId}
               </p>
             </div>
@@ -72,11 +74,11 @@ function CheckoutSuccessContent() {
 
           <div className="buttons-container">
             <Link href={`/orders/${orderId}`} className="btn-primary">
-              შეკვეთის დეტალების ნახვა
+              {t("payment.success.viewOrderDetails")}
             </Link>
 
             <Link href="/shop" className="btn-secondary">
-              სხვა პროდუქტების ნახვა
+              {t("payment.success.viewOtherProducts")}
             </Link>
           </div>
         </div>
@@ -86,8 +88,9 @@ function CheckoutSuccessContent() {
 }
 
 export default function CheckoutSuccessPage() {
+  const { t } = useLanguage();
   return (
-    <Suspense fallback={<div>Loading...</div>}>
+    <Suspense fallback={<div>{t("addresses.loading")}</div>}>
       <CheckoutSuccessContent />
     </Suspense>
   );

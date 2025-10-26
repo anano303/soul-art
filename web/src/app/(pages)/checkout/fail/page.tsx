@@ -2,12 +2,14 @@
 
 import { useEffect, useState, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
+import { useLanguage } from "@/hooks/LanguageContext";
 import Link from "next/link";
 import "./page.css";
 
 function CheckoutFailContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
+  const { t } = useLanguage();
   const [orderId, setOrderId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -59,17 +61,16 @@ function CheckoutFailContent() {
           </svg>
         </div>
 
-        <h1 className="fail-title">გადახდა ვერ შესრულდა</h1>
+        <h1 className="fail-title">{t("payment.fail.title")}</h1>
 
         <p className="fail-description">
-          გადახდის პროცესში რაღაც ხარვეზი მოხდა. გთხოვთ სცადოთ ხელახლა ან
-          დაგვიკავშირდით მხარდაჭერის სამსახურთან.
+          {t("payment.fail.description")}
         </p>
 
         {orderId && (
           <div className="order-info">
             <p className="order-info-text">
-              <span className="order-info-label">შეკვეთის ნომერი:</span>{" "}
+              <span className="order-info-label">{t("payment.fail.orderNumber")}</span>{" "}
               {orderId}
             </p>
           </div>
@@ -77,15 +78,15 @@ function CheckoutFailContent() {
 
         <div className="buttons-container">
           <button onClick={handleRetryPayment} className="btn-primary">
-            ხელახლა ცდა
+            {t("payment.fail.retry")}
           </button>
 
           <Link href="/cart" className="btn-secondary">
-            კალათაში დაბრუნება
+            {t("payment.fail.backToCart")}
           </Link>
 
           <Link href="/products" className="btn-secondary">
-            სხვა პროდუქტების ნახვა
+            {t("payment.fail.viewOtherProducts")}
           </Link>
         </div>
       </div>
@@ -94,8 +95,9 @@ function CheckoutFailContent() {
 }
 
 export default function CheckoutFailPage() {
+  const { t } = useLanguage();
   return (
-    <Suspense fallback={<div>Loading...</div>}>
+    <Suspense fallback={<div>{t("addresses.loading")}</div>}>
       <CheckoutFailContent />
     </Suspense>
   );

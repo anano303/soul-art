@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { apiClient } from "@/lib/axios";
 import { useAuth } from "@/hooks/use-auth";
+import { useLanguage } from "@/hooks/LanguageContext";
 import { Plus, MapPin, Edit2, Trash2, Check } from "lucide-react";
 import "./addresses.css";
 
@@ -19,6 +20,7 @@ interface ShippingAddress {
 
 export default function AddressesPage() {
   const { user } = useAuth();
+  const { t } = useLanguage();
   const [addresses, setAddresses] = useState<ShippingAddress[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -83,7 +85,7 @@ export default function AddressesPage() {
   };
 
   const handleDeleteAddress = async (addressId: string) => {
-    if (!confirm("Are you sure you want to delete this address?")) return;
+    if (!confirm(t("addresses.confirmDelete"))) return;
     
     try {
       await apiClient.delete(`/users/me/addresses/${addressId}`);
@@ -135,7 +137,7 @@ export default function AddressesPage() {
   if (loading) {
     return (
       <div className="addresses-page">
-        <div className="loading">იტვირთება...</div>
+        <div className="loading">{t("addresses.loading")}</div>
       </div>
     );
   }
@@ -143,83 +145,83 @@ export default function AddressesPage() {
   return (
     <div className="addresses-page">
       <div className="addresses-header">
-        <h1>მიწოდების მისამართები</h1>
+        <h1>{t("addresses.title")}</h1>
         <button
           onClick={() => setShowAddForm(true)}
           className="btn-add-address"
           disabled={showAddForm}
         >
           <Plus size={20} />
-          ახალი მისამართი
+          {t("addresses.addNew")}
         </button>
       </div>
 
       {showAddForm && (
         <div className="address-form-card">
-          <h3>ახალი მისამართის დამატება</h3>
+          <h3>{t("addresses.addNewAddress")}</h3>
           <form onSubmit={handleAddAddress}>
             <div className="form-grid">
               <div className="form-field">
-                <label>სახელი</label>
+                <label>{t("addresses.form.name")}</label>
                 <input
                   type="text"
                   value={formData.label}
                   onChange={(e) => setFormData({ ...formData, label: e.target.value })}
-                  placeholder="მაგ: სახლი, სამუშაო"
+                  placeholder={t("addresses.form.namePlaceholder")}
                 />
               </div>
 
               <div className="form-field full-width">
-                <label>მისამართი *</label>
+                <label>{t("addresses.form.address")} *</label>
                 <input
                   type="text"
                   required
                   value={formData.address}
                   onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                  placeholder="ქუჩა, შენობა, ბინა"
+                  placeholder={t("addresses.form.addressPlaceholder")}
                 />
               </div>
 
               <div className="form-field">
-                <label>ქალაქი *</label>
+                <label>{t("addresses.form.city")} *</label>
                 <input
                   type="text"
                   required
                   value={formData.city}
                   onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                  placeholder="მაგ: თბილისი"
+                  placeholder={t("addresses.form.cityPlaceholder")}
                 />
               </div>
 
               <div className="form-field">
-                <label>საფოსტო კოდი</label>
+                <label>{t("addresses.form.postalCode")}</label>
                 <input
                   type="text"
                   value={formData.postalCode}
                   onChange={(e) => setFormData({ ...formData, postalCode: e.target.value })}
-                  placeholder="მაგ: 0179"
+                  placeholder={t("addresses.form.postalCodePlaceholder")}
                 />
               </div>
 
               <div className="form-field">
-                <label>ქვეყანა *</label>
+                <label>{t("addresses.form.country")} *</label>
                 <select
                   required
                   value={formData.country}
                   onChange={(e) => setFormData({ ...formData, country: e.target.value })}
                 >
-                  <option value="Georgia">საქართველო</option>
+                  <option value="Georgia">{t("addresses.form.countryGeorgia")}</option>
                 </select>
               </div>
 
               <div className="form-field">
-                <label>ტელეფონი *</label>
+                <label>{t("addresses.form.phone")} *</label>
                 <input
                   type="tel"
                   required
                   value={formData.phoneNumber}
                   onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
-                  placeholder="+995 XXX XX XX XX"
+                  placeholder={t("addresses.form.phonePlaceholder")}
                 />
               </div>
 
@@ -230,14 +232,14 @@ export default function AddressesPage() {
                     checked={formData.isDefault}
                     onChange={(e) => setFormData({ ...formData, isDefault: e.target.checked })}
                   />
-                  მთავარ მისამართად დაყენება
+                  {t("addresses.form.setAsDefault")}
                 </label>
               </div>
             </div>
 
             <div className="form-actions">
               <button type="submit" className="btn-primary">
-                დამატება
+                {t("addresses.actions.add")}
               </button>
               <button
                 type="button"
@@ -247,7 +249,7 @@ export default function AddressesPage() {
                 }}
                 className="btn-secondary"
               >
-                გაუქმება
+                {t("addresses.actions.cancel")}
               </button>
             </div>
           </form>
@@ -258,8 +260,8 @@ export default function AddressesPage() {
         {addresses.length === 0 ? (
           <div className="empty-state">
             <MapPin size={48} />
-            <h3>მისამართები არ არის დამატებული</h3>
-            <p>დაამატეთ თქვენი მიწოდების მისამართი სწრაფი გაფორმებისთვის</p>
+            <h3>{t("addresses.empty.title")}</h3>
+            <p>{t("addresses.empty.description")}</p>
           </div>
         ) : (
           addresses.map((address) => (
@@ -277,7 +279,7 @@ export default function AddressesPage() {
                 >
                   <div className="form-grid">
                     <div className="form-field">
-                      <label>ეტიკეტი</label>
+                      <label>{t("addresses.form.name")}</label>
                       <input
                         type="text"
                         value={formData.label}
@@ -286,7 +288,7 @@ export default function AddressesPage() {
                     </div>
 
                     <div className="form-field full-width">
-                      <label>მისამართი *</label>
+                      <label>{t("addresses.form.address")} *</label>
                       <input
                         type="text"
                         required
@@ -296,7 +298,7 @@ export default function AddressesPage() {
                     </div>
 
                     <div className="form-field">
-                      <label>ქალაქი *</label>
+                      <label>{t("addresses.form.city")} *</label>
                       <input
                         type="text"
                         required
@@ -306,28 +308,27 @@ export default function AddressesPage() {
                     </div>
 
                     <div className="form-field">
-                      <label>საფოსტო კოდი *</label>
+                      <label>{t("addresses.form.postalCode")}</label>
                       <input
                         type="text"
-                        required
                         value={formData.postalCode}
                         onChange={(e) => setFormData({ ...formData, postalCode: e.target.value })}
                       />
                     </div>
 
                     <div className="form-field">
-                      <label>ქვეყანა *</label>
+                      <label>{t("addresses.form.country")} *</label>
                       <select
                         required
                         value={formData.country}
                         onChange={(e) => setFormData({ ...formData, country: e.target.value })}
                       >
-                        <option value="Georgia">საქართველო</option>
+                        <option value="Georgia">{t("addresses.form.countryGeorgia")}</option>
                       </select>
                     </div>
 
                     <div className="form-field">
-                      <label>ტელეფონი *</label>
+                      <label>{t("addresses.form.phone")} *</label>
                       <input
                         type="tel"
                         required
@@ -339,14 +340,14 @@ export default function AddressesPage() {
 
                   <div className="form-actions">
                     <button type="submit" className="btn-primary btn-small">
-                      შენახვა
+                      {t("addresses.actions.save")}
                     </button>
                     <button
                       type="button"
                       onClick={cancelEdit}
                       className="btn-secondary btn-small"
                     >
-                      გაუქმება
+                      {t("addresses.actions.cancel")}
                     </button>
                   </div>
                 </form>
@@ -357,7 +358,7 @@ export default function AddressesPage() {
                     {address.isDefault && (
                       <span className="default-badge">
                         <Check size={14} />
-                        მთავარი
+                        {t("addresses.badges.default")}
                       </span>
                     )}
                   </div>
@@ -367,7 +368,7 @@ export default function AddressesPage() {
                     <p className="address-line">
                       {address.city}, {address.postalCode}
                     </p>
-                    <p className="address-line">{address.country}</p>
+                    <p className="address-line">{address.country === 'Georgia' ? t("addresses.form.countryGeorgia") : address.country}</p>
                     <p className="address-line phone">{address.phoneNumber}</p>
                   </div>
 
@@ -378,7 +379,7 @@ export default function AddressesPage() {
                         className="btn-link"
                       >
                         <Check size={16} />
-                        მთავარად დაყენება
+                        {t("addresses.actions.setAsDefault")}
                       </button>
                     )}
                     <button
@@ -386,14 +387,14 @@ export default function AddressesPage() {
                       className="btn-link"
                     >
                       <Edit2 size={16} />
-                      რედაქტირება
+                      {t("addresses.actions.edit")}
                     </button>
                     <button
                       onClick={() => handleDeleteAddress(address._id)}
                       className="btn-link danger"
                     >
                       <Trash2 size={16} />
-                      წაშლა
+                      {t("addresses.actions.delete")}
                     </button>
                   </div>
                 </>

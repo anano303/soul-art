@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useCheckout } from "../context/checkout-context";
 import { useAuth } from "@/hooks/use-auth";
+import { useLanguage } from "@/hooks/LanguageContext";
 import { apiClient } from "@/lib/axios";
 import { Edit2, Check, Plus } from "lucide-react";
 import "./address-selector.css";
@@ -25,6 +26,7 @@ interface AddressSelectorProps {
 export function AddressSelector({ onAddressSelected }: AddressSelectorProps) {
   const { shippingAddress, setShippingAddress } = useCheckout();
   const { user } = useAuth();
+  const { t } = useLanguage();
   const [savedAddresses, setSavedAddresses] = useState<ShippingAddress[]>([]);
   const [selectedAddressId, setSelectedAddressId] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -161,12 +163,12 @@ export function AddressSelector({ onAddressSelected }: AddressSelectorProps) {
   };
 
   if (loading) {
-    return <div className="address-selector-loading">იტვირთება...</div>;
+    return <div className="address-selector-loading">{t("addresses.loading")}</div>;
   }
 
   return (
     <div className="address-selector">
-      <h3 className="address-selector-title">აირჩიეთ მიწოდების მისამართი</h3>
+      <h3 className="address-selector-title">{t("addresses.selectAddress")}</h3>
 
       {/* Saved Addresses */}
       {savedAddresses.length > 0 && (
@@ -189,21 +191,21 @@ export function AddressSelector({ onAddressSelected }: AddressSelectorProps) {
                 >
                   <div className="form-row">
                     <div className="form-field">
-                      <label>სახელი</label>
+                      <label>{t("addresses.form.name")}</label>
                       <input
                         type="text"
                         value={formData.label}
                         onChange={(e) =>
                           setFormData({ ...formData, label: e.target.value })
                         }
-                        placeholder="მაგ: სახლი, სამუშაო"
+                        placeholder={t("addresses.form.namePlaceholder")}
                       />
                     </div>
                   </div>
 
                   <div className="form-row">
                     <div className="form-field">
-                      <label>მისამართი *</label>
+                      <label>{t("addresses.form.address")} *</label>
                       <input
                         type="text"
                         required
@@ -211,14 +213,14 @@ export function AddressSelector({ onAddressSelected }: AddressSelectorProps) {
                         onChange={(e) =>
                           setFormData({ ...formData, address: e.target.value })
                         }
-                        placeholder="ქუჩა, შენობა, ბინა"
+                        placeholder={t("addresses.form.addressPlaceholder")}
                       />
                     </div>
                   </div>
 
                   <div className="form-row">
                     <div className="form-field">
-                      <label>ქალაქი *</label>
+                      <label>{t("addresses.form.city")} *</label>
                       <input
                         type="text"
                         required
@@ -229,7 +231,7 @@ export function AddressSelector({ onAddressSelected }: AddressSelectorProps) {
                       />
                     </div>
                     <div className="form-field">
-                      <label>საფოსტო კოდი</label>
+                      <label>{t("addresses.form.postalCode")}</label>
                       <input
                         type="text"
                         value={formData.postalCode}
@@ -242,7 +244,7 @@ export function AddressSelector({ onAddressSelected }: AddressSelectorProps) {
 
                   <div className="form-row">
                     <div className="form-field">
-                      <label>ქვეყანა *</label>
+                      <label>{t("addresses.form.country")} *</label>
                       <select
                         required
                         value={formData.country}
@@ -250,11 +252,11 @@ export function AddressSelector({ onAddressSelected }: AddressSelectorProps) {
                           setFormData({ ...formData, country: e.target.value })
                         }
                       >
-                        <option value="Georgia">საქართველო</option>
+                        <option value="Georgia">{t("addresses.form.countryGeorgia")}</option>
                       </select>
                     </div>
                     <div className="form-field">
-                      <label>ტელეფონი *</label>
+                      <label>{t("addresses.form.phone")} *</label>
                       <input
                         type="tel"
                         required
@@ -268,14 +270,14 @@ export function AddressSelector({ onAddressSelected }: AddressSelectorProps) {
 
                   <div className="form-actions">
                     <button type="submit" className="btn-save">
-                      შენახვა
+                      {t("addresses.actions.save")}
                     </button>
                     <button
                       type="button"
                       onClick={cancelEdit}
                       className="btn-cancel"
                     >
-                      გაუქმება
+                      {t("addresses.actions.cancel")}
                     </button>
                   </div>
                 </form>
@@ -298,7 +300,7 @@ export function AddressSelector({ onAddressSelected }: AddressSelectorProps) {
                         {address.isDefault && (
                           <span className="default-badge-small">
                             <Check size={12} />
-                            მთავარი
+                            {t("addresses.badges.default")}
                           </span>
                         )}
                       </label>
@@ -309,7 +311,7 @@ export function AddressSelector({ onAddressSelected }: AddressSelectorProps) {
                       type="button"
                     >
                       <Edit2 size={16} />
-                      რედაქტირება
+                      {t("addresses.actions.edit")}
                     </button>
                   </div>
 
@@ -318,7 +320,7 @@ export function AddressSelector({ onAddressSelected }: AddressSelectorProps) {
                     <p>
                       {address.city}, {address.postalCode}
                     </p>
-                    <p>{address.country}</p>
+                    <p>{address.country === 'Georgia' ? t("addresses.form.countryGeorgia") : address.country}</p>
                     <p className="phone">{address.phoneNumber}</p>
                   </div>
                 </>
@@ -336,13 +338,13 @@ export function AddressSelector({ onAddressSelected }: AddressSelectorProps) {
           type="button"
         >
           <Plus size={20} />
-          სხვა მისამართი
+          {t("addresses.anotherAddress")}
         </button>
       )}
 
       {showNewAddressForm && (
         <div className="new-address-section">
-          <h4>სხვა მისამართი</h4>
+          <h4>{t("addresses.anotherAddress")}</h4>
 
           <form onSubmit={handleUseNewAddress} className="new-address-form">
             {/* Save Address Checkbox First */}
@@ -353,7 +355,7 @@ export function AddressSelector({ onAddressSelected }: AddressSelectorProps) {
                   checked={saveNewAddress}
                   onChange={(e) => setSaveNewAddress(e.target.checked)}
                 />
-                <span>შენახვა ჩემს მისამართებში</span>
+                <span>{t("addresses.form.saveToAddresses")}</span>
               </label>
             </div>
 
@@ -362,14 +364,14 @@ export function AddressSelector({ onAddressSelected }: AddressSelectorProps) {
               <>
                 <div className="form-row">
                   <div className="form-field">
-                    <label>სახელი</label>
+                    <label>{t("addresses.form.name")}</label>
                     <input
                       type="text"
                       value={formData.label}
                       onChange={(e) =>
                         setFormData({ ...formData, label: e.target.value })
                       }
-                      placeholder="მაგ: სახლი, სამუშაო, მშობლების სახლი"
+                      placeholder={t("addresses.form.namePlaceholder")}
                     />
                   </div>
                 </div>
@@ -384,7 +386,7 @@ export function AddressSelector({ onAddressSelected }: AddressSelectorProps) {
                           setFormData({ ...formData, isDefault: e.target.checked })
                         }
                       />
-                      მთავარ მისამართად დაყენება
+                      {t("addresses.form.setAsDefault")}
                     </label>
                   </div>
                 </div>
@@ -393,7 +395,7 @@ export function AddressSelector({ onAddressSelected }: AddressSelectorProps) {
 
             <div className="form-row">
               <div className="form-field">
-                <label>მისამართი *</label>
+                <label>{t("addresses.form.address")} *</label>
                 <input
                   type="text"
                   required
@@ -401,14 +403,14 @@ export function AddressSelector({ onAddressSelected }: AddressSelectorProps) {
                   onChange={(e) =>
                     setFormData({ ...formData, address: e.target.value })
                   }
-                  placeholder="ქუჩა, შენობა, ბინა"
+                  placeholder={t("addresses.form.addressPlaceholder")}
                 />
               </div>
             </div>
 
             <div className="form-row">
               <div className="form-field">
-                <label>ქალაქი *</label>
+                <label>{t("addresses.form.city")} *</label>
                 <input
                   type="text"
                   required
@@ -416,25 +418,25 @@ export function AddressSelector({ onAddressSelected }: AddressSelectorProps) {
                   onChange={(e) =>
                     setFormData({ ...formData, city: e.target.value })
                   }
-                  placeholder="მაგ: თბილისი"
+                  placeholder={t("addresses.form.cityPlaceholder")}
                 />
               </div>
               <div className="form-field">
-                <label>საფოსტო კოდი</label>
+                <label>{t("addresses.form.postalCode")}</label>
                 <input
                   type="text"
                   value={formData.postalCode}
                   onChange={(e) =>
                     setFormData({ ...formData, postalCode: e.target.value })
                   }
-                  placeholder="მაგ: 0179"
+                  placeholder={t("addresses.form.postalCodePlaceholder")}
                 />
               </div>
             </div>
 
             <div className="form-row">
               <div className="form-field">
-                <label>ქვეყანა *</label>
+                <label>{t("addresses.form.country")} *</label>
                 <select
                   required
                   value={formData.country}
@@ -442,11 +444,11 @@ export function AddressSelector({ onAddressSelected }: AddressSelectorProps) {
                     setFormData({ ...formData, country: e.target.value })
                   }
                 >
-                  <option value="Georgia">საქართველო</option>
+                  <option value="Georgia">{t("addresses.form.countryGeorgia")}</option>
                 </select>
               </div>
               <div className="form-field">
-                <label>ტელეფონი *</label>
+                <label>{t("addresses.form.phone")} *</label>
                 <input
                   type="tel"
                   required
@@ -454,14 +456,14 @@ export function AddressSelector({ onAddressSelected }: AddressSelectorProps) {
                   onChange={(e) =>
                     setFormData({ ...formData, phoneNumber: e.target.value })
                   }
-                  placeholder="+995 XXX XX XX XX"
+                  placeholder={t("addresses.form.phonePlaceholder")}
                 />
               </div>
             </div>
 
             <div className="form-actions">
               <button type="submit" className="btn-save">
-                გამოყენება
+                {t("addresses.actions.use")}
               </button>
               <button
                 type="button"
@@ -471,7 +473,7 @@ export function AddressSelector({ onAddressSelected }: AddressSelectorProps) {
                 }}
                 className="btn-cancel"
               >
-                გაუქმება
+                {t("addresses.actions.cancel")}
               </button>
             </div>
           </form>
