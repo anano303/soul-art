@@ -91,7 +91,13 @@ apiClient.interceptors.response.use(
     }
 
     if (error.response?.status === 401 && !originalRequest._retry) {
-      console.log(`🔐 401 Unauthorized detected for: ${requestUrl}`);
+      // Don't redirect for guest-accessible endpoints - just return the error
+      const guestAccessibleEndpoints = ['/cart/validate', '/orders'];
+      const isGuestEndpoint = guestAccessibleEndpoints.some(endpoint => requestUrl.includes(endpoint));
+      
+      if (isGuestEndpoint) {
+        return Promise.reject(error);
+      }
       
             // Check if this is a public route - be more specific to avoid false positives
       const isPublicRoute = publicRoutes.some(route => {

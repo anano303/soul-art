@@ -104,7 +104,6 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       console.error("Error adding to cart:", error);
       
       if ((error as AxiosError)?.response?.status === 401) {
-        console.log('Authentication error (401) when adding to cart, redirecting to login');
         window.location.href = '/login?redirect=' + encodeURIComponent(window.location.pathname);
       } else {
         setError("Failed to add item to cart. Please try again.");
@@ -117,7 +116,6 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const updateQuantity = async (productId: string, quantity: number) => {
     // Check if user is logged in before proceeding
     if (!isAuthenticated() || !isLoggedIn) {
-      console.log('User not authenticated, redirecting to login');
       window.location.href = '/login?redirect=' + encodeURIComponent(window.location.pathname);
       return;
     }
@@ -141,7 +139,6 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       console.error("Error updating cart item quantity:", error);
       
       if ((error as AxiosError)?.response?.status === 401) {
-        console.log('Authentication error (401) when updating quantity, redirecting to login');
         window.location.href = '/login?redirect=' + encodeURIComponent(window.location.pathname);
       } else {
         setError("Failed to update item quantity. Please try again.");
@@ -154,7 +151,6 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const removeFromCart = async (productId: string) => {
     // Check if user is logged in before proceeding
     if (!isAuthenticated() || !isLoggedIn) {
-      console.log('User not authenticated, redirecting to login');
       window.location.href = '/login?redirect=' + encodeURIComponent(window.location.pathname);
       return;
     }
@@ -178,7 +174,6 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       console.error("Error removing item from cart:", error);
       
       if ((error as AxiosError)?.response?.status === 401) {
-        console.log('Authentication error (401) when removing from cart, redirecting to login');
         window.location.href = '/login?redirect=' + encodeURIComponent(window.location.pathname);
       } else {
         setError("Failed to remove item from cart. Please try again.");

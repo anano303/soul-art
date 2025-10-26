@@ -25,6 +25,7 @@ interface OrderConfirmationPayload {
   customerName: string;
   orderId: string;
   profileUrl: string;
+  orderDetailsUrl?: string; // Direct link to order details (for guest users)
   shippingAddress: string;
   contactPhone?: string;
   totals: {
@@ -372,6 +373,7 @@ export class EmailService {
       customerName,
       orderId,
       profileUrl,
+      orderDetailsUrl,
       shippingAddress,
       contactPhone,
       totals,
@@ -392,6 +394,12 @@ export class EmailService {
 
     const sanitizeAttr = (value?: string) =>
       typeof value === 'string' ? value.replace(/"/g, '&quot;') : '';
+
+    // Use orderDetailsUrl for guest users, profileUrl for registered users
+    const viewOrderUrl = orderDetailsUrl || profileUrl;
+    const viewOrderText = orderDetailsUrl 
+      ? 'შეკვეთის დეტალების ნახვა' 
+      : 'პროფილიდან';
 
     const itemsList = (orderItems || []).map((item) => {
       const quantity = safeTotal(item.quantity);
@@ -460,7 +468,7 @@ export class EmailService {
           <h2 style="color: #012645; margin-bottom: 12px;">მადლობა შეძენისთვის, ${customerName}!</h2>
           <p style="margin: 0 0 16px; color: #334155;">
             მადლობა შეძენისთვის, შეკვეთის დეტალები შეგიძლიათ აკონტროლოთ
-            <a href="${profileUrl}" style="color: #012645; font-weight: 600;">პროფილიდან</a>,
+            <a href="${viewOrderUrl}" style="color: #012645; font-weight: 600;">${viewOrderText}</a>,
             პრობლემების შემთხვევაში მოგვწერეთ.
           </p>
 
@@ -488,7 +496,7 @@ export class EmailService {
           </section>
 
           <div style="text-align: center; margin-bottom: 24px;">
-            <a href="${profileUrl}" style="display: inline-block; background: #012645; color: #ffffff; padding: 12px 24px; border-radius: 8px; text-decoration: none;">
+            <a href="${viewOrderUrl}" style="display: inline-block; background: #012645; color: #ffffff; padding: 12px 24px; border-radius: 8px; text-decoration: none;">
               ნახეთ შეკვეთა
             </a>
           </div>

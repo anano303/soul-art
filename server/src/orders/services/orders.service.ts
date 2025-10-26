@@ -928,9 +928,15 @@ export class OrdersService {
         return;
       }
 
-      const customerName = this.getDisplayName(orderWithData.user);
-      const customerEmail = orderWithData.user?.email;
-      const customerPhone = orderWithData.user?.phoneNumber;
+      const customerName = orderWithData.isGuestOrder && orderWithData.guestInfo?.fullName
+        ? orderWithData.guestInfo.fullName
+        : this.getDisplayName(orderWithData.user);
+      const customerEmail = orderWithData.isGuestOrder && orderWithData.guestInfo?.email 
+        ? orderWithData.guestInfo.email 
+        : orderWithData.user?.email;
+      const customerPhone = orderWithData.isGuestOrder && orderWithData.guestInfo?.phoneNumber
+        ? orderWithData.guestInfo.phoneNumber
+        : orderWithData.user?.phoneNumber;
       const shippingDetails = (orderWithData.shippingDetails ??
         {}) as Partial<ShippingDetails>;
       const baseUrl = this.getPrimaryAppUrl();
@@ -984,7 +990,7 @@ export class OrdersService {
 
       if (customerEmail) {
         try {
-          await this.emailService.sendOrderConfirmation(customerEmail, {
+          const emailPayload: any = {
             customerName,
             orderId,
             profileUrl: `${baseUrl}/profile/orders`,
@@ -994,7 +1000,14 @@ export class OrdersService {
             deliverySummary,
             placedAt: orderWithData.createdAt,
             orderItems: customerOrderItems,
-          });
+          };
+
+          // For guest orders, include direct order details URL
+          if (orderWithData.isGuestOrder) {
+            emailPayload.orderDetailsUrl = `${baseUrl}/orders/${orderId}`;
+          }
+
+          await this.emailService.sendOrderConfirmation(customerEmail, emailPayload);
         } catch (error) {
           this.logger.error(
             `Failed to send customer confirmation email for order ${orderId}: ${error.message}`,

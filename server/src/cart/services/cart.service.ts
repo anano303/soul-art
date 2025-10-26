@@ -315,4 +315,74 @@ export class CartService {
         : 'Some items are unavailable',
     };
   }
+
+  async validateGuestCartItems(items: any[]) {
+    const unavailableItems = [];
+    let isValid = true;
+
+    // Get all product details
+    const productIds = items.map((item) => item.productId);
+    const products = await this.productsService.findByIds(productIds);
+
+    for (const item of items) {
+      const product = products.find(
+        (p) => p._id.toString() === item.productId.toString(),
+      );
+
+      if (!product) {
+        // Product no longer exists
+        isValid = false;
+        unavailableItems.push({
+          productId: item.productId,
+          reason: 'not_found',
+        });
+        continue;
+      }
+
+      let availableStock = product.countInStock;
+
+      // Check variant stock if applicable
+      if (
+        item.size &&
+        item.color &&
+        product.variants &&
+        product.variants.length > 0
+      ) {
+        const variant = product.variants.find(
+          (v) =>
+            v.size === item.size &&
+            v.color === item.color &&
+            v.ageGroup === item.ageGroup,
+        );
+
+        if (variant) {
+          availableStock = variant.stock;
+        }
+      }
+
+      // Check stock availability
+      if (availableStock <= 0) {
+        isValid = false;
+        unavailableItems.push({
+          productId: item.productId,
+          reason: 'out_of_stock',
+        });
+      } else if (item.quantity > availableStock) {
+        isValid = false;
+        unavailableItems.push({
+          productId: item.productId,
+          reason: 'insufficient_stock',
+          availableQuantity: availableStock,
+        });
+      }
+    }
+
+    return {
+      isValid,
+      unavailableItems,
+      message: isValid
+        ? 'All items are available'
+        : 'Some items are unavailable',
+    };
+  }
 }

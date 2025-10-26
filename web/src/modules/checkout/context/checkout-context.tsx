@@ -2,11 +2,19 @@
 
 import { createContext, useContext, useState } from "react";
 
+interface GuestInfo {
+  email: string;
+  phoneNumber: string;
+  fullName: string;
+}
+
 interface CheckoutContextType {
   shippingAddress: ShippingAddress | null;
   paymentMethod: string | null;
+  guestInfo: GuestInfo | null;
   setShippingAddress: (address: ShippingAddress | null) => void;
   setPaymentMethod: (method: string) => void;
+  setGuestInfo: (info: GuestInfo | null) => void;
   clearCheckout: () => void;
 }
 
@@ -27,6 +35,7 @@ export function CheckoutProvider({ children }: { children: React.ReactNode }) {
   const [shippingAddress, setShippingAddressState] =
     useState<ShippingAddress | null>(null);
   const [paymentMethod, setPaymentMethodState] = useState<string | null>(null);
+  const [guestInfo, setGuestInfoState] = useState<GuestInfo | null>(null);
 
   const setShippingAddress = (address: ShippingAddress | null) => {
     setShippingAddressState(address);
@@ -36,9 +45,14 @@ export function CheckoutProvider({ children }: { children: React.ReactNode }) {
     setPaymentMethodState(method);
   };
 
+  const setGuestInfo = (info: GuestInfo | null) => {
+    setGuestInfoState(info);
+  };
+
   const clearCheckout = () => {
     setShippingAddressState(null);
     setPaymentMethodState(null);
+    setGuestInfoState(null);
   };
 
   return (
@@ -46,8 +60,10 @@ export function CheckoutProvider({ children }: { children: React.ReactNode }) {
       value={{
         shippingAddress,
         paymentMethod,
+        guestInfo,
         setShippingAddress,
         setPaymentMethod,
+        setGuestInfo,
         clearCheckout,
       }}
     >

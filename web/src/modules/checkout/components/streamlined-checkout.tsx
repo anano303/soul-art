@@ -11,18 +11,19 @@ import { apiClient } from "@/lib/axios";
 import { TAX_RATE } from "@/config/constants";
 import { LoginForm } from "@/modules/auth/components/login-form";
 import { AddressSelector } from "./address-selector";
+import { GuestInfoForm } from "./guest-info-form";
 import { Check, AlertTriangle } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import "./streamlined-checkout.css";
 
-type CheckoutStep = "auth" | "shipping" | "payment" | "review";
+type CheckoutStep = "auth" | "guest" | "shipping" | "payment" | "review";
 
 export function StreamlinedCheckout() {
   const { user } = useAuth();
   const { items, clearCart } = useCart();
-  const { shippingAddress, setShippingAddress, setPaymentMethod, paymentMethod, clearCheckout } =
+  const { shippingAddress, setShippingAddress, setPaymentMethod, paymentMethod, guestInfo, setGuestInfo, clearCheckout } =
     useCheckout();
   const { language, t } = useLanguage();
   const router = useRouter();
@@ -41,6 +42,7 @@ export function StreamlinedCheckout() {
   const [paymentWindowRef, setPaymentWindowRef] = useState<Window | null>(null);
   const [currentOrderId, setCurrentOrderId] = useState<string | null>(null);
   const [addressesLoaded, setAddressesLoaded] = useState(false);
+  const [isGuestCheckout, setIsGuestCheckout] = useState(false);
 
   // Calculate totals
   const itemsPrice = items.reduce((acc, item) => acc + item.price * item.qty, 0);
@@ -76,9 +78,11 @@ export function StreamlinedCheckout() {
   useEffect(() => {
     if (isEditing) return;
     
-    if (!user) {
+    if (!user && !isGuestCheckout) {
       setCurrentStep("auth");
-    } else if (!addressesLoaded) {
+    } else if (!user && isGuestCheckout && !guestInfo) {
+      setCurrentStep("guest");
+    } else if (!addressesLoaded && user) {
       // Wait for addresses to load before deciding
       return;
     } else if (!shippingAddress) {
@@ -88,7 +92,7 @@ export function StreamlinedCheckout() {
       // Auto-set BOG as default payment method
       setPaymentMethod("BOG");
     }
-  }, [user, shippingAddress, setPaymentMethod, isEditing, addressesLoaded]);
+  }, [user, isGuestCheckout, guestInfo, shippingAddress, setPaymentMethod, isEditing, addressesLoaded]);
 
   // Validate cart items
   const validateCartItems = async () => {
@@ -163,7 +167,16 @@ export function StreamlinedCheckout() {
         ageGroup: item.ageGroup,
       }));
 
-      const orderResponse = await apiClient.post("/orders", {
+      const orderPayload: {
+        orderItems: typeof orderItems;
+        shippingDetails: typeof shippingAddress;
+        paymentMethod: typeof paymentMethod;
+        itemsPrice: number;
+        taxPrice: number;
+        shippingPrice: number;
+        totalPrice: number;
+        guestInfo?: typeof guestInfo;
+      } = {
         orderItems,
         shippingDetails: shippingAddress,
         paymentMethod,
@@ -171,7 +184,14 @@ export function StreamlinedCheckout() {
         taxPrice,
         shippingPrice,
         totalPrice,
-      });
+      };
+
+      // Add guest info if guest checkout
+      if (!user && guestInfo) {
+        orderPayload.guestInfo = guestInfo;
+      }
+
+      const orderResponse = await apiClient.post("/orders", orderPayload);
 
       const orderId = orderResponse.data._id;
 
@@ -203,12 +223,12 @@ export function StreamlinedCheckout() {
     try {
       const paymentData = {
         customer: {
-          firstName: shippingAddress?.address?.split(" ")[0] || "Customer",
-          lastName: shippingAddress?.address?.split(" ")[1] || "",
+          firstName: (guestInfo?.fullName || shippingAddress?.address)?.split(" ")[0] || "Customer",
+          lastName: (guestInfo?.fullName || shippingAddress?.address)?.split(" ")[1] || "",
           personalId: "000000000",
           address: shippingAddress?.address || "",
-          phoneNumber: shippingAddress?.phoneNumber || "",
-          email: user?.email || "",
+          phoneNumber: guestInfo?.phoneNumber || shippingAddress?.phoneNumber || "",
+          email: guestInfo?.email || user?.email || "",
         },
         product: {
           productName: `Order #${orderId}`,
@@ -268,7 +288,9 @@ export function StreamlinedCheckout() {
         // Also poll the order status as backup
         const pollOrderStatus = setInterval(async () => {
           try {
-            const orderStatus = await apiClient.get(`/orders/${orderId}`);
+            // Include email parameter for guest orders
+            const emailParam = !user && guestInfo?.email ? `?email=${encodeURIComponent(guestInfo.email)}` : '';
+            const orderStatus = await apiClient.get(`/orders/${orderId}${emailParam}`);
             if (orderStatus.data.isPaid) {
               clearInterval(pollOrderStatus);
               clearCart();
@@ -362,9 +384,9 @@ export function StreamlinedCheckout() {
         <div className="checkout-content">
           {/* Step Indicator */}
           <div className="step-indicator">
-            <div className={cn("step", currentStep === "auth" && "active", user && "completed")}>
+            <div className={cn("step", (currentStep === "auth" || currentStep === "guest") && "active", (user || guestInfo) && "completed")}>
               <div className="step-circle">
-                {user ? <Check className="w-4 h-4" /> : "1"}
+                {(user || guestInfo) ? <Check className="w-4 h-4" /> : "1"}
               </div>
               <span className="step-label">{t("checkout.steps.authorization")}</span>
             </div>
@@ -410,11 +432,39 @@ export function StreamlinedCheckout() {
                   {t("checkout.stepIndicators.authorization.description")}
                 </p>
                 <LoginForm />
+                <div style={{ textAlign: "center", marginTop: "1.5rem" }}>
+                  <button
+                    onClick={() => {
+                      setIsGuestCheckout(true);
+                      setCurrentStep("guest");
+                    }}
+                    className="btn-link"
+                    style={{ fontSize: "1rem" }}
+                  >
+                    {t("checkout.guest.continueAsGuest")}
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Step 1b: Guest Info */}
+            {currentStep === "guest" && !user && (
+              <div className="step-section">
+                <GuestInfoForm
+                  onContinue={() => {
+                    setCurrentStep("shipping");
+                  }}
+                  onSignIn={() => {
+                    setIsGuestCheckout(false);
+                    setGuestInfo(null);
+                    setCurrentStep("auth");
+                  }}
+                />
               </div>
             )}
 
             {/* Step 2: Shipping */}
-            {currentStep === "shipping" && user && (
+            {currentStep === "shipping" && (user || guestInfo) && (
               <div className="step-section">
                 <h2>{t("checkout.stepIndicators.shipping.title")}</h2>
                 <p className="step-description">
@@ -429,7 +479,7 @@ export function StreamlinedCheckout() {
             )}
 
             {/* Step 3: Review & Place Order */}
-            {currentStep === "review" && user && shippingAddress && (
+            {currentStep === "review" && (user || guestInfo) && shippingAddress && (
               <div className="step-section">
                 <h2>{t("checkout.stepIndicators.review.title")}</h2>
                 <p className="step-description">

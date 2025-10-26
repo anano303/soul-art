@@ -3,35 +3,73 @@
 import { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { useLanguage } from "@/hooks/LanguageContext";
+import { useAuth } from "@/hooks/use-auth";
+import { useCheckout } from "@/modules/checkout/context/checkout-context";
 import Link from "next/link";
 import "./page.css";
 
 function CheckoutSuccessContent() {
   const searchParams = useSearchParams();
   const { t } = useLanguage();
+  const { user } = useAuth();
+  const { guestInfo, clearCheckout } = useCheckout();
   const [orderId, setOrderId] = useState<string | null>(null);
+  const [guestEmail, setGuestEmail] = useState<string | null>(null);
 
   useEffect(() => {
     if (searchParams) {
       const orderIdParam = searchParams.get("orderId");
       setOrderId(orderIdParam);
       
+      // Try multiple sources for guest email
+      let email = null;
+      
+      // First, try guestInfo from context
+      if (guestInfo?.email) {
+        email = guestInfo.email;
+      }
+      
+      // Second, try localStorage
+      if (!email && orderIdParam) {
+        const storedEmail = localStorage.getItem(`order_${orderIdParam}_email`);
+        if (storedEmail) {
+          email = storedEmail;
+        }
+      }
+      
+      // Third, try URL parameter (in case it was passed)
+      if (!email) {
+        const emailParam = searchParams.get("email");
+        if (emailParam) {
+          email = emailParam;
+        }
+      }
+      
+      if (email) {
+        setGuestEmail(email);
+        // Always store in localStorage for future access
+        if (orderIdParam) {
+          localStorage.setItem(`order_${orderIdParam}_email`, email);
+        }
+      }
+      
       // Verify payment status with backend
       if (orderIdParam) {
         const verifyPayment = async () => {
           try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/payments/bog/verify/${orderIdParam}`, {
+            await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/payments/bog/verify/${orderIdParam}`, {
               method: 'POST',
               credentials: 'include',
             });
-            const result = await response.json();
-            console.log('Payment verification result:', result);
           } catch (error) {
             console.error('Failed to verify payment:', error);
           }
         };
         verifyPayment();
       }
+      
+      // Clear checkout context after successful payment
+      clearCheckout();
       
       // Notify parent window (if opened in modal/popup)
       if (window.opener || window.parent !== window) {
@@ -48,7 +86,7 @@ function CheckoutSuccessContent() {
         }
       }
     }
-  }, [searchParams]);
+  }, [searchParams, guestInfo, clearCheckout]);
 
   return (
     <div className="checkout-success-container">
@@ -73,13 +111,25 @@ function CheckoutSuccessContent() {
           )}
 
           <div className="buttons-container">
-            <Link href={`/orders/${orderId}`} className="btn-primary">
+            <Link 
+              href={`/orders/${orderId}`} 
+              className="btn-primary"
+            >
               {t("payment.success.viewOrderDetails")}
             </Link>
 
             <Link href="/shop" className="btn-secondary">
               {t("payment.success.viewOtherProducts")}
             </Link>
+
+            {!user && guestEmail && (
+              <div className="guest-account-prompt">
+                <p>{t("payment.success.guestPrompt")}</p>
+                <Link href={`/register?email=${encodeURIComponent(guestEmail)}`} className="btn-link">
+                  {t("payment.success.createAccount")}
+                </Link>
+              </div>
+            )}
           </div>
         </div>
       </div>

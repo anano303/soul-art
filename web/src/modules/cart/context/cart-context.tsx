@@ -160,13 +160,67 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       ageGroup = "",
       price?: number
     ) => {
-      // თუ მომხმარებელი არაა ავტორიზებული, გადავიყვანოთ ლოგინ გვერდზე
+      // Support guest checkout - use localStorage if not authenticated
       if (!user) {
-        console.log("User not authenticated, redirecting to login");
-        window.location.href =
-          "/login?redirect=" + encodeURIComponent(window.location.pathname);
-        // Promise რომ არ გაგრძელდეს
-        throw new Error("User not authenticated");
+        console.log("Guest user - adding to localStorage cart");
+        setLoading(true);
+        try {
+          const existingCart = localStorage.getItem("guest_cart");
+          const guestItems: CartItem[] = existingCart ? JSON.parse(existingCart) : [];
+          
+          // Find if item already exists
+          const existingItemIndex = guestItems.findIndex(
+            (item) =>
+              item.productId === productId &&
+              (item.size || "") === (size || "") &&
+              (item.color || "") === (color || "") &&
+              (item.ageGroup || "") === (ageGroup || "")
+          );
+
+          if (existingItemIndex > -1) {
+            // Update quantity
+            guestItems[existingItemIndex].qty += quantity;
+          } else {
+            // Add new item - we'll need to fetch product details
+            try {
+              const response = await apiClient.get(`/products/${productId}`);
+              const product = response.data;
+              guestItems.push({
+                productId,
+                name: product.name,
+                nameEn: product.nameEn,
+                image: product.images?.[0] || "",
+                price: price || product.price,
+                qty: quantity,
+                size,
+                color,
+                ageGroup,
+                countInStock: product.countInStock || 0,
+              });
+            } catch (error) {
+              console.error("Error fetching product details:", error);
+              throw error;
+            }
+          }
+
+          localStorage.setItem("guest_cart", JSON.stringify(guestItems));
+          setItems(guestItems);
+
+          toast({
+            title: "პროდუქტი დაემატა",
+            description: "პროდუქტი წარმატებით დაემატა კალათაში",
+          });
+        } catch (error) {
+          toast({
+            title: "Error adding item",
+            description: "There was a problem adding your item.",
+            variant: "destructive",
+          });
+          console.error("Error adding item to guest cart:", error);
+        } finally {
+          setLoading(false);
+        }
+        return;
       }
 
       setLoading(true);
@@ -233,11 +287,40 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       color?: string,
       ageGroup?: string
     ) => {
-      // თუ მომხმარებელი არაა ავტორიზებული, გადავიყვანოთ ლოგინ გვერდზე
+      // Support guest cart
       if (!user) {
-        console.log("User not authenticated, redirecting to login");
-        window.location.href =
-          "/login?redirect=" + encodeURIComponent(window.location.pathname);
+        setLoading(true);
+        try {
+          const existingCart = localStorage.getItem("guest_cart");
+          const guestItems: CartItem[] = existingCart ? JSON.parse(existingCart) : [];
+          
+          const itemIndex = guestItems.findIndex(
+            (item) =>
+              item.productId === productId &&
+              (item.size || "") === (size || "") &&
+              (item.color || "") === (color || "") &&
+              (item.ageGroup || "") === (ageGroup || "")
+          );
+
+          if (itemIndex > -1) {
+            if (qty <= 0) {
+              guestItems.splice(itemIndex, 1);
+            } else {
+              guestItems[itemIndex].qty = qty;
+            }
+            localStorage.setItem("guest_cart", JSON.stringify(guestItems));
+            setItems(guestItems);
+          }
+        } catch (error) {
+          console.error("Error updating guest cart quantity:", error);
+          toast({
+            title: "Error",
+            description: "There was a problem updating your item quantity.",
+            variant: "destructive",
+          });
+        } finally {
+          setLoading(false);
+        }
         return;
       }
 
@@ -282,6 +365,43 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       color?: string,
       ageGroup?: string
     ) => {
+      // Support guest cart
+      if (!user) {
+        setLoading(true);
+        try {
+          const existingCart = localStorage.getItem("guest_cart");
+          const guestItems: CartItem[] = existingCart ? JSON.parse(existingCart) : [];
+          
+          const filteredItems = guestItems.filter(
+            (item) =>
+              !(
+                item.productId === productId &&
+                (item.size || "") === (size || "") &&
+                (item.color || "") === (color || "") &&
+                (item.ageGroup || "") === (ageGroup || "")
+              )
+          );
+
+          localStorage.setItem("guest_cart", JSON.stringify(filteredItems));
+          setItems(filteredItems);
+          
+          toast({
+            title: "პროდუქტი წაშალდა",
+            description: "პროდუქტი წარმატებით წაშალდა კალათიდან",
+          });
+        } catch (error) {
+          console.error("Error removing item from guest cart:", error);
+          toast({
+            title: "Error",
+            description: "There was a problem removing your item from the cart.",
+            variant: "destructive",
+          });
+        } finally {
+          setLoading(false);
+        }
+        return;
+      }
+
       // თუ მომხმარებელი არაა ავტორიზებული, გადავიყვანოთ ლოგინ გვერდზე
       if (!user) {
         console.log("User not authenticated, redirecting to login");
@@ -322,11 +442,14 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   );
 
   const clearCart = useCallback(async () => {
-    // თუ მომხმარებელი არაა ავტორიზებული, გადავიყვანოთ ლოგინ გვერდზე
+    // Support guest cart
     if (!user) {
-      console.log("User not authenticated, redirecting to login");
-      window.location.href =
-        "/login?redirect=" + encodeURIComponent(window.location.pathname);
+      localStorage.removeItem("guest_cart");
+      setItems([]);
+      toast({
+        title: "Cart cleared",
+        description: "All items have been removed from your cart.",
+      });
       return;
     }
 
@@ -365,12 +488,45 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       setLoading(true);
       try {
         if (user) {
-          // მხოლოდ ავტორიზებული მომხმარებლებისთვის ვტვირთავთ კალათას
+          // Load authenticated user cart from server
           const { data } = await apiClient.get("/cart");
           setItems(data.items || []);
+          
+          // Sync guest cart if exists
+          const guestCart = localStorage.getItem("guest_cart");
+          if (guestCart) {
+            const guestItems: CartItem[] = JSON.parse(guestCart);
+            if (guestItems.length > 0) {
+              // Merge guest cart items
+              for (const item of guestItems) {
+                try {
+                  await apiClient.post("/cart/items", {
+                    productId: item.productId,
+                    qty: item.qty,
+                    size: item.size || "",
+                    color: item.color || "",
+                    ageGroup: item.ageGroup || "",
+                    price: item.price,
+                  });
+                } catch (error) {
+                  console.error("Error syncing guest cart item:", error);
+                }
+              }
+              // Reload cart after sync
+              const { data: updatedData } = await apiClient.get("/cart");
+              setItems(updatedData.items || []);
+              // Clear guest cart
+              localStorage.removeItem("guest_cart");
+            }
+          }
         } else {
-          // არაავტორიზებული მომხმარებლებისთვის კალათა ცარიელი უნდა იყოს
-          setItems([]);
+          // Load guest cart from localStorage
+          const guestCart = localStorage.getItem("guest_cart");
+          if (guestCart) {
+            setItems(JSON.parse(guestCart));
+          } else {
+            setItems([]);
+          }
         }
       } catch (error) {
         console.error("Error loading cart:", error);

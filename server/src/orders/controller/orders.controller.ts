@@ -102,10 +102,34 @@ export class OrdersController {
     return this.ordersService.findUserOrders(user._id.toString());
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(OptionalJwtAuthGuard)
   @Get(':id')
-  async getOrder(@Param('id') id: string) {
-    return this.ordersService.findById(id);
+  async getOrder(
+    @Param('id') id: string,
+    @CurrentUser() user?: UserDocument,
+    @Query('email') guestEmail?: string,
+  ) {
+    const order = await this.ordersService.findById(id);
+    
+    // If user is authenticated, check if order belongs to them
+    if (user) {
+      if (order.user && order.user.toString() === user._id.toString()) {
+        return order;
+      }
+      // If user is admin or seller, allow access
+      if (user.role === Role.Admin || user.role === Role.Seller) {
+        return order;
+      }
+    }
+    
+    // For guest orders, allow public access (no authentication required)
+    // Guest orders are public and can be viewed by anyone with the order ID
+    if (order.isGuestOrder) {
+      return order;
+    }
+    
+    // If it's a registered user's order but user is not authenticated, deny access
+    throw new UnauthorizedException('You do not have permission to view this order');
   }
 
   @UseGuards(JwtAuthGuard)

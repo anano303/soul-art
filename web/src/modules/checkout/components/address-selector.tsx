@@ -24,7 +24,7 @@ interface AddressSelectorProps {
 }
 
 export function AddressSelector({ onAddressSelected }: AddressSelectorProps) {
-  const { shippingAddress, setShippingAddress } = useCheckout();
+  const { shippingAddress, setShippingAddress, guestInfo } = useCheckout();
   const { user } = useAuth();
   const { t } = useLanguage();
   const [savedAddresses, setSavedAddresses] = useState<ShippingAddress[]>([]);
@@ -47,6 +47,20 @@ export function AddressSelector({ onAddressSelected }: AddressSelectorProps) {
   const [saveNewAddress, setSaveNewAddress] = useState(false);
 
   const fetchSavedAddresses = async () => {
+    // Only fetch saved addresses for authenticated users
+    if (!user) {
+      setLoading(false);
+      // For guests, show the new address form immediately and pre-fill phone number
+      setShowNewAddressForm(true);
+      if (guestInfo?.phoneNumber) {
+        setFormData(prev => ({
+          ...prev,
+          phoneNumber: guestInfo.phoneNumber,
+        }));
+      }
+      return;
+    }
+
     try {
       setLoading(true);
       const response = await apiClient.get("/users/me/addresses");
@@ -71,7 +85,7 @@ export function AddressSelector({ onAddressSelected }: AddressSelectorProps) {
   useEffect(() => {
     fetchSavedAddresses();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [user]);
 
   const selectAddress = (address: ShippingAddress) => {
     setSelectedAddressId(address._id || null);
@@ -157,7 +171,7 @@ export function AddressSelector({ onAddressSelected }: AddressSelectorProps) {
       city: "",
       postalCode: "",
       country: "Georgia",
-      phoneNumber: user?.phoneNumber || "",
+      phoneNumber: guestInfo?.phoneNumber || user?.phoneNumber || "",
     });
     setSaveNewAddress(false);
   };
@@ -347,20 +361,22 @@ export function AddressSelector({ onAddressSelected }: AddressSelectorProps) {
           <h4>{t("addresses.anotherAddress")}</h4>
 
           <form onSubmit={handleUseNewAddress} className="new-address-form">
-            {/* Save Address Checkbox First */}
-            <div className="save-address-checkbox">
-              <label>
-                <input
-                  type="checkbox"
-                  checked={saveNewAddress}
-                  onChange={(e) => setSaveNewAddress(e.target.checked)}
-                />
-                <span>{t("addresses.form.saveToAddresses")}</span>
-              </label>
-            </div>
+            {/* Save Address Checkbox - only for authenticated users */}
+            {user && (
+              <div className="save-address-checkbox">
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={saveNewAddress}
+                    onChange={(e) => setSaveNewAddress(e.target.checked)}
+                  />
+                  <span>{t("addresses.form.saveToAddresses")}</span>
+                </label>
+              </div>
+            )}
 
             {/* Label field - only show if saving */}
-            {saveNewAddress && (
+            {saveNewAddress && user && (
               <>
                 <div className="form-row">
                   <div className="form-field">

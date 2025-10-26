@@ -345,6 +345,16 @@ export class AuthController {
     status: 400,
     description: 'Bad request - validation error',
   })
+  @Post('check-email')
+  async checkEmail(@Body() body: { email: string }) {
+    const user = await this.usersService.findByEmail(body.email);
+    return { exists: !!user };
+  }
+
+  @ApiResponse({
+    status: 400,
+    description: 'Bad request - validation error',
+  })
   @UseInterceptors(createRateLimitInterceptor(authRateLimit))
   @Post('register')
   async register(

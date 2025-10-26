@@ -17,7 +17,11 @@ import type * as z from "zod";
 
 type LoginFormData = z.infer<typeof loginSchema>;
 
-export function LoginForm() {
+interface LoginFormProps {
+  redirectUrl?: string;
+}
+
+export function LoginForm({ redirectUrl }: LoginFormProps = {}) {
   const { t } = useLanguage();
   const errorHandler = useErrorHandler();
   const { mutate: login, isLoading, error: hookError } = useLogin();
@@ -26,10 +30,23 @@ export function LoginForm() {
   const [returnUrl, setReturnUrl] = useState("/");
 
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const url = params.get("returnUrl") || params.get("redirect") || "/";
-    setReturnUrl(url);
-  }, []);
+    // Priority: 1. Prop 2. URL params 3. Current page (if checkout) 4. Default "/"
+    if (redirectUrl) {
+      setReturnUrl(redirectUrl);
+    } else {
+      const params = new URLSearchParams(window.location.search);
+      const urlParam = params.get("returnUrl") || params.get("redirect");
+      
+      if (urlParam) {
+        setReturnUrl(urlParam);
+      } else if (window.location.pathname.includes('/checkout')) {
+        // If we're on checkout page, return to checkout after login
+        setReturnUrl(window.location.pathname);
+      } else {
+        setReturnUrl("/");
+      }
+    }
+  }, [redirectUrl]);
 
   // Watch for errors from the hook
   useEffect(() => {

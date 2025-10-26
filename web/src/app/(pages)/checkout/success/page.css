@@ -220,6 +220,37 @@
   box-shadow: 0 6px 12px rgba(244, 140, 6, 0.2);
 }
 
+.guest-account-prompt {
+  margin-top: 1.5rem;
+  padding: 1.5rem;
+  background: linear-gradient(135deg, #2a2a2a, #3a3a3a);
+  border-radius: 8px;
+  border: 1px solid #4b5320;
+  text-align: center;
+}
+
+.guest-account-prompt p {
+  color: #e6cd9f;
+  font-size: 0.95rem;
+  margin-bottom: 1rem;
+}
+
+.btn-link {
+  color: #f48c06;
+  font-weight: 500;
+  text-decoration: underline;
+  cursor: pointer;
+  background: none;
+  border: none;
+  font-size: 1rem;
+  font-family: "FiraGo-Enhanced", "FiraGo", "Noto Sans Georgian", sans-serif;
+  transition: color 0.2s;
+}
+
+.btn-link:hover {
+  color: #ffa726;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .checkout-success-container {

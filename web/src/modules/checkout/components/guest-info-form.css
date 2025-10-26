@@ -1,0 +1,155 @@
+.guest-info-form-container {
+  max-width: 500px;
+  margin: 0 auto;
+  padding: 2rem;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.guest-info-header {
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.guest-info-header h2 {
+  font-size: 1.75rem;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin-bottom: 0.5rem;
+}
+
+.guest-info-description {
+  color: #666;
+  font-size: 0.95rem;
+}
+
+.guest-info-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form-group label {
+  font-weight: 500;
+  color: #333;
+  font-size: 0.95rem;
+}
+
+.form-group .required {
+  color: #e53e3e;
+}
+
+.form-group input {
+  padding: 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 1rem;
+  transition: all 0.2s;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.form-group input.error {
+  border-color: #e53e3e;
+}
+
+.form-group input.error:focus {
+  border-color: #e53e3e;
+  box-shadow: 0 0 0 3px rgba(229, 62, 62, 0.1);
+}
+
+.error-message {
+  color: #e53e3e;
+  font-size: 0.875rem;
+  margin-top: -0.25rem;
+}
+
+.info-message {
+  color: #3b82f6;
+  font-size: 0.875rem;
+  margin-top: -0.25rem;
+}
+
+.inline-link {
+  background: none;
+  border: none;
+  color: #3b82f6;
+  font-weight: 500;
+  text-decoration: underline;
+  cursor: pointer;
+  padding: 0;
+  font-size: inherit;
+}
+
+.inline-link:hover {
+  color: #2563eb;
+}
+
+.continue-button {
+  padding: 0.875rem 1.5rem;
+  background-color: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  margin-top: 0.5rem;
+}
+
+.continue-button:hover {
+  background-color: #2563eb;
+}
+
+.continue-button:active {
+  background-color: #1d4ed8;
+}
+
+.sign-in-prompt {
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e5e7eb;
+  text-align: center;
+}
+
+.sign-in-prompt p {
+  color: #666;
+  font-size: 0.95rem;
+}
+
+.sign-in-link {
+  background: none;
+  border: none;
+  color: #3b82f6;
+  font-weight: 500;
+  cursor: pointer;
+  text-decoration: underline;
+  padding: 0;
+  font-size: inherit;
+}
+
+.sign-in-link:hover {
+  color: #2563eb;
+}
+
+@media (max-width: 640px) {
+  .guest-info-form-container {
+    padding: 1.5rem;
+  }
+
+  .guest-info-header h2 {
+    font-size: 1.5rem;
+  }
+}

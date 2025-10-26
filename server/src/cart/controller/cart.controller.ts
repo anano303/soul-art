@@ -10,6 +10,7 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../../guards/jwt-auth.guard';
+import { OptionalJwtAuthGuard } from '../../guards/optional-jwt-auth.guard';
 import { CurrentUser } from '../../decorators/current-user.decorator';
 import { CartService } from '../services/cart.service';
 import { AddToCartDto } from '../dtos/add-to-cart.dto';
@@ -18,15 +19,16 @@ import { SavePaymentMethodDto } from '../dtos/save-payment-method.dto';
 import { UserDocument } from '../../users/schemas/user.schema';
 
 @Controller('cart')
-@UseGuards(JwtAuthGuard)
 export class CartController {
   constructor(private cartService: CartService) {}
 
+  @UseGuards(JwtAuthGuard)
   @Get()
   getCart(@CurrentUser() user: UserDocument) {
     return this.cartService.getCart(user);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Post('items')
   addToCart(
     @Body() { productId, qty, size, color, ageGroup, price }: AddToCartDto,
@@ -46,6 +48,7 @@ export class CartController {
     );
   }
 
+  @UseGuards(JwtAuthGuard)
   @Put('items/:productId')
   updateCartItem(
     @Param('productId') productId: string,
@@ -62,6 +65,7 @@ export class CartController {
     );
   }
 
+  @UseGuards(JwtAuthGuard)
   @Delete('items/:productId')
   removeFromCart(
     @Param('productId') productId: string,
@@ -82,6 +86,7 @@ export class CartController {
     );
   }
 
+  @UseGuards(JwtAuthGuard)
   @Post('shipping')
   saveShipping(
     @Body() shippingDetails: SaveShippingDetailsDto,
@@ -90,6 +95,7 @@ export class CartController {
     return this.cartService.validateShippingDetails(shippingDetails);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Post('payment')
   savePaymentMethod(
     @Body() { paymentMethod }: SavePaymentMethodDto,
@@ -100,13 +106,28 @@ export class CartController {
     return this.cartService.validatePaymentMethod(paymentMethod);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Delete()
   clearCart(@CurrentUser() user: UserDocument) {
     return this.cartService.clearCart(user);
   }
 
+  @UseGuards(OptionalJwtAuthGuard)
   @Post('validate')
-  async validateCart(@CurrentUser() user: UserDocument) {
-    return this.cartService.validateCartItems(user);
+  async validateCart(
+    @Body() body: { items?: any[] },
+    @CurrentUser() user?: UserDocument,
+  ) {
+    // For authenticated users, validate their cart
+    if (user) {
+      return this.cartService.validateCartItems(user);
+    }
+    
+    // For guest users, validate the items they send
+    if (!body.items || body.items.length === 0) {
+      throw new BadRequestException('Items array is required for guest validation');
+    }
+    
+    return this.cartService.validateGuestCartItems(body.items);
   }
 }
