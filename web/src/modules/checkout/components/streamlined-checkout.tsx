@@ -37,6 +37,9 @@ export function StreamlinedCheckout() {
   const [paymentUrl, setPaymentUrl] = useState<string>("");
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  const [paymentWindowClosed, setPaymentWindowClosed] = useState(false);
+  const [paymentWindowRef, setPaymentWindowRef] = useState<Window | null>(null);
+  const [currentOrderId, setCurrentOrderId] = useState<string | null>(null);
 
   // Calculate totals
   const itemsPrice = items.reduce((acc, item) => acc + item.price * item.qty, 0);
@@ -170,6 +173,7 @@ export function StreamlinedCheckout() {
   // Handle BOG payment
   const handleBOGPayment = async (orderId: string, amount: number) => {
     setIsProcessingPayment(true);
+    setCurrentOrderId(orderId);
     try {
       const paymentData = {
         customer: {
@@ -195,31 +199,66 @@ export function StreamlinedCheckout() {
       const result = response.data;
 
       if (result?.redirect_url) {
-        // Try to open in modal first, fallback to new window
         setPaymentUrl(result.redirect_url);
         setShowPaymentModal(true);
+        setPaymentWindowClosed(false);
         
-        // Also open in new window as fallback (in case iframe is blocked)
+        // Open payment in new window
         const paymentWindow = window.open(
           result.redirect_url,
           "BOGPayment",
           "width=600,height=700,scrollbars=yes"
         );
         
-        // Listen for payment completion
-        window.addEventListener("message", (event) => {
+        setPaymentWindowRef(paymentWindow);
+
+        // Check if window was closed
+        const checkWindowClosed = setInterval(() => {
+          if (paymentWindow && paymentWindow.closed) {
+            setPaymentWindowClosed(true);
+            clearInterval(checkWindowClosed);
+          }
+        }, 500);
+        
+        // Listen for payment completion via postMessage
+        const handlePaymentMessage = (event: MessageEvent) => {
           if (event.data.type === "payment_success") {
             clearCart();
             clearCheckout();
             setShowPaymentModal(false);
-            if (paymentWindow) paymentWindow.close();
+            if (paymentWindow && !paymentWindow.closed) paymentWindow.close();
+            window.removeEventListener("message", handlePaymentMessage);
             router.push(`/checkout/success?orderId=${orderId}`);
           } else if (event.data.type === "payment_fail") {
             setShowPaymentModal(false);
-            if (paymentWindow) paymentWindow.close();
+            if (paymentWindow && !paymentWindow.closed) paymentWindow.close();
+            window.removeEventListener("message", handlePaymentMessage);
             router.push(`/checkout/fail?orderId=${orderId}`);
           }
-        });
+        };
+
+        window.addEventListener("message", handlePaymentMessage);
+
+        // Also poll the order status as backup
+        const pollOrderStatus = setInterval(async () => {
+          try {
+            const orderStatus = await apiClient.get(`/orders/${orderId}`);
+            if (orderStatus.data.isPaid) {
+              clearInterval(pollOrderStatus);
+              clearCart();
+              clearCheckout();
+              setShowPaymentModal(false);
+              if (paymentWindow && !paymentWindow.closed) paymentWindow.close();
+              window.removeEventListener("message", handlePaymentMessage);
+              router.push(`/checkout/success?orderId=${orderId}`);
+            }
+          } catch {
+            // Continue polling
+          }
+        }, 3000);
+
+        // Stop polling after 10 minutes
+        setTimeout(() => clearInterval(pollOrderStatus), 600000);
       }
     } catch (error) {
       console.error("BOG Payment Error:", error);
@@ -230,6 +269,47 @@ export function StreamlinedCheckout() {
       });
     } finally {
       setIsProcessingPayment(false);
+    }
+  };
+
+  // Reopen payment window
+  const reopenPaymentWindow = () => {
+    if (paymentUrl) {
+      const paymentWindow = window.open(
+        paymentUrl,
+        "BOGPayment",
+        "width=600,height=700,scrollbars=yes"
+      );
+      setPaymentWindowRef(paymentWindow);
+      setPaymentWindowClosed(false);
+
+      // Check if window was closed
+      const checkWindowClosed = setInterval(() => {
+        if (paymentWindow && paymentWindow.closed) {
+          setPaymentWindowClosed(true);
+          clearInterval(checkWindowClosed);
+        }
+      }, 500);
+    }
+  };
+
+  // Cancel order and restore stock
+  const handleCancelOrder = async () => {
+    if (currentOrderId) {
+      try {
+        await apiClient.post(`/orders/${currentOrderId}/cancel`, {
+          reason: "User closed payment modal without completing payment"
+        });
+        console.log(`Order ${currentOrderId} cancelled and stock restored`);
+      } catch (error) {
+        console.error("Error cancelling order:", error);
+      }
+    }
+    setShowPaymentModal(false);
+    setCurrentOrderId(null);
+    setPaymentUrl("");
+    if (paymentWindowRef && !paymentWindowRef.closed) {
+      paymentWindowRef.close();
     }
   };
 
@@ -575,23 +655,64 @@ export function StreamlinedCheckout() {
 
       {/* Payment Modal */}
       {showPaymentModal && paymentUrl && (
-        <div className="payment-modal-overlay" onClick={() => setShowPaymentModal(false)}>
-          <div className="payment-modal" onClick={(e) => e.stopPropagation()}>
-            <div className="payment-modal-header">
-              <h3>გადახდის გვერდი</h3>
-              <button onClick={() => setShowPaymentModal(false)} className="close-button">
-                ✕
-              </button>
+        <div className="payment-modal-overlay">
+          <div className="payment-modal-content">
+            <button 
+              onClick={handleCancelOrder}
+              className="payment-modal-close"
+              aria-label="Close"
+            >
+              ✕
+            </button>
+            
+            <div className="payment-modal-icon">
+              <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <rect x="2" y="5" width="20" height="14" rx="2"/>
+                <line x1="2" y1="10" x2="22" y2="10"/>
+              </svg>
             </div>
-            <iframe
-              src={paymentUrl}
-              className="payment-iframe"
-              title="BOG Payment"
-              sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-top-navigation"
-            />
+
+            <h2 className="payment-modal-title">გადახდის დასრულება</h2>
+            
+            <p className="payment-modal-description">
+              გადახდის გვერდზე შეიყვანეთ ბარათის მონაცემები და დაასრულეთ გადახდა.
+            </p>
+
+            {paymentWindowClosed && (
+              <div className="payment-modal-warning">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                  <line x1="12" y1="9" x2="12" y2="13"/>
+                  <line x1="12" y1="17" x2="12.01" y2="17"/>
+                </svg>
+                <span>გადახდის ფანჯარა დაიხურა. დააჭირეთ ქვემოთ მის ხელახლა გასახსნელად.</span>
+              </div>
+            )}
+
+            <div className="payment-modal-actions">
+              {paymentWindowClosed ? (
+                <button 
+                  onClick={reopenPaymentWindow}
+                  className="btn-payment-primary"
+                >
+                  გადახდის ფანჯრის ხელახლა გახსნა
+                </button>
+              ) : (
+                <a 
+                  href={paymentUrl} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="btn-payment-link"
+                  onClick={reopenPaymentWindow}
+                >
+                  გადახდის გვერდზე გადასვლა
+                </a>
+              )}
+            </div>
+
             <div className="payment-modal-footer">
-              <p className="text-sm text-gray-600">
-                თუ გადახდის გვერდი არ გაიხსნა, <a href={paymentUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">დააჭირეთ აქ</a>
+              <p className="payment-modal-note">
+                💡 გადახდის დასრულების შემდეგ ავტომატურად გადამოგიყვანთ დადასტურების გვერდზე
               </p>
             </div>
           </div>
