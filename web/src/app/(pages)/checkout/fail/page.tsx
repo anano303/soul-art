@@ -14,6 +14,21 @@ function CheckoutFailContent() {
     if (searchParams) {
       const orderIdParam = searchParams.get("orderId");
       setOrderId(orderIdParam);
+      
+      // Notify parent window (if opened in modal/popup)
+      if (window.opener || window.parent !== window) {
+        try {
+          const message = { type: "payment_fail", orderId: orderIdParam };
+          if (window.opener) {
+            window.opener.postMessage(message, window.location.origin);
+          }
+          if (window.parent !== window) {
+            window.parent.postMessage(message, window.location.origin);
+          }
+        } catch (error) {
+          console.error("Failed to notify parent window:", error);
+        }
+      }
     }
   }, [searchParams]);
 

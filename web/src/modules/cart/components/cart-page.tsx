@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import { useCart } from "../context/cart-context";
 import { CartEmpty } from "./cart-empty";
 import { CartItem } from "./cart-item";
-import { formatPrice } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import { useLanguage } from "@/hooks/LanguageContext";
 import { useQuery } from "@tanstack/react-query";
@@ -12,8 +11,6 @@ import { fetchWithAuth } from "@/lib/fetch-with-auth";
 import { useCheckout } from "@/modules/checkout/context/checkout-context";
 import {
   calculateShipping,
-  formatShippingCost,
-  isShippingSupported,
 } from "@/lib/shipping";
 import "./cart-page.css";
 import { Color } from "@/types";
@@ -25,7 +22,7 @@ export function CartPage() {
   const { shippingAddress } = useCheckout();
 
   // Force re-render when localStorage changes
-  const [forceUpdate, setForceUpdate] = useState(0);
+  const [, setForceUpdate] = useState(0);
 
   useEffect(() => {
     const handleStorageChange = () => {
@@ -43,7 +40,7 @@ export function CartPage() {
           if (parsed.country !== shippingAddress?.country) {
             setForceUpdate((prev: number) => prev + 1);
           }
-        } catch (e) {
+        } catch {
           // ignore
         }
       }
@@ -104,7 +101,7 @@ export function CartPage() {
         currentShippingAddress = parsed;
       }
     }
-  } catch (e) {
+  } catch {
     // Use context fallback
   }
 
@@ -176,7 +173,7 @@ export function CartPage() {
               </div>
               <button
                 className="checkout-button"
-                onClick={() => router.push("/checkout/unified")}
+                onClick={() => router.push("/checkout/streamlined")}
               >
                 {t("cart.checkout")}
               </button>
