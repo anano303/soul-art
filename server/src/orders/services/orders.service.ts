@@ -403,6 +403,155 @@ export class OrdersService {
       await session.endSession();
     }
   }
+
+  async createGuestOrder(
+    orderAttrs: Partial<Order> & { guestInfo: { email: string; phoneNumber: string; fullName: string } },
+    externalOrderId?: string,
+  ): Promise<OrderDocument> {
+    const {
+      orderItems,
+      shippingDetails,
+      paymentMethod,
+      itemsPrice,
+      taxPrice,
+      shippingPrice,
+      totalPrice,
+      guestInfo,
+    } = orderAttrs;
+
+    if (orderItems && orderItems.length < 1)
+      throw new BadRequestException('No order items received.');
+
+    // Validate guest info
+    if (!guestInfo || !guestInfo.email || !guestInfo.phoneNumber || !guestInfo.fullName) {
+      throw new BadRequestException('Guest checkout requires email, phoneNumber, and fullName');
+    }
+
+    // Start MongoDB transaction to prevent race conditions
+    const session = await this.connection.startSession();
+    try {
+      return await session.withTransaction(async () => {
+        // First, validate and reserve stock for all items ATOMICALLY
+        for (const item of orderItems) {
+          const product = await this.productModel
+            .findById(item.productId)
+            .session(session);
+
+          if (!product) {
+            throw new NotFoundException(
+              `Product with ID ${item.productId} not found`,
+            );
+          }
+
+          // Check and reserve stock atomically
+          if (
+            product.variants &&
+            product.variants.length > 0 &&
+            (item.size || item.color || item.ageGroup)
+          ) {
+            // Find the specific variant
+            const variantIndex = product.variants.findIndex(
+              (v) =>
+                v.size === item.size &&
+                v.color === item.color &&
+                v.ageGroup === item.ageGroup,
+            );
+
+            if (variantIndex === -1) {
+              throw new BadRequestException(
+                `Variant not found for product ${product.name} (${item.size}/${item.color}/${item.ageGroup})`,
+              );
+            }
+
+            if (product.variants[variantIndex].stock < item.qty) {
+              throw new BadRequestException(
+                `Not enough stock for product ${product.name} variant (${item.size}/${item.color}/${item.ageGroup}). Available: ${product.variants[variantIndex].stock}, Requested: ${item.qty}`,
+              );
+            }
+
+            // Reserve stock immediately (subtract from available stock)
+            product.variants[variantIndex].stock -= item.qty;
+          } else {
+            // Handle legacy products without variants
+            if (product.countInStock < item.qty) {
+              throw new BadRequestException(
+                `Not enough stock for product ${product.name}. Available: ${product.countInStock}, Requested: ${item.qty}`,
+              );
+            }
+
+            // Reserve stock immediately
+            product.countInStock -= item.qty;
+          }
+
+          // Save the product with updated stock within the transaction
+          await product.save({ session });
+        }
+
+        // Now create the order (stock is already reserved)
+        const enhancedOrderItems = await Promise.all(
+          orderItems.map(async (item) => {
+            const product = await this.productModel
+              .findById(item.productId)
+              .session(session);
+
+            if (!product) {
+              throw new NotFoundException(
+                `Product with ID ${item.productId} not found`,
+              );
+            }
+
+            return {
+              ...item,
+              // Ensure size, color, and ageGroup are included from the order item
+              size: item.size || '',
+              color: item.color || '',
+              ageGroup: item.ageGroup || '',
+              product: {
+                _id: product._id,
+                name: product.name,
+                nameEn: product.nameEn,
+                deliveryType: product.deliveryType,
+                minDeliveryDays: product.minDeliveryDays,
+                maxDeliveryDays: product.maxDeliveryDays,
+                dimensions: product.dimensions
+                  ? {
+                      width: product.dimensions.width,
+                      height: product.dimensions.height,
+                      depth: product.dimensions.depth,
+                    }
+                  : undefined,
+              },
+            };
+          }),
+        );
+
+        const createdOrder = await this.orderModel.create(
+          [
+            {
+              user: null, // No user for guest orders
+              guestInfo, // Store guest information
+              isGuestOrder: true,
+              orderItems: enhancedOrderItems,
+              shippingDetails,
+              paymentMethod,
+              itemsPrice,
+              taxPrice,
+              shippingPrice,
+              totalPrice,
+              externalOrderId,
+              stockReservationExpires: new Date(Date.now() + 10 * 60 * 1000), // 10 minutes from now
+            },
+          ],
+          { session },
+        );
+
+        return createdOrder[0];
+      });
+    } finally {
+      await session.endSession();
+    }
+  }
+
   async findAll(): Promise<OrderDocument[]> {
     // Sort by createdAt in descending order (newest first)
     const orders = await this.orderModel
@@ -429,6 +578,71 @@ export class OrdersService {
     if (!order) throw new NotFoundException('No order with given ID.');
     return order;
   }
+
+  /**
+   * Link all guest orders with a specific email to a newly registered user
+   * This is called when a guest user registers with their email
+   */
+  async linkGuestOrdersByEmail(
+    email: string,
+    userId: string,
+  ): Promise<{ linkedCount: number }> {
+    try {
+      if (!email || !userId) {
+        throw new BadRequestException('Email and userId are required');
+      }
+
+      if (!Types.ObjectId.isValid(userId)) {
+        throw new BadRequestException('Invalid user ID');
+      }
+
+      const lowercaseEmail = email.toLowerCase();
+
+      // Find all guest orders with this email
+      const guestOrders = await this.orderModel.find({
+        isGuestOrder: true,
+        'guestInfo.email': lowercaseEmail,
+      });
+
+      if (guestOrders.length === 0) {
+        this.logger.log(
+          `No guest orders found for email: ${lowercaseEmail}`,
+        );
+        return { linkedCount: 0 };
+      }
+
+      // Update all guest orders to link them to the user
+      const result = await this.orderModel.updateMany(
+        {
+          isGuestOrder: true,
+          'guestInfo.email': lowercaseEmail,
+        },
+        {
+          $set: {
+            user: new Types.ObjectId(userId),
+            isGuestOrder: false,
+          },
+          $unset: {
+            guestInfo: '',
+          },
+        },
+      );
+
+      this.logger.log(
+        `Linked ${result.modifiedCount} guest orders to user ${userId} (email: ${lowercaseEmail})`,
+      );
+
+      return { linkedCount: result.modifiedCount };
+    } catch (error: any) {
+      this.logger.error(
+        `Failed to link guest orders: ${error.message}`,
+        error.stack,
+      );
+      // Don't throw error - we don't want to fail user registration if order linking fails
+      return { linkedCount: 0 };
+    }
+  }
+
   async updatePaid(
     id: string,
     paymentResult: PaymentResult,

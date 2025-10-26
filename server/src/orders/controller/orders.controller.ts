@@ -8,6 +8,7 @@ import {
   UseGuards,
   Query,
   BadRequestException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { RolesGuard } from '@/guards/roles.guard';
 import { OrdersService } from '../services/orders.service';
@@ -16,6 +17,7 @@ import { BalanceService } from '../../users/services/balance.service';
 import { UserDocument } from '@/users/schemas/user.schema';
 import { CurrentUser } from '@/decorators/current-user.decorator';
 import { JwtAuthGuard } from '@/guards/jwt-auth.guard';
+import { OptionalJwtAuthGuard } from '@/guards/optional-jwt-auth.guard';
 import { Roles } from '@/decorators/roles.decorator';
 import { Role } from '@/types/role.enum';
 
@@ -27,11 +29,21 @@ export class OrdersController {
     private balanceService: BalanceService,
   ) {}
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(OptionalJwtAuthGuard)
   @Post()
-  async createOrder(@Body() body: any, @CurrentUser() user: UserDocument) {
+  async createOrder(@Body() body: any, @CurrentUser() user?: UserDocument) {
     try {
-      return await this.ordersService.create(body, user._id.toString());
+      // Support both authenticated and guest checkout
+      if (user) {
+        // Authenticated user checkout
+        return await this.ordersService.create(body, user._id.toString());
+      } else {
+        // Guest checkout - require guest info
+        if (!body.guestInfo || !body.guestInfo.email || !body.guestInfo.phoneNumber || !body.guestInfo.fullName) {
+          throw new BadRequestException('Guest checkout requires email, phoneNumber, and fullName');
+        }
+        return await this.ordersService.createGuestOrder(body);
+      }
     } catch (error) {
       // If stock related error, format it properly for frontend
       if (error.message?.includes('Not enough stock')) {

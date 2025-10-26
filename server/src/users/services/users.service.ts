@@ -26,6 +26,7 @@ import { UserCloudinaryService } from './user-cloudinary.service';
 import { generateBaseArtistSlug } from '@/utils/slug-generator';
 import { BalanceService } from './balance.service';
 import { ReferralsService } from '@/referrals/services/referrals.service';
+import { OrdersService } from '@/orders/services/orders.service';
 import { UpdateArtistProfileDto } from '../dtos/update-artist-profile.dto';
 import { ArtistSocialLinks } from '../schemas/user.schema';
 
@@ -42,6 +43,9 @@ export class UsersService {
     @Optional()
     @Inject(forwardRef(() => ReferralsService))
     private readonly referralsService?: ReferralsService,
+    @Optional()
+    @Inject(forwardRef(() => OrdersService))
+    private readonly ordersService?: OrdersService,
   ) {}
 
   private normalizeArtistSlug(slug: string): string {
@@ -727,6 +731,27 @@ export class UsersService {
             error.stack,
           );
           // არ ვაჩერებთ რეგისტრაციას რეფერალური კოდის შეცდომის გამო
+        }
+      }
+
+      // Link any guest orders with this email to the new user account
+      if (newUser.email && this.ordersService) {
+        try {
+          const result = await this.ordersService.linkGuestOrdersByEmail(
+            newUser.email,
+            newUser._id.toString(),
+          );
+          if (result.linkedCount > 0) {
+            this.logger.log(
+              `Linked ${result.linkedCount} guest order(s) to newly registered user: ${newUser.email}`,
+            );
+          }
+        } catch (error) {
+          this.logger.error(
+            `Failed to link guest orders for user ${newUser.email}: ${error.message}`,
+            error.stack,
+          );
+          // Don't fail registration if order linking fails
         }
       }
 

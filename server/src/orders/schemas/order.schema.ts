@@ -7,8 +7,26 @@ export type OrderDocument = Order & mongoose.Document;
 
 @Schema({ timestamps: true })
 export class Order {
-  @Prop({ type: mongoose.Schema.Types.ObjectId, required: true, ref: 'User' })
-  user!: User;
+  @Prop({ type: mongoose.Schema.Types.ObjectId, required: false, ref: 'User' })
+  user?: User;
+
+  // Guest checkout information (when user is not authenticated)
+  @Prop({
+    required: false,
+    type: {
+      email: { required: true, type: String },
+      phoneNumber: { required: true, type: String },
+      fullName: { required: true, type: String },
+    },
+  })
+  guestInfo?: {
+    email: string;
+    phoneNumber: string;
+    fullName: string;
+  };
+
+  @Prop({ default: false })
+  isGuestOrder!: boolean;
 
   @Prop({
     required: true,

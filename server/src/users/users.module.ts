@@ -35,6 +35,7 @@ import { AwsS3Module } from '@/aws-s3/aws-s3.module';
 import { CloudinaryModule } from '@/cloudinary/cloudinary.module';
 import { UserCloudinaryService } from './services/user-cloudinary.service';
 import { ReferralsModule } from '../referrals/referrals.module';
+import { OrderModule } from '../orders/order.module';
 
 @Module({
   imports: [
@@ -77,6 +78,7 @@ import { ReferralsModule } from '../referrals/referrals.module';
     AwsS3Module,
     CloudinaryModule, // Add Cloudinary module
     forwardRef(() => ReferralsModule), // Add ReferralsModule for dependency injection
+    forwardRef(() => OrderModule), // Add OrderModule for guest order linking
   ],
   controllers: [
     AuthController,
