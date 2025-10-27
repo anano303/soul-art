@@ -32,6 +32,7 @@ import {
   CATEGORY_MAPPING,
 } from '@/utils/subcategories';
 import { ProductDto, FindAllProductsDto } from '../dtos/product.dto';
+import { FacebookPostingService } from '@/products/services/facebook-posting.service';
 
 interface FindManyParams {
   keyword?: string;
@@ -63,6 +64,8 @@ export class ProductsService {
     @Optional()
     @Inject(forwardRef(() => 'ReferralsService'))
     private referralsService?: any, // ტიპი ასე დავტოვოთ circular dependency-ის გამო
+    @Optional()
+    private facebookPostingService?: FacebookPostingService,
   ) {}
 
   async findTopRated(): Promise<ProductDocument[]> {
@@ -549,6 +552,40 @@ export class ProductsService {
           `რეფერალური ბონუსის დამუშავების შეცდომა: ${error.message}`,
         );
         // არ ვაჩერებთ პროდუქტის დამტკიცებას რეფერალური ბონუსის შეცდომის გამო
+      }
+    }
+
+    // Auto-post to Facebook Page on approval (best-effort, non-blocking)
+    if (
+      status === ProductStatus.APPROVED &&
+      this.facebookPostingService &&
+      (process.env.FACEBOOK_POSTS_PAGE_ID || process.env.FACEBOOK_PAGE_ID) &&
+      (process.env.FACEBOOK_POSTS_PAGE_ACCESS_TOKEN ||
+        process.env.FACEBOOK_PAGE_ACCESS_TOKEN) &&
+      (process.env.FACEBOOK_AUTO_POST || 'true').toLowerCase() !== 'false'
+    ) {
+      try {
+        // best-effort, don't await to not block response
+        this.facebookPostingService
+          .postApprovedProduct(updatedProduct)
+          .then((res) => {
+            if (res?.success) {
+              console.log(
+                '[FB] Posted product',
+                updatedProduct._id?.toString?.(),
+                'postId:',
+                res.postId,
+              );
+            } else {
+              console.warn('[FB] Post failed', res?.error);
+            }
+          })
+          .catch((err) => console.warn('[FB] Post error', err?.message || err));
+      } catch (err) {
+        console.warn(
+          '[FB] Unexpected post error',
+          (err as any)?.message || err,
+        );
       }
     }
 
