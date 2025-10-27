@@ -94,15 +94,46 @@ export class FacebookPostingService {
     const desc = product.description || product.descriptionEn || '';
     const { message: priceBlock } = this.formatPrice(product);
     const url = this.buildProductUrl(product);
+    const tags = this.formatHashtags(product);
 
     const parts: string[] = [
       `📌 ${title}`,
       desc ? `\n${desc}` : '',
       `\n${priceBlock}`,
       url ? `\n🔗 ნახვა/ყიდვა: ${url}` : '',
+      tags ? `\n${tags}` : '',
     ].filter(Boolean);
 
     return parts.join('\n');
+  }
+
+  private formatHashtags(product: ProductDocument): string {
+    const raw = Array.isArray((product as any).hashtags)
+      ? ((product as any).hashtags as string[])
+      : [];
+
+    // Normalize: trim, drop empty, ensure starts with #, replace spaces with underscores
+    const cleaned = raw
+      .map((t) => (typeof t === 'string' ? t.trim() : ''))
+      .filter(Boolean)
+      .map((t) => t.replace(/^#+/, '')) // remove leading # if present
+      .map((t) => t.replace(/\s+/g, '_')) // spaces to underscores
+      .map((t) => t.replace(/[^\p{L}\p{N}_-]+/gu, '')) // keep letters (any language), numbers, _ and -
+      .filter(Boolean)
+      .map((t) => `#${t}`);
+
+    // Deduplicate and limit count to keep caption readable (e.g., 10)
+    const seen = new Set<string>();
+    const uniqueLimited: string[] = [];
+    for (const tag of cleaned) {
+      if (!seen.has(tag)) {
+        seen.add(tag);
+        uniqueLimited.push(tag);
+        if (uniqueLimited.length >= 10) break;
+      }
+    }
+
+    return uniqueLimited.length ? uniqueLimited.join(' ') : '';
   }
 
   private async uploadPhotosUnpublished(
