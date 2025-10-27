@@ -556,36 +556,51 @@ export class ProductsService {
     }
 
     // Auto-post to Facebook Page on approval (best-effort, non-blocking)
-    if (
-      status === ProductStatus.APPROVED &&
-      this.facebookPostingService &&
-      (process.env.FACEBOOK_POSTS_PAGE_ID || process.env.FACEBOOK_PAGE_ID) &&
-      (process.env.FACEBOOK_POSTS_PAGE_ACCESS_TOKEN ||
-        process.env.FACEBOOK_PAGE_ACCESS_TOKEN) &&
-      (process.env.FACEBOOK_AUTO_POST || 'true').toLowerCase() !== 'false'
-    ) {
-      try {
-        // best-effort, don't await to not block response
-        this.facebookPostingService
-          .postApprovedProduct(updatedProduct)
-          .then((res) => {
-            if (res?.success) {
-              console.log(
-                '[FB] Posted product',
-                updatedProduct._id?.toString?.(),
-                'postId:',
-                res.postId,
-              );
-            } else {
-              console.warn('[FB] Post failed', res?.error);
-            }
-          })
-          .catch((err) => console.warn('[FB] Post error', err?.message || err));
-      } catch (err) {
-        console.warn(
-          '[FB] Unexpected post error',
-          (err as any)?.message || err,
-        );
+    if (status === ProductStatus.APPROVED) {
+      const haveService = Boolean(this.facebookPostingService);
+      const havePageId = Boolean(
+        process.env.FACEBOOK_POSTS_PAGE_ID || process.env.FACEBOOK_PAGE_ID,
+      );
+      const haveToken = Boolean(
+        process.env.FACEBOOK_POSTS_PAGE_ACCESS_TOKEN ||
+          process.env.FACEBOOK_PAGE_ACCESS_TOKEN,
+      );
+      const autoPostEnabled =
+        (process.env.FACEBOOK_AUTO_POST || 'true').toLowerCase() !== 'false';
+
+      if (haveService && havePageId && haveToken && autoPostEnabled) {
+        try {
+          // best-effort, don't await to not block response
+          this.facebookPostingService
+            .postApprovedProduct(updatedProduct)
+            .then((res) => {
+              if (res?.success) {
+                console.log(
+                  '[FB] Posted product',
+                  updatedProduct._id?.toString?.(),
+                  'postId:',
+                  res.postId,
+                );
+              } else {
+                console.warn('[FB] Post failed', res?.error);
+              }
+            })
+            .catch((err) =>
+              console.warn('[FB] Post error', err?.message || err),
+            );
+        } catch (err) {
+          console.warn(
+            '[FB] Unexpected post error',
+            (err as any)?.message || err,
+          );
+        }
+      } else {
+        console.log('[FB] Auto-post skipped', {
+          haveService,
+          havePageId,
+          haveToken,
+          autoPostEnabled,
+        });
       }
     }
 

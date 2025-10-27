@@ -12,6 +12,7 @@ import { Order } from '@/orders/schemas/order.schema';
 import { OrderSchema } from '@/orders/schemas/order.schema';
 import { Model } from 'mongoose';
 import { ReferralsModule } from '@/referrals/referrals.module';
+import { FacebookPostingService } from './services/facebook-posting.service';
 import { PushNotificationModule } from '@/push/push-notification.module';
 
 // Add a provider to manually drop the problematic index on module initialization
@@ -109,7 +110,7 @@ export class IndexCleanupService implements OnModuleInit {
     forwardRef(() => ReferralsModule), // Add ReferralsModule
     PushNotificationModule,
   ],
-  providers: [ProductsService, AppService, IndexCleanupService],
+  providers: [ProductsService, AppService, IndexCleanupService, FacebookPostingService],
   controllers: [ProductsController],
   exports: [
     ProductsService,
