@@ -110,7 +110,12 @@ export class IndexCleanupService implements OnModuleInit {
     forwardRef(() => ReferralsModule), // Add ReferralsModule
     PushNotificationModule,
   ],
-  providers: [ProductsService, AppService, IndexCleanupService, FacebookPostingService],
+  providers: [
+    ProductsService,
+    AppService,
+    IndexCleanupService,
+    FacebookPostingService,
+  ],
   controllers: [ProductsController],
   exports: [
     ProductsService,

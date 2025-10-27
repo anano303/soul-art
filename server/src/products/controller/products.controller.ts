@@ -34,6 +34,7 @@ import { AgeGroup } from '@/types';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
 import axios from 'axios';
 import { PushNotificationService } from '@/push/services/push-notification.service';
+import { FacebookPostingService } from '@/products/services/facebook-posting.service';
 
 @ApiTags('products')
 @Controller('products')
@@ -43,6 +44,7 @@ export class ProductsController {
     private appService: AppService,
     private productExpertAgent: ProductExpertAgent,
     private pushNotificationService: PushNotificationService,
+    private facebookPostingService: FacebookPostingService,
   ) {}
 
   @Get()
@@ -589,6 +591,44 @@ export class ProductsController {
     }
 
     return updatedProduct;
+  }
+
+  @Post(':id/post-to-facebook')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.Admin)
+  @ApiOperation({ summary: 'Manually post a product to Facebook Page (Admin)' })
+  @ApiParam({ name: 'id', description: 'Product ID' })
+  async postProductToFacebook(@Param('id') id: string) {
+    const product = await this.productsService.findById(id);
+
+    if (!product) {
+      throw new BadRequestException('Product not found');
+    }
+
+    // Best-effort call, return the result
+    const result = await this.facebookPostingService.postApprovedProduct(
+      product as any,
+    );
+
+    if (!result.success) {
+      // Attach a friendlier message if common permission issue occurs
+      const msg = (result.error?.error?.message ||
+        result.error?.message ||
+        '') as string;
+      if (/publish_actions/i.test(msg)) {
+        throw new BadRequestException(
+          'Facebook rejected the request. Use a Page Access Token with pages_manage_posts in FACEBOOK_POSTS_PAGE_ACCESS_TOKEN and ensure FACEBOOK_POSTS_PAGE_ID is set.',
+        );
+      }
+      throw new BadRequestException(
+        result.error || 'Failed to post to Facebook',
+      );
+    }
+
+    return {
+      ok: true,
+      postId: result.postId,
+    };
   }
 
   @Get('colors')

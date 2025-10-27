@@ -220,11 +220,18 @@ export class FacebookPostingService {
 
       return { success: true, postId: res.data?.id };
     } catch (error: any) {
-      this.logger.error(
-        'Facebook post failed',
-        error?.response?.data || error.message,
-      );
-      return { success: false, error: error?.response?.data || error.message };
+      const errPayload = error?.response?.data || { message: error.message };
+      // Add friendlier hint for common permission mistake
+      const msg = errPayload?.error?.message || errPayload?.message || '';
+      if (/publish_actions/i.test(msg)) {
+        this.logger.error('Facebook post failed', errPayload);
+        this.logger.warn(
+          '[FB] Hint: Use a Page Access Token with pages_manage_posts (and pages_read_engagement). Do not use user/app/pixel tokens. Generate a Page token via /me/accounts after granting pages_manage_posts to the user in the app, then use that Page token in FACEBOOK_POSTS_PAGE_ACCESS_TOKEN.',
+        );
+      } else {
+        this.logger.error('Facebook post failed', errPayload);
+      }
+      return { success: false, error: errPayload };
     }
   }
 }
