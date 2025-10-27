@@ -1108,6 +1108,8 @@ export const TRANSLATIONS: Translations = {
       noImageSelected: "მინიმუმ ერთი სურათის ატვირთვა აუცილებელია",
       deliveryDaysRequired:
         "მიწოდების დღეების მითითება აუცილებელია სელერის მიწოდების შემთხვევაში",
+      minimumPriceForSoulArt:
+        "SoulArt მიწოდებისთვის მინიმალური ფასი არის 12 ლარი (მოიცავს 10% კომისიას + 10 ლარიან მიწოდებას)",
 
       // Form actions
       createProduct: "პროდუქტის შექმნა",

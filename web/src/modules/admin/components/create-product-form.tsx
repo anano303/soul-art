@@ -783,6 +783,16 @@ export function CreateProductForm({
         return;
       }
 
+      // Validate minimum price for SoulArt delivery
+      if (deliveryType === "SoulArt" && formData.price < 12) {
+        setErrors((prev) => ({
+          ...prev,
+          price: t("adminProducts.minimumPriceForSoulArt"),
+        }));
+        setPending(false);
+        return;
+      }
+
       // Validate discount fields
       if (discountPercentage && parseFloat(discountPercentage) > 0) {
         const discountValue = parseFloat(discountPercentage);
@@ -1596,6 +1606,26 @@ export function CreateProductForm({
               />
             </div>
           </div>
+            {deliveryType === "SoulArt" && (
+              <div className="info-message" style={{
+                background: "linear-gradient(135deg, rgba(1, 38, 69, 0.1), rgba(123, 86, 66, 0.05))",
+                padding: "1rem",
+                borderRadius: "8px",
+                borderLeft: "4px solid #012645",
+                marginTop: "0.75rem",
+                fontSize: "0.9rem",
+                color: "#012645"
+              }}>
+                <strong>ℹ️ მნიშვნელოვანი:</strong>
+                <p style={{ marginTop: "0.5rem", marginBottom: "0" }}>
+                  SoulArt მიწოდება თბილისში ღირს 10 ლარი. გთხოვთ, პროდუქტის ფასი დააწესოთ მინიმუმ 12 ლარი, რაც მოიცავს:
+                </p>
+                <ul style={{ marginTop: "0.5rem", marginBottom: "0", paddingLeft: "1.5rem" }}>
+                  <li>10% საიტის კომისია</li>
+                  <li>10 ლარი მიწოდების ღირებულება</li>
+                </ul>
+              </div>
+            )}
 
           {deliveryType === "SELLER" && (
             <div className="delivery-days">
@@ -1844,7 +1874,8 @@ export function CreateProductForm({
         {/* Validation Errors Display */}
         {(!selectedCategory ||
           !selectedSubcategory ||
-          formData.images.length === 0) && (
+          formData.images.length === 0 ||
+          (deliveryType === "SoulArt" && formData.price < 12)) && (
           <div
             className="validation-errors-display"
             style={{
@@ -1897,6 +1928,17 @@ export function CreateProductForm({
                   }}
                 >
                   • {t("adminProducts.noImageSelected")}
+                </li>
+              )}
+              {deliveryType === "SoulArt" && formData.price < 12 && (
+                <li
+                  style={{
+                    color: "#ca8a04",
+                    fontSize: "14px",
+                    marginBottom: "4px",
+                  }}
+                >
+                  • {t("adminProducts.minimumPriceForSoulArt")}
                 </li>
               )}
             </ul>
