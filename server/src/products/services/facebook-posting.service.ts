@@ -72,18 +72,18 @@ export class FacebookPostingService {
         0,
         Math.round((product.price - discountAmount) * 100) / 100,
       );
-      lines.push(
-        `ფასი: ${finalPrice}${currency} (ფასდაკლება ${discountPct}% — ძველი ფასი ${product.price}${currency})`,
-      );
+      // Use emojis and plain text newlines for Facebook captions (HTML is not rendered)
+      lines.push(`💰 ფასი: ${finalPrice}${currency}`);
+      lines.push(`🔻 ფასდაკლება: ${discountPct}% — ძველი ფასი ${product.price}${currency}`);
       if (product.discountEndDate) {
         const end = new Date(product.discountEndDate);
         const y = end.getFullYear();
         const m = (end.getMonth() + 1).toString().padStart(2, '0');
         const d = end.getDate().toString().padStart(2, '0');
-        lines.push(`ფასდაკლება მოქმედებს  ${y}-${m}-${d}-მდე`);
+        lines.push(`⏳ მოქმედებს ${y}-${m}-${d}-მდე`);
       }
     } else {
-      lines.push(`ფასი: ${product.price}${currency}`);
+      lines.push(`💰 ფასი: ${product.price}${currency}`);
     }
 
     return { message: lines.join('\n'), finalPrice };
@@ -95,16 +95,43 @@ export class FacebookPostingService {
     const { message: priceBlock } = this.formatPrice(product);
     const url = this.buildProductUrl(product);
     const tags = this.formatHashtags(product);
+    const author = this.getAuthor(product);
+    const sellerUrl = this.getSellerProfileUrl(product);
 
     const parts: string[] = [
       `📌 ${title}`,
+      author ? `\n✍️ ავტორი: ${author}` : '',
       desc ? `\n${desc}` : '',
       `\n${priceBlock}`,
       url ? `\n🔗 ნახვა/ყიდვა: ${url}` : '',
+      sellerUrl ? `\n👤 ავტორის გვერდი: ${sellerUrl}` : '',
       tags ? `\n${tags}` : '',
     ].filter(Boolean);
 
     return parts.join('\n');
+  }
+
+  private getAuthor(product: ProductDocument): string | null {
+    const anyProd: any = product as any;
+    // Prefer explicit brand; else try populated user.storeName or user.name
+    const brand = anyProd.brand as string | undefined;
+    const storeName = anyProd.user?.storeName as string | undefined;
+    const userName = anyProd.user?.name as string | undefined;
+    const artistSlug = anyProd.user?.artistSlug as string | undefined;
+    const author = brand || storeName || userName || null;
+    // Optionally append slug if available
+    if (author && artistSlug) {
+      return `${author} (${artistSlug})`;
+    }
+    return author;
+  }
+
+  private getSellerProfileUrl(product: ProductDocument): string | null {
+    const anyProd: any = product as any;
+    const base = this.getPublicBaseUrl();
+    const artistSlug = anyProd.user?.artistSlug as string | undefined;
+    if (!base || !artistSlug) return null;
+    return `${base}/@${artistSlug}`;
   }
 
   private formatHashtags(product: ProductDocument): string {

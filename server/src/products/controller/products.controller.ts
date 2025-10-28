@@ -599,7 +599,8 @@ export class ProductsController {
   @ApiOperation({ summary: 'Manually post a product to Facebook Page (Admin)' })
   @ApiParam({ name: 'id', description: 'Product ID' })
   async postProductToFacebook(@Param('id') id: string) {
-    const product = await this.productsService.findById(id);
+    // Ensure we populate seller info so author and profile link appear in the caption
+    const product = await this.productsService.findByIdWithUser(id);
 
     if (!product) {
       throw new BadRequestException('Product not found');

@@ -330,6 +330,21 @@ export class ProductsService {
     return product;
   }
 
+  async findByIdWithUser(id: string): Promise<ProductDocument> {
+    if (!Types.ObjectId.isValid(id))
+      throw new BadRequestException('Invalid product ID.');
+
+    const product = await this.productModel
+      .findById(id)
+      .populate('user', 'storeName name artistSlug')
+      .populate('mainCategory')
+      .populate('subCategory');
+
+    if (!product) throw new NotFoundException('No product with given ID.');
+
+    return product;
+  }
+
   async incrementViewCount(id: string): Promise<void> {
     if (!Types.ObjectId.isValid(id))
       throw new BadRequestException('Invalid product ID.');
