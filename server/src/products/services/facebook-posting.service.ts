@@ -74,7 +74,9 @@ export class FacebookPostingService {
       );
       // Use emojis and plain text newlines for Facebook captions (HTML is not rendered)
       lines.push(`💰 ფასი: ${finalPrice}${currency}`);
-      lines.push(`🔻 ფასდაკლება: ${discountPct}% — ძველი ფასი ${product.price}${currency}`);
+      lines.push(
+        `🔻 ფასდაკლება: ${discountPct}% — ძველი ფასი ${product.price}${currency}`,
+      );
       if (product.discountEndDate) {
         const end = new Date(product.discountEndDate);
         const y = end.getFullYear();
