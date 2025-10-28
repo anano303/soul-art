@@ -1618,10 +1618,10 @@ export function CreateProductForm({
               }}>
                 <strong>ℹ️ მნიშვნელოვანი:</strong>
                 <p style={{ marginTop: "0.5rem", marginBottom: "0" }}>
-                  SoulArt მიწოდება თბილისში ღირს 10 ლარი. გთხოვთ, პროდუქტის ფასი დააწესოთ მინიმუმ 12 ლარი, რაც მოიცავს:
+                  SoulArt მიწოდება თბილისში ღირს 5% მინიმუმ 10 ლარი. გთხოვთ, პროდუქტის ფასი დააწესოთ მინიმუმ 12 ლარი, რაც მოიცავს:
                 </p>
                 <ul style={{ marginTop: "0.5rem", marginBottom: "0", paddingLeft: "1.5rem" }}>
-                  <li>10% საიტის კომისია</li>
+                  <li>10% საიტის საკომისიო</li>
                   <li>10 ლარი მიწოდების ღირებულება</li>
                 </ul>
               </div>

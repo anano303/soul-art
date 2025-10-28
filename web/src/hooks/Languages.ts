@@ -1077,7 +1077,7 @@ export const TRANSLATIONS: Translations = {
       ageGroups: "ასაკობრივი ჯგუფები",
       sizes: "ზომები",
       colors: "ფერები",
-      stock: "საცავში",
+      stock: "რაოდენობა მარაგში",
       brand: "ბრენდი",
       images: "სურათები",
       brandLogo: "ბრენდის ლოგო",
@@ -1109,7 +1109,7 @@ export const TRANSLATIONS: Translations = {
       deliveryDaysRequired:
         "მიწოდების დღეების მითითება აუცილებელია სელერის მიწოდების შემთხვევაში",
       minimumPriceForSoulArt:
-        "SoulArt მიწოდებისთვის მინიმალური ფასი არის 12 ლარი (მოიცავს 10% კომისიას + 10 ლარიან მიწოდებას)",
+        "SoulArt მიწოდებისთვის მინიმალური ფასი არის 12 ლარი (მოიცავს 10% საკომისიოს + 10 ლარიან მიწოდებას)",
 
       // Form actions
       createProduct: "პროდუქტის შექმნა",
