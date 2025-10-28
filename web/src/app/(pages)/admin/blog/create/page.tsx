@@ -11,6 +11,12 @@ export default function AdminBlogCreatePage() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    const hasBlogManagerAccess = (role?: string | null) => {
+      if (!role) return false;
+      const normalized = role.toString().toLowerCase();
+      return normalized === Role.Admin || normalized === Role.Blogger;
+    };
+
     if (!isLoggedIn()) {
       router.push("/login?redirect=/admin/blog/create");
       return;
@@ -22,8 +28,8 @@ export default function AdminBlogCreatePage() {
       return;
     }
 
-    if (userData.role !== Role.Admin) {
-      console.log("Only admins can create blog posts");
+    if (!hasBlogManagerAccess(userData.role)) {
+      console.log("Only admins/bloggers can create blog posts");
       router.push("/admin/blog");
       return;
     }

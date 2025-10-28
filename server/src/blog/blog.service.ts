@@ -1,9 +1,14 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { BlogPost, BlogPostDocument } from './schemas/blog-post.schema';
 import { CreateBlogPostDto } from './dto/create-blog-post.dto';
 import { UpdateBlogPostDto } from './dto/update-blog-post.dto';
+import { Role } from '../types/role.enum';
 
 @Injectable()
 export class BlogService {
@@ -15,9 +20,21 @@ export class BlogService {
   async create(
     createBlogPostDto: CreateBlogPostDto,
     userId: string,
+    userRole: Role,
   ): Promise<BlogPost> {
-    const blogPost = new this.blogPostModel({
+    const isAdmin = userRole === Role.Admin;
+    const publishDate = createBlogPostDto.publishDate
+      ? new Date(createBlogPostDto.publishDate)
+      : new Date();
+
+    const payload: CreateBlogPostDto = {
       ...createBlogPostDto,
+      isPublished: isAdmin ? (createBlogPostDto.isPublished ?? false) : false,
+      publishDate: publishDate.toISOString(),
+    };
+
+    const blogPost = new this.blogPostModel({
+      ...payload,
       createdBy: userId,
     });
     return blogPost.save();
@@ -48,16 +65,37 @@ export class BlogService {
   async update(
     id: string,
     updateBlogPostDto: UpdateBlogPostDto,
+    userId: string,
+    userRole: Role,
   ): Promise<BlogPost> {
-    const blogPost = await this.blogPostModel
-      .findByIdAndUpdate(id, updateBlogPostDto, { new: true })
-      .exec();
+    const existing = await this.blogPostModel.findById(id).exec();
 
-    if (!blogPost) {
+    if (!existing) {
       throw new NotFoundException(`Blog post with ID ${id} not found`);
     }
 
-    return blogPost;
+    const isAdmin = userRole === Role.Admin;
+    const isOwner = existing.createdBy?.toString() === userId;
+
+    if (!isAdmin && !isOwner) {
+      throw new ForbiddenException('You can only modify your own posts');
+    }
+
+    const sanitizedUpdate: UpdateBlogPostDto = {
+      ...updateBlogPostDto,
+    };
+
+    delete (sanitizedUpdate as any).createdBy;
+    delete (sanitizedUpdate as any).createdById;
+
+    if (!isAdmin) {
+      sanitizedUpdate.isPublished = existing.isPublished;
+    }
+
+    Object.assign(existing, sanitizedUpdate);
+    await existing.save();
+
+    return existing;
   }
 
   async remove(id: string): Promise<void> {

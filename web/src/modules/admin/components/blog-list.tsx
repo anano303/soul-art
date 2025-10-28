@@ -8,6 +8,7 @@ import Image from "next/image";
 import { toast } from "react-hot-toast";
 import { getUserData } from "@/lib/auth";
 import { Role } from "@/types/role";
+import { User } from "@/types";
 import "./blog-list.css";
 
 interface BlogPost {
@@ -19,7 +20,16 @@ interface BlogPost {
   coverImage: string;
   publishDate: string;
   isPublished: boolean;
+  createdById?: string;
+  authorId?: string;
+  authorEmail?: string;
+  ownerId?: string;
+  createdByEmail?: string;
   createdBy?: {
+    _id?: string;
+    id?: string;
+    userId?: string;
+    authorId?: string;
     username?: string;
     email?: string;
     name?: string;
@@ -30,6 +40,12 @@ export function BlogList() {
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<"all" | "published" | "draft">("all");
+  const [currentUser, setCurrentUser] = useState<User | null>(() => {
+    if (typeof window === "undefined") {
+      return null;
+    }
+    return getUserData();
+  });
   const [userRole, setUserRole] = useState<Role | null>(() => {
     if (typeof window === "undefined") {
       return null;
@@ -40,11 +56,63 @@ export function BlogList() {
   useEffect(() => {
     if (typeof window === "undefined") return;
     const userData = getUserData();
+    setCurrentUser(userData ?? null);
     setUserRole(userData?.role ?? null);
   }, []);
 
   const isAdmin = userRole === Role.Admin;
   const isBlogger = userRole === Role.Blogger;
+  const canCreatePosts = isAdmin || isBlogger;
+
+  const isPostOwner = (post: BlogPost) => {
+    if (!currentUser) return false;
+
+    const normalize = (value: unknown) => {
+      if (value === undefined || value === null) {
+        return "";
+      }
+      return String(value);
+    };
+
+    const userIdCandidates = [
+      post.createdById,
+      post.authorId,
+      post.ownerId,
+      post.createdBy?._id,
+      post.createdBy?.id,
+      post.createdBy?.userId,
+      post.createdBy?.authorId,
+    ]
+      .filter(Boolean)
+      .map((candidate) => normalize(candidate));
+
+    if (
+      currentUser._id &&
+      userIdCandidates.some((candidate) => candidate === currentUser._id)
+    ) {
+      return true;
+    }
+
+    const emailCandidates = [
+      post.createdBy?.email,
+      post.authorEmail,
+      post.createdByEmail,
+    ]
+      .filter(Boolean)
+      .map((candidate) => normalize(candidate).toLowerCase());
+
+    if (
+      currentUser.email &&
+      emailCandidates.includes(currentUser.email.toLowerCase())
+    ) {
+      return true;
+    }
+
+    return false;
+  };
+
+  const canEditPost = (post: BlogPost) =>
+    isAdmin || (isBlogger && isPostOwner(post));
 
   const fetchPosts = async () => {
     try {
@@ -129,7 +197,7 @@ export function BlogList() {
     <div className="blog-admin-container">
       <div className="blog-admin-header">
         <h1>ბლოგის მართვა</h1>
-        {isAdmin && (
+        {canCreatePosts && (
           <Link href="/admin/blog/create" className="btn-create">
             <Plus size={20} />
             ახალი პოსტი
@@ -199,15 +267,17 @@ export function BlogList() {
               </p>
 
               <div className="post-actions">
-                {isAdmin ? (
+                {canEditPost(post) && (
+                  <Link
+                    href={`/admin/blog/${post._id}/edit`}
+                    className="btn-action btn-edit"
+                  >
+                    <Edit size={16} />
+                    რედაქტირება
+                  </Link>
+                )}
+                {isAdmin && (
                   <>
-                    <Link
-                      href={`/admin/blog/${post._id}/edit`}
-                      className="btn-action btn-edit"
-                    >
-                      <Edit size={16} />
-                      რედაქტირება
-                    </Link>
                     <button
                       onClick={() => handleTogglePublish(post._id)}
                       className="btn-action btn-toggle"
@@ -232,10 +302,11 @@ export function BlogList() {
                       წაშლა
                     </button>
                   </>
-                ) : (
+                )}
+                {!canEditPost(post) && !isAdmin && (
                   <span className="post-actions-readonly">
                     {isBlogger
-                      ? "ბლოგერის როლს მხოლოდ ნახვის უფლება აქვს"
+                      ? "შეგიძლიათ მხოლოდ საკუთარი პოსტების რედაქტირება"
                       : "მხოლოდ ადმინს შეუძლია პოსტის შეცვლა"}
                   </span>
                 )}
@@ -248,7 +319,7 @@ export function BlogList() {
       {posts.length === 0 && (
         <div className="empty-state">
           <p>პოსტები არ მოიძებნა</p>
-          {isAdmin && (
+          {canCreatePosts && (
             <Link href="/admin/blog/create" className="btn-create">
               <Plus size={20} />
               შექმენი პირველი პოსტი

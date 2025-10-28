@@ -8,6 +8,7 @@ import {
   Param,
   Query,
   UseGuards,
+  ForbiddenException,
 } from '@nestjs/common';
 import { BlogService } from './blog.service';
 import { CreateBlogPostDto } from './dto/create-blog-post.dto';
@@ -18,6 +19,8 @@ import { Roles } from '../decorators/roles.decorator';
 import { Role } from '../types/role.enum';
 import { UserId } from '../decorators/userId.decorator';
 import { UpdateBlogPostDto } from './dto/update-blog-post.dto';
+import { Request } from 'express';
+import { Req } from '@nestjs/common';
 
 @Controller('blog')
 export class BlogController {
@@ -37,26 +40,37 @@ export class BlogController {
     return this.blogService.findOne(id);
   }
 
-  // Admin only: Create blog post
+  // Admin/Blogger: Create blog post
   @Post()
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.Admin)
+  @Roles(Role.Admin, Role.Blogger)
   async create(
     @Body() createBlogPostDto: CreateBlogPostDto,
     @UserId() userId: string,
+    @Req() req: Request,
   ) {
-    return this.blogService.create(createBlogPostDto, userId);
+    const userRole = (req.user as any)?.role as Role | undefined;
+    if (!userRole) {
+      throw new ForbiddenException('Unable to verify user role');
+    }
+    return this.blogService.create(createBlogPostDto, userId, userRole);
   }
 
-  // Admin only: Update blog post
+  // Admin/Blogger: Update blog post
   @Put(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.Admin)
+  @Roles(Role.Admin, Role.Blogger)
   async update(
     @Param('id') id: string,
     @Body() updateBlogPostDto: UpdateBlogPostDto,
+    @UserId() userId: string,
+    @Req() req: Request,
   ) {
-    return this.blogService.update(id, updateBlogPostDto);
+    const userRole = (req.user as any)?.role as Role | undefined;
+    if (!userRole) {
+      throw new ForbiddenException('Unable to verify user role');
+    }
+    return this.blogService.update(id, updateBlogPostDto, userId, userRole);
   }
 
   // Admin only: Delete blog post

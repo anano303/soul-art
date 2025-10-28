@@ -6,6 +6,8 @@ import { fetchWithAuth } from "@/lib/fetch-with-auth";
 import { toast } from "react-hot-toast";
 import { Plus, Trash2, Upload, Save, X } from "lucide-react";
 import Image from "next/image";
+import { getUserData } from "@/lib/auth";
+import { Role } from "@/types/role";
 import "./blog-form.css";
 
 interface QAItem {
@@ -37,6 +39,12 @@ export function BlogForm({ postId }: BlogFormProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [currentUser] = useState(() => {
+    if (typeof window === "undefined") {
+      return null;
+    }
+    return getUserData();
+  });
   const normalizeQA = (items?: Array<Partial<QAItem>>): QAItem[] => {
     if (!Array.isArray(items) || items.length === 0) {
       return [{ question: "", answer: "" }];
@@ -45,6 +53,52 @@ export function BlogForm({ postId }: BlogFormProps) {
       question: item?.question ?? "",
       answer: item?.answer ?? "",
     }));
+  };
+  const isPostOwner = (post: any) => {
+    if (!currentUser) return false;
+
+    const normalize = (value: unknown) => {
+      if (value === undefined || value === null) {
+        return "";
+      }
+      return String(value);
+    };
+
+    const userIdCandidates = [
+      post?.createdById,
+      post?.authorId,
+      post?.ownerId,
+      post?.createdBy?._id,
+      post?.createdBy?.id,
+      post?.createdBy?.userId,
+      post?.createdBy?.authorId,
+    ]
+      .filter(Boolean)
+      .map((candidate: unknown) => normalize(candidate));
+
+    if (
+      currentUser._id &&
+      userIdCandidates.some((candidate) => candidate === currentUser._id)
+    ) {
+      return true;
+    }
+
+    const emailCandidates = [
+      post?.createdBy?.email,
+      post?.authorEmail,
+      post?.createdByEmail,
+    ]
+      .filter(Boolean)
+      .map((candidate: unknown) => normalize(candidate).toLowerCase());
+
+    if (
+      currentUser.email &&
+      emailCandidates.includes(currentUser.email.toLowerCase())
+    ) {
+      return true;
+    }
+
+    return false;
   };
   const [formData, setFormData] = useState<BlogFormData>({
     title: "",
@@ -73,6 +127,16 @@ export function BlogForm({ postId }: BlogFormProps) {
       const response = await fetchWithAuth(`/blog/${postId}`);
       if (response.ok) {
         const data = await response.json();
+
+        if (
+          postId &&
+          currentUser?.role === Role.Blogger &&
+          !isPostOwner(data)
+        ) {
+          toast.error("შეგიძლიათ მხოლოდ საკუთარი პოსტების რედაქტირება");
+          router.push("/admin/blog");
+          return;
+        }
         setFormData({
           title: data.title,
           titleEn: data.titleEn,

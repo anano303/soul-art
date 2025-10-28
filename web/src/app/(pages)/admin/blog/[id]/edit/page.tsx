@@ -12,6 +12,12 @@ export default function AdminBlogEditPage() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    const hasBlogManagerAccess = (role?: string | null) => {
+      if (!role) return false;
+      const normalized = role.toString().toLowerCase();
+      return normalized === Role.Admin || normalized === Role.Blogger;
+    };
+
     if (!isLoggedIn()) {
       router.push("/login?redirect=/admin/blog");
       return;
@@ -23,8 +29,8 @@ export default function AdminBlogEditPage() {
       return;
     }
 
-    if (userData.role !== Role.Admin) {
-      console.log("Only admins can edit blog posts");
+    if (!hasBlogManagerAccess(userData.role)) {
+      console.log("Only admins/bloggers can edit blog posts");
       router.push("/admin/blog");
       return;
     }
