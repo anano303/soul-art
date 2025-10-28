@@ -38,6 +38,8 @@ export class BogTransferService {
   private readonly logger = new Logger(BogTransferService.name);
   private readonly clientId: string;
   private readonly clientSecret: string;
+  private readonly withdrawalClientId: string;
+  private readonly withdrawalClientSecret: string;
   private readonly companyIban: string;
   private readonly apiUrl: string; // Base URL: https://api.businessonline.ge/api
   private readonly redirectUri: string;
@@ -50,6 +52,8 @@ export class BogTransferService {
   constructor(private configService: ConfigService) {
     this.clientId = this.configService.get<string>('BOG_BONLINE_CLIENT_ID');
     this.clientSecret = this.configService.get<string>('BOG_BONLINE_CLIENT_SECRET');
+    this.withdrawalClientId = this.configService.get<string>('BOG_WITHDRAWAL_CLIENT_ID');
+    this.withdrawalClientSecret = this.configService.get<string>('BOG_WITHDRAWAL_CLIENT_SECRET');
     this.companyIban = this.configService.get<string>('BOG_COMPANY_IBAN');
     this.apiUrl = this.configService.get<string>('BOG_API_URL');
     this.redirectUri = this.configService.get<string>('BOG_REDIRECT_URI');
@@ -236,8 +240,9 @@ export class BogTransferService {
   /**
    * Get OAuth2 access token from BOG
    * Tries OAuth2 token first, falls back to client credentials
+   * @param useWithdrawalCredentials - If true, uses withdrawal client credentials instead of regular ones
    */
-  private async getAccessToken(): Promise<string> {
+  private async getAccessToken(useWithdrawalCredentials = false): Promise<string> {
     // Check if we have a valid OAuth2 token
     if (this.accessToken && this.tokenExpiry && new Date() < this.tokenExpiry) {
       this.logger.debug('Using cached OAuth2 access token');
@@ -256,19 +261,22 @@ export class BogTransferService {
 
     // Fall back to client credentials flow
     try {
+      const clientId = useWithdrawalCredentials && this.withdrawalClientId ? this.withdrawalClientId : this.clientId;
+      const clientSecret = useWithdrawalCredentials && this.withdrawalClientSecret ? this.withdrawalClientSecret : this.clientSecret;
+      
       const authEndpoint = 'https://account.bog.ge/auth/realms/bog/protocol/openid-connect/token';
-      this.logger.debug(`Requesting client credentials token from: ${authEndpoint}`);
-      this.logger.debug(`Client ID: ${this.clientId}`);
+      this.logger.debug(`Requesting client credentials token from: ${authEndpoint}${useWithdrawalCredentials ? ' (withdrawal account)' : ''}`);
+      this.logger.debug(`Client ID: ${clientId}`);
       
       // Create Basic Auth header
-      const basicAuth = Buffer.from(`${this.clientId}:${this.clientSecret}`).toString('base64');
+      const basicAuth = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
       
       const response = await axios.post(
         authEndpoint,
         new URLSearchParams({
           grant_type: 'client_credentials',
-          client_id: this.clientId,
-          client_secret: this.clientSecret,
+          client_id: clientId,
+          client_secret: clientSecret,
         }),
         {
           headers: {
@@ -305,7 +313,8 @@ export class BogTransferService {
   async transferToSeller(
     transferRequest: BogTransferRequest,
   ): Promise<BogTransferResponse> {
-    const token = await this.getAccessToken();
+    // Use withdrawal credentials for actual money transfers
+    const token = await this.getAccessToken(true);
 
     // Validate IBAN format (basic check)
     if (!transferRequest.beneficiaryAccountNumber.startsWith('GE')) {
@@ -438,7 +447,8 @@ export class BogTransferService {
   async batchTransferToSellers(
     transfers: BogTransferRequest[],
   ): Promise<BogTransferResponse[]> {
-    const token = await this.getAccessToken();
+    // Use withdrawal credentials for actual money transfers
+    const token = await this.getAccessToken(true);
 
     const documents = transfers.map((transfer) => ({
       Nomination: transfer.nomination,
