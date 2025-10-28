@@ -537,20 +537,61 @@ export default function BogTransfersPage() {
                             <td className="px-6 py-4 whitespace-nowrap">
                               {uniqueKey ? (
                                 <div className="flex gap-2">
-                                  <button
-                                    onClick={() => handleSignClick(uniqueKey, withdrawal._id)}
-                                    disabled={loading}
-                                    className="bg-green-600 text-white px-3 py-1.5 rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
-                                  >
-                                    ხელმოწერა
-                                  </button>
-                                  <button
-                                    onClick={() => rejectWithdrawal(withdrawal._id)}
-                                    disabled={loading}
-                                    className="bg-red-600 text-white px-3 py-1.5 rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
-                                  >
-                                    უარყოფა
-                                  </button>
+                                  {/* Only show sign button if status is 'A' (To be Signed) */}
+                                  {withdrawal.bogStatus?.status === 'A' ? (
+                                    <>
+                                      <button
+                                        onClick={() => handleSignClick(uniqueKey, withdrawal._id)}
+                                        disabled={loading}
+                                        className="bg-green-600 text-white px-3 py-1.5 rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+                                      >
+                                        ხელმოწერა
+                                      </button>
+                                      <button
+                                        onClick={() => rejectWithdrawal(withdrawal._id)}
+                                        disabled={loading}
+                                        className="bg-red-600 text-white px-3 py-1.5 rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+                                      >
+                                        უარყოფა
+                                      </button>
+                                    </>
+                                  ) : withdrawal.bogStatus?.status === 'S' || withdrawal.bogStatus?.status === 'T' || withdrawal.bogStatus?.status === 'Z' ? (
+                                    <div className="flex items-center gap-2">
+                                      <span className="text-sm text-blue-600 font-medium">
+                                        {withdrawal.bogStatus.status === 'S' && '✓ ხელმოწერილია'}
+                                        {withdrawal.bogStatus.status === 'T' && '⏳ მიმდინარეობს'}
+                                        {withdrawal.bogStatus.status === 'Z' && '🔄 იწერება ხელმოწერა'}
+                                      </span>
+                                      <button
+                                        onClick={() => rejectWithdrawal(withdrawal._id)}
+                                        disabled={loading}
+                                        className="bg-red-600 text-white px-3 py-1.5 rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+                                      >
+                                        უარყოფა
+                                      </button>
+                                    </div>
+                                  ) : withdrawal.bogStatus?.status === 'P' ? (
+                                    <span className="text-sm text-green-600 font-medium">✓ დასრულებულია</span>
+                                  ) : withdrawal.bogStatus?.status === 'R' ? (
+                                    <span className="text-sm text-red-600 font-medium">✗ უარყოფილია</span>
+                                  ) : (
+                                    <div className="flex gap-2">
+                                      <button
+                                        onClick={() => handleSignClick(uniqueKey, withdrawal._id)}
+                                        disabled={loading}
+                                        className="bg-green-600 text-white px-3 py-1.5 rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+                                      >
+                                        ხელმოწერა
+                                      </button>
+                                      <button
+                                        onClick={() => rejectWithdrawal(withdrawal._id)}
+                                        disabled={loading}
+                                        className="bg-red-600 text-white px-3 py-1.5 rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+                                      >
+                                        უარყოფა
+                                      </button>
+                                    </div>
+                                  )}
                                 </div>
                               ) : (
                                 <span className="text-xs text-gray-400">UniqueKey არარის</span>
