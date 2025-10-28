@@ -577,7 +577,7 @@ export class ProductsService {
         process.env.FACEBOOK_POSTS_PAGE_ID || process.env.FACEBOOK_PAGE_ID,
       );
       const haveToken = Boolean(
-        process.env.FACEBOOK_POSTS_PAGE_ACCESS_TOKEN ||
+        process.env.FACEBOOK_PAGE_ACCESS_TOKEN ||
           process.env.FACEBOOK_PAGE_ACCESS_TOKEN,
       );
       const autoPostEnabled =

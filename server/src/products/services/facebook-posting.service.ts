@@ -15,7 +15,7 @@ export class FacebookPostingService {
   private readonly pageId =
     process.env.FACEBOOK_POSTS_PAGE_ID || process.env.FACEBOOK_PAGE_ID;
   private readonly pageAccessToken =
-    process.env.FACEBOOK_POSTS_PAGE_ACCESS_TOKEN ||
+    process.env.FACEBOOK_PAGE_ACCESS_TOKEN ||
     process.env.FACEBOOK_PAGE_ACCESS_TOKEN;
   private readonly autoPostFlag = (
     process.env.FACEBOOK_AUTO_POST || 'true'
