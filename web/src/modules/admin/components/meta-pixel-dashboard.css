@@ -301,6 +301,47 @@
   gap: 1.5rem;
 }
 
+.event-table {
+  margin-top: 2rem;
+  background: white;
+  border-radius: 12px;
+  border: 1px solid #e0e7ff;
+  overflow: hidden;
+}
+
+.event-table-header,
+.event-table-row {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr 1fr;
+  padding: 1rem 1.5rem;
+  align-items: center;
+  gap: 1rem;
+}
+
+.event-table-header {
+  background: linear-gradient(135deg, #eef2ff 0%, #e0e7ff 100%);
+  font-weight: 700;
+  color: #1a1a1a;
+}
+
+.event-table-row:nth-child(even) {
+  background: #f8fafc;
+}
+
+.event-table-row:hover {
+  background: #eef2ff;
+}
+
+.event-table .event-name {
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.event-table .event-count-number {
+  color: #1a1a1a;
+  font-weight: 700;
+}
+
 .event-card {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;

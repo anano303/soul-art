@@ -9,6 +9,8 @@ import { useParams, useSearchParams } from "next/navigation";
 import HeartLoading from "@/components/HeartLoading/HeartLoading";
 import { useLanguage } from "@/hooks/LanguageContext";
 
+import { trackSearch } from "@/components/MetaPixel";
+
 import { useRouter } from "next/navigation";
 import { ProductGrid } from "@/modules/products/components/product-grid";
 import { Product } from "@/types";
@@ -32,7 +34,7 @@ function UsersSearchPageContent() {
   const searchParams = useSearchParams();
   const { language } = useLanguage();
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<'users' | 'products'>('users');
+  const [activeTab, setActiveTab] = useState<"users" | "products">("users");
 
   const keyword = (params?.keyword as string) || "";
   const currentPage = Number(searchParams?.get("page")) || 1;
@@ -40,9 +42,40 @@ function UsersSearchPageContent() {
   console.log("Users search keyword:", keyword);
   console.log("URL-decoded keyword:", decodeURIComponent(keyword || ""));
 
+  useEffect(() => {
+    if (!keyword) {
+      return;
+    }
+
+    const decodedKeyword = decodeURIComponent(keyword || "").trim();
+    if (!decodedKeyword) {
+      return;
+    }
+
+    const normalizedKey = decodedKeyword.toLowerCase();
+    let shouldTrack = true;
+
+    if (typeof window !== "undefined") {
+      try {
+        const lastTracked = sessionStorage.getItem("lastTrackedSearch");
+        if (lastTracked === normalizedKey) {
+          shouldTrack = false;
+        } else {
+          sessionStorage.setItem("lastTrackedSearch", normalizedKey);
+        }
+      } catch (storageError) {
+        console.warn("Failed to read search tracking cache", storageError);
+      }
+    }
+
+    if (shouldTrack) {
+      trackSearch(decodedKeyword);
+    }
+  }, [keyword]);
+
   // Fetch search ranking to determine recommended tab and get both artists and products
   const { data: rankingData } = useQuery<{
-    recommendedTab: 'artists' | 'products';
+    recommendedTab: "artists" | "products";
     artists: User[];
     products: Product[];
     reasoning: string;
@@ -52,14 +85,16 @@ function UsersSearchPageContent() {
       const decodedKeyword = decodeURIComponent(keyword || "");
       if (!decodedKeyword) {
         return {
-          recommendedTab: 'artists' as const,
+          recommendedTab: "artists" as const,
           artists: [],
           products: [],
-          reasoning: 'Default to artists for empty search'
+          reasoning: "Default to artists for empty search",
         };
       }
 
-      const response = await fetchWithAuth(`/artists/search/ranking?q=${encodeURIComponent(decodedKeyword)}`);
+      const response = await fetchWithAuth(
+        `/artists/search/ranking?q=${encodeURIComponent(decodedKeyword)}`
+      );
       if (!response.ok) {
         throw new Error(`Error fetching search ranking: ${response.status}`);
       }
@@ -75,31 +110,40 @@ function UsersSearchPageContent() {
   useEffect(() => {
     // First check if there's a tab parameter in the URL
     const tabParam = searchParams?.get("tab");
-    if (tabParam && (tabParam === 'users' || tabParam === 'products')) {
+    if (tabParam && (tabParam === "users" || tabParam === "products")) {
       setActiveTab(tabParam);
       console.log(`Setting active tab to: ${tabParam} from URL parameter`);
       return;
     }
-    
+
     // Otherwise use ranking recommendation
     if (rankingData && rankingData.recommendedTab) {
-      const recommendedTab = rankingData.recommendedTab === 'artists' ? 'users' : 'products';
+      const recommendedTab =
+        rankingData.recommendedTab === "artists" ? "users" : "products";
       setActiveTab(recommendedTab);
-      console.log(`Setting active tab to: ${recommendedTab} based on ranking: ${rankingData.reasoning}`);
+      console.log(
+        `Setting active tab to: ${recommendedTab} based on ranking: ${rankingData.reasoning}`
+      );
     }
   }, [rankingData, searchParams]);
 
   // Use ranking data for users/artists
-  const usersData = rankingData ? {
-    users: rankingData.artists || [],
-    total: rankingData.artists?.length || 0,
-  } : { users: [], total: 0 };
-  
+  const usersData = rankingData
+    ? {
+        users: rankingData.artists || [],
+        total: rankingData.artists?.length || 0,
+      }
+    : { users: [], total: 0 };
+
   const usersLoading = rankingData === undefined;
   const usersError = null; // We'll handle errors in the ranking query
 
   // Fetch products based on the search keyword (keep the existing complex query)
-  const { data: productsData, isLoading: productsLoading, error: productsError } = useQuery<{items: Product[], pages: number, totalItems: number}>({
+  const {
+    data: productsData,
+    isLoading: productsLoading,
+    error: productsError,
+  } = useQuery<{ items: Product[]; pages: number; totalItems: number }>({
     queryKey: ["search-products", keyword, currentPage],
     queryFn: async () => {
       const decodedKeyword = decodeURIComponent(keyword || "");
@@ -130,11 +174,11 @@ function UsersSearchPageContent() {
         totalItems: result.total || result.totalItems || 0,
       };
     },
-    enabled: !!keyword && activeTab === 'products',
+    enabled: !!keyword && activeTab === "products",
   });
 
-  const isLoading = activeTab === 'users' ? usersLoading : productsLoading;
-  const error = activeTab === 'users' ? usersError : productsError;
+  const isLoading = activeTab === "users" ? usersLoading : productsLoading;
+  const error = activeTab === "users" ? usersError : productsError;
 
   const getUserDisplayName = (user: User) => {
     return user.name;
@@ -174,10 +218,13 @@ function UsersSearchPageContent() {
           <div className="users-search-header">
             <Link href="/" className="users-search-back-button">
               <ArrowLeft className="h-4 w-4" />
-              {language === 'en' ? 'Back to Home' : 'მთავარზე დაბრუნება'}
+              {language === "en" ? "Back to Home" : "მთავარზე დაბრუნება"}
             </Link>
             <h1 className="users-search-title">
-              {language === 'en' ? 'Artist Search Results' : 'არტისტების ძიების შედეგები'}:{" "}
+              {language === "en"
+                ? "Artist Search Results"
+                : "არტისტების ძიების შედეგები"}
+              :{" "}
               <span className="users-search-keyword">
                 {decodeURIComponent(keyword || "")}
               </span>
@@ -186,13 +233,17 @@ function UsersSearchPageContent() {
 
           <div className="users-search-error">
             <h2 className="users-search-error-title">
-              {language === 'en' ? 'Something went wrong' : 'რაღაც არ ისე მოხდა'}
+              {language === "en"
+                ? "Something went wrong"
+                : "რაღაც არ ისე მოხდა"}
             </h2>
             <p className="users-search-error-message">
-              {language === 'en' ? 'Please try again later.' : 'სცადეთ მოგვიანებით.'}
+              {language === "en"
+                ? "Please try again later."
+                : "სცადეთ მოგვიანებით."}
             </p>
             <Link href="/" className="users-search-browse-button">
-              {language === 'en' ? 'Back to Home' : 'მთავარზე დაბრუნება'}
+              {language === "en" ? "Back to Home" : "მთავარზე დაბრუნება"}
             </Link>
           </div>
         </div>
@@ -214,10 +265,10 @@ function UsersSearchPageContent() {
         <div className="users-search-header">
           <Link href="/" className="users-search-back-button">
             <ArrowLeft className="h-4 w-4" />
-            {language === 'en' ? 'Back to Home' : 'მთავარზე დაბრუნება'}
+            {language === "en" ? "Back to Home" : "მთავარზე დაბრუნება"}
           </Link>
           <h1 className="users-search-title">
-            {language === 'en' ? 'Search Results' : 'ძიების შედეგები'}:{" "}
+            {language === "en" ? "Search Results" : "ძიების შედეგები"}:{" "}
             <span className="users-search-keyword">
               {decodeURIComponent(keyword || "")}
             </span>
@@ -229,49 +280,62 @@ function UsersSearchPageContent() {
           <div className="search-tabs">
             <button
               type="button"
-              className={`search-tab ${activeTab === 'users' ? 'active' : ''}`}
-              onClick={() => setActiveTab('users')}
+              className={`search-tab ${activeTab === "users" ? "active" : ""}`}
+              onClick={() => setActiveTab("users")}
             >
               <UserIcon size={16} />
-              {language === 'en' ? 'Artists' : 'არტისტები'}
+              {language === "en" ? "Artists" : "არტისტები"}
               {usersData && (
                 <span className="search-tab-count">({usersData.total})</span>
               )}
             </button>
             <button
               type="button"
-              className={`search-tab ${activeTab === 'products' ? 'active' : ''}`}
-              onClick={() => setActiveTab('products')}
+              className={`search-tab ${
+                activeTab === "products" ? "active" : ""
+              }`}
+              onClick={() => setActiveTab("products")}
             >
               <Package size={16} />
-              {language === 'en' ? 'Products' : 'პროდუქტები'}
+              {language === "en" ? "Products" : "პროდუქტები"}
               {productsData && (
-                <span className="search-tab-count">({productsData.totalItems})</span>
+                <span className="search-tab-count">
+                  ({productsData.totalItems})
+                </span>
               )}
             </button>
           </div>
         </div>
 
         {/* Tab Content */}
-        {activeTab === 'users' && (
+        {activeTab === "users" && (
           <>
             {/* No Users Results State */}
             {!hasUsers && !isLoading && (
               <div className="users-search-no-results">
                 <h2 className="users-search-no-results-title">
-                  {language === 'en' ? 'No artists found' : 'არტისტები არ მოიძებნა'}
+                  {language === "en"
+                    ? "No artists found"
+                    : "არტისტები არ მოიძებნა"}
                 </h2>
                 <p className="users-search-no-results-message">
-                  {language === 'en' ? 'No artists found for' : 'არტისტები არ მოიძებნა'} &ldquo;
+                  {language === "en"
+                    ? "No artists found for"
+                    : "არტისტები არ მოიძებნა"}{" "}
+                  &ldquo;
                   <span className="users-search-keyword">
                     {decodeURIComponent(keyword || "")}
                   </span>
                   &rdquo;.
                   <br />
-                  {language === 'en' ? 'Try different search terms' : 'სცადეთ სხვა საძიებო სიტყვები'}
+                  {language === "en"
+                    ? "Try different search terms"
+                    : "სცადეთ სხვა საძიებო სიტყვები"}
                 </p>
                 <Link href="/" className="users-search-browse-button">
-                  {language === 'en' ? 'Browse All Artists' : 'ყველა არტისტის ნახვა'}
+                  {language === "en"
+                    ? "Browse All Artists"
+                    : "ყველა არტისტის ნახვა"}
                 </Link>
               </div>
             )}
@@ -283,10 +347,12 @@ function UsersSearchPageContent() {
                   <p className="users-search-results-count">
                     {language === "en" ? "Found" : "ნაპოვნია"}{" "}
                     <span className="highlight">{usersData!.total}</span>{" "}
-                    {language === "en" 
-                      ? (usersData!.total === 1 ? "artist" : "artists") 
-                      : "არტისტი"
-                    } {language === "en" ? "for" : ""} &ldquo;
+                    {language === "en"
+                      ? usersData!.total === 1
+                        ? "artist"
+                        : "artists"
+                      : "არტისტი"}{" "}
+                    {language === "en" ? "for" : ""} &ldquo;
                     <span className="users-search-keyword">
                       {decodeURIComponent(keyword || "")}
                     </span>
@@ -302,12 +368,14 @@ function UsersSearchPageContent() {
                         className="users-search-card"
                         onClick={() => handleUserClick(user)}
                         style={{
-                          backgroundImage: getUserCoverImage(user) 
-                            ? `linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.6)), url(${getUserCoverImage(user)})` 
+                          backgroundImage: getUserCoverImage(user)
+                            ? `linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.6)), url(${getUserCoverImage(
+                                user
+                              )})`
                             : undefined,
-                          backgroundSize: 'cover',
-                          backgroundPosition: 'center',
-                          backgroundRepeat: 'no-repeat',
+                          backgroundSize: "cover",
+                          backgroundPosition: "center",
+                          backgroundRepeat: "no-repeat",
                         }}
                       >
                         <div className="users-search-card-image">
@@ -325,16 +393,16 @@ function UsersSearchPageContent() {
                             </div>
                           )}
                         </div>
-                        
+
                         <div className="users-search-card-info">
                           <h3 className="users-search-card-name">
                             {getUserDisplayName(user)}
                           </h3>
-                          
+
                           <span className="users-search-card-badge">
-                            {language === 'en' ? 'Artist' : 'არტისტი'}
+                            {language === "en" ? "Artist" : "არტისტი"}
                           </span>
-                          
+
                           <p className="users-search-card-subtitle">
                             @{user.slug}
                           </p>
@@ -349,25 +417,34 @@ function UsersSearchPageContent() {
         )}
 
         {/* Products Tab Content */}
-        {activeTab === 'products' && (
+        {activeTab === "products" && (
           <>
             {/* No Products Results State */}
             {!hasProducts && !isLoading && (
               <div className="users-search-no-results">
                 <h2 className="users-search-no-results-title">
-                  {language === 'en' ? 'No products found' : 'პროდუქტები არ მოიძებნა'}
+                  {language === "en"
+                    ? "No products found"
+                    : "პროდუქტები არ მოიძებნა"}
                 </h2>
                 <p className="users-search-no-results-message">
-                  {language === 'en' ? 'No products found for' : 'პროდუქტები არ მოიძებნა'} &ldquo;
+                  {language === "en"
+                    ? "No products found for"
+                    : "პროდუქტები არ მოიძებნა"}{" "}
+                  &ldquo;
                   <span className="users-search-keyword">
                     {decodeURIComponent(keyword || "")}
                   </span>
                   &rdquo;.
                   <br />
-                  {language === 'en' ? 'Try different search terms' : 'სცადეთ სხვა საძიებო სიტყვები'}
+                  {language === "en"
+                    ? "Try different search terms"
+                    : "სცადეთ სხვა საძიებო სიტყვები"}
                 </p>
                 <Link href="/shop" className="users-search-browse-button">
-                  {language === 'en' ? 'Browse All Products' : 'ყველა პროდუქტის ნახვა'}
+                  {language === "en"
+                    ? "Browse All Products"
+                    : "ყველა პროდუქტის ნახვა"}
                 </Link>
               </div>
             )}
@@ -378,11 +455,15 @@ function UsersSearchPageContent() {
                 <div className="users-search-results-info">
                   <p className="users-search-results-count">
                     {language === "en" ? "Found" : "ნაპოვნია"}{" "}
-                    <span className="highlight">{productsData!.totalItems}</span>{" "}
-                    {language === "en" 
-                      ? (productsData!.totalItems === 1 ? "product" : "products") 
-                      : "პროდუქტი"
-                    } {language === "en" ? "for" : ""} &ldquo;
+                    <span className="highlight">
+                      {productsData!.totalItems}
+                    </span>{" "}
+                    {language === "en"
+                      ? productsData!.totalItems === 1
+                        ? "product"
+                        : "products"
+                      : "პროდუქტი"}{" "}
+                    {language === "en" ? "for" : ""} &ldquo;
                     <span className="users-search-keyword">
                       {decodeURIComponent(keyword || "")}
                     </span>

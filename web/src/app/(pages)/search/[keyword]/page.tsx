@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense } from "react";
+import { Suspense, useEffect } from "react";
 import { ProductGrid } from "@/modules/products/components/product-grid";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
@@ -10,6 +10,7 @@ import { useParams, useSearchParams } from "next/navigation";
 import { Product } from "@/types";
 import HeartLoading from "@/components/HeartLoading/HeartLoading";
 import { useLanguage } from "@/hooks/LanguageContext";
+import { trackSearch } from "@/components/MetaPixel";
 import "./search-page.css";
 
 interface ProductsResponse {
@@ -28,6 +29,37 @@ function SearchPageContent() {
 
   console.log("Raw keyword from URL:", keyword);
   console.log("URL-decoded keyword:", decodeURIComponent(keyword || ""));
+
+  useEffect(() => {
+    if (!keyword) {
+      return;
+    }
+
+    const decodedKeyword = decodeURIComponent(keyword || "").trim();
+    if (!decodedKeyword) {
+      return;
+    }
+
+    const normalizedKey = decodedKeyword.toLowerCase();
+    let shouldTrack = true;
+
+    if (typeof window !== "undefined") {
+      try {
+        const lastTracked = sessionStorage.getItem("lastTrackedSearch");
+        if (lastTracked === normalizedKey) {
+          shouldTrack = false;
+        } else {
+          sessionStorage.setItem("lastTrackedSearch", normalizedKey);
+        }
+      } catch (storageError) {
+        console.warn("Failed to read search tracking cache", storageError);
+      }
+    }
+
+    if (shouldTrack) {
+      trackSearch(decodedKeyword);
+    }
+  }, [keyword]);
 
   // Fetch products based on the search keyword
   const { data, isLoading, error } = useQuery<ProductsResponse>({
