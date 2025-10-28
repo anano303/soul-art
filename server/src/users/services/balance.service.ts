@@ -404,6 +404,7 @@ export class BalanceService {
           beneficiaryName: sellerName,
           amount: amount,
           nomination: 'SoulArt - გაყიდვებიდან მიღებული თანხა',
+          beneficiaryBankCode: seller.beneficiaryBankCode || 'BAGAGE22',
         });
 
         // გადარიცხვა შეიქმნა BOG-ში და ელოდება ხელმოწერას
