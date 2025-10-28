@@ -43,11 +43,17 @@ export class BogTransferService {
   private readonly companyIban: string;
   private readonly apiUrl: string; // Base URL: https://api.businessonline.ge/api
   private readonly redirectUri: string;
-  private accessToken: string | null = null;
-  private tokenExpiry: Date | null = null;
-  private refreshToken: string | null = null;
+  
+  // OAuth2 tokens (for admin panel - viewing only)
+  private oauthAccessToken: string | null = null;
+  private oauthTokenExpiry: Date | null = null;
+  private oauthRefreshToken: string | null = null;
   private idToken: string | null = null;
   private userInfo: any = null;
+  
+  // Client credentials tokens (for withdrawal operations)
+  private withdrawalAccessToken: string | null = null;
+  private withdrawalTokenExpiry: Date | null = null;
 
   constructor(private configService: ConfigService) {
     this.clientId = this.configService.get<string>('BOG_BONLINE_CLIENT_ID');
@@ -103,11 +109,11 @@ export class BogTransferService {
         },
       );
 
-      this.accessToken = response.data.access_token;
-      this.refreshToken = response.data.refresh_token;
+      this.oauthAccessToken = response.data.access_token;
+      this.oauthRefreshToken = response.data.refresh_token;
       this.idToken = response.data.id_token; // JWT token with user info
       const expiresIn = response.data.expires_in || 3600;
-      this.tokenExpiry = new Date(Date.now() + expiresIn * 1000);
+      this.oauthTokenExpiry = new Date(Date.now() + expiresIn * 1000);
 
       this.logger.log('Successfully obtained OAuth2 access token');
       this.logger.debug(`Token expires in ${expiresIn} seconds`);
@@ -131,7 +137,7 @@ export class BogTransferService {
    * Refresh access token using refresh token
    */
   private async refreshAccessToken(): Promise<string> {
-    if (!this.refreshToken) {
+    if (!this.oauthRefreshToken) {
       throw new BadRequestException('No refresh token available. User needs to re-authorize.');
     }
 
@@ -145,7 +151,7 @@ export class BogTransferService {
         authEndpoint,
         new URLSearchParams({
           grant_type: 'refresh_token',
-          refresh_token: this.refreshToken,
+          refresh_token: this.oauthRefreshToken,
         }),
         {
           headers: {
@@ -155,14 +161,14 @@ export class BogTransferService {
         },
       );
 
-      this.accessToken = response.data.access_token;
-      this.refreshToken = response.data.refresh_token;
+      this.oauthAccessToken = response.data.access_token;
+      this.oauthRefreshToken = response.data.refresh_token;
       this.idToken = response.data.id_token;
       const expiresIn = response.data.expires_in || 3600;
-      this.tokenExpiry = new Date(Date.now() + expiresIn * 1000);
+      this.oauthTokenExpiry = new Date(Date.now() + expiresIn * 1000);
 
       this.logger.log('Successfully refreshed access token');
-      return this.accessToken;
+      return this.oauthAccessToken;
     } catch (error) {
       this.logger.error('Failed to refresh access token');
       // Clear all tokens so user will be prompted to re-authorize
@@ -176,17 +182,17 @@ export class BogTransferService {
    * Returns true if we have a valid access token OR a refresh token that can get us a new one
    */
   isAuthenticated(): boolean {
-    // If we have a valid access token, we're authenticated
-    if (this.accessToken && this.tokenExpiry && new Date() < this.tokenExpiry) {
+    // If we have a valid OAuth access token, we're authenticated
+    if (this.oauthAccessToken && this.oauthTokenExpiry && new Date() < this.oauthTokenExpiry) {
       return true;
     }
     
-    // If access token is expired but we have a refresh token, we can still get a new token
-    if (this.refreshToken) {
+    // If OAuth access token is expired but we have a refresh token, we can still get a new token
+    if (this.oauthRefreshToken) {
       return true;
     }
     
-    // No valid tokens at all
+    // No valid OAuth tokens at all
     return false;
   }
 
@@ -194,10 +200,12 @@ export class BogTransferService {
    * Clear all OAuth2 tokens (logout)
    */
   clearTokens(): void {
-    this.accessToken = null;
-    this.refreshToken = null;
-    this.tokenExpiry = null;
+    this.oauthAccessToken = null;
+    this.oauthRefreshToken = null;
+    this.oauthTokenExpiry = null;
     this.idToken = null;
+    this.withdrawalAccessToken = null;
+    this.withdrawalTokenExpiry = null;
     this.userInfo = null;
     this.logger.log('OAuth2 tokens cleared');
   }
@@ -243,19 +251,27 @@ export class BogTransferService {
    * @param useWithdrawalCredentials - If true, uses withdrawal client credentials instead of regular ones
    */
   private async getAccessToken(useWithdrawalCredentials = false): Promise<string> {
-    // Check if we have a valid OAuth2 token
-    if (this.accessToken && this.tokenExpiry && new Date() < this.tokenExpiry) {
-      this.logger.debug('Using cached OAuth2 access token');
-      return this.accessToken;
-    }
+    // If using withdrawal credentials, check withdrawal token cache
+    if (useWithdrawalCredentials) {
+      if (this.withdrawalAccessToken && this.withdrawalTokenExpiry && new Date() < this.withdrawalTokenExpiry) {
+        this.logger.debug('Using cached withdrawal access token');
+        return this.withdrawalAccessToken;
+      }
+    } else {
+      // Check if we have a valid OAuth2 token for viewing
+      if (this.oauthAccessToken && this.oauthTokenExpiry && new Date() < this.oauthTokenExpiry) {
+        this.logger.debug('Using cached OAuth2 access token');
+        return this.oauthAccessToken;
+      }
 
-    // Try to refresh if we have a refresh token
-    if (this.refreshToken) {
-      this.logger.debug('Access token expired, attempting refresh');
-      try {
-        return await this.refreshAccessToken();
-      } catch (error) {
-        this.logger.warn('Refresh failed, falling back to client credentials');
+      // Try to refresh OAuth token if we have a refresh token
+      if (this.oauthRefreshToken) {
+        this.logger.debug('OAuth access token expired, attempting refresh');
+        try {
+          return await this.refreshAccessToken();
+        } catch (error) {
+          this.logger.warn('OAuth refresh failed, falling back to client credentials');
+        }
       }
     }
 
@@ -288,13 +304,23 @@ export class BogTransferService {
 
       this.logger.debug(`OAuth2 Response status: ${response.status}`);
 
-      this.accessToken = response.data.access_token;
+      const accessToken = response.data.access_token;
       // Set token expiry (usually expires_in is in seconds)
       const expiresIn = response.data.expires_in || 3600;
-      this.tokenExpiry = new Date(Date.now() + expiresIn * 1000);
+      const tokenExpiry = new Date(Date.now() + expiresIn * 1000);
+      
+      // Store in appropriate cache based on which credentials were used
+      if (useWithdrawalCredentials) {
+        this.withdrawalAccessToken = accessToken;
+        this.withdrawalTokenExpiry = tokenExpiry;
+        this.logger.log('Successfully obtained BOG withdrawal access token via client credentials');
+      } else {
+        this.oauthAccessToken = accessToken;
+        this.oauthTokenExpiry = tokenExpiry;
+        this.logger.log('Successfully obtained BOG viewing access token via client credentials');
+      }
 
-      this.logger.log('Successfully obtained BOG access token via client credentials');
-      return this.accessToken;
+      return accessToken;
     } catch (error) {
       this.logger.error('Failed to get BOG access token');
       if (error.response) {
@@ -494,7 +520,7 @@ export class BogTransferService {
    * API: POST /api/sign/document
    */
   async signDocument(uniqueKey: number, otp: string): Promise<boolean> {
-    const token = await this.getAccessToken();
+    const token = await this.getAccessToken(); // Use OAuth credentials for signing
 
     try {
       this.logger.log(`Signing document with UniqueKey: ${uniqueKey}`);
@@ -575,7 +601,7 @@ export class BogTransferService {
    * Note: BOG requires ObjectKey (document ID) and ObjectType (0 for Payment)
    */
   async requestOtp(uniqueKey?: number): Promise<void> {
-    const token = await this.getAccessToken();
+    const token = await this.getAccessToken(); // Use OAuth credentials for OTP request
 
     try {
       // BOG API requires ObjectKey and ObjectType

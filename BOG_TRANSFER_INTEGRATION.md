@@ -3,6 +3,51 @@
 ## Overview
 Automatic bank transfer integration with Bank of Georgia (BOG) API for seller withdrawals. Sellers now receive instant payments instead of waiting 5 days for manual processing.
 
+## ⚠️ Dual Authentication Architecture
+
+**IMPORTANT**: This integration uses TWO separate BOG Business Online accounts for security:
+
+### 1. **Admin Panel Account** (OAuth2 - View Only)
+- **Purpose**: Admin dashboard viewing and monitoring
+- **Permissions**: VIEW accounts, balances, documents
+- **Authentication**: OAuth2 authorization code flow
+- **Credentials**: `BOG_BONLINE_CLIENT_ID` + `BOG_BONLINE_CLIENT_SECRET`
+- **Token Storage**: Separate OAuth token cache (`oauthAccessToken`, `oauthRefreshToken`)
+- **Used for**:
+  - Viewing account balance
+  - Checking document status
+  - Admin panel UI data
+
+### 2. **Withdrawal Account** (Client Credentials - Sign Permissions)
+- **Purpose**: Actual money transfers and document signing
+- **Permissions**: SIGN documents, CREATE transfers, EXECUTE withdrawals
+- **Authentication**: Client credentials flow
+- **Credentials**: `BOG_WITHDRAWAL_CLIENT_ID` + `BOG_WITHDRAWAL_CLIENT_SECRET`
+- **Token Storage**: Separate withdrawal token cache (`withdrawalAccessToken`, `withdrawalTokenExpiry`)
+- **Used for**:
+  - Creating transfer documents
+  - Signing documents with OTP
+  - Executing seller withdrawals
+  - Batch transfers
+
+### Why Two Accounts?
+
+BOG's security model requires **separate credentials for viewing vs signing**:
+- Admin panel users can browse data safely without risking actual money transfers
+- Withdrawal operations use dedicated credentials with proper signing permissions
+- Token separation prevents accidental use of viewing credentials for withdrawals
+- Follows principle of least privilege
+
+### Token Flow
+
+```
+Admin Panel Access:
+User → OAuth Login → oauthAccessToken (cached) → View Balance/Docs
+
+Withdrawal Operation:
+System → Client Credentials → withdrawalAccessToken (cached) → Sign & Transfer
+```
+
 ## Features
 - **Instant Transfers**: Money transferred immediately upon withdrawal request
 - **Automatic Processing**: No admin intervention required
@@ -14,17 +59,24 @@ Automatic bank transfer integration with Bank of Georgia (BOG) API for seller wi
 
 ### Environment Variables (.env)
 ```env
-# BOG API Credentials (already configured)
-BOG_CLIENT_ID={client id}
-BOG_CLIENT_SECRET={client secret}
-
-# BOG Configuration (newly added)
-BOG_COMPANY_IBAN=GE72BG0000000609635881
+# BOG API Base URL
 BOG_API_URL=https://api.bog.ge/api
+BOG_COMPANY_IBAN=GE72BG0000000609635881
+BOG_REDIRECT_URI=https://your-domain.com/api/admin/bog/auth/callback
+
+# Admin Panel Account (OAuth2 - View Only)
+BOG_BONLINE_CLIENT_ID={admin panel client id}
+BOG_BONLINE_CLIENT_SECRET={admin panel secret}
+
+# Withdrawal Account (Client Credentials - Sign Permissions)
+BOG_WITHDRAWAL_CLIENT_ID={withdrawal client id}
+BOG_WITHDRAWAL_CLIENT_SECRET={withdrawal secret}
+
+# Default bank code for transfers
 BOG_RTGS_CODE=BAGAGE22
-BOG_BONLINE_CLIENT_ID={bonline client id}
-BOG_BONLINE_CLIENT_SECRET={bonline client secret}
 ```
+
+**Note**: You must create TWO separate applications in BOG Business Online portal with different permission scopes.
 
 ## Architecture
 
