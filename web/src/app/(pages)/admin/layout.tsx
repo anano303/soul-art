@@ -2,9 +2,11 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { getUserData, isLoggedIn } from "@/lib/auth";
+import { getUserData, isLoggedIn, storeUserData } from "@/lib/auth";
 import { Sidebar } from "lucide-react";
 import { CacheRefreshManager } from "@/components/cache-refresh-manager/cache-refresh-manager";
+import { fetchWithAuth } from "@/lib/fetch-with-auth";
+import { Role } from "@/types/role";
 
 export default function AdminLayout({
   children,
@@ -16,6 +18,16 @@ export default function AdminLayout({
   const [authorized, setAuthorized] = useState(false);
 
   useEffect(() => {
+    const hasAdminAccess = (role?: string | null) => {
+      if (!role) return false;
+      const normalized = role.toString().toLowerCase();
+      return (
+        normalized === Role.Admin ||
+        normalized === Role.Seller ||
+        normalized === Role.Blogger
+      );
+    };
+
     const checkAuth = async () => {
       try {
         // Check if user is authenticated using the correct function
@@ -26,22 +38,31 @@ export default function AdminLayout({
         }
 
         // Get user data from local storage
-        const userData = getUserData();
+        let userData = getUserData();
+
         if (!userData) {
-          console.log("No user data found, redirecting to login");
-          router.push("/login?redirect=/admin");
-          return;
+          console.log("No cached user data, trying to refresh profile");
+          try {
+            const response = await fetchWithAuth("/auth/profile");
+            if (response.ok) {
+              userData = await response.json();
+              storeUserData(userData);
+            }
+          } catch (error) {
+            console.error("Failed to refresh user profile:", error);
+          }
+
+          if (!userData) {
+            router.push("/login?redirect=/admin");
+            return;
+          }
         }
 
         console.log("Current user role:", userData.role);
 
-        // Check if user has admin or seller role (case-insensitive)
-        if (
-          userData.role?.toLowerCase() !== "admin" &&
-          userData.role?.toLowerCase() !== "seller"
-        ) {
+        if (!hasAdminAccess(userData.role)) {
           console.log(
-            "User doesn't have admin/seller permissions, role:",
+            "User doesn't have admin/seller/blogger permissions, role:",
             userData.role
           );
           router.push("/");

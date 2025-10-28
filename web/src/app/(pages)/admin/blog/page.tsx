@@ -3,7 +3,8 @@
 import { BlogList } from "@/modules/admin/components/blog-list";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { isLoggedIn, getUserData } from "@/lib/auth";
+import { getUserData, storeUserData } from "@/lib/auth";
+import { fetchWithAuth } from "@/lib/fetch-with-auth";
 import { Role } from "@/types/role";
 
 export default function AdminBlogPage() {
@@ -11,24 +12,55 @@ export default function AdminBlogPage() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    if (!isLoggedIn()) {
-      router.push("/login?redirect=/admin/blog");
-      return;
-    }
+    let isMounted = true;
 
-    const userData = getUserData();
-    if (!userData) {
-      router.push("/login?redirect=/admin/blog");
-      return;
-    }
+    const hasBlogAccess = (role?: string | null) => {
+      if (!role) return false;
+      const normalized = role.toString().toLowerCase();
+      return normalized === Role.Admin || normalized === Role.Blogger;
+    };
 
-    if (userData.role !== Role.Admin && userData.role !== Role.Blogger) {
-      console.log("User doesn't have permissions for blog admin");
+    const verifyAccess = async () => {
+      const hasLocalAccess = () => {
+        const cachedUser = getUserData();
+        return hasBlogAccess(cachedUser?.role);
+      };
+
+      if (hasLocalAccess()) {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+        return;
+      }
+
+      try {
+        const response = await fetchWithAuth("/auth/profile");
+        const freshUser = await response.json();
+
+        if (freshUser) {
+          storeUserData(freshUser);
+
+          if (hasBlogAccess(freshUser.role)) {
+            if (isMounted) {
+              setIsLoading(false);
+            }
+            return;
+          }
+        }
+      } catch (error) {
+        console.error("Failed to verify blog admin access:", error);
+        router.push("/login?redirect=/admin/blog");
+        return;
+      }
+
       router.push("/");
-      return;
-    }
+    };
 
-    setIsLoading(false);
+    verifyAccess();
+
+    return () => {
+      isMounted = false;
+    };
   }, [router]);
 
   if (isLoading) {

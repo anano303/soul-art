@@ -37,6 +37,15 @@ export function BlogForm({ postId }: BlogFormProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const normalizeQA = (items?: Array<Partial<QAItem>>): QAItem[] => {
+    if (!Array.isArray(items) || items.length === 0) {
+      return [{ question: "", answer: "" }];
+    }
+    return items.map((item) => ({
+      question: item?.question ?? "",
+      answer: item?.answer ?? "",
+    }));
+  };
   const [formData, setFormData] = useState<BlogFormData>({
     title: "",
     titleEn: "",
@@ -73,8 +82,8 @@ export function BlogForm({ postId }: BlogFormProps) {
           coverImage: data.coverImage,
           intro: data.intro,
           introEn: data.introEn,
-          qa: data.qa,
-          qaEn: data.qaEn,
+          qa: normalizeQA(data.qa),
+          qaEn: normalizeQA(data.qaEn),
           images: data.images || [],
           isPublished: data.isPublished,
           publishDate: new Date(data.publishDate).toISOString().split("T")[0],
@@ -211,10 +220,19 @@ export function BlogForm({ postId }: BlogFormProps) {
       const url = postId ? `/blog/${postId}` : "/blog";
       const method = postId ? "PUT" : "POST";
 
+      const sanitizedPayload = {
+        ...formData,
+        qa: formData.qa.map(({ question, answer }) => ({ question, answer })),
+        qaEn: formData.qaEn.map(({ question, answer }) => ({
+          question,
+          answer,
+        })),
+      };
+
       const response = await fetchWithAuth(url, {
         method,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(sanitizedPayload),
       });
 
       if (response.ok) {
