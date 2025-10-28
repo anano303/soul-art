@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { useCart } from "@/modules/cart/context/cart-context";
 import { useCheckout } from "../context/checkout-context";
@@ -17,14 +17,22 @@ import Image from "next/image";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import "./streamlined-checkout.css";
+import { trackInitiateCheckout, trackPurchase } from "@/components/MetaPixel";
 
 type CheckoutStep = "auth" | "guest" | "shipping" | "payment" | "review";
 
 export function StreamlinedCheckout() {
   const { user } = useAuth();
   const { items, clearCart } = useCart();
-  const { shippingAddress, setShippingAddress, setPaymentMethod, paymentMethod, guestInfo, setGuestInfo, clearCheckout } =
-    useCheckout();
+  const {
+    shippingAddress,
+    setShippingAddress,
+    setPaymentMethod,
+    paymentMethod,
+    guestInfo,
+    setGuestInfo,
+    clearCheckout,
+  } = useCheckout();
   const { language, t } = useLanguage();
   const router = useRouter();
   const { toast } = useToast();
@@ -43,12 +51,17 @@ export function StreamlinedCheckout() {
   const [currentOrderId, setCurrentOrderId] = useState<string | null>(null);
   const [addressesLoaded, setAddressesLoaded] = useState(false);
   const [isGuestCheckout, setIsGuestCheckout] = useState(false);
+  const hasTrackedInitiateRef = useRef(false);
 
   // Calculate totals
-  const itemsPrice = items.reduce((acc, item) => acc + item.price * item.qty, 0);
+  const itemsPrice = items.reduce(
+    (acc, item) => acc + item.price * item.qty,
+    0
+  );
   const shippingPrice = itemsPrice > 100 ? 0 : 0;
   const taxPrice = Number((itemsPrice * TAX_RATE).toFixed(2));
   const totalPrice = itemsPrice + shippingPrice + taxPrice;
+  const totalUnits = items.reduce((acc, item) => acc + item.qty, 0);
 
   // Fetch saved addresses when user is authenticated
   useEffect(() => {
@@ -59,7 +72,9 @@ export function StreamlinedCheckout() {
         setAddressesLoaded(true);
 
         // Auto-select default address if exists and no address is currently selected
-        const defaultAddress = addresses.find((addr: { isDefault?: boolean }) => addr.isDefault);
+        const defaultAddress = addresses.find(
+          (addr: { isDefault?: boolean }) => addr.isDefault
+        );
         if (defaultAddress && !shippingAddress) {
           setShippingAddress(defaultAddress);
         }
@@ -77,7 +92,7 @@ export function StreamlinedCheckout() {
   // Auto-advance steps based on state (but not when editing)
   useEffect(() => {
     if (isEditing) return;
-    
+
     if (!user && !isGuestCheckout) {
       setCurrentStep("auth");
     } else if (!user && isGuestCheckout && !guestInfo) {
@@ -92,7 +107,26 @@ export function StreamlinedCheckout() {
       // Auto-set BOG as default payment method
       setPaymentMethod("BOG");
     }
-  }, [user, isGuestCheckout, guestInfo, shippingAddress, setPaymentMethod, isEditing, addressesLoaded]);
+  }, [
+    user,
+    isGuestCheckout,
+    guestInfo,
+    shippingAddress,
+    setPaymentMethod,
+    isEditing,
+    addressesLoaded,
+  ]);
+
+  useEffect(() => {
+    if (
+      currentStep === "review" &&
+      totalUnits > 0 &&
+      !hasTrackedInitiateRef.current
+    ) {
+      trackInitiateCheckout(totalPrice, "GEL", totalUnits);
+      hasTrackedInitiateRef.current = true;
+    }
+  }, [currentStep, totalUnits, totalPrice]);
 
   // Validate cart items
   const validateCartItems = async () => {
@@ -126,24 +160,26 @@ export function StreamlinedCheckout() {
       const validationResult = await validateCartItems();
 
       if (!validationResult.isValid) {
-        const unavailable = validationResult.unavailableItems.map((item: {
-          productId: string;
-          reason: string;
-          availableQuantity?: number;
-        }) => ({
-          productId: item.productId,
-          name:
-            items.find((cartItem) => cartItem.productId === item.productId)?.name ||
-            "პროდუქტი",
-          reason:
-            item.reason === "out_of_stock"
-              ? "არ არის მარაგში"
-              : item.reason === "not_found"
-              ? "აღარ არსებობს"
-              : item.reason === "insufficient_stock"
-              ? `მარაგში მხოლოდ ${item.availableQuantity} ცალია`
-              : "მიუწვდომელია",
-        }));
+        const unavailable = validationResult.unavailableItems.map(
+          (item: {
+            productId: string;
+            reason: string;
+            availableQuantity?: number;
+          }) => ({
+            productId: item.productId,
+            name:
+              items.find((cartItem) => cartItem.productId === item.productId)
+                ?.name || "პროდუქტი",
+            reason:
+              item.reason === "out_of_stock"
+                ? "არ არის მარაგში"
+                : item.reason === "not_found"
+                ? "აღარ არსებობს"
+                : item.reason === "insufficient_stock"
+                ? `მარაგში მხოლოდ ${item.availableQuantity} ცალია`
+                : "მიუწვდომელია",
+          })
+        );
 
         setUnavailableItems(unavailable);
         toast({
@@ -193,13 +229,61 @@ export function StreamlinedCheckout() {
 
       const orderResponse = await apiClient.post("/orders", orderPayload);
 
-      const orderId = orderResponse.data._id;
+      const orderData = orderResponse.data;
+      const orderId = orderData._id;
+      const orderSummary = {
+        orderId,
+        totalPrice:
+          typeof orderData.totalPrice === "number"
+            ? orderData.totalPrice
+            : totalPrice,
+        currency: orderData.currency || "GEL",
+        items: orderItems.map((item) => ({
+          productId: item.productId,
+          quantity: item.qty,
+          price: item.price,
+        })),
+      };
+
+      if (typeof window !== "undefined") {
+        try {
+          sessionStorage.setItem(
+            `order_summary_${orderId}`,
+            JSON.stringify(orderSummary)
+          );
+          localStorage.setItem(
+            `order_summary_${orderId}`,
+            JSON.stringify(orderSummary)
+          );
+          sessionStorage.removeItem(`order_summary_${orderId}_tracked`);
+          localStorage.removeItem(`order_summary_${orderId}_tracked`);
+        } catch (storageError) {
+          console.warn(
+            "Failed to cache order summary for analytics:",
+            storageError
+          );
+        }
+      }
 
       // If BOG payment, initiate payment flow
       if (paymentMethod === "BOG") {
-        await handleBOGPayment(orderId, totalPrice);
+        await handleBOGPayment(orderId, orderSummary.totalPrice);
       } else {
         // For other payment methods, redirect to order page
+        try {
+          trackPurchase(
+            orderSummary.totalPrice,
+            orderSummary.currency,
+            orderId
+          );
+          if (typeof window !== "undefined") {
+            sessionStorage.setItem(`order_summary_${orderId}_tracked`, "true");
+            localStorage.setItem(`order_summary_${orderId}_tracked`, "true");
+          }
+        } catch (analyticsError) {
+          console.warn("Failed to emit Purchase event:", analyticsError);
+        }
+
         await clearCart();
         clearCheckout();
         router.push(`/orders/${orderId}`);
@@ -223,11 +307,16 @@ export function StreamlinedCheckout() {
     try {
       const paymentData = {
         customer: {
-          firstName: (guestInfo?.fullName || shippingAddress?.address)?.split(" ")[0] || "Customer",
-          lastName: (guestInfo?.fullName || shippingAddress?.address)?.split(" ")[1] || "",
+          firstName:
+            (guestInfo?.fullName || shippingAddress?.address)?.split(" ")[0] ||
+            "Customer",
+          lastName:
+            (guestInfo?.fullName || shippingAddress?.address)?.split(" ")[1] ||
+            "",
           personalId: "000000000",
           address: shippingAddress?.address || "",
-          phoneNumber: guestInfo?.phoneNumber || shippingAddress?.phoneNumber || "",
+          phoneNumber:
+            guestInfo?.phoneNumber || shippingAddress?.phoneNumber || "",
           email: guestInfo?.email || user?.email || "",
         },
         product: {
@@ -241,21 +330,24 @@ export function StreamlinedCheckout() {
         failUrl: `${window.location.origin}/checkout/fail?orderId=${orderId}`,
       };
 
-      const response = await apiClient.post("/payments/bog/create", paymentData);
+      const response = await apiClient.post(
+        "/payments/bog/create",
+        paymentData
+      );
       const result = response.data;
 
       if (result?.redirect_url) {
         setPaymentUrl(result.redirect_url);
         setShowPaymentModal(true);
         setPaymentWindowClosed(false);
-        
+
         // Open payment in new window
         const paymentWindow = window.open(
           result.redirect_url,
           "BOGPayment",
           "width=600,height=700,scrollbars=yes"
         );
-        
+
         setPaymentWindowRef(paymentWindow);
 
         // Check if window was closed
@@ -265,7 +357,7 @@ export function StreamlinedCheckout() {
             clearInterval(checkWindowClosed);
           }
         }, 500);
-        
+
         // Listen for payment completion via postMessage
         const handlePaymentMessage = (event: MessageEvent) => {
           if (event.data.type === "payment_success") {
@@ -289,8 +381,13 @@ export function StreamlinedCheckout() {
         const pollOrderStatus = setInterval(async () => {
           try {
             // Include email parameter for guest orders
-            const emailParam = !user && guestInfo?.email ? `?email=${encodeURIComponent(guestInfo.email)}` : '';
-            const orderStatus = await apiClient.get(`/orders/${orderId}${emailParam}`);
+            const emailParam =
+              !user && guestInfo?.email
+                ? `?email=${encodeURIComponent(guestInfo.email)}`
+                : "";
+            const orderStatus = await apiClient.get(
+              `/orders/${orderId}${emailParam}`
+            );
             if (orderStatus.data.isPaid) {
               clearInterval(pollOrderStatus);
               clearCart();
@@ -346,7 +443,7 @@ export function StreamlinedCheckout() {
     if (currentOrderId) {
       try {
         await apiClient.post(`/orders/${currentOrderId}/cancel`, {
-          reason: "User closed payment modal without completing payment"
+          reason: "User closed payment modal without completing payment",
         });
         console.log(`Order ${currentOrderId} cancelled and stock restored`);
       } catch (error) {
@@ -384,13 +481,27 @@ export function StreamlinedCheckout() {
         <div className="checkout-content">
           {/* Step Indicator */}
           <div className="step-indicator">
-            <div className={cn("step", (currentStep === "auth" || currentStep === "guest") && "active", (user || guestInfo) && "completed")}>
+            <div
+              className={cn(
+                "step",
+                (currentStep === "auth" || currentStep === "guest") && "active",
+                (user || guestInfo) && "completed"
+              )}
+            >
               <div className="step-circle">
-                {(user || guestInfo) ? <Check className="w-4 h-4" /> : "1"}
+                {user || guestInfo ? <Check className="w-4 h-4" /> : "1"}
               </div>
-              <span className="step-label">{t("checkout.steps.authorization")}</span>
+              <span className="step-label">
+                {t("checkout.steps.authorization")}
+              </span>
             </div>
-            <div className={cn("step", currentStep === "shipping" && "active", shippingAddress && "completed")}>
+            <div
+              className={cn(
+                "step",
+                currentStep === "shipping" && "active",
+                shippingAddress && "completed"
+              )}
+            >
               <div className="step-circle">
                 {shippingAddress ? <Check className="w-4 h-4" /> : "2"}
               </div>
@@ -415,7 +526,10 @@ export function StreamlinedCheckout() {
                     </li>
                   ))}
                 </ul>
-                <button onClick={() => router.push("/cart")} className="btn-secondary">
+                <button
+                  onClick={() => router.push("/cart")}
+                  className="btn-secondary"
+                >
                   კალათში დაბრუნება
                 </button>
               </div>
@@ -479,64 +593,80 @@ export function StreamlinedCheckout() {
             )}
 
             {/* Step 3: Review & Place Order */}
-            {currentStep === "review" && (user || guestInfo) && shippingAddress && (
-              <div className="step-section">
-                <h2>{t("checkout.stepIndicators.review.title")}</h2>
-                <p className="step-description">
-                  {t("checkout.stepIndicators.review.description")}
-                </p>
-
-                {/* Shipping Address Review */}
-                <div className="review-card">
-                  <h3>{t("checkout.shippingAddress")}</h3>
-                  <p>
-                    {shippingAddress.address}, {shippingAddress.city},{" "}
-                    {shippingAddress.postalCode}, {shippingAddress.country}
+            {currentStep === "review" &&
+              (user || guestInfo) &&
+              shippingAddress && (
+                <div className="step-section">
+                  <h2>{t("checkout.stepIndicators.review.title")}</h2>
+                  <p className="step-description">
+                    {t("checkout.stepIndicators.review.description")}
                   </p>
-                  <p>
-                    <strong>{t("auth.phoneNumber")}:</strong> {shippingAddress.phoneNumber}
-                  </p>
-                  <button
-                    onClick={() => {
-                      setIsEditing(true);
-                      setCurrentStep("shipping");
-                    }}
-                    className="btn-link"
-                  >
-                    შეცვლა
-                  </button>
-                </div>
 
-                {/* Order Items */}
-                <div className="review-card">
-                  <h3>შეკვეთის პროდუქტები</h3>
-                  <div className="order-items-review">
-                    {items.map((item) => {
-                      const displayName =
-                        language === "en" && item.nameEn ? item.nameEn : item.name;
-                      return (
-                        <div
-                          key={`${item.productId}-${item.color ?? "c"}-${item.size ?? "s"}-${item.ageGroup ?? "a"}`}
-                          className="order-item-row"
-                        >
-                          <div className="item-image">
-                            <Image src={item.image} alt={displayName} fill className="object-cover" />
+                  {/* Shipping Address Review */}
+                  <div className="review-card">
+                    <h3>{t("checkout.shippingAddress")}</h3>
+                    <p>
+                      {shippingAddress.address}, {shippingAddress.city},{" "}
+                      {shippingAddress.postalCode}, {shippingAddress.country}
+                    </p>
+                    <p>
+                      <strong>{t("auth.phoneNumber")}:</strong>{" "}
+                      {shippingAddress.phoneNumber}
+                    </p>
+                    <button
+                      onClick={() => {
+                        setIsEditing(true);
+                        setCurrentStep("shipping");
+                      }}
+                      className="btn-link"
+                    >
+                      შეცვლა
+                    </button>
+                  </div>
+
+                  {/* Order Items */}
+                  <div className="review-card">
+                    <h3>შეკვეთის პროდუქტები</h3>
+                    <div className="order-items-review">
+                      {items.map((item) => {
+                        const displayName =
+                          language === "en" && item.nameEn
+                            ? item.nameEn
+                            : item.name;
+                        return (
+                          <div
+                            key={`${item.productId}-${item.color ?? "c"}-${
+                              item.size ?? "s"
+                            }-${item.ageGroup ?? "a"}`}
+                            className="order-item-row"
+                          >
+                            <div className="item-image">
+                              <Image
+                                src={item.image}
+                                alt={displayName}
+                                fill
+                                className="object-cover"
+                              />
+                            </div>
+                            <div className="item-details">
+                              <Link
+                                href={`/products/${item.productId}`}
+                                className="item-name"
+                              >
+                                {displayName}
+                              </Link>
+                              <p className="item-price">
+                                {item.qty} x {item.price} ₾ ={" "}
+                                {item.qty * item.price} ₾
+                              </p>
+                            </div>
                           </div>
-                          <div className="item-details">
-                            <Link href={`/products/${item.productId}`} className="item-name">
-                              {displayName}
-                            </Link>
-                            <p className="item-price">
-                              {item.qty} x {item.price} ₾ = {item.qty * item.price} ₾
-                            </p>
-                          </div>
-                        </div>
-                      );
-                    })}
+                        );
+                      })}
+                    </div>
                   </div>
                 </div>
-              </div>
-            )}
+              )}
           </div>
         </div>
 
@@ -544,18 +674,25 @@ export function StreamlinedCheckout() {
         <div className="order-summary-sidebar">
           <div className="summary-sticky">
             <h3 className="summary-title">შეკვეთის მონაცემები</h3>
-            
+
             <div className="summary-items">
               {items.slice(0, 3).map((item) => {
                 const displayName =
                   language === "en" && item.nameEn ? item.nameEn : item.name;
                 return (
                   <div
-                    key={`${item.productId}-${item.color ?? "c"}-${item.size ?? "s"}-${item.ageGroup ?? "a"}`}
+                    key={`${item.productId}-${item.color ?? "c"}-${
+                      item.size ?? "s"
+                    }-${item.ageGroup ?? "a"}`}
                     className="summary-item"
                   >
                     <div className="summary-item-image">
-                      <Image src={item.image} alt={displayName} fill className="object-cover" />
+                      <Image
+                        src={item.image}
+                        alt={displayName}
+                        fill
+                        className="object-cover"
+                      />
                     </div>
                     <div className="summary-item-details">
                       <p className="summary-item-name">{displayName}</p>
@@ -563,12 +700,16 @@ export function StreamlinedCheckout() {
                         {item.qty} x {item.price} ₾
                       </p>
                     </div>
-                    <p className="summary-item-total">{(item.qty * item.price).toFixed(2)} ₾</p>
+                    <p className="summary-item-total">
+                      {(item.qty * item.price).toFixed(2)} ₾
+                    </p>
                   </div>
                 );
               })}
               {items.length > 3 && (
-                <p className="summary-more">+ {items.length - 3} სხვა პროდუქტი</p>
+                <p className="summary-more">
+                  + {items.length - 3} სხვა პროდუქტი
+                </p>
               )}
             </div>
 
@@ -581,15 +722,19 @@ export function StreamlinedCheckout() {
               </div>
               <div className="summary-row">
                 <span>{t("cart.delivery")}</span>
-                <span>{shippingPrice === 0 ? t("cart.free") : `${Number(shippingPrice).toFixed(2)} ₾`}</span>
+                <span>
+                  {shippingPrice === 0
+                    ? t("cart.free")
+                    : `${Number(shippingPrice).toFixed(2)} ₾`}
+                </span>
               </div>
               <div className="summary-row">
                 <span>{t("cart.commission")}</span>
                 <span>{taxPrice.toFixed(2)} ₾</span>
               </div>
-              
+
               <div className="summary-divider" />
-              
+
               <div className="summary-row summary-total">
                 <span>{t("cart.totalCost")}</span>
                 <span className="total-amount">{totalPrice.toFixed(2)} ₾</span>
@@ -612,25 +757,58 @@ export function StreamlinedCheckout() {
             {currentStep === "review" && (
               <button
                 onClick={handlePlaceOrder}
-                disabled={isValidating || unavailableItems.length > 0 || isProcessingPayment}
+                disabled={
+                  isValidating ||
+                  unavailableItems.length > 0 ||
+                  isProcessingPayment
+                }
                 className="btn-bog-payment sidebar-action-btn mobile-place-order"
               >
                 <div className="bog-payment-content">
                   <div className="card-icon">
                     <svg width="32" height="24" viewBox="0 0 32 24" fill="none">
-                      <rect x="1" y="1" width="30" height="22" rx="3" stroke="white" strokeWidth="2" fill="rgba(255,255,255,0.2)"/>
-                      <line x1="1" y1="7" x2="31" y2="7" stroke="white" strokeWidth="2"/>
-                      <rect x="4" y="14" width="10" height="4" rx="1" fill="white"/>
+                      <rect
+                        x="1"
+                        y="1"
+                        width="30"
+                        height="22"
+                        rx="3"
+                        stroke="white"
+                        strokeWidth="2"
+                        fill="rgba(255,255,255,0.2)"
+                      />
+                      <line
+                        x1="1"
+                        y1="7"
+                        x2="31"
+                        y2="7"
+                        stroke="white"
+                        strokeWidth="2"
+                      />
+                      <rect
+                        x="4"
+                        y="14"
+                        width="10"
+                        height="4"
+                        rx="1"
+                        fill="white"
+                      />
                     </svg>
                   </div>
                   <div className="bog-payment-text">
                     <span className="bog-payment-title">ბარათით გადახდა</span>
-                    <span className="bog-payment-subtitle">ყველა ბარათი მიიღება</span>
+                    <span className="bog-payment-subtitle">
+                      ყველა ბარათი მიიღება
+                    </span>
                   </div>
-                  {(isValidating || isProcessingPayment) && <div className="spinner" />}
+                  {(isValidating || isProcessingPayment) && (
+                    <div className="spinner" />
+                  )}
                 </div>
                 {!isValidating && !isProcessingPayment && (
-                  <span className="bog-payment-amount">{totalPrice.toFixed(2)} ₾</span>
+                  <span className="bog-payment-amount">
+                    {totalPrice.toFixed(2)} ₾
+                  </span>
                 )}
               </button>
             )}
@@ -642,50 +820,68 @@ export function StreamlinedCheckout() {
       {showPaymentModal && paymentUrl && (
         <div className="payment-modal-overlay">
           <div className="payment-modal-content">
-            <button 
+            <button
               onClick={handleCancelOrder}
               className="payment-modal-close"
               aria-label="Close"
             >
               ✕
             </button>
-            
+
             <div className="payment-modal-icon">
-              <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <rect x="2" y="5" width="20" height="14" rx="2"/>
-                <line x1="2" y1="10" x2="22" y2="10"/>
+              <svg
+                width="64"
+                height="64"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+              >
+                <rect x="2" y="5" width="20" height="14" rx="2" />
+                <line x1="2" y1="10" x2="22" y2="10" />
               </svg>
             </div>
 
             <h2 className="payment-modal-title">გადახდის დასრულება</h2>
-            
+
             <p className="payment-modal-description">
-              გადახდის გვერდზე შეიყვანეთ ბარათის მონაცემები და დაასრულეთ გადახდა.
+              გადახდის გვერდზე შეიყვანეთ ბარათის მონაცემები და დაასრულეთ
+              გადახდა.
             </p>
 
             {paymentWindowClosed && (
               <div className="payment-modal-warning">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
-                  <line x1="12" y1="9" x2="12" y2="13"/>
-                  <line x1="12" y1="17" x2="12.01" y2="17"/>
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
+                  <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+                  <line x1="12" y1="9" x2="12" y2="13" />
+                  <line x1="12" y1="17" x2="12.01" y2="17" />
                 </svg>
-                <span>გადახდის ფანჯარა დაიხურა. დააჭირეთ ქვემოთ მის ხელახლა გასახსნელად.</span>
+                <span>
+                  გადახდის ფანჯარა დაიხურა. დააჭირეთ ქვემოთ მის ხელახლა
+                  გასახსნელად.
+                </span>
               </div>
             )}
 
             <div className="payment-modal-actions">
               {paymentWindowClosed ? (
-                <button 
+                <button
                   onClick={reopenPaymentWindow}
                   className="btn-payment-primary"
                 >
                   გადახდის ფანჯრის ხელახლა გახსნა
                 </button>
               ) : (
-                <a 
-                  href={paymentUrl} 
-                  target="_blank" 
+                <a
+                  href={paymentUrl}
+                  target="_blank"
                   rel="noopener noreferrer"
                   className="btn-payment-link"
                   onClick={reopenPaymentWindow}
@@ -697,7 +893,8 @@ export function StreamlinedCheckout() {
 
             <div className="payment-modal-footer">
               <p className="payment-modal-note">
-                💡 გადახდის დასრულების შემდეგ ავტომატურად გადამოგიყვანთ დადასტურების გვერდზე
+                💡 გადახდის დასრულების შემდეგ ავტომატურად გადამოგიყვანთ
+                დადასტურების გვერდზე
               </p>
             </div>
           </div>

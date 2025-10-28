@@ -14,6 +14,32 @@ declare global {
 export const FB_PIXEL_ID =
   process.env.NEXT_PUBLIC_META_PIXEL_ID || "1189697243076610";
 
+const buildUserActivityPayload = (
+  eventType: string,
+  extra: Record<string, any> = {},
+  currentUser?: any
+) => {
+  if (typeof window === "undefined") {
+    return null;
+  }
+
+  const user = currentUser ?? getUserData();
+  const fallbackName =
+    user?.name ||
+    (user?.ownerFirstName && user?.ownerLastName
+      ? `${user.ownerFirstName} ${user.ownerLastName}`
+      : "Anonymous");
+
+  return {
+    userName: fallbackName,
+    email: user?.email ?? null,
+    phone: user?.phoneNumber ?? null,
+    eventType,
+    url: window.location.pathname + window.location.search,
+    additionalData: extra,
+  };
+};
+
 export const pageview = () => {
   if (typeof window !== "undefined" && window.fbq) {
     // Get current user data from localStorage
@@ -68,18 +94,15 @@ export const pageview = () => {
 
     window.fbq("track", "PageView", enhancedData);
 
-    // Also track in our own system
-    trackUserActivity({
-      userName:
-        currentUser?.name ||
-        (currentUser?.ownerFirstName && currentUser?.ownerLastName
-          ? `${currentUser.ownerFirstName} ${currentUser.ownerLastName}`
-          : "Anonymous"),
-      email: currentUser?.email,
-      phone: currentUser?.phoneNumber,
-      eventType: "PageView",
-      url: window.location.pathname + window.location.search,
-    });
+    const activityPayload = buildUserActivityPayload(
+      "PageView",
+      { pixelFields: enhancedData },
+      currentUser
+    );
+
+    if (activityPayload) {
+      trackUserActivity(activityPayload);
+    }
   }
 };
 
@@ -123,13 +146,20 @@ export const trackViewContent = (
   value: number,
   currency = "GEL"
 ) => {
-  trackEvent("ViewContent", {
+  const payload = {
     content_name: contentName,
     content_ids: [contentId],
     content_type: "product",
     value: value,
     currency: currency,
-  });
+  };
+
+  trackEvent("ViewContent", payload);
+
+  const activityPayload = buildUserActivityPayload("ViewContent", payload);
+  if (activityPayload) {
+    trackUserActivity(activityPayload);
+  }
 };
 
 export const trackAddToCart = (
@@ -138,13 +168,20 @@ export const trackAddToCart = (
   value: number,
   currency = "GEL"
 ) => {
-  trackEvent("AddToCart", {
+  const payload = {
     content_name: contentName,
     content_ids: [contentId],
     content_type: "product",
     value: value,
     currency: currency,
-  });
+  };
+
+  trackEvent("AddToCart", payload);
+
+  const activityPayload = buildUserActivityPayload("AddToCart", payload);
+  if (activityPayload) {
+    trackUserActivity(activityPayload);
+  }
 };
 
 export const trackInitiateCheckout = (
@@ -152,11 +189,18 @@ export const trackInitiateCheckout = (
   currency = "GEL",
   numItems: number
 ) => {
-  trackEvent("InitiateCheckout", {
+  const payload = {
     value: value,
     currency: currency,
     num_items: numItems,
-  });
+  };
+
+  trackEvent("InitiateCheckout", payload);
+
+  const activityPayload = buildUserActivityPayload("InitiateCheckout", payload);
+  if (activityPayload) {
+    trackUserActivity(activityPayload);
+  }
 };
 
 export const trackPurchase = (
@@ -164,18 +208,32 @@ export const trackPurchase = (
   currency = "GEL",
   orderId: string
 ) => {
-  trackEvent("Purchase", {
+  const payload = {
     value: value,
     currency: currency,
     content_type: "product",
     order_id: orderId,
-  });
+  };
+
+  trackEvent("Purchase", payload);
+
+  const activityPayload = buildUserActivityPayload("Purchase", payload);
+  if (activityPayload) {
+    trackUserActivity(activityPayload);
+  }
 };
 
 export const trackSearch = (searchString: string) => {
-  trackEvent("Search", {
+  const payload = {
     search_string: searchString,
-  });
+  };
+
+  trackEvent("Search", payload);
+
+  const activityPayload = buildUserActivityPayload("Search", payload);
+  if (activityPayload) {
+    trackUserActivity(activityPayload);
+  }
 };
 
 export default function MetaPixel() {

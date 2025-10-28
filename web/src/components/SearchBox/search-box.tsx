@@ -6,6 +6,7 @@ import { Search, User } from "lucide-react";
 import { useLanguage } from "@/hooks/LanguageContext";
 import { fetchWithAuth } from "@/lib/fetch-with-auth";
 import { useDebounce } from "@/hooks/use-debounce";
+import { trackSearch } from "@/components/MetaPixel";
 
 import "./SearchBox.css";
 
@@ -28,36 +29,43 @@ export default function SearchBox() {
   const [showPopup, setShowPopup] = useState(false);
   const [users, setUsers] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  
+
   const searchRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  
+
   const debouncedKeyword = useDebounce(keyword, 300);
 
-    // Search artists API call
+  // Search artists API call
   const searchUsers = async (query: string): Promise<User[]> => {
     if (!query || query.length < 2) return [];
     try {
-      console.log('Searching for artists with query:', query);
-      console.log('API URL:', `${process.env.NEXT_PUBLIC_API_URL}/artists/search?q=${encodeURIComponent(query)}`);
-      
-      const response = await fetchWithAuth(`/artists/search?q=${encodeURIComponent(query)}`);
-      
-      console.log('Search response status:', response.status);
-      console.log('Search response ok:', response.ok);
-      
+      console.log("Searching for artists with query:", query);
+      console.log(
+        "API URL:",
+        `${
+          process.env.NEXT_PUBLIC_API_URL
+        }/artists/search?q=${encodeURIComponent(query)}`
+      );
+
+      const response = await fetchWithAuth(
+        `/artists/search?q=${encodeURIComponent(query)}`
+      );
+
+      console.log("Search response status:", response.status);
+      console.log("Search response ok:", response.ok);
+
       if (response.ok) {
         const data = await response.json();
-        console.log('Search results:', data);
+        console.log("Search results:", data);
         return Array.isArray(data) ? data : [];
       } else {
-        console.error('Search failed with status:', response.status);
+        console.error("Search failed with status:", response.status);
         const errorText = await response.text();
-        console.error('Error response:', errorText);
+        console.error("Error response:", errorText);
         return [];
       }
     } catch (error) {
-      console.error('Error searching artists:', error);
+      console.error("Error searching artists:", error);
       return [];
     }
   };
@@ -81,39 +89,60 @@ export default function SearchBox() {
   // Close popup when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
+      if (
+        searchRef.current &&
+        !searchRef.current.contains(event.target as Node)
+      ) {
         setShowPopup(false);
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (keyword.trim()) {
       setShowPopup(false);
-      
+      const normalizedKeyword = keyword.trim();
+
+      trackSearch(normalizedKeyword);
+      if (typeof window !== "undefined") {
+        try {
+          sessionStorage.setItem(
+            "lastTrackedSearch",
+            normalizedKeyword.toLowerCase()
+          );
+        } catch (storageError) {
+          console.warn("Failed to persist last tracked search", storageError);
+        }
+      }
+
       try {
         // Get search ranking to determine which tab to show first
-        const response = await fetchWithAuth(`/artists/search/ranking?q=${encodeURIComponent(keyword.trim())}`);
-        
+        const response = await fetchWithAuth(
+          `/artists/search/ranking?q=${encodeURIComponent(normalizedKeyword)}`
+        );
+
         if (response.ok) {
           const ranking = await response.json();
-          console.log('Search ranking:', ranking);
-          
+          console.log("Search ranking:", ranking);
+
           // Navigate to search page with recommended tab as URL parameter
-          const recommendedTab = ranking.recommendedTab === 'products' ? 'products' : 'users';
-          router.push(`/search/users/${keyword.trim()}?tab=${recommendedTab}`);
+          const recommendedTab =
+            ranking.recommendedTab === "products" ? "products" : "users";
+          router.push(
+            `/search/users/${normalizedKeyword}?tab=${recommendedTab}`
+          );
         } else {
           // Fallback to default behavior if ranking fails
-          router.push(`/search/users/${keyword.trim()}`);
+          router.push(`/search/users/${normalizedKeyword}`);
         }
       } catch (error) {
-        console.error('Error getting search ranking:', error);
+        console.error("Error getting search ranking:", error);
         // Fallback to default behavior
-        router.push(`/search/users/${keyword.trim()}`);
+        router.push(`/search/users/${normalizedKeyword}`);
       }
     }
   };
@@ -121,6 +150,17 @@ export default function SearchBox() {
   const handleUserClick = (user: User) => {
     setShowPopup(false);
     setKeyword("");
+    const lookupName = keyword.trim();
+    if (lookupName) {
+      trackSearch(lookupName);
+      if (typeof window !== "undefined") {
+        try {
+          sessionStorage.setItem("lastTrackedSearch", lookupName.toLowerCase());
+        } catch (storageError) {
+          console.warn("Failed to persist last tracked search", storageError);
+        }
+      }
+    }
     router.push(`/artists/${user.slug}`);
   };
 
@@ -157,18 +197,18 @@ export default function SearchBox() {
       </form>
 
       {/* User Results Popup */}
-      {showPopup && (keyword.length >= 2) && (
+      {showPopup && keyword.length >= 2 && (
         <div className="search-popup">
           {isLoading ? (
             <div className="search-popup-loading">
-              {language === 'en' ? 'Searching...' : 'ძიება...'}
+              {language === "en" ? "Searching..." : "ძიება..."}
             </div>
           ) : (
             <>
               {users.length > 0 && (
                 <div className="search-popup-section">
                   <h4 className="search-popup-title">
-                    {language === 'en' ? 'Artists' : 'არტისტები'}
+                    {language === "en" ? "Artists" : "არტისტები"}
                   </h4>
                   {users.slice(0, 5).map((user) => (
                     <button
@@ -196,7 +236,7 @@ export default function SearchBox() {
                           {getUserDisplayName(user)}
                         </span>
                         <span className="search-popup-item-badge">
-                          {language === 'en' ? 'Artist' : 'არტისტი'}
+                          {language === "en" ? "Artist" : "არტისტი"}
                         </span>
                       </div>
                     </button>
@@ -206,7 +246,9 @@ export default function SearchBox() {
 
               {users.length === 0 && (
                 <div className="search-popup-empty">
-                  {language === 'en' ? 'No artists found' : 'არტისტები არ მოიძებნა'}
+                  {language === "en"
+                    ? "No artists found"
+                    : "არტისტები არ მოიძებნა"}
                 </div>
               )}
 
@@ -218,11 +260,28 @@ export default function SearchBox() {
                   onClick={() => {
                     setShowPopup(false);
                     if (keyword.trim()) {
-                      router.push(`/search/users/${keyword.trim()}`);
+                      const normalizedKeyword = keyword.trim();
+                      trackSearch(normalizedKeyword);
+                      if (typeof window !== "undefined") {
+                        try {
+                          sessionStorage.setItem(
+                            "lastTrackedSearch",
+                            normalizedKeyword.toLowerCase()
+                          );
+                        } catch (storageError) {
+                          console.warn(
+                            "Failed to persist last tracked search",
+                            storageError
+                          );
+                        }
+                      }
+                      router.push(`/search/users/${normalizedKeyword}`);
                     }
                   }}
                 >
-                  {language === 'en' ? 'View all results' : 'ყველა შედეგის ნახვა'}
+                  {language === "en"
+                    ? "View all results"
+                    : "ყველა შედეგის ნახვა"}
                 </button>
               </div>
             </>

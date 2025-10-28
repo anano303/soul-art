@@ -170,7 +170,10 @@ export function ProductCard({
       setIsBuying(false);
       // Error toast is already shown by addToCart if there's an issue
       // Only show additional error if user is not being redirected to login
-      if (error instanceof Error && error.message !== "User not authenticated") {
+      if (
+        error instanceof Error &&
+        error.message !== "User not authenticated"
+      ) {
         toast({
           title: language === "en" ? "Error" : "შეცდომა",
           description:
@@ -271,8 +274,10 @@ export function ProductCard({
       <div className="product-card-actions">
         <AddToCartButton
           productId={product._id}
+          productName={displayName}
           countInStock={product.countInStock}
           className="btn-add-to-cart-icon"
+          price={isDiscounted ? discountedPrice : product.price}
           hideQuantity={true}
           openCartOnAdd={false}
           iconOnly={true}
@@ -303,7 +308,9 @@ export function ProductCard({
               >
                 <path d="M21 12a9 9 0 1 1-6.219-8.56" />
               </svg>
-              <span>{language === "en" ? "Processing..." : "დამუშავება..."}</span>
+              <span>
+                {language === "en" ? "Processing..." : "დამუშავება..."}
+              </span>
             </>
           ) : (
             <>

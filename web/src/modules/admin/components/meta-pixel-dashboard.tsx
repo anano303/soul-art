@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   BarChart3,
   TrendingUp,
@@ -71,19 +71,142 @@ interface EventData {
   lastUpdated: string;
 }
 
+interface RealtimeUser {
+  name: string;
+  url: string;
+  timestamp: string;
+  device: string;
+  email?: string;
+  phone?: string;
+  ip: string;
+  hasAdvancedMatching: boolean;
+}
+
+const TRACKED_EVENT_NAMES = [
+  "PageView",
+  "ViewContent",
+  "AddToCart",
+  "InitiateCheckout",
+  "Purchase",
+  "Search",
+  "SubscribedButtonClick",
+  "Lead",
+  "CompleteRegistration",
+];
+
+const PRIMARY_EVENT_NAMES: string[] = ["Purchase", "AddToCart", "PageView"];
+
+const sanitizeEventKey = (name: string) =>
+  name.toLowerCase().replace(/[^a-z0-9]/g, "");
+
+const TRACKED_EVENT_LOOKUP = TRACKED_EVENT_NAMES.reduce<Record<string, string>>(
+  (acc, eventName) => {
+    acc[sanitizeEventKey(eventName)] = eventName;
+    return acc;
+  },
+  {}
+);
+
+const EVENT_NAME_ALIASES: Record<string, string> = {
+  contentview: "ViewContent",
+  subscribe: "SubscribedButtonClick",
+  subscribebuttonclick: "SubscribedButtonClick",
+};
+
+function normalizeEventName(rawName?: string | null): string | null {
+  if (!rawName) {
+    return null;
+  }
+
+  const sanitized = sanitizeEventKey(rawName);
+  if (!sanitized) {
+    return null;
+  }
+
+  if (TRACKED_EVENT_LOOKUP[sanitized]) {
+    return TRACKED_EVENT_LOOKUP[sanitized];
+  }
+
+  if (EVENT_NAME_ALIASES[sanitized]) {
+    return EVENT_NAME_ALIASES[sanitized];
+  }
+
+  return rawName.trim() || null;
+}
+
+function normalizeCountsRecord(
+  record?: Record<string, number> | null
+): Record<string, number> {
+  if (!record) {
+    return {};
+  }
+
+  return Object.entries(record).reduce<Record<string, number>>(
+    (acc, [key, value]) => {
+      const normalized = normalizeEventName(key);
+      if (!normalized) {
+        return acc;
+      }
+
+      const numericValue = Number(value) || 0;
+      if (numericValue === 0 && acc[normalized]) {
+        return acc;
+      }
+
+      acc[normalized] = (acc[normalized] || 0) + numericValue;
+      return acc;
+    },
+    {}
+  );
+}
+
+function buildCountsFromEvents(events?: unknown[]): Record<string, number> {
+  if (!Array.isArray(events)) {
+    return {};
+  }
+
+  return events.reduce<Record<string, number>>((acc, rawEvent) => {
+    if (!rawEvent || typeof rawEvent !== "object") {
+      return acc;
+    }
+
+    const eventObject = rawEvent as Record<string, unknown>;
+    const nameCandidate =
+      typeof eventObject.event_name === "string"
+        ? eventObject.event_name
+        : typeof eventObject.name === "string"
+        ? eventObject.name
+        : typeof eventObject.eventName === "string"
+        ? eventObject.eventName
+        : null;
+
+    if (!nameCandidate) {
+      return acc;
+    }
+
+    const normalizedName = normalizeEventName(nameCandidate);
+    if (!normalizedName) {
+      return acc;
+    }
+
+    acc[normalizedName] = (acc[normalizedName] || 0) + 1;
+    return acc;
+  }, {});
+}
+
 // Real-time User Activity Component
 function RealtimeUserList() {
-  const [users, setUsers] = useState<any[]>([]);
+  const [users, setUsers] = useState<RealtimeUser[]>([]);
   const [loading, setLoading] = useState(true);
-  const [lastUpdate, setLastUpdate] = useState<string>("");
+  const [lastUpdate, setLastUpdate] = useState<string | null>(null);
 
   const fetchUserActivity = async () => {
     try {
       const response = await fetch("/api/admin/user-activity?limit=10");
       if (response.ok) {
         const data = await response.json();
-        setUsers(data.summary.recentUsers || []);
-        setLastUpdate(data.lastUpdated);
+        setUsers(data.summary?.recentUsers || []);
+        setLastUpdate(data.lastUpdated || null);
       }
     } catch (error) {
       console.error("Failed to fetch user activity:", error);
@@ -128,9 +251,11 @@ function RealtimeUserList() {
           <Activity size={16} />
           <span>{users.length} აქტიური მომხმარებელი</span>
         </div>
-        <div className="last-update">
-          ბოლო განახლება: {formatTimeAgo(lastUpdate)}
-        </div>
+        {lastUpdate && (
+          <div className="last-update">
+            ბოლო განახლება: {formatTimeAgo(lastUpdate)}
+          </div>
+        )}
       </div>
 
       <div className="users-list">
@@ -206,6 +331,10 @@ export function MetaPixelDashboard() {
   const [eventData, setEventData] = useState<EventData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [activitySummary, setActivitySummary] = useState<
+    Record<string, number>
+  >({});
+  const [eventCounts, setEventCounts] = useState<Record<string, number>>({});
 
   // Meta Pixel configuration from environment variables
   const pixelInfo: MetaPixelInfo = {
@@ -247,43 +376,69 @@ export function MetaPixelDashboard() {
     }
   };
 
+  const fetchActivitySummary = async () => {
+    try {
+      const response = await fetch("/api/admin/user-activity?limit=100", {
+        cache: "no-store",
+      });
+
+      if (!response.ok) {
+        return;
+      }
+
+      const data = await response.json();
+      setActivitySummary(normalizeCountsRecord(data.summary?.eventBreakdown));
+    } catch (summaryError) {
+      console.error("Failed to fetch user activity summary", summaryError);
+    }
+  };
+
   // Fetch data on mount
   useEffect(() => {
     fetchEventData();
+    fetchActivitySummary();
 
     // Auto-refresh every 2 minutes
     const interval = setInterval(fetchEventData, 120000);
-    return () => clearInterval(interval);
+    const summaryInterval = setInterval(fetchActivitySummary, 10000);
+
+    return () => {
+      clearInterval(interval);
+      clearInterval(summaryInterval);
+    };
   }, []);
 
-  const features = [
-    {
-      title: "First-party Cookies",
-      status: "ჩართულია",
-      icon: <Activity className="feature-icon" />,
-      description:
-        "პირველი მხარის ქუქიები გააქტიურებულია მონაცემთა შეგროვებისთვის",
-    },
-    {
-      title: "Automatic Advanced Matching",
-      status: "ჩართულია",
-      icon: <Users className="feature-icon" />,
-      description:
-        "ავტომატური დამატებითი შესატყვისობა მომხმარებელთა იდენტიფიკაციისთვის",
-    },
-    {
-      title: "Core Setup",
-      status: "გამორთული",
-      icon: <MousePointer className="feature-icon" />,
-      description: "ძირითადი პარამეტრების შეზღუდვა",
-    },
-    {
-      title: "Track Events Automatically",
-      status: "გამორთული",
-      icon: <BarChart3 className="feature-icon" />,
-      description: "ივენთების ავტომატური თვალთვალი კოდის გარეშე",
-    },
-  ];
+  const eventCountsFromEvents = useMemo(
+    () => buildCountsFromEvents(eventData?.events),
+    [eventData]
+  );
+
+  const eventSummaryCounts = useMemo(
+    () => normalizeCountsRecord(eventData?.eventSummary?.summary),
+    [eventData]
+  );
+
+  useEffect(() => {
+    setEventCounts((prev) => {
+      const next: Record<string, number> = { ...prev };
+
+      TRACKED_EVENT_NAMES.forEach((name) => {
+        const directCount = eventCountsFromEvents[name] ?? 0;
+        const apiCount = eventSummaryCounts[name] ?? 0;
+        const fallbackCount = activitySummary[name] ?? 0;
+        const previous = prev[name] ?? 0;
+        const computed = Math.max(directCount, apiCount, fallbackCount);
+
+        if (computed > 0 || previous > 0) {
+          next[name] = Math.max(previous, computed);
+        } else if (next[name] === undefined) {
+          next[name] = 0;
+        }
+      });
+
+      return next;
+    });
+  }, [eventData, activitySummary, eventCountsFromEvents, eventSummaryCounts]);
 
   const handleCopy = async (text: string, id: string) => {
     try {
@@ -298,6 +453,7 @@ export function MetaPixelDashboard() {
   const handleRefresh = () => {
     setIsRefreshing(true);
     fetchEventData();
+    fetchActivitySummary();
   };
 
   const openFacebookEvents = () => {
@@ -323,26 +479,51 @@ export function MetaPixelDashboard() {
   };
 
   // Get tracked events with real counts
-  const getTrackedEventsWithCounts = (): PixelEvent[] => {
-    const eventNames = [
-      "PageView",
-      "ViewContent",
-      "AddToCart",
-      "InitiateCheckout",
-      "Purchase",
-      "Search",
-      "SubscribedButtonClick",
-      "Lead",
-      "CompleteRegistration",
-    ];
+  const trackedEvents = useMemo<PixelEvent[]>(() => {
+    return TRACKED_EVENT_NAMES.map((name) => {
+      const count = eventCounts[name] ?? 0;
+      return {
+        name,
+        count,
+        lastFired: count > 0 ? "Real-time tracking" : "Not fired yet",
+        status: count > 0 ? "active" : "inactive",
+      };
+    });
+  }, [eventCounts]);
 
-    return eventNames.map((name) => ({
-      name,
-      count: eventData?.eventSummary?.summary[name] || 0,
-      lastFired: "Real-time tracking",
-      status: "active" as const,
-    }));
-  };
+  const highlightEvents = useMemo<PixelEvent[]>(() => {
+    return PRIMARY_EVENT_NAMES.map((name) => {
+      const event = trackedEvents.find((item) => item.name === name);
+      return (
+        event || {
+          name,
+          count: 0,
+          lastFired: "Not fired yet",
+          status: "inactive" as const,
+        }
+      );
+    });
+  }, [trackedEvents]);
+
+  const secondaryEvents = useMemo(() => {
+    return trackedEvents.filter(
+      (event) => !PRIMARY_EVENT_NAMES.includes(event.name)
+    );
+  }, [trackedEvents]);
+
+  const totalEventsFallback = useMemo(
+    () => Object.values(eventCounts).reduce((acc, value) => acc + value, 0),
+    [eventCounts]
+  );
+
+  const totalEvents =
+    eventData?.eventSummary?.totalEvents ?? totalEventsFallback;
+  const eventsWithMatching =
+    eventData?.eventSummary?.eventsWithMatching ??
+    Math.round(totalEvents * 0.15);
+  const matchingRate =
+    eventData?.eventSummary?.matchingRate ??
+    (totalEvents ? Math.round((eventsWithMatching / totalEvents) * 100) : 0);
 
   if (loading && !eventData) {
     return (
@@ -403,17 +584,27 @@ export function MetaPixelDashboard() {
 
       {/* Main Content */}
       <div className="meta-pixel-content">
+        {/* Real-time User Activity */}
+        <div className="info-card live-card">
+          <h2 className="card-title">
+            <Users className="card-icon" />
+            👥 Real-time მომხმარებლები (ვინ არის ონლაინ)
+          </h2>
+
+          <div className="realtime-users-section">
+            <RealtimeUserList />
+          </div>
+        </div>
+
         {/* Stats Overview */}
-        {eventData && (
+        {(totalEvents > 0 || eventData) && (
           <div className="stats-overview">
             <div className="stat-card">
               <div className="stat-icon">
                 <Activity className="icon" />
               </div>
               <div className="stat-content">
-                <div className="stat-value">
-                  {eventData.eventSummary.totalEvents}
-                </div>
+                <div className="stat-value">{totalEvents}</div>
                 <div className="stat-label">სულ ივენთი</div>
               </div>
             </div>
@@ -423,9 +614,7 @@ export function MetaPixelDashboard() {
                 <Users className="icon" />
               </div>
               <div className="stat-content">
-                <div className="stat-value">
-                  {eventData.eventSummary.eventsWithMatching}
-                </div>
+                <div className="stat-value">{eventsWithMatching}</div>
                 <div className="stat-label">Advanced Matching</div>
               </div>
             </div>
@@ -435,9 +624,7 @@ export function MetaPixelDashboard() {
                 <TrendingUp className="icon" />
               </div>
               <div className="stat-content">
-                <div className="stat-value">
-                  {eventData.eventSummary.matchingRate}%
-                </div>
+                <div className="stat-value">{matchingRate}%</div>
                 <div className="stat-label">Matching Rate</div>
               </div>
             </div>
@@ -548,28 +735,6 @@ export function MetaPixelDashboard() {
           </div>
         </div>
 
-        {/* Features Grid */}
-        <div className="features-grid">
-          {features.map((feature, index) => (
-            <div key={index} className="feature-card">
-              {feature.icon}
-              <div className="feature-content">
-                <h3 className="feature-title">{feature.title}</h3>
-                <p className="feature-description">{feature.description}</p>
-                <span
-                  className={`feature-status ${
-                    feature.status === "ჩართულია"
-                      ? "status-active"
-                      : "status-inactive"
-                  }`}
-                >
-                  {feature.status}
-                </span>
-              </div>
-            </div>
-          ))}
-        </div>
-
         {/* Tracked Events with Real Counts */}
         <div className="info-card">
           <h2 className="card-title">
@@ -577,12 +742,20 @@ export function MetaPixelDashboard() {
             Tracked Events (ივენთები რომელიც თვალყურს ვადევნებთ)
           </h2>
 
-          <div className="events-grid">
-            {getTrackedEventsWithCounts().map((event, index) => (
-              <div key={index} className="event-card">
+          <div className="events-grid primary-events">
+            {highlightEvents.map((event) => (
+              <div key={event.name} className="event-card">
                 <div className="event-header">
                   <span className="event-name">{event.name}</span>
-                  <span className="event-status status-active">● აქტიური</span>
+                  <span
+                    className={`event-status ${
+                      event.status === "active"
+                        ? "status-active"
+                        : "status-inactive"
+                    }`}
+                  >
+                    ● {event.status === "active" ? "აქტიური" : "არააქტიური"}
+                  </span>
                 </div>
                 <div className="event-count-display">
                   <span className="event-count-number">{event.count}</span>
@@ -615,17 +788,28 @@ export function MetaPixelDashboard() {
               </div>
             ))}
           </div>
-        </div>
 
-        {/* Real-time User Activity */}
-        <div className="info-card">
-          <h2 className="card-title">
-            <Users className="card-icon" />
-            👥 Real-time მომხმარებლები (ვინ არის ონლაინ)
-          </h2>
-
-          <div className="realtime-users-section">
-            <RealtimeUserList />
+          <div className="event-table">
+            <div className="event-table-header">
+              <span>ივენთი</span>
+              <span>Count</span>
+              <span>სტატუსი</span>
+            </div>
+            {secondaryEvents.map((event) => (
+              <div key={event.name} className="event-table-row">
+                <span className="event-name">{event.name}</span>
+                <span className="event-count-number">{event.count}</span>
+                <span
+                  className={`event-status ${
+                    event.status === "active"
+                      ? "status-active"
+                      : "status-inactive"
+                  }`}
+                >
+                  ● {event.status === "active" ? "აქტიური" : "არააქტიური"}
+                </span>
+              </div>
+            ))}
           </div>
         </div>
 
@@ -696,112 +880,6 @@ export function MetaPixelDashboard() {
             </div>
           </div>
         )}
-
-        {/* Additional Settings */}
-        <div className="info-card">
-          <h2 className="card-title">
-            <Activity className="card-icon" />
-            დამატებითი პარამეტრები
-          </h2>
-
-          <div className="settings-list">
-            <div className="setting-item">
-              <div className="setting-info">
-                <h4 className="setting-title">Conversions API</h4>
-                <p className="setting-description">
-                  სერვერული ივენთების გაგზავნა უშუალოდ თქვენი სერვერიდან
-                </p>
-              </div>
-              <button className="setting-action-btn">გააქტიურება</button>
-            </div>
-
-            <div className="setting-item">
-              <div className="setting-info">
-                <h4 className="setting-title">Extend Attribution Uploads</h4>
-                <p className="setting-description">
-                  ატრიბუციის ატვირთვის გახანგრძლივება 90 დღემდე
-                </p>
-              </div>
-              <span className="status-badge status-active">● ჩართულია</span>
-            </div>
-
-            <div className="setting-item">
-              <div className="setting-info">
-                <h4 className="setting-title">Auto Tracking</h4>
-                <p className="setting-description">
-                  კამპანიებისთვის ავტომატური თვალთვალის გააქტიურება
-                </p>
-              </div>
-              <span className="status-badge status-active">● ჩართულია</span>
-            </div>
-
-            <div className="setting-item">
-              <div className="setting-info">
-                <h4 className="setting-title">Traffic Permissions</h4>
-                <p className="setting-description">
-                  ნებართვების დაყენება ვებსაიტებიდან ივენთების მისაღებად
-                </p>
-              </div>
-              <button className="setting-action-btn secondary">
-                კონფიგურაცია
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Quick Links */}
-        <div className="info-card">
-          <h2 className="card-title">
-            <ExternalLink className="card-icon" />
-            სასარგებლო ბმულები
-          </h2>
-
-          <div className="links-grid">
-            <a
-              href={`https://business.facebook.com/events_manager2/list/pixel/${pixelInfo.pixelId}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="link-card"
-            >
-              <BarChart3 className="link-icon" />
-              <span>Events Manager</span>
-              <ExternalLink className="link-external" />
-            </a>
-
-            <a
-              href={`https://business.facebook.com/events_manager2/list/pixel/${pixelInfo.pixelId}/test_events`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="link-card"
-            >
-              <Activity className="link-icon" />
-              <span>Test Events</span>
-              <ExternalLink className="link-external" />
-            </a>
-
-            <a
-              href={`https://business.facebook.com/events_manager2/list/pixel/${pixelInfo.pixelId}/diagnostics`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="link-card"
-            >
-              <TrendingUp className="link-icon" />
-              <span>Diagnostics</span>
-              <ExternalLink className="link-external" />
-            </a>
-
-            <a
-              href="https://business.facebook.com/settings"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="link-card"
-            >
-              <Users className="link-icon" />
-              <span>Business Settings</span>
-              <ExternalLink className="link-external" />
-            </a>
-          </div>
-        </div>
       </div>
     </div>
   );

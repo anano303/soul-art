@@ -35,6 +35,7 @@ import { SimilarProductCard } from "./similar-product-card";
 import { useCart } from "@/modules/cart/context/cart-context";
 import ProductSchema from "@/components/ProductSchema";
 import { AddToCartButton } from "./AddToCartButton";
+import { trackViewContent } from "@/components/MetaPixel";
 
 // Similar Products Component
 function SimilarProducts({
@@ -158,6 +159,7 @@ export function ProductDetails({ product }: ProductDetailsProps) {
   } | null>(null);
   const isViewIncrementedRef = useRef(false);
   const currentProductIdRef = useRef<string | null>(null);
+  const hasTrackedViewRef = useRef(false);
   const router = useRouter();
   const { t, language } = useLanguage();
 
@@ -434,6 +436,19 @@ export function ProductDetails({ product }: ProductDetailsProps) {
 
   const isDiscounted = hasActiveDiscount();
   const finalPrice = calculateDiscountedPrice();
+
+  useEffect(() => {
+    hasTrackedViewRef.current = false;
+  }, [product._id]);
+
+  useEffect(() => {
+    if (hasTrackedViewRef.current) {
+      return;
+    }
+
+    trackViewContent(displayName, product._id, finalPrice, "GEL");
+    hasTrackedViewRef.current = true;
+  }, [displayName, product._id, finalPrice]);
 
   const availableQuantity = useMemo(() => {
     let stock = product.countInStock || 0;
@@ -963,6 +978,7 @@ export function ProductDetails({ product }: ProductDetailsProps) {
               <div className="add-to-cart-btn-wrapper">
                 <AddToCartButton
                   productId={product._id}
+                  productName={displayName}
                   countInStock={availableQuantity}
                   className="add-to-cart-btn"
                   selectedSize={selectedSize}
@@ -979,6 +995,7 @@ export function ProductDetails({ product }: ProductDetailsProps) {
           {isOutOfStock && (
             <AddToCartButton
               productId={product._id}
+              productName={displayName}
               countInStock={availableQuantity}
               className="add-to-cart-btn"
               selectedSize={selectedSize}

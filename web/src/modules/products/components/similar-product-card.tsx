@@ -159,10 +159,12 @@ export function SimilarProductCard({
         >
           <AddToCartButton
             productId={product._id}
+            productName={displayName}
             countInStock={product.countInStock}
             className="similar-addButtonCart similar-btn-buy-compact"
             hideQuantity={true}
             openCartOnAdd={false}
+            price={isDiscounted ? discountedPrice : product.price}
           />
         </div>
         <Link

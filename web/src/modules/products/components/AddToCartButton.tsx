@@ -6,9 +6,11 @@ import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/hooks/LanguageContext";
 import "./ProductCard.css";
 import { useCart } from "@/modules/cart/context/cart-context";
+import { trackAddToCart } from "@/components/MetaPixel";
 
 interface AddToCartButtonProps {
   productId: string;
+  productName: string;
   countInStock: number;
   className?: string;
   selectedSize?: string;
@@ -16,6 +18,7 @@ interface AddToCartButtonProps {
   selectedAgeGroup?: string;
   quantity?: number;
   price?: number;
+  currency?: string;
   hideQuantity?: boolean; // New prop to hide quantity selector
   openCartOnAdd?: boolean; // New prop to open cart after adding
   iconOnly?: boolean; // New prop to show only icon, no text
@@ -23,6 +26,7 @@ interface AddToCartButtonProps {
 
 export function AddToCartButton({
   productId,
+  productName,
   countInStock,
   className,
   selectedSize = "",
@@ -30,6 +34,7 @@ export function AddToCartButton({
   selectedAgeGroup = "",
   quantity: externalQuantity,
   price,
+  currency = "GEL",
   hideQuantity = false, // Default to false
   openCartOnAdd = false, // Default to false
   iconOnly = false, // Default to false
@@ -91,6 +96,13 @@ export function AddToCartButton({
           title: t("cart.quantityUpdated"),
           description: `${t("cart.newQuantity")}: ${newQuantity}`,
         });
+
+        trackAddToCart(
+          productName,
+          productId,
+          (price ?? 0) * quantity,
+          currency
+        );
       } catch (error) {
         console.error("Update quantity error:", error);
         toast({
@@ -128,6 +140,13 @@ export function AddToCartButton({
             title: t("cart.quantityUpdated"),
             description: `${t("cart.newQuantity")}: ${newQuantity}`,
           });
+
+          trackAddToCart(
+            productName,
+            productId,
+            (price ?? 0) * quantity,
+            currency
+          );
         } catch (error) {
           console.error("Update quantity error:", error);
           toast({
@@ -156,6 +175,13 @@ export function AddToCartButton({
             title: t("cart.addedToCart"),
             description: t("cart.productAdded"),
           });
+
+          trackAddToCart(
+            productName,
+            productId,
+            (price ?? 0) * quantity,
+            currency
+          );
 
           // Open cart if requested
           if (openCartOnAdd) {
@@ -219,7 +245,9 @@ export function AddToCartButton({
       )}
 
       <button
-        className={`addButtonCart ${className} ${isInCart ? "in-cart" : ""} ${iconOnly ? "icon-only" : ""}`}
+        className={`addButtonCart ${className} ${isInCart ? "in-cart" : ""} ${
+          iconOnly ? "icon-only" : ""
+        }`}
         disabled={
           isOutOfStock ||
           loading ||
