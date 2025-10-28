@@ -1052,19 +1052,40 @@ export class UsersService {
         }
       }
 
-      // Update fields only if they are provided
-      if (updateDto.name) user.name = updateDto.name;
-      if (updateDto.email) user.email = updateDto.email;
-      if (updateDto.role) user.role = updateDto.role;
+      const updateData: Partial<User> = {};
 
-      // Only hash and update password if it's provided and not empty
-      if (updateDto.password && updateDto.password.trim() !== '') {
-        this.logger.log('Updating password for user', id);
-        user.password = await hashPassword(updateDto.password);
+      if (updateDto.name) {
+        updateData.name = updateDto.name;
       }
 
-      await user.save();
-      return user;
+      if (updateDto.email) {
+        updateData.email = updateDto.email;
+      }
+
+      if (updateDto.role) {
+        updateData.role = updateDto.role;
+      }
+
+      if (updateDto.password && updateDto.password.trim() !== '') {
+        this.logger.log('Updating password for user', id);
+        updateData.password = await hashPassword(updateDto.password);
+      }
+
+      if (Object.keys(updateData).length === 0) {
+        return user;
+      }
+
+      const updatedUser = await this.userModel.findByIdAndUpdate(
+        id,
+        { $set: updateData },
+        { new: true, runValidators: true, context: 'query' },
+      );
+
+      if (!updatedUser) {
+        throw new NotFoundException('User not found');
+      }
+
+      return updatedUser;
     } catch (error) {
       this.logger.error(`Failed to update user: ${error.message}`);
       throw error;
