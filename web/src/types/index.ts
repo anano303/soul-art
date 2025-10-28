@@ -186,6 +186,8 @@ export interface User {
   profileImage?: string;
   phoneNumber: string;
   role: Role;
+  firstName?: string;
+  lastName?: string;
   storeName?: string;
   storeLogo?: string;
   artistSlug?: string | null;
@@ -234,6 +236,7 @@ export interface PaginatedResponse<T> {
       admin: number;
       seller: number;
       user: number;
+      blogger: number;
     };
   };
 }

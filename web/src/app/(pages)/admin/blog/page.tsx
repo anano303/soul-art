@@ -22,9 +22,9 @@ export default function AdminBlogPage() {
       return;
     }
 
-    if (userData.role !== Role.Admin) {
-      console.log("User doesn't have admin permissions for blog");
-      router.push("/admin/products");
+    if (userData.role !== Role.Admin && userData.role !== Role.Blogger) {
+      console.log("User doesn't have permissions for blog admin");
+      router.push("/");
       return;
     }
 

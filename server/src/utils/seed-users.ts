@@ -3,7 +3,7 @@ import { hash } from 'argon2';
 import { Role } from '@/types/role.enum';
 
 // const ROLES = ['user', 'admin'] as const;
-const ROLES = [Role.User, Role.Admin, Role.Seller] as const;
+const ROLES = [Role.User, Role.Admin, Role.Seller, Role.Blogger] as const;
 
 interface GeneratedUser {
   name: string;
@@ -34,7 +34,10 @@ export async function generateUsers(count: number): Promise<GeneratedUser[]> {
       password: hashedPassword,
       avatar: faker.image.avatar(),
       // isAdmin: i === 0, // First user is admin
-      role: i === 0 ? Role.Admin : faker.helpers.arrayElement([Role.User, Role.Seller]), // პირველი admin, დანარჩენები random
+      role:
+        i === 0
+          ? Role.Admin
+          : faker.helpers.arrayElement([Role.User, Role.Seller, Role.Blogger]), // პირველი admin, დანარჩენები random
       createdAt: faker.date.past({ years: 1 }),
       reviews: faker.number.int({ min: 0, max: 15 }),
       purchases: faker.number.int({ min: 1, max: 20 }),

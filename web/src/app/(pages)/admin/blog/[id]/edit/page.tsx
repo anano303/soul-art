@@ -24,8 +24,8 @@ export default function AdminBlogEditPage() {
     }
 
     if (userData.role !== Role.Admin) {
-      console.log("User doesn't have admin permissions for blog");
-      router.push("/admin/products");
+      console.log("Only admins can edit blog posts");
+      router.push("/admin/blog");
       return;
     }
 

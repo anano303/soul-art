@@ -10,6 +10,9 @@ class RoleCountsDto {
 
   @Expose()
   user!: number;
+
+  @Expose()
+  blogger!: number;
 }
 
 class UsersSummaryDto {

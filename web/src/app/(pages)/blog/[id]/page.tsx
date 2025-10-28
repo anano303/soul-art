@@ -24,6 +24,7 @@ interface PopulatedUser {
   email?: string;
   firstName?: string;
   lastName?: string;
+  name?: string;
 }
 
 interface BlogPostData {
@@ -127,6 +128,7 @@ export default function BlogPostPage() {
 
     return (
       fullName ||
+      post.createdBy.name ||
       post.createdBy.username ||
       (language === "en" ? "Soulart Admin" : "სოულარტის გუნდი")
     );

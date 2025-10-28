@@ -21,6 +21,7 @@ import {
   BarChart3,
   Activity,
   MapPin,
+  PenSquare,
 } from "lucide-react";
 
 // Add a style object for the FiraGo font
@@ -223,20 +224,34 @@ export default function UserMenu({ onNavigate }: { onNavigate?: () => void }) {
               <span>{t("navigation.referrals")}</span>
             </Link>
 
-            {(user.role === Role.Admin || user.role === Role.Seller) && (
+            {(user.role === Role.Admin ||
+              user.role === Role.Seller ||
+              user.role === Role.Blogger) && (
               <>
                 <hr />
                 <div className="dropdown-label">
                   {t("navigation.adminPanel")}
                 </div>
-                <Link
-                  href="/admin/products"
-                  className="dropdown-item"
-                  onClick={handleLinkClick}
-                >
-                  <Package size={18} />
-                  <span>{t("navigation.products")}</span>
-                </Link>
+                {(user.role === Role.Admin || user.role === Role.Seller) && (
+                  <Link
+                    href="/admin/products"
+                    className="dropdown-item"
+                    onClick={handleLinkClick}
+                  >
+                    <Package size={18} />
+                    <span>{t("navigation.products")}</span>
+                  </Link>
+                )}
+                {(user.role === Role.Admin || user.role === Role.Blogger) && (
+                  <Link
+                    href="/admin/blog"
+                    className="dropdown-item"
+                    onClick={handleLinkClick}
+                  >
+                    <PenSquare size={18} />
+                    <span>{t("navigation.adminBlog")}</span>
+                  </Link>
+                )}
               </>
             )}
             {user.role === Role.Admin && (

@@ -76,14 +76,18 @@ export class AuthController {
   @UseInterceptors(createRateLimitInterceptor(authRateLimit))
   @Post('login')
   async login(
-    @Body() body: LoginDto & { deviceInfo?: { fingerprint?: string; userAgent?: string; trusted?: boolean } },
+    @Body()
+    body: LoginDto & {
+      deviceInfo?: {
+        fingerprint?: string;
+        userAgent?: string;
+        trusted?: boolean;
+      };
+    },
     @Res({ passthrough: true }) res: Response,
     @Req() req: Request,
   ) {
-    const user = await this.authService.validateUser(
-      body.email,
-      body.password,
-    );
+    const user = await this.authService.validateUser(body.email, body.password);
 
     let profileImage = null;
     if (user.profileImagePath) {
@@ -94,12 +98,16 @@ export class AuthController {
 
     // Extract device info from request body or generate from request
     const deviceInfo = {
-      fingerprint: body.deviceInfo?.fingerprint || this.generateDeviceFingerprint(req),
+      fingerprint:
+        body.deviceInfo?.fingerprint || this.generateDeviceFingerprint(req),
       userAgent: body.deviceInfo?.userAgent || req.headers['user-agent'] || '',
       trusted: body.deviceInfo?.trusted || false,
     };
 
-    const { tokens, user: userData } = await this.authService.login(user, deviceInfo);
+    const { tokens, user: userData } = await this.authService.login(
+      user,
+      deviceInfo,
+    );
 
     // Set HTTP-only cookies instead of returning tokens in response
     res.cookie(
@@ -211,19 +219,23 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   async logout(
     @CurrentUser() user: UserDocument,
-    @Body() body: { deviceInfo?: { fingerprint?: string; logoutAllDevices?: boolean } },
+    @Body()
+    body: { deviceInfo?: { fingerprint?: string; logoutAllDevices?: boolean } },
     @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
   ) {
     // Extract device fingerprint for per-device logout
-    const deviceFingerprint = body.deviceInfo?.fingerprint || this.generateDeviceFingerprint(req);
-    
+    const deviceFingerprint =
+      body.deviceInfo?.fingerprint || this.generateDeviceFingerprint(req);
+
     if (body.deviceInfo?.logoutAllDevices) {
       // Full logout from all devices
       await this.authService.logout(user._id.toString());
     } else {
       // Logout only current device
-      await this.authService.logout(user._id.toString(), { fingerprint: deviceFingerprint });
+      await this.authService.logout(user._id.toString(), {
+        fingerprint: deviceFingerprint,
+      });
     }
 
     // Clear HTTP-only cookies
@@ -236,9 +248,11 @@ export class AuthController {
       maxAge: 0,
     });
 
-    return { 
+    return {
       success: true,
-      message: body.deviceInfo?.logoutAllDevices ? 'Logged out from all devices' : 'Logged out from current device'
+      message: body.deviceInfo?.logoutAllDevices
+        ? 'Logged out from all devices'
+        : 'Logged out from current device',
     };
   }
 
@@ -381,7 +395,7 @@ export class AuthController {
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.Admin, Role.User, Role.Seller)
+  @Roles(Role.Admin, Role.User, Role.Seller, Role.Blogger)
   @Put('profile')
   async updateProfile(
     @CurrentUser() user: UserDocument,

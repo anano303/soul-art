@@ -5,7 +5,6 @@ import { BlogPost, BlogPostDocument } from './schemas/blog-post.schema';
 import { CreateBlogPostDto } from './dto/create-blog-post.dto';
 import { UpdateBlogPostDto } from './dto/update-blog-post.dto';
 
-
 @Injectable()
 export class BlogService {
   constructor(
@@ -29,14 +28,14 @@ export class BlogService {
     return this.blogPostModel
       .find(filter)
       .sort({ publishDate: -1 })
-      .populate('createdBy', 'username email')
+      .populate('createdBy', 'name username email')
       .exec();
   }
 
   async findOne(id: string): Promise<BlogPost> {
     const blogPost = await this.blogPostModel
       .findById(id)
-      .populate('createdBy', 'username email')
+      .populate('createdBy', 'name username email')
       .exec();
 
     if (!blogPost) {

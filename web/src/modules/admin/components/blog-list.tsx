@@ -2,11 +2,12 @@
 
 import { useState, useEffect } from "react";
 import { fetchWithAuth } from "@/lib/fetch-with-auth";
-import { useRouter } from "next/navigation";
 import { Plus, Edit, Trash2, Eye, EyeOff, Calendar } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { toast } from "react-hot-toast";
+import { getUserData } from "@/lib/auth";
+import { Role } from "@/types/role";
 import "./blog-list.css";
 
 interface BlogPost {
@@ -18,17 +19,32 @@ interface BlogPost {
   coverImage: string;
   publishDate: string;
   isPublished: boolean;
-  createdBy: {
-    username: string;
-    email: string;
-  };
+  createdBy?: {
+    username?: string;
+    email?: string;
+    name?: string;
+  } | null;
 }
 
 export function BlogList() {
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<"all" | "published" | "draft">("all");
-  const router = useRouter();
+  const [userRole, setUserRole] = useState<Role | null>(() => {
+    if (typeof window === "undefined") {
+      return null;
+    }
+    return getUserData()?.role ?? null;
+  });
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const userData = getUserData();
+    setUserRole(userData?.role ?? null);
+  }, []);
+
+  const isAdmin = userRole === Role.Admin;
+  const isBlogger = userRole === Role.Blogger;
 
   const fetchPosts = async () => {
     try {
@@ -56,6 +72,11 @@ export function BlogList() {
   }, [filter]);
 
   const handleDelete = async (id: string) => {
+    if (!isAdmin) {
+      toast.error("არ გაქვთ პოსტის წაშლის უფლება");
+      return;
+    }
+
     if (!confirm("დარწმუნებული ხართ რომ გსურთ ამ პოსტის წაშლა?")) {
       return;
     }
@@ -78,6 +99,11 @@ export function BlogList() {
   };
 
   const handleTogglePublish = async (id: string) => {
+    if (!isAdmin) {
+      toast.error("გამოქვეყნების შეცვლა მხოლოდ ადმინს შეუძლია");
+      return;
+    }
+
     try {
       const response = await fetchWithAuth(`/blog/${id}/toggle-publish`, {
         method: "PUT",
@@ -103,10 +129,12 @@ export function BlogList() {
     <div className="blog-admin-container">
       <div className="blog-admin-header">
         <h1>ბლოგის მართვა</h1>
-        <Link href="/admin/blog/create" className="btn-create">
-          <Plus size={20} />
-          ახალი პოსტი
-        </Link>
+        {isAdmin && (
+          <Link href="/admin/blog/create" className="btn-create">
+            <Plus size={20} />
+            ახალი პოსტი
+          </Link>
+        )}
       </div>
 
       <div className="blog-filters">
@@ -166,40 +194,51 @@ export function BlogList() {
               <h3 className="post-title">{post.title}</h3>
               <p className="post-artist">მხატვარი: {post.artist}</p>
               <p className="post-author">
-                ავტორი: {post.createdBy?.username || "უცნობი"}
+                ავტორი:{" "}
+                {post.createdBy?.name || post.createdBy?.username || "უცნობი"}
               </p>
 
               <div className="post-actions">
-                <Link
-                  href={`/admin/blog/${post._id}/edit`}
-                  className="btn-action btn-edit"
-                >
-                  <Edit size={16} />
-                  რედაქტირება
-                </Link>
-                <button
-                  onClick={() => handleTogglePublish(post._id)}
-                  className="btn-action btn-toggle"
-                >
-                  {post.isPublished ? (
-                    <>
-                      <EyeOff size={16} />
-                      დამალვა
-                    </>
-                  ) : (
-                    <>
-                      <Eye size={16} />
-                      გამოქვეყნება
-                    </>
-                  )}
-                </button>
-                <button
-                  onClick={() => handleDelete(post._id)}
-                  className="btn-action btn-delete"
-                >
-                  <Trash2 size={16} />
-                  წაშლა
-                </button>
+                {isAdmin ? (
+                  <>
+                    <Link
+                      href={`/admin/blog/${post._id}/edit`}
+                      className="btn-action btn-edit"
+                    >
+                      <Edit size={16} />
+                      რედაქტირება
+                    </Link>
+                    <button
+                      onClick={() => handleTogglePublish(post._id)}
+                      className="btn-action btn-toggle"
+                    >
+                      {post.isPublished ? (
+                        <>
+                          <EyeOff size={16} />
+                          დამალვა
+                        </>
+                      ) : (
+                        <>
+                          <Eye size={16} />
+                          გამოქვეყნება
+                        </>
+                      )}
+                    </button>
+                    <button
+                      onClick={() => handleDelete(post._id)}
+                      className="btn-action btn-delete"
+                    >
+                      <Trash2 size={16} />
+                      წაშლა
+                    </button>
+                  </>
+                ) : (
+                  <span className="post-actions-readonly">
+                    {isBlogger
+                      ? "ბლოგერის როლს მხოლოდ ნახვის უფლება აქვს"
+                      : "მხოლოდ ადმინს შეუძლია პოსტის შეცვლა"}
+                  </span>
+                )}
               </div>
             </div>
           </div>
@@ -209,10 +248,12 @@ export function BlogList() {
       {posts.length === 0 && (
         <div className="empty-state">
           <p>პოსტები არ მოიძებნა</p>
-          <Link href="/admin/blog/create" className="btn-create">
-            <Plus size={20} />
-            შექმენი პირველი პოსტი
-          </Link>
+          {isAdmin && (
+            <Link href="/admin/blog/create" className="btn-create">
+              <Plus size={20} />
+              შექმენი პირველი პოსტი
+            </Link>
+          )}
         </div>
       )}
     </div>

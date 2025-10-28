@@ -96,7 +96,10 @@ export class UsersService {
     }));
   }
 
-  async searchPublicArtists(keyword: string, limit: number = 20): Promise<any[]> {
+  async searchPublicArtists(
+    keyword: string,
+    limit: number = 20,
+  ): Promise<any[]> {
     if (!keyword || keyword.trim().length < 2) {
       return [];
     }
@@ -118,7 +121,17 @@ export class UsersService {
         })
         .sort({ updatedAt: -1 })
         .limit(normalizedLimit)
-        .select(['artistSlug', 'storeName', 'name', 'updatedAt', 'createdAt', 'artistCoverImage', 'storeLogo', 'storeLogoPath', 'profileImagePath'])
+        .select([
+          'artistSlug',
+          'storeName',
+          'name',
+          'updatedAt',
+          'createdAt',
+          'artistCoverImage',
+          'storeLogo',
+          'storeLogoPath',
+          'profileImagePath',
+        ])
         .lean();
 
       return artists.map((artist) => ({
@@ -139,7 +152,10 @@ export class UsersService {
     }
   }
 
-  async getSearchRanking(keyword: string, limit: number = 20): Promise<{
+  async getSearchRanking(
+    keyword: string,
+    limit: number = 20,
+  ): Promise<{
     recommendedTab: 'artists' | 'products';
     artists: any[];
     products: any[];
@@ -150,7 +166,7 @@ export class UsersService {
         recommendedTab: 'artists',
         artists: [],
         products: [],
-        reasoning: 'Default to artists for empty search'
+        reasoning: 'Default to artists for empty search',
       };
     }
 
@@ -161,7 +177,7 @@ export class UsersService {
       // Search artists and products in parallel
       const [artists, products] = await Promise.all([
         this.searchPublicArtists(keyword.trim(), normalizedLimit),
-        this.searchProducts(keyword.trim(), normalizedLimit)
+        this.searchProducts(keyword.trim(), normalizedLimit),
       ]);
 
       // Determine which tab to show first
@@ -170,15 +186,17 @@ export class UsersService {
 
       // 1. Check for exact matches (case-insensitive)
       const lowerKeyword = keyword.trim().toLowerCase();
-      
-      const exactArtistMatch = artists.some(artist => 
-        artist.name.toLowerCase() === lowerKeyword || 
-        artist.slug.toLowerCase() === lowerKeyword
+
+      const exactArtistMatch = artists.some(
+        (artist) =>
+          artist.name.toLowerCase() === lowerKeyword ||
+          artist.slug.toLowerCase() === lowerKeyword,
       );
-      
-      const exactProductMatch = products.some(product => 
-        product.name?.toLowerCase() === lowerKeyword ||
-        product.nameEn?.toLowerCase() === lowerKeyword
+
+      const exactProductMatch = products.some(
+        (product) =>
+          product.name?.toLowerCase() === lowerKeyword ||
+          product.nameEn?.toLowerCase() === lowerKeyword,
       );
 
       if (exactArtistMatch && !exactProductMatch) {
@@ -189,8 +207,10 @@ export class UsersService {
         reasoning = 'Exact product name match found';
       } else if (exactArtistMatch && exactProductMatch) {
         // Both have exact matches, use count as tiebreaker
-        recommendedTab = artists.length >= products.length ? 'artists' : 'products';
-        reasoning = 'Both have exact matches, showing category with more results';
+        recommendedTab =
+          artists.length >= products.length ? 'artists' : 'products';
+        reasoning =
+          'Both have exact matches, showing category with more results';
       } else {
         // 2. Check availability (no results in one category)
         if (artists.length === 0 && products.length > 0) {
@@ -206,7 +226,7 @@ export class UsersService {
           // 3. Use relevance scoring
           const artistScore = this.calculateRelevanceScore(artists, keyword);
           const productScore = this.calculateRelevanceScore(products, keyword);
-          
+
           if (productScore > artistScore) {
             recommendedTab = 'products';
             reasoning = `Products more relevant (score: ${productScore} vs ${artistScore})`;
@@ -221,7 +241,7 @@ export class UsersService {
         recommendedTab,
         artists,
         products,
-        reasoning
+        reasoning,
       };
     } catch (error) {
       console.error('Error in search ranking:', error);
@@ -232,7 +252,7 @@ export class UsersService {
   private async searchProducts(keyword: string, limit: number): Promise<any[]> {
     try {
       const sanitizedKeyword = keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-      
+
       const products = await this.productModel
         .find({
           status: ProductStatus.APPROVED,
@@ -264,18 +284,18 @@ export class UsersService {
 
   private calculateRelevanceScore(results: any[], keyword: string): number {
     if (!results.length) return 0;
-    
+
     const lowerKeyword = keyword.toLowerCase();
     let score = 0;
-    
-    results.forEach(item => {
+
+    results.forEach((item) => {
       const name = (item.name || '').toLowerCase();
       const nameEn = (item.nameEn || '').toLowerCase();
       const slug = (item.slug || '').toLowerCase();
-      
+
       // Check all relevant fields for matches
-      const searchFields = [name, nameEn, slug].filter(field => field);
-      
+      const searchFields = [name, nameEn, slug].filter((field) => field);
+
       for (const field of searchFields) {
         // Exact match gets highest score
         if (field === lowerKeyword) {
@@ -294,7 +314,7 @@ export class UsersService {
         }
       }
     });
-    
+
     return score;
   }
 
@@ -838,14 +858,18 @@ export class UsersService {
     }
   > {
     const safePage = Number.isFinite(page) && page > 0 ? Math.floor(page) : 1;
-    const safeLimit = Number.isFinite(limit) && limit > 0 ? Math.floor(limit) : 20;
+    const safeLimit =
+      Number.isFinite(limit) && limit > 0 ? Math.floor(limit) : 20;
     const normalizedLimit = Math.min(safeLimit, 100);
     const skip = (safePage - 1) * normalizedLimit;
 
     const filters: FilterQuery<User> = {};
 
     const normalizedRole = role?.toLowerCase();
-    if (normalizedRole && Object.values(Role).includes(normalizedRole as Role)) {
+    if (
+      normalizedRole &&
+      Object.values(Role).includes(normalizedRole as Role)
+    ) {
       filters.role = normalizedRole as Role;
     }
 
@@ -884,6 +908,7 @@ export class UsersService {
       [Role.Admin]: 0,
       [Role.Seller]: 0,
       [Role.User]: 0,
+      [Role.Blogger]: 0,
     };
 
     roleAggregation.forEach(({ _id, count }) => {
@@ -1067,43 +1092,47 @@ export class UsersService {
   private async generateUniqueArtistSlug(
     storeName?: string,
     email?: string,
-    name?: string
+    name?: string,
   ): Promise<string> {
     // Generate base slug
     const baseSlug = generateBaseArtistSlug(storeName, email, name);
-    
+
     // If base slug is empty or too short, use a default
     let slug = baseSlug || 'artist';
     if (slug.length < 3) {
       slug = 'artist';
     }
-    
+
     // Check if slug already exists
     let counter = 1;
     let uniqueSlug = slug;
-    
+
     while (true) {
-      const existingUser = await this.userModel.findOne({ 
-        artistSlug: uniqueSlug 
-      }).lean();
-      
+      const existingUser = await this.userModel
+        .findOne({
+          artistSlug: uniqueSlug,
+        })
+        .lean();
+
       if (!existingUser) {
         // Slug is unique, we can use it
         break;
       }
-      
+
       // Slug exists, try with counter
       uniqueSlug = `${slug}${counter}`;
       counter++;
-      
+
       // Safety check to prevent infinite loop
       if (counter > 9999) {
         uniqueSlug = `${slug}${Date.now()}`;
         break;
       }
     }
-    
-    this.logger.log(`Generated unique artist slug: ${uniqueSlug} (base: ${baseSlug})`);
+
+    this.logger.log(
+      `Generated unique artist slug: ${uniqueSlug} (base: ${baseSlug})`,
+    );
     return uniqueSlug;
   }
 
@@ -1118,7 +1147,7 @@ export class UsersService {
       const artistSlug = await this.generateUniqueArtistSlug(
         dto.storeName,
         dto.email,
-        dto.storeName // Use storeName as fallback name
+        dto.storeName, // Use storeName as fallback name
       );
 
       const sellerData = {
@@ -1156,7 +1185,7 @@ export class UsersService {
       const artistSlug = await this.generateUniqueArtistSlug(
         dto.storeName,
         dto.email,
-        dto.ownerFirstName + ' ' + dto.ownerLastName // Use ownerFirstName and ownerLastName as fallback name
+        dto.ownerFirstName + ' ' + dto.ownerLastName, // Use ownerFirstName and ownerLastName as fallback name
       );
 
       // Create the seller account first
@@ -1609,7 +1638,7 @@ export class UsersService {
     // Check if users exist
     const [follower, target] = await Promise.all([
       this.findById(followerId),
-      this.findById(targetUserId)
+      this.findById(targetUserId),
     ]);
 
     if (!follower || !target) {
@@ -1628,27 +1657,27 @@ export class UsersService {
 
     // Update both users atomically
     const session = await this.userModel.db.startSession();
-    
+
     try {
       await session.withTransaction(async () => {
         // Add to follower's following list
         await this.userModel.updateOne(
           { _id: followerId },
-          { 
+          {
             $addToSet: { following: targetUserId },
-            $inc: { followingCount: 1 }
+            $inc: { followingCount: 1 },
           },
-          { session }
+          { session },
         );
 
         // Add to target's followers list
         await this.userModel.updateOne(
           { _id: targetUserId },
-          { 
+          {
             $addToSet: { followers: followerId },
-            $inc: { followersCount: 1 }
+            $inc: { followersCount: 1 },
           },
-          { session }
+          { session },
         );
       });
 
@@ -1669,7 +1698,7 @@ export class UsersService {
     // Check if users exist
     const [follower, target] = await Promise.all([
       this.findById(followerId),
-      this.findById(targetUserId)
+      this.findById(targetUserId),
     ]);
 
     if (!follower || !target) {
@@ -1683,27 +1712,27 @@ export class UsersService {
 
     // Update both users atomically
     const session = await this.userModel.db.startSession();
-    
+
     try {
       await session.withTransaction(async () => {
         // Remove from follower's following list
         await this.userModel.updateOne(
           { _id: followerId },
-          { 
+          {
             $pull: { following: targetUserId },
-            $inc: { followingCount: -1 }
+            $inc: { followingCount: -1 },
           },
-          { session }
+          { session },
         );
 
         // Remove from target's followers list
         await this.userModel.updateOne(
           { _id: targetUserId },
-          { 
+          {
             $pull: { followers: followerId },
-            $inc: { followersCount: -1 }
+            $inc: { followersCount: -1 },
           },
-          { session }
+          { session },
         );
       });
 
@@ -1716,8 +1745,14 @@ export class UsersService {
   /**
    * Check if user is following another user
    */
-  async isFollowing(followerId: string, targetUserId: string): Promise<boolean> {
-    const follower = await this.userModel.findById(followerId).select('following').lean();
+  async isFollowing(
+    followerId: string,
+    targetUserId: string,
+  ): Promise<boolean> {
+    const follower = await this.userModel
+      .findById(followerId)
+      .select('following')
+      .lean();
     return follower?.following?.includes(targetUserId) || false;
   }
 
@@ -1725,9 +1760,9 @@ export class UsersService {
    * Get followers list for an artist
    */
   async getFollowers(
-    artistId: string, 
-    page: number = 1, 
-    limit: number = 20
+    artistId: string,
+    page: number = 1,
+    limit: number = 20,
   ): Promise<PaginatedResponse<any>> {
     const artist = await this.findById(artistId);
     if (!artist) {
@@ -1742,7 +1777,7 @@ export class UsersService {
       id: artist._id,
       name: artist.name,
       followersArray: artist.followers,
-      followersCount: artist.followersCount
+      followersCount: artist.followersCount,
     });
 
     const skip = (page - 1) * limit;
@@ -1754,16 +1789,16 @@ export class UsersService {
       { $limit: limit },
       {
         $addFields: {
-          followerObjectId: { $toObjectId: '$followers' }
-        }
+          followerObjectId: { $toObjectId: '$followers' },
+        },
       },
       {
         $lookup: {
           from: 'users',
           localField: 'followerObjectId',
           foreignField: '_id',
-          as: 'followerDetails'
-        }
+          as: 'followerDetails',
+        },
       },
       { $unwind: '$followerDetails' },
       {
@@ -1774,14 +1809,14 @@ export class UsersService {
           profileImagePath: '$followerDetails.profileImagePath',
           role: '$followerDetails.role',
           storeName: '$followerDetails.storeName',
-          artistSlug: '$followerDetails.artistSlug'
-        }
-      }
+          artistSlug: '$followerDetails.artistSlug',
+        },
+      },
     ]);
 
     console.log('Aggregation result:', {
       followersFound: followers.length,
-      followers: followers
+      followers: followers,
     });
 
     const total = artist.followersCount || 0;
@@ -1791,7 +1826,7 @@ export class UsersService {
       items: followers,
       total,
       page,
-      pages: totalPages
+      pages: totalPages,
     };
   }
 
@@ -1799,9 +1834,9 @@ export class UsersService {
    * Get following list for a user
    */
   async getFollowing(
-    userId: string, 
-    page: number = 1, 
-    limit: number = 20
+    userId: string,
+    page: number = 1,
+    limit: number = 20,
   ): Promise<PaginatedResponse<any>> {
     const user = await this.findById(userId);
     if (!user) {
@@ -1820,8 +1855,8 @@ export class UsersService {
           from: 'users',
           localField: 'following',
           foreignField: '_id',
-          as: 'followingDetails'
-        }
+          as: 'followingDetails',
+        },
       },
       { $unwind: '$followingDetails' },
       {
@@ -1832,9 +1867,9 @@ export class UsersService {
           artistSlug: '$followingDetails.artistSlug',
           profileImagePath: '$followingDetails.profileImagePath',
           storeLogo: '$followingDetails.storeLogo',
-          artistCoverImage: '$followingDetails.artistCoverImage'
-        }
-      }
+          artistCoverImage: '$followingDetails.artistCoverImage',
+        },
+      },
     ]);
 
     const total = user.followingCount || 0;
@@ -1844,7 +1879,7 @@ export class UsersService {
       items: following,
       total,
       page,
-      pages: totalPages
+      pages: totalPages,
     };
   }
 
@@ -1899,7 +1934,11 @@ export class UsersService {
     return newAddress;
   }
 
-  async updateShippingAddress(userId: string, addressId: string, addressData: any) {
+  async updateShippingAddress(
+    userId: string,
+    addressId: string,
+    addressData: any,
+  ) {
     const user = await this.findById(userId);
     if (!user) {
       throw new NotFoundException('User not found');
@@ -1910,7 +1949,7 @@ export class UsersService {
     }
 
     const addressIndex = user.shippingAddresses.findIndex(
-      (addr) => addr._id === addressId
+      (addr) => addr._id === addressId,
     );
 
     if (addressIndex === -1) {
@@ -1949,7 +1988,7 @@ export class UsersService {
 
     const initialLength = user.shippingAddresses.length;
     user.shippingAddresses = user.shippingAddresses.filter(
-      (addr) => addr._id !== addressId
+      (addr) => addr._id !== addressId,
     );
 
     if (user.shippingAddresses.length === initialLength) {
@@ -1977,7 +2016,9 @@ export class UsersService {
       throw new NotFoundException('No addresses found');
     }
 
-    const address = user.shippingAddresses.find((addr) => addr._id === addressId);
+    const address = user.shippingAddresses.find(
+      (addr) => addr._id === addressId,
+    );
     if (!address) {
       throw new NotFoundException('Address not found');
     }

@@ -110,20 +110,15 @@ export function UsersList() {
     }
   }, [page, searchInput, roleFilter, isInitialized]);
 
-  const {
-    data,
-    error,
-    isLoading,
-    isFetching,
-  } = useQuery({
+  const { data, error, isLoading, isFetching } = useQuery({
     queryKey: ["users", page, debouncedSearch, roleFilter],
     queryFn: () => getUsers(page, 8, debouncedSearch, roleFilter),
     retry: false,
     staleTime: 30 * 1000, // 30 seconds
     refetchInterval: 60 * 1000, // Auto-refresh every minute for new users
-  refetchIntervalInBackground: true,
-  refetchOnWindowFocus: true,
-  placeholderData: keepPreviousData,
+    refetchIntervalInBackground: true,
+    refetchOnWindowFocus: true,
+    placeholderData: keepPreviousData,
     enabled: isInitialized,
   });
 
@@ -160,6 +155,7 @@ export function UsersList() {
       totalUsers: data?.summary?.totalUsers ?? data?.total ?? 0,
       admin: data?.summary?.roleCounts?.admin ?? 0,
       seller: data?.summary?.roleCounts?.seller ?? 0,
+      blogger: data?.summary?.roleCounts?.blogger ?? 0,
       user: data?.summary?.roleCounts?.user ?? 0,
     };
   }, [data]);
@@ -223,6 +219,7 @@ export function UsersList() {
               <option value={Role.Admin}>Admins</option>
               <option value={Role.Seller}>Sellers</option>
               <option value={Role.User}>Customers</option>
+              <option value={Role.Blogger}>Bloggers</option>
             </select>
           </label>
         </div>
@@ -244,6 +241,12 @@ export function UsersList() {
             <span className="usr-summary-label">Sellers</span>
             <span className="usr-summary-value">
               {summary.seller.toLocaleString()}
+            </span>
+          </div>
+          <div className="usr-summary-card">
+            <span className="usr-summary-label">Bloggers</span>
+            <span className="usr-summary-value">
+              {summary.blogger.toLocaleString()}
             </span>
           </div>
           <div className="usr-summary-card">
@@ -282,6 +285,11 @@ export function UsersList() {
                     <span className="usr-badge-seller">
                       <ShieldCheck className="usr-icon" />
                       Seller
+                    </span>
+                  ) : user.role === Role.Blogger ? (
+                    <span className="usr-badge-blogger">
+                      <ShieldCheck className="usr-icon" />
+                      Blogger
                     </span>
                   ) : (
                     <span className="usr-badge">

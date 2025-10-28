@@ -165,6 +165,16 @@
   flex-wrap: wrap;
 }
 
+.post-actions-readonly {
+  font-size: 0.85rem;
+  color: #666;
+  background: #f1f3f5;
+  border-radius: 6px;
+  padding: 0.5rem 0.75rem;
+  text-align: center;
+  width: 100%;
+}
+
 .btn-action {
   display: inline-flex;
   align-items: center;

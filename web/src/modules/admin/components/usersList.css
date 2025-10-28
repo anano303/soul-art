@@ -328,6 +328,12 @@
   border: 1px solid #81c784;
 }
 
+.usr-badge-blogger {
+  background: linear-gradient(135deg, #f3e5f5, #e1bee7);
+  color: #6a1b9a;
+  border: 1px solid #ba68c8;
+}
+
 /* Actions */
 .usr-actions {
   display: flex;
