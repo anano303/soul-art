@@ -1,4 +1,5 @@
-import { Pencil, Trash2, CheckCircle, XCircle } from "lucide-react";
+import { Pencil, Trash2, CheckCircle, XCircle, Megaphone, Loader2 } from "lucide-react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "@/hooks/use-toast";
 import { Product, ProductStatus } from "@/types";
@@ -21,6 +22,7 @@ export function ProductsActions({
 }: ProductsActionsProps) {
   const router = useRouter();
   const { user } = useUser();
+  const [isPosting, setIsPosting] = useState(false);
 
   console.log("Current user from useUser:", user);
 
@@ -104,6 +106,47 @@ export function ProductsActions({
     }
   };
 
+  const handlePostToFacebook = async () => {
+    if (!product._id) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Invalid product ID. Please refresh the page.",
+      });
+      return;
+    }
+
+    try {
+      setIsPosting(true);
+      const response = await fetchWithAuth(
+        `/products/${product._id}/post-to-facebook`,
+        { method: "POST" }
+      );
+
+      const data = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        throw new Error(
+          data?.message || data?.error || "Failed to post to Facebook"
+        );
+      }
+
+      const postId: string | undefined = data?.postId;
+      toast({
+        title: "Posted to Facebook",
+        description: postId ? `Post ID: ${postId}` : "The product was posted.",
+      });
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Facebook post failed",
+        description: error?.message || "Please check server logs and config",
+      });
+    } finally {
+      setIsPosting(false);
+    }
+  };
+
   return (
     <div className="space-x-2">
       <Link
@@ -134,6 +177,21 @@ export function ProductsActions({
             <XCircle className="actions reject" />
           </button>
         </>
+      )}
+
+      {isAdmin && (
+        <button
+          className="fb-btn"
+          onClick={handlePostToFacebook}
+          title="Post to Facebook"
+          disabled={isPosting}
+        >
+          {isPosting ? (
+            <Loader2 className="actions fb-post spin" />
+          ) : (
+            <Megaphone className="actions fb-post" />
+          )}
+        </button>
       )}
 
       <button

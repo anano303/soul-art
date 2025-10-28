@@ -77,3 +77,37 @@
   );
   border-color: #17a2b8;
 }
+
+/* Facebook post button */
+.space-x-2 button.fb-btn {
+  color: #1877f2;
+  border-color: rgba(24, 119, 242, 0.3);
+}
+
+.space-x-2 button.fb-btn:hover:not(:disabled) {
+  background: linear-gradient(
+    135deg,
+    rgba(24, 119, 242, 0.1),
+    rgba(24, 119, 242, 0.05)
+  );
+  border-color: #1877f2;
+}
+
+.space-x-2 button.fb-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.actions.fb-post {
+  color: #1877f2;
+}
+
+.actions.spin {
+  animation: spin 0.9s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
