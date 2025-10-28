@@ -460,7 +460,6 @@ export class BogTransferService {
       BeneficiaryBankCode: transfer.beneficiaryBankCode || 'BAGAGE22',
       BeneficiaryInn: transfer.beneficiaryInn,
       BeneficiaryName: transfer.beneficiaryName,
-      CheckInn: true,
       DispatchType: transfer.amount <= 10000 ? 'BULK' : 'MT103',
     }));
 
