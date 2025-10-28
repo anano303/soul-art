@@ -11,14 +11,29 @@ import { toast } from "@/hooks/use-toast";
 import { useLanguage } from "@/hooks/LanguageContext";
 import Image from "next/image";
 import "./become-seller-modal.css";
+import { GEORGIAN_BANKS, detectBankFromIban } from "@/utils/georgian-banks";
 
 const becomeSellerSchema = z.object({
   storeName: z.string().min(1, "მაღაზიის სახელი აუცილებელია"),
   identificationNumber: z.string().min(1, "პირადი ნომერი აუცილებელია"),
   accountNumber: z.string().min(1, "საბანკო ანგარიში აუცილებელია"),
+  beneficiaryBankCode: z.string().min(1, "ბანკი აუცილებელია"),
   phoneNumber: z.string().optional(),
   invitationCode: z.string().optional(),
-});
+}).refine(
+  (data) => {
+    if (data.accountNumber && data.accountNumber.trim()) {
+      const iban = data.accountNumber.trim();
+      const detectedBank = detectBankFromIban(iban);
+      return detectedBank !== null;
+    }
+    return true;
+  },
+  {
+    message: "არასწორი IBAN. გთხოვთ შეიყვანოთ ქართული IBAN (22 სიმბოლო, იწყება GE-ით)",
+    path: ["accountNumber"],
+  }
+);
 
 type BecomeSellerFormData = z.infer<typeof becomeSellerSchema>;
 
@@ -45,6 +60,7 @@ export function BecomeSellerModal({
     handleSubmit,
     formState: { errors },
     reset,
+    setValue,
   } = useForm<BecomeSellerFormData>({
     resolver: zodResolver(becomeSellerSchema),
     defaultValues: {
@@ -254,10 +270,43 @@ export function BecomeSellerModal({
               placeholder={t("profile.sellerAccountNumberPlaceholder")}
               {...register("accountNumber")}
               className="form-input"
+              onChange={(e) => {
+                const iban = e.target.value.trim();
+                const detectedBank = detectBankFromIban(iban);
+                if (detectedBank) {
+                  setValue("beneficiaryBankCode", detectedBank);
+                } else if (iban.length >= 22) {
+                  setValue("beneficiaryBankCode", "");
+                }
+              }}
             />
             {errors.accountNumber && (
               <span className="error-message">
                 {t("profile.sellerAccountNumberRequired")}
+              </span>
+            )}
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="beneficiaryBankCode">
+              {t("profile.bank")} *
+            </label>
+            <select
+              id="beneficiaryBankCode"
+              {...register("beneficiaryBankCode")}
+              className="form-input"
+              disabled={true}
+            >
+              <option value="">{t("profile.selectBank")}</option>
+              {GEORGIAN_BANKS.map((bank) => (
+                <option key={bank.code} value={bank.code}>
+                  {bank.name} ({bank.nameEn})
+                </option>
+              ))}
+            </select>
+            {errors.beneficiaryBankCode && (
+              <span className="error-message">
+                {t("profile.bankRequired")}
               </span>
             )}
           </div>

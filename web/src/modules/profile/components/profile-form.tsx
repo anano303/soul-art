@@ -14,6 +14,7 @@ import Image from "next/image";
 import { useLanguage } from "@/hooks/LanguageContext";
 import { SellerBalanceWidget } from "@/modules/balance/components/seller-balance-widget";
 import { BecomeSellerButton } from "@/components/become-seller-button/become-seller-button";
+import { GEORGIAN_BANKS, detectBankFromIban } from "@/utils/georgian-banks";
 const SLUG_PATTERN = /^[a-z0-9]*(?:-[a-z0-9]+)*$/;
 const formSchema = z
   .object({
@@ -31,6 +32,7 @@ const formSchema = z
     phoneNumber: z.string().optional(),
     identificationNumber: z.string().optional(),
     accountNumber: z.string().optional(),
+    beneficiaryBankCode: z.string().optional(),
   })
   .refine(
     (data) => {
@@ -42,6 +44,20 @@ const formSchema = z
     {
       message: "პაროლები არ ემთხვევა",
       path: ["confirmPassword"],
+    }
+  )
+  .refine(
+    (data) => {
+      if (data.accountNumber && data.accountNumber.trim()) {
+        const iban = data.accountNumber.trim();
+        const detectedBank = detectBankFromIban(iban);
+        return detectedBank !== null;
+      }
+      return true;
+    },
+    {
+      message: "არასწორი IBAN. გთხოვთ შეიყვანოთ ქართული IBAN (22 სიმბოლო, იწყება GE-ით)",
+      path: ["accountNumber"],
     }
   );
 
@@ -125,6 +141,7 @@ export function ProfileForm() {
       phoneNumber: user?.phoneNumber || "",
       identificationNumber: user?.identificationNumber || "",
       accountNumber: user?.accountNumber || "",
+      beneficiaryBankCode: user?.beneficiaryBankCode || "",
     },
   });
 
@@ -174,6 +191,7 @@ export function ProfileForm() {
         phoneNumber: user.phoneNumber || "",
         identificationNumber: user.identificationNumber || "",
         accountNumber: user.accountNumber || "",
+        beneficiaryBankCode: user.beneficiaryBankCode || "",
       });
 
       const existingSlug = user.artistSlug ?? "";
@@ -892,12 +910,51 @@ export function ProfileForm() {
                     placeholder={
                       t("profile.accountNumberPlaceholder") as string
                     }
+                    onChange={(e) => {
+                      // Auto-detect bank from IBAN
+                      const iban = e.target.value.trim();
+                      const detectedBank = detectBankFromIban(iban);
+                      if (detectedBank) {
+                        form.setValue("beneficiaryBankCode", detectedBank);
+                      } else if (iban.length >= 22) {
+                        form.setValue("beneficiaryBankCode", "");
+                      }
+                      // Still register the change
+                      form.register("accountNumber").onChange(e);
+                    }}
                   />
                   {form.formState.errors.accountNumber && (
                     <span className="error-message">
                       {form.formState.errors.accountNumber.message}
                     </span>
                   )}
+                </div>
+
+                <div className="form-field">
+                  <label htmlFor="beneficiaryBankCode" className="label">
+                    {t("profile.bankName") || "ბანკი"}
+                  </label>
+                  <select
+                    id="beneficiaryBankCode"
+                    {...form.register("beneficiaryBankCode")}
+                    className="input"
+                    disabled={true}
+                  >
+                    <option value="">{t("profile.selectBank") || "აირჩიეთ ბანკი"}</option>
+                    {GEORGIAN_BANKS.map((bank) => (
+                      <option key={bank.code} value={bank.code}>
+                        {bank.name} ({bank.nameEn})
+                      </option>
+                    ))}
+                  </select>
+                  {form.formState.errors.beneficiaryBankCode && (
+                    <span className="error-message">
+                      {form.formState.errors.beneficiaryBankCode.message}
+                    </span>
+                  )}
+                  <p className="text-xs text-gray-500 mt-1">
+                    {t("profile.bankAutoDetect") || "ბანკი ავტომატურად დადგინდება ანგარიშის ნომრით"}
+                  </p>
                 </div>
 
                 <div className="form-field">

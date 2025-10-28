@@ -104,6 +104,9 @@ export class User {
   @Prop({ type: String, default: null })
   accountNumber?: string;
 
+  @Prop({ type: String, default: null })
+  beneficiaryBankCode?: string; // SWIFT/BIC code (e.g., BAGAGE22, TBCBGE22)
+
   @Prop()
   passwordResetToken?: string;
 
