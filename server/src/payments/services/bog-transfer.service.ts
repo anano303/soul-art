@@ -340,7 +340,6 @@ export class BogTransferService {
       BeneficiaryBankCode: transferRequest.beneficiaryBankCode || 'BAGAGE22', // Default to BOG
       BeneficiaryInn: transferRequest.beneficiaryInn,
       BeneficiaryName: transferRequest.beneficiaryName,
-      CheckInn: true, // Verify account matches ID number
       DispatchType: dispatchType,
     };
 
