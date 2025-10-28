@@ -352,7 +352,7 @@ export default function BogTransfersPage() {
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="mb-8 flex justify-between items-center">
+        <div className="mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
             <h1 className="text-3xl font-bold text-gray-900 mb-2">
               BOG გადარიცხვების მართვა
@@ -361,37 +361,37 @@ export default function BogTransfersPage() {
               საქართველოს ბანკის გადარიცხვების სისტემა
             </p>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 w-full md:w-auto">
             {/* BOG User Info */}
             {bogUser && (
               <div className="flex items-center gap-3 bg-white rounded-lg px-4 py-2 border border-gray-200 shadow-sm">
-                <div className="bg-gradient-to-r from-[#ff600a] to-[#ff6c1d] w-10 h-10 rounded-full flex items-center justify-center text-white font-bold">
-                  {bogUser.name ? bogUser.name.charAt(0).toUpperCase() : 'B'}
-                </div>
-                <div className="text-left flex-1 min-w-0">
-                  <p className="text-sm font-medium text-gray-900 truncate">
-                    {bogUser.name || 'BOG User'}
-                  </p>
-                  <div className="space-y-0.5">
-                    {bogUser.companyId && (
-                      <p className="text-xs text-gray-500">Company: {bogUser.companyId}</p>
-                    )}
-                    {bogUser.userId && (
-                      <p className="text-xs text-gray-400 font-mono truncate max-w-[200px]" title={bogUser.userId}>
-                        User: {bogUser.userId.split(':').pop()}
-                      </p>
-                    )}
-                  </div>
-                </div>
+          <div className="bg-gradient-to-r from-[#ff600a] to-[#ff6c1d] w-10 h-10 rounded-full flex items-center justify-center text-white font-bold">
+            {bogUser.name ? bogUser.name.charAt(0).toUpperCase() : 'B'}
+          </div>
+          <div className="text-left flex-1 min-w-0">
+            <p className="text-sm font-medium text-gray-900 truncate">
+              {bogUser.name || 'BOG User'}
+            </p>
+            <div className="space-y-0.5">
+              {bogUser.companyId && (
+                <p className="text-xs text-gray-500">Company: {bogUser.companyId}</p>
+              )}
+              {bogUser.userId && (
+                <p className="text-xs text-gray-400 font-mono truncate max-w-[200px]" title={bogUser.userId}>
+            User: {bogUser.userId.split(':').pop()}
+                </p>
+              )}
+            </div>
+          </div>
               </div>
             )}
             {/* Logout Button */}
             <button
               onClick={handleLogout}
-              className="bg-white hover:bg-gray-50 text-gray-700 font-medium py-2 px-4 rounded-lg border border-gray-300 shadow-sm transition-colors flex items-center gap-2"
+              className="bg-white hover:bg-gray-50 text-gray-700 font-medium py-2 px-4 rounded-lg border border-gray-300 shadow-sm transition-colors flex items-center justify-center gap-2"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
               </svg>
               გასვლა
             </button>
