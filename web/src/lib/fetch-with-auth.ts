@@ -1,7 +1,4 @@
-import {
-  clearUserData,
-  refreshTokens,
-} from "./auth";
+import { clearUserData, refreshTokens } from "./auth";
 
 export async function fetchWithAuth(url: string, config: RequestInit = {}) {
   const { headers, ...rest } = config;
@@ -11,13 +8,21 @@ export async function fetchWithAuth(url: string, config: RequestInit = {}) {
   }
 
   const makeRequest = async () => {
+    // Prepare headers - don't set Content-Type for FormData (browser will set it automatically with boundary)
+    const requestHeaders: Record<string, string> = { ...headers } as Record<
+      string,
+      string
+    >;
+
+    // Only add Content-Type if body is not FormData
+    if (!(rest.body instanceof FormData)) {
+      requestHeaders["Content-Type"] = "application/json";
+    }
+
     // With HTTP-only cookies, no need for Authorization header
     return fetch(`${process.env.NEXT_PUBLIC_API_URL}${url}`, {
       ...rest,
-      headers: {
-        ...headers,
-        "Content-Type": "application/json",
-      },
+      headers: requestHeaders,
       credentials: "include", // Always include cookies
       mode: "cors",
     });
@@ -30,20 +35,22 @@ export async function fetchWithAuth(url: string, config: RequestInit = {}) {
       try {
         // Attempt to refresh the token via HTTP-only cookies
         await refreshTokens();
-        
+
         // Retry the original request
         response = await makeRequest();
       } catch {
         // Refresh failed, clear user data and redirect to login
         clearUserData();
-        
+
         // Check if we're not already on a public page
-        if (typeof window !== "undefined" && 
-            !window.location.pathname.includes("/login") && 
-            !window.location.pathname.includes("/register")) {
+        if (
+          typeof window !== "undefined" &&
+          !window.location.pathname.includes("/login") &&
+          !window.location.pathname.includes("/register")
+        ) {
           window.location.href = "/login";
         }
-        
+
         throw new Error("სესია ვადაგასულია, გთხოვთ თავიდან შეხვიდეთ");
       }
     }

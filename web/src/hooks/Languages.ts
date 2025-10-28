@@ -245,6 +245,7 @@ export const TRANSLATIONS: Translations = {
       sellArtwork: "გაყიდე ნამუშევრები",
       myArtworks: "ჩემი ნამუშევრები",
       forum: "ფორუმი",
+      blog: "ბლოგი",
       about: "ჩვენს შესახებ",
       login: "შესვლა",
       profile: "პროფილი",
@@ -601,7 +602,8 @@ export const TRANSLATIONS: Translations = {
       anotherAddress: "სხვა მისამართი",
       empty: {
         title: "მისამართები არ არის დამატებული",
-        description: "დაამატეთ თქვენი მიწოდების მისამართი სწრაფი გაფორმებისთვის",
+        description:
+          "დაამატეთ თქვენი მიწოდების მისამართი სწრაფი გაფორმებისთვის",
       },
       form: {
         name: "სახელი",
@@ -639,19 +641,22 @@ export const TRANSLATIONS: Translations = {
       cardPayment: "ბარათით გადახდა",
       allCardsAccepted: "ყველა ბარათი მიიღება",
       completePayment: "გადახდის დასრულება",
-      enterCardDetails: "გადახდის გვერდზე შეიყვანეთ ბარათის მონაცემები და დაასრულეთ გადახდა",
+      enterCardDetails:
+        "გადახდის გვერდზე შეიყვანეთ ბარათის მონაცემები და დაასრულეთ გადახდა",
       success: {
         title: "გადახდა წარმატებით დასრულდა!",
         thanksForPurchase: "მადლობა შეძენისთვის !",
         orderNumber: "შეკვეთის ნომერი:",
         viewOrderDetails: "შეკვეთის დეტალების ნახვა",
         viewOtherProducts: "სხვა პროდუქტების ნახვა",
-        guestPrompt: "შექმენით ანგარიში თქვენი შეკვეთის თვალთვალის გასაადვილებლად",
+        guestPrompt:
+          "შექმენით ანგარიში თქვენი შეკვეთის თვალთვალის გასაადვილებლად",
         createAccount: "ანგარიშის შექმნა",
       },
       fail: {
         title: "გადახდა ვერ შესრულდა",
-        description: "გადახდის პროცესში რაღაც ხარვეზი მოხდა. გთხოვთ სცადოთ ხელახლა ან დაგვიკავშირდით მხარდაჭერის სამსახურთან.",
+        description:
+          "გადახდის პროცესში რაღაც ხარვეზი მოხდა. გთხოვთ სცადოთ ხელახლა ან დაგვიკავშირდით მხარდაჭერის სამსახურთან.",
         orderNumber: "შეკვეთის ნომერი:",
         retry: "ხელახლა ცდა",
         backToCart: "კალათაში დაბრუნება",
@@ -1638,6 +1643,7 @@ export const TRANSLATIONS: Translations = {
       sellArtwork: "Sell Artwork",
       myArtworks: "My Artworks",
       forum: "Forum",
+      blog: "Blog",
       about: "About",
       login: "Login",
       profile: "Profile",
@@ -2030,7 +2036,8 @@ export const TRANSLATIONS: Translations = {
       cardPayment: "Card Payment",
       allCardsAccepted: "All cards accepted",
       completePayment: "Complete Payment",
-      enterCardDetails: "Enter your card details on the payment page and complete the payment",
+      enterCardDetails:
+        "Enter your card details on the payment page and complete the payment",
       success: {
         title: "Payment Completed Successfully!",
         thanksForPurchase: "Thank you for your purchase!",
@@ -2042,7 +2049,8 @@ export const TRANSLATIONS: Translations = {
       },
       fail: {
         title: "Payment Failed",
-        description: "Something went wrong during the payment process. Please try again or contact support.",
+        description:
+          "Something went wrong during the payment process. Please try again or contact support.",
         orderNumber: "Order Number:",
         retry: "Try Again",
         backToCart: "Back to Cart",

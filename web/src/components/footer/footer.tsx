@@ -44,13 +44,18 @@ export default function Footer() {
               </a>
             </li>
             <li>
+              <a href="/blog" className="footer-link">
+                {t("navigation.blog")}
+              </a>
+            </li>
+            <li>
               <a href="/auction" className="footer-link">
                 {t("navigation.auction")}
               </a>
             </li>
             <li>
               <a href="/referral-info" className="footer-link">
-              {t("footer.referralInfo")}
+                {t("footer.referralInfo")}
               </a>
             </li>
             <li>

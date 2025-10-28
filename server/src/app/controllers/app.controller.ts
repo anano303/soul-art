@@ -17,8 +17,14 @@ export class AppController {
   @UseInterceptors(FileInterceptor('image'))
   @UseInterceptors(createRateLimitInterceptor(uploadRateLimit))
   async uploadFile(@UploadedFile() file: Express.Multer.File) {
-    const response = await this.appService.uploadImageToCloudinary(file);
+    if (!file) {
+      throw new Error('No file uploaded');
+    }
 
-    return response.url;
+    const url = await this.appService.uploadImageToCloudinary(file);
+
+    return {
+      url,
+    };
   }
 }

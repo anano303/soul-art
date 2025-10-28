@@ -22,6 +22,7 @@ import { BannerModule } from '@/banners/banner.module';
 import { SharedServicesModule } from './shared-services.module';
 import { ReferralsModule } from '../referrals/referrals.module';
 import { PushNotificationModule } from '../push/push-notification.module';
+import { BlogModule } from '../blog/blog.module';
 
 @Module({
   imports: [
@@ -49,6 +50,7 @@ import { PushNotificationModule } from '../push/push-notification.module';
     BannerModule,
     ReferralsModule,
     PushNotificationModule,
+    BlogModule,
   ],
   controllers: [AppController],
   providers: [AppService, GoogleStrategy],
