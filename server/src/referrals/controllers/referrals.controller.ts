@@ -11,6 +11,7 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { ReferralsService } from '../services/referrals.service';
+import { ReferralMaintenanceService } from '../services/referral-maintenance.service';
 import {
   CreateWithdrawalRequestDto,
   ProcessWithdrawalDto,
@@ -29,7 +30,10 @@ import { UserDocument } from '../../users/schemas/user.schema';
 @Controller('referrals')
 @UseGuards(JwtAuthGuard)
 export class ReferralsController {
-  constructor(private readonly referralsService: ReferralsService) {}
+  constructor(
+    private readonly referralsService: ReferralsService,
+    private readonly maintenanceService: ReferralMaintenanceService,
+  ) {}
 
   // რეფერალური კოდის მიღება/შექმნა
   @Get('code')
@@ -136,15 +140,7 @@ export class ReferralsController {
   @Roles(Role.Admin)
   @HttpCode(HttpStatus.OK)
   async triggerMaintenance() {
-    // Import the maintenance service here to avoid circular dependency
-    const { ReferralMaintenanceService } = await import('../services/referral-maintenance.service');
-    const maintenanceService = new ReferralMaintenanceService(
-      this.referralsService['userModel'],
-      this.referralsService['referralModel'],
-      this.referralsService['balanceTransactionModel'],
-    );
-    
-    await maintenanceService.onApplicationBootstrap();
+    await this.maintenanceService.onApplicationBootstrap();
     return { message: 'რეფერალების მოვაგვარება დასრულდა' };
   }
 }

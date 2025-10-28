@@ -53,7 +53,8 @@ export class PushNotificationService {
     private pushSubscriptionModel: Model<PushSubscriptionDoc>,
   ) {
     this.initializeVAPID();
-    this.loadSubscriptionsFromDatabase();
+    // Defer loading subscriptions until actually needed for faster startup
+    // They will be loaded on-demand when first push notification is sent
   }
 
   private initializeVAPID() {

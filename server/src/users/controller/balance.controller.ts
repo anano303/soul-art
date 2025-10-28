@@ -186,12 +186,13 @@ export class BalanceController {
     }
 
     try {
-      await this.balanceService.requestWithdrawal(sellerId, amount);
+      const result = await this.balanceService.requestWithdrawal(sellerId, amount);
 
       return {
         success: true,
-        message:
-          'თანხის გატანის მოთხოვნა წარმატებით მიღებულია. თანხა ჩაირიცხება 5 სამუშაო დღის განმავლობაში.',
+        status: result.status,
+        uniqueKey: result.uniqueKey,
+        message: result.message,
       };
     } catch (error) {
       if (

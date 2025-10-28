@@ -36,6 +36,7 @@ import { CloudinaryModule } from '@/cloudinary/cloudinary.module';
 import { UserCloudinaryService } from './services/user-cloudinary.service';
 import { ReferralsModule } from '../referrals/referrals.module';
 import { OrderModule } from '../orders/order.module';
+import { PaymentsModule } from '../payments/payments.module';
 
 @Module({
   imports: [
@@ -77,6 +78,7 @@ import { OrderModule } from '../orders/order.module';
     }),
     AwsS3Module,
     CloudinaryModule, // Add Cloudinary module
+    PaymentsModule, // Add PaymentsModule for BOG transfer service
     forwardRef(() => ReferralsModule), // Add ReferralsModule for dependency injection
     forwardRef(() => OrderModule), // Add OrderModule for guest order linking
   ],

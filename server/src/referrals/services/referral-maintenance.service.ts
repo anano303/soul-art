@@ -1,4 +1,5 @@
 import { Injectable, Logger, OnApplicationBootstrap } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { User, UserDocument } from '@/users/schemas/user.schema';
@@ -24,13 +25,23 @@ export class ReferralMaintenanceService implements OnApplicationBootstrap {
     @InjectModel(Referral.name) private referralModel: Model<ReferralDocument>,
     @InjectModel(ReferralBalanceTransaction.name)
     private txModel: Model<ReferralBalanceTransactionDocument>,
+    private configService: ConfigService,
   ) {}
 
   async onApplicationBootstrap(): Promise<void> {
+    // Skip maintenance tasks in development to speed up startup
+    const isDevelopment = this.configService.get('NODE_ENV') !== 'production';
+    if (isDevelopment) {
+      this.logger.log('⚡ Skipping referral maintenance in development mode for faster startup');
+      return;
+    }
+
     try {
+      this.logger.log('🔧 Running referral maintenance tasks...');
       await this.normalizeSellerReferrals();
-      await this.normalizeUserReferrals(); // Add this line
+      await this.normalizeUserReferrals();
       await this.recalculateReferralBalances();
+      this.logger.log('✅ Referral maintenance completed');
     } catch (e) {
       this.logger.warn(`Maintenance failed: ${e?.message || e}`);
     }

@@ -22,6 +22,7 @@ import {
   Activity,
   MapPin,
   PenSquare,
+  Landmark,
 } from "lucide-react";
 
 // Add a style object for the FiraGo font
@@ -340,6 +341,18 @@ export default function UserMenu({ onNavigate }: { onNavigate?: () => void }) {
               >
                 <Activity size={18} />
                 <span>Meta Pixel</span>
+              </Link>
+            )}
+
+            {/* BOG Transfers link - Only for Admin */}
+            {user.role === Role.Admin && (
+              <Link
+                href="/admin/bog-transfers"
+                className="dropdown-item"
+                onClick={handleLinkClick}
+              >
+                <Landmark size={18} />
+                <span>BOG გადარიცხვები</span>
               </Link>
             )}
 

@@ -16,6 +16,7 @@ import {
   ProductDocument,
 } from '../../products/schemas/product.schema';
 import { BankIntegrationService } from './bog-bank-integration.service';
+import { BogTransferService } from '../../payments/services/bog-transfer.service';
 import { EmailService } from '../../email/services/email.services';
 
 @Injectable()
@@ -31,6 +32,7 @@ export class BalanceService {
     @InjectModel(Product.name) private productModel: Model<Product>,
     @InjectModel(Order.name) private orderModel: Model<Order>,
     private bankIntegrationService: BankIntegrationService,
+    private bogTransferService: BogTransferService,
     private emailService: EmailService,
   ) {}
 
@@ -191,26 +193,146 @@ export class BalanceService {
 
   /**
    * Pending withdrawal requests (ადმინისთვის)
+   * Fetches BOG document statuses and updates DB
    */
   async getPendingWithdrawalRequests(): Promise<{
     count: number;
-    requests: BalanceTransactionDocument[];
+    requests: any[];
   }> {
     const pendingRequests = await this.balanceTransactionModel
       .find({ type: 'withdrawal_pending' })
       .populate('seller')
       .sort({ createdAt: -1 });
 
+    // Extract UniqueKeys from descriptions
+    const uniqueKeys: number[] = [];
+    const requestMap = new Map<number, BalanceTransactionDocument>();
+
+    for (const request of pendingRequests) {
+      const match = request.description.match(/UniqueKey: (\d+)/);
+      if (match) {
+        const uniqueKey = parseInt(match[1], 10);
+        uniqueKeys.push(uniqueKey);
+        requestMap.set(uniqueKey, request);
+      }
+    }
+
+    // Fetch statuses from BOG API for all documents
+    let statuses: any[] = [];
+    if (uniqueKeys.length > 0) {
+      try {
+        statuses = await this.bogTransferService.getDocumentStatuses(uniqueKeys);
+        this.logger.log(`Fetched ${statuses.length} statuses from BOG API`);
+      } catch (error) {
+        this.logger.error('Failed to fetch BOG statuses', error);
+      }
+    }
+
+    // Update database with BOG statuses
+    for (const status of statuses) {
+      const request = requestMap.get(status.UniqueKey);
+      if (request) {
+        // Check if status changed to completed
+        if (status.Status === 'P' && request.type === 'withdrawal_pending') {
+          // Document is completed, update to withdrawal_completed
+          this.logger.log(`Document ${status.UniqueKey} is completed, updating DB`);
+          
+          try {
+            // Update transaction type to completed
+            await this.balanceTransactionModel.findByIdAndUpdate(request._id, {
+              type: 'withdrawal_completed',
+              description: `${request.description} - Status: Completed`,
+            });
+
+            // Update seller balance
+            const sellerBalance = await this.sellerBalanceModel.findOne({
+              seller: request.seller,
+            });
+
+            if (sellerBalance) {
+              sellerBalance.pendingWithdrawals -= Math.abs(request.amount);
+              sellerBalance.totalWithdrawn += Math.abs(request.amount);
+              await sellerBalance.save();
+            }
+
+            // Send email notification
+            const seller = await this.userModel.findById(request.seller);
+            if (seller) {
+              try {
+                await this.emailService.sendWithdrawalCompletedNotification(
+                  seller.email,
+                  `${seller.ownerFirstName} ${seller.ownerLastName}`,
+                  Math.abs(request.amount),
+                );
+              } catch (emailError) {
+                this.logger.warn('Failed to send completion email', emailError);
+              }
+            }
+          } catch (updateError) {
+            this.logger.error(`Failed to update completed withdrawal ${status.UniqueKey}`, updateError);
+          }
+        }
+        // Check if status is rejected/cancelled
+        else if (['R', 'C', 'D'].includes(status.Status) && request.type === 'withdrawal_pending') {
+          this.logger.log(`Document ${status.UniqueKey} is rejected/cancelled, updating DB`);
+          
+          try {
+            // Return money to seller's balance
+            await this.rejectWithdrawal(
+              request._id.toString(),
+              'system',
+              `BOG Status: ${this.bogTransferService.getStatusText(status.Status)}`,
+            );
+          } catch (rejectError) {
+            this.logger.error(`Failed to reject withdrawal ${status.UniqueKey}`, rejectError);
+          }
+        }
+      }
+    }
+
+    // Re-fetch to get updated data after status changes
+    const updatedRequests = await this.balanceTransactionModel
+      .find({ type: 'withdrawal_pending' })
+      .populate('seller')
+      .sort({ createdAt: -1 });
+
+    // Attach BOG status to each request
+    const requestsWithStatus = updatedRequests.map((request) => {
+      const match = request.description.match(/UniqueKey: (\d+)/);
+      let bogStatus = null;
+      
+      if (match) {
+        const uniqueKey = parseInt(match[1], 10);
+        const statusData = statuses.find((s) => s.UniqueKey === uniqueKey);
+        if (statusData) {
+          bogStatus = {
+            status: statusData.Status,
+            statusText: this.bogTransferService.getStatusText(statusData.Status),
+            resultCode: statusData.ResultCode,
+            rejectCode: statusData.RejectCode,
+          };
+        }
+      }
+
+      return {
+        ...request.toObject(),
+        bogStatus,
+      };
+    });
+
     return {
-      count: pendingRequests.length,
-      requests: pendingRequests,
+      count: requestsWithStatus.length,
+      requests: requestsWithStatus,
     };
   }
 
   /**
    * თანხის გატანის მოთხოვნა (დროებითი implementation)
    */
-  async requestWithdrawal(sellerId: string, amount: number): Promise<void> {
+  async requestWithdrawal(
+    sellerId: string,
+    amount: number,
+  ): Promise<{ status: string; uniqueKey: number; message: string }> {
     this.logger.log(
       `Processing withdrawal request for seller: ${sellerId}, amount: ${amount}`,
     );
@@ -242,6 +364,13 @@ export class BalanceService {
       );
     }
 
+    // ID number validation for BOG transfer
+    if (!seller.identificationNumber) {
+      throw new Error(
+        'პირადი ნომერი არ არის მითითებული. გთხოვთ დაამატოთ პირადი ნომერი პროფილის გვერდიდან.',
+      );
+    }
+
     // ანგარიშის ნომრის ვალიდაცია
     const formattedAccountNumber =
       this.bankIntegrationService.formatAccountNumber(seller.accountNumber);
@@ -265,50 +394,127 @@ export class BalanceService {
         $inc: { balance: -amount },
       });
 
-      // პენდინგ წითრავლის ტრანზაქციის ჩანაწერი
-      const transaction = new this.balanceTransactionModel({
-        seller: sellerId,
-        order: null,
-        amount: -amount,
-        type: 'withdrawal_pending',
-        description: `თანხის გატანის მოთხოვნა - გადარიცხება 5 სამუშაო დღეში (${formattedAccountNumber})`,
-        finalAmount: -amount,
-      });
-
-      await transaction.save();
-
-      // Email notifications
+      // BOG-ის მეშვეობით ავტომატური გადარიცხვა
       try {
-        // სელერისთვის notification
-        await this.emailService.sendWithdrawalPendingNotification(
-          seller.email,
-          (seller.ownerFirstName || '') + ' ' + (seller.ownerLastName || ''),
-          amount,
-          formattedAccountNumber,
+        const sellerName = `${seller.ownerFirstName || ''} ${seller.ownerLastName || ''}`.trim();
+        
+        const transferResult = await this.bogTransferService.transferToSeller({
+          beneficiaryAccountNumber: formattedAccountNumber,
+          beneficiaryInn: seller.identificationNumber,
+          beneficiaryName: sellerName,
+          amount: amount,
+          nomination: 'SoulArt - გაყიდვებიდან მიღებული თანხა',
+        });
+
+        // გადარიცხვა შეიქმნა BOG-ში და ელოდება ხელმოწერას
+        // ResultCode 0 = Ready to Sign, ResultCode 1 = Completed
+        const isPending = transferResult.resultCode === 0;
+        
+        if (isPending) {
+          // დოკუმენტი შეიქმნა და ელოდება დამტკიცებას
+          const transaction = new this.balanceTransactionModel({
+            seller: sellerId,
+            order: null,
+            amount: -amount,
+            type: 'withdrawal_pending',
+            description: `თანხის გატანის მოთხოვნა BOG-ში შექმნილია და ელოდება დამტკიცებას (${formattedAccountNumber}) - BOG UniqueKey: ${transferResult.uniqueKey}`,
+            finalAmount: -amount,
+          });
+
+          await transaction.save();
+
+          this.logger.log(
+            `Withdrawal document created in BOG, pending approval. Seller: ${sellerId}, amount: ${amount}, BOG UniqueKey: ${transferResult.uniqueKey}`,
+          );
+          
+          return {
+            status: 'pending',
+            uniqueKey: transferResult.uniqueKey,
+            message: 'გადარიცხვის დოკუმენტი შექმნილია ბანკში და ელოდება ადმინისტრატორის დამტკიცებას.',
+          };
+        } else {
+          // გადარიცხვა დასრულდა (ResultCode === 1)
+          sellerBalance.pendingWithdrawals -= amount;
+          sellerBalance.totalWithdrawn += amount;
+          await sellerBalance.save();
+
+          const transaction = new this.balanceTransactionModel({
+            seller: sellerId,
+            order: null,
+            amount: -amount,
+            type: 'withdrawal_completed',
+            description: `თანხის წარმატებული გადარიცხვა (${formattedAccountNumber}) - BOG UniqueKey: ${transferResult.uniqueKey}`,
+            finalAmount: -amount,
+          });
+
+          await transaction.save();
+
+          // Email notification სელერისთვის
+          try {
+            await this.emailService.sendWithdrawalCompletedNotification(
+              seller.email,
+              sellerName,
+              amount,
+            );
+          } catch (emailError) {
+            this.logger.warn(
+              `Email notification failed for successful withdrawal: ${emailError.message}`,
+            );
+          }
+
+          this.logger.log(
+            `Automatic withdrawal completed for seller: ${sellerId}, amount: ${amount}, BOG UniqueKey: ${transferResult.uniqueKey}`,
+          );
+          
+          return {
+            status: 'completed',
+            uniqueKey: transferResult.uniqueKey,
+            message: 'თანხა წარმატებით გადაირიცხა თქვენს ანგარიშზე.',
+          };
+        }
+      } catch (bogError) {
+        // BOG გადარიცხვის ერორის შემთხვევაში ბალანსის აღდგენა
+        sellerBalance.totalBalance += amount;
+        sellerBalance.pendingWithdrawals -= amount;
+        await sellerBalance.save();
+
+        // User model-შიც ბალანსის აღდგენა
+        await this.userModel.findByIdAndUpdate(sellerId, {
+          $inc: { balance: amount },
+        });
+
+        // წარუმატებელი გადარიცხვის ტრანზაქციის ჩანაწერი
+        const failedTransaction = new this.balanceTransactionModel({
+          seller: sellerId,
+          order: null,
+          amount: 0,
+          type: 'withdrawal_failed',
+          description: `თანხის გადარიცხვა ვერ მოხერხდა: ${bogError.message}`,
+          finalAmount: 0,
+        });
+
+        await failedTransaction.save();
+
+        this.logger.error(
+          `BOG transfer failed for seller: ${sellerId}, error: ${bogError.message}`,
+          bogError.stack,
         );
 
-        // ადმინისთვის notification
-        await this.emailService.sendWithdrawalAdminNotification(
-          (seller.ownerFirstName || '') + ' ' + (seller.ownerLastName || ''),
-          amount,
-          seller.email,
-          'PENDING_MANUAL_PROCESS',
-        );
-      } catch (emailError) {
-        this.logger.warn(
-          `Email notification failed for withdrawal request: ${emailError.message}`,
+        throw new Error(
+          `გადარიცხვა ვერ მოხერხდა. გთხოვთ შეამოწმოთ ანგარიშის მონაცემები და სცადოთ ხელახლა. შეცდომა: ${bogError.message}`,
         );
       }
-
-      this.logger.log(
-        `Withdrawal request successful for seller: ${sellerId}, amount: ${amount}`,
-      );
     } catch (error) {
-      // ერორის შემთხვევაში ბალანსის აღდგენა
+      // ზოგადი ერორის შემთხვევაში ბალანსის აღდგენა (თუ აქამდე მოვიდა)
       if (sellerBalance.pendingWithdrawals >= amount) {
         sellerBalance.totalBalance += amount;
         sellerBalance.pendingWithdrawals -= amount;
         await sellerBalance.save();
+
+        // User model-შიც ბალანსის აღდგენა
+        await this.userModel.findByIdAndUpdate(sellerId, {
+          $inc: { balance: amount },
+        });
       }
 
       this.logger.error(
