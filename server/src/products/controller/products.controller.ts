@@ -619,14 +619,8 @@ export class ProductsController {
               throw new BadRequestException(
                 `Failed to upload image: ${file.originalname}`,
               );
-            } finally {
-              // Clean up temp file
-              try {
-                require('fs').unlinkSync(file.path);
-              } catch (cleanupError) {
-                console.warn('Failed to cleanup temp file:', cleanupError);
-              }
             }
+            // Don't cleanup here - will be cleaned up after YouTube processing decision
           }),
         );
       }
@@ -638,12 +632,7 @@ export class ProductsController {
           buffer: fileBuffer
         };
         brandLogoUrl = await this.appService.uploadImageToCloudinary(fileWithBuffer);
-        // Clean up temp file
-        try {
-          require('fs').unlinkSync(files.brandLogo[0].path);
-        } catch (cleanupError) {
-          console.warn('Failed to cleanup temp brandLogo file:', cleanupError);
-        }
+        // Don't cleanup here - will be cleaned up after YouTube processing decision
       } else if (productData.brandLogoUrl) {
         brandLogoUrl = productData.brandLogoUrl;
       } else if (
@@ -775,7 +764,9 @@ export class ProductsController {
         !!youtubeVideoFile ||
         youtubeImageFiles.length > 0 ||
         (!updatedProduct.youtubeVideoId &&
-          (updatedProduct.images?.length ?? 0) > 0);
+          (updatedProduct.images?.length ?? 0) > 0) ||
+        // Trigger if images have changed (for updates)
+        (JSON.stringify(finalImages.sort()) !== JSON.stringify((product.images || []).sort()));
 
       console.log('🎬 YouTube Upload Check (Update):', {
         hasVideoFile: !!youtubeVideoFile,
@@ -792,6 +783,26 @@ export class ProductsController {
           require('fs').unlinkSync(videoFile.path);
         } catch (cleanupError) {
           console.warn('Failed to cleanup temp video file:', cleanupError);
+        }
+      }
+
+      // Cleanup image files if YouTube processing is not needed
+      if (!shouldTriggerYoutubeUpload && files?.images?.length) {
+        files.images.forEach((file) => {
+          try {
+            require('fs').unlinkSync(file.path);
+          } catch (cleanupError) {
+            console.warn('Failed to cleanup temp image file:', cleanupError);
+          }
+        });
+      }
+
+      // Cleanup brandLogo file if YouTube processing is not needed
+      if (!shouldTriggerYoutubeUpload && files?.brandLogo?.length) {
+        try {
+          require('fs').unlinkSync(files.brandLogo[0].path);
+        } catch (cleanupError) {
+          console.warn('Failed to cleanup temp brandLogo file:', cleanupError);
         }
       }
 

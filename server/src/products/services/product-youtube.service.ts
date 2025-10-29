@@ -70,6 +70,8 @@ export class ProductYoutubeService {
       return null;
     }
 
+    console.log('✅ YouTube is configured, proceeding with upload');
+
     let tempDir: string | null = null;
     let videoPath: string | null = null;
 
@@ -461,6 +463,13 @@ export class ProductYoutubeService {
     const refreshToken = this.configService.get<string>(
       'YOUTUBE_REFRESH_TOKEN',
     );
+
+    console.log('🔧 YouTube Config Check:', {
+      hasClientId: !!clientId,
+      hasClientSecret: !!clientSecret,
+      hasRefreshToken: !!refreshToken
+    });
+
     if (!clientId || !clientSecret || !refreshToken) {
       return false;
     }
