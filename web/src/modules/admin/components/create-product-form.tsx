@@ -1074,21 +1074,23 @@ export function CreateProductForm({
       if (!isEdit && data?._id) {
         try {
           await fetch(
-            `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/v1"}/push/new-product`,
+            `${
+              process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/v1"
+            }/push/new-product`,
             {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            credentials: "include",
-            body: JSON.stringify({
-              productId: data._id,
-              productName: formData.name,
-              productPrice: formData.price,
-              productImage: data.images?.[0] || null,
-              category: selectedCategory,
-              subCategory: selectedSubcategory,
-            }),
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              credentials: "include",
+              body: JSON.stringify({
+                productId: data._id,
+                productName: formData.name,
+                productPrice: formData.price,
+                productImage: data.images?.[0] || null,
+                category: selectedCategory,
+                subCategory: selectedSubcategory,
+              }),
             }
           );
           console.log("✅ New product notification sent:", formData.name);

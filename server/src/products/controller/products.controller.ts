@@ -380,7 +380,12 @@ export class ProductsController {
         .map((file) => this.prepareFileForBackground(file))
         .filter((item): item is BackgroundUploadFile => !!item);
 
-      if (youtubeVideoFile || youtubeImageFiles.length) {
+      const hasAssetsForYoutube =
+        !!youtubeVideoFile ||
+        youtubeImageFiles.length > 0 ||
+        (createdProduct.images?.length ?? 0) > 0;
+
+      if (hasAssetsForYoutube) {
         setImmediate(() => {
           this.productYoutubeService
             .handleProductVideoUpload({
@@ -659,7 +664,12 @@ export class ProductsController {
         .map((file) => this.prepareFileForBackground(file))
         .filter((item): item is BackgroundUploadFile => !!item);
 
-      if (youtubeVideoFile || youtubeImageFiles.length) {
+      const hasAssetsForYoutube =
+        !!youtubeVideoFile ||
+        youtubeImageFiles.length > 0 ||
+        (updatedProduct.images?.length ?? 0) > 0;
+
+      if (hasAssetsForYoutube) {
         setImmediate(() => {
           this.productYoutubeService
             .handleProductVideoUpload({
