@@ -162,6 +162,15 @@ export class Product {
   @Prop({ required: false })
   videoDescription?: string; // YouTube embed code or URL
 
+  @Prop({ required: false })
+  youtubeVideoId?: string;
+
+  @Prop({ required: false })
+  youtubeVideoUrl?: string;
+
+  @Prop({ required: false })
+  youtubeEmbedUrl?: string;
+
   // SEO hashtags for better search visibility
   @Prop({ type: [String], default: [] })
   hashtags?: string[];

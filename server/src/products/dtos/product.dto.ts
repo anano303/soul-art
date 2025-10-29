@@ -96,6 +96,18 @@ export class ProductDto {
   @IsOptional()
   videoDescription?: string; // YouTube embed code or URL
 
+  @IsString()
+  @IsOptional()
+  youtubeVideoId?: string;
+
+  @IsString()
+  @IsOptional()
+  youtubeVideoUrl?: string;
+
+  @IsString()
+  @IsOptional()
+  youtubeEmbedUrl?: string;
+
   @IsArray()
   @IsOptional()
   @IsString({ each: true })

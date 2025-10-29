@@ -152,6 +152,9 @@ export interface Product {
   };
   variants?: ProductVariant[];
   videoDescription?: string; // YouTube embed code or URL
+  youtubeVideoId?: string;
+  youtubeVideoUrl?: string;
+  youtubeEmbedUrl?: string;
   // Discount functionality
   discountPercentage?: number;
   discountStartDate?: string;

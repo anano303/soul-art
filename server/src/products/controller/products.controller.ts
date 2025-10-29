@@ -35,6 +35,8 @@ import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
 import axios from 'axios';
 import { PushNotificationService } from '@/push/services/push-notification.service';
 import { FacebookPostingService } from '@/products/services/facebook-posting.service';
+import { ProductYoutubeService } from '@/products/services/product-youtube.service';
+import { memoryStorage } from 'multer';
 
 @ApiTags('products')
 @Controller('products')
@@ -42,6 +44,7 @@ export class ProductsController {
   constructor(
     private productsService: ProductsService,
     private appService: AppService,
+    private productYoutubeService: ProductYoutubeService,
     private productExpertAgent: ProductExpertAgent,
     private pushNotificationService: PushNotificationService,
     private facebookPostingService: FacebookPostingService,
@@ -213,10 +216,15 @@ export class ProductsController {
       [
         { name: 'images', maxCount: 10 },
         { name: 'brandLogo', maxCount: 1 },
+        { name: 'video', maxCount: 1 },
       ],
       {
+        storage: memoryStorage(),
+        limits: {
+          fileSize: 150 * 1024 * 1024, // 150MB cap for videos
+        },
         fileFilter: (req, file, cb) => {
-          const allowedMimeTypes = [
+          const imageMimeTypes = [
             'image/jpeg',
             'image/png',
             'image/jpg',
@@ -225,7 +233,29 @@ export class ProductsController {
             'image/heic',
             'image/heif',
           ];
-          if (!allowedMimeTypes.includes(file.mimetype.toLowerCase())) {
+          const videoMimeTypes = [
+            'video/mp4',
+            'video/quicktime',
+            'video/mpeg',
+            'video/x-matroska',
+            'video/webm',
+          ];
+
+          const mimetype = file.mimetype.toLowerCase();
+
+          if (file.fieldname === 'video') {
+            if (!videoMimeTypes.includes(mimetype)) {
+              return cb(
+                new Error(
+                  `Unsupported video type: ${file.mimetype}. Supported types: MP4, MOV, MPEG, MKV, WEBM.`,
+                ),
+                false,
+              );
+            }
+            return cb(null, true);
+          }
+
+          if (!imageMimeTypes.includes(mimetype)) {
             return cb(
               new Error(
                 `Unsupported file type: ${file.mimetype}. Supported types: JPEG, PNG, GIF, WEBP, HEIC.`,
@@ -245,10 +275,12 @@ export class ProductsController {
     allFiles: {
       images: Express.Multer.File[];
       brandLogo?: Express.Multer.File[];
+      video?: Express.Multer.File[];
     },
   ) {
     const files = allFiles.images;
     const { brandLogo } = allFiles;
+    const videoFile = allFiles.video?.[0] || null;
 
     if (!files || files.length === 0) {
       throw new BadRequestException('At least one image is required');
@@ -340,15 +372,47 @@ export class ProductsController {
         videoDescription,
       });
 
+      let finalProduct = createdProduct;
+
+      try {
+        const youtubeResult =
+          await this.productYoutubeService.handleProductVideoUpload({
+            product: createdProduct,
+            user,
+            videoFile,
+            imageFiles: files,
+          });
+
+        if (youtubeResult) {
+          const updatedProduct = await this.productsService.attachYoutubeVideo(
+            createdProduct._id.toString(),
+            youtubeResult,
+          );
+
+          if (updatedProduct) {
+            finalProduct = updatedProduct;
+          } else {
+            createdProduct.youtubeVideoId = youtubeResult.videoId;
+            createdProduct.youtubeVideoUrl = youtubeResult.videoUrl;
+            createdProduct.youtubeEmbedUrl = youtubeResult.embedUrl;
+          }
+        }
+      } catch (youtubeError) {
+        console.error(
+          'Failed to upload product video to YouTube:',
+          youtubeError,
+        );
+      }
+
       // Send push notification for new product (don't await to avoid blocking response)
-      this.sendNewProductPushNotification(createdProduct).catch((error) => {
+      this.sendNewProductPushNotification(finalProduct).catch((error) => {
         console.error(
           'Failed to send push notification for new product:',
           error,
         );
       });
 
-      return createdProduct;
+      return finalProduct;
     } catch (error) {
       console.error('Error creating product:', error);
       throw new InternalServerErrorException(
@@ -362,10 +426,61 @@ export class ProductsController {
   @Roles(Role.Admin, Role.Seller)
   @Put(':id')
   @UseInterceptors(
-    FileFieldsInterceptor([
-      { name: 'images', maxCount: 10 },
-      { name: 'brandLogo', maxCount: 1 },
-    ]),
+    FileFieldsInterceptor(
+      [
+        { name: 'images', maxCount: 10 },
+        { name: 'brandLogo', maxCount: 1 },
+        { name: 'video', maxCount: 1 },
+      ],
+      {
+        storage: memoryStorage(),
+        limits: {
+          fileSize: 150 * 1024 * 1024,
+        },
+        fileFilter: (req, file, cb) => {
+          const imageMimeTypes = [
+            'image/jpeg',
+            'image/png',
+            'image/jpg',
+            'image/gif',
+            'image/webp',
+            'image/heic',
+            'image/heif',
+          ];
+          const videoMimeTypes = [
+            'video/mp4',
+            'video/quicktime',
+            'video/mpeg',
+            'video/x-matroska',
+            'video/webm',
+          ];
+
+          const mimetype = file.mimetype.toLowerCase();
+
+          if (file.fieldname === 'video') {
+            if (!videoMimeTypes.includes(mimetype)) {
+              return cb(
+                new Error(
+                  `Unsupported video type: ${file.mimetype}. Supported types: MP4, MOV, MPEG, MKV, WEBM.`,
+                ),
+                false,
+              );
+            }
+            return cb(null, true);
+          }
+
+          if (!imageMimeTypes.includes(mimetype)) {
+            return cb(
+              new Error(
+                `Unsupported file type: ${file.mimetype}. Supported types: JPEG, PNG, GIF, WEBP, HEIC.`,
+              ),
+              false,
+            );
+          }
+          cb(null, true);
+        },
+      },
+    ),
   )
   async updateProduct(
     @Param('id') id: string,
@@ -376,6 +491,7 @@ export class ProductsController {
     files: {
       images?: Express.Multer.File[];
       brandLogo?: Express.Multer.File[];
+      video?: Express.Multer.File[];
     },
   ) {
     const product = await this.productsService.findById(id);
@@ -389,6 +505,7 @@ export class ProductsController {
     try {
       let imageUrls;
       let brandLogoUrl;
+      const videoFile = files?.video?.[0] || null;
 
       if (files?.images?.length) {
         imageUrls = await Promise.all(
@@ -523,8 +640,35 @@ export class ProductsController {
       };
 
       const updatedProduct = await this.productsService.update(id, updateData);
+      let finalProduct = updatedProduct;
 
-      return updatedProduct;
+      if (videoFile || (files?.images && files.images.length > 0)) {
+        try {
+          const youtubeResult =
+            await this.productYoutubeService.handleProductVideoUpload({
+              product: updatedProduct,
+              user,
+              videoFile,
+              imageFiles: files?.images || [],
+            });
+
+          if (youtubeResult) {
+            const refreshedProduct =
+              await this.productsService.attachYoutubeVideo(id, youtubeResult);
+
+            if (refreshedProduct) {
+              finalProduct = refreshedProduct;
+            }
+          }
+        } catch (youtubeError) {
+          console.error(
+            'Failed to refresh YouTube video for product:',
+            youtubeError,
+          );
+        }
+      }
+
+      return finalProduct;
     } catch (error) {
       console.error('Update error:', error);
       throw new InternalServerErrorException(
