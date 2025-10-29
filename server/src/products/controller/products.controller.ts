@@ -372,37 +372,49 @@ export class ProductsController {
         videoDescription,
       });
 
-      let finalProduct = createdProduct;
+      const clonedVideoFile = videoFile
+        ? ({ ...videoFile, buffer: Buffer.from(videoFile.buffer) } as Express.Multer.File)
+        : null;
+      const clonedImageFiles = files.map((file) =>
+        ({ ...file, buffer: Buffer.from(file.buffer) } as Express.Multer.File),
+      );
 
-      try {
-        const youtubeResult =
-          await this.productYoutubeService.handleProductVideoUpload({
-            product: createdProduct,
-            user,
-            videoFile,
-            imageFiles: files,
-          });
+      if (clonedVideoFile || clonedImageFiles.length) {
+        setImmediate(() => {
+          this.productYoutubeService
+            .handleProductVideoUpload({
+              product: createdProduct,
+              user,
+              videoFile: clonedVideoFile,
+              imageFiles: clonedImageFiles,
+            })
+            .then(async (youtubeResult) => {
+              if (!youtubeResult) {
+                return;
+              }
 
-        if (youtubeResult) {
-          const updatedProduct = await this.productsService.attachYoutubeVideo(
-            createdProduct._id.toString(),
-            youtubeResult,
-          );
-
-          if (updatedProduct) {
-            finalProduct = updatedProduct;
-          } else {
-            createdProduct.youtubeVideoId = youtubeResult.videoId;
-            createdProduct.youtubeVideoUrl = youtubeResult.videoUrl;
-            createdProduct.youtubeEmbedUrl = youtubeResult.embedUrl;
-          }
-        }
-      } catch (youtubeError) {
-        console.error(
-          'Failed to upload product video to YouTube:',
-          youtubeError,
-        );
+              try {
+                await this.productsService.attachYoutubeVideo(
+                  createdProduct._id.toString(),
+                  youtubeResult,
+                );
+              } catch (attachmentError) {
+                console.error(
+                  'Failed to persist YouTube metadata for product:',
+                  attachmentError,
+                );
+              }
+            })
+            .catch((youtubeError) => {
+              console.error(
+                'Failed to upload product video to YouTube:',
+                youtubeError,
+              );
+            });
+        });
       }
+
+      const finalProduct = createdProduct;
 
       // Send push notification for new product (don't await to avoid blocking response)
       this.sendNewProductPushNotification(finalProduct).catch((error) => {
