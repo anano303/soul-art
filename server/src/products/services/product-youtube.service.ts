@@ -12,11 +12,17 @@ import ffmpegInstaller from '@ffmpeg-installer/ffmpeg';
 import ffprobeInstaller from '@ffprobe-installer/ffprobe';
 import sharp from 'sharp';
 
+export interface BackgroundUploadFile {
+  buffer: Buffer;
+  originalname: string;
+  mimetype: string;
+}
+
 interface ProductVideoPayload {
   product: ProductDocument;
   user: UserDocument;
-  videoFile?: Express.Multer.File | null;
-  imageFiles: Express.Multer.File[];
+  videoFile?: BackgroundUploadFile | null;
+  imageFiles: BackgroundUploadFile[];
 }
 
 export interface YoutubeVideoResult {
@@ -112,7 +118,7 @@ export class ProductYoutubeService {
 
   private async persistUploadedVideo(
     tempDir: string,
-    videoFile: Express.Multer.File,
+    videoFile: BackgroundUploadFile,
   ): Promise<string> {
     const extension = path.extname(videoFile.originalname) || '.mp4';
     const videoPath = path.join(tempDir, `uploaded${extension}`);
@@ -122,7 +128,7 @@ export class ProductYoutubeService {
 
   private async generateSlideshowVideo(
     tempDir: string,
-    imageFiles: Express.Multer.File[],
+    imageFiles: BackgroundUploadFile[],
     productName: string,
   ): Promise<string | null> {
     if (!imageFiles.length) {

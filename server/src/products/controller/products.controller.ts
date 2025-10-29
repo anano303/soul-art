@@ -35,7 +35,10 @@ import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
 import axios from 'axios';
 import { PushNotificationService } from '@/push/services/push-notification.service';
 import { FacebookPostingService } from '@/products/services/facebook-posting.service';
-import { ProductYoutubeService } from '@/products/services/product-youtube.service';
+import {
+  BackgroundUploadFile,
+  ProductYoutubeService,
+} from '@/products/services/product-youtube.service';
 import { memoryStorage } from 'multer';
 
 @ApiTags('products')
@@ -372,14 +375,19 @@ export class ProductsController {
         videoDescription,
       });
 
-      if (videoFile || files.length) {
+      const youtubeVideoFile = this.prepareFileForBackground(videoFile);
+      const youtubeImageFiles = files
+        .map((file) => this.prepareFileForBackground(file))
+        .filter((item): item is BackgroundUploadFile => !!item);
+
+      if (youtubeVideoFile || youtubeImageFiles.length) {
         setImmediate(() => {
           this.productYoutubeService
             .handleProductVideoUpload({
               product: createdProduct,
               user,
-              videoFile,
-              imageFiles: files,
+              videoFile: youtubeVideoFile,
+              imageFiles: youtubeImageFiles,
             })
             .then(async (youtubeResult) => {
               if (!youtubeResult) {
@@ -646,14 +654,19 @@ export class ProductsController {
 
       const updatedProduct = await this.productsService.update(id, updateData);
 
-      if (videoFile || (files?.images && files.images.length)) {
+      const youtubeVideoFile = this.prepareFileForBackground(videoFile);
+      const youtubeImageFiles = (files?.images || [])
+        .map((file) => this.prepareFileForBackground(file))
+        .filter((item): item is BackgroundUploadFile => !!item);
+
+      if (youtubeVideoFile || youtubeImageFiles.length) {
         setImmediate(() => {
           this.productYoutubeService
             .handleProductVideoUpload({
               product: updatedProduct,
               user,
-              videoFile,
-              imageFiles: files?.images || [],
+              videoFile: youtubeVideoFile,
+              imageFiles: youtubeImageFiles,
             })
             .then(async (youtubeResult) => {
               if (!youtubeResult) {
@@ -748,6 +761,34 @@ export class ProductsController {
     }
 
     return updatedProduct;
+  }
+
+  private prepareFileForBackground(
+    file?: Express.Multer.File | null,
+  ): BackgroundUploadFile | null {
+    if (!file || !file.buffer || !file.buffer.length) {
+      return null;
+    }
+
+    try {
+      const bufferView =
+        typeof file.buffer.subarray === 'function'
+          ? file.buffer.subarray(0)
+          : Buffer.from(
+              file.buffer.buffer,
+              file.buffer.byteOffset,
+              file.buffer.byteLength,
+            );
+
+      return {
+        buffer: bufferView,
+        originalname: file.originalname,
+        mimetype: file.mimetype,
+      };
+    } catch (error) {
+      console.error('Failed to prepare file for background processing:', error);
+      return null;
+    }
   }
 
   @Post(':id/post-to-facebook')
