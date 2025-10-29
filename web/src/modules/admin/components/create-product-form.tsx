@@ -1073,7 +1073,9 @@ export function CreateProductForm({
       // Send new product notification for new products only
       if (!isEdit && data?._id) {
         try {
-          await fetch("/api/push/new-product", {
+          await fetch(
+            `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/v1"}/push/new-product`,
+            {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -1087,7 +1089,8 @@ export function CreateProductForm({
               category: selectedCategory,
               subCategory: selectedSubcategory,
             }),
-          });
+            }
+          );
           console.log("✅ New product notification sent:", formData.name);
         } catch (notificationError) {
           console.error(
