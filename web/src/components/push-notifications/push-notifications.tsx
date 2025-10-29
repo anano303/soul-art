@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import "./push-notifications.css";
 import { useUser } from "@/modules/auth/hooks/use-user";
+import { trackSubscribedButtonClick } from "@/components/MetaPixel";
 
 interface NotificationState {
   permission: NotificationPermission;
@@ -279,6 +280,12 @@ export function PushNotificationManager() {
         showPrompt: false,
         error: null,
       }));
+
+      trackSubscribedButtonClick({
+        channel: "push_notifications",
+        permission: Notification.permission,
+        hasUserAccount: Boolean(user?._id),
+      });
 
       if (Notification.permission === "granted") {
         new Notification("🎉 შეტყობინებები ჩართულია!", {

@@ -96,6 +96,8 @@ const TRACKED_EVENT_NAMES = [
 
 const PRIMARY_EVENT_NAMES: string[] = ["Purchase", "AddToCart", "PageView"];
 
+const EVENT_COUNT_STORAGE_KEY = "metaPixelEventCounts";
+
 const sanitizeEventKey = (name: string) =>
   name.toLowerCase().replace(/[^a-z0-9]/g, "");
 
@@ -334,7 +336,43 @@ export function MetaPixelDashboard() {
   const [activitySummary, setActivitySummary] = useState<
     Record<string, number>
   >({});
-  const [eventCounts, setEventCounts] = useState<Record<string, number>>({});
+  const [eventCounts, setEventCounts] = useState<Record<string, number>>(() => {
+    if (typeof window === "undefined") {
+      return {};
+    }
+
+    try {
+      const stored = window.localStorage.getItem(EVENT_COUNT_STORAGE_KEY);
+      if (!stored) {
+        return {};
+      }
+
+      const parsed = JSON.parse(stored);
+      if (!parsed || typeof parsed !== "object") {
+        return {};
+      }
+
+      const parsedRecord = parsed as Record<string, unknown>;
+
+      return TRACKED_EVENT_NAMES.reduce<Record<string, number>>((acc, name) => {
+        const value = parsedRecord?.[name];
+        const numericValue =
+          typeof value === "number"
+            ? value
+            : typeof value === "string"
+            ? Number(value)
+            : 0;
+
+        acc[name] = Number.isFinite(numericValue)
+          ? Math.max(0, numericValue)
+          : 0;
+        return acc;
+      }, {});
+    } catch (storageError) {
+      console.warn("Failed to restore Meta Pixel event counts", storageError);
+      return {};
+    }
+  });
 
   // Meta Pixel configuration from environment variables
   const pixelInfo: MetaPixelInfo = {
@@ -439,6 +477,28 @@ export function MetaPixelDashboard() {
       return next;
     });
   }, [eventData, activitySummary, eventCountsFromEvents, eventSummaryCounts]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    try {
+      const payload = TRACKED_EVENT_NAMES.reduce<Record<string, number>>(
+        (acc, name) => {
+          acc[name] = eventCounts[name] ?? 0;
+          return acc;
+        },
+        {}
+      );
+      window.localStorage.setItem(
+        EVENT_COUNT_STORAGE_KEY,
+        JSON.stringify(payload)
+      );
+    } catch (storageError) {
+      console.warn("Failed to persist Meta Pixel event counts", storageError);
+    }
+  }, [eventCounts]);
 
   const handleCopy = async (text: string, id: string) => {
     try {
