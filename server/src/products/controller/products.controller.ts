@@ -224,7 +224,8 @@ export class ProductsController {
       {
         storage: memoryStorage(),
         limits: {
-          fileSize: 150 * 1024 * 1024, // 150MB cap for videos
+          fileSize: 50 * 1024 * 1024, // Reduced to 50MB to prevent memory issues
+          files: 15, // Limit total files
         },
         fileFilter: (req, file, cb) => {
           const imageMimeTypes = [
@@ -290,8 +291,18 @@ export class ProductsController {
     }
 
     try {
+      // Process images with error handling to prevent server crashes
       const imageUrls = await Promise.all(
-        files.map((file) => this.appService.uploadImageToCloudinary(file)),
+        files.map(async (file) => {
+          try {
+            return await this.appService.uploadImageToCloudinary(file);
+          } catch (uploadError) {
+            console.error('Failed to upload image to Cloudinary:', uploadError);
+            throw new BadRequestException(
+              `Failed to upload image: ${file.originalname}`,
+            );
+          }
+        }),
       );
 
       let brandLogoUrl = null;
@@ -387,7 +398,8 @@ export class ProductsController {
           (createdProduct.images?.length ?? 0) > 0);
 
       if (shouldTriggerYoutubeUpload) {
-        setImmediate(() => {
+        // Defer YouTube processing to prevent blocking the response and reduce memory usage
+        setTimeout(() => {
           this.productYoutubeService
             .handleProductVideoUpload({
               product: createdProduct,
@@ -405,6 +417,9 @@ export class ProductsController {
                   createdProduct._id.toString(),
                   youtubeResult,
                 );
+                console.log(
+                  `✅ YouTube video attached to product: ${createdProduct._id}`,
+                );
               } catch (attachmentError) {
                 console.error(
                   'Failed to persist YouTube metadata for product:',
@@ -418,7 +433,7 @@ export class ProductsController {
                 youtubeError,
               );
             });
-        });
+        }, 1000); // 1 second delay to ensure response is sent first
       }
 
       const finalProduct = createdProduct;
@@ -454,7 +469,8 @@ export class ProductsController {
       {
         storage: memoryStorage(),
         limits: {
-          fileSize: 150 * 1024 * 1024,
+          fileSize: 50 * 1024 * 1024, // Reduced to 50MB to prevent memory issues
+          files: 15, // Limit total files
         },
         fileFilter: (req, file, cb) => {
           const imageMimeTypes = [
@@ -528,9 +544,19 @@ export class ProductsController {
 
       if (files?.images?.length) {
         imageUrls = await Promise.all(
-          files.images.map((file) =>
-            this.appService.uploadImageToCloudinary(file),
-          ),
+          files.images.map(async (file) => {
+            try {
+              return await this.appService.uploadImageToCloudinary(file);
+            } catch (uploadError) {
+              console.error(
+                'Failed to upload image to Cloudinary:',
+                uploadError,
+              );
+              throw new BadRequestException(
+                `Failed to upload image: ${file.originalname}`,
+              );
+            }
+          }),
         );
       }
 
@@ -672,7 +698,8 @@ export class ProductsController {
           (updatedProduct.images?.length ?? 0) > 0);
 
       if (shouldTriggerYoutubeUpload) {
-        setImmediate(() => {
+        // Defer YouTube processing to prevent blocking the response and reduce memory usage
+        setTimeout(() => {
           this.productYoutubeService
             .handleProductVideoUpload({
               product: updatedProduct,
@@ -690,6 +717,7 @@ export class ProductsController {
                   id,
                   youtubeResult,
                 );
+                console.log(`✅ YouTube video updated for product: ${id}`);
               } catch (attachmentError) {
                 console.error(
                   'Failed to persist refreshed YouTube metadata:',

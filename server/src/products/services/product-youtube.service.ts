@@ -194,20 +194,28 @@ export class ProductYoutubeService {
     const framesDir = path.join(tempDir, 'frames');
     await fsp.mkdir(framesDir, { recursive: true });
 
-    await Promise.all(
-      slides.map(async (file, index) => {
-        const frameName = `frame-${String(index + 1).padStart(3, '0')}.jpg`;
-        const framePath = path.join(framesDir, frameName);
+    // Process images sequentially to reduce memory usage
+    for (let index = 0; index < slides.length; index++) {
+      const file = slides[index];
+      const frameName = `frame-${String(index + 1).padStart(3, '0')}.jpg`;
+      const framePath = path.join(framesDir, frameName);
+
+      try {
         await sharp(Buffer.from(file.buffer))
           .resize(1920, 1080, {
             fit: 'contain',
             background: { r: 255, g: 255, b: 255, alpha: 1 },
           })
-          .jpeg({ quality: 90 })
+          .jpeg({ quality: 85 }) // Reduced quality to save memory
           .toFile(framePath);
-      }),
-    );
 
+        // Force garbage collection of buffer
+        file.buffer = null as any;
+      } catch (error) {
+        this.logger.error(`Failed to process slide ${index + 1}:`, error);
+        throw error;
+      }
+    }
     const outputPath = path.join(tempDir, `${this.slugify(productName)}.mp4`);
     let audioPath: string | null = null;
 
