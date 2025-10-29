@@ -3,6 +3,9 @@
 
 .header-placeholder {
   height: 65px;
+  /* Add safe area support for iPhone notch/Dynamic Island */
+  padding-top: env(safe-area-inset-top);
+  height: calc(65px + env(safe-area-inset-top));
   position: sticky;
   top: 0;
   z-index: 9999;
@@ -15,12 +18,18 @@ header {
   justify-content: space-between;
   align-items: center;
   padding: 10px 20px;
+  /* Add safe area padding for iPhone notch/Dynamic Island */
+  padding-top: calc(10px + env(safe-area-inset-top));
+  padding-left: max(20px, env(safe-area-inset-left));
+  padding-right: max(20px, env(safe-area-inset-right));
   background-color: $primary-color;
   position: fixed;
   width: 100%;
   top: 0;
   z-index: 10000;
   height: 65px;
+  /* Total height including safe area */
+  min-height: calc(65px + env(safe-area-inset-top));
 
   /* Add .flex class */
   .flex {
