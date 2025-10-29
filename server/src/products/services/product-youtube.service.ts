@@ -37,6 +37,7 @@ export class ProductYoutubeService {
   private readonly logger = new Logger(ProductYoutubeService.name);
   private readonly maxSlides = 50;
   private outroSlide: BackgroundUploadFile | null | undefined;
+  private audioTrack: BackgroundUploadFile | null | undefined;
 
   constructor(
     private readonly youtubeService: YoutubeService,
@@ -177,6 +178,7 @@ export class ProductYoutubeService {
 
     const slideDuration = this.getSlideDurationSeconds();
     const outroSlide = await this.getOutroSlide();
+    const audioTrack = await this.getAudioTrack();
     const maxImageCount = outroSlide ? this.maxSlides - 1 : this.maxSlides;
     const limitedImages = imageFiles.slice(0, Math.max(maxImageCount, 0));
     const slides: BackgroundUploadFile[] = [...limitedImages];
@@ -207,16 +209,38 @@ export class ProductYoutubeService {
     );
 
     const outputPath = path.join(tempDir, `${this.slugify(productName)}.mp4`);
+    let audioPath: string | null = null;
+
+    if (audioTrack) {
+      const audioExtension =
+        path.extname(audioTrack.originalname) ||
+        this.getExtensionFromMime(audioTrack.mimetype) ||
+        '.mp3';
+      audioPath = path.join(tempDir, `audio-track${audioExtension}`);
+      await fsp.writeFile(audioPath, Buffer.from(audioTrack.buffer));
+    }
 
     await new Promise<void>((resolve, reject) => {
-      ffmpeg()
+      const command = ffmpeg()
         .addInput(path.join(framesDir, 'frame-%03d.jpg'))
         .inputOptions([`-framerate 1/${slideDuration}`])
         .videoFilters([
           'scale=1920:1080:force_original_aspect_ratio=decrease',
           'pad=1920:1080:(ow-iw)/2:(oh-ih)/2',
-        ])
-        .outputOptions(['-c:v libx264', '-pix_fmt yuv420p', '-r 30'])
+        ]);
+
+      const outputOptions = ['-c:v libx264', '-pix_fmt yuv420p', '-r 30'];
+
+      if (audioPath) {
+        command.addInput(audioPath);
+        outputOptions.push('-shortest');
+        outputOptions.push('-c:a aac', '-b:a 192k');
+      } else {
+        outputOptions.push('-an');
+      }
+
+      command
+        .outputOptions(outputOptions)
         .on('end', () => resolve())
         .on('error', (err) => reject(err))
         .save(outputPath);
@@ -296,6 +320,62 @@ export class ProductYoutubeService {
     return this.outroSlide;
   }
 
+  private async getAudioTrack(): Promise<BackgroundUploadFile | null> {
+    if (this.audioTrack !== undefined) {
+      return this.audioTrack;
+    }
+
+    const audioUrl = this.configService.get<string>('SLIDESHOW_AUDIO_URL');
+    const audioPath = this.configService.get<string>('SLIDESHOW_AUDIO_PATH');
+
+    if (!audioUrl && !audioPath) {
+      this.audioTrack = null;
+      return this.audioTrack;
+    }
+
+    try {
+      if (audioUrl) {
+        const response = await axios.get<ArrayBuffer>(audioUrl, {
+          responseType: 'arraybuffer',
+          timeout: 15000,
+        });
+
+        const url = new URL(audioUrl);
+        const originalname = path.basename(url.pathname) || 'slideshow-audio';
+        const mimetype =
+          (response.headers['content-type'] as string | undefined) ||
+          this.guessMimeTypeFromExtension(originalname) ||
+          'audio/mpeg';
+
+        this.audioTrack = {
+          buffer: Buffer.from(response.data),
+          originalname,
+          mimetype,
+        };
+
+        return this.audioTrack;
+      }
+
+      if (audioPath) {
+        const resolvedPath = path.isAbsolute(audioPath)
+          ? audioPath
+          : path.resolve(process.cwd(), audioPath);
+        const buffer = await fsp.readFile(resolvedPath);
+        const originalname = path.basename(resolvedPath);
+        const mimetype =
+          this.guessMimeTypeFromExtension(resolvedPath) || 'audio/mpeg';
+
+        this.audioTrack = { buffer, originalname, mimetype };
+        return this.audioTrack;
+      }
+    } catch (error) {
+      this.logger.warn('Failed to load slideshow audio track', error as Error);
+    }
+
+    this.audioTrack = null;
+    return this.audioTrack;
+  }
+
   private guessMimeTypeFromExtension(filePath: string): string | null {
     const ext = path.extname(filePath).toLowerCase();
     switch (ext) {
@@ -310,6 +390,46 @@ export class ProductYoutubeService {
         return 'image/gif';
       case '.avif':
         return 'image/avif';
+      case '.mp3':
+        return 'audio/mpeg';
+      case '.m4a':
+      case '.aac':
+        return 'audio/aac';
+      case '.wav':
+        return 'audio/wav';
+      case '.ogg':
+      case '.oga':
+        return 'audio/ogg';
+      default:
+        return null;
+    }
+  }
+
+  private getExtensionFromMime(mimeType: string): string | null {
+    if (!mimeType) {
+      return null;
+    }
+
+    const normalized = mimeType.toLowerCase();
+    switch (normalized) {
+      case 'image/jpeg':
+        return '.jpg';
+      case 'image/png':
+        return '.png';
+      case 'image/webp':
+        return '.webp';
+      case 'image/gif':
+        return '.gif';
+      case 'image/avif':
+        return '.avif';
+      case 'audio/mpeg':
+        return '.mp3';
+      case 'audio/aac':
+        return '.aac';
+      case 'audio/wav':
+        return '.wav';
+      case 'audio/ogg':
+        return '.ogg';
       default:
         return null;
     }
