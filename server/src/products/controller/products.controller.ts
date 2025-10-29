@@ -39,7 +39,7 @@ import {
   BackgroundUploadFile,
   ProductYoutubeService,
 } from '@/products/services/product-youtube.service';
-import { memoryStorage } from 'multer';
+import { memoryStorage, diskStorage } from 'multer';
 
 @ApiTags('products')
 @Controller('products')
@@ -222,7 +222,17 @@ export class ProductsController {
         { name: 'video', maxCount: 1 },
       ],
       {
-        storage: memoryStorage(),
+        storage: diskStorage({
+          destination: (req, file, cb) => {
+            const uploadDir = './uploads/temp';
+            require('fs').mkdirSync(uploadDir, { recursive: true });
+            cb(null, uploadDir);
+          },
+          filename: (req, file, cb) => {
+            const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+            cb(null, file.fieldname + '-' + uniqueSuffix + '-' + file.originalname);
+          }
+        }),
         limits: {
           fileSize: 50 * 1024 * 1024, // Reduced to 50MB to prevent memory issues
           files: 15, // Limit total files
@@ -295,12 +305,24 @@ export class ProductsController {
       const imageUrls = await Promise.all(
         files.map(async (file) => {
           try {
-            return await this.appService.uploadImageToCloudinary(file);
+            const fileBuffer = require('fs').readFileSync(file.path);
+            const fileWithBuffer = {
+              ...file,
+              buffer: fileBuffer
+            };
+            return await this.appService.uploadImageToCloudinary(fileWithBuffer);
           } catch (uploadError) {
             console.error('Failed to upload image to Cloudinary:', uploadError);
             throw new BadRequestException(
               `Failed to upload image: ${file.originalname}`,
             );
+          } finally {
+            // Clean up temp file
+            try {
+              require('fs').unlinkSync(file.path);
+            } catch (cleanupError) {
+              console.warn('Failed to cleanup temp file:', cleanupError);
+            }
           }
         }),
       );
@@ -308,9 +330,18 @@ export class ProductsController {
       let brandLogoUrl = null;
 
       if (brandLogo && brandLogo.length > 0) {
-        brandLogoUrl = await this.appService.uploadImageToCloudinary(
-          brandLogo[0],
-        );
+        const fileBuffer = require('fs').readFileSync(brandLogo[0].path);
+        const fileWithBuffer = {
+          ...brandLogo[0],
+          buffer: fileBuffer
+        };
+        brandLogoUrl = await this.appService.uploadImageToCloudinary(fileWithBuffer);
+        // Clean up temp file
+        try {
+          require('fs').unlinkSync(brandLogo[0].path);
+        } catch (cleanupError) {
+          console.warn('Failed to cleanup temp brandLogo file:', cleanupError);
+        }
       } else if (productData.brandLogoUrl) {
         brandLogoUrl = productData.brandLogoUrl;
       } else if (user.role === Role.Seller && user.storeLogoPath) {
@@ -391,6 +422,15 @@ export class ProductsController {
         .map((file) => this.prepareFileForBackground(file))
         .filter((item): item is BackgroundUploadFile => !!item);
 
+      // Clean up video file after preparing for background processing
+      if (videoFile?.path) {
+        try {
+          require('fs').unlinkSync(videoFile.path);
+        } catch (cleanupError) {
+          console.warn('Failed to cleanup temp video file:', cleanupError);
+        }
+      }
+
       const shouldTriggerYoutubeUpload =
         !!youtubeVideoFile ||
         youtubeImageFiles.length > 0 ||
@@ -467,7 +507,17 @@ export class ProductsController {
         { name: 'video', maxCount: 1 },
       ],
       {
-        storage: memoryStorage(),
+        storage: diskStorage({
+          destination: (req, file, cb) => {
+            const uploadDir = './uploads/temp';
+            require('fs').mkdirSync(uploadDir, { recursive: true });
+            cb(null, uploadDir);
+          },
+          filename: (req, file, cb) => {
+            const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+            cb(null, file.fieldname + '-' + uniqueSuffix + '-' + file.originalname);
+          }
+        }),
         limits: {
           fileSize: 50 * 1024 * 1024, // Reduced to 50MB to prevent memory issues
           files: 15, // Limit total files
@@ -546,7 +596,12 @@ export class ProductsController {
         imageUrls = await Promise.all(
           files.images.map(async (file) => {
             try {
-              return await this.appService.uploadImageToCloudinary(file);
+              const fileBuffer = require('fs').readFileSync(file.path);
+              const fileWithBuffer = {
+                ...file,
+                buffer: fileBuffer
+              };
+              return await this.appService.uploadImageToCloudinary(fileWithBuffer);
             } catch (uploadError) {
               console.error(
                 'Failed to upload image to Cloudinary:',
@@ -555,15 +610,31 @@ export class ProductsController {
               throw new BadRequestException(
                 `Failed to upload image: ${file.originalname}`,
               );
+            } finally {
+              // Clean up temp file
+              try {
+                require('fs').unlinkSync(file.path);
+              } catch (cleanupError) {
+                console.warn('Failed to cleanup temp file:', cleanupError);
+              }
             }
           }),
         );
       }
 
       if (files?.brandLogo?.length) {
-        brandLogoUrl = await this.appService.uploadImageToCloudinary(
-          files.brandLogo[0],
-        );
+        const fileBuffer = require('fs').readFileSync(files.brandLogo[0].path);
+        const fileWithBuffer = {
+          ...files.brandLogo[0],
+          buffer: fileBuffer
+        };
+        brandLogoUrl = await this.appService.uploadImageToCloudinary(fileWithBuffer);
+        // Clean up temp file
+        try {
+          require('fs').unlinkSync(files.brandLogo[0].path);
+        } catch (cleanupError) {
+          console.warn('Failed to cleanup temp brandLogo file:', cleanupError);
+        }
       } else if (productData.brandLogoUrl) {
         brandLogoUrl = productData.brandLogoUrl;
       } else if (
@@ -691,6 +762,15 @@ export class ProductsController {
         .map((file) => this.prepareFileForBackground(file))
         .filter((item): item is BackgroundUploadFile => !!item);
 
+      // Clean up video file after preparing for background processing
+      if (videoFile?.path) {
+        try {
+          require('fs').unlinkSync(videoFile.path);
+        } catch (cleanupError) {
+          console.warn('Failed to cleanup temp video file:', cleanupError);
+        }
+      }
+
       const shouldTriggerYoutubeUpload =
         !!youtubeVideoFile ||
         youtubeImageFiles.length > 0 ||
@@ -806,22 +886,15 @@ export class ProductsController {
   private prepareFileForBackground(
     file?: Express.Multer.File | null,
   ): BackgroundUploadFile | null {
-    if (!file || !file.buffer || !file.buffer.length) {
+    if (!file || !file.path) {
       return null;
     }
 
     try {
-      const bufferView =
-        typeof file.buffer.subarray === 'function'
-          ? file.buffer.subarray(0)
-          : Buffer.from(
-              file.buffer.buffer,
-              file.buffer.byteOffset,
-              file.buffer.byteLength,
-            );
+      const buffer = require('fs').readFileSync(file.path);
 
       return {
-        buffer: bufferView,
+        buffer: buffer,
         originalname: file.originalname,
         mimetype: file.mimetype,
       };
