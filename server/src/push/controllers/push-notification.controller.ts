@@ -1,9 +1,13 @@
-import { Body, Controller, Get, Post, Query, Req } from '@nestjs/common';
+import { Body, Controller, Get, Post, Req } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
-import { PushNotificationService } from '../services/push-notification.service';
+import {
+  NotificationPayload,
+  PushNotificationService,
+} from '../services/push-notification.service';
 import {
   PushSubscriptionDto,
   PushNotificationDto,
+  NewProductNotificationDto,
 } from '../dtos/push-notification.dto';
 import { Request } from 'express';
 
@@ -102,6 +106,52 @@ export class PushNotificationController {
       sent: results.successful,
       failed: results.failed,
       message: 'ტესტური შეტყობინება გაიგზავნა',
+    };
+  }
+
+  @Post('new-product')
+  @ApiOperation({ summary: 'Broadcast a new product notification' })
+  @ApiResponse({ status: 200, description: 'Notification dispatched' })
+  async sendNewProduct(@Body() body: NewProductNotificationDto) {
+    const {
+      productId,
+      productName,
+      productPrice,
+      productImage,
+      category,
+      subCategory,
+    } = body;
+
+    const priceText = productPrice ? ` • ფასი: ${productPrice} ₾` : '';
+    const categoryText = [category, subCategory]
+      .filter(Boolean)
+      .map((value) => `#${value?.toString().replace(/\s+/g, '').toLowerCase()}`)
+      .join(' ');
+
+    const payload: NotificationPayload = {
+      title: '🆕 ახალი ნამუშევარი SoulArt-ზე!',
+      body: `${productName}${priceText}`.trim(),
+      icon: productImage || '/android-icon-192x192.png',
+      badge: '/favicon-96x96.png',
+      data: {
+        type: 'new_product' as const,
+        url: `/products/${productId}`,
+        id: productId,
+      },
+      tag: `new-product-${productId}`,
+      requireInteraction: true,
+    };
+
+    if (categoryText) {
+      payload.body = `${payload.body}\n${categoryText}`;
+    }
+
+    const results = await this.pushService.sendToAll(payload);
+
+    return {
+      success: true,
+      sent: results.successful,
+      failed: results.failed,
     };
   }
 }
