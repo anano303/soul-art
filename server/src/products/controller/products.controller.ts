@@ -380,12 +380,13 @@ export class ProductsController {
         .map((file) => this.prepareFileForBackground(file))
         .filter((item): item is BackgroundUploadFile => !!item);
 
-      const hasAssetsForYoutube =
+      const shouldTriggerYoutubeUpload =
         !!youtubeVideoFile ||
         youtubeImageFiles.length > 0 ||
-        (createdProduct.images?.length ?? 0) > 0;
+        (!createdProduct.youtubeVideoId &&
+          (createdProduct.images?.length ?? 0) > 0);
 
-      if (hasAssetsForYoutube) {
+      if (shouldTriggerYoutubeUpload) {
         setImmediate(() => {
           this.productYoutubeService
             .handleProductVideoUpload({
@@ -664,12 +665,13 @@ export class ProductsController {
         .map((file) => this.prepareFileForBackground(file))
         .filter((item): item is BackgroundUploadFile => !!item);
 
-      const hasAssetsForYoutube =
+      const shouldTriggerYoutubeUpload =
         !!youtubeVideoFile ||
         youtubeImageFiles.length > 0 ||
-        (updatedProduct.images?.length ?? 0) > 0;
+        (!updatedProduct.youtubeVideoId &&
+          (updatedProduct.images?.length ?? 0) > 0);
 
-      if (hasAssetsForYoutube) {
+      if (shouldTriggerYoutubeUpload) {
         setImmediate(() => {
           this.productYoutubeService
             .handleProductVideoUpload({
