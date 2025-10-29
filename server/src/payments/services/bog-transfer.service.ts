@@ -752,4 +752,42 @@ export class BogTransferService {
   getStatusText(statusCode: string): string {
     return BOG_STATUS_MAP[statusCode] || statusCode;
   }
+
+  /**
+   * Cancel a document in BOG system
+   * API: DELETE /api/documents/{uniqueKey}
+   */
+  async cancelDocument(uniqueKey: number): Promise<boolean> {
+    const token = await this.getAccessToken();
+
+    try {
+      this.logger.log(`Cancelling document with UniqueKey: ${uniqueKey}`);
+
+      await axios.delete(
+        `${this.apiUrl}/documents/${uniqueKey}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        },
+      );
+
+      this.logger.log(`Document ${uniqueKey} cancelled successfully`);
+      return true;
+    } catch (error) {
+      this.logger.error(
+        `Failed to cancel document ${uniqueKey}`,
+        error.response?.data || error.message,
+      );
+      
+      // If document is already in a final state, don't throw error
+      if (error.response?.status === 400 || error.response?.status === 404) {
+        this.logger.warn(`Document ${uniqueKey} may already be processed or not found`);
+        return false;
+      }
+      
+      throw new BadRequestException(`Failed to cancel document in BOG: ${error.response?.data?.message || error.message}`);
+    }
+  }
 }

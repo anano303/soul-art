@@ -628,6 +628,22 @@ export class BalanceService {
     const sellerId = (transaction.seller as any)._id.toString();
     const amount = Math.abs(transaction.amount);
 
+    // Extract UniqueKey from description to cancel in BOG
+    const uniqueKeyMatch = transaction.description.match(/UniqueKey: (\d+)/);
+    if (uniqueKeyMatch) {
+      const uniqueKey = parseInt(uniqueKeyMatch[1], 10);
+      try {
+        this.logger.log(`Attempting to cancel BOG document: ${uniqueKey}`);
+        await this.bogTransferService.cancelDocument(uniqueKey);
+        this.logger.log(`BOG document ${uniqueKey} cancelled successfully`);
+      } catch (cancelError) {
+        this.logger.warn(
+          `Failed to cancel BOG document ${uniqueKey}: ${cancelError.message}. Continuing with local rejection.`,
+        );
+        // Continue with local rejection even if BOG cancellation fails
+      }
+    }
+
     // ბალანსის აღდგენა
     const sellerBalance = await this.sellerBalanceModel.findOne({
       seller: sellerId,
