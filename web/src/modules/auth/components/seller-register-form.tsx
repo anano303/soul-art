@@ -15,6 +15,7 @@ import { useLanguage } from "@/hooks/LanguageContext";
 import { SellerContract } from "@/components/SellerContract";
 import { TermsAndConditions } from "@/components/TermsAndConditions";
 import { PrivacyPolicy } from "@/components/PrivacyPolicy";
+import { trackCompleteRegistration } from "@/components/MetaPixel";
 
 type SellerRegisterFormData = z.infer<typeof sellerRegisterSchema>;
 
@@ -38,6 +39,7 @@ export function SellerRegisterForm() {
   const [showTerms, setShowTerms] = useState(false);
   const [showPrivacyPolicy, setShowPrivacyPolicy] = useState(false);
   const [referralCode, setReferralCode] = useState<string>("");
+  const hasTrackedRegistrationRef = useRef(false);
 
   const {
     register: registerField,
@@ -110,6 +112,9 @@ export function SellerRegisterForm() {
       formData.append("logoFile", fileInputRef.current.files[0]);
     }
 
+    const hasReferral = Boolean(data.invitationCode?.trim());
+    const includedLogo = Boolean(fileInputRef.current?.files?.length);
+
     register(formData, {
       onSuccess: () => {
         setIsSuccess(true);
@@ -118,6 +123,16 @@ export function SellerRegisterForm() {
           description: t("auth.sellerAccountCreatedSuccessfully"),
           variant: "default",
         });
+
+        if (!hasTrackedRegistrationRef.current) {
+          trackCompleteRegistration({
+            registration_type: "seller",
+            method: "email",
+            hasReferral,
+            uploadedLogo: includedLogo,
+          });
+          hasTrackedRegistrationRef.current = true;
+        }
 
         // Redirect to login page after 2 seconds
         setTimeout(() => {

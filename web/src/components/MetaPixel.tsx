@@ -236,6 +236,43 @@ export const trackSearch = (searchString: string) => {
   }
 };
 
+export const trackSubscribedButtonClick = (
+  details: Record<string, any> = {}
+) => {
+  trackEvent("SubscribedButtonClick", details);
+
+  const activityPayload = buildUserActivityPayload(
+    "SubscribedButtonClick",
+    details
+  );
+  if (activityPayload) {
+    trackUserActivity(activityPayload);
+  }
+};
+
+export const trackLead = (leadData: Record<string, any>) => {
+  trackEvent("Lead", leadData);
+
+  const activityPayload = buildUserActivityPayload("Lead", leadData);
+  if (activityPayload) {
+    trackUserActivity(activityPayload);
+  }
+};
+
+export const trackCompleteRegistration = (
+  registrationData: Record<string, any>
+) => {
+  trackEvent("CompleteRegistration", registrationData);
+
+  const activityPayload = buildUserActivityPayload(
+    "CompleteRegistration",
+    registrationData
+  );
+  if (activityPayload) {
+    trackUserActivity(activityPayload);
+  }
+};
+
 export default function MetaPixel() {
   const pathname = usePathname();
   const searchParams = useSearchParams();

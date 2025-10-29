@@ -3,6 +3,7 @@
 import { useState } from "react";
 import "./contact.css";
 import { useLanguage } from "@/hooks/LanguageContext";
+import { trackLead } from "@/components/MetaPixel";
 
 export const dynamic = "force-dynamic";
 
@@ -42,6 +43,21 @@ export default function ContactPage() {
     return !Object.values(newErrors).some((error) => error);
   };
 
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    const isValid = validateForm();
+    if (!isValid) {
+      event.preventDefault();
+      return;
+    }
+
+    trackLead({
+      lead_type: "contact_form",
+      subject: formData.subject,
+      hasMessage: Boolean(formData.message?.trim()),
+      replyEmail: formData.email,
+    });
+  };
+
   return (
     <div className="contact-container">
       <h1 className="contact-title">{t("contact.title")}</h1>
@@ -50,11 +66,7 @@ export default function ContactPage() {
         action="https://formspree.io/f/movenjpn"
         method="POST"
         className="contact-form"
-        onSubmit={(e) => {
-          if (!validateForm()) {
-            e.preventDefault();
-          }
-        }}
+        onSubmit={handleSubmit}
       >
         <div className="form-group">
           <label htmlFor="name">{t("contact.name")}</label>

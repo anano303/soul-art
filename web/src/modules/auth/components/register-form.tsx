@@ -11,10 +11,11 @@ import { toast } from "@/hooks/use-toast";
 import { useErrorHandler } from "@/hooks/use-error-handler";
 import "./register-form.css";
 import type * as z from "zod";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useLanguage } from "@/hooks/LanguageContext";
 import { TermsAndConditions } from "@/components/TermsAndConditions";
 import { PrivacyPolicy } from "@/components/PrivacyPolicy";
+import { trackCompleteRegistration } from "@/components/MetaPixel";
 
 type RegisterFormData = z.infer<typeof registerSchema>;
 
@@ -45,6 +46,7 @@ export function RegisterForm() {
   const [email, setEmail] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [canSendEmail, setCanSendEmail] = useState(false);
+  const hasTrackedRegistrationRef = useRef(false);
 
   useEffect(() => {
     setCanSendEmail(email.trim().length > 0);
@@ -107,6 +109,8 @@ export function RegisterForm() {
     }
     setErrorMessage("");
 
+    const hasReferral = Boolean(data.invitationCode?.trim());
+
     register(data, {
       onSuccess: () => {
         setIsSuccess(true);
@@ -115,6 +119,15 @@ export function RegisterForm() {
           description: t("auth.accountCreatedSuccessfully"),
           variant: "default",
         });
+
+        if (!hasTrackedRegistrationRef.current) {
+          trackCompleteRegistration({
+            registration_type: "customer",
+            method: "email",
+            hasReferral,
+          });
+          hasTrackedRegistrationRef.current = true;
+        }
 
         // Redirect to login page after 2 seconds
         setTimeout(() => {
