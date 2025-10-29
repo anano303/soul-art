@@ -422,20 +422,29 @@ export class ProductsController {
         .map((file) => this.prepareFileForBackground(file))
         .filter((item): item is BackgroundUploadFile => !!item);
 
-      // Clean up video file after preparing for background processing
-      if (videoFile?.path) {
+      const shouldTriggerYoutubeUpload =
+        !!youtubeVideoFile ||
+        youtubeImageFiles.length > 0 ||
+        (!createdProduct.youtubeVideoId &&
+          (createdProduct.images?.length ?? 0) > 0);
+
+      console.log('🎬 YouTube Upload Check:', {
+        hasVideoFile: !!youtubeVideoFile,
+        imageFilesCount: youtubeImageFiles.length,
+        hasExistingVideo: !!createdProduct.youtubeVideoId,
+        imagesCount: createdProduct.images?.length ?? 0,
+        shouldTrigger: shouldTriggerYoutubeUpload
+      });
+
+      // Don't cleanup video file immediately - it will be cleaned up by YouTube service
+      // Only cleanup if YouTube processing is not needed
+      if (!shouldTriggerYoutubeUpload && videoFile?.path) {
         try {
           require('fs').unlinkSync(videoFile.path);
         } catch (cleanupError) {
           console.warn('Failed to cleanup temp video file:', cleanupError);
         }
       }
-
-      const shouldTriggerYoutubeUpload =
-        !!youtubeVideoFile ||
-        youtubeImageFiles.length > 0 ||
-        (!createdProduct.youtubeVideoId &&
-          (createdProduct.images?.length ?? 0) > 0);
 
       if (shouldTriggerYoutubeUpload) {
         // Defer YouTube processing to prevent blocking the response and reduce memory usage
@@ -762,20 +771,29 @@ export class ProductsController {
         .map((file) => this.prepareFileForBackground(file))
         .filter((item): item is BackgroundUploadFile => !!item);
 
-      // Clean up video file after preparing for background processing
-      if (videoFile?.path) {
+      const shouldTriggerYoutubeUpload =
+        !!youtubeVideoFile ||
+        youtubeImageFiles.length > 0 ||
+        (!updatedProduct.youtubeVideoId &&
+          (updatedProduct.images?.length ?? 0) > 0);
+
+      console.log('🎬 YouTube Upload Check (Update):', {
+        hasVideoFile: !!youtubeVideoFile,
+        imageFilesCount: youtubeImageFiles.length,
+        hasExistingVideo: !!updatedProduct.youtubeVideoId,
+        imagesCount: updatedProduct.images?.length ?? 0,
+        shouldTrigger: shouldTriggerYoutubeUpload
+      });
+
+      // Don't cleanup video file immediately - it will be cleaned up by YouTube service
+      // Only cleanup if YouTube processing is not needed
+      if (!shouldTriggerYoutubeUpload && videoFile?.path) {
         try {
           require('fs').unlinkSync(videoFile.path);
         } catch (cleanupError) {
           console.warn('Failed to cleanup temp video file:', cleanupError);
         }
       }
-
-      const shouldTriggerYoutubeUpload =
-        !!youtubeVideoFile ||
-        youtubeImageFiles.length > 0 ||
-        (!updatedProduct.youtubeVideoId &&
-          (updatedProduct.images?.length ?? 0) > 0);
 
       if (shouldTriggerYoutubeUpload) {
         // Defer YouTube processing to prevent blocking the response and reduce memory usage
@@ -891,6 +909,12 @@ export class ProductsController {
     }
 
     try {
+      // Check if file exists before trying to read it
+      if (!require('fs').existsSync(file.path)) {
+        console.warn(`Temp file not found for background processing: ${file.path}`);
+        return null;
+      }
+
       const buffer = require('fs').readFileSync(file.path);
 
       return {

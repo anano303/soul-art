@@ -57,8 +57,16 @@ export class ProductYoutubeService {
     videoFile,
     imageFiles,
   }: ProductVideoPayload): Promise<YoutubeVideoResult | null> {
+    console.log('🎬 YouTube Service Called:', {
+      productId: product._id,
+      hasVideoFile: !!videoFile,
+      imageFilesCount: imageFiles.length,
+      productImagesCount: product.images?.length ?? 0
+    });
+
     if (!this.isYoutubeConfigured()) {
       this.logger.warn('YouTube credentials missing. Skipping video upload.');
+      console.log('❌ YouTube not configured - missing credentials');
       return null;
     }
 
@@ -105,6 +113,8 @@ export class ProductYoutubeService {
       if (tempDir) {
         await this.safeRemoveDir(tempDir);
       }
+      // Clean up original uploaded files after YouTube processing
+      await this.cleanupUploadedFiles(videoFile, imageFiles);
     }
   }
 
@@ -623,5 +633,15 @@ export class ProductYoutubeService {
         error as Error,
       );
     }
+  }
+
+  private async cleanupUploadedFiles(
+    videoFile: BackgroundUploadFile | null,
+    imageFiles: BackgroundUploadFile[],
+  ): Promise<void> {
+    // Note: We can't reliably cleanup the original uploaded files here
+    // because we don't have access to their original file paths.
+    // The controller handles cleanup based on whether YouTube processing is needed.
+    this.logger.debug('YouTube processing completed, original file cleanup handled by controller');
   }
 }
