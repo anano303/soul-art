@@ -372,21 +372,14 @@ export class ProductsController {
         videoDescription,
       });
 
-      const clonedVideoFile = videoFile
-        ? ({ ...videoFile, buffer: Buffer.from(videoFile.buffer) } as Express.Multer.File)
-        : null;
-      const clonedImageFiles = files.map((file) =>
-        ({ ...file, buffer: Buffer.from(file.buffer) } as Express.Multer.File),
-      );
-
-      if (clonedVideoFile || clonedImageFiles.length) {
+      if (videoFile || files.length) {
         setImmediate(() => {
           this.productYoutubeService
             .handleProductVideoUpload({
               product: createdProduct,
               user,
-              videoFile: clonedVideoFile,
-              imageFiles: clonedImageFiles,
+              videoFile,
+              imageFiles: files,
             })
             .then(async (youtubeResult) => {
               if (!youtubeResult) {
@@ -652,35 +645,43 @@ export class ProductsController {
       };
 
       const updatedProduct = await this.productsService.update(id, updateData);
-      let finalProduct = updatedProduct;
 
-      if (videoFile || (files?.images && files.images.length > 0)) {
-        try {
-          const youtubeResult =
-            await this.productYoutubeService.handleProductVideoUpload({
+      if (videoFile || (files?.images && files.images.length)) {
+        setImmediate(() => {
+          this.productYoutubeService
+            .handleProductVideoUpload({
               product: updatedProduct,
               user,
               videoFile,
               imageFiles: files?.images || [],
+            })
+            .then(async (youtubeResult) => {
+              if (!youtubeResult) {
+                return;
+              }
+
+              try {
+                await this.productsService.attachYoutubeVideo(
+                  id,
+                  youtubeResult,
+                );
+              } catch (attachmentError) {
+                console.error(
+                  'Failed to persist refreshed YouTube metadata:',
+                  attachmentError,
+                );
+              }
+            })
+            .catch((youtubeError) => {
+              console.error(
+                'Failed to refresh YouTube video for product:',
+                youtubeError,
+              );
             });
-
-          if (youtubeResult) {
-            const refreshedProduct =
-              await this.productsService.attachYoutubeVideo(id, youtubeResult);
-
-            if (refreshedProduct) {
-              finalProduct = refreshedProduct;
-            }
-          }
-        } catch (youtubeError) {
-          console.error(
-            'Failed to refresh YouTube video for product:',
-            youtubeError,
-          );
-        }
+        });
       }
 
-      return finalProduct;
+      return updatedProduct;
     } catch (error) {
       console.error('Update error:', error);
       throw new InternalServerErrorException(
