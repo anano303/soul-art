@@ -482,7 +482,7 @@ async function generateSlideshow(
   await fsp.mkdir(framesDir, { recursive: true });
   console.log(`   📁 Frames directory: ${framesDir}`);
 
-  console.log(`   🖼️  Processing ${images.length} images...`);
+  console.log(`   🖼️  Processing ${images.length} product images...`);
   for (let i = 0; i < images.length; i++) {
     const frameName = `frame-${String(i + 1).padStart(3, '0')}.jpg`;
     const framePath = path.join(framesDir, frameName);
@@ -496,6 +496,37 @@ async function generateSlideshow(
       .toFile(framePath);
 
     console.log(`      [${i + 1}/${images.length}] ✅ ${frameName}`);
+  }
+
+  // Add outro image if configured
+  const outroImageUrl = configService.get('SLIDESHOW_OUTRO_IMAGE_URL');
+  if (outroImageUrl) {
+    console.log(`   🎬 Adding outro image from: ${outroImageUrl}`);
+    try {
+      const response = await axios.get(outroImageUrl, {
+        responseType: 'arraybuffer',
+        timeout: 30000,
+      });
+      const outroBuffer = Buffer.from(response.data);
+      
+      const outroFrameName = `frame-${String(images.length + 1).padStart(3, '0')}.jpg`;
+      const outroFramePath = path.join(framesDir, outroFrameName);
+      
+      await sharp(outroBuffer)
+        .resize(1920, 1080, {
+          fit: 'contain',
+          background: { r: 255, g: 255, b: 255, alpha: 1 },
+        })
+        .jpeg({ quality: 85 })
+        .toFile(outroFramePath);
+      
+      console.log(`   ✅ Outro image added: ${outroFrameName}`);
+    } catch (error) {
+      console.warn(`   ⚠️  Failed to add outro image: ${error.message}`);
+      console.warn(`   ℹ️  Continuing without outro image...`);
+    }
+  } else {
+    console.log(`   ℹ️  No outro image configured (SLIDESHOW_OUTRO_IMAGE_URL not set)`);
   }
 
   // Generate video
