@@ -542,6 +542,11 @@ async function generateSlideshow(
   await new Promise<void>((resolve, reject) => {
     const inputPattern = path.join(framesDir, 'frame-%03d.jpg');
     console.log(`   ▶️  Starting FFmpeg with input: ${inputPattern}`);
+    console.log(`   📊 FFmpeg Configuration:`);
+    console.log(`      - Input: ${inputPattern}`);
+    console.log(`      - Output: ${outputPath}`);
+    console.log(`      - Framerate: 1/${slideDuration}`);
+    console.log(`      - FFmpeg Binary: ${ffmpegInstaller.path}`);
 
     const command = ffmpeg()
       .addInput(inputPattern)
@@ -558,6 +563,15 @@ async function generateSlideshow(
         '-crf 28',
         '-an',
       ])
+      // @ts-ignore - fluent-ffmpeg types incomplete
+      .on('start', (commandLine) => {
+        console.log(`   🚀 FFmpeg command started:`);
+        console.log(`      ${commandLine}`);
+      })
+      // @ts-ignore - fluent-ffmpeg types incomplete
+      .on('progress', (progress) => {
+        console.log(`   ⏳ FFmpeg progress: ${JSON.stringify(progress)}`);
+      })
       .on('end', () => {
         console.log('   ✅ FFmpeg encoding completed');
         resolve();
@@ -566,16 +580,27 @@ async function generateSlideshow(
       .on('error', (err: any, stdout: any, stderr: any) => {
         console.error(`   ❌ FFmpeg error: ${err.message}`);
         console.error(`   📋 Error code: ${err.code}`);
+        console.error(`   📋 Error name: ${err.name}`);
+        console.error(`   📋 Error stack: ${err.stack}`);
         if (stdout) console.error(`   📤 STDOUT:`, stdout);
         if (stderr) console.error(`   📤 STDERR:`, stderr);
-        console.error(`   📋 Full error object:`, err);
+        console.error(`   📋 Full error object:`, JSON.stringify(err, null, 2));
         reject(new Error(`FFmpeg slideshow generation failed: ${err.message}`));
+      })
+      // @ts-ignore - fluent-ffmpeg types incomplete
+      .on('stderr', (stderrLine) => {
+        console.log(`   📝 FFmpeg stderr: ${stderrLine}`);
       });
 
     try {
+      console.log(`   💾 Calling command.save(${outputPath})...`);
       command.save(outputPath);
+      console.log(`   ✅ command.save() called successfully, waiting for FFmpeg to complete...`);
     } catch (syncError) {
       console.error(`   ❌ Synchronous error starting FFmpeg:`, syncError);
+      console.error(`   ❌ Error type: ${syncError.constructor.name}`);
+      console.error(`   ❌ Error message: ${syncError.message}`);
+      console.error(`   ❌ Error stack: ${syncError.stack}`);
       reject(syncError);
     }
   });
