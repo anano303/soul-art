@@ -12,28 +12,103 @@ import ffmpegInstaller from '@ffmpeg-installer/ffmpeg';
 import ffprobeInstaller from '@ffprobe-installer/ffprobe';
 import sharp from 'sharp';
 import axios from 'axios';
+import { exec } from 'child_process';
+import { promisify } from 'util';
+
+const execAsync = promisify(exec);
 
 // Configure ffmpeg
 console.log('🔧 Configuring FFmpeg...');
 if (ffmpegInstaller?.path) {
   console.log(`   ✅ FFmpeg binary: ${ffmpegInstaller.path}`);
-  ffmpeg.setFfmpegPath(ffmpegInstaller.path);
+
   // Check if binary exists
   if (fs.existsSync(ffmpegInstaller.path)) {
     console.log('   ✅ FFmpeg binary file exists');
+
+    // Ensure binary is executable (Linux/Mac)
+    try {
+      if (process.platform !== 'win32') {
+        fs.chmodSync(ffmpegInstaller.path, '755');
+        console.log('   ✅ FFmpeg binary permissions set (755)');
+      }
+    } catch (chmodError) {
+      console.warn(`   ⚠️  Could not set permissions: ${chmodError.message}`);
+    }
   } else {
     console.error('   ❌ FFmpeg binary file NOT FOUND!');
   }
+
+  ffmpeg.setFfmpegPath(ffmpegInstaller.path);
 } else {
   console.error('   ❌ FFmpeg installer path is undefined!');
 }
 
 if (ffprobeInstaller?.path) {
   console.log(`   ✅ FFprobe binary: ${ffprobeInstaller.path}`);
+
+  // Ensure ffprobe is also executable
+  if (fs.existsSync(ffprobeInstaller.path) && process.platform !== 'win32') {
+    try {
+      fs.chmodSync(ffprobeInstaller.path, '755');
+      console.log('   ✅ FFprobe binary permissions set (755)');
+    } catch (chmodError) {
+      console.warn(
+        `   ⚠️  Could not set FFprobe permissions: ${chmodError.message}`,
+      );
+    }
+  }
+
   ffmpeg.setFfprobePath(ffprobeInstaller.path);
 } else {
   console.error('   ❌ FFprobe installer path is undefined!');
 }
+
+// Catch any uncaught errors in worker thread to prevent server crash
+process.on('uncaughtException', (error) => {
+  console.error('');
+  console.error(
+    '═══════════════════════════════════════════════════════════════',
+  );
+  console.error('💥 UNCAUGHT EXCEPTION IN WORKER THREAD');
+  console.error(
+    '═══════════════════════════════════════════════════════════════',
+  );
+  console.error(`Error: ${error.message}`);
+  console.error(`Stack: ${error.stack}`);
+  console.error(
+    '═══════════════════════════════════════════════════════════════',
+  );
+
+  parentPort?.postMessage({
+    success: false,
+    error: `Uncaught exception: ${error.message}`,
+  });
+
+  process.exit(1);
+});
+
+process.on('unhandledRejection', (reason: any) => {
+  console.error('');
+  console.error(
+    '═══════════════════════════════════════════════════════════════',
+  );
+  console.error('💥 UNHANDLED REJECTION IN WORKER THREAD');
+  console.error(
+    '═══════════════════════════════════════════════════════════════',
+  );
+  console.error(`Reason: ${reason}`);
+  console.error(
+    '═══════════════════════════════════════════════════════════════',
+  );
+
+  parentPort?.postMessage({
+    success: false,
+    error: `Unhandled rejection: ${reason}`,
+  });
+
+  process.exit(1);
+});
 
 interface WorkerData {
   productId: string;
@@ -49,34 +124,58 @@ async function processVideo() {
   const data: WorkerData = workerData;
   let tempDir: string | null = null;
 
-  console.log('═══════════════════════════════════════════════════════════════');
+  console.log(
+    '═══════════════════════════════════════════════════════════════',
+  );
   console.log('🚀 WORKER THREAD STARTED');
-  console.log('═══════════════════════════════════════════════════════════════');
+  console.log(
+    '═══════════════════════════════════════════════════════════════',
+  );
   console.log(`📦 Product ID: ${data.productId}`);
   console.log(`📝 Product Name: ${data.productName}`);
   console.log(`🖼️  Images Count: ${data.images?.length || 0}`);
   console.log(`📹 Video File Path: ${data.videoFilePath || 'NONE'}`);
   console.log(`👤 User: ${data.userName} (${data.userEmail})`);
-  console.log('═══════════════════════════════════════════════════════════════');
+  console.log(
+    '═══════════════════════════════════════════════════════════════',
+  );
 
   try {
     console.log('');
     console.log('🔧 Step 1: Bootstrapping NestJS Application Context...');
-    
-    // Check FFmpeg availability
+
+    // Check FFmpeg availability and test execution
     console.log('🔍 Checking FFmpeg installation...');
     console.log(`   FFmpeg path: ${ffmpegInstaller?.path || 'Not configured'}`);
-    console.log(`   FFprobe path: ${ffprobeInstaller?.path || 'Not configured'}`);
-    
+    console.log(
+      `   FFprobe path: ${ffprobeInstaller?.path || 'Not configured'}`,
+    );
+
+    if (ffmpegInstaller?.path) {
+      try {
+        console.log('🧪 Testing FFmpeg executable...');
+        const { stdout } = await execAsync(
+          `"${ffmpegInstaller.path}" -version 2>&1 | head -n 1`,
+        );
+        console.log(`   ✅ FFmpeg test passed: ${stdout.trim()}`);
+      } catch (testError: any) {
+        console.error(`   ❌ FFmpeg test failed!`);
+        console.error(`   📋 Error: ${testError.message}`);
+        if (testError.stderr)
+          console.error(`   📤 STDERR: ${testError.stderr}`);
+        throw new Error(`FFmpeg is not working: ${testError.message}`);
+      }
+    }
+
     // Bootstrap NestJS to get services
     const app = await NestFactory.createApplicationContext(AppModule, {
       logger: false,
     });
     console.log('✅ NestJS Application Context created');
-    
+
     const youtubeService = app.get(YoutubeService);
     console.log('✅ YoutubeService retrieved');
-    
+
     const configService = app.get(ConfigService);
     console.log('✅ ConfigService retrieved');
 
@@ -96,7 +195,9 @@ async function processVideo() {
       console.log(`📥 Downloading ${data.images.length} images...`);
       for (let i = 0; i < data.images.length; i++) {
         try {
-          console.log(`   [${i + 1}/${data.images.length}] Downloading: ${data.images[i]}`);
+          console.log(
+            `   [${i + 1}/${data.images.length}] Downloading: ${data.images[i]}`,
+          );
           const response = await axios.get(data.images[i], {
             responseType: 'arraybuffer',
             timeout: 30000,
@@ -108,10 +209,14 @@ async function processVideo() {
           });
           console.log(`   ✅ Downloaded (${buffer.length} bytes)`);
         } catch (error) {
-          console.warn(`   ⚠️  Failed to download image ${i + 1}: ${error.message}`);
+          console.warn(
+            `   ⚠️  Failed to download image ${i + 1}: ${error.message}`,
+          );
         }
       }
-      console.log(`✅ Successfully downloaded ${imageBuffers.length}/${data.images.length} images`);
+      console.log(
+        `✅ Successfully downloaded ${imageBuffers.length}/${data.images.length} images`,
+      );
     } else {
       console.log('ℹ️  No images to download');
     }
@@ -124,7 +229,9 @@ async function processVideo() {
       fs.existsSync(data.videoFilePath) &&
       imageBuffers.length > 0
     ) {
-      console.log('📹 SCENARIO 1: Video + Images → Will merge video with slideshow');
+      console.log(
+        '📹 SCENARIO 1: Video + Images → Will merge video with slideshow',
+      );
       console.log(`   Video exists: ${data.videoFilePath}`);
       console.log(`   Images to add: ${imageBuffers.length}`);
 
@@ -152,7 +259,9 @@ async function processVideo() {
     }
     // Case 2: Only video
     else if (data.videoFilePath && fs.existsSync(data.videoFilePath)) {
-      console.log('📹 SCENARIO 2: Video only → Will use uploaded video directly');
+      console.log(
+        '📹 SCENARIO 2: Video only → Will use uploaded video directly',
+      );
       console.log(`   Video path: ${data.videoFilePath}`);
       finalVideoPath = data.videoFilePath;
       console.log('✅ Using existing video file');
@@ -161,7 +270,7 @@ async function processVideo() {
     else if (imageBuffers.length > 0) {
       console.log('🖼️  SCENARIO 3: Images only → Will generate slideshow');
       console.log(`   Images count: ${imageBuffers.length}`);
-      
+
       console.log('');
       console.log('🎞️  Step 5: Generating slideshow from images...');
       try {
@@ -174,7 +283,9 @@ async function processVideo() {
         console.log(`✅ Slideshow generated: ${finalVideoPath}`);
       } catch (slideshowError) {
         console.error('❌ Slideshow generation failed:', slideshowError);
-        throw new Error(`Failed to generate slideshow: ${slideshowError.message}`);
+        throw new Error(
+          `Failed to generate slideshow: ${slideshowError.message}`,
+        );
       }
     } else {
       console.error('❌ ERROR: No video or images available for processing!');
@@ -190,7 +301,9 @@ async function processVideo() {
     console.log('📤 Step 6: Uploading to YouTube...');
     console.log(`   Final video path: ${finalVideoPath}`);
     const videoStats = fs.statSync(finalVideoPath);
-    console.log(`   Video size: ${(videoStats.size / 1024 / 1024).toFixed(2)} MB`);
+    console.log(
+      `   Video size: ${(videoStats.size / 1024 / 1024).toFixed(2)} MB`,
+    );
 
     // Upload to YouTube
     const uploadOptions = {
@@ -212,7 +325,7 @@ async function processVideo() {
     console.log(`   Title: ${uploadOptions.title}`);
     console.log(`   Privacy: ${uploadOptions.privacyStatus}`);
     console.log(`   Tags: ${uploadOptions.tags.join(', ')}`);
-    
+
     console.log('🚀 Starting YouTube upload...');
     const result = await youtubeService.uploadVideo(
       finalVideoPath,
@@ -243,22 +356,32 @@ async function processVideo() {
     console.log('🔌 Closing NestJS application context...');
     await app.close();
     console.log('✅ Application context closed');
-    
+
     console.log('');
-    console.log('═══════════════════════════════════════════════════════════════');
+    console.log(
+      '═══════════════════════════════════════════════════════════════',
+    );
     console.log('✅ WORKER COMPLETED SUCCESSFULLY');
-    console.log('═══════════════════════════════════════════════════════════════');
+    console.log(
+      '═══════════════════════════════════════════════════════════════',
+    );
   } catch (error) {
     console.error('');
-    console.error('═══════════════════════════════════════════════════════════════');
+    console.error(
+      '═══════════════════════════════════════════════════════════════',
+    );
     console.error('💥 WORKER ERROR');
-    console.error('═══════════════════════════════════════════════════════════════');
+    console.error(
+      '═══════════════════════════════════════════════════════════════',
+    );
     console.error(`Error Name: ${error.name}`);
     console.error(`Error Message: ${error.message}`);
     console.error(`Error Stack:`);
     console.error(error.stack);
-    console.error('═══════════════════════════════════════════════════════════════');
-    
+    console.error(
+      '═══════════════════════════════════════════════════════════════',
+    );
+
     console.log('');
     console.log('📨 Sending error message to main thread...');
     parentPort?.postMessage({
@@ -281,7 +404,9 @@ async function processVideo() {
     }
     if (workerData.videoFilePath && fs.existsSync(workerData.videoFilePath)) {
       try {
-        console.log(`   Removing uploaded video file: ${workerData.videoFilePath}`);
+        console.log(
+          `   Removing uploaded video file: ${workerData.videoFilePath}`,
+        );
         await fsp.unlink(workerData.videoFilePath);
         console.log('   ✅ Uploaded video file removed');
       } catch (e) {
@@ -302,7 +427,7 @@ async function generateSlideshow(
   console.log('   ┌─────────────────────────────────────────────────────');
   console.log('   │ 🎞️  GENERATING SLIDESHOW');
   console.log('   └─────────────────────────────────────────────────────');
-  
+
   const slideDuration = configService.get('YOUTUBE_SLIDE_DURATION_SECONDS', 5);
   console.log(`   ⏱️  Slide duration: ${slideDuration} seconds`);
 
@@ -332,7 +457,7 @@ async function generateSlideshow(
   console.log(`   🎬 Output path: ${outputPath}`);
   console.log(`   🔧 Starting FFmpeg encoding...`);
   console.log(`   📂 Input pattern: ${path.join(framesDir, 'frame-%03d.jpg')}`);
-  
+
   // Verify frames exist
   const frameFiles = await fsp.readdir(framesDir);
   console.log(`   📁 Frame files in directory: ${frameFiles.join(', ')}`);
@@ -340,7 +465,7 @@ async function generateSlideshow(
   await new Promise<void>((resolve, reject) => {
     const inputPattern = path.join(framesDir, 'frame-%03d.jpg');
     console.log(`   ▶️  Starting FFmpeg with input: ${inputPattern}`);
-    
+
     const command = ffmpeg()
       .addInput(inputPattern)
       .inputOptions([`-framerate 1/${slideDuration}`])
@@ -369,7 +494,7 @@ async function generateSlideshow(
         console.error(`   📋 Full error object:`, err);
         reject(new Error(`FFmpeg slideshow generation failed: ${err.message}`));
       });
-      
+
     try {
       command.save(outputPath);
     } catch (syncError) {
@@ -394,7 +519,7 @@ async function mergeVideos(
   console.log('   ┌─────────────────────────────────────────────────────');
   console.log('   │ 🔗 MERGING VIDEOS');
   console.log('   └─────────────────────────────────────────────────────');
-  
+
   const outputPath = path.join(tempDir, `merged-${Date.now()}.mp4`);
   console.log(`   📥 Input video: ${videoPath}`);
   console.log(`   📥 Input slideshow: ${slideshowPath}`);

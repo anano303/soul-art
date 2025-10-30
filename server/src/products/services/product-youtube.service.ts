@@ -52,19 +52,25 @@ export class ProductYoutubeService {
     this.logger.log(`📦 Product ID: ${product._id}`);
     this.logger.log(`📹 Has Video File: ${!!videoFile}`);
     if (videoFile) {
-      this.logger.log(`📹 Video File Size: ${videoFile.buffer?.length || 0} bytes`);
+      this.logger.log(
+        `📹 Video File Size: ${videoFile.buffer?.length || 0} bytes`,
+      );
       this.logger.log(`📹 Video File Name: ${videoFile.originalname}`);
     }
     this.logger.log(`🖼️  Image Files Count: ${imageFiles.length}`);
     this.logger.log(`🖼️  Product Images Count: ${product.images?.length ?? 0}`);
     if (product.images && product.images.length > 0) {
-      this.logger.log(`🖼️  First 3 images: ${JSON.stringify(product.images.slice(0, 3))}`);
+      this.logger.log(
+        `🖼️  First 3 images: ${JSON.stringify(product.images.slice(0, 3))}`,
+      );
     }
     this.logger.log(`👤 User: ${user.name} (${user.email})`);
     this.logger.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
 
     if (!this.isYoutubeConfigured()) {
-      this.logger.warn('❌ YouTube credentials missing. Skipping video upload.');
+      this.logger.warn(
+        '❌ YouTube credentials missing. Skipping video upload.',
+      );
       return null;
     }
 
@@ -83,14 +89,16 @@ export class ProductYoutubeService {
         await fsp.writeFile(videoFilePath, videoFile.buffer);
         this.logger.log(`✅ Video file saved to temp location`);
       } else {
-        this.logger.log('ℹ️  No video file provided - will generate slideshow only');
+        this.logger.log(
+          'ℹ️  No video file provided - will generate slideshow only',
+        );
       }
 
       this.logger.log('📋 Step 2: Preparing Worker Thread data...');
       // Start worker thread for background processing
       const workerPath = path.join(__dirname, '../workers/youtube.worker.js');
       this.logger.log(`🔧 Worker script path: ${workerPath}`);
-      
+
       // Ensure all data is serializable for Worker Thread
       this.logger.log('🔄 Converting product data to serializable format...');
       const workerData = {
@@ -99,8 +107,8 @@ export class ProductYoutubeService {
         productDescription: String(product.description || ''),
         userName: String(user.name || ''),
         userEmail: String(user.email || ''),
-        images: Array.isArray(product.images) 
-          ? product.images.map(img => String(img)).filter(Boolean)
+        images: Array.isArray(product.images)
+          ? product.images.map((img) => String(img)).filter(Boolean)
           : [],
         videoFilePath: videoFilePath ? String(videoFilePath) : undefined,
       };
@@ -111,9 +119,11 @@ export class ProductYoutubeService {
       this.logger.log(`   - Images Count: ${workerData.images.length}`);
       this.logger.log(`   - Has Video File: ${!!workerData.videoFilePath}`);
       this.logger.log(`   - User: ${workerData.userName}`);
-      
+
       if (workerData.images.length > 0) {
-        this.logger.log(`   - Sample Images: ${workerData.images.slice(0, 2).join(', ')}`);
+        this.logger.log(
+          `   - Sample Images: ${workerData.images.slice(0, 2).join(', ')}`,
+        );
       }
 
       this.logger.log('🚀 Step 3: Spawning Worker Thread...');
@@ -125,11 +135,11 @@ export class ProductYoutubeService {
         this.logger.log('📬 WORKER MESSAGE RECEIVED');
         this.logger.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
         this.logger.log(`Message: ${JSON.stringify(message, null, 2)}`);
-        
+
         if (message.success) {
           this.logger.log('✅ Worker reported SUCCESS!');
           this.logger.log(`📦 Updating Product ${message.data.productId}...`);
-          
+
           try {
             const updatedProduct = await this.productModel.findByIdAndUpdate(
               message.data.productId,
@@ -140,7 +150,7 @@ export class ProductYoutubeService {
               },
               { new: true },
             );
-            
+
             if (updatedProduct) {
               this.logger.log('✅ Product updated successfully!');
               this.logger.log(`   - YouTube Video ID: ${message.data.videoId}`);
@@ -159,12 +169,18 @@ export class ProductYoutubeService {
       });
 
       worker.on('error', (error) => {
-        this.logger.error('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+        this.logger.error(
+          '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━',
+        );
         this.logger.error('💥 WORKER THREAD ERROR');
-        this.logger.error('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+        this.logger.error(
+          '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━',
+        );
         this.logger.error(`Error: ${error.message}`);
         this.logger.error(`Stack: ${error.stack}`);
-        this.logger.error('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+        this.logger.error(
+          '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━',
+        );
       });
 
       worker.on('exit', (code) => {
