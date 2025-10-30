@@ -14,11 +14,25 @@ import sharp from 'sharp';
 import axios from 'axios';
 
 // Configure ffmpeg
+console.log('🔧 Configuring FFmpeg...');
 if (ffmpegInstaller?.path) {
+  console.log(`   ✅ FFmpeg binary: ${ffmpegInstaller.path}`);
   ffmpeg.setFfmpegPath(ffmpegInstaller.path);
+  // Check if binary exists
+  if (fs.existsSync(ffmpegInstaller.path)) {
+    console.log('   ✅ FFmpeg binary file exists');
+  } else {
+    console.error('   ❌ FFmpeg binary file NOT FOUND!');
+  }
+} else {
+  console.error('   ❌ FFmpeg installer path is undefined!');
 }
+
 if (ffprobeInstaller?.path) {
+  console.log(`   ✅ FFprobe binary: ${ffprobeInstaller.path}`);
   ffmpeg.setFfprobePath(ffprobeInstaller.path);
+} else {
+  console.error('   ❌ FFprobe installer path is undefined!');
 }
 
 interface WorkerData {
@@ -327,7 +341,7 @@ async function generateSlideshow(
     const inputPattern = path.join(framesDir, 'frame-%03d.jpg');
     console.log(`   ▶️  Starting FFmpeg with input: ${inputPattern}`);
     
-    ffmpeg()
+    const command = ffmpeg()
       .addInput(inputPattern)
       .inputOptions([`-framerate 1/${slideDuration}`])
       .videoFilters([
@@ -346,12 +360,22 @@ async function generateSlideshow(
         console.log('   ✅ FFmpeg encoding completed');
         resolve();
       })
-      .on('error', (err) => {
+      // @ts-ignore - fluent-ffmpeg types are incorrect, error callback gets 3 params
+      .on('error', (err: any, stdout: any, stderr: any) => {
         console.error(`   ❌ FFmpeg error: ${err.message}`);
-        console.error(`   📋 Full error:`, err);
+        console.error(`   📋 Error code: ${err.code}`);
+        if (stdout) console.error(`   📤 STDOUT:`, stdout);
+        if (stderr) console.error(`   📤 STDERR:`, stderr);
+        console.error(`   📋 Full error object:`, err);
         reject(new Error(`FFmpeg slideshow generation failed: ${err.message}`));
-      })
-      .save(outputPath);
+      });
+      
+    try {
+      command.save(outputPath);
+    } catch (syncError) {
+      console.error(`   ❌ Synchronous error starting FFmpeg:`, syncError);
+      reject(syncError);
+    }
   });
 
   const stats = fs.statSync(outputPath);
