@@ -7,6 +7,7 @@ import * as fs from 'fs';
 import { promises as fsp } from 'fs';
 import * as os from 'os';
 import * as path from 'path';
+import { fork, ChildProcess } from 'child_process';
 import ffmpeg from 'fluent-ffmpeg';
 import ffmpegInstaller from '@ffmpeg-installer/ffmpeg';
 import ffprobeInstaller from '@ffprobe-installer/ffprobe';
@@ -73,41 +74,35 @@ export class ProductYoutubeService {
     console.log('✅ YouTube is configured, proceeding with upload');
 
     let tempDir: string | null = null;
-    let videoPath: string | null = null;
 
     try {
       tempDir = await fsp.mkdtemp(path.join(os.tmpdir(), 'soulart-product-'));
 
-      const workingImageFiles =
-        imageFiles && imageFiles.length
-          ? imageFiles
-          : await this.fetchImagesFromProduct(product);
+      // Spawn worker process for video processing
+      const workerPath = path.join(__dirname, 'youtube-worker.js');
+      const worker = fork(workerPath, [], {
+        stdio: ['pipe', 'pipe', 'pipe', 'ipc'],
+        env: {
+          ...process.env,
+          // Pass necessary environment variables to worker
+          YOUTUBE_CLIENT_ID: this.configService.get('YOUTUBE_CLIENT_ID'),
+          YOUTUBE_CLIENT_SECRET: this.configService.get('YOUTUBE_CLIENT_SECRET'),
+          YOUTUBE_REFRESH_TOKEN: this.configService.get('YOUTUBE_REFRESH_TOKEN'),
+        }
+      });
 
-      if (videoFile) {
-        videoPath = await this.persistUploadedVideo(tempDir, videoFile);
-      } else {
-        videoPath = await this.generateSlideshowVideo(
-          tempDir,
-          workingImageFiles,
-          product?.name ?? 'SoulArt Product',
-        );
-      }
+      return await this.processWithWorker(worker, {
+        type: 'process_video',
+        product: product.toObject ? product.toObject() : product,
+        user: user.toObject ? user.toObject() : user,
+        videoFile,
+        imageFiles,
+        tempDir,
+      });
 
-      if (!videoPath) {
-        this.logger.warn('No video path generated for product upload.');
-        return null;
-      }
-
-      const uploadOptions = this.buildVideoMetadata(product, user);
-      const uploadResult = await this.youtubeService.uploadVideo(
-        videoPath,
-        uploadOptions,
-      );
-
-      return uploadResult;
     } catch (error) {
       this.logger.error(
-        'Failed to upload product video to YouTube',
+        'Failed to process product video with worker',
         error as Error,
       );
       return null;
@@ -118,6 +113,49 @@ export class ProductYoutubeService {
       // Clean up original uploaded files after YouTube processing
       await this.cleanupUploadedFiles(videoFile, imageFiles);
     }
+  }
+
+  private async processWithWorker(
+    worker: ChildProcess,
+    message: any
+  ): Promise<YoutubeVideoResult | null> {
+    return new Promise((resolve, reject) => {
+      const timeout = setTimeout(() => {
+        worker.kill('SIGTERM');
+        this.logger.error('YouTube worker processing timeout - killed worker');
+        resolve(null); // Don't reject, just return null to prevent main process crash
+      }, 15 * 60 * 1000); // 15 minutes timeout
+
+      worker.on('message', (response: any) => {
+        clearTimeout(timeout);
+        worker.kill('SIGTERM');
+
+        if (response.success) {
+          resolve(response.result);
+        } else {
+          this.logger.error('YouTube worker failed:', response.error);
+          resolve(null); // Return null instead of throwing to prevent crash
+        }
+      });
+
+      worker.on('error', (error) => {
+        clearTimeout(timeout);
+        worker.kill('SIGTERM');
+        this.logger.error('YouTube worker process error:', error);
+        resolve(null); // Return null instead of throwing
+      });
+
+      worker.on('exit', (code, signal) => {
+        clearTimeout(timeout);
+        if (code && code !== 0) {
+          this.logger.error(`YouTube worker exited with code ${code}, signal: ${signal}`);
+        }
+        // Don't resolve here as message handler should have already resolved
+      });
+
+      // Send the processing message to worker
+      worker.send(message);
+    });
   }
 
   private async fetchImagesFromProduct(

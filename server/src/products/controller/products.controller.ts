@@ -447,42 +447,40 @@ export class ProductsController {
       }
 
       if (shouldTriggerYoutubeUpload) {
-        // Defer YouTube processing to prevent blocking the response and reduce memory usage
-        setTimeout(() => {
-          this.productYoutubeService
-            .handleProductVideoUpload({
-              product: createdProduct,
-              user,
-              videoFile: youtubeVideoFile,
-              imageFiles: youtubeImageFiles,
-            })
-            .then(async (youtubeResult) => {
-              if (!youtubeResult) {
-                return;
-              }
+        // Process YouTube video in background worker (safe, won't crash main server)
+        this.productYoutubeService
+          .handleProductVideoUpload({
+            product: createdProduct,
+            user,
+            videoFile: youtubeVideoFile,
+            imageFiles: youtubeImageFiles,
+          })
+          .then(async (youtubeResult) => {
+            if (!youtubeResult) {
+              return;
+            }
 
-              try {
-                await this.productsService.attachYoutubeVideo(
-                  createdProduct._id.toString(),
-                  youtubeResult,
-                );
-                console.log(
-                  `✅ YouTube video attached to product: ${createdProduct._id}`,
-                );
-              } catch (attachmentError) {
-                console.error(
-                  'Failed to persist YouTube metadata for product:',
-                  attachmentError,
-                );
-              }
-            })
-            .catch((youtubeError) => {
-              console.error(
-                'Failed to upload product video to YouTube:',
-                youtubeError,
+            try {
+              await this.productsService.attachYoutubeVideo(
+                createdProduct._id.toString(),
+                youtubeResult,
               );
-            });
-        }, 1000); // 1 second delay to ensure response is sent first
+              console.log(
+                `✅ YouTube video attached to product: ${createdProduct._id}`,
+              );
+            } catch (attachmentError) {
+              console.error(
+                'Failed to persist YouTube metadata for product:',
+                attachmentError,
+              );
+            }
+          })
+          .catch((youtubeError) => {
+            console.error(
+              'Failed to upload product video to YouTube:',
+              youtubeError,
+            );
+          });
       }
 
       const finalProduct = createdProduct;
@@ -807,40 +805,38 @@ export class ProductsController {
       }
 
       if (shouldTriggerYoutubeUpload) {
-        // Defer YouTube processing to prevent blocking the response and reduce memory usage
-        setTimeout(() => {
-          this.productYoutubeService
-            .handleProductVideoUpload({
-              product: updatedProduct,
-              user,
-              videoFile: youtubeVideoFile,
-              imageFiles: youtubeImageFiles,
-            })
-            .then(async (youtubeResult) => {
-              if (!youtubeResult) {
-                return;
-              }
+        // Process YouTube video in background worker (safe, won't crash main server)
+        this.productYoutubeService
+          .handleProductVideoUpload({
+            product: updatedProduct,
+            user,
+            videoFile: youtubeVideoFile,
+            imageFiles: youtubeImageFiles,
+          })
+          .then(async (youtubeResult) => {
+            if (!youtubeResult) {
+              return;
+            }
 
-              try {
-                await this.productsService.attachYoutubeVideo(
-                  id,
-                  youtubeResult,
-                );
-                console.log(`✅ YouTube video updated for product: ${id}`);
-              } catch (attachmentError) {
-                console.error(
-                  'Failed to persist refreshed YouTube metadata:',
-                  attachmentError,
-                );
-              }
-            })
-            .catch((youtubeError) => {
-              console.error(
-                'Failed to refresh YouTube video for product:',
-                youtubeError,
+            try {
+              await this.productsService.attachYoutubeVideo(
+                id,
+                youtubeResult,
               );
-            });
-        });
+              console.log(`✅ YouTube video updated for product: ${id}`);
+            } catch (attachmentError) {
+              console.error(
+                'Failed to persist refreshed YouTube metadata:',
+                attachmentError,
+              );
+            }
+          })
+          .catch((youtubeError) => {
+            console.error(
+              'Failed to refresh YouTube video for product:',
+              youtubeError,
+            );
+          });
       }
 
       return updatedProduct;

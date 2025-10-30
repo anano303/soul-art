@@ -186,6 +186,16 @@ export class YoutubeService {
       };
     } catch (error) {
       this.logger.error('Error uploading video:', error);
+
+      // Handle quota exceeded error specifically
+      if (error.message?.includes('quota') || error.message?.includes('exceeded')) {
+        this.logger.warn('YouTube upload quota exceeded - this is normal and will reset daily');
+        throw new HttpException(
+          'YouTube upload quota exceeded. Please try again tomorrow.',
+          HttpStatus.TOO_MANY_REQUESTS,
+        );
+      }
+
       throw new HttpException(
         `Failed to upload video: ${error.message}`,
         HttpStatus.INTERNAL_SERVER_ERROR,
