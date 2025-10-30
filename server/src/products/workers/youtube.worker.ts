@@ -488,11 +488,11 @@ async function generateSlideshow(
     const framePath = path.join(framesDir, frameName);
 
     await sharp(images[i].buffer)
-      .resize(1920, 1080, {
+      .resize(1280, 720, {
         fit: 'contain',
         background: { r: 255, g: 255, b: 255, alpha: 1 },
       })
-      .jpeg({ quality: 85 })
+      .jpeg({ quality: 80 })
       .toFile(framePath);
 
     console.log(`      [${i + 1}/${images.length}] ✅ ${frameName}`);
@@ -513,11 +513,11 @@ async function generateSlideshow(
       const outroFramePath = path.join(framesDir, outroFrameName);
       
       await sharp(outroBuffer)
-        .resize(1920, 1080, {
+        .resize(1280, 720, {
           fit: 'contain',
           background: { r: 255, g: 255, b: 255, alpha: 1 },
         })
-        .jpeg({ quality: 85 })
+        .jpeg({ quality: 80 })
         .toFile(outroFramePath);
       
       console.log(`   ✅ Outro image added: ${outroFrameName}`);
@@ -552,16 +552,17 @@ async function generateSlideshow(
       .addInput(inputPattern)
       .inputOptions([`-framerate 1/${slideDuration}`])
       .videoFilters([
-        'scale=1920:1080:force_original_aspect_ratio=decrease',
-        'pad=1920:1080:(ow-iw)/2:(oh-ih)/2',
+        'scale=1280:720:force_original_aspect_ratio=decrease',
+        'pad=1280:720:(ow-iw)/2:(oh-ih)/2',
       ])
       .outputOptions([
         '-c:v libx264',
         '-pix_fmt yuv420p',
         '-r 30',
-        '-preset ultrafast',
-        '-crf 28',
+        '-preset veryfast',
+        '-crf 23',
         '-an',
+        '-threads 2',
       ])
       // @ts-ignore - fluent-ffmpeg types incomplete
       .on('start', (commandLine) => {
