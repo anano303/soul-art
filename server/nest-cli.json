@@ -3,6 +3,23 @@
   "collection": "@nestjs/schematics",
   "sourceRoot": "src",
   "compilerOptions": {
-    "deleteOutDir": true
+    "deleteOutDir": true,
+    "watchAssets": true,
+    "assets": ["**/*.json", "**/*.hbs", "**/*.txt"],
+    "plugins": []
+  },
+  "watchMode": {
+    "watchAssets": true,
+    "ignore": [
+      "**/*.spec.ts",
+      "**/*.e2e-spec.ts",
+      "**/node_modules/**",
+      "**/dist/**",
+      "**/uploads/**",
+      "**/temp/**",
+      "**/tmp/**",
+      "**/.git/**",
+      "**/.env*"
+    ]
   }
 }

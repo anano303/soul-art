@@ -35,6 +35,11 @@ import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
 import axios from 'axios';
 import { PushNotificationService } from '@/push/services/push-notification.service';
 import { FacebookPostingService } from '@/products/services/facebook-posting.service';
+import {
+  BackgroundUploadFile,
+  ProductYoutubeService,
+} from '@/products/services/product-youtube.service';
+import { memoryStorage, diskStorage } from 'multer';
 
 @ApiTags('products')
 @Controller('products')
@@ -42,6 +47,7 @@ export class ProductsController {
   constructor(
     private productsService: ProductsService,
     private appService: AppService,
+    private productYoutubeService: ProductYoutubeService,
     private productExpertAgent: ProductExpertAgent,
     private pushNotificationService: PushNotificationService,
     private facebookPostingService: FacebookPostingService,
@@ -213,10 +219,30 @@ export class ProductsController {
       [
         { name: 'images', maxCount: 10 },
         { name: 'brandLogo', maxCount: 1 },
+        { name: 'video', maxCount: 1 },
       ],
       {
+        storage: diskStorage({
+          destination: (req, file, cb) => {
+            const uploadDir = './uploads/temp';
+            require('fs').mkdirSync(uploadDir, { recursive: true });
+            cb(null, uploadDir);
+          },
+          filename: (req, file, cb) => {
+            const uniqueSuffix =
+              Date.now() + '-' + Math.round(Math.random() * 1e9);
+            cb(
+              null,
+              file.fieldname + '-' + uniqueSuffix + '-' + file.originalname,
+            );
+          },
+        }),
+        limits: {
+          fileSize: 50 * 1024 * 1024, // Reduced to 50MB to prevent memory issues
+          files: 15, // Limit total files
+        },
         fileFilter: (req, file, cb) => {
-          const allowedMimeTypes = [
+          const imageMimeTypes = [
             'image/jpeg',
             'image/png',
             'image/jpg',
@@ -225,7 +251,29 @@ export class ProductsController {
             'image/heic',
             'image/heif',
           ];
-          if (!allowedMimeTypes.includes(file.mimetype.toLowerCase())) {
+          const videoMimeTypes = [
+            'video/mp4',
+            'video/quicktime',
+            'video/mpeg',
+            'video/x-matroska',
+            'video/webm',
+          ];
+
+          const mimetype = file.mimetype.toLowerCase();
+
+          if (file.fieldname === 'video') {
+            if (!videoMimeTypes.includes(mimetype)) {
+              return cb(
+                new Error(
+                  `Unsupported video type: ${file.mimetype}. Supported types: MP4, MOV, MPEG, MKV, WEBM.`,
+                ),
+                false,
+              );
+            }
+            return cb(null, true);
+          }
+
+          if (!imageMimeTypes.includes(mimetype)) {
             return cb(
               new Error(
                 `Unsupported file type: ${file.mimetype}. Supported types: JPEG, PNG, GIF, WEBP, HEIC.`,
@@ -245,26 +293,62 @@ export class ProductsController {
     allFiles: {
       images: Express.Multer.File[];
       brandLogo?: Express.Multer.File[];
+      video?: Express.Multer.File[];
     },
   ) {
     const files = allFiles.images;
     const { brandLogo } = allFiles;
+    const videoFile = allFiles.video?.[0] || null;
 
     if (!files || files.length === 0) {
       throw new BadRequestException('At least one image is required');
     }
 
     try {
+      // Process images with error handling to prevent server crashes
       const imageUrls = await Promise.all(
-        files.map((file) => this.appService.uploadImageToCloudinary(file)),
+        files.map(async (file) => {
+          try {
+            const fileBuffer = require('fs').readFileSync(file.path);
+            const fileWithBuffer = {
+              ...file,
+              buffer: fileBuffer,
+            };
+            return await this.appService.uploadImageToCloudinary(
+              fileWithBuffer,
+            );
+          } catch (uploadError) {
+            console.error('Failed to upload image to Cloudinary:', uploadError);
+            throw new BadRequestException(
+              `Failed to upload image: ${file.originalname}`,
+            );
+          } finally {
+            // Clean up temp file
+            try {
+              require('fs').unlinkSync(file.path);
+            } catch (cleanupError) {
+              console.warn('Failed to cleanup temp file:', cleanupError);
+            }
+          }
+        }),
       );
 
       let brandLogoUrl = null;
 
       if (brandLogo && brandLogo.length > 0) {
-        brandLogoUrl = await this.appService.uploadImageToCloudinary(
-          brandLogo[0],
-        );
+        const fileBuffer = require('fs').readFileSync(brandLogo[0].path);
+        const fileWithBuffer = {
+          ...brandLogo[0],
+          buffer: fileBuffer,
+        };
+        brandLogoUrl =
+          await this.appService.uploadImageToCloudinary(fileWithBuffer);
+        // Clean up temp file
+        try {
+          require('fs').unlinkSync(brandLogo[0].path);
+        } catch (cleanupError) {
+          console.warn('Failed to cleanup temp brandLogo file:', cleanupError);
+        }
       } else if (productData.brandLogoUrl) {
         brandLogoUrl = productData.brandLogoUrl;
       } else if (user.role === Role.Seller && user.storeLogoPath) {
@@ -340,15 +424,83 @@ export class ProductsController {
         videoDescription,
       });
 
+      const youtubeVideoFile = this.prepareFileForBackground(videoFile);
+      const youtubeImageFiles = files
+        .map((file) => this.prepareFileForBackground(file))
+        .filter((item): item is BackgroundUploadFile => !!item);
+
+      const shouldTriggerYoutubeUpload =
+        !!youtubeVideoFile ||
+        youtubeImageFiles.length > 0 ||
+        (!createdProduct.youtubeVideoId &&
+          (createdProduct.images?.length ?? 0) > 0);
+
+      console.log('🎬 YouTube Upload Check:', {
+        hasVideoFile: !!youtubeVideoFile,
+        imageFilesCount: youtubeImageFiles.length,
+        hasExistingVideo: !!createdProduct.youtubeVideoId,
+        imagesCount: createdProduct.images?.length ?? 0,
+        shouldTrigger: shouldTriggerYoutubeUpload,
+      });
+
+      // Don't cleanup video file immediately - it will be cleaned up by YouTube service
+      // Only cleanup if YouTube processing is not needed
+      if (!shouldTriggerYoutubeUpload && videoFile?.path) {
+        try {
+          require('fs').unlinkSync(videoFile.path);
+        } catch (cleanupError) {
+          console.warn('Failed to cleanup temp video file:', cleanupError);
+        }
+      }
+
+      if (shouldTriggerYoutubeUpload) {
+        // Process YouTube video in background worker (safe, won't crash main server)
+        this.productYoutubeService
+          .handleProductVideoUpload({
+            product: createdProduct,
+            user,
+            videoFile: youtubeVideoFile,
+            imageFiles: youtubeImageFiles,
+          })
+          .then(async (youtubeResult) => {
+            if (!youtubeResult) {
+              return;
+            }
+
+            try {
+              await this.productsService.attachYoutubeVideo(
+                createdProduct._id.toString(),
+                youtubeResult,
+              );
+              console.log(
+                `✅ YouTube video attached to product: ${createdProduct._id}`,
+              );
+            } catch (attachmentError) {
+              console.error(
+                'Failed to persist YouTube metadata for product:',
+                attachmentError,
+              );
+            }
+          })
+          .catch((youtubeError) => {
+            console.error(
+              'Failed to upload product video to YouTube:',
+              youtubeError,
+            );
+          });
+      }
+
+      const finalProduct = createdProduct;
+
       // Send push notification for new product (don't await to avoid blocking response)
-      this.sendNewProductPushNotification(createdProduct).catch((error) => {
+      this.sendNewProductPushNotification(finalProduct).catch((error) => {
         console.error(
           'Failed to send push notification for new product:',
           error,
         );
       });
 
-      return createdProduct;
+      return finalProduct;
     } catch (error) {
       console.error('Error creating product:', error);
       throw new InternalServerErrorException(
@@ -362,10 +514,76 @@ export class ProductsController {
   @Roles(Role.Admin, Role.Seller)
   @Put(':id')
   @UseInterceptors(
-    FileFieldsInterceptor([
-      { name: 'images', maxCount: 10 },
-      { name: 'brandLogo', maxCount: 1 },
-    ]),
+    FileFieldsInterceptor(
+      [
+        { name: 'images', maxCount: 10 },
+        { name: 'brandLogo', maxCount: 1 },
+        { name: 'video', maxCount: 1 },
+      ],
+      {
+        storage: diskStorage({
+          destination: (req, file, cb) => {
+            const uploadDir = './uploads/temp';
+            require('fs').mkdirSync(uploadDir, { recursive: true });
+            cb(null, uploadDir);
+          },
+          filename: (req, file, cb) => {
+            const uniqueSuffix =
+              Date.now() + '-' + Math.round(Math.random() * 1e9);
+            cb(
+              null,
+              file.fieldname + '-' + uniqueSuffix + '-' + file.originalname,
+            );
+          },
+        }),
+        limits: {
+          fileSize: 50 * 1024 * 1024, // Reduced to 50MB to prevent memory issues
+          files: 15, // Limit total files
+        },
+        fileFilter: (req, file, cb) => {
+          const imageMimeTypes = [
+            'image/jpeg',
+            'image/png',
+            'image/jpg',
+            'image/gif',
+            'image/webp',
+            'image/heic',
+            'image/heif',
+          ];
+          const videoMimeTypes = [
+            'video/mp4',
+            'video/quicktime',
+            'video/mpeg',
+            'video/x-matroska',
+            'video/webm',
+          ];
+
+          const mimetype = file.mimetype.toLowerCase();
+
+          if (file.fieldname === 'video') {
+            if (!videoMimeTypes.includes(mimetype)) {
+              return cb(
+                new Error(
+                  `Unsupported video type: ${file.mimetype}. Supported types: MP4, MOV, MPEG, MKV, WEBM.`,
+                ),
+                false,
+              );
+            }
+            return cb(null, true);
+          }
+
+          if (!imageMimeTypes.includes(mimetype)) {
+            return cb(
+              new Error(
+                `Unsupported file type: ${file.mimetype}. Supported types: JPEG, PNG, GIF, WEBP, HEIC.`,
+              ),
+              false,
+            );
+          }
+          cb(null, true);
+        },
+      },
+    ),
   )
   async updateProduct(
     @Param('id') id: string,
@@ -376,6 +594,7 @@ export class ProductsController {
     files: {
       images?: Express.Multer.File[];
       brandLogo?: Express.Multer.File[];
+      video?: Express.Multer.File[];
     },
   ) {
     const product = await this.productsService.findById(id);
@@ -389,19 +608,43 @@ export class ProductsController {
     try {
       let imageUrls;
       let brandLogoUrl;
+      const videoFile = files?.video?.[0] || null;
 
       if (files?.images?.length) {
         imageUrls = await Promise.all(
-          files.images.map((file) =>
-            this.appService.uploadImageToCloudinary(file),
-          ),
+          files.images.map(async (file) => {
+            try {
+              const fileBuffer = require('fs').readFileSync(file.path);
+              const fileWithBuffer = {
+                ...file,
+                buffer: fileBuffer,
+              };
+              return await this.appService.uploadImageToCloudinary(
+                fileWithBuffer,
+              );
+            } catch (uploadError) {
+              console.error(
+                'Failed to upload image to Cloudinary:',
+                uploadError,
+              );
+              throw new BadRequestException(
+                `Failed to upload image: ${file.originalname}`,
+              );
+            }
+            // Don't cleanup here - will be cleaned up after YouTube processing decision
+          }),
         );
       }
 
       if (files?.brandLogo?.length) {
-        brandLogoUrl = await this.appService.uploadImageToCloudinary(
-          files.brandLogo[0],
-        );
+        const fileBuffer = require('fs').readFileSync(files.brandLogo[0].path);
+        const fileWithBuffer = {
+          ...files.brandLogo[0],
+          buffer: fileBuffer,
+        };
+        brandLogoUrl =
+          await this.appService.uploadImageToCloudinary(fileWithBuffer);
+        // Don't cleanup here - will be cleaned up after YouTube processing decision
       } else if (productData.brandLogoUrl) {
         brandLogoUrl = productData.brandLogoUrl;
       } else if (
@@ -524,6 +767,90 @@ export class ProductsController {
 
       const updatedProduct = await this.productsService.update(id, updateData);
 
+      const youtubeVideoFile = this.prepareFileForBackground(videoFile);
+      const youtubeImageFiles = (files?.images || [])
+        .map((file) => this.prepareFileForBackground(file))
+        .filter((item): item is BackgroundUploadFile => !!item);
+
+      const shouldTriggerYoutubeUpload =
+        !!youtubeVideoFile ||
+        youtubeImageFiles.length > 0 ||
+        (!updatedProduct.youtubeVideoId &&
+          (updatedProduct.images?.length ?? 0) > 0) ||
+        // Trigger if images have changed (for updates)
+        JSON.stringify(finalImages.sort()) !==
+          JSON.stringify((product.images || []).sort());
+
+      console.log('🎬 YouTube Upload Check (Update):', {
+        hasVideoFile: !!youtubeVideoFile,
+        imageFilesCount: youtubeImageFiles.length,
+        hasExistingVideo: !!updatedProduct.youtubeVideoId,
+        imagesCount: updatedProduct.images?.length ?? 0,
+        shouldTrigger: shouldTriggerYoutubeUpload,
+      });
+
+      // Don't cleanup video file immediately - it will be cleaned up by YouTube service
+      // Only cleanup if YouTube processing is not needed
+      if (!shouldTriggerYoutubeUpload && videoFile?.path) {
+        try {
+          require('fs').unlinkSync(videoFile.path);
+        } catch (cleanupError) {
+          console.warn('Failed to cleanup temp video file:', cleanupError);
+        }
+      }
+
+      // Cleanup image files if YouTube processing is not needed
+      if (!shouldTriggerYoutubeUpload && files?.images?.length) {
+        files.images.forEach((file) => {
+          try {
+            require('fs').unlinkSync(file.path);
+          } catch (cleanupError) {
+            console.warn('Failed to cleanup temp image file:', cleanupError);
+          }
+        });
+      }
+
+      // Cleanup brandLogo file if YouTube processing is not needed
+      if (!shouldTriggerYoutubeUpload && files?.brandLogo?.length) {
+        try {
+          require('fs').unlinkSync(files.brandLogo[0].path);
+        } catch (cleanupError) {
+          console.warn('Failed to cleanup temp brandLogo file:', cleanupError);
+        }
+      }
+
+      if (shouldTriggerYoutubeUpload) {
+        // Process YouTube video in background worker (safe, won't crash main server)
+        this.productYoutubeService
+          .handleProductVideoUpload({
+            product: updatedProduct,
+            user,
+            videoFile: youtubeVideoFile,
+            imageFiles: youtubeImageFiles,
+          })
+          .then(async (youtubeResult) => {
+            if (!youtubeResult) {
+              return;
+            }
+
+            try {
+              await this.productsService.attachYoutubeVideo(id, youtubeResult);
+              console.log(`✅ YouTube video updated for product: ${id}`);
+            } catch (attachmentError) {
+              console.error(
+                'Failed to persist refreshed YouTube metadata:',
+                attachmentError,
+              );
+            }
+          })
+          .catch((youtubeError) => {
+            console.error(
+              'Failed to refresh YouTube video for product:',
+              youtubeError,
+            );
+          });
+      }
+
       return updatedProduct;
     } catch (error) {
       console.error('Update error:', error);
@@ -591,6 +918,35 @@ export class ProductsController {
     }
 
     return updatedProduct;
+  }
+
+  private prepareFileForBackground(
+    file?: Express.Multer.File | null,
+  ): BackgroundUploadFile | null {
+    if (!file || !file.path) {
+      return null;
+    }
+
+    try {
+      // Check if file exists before trying to read it
+      if (!require('fs').existsSync(file.path)) {
+        console.warn(
+          `Temp file not found for background processing: ${file.path}`,
+        );
+        return null;
+      }
+
+      const buffer = require('fs').readFileSync(file.path);
+
+      return {
+        buffer: buffer,
+        originalname: file.originalname,
+        mimetype: file.mimetype,
+      };
+    } catch (error) {
+      console.error('Failed to prepare file for background processing:', error);
+      return null;
+    }
   }
 
   @Post(':id/post-to-facebook')

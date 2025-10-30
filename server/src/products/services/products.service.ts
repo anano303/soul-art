@@ -33,6 +33,7 @@ import {
 } from '@/utils/subcategories';
 import { ProductDto, FindAllProductsDto } from '../dtos/product.dto';
 import { FacebookPostingService } from '@/products/services/facebook-posting.service';
+import { YoutubeVideoResult } from './product-youtube.service';
 
 interface FindManyParams {
   keyword?: string;
@@ -782,6 +783,27 @@ export class ProductsService {
       // Rethrow any other errors
       throw error;
     }
+  }
+
+  async attachYoutubeVideo(
+    productId: string,
+    videoPayload: YoutubeVideoResult,
+  ): Promise<ProductDocument | null> {
+    if (!Types.ObjectId.isValid(productId)) {
+      throw new BadRequestException('Invalid product ID.');
+    }
+
+    return this.productModel
+      .findByIdAndUpdate(
+        productId,
+        {
+          youtubeVideoId: videoPayload.videoId,
+          youtubeVideoUrl: videoPayload.videoUrl,
+          youtubeEmbedUrl: videoPayload.embedUrl,
+        },
+        { new: true },
+      )
+      .exec();
   }
 
   async findAll(options: FindAllProductsDto): Promise<any> {

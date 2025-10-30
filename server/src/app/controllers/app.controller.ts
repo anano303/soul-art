@@ -1,6 +1,7 @@
 import {
   Controller,
   Post,
+  Get,
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
@@ -12,6 +13,15 @@ import { createRateLimitInterceptor } from '@/interceptors/rate-limit.intercepto
 @Controller('')
 export class AppController {
   constructor(private appService: AppService) {}
+
+  @Get('health')
+  getHealth() {
+    return {
+      status: 'ok',
+      timestamp: new Date().toISOString(),
+      uptime: process.uptime(),
+    };
+  }
 
   @Post('upload')
   @UseInterceptors(FileInterceptor('image'))

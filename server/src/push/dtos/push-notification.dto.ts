@@ -1,4 +1,10 @@
-import { IsObject, IsOptional, IsString, IsBoolean } from 'class-validator';
+import {
+  IsBoolean,
+  IsObject,
+  IsOptional,
+  IsString,
+  IsUrl,
+} from 'class-validator';
 
 export class PushSubscriptionDto {
   @IsObject()
@@ -50,4 +56,28 @@ export class PushNotificationDto {
 
   @IsBoolean()
   requireInteraction: boolean;
+}
+
+export class NewProductNotificationDto {
+  @IsString()
+  productId: string;
+
+  @IsString()
+  productName: string;
+
+  @IsOptional()
+  @IsString()
+  productPrice?: string;
+
+  @IsOptional()
+  @IsUrl({}, { message: 'productImage must be a valid URL' })
+  productImage?: string;
+
+  @IsOptional()
+  @IsString()
+  category?: string;
+
+  @IsOptional()
+  @IsString()
+  subCategory?: string;
 }

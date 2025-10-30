@@ -14,6 +14,8 @@ import { Model } from 'mongoose';
 import { ReferralsModule } from '@/referrals/referrals.module';
 import { FacebookPostingService } from './services/facebook-posting.service';
 import { PushNotificationModule } from '@/push/push-notification.module';
+import { YoutubeModule } from '@/youtube/youtube.module';
+import { ProductYoutubeService } from './services/product-youtube.service';
 
 // Add a provider to manually drop the problematic index on module initialization
 export class IndexCleanupService implements OnModuleInit {
@@ -109,12 +111,14 @@ export class IndexCleanupService implements OnModuleInit {
     forwardRef(() => UsersModule),
     forwardRef(() => ReferralsModule), // Add ReferralsModule
     PushNotificationModule,
+    YoutubeModule,
   ],
   providers: [
     ProductsService,
     AppService,
     IndexCleanupService,
     FacebookPostingService,
+    ProductYoutubeService,
   ],
   controllers: [ProductsController],
   exports: [

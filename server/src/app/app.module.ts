@@ -23,6 +23,7 @@ import { SharedServicesModule } from './shared-services.module';
 import { ReferralsModule } from '../referrals/referrals.module';
 import { PushNotificationModule } from '../push/push-notification.module';
 import { BlogModule } from '../blog/blog.module';
+import { YoutubeModule } from '@/youtube/youtube.module';
 
 @Module({
   imports: [
@@ -51,6 +52,7 @@ import { BlogModule } from '../blog/blog.module';
     ReferralsModule,
     PushNotificationModule,
     BlogModule,
+    YoutubeModule,
   ],
   controllers: [AppController],
   providers: [AppService, GoogleStrategy],

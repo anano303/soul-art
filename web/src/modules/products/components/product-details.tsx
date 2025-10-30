@@ -163,6 +163,38 @@ export function ProductDetails({ product }: ProductDetailsProps) {
   const router = useRouter();
   const { t, language } = useLanguage();
 
+  const resolvedYoutubeEmbedUrl = useMemo(() => {
+    if (product.youtubeEmbedUrl) {
+      return product.youtubeEmbedUrl;
+    }
+
+    if (product.youtubeVideoUrl) {
+      try {
+        const youtubeUrl = new URL(product.youtubeVideoUrl);
+        let videoId = "";
+
+        if (youtubeUrl.hostname.includes("youtu.be")) {
+          videoId = youtubeUrl.pathname.substring(1);
+        } else {
+          const paramId = youtubeUrl.searchParams.get("v");
+          if (paramId) {
+            videoId = paramId;
+          }
+        }
+
+        if (videoId) {
+          return `https://www.youtube.com/embed/${videoId}`;
+        }
+      } catch (error) {
+        console.error("Failed to parse YouTube URL", error);
+      }
+    }
+
+    return null;
+  }, [product.youtubeEmbedUrl, product.youtubeVideoUrl]);
+
+  const hasVideo = Boolean(resolvedYoutubeEmbedUrl || product.videoDescription);
+
   // Determine theme based on product category
   const getThemeClass = () => {
     const categoryName =
@@ -1025,7 +1057,7 @@ export function ProductDetails({ product }: ProductDetailsProps) {
 
           <div className="tabs">
             <div className="tabs-list">
-              {product.videoDescription && (
+              {hasVideo && (
                 <button
                   className={`tabs-trigger ${
                     activeTab === "video" ? "active" : ""
@@ -1045,18 +1077,28 @@ export function ProductDetails({ product }: ProductDetailsProps) {
               </button>
             </div>
 
-            {product.videoDescription && (
+            {hasVideo && (
               <div
                 className={`tab-content ${
                   activeTab === "video" ? "active" : ""
                 }`}
               >
                 <div className="video-container">
-                  <div
-                    dangerouslySetInnerHTML={{
-                      __html: product.videoDescription,
-                    }}
-                  />
+                  {resolvedYoutubeEmbedUrl ? (
+                    <iframe
+                      src={resolvedYoutubeEmbedUrl}
+                      title={displayName}
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+                      allowFullScreen
+                      frameBorder={0}
+                    />
+                  ) : product.videoDescription ? (
+                    <div
+                      dangerouslySetInnerHTML={{
+                        __html: product.videoDescription,
+                      }}
+                    />
+                  ) : null}
                 </div>
               </div>
             )}

@@ -45,7 +45,7 @@ export class FacebookPostingService {
   private buildProductUrl(product: ProductDocument): string {
     const base = this.getPublicBaseUrl();
     const slugOrId = (product as any).slug || product._id;
-    return `${base}/product/${slugOrId}`;
+    return `${base}/products/${slugOrId}`;
   }
 
   private formatPrice(product: ProductDocument): {

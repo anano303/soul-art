@@ -33,6 +33,9 @@ interface ProductFormData extends BaseProductFormData {
     ageGroup?: string;
   };
   videoDescription?: string; // YouTube embed code or URL
+  youtubeVideoId?: string;
+  youtubeVideoUrl?: string;
+  youtubeEmbedUrl?: string;
   // Discount functionality
   discountPercentage?: number;
   discountStartDate?: string;
@@ -81,7 +84,6 @@ export function CreateProductForm({
       countInStock: 1,
       hashtags: [],
       brandLogo: undefined,
-      videoDescription: "",
     }
   );
 
@@ -111,6 +113,11 @@ export function CreateProductForm({
   const [serverError, setServerError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [videoFile, setVideoFile] = useState<File | null>(null);
+  const [videoError, setVideoError] = useState<string | null>(null);
+  const [existingYoutubeVideoUrl, setExistingYoutubeVideoUrl] = useState<
+    string | null
+  >(initialData?.youtubeVideoUrl || null);
 
   // Authorization check - redirect if not authenticated or not authorized
   useEffect(() => {
@@ -268,6 +275,9 @@ export function CreateProductForm({
 
   useEffect(() => {
     if (initialData) {
+      setExistingYoutubeVideoUrl(initialData.youtubeVideoUrl || null);
+      setVideoFile(null);
+      setVideoError(null);
       // Basic form data setup
       setFormData((prev) => ({
         ...prev,
@@ -289,7 +299,6 @@ export function CreateProductForm({
         sizes: initialData.sizes || [],
         colors: initialData.colors || [],
         hashtags: initialData.hashtags || [],
-        videoDescription: initialData.videoDescription || "",
       }));
 
       // Set hashtags input text
@@ -390,8 +399,11 @@ export function CreateProductForm({
     setErrors({});
     setServerError(null);
     setSuccess(null);
-
-    setSelectedCategory("");
+    setVideoFile(null);
+    setVideoError(null);
+    setVideoFile(null);
+    setVideoError(null);
+    setExistingYoutubeVideoUrl(null);
     setSelectedSubcategory("");
     setSelectedAgeGroups([]);
     setSelectedSizes([]);
@@ -721,6 +733,41 @@ export function CreateProductForm({
     }));
   };
 
+  const handleVideoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+
+    if (!file) {
+      setVideoFile(null);
+      setVideoError(null);
+      return;
+    }
+
+    const maxSizeMb = 150;
+    if (file.size > maxSizeMb * 1024 * 1024) {
+      setVideoFile(null);
+      setVideoError(
+        language === "en"
+          ? `Video file is too large. Maximum size is ${maxSizeMb}MB.`
+          : `ვიდეოს ზომა არ უნდა აღემატებოდეს ${maxSizeMb}MB-ს.`
+      );
+      return;
+    }
+
+    setVideoFile(file);
+    setVideoError(null);
+  };
+
+  const handleRemoveVideo = () => {
+    setVideoFile(null);
+    setVideoError(null);
+    const input = document.getElementById(
+      "productVideo"
+    ) as HTMLInputElement | null;
+    if (input) {
+      input.value = "";
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -828,6 +875,11 @@ export function CreateProductForm({
       // With HTTP-only cookies, no need to check token manually
       // Server will handle authentication automatically
 
+      if (videoError) {
+        setPending(false);
+        return;
+      }
+
       const formDataToSend = new FormData();
 
       // Add basic form fields
@@ -836,11 +888,6 @@ export function CreateProductForm({
       formDataToSend.append("price", String(formData.price));
       formDataToSend.append("description", formData.description);
       formDataToSend.append("descriptionEn", formData.descriptionEn || "");
-
-      // Add video description if present
-      if (formData.videoDescription) {
-        formDataToSend.append("videoDescription", formData.videoDescription);
-      }
 
       formDataToSend.append("countInStock", String(totalCount));
 
@@ -946,6 +993,10 @@ export function CreateProductForm({
         return;
       }
 
+      if (videoFile) {
+        formDataToSend.append("video", videoFile);
+      }
+
       // Double check that we're sending either existingImages or new images
       const hasImages =
         (formDataToSend.has("existingImages") &&
@@ -1002,10 +1053,15 @@ export function CreateProductForm({
       }
 
       const data = await response.json();
+      if (data?.youtubeVideoUrl) {
+        setExistingYoutubeVideoUrl(data.youtubeVideoUrl);
+      }
       const successMessage = isEdit
         ? t("adminProducts.productUpdatedSuccess")
         : t("adminProducts.productAddedSuccess");
       setSuccess(successMessage);
+      setVideoFile(null);
+      setVideoError(null);
 
       toast({
         title: isEdit
@@ -1017,21 +1073,26 @@ export function CreateProductForm({
       // Send new product notification for new products only
       if (!isEdit && data?._id) {
         try {
-          await fetch("/api/push/new-product", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            credentials: "include",
-            body: JSON.stringify({
-              productId: data._id,
-              productName: formData.name,
-              productPrice: formData.price,
-              productImage: data.images?.[0] || null,
-              category: selectedCategory,
-              subCategory: selectedSubcategory,
-            }),
-          });
+          await fetch(
+            `${
+              process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/v1"
+            }/push/new-product`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              credentials: "include",
+              body: JSON.stringify({
+                productId: data._id,
+                productName: formData.name,
+                productPrice: formData.price,
+                productImage: data.images?.[0] || null,
+                category: selectedCategory,
+                subCategory: selectedSubcategory,
+              }),
+            }
+          );
           console.log("✅ New product notification sent:", formData.name);
         } catch (notificationError) {
           console.error(
@@ -1236,19 +1297,49 @@ export function CreateProductForm({
             <p className="create-product-error text-center">{serverError}</p>
           </div>
         )}{" "}
-        <div>
-          <label htmlFor="videoDescription">
-            YouTube Embed Code (optional)
+        <div className="video-upload-section">
+          <label htmlFor="productVideo">
+            {language === "en"
+              ? "Product video (optional)"
+              : "პროდუქტის ვიდეო (არასავალდებულო)"}
           </label>
-          <textarea
-            id="videoDescription"
-            name="videoDescription"
-            value={formData.videoDescription || ""}
-            onChange={handleChange}
-            className="create-product-textarea"
-            placeholder="Paste YouTube embed code or iframe here"
-            rows={3}
+          <p className="video-upload-helper">
+            {language === "en"
+              ? "Uploading a short product video increases the chance of selling your artwork."
+              : "ვიდეოს ატვირთვა გაზრდის გაყიდვების შესაძლებლობას."}
+          </p>
+          <input
+            id="productVideo"
+            type="file"
+            accept="video/*"
+            onChange={handleVideoChange}
+            className="video-file-input"
           />
+          {videoError && <p className="create-product-error">{videoError}</p>}
+          {videoFile && (
+            <div className="selected-video-chip">
+              <span>{videoFile.name}</span>
+              <button
+                type="button"
+                onClick={handleRemoveVideo}
+                className="remove-video-button"
+              >
+                {language === "en" ? "Remove" : "წაშლა"}
+              </button>
+            </div>
+          )}
+          {!videoFile && existingYoutubeVideoUrl && (
+            <a
+              href={existingYoutubeVideoUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="youtube-preview-link"
+            >
+              {language === "en"
+                ? "View current YouTube video"
+                : "იხილეთ ამჟამინდელი YouTube ვიდეო"}
+            </a>
+          )}
         </div>
         {/* Discount Section */}
         <div className="discount-section">
@@ -1606,26 +1697,37 @@ export function CreateProductForm({
               />
             </div>
           </div>
-            {deliveryType === "SoulArt" && (
-              <div className="info-message" style={{
-                background: "linear-gradient(135deg, rgba(1, 38, 69, 0.1), rgba(123, 86, 66, 0.05))",
+          {deliveryType === "SoulArt" && (
+            <div
+              className="info-message"
+              style={{
+                background:
+                  "linear-gradient(135deg, rgba(1, 38, 69, 0.1), rgba(123, 86, 66, 0.05))",
                 padding: "1rem",
                 borderRadius: "8px",
                 borderLeft: "4px solid #012645",
                 marginTop: "0.75rem",
                 fontSize: "0.9rem",
-                color: "#012645"
-              }}>
-                <strong>ℹ️ მნიშვნელოვანი:</strong>
-                <p style={{ marginTop: "0.5rem", marginBottom: "0" }}>
-                  SoulArt მიწოდება თბილისში ღირს 5% მინიმუმ 10 ლარი. გთხოვთ, პროდუქტის ფასი დააწესოთ მინიმუმ 12 ლარი, რაც მოიცავს:
-                </p>
-                <ul style={{ marginTop: "0.5rem", marginBottom: "0", paddingLeft: "1.5rem" }}>
-                  <li>10% საიტის საკომისიო</li>
-                  <li>10 ლარი მიწოდების ღირებულება</li>
-                </ul>
-              </div>
-            )}
+                color: "#012645",
+              }}
+            >
+              <strong>ℹ️ მნიშვნელოვანი:</strong>
+              <p style={{ marginTop: "0.5rem", marginBottom: "0" }}>
+                SoulArt მიწოდება თბილისში ღირს 5% მინიმუმ 10 ლარი. გთხოვთ,
+                პროდუქტის ფასი დააწესოთ მინიმუმ 12 ლარი, რაც მოიცავს:
+              </p>
+              <ul
+                style={{
+                  marginTop: "0.5rem",
+                  marginBottom: "0",
+                  paddingLeft: "1.5rem",
+                }}
+              >
+                <li>10% საიტის საკომისიო</li>
+                <li>10 ლარი მიწოდების ღირებულება</li>
+              </ul>
+            </div>
+          )}
 
           {deliveryType === "SELLER" && (
             <div className="delivery-days">
