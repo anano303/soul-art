@@ -62,7 +62,7 @@ export class ProductYoutubeService {
       productId: product._id,
       hasVideoFile: !!videoFile,
       imageFilesCount: imageFiles.length,
-      productImagesCount: product.images?.length ?? 0
+      productImagesCount: product.images?.length ?? 0,
     });
 
     if (!this.isYoutubeConfigured()) {
@@ -86,9 +86,13 @@ export class ProductYoutubeService {
           ...process.env,
           // Pass necessary environment variables to worker
           YOUTUBE_CLIENT_ID: this.configService.get('YOUTUBE_CLIENT_ID'),
-          YOUTUBE_CLIENT_SECRET: this.configService.get('YOUTUBE_CLIENT_SECRET'),
-          YOUTUBE_REFRESH_TOKEN: this.configService.get('YOUTUBE_REFRESH_TOKEN'),
-        }
+          YOUTUBE_CLIENT_SECRET: this.configService.get(
+            'YOUTUBE_CLIENT_SECRET',
+          ),
+          YOUTUBE_REFRESH_TOKEN: this.configService.get(
+            'YOUTUBE_REFRESH_TOKEN',
+          ),
+        },
       });
 
       return await this.processWithWorker(worker, {
@@ -99,7 +103,6 @@ export class ProductYoutubeService {
         imageFiles,
         tempDir,
       });
-
     } catch (error) {
       this.logger.error(
         'Failed to process product video with worker',
@@ -117,14 +120,19 @@ export class ProductYoutubeService {
 
   private async processWithWorker(
     worker: ChildProcess,
-    message: any
+    message: any,
   ): Promise<YoutubeVideoResult | null> {
     return new Promise((resolve, reject) => {
-      const timeout = setTimeout(() => {
-        worker.kill('SIGTERM');
-        this.logger.error('YouTube worker processing timeout - killed worker');
-        resolve(null); // Don't reject, just return null to prevent main process crash
-      }, 15 * 60 * 1000); // 15 minutes timeout
+      const timeout = setTimeout(
+        () => {
+          worker.kill('SIGTERM');
+          this.logger.error(
+            'YouTube worker processing timeout - killed worker',
+          );
+          resolve(null); // Don't reject, just return null to prevent main process crash
+        },
+        15 * 60 * 1000,
+      ); // 15 minutes timeout
 
       worker.on('message', (response: any) => {
         clearTimeout(timeout);
@@ -148,7 +156,9 @@ export class ProductYoutubeService {
       worker.on('exit', (code, signal) => {
         clearTimeout(timeout);
         if (code && code !== 0) {
-          this.logger.error(`YouTube worker exited with code ${code}, signal: ${signal}`);
+          this.logger.error(
+            `YouTube worker exited with code ${code}, signal: ${signal}`,
+          );
         }
         // Don't resolve here as message handler should have already resolved
       });
@@ -505,7 +515,7 @@ export class ProductYoutubeService {
     console.log('🔧 YouTube Config Check:', {
       hasClientId: !!clientId,
       hasClientSecret: !!clientSecret,
-      hasRefreshToken: !!refreshToken
+      hasRefreshToken: !!refreshToken,
     });
 
     if (!clientId || !clientSecret || !refreshToken) {
@@ -689,6 +699,8 @@ export class ProductYoutubeService {
     // Note: We can't reliably cleanup the original uploaded files here
     // because we don't have access to their original file paths.
     // The controller handles cleanup based on whether YouTube processing is needed.
-    this.logger.debug('YouTube processing completed, original file cleanup handled by controller');
+    this.logger.debug(
+      'YouTube processing completed, original file cleanup handled by controller',
+    );
   }
 }

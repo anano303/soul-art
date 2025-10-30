@@ -48,7 +48,7 @@ class YoutubeWorker {
   constructor() {
     // Create a minimal config service for the worker
     const configService = {
-      get: (key: string) => process.env[key]
+      get: (key: string) => process.env[key],
     } as any;
 
     // Initialize YouTube service with worker's config
@@ -68,7 +68,7 @@ class YoutubeWorker {
       console.error('Worker error:', error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error'
+        error: error instanceof Error ? error.message : 'Unknown error',
       };
     }
   }
@@ -78,9 +78,12 @@ class YoutubeWorker {
     user,
     videoFile,
     imageFiles,
-    tempDir
+    tempDir,
   }: WorkerMessage & { type: 'process_video' }): Promise<any> {
-    console.log('🎬 Worker: Processing YouTube video for product:', product._id);
+    console.log(
+      '🎬 Worker: Processing YouTube video for product:',
+      product._id,
+    );
 
     let videoPath: string | null = null;
 
@@ -141,7 +144,9 @@ class YoutubeWorker {
       return [];
     }
 
-    console.log(`Worker: Fetching ${validUrls.length} product images for slideshow`);
+    console.log(
+      `Worker: Fetching ${validUrls.length} product images for slideshow`,
+    );
 
     const results: BackgroundUploadFile[] = [];
 
@@ -231,7 +236,7 @@ class YoutubeWorker {
           '-r 30',
           '-preset ultrafast', // Faster encoding, less CPU intensive
           '-crf 28', // Lower quality to reduce CPU/memory usage
-          '-an' // No audio
+          '-an', // No audio
         ])
         .on('end', () => resolve())
         .on('error', (err) => reject(err))
@@ -250,7 +255,13 @@ class YoutubeWorker {
     return {
       title: title.substring(0, 100),
       description: description.substring(0, 5000),
-      tags: ['SoulArt', 'artwork', 'digital art', 'creative', product.name].slice(0, 15),
+      tags: [
+        'SoulArt',
+        'artwork',
+        'digital art',
+        'creative',
+        product.name,
+      ].slice(0, 15),
       privacyStatus: 'public' as const,
     };
   }
@@ -280,7 +291,7 @@ process.on('message', async (message: WorkerMessage) => {
     if (process.send) {
       process.send({
         success: false,
-        error: error instanceof Error ? error.message : 'Worker crashed'
+        error: error instanceof Error ? error.message : 'Worker crashed',
       });
     }
   }
@@ -291,18 +302,23 @@ process.on('uncaughtException', (error) => {
   if (process.send) {
     process.send({
       success: false,
-      error: 'Worker crashed with uncaught exception'
+      error: 'Worker crashed with uncaught exception',
     });
   }
   process.exit(1);
 });
 
 process.on('unhandledRejection', (reason, promise) => {
-  console.error('🎬 YouTube Worker: Unhandled rejection at:', promise, 'reason:', reason);
+  console.error(
+    '🎬 YouTube Worker: Unhandled rejection at:',
+    promise,
+    'reason:',
+    reason,
+  );
   if (process.send) {
     process.send({
       success: false,
-      error: 'Worker crashed with unhandled rejection'
+      error: 'Worker crashed with unhandled rejection',
     });
   }
   process.exit(1);

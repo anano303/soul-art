@@ -229,9 +229,13 @@ export class ProductsController {
             cb(null, uploadDir);
           },
           filename: (req, file, cb) => {
-            const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-            cb(null, file.fieldname + '-' + uniqueSuffix + '-' + file.originalname);
-          }
+            const uniqueSuffix =
+              Date.now() + '-' + Math.round(Math.random() * 1e9);
+            cb(
+              null,
+              file.fieldname + '-' + uniqueSuffix + '-' + file.originalname,
+            );
+          },
         }),
         limits: {
           fileSize: 50 * 1024 * 1024, // Reduced to 50MB to prevent memory issues
@@ -308,9 +312,11 @@ export class ProductsController {
             const fileBuffer = require('fs').readFileSync(file.path);
             const fileWithBuffer = {
               ...file,
-              buffer: fileBuffer
+              buffer: fileBuffer,
             };
-            return await this.appService.uploadImageToCloudinary(fileWithBuffer);
+            return await this.appService.uploadImageToCloudinary(
+              fileWithBuffer,
+            );
           } catch (uploadError) {
             console.error('Failed to upload image to Cloudinary:', uploadError);
             throw new BadRequestException(
@@ -333,9 +339,10 @@ export class ProductsController {
         const fileBuffer = require('fs').readFileSync(brandLogo[0].path);
         const fileWithBuffer = {
           ...brandLogo[0],
-          buffer: fileBuffer
+          buffer: fileBuffer,
         };
-        brandLogoUrl = await this.appService.uploadImageToCloudinary(fileWithBuffer);
+        brandLogoUrl =
+          await this.appService.uploadImageToCloudinary(fileWithBuffer);
         // Clean up temp file
         try {
           require('fs').unlinkSync(brandLogo[0].path);
@@ -433,7 +440,7 @@ export class ProductsController {
         imageFilesCount: youtubeImageFiles.length,
         hasExistingVideo: !!createdProduct.youtubeVideoId,
         imagesCount: createdProduct.images?.length ?? 0,
-        shouldTrigger: shouldTriggerYoutubeUpload
+        shouldTrigger: shouldTriggerYoutubeUpload,
       });
 
       // Don't cleanup video file immediately - it will be cleaned up by YouTube service
@@ -521,9 +528,13 @@ export class ProductsController {
             cb(null, uploadDir);
           },
           filename: (req, file, cb) => {
-            const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-            cb(null, file.fieldname + '-' + uniqueSuffix + '-' + file.originalname);
-          }
+            const uniqueSuffix =
+              Date.now() + '-' + Math.round(Math.random() * 1e9);
+            cb(
+              null,
+              file.fieldname + '-' + uniqueSuffix + '-' + file.originalname,
+            );
+          },
         }),
         limits: {
           fileSize: 50 * 1024 * 1024, // Reduced to 50MB to prevent memory issues
@@ -606,9 +617,11 @@ export class ProductsController {
               const fileBuffer = require('fs').readFileSync(file.path);
               const fileWithBuffer = {
                 ...file,
-                buffer: fileBuffer
+                buffer: fileBuffer,
               };
-              return await this.appService.uploadImageToCloudinary(fileWithBuffer);
+              return await this.appService.uploadImageToCloudinary(
+                fileWithBuffer,
+              );
             } catch (uploadError) {
               console.error(
                 'Failed to upload image to Cloudinary:',
@@ -627,9 +640,10 @@ export class ProductsController {
         const fileBuffer = require('fs').readFileSync(files.brandLogo[0].path);
         const fileWithBuffer = {
           ...files.brandLogo[0],
-          buffer: fileBuffer
+          buffer: fileBuffer,
         };
-        brandLogoUrl = await this.appService.uploadImageToCloudinary(fileWithBuffer);
+        brandLogoUrl =
+          await this.appService.uploadImageToCloudinary(fileWithBuffer);
         // Don't cleanup here - will be cleaned up after YouTube processing decision
       } else if (productData.brandLogoUrl) {
         brandLogoUrl = productData.brandLogoUrl;
@@ -764,14 +778,15 @@ export class ProductsController {
         (!updatedProduct.youtubeVideoId &&
           (updatedProduct.images?.length ?? 0) > 0) ||
         // Trigger if images have changed (for updates)
-        (JSON.stringify(finalImages.sort()) !== JSON.stringify((product.images || []).sort()));
+        JSON.stringify(finalImages.sort()) !==
+          JSON.stringify((product.images || []).sort());
 
       console.log('🎬 YouTube Upload Check (Update):', {
         hasVideoFile: !!youtubeVideoFile,
         imageFilesCount: youtubeImageFiles.length,
         hasExistingVideo: !!updatedProduct.youtubeVideoId,
         imagesCount: updatedProduct.images?.length ?? 0,
-        shouldTrigger: shouldTriggerYoutubeUpload
+        shouldTrigger: shouldTriggerYoutubeUpload,
       });
 
       // Don't cleanup video file immediately - it will be cleaned up by YouTube service
@@ -819,10 +834,7 @@ export class ProductsController {
             }
 
             try {
-              await this.productsService.attachYoutubeVideo(
-                id,
-                youtubeResult,
-              );
+              await this.productsService.attachYoutubeVideo(id, youtubeResult);
               console.log(`✅ YouTube video updated for product: ${id}`);
             } catch (attachmentError) {
               console.error(
@@ -918,7 +930,9 @@ export class ProductsController {
     try {
       // Check if file exists before trying to read it
       if (!require('fs').existsSync(file.path)) {
-        console.warn(`Temp file not found for background processing: ${file.path}`);
+        console.warn(
+          `Temp file not found for background processing: ${file.path}`,
+        );
         return null;
       }
 
