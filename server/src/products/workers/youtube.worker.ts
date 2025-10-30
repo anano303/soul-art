@@ -49,6 +49,11 @@ async function processVideo() {
     console.log('');
     console.log('🔧 Step 1: Bootstrapping NestJS Application Context...');
     
+    // Check FFmpeg availability
+    console.log('🔍 Checking FFmpeg installation...');
+    console.log(`   FFmpeg path: ${ffmpegInstaller?.path || 'Not configured'}`);
+    console.log(`   FFprobe path: ${ffprobeInstaller?.path || 'Not configured'}`);
+    
     // Bootstrap NestJS to get services
     const app = await NestFactory.createApplicationContext(AppModule, {
       logger: false,
@@ -145,13 +150,18 @@ async function processVideo() {
       
       console.log('');
       console.log('🎞️  Step 5: Generating slideshow from images...');
-      finalVideoPath = await generateSlideshow(
-        tempDir,
-        imageBuffers,
-        data.productName,
-        configService,
-      );
-      console.log(`✅ Slideshow generated: ${finalVideoPath}`);
+      try {
+        finalVideoPath = await generateSlideshow(
+          tempDir,
+          imageBuffers,
+          data.productName,
+          configService,
+        );
+        console.log(`✅ Slideshow generated: ${finalVideoPath}`);
+      } catch (slideshowError) {
+        console.error('❌ Slideshow generation failed:', slideshowError);
+        throw new Error(`Failed to generate slideshow: ${slideshowError.message}`);
+      }
     } else {
       console.error('❌ ERROR: No video or images available for processing!');
       throw new Error('No video or images available');
@@ -307,10 +317,18 @@ async function generateSlideshow(
   const outputPath = path.join(tempDir, `slideshow-${Date.now()}.mp4`);
   console.log(`   🎬 Output path: ${outputPath}`);
   console.log(`   🔧 Starting FFmpeg encoding...`);
+  console.log(`   📂 Input pattern: ${path.join(framesDir, 'frame-%03d.jpg')}`);
+  
+  // Verify frames exist
+  const frameFiles = await fsp.readdir(framesDir);
+  console.log(`   📁 Frame files in directory: ${frameFiles.join(', ')}`);
 
   await new Promise<void>((resolve, reject) => {
+    const inputPattern = path.join(framesDir, 'frame-%03d.jpg');
+    console.log(`   ▶️  Starting FFmpeg with input: ${inputPattern}`);
+    
     ffmpeg()
-      .addInput(path.join(framesDir, 'frame-%03d.jpg'))
+      .addInput(inputPattern)
       .inputOptions([`-framerate 1/${slideDuration}`])
       .videoFilters([
         'scale=1920:1080:force_original_aspect_ratio=decrease',
@@ -330,7 +348,8 @@ async function generateSlideshow(
       })
       .on('error', (err) => {
         console.error(`   ❌ FFmpeg error: ${err.message}`);
-        reject(err);
+        console.error(`   📋 Full error:`, err);
+        reject(new Error(`FFmpeg slideshow generation failed: ${err.message}`));
       })
       .save(outputPath);
   });
