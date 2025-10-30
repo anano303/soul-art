@@ -129,11 +129,49 @@ export class YoutubeService {
    * @returns YouTube video URL
    */
   async uploadVideo(
-    filePath: string,
+    filePathOrUrl: string,
     options: VideoUploadOptions,
   ): Promise<{ videoId: string; videoUrl: string; embedUrl: string }> {
     try {
       this.ensureYoutubeClient();
+
+      let filePath = filePathOrUrl;
+      let isTemporaryFile = false;
+
+      // Check if it's a URL (Cloudinary)
+      if (
+        filePathOrUrl.startsWith('http://') ||
+        filePathOrUrl.startsWith('https://')
+      ) {
+        this.logger.log(`Downloading video from URL: ${filePathOrUrl}`);
+
+        // Download to temp file
+        const axios = require('axios');
+        const path = require('path');
+        const os = require('os');
+
+        const tempDir = await require('fs').promises.mkdtemp(
+          path.join(os.tmpdir(), 'youtube-upload-'),
+        );
+        filePath = path.join(tempDir, `video-${Date.now()}.mp4`);
+
+        const response = await axios.get(filePathOrUrl, {
+          responseType: 'stream',
+          timeout: 300000, // 5 minutes
+        });
+
+        const writer = fs.createWriteStream(filePath);
+        response.data.pipe(writer);
+
+        await new Promise<void>((resolve, reject) => {
+          writer.on('finish', () => resolve());
+          writer.on('error', reject);
+        });
+
+        isTemporaryFile = true;
+        this.logger.log(`Video downloaded to: ${filePath}`);
+      }
+
       if (!fs.existsSync(filePath)) {
         throw new HttpException('Video file not found', HttpStatus.NOT_FOUND);
       }
@@ -172,6 +210,20 @@ export class YoutubeService {
       const embedUrl = `https://www.youtube.com/embed/${videoId}`;
 
       this.logger.log(`Video uploaded successfully: ${videoUrl}`);
+
+      // Cleanup temporary file
+      if (isTemporaryFile) {
+        try {
+          await require('fs').promises.unlink(filePath);
+          const tempDir = require('path').dirname(filePath);
+          await require('fs').promises.rmdir(tempDir, { recursive: true });
+          this.logger.log('Temporary file cleaned up');
+        } catch (cleanupError) {
+          this.logger.warn(
+            `Failed to cleanup temporary file: ${cleanupError.message}`,
+          );
+        }
+      }
 
       // Playlist-ში დამატება
       const playlistId = this.configService.get<string>('YOUTUBE_PLAYLIST_ID');

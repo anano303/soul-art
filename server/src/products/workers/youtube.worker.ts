@@ -3,6 +3,7 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from '@/app/app.module';
 import { YoutubeService } from '@/youtube/youtube.service';
 import { ConfigService } from '@nestjs/config';
+import { CloudinaryService } from '@/cloudinary/services/cloudinary.service';
 import * as fs from 'fs';
 import { promises as fsp } from 'fs';
 import * as os from 'os';
@@ -184,6 +185,9 @@ async function processVideo() {
     const configService = app.get(ConfigService);
     console.log('✅ ConfigService retrieved');
 
+    const cloudinaryService = app.get(CloudinaryService);
+    console.log('✅ CloudinaryService retrieved');
+
     console.log('');
     console.log('📁 Step 2: Creating temp directory...');
     // Create temp directory
@@ -247,7 +251,9 @@ async function processVideo() {
         tempDir,
         imageBuffers,
         data.productName,
+        data.productId,
         configService,
+        cloudinaryService,
       );
       console.log(`✅ Slideshow generated: ${slideshowPath}`);
 
@@ -283,7 +289,9 @@ async function processVideo() {
           tempDir,
           imageBuffers,
           data.productName,
+          data.productId,
           configService,
+          cloudinaryService,
         );
         console.log(`✅ Slideshow generated: ${finalVideoPath}`);
       } catch (slideshowError) {
@@ -312,30 +320,31 @@ async function processVideo() {
 
     // Build Georgian description with all product details
     let georgianDescription = `🎨 ${data.productName}\n\n`;
-    
+
     if (data.productDescription) {
       georgianDescription += `📝 აღწერა:\n${data.productDescription}\n\n`;
     }
-    
+
     georgianDescription += `👤 ავტორი: ${data.userName || data.userEmail}\n`;
-    
+
     // Price information
     if (data.discountPercentage > 0) {
       const originalPrice = data.price;
-      const discountedPrice = originalPrice * (1 - data.discountPercentage / 100);
+      const discountedPrice =
+        originalPrice * (1 - data.discountPercentage / 100);
       georgianDescription += `💰 ფასი: ${discountedPrice.toFixed(2)}₾ (ფასდაკლება ${data.discountPercentage}%, იყო ${originalPrice.toFixed(2)}₾)\n`;
     } else {
       georgianDescription += `💰 ფასი: ${data.price.toFixed(2)}₾\n`;
     }
-    
+
     if (data.category) {
       georgianDescription += `📂 კატეგორია: ${data.category}\n`;
     }
-    
+
     if (data.brand) {
       georgianDescription += `🏷️ ბრენდი: ${data.brand}\n`;
     }
-    
+
     georgianDescription += `\n🛒 შესყიდვის ბმული: https://soulart.ge/product/${data.productId}\n`;
     georgianDescription += `🎨 ავტორის ყველა ნამუშევარი: https://soulart.ge/artist/${data.userId}\n`;
     georgianDescription += `\n✨ SoulArt - ქართული ხელოვნების პლატფორმა`;
@@ -347,7 +356,7 @@ async function processVideo() {
       'Georgian_Art',
       data.productName,
     ];
-    
+
     if (data.category) {
       tags.push(data.category);
     }
@@ -360,7 +369,10 @@ async function processVideo() {
 
     // Upload to YouTube
     const uploadOptions = {
-      title: `${data.productName} - ${data.userName || 'SoulArt'}`.substring(0, 100),
+      title: `${data.productName} - ${data.userName || 'SoulArt'}`.substring(
+        0,
+        100,
+      ),
       description: georgianDescription,
       tags: tags.slice(0, 15), // YouTube allows max 15 tags
       privacyStatus: 'public' as const,
@@ -370,7 +382,9 @@ async function processVideo() {
     console.log(`   Title: ${uploadOptions.title}`);
     console.log(`   Privacy: ${uploadOptions.privacyStatus}`);
     console.log(`   Tags: ${uploadOptions.tags.join(', ')}`);
-    console.log(`   Description preview: ${uploadOptions.description.substring(0, 200)}...`);
+    console.log(
+      `   Description preview: ${uploadOptions.description.substring(0, 200)}...`,
+    );
 
     console.log('🚀 Starting YouTube upload...');
     const result = await youtubeService.uploadVideo(
@@ -467,7 +481,9 @@ async function generateSlideshow(
   tempDir: string,
   images: Array<{ buffer: Buffer; filename: string }>,
   productName: string,
+  productId: string,
   configService: ConfigService,
+  cloudinaryService: CloudinaryService,
 ): Promise<string> {
   console.log('');
   console.log('   ┌─────────────────────────────────────────────────────');
@@ -508,10 +524,10 @@ async function generateSlideshow(
         timeout: 30000,
       });
       const outroBuffer = Buffer.from(response.data);
-      
+
       const outroFrameName = `frame-${String(images.length + 1).padStart(3, '0')}.jpg`;
       const outroFramePath = path.join(framesDir, outroFrameName);
-      
+
       await sharp(outroBuffer)
         .resize(1280, 720, {
           fit: 'contain',
@@ -519,14 +535,16 @@ async function generateSlideshow(
         })
         .jpeg({ quality: 80 })
         .toFile(outroFramePath);
-      
+
       console.log(`   ✅ Outro image added: ${outroFrameName}`);
     } catch (error) {
       console.warn(`   ⚠️  Failed to add outro image: ${error.message}`);
       console.warn(`   ℹ️  Continuing without outro image...`);
     }
   } else {
-    console.log(`   ℹ️  No outro image configured (SLIDESHOW_OUTRO_IMAGE_URL not set)`);
+    console.log(
+      `   ℹ️  No outro image configured (SLIDESHOW_OUTRO_IMAGE_URL not set)`,
+    );
   }
 
   // Generate video
@@ -596,7 +614,9 @@ async function generateSlideshow(
     try {
       console.log(`   💾 Calling command.save(${outputPath})...`);
       command.save(outputPath);
-      console.log(`   ✅ command.save() called successfully, waiting for FFmpeg to complete...`);
+      console.log(
+        `   ✅ command.save() called successfully, waiting for FFmpeg to complete...`,
+      );
     } catch (syncError) {
       console.error(`   ❌ Synchronous error starting FFmpeg:`, syncError);
       console.error(`   ❌ Error type: ${syncError.constructor.name}`);

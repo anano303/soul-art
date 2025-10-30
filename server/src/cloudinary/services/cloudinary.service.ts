@@ -6,13 +6,13 @@ import { Readable } from 'stream';
 export class CloudinaryService {
   async uploadImage(
     file: Express.Multer.File,
-    options: any = {}
+    options: any = {},
   ): Promise<UploadApiResponse | UploadApiErrorResponse> {
     return new Promise((resolve, reject) => {
       // Merge default options with provided options
       const uploadOptions = {
         folder: 'ecommerce',
-        ...options
+        ...options,
       };
 
       // Use upload instead of upload_stream for better compatibility
@@ -55,21 +55,79 @@ export class CloudinaryService {
     return Promise.all(uploadPromises);
   }
 
-  async uploadBuffer(buffer: Buffer): Promise<string> {
+  async uploadBuffer(
+    buffer: Buffer,
+    publicId?: string,
+    folder: string = 'products',
+    resourceType: 'image' | 'video' = 'image',
+  ): Promise<UploadApiResponse> {
     return new Promise((resolve, reject) => {
+      const uploadOptions: any = {
+        folder,
+        resource_type: resourceType,
+      };
+
+      if (publicId) {
+        uploadOptions.public_id = publicId;
+      }
+
       const upload = v2.uploader.upload_stream(
-        { folder: 'products' },
+        uploadOptions,
         (error, result) => {
           if (error) {
             console.error('Cloudinary upload error:', error);
             return reject(error);
           }
-          resolve(result?.secure_url || '');
+          resolve(result as UploadApiResponse);
         },
       );
 
       const stream = Readable.from(buffer);
       stream.pipe(upload);
+    });
+  }
+
+  async deleteResource(
+    publicId: string,
+    resourceType: 'image' | 'video' = 'image',
+  ): Promise<any> {
+    return new Promise((resolve, reject) => {
+      v2.uploader.destroy(
+        publicId,
+        { resource_type: resourceType },
+        (error, result) => {
+          if (error) {
+            console.error('Cloudinary delete error:', error);
+            return reject(error);
+          }
+          resolve(result);
+        },
+      );
+    });
+  }
+
+  async deleteFolder(folderPath: string): Promise<any> {
+    // Safety check: only allow deleting from youtube-temp folder
+    if (!folderPath.startsWith('youtube-temp/')) {
+      console.error(
+        `❌ Safety check failed: Attempted to delete non-youtube-temp folder: ${folderPath}`,
+      );
+      throw new Error('Can only delete folders from youtube-temp/ directory');
+    }
+
+    console.log(`🗑️  Deleting Cloudinary folder: ${folderPath}`);
+
+    return new Promise((resolve, reject) => {
+      v2.api.delete_resources_by_prefix(folderPath, (error, result) => {
+        if (error) {
+          console.error('Cloudinary folder delete error:', error);
+          return reject(error);
+        }
+        console.log(
+          `✅ Successfully deleted ${result.deleted?.length || 0} resources from ${folderPath}`,
+        );
+        resolve(result);
+      });
     });
   }
 }
