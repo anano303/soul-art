@@ -1,18 +1,15 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
+import { Worker } from 'worker_threads';
 import { YoutubeService, VideoUploadOptions } from '@/youtube/youtube.service';
-import { ProductDocument } from '../schemas/product.schema';
+import { Product, ProductDocument } from '../schemas/product.schema';
 import { UserDocument } from '@/users/schemas/user.schema';
 import * as fs from 'fs';
 import { promises as fsp } from 'fs';
 import * as os from 'os';
 import * as path from 'path';
-import { fork, ChildProcess } from 'child_process';
-import ffmpeg from 'fluent-ffmpeg';
-import ffmpegInstaller from '@ffmpeg-installer/ffmpeg';
-import ffprobeInstaller from '@ffprobe-installer/ffprobe';
-import sharp from 'sharp';
-import axios from 'axios';
 
 export interface BackgroundUploadFile {
   buffer: Buffer;
@@ -36,21 +33,12 @@ export interface YoutubeVideoResult {
 @Injectable()
 export class ProductYoutubeService {
   private readonly logger = new Logger(ProductYoutubeService.name);
-  private readonly maxSlides = 50;
-  private outroSlide: BackgroundUploadFile | null | undefined;
-  private audioTrack: BackgroundUploadFile | null | undefined;
 
   constructor(
     private readonly youtubeService: YoutubeService,
     private readonly configService: ConfigService,
-  ) {
-    if (ffmpegInstaller?.path) {
-      ffmpeg.setFfmpegPath(ffmpegInstaller.path);
-    }
-    if (ffprobeInstaller?.path) {
-      ffmpeg.setFfprobePath(ffprobeInstaller.path);
-    }
-  }
+    @InjectModel(Product.name) private productModel: Model<Product>,
+  ) {}
 
   async handleProductVideoUpload({
     product,
@@ -71,250 +59,76 @@ export class ProductYoutubeService {
       return null;
     }
 
-    console.log('✅ YouTube is configured, proceeding with upload');
-
-    let tempDir: string | null = null;
+    console.log(
+      '✅ YouTube configured, starting Worker Thread for video processing',
+    );
 
     try {
-      tempDir = await fsp.mkdtemp(path.join(os.tmpdir(), 'soulart-product-'));
-
-      // Spawn worker process for video processing
-      const workerPath = path.join(__dirname, 'youtube-worker.js');
-      const worker = fork(workerPath, [], {
-        stdio: ['pipe', 'pipe', 'pipe', 'ipc'],
-        env: {
-          ...process.env,
-          // Pass necessary environment variables to worker
-          YOUTUBE_CLIENT_ID: this.configService.get('YOUTUBE_CLIENT_ID'),
-          YOUTUBE_CLIENT_SECRET: this.configService.get(
-            'YOUTUBE_CLIENT_SECRET',
-          ),
-          YOUTUBE_REFRESH_TOKEN: this.configService.get(
-            'YOUTUBE_REFRESH_TOKEN',
-          ),
-        },
-      });
-
-      return await this.processWithWorker(worker, {
-        type: 'process_video',
-        product: product.toObject ? product.toObject() : product,
-        user: user.toObject ? user.toObject() : user,
-        videoFile,
-        imageFiles,
-        tempDir,
-      });
-    } catch (error) {
-      this.logger.error(
-        'Failed to process product video with worker',
-        error as Error,
-      );
-      return null;
-    } finally {
-      if (tempDir) {
-        await this.safeRemoveDir(tempDir);
+      // Save video file to temp location if exists
+      let videoFilePath: string | undefined;
+      if (videoFile && videoFile.buffer) {
+        const tempDir = await fsp.mkdtemp(
+          path.join(os.tmpdir(), 'soulart-upload-'),
+        );
+        videoFilePath = path.join(tempDir, `video-${Date.now()}.mp4`);
+        await fsp.writeFile(videoFilePath, videoFile.buffer);
       }
-      // Clean up original uploaded files after YouTube processing
-      await this.cleanupUploadedFiles(videoFile, imageFiles);
-    }
-  }
 
-  private async processWithWorker(
-    worker: ChildProcess,
-    message: any,
-  ): Promise<YoutubeVideoResult | null> {
-    return new Promise((resolve, reject) => {
-      const timeout = setTimeout(
-        () => {
-          worker.kill('SIGTERM');
-          this.logger.error(
-            'YouTube worker processing timeout - killed worker',
-          );
-          resolve(null); // Don't reject, just return null to prevent main process crash
+      // Start worker thread for background processing
+      const workerPath = path.join(__dirname, '../workers/youtube.worker.js');
+      const worker = new Worker(workerPath, {
+        workerData: {
+          productId: product._id.toString(),
+          productName: product.name,
+          productDescription: product.description,
+          userName: user.name,
+          userEmail: user.email,
+          images: product.images || [],
+          videoFilePath,
         },
-        15 * 60 * 1000,
-      ); // 15 minutes timeout
+      });
 
-      worker.on('message', (response: any) => {
-        clearTimeout(timeout);
-        worker.kill('SIGTERM');
-
-        if (response.success) {
-          resolve(response.result);
+      worker.on('message', async (message) => {
+        if (message.success) {
+          // Update product with YouTube info
+          await this.productModel.findByIdAndUpdate(
+            message.data.productId,
+            {
+              youtubeVideoId: message.data.videoId,
+              youtubeVideoUrl: message.data.videoUrl,
+              youtubeEmbedUrl: message.data.embedUrl,
+            },
+            { new: true },
+          );
+          this.logger.log(
+            `✅ Product ${message.data.productId} updated with YouTube video`,
+          );
         } else {
-          this.logger.error('YouTube worker failed:', response.error);
-          resolve(null); // Return null instead of throwing to prevent crash
+          this.logger.error(`❌ Worker failed: ${message.error}`);
         }
       });
 
       worker.on('error', (error) => {
-        clearTimeout(timeout);
-        worker.kill('SIGTERM');
-        this.logger.error('YouTube worker process error:', error);
-        resolve(null); // Return null instead of throwing
+        this.logger.error('Worker thread error:', error);
       });
 
-      worker.on('exit', (code, signal) => {
-        clearTimeout(timeout);
-        if (code && code !== 0) {
-          this.logger.error(
-            `YouTube worker exited with code ${code}, signal: ${signal}`,
-          );
+      worker.on('exit', (code) => {
+        if (code !== 0) {
+          this.logger.error(`Worker stopped with exit code ${code}`);
         }
-        // Don't resolve here as message handler should have already resolved
       });
 
-      // Send the processing message to worker
-      worker.send(message);
-    });
-  }
+      this.logger.log(`🎬 YouTube video processing started in worker thread`);
 
-  private async fetchImagesFromProduct(
-    product: ProductDocument,
-  ): Promise<BackgroundUploadFile[]> {
-    if (!product || !Array.isArray(product.images) || !product.images.length) {
-      return [];
-    }
-
-    const validUrls = product.images
-      .map((url) => {
-        try {
-          return new URL(url).toString();
-        } catch {
-          return null;
-        }
-      })
-      .filter((url): url is string => !!url)
-      .slice(0, this.maxSlides);
-
-    if (!validUrls.length) {
-      return [];
-    }
-
-    this.logger.log(
-      `No uploaded images provided. Fetching ${validUrls.length} product image(s) for slideshow generation.`,
-    );
-
-    const results: BackgroundUploadFile[] = [];
-
-    for (const [index, imageUrl] of validUrls.entries()) {
-      try {
-        const response = await axios.get<ArrayBuffer>(imageUrl, {
-          responseType: 'arraybuffer',
-          timeout: 15000,
-        });
-
-        const parsedUrl = new URL(imageUrl);
-        const extension = path.extname(parsedUrl.pathname) || '.jpg';
-        const mimetype =
-          (response.headers['content-type'] as string | undefined) ||
-          this.guessMimeTypeFromExtension(parsedUrl.pathname) ||
-          'image/jpeg';
-
-        results.push({
-          buffer: Buffer.from(response.data),
-          originalname: `product-image-${index + 1}${extension}`,
-          mimetype,
-        });
-      } catch (error) {
-        this.logger.warn(
-          `Failed to download product image for slideshow: ${imageUrl}`,
-          error as Error,
-        );
-      }
-    }
-
-    return results;
-  }
-
-  private async generateSlideshowVideo(
-    tempDir: string,
-    imageFiles: BackgroundUploadFile[],
-    productName: string,
-  ): Promise<string | null> {
-    if (!imageFiles.length) {
-      this.logger.warn('Cannot generate slideshow without images.');
+      // Don't wait - return immediately
+      return null;
+    } catch (error) {
+      this.logger.error(
+        'Failed to start YouTube video processing worker',
+        error as Error,
+      );
       return null;
     }
-
-    const slideDuration = this.getSlideDurationSeconds();
-    const outroSlide = await this.getOutroSlide();
-    const audioTrack = await this.getAudioTrack();
-    const maxImageCount = outroSlide ? this.maxSlides - 1 : this.maxSlides;
-    const limitedImages = imageFiles.slice(0, Math.max(maxImageCount, 0));
-    const slides: BackgroundUploadFile[] = [...limitedImages];
-
-    if (outroSlide) {
-      slides.push({
-        buffer: Buffer.from(outroSlide.buffer),
-        originalname: outroSlide.originalname,
-        mimetype: outroSlide.mimetype,
-      });
-    }
-
-    const framesDir = path.join(tempDir, 'frames');
-    await fsp.mkdir(framesDir, { recursive: true });
-
-    // Process images sequentially to reduce memory usage
-    for (let index = 0; index < slides.length; index++) {
-      const file = slides[index];
-      const frameName = `frame-${String(index + 1).padStart(3, '0')}.jpg`;
-      const framePath = path.join(framesDir, frameName);
-
-      try {
-        await sharp(Buffer.from(file.buffer))
-          .resize(1920, 1080, {
-            fit: 'contain',
-            background: { r: 255, g: 255, b: 255, alpha: 1 },
-          })
-          .jpeg({ quality: 85 }) // Reduced quality to save memory
-          .toFile(framePath);
-
-        // Force garbage collection of buffer
-        file.buffer = null as any;
-      } catch (error) {
-        this.logger.error(`Failed to process slide ${index + 1}:`, error);
-        throw error;
-      }
-    }
-    const outputPath = path.join(tempDir, `${this.slugify(productName)}.mp4`);
-    let audioPath: string | null = null;
-
-    if (audioTrack) {
-      const audioExtension =
-        path.extname(audioTrack.originalname) ||
-        this.getExtensionFromMime(audioTrack.mimetype) ||
-        '.mp3';
-      audioPath = path.join(tempDir, `audio-track${audioExtension}`);
-      await fsp.writeFile(audioPath, Buffer.from(audioTrack.buffer));
-    }
-
-    await new Promise<void>((resolve, reject) => {
-      const command = ffmpeg()
-        .addInput(path.join(framesDir, 'frame-%03d.jpg'))
-        .inputOptions([`-framerate 1/${slideDuration}`])
-        .videoFilters([
-          'scale=1920:1080:force_original_aspect_ratio=decrease',
-          'pad=1920:1080:(ow-iw)/2:(oh-ih)/2',
-        ]);
-
-      const outputOptions = ['-c:v libx264', '-pix_fmt yuv420p', '-r 30'];
-
-      if (audioPath) {
-        command.addInput(audioPath);
-        outputOptions.push('-shortest');
-        outputOptions.push('-c:a aac', '-b:a 192k');
-      } else {
-        outputOptions.push('-an');
-      }
-
-      command
-        .outputOptions(outputOptions)
-        .on('end', () => resolve())
-        .on('error', (err) => reject(err))
-        .save(outputPath);
-    });
-
-    return outputPath;
   }
 
   private getSlideDurationSeconds(): number {
@@ -326,122 +140,6 @@ export class ProductYoutubeService {
       return parsed;
     }
     return 5;
-  }
-
-  private async getOutroSlide(): Promise<BackgroundUploadFile | null> {
-    if (this.outroSlide !== undefined) {
-      return this.outroSlide;
-    }
-
-    const imageUrl = this.configService.get<string>(
-      'SLIDESHOW_OUTRO_IMAGE_URL',
-    );
-    const imagePath = this.configService.get<string>(
-      'SLIDESHOW_OUTRO_IMAGE_PATH',
-    );
-
-    if (!imageUrl && !imagePath) {
-      this.outroSlide = null;
-      return this.outroSlide;
-    }
-
-    try {
-      if (imageUrl) {
-        const response = await axios.get<ArrayBuffer>(imageUrl, {
-          responseType: 'arraybuffer',
-          timeout: 10000,
-        });
-
-        const url = new URL(imageUrl);
-        const originalname = path.basename(url.pathname) || 'outro.jpg';
-        const mimetype =
-          (response.headers['content-type'] as string | undefined) ||
-          this.guessMimeTypeFromExtension(originalname) ||
-          'image/jpeg';
-
-        this.outroSlide = {
-          buffer: Buffer.from(response.data),
-          originalname,
-          mimetype,
-        };
-
-        return this.outroSlide;
-      }
-
-      if (imagePath) {
-        const resolvedPath = path.isAbsolute(imagePath)
-          ? imagePath
-          : path.resolve(process.cwd(), imagePath);
-        const buffer = await fsp.readFile(resolvedPath);
-        const originalname = path.basename(resolvedPath);
-        const mimetype =
-          this.guessMimeTypeFromExtension(resolvedPath) || 'image/jpeg';
-
-        this.outroSlide = { buffer, originalname, mimetype };
-        return this.outroSlide;
-      }
-    } catch (error) {
-      this.logger.warn('Failed to load outro slide image', error as Error);
-    }
-
-    this.outroSlide = null;
-    return this.outroSlide;
-  }
-
-  private async getAudioTrack(): Promise<BackgroundUploadFile | null> {
-    if (this.audioTrack !== undefined) {
-      return this.audioTrack;
-    }
-
-    const audioUrl = this.configService.get<string>('SLIDESHOW_AUDIO_URL');
-    const audioPath = this.configService.get<string>('SLIDESHOW_AUDIO_PATH');
-
-    if (!audioUrl && !audioPath) {
-      this.audioTrack = null;
-      return this.audioTrack;
-    }
-
-    try {
-      if (audioUrl) {
-        const response = await axios.get<ArrayBuffer>(audioUrl, {
-          responseType: 'arraybuffer',
-          timeout: 15000,
-        });
-
-        const url = new URL(audioUrl);
-        const originalname = path.basename(url.pathname) || 'slideshow-audio';
-        const mimetype =
-          (response.headers['content-type'] as string | undefined) ||
-          this.guessMimeTypeFromExtension(originalname) ||
-          'audio/mpeg';
-
-        this.audioTrack = {
-          buffer: Buffer.from(response.data),
-          originalname,
-          mimetype,
-        };
-
-        return this.audioTrack;
-      }
-
-      if (audioPath) {
-        const resolvedPath = path.isAbsolute(audioPath)
-          ? audioPath
-          : path.resolve(process.cwd(), audioPath);
-        const buffer = await fsp.readFile(resolvedPath);
-        const originalname = path.basename(resolvedPath);
-        const mimetype =
-          this.guessMimeTypeFromExtension(resolvedPath) || 'audio/mpeg';
-
-        this.audioTrack = { buffer, originalname, mimetype };
-        return this.audioTrack;
-      }
-    } catch (error) {
-      this.logger.warn('Failed to load slideshow audio track', error as Error);
-    }
-
-    this.audioTrack = null;
-    return this.audioTrack;
   }
 
   private guessMimeTypeFromExtension(filePath: string): string | null {
