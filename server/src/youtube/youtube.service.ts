@@ -288,6 +288,75 @@ export class YoutubeService {
   }
 
   /**
+   * Upload thumbnail image for a video
+   * @param videoId - YouTube video ID
+   * @param thumbnailUrl - URL of the thumbnail image (Cloudinary URL)
+   */
+  async setVideoThumbnail(
+    videoId: string,
+    thumbnailUrl: string,
+  ): Promise<void> {
+    try {
+      this.ensureYoutubeClient();
+
+      this.logger.log(
+        `🖼️  Setting thumbnail for video ${videoId} from: ${thumbnailUrl}`,
+      );
+
+      // Download thumbnail from URL
+      const axios = require('axios');
+      const response = await axios.get(thumbnailUrl, {
+        responseType: 'arraybuffer',
+        timeout: 30000,
+      });
+
+      const thumbnailBuffer = Buffer.from(response.data);
+      this.logger.log(
+        `   ✅ Downloaded thumbnail (${thumbnailBuffer.length} bytes)`,
+      );
+
+      // Create temporary file for thumbnail
+      const fs = require('fs');
+      const fsp = require('fs').promises;
+      const os = require('os');
+      const tempDir = await fsp.mkdtemp(
+        require('path').join(os.tmpdir(), 'youtube-thumbnail-'),
+      );
+      const thumbnailPath = require('path').join(tempDir, 'thumbnail.jpg');
+      await fsp.writeFile(thumbnailPath, thumbnailBuffer);
+
+      this.logger.log(`   📁 Saved to temp: ${thumbnailPath}`);
+
+      // Upload thumbnail to YouTube
+      await this.youtube.thumbnails.set({
+        videoId: videoId,
+        media: {
+          body: fs.createReadStream(thumbnailPath),
+        },
+      });
+
+      this.logger.log(`   ✅ Thumbnail uploaded successfully for ${videoId}`);
+
+      // Cleanup temp file
+      try {
+        await fsp.unlink(thumbnailPath);
+        await fsp.rmdir(tempDir, { recursive: true });
+        this.logger.log(`   🧹 Temp thumbnail file cleaned up`);
+      } catch (cleanupError) {
+        this.logger.warn(
+          `   ⚠️  Failed to cleanup thumbnail temp file: ${cleanupError.message}`,
+        );
+      }
+    } catch (error) {
+      this.logger.error('Error setting video thumbnail:', error);
+      this.logger.warn(
+        'Thumbnail upload failed, but video was uploaded successfully',
+      );
+      // Don't throw - thumbnail is optional, video is already uploaded
+    }
+  }
+
+  /**
    * Playlist-ის შექმნა
    */
   async createPlaylist(

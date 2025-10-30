@@ -78,7 +78,13 @@ export class ProductYoutubeService {
 
     try {
       this.logger.log('📁 Step 1: Preparing video file (if exists)...');
-      // Save video file to temp location if exists
+      
+      // ========================================
+      // SLIDESHOW GENERATION TEMPORARILY DISABLED
+      // ========================================
+      // Only upload if user provided a video file
+      // Images-only products will skip YouTube upload
+      
       let videoFilePath: string | undefined;
       if (videoFile && videoFile.buffer) {
         const tempDir = await fsp.mkdtemp(
@@ -90,8 +96,10 @@ export class ProductYoutubeService {
         this.logger.log(`✅ Video file saved to temp location`);
       } else {
         this.logger.log(
-          'ℹ️  No video file provided - will generate slideshow only',
+          'ℹ️  No video file provided - skipping YouTube upload (slideshow generation disabled)',
         );
+        this.logger.log('   Product will be saved with images only');
+        return null; // Exit early - no YouTube upload needed
       }
 
       this.logger.log('📋 Step 2: Preparing Worker Thread data...');

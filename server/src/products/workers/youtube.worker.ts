@@ -232,77 +232,98 @@ async function processVideo() {
 
     console.log('');
     console.log('🎬 Step 4: Determining video processing scenario...');
-    // Case 1: Video + Images → Merge
-    if (
-      data.videoFilePath &&
-      fs.existsSync(data.videoFilePath) &&
-      imageBuffers.length > 0
-    ) {
-      console.log(
-        '📹 SCENARIO 1: Video + Images → Will merge video with slideshow',
-      );
-      console.log(`   Video exists: ${data.videoFilePath}`);
-      console.log(`   Images to add: ${imageBuffers.length}`);
+    
+    // ========================================
+    // SLIDESHOW GENERATION TEMPORARILY DISABLED
+    // ========================================
+    // Case 1: Video + Images → Merge (COMMENTED OUT)
+    // if (
+    //   data.videoFilePath &&
+    //   fs.existsSync(data.videoFilePath) &&
+    //   imageBuffers.length > 0
+    // ) {
+    //   console.log(
+    //     '📹 SCENARIO 1: Video + Images → Will merge video with slideshow',
+    //   );
+    //   console.log(`   Video exists: ${data.videoFilePath}`);
+    //   console.log(`   Images to add: ${imageBuffers.length}`);
 
-      console.log('');
-      console.log('🎞️  Step 5a: Generating slideshow from images...');
-      // Generate slideshow
-      const slideshowPath = await generateSlideshow(
-        tempDir,
-        imageBuffers,
-        data.productName,
-        data.productId,
-        configService,
-        cloudinaryService,
-      );
-      console.log(`✅ Slideshow generated: ${slideshowPath}`);
+    //   console.log('');
+    //   console.log('🎞️  Step 5a: Generating slideshow from images...');
+    //   // Generate slideshow
+    //   const slideshowPath = await generateSlideshow(
+    //     tempDir,
+    //     imageBuffers,
+    //     data.productName,
+    //     data.productId,
+    //     configService,
+    //     cloudinaryService,
+    //   );
+    //   console.log(`✅ Slideshow generated: ${slideshowPath}`);
 
-      console.log('');
-      console.log('🔗 Step 5b: Merging video with slideshow...');
-      // Merge video + slideshow
-      finalVideoPath = await mergeVideos(
-        tempDir,
-        data.videoFilePath,
-        slideshowPath,
-        data.productName,
-      );
-      console.log(`✅ Videos merged: ${finalVideoPath}`);
-    }
-    // Case 2: Only video
-    else if (data.videoFilePath && fs.existsSync(data.videoFilePath)) {
+    //   console.log('');
+    //   console.log('🔗 Step 5b: Merging video with slideshow...');
+    //   // Merge video + slideshow
+    //   finalVideoPath = await mergeVideos(
+    //     tempDir,
+    //     data.videoFilePath,
+    //     slideshowPath,
+    //     data.productName,
+    //     data.productId,
+    //     cloudinaryService,
+    //   );
+    //   console.log(`✅ Videos merged: ${finalVideoPath}`);
+    // }
+    
+    // Case 2: Only video (ACTIVE)
+    if (data.videoFilePath && fs.existsSync(data.videoFilePath)) {
       console.log(
-        '📹 SCENARIO 2: Video only → Will use uploaded video directly',
+        '📹 SCENARIO: Video only → Will use uploaded video directly',
       );
       console.log(`   Video path: ${data.videoFilePath}`);
       finalVideoPath = data.videoFilePath;
       console.log('✅ Using existing video file');
     }
-    // Case 3: Only images
-    else if (imageBuffers.length > 0) {
-      console.log('🖼️  SCENARIO 3: Images only → Will generate slideshow');
-      console.log(`   Images count: ${imageBuffers.length}`);
+    
+    // Case 3: Only images (COMMENTED OUT - No slideshow generation)
+    // else if (imageBuffers.length > 0) {
+    //   console.log('🖼️  SCENARIO 3: Images only → Will generate slideshow');
+    //   console.log(`   Images count: ${imageBuffers.length}`);
 
-      console.log('');
-      console.log('🎞️  Step 5: Generating slideshow from images...');
-      try {
-        finalVideoPath = await generateSlideshow(
-          tempDir,
-          imageBuffers,
-          data.productName,
-          data.productId,
-          configService,
-          cloudinaryService,
-        );
-        console.log(`✅ Slideshow generated: ${finalVideoPath}`);
-      } catch (slideshowError) {
-        console.error('❌ Slideshow generation failed:', slideshowError);
-        throw new Error(
-          `Failed to generate slideshow: ${slideshowError.message}`,
-        );
-      }
-    } else {
-      console.error('❌ ERROR: No video or images available for processing!');
-      throw new Error('No video or images available');
+    //   console.log('');
+    //   console.log('🎞️  Step 5: Generating slideshow from images...');
+    //   try {
+    //     finalVideoPath = await generateSlideshow(
+    //       tempDir,
+    //       imageBuffers,
+    //       data.productName,
+    //       data.productId,
+    //       configService,
+    //       cloudinaryService,
+    //     );
+    //     console.log(`✅ Slideshow generated: ${finalVideoPath}`);
+    //   } catch (slideshowError) {
+    //     console.error('❌ Slideshow generation failed:', slideshowError);
+    //     throw new Error(
+    //       `Failed to generate slideshow: ${slideshowError.message}`,
+    //     );
+    //   }
+    // }
+    else {
+      console.log('ℹ️  No video file uploaded - skipping YouTube upload');
+      console.log('   (Slideshow generation is temporarily disabled)');
+      
+      // Send message that no video processing is needed
+      parentPort?.postMessage({
+        success: true,
+        data: {
+          productId: data.productId,
+          message: 'No video to upload - product has images only',
+        },
+      });
+      
+      await app.close();
+      return;
     }
 
     if (!finalVideoPath) {
@@ -399,7 +420,35 @@ async function processVideo() {
     console.log(`   Embed URL: ${result.embedUrl}`);
 
     console.log('');
-    console.log('📨 Step 7: Sending success message to main thread...');
+    console.log('🖼️  Step 7: Setting video thumbnail...');
+    // Use first product image as thumbnail
+    if (data.images && data.images.length > 0) {
+      const thumbnailUrl = data.images[0];
+      console.log(`   Using first product image: ${thumbnailUrl}`);
+      try {
+        await youtubeService.setVideoThumbnail(result.videoId, thumbnailUrl);
+        console.log(`   ✅ Thumbnail set successfully`);
+      } catch (thumbnailError) {
+        console.warn(`   ⚠️  Thumbnail upload failed: ${thumbnailError.message}`);
+        console.warn(`   ℹ️  Video is still uploaded, thumbnail can be set manually later`);
+      }
+    } else {
+      console.log(`   ℹ️  No product images available for thumbnail`);
+    }
+
+    console.log('');
+    console.log('🧹 Step 8: Cleaning up Cloudinary temp files...');
+    const cloudinaryFolder = `youtube-temp/${data.productId}`;
+    try {
+      await cloudinaryService.deleteFolder(cloudinaryFolder);
+      console.log(`✅ Cloudinary temp folder deleted: ${cloudinaryFolder}`);
+    } catch (cleanupError) {
+      console.warn(`⚠️  Cloudinary cleanup failed: ${cleanupError.message}`);
+      console.warn(`ℹ️  Temp files may remain in: ${cloudinaryFolder}`);
+    }
+
+    console.log('');
+    console.log('📨 Step 9: Sending success message to main thread...');
     // Send result back to main thread
     parentPort?.postMessage({
       success: true,
@@ -451,8 +500,8 @@ async function processVideo() {
     console.log('✅ Error message sent');
   } finally {
     console.log('');
-    console.log('🧹 Step 8: Cleanup...');
-    // Cleanup
+    console.log('🧹 Step 10: Local filesystem cleanup...');
+    // Cleanup local files only
     if (tempDir) {
       try {
         console.log(`   Removing temp directory: ${tempDir}`);
@@ -477,6 +526,13 @@ async function processVideo() {
   }
 }
 
+// ========================================
+// SLIDESHOW GENERATION - TEMPORARILY DISABLED
+// ========================================
+// Reason: FFmpeg causes exit code 128 on production server (memory/CPU limits)
+// This function will be re-enabled when we find a solution (external service, better server, etc.)
+
+/*
 async function generateSlideshow(
   tempDir: string,
   images: Array<{ buffer: Buffer; filename: string }>,
@@ -493,25 +549,43 @@ async function generateSlideshow(
   const slideDuration = configService.get('YOUTUBE_SLIDE_DURATION_SECONDS', 5);
   console.log(`   ⏱️  Slide duration: ${slideDuration} seconds`);
 
-  // Save images as frames
+  // Save images as frames (local for FFmpeg)
   const framesDir = path.join(tempDir, 'frames');
   await fsp.mkdir(framesDir, { recursive: true });
   console.log(`   📁 Frames directory: ${framesDir}`);
+
+  const cloudinaryFolder = `youtube-temp/${productId}`;
+  console.log(`   ☁️  Cloudinary folder: ${cloudinaryFolder}`);
 
   console.log(`   🖼️  Processing ${images.length} product images...`);
   for (let i = 0; i < images.length; i++) {
     const frameName = `frame-${String(i + 1).padStart(3, '0')}.jpg`;
     const framePath = path.join(framesDir, frameName);
 
-    await sharp(images[i].buffer)
+    // Process image with Sharp
+    const processedBuffer = await sharp(images[i].buffer)
       .resize(1280, 720, {
         fit: 'contain',
         background: { r: 255, g: 255, b: 255, alpha: 1 },
       })
       .jpeg({ quality: 80 })
-      .toFile(framePath);
+      .toBuffer();
 
-    console.log(`      [${i + 1}/${images.length}] ✅ ${frameName}`);
+    // Save locally for FFmpeg
+    await fsp.writeFile(framePath, processedBuffer);
+
+    // Upload to Cloudinary for backup/production
+    try {
+      await cloudinaryService.uploadBuffer(
+        processedBuffer,
+        frameName.replace('.jpg', ''),
+        cloudinaryFolder,
+        'image',
+      );
+      console.log(`      [${i + 1}/${images.length}] ✅ ${frameName} (local + Cloudinary)`);
+    } catch (cloudinaryError) {
+      console.warn(`      [${i + 1}/${images.length}] ⚠️  ${frameName} (local only, Cloudinary failed: ${cloudinaryError.message})`);
+    }
   }
 
   // Add outro image if configured
@@ -528,15 +602,29 @@ async function generateSlideshow(
       const outroFrameName = `frame-${String(images.length + 1).padStart(3, '0')}.jpg`;
       const outroFramePath = path.join(framesDir, outroFrameName);
 
-      await sharp(outroBuffer)
+      const processedOutroBuffer = await sharp(outroBuffer)
         .resize(1280, 720, {
           fit: 'contain',
           background: { r: 255, g: 255, b: 255, alpha: 1 },
         })
         .jpeg({ quality: 80 })
-        .toFile(outroFramePath);
+        .toBuffer();
 
-      console.log(`   ✅ Outro image added: ${outroFrameName}`);
+      // Save locally
+      await fsp.writeFile(outroFramePath, processedOutroBuffer);
+
+      // Upload to Cloudinary
+      try {
+        await cloudinaryService.uploadBuffer(
+          processedOutroBuffer,
+          outroFrameName.replace('.jpg', ''),
+          cloudinaryFolder,
+          'image',
+        );
+        console.log(`   ✅ Outro image added: ${outroFrameName} (local + Cloudinary)`);
+      } catch (cloudinaryError) {
+        console.log(`   ✅ Outro image added: ${outroFrameName} (local only, Cloudinary failed: ${cloudinaryError.message})`);
+      }
     } catch (error) {
       console.warn(`   ⚠️  Failed to add outro image: ${error.message}`);
       console.warn(`   ℹ️  Continuing without outro image...`);
@@ -547,7 +635,7 @@ async function generateSlideshow(
     );
   }
 
-  // Generate video
+  // Generate video with FFmpeg (locally)
   const outputPath = path.join(tempDir, `slideshow-${Date.now()}.mp4`);
   console.log(`   🎬 Output path: ${outputPath}`);
   console.log(`   🔧 Starting FFmpeg encoding...`);
@@ -629,7 +717,25 @@ async function generateSlideshow(
   const stats = fs.statSync(outputPath);
   console.log(`   ✅ Slideshow generated: ${outputPath}`);
   console.log(`   📦 Size: ${(stats.size / 1024 / 1024).toFixed(2)} MB`);
-  return outputPath;
+
+  // Upload final video to Cloudinary
+  console.log(`   ☁️  Uploading final video to Cloudinary...`);
+  try {
+    const videoBuffer = await fsp.readFile(outputPath);
+    const uploadResult = await cloudinaryService.uploadBuffer(
+      videoBuffer,
+      `slideshow-${Date.now()}`,
+      cloudinaryFolder,
+      'video',
+    );
+    console.log(`   ✅ Video uploaded to Cloudinary: ${uploadResult.secure_url}`);
+    console.log(`   🔗 Returning Cloudinary URL for YouTube upload`);
+    return uploadResult.secure_url;
+  } catch (cloudinaryError) {
+    console.warn(`   ⚠️  Cloudinary upload failed: ${cloudinaryError.message}`);
+    console.warn(`   ℹ️  Falling back to local file path`);
+    return outputPath;
+  }
 }
 
 async function mergeVideos(
@@ -637,20 +743,35 @@ async function mergeVideos(
   videoPath: string,
   slideshowPath: string,
   productName: string,
+  productId: string,
+  cloudinaryService: CloudinaryService,
 ): Promise<string> {
   console.log('');
   console.log('   ┌─────────────────────────────────────────────────────');
   console.log('   │ 🔗 MERGING VIDEOS');
   console.log('   └─────────────────────────────────────────────────────');
 
+  // If slideshowPath is Cloudinary URL, download it first
+  let localSlideshowPath = slideshowPath;
+  if (slideshowPath.startsWith('http://') || slideshowPath.startsWith('https://')) {
+    console.log(`   ☁️  Downloading slideshow from Cloudinary: ${slideshowPath}`);
+    const response = await axios.get(slideshowPath, {
+      responseType: 'arraybuffer',
+      timeout: 60000,
+    });
+    localSlideshowPath = path.join(tempDir, `slideshow-downloaded-${Date.now()}.mp4`);
+    await fsp.writeFile(localSlideshowPath, Buffer.from(response.data));
+    console.log(`   ✅ Slideshow downloaded to: ${localSlideshowPath}`);
+  }
+
   const outputPath = path.join(tempDir, `merged-${Date.now()}.mp4`);
   console.log(`   📥 Input video: ${videoPath}`);
-  console.log(`   📥 Input slideshow: ${slideshowPath}`);
+  console.log(`   📥 Input slideshow: ${localSlideshowPath}`);
   console.log(`   📤 Output: ${outputPath}`);
 
   // Create concat list
   const concatListPath = path.join(tempDir, 'concat-list.txt');
-  const concatContent = `file '${videoPath}'\nfile '${slideshowPath}'`;
+  const concatContent = `file '${videoPath}'\nfile '${localSlideshowPath}'`;
   await fsp.writeFile(concatListPath, concatContent);
   console.log(`   📝 Concat list created: ${concatListPath}`);
 
@@ -675,8 +796,28 @@ async function mergeVideos(
   const stats = fs.statSync(outputPath);
   console.log(`   ✅ Videos merged successfully: ${outputPath}`);
   console.log(`   📦 Size: ${(stats.size / 1024 / 1024).toFixed(2)} MB`);
-  return outputPath;
+
+  // Upload merged video to Cloudinary
+  console.log(`   ☁️  Uploading merged video to Cloudinary...`);
+  const cloudinaryFolder = `youtube-temp/${productId}`;
+  try {
+    const videoBuffer = await fsp.readFile(outputPath);
+    const uploadResult = await cloudinaryService.uploadBuffer(
+      videoBuffer,
+      `merged-${Date.now()}`,
+      cloudinaryFolder,
+      'video',
+    );
+    console.log(`   ✅ Merged video uploaded to Cloudinary: ${uploadResult.secure_url}`);
+    console.log(`   🔗 Returning Cloudinary URL for YouTube upload`);
+    return uploadResult.secure_url;
+  } catch (cloudinaryError) {
+    console.warn(`   ⚠️  Cloudinary upload failed: ${cloudinaryError.message}`);
+    console.warn(`   ℹ️  Falling back to local file path`);
+    return outputPath;
+  }
 }
+*/
 
 // Start processing
 processVideo();
