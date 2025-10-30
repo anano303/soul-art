@@ -114,8 +114,13 @@ interface WorkerData {
   productId: string;
   productName: string;
   productDescription: string;
+  price: number;
+  discountPercentage: number;
+  brand: string;
+  category: string;
   userName: string;
   userEmail: string;
+  userId: string;
   images: string[];
   videoFilePath?: string;
 }
@@ -305,19 +310,59 @@ async function processVideo() {
       `   Video size: ${(videoStats.size / 1024 / 1024).toFixed(2)} MB`,
     );
 
+    // Build Georgian description with all product details
+    let georgianDescription = `🎨 ${data.productName}\n\n`;
+    
+    if (data.productDescription) {
+      georgianDescription += `📝 აღწერა:\n${data.productDescription}\n\n`;
+    }
+    
+    georgianDescription += `👤 ავტორი: ${data.userName || data.userEmail}\n`;
+    
+    // Price information
+    if (data.discountPercentage > 0) {
+      const originalPrice = data.price;
+      const discountedPrice = originalPrice * (1 - data.discountPercentage / 100);
+      georgianDescription += `💰 ფასი: ${discountedPrice.toFixed(2)}₾ (ფასდაკლება ${data.discountPercentage}%, იყო ${originalPrice.toFixed(2)}₾)\n`;
+    } else {
+      georgianDescription += `💰 ფასი: ${data.price.toFixed(2)}₾\n`;
+    }
+    
+    if (data.category) {
+      georgianDescription += `📂 კატეგორია: ${data.category}\n`;
+    }
+    
+    if (data.brand) {
+      georgianDescription += `🏷️ ბრენდი: ${data.brand}\n`;
+    }
+    
+    georgianDescription += `\n🛒 შესყიდვის ბმული: https://soulart.ge/product/${data.productId}\n`;
+    georgianDescription += `🎨 ავტორის ყველა ნამუშევარი: https://soulart.ge/artist/${data.userId}\n`;
+    georgianDescription += `\n✨ SoulArt - ქართული ხელოვნების პლატფორმა`;
+
+    // Build tags with product name, category, brand
+    const tags = [
+      'SoulArt',
+      'ქართული_ხელოვნება',
+      'Georgian_Art',
+      data.productName,
+    ];
+    
+    if (data.category) {
+      tags.push(data.category);
+    }
+    if (data.brand) {
+      tags.push(data.brand);
+    }
+    if (data.userName) {
+      tags.push(data.userName);
+    }
+
     // Upload to YouTube
     const uploadOptions = {
-      title: `${data.productName} - SoulArt`.substring(0, 100),
-      description: data.productDescription
-        ? `${data.productDescription}\n\nCreated by ${data.userName || data.userEmail} on SoulArt`
-        : `Beautiful artwork by ${data.userName || data.userEmail} on SoulArt`,
-      tags: [
-        'SoulArt',
-        'artwork',
-        'digital art',
-        'creative',
-        data.productName,
-      ].slice(0, 15),
+      title: `${data.productName} - ${data.userName || 'SoulArt'}`.substring(0, 100),
+      description: georgianDescription,
+      tags: tags.slice(0, 15), // YouTube allows max 15 tags
       privacyStatus: 'public' as const,
     };
 
@@ -325,6 +370,7 @@ async function processVideo() {
     console.log(`   Title: ${uploadOptions.title}`);
     console.log(`   Privacy: ${uploadOptions.privacyStatus}`);
     console.log(`   Tags: ${uploadOptions.tags.join(', ')}`);
+    console.log(`   Description preview: ${uploadOptions.description.substring(0, 200)}...`);
 
     console.log('🚀 Starting YouTube upload...');
     const result = await youtubeService.uploadVideo(

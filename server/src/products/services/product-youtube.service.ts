@@ -105,8 +105,13 @@ export class ProductYoutubeService {
         productId: product._id.toString(),
         productName: String(product.name || ''),
         productDescription: String(product.description || ''),
+        price: product.price || 0,
+        discountPercentage: product.discountPercentage || 0,
+        brand: String(product.brand || ''),
+        category: String(product.category || ''),
         userName: String(user.name || ''),
         userEmail: String(user.email || ''),
+        userId: user._id.toString(),
         images: Array.isArray(product.images)
           ? product.images.map((img) => String(img)).filter(Boolean)
           : [],
