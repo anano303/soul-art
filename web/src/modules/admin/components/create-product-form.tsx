@@ -1719,13 +1719,13 @@ export function CreateProductForm({
           >
             {language === "en"
               ? "Enter dimensions in centimeters. Leave empty if not applicable."
-              : "შეიყვანეთ ზომები სანტიმეტრებში. დატოვეთ ცარიელი თუ არ არის შესაბამისი."}
+              : "ნახატებისთვის სავალდებულოა შეიყვანეთ ზომები სანტიმეტრებში. დატოვეთ ცარიელი თუ არ არის საჭირო."}
           </small>
         </div>
         {/* Materials Section */}
         <div>
           <label htmlFor="materials">
-            {language === "en" ? "Materials" : "მასალები"}
+            {language === "en" ? "Materials" : "მასალა/მასალები"}
           </label>
           <textarea
             id="materials"
@@ -1735,7 +1735,7 @@ export function CreateProductForm({
             placeholder={
               language === "en"
                 ? "Enter materials separated by commas (e.g., wood, metal, fabric)"
-                : "შეიყვანეთ მასალები მძიმეებით გამოყოფილი (მაგ. ხე, ლითონი, ქსოვილი)"
+                : "შეიყვანეთ მასალები მძიმეებით გამოყოფილი (მაგ. აკრილი, ტილო, ხე, ლითონი, ქსოვილი)"
             }
             rows={2}
           />

@@ -752,44 +752,73 @@ export function ProductDetails({ product }: ProductDetailsProps) {
             </div>
           )}
 
-          {/* View Counter */}
-          <div className="view-counter">
-            <svg
-              className="view-icon"
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-            >
-              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-              <circle cx="12" cy="12" r="3" />
-            </svg>
-            <span className="view-text">
-              {currentProduct.viewCount || 0}{" "}
-              {language === "en" ? "views" : "ნახვა"}
-            </span>
-          </div>
+          {/* Badge and View Counter Row */}
+          <div className="badge-view-row">
+            {/* Original/Copy Badge */}
+            <div className="original-copy-badge">
+              <span
+                className={`badge-text ${
+                  product.isOriginal ? "original" : "copy"
+                }`}
+              >
+                {product.isOriginal
+                  ? language === "en"
+                    ? "Original"
+                    : "ორიგინალი"
+                  : language === "en"
+                  ? "Copy"
+                  : "ასლი"}
+              </span>
+            </div>
 
-          {/* Original/Copy Information */}
-          <div className="info-section">
-            <div className="info-row">
-              <div className="info-icon-circle">
-                <Star size={20} />
-              </div>
-              <div className="info-text-content">
-                <div className="info-label-text">
-                  {t("product.productType")}
-                </div>
-                <div className="info-value-text">
-                  {product.isOriginal
-                    ? t("product.original")
-                    : t("product.copy")}
-                </div>
-              </div>
+            {/* View Counter */}
+            <div className="view-counter">
+              <svg
+                className="view-icon"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+              >
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                <circle cx="12" cy="12" r="3" />
+              </svg>
+              <span className="view-text">
+                {currentProduct.viewCount || 0}{" "}
+                {language === "en" ? "views" : "ნახვა"}
+              </span>
             </div>
           </div>
+
+          {/* Materials Information */}
+          {product.materials && product.materials.length > 0 && (
+            <div className="metadata-item">
+              <div className="metadata-label">
+                <Package size={18} />
+                <span>{t("product.materials")}</span>
+              </div>
+              <div className="metadata-value">
+                {product.materials.join(", ")}
+              </div>
+            </div>
+          )}
+
+          {/* Dimensions Information */}
+          {dimensions && (
+            <div className="metadata-item">
+              <div className="metadata-label">
+                <Ruler size={18} />
+                <span>{t("product.dimensions")}</span>
+              </div>
+              <div className="metadata-value">
+                {dimensions.width && `${dimensions.width} × `}
+                {dimensions.height && `${dimensions.height}`}
+                {dimensions.depth && ` × ${dimensions.depth}`} {t("product.cm")}
+              </div>
+            </div>
+          )}
 
           {/* Description - Prominent with label */}
           {product.description && (
@@ -824,66 +853,6 @@ export function ProductDetails({ product }: ProductDetailsProps) {
             ) : (
               <div className="current-price">₾{product.price.toFixed(2)}</div>
             )}
-          </div>
-
-          {/* Materials Information */}
-          {product.materials && product.materials.length > 0 && (
-            <div className="info-section">
-              <div className="info-row">
-                <div className="info-icon-circle">
-                  <Package size={20} />
-                </div>
-                <div className="info-text-content">
-                  <div className="info-label-text">
-                    {t("product.materials")}
-                  </div>
-                  <div className="info-value-text">
-                    {product.materials.join(", ")}
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Dimensions Information - Redesigned */}
-          {dimensions && (
-            <div className="info-section">
-              <div className="info-row">
-                <div className="info-icon-circle">
-                  <Ruler size={20} />
-                </div>
-                <div className="info-text-content">
-                  <div className="info-label-text">
-                    {t("product.dimensions")}
-                  </div>
-                  <div className="info-value-text">
-                    {dimensions.width && `${dimensions.width} × `}
-                    {dimensions.height && `${dimensions.height}`}
-                    {dimensions.depth && ` × ${dimensions.depth}`}{" "}
-                    {t("product.cm")}
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Original/Copy Information */}
-          <div className="info-section">
-            <div className="info-row">
-              <div className="info-icon-circle">
-                <Star size={20} />
-              </div>
-              <div className="info-text-content">
-                <div className="info-label-text">
-                  {t("product.productType")}
-                </div>
-                <div className="info-value-text">
-                  {product.isOriginal
-                    ? t("product.original")
-                    : t("product.copy")}
-                </div>
-              </div>
-            </div>
           </div>
 
           {/* Delivery Information - Redesigned */}

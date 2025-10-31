@@ -359,7 +359,7 @@ export const TRANSLATIONS: Translations = {
       productType: "პროდუქტის ტიპი",
       original: "ორიგინალი",
       copy: "ასლი",
-      materials: "მასალები",
+      materials: "მასალა",
       deliveryInfo: "მიწოდების ინფორმაცია",
       sellerDelivery: "მიწოდება ავტორისგან",
       courierDelivery: "მიწოდება უფასო, SoulArt-ის კურიერით, 1-2 დღეში",
