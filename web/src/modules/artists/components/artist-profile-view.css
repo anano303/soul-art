@@ -602,7 +602,7 @@
 }
 
 .artist-product-card__info {
-  padding: 0.3rem 0.5rem;
+  padding: .7rem 1rem;
   background: #fff;
 }
 
@@ -626,6 +626,7 @@
   width: 36px;
   height: 36px;
   padding: 0;
+  margin: 0;
   display: flex;
   align-items: center;
   justify-content: center;
