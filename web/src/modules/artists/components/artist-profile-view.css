@@ -351,12 +351,9 @@
 
 .artist-product-card__image-wrapper {
   position: relative;
-<<<<<<< HEAD
+
   aspect-ratio: 1;
-=======
-  aspect-ratio: 4 / 3;
-  flex: 1;
->>>>>>> 893e4d007342ad22a51ff7ef083972a4d117d0e1
+
   background: linear-gradient(
     135deg,
     rgba(1, 38, 69, 0.08),
