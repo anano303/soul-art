@@ -31,7 +31,7 @@ import { Color, AgeGroupItem } from "@/types";
 import { toast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
 
-import { SimilarProductCard } from "./similar-product-card";
+import { ProductGrid } from "./product-grid";
 import { useCart } from "@/modules/cart/context/cart-context";
 import ProductSchema from "@/components/ProductSchema";
 import { AddToCartButton } from "./AddToCartButton";
@@ -40,25 +40,50 @@ import { trackViewContent } from "@/components/MetaPixel";
 // Similar Products Component
 function SimilarProducts({
   currentProductId,
+  categoryId,
   subCategoryId,
 }: {
   currentProductId: string;
+  categoryId: string;
   subCategoryId: string;
 }) {
   const { t } = useLanguage();
 
+  // Helper function to determine theme based on product category
+  const getProductTheme = (product: Product) => {
+    const categoryName =
+      typeof product.category === "string"
+        ? product.category
+        : product.category?.name || "";
+
+    if (
+      categoryName === "ხელნაკეთი ნივთები" ||
+      categoryName === "ხელნაკეთი" ||
+      categoryName === "Handmades" ||
+      categoryName === "Handmade"
+    ) {
+      return "handmade-theme";
+    }
+
+    return "default";
+  };
+
   const { data: productsResponse, isLoading } = useQuery({
-    queryKey: ["similarProducts", subCategoryId],
+    queryKey: ["similarProducts", subCategoryId || categoryId],
     queryFn: async () => {
       try {
-        if (!subCategoryId) {
+        // Try subCategory first, then fall back to category
+        const filterParam = subCategoryId ? "subCategory" : "mainCategory";
+        const filterValue = subCategoryId || categoryId;
+
+        if (!filterValue) {
           return { items: [] };
         }
 
         const searchParams = new URLSearchParams({
           page: "1",
           limit: "10",
-          subCategory: subCategoryId,
+          [filterParam]: filterValue,
         });
 
         const response = await fetchWithAuth(
@@ -76,7 +101,7 @@ function SimilarProducts({
         return { items: [] };
       }
     },
-    enabled: !!subCategoryId,
+    enabled: !!(subCategoryId || categoryId),
     retry: 1,
     refetchOnWindowFocus: false,
   });
@@ -122,18 +147,17 @@ function SimilarProducts({
     );
   }
 
-  if (!subCategoryId || similarProducts.length === 0) {
+  if ((!subCategoryId && !categoryId) || similarProducts.length === 0) {
     return null;
   }
 
   return (
     <div className="similar-products-section">
       <h2 className="similar-products-title">{t("product.similarProducts")}</h2>
-      <div className="similar-products-grid">
-        {similarProducts.map((product: Product) => (
-          <SimilarProductCard key={product._id} product={product} />
-        ))}
-      </div>
+      <ProductGrid
+        products={similarProducts}
+        theme={getProductTheme(similarProducts[0])}
+      />
     </div>
   );
 }
@@ -1211,6 +1235,11 @@ export function ProductDetails({ product }: ProductDetailsProps) {
       {/* Similar Products Section */}
       <SimilarProducts
         currentProductId={product._id}
+        categoryId={
+          typeof product.category === "string"
+            ? product.category
+            : product.category?.id || product.category?._id || ""
+        }
         subCategoryId={
           typeof product.subCategory === "string"
             ? product.subCategory
