@@ -1653,7 +1653,7 @@ export function CreateProductForm({
           >
             {language === "en"
               ? "Original products are marked as authentic. Copies are reproductions."
-              : "ორიგინალური პროდუქტები მონიშნულია როგორც ავთენტური. ასლები არის რეპროდუქციები."}
+              : "ორიგინალი პროდუქტები მონიშნულია როგორც ავთენტური. ასლები არის რეპროდუქციები."}
           </small>
         </div>
         {/* Dimensions Section */}
