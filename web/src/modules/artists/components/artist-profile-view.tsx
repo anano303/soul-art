@@ -13,7 +13,10 @@ import { GalleryLikeButton } from "@/components/gallery-like-button";
 import { GalleryComments } from "@/components/gallery-comments";
 import { GalleryViewer } from "@/components/gallery-viewer";
 import { useGalleryInteractions } from "@/hooks/useGalleryInteractions";
-import { Grid3X3, ShoppingBag, Info } from "lucide-react";
+import { AddToCartButton } from "@/modules/products/components/AddToCartButton";
+import { useCart } from "@/modules/cart/context/cart-context";
+import { useToast } from "@/hooks/use-toast";
+import { Grid3X3, ShoppingBag, Info, ShoppingCart } from "lucide-react";
 import BrushTrail from "@/components/BrushTrail/BrushTrail";
 import { FollowButton } from "@/components/follow-button/follow-button";
 import { FollowersModal } from "@/components/followers-modal/followers-modal";
@@ -135,11 +138,15 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
   const queryClient = useQueryClient();
   const { artist, products } = data;
   const [showEditor, setShowEditor] = useState(false);
-  const [activeTab, setActiveTab] = useState<'sale' | 'gallery' | 'info'>('sale');
+  const [activeTab, setActiveTab] = useState<"sale" | "gallery" | "info">(
+    "sale"
+  );
   const [viewerOpen, setViewerOpen] = useState(false);
   const [viewerIndex, setViewerIndex] = useState(0);
   const [followersModalOpen, setFollowersModalOpen] = useState(false);
-  const [followersCount, setFollowersCount] = useState(artist.followersCount || 0);
+  const [followersCount, setFollowersCount] = useState(
+    artist.followersCount || 0
+  );
   const heroRef = useRef<HTMLElement>(null);
 
   const handleSettingsClose = useCallback(() => {
@@ -155,9 +162,13 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
 
   const productItems = products?.items ?? [];
   const galleryItems = artist.artistGallery ?? [];
-  
+
   // Debug logging
-  console.log('Gallery viewer state:', { viewerOpen, viewerIndex, galleryItemsCount: galleryItems.length });
+  console.log("Gallery viewer state:", {
+    viewerOpen,
+    viewerIndex,
+    galleryItemsCount: galleryItems.length,
+  });
 
   const anySocial = socialOrder.some(({ key }) => artist.artistSocials?.[key]);
   const isOwner = user?._id === artist.id;
@@ -173,16 +184,19 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
     router.refresh();
   }, [queryClient, router]);
 
-  const handleFollowChange = useCallback((isFollowing: boolean) => {
-    setFollowersCount(prev => isFollowing ? prev + 1 : prev - 1);
-    
-    // Invalidate relevant queries to ensure fresh data on next load
-    queryClient.invalidateQueries({ queryKey: ["user"] });
-    queryClient.invalidateQueries({ queryKey: ["artist-profile"] });
-    
-    // Also refresh the router cache
-    router.refresh();
-  }, [queryClient, router]);
+  const handleFollowChange = useCallback(
+    (isFollowing: boolean) => {
+      setFollowersCount((prev) => (isFollowing ? prev + 1 : prev - 1));
+
+      // Invalidate relevant queries to ensure fresh data on next load
+      queryClient.invalidateQueries({ queryKey: ["user"] });
+      queryClient.invalidateQueries({ queryKey: ["artist-profile"] });
+
+      // Also refresh the router cache
+      router.refresh();
+    },
+    [queryClient, router]
+  );
 
   // Sync local follower count with artist data
   useEffect(() => {
@@ -252,7 +266,7 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
                   </button>
                 )}
               </div>
-              
+
               {/* Followers stats and Follow button */}
               <div className="artist-hero__stats">
                 {isOwner ? (
@@ -279,8 +293,8 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
                   </div>
                 )}
                 {!isOwner && (
-                  <FollowButton 
-                    targetUserId={artist.id} 
+                  <FollowButton
+                    targetUserId={artist.id}
                     targetUserName={artist.storeName || artist.name}
                     onFollowChange={handleFollowChange}
                   />
@@ -288,7 +302,7 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
               </div>
             </div>
           </div>
-          
+
           {/* Bottom row: Biography spanning full width */}
           {biography && (
             <div className="artist-hero__bio-row">
@@ -317,24 +331,30 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
           <div className="artist-tabs__nav">
             <button
               type="button"
-              className={`artist-tabs__tab ${activeTab === 'sale' ? 'artist-tabs__tab--active' : ''}`}
-              onClick={() => setActiveTab('sale')}
+              className={`artist-tabs__tab ${
+                activeTab === "sale" ? "artist-tabs__tab--active" : ""
+              }`}
+              onClick={() => setActiveTab("sale")}
               title={getSaleCopy(language)}
             >
               <ShoppingBag className="artist-tabs__tab-icon" size={24} />
             </button>
             <button
               type="button"
-              className={`artist-tabs__tab ${activeTab === 'gallery' ? 'artist-tabs__tab--active' : ''}`}
-              onClick={() => setActiveTab('gallery')}
+              className={`artist-tabs__tab ${
+                activeTab === "gallery" ? "artist-tabs__tab--active" : ""
+              }`}
+              onClick={() => setActiveTab("gallery")}
               title={getGalleryCopy(language)}
             >
               <Grid3X3 className="artist-tabs__tab-icon" size={24} />
             </button>
             <button
               type="button"
-              className={`artist-tabs__tab ${activeTab === 'info' ? 'artist-tabs__tab--active' : ''}`}
-              onClick={() => setActiveTab('info')}
+              className={`artist-tabs__tab ${
+                activeTab === "info" ? "artist-tabs__tab--active" : ""
+              }`}
+              onClick={() => setActiveTab("info")}
               title={getInfoCopy(language)}
             >
               <Info className="artist-tabs__tab-icon" size={24} />
@@ -342,8 +362,14 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
           </div>
 
           <div className="artist-tabs__content">
-            {activeTab === 'sale' && (
-              <section className={`artist-tab-panel ${productItems.length > 0 ? 'artist-tab-panel--products' : 'artist-tab-panel--empty'}`}>
+            {activeTab === "sale" && (
+              <section
+                className={`artist-tab-panel ${
+                  productItems.length > 0
+                    ? "artist-tab-panel--products"
+                    : "artist-tab-panel--empty"
+                }`}
+              >
                 {productItems.length > 0 ? (
                   <div className="artist-grid artist-grid--products">
                     {productItems.map((product) => (
@@ -363,35 +389,45 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
               </section>
             )}
 
-            {activeTab === 'gallery' && (
-              <section className={`artist-tab-panel ${galleryItems.length > 0 ? 'artist-tab-panel--gallery' : 'artist-tab-panel--empty'}`}>
+            {activeTab === "gallery" && (
+              <section
+                className={`artist-tab-panel ${
+                  galleryItems.length > 0
+                    ? "artist-tab-panel--gallery"
+                    : "artist-tab-panel--empty"
+                }`}
+              >
                 {galleryItems.length > 0 ? (
                   <div className="artist-grid artist-grid--gallery">
                     {galleryItems.map((url, index) => {
                       const stats = getStatsForImage(url);
                       return (
-                        <div 
-                          key={url} 
+                        <div
+                          key={url}
                           className="artist-gallery-card"
                           onClick={() => {
-                            console.log('Gallery image clicked, index:', index);
+                            console.log("Gallery image clicked, index:", index);
                             setViewerIndex(index);
                             setViewerOpen(true);
                           }}
-                          style={{ cursor: 'pointer' }}
+                          style={{ cursor: "pointer" }}
                         >
                           <CloudinaryImage
                             src={url}
-                            alt={`Gallery item by ${artist.storeName || artist.name}`}
+                            alt={`Gallery item by ${
+                              artist.storeName || artist.name
+                            }`}
                             width={600}
                             height={600}
                             className="artist-gallery-card__image"
                           />
                           <div className="artist-gallery-card__overlay">
                             <span className="artist-gallery-card__badge">
-                              {language === "en" ? "Not for sale" : "არ იყიდება"}
+                              {language === "en"
+                                ? "Not for sale"
+                                : "არ იყიდება"}
                             </span>
-                            <div 
+                            <div
                               className="artist-gallery-card__interactions"
                               onClick={(e) => e.stopPropagation()}
                             >
@@ -401,7 +437,10 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
                                 initialLikesCount={stats.likesCount}
                                 initialIsLiked={stats.isLikedByUser}
                                 onLikeToggle={(isLiked, likesCount) => {
-                                  updateStats(url, { isLikedByUser: isLiked, likesCount });
+                                  updateStats(url, {
+                                    isLikedByUser: isLiked,
+                                    likesCount,
+                                  });
                                 }}
                               />
                               <GalleryComments
@@ -421,16 +460,17 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
                 ) : (
                   <div className="artist-empty-state">
                     <div className="artist-empty-state__icon">🖼️</div>
-                    <p className="artist-empty-state__text">{galleryEmptyCopy}</p>
+                    <p className="artist-empty-state__text">
+                      {galleryEmptyCopy}
+                    </p>
                   </div>
                 )}
               </section>
             )}
 
-            {activeTab === 'info' && (
+            {activeTab === "info" && (
               <section className="artist-tab-panel artist-tab-panel--info">
                 <div className="artist-info-grid">
-                  
                   {/* Creative Focus */}
                   {(artist.artistDisciplines?.length ?? 0) > 0 && (
                     <div className="artist-info-section">
@@ -453,14 +493,18 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
                       <h3 className="artist-info-section__title">
                         {language === "en" ? "Location" : "მდებარეობა"}
                       </h3>
-                      <p className="artist-info-text">{artist.artistLocation}</p>
+                      <p className="artist-info-text">
+                        {artist.artistLocation}
+                      </p>
                     </div>
                   )}
 
                   {/* Commissions */}
                   <div className="artist-info-section">
                     <h3 className="artist-info-section__title">
-                      {language === "en" ? "Custom Orders" : "ინდივიდუალური შეკვეთები"}
+                      {language === "en"
+                        ? "Custom Orders"
+                        : "ინდივიდუალური შეკვეთები"}
                     </h3>
                     <p className="artist-info-text">
                       {getCommissionsCopy(
@@ -498,7 +542,6 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
                       </div>
                     </div>
                   )}
-
                 </div>
               </section>
             )}
@@ -540,35 +583,229 @@ interface ProductCardProps {
 }
 
 function ProductCard({ product, language }: ProductCardProps) {
+  const { addToCart } = useCart();
+  const { toast } = useToast();
+  const router = useRouter();
+  const [isBuying, setIsBuying] = useState(false);
   const image = product.images?.[0];
   const href = `/products/${product.id}`;
 
+  // Assume no discount for now, since ArtistProductSummary doesn't have it
+  const discountPercentage = product.discountPercentage || 0;
+  const countInStock = product.countInStock || 1;
+
+  const deliveryText = () => {
+    console.log("Delivery data:", {
+      min: product.minDeliveryDays,
+      max: product.maxDeliveryDays,
+    });
+    if (!product.minDeliveryDays && !product.maxDeliveryDays) {
+      return language === "en"
+        ? "Delivery time: 3-5 days"
+        : "მიტანის ვადა: 3-5 დღე";
+    }
+    const min = product.minDeliveryDays;
+    const max = product.maxDeliveryDays;
+    if (min === max) {
+      return language === "en" ? `${min} days delivery` : `${min} დღე მიტანა`;
+    }
+    return language === "en"
+      ? `${min}-${max} days delivery`
+      : `${min}-${max} დღე მიტანა`;
+  };
+
+  console.log("Delivery text:", deliveryText());
+
+  const handleBuyNow = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (countInStock <= 0) {
+      toast({
+        title: language === "en" ? "Out of Stock" : "არ არის მარაგში",
+        description:
+          language === "en"
+            ? "This product is currently out of stock"
+            : "პროდუქტი ამჟამად არ არის მარაგში",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsBuying(true);
+
+    try {
+      // Calculate discounted price if applicable
+      const isDiscounted = discountPercentage > 0;
+      const discountedPrice = isDiscounted
+        ? product.price * (1 - discountPercentage / 100)
+        : product.price;
+
+      // Add item to cart with discounted price if applicable
+      await addToCart(
+        product.id,
+        1,
+        undefined,
+        undefined,
+        undefined,
+        isDiscounted ? discountedPrice : product.price
+      );
+
+      // Small delay to ensure cart updates, then redirect
+      setTimeout(() => {
+        router.push("/checkout/streamlined");
+      }, 300);
+    } catch (error) {
+      console.error("Buy now error:", error);
+      setIsBuying(false);
+      // Error toast is already shown by addToCart if there's an issue
+      // Only show additional error if user is not being redirected to login
+      if (
+        error instanceof Error &&
+        error.message !== "User not authenticated"
+      ) {
+        toast({
+          title: language === "en" ? "Error" : "შეცდომა",
+          description:
+            language === "en"
+              ? "Failed to proceed to checkout"
+              : "გადახდის გვერდზე გადასვლა ვერ მოხერხდა",
+          variant: "destructive",
+        });
+      }
+    }
+  };
+
   return (
     <article className="artist-product-card">
-      <div className="artist-product-card__image-wrapper">
-        {image ? (
-          <CloudinaryImage
-            src={image}
-            alt={product.name}
-            width={400}
-            height={400}
-            className="artist-product-card__image"
-          />
-        ) : (
-          <div className="artist-product-card__image-placeholder">
-            {product.name.charAt(0)}
+      <Link href={href} className="artist-product-card__link">
+        <div className="artist-product-card__image-wrapper">
+          {image ? (
+            <CloudinaryImage
+              src={image}
+              alt={product.name}
+              width={400}
+              height={400}
+              className="artist-product-card__image"
+            />
+          ) : (
+            <div className="artist-product-card__image-placeholder">
+              {product.name.charAt(0)}
+            </div>
+          )}
+          {/* Discount badge - always visible if discounted */}
+          {discountPercentage > 0 && (
+            <div className="artist-product-card__discount-badge">
+              -{discountPercentage}%
+            </div>
+          )}
+          <div className="artist-product-card__overlay">
+            <div className="artist-product-card__price-overlay">
+              {discountPercentage > 0 ? (
+                <>
+                  <span className="artist-product-card__original-price">
+                    {formatPrice(product.price, language)}
+                  </span>
+                  <span className="artist-product-card__discounted-price">
+                    {formatPrice(
+                      product.price * (1 - discountPercentage / 100),
+                      language
+                    )}
+                  </span>
+                </>
+              ) : (
+                <span className="artist-product-card__price">
+                  {formatPrice(product.price, language)}
+                </span>
+              )}
+            </div>
+            {product.description && (
+              <div className="artist-product-card__description">
+                {product.description}
+              </div>
+            )}
+            {deliveryText() && (
+              <div className="artist-product-card__delivery">
+                {deliveryText()}
+              </div>
+            )}
+            <div className="artist-product-card__overlay-actions">
+              <button
+                type="button"
+                className="artist-product-card__buy-now-overlay"
+                onClick={handleBuyNow}
+                disabled={isBuying || countInStock <= 0}
+                title={
+                  language === "en"
+                    ? "Buy now - Direct to checkout"
+                    : "იყიდე ახლავე - პირდაპირ გადახდაზე"
+                }
+              >
+                {isBuying ? (
+                  <>
+                    <svg
+                      className="spinner-icon"
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+                    </svg>
+                    <span>
+                      {language === "en" ? "Processing..." : "დამუშავება..."}
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path d="M5 12h14" />
+                      <path d="m12 5 7 7-7 7" />
+                    </svg>
+                    <span>
+                      {language === "en" ? "Buy Now" : "იყიდე ახლავე"}
+                    </span>
+                  </>
+                )}
+              </button>
+            </div>
           </div>
-        )}
-      </div>
-      <div className="artist-product-card__body">
-        <h3>{product.name}</h3>
-        <p className="artist-product-card__price">
-          {formatPrice(product.price, language)}
-        </p>
-        <Link href={href} className="artist-product-card__link">
-          {language === "en" ? "View piece" : "ნახვა"}
-        </Link>
-      </div>
+        </div>
+        <div className="artist-product-card__info">
+          <div className="artist-product-card__title-row">
+            <h3 className="artist-product-card__title">{product.name}</h3>
+            <AddToCartButton
+              productId={product.id}
+              productName={product.name}
+              countInStock={countInStock}
+              className="btn-add-to-cart-icon"
+              price={
+                discountPercentage > 0
+                  ? product.price * (1 - discountPercentage / 100)
+                  : product.price
+              }
+              hideQuantity={true}
+              openCartOnAdd={false}
+              iconOnly={true}
+            />
+          </div>
+        </div>
+      </Link>
     </article>
   );
 }

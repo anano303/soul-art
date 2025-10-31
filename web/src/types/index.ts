@@ -38,6 +38,12 @@ export interface ArtistProductSummary {
   brandLogo?: string | null;
   rating?: number;
   numReviews?: number;
+  description?: string;
+  discountPercentage?: number;
+  countInStock?: number;
+  deliveryType?: "SELLER" | "SoulArt";
+  minDeliveryDays?: number;
+  maxDeliveryDays?: number;
   createdAt?: string | null;
 }
 
