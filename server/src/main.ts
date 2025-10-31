@@ -26,6 +26,7 @@ async function bootstrap() {
         'https://www.soulart.vercel.app',
         'https://soulart.ge',
         'https://www.soulart.ge',
+        'https://dev.soulart.ge',
         'https://soulart.vercel.app',
         'https://soulart.vercel.app/home',
         'https://soulart-web.vercel.app',
