@@ -40,6 +40,8 @@ export const productSchema = z.object({
       depth: z.number().optional().nullable(),
     })
     .optional(),
+  isOriginal: z.boolean().optional().default(true),
+  materials: z.array(z.string()).optional().default([]),
 });
 
 export type ProductFormData = z.infer<typeof productSchema>;

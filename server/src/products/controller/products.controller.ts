@@ -361,6 +361,8 @@ export class ProductsController {
       let sizes = productData.sizes;
       let colors = productData.colors;
       let hashtags = productData.hashtags;
+      let dimensions = productData.dimensions;
+      let materials = productData.materials;
 
       if (typeof ageGroups === 'string') {
         try {
@@ -394,6 +396,32 @@ export class ProductsController {
         }
       }
 
+      if (typeof dimensions === 'string') {
+        try {
+          dimensions = JSON.parse(dimensions);
+        } catch (e) {
+          dimensions = undefined;
+        }
+      }
+
+      if (typeof materials === 'string') {
+        try {
+          materials = JSON.parse(materials);
+        } catch (e) {
+          materials = [];
+        }
+      }
+
+      // Parse isOriginal boolean
+      if (typeof productData.isOriginal === 'string') {
+        productData.isOriginal = productData.isOriginal === 'true';
+      }
+
+      // Ensure materials is always an array
+      if (!materials) {
+        materials = [];
+      }
+
       // Extract the main category data
       const {
         mainCategory,
@@ -418,6 +446,8 @@ export class ProductsController {
         sizes,
         colors,
         hashtags,
+        dimensions,
+        materials,
         user,
         images: imageUrls,
         brandLogo: brandLogoUrl,
@@ -661,6 +691,8 @@ export class ProductsController {
       let sizes = productData.sizes;
       let colors = productData.colors;
       let hashtags = productData.hashtags;
+      let dimensions = productData.dimensions;
+      let materials = productData.materials;
 
       if (typeof ageGroups === 'string') {
         try {
@@ -692,6 +724,32 @@ export class ProductsController {
         } catch (e) {
           hashtags = [];
         }
+      }
+
+      if (typeof dimensions === 'string') {
+        try {
+          dimensions = JSON.parse(dimensions);
+        } catch (e) {
+          dimensions = undefined;
+        }
+      }
+
+      if (typeof materials === 'string') {
+        try {
+          materials = JSON.parse(materials);
+        } catch (e) {
+          materials = [];
+        }
+      }
+
+      // Parse isOriginal boolean
+      if (typeof productData.isOriginal === 'string') {
+        productData.isOriginal = productData.isOriginal === 'true';
+      }
+
+      // Ensure materials is always an array
+      if (!materials) {
+        materials = [];
       }
 
       // Handle existing images
@@ -764,6 +822,11 @@ export class ProductsController {
           ? new Date(productData.discountEndDate)
           : undefined,
       };
+
+      // Explicitly set the parsed new fields to ensure they override any values from productDataWithoutUser
+      updateData.dimensions = dimensions;
+      updateData.materials = materials;
+      updateData.isOriginal = productData.isOriginal;
 
       const updatedProduct = await this.productsService.update(id, updateData);
 

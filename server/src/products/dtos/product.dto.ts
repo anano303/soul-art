@@ -7,6 +7,7 @@ import {
   IsObject,
   ValidateNested,
   IsMongoId,
+  IsBoolean,
 } from 'class-validator';
 import {
   ProductStatus,
@@ -205,6 +206,15 @@ export class ProductDto {
     depth?: number;
   };
 
+  @IsBoolean()
+  @IsOptional()
+  isOriginal?: boolean;
+
+  @IsArray()
+  @IsOptional()
+  @IsString({ each: true })
+  materials?: string[];
+
   @IsString()
   @IsOptional()
   brandLogoUrl?: string;
@@ -274,6 +284,14 @@ export class FindAllProductsDto {
   @IsOptional()
   @IsString()
   includeVariants?: string;
+
+  @IsOptional()
+  @IsBoolean()
+  isOriginal?: boolean;
+
+  @IsOptional()
+  @IsString()
+  material?: string;
 }
 
 // We already have the correct DTO definitions with IsMongoId() decorators for mainCategory and subCategory

@@ -156,6 +156,8 @@ export interface Product {
     height?: number;
     depth?: number;
   };
+  isOriginal?: boolean;
+  materials?: string[];
   variants?: ProductVariant[];
   videoDescription?: string; // YouTube embed code or URL
   youtubeVideoId?: string;

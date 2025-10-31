@@ -229,6 +229,12 @@ export class Product {
     height?: number;
     depth?: number;
   };
+
+  @Prop({ type: Boolean, default: true })
+  isOriginal?: boolean;
+
+  @Prop({ type: [String], default: [] })
+  materials?: string[];
 }
 
 export const ProductSchema = SchemaFactory.createForClass(Product);

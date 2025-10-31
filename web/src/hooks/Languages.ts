@@ -356,6 +356,10 @@ export const TRANSLATIONS: Translations = {
       ref: "Ref:",
       reviews: "შეფასებები",
       dimensions: "ნამუშევრის ზომები",
+      productType: "პროდუქტის ტიპი",
+      original: "ორიგინალი",
+      copy: "ასლი",
+      materials: "მასალები",
       deliveryInfo: "მიწოდების ინფორმაცია",
       sellerDelivery: "მიწოდება ავტორისგან",
       courierDelivery: "მიწოდება უფასო, SoulArt-ის კურიერით, 1-2 დღეში",
@@ -371,6 +375,10 @@ export const TRANSLATIONS: Translations = {
       selectSize: "აირჩიეთ ზომა",
       selectColor: "აირჩიეთ ფერი",
       addToCartSuccess: "პროდუქტი წარმატებით დაემატა კალათაში",
+      width: "სიგანე",
+      height: "სიმაღლე",
+      depth: "სიღრმე",
+      cm: "სმ",
     },
 
     // Room Viewer
@@ -1752,6 +1760,10 @@ export const TRANSLATIONS: Translations = {
       ref: "Ref:",
       reviews: "Reviews",
       dimensions: "Artwork Dimensions",
+      productType: "Product Type",
+      original: "Original",
+      copy: "Copy",
+      materials: "Materials",
       deliveryInfo: "Delivery Information",
       sellerDelivery: "Delivery by Artist",
       courierDelivery: "Delivery by SoulArt Courier",
@@ -1767,6 +1779,10 @@ export const TRANSLATIONS: Translations = {
       selectSize: "Select Size",
       selectColor: "Select Color",
       addToCartSuccess: "Product successfully added to cart",
+      width: "Width",
+      height: "Height",
+      depth: "Depth",
+      cm: "cm",
     },
 
     // Room Viewer

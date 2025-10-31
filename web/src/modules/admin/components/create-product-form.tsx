@@ -40,6 +40,7 @@ interface ProductFormData extends BaseProductFormData {
   discountPercentage?: number;
   discountStartDate?: string;
   discountEndDate?: string;
+  // New fields are already included in BaseProductFormData
 }
 
 interface CreateProductFormProps {
@@ -84,6 +85,8 @@ export function CreateProductForm({
       countInStock: 1,
       hashtags: [],
       brandLogo: undefined,
+      isOriginal: true,
+      materials: [],
     }
   );
 
@@ -118,6 +121,22 @@ export function CreateProductForm({
   const [existingYoutubeVideoUrl, setExistingYoutubeVideoUrl] = useState<
     string | null
   >(initialData?.youtubeVideoUrl || null);
+
+  // New fields for original/copy and materials
+  const [isOriginal, setIsOriginal] = useState<boolean>(true);
+  const [materials, setMaterials] = useState<string[]>([]);
+  const [materialsInput, setMaterialsInput] = useState<string>("");
+
+  // Dimensions state
+  const [dimensions, setDimensions] = useState<{
+    width?: number;
+    height?: number;
+    depth?: number;
+  }>({
+    width: undefined,
+    height: undefined,
+    depth: undefined,
+  });
 
   // Authorization check - redirect if not authenticated or not authorized
   useEffect(() => {
@@ -337,6 +356,26 @@ export function CreateProductForm({
         }
       }
 
+      // Initialize new fields
+      if (initialData.isOriginal !== undefined) {
+        setIsOriginal(initialData.isOriginal);
+      } else {
+        setIsOriginal(true); // Default to true
+      }
+
+      if (initialData.dimensions) {
+        setDimensions({
+          width: initialData.dimensions.width ?? undefined,
+          height: initialData.dimensions.height ?? undefined,
+          depth: initialData.dimensions.depth ?? undefined,
+        });
+      }
+
+      if (initialData.materials) {
+        setMaterials(initialData.materials);
+        setMaterialsInput(initialData.materials.join(", "));
+      }
+
       // Extract category ID correctly, handling both object and string formats
       if (initialData.mainCategory) {
         const categoryId =
@@ -394,6 +433,8 @@ export function CreateProductForm({
       sizes: [],
       colors: [],
       brandLogo: undefined,
+      isOriginal: true,
+      materials: [],
     });
     setHashtagsInput("");
     setErrors({});
@@ -415,6 +456,16 @@ export function CreateProductForm({
     setDiscountPercentage("");
     setDiscountStartDate("");
     setDiscountEndDate("");
+
+    // Reset new fields
+    setIsOriginal(true);
+    setMaterials([]);
+    setMaterialsInput("");
+    setDimensions({
+      width: undefined,
+      height: undefined,
+      depth: undefined,
+    });
 
     // Clear saved form data when resetting
     clearFormFromStorage();
@@ -715,6 +766,22 @@ export function CreateProductForm({
     }));
   };
 
+  // Materials handling functions
+  const handleMaterialsChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const value = e.target.value;
+    setMaterialsInput(value);
+
+    // Update materials array in real-time
+    const materialsArray = value
+      ? value
+          .split(",")
+          .map((material) => material.trim())
+          .filter((material) => material.length > 0)
+      : [];
+
+    setMaterials(materialsArray);
+  };
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { files } = e.target;
     if (files) {
@@ -960,6 +1027,13 @@ export function CreateProductForm({
       if (discountEndDate) {
         formDataToSend.append("discountEndDate", discountEndDate);
       }
+
+      // Add new fields: isOriginal, dimensions, materials
+      formDataToSend.append("isOriginal", String(isOriginal));
+      if (dimensions.width || dimensions.height || dimensions.depth) {
+        formDataToSend.append("dimensions", JSON.stringify(dimensions));
+      }
+      formDataToSend.append("materials", JSON.stringify(materials));
 
       // Handle images - separate existing images from new ones
       const existingImages: string[] = [];
@@ -1486,6 +1560,232 @@ export function CreateProductForm({
             <p className="create-product-error">{errors.descriptionEn}</p>
           )}
         </div>{" "}
+        {/* Original/Copy Section */}
+        <div>
+          <label>{language === "en" ? "Product Type" : "პროდუქტის ტიპი"}</label>
+          <div
+            style={{
+              marginTop: "8px",
+              display: "flex",
+              gap: "12px",
+              alignItems: "center",
+            }}
+          >
+            <label
+              style={{
+                display: "flex",
+                alignItems: "center",
+                cursor: "pointer",
+                padding: "6px 12px",
+                borderRadius: "6px",
+                border: "1px solid #e9ecef",
+                backgroundColor:
+                  isOriginal === true ? "#e3f2fd" : "transparent",
+                transition: "all 0.2s",
+                // flex: 1,
+                justifyContent: "center",
+              }}
+              onMouseEnter={(e) => {
+                if (isOriginal !== true)
+                  e.currentTarget.style.backgroundColor = "#f8f9fa";
+              }}
+              onMouseLeave={(e) => {
+                if (isOriginal !== true)
+                  e.currentTarget.style.backgroundColor = "transparent";
+              }}
+            >
+              <input
+                type="radio"
+                name="isOriginal"
+                value="true"
+                checked={isOriginal === true}
+                onChange={() => setIsOriginal(true)}
+                style={{ marginRight: "6px" }}
+              />
+              <span style={{ fontSize: "0.9rem", fontWeight: "500" }}>
+                {language === "en" ? "Original" : "ორიგინალი"}
+              </span>
+            </label>
+            <label
+              style={{
+                display: "flex",
+                alignItems: "center",
+                cursor: "pointer",
+                padding: "6px 12px",
+                borderRadius: "6px",
+                border: "1px solid #e9ecef",
+                backgroundColor:
+                  isOriginal === false ? "#ffebee" : "transparent",
+                transition: "all 0.2s",
+                // flex: 1,
+                justifyContent: "center",
+              }}
+              onMouseEnter={(e) => {
+                if (isOriginal !== false)
+                  e.currentTarget.style.backgroundColor = "#f8f9fa";
+              }}
+              onMouseLeave={(e) => {
+                if (isOriginal !== false)
+                  e.currentTarget.style.backgroundColor = "transparent";
+              }}
+            >
+              <input
+                type="radio"
+                name="isOriginal"
+                value="false"
+                checked={isOriginal === false}
+                onChange={() => setIsOriginal(false)}
+                style={{ marginRight: "6px" }}
+              />
+              <span style={{ fontSize: "0.9rem", fontWeight: "500" }}>
+                {language === "en" ? "Copy" : "ასლი"}
+              </span>
+            </label>
+          </div>
+          <small
+            style={{
+              color: "#666",
+              fontSize: "0.85rem",
+              display: "block",
+              marginTop: "6px",
+              lineHeight: "1.4",
+            }}
+          >
+            {language === "en"
+              ? "Original products are marked as authentic. Copies are reproductions."
+              : "ორიგინალური პროდუქტები მონიშნულია როგორც ავთენტური. ასლები არის რეპროდუქციები."}
+          </small>
+        </div>
+        {/* Dimensions Section */}
+        <div>
+          <label>{language === "en" ? "Dimensions (cm)" : "ზომები (სმ)"}</label>
+          <div style={{ display: "flex", gap: "12px", marginTop: "8px" }}>
+            <div style={{ flex: 1 }}>
+              <input
+                type="number"
+                placeholder={language === "en" ? "Width" : "სიგანე"}
+                value={dimensions.width || ""}
+                onChange={(e) =>
+                  setDimensions((prev) => ({
+                    ...prev,
+                    width: e.target.value ? Number(e.target.value) : undefined,
+                  }))
+                }
+                className="create-product-input"
+                min={0}
+                step={0.1}
+              />
+            </div>
+            <div style={{ flex: 1 }}>
+              <input
+                type="number"
+                placeholder={language === "en" ? "Height" : "სიმაღლე"}
+                value={dimensions.height || ""}
+                onChange={(e) =>
+                  setDimensions((prev) => ({
+                    ...prev,
+                    height: e.target.value ? Number(e.target.value) : undefined,
+                  }))
+                }
+                className="create-product-input"
+                min={0}
+                step={0.1}
+              />
+            </div>
+            <div style={{ flex: 1 }}>
+              <input
+                type="number"
+                placeholder={language === "en" ? "Depth" : "სიღრმე"}
+                value={dimensions.depth || ""}
+                onChange={(e) =>
+                  setDimensions((prev) => ({
+                    ...prev,
+                    depth: e.target.value ? Number(e.target.value) : undefined,
+                  }))
+                }
+                className="create-product-input"
+                min={0}
+                step={0.1}
+              />
+            </div>
+          </div>
+          <small
+            style={{
+              color: "#666",
+              fontSize: "0.9rem",
+              display: "block",
+              marginTop: "4px",
+            }}
+          >
+            {language === "en"
+              ? "Enter dimensions in centimeters. Leave empty if not applicable."
+              : "შეიყვანეთ ზომები სანტიმეტრებში. დატოვეთ ცარიელი თუ არ არის შესაბამისი."}
+          </small>
+        </div>
+        {/* Materials Section */}
+        <div>
+          <label htmlFor="materials">
+            {language === "en" ? "Materials" : "მასალები"}
+          </label>
+          <textarea
+            id="materials"
+            value={materialsInput}
+            onChange={handleMaterialsChange}
+            className="create-product-textarea"
+            placeholder={
+              language === "en"
+                ? "Enter materials separated by commas (e.g., wood, metal, fabric)"
+                : "შეიყვანეთ მასალები მძიმეებით გამოყოფილი (მაგ. ხე, ლითონი, ქსოვილი)"
+            }
+            rows={2}
+          />
+          <small
+            style={{
+              color: "#666",
+              fontSize: "0.9rem",
+              display: "block",
+              marginTop: "4px",
+            }}
+          >
+            {language === "en"
+              ? "List the materials used in this product. Separate with commas."
+              : "ჩამოწერეთ ამ პროდუქტში გამოყენებული მასალები. გამოყავით მძიმეებით."}
+          </small>
+          {/* Materials preview */}
+          {materials.length > 0 && (
+            <div
+              style={{
+                marginTop: "8px",
+                padding: "8px",
+                backgroundColor: "#f8f9fa",
+                borderRadius: "4px",
+                border: "1px solid #e9ecef",
+              }}
+            >
+              <small style={{ color: "#495057", fontWeight: "bold" }}>
+                {language === "en" ? "Preview:" : "გადახედვა:"}
+              </small>
+              <div style={{ marginTop: "4px" }}>
+                {materials.map((material, index) => (
+                  <span
+                    key={index}
+                    style={{
+                      display: "inline-block",
+                      backgroundColor: "#28a745",
+                      color: "white",
+                      padding: "2px 6px",
+                      margin: "2px",
+                      borderRadius: "3px",
+                      fontSize: "0.8rem",
+                    }}
+                  >
+                    {material.trim()}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
         <div>
           <label htmlFor="price">{t("adminProducts.price")}</label>
           <input

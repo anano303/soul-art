@@ -10,6 +10,8 @@ import {
   CheckCircle,
   Shield,
   Share2,
+  Star,
+  Package,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ReviewForm } from "./review-form";
@@ -340,6 +342,7 @@ export function ProductDetails({ product }: ProductDetailsProps) {
 
   // Parse dimensions if they are stored as a string
   useEffect(() => {
+    console.log("Product dimensions:", product.dimensions);
     if (!product.dimensions) {
       setDimensions(null);
       return;
@@ -769,18 +772,23 @@ export function ProductDetails({ product }: ProductDetailsProps) {
             </span>
           </div>
 
-          {/* Trust Badges */}
-          <div className="trust-badges">
-            <div className="trust-badge">
-              <CheckCircle className="trust-badge-icon" size={20} />
-              {language === "en" ? "Authentic Product" : "ორიგინალი "}
+          {/* Original/Copy Information */}
+          <div className="info-section">
+            <div className="info-row">
+              <div className="info-icon-circle">
+                <Star size={20} />
+              </div>
+              <div className="info-text-content">
+                <div className="info-label-text">
+                  {t("product.productType")}
+                </div>
+                <div className="info-value-text">
+                  {product.isOriginal
+                    ? t("product.original")
+                    : t("product.copy")}
+                </div>
+              </div>
             </div>
-            {/* <div className="trust-badge">
-              <Shield className="trust-badge-icon" size={20} />
-              {language === "en"
-                ? "Quality Guaranteed"
-                : "ხარისხი გარანტირებული"}
-            </div> */}
           </div>
 
           {/* Description - Prominent with label */}
@@ -818,32 +826,65 @@ export function ProductDetails({ product }: ProductDetailsProps) {
             )}
           </div>
 
-          {/* Dimensions Information */}
-          {dimensions && (
-            <div className="dimensions-info">
-              <h3 className="info-title">{t("product.dimensions")}</h3>
-              <div className="dimensions-details">
-                {dimensions.width && (
-                  <span>
-                    {t("product.width")}: {dimensions.width}
-                    {t("product.cm")}
-                  </span>
-                )}
-                {dimensions.height && (
-                  <span>
-                    {t("product.height")}: {dimensions.height}
-                    {t("product.cm")}
-                  </span>
-                )}
-                {dimensions.depth && (
-                  <span>
-                    {t("product.depth")}: {dimensions.depth}
-                    {t("product.cm")}
-                  </span>
-                )}
+          {/* Materials Information */}
+          {product.materials && product.materials.length > 0 && (
+            <div className="info-section">
+              <div className="info-row">
+                <div className="info-icon-circle">
+                  <Package size={20} />
+                </div>
+                <div className="info-text-content">
+                  <div className="info-label-text">
+                    {t("product.materials")}
+                  </div>
+                  <div className="info-value-text">
+                    {product.materials.join(", ")}
+                  </div>
+                </div>
               </div>
             </div>
           )}
+
+          {/* Dimensions Information - Redesigned */}
+          {dimensions && (
+            <div className="info-section">
+              <div className="info-row">
+                <div className="info-icon-circle">
+                  <Ruler size={20} />
+                </div>
+                <div className="info-text-content">
+                  <div className="info-label-text">
+                    {t("product.dimensions")}
+                  </div>
+                  <div className="info-value-text">
+                    {dimensions.width && `${dimensions.width} × `}
+                    {dimensions.height && `${dimensions.height}`}
+                    {dimensions.depth && ` × ${dimensions.depth}`}{" "}
+                    {t("product.cm")}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Original/Copy Information */}
+          <div className="info-section">
+            <div className="info-row">
+              <div className="info-icon-circle">
+                <Star size={20} />
+              </div>
+              <div className="info-text-content">
+                <div className="info-label-text">
+                  {t("product.productType")}
+                </div>
+                <div className="info-value-text">
+                  {product.isOriginal
+                    ? t("product.original")
+                    : t("product.copy")}
+                </div>
+              </div>
+            </div>
+          </div>
 
           {/* Delivery Information - Redesigned */}
           <div className="info-section">
@@ -874,28 +915,6 @@ export function ProductDetails({ product }: ProductDetailsProps) {
               </div>
             </div>
           </div>
-
-          {/* Dimensions Information - Redesigned */}
-          {dimensions && (
-            <div className="info-section">
-              <div className="info-row">
-                <div className="info-icon-circle">
-                  <Ruler size={20} />
-                </div>
-                <div className="info-text-content">
-                  <div className="info-label-text">
-                    {t("product.dimensions")}
-                  </div>
-                  <div className="info-value-text">
-                    {dimensions.width && `${dimensions.width} × `}
-                    {dimensions.height && `${dimensions.height}`}
-                    {dimensions.depth && ` × ${dimensions.depth}`}{" "}
-                    {t("product.cm")}
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
 
           {/* Enhanced Stock Indicator */}
           <div

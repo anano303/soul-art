@@ -53,6 +53,8 @@ interface FindManyParams {
   minPrice?: string;
   maxPrice?: string;
   includeVariants?: boolean;
+  isOriginal?: boolean;
+  material?: string;
 }
 
 @Injectable()
@@ -97,6 +99,8 @@ export class ProductsService {
       minPrice,
       maxPrice,
       includeVariants = false,
+      isOriginal,
+      material,
     } = params;
 
     const pageNumber = parseInt(page);
@@ -191,6 +195,16 @@ export class ProductsService {
 
     if (color) {
       filter.colors = color;
+    }
+
+    // Filter by original/copy status
+    if (isOriginal !== undefined) {
+      filter.isOriginal = isOriginal;
+    }
+
+    // Filter by material
+    if (material) {
+      filter.materials = material;
     }
 
     // Filter by discount status
@@ -462,6 +476,9 @@ export class ProductsService {
     if (data.maxDeliveryDays !== undefined)
       updateFields.maxDeliveryDays = data.maxDeliveryDays;
     if (data.dimensions) updateFields.dimensions = data.dimensions;
+    if (data.isOriginal !== undefined)
+      updateFields.isOriginal = data.isOriginal;
+    if (data.materials !== undefined) updateFields.materials = data.materials;
     if (data.categoryStructure)
       updateFields.categoryStructure = data.categoryStructure;
 
@@ -807,16 +824,23 @@ export class ProductsService {
   }
 
   async findAll(options: FindAllProductsDto): Promise<any> {
-    let query = {};
-    if (options.mainCategory) {
-      query = { ...query, 'categoryStructure.main': options.mainCategory };
-    }
-    if (options.ageGroup) {
-      query = { ...query, 'categoryStructure.ageGroup': options.ageGroup };
-    }
-
-    // Additional logic for fetching products based on the query
-    return this.productModel.find(query).exec();
+    return this.findMany({
+      keyword: options.keyword,
+      page: options.page,
+      limit: options.limit,
+      brand: options.brand,
+      mainCategory: options.mainCategory,
+      subCategory: options.subCategory,
+      sortBy: options.sortBy,
+      sortDirection: options.sortOrder === 'asc' ? 'asc' : 'desc',
+      ageGroup: options.ageGroup,
+      size: options.size,
+      color: options.color,
+      includeVariants: options.includeVariants === 'true',
+      isOriginal: options.isOriginal,
+      material: options.material,
+      status: ProductStatus.APPROVED, // Default to approved for public API
+    });
   }
 
   // Add a method to check stock availability by size and color
