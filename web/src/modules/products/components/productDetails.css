@@ -768,10 +768,6 @@ body {
     order: 1;
   }
 
-  .product-info {
-    order: 2;
-  }
-
   .fullscreen-close {
     top: 12px;
     right: 12px;
