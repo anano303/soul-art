@@ -78,6 +78,18 @@ export function ProductFilters({
   const filterButtonRef = useRef<HTMLButtonElement>(null);
   const filterContainerRef = useRef<HTMLDivElement>(null);
 
+  // Prevent body scroll when filters are open
+  useEffect(() => {
+    if (showFilters) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [showFilters]);
+
   // Update local state when props change
   useEffect(() => {
     setMinPrice(priceRange[0]);
@@ -268,24 +280,15 @@ export function ProductFilters({
 
   // Fetch all available materials
   const { data: availableMaterials = [] } = useQuery<string[]>({
-    queryKey: ["materials", selectedCategoryId, selectedSubCategoryId],
+    queryKey: ["materials", selectedCategoryId],
     queryFn: async () => {
       try {
-        // Build query params based on selected filters
+        // Always fetch materials from ALL subcategories of the selected category
         const params = new URLSearchParams();
         if (selectedCategoryId)
           params.append("mainCategory", selectedCategoryId);
 
-        const selectedIds = Array.isArray(selectedSubCategoryId)
-          ? selectedSubCategoryId
-          : selectedSubCategoryId
-          ? [selectedSubCategoryId]
-          : [];
-
-        if (selectedIds.length > 0) {
-          params.append("subCategory", selectedIds.join(","));
-        }
-
+        // Don't filter by subcategory - get all materials from the entire category
         const queryString = params.toString();
         const url = queryString
           ? `/products?${queryString}&page=1&limit=1000`
@@ -320,24 +323,15 @@ export function ProductFilters({
 
   // Fetch all available dimensions
   const { data: availableDimensions = [] } = useQuery<string[]>({
-    queryKey: ["dimensions", selectedCategoryId, selectedSubCategoryId],
+    queryKey: ["dimensions", selectedCategoryId],
     queryFn: async () => {
       try {
-        // Build query params based on selected filters
+        // Always fetch dimensions from ALL subcategories of the selected category
         const params = new URLSearchParams();
         if (selectedCategoryId)
           params.append("mainCategory", selectedCategoryId);
 
-        const selectedIds = Array.isArray(selectedSubCategoryId)
-          ? selectedSubCategoryId
-          : selectedSubCategoryId
-          ? [selectedSubCategoryId]
-          : [];
-
-        if (selectedIds.length > 0) {
-          params.append("subCategory", selectedIds.join(","));
-        }
-
+        // Don't filter by subcategory - get all dimensions from the entire category
         const queryString = params.toString();
         const url = queryString
           ? `/products?${queryString}&page=1&limit=1000`
@@ -938,6 +932,11 @@ export function ProductFilters({
             </div>
           )}
 
+          {/* Filter Overlay */}
+          {showFilters && (
+            <div className="filter-modal-overlay" onClick={handleClose} />
+          )}
+
           {!showFilters && (
             <button
               ref={filterButtonRef}
@@ -961,6 +960,7 @@ export function ProductFilters({
               className={`additional-filters ${isClosing ? "closing" : ""}`}
             >
               <div className="filters-header">
+                <h3>{language === "en" ? "Filters" : "ფილტრები"}</h3>
                 <button
                   className="filters-close-btn"
                   onClick={handleClose}
@@ -1250,93 +1250,85 @@ export function ProductFilters({
                 </div>
               </div>
               {/* Materials Filter */}
-              {((Array.isArray(selectedSubCategoryId) &&
-                selectedSubCategoryId.length > 0) ||
-                (typeof selectedSubCategoryId === "string" &&
-                  selectedSubCategoryId)) &&
-                availableMaterials.length > 0 && (
-                  <div className="filter-section compact-filter">
-                    <div className="filter-header compact">
-                      <h3 className="filter-title compact">
-                        {language === "en" ? "Materials" : "მასალები"}
-                      </h3>
-                    </div>
-                    <div className="filter-options compact">
-                      <div className="checkbox-group">
-                        {availableMaterials.slice(0, 5).map((material) => {
-                          const selectedMaterialsArray = Array.isArray(
-                            selectedMaterial
-                          )
-                            ? selectedMaterial
-                            : selectedMaterial
-                            ? [selectedMaterial]
-                            : [];
-                          const isChecked =
-                            selectedMaterialsArray.includes(material);
+              {selectedCategoryId && availableMaterials.length > 0 && (
+                <div className="filter-section compact-filter">
+                  <div className="filter-header compact">
+                    <h3 className="filter-title compact">
+                      {language === "en" ? "Materials" : "მასალები"}
+                    </h3>
+                  </div>
+                  <div className="filter-options compact">
+                    <div className="checkbox-group">
+                      {availableMaterials.slice(0, 5).map((material) => {
+                        const selectedMaterialsArray = Array.isArray(
+                          selectedMaterial
+                        )
+                          ? selectedMaterial
+                          : selectedMaterial
+                          ? [selectedMaterial]
+                          : [];
+                        const isChecked =
+                          selectedMaterialsArray.includes(material);
 
-                          return (
-                            <label key={material} className="checkbox-label">
-                              <input
-                                type="checkbox"
-                                checked={isChecked}
-                                onChange={() =>
-                                  onMaterialFilterChange?.(material)
-                                }
-                                className="checkbox-input"
-                              />
-                              <span className="checkbox-text">{material}</span>
-                            </label>
-                          );
-                        })}
-                      </div>
+                        return (
+                          <label key={material} className="checkbox-label">
+                            <input
+                              type="checkbox"
+                              checked={isChecked}
+                              onChange={() =>
+                                onMaterialFilterChange?.(material)
+                              }
+                              className="checkbox-input"
+                            />
+                            <span className="checkbox-text">{material}</span>
+                          </label>
+                        );
+                      })}
                     </div>
                   </div>
-                )}
+                </div>
+              )}
               {/* Dimensions Filter */}
-              {((Array.isArray(selectedSubCategoryId) &&
-                selectedSubCategoryId.length > 0) ||
-                (typeof selectedSubCategoryId === "string" &&
-                  selectedSubCategoryId)) &&
-                availableDimensions.length > 0 && (
-                  <div className="filter-section compact-filter">
-                    <div className="filter-header compact">
-                      <h3 className="filter-title compact">
-                        {language === "en" ? "Dimensions" : "ზომები"}
-                      </h3>
-                    </div>
-                    <div className="filter-options compact">
-                      <div className="checkbox-group">
-                        {availableDimensions.slice(0, 5).map((dimension) => {
-                          const selectedDimensionsArray = Array.isArray(
-                            selectedDimension
-                          )
-                            ? selectedDimension
-                            : selectedDimension
-                            ? [selectedDimension]
-                            : [];
-                          const isChecked =
-                            selectedDimensionsArray.includes(dimension);
+              {selectedCategoryId && availableDimensions.length > 0 && (
+                <div className="filter-section compact-filter">
+                  <div className="filter-header compact">
+                    <h3 className="filter-title compact">
+                      {language === "en" ? "Dimensions" : "ზომები"}
+                    </h3>
+                  </div>
+                  <div className="filter-options compact">
+                    <div className="checkbox-group">
+                      {availableDimensions.slice(0, 5).map((dimension) => {
+                        const selectedDimensionsArray = Array.isArray(
+                          selectedDimension
+                        )
+                          ? selectedDimension
+                          : selectedDimension
+                          ? [selectedDimension]
+                          : [];
+                        const isChecked =
+                          selectedDimensionsArray.includes(dimension);
 
-                          return (
-                            <label key={dimension} className="checkbox-label">
-                              <input
-                                type="checkbox"
-                                checked={isChecked}
-                                onChange={() =>
-                                  onDimensionFilterChange?.(dimension)
-                                }
-                                className="checkbox-input"
-                              />
-                              <span className="checkbox-text">
-                                {dimension} {language === "en" ? "cm" : "სმ"}
-                              </span>
-                            </label>
-                          );
-                        })}
-                      </div>
+                        return (
+                          <label key={dimension} className="checkbox-label">
+                            <input
+                              type="checkbox"
+                              checked={isChecked}
+                              onChange={() =>
+                                onDimensionFilterChange?.(dimension)
+                              }
+                              className="checkbox-input"
+                            />
+                            <span className="checkbox-text">
+                              {dimension} {language === "en" ? "cm" : "სმ"}
+                            </span>
+                          </label>
+                        );
+                      })}
                     </div>
                   </div>
-                )}
+                </div>
+              )}
               <div className="filter-section">
                 {" "}
                 <h3 className="filter-title">{t("shop.priceRange")}</h3>

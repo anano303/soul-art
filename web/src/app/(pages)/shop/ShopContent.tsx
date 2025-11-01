@@ -496,35 +496,36 @@ const ShopContent = () => {
   return (
     <div className="shop-container default">
       <div className="content">
-        <div className="shop-layout">
-          <div className="filters-sidebar">
-            <ProductFilters
-              onCategoryChange={handleCategoryChange}
-              onSubCategoryChange={handleSubCategoryChange}
-              onAgeGroupChange={handleAgeGroupChange}
-              onSizeChange={handleSizeChange}
-              onColorChange={handleColorChange}
-              onBrandChange={handleBrandChange}
-              onDiscountFilterChange={handleDiscountFilterChange}
-              onOriginalFilterChange={handleOriginalFilterChange}
-              onMaterialFilterChange={handleMaterialFilterChange}
-              onDimensionFilterChange={handleDimensionFilterChange}
-              onPriceRangeChange={handlePriceRangeChange}
-              onSortChange={handleSortChange}
-              selectedCategoryId={selectedCategoryId}
-              selectedSubCategoryId={selectedSubCategoryIds}
-              selectedAgeGroup={selectedAgeGroup}
-              selectedSize={selectedSize}
-              selectedColor={selectedColor}
-              selectedBrand={selectedBrand}
-              selectedOriginal={selectedOriginalTypes}
-              selectedMaterial={selectedMaterials}
-              selectedDimension={selectedDimensions}
-              showDiscountedOnly={showDiscountedOnly}
-              priceRange={priceRange}
-            />
-          </div>
+        {/* Product Filters Component */}
+        <div className="filters-wrapper">
+          <ProductFilters
+            onCategoryChange={handleCategoryChange}
+            onSubCategoryChange={handleSubCategoryChange}
+            onAgeGroupChange={handleAgeGroupChange}
+            onSizeChange={handleSizeChange}
+            onColorChange={handleColorChange}
+            onBrandChange={handleBrandChange}
+            onDiscountFilterChange={handleDiscountFilterChange}
+            onOriginalFilterChange={handleOriginalFilterChange}
+            onMaterialFilterChange={handleMaterialFilterChange}
+            onDimensionFilterChange={handleDimensionFilterChange}
+            onPriceRangeChange={handlePriceRangeChange}
+            onSortChange={handleSortChange}
+            selectedCategoryId={selectedCategoryId}
+            selectedSubCategoryId={selectedSubCategoryIds}
+            selectedAgeGroup={selectedAgeGroup}
+            selectedSize={selectedSize}
+            selectedColor={selectedColor}
+            selectedBrand={selectedBrand}
+            selectedOriginal={selectedOriginalTypes}
+            selectedMaterial={selectedMaterials}
+            selectedDimension={selectedDimensions}
+            showDiscountedOnly={showDiscountedOnly}
+            priceRange={priceRange}
+          />
+        </div>
 
+        <div className="shop-layout">
           {brandInfo && (
             <div className="brand-info">
               {brandInfo.logo && (

@@ -17,9 +17,9 @@
 }
 
 .filter-section {
-  margin-bottom: 16px;
-  padding-bottom: 16px;
-  border-bottom: 1px solid #e5e5e5;
+  margin-bottom: 20px;
+  padding-bottom: 20px;
+  border-bottom: 2px solid #f0f0f0;
 }
 
 .filter-section:last-child {
@@ -32,13 +32,13 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 10px;
+  margin-bottom: 14px;
   font-family: firaGo;
   margin-top: 0;
 }
 
 .filter-title {
-  font-size: 1rem;
+  font-size: 1.05rem;
   font-weight: 600;
   color: #0f1111;
   margin: 0;
@@ -48,22 +48,22 @@
 
 .filter-clear-btn {
   background: transparent;
-  color: #007185;
+  color: #012645;
   border: none;
-  padding: 4px 8px;
-  border-radius: 4px;
+  padding: 6px 12px;
+  border-radius: 6px;
   cursor: pointer;
   font-size: 0.85rem;
-  font-weight: 400;
+  font-weight: 500;
   transition: all 0.2s ease;
   font-family: firaGo;
   text-decoration: none;
 }
 
 .filter-clear-btn:hover {
-  color: #c7511f;
-  text-decoration: underline;
-  background: transparent;
+  background: #f5f5f5;
+  color: #012645;
+  text-decoration: none;
   transform: none;
   box-shadow: none;
 }
@@ -72,22 +72,21 @@
 .main-categories-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 20px;
+  gap: 12px;
   margin-bottom: 20px;
   padding: 0;
 }
 
 .main-category-option {
   position: relative;
-  background: linear-gradient(135deg, #fff 0%, #f8f6f0 100%);
-  border: 3px solid var(--secondary-color);
-  border-radius: 15px;
-  padding: 15px 18px;
+  background: #fff;
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  padding: 16px 18px;
   text-align: center;
   cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(123, 86, 66, 0.12);
-  overflow: hidden;
+  transition: all 0.25s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
   min-height: 60px;
   display: flex;
   align-items: center;
@@ -95,52 +94,38 @@
   font-family: firaGo;
 }
 
-.main-category-option::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(255, 255, 255, 0.3),
-    transparent
-  );
-  transition: left 0.5s ease;
-}
-
-.main-category-option:hover::before {
-  left: 100%;
-}
-
 .main-category-option:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 12px 30px rgba(123, 86, 66, 0.25);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(1, 38, 69, 0.12);
+  border-color: #012645;
 }
 
 .main-category-option.selected {
-  border-width: 5px;
-  transform: scale(1.05);
-  box-shadow: 0 12px 40px rgba(123, 86, 66, 0.4);
-  z-index: 2;
+  background: linear-gradient(135deg, #012645 0%, #014470 100%);
+  border-color: #012645;
+  color: white;
+  box-shadow: 0 4px 16px rgba(1, 38, 69, 0.3);
+  transform: translateY(-2px);
 }
 
 .category-name {
-  font-size: 1.1rem;
-  font-weight: 700;
+  font-size: 1rem;
+  font-weight: 600;
   color: inherit;
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+  text-shadow: none;
   position: relative;
   z-index: 1;
   margin: 0;
   font-family: firaGo;
 }
 
+.main-category-option.selected .category-name {
+  color: white;
+}
+
 .subcategory-name {
-  font-size: 1rem;
-  font-weight: 600;
+  font-size: 0.95rem;
+  font-weight: 500;
   color: inherit;
   position: relative;
   z-index: 1;
@@ -294,9 +279,9 @@
 /* Subcategory Pills Styling */
 .subcategory-pill {
   background: #fff;
-  border: 2px solid #d5d9d9;
-  border-radius: 20px;
-  padding: 8px 16px;
+  border: 2px solid #e0e0e0;
+  border-radius: 24px;
+  padding: 10px 18px;
   cursor: pointer;
   transition: all 0.2s ease;
   font-size: 0.9rem;
@@ -310,15 +295,16 @@
 }
 
 .subcategory-pill:hover {
-  background: #f7fafa;
-  border-color: #007185;
+  background: #f8f8f8;
+  border-color: #012645;
   transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(1, 38, 69, 0.1);
 }
 
 /* Active state for "All" pill when no subcategories are selected */
 .subcategory-pill.active {
-  background: #007185;
-  border-color: #007185;
+  background: #012645;
+  border-color: #012645;
   color: #fff;
   font-weight: 600;
 }
@@ -326,8 +312,8 @@
 /* Selected state for individual subcategory pills */
 .subcategory-pill.selected {
   background: #e3f2fd;
-  border-color: #007185;
-  color: #007185;
+  border-color: #012645;
+  color: #012645;
   font-weight: 600;
 }
 
@@ -388,8 +374,9 @@
 
 .filter-group {
   display: flex;
-  flex-direction: column;
-  gap: 6px;
+  flex-direction: row;
+  gap: 12px;
+  flex-wrap: wrap;
 }
 
 .filter-option {
@@ -406,6 +393,9 @@
   display: flex;
   align-items: center;
   gap: 8px;
+  flex: 1;
+  min-width: 120px;
+  justify-content: center;
 }
 
 .filter-option:hover {
@@ -432,27 +422,31 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 8px 12px;
+  padding: 10px 14px;
   cursor: pointer;
-  transition: background 0.2s ease;
-  border-radius: 6px;
+  transition: all 0.2s ease;
+  border-radius: 8px;
+  background: #fff;
+  border: 1px solid #e0e0e0;
 }
 
 .checkbox-label:hover {
-  background: #f7fafa;
+  background: #f8f8f8;
+  border-color: #012645;
 }
 
 .checkbox-input {
-  width: 16px;
-  height: 16px;
+  width: 18px;
+  height: 18px;
   cursor: pointer;
-  accent-color: #007185;
+  accent-color: #012645;
 }
 
 .checkbox-text {
   font-size: 0.9rem;
   color: #0f1111;
   font-family: firaGo;
+  font-weight: 500;
 }
 
 /* Price Range */
@@ -464,13 +458,14 @@
 
 .price-inputs {
   display: flex;
-  gap: 10px;
-  align-items: center;
+  flex-direction: column;
+  gap: 12px;
+  align-items: stretch;
 }
 
 .price-input {
-  flex: 1;
-  padding: 8px 12px;
+  width: 100%;
+  padding: 10px 14px;
   border: 1px solid #d5d9d9;
   border-radius: 8px;
   font-size: 0.9rem;
@@ -486,12 +481,37 @@
 }
 
 .price-separator {
-  color: #565959;
-  font-weight: 500;
+  display: none;
 }
 
-/* Filter Toggle Button */
-.filter-toggle-btn {
+.price-apply-btn {
+  width: 100%;
+  background: #012645;
+  color: white;
+  border: none;
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  font-family: firaGo;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-top: 4px;
+}
+
+.price-apply-btn:hover {
+  background: #014470;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(1, 38, 69, 0.2);
+}
+
+.price-apply-btn:active {
+  transform: translateY(0);
+}
+
+/* Filter Toggle Button inside product-filters - keep it visible */
+/* This button opens the additional-filters section */
+.product-filters .filter-toggle-btn {
   background: #007185;
   color: white;
   border: none;
@@ -509,11 +529,11 @@
   position: relative;
 }
 
-.filter-toggle-btn.fixed {
+.product-filters .filter-toggle-btn.fixed {
   box-shadow: 0 4px 12px rgba(0, 113, 133, 0.3);
 }
 
-.filter-toggle-btn:hover {
+.product-filters .filter-toggle-btn:hover {
   background: #005a6d;
   transform: translateY(-2px);
 }
@@ -522,39 +542,138 @@
   filter: brightness(0) invert(1);
 }
 
-/* Additional Filters */
-.additional-filters {
-  background: #fff;
-  border: 1px solid #d5d9d9;
+/* Additional Filters - Desktop Sidebar & Mobile Full-screen Modal */
+
+/* Desktop: Slide-out sidebar from left */
+@media (min-width: 769px) {
+  .additional-filters {
+    position: fixed;
+    top: 60px; /* Header-ის ქვემოთ */
+    left: 0;
+    bottom: 0;
+    width: 380px;
+    max-width: 90vw;
+    background: #ffffff;
+    box-shadow: 2px 0 20px rgba(0, 0, 0, 0.1);
+    transform: translateX(-100%);
+    transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 999;
+    overflow-y: auto;
+    padding: 24px;
+    border-radius: 0;
+    margin-top: 0;
+    border: none;
+    border-right: 1px solid #e0e0e0;
+  }
+
+  .additional-filters:not(.closing) {
+    transform: translateX(0);
+  }
+
+  .additional-filters.closing {
+    transform: translateX(-100%);
+  }
+}
+
+/* Mobile: Full-screen modal from bottom */
+@media (max-width: 768px) {
+  .additional-filters {
+    position: fixed;
+    top: 60px; /* Header-ის ქვემოთ მობილზეც */
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    height: calc(100vh - 60px);
+    background: #ffffff;
+    transform: translateY(100%);
+    transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 999;
+    overflow-y: auto;
+    padding: 20px;
+    border-radius: 16px 16px 0 0;
+    margin-top: 0;
+    border: none;
+  }
+
+  .additional-filters:not(.closing) {
+    transform: translateY(0);
+  }
+
+  .additional-filters.closing {
+    transform: translateY(100%);
+  }
+}
+
+/* Overlay for modal */
+.filter-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(1, 38, 69, 0.5);
+  z-index: 998;
+  animation: fadeIn 0.3s ease;
+  backdrop-filter: blur(2px);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Filters Header inside Modal/Sidebar */
+.additional-filters .filters-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 0 20px 0;
+  margin-bottom: 20px;
+  border-bottom: 2px solid #f0f0f0;
+  position: sticky;
+  top: 0;
+  background: #ffffff;
+  z-index: 10;
+}
+
+.additional-filters .filters-header h3 {
+  font-size: 20px;
+  font-weight: 600;
+  color: #012645;
+  margin: 0;
+}
+
+.additional-filters .filters-close-btn {
+  background: #f5f5f5;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  padding: 8px 12px;
+  line-height: 1;
+  color: #666;
+  transition: all 0.2s ease;
   border-radius: 8px;
-  padding: 16px;
-  margin-top: 12px;
-  animation: slideIn 0.3s ease-out;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-@keyframes slideIn {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+.additional-filters .filters-close-btn:hover {
+  background: #012645;
+  color: white;
 }
 
-.additional-filters.closing {
-  animation: slideOut 0.5s ease-in;
-}
-
-@keyframes slideOut {
-  from {
-    opacity: 1;
-    transform: translateY(0);
-  }
-  to {
-    opacity: 0;
-    transform: translateY(-10px);
+@media (max-width: 768px) {
+  .additional-filters .filters-header {
+    padding: 16px 0;
+    margin-bottom: 16px;
   }
 }
 
@@ -792,27 +911,25 @@
 /* Clear Filters Button */
 .clear-filters-btn {
   background: #fff;
-  color: #565959;
-  border: 1px solid #d5d9d9;
-  padding: 8px 16px;
+  color: #012645;
+  border: 2px solid #012645;
+  padding: 12px 24px;
   border-radius: 8px;
   cursor: pointer;
-  font-size: 0.85rem;
-  font-weight: 500;
+  font-size: 0.95rem;
+  font-weight: 600;
   margin-top: 10px;
-  width: auto;
-  max-width: 180px;
-  margin-left: auto;
-  margin-right: auto;
+  width: 100%;
   display: block;
   transition: all 0.2s ease;
   font-family: firaGo;
 }
 
 .clear-filters-btn:hover {
-  background: #f7fafa;
-  border-color: #007185;
-  color: #007185;
+  background: #012645;
+  color: white;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(1, 38, 69, 0.2);
 }
 
 /* Loading State */
