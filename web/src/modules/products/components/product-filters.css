@@ -291,6 +291,62 @@
   overflow: visible;
 }
 
+/* Subcategory Pills Styling */
+.subcategory-pill {
+  background: #fff;
+  border: 2px solid #d5d9d9;
+  border-radius: 20px;
+  padding: 8px 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.9rem;
+  color: #0f1111;
+  font-family: firaGo;
+  text-align: center;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+
+.subcategory-pill:hover {
+  background: #f7fafa;
+  border-color: #007185;
+  transform: translateY(-1px);
+}
+
+/* Active state for "All" pill when no subcategories are selected */
+.subcategory-pill.active {
+  background: #007185;
+  border-color: #007185;
+  color: #fff;
+  font-weight: 600;
+}
+
+/* Selected state for individual subcategory pills */
+.subcategory-pill.selected {
+  background: #e3f2fd;
+  border-color: #007185;
+  color: #007185;
+  font-weight: 600;
+}
+
+.pill-text {
+  flex: 1;
+}
+
+.pill-x {
+  font-size: 1rem;
+  font-weight: bold;
+  margin-left: 4px;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.pill-x:hover {
+  transform: scale(1.2);
+}
+
 .subcategory-option {
   background: #fff;
   border: 1px solid #d5d9d9;

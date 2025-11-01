@@ -71,7 +71,24 @@ export class ProductsController {
     @Query('minPrice') minPrice: string,
     @Query('maxPrice') maxPrice: string,
     @Query('includeVariants') includeVariants: string,
+    @Query('isOriginal') isOriginal: string,
+    @Query('material') material: string,
+    @Query('dimension') dimension: string,
   ) {
+    // Parse isOriginal parameter to handle multiple values (comma-separated)
+    let parsedIsOriginal: boolean | undefined = undefined;
+    if (isOriginal) {
+      const values = isOriginal.split(',').map((v) => v.trim());
+      // If both "true" and "false" are selected, don't filter
+      if (values.includes('true') && values.includes('false')) {
+        parsedIsOriginal = undefined;
+      } else if (values.includes('true')) {
+        parsedIsOriginal = true;
+      } else if (values.includes('false')) {
+        parsedIsOriginal = false;
+      }
+    }
+
     return this.productsService.findMany({
       keyword,
       page,
@@ -89,6 +106,8 @@ export class ProductsController {
       minPrice,
       maxPrice,
       includeVariants: includeVariants === 'true',
+      isOriginal: parsedIsOriginal,
+      material,
     });
   }
 
