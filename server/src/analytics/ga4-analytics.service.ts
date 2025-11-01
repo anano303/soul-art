@@ -85,8 +85,8 @@ export class Ga4AnalyticsService {
 
   async getAnalyticsData(daysAgo: number = 7): Promise<AnalyticsData> {
     if (!this.analyticsDataClient || !this.propertyId) {
-      this.logger.warn('GA4 not configured, returning sample data');
-      return this.getSampleData();
+      this.logger.error('GA4 not configured - missing credentials or property ID');
+      throw new Error('GA4 Analytics not configured. Please set GA4_CREDENTIALS and GA4_PROPERTY_ID environment variables.');
     }
 
     try {
@@ -101,6 +101,8 @@ export class Ga4AnalyticsService {
       const apiMetrics = this.extractApiMetrics(events);
       const userJourneys = await this.getUserJourneys(daysAgo);
 
+      this.logger.log(`Successfully fetched GA4 data: ${pageViews.length} pages, ${events.length} events, ${funnel.length} funnel steps`);
+
       return {
         pageViews,
         homepageEvents,
@@ -110,8 +112,8 @@ export class Ga4AnalyticsService {
         apiMetrics,
       };
     } catch (error) {
-      this.logger.error('Failed to fetch GA4 data:', error);
-      return this.getSampleData();
+      this.logger.error('Failed to fetch GA4 data:', error.message || error);
+      throw new Error(`Failed to fetch analytics data: ${error.message || 'Unknown error'}`);
     }
   }
 
@@ -156,15 +158,16 @@ export class Ga4AnalyticsService {
   }
 
   private async getPurchaseFunnel(daysAgo: number): Promise<FunnelStep[]> {
-    // Fetch funnel events
+    // Fetch funnel events - these match our actual event names
     const funnelEvents = [
-      'add_to_cart',
-      'view_cart',
-      'begin_checkout',
-      'add_shipping_info',
-      'view_summary',
-      'click_purchase',
-      'purchase_complete',
+      'funnel_add_to_cart',
+      'funnel_view_cart',
+      'funnel_begin_checkout',
+      'funnel_checkout_login',
+      'funnel_add_shipping_info',
+      'funnel_view_summary',
+      'funnel_click_purchase',
+      'funnel_purchase_complete',
     ];
 
     const response = await this.analyticsDataClient.properties.runReport({
@@ -193,7 +196,8 @@ export class Ga4AnalyticsService {
       'Add to Cart',
       'View Cart',
       'Begin Checkout',
-      'Add Address',
+      'Checkout Login',
+      'Add Shipping Info',
       'View Summary',
       'Click Purchase',
       'Purchase Complete',
@@ -204,8 +208,8 @@ export class Ga4AnalyticsService {
 
     funnelEvents.forEach((event, index) => {
       const count = eventCounts.get(event) || 0;
-      const firstCount = eventCounts.get(funnelEvents[0]) || 1;
-      const percentage = (Number(count) / Number(firstCount)) * 100;
+      const firstCount = Number(eventCounts.get(funnelEvents[0]) || 1);
+      const percentage = firstCount > 0 ? (Number(count) / firstCount) * 100 : 0;
       const dropoff = previousCount > 0 ? ((previousCount - Number(count)) / previousCount) * 100 : 0;
 
       funnel.push({
@@ -263,15 +267,17 @@ export class Ga4AnalyticsService {
   }
 
   private extractErrors(events: { event: string; count: number }[]): ErrorData[] {
-    const errorEvents = events.filter((e) => e.event === 'error_occurred');
+    // Look for error-related events
+    const error404 = events.find((e) => e.event === 'page_not_found')?.count || 0;
+    const apiError = events.find((e) => e.event === 'api_error')?.count || 0;
+    const networkError = events.find((e) => e.event === 'network_error')?.count || 0;
+    const errorOccurred = events.find((e) => e.event === 'error_occurred')?.count || 0;
 
-    // In production, you'd query with error_type dimension
-    // For now, return aggregated error data
     return [
-      { type: '404 - Page Not Found', count: 0 },
-      { type: 'API Error', count: 0 },
-      { type: 'Network Error', count: 0 },
-      { type: 'Payment Error', count: 0 },
+      { type: '404 - Page Not Found', count: error404 },
+      { type: 'API Error', count: apiError },
+      { type: 'Network Error', count: networkError },
+      { type: 'General Errors', count: errorOccurred },
     ];
   }
 
@@ -302,50 +308,5 @@ export class Ga4AnalyticsService {
       button_click: 'Button interactions',
     };
     return details[eventName] || '';
-  }
-
-  private getSampleData(): AnalyticsData {
-    return {
-      pageViews: [
-        { page: '/', views: 1234, title: 'Homepage' },
-        { page: '/shop', views: 856, title: 'Shop' },
-        { page: '/products/*', views: 2341, title: 'Product Pages' },
-        { page: '/cart', views: 432, title: 'Shopping Cart' },
-        { page: '/checkout', views: 234, title: 'Checkout' },
-      ],
-      homepageEvents: [
-        { event: 'search', count: 543, details: 'Search box interactions' },
-        { event: 'product_click', count: 1234, details: 'Product card clicks' },
-        { event: 'artist_profile_view', count: 456, details: 'Artist profile views' },
-        { event: 'category_click', count: 789, details: 'Category clicks' },
-        { event: 'banner_click', count: 123, details: 'Banner clicks' },
-      ],
-      userJourneys: [
-        { path: '/ → /shop → /products/*', count: 432, avgTime: 180 },
-        { path: '/ → /products/* → /cart', count: 234, avgTime: 240 },
-        { path: '/ → /search → /products/*', count: 345, avgTime: 150 },
-      ],
-      purchaseFunnel: [
-        { step: 'Add to Cart', count: 1000, percentage: 100 },
-        { step: 'View Cart', count: 750, dropoff: 25, percentage: 75 },
-        { step: 'Begin Checkout', count: 600, dropoff: 20, percentage: 60 },
-        { step: 'Add Address', count: 550, dropoff: 8.3, percentage: 55 },
-        { step: 'View Summary', count: 520, dropoff: 5.5, percentage: 52 },
-        { step: 'Click Purchase', count: 480, dropoff: 7.7, percentage: 48 },
-        { step: 'Purchase Complete', count: 450, dropoff: 6.3, percentage: 45 },
-      ],
-      errors: [
-        { type: '404 - Page Not Found', count: 45 },
-        { type: 'API Error', count: 23 },
-        { type: 'Network Error', count: 12 },
-        { type: 'Payment Error', count: 8 },
-      ],
-      apiMetrics: {
-        total: 15234,
-        successful: 14890,
-        failed: 344,
-        avgDuration: 245,
-      },
-    };
   }
 }

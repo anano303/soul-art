@@ -18,8 +18,30 @@ export const ga4Event = (
   eventName: string,
   parameters?: Record<string, unknown>
 ) => {
-  if (typeof window !== "undefined" && window.gtag) {
+  if (typeof window !== "undefined") {
+    if (!window.gtag) {
+      console.warn(`[GA4] gtag not loaded yet, event queued: ${eventName}`);
+      // Queue the event to be sent when gtag loads
+      setTimeout(() => {
+        if (window.gtag) {
+          window.gtag("event", eventName, parameters);
+          console.log(`[GA4] Event sent (delayed): ${eventName}`, parameters);
+        } else {
+          console.error(`[GA4] gtag still not available after delay, event lost: ${eventName}`);
+        }
+      }, 1000);
+      return;
+    }
+    
     window.gtag("event", eventName, parameters);
+    console.log(`[GA4] Event sent: ${eventName}`, parameters);
+    
+    // Also log to dataLayer for verification
+    if (window.dataLayer) {
+      console.log(`[GA4] dataLayer length: ${window.dataLayer.length}`);
+    }
+  } else {
+    console.warn(`[GA4] Window not available, cannot send event: ${eventName}`);
   }
 };
 

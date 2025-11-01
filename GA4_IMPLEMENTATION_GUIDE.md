@@ -305,6 +305,43 @@ router.events?.on("routeChangeComplete", (url) => {
 
 ## 📝 Testing
 
+### ⚠️ Important: Dashboard vs Real-time Tracking
+
+**The dashboard shows 0s? This is NORMAL!** Here's why:
+
+- **GA4 Data API has a 24-48 hour delay** - Historical data takes time to process
+- **GA4 credentials may not be configured** - Backend needs service account setup
+- **Events ARE being tracked in real-time** - They're being sent to GA4 immediately
+
+### Verify Events in GA4 (Real-time)
+
+**Method 1: Browser Console (Easiest)**
+
+1. Open browser console (Cmd+Option+J on Mac, Ctrl+Shift+J on Windows)
+2. Perform actions on site (add to cart, checkout, etc.)
+3. Look for messages like:
+   ```
+   [GA4] Event sent: add_to_cart {productId: "123", price: 50, quantity: 1}
+   [GA4] Event sent: begin_checkout {cartTotal: 100, items: Array(2)}
+   ```
+4. If you see these → ✅ Events are working!
+
+**Method 2: GA4 Real-time Reports**
+
+1. Go to GA4 → Reports → Real-time
+2. Perform actions on your site
+3. Watch events appear within seconds
+4. Look for events like: `add_to_cart`, `begin_checkout`, `purchase_complete`
+
+**Method 3: GA4 DebugView (Advanced)**
+
+1. Install [Google Analytics Debugger](https://chrome.google.com/webstore/detail/google-analytics-debugger/jnkmfdileelhofjcijamephohjechhna)
+2. Enable it and reload your site
+3. Go to GA4 → Admin → DebugView
+4. See all events with full parameters in real-time
+
+📖 **For detailed testing instructions**, see `GA4_TESTING_GUIDE.md`
+
 ### Verify Events in GA4
 
 1. Open GA4 Property → Reports → Real-time

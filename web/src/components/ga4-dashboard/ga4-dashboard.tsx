@@ -26,6 +26,7 @@ interface AnalyticsData {
 export default function GA4Dashboard() {
   const { language } = useLanguage();
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [timeRange, setTimeRange] = useState<"7d" | "30d" | "90d">("7d");
   const [data, setData] = useState<AnalyticsData>({
     pageViews: [],
@@ -44,6 +45,7 @@ export default function GA4Dashboard() {
   useEffect(() => {
     // Fetch real analytics data from backend
     setLoading(true);
+    setError(null);
     
     const fetchAnalytics = async () => {
       try {
@@ -55,16 +57,17 @@ export default function GA4Dashboard() {
           }
         );
         
-        if (response.ok) {
-          const analyticsData = await response.json();
-          setData(analyticsData);
-        } else {
-          console.error("Failed to fetch analytics:", response.status);
-          // Keep showing sample data on error
+        if (!response.ok) {
+          const errorText = await response.text();
+          throw new Error(`Failed to fetch analytics: ${response.status} ${errorText}`);
         }
+        
+        const analyticsData = await response.json();
+        setData(analyticsData);
+        setError(null);
       } catch (error) {
         console.error("Error fetching analytics:", error);
-        // Keep showing sample data on error
+        setError(error instanceof Error ? error.message : "Failed to fetch analytics data");
       } finally {
         setLoading(false);
       }
@@ -99,6 +102,46 @@ export default function GA4Dashboard() {
               ? "Google Analytics 4 - Comprehensive Website Analytics"
               : "Google Analytics 4 - ვებსაიტის სრული ანალიტიკა"}
           </p>
+          
+          {error && (
+            <div
+              style={{
+                background: "#fee",
+                border: "1px solid #f44",
+                borderRadius: "8px",
+                padding: "12px 16px",
+                marginTop: "12px",
+                fontSize: "0.9rem",
+                color: "#c00",
+              }}
+            >
+              <strong>❌ Error:</strong> {error}
+              <br />
+              <small>
+                {language === "en"
+                  ? "Check server logs and ensure GA4_CREDENTIALS and GA4_PROPERTY_ID are properly configured."
+                  : "შეამოწმეთ სერვერის ლოგები და დარწმუნდით, რომ GA4_CREDENTIALS და GA4_PROPERTY_ID სწორად არის კონფიგურირებული."}
+              </small>
+            </div>
+          )}
+          
+          {!error && data.pageViews.length === 0 && !loading && (
+            <div
+              style={{
+                background: "#fff3cd",
+                border: "1px solid #ffc107",
+                borderRadius: "8px",
+                padding: "12px 16px",
+                marginTop: "12px",
+                fontSize: "0.9rem",
+              }}
+            >
+              <strong>ℹ️ Note:</strong>{" "}
+              {language === "en"
+                ? "No data available yet. GA4 Data API typically takes 24-48 hours to process data. Events are being tracked - check GA4 Real-time reports or browser console for '[GA4] Event sent:' messages."
+                : "მონაცემები ჯერ არ არის ხელმისაწვდომი. GA4 Data API-ს ჩვეულებრივ 24-48 საათი სჭირდება მონაცემების დამუშავებისთვის. ივენთები ტრექინგში არიან - შეამოწმეთ GA4 Real-time რეპორტები ან ბრაუზერის კონსოლი '[GA4] Event sent:' შეტყობინებებისთვის."}
+            </div>
+          )}
         </div>
 
         <div className="ga4-dashboard__time-range">
