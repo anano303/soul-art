@@ -77,9 +77,18 @@
   padding: 0;
 }
 
+/* When category is selected, increase gap to prevent overlap */
+.main-categories-grid:has(.main-category-option.selected) {
+  gap: 20px;
+}
+
 @media (min-width: 1200px) {
   .main-categories-grid {
     gap: 20px;
+  }
+
+  .main-categories-grid:has(.main-category-option.selected) {
+    gap: 24px;
   }
 }
 
@@ -88,7 +97,7 @@
   background: #fff;
   border: 2px solid #e0e0e0;
   border-radius: 12px;
-  padding: 16px 18px;
+  padding: 14px 16px;
   text-align: center;
   cursor: pointer;
   transition: all 0.25s ease;
@@ -746,13 +755,14 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0 0 20px 0;
-  margin-bottom: 20px;
+  margin: -24px -24px 20px -24px;
+  padding: 24px 24px 24px 24px;
   border-bottom: 2px solid #f0f0f0;
   position: sticky;
-  top: 0;
+  top: -20px;
   background: #ffffff;
-  z-index: 10;
+  z-index: 100;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .additional-filters .filters-header h3 {
@@ -786,8 +796,8 @@
 
 @media (max-width: 768px) {
   .additional-filters .filters-header {
-    padding: 16px 0;
-    margin-bottom: 16px;
+    margin: -20px -20px 16px -20px;
+    padding: 20px 20px 20px 20px;
   }
 }
 
@@ -1511,18 +1521,18 @@
 /* არჩეული კატეგორიისთვის ეფექტები */
 
 .main-category-option.selected {
-  transform: scale(1.08);
+  transform: scale(1.05);
   animation: selectedPulse 2s ease-in-out infinite;
-  border-width: 5px;
+  border-width: 3px;
 }
 
 @keyframes selectedPulse {
   0%,
   100% {
-    transform: scale(1.08);
+    transform: scale(1.05);
   }
   50% {
-    transform: scale(1.1);
+    transform: scale(1.07);
   }
 }
 
