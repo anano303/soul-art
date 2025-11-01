@@ -20,9 +20,10 @@ type LoginFormData = z.infer<typeof loginSchema>;
 
 interface LoginFormProps {
   redirectUrl?: string;
+  onLoginSuccess?: () => void; // Callback for successful login without navigation
 }
 
-export function LoginForm({ redirectUrl }: LoginFormProps = {}) {
+export function LoginForm({ redirectUrl, onLoginSuccess }: LoginFormProps = {}) {
   const { t } = useLanguage();
   const errorHandler = useErrorHandler();
   const { mutate: login, isLoading, error: hookError } = useLogin();
@@ -102,7 +103,13 @@ export function LoginForm({ redirectUrl }: LoginFormProps = {}) {
               description: "კეთილი იყოს თქვენი დაბრუნება!",
               variant: "default",
             });
-            router.push(returnUrl);
+            
+            // Use callback if provided (e.g., for checkout flow), otherwise navigate
+            if (onLoginSuccess) {
+              onLoginSuccess();
+            } else {
+              router.push(returnUrl);
+            }
           } else {
             // Login was processed but returned an error
             const errorMessage = response.error || "ავტორიზაცია ვერ მოხერხდა";

@@ -597,7 +597,12 @@ export function StreamlinedCheckout() {
                 <p className="step-description">
                   {t("checkout.stepIndicators.authorization.description")}
                 </p>
-                <LoginForm />
+                <LoginForm
+                  onLoginSuccess={() => {
+                    // Login successful, stay in checkout - step will auto-advance via useEffect
+                    // No need to manually change step, the auto-advance logic will handle it
+                  }}
+                />
                 <div style={{ textAlign: "center", marginTop: "1.5rem" }}>
                   <button
                     onClick={() => {
