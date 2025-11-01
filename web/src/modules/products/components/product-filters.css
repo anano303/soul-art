@@ -72,9 +72,15 @@
 .main-categories-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 12px;
+  gap: 16px;
   margin-bottom: 20px;
   padding: 0;
+}
+
+@media (min-width: 1200px) {
+  .main-categories-grid {
+    gap: 20px;
+  }
 }
 
 .main-category-option {
@@ -135,38 +141,6 @@
 .subcategory-option.selected .subcategory-name {
   color: white;
   text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
-}
-
-/* ქვეკატეგორიების განყოფილება */
-.subcategories-section {
-  width: 96%;
-  color: var(--primary-color);
-  margin-top: 20px;
-
-  position: relative;
-  overflow: visible; /* ცვლილება: visible რომ hover ეფექტები არ იჭრებოდეს */
-  justify-self: center;
-  align-self: center;
-  font-family: firaGo;
-}
-
-.subcategories-section::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 4px;
-  background: linear-gradient(
-    90deg,
-    var(--secondary-color),
-    var(--primary-color),
-    var(--secondary-color),
-    var(--primary-color),
-    var(--secondary-color)
-  );
-  background-size: 200% 100%;
-  animation: gradientMove 3s ease-in-out infinite;
 }
 
 /* ნახატების კატეგორიისთვის ლურჯი ქვეკატეგორიები */
@@ -256,24 +230,48 @@
 
 /* Subcategories Section - Amazon Style */
 .subcategories-section {
-  margin-top: 12px;
-  padding: 0;
+  margin-top: 16px;
+  margin-bottom: 0;
+  padding: 12px 0;
+  border-top: 1px solid #e0e0e0;
+  border-bottom: 1px solid #e0e0e0;
 }
 
 .subcategories-title {
   font-size: 0.95rem;
   font-weight: 600;
   color: #0f1111;
-  margin-bottom: 8px;
+  margin-bottom: 12px;
   padding: 0;
   text-shadow: none;
 }
 
 .subcategories-grid {
   display: flex;
-  flex-direction: column;
-  gap: 6px;
-  overflow: visible;
+  flex-direction: row;
+  gap: 10px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 4px 0;
+  scrollbar-width: thin;
+  scrollbar-color: #012645 transparent;
+}
+
+.subcategories-grid::-webkit-scrollbar {
+  height: 6px;
+}
+
+.subcategories-grid::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.subcategories-grid::-webkit-scrollbar-thumb {
+  background-color: #012645;
+  border-radius: 3px;
+}
+
+.subcategories-grid::-webkit-scrollbar-thumb:hover {
+  background-color: #014470;
 }
 
 /* Subcategory Pills Styling */
@@ -311,10 +309,38 @@
 
 /* Selected state for individual subcategory pills */
 .subcategory-pill.selected {
-  background: #e3f2fd;
+  background: #012645;
   border-color: #012645;
-  color: #012645;
+  color: #fff;
   font-weight: 600;
+}
+
+.subcategory-pill.selected .pill-text {
+  color: #fff;
+}
+
+/* Handmade category - brown theme for pills */
+.subcategories-section[data-category="handmade"] .subcategory-pill.active,
+.subcategories-section[data-category="handmade"] .subcategory-pill.selected {
+  background: var(--secondary-color);
+  border-color: var(--secondary-color);
+  color: #fff;
+}
+
+.subcategories-section[data-category="handmade"] .subcategory-pill:hover {
+  border-color: var(--secondary-color);
+}
+
+/* Paintings category - blue theme for pills */
+.subcategories-section[data-category="paintings"] .subcategory-pill.active,
+.subcategories-section[data-category="paintings"] .subcategory-pill.selected {
+  background: var(--primary-color);
+  border-color: var(--primary-color);
+  color: #fff;
+}
+
+.subcategories-section[data-category="paintings"] .subcategory-pill:hover {
+  border-color: var(--primary-color);
 }
 
 .pill-text {
@@ -1144,15 +1170,12 @@
   }
 
   .subcategories-grid {
-    gap: 8px;
-    padding: 8px;
-    overflow-x: auto;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
+    gap: 10px;
+    padding: 4px 0;
   }
 
   .subcategories-grid::-webkit-scrollbar {
-    display: none;
+    height: 4px;
   }
 
   .subcategory-option {
@@ -1163,15 +1186,6 @@
 
   .filter-group {
     justify-content: center;
-  }
-
-  .price-inputs {
-    flex-direction: column;
-    gap: 8px;
-  }
-
-  .price-separator {
-    display: none;
   }
 
   .clear-filters-btn {
@@ -1202,11 +1216,11 @@
     font-size: 1rem;
   }
   .subcategories-section {
-    padding-top: 15px;
+    padding-top: 12px;
   }
 
   .subcategories-grid {
-    gap: 6px;
+    gap: 8px;
   }
 
   .subcategory-option {
@@ -1286,8 +1300,15 @@
   }
 
   .price-inputs {
-    flex-direction: column;
     gap: 8px;
+  }
+  .price-input {
+    min-width: 70px;
+    font-size: 0.85rem;
+    padding: 8px 10px;
+  }
+  .price-separator {
+    font-size: 0.9rem;
   }
 }
 

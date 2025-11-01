@@ -909,7 +909,7 @@ export function ProductFilters({
                       style={{ cursor: "pointer" }}
                     >
                       <span className="pill-text">
-                        {t("shop.all") || "ყველა"}
+                        {language === "en" ? "All" : "ყველა"}
                       </span>
                     </div>
 
