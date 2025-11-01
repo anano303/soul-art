@@ -73,10 +73,25 @@ export function ProductFilters({
   const [brandSearchTerm, setBrandSearchTerm] = useState<string>("");
   const [hasHorizontalScroll, setHasHorizontalScroll] = useState(false);
   const [showBrandsDropdown, setShowBrandsDropdown] = useState(false);
+  const [isButtonSticky, setIsButtonSticky] = useState(false);
 
   // Refs for scroll and positioning
   const filterButtonRef = useRef<HTMLButtonElement>(null);
   const filterContainerRef = useRef<HTMLDivElement>(null);
+
+  // Track scroll position for sticky button on desktop
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.innerWidth > 768) {
+        // Desktop only
+        const scrollTop = window.scrollY || document.documentElement.scrollTop;
+        setIsButtonSticky(scrollTop > 100);
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   // Prevent body scroll when filters are open
   useEffect(() => {
@@ -964,7 +979,7 @@ export function ProductFilters({
           {!showFilters && (
             <button
               ref={filterButtonRef}
-              className="filter-toggle-btn"
+              className={`filter-toggle-btn desktop-sticky-filter-btn ${isButtonSticky ? 'sticky' : ''}`}
               onClick={handleFilterToggle}
             >
               <Image

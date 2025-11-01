@@ -580,6 +580,42 @@
   filter: brightness(0) invert(1);
 }
 
+/* Desktop Sticky Filter Button */
+@media (min-width: 769px) {
+  .desktop-sticky-filter-btn {
+    position: relative;
+    transition: all 0.3s ease;
+  }
+
+  .desktop-sticky-filter-btn.sticky {
+    position: fixed;
+    top: 80px;
+    left: 20px;
+    z-index: 998;
+    animation: slideInFromLeft 0.3s ease-out;
+  }
+
+  @keyframes slideInFromLeft {
+    from {
+      opacity: 0;
+      transform: translateX(-20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+}
+
+/* Mobile - Hide sticky behavior */
+@media (max-width: 768px) {
+  .desktop-sticky-filter-btn.sticky {
+    position: relative !important;
+    top: auto !important;
+    left: auto !important;
+  }
+}
+
 /* Additional Filters - Desktop Sidebar & Mobile Full-screen Modal */
 
 /* Desktop: Slide-out sidebar from left */
@@ -595,6 +631,12 @@
     border-radius: 8px !important;
     border-top: 2px solid #012645 !important;
     border: 2px solid #012645 !important;
+  }
+
+  .product-filters .desktop-sticky-filter-btn.sticky {
+    position: fixed !important;
+    top: 80px !important;
+    left: 20px !important;
   }
 
   .additional-filters {
