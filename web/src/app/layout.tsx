@@ -28,6 +28,7 @@ import { NetworkStatus } from "@/components/network-status/network-status";
 import { PushNotificationManager } from "@/components/push-notifications/push-notifications";
 import { CacheManager } from "@/components/cache-manager/cache-manager";
 import PWAManager from "@/components/pwa-manager";
+import { GA4UserTracker } from "@/components/ga4-user-tracker";
 import "@/lib/cloudflare-cleanup"; // Auto-cleanup Cloudflare cookies in development
 
 export const viewport = {
@@ -313,6 +314,9 @@ export default function RootLayout({
             <CartProvider>
               <CheckoutProvider>
                 <LanguageProvider>
+                  {/* GA4 User ID Tracking */}
+                  <GA4UserTracker />
+                  
                   <div
                     style={{
                       display: "flex",

@@ -1,16 +1,16 @@
 import { Metadata } from "next";
-import AnalyticsDashboard from "@/components/analytics-dashboard/analytics-dashboard";
+import GA4Dashboard from "@/components/ga4-dashboard/ga4-dashboard";
 
 export const metadata: Metadata = {
   title: "Analytics Dashboard | SoulArt Admin",
   description:
-    "Vercel Analytics Dashboard - ვიზიტორები, ტრაფიკი, Performance მეტრიკები",
+    "Comprehensive Analytics - Google Analytics 4, Vercel Analytics, Performance მეტრიკები",
 };
 
 export default function AnalyticsPage() {
   return (
-    <div style={{ padding: "2rem" }}>
-      <AnalyticsDashboard />
+    <div>
+      <GA4Dashboard />
     </div>
   );
 }

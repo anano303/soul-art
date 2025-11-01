@@ -11,6 +11,7 @@ import { useState, useEffect } from "react";
 import { toast } from "@/hooks/use-toast";
 import { useLanguage } from "@/hooks/LanguageContext";
 import { useErrorHandler } from "@/hooks/use-error-handler";
+import { setUserId, setUserProperties } from "@/lib/ga4-analytics";
 import "./login-form.css";
 
 import type * as z from "zod";
@@ -75,6 +76,27 @@ export function LoginForm({ redirectUrl }: LoginFormProps = {}) {
         onSuccess: (response) => {
           if (response.success) {
             // Successfully logged in
+            
+            // Set GA4 User ID immediately upon login
+            if (response.user?._id) {
+              setUserId(response.user._id);
+              
+              // Set user properties for segmentation
+              const userProperties: Record<string, string> = {
+                user_role: response.user.role || "user",
+              };
+
+              if (response.user.isEmailVerified !== undefined) {
+                userProperties.email_verified = String(response.user.isEmailVerified);
+              }
+
+              if (response.user.isSeller !== undefined) {
+                userProperties.is_seller = String(response.user.isSeller);
+              }
+
+              setUserProperties(userProperties);
+            }
+            
             toast({
               title: "წარმატებული ავტორიზაცია",
               description: "კეთილი იყოს თქვენი დაბრუნება!",

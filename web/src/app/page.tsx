@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import HomePageForum from "@/components/homePageForum/homePageForum";
 import HomePagesHead from "@/components/homePagesHead/homePagesHead";
 import HomePageShop from "@/components/homePageShop/homePageShop";
@@ -9,9 +10,15 @@ import { GuestReferralBanner } from "@/components/referralBanners/guest-referral
 import { ReferralPromoBanner } from "@/components/referralBanners/referral-promo-banner";
 import { useLanguage } from "@/hooks/LanguageContext";
 import DiscountedRail from "@/components/discountedRail/DiscountedRail";
+import { trackPageView } from "@/lib/ga4-analytics";
 
 const Home = () => {
   const { language } = useLanguage();
+
+  useEffect(() => {
+    // Track homepage view
+    trackPageView("/", "Homepage");
+  }, []);
 
   return (
     <div>

@@ -20,6 +20,7 @@ import { Grid3X3, ShoppingBag, Info } from "lucide-react";
 import BrushTrail from "@/components/BrushTrail/BrushTrail";
 import { FollowButton } from "@/components/follow-button/follow-button";
 import { FollowersModal } from "@/components/followers-modal/followers-modal";
+import { trackArtistProfileView } from "@/lib/ga4-analytics";
 import "./artist-profile-view.css";
 import "@/components/gallery-interactions.css";
 import "@/components/gallery-viewer.css";
@@ -148,6 +149,13 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
     artist.followersCount || 0
   );
   const heroRef = useRef<HTMLElement>(null);
+
+  // Track artist profile view
+  useEffect(() => {
+    if (artist.artistSlug) {
+      trackArtistProfileView(artist.artistSlug, "link");
+    }
+  }, [artist.artistSlug]);
 
   const handleSettingsClose = useCallback(() => {
     setShowEditor(false);

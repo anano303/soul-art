@@ -8,6 +8,7 @@ import { useCheckout } from "@/modules/checkout/context/checkout-context";
 import Link from "next/link";
 import "./page.css";
 import { trackPurchase } from "@/components/MetaPixel";
+import { trackPurchaseComplete } from "@/lib/ga4-analytics";
 
 interface StoredOrderSummary {
   orderId: string;
@@ -142,6 +143,14 @@ function CheckoutSuccessContent() {
         orderSummary.currency || "GEL",
         orderId
       );
+      
+      // Track in GA4 as well
+      trackPurchaseComplete(
+        orderId,
+        orderSummary.totalPrice ?? 0,
+        orderSummary.items || []
+      );
+      
       hasTrackedPurchaseRef.current = true;
 
       sessionStorage.setItem(`order_summary_${orderId}_tracked`, "true");

@@ -13,6 +13,7 @@ import noPhoto from "../../../assets/nophoto.webp";
 import Star from "../../../assets/Images/star.png";
 import Star2 from "../../../assets/Images/startHandMade.png";
 import { useLanguage } from "@/hooks/LanguageContext";
+import { trackProductInteraction, trackAddToCart } from "@/lib/ga4-analytics";
 
 interface ProductCardProps {
   product: Product;
@@ -151,6 +152,14 @@ export function ProductCard({
     setIsBuying(true);
 
     try {
+      // Track quick purchase action
+      trackAddToCart(
+        product._id,
+        displayName,
+        isDiscounted ? discountedPrice : product.price,
+        1
+      );
+
       // Add item to cart with discounted price if applicable
       await addToCart(
         product._id,
@@ -194,7 +203,10 @@ export function ProductCard({
       )}
 
       {/* Product image and name - clickable link to product */}
-      <Link href={`/products/${product._id}`}>
+      <Link 
+        href={`/products/${product._id}`}
+        onClick={() => trackProductInteraction(product._id, 'click', 'product_card')}
+      >
         <div className="product-image">
           {isDigitalCategory && categoryLabel && (
             <div className="digital-category-badge">

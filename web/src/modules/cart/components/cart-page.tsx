@@ -12,6 +12,7 @@ import { useCheckout } from "@/modules/checkout/context/checkout-context";
 import {
   calculateShipping,
 } from "@/lib/shipping";
+import { trackViewCart } from "@/lib/ga4-analytics";
 import "./cart-page.css";
 import { Color } from "@/types";
 
@@ -23,6 +24,17 @@ export function CartPage() {
 
   // Force re-render when localStorage changes
   const [, setForceUpdate] = useState(0);
+
+  // Track cart view
+  useEffect(() => {
+    if (items.length > 0 && !loading) {
+      const cartTotal = items.reduce(
+        (sum, item) => sum + item.price * item.qty,
+        0
+      );
+      trackViewCart(cartTotal, items.length);
+    }
+  }, [items, loading]);
 
   useEffect(() => {
     const handleStorageChange = () => {

@@ -6,7 +6,8 @@ import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/hooks/LanguageContext";
 import "./ProductCard.css";
 import { useCart } from "@/modules/cart/context/cart-context";
-import { trackAddToCart } from "@/components/MetaPixel";
+import { trackAddToCart as metaTrackAddToCart } from "@/components/MetaPixel";
+import { trackAddToCart } from "@/lib/ga4-analytics";
 
 interface AddToCartButtonProps {
   productId: string;
@@ -98,6 +99,12 @@ export function AddToCartButton({
         });
 
         trackAddToCart(
+          productId,
+          productName,
+          price ?? 0,
+          quantity
+        );
+        metaTrackAddToCart(
           productName,
           productId,
           (price ?? 0) * quantity,
@@ -142,6 +149,12 @@ export function AddToCartButton({
           });
 
           trackAddToCart(
+            productId,
+            productName,
+            price ?? 0,
+            quantity
+          );
+          metaTrackAddToCart(
             productName,
             productId,
             (price ?? 0) * quantity,
@@ -177,6 +190,12 @@ export function AddToCartButton({
           });
 
           trackAddToCart(
+            productId,
+            productName,
+            price ?? 0,
+            quantity
+          );
+          metaTrackAddToCart(
             productName,
             productId,
             (price ?? 0) * quantity,

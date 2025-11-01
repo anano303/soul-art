@@ -6,7 +6,8 @@ import { Search, User } from "lucide-react";
 import { useLanguage } from "@/hooks/LanguageContext";
 import { fetchWithAuth } from "@/lib/fetch-with-auth";
 import { useDebounce } from "@/hooks/use-debounce";
-import { trackSearch } from "@/components/MetaPixel";
+import { trackSearch as metaTrackSearch } from "@/components/MetaPixel";
+import { trackSearch } from "@/lib/ga4-analytics";
 
 import "./SearchBox.css";
 
@@ -107,7 +108,10 @@ export default function SearchBox() {
       setShowPopup(false);
       const normalizedKeyword = keyword.trim();
 
-      trackSearch(normalizedKeyword);
+      // Track search in both Meta Pixel and GA4
+      metaTrackSearch(normalizedKeyword);
+      trackSearch(normalizedKeyword, users.length);
+      
       if (typeof window !== "undefined") {
         try {
           sessionStorage.setItem(
@@ -152,7 +156,8 @@ export default function SearchBox() {
     setKeyword("");
     const lookupName = keyword.trim();
     if (lookupName) {
-      trackSearch(lookupName);
+      metaTrackSearch(lookupName);
+      trackSearch(lookupName, users.length);
       if (typeof window !== "undefined") {
         try {
           sessionStorage.setItem("lastTrackedSearch", lookupName.toLowerCase());
@@ -261,7 +266,8 @@ export default function SearchBox() {
                     setShowPopup(false);
                     if (keyword.trim()) {
                       const normalizedKeyword = keyword.trim();
-                      trackSearch(normalizedKeyword);
+                      metaTrackSearch(normalizedKeyword);
+                      trackSearch(normalizedKeyword, users.length);
                       if (typeof window !== "undefined") {
                         try {
                           sessionStorage.setItem(

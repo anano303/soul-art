@@ -1,4 +1,5 @@
 import { clearUserData, refreshTokens } from "./auth";
+import { trackAPICall, trackNetworkError } from "./ga4-analytics";
 
 export async function fetchWithAuth(url: string, config: RequestInit = {}) {
   const { headers, ...rest } = config;
@@ -6,6 +7,9 @@ export async function fetchWithAuth(url: string, config: RequestInit = {}) {
   if (typeof window === "undefined") {
     throw new Error("fetchWithAuth must be used in client components only");
   }
+
+  const startTime = performance.now();
+  const method = (rest.method || "GET").toUpperCase();
 
   const makeRequest = async () => {
     // Prepare headers - don't set Content-Type for FormData (browser will set it automatically with boundary)
@@ -54,6 +58,12 @@ export async function fetchWithAuth(url: string, config: RequestInit = {}) {
         throw new Error("სესია ვადაგასულია, გთხოვთ თავიდან შეხვიდეთ");
       }
     }
+
+    const duration = performance.now() - startTime;
+    const success = response.ok;
+
+    // Track API call in GA4
+    trackAPICall(url, method, response.status, duration, success);
 
     // For 204 No Content, return the response as is
     if (response.status === 204) {
@@ -115,6 +125,10 @@ export async function fetchWithAuth(url: string, config: RequestInit = {}) {
     return response;
   } catch (error) {
     console.error(`[fetchWithAuth] error:`, error);
+    
+    // Track network error
+    trackNetworkError(url, error instanceof Error ? error.message : "Unknown error");
+    
     // Re-throw the error for handling by the caller
     throw error;
   }

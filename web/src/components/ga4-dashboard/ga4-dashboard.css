@@ -1,0 +1,502 @@
+.ga4-dashboard {
+  padding: 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  min-height: 100vh;
+}
+
+.ga4-dashboard__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.ga4-dashboard__title {
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0 0 0.5rem 0;
+  color: #1a202c;
+}
+
+.ga4-dashboard__subtitle {
+  font-size: 0.95rem;
+  color: #64748b;
+  margin: 0;
+}
+
+.ga4-dashboard__time-range {
+  display: flex;
+  gap: 0.5rem;
+  background: white;
+  padding: 0.25rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.ga4-dashboard__time-range button {
+  padding: 0.5rem 1rem;
+  border: none;
+  background: transparent;
+  color: #64748b;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.ga4-dashboard__time-range button:hover {
+  background: #f1f5f9;
+}
+
+.ga4-dashboard__time-range button.active {
+  background: #3b82f6;
+  color: white;
+}
+
+.ga4-dashboard__loading {
+  text-align: center;
+  padding: 4rem 0;
+}
+
+.spinner {
+  width: 50px;
+  height: 50px;
+  margin: 0 auto 1rem;
+  border: 4px solid #e5e7eb;
+  border-top-color: #3b82f6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Key Metrics Cards */
+.ga4-dashboard__metrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.metric-card {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 1rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.metric-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+}
+
+.metric-card__icon {
+  font-size: 2.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.metric-card__value {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.metric-card__label {
+  font-size: 0.9rem;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.metric-card--primary .metric-card__value {
+  color: #3b82f6;
+}
+
+.metric-card--success .metric-card__value {
+  color: #10b981;
+}
+
+.metric-card--info .metric-card__value {
+  color: #8b5cf6;
+}
+
+.metric-card--warning .metric-card__value {
+  color: #f59e0b;
+}
+
+/* Sections */
+.ga4-section {
+  background: white;
+  padding: 2rem;
+  border-radius: 1rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+  margin-bottom: 2rem;
+}
+
+.ga4-section__title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0 0 1.5rem 0;
+  color: #1a202c;
+  border-bottom: 2px solid #e5e7eb;
+  padding-bottom: 0.75rem;
+}
+
+/* Tables */
+.ga4-table {
+  overflow-x: auto;
+}
+
+.ga4-table table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.ga4-table th {
+  text-align: left;
+  padding: 0.75rem;
+  background: #f8fafc;
+  color: #64748b;
+  font-weight: 600;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.ga4-table td {
+  padding: 1rem 0.75rem;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.ga4-table tr:last-child td {
+  border-bottom: none;
+}
+
+.table-cell-main {
+  font-weight: 600;
+  color: #1a202c;
+}
+
+.table-cell-sub {
+  font-size: 0.875rem;
+  color: #64748b;
+  margin-top: 0.25rem;
+}
+
+.table-cell-number {
+  font-weight: 600;
+  color: #3b82f6;
+  text-align: right;
+}
+
+.journey-path {
+  font-family: 'Monaco', 'Courier New', monospace;
+  font-size: 0.875rem;
+  color: #475569;
+}
+
+/* Progress Bars */
+.progress-bar {
+  position: relative;
+  height: 28px;
+  background: #f1f5f9;
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+
+.progress-bar__fill {
+  height: 100%;
+  background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+  transition: width 0.6s ease;
+  display: flex;
+  align-items: center;
+  padding-left: 0.75rem;
+}
+
+.progress-bar__label {
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: #475569;
+}
+
+/* Event Cards Grid */
+.ga4-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.event-card {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 1.5rem;
+  border-radius: 0.75rem;
+  text-align: center;
+  transition: transform 0.2s ease;
+}
+
+.event-card:hover {
+  transform: scale(1.05);
+}
+
+.event-card__count {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.event-card__name {
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.event-card__details {
+  font-size: 0.75rem;
+  opacity: 0.9;
+}
+
+/* Funnel Chart */
+.funnel-chart {
+  padding: 1rem 0;
+}
+
+.funnel-step {
+  margin-bottom: 1rem;
+}
+
+.funnel-step__bar-container {
+  margin-bottom: 0.5rem;
+}
+
+.funnel-step__bar {
+  background: linear-gradient(90deg, #10b981, #059669);
+  height: 50px;
+  border-radius: 0.5rem;
+  display: flex;
+  align-items: center;
+  padding-left: 1rem;
+  box-shadow: 0 2px 4px rgba(16, 185, 129, 0.3);
+  transition: width 0.6s ease;
+}
+
+.funnel-step__label {
+  color: white;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.funnel-step__stats {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 1rem;
+}
+
+.funnel-step__count {
+  font-size: 0.875rem;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.funnel-step__dropoff {
+  background: #fee2e2;
+  color: #dc2626;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.375rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.funnel-summary {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  background: #f0fdf4;
+  border-left: 4px solid #10b981;
+  border-radius: 0.5rem;
+}
+
+.funnel-summary p {
+  margin: 0;
+  color: #065f46;
+  font-size: 0.95rem;
+}
+
+/* Section Row */
+.ga4-section-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+.ga4-section--half {
+  margin-bottom: 0;
+}
+
+/* Error List */
+.error-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.error-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  background: #fef2f2;
+  border-left: 4px solid #ef4444;
+  border-radius: 0.5rem;
+}
+
+.error-item__type {
+  font-weight: 500;
+  color: #7f1d1d;
+}
+
+.error-item__count {
+  background: #dc2626;
+  color: white;
+  padding: 0.25rem 0.75rem;
+  border-radius: 1rem;
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+/* API Metrics */
+.api-metrics {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.api-metric {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  background: #f8fafc;
+  border-radius: 0.5rem;
+  border-left: 4px solid #94a3b8;
+}
+
+.api-metric--success {
+  background: #f0fdf4;
+  border-left-color: #10b981;
+}
+
+.api-metric--success .api-metric__value {
+  color: #059669;
+}
+
+.api-metric--error {
+  background: #fef2f2;
+  border-left-color: #ef4444;
+}
+
+.api-metric--error .api-metric__value {
+  color: #dc2626;
+}
+
+.api-metric--rate {
+  background: #eff6ff;
+  border-left-color: #3b82f6;
+}
+
+.api-metric--rate .api-metric__value {
+  color: #2563eb;
+}
+
+.api-metric__label {
+  font-weight: 500;
+  color: #475569;
+  font-size: 0.9rem;
+}
+
+.api-metric__value {
+  font-weight: 700;
+  font-size: 1.125rem;
+  color: #1a202c;
+}
+
+/* Footer */
+.ga4-dashboard__footer {
+  text-align: center;
+  padding: 2rem 0;
+  color: #64748b;
+  font-size: 0.875rem;
+}
+
+.ga4-dashboard__footer p {
+  margin: 0.5rem 0;
+}
+
+.ga4-dashboard__note {
+  background: #fef3c7;
+  color: #92400e;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  border-left: 4px solid #f59e0b;
+  margin-top: 1rem !important;
+  text-align: left;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .ga4-dashboard {
+    padding: 1rem;
+  }
+
+  .ga4-dashboard__header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .ga4-dashboard__title {
+    font-size: 1.5rem;
+  }
+
+  .ga4-section {
+    padding: 1.5rem;
+  }
+
+  .ga4-section__title {
+    font-size: 1.25rem;
+  }
+
+  .metric-card {
+    padding: 1rem;
+  }
+
+  .metric-card__value {
+    font-size: 2rem;
+  }
+
+  .ga4-grid {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  }
+
+  .ga4-section-row {
+    grid-template-columns: 1fr;
+  }
+}

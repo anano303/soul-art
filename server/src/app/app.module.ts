@@ -24,6 +24,7 @@ import { ReferralsModule } from '../referrals/referrals.module';
 import { PushNotificationModule } from '../push/push-notification.module';
 import { BlogModule } from '../blog/blog.module';
 import { YoutubeModule } from '@/youtube/youtube.module';
+import { AnalyticsModule } from '../analytics/analytics.module';
 
 @Module({
   imports: [
@@ -53,6 +54,7 @@ import { YoutubeModule } from '@/youtube/youtube.module';
     PushNotificationModule,
     BlogModule,
     YoutubeModule,
+    AnalyticsModule,
   ],
   controllers: [AppController],
   providers: [AppService, GoogleStrategy],
