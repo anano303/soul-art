@@ -11,7 +11,6 @@ import LoadingAnim from "@/components/loadingAnim/loadingAnim";
 import { ProductCard } from "@/modules/products/components/product-card";
 import {
   ArrowRight,
-  ArrowLeft,
   ChevronLeft,
   ChevronRight,
   Sparkles,
@@ -58,7 +57,6 @@ function hasActiveDiscount(product: Product) {
 const DiscountedRail = () => {
   const { t, language } = useLanguage();
   const scrollerRef = useRef<HTMLDivElement | null>(null);
-  const [ctaVisible, setCtaVisible] = useState(false);
   const [hasOverflow, setHasOverflow] = useState(false);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
@@ -111,7 +109,6 @@ const DiscountedRail = () => {
     const scrollerEl = scrollerRef.current;
     if (!scrollerEl) {
       setHasOverflow(false);
-      setCtaVisible(false);
       return;
     }
 
@@ -123,15 +120,6 @@ const DiscountedRail = () => {
       // Scroll arrows visibility
       setCanScrollLeft(scrollLeft > 5);
       setCanScrollRight(scrollLeft + clientWidth < scrollWidth - 5);
-
-      if (overflow) {
-        // თუ overflow არსებობს, CTA გამოჩნდეს მხოლოდ მაშინ როცა ბოლომდე გავიდეთ
-        const reachedEnd = scrollLeft + clientWidth >= scrollWidth - 10;
-        setCtaVisible(reachedEnd);
-      } else {
-        // თუ overflow არ არსებობს, CTA ყოველთვის ჩანდეს
-        setCtaVisible(true);
-      }
     };
 
     evaluateScroll();
@@ -221,9 +209,7 @@ const DiscountedRail = () => {
 
           <Link
             href="/shop?discountOnly=true"
-            className={`discounted-rail__cta ${ctaVisible ? "is-visible" : ""}`}
-            tabIndex={ctaVisible ? 0 : -1}
-            aria-hidden={!ctaVisible}
+            className="discounted-rail__cta is-visible"
           >
             <span>{t("home.discountedRail.viewAll")}</span>
             <ArrowRight size={16} aria-hidden="true" />
@@ -280,6 +266,28 @@ const DiscountedRail = () => {
                   />
                 </div>
               ))}
+              {/* See More Card at the end */}
+              <div className="discounted-rail__card" role="listitem">
+                <Link
+                  href="/shop?discountOnly=true"
+                  className="discounted-rail__see-more-card"
+                >
+                  <div className="discounted-rail__see-more-content">
+                    <Sparkles size={32} className="discounted-rail__see-more-icon" />
+                    <h3 className="discounted-rail__see-more-title">
+                      {t("home.discountedRail.viewAll")}
+                    </h3>
+                    <p className="discounted-rail__see-more-subtitle">
+                      {language === "en"
+                        ? "Explore all discounts"
+                        : "ნახე ყველა ფასდაკლება"}
+                    </p>
+                    <div className="discounted-rail__see-more-arrow">
+                      <ArrowRight size={20} />
+                    </div>
+                  </div>
+                </Link>
+              </div>
             </div>
           </div>
         ) : (

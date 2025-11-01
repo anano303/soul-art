@@ -149,7 +149,7 @@
   display: flex;
   gap: clamp(1rem, 2.5vw, 1.5rem);
   overflow-x: auto;
-  padding-bottom: 0.5rem;
+  padding: 0.5rem 0;
   scroll-snap-type: x mandatory;
   scrollbar-width: none;
   -ms-overflow-style: none;
@@ -178,6 +178,99 @@
 .discounted-rail__empty {
   font-size: 1rem;
   color: rgba(1, 38, 69, 0.65);
+}
+
+.discounted-rail__see-more-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  min-height: 400px;
+  min-width: 280px;
+  background: linear-gradient(
+    135deg,
+    rgba(220, 38, 127, 0.08) 0%,
+    rgba(244, 140, 6, 0.1) 50%,
+    rgba(255, 59, 48, 0.08) 100%
+  );
+  border-radius: 12px;
+  border: 2px dashed rgba(1, 38, 69, 0.15);
+  transition: all 0.3s ease;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+@media (max-width: 768px) {
+  .discounted-rail__see-more-card {
+    max-width: 40%;
+  }
+}
+
+@media (max-width: 634px) {
+  .discounted-rail__see-more-card {
+    width: 70vw;
+    max-width: 240px;
+    max-width: 100%;
+  }
+}
+
+.discounted-rail__see-more-card:hover {
+  border-color: rgba(1, 38, 69, 0.3);
+  background: linear-gradient(
+    135deg,
+    rgba(220, 38, 127, 0.12) 0%,
+    rgba(244, 140, 6, 0.15) 50%,
+    rgba(255, 59, 48, 0.12) 100%
+  );
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(1, 38, 69, 0.1);
+}
+
+.discounted-rail__see-more-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 2rem 1rem;
+}
+
+.discounted-rail__see-more-icon {
+  color: #ff3b30;
+  opacity: 0.8;
+}
+
+.discounted-rail__see-more-title {
+  font-family: "FiraGo", serif;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--primary-color, #012645);
+  margin: 0;
+  text-align: center;
+}
+
+.discounted-rail__see-more-subtitle {
+  font-size: 0.875rem;
+  color: rgba(1, 38, 69, 0.65);
+  margin: 0;
+  text-align: center;
+}
+
+.discounted-rail__see-more-arrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary-color, #012645), #0f4f75);
+  color: white;
+  margin-top: 0.5rem;
+  transition: transform 0.3s ease;
+}
+
+.discounted-rail__see-more-card:hover .discounted-rail__see-more-arrow {
+  transform: translateX(4px);
 }
 
 @media (max-width: 1024px) {
