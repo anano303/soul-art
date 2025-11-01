@@ -32,14 +32,15 @@ Complete tracking utilities covering:
 - `endUserSession()` - End session and track duration
 - `trackPageTransition(fromPage, toPage, duration)` - Page-to-page navigation
 
-#### 7-Step Purchase Funnel
+#### 8-Step Purchase Funnel
 1. `trackAddToCart(productId, productName, price, quantity)` - Add to cart
 2. `trackViewCart(cartTotal, itemCount)` - Cart page view
 3. `trackBeginCheckout(cartTotal, items)` - Start checkout
-4. `trackAddShippingInfo(shippingMethod?)` - Add shipping address
-5. `trackViewSummary(orderTotal)` - Review order summary
-6. `trackClickPurchase(orderTotal)` - Click purchase button
-7. `trackPurchaseComplete(orderId, orderTotal, items)` - Successful purchase
+4. `trackCheckoutLogin(isNewUser)` - Login during checkout (checkout-specific only)
+5. `trackAddShippingInfo(shippingMethod?)` - Add shipping address
+6. `trackViewSummary(orderTotal)` - Review order summary
+7. `trackClickPurchase(orderTotal)` - Click purchase button
+8. `trackPurchaseComplete(orderId, orderTotal, items)` - Successful purchase
 
 #### Error & API Monitoring
 - `trackError(errorType, errorMessage, errorStack?, additionalData?)` - Error tracking
@@ -88,11 +89,12 @@ Beautiful, comprehensive analytics dashboard with:
 - Helps identify popular navigation patterns
 
 **🛒 Purchase Funnel**
-- 7-step visual funnel with:
+- 8-step visual funnel with:
   - Horizontal bars showing relative volume
   - User counts for each step
   - Dropoff percentages between steps
   - Overall conversion rate summary
+  - Includes checkout-specific login tracking (Step 4)
 - Color-coded progress visualization
 
 **⚠️ Errors Dashboard**
@@ -152,9 +154,17 @@ Tracking implemented across the platform:
 - Tracks: cart total, item count
 
 #### Checkout Success (`/web/src/app/(pages)/checkout/success/page.tsx`)
-- ✅ Purchase complete tracking (Step 7 of funnel)
+- ✅ Purchase complete tracking (Step 8 of funnel)
 - ✅ Preserves Meta Pixel purchase tracking
 - Tracks: orderId, orderTotal, items array, currency
+
+#### Streamlined Checkout (`/web/src/modules/checkout/components/streamlined-checkout.tsx`)
+- ✅ Begin checkout tracking (Step 3 of funnel)
+- ✅ Checkout login tracking (Step 4 of funnel - checkout-specific only)
+- ✅ Add shipping info tracking (Step 5 of funnel)
+- ✅ View summary tracking (Step 6 of funnel)
+- ✅ Click purchase tracking (Step 7 of funnel)
+- Tracks complete checkout flow from start to finish
 
 ---
 
@@ -232,12 +242,17 @@ The dashboard currently shows sample data. To display real analytics:
 
 ### 2. Add Missing Funnel Steps
 
-Currently tracking Steps 1, 2, and 7. Add:
+Currently tracking Steps 1, 2, 3, 4, 6, 7, and 8. Step 5 (Add Shipping Info) auto-tracks when address is selected.
 
-- **Step 3**: `trackBeginCheckout()` in checkout page initialization
-- **Step 4**: `trackAddShippingInfo()` after address form submission
-- **Step 5**: `trackViewSummary()` on order review page load
-- **Step 6**: `trackClickPurchase()` on payment button click
+All 8 steps are now implemented:
+- ✅ Step 1: Add to Cart
+- ✅ Step 2: View Cart  
+- ✅ Step 3: Begin Checkout
+- ✅ Step 4: Checkout Login (checkout-specific only)
+- ✅ Step 5: Add Shipping Info
+- ✅ Step 6: View Summary
+- ✅ Step 7: Click Purchase
+- ✅ Step 8: Purchase Complete
 
 ### 3. Implement 404 Tracking
 
@@ -311,14 +326,15 @@ Check browser console for GA4 events:
 
 ### Test Purchase Funnel
 
-Complete a test purchase and verify all 7 steps fire:
+Complete a test purchase and verify all 8 steps fire:
 1. Add to cart → Check for "add_to_cart" event
 2. View cart → Check for "view_cart" event
 3. Begin checkout → Check for "begin_checkout" event
-4. Add shipping → Check for "add_shipping_info" event
-5. View summary → Check for "view_summary" event
-6. Click purchase → Check for "click_purchase" event
-7. Success page → Check for "purchase_complete" event
+4. Login during checkout → Check for "checkout_login" event (only if not logged in)
+5. Add shipping → Check for "add_shipping_info" event
+6. View summary → Check for "view_summary" event
+7. Click purchase → Check for "click_purchase" event
+8. Success page → Check for "purchase_complete" event
 
 ---
 
@@ -362,21 +378,23 @@ The dashboard features:
 - ✅ Complete GA4 tracking library
 - ✅ Beautiful admin dashboard
 - ✅ Event tracking on all major actions
-- ✅ Purchase funnel monitoring (3 of 7 steps active)
+- ✅ Complete 8-step purchase funnel (including checkout-specific login)
 - ✅ Error boundary and API monitoring
 - ✅ Meta Pixel integration preserved
+- ✅ User ID tracking for authenticated users
+- ✅ 404 page tracking
 
 **What's working:**
 - Real-time event tracking to GA4
 - Dashboard shows sample data structure
 - Error monitoring captures all failures
 - API calls automatically tracked
-- Purchase completion tracked
+- Complete purchase funnel with checkout login tracking
+- User segmentation by role, seller status, account age
 
 **What's next:**
 - Connect GA4 Data API for real dashboard data
-- Complete remaining funnel steps (3-6)
-- Add 404 page tracking
-- Implement user ID tracking for authenticated users
+- Test complete funnel with real user flows
+- Monitor checkout login conversion rates
 
-🎉 **Your GA4 analytics system is production-ready!**
+🎉 **Your GA4 analytics system is production-ready with complete 8-step funnel tracking!**

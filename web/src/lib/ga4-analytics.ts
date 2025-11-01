@@ -190,6 +190,7 @@ export type PurchaseFunnelStep =
   | "add_to_cart"
   | "view_cart"
   | "begin_checkout"
+  | "checkout_login"
   | "add_shipping_info"
   | "view_summary"
   | "click_purchase"
@@ -258,14 +259,22 @@ export const trackBeginCheckout = (cartTotal: number, items: unknown[]) => {
   });
 };
 
-// Step 4: Add Shipping Info
+// Step 4: Checkout Login (only tracked during checkout flow)
+export const trackCheckoutLogin = (isNewUser: boolean = false) => {
+  trackPurchaseFunnel("checkout_login", {
+    is_new_user: isNewUser,
+    login_context: "checkout",
+  });
+};
+
+// Step 5: Add Shipping Info
 export const trackAddShippingInfo = (shippingMethod?: string) => {
   trackPurchaseFunnel("add_shipping_info", {
     shippingMethod,
   });
 };
 
-// Step 5: View Summary
+// Step 6: View Summary
 export const trackViewSummary = (orderTotal: number) => {
   trackPurchaseFunnel("view_summary", {
     orderTotal,
@@ -273,7 +282,7 @@ export const trackViewSummary = (orderTotal: number) => {
   });
 };
 
-// Step 6: Click Purchase Button
+// Step 7: Click Purchase Button
 export const trackClickPurchase = (orderTotal: number) => {
   trackPurchaseFunnel("click_purchase", {
     orderTotal,
@@ -281,7 +290,7 @@ export const trackClickPurchase = (orderTotal: number) => {
   });
 };
 
-// Step 7: Purchase Complete
+// Step 8: Purchase Complete
 export const trackPurchaseComplete = (
   orderId: string,
   orderTotal: number,

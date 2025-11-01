@@ -22,7 +22,8 @@ import {
   trackBeginCheckout, 
   trackAddShippingInfo, 
   trackViewSummary, 
-  trackClickPurchase 
+  trackClickPurchase,
+  trackCheckoutLogin
 } from "@/lib/ga4-analytics";
 
 type CheckoutStep = "auth" | "guest" | "shipping" | "payment" | "review";
@@ -60,6 +61,8 @@ export function StreamlinedCheckout() {
   const hasTrackedInitiateRef = useRef(false);
   const hasTrackedBeginCheckoutRef = useRef(false);
   const hasTrackedViewSummaryRef = useRef(false);
+  const hasTrackedCheckoutLoginRef = useRef(false);
+  const previousStepRef = useRef<CheckoutStep | null>(null);
 
   // Calculate totals
   const itemsPrice = items.reduce(
@@ -122,6 +125,8 @@ export function StreamlinedCheckout() {
   useEffect(() => {
     if (isEditing) return;
 
+    const previousStep = previousStepRef.current;
+    
     if (!user && !isGuestCheckout) {
       setCurrentStep("auth");
     } else if (!user && isGuestCheckout && !guestInfo) {
@@ -130,12 +135,20 @@ export function StreamlinedCheckout() {
       // Wait for addresses to load before deciding
       return;
     } else if (!shippingAddress) {
+      // Track Step 4: Checkout Login (when user successfully authenticates during checkout)
+      if (previousStep === "auth" && user && !hasTrackedCheckoutLoginRef.current) {
+        trackCheckoutLogin(false); // false = existing user logging in
+        hasTrackedCheckoutLoginRef.current = true;
+      }
       setCurrentStep("shipping");
     } else {
       setCurrentStep("review");
       // Auto-set BOG as default payment method
       setPaymentMethod("BOG");
     }
+    
+    // Update previous step ref
+    previousStepRef.current = currentStep;
   }, [
     user,
     isGuestCheckout,
@@ -144,6 +157,7 @@ export function StreamlinedCheckout() {
     setPaymentMethod,
     isEditing,
     addressesLoaded,
+    currentStep,
   ]);
 
   useEffect(() => {
