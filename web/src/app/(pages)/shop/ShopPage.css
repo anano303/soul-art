@@ -87,7 +87,7 @@
   cursor: pointer;
   font-size: 16px;
   font-weight: 500;
-  margin-bottom: 20px;
+  margin-bottom: 0;
   transition: background-color 0.3s ease, transform 0.2s ease;
   z-index: 10;
   position: relative;
@@ -335,14 +335,7 @@
 
 /* Mobile: Full-screen modal from bottom */
 @media (max-width: 768px) {
-  .filter-toggle-btn {
-    width: 100%;
-    justify-content: center;
-    position: sticky;
-    top: 0;
-    z-index: 10;
-    margin-bottom: 10px;
-  }
+  /* Mobile filter-toggle-btn styles are now in product-filters.css */
 
   .filters-sidebar {
     position: fixed;

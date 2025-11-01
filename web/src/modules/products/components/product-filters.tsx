@@ -288,9 +288,15 @@ export function ProductFilters({
           params.append("mainCategory", selectedCategoryId);
 
         // If subcategories are selected, filter materials by those subcategories
-        if (Array.isArray(selectedSubCategoryId) && selectedSubCategoryId.length > 0) {
+        if (
+          Array.isArray(selectedSubCategoryId) &&
+          selectedSubCategoryId.length > 0
+        ) {
           params.append("subCategory", selectedSubCategoryId.join(","));
-        } else if (typeof selectedSubCategoryId === "string" && selectedSubCategoryId) {
+        } else if (
+          typeof selectedSubCategoryId === "string" &&
+          selectedSubCategoryId
+        ) {
           params.append("subCategory", selectedSubCategoryId);
         }
 
@@ -336,9 +342,15 @@ export function ProductFilters({
           params.append("mainCategory", selectedCategoryId);
 
         // If subcategories are selected, filter dimensions by those subcategories
-        if (Array.isArray(selectedSubCategoryId) && selectedSubCategoryId.length > 0) {
+        if (
+          Array.isArray(selectedSubCategoryId) &&
+          selectedSubCategoryId.length > 0
+        ) {
           params.append("subCategory", selectedSubCategoryId.join(","));
-        } else if (typeof selectedSubCategoryId === "string" && selectedSubCategoryId) {
+        } else if (
+          typeof selectedSubCategoryId === "string" &&
+          selectedSubCategoryId
+        ) {
           params.append("subCategory", selectedSubCategoryId);
         }
 
