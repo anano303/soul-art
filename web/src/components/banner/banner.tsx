@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useLanguage } from "@/hooks/LanguageContext";
 import { fetchActiveBanners } from "@/lib/banner-api";
 import { Banner as BannerType } from "@/types/banner";
+import { trackBannerClick } from "@/lib/ga4-analytics";
 import "./banner.css";
 
 const Banner = () => {
@@ -182,7 +183,15 @@ const Banner = () => {
                 {language === "en" ? banner.titleEn : banner.title}
               </h1>
               {banner.buttonText && banner.buttonLink && (
-                <Link href={banner.buttonLink} className="banner-cta-btn">
+                <Link 
+                  href={banner.buttonLink} 
+                  className="banner-cta-btn"
+                  onClick={() => trackBannerClick(
+                    banner._id || `banner-${index}`,
+                    language === "en" ? banner.titleEn : banner.title,
+                    banner.buttonLink
+                  )}
+                >
                   <span className="btn-text">
                     {language === "en"
                       ? banner.buttonTextEn

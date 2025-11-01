@@ -13,6 +13,7 @@ import { useQuery } from "@tanstack/react-query";
 import { fetchWithAuth } from "@/lib/fetch-with-auth";
 import { memoryCache } from "@/lib/cache";
 import Image from "next/image";
+import { trackSeeMoreClick } from "@/lib/ga4-analytics";
 // import { Shirt, ShoppingBag, Footprints } from "lucide-react";
 
 interface CategoryProducts {
@@ -304,6 +305,7 @@ const HomePageShop = () => {
                     <div className="see-more-desktop see-more">
                       <Link
                         href={`/shop?page=1&mainCategory=${categoryData.categoryId}`}
+                        onClick={() => trackSeeMoreClick(categoryData.category, categoryData.products.length)}
                       >
                         <button className="see-more-btn">
                           {t("shop.seeAll")}
@@ -326,6 +328,7 @@ const HomePageShop = () => {
                   <div className="see-more-mobile see-more">
                     <Link
                       href={`/shop?page=1&mainCategory=${categoryData.categoryId}`}
+                      onClick={() => trackSeeMoreClick(categoryData.category, categoryData.products.length)}
                     >
                       <button className="see-more-btn">
                         {t("shop.seeAll")}

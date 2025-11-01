@@ -108,16 +108,55 @@ export const trackNavigation = (
   });
 };
 
-// Button/Link clicks
-export const trackButtonClick = (
-  buttonName: string,
-  location: string,
-  additionalData?: Record<string, unknown>
-) => {
-  ga4Event("button_click", {
-    button_name: buttonName,
-    button_location: location,
-    ...additionalData,
+// Specific Homepage Button Clicks
+export const trackSeeMoreClick = (section: string, itemCount?: number) => {
+  ga4Event("see_more_click", {
+    section,
+    item_count: itemCount,
+    page_location: window.location.pathname,
+  });
+};
+
+export const trackSeeMoreDiscountsClick = () => {
+  ga4Event("see_more_discounts_click", {
+    page_location: window.location.pathname,
+  });
+};
+
+export const trackShopNowClick = (source: string) => {
+  ga4Event("shop_now_click", {
+    click_source: source,
+    page_location: window.location.pathname,
+  });
+};
+
+export const trackViewAllArtistsClick = () => {
+  ga4Event("view_all_artists_click", {
+    page_location: window.location.pathname,
+  });
+};
+
+export const trackViewAllProductsClick = (category?: string) => {
+  ga4Event("view_all_products_click", {
+    category,
+    page_location: window.location.pathname,
+  });
+};
+
+export const trackCategoryClick = (categoryName: string, categoryId?: string) => {
+  ga4Event("category_click", {
+    category_name: categoryName,
+    category_id: categoryId,
+    page_location: window.location.pathname,
+  });
+};
+
+export const trackBannerClick = (bannerId: string, bannerTitle?: string, targetUrl?: string) => {
+  ga4Event("banner_click", {
+    banner_id: bannerId,
+    banner_title: bannerTitle,
+    target_url: targetUrl,
+    page_location: window.location.pathname,
   });
 };
 
