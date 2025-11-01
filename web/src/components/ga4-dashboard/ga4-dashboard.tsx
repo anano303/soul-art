@@ -287,36 +287,85 @@ export default function GA4Dashboard() {
             </div>
           </section>
 
-          {/* Section 3: User Journeys */}
+          {/* Section 3: User Journey Paths */}
           <section className="ga4-section">
             <h2 className="ga4-section__title">
               🗺️{" "}
               {language === "en"
-                ? "Top User Journeys"
-                : "ყველაზე გავრცელებული მარშრუტები"}
+                ? "User Journey Paths (Sequential)"
+                : "მომხმარებლის მარშრუტები (თანმიმდევრული)"}
             </h2>
+            <p className="ga4-section__description" style={{ marginBottom: '1rem', color: '#666' }}>
+              {language === "en"
+                ? "See the exact sequence of pages users visit. Each path shows the journey from entry to exit."
+                : "ნახეთ გვერდების ზუსტი თანმიმდევრობა რომელსაც მომხმარებლები ეწვევიან."}
+            </p>
             <div className="ga4-table">
               <table>
                 <thead>
                   <tr>
-                    <th>{language === "en" ? "Path" : "მარშრუტი"}</th>
-                    <th>{language === "en" ? "Users" : "მომხმარებლები"}</th>
-                    <th>{language === "en" ? "Avg Time (s)" : "საშ. დრო (წმ)"}</th>
+                    <th style={{ width: '60%' }}>
+                      {language === "en" ? "Sequential Path" : "თანმიმდევრული მარშრუტი"}
+                    </th>
+                    <th style={{ textAlign: 'center' }}>
+                      {language === "en" ? "Users" : "მომხმარებლები"}
+                    </th>
+                    <th style={{ textAlign: 'center' }}>
+                      {language === "en" ? "Avg Time (s)" : "საშ. დრო (წმ)"}
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
-                  {data.userJourneys.map((journey, index) => (
-                    <tr key={index}>
-                      <td className="journey-path">{journey.path}</td>
-                      <td className="table-cell-number">{journey.count}</td>
-                      <td className="table-cell-number">
-                        {journey.avgTime || "N/A"}
+                  {data.userJourneys.length === 0 ? (
+                    <tr>
+                      <td colSpan={3} style={{ textAlign: 'center', padding: '2rem', color: '#999' }}>
+                        {language === "en"
+                          ? "No user path data yet. Navigate through the site to generate paths. Data appears in 24-48 hours."
+                          : "მომხმარებლის მარშრუტის მონაცემები ჯერ არ არის. ნავიგაცია გააკეთეთ საიტზე. მონაცემები 24-48 საათში გამოჩნდება."}
                       </td>
                     </tr>
-                  ))}
+                  ) : (
+                    data.userJourneys.map((journey, index) => (
+                      <tr key={index}>
+                        <td className="journey-path" style={{ 
+                          fontFamily: 'monospace', 
+                          fontSize: '0.9rem',
+                          color: '#2563eb',
+                          fontWeight: '500'
+                        }}>
+                          {journey.path}
+                        </td>
+                        <td className="table-cell-number" style={{ 
+                          textAlign: 'center',
+                          fontWeight: '600',
+                          color: '#059669'
+                        }}>
+                          {journey.count.toLocaleString()}
+                        </td>
+                        <td className="table-cell-number" style={{ textAlign: 'center' }}>
+                          {journey.avgTime ? `${journey.avgTime}s` : "N/A"}
+                        </td>
+                      </tr>
+                    ))
+                  )}
                 </tbody>
               </table>
             </div>
+            {data.userJourneys.length > 0 && (
+              <div style={{ 
+                marginTop: '1rem', 
+                padding: '0.75rem', 
+                backgroundColor: '#f0f9ff', 
+                borderRadius: '6px',
+                fontSize: '0.85rem',
+                color: '#1e40af'
+              }}>
+                <strong>{language === "en" ? "💡 Tip:" : "💡 რჩევა:"}</strong>{" "}
+                {language === "en"
+                  ? "The → arrow shows the order of pages visited. Use this to understand common conversion paths."
+                  : "→ ისარი აჩვენებს გვერდების მონახულების თანმიმდევრობას. გამოიყენეთ კონვერსიის გზების გასაგებად."}
+              </div>
+            )}
           </section>
 
           {/* Section 4: Purchase Funnel */}
