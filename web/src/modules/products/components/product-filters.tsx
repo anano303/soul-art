@@ -979,7 +979,9 @@ export function ProductFilters({
           {!showFilters && (
             <button
               ref={filterButtonRef}
-              className={`filter-toggle-btn desktop-sticky-filter-btn ${isButtonSticky ? 'sticky' : ''}`}
+              className={`filter-toggle-btn desktop-sticky-filter-btn ${
+                isButtonSticky ? "sticky" : ""
+              }`}
               onClick={handleFilterToggle}
             >
               <Image

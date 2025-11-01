@@ -258,7 +258,7 @@
 }
 
 .subcategories-grid::-webkit-scrollbar {
-  height: 6px;
+  height: 3px;
 }
 
 .subcategories-grid::-webkit-scrollbar-track {
@@ -571,7 +571,8 @@
 }
 
 .product-filters .filter-toggle-btn:hover .filter-icon {
-  filter: brightness(0) saturate(100%) invert(9%) sepia(54%) saturate(3210%) hue-rotate(182deg) brightness(96%) contrast(102%);
+  filter: brightness(0) saturate(100%) invert(9%) sepia(54%) saturate(3210%)
+    hue-rotate(182deg) brightness(96%) contrast(102%);
 }
 
 .filter-icon {
@@ -657,6 +658,26 @@
     margin-top: 0;
     border: none;
     border-right: 1px solid #e0e0e0;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(1, 38, 69, 0.3) transparent;
+  }
+
+  /* Custom scrollbar for desktop additional-filters */
+  .additional-filters::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  .additional-filters::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .additional-filters::-webkit-scrollbar-thumb {
+    background: rgba(1, 38, 69, 0.3);
+    border-radius: 10px;
+  }
+
+  .additional-filters::-webkit-scrollbar-thumb:hover {
+    background: rgba(1, 38, 69, 0.5);
   }
 
   .additional-filters:not(.closing) {
