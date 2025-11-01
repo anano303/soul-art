@@ -591,7 +591,7 @@ interface ProductCardProps {
 }
 
 function ProductCard({ product, language }: ProductCardProps) {
-  const { addToCart } = useCart();
+  const { addToCart, isItemInCart } = useCart();
   const { toast } = useToast();
   const router = useRouter();
   const [isBuying, setIsBuying] = useState(false);
@@ -643,23 +643,28 @@ function ProductCard({ product, language }: ProductCardProps) {
     setIsBuying(true);
 
     try {
-      // Calculate discounted price if applicable
-      const isDiscounted = discountPercentage > 0;
-      const discountedPrice = isDiscounted
-        ? product.price * (1 - discountPercentage / 100)
-        : product.price;
+      // Check if item is already in cart
+      const isInCart = isItemInCart(product.id);
+      
+      if (!isInCart) {
+        // Calculate discounted price if applicable
+        const isDiscounted = discountPercentage > 0;
+        const discountedPrice = isDiscounted
+          ? product.price * (1 - discountPercentage / 100)
+          : product.price;
 
-      // Add item to cart with discounted price if applicable
-      await addToCart(
-        product.id,
-        1,
-        undefined,
-        undefined,
-        undefined,
-        isDiscounted ? discountedPrice : product.price
-      );
+        // Add item to cart with discounted price if applicable
+        await addToCart(
+          product.id,
+          1,
+          undefined,
+          undefined,
+          undefined,
+          isDiscounted ? discountedPrice : product.price
+        );
+      }
 
-      // Small delay to ensure cart updates, then redirect
+      // Redirect to checkout (whether item was already in cart or just added)
       setTimeout(() => {
         router.push("/checkout/streamlined");
       }, 300);

@@ -28,7 +28,7 @@ export function ProductCard({
 }: ProductCardProps) {
   const { language } = useLanguage();
   const router = useRouter();
-  const { addToCart } = useCart();
+  const { addToCart, isItemInCart } = useCart();
   const { toast } = useToast();
   const [isBuying, setIsBuying] = useState(false);
 
@@ -152,25 +152,30 @@ export function ProductCard({
     setIsBuying(true);
 
     try {
-      // Track quick purchase action
-      trackAddToCart(
-        product._id,
-        displayName,
-        isDiscounted ? discountedPrice : product.price,
-        1
-      );
+      // Check if item is already in cart
+      const isInCart = isItemInCart(product._id);
+      
+      if (!isInCart) {
+        // Track quick purchase action
+        trackAddToCart(
+          product._id,
+          displayName,
+          isDiscounted ? discountedPrice : product.price,
+          1
+        );
 
-      // Add item to cart with discounted price if applicable
-      await addToCart(
-        product._id,
-        1,
-        undefined,
-        undefined,
-        undefined,
-        isDiscounted ? discountedPrice : product.price
-      );
+        // Add item to cart with discounted price if applicable
+        await addToCart(
+          product._id,
+          1,
+          undefined,
+          undefined,
+          undefined,
+          isDiscounted ? discountedPrice : product.price
+        );
+      }
 
-      // Small delay to ensure cart updates, then redirect
+      // Redirect to checkout (whether item was already in cart or just added)
       setTimeout(() => {
         router.push("/checkout/streamlined");
       }, 300);
