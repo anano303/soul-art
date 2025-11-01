@@ -29,6 +29,7 @@ import { PushNotificationManager } from "@/components/push-notifications/push-no
 import { CacheManager } from "@/components/cache-manager/cache-manager";
 import PWAManager from "@/components/pwa-manager";
 import { GA4UserTracker } from "@/components/ga4-user-tracker";
+import { PageViewTracker } from "@/components/page-view-tracker";
 import "@/lib/cloudflare-cleanup"; // Auto-cleanup Cloudflare cookies in development
 
 export const viewport = {
@@ -316,6 +317,9 @@ export default function RootLayout({
                 <LanguageProvider>
                   {/* GA4 User ID Tracking */}
                   <GA4UserTracker />
+                  
+                  {/* GA4 Page View and User Path Tracking */}
+                  <PageViewTracker />
                   
                   <div
                     style={{

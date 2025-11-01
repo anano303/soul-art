@@ -226,25 +226,81 @@ export class Ga4AnalyticsService {
   }
 
   private async getUserJourneys(daysAgo: number): Promise<UserJourney[]> {
-    // Get page sequences (simplified - in production you'd use User Explorer or custom reports)
-    const response = await this.analyticsDataClient.properties.runReport({
-      property: `properties/${this.propertyId}`,
-      requestBody: {
-        dateRanges: [{ startDate: `${daysAgo}daysAgo`, endDate: 'today' }],
-        dimensions: [{ name: 'pagePath' }],
-        metrics: [{ name: 'sessions' }, { name: 'averageSessionDuration' }],
-        orderBys: [{ metric: { metricName: 'sessions' }, desc: true }],
-        limit: 5,
-      },
-    });
+    // Fetch user_path events to get actual sequential journeys
+    try {
+      const response = await this.analyticsDataClient.properties.runReport({
+        property: `properties/${this.propertyId}`,
+        requestBody: {
+          dateRanges: [{ startDate: `${daysAgo}daysAgo`, endDate: 'today' }],
+          dimensions: [
+            { name: 'eventName' },
+            { name: 'customEvent:path' }, // Custom parameter containing the path
+          ],
+          metrics: [{ name: 'eventCount' }],
+          dimensionFilter: {
+            filter: {
+              fieldName: 'eventName',
+              stringFilter: { value: 'user_path' },
+            },
+          },
+          orderBys: [{ metric: { metricName: 'eventCount' }, desc: true }],
+          limit: 20,
+        },
+      });
 
-    return (
-      response.data.rows?.map((row) => ({
-        path: row.dimensionValues[0].value,
-        count: parseInt(row.metricValues[0].value || '0'),
-        avgTime: Math.round(parseFloat(row.metricValues[1].value || '0')),
-      })) || []
-    );
+      if (!response.data.rows || response.data.rows.length === 0) {
+        this.logger.warn('No user_path events found yet. Users need to navigate through the site.');
+        return [];
+      }
+
+      // Aggregate paths and count occurrences
+      const pathCounts = new Map<string, number>();
+      
+      response.data.rows.forEach((row) => {
+        const path = row.dimensionValues[1]?.value || '';
+        const count = parseInt(row.metricValues[0]?.value || '0');
+        
+        if (path && path !== '(not set)') {
+          pathCounts.set(path, (pathCounts.get(path) || 0) + count);
+        }
+      });
+
+      // Convert to array and sort by count
+      const journeys = Array.from(pathCounts.entries())
+        .map(([path, count]) => ({
+          path,
+          count,
+          avgTime: 0, // Could be calculated if we track session_end with timing
+        }))
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 10);
+
+      this.logger.log(`Found ${journeys.length} unique user paths`);
+      return journeys;
+
+    } catch (error) {
+      this.logger.warn('Failed to fetch user_path events, falling back to page-based journeys:', error.message);
+      
+      // Fallback: Get most visited pages as simple paths
+      const response = await this.analyticsDataClient.properties.runReport({
+        property: `properties/${this.propertyId}`,
+        requestBody: {
+          dateRanges: [{ startDate: `${daysAgo}daysAgo`, endDate: 'today' }],
+          dimensions: [{ name: 'pagePath' }],
+          metrics: [{ name: 'sessions' }, { name: 'averageSessionDuration' }],
+          orderBys: [{ metric: { metricName: 'sessions' }, desc: true }],
+          limit: 5,
+        },
+      });
+
+      return (
+        response.data.rows?.map((row) => ({
+          path: row.dimensionValues[0].value,
+          count: parseInt(row.metricValues[0].value || '0'),
+          avgTime: Math.round(parseFloat(row.metricValues[1].value || '0')),
+        })) || []
+      );
+    }
   }
 
   private extractHomepageEvents(events: { event: string; count: number }[]): HomepageEvent[] {

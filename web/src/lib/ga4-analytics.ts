@@ -153,6 +153,64 @@ export const trackProductInteraction = (
 // 3. USER JOURNEY TRACKING
 // ============================================
 
+// Helper to get or create session ID
+const getSessionId = (): string => {
+  let sessionId = sessionStorage.getItem("ga4_session_id");
+  if (!sessionId) {
+    sessionId = `session_${Date.now()}_${Math.random()
+      .toString(36)
+      .substr(2, 9)}`;
+    sessionStorage.setItem("ga4_session_id", sessionId);
+  }
+  return sessionId;
+};
+
+// Helper to get or initialize user path
+const getUserPath = (): string[] => {
+  const pathStr = sessionStorage.getItem("ga4_user_path");
+  return pathStr ? JSON.parse(pathStr) : [];
+};
+
+// Helper to save user path
+const saveUserPath = (path: string[]) => {
+  sessionStorage.setItem("ga4_user_path", JSON.stringify(path));
+};
+
+// Track page view with path tracking
+export const trackPageViewWithPath = (pagePath: string, pageTitle?: string) => {
+  const sessionId = getSessionId();
+  const currentPath = getUserPath();
+  const previousPage = currentPath.length > 0 ? currentPath[currentPath.length - 1] : null;
+  
+  // Add current page to path
+  currentPath.push(pagePath);
+  saveUserPath(currentPath);
+  
+  // Track page view
+  ga4Event("page_view", {
+    page_path: pagePath,
+    page_title: pageTitle || document.title,
+    page_location: window.location.href,
+    session_id: sessionId,
+    step_number: currentPath.length,
+    previous_page: previousPage,
+  });
+  
+  // Track user path (as a single event with the journey)
+  if (currentPath.length > 1) {
+    ga4Event("user_path", {
+      session_id: sessionId,
+      path: currentPath.join(" → "),
+      path_length: currentPath.length,
+      current_page: pagePath,
+      entry_page: currentPath[0],
+    });
+  }
+  
+  // Log for debugging
+  console.log(`[GA4] User path: ${currentPath.join(" → ")}`);
+};
+
 export const trackUserJourney = (
   step: string,
   stepNumber: number,
@@ -167,35 +225,40 @@ export const trackUserJourney = (
 
 // Session tracking
 export const startUserSession = () => {
-  const sessionId = `session_${Date.now()}_${Math.random()
-    .toString(36)
-    .substr(2, 9)}`;
-  sessionStorage.setItem("ga4_session_id", sessionId);
+  const sessionId = getSessionId();
+  const path: string[] = [window.location.pathname];
+  saveUserPath(path);
 
   ga4Event("session_start", {
     session_id: sessionId,
     entry_page: window.location.pathname,
   });
 
+  console.log(`[GA4] Session started: ${sessionId}`);
   return sessionId;
 };
 
 export const endUserSession = () => {
   const sessionId = sessionStorage.getItem("ga4_session_id");
+  const userPath = getUserPath();
 
   if (sessionId) {
     ga4Event("session_end", {
       session_id: sessionId,
       exit_page: window.location.pathname,
+      total_pages: userPath.length,
+      full_path: userPath.join(" → "),
     });
 
     sessionStorage.removeItem("ga4_session_id");
+    sessionStorage.removeItem("ga4_user_path");
+    console.log(`[GA4] Session ended. Path: ${userPath.join(" → ")}`);
   }
 };
 
 // Track page transitions
 export const trackPageTransition = (fromPage: string, toPage: string) => {
-  const sessionId = sessionStorage.getItem("ga4_session_id");
+  const sessionId = getSessionId();
 
   ga4Event("page_transition", {
     session_id: sessionId,
