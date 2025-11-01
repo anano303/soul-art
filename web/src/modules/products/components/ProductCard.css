@@ -678,12 +678,6 @@
   margin-top: 12px;
 }
 
-/* Handmade theme button */
-.handmade-theme .addButtonCart {
-  background: var(--secondary-color);
-  background: linear-gradient(135deg, var(--secondary-color) 0%, #5a2a01 100%);
-}
-
 .handmade-theme .addButtonCart:hover:not(:disabled) {
   background: var(--secondary-color);
   box-shadow: 0 5px 15px rgba(125, 90, 53, 0.3);
