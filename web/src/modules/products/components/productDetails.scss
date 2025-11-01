@@ -753,7 +753,7 @@ body {
     
   /* Mobile responsiveness for fullscreen modal */
   @media (max-width: 768px) {
-    .container {
+    &.container {
       max-width: 100%;
       padding: 40px 15px;
       overflow-x: hidden;
@@ -874,7 +874,7 @@ body {
       margin: 0 -15px;
     }
 
-    .container {
+    &.container {
       max-width: 100%;
       width: 100%;
       padding: 20px 10px;
@@ -970,7 +970,7 @@ body {
 
   /* Responsive adjustments for very small devices */
   @media (max-width: 360px) {
-    .container {
+    &.container {
       padding: 15px 5px;
       max-width: 100%;
       width: 100%;
