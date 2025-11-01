@@ -259,7 +259,7 @@ export class ProductsService {
     const productQuery = this.productModel
       .find(filter)
       .sort(sort)
-      .populate('user', 'name email phoneNumber storeName')
+      .populate('user', 'name email phoneNumber storeName artistSlug')
       // Ensure we populate all fields from category objects
       .populate('mainCategory')
       .populate('subCategory')
@@ -301,6 +301,7 @@ export class ProductsService {
 
     const product = await this.productModel
       .findById(id)
+      .populate('user', 'storeName name artistSlug')
       .populate('mainCategory')
       .populate('subCategory');
 

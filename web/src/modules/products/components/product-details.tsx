@@ -7,10 +7,7 @@ import {
   X,
   Truck,
   Ruler,
-  CheckCircle,
-  Shield,
   Share2,
-  Star,
   Package,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -30,11 +27,8 @@ import { useLanguage } from "@/hooks/LanguageContext";
 import { useQuery } from "@tanstack/react-query";
 import { fetchWithAuth } from "@/lib/fetch-with-auth";
 import { Color, AgeGroupItem } from "@/types";
-import { toast } from "@/hooks/use-toast";
-import { Loader2 } from "lucide-react";
 
 import { ProductGrid } from "./product-grid";
-import { useCart } from "@/modules/cart/context/cart-context";
 import ProductSchema from "@/components/ProductSchema";
 import { AddToCartButton } from "./AddToCartButton";
 import { trackViewContent } from "@/components/MetaPixel";
@@ -183,8 +177,6 @@ export function ProductDetails({ product }: ProductDetailsProps) {
     height?: number;
     depth?: number;
   } | null>(null);
-  const isViewIncrementedRef = useRef(false);
-  const currentProductIdRef = useRef<string | null>(null);
   const hasTrackedViewRef = useRef(false);
   const router = useRouter();
   const { t, language } = useLanguage();
@@ -282,11 +274,6 @@ export function ProductDetails({ product }: ProductDetailsProps) {
   // Display name and description based on selected language
   const displayName =
     language === "en" && product.nameEn ? product.nameEn : product.name;
-
-  const displayDescription =
-    language === "en" && product.descriptionEn
-      ? product.descriptionEn
-      : product.description;
 
   const getLocalizedName = (
     value?:
@@ -402,7 +389,7 @@ export function ProductDetails({ product }: ProductDetailsProps) {
     const incrementViewCount = async () => {
       console.log("Calling incrementViewCount for product:", product._id);
       try {
-        const response = await fetchWithAuth(`/products/${product._id}/view`, {
+        await fetchWithAuth(`/products/${product._id}/view`, {
           method: "POST",
         });
         console.log(
@@ -525,23 +512,6 @@ export function ProductDetails({ product }: ProductDetailsProps) {
     return stock;
   }, [selectedSize, selectedColor, selectedAgeGroup, product]);
 
-  if (!product) return null;
-
-  // Safety check for images array
-  if (
-    !product.images ||
-    !Array.isArray(product.images) ||
-    product.images.length === 0
-  ) {
-    return (
-      <div className="container">
-        <div className="error-message">
-          <p>{t("product.noImagesAvailable") || "სურათები მიუწვდომელია"}</p>
-        </div>
-      </div>
-    );
-  }
-
   const isOutOfStock = availableQuantity === 0;
 
   // Function to open fullscreen image
@@ -557,7 +527,7 @@ export function ProductDetails({ product }: ProductDetailsProps) {
   // Keyboard navigation for gallery
   useEffect(() => {
     const handleKeyPress = (e: KeyboardEvent) => {
-      if (!product.images || product.images.length <= 1) return;
+      if (!product?.images || product.images.length <= 1) return;
 
       if (e.key === "ArrowLeft") {
         e.preventDefault();
@@ -581,6 +551,23 @@ export function ProductDetails({ product }: ProductDetailsProps) {
     window.addEventListener("keydown", handleKeyPress);
     return () => window.removeEventListener("keydown", handleKeyPress);
   }, [currentImageIndex, product.images, isFullscreenOpen]);
+
+  if (!product) return null;
+
+  // Safety check for images array
+  if (
+    !product.images ||
+    !Array.isArray(product.images) ||
+    product.images.length === 0
+  ) {
+    return (
+      <div className="container">
+        <div className="error-message">
+          <p>{t("product.noImagesAvailable") || "სურათები მიუწვდომელია"}</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={`container ${themeClass}`}>
@@ -688,11 +675,19 @@ export function ProductDetails({ product }: ProductDetailsProps) {
 
           {/* Brand with hover tooltip - Compact under title */}
           <Link
-            href={`/shop?brand=${encodeURIComponent(product.brand)}`}
+            href={
+              product.user?.artistSlug
+                ? `/@${product.user.artistSlug}`
+                : `/shop?brand=${encodeURIComponent(product.brand)}`
+            }
             className="brand-details"
             title={
               language === "en"
-                ? `View all products by ${product.brand}`
+                ? product.user?.artistSlug
+                  ? `Visit ${product.brand}'s portfolio`
+                  : `View all products by ${product.brand}`
+                : product.user?.artistSlug
+                ? `${product.brand}-ის პორტფოლიო`
                 : `ნახე ${product.brand}-ის ყველა ნამუშევარი`
             }
           >

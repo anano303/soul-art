@@ -16,7 +16,7 @@ import { useGalleryInteractions } from "@/hooks/useGalleryInteractions";
 import { AddToCartButton } from "@/modules/products/components/AddToCartButton";
 import { useCart } from "@/modules/cart/context/cart-context";
 import { useToast } from "@/hooks/use-toast";
-import { Grid3X3, ShoppingBag, Info, ShoppingCart } from "lucide-react";
+import { Grid3X3, ShoppingBag, Info } from "lucide-react";
 import BrushTrail from "@/components/BrushTrail/BrushTrail";
 import { FollowButton } from "@/components/follow-button/follow-button";
 import { FollowersModal } from "@/components/followers-modal/followers-modal";
@@ -279,7 +279,7 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
                       {followersCount}
                     </span>
                     <span className="artist-hero__stat-label">
-                      {language === "en" ? "followers" : "მიმდევრები"}
+                      {language === "en" ? "followers" : "გამომწერები"}
                     </span>
                   </button>
                 ) : (
@@ -288,7 +288,7 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
                       {followersCount}
                     </span>
                     <span className="artist-hero__stat-label">
-                      {language === "en" ? "followers" : "მიმდევრები"}
+                      {language === "en" ? "followers" : "გამომწერები"}
                     </span>
                   </div>
                 )}

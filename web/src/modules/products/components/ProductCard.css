@@ -195,10 +195,18 @@
   margin: 0 10px;
   margin-top: 5px;
 }
+
 .product-info {
   display: flex;
   flex-direction: column;
   gap: 0px;
+}
+
+.product-info-top {
+  padding-top: 10px;
+}
+
+.product-info-bottom {
   padding-bottom: 5px;
 }
 

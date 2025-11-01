@@ -193,6 +193,7 @@ export function ProductCard({
         <div className="discount-badge">-{product.discountPercentage}%</div>
       )}
 
+      {/* Product image and name - clickable link to product */}
       <Link href={`/products/${product._id}`}>
         <div className="product-image">
           {isDigitalCategory && categoryLabel && (
@@ -213,7 +214,7 @@ export function ProductCard({
           />
           <div className="product-card-overlay"></div>
         </div>
-        <div className="product-info">
+        <div className="product-info product-info-top">
           <div className="product-name-rating">
             <h3 className="product-name">{displayName}</h3>
             <div className="product-rating">
@@ -232,22 +233,42 @@ export function ProductCard({
               )}
             </div>
           </div>
-          <p
-            style={{
-              margin: "3px 10px",
-              fontSize: "0.85rem",
-              color:
-                theme === "handmade-theme"
-                  ? "var(--secondary-color)"
-                  : "#153754",
-            }}
-          >
-            <span className="author">
-              {language === "en" ? "Author: " : "ავტორი: "}
-            </span>
-            {product.brand}
-          </p>
+        </div>
+      </Link>
 
+      {/* Author - separate section with product-info styling */}
+      <div className="product-info">
+        <p
+          style={{
+            margin: "3px 10px",
+            fontSize: "0.85rem",
+            color:
+              theme === "handmade-theme"
+                ? "var(--secondary-color)"
+                : "#153754",
+          }}
+        >
+          <span className="author">
+            {language === "en" ? "Author: " : "ავტორი: "}
+          </span>
+          {product.user?.artistSlug ? (
+            <Link
+              href={`/@${product.user.artistSlug}`}
+              style={{
+                color: "inherit",
+              }}
+            >
+              {product.brand}
+            </Link>
+          ) : (
+            product.brand
+          )}
+        </p>
+      </div>
+
+      {/* Price - clickable link to product */}
+      <Link href={`/products/${product._id}`}>
+        <div className="product-info product-info-bottom">
           <div className="product-details">
             <div className="priceAndRaiting">
               {isDiscounted ? (
