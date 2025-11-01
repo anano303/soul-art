@@ -225,15 +225,16 @@ export default function UserMenu({ onNavigate }: { onNavigate?: () => void }) {
               <span>{t("navigation.referrals")}</span>
             </Link>
 
-            {(user.role === Role.Admin ||
-              user.role === Role.Seller ||
-              user.role === Role.Blogger) && (
+            {(user.role?.toLowerCase() === Role.Admin ||
+              user.role?.toLowerCase() === Role.Seller ||
+              user.role?.toLowerCase() === Role.Blogger) && (
               <>
                 <hr />
                 <div className="dropdown-label">
                   {t("navigation.adminPanel")}
                 </div>
-                {(user.role === Role.Admin || user.role === Role.Seller) && (
+                {(user.role?.toLowerCase() === Role.Admin ||
+                  user.role?.toLowerCase() === Role.Seller) && (
                   <Link
                     href="/admin/products"
                     className="dropdown-item"
@@ -243,7 +244,8 @@ export default function UserMenu({ onNavigate }: { onNavigate?: () => void }) {
                     <span>{t("navigation.products")}</span>
                   </Link>
                 )}
-                {(user.role === Role.Admin || user.role === Role.Blogger) && (
+                {(user.role?.toLowerCase() === Role.Admin ||
+                  user.role?.toLowerCase() === Role.Blogger) && (
                   <Link
                     href="/admin/blog"
                     className="dropdown-item"
@@ -255,7 +257,7 @@ export default function UserMenu({ onNavigate }: { onNavigate?: () => void }) {
                 )}
               </>
             )}
-            {user.role === Role.Admin && (
+            {user.role?.toLowerCase() === Role.Admin && (
               <>
                 <Link
                   href="/admin/banners"
@@ -276,7 +278,7 @@ export default function UserMenu({ onNavigate }: { onNavigate?: () => void }) {
               </>
             )}
 
-            {user.role === Role.Admin && (
+            {user.role?.toLowerCase() === Role.Admin && (
               <>
                 <Link
                   href="/admin/categories"
@@ -297,7 +299,8 @@ export default function UserMenu({ onNavigate }: { onNavigate?: () => void }) {
               </>
             )}
 
-            {(user.role === Role.Admin || user.role === Role.Seller) && (
+            {(user.role?.toLowerCase() === Role.Admin ||
+              user.role?.toLowerCase() === Role.Seller) && (
               <Link
                 href="/admin/orders"
                 className="dropdown-item"
@@ -309,7 +312,7 @@ export default function UserMenu({ onNavigate }: { onNavigate?: () => void }) {
             )}
 
             {/* Balance links */}
-            {user.role === Role.Admin && (
+            {user.role?.toLowerCase() === Role.Admin && (
               <Link
                 href="/admin/balances"
                 className="dropdown-item"
@@ -321,7 +324,7 @@ export default function UserMenu({ onNavigate }: { onNavigate?: () => void }) {
             )}
 
             {/* Analytics link */}
-            {user.role === Role.Admin && (
+            {user.role?.toLowerCase() === Role.Admin && (
               <Link
                 href="/admin/analytics"
                 className="dropdown-item"
@@ -333,7 +336,7 @@ export default function UserMenu({ onNavigate }: { onNavigate?: () => void }) {
             )}
 
             {/* Meta Pixel link - Only for Admin */}
-            {user.role === Role.Admin && (
+            {user.role?.toLowerCase() === Role.Admin && (
               <Link
                 href="/admin/meta-pixel"
                 className="dropdown-item"
@@ -345,7 +348,7 @@ export default function UserMenu({ onNavigate }: { onNavigate?: () => void }) {
             )}
 
             {/* BOG Transfers link - Only for Admin */}
-            {user.role === Role.Admin && (
+            {user.role?.toLowerCase() === Role.Admin && (
               <Link
                 href="/admin/bog-transfers"
                 className="dropdown-item"
@@ -356,7 +359,7 @@ export default function UserMenu({ onNavigate }: { onNavigate?: () => void }) {
               </Link>
             )}
 
-            {user.role === Role.Seller && (
+            {user.role?.toLowerCase() === Role.Seller && (
               <Link
                 href="/profile/balance"
                 className="dropdown-item"
