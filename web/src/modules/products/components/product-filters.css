@@ -1,10 +1,10 @@
-/* მთავარი კონტეინერი */
+/* მთავარი კონტეინერი - Amazon Style */
 .product-filters {
-  font-family: firaGo;
-  background: none;
-  border: none;
-  padding: 15px;
-
+  font-family: firaGo, Arial, sans-serif;
+  background: #fff;
+  border: 1px solid #e5e5e5;
+  border-radius: 8px;
+  padding: 16px;
   position: relative;
   overflow: visible;
   transition: all 0.3s ease;
@@ -18,108 +18,129 @@
 
 .filter-section {
   margin-bottom: 20px;
+  padding-bottom: 20px;
+  border-bottom: 2px solid #f0f0f0;
+}
+
+.filter-section:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
 }
 
 .filter-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 12px;
+  margin-bottom: 14px;
   font-family: firaGo;
-  margin-top: 30px;
+  margin-top: 0;
 }
 
 .filter-title {
-  font-size: 1.2rem;
+  font-size: 1.05rem;
   font-weight: 600;
-  color: var(--primary-color);
+  color: #0f1111;
   margin: 0;
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+  text-shadow: none;
   font-family: firaGo;
 }
 
 .filter-clear-btn {
-  background: linear-gradient(
-    10deg,
-    var(--secondary-color),
-    var(--primary-color)
-  );
-  color: white;
+  background: transparent;
+  color: #012645;
   border: none;
-  padding: 8px 16px;
-  border-radius: 20px;
+  padding: 6px 12px;
+  border-radius: 6px;
   cursor: pointer;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   font-weight: 500;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 15px var(--secondary-color);
+  transition: all 0.2s ease;
   font-family: firaGo;
+  text-decoration: none;
 }
 
 .filter-clear-btn:hover {
-  background: linear-gradient(
-    10deg,
-    var(--primary-color),
-    var(--secondary-color)
-  );
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px var(--secondary-color);
+  background: #f5f5f5;
+  color: #012645;
+  text-decoration: none;
+  transform: none;
+  box-shadow: none;
 }
 
 /* მთავარი კატეგორიის ჩამონათვალი */
 .main-categories-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 40px;
-  margin-bottom: 25px;
-  padding: 15px;
+  gap: 16px;
+  margin-bottom: 20px;
+  padding: 0;
+}
+
+/* When category is selected, increase gap to prevent overlap */
+.main-categories-grid:has(.main-category-option.selected) {
+  gap: 20px;
+}
+
+@media (min-width: 1200px) {
+  .main-categories-grid {
+    gap: 20px;
+  }
+
+  .main-categories-grid:has(.main-category-option.selected) {
+    gap: 24px;
+  }
 }
 
 .main-category-option {
   position: relative;
-  background: linear-gradient(
-    135deg,
-    var(--primary-color) 0%,
-    var(--secondary-color) 100%
-  );
-  border: 3px solid var(--secondary-color);
-  border-radius: 20px;
-  padding: 15px 10px;
+  background: #fff;
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  padding: 14px 16px;
   text-align: center;
   cursor: pointer;
-  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-  overflow: hidden;
-  white-space: nowrap;
+  transition: all 0.25s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  min-height: 60px;
   display: flex;
   align-items: center;
   justify-content: center;
   font-family: firaGo;
-  color: white;
 }
 
-/* ძველი hover ეფექტები წავშალოთ */
+.main-category-option:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(1, 38, 69, 0.12);
+  border-color: #012645;
+}
 
-/* ძველი კატეგორიების სტილები წავშალოთ */
+.main-category-option.selected {
+  background: linear-gradient(135deg, #012645 0%, #014470 100%);
+  border-color: #012645;
+  color: white;
+  box-shadow: 0 4px 16px rgba(1, 38, 69, 0.3);
+  transform: translateY(-2px);
+}
 
-/* ღირებულებების შეცვლა */
-/* ღირებულებების შეცვლა */
-
-/* ძველი კატეგორიების კლასები შევცვალოთ */
 .category-name {
-  font-size: 1.3rem;
-  font-weight: 700;
+  font-size: 1rem;
+  font-weight: 600;
   color: inherit;
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+  text-shadow: none;
   position: relative;
   z-index: 1;
   margin: 0;
   font-family: firaGo;
 }
 
+.main-category-option.selected .category-name {
+  color: white;
+}
+
 .subcategory-name {
-  font-size: 1rem;
-  font-weight: 600;
+  font-size: 0.95rem;
+  font-weight: 500;
   color: inherit;
   position: relative;
   z-index: 1;
@@ -129,38 +150,6 @@
 .subcategory-option.selected .subcategory-name {
   color: white;
   text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
-}
-
-/* ქვეკატეგორიების განყოფილება */
-.subcategories-section {
-  width: 96%;
-  color: var(--primary-color);
-  margin-top: 20px;
-
-  position: relative;
-  overflow: visible; /* ცვლილება: visible რომ hover ეფექტები არ იჭრებოდეს */
-  justify-self: center;
-  align-self: center;
-  font-family: firaGo;
-}
-
-.subcategories-section::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 4px;
-  background: linear-gradient(
-    90deg,
-    var(--secondary-color),
-    var(--primary-color),
-    var(--secondary-color),
-    var(--primary-color),
-    var(--secondary-color)
-  );
-  background-size: 200% 100%;
-  animation: gradientMove 3s ease-in-out infinite;
 }
 
 /* ნახატების კატეგორიისთვის ლურჯი ქვეკატეგორიები */
@@ -248,369 +237,701 @@
   text-shadow: 1px 1px 2px var(--secondary-color);
 }
 
-/* paintings კატეგორიისთვის სათაურის ფერი */
-.subcategories-section[data-category="paintings"] .subcategories-title {
-  color: var(--primary-color);
-  text-shadow: 1px 1px 2px var(--primary-color);
-}
-
-@keyframes gradientMove {
-  0%,
-  100% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
+/* Subcategories Section - Amazon Style */
+.subcategories-section {
+  margin-top: 16px;
+  margin-bottom: 0;
+  padding: 12px 0;
+  border-top: 1px solid #e0e0e0;
+  border-bottom: 1px solid #e0e0e0;
 }
 
 .subcategories-title {
-  position: relative;
-  color: var(--primary-color);
-
-  font-size: 1.3rem;
-  margin-bottom: 20px;
-  padding-bottom: 10px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #0f1111;
+  margin-bottom: 12px;
+  padding: 0;
+  text-shadow: none;
 }
 
 .subcategories-grid {
   display: flex;
-  flex-wrap: nowrap; /* ერთ ხაზზე */
-  gap: 12px;
-  overflow-x: auto; /* ჰორიზონტალური სქროლი */
-  overflow-y: visible; /* ცვლილება: visible რომ hover ეფექტები არ იჭრებოდეს */
-  padding: 10px 0; /* ზედა და ქვედა padding hover ეფექტებისთვის */
-  scrollbar-width: none; /* Firefox-ში სქროლის დამალვა */
-  -ms-overflow-style: none; /* IE/Edge-ში სქროლის დამალვა */
-  scroll-behavior: smooth; /* smooth სქროლინგი */
+  flex-direction: row;
+  gap: 10px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 4px 0;
+  scrollbar-width: thin;
+  scrollbar-color: #012645 transparent;
 }
 
 .subcategories-grid::-webkit-scrollbar {
-  display: none; /* Webkit ბრაუზერებში სქროლის დამალვა */
+  height: 3px;
+}
+
+.subcategories-grid::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.subcategories-grid::-webkit-scrollbar-thumb {
+  background-color: #012645;
+  border-radius: 3px;
+}
+
+.subcategories-grid::-webkit-scrollbar-thumb:hover {
+  background-color: #014470;
+}
+
+/* Subcategory Pills Styling */
+.subcategory-pill {
+  background: #fff;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 10px 18px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.9rem;
+  color: #0f1111;
+  font-family: firaGo;
+  text-align: center;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+
+.subcategory-pill:hover {
+  background: #f8f8f8;
+  border-color: #012645;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(1, 38, 69, 0.1);
+}
+
+/* Active state for "All" pill when no subcategories are selected */
+.subcategory-pill.active {
+  background: #012645;
+  border-color: #012645;
+  color: #fff;
+  font-weight: 600;
+}
+
+/* Selected state for individual subcategory pills */
+.subcategory-pill.selected {
+  background: #012645;
+  border-color: #012645;
+  color: #fff;
+  font-weight: 600;
+}
+
+.subcategory-pill.selected .pill-text {
+  color: #fff;
+}
+
+/* Handmade category - brown theme for pills */
+.subcategories-section[data-category="handmade"] .subcategory-pill.active,
+.subcategories-section[data-category="handmade"] .subcategory-pill.selected {
+  background: var(--secondary-color);
+  border-color: var(--secondary-color);
+  color: #fff;
+}
+
+.subcategories-section[data-category="handmade"] .subcategory-pill:hover {
+  border-color: var(--secondary-color);
+}
+
+/* Paintings category - blue theme for pills */
+.subcategories-section[data-category="paintings"] .subcategory-pill.active,
+.subcategories-section[data-category="paintings"] .subcategory-pill.selected {
+  background: var(--primary-color);
+  border-color: var(--primary-color);
+  color: #fff;
+}
+
+.subcategories-section[data-category="paintings"] .subcategory-pill:hover {
+  border-color: var(--primary-color);
+}
+
+.pill-text {
+  flex: 1;
+}
+
+.pill-x {
+  font-size: 1rem;
+  font-weight: bold;
+  margin-left: 4px;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.pill-x:hover {
+  transform: scale(1.2);
 }
 
 .subcategory-option {
-  position: relative;
-  background: linear-gradient(
-    135deg,
-    var(--primary-color) 0%,
-    var(--secondary-color) 100%
-  );
-  border: 2px solid var(--secondary-color);
-  border-radius: 25px;
-  padding: 12px 20px;
-  text-align: center;
+  background: #fff;
+  border: 1px solid #d5d9d9;
+  border-radius: 8px;
+  padding: 10px 14px;
   cursor: pointer;
-  transition: all 0.3s ease;
-  overflow: hidden;
-  white-space: nowrap;
+  transition: all 0.2s ease;
   font-size: 0.9rem;
-  min-width: 100px;
-  flex-shrink: 0;
-  color: white;
+  color: #0f1111;
+  font-family: firaGo;
+  text-align: left;
 }
 
-/* ზოგადი ქვეკატეგორიების hover (თუ არ არის სპეციალური კატეგორია) */
 .subcategory-option:hover {
-  transform: translateY(-3px) scale(1.05);
-  box-shadow: 0 8px 25px var(--secondary-color);
-  border-color: var(--primary-color);
+  background: #f7fafa;
+  border-color: #007185;
 }
 
-/* ზოგადი ქვეკატეგორიების selected (თუ არ არის სპეციალური კატეგორია) */
 .subcategory-option.selected {
-  background: linear-gradient(
-    135deg,
-    var(--secondary-color) 0%,
-    var(--primary-color) 100%
-  );
-  color: white;
-  border-color: var(--primary-color);
-  transform: translateY(-2px) scale(1.05);
-  box-shadow: 0 8px 25px var(--secondary-color);
-}
-
-/* ქვეკატეგორიების ძველი სტილები წავშალოთ */
-
-/* ქვეკატეგორიების ძველი სტილები წავშალოთ */
-
-.subcategory-option.selected .subcategory-name {
-  color: white;
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
-}
-
-/* ფილტრების ტოგლი */
-.filter-toggle-btn {
-  background: var(--primary-color);
-  color: white;
-  border: none;
-  padding: 5px 15px;
-  border-radius: 25px;
-  cursor: pointer;
-  font-size: 1.1rem;
+  background: #e3f2fd;
+  border-color: #007185;
+  border-width: 2px;
   font-weight: 600;
+  color: #007185;
+}
+
+.subcategory-name {
+  font-size: 0.9rem;
+  font-family: firaGo;
+  font-weight: 500;
+  color: inherit;
+  text-shadow: none;
+}
+
+/* Filter Options - Amazon Style */
+.filter-options {
+  padding: 0;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: row;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.filter-option {
+  background: #fff;
+  border: 1px solid #d5d9d9;
+  border-radius: 8px;
+  padding: 10px 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.9rem;
+  color: #0f1111;
+  font-family: firaGo;
+  text-align: left;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-width: 120px;
+  justify-content: center;
+}
+
+.filter-option:hover {
+  background: #f7fafa;
+  border-color: #007185;
+}
+
+.filter-option.selected {
+  background: #e3f2fd;
+  border-color: #007185;
+  border-width: 2px;
+  font-weight: 600;
+  color: #007185;
+}
+
+/* Checkbox Styles */
+.checkbox-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.checkbox-label {
   display: flex;
   align-items: center;
   gap: 10px;
-  margin-top: 70px;
-  transition: all 0.3s ease;
-  box-shadow: 0 5px 20px var(--secondary-color);
+  padding: 10px 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border-radius: 8px;
+  background: #fff;
+  border: 1px solid #e0e0e0;
+}
+
+.checkbox-label:hover {
+  background: #f8f8f8;
+  border-color: #012645;
+}
+
+.checkbox-input {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  accent-color: #012645;
+}
+
+.checkbox-text {
+  font-size: 0.9rem;
+  color: #0f1111;
   font-family: firaGo;
-  /* საწყისი პოზიცია - JavaScript-ი მართავს sticky ქცევას */
+  font-weight: 500;
+}
+
+/* Price Range */
+.price-range {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.price-inputs {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  align-items: center;
+}
+
+.price-input {
+  flex: 1;
+  padding: 10px 12px;
+  border: 1px solid #d5d9d9;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-family: firaGo;
+  color: #0f1111;
+  background: #fff;
+  min-width: 80px;
+}
+
+.price-input:focus {
+  outline: none;
+  border-color: #012645;
+  box-shadow: 0 0 0 3px rgba(1, 38, 69, 0.1);
+}
+
+.price-separator {
+  color: #565959;
+  font-weight: 500;
+  display: block;
+}
+
+.price-apply-btn {
+  width: 100%;
+  background: #012645;
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  font-family: firaGo;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.price-apply-btn:hover {
+  background: #014470;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(1, 38, 69, 0.2);
+}
+
+.price-apply-btn:active {
+  transform: translateY(0);
+}
+
+/* Filter Toggle Button inside product-filters - keep it visible */
+/* This button opens the additional-filters section */
+.product-filters .filter-toggle-btn {
+  background: #012645;
+  color: white;
+  border: 2px solid #012645;
+  padding: 12px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 20px;
+  transition: all 0.2s ease;
+  font-family: firaGo;
   position: relative;
+  box-shadow: 0 2px 8px rgba(1, 38, 69, 0.2);
 }
 
-/* Fixed მდგომარეობის სტილები */
-.filter-toggle-btn.fixed {
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
-  transform: scale(1.05);
+.product-filters .filter-toggle-btn.fixed {
+  box-shadow: 0 4px 12px rgba(1, 38, 69, 0.3);
 }
 
-.filter-toggle-btn:hover {
-  background: linear-gradient(
-    10deg,
-    var(--primary-color),
-    var(--secondary-color)
-  );
+.product-filters .filter-toggle-btn:hover {
+  background: #fff;
+  color: #012645;
   transform: translateY(-2px);
-  box-shadow: 0 8px 25px var(--secondary-color);
+  box-shadow: 0 4px 12px rgba(1, 38, 69, 0.2);
+}
+
+.product-filters .filter-toggle-btn:hover .filter-icon {
+  filter: brightness(0) saturate(100%) invert(9%) sepia(54%) saturate(3210%)
+    hue-rotate(182deg) brightness(96%) contrast(102%);
 }
 
 .filter-icon {
+  width: 20px;
+  height: 20px;
   filter: brightness(0) invert(1);
 }
 
-/* დამატებითი ფილტრები */
-.additional-filters {
-  background: linear-gradient(135deg, #fff 0%, #f8f6f0 100%);
-  border: 2px solid var(--secondary-color);
-  border-radius: 15px;
-  padding: 20px;
-  margin-top: 15px;
-  box-shadow: 0 6px 20px rgba(123, 86, 66, 0.15);
-  position: relative;
-  overflow: hidden;
-  animation: slideIn 0.5s ease-out;
-  backdrop-filter: blur(10px);
+/* Desktop Sticky Filter Button */
+@media (min-width: 769px) {
+  .desktop-sticky-filter-btn {
+    position: relative;
+    transition: all 0.3s ease;
+  }
+
+  .desktop-sticky-filter-btn.sticky {
+    position: fixed;
+    top: 80px;
+    left: 20px;
+    z-index: 998;
+    animation: slideInFromLeft 0.3s ease-out;
+  }
+
+  @keyframes slideInFromLeft {
+    from {
+      opacity: 0;
+      transform: translateX(-20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
 }
 
-.additional-filters::before {
-  content: "";
-  position: absolute;
+/* Mobile - Hide sticky behavior */
+@media (max-width: 768px) {
+  .desktop-sticky-filter-btn.sticky {
+    position: relative !important;
+    top: auto !important;
+    left: auto !important;
+  }
+}
+
+/* Additional Filters - Desktop Sidebar & Mobile Full-screen Modal */
+
+/* Desktop: Slide-out sidebar from left */
+@media (min-width: 769px) {
+  .product-filters .filter-toggle-btn {
+    position: relative !important;
+    top: auto !important;
+    bottom: auto !important;
+    left: auto !important;
+    right: auto !important;
+    transform: none !important;
+    width: auto !important;
+    border-radius: 8px !important;
+    border-top: 2px solid #012645 !important;
+    border: 2px solid #012645 !important;
+  }
+
+  .product-filters .desktop-sticky-filter-btn.sticky {
+    position: fixed !important;
+    top: 80px !important;
+    left: 20px !important;
+  }
+
+  .additional-filters {
+    position: fixed;
+    top: 60px; /* Header-ის ქვემოთ */
+    left: 0;
+    bottom: 0;
+    width: 380px;
+    max-width: 90vw;
+    background: #ffffff;
+    box-shadow: 2px 0 20px rgba(0, 0, 0, 0.1);
+    transform: translateX(-100%);
+    transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 999;
+    overflow-y: auto;
+    padding: 24px;
+    border-radius: 0;
+    margin-top: 0;
+    border: none;
+    border-right: 1px solid #e0e0e0;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(1, 38, 69, 0.3) transparent;
+  }
+
+  /* Custom scrollbar for desktop additional-filters */
+  .additional-filters::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  .additional-filters::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .additional-filters::-webkit-scrollbar-thumb {
+    background: rgba(1, 38, 69, 0.3);
+    border-radius: 10px;
+  }
+
+  .additional-filters::-webkit-scrollbar-thumb:hover {
+    background: rgba(1, 38, 69, 0.5);
+  }
+
+  .additional-filters:not(.closing) {
+    transform: translateX(0);
+  }
+
+  .additional-filters.closing {
+    transform: translateX(-100%);
+  }
+}
+
+/* Mobile: Full-screen modal from bottom */
+@media (max-width: 768px) {
+  .additional-filters {
+    position: fixed;
+    top: 60px; /* Header-ის ქვემოთ მობილზეც */
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    height: calc(100vh - 60px);
+    background: #ffffff;
+    transform: translateY(100%);
+    transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 999;
+    overflow-y: auto;
+    padding: 20px;
+    border-radius: 16px 16px 0 0;
+    margin-top: 0;
+    border: none;
+  }
+
+  .additional-filters:not(.closing) {
+    transform: translateY(0);
+  }
+
+  .additional-filters.closing {
+    transform: translateY(100%);
+  }
+}
+
+/* Overlay for modal */
+.filter-modal-overlay {
+  position: fixed;
   top: 0;
   left: 0;
   right: 0;
-  height: 3px;
-  background: linear-gradient(
-    90deg,
-    var(--secondary-color),
-    var(--primary-color),
-    var(--secondary-color)
-  );
-  background-size: 200% 100%;
-  animation: gradientMove 3s ease-in-out infinite;
+  bottom: 0;
+  background-color: rgba(1, 38, 69, 0.5);
+  z-index: 998;
+  animation: fadeIn 0.3s ease;
+  backdrop-filter: blur(2px);
 }
 
-@keyframes slideIn {
+@keyframes fadeIn {
   from {
     opacity: 0;
-    transform: translateY(-20px);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
   }
 }
 
-.additional-filters.closing {
-  animation: slideOut 0.5s ease-in;
+/* Filters Header inside Modal/Sidebar */
+.additional-filters .filters-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: -24px -24px 20px -24px;
+  padding: 24px 24px 24px 24px;
+  border-bottom: 2px solid #f0f0f0;
+  position: sticky;
+  top: -20px;
+  background: #ffffff;
+  z-index: 100;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
-@keyframes slideOut {
-  from {
-    opacity: 1;
-    transform: translateY(0);
-  }
-  to {
-    opacity: 0;
-    transform: translateY(-20px);
+.additional-filters .filters-header h3 {
+  font-size: 20px;
+  font-weight: 600;
+  color: #012645;
+  margin: 0;
+}
+
+.additional-filters .filters-close-btn {
+  background: #f5f5f5;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  padding: 8px 12px;
+  line-height: 1;
+  color: #666;
+  transition: all 0.2s ease;
+  border-radius: 8px;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.additional-filters .filters-close-btn:hover {
+  background: #012645;
+  color: white;
+}
+
+@media (max-width: 768px) {
+  .additional-filters .filters-header {
+    margin: -20px -20px 16px -20px;
+    padding: 20px 20px 20px 20px;
   }
 }
 
 .filters-header {
   display: flex;
   justify-content: flex-end;
-  margin-bottom: 15px;
-  margin-top: 5px;
+  margin-bottom: 12px;
+  margin-top: 4px;
 }
 
 .filters-close-btn {
-  background: linear-gradient(45deg, #dc3545, #c82333);
-  color: white;
-  border: none;
-  padding: 8px 12px;
-  border-radius: 50%;
+  background: #fff;
+  color: #565959;
+  border: 1px solid #d5d9d9;
+  padding: 6px 10px;
+  border-radius: 6px;
   cursor: pointer;
-  font-size: 1rem;
-  font-weight: bold;
-  transition: all 0.3s ease;
-  box-shadow: 0 3px 10px rgba(220, 53, 69, 0.3);
-  width: 35px;
-  height: 35px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
   display: flex;
   align-items: center;
   justify-content: center;
+  font-family: firaGo;
 }
 
 .filters-close-btn:hover {
-  background: linear-gradient(45deg, #c82333, #dc3545);
-  transform: scale(1.1);
-  box-shadow: 0 6px 20px rgba(220, 53, 69, 0.4);
+  background: #f7fafa;
+  border-color: #007185;
+  color: #007185;
 }
 
-/* ფილტრების ჯგუფები */
-.filter-group {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 8px;
-}
-
-.filter-option {
-  background: linear-gradient(135deg, #fff 0%, #f8f6f0 100%);
-  border: 2px solid var(--secondary-color);
-  border-radius: 8px;
+/* Sort Dropdown - Amazon Style */
+.sort-dropdown {
   padding: 8px 12px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  font-size: 0.9rem;
-  font-weight: 500;
-  color: var(--primary-color);
-}
-
-.filter-option:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 15px var(--secondary-color);
-  border-color: var(--primary-color);
-}
-
-.filter-option.selected {
-  background: linear-gradient(135deg 0%, var(--primary-color) 100%);
-  color: white;
-  border-color: var(--primary-color);
-  box-shadow: 0 4px 15px var(--secondary-color);
-}
-
-/* ფასის დიაპაზონი */
-.price-range {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-  margin-top: 10px;
-}
-
-.price-input {
-  flex: 1;
-  padding: 10px 12px;
-  border: 2px solid var(--secondary-color);
+  border: 1px solid #d5d9d9;
   border-radius: 8px;
+  background: #fff;
   font-size: 0.9rem;
-  background: linear-gradient(135deg, #fff 0%, #f8f6f0 100%);
-  color: var(--primary-color);
-  font-weight: 500;
+  color: #0f1111;
+  font-family: firaGo;
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
-.price-input:focus {
+.sort-dropdown:hover {
+  border-color: #007185;
+}
+
+.sort-dropdown:focus {
   outline: none;
-  border-color: var(--primary-color);
-  box-shadow: 0 0 10px var(--secondary-color);
+  border-color: #007185;
+  box-shadow: 0 0 0 3px #e3f2fd;
 }
 
-.price-apply-btn {
-  background: linear-gradient(
-    10deg,
-    var(--secondary-color),
-    var(--primary-color)
-  );
-  color: white;
-  border: none;
-  padding: 10px 16px;
-  border-radius: 8px;
-  cursor: pointer;
-  font-weight: 600;
-  font-size: 0.9rem;
-  transition: all 0.3s ease;
-  box-shadow: 0 3px 10px var(--secondary-color);
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .product-filters {
+    padding: 12px;
+  }
+
+  .main-category-option {
+    font-size: 0.85rem;
+    padding: 10px 14px;
+  }
+
+  .subcategory-option {
+    font-size: 0.85rem;
+    padding: 8px 12px;
+  }
+
+  .filter-toggle-btn {
+    position: fixed !important;
+    top: auto !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
+    margin-top: 0;
+    font-size: 0.95rem;
+    padding: 16px 20px;
+    z-index: 999;
+    border-radius: 0 !important;
+    border-top: 2px solid #012645 !important;
+    box-shadow: 0 -4px 12px rgba(1, 38, 69, 0.2);
+    transform: none !important;
+  }
 }
 
-.price-apply-btn:hover {
-  background: linear-gradient(
-    10deg,
-    var(--primary-color),
-    var(--secondary-color)
-  );
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px var(--secondary-color);
-}
-
-/* ბრენდების ძიება */
+/* Brand Search */
 .brand-search-container {
   margin-top: 10px;
   margin-bottom: 10px;
   position: relative;
 }
 
-.brand-search-container::before {
-  content: "🎨";
-  position: absolute;
-  right: 15px;
-  top: 50%;
-  transform: translateY(-50%);
-  font-size: 1.2rem;
-  pointer-events: none;
-  opacity: 0.6;
-  z-index: 1;
-}
-
 .brand-search-input {
-  width: 80%;
-  padding: 12px 45px 12px 15px;
-  border: 2px solid var(--secondary-color);
-  border-radius: 10px;
-  font-size: 1rem;
-  background: linear-gradient(135deg, #fff 0%, #f8f6f0 100%);
-  color: var(--primary-color);
-  font-weight: 500;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 8px var(--secondary-color);
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #d5d9d9;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  background: #fff;
+  color: #0f1111;
+  font-family: firaGo;
+  transition: all 0.2s ease;
 }
 
 .brand-search-input:focus {
   outline: none;
-  border-color: var(--primary-color);
-  box-shadow: 0 0 15px var(--secondary-color);
-  transform: translateY(-1px);
+  border-color: #007185;
+  box-shadow: 0 0 0 3px #e3f2fd;
 }
 
 .brand-search-input::placeholder {
-  color: var(--primary-color);
-  opacity: 0.7;
+  color: #565959;
 }
 
-/* ბრენდების dropdown ეფექტი */
+/* Remove old gradient styles */
+
+/* Brands Dropdown */
 .brands-dropdown {
   position: absolute;
   top: 100%;
   left: 0;
   right: 0;
   background: white;
-  border: 2px solid var(--secondary-color);
+  border: 1px solid #d5d9d9;
   border-top: none;
-  border-radius: 0 0 10px 10px;
+  border-radius: 0 0 8px 8px;
   max-height: 200px;
   overflow-y: auto;
   z-index: 1000;
-  box-shadow: 0 4px 15px var(--secondary-color);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   animation: fadeIn 0.2s ease;
 }
 
@@ -620,44 +941,25 @@
 
 .brands-dropdown::-webkit-scrollbar-track {
   background: #f1f1f1;
-  border-radius: 10px;
 }
 
 .brands-dropdown::-webkit-scrollbar-thumb {
-  background: linear-gradient(
-    10deg,
-    var(--secondary-color),
-    var(--primary-color)
-  );
-  border-radius: 10px;
+  background: #888;
+  border-radius: 3px;
 }
 
 .brand-dropdown-item {
-  padding: 12px 15px;
+  padding: 10px 14px;
   cursor: pointer;
   border-bottom: 1px solid #eee;
   transition: all 0.2s ease;
-  color: var(--primary-color);
-  font-weight: 500;
-  position: relative;
-}
-
-.brand-dropdown-item::before {
-  content: "✨";
-  position: absolute;
-  left: 15px;
-  opacity: 0;
-  transition: opacity 0.2s ease;
-}
-
-.brand-dropdown-item:hover::before {
-  opacity: 1;
+  color: #0f1111;
+  font-family: firaGo;
+  font-size: 0.9rem;
 }
 
 .brand-dropdown-item:hover {
-  background: linear-gradient(135deg, #f8f6f0 0%, #e8e3d8 100%);
-  transform: translateX(5px);
-  padding-left: 25px;
+  background: #f7fafa;
 }
 
 .brand-dropdown-item:last-child {
@@ -665,25 +967,13 @@
 }
 
 .brand-dropdown-item.selected {
-  background: linear-gradient(
-    135deg,
-    var(--secondary-color) 0%,
-    var(--primary-color) 100%
-  );
-  color: white;
+  background: #e3f2fd;
+  color: #007185;
   font-weight: 600;
-  transform: translateX(0);
-  padding-left: 15px;
-}
-
-.brand-dropdown-item.selected::before {
-  content: "🎨";
-  opacity: 1;
-  color: white;
 }
 
 .brand-dropdown-item.no-brands-message {
-  color: var(--secondary-color);
+  color: #565959;
   font-style: italic;
   cursor: default;
   text-align: center;
@@ -719,92 +1009,82 @@
   }
 }
 
-/* სორტირება */
+/* Sort Options */
 .sort-options {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
-  margin-top: 15px;
+  gap: 8px;
+  margin-top: 12px;
 }
 
 .sort-option {
-  background: linear-gradient(135deg, #fff 0%, #f8f6f0 100%);
-  border: 2px solid var(--secondary-color);
-  border-radius: 10px;
-  padding: 12px 18px;
+  background: #fff;
+  border: 1px solid #d5d9d9;
+  border-radius: 8px;
+  padding: 10px 16px;
   cursor: pointer;
-  transition: all 0.3s ease;
-  font-size: 0.95rem;
+  transition: all 0.2s ease;
+  font-size: 0.9rem;
   font-weight: 500;
-  color: var(--primary-color);
+  color: #0f1111;
+  font-family: firaGo;
 }
 
 .sort-option:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 15px var(--secondary-color);
-  border-color: var(--primary-color);
+  background: #f7fafa;
+  border-color: #007185;
 }
 
 .sort-option.selected {
-  background: linear-gradient(
-    135deg,
-    var(--secondary-color) 0%,
-    var(--primary-color) 100%
-  );
-  color: white;
-  border-color: var(--primary-color);
-  box-shadow: 0 4px 15px var(--secondary-color);
+  background: #e3f2fd;
+  color: #007185;
+  border-color: #007185;
+  border-width: 2px;
+  font-weight: 600;
 }
 
-/* ყველა ფილტრის გასუფთავება */
+/* Clear Filters Button */
 .clear-filters-btn {
-  background: linear-gradient(45deg, #dc3545, #c82333);
-  color: white;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 12px;
+  background: #fff;
+  color: #012645;
+  border: 2px solid #012645;
+  padding: 12px 24px;
+  border-radius: 8px;
   cursor: pointer;
-  font-size: 0.85rem;
-  font-weight: 500;
+  font-size: 0.95rem;
+  font-weight: 600;
   margin-top: 10px;
-  width: auto;
-  max-width: 180px;
-  margin-left: auto;
-  margin-right: auto;
+  width: 100%;
   display: block;
-  transition: all 0.3s ease;
-  box-shadow: 0 3px 10px rgba(220, 53, 69, 0.3);
+  transition: all 0.2s ease;
+  font-family: firaGo;
 }
 
 .clear-filters-btn:hover {
-  background: linear-gradient(45deg, #c82333, #dc3545);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(220, 53, 69, 0.4);
+  background: #012645;
+  color: white;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(1, 38, 69, 0.2);
 }
 
-/* ლოადინგი */
+/* Loading State */
 .loading {
   min-height: 100px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.8) 0%,
-    rgba(248, 246, 240, 0.8) 100%
-  );
-  border-radius: 15px;
-  backdrop-filter: blur(5px);
+  background: #fff;
+  border-radius: 8px;
 }
 
-/* შეცდომის შეტყობინება */
+/* Error Message */
 .filter-error {
-  background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
-  border: 2px solid #dc3545;
-  border-radius: 10px;
-  padding: 15px;
-  margin-bottom: 20px;
-  color: #721c24;
+  background: #fef5f5;
+  border: 1px solid #e3cfcf;
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 16px;
+  color: #c41e3a;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -813,44 +1093,49 @@
 .filter-error p {
   margin: 0;
   font-weight: 500;
+  font-family: firaGo;
+  font-size: 0.9rem;
 }
 
 .filter-error button {
-  background: linear-gradient(45deg, #dc3545, #c82333);
-  color: white;
-  border: none;
+  background: #fff;
+  color: #565959;
+  border: 1px solid #d5d9d9;
   padding: 8px 12px;
   border-radius: 6px;
   cursor: pointer;
   font-size: 0.9rem;
   font-weight: 500;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
+  font-family: firaGo;
 }
 
 .filter-error button:hover {
-  background: linear-gradient(45deg, #c82333, #dc3545);
-  transform: scale(1.05);
+  background: #f7fafa;
+  border-color: #007185;
+  color: #007185;
 }
 
-/* დამატებითი სტილები */
+/* No Categories Message */
 .no-categories {
   text-align: center;
   padding: 40px 20px;
-  color: var(--primary-color);
+  color: #565959;
   font-style: italic;
 }
 
 .no-categories p {
   margin: 0;
-  font-size: 1.1rem;
+  font-size: 1rem;
+  font-family: firaGo;
 }
 
-/* ზომების ჯგუფი */
+/* Size Group */
 .size-group {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  justify-content: center;
+  justify-content: flex-start;
 }
 
 .filter-option.size {
@@ -859,42 +1144,43 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 50%;
-  font-weight: bold;
+  border-radius: 8px;
+  font-weight: 600;
   font-size: 0.9rem;
 }
 
-/* ფერების ჯგუფი */
+/* Color Group */
 .color-group {
   display: flex;
   flex-wrap: wrap;
-  gap: 12px;
-  justify-content: center;
+  gap: 10px;
+  justify-content: flex-start;
 }
 
 .filter-option.color {
   min-width: 60px;
   padding: 8px 12px;
-  border-radius: 20px;
+  border-radius: 8px;
   font-size: 0.9rem;
   text-align: center;
   position: relative;
+  padding-left: 32px;
 }
 
 .filter-option.color::before {
   content: "";
   position: absolute;
-  left: 8px;
+  left: 10px;
   top: 50%;
   transform: translateY(-50%);
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
   background: currentColor;
-  border: 1px solid #ddd;
+  border: 1px solid #d5d9d9;
 }
 
-/* ბრენდების scroll */
+/* Brands Scrollable */
 .brands-scrollable {
   max-height: 200px;
   overflow-y: auto;
@@ -907,122 +1193,95 @@
 
 .brands-scrollable::-webkit-scrollbar-track {
   background: #f1f1f1;
-  border-radius: 10px;
 }
 
 .brands-scrollable::-webkit-scrollbar-thumb {
-  background: linear-gradient(
-    10deg,
-    var(--secondary-color),
-    var(--primary-color)
-  );
-  border-radius: 10px;
+  background: #888;
+  border-radius: 3px;
 }
 
 .no-brands-message {
   text-align: center;
   padding: 20px;
-  color: var(--primary-color);
+  color: #565959;
   font-style: italic;
+  font-family: firaGo;
+  font-size: 0.9rem;
 }
 
-/* ფასდაკლების ფილტრი */
+/* Discount Filter */
 .discount-filter {
-  background: linear-gradient(135deg, #fff 0%, #f8f6f0 100%) !important;
-  border: 2px solid #e74c3c !important;
-  transition: all 0.3s ease !important;
-  width: 80%;
+  background: #fff !important;
+  border: 1px solid #d5d9d9 !important;
+  transition: all 0.2s ease !important;
 }
 
 .discount-filter:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3);
+  background: #f7fafa !important;
+  border-color: #007185 !important;
 }
 
 .discount-filter.selected {
-  background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%) !important;
-  color: white !important;
+  background: #e3f2fd !important;
+  color: #007185 !important;
+  border-color: #007185 !important;
+  border-width: 2px !important;
 }
 
-/* ფასის input-ები */
-.price-inputs {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-}
-
-.price-separator {
-  color: var(--primary-color);
-  font-weight: bold;
-  font-size: 1.2rem;
-}
-
-/* სორტირების select */
+/* Sort Select */
 .sort-select {
-  border: 2px solid var(--secondary-color);
-  border-radius: 10px;
-  font-size: 1rem;
-  background: linear-gradient(135deg, #fff 0%, #f8f6f0 100%);
-  color: var(--primary-color);
+  border: 1px solid #d5d9d9;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  background: #fff;
+  color: #0f1111;
   font-weight: 500;
   cursor: pointer;
-  width: 15%;
+  padding: 8px 12px;
   font-family: firaGo;
-}
-
-.sort-select.handmade-theme {
-  color: var(--secondary-color);
 }
 
 .sort-select:focus {
   outline: none;
-  border-color: var(--primary-color);
-  box-shadow: 0 0 10px var(--secondary-color);
-}
-
-.sort-select.handmade-theme:focus {
-  border-color: var(--secondary-color);
-  box-shadow: 0 0 10px var(--secondary-color);
+  border-color: #007185;
+  box-shadow: 0 0 0 3px #e3f2fd;
 }
 
 .sort-select option {
   background: white;
-  color: var(--primary-color);
+  color: #0f1111;
   padding: 10px;
 }
 
-.sort-select.handmade-theme option {
-  color: var(--secondary-color);
-}
-
-/* responsive improvements */
+/* Responsive Improvements */
 @media (max-width: 768px) {
   .main-categories-grid {
     grid-template-columns: 1fr;
-    gap: 15px;
-    padding: 10px;
+    gap: 12px;
+    padding: 8px;
   }
+
   .filter-header {
     justify-self: right;
   }
+
   .main-category-option {
-    padding: 20px 15px;
+    padding: 12px 14px;
+    min-height: 55px;
   }
+
   .sort-select {
-    width: 30%;
+    width: 100%;
+    max-width: 250px;
   }
 
   .subcategories-grid {
-    gap: 8px;
-    padding: 8px 8px; /* ზედა და ქვედა padding hover ეფექტებისთვის */
-    overflow-x: auto;
-    overflow-y: visible; /* ცვლილება: visible რომ hover ეფექტები არ იჭრებოდეს */
-    scrollbar-width: none;
-    -ms-overflow-style: none;
+    gap: 10px;
+    padding: 4px 0;
   }
 
   .subcategories-grid::-webkit-scrollbar {
-    display: none;
+    height: 4px;
   }
 
   .subcategory-option {
@@ -1033,15 +1292,6 @@
 
   .filter-group {
     justify-content: center;
-  }
-
-  .price-inputs {
-    flex-direction: column;
-    gap: 8px;
-  }
-
-  .price-separator {
-    display: none;
   }
 
   .clear-filters-btn {
@@ -1055,22 +1305,28 @@
     padding: 15px;
   }
   .sort-select {
-    width: 40%;
+    width: 100%;
   }
   .main-categories-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
     padding: 5px;
   }
 
   .main-category-option {
-    padding: 15px 10px;
+    padding: 12px 10px;
+    min-height: 50px;
   }
 
+  .category-name {
+    font-size: 1rem;
+  }
   .subcategories-section {
-    padding-top: 15px;
+    padding-top: 12px;
   }
 
   .subcategories-grid {
-    gap: 6px;
+    gap: 8px;
   }
 
   .subcategory-option {
@@ -1142,7 +1398,23 @@
   }
 
   .subcategories-title {
-    font-size: 1.1rem;
+    font-size: 1rem;
+  }
+
+  .checkbox-label {
+    padding: 6px 10px;
+  }
+
+  .price-inputs {
+    gap: 8px;
+  }
+  .price-input {
+    min-width: 70px;
+    font-size: 0.85rem;
+    padding: 8px 10px;
+  }
+  .price-separator {
+    font-size: 0.9rem;
   }
 }
 
@@ -1247,27 +1519,31 @@
 }
 
 /* არჩეული კატეგორიისთვის ეფექტები */
+
 .main-category-option.selected {
-  transform: translateY(-5px) scale(1.05);
+  transform: scale(1.05);
   animation: selectedPulse 2s ease-in-out infinite;
+  border-width: 3px;
 }
 
 @keyframes selectedPulse {
   0%,
   100% {
-    transform: translateY(0px) scale(1.05);
+    transform: scale(1.05);
   }
   50% {
-    transform: translateY(-2px) scale(1.08);
+    transform: scale(1.07);
   }
 }
 
 .main-category-option.selected:first-child {
-  box-shadow: 0 15px 50px rgba(1, 38, 69, 0.6);
+  box-shadow: 0 15px 50px rgba(1, 38, 69, 0.7);
+  border-color: var(--primary-color);
 }
 
 .main-category-option.selected:last-child {
-  box-shadow: 0 15px 50px rgba(123, 86, 66, 0.6);
+  box-shadow: 0 15px 50px rgba(123, 86, 66, 0.7);
+  border-color: var(--secondary-color);
 }
 
 /* ემოჯიები */
@@ -1311,4 +1587,69 @@
 /* Smooth scroll behavior */
 html {
   scroll-behavior: smooth;
+}
+
+/* Compact filter sections - Amazon style */
+.filter-section.compact-filter {
+  margin-bottom: 16px;
+  border-bottom: 1px solid #e5e5e5;
+  padding-bottom: 16px;
+}
+
+.filter-header.compact {
+  margin-bottom: 8px;
+  margin-top: 0;
+}
+
+.filter-title.compact {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #333;
+  text-shadow: none;
+  margin: 0;
+}
+
+.filter-options.compact {
+  padding: 0;
+}
+
+/* Checkbox styles - Amazon inspired */
+.checkbox-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 8px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  border-radius: 4px;
+  font-family: firaGo;
+}
+
+.checkbox-label:hover {
+  background-color: #f7fafa;
+}
+
+.checkbox-input {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  accent-color: #007185;
+  margin: 0;
+  flex-shrink: 0;
+}
+
+.checkbox-text {
+  font-size: 0.9rem;
+  color: #0f1111;
+  line-height: 1.4;
+}
+
+.checkbox-label:hover .checkbox-text {
+  color: #007185;
 }

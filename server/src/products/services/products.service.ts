@@ -55,6 +55,7 @@ interface FindManyParams {
   includeVariants?: boolean;
   isOriginal?: boolean;
   material?: string;
+  dimension?: string;
 }
 
 @Injectable()
@@ -101,6 +102,7 @@ export class ProductsService {
       includeVariants = false,
       isOriginal,
       material,
+      dimension,
     } = params;
 
     const pageNumber = parseInt(page);
@@ -177,10 +179,25 @@ export class ProductsService {
     }
 
     if (subCategory) {
-      try {
-        filter.subCategory = new Types.ObjectId(subCategory);
-      } catch (error) {
-        filter.subCategory = subCategory;
+      // Support comma-separated multiple subcategories
+      const subCategoryIds = subCategory.split(',').map((id) => id.trim());
+
+      if (subCategoryIds.length > 1) {
+        // Multiple subcategories - use $in operator
+        try {
+          filter.subCategory = {
+            $in: subCategoryIds.map((id) => new Types.ObjectId(id)),
+          };
+        } catch (error) {
+          filter.subCategory = { $in: subCategoryIds };
+        }
+      } else {
+        // Single subcategory - use direct match
+        try {
+          filter.subCategory = new Types.ObjectId(subCategory);
+        } catch (error) {
+          filter.subCategory = subCategory;
+        }
       }
     }
 
@@ -202,9 +219,55 @@ export class ProductsService {
       filter.isOriginal = isOriginal;
     }
 
-    // Filter by material
+    // Filter by material - support multiple materials
     if (material) {
-      filter.materials = material;
+      const materials = material.split(',').map((m) => m.trim());
+      if (materials.length > 1) {
+        // Multiple materials - product must have at least one
+        filter.materials = { $in: materials };
+      } else {
+        // Single material
+        filter.materials = materials[0];
+      }
+    }
+
+    // Filter by dimension - support multiple dimensions
+    if (dimension) {
+      const dimensions = dimension.split(',').map((d) => d.trim());
+
+      if (dimensions.length > 1) {
+        // Multiple dimensions - create OR conditions
+        const dimensionConditions = dimensions
+          .map((dim) => {
+            const [width, height, depth] = dim.split('x').map(Number);
+            if (width && height) {
+              const condition: any = {
+                'dimensions.width': width,
+                'dimensions.height': height,
+              };
+              if (depth) {
+                condition['dimensions.depth'] = depth;
+              }
+              return condition;
+            }
+            return null;
+          })
+          .filter(Boolean);
+
+        if (dimensionConditions.length > 0) {
+          filter.$or = dimensionConditions;
+        }
+      } else {
+        // Single dimension
+        const [width, height, depth] = dimensions[0].split('x').map(Number);
+        if (width && height) {
+          filter['dimensions.width'] = width;
+          filter['dimensions.height'] = height;
+          if (depth) {
+            filter['dimensions.depth'] = depth;
+          }
+        }
+      }
     }
 
     // Filter by discount status

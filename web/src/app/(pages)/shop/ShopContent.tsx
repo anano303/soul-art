@@ -40,8 +40,9 @@ const ShopContent = () => {
 
   // New filter state
   const [selectedCategoryId, setSelectedCategoryId] = useState<string>("");
-  const [selectedSubCategoryId, setSelectedSubCategoryId] =
-    useState<string>("");
+  const [selectedSubCategoryIds, setSelectedSubCategoryIds] = useState<
+    string[]
+  >([]);
   const [selectedAgeGroup, setSelectedAgeGroup] = useState<string>("");
   const [selectedSize, setSelectedSize] = useState<string>("");
   const [selectedColor, setSelectedColor] = useState<string>("");
@@ -57,6 +58,11 @@ const ShopContent = () => {
   const [selectedBrand, setSelectedBrand] = useState<string>(initialBrand);
 
   const [showDiscountedOnly, setShowDiscountedOnly] = useState<boolean>(false);
+  const [selectedOriginalTypes, setSelectedOriginalTypes] = useState<string[]>(
+    []
+  );
+  const [selectedMaterials, setSelectedMaterials] = useState<string[]>([]);
+  const [selectedDimensions, setSelectedDimensions] = useState<string[]>([]);
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 1000]);
   const [sorting, setSorting] = useState<{
     field: string;
@@ -174,7 +180,9 @@ const ShopContent = () => {
 
     setCurrentPage(initialPage);
     setSelectedCategoryId(mainCategoryParam);
-    setSelectedSubCategoryId(subCategoryParam);
+    setSelectedSubCategoryIds(
+      subCategoryParam ? subCategoryParam.split(",") : []
+    );
     setSelectedAgeGroup(ageGroupParam);
     setSelectedSize(sizeParam);
     setSelectedColor(colorParam);
@@ -208,7 +216,7 @@ const ShopContent = () => {
     if (
       currentPage === pending.page &&
       selectedCategoryId === pending.mainCategory &&
-      selectedSubCategoryId === pending.subCategory &&
+      selectedSubCategoryIds.join(",") === pending.subCategory &&
       selectedAgeGroup === pending.ageGroup &&
       selectedSize === pending.size &&
       selectedColor === pending.color &&
@@ -223,7 +231,7 @@ const ShopContent = () => {
   }, [
     currentPage,
     selectedCategoryId,
-    selectedSubCategoryId,
+    selectedSubCategoryIds,
     selectedAgeGroup,
     selectedSize,
     selectedColor,
@@ -255,11 +263,16 @@ const ShopContent = () => {
         };
 
         if (selectedCategoryId) params.mainCategory = selectedCategoryId;
-        if (selectedSubCategoryId) params.subCategory = selectedSubCategoryId;
+        if (selectedSubCategoryIds.length > 0)
+          params.subCategory = selectedSubCategoryIds.join(",");
         if (selectedAgeGroup) params.ageGroup = selectedAgeGroup;
         if (selectedSize) params.size = selectedSize;
         if (selectedColor) params.color = selectedColor;
         if (selectedBrand) params.brand = selectedBrand;
+        if (selectedMaterials.length > 0)
+          params.material = selectedMaterials.join(",");
+        if (selectedDimensions.length > 0)
+          params.dimension = selectedDimensions.join(",");
 
         // Always send price parameters if they differ from defaults
         if (priceRange[0] !== 0 || priceRange[1] !== 1000) {
@@ -268,6 +281,8 @@ const ShopContent = () => {
         }
 
         if (showDiscountedOnly) params.discounted = "true";
+        if (selectedOriginalTypes.length > 0)
+          params.isOriginal = selectedOriginalTypes.join(",");
 
         const response = await getProducts(currentPage, 20, params);
         setProducts(response.items || []);
@@ -285,14 +300,17 @@ const ShopContent = () => {
   }, [
     currentPage,
     selectedCategoryId,
-    selectedSubCategoryId,
+    selectedSubCategoryIds,
     selectedAgeGroup,
     selectedSize,
     selectedColor,
     selectedBrand,
+    selectedMaterials,
+    selectedDimensions,
     priceRange,
     sorting,
     showDiscountedOnly,
+    selectedOriginalTypes,
   ]);
 
   useEffect(() => {
@@ -300,7 +318,8 @@ const ShopContent = () => {
 
     const params = new URLSearchParams();
     if (selectedCategoryId) params.set("mainCategory", selectedCategoryId);
-    if (selectedSubCategoryId) params.set("subCategory", selectedSubCategoryId);
+    if (selectedSubCategoryIds.length > 0)
+      params.set("subCategory", selectedSubCategoryIds.join(","));
     if (selectedAgeGroup) params.set("ageGroup", selectedAgeGroup);
     if (selectedSize) params.set("size", selectedSize);
     if (selectedColor) params.set("color", selectedColor);
@@ -324,7 +343,7 @@ const ShopContent = () => {
   }, [
     router,
     selectedCategoryId,
-    selectedSubCategoryId,
+    selectedSubCategoryIds,
     selectedAgeGroup,
     selectedSize,
     selectedColor,
@@ -346,7 +365,7 @@ const ShopContent = () => {
       setCurrentPage(1);
       setSelectedCategoryId(categoryId);
       if (categoryId !== selectedCategoryId) {
-        setSelectedSubCategoryId("");
+        setSelectedSubCategoryIds([]);
         setSelectedAgeGroup("");
         setSelectedSize("");
         setSelectedColor("");
@@ -355,18 +374,20 @@ const ShopContent = () => {
     [selectedCategoryId]
   );
 
-  const handleSubCategoryChange = useCallback(
-    (subcategoryId: string) => {
-      setCurrentPage(1);
-      setSelectedSubCategoryId(subcategoryId);
-      if (subcategoryId !== selectedSubCategoryId) {
-        setSelectedAgeGroup("");
-        setSelectedSize("");
-        setSelectedColor("");
-      }
-    },
-    [selectedSubCategoryId]
-  );
+  const handleSubCategoryChange = useCallback((subcategoryId: string) => {
+    setCurrentPage(1);
+    if (!subcategoryId) {
+      setSelectedSubCategoryIds([]);
+    } else {
+      setSelectedSubCategoryIds((prev) => {
+        if (prev.includes(subcategoryId)) {
+          return prev.filter((id) => id !== subcategoryId);
+        } else {
+          return [...prev, subcategoryId];
+        }
+      });
+    }
+  }, []);
 
   const handleAgeGroupChange = useCallback((ageGroup: string) => {
     setCurrentPage(1);
@@ -405,6 +426,42 @@ const ShopContent = () => {
     []
   );
 
+  const handleOriginalFilterChange = useCallback((type: string) => {
+    setCurrentPage(1);
+    setSelectedOriginalTypes((prev) => {
+      if (!type) return [];
+      if (prev.includes(type)) {
+        return prev.filter((t) => t !== type);
+      } else {
+        return [...prev, type];
+      }
+    });
+  }, []);
+
+  const handleMaterialFilterChange = useCallback((material: string) => {
+    setCurrentPage(1);
+    setSelectedMaterials((prev) => {
+      if (!material) return [];
+      if (prev.includes(material)) {
+        return prev.filter((m) => m !== material);
+      } else {
+        return [...prev, material];
+      }
+    });
+  }, []);
+
+  const handleDimensionFilterChange = useCallback((dimension: string) => {
+    setCurrentPage(1);
+    setSelectedDimensions((prev) => {
+      if (!dimension) return [];
+      if (prev.includes(dimension)) {
+        return prev.filter((d) => d !== dimension);
+      } else {
+        return [...prev, dimension];
+      }
+    });
+  }, []);
+
   const handlePriceRangeChange = useCallback((range: [number, number]) => {
     setPriceRange((previousRange) => {
       const hasChanged =
@@ -439,29 +496,36 @@ const ShopContent = () => {
   return (
     <div className="shop-container default">
       <div className="content">
-        <div className="shop-layout">
-          <div className="filters-sidebar">
-            <ProductFilters
-              onCategoryChange={handleCategoryChange}
-              onSubCategoryChange={handleSubCategoryChange}
-              onAgeGroupChange={handleAgeGroupChange}
-              onSizeChange={handleSizeChange}
-              onColorChange={handleColorChange}
-              onBrandChange={handleBrandChange}
-              onDiscountFilterChange={handleDiscountFilterChange}
-              onPriceRangeChange={handlePriceRangeChange}
-              onSortChange={handleSortChange}
-              selectedCategoryId={selectedCategoryId}
-              selectedSubCategoryId={selectedSubCategoryId}
-              selectedAgeGroup={selectedAgeGroup}
-              selectedSize={selectedSize}
-              selectedColor={selectedColor}
-              selectedBrand={selectedBrand}
-              showDiscountedOnly={showDiscountedOnly}
-              priceRange={priceRange}
-            />
-          </div>
+        {/* Product Filters Component */}
+        <div className="filters-wrapper">
+          <ProductFilters
+            onCategoryChange={handleCategoryChange}
+            onSubCategoryChange={handleSubCategoryChange}
+            onAgeGroupChange={handleAgeGroupChange}
+            onSizeChange={handleSizeChange}
+            onColorChange={handleColorChange}
+            onBrandChange={handleBrandChange}
+            onDiscountFilterChange={handleDiscountFilterChange}
+            onOriginalFilterChange={handleOriginalFilterChange}
+            onMaterialFilterChange={handleMaterialFilterChange}
+            onDimensionFilterChange={handleDimensionFilterChange}
+            onPriceRangeChange={handlePriceRangeChange}
+            onSortChange={handleSortChange}
+            selectedCategoryId={selectedCategoryId}
+            selectedSubCategoryId={selectedSubCategoryIds}
+            selectedAgeGroup={selectedAgeGroup}
+            selectedSize={selectedSize}
+            selectedColor={selectedColor}
+            selectedBrand={selectedBrand}
+            selectedOriginal={selectedOriginalTypes}
+            selectedMaterial={selectedMaterials}
+            selectedDimension={selectedDimensions}
+            showDiscountedOnly={showDiscountedOnly}
+            priceRange={priceRange}
+          />
+        </div>
 
+        <div className="shop-layout">
           {brandInfo && (
             <div className="brand-info">
               {brandInfo.logo && (
@@ -497,7 +561,7 @@ const ShopContent = () => {
                   className="reset-filters-btn"
                   onClick={() => {
                     setSelectedCategoryId("");
-                    setSelectedSubCategoryId("");
+                    setSelectedSubCategoryIds([]);
                     setSelectedAgeGroup("");
                     setSelectedSize("");
                     setSelectedColor("");
