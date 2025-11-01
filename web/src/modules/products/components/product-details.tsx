@@ -669,7 +669,7 @@ export function ProductDetails({ product }: ProductDetailsProps) {
         </div>
 
         {/* Right Column - Product Info */}
-        <div className="product-info">
+        <div className="main-product-info">
           {/* Product Title - First for hierarchy */}
           <h1 className="product-title">{displayName}</h1>
 
