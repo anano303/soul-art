@@ -540,8 +540,8 @@
 /* Filter Toggle Button inside product-filters - keep it visible */
 /* This button opens the additional-filters section */
 .product-filters .filter-toggle-btn {
-  background: #fff;
-  color: #012645;
+  background: #012645;
+  color: white;
   border: 2px solid #012645;
   padding: 12px 20px;
   border-radius: 8px;
@@ -556,28 +556,28 @@
   transition: all 0.2s ease;
   font-family: firaGo;
   position: relative;
-  box-shadow: 0 2px 8px rgba(1, 38, 69, 0.1);
+  box-shadow: 0 2px 8px rgba(1, 38, 69, 0.2);
 }
 
 .product-filters .filter-toggle-btn.fixed {
-  box-shadow: 0 4px 12px rgba(1, 38, 69, 0.2);
+  box-shadow: 0 4px 12px rgba(1, 38, 69, 0.3);
 }
 
 .product-filters .filter-toggle-btn:hover {
-  background: #012645;
-  color: white;
+  background: #fff;
+  color: #012645;
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(1, 38, 69, 0.2);
 }
 
 .product-filters .filter-toggle-btn:hover .filter-icon {
-  filter: brightness(0) invert(1);
+  filter: brightness(0) saturate(100%) invert(9%) sepia(54%) saturate(3210%) hue-rotate(182deg) brightness(96%) contrast(102%);
 }
 
 .filter-icon {
   width: 20px;
   height: 20px;
-  filter: none;
+  filter: brightness(0) invert(1);
 }
 
 /* Additional Filters - Desktop Sidebar & Mobile Full-screen Modal */
