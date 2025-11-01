@@ -280,15 +280,20 @@ export function ProductFilters({
 
   // Fetch all available materials
   const { data: availableMaterials = [] } = useQuery<string[]>({
-    queryKey: ["materials", selectedCategoryId],
+    queryKey: ["materials", selectedCategoryId, selectedSubCategoryId],
     queryFn: async () => {
       try {
-        // Always fetch materials from ALL subcategories of the selected category
         const params = new URLSearchParams();
         if (selectedCategoryId)
           params.append("mainCategory", selectedCategoryId);
 
-        // Don't filter by subcategory - get all materials from the entire category
+        // If subcategories are selected, filter materials by those subcategories
+        if (Array.isArray(selectedSubCategoryId) && selectedSubCategoryId.length > 0) {
+          params.append("subCategory", selectedSubCategoryId.join(","));
+        } else if (typeof selectedSubCategoryId === "string" && selectedSubCategoryId) {
+          params.append("subCategory", selectedSubCategoryId);
+        }
+
         const queryString = params.toString();
         const url = queryString
           ? `/products?${queryString}&page=1&limit=1000`
@@ -323,15 +328,20 @@ export function ProductFilters({
 
   // Fetch all available dimensions
   const { data: availableDimensions = [] } = useQuery<string[]>({
-    queryKey: ["dimensions", selectedCategoryId],
+    queryKey: ["dimensions", selectedCategoryId, selectedSubCategoryId],
     queryFn: async () => {
       try {
-        // Always fetch dimensions from ALL subcategories of the selected category
         const params = new URLSearchParams();
         if (selectedCategoryId)
           params.append("mainCategory", selectedCategoryId);
 
-        // Don't filter by subcategory - get all dimensions from the entire category
+        // If subcategories are selected, filter dimensions by those subcategories
+        if (Array.isArray(selectedSubCategoryId) && selectedSubCategoryId.length > 0) {
+          params.append("subCategory", selectedSubCategoryId.join(","));
+        } else if (typeof selectedSubCategoryId === "string" && selectedSubCategoryId) {
+          params.append("subCategory", selectedSubCategoryId);
+        }
+
         const queryString = params.toString();
         const url = queryString
           ? `/products?${queryString}&page=1&limit=1000`
@@ -895,6 +905,8 @@ export function ProductFilters({
                           ? "active"
                           : ""
                       }`}
+                      onClick={() => onSubCategoryChange("")}
+                      style={{ cursor: "pointer" }}
                     >
                       <span className="pill-text">
                         {t("shop.all") || "ყველა"}
