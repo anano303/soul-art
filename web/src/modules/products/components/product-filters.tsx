@@ -21,12 +21,18 @@ interface FilterProps {
   }) => void;
   onBrandChange: (brand: string) => void;
   onDiscountFilterChange: (showDiscountedOnly: boolean) => void;
+  onDimensionFilterChange?: (dimension: string) => void;
+  onMaterialFilterChange?: (material: string) => void;
+  onOriginalFilterChange?: (isOriginal: string) => void;
   selectedCategoryId?: string;
   selectedSubCategoryId?: string;
   selectedAgeGroup?: string;
   selectedSize?: string;
   selectedColor?: string;
   selectedBrand?: string;
+  selectedDimension?: string;
+  selectedMaterial?: string;
+  selectedOriginal?: string;
   showDiscountedOnly?: boolean;
   priceRange?: [number, number]; // min, max
   onPriceRangeChange: (range: [number, number]) => void;
@@ -42,12 +48,18 @@ export function ProductFilters({
   onBrandChange,
   onDiscountFilterChange,
   onPriceRangeChange,
+  onDimensionFilterChange,
+  onMaterialFilterChange,
+  onOriginalFilterChange,
   selectedCategoryId,
   selectedSubCategoryId,
   selectedAgeGroup,
   selectedSize,
   selectedColor,
   selectedBrand,
+  selectedDimension,
+  selectedMaterial,
+  selectedOriginal,
   showDiscountedOnly = false,
   priceRange = [0, 1000],
 }: FilterProps) {
@@ -252,6 +264,85 @@ export function ProductFilters({
     refetchOnWindowFocus: false,
     staleTime: 10 * 60 * 1000, // Cache for 10 minutes (age groups change rarely)
     gcTime: 30 * 60 * 1000, // Keep in cache for 30 minutes
+  });
+
+  // Fetch all available materials
+  const { data: availableMaterials = [] } = useQuery<string[]>({
+    queryKey: ["materials"],
+    queryFn: async () => {
+      try {
+        const response = await fetchWithAuth("/products?page=1&limit=1000");
+        if (!response.ok) {
+          return [];
+        }
+        const productsData = await response.json();
+        const products = productsData.items || productsData;
+        // Extract unique materials from products
+        const materials: string[] = [
+          ...new Set(
+            products
+              .flatMap(
+                (product: { materials?: string[] }) => product.materials || []
+              )
+              .filter(Boolean) as string[]
+          ),
+        ];
+        return materials;
+      } catch (err) {
+        console.error("Failed to fetch materials:", err);
+        return [];
+      }
+    },
+    retry: 1,
+    refetchOnWindowFocus: false,
+  });
+
+  // Fetch all available dimensions
+  const { data: availableDimensions = [] } = useQuery<string[]>({
+    queryKey: ["dimensions"],
+    queryFn: async () => {
+      try {
+        const response = await fetchWithAuth("/products?page=1&limit=1000");
+        if (!response.ok) {
+          return [];
+        }
+        const productsData = await response.json();
+        const products = productsData.items || productsData;
+        // Extract unique dimension strings from products
+        const dimensions: string[] = [
+          ...new Set(
+            products
+              .map(
+                (product: {
+                  dimensions?: {
+                    width?: number;
+                    height?: number;
+                    depth?: number;
+                  };
+                }) => {
+                  if (product.dimensions?.width && product.dimensions?.height) {
+                    return `${product.dimensions.width}x${
+                      product.dimensions.height
+                    }${
+                      product.dimensions.depth
+                        ? `x${product.dimensions.depth}`
+                        : ""
+                    }`;
+                  }
+                  return null;
+                }
+              )
+              .filter(Boolean) as string[]
+          ),
+        ];
+        return dimensions;
+      } catch (err) {
+        console.error("Failed to fetch dimensions:", err);
+        return [];
+      }
+    },
+    retry: 1,
+    refetchOnWindowFocus: false,
   });
 
   // Get available attributes based on selected subcategory
@@ -1017,6 +1108,107 @@ export function ProductFilters({
                       </span>
                       <span>{t("shop.onlyDiscountedProducts")}</span>
                     </div>
+                  </div>
+                </div>
+              </div>
+              {/* Original/Copy Filter */}
+              <div className="filter-section">
+                <div className="filter-header">
+                  <h3 className="filter-title">
+                    {language === "en" ? "Product Type" : "პროდუქტის ტიპი"}
+                  </h3>
+                  {selectedOriginal && (
+                    <button
+                      className="filter-clear-btn"
+                      onClick={() => onOriginalFilterChange?.("")}
+                      aria-label={t("shop.clear")}
+                    >
+                      {t("shop.clear")}
+                    </button>
+                  )}
+                </div>
+                <div className="filter-options">
+                  <div className="filter-group">
+                    <div
+                      className={`filter-option ${
+                        selectedOriginal === "true" ? "selected" : ""
+                      }`}
+                      onClick={() =>
+                        onOriginalFilterChange?.(
+                          selectedOriginal === "true" ? "" : "true"
+                        )
+                      }
+                    >
+                      {language === "en" ? "Original" : "ორიგინალი"}
+                    </div>
+                    <div
+                      className={`filter-option ${
+                        selectedOriginal === "false" ? "selected" : ""
+                      }`}
+                      onClick={() =>
+                        onOriginalFilterChange?.(
+                          selectedOriginal === "false" ? "" : "false"
+                        )
+                      }
+                    >
+                      {language === "en" ? "Copy" : "ასლი"}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              {/* Materials Filter */}
+              <div className="filter-section compact-filter">
+                <div className="filter-header compact">
+                  <h3 className="filter-title compact">
+                    {language === "en" ? "Materials" : "მასალები"}
+                  </h3>
+                </div>
+                <div className="filter-options compact">
+                  <div className="checkbox-group">
+                    {availableMaterials.slice(0, 5).map((material) => (
+                      <label key={material} className="checkbox-label">
+                        <input
+                          type="checkbox"
+                          checked={selectedMaterial === material}
+                          onChange={() =>
+                            onMaterialFilterChange?.(
+                              material === selectedMaterial ? "" : material
+                            )
+                          }
+                          className="checkbox-input"
+                        />
+                        <span className="checkbox-text">{material}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              </div>
+              {/* Dimensions Filter */}
+              <div className="filter-section compact-filter">
+                <div className="filter-header compact">
+                  <h3 className="filter-title compact">
+                    {language === "en" ? "Dimensions" : "ზომები"}
+                  </h3>
+                </div>
+                <div className="filter-options compact">
+                  <div className="checkbox-group">
+                    {availableDimensions.slice(0, 5).map((dimension) => (
+                      <label key={dimension} className="checkbox-label">
+                        <input
+                          type="checkbox"
+                          checked={selectedDimension === dimension}
+                          onChange={() =>
+                            onDimensionFilterChange?.(
+                              dimension === selectedDimension ? "" : dimension
+                            )
+                          }
+                          className="checkbox-input"
+                        />
+                        <span className="checkbox-text">
+                          {dimension} {language === "en" ? "cm" : "სმ"}
+                        </span>
+                      </label>
+                    ))}
                   </div>
                 </div>
               </div>
