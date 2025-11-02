@@ -100,6 +100,89 @@ export default function BlogPostPage() {
     fetchPost();
   }, [postId, language]);
 
+  // Update meta tags for social sharing
+  useEffect(() => {
+    if (!post) return;
+
+    const title = language === "en" && post.titleEn ? post.titleEn : post.title;
+    const description = (() => {
+      if (post.postType === PostType.ARTICLE) {
+        return language === "en" && post.contentEn
+          ? post.contentEn.slice(0, 160)
+          : post.content?.slice(0, 160) || "";
+      } else {
+        return language === "en" && post.introEn
+          ? post.introEn.slice(0, 160)
+          : post.intro?.slice(0, 160) || "";
+      }
+    })();
+    const author = (() => {
+      if (post.postType === PostType.ARTICLE) {
+        return language === "en" && post.authorEn
+          ? post.authorEn
+          : post.author || "";
+      } else {
+        return language === "en" && post.artistEn
+          ? post.artistEn
+          : post.artist || "";
+      }
+    })();
+    const url = typeof window !== "undefined" ? window.location.href : "";
+
+    // Update document title
+    document.title = `${title} - Soulart Blog`;
+
+    // Update or create meta tags
+    const updateMetaTag = (property: string, content: string) => {
+      let meta = document.querySelector(
+        `meta[property="${property}"]`
+      ) as HTMLMetaElement;
+      if (!meta) {
+        meta = document.createElement("meta");
+        meta.setAttribute("property", property);
+        document.head.appendChild(meta);
+      }
+      meta.content = content;
+    };
+
+    const updateMetaName = (name: string, content: string) => {
+      let meta = document.querySelector(
+        `meta[name="${name}"]`
+      ) as HTMLMetaElement;
+      if (!meta) {
+        meta = document.createElement("meta");
+        meta.setAttribute("name", name);
+        document.head.appendChild(meta);
+      }
+      meta.content = content;
+    };
+
+    // Open Graph tags
+    updateMetaTag("og:title", title);
+    updateMetaTag("og:description", description);
+    updateMetaTag("og:image", post.coverImage);
+    updateMetaTag("og:url", url);
+    updateMetaTag("og:type", "article");
+    updateMetaTag("og:site_name", "Soulart");
+
+    // Twitter Card tags
+    updateMetaName("twitter:card", "summary_large_image");
+    updateMetaName("twitter:title", title);
+    updateMetaName("twitter:description", description);
+    updateMetaName("twitter:image", post.coverImage);
+
+    // Additional meta tags
+    updateMetaName("description", description);
+    if (author) {
+      updateMetaName("author", author);
+    }
+
+    // Cleanup function
+    return () => {
+      // Optionally remove meta tags on unmount
+    };
+  }, [post, language]);
+
   if (loading) {
     return (
       <div className="blog-post-container">
