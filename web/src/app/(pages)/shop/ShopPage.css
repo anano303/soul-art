@@ -33,7 +33,7 @@
 
 /* Handmade theme - also dark */
 .shop-container.handmade-theme {
-  background-color: #121212;
+  background-color: transparent;
   background-image: none;
   animation: none;
 }
