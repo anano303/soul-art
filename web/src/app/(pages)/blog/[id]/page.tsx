@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { useLanguage } from "@/hooks/LanguageContext";
+import { SocialShare } from "@/components/social-share";
 import {
   Palette,
   Image as ImageIcon,
@@ -18,6 +19,11 @@ interface QA {
   answer: string;
 }
 
+enum PostType {
+  INTERVIEW = "interview",
+  ARTICLE = "article",
+}
+
 interface PopulatedUser {
   _id: string;
   username?: string;
@@ -29,16 +35,23 @@ interface PopulatedUser {
 
 interface BlogPostData {
   _id: string;
+  postType: PostType;
   title: string;
   titleEn: string;
-  artist: string;
-  artistEn: string;
-  artistUsername?: string; // მხატვრის username-ი პროფილისთვის
+  artist?: string;
+  artistEn?: string;
+  artistUsername?: string;
   coverImage: string;
-  intro: string;
-  introEn: string;
-  qa: QA[];
-  qaEn: QA[];
+  intro?: string;
+  introEn?: string;
+  qa?: QA[];
+  qaEn?: QA[];
+  subtitle?: string;
+  subtitleEn?: string;
+  content?: string;
+  contentEn?: string;
+  author?: string;
+  authorEn?: string;
   images?: string[];
   publishDate: string;
   createdBy?: PopulatedUser | string | null;
@@ -109,10 +122,20 @@ export default function BlogPostPage() {
   }
 
   const title = language === "en" && post.titleEn ? post.titleEn : post.title;
+  const subtitle =
+    language === "en" && post.subtitleEn ? post.subtitleEn : post.subtitle;
   const intro = language === "en" && post.introEn ? post.introEn : post.intro;
+  const content =
+    language === "en" && post.contentEn ? post.contentEn : post.content;
   const qaItems = language === "en" && post.qaEn?.length ? post.qaEn : post.qa;
   const artistName =
     language === "en" && post.artistEn ? post.artistEn : post.artist;
+  const articleAuthor =
+    language === "en" && post.authorEn ? post.authorEn : post.author;
+
+  const isInterview = !post.postType || post.postType === PostType.INTERVIEW;
+  const isArticle = post.postType === PostType.ARTICLE;
+
   const authorName = (() => {
     if (!post.createdBy) {
       return language === "en" ? "Soulart Admin" : "სოულარტის გუნდი";
@@ -166,13 +189,15 @@ export default function BlogPostPage() {
           <div className="blog-post-header-content">
             <h1 className="blog-post-title">{title}</h1>
             <div className="blog-post-meta">
-              <span className="blog-post-artist">
-                {language === "en" ? "Artist: " : "ხელოვანი: "}
-                {artistName}
-              </span>
+              {isInterview && artistName && (
+                <span className="blog-post-artist">
+                  {language === "en" ? "Artist: " : "ხელოვანი: "}
+                  {artistName}
+                </span>
+              )}
               <span className="blog-post-author">
                 {language === "en" ? "Author: " : "ავტორი: "}
-                {authorName}
+                {isArticle && articleAuthor ? articleAuthor : authorName}
               </span>
               {formattedDate && (
                 <span className="blog-post-date">{formattedDate}</span>
@@ -182,10 +207,64 @@ export default function BlogPostPage() {
         </div>
 
         <div className="blog-post-content">
-          <p className="blog-post-intro">{intro}</p>
+          {/* Social Share - right after cover image */}
+          <SocialShare
+            url={
+              typeof window !== "undefined"
+                ? window.location.href
+                : `${process.env.NEXT_PUBLIC_WEB_URL}/blog/${post._id}`
+            }
+            title={title}
+            description={
+              isInterview ? intro : isArticle ? content?.slice(0, 150) : ""
+            }
+          />
 
-          {/* Artist Links Section */}
-          {post.artistUsername && (
+          {/* Subtitle for articles - after social share */}
+          {isArticle && subtitle && (
+            <h2 className="blog-post-subtitle-content">{subtitle}</h2>
+          )}
+
+          {isInterview && intro && <p className="blog-post-intro">{intro}</p>}
+
+          {isArticle && content && (
+            <div className="blog-article-content">
+              <p className="blog-article-text">{content}</p>
+            </div>
+          )}
+
+          {/* Article External Link */}
+          {isArticle && post.artistUsername && (
+            <div className="article-external-link">
+              <a
+                href={post.artistUsername}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="external-link-btn"
+              >
+                <span>
+                  {language === "en" ? "Related Link" : "დაკავშირებული ლინკი"}
+                </span>
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                  <polyline points="15 3 21 3 21 9"></polyline>
+                  <line x1="10" y1="14" x2="21" y2="3"></line>
+                </svg>
+              </a>
+            </div>
+          )}
+
+          {/* Artist Links Section for Interviews */}
+          {isInterview && post.artistUsername && (
             <div className="artist-links-section">
               <div className="artist-links-card">
                 <div className="artist-links-header">
@@ -222,24 +301,26 @@ export default function BlogPostPage() {
             </div>
           )}
 
-          <div className="blog-post-qa">
-            {qaItems.map((item, index) => (
-              <div key={index} className="qa-item">
-                <div className="qa-question">
-                  <span className="qa-q-label">
-                    {language === "en" ? "Question:" : "კითხვა:"}
-                  </span>
-                  <h3>{item.question}</h3>
+          {isInterview && qaItems && qaItems.length > 0 && (
+            <div className="blog-post-qa">
+              {qaItems.map((item, index) => (
+                <div key={index} className="qa-item">
+                  <div className="qa-question">
+                    <span className="qa-q-label">
+                      {language === "en" ? "Question:" : "კითხვა:"}
+                    </span>
+                    <h3>{item.question}</h3>
+                  </div>
+                  <div className="qa-answer">
+                    <span className="qa-a-label">
+                      {language === "en" ? "Answer:" : "პასუხი:"}
+                    </span>
+                    <p>{item.answer}</p>
+                  </div>
                 </div>
-                <div className="qa-answer">
-                  <span className="qa-a-label">
-                    {language === "en" ? "Answer:" : "პასუხი:"}
-                  </span>
-                  <p>{item.answer}</p>
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
 
           {post.images && post.images.length > 0 && (
             <div className="blog-post-gallery">
@@ -265,7 +346,13 @@ export default function BlogPostPage() {
 
       <div className="blog-post-footer">
         <Link href="/blog" className="blog-post-back-btn">
-          {language === "en" ? "← All Interviews" : "← ყველა ინტერვიუ"}
+          {language === "en"
+            ? isArticle
+              ? "← All Blog Posts"
+              : "← All Interviews"
+            : isArticle
+            ? "← ყველა პოსტი"
+            : "← ყველა ინტერვიუ"}
         </Link>
       </div>
     </div>

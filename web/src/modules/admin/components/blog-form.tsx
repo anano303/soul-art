@@ -15,7 +15,13 @@ interface QAItem {
   answer: string;
 }
 
+enum PostType {
+  INTERVIEW = "interview",
+  ARTICLE = "article",
+}
+
 interface BlogFormData {
+  postType: PostType;
   title: string;
   titleEn: string;
   artist: string;
@@ -26,6 +32,12 @@ interface BlogFormData {
   introEn: string;
   qa: QAItem[];
   qaEn: QAItem[];
+  subtitle: string;
+  subtitleEn: string;
+  content: string;
+  contentEn: string;
+  author: string;
+  authorEn: string;
   images: string[];
   isPublished: boolean;
   publishDate: string;
@@ -101,6 +113,7 @@ export function BlogForm({ postId }: BlogFormProps) {
     return false;
   };
   const [formData, setFormData] = useState<BlogFormData>({
+    postType: PostType.INTERVIEW,
     title: "",
     titleEn: "",
     artist: "",
@@ -111,6 +124,19 @@ export function BlogForm({ postId }: BlogFormProps) {
     introEn: "",
     qa: [{ question: "", answer: "" }],
     qaEn: [{ question: "", answer: "" }],
+    subtitle: "",
+    subtitleEn: "",
+    content: "",
+    contentEn: "",
+    author: currentUser
+      ? [currentUser.firstName, currentUser.lastName]
+          .filter(Boolean)
+          .join(" ") ||
+        currentUser.name ||
+        currentUser.username ||
+        ""
+      : "",
+    authorEn: "",
     images: [],
     isPublished: false,
     publishDate: new Date().toISOString().split("T")[0],
@@ -121,6 +147,26 @@ export function BlogForm({ postId }: BlogFormProps) {
       fetchPost();
     }
   }, [postId]);
+
+  // Auto-fill author name when switching to article type (only for new posts)
+  useEffect(() => {
+    if (!postId && formData.postType === PostType.ARTICLE && currentUser) {
+      const currentAuthorName =
+        [currentUser.firstName, currentUser.lastName]
+          .filter(Boolean)
+          .join(" ") ||
+        currentUser.name ||
+        currentUser.username ||
+        "";
+
+      if (!formData.author) {
+        setFormData((prev) => ({
+          ...prev,
+          author: currentAuthorName,
+        }));
+      }
+    }
+  }, [formData.postType, postId, currentUser]);
 
   const fetchPost = async () => {
     try {
@@ -138,16 +184,23 @@ export function BlogForm({ postId }: BlogFormProps) {
           return;
         }
         setFormData({
+          postType: data.postType || PostType.INTERVIEW,
           title: data.title,
           titleEn: data.titleEn,
-          artist: data.artist,
-          artistEn: data.artistEn,
+          artist: data.artist || "",
+          artistEn: data.artistEn || "",
           artistUsername: data.artistUsername || "",
           coverImage: data.coverImage,
-          intro: data.intro,
-          introEn: data.introEn,
+          intro: data.intro || "",
+          introEn: data.introEn || "",
           qa: normalizeQA(data.qa),
           qaEn: normalizeQA(data.qaEn),
+          subtitle: data.subtitle || "",
+          subtitleEn: data.subtitleEn || "",
+          content: data.content || "",
+          contentEn: data.contentEn || "",
+          author: data.author || "",
+          authorEn: data.authorEn || "",
           images: data.images || [],
           isPublished: data.isPublished,
           publishDate: new Date(data.publishDate).toISOString().split("T")[0],
@@ -273,9 +326,16 @@ export function BlogForm({ postId }: BlogFormProps) {
       return;
     }
 
-    if (formData.qa.length === 0 || formData.qaEn.length === 0) {
-      toast.error("გთხოვთ დაამატოთ მინიმუმ ერთი კითხვა-პასუხი");
-      return;
+    if (formData.postType === PostType.INTERVIEW) {
+      if (formData.qa.length === 0) {
+        toast.error("გთხოვთ დაამატოთ მინიმუმ ერთი კითხვა-პასუხი");
+        return;
+      }
+    } else if (formData.postType === PostType.ARTICLE) {
+      if (!formData.content) {
+        toast.error("გთხოვთ შეავსოთ სტატიის შინაარსი");
+        return;
+      }
     }
 
     setLoading(true);
@@ -284,14 +344,44 @@ export function BlogForm({ postId }: BlogFormProps) {
       const url = postId ? `/blog/${postId}` : "/blog";
       const method = postId ? "PUT" : "POST";
 
-      const sanitizedPayload = {
-        ...formData,
-        qa: formData.qa.map(({ question, answer }) => ({ question, answer })),
-        qaEn: formData.qaEn.map(({ question, answer }) => ({
+      // Prepare payload based on post type
+      const sanitizedPayload: any = {
+        postType: formData.postType,
+        title: formData.title,
+        titleEn: formData.titleEn,
+        coverImage: formData.coverImage,
+        images: formData.images,
+        isPublished: formData.isPublished,
+        publishDate: formData.publishDate,
+      };
+
+      if (formData.postType === PostType.INTERVIEW) {
+        // Include interview-specific fields
+        sanitizedPayload.artist = formData.artist;
+        sanitizedPayload.artistEn = formData.artistEn;
+        sanitizedPayload.artistUsername = formData.artistUsername;
+        sanitizedPayload.intro = formData.intro;
+        sanitizedPayload.introEn = formData.introEn;
+        sanitizedPayload.qa = formData.qa.map(({ question, answer }) => ({
           question,
           answer,
-        })),
-      };
+        }));
+        sanitizedPayload.qaEn = formData.qaEn.map(({ question, answer }) => ({
+          question,
+          answer,
+        }));
+      } else if (formData.postType === PostType.ARTICLE) {
+        // Include article-specific fields only
+        sanitizedPayload.subtitle = formData.subtitle;
+        sanitizedPayload.subtitleEn = formData.subtitleEn;
+        sanitizedPayload.content = formData.content;
+        sanitizedPayload.contentEn = formData.contentEn;
+        sanitizedPayload.author = formData.author;
+        sanitizedPayload.authorEn = formData.authorEn;
+        if (formData.artistUsername) {
+          sanitizedPayload.artistUsername = formData.artistUsername; // For external link
+        }
+      }
 
       const response = await fetchWithAuth(url, {
         method,
@@ -334,6 +424,37 @@ export function BlogForm({ postId }: BlogFormProps) {
         </div>
       </div>
 
+      {/* Post Type Selector */}
+      <div className="form-section-full">
+        <div className="form-group">
+          <label>პოსტის ტიპი *</label>
+          <div className="post-type-selector">
+            <button
+              type="button"
+              className={`post-type-btn ${
+                formData.postType === PostType.INTERVIEW ? "active" : ""
+              }`}
+              onClick={() =>
+                setFormData({ ...formData, postType: PostType.INTERVIEW })
+              }
+            >
+              ინტერვიუ
+            </button>
+            <button
+              type="button"
+              className={`post-type-btn ${
+                formData.postType === PostType.ARTICLE ? "active" : ""
+              }`}
+              onClick={() =>
+                setFormData({ ...formData, postType: PostType.ARTICLE })
+              }
+            >
+              სტატია
+            </button>
+          </div>
+        </div>
+      </div>
+
       <div className="form-grid">
         {/* Left Column */}
         <div className="form-section">
@@ -348,189 +469,278 @@ export function BlogForm({ postId }: BlogFormProps) {
               onChange={(e) =>
                 setFormData({ ...formData, title: e.target.value })
               }
-              placeholder="ინტერვიუ მხატვართან..."
-            />
-          </div>
-
-          <div className="form-group">
-            <label>მხატვრის სახელი *</label>
-            <input
-              type="text"
-              required
-              value={formData.artist}
-              onChange={(e) =>
-                setFormData({ ...formData, artist: e.target.value })
+              placeholder={
+                formData.postType === PostType.INTERVIEW
+                  ? "ინტერვიუ მხატვართან..."
+                  : "სტატიის სათაური"
               }
-              placeholder="ანა გელაშვილი"
             />
           </div>
 
-          <div className="form-group">
-            <label>შესავალი ტექსტი *</label>
-            <textarea
-              required
-              rows={4}
-              value={formData.intro}
-              onChange={(e) =>
-                setFormData({ ...formData, intro: e.target.value })
-              }
-              placeholder="მოკლე აღწერა მხატვარზე..."
-            />
-          </div>
-
-          <div className="qa-section">
-            <div className="qa-header">
-              <h3>კითხვა-პასუხები</h3>
-              <button
-                type="button"
-                onClick={() => addQAPair("ka")}
-                className="btn-add-qa"
-              >
-                <Plus size={16} />
-                დამატება
-              </button>
-            </div>
-
-            {formData.qa.map((item, index) => (
-              <div key={index} className="qa-pair">
-                <div className="qa-pair-header">
-                  <span>კითხვა-პასუხი #{index + 1}</span>
-                  {formData.qa.length > 1 && (
-                    <button
-                      type="button"
-                      onClick={() => removeQAPair(index, "ka")}
-                      className="btn-remove-qa"
-                    >
-                      <Trash2 size={14} />
-                    </button>
-                  )}
-                </div>
-                <div className="form-group">
-                  <label>კითხვა</label>
-                  <input
-                    type="text"
-                    required
-                    value={item.question}
-                    onChange={(e) =>
-                      updateQAPair(index, "question", e.target.value, "ka")
-                    }
-                    placeholder="როდის დაიწყეთ მხატვრობა?"
-                  />
-                </div>
-                <div className="form-group">
-                  <label>პასუხი</label>
-                  <textarea
-                    required
-                    rows={4}
-                    value={item.answer}
-                    onChange={(e) =>
-                      updateQAPair(index, "answer", e.target.value, "ka")
-                    }
-                    placeholder="პასუხი..."
-                  />
-                </div>
+          {formData.postType === PostType.INTERVIEW ? (
+            <>
+              <div className="form-group">
+                <label>მხატვრის სახელი *</label>
+                <input
+                  type="text"
+                  required
+                  value={formData.artist}
+                  onChange={(e) =>
+                    setFormData({ ...formData, artist: e.target.value })
+                  }
+                  placeholder="ანა გელაშვილი"
+                />
               </div>
-            ))}
-          </div>
+
+              <div className="form-group">
+                <label>შესავალი ტექსტი *</label>
+                <textarea
+                  required
+                  rows={4}
+                  value={formData.intro}
+                  onChange={(e) =>
+                    setFormData({ ...formData, intro: e.target.value })
+                  }
+                  placeholder="მოკლე აღწერა მხატვარზე..."
+                />
+              </div>
+
+              <div className="qa-section">
+                <div className="qa-header">
+                  <h3>კითხვა-პასუხები</h3>
+                  <button
+                    type="button"
+                    onClick={() => addQAPair("ka")}
+                    className="btn-add-qa"
+                  >
+                    <Plus size={16} />
+                    დამატება
+                  </button>
+                </div>
+
+                {formData.qa.map((item, index) => (
+                  <div key={index} className="qa-pair">
+                    <div className="qa-pair-header">
+                      <span>კითხვა-პასუხი #{index + 1}</span>
+                      {formData.qa.length > 1 && (
+                        <button
+                          type="button"
+                          onClick={() => removeQAPair(index, "ka")}
+                          className="btn-remove-qa"
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      )}
+                    </div>
+                    <div className="form-group">
+                      <label>კითხვა</label>
+                      <input
+                        type="text"
+                        required
+                        value={item.question}
+                        onChange={(e) =>
+                          updateQAPair(index, "question", e.target.value, "ka")
+                        }
+                        placeholder="როდის დაიწყეთ მხატვრობა?"
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label>პასუხი</label>
+                      <textarea
+                        required
+                        rows={4}
+                        value={item.answer}
+                        onChange={(e) =>
+                          updateQAPair(index, "answer", e.target.value, "ka")
+                        }
+                        placeholder="პასუხი..."
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="form-group">
+                <label>ქვესათაური</label>
+                <input
+                  type="text"
+                  value={formData.subtitle}
+                  onChange={(e) =>
+                    setFormData({ ...formData, subtitle: e.target.value })
+                  }
+                  placeholder="სტატიის ქვესათაური"
+                />
+              </div>
+
+              <div className="form-group">
+                <label>სტატიის შინაარსი *</label>
+                <textarea
+                  required
+                  rows={12}
+                  value={formData.content}
+                  onChange={(e) =>
+                    setFormData({ ...formData, content: e.target.value })
+                  }
+                  placeholder="სტატიის სრული შინაარსი..."
+                />
+              </div>
+
+              <div className="form-group">
+                <label>ავტორი *</label>
+                <input
+                  type="text"
+                  required
+                  value={formData.author}
+                  onChange={(e) =>
+                    setFormData({ ...formData, author: e.target.value })
+                  }
+                  placeholder="ავტორის სახელი"
+                />
+              </div>
+            </>
+          )}
         </div>
 
         {/* Right Column */}
         <div className="form-section">
-          <h2>English Version</h2>
+          <h2>English Version (Optional)</h2>
 
           <div className="form-group">
-            <label>Title *</label>
+            <label>Title</label>
             <input
               type="text"
-              required
               value={formData.titleEn}
               onChange={(e) =>
                 setFormData({ ...formData, titleEn: e.target.value })
               }
-              placeholder="Interview with Artist..."
-            />
-          </div>
-
-          <div className="form-group">
-            <label>Artist Name *</label>
-            <input
-              type="text"
-              required
-              value={formData.artistEn}
-              onChange={(e) =>
-                setFormData({ ...formData, artistEn: e.target.value })
+              placeholder={
+                formData.postType === PostType.INTERVIEW
+                  ? "Interview with Artist..."
+                  : "Article Title"
               }
-              placeholder="Ana Gelashvili"
             />
           </div>
 
-          <div className="form-group">
-            <label>Intro Text *</label>
-            <textarea
-              required
-              rows={4}
-              value={formData.introEn}
-              onChange={(e) =>
-                setFormData({ ...formData, introEn: e.target.value })
-              }
-              placeholder="Brief description about the artist..."
-            />
-          </div>
-
-          <div className="qa-section">
-            <div className="qa-header">
-              <h3>Q&A Pairs</h3>
-              <button
-                type="button"
-                onClick={() => addQAPair("en")}
-                className="btn-add-qa"
-              >
-                <Plus size={16} />
-                Add
-              </button>
-            </div>
-
-            {formData.qaEn.map((item, index) => (
-              <div key={index} className="qa-pair">
-                <div className="qa-pair-header">
-                  <span>Q&A #{index + 1}</span>
-                  {formData.qaEn.length > 1 && (
-                    <button
-                      type="button"
-                      onClick={() => removeQAPair(index, "en")}
-                      className="btn-remove-qa"
-                    >
-                      <Trash2 size={14} />
-                    </button>
-                  )}
-                </div>
-                <div className="form-group">
-                  <label>Question</label>
-                  <input
-                    type="text"
-                    required
-                    value={item.question}
-                    onChange={(e) =>
-                      updateQAPair(index, "question", e.target.value, "en")
-                    }
-                    placeholder="When did you start painting?"
-                  />
-                </div>
-                <div className="form-group">
-                  <label>Answer</label>
-                  <textarea
-                    required
-                    rows={4}
-                    value={item.answer}
-                    onChange={(e) =>
-                      updateQAPair(index, "answer", e.target.value, "en")
-                    }
-                    placeholder="Answer..."
-                  />
-                </div>
+          {formData.postType === PostType.INTERVIEW ? (
+            <>
+              <div className="form-group">
+                <label>Artist Name</label>
+                <input
+                  type="text"
+                  value={formData.artistEn}
+                  onChange={(e) =>
+                    setFormData({ ...formData, artistEn: e.target.value })
+                  }
+                  placeholder="Ana Gelashvili"
+                />
               </div>
-            ))}
-          </div>
+
+              <div className="form-group">
+                <label>Intro Text</label>
+                <textarea
+                  rows={4}
+                  value={formData.introEn}
+                  onChange={(e) =>
+                    setFormData({ ...formData, introEn: e.target.value })
+                  }
+                  placeholder="Brief description about the artist..."
+                />
+              </div>
+
+              <div className="qa-section">
+                <div className="qa-header">
+                  <h3>Q&A Pairs</h3>
+                  <button
+                    type="button"
+                    onClick={() => addQAPair("en")}
+                    className="btn-add-qa"
+                  >
+                    <Plus size={16} />
+                    Add
+                  </button>
+                </div>
+
+                {formData.qaEn.map((item, index) => (
+                  <div key={index} className="qa-pair">
+                    <div className="qa-pair-header">
+                      <span>Q&A #{index + 1}</span>
+                      {formData.qaEn.length > 1 && (
+                        <button
+                          type="button"
+                          onClick={() => removeQAPair(index, "en")}
+                          className="btn-remove-qa"
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      )}
+                    </div>
+                    <div className="form-group">
+                      <label>Question</label>
+                      <input
+                        type="text"
+                        value={item.question}
+                        onChange={(e) =>
+                          updateQAPair(index, "question", e.target.value, "en")
+                        }
+                        placeholder="When did you start painting?"
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label>Answer</label>
+                      <textarea
+                        rows={4}
+                        value={item.answer}
+                        onChange={(e) =>
+                          updateQAPair(index, "answer", e.target.value, "en")
+                        }
+                        placeholder="Answer..."
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="form-group">
+                <label>Subtitle</label>
+                <input
+                  type="text"
+                  value={formData.subtitleEn}
+                  onChange={(e) =>
+                    setFormData({ ...formData, subtitleEn: e.target.value })
+                  }
+                  placeholder="Article subtitle"
+                />
+              </div>
+
+              <div className="form-group">
+                <label>Article Content</label>
+                <textarea
+                  rows={12}
+                  value={formData.contentEn}
+                  onChange={(e) =>
+                    setFormData({ ...formData, contentEn: e.target.value })
+                  }
+                  placeholder="Full article content..."
+                />
+              </div>
+
+              <div className="form-group">
+                <label>Author</label>
+                <input
+                  type="text"
+                  value={formData.authorEn}
+                  onChange={(e) =>
+                    setFormData({ ...formData, authorEn: e.target.value })
+                  }
+                  placeholder="Author name"
+                />
+              </div>
+            </>
+          )}
         </div>
       </div>
 
@@ -539,20 +749,37 @@ export function BlogForm({ postId }: BlogFormProps) {
         <h2>დამატებითი ინფორმაცია</h2>
 
         <div className="form-row">
-          <div className="form-group">
-            <label>მხატვრის Username (არაა აუცილებელი)</label>
-            <input
-              type="text"
-              value={formData.artistUsername}
-              onChange={(e) =>
-                setFormData({ ...formData, artistUsername: e.target.value })
-              }
-              placeholder="ana_artist"
-            />
-            <small>
-              შეიყვანეთ username რომ ბლოგში ჩაემატოს ბმული მხატვრის გვერდზე
-            </small>
-          </div>
+          {formData.postType === PostType.INTERVIEW && (
+            <div className="form-group">
+              <label>მხატვრის Username (არაა აუცილებელი)</label>
+              <input
+                type="text"
+                value={formData.artistUsername}
+                onChange={(e) =>
+                  setFormData({ ...formData, artistUsername: e.target.value })
+                }
+                placeholder="ana_artist"
+              />
+              <small>
+                შეიყვანეთ username რომ ბლოგში ჩაემატოს ბმული მხატვრის გვერდზე
+              </small>
+            </div>
+          )}
+
+          {formData.postType === PostType.ARTICLE && (
+            <div className="form-group">
+              <label>ლინკი (არაა აუცილებელი)</label>
+              <input
+                type="url"
+                value={formData.artistUsername}
+                onChange={(e) =>
+                  setFormData({ ...formData, artistUsername: e.target.value })
+                }
+                placeholder="https://example.com"
+              />
+              <small>დაამატეთ შესაბამისი ლინკი თუ გსურთ</small>
+            </div>
+          )}
 
           <div className="form-group">
             <label>გამოქვეყნების თარიღი *</label>

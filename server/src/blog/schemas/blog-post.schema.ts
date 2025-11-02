@@ -3,37 +3,66 @@ import { Document, Types } from 'mongoose';
 
 export type BlogPostDocument = BlogPost & Document;
 
+export enum PostType {
+  INTERVIEW = 'interview',
+  ARTICLE = 'article',
+}
+
 @Schema({ timestamps: true })
 export class BlogPost {
+  @Prop({ required: true, enum: PostType, default: PostType.INTERVIEW })
+  postType: PostType;
+
   @Prop({ required: true })
   title: string;
 
-  @Prop({ required: true })
+  @Prop()
   titleEn: string;
 
-  @Prop({ required: true })
+  // For interviews
+  @Prop()
   artist: string;
 
-  @Prop({ required: true })
+  @Prop()
   artistEn: string;
 
   @Prop()
-  artistUsername?: string;
+  artistUsername?: string; // For interviews: artist username, For articles: any URL link
 
   @Prop({ required: true })
   coverImage: string;
 
-  @Prop({ required: true })
+  // For interviews
+  @Prop()
   intro: string;
 
-  @Prop({ required: true })
+  @Prop()
   introEn: string;
 
-  @Prop({ type: [{ question: String, answer: String }], required: true })
+  @Prop({ type: [{ question: String, answer: String }] })
   qa: Array<{ question: string; answer: string }>;
 
-  @Prop({ type: [{ question: String, answer: String }], required: true })
+  @Prop({ type: [{ question: String, answer: String }] })
   qaEn: Array<{ question: string; answer: string }>;
+
+  // For articles
+  @Prop()
+  subtitle: string;
+
+  @Prop()
+  subtitleEn: string;
+
+  @Prop()
+  content: string;
+
+  @Prop()
+  contentEn: string;
+
+  @Prop()
+  author: string;
+
+  @Prop()
+  authorEn: string;
 
   @Prop({ type: [String], default: [] })
   images: string[];
