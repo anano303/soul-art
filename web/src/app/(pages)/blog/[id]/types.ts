@@ -21,7 +21,7 @@ export interface BlogPostData {
   _id: string;
   postType: PostType;
   title: string;
-  titleEn: string;
+  titleEn?: string;
   artist?: string;
   artistEn?: string;
   artistUsername?: string;

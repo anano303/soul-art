@@ -78,12 +78,12 @@ const getAuthorName = (post: BlogPostData): string | undefined => {
 };
 
 const getShareTitle = (post: BlogPostData): string => {
-  const baseTitle = post.titleEn || post.title;
+  const baseTitle = post.title;
 
   if (!post.postType || post.postType === PostType.INTERVIEW) {
-    const artistName = post.artistEn || post.artist;
-    if (artistName) {
-      return `${artistName} - ${baseTitle}`;
+    const artist = post.artist;
+    if (artist) {
+      return `${artist} - ${baseTitle}`;
     }
   }
 
@@ -91,10 +91,10 @@ const getShareTitle = (post: BlogPostData): string => {
 };
 
 const getShareDescription = (post: BlogPostData): string | undefined => {
-  const author = post.authorEn || post.author || getAuthorName(post);
-  const intro = post.introEn || post.intro || "";
-  const content = post.contentEn || post.content || "";
-  const artistName = post.artistEn || post.artist || "";
+  const author = post.author || getAuthorName(post);
+  const intro = post.intro || "";
+  const content = post.content || "";
+  const artistName = post.artist || "";
 
   if (post.postType === PostType.ARTICLE) {
     const snippet = (content || intro).slice(0, 160).trim();
@@ -113,8 +113,7 @@ const getShareDescription = (post: BlogPostData): string | undefined => {
     return parts.join(" | ");
   }
 
-  const fallbackTitle =
-    post.artistEn || post.artist || post.titleEn || post.title;
+  const fallbackTitle = post.artist || post.title;
   return author ? `${fallbackTitle} - ${author}` : fallbackTitle;
 };
 
@@ -139,7 +138,7 @@ export async function generateMetadata({
     : undefined;
 
   return {
-    title: `${post.titleEn || post.title} - Soulart Blog`,
+    title: `${post.title} - Soulart Blog`,
     description: shareDescription,
     alternates: canonicalUrl
       ? {
