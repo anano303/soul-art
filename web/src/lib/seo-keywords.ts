@@ -493,8 +493,8 @@ const resolveCategoryKeywords = (category?: MaybeCategory): string[] => {
   );
 };
 
-const PRODUCT_FETCH_LIMIT = 200;
-const PRODUCT_MAX_PAGES = 5;
+const PRODUCT_FETCH_LIMIT = 50;
+const PRODUCT_MAX_PAGES = 1;
 
 const fetchProductKeywordsInternal = cache(async (): Promise<string[]> => {
   const apiBase = process.env.NEXT_PUBLIC_API_URL;
@@ -732,8 +732,8 @@ type ArtistKeywordSource = {
   followingCount?: number | null;
 };
 
-const ARTIST_FETCH_LIMIT = 200;
-const ARTIST_MAX_PAGES = 5;
+const ARTIST_FETCH_LIMIT = 50;
+const ARTIST_MAX_PAGES = 1;
 
 const fetchArtistKeywordsInternal = cache(async (): Promise<string[]> => {
   const apiBase = process.env.NEXT_PUBLIC_API_URL;
@@ -850,8 +850,8 @@ type ForumKeywordSource = {
   likes?: number | null;
 };
 
-const FORUM_FETCH_TAKE = 200;
-const FORUM_MAX_PAGES = 5;
+const FORUM_FETCH_TAKE = 50;
+const FORUM_MAX_PAGES = 1;
 
 const fetchForumKeywordsInternal = cache(async (): Promise<string[]> => {
   const apiBase = process.env.NEXT_PUBLIC_API_URL;
@@ -933,8 +933,8 @@ type CategoryKeywordSource = {
   isActive?: boolean | null;
 };
 
-const CATEGORY_FETCH_LIMIT = 200;
-const CATEGORY_MAX_PAGES = 5;
+const CATEGORY_FETCH_LIMIT = 100;
+const CATEGORY_MAX_PAGES = 1;
 
 const fetchCategoryKeywordsInternal = cache(async (): Promise<string[]> => {
   const apiBase = process.env.NEXT_PUBLIC_API_URL;
@@ -1007,8 +1007,8 @@ type SubCategoryKeywordSource = {
   description?: string | null;
 };
 
-const SUBCATEGORY_FETCH_LIMIT = 200;
-const SUBCATEGORY_MAX_PAGES = 5;
+const SUBCATEGORY_FETCH_LIMIT = 100;
+const SUBCATEGORY_MAX_PAGES = 1;
 
 const fetchSubCategoryKeywordsInternal = cache(async (): Promise<string[]> => {
   const apiBase = process.env.NEXT_PUBLIC_API_URL;
