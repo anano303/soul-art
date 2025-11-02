@@ -1,5 +1,12 @@
 import { Metadata } from "next";
-import { fetchWithAuth } from "@/lib/fetch-with-auth";
+import {
+  GLOBAL_KEYWORDS,
+  extractKeywordsFromText,
+  getProductKeywords,
+  getArtistKeywords,
+  mergeKeywordSets,
+  sanitizeKeyword,
+} from "@/lib/seo-keywords";
 import SingleForumPost from "./SingleForumPost";
 
 interface Forum {
@@ -46,6 +53,42 @@ function extractTextContent(content: string): string {
   return textOnly.replace(/\s+/g, " ").trim();
 }
 
+const buildForumKeywords = (forum: Forum): string[] => {
+  const keywordMap = new Map<string, string>();
+
+  const registerKeyword = (value?: string | null) => {
+    const sanitized = sanitizeKeyword(value);
+    if (!sanitized) {
+      return;
+    }
+
+    const key = sanitized.toLowerCase();
+    if (!keywordMap.has(key)) {
+      keywordMap.set(key, sanitized);
+    }
+  };
+
+  const registerText = (value?: string | null) => {
+    extractKeywordsFromText(value).forEach(registerKeyword);
+  };
+
+  registerText(forum.content);
+  registerKeyword(forum.user?.name);
+  registerText(forum.user?.name);
+
+  forum.tags?.forEach(registerKeyword);
+
+  forum.comments?.forEach((comment) => {
+    registerText(comment.content);
+    registerKeyword(comment.user?.name);
+  });
+
+  registerKeyword(forum.image);
+  registerKeyword(forum.createdAt);
+
+  return Array.from(keywordMap.values()).slice(0, 120);
+};
+
 export async function generateMetadata({
   params,
 }: {
@@ -77,103 +120,24 @@ export async function generateMetadata({
     } | SoulArt.ge Forum`;
     const description = truncateText(textContent, 155);
 
-    // Get all comment text for additional SEO content
-    const commentTexts = forum.comments
-      .map((comment) => extractTextContent(comment.content))
-      .join(" ");
-
-    const fullContent = `${textContent} ${commentTexts}`;
-    const keywords = [
-      "SoulArt.ge",
-      "ქართული ხელოვნება",
-      "ნახატები",
-      "ქართველი მხატვრების ნახატები",
-      "საჩუქრები",
-      "საჩუქრად ნახატები",
-      "საჩუქრად ხელნაკეთი ნივთები",
-      "ნახატიები ონლაინ",
-      "ხელნაკეთი ნივთები ონლაინ",
-      "ქართველი მხატვრები",
-      "ქართული ხელოვნება",
-      "ნახატი",
-      "ხელნაკეთი",
-      "ნახატების საიტი",
-      "ხელნაკეთი ნივთების საიტი",
-      "ნახატების მაღაზია",
-      "ხელნაკეთი ნივთების მაღაზია",
-      "ხელოვანები",
-      "ქართული ხელოვნება ონლაინ",
-      "ქართველი მხატვრები",
-      "ნახატების ვებგვერდი",
-      "ხელნაკეთი ნივთების ვებგვერდი",
-      "ყველა ქართველი მხატვრის ნახატები",
-      "ყველა ქართველი ხელოვანის ხელნაკეთი ნივთები",
-      "ქართველი მხატვრების ნამუშევრები",
-      "ქართველი ხელოვანების ნამუშევრები",
-      "Soulart ბლოგი",
-      "Soulart ინტერვიუები",
-      "Soulart ქართველი მხატვრები",
-      "ხელოვანები",
-      "Soulart.ge",
-      "ხელნაკეთი ნივთები",
-      "იყიდება ნახატები",
-      "იყიდება ხელნაკეთი ნივთები",
-      "ხელოვნების პლატფორმა",
-      "ხელოვანების მხარდაჭერა",
-      "Soulart ისტორია",
-      "ქართული პლატფორმა",
-      "ხელოვანებისთვის",
-      "ხელნაკეთი ნივთები",
-      "ფასდაკლებები",
-      "ხელოვნების ბაზარი",
-      "ნახატების კოლექცია",
-      "ხელოვნების გალერეა",
-      "ხელოვანების საზოგადოება",
-      "იყიდება ხელოვნების ნიმუშები",
-      "ხელოვნების ღონისძიებები",
-      "ხელოვნების გამოფენები",
-      "ჩვენი ისტორია",
-      "იყიდება ნახატები ონლაინ",
-      "იყიდება ხელნაკეთი ნივთები ონლაინ",
-      "ხელოვნების პლატფორმა საქართველოში",
-      "ხელოვანების მხარდაჭერა ონლაინ",
-      "Soulart ისტორია",
-      "დამფუძნებლები",
-      "მისია",
-      "ხედვა",
-      "ლევან ბეროშვილი",
-      "ანი ბეროშვილი",
-      "about us",
-      "our story",
-      "mission",
-      "vision",
-      "handmade items",
-      "Georgian art",
-      "Georgian artists",
-      "paintings for sale",
-      "handmade for sale",
-      "art marketplace",
-      "art community",
-      "buy art online",
-      "buy handmade online",
-      "art platform",
-      "support artists",
-      "Soulart history",
-      "paintings for sale",
-      "handmade for sale",
-      "Georgian platform",
-      "handmade",
-      "Georgian art",
-      "ფორუმი",
-      "forum",
-      ...forum.tags,
-      forum.user.name,
-    ].join(", ");
+    const forumKeywords = buildForumKeywords(forum);
+    const [productKeywords, artistKeywords] = await Promise.all([
+      getProductKeywords(),
+      getArtistKeywords(),
+    ]);
+    const keywords = mergeKeywordSets(
+      forumKeywords,
+      forum.tags,
+      [forum.user.name],
+      productKeywords,
+      artistKeywords,
+      GLOBAL_KEYWORDS
+    ).slice(0, 180);
 
     return {
       title,
       description,
-      keywords,
+      keywords: keywords.length ? keywords : undefined,
       authors: [{ name: forum.user.name }],
       creator: forum.user.name,
       publisher: "SoulArt.ge",
