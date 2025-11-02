@@ -228,6 +228,15 @@ const registerYearFromDate = (
   }
 };
 
+const shouldSkipKeywordAggregation = (): boolean => {
+  const phase = process.env.NEXT_PHASE;
+  if (phase === "phase-production-build" || phase === "phase-export") {
+    return true;
+  }
+
+  return process.env.SKIP_SEO_KEYWORD_AGGREGATION === "true";
+};
+
 export const sanitizeKeyword = normalizeKeyword;
 
 export const extractKeywordsFromText = (text?: string | null): string[] => {
@@ -497,6 +506,10 @@ const PRODUCT_FETCH_LIMIT = 50;
 const PRODUCT_MAX_PAGES = 1;
 
 const fetchProductKeywordsInternal = cache(async (): Promise<string[]> => {
+  if (shouldSkipKeywordAggregation()) {
+    return [];
+  }
+
   const apiBase = process.env.NEXT_PUBLIC_API_URL;
   if (!apiBase) {
     return [];
@@ -736,6 +749,10 @@ const ARTIST_FETCH_LIMIT = 50;
 const ARTIST_MAX_PAGES = 1;
 
 const fetchArtistKeywordsInternal = cache(async (): Promise<string[]> => {
+  if (shouldSkipKeywordAggregation()) {
+    return [];
+  }
+
   const apiBase = process.env.NEXT_PUBLIC_API_URL;
   if (!apiBase) {
     return [];
@@ -854,6 +871,10 @@ const FORUM_FETCH_TAKE = 50;
 const FORUM_MAX_PAGES = 1;
 
 const fetchForumKeywordsInternal = cache(async (): Promise<string[]> => {
+  if (shouldSkipKeywordAggregation()) {
+    return [];
+  }
+
   const apiBase = process.env.NEXT_PUBLIC_API_URL;
   if (!apiBase) {
     return [];
@@ -937,6 +958,10 @@ const CATEGORY_FETCH_LIMIT = 100;
 const CATEGORY_MAX_PAGES = 1;
 
 const fetchCategoryKeywordsInternal = cache(async (): Promise<string[]> => {
+  if (shouldSkipKeywordAggregation()) {
+    return [];
+  }
+
   const apiBase = process.env.NEXT_PUBLIC_API_URL;
   if (!apiBase) {
     return [];
@@ -1011,6 +1036,10 @@ const SUBCATEGORY_FETCH_LIMIT = 100;
 const SUBCATEGORY_MAX_PAGES = 1;
 
 const fetchSubCategoryKeywordsInternal = cache(async (): Promise<string[]> => {
+  if (shouldSkipKeywordAggregation()) {
+    return [];
+  }
+
   const apiBase = process.env.NEXT_PUBLIC_API_URL;
   if (!apiBase) {
     return [];
@@ -1085,6 +1114,10 @@ type BannerKeywordSource = {
 };
 
 const fetchBannerKeywordsInternal = cache(async (): Promise<string[]> => {
+  if (shouldSkipKeywordAggregation()) {
+    return [];
+  }
+
   const apiBase = process.env.NEXT_PUBLIC_API_URL;
   if (!apiBase) {
     return [];
