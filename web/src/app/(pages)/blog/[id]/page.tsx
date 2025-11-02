@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { cache } from "react";
+import { GLOBAL_KEYWORDS } from "@/lib/seo-keywords";
 import { BlogPostClient } from "./BlogPostClient";
 import { BlogPostData, PostType } from "./types";
 
@@ -81,6 +82,143 @@ const getAuthorName = (post: BlogPostData): string | undefined => {
   );
 };
 
+const NON_WORD_REGEX = /[^\p{L}\p{N}\s-]+/gu;
+const WORD_SPLIT_REGEX = /[\s,.;:!?()\[\]{}"“”'«»<>/|]+/gu;
+
+const sanitizeKeyword = (keyword: string | null | undefined): string | null => {
+  if (!keyword) {
+    return null;
+  }
+
+  const cleaned = keyword
+    .replace(NON_WORD_REGEX, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  if (!cleaned) {
+    return null;
+  }
+
+  if (cleaned.length === 1 && !/\p{N}/u.test(cleaned)) {
+    return null;
+  }
+
+  return cleaned;
+};
+
+const extractKeywordsFromText = (text?: string | null): string[] => {
+  if (!text) {
+    return [];
+  }
+
+  const keywords: string[] = [];
+  text.split(WORD_SPLIT_REGEX).forEach((segment) => {
+    const sanitized = sanitizeKeyword(segment);
+    if (sanitized && sanitized.length > 1) {
+      keywords.push(sanitized);
+    }
+  });
+
+  return keywords;
+};
+
+const getBlogKeywords = (post: BlogPostData): string[] => {
+  const keywordMap = new Map<string, string>();
+  const registerKeyword = (value?: string | null) => {
+    const sanitized = sanitizeKeyword(value);
+    if (!sanitized) {
+      return;
+    }
+
+    const key = sanitized.toLowerCase();
+    if (!keywordMap.has(key)) {
+      keywordMap.set(key, sanitized);
+    }
+  };
+
+  const registerText = (value?: string | null) => {
+    extractKeywordsFromText(value).forEach(registerKeyword);
+  };
+
+  registerKeyword(post.title);
+  registerKeyword(post.titleEn);
+  registerKeyword(post.subtitle);
+  registerKeyword(post.subtitleEn);
+  registerKeyword(post.artist);
+  registerKeyword(post.artistEn);
+  registerKeyword(post.artistUsername);
+  registerKeyword(post.author);
+  registerKeyword(post.authorEn);
+  registerKeyword(post.postType);
+
+  registerText(post.intro);
+  registerText(post.introEn);
+  registerText(post.content);
+  registerText(post.contentEn);
+
+  if (post.qa) {
+    post.qa.forEach((item) => {
+      registerKeyword(item.question);
+      registerKeyword(item.answer);
+      registerText(item.question);
+      registerText(item.answer);
+    });
+  }
+
+  if (post.qaEn) {
+    post.qaEn.forEach((item) => {
+      registerKeyword(item.question);
+      registerKeyword(item.answer);
+      registerText(item.question);
+      registerText(item.answer);
+    });
+  }
+
+  if (post.createdBy && typeof post.createdBy !== "string") {
+    const { firstName, lastName, username, name } = post.createdBy;
+    registerKeyword(firstName);
+    registerKeyword(lastName);
+    registerKeyword(username);
+    registerKeyword(name);
+    const fullName = [firstName, lastName].filter(Boolean).join(" ");
+    registerKeyword(fullName);
+  }
+
+  if (post.publishDate) {
+    const publishYear = new Date(post.publishDate).getFullYear().toString();
+    registerKeyword(publishYear);
+  }
+
+  if (post.createdAt) {
+    const createdYear = new Date(post.createdAt).getFullYear().toString();
+    registerKeyword(createdYear);
+  }
+
+  return Array.from(keywordMap.values()).slice(0, 120);
+};
+
+const combineKeywords = (base: string[], dynamic: string[]): string[] => {
+  const keywordMap = new Map<string, string>();
+  const register = (list: string[]) => {
+    list.forEach((keyword) => {
+      const sanitized = sanitizeKeyword(keyword);
+      if (!sanitized) {
+        return;
+      }
+
+      const key = sanitized.toLowerCase();
+      if (!keywordMap.has(key)) {
+        keywordMap.set(key, sanitized);
+      }
+    });
+  };
+
+  register(dynamic);
+  register(base);
+
+  return Array.from(keywordMap.values()).slice(0, 160);
+};
+
 const getShareTitle = (post: BlogPostData): string => {
   const baseTitle = post.title;
 
@@ -140,10 +278,13 @@ export async function generateMetadata({
   const canonicalUrl = WEB_BASE_URL
     ? `${WEB_BASE_URL}/blog/${post._id}`
     : undefined;
+  const dynamicKeywords = getBlogKeywords(post);
+  const keywords = combineKeywords(GLOBAL_KEYWORDS, dynamicKeywords);
 
   return {
     title: `${post.title} - Soulart Blog`,
     description: shareDescription,
+    keywords: keywords.length ? keywords : undefined,
     alternates: canonicalUrl
       ? {
           canonical: canonicalUrl,
