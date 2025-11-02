@@ -128,6 +128,17 @@ export default function BlogPostPage() {
       }
     })();
     const url = typeof window !== "undefined" ? window.location.href : "";
+    
+    // Convert cover image to absolute URL for social sharing
+    const getAbsoluteImageUrl = (imageUrl: string) => {
+      if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
+        return imageUrl;
+      }
+      // If it's a relative URL, prepend the API URL
+      return `${process.env.NEXT_PUBLIC_API_URL}${imageUrl.startsWith('/') ? '' : '/'}${imageUrl}`;
+    };
+
+    const absoluteImageUrl = getAbsoluteImageUrl(post.coverImage);
 
     // Update document title
     document.title = `${title} - Soulart Blog`;
@@ -160,7 +171,7 @@ export default function BlogPostPage() {
     // Open Graph tags
     updateMetaTag("og:title", title);
     updateMetaTag("og:description", description);
-    updateMetaTag("og:image", post.coverImage);
+    updateMetaTag("og:image", absoluteImageUrl);
     updateMetaTag("og:url", url);
     updateMetaTag("og:type", "article");
     updateMetaTag("og:site_name", "Soulart");
@@ -169,7 +180,7 @@ export default function BlogPostPage() {
     updateMetaName("twitter:card", "summary_large_image");
     updateMetaName("twitter:title", title);
     updateMetaName("twitter:description", description);
-    updateMetaName("twitter:image", post.coverImage);
+    updateMetaName("twitter:image", absoluteImageUrl);
 
     // Additional meta tags
     updateMetaName("description", description);
@@ -270,7 +281,6 @@ export default function BlogPostPage() {
             />
           </div>
           <div className="blog-post-header-content">
-            <h1 className="blog-post-title">{title}</h1>
             <div className="blog-post-meta">
               {isInterview && artistName && (
                 <span className="blog-post-artist">
@@ -290,7 +300,10 @@ export default function BlogPostPage() {
         </div>
 
         <div className="blog-post-content">
-          {/* Social Share - right after cover image */}
+          {/* Title after image */}
+          <h1 className="blog-post-title-content">{title}</h1>
+
+          {/* Social Share - right after title */}
           <SocialShare
             url={
               typeof window !== "undefined"
