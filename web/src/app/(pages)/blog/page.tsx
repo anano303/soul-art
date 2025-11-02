@@ -60,8 +60,8 @@ export default function BlogPage() {
         <h1 className="blog-title">{language === "en" ? "Blog" : "ბლოგი"}</h1>
         <p className="blog-subtitle">
           {language === "en"
-            ? "Interviews with Georgian Artists"
-            : "ინტერვიუები ქართველ ხელოვანებთან"}
+            ? "About art and artists"
+            : "ხელოვნების და ხელოვანების შესახებ"}
         </p>
       </div>
 

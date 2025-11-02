@@ -231,11 +231,23 @@ export function BlogPostClient({ postId, initialPost }: BlogPostClientProps) {
         <div className="blog-post-content">
           <h1 className="blog-post-title-content">{title}</h1>
 
-          <SocialShare
-            url={shareUrl}
-            title={title}
-            description={shareDescription}
-          />
+          <div className="blog-post-share-row">
+            <SocialShare
+              url={shareUrl}
+              title={title}
+              description={shareDescription}
+            />
+            {post.views !== undefined && (
+              <div className="blog-post-views">
+                <span className="views-icon" aria-hidden="true">
+                  👁️
+                </span>
+                <span className="views-count">
+                  {post.views} {language === "en" ? "views" : "ნახვა"}
+                </span>
+              </div>
+            )}
+          </div>
 
           {isArticle && subtitle && (
             <h2 className="blog-post-subtitle-content">{subtitle}</h2>
@@ -359,15 +371,6 @@ export function BlogPostClient({ postId, initialPost }: BlogPostClientProps) {
       </article>
 
       <div className="blog-post-footer">
-        {post.views !== undefined && (
-          <div className="blog-post-views">
-            <span className="views-icon">👁️</span>
-            <span className="views-count">
-              {post.views} {language === "en" ? "views" : "ნახვა"}
-            </span>
-          </div>
-        )}
-
         <Link href="/blog" className="blog-post-back-btn">
           {language === "en"
             ? isArticle

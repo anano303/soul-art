@@ -5,9 +5,9 @@ import { BlogPostClient } from "./BlogPostClient";
 import { BlogPostData, PostType } from "./types";
 
 interface BlogPageParams {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -121,7 +121,8 @@ const getShareDescription = (post: BlogPostData): string | undefined => {
 export async function generateMetadata({
   params,
 }: BlogPageParams): Promise<Metadata> {
-  const post = await getPost(params.id);
+  const { id } = await params;
+  const post = await getPost(id);
 
   if (!post) {
     return {
@@ -173,11 +174,12 @@ export async function generateMetadata({
 }
 
 export default async function BlogPostPage({ params }: BlogPageParams) {
-  const post = await getPost(params.id);
+  const { id } = await params;
+  const post = await getPost(id);
 
   if (!post) {
     notFound();
   }
 
-  return <BlogPostClient postId={params.id} initialPost={post} />;
+  return <BlogPostClient postId={id} initialPost={post} />;
 }
