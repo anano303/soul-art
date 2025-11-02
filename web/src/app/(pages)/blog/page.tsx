@@ -4,17 +4,28 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useLanguage } from "@/hooks/LanguageContext";
+import { FileText, MessageCircle } from "lucide-react";
 import "./blog.css";
+
+enum PostType {
+  INTERVIEW = "interview",
+  ARTICLE = "article",
+}
 
 interface BlogPost {
   _id: string;
+  postType?: PostType;
   title: string;
   titleEn: string;
-  artist: string;
-  artistEn: string;
+  artist?: string;
+  artistEn?: string;
   coverImage: string;
-  intro: string;
-  introEn: string;
+  intro?: string;
+  introEn?: string;
+  subtitle?: string;
+  subtitleEn?: string;
+  content?: string;
+  contentEn?: string;
   publishDate: string;
 }
 
@@ -49,8 +60,8 @@ export default function BlogPage() {
         <h1 className="blog-title">{language === "en" ? "Blog" : "ბლოგი"}</h1>
         <p className="blog-subtitle">
           {language === "en"
-            ? "Interviews with Georgian Artists"
-            : "ინტერვიუები ქართველ ხელოვანებთან"}
+            ? "About art and artists"
+            : "ხელოვნების და ხელოვანების შესახებ"}
         </p>
       </div>
 
@@ -82,23 +93,48 @@ export default function BlogPage() {
                     fill
                     style={{ objectFit: "cover" }}
                   />
+                  <div className="blog-card-type-badge">
+                    {!post.postType || post.postType === PostType.INTERVIEW ? (
+                      <>
+                        <MessageCircle size={16} />
+                        <span>
+                          {language === "en" ? "Interview" : "ინტერვიუ"}
+                        </span>
+                      </>
+                    ) : (
+                      <>
+                        <FileText size={16} />
+                        <span>{language === "en" ? "Article" : "სტატია"}</span>
+                      </>
+                    )}
+                  </div>
                 </div>
                 <div className="blog-card-content">
                   <div className="blog-card-meta">
                     <span className="blog-card-date">
                       {new Date(post.publishDate).toLocaleDateString("ka-GE")}
                     </span>
-                    <span className="blog-card-artist">
-                      {language === "en" ? post.artistEn : post.artist}
-                    </span>
+                    {post.artist && (
+                      <span className="blog-card-artist">
+                        {language === "en" ? post.artistEn : post.artist}
+                      </span>
+                    )}
                   </div>
                   <h2 className="blog-card-title">
                     {language === "en" ? post.titleEn : post.title}
                   </h2>
                   <p className="blog-card-excerpt">
                     {language === "en"
-                      ? post.introEn.slice(0, 150) + "..."
-                      : post.intro.slice(0, 150) + "..."}
+                      ? post.introEn
+                        ? post.introEn.slice(0, 150) + "..."
+                        : post.contentEn
+                        ? post.contentEn.slice(0, 150) + "..."
+                        : ""
+                      : post.intro
+                      ? post.intro.slice(0, 150) + "..."
+                      : post.content
+                      ? post.content.slice(0, 150) + "..."
+                      : ""}
                   </p>
                   <span className="blog-card-link">
                     {language === "en" ? "Read more →" : "წაიკითხე მეტი →"}

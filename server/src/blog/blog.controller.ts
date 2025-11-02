@@ -40,6 +40,12 @@ export class BlogController {
     return this.blogService.findOne(id);
   }
 
+  // Public: Increment view count
+  @Post(':id/view')
+  async incrementView(@Param('id') id: string) {
+    return this.blogService.incrementView(id);
+  }
+
   // Admin/Blogger: Create blog post
   @Post()
   @UseGuards(JwtAuthGuard, RolesGuard)

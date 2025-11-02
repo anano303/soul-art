@@ -117,4 +117,17 @@ export class BlogService {
       )
       .exec();
   }
+
+  async incrementView(id: string): Promise<BlogPost> {
+    const blogPost = await this.blogPostModel
+      .findByIdAndUpdate(id, { $inc: { views: 1 } }, { new: true })
+      .populate('createdBy', 'name username email')
+      .exec();
+
+    if (!blogPost) {
+      throw new NotFoundException(`Blog post with ID ${id} not found`);
+    }
+
+    return blogPost;
+  }
 }

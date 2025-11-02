@@ -6,8 +6,10 @@ import {
   IsBoolean,
   IsDateString,
   ValidateNested,
+  IsEnum,
 } from 'class-validator';
 import { Type } from 'class-transformer';
+import { PostType } from '../schemas/blog-post.schema';
 
 class QAItem {
   @IsString()
@@ -20,21 +22,26 @@ class QAItem {
 }
 
 export class CreateBlogPostDto {
+  @IsEnum(PostType)
+  @IsOptional()
+  postType?: PostType;
+
   @IsString()
   @IsNotEmpty()
   title: string;
 
   @IsString()
-  @IsNotEmpty()
-  titleEn: string;
+  @IsOptional()
+  titleEn?: string;
+
+  // For interviews
+  @IsString()
+  @IsOptional()
+  artist?: string;
 
   @IsString()
-  @IsNotEmpty()
-  artist: string;
-
-  @IsString()
-  @IsNotEmpty()
-  artistEn: string;
+  @IsOptional()
+  artistEn?: string;
 
   @IsString()
   @IsOptional()
@@ -44,23 +51,51 @@ export class CreateBlogPostDto {
   @IsNotEmpty()
   coverImage: string;
 
+  // For interviews
   @IsString()
-  @IsNotEmpty()
-  intro: string;
+  @IsOptional()
+  intro?: string;
 
   @IsString()
-  @IsNotEmpty()
-  introEn: string;
+  @IsOptional()
+  introEn?: string;
 
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => QAItem)
-  qa: QAItem[];
+  @IsOptional()
+  qa?: QAItem[];
 
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => QAItem)
-  qaEn: QAItem[];
+  @IsOptional()
+  qaEn?: QAItem[];
+
+  // For articles
+  @IsString()
+  @IsOptional()
+  subtitle?: string;
+
+  @IsString()
+  @IsOptional()
+  subtitleEn?: string;
+
+  @IsString()
+  @IsOptional()
+  content?: string;
+
+  @IsString()
+  @IsOptional()
+  contentEn?: string;
+
+  @IsString()
+  @IsOptional()
+  author?: string;
+
+  @IsString()
+  @IsOptional()
+  authorEn?: string;
 
   @IsArray()
   @IsString({ each: true })

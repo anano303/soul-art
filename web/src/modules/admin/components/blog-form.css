@@ -64,6 +64,37 @@
   border-bottom: 2px solid #764ba2;
 }
 
+.post-type-selector {
+  display: flex;
+  gap: 1rem;
+}
+
+.post-type-btn {
+  flex: 1;
+  padding: 1rem 2rem;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  background: white;
+  color: #666;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.post-type-btn:hover {
+  border-color: #667eea;
+  color: #667eea;
+  transform: translateY(-2px);
+}
+
+.post-type-btn.active {
+  border-color: #667eea;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
 .form-group {
   margin-bottom: 1.5rem;
 }

@@ -32,14 +32,122 @@ import { GA4UserTracker } from "@/components/ga4-user-tracker";
 import { PageViewTracker } from "@/components/page-view-tracker";
 import "@/lib/cloudflare-cleanup"; // Auto-cleanup Cloudflare cookies in development
 
+const BASE_KEYWORDS = [
+  "ხელნაკეთი",
+  "ნახატები",
+  "ხელოვნება",
+  "ნამუშევრები",
+  "მაღაზია",
+  "პირველი ონლაინ პლატფორმა",
+  "Georgia",
+  "handmade items",
+  "პირველი ნახატების ონლაინ პლატფორმა",
+  "პირველი ხელნაკეთი ნივთების ონლაინ პლატფორმა",
+  "first online platform for paintings",
+  "first online platform for handmade items",
+  "Soulart",
+  "სოულარტ",
+  "სოულარტი",
+  "სოულართი",
+  "სოულართ",
+  "soul art",
+  "soulart",
+  "soul",
+  "soul-art",
+  "საქართველო",
+  "handmade",
+  "paintings",
+  "artworks",
+  "art",
+  "store",
+  "crafts",
+  "gallery",
+];
+
+const ADDITIONAL_KEYWORDS = [
+  "ნახატები",
+  "ქართველი მხატვრების ნახატები",
+  "საჩუქრები",
+  "საჩუქრად ნახატები",
+  "საჩუქრად ხელნაკეთი ნივთები",
+  "ნახატიები ონლაინ",
+  "ხელნაკეთი ნივთები ონლაინ",
+  "ქართველი მხატვრები",
+  "ქართული ხელოვნება",
+  "ნახატი",
+  "ხელნაკეთი",
+  "ნახატების საიტი",
+  "ხელნაკეთი ნივთების საიტი",
+  "ნახატების მაღაზია",
+  "ხელნაკეთი ნივთების მაღაზია",
+  "ხელოვანები",
+  "ქართული ხელოვნება ონლაინ",
+  "ნახატების ვებგვერდი",
+  "ხელნაკეთი ნივთების ვებგვერდი",
+  "ყველა ქართველი მხატვრის ნახატები",
+  "ყველა ქართველი ხელოვანის ხელნაკეთი ნივთები",
+  "ქართველი მხატვრების ნამუშევრები",
+  "ქართველი ხელოვანების ნამუშევრები",
+  "Soulart ბლოგი",
+  "Soulart ინტერვიუები",
+  "Soulart ქართველი მხატვრები",
+  "Soulart.ge",
+  "ხელნაკეთი ნივთები",
+  "იყიდება ნახატები",
+  "იყიდება ხელნაკეთი ნივთები",
+  "ხელოვნების პლატფორმა",
+  "ხელოვანების მხარდაჭერა",
+  "Soulart ისტორია",
+  "ხელოვანებისთვის",
+  "ფასდაკლებები",
+  "ხელოვნების ბაზარი",
+  "ნახატების კოლექცია",
+  "ხელოვნების გალერეა",
+  "ხელოვანების საზოგადოება",
+  "იყიდება ხელოვნების ნიმუშები",
+  "ხელოვნების ღონისძიებები",
+  "ხელოვნების გამოფენები",
+  "ჩვენი ისტორია",
+  "იყიდება ნახატები ონლაინ",
+  "იყიდება ხელნაკეთი ნივთები ონლაინ",
+  "ხელოვნების პლატფორმა საქართველოში",
+  "ხელოვანების მხარდაჭერა ონლაინ",
+  "დამფუძნებლები",
+  "მისია",
+  "ხედვა",
+  "ლევან ბეროშვილი",
+  "ანი ბეროშვილი",
+  "about us",
+  "our story",
+  "mission",
+  "vision",
+  "Georgian art",
+  "Georgian artists",
+  "paintings for sale",
+  "handmade for sale",
+  "art marketplace",
+  "art community",
+  "buy art online",
+  "buy handmade online",
+  "art platform",
+  "support artists",
+  "Soulart history",
+  "Georgian platform",
+  "handmade",
+];
+
+const KEYWORDS = Array.from(
+  new Set([...BASE_KEYWORDS, ...ADDITIONAL_KEYWORDS])
+);
+
 export const viewport = {
-  width: 'device-width',
+  width: "device-width",
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
   // Also prevent zoom on input focus (iOS)
-  viewportFit: 'cover'
-}
+  viewportFit: "cover",
+};
 
 export const metadata: Metadata = {
   metadataBase: new URL(
@@ -49,38 +157,7 @@ export const metadata: Metadata = {
     "Soulart - ნახატების და ხელნაკეთი ნივთების პირველი ონლაინ პლატფორმა   საქართველოში",
   description:
     "უნიკალური ხელნაკეთი ნივთები, ნახატები, ხელოვნების ნამუშევრები. ხარისხი, სანდოობა, ფასი. Unique handmade items, paintings, artworks in Georgia",
-  keywords: [
-    "ხელნაკეთი",
-    "ნახატები",
-    "ხელოვნება",
-    "ნამუშევრები",
-    "მაღაზია",
-    "პირველი ონლაინ პლატფორმა",
-    "Georgia",
-    "handmade items",
-    "პირველი ნახატების ონლაინ პლატფორმა",
-    "პირველი ხელნაკეთი ნივთების ონლაინ პლატფორმა",
-    "first online platform for paintings",
-    "first online platform for handmade items",
-    "Soulart",
-    "სოულარტ",
-    "სოულარტი",
-    "სოულართი",
-    "სოულართ",
-    "soul art",
-    "soulart",
-    "soul",
-    "soul-art",
-    "საქართველო",
-    "handmade",
-    "paintings",
-    "artworks",
-    "art",
-    "store",
-    "Georgia",
-    "crafts",
-    "gallery",
-  ],
+  keywords: KEYWORDS,
   authors: [{ name: "Soulart" }],
   creator: "Soulart",
   publisher: "Soulart",
@@ -317,10 +394,10 @@ export default function RootLayout({
                 <LanguageProvider>
                   {/* GA4 User ID Tracking */}
                   <GA4UserTracker />
-                  
+
                   {/* GA4 Page View and User Path Tracking */}
                   <PageViewTracker />
-                  
+
                   <div
                     style={{
                       display: "flex",
