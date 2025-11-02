@@ -597,7 +597,7 @@
   .blog-post-artist,
   .blog-post-author,
   .blog-post-date {
-    font-size: 0.875rem;
+    font-size: 0.75rem;
     padding: 0.4rem 0.75rem;
   }
 
@@ -641,6 +641,20 @@
 
   .gallery-item {
     height: 250px;
+  }
+}
+
+@media (max-width: 408px) and (min-width: 381px) {
+  .blog-post-meta {
+    flex-direction: row;
+    flex-wrap: nowrap;
+    gap: 0.5rem;
+  }
+
+  .blog-post-artist,
+  .blog-post-author,
+  .blog-post-date {
+    padding: 0.35rem 0.65rem;
   }
 }
 

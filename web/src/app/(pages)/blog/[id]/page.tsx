@@ -24,12 +24,16 @@ const getAbsoluteImageUrl = (
     return imageUrl;
   }
 
-  if (!API_BASE_URL) {
-    return undefined;
+  const prefix = imageUrl.startsWith("/") ? "" : "/";
+  if (WEB_BASE_URL) {
+    return `${WEB_BASE_URL}${prefix}${imageUrl}`;
   }
 
-  const prefix = imageUrl.startsWith("/") ? "" : "/";
-  return `${API_BASE_URL}${prefix}${imageUrl}`;
+  if (API_BASE_URL) {
+    return `${API_BASE_URL}${prefix}${imageUrl}`;
+  }
+
+  return undefined;
 };
 
 const getPost = cache(async (postId: string): Promise<BlogPostData | null> => {
