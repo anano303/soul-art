@@ -1,7 +1,14 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { cache } from "react";
-import { GLOBAL_KEYWORDS } from "@/lib/seo-keywords";
+import {
+  GLOBAL_KEYWORDS,
+  extractKeywordsFromText,
+  mergeKeywordSets,
+  sanitizeKeyword,
+  getProductKeywords,
+  getArtistKeywords,
+} from "@/lib/seo-keywords";
 import { BlogPostClient } from "./BlogPostClient";
 import { BlogPostData, PostType } from "./types";
 
@@ -82,46 +89,6 @@ const getAuthorName = (post: BlogPostData): string | undefined => {
   );
 };
 
-const NON_WORD_REGEX = /[^\p{L}\p{N}\s-]+/gu;
-const WORD_SPLIT_REGEX = /[\s,.;:!?()\[\]{}"“”'«»<>/|]+/gu;
-
-const sanitizeKeyword = (keyword: string | null | undefined): string | null => {
-  if (!keyword) {
-    return null;
-  }
-
-  const cleaned = keyword
-    .replace(NON_WORD_REGEX, " ")
-    .replace(/\s+/g, " ")
-    .trim();
-
-  if (!cleaned) {
-    return null;
-  }
-
-  if (cleaned.length === 1 && !/\p{N}/u.test(cleaned)) {
-    return null;
-  }
-
-  return cleaned;
-};
-
-const extractKeywordsFromText = (text?: string | null): string[] => {
-  if (!text) {
-    return [];
-  }
-
-  const keywords: string[] = [];
-  text.split(WORD_SPLIT_REGEX).forEach((segment) => {
-    const sanitized = sanitizeKeyword(segment);
-    if (sanitized && sanitized.length > 1) {
-      keywords.push(sanitized);
-    }
-  });
-
-  return keywords;
-};
-
 const getBlogKeywords = (post: BlogPostData): string[] => {
   const keywordMap = new Map<string, string>();
   const registerKeyword = (value?: string | null) => {
@@ -197,28 +164,6 @@ const getBlogKeywords = (post: BlogPostData): string[] => {
   return Array.from(keywordMap.values()).slice(0, 120);
 };
 
-const combineKeywords = (base: string[], dynamic: string[]): string[] => {
-  const keywordMap = new Map<string, string>();
-  const register = (list: string[]) => {
-    list.forEach((keyword) => {
-      const sanitized = sanitizeKeyword(keyword);
-      if (!sanitized) {
-        return;
-      }
-
-      const key = sanitized.toLowerCase();
-      if (!keywordMap.has(key)) {
-        keywordMap.set(key, sanitized);
-      }
-    });
-  };
-
-  register(dynamic);
-  register(base);
-
-  return Array.from(keywordMap.values()).slice(0, 160);
-};
-
 const getShareTitle = (post: BlogPostData): string => {
   const baseTitle = post.title;
 
@@ -279,7 +224,16 @@ export async function generateMetadata({
     ? `${WEB_BASE_URL}/blog/${post._id}`
     : undefined;
   const dynamicKeywords = getBlogKeywords(post);
-  const keywords = combineKeywords(GLOBAL_KEYWORDS, dynamicKeywords);
+  const [productKeywords, artistKeywords] = await Promise.all([
+    getProductKeywords(),
+    getArtistKeywords(),
+  ]);
+  const keywords = mergeKeywordSets(
+    dynamicKeywords,
+    productKeywords,
+    artistKeywords,
+    GLOBAL_KEYWORDS
+  ).slice(0, 180);
 
   return {
     title: `${post.title} - Soulart Blog`,

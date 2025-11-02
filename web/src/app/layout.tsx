@@ -9,7 +9,16 @@ import Footer from "@/components/footer/footer";
 import { LanguageProvider } from "@/hooks/LanguageContext";
 import Header from "@/components/header/header";
 import MessengerChatWrapper from "@/components/MessengerChat/MessengerChatWrapper";
-import { GLOBAL_KEYWORDS } from "@/lib/seo-keywords";
+import {
+  GLOBAL_KEYWORDS,
+  getArtistKeywords,
+  getBannerKeywords,
+  getCategoryKeywords,
+  getSubCategoryKeywords,
+  getForumKeywords,
+  getProductKeywords,
+  mergeKeywordSets,
+} from "@/lib/seo-keywords";
 
 const PRIMARY_COLOR = "#012645";
 import { CartProvider } from "@/modules/cart/context/cart-context";
@@ -42,90 +51,117 @@ export const viewport = {
   viewportFit: "cover",
 };
 
-export const metadata: Metadata = {
-  metadataBase: new URL(
-    process.env.NEXT_PUBLIC_CLIENT_URL || "https://soulart.ge"
-  ),
-  title:
-    "Soulart - ნახატების და ხელნაკეთი ნივთების პირველი ონლაინ პლატფორმა   საქართველოში",
-  description:
-    "უნიკალური ხელნაკეთი ნივთები, ნახატები, ხელოვნების ნამუშევრები. ხარისხი, სანდოობა, ფასი. Unique handmade items, paintings, artworks in Georgia",
-  keywords: GLOBAL_KEYWORDS,
-  authors: [{ name: "Soulart" }],
-  creator: "Soulart",
-  publisher: "Soulart",
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
+export async function generateMetadata(): Promise<Metadata> {
+  const [
+    productKeywords,
+    artistKeywords,
+    forumKeywords,
+    categoryKeywords,
+    subCategoryKeywords,
+    bannerKeywords,
+  ] = await Promise.all([
+    getProductKeywords(),
+    getArtistKeywords(),
+    getForumKeywords(),
+    getCategoryKeywords(),
+    getSubCategoryKeywords(),
+    getBannerKeywords(),
+  ]);
+  const keywords = mergeKeywordSets(
+    productKeywords,
+    artistKeywords,
+    forumKeywords,
+    categoryKeywords,
+    subCategoryKeywords,
+    bannerKeywords,
+    GLOBAL_KEYWORDS
+  ).slice(0, 200);
+
+  return {
+    metadataBase: new URL(
+      process.env.NEXT_PUBLIC_CLIENT_URL || "https://soulart.ge"
+    ),
+    title:
+      "Soulart - ნახატების და ხელნაკეთი ნივთების პირველი ონლაინ პლატფორმა   საქართველოში",
+    description:
+      "უნიკალური ხელნაკეთი ნივთები, ნახატები, ხელოვნების ნამუშევრები. ხარისხი, სანდოობა, ფასი. Unique handmade items, paintings, artworks in Georgia",
+    keywords,
+    authors: [{ name: "Soulart" }],
+    creator: "Soulart",
+    publisher: "Soulart",
+    robots: {
       index: true,
       follow: true,
-      "max-image-preview": "large",
-      "max-snippet": -1,
-      "max-video-preview": -1,
+      googleBot: {
+        index: true,
+        follow: true,
+        "max-image-preview": "large",
+        "max-snippet": -1,
+        "max-video-preview": -1,
+      },
     },
-  },
-  verification: {
-    google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION || undefined,
-  },
-  other: {
-    "google-site-verification":
-      process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION || "", // backup
-    "geo.region": "GE",
-    "geo.placename": "Georgia",
-    "geo.position": "41.7151;44.8271", // თბილისის კოორდინატები
-    ICBM: "41.7151, 44.8271",
-  },
-  icons: {
-    icon: "/soulart_icon_blue_fullsizes.ico",
-    shortcut: "/soulart_icon_blue_fullsizes.ico",
-    apple: "/soulart_icon_blue_fullsizes.ico",
-    other: [
-      {
-        rel: "icon",
-        url: "/soulart_icon_blue_fullsizes.ico",
-        type: "image/x-icon",
-      },
-      {
-        rel: "shortcut icon",
-        url: "/soulart_icon_blue_fullsizes.ico",
-        type: "image/x-icon",
-      },
-      { rel: "apple-touch-icon", url: "/soulart_icon_blue_fullsizes.ico" },
-      {
-        rel: "mask-icon",
-        url: "/soulart_icon_blue_fullsizes.ico",
-        color: PRIMARY_COLOR,
-      },
-    ],
-  },
-  openGraph: {
-    type: "website",
-    locale: "ka_GE",
-    url: "https://Soulart.ge/",
-    siteName: "Soulart",
-    title:
-      "Soulart - ნახატების და ხელნაკეთი ნივთების   პირველი ონლაინ პლატფორმა საქართველოში",
-    description:
-      "უნიკალური ხელნაკეთი ნივთები, ნახატები, ხელოვნების ნამუშევრები. ხარისხი, სანდოობა, ფასი",
-    images: [
-      {
-        url: "/van-gogh.jpg",
-        width: 1200,
-        height: 630,
-        alt: "Soulart - ნახატების და ხელნაკეთი ნივთების   პირველი ონლაინ პლატფორმა საქართველოში",
-      },
-    ],
-  },
-  twitter: {
-    card: "summary_large_image",
-    title:
-      "Soulart - ნახატების და ხელნაკეთი ნივთების   პირველი ონლაინ პლატფორმა საქართველოში",
-    description:
-      "ხელნაკეთი ნივთების და ნახატების საუკეთესო არჩევანი საქართველოში",
-    images: ["/van-gogh.jpg"],
-  },
-};
+    verification: {
+      google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION || undefined,
+    },
+    other: {
+      "google-site-verification":
+        process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION || "", // backup
+      "geo.region": "GE",
+      "geo.placename": "Georgia",
+      "geo.position": "41.7151;44.8271", // თბილისის კოორდინატები
+      ICBM: "41.7151, 44.8271",
+    },
+    icons: {
+      icon: "/soulart_icon_blue_fullsizes.ico",
+      shortcut: "/soulart_icon_blue_fullsizes.ico",
+      apple: "/soulart_icon_blue_fullsizes.ico",
+      other: [
+        {
+          rel: "icon",
+          url: "/soulart_icon_blue_fullsizes.ico",
+          type: "image/x-icon",
+        },
+        {
+          rel: "shortcut icon",
+          url: "/soulart_icon_blue_fullsizes.ico",
+          type: "image/x-icon",
+        },
+        { rel: "apple-touch-icon", url: "/soulart_icon_blue_fullsizes.ico" },
+        {
+          rel: "mask-icon",
+          url: "/soulart_icon_blue_fullsizes.ico",
+          color: PRIMARY_COLOR,
+        },
+      ],
+    },
+    openGraph: {
+      type: "website",
+      locale: "ka_GE",
+      url: "https://Soulart.ge/",
+      siteName: "Soulart",
+      title:
+        "Soulart - ნახატების და ხელნაკეთი ნივთების   პირველი ონლაინ პლატფორმა საქართველოში",
+      description:
+        "უნიკალური ხელნაკეთი ნივთები, ნახატები, ხელოვნების ნამუშევრები. ხარისხი, სანდოობა, ფასი",
+      images: [
+        {
+          url: "/van-gogh.jpg",
+          width: 1200,
+          height: 630,
+          alt: "Soulart - ნახატების და ხელნაკეთი ნივთების   პირველი ონლაინ პლატფორმა საქართველოში",
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title:
+        "Soulart - ნახატების და ხელნაკეთი ნივთების   პირველი ონლაინ პლატფორმა საქართველოში",
+      description:
+        "ხელნაკეთი ნივთების და ნახატების საუკეთესო არჩევანი საქართველოში",
+      images: ["/van-gogh.jpg"],
+    },
+  };
+}
 
 export default function RootLayout({
   children,
