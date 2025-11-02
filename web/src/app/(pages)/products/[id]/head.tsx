@@ -1,4 +1,13 @@
 import { Metadata } from "next";
+import {
+  GLOBAL_KEYWORDS,
+  extractKeywordsFromText,
+  getArtistKeywords,
+  getProductKeywords,
+  mergeKeywordSets,
+  sanitizeKeyword,
+} from "@/lib/seo-keywords";
+import { collectProductKeywords } from "./layout";
 
 interface HeadProps {
   params: { id: string };
@@ -36,31 +45,31 @@ export async function generateMetadata({
       description = `${description} ${hashtagText}`.slice(0, 160);
     }
 
-    const categoryKeywords = [];
-    if (
-      typeof product.mainCategory === "object" &&
-      product.mainCategory?.name
-    ) {
-      categoryKeywords.push(product.mainCategory.name);
-    }
-    if (typeof product.subCategory === "object" && product.subCategory?.name) {
-      categoryKeywords.push(product.subCategory.name);
-    }
+    const pageKeywords = collectProductKeywords(product);
+    const brandKeyword = sanitizeKeyword(product.brand);
+    const metadataKeywords = mergeKeywordSets(
+      pageKeywords,
+      extractKeywordsFromText(title),
+      extractKeywordsFromText(description),
+      brandKeyword ? [brandKeyword] : undefined
+    );
 
-    const keywords = [
-      product.name,
-      product.brand,
-      ...categoryKeywords,
-      ...(product.hashtags || []),
-      "საზაფხულო",
-      "მაისური",
-      "SoulArt",
-    ].join(", ");
+    const [globalProductKeywords, artistKeywords] = await Promise.all([
+      getProductKeywords(),
+      getArtistKeywords(),
+    ]);
+
+    const keywords = mergeKeywordSets(
+      metadataKeywords,
+      globalProductKeywords,
+      artistKeywords,
+      GLOBAL_KEYWORDS
+    ).slice(0, 200);
 
     return {
       title,
       description,
-      keywords,
+      keywords: keywords.length ? keywords : undefined,
       openGraph: {
         title,
         description,

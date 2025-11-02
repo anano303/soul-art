@@ -1,6 +1,113 @@
 import { Suspense } from "react";
 import ShopContent from "./ShopContent";
 import { Metadata } from "next";
+import {
+  GLOBAL_KEYWORDS,
+  extractKeywordsFromText,
+  getArtistKeywords,
+  getProductKeywords,
+  mergeKeywordSets,
+  sanitizeKeyword,
+} from "@/lib/seo-keywords";
+
+type ShopProduct = {
+  name?: string | null;
+  nameEn?: string | null;
+  brand?: string | null;
+  brandLogo?: string | null;
+  description?: string | null;
+  descriptionEn?: string | null;
+  summary?: string | null;
+  summaryEn?: string | null;
+  category?: string | { name?: string | null; title?: string | null } | null;
+  subCategory?: string | { name?: string | null; title?: string | null } | null;
+  mainCategory?:
+    | string
+    | { name?: string | null; title?: string | null }
+    | null;
+  hashtags?: string[] | null;
+  materials?: string[] | null;
+  colors?: string[] | null;
+  sizes?: string[] | null;
+  images?: string[] | null;
+  user?: {
+    name?: string | null;
+    storeName?: string | null;
+  } | null;
+};
+
+const collectShopKeywords = (options: {
+  brand?: string;
+  authorInfo?: string;
+  product?: ShopProduct | null;
+  title?: string;
+  description?: string;
+}): string[] => {
+  const keywordMap = new Map<string, string>();
+
+  const register = (value?: string | null) => {
+    const sanitized = sanitizeKeyword(value);
+    if (!sanitized) {
+      return;
+    }
+
+    const key = sanitized.toLowerCase();
+    if (!keywordMap.has(key)) {
+      keywordMap.set(key, sanitized);
+    }
+  };
+
+  const registerText = (value?: string | null) => {
+    extractKeywordsFromText(value).forEach(register);
+  };
+
+  const registerArray = (values?: string[] | null) => {
+    values?.forEach(register);
+  };
+
+  const registerCategory = (
+    category?: ShopProduct["category"] | ShopProduct["subCategory"]
+  ) => {
+    if (!category) {
+      return;
+    }
+
+    if (typeof category === "string") {
+      register(category);
+      return;
+    }
+
+    register(category.name ?? category.title ?? undefined);
+  };
+
+  register(options.brand);
+  registerText(options.brand);
+  register(options.authorInfo);
+  registerText(options.title);
+  registerText(options.description);
+
+  const product = options.product;
+  if (product) {
+    register(product.name);
+    register(product.nameEn);
+    register(product.brand);
+    registerText(product.description);
+    registerText(product.descriptionEn);
+    registerText(product.summary);
+    registerText(product.summaryEn);
+
+    registerCategory(product.category);
+    registerCategory(product.subCategory);
+    registerCategory(product.mainCategory);
+
+    registerArray(product.hashtags ?? []);
+    registerArray(product.materials ?? []);
+    registerArray(product.colors ?? []);
+    registerArray(product.sizes ?? []);
+  }
+
+  return Array.from(keywordMap.values());
+};
 
 export async function generateMetadata({
   searchParams,
@@ -34,23 +141,31 @@ export async function generateMetadata({
       "პირველი პლატფორმა საქართველოში - ხელნაკეთი ნივთები და ნახატები | SoulArt";
     let description =
       "შეიძინეთ უნიკალური ხელნაკეთი ნივთები და ნახატები SoulArt-ის ონლაინ პლატფორმაზე. ქართველი ხელოვანების ნამუშევრები, ხელნაკეთი ნივთები, აქსესუარები და დეკორი. ხარისხიანი ნივთები საუკეთესო ფასად საქართველოში. Shop unique handmade items and paintings.";
+    let latestProduct: ShopProduct | null = null;
 
     if (response.ok) {
       const data = await response.json();
       console.log("API Response:", data); // დამატება
-      if (data.items && data.items.length > 0) {
-        const latestProduct = data.items[0];
+      const items = Array.isArray(data?.items)
+        ? data.items
+        : Array.isArray(data?.products)
+        ? data.products
+        : Array.isArray(data)
+        ? data
+        : [];
+      if (items.length > 0) {
+        latestProduct = items[0];
 
         // For brand pages, use the populated user information
-        if (brand && latestProduct.user) {
+        if (brand && latestProduct?.user) {
           authorInfo =
             latestProduct.user.name || latestProduct.user.storeName || brand;
         }
 
         // Use brandLogo as primary representative image for brand pages, fallback to product image
-        if (latestProduct.brandLogo) {
+        if (latestProduct?.brandLogo) {
           representativeImage = latestProduct.brandLogo;
-        } else if (latestProduct.images && latestProduct.images.length > 0) {
+        } else if (latestProduct?.images && latestProduct.images.length > 0) {
           const imageUrl = latestProduct.images[0];
           // Ensure the image URL is absolute for OpenGraph
           representativeImage = imageUrl.startsWith("http")
@@ -68,108 +183,30 @@ export async function generateMetadata({
       description = `შეიძინეთ ${authorInfo}-ის უნიკალური ნამუშევრები SoulArt-ის ონლაინ პლატფორმაზე. ქართველი ხელოვანების ნამუშევრები, ნახატები,  ხელნაკეთი ნივთები.`;
     }
 
+    const pageKeywords = collectShopKeywords({
+      brand,
+      authorInfo,
+      product: latestProduct,
+      title,
+      description,
+    });
+
+    const [productKeywords, artistKeywords] = await Promise.all([
+      getProductKeywords(),
+      getArtistKeywords(),
+    ]);
+
+    const keywords = mergeKeywordSets(
+      pageKeywords,
+      productKeywords,
+      artistKeywords,
+      GLOBAL_KEYWORDS
+    ).slice(0, 200);
+
     return {
       title,
       description,
-      keywords: [
-        "პლატფორმა",
-        "ხელნაკეთი ნივთები",
-        "ნახატები",
-        "ქართველი მხატვრები",
-        "SoulArt",
-        "ხელნაკეთი სამკაულები",
-        "ხელნაკეთი აქსესუარები",
-        "დეკორი",
-        "ხელოვნება",
-        "ნახატები",
-        "ქართველი მხატვრების ნახატები",
-        "საჩუქრები",
-        "საჩუქრად ნახატები",
-        "საჩუქრად ხელნაკეთი ნივთები",
-        "ნახატიები ონლაინ",
-        "ხელნაკეთი ნივთები ონლაინ",
-        "ქართველი მხატვრები",
-        "ქართული ხელოვნება",
-        "ნახატი",
-        "ხელნაკეთი",
-        "ნახატების საიტი",
-        "ხელნაკეთი ნივთების საიტი",
-        "ნახატების მაღაზია",
-        "ხელნაკეთი ნივთების მაღაზია",
-        "ხელოვანები",
-        "ქართული ხელოვნება ონლაინ",
-        "ქართველი მხატვრები",
-        "ნახატების ვებგვერდი",
-        "ხელნაკეთი ნივთების ვებგვერდი",
-        "ყველა ქართველი მხატვრის ნახატები",
-        "ყველა ქართველი ხელოვანის ხელნაკეთი ნივთები",
-        "ქართველი მხატვრების ნამუშევრები",
-        "ქართველი ხელოვანების ნამუშევრები",
-        "Soulart ბლოგი",
-        "Soulart ინტერვიუები",
-        "Soulart ქართველი მხატვრები",
-        "ხელოვანები",
-        "Soulart.ge",
-        "ხელნაკეთი ნივთები",
-        "იყიდება ნახატები",
-        "იყიდება ხელნაკეთი ნივთები",
-        "ხელოვნების პლატფორმა",
-        "ხელოვანების მხარდაჭერა",
-        "Soulart ისტორია",
-        "ქართული პლატფორმა",
-        "ხელოვანებისთვის",
-        "ხელნაკეთი ნივთები",
-        "ფასდაკლებები",
-        "ხელოვნების ბაზარი",
-        "ნახატების კოლექცია",
-        "ხელოვნების გალერეა",
-        "ხელოვანების საზოგადოება",
-        "იყიდება ხელოვნების ნიმუშები",
-        "ხელოვნების ღონისძიებები",
-        "ხელოვნების გამოფენები",
-        "ჩვენი ისტორია",
-        "იყიდება ნახატები ონლაინ",
-        "იყიდება ხელნაკეთი ნივთები ონლაინ",
-        "ხელოვნების პლატფორმა საქართველოში",
-        "ხელოვანების მხარდაჭერა ონლაინ",
-        "Soulart ისტორია",
-        "დამფუძნებლები",
-        "მისია",
-        "ხედვა",
-        "ლევან ბეროშვილი",
-        "ანი ბეროშვილი",
-        "about us",
-        "our story",
-        "mission",
-        "vision",
-        "handmade items",
-        "Georgian art",
-        "Georgian artists",
-        "paintings for sale",
-        "handmade for sale",
-        "art marketplace",
-        "art community",
-        "buy art online",
-        "buy handmade online",
-        "art platform",
-        "support artists",
-        "Soulart history",
-        "paintings for sale",
-        "handmade for sale",
-        "Georgian platform",
-        "handmade",
-        "shop",
-        "handmade items",
-        "paintings",
-        "georgian artists",
-        "handmade jewelry",
-        "handmade accessories",
-        "art",
-        "decor",
-        "Georgia",
-        "unique art",
-        "artisan crafts",
-      ],
+      keywords: keywords.length ? keywords : undefined,
       authors: [{ name: authorInfo }],
       creator: authorInfo,
       publisher: "SoulArt",

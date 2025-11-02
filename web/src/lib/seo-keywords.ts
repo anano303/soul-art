@@ -376,7 +376,7 @@ const fetchProductKeywordsInternal = cache(async (): Promise<string[]> => {
     let page = 1;
 
     while (page <= PRODUCT_MAX_PAGES) {
-  const url = `${apiBase}/products?page=${page}&limit=${PRODUCT_FETCH_LIMIT}&sort=createdAt&direction=desc&populate=user&select=name,nameEn,brand,brandLogo,description,descriptionEn,summary,summaryEn,category,subCategory,mainCategory,hashtags,materials,colors,sizes,ageGroups,images,variants,seoTitle,seoDescription,slug,videoDescription,youtubeVideoId,youtubeVideoUrl,youtubeEmbedUrl,categoryStructure,deliveryType,minDeliveryDays,maxDeliveryDays,discountPercentage,discountStartDate,discountEndDate,dimensions,isOriginal,reviews,viewCount,rating,numReviews,price,countInStock,user`;
+      const url = `${apiBase}/products?page=${page}&limit=${PRODUCT_FETCH_LIMIT}&sort=createdAt&direction=desc&populate=user&select=name,nameEn,brand,brandLogo,description,descriptionEn,summary,summaryEn,category,subCategory,mainCategory,hashtags,materials,colors,sizes,ageGroups,images,variants,seoTitle,seoDescription,slug,videoDescription,youtubeVideoId,youtubeVideoUrl,youtubeEmbedUrl,categoryStructure,deliveryType,minDeliveryDays,maxDeliveryDays,discountPercentage,discountStartDate,discountEndDate,dimensions,isOriginal,reviews,viewCount,rating,numReviews,price,countInStock,user`;
       const response = await fetch(url, {
         next: { revalidate: 3600 },
       });
@@ -411,10 +411,10 @@ const fetchProductKeywordsInternal = cache(async (): Promise<string[]> => {
         registerKeywordsFromText(map, item.descriptionEn);
         registerKeywordsFromText(map, item.summary);
         registerKeywordsFromText(map, item.summaryEn);
-  registerKeywordsFromText(map, item.videoDescription);
-  registerKeyword(map, item.youtubeVideoId);
-  registerKeyword(map, item.youtubeVideoUrl);
-  registerKeyword(map, item.youtubeEmbedUrl);
+        registerKeywordsFromText(map, item.videoDescription);
+        registerKeyword(map, item.youtubeVideoId);
+        registerKeyword(map, item.youtubeVideoUrl);
+        registerKeyword(map, item.youtubeEmbedUrl);
 
         registerKeywordsFromArray(map, item.materials);
         registerKeywordsFromArray(map, item.colors);
@@ -439,13 +439,27 @@ const fetchProductKeywordsInternal = cache(async (): Promise<string[]> => {
 
         registerKeyword(map, item.deliveryType);
         if (item.deliveryType === "SELLER") {
-          registerKeywordsFromArray(map, ["seller delivery", "მოყვანა გამყიდველის მიერ"]);
+          registerKeywordsFromArray(map, [
+            "seller delivery",
+            "მოყვანა გამყიდველის მიერ",
+          ]);
         } else if (item.deliveryType === "SoulArt") {
-          registerKeywordsFromArray(map, ["soulart delivery", "სოულარტის მიტანა"]);
+          registerKeywordsFromArray(map, [
+            "soulart delivery",
+            "სოულარტის მიტანა",
+          ]);
         }
 
-        registerKeywordFromNumber(map, item.minDeliveryDays, "min delivery days");
-        registerKeywordFromNumber(map, item.maxDeliveryDays, "max delivery days");
+        registerKeywordFromNumber(
+          map,
+          item.minDeliveryDays,
+          "min delivery days"
+        );
+        registerKeywordFromNumber(
+          map,
+          item.maxDeliveryDays,
+          "max delivery days"
+        );
         registerKeywordFromNumber(map, item.discountPercentage, "discount");
         registerYearFromDate(map, item.discountStartDate);
         registerYearFromDate(map, item.discountEndDate);

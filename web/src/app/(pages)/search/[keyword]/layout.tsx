@@ -1,9 +1,48 @@
 import { Metadata } from "next";
+import {
+  GLOBAL_KEYWORDS,
+  extractKeywordsFromText,
+  getArtistKeywords,
+  getProductKeywords,
+  mergeKeywordSets,
+  sanitizeKeyword,
+} from "@/lib/seo-keywords";
 
 interface LayoutProps {
   children: React.ReactNode;
   params: Promise<{ keyword: string }>;
 }
+
+const collectSearchKeywords = (term: string): string[] => {
+  const keywordMap = new Map<string, string>();
+
+  const register = (value?: string | null) => {
+    const sanitized = sanitizeKeyword(value);
+    if (!sanitized) {
+      return;
+    }
+
+    const key = sanitized.toLowerCase();
+    if (!keywordMap.has(key)) {
+      keywordMap.set(key, sanitized);
+    }
+  };
+
+  const registerText = (value?: string | null) => {
+    extractKeywordsFromText(value).forEach(register);
+  };
+
+  register(term);
+  register(term.toLowerCase());
+  registerText(term);
+
+  if (term.includes(" ")) {
+    const condensed = term.replace(/\s+/g, "");
+    register(condensed);
+  }
+
+  return Array.from(keywordMap.values());
+};
 
 export async function generateMetadata({
   params,
@@ -13,27 +52,24 @@ export async function generateMetadata({
   const { keyword } = await params;
 
   const decodedKeyword = decodeURIComponent(keyword || "");
+  const pageKeywords = collectSearchKeywords(decodedKeyword);
+
+  const [productKeywords, artistKeywords] = await Promise.all([
+    getProductKeywords(),
+    getArtistKeywords(),
+  ]);
+
+  const keywords = mergeKeywordSets(
+    pageKeywords,
+    productKeywords,
+    artistKeywords,
+    GLOBAL_KEYWORDS
+  ).slice(0, 200);
 
   return {
     title: `ძიება: ${decodedKeyword} - Soulart | Search: ${decodedKeyword}`,
     description: `ძიების შედეგები "${decodedKeyword}" - ხელნაკეთი ნივთები და ნახატები Soulart-ში. Search results for "${decodedKeyword}" - handmade items and paintings at Soulart.`,
-    keywords: [
-      decodedKeyword,
-      "ძიება",
-      "ხელნაკეთი",
-      "ნახატები",
-      "ხელოვნება",
-      "ნამუშევრები",
-      "Soulart",
-      "search",
-      "handmade",
-      "paintings",
-      "artworks",
-      "art",
-      "crafts",
-      "find",
-      "results",
-    ],
+    keywords: keywords.length ? keywords : undefined,
     authors: [{ name: "Soulart" }],
     creator: "Soulart",
     publisher: "Soulart",

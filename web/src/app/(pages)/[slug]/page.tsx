@@ -2,6 +2,14 @@ import { notFound } from "next/navigation";
 import { ArtistProfileView } from "@/modules/artists/components/artist-profile-view";
 import { ArtistProfileResponse } from "@/types";
 import type { Metadata } from "next";
+import {
+  GLOBAL_KEYWORDS,
+  extractKeywordsFromText,
+  getArtistKeywords,
+  getProductKeywords,
+  mergeKeywordSets,
+  sanitizeKeyword,
+} from "@/lib/seo-keywords";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/v1";
 const SITE_BASE = process.env.NEXT_PUBLIC_CLIENT_URL || "https://soulart.ge";
@@ -67,15 +75,91 @@ function buildAbsoluteUrl(path: string) {
   }
 }
 
+const collectArtistKeywords = (
+  artist: ArtistProfileResponse["artist"],
+  biography: string,
+  products: ArtistProfileResponse["products"] | null
+): string[] => {
+  const keywordMap = new Map<string, string>();
+
+  const register = (value?: string | null) => {
+    const sanitized = sanitizeKeyword(value);
+    if (!sanitized) {
+      return;
+    }
+
+    const key = sanitized.toLowerCase();
+    if (!keywordMap.has(key)) {
+      keywordMap.set(key, sanitized);
+    }
+  };
+
+  const registerText = (value?: string | null) => {
+    extractKeywordsFromText(value).forEach(register);
+  };
+
+  const registerArray = (values?: string[] | null) => {
+    values?.forEach(register);
+  };
+
+  const registerImage = (url?: string | null) => {
+    if (!url) {
+      return;
+    }
+
+    const segments = url.split("/");
+    const fileName = segments.pop();
+    if (fileName) {
+      register(fileName.replace(/\.[^/.]+$/, " "));
+    }
+  };
+
+  register(artist.name);
+  register(artist.storeName);
+  register(artist.artistSlug);
+  registerText(artist.artistLocation ?? undefined);
+  registerArray(artist.artistDisciplines ?? []);
+  registerArray(artist.artistHighlights ?? []);
+  registerText(artist.artistSlug ?? undefined);
+  registerImage(artist.artistCoverImage ?? undefined);
+  registerImage(artist.storeLogo ?? undefined);
+
+  registerText(biography);
+
+  if (artist.artistBio) {
+    Object.values(artist.artistBio).forEach((value) =>
+      registerText(typeof value === "string" ? value : undefined)
+    );
+  }
+
+  if (artist.artistSocials) {
+    Object.entries(artist.artistSocials).forEach(([key, value]) => {
+      register(key);
+      registerText(value ?? undefined);
+    });
+  }
+
+  if (products?.items?.length) {
+    products.items.forEach((product) => {
+      register(product.name);
+      register(product.brand);
+      registerText(product.description ?? undefined);
+      product.images?.forEach(registerImage);
+    });
+  }
+
+  return Array.from(keywordMap.values());
+};
+
 export async function generateMetadata({
   params,
 }: ArtistPageProps): Promise<Metadata> {
   const { slug: originalSlug } = await params;
   let startIndex = 0;
-  if (originalSlug.includes('@')) {
-    startIndex = originalSlug.indexOf('@') + 1;
-  } else if (originalSlug.includes('%40')) {
-    startIndex = originalSlug.indexOf('%40') + 3;
+  if (originalSlug.includes("@")) {
+    startIndex = originalSlug.indexOf("@") + 1;
+  } else if (originalSlug.includes("%40")) {
+    startIndex = originalSlug.indexOf("%40") + 3;
   }
   const slug = originalSlug.toLowerCase().substring(startIndex);
 
@@ -100,9 +184,28 @@ export async function generateMetadata({
         ]
       : undefined;
 
+    const artistKeywordSet = collectArtistKeywords(
+      artist,
+      biography,
+      data.products ?? null
+    );
+
+    const [productKeywords, globalArtistKeywords] = await Promise.all([
+      getProductKeywords(),
+      getArtistKeywords(),
+    ]);
+
+    const keywords = mergeKeywordSets(
+      artistKeywordSet,
+      productKeywords,
+      globalArtistKeywords,
+      GLOBAL_KEYWORDS
+    ).slice(0, 200);
+
     return {
       title: `${displayName} | SoulArt Artist`,
       description,
+      keywords: keywords.length ? keywords : undefined,
       alternates: { canonical },
       openGraph: {
         title: `${displayName} | SoulArt`,
@@ -146,17 +249,17 @@ export async function generateMetadata({
 export default async function ArtistPage({ params }: ArtistPageProps) {
   const { slug } = await params;
   let startIndex = 0;
-  if (slug.includes('@')) {
-    startIndex = slug.indexOf('@') + 1;
-  } else if (slug.includes('%40')) {
-    startIndex = slug.indexOf('%40') + 3;
+  if (slug.includes("@")) {
+    startIndex = slug.indexOf("@") + 1;
+  } else if (slug.includes("%40")) {
+    startIndex = slug.indexOf("%40") + 3;
   }
-  const data = await fetchArtistProfile(slug.toLowerCase().substring(startIndex));
+  const data = await fetchArtistProfile(
+    slug.toLowerCase().substring(startIndex)
+  );
 
   return (
-    <main
-      className="Container"
-    >
+    <main className="Container">
       <ArtistProfileView data={data} />
     </main>
   );
