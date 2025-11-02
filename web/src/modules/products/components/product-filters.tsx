@@ -15,10 +15,6 @@ interface FilterProps {
   onAgeGroupChange: (ageGroup: string) => void;
   onSizeChange: (size: string) => void;
   onColorChange: (color: string) => void;
-  onSortChange: (sortOption: {
-    field: string;
-    direction: "asc" | "desc";
-  }) => void;
   onBrandChange: (brand: string) => void;
   onDiscountFilterChange: (showDiscountedOnly: boolean) => void;
   onDimensionFilterChange?: (dimension: string) => void;
@@ -44,7 +40,6 @@ export function ProductFilters({
   onAgeGroupChange,
   onSizeChange,
   onColorChange,
-  onSortChange,
   onBrandChange,
   onDiscountFilterChange,
   onPriceRangeChange,
@@ -67,43 +62,52 @@ export function ProductFilters({
   const [minPrice, setMinPrice] = useState(priceRange[0]);
   const [maxPrice, setMaxPrice] = useState(priceRange[1]);
   const [error, setError] = useState<string | null>(null);
+  const [isDesktop, setIsDesktop] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
   const [showSubcategories, setShowSubcategories] = useState(false);
   const [brandSearchTerm, setBrandSearchTerm] = useState<string>("");
   const [hasHorizontalScroll, setHasHorizontalScroll] = useState(false);
   const [showBrandsDropdown, setShowBrandsDropdown] = useState(false);
-  const [isButtonSticky, setIsButtonSticky] = useState(false);
 
   // Refs for scroll and positioning
   const filterButtonRef = useRef<HTMLButtonElement>(null);
   const filterContainerRef = useRef<HTMLDivElement>(null);
 
-  // Track scroll position for sticky button on desktop
   useEffect(() => {
-    const handleScroll = () => {
-      if (window.innerWidth > 768) {
-        // Desktop only
-        const scrollTop = window.scrollY || document.documentElement.scrollTop;
-        setIsButtonSticky(scrollTop > 100);
+    const handleResize = () => {
+      const desktop = window.innerWidth >= 1024;
+      setIsDesktop(desktop);
+      setShowFilters(desktop);
+      if (desktop) {
+        setIsClosing(false);
       }
     };
 
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
   // Prevent body scroll when filters are open
   useEffect(() => {
+    if (isDesktop) {
+      document.body.style.overflow = "";
+      return () => {
+        document.body.style.overflow = "";
+      };
+    }
+
     if (showFilters) {
       document.body.style.overflow = "hidden";
     } else {
       document.body.style.overflow = "";
     }
+
     return () => {
       document.body.style.overflow = "";
     };
-  }, [showFilters]);
+  }, [showFilters, isDesktop]);
 
   // Update local state when props change
   useEffect(() => {
@@ -138,20 +142,6 @@ export function ProductFilters({
       setShowSubcategories(false);
     }
   }, [selectedCategoryId]);
-
-  // Helper function to determine if selected category is handmade
-  const isHandmadeCategory = () => {
-    if (!selectedCategoryId || !categories.length) return false;
-    const selectedCategory = categories.find(
-      (cat) => cat._id === selectedCategoryId
-    );
-    if (!selectedCategory) return false;
-
-    return (
-      selectedCategory.nameEn === "Handmades" ||
-      selectedCategory.nameEn === "Handmade"
-    );
-  };
 
   // Fetch all categories with error handling
   const {
@@ -603,13 +593,6 @@ export function ProductFilters({
   const handleFilterToggle = () => {
     setShowFilters(true);
 
-    // Reset button position when opening filters
-    if (filterButtonRef.current) {
-      filterButtonRef.current.style.position = "relative";
-      filterButtonRef.current.style.top = "auto";
-      filterButtonRef.current.classList.remove("fixed");
-    }
-
     // Scroll to filter section after a short delay to allow it to render
     setTimeout(() => {
       if (filterContainerRef.current) {
@@ -750,45 +733,6 @@ export function ProductFilters({
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [showSubcategories]);
-
-  // Handle filter toggle button sticky behavior on scroll
-  useEffect(() => {
-    const handleScroll = () => {
-      const filterButton = filterButtonRef.current;
-      if (filterButton && !showFilters) {
-        const buttonRect = filterButton.getBoundingClientRect();
-        const buttonTop = buttonRect.top;
-
-        // If button is about to scroll out of view (within 100px of top), make it sticky
-        if (buttonTop <= 100 && !filterButton.classList.contains("fixed")) {
-          filterButton.classList.add("fixed");
-          filterButton.style.position = "fixed";
-          filterButton.style.top = "20px";
-          filterButton.style.zIndex = "1000";
-          filterButton.style.width = `${buttonRect.width}px`; // Preserve width
-        } else if (
-          buttonTop > 100 &&
-          filterButton.classList.contains("fixed")
-        ) {
-          // Reset to original position when scrolling back up
-          filterButton.classList.remove("fixed");
-          filterButton.style.position = "relative";
-          filterButton.style.top = "auto";
-          filterButton.style.width = "auto";
-        }
-      }
-    };
-
-    // Add scroll listener
-    window.addEventListener("scroll", handleScroll);
-
-    // Initial check
-    handleScroll();
-
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-    };
-  }, [showFilters]);
 
   return (
     <div className="product-filters-container">
@@ -972,43 +916,44 @@ export function ProductFilters({
           )}
 
           {/* Filter Overlay */}
-          {showFilters && (
+          {showFilters && !isDesktop && (
             <div className="filter-modal-overlay" onClick={handleClose} />
           )}
 
-          {!showFilters && (
+          {!isDesktop && !showFilters && (
             <button
               ref={filterButtonRef}
-              className={`filter-toggle-btn desktop-sticky-filter-btn ${
-                isButtonSticky ? "sticky" : ""
-              }`}
+              className={`filter-toggle-btn desktop-sticky-filter-btn sticky`}
               onClick={handleFilterToggle}
             >
               <Image
                 src="/filter.png"
                 alt={t("shop.filter")}
                 className="filter-icon"
-                width={20}
-                height={20}
+                width={24}
+                height={24}
               />
-              {t("shop.filterToggle")}
             </button>
           )}
 
-          {showFilters && (
+          {(showFilters || isDesktop) && (
             <div
               ref={filterContainerRef}
-              className={`additional-filters ${isClosing ? "closing" : ""}`}
+              className={`additional-filters ${
+                !isDesktop && isClosing ? "closing" : ""
+              } ${isDesktop ? "desktop-visible" : ""}`}
             >
               <div className="filters-header">
                 <h3>{language === "en" ? "Filters" : "ფილტრები"}</h3>
-                <button
-                  className="filters-close-btn"
-                  onClick={handleClose}
-                  aria-label={t("shop.closeFilters")}
-                >
-                  ✕
-                </button>
+                {!isDesktop && (
+                  <button
+                    className="filters-close-btn"
+                    onClick={handleClose}
+                    aria-label={t("shop.closeFilters")}
+                  >
+                    ✕
+                  </button>
+                )}
               </div>
               {((Array.isArray(selectedSubCategoryId) &&
                 selectedSubCategoryId.length > 0) ||
@@ -1429,35 +1374,6 @@ export function ProductFilters({
               )}
             </div>
           )}
-        </div>
-
-        <div className="sort-section">
-          {/* <div className="sort-header">
-            <h3 className="sort-title">{t("shop.sortBy")}</h3>
-          </div> */}
-          <div className="sort-options">
-            <select
-              className={`sort-select ${
-                isHandmadeCategory() ? "handmade-theme" : ""
-              }`}
-              onChange={(e) => {
-                const value = e.target.value;
-                const [field, direction] = value.split("-");
-                onSortChange({
-                  field,
-                  direction: direction as "asc" | "desc",
-                });
-              }}
-            >
-              {" "}
-              <option value="createdAt-desc">{t("shop.newest")}</option>{" "}
-              <option value="price-asc">{t("shop.priceLowHigh")}</option>{" "}
-              <option value="price-desc">{t("shop.priceHighLow")}</option>{" "}
-              <option value="name-asc">{t("shop.nameAZ")}</option>{" "}
-              <option value="name-desc">{t("shop.nameZA")}</option>{" "}
-              <option value="rating-desc">{t("shop.ratingHigh")}</option>
-            </select>
-          </div>
         </div>
       </div>
     </div>

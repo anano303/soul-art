@@ -199,6 +199,20 @@ const ShopContent = () => {
     });
   }, [searchParams]);
 
+  // Helper function to determine if selected category is handmade
+  const isHandmadeCategory = () => {
+    if (!selectedCategoryId || !categories.length) return false;
+    const selectedCategory = categories.find(
+      (cat) => cat._id === selectedCategoryId
+    );
+    if (!selectedCategory) return false;
+
+    return (
+      selectedCategory.nameEn === "Handmades" ||
+      selectedCategory.nameEn === "Handmade"
+    );
+  };
+
   useEffect(() => {
     if (initializedRef.current) return;
 
@@ -494,10 +508,9 @@ const ShopContent = () => {
       : null;
 
   return (
-    <div className="shop-container default">
-      <div className="content">
-        {/* Product Filters Component */}
-        <div className="filters-wrapper">
+    <div className={`shop-container ${getTheme()}`}>
+      <div className="shop-shell">
+        <aside className="filters-sidebar">
           <ProductFilters
             onCategoryChange={handleCategoryChange}
             onSubCategoryChange={handleSubCategoryChange}
@@ -510,7 +523,6 @@ const ShopContent = () => {
             onMaterialFilterChange={handleMaterialFilterChange}
             onDimensionFilterChange={handleDimensionFilterChange}
             onPriceRangeChange={handlePriceRangeChange}
-            onSortChange={handleSortChange}
             selectedCategoryId={selectedCategoryId}
             selectedSubCategoryId={selectedSubCategoryIds}
             selectedAgeGroup={selectedAgeGroup}
@@ -523,59 +535,91 @@ const ShopContent = () => {
             showDiscountedOnly={showDiscountedOnly}
             priceRange={priceRange}
           />
+        </aside>
+
+        <div className="shop-main">
+          <div className="content">
+            <div className="shop-layout">
+              {brandInfo && (
+                <div className="brand-info">
+                  {brandInfo.logo && (
+                    <Image
+                      src={brandInfo.logo}
+                      alt={brandInfo.name}
+                      width={50}
+                      height={50}
+                    />
+                  )}
+                  <h2 style={{ color: PRIMARY_COLOR }}>
+                    {brandInfo.name}-ის ნამუშევრები{" "}
+                  </h2>
+                </div>
+              )}
+        <div className="sort-section">
+          {/* <div className="sort-header">
+            <h3 className="sort-title">{t("shop.sortBy")}</h3>
+          </div> */}
+          <div className="sort-options">
+            <select
+              className={`sort-select ${
+                isHandmadeCategory() ? "handmade-theme" : ""
+              }`}
+              onChange={(e) => {
+                const value = e.target.value;
+                const [field, direction] = value.split("-");
+                handleSortChange({
+                  field,
+                  direction: direction as "asc" | "desc",
+                });
+              }}
+            >
+              {" "}
+              <option value="createdAt-desc">{t("shop.newest")}</option>{" "}
+              <option value="price-asc">{t("shop.priceLowHigh")}</option>{" "}
+              <option value="price-desc">{t("shop.priceHighLow")}</option>{" "}
+              <option value="name-asc">{t("shop.nameAZ")}</option>{" "}
+              <option value="name-desc">{t("shop.nameZA")}</option>{" "}
+              <option value="rating-desc">{t("shop.ratingHigh")}</option>
+            </select>
+          </div>
         </div>
 
-        <div className="shop-layout">
-          {brandInfo && (
-            <div className="brand-info">
-              {brandInfo.logo && (
-                <Image
-                  src={brandInfo.logo}
-                  alt={brandInfo.name}
-                  width={50}
-                  height={50}
-                />
-              )}
-              <h2 style={{ color: PRIMARY_COLOR }}>
-                {brandInfo.name}-ის ნამუშევრები{" "}
-              </h2>
-            </div>
-          )}
-
-          <div className="products-area">
-            {isLoading ? (
-              <div className="loading-state">{t("shop.loading")}</div>
-            ) : products.length > 0 ? (
-              <ProductGrid
-                products={products}
-                theme={getTheme()}
-                currentPage={currentPage}
-                totalPages={totalPages}
-                onPageChange={handlePageChange}
-                isShopPage={true}
-              />
-            ) : (
-              <div className="empty-state">
-                <p>{t("shop.emptyDescription")}</p>
-                <button
-                  className="reset-filters-btn"
-                  onClick={() => {
-                    setSelectedCategoryId("");
-                    setSelectedSubCategoryIds([]);
-                    setSelectedAgeGroup("");
-                    setSelectedSize("");
-                    setSelectedColor("");
-                    setSelectedBrand("");
-                    setShowDiscountedOnly(false);
-                    setPriceRange([0, 1000]);
-                    setSorting({ field: "createdAt", direction: "desc" });
-                    setCurrentPage(1);
-                  }}
-                >
-                  {t("shop.resetFilters")}
-                </button>
+              <div className="products-area">
+                {isLoading ? (
+                  <div className="loading-state">{t("shop.loading")}</div>
+                ) : products.length > 0 ? (
+                  <ProductGrid
+                    products={products}
+                    theme={getTheme()}
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    onPageChange={handlePageChange}
+                    isShopPage={true}
+                  />
+                ) : (
+                  <div className="empty-state">
+                    <p>{t("shop.emptyDescription")}</p>
+                    <button
+                      className="reset-filters-btn"
+                      onClick={() => {
+                        setSelectedCategoryId("");
+                        setSelectedSubCategoryIds([]);
+                        setSelectedAgeGroup("");
+                        setSelectedSize("");
+                        setSelectedColor("");
+                        setSelectedBrand("");
+                        setShowDiscountedOnly(false);
+                        setPriceRange([0, 1000]);
+                        setSorting({ field: "createdAt", direction: "desc" });
+                        setCurrentPage(1);
+                      }}
+                    >
+                      {t("shop.resetFilters")}
+                    </button>
+                  </div>
+                )}
               </div>
-            )}
+            </div>
           </div>
         </div>
       </div>
