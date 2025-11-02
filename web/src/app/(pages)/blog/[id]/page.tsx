@@ -54,6 +54,7 @@ interface BlogPostData {
   authorEn?: string;
   images?: string[];
   publishDate: string;
+  views?: number;
   createdBy?: PopulatedUser | string | null;
   createdAt?: string;
 }
@@ -85,6 +86,11 @@ export default function BlogPostPage() {
 
         const data: BlogPostData = await response.json();
         setPost(data);
+
+        // Increment view count
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/blog/${postId}/view`, {
+          method: "POST",
+        }).catch((err) => console.error("Failed to increment view:", err));
       } catch (err) {
         console.error("Error fetching blog post", err);
         setError(
@@ -450,6 +456,15 @@ export default function BlogPostPage() {
       </article>
 
       <div className="blog-post-footer">
+        {post.views !== undefined && (
+          <div className="blog-post-views">
+            <span className="views-icon">👁️</span>
+            <span className="views-count">
+              {post.views} {language === "en" ? "views" : "ნახვა"}
+            </span>
+          </div>
+        )}
+
         <Link href="/blog" className="blog-post-back-btn">
           {language === "en"
             ? isArticle

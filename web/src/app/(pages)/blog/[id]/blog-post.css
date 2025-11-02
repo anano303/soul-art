@@ -492,6 +492,30 @@
   padding-top: 2rem;
   border-top: 1px solid #e0e0e0;
   text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  align-items: center;
+}
+
+.blog-post-views {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1rem;
+  color: #666;
+  background: #f5f5f5;
+  padding: 0.75rem 1.5rem;
+  border-radius: 25px;
+  font-weight: 500;
+}
+
+.views-icon {
+  font-size: 1.25rem;
+}
+
+.views-count {
+  color: #333;
 }
 
 .blog-post-back-btn {
