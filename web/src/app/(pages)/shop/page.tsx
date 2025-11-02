@@ -1,6 +1,9 @@
 import { Suspense } from "react";
 import ShopContent from "./ShopContent";
 import { Metadata } from "next";
+
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 import {
   GLOBAL_KEYWORDS,
   extractKeywordsFromText,
