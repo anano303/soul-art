@@ -14,7 +14,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ReviewForm } from "./review-form";
 import { ProductReviews } from "./product-reviews";
 import { useRouter } from "next/navigation";
-import "./productDetails.css";
+import "./productDetails.scss";
 
 const PRIMARY_COLOR = "#012645";
 import "./ProductCard.css"; // Import ProductCard styles for button consistency
@@ -570,7 +570,7 @@ export function ProductDetails({ product }: ProductDetailsProps) {
   }
 
   return (
-    <div className={`container ${themeClass}`}>
+    <div className={`container product-details-container ${themeClass}`}>
       {/* SEO Product Schema */}
       <ProductSchema product={product} productId={product._id} />
 
@@ -669,7 +669,7 @@ export function ProductDetails({ product }: ProductDetailsProps) {
         </div>
 
         {/* Right Column - Product Info */}
-        <div className="product-info">
+        <div className="main-product-info">
           {/* Product Title - First for hierarchy */}
           <h1 className="product-title">{displayName}</h1>
 

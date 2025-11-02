@@ -392,8 +392,11 @@ export default function GA4Dashboard() {
                       {step.count.toLocaleString()} {language === "en" ? "users" : "მომხმარებელი"}
                     </span>
                     {step.dropoff !== undefined && (
-                      <span className="funnel-step__dropoff">
-                        -{step.dropoff.toFixed(1)}%
+                      <span 
+                        className="funnel-step__dropoff"
+                        style={{ color: step.dropoff < 0 ? '#10b981' : '#ef4444' }}
+                      >
+                        {-step.dropoff.toFixed(1)}%
                       </span>
                     )}
                   </div>

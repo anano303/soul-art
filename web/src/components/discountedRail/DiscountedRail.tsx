@@ -16,6 +16,7 @@ import {
   Sparkles,
   TicketPercent,
 } from "lucide-react";
+import { trackSeeMoreDiscountsClick } from "@/lib/ga4-analytics";
 import "./discountedRail.css";
 
 const DISCOUNT_RAIL_LIMIT = 12;
@@ -210,6 +211,7 @@ const DiscountedRail = () => {
           <Link
             href="/shop?discountOnly=true"
             className="discounted-rail__cta is-visible"
+            onClick={() => trackSeeMoreDiscountsClick()}
           >
             <span>{t("home.discountedRail.viewAll")}</span>
             <ArrowRight size={16} aria-hidden="true" />
@@ -271,6 +273,7 @@ const DiscountedRail = () => {
                 <Link
                   href="/shop?discountOnly=true"
                   className="discounted-rail__see-more-card"
+                  onClick={() => trackSeeMoreDiscountsClick()}
                 >
                   <div className="discounted-rail__see-more-content">
                     <Sparkles size={32} className="discounted-rail__see-more-icon" />

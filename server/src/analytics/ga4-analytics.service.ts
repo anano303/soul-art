@@ -185,7 +185,7 @@ export class Ga4AnalyticsService {
       },
     });
 
-    const eventCounts = new Map(
+    const eventCounts: Map<string, number> = new Map(
       response.data.rows?.map((row) => [
         row.dimensionValues[0].value,
         parseInt(row.metricValues[0].value || '0'),
@@ -205,11 +205,11 @@ export class Ga4AnalyticsService {
 
     const funnel: FunnelStep[] = [];
     let previousCount = 0;
+    const max = Math.max(...eventCounts.values())
 
     funnelEvents.forEach((event, index) => {
       const count = eventCounts.get(event) || 0;
-      const firstCount = Number(eventCounts.get(funnelEvents[0]) || 1);
-      const percentage = firstCount > 0 ? (Number(count) / firstCount) * 100 : 0;
+      const percentage = max > 0 ? (Number(count) / max) * 100 : 0;
       const dropoff = previousCount > 0 ? ((previousCount - Number(count)) / previousCount) * 100 : 0;
 
       funnel.push({
@@ -306,11 +306,15 @@ export class Ga4AnalyticsService {
   private extractHomepageEvents(events: { event: string; count: number }[]): HomepageEvent[] {
     const homepageEventNames = [
       'search',
-      'product_click',
+      'product_interaction',
       'artist_profile_view',
       'category_click',
       'banner_click',
-      'button_click',
+      'see_more_click',
+      'see_more_discounts_click',
+      'shop_now_click',
+      'view_all_artists_click',
+      'view_all_products_click',
     ];
 
     return events
@@ -357,11 +361,15 @@ export class Ga4AnalyticsService {
   private getEventDetails(eventName: string): string {
     const details = {
       search: 'Search box interactions',
-      product_click: 'Product card clicks',
+      product_interaction: 'Product card clicks/views',
       artist_profile_view: 'Artist profile views',
-      category_click: 'Category clicks',
-      banner_click: 'Banner clicks',
-      button_click: 'Button interactions',
+      category_click: 'Category navigation clicks',
+      banner_click: 'Banner/promotional clicks',
+      see_more_click: 'See More button clicks',
+      see_more_discounts_click: 'See More Discounts button clicks',
+      shop_now_click: 'Shop Now button clicks',
+      view_all_artists_click: 'View All Artists button clicks',
+      view_all_products_click: 'View All Products button clicks',
     };
     return details[eventName] || '';
   }
