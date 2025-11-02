@@ -128,17 +128,22 @@ export default function BlogPostPage() {
       }
     })();
     const url = typeof window !== "undefined" ? window.location.href : "";
-    
+
     // Convert cover image to absolute URL for social sharing
     const getAbsoluteImageUrl = (imageUrl: string) => {
-      if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
+      if (imageUrl.startsWith("http://") || imageUrl.startsWith("https://")) {
         return imageUrl;
       }
       // If it's a relative URL, prepend the API URL
-      return `${process.env.NEXT_PUBLIC_API_URL}${imageUrl.startsWith('/') ? '' : '/'}${imageUrl}`;
+      return `${process.env.NEXT_PUBLIC_API_URL}${
+        imageUrl.startsWith("/") ? "" : "/"
+      }${imageUrl}`;
     };
 
     const absoluteImageUrl = getAbsoluteImageUrl(post.coverImage);
+
+    // Debug log
+    console.log("Cover Image URL for meta tags:", absoluteImageUrl);
 
     // Update document title
     document.title = `${title} - Soulart Blog`;
@@ -172,6 +177,9 @@ export default function BlogPostPage() {
     updateMetaTag("og:title", title);
     updateMetaTag("og:description", description);
     updateMetaTag("og:image", absoluteImageUrl);
+    updateMetaTag("og:image:width", "1200");
+    updateMetaTag("og:image:height", "630");
+    updateMetaTag("og:image:alt", title);
     updateMetaTag("og:url", url);
     updateMetaTag("og:type", "article");
     updateMetaTag("og:site_name", "Soulart");
@@ -181,6 +189,7 @@ export default function BlogPostPage() {
     updateMetaName("twitter:title", title);
     updateMetaName("twitter:description", description);
     updateMetaName("twitter:image", absoluteImageUrl);
+    updateMetaName("twitter:image:alt", title);
 
     // Additional meta tags
     updateMetaName("description", description);
