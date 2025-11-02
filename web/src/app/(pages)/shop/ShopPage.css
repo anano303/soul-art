@@ -120,35 +120,6 @@
 
 /* Sidebar keeps full filter stack on desktop */
 
-/* Filter Toggle Button */
-.filter-toggle-btn {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 12px 20px;
-  background-color: #012645;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 16px;
-  font-weight: 500;
-  margin-bottom: 0;
-  transition: background-color 0.3s ease, transform 0.2s ease;
-  z-index: 10;
-  position: relative;
-}
-
-.filter-toggle-btn:hover {
-  background-color: #013a5f;
-  transform: translateY(-2px);
-}
-
-.filter-toggle-btn svg {
-  width: 24px;
-  height: 24px;
-}
-
 /* Filter Overlay */
 .filter-overlay {
   position: fixed;
@@ -332,8 +303,8 @@
 .categories-section {
   width: 100%;
   /* max-width: 1400px; */
-  margin: 40px auto 2px auto;
-  padding: 0 20px;
+  margin: 20px auto 2px auto;
+  padding: 0 10px;
   box-sizing: border-box;
   /* overflow-x: hidden; */
   height: auto;
@@ -459,11 +430,6 @@
 @media (max-width: 1200px) {
   .categories-grid {
     gap: 20px;
-  }
-
-  .categories-section {
-    margin: 30px auto;
-    padding: 0 15px;
   }
 
   .category-card {
