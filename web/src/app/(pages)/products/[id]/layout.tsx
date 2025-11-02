@@ -1,134 +1,16 @@
 import { Metadata } from "next";
 import {
   GLOBAL_KEYWORDS,
-  extractKeywordsFromText,
+  collectProductKeywords,
   getArtistKeywords,
   getProductKeywords,
   mergeKeywordSets,
-  sanitizeKeyword,
 } from "@/lib/seo-keywords";
 
 interface LayoutProps {
   children: React.ReactNode;
   params: Promise<{ id: string }>;
 }
-
-export const collectProductKeywords = (product: any): string[] => {
-  const keywordMap = new Map<string, string>();
-
-  const register = (value?: string | null) => {
-    const sanitized = sanitizeKeyword(value);
-    if (!sanitized) {
-      return;
-    }
-
-    const key = sanitized.toLowerCase();
-    if (!keywordMap.has(key)) {
-      keywordMap.set(key, sanitized);
-    }
-  };
-
-  const registerText = (value?: string | null) => {
-    extractKeywordsFromText(value).forEach(register);
-  };
-
-  const registerArray = (values?: string[] | null) => {
-    values?.forEach(register);
-  };
-
-  const registerCategory = (category: any) => {
-    if (!category) {
-      return;
-    }
-
-    if (typeof category === "string") {
-      register(category);
-      return;
-    }
-
-    register(category?.name ?? category?.title ?? undefined);
-  };
-
-  const registerImage = (url?: string | null) => {
-    if (!url) {
-      return;
-    }
-
-    const segments = url.split("/");
-    const fileName = segments.pop();
-    if (fileName) {
-      register(fileName.replace(/\.[^/.]+$/, " "));
-    }
-  };
-
-  register(product?.name);
-  register(product?.nameEn);
-  register(product?.brand);
-  registerText(product?.description);
-  registerText(product?.descriptionEn);
-  registerText(product?.videoDescription);
-  registerText(product?.seoDescription);
-  register(product?.seoTitle);
-  register(product?.slug);
-
-  registerCategory(product?.category);
-  registerCategory(product?.subCategory);
-  registerCategory(product?.mainCategory);
-
-  if (Array.isArray(product?.hashtags)) {
-    product.hashtags.forEach((tag: string) => {
-      if (typeof tag === "string") {
-        register(tag.replace(/^#+/, ""));
-      }
-    });
-  }
-
-  registerArray(product?.materials ?? []);
-  registerArray(product?.colors ?? []);
-  registerArray(product?.sizes ?? []);
-  registerArray(product?.ageGroups ?? []);
-
-  if (product?.dimensions) {
-    register(`${product.dimensions.width ?? ""} width`);
-    register(`${product.dimensions.height ?? ""} height`);
-    register(`${product.dimensions.depth ?? ""} depth`);
-  }
-
-  if (Array.isArray(product?.variants)) {
-    product.variants.forEach((variant: any) => {
-      register(variant?.name);
-      register(variant?.sku);
-      if (Array.isArray(variant?.optionValues)) {
-        variant.optionValues.forEach((option: any) => register(option?.value));
-      }
-    });
-  }
-
-  if (Array.isArray(product?.images)) {
-    product.images.forEach((image: string) => registerImage(image));
-  }
-
-  if (product?.brandLogo) {
-    registerImage(product.brandLogo);
-  }
-
-  if (product?.user) {
-    register(product.user?.name);
-    register(product.user?.storeName);
-    register(product.user?.firstName);
-    register(product.user?.lastName);
-    register(product.user?.artistSlug);
-  }
-
-  if (Array.isArray(product?.reviews)) {
-    product.reviews.forEach((review: any) => {
-      register(review?.name);
-      registerText(review?.comment);
-    });
-  }
-
-  return Array.from(keywordMap.values());
-};
 
 export async function generateMetadata({
   params,

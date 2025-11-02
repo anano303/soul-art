@@ -348,6 +348,137 @@ type ProductKeywordSource = {
   } | null;
 };
 
+export const collectProductKeywords = (
+  product?: ProductKeywordSource | null
+): string[] => {
+  if (!product) {
+    return [];
+  }
+
+  const map = new Map<string, string>();
+
+  registerKeyword(map, product.name);
+  registerKeyword(map, product.nameEn);
+  registerKeyword(map, product.brand);
+  registerKeyword(map, product.seoTitle);
+  registerKeyword(map, product.slug);
+
+  registerKeywordsFromText(map, product.description);
+  registerKeywordsFromText(map, product.descriptionEn);
+  registerKeywordsFromText(map, product.summary);
+  registerKeywordsFromText(map, product.summaryEn);
+  registerKeywordsFromText(map, product.videoDescription);
+  registerKeywordsFromText(map, product.seoDescription);
+
+  resolveCategoryKeywords(product.category).forEach((value) =>
+    registerKeyword(map, value)
+  );
+  resolveCategoryKeywords(product.subCategory).forEach((value) =>
+    registerKeyword(map, value)
+  );
+  resolveCategoryKeywords(product.mainCategory).forEach((value) =>
+    registerKeyword(map, value)
+  );
+
+  const normalizedHashtags = product.hashtags?.map((tag) =>
+    typeof tag === "string" ? tag.replace(/^#+/, "") : tag
+  );
+  registerKeywordsFromArray(map, normalizedHashtags ?? undefined);
+  registerKeywordsFromArray(map, product.materials ?? undefined);
+  registerKeywordsFromArray(map, product.colors ?? undefined);
+  registerKeywordsFromArray(map, product.sizes ?? undefined);
+  registerKeywordsFromArray(map, product.ageGroups ?? undefined);
+
+  product.images?.forEach((image) => registerKeywordFromImage(map, image));
+  registerKeywordFromImage(map, product.brandLogo);
+
+  product.variants?.forEach((variant) => {
+    registerKeyword(map, variant?.name);
+    registerKeyword(map, variant?.sku);
+    variant?.optionValues?.forEach((option) =>
+      registerKeyword(map, option?.value)
+    );
+  });
+
+  if (product.dimensions) {
+    registerKeywordFromNumber(map, product.dimensions.width, "width");
+    registerKeywordFromNumber(map, product.dimensions.height, "height");
+    registerKeywordFromNumber(map, product.dimensions.depth, "depth");
+  }
+
+  registerKeywordFromNumber(map, product.discountPercentage, "discount");
+  registerYearFromDate(map, product.discountStartDate);
+  registerYearFromDate(map, product.discountEndDate);
+  registerKeywordFromNumber(map, product.minDeliveryDays, "min delivery");
+  registerKeywordFromNumber(map, product.maxDeliveryDays, "max delivery");
+  registerKeywordFromNumber(map, product.viewCount, "views");
+  registerKeywordFromNumber(map, product.rating, "rating");
+  registerKeywordFromNumber(map, product.numReviews, "reviews");
+  registerKeywordFromNumber(map, product.price, "price");
+  registerKeywordFromNumber(map, product.countInStock, "stock");
+
+  registerBooleanKeyword(map, product.isOriginal, ["original"], ["copy"]);
+
+  if (product.user) {
+    registerKeyword(map, product.user.name);
+    registerKeyword(map, product.user.storeName);
+    registerKeyword(map, product.user.firstName);
+    registerKeyword(map, product.user.lastName);
+    registerKeyword(map, product.user.username);
+    registerKeyword(map, product.user.artistSlug);
+    registerKeyword(map, product.user.artistLocation);
+    registerKeywordFromImage(map, product.user.storeLogo);
+
+    if (product.user.artistBio) {
+      Object.values(product.user.artistBio).forEach((entry) =>
+        registerKeywordsFromText(map, entry ?? undefined)
+      );
+    }
+
+    registerKeywordsFromArray(map, product.user.artistHighlights ?? undefined);
+    product.user.artistGallery?.forEach((image) =>
+      registerKeywordFromImage(map, image)
+    );
+
+    if (product.user.artistSocials) {
+      Object.values(product.user.artistSocials).forEach((handle) =>
+        registerKeyword(map, handle ?? undefined)
+      );
+    }
+
+    registerBooleanKeyword(
+      map,
+      product.user.artistOpenForCommissions,
+      ["commissions open"],
+      ["commissions closed"]
+    );
+
+    registerKeywordFromNumber(map, product.user.followersCount, "followers");
+    registerKeywordFromNumber(map, product.user.followingCount, "following");
+    registerKeyword(map, product.user.ownerFirstName);
+    registerKeyword(map, product.user.ownerLastName);
+    registerKeyword(map, product.user.identificationNumber);
+    registerKeyword(map, product.user.accountNumber);
+
+    if (product.user.seller) {
+      registerKeyword(map, product.user.seller.storeName);
+      registerKeywordFromImage(map, product.user.seller.storeLogo);
+      registerKeyword(map, product.user.seller.ownerFirstName);
+      registerKeyword(map, product.user.seller.ownerLastName);
+      registerKeyword(map, product.user.seller.phoneNumber);
+      registerKeyword(map, product.user.seller.email);
+    }
+  }
+
+  product.reviews?.forEach((review) => {
+    registerKeyword(map, review?.name);
+    registerKeyword(map, review?.nameEn);
+    registerKeywordsFromText(map, review?.comment ?? undefined);
+  });
+
+  return Array.from(map.values());
+};
+
 const resolveCategoryKeywords = (category?: MaybeCategory): string[] => {
   if (!category) {
     return [];

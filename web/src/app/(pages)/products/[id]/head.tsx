@@ -1,13 +1,13 @@
 import { Metadata } from "next";
 import {
   GLOBAL_KEYWORDS,
+  collectProductKeywords,
   extractKeywordsFromText,
   getArtistKeywords,
   getProductKeywords,
   mergeKeywordSets,
   sanitizeKeyword,
 } from "@/lib/seo-keywords";
-import { collectProductKeywords } from "./layout";
 
 interface HeadProps {
   params: { id: string };
