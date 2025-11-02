@@ -84,7 +84,6 @@
   display: none !important;
 }
 
-
 /* Sort Options */
 .sort-options {
   display: flex;
@@ -278,8 +277,6 @@
   background: rgba(1, 38, 69, 0.55);
 }
 
-
-
 .products-area {
   flex: 1;
 }
@@ -417,7 +414,7 @@
 }
 
 .category-name {
-  font-size: 24px;
+  font-size: 18px;
   font-weight: 600;
   margin-bottom: 5px;
   text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8);
