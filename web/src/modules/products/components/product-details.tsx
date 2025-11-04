@@ -1220,6 +1220,7 @@ export function ProductDetails({ product }: ProductDetailsProps) {
           productImage={product.images[currentImageIndex]}
           isOpen={isRoomViewerOpen}
           onClose={() => setIsRoomViewerOpen(false)}
+          dimensions={product.dimensions}
         />
       )}
 

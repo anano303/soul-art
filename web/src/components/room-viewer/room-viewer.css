@@ -281,6 +281,13 @@
   box-shadow: 0 6px 12px rgba(59, 130, 246, 0.3);
 }
 
+.artwork-size-summary .artwork-size-readonly {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1f2937;
+}
+
 .room-viewer-close-mobile {
   display: none;
   margin-top: auto;
@@ -305,20 +312,24 @@
     grid-template-columns: 1fr;
   }
 
-  .room-controls-panel {
-    flex-direction: row;
-    flex-wrap: wrap;
-    max-height: none;
-    overflow: visible;
-  }
-
-  /* .control-card {
-    flex: 1 1 260px;
-  } */
-
   .room-viewer-close-mobile {
     display: block;
     width: 100%;
+  }
+}
+
+@media (max-width: 1200px) and (min-width: 769px) {
+  .room-controls-panel {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 20px;
+    max-height: none;
+    overflow: visible;
+    padding-right: 0;
+  }
+
+  .control-card {
+    min-height: 100%;
   }
 }
 
