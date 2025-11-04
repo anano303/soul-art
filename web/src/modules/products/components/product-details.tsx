@@ -1227,7 +1227,7 @@ export function ProductDetails({ product }: ProductDetailsProps) {
             />
           </div>
 
-          <div className="tabs">
+          {/* <div className="tabs">
             <div className="tabs-list">
               {hasVideo && (
                 <button
@@ -1286,7 +1286,7 @@ export function ProductDetails({ product }: ProductDetailsProps) {
               />
               <ProductReviews product={product} />
             </div>
-          </div>
+          </div> */}
         </div>
       </div>
 
