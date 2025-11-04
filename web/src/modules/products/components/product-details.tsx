@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo, useRef } from "react";
 import Image from "next/image";
-import { StarIcon, X, Truck, Ruler, Share2, Package } from "lucide-react";
+import { StarIcon, X, Truck, Ruler, Share2, Package, Play } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ReviewForm } from "./review-form";
 import { ProductReviews } from "./product-reviews";
@@ -12,7 +12,7 @@ import "./productDetails.scss";
 const PRIMARY_COLOR = "#012645";
 import "./ProductCard.css"; // Import ProductCard styles for button consistency
 import "./videoTabs.css"; // Import new tabs styles
-import { Product } from "@/types";
+import { Product, MainCategory } from "@/types";
 import Link from "next/link";
 import { ShareButtons } from "@/components/share-buttons/share-buttons";
 import { RoomViewer } from "@/components/room-viewer/room-viewer";
@@ -25,6 +25,18 @@ import { ProductGrid } from "./product-grid";
 import ProductSchema from "@/components/ProductSchema";
 import { AddToCartButton } from "./AddToCartButton";
 import { trackViewContent } from "@/components/MetaPixel";
+
+type MediaItem =
+  | {
+      type: "video";
+      source: string;
+      thumbnail: string | null;
+    }
+  | {
+      type: "image";
+      source: string;
+      thumbnail: string;
+    };
 
 // Similar Products Component
 function SimilarProducts({
@@ -174,37 +186,120 @@ export function ProductDetails({ product }: ProductDetailsProps) {
   const router = useRouter();
   const { t, language } = useLanguage();
 
-  const resolvedYoutubeEmbedUrl = useMemo(() => {
-    if (product.youtubeEmbedUrl) {
-      return product.youtubeEmbedUrl;
-    }
+  const { resolvedYoutubeEmbedUrl, videoId } = useMemo(() => {
+    let embedUrl: string | null = null;
+    let extractedVideoId = "";
 
-    if (product.youtubeVideoUrl) {
+    const extractIdFromUrl = (url: string) => {
       try {
-        const youtubeUrl = new URL(product.youtubeVideoUrl);
-        let videoId = "";
-
-        if (youtubeUrl.hostname.includes("youtu.be")) {
-          videoId = youtubeUrl.pathname.substring(1);
-        } else {
-          const paramId = youtubeUrl.searchParams.get("v");
-          if (paramId) {
-            videoId = paramId;
-          }
+        const parsed = new URL(url);
+        if (parsed.hostname.includes("youtu.be")) {
+          return parsed.pathname.replace("/", "").split("/")[0];
         }
-
-        if (videoId) {
-          return `https://www.youtube.com/embed/${videoId}`;
+        const pathIdMatch = parsed.pathname.match(/\/embed\/([^/?]+)/);
+        if (pathIdMatch && pathIdMatch[1]) {
+          return pathIdMatch[1];
         }
+        const vParam = parsed.searchParams.get("v");
+        return vParam || "";
       } catch (error) {
         console.error("Failed to parse YouTube URL", error);
+        return "";
+      }
+    };
+
+    if (product.youtubeEmbedUrl) {
+      embedUrl = product.youtubeEmbedUrl;
+      extractedVideoId = extractIdFromUrl(product.youtubeEmbedUrl);
+    }
+
+    if (!embedUrl && product.youtubeVideoUrl) {
+      const id = extractIdFromUrl(product.youtubeVideoUrl);
+      if (id) {
+        embedUrl = `https://www.youtube.com/embed/${id}`;
+        extractedVideoId = id;
       }
     }
 
-    return null;
+    return { resolvedYoutubeEmbedUrl: embedUrl, videoId: extractedVideoId };
   }, [product.youtubeEmbedUrl, product.youtubeVideoUrl]);
 
+  const previewYoutubeUrl = useMemo(() => {
+    if (!videoId) {
+      return null;
+    }
+
+    const params = new URLSearchParams({
+      autoplay: "1",
+      mute: "1",
+      controls: "0",
+      loop: "1",
+      playlist: videoId,
+      playsinline: "1",
+      rel: "0",
+      modestbranding: "1",
+    });
+
+    return `https://www.youtube.com/embed/${videoId}?${params.toString()}`;
+  }, [videoId]);
+
   const hasVideo = Boolean(resolvedYoutubeEmbedUrl || product.videoDescription);
+
+  const mediaItems = useMemo<MediaItem[]>(() => {
+    const items: MediaItem[] = [];
+
+    if (resolvedYoutubeEmbedUrl) {
+      const videoSource =
+        previewYoutubeUrl ||
+        `${resolvedYoutubeEmbedUrl}?autoplay=1&mute=1&controls=0&rel=0&playsinline=1`;
+      const videoThumbnail = videoId
+        ? `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`
+        : null;
+      items.push({
+        type: "video",
+        source: videoSource,
+        thumbnail: videoThumbnail,
+      });
+    }
+
+    if (Array.isArray(product.images)) {
+      product.images.forEach((image) => {
+        if (image) {
+          items.push({ type: "image", source: image, thumbnail: image });
+        }
+      });
+    }
+
+    return items;
+  }, [product.images, previewYoutubeUrl, resolvedYoutubeEmbedUrl, videoId]);
+
+  const imageMediaIndexes = useMemo(() => {
+    return mediaItems.reduce<number[]>((acc, item, index) => {
+      if (item.type === "image") {
+        acc.push(index);
+      }
+      return acc;
+    }, []);
+  }, [mediaItems]);
+
+  const firstImageMediaIndex = useMemo(() => {
+    return imageMediaIndexes.length > 0 ? imageMediaIndexes[0] : -1;
+  }, [imageMediaIndexes]);
+
+  const currentMediaItem = mediaItems[currentImageIndex] ?? null;
+
+  useEffect(() => {
+    if (mediaItems.length === 0) {
+      if (currentImageIndex !== 0) {
+        setCurrentImageIndex(0);
+      }
+      return;
+    }
+
+    if (currentImageIndex > mediaItems.length - 1) {
+      setCurrentImageIndex(0);
+    }
+  }, [mediaItems.length, currentImageIndex]);
 
   const displayedMaterials = useMemo(() => {
     const geMaterials = Array.isArray(product.materials)
@@ -334,6 +429,32 @@ export function ProductDetails({ product }: ProductDetailsProps) {
 
   const isDigitalCategory =
     rawCategoryTokens.includes("ციფრ") || rawCategoryTokens.includes("digital");
+
+  const mainCategoryRawName = getRawName(product.mainCategory).toLowerCase();
+  const mainCategoryLocalizedName = getLocalizedName(
+    product.mainCategory
+  ).toLowerCase();
+  const categoryStructureMain = (
+    product.categoryStructure?.main || ""
+  ).toString();
+
+  const isPaintingCategory =
+    categoryStructureMain.toUpperCase() === MainCategory.PAINTINGS ||
+    mainCategoryRawName === "paintings" ||
+    mainCategoryRawName === "painting" ||
+    mainCategoryLocalizedName === "paintings" ||
+    mainCategoryLocalizedName === "painting" ||
+    rawCategoryTokens.includes("painting") ||
+    rawCategoryTokens.includes("paintings") ||
+    rawCategoryTokens.includes("ნახატ");
+
+  const canShowRoomViewer = isPaintingCategory && imageMediaIndexes.length > 0;
+
+  useEffect(() => {
+    if (!canShowRoomViewer && isRoomViewerOpen) {
+      setIsRoomViewerOpen(false);
+    }
+  }, [canShowRoomViewer, isRoomViewerOpen]);
 
   // Parse dimensions if they are stored as a string
   useEffect(() => {
@@ -524,6 +645,9 @@ export function ProductDetails({ product }: ProductDetailsProps) {
 
   // Function to open fullscreen image
   const openFullscreen = () => {
+    if (currentMediaItem?.type !== "image") {
+      return;
+    }
     setIsFullscreenOpen(true);
   };
 
@@ -535,21 +659,19 @@ export function ProductDetails({ product }: ProductDetailsProps) {
   // Keyboard navigation for gallery
   useEffect(() => {
     const handleKeyPress = (e: KeyboardEvent) => {
-      if (!product?.images || product.images.length <= 1) return;
+      if (mediaItems.length <= 1) {
+        return;
+      }
 
       if (e.key === "ArrowLeft") {
         e.preventDefault();
-        setCurrentImageIndex(
-          currentImageIndex === 0
-            ? product.images.length - 1
-            : currentImageIndex - 1
+        setCurrentImageIndex((prevIndex) =>
+          prevIndex === 0 ? mediaItems.length - 1 : prevIndex - 1
         );
       } else if (e.key === "ArrowRight") {
         e.preventDefault();
-        setCurrentImageIndex(
-          currentImageIndex === product.images.length - 1
-            ? 0
-            : currentImageIndex + 1
+        setCurrentImageIndex((prevIndex) =>
+          prevIndex === mediaItems.length - 1 ? 0 : prevIndex + 1
         );
       } else if (e.key === "Escape" && isFullscreenOpen) {
         closeFullscreen();
@@ -558,16 +680,12 @@ export function ProductDetails({ product }: ProductDetailsProps) {
 
     window.addEventListener("keydown", handleKeyPress);
     return () => window.removeEventListener("keydown", handleKeyPress);
-  }, [currentImageIndex, product.images, isFullscreenOpen]);
+  }, [closeFullscreen, isFullscreenOpen, mediaItems.length]);
 
   if (!product) return null;
 
   // Safety check for images array
-  if (
-    !product.images ||
-    !Array.isArray(product.images) ||
-    product.images.length === 0
-  ) {
+  if (mediaItems.length === 0) {
     return (
       <div className="container">
         <div className="error-message">
@@ -593,7 +711,9 @@ export function ProductDetails({ product }: ProductDetailsProps) {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
                 transition={{ duration: 0.2 }}
-                className="image-wrapper"
+                className={`image-wrapper ${
+                  currentMediaItem?.type === "video" ? "is-video" : ""
+                }`}
                 onClick={openFullscreen}
               >
                 {isDigitalCategory && categoryLabel && (
@@ -611,69 +731,103 @@ export function ProductDetails({ product }: ProductDetailsProps) {
                     -{product.discountPercentage}% OFF
                   </span>
                 )}
-                {product.images && product.images[currentImageIndex] && (
+
+                {currentMediaItem?.type === "video" ? (
+                  <div className="product-video-frame">
+                    <iframe
+                      src={currentMediaItem.source}
+                      title="Product video"
+                      frameBorder={0}
+                      allow="autoplay; clipboard-write; encrypted-media; picture-in-picture"
+                      allowFullScreen
+                      tabIndex={-1}
+                    />
+                  </div>
+                ) : currentMediaItem?.type === "image" ? (
                   <Image
-                    src={product.images[currentImageIndex]}
+                    src={currentMediaItem.source}
                     alt={displayName}
                     fill
                     className="object-contain"
                     loading="eager"
                   />
-                )}
+                ) : null}
 
-                {/* Zoom Indicator */}
-                <div className="zoom-indicator">
-                  <svg
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                  >
-                    <circle cx="11" cy="11" r="8" />
-                    <path d="m21 21-4.35-4.35" />
-                    <path d="M11 8v6" />
-                    <path d="M8 11h6" />
-                  </svg>
-                  {language === "en" ? "Click to zoom" : "დააჭირე გასადიდებლად"}
-                </div>
+                {currentMediaItem?.type === "image" && (
+                  <div className="zoom-indicator">
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                    >
+                      <circle cx="11" cy="11" r="8" />
+                      <path d="m21 21-4.35-4.35" />
+                      <path d="M11 8v6" />
+                      <path d="M8 11h6" />
+                    </svg>
+                    {language === "en"
+                      ? "Click to zoom"
+                      : "დააჭირე გასადიდებლად"}
+                  </div>
+                )}
               </motion.div>
             </AnimatePresence>
           </div>
 
           <div className="thumbnail-container">
-            {product.images?.map(
-              (image, index) =>
-                image && (
-                  <motion.button
-                    key={image}
-                    onClick={() => setCurrentImageIndex(index)}
-                    className={`thumbnail ${
-                      index === currentImageIndex ? "active" : ""
-                    }`}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                  >
+            {mediaItems.map((item, index) => {
+              const isActive = index === currentImageIndex;
+              const isVideo = item.type === "video";
+
+              return (
+                <motion.button
+                  key={`${item.type}-${index}`}
+                  onClick={() => setCurrentImageIndex(index)}
+                  className={`thumbnail ${isActive ? "active" : ""} ${
+                    isVideo ? "video" : ""
+                  }`}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  {item.thumbnail ? (
                     <Image
-                      src={image}
-                      alt={`${displayName} view ${index + 1}`}
+                      src={item.thumbnail}
+                      alt={
+                        isVideo
+                          ? "Video preview"
+                          : `${displayName} view ${index + 1}`
+                      }
                       fill
                       className="object-cover"
                     />
-                  </motion.button>
-                )
-            )}
+                  ) : (
+                    <div className="thumbnail-video-fallback">
+                      <Play size={32} />
+                    </div>
+                  )}
+                  {isVideo && (
+                    <div className="thumbnail-video-indicator">
+                      <Play size={14} />
+                    </div>
+                  )}
+                </motion.button>
+              );
+            })}
           </div>
 
-          <div className="try-on-wall-container">
-            <motion.button
-              className="try-on-wall-btn"
-              onClick={() => setIsRoomViewerOpen(true)}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              {t("product.tryInRoom")}
-            </motion.button>
-          </div>
+          {canShowRoomViewer && product.images?.length ? (
+            <div className="try-on-wall-container">
+              <motion.button
+                className="try-on-wall-btn"
+                onClick={() => setIsRoomViewerOpen(true)}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                {t("product.tryInRoom")}
+              </motion.button>
+            </div>
+          ) : null}
         </div>
 
         {/* Right Column - Product Info */}
@@ -1067,6 +1221,9 @@ export function ProductDetails({ product }: ProductDetailsProps) {
             <ShareButtons
               url={typeof window !== "undefined" ? window.location.href : ""}
               title={`${displayName} by ${product.brand}`}
+              isOriginal={product.isOriginal}
+              materials={displayedMaterials}
+              dimensions={dimensions || undefined}
             />
           </div>
 
@@ -1134,90 +1291,96 @@ export function ProductDetails({ product }: ProductDetailsProps) {
       </div>
 
       {/* Fullscreen Image Modal */}
-      {isFullscreenOpen &&
-        product.images &&
-        product.images[currentImageIndex] && (
-          <div className="fullscreen-modal" onClick={closeFullscreen}>
-            <button
-              className="fullscreen-close"
-              onClick={(e) => {
-                e.stopPropagation();
-                closeFullscreen();
-              }}
-            >
-              <X />
-            </button>
-            <div
-              className="fullscreen-image-container"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <Image
-                src={product.images[currentImageIndex]}
-                alt={displayName}
-                width={1200}
-                height={1200}
-                quality={100}
-                className="fullscreen-image"
-              />
+      {isFullscreenOpen && currentMediaItem?.type === "image" && (
+        <div className="fullscreen-modal" onClick={closeFullscreen}>
+          <button
+            className="fullscreen-close"
+            onClick={(e) => {
+              e.stopPropagation();
+              closeFullscreen();
+            }}
+          >
+            <X />
+          </button>
+          <div
+            className="fullscreen-image-container"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <Image
+              src={currentMediaItem.source}
+              alt={displayName}
+              width={1200}
+              height={1200}
+              quality={100}
+              className="fullscreen-image"
+            />
 
-              {/* Gallery Navigation in Fullscreen */}
-              {product.images && product.images.length > 1 && (
-                <>
-                  <button
-                    className="fullscreen-gallery-nav prev"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setCurrentImageIndex(
-                        currentImageIndex === 0
-                          ? product.images!.length - 1
-                          : currentImageIndex - 1
-                      );
-                    }}
+            {/* Gallery Navigation in Fullscreen */}
+            {imageMediaIndexes.length > 1 && (
+              <>
+                <button
+                  className="fullscreen-gallery-nav prev"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    const currentPos =
+                      imageMediaIndexes.indexOf(currentImageIndex);
+                    const newPos =
+                      currentPos === 0
+                        ? imageMediaIndexes.length - 1
+                        : currentPos - 1;
+                    setCurrentImageIndex(imageMediaIndexes[newPos]);
+                  }}
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
                   >
-                    <svg
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2.5"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <polyline points="15,18 9,12 15,6" />
-                    </svg>
-                  </button>
+                    <polyline points="15,18 9,12 15,6" />
+                  </svg>
+                </button>
 
-                  <button
-                    className="fullscreen-gallery-nav next"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setCurrentImageIndex(
-                        currentImageIndex === product.images!.length - 1
-                          ? 0
-                          : currentImageIndex + 1
-                      );
-                    }}
+                <button
+                  className="fullscreen-gallery-nav next"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    const currentPos =
+                      imageMediaIndexes.indexOf(currentImageIndex);
+                    const newPos =
+                      currentPos === imageMediaIndexes.length - 1
+                        ? 0
+                        : currentPos + 1;
+                    setCurrentImageIndex(imageMediaIndexes[newPos]);
+                  }}
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
                   >
-                    <svg
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2.5"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <polyline points="9,18 15,12 9,6" />
-                    </svg>
-                  </button>
-                </>
-              )}
-            </div>
+                    <polyline points="9,18 15,12 9,6" />
+                  </svg>
+                </button>
+              </>
+            )}
           </div>
-        )}
+        </div>
+      )}
 
       {/* Room Viewer Modal */}
-      {product.images && product.images[currentImageIndex] && (
+      {canShowRoomViewer && isRoomViewerOpen && (
         <RoomViewer
-          productImage={product.images[currentImageIndex]}
+          productImage={
+            currentMediaItem?.type === "image"
+              ? currentMediaItem.source
+              : mediaItems.find((m) => m.type === "image")?.source || ""
+          }
           isOpen={isRoomViewerOpen}
           onClose={() => setIsRoomViewerOpen(false)}
           dimensions={product.dimensions}
