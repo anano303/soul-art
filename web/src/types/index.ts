@@ -40,6 +40,8 @@ export interface ArtistProductSummary {
   numReviews?: number;
   description?: string;
   discountPercentage?: number;
+  discountStartDate?: string | null;
+  discountEndDate?: string | null;
   countInStock?: number;
   deliveryType?: "SELLER" | "SoulArt";
   minDeliveryDays?: number;
