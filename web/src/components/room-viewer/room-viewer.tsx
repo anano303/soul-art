@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import Image from "next/image";
-import { motion } from "framer-motion";
+import { motion, useMotionValue } from "framer-motion";
 import "./room-viewer.css";
 import { useLanguage } from "@/hooks/LanguageContext";
 
@@ -62,7 +62,7 @@ const ROOM_SCALE_MULTIPLIER: Record<RoomType, number> = {
 };
 
 const DEFAULT_ARTWORK_HEIGHT_CM = 90;
-const MAX_ARTWORK_RATIO = 0.85;
+const MAX_ARTWORK_RATIO = 0.75;
 const FALLBACK_HEIGHT_RATIO = 0.45;
 const MIN_ARTWORK_HEIGHT_RATIO = 0.2;
 
@@ -74,7 +74,6 @@ export function RoomViewer({
 }: RoomViewerProps) {
   const [currentRoom, setCurrentRoom] = useState<RoomType>("living");
   const [wallColor, setWallColor] = useState("#FFFFFF");
-  const [productPosition, setProductPosition] = useState({ x: 0, y: 0 });
   const [roomImagesLoaded, setRoomImagesLoaded] = useState(false);
   const [productLoaded, setProductLoaded] = useState(false);
   const [artworkSizePx, setArtworkSizePx] = useState({ width: 0, height: 0 });
@@ -86,9 +85,14 @@ export function RoomViewer({
     width?: number;
     height?: number;
   }>({});
+  const [initialDistance, setInitialDistance] = useState(0);
+  const [initialScale, setInitialScale] = useState(1);
   const { t } = useLanguage();
 
   const containerRef = useRef<HTMLDivElement>(null);
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
+  const scale = useMotionValue(1);
 
   useEffect(() => {
     const checkImagesLoaded = async () => {
@@ -103,11 +107,6 @@ export function RoomViewer({
 
     checkImagesLoaded();
   }, []);
-
-  useEffect(() => {
-    setProductPosition({ x: 0, y: 0 });
-  }, [currentRoom, isOpen]);
-
   useEffect(() => {
     setProductLoaded(false);
   }, [productImage]);
@@ -117,7 +116,6 @@ export function RoomViewer({
       return;
     }
 
-    setProductPosition({ x: 0, y: 0 });
     setArtworkSizePx({ width: 0, height: 0 });
     setResolvedDimensionsCm({});
   }, [productImage]);
@@ -165,6 +163,15 @@ export function RoomViewer({
     if (widthCmRaw && heightCmRaw) {
       resolvedWidthCm = widthCmRaw;
       resolvedHeightCm = heightCmRaw;
+
+      if (aspectRatio > 0) {
+        const dimensionRatio = resolvedWidthCm / resolvedHeightCm;
+        const ratioDifference = Math.abs(dimensionRatio - aspectRatio);
+
+        if (ratioDifference / aspectRatio > 0.08) {
+          resolvedWidthCm = resolvedHeightCm * aspectRatio;
+        }
+      }
     } else if (widthCmRaw && aspectRatio > 0) {
       resolvedWidthCm = widthCmRaw;
       resolvedHeightCm = widthCmRaw / aspectRatio;
@@ -188,8 +195,8 @@ export function RoomViewer({
     }
 
     const scaleMultiplier = ROOM_SCALE_MULTIPLIER[currentRoom] ?? 1;
-    const pxPerCmX = (containerWidth * scaleMultiplier) / roomScale.width;
-    const pxPerCmY = (containerHeight * scaleMultiplier) / roomScale.height;
+    const pxPerCmX = containerWidth / roomScale.width;
+    const pxPerCmY = containerHeight / roomScale.height;
 
     let widthPx = resolvedWidthCm * pxPerCmX;
     let heightPx = resolvedHeightCm * pxPerCmY;
@@ -200,7 +207,7 @@ export function RoomViewer({
     const initialScale = Math.min(
       widthPx > 0 ? maxWidthPx / widthPx : 1,
       heightPx > 0 ? maxHeightPx / heightPx : 1,
-      1,
+      1
     );
 
     if (initialScale < 1) {
@@ -218,7 +225,7 @@ export function RoomViewer({
     const postMinScale = Math.min(
       widthPx > 0 ? maxWidthPx / widthPx : 1,
       heightPx > 0 ? maxHeightPx / heightPx : 1,
-      1,
+      1
     );
 
     if (postMinScale < 1) {
@@ -243,13 +250,22 @@ export function RoomViewer({
       width: resolvedWidthCm,
       height: resolvedHeightCm,
     });
-    setProductPosition({ x: 0, y: 0 });
+
+    const initialX = Math.max((containerWidth - widthPx) / 2, 0);
+    const initialY = Math.max(containerHeight * 0.3 - heightPx / 2, 0);
+
+    x.set(initialX);
+    y.set(initialY);
+    scale.set(1);
   }, [
     currentRoom,
     dimensions?.height,
     dimensions?.width,
     imageNaturalSize.height,
     imageNaturalSize.width,
+    x,
+    y,
+    scale,
   ]);
 
   useEffect(() => {
@@ -303,11 +319,46 @@ export function RoomViewer({
 
   const handleRoomChange = (room: RoomType) => {
     setCurrentRoom(room);
-    setProductPosition({ x: 0, y: 0 });
+    scale.set(1); // Reset zoom when changing rooms
   };
 
   const handleColorChange = (color: string) => {
     setWallColor(color);
+  };
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (e.touches.length === 2) {
+      const touch1 = e.touches[0];
+      const touch2 = e.touches[1];
+      const distance = Math.sqrt(
+        Math.pow(touch2.clientX - touch1.clientX, 2) +
+          Math.pow(touch2.clientY - touch1.clientY, 2)
+      );
+      setInitialDistance(distance);
+      setInitialScale(scale.get());
+    }
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (e.touches.length === 2 && initialDistance > 0) {
+      e.preventDefault(); // Prevent scrolling
+      const touch1 = e.touches[0];
+      const touch2 = e.touches[1];
+      const currentDistance = Math.sqrt(
+        Math.pow(touch2.clientX - touch1.clientX, 2) +
+          Math.pow(touch2.clientY - touch1.clientY, 2)
+      );
+      const scaleFactor = currentDistance / initialDistance;
+      const newScale = Math.max(0.3, Math.min(5, initialScale * scaleFactor));
+      scale.set(newScale);
+    }
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (e.touches.length < 2) {
+      setInitialDistance(0);
+      setInitialScale(1);
+    }
   };
 
   const hasComputedArtworkSize =
@@ -351,7 +402,20 @@ export function RoomViewer({
               ref={containerRef}
               style={{ backgroundColor: wallColor }}
             >
-              <div className="room-image-wrapper">
+              <motion.div
+                className="room-image-wrapper"
+                drag={false}
+                onTouchStart={handleTouchStart}
+                onTouchMove={handleTouchMove}
+                onTouchEnd={handleTouchEnd}
+                style={{
+                  scale,
+                  originX: 0.5,
+                  originY: 0.5,
+                  width: "100%",
+                  height: "100%",
+                }}
+              >
                 {roomImagesLoaded ? (
                   <Image
                     src={rooms[currentRoom]}
@@ -370,6 +434,7 @@ export function RoomViewer({
                   className="product-on-wall"
                   drag
                   dragConstraints={containerRef}
+                  dragElastic={0}
                   dragMomentum={false}
                   style={{
                     width: hasComputedArtworkSize
@@ -379,17 +444,10 @@ export function RoomViewer({
                       ? `${artworkSizePx.height}px`
                       : `${fallbackHeightPercent}%`,
                     position: "absolute",
-                    top: "30%",
-                    left: "50%",
-                    transform: "translate(-50%, -50%)",
-                    x: productPosition.x,
-                    y: productPosition.y,
-                  }}
-                  onDragEnd={(event, info) => {
-                    setProductPosition((prev) => ({
-                      x: prev.x + info.offset.x,
-                      y: prev.y + info.offset.y,
-                    }));
+                    top: 0,
+                    left: 0,
+                    x,
+                    y,
                   }}
                 >
                   {productImage && (
@@ -440,7 +498,7 @@ export function RoomViewer({
                     </div>
                   )}
                 </motion.div>
-              </div>
+              </motion.div>
             </div>
             <div className="instructions">
               <p>{t("roomViewer.instructions")}</p>
