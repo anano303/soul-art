@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { fetchWithAuth } from "@/lib/fetch-with-auth";
 import "./product-filters.css";
@@ -69,6 +69,18 @@ export function ProductFilters({
   const [brandSearchTerm, setBrandSearchTerm] = useState<string>("");
   const [hasHorizontalScroll, setHasHorizontalScroll] = useState(false);
   const [showBrandsDropdown, setShowBrandsDropdown] = useState(false);
+  const [isMaterialSectionOpen, setIsMaterialSectionOpen] = useState(() => {
+    if (Array.isArray(selectedMaterial)) {
+      return selectedMaterial.length > 0;
+    }
+    return Boolean(selectedMaterial);
+  });
+  const [isDimensionSectionOpen, setIsDimensionSectionOpen] = useState(() => {
+    if (Array.isArray(selectedDimension)) {
+      return selectedDimension.length > 0;
+    }
+    return Boolean(selectedDimension);
+  });
 
   // Refs for scroll and positioning
   const filterButtonRef = useRef<HTMLButtonElement>(null);
@@ -142,6 +154,22 @@ export function ProductFilters({
       setShowSubcategories(false);
     }
   }, [selectedCategoryId]);
+
+  useEffect(() => {
+    if (Array.isArray(selectedMaterial) && selectedMaterial.length > 0) {
+      setIsMaterialSectionOpen(true);
+    } else if (typeof selectedMaterial === "string" && selectedMaterial) {
+      setIsMaterialSectionOpen(true);
+    }
+  }, [selectedMaterial]);
+
+  useEffect(() => {
+    if (Array.isArray(selectedDimension) && selectedDimension.length > 0) {
+      setIsDimensionSectionOpen(true);
+    } else if (typeof selectedDimension === "string" && selectedDimension) {
+      setIsDimensionSectionOpen(true);
+    }
+  }, [selectedDimension]);
 
   // Fetch all categories with error handling
   const {
@@ -337,6 +365,30 @@ export function ProductFilters({
     enabled: !!selectedCategoryId,
   });
 
+  const normalizedSelectedMaterials = useMemo(() => {
+    if (Array.isArray(selectedMaterial)) {
+      return selectedMaterial.map((material) => material.trim()).filter(Boolean);
+    }
+    if (typeof selectedMaterial === "string" && selectedMaterial) {
+      return [selectedMaterial.trim()].filter(Boolean);
+    }
+    return [];
+  }, [selectedMaterial]);
+
+  const sortedMaterials = useMemo(() => {
+    return Array.from(
+      new Set(
+        availableMaterials
+          .map((material) => material.trim())
+          .filter((material) => material.length > 0),
+      ),
+    ).sort((a, b) =>
+      a.localeCompare(b, language === "en" ? "en" : "ka", {
+        sensitivity: "base",
+      }),
+    );
+  }, [availableMaterials, language]);
+
   // Fetch all available dimensions
   const { data: availableDimensions = [] } = useQuery<string[]>({
     queryKey: ["dimensions", selectedCategoryId, selectedSubCategoryId],
@@ -436,6 +488,16 @@ export function ProductFilters({
     refetchOnWindowFocus: false,
     enabled: !!selectedCategoryId,
   });
+
+  const normalizedSelectedDimensions = useMemo(() => {
+    if (Array.isArray(selectedDimension)) {
+      return selectedDimension.map((dimension) => dimension.trim()).filter(Boolean);
+    }
+    if (typeof selectedDimension === "string" && selectedDimension) {
+      return [selectedDimension.trim()].filter(Boolean);
+    }
+    return [];
+  }, [selectedDimension]);
 
   // Get available attributes based on selected subcategory
   const getAvailableAttributes = (
@@ -1303,42 +1365,72 @@ export function ProductFilters({
                 </div>
               </div>
               {/* Materials Filter */}
-              {selectedCategoryId && availableMaterials.length > 0 && (
+              {selectedCategoryId && sortedMaterials.length > 0 && (
                 <div className="filter-section compact-filter">
                   <div className="filter-header compact">
-                    <h3 className="filter-title compact">
-                      {language === "en" ? "Materials" : "მასალები"}
-                    </h3>
-                  </div>
-                  <div className="filter-options compact">
-                    <div className="checkbox-group">
-                      {availableMaterials.slice(0, 5).map((material) => {
-                        const selectedMaterialsArray = Array.isArray(
-                          selectedMaterial
-                        )
-                          ? selectedMaterial
-                          : selectedMaterial
-                          ? [selectedMaterial]
-                          : [];
-                        const isChecked =
-                          selectedMaterialsArray.includes(material);
-
-                        return (
-                          <label key={material} className="checkbox-label">
-                            <input
-                              type="checkbox"
-                              checked={isChecked}
-                              onChange={() =>
-                                onMaterialFilterChange?.(material)
-                              }
-                              className="checkbox-input"
-                            />
-                            <span className="checkbox-text">{material}</span>
-                          </label>
-                        );
-                      })}
+                    <div>
+                      <h3 className="filter-title compact">
+                        {language === "en" ? "Materials" : "მასალები"}
+                      </h3>
+                    </div>
+                    <div className="filter-header-actions">
+                      {normalizedSelectedMaterials.length > 0 && (
+                        <button
+                          className="filter-clear-btn"
+                          onClick={() => onMaterialFilterChange?.("")}
+                          aria-label={t("shop.clear")}
+                        >
+                          {t("shop.clear")}
+                        </button>
+                      )}
+                      <button
+                        type="button"
+                        className="filter-collapse-btn"
+                        onClick={() =>
+                          setIsMaterialSectionOpen((previous) => !previous)
+                        }
+                        aria-expanded={isMaterialSectionOpen}
+                        aria-controls="materials-filter-options"
+                      >
+                        {isMaterialSectionOpen
+                          ? language === "en"
+                            ? "Hide"
+                            : "დამალე"
+                          : language === "en"
+                          ? "Show"
+                          : "გახსენი"}
+                      </button>
                     </div>
                   </div>
+                  {isMaterialSectionOpen && (
+                    <div
+                      className="filter-options compact"
+                      id="materials-filter-options"
+                    >
+                      <div className="checkbox-group">
+                        {sortedMaterials.map((material) => {
+                          const isChecked =
+                            normalizedSelectedMaterials.includes(material);
+
+                          return (
+                            <label key={material} className="checkbox-label">
+                              <input
+                                type="checkbox"
+                                checked={isChecked}
+                                onChange={() =>
+                                  onMaterialFilterChange?.(material)
+                                }
+                                className="checkbox-input"
+                              />
+                              <span className="checkbox-text">
+                                {material}
+                              </span>
+                            </label>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
               {/* Dimensions Filter */}
@@ -1355,42 +1447,72 @@ export function ProductFilters({
                           : "ზომები სანტიმეტრებში (სიგანე / სიმაღლე / სიღრმე)"}
                       </p>
                     </div>
-                  </div>
-                  <div className="filter-options compact">
-                    <div className="checkbox-group">
-                      {availableDimensions.map((dimension) => {
-                        const selectedDimensionsArray = Array.isArray(
-                          selectedDimension
-                        )
-                          ? selectedDimension
-                          : selectedDimension
-                          ? [selectedDimension]
-                          : [];
-                        const normalizedDimension = dimension.trim();
-                        const isChecked =
-                          selectedDimensionsArray.includes(normalizedDimension);
-
-                        return (
-                          <label key={dimension} className="checkbox-label">
-                            <input
-                              type="checkbox"
-                              checked={isChecked}
-                              onChange={() =>
-                                onDimensionFilterChange?.(normalizedDimension)
-                              }
-                              className="checkbox-input"
-                            />
-                            <span className="checkbox-text">
-                              {normalizedDimension}
-                              <span className="dimension-unit">
-                                {language === "en" ? " cm" : " სმ"}
-                              </span>
-                            </span>
-                          </label>
-                        );
-                      })}
+                    <div className="filter-header-actions">
+                      {normalizedSelectedDimensions.length > 0 && (
+                        <button
+                          className="filter-clear-btn"
+                          onClick={() => onDimensionFilterChange?.("")}
+                          aria-label={t("shop.clear")}
+                        >
+                          {t("shop.clear")}
+                        </button>
+                      )}
+                      <button
+                        type="button"
+                        className="filter-collapse-btn"
+                        onClick={() =>
+                          setIsDimensionSectionOpen((previous) => !previous)
+                        }
+                        aria-expanded={isDimensionSectionOpen}
+                        aria-controls="dimensions-filter-options"
+                      >
+                        {isDimensionSectionOpen
+                          ? language === "en"
+                            ? "Hide"
+                            : "დამალე"
+                          : language === "en"
+                          ? "Show"
+                          : "გახსენი"}
+                      </button>
                     </div>
                   </div>
+                  {isDimensionSectionOpen && (
+                    <div
+                      className="filter-options compact"
+                      id="dimensions-filter-options"
+                    >
+                      <div className="checkbox-group">
+                        {availableDimensions.map((dimension) => {
+                          const normalizedDimension = dimension.trim();
+                          const isChecked =
+                            normalizedSelectedDimensions.includes(
+                              normalizedDimension
+                            );
+
+                          return (
+                            <label key={dimension} className="checkbox-label">
+                              <input
+                                type="checkbox"
+                                checked={isChecked}
+                                onChange={() =>
+                                  onDimensionFilterChange?.(
+                                    normalizedDimension
+                                  )
+                                }
+                                className="checkbox-input"
+                              />
+                              <span className="checkbox-text">
+                                {normalizedDimension}
+                                <span className="dimension-unit">
+                                  {language === "en" ? " cm" : " სმ"}
+                                </span>
+                              </span>
+                            </label>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
               <div className="filter-section">

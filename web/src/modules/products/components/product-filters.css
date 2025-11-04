@@ -37,6 +37,12 @@
   margin-top: 0;
 }
 
+.filter-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .filter-title {
   font-size: 1.05rem;
   font-weight: 600;
@@ -84,6 +90,24 @@
   text-decoration: none;
   transform: none;
   box-shadow: none;
+}
+
+.filter-collapse-btn {
+  background: transparent;
+  border: none;
+  color: #012645;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 500;
+  padding: 6px 8px;
+  border-radius: 6px;
+  transition: background 0.2s ease, color 0.2s ease;
+  font-family: firaGo;
+}
+
+.filter-collapse-btn:hover {
+  background: rgba(1, 38, 69, 0.08);
+  color: #012645;
 }
 
 /* მთავარი კატეგორიის ჩამონათვალი */
