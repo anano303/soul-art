@@ -906,6 +906,14 @@ export function ProductsList() {
                     product={product}
                     onStatusChange={handleStatusChange}
                     onDelete={handleProductDeleted}
+                    materials={
+                      language === "en"
+                        ? product.materialsEn && product.materialsEn.length > 0
+                          ? product.materialsEn
+                          : product.materials
+                        : product.materials
+                    }
+                    dimensions={product.dimensions}
                   />
                 </td>
               </tr>
