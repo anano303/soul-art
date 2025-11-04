@@ -125,9 +125,16 @@ const MATERIAL_LABELS = [
   'ტილო ზეთში',
 ];
 
-const KEYWORD_MATERIAL_RULES: { material: string; variants: string[] }[] = [
+interface MaterialDefinition {
+  ge: string;
+  en: string;
+  variants: string[];
+}
+
+const MATERIAL_DEFINITIONS: MaterialDefinition[] = [
   {
-    material: 'ტილო',
+    ge: 'ტილო',
+    en: 'Canvas',
     variants: [
       'ტილო',
       'ტილოზე',
@@ -137,33 +144,405 @@ const KEYWORD_MATERIAL_RULES: { material: string; variants: string[] }[] = [
       'კანვასი',
       'კანვასზე',
       'კანვასის',
+      'canvas',
     ],
   },
   {
-    material: 'აკრილი',
-    variants: ['აკრილი', 'აკრილის', 'აკრილით', 'აკრილზე', 'აკრილში', 'აკრილთან'],
+    ge: 'აკრილი',
+    en: 'Acrylic',
+    variants: [
+      'აკრილი',
+      'აკრილის',
+      'აკრილით',
+      'აკრილზე',
+      'აკრილში',
+      'აკრილთან',
+      'acrylic',
+    ],
   },
   {
-    material: 'ზეთი',
-    variants: ['ზეთი', 'ზეთის', 'ზეთით', 'ზეთზე', 'ზეთში'],
+    ge: 'ზეთი',
+    en: 'Oil paint',
+    variants: ['ზეთი', 'ზეთის', 'ზეთით', 'ზეთზე', 'ზეთში', 'oil', 'oil paint'],
   },
   {
-    material: 'ფანქარი',
-    variants: ['ფანქარი', 'ფანქრის', 'ფანქრით', 'ფანქარზე', 'ფანქარში'],
+    ge: 'ფანქარი',
+    en: 'Pencil',
+    variants: [
+      'ფანქარი',
+      'ფანქრის',
+      'ფანქრით',
+      'ფანქარზე',
+      'ფანქარში',
+      'pencil',
+    ],
   },
   {
-    material: 'მუყაო',
-    variants: ['მუყაო', 'მუყაოზე', 'მუყაოს', 'მუყაოში', 'მუყაოდან'],
+    ge: 'მუყაო',
+    en: 'Cardboard',
+    variants: [
+      'მუყაო',
+      'მუყაოზე',
+      'მუყაოს',
+      'მუყაოში',
+      'მუყაოდან',
+      'cardboard',
+    ],
   },
   {
-    material: 'ხე',
-    variants: ['ხე', 'ხის', 'ხეზე', 'ხიდან', 'ხეში', 'ხისგან'],
+    ge: 'ხე',
+    en: 'Wood',
+    variants: ['ხე', 'ხის', 'ხეზე', 'ხიდან', 'ხეში', 'ხისგან', 'wood'],
   },
   {
-    material: 'აკვარელი',
-    variants: ['აკვარელი', 'აკვარელის', 'აკვარელით', 'აკვარელზე'],
+    ge: 'აკვარელი',
+    en: 'Watercolor',
+    variants: [
+      'აკვარელი',
+      'აკვარელის',
+      'აკვარელით',
+      'აკვარელზე',
+      'აკვარელში',
+      'watercolor',
+    ],
+  },
+  {
+    ge: 'ქაღალდი',
+    en: 'Paper',
+    variants: ['ქაღალდი', 'ქაღალდის', 'ქაღალდზე', 'paper'],
+  },
+  {
+    ge: 'კოლაჟი',
+    en: 'Collage',
+    variants: ['კოლაჟი', 'collage'],
+  },
+  {
+    ge: 'პასტელი',
+    en: 'Pastel',
+    variants: ['პასტელი', 'pastel'],
+  },
+  {
+    ge: 'ტემპერა',
+    en: 'Tempera',
+    variants: ['ტემპერა', 'tempera'],
+  },
+  {
+    ge: 'გუაში',
+    en: 'Gouache',
+    variants: ['გუაში', 'gouache'],
+  },
+  {
+    ge: 'ტუში',
+    en: 'Ink',
+    variants: ['ტუში', 'მელანი', 'ink'],
+  },
+  {
+    ge: 'ქსოვილი',
+    en: 'Fabric',
+    variants: [
+      'ქსოვილი',
+      'ქსოვილით',
+      'ქსოვილზე',
+      'fabric',
+      'textile',
+      'ტექსტილი',
+    ],
+  },
+  {
+    ge: 'თიხა',
+    en: 'Clay',
+    variants: ['თიხა', 'თიხით', 'თიხაზე', 'clay'],
+  },
+  {
+    ge: 'კერამიკა',
+    en: 'Ceramic',
+    variants: ['კერამიკა', 'კერამიკით', 'ceramic', 'porcelain', 'ფაიფური'],
+  },
+  {
+    ge: 'ბრინჯაო',
+    en: 'Bronze',
+    variants: ['ბრინჯაო', 'bronze'],
+  },
+  {
+    ge: 'ლითონი',
+    en: 'Metal',
+    variants: [
+      'ლითონი',
+      'ლითონით',
+      'ლითონზე',
+      'metal',
+      'aluminium',
+      'brass',
+      'steel',
+    ],
+  },
+  {
+    ge: 'მინა',
+    en: 'Glass',
+    variants: ['მინა', 'მინაზე', 'glass'],
+  },
+  {
+    ge: 'ქვა',
+    en: 'Stone',
+    variants: ['ქვა', 'ქვით', 'ქვაზე', 'stone'],
+  },
+  {
+    ge: 'შერეული ტექნიკა',
+    en: 'Mixed media',
+    variants: [
+      'შერეული ტექნიკა',
+      'შერეული მასალა',
+      'შერეული მასალები',
+      'mixed media',
+      'mixed materials',
+    ],
+  },
+  {
+    ge: 'ტილოზე ზეთი',
+    en: 'Oil on canvas',
+    variants: ['ზეთი ტილოზე', 'ზეთი ტილო', 'oil on canvas'],
+  },
+  {
+    ge: 'ტილოზე აკრილი',
+    en: 'Acrylic on canvas',
+    variants: ['აკრილი ტილოზე', 'acrylic on canvas'],
+  },
+  {
+    ge: 'ქაღალდზე აკვარელი',
+    en: 'Watercolor on paper',
+    variants: ['აკვარელი ქაღალდზე', 'watercolor on paper'],
+  },
+  {
+    ge: 'ქაღალდზე ფანქარი',
+    en: 'Pencil on paper',
+    variants: ['ფანქარი ქაღალდზე', 'pencil on paper'],
+  },
+  {
+    ge: 'ტილოზე აკვარელი',
+    en: 'Watercolor on canvas',
+    variants: ['აკვარელი ტილოზე', 'watercolor on canvas'],
+  },
+  {
+    ge: 'ტილოზე ფანქარი',
+    en: 'Pencil on canvas',
+    variants: ['ფანქარი ტილოზე', 'pencil on canvas'],
+  },
+  {
+    ge: 'ფურცელი',
+    en: 'Sheet',
+    variants: ['ფურცელი', 'sheet'],
+  },
+  {
+    ge: 'ციფრული',
+    en: 'Digital',
+    variants: ['ციფრული', 'digital'],
+  },
+  {
+    ge: 'pdf',
+    en: 'PDF',
+    variants: ['pdf', 'პდფ'],
+  },
+  {
+    ge: 'ნაჭერი',
+    en: 'Cloth',
+    variants: ['ნაჭერი', 'cloth'],
+  },
+  {
+    ge: 'ტექსტურული პასტა',
+    en: 'Texture paste',
+    variants: ['ტექსტურული პასტა', 'texture paste'],
+  },
+  {
+    ge: 'ბამბა',
+    en: 'Cotton',
+    variants: ['ბამბა', 'cotton'],
+  },
+  {
+    ge: 'ბამბის ძაფი',
+    en: 'Cotton yarn',
+    variants: ['ბამბის ძაფი', 'cotton yarn'],
+  },
+  {
+    ge: 'მარგალიტის და შუშის მძივები',
+    en: 'Pearl and glass beads',
+    variants: ['მარგალიტის და შუშის მძივები'],
+  },
+  {
+    ge: 'მეტალის დეტალი',
+    en: 'Metal detail',
+    variants: ['მეტალის დეტალი'],
+  },
+  {
+    ge: 'მეტალი',
+    en: 'Metal',
+    variants: ['მეტალი', 'metal'],
+  },
+  {
+    ge: 'მასტერხინი',
+    en: 'Palette knife',
+    variants: ['მასტერხინი'],
+  },
+  {
+    ge: 'შიმერები',
+    en: 'Shimmers',
+    variants: ['შიმერები'],
+  },
+  {
+    ge: 'კალამი',
+    en: 'Pen',
+    variants: ['კალამი', 'pen'],
+  },
+  {
+    ge: 'ჩარჩო',
+    en: 'Frame',
+    variants: ['ჩარჩო', 'frame'],
+  },
+  {
+    ge: 'ვატმანი',
+    en: 'Whatman paper',
+    variants: ['ვატმანი'],
+  },
+  {
+    ge: 'ბისერები',
+    en: 'Beads',
+    variants: ['ბისერები', 'beads'],
+  },
+  {
+    ge: 'აკრილის საღებავი',
+    en: 'Acrylic paint',
+    variants: ['acrylic paint', 'აკრილის საღებავი'],
+  },
+  {
+    ge: 'ეპოქსი',
+    en: 'Epoxy',
+    variants: ['epoxy', 'ეპოქსი'],
+  },
+  {
+    ge: 'კრისტალები',
+    en: 'Crystals',
+    variants: ['crystals', 'კრისტალები'],
+  },
+  {
+    ge: 'უჟანგავი ფოლადის დეტალები',
+    en: 'Stainless steel details',
+    variants: ['უჟანგავი ფოლადის დეტალები'],
+  },
+  {
+    ge: 'უჟანგავი რკინის დეტალები',
+    en: 'Stainless iron details',
+    variants: ['უჟანგავი რკინის დეტალები'],
+  },
+  {
+    ge: 'ქაღალდის ფორმატზე ფანქრით ნახატი',
+    en: 'Pencil drawing on paper',
+    variants: ['ქაღალდის ფორმატზე ფანქრით ნახატი'],
+  },
+  {
+    ge: 'ტილო აკრილი ჩარჩო',
+    en: 'Canvas acrylic frame',
+    variants: ['ტილო აკრილი  ჩარჩო', 'ტილო აკრილი ჩარჩო'],
+  },
+  {
+    ge: 'ქვეჩარჩოზე',
+    en: 'On subframe',
+    variants: ['ქვეჩარჩოზე'],
+  },
+  {
+    ge: 'ოქროს ფირფიტები',
+    en: 'Gold leaf',
+    variants: ['ოქროს ფირფიტები(პოტალი).', 'ოქროს ფირფიტები', 'პოტალი'],
+  },
+  {
+    ge: 'ხელნაკეთი თიხა (წებო და ქაღალდი)',
+    en: 'Handmade clay (glue and paper)',
+    variants: [
+      'ხელნაკეთი თიხა ( წებო და ქაღალდი',
+      'ხელნაკეთი თიხა( ქაღალდი და წებო',
+      'handmade clay',
+    ],
+  },
+  {
+    ge: '100 აკრილი',
+    en: 'Acrylic',
+    variants: ['100 აკრილი', '70 აკრილი'],
   },
 ];
+
+const MATERIAL_TRANSLATION_MAP: Record<string, string> = {};
+
+MATERIAL_DEFINITIONS.forEach(({ ge, en, variants }) => {
+  MATERIAL_TRANSLATION_MAP[ge.toLowerCase()] = en;
+  variants.forEach((variant) => {
+    MATERIAL_TRANSLATION_MAP[variant.toLowerCase()] = en;
+  });
+});
+
+const KEYWORD_MATERIAL_RULES = MATERIAL_DEFINITIONS.map(({ ge, variants }) => ({
+  material: ge,
+  variants: variants.map((variant) => variant.toLowerCase()),
+}));
+
+const missingTranslations = new Map<string, number>();
+
+function resolveMaterialTranslation(value: string): {
+  translation: string;
+  found: boolean;
+} {
+  const trimmed = value?.trim();
+  if (!trimmed) {
+    return { translation: '', found: false };
+  }
+
+  const normalized = trimmed.toLowerCase();
+
+  if (MATERIAL_TRANSLATION_MAP[normalized]) {
+    return {
+      translation: MATERIAL_TRANSLATION_MAP[normalized],
+      found: true,
+    };
+  }
+
+  const cleaned = normalized.replace(/["'“”„«»]/g, '');
+  if (cleaned !== normalized && MATERIAL_TRANSLATION_MAP[cleaned]) {
+    return {
+      translation: MATERIAL_TRANSLATION_MAP[cleaned],
+      found: true,
+    };
+  }
+
+  const tokenCandidates = normalized
+    .split(/[\s+\-/]+/)
+    .map((token) => token.trim())
+    .filter(Boolean);
+
+  if (tokenCandidates.length > 1) {
+    const translatedTokens = tokenCandidates.map(
+      (token) => MATERIAL_TRANSLATION_MAP[token] || null,
+    );
+
+    if (translatedTokens.every((token): token is string => Boolean(token))) {
+      return {
+        translation: translatedTokens.join(' '),
+        found: true,
+      };
+    }
+  }
+
+  return {
+    translation: trimmed,
+    found: false,
+  };
+}
+
+function translateMaterial(value: string): string {
+  const { translation, found } = resolveMaterialTranslation(value);
+  if (!found) {
+    const key = value.trim();
+    const current = missingTranslations.get(key) ?? 0;
+    missingTranslations.set(key, current + 1);
+  }
+  return translation;
+}
 
 const IGNORED_LABELS = new Set<string>([
   'size',
@@ -600,6 +979,7 @@ async function migrateProductMaterials() {
         'summary',
         'summaryEn',
         'materials',
+        'materialsEn',
       ])
       .lean();
 
@@ -609,16 +989,46 @@ async function migrateProductMaterials() {
     let updatedCount = 0;
     let skippedNoChange = 0;
     let skippedNoMatch = 0;
+    const uniqueMaterials = new Map<string, number>();
 
     products.forEach((product: any) => {
       const parsedMaterials = collectMaterials(product);
+
+      parsedMaterials.forEach((material) => {
+        uniqueMaterials.set(material, (uniqueMaterials.get(material) ?? 0) + 1);
+      });
 
       if (!parsedMaterials.length) {
         skippedNoMatch += 1;
         return;
       }
 
-      if (materialsAreEqual(product.materials, parsedMaterials)) {
+      const translatedMaterials = parsedMaterials.map(translateMaterial);
+
+      const materialsChanged = !materialsAreEqual(
+        product.materials,
+        parsedMaterials,
+      );
+      const materialsEnChanged = !materialsAreEqual(
+        product.materialsEn,
+        translatedMaterials,
+      );
+
+      if (!materialsChanged && !materialsEnChanged) {
+        skippedNoChange += 1;
+        return;
+      }
+
+      const updatePayload: Record<string, unknown> = {};
+
+      if (materialsChanged) {
+        updatePayload.materials = parsedMaterials;
+        updatePayload.materialsEn = translatedMaterials;
+      } else if (materialsEnChanged) {
+        updatePayload.materialsEn = translatedMaterials;
+      }
+
+      if (Object.keys(updatePayload).length === 0) {
         skippedNoChange += 1;
         return;
       }
@@ -627,12 +1037,42 @@ async function migrateProductMaterials() {
         updateOne: {
           filter: { _id: product._id },
           update: {
-            $set: { materials: parsedMaterials },
+            $set: updatePayload,
           },
         },
       });
       updatedCount += 1;
     });
+
+    const sortedUniqueMaterials = Array.from(uniqueMaterials.entries()).sort(
+      ([a], [b]) => a.localeCompare(b, 'ka', { sensitivity: 'base' }),
+    );
+
+    if (sortedUniqueMaterials.length) {
+      console.log('Detected material vocabulary (KA → EN):');
+      sortedUniqueMaterials.forEach(([material, count]) => {
+        const { translation } = resolveMaterialTranslation(material);
+        console.log(`  • ${material} (${count}) → ${translation || '—'}`);
+      });
+      console.log('');
+    } else {
+      console.log('No materials detected in the current dataset.');
+    }
+
+    if (missingTranslations.size > 0) {
+      console.log('⚠️ Missing translation entries:');
+      Array.from(missingTranslations.entries())
+        .sort(([, a], [, b]) => b - a)
+        .forEach(([material, count]) => {
+          console.log(
+            `  - ${material} (${count} occurrence${count > 1 ? 's' : ''})`,
+          );
+        });
+      console.log('');
+    } else {
+      console.log('✅ All detected materials have English translations.');
+      console.log('');
+    }
 
     if (!bulkOperations.length) {
       console.log('No material updates were required.');

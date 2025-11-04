@@ -111,6 +111,22 @@ export class ProductsService {
 
     const filter: any = {};
 
+    const addAndCondition = (condition: Record<string, unknown>) => {
+      if (!condition) return;
+
+      if (!filter.$and) {
+        filter.$and = [condition];
+        return;
+      }
+
+      if (Array.isArray(filter.$and)) {
+        filter.$and.push(condition);
+        return;
+      }
+
+      filter.$and = [filter.$and, condition];
+    };
+
     if (keyword) {
       // First, find users matching the keyword (by email, name, or store name)
       const matchingUsers = await this.usersService.findUsersByKeyword(keyword);
@@ -214,9 +230,15 @@ export class ProductsService {
       filter.colors = color;
     }
 
-    // Filter by original/copy status
+    // Filter by original/copy status - treat missing values as original for legacy data
     if (isOriginal !== undefined) {
-      filter.isOriginal = isOriginal;
+      if (isOriginal === true) {
+        addAndCondition({
+          $or: [{ isOriginal: true }, { isOriginal: { $exists: false } }],
+        });
+      } else {
+        filter.isOriginal = false;
+      }
     }
 
     // Filter by material - support Georgian and English values
@@ -294,23 +316,21 @@ export class ProductsService {
     // Filter by discount status
     if (discounted === true) {
       const now = new Date();
-      filter.$and = [
-        { discountPercentage: { $exists: true, $gt: 0 } },
-        {
-          $or: [
-            { discountStartDate: { $exists: false } },
-            { discountStartDate: null },
-            { discountStartDate: { $lte: now } },
-          ],
-        },
-        {
-          $or: [
-            { discountEndDate: { $exists: false } },
-            { discountEndDate: null },
-            { discountEndDate: { $gte: now } },
-          ],
-        },
-      ];
+      addAndCondition({ discountPercentage: { $exists: true, $gt: 0 } });
+      addAndCondition({
+        $or: [
+          { discountStartDate: { $exists: false } },
+          { discountStartDate: null },
+          { discountStartDate: { $lte: now } },
+        ],
+      });
+      addAndCondition({
+        $or: [
+          { discountEndDate: { $exists: false } },
+          { discountEndDate: null },
+          { discountEndDate: { $gte: now } },
+        ],
+      });
     }
 
     // Filter by price range
