@@ -125,6 +125,46 @@ const MATERIAL_LABELS = [
   'ტილო ზეთში',
 ];
 
+const KEYWORD_MATERIAL_RULES: { material: string; variants: string[] }[] = [
+  {
+    material: 'ტილო',
+    variants: [
+      'ტილო',
+      'ტილოზე',
+      'ტილოს',
+      'ტილოთი',
+      'ტილოდან',
+      'კანვასი',
+      'კანვასზე',
+      'კანვასის',
+    ],
+  },
+  {
+    material: 'აკრილი',
+    variants: ['აკრილი', 'აკრილის', 'აკრილით', 'აკრილზე', 'აკრილში', 'აკრილთან'],
+  },
+  {
+    material: 'ზეთი',
+    variants: ['ზეთი', 'ზეთის', 'ზეთით', 'ზეთზე', 'ზეთში'],
+  },
+  {
+    material: 'ფანქარი',
+    variants: ['ფანქარი', 'ფანქრის', 'ფანქრით', 'ფანქარზე', 'ფანქარში'],
+  },
+  {
+    material: 'მუყაო',
+    variants: ['მუყაო', 'მუყაოზე', 'მუყაოს', 'მუყაოში', 'მუყაოდან'],
+  },
+  {
+    material: 'ხე',
+    variants: ['ხე', 'ხის', 'ხეზე', 'ხიდან', 'ხეში', 'ხისგან'],
+  },
+  {
+    material: 'აკვარელი',
+    variants: ['აკვარელი', 'აკვარელის', 'აკვარელით', 'აკვარელზე'],
+  },
+];
+
 const IGNORED_LABELS = new Set<string>([
   'size',
   'sizes',
@@ -379,7 +419,9 @@ function normalizeMaterials(segments: string[]): string[] {
     replaced
       .split(',')
       .map((part) => extractValueCandidate(part))
-      .map((candidate) => (candidate ? normalizeMaterialValue(candidate) : null))
+      .map((candidate) =>
+        candidate ? normalizeMaterialValue(candidate) : null,
+      )
       .forEach((value) => {
         if (value) {
           candidates.push(value);
@@ -436,6 +478,43 @@ function parseMaterials(description?: string | null): string[] {
   return normalizeMaterials(segments);
 }
 
+function tokenizeForKeywordMatching(text: string): string[] {
+  return text
+    .toLowerCase()
+    .replace(/[,.;:!?'"“”„«»()\[\]{}\r\n\t]+/g, ' ')
+    .split(' ')
+    .map((token) => token.trim())
+    .filter(Boolean);
+}
+
+function extractMaterialsFromKeywords(description?: string | null): string[] {
+  if (!description) {
+    return [];
+  }
+
+  const prepared = prepareDescription(description);
+  if (!prepared) {
+    return [];
+  }
+
+  const tokens = tokenizeForKeywordMatching(prepared);
+  if (!tokens.length) {
+    return [];
+  }
+
+  const tokenSet = new Set(tokens);
+  const matches: string[] = [];
+
+  KEYWORD_MATERIAL_RULES.forEach(({ material, variants }) => {
+    const hasMatch = variants.some((variant) => tokenSet.has(variant));
+    if (hasMatch) {
+      matches.push(material);
+    }
+  });
+
+  return matches;
+}
+
 function collectMaterials(product: any): string[] {
   const sources = [
     product.description,
@@ -446,9 +525,30 @@ function collectMaterials(product: any): string[] {
 
   const collected = new Map<string, string>();
 
+  if (Array.isArray(product.materials)) {
+    product.materials
+      .filter((material) => typeof material === 'string')
+      .map((material) => material.trim())
+      .filter((material) => material.length > 0)
+      .forEach((material) => {
+        const key = material.toLowerCase();
+        if (!collected.has(key)) {
+          collected.set(key, material);
+        }
+      });
+  }
+
   sources.forEach((source) => {
     const parsed = parseMaterials(source);
     parsed.forEach((material) => {
+      const key = material.toLowerCase();
+      if (!collected.has(key)) {
+        collected.set(key, material);
+      }
+    });
+
+    const keywordMatches = extractMaterialsFromKeywords(source);
+    keywordMatches.forEach((material) => {
       const key = material.toLowerCase();
       if (!collected.has(key)) {
         collected.set(key, material);

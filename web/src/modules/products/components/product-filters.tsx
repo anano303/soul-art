@@ -34,6 +34,11 @@ interface FilterProps {
   onPriceRangeChange: (range: [number, number]) => void;
 }
 
+type MaterialQueryResult = {
+  values: string[];
+  translations: Record<string, string>;
+};
+
 export function ProductFilters({
   onCategoryChange,
   onSubCategoryChange,
@@ -312,62 +317,90 @@ export function ProductFilters({
   });
 
   // Fetch all available materials
-  const { data: availableMaterials = [] } = useQuery<string[]>({
-    queryKey: ["materials", selectedCategoryId, selectedSubCategoryId],
-    queryFn: async () => {
-      try {
-        const params = new URLSearchParams();
-        if (selectedCategoryId)
-          params.append("mainCategory", selectedCategoryId);
+  const { data: availableMaterialsData = { values: [], translations: {} } } =
+    useQuery<MaterialQueryResult>({
+      queryKey: ["materials", selectedCategoryId, selectedSubCategoryId],
+      queryFn: async () => {
+        try {
+          const params = new URLSearchParams();
+          if (selectedCategoryId)
+            params.append("mainCategory", selectedCategoryId);
 
-        // If subcategories are selected, filter materials by those subcategories
-        if (
-          Array.isArray(selectedSubCategoryId) &&
-          selectedSubCategoryId.length > 0
-        ) {
-          params.append("subCategory", selectedSubCategoryId.join(","));
-        } else if (
-          typeof selectedSubCategoryId === "string" &&
-          selectedSubCategoryId
-        ) {
-          params.append("subCategory", selectedSubCategoryId);
+          if (
+            Array.isArray(selectedSubCategoryId) &&
+            selectedSubCategoryId.length > 0
+          ) {
+            params.append("subCategory", selectedSubCategoryId.join(","));
+          } else if (
+            typeof selectedSubCategoryId === "string" &&
+            selectedSubCategoryId
+          ) {
+            params.append("subCategory", selectedSubCategoryId);
+          }
+
+          const queryString = params.toString();
+          const url = queryString
+            ? `/products?${queryString}&page=1&limit=1000`
+            : "/products?page=1&limit=1000";
+
+          const response = await fetchWithAuth(url);
+          if (!response.ok) {
+            return { values: [], translations: {} };
+          }
+
+          const productsResponse = await response.json();
+          const products = productsResponse.items || productsResponse;
+
+          const materialsSet = new Set<string>();
+          const translationMap = new Map<string, string>();
+
+          products.forEach(
+            (product: { materials?: string[]; materialsEn?: string[] }) => {
+              const productMaterials = Array.isArray(product.materials)
+                ? product.materials
+                : [];
+              const productMaterialsEn = Array.isArray(product.materialsEn)
+                ? product.materialsEn
+                : [];
+
+              productMaterials.forEach((material: string, index: number) => {
+                const normalizedMaterial = material?.trim();
+                if (!normalizedMaterial) {
+                  return;
+                }
+
+                materialsSet.add(normalizedMaterial);
+
+                const normalizedTranslation = productMaterialsEn[index]?.trim();
+                if (
+                  normalizedTranslation &&
+                  !translationMap.has(normalizedMaterial)
+                ) {
+                  translationMap.set(normalizedMaterial, normalizedTranslation);
+                }
+              });
+            }
+          );
+
+          return {
+            values: Array.from(materialsSet),
+            translations: Object.fromEntries(translationMap),
+          };
+        } catch (err) {
+          console.error("Failed to fetch materials:", err);
+          return { values: [], translations: {} };
         }
-
-        const queryString = params.toString();
-        const url = queryString
-          ? `/products?${queryString}&page=1&limit=1000`
-          : "/products?page=1&limit=1000";
-
-        const response = await fetchWithAuth(url);
-        if (!response.ok) {
-          return [];
-        }
-        const productsData = await response.json();
-        const products = productsData.items || productsData;
-        // Extract unique materials from products
-        const materials: string[] = [
-          ...new Set(
-            products
-              .flatMap(
-                (product: { materials?: string[] }) => product.materials || []
-              )
-              .filter(Boolean) as string[]
-          ),
-        ];
-        return materials;
-      } catch (err) {
-        console.error("Failed to fetch materials:", err);
-        return [];
-      }
-    },
-    retry: 1,
-    refetchOnWindowFocus: false,
-    enabled: !!selectedCategoryId,
-  });
+      },
+      retry: 1,
+      refetchOnWindowFocus: false,
+      enabled: !!selectedCategoryId,
+    });
 
   const normalizedSelectedMaterials = useMemo(() => {
     if (Array.isArray(selectedMaterial)) {
-      return selectedMaterial.map((material) => material.trim()).filter(Boolean);
+      return selectedMaterial
+        .map((material) => material.trim())
+        .filter(Boolean);
     }
     if (typeof selectedMaterial === "string" && selectedMaterial) {
       return [selectedMaterial.trim()].filter(Boolean);
@@ -376,18 +409,31 @@ export function ProductFilters({
   }, [selectedMaterial]);
 
   const sortedMaterials = useMemo(() => {
-    return Array.from(
+    const locale = language === "en" ? "en" : "ka";
+
+    const uniqueMaterials = Array.from(
       new Set(
-        availableMaterials
+        availableMaterialsData.values
           .map((material) => material.trim())
-          .filter((material) => material.length > 0),
-      ),
-    ).sort((a, b) =>
-      a.localeCompare(b, language === "en" ? "en" : "ka", {
-        sensitivity: "base",
-      }),
+          .filter((material) => material.length > 0)
+      )
     );
-  }, [availableMaterials, language]);
+
+    return uniqueMaterials.sort((valueA, valueB) => {
+      const labelA =
+        language === "en"
+          ? availableMaterialsData.translations[valueA] || valueA
+          : valueA;
+      const labelB =
+        language === "en"
+          ? availableMaterialsData.translations[valueB] || valueB
+          : valueB;
+
+      return labelA.localeCompare(labelB, locale, {
+        sensitivity: "base",
+      });
+    });
+  }, [availableMaterialsData, language]);
 
   // Fetch all available dimensions
   const { data: availableDimensions = [] } = useQuery<string[]>({
@@ -491,7 +537,9 @@ export function ProductFilters({
 
   const normalizedSelectedDimensions = useMemo(() => {
     if (Array.isArray(selectedDimension)) {
-      return selectedDimension.map((dimension) => dimension.trim()).filter(Boolean);
+      return selectedDimension
+        .map((dimension) => dimension.trim())
+        .filter(Boolean);
     }
     if (typeof selectedDimension === "string" && selectedDimension) {
       return [selectedDimension.trim()].filter(Boolean);
@@ -1411,6 +1459,11 @@ export function ProductFilters({
                         {sortedMaterials.map((material) => {
                           const isChecked =
                             normalizedSelectedMaterials.includes(material);
+                          const displayLabel =
+                            language === "en"
+                              ? availableMaterialsData.translations[material] ||
+                                material
+                              : material;
 
                           return (
                             <label key={material} className="checkbox-label">
@@ -1423,7 +1476,7 @@ export function ProductFilters({
                                 className="checkbox-input"
                               />
                               <span className="checkbox-text">
-                                {material}
+                                {displayLabel}
                               </span>
                             </label>
                           );
@@ -1495,9 +1548,7 @@ export function ProductFilters({
                                 type="checkbox"
                                 checked={isChecked}
                                 onChange={() =>
-                                  onDimensionFilterChange?.(
-                                    normalizedDimension
-                                  )
+                                  onDimensionFilterChange?.(normalizedDimension)
                                 }
                                 className="checkbox-input"
                               />

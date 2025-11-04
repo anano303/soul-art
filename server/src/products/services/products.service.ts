@@ -219,15 +219,36 @@ export class ProductsService {
       filter.isOriginal = isOriginal;
     }
 
-    // Filter by material - support multiple materials
+    // Filter by material - support Georgian and English values
     if (material) {
-      const materials = material.split(',').map((m) => m.trim());
-      if (materials.length > 1) {
-        // Multiple materials - product must have at least one
-        filter.materials = { $in: materials };
-      } else {
-        // Single material
-        filter.materials = materials[0];
+      const materialsList = material
+        .split(',')
+        .map((m) => m.trim())
+        .filter((m) => m.length > 0);
+
+      if (materialsList.length > 0) {
+        const escapeRegex = (value: string) =>
+          value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+        const regexValues = materialsList.map(
+          (value) => new RegExp(`^${escapeRegex(value)}$`, 'i'),
+        );
+
+        const materialCondition = {
+          $or: [
+            { materials: { $in: regexValues } },
+            { materialsEn: { $in: regexValues } },
+          ],
+        };
+
+        if (filter.$and) {
+          if (!Array.isArray(filter.$and)) {
+            filter.$and = [filter.$and];
+          }
+          filter.$and.push(materialCondition);
+        } else {
+          filter.$and = [materialCondition];
+        }
       }
     }
 
@@ -543,6 +564,8 @@ export class ProductsService {
     if (data.isOriginal !== undefined)
       updateFields.isOriginal = data.isOriginal;
     if (data.materials !== undefined) updateFields.materials = data.materials;
+    if (data.materialsEn !== undefined)
+      updateFields.materialsEn = data.materialsEn;
     if (data.categoryStructure)
       updateFields.categoryStructure = data.categoryStructure;
 
@@ -816,6 +839,10 @@ export class ProductsService {
       data.sizes = Array.isArray(data.sizes) ? data.sizes : [];
       data.colors = Array.isArray(data.colors) ? data.colors : [];
       data.hashtags = Array.isArray(data.hashtags) ? data.hashtags : [];
+      data.materials = Array.isArray(data.materials) ? data.materials : [];
+      data.materialsEn = Array.isArray(data.materialsEn)
+        ? data.materialsEn
+        : [];
 
       console.log('Creating product with hashtags:', data.hashtags);
 

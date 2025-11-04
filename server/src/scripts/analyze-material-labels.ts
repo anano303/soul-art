@@ -4,7 +4,12 @@ import { Model } from 'mongoose';
 import { getModelToken } from '@nestjs/mongoose';
 import { Product } from '../products/schemas/product.schema';
 
-type ProductDoc = Product & { description?: string; descriptionEn?: string; summary?: string; summaryEn?: string };
+type ProductDoc = Product & {
+  description?: string;
+  descriptionEn?: string;
+  summary?: string;
+  summaryEn?: string;
+};
 
 type LabelStats = {
   totalOccurrences: number;
@@ -54,7 +59,10 @@ function extractLabelFromLine(line: string): string | null {
     return null;
   }
 
-  if (rawLabel.length < MIN_LABEL_CHARACTERS || rawLabel.length > MAX_LABEL_LENGTH) {
+  if (
+    rawLabel.length < MIN_LABEL_CHARACTERS ||
+    rawLabel.length > MAX_LABEL_LENGTH
+  ) {
     return null;
   }
 
@@ -82,7 +90,9 @@ async function analyzeMaterialLabels() {
       .find({}, { description: 1, descriptionEn: 1, summary: 1, summaryEn: 1 })
       .lean();
 
-    console.log(`Analyzing ${products.length} products for potential material labels...`);
+    console.log(
+      `Analyzing ${products.length} products for potential material labels...`,
+    );
 
     const labelMap = new Map<string, LabelStats>();
 
@@ -135,7 +145,9 @@ async function analyzeMaterialLabels() {
 
     console.log('\nTop potential labels (min 2 occurrences):');
     results.forEach((entry, index) => {
-      console.log(`\n${index + 1}. "${entry.label}" — ${entry.totalOccurrences} hits`);
+      console.log(
+        `\n${index + 1}. "${entry.label}" — ${entry.totalOccurrences} hits`,
+      );
       entry.lineSamples.forEach((sample) => {
         console.log(`   · ${sample}`);
       });

@@ -2,14 +2,7 @@
 
 import { useState, useEffect, useMemo, useRef } from "react";
 import Image from "next/image";
-import {
-  StarIcon,
-  X,
-  Truck,
-  Ruler,
-  Share2,
-  Package,
-} from "lucide-react";
+import { StarIcon, X, Truck, Ruler, Share2, Package } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ReviewForm } from "./review-form";
 import { ProductReviews } from "./product-reviews";
@@ -212,6 +205,21 @@ export function ProductDetails({ product }: ProductDetailsProps) {
   }, [product.youtubeEmbedUrl, product.youtubeVideoUrl]);
 
   const hasVideo = Boolean(resolvedYoutubeEmbedUrl || product.videoDescription);
+
+  const displayedMaterials = useMemo(() => {
+    const geMaterials = Array.isArray(product.materials)
+      ? product.materials.filter((material) => material && material.trim())
+      : [];
+    const enMaterials = Array.isArray(product.materialsEn)
+      ? product.materialsEn.filter((material) => material && material.trim())
+      : [];
+
+    if (language === "en" && enMaterials.length > 0) {
+      return enMaterials;
+    }
+
+    return geMaterials;
+  }, [language, product]);
 
   // Determine theme based on product category
   const getThemeClass = () => {
@@ -788,14 +796,14 @@ export function ProductDetails({ product }: ProductDetailsProps) {
           </div>
 
           {/* Materials Information */}
-          {product.materials && product.materials.length > 0 && (
+          {displayedMaterials.length > 0 && (
             <div className="metadata-item">
               <div className="metadata-label">
                 <Package size={18} />
                 <span>{t("product.materials")}</span>
               </div>
               <div className="metadata-value">
-                {product.materials.join(", ")}
+                {displayedMaterials.join(", ")}
               </div>
             </div>
           )}

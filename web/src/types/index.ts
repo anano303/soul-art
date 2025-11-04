@@ -160,6 +160,7 @@ export interface Product {
   };
   isOriginal?: boolean;
   materials?: string[];
+  materialsEn?: string[];
   variants?: ProductVariant[];
   videoDescription?: string; // YouTube embed code or URL
   youtubeVideoId?: string;

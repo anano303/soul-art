@@ -283,6 +283,7 @@ type ProductKeywordSource = {
   summary?: string | null;
   summaryEn?: string | null;
   materials?: string[] | null;
+  materialsEn?: string[] | null;
   colors?: string[] | null;
   sizes?: string[] | null;
   ageGroups?: string[] | null;

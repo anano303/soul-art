@@ -235,6 +235,9 @@ export class Product {
 
   @Prop({ type: [String], default: [] })
   materials?: string[];
+
+  @Prop({ type: [String], default: [] })
+  materialsEn?: string[];
 }
 
 export const ProductSchema = SchemaFactory.createForClass(Product);
