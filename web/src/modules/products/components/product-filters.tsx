@@ -383,13 +383,18 @@ export function ProductFilters({
                   };
                 }) => {
                   if (product.dimensions?.width && product.dimensions?.height) {
-                    return `${product.dimensions.width}x${
-                      product.dimensions.height
-                    }${
-                      product.dimensions.depth
-                        ? `x${product.dimensions.depth}`
-                        : ""
-                    }`;
+                    const width = Number(product.dimensions.width);
+                    const height = Number(product.dimensions.height);
+                    const depth = product.dimensions.depth
+                      ? Number(product.dimensions.depth)
+                      : undefined;
+
+                    if (Number.isFinite(width) && Number.isFinite(height)) {
+                      const base = `${width}x${height}`;
+                      return depth && Number.isFinite(depth)
+                        ? `${base}x${depth}`
+                        : base;
+                    }
                   }
                   return null;
                 }
@@ -397,7 +402,31 @@ export function ProductFilters({
               .filter(Boolean) as string[]
           ),
         ];
-        return dimensions;
+        return dimensions.sort((a, b) => {
+          const parseDimension = (value: string) =>
+            value
+              .split("x")
+              .map((segment) => parseFloat(segment.trim()))
+              .filter((num) => Number.isFinite(num));
+
+          const dimsA = parseDimension(a);
+          const dimsB = parseDimension(b);
+          const compareLength = Math.max(dimsA.length, dimsB.length);
+
+          for (let i = 0; i < compareLength; i += 1) {
+            const valA = dimsA[i] ?? Number.NEGATIVE_INFINITY;
+            const valB = dimsB[i] ?? Number.NEGATIVE_INFINITY;
+
+            if (valA !== valB) {
+              return valA - valB;
+            }
+          }
+
+          return a.localeCompare(b, undefined, {
+            numeric: true,
+            sensitivity: "base",
+          });
+        });
       } catch (err) {
         console.error("Failed to fetch dimensions:", err);
         return [];
@@ -412,34 +441,75 @@ export function ProductFilters({
   const getAvailableAttributes = (
     attributeType: "ageGroups" | "sizes" | "colors"
   ): string[] => {
-    if (!selectedSubCategoryId || !subcategories || subcategories.length === 0)
-      return [];
+    if (!subcategories || subcategories.length === 0) return [];
 
-    // Convert to array if string or already array
+    // Normalize selected subcategory ids (empty array means "all")
     const selectedIds = Array.isArray(selectedSubCategoryId)
-      ? selectedSubCategoryId
-      : [selectedSubCategoryId];
+      ? selectedSubCategoryId.filter(Boolean).map((id) => id.toString())
+      : selectedSubCategoryId
+      ? [selectedSubCategoryId.toString()]
+      : [];
 
-    // If no subcategories selected, return empty
-    if (selectedIds.length === 0) return [];
+    const relevantSubcategories =
+      selectedIds.length > 0
+        ? subcategories.filter((sub) => {
+            const candidateId =
+              (sub.id as string | undefined) ?? (sub._id as string | undefined);
+            return candidateId
+              ? selectedIds.includes(candidateId.toString())
+              : false;
+          })
+        : subcategories;
 
-    // Collect all attributes from all selected subcategories
+    if (relevantSubcategories.length === 0) {
+      return [];
+    }
+
     const allAttributes = new Set<string>();
 
-    selectedIds.forEach((subId) => {
-      const selectedSubCategory = subcategories.find(
-        (sub) => sub.id === subId || sub._id === subId
-      );
-
-      if (selectedSubCategory && selectedSubCategory[attributeType]) {
-        selectedSubCategory[attributeType].forEach((attr: string) =>
-          allAttributes.add(attr)
-        );
+    relevantSubcategories.forEach((sub) => {
+      const attributes = sub?.[attributeType];
+      if (Array.isArray(attributes)) {
+        attributes
+          .filter((attr): attr is string => typeof attr === "string" && !!attr)
+          .forEach((attr) => allAttributes.add(attr));
       }
     });
 
-    return Array.from(allAttributes);
-  }; // Get localized color name based on current language
+    if (attributeType === "sizes") {
+      return Array.from(allAttributes).sort((a, b) => {
+        const pattern = /\d+(?:[.,]\d+)?/g;
+        const numsA =
+          a
+            .match(pattern)
+            ?.map((value) => parseFloat(value.replace(/,/g, "."))) || [];
+        const numsB =
+          b
+            .match(pattern)
+            ?.map((value) => parseFloat(value.replace(/,/g, "."))) || [];
+
+        const compareLength = Math.max(numsA.length, numsB.length);
+        for (let i = 0; i < compareLength; i += 1) {
+          const valA = numsA[i] ?? Number.NEGATIVE_INFINITY;
+          const valB = numsB[i] ?? Number.NEGATIVE_INFINITY;
+
+          if (valA !== valB) {
+            return valA - valB;
+          }
+        }
+
+        return a.localeCompare(b, undefined, {
+          numeric: true,
+          sensitivity: "base",
+        });
+      });
+    }
+
+    return Array.from(allAttributes).sort((a, b) =>
+      a.localeCompare(b, undefined, { numeric: true, sensitivity: "base" })
+    );
+  };
+  // Get localized color name based on current language
   const getLocalizedColorName = (colorName: string): string => {
     if (language === "en") {
       // Find the color in availableColors to get its English name
@@ -998,10 +1068,7 @@ export function ProductFilters({
                     </div>
                   </div>
                 )}
-              {((Array.isArray(selectedSubCategoryId) &&
-                selectedSubCategoryId.length > 0) ||
-                (typeof selectedSubCategoryId === "string" &&
-                  selectedSubCategoryId)) &&
+              {selectedCategoryId &&
                 getAvailableAttributes("sizes").length > 0 && (
                   <div className="filter-section">
                     <div className="filter-header">
@@ -1278,13 +1345,20 @@ export function ProductFilters({
               {selectedCategoryId && availableDimensions.length > 0 && (
                 <div className="filter-section compact-filter">
                   <div className="filter-header compact">
-                    <h3 className="filter-title compact">
-                      {language === "en" ? "Dimensions" : "ზომები"}
-                    </h3>
+                    <div>
+                      <h3 className="filter-title compact">
+                        {language === "en" ? "Dimensions" : "ზომები"}
+                      </h3>
+                      <p className="filter-subtitle compact">
+                        {language === "en"
+                          ? "Measurements in centimeters (width / height / depth)"
+                          : "ზომები სანტიმეტრებში (სიგანე / სიმაღლე / სიღრმე)"}
+                      </p>
+                    </div>
                   </div>
                   <div className="filter-options compact">
                     <div className="checkbox-group">
-                      {availableDimensions.slice(0, 5).map((dimension) => {
+                      {availableDimensions.map((dimension) => {
                         const selectedDimensionsArray = Array.isArray(
                           selectedDimension
                         )
@@ -1292,8 +1366,9 @@ export function ProductFilters({
                           : selectedDimension
                           ? [selectedDimension]
                           : [];
+                        const normalizedDimension = dimension.trim();
                         const isChecked =
-                          selectedDimensionsArray.includes(dimension);
+                          selectedDimensionsArray.includes(normalizedDimension);
 
                         return (
                           <label key={dimension} className="checkbox-label">
@@ -1301,12 +1376,15 @@ export function ProductFilters({
                               type="checkbox"
                               checked={isChecked}
                               onChange={() =>
-                                onDimensionFilterChange?.(dimension)
+                                onDimensionFilterChange?.(normalizedDimension)
                               }
                               className="checkbox-input"
                             />
                             <span className="checkbox-text">
-                              {dimension} {language === "en" ? "cm" : "სმ"}
+                              {normalizedDimension}
+                              <span className="dimension-unit">
+                                {language === "en" ? " cm" : " სმ"}
+                              </span>
                             </span>
                           </label>
                         );

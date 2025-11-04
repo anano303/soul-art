@@ -46,6 +46,24 @@
   font-family: firaGo;
 }
 
+.filter-subtitle {
+  margin: 4px 0 0;
+  font-size: 0.85rem;
+  color: #6b6f72;
+  font-family: firaGo;
+  line-height: 1.4;
+}
+
+.filter-subtitle.compact {
+  margin-top: 2px;
+}
+
+.dimension-unit {
+  color: #6b6f72;
+  font-size: 0.85em;
+  margin-left: 4px;
+}
+
 .filter-clear-btn {
   background: transparent;
   color: #012645;
@@ -968,7 +986,6 @@
     transform: translateY(0);
   }
 }
-
 
 /* Clear Filters Button */
 .clear-filters-btn {

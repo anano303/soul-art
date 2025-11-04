@@ -108,6 +108,7 @@ export class ProductsController {
       includeVariants: includeVariants === 'true',
       isOriginal: parsedIsOriginal,
       material,
+      dimension,
     });
   }
 
