@@ -1534,6 +1534,7 @@ html {
 .filter-header.compact {
   margin-bottom: 8px;
   margin-top: 0;
+  width: 100%;
 }
 
 .filter-title.compact {

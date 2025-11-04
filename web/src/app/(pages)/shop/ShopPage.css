@@ -249,7 +249,7 @@
 
 .filters-sidebar {
   position: sticky;
-  top: 85px;
+  /* top: 85px; */
   flex: 0 0 320px;
   width: 320px;
   align-self: flex-start;
