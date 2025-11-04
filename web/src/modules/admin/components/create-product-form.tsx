@@ -2172,7 +2172,7 @@ export function CreateProductForm({
             <p className="seller-info-text">
               {language === "en"
                 ? "Brand name is automatically set to your store name"
-                : "ბრენდის სახელი ავტომატურად დაყენებულია თქვენი მაღაზიის სახელზე"}
+                : "ბრენდის სახელი ავტომატურად დაყენებულია თქვენი მაღაზიის სახელზე, ეს სახელი გამოჩნდება როგორც ავტორი, შეცვლა შეგიძლიათ პროფილიდან"}
             </p>
           )}
           {errors.brand && (
@@ -2216,7 +2216,7 @@ export function CreateProductForm({
               }}
             >
               <small style={{ color: "#495057", fontWeight: "bold" }}>
-                {language === "en" ? "Preview:" : "პრევიუ:"}
+                {language === "en" ? "Preview:" : "გადახედვა:"}
               </small>
               <div style={{ marginTop: "4px" }}>
                 {formData.hashtags.map((tag, index) => (
@@ -2241,6 +2241,11 @@ export function CreateProductForm({
         </div>{" "}
         <div>
           <label htmlFor="images">{t("adminProducts.images")}</label>
+             <small style={{ color: "#666", fontSize: "0.9rem" }}>
+            {language === "en"
+              ? "It's recommended to upload multiple high-quality photos from different angles to better showcase your artwork."
+              : "სასურველია ატვირთოთ რამდენიმე სხვადასხვა ხედის, მაღალი ხარისხის ფოტო, ნამუშევრის უკეთესად წარმოსაჩენად."}
+          </small>
           <input
             id="images"
             name="images"
