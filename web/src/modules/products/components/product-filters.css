@@ -37,6 +37,12 @@
   margin-top: 0;
 }
 
+.filter-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .filter-title {
   font-size: 1.05rem;
   font-weight: 600;
@@ -44,6 +50,24 @@
   margin: 0;
   text-shadow: none;
   font-family: firaGo;
+}
+
+.filter-subtitle {
+  margin: 4px 0 0;
+  font-size: 0.85rem;
+  color: #6b6f72;
+  font-family: firaGo;
+  line-height: 1.4;
+}
+
+.filter-subtitle.compact {
+  margin-top: 2px;
+}
+
+.dimension-unit {
+  color: #6b6f72;
+  font-size: 0.85em;
+  margin-left: 4px;
 }
 
 .filter-clear-btn {
@@ -66,6 +90,24 @@
   text-decoration: none;
   transform: none;
   box-shadow: none;
+}
+
+.filter-collapse-btn {
+  background: transparent;
+  border: none;
+  color: #012645;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 500;
+  padding: 6px 8px;
+  border-radius: 6px;
+  transition: background 0.2s ease, color 0.2s ease;
+  font-family: firaGo;
+}
+
+.filter-collapse-btn:hover {
+  background: rgba(1, 38, 69, 0.08);
+  color: #012645;
 }
 
 /* მთავარი კატეგორიის ჩამონათვალი */
@@ -969,7 +1011,6 @@
   }
 }
 
-
 /* Clear Filters Button */
 .clear-filters-btn {
   background: #fff;
@@ -1493,6 +1534,7 @@ html {
 .filter-header.compact {
   margin-bottom: 8px;
   margin-top: 0;
+  width: 100%;
 }
 
 .filter-title.compact {

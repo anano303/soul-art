@@ -15,20 +15,30 @@ import "./productActions.css";
 import { useUser } from "@/modules/auth/hooks/use-user";
 import { Role } from "@/types/role";
 import Link from "next/link";
+import { useLanguage } from "@/hooks/LanguageContext";
 
 interface ProductsActionsProps {
   product: Product;
   onStatusChange?: (productId: string, newStatus: ProductStatus) => void;
   onDelete?: () => void;
+  materials?: string[];
+  dimensions?: {
+    width?: number;
+    height?: number;
+    depth?: number;
+  };
 }
 
 export function ProductsActions({
   product,
   onStatusChange,
   onDelete,
+  materials,
+  dimensions,
 }: ProductsActionsProps) {
   const router = useRouter();
   const { user } = useUser();
+  const { language } = useLanguage();
   const [isPosting, setIsPosting] = useState(false);
 
   console.log("Current user from useUser:", user);
@@ -127,7 +137,9 @@ export function ProductsActions({
       setIsPosting(true);
       const response = await fetchWithAuth(
         `/products/${product._id}/post-to-facebook`,
-        { method: "POST" }
+        {
+          method: "POST",
+        }
       );
 
       const data = await response.json().catch(() => ({}));

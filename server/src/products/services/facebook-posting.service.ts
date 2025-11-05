@@ -100,17 +100,62 @@ export class FacebookPostingService {
     const author = this.getAuthor(product);
     const sellerUrl = this.getSellerProfileUrl(product);
 
+    // Add material, dimensions, and original info
+    const materialInfo = this.formatMaterials(product);
+    const dimensionInfo = this.formatDimensions(product);
+    const originalInfo = this.formatOriginalStatus(product);
+
     const parts: string[] = [
       `📌 ${title}`,
-      author ? `\n✍️ ავტორი: ${author}` : '',
-      desc ? `\n${desc}` : '',
-      `\n${priceBlock}`,
-      url ? `\n🔗 ნახვა/ყიდვა: ${url}` : '',
-      sellerUrl ? `\n👤 ავტორის გვერდი: ${sellerUrl}` : '',
-      tags ? `\n${tags}` : '',
+      author ? `✍️ ავტორი: ${author}` : '',
+      desc ? `${desc}` : '',
+      originalInfo ? `${originalInfo}` : '',
+      materialInfo ? `${materialInfo}` : '',
+      dimensionInfo ? `${dimensionInfo}` : '',
+      `${priceBlock}`,
+      url ? `🔗 ნახვა/ყიდვა: ${url}` : '',
+      sellerUrl ? `👤 ავტორის გვერდი: ${sellerUrl}` : '',
+      tags ? `${tags}` : '',
     ].filter(Boolean);
 
     return parts.join('\n');
+  }
+
+  private formatOriginalStatus(product: ProductDocument): string | null {
+    const anyProd: any = product as any;
+    if (anyProd.isOriginal === undefined || anyProd.isOriginal === null) {
+      return null;
+    }
+    return anyProd.isOriginal ? '✅ ორიგინალი' : '🖼️ ასლი';
+  }
+
+  private formatMaterials(product: ProductDocument): string | null {
+    const anyProd: any = product as any;
+    const materials = Array.isArray(anyProd.materials)
+      ? anyProd.materials.filter(Boolean).slice(0, 3)
+      : [];
+
+    if (materials.length === 0) return null;
+
+    return `🎨 მასალა: ${materials.join(', ')}`;
+  }
+
+  private formatDimensions(product: ProductDocument): string | null {
+    const anyProd: any = product as any;
+    const dims = anyProd.dimensions;
+
+    if (!dims) return null;
+
+    const { width, height, depth } = dims;
+
+    if (!width && !height && !depth) return null;
+
+    const parts: string[] = [];
+    if (width) parts.push(`${width}`);
+    if (height) parts.push(`${height}`);
+    if (depth) parts.push(`${depth}`);
+
+    return parts.length > 0 ? `📏 ზომა: ${parts.join('×')} სმ` : null;
   }
 
   private getAuthor(product: ProductDocument): string | null {

@@ -64,6 +64,24 @@ body {
     cursor: pointer;
   }
 
+  .image-wrapper.is-video {
+    cursor: default;
+  }
+
+  .product-video-frame {
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    overflow: hidden;
+    background-color: #000;
+  }
+
+  .product-video-frame iframe {
+    width: 100%;
+    height: 100%;
+    border: 0;
+  }
+
   .discount-badge {
     position: absolute;
     top: 10px;
@@ -167,6 +185,14 @@ body {
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
   }
 
+  .thumbnail.video {
+    background: radial-gradient(
+      circle at center,
+      rgba(1, 38, 69, 0.12),
+      rgba(1, 38, 69, 0.2)
+    );
+  }
+
   .thumbnail.active {
     border-color: var(--primary-color);
     transform: scale(1.05);
@@ -174,6 +200,31 @@ body {
 
   .thumbnail.active img {
     object-fit: contain;
+  }
+
+  .thumbnail-video-indicator {
+    position: absolute;
+    bottom: 8px;
+    left: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: rgba(1, 38, 69, 0.85);
+    color: #fff;
+    box-shadow: 0 4px 10px rgba(1, 38, 69, 0.35);
+  }
+
+  .thumbnail-video-fallback {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(1, 38, 69, 0.58);
+    color: #fff;
   }
   .thumbnail:hover {
     transform: scale(1.05);
@@ -750,7 +801,6 @@ body {
     overflow: hidden;
   }
 
-    
   /* Mobile responsiveness for fullscreen modal */
   @media (max-width: 768px) {
     &.container {
@@ -769,7 +819,6 @@ body {
     .main-product-info {
       order: 2;
     }
-
 
     .fullscreen-close {
       top: 12px;
@@ -1838,5 +1887,4 @@ body {
     color: #333;
     margin-left: 26px;
   }
-
 }

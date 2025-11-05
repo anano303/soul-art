@@ -392,10 +392,11 @@ export const TRANSLATIONS: Translations = {
       artworkSize: "ნამუშევრის ზომა",
       wallColor: "კედლის ფერი",
       instructions:
-        "გადაიტანეთ არჩეული პროდუქტი კედელზე სასურველ პოზიციაზე. გამოიყენეთ ზომის რეგულატორი.",
+        "გადააადგილე არჩეული ნამუშევარი კედელზე სასურველ პოზიციაზე. ზომა ავტომატურად შეესაბამება მითითებულ სანტიმეტრებს.",
       loading: "ოთახის სურათების ჩატვირთვა...",
       artworkLoading: "ნამუშევრების ჩატვირთვა...",
       close: "დახურვა",
+      autoSizing: "ზომა ავტომატურად შეესაბამება მითითებულ სანტიმეტრებს.",
     },
 
     // Profile
@@ -1796,10 +1797,11 @@ export const TRANSLATIONS: Translations = {
       artworkSize: "Artwork Size",
       wallColor: "Wall Color",
       instructions:
-        "Drag the selected product to the desired position on the wall. Use the size regulator.",
+        "Drag the artwork to the desired position on the wall. The scale matches the provided dimensions automatically.",
       loading: "Loading room images...",
       artworkLoading: "Loading artwork...",
       close: "close",
+      autoSizing: "Size matches the provided dimensions automatically.",
     },
 
     // Profile

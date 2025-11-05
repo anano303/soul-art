@@ -72,22 +72,29 @@ export function CreateProductForm({
     Partial<Record<keyof ProductFormData, string>>
   >({});
   const [formData, setFormData] = useState<ProductFormData & { _id?: string }>(
-    initialData || {
-      name: "",
-      nameEn: "",
-      price: 1,
-      description: "",
-      descriptionEn: "",
-      images: [],
-      brand: "SoulArt", // Set default brand here
-      category: "",
-      subcategory: "",
-      countInStock: 1,
-      hashtags: [],
-      brandLogo: undefined,
-      isOriginal: true,
-      materials: [],
-    }
+    initialData
+      ? {
+          ...initialData,
+          materials: initialData.materials ?? [],
+          materialsEn: initialData.materialsEn ?? [],
+        }
+      : {
+          name: "",
+          nameEn: "",
+          price: 1,
+          description: "",
+          descriptionEn: "",
+          images: [],
+          brand: "SoulArt", // Set default brand here
+          category: "",
+          subcategory: "",
+          countInStock: 1,
+          hashtags: [],
+          brandLogo: undefined,
+          isOriginal: true,
+          materials: [],
+          materialsEn: [],
+        }
   );
 
   // State for new category structure
@@ -126,6 +133,8 @@ export function CreateProductForm({
   const [isOriginal, setIsOriginal] = useState<boolean>(true);
   const [materials, setMaterials] = useState<string[]>([]);
   const [materialsInput, setMaterialsInput] = useState<string>("");
+  const [materialsEn, setMaterialsEn] = useState<string[]>([]);
+  const [materialsEnInput, setMaterialsEnInput] = useState<string>("");
 
   // Dimensions state
   const [dimensions, setDimensions] = useState<{
@@ -375,6 +384,10 @@ export function CreateProductForm({
         setMaterials(initialData.materials);
         setMaterialsInput(initialData.materials.join(", "));
       }
+      if (initialData.materialsEn) {
+        setMaterialsEn(initialData.materialsEn);
+        setMaterialsEnInput(initialData.materialsEn.join(", "));
+      }
 
       // Extract category ID correctly, handling both object and string formats
       if (initialData.mainCategory) {
@@ -435,6 +448,7 @@ export function CreateProductForm({
       brandLogo: undefined,
       isOriginal: true,
       materials: [],
+      materialsEn: [],
     });
     setHashtagsInput("");
     setErrors({});
@@ -461,6 +475,8 @@ export function CreateProductForm({
     setIsOriginal(true);
     setMaterials([]);
     setMaterialsInput("");
+    setMaterialsEn([]);
+    setMaterialsEnInput("");
     setDimensions({
       width: undefined,
       height: undefined,
@@ -608,6 +624,10 @@ export function CreateProductForm({
           typeof img === "string" ? img : null
         ),
         brandLogo: typeof data.brandLogo === "string" ? data.brandLogo : null,
+        materials,
+        materialsEn,
+        materialsInput,
+        materialsEnInput,
         // Include additional state
         selectedCategory,
         selectedSubcategory,
@@ -671,6 +691,14 @@ export function CreateProductForm({
           setDiscountStartDate(parsedData.discountStartDate);
         if (parsedData.discountEndDate)
           setDiscountEndDate(parsedData.discountEndDate);
+        if (parsedData.materials)
+          setMaterials(parsedData.materials as string[]);
+        if (parsedData.materialsInput)
+          setMaterialsInput(parsedData.materialsInput as string);
+        if (parsedData.materialsEn)
+          setMaterialsEn(parsedData.materialsEn as string[]);
+        if (parsedData.materialsEnInput)
+          setMaterialsEnInput(parsedData.materialsEnInput as string);
 
         console.log("Form data restored from localStorage");
       }
@@ -780,6 +808,22 @@ export function CreateProductForm({
       : [];
 
     setMaterials(materialsArray);
+  };
+
+  const handleMaterialsEnChange = (
+    e: React.ChangeEvent<HTMLTextAreaElement>
+  ) => {
+    const value = e.target.value;
+    setMaterialsEnInput(value);
+
+    const materialsArray = value
+      ? value
+          .split(",")
+          .map((material) => material.trim())
+          .filter((material) => material.length > 0)
+      : [];
+
+    setMaterialsEn(materialsArray);
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -1034,6 +1078,7 @@ export function CreateProductForm({
         formDataToSend.append("dimensions", JSON.stringify(dimensions));
       }
       formDataToSend.append("materials", JSON.stringify(materials));
+      formDataToSend.append("materialsEn", JSON.stringify(materialsEn));
 
       // Handle images - separate existing images from new ones
       const existingImages: string[] = [];
@@ -1255,6 +1300,14 @@ export function CreateProductForm({
       }
     };
   }, []);
+
+  useEffect(() => {
+    setFormData((prev) => ({
+      ...prev,
+      materials,
+      materialsEn,
+    }));
+  }, [materials, materialsEn]);
 
   // Warn user before leaving page with unsaved data
   useEffect(() => {
@@ -1751,6 +1804,33 @@ export function CreateProductForm({
               ? "List the materials used in this product. Separate with commas."
               : "ჩამოწერეთ ამ პროდუქტში გამოყენებული მასალები. გამოყავით მძიმეებით."}
           </small>
+          <label htmlFor="materialsEn" style={{ marginTop: "12px" }}>
+            {language === "en" ? "Materials (English)" : "მასალა ინგლისურად"}
+          </label>
+          <textarea
+            id="materialsEn"
+            value={materialsEnInput}
+            onChange={handleMaterialsEnChange}
+            className="create-product-textarea"
+            placeholder={
+              language === "en"
+                ? "Enter English equivalents separated by commas (match order above)"
+                : "შეიყვანეთ ინგლისური ვერსიები მძიმეებით (იმავე მიმდევრობით)"
+            }
+            rows={2}
+          />
+          <small
+            style={{
+              color: "#666",
+              fontSize: "0.9rem",
+              display: "block",
+              marginTop: "4px",
+            }}
+          >
+            {language === "en"
+              ? "Optional. Provide English labels matching the Georgian list order."
+              : "არასავალდებულოა. ჩაწერეთ შესაბამისი ინგლისური სახელწოდებები იგივე რიგით."}
+          </small>
           {/* Materials preview */}
           {materials.length > 0 && (
             <div
@@ -1783,6 +1863,26 @@ export function CreateProductForm({
                   </span>
                 ))}
               </div>
+              {materialsEn.length > 0 && (
+                <div style={{ marginTop: "6px" }}>
+                  {materialsEn.map((material, index) => (
+                    <span
+                      key={`en-${index}`}
+                      style={{
+                        display: "inline-block",
+                        backgroundColor: "#3b82f6",
+                        color: "white",
+                        padding: "2px 6px",
+                        margin: "2px",
+                        borderRadius: "3px",
+                        fontSize: "0.8rem",
+                      }}
+                    >
+                      {material.trim()}
+                    </span>
+                  ))}
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -2072,7 +2172,7 @@ export function CreateProductForm({
             <p className="seller-info-text">
               {language === "en"
                 ? "Brand name is automatically set to your store name"
-                : "ბრენდის სახელი ავტომატურად დაყენებულია თქვენი მაღაზიის სახელზე"}
+                : "ბრენდის სახელი ავტომატურად დაყენებულია თქვენი მაღაზიის სახელზე, ეს სახელი გამოჩნდება როგორც ავტორი, შეცვლა შეგიძლიათ პროფილიდან"}
             </p>
           )}
           {errors.brand && (
@@ -2116,7 +2216,7 @@ export function CreateProductForm({
               }}
             >
               <small style={{ color: "#495057", fontWeight: "bold" }}>
-                {language === "en" ? "Preview:" : "პრევიუ:"}
+                {language === "en" ? "Preview:" : "გადახედვა:"}
               </small>
               <div style={{ marginTop: "4px" }}>
                 {formData.hashtags.map((tag, index) => (
@@ -2141,6 +2241,11 @@ export function CreateProductForm({
         </div>{" "}
         <div>
           <label htmlFor="images">{t("adminProducts.images")}</label>
+             <small style={{ color: "#666", fontSize: "0.9rem" }}>
+            {language === "en"
+              ? "It's recommended to upload multiple high-quality photos from different angles to better showcase your artwork."
+              : "სასურველია ატვირთოთ რამდენიმე სხვადასხვა ხედის, მაღალი ხარისხის ფოტო, ნამუშევრის უკეთესად წარმოსაჩენად."}
+          </small>
           <input
             id="images"
             name="images"

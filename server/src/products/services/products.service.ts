@@ -111,6 +111,22 @@ export class ProductsService {
 
     const filter: any = {};
 
+    const addAndCondition = (condition: Record<string, unknown>) => {
+      if (!condition) return;
+
+      if (!filter.$and) {
+        filter.$and = [condition];
+        return;
+      }
+
+      if (Array.isArray(filter.$and)) {
+        filter.$and.push(condition);
+        return;
+      }
+
+      filter.$and = [filter.$and, condition];
+    };
+
     if (keyword) {
       // First, find users matching the keyword (by email, name, or store name)
       const matchingUsers = await this.usersService.findUsersByKeyword(keyword);
@@ -214,20 +230,47 @@ export class ProductsService {
       filter.colors = color;
     }
 
-    // Filter by original/copy status
+    // Filter by original/copy status - treat missing values as original for legacy data
     if (isOriginal !== undefined) {
-      filter.isOriginal = isOriginal;
+      if (isOriginal === true) {
+        addAndCondition({
+          $or: [{ isOriginal: true }, { isOriginal: { $exists: false } }],
+        });
+      } else {
+        filter.isOriginal = false;
+      }
     }
 
-    // Filter by material - support multiple materials
+    // Filter by material - support Georgian and English values
     if (material) {
-      const materials = material.split(',').map((m) => m.trim());
-      if (materials.length > 1) {
-        // Multiple materials - product must have at least one
-        filter.materials = { $in: materials };
-      } else {
-        // Single material
-        filter.materials = materials[0];
+      const materialsList = material
+        .split(',')
+        .map((m) => m.trim())
+        .filter((m) => m.length > 0);
+
+      if (materialsList.length > 0) {
+        const escapeRegex = (value: string) =>
+          value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+        const regexValues = materialsList.map(
+          (value) => new RegExp(`^${escapeRegex(value)}$`, 'i'),
+        );
+
+        const materialCondition = {
+          $or: [
+            { materials: { $in: regexValues } },
+            { materialsEn: { $in: regexValues } },
+          ],
+        };
+
+        if (filter.$and) {
+          if (!Array.isArray(filter.$and)) {
+            filter.$and = [filter.$and];
+          }
+          filter.$and.push(materialCondition);
+        } else {
+          filter.$and = [materialCondition];
+        }
       }
     }
 
@@ -273,23 +316,21 @@ export class ProductsService {
     // Filter by discount status
     if (discounted === true) {
       const now = new Date();
-      filter.$and = [
-        { discountPercentage: { $exists: true, $gt: 0 } },
-        {
-          $or: [
-            { discountStartDate: { $exists: false } },
-            { discountStartDate: null },
-            { discountStartDate: { $lte: now } },
-          ],
-        },
-        {
-          $or: [
-            { discountEndDate: { $exists: false } },
-            { discountEndDate: null },
-            { discountEndDate: { $gte: now } },
-          ],
-        },
-      ];
+      addAndCondition({ discountPercentage: { $exists: true, $gt: 0 } });
+      addAndCondition({
+        $or: [
+          { discountStartDate: { $exists: false } },
+          { discountStartDate: null },
+          { discountStartDate: { $lte: now } },
+        ],
+      });
+      addAndCondition({
+        $or: [
+          { discountEndDate: { $exists: false } },
+          { discountEndDate: null },
+          { discountEndDate: { $gte: now } },
+        ],
+      });
     }
 
     // Filter by price range
@@ -543,6 +584,8 @@ export class ProductsService {
     if (data.isOriginal !== undefined)
       updateFields.isOriginal = data.isOriginal;
     if (data.materials !== undefined) updateFields.materials = data.materials;
+    if (data.materialsEn !== undefined)
+      updateFields.materialsEn = data.materialsEn;
     if (data.categoryStructure)
       updateFields.categoryStructure = data.categoryStructure;
 
@@ -816,6 +859,10 @@ export class ProductsService {
       data.sizes = Array.isArray(data.sizes) ? data.sizes : [];
       data.colors = Array.isArray(data.colors) ? data.colors : [];
       data.hashtags = Array.isArray(data.hashtags) ? data.hashtags : [];
+      data.materials = Array.isArray(data.materials) ? data.materials : [];
+      data.materialsEn = Array.isArray(data.materialsEn)
+        ? data.materialsEn
+        : [];
 
       console.log('Creating product with hashtags:', data.hashtags);
 

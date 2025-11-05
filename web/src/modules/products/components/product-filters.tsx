@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { fetchWithAuth } from "@/lib/fetch-with-auth";
 import "./product-filters.css";
@@ -33,6 +33,11 @@ interface FilterProps {
   priceRange?: [number, number]; // min, max
   onPriceRangeChange: (range: [number, number]) => void;
 }
+
+type MaterialQueryResult = {
+  values: string[];
+  translations: Record<string, string>;
+};
 
 export function ProductFilters({
   onCategoryChange,
@@ -69,6 +74,18 @@ export function ProductFilters({
   const [brandSearchTerm, setBrandSearchTerm] = useState<string>("");
   const [hasHorizontalScroll, setHasHorizontalScroll] = useState(false);
   const [showBrandsDropdown, setShowBrandsDropdown] = useState(false);
+  const [isMaterialSectionOpen, setIsMaterialSectionOpen] = useState(() => {
+    if (Array.isArray(selectedMaterial)) {
+      return selectedMaterial.length > 0;
+    }
+    return Boolean(selectedMaterial);
+  });
+  const [isDimensionSectionOpen, setIsDimensionSectionOpen] = useState(() => {
+    if (Array.isArray(selectedDimension)) {
+      return selectedDimension.length > 0;
+    }
+    return Boolean(selectedDimension);
+  });
 
   // Refs for scroll and positioning
   const filterButtonRef = useRef<HTMLButtonElement>(null);
@@ -142,6 +159,22 @@ export function ProductFilters({
       setShowSubcategories(false);
     }
   }, [selectedCategoryId]);
+
+  useEffect(() => {
+    if (Array.isArray(selectedMaterial) && selectedMaterial.length > 0) {
+      setIsMaterialSectionOpen(true);
+    } else if (typeof selectedMaterial === "string" && selectedMaterial) {
+      setIsMaterialSectionOpen(true);
+    }
+  }, [selectedMaterial]);
+
+  useEffect(() => {
+    if (Array.isArray(selectedDimension) && selectedDimension.length > 0) {
+      setIsDimensionSectionOpen(true);
+    } else if (typeof selectedDimension === "string" && selectedDimension) {
+      setIsDimensionSectionOpen(true);
+    }
+  }, [selectedDimension]);
 
   // Fetch all categories with error handling
   const {
@@ -284,58 +317,123 @@ export function ProductFilters({
   });
 
   // Fetch all available materials
-  const { data: availableMaterials = [] } = useQuery<string[]>({
-    queryKey: ["materials", selectedCategoryId, selectedSubCategoryId],
-    queryFn: async () => {
-      try {
-        const params = new URLSearchParams();
-        if (selectedCategoryId)
-          params.append("mainCategory", selectedCategoryId);
+  const { data: availableMaterialsData = { values: [], translations: {} } } =
+    useQuery<MaterialQueryResult>({
+      queryKey: ["materials", selectedCategoryId, selectedSubCategoryId],
+      queryFn: async () => {
+        try {
+          const params = new URLSearchParams();
+          if (selectedCategoryId)
+            params.append("mainCategory", selectedCategoryId);
 
-        // If subcategories are selected, filter materials by those subcategories
-        if (
-          Array.isArray(selectedSubCategoryId) &&
-          selectedSubCategoryId.length > 0
-        ) {
-          params.append("subCategory", selectedSubCategoryId.join(","));
-        } else if (
-          typeof selectedSubCategoryId === "string" &&
-          selectedSubCategoryId
-        ) {
-          params.append("subCategory", selectedSubCategoryId);
+          if (
+            Array.isArray(selectedSubCategoryId) &&
+            selectedSubCategoryId.length > 0
+          ) {
+            params.append("subCategory", selectedSubCategoryId.join(","));
+          } else if (
+            typeof selectedSubCategoryId === "string" &&
+            selectedSubCategoryId
+          ) {
+            params.append("subCategory", selectedSubCategoryId);
+          }
+
+          const queryString = params.toString();
+          const url = queryString
+            ? `/products?${queryString}&page=1&limit=1000`
+            : "/products?page=1&limit=1000";
+
+          const response = await fetchWithAuth(url);
+          if (!response.ok) {
+            return { values: [], translations: {} };
+          }
+
+          const productsResponse = await response.json();
+          const products = productsResponse.items || productsResponse;
+
+          const materialsSet = new Set<string>();
+          const translationMap = new Map<string, string>();
+
+          products.forEach(
+            (product: { materials?: string[]; materialsEn?: string[] }) => {
+              const productMaterials = Array.isArray(product.materials)
+                ? product.materials
+                : [];
+              const productMaterialsEn = Array.isArray(product.materialsEn)
+                ? product.materialsEn
+                : [];
+
+              productMaterials.forEach((material: string, index: number) => {
+                const normalizedMaterial = material?.trim();
+                if (!normalizedMaterial) {
+                  return;
+                }
+
+                materialsSet.add(normalizedMaterial);
+
+                const normalizedTranslation = productMaterialsEn[index]?.trim();
+                if (
+                  normalizedTranslation &&
+                  !translationMap.has(normalizedMaterial)
+                ) {
+                  translationMap.set(normalizedMaterial, normalizedTranslation);
+                }
+              });
+            }
+          );
+
+          return {
+            values: Array.from(materialsSet),
+            translations: Object.fromEntries(translationMap),
+          };
+        } catch (err) {
+          console.error("Failed to fetch materials:", err);
+          return { values: [], translations: {} };
         }
+      },
+      retry: 1,
+      refetchOnWindowFocus: false,
+      enabled: !!selectedCategoryId,
+    });
 
-        const queryString = params.toString();
-        const url = queryString
-          ? `/products?${queryString}&page=1&limit=1000`
-          : "/products?page=1&limit=1000";
+  const normalizedSelectedMaterials = useMemo(() => {
+    if (Array.isArray(selectedMaterial)) {
+      return selectedMaterial
+        .map((material) => material.trim())
+        .filter(Boolean);
+    }
+    if (typeof selectedMaterial === "string" && selectedMaterial) {
+      return [selectedMaterial.trim()].filter(Boolean);
+    }
+    return [];
+  }, [selectedMaterial]);
 
-        const response = await fetchWithAuth(url);
-        if (!response.ok) {
-          return [];
-        }
-        const productsData = await response.json();
-        const products = productsData.items || productsData;
-        // Extract unique materials from products
-        const materials: string[] = [
-          ...new Set(
-            products
-              .flatMap(
-                (product: { materials?: string[] }) => product.materials || []
-              )
-              .filter(Boolean) as string[]
-          ),
-        ];
-        return materials;
-      } catch (err) {
-        console.error("Failed to fetch materials:", err);
-        return [];
-      }
-    },
-    retry: 1,
-    refetchOnWindowFocus: false,
-    enabled: !!selectedCategoryId,
-  });
+  const sortedMaterials = useMemo(() => {
+    const locale = language === "en" ? "en" : "ka";
+
+    const uniqueMaterials = Array.from(
+      new Set(
+        availableMaterialsData.values
+          .map((material) => material.trim())
+          .filter((material) => material.length > 0)
+      )
+    );
+
+    return uniqueMaterials.sort((valueA, valueB) => {
+      const labelA =
+        language === "en"
+          ? availableMaterialsData.translations[valueA] || valueA
+          : valueA;
+      const labelB =
+        language === "en"
+          ? availableMaterialsData.translations[valueB] || valueB
+          : valueB;
+
+      return labelA.localeCompare(labelB, locale, {
+        sensitivity: "base",
+      });
+    });
+  }, [availableMaterialsData, language]);
 
   // Fetch all available dimensions
   const { data: availableDimensions = [] } = useQuery<string[]>({
@@ -383,13 +481,18 @@ export function ProductFilters({
                   };
                 }) => {
                   if (product.dimensions?.width && product.dimensions?.height) {
-                    return `${product.dimensions.width}x${
-                      product.dimensions.height
-                    }${
-                      product.dimensions.depth
-                        ? `x${product.dimensions.depth}`
-                        : ""
-                    }`;
+                    const width = Number(product.dimensions.width);
+                    const height = Number(product.dimensions.height);
+                    const depth = product.dimensions.depth
+                      ? Number(product.dimensions.depth)
+                      : undefined;
+
+                    if (Number.isFinite(width) && Number.isFinite(height)) {
+                      const base = `${width}x${height}`;
+                      return depth && Number.isFinite(depth)
+                        ? `${base}x${depth}`
+                        : base;
+                    }
                   }
                   return null;
                 }
@@ -397,7 +500,31 @@ export function ProductFilters({
               .filter(Boolean) as string[]
           ),
         ];
-        return dimensions;
+        return dimensions.sort((a, b) => {
+          const parseDimension = (value: string) =>
+            value
+              .split("x")
+              .map((segment) => parseFloat(segment.trim()))
+              .filter((num) => Number.isFinite(num));
+
+          const dimsA = parseDimension(a);
+          const dimsB = parseDimension(b);
+          const compareLength = Math.max(dimsA.length, dimsB.length);
+
+          for (let i = 0; i < compareLength; i += 1) {
+            const valA = dimsA[i] ?? Number.NEGATIVE_INFINITY;
+            const valB = dimsB[i] ?? Number.NEGATIVE_INFINITY;
+
+            if (valA !== valB) {
+              return valA - valB;
+            }
+          }
+
+          return a.localeCompare(b, undefined, {
+            numeric: true,
+            sensitivity: "base",
+          });
+        });
       } catch (err) {
         console.error("Failed to fetch dimensions:", err);
         return [];
@@ -408,38 +535,91 @@ export function ProductFilters({
     enabled: !!selectedCategoryId,
   });
 
+  const normalizedSelectedDimensions = useMemo(() => {
+    if (Array.isArray(selectedDimension)) {
+      return selectedDimension
+        .map((dimension) => dimension.trim())
+        .filter(Boolean);
+    }
+    if (typeof selectedDimension === "string" && selectedDimension) {
+      return [selectedDimension.trim()].filter(Boolean);
+    }
+    return [];
+  }, [selectedDimension]);
+
   // Get available attributes based on selected subcategory
   const getAvailableAttributes = (
     attributeType: "ageGroups" | "sizes" | "colors"
   ): string[] => {
-    if (!selectedSubCategoryId || !subcategories || subcategories.length === 0)
-      return [];
+    if (!subcategories || subcategories.length === 0) return [];
 
-    // Convert to array if string or already array
+    // Normalize selected subcategory ids (empty array means "all")
     const selectedIds = Array.isArray(selectedSubCategoryId)
-      ? selectedSubCategoryId
-      : [selectedSubCategoryId];
+      ? selectedSubCategoryId.filter(Boolean).map((id) => id.toString())
+      : selectedSubCategoryId
+      ? [selectedSubCategoryId.toString()]
+      : [];
 
-    // If no subcategories selected, return empty
-    if (selectedIds.length === 0) return [];
+    const relevantSubcategories =
+      selectedIds.length > 0
+        ? subcategories.filter((sub) => {
+            const candidateId =
+              (sub.id as string | undefined) ?? (sub._id as string | undefined);
+            return candidateId
+              ? selectedIds.includes(candidateId.toString())
+              : false;
+          })
+        : subcategories;
 
-    // Collect all attributes from all selected subcategories
+    if (relevantSubcategories.length === 0) {
+      return [];
+    }
+
     const allAttributes = new Set<string>();
 
-    selectedIds.forEach((subId) => {
-      const selectedSubCategory = subcategories.find(
-        (sub) => sub.id === subId || sub._id === subId
-      );
-
-      if (selectedSubCategory && selectedSubCategory[attributeType]) {
-        selectedSubCategory[attributeType].forEach((attr: string) =>
-          allAttributes.add(attr)
-        );
+    relevantSubcategories.forEach((sub) => {
+      const attributes = sub?.[attributeType];
+      if (Array.isArray(attributes)) {
+        attributes
+          .filter((attr): attr is string => typeof attr === "string" && !!attr)
+          .forEach((attr) => allAttributes.add(attr));
       }
     });
 
-    return Array.from(allAttributes);
-  }; // Get localized color name based on current language
+    if (attributeType === "sizes") {
+      return Array.from(allAttributes).sort((a, b) => {
+        const pattern = /\d+(?:[.,]\d+)?/g;
+        const numsA =
+          a
+            .match(pattern)
+            ?.map((value) => parseFloat(value.replace(/,/g, "."))) || [];
+        const numsB =
+          b
+            .match(pattern)
+            ?.map((value) => parseFloat(value.replace(/,/g, "."))) || [];
+
+        const compareLength = Math.max(numsA.length, numsB.length);
+        for (let i = 0; i < compareLength; i += 1) {
+          const valA = numsA[i] ?? Number.NEGATIVE_INFINITY;
+          const valB = numsB[i] ?? Number.NEGATIVE_INFINITY;
+
+          if (valA !== valB) {
+            return valA - valB;
+          }
+        }
+
+        return a.localeCompare(b, undefined, {
+          numeric: true,
+          sensitivity: "base",
+        });
+      });
+    }
+
+    return Array.from(allAttributes).sort((a, b) =>
+      a.localeCompare(b, undefined, { numeric: true, sensitivity: "base" })
+    );
+  };
+  // Get localized color name based on current language
   const getLocalizedColorName = (colorName: string): string => {
     if (language === "en") {
       // Find the color in availableColors to get its English name
@@ -998,10 +1178,7 @@ export function ProductFilters({
                     </div>
                   </div>
                 )}
-              {((Array.isArray(selectedSubCategoryId) &&
-                selectedSubCategoryId.length > 0) ||
-                (typeof selectedSubCategoryId === "string" &&
-                  selectedSubCategoryId)) &&
+              {selectedCategoryId &&
                 getAvailableAttributes("sizes").length > 0 && (
                   <div className="filter-section">
                     <div className="filter-header">
@@ -1236,83 +1413,157 @@ export function ProductFilters({
                 </div>
               </div>
               {/* Materials Filter */}
-              {selectedCategoryId && availableMaterials.length > 0 && (
+              {selectedCategoryId && sortedMaterials.length > 0 && (
                 <div className="filter-section compact-filter">
                   <div className="filter-header compact">
-                    <h3 className="filter-title compact">
-                      {language === "en" ? "Materials" : "მასალები"}
-                    </h3>
-                  </div>
-                  <div className="filter-options compact">
-                    <div className="checkbox-group">
-                      {availableMaterials.slice(0, 5).map((material) => {
-                        const selectedMaterialsArray = Array.isArray(
-                          selectedMaterial
-                        )
-                          ? selectedMaterial
-                          : selectedMaterial
-                          ? [selectedMaterial]
-                          : [];
-                        const isChecked =
-                          selectedMaterialsArray.includes(material);
-
-                        return (
-                          <label key={material} className="checkbox-label">
-                            <input
-                              type="checkbox"
-                              checked={isChecked}
-                              onChange={() =>
-                                onMaterialFilterChange?.(material)
-                              }
-                              className="checkbox-input"
-                            />
-                            <span className="checkbox-text">{material}</span>
-                          </label>
-                        );
-                      })}
+                    <div>
+                      <h3 className="filter-title compact">
+                        {language === "en" ? "Materials" : "მასალები"}
+                      </h3>
+                    </div>
+                    <div className="filter-header-actions">
+                      {normalizedSelectedMaterials.length > 0 && (
+                        <button
+                          className="filter-clear-btn"
+                          onClick={() => onMaterialFilterChange?.("")}
+                          aria-label={t("shop.clear")}
+                        >
+                          {t("shop.clear")}
+                        </button>
+                      )}
+                      <button
+                        type="button"
+                        className="filter-collapse-btn"
+                        onClick={() =>
+                          setIsMaterialSectionOpen((previous) => !previous)
+                        }
+                        aria-expanded={isMaterialSectionOpen}
+                        aria-controls="materials-filter-options"
+                      >
+                        {isMaterialSectionOpen
+                          ? language === "en"
+                            ? "Hide"
+                            : "დამალე"
+                          : language === "en"
+                          ? "Show"
+                          : "გახსენი"}
+                      </button>
                     </div>
                   </div>
+                  {isMaterialSectionOpen && (
+                    <div
+                      className="filter-options compact"
+                      id="materials-filter-options"
+                    >
+                      <div className="checkbox-group">
+                        {sortedMaterials.map((material) => {
+                          const isChecked =
+                            normalizedSelectedMaterials.includes(material);
+                          const displayLabel =
+                            language === "en"
+                              ? availableMaterialsData.translations[material] ||
+                                material
+                              : material;
+
+                          return (
+                            <label key={material} className="checkbox-label">
+                              <input
+                                type="checkbox"
+                                checked={isChecked}
+                                onChange={() =>
+                                  onMaterialFilterChange?.(material)
+                                }
+                                className="checkbox-input"
+                              />
+                              <span className="checkbox-text">
+                                {displayLabel}
+                              </span>
+                            </label>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
               {/* Dimensions Filter */}
               {selectedCategoryId && availableDimensions.length > 0 && (
                 <div className="filter-section compact-filter">
                   <div className="filter-header compact">
-                    <h3 className="filter-title compact">
-                      {language === "en" ? "Dimensions" : "ზომები"}
-                    </h3>
-                  </div>
-                  <div className="filter-options compact">
-                    <div className="checkbox-group">
-                      {availableDimensions.slice(0, 5).map((dimension) => {
-                        const selectedDimensionsArray = Array.isArray(
-                          selectedDimension
-                        )
-                          ? selectedDimension
-                          : selectedDimension
-                          ? [selectedDimension]
-                          : [];
-                        const isChecked =
-                          selectedDimensionsArray.includes(dimension);
-
-                        return (
-                          <label key={dimension} className="checkbox-label">
-                            <input
-                              type="checkbox"
-                              checked={isChecked}
-                              onChange={() =>
-                                onDimensionFilterChange?.(dimension)
-                              }
-                              className="checkbox-input"
-                            />
-                            <span className="checkbox-text">
-                              {dimension} {language === "en" ? "cm" : "სმ"}
-                            </span>
-                          </label>
-                        );
-                      })}
+                    <div>
+                      <h3 className="filter-title compact">
+                        {language === "en" ? "Dimensions" : "ზომები"}
+                      </h3>
+                      <p className="filter-subtitle compact">
+                        {language === "en"
+                          ? "Measurements in centimeters (width / height / depth)"
+                          : "ზომები სანტიმეტრებში (სიგანე / სიმაღლე / სიღრმე)"}
+                      </p>
+                    </div>
+                    <div className="filter-header-actions">
+                      {normalizedSelectedDimensions.length > 0 && (
+                        <button
+                          className="filter-clear-btn"
+                          onClick={() => onDimensionFilterChange?.("")}
+                          aria-label={t("shop.clear")}
+                        >
+                          {t("shop.clear")}
+                        </button>
+                      )}
+                      <button
+                        type="button"
+                        className="filter-collapse-btn"
+                        onClick={() =>
+                          setIsDimensionSectionOpen((previous) => !previous)
+                        }
+                        aria-expanded={isDimensionSectionOpen}
+                        aria-controls="dimensions-filter-options"
+                      >
+                        {isDimensionSectionOpen
+                          ? language === "en"
+                            ? "Hide"
+                            : "დამალე"
+                          : language === "en"
+                          ? "Show"
+                          : "გახსენი"}
+                      </button>
                     </div>
                   </div>
+                  {isDimensionSectionOpen && (
+                    <div
+                      className="filter-options compact"
+                      id="dimensions-filter-options"
+                    >
+                      <div className="checkbox-group">
+                        {availableDimensions.map((dimension) => {
+                          const normalizedDimension = dimension.trim();
+                          const isChecked =
+                            normalizedSelectedDimensions.includes(
+                              normalizedDimension
+                            );
+
+                          return (
+                            <label key={dimension} className="checkbox-label">
+                              <input
+                                type="checkbox"
+                                checked={isChecked}
+                                onChange={() =>
+                                  onDimensionFilterChange?.(normalizedDimension)
+                                }
+                                className="checkbox-input"
+                              />
+                              <span className="checkbox-text">
+                                {normalizedDimension}
+                                <span className="dimension-unit">
+                                  {language === "en" ? " cm" : " სმ"}
+                                </span>
+                              </span>
+                            </label>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
               <div className="filter-section">

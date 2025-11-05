@@ -40,6 +40,8 @@ export interface ArtistProductSummary {
   numReviews?: number;
   description?: string;
   discountPercentage?: number;
+  discountStartDate?: string | null;
+  discountEndDate?: string | null;
   countInStock?: number;
   deliveryType?: "SELLER" | "SoulArt";
   minDeliveryDays?: number;
@@ -158,6 +160,7 @@ export interface Product {
   };
   isOriginal?: boolean;
   materials?: string[];
+  materialsEn?: string[];
   variants?: ProductVariant[];
   videoDescription?: string; // YouTube embed code or URL
   youtubeVideoId?: string;

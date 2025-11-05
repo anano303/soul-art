@@ -215,6 +215,11 @@ export class ProductDto {
   @IsString({ each: true })
   materials?: string[];
 
+  @IsArray()
+  @IsOptional()
+  @IsString({ each: true })
+  materialsEn?: string[];
+
   @IsString()
   @IsOptional()
   brandLogoUrl?: string;

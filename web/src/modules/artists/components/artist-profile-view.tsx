@@ -89,6 +89,35 @@ function getCommissionsCopy(language: "en" | "ge", isOpen: boolean) {
     : "ამჟამად არ იღებს ინდივიდუალურ შეკვეთებს";
 }
 
+function getActiveDiscountPercentage(product: ArtistProductSummary): number {
+  const rawPercentage = product.discountPercentage ?? 0;
+  if (!rawPercentage || rawPercentage <= 0) {
+    return 0;
+  }
+
+  const now = Date.now();
+
+  const parseDate = (value?: string | null): number | null => {
+    if (!value) {
+      return null;
+    }
+    const timestamp = new Date(value).getTime();
+    return Number.isNaN(timestamp) ? null : timestamp;
+  };
+
+  const startTimestamp = parseDate(product.discountStartDate);
+  const endTimestamp = parseDate(product.discountEndDate);
+
+  const startsInFuture = startTimestamp !== null && startTimestamp > now;
+  const endedInPast = endTimestamp !== null && endTimestamp < now;
+
+  if (startsInFuture || endedInPast) {
+    return 0;
+  }
+
+  return rawPercentage;
+}
+
 function resolveBiography(
   bio:
     | ArtistProfileResponse["artist"]["artistBio"]
@@ -598,8 +627,7 @@ function ProductCard({ product, language }: ProductCardProps) {
   const image = product.images?.[0];
   const href = `/products/${product.id}`;
 
-  // Assume no discount for now, since ArtistProductSummary doesn't have it
-  const discountPercentage = product.discountPercentage || 0;
+  const discountPercentage = getActiveDiscountPercentage(product);
   const countInStock = product.countInStock || 1;
 
   const deliveryText = () => {
@@ -645,7 +673,7 @@ function ProductCard({ product, language }: ProductCardProps) {
     try {
       // Check if item is already in cart
       const isInCart = isItemInCart(product.id);
-      
+
       if (!isInCart) {
         // Calculate discounted price if applicable
         const isDiscounted = discountPercentage > 0;
@@ -706,7 +734,7 @@ function ProductCard({ product, language }: ProductCardProps) {
               {product.name.charAt(0)}
             </div>
           )}
-          {/* Discount badge - always visible if discounted */}
+          {/* Discount badge - only show when discount is active */}
           {discountPercentage > 0 && (
             <div className="artist-product-card__discount-badge">
               -{discountPercentage}%

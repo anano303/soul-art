@@ -23,12 +23,68 @@ import "./share-buttons.css";
 interface ShareButtonsProps {
   url: string;
   title: string;
+  isOriginal?: boolean;
+  materials?: string[];
+  dimensions?: {
+    width?: number;
+    height?: number;
+    depth?: number;
+  };
 }
 
-export function ShareButtons({ url, title }: ShareButtonsProps) {
-  const { t } = useLanguage();
+export function ShareButtons({
+  url,
+  title,
+  isOriginal,
+  materials,
+  dimensions,
+}: ShareButtonsProps) {
+  const { t, language } = useLanguage();
   const [showMore, setShowMore] = useState(false);
   const [copied, setCopied] = useState(false);
+
+  const buildShareDescription = () => {
+    const parts: string[] = [title];
+
+    if (isOriginal !== undefined) {
+      const originalText =
+        language === "en"
+          ? isOriginal
+            ? "✅ Original artwork"
+            : "🖼️ Print"
+          : isOriginal
+          ? "✅ ორიგინალი"
+          : "🖼️ ასლი";
+      parts.push(originalText);
+    }
+
+    if (materials && materials.length > 0) {
+      const materialsText =
+        language === "en"
+          ? `🎨 ${materials.slice(0, 2).join(", ")}`
+          : `🎨 ${materials.slice(0, 2).join(", ")}`;
+      parts.push(materialsText);
+    }
+
+    if (dimensions) {
+      const { width, height, depth } = dimensions;
+      let dimText = "";
+      if (width && height) {
+        dimText = depth
+          ? `📏 ${width}×${height}×${depth} cm`
+          : `📏 ${width}×${height} cm`;
+      } else if (width) {
+        dimText = `📏 ${width} cm`;
+      } else if (height) {
+        dimText = `📏 ${height} cm`;
+      }
+      if (dimText) parts.push(dimText);
+    }
+
+    return parts.join("\n");
+  };
+
+  const shareDescription = buildShareDescription();
 
   const handleCopy = async () => {
     try {
@@ -56,7 +112,7 @@ export function ShareButtons({ url, title }: ShareButtonsProps) {
       label: "Facebook",
       props: {
         url: url,
-        quote: title,
+        quote: shareDescription,
         hashtag: "#SoulArt",
       },
     },
@@ -66,7 +122,7 @@ export function ShareButtons({ url, title }: ShareButtonsProps) {
       label: "Twitter",
       props: {
         url: url,
-        title: title,
+        title: shareDescription,
         hashtags: ["SoulArt", "Art"],
       },
     },
@@ -79,7 +135,7 @@ export function ShareButtons({ url, title }: ShareButtonsProps) {
       label: "Telegram",
       props: {
         url: url,
-        title: title,
+        title: shareDescription,
       },
     },
     {
@@ -88,7 +144,7 @@ export function ShareButtons({ url, title }: ShareButtonsProps) {
       label: "WhatsApp",
       props: {
         url: url,
-        title: title,
+        title: shareDescription,
       },
     },
     {
@@ -97,7 +153,7 @@ export function ShareButtons({ url, title }: ShareButtonsProps) {
       label: "LinkedIn",
       props: {
         url: url,
-        title: title,
+        title: shareDescription,
       },
     },
     {
@@ -107,6 +163,7 @@ export function ShareButtons({ url, title }: ShareButtonsProps) {
       props: {
         url: url,
         subject: title,
+        body: shareDescription,
       },
     },
     {
@@ -115,7 +172,7 @@ export function ShareButtons({ url, title }: ShareButtonsProps) {
       label: "Viber",
       props: {
         url: url,
-        title: title,
+        title: shareDescription,
       },
     },
   ];

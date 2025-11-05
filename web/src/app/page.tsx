@@ -23,10 +23,10 @@ const Home = () => {
   return (
     <div>
       <HomePagesHead />
-      <div>
+      {/* <div>
         <GuestReferralBanner />
         <ReferralPromoBanner />
-      </div>
+      </div> */}
       <TopItems />
       <Banner />
       <DiscountedRail />
