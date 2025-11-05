@@ -649,7 +649,7 @@ export class ProductsController {
     const product = await this.productsService.findById(id);
     if (
       user.role !== Role.Admin &&
-      product.user.toString() !== user._id.toString()
+      (product.user as any)._id.toString() !== user._id.toString()
     ) {
       throw new UnauthorizedException('You can only edit your own products');
     }
