@@ -6,22 +6,62 @@ import {
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { BlogPost, BlogPostDocument } from './schemas/blog-post.schema';
+import {
+  BlogPostView,
+  BlogPostViewDocument,
+} from './schemas/blog-post-view.schema';
 import { CreateBlogPostDto } from './dto/create-blog-post.dto';
 import { UpdateBlogPostDto } from './dto/update-blog-post.dto';
 import { Role } from '../types/role.enum';
 
 @Injectable()
 export class BlogService {
+  private readonly MIN_DISPLAY_VIEWS = 220;
+
   constructor(
     @InjectModel(BlogPost.name)
     private blogPostModel: Model<BlogPostDocument>,
+    @InjectModel(BlogPostView.name)
+    private blogPostViewModel: Model<BlogPostViewDocument>,
   ) {}
+
+  private normalizeIp(ip?: string | string[]): string | null {
+    if (!ip) {
+      return null;
+    }
+
+    const raw = Array.isArray(ip) ? ip[0] : ip;
+
+    if (!raw) {
+      return null;
+    }
+
+    return raw.replace('::ffff:', '').trim().toLowerCase();
+  }
+
+  private formatPost(
+    post: BlogPostDocument | (BlogPost & Record<string, any>) | null,
+  ) {
+    if (!post) {
+      return post;
+    }
+
+    const plain =
+      typeof (post as BlogPostDocument).toObject === 'function'
+        ? (post as BlogPostDocument).toObject({ virtuals: true })
+        : (post as BlogPost & Record<string, any>);
+
+    return {
+      ...plain,
+      views: this.MIN_DISPLAY_VIEWS + Math.max(plain.views ?? 0, 0),
+    };
+  }
 
   async create(
     createBlogPostDto: CreateBlogPostDto,
     userId: string,
     userRole: Role,
-  ): Promise<BlogPost> {
+  ) {
     const isAdmin = userRole === Role.Admin;
     const publishDate = createBlogPostDto.publishDate
       ? new Date(createBlogPostDto.publishDate)
@@ -37,29 +77,35 @@ export class BlogService {
       ...payload,
       createdBy: userId,
     });
-    return blogPost.save();
+    await blogPost.save();
+    await blogPost.populate('createdBy', 'name username email');
+    return this.formatPost(blogPost);
   }
 
-  async findAll(published?: boolean): Promise<BlogPost[]> {
+  async findAll(published?: boolean) {
     const filter = published !== undefined ? { isPublished: published } : {};
-    return this.blogPostModel
+    const posts = await this.blogPostModel
       .find(filter)
       .sort({ publishDate: -1 })
       .populate('createdBy', 'name username email')
+      .lean({ virtuals: true })
       .exec();
+
+    return posts.map((post) => this.formatPost(post));
   }
 
-  async findOne(id: string): Promise<BlogPost> {
+  async findOne(id: string) {
     const blogPost = await this.blogPostModel
       .findById(id)
       .populate('createdBy', 'name username email')
+      .lean({ virtuals: true })
       .exec();
 
     if (!blogPost) {
       throw new NotFoundException(`Blog post with ID ${id} not found`);
     }
 
-    return blogPost;
+    return this.formatPost(blogPost);
   }
 
   async update(
@@ -67,7 +113,7 @@ export class BlogService {
     updateBlogPostDto: UpdateBlogPostDto,
     userId: string,
     userRole: Role,
-  ): Promise<BlogPost> {
+  ) {
     const existing = await this.blogPostModel.findById(id).exec();
 
     if (!existing) {
@@ -94,8 +140,9 @@ export class BlogService {
 
     Object.assign(existing, sanitizedUpdate);
     await existing.save();
+    await existing.populate('createdBy', 'name username email');
 
-    return existing;
+    return this.formatPost(existing);
   }
 
   async remove(id: string): Promise<void> {
@@ -106,21 +153,50 @@ export class BlogService {
     }
   }
 
-  async togglePublish(id: string): Promise<BlogPost> {
+  async togglePublish(id: string) {
     const blogPost = await this.findOne(id);
-    blogPost.isPublished = !blogPost.isPublished;
-    return this.blogPostModel
+    const updated = await this.blogPostModel
       .findByIdAndUpdate(
         id,
-        { isPublished: blogPost.isPublished },
+        { isPublished: !blogPost.isPublished },
         { new: true },
       )
+      .populate('createdBy', 'name username email')
       .exec();
+
+    if (!updated) {
+      throw new NotFoundException(`Blog post with ID ${id} not found`);
+    }
+
+    return this.formatPost(updated);
   }
 
-  async incrementView(id: string): Promise<BlogPost> {
-    const blogPost = await this.blogPostModel
-      .findByIdAndUpdate(id, { $inc: { views: 1 } }, { new: true })
+  async incrementView(id: string, ipAddress?: string) {
+    const normalizedIp = this.normalizeIp(ipAddress);
+    let shouldIncrement = true;
+
+    if (normalizedIp) {
+      const updateResult = await this.blogPostViewModel
+        .updateOne(
+          { post: id, ipAddress: normalizedIp },
+          { $setOnInsert: { post: id, ipAddress: normalizedIp } },
+          { upsert: true },
+        )
+        .exec();
+
+      const upsertedCount = (updateResult as any)?.upsertedCount ?? 0;
+      shouldIncrement = upsertedCount > 0;
+    }
+
+    const query = shouldIncrement
+      ? this.blogPostModel.findByIdAndUpdate(
+          id,
+          { $inc: { views: 1 } },
+          { new: true },
+        )
+      : this.blogPostModel.findById(id);
+
+    const blogPost = await query
       .populate('createdBy', 'name username email')
       .exec();
 
@@ -128,6 +204,6 @@ export class BlogService {
       throw new NotFoundException(`Blog post with ID ${id} not found`);
     }
 
-    return blogPost;
+    return this.formatPost(blogPost);
   }
 }

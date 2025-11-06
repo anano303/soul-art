@@ -747,7 +747,6 @@ export function BlogForm({ postId }: BlogFormProps) {
                   placeholder="Author name"
                 />
               </div>
-
             </>
           )}
         </div>

@@ -42,8 +42,13 @@ export class BlogController {
 
   // Public: Increment view count
   @Post(':id/view')
-  async incrementView(@Param('id') id: string) {
-    return this.blogService.incrementView(id);
+  async incrementView(@Param('id') id: string, @Req() req: Request) {
+    const forwardedFor = req.headers['x-forwarded-for'];
+    const clientIp = Array.isArray(forwardedFor)
+      ? forwardedFor[0]
+      : forwardedFor?.split(',')[0];
+
+    return this.blogService.incrementView(id, clientIp || req.ip);
   }
 
   // Admin/Blogger: Create blog post

@@ -111,14 +111,18 @@ export function BlogPostClient({ postId, initialPost }: BlogPostClientProps) {
     fetch(`${process.env.NEXT_PUBLIC_API_URL}/blog/${postId}/view`, {
       method: "POST",
     })
-      .then(() => {
+      .then(async (response) => {
+        if (!response.ok) {
+          throw new Error(`Failed to increment view: ${response.status}`);
+        }
+
+        const updatedPost: BlogPostData = await response.json();
         setPost((prev) => {
           if (!prev) {
-            return prev;
+            return updatedPost;
           }
 
-          const currentViews = typeof prev.views === "number" ? prev.views : 0;
-          return { ...prev, views: currentViews + 1 };
+          return { ...prev, views: updatedPost.views ?? prev.views };
         });
       })
       .catch((err) => console.error("Failed to increment view:", err));
