@@ -143,7 +143,7 @@ function CheckoutSuccessContent() {
         orderSummary.currency || "GEL",
         orderId
       );
-      
+
       // Track in GA4 as well
       trackPurchaseComplete(
         orderId,
@@ -151,16 +151,16 @@ function CheckoutSuccessContent() {
         orderSummary.items || []
       );
 
-      // Track Google Ads conversion
-      if (typeof window !== 'undefined' && (window as any).gtag) {
-        (window as any).gtag('event', 'conversion', {
-          'send_to': 'AW-17709570539/YOUR_CONVERSION_LABEL',
-          'value': orderSummary.totalPrice ?? 0,
-          'currency': orderSummary.currency || 'GEL',
-          'transaction_id': orderId
+      // Track Google Ads purchase conversion (Enhanced)
+      if (typeof window !== "undefined" && (window as any).gtag) {
+        (window as any).gtag("event", "purchase", {
+          send_to: "AW-17709570539",
+          value: orderSummary.totalPrice ?? 0,
+          currency: orderSummary.currency || "GEL",
+          transaction_id: orderId,
         });
       }
-      
+
       hasTrackedPurchaseRef.current = true;
 
       sessionStorage.setItem(`order_summary_${orderId}_tracked`, "true");
