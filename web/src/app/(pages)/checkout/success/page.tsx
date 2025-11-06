@@ -150,6 +150,16 @@ function CheckoutSuccessContent() {
         orderSummary.totalPrice ?? 0,
         orderSummary.items || []
       );
+
+      // Track Google Ads conversion
+      if (typeof window !== 'undefined' && (window as any).gtag) {
+        (window as any).gtag('event', 'conversion', {
+          'send_to': 'AW-17709570539/YOUR_CONVERSION_LABEL',
+          'value': orderSummary.totalPrice ?? 0,
+          'currency': orderSummary.currency || 'GEL',
+          'transaction_id': orderId
+        });
+      }
       
       hasTrackedPurchaseRef.current = true;
 

@@ -239,6 +239,23 @@ export default function RootLayout({
         <link rel="dns-prefetch" href="//www.googletagmanager.com" />
         <link rel="dns-prefetch" href="//www.google-analytics.com" />
 
+        {/* Google Ads Tag (gtag.js) */}
+        <script
+          async
+          src="https://www.googletagmanager.com/gtag/js?id=AW-17709570539"
+        />
+        <script
+          id="google-ads-gtag"
+          dangerouslySetInnerHTML={{
+            __html: `
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('js', new Date());
+              gtag('config', 'AW-17709570539');
+            `,
+          }}
+        />
+
         {/* Meta Pixel Code */}
         <script
           id="meta-pixel-script"
