@@ -106,6 +106,39 @@
   display: flex;
   gap: 0.75rem;
   margin-top: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.artist-add-product-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.55rem 1.2rem;
+  border-radius: 999px;
+  border: 1px solid rgba(224, 216, 73, 0.8);
+  background: linear-gradient(
+    135deg,
+    rgba(224, 216, 73, 0.25),
+    rgba(224, 216, 73, 0.15)
+  );
+  color: #fff;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
+  box-shadow: 0 2px 8px rgba(224, 216, 73, 0.2);
+}
+
+.artist-add-product-button:hover {
+  background: linear-gradient(
+    135deg,
+    rgba(224, 216, 73, 0.35),
+    rgba(224, 216, 73, 0.25)
+  );
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(224, 216, 73, 0.3);
+  border-color: rgba(224, 216, 73, 1);
 }
 
 .artist-edit-button {
@@ -602,7 +635,7 @@
 }
 
 .artist-product-card__info {
-  padding: .7rem 1rem;
+  padding: 0.7rem 1rem;
   background: #fff;
 }
 
@@ -742,6 +775,13 @@
   .artist-hero__actions {
     width: 100%;
     justify-content: flex-start;
+  }
+
+  .artist-add-product-button,
+  .artist-edit-button {
+    width: fit-content;
+    font-size: 0.85rem;
+    padding: 0.5rem 1rem;
   }
 
   .artist-hero__bio-row {

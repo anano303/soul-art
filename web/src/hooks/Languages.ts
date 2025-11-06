@@ -1099,7 +1099,7 @@ export const TRANSLATIONS: Translations = {
       enterBrandName: "შეიყვანეთ ბრენდის სახელი",
       uploadReminder: "გთხოვთ ატვირთოთ მინიმუმ ერთი სურათი",
       productDescriptionHint:
-        "გთხოვთ მიუთითოთ დეტალური ინფორმაცია, მასალა და ზომები ორივე ენაზე",
+        "გთხოვთ მიუთითოთ დეტალური ინფორმაცია ორივე ენაზე",
 
       // Dropdown options
       loading: "იტვირთება...",

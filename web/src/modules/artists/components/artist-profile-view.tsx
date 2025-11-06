@@ -16,7 +16,7 @@ import { useGalleryInteractions } from "@/hooks/useGalleryInteractions";
 import { AddToCartButton } from "@/modules/products/components/AddToCartButton";
 import { useCart } from "@/modules/cart/context/cart-context";
 import { useToast } from "@/hooks/use-toast";
-import { Grid3X3, ShoppingBag, Info } from "lucide-react";
+import { Grid3X3, ShoppingBag, Info, Plus } from "lucide-react";
 import BrushTrail from "@/components/BrushTrail/BrushTrail";
 import { FollowButton } from "@/components/follow-button/follow-button";
 import { FollowersModal } from "@/components/followers-modal/followers-modal";
@@ -287,21 +287,39 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
             <div className="artist-hero__info">
               <div className="artist-hero__title-row">
                 <h1>{artist.storeName || artist.name}</h1>
-                {isOwner && (
-                  <button
-                    type="button"
-                    className="artist-edit-button"
-                    onClick={toggleEditor}
-                  >
-                    {language === "en"
-                      ? showEditor
-                        ? "Hide editing"
-                        : "Edit artist page"
-                      : showEditor
-                      ? "დამალე რედაქტირება"
-                      : "რედაქტირება"}
-                  </button>
-                )}
+                <div className="artist-hero__actions">
+                  {isOwner && (
+                    <>
+                      <Link
+                        href="/admin/products/create"
+                        className="artist-add-product-button"
+                        title={
+                          language === "en"
+                            ? "Add New Product"
+                            : "ნამუშევრის დამატება"
+                        }
+                      >
+                        <Plus size={18} />
+                        {language === "en"
+                          ? "Add Product"
+                          : "დაამატე ნამუშევარი"}
+                      </Link>
+                      <button
+                        type="button"
+                        className="artist-edit-button"
+                        onClick={toggleEditor}
+                      >
+                        {language === "en"
+                          ? showEditor
+                            ? "Hide editing"
+                            : "Edit artist page"
+                          : showEditor
+                          ? "დამალე რედაქტირება"
+                          : "რედაქტირება"}
+                      </button>
+                    </>
+                  )}
+                </div>
               </div>
 
               {/* Followers stats and Follow button */}
