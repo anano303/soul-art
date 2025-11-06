@@ -48,6 +48,14 @@ export class CreateBlogPostDto {
   artistUsername?: string;
 
   @IsString()
+  @IsOptional()
+  linkName?: string;
+
+  @IsString()
+  @IsOptional()
+  linkNameEn?: string;
+
+  @IsString()
   @IsNotEmpty()
   coverImage: string;
 

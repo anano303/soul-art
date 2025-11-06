@@ -25,6 +25,8 @@ export interface BlogPostData {
   artist?: string;
   artistEn?: string;
   artistUsername?: string;
+  linkName?: string;
+  linkNameEn?: string;
   coverImage: string;
   intro?: string;
   introEn?: string;

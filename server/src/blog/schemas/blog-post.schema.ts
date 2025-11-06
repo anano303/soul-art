@@ -29,6 +29,12 @@ export class BlogPost {
   @Prop()
   artistUsername?: string; // For interviews: artist username, For articles: any URL link
 
+  @Prop()
+  linkName?: string;
+
+  @Prop()
+  linkNameEn?: string;
+
   @Prop({ required: true })
   coverImage: string;
 

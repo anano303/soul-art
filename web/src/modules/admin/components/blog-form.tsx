@@ -27,6 +27,8 @@ interface BlogFormData {
   artist: string;
   artistEn: string;
   artistUsername: string;
+  linkName: string;
+  linkNameEn: string;
   coverImage: string;
   intro: string;
   introEn: string;
@@ -119,6 +121,8 @@ export function BlogForm({ postId }: BlogFormProps) {
     artist: "",
     artistEn: "",
     artistUsername: "",
+    linkName: "",
+    linkNameEn: "",
     coverImage: "",
     intro: "",
     introEn: "",
@@ -190,6 +194,8 @@ export function BlogForm({ postId }: BlogFormProps) {
           artist: data.artist || "",
           artistEn: data.artistEn || "",
           artistUsername: data.artistUsername || "",
+          linkName: data.linkName || "",
+          linkNameEn: data.linkNameEn || "",
           coverImage: data.coverImage,
           intro: data.intro || "",
           introEn: data.introEn || "",
@@ -359,7 +365,9 @@ export function BlogForm({ postId }: BlogFormProps) {
         // Include interview-specific fields
         sanitizedPayload.artist = formData.artist;
         sanitizedPayload.artistEn = formData.artistEn;
-        sanitizedPayload.artistUsername = formData.artistUsername;
+        sanitizedPayload.artistUsername = formData.artistUsername?.trim() ?? "";
+        sanitizedPayload.linkName = "";
+        sanitizedPayload.linkNameEn = "";
         sanitizedPayload.intro = formData.intro;
         sanitizedPayload.introEn = formData.introEn;
         sanitizedPayload.qa = formData.qa.map(({ question, answer }) => ({
@@ -378,9 +386,9 @@ export function BlogForm({ postId }: BlogFormProps) {
         sanitizedPayload.contentEn = formData.contentEn;
         sanitizedPayload.author = formData.author;
         sanitizedPayload.authorEn = formData.authorEn;
-        if (formData.artistUsername) {
-          sanitizedPayload.artistUsername = formData.artistUsername; // For external link
-        }
+        sanitizedPayload.linkName = formData.linkName?.trim() ?? "";
+        sanitizedPayload.linkNameEn = formData.linkNameEn?.trim() ?? "";
+        sanitizedPayload.artistUsername = formData.artistUsername?.trim() ?? "";
       }
 
       const response = await fetchWithAuth(url, {
@@ -739,6 +747,7 @@ export function BlogForm({ postId }: BlogFormProps) {
                   placeholder="Author name"
                 />
               </div>
+
             </>
           )}
         </div>
@@ -767,17 +776,40 @@ export function BlogForm({ postId }: BlogFormProps) {
           )}
 
           {formData.postType === PostType.ARTICLE && (
-            <div className="form-group">
+            <div className="form-group link-group">
               <label>ლინკი (არაა აუცილებელი)</label>
-              <input
-                type="url"
-                value={formData.artistUsername}
-                onChange={(e) =>
-                  setFormData({ ...formData, artistUsername: e.target.value })
-                }
-                placeholder="https://example.com"
-              />
-              <small>დაამატეთ შესაბამისი ლინკი თუ გსურთ</small>
+              <div className="link-fields">
+                <input
+                  type="text"
+                  value={formData.linkName}
+                  onChange={(e) =>
+                    setFormData({ ...formData, linkName: e.target.value })
+                  }
+                  placeholder="ბმულის სახელი"
+                />
+                <input
+                  type="text"
+                  value={formData.linkNameEn}
+                  onChange={(e) =>
+                    setFormData({ ...formData, linkNameEn: e.target.value })
+                  }
+                  placeholder="Link name (EN)"
+                />
+                <input
+                  type="url"
+                  value={formData.artistUsername}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      artistUsername: e.target.value,
+                    })
+                  }
+                  placeholder="https://example.com"
+                />
+              </div>
+              <small>
+                დაამატეთ ლინკი და მისთვის ქართული და ინგლისური სახელწოდება
+              </small>
             </div>
           )}
 

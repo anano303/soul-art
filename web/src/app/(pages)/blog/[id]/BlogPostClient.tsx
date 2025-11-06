@@ -156,6 +156,18 @@ export function BlogPostClient({ postId, initialPost }: BlogPostClientProps) {
   const isInterview = !post.postType || post.postType === PostType.INTERVIEW;
   const isArticle = post.postType === PostType.ARTICLE;
 
+  const articleLinkLabel = useMemo(() => {
+    const defaultLabel =
+      language === "en" ? "Related Link" : "დაკავშირებული ლინკი";
+    if (!post.artistUsername) {
+      return defaultLabel;
+    }
+    if (language === "en") {
+      return post.linkNameEn || post.linkName || defaultLabel;
+    }
+    return post.linkName || post.linkNameEn || defaultLabel;
+  }, [language, post.artistUsername, post.linkName, post.linkNameEn]);
+
   const authorName = useMemo(
     () => getViewAuthorName(post, language),
     [post, language]
@@ -269,9 +281,7 @@ export function BlogPostClient({ postId, initialPost }: BlogPostClientProps) {
                 rel="noopener noreferrer"
                 className="external-link-btn"
               >
-                <span>
-                  {language === "en" ? "Related Link" : "დაკავშირებული ლინკი"}
-                </span>
+                <span>{articleLinkLabel}</span>
                 <svg
                   width="20"
                   height="20"
