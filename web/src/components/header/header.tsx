@@ -60,14 +60,14 @@ export default function Header() {
             <li>
               <Link
                 href={
-                  user?.role === "seller"
-                    ? "/admin/products"
+                  user?.role === "seller" && user?.artistSlug
+                    ? `/@${user.artistSlug}`
                     : "/sellers-register"
                 }
                 onClick={closeNav}
               >
                 {user?.role === "seller"
-                  ? t("navigation.myArtworks")
+                  ? t("navigation.myPage")
                   : t("navigation.sellArtwork")}
               </Link>
             </li>

@@ -244,6 +244,7 @@ export const TRANSLATIONS: Translations = {
       myOrders: "ჩემი შეკვეთები",
       sellArtwork: "გაყიდე ნამუშევრები",
       myArtworks: "ჩემი ნამუშევრები",
+      myPage: "ჩემი გვერდი",
       forum: "ფორუმი",
       blog: "ბლოგი",
       about: "ჩვენს შესახებ",
@@ -1098,8 +1099,7 @@ export const TRANSLATIONS: Translations = {
       brandLogo: "ბრენდის ლოგო",
       enterBrandName: "შეიყვანეთ ბრენდის სახელი",
       uploadReminder: "გთხოვთ ატვირთოთ მინიმუმ ერთი სურათი",
-      productDescriptionHint:
-        "გთხოვთ მიუთითოთ დეტალური ინფორმაცია ორივე ენაზე",
+      productDescriptionHint: "გთხოვთ მიუთითოთ დეტალური ინფორმაცია ორივე ენაზე",
 
       // Dropdown options
       loading: "იტვირთება...",
@@ -1652,6 +1652,7 @@ export const TRANSLATIONS: Translations = {
       myOrders: "My Orders",
       sellArtwork: "Sell Artwork",
       myArtworks: "My Artworks",
+      myPage: "My Page",
       forum: "Forum",
       blog: "Blog",
       about: "About",
