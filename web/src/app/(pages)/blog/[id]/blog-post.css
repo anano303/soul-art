@@ -364,7 +364,7 @@
 .blog-post-qa {
   display: flex;
   flex-direction: column;
-  gap: 3rem;
+  gap: 1rem;
   margin-top: 3rem;
 }
 
