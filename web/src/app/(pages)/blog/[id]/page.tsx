@@ -69,24 +69,29 @@ const getPost = cache(async (postId: string): Promise<BlogPostData | null> => {
 });
 
 const getAuthorName = (post: BlogPostData): string | undefined => {
+  // First priority: explicit author fields
   if (post.postType === PostType.ARTICLE && (post.author || post.authorEn)) {
     return post.authorEn || post.author || undefined;
   }
 
+  // Check if author field exists for any post type
+  if (post.author || post.authorEn) {
+    return post.authorEn || post.author || undefined;
+  }
+
+  // Fall back to createdBy data
   if (!post.createdBy) {
-    return post.author || post.authorEn || undefined;
+    return undefined;
   }
 
   if (typeof post.createdBy === "string") {
-    return post.author || post.authorEn || undefined;
+    return undefined;
   }
 
   const { firstName, lastName, name, username } = post.createdBy;
   const fullName = [firstName, lastName].filter(Boolean).join(" ");
 
-  return (
-    fullName || name || username || post.author || post.authorEn || undefined
-  );
+  return fullName || name || username || undefined;
 };
 
 const getBlogKeywords = (post: BlogPostData): string[] => {

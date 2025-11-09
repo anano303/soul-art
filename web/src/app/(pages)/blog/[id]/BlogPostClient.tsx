@@ -20,6 +20,12 @@ interface BlogPostClientProps {
 }
 
 const getViewAuthorName = (post: BlogPostData, language: string): string => {
+  // First, check if post has explicit author field
+  if (post.author) {
+    return language === "en" && post.authorEn ? post.authorEn : post.author;
+  }
+
+  // Fall back to createdBy data
   if (!post.createdBy) {
     return language === "en" ? "Soulart Admin" : "სოულარტის გუნდი";
   }

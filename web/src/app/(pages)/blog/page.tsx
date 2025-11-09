@@ -19,6 +19,8 @@ interface BlogPost {
   titleEn: string;
   artist?: string;
   artistEn?: string;
+  author?: string;
+  authorEn?: string;
   coverImage: string;
   intro?: string;
   introEn?: string;
@@ -117,6 +119,13 @@ export default function BlogPage() {
                     {post.artist && (
                       <span className="blog-card-artist">
                         {language === "en" ? post.artistEn : post.artist}
+                      </span>
+                    )}
+                    {post.author && (
+                      <span className="blog-card-author">
+                        {language === "en"
+                          ? post.authorEn || post.author
+                          : post.author}
                       </span>
                     )}
                   </div>

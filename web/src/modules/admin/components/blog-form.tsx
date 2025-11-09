@@ -152,9 +152,9 @@ export function BlogForm({ postId }: BlogFormProps) {
     }
   }, [postId]);
 
-  // Auto-fill author name when switching to article type (only for new posts)
+  // Auto-fill author name when switching post type (only for new posts)
   useEffect(() => {
-    if (!postId && formData.postType === PostType.ARTICLE && currentUser) {
+    if (!postId && currentUser) {
       const currentAuthorName =
         [currentUser.firstName, currentUser.lastName]
           .filter(Boolean)
@@ -378,6 +378,8 @@ export function BlogForm({ postId }: BlogFormProps) {
           question,
           answer,
         }));
+        sanitizedPayload.author = formData.author;
+        sanitizedPayload.authorEn = formData.authorEn;
       } else if (formData.postType === PostType.ARTICLE) {
         // Include article-specific fields only
         sanitizedPayload.subtitle = formData.subtitle;
@@ -567,6 +569,19 @@ export function BlogForm({ postId }: BlogFormProps) {
                   </div>
                 ))}
               </div>
+
+              <div className="form-group">
+                <label>ავტორი (ინტერვიუერი) *</label>
+                <input
+                  type="text"
+                  required
+                  value={formData.author}
+                  onChange={(e) =>
+                    setFormData({ ...formData, author: e.target.value })
+                  }
+                  placeholder="ავტორის სახელი"
+                />
+              </div>
             </>
           ) : (
             <>
@@ -708,6 +723,18 @@ export function BlogForm({ postId }: BlogFormProps) {
                     </div>
                   </div>
                 ))}
+              </div>
+
+              <div className="form-group">
+                <label>Author (Interviewer)</label>
+                <input
+                  type="text"
+                  value={formData.authorEn}
+                  onChange={(e) =>
+                    setFormData({ ...formData, authorEn: e.target.value })
+                  }
+                  placeholder="Author name"
+                />
               </div>
             </>
           ) : (

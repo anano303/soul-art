@@ -17,6 +17,8 @@ interface BlogPost {
   titleEn: string;
   artist: string;
   artistEn: string;
+  author?: string;
+  authorEn?: string;
   coverImage: string;
   publishDate: string;
   isPublished: boolean;
@@ -260,10 +262,15 @@ export function BlogList() {
               </div>
 
               <h3 className="post-title">{post.title}</h3>
-              <p className="post-artist">მხატვარი: {post.artist}</p>
+              {post.artist && (
+                <p className="post-artist">მხატვარი: {post.artist}</p>
+              )}
               <p className="post-author">
                 ავტორი:{" "}
-                {post.createdBy?.name || post.createdBy?.username || "უცნობი"}
+                {post.author ||
+                  post.createdBy?.name ||
+                  post.createdBy?.username ||
+                  "უცნობი"}
               </p>
 
               <div className="post-actions">
