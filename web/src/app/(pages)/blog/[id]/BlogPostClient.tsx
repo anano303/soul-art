@@ -346,15 +346,15 @@ export function BlogPostClient({ postId, initialPost }: BlogPostClientProps) {
               {qaItems.map((item, index) => (
                 <div key={index} className="qa-item">
                   <div className="qa-question">
-                    <span className="qa-q-label">
+                    {/* <span className="qa-q-label">
                       {language === "en" ? "Question:" : "კითხვა:"}
-                    </span>
+                    </span> */}
                     <h3>{item.question}</h3>
                   </div>
                   <div className="qa-answer">
-                    <span className="qa-a-label">
+                    {/* <span className="qa-a-label">
                       {language === "en" ? "Answer:" : "პასუხი:"}
-                    </span>
+                    </span> */}
                     <p>{item.answer}</p>
                   </div>
                 </div>
