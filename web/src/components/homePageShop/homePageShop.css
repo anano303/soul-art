@@ -223,23 +223,23 @@
   z-index: -1;
 }
 
-.product-section:nth-child(odd)::before {
+/* .product-section:nth-child(odd)::before {
   background: linear-gradient(
     -45deg,
     rgba(123, 86, 66, 0.03) 0%,
     rgba(248, 246, 240, 0.05) 50%,
     rgba(123, 86, 66, 0.03) 100%
   );
-}
+} */
 
-.product-section:nth-child(even)::before {
+/* .product-section:nth-child(even)::before {
   background: linear-gradient(
     45deg,
     rgba(1, 38, 69, 0.03) 0%,
     rgba(248, 246, 240, 0.05) 50%,
     rgba(1, 38, 69, 0.03) 100%
   );
-}
+} */
 
 .see-more-mobile {
   display: none; /* Hide on desktop */
@@ -427,7 +427,7 @@
     var(--primary-color, #012645)
   );
   color: white;
-  padding: 3px;
+  padding: 3px 25px;
   border: none;
   /* border-radius: 25px; */
   cursor: pointer;
@@ -872,23 +872,23 @@
   z-index: -1;
 }
 
-.product-section:nth-child(odd)::before {
+/* .product-section:nth-child(odd)::before {
   background: linear-gradient(
     -45deg,
     rgba(123, 86, 66, 0.03) 0%,
     rgba(248, 246, 240, 0.05) 50%,
     rgba(123, 86, 66, 0.03) 100%
   );
-}
+} */
 
-.product-section:nth-child(even)::before {
+/* .product-section:nth-child(even)::before {
   background: linear-gradient(
     45deg,
     rgba(1, 38, 69, 0.03) 0%,
     rgba(248, 246, 240, 0.05) 50%,
     rgba(1, 38, 69, 0.03) 100%
   );
-}
+} */
 
 /* სექციის header-ისთვის დამატებითი სტილები */
 .section-header {

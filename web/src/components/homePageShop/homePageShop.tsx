@@ -237,10 +237,7 @@ const HomePageShop = () => {
   }, [categoryProducts.length, language]);
 
   return (
-    <div
-      className="container shop-container"
-      key={`shop-container-${language}`}
-    >
+    <div className=" shop-container" key={`shop-container-${language}`}>
       <div className="content">
         {isLoading ? (
           <div className="loading-container">
@@ -305,7 +302,12 @@ const HomePageShop = () => {
                     <div className="see-more-desktop see-more">
                       <Link
                         href={`/shop?page=1&mainCategory=${categoryData.categoryId}`}
-                        onClick={() => trackSeeMoreClick(categoryData.category, categoryData.products.length)}
+                        onClick={() =>
+                          trackSeeMoreClick(
+                            categoryData.category,
+                            categoryData.products.length
+                          )
+                        }
                       >
                         <button className="see-more-btn">
                           {t("shop.seeAll")}
@@ -328,7 +330,12 @@ const HomePageShop = () => {
                   <div className="see-more-mobile see-more">
                     <Link
                       href={`/shop?page=1&mainCategory=${categoryData.categoryId}`}
-                      onClick={() => trackSeeMoreClick(categoryData.category, categoryData.products.length)}
+                      onClick={() =>
+                        trackSeeMoreClick(
+                          categoryData.category,
+                          categoryData.products.length
+                        )
+                      }
                     >
                       <button className="see-more-btn">
                         {t("shop.seeAll")}
