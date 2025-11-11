@@ -21,7 +21,12 @@
     "test:watch": "cross-env NODE_ENV=test NODE_ENV=test jest --watch",
     "test:cov": "cross-env NODE_ENV=test jest --coverage",
     "test:debug": "cross-env NODE_ENV=test node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "cross-env NODE_ENV=test jest --config ./test/jest-e2e.json"
+    "test:e2e": "cross-env NODE_ENV=test jest --config ./test/jest-e2e.json",
+    "cloudinary:check": "ts-node -r tsconfig-paths/register src/scripts/check-cloudinary-urls.ts",
+    "cloudinary:copy": "ts-node -r tsconfig-paths/register src/scripts/copy-cloudinary-assets.ts",
+    "cloudinary:copy:dry-run": "ts-node -r tsconfig-paths/register src/scripts/copy-cloudinary-assets.ts --dry-run",
+    "cloudinary:delete": "ts-node -r tsconfig-paths/register src/scripts/delete-all-cloudinary.ts",
+    "cloudinary:delete:dry-run": "ts-node -r tsconfig-paths/register src/scripts/delete-all-cloudinary.ts --dry-run"
   },
   "dependencies": {
     "@ai-sdk/openai": "^1.0.8",

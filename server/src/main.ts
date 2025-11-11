@@ -1,5 +1,5 @@
 import 'dotenv/config';
-import { NestFactory } from '@nestjs/core';
+import { NestFactory, Reflector } from '@nestjs/core';
 import { AppModule } from './app/app.module';
 import { ValidationPipe, VersioningType } from '@nestjs/common';
 import { NestExpressApplication } from '@nestjs/platform-express';
@@ -10,6 +10,7 @@ import { join } from 'path';
 import * as fs from 'fs';
 import * as express from 'express';
 import { apiRateLimit } from './middleware/security.middleware';
+import { CloudinaryUrlInterceptor } from './interceptors/cloudinary-url.interceptor';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
@@ -83,11 +84,13 @@ async function bootstrap() {
   app.use(express.raw({ limit: '50mb' }));
 
   // Security middleware (configured to work with CORS)
-  app.use(helmet({
-    crossOriginEmbedderPolicy: false, // Disable COEP for CORS compatibility
-    crossOriginResourcePolicy: { policy: "cross-origin" }, // Allow cross-origin requests
-    contentSecurityPolicy: false, // Disable CSP for development
-  }));
+  app.use(
+    helmet({
+      crossOriginEmbedderPolicy: false, // Disable COEP for CORS compatibility
+      crossOriginResourcePolicy: { policy: 'cross-origin' }, // Allow cross-origin requests
+      contentSecurityPolicy: false, // Disable CSP for development
+    }),
+  );
   app.use(apiRateLimit); // Apply global rate limiting
   app.use(cookieParser());
 
@@ -106,6 +109,10 @@ async function bootstrap() {
       },
     }),
   );
+
+  // Apply Cloudinary URL transformation to all responses
+  app.useGlobalInterceptors(new CloudinaryUrlInterceptor());
+
   app.use('/favicon.ico', (req, res) => res.status(204).send());
 
   // Setup static file serving for uploads
