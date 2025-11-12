@@ -23,11 +23,49 @@ interface AnalyticsData {
   };
 }
 
+interface DetailedErrorData {
+  total: number;
+  summary: Array<{
+    type: string;
+    count: number;
+    uniqueErrors: number;
+    details: Array<{
+      message: string;
+      endpoint: string;
+      status: string;
+      page: string;
+      count: number;
+    }>;
+  }>;
+  topFailingEndpoints: Array<{
+    endpoint: string;
+    count: number;
+  }>;
+  statusDistribution: Array<{
+    status: string;
+    count: number;
+    category: string;
+  }>;
+  period: string;
+  pagination?: {
+    page: number;
+    limit: number;
+    totalItems: number;
+    totalPages: number;
+    hasNextPage: boolean;
+    hasPrevPage: boolean;
+  };
+}
+
 export default function GA4Dashboard() {
   const { language } = useLanguage();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [timeRange, setTimeRange] = useState<"7d" | "30d" | "90d">("7d");
+  const [timeRange, setTimeRange] = useState<"1d" | "7d" | "30d" | "90d">("7d");
+  const [expandedErrorType, setExpandedErrorType] = useState<string | null>(null);
+  const [detailedErrors, setDetailedErrors] = useState<DetailedErrorData | null>(null);
+  const [isLoadingErrors, setIsLoadingErrors] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
   const [data, setData] = useState<AnalyticsData>({
     pageViews: [],
     homepageEvents: [],
@@ -46,10 +84,11 @@ export default function GA4Dashboard() {
     // Fetch real analytics data from backend
     setLoading(true);
     setError(null);
+    setExpandedErrorType(null); // Reset expanded errors when changing period
     
     const fetchAnalytics = async () => {
       try {
-        const days = timeRange === "7d" ? 7 : timeRange === "30d" ? 30 : 90;
+        const days = timeRange === "1d" ? 1 : timeRange === "7d" ? 7 : timeRange === "30d" ? 30 : 90;
         const response = await fetch(
           `${process.env.NEXT_PUBLIC_API_URL}/analytics/ga4?days=${days}`,
           {
@@ -75,6 +114,54 @@ export default function GA4Dashboard() {
     
     fetchAnalytics();
   }, [timeRange]);
+
+  // Fetch detailed errors
+  const fetchDetailedErrors = async (errorType: string, page: number = 1) => {
+    try {
+      setIsLoadingErrors(true);
+      const days = timeRange === "1d" ? 1 : timeRange === "7d" ? 7 : timeRange === "30d" ? 30 : 90;
+      
+      const url = new URL(`${process.env.NEXT_PUBLIC_API_URL}/analytics/ga4/errors`);
+      url.searchParams.append("days", days.toString());
+      url.searchParams.append("errorType", errorType);
+      url.searchParams.append("page", page.toString());
+      url.searchParams.append("limit", "30");
+
+      const response = await fetch(url.toString(), {
+        credentials: "include",
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch detailed errors");
+      }
+
+      const errorData = await response.json();
+      setDetailedErrors(errorData);
+      setCurrentPage(page);
+    } catch (error) {
+      console.error("Error fetching detailed errors:", error);
+    } finally {
+      setIsLoadingErrors(false);
+    }
+  };
+
+  const handleErrorTypeClick = (errorType: string) => {
+    if (expandedErrorType === errorType) {
+      setExpandedErrorType(null);
+      setDetailedErrors(null);
+      setCurrentPage(1);
+    } else {
+      setExpandedErrorType(errorType);
+      setCurrentPage(1);
+      fetchDetailedErrors(errorType, 1);
+    }
+  };
+
+  const handlePageChange = (newPage: number) => {
+    if (expandedErrorType) {
+      fetchDetailedErrors(expandedErrorType, newPage);
+    }
+  };
 
   const successRate =
     data.apiMetrics.total > 0
@@ -145,6 +232,12 @@ export default function GA4Dashboard() {
         </div>
 
         <div className="ga4-dashboard__time-range">
+          <button
+            className={timeRange === "1d" ? "active" : ""}
+            onClick={() => setTimeRange("1d")}
+          >
+            {language === "en" ? "1 Day" : "1 დღე"}
+          </button>
           <button
             className={timeRange === "7d" ? "active" : ""}
             onClick={() => setTimeRange("7d")}
@@ -423,9 +516,165 @@ export default function GA4Dashboard() {
               </h2>
               <div className="error-list">
                 {data.errors.map((error, index) => (
-                  <div key={index} className="error-item">
-                    <span className="error-item__type">{error.type}</span>
-                    <span className="error-item__count">{error.count}</span>
+                  <div key={index} className="error-item-expandable">
+                    <div 
+                      className="error-item-header"
+                      onClick={() => handleErrorTypeClick(error.type)}
+                      style={{ cursor: 'pointer' }}
+                    >
+                      <div className="error-item-info">
+                        <span className="error-item__type">{error.type}</span>
+                        <span className="error-item__count">{error.count}</span>
+                      </div>
+                      <span className="expand-icon">
+                        {expandedErrorType === error.type ? '▼' : '▶'}
+                      </span>
+                    </div>
+                    
+                    {expandedErrorType === error.type && (
+                      <div className="error-details">
+                        {isLoadingErrors ? (
+                          <div className="loading-details">
+                            <div className="spinner"></div>
+                            <p>{language === "en" ? "Loading error details..." : "იტვირთება დეტალები..."}</p>
+                          </div>
+                        ) : detailedErrors ? (
+                          <div className="detailed-errors">
+                            {/* Error Stats */}
+                            <div className="error-stats">
+                              <div className="stat-box">
+                                <div className="stat-label">
+                                  {language === "en" ? "Total Errors" : "სულ შეცდომები"}
+                                </div>
+                                <div className="stat-value">{detailedErrors.total.toLocaleString()}</div>
+                              </div>
+                              <div className="stat-box">
+                                <div className="stat-label">
+                                  {language === "en" ? "Period" : "პერიოდი"}
+                                </div>
+                                <div className="stat-value">{detailedErrors.period}</div>
+                              </div>
+                            </div>
+
+                            {/* Top Failing Endpoints */}
+                            {detailedErrors.topFailingEndpoints.length > 0 && (
+                              <div className="error-subsection">
+                                <h4>
+                                  {language === "en" ? "Top Failing Endpoints" : "ყველაზე პრობლემური ენდპოინტები"}
+                                  <span className="subsection-count">
+                                    ({detailedErrors.topFailingEndpoints.length})
+                                  </span>
+                                </h4>
+                                <div className="endpoint-list">
+                                  {detailedErrors.topFailingEndpoints.slice(0, 10).map((ep, idx) => (
+                                    <div key={idx} className="endpoint-item">
+                                      <span className="endpoint-path">{ep.endpoint}</span>
+                                      <span className="endpoint-count">{ep.count}</span>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+
+                            {/* Status Code Distribution */}
+                            {detailedErrors.statusDistribution.length > 0 && (
+                              <div className="error-subsection">
+                                <h4>
+                                  {language === "en" ? "Status Code Distribution" : "სტატუს კოდების განაწილება"}
+                                  <span className="subsection-count">
+                                    ({detailedErrors.statusDistribution.length})
+                                  </span>
+                                </h4>
+                                <div className="status-list">
+                                  {detailedErrors.statusDistribution.map((status, idx) => (
+                                    <div key={idx} className="status-item">
+                                      <div>
+                                        <span className={`status-code ${status.category}`}>
+                                          {status.status}
+                                        </span>
+                                        <span className="status-category">{status.category}</span>
+                                      </div>
+                                      <span className="status-count">{status.count}</span>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+
+                            {/* Detailed Error List with Pagination */}
+                            {detailedErrors.summary.length > 0 && detailedErrors.summary[0].details.length > 0 && (
+                              <div className="error-subsection">
+                                <h4>
+                                  {language === "en" 
+                                    ? `Errors (Page ${detailedErrors.pagination?.page || 1} of ${detailedErrors.pagination?.totalPages || 1})`
+                                    : `შეცდომები (გვერდი ${detailedErrors.pagination?.page || 1} / ${detailedErrors.pagination?.totalPages || 1})`
+                                  }
+                                  <span className="subsection-count">
+                                    ({detailedErrors.pagination?.totalItems || detailedErrors.summary[0].details.length} {language === "en" ? "total" : "სულ"})
+                                  </span>
+                                </h4>
+                                <div className="error-details-table">
+                                  {detailedErrors.summary[0].details.map((detail, idx) => (
+                                    <div key={idx} className="error-detail-row">
+                                      <div className="error-detail-message">
+                                        <strong>{detail.message || "Unknown error"}</strong>
+                                      </div>
+                                      <div className="error-detail-info">
+                                        {detail.endpoint && (
+                                          <span>
+                                            <strong>{language === "en" ? "Endpoint:" : "ენდპოინტი:"}</strong> {detail.endpoint}
+                                          </span>
+                                        )}
+                                        {detail.status && (
+                                          <span>
+                                            <strong>{language === "en" ? "Status:" : "სტატუსი:"}</strong> {detail.status}
+                                          </span>
+                                        )}
+                                        {detail.page && (
+                                          <span>
+                                            <strong>{language === "en" ? "Page:" : "გვერდი:"}</strong> {detail.page}
+                                          </span>
+                                        )}
+                                        <span>
+                                          <strong>{language === "en" ? "Count:" : "რაოდენობა:"}</strong> {detail.count}
+                                        </span>
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+
+                                {/* Pagination Controls */}
+                                {detailedErrors.pagination && detailedErrors.pagination.totalPages > 1 && (
+                                  <div className="pagination-controls">
+                                    <button
+                                      className="pagination-btn"
+                                      onClick={() => handlePageChange(currentPage - 1)}
+                                      disabled={!detailedErrors.pagination.hasPrevPage || isLoadingErrors}
+                                    >
+                                      ← {language === "en" ? "Previous" : "წინა"}
+                                    </button>
+                                    <span className="pagination-info">
+                                      {language === "en" ? "Page" : "გვერდი"} {detailedErrors.pagination.page} / {detailedErrors.pagination.totalPages}
+                                    </span>
+                                    <button
+                                      className="pagination-btn"
+                                      onClick={() => handlePageChange(currentPage + 1)}
+                                      disabled={!detailedErrors.pagination.hasNextPage || isLoadingErrors}
+                                    >
+                                      {language === "en" ? "Next" : "შემდეგი"} →
+                                    </button>
+                                  </div>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        ) : (
+                          <p style={{ padding: '1rem', color: '#666' }}>
+                            {language === "en" ? "No detailed error data available" : "დეტალური მონაცემები არ არის ხელმისაწვდომი"}
+                          </p>
+                        )}
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>

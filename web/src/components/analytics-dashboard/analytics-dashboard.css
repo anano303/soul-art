@@ -17,6 +17,40 @@
   font-weight: 700;
 }
 
+/* Period Tabs */
+.period-tabs {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+}
+
+.period-tab {
+  padding: 0.75rem 1.5rem;
+  background: white;
+  border: 2px solid rgba(1, 38, 69, 0.2);
+  border-radius: 8px;
+  color: #666;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: "FiraGo", "Noto Sans Georgian", sans-serif;
+}
+
+.period-tab:hover {
+  background: #f8f9fa;
+  border-color: var(--primary-color, #012645);
+}
+
+.period-tab.active {
+  background: var(--primary-color, #012645);
+  color: white;
+  border-color: var(--primary-color, #012645);
+  box-shadow: 0 4px 12px rgba(1, 38, 69, 0.2);
+}
+
 .analytics-error {
   text-align: center;
   padding: 2rem;
@@ -159,37 +193,556 @@
   margin: 0.25rem 0;
 }
 
+/* Errors Section */
+.errors-section {
+  margin-top: 2rem;
+  padding: 1.5rem;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.errors-section h3 {
+  color: #d32f2f;
+  margin-bottom: 1.5rem;
+  font-size: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.errors-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.error-item {
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.error-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  background: #f5f5f5;
+  transition: background 0.2s;
+  cursor: pointer;
+  gap: 0.75rem;
+  min-height: 60px;
+}
+
+.error-header:hover {
+  background: #eeeeee;
+}
+
+.error-type {
+  font-weight: 600;
+  color: #333;
+  font-size: 1rem;
+  flex: 1;
+  word-break: break-word;
+}
+
+.error-count {
+  color: #d32f2f;
+  font-weight: 500;
+  font-size: 0.95rem;
+  white-space: nowrap;
+}
+
+.expand-icon {
+  color: #666;
+  font-size: 1rem;
+  min-width: 20px;
+  text-align: center;
+}
+
+.error-details {
+  padding: 1.5rem;
+  background: white;
+  border-top: 1px solid #e0e0e0;
+}
+
+.loading-details {
+  text-align: center;
+  padding: 2rem;
+  color: #666;
+}
+
+.detailed-errors {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.error-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.stat-box {
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.stat-label {
+  font-size: 0.85rem;
+  color: #666;
+  margin-bottom: 0.5rem;
+}
+
+.stat-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--primary-color, #012645);
+}
+
+.error-subsection {
+  padding: 1rem;
+  background: #fafafa;
+  border-radius: 8px;
+  border-left: 4px solid #d32f2f;
+}
+
+.error-subsection h4 {
+  color: #333;
+  margin-bottom: 1rem;
+  font-size: 1.1rem;
+}
+
+.subsection-count {
+  font-size: 0.85rem;
+  color: #666;
+  font-weight: normal;
+  margin-left: 0.5rem;
+}
+
+.endpoint-list,
+.status-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.endpoint-item,
+.status-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem;
+  background: white;
+  border-radius: 6px;
+  border: 1px solid #e0e0e0;
+}
+
+.endpoint-path {
+  font-family: monospace;
+  font-size: 0.9rem;
+  color: #1976d2;
+  flex: 1;
+}
+
+.endpoint-count {
+  font-weight: 600;
+  color: #d32f2f;
+}
+
+.status-code {
+  font-family: monospace;
+  font-weight: 700;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
+
+.status-code.server_error {
+  background: #ffebee;
+  color: #c62828;
+}
+
+.status-code.client_error {
+  background: #fff3e0;
+  color: #e65100;
+}
+
+.status-code.other {
+  background: #f5f5f5;
+  color: #666;
+}
+
+.status-category {
+  text-transform: capitalize;
+  color: #666;
+  font-size: 0.85rem;
+}
+
+.status-count {
+  font-weight: 600;
+  color: #333;
+}
+
+.error-details-table {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.error-detail-row {
+  padding: 1rem;
+  background: white;
+  border-radius: 6px;
+  border-left: 3px solid #ff9800;
+}
+
+.error-detail-message {
+  margin-bottom: 0.75rem;
+  color: #333;
+  font-size: 0.95rem;
+}
+
+.error-detail-info {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  font-size: 0.85rem;
+  color: #666;
+}
+
+.error-detail-info span {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.error-detail-info strong {
+  color: #333;
+}
+
 /* Mobile Responsive */
 @media (max-width: 768px) {
   .analytics-dashboard {
     padding: 1rem;
   }
 
+  .analytics-dashboard h2 {
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .period-tabs {
+    gap: 0.5rem;
+  }
+
+  .period-tab {
+    padding: 0.6rem 1rem;
+    font-size: 0.85rem;
+    flex: 1;
+    min-width: 0;
+  }
+
   .analytics-grid {
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    gap: 1rem;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
   }
 
   .metric-card {
-    padding: 1rem;
+    padding: 0.75rem;
+  }
+
+  .metric-icon {
+    font-size: 1.5rem;
+    margin-bottom: 0.25rem;
   }
 
   .metric-value {
-    font-size: 2rem;
+    font-size: 1.5rem;
+  }
+
+  .metric-label {
+    font-size: 0.75rem;
   }
 
   .analytics-charts {
     grid-template-columns: 1fr;
-    gap: 1.5rem;
+    gap: 1rem;
   }
 
   .chart-section {
     padding: 1rem;
   }
 
+  .chart-section h3 {
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+  }
+
   .page-item,
   .source-item {
     flex-wrap: wrap;
     gap: 0.5rem;
+    padding: 0.75rem;
+  }
+
+  .page-rank,
+  .source-rank {
+    font-size: 0.85rem;
+  }
+
+  .page-path,
+  .source-name {
+    font-size: 0.85rem;
+    flex-basis: 100%;
+  }
+
+  .page-views,
+  .source-visitors {
+    font-size: 0.85rem;
+  }
+
+  .errors-section {
+    padding: 1rem;
+  }
+
+  .errors-section h3 {
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+  }
+
+  .error-header {
+    padding: 0.75rem;
+    flex-wrap: wrap;
+    min-height: auto;
+  }
+
+  .error-type {
+    font-size: 0.9rem;
+    flex-basis: 100%;
+    margin-bottom: 0.5rem;
+  }
+
+  .error-count {
+    font-size: 0.85rem;
+    flex: 1;
+  }
+
+  .expand-icon {
+    font-size: 0.9rem;
+  }
+
+  .error-details {
+    padding: 1rem;
+  }
+
+  .error-subsection {
+    padding: 0.75rem;
+  }
+
+  .error-subsection h4 {
+    font-size: 1rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .error-stats {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+
+  .stat-box {
+    padding: 0.75rem;
+  }
+
+  .stat-label {
+    font-size: 0.8rem;
+  }
+
+  .stat-value {
+    font-size: 1.25rem;
+  }
+
+  .endpoint-item,
+  .status-item {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    padding: 0.75rem;
+  }
+
+  .endpoint-path {
+    font-size: 0.8rem;
+    flex-basis: 100%;
+    word-break: break-all;
+  }
+
+  .endpoint-count,
+  .status-count {
+    font-size: 0.85rem;
+  }
+
+  .status-code {
+    font-size: 0.8rem;
+  }
+
+  .error-detail-row {
+    padding: 0.75rem;
+  }
+
+  .error-detail-message {
+    font-size: 0.85rem;
+    margin-bottom: 0.5rem;
+    word-break: break-word;
+  }
+
+  .error-detail-info {
+    flex-direction: column;
+    gap: 0.5rem;
+    font-size: 0.8rem;
+  }
+
+  .error-detail-info span {
+    flex-wrap: wrap;
+  }
+}
+
+/* Tablet Responsive (iPad, medium screens) */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .analytics-dashboard {
+    padding: 1.5rem;
+  }
+
+  .analytics-dashboard h2 {
+    font-size: 1.75rem;
+  }
+
+  .period-tab {
+    padding: 0.7rem 1.25rem;
+    font-size: 0.9rem;
+  }
+
+  .analytics-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+  }
+
+  .metric-card {
+    padding: 1.25rem;
+  }
+
+  .metric-value {
+    font-size: 2.25rem;
+  }
+
+  .chart-section {
+    padding: 1.25rem;
+  }
+
+  .error-header {
+    padding: 0.9rem;
+  }
+
+  .error-type {
+    font-size: 1rem;
+  }
+
+  .endpoint-path {
+    font-size: 0.85rem;
+  }
+}
+
+/* Small Mobile (iPhone SE, small Android) */
+@media (max-width: 480px) {
+  .analytics-dashboard {
+    padding: 0.75rem;
+  }
+
+  .analytics-dashboard h2 {
+    font-size: 1.25rem;
+    margin-bottom: 1rem;
+  }
+
+  .period-tabs {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .period-tab {
+    width: 100%;
+    padding: 0.65rem 0.75rem;
+    font-size: 0.8rem;
+  }
+
+  .analytics-grid {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+
+  .metric-card {
+    padding: 0.65rem;
+  }
+
+  .metric-icon {
+    font-size: 1.25rem;
+  }
+
+  .metric-value {
+    font-size: 1.5rem;
+  }
+
+  .metric-label {
+    font-size: 0.7rem;
+  }
+
+  .chart-section {
+    padding: 0.75rem;
+  }
+
+  .chart-section h3 {
+    font-size: 1rem;
+  }
+
+  .errors-section {
+    padding: 0.75rem;
+  }
+
+  .errors-section h3 {
+    font-size: 1.1rem;
+  }
+
+  .error-header {
+    padding: 0.65rem;
+  }
+
+  .error-type {
+    font-size: 0.85rem;
+  }
+
+  .error-count {
+    font-size: 0.8rem;
+  }
+
+  .error-details {
+    padding: 0.75rem;
+  }
+
+  .error-subsection {
+    padding: 0.65rem;
+  }
+
+  .error-subsection h4 {
+    font-size: 0.9rem;
+  }
+
+  .stat-value {
+    font-size: 1.1rem;
+  }
+
+  .endpoint-path,
+  .error-detail-message {
+    font-size: 0.75rem;
   }
 }

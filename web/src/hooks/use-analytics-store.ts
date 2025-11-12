@@ -8,6 +8,36 @@ export interface AnalyticsData {
   avgSessionDuration: number;
   topPages: Array<{ page: string; views: number }>;
   topSources: Array<{ source: string; visitors: number }>;
+  errors?: {
+    total: number;
+    byType: Array<{ type: string; count: number }>;
+  };
+}
+
+export interface DetailedErrorData {
+  total: number;
+  summary: Array<{
+    type: string;
+    count: number;
+    uniqueErrors: number;
+    details: Array<{
+      message: string;
+      endpoint: string;
+      status: string;
+      page: string;
+      count: number;
+    }>;
+  }>;
+  topFailingEndpoints: Array<{
+    endpoint: string;
+    count: number;
+  }>;
+  statusDistribution: Array<{
+    status: string;
+    count: number;
+    category: string;
+  }>;
+  period: string;
 }
 
 export const useAnalytics = () => {
@@ -21,39 +51,58 @@ export const useAnalytics = () => {
     topSources: [],
   });
 
+  const [detailedErrors, setDetailedErrors] =
+    useState<DetailedErrorData | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingErrors, setIsLoadingErrors] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Fetch mock analytics data
-  const fetchAnalytics = useCallback(async () => {
+  // Fetch analytics data from backend
+  const fetchAnalytics = useCallback(async (days: number = 7) => {
     try {
       setIsLoading(true);
       setError(null);
 
-      // Mock data for demonstration
-      // Production-ში ეს უნდა შეიცვალოს Vercel Analytics API calls-ით
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/v1/analytics/ga4?days=${days}`,
+        {
+          credentials: "include",
+        }
+      );
 
+      if (!response.ok) {
+        throw new Error("Failed to fetch analytics");
+      }
+
+      const analyticsData = await response.json();
+
+      // Transform data to match our interface
       setData({
-        pageViews: Math.floor(Math.random() * 10000),
-        visitors: Math.floor(Math.random() * 5000),
-        sessions: Math.floor(Math.random() * 3000),
-        bounceRate: Math.floor(Math.random() * 100),
-        avgSessionDuration: Math.floor(Math.random() * 300),
-        topPages: [
-          { page: "/", views: Math.floor(Math.random() * 1000) },
-          { page: "/shop", views: Math.floor(Math.random() * 800) },
-          { page: "/products", views: Math.floor(Math.random() * 600) },
-          { page: "/about", views: Math.floor(Math.random() * 400) },
-          { page: "/contact", views: Math.floor(Math.random() * 200) },
-        ],
-        topSources: [
-          { source: "Google", visitors: Math.floor(Math.random() * 1000) },
-          { source: "Facebook", visitors: Math.floor(Math.random() * 500) },
-          { source: "Direct", visitors: Math.floor(Math.random() * 800) },
-          { source: "Instagram", visitors: Math.floor(Math.random() * 300) },
-        ],
+        pageViews:
+          analyticsData.pageViews?.reduce(
+            (sum: number, p: any) => sum + p.views,
+            0
+          ) || 0,
+        visitors: analyticsData.pageViews?.length || 0,
+        sessions:
+          analyticsData.userJourneys?.reduce(
+            (sum: number, j: any) => sum + j.count,
+            0
+          ) || 0,
+        bounceRate: 0,
+        avgSessionDuration: analyticsData.userJourneys?.[0]?.avgTime || 0,
+        topPages: analyticsData.pageViews?.slice(0, 5) || [],
+        topSources: [],
+        errors: {
+          total:
+            analyticsData.errors?.reduce(
+              (sum: number, e: any) => sum + e.count,
+              0
+            ) || 0,
+          byType: analyticsData.errors || [],
+        },
       });
+
       setIsLoading(false);
     } catch (error) {
       console.error("Analytics fetch error:", error);
@@ -62,10 +111,46 @@ export const useAnalytics = () => {
     }
   }, []);
 
+  // Fetch detailed errors
+  const fetchDetailedErrors = useCallback(
+    async (errorType?: string, days: number = 7) => {
+      try {
+        setIsLoadingErrors(true);
+
+        const url = new URL(
+          `${process.env.NEXT_PUBLIC_API_URL}/v1/analytics/ga4/errors`
+        );
+        url.searchParams.append("days", days.toString());
+        if (errorType) {
+          url.searchParams.append("errorType", errorType);
+        }
+
+        const response = await fetch(url.toString(), {
+          credentials: "include",
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch detailed errors");
+        }
+
+        const errorsData = await response.json();
+        setDetailedErrors(errorsData);
+        setIsLoadingErrors(false);
+      } catch (error) {
+        console.error("Detailed errors fetch error:", error);
+        setIsLoadingErrors(false);
+      }
+    },
+    []
+  );
+
   return {
     data,
+    detailedErrors,
     isLoading,
+    isLoadingErrors,
     error,
     fetchAnalytics,
+    fetchDetailedErrors,
   };
 };

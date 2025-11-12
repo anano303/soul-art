@@ -16,4 +16,18 @@ export class AnalyticsController {
     const daysAgo = days ? parseInt(days) : 7;
     return this.ga4Service.getAnalyticsData(daysAgo);
   }
+
+  @Get('ga4/errors')
+  @Roles(Role.Admin)
+  async getGA4Errors(
+    @Query('days') days?: string,
+    @Query('errorType') errorType?: string,
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+  ) {
+    const daysAgo = days ? parseInt(days) : 7;
+    const pageNum = page ? parseInt(page) : 1;
+    const limitNum = limit ? parseInt(limit) : 30;
+    return this.ga4Service.getDetailedErrors(daysAgo, errorType, pageNum, limitNum);
+  }
 }

@@ -85,8 +85,12 @@ export class Ga4AnalyticsService {
 
   async getAnalyticsData(daysAgo: number = 7): Promise<AnalyticsData> {
     if (!this.analyticsDataClient || !this.propertyId) {
-      this.logger.error('GA4 not configured - missing credentials or property ID');
-      throw new Error('GA4 Analytics not configured. Please set GA4_CREDENTIALS and GA4_PROPERTY_ID environment variables.');
+      this.logger.error(
+        'GA4 not configured - missing credentials or property ID',
+      );
+      throw new Error(
+        'GA4 Analytics not configured. Please set GA4_CREDENTIALS and GA4_PROPERTY_ID environment variables.',
+      );
     }
 
     try {
@@ -101,7 +105,9 @@ export class Ga4AnalyticsService {
       const apiMetrics = this.extractApiMetrics(events);
       const userJourneys = await this.getUserJourneys(daysAgo);
 
-      this.logger.log(`Successfully fetched GA4 data: ${pageViews.length} pages, ${events.length} events, ${funnel.length} funnel steps`);
+      this.logger.log(
+        `Successfully fetched GA4 data: ${pageViews.length} pages, ${events.length} events, ${funnel.length} funnel steps`,
+      );
 
       return {
         pageViews,
@@ -113,7 +119,9 @@ export class Ga4AnalyticsService {
       };
     } catch (error) {
       this.logger.error('Failed to fetch GA4 data:', error.message || error);
-      throw new Error(`Failed to fetch analytics data: ${error.message || 'Unknown error'}`);
+      throw new Error(
+        `Failed to fetch analytics data: ${error.message || 'Unknown error'}`,
+      );
     }
   }
 
@@ -205,12 +213,15 @@ export class Ga4AnalyticsService {
 
     const funnel: FunnelStep[] = [];
     let previousCount = 0;
-    const max = Math.max(...eventCounts.values())
+    const max = Math.max(...eventCounts.values());
 
     funnelEvents.forEach((event, index) => {
       const count = eventCounts.get(event) || 0;
       const percentage = max > 0 ? (Number(count) / max) * 100 : 0;
-      const dropoff = previousCount > 0 ? ((previousCount - Number(count)) / previousCount) * 100 : 0;
+      const dropoff =
+        previousCount > 0
+          ? ((previousCount - Number(count)) / previousCount) * 100
+          : 0;
 
       funnel.push({
         step: stepLabels[index],
@@ -249,17 +260,19 @@ export class Ga4AnalyticsService {
       });
 
       if (!response.data.rows || response.data.rows.length === 0) {
-        this.logger.warn('No user_path events found yet. Users need to navigate through the site.');
+        this.logger.warn(
+          'No user_path events found yet. Users need to navigate through the site.',
+        );
         return [];
       }
 
       // Aggregate paths and count occurrences
       const pathCounts = new Map<string, number>();
-      
+
       response.data.rows.forEach((row) => {
         const path = row.dimensionValues[1]?.value || '';
         const count = parseInt(row.metricValues[0]?.value || '0');
-        
+
         if (path && path !== '(not set)') {
           pathCounts.set(path, (pathCounts.get(path) || 0) + count);
         }
@@ -277,10 +290,12 @@ export class Ga4AnalyticsService {
 
       this.logger.log(`Found ${journeys.length} unique user paths`);
       return journeys;
-
     } catch (error) {
-      this.logger.warn('Failed to fetch user_path events, falling back to page-based journeys:', error.message);
-      
+      this.logger.warn(
+        'Failed to fetch user_path events, falling back to page-based journeys:',
+        error.message,
+      );
+
       // Fallback: Get most visited pages as simple paths
       const response = await this.analyticsDataClient.properties.runReport({
         property: `properties/${this.propertyId}`,
@@ -303,7 +318,9 @@ export class Ga4AnalyticsService {
     }
   }
 
-  private extractHomepageEvents(events: { event: string; count: number }[]): HomepageEvent[] {
+  private extractHomepageEvents(
+    events: { event: string; count: number }[],
+  ): HomepageEvent[] {
     const homepageEventNames = [
       'search',
       'product_interaction',
@@ -326,12 +343,17 @@ export class Ga4AnalyticsService {
       }));
   }
 
-  private extractErrors(events: { event: string; count: number }[]): ErrorData[] {
+  private extractErrors(
+    events: { event: string; count: number }[],
+  ): ErrorData[] {
     // Look for error-related events
-    const error404 = events.find((e) => e.event === 'page_not_found')?.count || 0;
+    const error404 =
+      events.find((e) => e.event === 'page_not_found')?.count || 0;
     const apiError = events.find((e) => e.event === 'api_error')?.count || 0;
-    const networkError = events.find((e) => e.event === 'network_error')?.count || 0;
-    const errorOccurred = events.find((e) => e.event === 'error_occurred')?.count || 0;
+    const networkError =
+      events.find((e) => e.event === 'network_error')?.count || 0;
+    const errorOccurred =
+      events.find((e) => e.event === 'error_occurred')?.count || 0;
 
     return [
       { type: '404 - Page Not Found', count: error404 },
@@ -341,7 +363,9 @@ export class Ga4AnalyticsService {
     ];
   }
 
-  private extractApiMetrics(events: { event: string; count: number }[]): ApiMetrics {
+  private extractApiMetrics(
+    events: { event: string; count: number }[],
+  ): ApiMetrics {
     const apiCallEvent = events.find((e) => e.event === 'api_call');
     const total = apiCallEvent?.count || 0;
 
@@ -372,5 +396,214 @@ export class Ga4AnalyticsService {
       view_all_products_click: 'View All Products button clicks',
     };
     return details[eventName] || '';
+  }
+
+  /**
+   * Get detailed error information with breakdown by endpoint, status, type
+   * Note: Requires custom dimensions to be configured in GA4 Admin
+   */
+  async getDetailedErrors(
+    daysAgo: number = 7,
+    errorType?: string,
+    page: number = 1,
+    limit: number = 30,
+  ) {
+    if (!this.analyticsDataClient || !this.propertyId) {
+      throw new Error('GA4 Analytics not configured');
+    }
+
+    try {
+      // Determine which event name to query based on error type
+      let eventNames = ['error_occurred', 'api_error', 'network_error', 'page_not_found'];
+      
+      if (errorType) {
+        if (errorType.includes('404')) {
+          eventNames = ['page_not_found'];
+        } else if (errorType.includes('API')) {
+          eventNames = ['api_error'];
+        } else if (errorType.includes('Network')) {
+          eventNames = ['network_error'];
+        } else if (errorType.includes('General')) {
+          eventNames = ['error_occurred'];
+        }
+      }
+
+      // Fetch ALL error events (increase limit to 1000)
+      const response = await this.analyticsDataClient.properties.runReport({
+        property: `properties/${this.propertyId}`,
+        requestBody: {
+          dateRanges: [{ startDate: `${daysAgo}daysAgo`, endDate: 'today' }],
+          dimensions: [
+            { name: 'eventName' },
+            { name: 'pagePath' },
+            { name: 'pageTitle' },
+          ],
+          metrics: [{ name: 'eventCount' }],
+          dimensionFilter: {
+            filter: {
+              fieldName: 'eventName',
+              inListFilter: {
+                values: eventNames,
+              },
+            },
+          },
+          orderBys: [{ metric: { metricName: 'eventCount' }, desc: true }],
+          limit: 1000, // Get up to 1000 errors
+        },
+      });
+
+      const allErrorDetails: any[] = [];
+      let totalErrors = 0;
+      const pageErrors: Record<string, number> = {};
+
+      response.data.rows?.forEach((row) => {
+        const eventName = row.dimensionValues[0]?.value || 'unknown';
+        const pagePath = row.dimensionValues[1]?.value || '/';
+        const title = row.dimensionValues[2]?.value || 'Untitled';
+        const count = parseInt(row.metricValues[0]?.value || '0');
+
+        if (count === 0) return;
+
+        totalErrors += count;
+
+        // Map event names to user-friendly messages
+        let message = '';
+        let endpoint = 'N/A';
+        let status = 'N/A';
+
+        switch (eventName) {
+          case 'page_not_found':
+            message = `404 - Page not found: ${pagePath}`;
+            status = '404';
+            break;
+          case 'api_error':
+            message = `API request failed on ${pagePath}`;
+            endpoint = 'API call from ' + pagePath;
+            status = '500';
+            break;
+          case 'network_error':
+            message = `Network connection failed on ${pagePath}`;
+            endpoint = 'Network request from ' + pagePath;
+            status = 'Network';
+            break;
+          case 'error_occurred':
+            message = `Error occurred: ${title} (${pagePath})`;
+            status = 'Error';
+            break;
+          default:
+            message = `${eventName} on ${pagePath}`;
+        }
+
+        allErrorDetails.push({
+          message,
+          endpoint,
+          status,
+          page: pagePath,
+          count,
+        });
+
+        // Count errors by page
+        if (!pageErrors[pagePath]) {
+          pageErrors[pagePath] = 0;
+        }
+        pageErrors[pagePath] += count;
+      });
+
+      // Calculate pagination
+      const totalItems = allErrorDetails.length;
+      const totalPages = Math.ceil(totalItems / limit);
+      const startIndex = (page - 1) * limit;
+      const endIndex = startIndex + limit;
+      const paginatedDetails = allErrorDetails.slice(startIndex, endIndex);
+
+      // Top failing pages
+      const topFailingEndpoints = Object.entries(pageErrors)
+        .map(([pagePath, count]) => ({ endpoint: pagePath, count }))
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 10);
+
+      // Status distribution (simplified)
+      const statusCounts: Record<string, number> = {};
+      allErrorDetails.forEach((err) => {
+        if (!statusCounts[err.status]) {
+          statusCounts[err.status] = 0;
+        }
+        statusCounts[err.status] += err.count;
+      });
+
+      const statusDistribution = Object.entries(statusCounts)
+        .map(([status, count]) => ({
+          status,
+          count,
+          category:
+            status === '404' || status.startsWith('4')
+              ? 'client_error'
+              : status === '500' || status.startsWith('5')
+                ? 'server_error'
+                : 'other',
+        }))
+        .sort((a, b) => b.count - a.count);
+
+      this.logger.log(
+        `Fetched ${totalErrors} error events from GA4 (${totalItems} unique errors, page ${page}/${totalPages})`,
+      );
+
+      return {
+        total: totalErrors,
+        summary: [
+          {
+            type: errorType || 'All Errors',
+            count: totalErrors,
+            uniqueErrors: totalItems,
+            details: paginatedDetails,
+          },
+        ],
+        topFailingEndpoints,
+        statusDistribution,
+        period: `Last ${daysAgo} ${daysAgo === 1 ? 'day' : 'days'}`,
+        pagination: {
+          page,
+          limit,
+          totalItems,
+          totalPages,
+          hasNextPage: page < totalPages,
+          hasPrevPage: page > 1,
+        },
+      };
+    } catch (error) {
+      this.logger.error('Failed to fetch detailed errors:', error.message);
+      
+      // Return empty data with helpful message
+      return {
+        total: 0,
+        summary: [
+          {
+            type: errorType || 'All Errors',
+            count: 0,
+            uniqueErrors: 0,
+            details: [
+              {
+                message: 'No error data available yet. Make sure error tracking events are being sent.',
+                endpoint: 'Check console logs',
+                status: 'N/A',
+                page: 'N/A',
+                count: 0,
+              },
+            ],
+          },
+        ],
+        topFailingEndpoints: [],
+        statusDistribution: [],
+        period: `Last ${daysAgo} ${daysAgo === 1 ? 'day' : 'days'}`,
+        pagination: {
+          page: 1,
+          limit,
+          totalItems: 0,
+          totalPages: 0,
+          hasNextPage: false,
+          hasPrevPage: false,
+        },
+      };
+    }
   }
 }

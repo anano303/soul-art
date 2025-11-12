@@ -294,14 +294,21 @@
   display: flex;
   align-items: center;
   padding-left: 1rem;
+  padding-right: 1rem;
   box-shadow: 0 2px 4px rgba(16, 185, 129, 0.3);
   transition: width 0.6s ease;
+  min-width: 120px;
+  position: relative;
 }
 
 .funnel-step__label {
   color: white;
   font-weight: 600;
   font-size: 0.95rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
 }
 
 .funnel-step__stats {
@@ -369,9 +376,41 @@
   border-radius: 0.5rem;
 }
 
+.error-item-expandable {
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  margin-bottom: 0.75rem;
+  overflow: hidden;
+}
+
+.error-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  background: #fef2f2;
+  transition: background 0.2s;
+  cursor: pointer;
+  gap: 1rem;
+}
+
+.error-item-header:hover {
+  background: #fee2e2;
+}
+
+.error-item-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex: 1;
+  gap: 1rem;
+}
+
 .error-item__type {
-  font-weight: 500;
+  font-weight: 600;
   color: #7f1d1d;
+  flex: 1;
 }
 
 .error-item__count {
@@ -381,6 +420,224 @@
   border-radius: 1rem;
   font-weight: 600;
   font-size: 0.875rem;
+}
+
+.expand-icon {
+  color: #666;
+  font-size: 1rem;
+  min-width: 20px;
+  text-align: center;
+}
+
+.error-details {
+  padding: 1.5rem;
+  background: white;
+  border-top: 1px solid #e0e0e0;
+}
+
+.loading-details {
+  text-align: center;
+  padding: 2rem;
+  color: #666;
+}
+
+.detailed-errors {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.error-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.stat-box {
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.stat-label {
+  font-size: 0.85rem;
+  color: #666;
+  margin-bottom: 0.5rem;
+}
+
+.stat-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #012645;
+}
+
+.error-subsection {
+  padding: 1rem;
+  background: #fafafa;
+  border-radius: 8px;
+  border-left: 4px solid #d32f2f;
+}
+
+.error-subsection h4 {
+  color: #333;
+  margin-bottom: 1rem;
+  font-size: 1.1rem;
+}
+
+.subsection-count {
+  font-size: 0.85rem;
+  color: #666;
+  font-weight: normal;
+  margin-left: 0.5rem;
+}
+
+.endpoint-list,
+.status-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.endpoint-item,
+.status-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem;
+  background: white;
+  border-radius: 6px;
+  border: 1px solid #e0e0e0;
+}
+
+.endpoint-path {
+  font-family: monospace;
+  font-size: 0.9rem;
+  color: #1976d2;
+  flex: 1;
+  word-break: break-all;
+}
+
+.endpoint-count {
+  font-weight: 600;
+  color: #d32f2f;
+  white-space: nowrap;
+  margin-left: 0.75rem;
+}
+
+.status-code {
+  font-family: monospace;
+  font-weight: 700;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  margin-right: 0.5rem;
+}
+
+.status-code.server_error {
+  background: #ffebee;
+  color: #c62828;
+}
+
+.status-code.client_error {
+  background: #fff3e0;
+  color: #e65100;
+}
+
+.status-code.other {
+  background: #f5f5f5;
+  color: #666;
+}
+
+.status-category {
+  text-transform: capitalize;
+  color: #666;
+  font-size: 0.85rem;
+}
+
+.status-count {
+  font-weight: 600;
+  color: #333;
+  white-space: nowrap;
+  margin-left: 0.75rem;
+}
+
+.error-details-table {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.error-detail-row {
+  padding: 1rem;
+  background: white;
+  border-radius: 6px;
+  border-left: 3px solid #ff9800;
+}
+
+.error-detail-message {
+  margin-bottom: 0.75rem;
+  color: #333;
+  font-size: 0.95rem;
+}
+
+.error-detail-info {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  font-size: 0.85rem;
+  color: #666;
+}
+
+.error-detail-info span {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.error-detail-info strong {
+  color: #333;
+}
+
+/* Pagination Controls */
+.pagination-controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e0e0e0;
+}
+
+.pagination-btn {
+  padding: 0.5rem 1rem;
+  background: var(--primary-color, #012645);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: "FiraGo", "Noto Sans Georgian", sans-serif;
+}
+
+.pagination-btn:hover:not(:disabled) {
+  background: #023a6b;
+  transform: translateY(-1px);
+}
+
+.pagination-btn:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.pagination-info {
+  font-weight: 600;
+  color: #333;
+  min-width: 120px;
+  text-align: center;
 }
 
 /* API Metrics */
@@ -470,33 +727,363 @@
   .ga4-dashboard__header {
     flex-direction: column;
     align-items: flex-start;
+    gap: 1rem;
   }
 
   .ga4-dashboard__title {
     font-size: 1.5rem;
   }
 
+  .ga4-dashboard__subtitle {
+    font-size: 0.9rem;
+  }
+
+  .ga4-dashboard__time-range {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    width: 100%;
+  }
+
+  .ga4-dashboard__time-range button {
+    padding: 0.6rem 1rem;
+    font-size: 0.85rem;
+    flex: 1;
+    min-width: 0;
+  }
+
   .ga4-section {
-    padding: 1.5rem;
-  }
-
-  .ga4-section__title {
-    font-size: 1.25rem;
-  }
-
-  .metric-card {
     padding: 1rem;
   }
 
+  .ga4-section__title {
+    font-size: 1.1rem;
+  }
+
+  .ga4-dashboard__metrics {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+  }
+
+  .metric-card {
+    padding: 0.75rem;
+  }
+
+  .metric-card__icon {
+    font-size: 1.5rem;
+  }
+
   .metric-card__value {
-    font-size: 2rem;
+    font-size: 1.5rem;
+  }
+
+  .metric-card__label {
+    font-size: 0.75rem;
   }
 
   .ga4-grid {
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
   }
 
   .ga4-section-row {
     grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  /* Funnel responsive */
+  .funnel-step__bar {
+    height: 45px;
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+    min-width: 100px;
+  }
+
+  .funnel-step__label {
+    font-size: 0.85rem;
+  }
+
+  .funnel-step__stats {
+    padding: 0 0.5rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .funnel-step__count {
+    font-size: 0.8rem;
+  }
+
+  .funnel-step__dropoff {
+    font-size: 0.8rem;
+  }
+
+  /* Tables */
+  .ga4-table table {
+    font-size: 0.85rem;
+  }
+
+  .ga4-table th,
+  .ga4-table td {
+    padding: 0.5rem;
+  }
+
+  /* Error list */
+  .error-item,
+  .error-item-header {
+    padding: 0.75rem;
+    font-size: 0.85rem;
+  }
+
+  .error-item__type {
+    font-size: 0.9rem;
+  }
+
+  .error-item__count {
+    font-size: 0.8rem;
+    padding: 0.2rem 0.6rem;
+  }
+
+  .expand-icon {
+    font-size: 0.9rem;
+  }
+
+  .error-details {
+    padding: 1rem;
+  }
+
+  .error-subsection {
+    padding: 0.75rem;
+  }
+
+  .error-subsection h4 {
+    font-size: 1rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .error-stats {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+
+  .stat-box {
+    padding: 0.75rem;
+  }
+
+  .stat-label {
+    font-size: 0.8rem;
+  }
+
+  .stat-value {
+    font-size: 1.25rem;
+  }
+
+  .endpoint-item,
+  .status-item {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    padding: 0.75rem;
+  }
+
+  .endpoint-path {
+    font-size: 0.8rem;
+    flex-basis: 100%;
+  }
+
+  .endpoint-count,
+  .status-count {
+    font-size: 0.85rem;
+  }
+
+  .status-code {
+    font-size: 0.8rem;
+  }
+
+  .error-detail-row {
+    padding: 0.75rem;
+  }
+
+  .error-detail-message {
+    font-size: 0.85rem;
+    margin-bottom: 0.5rem;
+    word-break: break-word;
+  }
+
+  .error-detail-info {
+    flex-direction: column;
+    gap: 0.5rem;
+    font-size: 0.8rem;
+  }
+
+  .error-detail-info span {
+    flex-wrap: wrap;
+  }
+
+  .pagination-controls {
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+
+  .pagination-btn {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.85rem;
+  }
+
+  .pagination-info {
+    font-size: 0.85rem;
+    min-width: 100px;
+  }
+
+  /* API Metrics */
+  .api-metric {
+    padding: 0.75rem;
+  }
+
+  .api-metric__label,
+  .api-metric__value {
+    font-size: 0.85rem;
   }
 }
+
+/* Small mobile */
+@media (max-width: 480px) {
+  .ga4-dashboard {
+    padding: 0.75rem;
+  }
+
+  .ga4-dashboard__title {
+    font-size: 1.25rem;
+  }
+
+  .ga4-dashboard__time-range {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .ga4-dashboard__time-range button {
+    width: 100%;
+    padding: 0.65rem;
+    font-size: 0.8rem;
+  }
+
+  .ga4-dashboard__metrics {
+    grid-template-columns: 1fr;
+  }
+
+  .metric-card {
+    padding: 0.65rem;
+  }
+
+  .metric-card__value {
+    font-size: 1.5rem;
+  }
+
+  .ga4-section {
+    padding: 0.75rem;
+  }
+
+  .ga4-section__title {
+    font-size: 1rem;
+  }
+
+  .funnel-step__bar {
+    height: 40px;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+    min-width: 80px;
+  }
+
+  .funnel-step__label {
+    font-size: 0.75rem;
+  }
+
+  .funnel-step__stats {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 0.25rem 0.5rem;
+  }
+
+  .funnel-step__count,
+  .funnel-step__dropoff {
+    font-size: 0.75rem;
+  }
+
+  .ga4-table {
+    overflow-x: auto;
+  }
+
+  .ga4-table table {
+    font-size: 0.75rem;
+  }
+
+  .ga4-table th,
+  .ga4-table td {
+    padding: 0.4rem;
+  }
+
+  .error-item-header {
+    padding: 0.65rem;
+  }
+
+  .error-item__type {
+    font-size: 0.85rem;
+  }
+
+  .error-item__count {
+    font-size: 0.75rem;
+  }
+
+  .error-details {
+    padding: 0.75rem;
+  }
+
+  .error-subsection {
+    padding: 0.65rem;
+  }
+
+  .error-subsection h4 {
+    font-size: 0.9rem;
+  }
+
+  .stat-value {
+    font-size: 1.1rem;
+  }
+
+  .endpoint-path,
+  .error-detail-message {
+    font-size: 0.75rem;
+  }
+
+  .pagination-controls {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .pagination-btn {
+    width: 100%;
+    padding: 0.65rem;
+    font-size: 0.8rem;
+  }
+
+  .pagination-info {
+    font-size: 0.8rem;
+  }
+}
+
+/* Tablet */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .ga4-dashboard {
+    padding: 1.5rem;
+  }
+
+  .ga4-dashboard__metrics {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .ga4-dashboard__time-range button {
+    padding: 0.65rem 1.25rem;
+  }
+
+  .funnel-step__bar {
+    height: 48px;
+  }
+}
+
