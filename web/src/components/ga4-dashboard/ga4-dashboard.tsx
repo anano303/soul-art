@@ -72,6 +72,8 @@ interface LiveUserData {
   activeUsers: number;
   sessionId?: string;
   lastActivity?: string;
+  userName?: string;
+  userEmail?: string;
 }
 
 interface RealtimeData {
@@ -263,17 +265,21 @@ export default function GA4Dashboard() {
       }
 
       // Combine data - prioritize our tracking (has IP)
-      const combinedUsers = visitorsData?.visitors?.map((v: any) => ({
-        id: v.id,
-        sessionId: v.id,
-        ip: v.ip,
-        page: v.page,
-        device: v.device,
-        browser: v.browser || v.os,
-        location: v.city && v.city !== 'Unknown' ? v.city : v.country || 'Unknown',
-        pageViews: v.pageViews,
-        activeUsers: 1,
-      })) || [];
+      const combinedUsers =
+        visitorsData?.visitors?.map((v: any) => ({
+          id: v.id,
+          sessionId: v.id,
+          ip: v.ip,
+          page: v.page,
+          device: v.device,
+          browser: v.browser || v.os,
+          location:
+            v.city && v.city !== "Unknown" ? v.city : v.country || "Unknown",
+          pageViews: v.pageViews,
+          activeUsers: 1,
+          userName: v.userName,
+          userEmail: v.userEmail,
+        })) || [];
 
       setLiveUsersData({
         activeUsers: visitorsData?.total || ga4Data?.activeUsers || 0,
@@ -403,6 +409,9 @@ export default function GA4Dashboard() {
                         <thead>
                           <tr>
                             <th>#</th>
+                            <th>
+                              {language === "en" ? "User" : "მომხმარებელი"}
+                            </th>
                             <th>{language === "en" ? "IP" : "IP"}</th>
                             <th>{language === "en" ? "Page" : "გვერდი"}</th>
                             <th>
@@ -423,6 +432,21 @@ export default function GA4Dashboard() {
                           {liveUsersData.users.map((user, index) => (
                             <tr key={user.sessionId || user.id}>
                               <td>{index + 1}</td>
+                              <td
+                                className="table-cell-user"
+                                title={user.userEmail || undefined}
+                              >
+                                {user.userName || (
+                                  <span
+                                    style={{
+                                      color: "#999",
+                                      fontStyle: "italic",
+                                    }}
+                                  >
+                                    {language === "en" ? "Guest" : "სტუმარი"}
+                                  </span>
+                                )}
+                              </td>
                               <td className="table-cell-ip" title={user.ip}>
                                 {user.ip || "—"}
                               </td>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { useQuery } from "@tanstack/react-query";
 
 const SESSION_ID_KEY = "visitor_session_id";
 const SESSION_DURATION = 30 * 60 * 1000; // 30 minutes
@@ -15,15 +16,22 @@ function generateUUID() {
 }
 
 export function useVisitorTracking() {
-  const hasTracked = useRef(false);
+  // Get user from React Query cache
+  const { data: user } = useQuery({
+    queryKey: ["user"],
+    enabled: false, // Don't fetch, just read from cache
+  });
+
+  console.log('[useVisitorTracking] Hook called', { user: !!user, userId: (user as any)?._id });
 
   useEffect(() => {
-    if (hasTracked.current) return;
-    hasTracked.current = true;
+    console.log('[useVisitorTracking] useEffect running', { hasUser: !!user, userId: (user as any)?._id });
 
     // Get or create session ID
     let sessionId = localStorage.getItem(SESSION_ID_KEY);
     const lastActivity = localStorage.getItem("last_activity");
+
+    console.log('[useVisitorTracking] Session info', { sessionId, lastActivity });
 
     const now = Date.now();
     if (
@@ -33,6 +41,7 @@ export function useVisitorTracking() {
       // Create new session
       sessionId = generateUUID();
       localStorage.setItem(SESSION_ID_KEY, sessionId);
+      console.log('[useVisitorTracking] New session created', { sessionId });
     }
 
     localStorage.setItem("last_activity", now.toString());
@@ -40,6 +49,13 @@ export function useVisitorTracking() {
     // Track visitor
     const trackVisitor = async () => {
       try {
+        const userId = (user as any)?._id || (user as any)?.id;
+        console.log("[Visitor Tracking] Sending data:", {
+          page: window.location.pathname,
+          userId: userId ? userId : "None",
+          userPresent: !!user,
+        });
+
         const response = await fetch(
           `${process.env.NEXT_PUBLIC_API_URL}/analytics/track-visitor`,
           {
@@ -47,11 +63,12 @@ export function useVisitorTracking() {
             headers: {
               "Content-Type": "application/json",
             },
+            credentials: "include", // Important for auth cookies
             body: JSON.stringify({
               page: window.location.pathname,
               referrer: document.referrer || "Direct",
               sessionId,
-              userId: getUserId(), // Get from localStorage if logged in
+              userId: userId, // Get from React Query cache
             }),
           }
         );
@@ -89,18 +106,5 @@ export function useVisitorTracking() {
       window.removeEventListener("popstate", handlePageChange);
       document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
-  }, []);
-}
-
-function getUserId(): string | undefined {
-  try {
-    const userStr = localStorage.getItem("user");
-    if (userStr) {
-      const user = JSON.parse(userStr);
-      return user._id || user.id;
-    }
-  } catch (error) {
-    // Ignore
-  }
-  return undefined;
+  }, [user]); // Add user as dependency
 }

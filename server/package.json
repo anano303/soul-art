@@ -62,6 +62,7 @@
     "express": "^4.21.2",
     "express-rate-limit": "^8.0.1",
     "fluent-ffmpeg": "^2.1.2",
+    "geoip-lite": "^1.4.10",
     "google-auth-library": "^10.4.2",
     "googleapis": "^164.1.0",
     "helmet": "^8.0.0",

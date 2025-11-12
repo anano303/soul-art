@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document } from 'mongoose';
+import { Document, Types } from 'mongoose';
 
 @Schema({ timestamps: true })
 export class Visitor extends Document {
@@ -30,8 +30,8 @@ export class Visitor extends Document {
   @Prop()
   city: string;
 
-  @Prop()
-  userId?: string; // If logged in
+  @Prop({ type: Types.ObjectId, ref: 'User' })
+  userId?: Types.ObjectId; // Reference to User model
 
   @Prop()
   sessionId: string;

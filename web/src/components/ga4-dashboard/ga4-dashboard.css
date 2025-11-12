@@ -1350,7 +1350,7 @@
 
 .live-users-table {
   width: 100%;
-  min-width: 700px; /* Increased for IP column */
+  min-width: 850px; /* Increased for User column */
   border-collapse: collapse;
   font-size: 0.85rem;
 }
@@ -1375,6 +1375,15 @@
   color: #64748b;
   font-size: 13px;
   max-width: 130px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.table-cell-user {
+  font-weight: 500;
+  color: #1e293b;
+  max-width: 150px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;

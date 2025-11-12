@@ -1,7 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { Visitor } from './schemas/visitor.schema';
+import * as geoip from 'geoip-lite';
 
 @Injectable()
 export class VisitorTrackingService {
@@ -23,7 +24,14 @@ export class VisitorTrackingService {
     userId?: string;
   }) {
     try {
+      console.log('[trackVisitor] Processing:', {
+        userId: data.userId,
+        userIdType: typeof data.userId,
+        hasUserId: !!data.userId,
+      });
+
       const deviceInfo = this.parseUserAgent(data.userAgent);
+      const geoInfo = this.getGeoLocation(data.ip);
 
       // Check if visitor already exists with this sessionId (within last 30 minutes)
       const thirtyMinutesAgo = new Date(Date.now() - 30 * 60 * 1000);
@@ -39,7 +47,7 @@ export class VisitorTrackingService {
         existingVisitor.page = data.page;
         existingVisitor.isActive = true;
         if (data.userId) {
-          existingVisitor.userId = data.userId;
+          existingVisitor.userId = new Types.ObjectId(data.userId);
         }
         await existingVisitor.save();
         return existingVisitor;
@@ -52,10 +60,12 @@ export class VisitorTrackingService {
         page: data.page,
         referrer: data.referrer || 'Direct',
         sessionId: data.sessionId,
-        userId: data.userId,
+        userId: data.userId ? new Types.ObjectId(data.userId) : undefined,
         device: deviceInfo.device,
         browser: deviceInfo.browser,
         os: deviceInfo.os,
+        country: geoInfo.country,
+        city: geoInfo.city,
         lastActivity: new Date(),
         isActive: true,
       });
@@ -82,13 +92,14 @@ export class VisitorTrackingService {
         lastActivity: { $gte: thirtyMinutesAgo },
         isActive: true,
       })
+      .populate('userId', 'name email username') // Populate user details
       .sort({ lastActivity: -1 })
       .limit(100)
       .lean();
 
     return {
       total: activeVisitors.length,
-      visitors: activeVisitors.map((v) => ({
+      visitors: activeVisitors.map((v: any) => ({
         id: v._id,
         ip: v.ip, // Show full IP for admin dashboard
         page: v.page,
@@ -100,7 +111,9 @@ export class VisitorTrackingService {
         referrer: v.referrer,
         pageViews: v.pageViews,
         lastActivity: v.lastActivity,
-        userId: v.userId,
+        userId: v.userId?._id || v.userId,
+        userName: v.userId?.name || v.userId?.username || null,
+        userEmail: v.userId?.email || null,
       })),
     };
   }
@@ -162,6 +175,32 @@ export class VisitorTrackingService {
       os = 'iOS';
 
     return { device, browser, os };
+  }
+
+  /**
+   * Get geolocation from IP address
+   */
+  private getGeoLocation(ip: string): { country: string; city: string } {
+    // Handle localhost/private IPs
+    if (
+      !ip ||
+      ip === '::1' ||
+      ip === '127.0.0.1' ||
+      ip.startsWith('192.168.') ||
+      ip.startsWith('10.')
+    ) {
+      return { country: 'Georgia', city: 'Tbilisi' }; // Default for local development
+    }
+
+    const geo = geoip.lookup(ip);
+    if (geo) {
+      return {
+        country: geo.country || 'Unknown',
+        city: geo.city || 'Unknown',
+      };
+    }
+
+    return { country: 'Unknown', city: 'Unknown' };
   }
 
   /**
