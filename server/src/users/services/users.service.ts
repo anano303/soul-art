@@ -1986,7 +1986,7 @@ export class UsersService {
     }
 
     const addressIndex = user.shippingAddresses.findIndex(
-      (addr) => addr._id === addressId,
+      (addr) => addr._id.toString() === addressId,
     );
 
     if (addressIndex === -1) {
@@ -2025,7 +2025,7 @@ export class UsersService {
 
     const initialLength = user.shippingAddresses.length;
     user.shippingAddresses = user.shippingAddresses.filter(
-      (addr) => addr._id !== addressId,
+      (addr) => addr._id.toString() !== addressId,
     );
 
     if (user.shippingAddresses.length === initialLength) {
@@ -2054,7 +2054,7 @@ export class UsersService {
     }
 
     const address = user.shippingAddresses.find(
-      (addr) => addr._id === addressId,
+      (addr) => addr._id.toString() === addressId,
     );
     if (!address) {
       throw new NotFoundException('Address not found');
