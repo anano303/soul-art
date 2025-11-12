@@ -175,26 +175,141 @@ export class VisitorTrackingService {
    * Get geolocation from IP address
    */
   private getGeoLocation(ip: string): { country: string; city: string } {
-    // Handle localhost/private IPs
+    // Handle localhost/private IPs - default to Georgia
     if (
       !ip ||
       ip === '::1' ||
       ip === '127.0.0.1' ||
       ip.startsWith('192.168.') ||
-      ip.startsWith('10.')
+      ip.startsWith('10.') ||
+      ip.startsWith('172.16.') ||
+      ip.startsWith('172.17.') ||
+      ip.startsWith('172.18.') ||
+      ip.startsWith('172.19.') ||
+      ip.startsWith('172.20.') ||
+      ip.startsWith('172.21.') ||
+      ip.startsWith('172.22.') ||
+      ip.startsWith('172.23.') ||
+      ip.startsWith('172.24.') ||
+      ip.startsWith('172.25.') ||
+      ip.startsWith('172.26.') ||
+      ip.startsWith('172.27.') ||
+      ip.startsWith('172.28.') ||
+      ip.startsWith('172.29.') ||
+      ip.startsWith('172.30.') ||
+      ip.startsWith('172.31.')
     ) {
-      return { country: 'Georgia', city: 'Tbilisi' }; // Default for local development
+      return { country: 'Georgia', city: 'Tbilisi' };
     }
 
-    const geo = geoip.lookup(ip);
-    if (geo) {
-      return {
-        country: geo.country || 'Unknown',
-        city: geo.city || 'Unknown',
-      };
+    try {
+      const geo = geoip.lookup(ip);
+      if (geo) {
+        // geoip-lite returns country codes (GE, US, etc), convert to full names
+        const countryName = this.getCountryName(geo.country);
+        // If city is missing, use capital/major city as fallback
+        const cityName = geo.city || this.getDefaultCity(geo.country);
+
+        return {
+          country: countryName,
+          city: cityName,
+        };
+      }
+    } catch (error) {
+      this.logger.warn(`Failed to lookup IP: ${ip}`, error);
     }
 
     return { country: 'Unknown', city: 'Unknown' };
+  }
+
+  /**
+   * Convert country code to full country name
+   */
+  private getCountryName(countryCode: string): string {
+    const countryMap: { [key: string]: string } = {
+      GE: 'Georgia',
+      US: 'United States',
+      GB: 'United Kingdom',
+      DE: 'Germany',
+      FR: 'France',
+      IT: 'Italy',
+      ES: 'Spain',
+      RU: 'Russia',
+      TR: 'Turkey',
+      UA: 'Ukraine',
+      PL: 'Poland',
+      RO: 'Romania',
+      NL: 'Netherlands',
+      BE: 'Belgium',
+      CZ: 'Czech Republic',
+      GR: 'Greece',
+      PT: 'Portugal',
+      SE: 'Sweden',
+      HU: 'Hungary',
+      AT: 'Austria',
+      CH: 'Switzerland',
+      BG: 'Bulgaria',
+      DK: 'Denmark',
+      FI: 'Finland',
+      SK: 'Slovakia',
+      NO: 'Norway',
+      IE: 'Ireland',
+      HR: 'Croatia',
+      BA: 'Bosnia',
+      RS: 'Serbia',
+      LT: 'Lithuania',
+      SI: 'Slovenia',
+      LV: 'Latvia',
+      EE: 'Estonia',
+      AM: 'Armenia',
+      AZ: 'Azerbaijan',
+    };
+    return countryMap[countryCode] || countryCode;
+  }
+
+  /**
+   * Get default/capital city for country when geoip doesn't provide city data
+   */
+  private getDefaultCity(countryCode: string): string {
+    const defaultCities: { [key: string]: string } = {
+      GE: 'Tbilisi',
+      US: 'New York',
+      GB: 'London',
+      DE: 'Berlin',
+      FR: 'Paris',
+      IT: 'Rome',
+      ES: 'Madrid',
+      RU: 'Moscow',
+      TR: 'Istanbul',
+      UA: 'Kyiv',
+      PL: 'Warsaw',
+      RO: 'Bucharest',
+      NL: 'Amsterdam',
+      BE: 'Brussels',
+      CZ: 'Prague',
+      GR: 'Athens',
+      PT: 'Lisbon',
+      SE: 'Stockholm',
+      HU: 'Budapest',
+      AT: 'Vienna',
+      CH: 'Zurich',
+      BG: 'Sofia',
+      DK: 'Copenhagen',
+      FI: 'Helsinki',
+      SK: 'Bratislava',
+      NO: 'Oslo',
+      IE: 'Dublin',
+      HR: 'Zagreb',
+      BA: 'Sarajevo',
+      RS: 'Belgrade',
+      LT: 'Vilnius',
+      SI: 'Ljubljana',
+      LV: 'Riga',
+      EE: 'Tallinn',
+      AM: 'Yerevan',
+      AZ: 'Baku',
+    };
+    return defaultCities[countryCode] || 'Unknown';
   }
 
   /**

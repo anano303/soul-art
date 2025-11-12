@@ -23,7 +23,6 @@ export function useVisitorTracking() {
   });
 
   useEffect(() => {
-
     // Get or create session ID
     let sessionId = localStorage.getItem(SESSION_ID_KEY);
     const lastActivity = localStorage.getItem("last_activity");

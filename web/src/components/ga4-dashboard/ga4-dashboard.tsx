@@ -271,8 +271,19 @@ export default function GA4Dashboard() {
           page: v.page,
           device: v.device,
           browser: v.browser || v.os,
-          location:
-            v.city && v.city !== "Unknown" ? v.city : v.country || "Unknown",
+          location: (() => {
+            const city = v.city && v.city !== "Unknown" ? v.city : null;
+            const country = v.country && v.country !== "Unknown" ? v.country : null;
+            
+            if (city && country) {
+              return `${city}, ${country}`;
+            } else if (city) {
+              return city;
+            } else if (country) {
+              return country;
+            }
+            return "Unknown";
+          })(),
           pageViews: v.pageViews,
           activeUsers: 1,
           userName: v.userName,
