@@ -24,12 +24,6 @@ export class VisitorTrackingService {
     userId?: string;
   }) {
     try {
-      console.log('[trackVisitor] Processing:', {
-        userId: data.userId,
-        userIdType: typeof data.userId,
-        hasUserId: !!data.userId,
-      });
-
       const deviceInfo = this.parseUserAgent(data.userAgent);
       const geoInfo = this.getGeoLocation(data.ip);
 

@@ -22,16 +22,16 @@ export function useVisitorTracking() {
     enabled: false, // Don't fetch, just read from cache
   });
 
-  console.log('[useVisitorTracking] Hook called', { user: !!user, userId: (user as any)?._id });
-
   useEffect(() => {
-    console.log('[useVisitorTracking] useEffect running', { hasUser: !!user, userId: (user as any)?._id });
 
     // Get or create session ID
     let sessionId = localStorage.getItem(SESSION_ID_KEY);
     const lastActivity = localStorage.getItem("last_activity");
 
-    console.log('[useVisitorTracking] Session info', { sessionId, lastActivity });
+    console.log("[useVisitorTracking] Session info", {
+      sessionId,
+      lastActivity,
+    });
 
     const now = Date.now();
     if (
@@ -41,7 +41,7 @@ export function useVisitorTracking() {
       // Create new session
       sessionId = generateUUID();
       localStorage.setItem(SESSION_ID_KEY, sessionId);
-      console.log('[useVisitorTracking] New session created', { sessionId });
+      console.log("[useVisitorTracking] New session created", { sessionId });
     }
 
     localStorage.setItem("last_activity", now.toString());

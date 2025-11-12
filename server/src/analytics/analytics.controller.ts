@@ -67,12 +67,6 @@ export class AnalyticsController {
       'Unknown';
     const userAgent = req.headers['user-agent'] || 'Unknown';
 
-    console.log('[track-visitor] Received:', {
-      userId: body.userId,
-      page: body.page,
-      sessionId: body.sessionId,
-    });
-
     return this.visitorService.trackVisitor({
       ip,
       userAgent,
