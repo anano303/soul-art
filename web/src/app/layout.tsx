@@ -40,6 +40,7 @@ import { CacheManager } from "@/components/cache-manager/cache-manager";
 import PWAManager from "@/components/pwa-manager";
 import { GA4UserTracker } from "@/components/ga4-user-tracker";
 import { PageViewTracker } from "@/components/page-view-tracker";
+import { VisitorTracker } from "@/components/visitor-tracker";
 import "@/lib/cloudflare-cleanup"; // Auto-cleanup Cloudflare cookies in development
 
 export const viewport = {
@@ -343,6 +344,9 @@ export default function RootLayout({
 
                   {/* GA4 Page View and User Path Tracking */}
                   <PageViewTracker />
+
+                  {/* Visitor Tracking with IP */}
+                  <VisitorTracker />
 
                   <div
                     style={{

@@ -619,4 +619,106 @@ export class Ga4AnalyticsService {
       };
     }
   }
+
+  /**
+   * Get real-time active users with detailed information (last 30 minutes)
+   */
+  async getRealtimeUsers() {
+    if (!this.analyticsDataClient || !this.propertyId) {
+      throw new Error('GA4 Analytics not configured');
+    }
+
+    try {
+      // Get total active users count
+      const countResponse =
+        await this.analyticsDataClient.properties.runRealtimeReport({
+          property: `properties/${this.propertyId}`,
+          requestBody: {
+            metrics: [{ name: 'activeUsers' }],
+          },
+        });
+
+      const activeUsers = parseInt(
+        countResponse.data.rows?.[0]?.metricValues?.[0]?.value || '0',
+      );
+
+      // Get detailed user information
+      // Note: Real-Time API is limited to 4 dimensions maximum
+      const detailsResponse =
+        await this.analyticsDataClient.properties.runRealtimeReport({
+          property: `properties/${this.propertyId}`,
+          requestBody: {
+            dimensions: [
+              { name: 'unifiedScreenName' }, // Page path
+              { name: 'deviceCategory' }, // Device type (mobile/desktop/tablet)
+              { name: 'platform' }, // Platform (Web, iOS, Android)
+              { name: 'city' }, // City
+            ],
+            metrics: [{ name: 'activeUsers' }],
+            limit: 100, // Get up to 100 active user sessions
+            orderBys: [{ metric: { metricName: 'activeUsers' }, desc: true }],
+          },
+        });
+
+      // Parse detailed user data
+      const users =
+        detailsResponse.data.rows?.map((row, index) => {
+          const page = row.dimensionValues[0]?.value || '/';
+          const device = row.dimensionValues[1]?.value || 'desktop';
+          const platform = row.dimensionValues[2]?.value || 'web';
+          const city = row.dimensionValues[3]?.value || 'Unknown';
+          const usersOnPage = parseInt(row.metricValues[0]?.value || '1');
+
+          // Format device info
+          const deviceInfo =
+            device === 'desktop'
+              ? '🖥️ Desktop'
+              : device === 'mobile'
+                ? '📱 Mobile'
+                : device === 'tablet'
+                  ? '📱 Tablet'
+                  : device;
+
+          // Format location (city only, no country)
+          const location =
+            city !== '(not set)' && city !== 'Unknown' ? city : 'Unknown';
+
+          return {
+            id: `user-${index + 1}`,
+            page,
+            device: deviceInfo,
+            browser: platform, // Platform (web, iOS, Android)
+            location,
+            country: 'N/A', // Country removed to stay within 4 dimensions limit
+            city,
+            source: 'Real-Time',
+            pageViews: usersOnPage,
+            userType: 'Active',
+            activeUsers: usersOnPage,
+          };
+        }) || [];
+
+      this.logger.log(
+        `Real-time: ${activeUsers} active users, ${users.length} sessions`,
+      );
+
+      return {
+        activeUsers,
+        totalSessions: users.length,
+        users,
+        timestamp: new Date().toISOString(),
+      };
+    } catch (error) {
+      this.logger.error('Failed to fetch real-time users:', error.message);
+
+      // Return basic data on error
+      return {
+        activeUsers: 0,
+        totalSessions: 0,
+        users: [],
+        timestamp: new Date().toISOString(),
+        error: 'Failed to fetch detailed real-time data',
+      };
+    }
+  }
 }

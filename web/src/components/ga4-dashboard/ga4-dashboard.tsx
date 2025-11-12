@@ -57,6 +57,31 @@ interface DetailedErrorData {
   };
 }
 
+interface LiveUserData {
+  id: string;
+  ip?: string;
+  page: string;
+  device: string;
+  browser: string;
+  location: string;
+  country: string;
+  city: string;
+  source: string;
+  pageViews: number;
+  userType: string;
+  activeUsers: number;
+  sessionId?: string;
+  lastActivity?: string;
+}
+
+interface RealtimeData {
+  activeUsers: number;
+  totalSessions: number;
+  users: LiveUserData[];
+  timestamp: string;
+  error?: string;
+}
+
 export default function GA4Dashboard() {
   const { language } = useLanguage();
   const [loading, setLoading] = useState(true);
@@ -69,6 +94,9 @@ export default function GA4Dashboard() {
     useState<DetailedErrorData | null>(null);
   const [isLoadingErrors, setIsLoadingErrors] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
+  const [showLiveUsers, setShowLiveUsers] = useState(false);
+  const [liveUsersData, setLiveUsersData] = useState<RealtimeData | null>(null);
+  const [liveUsersLoading, setLiveUsersLoading] = useState(false);
   const [data, setData] = useState<AnalyticsData>({
     pageViews: [],
     homepageEvents: [],
@@ -131,6 +159,24 @@ export default function GA4Dashboard() {
     fetchAnalytics();
   }, [timeRange]);
 
+  // Auto-refresh live users every 30 seconds
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+
+    if (showLiveUsers) {
+      // Refresh every 30 seconds
+      interval = setInterval(() => {
+        fetchLiveUsers();
+      }, 30000);
+    }
+
+    return () => {
+      if (interval) {
+        clearInterval(interval);
+      }
+    };
+  }, [showLiveUsers]);
+
   // Fetch detailed errors
   const fetchDetailedErrors = async (errorType: string, page: number = 1) => {
     try {
@@ -163,10 +209,12 @@ export default function GA4Dashboard() {
       const errorData = await response.json();
       setDetailedErrors(errorData);
       setCurrentPage(page);
+      console.log("Error pagination:", errorData.pagination);
     } catch (error) {
       console.error("Error fetching detailed errors:", error);
     } finally {
       setIsLoadingErrors(false);
+      console.log("isLoadingErrors set to false");
     }
   };
 
@@ -188,6 +236,72 @@ export default function GA4Dashboard() {
     }
   };
 
+  // Fetch real-time live users from both GA4 and our tracking
+  const fetchLiveUsers = async () => {
+    try {
+      setLiveUsersLoading(true);
+
+      // Fetch both GA4 and our visitor tracking
+      const [ga4Response, visitorsResponse] = await Promise.all([
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/analytics/ga4/realtime`, {
+          credentials: "include",
+        }).catch(() => null),
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/analytics/live-visitors`, {
+          credentials: "include",
+        }).catch(() => null),
+      ]);
+
+      let ga4Data = null;
+      let visitorsData = null;
+
+      if (ga4Response && ga4Response.ok) {
+        ga4Data = await ga4Response.json();
+      }
+
+      if (visitorsResponse && visitorsResponse.ok) {
+        visitorsData = await visitorsResponse.json();
+      }
+
+      // Combine data - prioritize our tracking (has IP)
+      const combinedUsers = visitorsData?.visitors?.map((v: any) => ({
+        id: v.id,
+        sessionId: v.id,
+        ip: v.ip,
+        page: v.page,
+        device: v.device,
+        browser: v.browser || v.os,
+        location: v.city && v.city !== 'Unknown' ? v.city : v.country || 'Unknown',
+        pageViews: v.pageViews,
+        activeUsers: 1,
+      })) || [];
+
+      setLiveUsersData({
+        activeUsers: visitorsData?.total || ga4Data?.activeUsers || 0,
+        totalSessions: combinedUsers.length,
+        users: combinedUsers,
+        timestamp: new Date().toISOString(),
+      });
+    } catch (error) {
+      console.error("Error fetching live users:", error);
+      setLiveUsersData({
+        activeUsers: 0,
+        totalSessions: 0,
+        users: [],
+        timestamp: new Date().toISOString(),
+        error: "Failed to load data",
+      });
+    } finally {
+      setLiveUsersLoading(false);
+    }
+  };
+
+  const handleLiveUsersClick = () => {
+    setShowLiveUsers(!showLiveUsers);
+    if (!showLiveUsers && liveUsersData === null) {
+      fetchLiveUsers();
+    }
+  };
+
   const successRate =
     data.apiMetrics.total > 0
       ? ((data.apiMetrics.successful / data.apiMetrics.total) * 100).toFixed(2)
@@ -206,14 +320,181 @@ export default function GA4Dashboard() {
     <div className="ga4-dashboard">
       <div className="ga4-dashboard__header">
         <div className="ga4-dashboard__title-section">
-          <h1 className="ga4-dashboard__title">
-            📊 {language === "en" ? "Analytics Dashboard" : "ანალიტიკის პანელი"}
-          </h1>
-          <p className="ga4-dashboard__subtitle">
-            {language === "en"
-              ? "Google Analytics 4 - Comprehensive Website Analytics"
-              : "Google Analytics 4 - ვებსაიტის სრული ანალიტიკა"}
-          </p>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: "1rem",
+              flexWrap: "wrap",
+              maxWidth: "100%",
+            }}
+          >
+            <div>
+              <h1 className="ga4-dashboard__title">
+                📊{" "}
+                {language === "en"
+                  ? "Analytics Dashboard"
+                  : "ანალიტიკის პანელი"}
+              </h1>
+              <p className="ga4-dashboard__subtitle">
+                {language === "en"
+                  ? "Google Analytics 4 - Comprehensive Website Analytics"
+                  : "Google Analytics 4 - ვებსაიტის სრული ანალიტიკა"}
+              </p>
+            </div>
+
+            {/* Live Users Button */}
+            <button
+              className="live-users-btn"
+              onClick={handleLiveUsersClick}
+              disabled={liveUsersLoading}
+            >
+              <span className="live-indicator"></span>
+              {language === "en" ? "Live Users" : "ლაივ მომხმარებლები"}
+            </button>
+          </div>
+
+          {/* Live Users Display */}
+          {showLiveUsers && (
+            <div className="live-users-panel">
+              {liveUsersLoading ? (
+                <div className="live-users-loading">
+                  <div className="spinner"></div>
+                  <span>
+                    {language === "en" ? "Loading..." : "იტვირთება..."}
+                  </span>
+                </div>
+              ) : liveUsersData ? (
+                <div className="live-users-detailed">
+                  {/* Summary Stats */}
+                  <div className="live-users-summary">
+                    <div className="live-stat-box">
+                      <span className="live-stat-number">
+                        {liveUsersData.activeUsers}
+                      </span>
+                      <span className="live-stat-label">
+                        {language === "en"
+                          ? "Active Users"
+                          : "აქტიური მომხმარებელი"}
+                      </span>
+                    </div>
+                    <div className="live-stat-box">
+                      <span className="live-stat-number">
+                        {liveUsersData.totalSessions}
+                      </span>
+                      <span className="live-stat-label">
+                        {language === "en" ? "Sessions" : "სესიები"}
+                      </span>
+                    </div>
+                    <button
+                      className="refresh-btn-inline"
+                      onClick={fetchLiveUsers}
+                      disabled={liveUsersLoading}
+                    >
+                      🔄 {language === "en" ? "Refresh" : "განახლება"}
+                    </button>
+                  </div>
+
+                  {/* Detailed Users Table */}
+                  {liveUsersData.users.length > 0 ? (
+                    <div className="live-users-table-wrapper">
+                      <table className="live-users-table">
+                        <thead>
+                          <tr>
+                            <th>#</th>
+                            <th>{language === "en" ? "IP" : "IP"}</th>
+                            <th>{language === "en" ? "Page" : "გვერდი"}</th>
+                            <th>
+                              {language === "en" ? "Device" : "მოწყობილობა"}
+                            </th>
+                            <th>
+                              {language === "en" ? "Platform" : "პლატფორმა"}
+                            </th>
+                            <th>
+                              {language === "en"
+                                ? "Location"
+                                : "ადგილმდებარეობა"}
+                            </th>
+                            <th>{language === "en" ? "Views" : "ნახვები"}</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {liveUsersData.users.map((user, index) => (
+                            <tr key={user.sessionId || user.id}>
+                              <td>{index + 1}</td>
+                              <td className="table-cell-ip" title={user.ip}>
+                                {user.ip || "—"}
+                              </td>
+                              <td className="table-cell-page" title={user.page}>
+                                <a
+                                  href={user.page}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  style={{
+                                    color: "#0066cc",
+                                    textDecoration: "underline",
+                                  }}
+                                >
+                                  {user.page}
+                                </a>
+                              </td>
+                              <td className="table-cell-device">
+                                {user.device}
+                              </td>
+                              <td>{user.browser}</td>
+                              <td
+                                className="table-cell-location"
+                                title={user.location}
+                              >
+                                {user.location}
+                              </td>
+                              <td className="table-cell-center">
+                                {user.pageViews}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  ) : (
+                    <div className="no-live-users">
+                      <p>
+                        {language === "en"
+                          ? "No active users in the last 30 minutes"
+                          : "ბოლო 30 წუთში აქტიური მომხმარებლები არ არიან"}
+                      </p>
+                    </div>
+                  )}
+
+                  <div className="live-users-footer">
+                    <small>
+                      {language === "en"
+                        ? `Last updated: ${new Date(
+                            liveUsersData.timestamp
+                          ).toLocaleTimeString()}`
+                        : `ბოლო განახლება: ${new Date(
+                            liveUsersData.timestamp
+                          ).toLocaleTimeString()}`}
+                    </small>
+                    <small style={{ opacity: 0.7 }}>
+                      {language === "en"
+                        ? "Auto-refreshes every 30 seconds"
+                        : "ავტომატურად განახლდება ყოველ 30 წამში"}
+                    </small>
+                  </div>
+                </div>
+              ) : (
+                <div className="live-users-error">
+                  <p>
+                    {language === "en"
+                      ? "Failed to load live users data"
+                      : "ვერ ჩაიტვირთა მონაცემები"}
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
 
           {error && (
             <div
@@ -659,7 +940,14 @@ export default function GA4Dashboard() {
                                     .slice(0, 10)
                                     .map((ep, idx) => (
                                       <div key={idx} className="endpoint-item">
-                                        <span className="endpoint-path">
+                                        <span
+                                          className="endpoint-path"
+                                          title={ep.endpoint}
+                                          style={{
+                                            wordBreak: "break-all",
+                                            whiteSpace: "normal",
+                                          }}
+                                        >
                                           {ep.endpoint}
                                         </span>
                                         <span className="endpoint-count">
@@ -748,7 +1036,13 @@ export default function GA4Dashboard() {
                                           <div className="error-detail-info">
                                             {detail.endpoint &&
                                               detail.endpoint !== "N/A" && (
-                                                <span>
+                                                <span
+                                                  style={{
+                                                    wordBreak: "break-all",
+                                                    whiteSpace: "normal",
+                                                  }}
+                                                  title={detail.endpoint}
+                                                >
                                                   <strong>
                                                     {language === "en"
                                                       ? "Endpoint:"
@@ -806,45 +1100,49 @@ export default function GA4Dashboard() {
                                   </p>
                                 )}
 
-                                {/* Pagination Controls - Always show if multiple pages */}
-                                {detailedErrors.pagination &&
-                                  detailedErrors.pagination.totalPages > 1 && (
-                                    <div className="pagination-controls">
-                                      <button
-                                        className="pagination-btn"
-                                        onClick={() =>
-                                          handlePageChange(currentPage - 1)
-                                        }
-                                        disabled={
-                                          !detailedErrors.pagination
-                                            .hasPrevPage || isLoadingErrors
-                                        }
+                                {/* Pagination Controls - Always show if pagination data exists */}
+                                {detailedErrors.pagination && (
+                                  <div className="pagination-controls">
+                                    <button
+                                      className="pagination-btn"
+                                      onClick={() =>
+                                        handlePageChange(currentPage - 1)
+                                      }
+                                      disabled={
+                                        !detailedErrors.pagination.hasPrevPage
+                                      }
+                                    >
+                                      ←{" "}
+                                      {language === "en" ? "Previous" : "წინა"}
+                                    </button>
+                                    <span className="pagination-info">
+                                      {language === "en" ? "Page" : "გვერდი"}{" "}
+                                      {detailedErrors.pagination.page} /{" "}
+                                      {detailedErrors.pagination.totalPages}
+                                      <span
+                                        style={{
+                                          marginLeft: "0.5rem",
+                                          opacity: 0.7,
+                                          fontSize: "0.85rem",
+                                        }}
                                       >
-                                        ←{" "}
-                                        {language === "en"
-                                          ? "Previous"
-                                          : "წინა"}
-                                      </button>
-                                      <span className="pagination-info">
-                                        {language === "en" ? "Page" : "გვერდი"}{" "}
-                                        {detailedErrors.pagination.page} /{" "}
-                                        {detailedErrors.pagination.totalPages}
+                                        ({detailedErrors.pagination.totalItems}{" "}
+                                        {language === "en" ? "total" : "სულ"})
                                       </span>
-                                      <button
-                                        className="pagination-btn"
-                                        onClick={() =>
-                                          handlePageChange(currentPage + 1)
-                                        }
-                                        disabled={
-                                          !detailedErrors.pagination
-                                            .hasNextPage || isLoadingErrors
-                                        }
-                                      >
-                                        {language === "en" ? "Next" : "შემდეგი"}{" "}
-                                        →
-                                      </button>
-                                    </div>
-                                  )}
+                                    </span>
+                                    <button
+                                      className="pagination-btn"
+                                      onClick={() =>
+                                        handlePageChange(currentPage + 1)
+                                      }
+                                      disabled={
+                                        !detailedErrors.pagination.hasNextPage
+                                      }
+                                    >
+                                      {language === "en" ? "Next" : "შემდეგი"} →
+                                    </button>
+                                  </div>
+                                )}
                               </div>
                             )}
                           </div>
