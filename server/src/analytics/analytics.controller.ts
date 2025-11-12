@@ -28,6 +28,11 @@ export class AnalyticsController {
     const daysAgo = days ? parseInt(days) : 7;
     const pageNum = page ? parseInt(page) : 1;
     const limitNum = limit ? parseInt(limit) : 30;
-    return this.ga4Service.getDetailedErrors(daysAgo, errorType, pageNum, limitNum);
+    return this.ga4Service.getDetailedErrors(
+      daysAgo,
+      errorType,
+      pageNum,
+      limitNum,
+    );
   }
 }

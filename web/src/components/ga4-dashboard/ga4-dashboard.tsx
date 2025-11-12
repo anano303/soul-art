@@ -62,8 +62,11 @@ export default function GA4Dashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [timeRange, setTimeRange] = useState<"1d" | "7d" | "30d" | "90d">("7d");
-  const [expandedErrorType, setExpandedErrorType] = useState<string | null>(null);
-  const [detailedErrors, setDetailedErrors] = useState<DetailedErrorData | null>(null);
+  const [expandedErrorType, setExpandedErrorType] = useState<string | null>(
+    null
+  );
+  const [detailedErrors, setDetailedErrors] =
+    useState<DetailedErrorData | null>(null);
   const [isLoadingErrors, setIsLoadingErrors] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [data, setData] = useState<AnalyticsData>({
@@ -85,33 +88,46 @@ export default function GA4Dashboard() {
     setLoading(true);
     setError(null);
     setExpandedErrorType(null); // Reset expanded errors when changing period
-    
+
     const fetchAnalytics = async () => {
       try {
-        const days = timeRange === "1d" ? 1 : timeRange === "7d" ? 7 : timeRange === "30d" ? 30 : 90;
+        const days =
+          timeRange === "1d"
+            ? 1
+            : timeRange === "7d"
+            ? 7
+            : timeRange === "30d"
+            ? 30
+            : 90;
         const response = await fetch(
           `${process.env.NEXT_PUBLIC_API_URL}/analytics/ga4?days=${days}`,
           {
             credentials: "include",
           }
         );
-        
+
         if (!response.ok) {
           const errorText = await response.text();
-          throw new Error(`Failed to fetch analytics: ${response.status} ${errorText}`);
+          throw new Error(
+            `Failed to fetch analytics: ${response.status} ${errorText}`
+          );
         }
-        
+
         const analyticsData = await response.json();
         setData(analyticsData);
         setError(null);
       } catch (error) {
         console.error("Error fetching analytics:", error);
-        setError(error instanceof Error ? error.message : "Failed to fetch analytics data");
+        setError(
+          error instanceof Error
+            ? error.message
+            : "Failed to fetch analytics data"
+        );
       } finally {
         setLoading(false);
       }
     };
-    
+
     fetchAnalytics();
   }, [timeRange]);
 
@@ -119,9 +135,18 @@ export default function GA4Dashboard() {
   const fetchDetailedErrors = async (errorType: string, page: number = 1) => {
     try {
       setIsLoadingErrors(true);
-      const days = timeRange === "1d" ? 1 : timeRange === "7d" ? 7 : timeRange === "30d" ? 30 : 90;
-      
-      const url = new URL(`${process.env.NEXT_PUBLIC_API_URL}/analytics/ga4/errors`);
+      const days =
+        timeRange === "1d"
+          ? 1
+          : timeRange === "7d"
+          ? 7
+          : timeRange === "30d"
+          ? 30
+          : 90;
+
+      const url = new URL(
+        `${process.env.NEXT_PUBLIC_API_URL}/analytics/ga4/errors`
+      );
       url.searchParams.append("days", days.toString());
       url.searchParams.append("errorType", errorType);
       url.searchParams.append("page", page.toString());
@@ -189,7 +214,7 @@ export default function GA4Dashboard() {
               ? "Google Analytics 4 - Comprehensive Website Analytics"
               : "Google Analytics 4 - ვებსაიტის სრული ანალიტიკა"}
           </p>
-          
+
           {error && (
             <div
               style={{
@@ -211,7 +236,7 @@ export default function GA4Dashboard() {
               </small>
             </div>
           )}
-          
+
           {!error && data.pageViews.length === 0 && !loading && (
             <div
               style={{
@@ -272,7 +297,9 @@ export default function GA4Dashboard() {
               <div className="metric-card__icon">🎯</div>
               <div className="metric-card__value">{conversionRate}%</div>
               <div className="metric-card__label">
-                {language === "en" ? "Conversion Rate" : "კონვერსიის მაჩვენებელი"}
+                {language === "en"
+                  ? "Conversion Rate"
+                  : "კონვერსიის მაჩვენებელი"}
               </div>
             </div>
 
@@ -388,7 +415,10 @@ export default function GA4Dashboard() {
                 ? "User Journey Paths (Sequential)"
                 : "მომხმარებლის მარშრუტები (თანმიმდევრული)"}
             </h2>
-            <p className="ga4-section__description" style={{ marginBottom: '1rem', color: '#666' }}>
+            <p
+              className="ga4-section__description"
+              style={{ marginBottom: "1rem", color: "#666" }}
+            >
               {language === "en"
                 ? "See the exact sequence of pages users visit. Each path shows the journey from entry to exit."
                 : "ნახეთ გვერდების ზუსტი თანმიმდევრობა რომელსაც მომხმარებლები ეწვევიან."}
@@ -397,13 +427,15 @@ export default function GA4Dashboard() {
               <table>
                 <thead>
                   <tr>
-                    <th style={{ width: '60%' }}>
-                      {language === "en" ? "Sequential Path" : "თანმიმდევრული მარშრუტი"}
+                    <th style={{ width: "60%" }}>
+                      {language === "en"
+                        ? "Sequential Path"
+                        : "თანმიმდევრული მარშრუტი"}
                     </th>
-                    <th style={{ textAlign: 'center' }}>
+                    <th style={{ textAlign: "center" }}>
                       {language === "en" ? "Users" : "მომხმარებლები"}
                     </th>
-                    <th style={{ textAlign: 'center' }}>
+                    <th style={{ textAlign: "center" }}>
                       {language === "en" ? "Avg Time (s)" : "საშ. დრო (წმ)"}
                     </th>
                   </tr>
@@ -411,7 +443,14 @@ export default function GA4Dashboard() {
                 <tbody>
                   {data.userJourneys.length === 0 ? (
                     <tr>
-                      <td colSpan={3} style={{ textAlign: 'center', padding: '2rem', color: '#999' }}>
+                      <td
+                        colSpan={3}
+                        style={{
+                          textAlign: "center",
+                          padding: "2rem",
+                          color: "#999",
+                        }}
+                      >
                         {language === "en"
                           ? "No user path data yet. Navigate through the site to generate paths. Data appears in 24-48 hours."
                           : "მომხმარებლის მარშრუტის მონაცემები ჯერ არ არის. ნავიგაცია გააკეთეთ საიტზე. მონაცემები 24-48 საათში გამოჩნდება."}
@@ -420,22 +459,31 @@ export default function GA4Dashboard() {
                   ) : (
                     data.userJourneys.map((journey, index) => (
                       <tr key={index}>
-                        <td className="journey-path" style={{ 
-                          fontFamily: 'monospace', 
-                          fontSize: '0.9rem',
-                          color: '#2563eb',
-                          fontWeight: '500'
-                        }}>
+                        <td
+                          className="journey-path"
+                          style={{
+                            fontFamily: "monospace",
+                            fontSize: "0.9rem",
+                            color: "#2563eb",
+                            fontWeight: "500",
+                          }}
+                        >
                           {journey.path}
                         </td>
-                        <td className="table-cell-number" style={{ 
-                          textAlign: 'center',
-                          fontWeight: '600',
-                          color: '#059669'
-                        }}>
+                        <td
+                          className="table-cell-number"
+                          style={{
+                            textAlign: "center",
+                            fontWeight: "600",
+                            color: "#059669",
+                          }}
+                        >
                           {journey.count.toLocaleString()}
                         </td>
-                        <td className="table-cell-number" style={{ textAlign: 'center' }}>
+                        <td
+                          className="table-cell-number"
+                          style={{ textAlign: "center" }}
+                        >
                           {journey.avgTime ? `${journey.avgTime}s` : "N/A"}
                         </td>
                       </tr>
@@ -445,14 +493,16 @@ export default function GA4Dashboard() {
               </table>
             </div>
             {data.userJourneys.length > 0 && (
-              <div style={{ 
-                marginTop: '1rem', 
-                padding: '0.75rem', 
-                backgroundColor: '#f0f9ff', 
-                borderRadius: '6px',
-                fontSize: '0.85rem',
-                color: '#1e40af'
-              }}>
+              <div
+                style={{
+                  marginTop: "1rem",
+                  padding: "0.75rem",
+                  backgroundColor: "#f0f9ff",
+                  borderRadius: "6px",
+                  fontSize: "0.85rem",
+                  color: "#1e40af",
+                }}
+              >
                 <strong>{language === "en" ? "💡 Tip:" : "💡 რჩევა:"}</strong>{" "}
                 {language === "en"
                   ? "The → arrow shows the order of pages visited. Use this to understand common conversion paths."
@@ -464,10 +514,7 @@ export default function GA4Dashboard() {
           {/* Section 4: Purchase Funnel */}
           <section className="ga4-section">
             <h2 className="ga4-section__title">
-              🛒{" "}
-              {language === "en"
-                ? "Purchase Funnel"
-                : "შეძენის ფუნელი"}
+              🛒 {language === "en" ? "Purchase Funnel" : "შეძენის ფუნელი"}
             </h2>
             <div className="funnel-chart">
               {data.purchaseFunnel.map((step, index) => (
@@ -482,12 +529,15 @@ export default function GA4Dashboard() {
                   </div>
                   <div className="funnel-step__stats">
                     <span className="funnel-step__count">
-                      {step.count.toLocaleString()} {language === "en" ? "users" : "მომხმარებელი"}
+                      {step.count.toLocaleString()}{" "}
+                      {language === "en" ? "users" : "მომხმარებელი"}
                     </span>
                     {step.dropoff !== undefined && (
-                      <span 
+                      <span
                         className="funnel-step__dropoff"
-                        style={{ color: step.dropoff < 0 ? '#10b981' : '#ef4444' }}
+                        style={{
+                          color: step.dropoff < 0 ? "#10b981" : "#ef4444",
+                        }}
                       >
                         {-step.dropoff.toFixed(1)}%
                       </span>
@@ -498,9 +548,14 @@ export default function GA4Dashboard() {
             </div>
             <div className="funnel-summary">
               <p>
-                <strong>{language === "en" ? "Conversion Rate:" : "კონვერსიის მაჩვენებელი:"}</strong>{" "}
+                <strong>
+                  {language === "en"
+                    ? "Conversion Rate:"
+                    : "კონვერსიის მაჩვენებელი:"}
+                </strong>{" "}
                 {conversionRate}% (
-                {data.purchaseFunnel[data.purchaseFunnel.length - 1]?.count || 0}{" "}
+                {data.purchaseFunnel[data.purchaseFunnel.length - 1]?.count ||
+                  0}{" "}
                 {language === "en" ? "purchases from" : "შესყიდვა"}{" "}
                 {data.purchaseFunnel[0]?.count || 0}{" "}
                 {language === "en" ? "cart additions" : "კალათაში დამატებიდან"})
@@ -517,42 +572,73 @@ export default function GA4Dashboard() {
               <div className="error-list">
                 {data.errors.map((error, index) => (
                   <div key={index} className="error-item-expandable">
-                    <div 
+                    <div
                       className="error-item-header"
                       onClick={() => handleErrorTypeClick(error.type)}
-                      style={{ cursor: 'pointer' }}
+                      style={{ cursor: "pointer" }}
                     >
                       <div className="error-item-info">
                         <span className="error-item__type">{error.type}</span>
                         <span className="error-item__count">{error.count}</span>
                       </div>
                       <span className="expand-icon">
-                        {expandedErrorType === error.type ? '▼' : '▶'}
+                        {expandedErrorType === error.type ? "▼" : "▶"}
                       </span>
                     </div>
-                    
+
                     {expandedErrorType === error.type && (
                       <div className="error-details">
                         {isLoadingErrors ? (
                           <div className="loading-details">
                             <div className="spinner"></div>
-                            <p>{language === "en" ? "Loading error details..." : "იტვირთება დეტალები..."}</p>
+                            <p>
+                              {language === "en"
+                                ? "Loading error details..."
+                                : "იტვირთება დეტალები..."}
+                            </p>
                           </div>
                         ) : detailedErrors ? (
                           <div className="detailed-errors">
+                            {/* Info Box */}
+                            <div
+                              style={{
+                                background: "#fff3cd",
+                                border: "1px solid #ffc107",
+                                borderRadius: "8px",
+                                padding: "1rem",
+                                marginBottom: "1rem",
+                                fontSize: "0.9rem",
+                              }}
+                            >
+                              <strong>
+                                ℹ️ {language === "en" ? "Note:" : "შენიშვნა:"}
+                              </strong>
+                              <p style={{ margin: "0.5rem 0 0 0" }}>
+                                {language === "en"
+                                  ? "Error details show event counts from GA4. For exact error messages, check browser console logs with [GA4 Error Tracking] prefix."
+                                  : "ერორის დეტალები აჩვენებს მოვლენების რაოდენობას GA4-დან. ზუსტი error message-ებისთვის შეამოწმეთ browser console logs [GA4 Error Tracking] პრეფიქსით."}
+                              </p>
+                            </div>
+
                             {/* Error Stats */}
                             <div className="error-stats">
                               <div className="stat-box">
                                 <div className="stat-label">
-                                  {language === "en" ? "Total Errors" : "სულ შეცდომები"}
+                                  {language === "en"
+                                    ? "Total Errors"
+                                    : "სულ შეცდომები"}
                                 </div>
-                                <div className="stat-value">{detailedErrors.total.toLocaleString()}</div>
+                                <div className="stat-value">
+                                  {detailedErrors.total.toLocaleString()}
+                                </div>
                               </div>
                               <div className="stat-box">
                                 <div className="stat-label">
                                   {language === "en" ? "Period" : "პერიოდი"}
                                 </div>
-                                <div className="stat-value">{detailedErrors.period}</div>
+                                <div className="stat-value">
+                                  {detailedErrors.period}
+                                </div>
                               </div>
                             </div>
 
@@ -560,18 +646,27 @@ export default function GA4Dashboard() {
                             {detailedErrors.topFailingEndpoints.length > 0 && (
                               <div className="error-subsection">
                                 <h4>
-                                  {language === "en" ? "Top Failing Endpoints" : "ყველაზე პრობლემური ენდპოინტები"}
+                                  {language === "en"
+                                    ? "Top Failing Endpoints"
+                                    : "ყველაზე პრობლემური ენდპოინტები"}
                                   <span className="subsection-count">
-                                    ({detailedErrors.topFailingEndpoints.length})
+                                    ({detailedErrors.topFailingEndpoints.length}
+                                    )
                                   </span>
                                 </h4>
                                 <div className="endpoint-list">
-                                  {detailedErrors.topFailingEndpoints.slice(0, 10).map((ep, idx) => (
-                                    <div key={idx} className="endpoint-item">
-                                      <span className="endpoint-path">{ep.endpoint}</span>
-                                      <span className="endpoint-count">{ep.count}</span>
-                                    </div>
-                                  ))}
+                                  {detailedErrors.topFailingEndpoints
+                                    .slice(0, 10)
+                                    .map((ep, idx) => (
+                                      <div key={idx} className="endpoint-item">
+                                        <span className="endpoint-path">
+                                          {ep.endpoint}
+                                        </span>
+                                        <span className="endpoint-count">
+                                          {ep.count}
+                                        </span>
+                                      </div>
+                                    ))}
                                 </div>
                               </div>
                             )}
@@ -580,97 +675,184 @@ export default function GA4Dashboard() {
                             {detailedErrors.statusDistribution.length > 0 && (
                               <div className="error-subsection">
                                 <h4>
-                                  {language === "en" ? "Status Code Distribution" : "სტატუს კოდების განაწილება"}
+                                  {language === "en"
+                                    ? "Status Code Distribution"
+                                    : "სტატუს კოდების განაწილება"}
                                   <span className="subsection-count">
                                     ({detailedErrors.statusDistribution.length})
                                   </span>
                                 </h4>
                                 <div className="status-list">
-                                  {detailedErrors.statusDistribution.map((status, idx) => (
-                                    <div key={idx} className="status-item">
-                                      <div>
-                                        <span className={`status-code ${status.category}`}>
-                                          {status.status}
+                                  {detailedErrors.statusDistribution.map(
+                                    (status, idx) => (
+                                      <div key={idx} className="status-item">
+                                        <div>
+                                          <span
+                                            className={`status-code ${status.category}`}
+                                          >
+                                            {status.status}
+                                          </span>
+                                          <span className="status-category">
+                                            {status.category}
+                                          </span>
+                                        </div>
+                                        <span className="status-count">
+                                          {status.count}
                                         </span>
-                                        <span className="status-category">{status.category}</span>
                                       </div>
-                                      <span className="status-count">{status.count}</span>
-                                    </div>
-                                  ))}
+                                    )
+                                  )}
                                 </div>
                               </div>
                             )}
 
                             {/* Detailed Error List with Pagination */}
-                            {detailedErrors.summary.length > 0 && detailedErrors.summary[0].details.length > 0 && (
+                            {detailedErrors.summary.length > 0 && (
                               <div className="error-subsection">
                                 <h4>
-                                  {language === "en" 
-                                    ? `Errors (Page ${detailedErrors.pagination?.page || 1} of ${detailedErrors.pagination?.totalPages || 1})`
-                                    : `შეცდომები (გვერდი ${detailedErrors.pagination?.page || 1} / ${detailedErrors.pagination?.totalPages || 1})`
-                                  }
+                                  {language === "en"
+                                    ? `All Errors (Page ${
+                                        detailedErrors.pagination?.page || 1
+                                      } of ${
+                                        detailedErrors.pagination?.totalPages ||
+                                        1
+                                      })`
+                                    : `ყველა შეცდომა (გვერდი ${
+                                        detailedErrors.pagination?.page || 1
+                                      } / ${
+                                        detailedErrors.pagination?.totalPages ||
+                                        1
+                                      })`}
                                   <span className="subsection-count">
-                                    ({detailedErrors.pagination?.totalItems || detailedErrors.summary[0].details.length} {language === "en" ? "total" : "სულ"})
+                                    (
+                                    {detailedErrors.pagination?.totalItems || 0}{" "}
+                                    {language === "en" ? "total" : "სულ"})
                                   </span>
                                 </h4>
-                                <div className="error-details-table">
-                                  {detailedErrors.summary[0].details.map((detail, idx) => (
-                                    <div key={idx} className="error-detail-row">
-                                      <div className="error-detail-message">
-                                        <strong>{detail.message || "Unknown error"}</strong>
-                                      </div>
-                                      <div className="error-detail-info">
-                                        {detail.endpoint && (
-                                          <span>
-                                            <strong>{language === "en" ? "Endpoint:" : "ენდპოინტი:"}</strong> {detail.endpoint}
-                                          </span>
-                                        )}
-                                        {detail.status && (
-                                          <span>
-                                            <strong>{language === "en" ? "Status:" : "სტატუსი:"}</strong> {detail.status}
-                                          </span>
-                                        )}
-                                        {detail.page && (
-                                          <span>
-                                            <strong>{language === "en" ? "Page:" : "გვერდი:"}</strong> {detail.page}
-                                          </span>
-                                        )}
-                                        <span>
-                                          <strong>{language === "en" ? "Count:" : "რაოდენობა:"}</strong> {detail.count}
-                                        </span>
-                                      </div>
-                                    </div>
-                                  ))}
-                                </div>
 
-                                {/* Pagination Controls */}
-                                {detailedErrors.pagination && detailedErrors.pagination.totalPages > 1 && (
-                                  <div className="pagination-controls">
-                                    <button
-                                      className="pagination-btn"
-                                      onClick={() => handlePageChange(currentPage - 1)}
-                                      disabled={!detailedErrors.pagination.hasPrevPage || isLoadingErrors}
-                                    >
-                                      ← {language === "en" ? "Previous" : "წინა"}
-                                    </button>
-                                    <span className="pagination-info">
-                                      {language === "en" ? "Page" : "გვერდი"} {detailedErrors.pagination.page} / {detailedErrors.pagination.totalPages}
-                                    </span>
-                                    <button
-                                      className="pagination-btn"
-                                      onClick={() => handlePageChange(currentPage + 1)}
-                                      disabled={!detailedErrors.pagination.hasNextPage || isLoadingErrors}
-                                    >
-                                      {language === "en" ? "Next" : "შემდეგი"} →
-                                    </button>
+                                {detailedErrors.summary[0].details.length >
+                                0 ? (
+                                  <div className="error-details-table">
+                                    {detailedErrors.summary[0].details.map(
+                                      (detail, idx) => (
+                                        <div
+                                          key={idx}
+                                          className="error-detail-row"
+                                        >
+                                          <div className="error-detail-message">
+                                            <strong>
+                                              {detail.message ||
+                                                "Unknown error"}
+                                            </strong>
+                                          </div>
+                                          <div className="error-detail-info">
+                                            {detail.endpoint &&
+                                              detail.endpoint !== "N/A" && (
+                                                <span>
+                                                  <strong>
+                                                    {language === "en"
+                                                      ? "Endpoint:"
+                                                      : "ენდპოინტი:"}
+                                                  </strong>{" "}
+                                                  {detail.endpoint}
+                                                </span>
+                                              )}
+                                            {detail.status &&
+                                              detail.status !== "N/A" && (
+                                                <span>
+                                                  <strong>
+                                                    {language === "en"
+                                                      ? "Status:"
+                                                      : "სტატუსი:"}
+                                                  </strong>{" "}
+                                                  {detail.status}
+                                                </span>
+                                              )}
+                                            {detail.page &&
+                                              detail.page !== "N/A" && (
+                                                <span>
+                                                  <strong>
+                                                    {language === "en"
+                                                      ? "Page:"
+                                                      : "გვერდი:"}
+                                                  </strong>{" "}
+                                                  {detail.page}
+                                                </span>
+                                              )}
+                                            <span>
+                                              <strong>
+                                                {language === "en"
+                                                  ? "Count:"
+                                                  : "რაოდენობა:"}
+                                              </strong>{" "}
+                                              {detail.count}
+                                            </span>
+                                          </div>
+                                        </div>
+                                      )
+                                    )}
                                   </div>
+                                ) : (
+                                  <p
+                                    style={{
+                                      padding: "1rem",
+                                      color: "#666",
+                                      textAlign: "center",
+                                    }}
+                                  >
+                                    {language === "en"
+                                      ? "No errors on this page"
+                                      : "ამ გვერდზე შეცდომები არ არის"}
+                                  </p>
                                 )}
+
+                                {/* Pagination Controls - Always show if multiple pages */}
+                                {detailedErrors.pagination &&
+                                  detailedErrors.pagination.totalPages > 1 && (
+                                    <div className="pagination-controls">
+                                      <button
+                                        className="pagination-btn"
+                                        onClick={() =>
+                                          handlePageChange(currentPage - 1)
+                                        }
+                                        disabled={
+                                          !detailedErrors.pagination
+                                            .hasPrevPage || isLoadingErrors
+                                        }
+                                      >
+                                        ←{" "}
+                                        {language === "en"
+                                          ? "Previous"
+                                          : "წინა"}
+                                      </button>
+                                      <span className="pagination-info">
+                                        {language === "en" ? "Page" : "გვერდი"}{" "}
+                                        {detailedErrors.pagination.page} /{" "}
+                                        {detailedErrors.pagination.totalPages}
+                                      </span>
+                                      <button
+                                        className="pagination-btn"
+                                        onClick={() =>
+                                          handlePageChange(currentPage + 1)
+                                        }
+                                        disabled={
+                                          !detailedErrors.pagination
+                                            .hasNextPage || isLoadingErrors
+                                        }
+                                      >
+                                        {language === "en" ? "Next" : "შემდეგი"}{" "}
+                                        →
+                                      </button>
+                                    </div>
+                                  )}
                               </div>
                             )}
                           </div>
                         ) : (
-                          <p style={{ padding: '1rem', color: '#666' }}>
-                            {language === "en" ? "No detailed error data available" : "დეტალური მონაცემები არ არის ხელმისაწვდომი"}
+                          <p style={{ padding: "1rem", color: "#666" }}>
+                            {language === "en"
+                              ? "No detailed error data available"
+                              : "დეტალური მონაცემები არ არის ხელმისაწვდომი"}
                           </p>
                         )}
                       </div>
@@ -719,7 +901,9 @@ export default function GA4Dashboard() {
                 </div>
                 <div className="api-metric api-metric--rate">
                   <span className="api-metric__label">
-                    {language === "en" ? "Success Rate:" : "წარმატების მაჩვენებელი:"}
+                    {language === "en"
+                      ? "Success Rate:"
+                      : "წარმატების მაჩვენებელი:"}
                   </span>
                   <span className="api-metric__value">{successRate}%</span>
                 </div>
@@ -729,14 +913,16 @@ export default function GA4Dashboard() {
 
           <div className="ga4-dashboard__footer">
             <p>
-              📊 {language === "en" ? "Powered by" : "გამოიყენება"} Google Analytics 4
+              📊 {language === "en" ? "Powered by" : "გამოიყენება"} Google
+              Analytics 4
             </p>
             <p>
               🔄 {language === "en" ? "Last updated:" : "ბოლო განახლება:"}{" "}
               {new Date().toLocaleString(language === "en" ? "en-US" : "ka-GE")}
             </p>
             <p className="ga4-dashboard__note">
-              ℹ️ {language === "en" 
+              ℹ️{" "}
+              {language === "en"
                 ? "Note: Analytics data is fetched from Google Analytics 4. If GA4 is not configured, sample data is shown."
                 : "შენიშვნა: ანალიტიკის მონაცემები მოდის Google Analytics 4-დან. თუ GA4 არ არის კონფიგურირებული, ნაჩვენებია ნიმუშის მონაცემები."}
             </p>

@@ -202,7 +202,7 @@
 }
 
 .journey-path {
-  font-family: 'Monaco', 'Courier New', monospace;
+  font-family: "Monaco", "Courier New", monospace;
   font-size: 0.875rem;
   color: #475569;
 }
@@ -1086,4 +1086,3 @@
     height: 48px;
   }
 }
-

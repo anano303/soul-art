@@ -414,8 +414,13 @@ export class Ga4AnalyticsService {
 
     try {
       // Determine which event name to query based on error type
-      let eventNames = ['error_occurred', 'api_error', 'network_error', 'page_not_found'];
-      
+      let eventNames = [
+        'error_occurred',
+        'api_error',
+        'network_error',
+        'page_not_found',
+      ];
+
       if (errorType) {
         if (errorType.includes('404')) {
           eventNames = ['page_not_found'];
@@ -437,6 +442,7 @@ export class Ga4AnalyticsService {
             { name: 'eventName' },
             { name: 'pagePath' },
             { name: 'pageTitle' },
+            { name: 'unifiedScreenName' }, // Try to get more info
           ],
           metrics: [{ name: 'eventCount' }],
           dimensionFilter: {
@@ -460,35 +466,41 @@ export class Ga4AnalyticsService {
         const eventName = row.dimensionValues[0]?.value || 'unknown';
         const pagePath = row.dimensionValues[1]?.value || '/';
         const title = row.dimensionValues[2]?.value || 'Untitled';
+        const screenName = row.dimensionValues[3]?.value || '';
         const count = parseInt(row.metricValues[0]?.value || '0');
 
         if (count === 0) return;
 
         totalErrors += count;
 
-        // Map event names to user-friendly messages
+        // Map event names to user-friendly messages with MORE detail
         let message = '';
         let endpoint = 'N/A';
         let status = 'N/A';
 
         switch (eventName) {
           case 'page_not_found':
-            message = `404 - Page not found: ${pagePath}`;
+            message = `404 Error: Page "${pagePath}" not found`;
             status = '404';
+            endpoint = pagePath;
             break;
           case 'api_error':
-            message = `API request failed on ${pagePath}`;
-            endpoint = 'API call from ' + pagePath;
+            message = `API Error on page: ${pagePath}`;
+            endpoint = `API call from ${pagePath}`;
             status = '500';
             break;
           case 'network_error':
-            message = `Network connection failed on ${pagePath}`;
-            endpoint = 'Network request from ' + pagePath;
+            message = `Network Error: Connection failed on ${pagePath}`;
+            endpoint = `Network from ${pagePath}`;
             status = 'Network';
             break;
           case 'error_occurred':
-            message = `Error occurred: ${title} (${pagePath})`;
-            status = 'Error';
+            // For general errors, try to extract meaningful info
+            message = `JavaScript Error on ${pagePath}`;
+            if (screenName && screenName !== '(not set)') {
+              message += ` (${screenName})`;
+            }
+            status = 'JS Error';
             break;
           default:
             message = `${eventName} on ${pagePath}`;
@@ -572,7 +584,7 @@ export class Ga4AnalyticsService {
       };
     } catch (error) {
       this.logger.error('Failed to fetch detailed errors:', error.message);
-      
+
       // Return empty data with helpful message
       return {
         total: 0,
@@ -583,7 +595,8 @@ export class Ga4AnalyticsService {
             uniqueErrors: 0,
             details: [
               {
-                message: 'No error data available yet. Make sure error tracking events are being sent.',
+                message:
+                  'No error data available yet. Make sure error tracking events are being sent.',
                 endpoint: 'Check console logs',
                 status: 'N/A',
                 page: 'N/A',
