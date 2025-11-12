@@ -211,12 +211,10 @@ export default function GA4Dashboard() {
       const errorData = await response.json();
       setDetailedErrors(errorData);
       setCurrentPage(page);
-      console.log("Error pagination:", errorData.pagination);
     } catch (error) {
       console.error("Error fetching detailed errors:", error);
     } finally {
       setIsLoadingErrors(false);
-      console.log("isLoadingErrors set to false");
     }
   };
 

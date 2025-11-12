@@ -28,11 +28,6 @@ export function useVisitorTracking() {
     let sessionId = localStorage.getItem(SESSION_ID_KEY);
     const lastActivity = localStorage.getItem("last_activity");
 
-    console.log("[useVisitorTracking] Session info", {
-      sessionId,
-      lastActivity,
-    });
-
     const now = Date.now();
     if (
       !sessionId ||
@@ -41,7 +36,6 @@ export function useVisitorTracking() {
       // Create new session
       sessionId = generateUUID();
       localStorage.setItem(SESSION_ID_KEY, sessionId);
-      console.log("[useVisitorTracking] New session created", { sessionId });
     }
 
     localStorage.setItem("last_activity", now.toString());
@@ -50,11 +44,6 @@ export function useVisitorTracking() {
     const trackVisitor = async () => {
       try {
         const userId = (user as any)?._id || (user as any)?.id;
-        console.log("[Visitor Tracking] Sending data:", {
-          page: window.location.pathname,
-          userId: userId ? userId : "None",
-          userPresent: !!user,
-        });
 
         const response = await fetch(
           `${process.env.NEXT_PUBLIC_API_URL}/analytics/track-visitor`,
