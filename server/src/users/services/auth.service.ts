@@ -60,16 +60,19 @@ export class AuthService {
     await user.save();
   }
 
-  async singInWithGoogle(googleData: {
-    email: string;
-    name: string;
-    id: string;
-    sub?: string;
-  }, deviceInfo?: {
-    fingerprint?: string;
-    userAgent?: string;
-    trusted?: boolean;
-  }) {
+  async singInWithGoogle(
+    googleData: {
+      email: string;
+      name: string;
+      id: string;
+      sub?: string;
+    },
+    deviceInfo?: {
+      fingerprint?: string;
+      userAgent?: string;
+      trusted?: boolean;
+    },
+  ) {
     // Convert email to lowercase
     const email = googleData.email.toLowerCase();
 
@@ -114,11 +117,14 @@ export class AuthService {
     return user;
   }
 
-  async login(user: UserDocument, deviceInfo?: {
-    fingerprint?: string;
-    userAgent?: string;
-    trusted?: boolean;
-  }): Promise<AuthResponseDto> {
+  async login(
+    user: UserDocument,
+    deviceInfo?: {
+      fingerprint?: string;
+      userAgent?: string;
+      trusted?: boolean;
+    },
+  ): Promise<AuthResponseDto> {
     const tokens = await this.generateTokens(user, deviceInfo);
 
     return {
@@ -133,7 +139,10 @@ export class AuthService {
     };
   }
 
-  private async generateTokens(user: UserDocument, deviceInfo?: any): Promise<TokensDto> {
+  private async generateTokens(
+    user: UserDocument,
+    deviceInfo?: any,
+  ): Promise<TokensDto> {
     const jti = randomUUID();
     const sessionId = randomUUID();
 
@@ -179,7 +188,8 @@ export class AuthService {
         } as TokenPayload,
         {
           expiresIn: '7d',
-          secret: process.env.JWT_SESSION_SECRET || process.env.JWT_ACCESS_SECRET,
+          secret:
+            process.env.JWT_SESSION_SECRET || process.env.JWT_ACCESS_SECRET,
         },
       ),
     ]);
@@ -196,28 +206,29 @@ export class AuthService {
       // Check if device already exists
       const existingUser = await this.userModel.findById(user._id);
       const existingDevice = existingUser?.knownDevices?.find(
-        device => device.fingerprint === deviceInfo.fingerprint
+        (device) => device.fingerprint === deviceInfo.fingerprint,
       );
 
       if (existingDevice) {
         // Update existing device with new tokens
         await this.userModel.findOneAndUpdate(
-          { 
+          {
             _id: user._id,
-            'knownDevices.fingerprint': deviceInfo.fingerprint 
+            'knownDevices.fingerprint': deviceInfo.fingerprint,
           },
           {
             $set: {
               ...globalUpdateData,
               'knownDevices.$.userAgent': deviceInfo.userAgent,
               'knownDevices.$.lastSeen': new Date(),
-              'knownDevices.$.trusted': deviceInfo.trusted || existingDevice.trusted,
+              'knownDevices.$.trusted':
+                deviceInfo.trusted || existingDevice.trusted,
               'knownDevices.$.sessionId': sessionId,
               'knownDevices.$.refreshToken': refreshToken,
               'knownDevices.$.refreshTokenJti': jti,
               'knownDevices.$.isActive': true,
-            }
-          }
+            },
+          },
         );
       } else {
         // Add new device with its own tokens
@@ -233,8 +244,8 @@ export class AuthService {
               refreshToken,
               refreshTokenJti: jti,
               isActive: true,
-            }
-          }
+            },
+          },
         });
       }
     } else {
@@ -249,10 +260,13 @@ export class AuthService {
     };
   }
 
-  async refresh(refreshToken: string, deviceInfo?: {
-    fingerprint?: string;
-    userAgent?: string;
-  }): Promise<TokensDto> {
+  async refresh(
+    refreshToken: string,
+    deviceInfo?: {
+      fingerprint?: string;
+      userAgent?: string;
+    },
+  ): Promise<TokensDto> {
     try {
       const payload = await this.jwtService.verifyAsync<TokenPayload>(
         refreshToken,
@@ -273,12 +287,13 @@ export class AuthService {
       // Try to find the device-specific refresh token first
       let validDevice = null;
       let deviceTrusted = false;
-      
+
       if (deviceInfo?.fingerprint) {
         validDevice = user.knownDevices?.find(
-          device => device.fingerprint === deviceInfo.fingerprint && 
-                   device.refreshTokenJti === payload.jti &&
-                   device.isActive
+          (device) =>
+            device.fingerprint === deviceInfo.fingerprint &&
+            device.refreshTokenJti === payload.jti &&
+            device.isActive,
         );
         deviceTrusted = validDevice?.trusted || false;
       }
@@ -287,9 +302,9 @@ export class AuthService {
       if (!validDevice && user.refreshToken === payload.jti) {
         console.log('🔄 Using legacy global refresh token');
         // Generate new tokens with device context (token rotation)
-        return this.generateTokens(user, { 
-          ...deviceInfo, 
-          trusted: deviceTrusted 
+        return this.generateTokens(user, {
+          ...deviceInfo,
+          trusted: deviceTrusted,
         });
       }
 
@@ -297,9 +312,9 @@ export class AuthService {
       if (validDevice) {
         console.log('🔄 Using device-specific refresh token');
         // Generate new tokens with device context (token rotation)
-        return this.generateTokens(user, { 
-          ...deviceInfo, 
-          trusted: deviceTrusted 
+        return this.generateTokens(user, {
+          ...deviceInfo,
+          trusted: deviceTrusted,
         });
       }
 
@@ -309,37 +324,40 @@ export class AuthService {
     }
   }
 
-  async logout(userId: string, deviceInfo?: { fingerprint?: string; sessionId?: string }): Promise<void> {
+  async logout(
+    userId: string,
+    deviceInfo?: { fingerprint?: string; sessionId?: string },
+  ): Promise<void> {
     if (deviceInfo?.fingerprint) {
       // Logout specific device only
       await this.userModel.findOneAndUpdate(
-        { 
+        {
           _id: userId,
-          'knownDevices.fingerprint': deviceInfo.fingerprint 
+          'knownDevices.fingerprint': deviceInfo.fingerprint,
         },
         {
-          $set: { 
+          $set: {
             'knownDevices.$.isActive': false,
             'knownDevices.$.refreshToken': null,
             'knownDevices.$.refreshTokenJti': null,
-          }
-        }
+          },
+        },
       );
       console.log(`🚪 Device ${deviceInfo.fingerprint} logged out`);
     } else if (deviceInfo?.sessionId) {
       // Logout by session ID
       await this.userModel.findOneAndUpdate(
-        { 
+        {
           _id: userId,
-          'knownDevices.sessionId': deviceInfo.sessionId 
+          'knownDevices.sessionId': deviceInfo.sessionId,
         },
         {
-          $set: { 
+          $set: {
             'knownDevices.$.isActive': false,
             'knownDevices.$.refreshToken': null,
             'knownDevices.$.refreshTokenJti': null,
-          }
-        }
+          },
+        },
       );
       console.log(`🚪 Session ${deviceInfo.sessionId} logged out`);
     } else {
@@ -351,61 +369,102 @@ export class AuthService {
           'knownDevices.$[].isActive': false,
           'knownDevices.$[].refreshToken': null,
           'knownDevices.$[].refreshTokenJti': null,
-        }
+        },
       });
-      console.log(`🚪 Full logout for user ${userId} - all devices deactivated`);
+      console.log(
+        `🚪 Full logout for user ${userId} - all devices deactivated`,
+      );
     }
   }
 
   // Method to trust a device for extended sessions
   async trustDevice(userId: string, deviceFingerprint: string): Promise<void> {
     await this.userModel.findOneAndUpdate(
-      { 
+      {
         _id: userId,
-        'knownDevices.fingerprint': deviceFingerprint 
+        'knownDevices.fingerprint': deviceFingerprint,
       },
       {
-        $set: { 'knownDevices.$.trusted': true }
-      }
+        $set: { 'knownDevices.$.trusted': true },
+      },
     );
   }
 
-
-
   // Method to trust device and generate new tokens atomically
-  async trustDeviceAndGenerateTokens(user: UserDocument, deviceFingerprint: string, userAgent: string): Promise<TokensDto> {
+  async trustDeviceAndGenerateTokens(
+    user: UserDocument,
+    deviceFingerprint: string,
+    userAgent: string,
+  ): Promise<TokensDto> {
     let sessionId: string;
+
+    // Generate JTI first (we'll need it for both new and existing devices)
+    const jti = require('crypto').randomUUID();
 
     // First, check if the device exists and update/create it
     const existingUser = await this.userModel.findById(user._id);
     const existingDevice = existingUser?.knownDevices?.find(
-      device => device.fingerprint === deviceFingerprint
+      (device) => device.fingerprint === deviceFingerprint,
     );
 
     if (existingDevice) {
       // Device exists - update it to trusted and use its sessionId
       sessionId = existingDevice.sessionId || require('crypto').randomUUID();
-      
+
       const updateResult = await this.userModel.findOneAndUpdate(
-        { 
+        {
           _id: user._id,
-          'knownDevices.fingerprint': deviceFingerprint 
+          'knownDevices.fingerprint': deviceFingerprint,
         },
         {
-          $set: { 
+          $set: {
             'knownDevices.$.trusted': true,
             'knownDevices.$.lastSeen': new Date(),
-            'knownDevices.$.sessionId': sessionId
-          }
+            'knownDevices.$.sessionId': sessionId,
+          },
         },
-        { returnDocument: 'after' }
+        { returnDocument: 'after' },
       );
-      
-      console.log('Updated existing device trust status:', updateResult ? 'success' : 'failed');
+
+      console.log(
+        'Updated existing device trust status:',
+        updateResult ? 'success' : 'failed',
+      );
     } else {
-      // Device doesn't exist - create it as trusted
+      // Device doesn't exist - create it as trusted WITH tokens
       sessionId = require('crypto').randomUUID();
-      
+
+      // Generate tokens first
+      const [accessToken, refreshToken] = await Promise.all([
+        this.jwtService.signAsync(
+          {
+            sub: user._id.toString(),
+            email: user.email,
+            role: user.role,
+            type: 'access',
+            sessionId,
+          },
+          {
+            expiresIn: '1h',
+            secret: process.env.JWT_ACCESS_SECRET,
+          },
+        ),
+        this.jwtService.signAsync(
+          {
+            sub: user._id.toString(),
+            email: user.email,
+            role: user.role,
+            type: 'refresh',
+            jti,
+            sessionId,
+          },
+          {
+            expiresIn: '30d',
+            secret: process.env.JWT_REFRESH_SECRET,
+          },
+        ),
+      ]);
+
       await this.userModel.findByIdAndUpdate(user._id, {
         $push: {
           knownDevices: {
@@ -414,16 +473,17 @@ export class AuthService {
             lastSeen: new Date(),
             trusted: true, // Create as trusted
             sessionId,
-          }
-        }
+            refreshToken,
+            refreshTokenJti: jti,
+            isActive: true,
+          },
+        },
       });
-      
-      console.log('Created new trusted device');
+
+      console.log('Created new trusted device with tokens');
     }
 
     // Generate new tokens using the device's sessionId
-    const jti = require('crypto').randomUUID();
-
     const [accessToken, refreshToken, sessionToken] = await Promise.all([
       // Access token - 1 hour
       this.jwtService.signAsync(
@@ -466,7 +526,8 @@ export class AuthService {
         },
         {
           expiresIn: '7d',
-          secret: process.env.JWT_SESSION_SECRET || process.env.JWT_ACCESS_SECRET,
+          secret:
+            process.env.JWT_SESSION_SECRET || process.env.JWT_ACCESS_SECRET,
         },
       ),
     ]);
@@ -495,15 +556,15 @@ export class AuthService {
   async removeDevice(userId: string, deviceFingerprint: string): Promise<void> {
     await this.userModel.findByIdAndUpdate(userId, {
       $pull: {
-        knownDevices: { fingerprint: deviceFingerprint }
-      }
+        knownDevices: { fingerprint: deviceFingerprint },
+      },
     });
   }
 
   // Method to remove all devices
   async removeAllDevices(userId: string): Promise<void> {
     await this.userModel.findByIdAndUpdate(userId, {
-      knownDevices: []
+      knownDevices: [],
     });
   }
 
@@ -514,25 +575,41 @@ export class AuthService {
 
     // Group devices by fingerprint and keep only the most recent one
     const uniqueDevices = user.knownDevices.reduce((acc, device) => {
-      const existing = acc.find(d => d.fingerprint === device.fingerprint);
+      const existing = acc.find((d) => d.fingerprint === device.fingerprint);
       if (!existing || device.lastSeen > existing.lastSeen) {
         if (existing) {
           // Remove the older one
           acc.splice(acc.indexOf(existing), 1);
         }
-        acc.push(device);
+
+        // Ensure device has required fields (migration support)
+        const cleanDevice = {
+          fingerprint: device.fingerprint,
+          userAgent: device.userAgent,
+          lastSeen: device.lastSeen,
+          trusted: device.trusted,
+          sessionId: device.sessionId,
+          refreshToken: device.refreshToken || null,
+          refreshTokenJti: device.refreshTokenJti || null,
+          isActive: device.isActive !== undefined ? device.isActive : true,
+        };
+
+        acc.push(cleanDevice);
       }
       return acc;
     }, []);
 
     // Update user with cleaned up devices
     await this.userModel.findByIdAndUpdate(userId, {
-      knownDevices: uniqueDevices
+      knownDevices: uniqueDevices,
     });
   }
 
   // Public method to generate tokens for a user (used when trusting device)
-  async generateTokensForUser(user: UserDocument, deviceInfo?: any): Promise<TokensDto> {
+  async generateTokensForUser(
+    user: UserDocument,
+    deviceInfo?: any,
+  ): Promise<TokensDto> {
     return this.generateTokens(user, deviceInfo);
   }
 

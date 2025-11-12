@@ -2000,17 +2000,25 @@ export class UsersService {
       });
     }
 
-    // Update the address
-    const updatedAddress = {
-      ...user.shippingAddresses[addressIndex],
-      ...addressData,
-      updatedAt: new Date(),
-    };
+    // Update the address properties directly (don't use spread to preserve _id)
+    const address = user.shippingAddresses[addressIndex];
+    if (addressData.label !== undefined) address.label = addressData.label;
+    if (addressData.address !== undefined)
+      address.address = addressData.address;
+    if (addressData.city !== undefined) address.city = addressData.city;
+    if (addressData.postalCode !== undefined)
+      address.postalCode = addressData.postalCode;
+    if (addressData.country !== undefined)
+      address.country = addressData.country;
+    if (addressData.phoneNumber !== undefined)
+      address.phoneNumber = addressData.phoneNumber;
+    if (addressData.isDefault !== undefined)
+      address.isDefault = addressData.isDefault;
+    address.updatedAt = new Date();
 
-    user.shippingAddresses[addressIndex] = updatedAddress;
     await user.save();
 
-    return updatedAddress;
+    return address;
   }
 
   async deleteShippingAddress(userId: string, addressId: string) {

@@ -26,7 +26,8 @@
     "cloudinary:copy": "ts-node -r tsconfig-paths/register src/scripts/copy-cloudinary-assets.ts",
     "cloudinary:copy:dry-run": "ts-node -r tsconfig-paths/register src/scripts/copy-cloudinary-assets.ts --dry-run",
     "cloudinary:delete": "ts-node -r tsconfig-paths/register src/scripts/delete-all-cloudinary.ts",
-    "cloudinary:delete:dry-run": "ts-node -r tsconfig-paths/register src/scripts/delete-all-cloudinary.ts --dry-run"
+    "cloudinary:delete:dry-run": "ts-node -r tsconfig-paths/register src/scripts/delete-all-cloudinary.ts --dry-run",
+    "migrate:device-tokens": "ts-node -r tsconfig-paths/register src/scripts/migrate-device-tokens.ts"
   },
   "dependencies": {
     "@ai-sdk/openai": "^1.0.8",

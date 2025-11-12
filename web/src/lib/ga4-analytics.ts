@@ -27,15 +27,17 @@ export const ga4Event = (
           window.gtag("event", eventName, parameters);
           console.log(`[GA4] Event sent (delayed): ${eventName}`, parameters);
         } else {
-          console.error(`[GA4] gtag still not available after delay, event lost: ${eventName}`);
+          console.error(
+            `[GA4] gtag still not available after delay, event lost: ${eventName}`
+          );
         }
       }, 1000);
       return;
     }
-    
+
     window.gtag("event", eventName, parameters);
     console.log(`[GA4] Event sent: ${eventName}`, parameters);
-    
+
     // Also log to dataLayer for verification
     if (window.dataLayer) {
       console.log(`[GA4] dataLayer length: ${window.dataLayer.length}`);
@@ -143,7 +145,10 @@ export const trackViewAllProductsClick = (category?: string) => {
   });
 };
 
-export const trackCategoryClick = (categoryName: string, categoryId?: string) => {
+export const trackCategoryClick = (
+  categoryName: string,
+  categoryId?: string
+) => {
   ga4Event("category_click", {
     category_name: categoryName,
     category_id: categoryId,
@@ -151,7 +156,11 @@ export const trackCategoryClick = (categoryName: string, categoryId?: string) =>
   });
 };
 
-export const trackBannerClick = (bannerId: string, bannerTitle?: string, targetUrl?: string) => {
+export const trackBannerClick = (
+  bannerId: string,
+  bannerTitle?: string,
+  targetUrl?: string
+) => {
   ga4Event("banner_click", {
     banner_id: bannerId,
     banner_title: bannerTitle,
@@ -219,12 +228,13 @@ const saveUserPath = (path: string[]) => {
 export const trackPageViewWithPath = (pagePath: string, pageTitle?: string) => {
   const sessionId = getSessionId();
   const currentPath = getUserPath();
-  const previousPage = currentPath.length > 0 ? currentPath[currentPath.length - 1] : null;
-  
+  const previousPage =
+    currentPath.length > 0 ? currentPath[currentPath.length - 1] : null;
+
   // Add current page to path
   currentPath.push(pagePath);
   saveUserPath(currentPath);
-  
+
   // Track page view
   ga4Event("page_view", {
     page_path: pagePath,
@@ -234,7 +244,7 @@ export const trackPageViewWithPath = (pagePath: string, pageTitle?: string) => {
     step_number: currentPath.length,
     previous_page: previousPage,
   });
-  
+
   // Track user path (as a single event with the journey)
   if (currentPath.length > 1) {
     ga4Event("user_path", {
@@ -245,7 +255,7 @@ export const trackPageViewWithPath = (pagePath: string, pageTitle?: string) => {
       entry_page: currentPath[0],
     });
   }
-  
+
   // Log for debugging
   console.log(`[GA4] User path: ${currentPath.join(" → ")}`);
 };
@@ -442,18 +452,33 @@ export const trackPurchaseComplete = (
 // ============================================
 
 export const trackError = (
-  errorType: "page_error" | "api_error" | "network_error" | "other",
+  errorType:
+    | "page_error"
+    | "api_error"
+    | "network_error"
+    | "auth_error"
+    | "validation_error"
+    | "other",
   errorMessage: string,
   errorStack?: string,
   additionalData?: Record<string, unknown>
 ) => {
-  ga4Event("error_occurred", {
+  // Enhanced error tracking with more context
+  const errorData = {
     error_type: errorType,
     error_message: errorMessage,
     error_stack: errorStack,
     page_path: window.location.pathname,
+    page_url: window.location.href,
+    user_agent: navigator.userAgent,
+    timestamp: new Date().toISOString(),
     ...additionalData,
-  });
+  };
+
+  ga4Event("error_occurred", errorData);
+
+  // Also log to console for debugging
+  console.error("[GA4 Error Tracking]", errorData);
 };
 
 export const trackAPICall = (
@@ -463,13 +488,32 @@ export const trackAPICall = (
   duration: number,
   success: boolean
 ) => {
-  ga4Event("api_call", {
+  const apiCallData = {
     api_endpoint: endpoint,
     api_method: method,
     api_status: status,
     api_duration_ms: duration,
     api_success: success,
-  });
+    page_path: window.location.pathname,
+  };
+
+  ga4Event("api_call", apiCallData);
+
+  // If API call failed, track as separate error event for better categorization
+  if (!success) {
+    const statusCategory =
+      status >= 500
+        ? "server_error"
+        : status >= 400 && status < 500
+        ? "client_error"
+        : "unknown_error";
+
+    ga4Event("api_error", {
+      ...apiCallData,
+      error_category: statusCategory,
+      error_message: `API ${method} ${endpoint} failed with status ${status}`,
+    });
+  }
 };
 
 // Track 404 errors
@@ -480,9 +524,14 @@ export const track404Error = (attemptedPath: string) => {
 };
 
 // Track network errors
-export const trackNetworkError = (url: string, errorMessage: string) => {
+export const trackNetworkError = (
+  url: string,
+  errorMessage: string,
+  additionalData?: Record<string, unknown>
+) => {
   trackError("network_error", errorMessage, undefined, {
     failed_url: url,
+    ...additionalData,
   });
 };
 

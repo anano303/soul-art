@@ -73,12 +73,21 @@ export async function fetchWithAuth(url: string, config: RequestInit = {}) {
     // Handle non-successful responses (not 2xx)
     if (!response.ok) {
       // Try to parse error details from the response
+      let errorMessage = "Unknown error";
+      let errorDetails: Record<string, unknown> = {};
+
       try {
         const contentType = response.headers.get("content-type");
 
         if (contentType && contentType.includes("application/json")) {
           const errorData = await response.json();
           console.error(`[fetchWithAuth] Error response:`, errorData);
+
+          errorDetails = {
+            error_data: JSON.stringify(errorData),
+            status_code: response.status,
+            status_text: response.statusText,
+          };
 
           // Special handling for specific error messages
           if (
@@ -87,19 +96,21 @@ export async function fetchWithAuth(url: string, config: RequestInit = {}) {
           ) {
             // For orders endpoints with this specific error, we'll pass it through
             // without treating it as an error - the component will handle it
-            throw new Error("Invalid order ID - user likely has no orders yet");
+            errorMessage = "Invalid order ID - user likely has no orders yet";
+            throw new Error(errorMessage);
           }
 
           if (errorData.message) {
-            throw new Error(
+            errorMessage =
               typeof errorData.message === "string"
                 ? errorData.message
                 : Array.isArray(errorData.message)
                 ? errorData.message.join(", ")
-                : JSON.stringify(errorData.message)
-            );
+                : JSON.stringify(errorData.message);
+            throw new Error(errorMessage);
           } else if (errorData.error) {
-            throw new Error(errorData.error);
+            errorMessage = errorData.error;
+            throw new Error(errorMessage);
           }
         } else {
           // Not JSON response
@@ -107,7 +118,13 @@ export async function fetchWithAuth(url: string, config: RequestInit = {}) {
           console.error(
             `[fetchWithAuth] Non-JSON error response: ${textError}`
           );
-          throw new Error(`შეცდომა: ${response.status} ${response.statusText}`);
+          errorMessage = `შეცდომა: ${response.status} ${response.statusText}`;
+          errorDetails = {
+            text_error: textError,
+            status_code: response.status,
+            status_text: response.statusText,
+          };
+          throw new Error(errorMessage);
         }
       } catch (parseError) {
         console.error(
@@ -115,20 +132,61 @@ export async function fetchWithAuth(url: string, config: RequestInit = {}) {
           parseError
         );
         // If we can't parse the response, use the HTTP status
-        throw new Error(`შეცდომა: ${response.status} ${response.statusText}`);
+        errorMessage = `შეცდომა: ${response.status} ${response.statusText}`;
+        errorDetails = {
+          parse_error:
+            parseError instanceof Error
+              ? parseError.message
+              : "Failed to parse",
+          status_code: response.status,
+          status_text: response.statusText,
+        };
+        throw new Error(errorMessage);
       }
 
       // Fallback error if we couldn't extract a more specific message
-      throw new Error("მოთხოვნის შესრულება ვერ მოხერხდა");
+      errorMessage = "მოთხოვნის შესრულება ვერ მოხერხდა";
+      throw new Error(errorMessage);
     }
 
     return response;
   } catch (error) {
     console.error(`[fetchWithAuth] error:`, error);
-    
-    // Track network error
-    trackNetworkError(url, error instanceof Error ? error.message : "Unknown error");
-    
+
+    // Determine error type based on error and response status
+    let errorType:
+      | "api_error"
+      | "network_error"
+      | "auth_error"
+      | "validation_error" = "network_error";
+    const errorMessage =
+      error instanceof Error ? error.message : "Unknown error";
+
+    // Check if response exists (API error) or not (network error)
+    if (error instanceof Error && errorMessage.includes("Failed to fetch")) {
+      errorType = "network_error";
+    } else if (
+      errorMessage.includes("სესია ვადაგასულია") ||
+      errorMessage.includes("unauthorized")
+    ) {
+      errorType = "auth_error";
+    } else if (
+      errorMessage.includes("Invalid") ||
+      errorMessage.includes("validation")
+    ) {
+      errorType = "validation_error";
+    } else {
+      errorType = "api_error";
+    }
+
+    // Track detailed error with proper categorization
+    trackNetworkError(url, errorMessage, {
+      error_type: errorType,
+      api_endpoint: url,
+      api_method: method,
+      error_stack: error instanceof Error ? error.stack : undefined,
+    });
+
     // Re-throw the error for handling by the caller
     throw error;
   }

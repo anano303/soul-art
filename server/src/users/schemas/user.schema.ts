@@ -61,8 +61,8 @@ export class User {
         lastSeen: { type: Date, default: Date.now },
         trusted: { type: Boolean, default: false },
         sessionId: { type: String, required: true },
-        refreshToken: { type: String, required: true }, // Per-device refresh token
-        refreshTokenJti: { type: String, required: true }, // JTI for validation
+        refreshToken: { type: String, required: false, default: null }, // Per-device refresh token (optional for migration)
+        refreshTokenJti: { type: String, required: false, default: null }, // JTI for validation (optional for migration)
         isActive: { type: Boolean, default: true }, // Can revoke individual devices
       },
     ],
@@ -74,8 +74,8 @@ export class User {
     lastSeen: Date;
     trusted: boolean;
     sessionId: string;
-    refreshToken: string;
-    refreshTokenJti: string;
+    refreshToken?: string | null;
+    refreshTokenJti?: string | null;
     isActive: boolean;
   }>;
 
@@ -175,15 +175,15 @@ export class User {
   artistGallery?: string[];
 
   // Follower system
-  @Prop({ 
-    type: [{ type: String, ref: 'User' }], 
-    default: [] 
+  @Prop({
+    type: [{ type: String, ref: 'User' }],
+    default: [],
   })
   followers?: string[]; // Array of user IDs who follow this user
 
-  @Prop({ 
-    type: [{ type: String, ref: 'User' }], 
-    default: [] 
+  @Prop({
+    type: [{ type: String, ref: 'User' }],
+    default: [],
   })
   following?: string[]; // Array of user IDs this user follows
 
