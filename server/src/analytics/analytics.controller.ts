@@ -85,8 +85,6 @@ export class AnalyticsController {
 
     const userAgent = req.headers['user-agent'] || 'Unknown';
 
-    console.log('[track-visitor] IP:', ip, '| User-Agent:', userAgent);
-
     return this.visitorService.trackVisitor({
       ip,
       userAgent,

@@ -27,9 +27,6 @@ export class VisitorTrackingService {
       const deviceInfo = this.parseUserAgent(data.userAgent);
       const geoInfo = this.getGeoLocation(data.ip);
 
-      console.log('[trackVisitor] Device:', deviceInfo);
-      console.log('[trackVisitor] Geo:', geoInfo);
-
       // Check if visitor already exists with this sessionId (within last 30 minutes)
       const thirtyMinutesAgo = new Date(Date.now() - 30 * 60 * 1000);
       const existingVisitor = await this.visitorModel.findOne({
@@ -54,7 +51,6 @@ export class VisitorTrackingService {
           existingVisitor.userId = new Types.ObjectId(data.userId);
         }
         await existingVisitor.save();
-        console.log('[trackVisitor] Updated existing visitor:', existingVisitor._id);
         return existingVisitor;
       }
 
@@ -186,8 +182,6 @@ export class VisitorTrackingService {
    * Get geolocation from IP address
    */
   private getGeoLocation(ip: string): { country: string; city: string } {
-    console.log('[getGeoLocation] Input IP:', ip);
-    
     // Handle localhost/private IPs - default to Georgia
     if (
       !ip ||
@@ -212,21 +206,17 @@ export class VisitorTrackingService {
       ip.startsWith('172.30.') ||
       ip.startsWith('172.31.')
     ) {
-      console.log('[getGeoLocation] Localhost detected, returning Georgia/Tbilisi');
       return { country: 'Georgia', city: 'Tbilisi' };
     }
 
     try {
       const geo = geoip.lookup(ip);
-      console.log('[getGeoLocation] geoip.lookup result:', JSON.stringify(geo));
       
       if (geo) {
         // geoip-lite returns country codes (GE, US, etc), convert to full names
         const countryName = this.getCountryName(geo.country);
         // If city is missing, use capital/major city as fallback
         const cityName = geo.city || this.getDefaultCity(geo.country);
-
-        console.log('[getGeoLocation] Final result:', { country: countryName, city: cityName });
         
         return {
           country: countryName,
@@ -237,7 +227,6 @@ export class VisitorTrackingService {
       this.logger.warn(`Failed to lookup IP: ${ip}`, error);
     }
 
-    console.log('[getGeoLocation] No geo data found, returning Unknown');
     return { country: 'Unknown', city: 'Unknown' };
   }
 
