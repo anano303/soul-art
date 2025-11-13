@@ -20,28 +20,20 @@ export const ga4Event = (
 ) => {
   if (typeof window !== "undefined") {
     if (!window.gtag) {
-      console.warn(`[GA4] gtag not loaded yet, event queued: ${eventName}`);
+      console.warn(`[GA4] gtag not loaded yet, queuing event: ${eventName}`);
       // Queue the event to be sent when gtag loads
       setTimeout(() => {
         if (window.gtag) {
           window.gtag("event", eventName, parameters);
-          console.log(`[GA4] Event sent (delayed): ${eventName}`, parameters);
         } else {
-          console.error(
-            `[GA4] gtag still not available after delay, event lost: ${eventName}`
-          );
+          console.error(`[GA4] gtag unavailable, event lost: ${eventName}`);
         }
       }, 1000);
       return;
     }
 
     window.gtag("event", eventName, parameters);
-    console.log(`[GA4] Event sent: ${eventName}`, parameters);
-
-    // Also log to dataLayer for verification
-    if (window.dataLayer) {
-      console.log(`[GA4] dataLayer length: ${window.dataLayer.length}`);
-    }
+    // Removed console.log for production - events are tracked in GA4
   } else {
     console.warn(`[GA4] Window not available, cannot send event: ${eventName}`);
   }
@@ -256,8 +248,7 @@ export const trackPageViewWithPath = (pagePath: string, pageTitle?: string) => {
     });
   }
 
-  // Log for debugging
-  console.log(`[GA4] User path: ${currentPath.join(" → ")}`);
+  // Path tracking removed for production - data is in GA4
 };
 
 export const trackUserJourney = (
@@ -283,7 +274,6 @@ export const startUserSession = () => {
     entry_page: window.location.pathname,
   });
 
-  console.log(`[GA4] Session started: ${sessionId}`);
   return sessionId;
 };
 
@@ -301,7 +291,6 @@ export const endUserSession = () => {
 
     sessionStorage.removeItem("ga4_session_id");
     sessionStorage.removeItem("ga4_user_path");
-    console.log(`[GA4] Session ended. Path: ${userPath.join(" → ")}`);
   }
 };
 

@@ -442,7 +442,8 @@ export class Ga4AnalyticsService {
             { name: 'eventName' },
             { name: 'pagePath' },
             { name: 'pageTitle' },
-            { name: 'unifiedScreenName' }, // Try to get more info
+            { name: 'customEvent:error_message' }, // Custom dimension for error message
+            { name: 'customEvent:error_type' }, // Custom dimension for error type
           ],
           metrics: [{ name: 'eventCount' }],
           dimensionFilter: {
@@ -466,7 +467,8 @@ export class Ga4AnalyticsService {
         const eventName = row.dimensionValues[0]?.value || 'unknown';
         const pagePath = row.dimensionValues[1]?.value || '/';
         const title = row.dimensionValues[2]?.value || 'Untitled';
-        const screenName = row.dimensionValues[3]?.value || '';
+        const errorMessage = row.dimensionValues[3]?.value || '';
+        const errorType = row.dimensionValues[4]?.value || '';
         const count = parseInt(row.metricValues[0]?.value || '0');
 
         if (count === 0) return;
@@ -485,22 +487,40 @@ export class Ga4AnalyticsService {
             endpoint = pagePath;
             break;
           case 'api_error':
-            message = `API Error on page: ${pagePath}`;
+            message = errorMessage || `API Error on page: ${pagePath}`;
             endpoint = `API call from ${pagePath}`;
             status = '500';
+            if (errorMessage) {
+              message = `API Error: ${errorMessage}`;
+            }
             break;
           case 'network_error':
-            message = `Network Error: Connection failed on ${pagePath}`;
+            message =
+              errorMessage || `Network Error: Connection failed on ${pagePath}`;
             endpoint = `Network from ${pagePath}`;
             status = 'Network';
             break;
           case 'error_occurred':
-            // For general errors, try to extract meaningful info
-            message = `JavaScript Error on ${pagePath}`;
-            if (screenName && screenName !== '(not set)') {
-              message += ` (${screenName})`;
+            // For general errors, show actual error message if available
+            if (errorMessage && errorMessage !== '(not set)') {
+              message = errorMessage;
+              // Try to extract error type for status
+              if (errorType && errorType !== '(not set)') {
+                status = errorType;
+              } else if (errorMessage.includes('TypeError')) {
+                status = 'TypeError';
+              } else if (errorMessage.includes('ReferenceError')) {
+                status = 'ReferenceError';
+              } else if (errorMessage.includes('SyntaxError')) {
+                status = 'SyntaxError';
+              } else {
+                status = 'JS Error';
+              }
+            } else {
+              message = `JavaScript Error on ${pagePath}`;
+              status = 'JS Error';
             }
-            status = 'JS Error';
+            endpoint = pagePath;
             break;
           default:
             message = `${eventName} on ${pagePath}`;

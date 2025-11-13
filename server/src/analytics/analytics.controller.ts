@@ -62,7 +62,7 @@ export class AnalyticsController {
   async trackVisitor(@Req() req: Request, @Body() body: any) {
     // Extract real client IP (handle proxies/load balancers)
     let ip = req.ip || req.socket.remoteAddress || 'Unknown';
-    
+
     // Check x-forwarded-for header (used by proxies like Cloudflare, nginx)
     const forwardedFor = req.headers['x-forwarded-for'] as string;
     if (forwardedFor) {
@@ -70,13 +70,13 @@ export class AnalyticsController {
       // We want the first IP (real client)
       ip = forwardedFor.split(',')[0].trim();
     }
-    
+
     // Check cf-connecting-ip header (Cloudflare specific)
     const cfConnectingIp = req.headers['cf-connecting-ip'] as string;
     if (cfConnectingIp) {
       ip = cfConnectingIp;
     }
-    
+
     // Check x-real-ip header (nginx/other proxies)
     const realIp = req.headers['x-real-ip'] as string;
     if (realIp) {

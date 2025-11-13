@@ -211,13 +211,13 @@ export class VisitorTrackingService {
 
     try {
       const geo = geoip.lookup(ip);
-      
+
       if (geo) {
         // geoip-lite returns country codes (GE, US, etc), convert to full names
         const countryName = this.getCountryName(geo.country);
         // If city is missing, use capital/major city as fallback
         const cityName = geo.city || this.getDefaultCity(geo.country);
-        
+
         return {
           country: countryName,
           city: cityName,

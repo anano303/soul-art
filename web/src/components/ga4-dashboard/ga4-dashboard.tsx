@@ -273,8 +273,9 @@ export default function GA4Dashboard() {
           browser: v.browser || v.os,
           location: (() => {
             const city = v.city && v.city !== "Unknown" ? v.city : null;
-            const country = v.country && v.country !== "Unknown" ? v.country : null;
-            
+            const country =
+              v.country && v.country !== "Unknown" ? v.country : null;
+
             if (city && country) {
               return `${city}, ${country}`;
             } else if (city) {

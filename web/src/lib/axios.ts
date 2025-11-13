@@ -16,7 +16,7 @@ export const axiosInstance = apiClient;
 // საჯარო მარშრუტები, რომლებიც არ საჭიროებენ ავტორიზაციას
 const publicRoutes = [
   "/auth/login",
-  "/auth/register", 
+  "/auth/register",
   "/auth/sellers-register",
   "/auth/refresh", // Don't refresh on refresh endpoint to avoid infinite loops
   "/login",
@@ -50,14 +50,10 @@ let failedQueue: Array<{
 }> = [];
 
 const processQueue = (error: Error | null, token: string | null = null) => {
-  console.log(`📋 Processing queue with ${failedQueue.length} requests. Error: ${error?.message || 'none'}, Token: ${token || 'none'}`);
-  
-  failedQueue.forEach((prom, index) => {
+  failedQueue.forEach((prom) => {
     if (error) {
-      console.log(`❌ Rejecting queued request ${index + 1}`);
       prom.reject(error);
     } else {
-      console.log(`✅ Resolving queued request ${index + 1}`);
       prom.resolve(token);
     }
   });
@@ -68,22 +64,17 @@ const processQueue = (error: Error | null, token: string | null = null) => {
 // Response interceptor with automatic token refresh
 apiClient.interceptors.response.use(
   (response) => {
-    // Log successful responses in development
-    if (process.env.NODE_ENV === 'development') {
-      console.log(`✅ API Success [${response.status}] ${response.config.method?.toUpperCase()} ${response.config.url}`);
-    }
+    // Removed success logging for production - only errors will be logged
     return response;
   },
   async (error) => {
     const originalRequest = error.config;
-    const requestUrl = error.config?.url || '';
-    
-    console.log(`🚨 Interceptor triggered for error response`);
-    
-    // Enhanced error logging
+    const requestUrl = error.config?.url || "";
+
+    // Only log errors, not every interceptor trigger
     if (error.response) {
       console.error(
-        `❌ API Error [${error.response.status}] from: ${requestUrl}`,
+        `❌ API Error [${error.response.status}] ${requestUrl}`,
         error.response.data
       );
     } else {
@@ -92,50 +83,41 @@ apiClient.interceptors.response.use(
 
     if (error.response?.status === 401 && !originalRequest._retry) {
       // Don't redirect for guest-accessible endpoints - just return the error
-      const guestAccessibleEndpoints = ['/cart/validate', '/orders'];
-      const isGuestEndpoint = guestAccessibleEndpoints.some(endpoint => requestUrl.includes(endpoint));
-      
+      const guestAccessibleEndpoints = ["/cart/validate", "/orders"];
+      const isGuestEndpoint = guestAccessibleEndpoints.some((endpoint) =>
+        requestUrl.includes(endpoint)
+      );
+
       if (isGuestEndpoint) {
         return Promise.reject(error);
       }
-      
-            // Check if this is a public route - be more specific to avoid false positives
-      const isPublicRoute = publicRoutes.some(route => {
+
+      // Check if this is a public route - be more specific to avoid false positives
+      const isPublicRoute = publicRoutes.some((route) => {
         // Special case for /auth/profile - should NOT be considered public
-        if (requestUrl.includes('/auth/profile')) {
-          console.log(`🔍 Profile endpoint detected - NOT treating as public route`);
+        if (requestUrl.includes("/auth/profile")) {
           return false;
         }
-        
-        const routePattern = route.replace(/\*/g, '.*');
+
+        const routePattern = route.replace(/\*/g, ".*");
         const regex = new RegExp(`^.*${routePattern}`);
-        const result = regex.test(requestUrl);
-        
-        console.log(`🔍 Route check: ${requestUrl} vs ${route} -> ${result}`);
-        return result;
+        return regex.test(requestUrl);
       });
 
       if (isPublicRoute) {
-        console.log(`⏭️ Skipping refresh for public route: ${requestUrl}`);
         return Promise.reject(error);
       }
 
-      console.log(`🔄 Attempting token refresh for protected route: ${requestUrl}`);
-
       if (isRefreshing) {
-        console.log(`⏳ Already refreshing token, queuing request: ${requestUrl}`);
         // If already refreshing, queue this request
         return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject });
-          console.log(`📋 Added to queue. Queue length: ${failedQueue.length}`);
         })
           .then((token) => {
-            console.log(`🔄 Retrying queued request with token: ${requestUrl}`);
             originalRequest.headers.Authorization = `Bearer ${token}`;
             return apiClient(originalRequest);
           })
           .catch((err) => {
-            console.error(`❌ Queued request failed: ${requestUrl}`, err);
             return Promise.reject(err);
           });
       }
@@ -143,21 +125,18 @@ apiClient.interceptors.response.use(
       originalRequest._retry = true;
       isRefreshing = true;
 
-      console.log(`🔄 Attempting to refresh tokens for: ${requestUrl}`);
-      
       try {
         const refreshResult = await refreshTokens();
-        console.log(`✅ Token refresh successful for: ${requestUrl}`, refreshResult);
-        
-        // With HTTP-only cookies, no need to update Authorization header
-        // Just retry the request, cookies will be included automatically
-        processQueue(null, 'refreshed');
-        
-        console.log(`🔄 Retrying original request: ${requestUrl}`);
+        processQueue(null, "refreshed");
         return apiClient(originalRequest);
       } catch (refreshError) {
-        console.error(`❌ Token refresh failed for: ${requestUrl}`, refreshError);
-        processQueue(refreshError instanceof Error ? refreshError : new Error('Token refresh failed'), null);
+        console.error(`❌ Token refresh failed, redirecting to login`);
+        processQueue(
+          refreshError instanceof Error
+            ? refreshError
+            : new Error("Token refresh failed"),
+          null
+        );
         clearUserData();
         window.location.href = "/login";
         return Promise.reject(refreshError);
@@ -170,5 +149,5 @@ apiClient.interceptors.response.use(
   }
 );
 
-// Export both names for compatibility  
+// Export both names for compatibility
 export { axiosInstance as axios };
