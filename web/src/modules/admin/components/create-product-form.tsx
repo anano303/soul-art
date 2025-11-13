@@ -158,7 +158,7 @@ export function CreateProductForm({
             : "ამ გვერდზე შესასვლელად საჭიროა ავტორიზაცია",
         variant: "destructive",
       });
-      router.push("/auth/login");
+      router.push("/login");
     } else if (user && !isSeller && user.role?.toLowerCase() !== "admin") {
       toast({
         title: language === "en" ? "Access Denied" : "წვდომა აკრძალულია",
@@ -1157,7 +1157,7 @@ export function CreateProductForm({
                 : "თქვენი სესია ამოიწურა. გთხოვთ ხელახლა შეხვიდეთ სისტემაში.",
             variant: "destructive",
           });
-          router.push("/auth/login");
+          router.push("/login");
           return;
         }
 

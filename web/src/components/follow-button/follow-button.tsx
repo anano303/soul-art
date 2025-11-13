@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useCallback, useEffect } from 'react';
-import { ChevronDown, UserPlus, UserCheck } from 'lucide-react';
-import { useUser } from '@/modules/auth/hooks/use-user';
-import { fetchWithAuth } from '@/lib/fetch-with-auth';
-import { toast } from '@/hooks/use-toast';
-import './follow-button.css';
+import { useState, useCallback, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { ChevronDown, UserPlus, UserCheck } from "lucide-react";
+import { useUser } from "@/modules/auth/hooks/use-user";
+import { fetchWithAuth } from "@/lib/fetch-with-auth";
+import { toast } from "@/hooks/use-toast";
+import "./follow-button.css";
 
 interface FollowButtonProps {
   targetUserId: string;
@@ -20,8 +21,9 @@ export function FollowButton({
   targetUserName,
   initialIsFollowing = false,
   onFollowChange,
-  className = ''
+  className = "",
 }: FollowButtonProps) {
+  const router = useRouter();
   const { user } = useUser();
   const isAuthenticated = !!user;
   const [isFollowing, setIsFollowing] = useState(initialIsFollowing);
@@ -36,11 +38,13 @@ export function FollowButton({
       }
 
       try {
-        const response = await fetchWithAuth(`/users/${targetUserId}/following-status`);
+        const response = await fetchWithAuth(
+          `/users/${targetUserId}/following-status`
+        );
         const data = await response.json();
         setIsFollowing(data.isFollowing);
       } catch (error) {
-        console.error('Failed to fetch follow status:', error);
+        console.error("Failed to fetch follow status:", error);
       }
     };
 
@@ -49,11 +53,12 @@ export function FollowButton({
 
   const handleFollow = useCallback(async () => {
     if (!isAuthenticated || !user) {
-      toast({
-        title: "Authentication Required",
-        description: "Please log in to follow artists",
-        variant: "destructive",
-      });
+      // Redirect to login with current page as redirect parameter
+      const redirect =
+        typeof window !== "undefined"
+          ? window.location.pathname + window.location.search
+          : "/";
+      router.push(`/login?redirect=${encodeURIComponent(redirect)}`);
       return;
     }
 
@@ -70,10 +75,10 @@ export function FollowButton({
 
     try {
       const endpoint = `/users/${targetUserId}/follow`;
-      
+
       if (isFollowing) {
         // Unfollow
-        await fetchWithAuth(endpoint, { method: 'DELETE' });
+        await fetchWithAuth(endpoint, { method: "DELETE" });
         setIsFollowing(false);
         onFollowChange?.(false);
         toast({
@@ -82,7 +87,7 @@ export function FollowButton({
         });
       } else {
         // Follow
-        await fetchWithAuth(endpoint, { method: 'POST' });
+        await fetchWithAuth(endpoint, { method: "POST" });
         setIsFollowing(true);
         onFollowChange?.(true);
         toast({
@@ -93,21 +98,33 @@ export function FollowButton({
     } catch (error) {
       toast({
         title: "Error",
-        description: error instanceof Error ? error.message : "Failed to update follow status",
+        description:
+          error instanceof Error
+            ? error.message
+            : "Failed to update follow status",
         variant: "destructive",
       });
     } finally {
       setIsLoading(false);
       setShowDropdown(false);
     }
-  }, [isAuthenticated, user, targetUserId, targetUserName, isFollowing, onFollowChange]);
+  }, [
+    isAuthenticated,
+    user,
+    targetUserId,
+    targetUserName,
+    isFollowing,
+    onFollowChange,
+    router,
+  ]);
 
-  if (!isAuthenticated || user?.id === targetUserId) {
+  // Don't show follow button if viewing own profile
+  if (user?.id === targetUserId) {
     return null;
   }
 
   if (!isFollowing) {
-    // Show Follow button
+    // Show Follow button (to both authenticated and non-authenticated users)
     return (
       <button
         onClick={handleFollow}
@@ -115,7 +132,7 @@ export function FollowButton({
         className={`follow-button follow-button--follow ${className}`}
       >
         <UserPlus size={16} />
-        {isLoading ? 'Following...' : 'Follow'}
+        {isLoading ? "Following..." : "Follow"}
       </button>
     );
   }
@@ -130,7 +147,7 @@ export function FollowButton({
       >
         <UserCheck size={16} />
         Following
-        <ChevronDown size={14} className={showDropdown ? 'rotated' : ''} />
+        <ChevronDown size={14} className={showDropdown ? "rotated" : ""} />
       </button>
 
       {showDropdown && (
@@ -146,7 +163,7 @@ export function FollowButton({
       )}
 
       {showDropdown && (
-        <div 
+        <div
           className="follow-dropdown-backdrop"
           onClick={() => setShowDropdown(false)}
         />
