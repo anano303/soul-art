@@ -60,12 +60,32 @@ export class AnalyticsController {
   // Visitor Tracking - Public endpoint
   @Post('track-visitor')
   async trackVisitor(@Req() req: Request, @Body() body: any) {
-    const ip =
-      req.ip ||
-      (req.headers['x-forwarded-for'] as string) ||
-      req.socket.remoteAddress ||
-      'Unknown';
+    // Extract real client IP (handle proxies/load balancers)
+    let ip = req.ip || req.socket.remoteAddress || 'Unknown';
+    
+    // Check x-forwarded-for header (used by proxies like Cloudflare, nginx)
+    const forwardedFor = req.headers['x-forwarded-for'] as string;
+    if (forwardedFor) {
+      // x-forwarded-for can be: "client, proxy1, proxy2"
+      // We want the first IP (real client)
+      ip = forwardedFor.split(',')[0].trim();
+    }
+    
+    // Check cf-connecting-ip header (Cloudflare specific)
+    const cfConnectingIp = req.headers['cf-connecting-ip'] as string;
+    if (cfConnectingIp) {
+      ip = cfConnectingIp;
+    }
+    
+    // Check x-real-ip header (nginx/other proxies)
+    const realIp = req.headers['x-real-ip'] as string;
+    if (realIp) {
+      ip = realIp;
+    }
+
     const userAgent = req.headers['user-agent'] || 'Unknown';
+
+    console.log('[track-visitor] IP:', ip, '| User-Agent:', userAgent);
 
     return this.visitorService.trackVisitor({
       ip,
