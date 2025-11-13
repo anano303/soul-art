@@ -609,7 +609,11 @@ export class UsersService {
     return this.userModel.findById(id);
   }
 
-  async getArtistProfile(identifier: string, page: number = 1, limit: number = 12) {
+  async getArtistProfile(
+    identifier: string,
+    page: number = 1,
+    limit: number = 12,
+  ) {
     if (!identifier) {
       throw new BadRequestException('Identifier is required');
     }
@@ -690,6 +694,10 @@ export class UsersService {
             this.isCloudinaryUrl(url),
           ),
           storeLogo,
+          artistRating: artist.artistRating ?? 0,
+          artistReviewsCount: artist.artistReviewsCount ?? 0,
+          artistDirectRating: artist.artistDirectRating ?? 0,
+          artistDirectReviewsCount: artist.artistDirectReviewsCount ?? 0,
         },
         products: {
           total: totalProducts,
@@ -727,7 +735,11 @@ export class UsersService {
     }
   }
 
-  async getArtistProducts(identifier: string, page: number = 1, limit: number = 12) {
+  async getArtistProducts(
+    identifier: string,
+    page: number = 1,
+    limit: number = 12,
+  ) {
     if (!identifier) {
       throw new BadRequestException('Identifier is required');
     }
@@ -2174,5 +2186,104 @@ export class UsersService {
     await user.save();
 
     return address;
+  }
+
+  /**
+   * Submit a direct review for an artist (seller)
+   */
+  async submitArtistReview(
+    userId: string,
+    artistId: string,
+    rating: number,
+    comment?: string,
+  ) {
+    // Validate rating
+    if (!rating || rating < 1 || rating > 5) {
+      throw new BadRequestException('Rating must be between 1 and 5');
+    }
+
+    // Prevent self-review
+    if (userId === artistId) {
+      throw new BadRequestException('You cannot review yourself');
+    }
+
+    // Find the artist
+    const artist = await this.userModel.findById(artistId).exec();
+    if (!artist) {
+      throw new NotFoundException('Artist not found');
+    }
+
+    if (artist.role !== Role.Seller) {
+      throw new BadRequestException('User is not an artist/seller');
+    }
+
+    // Check if user already reviewed this artist
+    const existingReviewIndex = artist.artistDirectReviews?.findIndex(
+      (review) => review.userId.toString() === userId,
+    );
+
+    if (existingReviewIndex !== undefined && existingReviewIndex >= 0) {
+      // Update existing review
+      artist.artistDirectReviews![existingReviewIndex] = {
+        userId,
+        rating,
+        comment,
+        createdAt: new Date(),
+      };
+    } else {
+      // Add new review
+      if (!artist.artistDirectReviews) {
+        artist.artistDirectReviews = [];
+      }
+      artist.artistDirectReviews.push({
+        userId,
+        rating,
+        comment,
+        createdAt: new Date(),
+      });
+    }
+
+    // Recalculate direct rating
+    const totalRating = artist.artistDirectReviews.reduce(
+      (sum, review) => sum + review.rating,
+      0,
+    );
+    artist.artistDirectRating =
+      artist.artistDirectReviews.length > 0
+        ? totalRating / artist.artistDirectReviews.length
+        : 0;
+    artist.artistDirectReviewsCount = artist.artistDirectReviews.length;
+
+    await artist.save();
+
+    this.logger.log(
+      `User ${userId} reviewed artist ${artistId} with rating ${rating}`,
+    );
+
+    return {
+      message: 'Review submitted successfully',
+      artistDirectRating: artist.artistDirectRating,
+      artistDirectReviewsCount: artist.artistDirectReviewsCount,
+    };
+  }
+
+  /**
+   * Get all direct reviews for an artist
+   */
+  async getArtistReviews(artistId: string) {
+    const artist = await this.userModel
+      .findById(artistId)
+      .populate('artistDirectReviews.userId', 'name email')
+      .exec();
+
+    if (!artist) {
+      throw new NotFoundException('Artist not found');
+    }
+
+    return {
+      artistDirectRating: artist.artistDirectRating ?? 0,
+      artistDirectReviewsCount: artist.artistDirectReviewsCount ?? 0,
+      reviews: artist.artistDirectReviews ?? [],
+    };
   }
 }

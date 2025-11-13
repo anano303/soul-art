@@ -16,10 +16,12 @@ import { useGalleryInteractions } from "@/hooks/useGalleryInteractions";
 import { AddToCartButton } from "@/modules/products/components/AddToCartButton";
 import { useCart } from "@/modules/cart/context/cart-context";
 import { useToast } from "@/hooks/use-toast";
-import { Grid3X3, ShoppingBag, Info, Plus } from "lucide-react";
+import { Grid3X3, ShoppingBag, Info, Plus, Star } from "lucide-react";
 import BrushTrail from "@/components/BrushTrail/BrushTrail";
 import { FollowButton } from "@/components/follow-button/follow-button";
 import { FollowersModal } from "@/components/followers-modal/followers-modal";
+import { ArtistReviewModal } from "./artist-review-modal";
+import { ArtistReviewsList } from "./artist-reviews-list";
 import { trackArtistProfileView } from "@/lib/ga4-analytics";
 import { fetchArtistProducts } from "@/lib/artist-api";
 import "./artist-profile-view.css";
@@ -177,6 +179,13 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
   const [followersModalOpen, setFollowersModalOpen] = useState(false);
   const [followersCount, setFollowersCount] = useState(
     artist.followersCount || 0
+  );
+  const [reviewModalOpen, setReviewModalOpen] = useState(false);
+  const [artistRating, setArtistRating] = useState(
+    artist.artistDirectRating || 0
+  );
+  const [artistReviewsCount, setArtistReviewsCount] = useState(
+    artist.artistDirectReviewsCount || 0
   );
   const heroRef = useRef<HTMLElement>(null);
 
@@ -354,6 +363,49 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
                 </div>
               </div>
 
+              {/* Artist Rating */}
+              <div className="artist-hero__rating-container">
+                {artistRating && artistRating > 0 ? (
+                  <div className="artist-hero__rating">
+                    <div className="artist-hero__stars">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <span
+                          key={star}
+                          className={`artist-hero__star ${
+                            star <= Math.round(artistRating || 0)
+                              ? "artist-hero__star--filled"
+                              : ""
+                          }`}
+                        >
+                          ★
+                        </span>
+                      ))}
+                    </div>
+                    <span className="artist-hero__rating-text">
+                      {artistRating?.toFixed(1)} ({artistReviewsCount || 0}{" "}
+                      {language === "en" ? "reviews" : "შეფასება"})
+                    </span>
+                  </div>
+                ) : null}
+
+                {/* Rate Artist Button - show if not own profile */}
+                {(!user || (user as any)?._id !== artist.id) && (
+                  <button
+                    onClick={() => {
+                      if (!user) {
+                        router.push("/auth/login");
+                        return;
+                      }
+                      setReviewModalOpen(true);
+                    }}
+                    className="artist-hero__rate-button"
+                  >
+                    <Star size={16} />
+                    {language === "en" ? "Rate Artist" : "შეაფასე მხატვარი"}
+                  </button>
+                )}
+              </div>
+
               {/* Followers stats and Follow button */}
               <div className="artist-hero__stats">
                 {isOwner ? (
@@ -442,9 +494,18 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
                 activeTab === "info" ? "artist-tabs__tab--active" : ""
               }`}
               onClick={() => setActiveTab("info")}
-              title={getInfoCopy(language)}
+              title={`${getInfoCopy(language)} ${
+                artistReviewsCount > 0
+                  ? `(${artistReviewsCount} ${
+                      language === "en" ? "reviews" : "შეფასება"
+                    })`
+                  : ""
+              }`}
             >
               <Info className="artist-tabs__tab-icon" size={24} />
+              {artistReviewsCount > 0 && (
+                <span className="artist-tabs__badge">{artistReviewsCount}</span>
+              )}
             </button>
           </div>
 
@@ -656,6 +717,14 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
                     </div>
                   )}
                 </div>
+
+                {/* Artist Reviews Section */}
+                <div className="artist-info-reviews">
+                  <ArtistReviewsList
+                    artistId={artist.id}
+                    key={`reviews-${artistReviewsCount}`}
+                  />
+                </div>
               </section>
             )}
           </div>
@@ -684,7 +753,30 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
         isOpen={followersModalOpen}
         onClose={() => setFollowersModalOpen(false)}
         artistId={artist.id}
+        artistName={artist.name}
+      />
+
+      {/* Artist Review Modal */}
+      <ArtistReviewModal
+        isOpen={reviewModalOpen}
+        onClose={() => setReviewModalOpen(false)}
+        artistId={artist.id}
         artistName={artist.storeName || artist.name}
+        onSuccess={async () => {
+          // Fetch updated rating without full page refresh
+          try {
+            const response = await fetch(
+              `${process.env.NEXT_PUBLIC_API_URL}/artists/${artist.id}/reviews`
+            );
+            if (response.ok) {
+              const data = await response.json();
+              setArtistRating(data.artistDirectRating || 0);
+              setArtistReviewsCount(data.artistDirectReviewsCount || 0);
+            }
+          } catch (error) {
+            console.error("Failed to fetch updated rating:", error);
+          }
+        }}
       />
     </div>
   );

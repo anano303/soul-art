@@ -27,6 +27,10 @@ export interface ArtistProfile {
   storeLogo?: string | null;
   followersCount?: number;
   followingCount?: number;
+  artistRating?: number;
+  artistReviewsCount?: number;
+  artistDirectRating?: number;
+  artistDirectReviewsCount?: number;
 }
 
 export interface ArtistProductSummary {
@@ -217,6 +221,10 @@ export interface User {
   artistSocials?: ArtistSocialLinks;
   artistHighlights?: string[];
   artistGallery?: string[];
+  artistRating?: number;
+  artistReviewsCount?: number;
+  artistDirectRating?: number;
+  artistDirectReviewsCount?: number;
   ownerFirstName?: string;
   ownerLastName?: string;
   identificationNumber?: string;

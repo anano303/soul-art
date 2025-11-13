@@ -240,7 +240,7 @@ export class Ga4AnalyticsService {
     // Fetch user_path events to get actual sequential journeys
     try {
       this.logger.log('Fetching user journeys from GA4...');
-      
+
       // Try getting event parameter directly instead of custom dimension
       const response = await this.analyticsDataClient.properties.runReport({
         property: `properties/${this.propertyId}`,
@@ -280,38 +280,48 @@ export class Ga4AnalyticsService {
         this.logger.warn(
           'No user_path events found with page_path parameter. Trying alternative approach...',
         );
-        
+
         // Alternative: Get all user_path events and try to extract from event data
-        const altResponse = await this.analyticsDataClient.properties.runReport({
-          property: `properties/${this.propertyId}`,
-          requestBody: {
-            dateRanges: [{ startDate: `${daysAgo}daysAgo`, endDate: 'today' }],
-            dimensions: [
-              { name: 'eventName' },
-            ],
-            metrics: [{ name: 'eventCount' }],
-            dimensionFilter: {
-              filter: {
-                fieldName: 'eventName',
-                stringFilter: { value: 'user_path' },
+        const altResponse = await this.analyticsDataClient.properties.runReport(
+          {
+            property: `properties/${this.propertyId}`,
+            requestBody: {
+              dateRanges: [
+                { startDate: `${daysAgo}daysAgo`, endDate: 'today' },
+              ],
+              dimensions: [{ name: 'eventName' }],
+              metrics: [{ name: 'eventCount' }],
+              dimensionFilter: {
+                filter: {
+                  fieldName: 'eventName',
+                  stringFilter: { value: 'user_path' },
+                },
               },
             },
           },
-        });
+        );
 
-        this.logger.log(`Alternative response - user_path events: ${altResponse.data.rows?.[0]?.metricValues?.[0]?.value || 0}`);
-        
+        this.logger.log(
+          `Alternative response - user_path events: ${altResponse.data.rows?.[0]?.metricValues?.[0]?.value || 0}`,
+        );
+
         if (!altResponse.data.rows || altResponse.data.rows.length === 0) {
-          this.logger.warn('No user_path events found at all. Users need to navigate through the site.');
+          this.logger.warn(
+            'No user_path events found at all. Users need to navigate through the site.',
+          );
           return [];
         }
 
         // If we have user_path events but can't extract paths, return a message
-        return [{
-          path: 'User path events detected but path data not available. Check GA4 configuration.',
-          count: parseInt(altResponse.data.rows[0]?.metricValues?.[0]?.value || '0'),
-          avgTime: 0,
-        }];
+        return [
+          {
+            path: 'User path events detected but path data not available. Check GA4 configuration.',
+            count: parseInt(
+              altResponse.data.rows[0]?.metricValues?.[0]?.value || '0',
+            ),
+            avgTime: 0,
+          },
+        ];
       }
 
       // Aggregate paths and count occurrences
@@ -329,7 +339,9 @@ export class Ga4AnalyticsService {
       });
 
       if (pathCounts.size === 0) {
-        this.logger.warn('All paths are "(not set)" or empty. GA4 custom dimension may not be configured properly.');
+        this.logger.warn(
+          'All paths are "(not set)" or empty. GA4 custom dimension may not be configured properly.',
+        );
         return [];
       }
 

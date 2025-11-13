@@ -34,6 +34,8 @@ import {
 import { ProductDto, FindAllProductsDto } from '../dtos/product.dto';
 import { FacebookPostingService } from '@/products/services/facebook-posting.service';
 import { YoutubeVideoResult } from './product-youtube.service';
+import { updateArtistRating } from '@/utils/artist-rating.util';
+import { User } from '@/users/schemas/user.schema';
 
 interface FindManyParams {
   keyword?: string;
@@ -63,6 +65,7 @@ export class ProductsService {
   constructor(
     @InjectModel(Product.name) private productModel: Model<ProductDocument>,
     @InjectModel(Order.name) private orderModel: Model<Order>,
+    @InjectModel(User.name) private userModel: Model<User>,
     @Inject(forwardRef(() => UsersService))
     private usersService: UsersService,
     @Optional()
@@ -363,7 +366,10 @@ export class ProductsService {
     const productQuery = this.productModel
       .find(filter)
       .sort(sort)
-      .populate('user', 'name email phoneNumber storeName artistSlug')
+      .populate(
+        'user',
+        'name email phoneNumber storeName artistSlug artistDirectRating artistDirectReviewsCount',
+      )
       // Ensure we populate all fields from category objects
       .populate('mainCategory')
       .populate('subCategory')
@@ -405,7 +411,10 @@ export class ProductsService {
 
     const product = await this.productModel
       .findById(id)
-      .populate('user', 'storeName name artistSlug')
+      .populate(
+        'user',
+        'storeName name artistSlug artistDirectRating artistDirectReviewsCount',
+      )
       .populate('mainCategory')
       .populate('subCategory');
 
@@ -456,7 +465,10 @@ export class ProductsService {
 
     const product = await this.productModel
       .findById(id)
-      .populate('user', 'storeName name artistSlug')
+      .populate(
+        'user',
+        'storeName name artistSlug artistDirectRating artistDirectReviewsCount',
+      )
       .populate('mainCategory')
       .populate('subCategory');
 
@@ -662,7 +674,12 @@ export class ProductsService {
     status: ProductStatus,
     rejectionReason?: string,
   ): Promise<ProductDocument> {
-    const product = await this.productModel.findById(id).populate('user');
+    const product = await this.productModel
+      .findById(id)
+      .populate(
+        'user',
+        'name email storeName artistSlug artistDirectRating artistDirectReviewsCount',
+      );
     if (!product) {
       throw new NotFoundException('პროდუქტი ვერ მოიძებნა');
     }
@@ -750,7 +767,10 @@ export class ProductsService {
   async findByStatus(status: ProductStatus): Promise<Product[]> {
     return this.productModel
       .find({ status })
-      .populate('user', 'name email phoneNumber storeName')
+      .populate(
+        'user',
+        'name email phoneNumber storeName artistSlug artistDirectRating artistDirectReviewsCount',
+      )
       .populate('mainCategory', 'name')
       .populate('subCategory', 'name ageGroups sizes colors')
       .sort({ createdAt: -1 })
@@ -808,6 +828,17 @@ export class ProductsService {
     product.numReviews = product.reviews.length;
 
     const updatedProduct = await product.save();
+
+    // Update artist rating after product review
+    try {
+      const artistId = product.user?.toString();
+      if (artistId) {
+        await updateArtistRating(artistId, this.productModel, this.userModel);
+      }
+    } catch (error) {
+      // Log but don't fail the review creation if rating update fails
+      console.error('Failed to update artist rating:', error);
+    }
 
     return updatedProduct;
   }

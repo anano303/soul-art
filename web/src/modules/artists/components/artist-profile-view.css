@@ -88,6 +88,29 @@
   gap: 0.75rem;
 }
 
+@media (max-width: 768px) {
+  .artist-hero__main-row {
+    flex-wrap: wrap;
+  }
+
+  .artist-hero__info {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    max-width: 100%;
+    width: auto;
+    flex: 1 1 auto;
+  }
+
+  .artist-hero__rating-container,
+  .artist-hero__stats {
+    order: 999;
+    flex-basis: 100%;
+    width: 100%;
+    margin-left: 0;
+  }
+}
+
 .artist-hero__title-row {
   display: flex;
   align-items: center;
@@ -208,6 +231,64 @@
   font-weight: 700;
   letter-spacing: 0.02em;
   margin: 0;
+}
+
+/* Artist Rating */
+.artist-hero__rating-container {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.artist-hero__rating {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.artist-hero__stars {
+  display: flex;
+  gap: 0.15rem;
+}
+
+.artist-hero__star {
+  font-size: 1.5rem;
+  color: rgba(255, 255, 255, 0.3);
+  transition: color 0.2s ease;
+}
+
+.artist-hero__star--filled {
+  color: #fbbf24;
+  text-shadow: 0 0 8px rgba(251, 191, 36, 0.5);
+}
+
+.artist-hero__rating-text {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.artist-hero__rate-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: rgba(251, 191, 36, 0.15);
+  border: 1px solid rgba(251, 191, 36, 0.3);
+  border-radius: 8px;
+  color: #fbbf24;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.artist-hero__rate-button:hover {
+  background: rgba(251, 191, 36, 0.25);
+  border-color: rgba(251, 191, 36, 0.5);
+  transform: translateY(-1px);
 }
 
 .artist-hero__location {
@@ -879,9 +960,31 @@
     padding: 1.5rem 10px;
   }
 
+  .artist-hero__main-row {
+    align-items: flex-start;
+    gap: 1.5rem;
+  }
+
   /* Responsive stats for mobile */
   .artist-hero__stats {
     gap: 1rem;
+    justify-content: flex-start;
+    margin-right: auto;
+    width: auto;
+    align-self: flex-start;
+  }
+
+  .artist-hero__rating-container {
+    justify-content: flex-start;
+    margin-right: auto;
+    width: auto;
+    align-self: flex-start;
+  }
+
+  .artist-hero__rate-button {
+    font-size: 0.85rem;
+    padding: 0.4rem 0.8rem;
+    white-space: nowrap;
   }
 
   .artist-hero__stat-number {
@@ -987,6 +1090,21 @@
   position: relative;
   border-bottom: 1px solid transparent;
   margin: 0 6rem;
+}
+
+.artist-tabs__badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: #fbbf24;
+  color: #000;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 10px;
+  min-width: 18px;
+  text-align: center;
+  line-height: 1;
 }
 
 .artist-tabs__tab:hover .artist-tabs__tab-icon {

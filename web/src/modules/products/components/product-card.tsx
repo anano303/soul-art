@@ -4,13 +4,14 @@ import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { Star } from "lucide-react";
 import "./ProductCard.css";
 import { Product } from "@/types";
 import { AddToCartButton } from "./AddToCartButton";
 import { useCart } from "@/modules/cart/context/cart-context";
 import { useToast } from "@/hooks/use-toast";
 import noPhoto from "../../../assets/nophoto.webp";
-import Star from "../../../assets/Images/star.png";
+import StarImg from "../../../assets/Images/star.png";
 import Star2 from "../../../assets/Images/startHandMade.png";
 import { useLanguage } from "@/hooks/LanguageContext";
 import { trackProductInteraction, trackAddToCart } from "@/lib/ga4-analytics";
@@ -91,6 +92,11 @@ export function ProductCard({
   const isDigitalCategory =
     rawCategoryTokens.includes("ციფრ") || rawCategoryTokens.includes("digital");
 
+  // Determine if it's paintings category (show Artist) or handmade (show Author)
+  const isPaintingsCategory =
+    rawCategoryTokens.includes("ნახატ") ||
+    rawCategoryTokens.includes("painting");
+
   // Check if product has active discount
   const hasActiveDiscount = () => {
     if (!product.discountPercentage || product.discountPercentage <= 0) {
@@ -154,7 +160,7 @@ export function ProductCard({
     try {
       // Check if item is already in cart
       const isInCart = isItemInCart(product._id);
-      
+
       if (!isInCart) {
         // Track quick purchase action
         trackAddToCart(
@@ -208,9 +214,11 @@ export function ProductCard({
       )}
 
       {/* Product image and name - clickable link to product */}
-      <Link 
+      <Link
         href={`/products/${product._id}`}
-        onClick={() => trackProductInteraction(product._id, 'click', 'product_card')}
+        onClick={() =>
+          trackProductInteraction(product._id, "click", "product_card")
+        }
       >
         <div className="product-image">
           {isDigitalCategory && categoryLabel && (
@@ -237,7 +245,7 @@ export function ProductCard({
             <div className="product-rating">
               <span style={{ marginRight: product.rating > 0 ? "5px" : "0" }}>
                 <Image
-                  src={theme === "handmade-theme" ? Star2 : Star}
+                  src={theme === "handmade-theme" ? Star2 : StarImg}
                   alt="rating star"
                   width={16}
                   height={16}
@@ -260,13 +268,17 @@ export function ProductCard({
             margin: "3px 10px",
             fontSize: "0.85rem",
             color:
-              theme === "handmade-theme"
-                ? "var(--secondary-color)"
-                : "#153754",
+              theme === "handmade-theme" ? "var(--secondary-color)" : "#153754",
           }}
         >
           <span className="author">
-            {language === "en" ? "Author: " : "ავტორი: "}
+            {isPaintingsCategory
+              ? language === "en"
+                ? "Artist: "
+                : "მხატვარი: "
+              : language === "en"
+              ? "Author: "
+              : "ავტორი: "}
           </span>
           {product.user?.artistSlug ? (
             <Link
@@ -279,6 +291,51 @@ export function ProductCard({
             </Link>
           ) : (
             product.brand
+          )}
+
+          {/* Artist Rating */}
+          {product.user && (
+            <span
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "4px",
+                marginLeft: "8px",
+                padding: "2px 6px",
+                background: "rgba(251, 191, 36, 0.1)",
+                borderRadius: "8px",
+              }}
+            >
+              <Star
+                size={13}
+                fill={
+                  product.user.artistDirectRating &&
+                  product.user.artistDirectRating > 0
+                    ? "#fbbf24"
+                    : "none"
+                }
+                stroke={
+                  product.user.artistDirectRating &&
+                  product.user.artistDirectRating > 0
+                    ? "#fbbf24"
+                    : "#94a3b8"
+                }
+                strokeWidth={2}
+              />
+              <span
+                style={{
+                  fontSize: "0.75rem",
+                  fontWeight: 600,
+                  color:
+                    product.user.artistDirectRating &&
+                    product.user.artistDirectRating > 0
+                      ? "#f59e0b"
+                      : "#64748b",
+                }}
+              >
+                {product.user.artistDirectRating?.toFixed(1) || "0"}
+              </span>
+            </span>
           )}
         </p>
       </div>

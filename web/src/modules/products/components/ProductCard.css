@@ -201,6 +201,12 @@
   flex-direction: column;
   gap: 0px;
 }
+.product-info p {
+  display: flex;
+
+  align-items: center;
+  gap: 3px;
+}
 
 .product-info-top {
   padding-top: 10px;
@@ -527,7 +533,9 @@
   color: var(--secondary-color);
 }
 
-.handmade-theme .product-card-actions .btn-add-to-cart-icon:hover:not(:disabled) {
+.handmade-theme
+  .product-card-actions
+  .btn-add-to-cart-icon:hover:not(:disabled) {
   background: var(--secondary-color);
   color: white;
   box-shadow: 0 3px 10px rgba(125, 90, 53, 0.25);

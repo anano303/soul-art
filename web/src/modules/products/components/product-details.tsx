@@ -867,6 +867,50 @@ export function ProductDetails({ product }: ProductDetailsProps) {
               {language === "en" ? "by" : "ავტორი"}
             </span>
             <span className="brand-name-text">{product.brand}</span>
+
+            {/* Artist Rating - always show if user exists */}
+            {product.user && (
+              <span
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "4px",
+                  marginLeft: "8px",
+                  padding: "2px 8px",
+                  borderRadius: "12px",
+                  backgroundColor:
+                    (product.user.artistDirectRating ?? 0) > 0
+                      ? "rgba(251, 191, 36, 0.1)"
+                      : "rgba(156, 163, 175, 0.1)",
+                }}
+              >
+                <StarIcon
+                  size={13}
+                  fill={
+                    (product.user.artistDirectRating ?? 0) > 0 ? "#fbbf24" : "none"
+                  }
+                  stroke={
+                    (product.user.artistDirectRating ?? 0) > 0 ? "#fbbf24" : "#9ca3af"
+                  }
+                  strokeWidth={2}
+                />
+                <span
+                  style={{
+                    fontSize: "0.75rem",
+                    fontWeight: 600,
+                    color:
+                      (product.user.artistDirectRating ?? 0) > 0
+                        ? "#fbbf24"
+                        : "#9ca3af",
+                  }}
+                >
+                  {(product.user.artistDirectRating ?? 0) > 0
+                    ? (product.user.artistDirectRating ?? 0).toFixed(1)
+                    : "0"}
+                </span>
+              </span>
+            )}
+
             <svg
               className="brand-arrow-icon"
               width="12"

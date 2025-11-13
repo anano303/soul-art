@@ -57,15 +57,21 @@ export class ArtistController {
   @Get('search')
   @ApiOperation({ summary: 'Search public artists by keyword' })
   @ApiResponse({ status: 200, description: 'Search results for artists' })
-  async searchArtists(@Query('q') keyword?: string, @Query('limit') limit: string = '20') {
+  async searchArtists(
+    @Query('q') keyword?: string,
+    @Query('limit') limit: string = '20',
+  ) {
     try {
       if (!keyword || keyword.trim().length < 2) {
         return [];
       }
       const parsedLimit = parseInt(limit, 10);
       const normalizedLimit = Number.isFinite(parsedLimit) ? parsedLimit : 20;
-      
-      return this.usersService.searchPublicArtists(keyword.trim(), normalizedLimit);
+
+      return this.usersService.searchPublicArtists(
+        keyword.trim(),
+        normalizedLimit,
+      );
     } catch (error) {
       console.error('Search artists error:', error);
       throw new BadRequestException('Failed to search artists');
@@ -73,22 +79,34 @@ export class ArtistController {
   }
 
   @Get('search/ranking')
-  @ApiOperation({ summary: 'Get search results with ranking for both artists and products' })
-  @ApiResponse({ status: 200, description: 'Search results with recommendation for which tab to show first' })
-  async getSearchRanking(@Query('q') keyword?: string, @Query('limit') limit: string = '20') {
+  @ApiOperation({
+    summary: 'Get search results with ranking for both artists and products',
+  })
+  @ApiResponse({
+    status: 200,
+    description:
+      'Search results with recommendation for which tab to show first',
+  })
+  async getSearchRanking(
+    @Query('q') keyword?: string,
+    @Query('limit') limit: string = '20',
+  ) {
     try {
       if (!keyword || keyword.trim().length < 2) {
         return {
           recommendedTab: 'artists',
           artists: [],
           products: [],
-          reasoning: 'Default to artists for empty search'
+          reasoning: 'Default to artists for empty search',
         };
       }
       const parsedLimit = parseInt(limit, 10);
       const normalizedLimit = Number.isFinite(parsedLimit) ? parsedLimit : 20;
-      
-      return this.usersService.getSearchRanking(keyword.trim(), normalizedLimit);
+
+      return this.usersService.getSearchRanking(
+        keyword.trim(),
+        normalizedLimit,
+      );
     } catch (error) {
       console.error('Search ranking error:', error);
       throw new BadRequestException('Failed to get search ranking');
@@ -108,10 +126,16 @@ export class ArtistController {
   ) {
     const parsedPage = parseInt(page, 10);
     const parsedLimit = parseInt(limit, 10);
-    const normalizedPage = Number.isFinite(parsedPage) && parsedPage > 0 ? parsedPage : 1;
-    const normalizedLimit = Number.isFinite(parsedLimit) && parsedLimit > 0 ? parsedLimit : 12;
-    
-    return this.usersService.getArtistProducts(identifier, normalizedPage, normalizedLimit);
+    const normalizedPage =
+      Number.isFinite(parsedPage) && parsedPage > 0 ? parsedPage : 1;
+    const normalizedLimit =
+      Number.isFinite(parsedLimit) && parsedLimit > 0 ? parsedLimit : 12;
+
+    return this.usersService.getArtistProducts(
+      identifier,
+      normalizedPage,
+      normalizedLimit,
+    );
   }
 
   @Get(':identifier')
@@ -127,10 +151,16 @@ export class ArtistController {
   ) {
     const parsedPage = parseInt(page, 10);
     const parsedLimit = parseInt(limit, 10);
-    const normalizedPage = Number.isFinite(parsedPage) && parsedPage > 0 ? parsedPage : 1;
-    const normalizedLimit = Number.isFinite(parsedLimit) && parsedLimit > 0 ? parsedLimit : 12;
-    
-    return this.usersService.getArtistProfile(identifier, normalizedPage, normalizedLimit);
+    const normalizedPage =
+      Number.isFinite(parsedPage) && parsedPage > 0 ? parsedPage : 1;
+    const normalizedLimit =
+      Number.isFinite(parsedLimit) && parsedLimit > 0 ? parsedLimit : 12;
+
+    return this.usersService.getArtistProfile(
+      identifier,
+      normalizedPage,
+      normalizedLimit,
+    );
   }
 
   @Patch('profile')
@@ -210,5 +240,35 @@ export class ArtistController {
     }
 
     return this.usersService.removeArtistGalleryImage(userId, imageUrl);
+  }
+
+  @Post(':artistId/review')
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Submit a direct review for an artist' })
+  @ApiResponse({ status: 201, description: 'Review submitted successfully' })
+  async submitArtistReview(
+    @CurrentUser() user: User,
+    @Param('artistId') artistId: string,
+    @Body() body: { rating: number; comment?: string },
+  ) {
+    const userId = (user as any)?._id?.toString();
+
+    if (!userId) {
+      throw new BadRequestException('Unable to resolve current user');
+    }
+
+    return this.usersService.submitArtistReview(
+      userId,
+      artistId,
+      body.rating,
+      body.comment,
+    );
+  }
+
+  @Get(':artistId/reviews')
+  @ApiOperation({ summary: 'Get all direct reviews for an artist' })
+  @ApiResponse({ status: 200, description: 'List of artist reviews' })
+  async getArtistReviews(@Param('artistId') artistId: string) {
+    return this.usersService.getArtistReviews(artistId);
   }
 }

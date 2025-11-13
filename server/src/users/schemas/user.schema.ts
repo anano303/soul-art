@@ -193,6 +193,38 @@ export class User {
   @Prop({ type: Number, default: 0 })
   followingCount?: number; // Cached count for performance
 
+  // Artist rating (calculated from product reviews)
+  @Prop({ type: Number, default: 0, min: 0, max: 5 })
+  artistRating?: number; // Average rating from all artist's product reviews
+
+  @Prop({ type: Number, default: 0 })
+  artistReviewsCount?: number; // Total number of reviews across all products
+
+  // Direct artist reviews (not product reviews)
+  @Prop({
+    type: [
+      {
+        userId: { type: String, required: true, ref: 'User' },
+        rating: { type: Number, required: true, min: 1, max: 5 },
+        comment: { type: String, required: false },
+        createdAt: { type: Date, default: Date.now },
+      },
+    ],
+    default: [],
+  })
+  artistDirectReviews?: Array<{
+    userId: string;
+    rating: number;
+    comment?: string;
+    createdAt: Date;
+  }>;
+
+  @Prop({ type: Number, default: 0, min: 0, max: 5 })
+  artistDirectRating?: number; // Average of direct artist reviews
+
+  @Prop({ type: Number, default: 0 })
+  artistDirectReviewsCount?: number; // Count of direct artist reviews
+
   // Shipping addresses
   @Prop({
     type: [
