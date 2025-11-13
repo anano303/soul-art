@@ -28,6 +28,7 @@ async function bootstrap() {
         'https://soulart.ge',
         'https://www.soulart.ge',
         'https://dev.soulart.ge',
+        'https://www.dev.soulart.ge',
         'https://soulart.vercel.app',
         'https://soulart.vercel.app/home',
         'https://soulart-web.vercel.app',
@@ -52,11 +53,13 @@ async function bootstrap() {
         !origin ||
         allowedOrigins.indexOf(origin) !== -1 ||
         origin.match(/localhost/) ||
-        origin.includes('.vercel.app') // Allow all Vercel domains
+        origin.includes('.vercel.app') ||
+        origin.includes('soulart.ge') // Allow all soulart.ge subdomains
       ) {
+        console.log(`✅ CORS allowed origin: ${origin || 'no-origin'}`);
         callback(null, true);
       } else {
-        console.warn(`CORS blocked origin: ${origin}`);
+        console.warn(`❌ CORS blocked origin: ${origin}`);
         callback(new Error('Not allowed by CORS'), false);
       }
     },
