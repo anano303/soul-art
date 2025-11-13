@@ -21,6 +21,7 @@ import BrushTrail from "@/components/BrushTrail/BrushTrail";
 import { FollowButton } from "@/components/follow-button/follow-button";
 import { FollowersModal } from "@/components/followers-modal/followers-modal";
 import { trackArtistProfileView } from "@/lib/ga4-analytics";
+import { fetchArtistProducts } from "@/lib/artist-api";
 import "./artist-profile-view.css";
 import "@/components/gallery-interactions.css";
 import "@/components/gallery-viewer.css";
@@ -179,12 +180,44 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
   );
   const heroRef = useRef<HTMLElement>(null);
 
+  // Products pagination state
+  const [productItems, setProductItems] = useState<ArtistProductSummary[]>(
+    products?.items ?? []
+  );
+  const [currentPage, setCurrentPage] = useState(products?.page ?? 1);
+  const [hasMoreProducts, setHasMoreProducts] = useState(
+    products?.hasMore ?? false
+  );
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+
   // Track artist profile view
   useEffect(() => {
     if (artist.artistSlug) {
       trackArtistProfileView(artist.artistSlug, "link");
     }
   }, [artist.artistSlug]);
+
+  const handleLoadMore = async () => {
+    if (isLoadingMore || !hasMoreProducts) return;
+
+    setIsLoadingMore(true);
+    try {
+      const nextPage = currentPage + 1;
+      const result = await fetchArtistProducts(
+        artist.artistSlug || artist.id,
+        nextPage,
+        12
+      );
+
+      setProductItems((prev) => [...prev, ...result.items]);
+      setCurrentPage(nextPage);
+      setHasMoreProducts(result.hasMore);
+    } catch (error) {
+      console.error("Failed to load more products:", error);
+    } finally {
+      setIsLoadingMore(false);
+    }
+  };
 
   const handleSettingsClose = useCallback(() => {
     setShowEditor(false);
@@ -197,7 +230,6 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
   const heroBackground = artist.artistCoverImage || undefined;
   const avatar = artist.storeLogo || undefined;
 
-  const productItems = products?.items ?? [];
   const galleryItems = artist.artistGallery ?? [];
 
   // Debug logging
@@ -426,15 +458,36 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
                 }`}
               >
                 {productItems.length > 0 ? (
-                  <div className="artist-grid artist-grid--products">
-                    {productItems.map((product) => (
-                      <ProductCard
-                        key={product.id}
-                        product={product}
-                        language={language}
-                      />
-                    ))}
-                  </div>
+                  <>
+                    <div className="artist-grid artist-grid--products">
+                      {productItems.map((product) => (
+                        <ProductCard
+                          key={product.id}
+                          product={product}
+                          language={language}
+                        />
+                      ))}
+                    </div>
+                    {hasMoreProducts && (
+                      <div style={{ 
+                        display: 'flex', 
+                        justifyContent: 'center', 
+                        marginTop: '2rem',
+                        marginBottom: '1rem'
+                      }}>
+                        <button
+                          onClick={handleLoadMore}
+                          disabled={isLoadingMore}
+                          className="artist-load-more-button"
+                        >
+                          {isLoadingMore 
+                            ? (language === "en" ? "Loading..." : "იტვირთება...")
+                            : (language === "en" ? "Load More" : "მეტის ჩატვირთვა")
+                          }
+                        </button>
+                      </div>
+                    )}
+                  </>
                 ) : (
                   <div className="artist-empty-state">
                     <div className="artist-empty-state__icon">🛒</div>

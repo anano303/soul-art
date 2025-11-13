@@ -609,7 +609,7 @@ export class UsersService {
     return this.userModel.findById(id);
   }
 
-  async getArtistProfile(identifier: string) {
+  async getArtistProfile(identifier: string, page: number = 1, limit: number = 12) {
     if (!identifier) {
       throw new BadRequestException('Identifier is required');
     }
@@ -632,11 +632,14 @@ export class UsersService {
         status: ProductStatus.APPROVED,
       };
 
+      const skip = (page - 1) * limit;
+
       const [products, totalProducts] = await Promise.all([
         this.productModel
           .find(productsFilter)
           .sort({ createdAt: -1 })
-          .limit(12)
+          .skip(skip)
+          .limit(limit)
           .select([
             'name',
             'price',
@@ -690,6 +693,10 @@ export class UsersService {
         },
         products: {
           total: totalProducts,
+          page,
+          limit,
+          totalPages: Math.ceil(totalProducts / limit),
+          hasMore: page * limit < totalProducts,
           items: products.map((product) => ({
             id: product._id.toString(),
             name: product.name,
@@ -714,6 +721,95 @@ export class UsersService {
     } catch (error) {
       this.logger.error(
         `Failed to load artist profile for identifier "${identifier}": ${error instanceof Error ? error.message : error}`,
+        error instanceof Error ? error.stack : undefined,
+      );
+      throw error;
+    }
+  }
+
+  async getArtistProducts(identifier: string, page: number = 1, limit: number = 12) {
+    if (!identifier) {
+      throw new BadRequestException('Identifier is required');
+    }
+
+    try {
+      const query = isValidObjectId(identifier)
+        ? { _id: new Types.ObjectId(identifier) }
+        : { artistSlug: this.normalizeArtistSlug(identifier) };
+
+      const artist = await this.userModel
+        .findOne({ ...query, role: Role.Seller })
+        .lean();
+
+      if (!artist) {
+        throw new NotFoundException('Artist not found');
+      }
+
+      const productsFilter = {
+        user: artist._id,
+        status: ProductStatus.APPROVED,
+      };
+
+      const skip = (page - 1) * limit;
+      const storeLogo = artist.storeLogoPath ?? artist.storeLogo ?? null;
+
+      const [products, totalProducts] = await Promise.all([
+        this.productModel
+          .find(productsFilter)
+          .sort({ createdAt: -1 })
+          .skip(skip)
+          .limit(limit)
+          .select([
+            'name',
+            'price',
+            'images',
+            'brand',
+            'brandLogo',
+            'rating',
+            'numReviews',
+            'description',
+            'discountPercentage',
+            'discountStartDate',
+            'discountEndDate',
+            'countInStock',
+            'deliveryType',
+            'minDeliveryDays',
+            'maxDeliveryDays',
+            'createdAt',
+          ])
+          .lean(),
+        this.productModel.countDocuments(productsFilter),
+      ]);
+
+      return {
+        total: totalProducts,
+        page,
+        limit,
+        totalPages: Math.ceil(totalProducts / limit),
+        hasMore: page * limit < totalProducts,
+        items: products.map((product) => ({
+          id: product._id.toString(),
+          name: product.name,
+          price: product.price,
+          images: product.images,
+          brand: product.brand,
+          brandLogo: product.brandLogo ?? storeLogo,
+          rating: product.rating,
+          numReviews: product.numReviews,
+          description: product.description,
+          discountPercentage: product.discountPercentage,
+          discountStartDate: product.discountStartDate ?? null,
+          discountEndDate: product.discountEndDate ?? null,
+          countInStock: product.countInStock,
+          deliveryType: product.deliveryType,
+          minDeliveryDays: product.minDeliveryDays,
+          maxDeliveryDays: product.maxDeliveryDays,
+          createdAt: (product as any).createdAt ?? null,
+        })),
+      };
+    } catch (error) {
+      this.logger.error(
+        `Failed to load artist products for identifier "${identifier}": ${error instanceof Error ? error.message : error}`,
         error instanceof Error ? error.stack : undefined,
       );
       throw error;

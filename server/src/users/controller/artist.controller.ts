@@ -95,14 +95,42 @@ export class ArtistController {
     }
   }
 
+  @Get(':identifier/products')
+  @ApiOperation({ summary: 'Fetch artist products with pagination' })
+  @ApiResponse({
+    status: 200,
+    description: 'Paginated artist products',
+  })
+  async getArtistProducts(
+    @Param('identifier') identifier: string,
+    @Query('page') page: string = '1',
+    @Query('limit') limit: string = '12',
+  ) {
+    const parsedPage = parseInt(page, 10);
+    const parsedLimit = parseInt(limit, 10);
+    const normalizedPage = Number.isFinite(parsedPage) && parsedPage > 0 ? parsedPage : 1;
+    const normalizedLimit = Number.isFinite(parsedLimit) && parsedLimit > 0 ? parsedLimit : 12;
+    
+    return this.usersService.getArtistProducts(identifier, normalizedPage, normalizedLimit);
+  }
+
   @Get(':identifier')
   @ApiOperation({ summary: 'Fetch artist profile by slug or ID' })
   @ApiResponse({
     status: 200,
     description: 'Artist profile with latest products',
   })
-  async getArtistProfile(@Param('identifier') identifier: string) {
-    return this.usersService.getArtistProfile(identifier);
+  async getArtistProfile(
+    @Param('identifier') identifier: string,
+    @Query('page') page: string = '1',
+    @Query('limit') limit: string = '12',
+  ) {
+    const parsedPage = parseInt(page, 10);
+    const parsedLimit = parseInt(limit, 10);
+    const normalizedPage = Number.isFinite(parsedPage) && parsedPage > 0 ? parsedPage : 1;
+    const normalizedLimit = Number.isFinite(parsedLimit) && parsedLimit > 0 ? parsedLimit : 12;
+    
+    return this.usersService.getArtistProfile(identifier, normalizedPage, normalizedLimit);
   }
 
   @Patch('profile')
