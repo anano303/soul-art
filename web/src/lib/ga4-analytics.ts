@@ -241,7 +241,7 @@ export const trackPageViewWithPath = (pagePath: string, pageTitle?: string) => {
   if (currentPath.length > 1) {
     ga4Event("user_path", {
       session_id: sessionId,
-      path: currentPath.join(" → "),
+      page_path: currentPath.join(" → "), // შეესაბამება GA4-ში არსებულ page_path dimension-ს
       path_length: currentPath.length,
       current_page: pagePath,
       entry_page: currentPath[0],

@@ -245,7 +245,7 @@ export class Ga4AnalyticsService {
           dateRanges: [{ startDate: `${daysAgo}daysAgo`, endDate: 'today' }],
           dimensions: [
             { name: 'eventName' },
-            { name: 'customEvent:path' }, // Custom parameter containing the path
+            { name: 'customEvent:page_path' }, // თქვენს GA4-ში არსებული page_path dimension
           ],
           metrics: [{ name: 'eventCount' }],
           dimensionFilter: {
@@ -442,8 +442,8 @@ export class Ga4AnalyticsService {
             { name: 'eventName' },
             { name: 'pagePath' },
             { name: 'pageTitle' },
-            { name: 'customEvent:error_message' }, // Custom dimension for error message
-            { name: 'customEvent:error_type' }, // Custom dimension for error type
+            { name: 'customEvent:error_message' }, // თქვენი GA4-ში არსებული dimension
+            { name: 'customEvent:error_type' }, // თქვენი GA4-ში არსებული dimension
           ],
           metrics: [{ name: 'eventCount' }],
           dimensionFilter: {
