@@ -393,7 +393,15 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
                   <button
                     onClick={() => {
                       if (!user) {
-                        router.push("/auth/login");
+                        // App uses a top-level /login route (Next "(auth)" is a route group),
+                        // redirect to /login and preserve current path so user returns after signing in.
+                        const redirect =
+                          typeof window !== "undefined"
+                            ? window.location.pathname + window.location.search
+                            : "/";
+                        router.push(`/login?redirect=${encodeURIComponent(
+                          redirect
+                        )}`);
                         return;
                       }
                       setReviewModalOpen(true);
