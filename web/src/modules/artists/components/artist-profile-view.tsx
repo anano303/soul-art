@@ -469,21 +469,26 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
                       ))}
                     </div>
                     {hasMoreProducts && (
-                      <div style={{ 
-                        display: 'flex', 
-                        justifyContent: 'center', 
-                        marginTop: '2rem',
-                        marginBottom: '1rem'
-                      }}>
+                      <div
+                        style={{
+                          display: "flex",
+                          justifyContent: "center",
+                          marginTop: "2rem",
+                          marginBottom: "1rem",
+                        }}
+                      >
                         <button
                           onClick={handleLoadMore}
                           disabled={isLoadingMore}
                           className="artist-load-more-button"
                         >
-                          {isLoadingMore 
-                            ? (language === "en" ? "Loading..." : "იტვირთება...")
-                            : (language === "en" ? "Load More" : "მეტის ჩატვირთვა")
-                          }
+                          {isLoadingMore
+                            ? language === "en"
+                              ? "Loading..."
+                              : "იტვირთება..."
+                            : language === "en"
+                            ? "Load More"
+                            : "მეტის ჩატვირთვა"}
                         </button>
                       </div>
                     )}
@@ -811,26 +816,28 @@ function ProductCard({ product, language }: ProductCardProps) {
               -{discountPercentage}%
             </div>
           )}
-          <div className="artist-product-card__overlay">
-            <div className="artist-product-card__price-overlay">
-              {discountPercentage > 0 ? (
-                <>
-                  <span className="artist-product-card__original-price">
-                    {formatPrice(product.price, language)}
-                  </span>
-                  <span className="artist-product-card__discounted-price">
-                    {formatPrice(
-                      product.price * (1 - discountPercentage / 100),
-                      language
-                    )}
-                  </span>
-                </>
-              ) : (
-                <span className="artist-product-card__price">
+          {/* Price - always visible */}
+          <div className="artist-product-card__price-overlay">
+            {discountPercentage > 0 ? (
+              <>
+                <span className="artist-product-card__original-price">
                   {formatPrice(product.price, language)}
                 </span>
-              )}
-            </div>
+                <span className="artist-product-card__discounted-price">
+                  {formatPrice(
+                    product.price * (1 - discountPercentage / 100),
+                    language
+                  )}
+                </span>
+              </>
+            ) : (
+              <span className="artist-product-card__price">
+                {formatPrice(product.price, language)}
+              </span>
+            )}
+          </div>
+          {/* Hover overlay with description and actions */}
+          <div className="artist-product-card__overlay">
             {product.description && (
               <div className="artist-product-card__description">
                 {product.description}
