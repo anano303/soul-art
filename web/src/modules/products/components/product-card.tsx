@@ -293,8 +293,8 @@ export function ProductCard({
             product.brand
           )}
 
-          {/* Artist Rating */}
-          {product.user && (
+          {/* Artist Rating - Temporarily disabled */}
+          {/* {product.user && (
             <span
               style={{
                 display: "inline-flex",
@@ -336,7 +336,7 @@ export function ProductCard({
                 {product.user.artistDirectRating?.toFixed(1) || "0"}
               </span>
             </span>
-          )}
+          )} */}
         </p>
       </div>
 
