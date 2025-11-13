@@ -239,31 +239,79 @@ export class Ga4AnalyticsService {
   private async getUserJourneys(daysAgo: number): Promise<UserJourney[]> {
     // Fetch user_path events to get actual sequential journeys
     try {
+      this.logger.log('Fetching user journeys from GA4...');
+      
+      // Try getting event parameter directly instead of custom dimension
       const response = await this.analyticsDataClient.properties.runReport({
         property: `properties/${this.propertyId}`,
         requestBody: {
           dateRanges: [{ startDate: `${daysAgo}daysAgo`, endDate: 'today' }],
           dimensions: [
             { name: 'eventName' },
-            { name: 'customEvent:page_path' }, // თქვენს GA4-ში არსებული page_path dimension
+            { name: 'eventParameterValue' }, // Get event parameter value
           ],
           metrics: [{ name: 'eventCount' }],
           dimensionFilter: {
-            filter: {
-              fieldName: 'eventName',
-              stringFilter: { value: 'user_path' },
+            andGroup: {
+              expressions: [
+                {
+                  filter: {
+                    fieldName: 'eventName',
+                    stringFilter: { value: 'user_path' },
+                  },
+                },
+                {
+                  filter: {
+                    fieldName: 'eventParameterKey',
+                    stringFilter: { value: 'page_path' },
+                  },
+                },
+              ],
             },
           },
           orderBys: [{ metric: { metricName: 'eventCount' }, desc: true }],
-          limit: 20,
+          limit: 50,
         },
       });
 
+      this.logger.log(`GA4 Response rows: ${response.data.rows?.length || 0}`);
+
       if (!response.data.rows || response.data.rows.length === 0) {
         this.logger.warn(
-          'No user_path events found yet. Users need to navigate through the site.',
+          'No user_path events found with page_path parameter. Trying alternative approach...',
         );
-        return [];
+        
+        // Alternative: Get all user_path events and try to extract from event data
+        const altResponse = await this.analyticsDataClient.properties.runReport({
+          property: `properties/${this.propertyId}`,
+          requestBody: {
+            dateRanges: [{ startDate: `${daysAgo}daysAgo`, endDate: 'today' }],
+            dimensions: [
+              { name: 'eventName' },
+            ],
+            metrics: [{ name: 'eventCount' }],
+            dimensionFilter: {
+              filter: {
+                fieldName: 'eventName',
+                stringFilter: { value: 'user_path' },
+              },
+            },
+          },
+        });
+
+        this.logger.log(`Alternative response - user_path events: ${altResponse.data.rows?.[0]?.metricValues?.[0]?.value || 0}`);
+        
+        if (!altResponse.data.rows || altResponse.data.rows.length === 0) {
+          this.logger.warn('No user_path events found at all. Users need to navigate through the site.');
+          return [];
+        }
+
+        // If we have user_path events but can't extract paths, return a message
+        return [{
+          path: 'User path events detected but path data not available. Check GA4 configuration.',
+          count: parseInt(altResponse.data.rows[0]?.metricValues?.[0]?.value || '0'),
+          avgTime: 0,
+        }];
       }
 
       // Aggregate paths and count occurrences
@@ -273,10 +321,17 @@ export class Ga4AnalyticsService {
         const path = row.dimensionValues[1]?.value || '';
         const count = parseInt(row.metricValues[0]?.value || '0');
 
-        if (path && path !== '(not set)') {
+        this.logger.debug(`Path: ${path}, Count: ${count}`);
+
+        if (path && path !== '(not set)' && path.trim() !== '') {
           pathCounts.set(path, (pathCounts.get(path) || 0) + count);
         }
       });
+
+      if (pathCounts.size === 0) {
+        this.logger.warn('All paths are "(not set)" or empty. GA4 custom dimension may not be configured properly.');
+        return [];
+      }
 
       // Convert to array and sort by count
       const journeys = Array.from(pathCounts.entries())
