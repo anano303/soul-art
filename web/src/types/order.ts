@@ -17,7 +17,13 @@ export interface OrderItem {
 
 export interface Order {
   _id: string;
-  user: User;
+  user?: User;
+  isGuestOrder?: boolean;
+  guestInfo?: {
+    email: string;
+    phoneNumber: string;
+    fullName: string;
+  };
   orderItems: OrderItem[];
   shippingDetails: ShippingDetails;
   paymentMethod: string;

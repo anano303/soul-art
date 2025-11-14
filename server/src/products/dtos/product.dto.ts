@@ -224,6 +224,10 @@ export class ProductDto {
   @IsOptional()
   brandLogoUrl?: string;
 
+  @IsBoolean()
+  @IsOptional()
+  addToPortfolio?: boolean;
+
   // Add the missing property for existing images
   @IsString()
   @IsOptional()

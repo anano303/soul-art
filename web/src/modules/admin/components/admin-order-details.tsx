@@ -26,7 +26,7 @@ export function AdminOrderDetails({ order }: AdminOrderDetailsProps) {
 
   // Debug: Log order shipping details
   console.log("Order shipping details:", order.shippingDetails);
-  console.log("Order user phone:", order.user.phoneNumber);
+  console.log("Order user phone:", order.user?.phoneNumber);
 
   // Check user role to determine what information to show
   const userData = getUserData();
@@ -191,10 +191,10 @@ export function AdminOrderDetails({ order }: AdminOrderDetailsProps) {
           },
           credentials: "include",
           body: JSON.stringify({
-            userId: order.user._id,
+            userId: order.user?._id,
             orderId: order._id,
             status: "delivered",
-            customerName: order.user.ownerFirstName || order.user.email,
+            customerName: order.isGuestOrder ? order.guestInfo?.fullName : (order.user?.ownerFirstName || order.user?.email),
             message: `🎉 თქვენი შეკვეთა #${order._id.slice(
               -6
             )} წარმატებით მიღებულია!`,
@@ -372,18 +372,21 @@ export function AdminOrderDetails({ order }: AdminOrderDetailsProps) {
           <div className="card">
             <h2>{t("adminOrders.shipping")}</h2>
             <p>
-              <strong>{t("adminOrders.customer")}:</strong> {order.user.name}
+              <strong>{t("adminOrders.customer")}:</strong> {order.isGuestOrder ? order.guestInfo?.fullName : order.user?.name || "Guest"}
             </p>
-            <p>
-              <strong>Email:</strong> {order.user.email}
-            </p>
-            {order.user.phoneNumber && (
+            {(order.user?.email || order.guestInfo?.email) && (
+              <p>
+                <strong>Email:</strong> {order.user?.email || order.guestInfo?.email}
+              </p>
+            )}
+            {(order.user?.phoneNumber || order.shippingDetails.phoneNumber) && (
               <p>
                 <strong>{t("adminOrders.phone")}:</strong>{" "}
-                {order.user.phoneNumber}
+                {order.user?.phoneNumber || order.shippingDetails.phoneNumber}
               </p>
             )}
             {order.shippingDetails.phoneNumber &&
+              order.user?.phoneNumber &&
               order.shippingDetails.phoneNumber !== order.user.phoneNumber && (
                 <p>
                   <strong>{t("adminOrders.shippingPhone")}:</strong>{" "}

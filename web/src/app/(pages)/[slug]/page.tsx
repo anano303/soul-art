@@ -20,8 +20,8 @@ async function fetchArtistProfile(
   const response = await fetch(
     `${API_BASE}/artists/${encodeURIComponent(slug)}`,
     {
-      next: { revalidate: 30 }, // Cache for 30 seconds instead of 60
-      cache: "force-cache",
+      next: { revalidate: 0 }, // Disable cache - always fetch fresh data
+      cache: "no-store",
     }
   );
 

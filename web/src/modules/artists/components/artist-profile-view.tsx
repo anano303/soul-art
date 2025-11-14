@@ -1,10 +1,16 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useMemo, useState, useCallback, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
-import { ArtistProfileResponse, ArtistProductSummary, User } from "@/types";
+import {
+  ArtistProfileResponse,
+  ArtistProductSummary,
+  PortfolioImageSummary,
+  User,
+} from "@/types";
 import { useLanguage } from "@/hooks/LanguageContext";
 import { useUser } from "@/modules/auth/hooks/use-user";
 import { CloudinaryImage } from "@/components/cloudinary-image";
@@ -16,7 +22,7 @@ import { useGalleryInteractions } from "@/hooks/useGalleryInteractions";
 import { AddToCartButton } from "@/modules/products/components/AddToCartButton";
 import { useCart } from "@/modules/cart/context/cart-context";
 import { useToast } from "@/hooks/use-toast";
-import { Grid3X3, ShoppingBag, Info, Plus, Star } from "lucide-react";
+import { Grid3X3, ShoppingBag, Info, Plus, Upload, Star } from "lucide-react";
 import BrushTrail from "@/components/BrushTrail/BrushTrail";
 import { FollowButton } from "@/components/follow-button/follow-button";
 import { FollowersModal } from "@/components/followers-modal/followers-modal";
@@ -169,13 +175,14 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
   const { user } = useUser();
   const router = useRouter();
   const queryClient = useQueryClient();
-  const { artist, products } = data;
+  const { artist, products, portfolio } = data;
   const [showEditor, setShowEditor] = useState(false);
   const [activeTab, setActiveTab] = useState<"sale" | "gallery" | "info">(
     "sale"
   );
   const [viewerOpen, setViewerOpen] = useState(false);
   const [viewerIndex, setViewerIndex] = useState(0);
+  const [viewerImageIndex, setViewerImageIndex] = useState(0);
   const [followersModalOpen, setFollowersModalOpen] = useState(false);
   const [followersCount, setFollowersCount] = useState(
     artist.followersCount || 0
@@ -187,7 +194,13 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
   const [artistReviewsCount, setArtistReviewsCount] = useState(
     artist.artistDirectReviewsCount || 0
   );
+  const [uploadModalOpen, setUploadModalOpen] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [caption, setCaption] = useState("");
   const heroRef = useRef<HTMLElement>(null);
+  const { toast } = useToast();
 
   // Products pagination state
   const [productItems, setProductItems] = useState<ArtistProductSummary[]>(
@@ -227,6 +240,12 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
       setIsLoadingMore(false);
     }
   };
+  // Handle hash navigation for portfolio section
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.location.hash === '#portfolio') {
+      setActiveTab('gallery');
+    }
+  }, []);
 
   const handleSettingsClose = useCallback(() => {
     setShowEditor(false);
@@ -239,14 +258,114 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
   const heroBackground = artist.artistCoverImage || undefined;
   const avatar = artist.storeLogo || undefined;
 
-  const galleryItems = artist.artistGallery ?? [];
+  const portfolioPosts = useMemo(
+    () => portfolio?.posts ?? [],
+    [portfolio]
+  );
 
-  // Debug logging
-  console.log("Gallery viewer state:", {
-    viewerOpen,
-    viewerIndex,
-    galleryItemsCount: galleryItems.length,
-  });
+  const { galleryPosts, galleryItems } = useMemo(() => {
+    type GalleryPost = {
+      postId: string | null;
+      productId: string | null;
+      caption: string | null;
+      hideBuyButton: boolean;
+      isSold: boolean;
+      isFeatured: boolean;
+      images: PortfolioImageSummary[];
+    };
+
+    const sanitizeImages = (images?: PortfolioImageSummary[] | null) =>
+      (images ?? [])
+        .filter(
+          (image) =>
+            image && typeof image.url === "string" && image.url.trim().length > 0
+        )
+        .map((image, index) => ({
+          ...image,
+          url: image.url.trim(),
+          order: typeof image.order === "number" ? image.order : index,
+        }))
+        .sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+
+    const posts: GalleryPost[] = [];
+
+    if (Array.isArray(portfolioPosts) && portfolioPosts.length > 0) {
+      portfolioPosts.forEach((post) => {
+        const images = sanitizeImages(post.images);
+        if (!images.length) {
+          return;
+        }
+
+        // Derive state from populated product if available
+        let hideBuyButton = post.hideBuyButton ?? false;
+        let isSold = post.isSold ?? false;
+        let actualProductId: string | null = typeof post.productId === 'string' ? post.productId : null;
+
+        if (post.productId && typeof post.productId === 'object') {
+          const product = post.productId;
+          actualProductId = product._id;
+          
+          // Check if product has stock
+          const hasStock = (() => {
+            if (Array.isArray(product.variants) && product.variants.length > 0) {
+              return product.variants.some(v => (v.stock ?? 0) > 0);
+            }
+            return (product.countInStock ?? 0) > 0;
+          })();
+
+          isSold = !hasStock;
+          hideBuyButton = product.status !== 'APPROVED' || !hasStock;
+        }
+
+        posts.push({
+          postId: post.id ?? null,
+          productId: actualProductId,
+          caption:
+            typeof post.caption === "string" && post.caption.trim().length > 0
+              ? post.caption.trim()
+              : null,
+          hideBuyButton,
+          isSold,
+          isFeatured: post.isFeatured ?? false,
+          images,
+        });
+      });
+    }
+
+    if (posts.length === 0) {
+      (artist.artistGallery ?? [])
+        .filter((url) => typeof url === "string" && url.trim().length > 0)
+        .forEach((url, index) => {
+          posts.push({
+            postId: null,
+            productId: null,
+            caption: null,
+            hideBuyButton: true,
+            isSold: false,
+            isFeatured: false,
+            images: [
+              {
+                url: url.trim(),
+                order: index,
+                metadata: { source: "legacy-gallery" },
+              } as PortfolioImageSummary,
+            ],
+          });
+        });
+    }
+
+    const imageUrls: string[] = [];
+    posts.forEach((post) => {
+      post.images.forEach((image) => {
+        imageUrls.push(image.url);
+      });
+    });
+
+    return {
+      galleryPosts: posts,
+      galleryItems: imageUrls,
+    };
+  }, [portfolioPosts, artist.artistGallery]);
 
   const anySocial = socialOrder.some(({ key }) => artist.artistSocials?.[key]);
   const isOwner = user?._id === artist.id;
@@ -389,7 +508,7 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
                 ) : null}
 
                 {/* Rate Artist Button - show if not own profile */}
-                {(!user || (user as any)?._id !== artist.id) && (
+                {(!user || user?._id !== artist.id) && (
                   <button
                     onClick={() => {
                       if (!user) {
@@ -491,7 +610,10 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
               className={`artist-tabs__tab ${
                 activeTab === "gallery" ? "artist-tabs__tab--active" : ""
               }`}
-              onClick={() => setActiveTab("gallery")}
+              onClick={() => {
+                setActiveTab("gallery");
+                window.history.pushState(null, '', '#portfolio');
+              }}
               title={getGalleryCopy(language)}
             >
               <Grid3X3 className="artist-tabs__tab-icon" size={24} />
@@ -574,28 +696,61 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
             {activeTab === "gallery" && (
               <section
                 className={`artist-tab-panel ${
-                  galleryItems.length > 0
+                  galleryPosts.length > 0
                     ? "artist-tab-panel--gallery"
                     : "artist-tab-panel--empty"
                 }`}
+                id="portfolio"
               >
-                {galleryItems.length > 0 ? (
+                {isOwner && galleryPosts.length > 0 && (
+                  <div style={{ margin: '10px', display: 'flex', justifyContent: 'center' }}>
+                    <button
+                      type="button"
+                      onClick={() => setUploadModalOpen(true)}
+                      className="artist-add-product-button"
+                      style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}
+                    >
+                      <Upload size={18} />
+                      {language === "en" ? "Add Portfolio Image" : "დაამატე პორტფოლიოში"}
+                    </button>
+                  </div>
+                )}
+                {galleryPosts.length > 0 ? (
                   <div className="artist-grid artist-grid--gallery">
-                    {galleryItems.map((url, index) => {
-                      const stats = getStatsForImage(url);
+                    {galleryPosts.map((post, index) => {
+                      const coverImage = post.images[0];
+                      if (!coverImage?.url) {
+                        return null;
+                      }
+
+                      const stats = getStatsForImage(coverImage.url);
+                      const isSellable =
+                        Boolean(post.productId) &&
+                        !post.hideBuyButton &&
+                        !post.isSold;
+                      const badgeText = post.isSold
+                        ? language === "en"
+                          ? "Sold out"
+                          : "გაყიდულია"
+                        : language === "en"
+                        ? "Not for sale"
+                        : "არ იყიდება";
+                      const showBadge = !isSellable || !post.productId;
                       return (
                         <div
-                          key={url}
+                          key={`${post.postId ?? coverImage.url}-${
+                            coverImage.order ?? index
+                          }`}
                           className="artist-gallery-card"
                           onClick={() => {
-                            console.log("Gallery image clicked, index:", index);
                             setViewerIndex(index);
+                            setViewerImageIndex(0);
                             setViewerOpen(true);
                           }}
                           style={{ cursor: "pointer" }}
                         >
                           <CloudinaryImage
-                            src={url}
+                            src={coverImage.url}
                             alt={`Gallery item by ${
                               artist.storeName || artist.name
                             }`}
@@ -604,22 +759,85 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
                             className="artist-gallery-card__image"
                           />
                           <div className="artist-gallery-card__overlay">
-                            <span className="artist-gallery-card__badge">
-                              {language === "en"
-                                ? "Not for sale"
-                                : "არ იყიდება"}
-                            </span>
+                            {post.isFeatured && (
+                              <span className="artist-gallery-card__featured-badge">
+                                <Star size={16} fill="currentColor" />
+                              </span>
+                            )}
+                            {showBadge && (
+                              <span className="artist-gallery-card__badge">
+                                {badgeText}
+                              </span>
+                            )}
                             <div
                               className="artist-gallery-card__interactions"
                               onClick={(e) => e.stopPropagation()}
                             >
+                              {isOwner && post.postId && (
+                                <button
+                                  type="button"
+                                  className={`artist-gallery-card__action ${post.isFeatured ? 'artist-gallery-card__action--featured' : ''}`}
+                                  onClick={async (e) => {
+                                    e.stopPropagation();
+                                    try {
+                                      const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/v1';
+                                      const response = await fetch(`${API_BASE}/portfolio/${post.postId}/toggle-featured`, {
+                                        method: 'PUT',
+                                        credentials: 'include',
+                                        headers: {
+                                          'Content-Type': 'application/json',
+                                        },
+                                      });
+                                      
+                                      if (response.ok) {
+                                        // Optimistically update UI by refreshing
+                                        router.refresh();
+                                        
+                                        // Also show a quick toast feedback
+                                        toast({
+                                          title: post.isFeatured 
+                                            ? (language === "en" ? "Removed from featured" : "წაიშალა რჩეულებიდან")
+                                            : (language === "en" ? "Marked as featured" : "მონიშნულია როგორც რჩეული"),
+                                        });
+                                      } else {
+                                        throw new Error('Failed to toggle featured');
+                                      }
+                                    } catch (error) {
+                                      console.error('Failed to toggle featured:', error);
+                                      toast({
+                                        title: language === "en" ? "Error" : "შეცდომა",
+                                        description: language === "en" ? "Failed to update featured status" : "რჩეული სტატუსის განახლება ვერ მოხერხდა",
+                                        variant: "destructive",
+                                      });
+                                    }
+                                  }}
+                                  aria-label={post.isFeatured ? (language === "en" ? "Remove from featured" : "წაშალე რჩეულებიდან") : (language === "en" ? "Mark as featured" : "მონიშნე როგორც რჩეული")}
+                                  title={post.isFeatured ? (language === "en" ? "Remove from featured" : "წაშალე რჩეულებიდან") : (language === "en" ? "Mark as featured" : "მონიშნე როგორც რჩეული")}
+                                >
+                                  <Star size={16} fill={post.isFeatured ? "currentColor" : "none"} />
+                                </button>
+                              )}
+                              {isSellable && post.productId && (
+                                <Link
+                                  href={`/products/${post.productId}`}
+                                  className="artist-gallery-card__action"
+                                  onClick={(event) => event.stopPropagation()}
+                                  aria-label={
+                                    language === "en"
+                                      ? "View listing"
+                                      : "ნახე ლისტინგი"
+                                  }
+                                >
+                                  <ShoppingBag size={16} />
+                                </Link>
+                              )}
                               <GalleryLikeButton
                                 artistId={artist.id}
-                                imageUrl={url}
+                                imageUrl={coverImage.url}
                                 initialLikesCount={stats.likesCount}
                                 initialIsLiked={stats.isLikedByUser}
                                 onLikeToggle={(isLiked, likesCount) => {
-                                  updateStats(url, {
+                                  updateStats(coverImage.url, {
                                     isLikedByUser: isLiked,
                                     likesCount,
                                   });
@@ -627,10 +845,12 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
                               />
                               <GalleryComments
                                 artistId={artist.id}
-                                imageUrl={url}
+                                imageUrl={coverImage.url}
                                 initialCommentsCount={stats.commentsCount}
                                 onCommentsCountChange={(commentsCount) => {
-                                  updateStats(url, { commentsCount });
+                                  updateStats(coverImage.url, {
+                                    commentsCount,
+                                  });
                                 }}
                               />
                             </div>
@@ -741,8 +961,9 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
 
       {/* Gallery Viewer Modal */}
       <GalleryViewer
-        images={galleryItems}
-        currentIndex={viewerIndex}
+        posts={galleryPosts}
+        currentPostIndex={viewerIndex}
+        currentImageIndex={viewerImageIndex}
         artist={{
           id: artist.id,
           name: artist.name,
@@ -751,9 +972,52 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
         }}
         isOpen={viewerOpen}
         onClose={() => setViewerOpen(false)}
-        onIndexChange={setViewerIndex}
+        onPostIndexChange={(postIndex, imageIndex = 0) => {
+          setViewerIndex(postIndex);
+          setViewerImageIndex(imageIndex);
+        }}
+        onImageIndexChange={setViewerImageIndex}
         getStatsForImage={getStatsForImage}
         updateStats={updateStats}
+        onPostDelete={async (postId) => {
+          const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/v1';
+          const response = await fetch(`${API_BASE}/portfolio/${postId}`, {
+            method: 'DELETE',
+            credentials: 'include',
+            headers: {
+              'Cache-Control': 'no-cache',
+            },
+          });
+          if (!response.ok) {
+            const error = await response.text();
+            throw new Error(error || 'Failed to delete post');
+          }
+          
+          // Close the viewer first
+          setViewerOpen(false);
+          
+          // Use Next.js router refresh to invalidate server cache and refetch
+          router.refresh();
+        }}
+        onPostEdit={async (postId, newCaption) => {
+          const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/v1';
+          const response = await fetch(`${API_BASE}/portfolio/${postId}`, {
+            method: 'PUT',
+            headers: { 
+              'Content-Type': 'application/json',
+              'Cache-Control': 'no-cache',
+            },
+            credentials: 'include',
+            body: JSON.stringify({ caption: newCaption }),
+          });
+          if (!response.ok) {
+            const error = await response.text();
+            throw new Error(error || 'Failed to update post');
+          }
+          
+          // Use Next.js router refresh to invalidate server cache and refetch
+          router.refresh();
+        }}
       />
 
       {/* Followers Modal */}
@@ -786,6 +1050,219 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
           }
         }}
       />
+
+      {/* Portfolio Upload Modal */}
+      {uploadModalOpen && (
+        <div className="modal-overlay" onClick={() => {
+          setUploadModalOpen(false);
+          setSelectedImage(null);
+          setImagePreview(null);
+          setCaption("");
+        }}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>{language === "en" ? "Add Portfolio Image" : "დაამატე პორტფოლიოში"}</h2>
+              <button
+                type="button"
+                className="modal-close"
+                onClick={() => {
+                  setUploadModalOpen(false);
+                  setSelectedImage(null);
+                  setImagePreview(null);
+                  setCaption("");
+                }}
+              >
+                ×
+              </button>
+            </div>
+            <div className="modal-body">
+              <div className="upload-form">
+                {/* Image Upload Area */}
+                <div className="upload-area">
+                  <input
+                    type="file"
+                    id="portfolio-image"
+                    accept="image/*"
+                    style={{ display: 'none' }}
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        setSelectedImage(file);
+                        const reader = new FileReader();
+                        reader.onloadend = () => {
+                          setImagePreview(reader.result as string);
+                        };
+                        reader.readAsDataURL(file);
+                      }
+                    }}
+                  />
+                  {imagePreview ? (
+                    <div className="image-preview-container">
+                      <Image src={imagePreview} alt="Preview" className="image-preview" width={600} height={600} unoptimized />
+                      <button
+                        type="button"
+                        className="change-image-button"
+                        onClick={() => document.getElementById('portfolio-image')?.click()}
+                      >
+                        {language === "en" ? "Change Image" : "შეცვალე სურათი"}
+                      </button>
+                    </div>
+                  ) : (
+                    <label htmlFor="portfolio-image" className="upload-label">
+                      <Upload size={48} />
+                      <span className="upload-text">
+                        {language === "en" ? "Click to upload image" : "დააჭირე სურათის ასატვირთად"}
+                      </span>
+                      <span className="upload-hint">
+                        {language === "en" ? "PNG, JPG, WEBP up to 10MB" : "PNG, JPG, WEBP მაქს. 10MB"}
+                      </span>
+                    </label>
+                  )}
+                </div>
+
+                {/* Description Field */}
+                <div className="form-group">
+                  <label htmlFor="portfolio-caption" className="form-label">
+                    {language === "en" ? "Description (Optional)" : "აღწერა (არასავალდებულო)"}
+                  </label>
+                  <textarea
+                    id="portfolio-caption"
+                    className="form-textarea"
+                    rows={4}
+                    maxLength={4000}
+                    placeholder={language === "en" ? "Add a description for your image..." : "დაამატე აღწერა შენს სურათს..."}
+                    value={caption}
+                    onChange={(e) => setCaption(e.target.value)}
+                  />
+                  <div className="character-count">
+                    {caption.length} / 4000
+                  </div>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="modal-actions">
+                  <button
+                    type="button"
+                    className="artist-edit-button"
+                    onClick={() => {
+                      setUploadModalOpen(false);
+                      setSelectedImage(null);
+                      setImagePreview(null);
+                      setCaption("");
+                    }}
+                  >
+                    {language === "en" ? "Cancel" : "გაუქმება"}
+                  </button>
+                  <button
+                    type="button"
+                    className="artist-add-product-button"
+                    disabled={!selectedImage || uploadingImage}
+                    onClick={async () => {
+                      if (!selectedImage) return;
+                      
+                      setUploadingImage(true);
+                      try {
+                        const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/v1';
+                        
+                        // Upload image to Cloudinary via artists gallery endpoint
+                        const formData = new FormData();
+                        formData.append('file', selectedImage);
+                        
+                        const uploadResponse = await fetch(`${API_BASE}/artists/gallery`, {
+                          method: 'POST',
+                          credentials: 'include',
+                          body: formData,
+                        });
+                        
+                        if (!uploadResponse.ok) {
+                          throw new Error('Failed to upload image');
+                        }
+                        
+                        const uploadData = await uploadResponse.json();
+                        const gallery = uploadData?.gallery || [];
+                        
+                        if (gallery.length === 0) {
+                          throw new Error('No image URL returned');
+                        }
+                        
+                        // Get the last uploaded image URL
+                        const imageUrl = gallery[gallery.length - 1];
+                        
+                        // Create portfolio post
+                        const createResponse = await fetch(`${API_BASE}/portfolio`, {
+                          method: 'POST',
+                          credentials: 'include',
+                          headers: {
+                            'Content-Type': 'application/json',
+                          },
+                          body: JSON.stringify({
+                            images: [imageUrl],
+                            caption: caption.trim() || null,
+                            tags: [],
+                          }),
+                        });
+                        
+                        if (!createResponse.ok) {
+                          throw new Error('Failed to create portfolio post');
+                        }
+                        
+                        toast({
+                          title: language === "en" ? "Success!" : "წარმატებული!",
+                          description: language === "en" ? "Portfolio image added successfully" : "პორტფოლიოს სურათი დაემატა",
+                        });
+                        
+                        // Reset form and close modal
+                        setUploadModalOpen(false);
+                        setSelectedImage(null);
+                        setImagePreview(null);
+                        setCaption("");
+                        
+                        // Refresh the page to show new image
+                        router.refresh();
+                      } catch (error) {
+                        console.error('Upload error:', error);
+                        toast({
+                          title: language === "en" ? "Error" : "შეცდომა",
+                          description: language === "en" ? "Failed to upload image" : "სურათის ატვირთვა ვერ მოხერხდა",
+                          variant: "destructive",
+                        });
+                      } finally {
+                        setUploadingImage(false);
+                      }
+                    }}
+                  >
+                    {uploadingImage ? (
+                      <>
+                        <svg
+                          className="spinner-icon"
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="16"
+                          height="16"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          style={{ animation: 'spin 1s linear infinite' }}
+                        >
+                          <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+                        </svg>
+                        {language === "en" ? "Uploading..." : "იტვირთება..."}
+                      </>
+                    ) : (
+                      <>
+                        <Upload size={18} />
+                        {language === "en" ? "Upload" : "ატვირთვა"}
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -6,6 +6,8 @@ import {
   MinLength,
   MaxLength,
   IsOptional,
+  Length,
+  Matches,
 } from 'class-validator';
 import { Transform } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
@@ -95,6 +97,14 @@ export class SellerRegisterDto {
   accountNumber: string;
 
   @ApiProperty({
+    example: 'TBCBGE22',
+    description: 'ბენეფიციარის ბანკის SWIFT/BIC კოდი',
+  })
+  @IsNotEmpty()
+  @IsString()
+  beneficiaryBankCode: string;
+
+  @ApiProperty({
     example: 'ABC12345',
     description: 'რეფერალური კოდი (არაუცილებელო)',
     required: false,
@@ -102,4 +112,22 @@ export class SellerRegisterDto {
   @IsOptional()
   @IsString()
   invitationCode?: string; // რეფერალური კოდი რომლითაც რეგისტრირდება
+
+  @ApiProperty({
+    example: 'digital-artistry',
+    description:
+      'არტისტის საჯარო სლაგი (მხოლოდ პატარა ასოები, ჰიფენები და ციფრები)',
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  @Transform(({ value }) =>
+    typeof value === 'string' ? value.trim().toLowerCase() : value,
+  )
+  @Length(3, 40)
+  @Matches(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, {
+    message:
+      'Artist slug may only contain lowercase letters, numbers, and hyphens',
+  })
+  artistSlug?: string;
 }

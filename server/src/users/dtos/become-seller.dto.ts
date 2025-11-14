@@ -3,8 +3,11 @@ import {
   IsString,
   IsPhoneNumber,
   IsOptional,
+  Length,
+  Matches,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { Transform } from 'class-transformer';
 
 export class BecomeSellerDto {
   @ApiProperty({
@@ -66,4 +69,22 @@ export class BecomeSellerDto {
   @IsOptional()
   @IsString()
   invitationCode?: string;
+
+  @ApiProperty({
+    example: 'digital-artistry',
+    description:
+      'არტისტის საჯარო სლაგი (მხოლოდ პატარა ასოები, ჰიფენები და ციფრები)',
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  @Transform(({ value }) =>
+    typeof value === 'string' ? value.trim().toLowerCase() : value,
+  )
+  @Length(3, 40)
+  @Matches(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, {
+    message:
+      'Artist slug may only contain lowercase letters, numbers, and hyphens',
+  })
+  artistSlug?: string;
 }

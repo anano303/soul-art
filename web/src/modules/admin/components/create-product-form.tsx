@@ -131,6 +131,7 @@ export function CreateProductForm({
 
   // New fields for original/copy and materials
   const [isOriginal, setIsOriginal] = useState<boolean>(true);
+  const [addToPortfolio, setAddToPortfolio] = useState<boolean>(true);
   const [materials, setMaterials] = useState<string[]>([]);
   const [materialsInput, setMaterialsInput] = useState<string>("");
   const [materialsEn, setMaterialsEn] = useState<string[]>([]);
@@ -482,6 +483,7 @@ export function CreateProductForm({
       height: undefined,
       depth: undefined,
     });
+    setAddToPortfolio(true);
 
     // Clear saved form data when resetting
     clearFormFromStorage();
@@ -641,6 +643,7 @@ export function CreateProductForm({
         discountPercentage,
         discountStartDate,
         discountEndDate,
+        addToPortfolio,
       };
       localStorage.setItem(FORM_DATA_KEY, JSON.stringify(formDataToSave));
     } catch (error) {
@@ -699,6 +702,9 @@ export function CreateProductForm({
           setMaterialsEn(parsedData.materialsEn as string[]);
         if (parsedData.materialsEnInput)
           setMaterialsEnInput(parsedData.materialsEnInput as string);
+        if (parsedData.addToPortfolio !== undefined) {
+          setAddToPortfolio(Boolean(parsedData.addToPortfolio));
+        }
 
         console.log("Form data restored from localStorage");
       }
@@ -772,6 +778,7 @@ export function CreateProductForm({
     discountPercentage,
     discountStartDate,
     discountEndDate,
+    addToPortfolio,
     isEdit,
   ]);
 
@@ -1079,6 +1086,10 @@ export function CreateProductForm({
       }
       formDataToSend.append("materials", JSON.stringify(materials));
       formDataToSend.append("materialsEn", JSON.stringify(materialsEn));
+      formDataToSend.append(
+        "addToPortfolio",
+        addToPortfolio ? "true" : "false"
+      );
 
       // Handle images - separate existing images from new ones
       const existingImages: string[] = [];
@@ -1544,6 +1555,41 @@ export function CreateProductForm({
               </div>
             </>
           )}
+        </div>
+        <div className="form-row-2">
+          <label
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+              cursor: "pointer",
+              fontWeight: 500,
+            }}
+          >
+            <input
+              type="checkbox"
+              checked={addToPortfolio}
+              onChange={(e) => setAddToPortfolio(e.target.checked)}
+            />
+            <span>
+              {language === "en"
+                ? "Add this listing to my portfolio automatically"
+                : "ავტომატურად დაამატე ეს პროდუქტი ჩემს პორტფოლიოში"}
+            </span>
+          </label>
+          <small
+            style={{
+              color: "#666",
+              fontSize: "0.85rem",
+              display: "block",
+              marginTop: "4px",
+              lineHeight: "1.4",
+            }}
+          >
+            {language === "en"
+              ? "If unchecked, you can publish it later from the portfolio page."
+              : "თუ არ მონიშნავ, პორტფოლიოში მოგვიანებით დამატებასაც შეძლებ."}
+          </small>
         </div>
         <div>
           <label htmlFor="name">{t("adminProducts.productNameGe")}</label>

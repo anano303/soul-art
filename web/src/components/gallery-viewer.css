@@ -86,6 +86,36 @@
   justify-content: center;
 }
 
+.gallery-viewer__image-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(0, 0, 0, 0.45);
+  border: none;
+  color: white;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.gallery-viewer__image-nav:hover {
+  background: rgba(0, 0, 0, 0.65);
+  transform: translateY(-50%) scale(1.08);
+}
+
+.gallery-viewer__image-nav--prev {
+  left: 16px;
+}
+
+.gallery-viewer__image-nav--next {
+  right: 16px;
+}
+
 .gallery-viewer__image-container {
   width: 100%;
   height: 100%;
@@ -104,6 +134,55 @@
   display: none;
 }
 
+.gallery-viewer__header {
+  padding: 1.5rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.gallery-viewer__artist-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.gallery-viewer__artist-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.gallery-viewer__artist-name {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #111827;
+}
+
+.gallery-viewer__post-date {
+  margin: 0.15rem 0 0;
+  font-size: 0.8125rem;
+  color: #6b7280;
+}
+
+.gallery-viewer__stats {
+  padding: 0.75rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+}
+
+.gallery-viewer__stat--comments {
+  margin-left: 0.5rem;
+}
+
+.gallery-viewer__status-wrapper {
+  padding: 1rem 1.5rem 0;
+}
+
 .gallery-viewer__sidebar {
   width: 350px;
   display: flex;
@@ -114,42 +193,102 @@
   height: 100%;
 }
 
-.gallery-viewer__header {
-  padding: 1.5rem;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+.gallery-viewer__thumbnails {
+  display: flex;
+  gap: 0.5rem;
+  padding: 1rem 1.5rem 0;
+  overflow-x: auto;
+  scrollbar-width: thin;
 }
 
-.gallery-viewer__artist-info {
+.gallery-viewer__thumbnails::-webkit-scrollbar {
+  height: 6px;
+}
+
+.gallery-viewer__thumbnails::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 9999px;
+}
+
+.gallery-viewer__thumbnail {
+  border: none;
+  padding: 0;
+  background: transparent;
+  border-radius: 10px;
+  overflow: hidden;
+  cursor: pointer;
+  outline: none;
+  position: relative;
+  flex-shrink: 0;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.gallery-viewer__thumbnail:not(.gallery-viewer__thumbnail--active):hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.gallery-viewer__thumbnail--active {
+  box-shadow: 0 0 0 2px #111827;
+}
+
+.gallery-viewer__thumbnail-image {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  display: block;
+}
+
+.gallery-viewer__mobile-carousel-wrapper {
+  position: relative;
+  margin: 0;
+  border-radius: 0;
+  overflow: hidden;
+  background: #000;
+}
+
+.gallery-viewer__mobile-carousel {
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+}
+
+.gallery-viewer__mobile-carousel::-webkit-scrollbar {
+  display: none;
+}
+
+.gallery-viewer__mobile-slide {
+  flex: 0 0 100%;
+  scroll-snap-align: center;
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  justify-content: center;
+  min-height: 320px;
+  background: #000;
 }
 
-.gallery-viewer__artist-avatar {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  object-fit: cover;
+.gallery-viewer__action--mobile {
+  padding: 0.4rem 0.6rem;
 }
 
-.gallery-viewer__artist-name {
-  margin: 0;
-  font-size: 1rem;
-  font-weight: 600;
-  color: #1f2937;
+.gallery-viewer__action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.625rem 0.75rem;
+  border-radius: 6px;
+  border: none;
+  background: transparent;
+  color: #374151;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
 }
 
-.gallery-viewer__post-date {
-  margin: 0;
-  font-size: 0.875rem;
-  color: #6b7280;
-}
-
-.gallery-viewer__stats {
-  padding: 0.25rem 0.5rem;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-  display: flex;
-  gap: 1rem;
+.gallery-viewer__action:hover {
+  background: #f3f4f6;
+  transform: scale(1.05);
 }
 
 .gallery-viewer__stat {
@@ -159,6 +298,10 @@
   color: #374151;
   font-size: 0.875rem;
   font-weight: 500;
+}
+
+.gallery-viewer__stat--action {
+  padding: 0;
 }
 
 .gallery-viewer__stat--interactive {
@@ -238,6 +381,26 @@
   flex-shrink: 0;
 }
 
+.gallery-viewer__caption-block {
+  padding: 1.25rem 1.5rem;
+  border-top: none;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  background: #f9fafb;
+}
+
+.gallery-viewer__caption-title {
+  margin: 0 0 0.65rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: #6b7280;
+}
+
+.gallery-viewer__caption-block .gallery-viewer__caption {
+  margin: 0.5rem 0 0;
+}
+
 
 
 
@@ -254,6 +417,14 @@
   border-radius: 20px;
   font-size: 0.875rem;
   font-weight: 500;
+}
+
+.gallery-viewer__counter--mobile {
+  bottom: auto;
+  top: 16px;
+  background: rgba(0, 0, 0, 0.55);
+  padding: 0.35rem 0.8rem;
+  font-size: 0.75rem;
 }
 
 /* Mobile Instagram-style layout */
@@ -321,6 +492,86 @@
   flex: 1;
 }
 
+.gallery-viewer__mobile-body {
+  width: 100%;
+  padding: 0 1rem 2rem;
+  box-sizing: border-box;
+}
+
+.gallery-viewer__mobile-stage {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  margin: 1rem 0;
+
+@media (min-width: 769px) {
+  .gallery-viewer__mobile-carousel-wrapper {
+    margin: 0 1rem;
+    border-radius: 16px;
+  }
+
+  .gallery-viewer__mobile-slide {
+    border-radius: inherit;
+  }
+}
+}
+
+.gallery-viewer__mobile-post-nav {
+  border: none;
+  background: rgba(0, 0, 0, 0.08);
+  color: #262626;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.gallery-viewer__mobile-post-nav:hover {
+  background: rgba(0, 0, 0, 0.12);
+  transform: scale(1.05);
+}
+
+.gallery-viewer__mobile-image-container--single {
+  position: relative;
+  flex: 1;
+  border-radius: 16px;
+  overflow: hidden;
+  background: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 320px;
+}
+
+.gallery-viewer__mobile-indicators {
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 6px;
+}
+
+.gallery-viewer__mobile-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.4);
+  transition: background 0.2s ease;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+.gallery-viewer__mobile-indicator--active {
+  background: #ffffff;
+}
+
 .gallery-viewer__mobile-item {
   width: 100%;
   background: white;
@@ -376,10 +627,45 @@
 
 .gallery-viewer__mobile-actions {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 0.5rem;
   margin-bottom: 0.5rem;
   flex-wrap: wrap;
+}
+
+.gallery-viewer__mobile-status {
+  padding: 0.75rem 1rem 0;
+  display: flex;
+  align-items: center;
+}
+
+.gallery-viewer__status {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.45rem 1rem;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.75);
+  color: #fff;
+  font-weight: 600;
+  font-size: 0.85rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.gallery-viewer__status--sold {
+  background: rgba(220, 38, 38, 0.85);
+}
+
+.gallery-viewer__caption {
+  margin: 1rem 1rem 0 1rem;
+  font-size: 0.92rem;
+  line-height: 1.45;
+  color: #1f2937;
+  white-space: pre-line;
+}
+
+.gallery-viewer__caption--mobile {
+  margin: 0.85rem 1rem 0.5rem;
 }
 
 .gallery-viewer__mobile-comment-btn {
@@ -615,4 +901,152 @@
   to {
     opacity: 1;
   }
+}
+
+/* Menu Styles */
+.gallery-viewer__menu-wrapper {
+  position: relative;
+  margin-left: auto;
+}
+
+.gallery-viewer__menu-button {
+  background: transparent;
+  border: none;
+  color: #262626;
+  padding: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background-color 0.2s;
+}
+
+.gallery-viewer__menu-button:hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.gallery-viewer__menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 8px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  min-width: 200px;
+  overflow: hidden;
+  z-index: 1001;
+}
+
+.gallery-viewer__menu-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: white;
+  border: none;
+  color: #262626;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  text-align: left;
+}
+
+.gallery-viewer__menu-item:hover {
+  background: #f5f5f5;
+}
+
+.gallery-viewer__menu-item--danger {
+  color: #ed4956;
+}
+
+.gallery-viewer__menu-item--danger:hover {
+  background: #fef1f2;
+}
+
+/* Edit Dialog Styles */
+.gallery-viewer__edit-dialog {
+  position: fixed;
+  inset: 0;
+  z-index: 10001;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.8);
+  animation: fadeIn 0.2s ease-out;
+}
+
+.gallery-viewer__edit-content {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  max-width: 500px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.gallery-viewer__edit-content h3 {
+  margin: 0 0 16px 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #262626;
+}
+
+.gallery-viewer__edit-content textarea {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #dbdbdb;
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: inherit;
+  resize: vertical;
+  min-height: 120px;
+  margin-bottom: 16px;
+}
+
+.gallery-viewer__edit-content textarea:focus {
+  outline: none;
+  border-color: #0095f6;
+}
+
+.gallery-viewer__edit-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+.gallery-viewer__edit-button {
+  padding: 8px 24px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.gallery-viewer__edit-button--cancel {
+  background: #f5f5f5;
+  color: #262626;
+}
+
+.gallery-viewer__edit-button--cancel:hover {
+  background: #e0e0e0;
+}
+
+.gallery-viewer__edit-button--save {
+  background: #0095f6;
+  color: white;
+}
+
+.gallery-viewer__edit-button--save:hover {
+  background: #0081d9;
+}
+
+.gallery-viewer__edit-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }

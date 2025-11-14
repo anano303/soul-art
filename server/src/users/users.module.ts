@@ -5,6 +5,7 @@ import { AuthController } from './controller/auth.controller';
 import { User, UserSchema } from './schemas/user.schema';
 import { GalleryLike, GalleryLikeSchema } from './schemas/gallery-like.schema';
 import { GalleryComment, GalleryCommentSchema } from './schemas/gallery-comment.schema';
+import { PortfolioPost, PortfolioPostSchema } from './schemas/portfolio-post.schema';
 import { Product, ProductSchema } from '../products/schemas/product.schema';
 import { Order, OrderSchema } from '../orders/schemas/order.schema';
 import {
@@ -29,6 +30,7 @@ import { UsersController } from './controller/users.controller';
 import { BalanceController } from './controller/balance.controller';
 import { ArtistController } from './controller/artist.controller';
 import { GalleryInteractionController } from './controller/gallery-interaction.controller';
+import { PortfolioController } from './controller/portfolio.controller';
 import { GoogleStrategy } from '@/strategies/google.strategy';
 import { EmailService } from '@/email/services/email.services';
 import { AwsS3Module } from '@/aws-s3/aws-s3.module';
@@ -52,6 +54,10 @@ import { PaymentsModule } from '../payments/payments.module';
       {
         name: GalleryComment.name,
         schema: GalleryCommentSchema,
+      },
+      {
+        name: PortfolioPost.name,
+        schema: PortfolioPostSchema,
       },
       {
         name: Product.name,
@@ -88,6 +94,7 @@ import { PaymentsModule } from '../payments/payments.module';
     BalanceController,
     ArtistController,
     GalleryInteractionController,
+    PortfolioController,
   ],
   providers: [
     UsersService,

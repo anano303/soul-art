@@ -33,6 +33,31 @@ export interface ArtistProfile {
   artistDirectReviewsCount?: number;
 }
 
+export interface PortfolioImageSummary {
+  url: string;
+  order: number;
+  metadata?: Record<string, string>;
+}
+
+export interface PortfolioPostSummary {
+  id: string;
+  productId: string | null | {
+    _id: string;
+    status: 'PENDING' | 'APPROVED' | 'REJECTED';
+    countInStock?: number;
+    variants?: Array<{ stock?: number }>;
+  };
+  caption?: string | null;
+  tags: string[];
+  images: PortfolioImageSummary[];
+  likesCount: number;
+  commentsCount: number;
+  hideBuyButton?: boolean; // Optional, derived from product if populated
+  isSold?: boolean; // Optional, derived from product if populated
+  isFeatured?: boolean; // Whether the post is marked as featured
+  publishedAt?: string | null;
+}
+
 export interface ArtistProductSummary {
   id: string;
   name: string;
@@ -62,6 +87,10 @@ export interface ArtistProfileResponse {
     totalPages?: number;
     hasMore?: boolean;
     items: ArtistProductSummary[];
+  };
+  portfolio: {
+    total: number;
+    posts: PortfolioPostSummary[];
   };
 }
 

@@ -296,7 +296,7 @@ export class OrdersService {
     // Start MongoDB transaction to prevent race conditions
     const session = await this.connection.startSession();
     try {
-      return await session.withTransaction(async () => {
+      const createdOrder = await session.withTransaction(async () => {
         // First, validate and reserve stock for all items ATOMICALLY
         for (const item of orderItems) {
           const product = await this.productModel
@@ -399,6 +399,8 @@ export class OrdersService {
         );
         return createdOrder[0];
       });
+
+      return createdOrder;
     } finally {
       await session.endSession();
     }
@@ -430,7 +432,7 @@ export class OrdersService {
     // Start MongoDB transaction to prevent race conditions
     const session = await this.connection.startSession();
     try {
-      return await session.withTransaction(async () => {
+      const createdOrder = await session.withTransaction(async () => {
         // First, validate and reserve stock for all items ATOMICALLY
         for (const item of orderItems) {
           const product = await this.productModel
@@ -547,6 +549,8 @@ export class OrdersService {
 
         return createdOrder[0];
       });
+
+      return createdOrder;
     } finally {
       await session.endSession();
     }
@@ -1509,7 +1513,7 @@ export class OrdersService {
     }
     const session = await this.connection.startSession();
     try {
-      return await session.withTransaction(async () => {
+      const updatedOrder = await session.withTransaction(async () => {
         // Refund stock for the order
         await this.refundStockForOrder(order, session);
         // Mark order as cancelled
@@ -1520,6 +1524,8 @@ export class OrdersService {
         const updatedOrder = await order.save({ session });
         return updatedOrder;
       });
+
+      return updatedOrder;
     } finally {
       await session.endSession();
     }
@@ -1537,7 +1543,10 @@ export class OrdersService {
    * Refund stock for a specific order - with safety checks
    * This method is used by the stock reservation service and manual cancellation
    */
-  private async refundStockForOrder(order: OrderDocument, session: any) {
+  private async refundStockForOrder(
+    order: OrderDocument,
+    session: ClientSession,
+  ) {
     // Ensure order is in a state where stock refund is appropriate
     if (order.isPaid || order.status === 'cancelled') {
       this.logger.warn(

@@ -1,5 +1,9 @@
 import * as z from "zod";
 
+const SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+const SLUG_VALIDATION_MESSAGE =
+  "სლაგი უნდა შედგებოდეს 3-40 სიმბოლოსგან (პატარა ლათინური ასოები, ციფრები და ჰიფენი)";
+
 export const sellerRegisterSchema = z.object({
   storeName: z.string().min(1, "მაღაზიის სახელი სავალდებულოა"),
   // Remove storeLogo since we'll handle it as a file upload
@@ -20,5 +24,21 @@ export const sellerRegisterSchema = z.object({
     .string()
     .regex(/^GE[0-9]{2}[A-Z0-9]{18}$/, "არასწორი IBAN ფორმატი")
     .refine((value) => value.length === 22, "IBAN უნდა შეიცავდეს 22 სიმბოლოს"),
+  beneficiaryBankCode: z
+    .string()
+    .min(1, "ბანკი აუცილებელია"),
+  artistSlug: z
+    .string()
+    .optional()
+    .transform((value) => (value ?? "").trim())
+    .refine(
+      (value) =>
+        value === "" ||
+        (value.length >= 3 && value.length <= 40 && SLUG_PATTERN.test(value)),
+      {
+        message: SLUG_VALIDATION_MESSAGE,
+        path: ["artistSlug"],
+      }
+    ),
   invitationCode: z.string().optional(), // renamed from referralCode
 });

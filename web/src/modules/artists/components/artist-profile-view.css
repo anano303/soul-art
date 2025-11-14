@@ -138,38 +138,30 @@
   gap: 0.5rem;
   padding: 0.55rem 1.2rem;
   border-radius: 999px;
-  border: 1px solid rgba(224, 216, 73, 0.8);
-  background: linear-gradient(
-    135deg,
-    rgba(224, 216, 73, 0.25),
-    rgba(224, 216, 73, 0.15)
-  );
+  border: 2px solid #012645;
+  background: linear-gradient(135deg, #012645, #023a69);
   color: #fff;
   font-weight: 600;
   font-size: 0.9rem;
   cursor: pointer;
   transition: all 0.2s ease;
   text-decoration: none;
-  box-shadow: 0 2px 8px rgba(224, 216, 73, 0.2);
+  box-shadow: 0 2px 8px rgba(1, 38, 69, 0.3);
 }
 
 .artist-add-product-button:hover {
-  background: linear-gradient(
-    135deg,
-    rgba(224, 216, 73, 0.35),
-    rgba(224, 216, 73, 0.25)
-  );
+  background: linear-gradient(135deg, #023a69, #034d8a);
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(224, 216, 73, 0.3);
-  border-color: rgba(224, 216, 73, 1);
+  box-shadow: 0 4px 12px rgba(1, 38, 69, 0.4);
+  border-color: #023a69;
 }
 
 .artist-edit-button {
   padding: 0.55rem 1.2rem;
   border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.65);
-  background: rgba(15, 23, 42, 0.35);
-  color: #fff;
+  border: 2px solid #666;
+  background: #fff;
+  color: #333;
   font-weight: 600;
   font-size: 0.9rem;
   cursor: pointer;
@@ -177,7 +169,8 @@
 }
 
 .artist-edit-button:hover {
-  background: rgba(15, 23, 42, 0.55);
+  background: #f5f5f5;
+  border-color: #333;
 }
 
 /* Hero Stats Section */
@@ -837,6 +830,13 @@
   pointer-events: auto;
 }
 
+@media (hover: none) {
+  .artist-gallery-card__overlay {
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
+
 .artist-gallery-card__badge {
   position: absolute;
   top: 16px;
@@ -850,6 +850,22 @@
   text-transform: uppercase;
 }
 
+.artist-gallery-card__featured-badge {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 16px;
+  background: rgba(255, 215, 0, 0.9);
+  color: #000;
+  backdrop-filter: blur(8px);
+  z-index: 2;
+}
+
 .artist-gallery-card__interactions {
   position: absolute;
   bottom: 16px;
@@ -857,6 +873,36 @@
   display: flex;
   gap: 0.5rem;
   align-items: center;
+}
+
+.artist-gallery-card__action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 16px;
+  background: rgba(0, 0, 0, 0.6);
+  color: #fff;
+  text-decoration: none;
+  transition: transform 0.2s ease, background 0.2s ease;
+  backdrop-filter: blur(8px);
+  cursor: pointer;
+  border: none;
+}
+
+.artist-gallery-card__action:hover {
+  background: rgba(0, 0, 0, 0.75);
+  transform: translateY(-1px);
+}
+
+.artist-gallery-card__action--featured {
+  background: rgba(255, 215, 0, 0.9);
+  color: #000;
+}
+
+.artist-gallery-card__action--featured:hover {
+  background: rgba(255, 215, 0, 1);
 }
 
 .artist-empty {
@@ -1356,10 +1402,204 @@
 }
 
 .artist-info-social-link:hover {
-  background: linear-gradient(135deg, #0f3c69, #6b2f01);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(1, 38, 69, 0.3);
-  color: white;
+  background: linear-gradient(135deg, #023a69, #69230a);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(1, 38, 69, 0.2);
+}
+
+/* Modal Styles */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 20px;
+  backdrop-filter: blur(4px);
+}
+
+.modal-content {
+  background: white;
+  border-radius: 16px;
+  max-width: 500px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24px 24px 16px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.modal-header h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #012645;
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  font-size: 28px;
+  line-height: 1;
+  cursor: pointer;
+  color: #666;
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.modal-close:hover {
+  background: rgba(0, 0, 0, 0.05);
+  color: #012645;
+}
+
+.modal-body {
+  padding: 24px;
+}
+
+.upload-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.upload-area {
+  width: 100%;
+  min-height: 200px;
+}
+
+.upload-label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 40px 20px;
+  border: 2px dashed #ccc;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: #f9f9f9;
+}
+
+.upload-label:hover {
+  border-color: #012645;
+  background: #f5f5f5;
+}
+
+.upload-text {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.upload-hint {
+  font-size: 0.875rem;
+  color: #666;
+}
+
+.image-preview-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.image-preview {
+  width: 100%;
+  height: auto;
+  max-height: 400px;
+  object-fit: contain;
+  border-radius: 12px;
+  border: 1px solid #e0e0e0;
+}
+
+.change-image-button {
+  align-self: center;
+  padding: 0.5rem 1rem;
+  border: 2px solid #666;
+  background: #fff;
+  color: #333;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.change-image-button:hover {
+  background: #f5f5f5;
+  border-color: #333;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-label {
+  font-weight: 600;
+  color: #333;
+  font-size: 0.95rem;
+}
+
+.form-textarea {
+  width: 100%;
+  padding: 12px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 0.95rem;
+  resize: vertical;
+  transition: border-color 0.2s ease;
+}
+
+.form-textarea:focus {
+  outline: none;
+  border-color: #012645;
+}
+
+.character-count {
+  align-self: flex-end;
+  font-size: 0.875rem;
+  color: #666;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 8px;
+}
+
+.modal-actions button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* Mobile responsive for info tab */

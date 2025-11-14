@@ -7,7 +7,7 @@ import { useSellerRegister } from "../hooks/use-auth";
 import Link from "next/link";
 import "./register-form.css";
 import type * as z from "zod";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "@/hooks/use-toast";
 import Image from "next/image";
@@ -16,11 +16,18 @@ import { SellerContract } from "@/components/SellerContract";
 import { TermsAndConditions } from "@/components/TermsAndConditions";
 import { PrivacyPolicy } from "@/components/PrivacyPolicy";
 import { trackCompleteRegistration } from "@/components/MetaPixel";
+import { apiClient } from "@/lib/axios";
+import { GEORGIAN_BANKS, detectBankFromIban } from "@/utils/georgian-banks";
 
 type SellerRegisterFormData = z.infer<typeof sellerRegisterSchema>;
 
+const SLUG_VALIDATION_MESSAGE =
+  "სლაგი უნდა შედგებოდეს 3-40 სიმბოლოსგან (პატარა ლათინური ასოები, ციფრები და ჰიფენი)";
+
+type SlugStatus = "idle" | "checking" | "available" | "taken" | "error";
+
 export function SellerRegisterForm() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const router = useRouter();
   const { mutate: register, isPending } = useSellerRegister();
   const [registrationError, setRegistrationError] = useState<string | null>(
@@ -43,12 +50,309 @@ export function SellerRegisterForm() {
 
   const {
     register: registerField,
+    unregister,
     handleSubmit,
     setValue,
+    watch,
     formState: { errors },
   } = useForm<SellerRegisterFormData>({
     resolver: zodResolver(sellerRegisterSchema),
   });
+
+  useEffect(() => {
+    registerField("artistSlug");
+    return () => {
+      unregister("artistSlug");
+    };
+  }, [registerField, unregister]);
+
+  const storeNameValue = watch("storeName");
+
+  const [slugInput, setSlugInput] = useState<string>("");
+  const [suggestedSlug, setSuggestedSlug] = useState<string>("");
+  const [isSlugAuto, setIsSlugAuto] = useState<boolean>(true);
+  const [slugStatus, setSlugStatus] = useState<SlugStatus>("idle");
+  const [slugMessage, setSlugMessage] = useState<string>("");
+  const slugRequestIdRef = useRef(0);
+  const manualCheckIdRef = useRef(0);
+
+  const portfolioBaseUrl =
+    process.env.NEXT_PUBLIC_WEBSITE_URL || "https://soulart.ge";
+  const portfolioDisplayBase = portfolioBaseUrl
+    .replace(/^https?:\/\//, "")
+    .replace(/\/$/, "");
+  const slugDisplayPrefix = `${portfolioDisplayBase}/@`;
+  const portfolioLinkBase = portfolioBaseUrl.replace(/\/$/, "");
+
+  const slugStatusColors: Record<SlugStatus, string> = {
+    idle: "#4b5563",
+    checking: "#2563eb",
+    available: "#15803d",
+    taken: "#b91c1c",
+    error: "#b45309",
+  };
+
+  const setSlugValue = useCallback(
+    (value: string, options?: { validate?: boolean; markDirty?: boolean }) => {
+      setSlugInput(value);
+      setValue("artistSlug", value, {
+        shouldDirty: options?.markDirty ?? true,
+        shouldValidate: options?.validate ?? true,
+      });
+    },
+    [setValue]
+  );
+
+  const slugify = useCallback((input: string) => {
+    if (!input) return "";
+    return input
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[^a-z0-9\s-]/g, "")
+      .replace(/\s+/g, "-")
+      .replace(/-{2,}/g, "-")
+      .replace(/^-+|-+$/g, "");
+  }, []);
+
+  const buildAutoSlug = useCallback(
+    (input: string) => {
+      const base = slugify(input);
+      if (base.length >= 3) {
+        return base;
+      }
+      return base.length > 0 ? `${base}-${Date.now().toString().slice(-2)}` : "artist";
+    },
+    [slugify]
+  );
+
+  const ensureSuggestedSlug = useCallback(
+    async (name: string) => {
+      const trimmed = name.trim();
+      if (!trimmed) {
+        slugRequestIdRef.current += 1;
+        setSuggestedSlug("");
+        setSlugStatus("idle");
+        setSlugMessage("");
+        setSlugValue("", { validate: true, markDirty: false });
+        return;
+      }
+
+      const baseCandidate = buildAutoSlug(trimmed);
+      const requestId = ++slugRequestIdRef.current;
+
+      setSlugStatus("checking");
+      setSlugMessage(
+        language === "en"
+          ? "Checking link availability..."
+          : "მიმდინარეობს ბმულის შემოწმება..."
+      );
+
+      try {
+        let attempt = 0;
+        let candidate = baseCandidate;
+
+        while (true) {
+          const { data } = await apiClient.get("/artists/slug/check", {
+            params: { slug: candidate },
+          });
+
+          if (slugRequestIdRef.current !== requestId) {
+            return;
+          }
+
+          if (data.available) {
+            setSuggestedSlug(candidate);
+            setSlugValue(candidate, { validate: true });
+            setSlugStatus("available");
+            setSlugMessage(
+              language === "en"
+                ? `We'll reserve ${portfolioLinkBase}/@${candidate} for you`
+                : `${portfolioLinkBase}/@${candidate} შენთვის იქნება დაჯავშნილი`
+            );
+            return;
+          }
+
+          attempt += 1;
+          if (attempt > 99) {
+            throw new Error("No available slug variations");
+          }
+          candidate = `${baseCandidate}-${attempt}`;
+        }
+      } catch (error) {
+        if (slugRequestIdRef.current !== requestId) {
+          return;
+        }
+        console.error("Slug suggestion failed", error);
+        setSuggestedSlug(baseCandidate);
+        setSlugValue(baseCandidate, { validate: true });
+        setSlugStatus("error");
+        setSlugMessage(
+          language === "en"
+            ? "We couldn't auto-generate a unique link. Please adjust manually."
+            : "ბმულის ავტომატური გენერაცია ვერ მოხერხდა. გთხოვთ, შეცვალოთ ხელით."
+        );
+      }
+    },
+    [buildAutoSlug, language, portfolioLinkBase, setSlugValue]
+  );
+
+  const checkSlugManually = useCallback(
+    async (slug: string, checkId: number) => {
+      if (!slug) {
+        return;
+      }
+
+      try {
+        const { data } = await apiClient.get("/artists/slug/check", {
+          params: { slug },
+        });
+
+        if (manualCheckIdRef.current !== checkId) {
+          return;
+        }
+
+        if (data.available) {
+          setSlugStatus("available");
+          setSlugMessage(
+            language === "en"
+              ? `${portfolioLinkBase}/@${slug} is available`
+              : `${portfolioLinkBase}/@${slug} თავისუფალია`
+          );
+        } else {
+          setSlugStatus("taken");
+          setSlugMessage(
+            data.reason === "reserved"
+              ? language === "en"
+                ? "This slug is reserved. Please choose another."
+                : "ეს სლაგი დაჯავშნულია. გთხოვთ, აირჩიოთ სხვა."
+              : language === "en"
+              ? "This link is already taken. Try another."
+              : "ეს ბმული უკვე დაკავებულია. სცადე სხვა ვარიანტი."
+          );
+        }
+      } catch (error) {
+        if (manualCheckIdRef.current !== checkId) {
+          return;
+        }
+        console.error("Slug availability check failed", error);
+        setSlugStatus("error");
+        setSlugMessage(
+          language === "en"
+            ? "Couldn't verify link. Try again later."
+            : "ბმულის შემოწმება ვერ მოხერხდა. სცადე მოგვიანებით."
+        );
+      }
+    },
+    [language, portfolioLinkBase]
+  );
+
+  const resetSlugState = useCallback(() => {
+    slugRequestIdRef.current += 1;
+    manualCheckIdRef.current += 1;
+    setSlugInput("");
+    setSuggestedSlug("");
+    setIsSlugAuto(true);
+    setSlugStatus("idle");
+    setSlugMessage("");
+    setSlugValue("", { validate: false, markDirty: false });
+  }, [setSlugValue]);
+
+  const handleSlugInputChange = useCallback(
+    (raw: string) => {
+      let sanitized = slugify(raw);
+      sanitized = sanitized.slice(0, 40).replace(/-{2,}/g, "-");
+      sanitized = sanitized.replace(/^-+|-+$/g, "");
+
+      setIsSlugAuto(false);
+      slugRequestIdRef.current += 1;
+      setSlugValue(sanitized, { validate: true });
+
+      if (!sanitized) {
+        setSlugStatus("idle");
+        setSlugMessage("");
+      }
+    },
+    [setSlugValue, slugify]
+  );
+
+  const handleUseSuggestedSlug = useCallback(() => {
+    setIsSlugAuto(true);
+    const source = storeNameValue ?? "";
+
+    if (suggestedSlug) {
+      slugRequestIdRef.current += 1;
+      setSlugValue(suggestedSlug, { validate: true, markDirty: true });
+      setSlugStatus("available");
+      setSlugMessage(
+        language === "en"
+          ? `We'll reserve ${portfolioLinkBase}/@${suggestedSlug} for you`
+          : `${portfolioLinkBase}/@${suggestedSlug} შენთვის იქნება დაჯავშნილი`
+      );
+    }
+
+    ensureSuggestedSlug(source);
+  }, [ensureSuggestedSlug, language, portfolioLinkBase, setSlugValue, storeNameValue, suggestedSlug]);
+
+  useEffect(() => {
+    if (!isSlugAuto) {
+      return;
+    }
+
+    const currentValue = storeNameValue ?? "";
+    if (!currentValue.trim()) {
+      ensureSuggestedSlug(currentValue);
+      return;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      ensureSuggestedSlug(currentValue);
+    }, 300);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
+  }, [ensureSuggestedSlug, isSlugAuto, storeNameValue]);
+
+  useEffect(() => {
+    if (isSlugAuto) {
+      return;
+    }
+
+    const trimmed = slugInput.trim();
+    manualCheckIdRef.current += 1;
+    const checkId = manualCheckIdRef.current;
+
+    if (!trimmed) {
+      setSlugStatus("idle");
+      setSlugMessage("");
+      return;
+    }
+
+    if (trimmed.length < 3) {
+      setSlugStatus("error");
+      setSlugMessage(
+        language === "en"
+          ? "Use at least 3 characters."
+          : "გამოიყენე მინიმუმ 3 სიმბოლო."
+      );
+      return;
+    }
+
+    setSlugStatus("checking");
+    setSlugMessage(
+      language === "en"
+        ? "Checking link availability..."
+        : "მიმდინარეობს ბმულის შემოწმება..."
+    );
+
+    const timeoutId = window.setTimeout(() => {
+      checkSlugManually(trimmed, checkId);
+    }, 400);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
+  }, [checkSlugManually, isSlugAuto, language, slugInput]);
 
   // Get referral code from URL parameters
   useEffect(() => {
@@ -97,12 +401,30 @@ export function SellerRegisterForm() {
       return;
     }
 
+    if (slugInput && slugStatus === "taken") {
+      setRegistrationError(
+        language === "en"
+          ? "This public link is already taken. Please choose another."
+          : "ეს საჯარო ბმული უკვე დაკავებულია. გთხოვთ, აირჩიოთ სხვა."
+      );
+      return;
+    }
+
+    if (slugInput && slugStatus === "checking") {
+      setRegistrationError(
+        language === "en"
+          ? "Please wait until we finish checking your public link."
+          : "დაელოდე, სანამ ბმულის შემოწმება დასრულდება."
+      );
+      return;
+    }
+
     // Create FormData to handle file uploads
     const formData = new FormData();
 
     // Add all form fields to FormData
     Object.entries(data).forEach(([key, value]) => {
-      if (value !== undefined) {
+      if (value !== undefined && value !== "") {
         formData.append(key, value as string);
       }
     });
@@ -118,6 +440,7 @@ export function SellerRegisterForm() {
     register(formData, {
       onSuccess: () => {
         setIsSuccess(true);
+        resetSlugState();
         toast({
           title: t("auth.registrationSuccessful"),
           description: t("auth.sellerAccountCreatedSuccessfully"),
@@ -184,6 +507,85 @@ export function SellerRegisterForm() {
           />
           {errors.storeName && (
             <p className="error-text">{errors.storeName.message}</p>
+          )}
+        </div>
+
+        <div className="input-group">
+          <label htmlFor="artistSlug">
+            {language === "en"
+              ? "Public portfolio link"
+              : "საჯარო პორტფოლიოს ბმული"}
+          </label>
+          <small
+            style={{
+              display: "block",
+              marginTop: "4px",
+              color: "#6b7280",
+              fontSize: "0.85rem",
+              lineHeight: 1.4,
+            }}
+          >
+            {language === "en"
+              ? "Choose how your public artist page URL will look."
+              : "აირჩიე, როგორ გამოჩნდება შენი საჯარო არტისტის გვერდის მისამართი."}
+          </small>
+          <div
+            style={{
+              display: "flex",
+              gap: "8px",
+              alignItems: "center",
+              marginTop: "8px",
+            }}
+          >
+            <span
+              style={{
+                backgroundColor: "#f3f4f6",
+                padding: "8px 12px",
+                borderRadius: "6px",
+                fontSize: "0.9rem",
+                color: "#374151",
+                whiteSpace: "nowrap",
+              }}
+            >
+              {slugDisplayPrefix}
+            </span>
+            <input
+              id="artistSlug"
+              type="text"
+              value={slugInput}
+              onChange={(event) => handleSlugInputChange(event.target.value)}
+              autoComplete="off"
+              spellCheck={false}
+            />
+          </div>
+          {!isSlugAuto && suggestedSlug && suggestedSlug !== slugInput ? (
+            <button
+              type="button"
+              onClick={handleUseSuggestedSlug}
+              className="logo-upload-button"
+              style={{
+                whiteSpace: "nowrap",
+                marginTop: "8px",
+              }}
+            >
+              {language === "en" ? "Use suggestion" : "ავტომატური ვარიანტი"}
+            </button>
+          ) : null}
+          {slugMessage && (
+            <p
+              style={{
+                marginTop: "8px",
+                fontSize: "0.85rem",
+                color: slugStatusColors[slugStatus],
+              }}
+            >
+              {slugMessage}
+            </p>
+          )}
+          {errors.artistSlug && (
+            <p className="error-text">
+              {errors.artistSlug.message || SLUG_VALIDATION_MESSAGE}
+            </p>
           )}
         </div>
 
@@ -303,9 +705,42 @@ export function SellerRegisterForm() {
             type="text"
             placeholder="GE29TB7777777777777777"
             {...registerField("accountNumber")}
+            onChange={(event) => {
+              const iban = event.target.value.trim();
+              const detectedBank = detectBankFromIban(iban);
+
+              if (detectedBank) {
+                setValue("beneficiaryBankCode", detectedBank, {
+                  shouldValidate: true,
+                });
+              } else if (iban.length >= 22) {
+                setValue("beneficiaryBankCode", "", {
+                  shouldValidate: true,
+                });
+              }
+            }}
           />
           {errors.accountNumber && (
             <p className="error-text">{errors.accountNumber.message}</p>
+          )}
+        </div>
+
+        <div className="input-group">
+          <label htmlFor="beneficiaryBankCode">{t("profile.bank")}</label>
+          <select
+            id="beneficiaryBankCode"
+            {...registerField("beneficiaryBankCode")}
+            disabled
+          >
+            <option value="">{t("profile.selectBank")}</option>
+            {GEORGIAN_BANKS.map((bank) => (
+              <option key={bank.code} value={bank.code}>
+                {bank.name} ({bank.nameEn})
+              </option>
+            ))}
+          </select>
+          {errors.beneficiaryBankCode && (
+            <p className="error-text">{errors.beneficiaryBankCode.message}</p>
           )}
         </div>
 

@@ -446,6 +446,16 @@ export class ProductsController {
         productData.isOriginal = productData.isOriginal === 'true';
       }
 
+      const rawAddToPortfolio = (productData as any).addToPortfolio;
+      let addToPortfolio: boolean | undefined;
+
+      if (typeof rawAddToPortfolio === 'string') {
+        const normalized = rawAddToPortfolio.trim().toLowerCase();
+        addToPortfolio = !['false', '0', 'off', 'no'].includes(normalized);
+      } else if (typeof rawAddToPortfolio === 'boolean') {
+        addToPortfolio = rawAddToPortfolio;
+      }
+
       // Ensure materials is always an array
       if (!materials) {
         materials = [];
@@ -464,29 +474,34 @@ export class ProductsController {
       } = productData;
 
       // Create the product with proper category references
-      const createdProduct = await this.productsService.create({
-        ...otherProductData,
-        // Set brand name to seller's store name if not provided
-        brand:
-          otherProductData.brand ||
-          (user.role === Role.Seller ? user.name : undefined),
-        // Keep legacy fields for backward compatibility
-        category: otherProductData.category || 'Other',
-        // New category system
-        mainCategory,
-        subCategory,
-        ageGroups,
-        sizes,
-        colors,
-        hashtags,
-        dimensions,
-        materials,
-        materialsEn,
-        user,
-        images: imageUrls,
-        brandLogo: brandLogoUrl,
-        videoDescription,
-      });
+      const createdProduct = await this.productsService.create(
+        {
+          ...otherProductData,
+          // Set brand name to seller's store name if not provided
+          brand:
+            otherProductData.brand ||
+            (user.role === Role.Seller ? user.name : undefined),
+          // Keep legacy fields for backward compatibility
+          category: otherProductData.category || 'Other',
+          // New category system
+          mainCategory,
+          subCategory,
+          ageGroups,
+          sizes,
+          colors,
+          hashtags,
+          dimensions,
+          materials,
+          materialsEn,
+          user,
+          images: imageUrls,
+          brandLogo: brandLogoUrl,
+          videoDescription,
+        },
+        {
+          addToPortfolio: addToPortfolio ?? true,
+        },
+      );
 
       const youtubeVideoFile = this.prepareFileForBackground(videoFile);
       const youtubeImageFiles = files
@@ -555,14 +570,6 @@ export class ProductsController {
       }
 
       const finalProduct = createdProduct;
-
-      // Send push notification for new product (don't await to avoid blocking response)
-      this.sendNewProductPushNotification(finalProduct).catch((error) => {
-        console.error(
-          'Failed to send push notification for new product:',
-          error,
-        );
-      });
 
       return finalProduct;
     } catch (error) {
@@ -1014,18 +1021,33 @@ export class ProductsController {
       rejectionReason,
     );
 
-    // Send push notification to seller when product status changes
-    if (updatedProduct.user) {
-      this.sendProductStatusPushNotification(
-        updatedProduct,
-        status,
-        rejectionReason,
-      ).catch((error) => {
-        console.error(
-          'Failed to send product status push notification:',
-          error,
-        );
-      });
+    // Send push notifications only in production
+    const isProduction = process.env.NODE_ENV === 'production';
+
+    if (isProduction) {
+      // Send push notification to seller when product status changes
+      if (updatedProduct.user) {
+        this.sendProductStatusPushNotification(
+          updatedProduct,
+          status,
+          rejectionReason,
+        ).catch((error) => {
+          console.error(
+            'Failed to send product status push notification:',
+            error,
+          );
+        });
+      }
+
+      // Send push notification to all users when product is approved
+      if (status === ProductStatus.APPROVED) {
+        this.sendNewProductPushNotification(updatedProduct).catch((error) => {
+          console.error(
+            'Failed to send push notification for approved product:',
+            error,
+          );
+        });
+      }
     }
 
     return updatedProduct;
@@ -1161,9 +1183,15 @@ export class ProductsController {
     return this.productsService.fixHeicBrandLogos();
   }
 
-  // Private method to send push notification for new product
+  // Private method to send push notification for approved product to all users
   private async sendNewProductPushNotification(product: any) {
     try {
+      // Double-check production environment
+      if (process.env.NODE_ENV !== 'production') {
+        console.log('⏭️  Skipping push notification (not in production)');
+        return;
+      }
+
       const pushPayload = {
         title: '🆕 ახალი ნამუშევარი SoulArt-ზე!',
         body: `${product.name || product.nameEn || 'ახალი ნამუშევარი'} - იხილეთ ახალი შემოთავაზება!`,
@@ -1203,6 +1231,12 @@ export class ProductsController {
     rejectionReason?: string,
   ) {
     try {
+      // Double-check production environment
+      if (process.env.NODE_ENV !== 'production') {
+        console.log('⏭️  Skipping status push notification (not in production)');
+        return;
+      }
+
       let title: string;
       let body: string;
       let notificationType: 'product_approved' | 'product_rejected';

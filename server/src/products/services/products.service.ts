@@ -36,6 +36,10 @@ import { FacebookPostingService } from '@/products/services/facebook-posting.ser
 import { YoutubeVideoResult } from './product-youtube.service';
 import { updateArtistRating } from '@/utils/artist-rating.util';
 import { User } from '@/users/schemas/user.schema';
+import {
+  PortfolioPost,
+  PortfolioPostDocument,
+} from '@/users/schemas/portfolio-post.schema';
 
 interface FindManyParams {
   keyword?: string;
@@ -66,6 +70,8 @@ export class ProductsService {
     @InjectModel(Product.name) private productModel: Model<ProductDocument>,
     @InjectModel(Order.name) private orderModel: Model<Order>,
     @InjectModel(User.name) private userModel: Model<User>,
+    @InjectModel(PortfolioPost.name)
+    private portfolioPostModel: Model<PortfolioPostDocument>,
     @Inject(forwardRef(() => UsersService))
     private usersService: UsersService,
     @Optional()
@@ -74,6 +80,249 @@ export class ProductsService {
     @Optional()
     private facebookPostingService?: FacebookPostingService,
   ) {}
+
+  private resolveArtistId(
+    product: ProductDocument,
+  ): Types.ObjectId | null {
+    const rawUser = product.user as any;
+
+    if (!rawUser) {
+      return null;
+    }
+
+    if (rawUser instanceof Types.ObjectId) {
+      return rawUser;
+    }
+
+    if (typeof rawUser === 'string') {
+      return Types.ObjectId.isValid(rawUser)
+        ? new Types.ObjectId(rawUser)
+        : null;
+    }
+
+    const candidate = rawUser._id ?? rawUser.id;
+
+    if (!candidate) {
+      return null;
+    }
+
+    if (candidate instanceof Types.ObjectId) {
+      return candidate;
+    }
+
+    if (typeof candidate === 'string' && Types.ObjectId.isValid(candidate)) {
+      return new Types.ObjectId(candidate);
+    }
+
+    return null;
+  }
+
+  private async buildProductCaption(product: ProductDocument): Promise<string | null> {
+    const parts: string[] = [];
+    const description = typeof product.description === 'string' ? product.description.trim() : '';
+
+    if (description) {
+      parts.push(description);
+    }
+
+    const details: string[] = [];
+
+    // Determine category text - need to handle ObjectId references
+    let categoryText = '';
+    
+    if (product.categoryStructure?.main || product.categoryStructure?.sub) {
+      // If categoryStructure exists, use it
+      const main = product.categoryStructure?.main ?? '';
+      const sub = product.categoryStructure?.sub ?? '';
+      categoryText = sub ? `${main} / ${sub}` : main;
+    } else if (product.subCategory || product.mainCategory) {
+      // If we have category references, populate them to get the names
+      try {
+        const populatedProduct = await this.productModel
+          .findById(product._id)
+          .populate('mainCategory')
+          .populate('subCategory')
+          .lean();
+        
+        if (populatedProduct) {
+          const mainCat = populatedProduct.mainCategory as any;
+          const subCat = populatedProduct.subCategory as any;
+          
+          if (subCat?.name) {
+            categoryText = mainCat?.name ? `${mainCat.name} / ${subCat.name}` : subCat.name;
+          } else if (mainCat?.name) {
+            categoryText = mainCat.name;
+          }
+        }
+      } catch (error) {
+        console.error('Error populating categories for caption:', error);
+      }
+    }
+    
+    // Fall back to legacy category field if nothing else worked
+    if (!categoryText && product.category) {
+      categoryText = product.category;
+    }
+    
+    if (categoryText) {
+      details.push(`Category: ${categoryText}`);
+    }
+
+    if (Array.isArray(product.materials) && product.materials.length) {
+      details.push(`Materials: ${product.materials.join(', ')}`);
+    }
+
+    if (product.dimensions) {
+      const dimensionsText = this.formatDimensions(product.dimensions);
+      if (dimensionsText) {
+        details.push(`Dimensions: ${dimensionsText}`);
+      }
+    }
+
+    if (Array.isArray(product.sizes) && product.sizes.length) {
+      details.push(`Sizes: ${product.sizes.join(', ')}`);
+    }
+
+    if (Array.isArray(product.colors) && product.colors.length) {
+      details.push(`Colors: ${product.colors.join(', ')}`);
+    }
+
+    if (Array.isArray(product.ageGroups) && product.ageGroups.length) {
+      details.push(`Age groups: ${product.ageGroups.join(', ')}`);
+    }
+
+    if (details.length) {
+      if (parts.length) {
+        parts.push('');
+      }
+      parts.push('Listing Details:');
+      details.forEach((detail) => parts.push(`- ${detail}`));
+    }
+
+    if (!parts.length) {
+      return null;
+    }
+
+    let caption = parts.join('\n');
+    if (caption.length > 4000) {
+      caption = `${caption.slice(0, 3997)}...`;
+    }
+
+    return caption;
+  }
+
+  private formatDimensions(dimensions: {
+    width?: number;
+    height?: number;
+    depth?: number;
+  }): string | null {
+    const { width, height, depth } = dimensions;
+    const numeric = [width, height, depth].filter(
+      (value) => typeof value === 'number' && !Number.isNaN(value),
+    );
+
+    if (!numeric.length) {
+      return null;
+    }
+
+    if (
+      typeof width === 'number' &&
+      typeof height === 'number' &&
+      typeof depth === 'number'
+    ) {
+      return `${width} x ${height} x ${depth} cm`;
+    }
+
+    if (typeof width === 'number' && typeof height === 'number') {
+      return `${width} x ${height} cm`;
+    }
+
+    if (typeof height === 'number') {
+      return `${height} cm (height)`;
+    }
+
+    if (typeof width === 'number') {
+      return `${width} cm (width)`;
+    }
+
+    if (typeof depth === 'number') {
+      return `${depth} cm (depth)`;
+    }
+
+    return null;
+  }
+
+  private async ensurePortfolioPostForProduct(
+    product: ProductDocument,
+  ): Promise<void> {
+    if (!this.portfolioPostModel) return;
+
+    const artistId = this.resolveArtistId(product);
+    if (!artistId) {
+      console.warn(
+        `Unable to resolve artistId for product ${product._id.toString()} when creating portfolio post`,
+      );
+      return;
+    }
+
+    const existing = await this.portfolioPostModel
+      .findOne({ productId: product._id })
+      .lean();
+
+    if (existing) {
+      return;
+    }
+
+    const rawImages = Array.isArray(product.images) ? product.images : [];
+    const images = rawImages
+      .filter((url) => typeof url === 'string' && url.trim())
+      .map((url, index) => ({
+        url: url.trim(),
+        order: index,
+        metadata: {
+          source: 'product-image',
+          productId: product._id.toString(),
+        },
+      }));
+
+    if (!images.length) {
+      return;
+    }
+
+    const caption = await this.buildProductCaption(product);
+
+    const rawCreatedAt = (product as any)?.createdAt;
+    const publishedAt = rawCreatedAt
+      ? new Date(rawCreatedAt)
+      : new Date();
+
+    try {
+      await this.portfolioPostModel.create({
+        artistId,
+        productId: product._id,
+        images,
+        caption,
+        tags: Array.isArray(product.hashtags) ? product.hashtags.slice(0, 20) : [],
+        isFeatured: false,
+        likesCount: 0,
+        commentsCount: 0,
+        publishedAt,
+      });
+    } catch (error) {
+      if (
+        (error as any)?.code === 11000 ||
+        (error as any)?.message?.includes('duplicate key')
+      ) {
+        // Portfolio post already exists, ignore race condition.
+        return;
+      }
+
+      console.error(
+        `Failed to create portfolio post for product ${product._id.toString()}:`,
+        error,
+      );
+    }
+  }
 
   async findTopRated(): Promise<ProductDocument[]> {
     const products = await this.productModel
@@ -713,8 +962,10 @@ export class ProductsService {
     }
 
     // Auto-post to Facebook Page on approval (best-effort, non-blocking)
+    // Only enabled in production environment
     if (status === ProductStatus.APPROVED) {
-      const haveService = Boolean(this.facebookPostingService);
+      const isProduction = process.env.NODE_ENV === 'production';
+      const haveService = this.facebookPostingService;
       const havePageId = Boolean(
         process.env.FACEBOOK_POSTS_PAGE_ID || process.env.FACEBOOK_PAGE_ID,
       );
@@ -725,7 +976,7 @@ export class ProductsService {
       const autoPostEnabled =
         (process.env.FACEBOOK_AUTO_POST || 'true').toLowerCase() !== 'false';
 
-      if (haveService && havePageId && haveToken && autoPostEnabled) {
+      if (isProduction && haveService && havePageId && haveToken && autoPostEnabled) {
         try {
           // best-effort, don't await to not block response
           this.facebookPostingService
@@ -753,6 +1004,7 @@ export class ProductsService {
         }
       } else {
         console.log('[FB] Auto-post skipped', {
+          isProduction,
           haveService,
           havePageId,
           haveToken,
@@ -858,7 +1110,10 @@ export class ProductsService {
     await this.productModel.deleteMany({});
   }
 
-  async create(productData: Partial<Product>): Promise<ProductDocument> {
+  async create(
+    productData: Partial<Product>,
+    options?: { addToPortfolio?: boolean },
+  ): Promise<ProductDocument> {
     try {
       // Convert string IDs to ObjectIds for category references
       const data = { ...productData };
@@ -925,6 +1180,16 @@ export class ProductsService {
 
       // Save the product
       await product.save();
+
+      const shouldCreatePortfolio =
+        options?.addToPortfolio === undefined
+          ? true
+          : options.addToPortfolio;
+
+      if (shouldCreatePortfolio) {
+        await this.ensurePortfolioPostForProduct(product);
+      }
+
       return product;
     } catch (error) {
       console.error('Error creating product:', error);

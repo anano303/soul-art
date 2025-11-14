@@ -14,6 +14,10 @@ import {
 
 import { User, UserDocument } from '../schemas/user.schema';
 import { Product, ProductStatus } from '../../products/schemas/product.schema';
+import {
+  PortfolioPost,
+  PortfolioPostDocument,
+} from '../schemas/portfolio-post.schema';
 import { hashPassword } from '@/utils/password';
 import { generateUsers } from '@/utils/seed-users';
 import { PaginatedResponse } from '@/types';
@@ -37,6 +41,8 @@ export class UsersService {
   constructor(
     @InjectModel(User.name) private userModel: Model<User>,
     @InjectModel(Product.name) private productModel: Model<Product>,
+    @InjectModel(PortfolioPost.name)
+    private portfolioPostModel: Model<PortfolioPostDocument>,
     private readonly awsS3Service: AwsS3Service,
     private readonly userCloudinaryService: UserCloudinaryService,
     private readonly balanceService: BalanceService,
@@ -637,8 +643,16 @@ export class UsersService {
       };
 
       const skip = (page - 1) * limit;
+      const portfolioFilter = {
+        artistId: artist._id,
+      };
 
-      const [products, totalProducts] = await Promise.all([
+      const [
+        products,
+        totalProducts,
+        portfolioPosts,
+        totalPortfolioPosts,
+      ] = await Promise.all([
         this.productModel
           .find(productsFilter)
           .sort({ createdAt: -1 })
@@ -664,6 +678,55 @@ export class UsersService {
           ])
           .lean(),
         this.productModel.countDocuments(productsFilter),
+        this.portfolioPostModel
+          .find(portfolioFilter)
+          .populate({
+            path: 'productId',
+            select: 'status countInStock variants',
+          })
+          .sort({ 
+            isFeatured: -1, 
+            // For featured items, sort by updatedAt (when they were marked as featured)
+            // For non-featured items, this doesn't matter as publishedAt takes precedence
+            updatedAt: -1, 
+            // publishedAt maintains original chronological order for non-featured items
+            publishedAt: -1, 
+            createdAt: -1, 
+            _id: -1 
+          })
+          .limit(60)
+          .select([
+            'productId',
+            'images',
+            'caption',
+            'tags',
+            'likesCount',
+            'commentsCount',
+            'isFeatured',
+            'updatedAt',
+            'publishedAt',
+            'createdAt',
+          ])
+          .lean()
+          .then((posts) => {
+            // Post-process to apply conditional sorting:
+            // Featured items: sort by updatedAt
+            // Non-featured items: sort by publishedAt only
+            const featured = posts.filter(p => (p as any).isFeatured).sort((a, b) => {
+              const aTime = new Date((a as any).updatedAt || (a as any).createdAt).getTime();
+              const bTime = new Date((b as any).updatedAt || (b as any).createdAt).getTime();
+              return bTime - aTime;
+            });
+            
+            const nonFeatured = posts.filter(p => !(p as any).isFeatured).sort((a, b) => {
+              const aTime = new Date((a as any).publishedAt || (a as any).createdAt).getTime();
+              const bTime = new Date((b as any).publishedAt || (b as any).createdAt).getTime();
+              return bTime - aTime;
+            });
+            
+            return [...featured, ...nonFeatured];
+          }),
+        this.portfolioPostModel.countDocuments(portfolioFilter),
       ]);
 
       const storeLogo = artist.storeLogoPath ?? artist.storeLogo ?? null;
@@ -674,6 +737,41 @@ export class UsersService {
           : typeof artist.artistBio === 'object' && artist.artistBio !== null
             ? { ...artist.artistBio }
             : {};
+
+      const formattedPortfolioPosts = (portfolioPosts as any[]).map((post) => {
+        return {
+          id: (post._id as Types.ObjectId).toString(),
+          productId: post.productId || null,
+          caption: post.caption || null,
+          tags: Array.isArray(post.tags) ? post.tags : [],
+          images: Array.isArray(post.images) ? post.images : [],
+          likesCount: post.likesCount || 0,
+          commentsCount: post.commentsCount || 0,
+          isFeatured: post.isFeatured || false,
+          publishedAt: post.publishedAt || post.createdAt || null,
+        };
+      });
+
+      const derivedGalleryUrls = formattedPortfolioPosts.flatMap((post) =>
+        post.images
+          .map((image) => image.url)
+          .filter((url) => typeof url === 'string' && this.isCloudinaryUrl(url)),
+      );
+
+      const uniqueGalleryUrls: string[] = [];
+      const seenGalleryUrls = new Set<string>();
+      derivedGalleryUrls.forEach((url) => {
+        if (!seenGalleryUrls.has(url)) {
+          seenGalleryUrls.add(url);
+          uniqueGalleryUrls.push(url);
+        }
+      });
+
+      const legacyGallery = (artist.artistGallery ?? []).filter((url: string) =>
+        this.isCloudinaryUrl(url),
+      );
+
+      const galleryUrls = uniqueGalleryUrls.length ? uniqueGalleryUrls : legacyGallery;
 
       return {
         artist: {
@@ -690,9 +788,7 @@ export class UsersService {
           followersCount: artist.followersCount ?? 0,
           followingCount: artist.followingCount ?? 0,
           artistHighlights: artist.artistHighlights ?? [],
-          artistGallery: (artist.artistGallery ?? []).filter((url: string) =>
-            this.isCloudinaryUrl(url),
-          ),
+          artistGallery: galleryUrls,
           storeLogo,
           artistRating: artist.artistRating ?? 0,
           artistReviewsCount: artist.artistReviewsCount ?? 0,
@@ -724,6 +820,10 @@ export class UsersService {
             maxDeliveryDays: product.maxDeliveryDays,
             createdAt: (product as any).createdAt ?? null,
           })),
+        },
+        portfolio: {
+          total: totalPortfolioPosts,
+          posts: formattedPortfolioPosts,
         },
       };
     } catch (error) {
@@ -1288,12 +1388,28 @@ export class UsersService {
         throw new ConflictException('User with this email already exists');
       }
 
-      // Generate unique artist slug
-      const artistSlug = await this.generateUniqueArtistSlug(
-        dto.storeName,
-        dto.email,
-        dto.storeName, // Use storeName as fallback name
-      );
+      let resolvedArtistSlug: string;
+
+      if (dto.artistSlug) {
+        const normalizedSlug = this.normalizeArtistSlug(dto.artistSlug);
+        const slugCheck = await this.isArtistSlugAvailable(normalizedSlug);
+
+        if (!slugCheck.available) {
+          throw new ConflictException(
+            slugCheck.reason === 'reserved'
+              ? 'This artist slug is reserved'
+              : 'This artist slug is already taken',
+          );
+        }
+
+        resolvedArtistSlug = normalizedSlug;
+      } else {
+        resolvedArtistSlug = await this.generateUniqueArtistSlug(
+          dto.storeName,
+          dto.email,
+          dto.storeName,
+        );
+      }
 
       const sellerData = {
         ...dto,
@@ -1301,7 +1417,7 @@ export class UsersService {
         email: dto.email.toLowerCase(),
         role: Role.Seller,
         password: dto.password,
-        artistSlug, // Add the generated slug
+        artistSlug: resolvedArtistSlug,
       };
 
       return await this.create(sellerData);
@@ -1326,12 +1442,28 @@ export class UsersService {
         throw new ConflictException('User with this email already exists');
       }
 
-      // Generate unique artist slug
-      const artistSlug = await this.generateUniqueArtistSlug(
-        dto.storeName,
-        dto.email,
-        dto.ownerFirstName + ' ' + dto.ownerLastName, // Use ownerFirstName and ownerLastName as fallback name
-      );
+      let resolvedArtistSlug: string;
+
+      if (dto.artistSlug) {
+        const normalizedSlug = this.normalizeArtistSlug(dto.artistSlug);
+        const slugCheck = await this.isArtistSlugAvailable(normalizedSlug);
+
+        if (!slugCheck.available) {
+          throw new ConflictException(
+            slugCheck.reason === 'reserved'
+              ? 'This artist slug is reserved'
+              : 'This artist slug is already taken',
+          );
+        }
+
+        resolvedArtistSlug = normalizedSlug;
+      } else {
+        resolvedArtistSlug = await this.generateUniqueArtistSlug(
+          dto.storeName,
+          dto.email,
+          dto.ownerFirstName + ' ' + dto.ownerLastName,
+        );
+      }
 
       // Create the seller account first
       const sellerData = {
@@ -1340,7 +1472,7 @@ export class UsersService {
         email: dto.email.toLowerCase(),
         role: Role.Seller,
         password: dto.password,
-        artistSlug, // Add the generated slug
+        artistSlug: resolvedArtistSlug,
       };
 
       const seller = await this.create(sellerData);
@@ -1722,6 +1854,36 @@ export class UsersService {
           );
         }
       }
+
+      // Resolve artist slug either from user input or auto-generated suggestion
+      const requestedSlug = becomeSellerDto.artistSlug?.trim();
+      let resolvedArtistSlug: string;
+
+      if (requestedSlug) {
+        const normalizedSlug = this.normalizeArtistSlug(requestedSlug);
+        const slugCheck = await this.isArtistSlugAvailable(
+          normalizedSlug,
+          userId,
+        );
+
+        if (!slugCheck.available) {
+          throw new ConflictException(
+            slugCheck.reason === 'reserved'
+              ? 'This artist slug is reserved'
+              : 'This artist slug is already taken',
+          );
+        }
+
+        resolvedArtistSlug = normalizedSlug;
+      } else {
+        resolvedArtistSlug = await this.generateUniqueArtistSlug(
+          becomeSellerDto.storeName,
+          user.email ?? undefined,
+          user.name ?? becomeSellerDto.storeName,
+        );
+      }
+
+      updateData.artistSlug = resolvedArtistSlug;
 
       // Update user in database
       const updatedUser = await this.userModel.findByIdAndUpdate(

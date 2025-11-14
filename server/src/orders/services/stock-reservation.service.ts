@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel, InjectConnection } from '@nestjs/mongoose';
-import { Model, Connection } from 'mongoose';
+import { Model, Connection, ClientSession } from 'mongoose';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { Order, OrderDocument } from '../schemas/order.schema';
 import { Product } from '../../products/schemas/product.schema';
@@ -94,7 +94,10 @@ export class StockReservationService {
   /**
    * Refund stock for a specific order - with safety checks
    */
-  private async refundStockForOrder(order: OrderDocument, session: any) {
+  private async refundStockForOrder(
+    order: OrderDocument,
+    session: ClientSession,
+  ) {
     // Ensure order is in a state where stock refund is appropriate
     if (order.isPaid || order.status === 'cancelled') {
       this.logger.warn(
