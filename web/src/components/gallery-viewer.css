@@ -435,6 +435,8 @@
   overflow-y: auto;
   padding: 0;
   flex-direction: column;
+  will-change: transform, opacity;
+  touch-action: pan-y;
 }
 
 .gallery-viewer__mobile-header-bar {

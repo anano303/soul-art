@@ -87,11 +87,18 @@ export function GalleryViewer({
   >(null);
   const [menuOpen, setMenuOpen] = useState<string | null>(null);
   const [editingPost, setEditingPost] = useState<{postId: string; caption: string} | null>(null);
+  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const mobileContainerRef = useRef<HTMLDivElement>(null);
   const mobileViewRef = useRef<HTMLDivElement>(null);
+  const headerRef = useRef<HTMLDivElement>(null);
   const postRefs = useRef<(HTMLDivElement | null)[]>([]);
   const imageListRefs = useRef<(HTMLDivElement | null)[]>([]);
   const touchDataRef = useRef<
     { x: number; y: number; postIndex: number } | null
+  >(null);
+  const dragDataRef = useRef<
+    { startX: number; startY: number; startScrollTop: number; canDrag: boolean; dragFromHeader: boolean } | null
   >(null);
 
   useEffect(() => {
@@ -431,6 +438,99 @@ export function GalleryViewer({
     [goToNextImage, goToPrevImage]
   );
 
+  // Drag-to-close handlers (Instagram style - vertical from header/top, horizontal right swipe)
+  const handleDragStart = useCallback((event: TouchEvent<HTMLDivElement>) => {
+    const scrollContainer = mobileContainerRef.current;
+    const header = headerRef.current;
+    if (!scrollContainer) return;
+
+    const touch = event.touches[0];
+    const scrollTop = scrollContainer.scrollTop;
+    
+    // Check if touch started on header
+    const touchTarget = event.target as HTMLElement;
+    const dragFromHeader = header?.contains(touchTarget) || false;
+    
+    // Allow drag-to-close when: 1) from header, or 2) scrolled to the very top (with 1px tolerance)
+    dragDataRef.current = {
+      startX: touch.clientX,
+      startY: touch.clientY,
+      startScrollTop: scrollTop,
+      canDrag: dragFromHeader || scrollTop <= 1,
+      dragFromHeader,
+    };
+
+    setIsDragging(false);
+    setDragOffset({ x: 0, y: 0 });
+  }, []);
+
+  const handleDragMove = useCallback((event: TouchEvent<HTMLDivElement>) => {
+    const dragData = dragDataRef.current;
+    if (!dragData) return;
+
+    const scrollContainer = mobileContainerRef.current;
+    if (!scrollContainer) return;
+
+    const touch = event.touches[0];
+    const deltaX = touch.clientX - dragData.startX;
+    const deltaY = touch.clientY - dragData.startY;
+
+    // Only proceed if there's actual movement
+    if (Math.abs(deltaX) < 5 && Math.abs(deltaY) < 5) return;
+
+    const currentScrollTop = scrollContainer.scrollTop;
+
+    // Check if we can drag vertically (from header or at top)
+    const canDragVertical = dragData.dragFromHeader || currentScrollTop <= 1;
+
+    // If already dragging, always prevent default and continue dragging in both directions
+    if (isDragging) {
+      event.preventDefault();
+      
+      setDragOffset({ 
+        x: Math.max(0, deltaX),
+        y: Math.max(0, deltaY) // Once dragging, allow vertical movement regardless
+      });
+      return;
+    }
+
+    // If trying to scroll up (deltaY < 0) when not at top, allow normal scrolling
+    if (deltaY < 0 && currentScrollTop > 1) {
+      return;
+    }
+
+    // Start dragging if: dragging right (>10px), OR dragging down when allowed (>10px)
+    const shouldStartDrag = (deltaX > 10) || (deltaY > 10 && canDragVertical);
+
+    if (shouldStartDrag) {
+      event.preventDefault();
+      setIsDragging(true);
+      
+      setDragOffset({ 
+        x: Math.max(0, deltaX),
+        y: Math.max(0, deltaY)
+      });
+    }
+  }, [isDragging]);
+
+  const handleDragEnd = useCallback(() => {
+    const currentOffset = dragOffset;
+    
+    setIsDragging(false);
+    dragDataRef.current = null;
+
+    // Close if dragged down more than 150px OR dragged right more than 100px
+    const shouldClose = currentOffset.y > 150 || currentOffset.x > 100;
+    
+    if (shouldClose) {
+      setDragOffset({ x: 0, y: 0 });
+      onClose();
+    } else {
+      // Snap back
+      setDragOffset({ x: 0, y: 0 });
+    }
+  }, [dragOffset, onClose]);
+
   useEffect(() => {
     if (!isMobile || !isOpen) {
       return;
@@ -513,9 +613,32 @@ export function GalleryViewer({
   };
 
   if (isMobile) {
+    // Calculate transform based on drag direction
+    const hasDrag = dragOffset.x > 0 || dragOffset.y > 0;
+    const dragTransform = hasDrag 
+      ? `translate(${dragOffset.x}px, ${dragOffset.y}px)` 
+      : 'translate(0, 0)';
+    
+    // Calculate opacity based on total drag distance
+    const totalDrag = Math.max(dragOffset.x, dragOffset.y);
+    const dragOpacity = hasDrag ? Math.max(0, 1 - totalDrag / 300) : 1;
+    const dragTransition = isDragging ? 'none' : 'transform 0.3s ease-out, opacity 0.3s ease-out';
+
     return (
-      <div className="gallery-viewer gallery-viewer--mobile">
-        <div className="gallery-viewer__mobile-header-bar">
+      <div 
+        className="gallery-viewer gallery-viewer--mobile"
+        ref={mobileContainerRef}
+        style={{
+          transform: dragTransform,
+          opacity: dragOpacity,
+          transition: dragTransition,
+          overflow: isDragging ? 'hidden' : 'auto',
+        }}
+        onTouchStart={handleDragStart}
+        onTouchMove={handleDragMove}
+        onTouchEnd={handleDragEnd}
+      >
+        <div className="gallery-viewer__mobile-header-bar" ref={headerRef}>
           <button
             className="gallery-viewer__back-btn"
             onClick={onClose}
