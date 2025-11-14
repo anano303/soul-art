@@ -586,7 +586,7 @@ export function GalleryViewer({
 
     const postElement = postRefs.current[currentPostIndex];
     if (postElement) {
-      postElement.scrollIntoView({ behavior: "smooth", block: "start" });
+      postElement.scrollIntoView({ behavior: "auto", block: "start" });
     }
 
     const container = imageListRefs.current[currentPostIndex];
