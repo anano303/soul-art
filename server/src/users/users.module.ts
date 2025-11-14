@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { forwardRef } from '@nestjs/common';
 import { AuthController } from './controller/auth.controller';
+import { ExploreController } from './controller/explore.controller';
 import { User, UserSchema } from './schemas/user.schema';
 import { GalleryLike, GalleryLikeSchema } from './schemas/gallery-like.schema';
 import { GalleryComment, GalleryCommentSchema } from './schemas/gallery-comment.schema';
@@ -95,6 +96,7 @@ import { PaymentsModule } from '../payments/payments.module';
     ArtistController,
     GalleryInteractionController,
     PortfolioController,
+    ExploreController,
   ],
   providers: [
     UsersService,

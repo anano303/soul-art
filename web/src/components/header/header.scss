@@ -49,6 +49,31 @@ header {
     }
   }
 
+  .header-back-button {
+    background: none;
+    border: none;
+    color: #f2ebeb;
+    cursor: pointer;
+    padding: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 0.2s ease;
+    -webkit-tap-highlight-color: transparent;
+
+    &:hover {
+      opacity: 0.8;
+    }
+
+    &:active {
+      opacity: 0.6;
+    }
+
+    svg {
+      display: block;
+    }
+  }
+
   .main-nav {
     flex-grow: 2;
     margin-left: 20px;

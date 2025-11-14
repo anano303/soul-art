@@ -1,0 +1,75 @@
+.mobile-bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  background: white;
+  border-top: 1px solid #dbdbdb;
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform;
+  padding-bottom: env(safe-area-inset-bottom, 0);
+}
+
+.mobile-bottom-nav--visible {
+  transform: translateY(0);
+}
+
+.mobile-bottom-nav--hidden {
+  transform: translateY(100%);
+}
+
+.mobile-bottom-nav__container {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  height: 56px;
+  padding: 0 8px;
+  max-width: 100%;
+}
+
+.mobile-bottom-nav__tab {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  flex: 1;
+  height: 100%;
+  text-decoration: none;
+  color: #8e8e8e;
+  transition: color 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+  cursor: pointer;
+}
+
+.mobile-bottom-nav__tab:active {
+  opacity: 0.7;
+}
+
+.mobile-bottom-nav__tab--active {
+  color: #262626;
+}
+
+.mobile-bottom-nav__icon {
+  transition: transform 0.2s ease;
+}
+
+.mobile-bottom-nav__tab:active .mobile-bottom-nav__icon {
+  transform: scale(0.9);
+}
+
+.mobile-bottom-nav__label {
+  font-size: 10px;
+  font-weight: 500;
+  line-height: 1;
+  text-align: center;
+}
+
+/* Ensure body has bottom padding when nav is visible on mobile */
+@media (max-width: 768px) {
+  body {
+    padding-bottom: calc(56px + env(safe-area-inset-bottom, 0));
+  }
+}

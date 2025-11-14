@@ -33,6 +33,7 @@ import GoogleAnalytics from "@/components/GoogleAnalytics";
 import VercelAnalytics from "@/components/VercelAnalytics";
 import MetaPixel from "@/components/MetaPixel";
 import { FloatingCartIcon } from "@/components/floating-cart-icon/floating-cart-icon";
+import { MobileBottomNav } from "@/components/mobile-bottom-nav/mobile-bottom-nav";
 import { PWAInstallPrompt } from "@/components/pwa-install-prompt/pwa-install-prompt";
 import { NetworkStatus } from "@/components/network-status/network-status";
 import { PushNotificationManager } from "@/components/push-notifications/push-notifications";
@@ -360,6 +361,7 @@ export default function RootLayout({
                     <div style={{ flex: 1 }}>{children}</div>
                     <Footer />
                     <FloatingCartIcon />
+                    <MobileBottomNav />
                   </div>
                 </LanguageProvider>
               </CheckoutProvider>

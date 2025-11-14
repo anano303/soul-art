@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState, useRef, useCallback } from "react";
+import { createPortal } from "react-dom";
 import type { TouchEvent } from "react";
 import {
   X,
@@ -36,6 +37,19 @@ export interface GalleryViewerPost {
   hideBuyButton: boolean;
   isSold: boolean;
   images: GalleryViewerImage[];
+  artist?: {
+    id: string;
+    username?: string;
+    artistName?: string;
+    artistSlug?: string;
+    profileImageUrl?: string;
+    name?: string;
+    storeName?: string;
+    storeLogo?: string;
+    storeLogoPath?: string;
+  };
+  likesCount?: number;
+  commentsCount?: number;
 }
 
 interface GalleryViewerProps {
@@ -59,6 +73,7 @@ interface GalleryViewerProps {
   ) => void;
   onPostDelete?: (postId: string) => void;
   onPostEdit?: (postId: string, newCaption: string) => void;
+  hideHeaderText?: boolean;
 }
 
 export function GalleryViewer({
@@ -74,6 +89,7 @@ export function GalleryViewer({
   updateStats,
   onPostDelete,
   onPostEdit,
+  hideHeaderText = false,
 }: GalleryViewerProps) {
   const { language } = useLanguage();
   const { user } = useUser();
@@ -110,6 +126,41 @@ export function GalleryViewer({
     window.addEventListener("resize", checkMobile);
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
+
+  // Add non-passive touchmove listener to allow preventDefault
+  useEffect(() => {
+    const container = mobileContainerRef.current;
+    if (!container) return;
+
+    const handleTouchMove = (event: globalThis.TouchEvent) => {
+      const dragData = dragDataRef.current;
+      if (!dragData || !event.cancelable) return;
+
+      const touch = event.touches[0];
+      const deltaX = touch.clientX - dragData.startX;
+      const deltaY = touch.clientY - dragData.startY;
+
+      const currentScrollTop = container.scrollTop;
+      const canDragVertical = dragData.dragFromHeader || currentScrollTop <= 1;
+
+      // Only prevent if:
+      // 1. Already actively dragging, OR
+      // 2. Clear horizontal drag intent (>10px horizontal, less vertical), OR
+      // 3. Clear vertical drag intent from top/header (>10px vertical, can drag)
+      if (isDragging) {
+        event.preventDefault();
+      } else if (Math.abs(deltaX) > 10 && Math.abs(deltaX) > Math.abs(deltaY)) {
+        // Horizontal drag
+        event.preventDefault();
+      } else if (Math.abs(deltaY) > 10 && deltaY > 0 && canDragVertical && Math.abs(deltaY) > Math.abs(deltaX)) {
+        // Vertical drag down from top
+        event.preventDefault();
+      }
+    };
+
+    container.addEventListener('touchmove', handleTouchMove, { passive: false });
+    return () => container.removeEventListener('touchmove', handleTouchMove);
+  }, [isDragging]);
 
   useEffect(() => {
     if (posts.length === 0) {
@@ -483,10 +534,8 @@ export function GalleryViewer({
     // Check if we can drag vertically (from header or at top)
     const canDragVertical = dragData.dragFromHeader || currentScrollTop <= 1;
 
-    // If already dragging, always prevent default and continue dragging in both directions
+    // If already dragging, continue dragging in both directions
     if (isDragging) {
-      event.preventDefault();
-      
       setDragOffset({ 
         x: Math.max(0, deltaX),
         y: Math.max(0, deltaY) // Once dragging, allow vertical movement regardless
@@ -503,7 +552,6 @@ export function GalleryViewer({
     const shouldStartDrag = (deltaX > 10) || (deltaY > 10 && canDragVertical);
 
     if (shouldStartDrag) {
-      event.preventDefault();
       setIsDragging(true);
       
       setDragOffset({ 
@@ -625,19 +673,20 @@ export function GalleryViewer({
     const dragTransition = isDragging ? 'none' : 'transform 0.3s ease-out, opacity 0.3s ease-out';
 
     return (
-      <div 
-        className="gallery-viewer gallery-viewer--mobile"
-        ref={mobileContainerRef}
-        style={{
-          transform: dragTransform,
-          opacity: dragOpacity,
-          transition: dragTransition,
-          overflow: isDragging ? 'hidden' : 'auto',
-        }}
-        onTouchStart={handleDragStart}
-        onTouchMove={handleDragMove}
-        onTouchEnd={handleDragEnd}
-      >
+      <>
+        <div 
+          className="gallery-viewer gallery-viewer--mobile"
+          ref={mobileContainerRef}
+          style={{
+            transform: dragTransform,
+            opacity: dragOpacity,
+            transition: dragTransition,
+            overflow: isDragging ? 'hidden' : 'auto',
+          }}
+          onTouchStart={handleDragStart}
+          onTouchMove={handleDragMove}
+          onTouchEnd={handleDragEnd}
+        >
         <div className="gallery-viewer__mobile-header-bar" ref={headerRef}>
           <button
             className="gallery-viewer__back-btn"
@@ -646,14 +695,16 @@ export function GalleryViewer({
           >
             <ChevronLeft size={24} />
           </button>
-          <div className="gallery-viewer__header-info">
-            <h2 className="gallery-viewer__header-title">
-              {language === "en" ? "Portfolio" : "პორტფოლიო"}
-            </h2>
-            <p className="gallery-viewer__header-subtitle">
-              {artist.storeName || artist.name}
-            </p>
-          </div>
+          {!hideHeaderText && (
+            <div className="gallery-viewer__header-info">
+              <h2 className="gallery-viewer__header-title">
+                {language === "en" ? "Portfolio" : "პორტფოლიო"}
+              </h2>
+              <p className="gallery-viewer__header-subtitle">
+                {artist.storeName || artist.name}
+              </p>
+            </div>
+          )}
           <div className="gallery-viewer__header-spacer" />
         </div>
 
@@ -694,10 +745,10 @@ export function GalleryViewer({
                 }}
               >
                 <div className="gallery-viewer__mobile-header">
-                  {artist.storeLogo && (
+                  {(post.artist?.profileImageUrl || post.artist?.storeLogo || post.artist?.storeLogoPath || artist.storeLogo) && (
                     <CloudinaryImage
-                      src={artist.storeLogo}
-                      alt={artist.storeName || artist.name}
+                      src={post.artist?.profileImageUrl || post.artist?.storeLogo || post.artist?.storeLogoPath || artist.storeLogo || ''}
+                      alt={post.artist?.artistName || post.artist?.storeName || post.artist?.name || post.artist?.username || artist.storeName || artist.name}
                       width={32}
                       height={32}
                       className="gallery-viewer__mobile-avatar"
@@ -705,7 +756,7 @@ export function GalleryViewer({
                   )}
                   <div className="gallery-viewer__mobile-user-info">
                     <h3 className="gallery-viewer__mobile-username">
-                      {artist.storeName || artist.name}
+                      {post.artist?.artistName || post.artist?.storeName || post.artist?.name || post.artist?.username || artist.storeName || artist.name}
                     </h3>
                     <p className="gallery-viewer__mobile-date">{creationDate}</p>
                   </div>
@@ -861,18 +912,20 @@ export function GalleryViewer({
                     className="gallery-viewer__mobile-comments-preview"
                     onClick={() => setMobileCommentsOpen({ imageUrl })}
                   >
-                    <GalleryComments
-                      artistId={artist.id}
-                      imageUrl={imageUrl}
-                      initialCommentsCount={imageStats.commentsCount}
-                      onCommentsCountChange={(commentsCount) => {
-                        updateStats(imageUrl, { commentsCount });
-                      }}
-                      autoExpanded={false}
-                      previewMode
-                      maxComments={3}
-                      showButton={false}
-                    />
+                    {index === currentPostIndex && (
+                      <GalleryComments
+                        artistId={post.artist?.id || artist.id}
+                        imageUrl={imageUrl}
+                        initialCommentsCount={imageStats.commentsCount}
+                        onCommentsCountChange={(commentsCount) => {
+                          updateStats(imageUrl, { commentsCount });
+                        }}
+                        autoExpanded={false}
+                        previewMode
+                        maxComments={3}
+                        showButton={false}
+                      />
+                    )}
                   </div>
                 </div>
 
@@ -892,7 +945,7 @@ export function GalleryViewer({
           })}
         </div>
 
-        {mobileCommentsOpen && (
+        {mobileCommentsOpen && typeof window !== 'undefined' && createPortal(
           <>
             <div
               className="gallery-viewer__mobile-comments-backdrop"
@@ -913,7 +966,7 @@ export function GalleryViewer({
 
               <div className="gallery-viewer__mobile-comments-content">
                 <GalleryComments
-                  artistId={artist.id}
+                  artistId={posts.find(p => p.images?.some(img => img.url === mobileCommentsOpen.imageUrl))?.artist?.id || artist.id}
                   imageUrl={mobileCommentsOpen.imageUrl}
                   initialCommentsCount={
                     getStatsForImage(mobileCommentsOpen.imageUrl).commentsCount
@@ -928,11 +981,13 @@ export function GalleryViewer({
                 />
               </div>
             </div>
-          </>
+          </>,
+          document.body
         )}
       </div>
-    );
-  }
+    </>
+  );
+}
 
   return (
     <>
@@ -1069,10 +1124,10 @@ export function GalleryViewer({
         <div className="gallery-viewer__sidebar">
           <div className="gallery-viewer__header">
             <div className="gallery-viewer__artist-info">
-              {artist.storeLogo && (
+              {(currentPost.artist?.profileImageUrl || currentPost.artist?.storeLogo || currentPost.artist?.storeLogoPath || artist.storeLogo) && (
                 <CloudinaryImage
-                  src={artist.storeLogo}
-                  alt={artist.storeName || artist.name}
+                  src={currentPost.artist?.profileImageUrl || currentPost.artist?.storeLogo || currentPost.artist?.storeLogoPath || artist.storeLogo || ''}
+                  alt={currentPost.artist?.artistName || currentPost.artist?.storeName || currentPost.artist?.name || currentPost.artist?.username || artist.storeName || artist.name}
                   width={40}
                   height={40}
                   className="gallery-viewer__artist-avatar"
@@ -1080,7 +1135,7 @@ export function GalleryViewer({
               )}
               <div>
                 <h3 className="gallery-viewer__artist-name">
-                  {artist.storeName || artist.name}
+                  {currentPost.artist?.artistName || currentPost.artist?.storeName || currentPost.artist?.name || currentPost.artist?.username || artist.storeName || artist.name}
                 </h3>
                 <p className="gallery-viewer__post-date">{creationDate}</p>
               </div>
@@ -1184,7 +1239,7 @@ export function GalleryViewer({
             )}
             <div className="gallery-viewer__stat gallery-viewer__stat--interactive">
               <GalleryLikeButton
-                artistId={artist.id}
+                artistId={currentPost.artist?.id || artist.id}
                 imageUrl={currentImageUrl}
                 initialLikesCount={stats.likesCount}
                 initialIsLiked={stats.isLikedByUser}
@@ -1207,7 +1262,7 @@ export function GalleryViewer({
 
           <div className="gallery-viewer__comments-section">
             <GalleryComments
-              artistId={artist.id}
+              artistId={currentPost.artist?.id || artist.id}
               imageUrl={currentImageUrl}
               initialCommentsCount={stats.commentsCount}
               onCommentsCountChange={(commentsCount) => {

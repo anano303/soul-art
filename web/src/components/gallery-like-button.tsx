@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { Heart } from 'lucide-react';
 import { galleryInteractionService } from '@/lib/gallery-interaction.service';
 import { useUser } from '@/modules/auth/hooks/use-user';
+import './gallery-interactions.css';
 
 interface GalleryLikeButtonProps {
   artistId: string;

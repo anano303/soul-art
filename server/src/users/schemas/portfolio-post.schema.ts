@@ -76,3 +76,5 @@ export const PortfolioPostSchema = SchemaFactory.createForClass(PortfolioPost);
 PortfolioPostSchema.index({ artistId: 1, createdAt: -1 });
 PortfolioPostSchema.index({ productId: 1 }, { unique: true, sparse: true });
 PortfolioPostSchema.index({ artistId: 1, isFeatured: 1 });
+PortfolioPostSchema.index({ publishedAt: -1, archivedAt: 1 }); // For explore feed
+PortfolioPostSchema.index({ caption: 'text', tags: 'text' }); // For search
