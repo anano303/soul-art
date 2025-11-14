@@ -52,8 +52,8 @@ export default function Header() {
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
-  // Hide header on explore page (after all hooks)
-  if (pathname === "/explore") {
+  // Hide header on explore page only on mobile (after all hooks)
+  if (pathname === "/explore" && isMobile) {
     return null;
   }
 
