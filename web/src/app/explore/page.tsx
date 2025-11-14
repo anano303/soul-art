@@ -2,14 +2,17 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Search, User } from "lucide-react";
+import { Search, User, ShoppingBag } from "lucide-react";
 import { useLanguage } from "@/hooks/LanguageContext";
 import { fetchWithAuth } from "@/lib/fetch-with-auth";
 import { useDebounce } from "@/hooks/use-debounce";
 import { GalleryViewer } from "@/components/gallery-viewer";
 import type { GalleryViewerPost } from "@/components/gallery-viewer";
 import type { GalleryInteractionStats } from "@/lib/gallery-interaction.service";
+import { GalleryLikeButton } from "@/components/gallery-like-button";
+import { GalleryComments } from "@/components/gallery-comments";
 import { trackSearch as metaTrackSearch } from "@/components/MetaPixel";
 import { trackSearch } from "@/lib/ga4-analytics";
 import "./explore.css";
@@ -414,10 +417,60 @@ export default function ExplorePage() {
               sizes="(max-width: 768px) 33vw, 25vw"
             />
             <div className="explore-grid__overlay">
-              <div className="explore-grid__stats">
-                <span>❤️ {post.likesCount || 0}</span>
-                <span>💬 {post.commentsCount || 0}</span>
-              </div>
+              {(() => {
+                const isSellable = Boolean(post.productId) && !post.isSold;
+                const showBadge = !isSellable || !post.productId;
+                const badgeText = post.isSold
+                  ? (language === "en" ? "Sold out" : "გაყიდულია")
+                  : (language === "en" ? "Not for sale" : "არ იყიდება");
+                
+                return (
+                  <>
+                    {showBadge && (
+                      <span className="explore-grid__badge">
+                        {badgeText}
+                      </span>
+                    )}
+                    <div
+                      className="explore-grid__interactions"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      {isSellable && post.productId && (
+                        <Link
+                          href={`/products/${post.productId}`}
+                          className="explore-grid__action"
+                          onClick={(event) => event.stopPropagation()}
+                          aria-label={language === "en" ? "View listing" : "ნახე ლისტინგი"}
+                        >
+                          <ShoppingBag size={16} />
+                        </Link>
+                      )}
+                      <GalleryLikeButton
+                        artistId={post.artist?.id || ""}
+                        imageUrl={post.imageUrl}
+                        initialLikesCount={getStatsForImage(post.imageUrl).likesCount}
+                        initialIsLiked={getStatsForImage(post.imageUrl).isLikedByUser}
+                        onLikeToggle={(isLiked, likesCount) => {
+                          updateStats(post.imageUrl, {
+                            isLikedByUser: isLiked,
+                            likesCount,
+                          });
+                        }}
+                      />
+                      <GalleryComments
+                        artistId={post.artist?.id || ""}
+                        imageUrl={post.imageUrl}
+                        initialCommentsCount={getStatsForImage(post.imageUrl).commentsCount}
+                        onCommentsCountChange={(commentsCount) => {
+                          updateStats(post.imageUrl, {
+                            commentsCount,
+                          });
+                        }}
+                      />
+                    </div>
+                  </>
+                );
+              })()}
             </div>
           </div>
         ))}
