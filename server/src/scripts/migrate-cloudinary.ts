@@ -445,6 +445,232 @@ async function migrateCategories(
 }
 
 /**
+ * Migrate portfolio posts collection
+ */
+async function migratePortfolioPosts(
+  db: any,
+  dryRun: boolean = false,
+): Promise<MigrationResult> {
+  console.log('\n📸 Migrating Portfolio Posts...');
+  const collection = db.collection('portfolioposts');
+
+  const result: MigrationResult = {
+    collection: 'portfolioposts',
+    field: 'images.url',
+    totalProcessed: 0,
+    successfulMigrations: 0,
+    failedMigrations: 0,
+    skipped: 0,
+    errors: [],
+  };
+
+  const posts = await collection
+    .find({
+      'images.url': { $regex: OLD_CLOUD_NAME },
+    })
+    .toArray();
+
+  console.log(`   Found ${posts.length} portfolio posts to migrate`);
+
+  for (const post of posts) {
+    result.totalProcessed++;
+    console.log(
+      `\n   📌 Portfolio Post [${result.totalProcessed}/${posts.length}] (${post._id})`,
+    );
+
+    try {
+      const updates: any = {};
+      let hasUpdates = false;
+
+      // Migrate images array
+      if (post.images && Array.isArray(post.images)) {
+        const newImages: any[] = [];
+        for (const image of post.images) {
+          if (image.url && image.url.includes(OLD_CLOUD_NAME)) {
+            if (dryRun) {
+              console.log(`   [DRY RUN] Would migrate image: ${image.url}`);
+              newImages.push({
+                ...image,
+                url: image.url.replace(OLD_CLOUD_NAME, NEW_CLOUD_NAME),
+              });
+            } else {
+              const newUrl = await uploadToNewCloudinary(image.url, 'ecommerce');
+              newImages.push({
+                ...image,
+                url: newUrl,
+              });
+            }
+            hasUpdates = true;
+          } else {
+            newImages.push(image);
+          }
+        }
+        if (hasUpdates) {
+          updates.images = newImages;
+        }
+      }
+
+      if (hasUpdates && !dryRun) {
+        await collection.updateOne({ _id: post._id }, { $set: updates });
+        result.successfulMigrations++;
+        console.log(`   ✅ Updated portfolio post ${post._id}`);
+      } else if (dryRun && hasUpdates) {
+        result.successfulMigrations++;
+        console.log(`   [DRY RUN] Would update portfolio post ${post._id}`);
+      } else {
+        result.skipped++;
+      }
+    } catch (error) {
+      result.failedMigrations++;
+      result.errors.push({
+        documentId: post._id.toString(),
+        error: error.message,
+      });
+      console.error(
+        `   ❌ Failed to migrate portfolio post ${post._id}:`,
+        error.message,
+      );
+    }
+  }
+
+  return result;
+}
+
+/**
+ * Migrate gallery likes collection
+ */
+async function migrateGalleryLikes(
+  db: any,
+  dryRun: boolean = false,
+): Promise<MigrationResult> {
+  console.log('\n❤️  Migrating Gallery Likes...');
+  const collection = db.collection('gallerylikes');
+
+  const result: MigrationResult = {
+    collection: 'gallerylikes',
+    field: 'imageUrl',
+    totalProcessed: 0,
+    successfulMigrations: 0,
+    failedMigrations: 0,
+    skipped: 0,
+    errors: [],
+  };
+
+  const likes = await collection
+    .find({
+      imageUrl: { $regex: OLD_CLOUD_NAME },
+    })
+    .toArray();
+
+  console.log(`   Found ${likes.length} gallery likes to migrate`);
+
+  for (const like of likes) {
+    result.totalProcessed++;
+    console.log(
+      `\n   📌 Gallery Like [${result.totalProcessed}/${likes.length}] (${like._id})`,
+    );
+
+    try {
+      if (like.imageUrl && like.imageUrl.includes(OLD_CLOUD_NAME)) {
+        if (dryRun) {
+          console.log(`   [DRY RUN] Would migrate imageUrl: ${like.imageUrl}`);
+          result.successfulMigrations++;
+        } else {
+          const newUrl = await uploadToNewCloudinary(like.imageUrl, 'ecommerce');
+          await collection.updateOne(
+            { _id: like._id },
+            { $set: { imageUrl: newUrl } },
+          );
+          result.successfulMigrations++;
+          console.log(`   ✅ Updated gallery like ${like._id}`);
+        }
+      } else {
+        result.skipped++;
+      }
+    } catch (error) {
+      result.failedMigrations++;
+      result.errors.push({
+        documentId: like._id.toString(),
+        error: error.message,
+      });
+      console.error(
+        `   ❌ Failed to migrate gallery like ${like._id}:`,
+        error.message,
+      );
+    }
+  }
+
+  return result;
+}
+
+/**
+ * Migrate gallery comments collection
+ */
+async function migrateGalleryComments(
+  db: any,
+  dryRun: boolean = false,
+): Promise<MigrationResult> {
+  console.log('\n💬 Migrating Gallery Comments...');
+  const collection = db.collection('gallerycomments');
+
+  const result: MigrationResult = {
+    collection: 'gallerycomments',
+    field: 'imageUrl',
+    totalProcessed: 0,
+    successfulMigrations: 0,
+    failedMigrations: 0,
+    skipped: 0,
+    errors: [],
+  };
+
+  const comments = await collection
+    .find({
+      imageUrl: { $regex: OLD_CLOUD_NAME },
+    })
+    .toArray();
+
+  console.log(`   Found ${comments.length} gallery comments to migrate`);
+
+  for (const comment of comments) {
+    result.totalProcessed++;
+    console.log(
+      `\n   📌 Gallery Comment [${result.totalProcessed}/${comments.length}] (${comment._id})`,
+    );
+
+    try {
+      if (comment.imageUrl && comment.imageUrl.includes(OLD_CLOUD_NAME)) {
+        if (dryRun) {
+          console.log(`   [DRY RUN] Would migrate imageUrl: ${comment.imageUrl}`);
+          result.successfulMigrations++;
+        } else {
+          const newUrl = await uploadToNewCloudinary(comment.imageUrl, 'ecommerce');
+          await collection.updateOne(
+            { _id: comment._id },
+            { $set: { imageUrl: newUrl } },
+          );
+          result.successfulMigrations++;
+          console.log(`   ✅ Updated gallery comment ${comment._id}`);
+        }
+      } else {
+        result.skipped++;
+      }
+    } catch (error) {
+      result.failedMigrations++;
+      result.errors.push({
+        documentId: comment._id.toString(),
+        error: error.message,
+      });
+      console.error(
+        `   ❌ Failed to migrate gallery comment ${comment._id}:`,
+        error.message,
+      );
+    }
+  }
+
+  return result;
+}
+
+/**
  * Main migration function
  */
 async function runMigration() {
@@ -479,6 +705,9 @@ async function runMigration() {
     results.push(await migrateBanners(db, dryRun));
     results.push(await migrateBlogs(db, dryRun));
     results.push(await migrateCategories(db, dryRun));
+    results.push(await migratePortfolioPosts(db, dryRun));
+    results.push(await migrateGalleryLikes(db, dryRun));
+    results.push(await migrateGalleryComments(db, dryRun));
 
     // Print summary
     console.log('\n' + '='.repeat(80));

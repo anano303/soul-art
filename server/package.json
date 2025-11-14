@@ -28,7 +28,8 @@
     "cloudinary:delete": "ts-node -r tsconfig-paths/register src/scripts/delete-all-cloudinary.ts",
     "cloudinary:delete:dry-run": "ts-node -r tsconfig-paths/register src/scripts/delete-all-cloudinary.ts --dry-run",
     "migrate:device-tokens": "ts-node -r tsconfig-paths/register src/scripts/migrate-device-tokens.ts",
-    "migrate:artist-ratings": "ts-node -r tsconfig-paths/register src/scripts/migrate-calculate-artist-ratings.ts"
+    "migrate:artist-ratings": "ts-node -r tsconfig-paths/register src/scripts/migrate-calculate-artist-ratings.ts",
+    "migrate:portfolio": "ts-node -r tsconfig-paths/register src/scripts/migrate-portfolio-posts.ts"
   },
   "dependencies": {
     "@ai-sdk/openai": "^1.0.8",
