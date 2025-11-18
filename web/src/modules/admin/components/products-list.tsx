@@ -450,6 +450,37 @@ export function ProductsList() {
                           {calculateDiscountedPrice(product).toFixed(2)} ₾
                         </span>
                         <span
+                          className="discount-badge black-friday-badge"
+                          style={{
+                            background:
+                              "linear-gradient(135deg, #000000 0%, #1a1a1a 100%)",
+                            color: "white",
+                            padding: "4px 8px",
+                            borderRadius: "6px",
+                            fontSize: "0.7em",
+                            marginLeft: "8px",
+                            display: "inline-flex",
+                            flexDirection: "column",
+                            alignItems: "center",
+                            gap: "2px",
+                            border: "1px solid #333",
+                          }}
+                        >
+                          <span
+                            style={{
+                              fontSize: "0.75em",
+                              letterSpacing: "0.5px",
+                              fontWeight: 800,
+                            }}
+                          >
+                            BLACK FRIDAY
+                          </span>
+                          <span style={{ fontSize: "1.1em", fontWeight: 900 }}>
+                            -{product.discountPercentage}%
+                          </span>
+                        </span>
+                        {/* Original discount badge - commented for restoration */}
+                        {/* <span
                           className="discount-badge"
                           style={{
                             backgroundColor: "#e74c3c",
@@ -461,7 +492,7 @@ export function ProductsList() {
                           }}
                         >
                           -{product.discountPercentage}%
-                        </span>
+                        </span> */}
                       </div>
                     ) : (
                       <span>{product.price} ₾</span>
@@ -843,6 +874,37 @@ export function ProductsList() {
                         {calculateDiscountedPrice(product).toFixed(2)} ₾
                       </span>
                       <span
+                        className="discount-badge black-friday-badge"
+                        style={{
+                          background:
+                            "linear-gradient(135deg, #000000 0%, #1a1a1a 100%)",
+                          color: "white",
+                          padding: "4px 8px",
+                          borderRadius: "6px",
+                          fontSize: "0.7em",
+                          marginLeft: "8px",
+                          display: "inline-flex",
+                          flexDirection: "column",
+                          alignItems: "center",
+                          gap: "2px",
+                          border: "1px solid #333",
+                        }}
+                      >
+                        <span
+                          style={{
+                            fontSize: "0.75em",
+                            letterSpacing: "0.5px",
+                            fontWeight: 800,
+                          }}
+                        >
+                          BLACK FRIDAY
+                        </span>
+                        <span style={{ fontSize: "1.1em", fontWeight: 900 }}>
+                          -{product.discountPercentage}%
+                        </span>
+                      </span>
+                      {/* Original discount badge - commented for restoration */}
+                      {/* <span
                         className="discount-badge"
                         style={{
                           backgroundColor: "#e74c3c",
@@ -854,7 +916,7 @@ export function ProductsList() {
                         }}
                       >
                         -{product.discountPercentage}%
-                      </span>
+                      </span> */}
                     </div>
                   ) : (
                     <span>{product.price} ₾</span>

@@ -731,7 +731,46 @@
   box-shadow: 0 4px 8px rgba(40, 167, 69, 0.3);
 }
 
-.discount-badge {
+/* Black Friday Discount Badge */
+.discount-badge.black-friday-badge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
+  color: white;
+  padding: 6px 10px;
+  font-weight: bold;
+  z-index: 2;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  border: 1px solid #333;
+}
+
+.black-friday-text {
+  font-size: 0.65rem;
+  letter-spacing: 0.5px;
+  font-weight: 800;
+  text-transform: uppercase;
+  background: linear-gradient(90deg, #fff, #ddd, #fff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.discount-percentage {
+  font-size: 1rem;
+  font-weight: 900;
+  color: #fff;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+/* Original discount badge - commented for restoration */
+/* .discount-badge {
   position: absolute;
   top: 10px;
   right: 10px;
@@ -742,7 +781,7 @@
   z-index: 2;
   border-radius: 4px;
   font-size: 0.9rem;
-}
+} */
 
 .price-container {
   display: flex;

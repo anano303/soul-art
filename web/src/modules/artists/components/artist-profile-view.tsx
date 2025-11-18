@@ -242,8 +242,11 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
   };
   // Handle hash navigation for portfolio section
   useEffect(() => {
-    if (typeof window !== 'undefined' && window.location.hash === '#portfolio') {
-      setActiveTab('gallery');
+    if (
+      typeof window !== "undefined" &&
+      window.location.hash === "#portfolio"
+    ) {
+      setActiveTab("gallery");
     }
   }, []);
 
@@ -258,10 +261,7 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
   const heroBackground = artist.artistCoverImage || undefined;
   const avatar = artist.storeLogo || undefined;
 
-  const portfolioPosts = useMemo(
-    () => portfolio?.posts ?? [],
-    [portfolio]
-  );
+  const portfolioPosts = useMemo(() => portfolio?.posts ?? [], [portfolio]);
 
   const { galleryPosts, galleryItems } = useMemo(() => {
     type GalleryPost = {
@@ -278,7 +278,9 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
       (images ?? [])
         .filter(
           (image) =>
-            image && typeof image.url === "string" && image.url.trim().length > 0
+            image &&
+            typeof image.url === "string" &&
+            image.url.trim().length > 0
         )
         .map((image, index) => ({
           ...image,
@@ -299,22 +301,26 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
         // Derive state from populated product if available
         let hideBuyButton = post.hideBuyButton ?? false;
         let isSold = post.isSold ?? false;
-        let actualProductId: string | null = typeof post.productId === 'string' ? post.productId : null;
+        let actualProductId: string | null =
+          typeof post.productId === "string" ? post.productId : null;
 
-        if (post.productId && typeof post.productId === 'object') {
+        if (post.productId && typeof post.productId === "object") {
           const product = post.productId;
           actualProductId = product._id;
-          
+
           // Check if product has stock
           const hasStock = (() => {
-            if (Array.isArray(product.variants) && product.variants.length > 0) {
-              return product.variants.some(v => (v.stock ?? 0) > 0);
+            if (
+              Array.isArray(product.variants) &&
+              product.variants.length > 0
+            ) {
+              return product.variants.some((v) => (v.stock ?? 0) > 0);
             }
             return (product.countInStock ?? 0) > 0;
           })();
 
           isSold = !hasStock;
-          hideBuyButton = product.status !== 'APPROVED' || !hasStock;
+          hideBuyButton = product.status !== "APPROVED" || !hasStock;
         }
 
         posts.push({
@@ -518,9 +524,9 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
                           typeof window !== "undefined"
                             ? window.location.pathname + window.location.search
                             : "/";
-                        router.push(`/login?redirect=${encodeURIComponent(
-                          redirect
-                        )}`);
+                        router.push(
+                          `/login?redirect=${encodeURIComponent(redirect)}`
+                        );
                         return;
                       }
                       setReviewModalOpen(true);
@@ -612,7 +618,7 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
               }`}
               onClick={() => {
                 setActiveTab("gallery");
-                window.history.pushState(null, '', '#portfolio');
+                window.history.pushState(null, "", "#portfolio");
               }}
               title={getGalleryCopy(language)}
             >
@@ -703,15 +709,27 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
                 id="portfolio"
               >
                 {isOwner && galleryPosts.length > 0 && (
-                  <div style={{ margin: '10px', display: 'flex', justifyContent: 'center' }}>
+                  <div
+                    style={{
+                      margin: "10px",
+                      display: "flex",
+                      justifyContent: "center",
+                    }}
+                  >
                     <button
                       type="button"
                       onClick={() => setUploadModalOpen(true)}
                       className="artist-add-product-button"
-                      style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}
+                      style={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: "8px",
+                      }}
                     >
                       <Upload size={18} />
-                      {language === "en" ? "Add Portfolio Image" : "დაამატე პორტფოლიოში"}
+                      {language === "en"
+                        ? "Add Portfolio Image"
+                        : "დაამატე პორტფოლიოში"}
                     </button>
                   </div>
                 )}
@@ -776,45 +794,90 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
                               {isOwner && post.postId && (
                                 <button
                                   type="button"
-                                  className={`artist-gallery-card__action ${post.isFeatured ? 'artist-gallery-card__action--featured' : ''}`}
+                                  className={`artist-gallery-card__action ${
+                                    post.isFeatured
+                                      ? "artist-gallery-card__action--featured"
+                                      : ""
+                                  }`}
                                   onClick={async (e) => {
                                     e.stopPropagation();
                                     try {
-                                      const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/v1';
-                                      const response = await fetch(`${API_BASE}/portfolio/${post.postId}/toggle-featured`, {
-                                        method: 'PUT',
-                                        credentials: 'include',
-                                        headers: {
-                                          'Content-Type': 'application/json',
-                                        },
-                                      });
-                                      
+                                      const API_BASE =
+                                        process.env.NEXT_PUBLIC_API_URL ||
+                                        "http://localhost:4000/v1";
+                                      const response = await fetch(
+                                        `${API_BASE}/portfolio/${post.postId}/toggle-featured`,
+                                        {
+                                          method: "PUT",
+                                          credentials: "include",
+                                          headers: {
+                                            "Content-Type": "application/json",
+                                          },
+                                        }
+                                      );
+
                                       if (response.ok) {
                                         // Optimistically update UI by refreshing
                                         router.refresh();
-                                        
+
                                         // Also show a quick toast feedback
                                         toast({
-                                          title: post.isFeatured 
-                                            ? (language === "en" ? "Removed from featured" : "წაიშალა რჩეულებიდან")
-                                            : (language === "en" ? "Marked as featured" : "მონიშნულია როგორც რჩეული"),
+                                          title: post.isFeatured
+                                            ? language === "en"
+                                              ? "Removed from featured"
+                                              : "წაიშალა რჩეულებიდან"
+                                            : language === "en"
+                                            ? "Marked as featured"
+                                            : "მონიშნულია როგორც რჩეული",
                                         });
                                       } else {
-                                        throw new Error('Failed to toggle featured');
+                                        throw new Error(
+                                          "Failed to toggle featured"
+                                        );
                                       }
                                     } catch (error) {
-                                      console.error('Failed to toggle featured:', error);
+                                      console.error(
+                                        "Failed to toggle featured:",
+                                        error
+                                      );
                                       toast({
-                                        title: language === "en" ? "Error" : "შეცდომა",
-                                        description: language === "en" ? "Failed to update featured status" : "რჩეული სტატუსის განახლება ვერ მოხერხდა",
+                                        title:
+                                          language === "en"
+                                            ? "Error"
+                                            : "შეცდომა",
+                                        description:
+                                          language === "en"
+                                            ? "Failed to update featured status"
+                                            : "რჩეული სტატუსის განახლება ვერ მოხერხდა",
                                         variant: "destructive",
                                       });
                                     }
                                   }}
-                                  aria-label={post.isFeatured ? (language === "en" ? "Remove from featured" : "წაშალე რჩეულებიდან") : (language === "en" ? "Mark as featured" : "მონიშნე როგორც რჩეული")}
-                                  title={post.isFeatured ? (language === "en" ? "Remove from featured" : "წაშალე რჩეულებიდან") : (language === "en" ? "Mark as featured" : "მონიშნე როგორც რჩეული")}
+                                  aria-label={
+                                    post.isFeatured
+                                      ? language === "en"
+                                        ? "Remove from featured"
+                                        : "წაშალე რჩეულებიდან"
+                                      : language === "en"
+                                      ? "Mark as featured"
+                                      : "მონიშნე როგორც რჩეული"
+                                  }
+                                  title={
+                                    post.isFeatured
+                                      ? language === "en"
+                                        ? "Remove from featured"
+                                        : "წაშალე რჩეულებიდან"
+                                      : language === "en"
+                                      ? "Mark as featured"
+                                      : "მონიშნე როგორც რჩეული"
+                                  }
                                 >
-                                  <Star size={16} fill={post.isFeatured ? "currentColor" : "none"} />
+                                  <Star
+                                    size={16}
+                                    fill={
+                                      post.isFeatured ? "currentColor" : "none"
+                                    }
+                                  />
                                 </button>
                               )}
                               {isSellable && post.productId && (
@@ -980,41 +1043,43 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
         getStatsForImage={getStatsForImage}
         updateStats={updateStats}
         onPostDelete={async (postId) => {
-          const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/v1';
+          const API_BASE =
+            process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/v1";
           const response = await fetch(`${API_BASE}/portfolio/${postId}`, {
-            method: 'DELETE',
-            credentials: 'include',
+            method: "DELETE",
+            credentials: "include",
             headers: {
-              'Cache-Control': 'no-cache',
+              "Cache-Control": "no-cache",
             },
           });
           if (!response.ok) {
             const error = await response.text();
-            throw new Error(error || 'Failed to delete post');
+            throw new Error(error || "Failed to delete post");
           }
-          
+
           // Close the viewer first
           setViewerOpen(false);
-          
+
           // Use Next.js router refresh to invalidate server cache and refetch
           router.refresh();
         }}
         onPostEdit={async (postId, newCaption) => {
-          const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/v1';
+          const API_BASE =
+            process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/v1";
           const response = await fetch(`${API_BASE}/portfolio/${postId}`, {
-            method: 'PUT',
-            headers: { 
-              'Content-Type': 'application/json',
-              'Cache-Control': 'no-cache',
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+              "Cache-Control": "no-cache",
             },
-            credentials: 'include',
+            credentials: "include",
             body: JSON.stringify({ caption: newCaption }),
           });
           if (!response.ok) {
             const error = await response.text();
-            throw new Error(error || 'Failed to update post');
+            throw new Error(error || "Failed to update post");
           }
-          
+
           // Use Next.js router refresh to invalidate server cache and refetch
           router.refresh();
         }}
@@ -1053,15 +1118,22 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
 
       {/* Portfolio Upload Modal */}
       {uploadModalOpen && (
-        <div className="modal-overlay" onClick={() => {
-          setUploadModalOpen(false);
-          setSelectedImage(null);
-          setImagePreview(null);
-          setCaption("");
-        }}>
+        <div
+          className="modal-overlay"
+          onClick={() => {
+            setUploadModalOpen(false);
+            setSelectedImage(null);
+            setImagePreview(null);
+            setCaption("");
+          }}
+        >
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
-              <h2>{language === "en" ? "Add Portfolio Image" : "დაამატე პორტფოლიოში"}</h2>
+              <h2>
+                {language === "en"
+                  ? "Add Portfolio Image"
+                  : "დაამატე პორტფოლიოში"}
+              </h2>
               <button
                 type="button"
                 className="modal-close"
@@ -1083,7 +1155,7 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
                     type="file"
                     id="portfolio-image"
                     accept="image/*"
-                    style={{ display: 'none' }}
+                    style={{ display: "none" }}
                     onChange={(e) => {
                       const file = e.target.files?.[0];
                       if (file) {
@@ -1098,11 +1170,20 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
                   />
                   {imagePreview ? (
                     <div className="image-preview-container">
-                      <Image src={imagePreview} alt="Preview" className="image-preview" width={600} height={600} unoptimized />
+                      <Image
+                        src={imagePreview}
+                        alt="Preview"
+                        className="image-preview"
+                        width={600}
+                        height={600}
+                        unoptimized
+                      />
                       <button
                         type="button"
                         className="change-image-button"
-                        onClick={() => document.getElementById('portfolio-image')?.click()}
+                        onClick={() =>
+                          document.getElementById("portfolio-image")?.click()
+                        }
                       >
                         {language === "en" ? "Change Image" : "შეცვალე სურათი"}
                       </button>
@@ -1111,10 +1192,14 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
                     <label htmlFor="portfolio-image" className="upload-label">
                       <Upload size={48} />
                       <span className="upload-text">
-                        {language === "en" ? "Click to upload image" : "დააჭირე სურათის ასატვირთად"}
+                        {language === "en"
+                          ? "Click to upload image"
+                          : "დააჭირე სურათის ასატვირთად"}
                       </span>
                       <span className="upload-hint">
-                        {language === "en" ? "PNG, JPG, WEBP up to 10MB" : "PNG, JPG, WEBP მაქს. 10MB"}
+                        {language === "en"
+                          ? "PNG, JPG, WEBP up to 10MB"
+                          : "PNG, JPG, WEBP მაქს. 10MB"}
                       </span>
                     </label>
                   )}
@@ -1123,20 +1208,24 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
                 {/* Description Field */}
                 <div className="form-group">
                   <label htmlFor="portfolio-caption" className="form-label">
-                    {language === "en" ? "Description (Optional)" : "აღწერა (არასავალდებულო)"}
+                    {language === "en"
+                      ? "Description (Optional)"
+                      : "აღწერა (არასავალდებულო)"}
                   </label>
                   <textarea
                     id="portfolio-caption"
                     className="form-textarea"
                     rows={4}
                     maxLength={4000}
-                    placeholder={language === "en" ? "Add a description for your image..." : "დაამატე აღწერა შენს სურათს..."}
+                    placeholder={
+                      language === "en"
+                        ? "Add a description for your image..."
+                        : "დაამატე აღწერა შენს სურათს..."
+                    }
                     value={caption}
                     onChange={(e) => setCaption(e.target.value)}
                   />
-                  <div className="character-count">
-                    {caption.length} / 4000
-                  </div>
+                  <div className="character-count">{caption.length} / 4000</div>
                 </div>
 
                 {/* Action Buttons */}
@@ -1159,71 +1248,86 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
                     disabled={!selectedImage || uploadingImage}
                     onClick={async () => {
                       if (!selectedImage) return;
-                      
+
                       setUploadingImage(true);
                       try {
-                        const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/v1';
-                        
+                        const API_BASE =
+                          process.env.NEXT_PUBLIC_API_URL ||
+                          "http://localhost:4000/v1";
+
                         // Upload image to Cloudinary via artists gallery endpoint
                         const formData = new FormData();
-                        formData.append('file', selectedImage);
-                        
-                        const uploadResponse = await fetch(`${API_BASE}/artists/gallery`, {
-                          method: 'POST',
-                          credentials: 'include',
-                          body: formData,
-                        });
-                        
+                        formData.append("file", selectedImage);
+
+                        const uploadResponse = await fetch(
+                          `${API_BASE}/artists/gallery`,
+                          {
+                            method: "POST",
+                            credentials: "include",
+                            body: formData,
+                          }
+                        );
+
                         if (!uploadResponse.ok) {
-                          throw new Error('Failed to upload image');
+                          throw new Error("Failed to upload image");
                         }
-                        
+
                         const uploadData = await uploadResponse.json();
                         const gallery = uploadData?.gallery || [];
-                        
+
                         if (gallery.length === 0) {
-                          throw new Error('No image URL returned');
+                          throw new Error("No image URL returned");
                         }
-                        
+
                         // Get the last uploaded image URL
                         const imageUrl = gallery[gallery.length - 1];
-                        
+
                         // Create portfolio post
-                        const createResponse = await fetch(`${API_BASE}/portfolio`, {
-                          method: 'POST',
-                          credentials: 'include',
-                          headers: {
-                            'Content-Type': 'application/json',
-                          },
-                          body: JSON.stringify({
-                            images: [imageUrl],
-                            caption: caption.trim() || null,
-                            tags: [],
-                          }),
-                        });
-                        
+                        const createResponse = await fetch(
+                          `${API_BASE}/portfolio`,
+                          {
+                            method: "POST",
+                            credentials: "include",
+                            headers: {
+                              "Content-Type": "application/json",
+                            },
+                            body: JSON.stringify({
+                              images: [imageUrl],
+                              caption: caption.trim() || null,
+                              tags: [],
+                            }),
+                          }
+                        );
+
                         if (!createResponse.ok) {
-                          throw new Error('Failed to create portfolio post');
+                          throw new Error("Failed to create portfolio post");
                         }
-                        
+
                         toast({
-                          title: language === "en" ? "Success!" : "წარმატებული!",
-                          description: language === "en" ? "Portfolio image added successfully" : "პორტფოლიოს სურათი დაემატა",
+                          title:
+                            language === "en" ? "Success!" : "წარმატებული!",
+                          description:
+                            language === "en"
+                              ? "Portfolio image added successfully"
+                              : "პორტფოლიოს სურათი დაემატა",
                         });
-                        
+
                         // Reset form and close modal
                         setUploadModalOpen(false);
                         setSelectedImage(null);
                         setImagePreview(null);
                         setCaption("");
-                        
+
                         // Refresh the page to show new image
                         router.refresh();
                       } catch (error) {
-                        console.error('Upload error:', error);
+                        console.error("Upload error:", error);
                         toast({
                           title: language === "en" ? "Error" : "შეცდომა",
-                          description: language === "en" ? "Failed to upload image" : "სურათის ატვირთვა ვერ მოხერხდა",
+                          description:
+                            language === "en"
+                              ? "Failed to upload image"
+                              : "სურათის ატვირთვა ვერ მოხერხდა",
                           variant: "destructive",
                         });
                       } finally {
@@ -1244,7 +1348,7 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
                           strokeWidth="2"
                           strokeLinecap="round"
                           strokeLinejoin="round"
-                          style={{ animation: 'spin 1s linear infinite' }}
+                          style={{ animation: "spin 1s linear infinite" }}
                         >
                           <path d="M21 12a9 9 0 1 1-6.219-8.56" />
                         </svg>
@@ -1387,12 +1491,21 @@ function ProductCard({ product, language }: ProductCardProps) {
               {product.name.charAt(0)}
             </div>
           )}
-          {/* Discount badge - only show when discount is active */}
+          {/* Discount badge - Black Friday Edition */}
           {discountPercentage > 0 && (
+            <div className="artist-product-card__discount-badge black-friday-badge">
+              <span className="black-friday-text">BLACK FRIDAY</span>
+              <span className="discount-percentage">
+                -{discountPercentage}%
+              </span>
+            </div>
+          )}
+          {/* Original discount badge - commented for restoration */}
+          {/* {discountPercentage > 0 && (
             <div className="artist-product-card__discount-badge">
               -{discountPercentage}%
             </div>
-          )}
+          )} */}
           {/* Price - always visible */}
           <div className="artist-product-card__price-overlay">
             {discountPercentage > 0 ? (
