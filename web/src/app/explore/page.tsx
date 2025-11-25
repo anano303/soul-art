@@ -516,6 +516,9 @@ export default function ExplorePage() {
           getStatsForImage={getStatsForImage}
           updateStats={updateStats}
           hideHeaderText={true}
+          onLoadMore={() => fetchPosts()}
+          hasMore={hasMore}
+          isLoadingMore={loading}
         />
       )}
     </div>

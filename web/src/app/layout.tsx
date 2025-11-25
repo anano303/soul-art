@@ -42,6 +42,7 @@ import PWAManager from "@/components/pwa-manager";
 import { GA4UserTracker } from "@/components/ga4-user-tracker";
 import { PageViewTracker } from "@/components/page-view-tracker";
 import { VisitorTracker } from "@/components/visitor-tracker";
+import { IOSGesturePrevention } from "@/components/ios-gesture-prevention";
 import "@/lib/cloudflare-cleanup"; // Auto-cleanup Cloudflare cookies in development
 
 export const viewport = {
@@ -348,6 +349,9 @@ export default function RootLayout({
 
                   {/* Visitor Tracking with IP */}
                   <VisitorTracker />
+
+                  {/* iOS Back Swipe Prevention */}
+                  <IOSGesturePrevention />
 
                   <div
                     style={{

@@ -94,6 +94,9 @@ interface GalleryViewerProps {
   onPostDelete?: (postId: string) => void;
   onPostEdit?: (postId: string, newCaption: string) => void;
   hideHeaderText?: boolean;
+  onLoadMore?: () => void;
+  hasMore?: boolean;
+  isLoadingMore?: boolean;
 }
 
 export function GalleryViewer({
@@ -110,6 +113,9 @@ export function GalleryViewer({
   onPostDelete,
   onPostEdit,
   hideHeaderText = false,
+  onLoadMore,
+  hasMore = false,
+  isLoadingMore = false,
 }: GalleryViewerProps) {
   const { language } = useLanguage();
   const { user } = useUser();
@@ -136,6 +142,7 @@ export function GalleryViewer({
   const dragDataRef = useRef<
     { startX: number; startY: number; startScrollTop: number; canDrag: boolean; dragFromHeader: boolean } | null
   >(null);
+  const loadMoreTriggeredRef = useRef(false);
 
   useEffect(() => {
     const checkMobile = () => {
@@ -665,6 +672,35 @@ export function GalleryViewer({
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, [currentPostIndex, isMobile, mobileImageIndices]);
+
+  // Infinite scroll trigger when scrolling in mobile viewer
+  useEffect(() => {
+    if (!isMobile || !isOpen || !onLoadMore) return;
+
+    const container = mobileContainerRef.current;
+    if (!container) return;
+
+    const handleScroll = () => {
+      const scrollTop = container.scrollTop;
+      const scrollHeight = container.scrollHeight;
+      const clientHeight = container.clientHeight;
+      const scrollPercentage = (scrollTop + clientHeight) / scrollHeight;
+
+      // Trigger load more when scrolled 80% down and have more content
+      if (scrollPercentage > 0.8 && hasMore && !isLoadingMore && !loadMoreTriggeredRef.current) {
+        loadMoreTriggeredRef.current = true;
+        onLoadMore();
+      }
+
+      // Reset trigger when scrolled back up
+      if (scrollPercentage < 0.7) {
+        loadMoreTriggeredRef.current = false;
+      }
+    };
+
+    container.addEventListener('scroll', handleScroll, { passive: true });
+    return () => container.removeEventListener('scroll', handleScroll);
+  }, [isMobile, isOpen, onLoadMore, hasMore, isLoadingMore]);
 
   if (!isOpen || !currentPost || !currentImage) {
     return null;
