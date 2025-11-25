@@ -23,6 +23,26 @@ import { useToast } from "@/hooks/use-toast";
 import { GalleryInteractionStats } from "@/lib/gallery-interaction.service";
 import "./gallery-viewer.css";
 
+// Extract aspect ratio from Cloudinary URL
+function getImageAspectRatio(url: string): number | null {
+  try {
+    // Cloudinary URLs often have dimensions in the transformation path
+    // Format: .../upload/w_XXX,h_YYY/... or .../upload/c_fill,w_XXX,h_YYY/...
+    const match = url.match(/\/upload\/(?:[^/]*,)?w_(\d+)(?:,|\/)(?:[^/]*,)?h_(\d+)/);
+    if (match) {
+      const width = parseInt(match[1], 10);
+      const height = parseInt(match[2], 10);
+      if (width && height) {
+        return width / height;
+      }
+    }
+    // Default to square if can't parse
+    return 1;
+  } catch {
+    return 1;
+  }
+}
+
 export interface GalleryViewerImage {
   url: string;
   order?: number | null;
@@ -126,6 +146,22 @@ export function GalleryViewer({
     window.addEventListener("resize", checkMobile);
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
+
+  // Prevent iOS back swipe gesture when viewer is open
+  useEffect(() => {
+    if (!isOpen || !isMobile) return;
+
+    const preventBackSwipe = (event: globalThis.TouchEvent) => {
+      const touch = event.touches[0];
+      // Detect touches near left edge (within 30px)
+      if (touch.clientX < 30 && event.cancelable) {
+        event.preventDefault();
+      }
+    };
+
+    document.addEventListener('touchstart', preventBackSwipe, { passive: false });
+    return () => document.removeEventListener('touchstart', preventBackSwipe);
+  }, [isOpen, isMobile]);
 
   // Add non-passive touchmove listener to allow preventDefault
   useEffect(() => {
@@ -829,22 +865,28 @@ export function GalleryViewer({
                     onTouchStart={(event) => handleTouchStart(event, index)}
                     onTouchEnd={handleTouchEnd}
                   >
-                    {postImages.map((image, imageIndex) => (
-                      <div
-                        key={`${image.url}-${imageIndex}`}
-                        className="gallery-viewer__mobile-slide"
-                      >
-                        <CloudinaryImage
-                          src={image.url}
-                          alt={`${artist.storeName || artist.name} - Image ${
-                            imageIndex + 1
-                          }`}
-                          width={800}
-                          height={800}
-                          className="gallery-viewer__mobile-image"
-                        />
-                      </div>
-                    ))}
+                    {postImages.map((image, imageIndex) => {
+                      const aspectRatio = getImageAspectRatio(image.url);
+                      return (
+                        <div
+                          key={`${image.url}-${imageIndex}`}
+                          className="gallery-viewer__mobile-slide"
+                          style={{
+                            aspectRatio: aspectRatio ? `${aspectRatio}` : '1',
+                          }}
+                        >
+                          <CloudinaryImage
+                            src={image.url}
+                            alt={`${artist.storeName || artist.name} - Image ${
+                              imageIndex + 1
+                            }`}
+                            width={800}
+                            height={800}
+                            className="gallery-viewer__mobile-image"
+                          />
+                        </div>
+                      );
+                    })}
                   </div>
 
                   {postImages.length > 1 && (
