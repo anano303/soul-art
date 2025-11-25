@@ -531,6 +531,17 @@ export function GalleryViewer({
 
     const currentScrollTop = scrollContainer.scrollTop;
 
+    // Check if user has scrolled away from the initial position
+    const hasScrolled = Math.abs(currentScrollTop - dragData.startScrollTop) > 5;
+    
+    // If user has scrolled, cancel drag-to-close
+    if (hasScrolled) {
+      dragDataRef.current = null;
+      setIsDragging(false);
+      setDragOffset({ x: 0, y: 0 });
+      return;
+    }
+
     // Check if we can drag vertically (from header or at top)
     const canDragVertical = dragData.dragFromHeader || currentScrollTop <= 1;
 
