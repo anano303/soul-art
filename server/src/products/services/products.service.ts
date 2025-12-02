@@ -966,7 +966,7 @@ export class ProductsService {
       }
     }
 
-    // Auto-post to Facebook Page on approval (best-effort, non-blocking)
+    // Auto-post to Facebook Page, Groups and Instagram on approval (best-effort, non-blocking)
     // Only enabled in production environment
     // თუ პროდუქტი პირველად დასტურდება (არა რეედიტირება)
     if (status === ProductStatus.APPROVED && !wasApprovedBefore) {
@@ -990,32 +990,35 @@ export class ProductsService {
         autoPostEnabled
       ) {
         try {
+          // Use postToAllPlatforms to post to Page, Groups, and Instagram
           // best-effort, don't await to not block response
           this.facebookPostingService
-            .postApprovedProduct(updatedProduct)
+            .postToAllPlatforms(updatedProduct)
             .then((res) => {
               if (res?.success) {
+                const platforms: string[] = [];
+                if (res.pagePost?.success) platforms.push('FB Page');
+                if (res.groupPosts?.some(g => g.success)) platforms.push('FB Groups');
+                if (res.instagramPost?.success) platforms.push('Instagram');
+                
                 console.log(
-                  '[FB] Posted new product',
-                  updatedProduct._id?.toString?.(),
-                  'postId:',
-                  res.postId,
+                  `[Social Media] Posted new product ${updatedProduct._id?.toString?.()} to: ${platforms.join(', ')}`,
                 );
               } else {
-                console.warn('[FB] Post failed', res?.error);
+                console.warn('[Social Media] Some posts failed', res?.errors);
               }
             })
             .catch((err) =>
-              console.warn('[FB] Post error', err?.message || err),
+              console.warn('[Social Media] Post error', err?.message || err),
             );
         } catch (err) {
           console.warn(
-            '[FB] Unexpected post error',
+            '[Social Media] Unexpected post error',
             (err as any)?.message || err,
           );
         }
       } else {
-        console.log('[FB] Auto-post skipped', {
+        console.log('[Social Media] Auto-post skipped', {
           isProduction,
           haveService,
           havePageId,

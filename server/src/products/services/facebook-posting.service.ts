@@ -8,6 +8,14 @@ interface PostResult {
   error?: any;
 }
 
+interface MultiPostResult {
+  success: boolean;
+  pagePost?: PostResult;
+  groupPosts?: PostResult[];
+  instagramPost?: PostResult;
+  errors?: any[];
+}
+
 @Injectable()
 export class FacebookPostingService {
   private readonly logger = new Logger(FacebookPostingService.name);
@@ -17,9 +25,25 @@ export class FacebookPostingService {
   private readonly pageAccessToken =
     process.env.FACEBOOK_PAGE_ACCESS_TOKEN ||
     process.env.FACEBOOK_PAGE_ACCESS_TOKEN;
+  
+  // Facebook Groups configuration (comma-separated group IDs)
+  private readonly groupIds = process.env.FACEBOOK_GROUP_IDS
+    ? process.env.FACEBOOK_GROUP_IDS.split(',').map(id => id.trim()).filter(Boolean)
+    : [];
+  
+  // Instagram configuration
+  private readonly instagramAccountId = process.env.INSTAGRAM_ACCOUNT_ID || '';
+  
   private readonly autoPostFlag = (
     process.env.FACEBOOK_AUTO_POST || 'true'
   ).toLowerCase();
+  private readonly autoPostGroups = (
+    process.env.FACEBOOK_AUTO_POST_GROUPS || 'false'
+  ).toLowerCase() === 'true';
+  private readonly autoPostInstagram = (
+    process.env.INSTAGRAM_AUTO_POST || 'false'
+  ).toLowerCase() === 'true';
+  
   private readonly allowedOrigins = process.env.ALLOWED_ORIGINS || '';
   private readonly serverBaseUrl = process.env.SERVER_BASE_URL || '';
 
@@ -307,5 +331,237 @@ export class FacebookPostingService {
       }
       return { success: false, error: errPayload };
     }
+  }
+
+  /**
+   * Post to Facebook Group
+   */
+  private async postToGroup(groupId: string, product: ProductDocument): Promise<PostResult> {
+    try {
+      const message = this.buildMessage(product);
+      const images = Array.isArray(product.images)
+        ? product.images.filter(Boolean).slice(0, 5)
+        : [];
+
+      if (images.length === 0) {
+        // Text-only post
+        const res = await axios.post(
+          `https://graph.facebook.com/v19.0/${groupId}/feed`,
+          null,
+          {
+            params: {
+              message,
+              access_token: this.pageAccessToken,
+            },
+          },
+        );
+        return { success: true, postId: res.data?.id };
+      }
+
+      if (images.length === 1) {
+        // Single photo post
+        const res = await axios.post(
+          `https://graph.facebook.com/v19.0/${groupId}/photos`,
+          null,
+          {
+            params: {
+              url: images[0],
+              caption: message,
+              access_token: this.pageAccessToken,
+            },
+          },
+        );
+        return { success: true, postId: res.data?.id };
+      }
+
+      // Multiple photos - upload unpublished first
+      const uploadedIds = await this.uploadPhotosUnpublishedForGroup(groupId, images);
+      const attached_media = uploadedIds.map((id) => ({ media_fbid: id }));
+
+      const res = await axios.post(
+        `https://graph.facebook.com/v19.0/${groupId}/feed`,
+        null,
+        {
+          params: {
+            message,
+            access_token: this.pageAccessToken,
+            attached_media,
+          },
+        },
+      );
+
+      return { success: true, postId: res.data?.id };
+    } catch (error: any) {
+      const errPayload = error?.response?.data || { message: error.message };
+      this.logger.error(`Facebook Group ${groupId} post failed`, errPayload);
+      return { success: false, error: errPayload };
+    }
+  }
+
+  /**
+   * Upload photos unpublished for group
+   */
+  private async uploadPhotosUnpublishedForGroup(
+    groupId: string,
+    imageUrls: string[],
+  ): Promise<string[]> {
+    const ids: string[] = [];
+    for (const url of imageUrls) {
+      try {
+        const res = await axios.post(
+          `https://graph.facebook.com/v19.0/${groupId}/photos`,
+          null,
+          {
+            params: {
+              url,
+              published: false,
+              access_token: this.pageAccessToken,
+            },
+          },
+        );
+        if (res.data && res.data.id) {
+          ids.push(res.data.id);
+        }
+      } catch (err: any) {
+        this.logger.warn(
+          `Group photo upload failed for ${url}: ${err?.response?.data?.error?.message || err.message}`,
+        );
+      }
+    }
+    return ids;
+  }
+
+  /**
+   * Post to Instagram (requires Instagram Business Account connected to Facebook Page)
+   */
+  private async postToInstagram(product: ProductDocument): Promise<PostResult> {
+    try {
+      if (!this.instagramAccountId) {
+        return { success: false, error: 'INSTAGRAM_ACCOUNT_ID not configured' };
+      }
+
+      const message = this.buildMessage(product);
+      const images = Array.isArray(product.images)
+        ? product.images.filter(Boolean)
+        : [];
+
+      if (images.length === 0) {
+        return { success: false, error: 'No images available for Instagram post' };
+      }
+
+      // Instagram API requires a two-step process:
+      // 1. Create a container (media object)
+      // 2. Publish the container
+
+      const imageUrl = images[0]; // Instagram single image for now
+      
+      // Step 1: Create container
+      const containerRes = await axios.post(
+        `https://graph.facebook.com/v19.0/${this.instagramAccountId}/media`,
+        null,
+        {
+          params: {
+            image_url: imageUrl,
+            caption: message,
+            access_token: this.pageAccessToken,
+          },
+        },
+      );
+
+      const creationId = containerRes.data?.id;
+      if (!creationId) {
+        throw new Error('Failed to create Instagram media container');
+      }
+
+      // Wait a moment for Instagram to process the image
+      await new Promise(resolve => setTimeout(resolve, 2000));
+
+      // Step 2: Publish
+      const publishRes = await axios.post(
+        `https://graph.facebook.com/v19.0/${this.instagramAccountId}/media_publish`,
+        null,
+        {
+          params: {
+            creation_id: creationId,
+            access_token: this.pageAccessToken,
+          },
+        },
+      );
+
+      return { success: true, postId: publishRes.data?.id };
+    } catch (error: any) {
+      const errPayload = error?.response?.data || { message: error.message };
+      this.logger.error('Instagram post failed', errPayload);
+      return { success: false, error: errPayload };
+    }
+  }
+
+  /**
+   * Post to all enabled platforms (Page, Groups, Instagram)
+   */
+  async postToAllPlatforms(product: ProductDocument): Promise<MultiPostResult> {
+    const result: MultiPostResult = {
+      success: true,
+      errors: [],
+    };
+
+    // 1. Post to Facebook Page
+    if (this.isEnabled() && this.autoPostFlag !== 'false') {
+      try {
+        const pageResult = await this.postApprovedProduct(product);
+        result.pagePost = pageResult;
+        if (!pageResult.success) {
+          result.success = false;
+          result.errors?.push({ platform: 'Facebook Page', error: pageResult.error });
+        } else {
+          this.logger.log(`Posted to Facebook Page: ${pageResult.postId}`);
+        }
+      } catch (error) {
+        result.success = false;
+        result.errors?.push({ platform: 'Facebook Page', error });
+        this.logger.error('Failed to post to Facebook Page', error);
+      }
+    }
+
+    // 2. Post to Facebook Groups
+    if (this.autoPostGroups && this.groupIds.length > 0) {
+      result.groupPosts = [];
+      for (const groupId of this.groupIds) {
+        try {
+          const groupResult = await this.postToGroup(groupId, product);
+          result.groupPosts.push(groupResult);
+          if (!groupResult.success) {
+            result.success = false;
+            result.errors?.push({ platform: `Facebook Group ${groupId}`, error: groupResult.error });
+          } else {
+            this.logger.log(`Posted to Facebook Group ${groupId}: ${groupResult.postId}`);
+          }
+        } catch (error) {
+          result.success = false;
+          result.errors?.push({ platform: `Facebook Group ${groupId}`, error });
+          this.logger.error(`Failed to post to Facebook Group ${groupId}`, error);
+        }
+      }
+    }
+
+    // 3. Post to Instagram
+    if (this.autoPostInstagram && this.instagramAccountId) {
+      try {
+        const instagramResult = await this.postToInstagram(product);
+        result.instagramPost = instagramResult;
+        if (!instagramResult.success) {
+          result.success = false;
+          result.errors?.push({ platform: 'Instagram', error: instagramResult.error });
+        } else {
+          this.logger.log(`Posted to Instagram: ${instagramResult.postId}`);
+        }
+      } catch (error) {
+        result.success = false;
+        result.errors?.push({ platform: 'Instagram', error });
+        this.logger.error('Failed to post to Instagram', error);
+      }
+    }
+
+    return result;
   }
 }
