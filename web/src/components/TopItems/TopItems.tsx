@@ -183,30 +183,68 @@ const TopItems: React.FC = () => {
 
       // Check if it's a badge or stat
       if ("title" in item) {
-        // Trust Badge as Street Art Graffiti
+        // Trust Badge
         interleavedItems.push(
-          <div key={`badge-${item.id}`} className={styles.graffitiBadge} data-badge={item.id}>
-            <div className={styles.graffitiContent}>
-              <div className={styles.graffitiIcon}>{item.icon}</div>
-              <div className={styles.graffitiText}>
-                <h4>{item.title}</h4>
-                <p>{item.description}</p>
+          <div key={`badge-${item.id}`} className={styles.itemLink}>
+            <div className={styles.easel}>
+              <div
+                className={`${styles.easelLeg} ${styles.easelLeftLeg}`}
+              ></div>
+              <div
+                className={`${styles.easelLeg} ${styles.easelRightLeg}`}
+              ></div>
+              <div
+                className={`${styles.easelLeg} ${styles.easelBackLeg}`}
+              ></div>
+              <div
+                className={`${styles.board} ${styles.badgeBoard}`}
+                data-badge={item.id}
+              >
+                <div className={styles.badgeContent}>
+                  <div className={styles.badgeIcon}>{item.icon}</div>
+                  <div className={styles.badgeText}>
+                    <h4>{item.title}</h4>
+                    <p>{item.description}</p>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         );
       } else {
-        // Social Stat as Street Art Graffiti
+        // Social Stat
         interleavedItems.push(
-          <div key={`stat-${item.id}`} className={styles.graffitiStat} data-stat={item.id}>
-            <div className={styles.graffitiStatContent}>
-              <div className={styles.graffitiStatIcon} style={{ color: item.color }}>
-                {item.icon}
+          <div key={`stat-${item.id}`} className={styles.itemLink}>
+            <div className={styles.easel}>
+              <div
+                className={`${styles.easelLeg} ${styles.easelLeftLeg}`}
+              ></div>
+              <div
+                className={`${styles.easelLeg} ${styles.easelRightLeg}`}
+              ></div>
+              <div
+                className={`${styles.easelLeg} ${styles.easelBackLeg}`}
+              ></div>
+              <div
+                className={`${styles.board} ${styles.statBoard}`}
+                data-stat={item.id}
+              >
+                <div className={styles.statContent}>
+                  <div
+                    className={styles.statIcon}
+                    style={{ color: item.color }}
+                  >
+                    {item.icon}
+                  </div>
+                  <div
+                    className={styles.statValue}
+                    style={{ color: item.color }}
+                  >
+                    {item.value}
+                  </div>
+                  <div className={styles.statLabel}>{item.label}</div>
+                </div>
               </div>
-              <div className={styles.graffitiStatValue} style={{ color: item.color }}>
-                {item.value}
-              </div>
-              <div className={styles.graffitiStatLabel}>{item.label}</div>
             </div>
           </div>
         );
