@@ -146,19 +146,23 @@ export function ProductsActions({
 
       if (!response.ok) {
         throw new Error(
-          data?.message || data?.error || "Failed to post to Facebook"
+          data?.message || data?.error || "Failed to post to social media"
         );
       }
 
-      const postId: string | undefined = data?.postId;
+      const platforms: string[] = data?.platforms || [];
+      const platformsText = platforms.length > 0 
+        ? platforms.join(', ') 
+        : 'Facebook';
+
       toast({
-        title: "Posted to Facebook",
-        description: postId ? `Post ID: ${postId}` : "The product was posted.",
+        title: "Posted to Social Media",
+        description: `Successfully posted to: ${platformsText}`,
       });
     } catch (error: any) {
       toast({
         variant: "destructive",
-        title: "Facebook post failed",
+        title: "Social media post failed",
         description: error?.message || "Please check server logs and config",
       });
     } finally {
@@ -202,7 +206,7 @@ export function ProductsActions({
         <button
           className="fb-btn"
           onClick={handlePostToFacebook}
-          title="Post to Facebook"
+          title="Post to all social media (FB, Instagram, Groups)"
           disabled={isPosting}
         >
           {isPosting ? (

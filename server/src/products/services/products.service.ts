@@ -937,11 +937,16 @@ export class ProductsService {
     }
 
     const oldStatus = product.status;
-    const wasApprovedBefore = oldStatus === ProductStatus.APPROVED;
+    const wasApprovedBefore = oldStatus === ProductStatus.APPROVED || !!product.firstApprovedAt;
 
     product.status = status;
     if (rejectionReason) {
       product.rejectionReason = rejectionReason;
+    }
+
+    // თუ პროდუქტი პირველად დასტურდება, შევინახოთ თარიღი
+    if (status === ProductStatus.APPROVED && !product.firstApprovedAt) {
+      product.firstApprovedAt = new Date();
     }
 
     const updatedProduct = await product.save();

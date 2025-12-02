@@ -1085,7 +1085,7 @@ export class ProductsController {
   @Post(':id/post-to-facebook')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.Admin)
-  @ApiOperation({ summary: 'Manually post a product to Facebook Page (Admin)' })
+  @ApiOperation({ summary: 'Manually post a product to all platforms (Facebook, Instagram, Groups)' })
   @ApiParam({ name: 'id', description: 'Product ID' })
   async postProductToFacebook(@Param('id') id: string) {
     // Ensure we populate seller info so author and profile link appear in the caption
@@ -1095,29 +1095,41 @@ export class ProductsController {
       throw new BadRequestException('Product not found');
     }
 
-    // Best-effort call, return the result
-    const result = await this.facebookPostingService.postApprovedProduct(
+    // Post to all platforms (Page, Groups, Instagram)
+    const result = await this.facebookPostingService.postToAllPlatforms(
       product as any,
     );
 
     if (!result.success) {
       // Attach a friendlier message if common permission issue occurs
-      const msg = (result.error?.error?.message ||
-        result.error?.message ||
+      const errors = result.errors || [];
+      const firstError = errors[0]?.error;
+      const msg = (firstError?.error?.message ||
+        firstError?.message ||
         '') as string;
+      
       if (/publish_actions/i.test(msg)) {
         throw new BadRequestException(
           'Facebook rejected the request. Use a Page Access Token with pages_manage_posts in FACEBOOK_POSTS_PAGE_ACCESS_TOKEN and ensure FACEBOOK_POSTS_PAGE_ID is set.',
         );
       }
       throw new BadRequestException(
-        result.error || 'Failed to post to Facebook',
+        firstError || 'Failed to post to social media platforms',
       );
     }
 
+    // Build success response with all platform results
+    const platforms: string[] = [];
+    if (result.pagePost?.success) platforms.push('Facebook Page');
+    if (result.groupPosts?.some(g => g.success)) platforms.push('Facebook Groups');
+    if (result.instagramPost?.success) platforms.push('Instagram');
+
     return {
       ok: true,
-      postId: result.postId,
+      platforms,
+      pagePost: result.pagePost,
+      groupPosts: result.groupPosts,
+      instagramPost: result.instagramPost,
     };
   }
 

@@ -214,6 +214,9 @@ export class Product {
   @Prop({ type: String })
   rejectionReason?: string;
 
+  @Prop({ type: Date })
+  firstApprovedAt?: Date;
+
   @Prop({ type: String, enum: DeliveryType, default: DeliveryType.SoulArt })
   deliveryType?: DeliveryType;
 
