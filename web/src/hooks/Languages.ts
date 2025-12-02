@@ -774,7 +774,7 @@ export const TRANSLATIONS: Translations = {
       heroSubtitle: "ორიგინალი ხელოვნების ნიმუშები პირდაპირ შემქმნელებისგან",
       trustBadges: {
         freeShipping: "უფასო მიწოდება",
-        freeShippingDesc: "30₾+ შეკვეთებზე",
+        freeShippingDesc: "50₾+ შეკვეთებზე",
         qualityGuarantee: "ხარისხის გარანტია",
         qualityGuaranteeDesc: "100% ორიგინალი",
         fastRefund: "თანხის მომენტალური დაბრუნება",
