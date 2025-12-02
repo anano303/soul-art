@@ -25,7 +25,6 @@ import { Role } from '@/types/role.enum';
 import { SellerRegisterDto } from '../dtos/seller-register.dto';
 import { BecomeSellerDto } from '../dtos/become-seller.dto';
 import { AdminProfileDto } from '../dtos/admin.profile.dto';
-import { AwsS3Service } from '@/aws-s3/aws-s3.service';
 import { UserCloudinaryService } from './user-cloudinary.service';
 import { generateBaseArtistSlug } from '@/utils/slug-generator';
 import { BalanceService } from './balance.service';
@@ -43,7 +42,6 @@ export class UsersService {
     @InjectModel(Product.name) private productModel: Model<Product>,
     @InjectModel(PortfolioPost.name)
     private portfolioPostModel: Model<PortfolioPostDocument>,
-    private readonly awsS3Service: AwsS3Service,
     private readonly userCloudinaryService: UserCloudinaryService,
     private readonly balanceService: BalanceService,
     @Optional()
@@ -1627,7 +1625,11 @@ export class UsersService {
 
   async uploadImage(filePath: string, fileBuffer: Buffer): Promise<string> {
     try {
-      return await this.awsS3Service.uploadImage(filePath, fileBuffer);
+      // Use Cloudinary instead of AWS S3
+      return await this.userCloudinaryService.uploadImageToCloudinary(
+        fileBuffer,
+        filePath,
+      );
     } catch (error) {
       this.logger.error(`Failed to upload image: ${error.message}`);
       throw new BadRequestException('Failed to upload image: ' + error.message);
@@ -1726,7 +1728,8 @@ export class UsersService {
     // Remove user's profile image if exists
     if (user.profileImagePath) {
       try {
-        await this.awsS3Service.deleteImageByFileId(
+        // Use Cloudinary to delete image
+        await this.userCloudinaryService.deleteImageFromCloudinary(
           user.profileImagePath as string,
         );
       } catch (error) {

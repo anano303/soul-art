@@ -34,7 +34,6 @@ import { GalleryInteractionController } from './controller/gallery-interaction.c
 import { PortfolioController } from './controller/portfolio.controller';
 import { GoogleStrategy } from '@/strategies/google.strategy';
 import { EmailService } from '@/email/services/email.services';
-import { AwsS3Module } from '@/aws-s3/aws-s3.module';
 import { CloudinaryModule } from '@/cloudinary/cloudinary.module';
 import { UserCloudinaryService } from './services/user-cloudinary.service';
 import { ReferralsModule } from '../referrals/referrals.module';
@@ -83,7 +82,6 @@ import { PaymentsModule } from '../payments/payments.module';
       secret: process.env.JWT_ACCESS_SECRET,
       signOptions: { expiresIn: '10m' },
     }),
-    AwsS3Module,
     CloudinaryModule, // Add Cloudinary module
     PaymentsModule, // Add PaymentsModule for BOG transfer service
     forwardRef(() => ReferralsModule), // Add ReferralsModule for dependency injection
