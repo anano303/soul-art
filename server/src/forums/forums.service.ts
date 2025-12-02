@@ -11,7 +11,6 @@ import { Forum, Comment } from './schema/forum.schema';
 import { isValidObjectId, Model, Types } from 'mongoose';
 import { UsersService } from '@/users/services/users.service';
 import { queryParamsDto } from './dto/queryParams.dto';
-import { AwsS3Service } from '@/aws-s3/aws-s3.service';
 import { CloudinaryService } from '@/cloudinary/services/cloudinary.service';
 import { AddCommentDto } from './dto/addComment.dto';
 import { SearchForumDto } from './dto/search-forum.dto';
@@ -23,7 +22,6 @@ export class ForumsService {
     @InjectModel(Forum.name) private forumModel: Model<Forum>,
     @InjectModel(Comment.name) private commentModel: Model<Comment>,
     private userService: UsersService,
-    private awsS3Service: AwsS3Service,
     private cloudinaryService: CloudinaryService,
   ) {}
 
@@ -612,9 +610,12 @@ export class ForumsService {
     const fileId = deletedForum.imagePath;
     if (fileId) {
       try {
-        await this.awsS3Service.deleteImageByFileId(fileId);
+        // Use Cloudinary to delete image
+        await this.cloudinaryService.deleteResource(fileId, 'image');
       } catch (error) {
-        throw new BadRequestException('Failed to delete the image from S3');
+        throw new BadRequestException(
+          'Failed to delete the image from Cloudinary',
+        );
       }
     }
 

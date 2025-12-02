@@ -12,7 +12,6 @@ import { AppController } from './controllers/app.controller';
 import { CloudinaryModule } from '../cloudinary/cloudinary.module';
 import { AppService } from './services/app.service';
 import { AiModule } from '@/ai/ai.module';
-import { AwsS3Module } from '@/aws-s3/aws-s3.module';
 import { ForumsModule } from '@/forums/forums.module';
 import { GoogleStrategy } from '@/strategies/google.strategy';
 import { connectDB } from '@/utils/config';
@@ -46,7 +45,6 @@ import { AnalyticsModule } from '../analytics/analytics.module';
     CloudinaryModule,
     AiModule,
     // SeedsModule,
-    AwsS3Module,
     ForumsModule,
     CategoriesModule,
     BannerModule,

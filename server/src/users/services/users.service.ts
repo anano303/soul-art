@@ -26,6 +26,7 @@ import { SellerRegisterDto } from '../dtos/seller-register.dto';
 import { BecomeSellerDto } from '../dtos/become-seller.dto';
 import { AdminProfileDto } from '../dtos/admin.profile.dto';
 import { UserCloudinaryService } from './user-cloudinary.service';
+import { CloudinaryService } from '@/cloudinary/services/cloudinary.service';
 import { generateBaseArtistSlug } from '@/utils/slug-generator';
 import { BalanceService } from './balance.service';
 import { ReferralsService } from '@/referrals/services/referrals.service';
@@ -43,6 +44,7 @@ export class UsersService {
     @InjectModel(PortfolioPost.name)
     private portfolioPostModel: Model<PortfolioPostDocument>,
     private readonly userCloudinaryService: UserCloudinaryService,
+    private readonly cloudinaryService: CloudinaryService,
     private readonly balanceService: BalanceService,
     @Optional()
     @Inject(forwardRef(() => ReferralsService))
@@ -1625,11 +1627,14 @@ export class UsersService {
 
   async uploadImage(filePath: string, fileBuffer: Buffer): Promise<string> {
     try {
-      // Use Cloudinary instead of AWS S3
-      return await this.userCloudinaryService.uploadImageToCloudinary(
+      // Use CloudinaryService directly for buffer uploads
+      const result = await this.cloudinaryService.uploadBuffer(
         fileBuffer,
-        filePath,
+        undefined, // Let Cloudinary generate public ID
+        'artists/profiles', // Folder for user profile images
+        'image',
       );
+      return result.secure_url;
     } catch (error) {
       this.logger.error(`Failed to upload image: ${error.message}`);
       throw new BadRequestException('Failed to upload image: ' + error.message);
@@ -1728,10 +1733,13 @@ export class UsersService {
     // Remove user's profile image if exists
     if (user.profileImagePath) {
       try {
-        // Use Cloudinary to delete image
-        await this.userCloudinaryService.deleteImageFromCloudinary(
+        // Extract public ID from Cloudinary URL and delete
+        const publicId = this.extractPublicIdFromUrl(
           user.profileImagePath as string,
         );
+        if (publicId) {
+          await this.cloudinaryService.deleteResource(publicId, 'image');
+        }
       } catch (error) {
         console.error('Failed to delete profile image', error);
         // Continue even if image deletion fails
@@ -1740,6 +1748,16 @@ export class UsersService {
 
     await this.userModel.findByIdAndDelete(id);
     return { message: 'User deleted successfully' };
+  }
+
+  // Helper method to extract Cloudinary public ID from URL
+  private extractPublicIdFromUrl(url: string): string | null {
+    if (!url) return null;
+
+    // Extract public ID from Cloudinary URL
+    // Example: https://res.cloudinary.com/<cloud>/image/upload/v123456/folder/filename.jpg
+    const matches = url.match(/\/([^\/]+\/[^\/]+)\.(jpg|jpeg|png|gif|webp)$/i);
+    return matches ? matches[1] : null;
   }
 
   // Migration helper methods
