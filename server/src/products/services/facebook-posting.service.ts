@@ -2,13 +2,13 @@ import { Injectable, Logger } from '@nestjs/common';
 import axios from 'axios';
 import { ProductDocument } from '../schemas/product.schema';
 
-interface PostResult {
+export interface PostResult {
   success: boolean;
   postId?: string;
   error?: any;
 }
 
-interface MultiPostResult {
+export interface MultiPostResult {
   success: boolean;
   pagePost?: PostResult;
   groupPosts?: PostResult[];
