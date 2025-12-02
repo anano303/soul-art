@@ -81,9 +81,7 @@ export class ProductsService {
     private facebookPostingService?: FacebookPostingService,
   ) {}
 
-  private resolveArtistId(
-    product: ProductDocument,
-  ): Types.ObjectId | null {
+  private resolveArtistId(product: ProductDocument): Types.ObjectId | null {
     const rawUser = product.user as any;
 
     if (!rawUser) {
@@ -117,9 +115,12 @@ export class ProductsService {
     return null;
   }
 
-  private async buildProductCaption(product: ProductDocument): Promise<string | null> {
+  private async buildProductCaption(
+    product: ProductDocument,
+  ): Promise<string | null> {
     const parts: string[] = [];
-    const description = typeof product.description === 'string' ? product.description.trim() : '';
+    const description =
+      typeof product.description === 'string' ? product.description.trim() : '';
 
     if (description) {
       parts.push(description);
@@ -129,7 +130,7 @@ export class ProductsService {
 
     // Determine category text - need to handle ObjectId references
     let categoryText = '';
-    
+
     if (product.categoryStructure?.main || product.categoryStructure?.sub) {
       // If categoryStructure exists, use it
       const main = product.categoryStructure?.main ?? '';
@@ -143,13 +144,15 @@ export class ProductsService {
           .populate('mainCategory')
           .populate('subCategory')
           .lean();
-        
+
         if (populatedProduct) {
           const mainCat = populatedProduct.mainCategory as any;
           const subCat = populatedProduct.subCategory as any;
-          
+
           if (subCat?.name) {
-            categoryText = mainCat?.name ? `${mainCat.name} / ${subCat.name}` : subCat.name;
+            categoryText = mainCat?.name
+              ? `${mainCat.name} / ${subCat.name}`
+              : subCat.name;
           } else if (mainCat?.name) {
             categoryText = mainCat.name;
           }
@@ -158,12 +161,12 @@ export class ProductsService {
         console.error('Error populating categories for caption:', error);
       }
     }
-    
+
     // Fall back to legacy category field if nothing else worked
     if (!categoryText && product.category) {
       categoryText = product.category;
     }
-    
+
     if (categoryText) {
       details.push(`Category: ${categoryText}`);
     }
@@ -292,9 +295,7 @@ export class ProductsService {
     const caption = await this.buildProductCaption(product);
 
     const rawCreatedAt = (product as any)?.createdAt;
-    const publishedAt = rawCreatedAt
-      ? new Date(rawCreatedAt)
-      : new Date();
+    const publishedAt = rawCreatedAt ? new Date(rawCreatedAt) : new Date();
 
     try {
       await this.portfolioPostModel.create({
@@ -302,7 +303,9 @@ export class ProductsService {
         productId: product._id,
         images,
         caption,
-        tags: Array.isArray(product.hashtags) ? product.hashtags.slice(0, 20) : [],
+        tags: Array.isArray(product.hashtags)
+          ? product.hashtags.slice(0, 20)
+          : [],
         isFeatured: false,
         likesCount: 0,
         commentsCount: 0,
@@ -934,6 +937,8 @@ export class ProductsService {
     }
 
     const oldStatus = product.status;
+    const wasApprovedBefore = oldStatus === ProductStatus.APPROVED;
+
     product.status = status;
     if (rejectionReason) {
       product.rejectionReason = rejectionReason;
@@ -963,7 +968,8 @@ export class ProductsService {
 
     // Auto-post to Facebook Page on approval (best-effort, non-blocking)
     // Only enabled in production environment
-    if (status === ProductStatus.APPROVED) {
+    // თუ პროდუქტი პირველად დასტურდება (არა რეედიტირება)
+    if (status === ProductStatus.APPROVED && !wasApprovedBefore) {
       const isProduction = process.env.NODE_ENV === 'production';
       const haveService = this.facebookPostingService;
       const havePageId = Boolean(
@@ -976,7 +982,13 @@ export class ProductsService {
       const autoPostEnabled =
         (process.env.FACEBOOK_AUTO_POST || 'true').toLowerCase() !== 'false';
 
-      if (isProduction && haveService && havePageId && haveToken && autoPostEnabled) {
+      if (
+        isProduction &&
+        haveService &&
+        havePageId &&
+        haveToken &&
+        autoPostEnabled
+      ) {
         try {
           // best-effort, don't await to not block response
           this.facebookPostingService
@@ -984,7 +996,7 @@ export class ProductsService {
             .then((res) => {
               if (res?.success) {
                 console.log(
-                  '[FB] Posted product',
+                  '[FB] Posted new product',
                   updatedProduct._id?.toString?.(),
                   'postId:',
                   res.postId,
@@ -1011,6 +1023,10 @@ export class ProductsService {
           autoPostEnabled,
         });
       }
+    } else if (status === ProductStatus.APPROVED && wasApprovedBefore) {
+      console.log(
+        '[FB] Auto-post skipped - product was already approved before (edited product)',
+      );
     }
 
     return updatedProduct;
@@ -1182,9 +1198,7 @@ export class ProductsService {
       await product.save();
 
       const shouldCreatePortfolio =
-        options?.addToPortfolio === undefined
-          ? true
-          : options.addToPortfolio;
+        options?.addToPortfolio === undefined ? true : options.addToPortfolio;
 
       if (shouldCreatePortfolio) {
         await this.ensurePortfolioPostForProduct(product);
