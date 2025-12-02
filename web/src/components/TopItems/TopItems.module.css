@@ -18,7 +18,7 @@
     rgba(248, 243, 235, 0.98) 50%,
     rgba(245, 237, 227, 0.98) 100%
   ) !important;
-  box-shadow: 7px -6px 10px 0px var(--primary-color) !important;
+  box-shadow: 4px -3px 2px 0px #b06f51 !important;
   border-bottom: 10px solid saddlebrown !important;
   position: relative;
   overflow: hidden;
@@ -283,10 +283,23 @@
   /* border-top: 3px solid #080866; */
   padding-top: 20px;
   display: flex;
-  overflow: hidden;
+  overflow-x: auto;
+  overflow-y: hidden;
   width: 100%;
   position: relative;
   padding-bottom: 50px;
+  cursor: grab;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE/Edge */
+  scroll-behavior: smooth;
+}
+
+.scroller::-webkit-scrollbar {
+  display: none; /* Chrome/Safari/Opera */
+}
+
+.scroller:active {
+  cursor: grabbing;
 }
 
 .inner {
@@ -294,7 +307,6 @@
   gap: 30px;
   margin: 0px 15px;
   width: max-content;
-  animation: scrollLoop 30s linear infinite;
 }
 
 .itemCard {
@@ -423,15 +435,14 @@
   top: 20px;
   left: 15px;
   border-radius: 5px;
-  box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.3);
-  box-shadow: 7px -6px 10px 0px var(--primary-color);
+  box-shadow: 4px -3px 2px 0px #b06f51;
   border-bottom: 10px solid saddlebrown;
 }
 
 /* Larger easels for badge and stat boards */
 .badgeBoard,
 .statBoard {
-  width: 180px !important;
+  width: 120px !important;
   height: 140px !important;
   left: 15px !important;
   top: 29px !important;

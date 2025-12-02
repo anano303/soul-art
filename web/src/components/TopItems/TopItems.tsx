@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import styles from "./TopItems.module.css";
@@ -25,6 +25,59 @@ import { useLanguage } from "@/hooks/LanguageContext";
 const TopItems: React.FC = () => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const { t, language } = useLanguage();
+  const [isDragging, setIsDragging] = useState(false);
+  const [startX, setStartX] = useState(0);
+  const [scrollLeft, setScrollLeft] = useState(0);
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (!scrollRef.current) return;
+    setIsDragging(true);
+    setStartX(e.pageX - scrollRef.current.offsetLeft);
+    setScrollLeft(scrollRef.current.scrollLeft);
+    if (scrollRef.current) {
+      scrollRef.current.style.cursor = 'grabbing';
+    }
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging || !scrollRef.current) return;
+    e.preventDefault();
+    const x = e.pageX - scrollRef.current.offsetLeft;
+    const walk = (x - startX) * 2;
+    scrollRef.current.scrollLeft = scrollLeft - walk;
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+    if (scrollRef.current) {
+      scrollRef.current.style.cursor = 'grab';
+    }
+  };
+
+  const handleMouseLeave = () => {
+    setIsDragging(false);
+    if (scrollRef.current) {
+      scrollRef.current.style.cursor = 'grab';
+    }
+  };
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (!scrollRef.current) return;
+    setIsDragging(true);
+    setStartX(e.touches[0].pageX - scrollRef.current.offsetLeft);
+    setScrollLeft(scrollRef.current.scrollLeft);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!isDragging || !scrollRef.current) return;
+    const x = e.touches[0].pageX - scrollRef.current.offsetLeft;
+    const walk = (x - startX) * 2;
+    scrollRef.current.scrollLeft = scrollLeft - walk;
+  };
+
+  const handleTouchEnd = () => {
+    setIsDragging(false);
+  };
 
   const { data: topProducts, isLoading } = useQuery({
     queryKey: ["topProducts"],
@@ -56,9 +109,18 @@ const TopItems: React.FC = () => {
   });
 
   useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.innerHTML += scrollRef.current.innerHTML;
-    }
+    const scroller = scrollRef.current;
+    if (!scroller) return;
+    
+    // Duplicate content for seamless loop
+    const inner = scroller.querySelector(`.${styles.inner}`) as HTMLElement;
+    if (!inner) return;
+    
+    const clone = inner.cloneNode(true) as HTMLElement;
+    scroller.appendChild(clone);
+    
+    // Enable overflow-x for manual scrolling
+    scroller.style.overflowX = 'auto';
 
     // Apply margin-top to every second .easel element
     const easels = document.querySelectorAll(`.${styles.easel}`);
@@ -67,7 +129,43 @@ const TopItems: React.FC = () => {
         (easel as HTMLElement).style.marginTop = "20%";
       }
     });
-  }, [topProducts]);
+
+    // Auto-scroll animation
+    let animationId: number;
+    let isPaused = false;
+    const scrollSpeed = 0.5; // pixels per frame
+    
+    const autoScroll = () => {
+      if (!isPaused && !isDragging && scroller) {
+        scroller.scrollLeft += scrollSpeed;
+        
+        // Seamless loop: reset when reaching halfway point
+        const maxScroll = inner.scrollWidth;
+        if (scroller.scrollLeft >= maxScroll) {
+          scroller.scrollLeft = 0;
+        }
+      }
+      animationId = requestAnimationFrame(autoScroll);
+    };
+
+    // Pause on hover
+    const handleMouseEnter = () => { isPaused = true; };
+    const handleMouseLeave = () => { isPaused = false; };
+    
+    scroller.addEventListener('mouseenter', handleMouseEnter);
+    scroller.addEventListener('mouseleave', handleMouseLeave);
+    
+    animationId = requestAnimationFrame(autoScroll);
+
+    return () => {
+      cancelAnimationFrame(animationId);
+      scroller.removeEventListener('mouseenter', handleMouseEnter);
+      scroller.removeEventListener('mouseleave', handleMouseLeave);
+      if (clone && clone.parentElement) {
+        clone.parentElement.removeChild(clone);
+      }
+    };
+  }, [topProducts, isDragging]);
 
   if (isLoading) {
     return (
@@ -256,7 +354,17 @@ const TopItems: React.FC = () => {
 
   return (
     <div className={styles.container}>
-      <div className={styles.scroller} ref={scrollRef}>
+      <div 
+        className={styles.scroller} 
+        ref={scrollRef}
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseLeave}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+      >
         <div className={styles.inner}>{interleavedItems}</div>
       </div>
     </div>
