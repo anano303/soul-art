@@ -25,25 +25,25 @@ export class FacebookPostingService {
   private readonly pageAccessToken =
     process.env.FACEBOOK_PAGE_ACCESS_TOKEN ||
     process.env.FACEBOOK_PAGE_ACCESS_TOKEN;
-  
+
   // Facebook Groups configuration (comma-separated group IDs)
   private readonly groupIds = process.env.FACEBOOK_GROUP_IDS
-    ? process.env.FACEBOOK_GROUP_IDS.split(',').map(id => id.trim()).filter(Boolean)
+    ? process.env.FACEBOOK_GROUP_IDS.split(',')
+        .map((id) => id.trim())
+        .filter(Boolean)
     : [];
-  
+
   // Instagram configuration
   private readonly instagramAccountId = process.env.INSTAGRAM_ACCOUNT_ID || '';
-  
+
   private readonly autoPostFlag = (
     process.env.FACEBOOK_AUTO_POST || 'true'
   ).toLowerCase();
-  private readonly autoPostGroups = (
-    process.env.FACEBOOK_AUTO_POST_GROUPS || 'false'
-  ).toLowerCase() === 'true';
-  private readonly autoPostInstagram = (
-    process.env.INSTAGRAM_AUTO_POST || 'false'
-  ).toLowerCase() === 'true';
-  
+  private readonly autoPostGroups =
+    (process.env.FACEBOOK_AUTO_POST_GROUPS || 'false').toLowerCase() === 'true';
+  private readonly autoPostInstagram =
+    (process.env.INSTAGRAM_AUTO_POST || 'false').toLowerCase() === 'true';
+
   private readonly allowedOrigins = process.env.ALLOWED_ORIGINS || '';
   private readonly serverBaseUrl = process.env.SERVER_BASE_URL || '';
 
@@ -336,7 +336,10 @@ export class FacebookPostingService {
   /**
    * Post to Facebook Group
    */
-  private async postToGroup(groupId: string, product: ProductDocument): Promise<PostResult> {
+  private async postToGroup(
+    groupId: string,
+    product: ProductDocument,
+  ): Promise<PostResult> {
     try {
       const message = this.buildMessage(product);
       const images = Array.isArray(product.images)
@@ -375,7 +378,10 @@ export class FacebookPostingService {
       }
 
       // Multiple photos - upload unpublished first
-      const uploadedIds = await this.uploadPhotosUnpublishedForGroup(groupId, images);
+      const uploadedIds = await this.uploadPhotosUnpublishedForGroup(
+        groupId,
+        images,
+      );
       const attached_media = uploadedIds.map((id) => ({ media_fbid: id }));
 
       const res = await axios.post(
@@ -446,7 +452,10 @@ export class FacebookPostingService {
         : [];
 
       if (images.length === 0) {
-        return { success: false, error: 'No images available for Instagram post' };
+        return {
+          success: false,
+          error: 'No images available for Instagram post',
+        };
       }
 
       // Instagram API requires a two-step process:
@@ -454,7 +463,7 @@ export class FacebookPostingService {
       // 2. Publish the container
 
       const imageUrl = images[0]; // Instagram single image for now
-      
+
       // Step 1: Create container
       const containerRes = await axios.post(
         `https://graph.facebook.com/v19.0/${this.instagramAccountId}/media`,
@@ -474,7 +483,7 @@ export class FacebookPostingService {
       }
 
       // Wait a moment for Instagram to process the image
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      await new Promise((resolve) => setTimeout(resolve, 2000));
 
       // Step 2: Publish
       const publishRes = await axios.post(
@@ -512,7 +521,10 @@ export class FacebookPostingService {
         result.pagePost = pageResult;
         if (!pageResult.success) {
           result.success = false;
-          result.errors?.push({ platform: 'Facebook Page', error: pageResult.error });
+          result.errors?.push({
+            platform: 'Facebook Page',
+            error: pageResult.error,
+          });
         } else {
           this.logger.log(`Posted to Facebook Page: ${pageResult.postId}`);
         }
@@ -532,14 +544,22 @@ export class FacebookPostingService {
           result.groupPosts.push(groupResult);
           if (!groupResult.success) {
             result.success = false;
-            result.errors?.push({ platform: `Facebook Group ${groupId}`, error: groupResult.error });
+            result.errors?.push({
+              platform: `Facebook Group ${groupId}`,
+              error: groupResult.error,
+            });
           } else {
-            this.logger.log(`Posted to Facebook Group ${groupId}: ${groupResult.postId}`);
+            this.logger.log(
+              `Posted to Facebook Group ${groupId}: ${groupResult.postId}`,
+            );
           }
         } catch (error) {
           result.success = false;
           result.errors?.push({ platform: `Facebook Group ${groupId}`, error });
-          this.logger.error(`Failed to post to Facebook Group ${groupId}`, error);
+          this.logger.error(
+            `Failed to post to Facebook Group ${groupId}`,
+            error,
+          );
         }
       }
     }
@@ -551,7 +571,10 @@ export class FacebookPostingService {
         result.instagramPost = instagramResult;
         if (!instagramResult.success) {
           result.success = false;
-          result.errors?.push({ platform: 'Instagram', error: instagramResult.error });
+          result.errors?.push({
+            platform: 'Instagram',
+            error: instagramResult.error,
+          });
         } else {
           this.logger.log(`Posted to Instagram: ${instagramResult.postId}`);
         }

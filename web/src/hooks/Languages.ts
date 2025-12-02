@@ -770,9 +770,23 @@ export const TRANSLATIONS: Translations = {
 
     // Home page
     home: {
-      heroTitle: "შეარჩიე ხელოვანების ნამუშევრები ან გაყიდე შენი 🖌️",
-      heroSubtitle:
-        "პერსონალური და ხელნაკეთი ნამუშევრები ქართველი ხელოვანებისგან",
+      heroTitle: "ქართველი მხატვრების და ხელოვანების ნამუშევრები",
+      heroSubtitle: "ორიგინალი ხელოვნების ნიმუშები პირდაპირ შემქმნელებისგან",
+      trustBadges: {
+        freeShipping: "უფასო მიწოდება",
+        freeShippingDesc: "30₾+ შეკვეთებზე",
+        qualityGuarantee: "ხარისხის გარანტია",
+        qualityGuaranteeDesc: "100% ორიგინალი",
+        fastRefund: "თანხის მომენტალური დაბრუნება",
+        fastRefundDesc:
+          "თუ შეკვეთა მითითებულ ვადაში არ ჩაგბარდათ, ან არ შეესაბამება აღწერას",
+        securePayment: "საქართველოს ბანკის დაცული გადახდა",
+        securePaymentDesc: "BOG & Card",
+      },
+      cta: {
+        browseArt: "ნამუშევრები",
+        sellYourArt: "გაყიდე შენი",
+      },
       discountedRail: {
         eyebrow: "ფასდაკლება",
         title: "დღევანდელი შეთავაზებები",
@@ -2174,8 +2188,22 @@ export const TRANSLATIONS: Translations = {
 
     // Home page
     home: {
-      heroTitle: "Discover artworks by artists or sell your own 🖌️",
-      heroSubtitle: "Personalized and handmade creations by Georgian artists",
+      heroTitle: "Georgian Artists' Artworks",
+      heroSubtitle: "Original art directly from creators",
+      trustBadges: {
+        freeShipping: "Free Shipping",
+        freeShippingDesc: "On orders 30₾+",
+        qualityGuarantee: "Quality Guarantee",
+        qualityGuaranteeDesc: "100% Original",
+        fastRefund: "Fast Refund",
+        fastRefundDesc: "On late delivery",
+        securePayment: "Secure Payment",
+        securePaymentDesc: "BOG & Card",
+      },
+      cta: {
+        browseArt: "Browse Art",
+        sellYourArt: "Sell Your Art",
+      },
       discountedRail: {
         eyebrow: "Sale",
         title: "Today's deals",

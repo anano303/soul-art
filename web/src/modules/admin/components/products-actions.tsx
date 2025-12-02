@@ -151,9 +151,8 @@ export function ProductsActions({
       }
 
       const platforms: string[] = data?.platforms || [];
-      const platformsText = platforms.length > 0 
-        ? platforms.join(', ') 
-        : 'Facebook';
+      const platformsText =
+        platforms.length > 0 ? platforms.join(", ") : "Facebook";
 
       toast({
         title: "Posted to Social Media",

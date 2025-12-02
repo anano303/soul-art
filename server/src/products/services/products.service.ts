@@ -937,7 +937,8 @@ export class ProductsService {
     }
 
     const oldStatus = product.status;
-    const wasApprovedBefore = oldStatus === ProductStatus.APPROVED || !!product.firstApprovedAt;
+    const wasApprovedBefore =
+      oldStatus === ProductStatus.APPROVED || !!product.firstApprovedAt;
 
     product.status = status;
     if (rejectionReason) {
@@ -1003,9 +1004,10 @@ export class ProductsService {
               if (res?.success) {
                 const platforms: string[] = [];
                 if (res.pagePost?.success) platforms.push('FB Page');
-                if (res.groupPosts?.some(g => g.success)) platforms.push('FB Groups');
+                if (res.groupPosts?.some((g) => g.success))
+                  platforms.push('FB Groups');
                 if (res.instagramPost?.success) platforms.push('Instagram');
-                
+
                 console.log(
                   `[Social Media] Posted new product ${updatedProduct._id?.toString?.()} to: ${platforms.join(', ')}`,
                 );
