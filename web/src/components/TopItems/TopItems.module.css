@@ -293,7 +293,7 @@
   -ms-overflow-style: none; /* IE/Edge */
   scroll-behavior: smooth;
   -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
-  touch-action: pan-x; /* Enable horizontal touch scrolling */
+  touch-action: pan-y pan-x; /* Enable both vertical and horizontal touch scrolling */
 }
 
 .scroller::-webkit-scrollbar {

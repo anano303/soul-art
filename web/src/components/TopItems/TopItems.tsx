@@ -58,16 +58,16 @@ const TopItems: React.FC = () => {
   useEffect(() => {
     const scroller = scrollRef.current;
     if (!scroller) return;
-    
+
     // Duplicate content for seamless loop
     const inner = scroller.querySelector(`.${styles.inner}`) as HTMLElement;
     if (!inner) return;
-    
+
     const clone = inner.cloneNode(true) as HTMLElement;
     scroller.appendChild(clone);
-    
+
     // Enable overflow-x for manual scrolling
-    scroller.style.overflowX = 'auto';
+    scroller.style.overflowX = "auto";
 
     // Apply margin-top to every second .easel element
     const easels = document.querySelectorAll(`.${styles.easel}`);
@@ -83,16 +83,19 @@ const TopItems: React.FC = () => {
     let isUserScrolling = false;
     let userScrollTimeout: NodeJS.Timeout;
     let lastScrollLeft = 0;
-    
+
     // Faster speed for mobile
-    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    const isMobile =
+      /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+        navigator.userAgent
+      );
     const scrollSpeed = isMobile ? 2.5 : 1.2; // Increased speed for both desktop and mobile
-    
+
     const autoScroll = () => {
       if (!isPaused && !isUserScrolling && scroller) {
         scroller.scrollLeft += scrollSpeed;
         lastScrollLeft = scroller.scrollLeft;
-        
+
         // Seamless loop: reset when reaching the original content width
         const originalWidth = inner.scrollWidth;
         if (scroller.scrollLeft >= originalWidth) {
@@ -104,24 +107,28 @@ const TopItems: React.FC = () => {
     };
 
     // Pause on hover (desktop)
-    const handleMouseEnter = () => { isPaused = true; };
-    const handleMouseLeave = () => { isPaused = false; };
-    
+    const handleMouseEnter = () => {
+      isPaused = true;
+    };
+    const handleMouseLeave = () => {
+      isPaused = false;
+    };
+
     // Detect horizontal touch for pausing auto-scroll
     let touchStartX = 0;
     let touchStartY = 0;
-    
+
     const handleTouchStart = (e: TouchEvent) => {
       touchStartX = e.touches[0].clientX;
       touchStartY = e.touches[0].clientY;
     };
-    
+
     const handleTouchMove = (e: TouchEvent) => {
       const touchEndX = e.touches[0].clientX;
       const touchEndY = e.touches[0].clientY;
       const diffX = Math.abs(touchEndX - touchStartX);
       const diffY = Math.abs(touchEndY - touchStartY);
-      
+
       // Only pause auto-scroll if horizontal swipe (not vertical)
       if (diffX > diffY && diffX > 10) {
         isUserScrolling = true;
@@ -131,7 +138,7 @@ const TopItems: React.FC = () => {
         }, 3000);
       }
     };
-    
+
     // Detect user scrolling (only manual scroll, not programmatic)
     const handleUserScroll = () => {
       // Check if scroll was caused by user (not our auto-scroll)
@@ -144,23 +151,25 @@ const TopItems: React.FC = () => {
       }
       lastScrollLeft = scroller.scrollLeft;
     };
-    
-    scroller.addEventListener('mouseenter', handleMouseEnter);
-    scroller.addEventListener('mouseleave', handleMouseLeave);
-    scroller.addEventListener('scroll', handleUserScroll, { passive: true });
-    scroller.addEventListener('touchstart', handleTouchStart, { passive: true });
-    scroller.addEventListener('touchmove', handleTouchMove, { passive: true });
-    
+
+    scroller.addEventListener("mouseenter", handleMouseEnter);
+    scroller.addEventListener("mouseleave", handleMouseLeave);
+    scroller.addEventListener("scroll", handleUserScroll, { passive: true });
+    scroller.addEventListener("touchstart", handleTouchStart, {
+      passive: true,
+    });
+    scroller.addEventListener("touchmove", handleTouchMove, { passive: true });
+
     animationId = requestAnimationFrame(autoScroll);
 
     return () => {
       cancelAnimationFrame(animationId);
       clearTimeout(userScrollTimeout);
-      scroller.removeEventListener('mouseenter', handleMouseEnter);
-      scroller.removeEventListener('mouseleave', handleMouseLeave);
-      scroller.removeEventListener('scroll', handleUserScroll);
-      scroller.removeEventListener('touchstart', handleTouchStart);
-      scroller.removeEventListener('touchmove', handleTouchMove);
+      scroller.removeEventListener("mouseenter", handleMouseEnter);
+      scroller.removeEventListener("mouseleave", handleMouseLeave);
+      scroller.removeEventListener("scroll", handleUserScroll);
+      scroller.removeEventListener("touchstart", handleTouchStart);
+      scroller.removeEventListener("touchmove", handleTouchMove);
       if (clone && clone.parentElement) {
         clone.parentElement.removeChild(clone);
       }
@@ -354,10 +363,7 @@ const TopItems: React.FC = () => {
 
   return (
     <div className={styles.container}>
-      <div 
-        className={styles.scroller} 
-        ref={scrollRef}
-      >
+      <div className={styles.scroller} ref={scrollRef}>
         <div className={styles.inner}>{interleavedItems}</div>
       </div>
     </div>
