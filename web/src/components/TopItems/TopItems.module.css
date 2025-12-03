@@ -292,6 +292,8 @@
   scrollbar-width: none; /* Firefox */
   -ms-overflow-style: none; /* IE/Edge */
   scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+  touch-action: pan-x; /* Enable horizontal touch scrolling */
 }
 
 .scroller::-webkit-scrollbar {

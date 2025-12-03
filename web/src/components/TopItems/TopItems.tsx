@@ -133,10 +133,17 @@ const TopItems: React.FC = () => {
     // Auto-scroll animation
     let animationId: number;
     let isPaused = false;
-    const scrollSpeed = 0.5; // pixels per frame
+    let lastTouchTime = 0;
+    
+    // Faster speed for mobile
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    const scrollSpeed = isMobile ? 1.8 : 0.5; // Much faster on mobile
     
     const autoScroll = () => {
-      if (!isPaused && !isDragging && scroller) {
+      const timeSinceTouch = Date.now() - lastTouchTime;
+      const shouldScroll = !isPaused && !isDragging && timeSinceTouch > 100;
+      
+      if (shouldScroll && scroller) {
         scroller.scrollLeft += scrollSpeed;
         
         // Seamless loop: reset when reaching halfway point
@@ -148,12 +155,21 @@ const TopItems: React.FC = () => {
       animationId = requestAnimationFrame(autoScroll);
     };
 
-    // Pause on hover
+    // Pause on hover (desktop)
     const handleMouseEnter = () => { isPaused = true; };
     const handleMouseLeave = () => { isPaused = false; };
     
+    // Track touch for mobile
+    const handleTouchEvent = () => {
+      lastTouchTime = Date.now();
+      isPaused = true;
+      setTimeout(() => { isPaused = false; }, 2000); // Resume after 2s
+    };
+    
     scroller.addEventListener('mouseenter', handleMouseEnter);
     scroller.addEventListener('mouseleave', handleMouseLeave);
+    scroller.addEventListener('touchstart', handleTouchEvent, { passive: true });
+    scroller.addEventListener('touchmove', handleTouchEvent, { passive: true });
     
     animationId = requestAnimationFrame(autoScroll);
 
@@ -161,6 +177,8 @@ const TopItems: React.FC = () => {
       cancelAnimationFrame(animationId);
       scroller.removeEventListener('mouseenter', handleMouseEnter);
       scroller.removeEventListener('mouseleave', handleMouseLeave);
+      scroller.removeEventListener('touchstart', handleTouchEvent);
+      scroller.removeEventListener('touchmove', handleTouchEvent);
       if (clone && clone.parentElement) {
         clone.parentElement.removeChild(clone);
       }
@@ -178,6 +196,20 @@ const TopItems: React.FC = () => {
   // Trust badges data
   const trustBadges = [
     {
+      id: "payment",
+      icon: (
+        <Image
+          src={bogLogo}
+          alt="BOG"
+          width={55}
+          height={55}
+          className={styles.bogLogoSmall}
+        />
+      ),
+      title: t("home.trustBadges.securePayment"),
+      description: t("home.trustBadges.securePaymentDesc"),
+    },
+    {
       id: "shipping",
       icon: <Truck size={24} strokeWidth={2.5} />,
       title: t("home.trustBadges.freeShipping"),
@@ -194,20 +226,6 @@ const TopItems: React.FC = () => {
       icon: <RotateCcw size={24} strokeWidth={2.5} />,
       title: t("home.trustBadges.fastRefund"),
       description: t("home.trustBadges.fastRefundDesc"),
-    },
-    {
-      id: "payment",
-      icon: (
-        <Image
-          src={bogLogo}
-          alt="BOG"
-          width={55}
-          height={55}
-          className={styles.bogLogoSmall}
-        />
-      ),
-      title: t("home.trustBadges.securePayment"),
-      description: t("home.trustBadges.securePaymentDesc"),
     },
   ];
 
