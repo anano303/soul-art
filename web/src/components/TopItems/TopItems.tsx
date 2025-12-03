@@ -25,59 +25,6 @@ import { useLanguage } from "@/hooks/LanguageContext";
 const TopItems: React.FC = () => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const { t, language } = useLanguage();
-  const [isDragging, setIsDragging] = useState(false);
-  const [startX, setStartX] = useState(0);
-  const [scrollLeft, setScrollLeft] = useState(0);
-
-  const handleMouseDown = (e: React.MouseEvent) => {
-    if (!scrollRef.current) return;
-    setIsDragging(true);
-    setStartX(e.pageX - scrollRef.current.offsetLeft);
-    setScrollLeft(scrollRef.current.scrollLeft);
-    if (scrollRef.current) {
-      scrollRef.current.style.cursor = 'grabbing';
-    }
-  };
-
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (!isDragging || !scrollRef.current) return;
-    e.preventDefault();
-    const x = e.pageX - scrollRef.current.offsetLeft;
-    const walk = (x - startX) * 2;
-    scrollRef.current.scrollLeft = scrollLeft - walk;
-  };
-
-  const handleMouseUp = () => {
-    setIsDragging(false);
-    if (scrollRef.current) {
-      scrollRef.current.style.cursor = 'grab';
-    }
-  };
-
-  const handleMouseLeave = () => {
-    setIsDragging(false);
-    if (scrollRef.current) {
-      scrollRef.current.style.cursor = 'grab';
-    }
-  };
-
-  const handleTouchStart = (e: React.TouchEvent) => {
-    if (!scrollRef.current) return;
-    setIsDragging(true);
-    setStartX(e.touches[0].pageX - scrollRef.current.offsetLeft);
-    setScrollLeft(scrollRef.current.scrollLeft);
-  };
-
-  const handleTouchMove = (e: React.TouchEvent) => {
-    if (!isDragging || !scrollRef.current) return;
-    const x = e.touches[0].pageX - scrollRef.current.offsetLeft;
-    const walk = (x - startX) * 2;
-    scrollRef.current.scrollLeft = scrollLeft - walk;
-  };
-
-  const handleTouchEnd = () => {
-    setIsDragging(false);
-  };
 
   const { data: topProducts, isLoading } = useQuery({
     queryKey: ["topProducts"],
@@ -133,23 +80,24 @@ const TopItems: React.FC = () => {
     // Auto-scroll animation
     let animationId: number;
     let isPaused = false;
-    let lastTouchTime = 0;
+    let isUserScrolling = false;
+    let userScrollTimeout: NodeJS.Timeout;
+    let lastScrollLeft = 0;
     
     // Faster speed for mobile
     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-    const scrollSpeed = isMobile ? 1.8 : 0.5; // Much faster on mobile
+    const scrollSpeed = isMobile ? 2.5 : 1.2; // Increased speed for both desktop and mobile
     
     const autoScroll = () => {
-      const timeSinceTouch = Date.now() - lastTouchTime;
-      const shouldScroll = !isPaused && !isDragging && timeSinceTouch > 100;
-      
-      if (shouldScroll && scroller) {
+      if (!isPaused && !isUserScrolling && scroller) {
         scroller.scrollLeft += scrollSpeed;
+        lastScrollLeft = scroller.scrollLeft;
         
-        // Seamless loop: reset when reaching halfway point
-        const maxScroll = inner.scrollWidth;
+        // Seamless loop: reset when reaching halfway point (midpoint of duplicated content)
+        const maxScroll = inner.scrollWidth / 2;
         if (scroller.scrollLeft >= maxScroll) {
           scroller.scrollLeft = 0;
+          lastScrollLeft = 0;
         }
       }
       animationId = requestAnimationFrame(autoScroll);
@@ -159,31 +107,37 @@ const TopItems: React.FC = () => {
     const handleMouseEnter = () => { isPaused = true; };
     const handleMouseLeave = () => { isPaused = false; };
     
-    // Track touch for mobile
-    const handleTouchEvent = () => {
-      lastTouchTime = Date.now();
-      isPaused = true;
-      setTimeout(() => { isPaused = false; }, 2000); // Resume after 2s
+    // Detect user scrolling (only manual scroll, not programmatic)
+    const handleUserScroll = () => {
+      // Check if scroll was caused by user (not our auto-scroll)
+      if (Math.abs(scroller.scrollLeft - lastScrollLeft) > scrollSpeed * 2) {
+        isUserScrolling = true;
+        clearTimeout(userScrollTimeout);
+        userScrollTimeout = setTimeout(() => {
+          isUserScrolling = false;
+        }, 3000); // Resume auto-scroll 3s after user stops
+      }
+      lastScrollLeft = scroller.scrollLeft;
     };
     
     scroller.addEventListener('mouseenter', handleMouseEnter);
     scroller.addEventListener('mouseleave', handleMouseLeave);
-    scroller.addEventListener('touchstart', handleTouchEvent, { passive: true });
-    scroller.addEventListener('touchmove', handleTouchEvent, { passive: true });
+    scroller.addEventListener('scroll', handleUserScroll, { passive: true });
+    scroller.addEventListener('touchstart', () => { isUserScrolling = true; }, { passive: true });
     
     animationId = requestAnimationFrame(autoScroll);
 
     return () => {
       cancelAnimationFrame(animationId);
+      clearTimeout(userScrollTimeout);
       scroller.removeEventListener('mouseenter', handleMouseEnter);
       scroller.removeEventListener('mouseleave', handleMouseLeave);
-      scroller.removeEventListener('touchstart', handleTouchEvent);
-      scroller.removeEventListener('touchmove', handleTouchEvent);
+      scroller.removeEventListener('scroll', handleUserScroll);
       if (clone && clone.parentElement) {
         clone.parentElement.removeChild(clone);
       }
     };
-  }, [topProducts, isDragging]);
+  }, [topProducts]);
 
   if (isLoading) {
     return (
@@ -375,13 +329,6 @@ const TopItems: React.FC = () => {
       <div 
         className={styles.scroller} 
         ref={scrollRef}
-        onMouseDown={handleMouseDown}
-        onMouseMove={handleMouseMove}
-        onMouseUp={handleMouseUp}
-        onMouseLeave={handleMouseLeave}
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
       >
         <div className={styles.inner}>{interleavedItems}</div>
       </div>
