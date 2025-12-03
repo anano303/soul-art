@@ -82,7 +82,8 @@ const TopItems: React.FC = () => {
     let isPaused = false;
     let isUserScrolling = false;
     let userScrollTimeout: NodeJS.Timeout;
-    let lastScrollLeft = 0;
+    let ignoreNextScrollEvent = false;
+    let ignoreResetId: number | null = null;
 
     // Faster speed for mobile
     const isMobile =
@@ -91,17 +92,26 @@ const TopItems: React.FC = () => {
       );
     const scrollSpeed = isMobile ? 2.5 : 1.2; // Increased speed for both desktop and mobile
 
+    const resetIgnoreFlag = () => {
+      if (ignoreResetId) cancelAnimationFrame(ignoreResetId);
+      ignoreResetId = requestAnimationFrame(() => {
+        ignoreNextScrollEvent = false;
+        ignoreResetId = null;
+      });
+    };
+
     const autoScroll = () => {
       if (!isPaused && !isUserScrolling && scroller) {
+        ignoreNextScrollEvent = true;
         scroller.scrollLeft += scrollSpeed;
-        lastScrollLeft = scroller.scrollLeft;
 
         // Seamless loop: reset when reaching the original content width
         const originalWidth = inner.scrollWidth;
         if (scroller.scrollLeft >= originalWidth) {
           scroller.scrollLeft = 0;
-          lastScrollLeft = 0;
         }
+
+        resetIgnoreFlag();
       }
       animationId = requestAnimationFrame(autoScroll);
     };
@@ -141,15 +151,15 @@ const TopItems: React.FC = () => {
 
     // Detect user scrolling (only manual scroll, not programmatic)
     const handleUserScroll = () => {
-      // Check if scroll was caused by user (not our auto-scroll)
-      if (Math.abs(scroller.scrollLeft - lastScrollLeft) > scrollSpeed * 2) {
-        isUserScrolling = true;
-        clearTimeout(userScrollTimeout);
-        userScrollTimeout = setTimeout(() => {
-          isUserScrolling = false;
-        }, 3000); // Resume auto-scroll 3s after user stops
+      if (ignoreNextScrollEvent) {
+        return;
       }
-      lastScrollLeft = scroller.scrollLeft;
+
+      isUserScrolling = true;
+      clearTimeout(userScrollTimeout);
+      userScrollTimeout = setTimeout(() => {
+        isUserScrolling = false;
+      }, 3000); // Resume auto-scroll 3s after user stops
     };
 
     scroller.addEventListener("mouseenter", handleMouseEnter);
@@ -170,6 +180,9 @@ const TopItems: React.FC = () => {
       scroller.removeEventListener("scroll", handleUserScroll);
       scroller.removeEventListener("touchstart", handleTouchStart);
       scroller.removeEventListener("touchmove", handleTouchMove);
+      if (ignoreResetId) {
+        cancelAnimationFrame(ignoreResetId);
+      }
       if (clone && clone.parentElement) {
         clone.parentElement.removeChild(clone);
       }
