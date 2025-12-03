@@ -778,8 +778,7 @@ export const TRANSLATIONS: Translations = {
         qualityGuarantee: "ხარისხის გარანტია",
         qualityGuaranteeDesc: "100% ორიგინალი",
         fastRefund: "თანხის მომენტალური დაბრუნება",
-        fastRefundDesc:
-          "თუ შეკვეთა მითითებულ ვადაში არ ჩაგბარდათ, ან არ შეესაბამება აღწერას",
+        fastRefundDesc: "თუ შეკვეთა არ ჩაგბარდათ, ან არ შეესაბამება აღწერას",
         securePayment: "საქართველოს ბანკის დაცული გადახდა",
         securePaymentDesc: "BOG & Card",
       },
