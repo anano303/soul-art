@@ -138,7 +138,7 @@
 
 .badgeText h4 {
   margin: 0;
-  font-size: 0.85rem;
+  font-size: 0.75rem;
   font-weight: 700;
   color: var(--primary-color, #012645);
   font-family: "FiraGO", sans-serif;
@@ -165,7 +165,7 @@
     rgba(248, 243, 235, 0.98) 50%,
     rgba(255, 255, 255, 0.98) 100%
   ) !important;
-  box-shadow: 7px -6px 10px 0px var(--primary-color) !important;
+  box-shadow: 4px -3px 2px 0px #b06f51 !important;
   border-bottom: 10px solid saddlebrown !important;
   position: relative;
   overflow: hidden;
@@ -281,7 +281,7 @@
 
 .scroller {
   /* border-top: 3px solid #080866; */
-  padding-top: 20px;
+  padding-top: 0;
   display: flex;
   overflow-x: auto;
   overflow-y: hidden;
@@ -444,8 +444,8 @@
 .statBoard {
   width: 120px !important;
   height: 140px !important;
-  left: 15px !important;
-  top: 29px !important;
+  left: 45px !important;
+  top: 19px !important;
 }
 
 /* Adjust parent easel size for badges/stats */
