@@ -93,9 +93,9 @@ const TopItems: React.FC = () => {
         scroller.scrollLeft += scrollSpeed;
         lastScrollLeft = scroller.scrollLeft;
         
-        // Seamless loop: reset when reaching halfway point (midpoint of duplicated content)
-        const maxScroll = inner.scrollWidth / 2;
-        if (scroller.scrollLeft >= maxScroll) {
+        // Seamless loop: reset when reaching the original content width
+        const originalWidth = inner.scrollWidth;
+        if (scroller.scrollLeft >= originalWidth) {
           scroller.scrollLeft = 0;
           lastScrollLeft = 0;
         }
