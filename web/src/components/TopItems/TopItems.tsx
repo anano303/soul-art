@@ -107,6 +107,31 @@ const TopItems: React.FC = () => {
     const handleMouseEnter = () => { isPaused = true; };
     const handleMouseLeave = () => { isPaused = false; };
     
+    // Detect horizontal touch for pausing auto-scroll
+    let touchStartX = 0;
+    let touchStartY = 0;
+    
+    const handleTouchStart = (e: TouchEvent) => {
+      touchStartX = e.touches[0].clientX;
+      touchStartY = e.touches[0].clientY;
+    };
+    
+    const handleTouchMove = (e: TouchEvent) => {
+      const touchEndX = e.touches[0].clientX;
+      const touchEndY = e.touches[0].clientY;
+      const diffX = Math.abs(touchEndX - touchStartX);
+      const diffY = Math.abs(touchEndY - touchStartY);
+      
+      // Only pause auto-scroll if horizontal swipe (not vertical)
+      if (diffX > diffY && diffX > 10) {
+        isUserScrolling = true;
+        clearTimeout(userScrollTimeout);
+        userScrollTimeout = setTimeout(() => {
+          isUserScrolling = false;
+        }, 3000);
+      }
+    };
+    
     // Detect user scrolling (only manual scroll, not programmatic)
     const handleUserScroll = () => {
       // Check if scroll was caused by user (not our auto-scroll)
@@ -123,7 +148,8 @@ const TopItems: React.FC = () => {
     scroller.addEventListener('mouseenter', handleMouseEnter);
     scroller.addEventListener('mouseleave', handleMouseLeave);
     scroller.addEventListener('scroll', handleUserScroll, { passive: true });
-    scroller.addEventListener('touchstart', () => { isUserScrolling = true; }, { passive: true });
+    scroller.addEventListener('touchstart', handleTouchStart, { passive: true });
+    scroller.addEventListener('touchmove', handleTouchMove, { passive: true });
     
     animationId = requestAnimationFrame(autoScroll);
 
@@ -133,6 +159,8 @@ const TopItems: React.FC = () => {
       scroller.removeEventListener('mouseenter', handleMouseEnter);
       scroller.removeEventListener('mouseleave', handleMouseLeave);
       scroller.removeEventListener('scroll', handleUserScroll);
+      scroller.removeEventListener('touchstart', handleTouchStart);
+      scroller.removeEventListener('touchmove', handleTouchMove);
       if (clone && clone.parentElement) {
         clone.parentElement.removeChild(clone);
       }
