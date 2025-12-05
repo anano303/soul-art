@@ -28,9 +28,11 @@ import { FollowButton } from "@/components/follow-button/follow-button";
 import { FollowersModal } from "@/components/followers-modal/followers-modal";
 import { ArtistReviewModal } from "./artist-review-modal";
 import { ArtistReviewsList } from "./artist-reviews-list";
+import { ShareButton } from "@/components/share-button/share-button";
 import { trackArtistProfileView } from "@/lib/ga4-analytics";
 import { fetchArtistProducts } from "@/lib/artist-api";
 import "./artist-profile-view.css";
+import "@/components/share-button/share-button.css";
 import "@/components/gallery-interactions.css";
 import "@/components/gallery-viewer.css";
 
@@ -453,9 +455,14 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
             <div className="artist-hero__info">
               <div className="artist-hero__title-row">
                 <h1>{artist.storeName || artist.name}</h1>
-                <div className="artist-hero__actions">
+                <div className="artist-hero__header-actions">
+                  <ShareButton
+                    url={`/artists/${artist.id}`}
+                    title={artist.storeName || artist.name}
+                    description={biography || undefined}
+                  />
                   {isOwner && (
-                    <>
+                    <div className="artist-hero__actions">
                       <Link
                         href="/admin/products/create"
                         className="artist-add-product-button"
@@ -483,7 +490,7 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
                           ? "დამალე რედაქტირება"
                           : "რედაქტირება"}
                       </button>
-                    </>
+                    </div>
                   )}
                 </div>
               </div>
