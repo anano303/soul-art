@@ -71,7 +71,8 @@
   margin-top: 0.375rem;
   margin-bottom: 0.5rem;
 }
-*/ .discounted-rail__subtitle {
+
+.discounted-rail__subtitle {
   font-size: clamp(0.8125rem, 1.4vw, 0.9375rem);
   line-height: 1.5;
   color: rgba(1, 38, 69, 0.65);
