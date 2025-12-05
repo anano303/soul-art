@@ -186,55 +186,26 @@ const DiscountedRail = () => {
       <div className="discounted-rail__wrapper">
         <div className="discounted-rail__header">
           <div className="discounted-rail__headline">
-            <span
-              className="discounted-rail__eyebrow black-friday-eyebrow"
-              aria-live="polite"
-            >
-              <Sparkles size={14} aria-hidden="true" />
-              BLACK FRIDAY
-            </span>
-            {/* Original eyebrow - commented for restoration */}
-            {/* <span className="discounted-rail__eyebrow" aria-live="polite">
+            <span className="discounted-rail__eyebrow" aria-live="polite">
               <Sparkles size={14} aria-hidden="true" />
               {t("home.discountedRail.eyebrow")}
-            </span> */}
+            </span>
             <h2 className="discounted-rail__title">
-              {language === "en"
-                ? "Black Friday Deals"
-                : "შავი პარასკევის შეთავაზებები"}
-            </h2>
-            {/* Original title - commented for restoration */}
-            {/* <h2 className="discounted-rail__title">
               {t("home.discountedRail.title")}
-            </h2> */}
+            </h2>
 
             {(topDiscount ?? 0) > 0 && (
-              <span className="discounted-rail__badge black-friday-badge-main">
-                <TicketPercent size={14} aria-hidden="true" />
-                {language === "en"
-                  ? `Up to ${Math.round(topDiscount)}% OFF`
-                  : `${Math.round(topDiscount)}%-მდე ფასდაკლება`}
-              </span>
-            )}
-            {/* Original badge - commented for restoration */}
-            {/* {(topDiscount ?? 0) > 0 && (
               <span className="discounted-rail__badge">
                 <TicketPercent size={14} aria-hidden="true" />
                 {t("home.discountedRail.badge", {
                   discount: Math.round(topDiscount),
                 })}
               </span>
-            )} */}
+            )}
 
             <p className="discounted-rail__subtitle">
-              {language === "en"
-                ? "Limited time offers - grab them before they're gone!"
-                : "შეზღუდული შეთავაზება - ნუ გამოტოვებთ!"}
-            </p>
-            {/* Original subtitle - commented for restoration */}
-            {/* <p className="discounted-rail__subtitle">
               {t("home.discountedRail.subtitle")}
-            </p> */}
+            </p>
           </div>
 
           <Link

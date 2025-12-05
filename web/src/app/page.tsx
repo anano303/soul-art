@@ -10,6 +10,7 @@ import { GuestReferralBanner } from "@/components/referralBanners/guest-referral
 import { ReferralPromoBanner } from "@/components/referralBanners/referral-promo-banner";
 import { useLanguage } from "@/hooks/LanguageContext";
 import DiscountedRail from "@/components/discountedRail/DiscountedRail";
+import GiftCategories from "@/components/giftCategories/GiftCategories";
 import { trackPageView } from "@/lib/ga4-analytics";
 
 const Home = () => {
@@ -30,6 +31,7 @@ const Home = () => {
       <TopItems />
       <Banner />
       <DiscountedRail />
+      <GiftCategories />
       {/* Forcing a full remount of HomePageShop when language changes */}
       <HomePageShop key={`home-shop-${language}`} />
       <HomePageForum />

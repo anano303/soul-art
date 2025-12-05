@@ -727,19 +727,10 @@ export function ProductDetails({ product }: ProductDetailsProps) {
                   </div>
                 )}
                 {isDiscounted && product.discountPercentage && (
-                  <span className="discount-badge black-friday-badge">
-                    <span className="black-friday-text">BLACK FRIDAY</span>
-                    <span className="discount-percentage">
-                      -{product.discountPercentage}%
-                    </span>
-                  </span>
-                )}
-                {/* Original discount badge - commented for restoration */}
-                {/* {isDiscounted && product.discountPercentage && (
                   <span className="discount-badge">
                     -{product.discountPercentage}% OFF
                   </span>
-                )} */}
+                )}
 
                 {currentMediaItem?.type === "video" ? (
                   <div className="product-video-frame">
@@ -1055,16 +1046,9 @@ export function ProductDetails({ product }: ProductDetailsProps) {
                   <span className="original-price-strike">
                     ₾{product.price.toFixed(2)}
                   </span>
-                  <span className="discount-badge black-friday-badge">
-                    <span className="black-friday-text">BLACK FRIDAY</span>
-                    <span className="discount-percentage">
-                      -{product.discountPercentage}%
-                    </span>
-                  </span>
-                  {/* Original discount badge - commented for restoration */}
-                  {/* <span className="discount-badge">
+                  <span className="discount-badge">
                     -{product.discountPercentage}%
-                  </span> */}
+                  </span>
                 </div>
                 <div className="savings-text">
                   {language === "en" ? "You save" : "დაზოგავ"} ₾

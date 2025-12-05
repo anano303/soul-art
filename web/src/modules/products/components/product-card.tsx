@@ -208,19 +208,10 @@ export function ProductCard({
 
   return (
     <div className={`product-card ${theme} ${className}`}>
-      {/* Discount badge - Black Friday Edition */}
+      {/* Discount badge */}
       {isDiscounted && (
-        <div className="discount-badge black-friday-badge">
-          <span className="black-friday-text">BLACK FRIDAY</span>
-          <span className="discount-percentage">
-            -{product.discountPercentage}%
-          </span>
-        </div>
-      )}
-      {/* Original discount badge - commented for restoration */}
-      {/* {isDiscounted && (
         <div className="discount-badge">-{product.discountPercentage}%</div>
-      )} */}
+      )}
 
       {/* Product image and name - clickable link to product */}
       <Link

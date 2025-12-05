@@ -790,11 +790,23 @@ export const TRANSLATIONS: Translations = {
         eyebrow: "ფასდაკლება",
         title: "დღევანდელი შეთავაზებები",
         subtitle:
-          "მხოლოდ ამ კვირაში — ხელოვნების ნამუშევრები განსაკუთრებული ფასით",
+          "მხოლოდ ამ კვირაში — ხელოვნების ნიმუშები განსაკუთრებული ფასით",
         badge: " {discount}%-მდე ფასდაკლება",
         viewAll: "ყველა შეთავაზება",
         empty: "ამ დროისთვის ფასდაკლებული ნამუშევრები არ გვაქვს",
         ariaLabel: "ფასდაკლებული ნამუშევრების სქროლი",
+      },
+      giftCategories: {
+        eyebrow: "საჩუქრები",
+        title: "განსხვავებული საჩუქრები, განსხვავებული ადამიანებისთვის",
+        subtitle:
+          "აირჩიეთ საუკეთესო საჩუქარი ყველა ბიუჯეტისთვის, ექსკლუზიური ნამუშევრები - ყველა ნამუშევარი უნიკალურია და  მხოლოდ შენთვის შექმნილი.თითოეული ნივთი არის ავტორის მიერ შექმნილი უნიკალური ისტორია,  რომელსაც სხვაგან ვერ იპოვი.",
+        under100: "200 ლარამდე",
+        under100Desc: "შთამბეჭდავი საჩუქრები 200 ლარამდე",
+        under200: "200 ლარამდე",
+        under200Desc: "პრემიუმ საჩუქრები 200 ლარამდე",
+        viewAll: "ყველა საჩუქარი",
+        ariaLabel: "საჩუქრების კატეგორიები",
       },
     },
 
@@ -2211,6 +2223,17 @@ export const TRANSLATIONS: Translations = {
         viewAll: "All deals",
         empty: "No discounted artworks are available right now",
         ariaLabel: "Discounted artworks carousel",
+      },
+      giftCategories: {
+        eyebrow: "Gifts",
+        title: "Perfect Gifts",
+        subtitle: "Choose the perfect gift for every budget",
+        under100: "Under 200₾",
+        under100Desc: "Amazing gifts under 200₾",
+        under200: "Under 200₾",
+        under200Desc: "Premium gifts under 200₾",
+        viewAll: "All gifts",
+        ariaLabel: "Gift categories",
       },
     },
 

@@ -1491,21 +1491,12 @@ function ProductCard({ product, language }: ProductCardProps) {
               {product.name.charAt(0)}
             </div>
           )}
-          {/* Discount badge - Black Friday Edition */}
+          {/* Discount badge */}
           {discountPercentage > 0 && (
-            <div className="artist-product-card__discount-badge black-friday-badge">
-              <span className="black-friday-text">BLACK FRIDAY</span>
-              <span className="discount-percentage">
-                -{discountPercentage}%
-              </span>
-            </div>
-          )}
-          {/* Original discount badge - commented for restoration */}
-          {/* {discountPercentage > 0 && (
             <div className="artist-product-card__discount-badge">
               -{discountPercentage}%
             </div>
-          )} */}
+          )}
           {/* Price - always visible */}
           <div className="artist-product-card__price-overlay">
             {discountPercentage > 0 ? (

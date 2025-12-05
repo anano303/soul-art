@@ -572,46 +572,8 @@
   font-size: 1.2rem;
 }
 
-/* Black Friday Discount Badge */
-.artist-product-card__discount-badge.black-friday-badge {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  background: linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
-  color: white;
-  padding: 6px 10px;
-  border-radius: 6px;
-  font-size: 0.7rem;
-  font-weight: 800;
-  text-transform: uppercase;
-  z-index: 2;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
-  border: 1px solid #333;
-}
-
-.artist-product-card__discount-badge .black-friday-text {
-  font-size: 0.6rem;
-  letter-spacing: 0.5px;
-  font-weight: 800;
-  background: linear-gradient(90deg, #fff, #ddd, #fff);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-.artist-product-card__discount-badge .discount-percentage {
-  font-size: 0.95rem;
-  font-weight: 900;
-  color: #fff;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
-}
-
-/* Original discount badge - commented for restoration */
-/* .artist-product-card__discount-badge {
+/* Discount Badge */
+.artist-product-card__discount-badge {
   position: absolute;
   top: 10px;
   right: 10px;
@@ -623,7 +585,7 @@
   font-weight: 600;
   text-transform: uppercase;
   z-index: 2;
-} */
+}
 
 .artist-product-card__description {
   background: rgba(255, 255, 255, 0.95);
