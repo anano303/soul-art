@@ -20,6 +20,7 @@ import { useLanguage } from "@/hooks/LanguageContext";
 import { useQuery } from "@tanstack/react-query";
 import { fetchWithAuth } from "@/lib/fetch-with-auth";
 import { Color, AgeGroupItem } from "@/types";
+import { optimizeCloudinaryUrl } from "@/lib/utils";
 
 import { ProductGrid } from "./product-grid";
 import ProductSchema from "@/components/ProductSchema";
@@ -265,7 +266,9 @@ export function ProductDetails({ product }: ProductDetailsProps) {
     if (Array.isArray(product.images)) {
       product.images.forEach((image) => {
         if (image) {
-          items.push({ type: "image", source: image, thumbnail: image });
+          const optimizedImage = optimizeCloudinaryUrl(image, { width: 800, quality: "auto:good" }) || image;
+          const thumbnailImage = optimizeCloudinaryUrl(image, { width: 150, quality: "auto:eco" }) || image;
+          items.push({ type: "image", source: optimizedImage, thumbnail: thumbnailImage });
         }
       });
     }

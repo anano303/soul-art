@@ -1,10 +1,6 @@
 @import "tailwindcss";
 
-/* Import only the necessary FiraGO weights for better performance */
-@import "@fontsource/firago/400.css"; /* Regular */
-@import "@fontsource/firago/500.css"; /* Medium */
-@import "@fontsource/firago/600.css"; /* SemiBold */
-@import "@fontsource/firago/700.css"; /* Bold */
+/* Font is now loaded via next/font/local in layout.tsx for better performance */
 
 /* Performance optimized CSS */
 :root {

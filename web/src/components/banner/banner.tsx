@@ -6,6 +6,7 @@ import { useLanguage } from "@/hooks/LanguageContext";
 import { fetchActiveBanners } from "@/lib/banner-api";
 import { Banner as BannerType } from "@/types/banner";
 import { trackBannerClick } from "@/lib/ga4-analytics";
+import { optimizeCloudinaryUrl } from "@/lib/utils";
 import "./banner.css";
 
 const Banner = () => {
@@ -39,7 +40,7 @@ const Banner = () => {
     banners.forEach((banner) => {
       if (banner.imageUrl) {
         const img = new Image();
-        img.src = banner.imageUrl;
+        img.src = optimizeCloudinaryUrl(banner.imageUrl, { width: 1920, quality: "auto:eco" }) || banner.imageUrl;
       }
     });
   }, [banners]);
@@ -174,7 +175,7 @@ const Banner = () => {
               isPrevious ? "previous" : ""
             }`}
             style={{
-              backgroundImage: `url(${banner.imageUrl})`,
+              backgroundImage: `url(${optimizeCloudinaryUrl(banner.imageUrl, { width: 1920, quality: "auto:eco" })})`,
             }}
           >
             <div className="banner-overlay"></div>

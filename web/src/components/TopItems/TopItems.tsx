@@ -21,6 +21,7 @@ import {
   TrendingUp,
 } from "lucide-react";
 import { useLanguage } from "@/hooks/LanguageContext";
+import { optimizeCloudinaryUrl } from "@/lib/utils";
 
 const TopItems: React.FC = () => {
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -286,7 +287,7 @@ const TopItems: React.FC = () => {
           <div className={`${styles.easelLeg} ${styles.easelBackLeg}`}></div>
           <div className={styles.board}>
             <Image
-              src={product.images[0] || noPhoto}
+              src={optimizeCloudinaryUrl(product.images[0], { width: 300, quality: "auto:eco" }) || noPhoto}
               alt={product.name}
               fill
               sizes="(max-width: 768px) 150px, 200px"
@@ -325,7 +326,7 @@ const TopItems: React.FC = () => {
                 <div className={styles.badgeContent}>
                   <div className={styles.badgeIcon}>{item.icon}</div>
                   <div className={styles.badgeText}>
-                    <h4>{item.title}</h4>
+                    <h3>{item.title}</h3>
                     <p>{item.description}</p>
                   </div>
                 </div>

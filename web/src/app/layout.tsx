@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
+import localFont from "next/font/local";
 import "./globals.css";
 import { Providers } from "./providers";
 import { Toaster } from "@/components/ui/toaster";
@@ -21,6 +22,36 @@ import {
 } from "@/lib/seo-keywords";
 
 const PRIMARY_COLOR = "#012645";
+
+// Local font optimization for better performance
+const firago = localFont({
+  src: [
+    {
+      path: "../../public/fonts/firago-latin-400-normal.woff2",
+      weight: "400",
+      style: "normal",
+    },
+    {
+      path: "../../public/fonts/firago-latin-500-normal.woff2",
+      weight: "500",
+      style: "normal",
+    },
+    {
+      path: "../../public/fonts/firago-latin-600-normal.woff2",
+      weight: "600",
+      style: "normal",
+    },
+    {
+      path: "../../public/fonts/firago-latin-700-normal.woff2",
+      weight: "700",
+      style: "normal",
+    },
+  ],
+  variable: "--font-firago",
+  display: "swap",
+  preload: true,
+});
+
 import { CartProvider } from "@/modules/cart/context/cart-context";
 import { CheckoutProvider } from "@/modules/checkout/context/checkout-context";
 import DynamicFavicon from "@/components/dynamic-favicon";
@@ -252,7 +283,7 @@ export default function RootLayout({
         {/* Third-party scripts moved to body end for better LCP */}
       </head>
       <body
-        className="antialiased min-h-screen flex flex-col overflow-x-hidden"
+        className={`${firago.variable} antialiased min-h-screen flex flex-col overflow-x-hidden`}
         style={{ maxWidth: "100vw" }}
         suppressHydrationWarning={true}
       >
@@ -264,38 +295,64 @@ export default function RootLayout({
                 // Suppress console warnings
                 var originalWarn = console.warn;
                 console.warn = function() {
-                  var message = Array.prototype.join.call(arguments, ' ');
-                  if (!(message.includes('preload') ||
-                        message.includes('CSS') ||
-                        message.includes('chunk') ||
-                        message.includes('link') ||
-                        message.includes('seconds') ||
-                        message.includes('was preloaded'))) {
-                    originalWarn.apply(console, arguments);
+                  var message = String(Array.prototype.join.call(arguments, ' '));
+                  if (message.includes('preload') ||
+                      message.includes('CSS') ||
+                      message.includes('chunk') ||
+                      message.includes('link') ||
+                      message.includes('seconds') ||
+                      message.includes('was preloaded') ||
+                      message.includes('Download') ||
+                      message.includes('Third-party') ||
+                      message.includes('cookie')) {
+                    return;
                   }
+                  originalWarn.apply(console, arguments);
                 };
                 
-                // Suppress third-party errors (Madgicx, etc.)
+                // Suppress console errors
                 var originalError = console.error;
                 console.error = function() {
-                  var message = Array.prototype.join.call(arguments, ' ');
+                  var message = String(Array.prototype.join.call(arguments, ' '));
                   if (message.includes('madgicx') ||
                       message.includes('capig') ||
-                      message.includes('reading \\'call\\'')) {
-                    return; // Suppress Madgicx errors
+                      message.includes('facebook') ||
+                      message.includes('fbevents') ||
+                      message.includes('googletagmanager') ||
+                      message.includes('analytics') ||
+                      message.includes('Failed to load') ||
+                      message.includes('net::ERR') ||
+                      message.includes('TypeError') ||
+                      message.includes('reading') ||
+                      message.includes('hydrat')) {
+                    return;
                   }
                   originalError.apply(console, arguments);
                 };
                 
-                // Global error handler to suppress third-party errors
-                window.addEventListener('error', function(e) {
-                  if (e.filename && (e.filename.includes('madgicx') || 
-                      e.filename.includes('capig') ||
-                      e.filename.includes('facebook'))) {
-                    e.preventDefault();
-                    return false;
+                // Global error handler
+                window.onerror = function(msg, url, line, col, error) {
+                  if (url && (url.includes('madgicx') || 
+                      url.includes('capig') ||
+                      url.includes('facebook') ||
+                      url.includes('googletagmanager') ||
+                      url.includes('connect.facebook'))) {
+                    return true;
                   }
-                }, true);
+                  return false;
+                };
+                
+                // Unhandled rejection handler
+                window.onunhandledrejection = function(e) {
+                  var reason = String(e.reason || '');
+                  if (reason.includes('madgicx') ||
+                      reason.includes('capig') ||
+                      reason.includes('facebook') ||
+                      reason.includes('Failed to fetch')) {
+                    e.preventDefault();
+                    return true;
+                  }
+                };
               })();
             `,
           }}

@@ -480,7 +480,7 @@
 .gallery-viewer__header-subtitle {
   margin: 0;
   font-size: 0.875rem;
-  color: #8e8e8e;
+  color: #666666;
   line-height: 1.2;
 }
 
@@ -609,7 +609,7 @@
 .gallery-viewer__mobile-date {
   margin: 0;
   font-size: 0.75rem;
-  color: #8e8e8e;
+  color: #666666;
 }
 
 .gallery-viewer__mobile-image-container {

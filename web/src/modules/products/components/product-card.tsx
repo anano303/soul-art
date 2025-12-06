@@ -15,6 +15,7 @@ import StarImg from "../../../assets/Images/star.png";
 import Star2 from "../../../assets/Images/startHandMade.png";
 import { useLanguage } from "@/hooks/LanguageContext";
 import { trackProductInteraction, trackAddToCart } from "@/lib/ga4-analytics";
+import { optimizeCloudinaryUrl } from "@/lib/utils";
 
 interface ProductCardProps {
   product: Product;
@@ -33,8 +34,9 @@ export function ProductCard({
   const { toast } = useToast();
   const [isBuying, setIsBuying] = useState(false);
 
-  // ვამოწმებთ სურათის ვალიდურობას
-  const productImage = product.images?.[0] || noPhoto.src;
+  // ვამოწმებთ სურათის ვალიდურობას და ვოპტიმიზირებთ Cloudinary URL-ს
+  const rawImage = product.images?.[0] || noPhoto.src;
+  const productImage = optimizeCloudinaryUrl(rawImage, { width: 400, quality: "auto:eco" }) || rawImage;
 
   // Display name based on selected language
   const displayName =
