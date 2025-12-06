@@ -23,9 +23,23 @@ const protectedPaths = [
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const hasTokens =
-    request.cookies.get("access_token") || request.cookies.get("refresh_token");
-  const isAuthenticated = Boolean(hasTokens); // ✅ Boolean() ვამატებთ, რომ სწორი იყოს
+  
+  // Check for authentication tokens - Next.js 16 compatible way
+  const accessToken = request.cookies.get("access_token");
+  const refreshToken = request.cookies.get("refresh_token");
+  const hasTokens = !!(accessToken?.value || refreshToken?.value);
+  const isAuthenticated = hasTokens;
+
+  // Debug logging for admin paths (remove in production after fixing)
+  if (pathname.startsWith("/admin")) {
+    console.log("[Middleware Debug]", {
+      pathname,
+      hasAccessToken: !!accessToken?.value,
+      hasRefreshToken: !!refreshToken?.value,
+      isAuthenticated,
+      allCookies: request.cookies.getAll().map(c => c.name)
+    });
+  }
 
   // Skip middleware for non-relevant paths (like api, _next, static files)
   if (
