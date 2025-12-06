@@ -639,3 +639,42 @@
     font-size: 10px;
   }
 }
+
+/* Forum Share Button Styles */
+.forum-share-button {
+  margin-left: auto;
+}
+
+.forum-share-button .share-button {
+  padding: 0.35rem 0.6rem;
+  font-size: 0.75rem;
+  min-width: 32px;
+  min-height: 32px;
+  background: rgba(1, 38, 69, 0.08);
+  border: 1px solid rgba(1, 38, 69, 0.15);
+  color: var(--primary-color, #012645);
+}
+
+.forum-share-button .share-button:hover {
+  background: rgba(1, 38, 69, 0.12);
+  border-color: rgba(1, 38, 69, 0.25);
+}
+
+.forum-share-button .share-button svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* Hide text on mobile, show only icon */
+@media screen and (max-width: 600px) {
+  .forum-share-button .share-button {
+    padding: 0.3rem;
+    min-width: 28px;
+    min-height: 28px;
+  }
+  
+  .forum-share-button .share-button svg {
+    width: 12px;
+    height: 12px;
+  }
+}

@@ -10,6 +10,7 @@ import { toast } from "@/hooks/use-toast";
 import { fetchWithAuth } from "@/lib/fetch-with-auth";
 import imageCompression from "browser-image-compression";
 import { apiClient } from "@/lib/axios";
+import { ShareButton } from "@/components/share-button/share-button";
 
 interface Comment {
   id: string;
@@ -990,6 +991,12 @@ const ForumPost = ({
           >
             {likesCount} {userLiked ? "💫" : "⭐"}
           </button>
+          <ShareButton
+            url={`/forum/${id}`}
+            title={text.substring(0, 100)}
+            description={text}
+            className="forum-share-button"
+          />
         </div>
 
         {showComments && (
