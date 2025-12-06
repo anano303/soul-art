@@ -40,7 +40,11 @@ const Banner = () => {
     banners.forEach((banner) => {
       if (banner.imageUrl) {
         const img = new Image();
-        img.src = optimizeCloudinaryUrl(banner.imageUrl, { width: 1920, quality: "auto:eco" }) || banner.imageUrl;
+        img.src =
+          optimizeCloudinaryUrl(banner.imageUrl, {
+            width: 1920,
+            quality: "auto:eco",
+          }) || banner.imageUrl;
       }
     });
   }, [banners]);
@@ -175,7 +179,10 @@ const Banner = () => {
               isPrevious ? "previous" : ""
             }`}
             style={{
-              backgroundImage: `url(${optimizeCloudinaryUrl(banner.imageUrl, { width: 1920, quality: "auto:eco" })})`,
+              backgroundImage: `url(${optimizeCloudinaryUrl(banner.imageUrl, {
+                width: 1920,
+                quality: "auto:eco",
+              })})`,
             }}
           >
             <div className="banner-overlay"></div>
@@ -184,14 +191,16 @@ const Banner = () => {
                 {language === "en" ? banner.titleEn : banner.title}
               </h2>
               {banner.buttonText && banner.buttonLink && (
-                <Link 
-                  href={banner.buttonLink} 
+                <Link
+                  href={banner.buttonLink}
                   className="banner-cta-btn"
-                  onClick={() => trackBannerClick(
-                    banner._id || `banner-${index}`,
-                    language === "en" ? banner.titleEn : banner.title,
-                    banner.buttonLink
-                  )}
+                  onClick={() =>
+                    trackBannerClick(
+                      banner._id || `banner-${index}`,
+                      language === "en" ? banner.titleEn : banner.title,
+                      banner.buttonLink
+                    )
+                  }
                 >
                   <span className="btn-text">
                     {language === "en"

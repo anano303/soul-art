@@ -241,6 +241,10 @@ export class Product {
 
   @Prop({ type: [String], default: [] })
   materialsEn?: string[];
+
+  // Hide from store/home pages but still visible on artist profile
+  @Prop({ type: Boolean, default: false })
+  hideFromStore?: boolean;
 }
 
 export const ProductSchema = SchemaFactory.createForClass(Product);

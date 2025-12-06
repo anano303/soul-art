@@ -39,7 +39,7 @@ export function FloatingCartIcon() {
   // 2. არ ვართ კალათის/checkout/orders გვერდებზე
   useEffect(() => {
     const shouldShow = totalItems > 0 && !isOnCartRelatedPage();
-    
+
     if (shouldShow && !isVisible) {
       setIsAnimatingOut(false);
       setIsVisible(true);
@@ -61,7 +61,7 @@ export function FloatingCartIcon() {
       return () => clearTimeout(timer);
     }
   }, [totalItems, pathname]);
-  
+
   const handleClick = () => {
     router.push("/cart");
   };
@@ -70,7 +70,9 @@ export function FloatingCartIcon() {
 
   return (
     <div
-      className={`floating-cart-icon ${isAnimatingOut ? 'animate-out' : 'animate-in'}`}
+      className={`floating-cart-icon ${
+        isAnimatingOut ? "animate-out" : "animate-in"
+      }`}
       onClick={handleClick}
       data-cart-toggle="true"
     >

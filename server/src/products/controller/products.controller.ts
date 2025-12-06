@@ -109,6 +109,7 @@ export class ProductsController {
       isOriginal: parsedIsOriginal,
       material,
       dimension,
+      excludeHiddenFromStore: true, // Hide products marked as hidden from store
     });
   }
 
@@ -1051,6 +1052,18 @@ export class ProductsController {
     }
 
     return updatedProduct;
+  }
+
+  @Put(':id/visibility')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.Admin)
+  @ApiOperation({ summary: 'Toggle product visibility in store (Admin only)' })
+  @ApiParam({ name: 'id', description: 'Product ID' })
+  async toggleStoreVisibility(
+    @Param('id') id: string,
+    @Body() { hideFromStore }: { hideFromStore: boolean },
+  ) {
+    return this.productsService.updateProductVisibility(id, hideFromStore);
   }
 
   private prepareFileForBackground(

@@ -266,9 +266,19 @@ export function ProductDetails({ product }: ProductDetailsProps) {
     if (Array.isArray(product.images)) {
       product.images.forEach((image) => {
         if (image) {
-          const optimizedImage = optimizeCloudinaryUrl(image, { width: 800, quality: "auto:good" }) || image;
-          const thumbnailImage = optimizeCloudinaryUrl(image, { width: 150, quality: "auto:eco" }) || image;
-          items.push({ type: "image", source: optimizedImage, thumbnail: thumbnailImage });
+          const optimizedImage =
+            optimizeCloudinaryUrl(image, {
+              width: 800,
+              quality: "auto:good",
+            }) || image;
+          const thumbnailImage =
+            optimizeCloudinaryUrl(image, { width: 150, quality: "auto:eco" }) ||
+            image;
+          items.push({
+            type: "image",
+            source: optimizedImage,
+            thumbnail: thumbnailImage,
+          });
         }
       });
     }

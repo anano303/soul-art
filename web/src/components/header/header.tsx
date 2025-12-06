@@ -167,13 +167,18 @@ export default function Header() {
         </div>
 
         {/* Mobile Navigation */}
-        <button 
-          className="mobile-nav-btn" 
+        <button
+          className="mobile-nav-btn"
           onClick={toggleNav}
-          aria-label={isNavOpen ? "Close navigation menu" : "Open navigation menu"}
+          aria-label={
+            isNavOpen ? "Close navigation menu" : "Open navigation menu"
+          }
           aria-expanded={isNavOpen}
         >
-          <span className={`hamburger-icon ${isNavOpen ? "close" : ""}`} aria-hidden="true">
+          <span
+            className={`hamburger-icon ${isNavOpen ? "close" : ""}`}
+            aria-hidden="true"
+          >
             {isNavOpen ? "×" : "☰"}
           </span>
         </button>

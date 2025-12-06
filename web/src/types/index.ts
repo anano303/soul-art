@@ -41,12 +41,15 @@ export interface PortfolioImageSummary {
 
 export interface PortfolioPostSummary {
   id: string;
-  productId: string | null | {
-    _id: string;
-    status: 'PENDING' | 'APPROVED' | 'REJECTED';
-    countInStock?: number;
-    variants?: Array<{ stock?: number }>;
-  };
+  productId:
+    | string
+    | null
+    | {
+        _id: string;
+        status: "PENDING" | "APPROVED" | "REJECTED";
+        countInStock?: number;
+        variants?: Array<{ stock?: number }>;
+      };
   caption?: string | null;
   tags: string[];
   images: PortfolioImageSummary[];
@@ -207,6 +210,8 @@ export interface Product {
   discountPercentage?: number;
   discountStartDate?: string;
   discountEndDate?: string;
+  // Store visibility
+  hideFromStore?: boolean;
 }
 
 export enum ProductStatus {

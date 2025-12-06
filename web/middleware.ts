@@ -77,14 +77,22 @@ export function middleware(request: NextRequest) {
 
   // Add performance headers in production
   const response = NextResponse.next();
-  
+
   // Cache static assets aggressively
-  if (pathname.match(/\.(js|css|woff2?|ttf|eot|svg|png|jpg|jpeg|gif|webp|ico)$/)) {
-    response.headers.set('Cache-Control', 'public, max-age=31536000, immutable');
+  if (
+    pathname.match(/\.(js|css|woff2?|ttf|eot|svg|png|jpg|jpeg|gif|webp|ico)$/)
+  ) {
+    response.headers.set(
+      "Cache-Control",
+      "public, max-age=31536000, immutable"
+    );
   }
-  
+
   // Add preload hints for critical resources
-  response.headers.set('Link', '</van-gogh.jpg>; rel=preload; as=image; fetchpriority=high');
+  response.headers.set(
+    "Link",
+    "</van-gogh.jpg>; rel=preload; as=image; fetchpriority=high"
+  );
 
   return response;
 }

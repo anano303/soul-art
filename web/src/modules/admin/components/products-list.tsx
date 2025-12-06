@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Product, User, Category, SubCategory } from "@/types";
 import { ProductsActions } from "./products-actions";
-import { Plus, Sparkles, Search, Filter, X } from "lucide-react";
+import { Plus, Sparkles, Search, Filter, X, Eye, EyeOff } from "lucide-react";
 import "./productList.css";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { fetchWithAuth } from "@/lib/fetch-with-auth";
@@ -15,6 +15,7 @@ import { Role } from "@/types/role";
 import { useLanguage } from "@/hooks/LanguageContext";
 import HeartLoading from "@/components/HeartLoading/HeartLoading";
 import { ProductStatus } from "@/types";
+import { updateProductVisibility } from "@/modules/products/api/update-product-visibility";
 
 // Extended Product type to include mainCategory and subCategory properties
 interface ProductWithCategories extends Product {
@@ -222,6 +223,39 @@ export function ProductsList() {
     queryClient.invalidateQueries({ queryKey: ["pendingProducts"] });
     setRefreshKey(Date.now()); // Add this to force a fresh fetch
     refetch();
+  }
+
+  // State to track which products are being toggled
+  const [togglingVisibility, setTogglingVisibility] = useState<Set<string>>(
+    new Set()
+  );
+
+  // Handle visibility toggle for admin
+  async function handleVisibilityToggle(
+    productId: string,
+    currentHideFromStore: boolean
+  ): Promise<void> {
+    setTogglingVisibility((prev) => new Set(prev).add(productId));
+
+    try {
+      const result = await updateProductVisibility(
+        productId,
+        !currentHideFromStore
+      );
+      if (result) {
+        // Refresh the products list
+        queryClient.invalidateQueries({ queryKey: ["products"] });
+        setRefreshKey(Date.now());
+      }
+    } catch (error) {
+      console.error("Error toggling visibility:", error);
+    } finally {
+      setTogglingVisibility((prev) => {
+        const newSet = new Set(prev);
+        newSet.delete(productId);
+        return newSet;
+      });
+    }
   }
 
   function getDisplayName(product: Product): string {
@@ -747,6 +781,7 @@ export function ProductsList() {
             <th className="prd-th">SUBCATEGORY</th>
             <th className="prd-th">STOCK</th>
             <th className="prd-th">Status</th>
+            {isAdmin && <th className="prd-th">VISIBILITY</th>}
             <th className="prd-th">DELIVERY</th>
             <th className="prd-th">SELLER INFO</th>
             <th className="prd-th prd-th-right">ACTIONS</th>
@@ -755,7 +790,10 @@ export function ProductsList() {
         <tbody>
           {isLoading && products.length === 0 ? (
             <tr>
-              <td colSpan={11} style={{ textAlign: "center", padding: "40px" }}>
+              <td
+                colSpan={isAdmin ? 12 : 11}
+                style={{ textAlign: "center", padding: "40px" }}
+              >
                 <div
                   style={{
                     display: "flex",
@@ -791,7 +829,7 @@ export function ProductsList() {
           ) : products.length === 0 ? (
             <tr>
               <td
-                colSpan={11}
+                colSpan={isAdmin ? 12 : 11}
                 style={{
                   textAlign: "center",
                   padding: "40px",
@@ -866,6 +904,77 @@ export function ProductsList() {
                 <td className="prd-td">
                   <StatusBadge status={product.status} />
                 </td>
+                {isAdmin && (
+                  <td className="prd-td">
+                    <button
+                      onClick={() =>
+                        handleVisibilityToggle(
+                          product._id,
+                          product.hideFromStore || false
+                        )
+                      }
+                      disabled={togglingVisibility.has(product._id)}
+                      className={`visibility-toggle-btn ${
+                        product.hideFromStore
+                          ? "hidden-from-store"
+                          : "visible-in-store"
+                      }`}
+                      title={
+                        product.hideFromStore
+                          ? language === "en"
+                            ? "Hidden from store - Click to show"
+                            : "დამალულია მაღაზიიდან - დააჭირე გამოსაჩენად"
+                          : language === "en"
+                          ? "Visible in store - Click to hide"
+                          : "ჩანს მაღაზიაში - დააჭირე დასამალად"
+                      }
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "6px",
+                        padding: "6px 10px",
+                        borderRadius: "6px",
+                        border: "none",
+                        cursor: togglingVisibility.has(product._id)
+                          ? "wait"
+                          : "pointer",
+                        fontSize: "12px",
+                        fontWeight: "500",
+                        transition: "all 0.2s ease",
+                        backgroundColor: product.hideFromStore
+                          ? "#fee2e2"
+                          : "#dcfce7",
+                        color: product.hideFromStore ? "#dc2626" : "#16a34a",
+                      }}
+                    >
+                      {togglingVisibility.has(product._id) ? (
+                        <span
+                          style={{
+                            width: "14px",
+                            height: "14px",
+                            border: "2px solid currentColor",
+                            borderTopColor: "transparent",
+                            borderRadius: "50%",
+                            animation: "spin 0.8s linear infinite",
+                          }}
+                        />
+                      ) : product.hideFromStore ? (
+                        <EyeOff size={14} />
+                      ) : (
+                        <Eye size={14} />
+                      )}
+                      <span>
+                        {product.hideFromStore
+                          ? language === "en"
+                            ? "Hidden"
+                            : "დამალული"
+                          : language === "en"
+                          ? "Visible"
+                          : "ხილული"}
+                      </span>
+                    </button>
+                  </td>
+                )}
                 <td className="prd-td">
                   <div className="delivery-info">
                     <span>{product.deliveryType || "SOULART"}</span>

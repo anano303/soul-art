@@ -51,7 +51,9 @@ export async function fetchWithAuth(url: string, config: RequestInit = {}) {
         retries < MAX_RETRIES
       ) {
         console.warn(
-          `[fetchWithAuth] Network error, retrying (${retries + 1}/${MAX_RETRIES})...`
+          `[fetchWithAuth] Network error, retrying (${
+            retries + 1
+          }/${MAX_RETRIES})...`
         );
         await delay(RETRY_DELAY * (retries + 1)); // Exponential backoff
         return makeRequestWithRetry(retries + 1);

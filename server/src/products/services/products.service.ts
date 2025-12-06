@@ -62,6 +62,7 @@ interface FindManyParams {
   isOriginal?: boolean;
   material?: string;
   dimension?: string;
+  excludeHiddenFromStore?: boolean; // If true, exclude products with hideFromStore=true
 }
 
 @Injectable()
@@ -358,6 +359,7 @@ export class ProductsService {
       isOriginal,
       material,
       dimension,
+      excludeHiddenFromStore = false,
     } = params;
 
     const pageNumber = parseInt(page);
@@ -365,6 +367,14 @@ export class ProductsService {
     const skip = (pageNumber - 1) * limitNumber;
 
     const filter: any = {};
+
+    // Exclude hidden products from store/home pages (but not from artist profiles)
+    if (excludeHiddenFromStore) {
+      filter.$or = [
+        { hideFromStore: { $exists: false } },
+        { hideFromStore: false },
+      ];
+    }
 
     const addAndCondition = (condition: Record<string, unknown>) => {
       if (!condition) return;
@@ -1038,6 +1048,29 @@ export class ProductsService {
         '[FB] Auto-post skipped - product was already approved before (edited product)',
       );
     }
+
+    return updatedProduct;
+  }
+
+  /**
+   * Update product visibility in store/home pages
+   * Product will still be visible on artist's profile page
+   */
+  async updateProductVisibility(
+    id: string,
+    hideFromStore: boolean,
+  ): Promise<ProductDocument> {
+    const product = await this.productModel.findById(id);
+    if (!product) {
+      throw new NotFoundException('პროდუქტი ვერ მოიძებნა');
+    }
+
+    product.hideFromStore = hideFromStore;
+    const updatedProduct = await product.save();
+
+    console.log(
+      `[Visibility] Product ${id} hideFromStore set to: ${hideFromStore}`,
+    );
 
     return updatedProduct;
   }

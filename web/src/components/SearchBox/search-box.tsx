@@ -111,7 +111,7 @@ export default function SearchBox() {
       // Track search in both Meta Pixel and GA4
       metaTrackSearch(normalizedKeyword);
       trackSearch(normalizedKeyword, users.length);
-      
+
       if (typeof window !== "undefined") {
         try {
           sessionStorage.setItem(
@@ -195,9 +195,17 @@ export default function SearchBox() {
             }
           }}
           className="search-input"
-          aria-label={language === "en" ? "Search products and artists" : "პროდუქტებისა და არტისტების ძიება"}
+          aria-label={
+            language === "en"
+              ? "Search products and artists"
+              : "პროდუქტებისა და არტისტების ძიება"
+          }
         />
-        <button type="submit" className="search-button" aria-label={language === "en" ? "Search" : "ძიება"}>
+        <button
+          type="submit"
+          className="search-button"
+          aria-label={language === "en" ? "Search" : "ძიება"}
+        >
           <Search size={18} aria-hidden="true" />
         </button>
       </form>

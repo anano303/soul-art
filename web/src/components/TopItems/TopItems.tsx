@@ -287,7 +287,12 @@ const TopItems: React.FC = () => {
           <div className={`${styles.easelLeg} ${styles.easelBackLeg}`}></div>
           <div className={styles.board}>
             <Image
-              src={optimizeCloudinaryUrl(product.images[0], { width: 300, quality: "auto:eco" }) || noPhoto}
+              src={
+                optimizeCloudinaryUrl(product.images[0], {
+                  width: 300,
+                  quality: "auto:eco",
+                }) || noPhoto
+              }
               alt={product.name}
               fill
               sizes="(max-width: 768px) 150px, 200px"
