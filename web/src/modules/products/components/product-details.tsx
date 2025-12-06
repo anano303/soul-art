@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo, useRef } from "react";
 import Image from "next/image";
-import { StarIcon, X, Truck, Ruler, Share2, Package, Play } from "lucide-react";
+import { StarIcon, X, Truck, Ruler, Package, Play } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ReviewForm } from "./review-form";
 import { ProductReviews } from "./product-reviews";
@@ -14,7 +14,7 @@ import "./ProductCard.css"; // Import ProductCard styles for button consistency
 import "./videoTabs.css"; // Import new tabs styles
 import { Product, MainCategory } from "@/types";
 import Link from "next/link";
-import { ShareButtons } from "@/components/share-buttons/share-buttons";
+import { ShareButton } from "@/components/share-button/share-button";
 import { RoomViewer } from "@/components/room-viewer/room-viewer";
 import { useLanguage } from "@/hooks/LanguageContext";
 import { useQuery } from "@tanstack/react-query";
@@ -26,6 +26,9 @@ import { ProductGrid } from "./product-grid";
 import ProductSchema from "@/components/ProductSchema";
 import { AddToCartButton } from "./AddToCartButton";
 import { trackViewContent } from "@/components/MetaPixel";
+import { useCart } from "@/modules/cart/context/cart-context";
+import { useToast } from "@/hooks/use-toast";
+import { trackAddToCart } from "@/lib/ga4-analytics";
 
 type MediaItem =
   | {
@@ -183,9 +186,12 @@ export function ProductDetails({ product }: ProductDetailsProps) {
     height?: number;
     depth?: number;
   } | null>(null);
+  const [isBuying, setIsBuying] = useState(false);
   const hasTrackedViewRef = useRef(false);
   const router = useRouter();
   const { t, language } = useLanguage();
+  const { addToCart, isItemInCart } = useCart();
+  const { toast } = useToast();
 
   const { resolvedYoutubeEmbedUrl, videoId } = useMemo(() => {
     let embedUrl: string | null = null;
@@ -656,6 +662,66 @@ export function ProductDetails({ product }: ProductDetailsProps) {
 
   const isOutOfStock = availableQuantity === 0;
 
+  // Handle Buy Now - Add to cart and redirect to checkout
+  const handleBuyNow = async () => {
+    if (isOutOfStock) {
+      toast({
+        title: language === "en" ? "Out of Stock" : "არ არის მარაგში",
+        description:
+          language === "en"
+            ? "This product is currently out of stock"
+            : "პროდუქტი ამჟამად არ არის მარაგში",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsBuying(true);
+
+    try {
+      // Check if item is already in cart
+      const isInCart = isItemInCart(product._id);
+
+      if (!isInCart) {
+        // Track quick purchase action
+        trackAddToCart(product._id, displayName, finalPrice, quantity);
+
+        // Add item to cart with discounted price if applicable
+        await addToCart(
+          product._id,
+          quantity,
+          selectedSize || undefined,
+          selectedColor || undefined,
+          selectedAgeGroup || undefined,
+          finalPrice
+        );
+      }
+
+      // Redirect to checkout (whether item was already in cart or just added)
+      setTimeout(() => {
+        router.push("/checkout/streamlined");
+      }, 300);
+    } catch (error) {
+      console.error("Buy now error:", error);
+      setIsBuying(false);
+      // Error toast is already shown by addToCart if there's an issue
+      // Only show additional error if user is not being redirected to login
+      if (
+        error instanceof Error &&
+        error.message !== "User not authenticated"
+      ) {
+        toast({
+          title: language === "en" ? "Error" : "შეცდომა",
+          description:
+            language === "en"
+              ? "Failed to proceed to checkout"
+              : "გადახდის გვერდზე გადასვლა ვერ მოხერხდა",
+          variant: "destructive",
+        });
+      }
+    }
+  };
+
   // Function to open fullscreen image
   const openFullscreen = () => {
     if (currentMediaItem?.type !== "image") {
@@ -829,8 +895,17 @@ export function ProductDetails({ product }: ProductDetailsProps) {
             })}
           </div>
 
-          {canShowRoomViewer && product.images?.length ? (
-            <div className="try-on-wall-container">
+          {/* Action buttons row - Share + Try in Room */}
+          <div className="image-action-buttons">
+            {/* Share Button */}
+            <ShareButton
+              url={`/products/${product._id}`}
+              title={displayName}
+              description={`${displayName} by ${product.brand}`}
+            />
+
+            {/* Try on Wall Button */}
+            {canShowRoomViewer && product.images?.length ? (
               <motion.button
                 className="try-on-wall-btn"
                 onClick={() => setIsRoomViewerOpen(true)}
@@ -839,8 +914,8 @@ export function ProductDetails({ product }: ProductDetailsProps) {
               >
                 {t("product.tryInRoom")}
               </motion.button>
-            </div>
-          ) : null}
+            ) : null}
+          </div>
         </div>
 
         {/* Right Column - Product Info */}
@@ -848,7 +923,30 @@ export function ProductDetails({ product }: ProductDetailsProps) {
           {/* Product Title - First for hierarchy */}
           <h1 className="product-title">{displayName}</h1>
 
-          {/* Brand with hover tooltip - Compact under title */}
+          {/* Price Section - Right after title for visibility */}
+          <div className="price-section-modern">
+            {isDiscounted ? (
+              <div className="price-with-discount">
+                <div className="current-price">₾{finalPrice.toFixed(2)}</div>
+                <div className="price-comparison">
+                  <span className="original-price-strike">
+                    ₾{product.price.toFixed(2)}
+                  </span>
+                  <span className="discount-badge">
+                    -{product.discountPercentage}%
+                  </span>
+                </div>
+                <div className="savings-text">
+                  {language === "en" ? "You save" : "დაზოგავ"} ₾
+                  {(product.price - finalPrice).toFixed(2)}
+                </div>
+              </div>
+            ) : (
+              <div className="current-price">₾{product.price.toFixed(2)}</div>
+            )}
+          </div>
+
+          {/* Brand with hover tooltip - Under price */}
           <Link
             href={
               product.user?.artistSlug
@@ -1050,29 +1148,6 @@ export function ProductDetails({ product }: ProductDetailsProps) {
             </div>
           )}
 
-          {/* Price Section - Eye-catching */}
-          <div className="price-section-modern">
-            {isDiscounted ? (
-              <div className="price-with-discount">
-                <div className="current-price">₾{finalPrice.toFixed(2)}</div>
-                <div className="price-comparison">
-                  <span className="original-price-strike">
-                    ₾{product.price.toFixed(2)}
-                  </span>
-                  <span className="discount-badge">
-                    -{product.discountPercentage}%
-                  </span>
-                </div>
-                <div className="savings-text">
-                  {language === "en" ? "You save" : "დაზოგავ"} ₾
-                  {(product.price - finalPrice).toFixed(2)}
-                </div>
-              </div>
-            ) : (
-              <div className="current-price">₾{product.price.toFixed(2)}</div>
-            )}
-          </div>
-
           {/* Delivery Information - Redesigned */}
           <div className="info-section">
             <div className="info-row">
@@ -1251,6 +1326,58 @@ export function ProductDetails({ product }: ProductDetailsProps) {
                   hideQuantity={true}
                 />
               </div>
+
+              {/* Buy Now Button */}
+              <button
+                onClick={handleBuyNow}
+                disabled={isOutOfStock || isBuying}
+                className="btn-buy-now"
+                title={
+                  language === "en"
+                    ? "Buy now - Direct to checkout"
+                    : "იყიდე ახლავე - პირდაპირ გადახდაზე"
+                }
+              >
+                {isBuying ? (
+                  <>
+                    <svg
+                      className="spinner-icon"
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="18"
+                      height="18"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+                    </svg>
+                    <span>
+                      {language === "en" ? "Processing..." : "დამუშავება..."}
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="18"
+                      height="18"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path d="M5 12h14" />
+                      <path d="m12 5 7 7-7 7" />
+                    </svg>
+                    <span>{language === "en" ? "Buy Now" : "იყიდე ახლავე"}</span>
+                  </>
+                )}
+              </button>
             </div>
           )}
 
@@ -1268,25 +1395,6 @@ export function ProductDetails({ product }: ProductDetailsProps) {
               hideQuantity={true}
             />
           )}
-
-          {/* Share with Friends */}
-          <div className="share-section">
-            <div className="share-header">
-              <Share2 size={18} />
-              <span>
-                {language === "en"
-                  ? "Share with Friends"
-                  : "გაუზიარე მეგობრებს"}
-              </span>
-            </div>
-            <ShareButtons
-              url={typeof window !== "undefined" ? window.location.href : ""}
-              title={`${displayName} by ${product.brand}`}
-              isOriginal={product.isOriginal}
-              materials={displayedMaterials}
-              dimensions={dimensions || undefined}
-            />
-          </div>
 
           {/* <div className="tabs">
             <div className="tabs-list">

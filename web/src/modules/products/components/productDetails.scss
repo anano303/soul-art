@@ -1055,6 +1055,35 @@ body {
       font-size: 16px;
     }
 
+    /* Mobile cart actions - stack buttons */
+    .cart-actions-container {
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .cart-actions-container .add-to-cart-btn-wrapper {
+      flex: 1 1 45%;
+      min-width: 120px;
+    }
+
+    .cart-actions-container .btn-buy-now {
+      flex: 1 1 45%;
+      min-width: 120px;
+      font-size: 13px;
+      padding: 10px 12px;
+      height: 44px;
+    }
+
+    /* Image action buttons responsive */
+    .image-action-buttons {
+      gap: 8px;
+    }
+
+    .image-action-buttons .try-on-wall-btn {
+      font-size: 13px;
+      padding: 10px 14px;
+    }
+
     .tabs {
       margin-top: 20px;
       gap: 15px;
@@ -1072,6 +1101,27 @@ body {
       padding: 10px 6px;
       font-size: 13px;
       min-width: 33%;
+    }
+  }
+
+  /* Medium mobile devices (500-550px) */
+  @media (max-width: 550px) {
+    .cart-actions-container {
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .cart-actions-container .add-to-cart-btn-wrapper,
+    .cart-actions-container .btn-buy-now {
+      flex: 1 1 100%;
+      width: 100%;
+      min-width: unset;
+    }
+
+    .cart-actions-container .btn-buy-now {
+      font-size: 14px;
+      padding: 12px 16px;
+      height: 46px;
     }
   }
 
@@ -1096,6 +1146,27 @@ body {
 
     .price {
       font-size: 20px;
+    }
+
+    /* Very small devices - stack everything */
+    .cart-actions-container {
+      flex-direction: column;
+    }
+
+    .cart-actions-container .add-to-cart-btn-wrapper,
+    .cart-actions-container .btn-buy-now {
+      flex: 1 1 100%;
+      width: 100%;
+    }
+
+    .image-action-buttons {
+      flex-direction: row;
+      gap: 6px;
+    }
+
+    .image-action-buttons .try-on-wall-btn {
+      font-size: 12px;
+      padding: 8px 10px;
     }
 
     .thumbnail-container {
@@ -1278,48 +1349,54 @@ body {
     margin: 0;
   }
 
-  /* Price Section Modern - Cleaner Design */
+  /* Price Section Modern - Artistic & Clean Design */
   .price-section-modern {
-    background: linear-gradient(
-      135deg,
-      rgba(1, 38, 69, 0.03) 0%,
-      rgba(1, 38, 69, 0.08) 100%
-    );
-    padding: 18px 20px;
-    border-radius: 12px;
-    margin: 16px 0;
-    box-shadow: 0 2px 8px rgba(1, 38, 69, 0.08);
+    display: inline-flex;
+    flex-direction: column;
+    gap: 4px;
+    margin: 12px 0;
+    padding: 0;
     position: relative;
-    transition: all 0.3s ease;
-  }
-
-  .price-section-modern:hover {
-    box-shadow: 0 4px 12px rgba(1, 38, 69, 0.12);
   }
 
   .price-with-discount {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 6px;
   }
 
   .current-price {
-    font-size: 32px;
+    font-size: 36px;
     font-weight: 800;
     color: var(--primary-color);
     font-family: FiraGo, serif;
+    line-height: 1;
+    position: relative;
+    display: inline-block;
+  }
+
+  .current-price::after {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    left: 0;
+    width: 60%;
+    height: 3px;
+    background: linear-gradient(90deg, var(--primary-color), transparent);
+    border-radius: 2px;
   }
 
   .price-comparison {
     display: flex;
     align-items: center;
     gap: 12px;
+    margin-top: 4px;
   }
 
   .original-price-strike {
     font-size: 18px;
     text-decoration: line-through;
-    color: #6c757d;
+    color: #999;
     font-weight: 500;
   }
 
@@ -1368,9 +1445,17 @@ body {
   } */
 
   .savings-text {
-    font-size: 13px;
-    font-weight: 500;
-    color: #495057;
+    font-size: 12px;
+    font-weight: 600;
+    color: #16a34a;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .savings-text::before {
+    content: '✓';
+    font-size: 10px;
   }
 
   /* Info Sections */
@@ -1813,6 +1898,62 @@ body {
     margin: 0;
   }
 
+  /* Buy Now Button for Product Details - Distinctive color */
+  .btn-buy-now {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 20px;
+    height: 48px;
+    background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+  }
+
+  .btn-buy-now:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(217, 119, 6, 0.4);
+    background: linear-gradient(135deg, #b45309 0%, #92400e 100%);
+  }
+
+  .btn-buy-now:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+
+  .btn-buy-now svg {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+  }
+
+  .btn-buy-now .spinner-icon {
+    animation: spin 1s linear infinite;
+  }
+
+  @keyframes spin {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  .btn-buy-now span {
+    font-weight: 600;
+    letter-spacing: 0.3px;
+  }
+
   .add-to-cart-btn.bounce-in {
     animation: bounceIn 0.6s ease;
   }
@@ -1852,6 +1993,26 @@ body {
   .add-to-cart-btn:active {
     transform: translateY(0);
     transition: all 0.1s ease;
+  }
+
+  /* Share Section Compact - Under image gallery */
+  .share-section-compact {
+    margin-top: 12px;
+    display: flex;
+    justify-content: flex-start;
+  }
+
+  /* Image Action Buttons - Share + Try in Room */
+  .image-action-buttons {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 16px;
+  }
+
+  .image-action-buttons .try-on-wall-btn {
+    flex: 1;
+    margin: 0;
   }
 
   /* Share Section */
