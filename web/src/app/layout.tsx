@@ -237,6 +237,14 @@ export default function RootLayout({
           crossOrigin="anonymous"
         />
 
+        {/* Preload LCP hero image */}
+        <link
+          rel="preload"
+          as="image"
+          href="/van-gogh.jpg"
+          fetchPriority="high"
+        />
+
         {/* DNS prefetch for external resources only */}
         <link rel="dns-prefetch" href="//connect.facebook.net" />
         <link rel="dns-prefetch" href="//www.googletagmanager.com" />
