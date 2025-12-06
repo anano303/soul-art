@@ -1,17 +1,38 @@
 "use client";
 
 import { useEffect } from "react";
-import HomePageForum from "@/components/homePageForum/homePageForum";
+import dynamic from "next/dynamic";
 import HomePagesHead from "@/components/homePagesHead/homePagesHead";
-import HomePageShop from "@/components/homePageShop/homePageShop";
-import Banner from "@/components/banner/banner";
 import TopItems from "@/components/TopItems/TopItems";
-import { GuestReferralBanner } from "@/components/referralBanners/guest-referral-banner";
-import { ReferralPromoBanner } from "@/components/referralBanners/referral-promo-banner";
-import { useLanguage } from "@/hooks/LanguageContext";
+import Banner from "@/components/banner/banner";
 import DiscountedRail from "@/components/discountedRail/DiscountedRail";
-import GiftCategories from "@/components/giftCategories/GiftCategories";
+import { useLanguage } from "@/hooks/LanguageContext";
 import { trackPageView } from "@/lib/ga4-analytics";
+
+// Lazy load below-the-fold components for better LCP
+const GiftCategories = dynamic(
+  () => import("@/components/giftCategories/GiftCategories"),
+  {
+    loading: () => <div style={{ minHeight: "200px" }} />,
+    ssr: true,
+  }
+);
+
+const HomePageShop = dynamic(
+  () => import("@/components/homePageShop/homePageShop"),
+  {
+    loading: () => <div style={{ minHeight: "400px" }} />,
+    ssr: true,
+  }
+);
+
+const HomePageForum = dynamic(
+  () => import("@/components/homePageForum/homePageForum"),
+  {
+    loading: () => <div style={{ minHeight: "300px" }} />,
+    ssr: true,
+  }
+);
 
 const Home = () => {
   const { language } = useLanguage();

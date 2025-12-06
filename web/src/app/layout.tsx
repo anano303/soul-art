@@ -5,9 +5,9 @@ import { Providers } from "./providers";
 import { Toaster } from "@/components/ui/toaster";
 import { AuthProvider } from "@/components/auth-provider";
 
-import Footer from "@/components/footer/footer";
 import { LanguageProvider } from "@/hooks/LanguageContext";
 import Header from "@/components/header/header";
+import Footer from "@/components/footer/footer";
 import MessengerChatWrapper from "@/components/MessengerChat/MessengerChatWrapper";
 import {
   GLOBAL_KEYWORDS,
@@ -34,15 +34,15 @@ import VercelAnalytics from "@/components/VercelAnalytics";
 import MetaPixel from "@/components/MetaPixel";
 import { FloatingCartIcon } from "@/components/floating-cart-icon/floating-cart-icon";
 import { MobileBottomNav } from "@/components/mobile-bottom-nav/mobile-bottom-nav";
-import { PWAInstallPrompt } from "@/components/pwa-install-prompt/pwa-install-prompt";
 import { NetworkStatus } from "@/components/network-status/network-status";
-import { PushNotificationManager } from "@/components/push-notifications/push-notifications";
 import { CacheManager } from "@/components/cache-manager/cache-manager";
-import PWAManager from "@/components/pwa-manager";
 import { GA4UserTracker } from "@/components/ga4-user-tracker";
 import { PageViewTracker } from "@/components/page-view-tracker";
 import { VisitorTracker } from "@/components/visitor-tracker";
 import { IOSGesturePrevention } from "@/components/ios-gesture-prevention";
+import { PWAInstallPrompt } from "@/components/pwa-install-prompt/pwa-install-prompt";
+import { PushNotificationManager } from "@/components/push-notifications/push-notifications";
+import PWAManager from "@/components/pwa-manager";
 import "@/lib/cloudflare-cleanup"; // Auto-cleanup Cloudflare cookies in development
 
 export const viewport = {

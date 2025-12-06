@@ -289,8 +289,10 @@ const TopItems: React.FC = () => {
               src={product.images[0] || noPhoto}
               alt={product.name}
               fill
+              sizes="(max-width: 768px) 150px, 200px"
               className={styles.productImage}
               style={{ objectFit: "cover", width: "100%" }}
+              loading={index < 3 ? "eager" : "lazy"}
             />
           </div>
         </div>

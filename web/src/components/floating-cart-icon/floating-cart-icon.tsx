@@ -4,13 +4,13 @@ import { useState, useEffect } from "react";
 import { ShoppingCart } from "lucide-react";
 import { useCart } from "@/modules/cart/context/cart-context";
 import { useRouter, usePathname } from "next/navigation";
-import { motion, AnimatePresence } from "framer-motion";
 import "./floating-cart-icon.css";
 
 export function FloatingCartIcon() {
   const router = useRouter();
   const pathname = usePathname();
   const [isVisible, setIsVisible] = useState(false);
+  const [isAnimatingOut, setIsAnimatingOut] = useState(false);
 
   let cartData;
   try {
@@ -39,7 +39,18 @@ export function FloatingCartIcon() {
   // 2. არ ვართ კალათის/checkout/orders გვერდებზე
   useEffect(() => {
     const shouldShow = totalItems > 0 && !isOnCartRelatedPage();
-    setIsVisible(shouldShow);
+    
+    if (shouldShow && !isVisible) {
+      setIsAnimatingOut(false);
+      setIsVisible(true);
+    } else if (!shouldShow && isVisible) {
+      setIsAnimatingOut(true);
+      const timer = setTimeout(() => {
+        setIsVisible(false);
+        setIsAnimatingOut(false);
+      }, 200);
+      return () => clearTimeout(timer);
+    }
 
     // Show tooltip for 3 seconds when cart is updated
     if (shouldShow && totalItems > 0) {
@@ -50,60 +61,37 @@ export function FloatingCartIcon() {
       return () => clearTimeout(timer);
     }
   }, [totalItems, pathname]);
+  
   const handleClick = () => {
     router.push("/cart");
   };
 
+  if (!isVisible) return null;
+
   return (
-    <AnimatePresence>
-      {isVisible && (
-        <motion.div
-          initial={{ scale: 0, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          exit={{ scale: 0, opacity: 0 }}
-          transition={{
-            type: "spring",
-            stiffness: 500,
-            damping: 25,
-          }}
-          className="floating-cart-icon"
-          onClick={handleClick}
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.9 }}
-          data-cart-toggle="true"
-        >
-          {/* Tooltip */}
-          <AnimatePresence>
-            {showTooltip && (
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 10 }}
-                className="floating-cart-tooltip"
-              >
-                გადადი კალათში 🛒
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          <div className="cart-icon-wrapper">
-            <ShoppingCart className="cart-icon" />
-            {totalItems > 0 && (
-              <motion.div
-                className="cart-badge"
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                transition={{ delay: 0.1 }}
-              >
-                {totalItems > 99 ? "99+" : totalItems}
-              </motion.div>
-            )}
-          </div>
-
-          {/* Ripple effect */}
-          <div className="cart-ripple"></div>
-        </motion.div>
+    <div
+      className={`floating-cart-icon ${isAnimatingOut ? 'animate-out' : 'animate-in'}`}
+      onClick={handleClick}
+      data-cart-toggle="true"
+    >
+      {/* Tooltip */}
+      {showTooltip && (
+        <div className="floating-cart-tooltip animate-tooltip">
+          გადადი კალათში 🛒
+        </div>
       )}
-    </AnimatePresence>
+
+      <div className="cart-icon-wrapper">
+        <ShoppingCart className="cart-icon" />
+        {totalItems > 0 && (
+          <div className="cart-badge animate-badge">
+            {totalItems > 99 ? "99+" : totalItems}
+          </div>
+        )}
+      </div>
+
+      {/* Ripple effect */}
+      <div className="cart-ripple"></div>
+    </div>
   );
 }

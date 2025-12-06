@@ -15,6 +15,37 @@
   transition: all 0.3s ease;
 }
 
+/* CSS Animation for enter/exit */
+.floating-cart-icon.animate-in {
+  animation: floatIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+.floating-cart-icon.animate-out {
+  animation: floatOut 0.2s ease-out forwards;
+}
+
+@keyframes floatIn {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes floatOut {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(0);
+    opacity: 0;
+  }
+}
+
 .floating-cart-tooltip {
   position: absolute;
   bottom: 70px;
@@ -32,6 +63,21 @@
   z-index: 1001;
 }
 
+.floating-cart-tooltip.animate-tooltip {
+  animation: tooltipIn 0.2s ease-out forwards;
+}
+
+@keyframes tooltipIn {
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .floating-cart-tooltip::after {
   content: "";
   position: absolute;
@@ -43,7 +89,11 @@
 
 .floating-cart-icon:hover {
   box-shadow: 0 8px 30px rgba(1, 38, 69, 0.4);
-  transform: translateY(-2px);
+  transform: translateY(-2px) scale(1.05);
+}
+
+.floating-cart-icon:active {
+  transform: scale(0.95);
 }
 
 .cart-icon-wrapper {
@@ -74,6 +124,20 @@
   font-size: 11px;
   font-weight: 600;
   border: 2px solid white;
+}
+
+.cart-badge.animate-badge {
+  animation: badgeIn 0.2s ease-out 0.1s forwards;
+  transform: scale(0);
+}
+
+@keyframes badgeIn {
+  0% {
+    transform: scale(0);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
 
 .cart-ripple {
