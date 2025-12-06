@@ -1,4 +1,4 @@
-export { generateMetadata as metadata } from "./metadata";
+export { generateMetadata } from "./metadata";
 
 export default function ReferralLayout({
   children,
