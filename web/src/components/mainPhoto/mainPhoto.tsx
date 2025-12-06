@@ -16,7 +16,7 @@ const MainPhoto = () => {
       <div className="main-hero-section" ref={heroRef}>
         {/* Hero Background Image - Priority for LCP optimization */}
         <Image
-          src="/van-gogh.jpg"
+          src="/van-gogh.webp"
           alt="SoulArt Hero"
           fill
           priority

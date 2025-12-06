@@ -178,7 +178,7 @@ export async function generateMetadata(): Promise<Metadata> {
         "ქართველი ხელოვანების უნიკალური ხელნაკეთი ნივთები, ნახატები, ხელოვნების ნამუშევრები ერთ სივრცეში.",
       images: [
         {
-          url: "/van-gogh.jpg",
+          url: "/van-gogh.webp",
           width: 1200,
           height: 630,
           alt: "Soulart - ნახატების და ხელნაკეთი ნივთების   პირველი ონლაინ პლატფორმა საქართველოში",
@@ -191,7 +191,7 @@ export async function generateMetadata(): Promise<Metadata> {
         "Soulart - ნახატების და ხელნაკეთი ნივთების   პირველი ონლაინ პლატფორმა საქართველოში",
       description:
         "ხელნაკეთი ნივთების და ნახატების საუკეთესო არჩევანი საქართველოში",
-      images: ["/van-gogh.jpg"],
+      images: ["/van-gogh.webp"],
     },
   };
 }
@@ -271,7 +271,7 @@ export default function RootLayout({
         <link
           rel="preload"
           as="image"
-          href="/van-gogh.jpg"
+          href="/van-gogh.webp"
           fetchPriority="high"
         />
 

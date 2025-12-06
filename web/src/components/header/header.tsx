@@ -89,7 +89,7 @@ export default function Header() {
           ) : (
             <Link href="/">
               <Image
-                src="/logo-white.png"
+                src="/logo-white.webp"
                 alt="logo soulArt"
                 width={200}
                 height={50}

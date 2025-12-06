@@ -35,7 +35,7 @@ export const metadata: Metadata = {
     siteName: "Soulart",
     images: [
       {
-        url: "/van-gogh.jpg",
+        url: "/van-gogh.webp",
         width: 1200,
         height: 630,
         alt: "Soulart Profile",
@@ -47,7 +47,7 @@ export const metadata: Metadata = {
     title: "პროფილი | Soulart - Profile | Soulart",
     description:
       "მომხმარებლის პროფილი, შეკვეთების ისტორია და პერსონალური პარამეტრები",
-    images: ["/van-gogh.jpg"],
+    images: ["/van-gogh.webp"],
   },
   robots: {
     index: false,

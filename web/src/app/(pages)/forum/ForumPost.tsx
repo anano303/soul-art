@@ -11,6 +11,7 @@ import { fetchWithAuth } from "@/lib/fetch-with-auth";
 import imageCompression from "browser-image-compression";
 import { apiClient } from "@/lib/axios";
 import { ShareButton } from "@/components/share-button/share-button";
+import { optimizeCloudinaryUrl } from "@/lib/utils";
 
 interface Comment {
   id: string;
@@ -808,7 +809,7 @@ const ForumPost = ({
   return (
     <div className="forum-post">
       <Image
-        src={image}
+        src={optimizeCloudinaryUrl(image, { width: 200, quality: "auto:eco" }) || image}
         alt="post image"
         width={80}
         height={80}

@@ -91,7 +91,7 @@ export function middleware(request: NextRequest) {
   // Add preload hints for critical resources
   response.headers.set(
     "Link",
-    "</van-gogh.jpg>; rel=preload; as=image; fetchpriority=high"
+    "</van-gogh.webp>; rel=preload; as=image; fetchpriority=high"
   );
 
   return response;

@@ -102,7 +102,7 @@ export const metadata: Metadata = {
     alternateLocale: ["en_US"],
     images: [
       {
-        url: "https://soulart.ge/van-gogh.jpg",
+        url: "https://soulart.ge/van-gogh.webp",
         width: 1200,
         height: 630,
         alt: "Soulart - ქართული პლატფორმა ხელოვანებისთვის",
@@ -115,7 +115,7 @@ export const metadata: Metadata = {
     title: "ჩვენს შესახებ | Soulart - About Us",
     description:
       "გაიგე Soulart.ge-ს შესახებ - ქართული ონლაინ პლატფორმა ხელოვანებისა და ხელნაკეთი ნივთების მოყვარულებისთვის.",
-    images: ["https://soulart.ge/van-gogh.jpg"],
+    images: ["https://soulart.ge/van-gogh.webp"],
   },
   alternates: {
     canonical: "https://soulart.ge/about",

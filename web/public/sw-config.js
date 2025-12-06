@@ -12,7 +12,7 @@ const STATIC_ASSETS = [
   "/manifest.json",
   "/favicon.ico",
   "/logo.png",
-  "/logo-white.png",
+  "/logo-white.webp",
   "/offline",
 ];
 
