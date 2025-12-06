@@ -456,11 +456,6 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
               <div className="artist-hero__title-row">
                 <h1>{artist.storeName || artist.name}</h1>
                 <div className="artist-hero__header-actions">
-                  <ShareButton
-                    url={`/artists/${artist.id}`}
-                    title={artist.storeName || artist.name}
-                    description={biography || undefined}
-                  />
                   {isOwner && (
                     <div className="artist-hero__actions">
                       <Link
@@ -589,6 +584,18 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
             </div>
           )}
         </div>
+
+        {/* Share button in bottom right corner */}
+        <ShareButton
+          url={
+            artist.artistSlug
+              ? `/@${artist.artistSlug}`
+              : `/artists/${artist.id}`
+          }
+          title={artist.storeName || artist.name}
+          description={biography || undefined}
+          className="share-button--artist artist-hero__share"
+        />
       </section>
 
       <div className="artist-profile__content">

@@ -20,11 +20,42 @@ export function ShareButton({
 }: ShareButtonProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [canNativeShare, setCanNativeShare] = useState(false);
   const { language } = useLanguage();
   const menuRef = useRef<HTMLDivElement>(null);
 
   const shareUrl =
     typeof window !== "undefined" ? window.location.origin + url : url;
+
+  // Check if native sharing is available
+  useEffect(() => {
+    setCanNativeShare(typeof navigator !== "undefined" && !!navigator.share);
+  }, []);
+
+  // Handle native share (for mobile)
+  const handleNativeShare = async () => {
+    try {
+      await navigator.share({
+        title: title,
+        text: description || title,
+        url: shareUrl,
+      });
+    } catch (err) {
+      // User cancelled or error - fallback to menu
+      if ((err as Error).name !== "AbortError") {
+        setIsOpen(true);
+      }
+    }
+  };
+
+  // Handle button click
+  const handleButtonClick = () => {
+    if (canNativeShare) {
+      handleNativeShare();
+    } else {
+      setIsOpen(!isOpen);
+    }
+  };
 
   // Close menu when clicking outside
   useEffect(() => {
@@ -166,7 +197,7 @@ export function ShareButton({
       <button
         type="button"
         className="share-button"
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={handleButtonClick}
         title={language === "en" ? "Share" : "გაზიარება"}
         aria-label={language === "en" ? "Share" : "გაზიარება"}
       >

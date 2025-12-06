@@ -22,6 +22,14 @@
   cursor: url("/brush.png"), auto;
 }
 
+/* Share button positioned in bottom right corner of hero */
+.artist-hero__share {
+  position: absolute;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  z-index: 10;
+}
+
 .artist-hero__overlay {
   position: absolute;
   inset: 0;
