@@ -520,7 +520,8 @@ export function GalleryViewer({
 
       touchDataRef.current = null;
 
-      if (Math.abs(deltaX) < 40 || Math.abs(deltaX) < Math.abs(deltaY)) {
+      // Only swipe if: horizontal movement > 60px AND horizontal > 2x vertical (clear horizontal intent)
+      if (Math.abs(deltaX) < 60 || Math.abs(deltaX) < Math.abs(deltaY) * 2) {
         return;
       }
 
