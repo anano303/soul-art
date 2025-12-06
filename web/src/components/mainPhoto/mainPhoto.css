@@ -29,6 +29,12 @@
   margin-top: 10%;
 }
 
+.hero-text h1 {
+  font-size: 36px;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
 .hero-text h2 {
   font-size: 36px;
   font-weight: bold;

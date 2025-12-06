@@ -59,16 +59,17 @@ const HomePageForum = () => {
 
   return (
     <div className="homePageForum">
-      <h1 className="homePageForumH1">
+      <h2 className="homePageForumH1">
         <Image
           src="/chat-icon.svg"
-          alt="Forum Icon"
+          alt=""
           width={28}
           height={28}
           className="forum-icon"
+          aria-hidden="true"
         />
         {t("navigation.forum")}
-      </h1>
+      </h2>
 
       {posts.map((post) => (
         <ForumPost

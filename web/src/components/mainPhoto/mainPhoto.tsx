@@ -29,7 +29,7 @@ const MainPhoto = () => {
           }}
         />
         <div className="hero-text">
-          <h2>{t("home.heroTitle")}</h2>
+          <h1>{t("home.heroTitle")}</h1>
           <p>{t("home.heroSubtitle")}</p>
         </div>
         <div className="search-box">

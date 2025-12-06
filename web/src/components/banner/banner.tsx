@@ -179,9 +179,9 @@ const Banner = () => {
           >
             <div className="banner-overlay"></div>
             <div className="banner-content">
-              <h1 className="banner-title">
+              <h2 className="banner-title">
                 {language === "en" ? banner.titleEn : banner.title}
-              </h1>
+              </h2>
               {banner.buttonText && banner.buttonLink && (
                 <Link 
                   href={banner.buttonLink} 
