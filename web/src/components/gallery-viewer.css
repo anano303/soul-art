@@ -249,9 +249,8 @@
 
 .gallery-viewer__mobile-carousel {
   display: flex;
-  overflow-x: auto;
-  scroll-snap-type: x mandatory;
-  -webkit-overflow-scrolling: touch;
+  overflow-x: hidden;
+  scroll-snap-type: none;
 }
 
 .gallery-viewer__mobile-carousel::-webkit-scrollbar {
@@ -264,8 +263,14 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 320px;
   background: #000;
+}
+
+.gallery-viewer__mobile-slide img {
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+  max-height: none;
 }
 
 .gallery-viewer__action--mobile {
@@ -1051,6 +1056,7 @@
 .gallery-viewer__share-btn {
   display: flex;
   align-items: center;
+  margin-left: 8px;
 }
 
 .gallery-viewer__share-btn .share-button-container {

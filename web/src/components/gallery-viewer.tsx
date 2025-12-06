@@ -900,8 +900,6 @@ export function GalleryViewer({
                     ref={(element) => {
                       imageListRefs.current[index] = element;
                     }}
-                    onTouchStart={(event) => handleTouchStart(event, index)}
-                    onTouchEnd={handleTouchEnd}
                   >
                     {postImages.map((image, imageIndex) => {
                       const aspectRatio = getImageAspectRatio(image.url);
@@ -1184,8 +1182,6 @@ export function GalleryViewer({
 
           <div
             className="gallery-viewer__image-container"
-            onTouchStart={(event) => handleTouchStart(event, currentPostIndex)}
-            onTouchEnd={handleTouchEnd}
           >
             <CloudinaryImage
               src={currentImageUrl}
