@@ -753,13 +753,13 @@
 
 .original-price {
   text-decoration: line-through;
-  color: #999;
+  color: #666;
   font-size: 0.9rem;
   margin-right: 8px;
 }
 
 .discounted-price {
-  color: #e74c3c;
+  color: #c0392b;
 }
 
 /* Handmade theme discounted price */
