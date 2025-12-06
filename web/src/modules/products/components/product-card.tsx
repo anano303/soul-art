@@ -37,7 +37,7 @@ export function ProductCard({
   // ვამოწმებთ სურათის ვალიდურობას და ვოპტიმიზირებთ Cloudinary URL-ს
   const rawImage = product.images?.[0] || noPhoto.src;
   const productImage =
-    optimizeCloudinaryUrl(rawImage, { width: 400, quality: "auto:eco" }) ||
+    optimizeCloudinaryUrl(rawImage, { width: 300, quality: "auto:eco" }) ||
     rawImage;
 
   // Display name based on selected language

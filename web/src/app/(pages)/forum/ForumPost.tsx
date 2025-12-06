@@ -809,7 +809,10 @@ const ForumPost = ({
   return (
     <div className="forum-post">
       <Image
-        src={optimizeCloudinaryUrl(image, { width: 200, quality: "auto:eco" }) || image}
+        src={
+          optimizeCloudinaryUrl(image, { width: 200, quality: "auto:eco" }) ||
+          image
+        }
         alt="post image"
         width={80}
         height={80}

@@ -289,7 +289,7 @@ const TopItems: React.FC = () => {
             <Image
               src={
                 optimizeCloudinaryUrl(product.images[0], {
-                  width: 300,
+                  width: 200,
                   quality: "auto:eco",
                 }) || noPhoto
               }

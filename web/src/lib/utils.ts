@@ -39,6 +39,7 @@ export function optimizeCloudinaryUrl(
       | "auto:best"
       | number;
     format?: "auto" | "webp" | "avif";
+    crop?: "limit" | "fill" | "fit" | "scale";
   } = {}
 ): string {
   if (!url) return "";
@@ -48,7 +49,7 @@ export function optimizeCloudinaryUrl(
     return url;
   }
 
-  const { width, height, quality = "auto", format = "auto" } = options;
+  const { width, height, quality = "auto:eco", format = "auto", crop = "limit" } = options;
 
   // Build transformation string
   const transforms: string[] = [];
@@ -71,7 +72,7 @@ export function optimizeCloudinaryUrl(
 
   // Add crop mode if dimensions are specified
   if (width || height) {
-    transforms.push("c_limit"); // Limit to max dimensions while preserving aspect ratio
+    transforms.push(`c_${crop}`); // Use specified crop mode (default: limit)
   }
 
   const transformString = transforms.join(",");
