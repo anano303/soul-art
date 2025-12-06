@@ -15,10 +15,8 @@ const publicPaths = [
 const protectedPaths = [
   "/profile",
   "/orders",
-  "/admin",
-  "/admin/products",
-  "/admin/products/create",
-  "/admin/products/[id]/edit", // დავამატოთ პროდუქტის რედაქტირების გზა
+  // Admin paths removed - admin layout handles its own auth via localStorage
+  // This prevents redirect issues when cookies aren't accessible in middleware
 ];
 
 export function middleware(request: NextRequest) {
@@ -29,17 +27,6 @@ export function middleware(request: NextRequest) {
   const refreshToken = request.cookies.get("refresh_token");
   const hasTokens = !!(accessToken?.value || refreshToken?.value);
   const isAuthenticated = hasTokens;
-
-  // Debug logging for admin paths (remove in production after fixing)
-  if (pathname.startsWith("/admin")) {
-    console.log("[Middleware Debug]", {
-      pathname,
-      hasAccessToken: !!accessToken?.value,
-      hasRefreshToken: !!refreshToken?.value,
-      isAuthenticated,
-      allCookies: request.cookies.getAll().map(c => c.name)
-    });
-  }
 
   // Skip middleware for non-relevant paths (like api, _next, static files)
   if (
