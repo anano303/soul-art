@@ -249,11 +249,12 @@ export default function RootLayout({
         style={{ maxWidth: "100vw" }}
         suppressHydrationWarning={true}
       >
-        {/* Suppress CSS preload warnings */}
+        {/* Suppress CSS preload warnings and third-party errors */}
         <script
           dangerouslySetInnerHTML={{
             __html: `
               (function() {
+                // Suppress console warnings
                 var originalWarn = console.warn;
                 console.warn = function() {
                   var message = Array.prototype.join.call(arguments, ' ');
@@ -266,6 +267,28 @@ export default function RootLayout({
                     originalWarn.apply(console, arguments);
                   }
                 };
+                
+                // Suppress third-party errors (Madgicx, etc.)
+                var originalError = console.error;
+                console.error = function() {
+                  var message = Array.prototype.join.call(arguments, ' ');
+                  if (message.includes('madgicx') ||
+                      message.includes('capig') ||
+                      message.includes('reading \\'call\\'')) {
+                    return; // Suppress Madgicx errors
+                  }
+                  originalError.apply(console, arguments);
+                };
+                
+                // Global error handler to suppress third-party errors
+                window.addEventListener('error', function(e) {
+                  if (e.filename && (e.filename.includes('madgicx') || 
+                      e.filename.includes('capig') ||
+                      e.filename.includes('facebook'))) {
+                    e.preventDefault();
+                    return false;
+                  }
+                }, true);
               })();
             `,
           }}

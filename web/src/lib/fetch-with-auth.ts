@@ -1,6 +1,13 @@
 import { clearUserData, refreshTokens } from "./auth";
 import { trackAPICall, trackNetworkError } from "./ga4-analytics";
 
+// Retry configuration
+const MAX_RETRIES = 2;
+const RETRY_DELAY = 1000; // 1 second
+
+// Helper function to delay
+const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
 export async function fetchWithAuth(url: string, config: RequestInit = {}) {
   const { headers, ...rest } = config;
 
@@ -31,8 +38,30 @@ export async function fetchWithAuth(url: string, config: RequestInit = {}) {
       mode: "cors",
     });
   };
+
+  // Retry wrapper for network errors
+  const makeRequestWithRetry = async (retries = 0): Promise<Response> => {
+    try {
+      return await makeRequest();
+    } catch (error) {
+      // Only retry on network errors (Failed to fetch), not on other errors
+      if (
+        error instanceof TypeError &&
+        error.message.includes("Failed to fetch") &&
+        retries < MAX_RETRIES
+      ) {
+        console.warn(
+          `[fetchWithAuth] Network error, retrying (${retries + 1}/${MAX_RETRIES})...`
+        );
+        await delay(RETRY_DELAY * (retries + 1)); // Exponential backoff
+        return makeRequestWithRetry(retries + 1);
+      }
+      throw error;
+    }
+  };
+
   try {
-    let response = await makeRequest();
+    let response = await makeRequestWithRetry();
 
     // Handle 401 Unauthorized - try to refresh token
     if (response.status === 401) {
@@ -41,7 +70,7 @@ export async function fetchWithAuth(url: string, config: RequestInit = {}) {
         await refreshTokens();
 
         // Retry the original request
-        response = await makeRequest();
+        response = await makeRequestWithRetry();
       } catch {
         // Refresh failed, clear user data and redirect to login
         clearUserData();

@@ -4,8 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "set NODE_OPTIONS=--max-old-space-size=3000 && next dev",
-    "build": "next build --no-lint",
-    "build:analyze": "set ANALYZE=true && next build --no-lint",
+    "build": "next build",
+    "build:analyze": "set ANALYZE=true && next build",
     "start": "next start",
     "lint": "next lint"
   },
