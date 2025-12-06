@@ -1374,7 +1374,9 @@ export function ProductDetails({ product }: ProductDetailsProps) {
                       <path d="M5 12h14" />
                       <path d="m12 5 7 7-7 7" />
                     </svg>
-                    <span>{language === "en" ? "Buy Now" : "იყიდე ახლავე"}</span>
+                    <span>
+                      {language === "en" ? "Buy Now" : "იყიდე ახლავე"}
+                    </span>
                   </>
                 )}
               </button>

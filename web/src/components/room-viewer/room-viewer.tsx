@@ -46,13 +46,15 @@ const colorOptions = [
   { name: "Blush Pink", value: "#FFEBEE" },
 ];
 
-const ROOM_DIMENSIONS_CM: Record<Exclude<RoomType, "custom">, { width: number; height: number }> =
-  {
-    living: { width: 480, height: 280 },
-    bedroom: { width: 420, height: 260 },
-    kitchen: { width: 360, height: 250 },
-    hall: { width: 320, height: 260 },
-  };
+const ROOM_DIMENSIONS_CM: Record<
+  Exclude<RoomType, "custom">,
+  { width: number; height: number }
+> = {
+  living: { width: 480, height: 280 },
+  bedroom: { width: 420, height: 260 },
+  kitchen: { width: 360, height: 250 },
+  hall: { width: 320, height: 260 },
+};
 
 const ROOM_SCALE_MULTIPLIER: Record<Exclude<RoomType, "custom">, number> = {
   living: 1.8,
@@ -151,9 +153,10 @@ export function RoomViewer({
     }
 
     // For custom room, use default living room dimensions
-    const roomScale = currentRoom === "custom" 
-      ? ROOM_DIMENSIONS_CM.living 
-      : ROOM_DIMENSIONS_CM[currentRoom];
+    const roomScale =
+      currentRoom === "custom"
+        ? ROOM_DIMENSIONS_CM.living
+        : ROOM_DIMENSIONS_CM[currentRoom];
     const widthCmRaw = parseDimensionValue(dimensions?.width ?? undefined);
     const heightCmRaw = parseDimensionValue(dimensions?.height ?? undefined);
 
@@ -199,9 +202,8 @@ export function RoomViewer({
       resolvedHeightCm = DEFAULT_ARTWORK_HEIGHT_CM;
     }
 
-    const scaleMultiplier = currentRoom === "custom" 
-      ? 1.8 
-      : (ROOM_SCALE_MULTIPLIER[currentRoom] ?? 1);
+    const scaleMultiplier =
+      currentRoom === "custom" ? 1.8 : ROOM_SCALE_MULTIPLIER[currentRoom] ?? 1;
     const pxPerCmX = containerWidth / roomScale.width;
     const pxPerCmY = containerHeight / roomScale.height;
 
@@ -592,7 +594,7 @@ export function RoomViewer({
                   {t("roomViewer.hall")}
                 </button>
               </div>
-              
+
               {/* Custom Room Upload */}
               <div className="custom-room-upload">
                 <input
@@ -605,10 +607,19 @@ export function RoomViewer({
                 />
                 <button
                   type="button"
-                  className={`upload-room-btn ${currentRoom === "custom" ? "active" : ""}`}
+                  className={`upload-room-btn ${
+                    currentRoom === "custom" ? "active" : ""
+                  }`}
                   onClick={() => fileInputRef.current?.click()}
                 >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  >
                     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
                     <polyline points="17 8 12 3 7 8" />
                     <line x1="12" y1="3" x2="12" y2="15" />

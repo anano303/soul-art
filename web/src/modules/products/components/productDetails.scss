@@ -1376,7 +1376,7 @@ body {
   }
 
   .current-price::after {
-    content: '';
+    content: "";
     position: absolute;
     bottom: -4px;
     left: 0;
@@ -1454,7 +1454,7 @@ body {
   }
 
   .savings-text::before {
-    content: '✓';
+    content: "✓";
     font-size: 10px;
   }
 
@@ -1898,7 +1898,7 @@ body {
     margin: 0;
   }
 
-  /* Buy Now Button for Product Details - Distinctive color */
+  /* Buy Now Button for Product Details - Matching try-on-wall-btn hover style */
   .btn-buy-now {
     flex: 1;
     display: flex;
@@ -1907,7 +1907,8 @@ body {
     gap: 8px;
     padding: 12px 20px;
     height: 48px;
-    background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
+    background: linear-gradient(45deg, #6a11cb, #2575fc, #ff758c, #ff7eb3);
+    background-size: 300% 300%;
     color: white;
     border: none;
     border-radius: 8px;
@@ -1916,12 +1917,24 @@ body {
     cursor: pointer;
     transition: all 0.3s ease;
     white-space: nowrap;
+    animation: gradientShift 4s ease infinite;
+  }
+
+  @keyframes gradientShift {
+    0% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+    100% {
+      background-position: 0% 50%;
+    }
   }
 
   .btn-buy-now:hover:not(:disabled) {
     transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(217, 119, 6, 0.4);
-    background: linear-gradient(135deg, #b45309 0%, #92400e 100%);
+    box-shadow: 0 8px 20px rgba(106, 17, 203, 0.4);
   }
 
   .btn-buy-now:disabled {

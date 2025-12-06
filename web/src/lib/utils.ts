@@ -49,7 +49,13 @@ export function optimizeCloudinaryUrl(
     return url;
   }
 
-  const { width, height, quality = "auto:eco", format = "auto", crop = "limit" } = options;
+  const {
+    width,
+    height,
+    quality = "auto:eco",
+    format = "auto",
+    crop = "limit",
+  } = options;
 
   // Build transformation string
   const transforms: string[] = [];
