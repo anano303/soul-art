@@ -48,9 +48,8 @@ import "@/lib/cloudflare-cleanup"; // Auto-cleanup Cloudflare cookies in develop
 export const viewport = {
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
-  // Also prevent zoom on input focus (iOS)
+  maximumScale: 5,
+  userScalable: true,
   viewportFit: "cover",
 };
 
@@ -331,7 +330,9 @@ export default function RootLayout({
                     }}
                   >
                     <Header />
-                    <div style={{ flex: 1 }}>{children}</div>
+                    <main style={{ flex: 1 }} id="main-content" role="main">
+                      {children}
+                    </main>
                     <Footer />
                     <FloatingCartIcon />
                     <MobileBottomNav />

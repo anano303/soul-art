@@ -195,9 +195,10 @@ export default function SearchBox() {
             }
           }}
           className="search-input"
+          aria-label={language === "en" ? "Search products and artists" : "პროდუქტებისა და არტისტების ძიება"}
         />
-        <button type="submit" className="search-button">
-          <Search size={18} />
+        <button type="submit" className="search-button" aria-label={language === "en" ? "Search" : "ძიება"}>
+          <Search size={18} aria-hidden="true" />
         </button>
       </form>
 

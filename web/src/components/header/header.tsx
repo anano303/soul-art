@@ -150,14 +150,12 @@ export default function Header() {
             <li className="mobile-only-nav">
               <UserMenu onNavigate={closeNav} />
             </li>
-            <div className="flex">
-              <li className="mobile-only-nav mobile-language">
-                <LanguageSwitcher onNavigate={closeNav} />
-              </li>
-              <li className="mobile-only-nav mobile-cart">
-                <CartIcon onNavigate={closeNav} />
-              </li>
-            </div>
+            <li className="mobile-only-nav mobile-language">
+              <LanguageSwitcher onNavigate={closeNav} />
+            </li>
+            <li className="mobile-only-nav mobile-cart">
+              <CartIcon onNavigate={closeNav} />
+            </li>
           </ul>
         </nav>
         <div className="auth-cart desktop-only">
@@ -169,11 +167,16 @@ export default function Header() {
         </div>
 
         {/* Mobile Navigation */}
-        <div className="mobile-nav-btn" onClick={toggleNav}>
-          <span className={`hamburger-icon ${isNavOpen ? "close" : ""}`}>
+        <button 
+          className="mobile-nav-btn" 
+          onClick={toggleNav}
+          aria-label={isNavOpen ? "Close navigation menu" : "Open navigation menu"}
+          aria-expanded={isNavOpen}
+        >
+          <span className={`hamburger-icon ${isNavOpen ? "close" : ""}`} aria-hidden="true">
             {isNavOpen ? "×" : "☰"}
           </span>
-        </div>
+        </button>
       </header>
     </>
   );
