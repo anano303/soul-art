@@ -17,6 +17,7 @@ import {
 import { CloudinaryImage } from "@/components/cloudinary-image";
 import { GalleryLikeButton } from "@/components/gallery-like-button";
 import { GalleryComments } from "@/components/gallery-comments";
+import { ShareButton } from "@/components/share-button/share-button";
 import { useLanguage } from "@/hooks/LanguageContext";
 import { useUser } from "@/modules/auth/hooks/use-user";
 import { useToast } from "@/hooks/use-toast";
@@ -995,6 +996,11 @@ export function GalleryViewer({
                       <MessageCircle size={24} />
                       <span>{imageStats.commentsCount}</span>
                     </button>
+                    <ShareButton
+                      url={post.productId ? `/products/${post.productId}` : (post.artist?.artistSlug ? `/@${post.artist.artistSlug}` : `/artists/${post.artist?.id || artist.id}`)}
+                      title={post.caption || (post.artist?.storeName || post.artist?.name || artist.storeName || artist.name)}
+                      className="gallery-viewer__share-btn"
+                    />
                   </div>
 
                   <div
@@ -1346,6 +1352,13 @@ export function GalleryViewer({
               <span>
                 {stats.commentsCount} {language === "en" ? "comments" : "კომენტარი"}
               </span>
+            </div>
+            <div className="gallery-viewer__stat gallery-viewer__stat--interactive">
+              <ShareButton
+                url={currentPost.productId ? `/products/${currentPost.productId}` : (currentPost.artist?.artistSlug ? `/@${currentPost.artist.artistSlug}` : `/artists/${currentPost.artist?.id || artist.id}`)}
+                title={currentPost.caption || (currentPost.artist?.storeName || currentPost.artist?.name || artist.storeName || artist.name)}
+                className="gallery-viewer__share-btn"
+              />
             </div>
           </div>
 

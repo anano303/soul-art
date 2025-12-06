@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Share2, Link as LinkIcon, Check, X } from "lucide-react";
+import { Send, Link as LinkIcon, Check, X } from "lucide-react";
 import { useLanguage } from "@/hooks/LanguageContext";
 import "./share-button.css";
 
@@ -201,7 +201,7 @@ export function ShareButton({
         title={language === "en" ? "Share" : "გაზიარება"}
         aria-label={language === "en" ? "Share" : "გაზიარება"}
       >
-        {isOpen ? <X size={16} /> : <Share2 size={16} />}
+        {isOpen ? <X size={16} /> : <Send size={16} />}
       </button>
 
       {isOpen && (

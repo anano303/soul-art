@@ -1046,3 +1046,45 @@
   opacity: 0.5;
   cursor: not-allowed;
 }
+
+/* Gallery Viewer Share Button - Instagram style */
+.gallery-viewer__share-btn {
+  display: flex;
+  align-items: center;
+}
+
+.gallery-viewer__share-btn .share-button-container {
+  margin: 0;
+}
+
+.gallery-viewer__share-btn .share-button {
+  background: transparent;
+  border: none;
+  color: #262626;
+  padding: 0;
+  min-width: auto;
+  min-height: auto;
+  box-shadow: none;
+  border-radius: 0;
+}
+
+.gallery-viewer__share-btn .share-button:hover {
+  background: transparent;
+  transform: none;
+  box-shadow: none;
+}
+
+.gallery-viewer__share-btn .share-button svg {
+  width: 22px;
+  height: 22px;
+}
+
+/* Mobile share button */
+.gallery-viewer__mobile-actions .gallery-viewer__share-btn .share-button {
+  color: #262626;
+}
+
+.gallery-viewer__mobile-actions .gallery-viewer__share-btn .share-button svg {
+  width: 22px;
+  height: 22px;
+}
