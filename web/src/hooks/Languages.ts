@@ -398,6 +398,8 @@ export const TRANSLATIONS: Translations = {
       artworkLoading: "ნამუშევრების ჩატვირთვა...",
       close: "დახურვა",
       autoSizing: "ზომა ავტომატურად შეესაბამება მითითებულ სანტიმეტრებს.",
+      uploadYourRoom: "ატვირთე შენი ოთახი",
+      removeCustomRoom: "წაშალე ატვირთული ოთახი",
     },
 
     // Profile
@@ -1828,6 +1830,8 @@ export const TRANSLATIONS: Translations = {
       artworkLoading: "Loading artwork...",
       close: "close",
       autoSizing: "Size matches the provided dimensions automatically.",
+      uploadYourRoom: "Upload Your Room",
+      removeCustomRoom: "Remove Uploaded Room",
     },
 
     // Profile

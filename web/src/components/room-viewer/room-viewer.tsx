@@ -11,7 +11,7 @@ import bedroomImg from "@/assets/roomview/bedroom-removebg-preview.png";
 import kitchenImg from "@/assets/roomview/dinning.png";
 import hallImg from "@/assets/roomview/hall-removebg-preview.png";
 
-type RoomType = "living" | "bedroom" | "kitchen" | "hall";
+type RoomType = "living" | "bedroom" | "kitchen" | "hall" | "custom";
 
 interface RoomViewerProps {
   productImage: string;
@@ -46,7 +46,7 @@ const colorOptions = [
   { name: "Blush Pink", value: "#FFEBEE" },
 ];
 
-const ROOM_DIMENSIONS_CM: Record<RoomType, { width: number; height: number }> =
+const ROOM_DIMENSIONS_CM: Record<Exclude<RoomType, "custom">, { width: number; height: number }> =
   {
     living: { width: 480, height: 280 },
     bedroom: { width: 420, height: 260 },
@@ -54,7 +54,7 @@ const ROOM_DIMENSIONS_CM: Record<RoomType, { width: number; height: number }> =
     hall: { width: 320, height: 260 },
   };
 
-const ROOM_SCALE_MULTIPLIER: Record<RoomType, number> = {
+const ROOM_SCALE_MULTIPLIER: Record<Exclude<RoomType, "custom">, number> = {
   living: 1.8,
   bedroom: 1.7,
   kitchen: 1.6,
@@ -87,9 +87,11 @@ export function RoomViewer({
   }>({});
   const [initialDistance, setInitialDistance] = useState(0);
   const [initialScale, setInitialScale] = useState(1);
+  const [customRoomImage, setCustomRoomImage] = useState<string | null>(null);
   const { t } = useLanguage();
 
   const containerRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const x = useMotionValue(0);
   const y = useMotionValue(0);
   const scale = useMotionValue(1);
@@ -148,7 +150,10 @@ export function RoomViewer({
       return;
     }
 
-    const roomScale = ROOM_DIMENSIONS_CM[currentRoom];
+    // For custom room, use default living room dimensions
+    const roomScale = currentRoom === "custom" 
+      ? ROOM_DIMENSIONS_CM.living 
+      : ROOM_DIMENSIONS_CM[currentRoom];
     const widthCmRaw = parseDimensionValue(dimensions?.width ?? undefined);
     const heightCmRaw = parseDimensionValue(dimensions?.height ?? undefined);
 
@@ -194,7 +199,9 @@ export function RoomViewer({
       resolvedHeightCm = DEFAULT_ARTWORK_HEIGHT_CM;
     }
 
-    const scaleMultiplier = ROOM_SCALE_MULTIPLIER[currentRoom] ?? 1;
+    const scaleMultiplier = currentRoom === "custom" 
+      ? 1.8 
+      : (ROOM_SCALE_MULTIPLIER[currentRoom] ?? 1);
     const pxPerCmX = containerWidth / roomScale.width;
     const pxPerCmY = containerHeight / roomScale.height;
 
@@ -326,6 +333,41 @@ export function RoomViewer({
     setWallColor(color);
   };
 
+  // Handle custom room image upload (frontend only, no server)
+  const handleCustomRoomUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith("image/")) {
+      return;
+    }
+
+    // Validate file size (max 10MB)
+    if (file.size > 10 * 1024 * 1024) {
+      return;
+    }
+
+    // Read file as base64 data URL (stays in browser memory only)
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const result = event.target?.result as string;
+      setCustomRoomImage(result);
+      setCurrentRoom("custom");
+      scale.set(1);
+    };
+    reader.readAsDataURL(file);
+
+    // Clear input so same file can be selected again
+    e.target.value = "";
+  };
+
+  const handleRemoveCustomRoom = () => {
+    setCustomRoomImage(null);
+    setCurrentRoom("living");
+    scale.set(1);
+  };
+
   const handleTouchStart = (e: React.TouchEvent) => {
     if (e.touches.length === 2) {
       const touch1 = e.touches[0];
@@ -416,7 +458,19 @@ export function RoomViewer({
                   height: "100%",
                 }}
               >
-                {roomImagesLoaded ? (
+                {currentRoom === "custom" && customRoomImage ? (
+                  // Custom uploaded room image
+                  <img
+                    src={customRoomImage}
+                    alt="Your room"
+                    className="room-image custom-room-image"
+                    style={{
+                      objectFit: "contain",
+                      width: "100%",
+                      height: "100%",
+                    }}
+                  />
+                ) : roomImagesLoaded && currentRoom !== "custom" ? (
                   <Image
                     src={rooms[currentRoom]}
                     alt={`${currentRoom} view`}
@@ -537,6 +591,40 @@ export function RoomViewer({
                 >
                   {t("roomViewer.hall")}
                 </button>
+              </div>
+              
+              {/* Custom Room Upload */}
+              <div className="custom-room-upload">
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleCustomRoomUpload}
+                  style={{ display: "none" }}
+                  id="custom-room-input"
+                />
+                <button
+                  type="button"
+                  className={`upload-room-btn ${currentRoom === "custom" ? "active" : ""}`}
+                  onClick={() => fileInputRef.current?.click()}
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                    <polyline points="17 8 12 3 7 8" />
+                    <line x1="12" y1="3" x2="12" y2="15" />
+                  </svg>
+                  {t("roomViewer.uploadYourRoom") || "ატვირთე შენი ოთახი"}
+                </button>
+                {customRoomImage && (
+                  <button
+                    type="button"
+                    className="remove-custom-room-btn"
+                    onClick={handleRemoveCustomRoom}
+                    title={t("roomViewer.removeCustomRoom") || "წაშალე"}
+                  >
+                    ×
+                  </button>
+                )}
               </div>
             </div>
 

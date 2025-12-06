@@ -220,6 +220,74 @@
   box-shadow: 0 10px 24px rgba(59, 130, 246, 0.25);
 }
 
+/* Custom Room Upload */
+.custom-room-upload {
+  margin-top: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.upload-room-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border: 2px dashed rgba(148, 163, 184, 0.6);
+  background-color: #f8fafc;
+  border-radius: 10px;
+  cursor: url("/brush.png"), pointer;
+  transition: all 0.2s ease;
+  font-weight: 500;
+  color: #64748b;
+  width: 100%;
+  justify-content: center;
+}
+
+.upload-room-btn:hover {
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+  background-color: rgba(59, 130, 246, 0.05);
+}
+
+.upload-room-btn.active {
+  border-style: solid;
+  border-color: var(--primary-color);
+  background-color: rgba(59, 130, 246, 0.1);
+  color: var(--primary-color);
+}
+
+.upload-room-btn svg {
+  flex-shrink: 0;
+}
+
+.remove-custom-room-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  background-color: #ef4444;
+  color: white;
+  font-size: 18px;
+  cursor: url("/brush.png"), pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.remove-custom-room-btn:hover {
+  background-color: #dc2626;
+  transform: scale(1.1);
+}
+
+/* Custom room image styling */
+.custom-room-image {
+  position: absolute !important;
+  inset: 0;
+}
+
 .color-options {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(28px, 1fr));
