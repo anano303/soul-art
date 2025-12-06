@@ -1898,8 +1898,8 @@ body {
     margin: 0;
   }
 
-  /* Buy Now Button for Product Details - Matching try-on-wall-btn hover style */
-  .btn-buy-now {
+  /* Buy Now Button for Product Details ONLY (not similar products) - Matching try-on-wall-btn hover style */
+  .cart-actions-container > .btn-buy-now {
     flex: 1;
     display: flex;
     align-items: center;
@@ -1932,24 +1932,25 @@ body {
     }
   }
 
-  .btn-buy-now:hover:not(:disabled) {
+  .cart-actions-container > .btn-buy-now:hover:not(:disabled) {
     transform: translateY(-2px);
     box-shadow: 0 8px 20px rgba(106, 17, 203, 0.4);
   }
 
-  .btn-buy-now:disabled {
+  .cart-actions-container > .btn-buy-now:disabled {
     background: #ccc;
     cursor: not-allowed;
     opacity: 0.6;
+    animation: none;
   }
 
-  .btn-buy-now svg {
+  .cart-actions-container > .btn-buy-now svg {
     width: 18px;
     height: 18px;
     flex-shrink: 0;
   }
 
-  .btn-buy-now .spinner-icon {
+  .cart-actions-container > .btn-buy-now .spinner-icon {
     animation: spin 1s linear infinite;
   }
 
@@ -1962,7 +1963,7 @@ body {
     }
   }
 
-  .btn-buy-now span {
+  .cart-actions-container > .btn-buy-now span {
     font-weight: 600;
     letter-spacing: 0.3px;
   }
