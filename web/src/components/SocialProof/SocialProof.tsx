@@ -10,7 +10,7 @@ import {
   RotateCcw,
 } from "lucide-react";
 import Image from "next/image";
-import bogLogo from "../../../public/bog.jpg";
+import bogLogo from "../../../public/bog.webp";
 import { useLanguage } from "@/hooks/LanguageContext";
 import "./SocialProof.css";
 

@@ -73,7 +73,7 @@ const TrustBadges = () => {
           <div className="badge-ornament-border"></div>
           <div className="trust-badge-icon trust-badge-icon-bog">
             <Image
-              src="/bog.jpg"
+              src="/bog.webp"
               alt="BOG Payment"
               width={65}
               height={65}

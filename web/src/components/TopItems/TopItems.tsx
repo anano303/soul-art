@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import styles from "./TopItems.module.css";
 import noPhoto from "../../assets/nophoto.webp";
-import bogLogo from "../../../public/bog.jpg";
+import bogLogo from "../../../public/bog.webp";
 import { useQuery } from "@tanstack/react-query";
 import { fetchWithAuth } from "@/lib/fetch-with-auth";
 import { Product } from "@/types";
