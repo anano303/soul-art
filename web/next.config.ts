@@ -9,28 +9,20 @@ const nextConfig: NextConfig = {
     },
     // Optimize bundling and loading only in production
     optimizeCss: process.env.NODE_ENV === "production",
-    optimizeServerReact: process.env.NODE_ENV === "production",
-    // Improve CSS handling
-    cssChunking: true,
     // Better caching
     staleTimes: {
       dynamic: 30,
       static: 180,
     },
-    // Reduce CSS warnings
-    turbo: {
-      rules: {
-        "*.css": ["css-loader"],
-      },
-    },
   },
+  // Empty turbopack config to acknowledge Turbopack usage
+  turbopack: {},
   // Optimize compilation
   compiler: {
     removeConsole: process.env.NODE_ENV === "production",
   },
   serverExternalPackages: [],
   images: {
-    domains: ["res.cloudinary.com", "fish-hunt.s3.eu-north-1.amazonaws.com"],
     remotePatterns: [
       {
         protocol: "https",

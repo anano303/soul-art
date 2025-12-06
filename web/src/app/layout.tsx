@@ -242,69 +242,7 @@ export default function RootLayout({
         <link rel="dns-prefetch" href="//www.googletagmanager.com" />
         <link rel="dns-prefetch" href="//www.google-analytics.com" />
 
-        {/* Google Ads Tag (gtag.js) */}
-        <script
-          async
-          src="https://www.googletagmanager.com/gtag/js?id=AW-17709570539"
-        />
-        <script
-          id="google-ads-gtag"
-          dangerouslySetInnerHTML={{
-            __html: `
-              window.dataLayer = window.dataLayer || [];
-              function gtag(){dataLayer.push(arguments);}
-              gtag('js', new Date());
-              gtag('config', 'AW-17709570539');
-            `,
-          }}
-        />
-
-        {/* Meta Pixel Code */}
-        <script
-          id="meta-pixel-script"
-          dangerouslySetInnerHTML={{
-            __html: `
-            !function(f,b,e,v,n,t,s)
-            {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-            n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-            if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
-            n.queue=[];t=b.createElement(e);t.async=!0;
-            t.src=v;s=b.getElementsByTagName(e)[0];
-            s.parentNode.insertBefore(t,s)}(window, document,'script',
-            'https://connect.facebook.net/en_US/fbevents.js');
-            fbq('init', '${
-              process.env.NEXT_PUBLIC_META_PIXEL_ID || "1189697243076610"
-            }');
-            fbq('track', 'PageView');
-          `,
-          }}
-        />
-        <noscript>
-          <img
-            height="1"
-            width="1"
-            style={{ display: "none" }}
-            src={`https://www.facebook.com/tr?id=${
-              process.env.NEXT_PUBLIC_META_PIXEL_ID || "1189697243076610"
-            }&ev=PageView&noscript=1`}
-            alt=""
-          />
-        </noscript>
-        {/* End Meta Pixel Code */}
-
-        {/* Facebook SDK - Fix appId to lowercase appid */}
-        <script
-          async
-          defer
-          crossOrigin="anonymous"
-          src={`https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v13.0&appid=${process.env.NEXT_PUBLIC_FACEBOOK_APP_ID}&autoLogAppEvents=1`}
-        />
-        {/* Remove the problematic prefetch links */}
-        {/* Add Google Fonts link */}
-        {/* <link
-          href="https://fonts.googleapis.com/css2?family=Fira+Sans:wght@400;500;600;700&display=swap"
-          rel="stylesheet"
-        /> */}
+        {/* Third-party scripts moved to body end for better LCP */}
       </head>
       <body
         className="antialiased min-h-screen flex flex-col overflow-x-hidden"
@@ -426,6 +364,56 @@ export default function RootLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{
             __html: JSON.stringify(storeSchema),
+          }}
+        />
+
+        {/* Deferred Third-Party Scripts - Loaded after page render for better LCP */}
+        <script
+          id="deferred-third-party"
+          dangerouslySetInnerHTML={{
+            __html: `
+              // Google Ads - defer by 2 seconds
+              setTimeout(function() {
+                var gtagScript = document.createElement('script');
+                gtagScript.async = true;
+                gtagScript.src = 'https://www.googletagmanager.com/gtag/js?id=AW-17709570539';
+                document.head.appendChild(gtagScript);
+                
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){dataLayer.push(arguments);}
+                window.gtag = gtag;
+                gtag('js', new Date());
+                gtag('config', 'AW-17709570539');
+              }, 2000);
+              
+              // Meta Pixel - defer by 2.5 seconds
+              setTimeout(function() {
+                !function(f,b,e,v,n,t,s)
+                {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+                n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+                if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+                n.queue=[];t=b.createElement(e);t.async=!0;
+                t.src=v;s=b.getElementsByTagName(e)[0];
+                s.parentNode.insertBefore(t,s)}(window, document,'script',
+                'https://connect.facebook.net/en_US/fbevents.js');
+                fbq('init', '${
+                  process.env.NEXT_PUBLIC_META_PIXEL_ID || "1189697243076610"
+                }');
+                fbq('track', 'PageView');
+              }, 2500);
+              
+              // Facebook SDK - defer by 3 seconds
+              setTimeout(function() {
+                var fbScript = document.createElement('script');
+                fbScript.async = true;
+                fbScript.defer = true;
+                fbScript.crossOrigin = 'anonymous';
+                fbScript.src = 'https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v13.0&appid=${
+                  process.env.NEXT_PUBLIC_FACEBOOK_APP_ID
+                }&autoLogAppEvents=1';
+                document.body.appendChild(fbScript);
+              }, 3000);
+            `,
           }}
         />
       </body>

@@ -5,7 +5,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
-import logo from "@/../../public/logo-white.png";
 import { CartIcon } from "@/modules/cart/components/cart-icon";
 import "./header.scss";
 import UserMenu from "./user-menu";
@@ -45,10 +44,10 @@ export default function Header() {
     const checkMobile = () => {
       setIsMobile(window.innerWidth <= 768);
     };
-    
+
     checkMobile();
     window.addEventListener("resize", checkMobile);
-    
+
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
@@ -90,7 +89,7 @@ export default function Header() {
           ) : (
             <Link href="/">
               <Image
-                src={logo}
+                src="/logo-white.png"
                 alt="logo soulArt"
                 width={200}
                 height={50}

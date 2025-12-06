@@ -8,9 +8,8 @@
 .main-hero-section {
   position: relative;
   height: 500px;
-  background-image: url("/van-gogh.jpg");
-  background-size: cover;
-  background-position: center;
+  /* Background handled by Next.js Image component for LCP */
+  background-color: #1a1a2e; /* Fallback color */
   color: #fff;
   text-align: center;
   display: flex;
@@ -19,6 +18,7 @@
   justify-content: center;
   align-items: center;
   cursor: url("/brush.png"), auto;
+  overflow: hidden;
 }
 
 .hero-text {
