@@ -23,6 +23,7 @@ import {
   MapPin,
   PenSquare,
   Landmark,
+  Heart,
 } from "lucide-react";
 
 // Add a style object for the FiraGo font
@@ -356,6 +357,18 @@ export default function UserMenu({ onNavigate }: { onNavigate?: () => void }) {
               >
                 <Landmark size={18} />
                 <span>BOG გადარიცხვები</span>
+              </Link>
+            )}
+
+            {/* Donations link - Only for Admin */}
+            {user.role?.toLowerCase() === Role.Admin && (
+              <Link
+                href="/admin/donations"
+                className="dropdown-item"
+                onClick={handleLinkClick}
+              >
+                <Heart size={18} />
+                <span>დონაციები</span>
               </Link>
             )}
 

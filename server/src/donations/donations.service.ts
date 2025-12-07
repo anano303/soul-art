@@ -96,9 +96,12 @@ export class DonationsService {
     try {
       const token = await this.getToken();
 
+      // Use API_URL directly for donations callback
+      const apiUrl = this.configService.get('API_URL') || 'https://api.soulart.ge';
+      const callbackUrl = `${apiUrl}/donations/callback`;
+
       const payload = {
-        callback_url: this.configService.get('BOG_CALLBACK_URL')?.replace('/bog/callback', '/donations/callback') 
-          || `${this.configService.get('API_URL')}/donations/callback`,
+        callback_url: callbackUrl,
         capture: 'automatic',
         external_order_id: externalOrderId,
         purchase_units: {
