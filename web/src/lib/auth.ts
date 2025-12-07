@@ -12,12 +12,19 @@ export const generateDeviceFingerprint = (): string => {
   if (typeof window === "undefined") return "";
   
   try {
+    // Check if we already have a stored fingerprint
+    const existingFingerprint = localStorage.getItem(DEVICE_FINGERPRINT_KEY);
+    if (existingFingerprint) {
+      return existingFingerprint;
+    }
+    
+    // Generate stable fingerprint (without screen dimensions to avoid mobile orientation issues)
     const components = [
       navigator.userAgent || "",
       navigator.language || "",
-      screen.width + "x" + screen.height,
       Intl.DateTimeFormat().resolvedOptions().timeZone || "",
-      navigator.platform || "",
+      // Add a random UUID for uniqueness on first generation
+      crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(2),
     ].join("|");
     
     // Simple hash function (for production, use a crypto library)

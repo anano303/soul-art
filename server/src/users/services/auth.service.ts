@@ -276,12 +276,14 @@ export class AuthService {
       );
 
       if (payload.type !== 'refresh' || !payload.jti) {
-        throw new UnauthorizedException();
+        console.log('❌ Invalid refresh token payload: type or jti missing');
+        throw new UnauthorizedException('Invalid token payload');
       }
 
       const user = await this.userModel.findById(payload.sub);
       if (!user) {
-        throw new UnauthorizedException();
+        console.log('❌ User not found for refresh token');
+        throw new UnauthorizedException('User not found');
       }
 
       // Try to find the device-specific refresh token first
@@ -289,12 +291,30 @@ export class AuthService {
       let deviceTrusted = false;
 
       if (deviceInfo?.fingerprint) {
+        console.log(`🔍 Looking for device with fingerprint: ${deviceInfo.fingerprint}`);
+        console.log(`🔍 Known devices: ${user.knownDevices?.length || 0}`);
+        
         validDevice = user.knownDevices?.find(
           (device) =>
             device.fingerprint === deviceInfo.fingerprint &&
             device.refreshTokenJti === payload.jti &&
             device.isActive,
         );
+        
+        if (!validDevice) {
+          // Try to find device by fingerprint only (in case JTI was rotated by another request)
+          const deviceByFingerprint = user.knownDevices?.find(
+            (device) =>
+              device.fingerprint === deviceInfo.fingerprint &&
+              device.isActive,
+          );
+          
+          if (deviceByFingerprint) {
+            console.log('⚠️ Device found but JTI mismatch - possible race condition, allowing refresh');
+            validDevice = deviceByFingerprint;
+          }
+        }
+        
         deviceTrusted = validDevice?.trusted || false;
       }
 
@@ -318,9 +338,14 @@ export class AuthService {
         });
       }
 
+      console.log('❌ No valid device or global token found');
       throw new UnauthorizedException('Invalid refresh token');
-    } catch {
-      throw new UnauthorizedException();
+    } catch (error) {
+      if (error instanceof UnauthorizedException) {
+        throw error;
+      }
+      console.error('❌ Token refresh error:', error);
+      throw new UnauthorizedException('Token refresh failed');
     }
   }
 

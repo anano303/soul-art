@@ -5,8 +5,29 @@ import { trackAPICall, trackNetworkError } from "./ga4-analytics";
 const MAX_RETRIES = 2;
 const RETRY_DELAY = 1000; // 1 second
 
+// Token refresh mutex to prevent race conditions
+let isRefreshing = false;
+let refreshPromise: Promise<void> | null = null;
+
 // Helper function to delay
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+// Synchronized refresh function to prevent multiple simultaneous refresh calls
+const synchronizedRefresh = async (): Promise<void> => {
+  if (isRefreshing && refreshPromise) {
+    // Wait for the ongoing refresh to complete
+    return refreshPromise;
+  }
+  
+  isRefreshing = true;
+  refreshPromise = refreshTokens()
+    .finally(() => {
+      isRefreshing = false;
+      refreshPromise = null;
+    });
+  
+  return refreshPromise;
+};
 
 export async function fetchWithAuth(url: string, config: RequestInit = {}) {
   const { headers, ...rest } = config;
@@ -68,8 +89,8 @@ export async function fetchWithAuth(url: string, config: RequestInit = {}) {
     // Handle 401 Unauthorized - try to refresh token
     if (response.status === 401) {
       try {
-        // Attempt to refresh the token via HTTP-only cookies
-        await refreshTokens();
+        // Use synchronized refresh to prevent race conditions
+        await synchronizedRefresh();
 
         // Retry the original request
         response = await makeRequestWithRetry();
