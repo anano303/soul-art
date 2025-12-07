@@ -490,15 +490,28 @@
 /* Product Card Actions - Icon button + Buy Now layout */
 .product-card-actions {
   display: flex;
-  gap: 8px;
-  padding: 0 10px 10px 10px;
+  gap: 4px;
+  padding: 0 8px 8px 8px;
   align-items: stretch;
+}
+
+/* Cart actions wrapper inside product-card-actions */
+.product-card-actions .cart-actions {
+  display: flex;
+  flex-shrink: 0;
+}
+
+.product-card-actions .cart-actions .addButtonCart {
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
 }
 
 /* Add to Cart - Icon only button */
 .product-card-actions .btn-add-to-cart-icon {
-  width: 44px;
-  height: 44px;
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
   margin-top: 0;
   padding: 0;
   display: flex;
@@ -737,6 +750,31 @@
   background: linear-gradient(to left, #218838, #17a2b8);
   transform: translateY(-1px);
   box-shadow: 0 4px 8px rgba(40, 167, 69, 0.3);
+}
+
+/* Icon-only mode for add to cart button */
+.addButtonCart.icon-only {
+  padding: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.addButtonCart.icon-only.in-cart {
+  padding: 0;
+}
+
+.addButtonCart.icon-only.in-cart::before {
+  display: none;
+}
+
+.addButtonCart.icon-only.in-cart svg {
+  display: none;
+}
+
+.addButtonCart.icon-only.in-cart::after {
+  content: "✓";
+  font-size: 16px;
+  font-weight: bold;
 }
 
 /* Discount Badge */
