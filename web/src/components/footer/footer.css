@@ -177,6 +177,13 @@
   .footer-socials {
     justify-content: center;
   }
+
+  .sponsor-button {
+    margin-left: auto;
+    margin-right: auto;
+    display: block;
+    max-width: 90vw;
+  }
 }
 
 @media (max-width: 480px) {
@@ -203,5 +210,12 @@
 
   .footer-bottom {
     font-size: 0.8rem;
+  }
+
+  .sponsor-button {
+    margin-left: auto;
+    margin-right: auto;
+    display: block;
+    max-width: 90vw;
   }
 }
