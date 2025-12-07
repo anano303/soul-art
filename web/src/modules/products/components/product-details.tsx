@@ -943,27 +943,47 @@ export function ProductDetails({ product }: ProductDetailsProps) {
           {/* Product Title - First for hierarchy */}
           <h1 className="product-title">{displayName}</h1>
 
-          {/* Price Section - Right after title for visibility */}
-          <div className="price-section-modern">
-            {isDiscounted ? (
-              <div className="price-with-discount">
-                <div className="current-price">₾{finalPrice.toFixed(2)}</div>
-                <div className="price-comparison">
-                  <span className="original-price-strike">
-                    ₾{product.price.toFixed(2)}
-                  </span>
-                  <span className="discount-badge">
-                    -{product.discountPercentage}%
-                  </span>
+          {/* Price and Badge Row */}
+          <div className="price-badge-row">
+            {/* Price Section */}
+            <div className="price-section-modern">
+              {isDiscounted ? (
+                <div className="price-with-discount">
+                  <div className="current-price">₾{finalPrice.toFixed(2)}</div>
+                  <div className="price-comparison">
+                    <span className="original-price-strike">
+                      ₾{product.price.toFixed(2)}
+                    </span>
+                    <span className="discount-badge">
+                      -{product.discountPercentage}%
+                    </span>
+                  </div>
+                  <div className="savings-text">
+                    {language === "en" ? "You save" : "დაზოგავ"} ₾
+                    {(product.price - finalPrice).toFixed(2)}
+                  </div>
                 </div>
-                <div className="savings-text">
-                  {language === "en" ? "You save" : "დაზოგავ"} ₾
-                  {(product.price - finalPrice).toFixed(2)}
-                </div>
-              </div>
-            ) : (
-              <div className="current-price">₾{product.price.toFixed(2)}</div>
-            )}
+              ) : (
+                <div className="current-price">₾{product.price.toFixed(2)}</div>
+              )}
+            </div>
+
+            {/* Original/Copy Badge */}
+            <div className="original-copy-badge">
+              <span
+                className={`badge-text ${
+                  product.isOriginal ? "original" : "copy"
+                }`}
+              >
+                {product.isOriginal
+                  ? language === "en"
+                    ? "Original"
+                    : "ორიგინალი"
+                  : language === "en"
+                  ? "Copy"
+                  : "ასლი"}
+              </span>
+            </div>
           </div>
 
           {/* Brand with hover tooltip - Under price */}
@@ -1093,50 +1113,36 @@ export function ProductDetails({ product }: ProductDetailsProps) {
             </div>
           )}
 
-          {/* Original/Copy Badge */}
-          <div className="original-copy-badge">
-            <span
-              className={`badge-text ${
-                product.isOriginal ? "original" : "copy"
-              }`}
-            >
-              {product.isOriginal
-                ? language === "en"
-                  ? "Original"
-                  : "ორიგინალი"
-                : language === "en"
-                ? "Copy"
-                : "ასლი"}
-            </span>
+          {/* Materials and Dimensions Row */}
+          <div className="metadata-row">
+            {/* Materials Information */}
+            {displayedMaterials.length > 0 && (
+              <div className="metadata-item">
+                <div className="metadata-label">
+                  <Package size={18} />
+                  <span>{t("product.materials")}</span>
+                </div>
+                <div className="metadata-value">
+                  {displayedMaterials.join(", ")}
+                </div>
+              </div>
+            )}
+
+            {/* Dimensions Information */}
+            {dimensions && (
+              <div className="metadata-item">
+                <div className="metadata-label">
+                  <Ruler size={18} />
+                  <span>{t("product.dimensions")}</span>
+                </div>
+                <div className="metadata-value">
+                  {dimensions.width && `${dimensions.width} × `}
+                  {dimensions.height && `${dimensions.height}`}
+                  {dimensions.depth && ` × ${dimensions.depth}`} {t("product.cm")}
+                </div>
+              </div>
+            )}
           </div>
-
-          {/* Materials Information */}
-          {displayedMaterials.length > 0 && (
-            <div className="metadata-item">
-              <div className="metadata-label">
-                <Package size={18} />
-                <span>{t("product.materials")}</span>
-              </div>
-              <div className="metadata-value">
-                {displayedMaterials.join(", ")}
-              </div>
-            </div>
-          )}
-
-          {/* Dimensions Information */}
-          {dimensions && (
-            <div className="metadata-item">
-              <div className="metadata-label">
-                <Ruler size={18} />
-                <span>{t("product.dimensions")}</span>
-              </div>
-              <div className="metadata-value">
-                {dimensions.width && `${dimensions.width} × `}
-                {dimensions.height && `${dimensions.height}`}
-                {dimensions.depth && ` × ${dimensions.depth}`} {t("product.cm")}
-              </div>
-            </div>
-          )}
 
           {/* Description - Prominent with label */}
           {product.description && (
