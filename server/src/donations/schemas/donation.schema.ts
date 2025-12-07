@@ -33,10 +33,10 @@ export class Donation {
   @Prop({ required: false, default: true })
   showInSponsors: boolean;
 
-  @Prop({ 
-    type: String, 
-    enum: DonationStatus, 
-    default: DonationStatus.PENDING 
+  @Prop({
+    type: String,
+    enum: DonationStatus,
+    default: DonationStatus.PENDING,
   })
   status: DonationStatus;
 

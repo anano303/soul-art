@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import "./DonationModal.css";
 import { useLanguage } from "@/hooks/LanguageContext";
 
@@ -22,8 +23,13 @@ export function DonationModal({ isOpen, onClose }: DonationModalProps) {
   const [showInSponsors, setShowInSponsors] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [mounted, setMounted] = useState(false);
 
-  if (!isOpen) return null;
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!isOpen || !mounted) return null;
 
   const handleAmountSelect = (value: number) => {
     setAmount(value);
@@ -89,7 +95,7 @@ export function DonationModal({ isOpen, onClose }: DonationModalProps) {
     }
   };
 
-  return (
+  return createPortal(
     <div className="donation-modal-overlay" onClick={onClose}>
       <div
         className="donation-modal"
@@ -216,6 +222,7 @@ export function DonationModal({ isOpen, onClose }: DonationModalProps) {
           </p>
         </form>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

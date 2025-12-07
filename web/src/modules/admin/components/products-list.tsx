@@ -5,7 +5,16 @@ import Image from "next/image";
 import Link from "next/link";
 import { Product, User, Category, SubCategory } from "@/types";
 import { ProductsActions } from "./products-actions";
-import { Plus, Sparkles, Search, Filter, X, Eye, EyeOff } from "lucide-react";
+import {
+  Plus,
+  Sparkles,
+  Search,
+  Filter,
+  X,
+  Eye,
+  EyeOff,
+  Heart,
+} from "lucide-react";
 import "./productList.css";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { fetchWithAuth } from "@/lib/fetch-with-auth";
@@ -14,6 +23,7 @@ import { StatusBadge } from "./status-badge";
 import { Role } from "@/types/role";
 import { useLanguage } from "@/hooks/LanguageContext";
 import HeartLoading from "@/components/HeartLoading/HeartLoading";
+import { DonationModal } from "@/components/donation/DonationModal";
 import { ProductStatus } from "@/types";
 import { updateProductVisibility } from "@/modules/products/api/update-product-visibility";
 
@@ -65,6 +75,7 @@ export function ProductsList() {
   const { user } = useUser();
   const { language } = useLanguage();
   const [refreshKey, setRefreshKey] = useState(Date.now());
+  const [showDonation, setShowDonation] = useState(false);
 
   const isAdmin = user?.role === Role.Admin;
 
@@ -526,6 +537,13 @@ export function ProductsList() {
       <div className="prd-header">
         <h1 className="prd-title">Products</h1>
         <div className="prd-actions">
+          <button
+            onClick={() => setShowDonation(true)}
+            className="prd-btn-donation"
+          >
+            <Heart className="prd-icon" />
+            დონაცია
+          </button>
           <Link href="/admin/products/create">
             <button className="prd-btn-outline">
               <Plus className="prd-icon" />
@@ -1059,6 +1077,11 @@ export function ProductsList() {
           }
         }
       `}</style>
+
+      <DonationModal
+        isOpen={showDonation}
+        onClose={() => setShowDonation(false)}
+      />
     </div>
   );
 }

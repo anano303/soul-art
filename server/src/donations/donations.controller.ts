@@ -26,10 +26,7 @@ export class DonationsController {
    * Create a new donation and get payment redirect URL
    */
   @Post()
-  async createDonation(
-    @Body() dto: CreateDonationDto,
-    @Req() req: Request,
-  ) {
+  async createDonation(@Body() dto: CreateDonationDto, @Req() req: Request) {
     const ipAddress = req.ip || req.headers['x-forwarded-for']?.toString();
     const userAgent = req.headers['user-agent'];
 

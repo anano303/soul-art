@@ -152,9 +152,7 @@ export default function AdminDonationsPage() {
                   <div className="donor-rank">#{index + 1}</div>
                   <div className="donor-info">
                     <div className="donor-name">{donor.donorName}</div>
-                    <div className="donor-stats">
-                      {donor.count} დონაცია
-                    </div>
+                    <div className="donor-stats">{donor.count} დონაცია</div>
                   </div>
                   <div className="donor-amount">{donor.totalAmount} ₾</div>
                 </div>
@@ -223,7 +221,9 @@ export default function AdminDonationsPage() {
                           {donation.message || "-"}
                         </td>
                         <td>
-                          <span className={`status-badge ${statusInfo.className}`}>
+                          <span
+                            className={`status-badge ${statusInfo.className}`}
+                          >
                             {statusInfo.label}
                           </span>
                         </td>
@@ -248,7 +248,9 @@ export default function AdminDonationsPage() {
                   გვერდი {page} / {donationsData.pages}
                 </span>
                 <button
-                  onClick={() => setPage((p) => Math.min(donationsData.pages, p + 1))}
+                  onClick={() =>
+                    setPage((p) => Math.min(donationsData.pages, p + 1))
+                  }
                   disabled={page === donationsData.pages}
                   className="pagination-btn"
                 >

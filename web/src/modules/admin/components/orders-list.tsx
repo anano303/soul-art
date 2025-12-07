@@ -4,17 +4,26 @@ import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { fetchWithAuth } from "@/lib/fetch-with-auth";
 import Link from "next/link";
-import { CheckCircle2, Store, Truck, XCircle, Wallet } from "lucide-react";
+import {
+  CheckCircle2,
+  Store,
+  Truck,
+  XCircle,
+  Wallet,
+  Heart,
+} from "lucide-react";
 import { Order } from "@/types/order";
 import "./orders-list.css";
 import HeartLoading from "@/components/HeartLoading/HeartLoading";
 import { getUserData } from "@/lib/auth";
 import { getSellerBalance } from "@/modules/balance/api/balance-api";
+import { DonationModal } from "@/components/donation/DonationModal";
 
 export function OrdersList() {
   const [page, setPage] = useState(1);
   const [userRole, setUserRole] = useState<string | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
+  const [showDonation, setShowDonation] = useState(false);
 
   useEffect(() => {
     const userData = getUserData();
@@ -84,6 +93,13 @@ export function OrdersList() {
                 {balance?.totalBalance?.toFixed(2) || "0.00"} ₾
               </span>
             </Link>
+            <button
+              onClick={() => setShowDonation(true)}
+              className="donation-btn"
+            >
+              <Heart className="donation-icon" />
+              <span>მხარი დაუჭირე SoulArt-ს</span>
+            </button>
           </div>
         )}
       </div>
@@ -289,6 +305,11 @@ export function OrdersList() {
           )}
         </>
       )}
+
+      <DonationModal
+        isOpen={showDonation}
+        onClose={() => setShowDonation(false)}
+      />
     </div>
   );
 }

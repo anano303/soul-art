@@ -4,7 +4,11 @@ import { Model } from 'mongoose';
 import { ConfigService } from '@nestjs/config';
 import axios from 'axios';
 import { v4 as uuidv4 } from 'uuid';
-import { Donation, DonationDocument, DonationStatus } from './schemas/donation.schema';
+import {
+  Donation,
+  DonationDocument,
+  DonationStatus,
+} from './schemas/donation.schema';
 
 interface BogTokenResponse {
   access_token: string;
@@ -97,7 +101,8 @@ export class DonationsService {
       const token = await this.getToken();
 
       // Use API_URL directly for donations callback
-      const apiUrl = this.configService.get('API_URL') || 'https://api.soulart.ge';
+      const apiUrl =
+        this.configService.get('API_URL') || 'https://api.soulart.ge';
       const callbackUrl = `${apiUrl}/donations/callback`;
 
       const payload = {
@@ -141,7 +146,9 @@ export class DonationsService {
       donation.bogOrderId = response.data.id;
       await donation.save();
 
-      this.logger.log(`Donation payment created: ${donation._id}, BOG Order: ${response.data.id}`);
+      this.logger.log(
+        `Donation payment created: ${donation._id}, BOG Order: ${response.data.id}`,
+      );
 
       return {
         donation,
@@ -149,7 +156,7 @@ export class DonationsService {
       };
     } catch (error) {
       this.logger.error('Failed to create BOG payment for donation:', error);
-      
+
       // Mark donation as failed
       donation.status = DonationStatus.FAILED;
       await donation.save();
@@ -158,9 +165,14 @@ export class DonationsService {
     }
   }
 
-  async handleCallback(callbackData: any): Promise<{ success: boolean; message: string }> {
+  async handleCallback(
+    callbackData: any,
+  ): Promise<{ success: boolean; message: string }> {
     try {
-      this.logger.log('Donation callback received:', JSON.stringify(callbackData, null, 2));
+      this.logger.log(
+        'Donation callback received:',
+        JSON.stringify(callbackData, null, 2),
+      );
 
       const {
         external_order_id,
@@ -168,10 +180,14 @@ export class DonationsService {
         order_id,
       } = callbackData.body;
 
-      const donation = await this.donationModel.findOne({ externalOrderId: external_order_id });
+      const donation = await this.donationModel.findOne({
+        externalOrderId: external_order_id,
+      });
 
       if (!donation) {
-        this.logger.warn(`Donation not found for external_order_id: ${external_order_id}`);
+        this.logger.warn(
+          `Donation not found for external_order_id: ${external_order_id}`,
+        );
         return { success: false, message: 'Donation not found' };
       }
 
@@ -209,7 +225,9 @@ export class DonationsService {
     return donation;
   }
 
-  async findByExternalOrderId(externalOrderId: string): Promise<DonationDocument | null> {
+  async findByExternalOrderId(
+    externalOrderId: string,
+  ): Promise<DonationDocument | null> {
     return this.donationModel.findOne({ externalOrderId });
   }
 
@@ -327,10 +345,13 @@ export class DonationsService {
       ]),
     ]);
 
-    const statusMap = statusCounts.reduce((acc, { _id, count }) => {
-      acc[_id] = count;
-      return acc;
-    }, {} as Record<string, number>);
+    const statusMap = statusCounts.reduce(
+      (acc, { _id, count }) => {
+        acc[_id] = count;
+        return acc;
+      },
+      {} as Record<string, number>,
+    );
 
     return {
       totalAmount: totals[0]?.totalAmount || 0,
