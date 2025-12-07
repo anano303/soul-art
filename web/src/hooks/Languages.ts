@@ -832,6 +832,14 @@ export const TRANSLATIONS: Translations = {
         viewAll: "ყველა საჩუქარი",
         ariaLabel: "საჩუქრების კატეგორიები",
       },
+      newYearPaintings: {
+        eyebrow: "საახალწლო სპეციალური",
+        title: "საახალწლო ნამუშევრები",
+        subtitle:
+          "შექმენი საახალწლო განწყობა შენს სივრცეში - აჩუქე საყვარელ ადამიანს სითბო და  სიყვარული ",
+        viewAll: "ყველა ნამუშევარი",
+        ariaLabel: "საახალწლო ნამუშევრების სქროლი",
+      },
     },
 
     // Timer translations
@@ -2282,6 +2290,13 @@ export const TRANSLATIONS: Translations = {
         under200Desc: "Premium gifts under 200₾",
         viewAll: "All gifts",
         ariaLabel: "Gift categories",
+      },
+      newYearPaintings: {
+        eyebrow: "New Year Special",
+        title: "New Year Paintings",
+        subtitle: "Unique paintings for winter holidays - give art, give love",
+        viewAll: "All paintings",
+        ariaLabel: "New Year paintings carousel",
       },
     },
 

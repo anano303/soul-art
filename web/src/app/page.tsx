@@ -18,6 +18,14 @@ const GiftCategories = dynamic(
   }
 );
 
+const NewYearPaintings = dynamic(
+  () => import("@/components/newYearPaintings/NewYearPaintings"),
+  {
+    loading: () => <div style={{ minHeight: "300px" }} />,
+    ssr: true,
+  }
+);
+
 const HomePageShop = dynamic(
   () => import("@/components/homePageShop/homePageShop"),
   {
@@ -53,6 +61,7 @@ const Home = () => {
       <Banner />
       <DiscountedRail />
       <GiftCategories />
+      <NewYearPaintings />
       {/* Forcing a full remount of HomePageShop when language changes */}
       <HomePageShop key={`home-shop-${language}`} />
       <HomePageForum />

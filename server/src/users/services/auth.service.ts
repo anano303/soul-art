@@ -291,30 +291,33 @@ export class AuthService {
       let deviceTrusted = false;
 
       if (deviceInfo?.fingerprint) {
-        console.log(`🔍 Looking for device with fingerprint: ${deviceInfo.fingerprint}`);
+        console.log(
+          `🔍 Looking for device with fingerprint: ${deviceInfo.fingerprint}`,
+        );
         console.log(`🔍 Known devices: ${user.knownDevices?.length || 0}`);
-        
+
         validDevice = user.knownDevices?.find(
           (device) =>
             device.fingerprint === deviceInfo.fingerprint &&
             device.refreshTokenJti === payload.jti &&
             device.isActive,
         );
-        
+
         if (!validDevice) {
           // Try to find device by fingerprint only (in case JTI was rotated by another request)
           const deviceByFingerprint = user.knownDevices?.find(
             (device) =>
-              device.fingerprint === deviceInfo.fingerprint &&
-              device.isActive,
+              device.fingerprint === deviceInfo.fingerprint && device.isActive,
           );
-          
+
           if (deviceByFingerprint) {
-            console.log('⚠️ Device found but JTI mismatch - possible race condition, allowing refresh');
+            console.log(
+              '⚠️ Device found but JTI mismatch - possible race condition, allowing refresh',
+            );
             validDevice = deviceByFingerprint;
           }
         }
-        
+
         deviceTrusted = validDevice?.trusted || false;
       }
 

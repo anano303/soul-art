@@ -18,14 +18,13 @@ const synchronizedRefresh = async (): Promise<void> => {
     // Wait for the ongoing refresh to complete
     return refreshPromise;
   }
-  
+
   isRefreshing = true;
-  refreshPromise = refreshTokens()
-    .finally(() => {
-      isRefreshing = false;
-      refreshPromise = null;
-    });
-  
+  refreshPromise = refreshTokens().finally(() => {
+    isRefreshing = false;
+    refreshPromise = null;
+  });
+
   return refreshPromise;
 };
 

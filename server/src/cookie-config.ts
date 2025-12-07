@@ -22,7 +22,9 @@ export const cookieConfig: Record<string, CookieConfig> = {
       maxAge: 60 * 60 * 1000, // 1 hour
       path: '/',
       // Domain for cross-subdomain cookie sharing - configurable via env var
-      domain: process.env.COOKIE_DOMAIN || (process.env.NODE_ENV === 'production' ? '.soulart.ge' : undefined),
+      domain:
+        process.env.COOKIE_DOMAIN ||
+        (process.env.NODE_ENV === 'production' ? '.soulart.ge' : undefined),
     },
   },
   refresh: {
@@ -34,7 +36,9 @@ export const cookieConfig: Record<string, CookieConfig> = {
       maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
       path: '/',
       // Domain for cross-subdomain cookie sharing - configurable via env var
-      domain: process.env.COOKIE_DOMAIN || (process.env.NODE_ENV === 'production' ? '.soulart.ge' : undefined),
+      domain:
+        process.env.COOKIE_DOMAIN ||
+        (process.env.NODE_ENV === 'production' ? '.soulart.ge' : undefined),
     },
   },
 } as const;

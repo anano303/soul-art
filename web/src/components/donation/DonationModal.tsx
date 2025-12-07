@@ -46,7 +46,7 @@ export function DonationModal({ isOpen, onClose }: DonationModalProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!donorName.trim() && !isAnonymous) {
       setError(t("donation.nameRequired"));
       return;
@@ -97,10 +97,7 @@ export function DonationModal({ isOpen, onClose }: DonationModalProps) {
 
   return createPortal(
     <div className="donation-modal-overlay" onClick={onClose}>
-      <div
-        className="donation-modal"
-        onClick={(e) => e.stopPropagation()}
-      >
+      <div className="donation-modal" onClick={(e) => e.stopPropagation()}>
         <button className="donation-modal-close" onClick={onClose}>
           ×
         </button>
@@ -114,13 +111,17 @@ export function DonationModal({ isOpen, onClose }: DonationModalProps) {
         <form onSubmit={handleSubmit} className="donation-form">
           {/* Amount Selection */}
           <div className="donation-section">
-            <label className="donation-label">{t("donation.selectAmount")}</label>
+            <label className="donation-label">
+              {t("donation.selectAmount")}
+            </label>
             <div className="amount-buttons">
               {PRESET_AMOUNTS.map((value) => (
                 <button
                   key={value}
                   type="button"
-                  className={`amount-btn ${amount === value && !customAmount ? "active" : ""}`}
+                  className={`amount-btn ${
+                    amount === value && !customAmount ? "active" : ""
+                  }`}
                   onClick={() => handleAmountSelect(value)}
                 >
                   {value} ₾
@@ -143,7 +144,7 @@ export function DonationModal({ isOpen, onClose }: DonationModalProps) {
           {/* Donor Info */}
           <div className="donation-section">
             <label className="donation-label">{t("donation.yourInfo")}</label>
-            
+
             <div className="anonymous-toggle">
               <input
                 type="checkbox"
@@ -177,7 +178,9 @@ export function DonationModal({ isOpen, onClose }: DonationModalProps) {
 
           {/* Message */}
           <div className="donation-section">
-            <label className="donation-label">{t("donation.leaveMessage")}</label>
+            <label className="donation-label">
+              {t("donation.leaveMessage")}
+            </label>
             <textarea
               placeholder={t("donation.messagePlaceholder")}
               value={message}
@@ -196,7 +199,9 @@ export function DonationModal({ isOpen, onClose }: DonationModalProps) {
                 checked={showInSponsors}
                 onChange={(e) => setShowInSponsors(e.target.checked)}
               />
-              <label htmlFor="showInSponsors">{t("donation.showInSponsors")}</label>
+              <label htmlFor="showInSponsors">
+                {t("donation.showInSponsors")}
+              </label>
             </div>
           </div>
 

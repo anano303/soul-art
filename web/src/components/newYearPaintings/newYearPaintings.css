@@ -1,0 +1,344 @@
+/* New Year Paintings Section - Winter Theme */
+.new-year-paintings-section {
+  padding: clamp(1.5rem, 4vw, 2.5rem) 0 clamp(2rem, 5vw, 3rem);
+  background: linear-gradient(135deg, #0a1628 0%, #1a365d 50%, #0f2847 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Falling snowflakes animation */
+.new-year-paintings-section::before {
+  content: "❄ ❅ ❆ ✦ ❄ ❅ ❆ ✦ ❄ ❅ ❆ ✦ ❄ ❅ ❆ ✦";
+  position: absolute;
+  top: -50px;
+  left: 0;
+  right: 0;
+  font-size: 18px;
+  letter-spacing: 80px;
+  color: rgba(255, 255, 255, 0.15);
+  animation: snowfall 18s linear infinite;
+  pointer-events: none;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.new-year-paintings-section::after {
+  content: "✦ ❆ ❅ ❄ ✦ ❆ ❅ ❄ ✦ ❆ ❅ ❄";
+  position: absolute;
+  top: -80px;
+  left: 100px;
+  right: 0;
+  font-size: 14px;
+  letter-spacing: 100px;
+  color: rgba(255, 255, 255, 0.1);
+  animation: snowfall 25s linear infinite;
+  animation-delay: 8s;
+  pointer-events: none;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+@keyframes snowfall {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(calc(100vh + 150px));
+  }
+}
+
+.new-year-paintings-wrapper {
+  width: min(1280px, 93vw);
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(1.25rem, 3vw, 1.75rem);
+  position: relative;
+  z-index: 1;
+}
+
+.new-year-paintings-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: clamp(1rem, 2.5vw, 1.75rem);
+}
+
+.new-year-paintings-headline {
+  flex: 1;
+}
+
+.new-year-paintings-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 4px;
+  background: rgba(147, 197, 253, 0.15);
+  border: 1px solid rgba(147, 197, 253, 0.3);
+  color: #93c5fd;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  font-size: 0.6875rem;
+  box-shadow: 0 1px 3px rgba(59, 130, 246, 0.15);
+}
+
+.new-year-paintings-eyebrow svg {
+  animation: sparkle 2s ease-in-out infinite;
+}
+
+@keyframes sparkle {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.15);
+  }
+}
+
+.new-year-paintings-title {
+  font-family: "FiraGo", serif;
+  font-size: clamp(1.5rem, 3vw, 2.2rem);
+  font-weight: 800;
+  color: #ffffff;
+  margin-top: 0.5rem;
+  margin-bottom: 0;
+  letter-spacing: 0.3px;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.new-year-paintings-subtitle {
+  font-size: clamp(0.8125rem, 1.4vw, 0.9375rem);
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.7);
+  max-width: 32rem;
+  margin-top: 0.5rem;
+}
+
+.new-year-paintings-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.25rem;
+  border-radius: 4px;
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.1);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+  text-decoration: none;
+  white-space: nowrap;
+  position: relative;
+  overflow: hidden;
+}
+
+.new-year-paintings-cta::before {
+  content: "❄";
+  position: absolute;
+  left: -20px;
+  font-size: 10px;
+  opacity: 0;
+  transition: all 0.3s ease;
+}
+
+.new-year-paintings-cta::after {
+  content: "✦";
+  position: absolute;
+  right: -20px;
+  font-size: 10px;
+  opacity: 0;
+  transition: all 0.3s ease;
+}
+
+.new-year-paintings-cta:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.5);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(255, 255, 255, 0.15);
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+}
+
+.new-year-paintings-cta:hover::before {
+  left: 6px;
+  opacity: 0.7;
+}
+
+.new-year-paintings-cta:hover::after {
+  right: 6px;
+  opacity: 0.7;
+}
+
+.new-year-paintings-scroller-shell {
+  position: relative;
+}
+
+.new-year-paintings-scroll-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.95);
+  color: #1e40af;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(8px);
+}
+
+.new-year-paintings-scroll-btn:hover {
+  background: rgba(255, 255, 255, 1);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+  transform: translateY(-50%) scale(1.05);
+}
+
+.new-year-paintings-scroll-btn--left {
+  left: 0.5rem;
+}
+
+.new-year-paintings-scroll-btn--right {
+  right: 0.5rem;
+}
+
+.new-year-paintings-scroller {
+  display: flex;
+  gap: clamp(1rem, 2.5vw, 1.5rem);
+  overflow-x: auto;
+  padding: 0.5rem 0;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.new-year-paintings-scroller::-webkit-scrollbar {
+  display: none;
+}
+
+.new-year-paintings-card {
+  flex: 0 0 clamp(200px, 24vw, 260px);
+  scroll-snap-align: start;
+}
+
+.new-year-paintings-loader {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 220px;
+}
+
+.new-year-paintings-loader .loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(255, 255, 255, 0.2);
+  border-top-color: #60a5fa;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Decorative snowflakes - static positioned */
+.snowflake-decoration {
+  position: absolute;
+  color: rgba(255, 255, 255, 0.2);
+  pointer-events: none;
+  animation: twinkle 4s ease-in-out infinite;
+  z-index: 0;
+}
+
+.snowflake-1 {
+  top: 10%;
+  left: 2%;
+  font-size: 24px;
+  animation-delay: 0s;
+}
+
+.snowflake-2 {
+  top: 50%;
+  right: 3%;
+  font-size: 32px;
+  animation-delay: 1s;
+}
+
+.snowflake-3 {
+  bottom: 15%;
+  left: 8%;
+  font-size: 20px;
+  animation-delay: 2s;
+}
+
+.snowflake-4 {
+  top: 20%;
+  right: 12%;
+  font-size: 18px;
+  animation-delay: 0.5s;
+}
+
+.snowflake-5 {
+  bottom: 35%;
+  right: 6%;
+  font-size: 22px;
+  animation-delay: 1.5s;
+}
+
+.snowflake-6 {
+  top: 65%;
+  left: 15%;
+  font-size: 16px;
+  animation-delay: 2.5s;
+}
+
+@keyframes twinkle {
+  0%,
+  100% {
+    opacity: 0.2;
+    transform: scale(1) rotate(0deg);
+  }
+  50% {
+    opacity: 0.4;
+    transform: scale(1.1) rotate(10deg);
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .new-year-paintings-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .new-year-paintings-scroll-btn {
+    display: none;
+  }
+
+  .snowflake-decoration {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .new-year-paintings-card {
+    flex: 0 0 200px;
+  }
+
+  .new-year-paintings-scroller {
+    gap: 0.75rem;
+  }
+}
