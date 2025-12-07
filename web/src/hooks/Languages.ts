@@ -770,6 +770,28 @@ export const TRANSLATIONS: Translations = {
       referralInfo: "რეფერალები - გამოიმუშავე ფული",
     },
 
+    // Donation
+    donation: {
+      title: "მხარი დაუჭირე SoulArt-ს",
+      subtitle: "თქვენი დონაცია გვეხმარება ქართული ხელოვნების პოპულარიზაციაში",
+      becomeSponsor: "გახდი სპონსორი",
+      selectAmount: "აირჩიე თანხა",
+      customAmount: "სხვა თანხა",
+      yourInfo: "თქვენი ინფორმაცია",
+      anonymous: "ანონიმურად დარჩენა",
+      namePlaceholder: "თქვენი სახელი",
+      emailPlaceholder: "ელ-ფოსტა (არასავალდებულო)",
+      leaveMessage: "დატოვეთ შეტყობინება",
+      messagePlaceholder: "თქვენი მესიჯი... (არასავალდებულო)",
+      showInSponsors: "სპონსორების სიაში გამოჩენა",
+      donate: "დონაცია",
+      securePayment: "უსაფრთხო გადახდა საქართველოს ბანკით",
+      nameRequired: "გთხოვთ შეიყვანოთ სახელი",
+      minAmount: "მინიმალური თანხა 1 ლარია",
+      error: "დაფიქსირდა შეცდომა. გთხოვთ სცადოთ ხელახლა.",
+      thankYou: "მადლობა თქვენი დონაციისთვის!",
+    },
+
     // Home page
     home: {
       heroTitle: "ქართველი მხატვრების და ხელოვანების ნამუშევრები",
@@ -2199,6 +2221,28 @@ export const TRANSLATIONS: Translations = {
       subscribe: "Subscribe",
       emailPlaceholder: "Enter your email",
       referralInfo: "Referrals - Earn money",
+    },
+
+    // Donation
+    donation: {
+      title: "Support SoulArt",
+      subtitle: "Your donation helps promote Georgian art",
+      becomeSponsor: "Become a Sponsor",
+      selectAmount: "Select Amount",
+      customAmount: "Custom Amount",
+      yourInfo: "Your Information",
+      anonymous: "Stay Anonymous",
+      namePlaceholder: "Your Name",
+      emailPlaceholder: "Email (optional)",
+      leaveMessage: "Leave a Message",
+      messagePlaceholder: "Your message... (optional)",
+      showInSponsors: "Show in Sponsors List",
+      donate: "Donate",
+      securePayment: "Secure payment via Bank of Georgia",
+      nameRequired: "Please enter your name",
+      minAmount: "Minimum amount is 1 GEL",
+      error: "An error occurred. Please try again.",
+      thankYou: "Thank you for your donation!",
     },
 
     // Home page

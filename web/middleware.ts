@@ -11,6 +11,9 @@ const publicPaths = [
   "/checkout",
   "/checkout/success",
   "/checkout/fail",
+  "/donation",
+  "/donation/success",
+  "/donation/fail",
 ];
 const protectedPaths = [
   "/profile",

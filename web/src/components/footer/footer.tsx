@@ -6,12 +6,14 @@ import { useLanguage } from "@/hooks/LanguageContext";
 import { TermsAndConditions } from "@/components/TermsAndConditions";
 import { SellerContract } from "@/components/SellerContract";
 import { PrivacyPolicy } from "@/components/PrivacyPolicy";
+import { DonationModal } from "@/components/donation/DonationModal";
 
 export default function Footer() {
   const { t } = useLanguage();
   const [showTerms, setShowTerms] = useState(false);
   const [showContract, setShowContract] = useState(false);
   const [showPrivacy, setShowPrivacy] = useState(false);
+  const [showDonation, setShowDonation] = useState(false);
 
   return (
     <footer className="footer-container">
@@ -114,6 +116,15 @@ export default function Footer() {
               Twitter
             </a>
           </div>
+
+          {/* Sponsor/Donation Button */}
+          <button
+            onClick={() => setShowDonation(true)}
+            className="sponsor-button"
+          >
+            <span className="sponsor-heart">❤️</span>
+            {t("donation.becomeSponsor")}
+          </button>
         </div>
       </div>
       <div className="footer-bottom">
@@ -137,6 +148,11 @@ export default function Footer() {
         isOpen={showContract}
         onClose={() => setShowContract(false)}
         showAcceptButton={false}
+      />
+
+      <DonationModal
+        isOpen={showDonation}
+        onClose={() => setShowDonation(false)}
       />
     </footer>
   );
