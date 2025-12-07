@@ -714,15 +714,23 @@
 .addButtonCart.in-cart {
   background: linear-gradient(to left, #28a745, #20c997);
   position: relative;
-  overflow: hidden;
+  overflow: visible;
+  padding: 8px 12px;
 }
 
 .addButtonCart.in-cart::before {
   content: "✓";
-  position: absolute;
-  left: 10px;
-  font-size: 16px;
+  position: relative;
+  left: 0;
+  font-size: 14px;
   font-weight: bold;
+  margin-right: 6px;
+  flex-shrink: 0;
+}
+
+.addButtonCart.in-cart span {
+  white-space: nowrap;
+  overflow: visible;
 }
 
 .addButtonCart.in-cart:hover:not(:disabled) {

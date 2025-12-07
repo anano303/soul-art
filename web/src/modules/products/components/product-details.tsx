@@ -895,7 +895,7 @@ export function ProductDetails({ product }: ProductDetailsProps) {
             })}
           </div>
 
-          {/* Action buttons row - Share + Try in Room */}
+          {/* Action buttons row - Share + Try in Room + Views */}
           <div className="image-action-buttons">
             {/* Share Button */}
             <ShareButton
@@ -915,6 +915,26 @@ export function ProductDetails({ product }: ProductDetailsProps) {
                 {t("product.tryInRoom")}
               </motion.button>
             ) : null}
+
+            {/* View Counter */}
+            <div className="view-counter">
+              <svg
+                className="view-icon"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+              >
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                <circle cx="12" cy="12" r="3" />
+              </svg>
+              <span className="view-text">
+                {currentProduct.viewCount || 0}{" "}
+                {language === "en" ? "views" : "ნახვა"}
+              </span>
+            </div>
           </div>
         </div>
 
@@ -1022,6 +1042,11 @@ export function ProductDetails({ product }: ProductDetailsProps) {
                   {(product.user.artistDirectRating ?? 0) > 0
                     ? (product.user.artistDirectRating ?? 0).toFixed(1)
                     : "0"}
+                  {(product.user.artistDirectReviewsCount ?? 0) > 0 && (
+                    <span style={{ fontWeight: 400, marginLeft: "2px" }}>
+                      ({product.user.artistDirectReviewsCount})
+                    </span>
+                  )}
                 </span>
               </span>
             )}
@@ -1061,51 +1086,28 @@ export function ProductDetails({ product }: ProductDetailsProps) {
               <div className="rating-text-enhanced">
                 <div className="rating-score">{product.rating.toFixed(1)}</div>
                 <div className="rating-reviews">
-                  {product.numReviews}{" "}
-                  {language === "en" ? "reviews" : "შეფასება"}
+                  ({product.numReviews}{" "}
+                  {language === "en" ? "reviews" : "შეფასება"})
                 </div>
               </div>
             </div>
           )}
 
-          {/* Badge and View Counter Row */}
-          <div className="badge-view-row">
-            {/* Original/Copy Badge */}
-            <div className="original-copy-badge">
-              <span
-                className={`badge-text ${
-                  product.isOriginal ? "original" : "copy"
-                }`}
-              >
-                {product.isOriginal
-                  ? language === "en"
-                    ? "Original"
-                    : "ორიგინალი"
-                  : language === "en"
-                  ? "Copy"
-                  : "ასლი"}
-              </span>
-            </div>
-
-            {/* View Counter */}
-            <div className="view-counter">
-              <svg
-                className="view-icon"
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-              >
-                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-                <circle cx="12" cy="12" r="3" />
-              </svg>
-              <span className="view-text">
-                {currentProduct.viewCount || 0}{" "}
-                {language === "en" ? "views" : "ნახვა"}
-              </span>
-            </div>
+          {/* Original/Copy Badge */}
+          <div className="original-copy-badge">
+            <span
+              className={`badge-text ${
+                product.isOriginal ? "original" : "copy"
+              }`}
+            >
+              {product.isOriginal
+                ? language === "en"
+                  ? "Original"
+                  : "ორიგინალი"
+                : language === "en"
+                ? "Copy"
+                : "ასლი"}
+            </span>
           </div>
 
           {/* Materials Information */}
@@ -1183,6 +1185,8 @@ export function ProductDetails({ product }: ProductDetailsProps) {
             className={`stock-indicator ${
               isOutOfStock
                 ? "out-of-stock"
+                : availableQuantity === 1
+                ? "last-item"
                 : availableQuantity <= 5
                 ? "low-stock"
                 : "in-stock"
@@ -1191,6 +1195,13 @@ export function ProductDetails({ product }: ProductDetailsProps) {
             <div className="stock-dot"></div>
             {isOutOfStock ? (
               <span>{t("shop.outOfStock")}</span>
+            ) : availableQuantity === 1 ? (
+              <span className="hurry-text">
+                🔥{" "}
+                {language === "en"
+                  ? "Hurry! Only 1 unique piece"
+                  : "იჩქარე! მხოლოდ 1 უნიკალური ნამუშევარი"}
+              </span>
             ) : (
               <span>
                 {language === "en" ? "In Stock" : "მარაგშია"}:{" "}

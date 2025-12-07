@@ -1111,6 +1111,23 @@ body {
       gap: 8px;
     }
 
+    .quantity-selector-wrapper {
+      width: 100%;
+      justify-content: center;
+      padding: 4px;
+    }
+
+    .qty-btn {
+      min-width: 44px;
+      height: 44px;
+      font-size: 18px;
+    }
+
+    .qty-input {
+      min-width: 50px;
+      font-size: 16px;
+    }
+
     .cart-actions-container .add-to-cart-btn-wrapper,
     .cart-actions-container .btn-buy-now {
       flex: 1 1 100%;
@@ -1161,12 +1178,18 @@ body {
 
     .image-action-buttons {
       flex-direction: row;
+      flex-wrap: wrap;
       gap: 6px;
     }
 
     .image-action-buttons .try-on-wall-btn {
       font-size: 12px;
       padding: 8px 10px;
+    }
+
+    .image-action-buttons .view-counter {
+      padding: 6px 10px;
+      font-size: 12px;
     }
 
     .thumbnail-container {
@@ -1398,6 +1421,17 @@ body {
     text-decoration: line-through;
     color: #999;
     font-weight: 500;
+  }
+
+  /* Discount badge inside price-comparison - NOT absolute positioned */
+  .price-comparison .discount-badge {
+    position: static;
+    background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+    color: white;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 700;
   }
 
   /* Black Friday Badge in Price Section */
@@ -1783,6 +1817,37 @@ body {
     border: 1px solid rgba(245, 158, 11, 0.2);
   }
 
+  /* Last item - special urgency style */
+  .stock-indicator.last-item {
+    background: linear-gradient(
+      135deg,
+      rgba(236, 72, 153, 0.08) 0%,
+      rgba(168, 85, 247, 0.1) 100%
+    );
+    color: #db2777;
+    border: 1px solid rgba(236, 72, 153, 0.25);
+    animation: urgencyPulse 2s ease-in-out infinite;
+  }
+
+  .stock-indicator.last-item .stock-dot {
+    background: linear-gradient(135deg, #ec4899, #a855f7);
+    animation: none;
+  }
+
+  .stock-indicator.last-item .hurry-text {
+    font-weight: 700;
+    letter-spacing: 0.3px;
+  }
+
+  @keyframes urgencyPulse {
+    0%, 100% {
+      box-shadow: 0 0 0 0 rgba(236, 72, 153, 0.3);
+    }
+    50% {
+      box-shadow: 0 0 0 4px rgba(236, 72, 153, 0.1);
+    }
+  }
+
   .stock-indicator.out-of-stock {
     background: linear-gradient(
       135deg,
@@ -1896,6 +1961,29 @@ body {
   .add-to-cart-btn-wrapper .add-to-cart-btn {
     width: 100%;
     margin: 0;
+  }
+
+  /* Override in-cart styles for product details page */
+  .add-to-cart-btn-wrapper .addButtonCart.in-cart {
+    overflow: visible;
+  }
+
+  .add-to-cart-btn-wrapper .addButtonCart.in-cart::before {
+    content: "✓";
+    position: relative;
+    width: auto;
+    height: auto;
+    left: 0;
+    top: 0;
+    background: none;
+    font-size: 14px;
+    font-weight: bold;
+    margin-right: 6px;
+    flex-shrink: 0;
+  }
+
+  .add-to-cart-btn-wrapper .addButtonCart.in-cart span {
+    white-space: nowrap;
   }
 
   /* Buy Now Button for Product Details ONLY (not similar products) - Matching try-on-wall-btn hover style */
@@ -2016,17 +2104,42 @@ body {
     justify-content: flex-start;
   }
 
-  /* Image Action Buttons - Share + Try in Room */
+  /* Image Action Buttons - Share + Try in Room + Views */
   .image-action-buttons {
     display: flex;
     align-items: center;
     gap: 12px;
     margin-top: 16px;
+    flex-wrap: wrap;
   }
 
   .image-action-buttons .try-on-wall-btn {
     flex: 1;
     margin: 0;
+  }
+
+  /* View counter in action buttons */
+  .image-action-buttons .view-counter {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 12px;
+    background: rgba(1, 43, 69, 0.06);
+    border-radius: 8px;
+    border: 1px solid rgba(1, 43, 69, 0.12);
+    margin: 0;
+    font-size: 13px;
+    color: #495057;
+  }
+
+  .image-action-buttons .view-counter .view-icon {
+    width: 14px;
+    height: 14px;
+    stroke: #6c757d;
+  }
+
+  .image-action-buttons .view-counter .view-text {
+    font-weight: 500;
   }
 
   /* Share Section */
