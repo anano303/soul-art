@@ -78,13 +78,13 @@ export class ProductYoutubeService {
 
     try {
       this.logger.log('📁 Step 1: Preparing video file (if exists)...');
-      
+
       // ========================================
       // SLIDESHOW GENERATION TEMPORARILY DISABLED
       // ========================================
       // Only upload if user provided a video file
       // Images-only products will skip YouTube upload
-      
+
       let videoFilePath: string | undefined;
       if (videoFile && videoFile.buffer) {
         const tempDir = await fsp.mkdtemp(
@@ -296,6 +296,154 @@ export class ProductYoutubeService {
       default:
         return null;
     }
+  }
+
+  /**
+   * Upload video to YouTube synchronously (waits for completion)
+   * Used when creating products - video uploads first, then product is created with YouTube URL
+   */
+  async uploadVideoSync({
+    productData,
+    user,
+    videoFile,
+  }: {
+    productData: {
+      _id?: string;
+      name: string;
+      description?: string;
+      price?: number;
+      discountPercentage?: number;
+      brand?: string;
+      category?: string;
+      images?: string[];
+    };
+    user: UserDocument;
+    videoFile: BackgroundUploadFile;
+  }): Promise<YoutubeVideoResult | null> {
+    this.logger.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    this.logger.log('🎬 YouTube SYNC Upload - START');
+    this.logger.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+
+    if (!this.isYoutubeConfigured()) {
+      this.logger.warn(
+        '❌ YouTube credentials missing. Skipping video upload.',
+      );
+      return null;
+    }
+
+    if (!videoFile || !videoFile.buffer) {
+      this.logger.warn('❌ No video file provided.');
+      return null;
+    }
+
+    let tempDir: string | null = null;
+
+    try {
+      // Create temp directory and save video file
+      tempDir = await fsp.mkdtemp(
+        path.join(os.tmpdir(), 'soulart-sync-upload-'),
+      );
+      const videoFilePath = path.join(tempDir, `video-${Date.now()}.mp4`);
+
+      this.logger.log(`📁 Saving video to temp: ${videoFilePath}`);
+      await fsp.writeFile(videoFilePath, videoFile.buffer);
+      this.logger.log(`✅ Video file saved (${videoFile.buffer.length} bytes)`);
+
+      // Prepare YouTube upload options
+      const title = `${productData.name} | SoulArt`.slice(0, 100);
+      const description = this.buildYoutubeDescription(productData, user);
+      const tags = this.buildYoutubeTags(productData);
+
+      this.logger.log(`📤 Starting YouTube upload: "${title}"`);
+
+      const uploadResult = await this.youtubeService.uploadVideo(
+        videoFilePath,
+        {
+          title,
+          description,
+          tags,
+          privacyStatus: 'public',
+        },
+      );
+
+      if (uploadResult && uploadResult.videoId) {
+        const result: YoutubeVideoResult = {
+          videoId: uploadResult.videoId,
+          videoUrl: `https://www.youtube.com/watch?v=${uploadResult.videoId}`,
+          embedUrl: `https://www.youtube.com/embed/${uploadResult.videoId}`,
+        };
+
+        this.logger.log('✅ YouTube upload SUCCESS!');
+        this.logger.log(`   - Video ID: ${result.videoId}`);
+        this.logger.log(`   - URL: ${result.videoUrl}`);
+
+        return result;
+      }
+
+      this.logger.warn('❌ YouTube upload returned no videoId');
+      return null;
+    } catch (error) {
+      this.logger.error('❌ YouTube sync upload failed:', error);
+      throw error;
+    } finally {
+      // Cleanup temp directory
+      if (tempDir) {
+        try {
+          await fsp.rm(tempDir, { recursive: true, force: true });
+          this.logger.log(`🧹 Cleaned up temp directory: ${tempDir}`);
+        } catch (cleanupError) {
+          this.logger.warn('Failed to cleanup temp directory:', cleanupError);
+        }
+      }
+    }
+  }
+
+  private buildYoutubeDescription(
+    productData: any,
+    user: UserDocument,
+  ): string {
+    const lines = [
+      `🎨 ${productData.name}`,
+      '',
+      productData.description || '',
+      '',
+      `💰 ფასი: ${productData.price || 0}₾`,
+    ];
+
+    if (productData.discountPercentage) {
+      lines.push(`🏷️ ფასდაკლება: ${productData.discountPercentage}%`);
+    }
+
+    lines.push('');
+    lines.push(`👤 გამყიდველი: ${user.name || 'SoulArt'}`);
+    lines.push('');
+    lines.push('🛒 შეიძინეთ: https://soulart.ge');
+    lines.push('');
+    lines.push('#SoulArt #ხელოვნება #საქართველო #art #georgia');
+
+    return lines.join('\n');
+  }
+
+  private buildYoutubeTags(productData: any): string[] {
+    const tags = [
+      'SoulArt',
+      'ხელოვნება',
+      'საქართველო',
+      'art',
+      'georgia',
+      'handmade',
+      'ხელნაკეთი',
+    ];
+
+    if (productData.category) {
+      tags.push(productData.category);
+    }
+
+    if (productData.brand) {
+      tags.push(productData.brand);
+    }
+
+    return tags.slice(0, 30); // YouTube limit
   }
 
   private isYoutubeConfigured(): boolean {

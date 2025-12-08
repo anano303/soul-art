@@ -116,7 +116,7 @@ async function bootstrap() {
 
   // Apply Cloudinary URL transformation to all responses
   app.useGlobalInterceptors(new CloudinaryUrlInterceptor());
-  
+
   // Apply Multer exception filter for better upload error handling
   app.useGlobalFilters(new MulterExceptionFilter());
 

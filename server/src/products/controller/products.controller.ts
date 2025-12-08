@@ -232,6 +232,124 @@ export class ProductsController {
     return this.productsService.deleteOne(id);
   }
 
+  // ========================================
+  // UPLOAD VIDEO TO YOUTUBE IMMEDIATELY
+  // ========================================
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.Admin, Role.Seller)
+  @Post('upload-video')
+  @UseInterceptors(
+    FileFieldsInterceptor([{ name: 'video', maxCount: 1 }], {
+      storage: diskStorage({
+        destination: (req, file, cb) => {
+          const uploadDir = './uploads/temp';
+          require('fs').mkdirSync(uploadDir, { recursive: true });
+          cb(null, uploadDir);
+        },
+        filename: (req, file, cb) => {
+          const uniqueSuffix =
+            Date.now() + '-' + Math.round(Math.random() * 1e9);
+          cb(null, 'video-' + uniqueSuffix + '-' + file.originalname);
+        },
+      }),
+      limits: {
+        fileSize: 500 * 1024 * 1024, // 500MB for videos
+      },
+      fileFilter: (req, file, cb) => {
+        const videoMimeTypes = [
+          'video/mp4',
+          'video/quicktime',
+          'video/mpeg',
+          'video/x-matroska',
+          'video/webm',
+          'video/x-msvideo',
+          'video/3gpp',
+        ];
+        if (!videoMimeTypes.includes(file.mimetype.toLowerCase())) {
+          return cb(
+            new Error(`Unsupported video type: ${file.mimetype}`),
+            false,
+          );
+        }
+        cb(null, true);
+      },
+    }),
+  )
+  async uploadVideoToYoutube(
+    @CurrentUser() user: UserDocument,
+    @Body()
+    body: {
+      productName?: string;
+      productDescription?: string;
+      price?: string;
+      brand?: string;
+    },
+    @UploadedFiles() files: { video?: Express.Multer.File[] },
+  ) {
+    const videoFile = files?.video?.[0];
+
+    if (!videoFile) {
+      throw new BadRequestException('No video file provided');
+    }
+
+    console.log('📹 Immediate YouTube upload request:', {
+      userId: user._id,
+      userName: user.name,
+      videoName: videoFile.originalname,
+      videoSize: videoFile.size,
+      productName: body.productName,
+    });
+
+    try {
+      const videoFileData = this.prepareFileForBackground(videoFile);
+
+      if (!videoFileData) {
+        throw new BadRequestException('Failed to process video file');
+      }
+
+      const tempProductData = {
+        name: body.productName || 'Product Video',
+        description: body.productDescription || '',
+        price: body.price ? Number(body.price) : 0,
+        brand: body.brand || user.name || 'SoulArt',
+        category: 'Other',
+      };
+
+      const youtubeResult = await this.productYoutubeService.uploadVideoSync({
+        productData: tempProductData,
+        user,
+        videoFile: videoFileData,
+      });
+
+      if (!youtubeResult) {
+        throw new BadRequestException(
+          'YouTube upload failed - no result returned',
+        );
+      }
+
+      console.log('✅ Immediate YouTube upload success:', youtubeResult);
+
+      return {
+        success: true,
+        videoId: youtubeResult.videoId,
+        videoUrl: youtubeResult.videoUrl,
+        embedUrl: youtubeResult.embedUrl,
+      };
+    } catch (error) {
+      console.error('❌ Immediate YouTube upload error:', error);
+      throw new BadRequestException(`YouTube upload failed: ${error.message}`);
+    } finally {
+      // Cleanup temp file
+      if (videoFile?.path) {
+        try {
+          require('fs').unlinkSync(videoFile.path);
+        } catch (e) {
+          console.warn('Failed to cleanup video temp file');
+        }
+      }
+    }
+  }
+
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.Admin, Role.Seller)
   @Post()
@@ -259,10 +377,17 @@ export class ProductsController {
           },
         }),
         limits: {
-          fileSize: 50 * 1024 * 1024, // Reduced to 50MB to prevent memory issues
+          fileSize: 500 * 1024 * 1024, // 500MB for videos
           files: 15, // Limit total files
         },
         fileFilter: (req, file, cb) => {
+          console.log('📁 File received:', {
+            fieldname: file.fieldname,
+            mimetype: file.mimetype,
+            originalname: file.originalname,
+            size: file.size,
+          });
+
           const imageMimeTypes = [
             'image/jpeg',
             'image/png',
@@ -278,15 +403,19 @@ export class ProductsController {
             'video/mpeg',
             'video/x-matroska',
             'video/webm',
+            'video/x-msvideo', // AVI
+            'video/3gpp', // 3GP
+            'video/x-flv', // FLV
           ];
 
           const mimetype = file.mimetype.toLowerCase();
 
           if (file.fieldname === 'video') {
             if (!videoMimeTypes.includes(mimetype)) {
+              console.error('❌ Unsupported video type:', file.mimetype);
               return cb(
                 new Error(
-                  `Unsupported video type: ${file.mimetype}. Supported types: MP4, MOV, MPEG, MKV, WEBM.`,
+                  `Unsupported video type: ${file.mimetype}. Supported types: MP4, MOV, MPEG, MKV, WEBM, AVI, 3GP.`,
                 ),
                 false,
               );
@@ -295,6 +424,7 @@ export class ProductsController {
           }
 
           if (!imageMimeTypes.includes(mimetype)) {
+            console.error('❌ Unsupported file type:', file.mimetype);
             return cb(
               new Error(
                 `Unsupported file type: ${file.mimetype}. Supported types: JPEG, PNG, GIF, WEBP, HEIC.`,
@@ -324,7 +454,7 @@ export class ProductsController {
       imagesCount: allFiles?.images?.length || 0,
       brandLogoCount: allFiles?.brandLogo?.length || 0,
       videoCount: allFiles?.video?.length || 0,
-      imageNames: allFiles?.images?.map(f => f.originalname) || [],
+      imageNames: allFiles?.images?.map((f) => f.originalname) || [],
       productName: productData?.name,
     });
 
@@ -485,7 +615,34 @@ export class ProductsController {
         ...otherProductData
       } = productData;
 
-      // Create the product with proper category references
+      // ========================================
+      // GET YOUTUBE DATA FROM FORM (uploaded separately via /upload-video)
+      // ========================================
+      const youtubeVideoId = (productData as any).youtubeVideoId;
+      const youtubeVideoUrl = (productData as any).youtubeVideoUrl;
+      const youtubeEmbedUrl = (productData as any).youtubeEmbedUrl;
+
+      if (youtubeVideoId) {
+        console.log('📹 YouTube data received from form:', {
+          youtubeVideoId,
+          youtubeVideoUrl,
+          youtubeEmbedUrl,
+        });
+      }
+
+      // If video file was sent with the form (legacy support), cleanup it
+      if (videoFile?.path) {
+        try {
+          require('fs').unlinkSync(videoFile.path);
+          console.log(
+            '🧹 Cleaned up unused video file (video already uploaded separately)',
+          );
+        } catch (cleanupError) {
+          console.warn('Failed to cleanup video file:', cleanupError);
+        }
+      }
+
+      // Create the product with proper category references (including YouTube data if available)
       const createdProduct = await this.productsService.create(
         {
           ...otherProductData,
@@ -509,81 +666,39 @@ export class ProductsController {
           images: imageUrls,
           brandLogo: brandLogoUrl,
           videoDescription,
+          // YouTube data (from form)
+          ...(youtubeVideoId && {
+            youtubeVideoId,
+            youtubeVideoUrl,
+            youtubeEmbedUrl,
+          }),
         },
         {
           addToPortfolio: addToPortfolio ?? true,
         },
       );
 
-      const youtubeVideoFile = this.prepareFileForBackground(videoFile);
-      const youtubeImageFiles = files
-        .map((file) => this.prepareFileForBackground(file))
-        .filter((item): item is BackgroundUploadFile => !!item);
-
-      const shouldTriggerYoutubeUpload =
-        !!youtubeVideoFile ||
-        youtubeImageFiles.length > 0 ||
-        (!createdProduct.youtubeVideoId &&
-          (createdProduct.images?.length ?? 0) > 0);
-
-      console.log('🎬 YouTube Upload Check:', {
-        hasVideoFile: !!youtubeVideoFile,
-        imageFilesCount: youtubeImageFiles.length,
-        hasExistingVideo: !!createdProduct.youtubeVideoId,
-        imagesCount: createdProduct.images?.length ?? 0,
-        shouldTrigger: shouldTriggerYoutubeUpload,
+      // Cleanup image temp files
+      files.forEach((file) => {
+        try {
+          if (file.path && require('fs').existsSync(file.path)) {
+            require('fs').unlinkSync(file.path);
+          }
+        } catch (cleanupError) {
+          console.warn('Failed to cleanup temp image file:', cleanupError);
+        }
       });
 
-      // Don't cleanup video file immediately - it will be cleaned up by YouTube service
-      // Only cleanup if YouTube processing is not needed
-      if (!shouldTriggerYoutubeUpload && videoFile?.path) {
+      // Cleanup brandLogo temp file
+      if (brandLogo && brandLogo.length > 0 && brandLogo[0].path) {
         try {
-          require('fs').unlinkSync(videoFile.path);
+          require('fs').unlinkSync(brandLogo[0].path);
         } catch (cleanupError) {
-          console.warn('Failed to cleanup temp video file:', cleanupError);
+          console.warn('Failed to cleanup temp brandLogo file:', cleanupError);
         }
       }
 
-      if (shouldTriggerYoutubeUpload) {
-        // Process YouTube video in background worker (safe, won't crash main server)
-        this.productYoutubeService
-          .handleProductVideoUpload({
-            product: createdProduct,
-            user,
-            videoFile: youtubeVideoFile,
-            imageFiles: youtubeImageFiles,
-          })
-          .then(async (youtubeResult) => {
-            if (!youtubeResult) {
-              return;
-            }
-
-            try {
-              await this.productsService.attachYoutubeVideo(
-                createdProduct._id.toString(),
-                youtubeResult,
-              );
-              console.log(
-                `✅ YouTube video attached to product: ${createdProduct._id}`,
-              );
-            } catch (attachmentError) {
-              console.error(
-                'Failed to persist YouTube metadata for product:',
-                attachmentError,
-              );
-            }
-          })
-          .catch((youtubeError) => {
-            console.error(
-              'Failed to upload product video to YouTube:',
-              youtubeError,
-            );
-          });
-      }
-
-      const finalProduct = createdProduct;
-
-      return finalProduct;
+      return createdProduct;
     } catch (error) {
       console.error('Error creating product:', error);
       throw new InternalServerErrorException(
@@ -620,10 +735,17 @@ export class ProductsController {
           },
         }),
         limits: {
-          fileSize: 50 * 1024 * 1024, // Reduced to 50MB to prevent memory issues
+          fileSize: 500 * 1024 * 1024, // 500MB for videos
           files: 15, // Limit total files
         },
         fileFilter: (req, file, cb) => {
+          console.log('📁 File received (update):', {
+            fieldname: file.fieldname,
+            mimetype: file.mimetype,
+            originalname: file.originalname,
+            size: file.size,
+          });
+
           const imageMimeTypes = [
             'image/jpeg',
             'image/png',
@@ -639,15 +761,19 @@ export class ProductsController {
             'video/mpeg',
             'video/x-matroska',
             'video/webm',
+            'video/x-msvideo', // AVI
+            'video/3gpp', // 3GP
+            'video/x-flv', // FLV
           ];
 
           const mimetype = file.mimetype.toLowerCase();
 
           if (file.fieldname === 'video') {
             if (!videoMimeTypes.includes(mimetype)) {
+              console.error('❌ Unsupported video type:', file.mimetype);
               return cb(
                 new Error(
-                  `Unsupported video type: ${file.mimetype}. Supported types: MP4, MOV, MPEG, MKV, WEBM.`,
+                  `Unsupported video type: ${file.mimetype}. Supported types: MP4, MOV, MPEG, MKV, WEBM, AVI, 3GP.`,
                 ),
                 false,
               );
@@ -656,6 +782,7 @@ export class ProductsController {
           }
 
           if (!imageMimeTypes.includes(mimetype)) {
+            console.error('❌ Unsupported file type:', file.mimetype);
             return cb(
               new Error(
                 `Unsupported file type: ${file.mimetype}. Supported types: JPEG, PNG, GIF, WEBP, HEIC.`,
@@ -895,90 +1022,59 @@ export class ProductsController {
       updateData.materialsEn = materialsEn;
       updateData.isOriginal = productData.isOriginal;
 
-      const updatedProduct = await this.productsService.update(id, updateData);
+      // ========================================
+      // GET YOUTUBE DATA FROM FORM (uploaded separately via /upload-video)
+      // ========================================
+      const youtubeVideoId = (productData as any).youtubeVideoId;
+      const youtubeVideoUrl = (productData as any).youtubeVideoUrl;
+      const youtubeEmbedUrl = (productData as any).youtubeEmbedUrl;
 
-      const youtubeVideoFile = this.prepareFileForBackground(videoFile);
-      const youtubeImageFiles = (files?.images || [])
-        .map((file) => this.prepareFileForBackground(file))
-        .filter((item): item is BackgroundUploadFile => !!item);
+      if (youtubeVideoId) {
+        console.log('📹 YouTube data received from form (update):', {
+          youtubeVideoId,
+          youtubeVideoUrl,
+          youtubeEmbedUrl,
+        });
+        updateData.youtubeVideoId = youtubeVideoId;
+        updateData.youtubeVideoUrl = youtubeVideoUrl;
+        updateData.youtubeEmbedUrl = youtubeEmbedUrl;
+      } else if (youtubeVideoUrl) {
+        // Keep existing YouTube URL if provided
+        updateData.youtubeVideoUrl = youtubeVideoUrl;
+      }
 
-      const shouldTriggerYoutubeUpload =
-        !!youtubeVideoFile ||
-        youtubeImageFiles.length > 0 ||
-        (!updatedProduct.youtubeVideoId &&
-          (updatedProduct.images?.length ?? 0) > 0) ||
-        // Trigger if images have changed (for updates)
-        JSON.stringify(finalImages.sort()) !==
-          JSON.stringify((product.images || []).sort());
-
-      console.log('🎬 YouTube Upload Check (Update):', {
-        hasVideoFile: !!youtubeVideoFile,
-        imageFilesCount: youtubeImageFiles.length,
-        hasExistingVideo: !!updatedProduct.youtubeVideoId,
-        imagesCount: updatedProduct.images?.length ?? 0,
-        shouldTrigger: shouldTriggerYoutubeUpload,
-      });
-
-      // Don't cleanup video file immediately - it will be cleaned up by YouTube service
-      // Only cleanup if YouTube processing is not needed
-      if (!shouldTriggerYoutubeUpload && videoFile?.path) {
+      // If video file was sent with the form (legacy support), cleanup it
+      if (videoFile?.path) {
         try {
           require('fs').unlinkSync(videoFile.path);
+          console.log('🧹 Cleaned up unused video file (update)');
         } catch (cleanupError) {
-          console.warn('Failed to cleanup temp video file:', cleanupError);
+          console.warn('Failed to cleanup video file:', cleanupError);
         }
       }
 
-      // Cleanup image files if YouTube processing is not needed
-      if (!shouldTriggerYoutubeUpload && files?.images?.length) {
+      const updatedProduct = await this.productsService.update(id, updateData);
+
+      // Cleanup image temp files
+      if (files?.images?.length) {
         files.images.forEach((file) => {
           try {
-            require('fs').unlinkSync(file.path);
+            if (file.path && require('fs').existsSync(file.path)) {
+              require('fs').unlinkSync(file.path);
+            }
           } catch (cleanupError) {
             console.warn('Failed to cleanup temp image file:', cleanupError);
           }
         });
       }
 
-      // Cleanup brandLogo file if YouTube processing is not needed
-      if (!shouldTriggerYoutubeUpload && files?.brandLogo?.length) {
+      // Cleanup brandLogo temp file
+      if (files?.brandLogo?.length) {
         try {
           require('fs').unlinkSync(files.brandLogo[0].path);
         } catch (cleanupError) {
           console.warn('Failed to cleanup temp brandLogo file:', cleanupError);
         }
-      }
-
-      if (shouldTriggerYoutubeUpload) {
-        // Process YouTube video in background worker (safe, won't crash main server)
-        this.productYoutubeService
-          .handleProductVideoUpload({
-            product: updatedProduct,
-            user,
-            videoFile: youtubeVideoFile,
-            imageFiles: youtubeImageFiles,
-          })
-          .then(async (youtubeResult) => {
-            if (!youtubeResult) {
-              return;
-            }
-
-            try {
-              await this.productsService.attachYoutubeVideo(id, youtubeResult);
-              console.log(`✅ YouTube video updated for product: ${id}`);
-            } catch (attachmentError) {
-              console.error(
-                'Failed to persist refreshed YouTube metadata:',
-                attachmentError,
-              );
-            }
-          })
-          .catch((youtubeError) => {
-            console.error(
-              'Failed to refresh YouTube video for product:',
-              youtubeError,
-            );
-          });
       }
 
       return updatedProduct;

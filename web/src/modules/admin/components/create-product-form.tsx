@@ -125,6 +125,13 @@ export function CreateProductForm({
   const [isSaving, setIsSaving] = useState(false);
   const [videoFile, setVideoFile] = useState<File | null>(null);
   const [videoError, setVideoError] = useState<string | null>(null);
+  const [videoUploading, setVideoUploading] = useState(false);
+  const [videoUploadProgress, setVideoUploadProgress] = useState<string>("");
+  const [uploadedYoutubeData, setUploadedYoutubeData] = useState<{
+    videoId: string;
+    videoUrl: string;
+    embedUrl: string;
+  } | null>(null);
   const [existingYoutubeVideoUrl, setExistingYoutubeVideoUrl] = useState<
     string | null
   >(initialData?.youtubeVideoUrl || null);
@@ -851,7 +858,7 @@ export function CreateProductForm({
     }));
   };
 
-  const handleVideoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleVideoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
 
     if (!file) {
@@ -860,7 +867,7 @@ export function CreateProductForm({
       return;
     }
 
-    const maxSizeMb = 150;
+    const maxSizeMb = 500; // Increased to 500MB
     if (file.size > maxSizeMb * 1024 * 1024) {
       setVideoFile(null);
       setVideoError(
@@ -873,11 +880,83 @@ export function CreateProductForm({
 
     setVideoFile(file);
     setVideoError(null);
+    setVideoUploading(true);
+    setVideoUploadProgress(
+      language === "en" ? "Uploading to YouTube..." : "იტვირთება YouTube-ზე..."
+    );
+
+    try {
+      // Create FormData for video upload
+      const videoFormData = new FormData();
+      videoFormData.append("video", file);
+      videoFormData.append("productName", formData.name || "Product Video");
+      videoFormData.append("productDescription", formData.description || "");
+      videoFormData.append("price", String(formData.price || 0));
+      videoFormData.append("brand", formData.brand || user?.name || "SoulArt");
+
+      console.log("📹 Uploading video to YouTube immediately...", {
+        name: file.name,
+        size: (file.size / 1024 / 1024).toFixed(2) + "MB",
+      });
+
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/products/upload-video`,
+        {
+          method: "POST",
+          body: videoFormData,
+          credentials: "include",
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || "Video upload failed");
+      }
+
+      const result = await response.json();
+      console.log("✅ YouTube upload complete:", result);
+
+      setUploadedYoutubeData({
+        videoId: result.videoId,
+        videoUrl: result.videoUrl,
+        embedUrl: result.embedUrl,
+      });
+      setVideoUploadProgress(
+        language === "en"
+          ? "✅ Uploaded to YouTube!"
+          : "✅ აიტვირთა YouTube-ზე!"
+      );
+
+      toast({
+        title: language === "en" ? "Video Uploaded" : "ვიდეო აიტვირთა",
+        description:
+          language === "en"
+            ? "Video successfully uploaded to YouTube"
+            : "ვიდეო წარმატებით აიტვირთა YouTube-ზე",
+      });
+    } catch (error) {
+      console.error("❌ YouTube upload error:", error);
+      setVideoError(
+        language === "en"
+          ? `Failed to upload video: ${
+              error instanceof Error ? error.message : "Unknown error"
+            }`
+          : `ვიდეოს ატვირთვა ვერ მოხერხდა: ${
+              error instanceof Error ? error.message : "უცნობი შეცდომა"
+            }`
+      );
+      setUploadedYoutubeData(null);
+      setVideoUploadProgress("");
+    } finally {
+      setVideoUploading(false);
+    }
   };
 
   const handleRemoveVideo = () => {
     setVideoFile(null);
     setVideoError(null);
+    setUploadedYoutubeData(null);
+    setVideoUploadProgress("");
     const input = document.getElementById(
       "productVideo"
     ) as HTMLInputElement | null;
@@ -1123,8 +1202,20 @@ export function CreateProductForm({
         return;
       }
 
-      if (videoFile) {
-        formDataToSend.append("video", videoFile);
+      // Add YouTube data if video was uploaded
+      if (uploadedYoutubeData) {
+        console.log("📹 Adding YouTube data to FormData:", uploadedYoutubeData);
+        formDataToSend.append("youtubeVideoId", uploadedYoutubeData.videoId);
+        formDataToSend.append("youtubeVideoUrl", uploadedYoutubeData.videoUrl);
+        formDataToSend.append("youtubeEmbedUrl", uploadedYoutubeData.embedUrl);
+      } else if (existingYoutubeVideoUrl) {
+        console.log(
+          "📹 Keeping existing YouTube URL:",
+          existingYoutubeVideoUrl
+        );
+        formDataToSend.append("youtubeVideoUrl", existingYoutubeVideoUrl);
+      } else {
+        console.log("📹 No YouTube video data");
       }
 
       // Double check that we're sending either existingImages or new images
@@ -1145,6 +1236,15 @@ export function CreateProductForm({
       const method = isEdit ? "PUT" : "POST";
       const endpoint = isEdit ? `/products/${formData._id}` : "/products";
 
+      // Log what we're sending
+      console.log("📤 Sending product request:", {
+        method,
+        endpoint,
+        hasVideo: formDataToSend.has("video"),
+        imagesCount: formDataToSend.getAll("images").length,
+        hasExistingImages: formDataToSend.has("existingImages"),
+      });
+
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}${endpoint}`,
         {
@@ -1152,6 +1252,12 @@ export function CreateProductForm({
           body: formDataToSend,
           credentials: "include", // Use HTTP-only cookies for authentication
         }
+      );
+
+      console.log(
+        "📥 Response received:",
+        response.status,
+        response.statusText
       );
 
       if (!response.ok) {
@@ -1446,12 +1552,46 @@ export function CreateProductForm({
               ? "Uploading a short product video increases the chance of selling your artwork."
               : "ვიდეოს ატვირთვა გაზრდის გაყიდვების შესაძლებლობას."}
           </p>
+          
+          {/* Video uploading indicator */}
+          {videoUploading && (
+            <div className="video-uploading-indicator">
+              <div className="video-upload-spinner"></div>
+              <p className="video-upload-status">
+                {videoUploadProgress || (language === "en" 
+                  ? "Uploading video to YouTube..." 
+                  : "ვიდეო იტვირთება YouTube-ზე...")}
+              </p>
+            </div>
+          )}
+          
+          {/* YouTube upload success */}
+          {uploadedYoutubeData && !videoUploading && (
+            <div className="youtube-upload-success">
+              <span className="success-icon">✅</span>
+              <span>
+                {language === "en" 
+                  ? "Video uploaded to YouTube!" 
+                  : "ვიდეო აიტვირთა YouTube-ზე!"}
+              </span>
+              <a 
+                href={uploadedYoutubeData.videoUrl} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="youtube-link"
+              >
+                {language === "en" ? "View" : "ნახვა"}
+              </a>
+            </div>
+          )}
+          
           <input
             id="productVideo"
             type="file"
             accept="video/*"
             onChange={handleVideoChange}
             className="video-file-input"
+            disabled={videoUploading}
           />
           {videoError && <p className="create-product-error">{videoError}</p>}
           {videoFile && (
