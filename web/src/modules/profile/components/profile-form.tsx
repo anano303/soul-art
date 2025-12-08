@@ -56,7 +56,8 @@ const formSchema = z
       return true;
     },
     {
-      message: "არასწორი IBAN. გთხოვთ შეიყვანოთ ქართული IBAN (22 სიმბოლო, იწყება GE-ით)",
+      message:
+        "არასწორი IBAN. გთხოვთ შეიყვანოთ ქართული IBAN (22 სიმბოლო, იწყება GE-ით)",
       path: ["accountNumber"],
     }
   );
@@ -88,8 +89,7 @@ export function ProfileForm() {
     .replace(/\/$/, "");
   const slugDisplayPrefix = `${portfolioDisplayBase}/@`;
   const portfolioLinkBase = portfolioBaseUrl.replace(/\/$/, "");
-  const buildPortfolioUrl = (slug: string) =>
-    `${portfolioLinkBase}/@${slug}`;
+  const buildPortfolioUrl = (slug: string) => `${portfolioLinkBase}/@${slug}`;
 
   // Helper function to check if URL is from Cloudinary
   const isCloudinaryUrl = useCallback((url: string): boolean => {
@@ -659,47 +659,51 @@ export function ProfileForm() {
       <div className="profile-images-container">
         {/* Profile image section - only show for non-sellers */}
         {!isSellerAccount && (
-        <div className="profile-image-section">
-          {profileImage ? (
-            <div className="profile-image-container">
-              <Image
-                src={profileImage}
-                alt="Profile"
-                width={150}
-                height={150}
-                className="profile-image"
-                unoptimized
-                key={`profile-${new Date().getTime()}`} // Add key for cache busting
-                onError={() => {
-                  setProfileImage(null); // Show initials on error
-                }}
-              />
-            </div>
-          ) : (
-            <div className="profile-image-container">
-              <AvatarInitial name={user?.name || ""} />
-            </div>
-          )}
-          <div>
-            <input
-              type="file"
-              onChange={handleFileChange}
-              ref={fileInputRef}
-              className="file-input"
-              accept="image/*"
-            />
-            <button
-              onClick={triggerFileInput}
-              disabled={isUploading}
-              className="upload-button"
-            >
-              {isUploading ? t("profile.uploading") : t("profile.uploadAvatar")}
-            </button>
-            {uploadSuccess && (
-              <div className="upload-success">{t("profile.uploadSuccess")}</div>
+          <div className="profile-image-section">
+            {profileImage ? (
+              <div className="profile-image-container">
+                <Image
+                  src={profileImage}
+                  alt="Profile"
+                  width={150}
+                  height={150}
+                  className="profile-image"
+                  unoptimized
+                  key={`profile-${new Date().getTime()}`} // Add key for cache busting
+                  onError={() => {
+                    setProfileImage(null); // Show initials on error
+                  }}
+                />
+              </div>
+            ) : (
+              <div className="profile-image-container">
+                <AvatarInitial name={user?.name || ""} />
+              </div>
             )}
+            <div>
+              <input
+                type="file"
+                onChange={handleFileChange}
+                ref={fileInputRef}
+                className="file-input"
+                accept="image/*"
+              />
+              <button
+                onClick={triggerFileInput}
+                disabled={isUploading}
+                className="upload-button"
+              >
+                {isUploading
+                  ? t("profile.uploading")
+                  : t("profile.uploadAvatar")}
+              </button>
+              {uploadSuccess && (
+                <div className="upload-success">
+                  {t("profile.uploadSuccess")}
+                </div>
+              )}
+            </div>
           </div>
-        </div>
         )}
       </div>
 
@@ -781,14 +785,16 @@ export function ProfileForm() {
               </h2>
 
               <div className="seller-logo-container">
-                <p style={{ 
-                  fontSize: "0.875rem", 
-                  color: "#666", 
-                  marginBottom: "0.75rem",
-                  textAlign: "center"
-                }}>
-                  {language === "en" 
-                    ? "Your logo will also be used as your profile photo" 
+                <p
+                  style={{
+                    fontSize: "0.875rem",
+                    color: "#666",
+                    marginBottom: "0.75rem",
+                    textAlign: "center",
+                  }}
+                >
+                  {language === "en"
+                    ? "Your logo will also be used as your profile photo"
                     : "ლოგო ავტომატურად გამოიყენება პროფილის ფოტოდაც"}
                 </p>
                 {isUploading ? (
@@ -953,7 +959,9 @@ export function ProfileForm() {
                     className="input"
                     disabled={true}
                   >
-                    <option value="">{t("profile.selectBank") || "აირჩიეთ ბანკი"}</option>
+                    <option value="">
+                      {t("profile.selectBank") || "აირჩიეთ ბანკი"}
+                    </option>
                     {GEORGIAN_BANKS.map((bank) => (
                       <option key={bank.code} value={bank.code}>
                         {bank.name} ({bank.nameEn})
@@ -966,7 +974,8 @@ export function ProfileForm() {
                     </span>
                   )}
                   <p className="text-xs text-gray-500 mt-1">
-                    {t("profile.bankAutoDetect") || "ბანკი ავტომატურად დადგინდება ანგარიშის ნომრით"}
+                    {t("profile.bankAutoDetect") ||
+                      "ბანკი ავტომატურად დადგინდება ანგარიშის ნომრით"}
                   </p>
                 </div>
 
