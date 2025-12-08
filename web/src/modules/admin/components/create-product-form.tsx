@@ -1582,14 +1582,28 @@ export function CreateProductForm({
             )}
             
             {!videoUploading && (
-              <input
-                id="productVideo"
-                type="file"
-                accept="video/*"
-                onChange={handleVideoChange}
-                className="video-file-input"
-                disabled={videoUploading}
-              />
+              (uploadedYoutubeData || videoFile) ? (
+                <div className="video-uploaded-input">
+                  <span className="uploaded-text">{language === "en" ? "Uploaded" : "ატვირთულია"}</span>
+                  <button
+                    type="button"
+                    className="remove-video-btn"
+                    onClick={() => {
+                      setVideoFile(null);
+                      setUploadedYoutubeData(null);
+                    }}
+                  >✕</button>
+                </div>
+              ) : (
+                <input
+                  id="productVideo"
+                  type="file"
+                  accept="video/*"
+                  onChange={handleVideoChange}
+                  className="video-file-input"
+                  disabled={videoUploading}
+                />
+              )
             )}
             {videoError && <p className="create-product-error">{videoError}</p>}
           </div>
@@ -1614,9 +1628,25 @@ export function CreateProductForm({
           </div>
         </div>
         
-        {/* Image previews - full width below */}
-        {formData.images.length > 0 && (
+        {/* Image previews and video embed - full width below */}
+        {(formData.images.length > 0 || uploadedYoutubeData) && (
           <div className="image-preview-container">
+            {/* Video embed thumbnail first */}
+            {uploadedYoutubeData && (
+              <div className="image-preview video-preview">
+                <iframe
+                  src={uploadedYoutubeData.embedUrl}
+                  width="100"
+                  height="100"
+                  frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                  title="Video preview"
+                  style={{ pointerEvents: 'none' }}
+                ></iframe>
+                <div className="video-overlay-icon">▶</div>
+              </div>
+            )}
             {formData.images.map((image, index) => {
               const imageUrl =
                 image instanceof File ? URL.createObjectURL(image) : image;
@@ -1647,19 +1677,26 @@ export function CreateProductForm({
           <p className="create-product-error">{errors.images}</p>
         )}
 
-        {/* Discount Section */}
-        <div className="discount-section">
-          <h3>
-            {language === "en"
-              ? "Discount Settings"
-              : "ფასდაკლების პარამეტრები"}
-          </h3>
-
-          <div>
+        {/* Price + Discount + Dates - All in one row on desktop */}
+        <div className="price-discount-dates-row">
+          <div className="price-input-wrapper">
+            <label htmlFor="price">{t("adminProducts.price")}</label>
+            <input
+              id="price"
+              name="price"
+              type="number"
+              value={formData.price}
+              onChange={handleChange}
+              className="create-product-input"
+              required
+            />
+            {errors.price && (
+              <p className="create-product-error">{errors.price}</p>
+            )}
+          </div>
+          <div className="discount-input-wrapper">
             <label htmlFor="discountPercentage">
-              {language === "en"
-                ? "Discount Percentage (%)"
-                : "ფასდაკლების პროცენტი (%)"}
+              % {language === "en" ? "discount" : "ფასდაკლება"}
             </label>
             <input
               id="discountPercentage"
@@ -1667,36 +1704,18 @@ export function CreateProductForm({
               value={discountPercentage}
               onChange={(e) => setDiscountPercentage(e.target.value)}
               className="create-product-input"
-              placeholder={
-                language === "en"
-                  ? "Enter discount percentage (0-100)"
-                  : "შეიყვანეთ ფასდაკლების პროცენტი (0-100)"
-              }
+              placeholder="0"
               min={0}
               max={100}
-              step={0.01}
+              step={1}
             />
-            <small
-              style={{
-                color: "#666",
-                fontSize: "0.9rem",
-                display: "block",
-                marginTop: "4px",
-              }}
-            >
-              {language === "en"
-                ? "Leave empty or set to 0 for no discount"
-                : "დატოვეთ ცარიელი ან დააყენეთ 0 ფასდაკლების გარეშე"}
-            </small>
           </div>
-
+          {/* Discount Dates - appear inline when discount is set */}
           {discountPercentage && parseFloat(discountPercentage) > 0 && (
             <>
-              <div>
+              <div className="date-input-wrapper">
                 <label htmlFor="discountStartDate">
-                  {language === "en"
-                    ? "Discount Start Date"
-                    : "ფასდაკლების დაწყების თარიღი"}
+                  {language === "en" ? "Start" : "დაწყ."}
                 </label>
                 <input
                   id="discountStartDate"
@@ -1706,12 +1725,9 @@ export function CreateProductForm({
                   className="create-product-input"
                 />
               </div>
-
-              <div>
+              <div className="date-input-wrapper">
                 <label htmlFor="discountEndDate">
-                  {language === "en"
-                    ? "Discount End Date"
-                    : "ფასდაკლების დასრულების თარიღი"}
+                  {language === "en" ? "End" : "დასრ."}
                 </label>
                 <input
                   id="discountEndDate"
@@ -2084,36 +2100,20 @@ export function CreateProductForm({
             )}
           </div>
         )}
-        {/* Price and Stock - Side by Side */}
-        <div className="form-row-2">
-          <div>
-            <label htmlFor="price">{t("adminProducts.price")}</label>
-            <input
-              id="price"
-              name="price"
-              type="number"
-              value={formData.price}
-              onChange={handleChange}
-              className="create-product-input"
-              required
-            />
-            {errors.price && (
-              <p className="create-product-error">{errors.price}</p>
-            )}
-          </div>
-          {stocks &&
-            stocks.map((stock) => (
+        {/* Stock Section */}
+        {stocks && stocks.length > 0 && (
+          <div className="stock-section">
+            {stocks.map((stock) => (
               <div
                 key={`${stock.ageGroup} - ${stock.size} - ${stock.color}`}
                 className="stock-info"
               >
-                {" "}
                 {stocks.length > 1 ? (
                   <label>
                     {stock.ageGroup
                       ? getLocalizedAgeGroupName(stock.ageGroup) + " - "
-                      : ""}{" "}
-                    {stock.size + " - " || ""}{" "}
+                      : ""}
+                    {stock.size + " - " || ""}
                     {stock.color ? getLocalizedColorName(stock.color) : ""}
                   </label>
                 ) : (
@@ -2132,7 +2132,8 @@ export function CreateProductForm({
                 />
               </div>
             ))}
-        </div>
+          </div>
+        )}
         {/* Category and Subcategory - Side by Side */}
         <div className="form-row-2">
           <div>
