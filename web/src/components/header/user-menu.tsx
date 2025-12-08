@@ -7,6 +7,8 @@ import "./user-menu.css";
 import { Role } from "@/types/role";
 import { useAuth } from "@/hooks/use-auth";
 import { useLanguage } from "@/hooks/LanguageContext";
+import { LanguageSwitcher } from "@/components/language-switcher/language-switcher";
+import { CartIcon } from "@/modules/cart/components/cart-icon";
 import {
   X,
   User,
@@ -32,12 +34,34 @@ const userMenuStyles = {
   fontFamily: '"FiraGo", sans-serif',
 };
 
-export default function UserMenu({ onNavigate }: { onNavigate?: () => void }) {
+interface UserMenuProps {
+  onNavigate?: () => void;
+  isOpenExternal?: boolean;
+  onCloseExternal?: () => void;
+  hideButton?: boolean; // Hide the button trigger (for mobile where hamburger controls it)
+}
+
+export default function UserMenu({
+  onNavigate,
+  isOpenExternal,
+  onCloseExternal,
+  hideButton = false,
+}: UserMenuProps) {
   const { user, isLoading, logout } = useAuth();
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpenInternal, setIsOpenInternal] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const { t } = useLanguage();
+
+  // Use external state if provided, otherwise internal
+  const isOpen = isOpenExternal !== undefined ? isOpenExternal : isOpenInternal;
+  const setIsOpen = (value: boolean) => {
+    if (isOpenExternal !== undefined && onCloseExternal) {
+      if (!value) onCloseExternal();
+    } else {
+      setIsOpenInternal(value);
+    }
+  };
 
   // Add state to store profile image URL
   const [profileImage, setProfileImage] = useState<string | null>(null);
@@ -86,6 +110,10 @@ export default function UserMenu({ onNavigate }: { onNavigate?: () => void }) {
   }, [user]);
 
   useEffect(() => {
+    // Don't add click outside listener for mobile (when hideButton is true)
+    // because hamburger controls the menu
+    if (hideButton) return;
+
     const handleClickOutside = (event: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
         handleClose();
@@ -96,13 +124,45 @@ export default function UserMenu({ onNavigate }: { onNavigate?: () => void }) {
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, []);
+  }, [hideButton]);
 
   if (isLoading) {
+    // Don't show loader if button is hidden (mobile mode)
+    if (hideButton) return null;
     return <div className="loader"></div>;
   }
 
   if (!user) {
+    // If button is hidden (mobile), show login link in a different way
+    if (hideButton && isOpen) {
+      return (
+        <div
+          className="user-menu-container mobile-menu-open"
+          style={userMenuStyles}
+        >
+          <div className="dropdown open" ref={menuRef}>
+            <div className="dropdown-menu">
+              <button
+                className="close-menu-btn"
+                onClick={handleClose}
+                aria-label="Close menu"
+              >
+                <X size={20} />
+              </button>
+              <Link
+                href="/login"
+                className="dropdown-item"
+                onClick={handleLinkClick}
+              >
+                <User size={18} />
+                <span>{t("navigation.login")}</span>
+              </Link>
+            </div>
+          </div>
+        </div>
+      );
+    }
+    if (hideButton) return null;
     return (
       <Link href="/login" className="button" onClick={handleLinkClick}>
         🎭
@@ -113,72 +173,77 @@ export default function UserMenu({ onNavigate }: { onNavigate?: () => void }) {
   }
 
   return (
-    <div className="user-menu-container" style={userMenuStyles}>
+    <div
+      className={`user-menu-container ${hideButton ? "mobile-menu-open" : ""}`}
+      style={userMenuStyles}
+    >
       <div
         className={`dropdown ${isOpen ? "open" : ""} ${
           isClosing ? "closing" : ""
         }`}
         ref={menuRef}
       >
-        <button
-          onClick={() => setIsOpen(!isOpen)}
-          className="button"
-          aria-label="Toggle user menu"
-        >
-          <div className="user-avatar">
-            <Image
-              src={profileImage || "/avatar.jpg"}
-              alt={user.name}
-              width={32}
-              height={32}
-              className="avatar-image"
-              loading="eager"
-              unoptimized
-              key={`avatar-${
-                user?.profileImage ? "profile" : "default"
-              }-${new Date().getTime()}`}
-              onError={(e) => {
-                console.warn("Failed to load profile image, retrying...");
+        {!hideButton && (
+          <button
+            onClick={() => setIsOpen(!isOpen)}
+            className="button"
+            aria-label="Toggle user menu"
+          >
+            <div className="user-avatar">
+              <Image
+                src={profileImage || "/avatar.jpg"}
+                alt={user.name}
+                width={32}
+                height={32}
+                className="avatar-image"
+                loading="eager"
+                unoptimized
+                key={`avatar-${
+                  user?.profileImage ? "profile" : "default"
+                }-${new Date().getTime()}`}
+                onError={(e) => {
+                  console.warn("Failed to load profile image, retrying...");
 
-                // Function to clean S3 URLs
-                const cleanS3Url = (url: string): string => {
-                  if (url.includes("amazonaws.com") && url.includes("?")) {
-                    return url.split("?")[0];
-                  }
-                  return url;
-                };
+                  // Function to clean S3 URLs
+                  const cleanS3Url = (url: string): string => {
+                    if (url.includes("amazonaws.com") && url.includes("?")) {
+                      return url.split("?")[0];
+                    }
+                    return url;
+                  };
 
-                // Add retry logic
-                setTimeout(() => {
-                  const imgElement = e.currentTarget as HTMLImageElement;
+                  // Add retry logic
+                  setTimeout(() => {
+                    const imgElement = e.currentTarget as HTMLImageElement;
 
-                  // If it's an AWS S3 URL, try with a cleaned version
-                  if (
-                    user?.profileImage &&
-                    user.profileImage.includes("amazonaws.com")
-                  ) {
-                    const cleanedUrl = cleanS3Url(user.profileImage);
-                    const newSrc = `${cleanedUrl}?retry=${new Date().getTime()}`;
-                    imgElement.src = newSrc;
-                  } else if (user?.profileImage) {
-                    // Otherwise add regular cache busting
-                    const newSrc = `${user.profileImage}${
-                      user.profileImage.includes("?") ? "&" : "?"
-                    }retry=${new Date().getTime()}`;
-                    imgElement.src = newSrc;
-                  } else {
-                    setProfileImage("/avatar.jpg");
-                  }
-                }, 500);
-              }}
-            />
-          </div>
-          <span className="username">
-            {user.name || t("navigation.profile")}
-          </span>
-          <span className="icon chevron-icon">▼</span>
-          {/* <ChevronDown size={16} className="chevron-icon" /> */}
-        </button>
+                    // If it's an AWS S3 URL, try with a cleaned version
+                    if (
+                      user?.profileImage &&
+                      user.profileImage.includes("amazonaws.com")
+                    ) {
+                      const cleanedUrl = cleanS3Url(user.profileImage);
+                      const newSrc = `${cleanedUrl}?retry=${new Date().getTime()}`;
+                      imgElement.src = newSrc;
+                    } else if (user?.profileImage) {
+                      // Otherwise add regular cache busting
+                      const newSrc = `${user.profileImage}${
+                        user.profileImage.includes("?") ? "&" : "?"
+                      }retry=${new Date().getTime()}`;
+                      imgElement.src = newSrc;
+                    } else {
+                      setProfileImage("/avatar.jpg");
+                    }
+                  }, 500);
+                }}
+              />
+            </div>
+            <span className="username">
+              {user.name || t("navigation.profile")}
+            </span>
+            <span className="icon chevron-icon">▼</span>
+            {/* <ChevronDown size={16} className="chevron-icon" /> */}
+          </button>
+        )}
         {isOpen && (
           <div className="dropdown-menu">
             {/* Close button for mobile */}
@@ -189,6 +254,34 @@ export default function UserMenu({ onNavigate }: { onNavigate?: () => void }) {
             >
               <X size={20} />
             </button>
+
+            {/* Mobile only: Language and Cart at top */}
+            {hideButton && (
+              <div className="mobile-menu-top-actions">
+                <LanguageSwitcher onNavigate={handleLinkClick} />
+                <CartIcon onNavigate={handleLinkClick} />
+              </div>
+            )}
+
+            {/* Mobile only: Profile header with image */}
+            {hideButton && (
+              <div className="mobile-profile-header">
+                <div className="user-avatar">
+                  <Image
+                    src={profileImage || "/avatar.jpg"}
+                    alt={user.name}
+                    width={40}
+                    height={40}
+                    className="avatar-image"
+                    loading="eager"
+                    unoptimized
+                  />
+                </div>
+                <span className="profile-name">
+                  {user.name || t("navigation.profile")}
+                </span>
+              </div>
+            )}
 
             <div className="dropdown-label">{t("navigation.profile")}</div>
             <hr />

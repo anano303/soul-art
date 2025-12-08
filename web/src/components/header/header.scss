@@ -160,6 +160,10 @@ header {
     display: none;
   }
 
+  .mobile-header-actions {
+    display: none;
+  }
+
   /* Mobile responsiveness */
   @media (max-width: 900px) {
     .header {
@@ -169,82 +173,34 @@ header {
       display: none;
     }
 
-    .main-nav ul {
+    .mobile-header-actions {
       display: flex;
-      flex-direction: column;
-      background-color: rgba($primary-color, 0.95);
-      position: absolute;
-      top: 100%; /* Default position for mobile */
-      left: 0;
-      right: 0;
-      border-radius: 0 0 5px 5px;
-      box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
-      max-height: 0; /* Initially collapsed */
-      overflow: hidden; /* Hide overflow */
-      transition: max-height 0.7s ease-out;
-      z-index: 999;
-      width: 100%;
-      padding: 0;
-      margin: 0;
+      align-items: center;
+      gap: 12px;
+    }
 
-      li {
-        padding: 15px 35px;
-        width: 100%;
-        box-sizing: border-box;
-        text-align: left;
-      }
-
-      /* Updated to allow language and cart to display side by side */
-      .mobile-language-cart-container {
-        display: flex;
-        justify-content: flex-start;
-        align-items: center;
-        gap: 20px;
-        padding: 15px 35px;
-      }
-
-      .mobile-language {
-        display: flex;
-        justify-content: flex-start;
-      }
-
-      .mobile-cart {
-        display: flex;
-        justify-content: flex-start;
-      }
+    .main-nav {
+      display: none;
     }
 
     /* Mobile menu icon (Hamburger) */
     .mobile-nav-btn {
       display: inline-flex;
       align-items: center;
+      justify-content: center;
       cursor: pointer;
-      width: 1.625rem;
+      width: 40px;
+      height: 40px;
       font-size: 24px;
       z-index: 10;
+      background: none;
+      border: none;
+      padding: 0;
     }
 
     .hamburger-icon {
-      font-size: 30px;
-      transition: transform 0.3s ease-in-out;
+      font-size: 28px;
       color: #ffffff;
-    }
-
-    .hamburger-icon.close {
-      transform: rotate(90deg); /* Rotation effect for X */
-    }
-
-    /* Toggle navigation when active */
-    &.mobile-nav-active .main-nav ul {
-      max-height: 500px;
-    }
-
-    .shop-dropdown .dropdown-menu {
-      display: none;
-    }
-
-    .mobile-only-nav {
-      display: block;
     }
   }
 }

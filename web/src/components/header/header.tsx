@@ -13,7 +13,7 @@ import { LanguageSwitcher } from "@/components/language-switcher/language-switch
 import { useLanguage } from "@/hooks/LanguageContext";
 
 export default function Header() {
-  const [isNavOpen, setIsNavOpen] = useState(false);
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const { user } = useUser();
   const router = useRouter();
@@ -22,7 +22,14 @@ export default function Header() {
 
   // Check if current page is a bottom nav page
   const isBottomNavPage = () => {
-    if (pathname === "/" || pathname === "/shop" || pathname === "/explore") {
+    if (
+      pathname === "/" ||
+      pathname === "/shop" ||
+      pathname === "/explore" ||
+      pathname === "/auction" ||
+      pathname.startsWith("/profile/orders") ||
+      pathname.startsWith("/sellers-register")
+    ) {
       return true;
     }
     // Check if on user's own profile page (artist page with @slug)
@@ -56,27 +63,18 @@ export default function Header() {
     return null;
   }
 
-  const toggleNav = () => {
-    setIsNavOpen((prevState) => !prevState); // Toggle navigation visibility
+  const toggleUserMenu = () => {
+    setIsUserMenuOpen((prev) => !prev);
   };
 
-  const handleOrdersClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    if (user) {
-      router.push("/profile/orders");
-    } else {
-      router.push("/unauthorized-orders");
-    }
-  };
-
-  const closeNav = () => {
-    setIsNavOpen(false);
+  const closeUserMenu = () => {
+    setIsUserMenuOpen(false);
   };
 
   return (
     <>
       <div className="header-placeholder" />
-      <header className={`header ${isNavOpen ? "mobile-nav-active" : ""}`}>
+      <header className="header">
         <div className="logo">
           {showBackButton ? (
             <button
@@ -103,7 +101,7 @@ export default function Header() {
             </Link>
           )}
         </div>
-        <nav className="main-nav">
+        <nav className="main-nav desktop-only">
           <ul>
             <li>
               <Link
@@ -112,7 +110,6 @@ export default function Header() {
                     ? `/@${user.artistSlug}`
                     : "/sellers-register"
                 }
-                onClick={closeNav}
               >
                 {user?.role === "seller"
                   ? t("navigation.myPage")
@@ -120,68 +117,47 @@ export default function Header() {
               </Link>
             </li>
             <li className="shop-dropdown">
-              <Link href="/shop?page=1" onClick={closeNav}>
-                {t("navigation.shop")}
-              </Link>
+              <Link href="/shop?page=1">{t("navigation.shop")}</Link>
               <div className="shop-dropdown-menu">
-                <Link href="/auction" onClick={closeNav}>
-                  {t("navigation.auction")}
-                </Link>
+                <Link href="/auction">{t("navigation.auction")}</Link>
               </div>
             </li>
-            {/* Mobile-only auction link */}
-            <li className="mobile-only-nav">
-              <Link href="/auction" onClick={closeNav}>
-                {t("navigation.auction")}
-              </Link>
-            </li>
             <li>
-              <a
-                href="#"
-                onClick={(e) => {
-                  handleOrdersClick(e);
-                  closeNav();
-                }}
-              >
-                {t("navigation.myOrders")}
-              </a>
-            </li>
-            {/* Mobile-only auth, language and cart */}
-            <li className="mobile-only-nav">
-              <UserMenu onNavigate={closeNav} />
-            </li>
-            <li className="mobile-only-nav mobile-language">
-              <LanguageSwitcher onNavigate={closeNav} />
-            </li>
-            <li className="mobile-only-nav mobile-cart">
-              <CartIcon onNavigate={closeNav} />
+              <Link href="/auction">{t("navigation.auction")}</Link>
             </li>
           </ul>
         </nav>
         <div className="auth-cart desktop-only">
           <div className="language-switcher-container">
-            <LanguageSwitcher onNavigate={closeNav} />
+            <LanguageSwitcher />
           </div>
-          <UserMenu onNavigate={closeNav} />
-          <CartIcon onNavigate={closeNav} />
+          <UserMenu />
+          <CartIcon />
         </div>
 
-        {/* Mobile Navigation */}
-        <button
-          className="mobile-nav-btn"
-          onClick={toggleNav}
-          aria-label={
-            isNavOpen ? "Close navigation menu" : "Open navigation menu"
-          }
-          aria-expanded={isNavOpen}
-        >
-          <span
-            className={`hamburger-icon ${isNavOpen ? "close" : ""}`}
-            aria-hidden="true"
+        {/* Mobile: Only hamburger menu - visibility controlled by CSS */}
+        <div className="mobile-header-actions">
+          <button
+            className="mobile-nav-btn"
+            onClick={toggleUserMenu}
+            aria-label={isUserMenuOpen ? "Close user menu" : "Open user menu"}
+            aria-expanded={isUserMenuOpen}
           >
-            {isNavOpen ? "×" : "☰"}
-          </span>
-        </button>
+            <span className="hamburger-icon" aria-hidden="true">
+              ☰
+            </span>
+          </button>
+        </div>
+
+        {/* Mobile UserMenu - controlled externally */}
+        {isMobile && (
+          <UserMenu
+            onNavigate={closeUserMenu}
+            isOpenExternal={isUserMenuOpen}
+            onCloseExternal={closeUserMenu}
+            hideButton={true}
+          />
+        )}
       </header>
     </>
   );

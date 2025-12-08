@@ -2,14 +2,15 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { Home, Store, Search, User } from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
+import { Home, Store, Search, User, Gavel, Palette } from "lucide-react";
 import { useUser } from "@/modules/auth/hooks/use-user";
 import { useLanguage } from "@/hooks/LanguageContext";
 import "./mobile-bottom-nav.css";
 
 export function MobileBottomNav() {
   const pathname = usePathname();
+  const router = useRouter();
   const { user } = useUser();
   const { language } = useLanguage();
   const [isVisible, setIsVisible] = useState(true);
@@ -17,15 +18,17 @@ export function MobileBottomNav() {
   const [isMobile, setIsMobile] = useState(false);
   const scrollThreshold = 10; // Minimum scroll distance to trigger hide/show
 
-  // Check if user is an artist
-  const isArtist = user?.role === "seller" || user?.isSeller;
+  // Check if user is an artist/seller
+  const isSeller = user?.role === "seller" || user?.isSeller;
 
-  // Define bottom nav routes
+  // Define bottom nav routes - all main pages
   const navRoutes = [
     "/",
     "/shop",
     "/explore",
-    ...(isArtist && user ? [`/@${user.artistSlug}`] : []),
+    "/auction",
+    "/sellers-register",
+    ...(isSeller && user?.artistSlug ? [`/@${user.artistSlug}`] : []),
   ];
 
   // Check if current page is in bottom nav
@@ -74,7 +77,15 @@ export function MobileBottomNav() {
   // Don't render on desktop or non-nav pages
   if (!isMobile || !isBottomNavPage) return null;
 
-  const tabs = [
+  type TabItem = {
+    href: string;
+    icon: typeof Home;
+    label: string;
+    active: boolean;
+    onClick?: () => void;
+  };
+
+  const tabs: TabItem[] = [
     {
       href: "/",
       icon: Home,
@@ -95,29 +106,71 @@ export function MobileBottomNav() {
     },
   ];
 
-  // Add profile tab if user is artist
-  if (isArtist && user && user.artistSlug) {
+  // Add seller page or registration based on user status (before auction and orders)
+  if (isSeller && user?.artistSlug) {
+    // If seller, show their artist page
     const artistPath = `/@${user.artistSlug}`;
     tabs.push({
       href: artistPath,
       icon: User,
-      label: language === "en" ? "Profile" : "პროფილი",
+      label: language === "en" ? "My Page" : "ჩემი გვერდი",
       active: pathname === artistPath,
+    });
+  } else {
+    // If not seller, show seller registration
+    tabs.push({
+      href: "/sellers-register",
+      icon: Palette,
+      label: language === "en" ? "Sell" : "გაყიდე",
+      active: pathname.startsWith("/sellers-register"),
     });
   }
 
+  // Add auction after seller page
+  tabs.push({
+    href: "/auction",
+    icon: Gavel,
+    label: language === "en" ? "Auction" : "აუქციონი",
+    active: pathname.startsWith("/auction"),
+  });
+
   return (
     <nav
-      className={`mobile-bottom-nav ${isVisible ? "mobile-bottom-nav--visible" : "mobile-bottom-nav--hidden"}`}
+      className={`mobile-bottom-nav ${
+        isVisible ? "mobile-bottom-nav--visible" : "mobile-bottom-nav--hidden"
+      }`}
     >
       <div className="mobile-bottom-nav__container">
         {tabs.map((tab) => {
           const Icon = tab.icon;
+
+          // Special handling for orders tab with onClick
+          if (tab.onClick) {
+            return (
+              <button
+                key={tab.href}
+                onClick={tab.onClick}
+                className={`mobile-bottom-nav__tab ${
+                  tab.active ? "mobile-bottom-nav__tab--active" : ""
+                }`}
+              >
+                <Icon
+                  size={24}
+                  className="mobile-bottom-nav__icon"
+                  strokeWidth={tab.active ? 2.5 : 2}
+                />
+                <span className="mobile-bottom-nav__label">{tab.label}</span>
+              </button>
+            );
+          }
+
           return (
             <Link
               key={tab.href}
               href={tab.href}
-              className={`mobile-bottom-nav__tab ${tab.active ? "mobile-bottom-nav__tab--active" : ""}`}
+              className={`mobile-bottom-nav__tab ${
+                tab.active ? "mobile-bottom-nav__tab--active" : ""
+              }`}
             >
               <Icon
                 size={24}
