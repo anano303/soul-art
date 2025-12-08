@@ -209,13 +209,10 @@
   display: none;
 }
 
-.premium-rail__card {
-  flex: 0 0 clamp(200px, 24vw, 260px);
-  scroll-snap-align: start;
-}
-
-.premium-rail__product-card {
-  height: 100%;
+.premium-rail__grid {
+  display: flex;
+  gap: 1rem;
+  padding: 0.5rem 0;
 }
 
 .premium-rail__loader {
@@ -332,10 +329,6 @@
 }
 
 @media (max-width: 540px) {
-  .premium-rail__card {
-    flex-basis: clamp(180px, 65vw, 220px);
-  }
-
   .premium-rail__title {
     font-size: clamp(1.25rem, 2.5vw, 1.75rem);
   }

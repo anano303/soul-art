@@ -238,42 +238,10 @@ const PremiumRail = () => {
                 language === "en" ? "Premium artworks" : "პრემიუმ ნამუშევრები"
               }
             >
-              {items.map((product) => (
-                <div
-                  key={product._id}
-                  className="premium-rail__card"
-                  role="listitem"
-                >
-                  <ProductCard
-                    product={product}
-                    className="premium-rail__product-card"
-                  />
-                </div>
-              ))}
-              {/* See More Card at the end */}
-              <div className="premium-rail__card" role="listitem">
-                <Link
-                  href={`/shop?minPrice=${PREMIUM_PRICE_THRESHOLD}&mainCategory=${PAINTINGS_CATEGORY_ID}&sortBy=price&sortDirection=desc`}
-                  className="premium-rail__see-more-card"
-                >
-                  <div className="premium-rail__see-more-content">
-                    <Palette
-                      size={32}
-                      className="premium-rail__see-more-icon"
-                    />
-                    <h3 className="premium-rail__see-more-title">
-                      {language === "en" ? "View All" : "ყველას ნახვა"}
-                    </h3>
-                    <p className="premium-rail__see-more-subtitle">
-                      {language === "en"
-                        ? "Explore premium paintings"
-                        : "ნახე პრემიუმ ნახატები"}
-                    </p>
-                    <div className="premium-rail__see-more-arrow">
-                      <ArrowRight size={20} />
-                    </div>
-                  </div>
-                </Link>
+              <div className="premium-rail__grid">
+                {items.map((product) => (
+                  <ProductCard key={product._id} product={product} />
+                ))}
               </div>
             </div>
           </div>

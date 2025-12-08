@@ -161,13 +161,10 @@
   display: none;
 }
 
-.discounted-rail__card {
-  flex: 0 0 clamp(200px, 24vw, 260px);
-  scroll-snap-align: start;
-}
-
-.discounted-rail__product-card {
-  height: 100%;
+.discounted-rail__grid {
+  display: flex;
+  gap: 1rem;
+  padding: 0.5rem 0;
 }
 
 .discounted-rail__loader {
@@ -295,10 +292,6 @@
 }
 
 @media (max-width: 540px) {
-  .discounted-rail__card {
-    flex-basis: clamp(180px, 65vw, 220px);
-  }
-
   .discounted-rail__title {
     font-size: clamp(1.25rem, 2.5vw, 1.75rem);
   }

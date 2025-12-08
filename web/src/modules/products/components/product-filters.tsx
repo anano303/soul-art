@@ -688,6 +688,11 @@ export function ProductFilters({
     }
 
     onPriceRangeChange([minPrice, maxPrice]);
+    
+    // Close filter on mobile after applying price
+    if (!isDesktop) {
+      handleClose();
+    }
   };
 
   // Translate category/subcategory names based on language
@@ -1097,7 +1102,20 @@ export function ProductFilters({
 
           {/* Filter Overlay */}
           {showFilters && !isDesktop && (
-            <div className="filter-modal-overlay" onClick={handleClose} />
+            <div
+              className="filter-modal-overlay"
+              onClick={(e) => {
+                // Don't close if clicking inside filter panel or on input elements
+                const target = e.target as HTMLElement;
+                if (
+                  target.tagName === "INPUT" ||
+                  target.closest(".additional-filters")
+                ) {
+                  return;
+                }
+                handleClose();
+              }}
+            />
           )}
 
           {!isDesktop && !showFilters && (

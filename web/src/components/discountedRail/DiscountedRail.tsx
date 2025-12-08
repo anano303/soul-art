@@ -256,43 +256,10 @@ const DiscountedRail = () => {
               role="list"
               aria-label={t("home.discountedRail.ariaLabel")}
             >
-              {items.map((product) => (
-                <div
-                  key={product._id}
-                  className="discounted-rail__card"
-                  role="listitem"
-                >
-                  <ProductCard
-                    product={product}
-                    className="discounted-rail__product-card"
-                  />
-                </div>
-              ))}
-              {/* See More Card at the end */}
-              <div className="discounted-rail__card" role="listitem">
-                <Link
-                  href="/shop?discountOnly=true"
-                  className="discounted-rail__see-more-card"
-                  onClick={() => trackSeeMoreDiscountsClick()}
-                >
-                  <div className="discounted-rail__see-more-content">
-                    <Sparkles
-                      size={32}
-                      className="discounted-rail__see-more-icon"
-                    />
-                    <h3 className="discounted-rail__see-more-title">
-                      {t("home.discountedRail.viewAll")}
-                    </h3>
-                    <p className="discounted-rail__see-more-subtitle">
-                      {language === "en"
-                        ? "Explore all discounts"
-                        : "ნახე ყველა ფასდაკლება"}
-                    </p>
-                    <div className="discounted-rail__see-more-arrow">
-                      <ArrowRight size={20} />
-                    </div>
-                  </div>
-                </Link>
+              <div className="discounted-rail__grid">
+                {items.map((product) => (
+                  <ProductCard key={product._id} product={product} />
+                ))}
               </div>
             </div>
           </div>
