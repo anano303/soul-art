@@ -854,6 +854,7 @@ export class UsersService {
     identifier: string,
     page: number = 1,
     limit: number = 12,
+    includeOwner: boolean = false,
   ) {
     if (!identifier) {
       throw new BadRequestException('Identifier is required');
@@ -872,13 +873,45 @@ export class UsersService {
         throw new NotFoundException('Artist not found');
       }
 
-      const productsFilter = {
+      // If includeOwner is true, include all products (pending, approved, rejected)
+      // Otherwise only show approved products
+      const productsFilter: any = {
         user: artist._id,
-        status: ProductStatus.APPROVED,
       };
+      
+      if (includeOwner) {
+        // Owner can see all their products
+        productsFilter.status = { $in: [ProductStatus.APPROVED, ProductStatus.PENDING, ProductStatus.REJECTED] };
+      } else {
+        productsFilter.status = ProductStatus.APPROVED;
+      }
 
       const skip = (page - 1) * limit;
       const storeLogo = artist.storeLogoPath ?? artist.storeLogo ?? null;
+
+      const selectFields = [
+        'name',
+        'price',
+        'images',
+        'brand',
+        'brandLogo',
+        'rating',
+        'numReviews',
+        'description',
+        'discountPercentage',
+        'discountStartDate',
+        'discountEndDate',
+        'countInStock',
+        'deliveryType',
+        'minDeliveryDays',
+        'maxDeliveryDays',
+        'createdAt',
+      ];
+      
+      // Include status and rejectionReason for owner
+      if (includeOwner) {
+        selectFields.push('status', 'rejectionReason');
+      }
 
       const [products, totalProducts] = await Promise.all([
         this.productModel
@@ -886,24 +919,7 @@ export class UsersService {
           .sort({ createdAt: -1 })
           .skip(skip)
           .limit(limit)
-          .select([
-            'name',
-            'price',
-            'images',
-            'brand',
-            'brandLogo',
-            'rating',
-            'numReviews',
-            'description',
-            'discountPercentage',
-            'discountStartDate',
-            'discountEndDate',
-            'countInStock',
-            'deliveryType',
-            'minDeliveryDays',
-            'maxDeliveryDays',
-            'createdAt',
-          ])
+          .select(selectFields)
           .lean(),
         this.productModel.countDocuments(productsFilter),
       ]);
@@ -932,6 +948,10 @@ export class UsersService {
           minDeliveryDays: product.minDeliveryDays,
           maxDeliveryDays: product.maxDeliveryDays,
           createdAt: (product as any).createdAt ?? null,
+          ...(includeOwner && {
+            status: product.status,
+            rejectionReason: (product as any).rejectionReason ?? null,
+          }),
         })),
       };
     } catch (error) {

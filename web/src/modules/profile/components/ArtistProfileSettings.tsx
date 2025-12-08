@@ -371,22 +371,11 @@ export function ArtistProfileSettings({
   const [galleryError, setGalleryError] = useState<string | null>(null);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [removingIndex, setRemovingIndex] = useState<number | null>(null);
-  const [coverImageDraft, setCoverImageDraft] = useState<string | null>(
-    baselineValues.cover ?? null
-  );
-  const [coverError, setCoverError] = useState<string | null>(null);
-  const [isUploadingCover, setIsUploadingCover] = useState(false);
   const galleryFileInputRef = useRef<HTMLInputElement>(null);
-  const coverFileInputRef = useRef<HTMLInputElement>(null);
   const sanitizedGalleryDraft = useMemo(
     () => sanitizeGallery(galleryDraft),
     [galleryDraft]
   );
-  const sanitizedCoverDraft = useMemo(() => {
-    if (!coverImageDraft) return null;
-    const trimmed = coverImageDraft.trim();
-    return trimmed.length > 0 ? trimmed : null;
-  }, [coverImageDraft]);
 
   const form = useForm<ArtistFormValues>({
     resolver: zodResolver(artistFormSchema),
@@ -406,8 +395,6 @@ export function ArtistProfileSettings({
     setLastSavedSlug(baselineValues.slug || null);
     setGalleryDraft(baselineValues.gallery);
     setGalleryError(null);
-    setCoverImageDraft(baselineValues.cover ?? null);
-    setCoverError(null);
     form.reset(
       {
         artistSlug: baselineValues.slug,
@@ -428,8 +415,7 @@ export function ArtistProfileSettings({
 
   const portfolioBaseUrl =
     process.env.NEXT_PUBLIC_WEBSITE_URL || "https://soulart.ge";
-  const buildPortfolioUrl = (slug: string) =>
-    `${portfolioBaseUrl}/@${slug}`;
+  const buildPortfolioUrl = (slug: string) => `${portfolioBaseUrl}/@${slug}`;
 
   const slugField = form.register("artistSlug");
   const locationField = form.register("artistLocation");
@@ -524,87 +510,9 @@ export function ArtistProfileSettings({
     }
   };
 
-  const triggerCoverUpload = () => {
-    setCoverError(null);
-    coverFileInputRef.current?.click();
-  };
-
   const triggerGalleryUpload = () => {
     setGalleryError(null);
     galleryFileInputRef.current?.click();
-  };
-
-  const handleCoverFileChange = async (
-    event: ChangeEvent<HTMLInputElement>
-  ) => {
-    const file = event.target.files?.[0];
-
-    if (!file) {
-      return;
-    }
-
-    if (!file.type.startsWith("image/")) {
-      setCoverError(
-        language === "en"
-          ? "Please upload an image file."
-          : "ატვირთე მხოლოდ სურათის ტიპის ფაილი."
-      );
-      event.target.value = "";
-      return;
-    }
-
-    try {
-      setIsUploadingCover(true);
-      const formData = new FormData();
-      formData.append("file", file);
-
-      const response = await apiClient.post("/artists/cover", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
-
-      const coverUrl: string | undefined = response.data?.coverUrl;
-      if (!coverUrl || !isCloudinaryUrl(coverUrl)) {
-        throw new Error(
-          language === "en"
-            ? "Upload succeeded but returned file was invalid."
-            : "ატვირთვა შესრულდა, თუმცა დაბრუნებული ბმული არასწორია."
-        );
-      }
-
-      setCoverImageDraft(coverUrl);
-      setCoverError(null);
-      refreshUserData();
-      toast({
-        title:
-          language === "en" ? "Cover image updated" : "ქავერის ფოტო განახლდა",
-      });
-    } catch (error) {
-      console.error("Cover upload failed", error);
-      const message =
-        error instanceof Error
-          ? error.message
-          : language === "en"
-          ? "Failed to upload cover image."
-          : "ქავერის სურათის ატვირთვა ვერ მოხერხდა.";
-      setCoverError(message);
-    } finally {
-      setIsUploadingCover(false);
-      event.target.value = "";
-    }
-  };
-
-  const handleCoverRemove = () => {
-    setCoverImageDraft(null);
-    setCoverError(null);
-    toast({
-      title: language === "en" ? "Cover removed" : "ქავერის ფოტო წაიშალა",
-      description:
-        language === "en"
-          ? "Press “Save public profile” to apply this change."
-          : "ცვლილების დასადასტურებლად დააჭირე „საჯარო პროფილის შენახვა“-ს.",
-    });
   };
 
   const handleGalleryFileChange = async (
@@ -880,12 +788,6 @@ export function ArtistProfileSettings({
         setGalleryDraft(sanitizeGallery(response.artist.artistGallery));
       }
 
-      if (typeof response?.artist?.artistCoverImage === "string") {
-        setCoverImageDraft(response.artist.artistCoverImage.trim());
-      } else if (response?.artist?.artistCoverImage === null) {
-        setCoverImageDraft(null);
-      }
-
       refreshUserData();
       queryClient.invalidateQueries({ queryKey: ["user"] });
       if (response?.message !== "No changes") {
@@ -909,7 +811,7 @@ export function ArtistProfileSettings({
     updateProfileMutation.mutate({
       values,
       gallery: sanitizedGalleryDraft,
-      cover: sanitizedCoverDraft,
+      cover: baselineValues.cover,
     });
   };
 
@@ -940,15 +842,6 @@ export function ArtistProfileSettings({
 
   return (
     <section className="artist-settings">
-      <div className="artist-settings__header">
-        <h2>{language === "en" ? "Store Link" : "მაღაზიის ბმული"}</h2>
-        <p className="artist-settings__description">
-          {language === "en"
-            ? "Choose a simple username for your personal store page."
-            : "აირჩიე მარტივი username შენი პირადი მაღაზიის გვერდისთვის."}
-        </p>
-      </div>
-
       <form onSubmit={form.handleSubmit(onSubmit)} className="artist-form">
         <div className="artist-portfolio-cta">
           <div className="artist-portfolio-cta__header">
@@ -1024,40 +917,6 @@ export function ArtistProfileSettings({
             </button>
           </div>
           {slugMessage && <div className={slugStatusClass}>{slugMessage}</div>}
-          {lastSavedSlug && (
-            <div className="artist-portfolio-share">
-              <p>
-                {language === "en"
-                  ? "Share your link or open it to edit your live portfolio."
-                  : "გაზიარე ბმული ან გახსენი, რათა ცოცხლად შეცვალო პორტფოლიო."}
-              </p>
-              <div className="artist-portfolio-share__actions">
-                <a
-                  href={buildPortfolioUrl(lastSavedSlug)}
-                  target="_blank"
-                  rel="noreferrer noopener"
-                  className="artist-button artist-button--ghost artist-button--small"
-                >
-                  {language === "en" ? "Visit portfolio" : "პორტფოლიოს ნახვა"}
-                </a>
-                <button
-                  type="button"
-                  className="artist-button artist-button--outline artist-button--small"
-                  onClick={() =>
-                    handleCopyLink(buildPortfolioUrl(lastSavedSlug))
-                  }
-                >
-                  {copyState === "copied"
-                    ? language === "en"
-                      ? "Copied!"
-                      : "დაკოპირდა!"
-                    : language === "en"
-                    ? "Copy link"
-                    : "ბმულის დაკოპირება"}
-                </button>
-              </div>
-            </div>
-          )}
         </div>
 
         <div className="artist-form__row">
@@ -1201,83 +1060,6 @@ export function ArtistProfileSettings({
                   />
                 </div>
               )
-            )}
-          </div>
-        </div>
-
-        <div className="artist-settings__cover">
-          <div>
-            <h3>{language === "en" ? "Cover image" : "ქავერის ფოტო"}</h3>
-            <p className="artist-settings__hint">
-              {language === "en"
-                ? "This hero image appears at the top of your public portfolio. Aim for a wide format (16:9)."
-                : "ეს ქავერის ფოტო ჩანს შენი საჯარო პორტფოლიოს თავში. იდეალურია ფართო ფორმატი (16:9)."}
-            </p>
-          </div>
-          <div className="artist-cover">
-            {sanitizedCoverDraft ? (
-              <img
-                src={sanitizedCoverDraft}
-                alt={
-                  language === "en"
-                    ? "Portfolio cover image"
-                    : "პორტფოლიოს ქავერის ფოტო"
-                }
-                className="artist-cover__image"
-              />
-            ) : (
-              <div className="artist-cover__placeholder">
-                {language === "en"
-                  ? "No cover image yet"
-                  : "ქავერის ფოტო ჯერ არ დამატებულა"}
-              </div>
-            )}
-            <input
-              ref={coverFileInputRef}
-              type="file"
-              accept="image/*"
-              className="artist-file-input"
-              onChange={handleCoverFileChange}
-            />
-            <div className="artist-cover__actions">
-              <button
-                type="button"
-                className="artist-button artist-button--small"
-                onClick={triggerCoverUpload}
-                disabled={isUploadingCover}
-              >
-                {isUploadingCover
-                  ? language === "en"
-                    ? "Uploading..."
-                    : "იტვირთება..."
-                  : language === "en"
-                  ? sanitizedCoverDraft
-                    ? "Replace image"
-                    : "Upload cover"
-                  : sanitizedCoverDraft
-                  ? "სურათის შეცვლა"
-                  : "ქავერის ატვირთვა"}
-              </button>
-              {sanitizedCoverDraft ? (
-                <button
-                  type="button"
-                  className="artist-button artist-button--ghost artist-button--small"
-                  onClick={handleCoverRemove}
-                  disabled={updateProfileMutation.isPending}
-                >
-                  {language === "en" ? "Remove cover" : "ქავერის წაშლა"}
-                </button>
-              ) : null}
-            </div>
-            <p className="artist-settings__hint">
-              {language === "en"
-                ? "Supported formats: JPG, PNG, WEBP. Maximum size 10 MB."
-                : "მხარდაჭერილი ფორმატები: JPG, PNG, WEBP. მაქსიმალური ზომა 10 მბ."}
-            </p>
-            {coverError && (
-              <p className="artist-settings__error" role="alert">
-                {coverError}
-              </p>
             )}
           </div>
         </div>

@@ -14,10 +14,11 @@ export interface PaginatedProductsResponse {
 export async function fetchArtistProducts(
   identifier: string,
   page: number = 1,
-  limit: number = 12
+  limit: number = 12,
+  includeOwner: boolean = false
 ): Promise<PaginatedProductsResponse> {
   const response = await fetch(
-    `${API_BASE}/artists/${encodeURIComponent(identifier)}/products?page=${page}&limit=${limit}`,
+    `${API_BASE}/artists/${encodeURIComponent(identifier)}/products?page=${page}&limit=${limit}&includeOwner=${includeOwner}`,
     {
       cache: "no-store",
     }

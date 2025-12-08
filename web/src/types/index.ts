@@ -79,6 +79,8 @@ export interface ArtistProductSummary {
   minDeliveryDays?: number;
   maxDeliveryDays?: number;
   createdAt?: string | null;
+  status?: "PENDING" | "APPROVED" | "REJECTED";
+  rejectionReason?: string | null;
 }
 
 export interface ArtistProfileResponse {

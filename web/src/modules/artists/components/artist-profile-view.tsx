@@ -2,7 +2,14 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useMemo, useState, useCallback, useRef, useEffect, ChangeEvent } from "react";
+import {
+  useMemo,
+  useState,
+  useCallback,
+  useRef,
+  useEffect,
+  ChangeEvent,
+} from "react";
 import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import {
@@ -22,7 +29,20 @@ import { useGalleryInteractions } from "@/hooks/useGalleryInteractions";
 import { AddToCartButton } from "@/modules/products/components/AddToCartButton";
 import { useCart } from "@/modules/cart/context/cart-context";
 import { useToast } from "@/hooks/use-toast";
-import { Grid3X3, ShoppingBag, Info, Plus, Upload, Star, Pencil, Camera } from "lucide-react";
+import {
+  Grid3X3,
+  ShoppingBag,
+  Info,
+  Plus,
+  Upload,
+  Star,
+  Pencil,
+  Camera,
+  Trash2,
+  Clock,
+  XCircle,
+  AlertTriangle,
+} from "lucide-react";
 import BrushTrail from "@/components/BrushTrail/BrushTrail";
 import { FollowButton } from "@/components/follow-button/follow-button";
 import { FollowersModal } from "@/components/followers-modal/followers-modal";
@@ -219,6 +239,7 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
     products?.hasMore ?? false
   );
   const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [ownerProductsLoaded, setOwnerProductsLoaded] = useState(false);
 
   // Track artist profile view
   useEffect(() => {
@@ -236,7 +257,8 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
       const result = await fetchArtistProducts(
         artist.artistSlug || artist.id,
         nextPage,
-        12
+        12,
+        isOwner // Pass isOwner to include pending/rejected products
       );
 
       setProductItems((prev) => [...prev, ...result.items]);
@@ -248,6 +270,12 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
       setIsLoadingMore(false);
     }
   };
+
+  // Handle product deletion - remove from local state
+  const handleProductDelete = useCallback((productId: string) => {
+    setProductItems((prev) => prev.filter((p) => p.id !== productId));
+  }, []);
+
   // Handle hash navigation for portfolio section
   useEffect(() => {
     if (
@@ -263,60 +291,66 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
   }, []);
 
   // Cover image upload handler
-  const handleCoverUpload = useCallback(async (event: ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
+  const handleCoverUpload = useCallback(
+    async (event: ChangeEvent<HTMLInputElement>) => {
+      const file = event.target.files?.[0];
+      if (!file) return;
 
-    if (!file.type.startsWith("image/")) {
-      toast({
-        title: language === "en" ? "Error" : "შეცდომა",
-        description: language === "en" 
-          ? "Please upload an image file." 
-          : "ატვირთე მხოლოდ სურათის ტიპის ფაილი.",
-        variant: "destructive",
-      });
-      event.target.value = "";
-      return;
-    }
-
-    try {
-      setIsUploadingCover(true);
-      const formData = new FormData();
-      formData.append("file", file);
-
-      const response = await apiClient.post("/artists/cover", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
-
-      const coverUrl = response.data?.coverUrl;
-      if (coverUrl) {
-        setCurrentCoverImage(coverUrl);
-        // Refresh user data and queries - no page refresh needed
-        queryClient.invalidateQueries({ queryKey: ["user"] });
-        queryClient.invalidateQueries({ queryKey: ["artist-profile"] });
+      if (!file.type.startsWith("image/")) {
         toast({
-          title: language === "en" ? "Cover updated" : "ქავერი განახლდა",
-          description: language === "en" 
-            ? "Your cover photo has been updated successfully." 
-            : "ქავერის ფოტო წარმატებით განახლდა.",
+          title: language === "en" ? "Error" : "შეცდომა",
+          description:
+            language === "en"
+              ? "Please upload an image file."
+              : "ატვირთე მხოლოდ სურათის ტიპის ფაილი.",
+          variant: "destructive",
         });
+        event.target.value = "";
+        return;
       }
-    } catch (error) {
-      console.error("Cover upload failed", error);
-      toast({
-        title: language === "en" ? "Upload failed" : "ატვირთვა ვერ მოხერხდა",
-        description: language === "en" 
-          ? "Failed to upload cover image. Please try again." 
-          : "ქავერის სურათის ატვირთვა ვერ მოხერხდა.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsUploadingCover(false);
-      event.target.value = "";
-    }
-  }, [language, queryClient, router, toast]);
+
+      try {
+        setIsUploadingCover(true);
+        const formData = new FormData();
+        formData.append("file", file);
+
+        const response = await apiClient.post("/artists/cover", formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        });
+
+        const coverUrl = response.data?.coverUrl;
+        if (coverUrl) {
+          setCurrentCoverImage(coverUrl);
+          // Refresh user data and queries - no page refresh needed
+          queryClient.invalidateQueries({ queryKey: ["user"] });
+          queryClient.invalidateQueries({ queryKey: ["artist-profile"] });
+          toast({
+            title: language === "en" ? "Cover updated" : "ქავერი განახლდა",
+            description:
+              language === "en"
+                ? "Your cover photo has been updated successfully."
+                : "ქავერის ფოტო წარმატებით განახლდა.",
+          });
+        }
+      } catch (error) {
+        console.error("Cover upload failed", error);
+        toast({
+          title: language === "en" ? "Upload failed" : "ატვირთვა ვერ მოხერხდა",
+          description:
+            language === "en"
+              ? "Failed to upload cover image. Please try again."
+              : "ქავერის სურათის ატვირთვა ვერ მოხერხდა.",
+          variant: "destructive",
+        });
+      } finally {
+        setIsUploadingCover(false);
+        event.target.value = "";
+      }
+    },
+    [language, queryClient, router, toast]
+  );
 
   const triggerCoverUpload = useCallback(() => {
     coverFileInputRef.current?.click();
@@ -327,60 +361,66 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
   const [currentAvatar, setCurrentAvatar] = useState(artist.storeLogo || null);
   const avatarFileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleAvatarUpload = useCallback(async (event: ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
+  const handleAvatarUpload = useCallback(
+    async (event: ChangeEvent<HTMLInputElement>) => {
+      const file = event.target.files?.[0];
+      if (!file) return;
 
-    if (!file.type.startsWith("image/")) {
-      toast({
-        title: language === "en" ? "Error" : "შეცდომა",
-        description: language === "en" 
-          ? "Please upload an image file." 
-          : "ატვირთე მხოლოდ სურათის ტიპის ფაილი.",
-        variant: "destructive",
-      });
-      event.target.value = "";
-      return;
-    }
-
-    try {
-      setIsUploadingAvatar(true);
-      const formData = new FormData();
-      formData.append("file", file);
-
-      const response = await apiClient.post("/users/seller-logo", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
-
-      const logoUrl = response.data?.logoUrl || response.data?.storeLogo;
-      if (logoUrl) {
-        setCurrentAvatar(logoUrl);
-        // Refresh user data and page
-        queryClient.invalidateQueries({ queryKey: ["user"] });
-        queryClient.invalidateQueries({ queryKey: ["artist-profile"] });
+      if (!file.type.startsWith("image/")) {
         toast({
-          title: language === "en" ? "Photo updated" : "ფოტო განახლდა",
-          description: language === "en" 
-            ? "Your profile photo has been updated successfully." 
-            : "პროფილის ფოტო წარმატებით განახლდა.",
+          title: language === "en" ? "Error" : "შეცდომა",
+          description:
+            language === "en"
+              ? "Please upload an image file."
+              : "ატვირთე მხოლოდ სურათის ტიპის ფაილი.",
+          variant: "destructive",
         });
+        event.target.value = "";
+        return;
       }
-    } catch (error) {
-      console.error("Avatar upload failed", error);
-      toast({
-        title: language === "en" ? "Upload failed" : "ატვირთვა ვერ მოხერხდა",
-        description: language === "en" 
-          ? "Failed to upload profile photo. Please try again." 
-          : "პროფილის ფოტოს ატვირთვა ვერ მოხერხდა.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsUploadingAvatar(false);
-      event.target.value = "";
-    }
-  }, [language, queryClient, router, toast]);
+
+      try {
+        setIsUploadingAvatar(true);
+        const formData = new FormData();
+        formData.append("file", file);
+
+        const response = await apiClient.post("/users/seller-logo", formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        });
+
+        const logoUrl = response.data?.logoUrl || response.data?.storeLogo;
+        if (logoUrl) {
+          setCurrentAvatar(logoUrl);
+          // Refresh user data and page
+          queryClient.invalidateQueries({ queryKey: ["user"] });
+          queryClient.invalidateQueries({ queryKey: ["artist-profile"] });
+          toast({
+            title: language === "en" ? "Photo updated" : "ფოტო განახლდა",
+            description:
+              language === "en"
+                ? "Your profile photo has been updated successfully."
+                : "პროფილის ფოტო წარმატებით განახლდა.",
+          });
+        }
+      } catch (error) {
+        console.error("Avatar upload failed", error);
+        toast({
+          title: language === "en" ? "Upload failed" : "ატვირთვა ვერ მოხერხდა",
+          description:
+            language === "en"
+              ? "Failed to upload profile photo. Please try again."
+              : "პროფილის ფოტოს ატვირთვა ვერ მოხერხდა.",
+          variant: "destructive",
+        });
+      } finally {
+        setIsUploadingAvatar(false);
+        event.target.value = "";
+      }
+    },
+    [language, queryClient, router, toast]
+  );
 
   const triggerAvatarUpload = useCallback(() => {
     avatarFileInputRef.current?.click();
@@ -390,7 +430,8 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
     return resolveBiography(artist.artistBio, language);
   }, [artist.artistBio, language]);
 
-  const heroBackground = currentCoverImage || artist.artistCoverImage || undefined;
+  const heroBackground =
+    currentCoverImage || artist.artistCoverImage || undefined;
   const avatar = currentAvatar || artist.storeLogo || undefined;
 
   const portfolioPosts = useMemo(() => portfolio?.posts ?? [], [portfolio]);
@@ -508,6 +549,29 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
   const anySocial = socialOrder.some(({ key }) => artist.artistSocials?.[key]);
   const isOwner = user?._id === artist.id;
 
+  // When owner is detected, fetch all products (including pending/rejected)
+  useEffect(() => {
+    if (isOwner && !ownerProductsLoaded) {
+      const loadOwnerProducts = async () => {
+        try {
+          const result = await fetchArtistProducts(
+            artist.artistSlug || artist.id,
+            1,
+            12,
+            true // includeOwner
+          );
+          setProductItems(result.items);
+          setCurrentPage(1);
+          setHasMoreProducts(result.hasMore);
+          setOwnerProductsLoaded(true);
+        } catch (error) {
+          console.error("Failed to load owner products:", error);
+        }
+      };
+      loadOwnerProducts();
+    }
+  }, [isOwner, ownerProductsLoaded, artist.artistSlug, artist.id]);
+
   // Gallery interactions
   const { getStatsForImage, updateStats } = useGalleryInteractions(
     artist.id,
@@ -562,7 +626,7 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
         }
       >
         <div className="artist-hero__overlay" />
-        
+
         {/* Cover Edit Button - Facebook style - positioned top left */}
         {isOwner && (
           <>
@@ -578,23 +642,31 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
               className="artist-hero__cover-edit-btn"
               onClick={triggerCoverUpload}
               disabled={isUploadingCover}
-              title={language === "en" ? "Change cover photo" : "ქავერის ფოტოს შეცვლა"}
+              title={
+                language === "en"
+                  ? "Change cover photo"
+                  : "ქავერის ფოტოს შეცვლა"
+              }
             >
               {isUploadingCover ? (
                 <>
                   <span className="artist-hero__cover-spinner" />
-                  <span>{language === "en" ? "Uploading..." : "იტვირთება..."}</span>
+                  <span>
+                    {language === "en" ? "Uploading..." : "იტვირთება..."}
+                  </span>
                 </>
               ) : (
                 <>
                   <Camera size={16} />
-                  <span>{language === "en" ? "Edit Cover" : "ქავერის შეცვლა"}</span>
+                  <span>
+                    {language === "en" ? "Edit Cover" : "ქავერის შეცვლა"}
+                  </span>
                 </>
               )}
             </button>
           </>
         )}
-        
+
         <div className="artist-hero__content">
           {/* Top row: Avatar and main info */}
           <div className="artist-hero__main-row">
@@ -626,10 +698,18 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
                   />
                   <button
                     type="button"
-                    className={`artist-hero__avatar-edit-btn ${isUploadingAvatar ? 'artist-hero__avatar-edit-btn--loading' : ''}`}
+                    className={`artist-hero__avatar-edit-btn ${
+                      isUploadingAvatar
+                        ? "artist-hero__avatar-edit-btn--loading"
+                        : ""
+                    }`}
                     onClick={triggerAvatarUpload}
                     disabled={isUploadingAvatar}
-                    title={language === "en" ? "Change profile photo" : "პროფილის ფოტოს შეცვლა"}
+                    title={
+                      language === "en"
+                        ? "Change profile photo"
+                        : "პროფილის ფოტოს შეცვლა"
+                    }
                   >
                     {isUploadingAvatar ? (
                       <span className="artist-hero__avatar-spinner" />
@@ -865,6 +945,7 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
                           product={product}
                           language={language}
                           isOwner={isOwner}
+                          onDelete={handleProductDelete}
                         />
                       ))}
                     </div>
@@ -1578,13 +1659,16 @@ interface ProductCardProps {
   product: ArtistProductSummary;
   language: "en" | "ge";
   isOwner?: boolean;
+  onDelete?: (productId: string) => void;
 }
 
-function ProductCard({ product, language, isOwner }: ProductCardProps) {
+function ProductCard({ product, language, isOwner, onDelete }: ProductCardProps) {
   const { addToCart, isItemInCart } = useCart();
   const { toast } = useToast();
   const router = useRouter();
   const [isBuying, setIsBuying] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const image = product.images?.[0];
   const href = `/products/${product.id}`;
 
@@ -1612,6 +1696,46 @@ function ProductCard({ product, language, isOwner }: ProductCardProps) {
   };
 
   console.log("Delivery text:", deliveryText());
+
+  const handleDeleteClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setShowDeleteConfirm(true);
+  };
+
+  const handleConfirmDelete = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDeleting(true);
+    try {
+      await apiClient.delete(`/products/${product.id}`);
+      toast({
+        title: language === "en" ? "Product deleted" : "პროდუქტი წაიშალა",
+        description: language === "en" 
+          ? "The product has been successfully deleted" 
+          : "პროდუქტი წარმატებით წაიშალა",
+      });
+      onDelete?.(product.id);
+    } catch (error) {
+      console.error("Delete error:", error);
+      toast({
+        title: language === "en" ? "Delete failed" : "წაშლა ვერ მოხერხდა",
+        description: language === "en"
+          ? "Failed to delete the product"
+          : "პროდუქტის წაშლა ვერ მოხერხდა",
+        variant: "destructive",
+      });
+    } finally {
+      setIsDeleting(false);
+      setShowDeleteConfirm(false);
+    }
+  };
+
+  const handleCancelDelete = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setShowDeleteConfirm(false);
+  };
 
   const handleBuyNow = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -1679,21 +1803,95 @@ function ProductCard({ product, language, isOwner }: ProductCardProps) {
   };
 
   return (
-    <article className="artist-product-card">
-      {/* Owner edit button */}
-      {isOwner && (
-        <Link
-          href={{
-            pathname: `/admin/products/edit`,
-            query: { id: product.id, refresh: Date.now() },
-          }}
-          className="artist-product-card__edit-btn"
-          onClick={(e) => e.stopPropagation()}
-          title={language === "en" ? "Edit product" : "რედაქტირება"}
-        >
-          <Pencil size={16} />
-        </Link>
+    <article className={`artist-product-card ${product.status === 'PENDING' ? 'artist-product-card--pending' : ''} ${product.status === 'REJECTED' ? 'artist-product-card--rejected' : ''}`}>
+      {/* Status badges for owner */}
+      {isOwner && product.status && product.status !== 'APPROVED' && (
+        <div className={`artist-product-card__status-badge artist-product-card__status-badge--${product.status.toLowerCase()}`}>
+          {product.status === 'PENDING' && (
+            <>
+              <Clock size={14} />
+              <span>{language === "en" ? "Pending" : "მოლოდინში"}</span>
+            </>
+          )}
+          {product.status === 'REJECTED' && (
+            <>
+              <XCircle size={14} />
+              <span>{language === "en" ? "Rejected" : "უარყოფილი"}</span>
+            </>
+          )}
+        </div>
       )}
+      
+      {/* Rejection reason tooltip */}
+      {isOwner && product.status === 'REJECTED' && product.rejectionReason && (
+        <div className="artist-product-card__rejection-reason">
+          <AlertTriangle size={14} />
+          <span>{language === "en" ? "Reason:" : "მიზეზი:"} {product.rejectionReason}</span>
+        </div>
+      )}
+      
+      {/* Owner action buttons */}
+      {isOwner && (
+        <div className="artist-product-card__owner-actions">
+          <Link
+            href={{
+              pathname: `/admin/products/edit`,
+              query: { id: product.id, refresh: Date.now() },
+            }}
+            className="artist-product-card__edit-btn"
+            onClick={(e) => e.stopPropagation()}
+            title={language === "en" ? "Edit product" : "რედაქტირება"}
+          >
+            <Pencil size={16} />
+          </Link>
+          <button
+            type="button"
+            className="artist-product-card__delete-btn"
+            onClick={handleDeleteClick}
+            title={language === "en" ? "Delete product" : "პროდუქტის წაშლა"}
+          >
+            <Trash2 size={16} />
+          </button>
+        </div>
+      )}
+      
+      {/* Delete confirmation overlay */}
+      {showDeleteConfirm && (
+        <div 
+          className="artist-product-card__delete-confirm"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="artist-product-card__delete-confirm-content">
+            <AlertTriangle size={24} className="artist-product-card__delete-confirm-icon" />
+            <p className="artist-product-card__delete-confirm-text">
+              {language === "en" 
+                ? "Are you sure you want to delete this product?" 
+                : "დარწმუნებული ხარ, რომ გსურს ამ პროდუქტის წაშლა?"}
+            </p>
+            <div className="artist-product-card__delete-confirm-actions">
+              <button
+                type="button"
+                className="artist-product-card__delete-confirm-cancel"
+                onClick={handleCancelDelete}
+                disabled={isDeleting}
+              >
+                {language === "en" ? "Cancel" : "გაუქმება"}
+              </button>
+              <button
+                type="button"
+                className="artist-product-card__delete-confirm-yes"
+                onClick={handleConfirmDelete}
+                disabled={isDeleting}
+              >
+                {isDeleting 
+                  ? (language === "en" ? "Deleting..." : "იშლება...") 
+                  : (language === "en" ? "Yes, Delete" : "დიახ, წაშალე")}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      
       <Link href={href} className="artist-product-card__link">
         <div className="artist-product-card__image-wrapper">
           {image ? (
