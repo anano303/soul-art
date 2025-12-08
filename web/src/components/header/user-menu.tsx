@@ -246,26 +246,45 @@ export default function UserMenu({
         )}
         {isOpen && (
           <div className="dropdown-menu">
-            {/* Close button for mobile */}
-            <button
-              className="close-menu-btn"
-              onClick={handleClose}
-              aria-label="Close menu"
-            >
-              <X size={20} />
-            </button>
-
-            {/* Mobile only: Language and Cart at top */}
+            {/* Mobile only: Header row with language/cart on left, X on right */}
             {hideButton && (
-              <div className="mobile-menu-top-actions">
-                <LanguageSwitcher onNavigate={handleLinkClick} />
-                <CartIcon onNavigate={handleLinkClick} />
+              <div className="mobile-menu-header-row">
+                <div className="mobile-menu-left-actions">
+                  <LanguageSwitcher onNavigate={handleLinkClick} />
+                  <CartIcon onNavigate={handleLinkClick} />
+                </div>
+                <button
+                  className="close-menu-btn"
+                  onClick={handleClose}
+                  aria-label="Close menu"
+                >
+                  <X size={20} />
+                </button>
               </div>
             )}
 
-            {/* Mobile only: Profile header with image */}
+            {/* Desktop: Just close button */}
+            {!hideButton && (
+              <button
+                className="close-menu-btn"
+                onClick={handleClose}
+                aria-label="Close menu"
+              >
+                <X size={20} />
+              </button>
+            )}
+
+            {/* Mobile only: Profile header with image - clickable for sellers */}
             {hideButton && (
-              <div className="mobile-profile-header">
+              <Link
+                href={
+                  (user.role === "seller" || user.isSeller) && user.artistSlug
+                    ? `/@${user.artistSlug}`
+                    : "/profile"
+                }
+                className="mobile-profile-header"
+                onClick={handleLinkClick}
+              >
                 <div className="user-avatar">
                   <Image
                     src={profileImage || "/avatar.jpg"}
@@ -280,7 +299,7 @@ export default function UserMenu({
                 <span className="profile-name">
                   {user.name || t("navigation.profile")}
                 </span>
-              </div>
+              </Link>
             )}
 
             <div className="dropdown-label">{t("navigation.profile")}</div>
