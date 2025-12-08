@@ -292,6 +292,35 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{
             __html: `
               (function() {
+                // Block Madgicx requests completely
+                var originalFetch = window.fetch;
+                window.fetch = function(url, options) {
+                  var urlStr = String(url || '');
+                  if (urlStr.includes('madgicx') || urlStr.includes('capig.')) {
+                    return Promise.resolve(new Response('{}', { status: 200 }));
+                  }
+                  return originalFetch.apply(this, arguments);
+                };
+                
+                // Block XMLHttpRequest to Madgicx
+                var originalXHROpen = XMLHttpRequest.prototype.open;
+                XMLHttpRequest.prototype.open = function(method, url) {
+                  var urlStr = String(url || '');
+                  if (urlStr.includes('madgicx') || urlStr.includes('capig.')) {
+                    this._blocked = true;
+                    return;
+                  }
+                  return originalXHROpen.apply(this, arguments);
+                };
+                
+                var originalXHRSend = XMLHttpRequest.prototype.send;
+                XMLHttpRequest.prototype.send = function() {
+                  if (this._blocked) {
+                    return;
+                  }
+                  return originalXHRSend.apply(this, arguments);
+                };
+                
                 // Suppress console warnings
                 var originalWarn = console.warn;
                 console.warn = function() {
