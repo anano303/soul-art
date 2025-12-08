@@ -878,10 +878,16 @@ export class UsersService {
       const productsFilter: any = {
         user: artist._id,
       };
-      
+
       if (includeOwner) {
         // Owner can see all their products
-        productsFilter.status = { $in: [ProductStatus.APPROVED, ProductStatus.PENDING, ProductStatus.REJECTED] };
+        productsFilter.status = {
+          $in: [
+            ProductStatus.APPROVED,
+            ProductStatus.PENDING,
+            ProductStatus.REJECTED,
+          ],
+        };
       } else {
         productsFilter.status = ProductStatus.APPROVED;
       }
@@ -907,7 +913,7 @@ export class UsersService {
         'maxDeliveryDays',
         'createdAt',
       ];
-      
+
       // Include status and rejectionReason for owner
       if (includeOwner) {
         selectFields.push('status', 'rejectionReason');

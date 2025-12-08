@@ -165,7 +165,7 @@
 /* მობაილზე ოდნავ განსხვავებული პოზიცია */
 @media (max-width: 768px) {
   .floating-cart-icon {
-    bottom: 100px;
+    bottom: calc(140px + env(safe-area-inset-bottom, 0));
     right: 15px;
     width: 55px;
     height: 55px;

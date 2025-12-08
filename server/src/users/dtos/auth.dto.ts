@@ -62,6 +62,15 @@ export class UserResponseDto {
 
   @ApiProperty()
   role?: Role;
+
+  @ApiProperty({ required: false })
+  artistSlug?: string | null;
+
+  @ApiProperty({ required: false })
+  isSeller?: boolean;
+
+  @ApiProperty({ required: false })
+  storeName?: string | null;
 }
 
 export class AuthResponseDto {

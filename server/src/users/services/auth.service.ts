@@ -133,8 +133,10 @@ export class AuthService {
         id: user._id.toString(),
         email: user.email,
         name: user.name,
-        // isAdmin: user.isAdmin,
         role: user.role,
+        artistSlug: user.artistSlug ?? null,
+        isSeller: user.role === 'seller',
+        storeName: user.storeName ?? null,
       },
     };
   }

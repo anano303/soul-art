@@ -1662,7 +1662,12 @@ interface ProductCardProps {
   onDelete?: (productId: string) => void;
 }
 
-function ProductCard({ product, language, isOwner, onDelete }: ProductCardProps) {
+function ProductCard({
+  product,
+  language,
+  isOwner,
+  onDelete,
+}: ProductCardProps) {
   const { addToCart, isItemInCart } = useCart();
   const { toast } = useToast();
   const router = useRouter();
@@ -1711,18 +1716,20 @@ function ProductCard({ product, language, isOwner, onDelete }: ProductCardProps)
       await apiClient.delete(`/products/${product.id}`);
       toast({
         title: language === "en" ? "Product deleted" : "პროდუქტი წაიშალა",
-        description: language === "en" 
-          ? "The product has been successfully deleted" 
-          : "პროდუქტი წარმატებით წაიშალა",
+        description:
+          language === "en"
+            ? "The product has been successfully deleted"
+            : "პროდუქტი წარმატებით წაიშალა",
       });
       onDelete?.(product.id);
     } catch (error) {
       console.error("Delete error:", error);
       toast({
         title: language === "en" ? "Delete failed" : "წაშლა ვერ მოხერხდა",
-        description: language === "en"
-          ? "Failed to delete the product"
-          : "პროდუქტის წაშლა ვერ მოხერხდა",
+        description:
+          language === "en"
+            ? "Failed to delete the product"
+            : "პროდუქტის წაშლა ვერ მოხერხდა",
         variant: "destructive",
       });
     } finally {
@@ -1803,17 +1810,25 @@ function ProductCard({ product, language, isOwner, onDelete }: ProductCardProps)
   };
 
   return (
-    <article className={`artist-product-card ${product.status === 'PENDING' ? 'artist-product-card--pending' : ''} ${product.status === 'REJECTED' ? 'artist-product-card--rejected' : ''}`}>
+    <article
+      className={`artist-product-card ${
+        product.status === "PENDING" ? "artist-product-card--pending" : ""
+      } ${
+        product.status === "REJECTED" ? "artist-product-card--rejected" : ""
+      }`}
+    >
       {/* Status badges for owner */}
-      {isOwner && product.status && product.status !== 'APPROVED' && (
-        <div className={`artist-product-card__status-badge artist-product-card__status-badge--${product.status.toLowerCase()}`}>
-          {product.status === 'PENDING' && (
+      {isOwner && product.status && product.status !== "APPROVED" && (
+        <div
+          className={`artist-product-card__status-badge artist-product-card__status-badge--${product.status.toLowerCase()}`}
+        >
+          {product.status === "PENDING" && (
             <>
               <Clock size={14} />
               <span>{language === "en" ? "Pending" : "მოლოდინში"}</span>
             </>
           )}
-          {product.status === 'REJECTED' && (
+          {product.status === "REJECTED" && (
             <>
               <XCircle size={14} />
               <span>{language === "en" ? "Rejected" : "უარყოფილი"}</span>
@@ -1821,15 +1836,18 @@ function ProductCard({ product, language, isOwner, onDelete }: ProductCardProps)
           )}
         </div>
       )}
-      
+
       {/* Rejection reason tooltip */}
-      {isOwner && product.status === 'REJECTED' && product.rejectionReason && (
+      {isOwner && product.status === "REJECTED" && product.rejectionReason && (
         <div className="artist-product-card__rejection-reason">
           <AlertTriangle size={14} />
-          <span>{language === "en" ? "Reason:" : "მიზეზი:"} {product.rejectionReason}</span>
+          <span>
+            {language === "en" ? "Reason:" : "მიზეზი:"}{" "}
+            {product.rejectionReason}
+          </span>
         </div>
       )}
-      
+
       {/* Owner action buttons */}
       {isOwner && (
         <div className="artist-product-card__owner-actions">
@@ -1854,18 +1872,21 @@ function ProductCard({ product, language, isOwner, onDelete }: ProductCardProps)
           </button>
         </div>
       )}
-      
+
       {/* Delete confirmation overlay */}
       {showDeleteConfirm && (
-        <div 
+        <div
           className="artist-product-card__delete-confirm"
           onClick={(e) => e.stopPropagation()}
         >
           <div className="artist-product-card__delete-confirm-content">
-            <AlertTriangle size={24} className="artist-product-card__delete-confirm-icon" />
+            <AlertTriangle
+              size={24}
+              className="artist-product-card__delete-confirm-icon"
+            />
             <p className="artist-product-card__delete-confirm-text">
-              {language === "en" 
-                ? "Are you sure you want to delete this product?" 
+              {language === "en"
+                ? "Are you sure you want to delete this product?"
                 : "დარწმუნებული ხარ, რომ გსურს ამ პროდუქტის წაშლა?"}
             </p>
             <div className="artist-product-card__delete-confirm-actions">
@@ -1883,15 +1904,19 @@ function ProductCard({ product, language, isOwner, onDelete }: ProductCardProps)
                 onClick={handleConfirmDelete}
                 disabled={isDeleting}
               >
-                {isDeleting 
-                  ? (language === "en" ? "Deleting..." : "იშლება...") 
-                  : (language === "en" ? "Yes, Delete" : "დიახ, წაშალე")}
+                {isDeleting
+                  ? language === "en"
+                    ? "Deleting..."
+                    : "იშლება..."
+                  : language === "en"
+                  ? "Yes, Delete"
+                  : "დიახ, წაშალე"}
               </button>
             </div>
           </div>
         </div>
       )}
-      
+
       <Link href={href} className="artist-product-card__link">
         <div className="artist-product-card__image-wrapper">
           {image ? (

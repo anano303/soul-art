@@ -7,7 +7,8 @@ import {
   Loader2,
   X,
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 import { toast } from "@/hooks/use-toast";
 import { Product, ProductStatus } from "@/types";
@@ -44,6 +45,12 @@ export function ProductsActions({
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [rejectionReason, setRejectionReason] = useState("");
   const [isRejecting, setIsRejecting] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  // For portal rendering
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   console.log("Current user from useUser:", user);
 
@@ -92,13 +99,18 @@ export function ProductsActions({
     }
   };
 
-  const handleStatusChange = async (newStatus: ProductStatus, reason?: string) => {
+  const handleStatusChange = async (
+    newStatus: ProductStatus,
+    reason?: string
+  ) => {
     try {
-      const body: { status: ProductStatus; rejectionReason?: string } = { status: newStatus };
+      const body: { status: ProductStatus; rejectionReason?: string } = {
+        status: newStatus,
+      };
       if (newStatus === ProductStatus.REJECTED && reason) {
         body.rejectionReason = reason;
       }
-      
+
       const response = await fetchWithAuth(`/products/${product._id}/status`, {
         method: "PUT",
         headers: {
@@ -117,8 +129,12 @@ export function ProductsActions({
         title: language === "en" ? "Status Updated" : "სტატუსი განახლდა",
         description:
           newStatus === ProductStatus.APPROVED
-            ? (language === "en" ? "Product has been approved" : "პროდუქტი დამტკიცდა")
-            : (language === "en" ? "Product has been rejected" : "პროდუქტი უარყოფილია"),
+            ? language === "en"
+              ? "Product has been approved"
+              : "პროდუქტი დამტკიცდა"
+            : language === "en"
+            ? "Product has been rejected"
+            : "პროდუქტი უარყოფილია",
       });
 
       // Don't use router.refresh() - let the parent component handle the update
@@ -192,112 +208,133 @@ export function ProductsActions({
   };
 
   return (
-    <div className="space-x-2">
-      {/* Rejection Modal */}
-      {showRejectModal && (
-        <div className="rejection-modal-overlay" onClick={() => setShowRejectModal(false)}>
-          <div className="rejection-modal" onClick={(e) => e.stopPropagation()}>
-            <div className="rejection-modal__header">
-              <h3>{language === "en" ? "Reject Product" : "პროდუქტის უარყოფა"}</h3>
-              <button 
-                type="button" 
-                className="rejection-modal__close"
-                onClick={() => setShowRejectModal(false)}
-              >
-                <X size={20} />
-              </button>
-            </div>
-            <div className="rejection-modal__body">
-              <label htmlFor="rejectionReason">
-                {language === "en" 
-                  ? "Reason for rejection (optional):" 
-                  : "უარყოფის მიზეზი (არასავალდებულო):"}
-              </label>
-              <textarea
-                id="rejectionReason"
-                value={rejectionReason}
-                onChange={(e) => setRejectionReason(e.target.value)}
-                placeholder={language === "en" 
-                  ? "Enter the reason why this product is being rejected..." 
-                  : "შეიყვანე მიზეზი რატომ უარყოფ ამ პროდუქტს..."}
-                rows={4}
-              />
-            </div>
-            <div className="rejection-modal__actions">
-              <button
-                type="button"
-                className="rejection-modal__cancel"
-                onClick={() => setShowRejectModal(false)}
-                disabled={isRejecting}
-              >
-                {language === "en" ? "Cancel" : "გაუქმება"}
-              </button>
-              <button
-                type="button"
-                className="rejection-modal__confirm"
-                onClick={handleConfirmReject}
-                disabled={isRejecting}
-              >
-                {isRejecting 
-                  ? (language === "en" ? "Rejecting..." : "უარყოფა...") 
-                  : (language === "en" ? "Reject Product" : "პროდუქტის უარყოფა")}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-      
-      <Link
-        href={{
-          pathname: `/admin/products/edit`,
-          query: { id: product._id, refresh: Date.now() }, // Add a timestamp to force refresh
-        }}
-        className="prd-action-link prd-action-edit"
-      >
-        <Pencil className="actions edit" />
-      </Link>
-
-      {/* Showing status buttons? {isAdmin && product.status === ProductStatus.PENDING} */}
-      {isAdmin && product.status === ProductStatus.PENDING && (
-        <>
-          <button
-            onClick={() => handleStatusChange(ProductStatus.APPROVED)}
-            className="text-green-500 hover:text-green-600"
-            title={language === "en" ? "Approve product" : "პროდუქტის დამტკიცება"}
+    <>
+      {/* Rejection Modal - rendered via portal to body */}
+      {mounted &&
+        showRejectModal &&
+        createPortal(
+          <div
+            className="rejection-modal-overlay"
+            onClick={() => setShowRejectModal(false)}
           >
-            <CheckCircle className="actions approve" />
-          </button>
-          <button
-            onClick={handleRejectClick}
-            className="text-red-500 hover:text-red-600"
-            title={language === "en" ? "Reject product" : "პროდუქტის უარყოფა"}
-          >
-            <XCircle className="actions reject" />
-          </button>
-        </>
-      )}
+            <div
+              className="rejection-modal"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="rejection-modal__header">
+                <h3>
+                  {language === "en" ? "Reject Product" : "პროდუქტის უარყოფა"}
+                </h3>
+                <button
+                  type="button"
+                  className="rejection-modal__close"
+                  onClick={() => setShowRejectModal(false)}
+                >
+                  <X size={20} />
+                </button>
+              </div>
+              <div className="rejection-modal__body">
+                <label htmlFor="rejectionReason">
+                  {language === "en"
+                    ? "Reason for rejection (optional):"
+                    : "უარყოფის მიზეზი (არასავალდებულო):"}
+                </label>
+                <textarea
+                  id="rejectionReason"
+                  value={rejectionReason}
+                  onChange={(e) => setRejectionReason(e.target.value)}
+                  placeholder={
+                    language === "en"
+                      ? "Enter the reason why this product is being rejected..."
+                      : "შეიყვანე მიზეზი რატომ უარყოფ ამ პროდუქტს..."
+                  }
+                  rows={4}
+                />
+              </div>
+              <div className="rejection-modal__actions">
+                <button
+                  type="button"
+                  className="rejection-modal__cancel"
+                  onClick={() => setShowRejectModal(false)}
+                  disabled={isRejecting}
+                >
+                  {language === "en" ? "Cancel" : "გაუქმება"}
+                </button>
+                <button
+                  type="button"
+                  className="rejection-modal__confirm"
+                  onClick={handleConfirmReject}
+                  disabled={isRejecting}
+                >
+                  {isRejecting
+                    ? language === "en"
+                      ? "Rejecting..."
+                      : "უარყოფა..."
+                    : language === "en"
+                    ? "Reject Product"
+                    : "პროდუქტის უარყოფა"}
+                </button>
+              </div>
+            </div>
+          </div>,
+          document.body
+        )}
 
-      {isAdmin && (
-        <button
-          className="fb-btn"
-          onClick={handlePostToFacebook}
-          title="Post to all social media (FB, Instagram, Groups)"
-          disabled={isPosting}
+      <div className="space-x-2">
+        <Link
+          href={{
+            pathname: `/admin/products/edit`,
+            query: { id: product._id, refresh: Date.now() }, // Add a timestamp to force refresh
+          }}
+          className="prd-action-link prd-action-edit"
         >
-          {isPosting ? (
-            <Loader2 className="actions fb-post spin" />
-          ) : (
-            <Megaphone className="actions fb-post" />
-          )}
-        </button>
-      )}
+          <Pencil className="actions edit" />
+        </Link>
 
-      <button
-        className="text-red-500 hover:text-red-600"
-        onClick={handleDelete}
-      >
-        <Trash2 className="actions trash" />
-      </button>
-    </div>
+        {/* Showing status buttons? {isAdmin && product.status === ProductStatus.PENDING} */}
+        {isAdmin && product.status === ProductStatus.PENDING && (
+          <>
+            <button
+              onClick={() => handleStatusChange(ProductStatus.APPROVED)}
+              className="text-green-500 hover:text-green-600"
+              title={
+                language === "en" ? "Approve product" : "პროდუქტის დამტკიცება"
+              }
+            >
+              <CheckCircle className="actions approve" />
+            </button>
+            <button
+              onClick={handleRejectClick}
+              className="text-red-500 hover:text-red-600"
+              title={language === "en" ? "Reject product" : "პროდუქტის უარყოფა"}
+            >
+              <XCircle className="actions reject" />
+            </button>
+          </>
+        )}
+
+        {isAdmin && (
+          <button
+            className="fb-btn"
+            onClick={handlePostToFacebook}
+            title="Post to all social media (FB, Instagram, Groups)"
+            disabled={isPosting}
+          >
+            {isPosting ? (
+              <Loader2 className="actions fb-post spin" />
+            ) : (
+              <Megaphone className="actions fb-post" />
+            )}
+          </button>
+        )}
+
+        <button
+          className="text-red-500 hover:text-red-600"
+          onClick={handleDelete}
+        >
+          <Trash2 className="actions trash" />
+        </button>
+      </div>
+    </>
   );
 }

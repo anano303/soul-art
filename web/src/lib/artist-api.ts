@@ -18,7 +18,9 @@ export async function fetchArtistProducts(
   includeOwner: boolean = false
 ): Promise<PaginatedProductsResponse> {
   const response = await fetch(
-    `${API_BASE}/artists/${encodeURIComponent(identifier)}/products?page=${page}&limit=${limit}&includeOwner=${includeOwner}`,
+    `${API_BASE}/artists/${encodeURIComponent(
+      identifier
+    )}/products?page=${page}&limit=${limit}&includeOwner=${includeOwner}`,
     {
       cache: "no-store",
     }
