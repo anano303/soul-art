@@ -128,7 +128,7 @@ export class DonationsService {
         industry: {
           type: 'ecommerce',
         },
-        payment_method: ['card'],
+        payment_method: ['card', 'google_pay', 'apple_pay', 'bog_loyalty'],
         ttl: 30, // 30 minutes to complete
         redirect_urls: {
           success: `${this.configService.get('FRONTEND_URL') || 'https://soulart.ge'}/donation/success?id=${donation._id}`,
