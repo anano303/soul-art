@@ -75,15 +75,15 @@
   transform-origin: top center;
 }
 
-/* Mobile-specific styles - Override to open upward ONLY on mobile */
+/* Mobile-specific styles - dropdown opens downward on mobile too */
 @media (max-width: 900px) {
   .language-switcher[data-mobile="true"] .language-dropdown {
-    top: auto;
-    bottom: 100%;
-    margin-top: 0;
-    margin-bottom: 8px;
-    transform-origin: bottom center;
-    animation: dropdown-fade-mobile 0.2s ease;
+    top: 100%;
+    bottom: auto;
+    margin-top: 8px;
+    margin-bottom: 0;
+    transform-origin: top center;
+    animation: dropdown-fade 0.2s ease;
   }
 }
 
