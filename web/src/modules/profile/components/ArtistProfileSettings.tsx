@@ -941,11 +941,11 @@ export function ArtistProfileSettings({
   return (
     <section className="artist-settings">
       <div className="artist-settings__header">
-        <h2>{language === "en" ? "Portfolio link" : "პორტფოლიოს ბმული"}</h2>
+        <h2>{language === "en" ? "Store Link" : "მაღაზიის ბმული"}</h2>
         <p className="artist-settings__description">
           {language === "en"
-            ? "Choose a username to generate your personal SoulArt page. Update the rest of your public info below."
-            : "აირჩიე უზერნაიმი და შექმენი შენი SoulArt-ის პირადი გვერდი. ქვემოთ განაახლე საჯარო ინფორმაცია."}
+            ? "Choose a simple username for your personal store page."
+            : "აირჩიე მარტივი username შენი პირადი მაღაზიის გვერდისთვის."}
         </p>
       </div>
 
@@ -954,13 +954,13 @@ export function ArtistProfileSettings({
           <div className="artist-portfolio-cta__header">
             <h3>
               {language === "en"
-                ? "Launch your personal portfolio website"
-                : "შექმენი შენი პირადი პორტფოლიოს გვერდი"}
+                ? "Your personal store link"
+                : "შენი პირადი მაღაზიის ბმული"}
             </h3>
             <p>
               {language === "en"
-                ? "Pick a username to get a shareable page that combines your store and showcase pieces."
-                : "მიუთითე სასურველი უზერნაიმი და მიიღე გაზიარებადი გვერდი, სადაც იყრის თავს შენი მაღაზია და პორტფოლიო."}
+                ? "Username should be simple and easy to remember."
+                : "username სასურველია იყოს მარტივი და დასამახსოვრებელი."}
             </p>
           </div>
           <div className="artist-portfolio-cta__field">

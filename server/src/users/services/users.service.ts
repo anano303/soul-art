@@ -1601,9 +1601,12 @@ export class UsersService {
       // Upload to Cloudinary
       const logoUrl = await this.userCloudinaryService.uploadSellerLogo(file);
 
-      // Store the full Cloudinary URL
+      // Store the full Cloudinary URL for both logo and profile image
+      // For sellers, logo = profile image (unified)
       await this.userModel.findByIdAndUpdate(userId, {
         storeLogoPath: logoUrl,
+        storeLogo: logoUrl,
+        profileImagePath: logoUrl, // Seller's logo is also their profile image
       });
 
       // Update all products of this seller to use the new logo

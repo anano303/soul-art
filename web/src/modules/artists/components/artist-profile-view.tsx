@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useMemo, useState, useCallback, useRef, useEffect } from "react";
+import { useMemo, useState, useCallback, useRef, useEffect, ChangeEvent } from "react";
 import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import {
@@ -22,7 +22,7 @@ import { useGalleryInteractions } from "@/hooks/useGalleryInteractions";
 import { AddToCartButton } from "@/modules/products/components/AddToCartButton";
 import { useCart } from "@/modules/cart/context/cart-context";
 import { useToast } from "@/hooks/use-toast";
-import { Grid3X3, ShoppingBag, Info, Plus, Upload, Star } from "lucide-react";
+import { Grid3X3, ShoppingBag, Info, Plus, Upload, Star, Pencil, Camera } from "lucide-react";
 import BrushTrail from "@/components/BrushTrail/BrushTrail";
 import { FollowButton } from "@/components/follow-button/follow-button";
 import { FollowersModal } from "@/components/followers-modal/followers-modal";
@@ -31,6 +31,7 @@ import { ArtistReviewsList } from "./artist-reviews-list";
 import { ShareButton } from "@/components/share-button/share-button";
 import { trackArtistProfileView } from "@/lib/ga4-analytics";
 import { fetchArtistProducts } from "@/lib/artist-api";
+import { apiClient } from "@/lib/axios";
 import "./artist-profile-view.css";
 import "@/components/share-button/share-button.css";
 import "@/components/gallery-interactions.css";
@@ -201,7 +202,12 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [caption, setCaption] = useState("");
+  const [isUploadingCover, setIsUploadingCover] = useState(false);
+  const [currentCoverImage, setCurrentCoverImage] = useState(
+    artist.artistCoverImage || null
+  );
   const heroRef = useRef<HTMLElement>(null);
+  const coverFileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
   // Products pagination state
@@ -256,12 +262,136 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
     setShowEditor(false);
   }, []);
 
+  // Cover image upload handler
+  const handleCoverUpload = useCallback(async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      toast({
+        title: language === "en" ? "Error" : "შეცდომა",
+        description: language === "en" 
+          ? "Please upload an image file." 
+          : "ატვირთე მხოლოდ სურათის ტიპის ფაილი.",
+        variant: "destructive",
+      });
+      event.target.value = "";
+      return;
+    }
+
+    try {
+      setIsUploadingCover(true);
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const response = await apiClient.post("/artists/cover", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      const coverUrl = response.data?.coverUrl;
+      if (coverUrl) {
+        setCurrentCoverImage(coverUrl);
+        // Refresh user data and queries - no page refresh needed
+        queryClient.invalidateQueries({ queryKey: ["user"] });
+        queryClient.invalidateQueries({ queryKey: ["artist-profile"] });
+        toast({
+          title: language === "en" ? "Cover updated" : "ქავერი განახლდა",
+          description: language === "en" 
+            ? "Your cover photo has been updated successfully." 
+            : "ქავერის ფოტო წარმატებით განახლდა.",
+        });
+      }
+    } catch (error) {
+      console.error("Cover upload failed", error);
+      toast({
+        title: language === "en" ? "Upload failed" : "ატვირთვა ვერ მოხერხდა",
+        description: language === "en" 
+          ? "Failed to upload cover image. Please try again." 
+          : "ქავერის სურათის ატვირთვა ვერ მოხერხდა.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsUploadingCover(false);
+      event.target.value = "";
+    }
+  }, [language, queryClient, router, toast]);
+
+  const triggerCoverUpload = useCallback(() => {
+    coverFileInputRef.current?.click();
+  }, []);
+
+  // Avatar/Logo upload state and handler
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+  const [currentAvatar, setCurrentAvatar] = useState(artist.storeLogo || null);
+  const avatarFileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleAvatarUpload = useCallback(async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      toast({
+        title: language === "en" ? "Error" : "შეცდომა",
+        description: language === "en" 
+          ? "Please upload an image file." 
+          : "ატვირთე მხოლოდ სურათის ტიპის ფაილი.",
+        variant: "destructive",
+      });
+      event.target.value = "";
+      return;
+    }
+
+    try {
+      setIsUploadingAvatar(true);
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const response = await apiClient.post("/users/seller-logo", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      const logoUrl = response.data?.logoUrl || response.data?.storeLogo;
+      if (logoUrl) {
+        setCurrentAvatar(logoUrl);
+        // Refresh user data and page
+        queryClient.invalidateQueries({ queryKey: ["user"] });
+        queryClient.invalidateQueries({ queryKey: ["artist-profile"] });
+        toast({
+          title: language === "en" ? "Photo updated" : "ფოტო განახლდა",
+          description: language === "en" 
+            ? "Your profile photo has been updated successfully." 
+            : "პროფილის ფოტო წარმატებით განახლდა.",
+        });
+      }
+    } catch (error) {
+      console.error("Avatar upload failed", error);
+      toast({
+        title: language === "en" ? "Upload failed" : "ატვირთვა ვერ მოხერხდა",
+        description: language === "en" 
+          ? "Failed to upload profile photo. Please try again." 
+          : "პროფილის ფოტოს ატვირთვა ვერ მოხერხდა.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsUploadingAvatar(false);
+      event.target.value = "";
+    }
+  }, [language, queryClient, router, toast]);
+
+  const triggerAvatarUpload = useCallback(() => {
+    avatarFileInputRef.current?.click();
+  }, []);
+
   const biography = useMemo(() => {
     return resolveBiography(artist.artistBio, language);
   }, [artist.artistBio, language]);
 
-  const heroBackground = artist.artistCoverImage || undefined;
-  const avatar = artist.storeLogo || undefined;
+  const heroBackground = currentCoverImage || artist.artistCoverImage || undefined;
+  const avatar = currentAvatar || artist.storeLogo || undefined;
 
   const portfolioPosts = useMemo(() => portfolio?.posts ?? [], [portfolio]);
 
@@ -432,6 +562,39 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
         }
       >
         <div className="artist-hero__overlay" />
+        
+        {/* Cover Edit Button - Facebook style - positioned top left */}
+        {isOwner && (
+          <>
+            <input
+              ref={coverFileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleCoverUpload}
+              style={{ display: "none" }}
+            />
+            <button
+              type="button"
+              className="artist-hero__cover-edit-btn"
+              onClick={triggerCoverUpload}
+              disabled={isUploadingCover}
+              title={language === "en" ? "Change cover photo" : "ქავერის ფოტოს შეცვლა"}
+            >
+              {isUploadingCover ? (
+                <>
+                  <span className="artist-hero__cover-spinner" />
+                  <span>{language === "en" ? "Uploading..." : "იტვირთება..."}</span>
+                </>
+              ) : (
+                <>
+                  <Camera size={16} />
+                  <span>{language === "en" ? "Edit Cover" : "ქავერის შეცვლა"}</span>
+                </>
+              )}
+            </button>
+          </>
+        )}
+        
         <div className="artist-hero__content">
           {/* Top row: Avatar and main info */}
           <div className="artist-hero__main-row">
@@ -450,6 +613,31 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
                     .charAt(0)
                     .toUpperCase()}
                 </div>
+              )}
+              {/* Avatar Edit Button - Facebook style with direct upload */}
+              {isOwner && (
+                <>
+                  <input
+                    ref={avatarFileInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleAvatarUpload}
+                    style={{ display: "none" }}
+                  />
+                  <button
+                    type="button"
+                    className={`artist-hero__avatar-edit-btn ${isUploadingAvatar ? 'artist-hero__avatar-edit-btn--loading' : ''}`}
+                    onClick={triggerAvatarUpload}
+                    disabled={isUploadingAvatar}
+                    title={language === "en" ? "Change profile photo" : "პროფილის ფოტოს შეცვლა"}
+                  >
+                    {isUploadingAvatar ? (
+                      <span className="artist-hero__avatar-spinner" />
+                    ) : (
+                      <Camera size={14} />
+                    )}
+                  </button>
+                </>
               )}
             </div>
             <div className="artist-hero__info">
@@ -676,6 +864,7 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
                           key={product.id}
                           product={product}
                           language={language}
+                          isOwner={isOwner}
                         />
                       ))}
                     </div>
@@ -1388,9 +1577,10 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
 interface ProductCardProps {
   product: ArtistProductSummary;
   language: "en" | "ge";
+  isOwner?: boolean;
 }
 
-function ProductCard({ product, language }: ProductCardProps) {
+function ProductCard({ product, language, isOwner }: ProductCardProps) {
   const { addToCart, isItemInCart } = useCart();
   const { toast } = useToast();
   const router = useRouter();
@@ -1490,6 +1680,20 @@ function ProductCard({ product, language }: ProductCardProps) {
 
   return (
     <article className="artist-product-card">
+      {/* Owner edit button */}
+      {isOwner && (
+        <Link
+          href={{
+            pathname: `/admin/products/edit`,
+            query: { id: product.id, refresh: Date.now() },
+          }}
+          className="artist-product-card__edit-btn"
+          onClick={(e) => e.stopPropagation()}
+          title={language === "en" ? "Edit product" : "რედაქტირება"}
+        >
+          <Pencil size={16} />
+        </Link>
+      )}
       <Link href={href} className="artist-product-card__link">
         <div className="artist-product-card__image-wrapper">
           {image ? (

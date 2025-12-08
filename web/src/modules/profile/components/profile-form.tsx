@@ -657,6 +657,8 @@ export function ProfileForm() {
       )}
 
       <div className="profile-images-container">
+        {/* Profile image section - only show for non-sellers */}
+        {!isSellerAccount && (
         <div className="profile-image-section">
           {profileImage ? (
             <div className="profile-image-container">
@@ -698,6 +700,7 @@ export function ProfileForm() {
             )}
           </div>
         </div>
+        )}
       </div>
 
       <form
@@ -778,6 +781,16 @@ export function ProfileForm() {
               </h2>
 
               <div className="seller-logo-container">
+                <p style={{ 
+                  fontSize: "0.875rem", 
+                  color: "#666", 
+                  marginBottom: "0.75rem",
+                  textAlign: "center"
+                }}>
+                  {language === "en" 
+                    ? "Your logo will also be used as your profile photo" 
+                    : "ლოგო ავტომატურად გამოიყენება პროფილის ფოტოდაც"}
+                </p>
                 {isUploading ? (
                   <div className="loading-logo">{t("profile.logoLoading")}</div>
                 ) : (
