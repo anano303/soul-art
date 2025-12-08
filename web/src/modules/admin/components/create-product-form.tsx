@@ -2127,7 +2127,7 @@ export function CreateProductForm({
                   type="number"
                   value={stock.stock}
                   onChange={(elem) => setStockCount(stock, +elem.target.value)}
-                  min={1}
+                  min={0}
                   required
                 />
               </div>
@@ -2256,7 +2256,7 @@ export function CreateProductForm({
               disabled
               value={totalCount}
               onChange={handleChange}
-              min={1}
+              min={0}
               required
             />
             <small

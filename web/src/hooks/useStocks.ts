@@ -115,7 +115,7 @@ export const useStocks = ({ initialData, attributes }: UseStocksProps) => {
 
       // If this combination already exists, keep its count, otherwise initialize
       // For initial data with variants, try to find matching variant
-      let initialStock = 0;
+      let initialStock = INITIAL_STOCK; // Default to 1 for new products
       if (initialData?.variants) {
         const matchingVariant = initialData.variants.find(
           (variant) =>
@@ -123,7 +123,9 @@ export const useStocks = ({ initialData, attributes }: UseStocksProps) => {
             variant.size === combo.size &&
             variant.color === combo.color
         );
-        initialStock = matchingVariant?.stock || INITIAL_STOCK;
+        if (matchingVariant) {
+          initialStock = matchingVariant.stock;
+        }
       }
 
       newStocks[key] = {
