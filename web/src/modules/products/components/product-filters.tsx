@@ -94,17 +94,23 @@ export function ProductFilters({
   useEffect(() => {
     const handleResize = () => {
       const desktop = window.innerWidth >= 1024;
+      const wasDesktop = isDesktop;
       setIsDesktop(desktop);
-      setShowFilters(desktop);
-      if (desktop) {
-        setIsClosing(false);
+
+      // Only auto-show/hide filters when crossing the desktop/mobile threshold
+      // Don't close on mobile keyboard resize
+      if (desktop !== wasDesktop) {
+        setShowFilters(desktop);
+        if (desktop) {
+          setIsClosing(false);
+        }
       }
     };
 
     handleResize();
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
-  }, []);
+  }, [isDesktop]);
 
   // Prevent body scroll when filters are open
   useEffect(() => {
@@ -688,7 +694,7 @@ export function ProductFilters({
     }
 
     onPriceRangeChange([minPrice, maxPrice]);
-    
+
     // Close filter on mobile after applying price
     if (!isDesktop) {
       handleClose();
