@@ -117,9 +117,16 @@ export class DonationsService {
               quantity: 1,
               unit_price: dto.amount,
               product_id: 'DONATION',
-              description: `დონაცია SoulArt-ისთვის${dto.message ? ` - ${dto.message.substring(0, 50)}` : ''}`,
+              description: 'SoulArt დონაცია',
             },
           ],
+        },
+        buyer: {
+          full_name: dto.donorName,
+          email: dto.donorEmail || undefined,
+        },
+        industry: {
+          type: 'ecommerce',
         },
         payment_method: ['card'],
         ttl: 30, // 30 minutes to complete
