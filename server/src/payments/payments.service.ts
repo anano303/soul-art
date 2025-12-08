@@ -97,7 +97,7 @@ export class PaymentsService {
           total_amount: data.product.totalPrice,
           basket,
         },
-        payment_method: ['card', 'google_pay', 'apple_pay', 'bog_loyalty'],
+        payment_method: ['card', 'google_pay', 'apple_pay', 'bog_loyalty', 'bog_p2p'],
         ttl: 10,
         redirect_urls: {
           success: data.successUrl || 'https://soulart.ge/checkout/success',
