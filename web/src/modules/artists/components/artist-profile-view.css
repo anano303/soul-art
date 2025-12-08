@@ -24,7 +24,7 @@
 
 /* Share button positioned in bottom right corner of hero */
 .artist-hero__share {
-  position: absolute;
+  position: absolute !important;
   bottom: 1.5rem;
   right: 1.5rem;
   z-index: 10;

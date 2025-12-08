@@ -195,7 +195,7 @@ function resolveBiography(
 
 export function ArtistProfileView({ data }: ArtistProfileViewProps) {
   const { language } = useLanguage();
-  const { user } = useUser();
+  const { user, isLoading: userLoading } = useUser();
   const router = useRouter();
   const queryClient = useQueryClient();
   const { artist, products, portfolio } = data;
@@ -547,7 +547,10 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
   }, [portfolioPosts, artist.artistGallery]);
 
   const anySocial = socialOrder.some(({ key }) => artist.artistSocials?.[key]);
-  const isOwner = user?._id === artist.id;
+  
+  // Get user ID - could be _id or id depending on source (API vs localStorage)
+  const userId = user?._id || (user as { id?: string })?.id;
+  const isOwner = !userLoading && !!userId && userId === artist.id;
 
   // When owner is detected, fetch all products (including pending/rejected)
   useEffect(() => {
@@ -784,7 +787,7 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
                 ) : null}
 
                 {/* Rate Artist Button - show if not own profile */}
-                {(!user || user?._id !== artist.id) && (
+                {(!user || userId !== artist.id) && (
                   <button
                     onClick={() => {
                       if (!user) {

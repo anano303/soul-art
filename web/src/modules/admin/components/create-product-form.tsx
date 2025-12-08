@@ -2276,6 +2276,68 @@ export function CreateProductForm({
             )}
           </div>
         )}
+        
+        {/* Hashtags Section - moved before delivery */}
+        <div>
+          <label htmlFor="hashtags">
+            {language === "en"
+              ? "Hashtags for SEO (English)"
+              : "ჰეშთეგები SEO-სთვის"}
+          </label>
+          <textarea
+            id="hashtags"
+            name="hashtags"
+            value={hashtagsInput}
+            onChange={handleHashtagsChange}
+            className="create-product-textarea"
+            placeholder={
+              language === "en"
+                ? "Enter hashtags separated by commas (e.g., handmade, art, unique)"
+                : "შეიყვანეთ ჰეშთეგები მძიმეებით გამოყოფილი (მაგ. ხელნაკეთი, ხელოვნება, უნიკალური)"
+            }
+            rows={3}
+          />
+          <small style={{ color: "#666", fontSize: "0.9rem" }}>
+            {language === "en"
+              ? "Add relevant hashtags to improve search visibility. Separate with commas."
+              : "დაამატეთ შესაბამისი ჰეშთეგები ძიების გაუმჯობესებისთვის. გამოყავით მძიმეებით."}
+          </small>
+          {/* Hashtags preview */}
+          {formData.hashtags && formData.hashtags.length > 0 && (
+            <div
+              style={{
+                marginTop: "8px",
+                padding: "8px",
+                backgroundColor: "#f8f9fa",
+                borderRadius: "4px",
+                border: "1px solid #e9ecef",
+              }}
+            >
+              <small style={{ color: "#495057", fontWeight: "bold" }}>
+                {language === "en" ? "Preview:" : "გადახედვა:"}
+              </small>
+              <div style={{ marginTop: "4px" }}>
+                {formData.hashtags.map((tag, index) => (
+                  <span
+                    key={index}
+                    style={{
+                      display: "inline-block",
+                      backgroundColor: "#007bff",
+                      color: "white",
+                      padding: "2px 6px",
+                      margin: "2px",
+                      borderRadius: "3px",
+                      fontSize: "0.8rem",
+                    }}
+                  >
+                    #{tag}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+
         <label>
           {language === "en" ? "Delivery Section" : "მიწოდების განყოფილება"}
         </label>
@@ -2364,65 +2426,6 @@ export function CreateProductForm({
             </div>
           )}
         </div>
-        <div>
-          <label htmlFor="hashtags">
-            {language === "en"
-              ? "Hashtags for SEO (English)"
-              : "ჰეშთეგები SEO-სთვის"}
-          </label>
-          <textarea
-            id="hashtags"
-            name="hashtags"
-            value={hashtagsInput}
-            onChange={handleHashtagsChange}
-            className="create-product-textarea"
-            placeholder={
-              language === "en"
-                ? "Enter hashtags separated by commas (e.g., handmade, art, unique)"
-                : "შეიყვანეთ ჰეშთეგები მძიმეებით გამოყოფილი (მაგ. ხელნაკეთი, ხელოვნება, უნიკალური)"
-            }
-            rows={3}
-          />
-          <small style={{ color: "#666", fontSize: "0.9rem" }}>
-            {language === "en"
-              ? "Add relevant hashtags to improve search visibility. Separate with commas."
-              : "დაამატეთ შესაბამისი ჰეშთეგები ძიების გაუმჯობესებისთვის. გამოყავით მძიმეებით."}
-          </small>
-          {/* Hashtags preview */}
-          {formData.hashtags && formData.hashtags.length > 0 && (
-            <div
-              style={{
-                marginTop: "8px",
-                padding: "8px",
-                backgroundColor: "#f8f9fa",
-                borderRadius: "4px",
-                border: "1px solid #e9ecef",
-              }}
-            >
-              <small style={{ color: "#495057", fontWeight: "bold" }}>
-                {language === "en" ? "Preview:" : "გადახედვა:"}
-              </small>
-              <div style={{ marginTop: "4px" }}>
-                {formData.hashtags.map((tag, index) => (
-                  <span
-                    key={index}
-                    style={{
-                      display: "inline-block",
-                      backgroundColor: "#007bff",
-                      color: "white",
-                      padding: "2px 6px",
-                      margin: "2px",
-                      borderRadius: "3px",
-                      fontSize: "0.8rem",
-                    }}
-                  >
-                    #{tag}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>{" "}
         {/* Brand Name */}
         <div>
           <label htmlFor="brand">{t("adminProducts.brand")}</label>
