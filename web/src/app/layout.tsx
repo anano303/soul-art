@@ -339,6 +339,20 @@ export default function RootLayout({
                   originalWarn.apply(console, arguments);
                 };
                 
+                // Auto-reload on chunk load failure (after new deploy)
+                window.addEventListener('error', function(e) {
+                  var message = String(e.message || '');
+                  if (message.includes('Loading chunk') || 
+                      message.includes('Failed to load') ||
+                      message.includes('ChunkLoadError')) {
+                    var reloadKey = 'chunk_reload_' + Date.now().toString().slice(0, -4);
+                    if (!sessionStorage.getItem(reloadKey)) {
+                      sessionStorage.setItem(reloadKey, '1');
+                      window.location.reload();
+                    }
+                  }
+                }, true);
+                
                 // Suppress console errors
                 var originalError = console.error;
                 console.error = function() {
@@ -350,6 +364,8 @@ export default function RootLayout({
                       message.includes('googletagmanager') ||
                       message.includes('analytics') ||
                       message.includes('Failed to load') ||
+                      message.includes('Loading chunk') ||
+                      message.includes('ChunkLoadError') ||
                       message.includes('net::ERR') ||
                       message.includes('TypeError') ||
                       message.includes('reading') ||
