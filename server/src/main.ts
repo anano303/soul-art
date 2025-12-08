@@ -11,6 +11,7 @@ import * as fs from 'fs';
 import * as express from 'express';
 import { apiRateLimit } from './middleware/security.middleware';
 import { CloudinaryUrlInterceptor } from './interceptors/cloudinary-url.interceptor';
+import { MulterExceptionFilter } from './interceptors/multer-exception.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
@@ -115,6 +116,9 @@ async function bootstrap() {
 
   // Apply Cloudinary URL transformation to all responses
   app.useGlobalInterceptors(new CloudinaryUrlInterceptor());
+  
+  // Apply Multer exception filter for better upload error handling
+  app.useGlobalFilters(new MulterExceptionFilter());
 
   app.use('/favicon.ico', (req, res) => res.status(204).send());
 

@@ -317,6 +317,17 @@ export class ProductsController {
       video?: Express.Multer.File[];
     },
   ) {
+    // Log received files for debugging
+    console.log('📦 Product upload request:', {
+      userId: user?._id,
+      userName: user?.name,
+      imagesCount: allFiles?.images?.length || 0,
+      brandLogoCount: allFiles?.brandLogo?.length || 0,
+      videoCount: allFiles?.video?.length || 0,
+      imageNames: allFiles?.images?.map(f => f.originalname) || [],
+      productName: productData?.name,
+    });
+
     const files = allFiles.images;
     const { brandLogo } = allFiles;
     const videoFile = allFiles.video?.[0] || null;
