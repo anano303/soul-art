@@ -871,49 +871,43 @@ export class EmailService {
     sellerName: string,
     subject: string,
     message: string,
+    artistSlug?: string,
   ): Promise<void> {
+    const profileUrl = artistSlug
+      ? `https://soulart.ge/@${artistSlug}`
+      : 'https://soulart.ge';
+
     const mailOptions = {
       from: emailConfig.from,
       to, // ინდივიდუალურად იგზავნება ყველა სელერს
       subject: `SoulArt: ${subject}`,
       html: `
-        <div style="font-family: 'FiraGO', Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background: #f9fafb;">
-          <div style="background: white; padding: 30px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
-            <!-- Header -->
-            <div style="text-align: center; margin-bottom: 30px;">
-              <h1 style="color: #012645; margin: 0; font-size: 24px;">SoulArt</h1>
-              <p style="color: #6b7280; font-size: 14px; margin: 5px 0 0;">შეტყობინება ადმინისტრაციისგან</p>
-            </div>
-            
-            <!-- Greeting -->
-            <p style="color: #374151; font-size: 16px; margin-bottom: 20px;">
+        <div style="font-family: 'FiraGO', Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff;">
+          <!-- Header -->
+          <div style="background: linear-gradient(135deg, #012645, #0f4f75); padding: 20px; text-align: center;">
+            <h1 style="color: white; margin: 0; font-size: 22px; font-weight: 600;">SoulArt</h1>
+          </div>
+          
+          <!-- Content -->
+          <div style="padding: 24px;">
+            <p style="color: #374151; font-size: 15px; margin: 0 0 16px;">
               გამარჯობა, <strong>${sellerName}</strong>!
             </p>
             
-            <!-- Message Content -->
-            <div style="background: #f3f4f6; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
-              <div style="color: #374151; font-size: 15px; line-height: 1.7; white-space: pre-line;">
-                ${message}
-              </div>
+            <div style="color: #374151; font-size: 14px; line-height: 1.6; white-space: pre-line; margin-bottom: 20px;">
+${message}
             </div>
             
-            <!-- CTA Button -->
-            <div style="text-align: center; margin: 25px 0;">
-              <a href="${process.env.ALLOWED_ORIGINS}/profile" 
-                 style="background: linear-gradient(135deg, #012645, #0f4f75); color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; display: inline-block; font-weight: 600;">
-                პროფილზე გადასვლა
-              </a>
-            </div>
+            <a href="${profileUrl}" 
+               style="background: #012645; color: white; padding: 10px 20px; text-decoration: none; border-radius: 6px; display: inline-block; font-size: 14px;">
+              SoulArt.ge
+            </a>
           </div>
           
           <!-- Footer -->
-          <div style="margin-top: 20px; text-align: center;">
-            <hr style="border: none; border-top: 1px solid #e5e7eb; margin-bottom: 20px;">
-            <p style="color: #9ca3af; font-size: 12px; margin: 0;">
-              ეს შეტყობინება გამოგზავნილია SoulArt-ის ადმინისტრაციის მიერ
-            </p>
-            <p style="color: #9ca3af; font-size: 12px; margin: 5px 0 0;">
-              © ${new Date().getFullYear()} SoulArt. ყველა უფლება დაცულია.
+          <div style="background: #f3f4f6; padding: 16px; text-align: center; border-top: 1px solid #e5e7eb;">
+            <p style="color: #6b7280; font-size: 12px; margin: 0;">
+              © ${new Date().getFullYear()} SoulArt
             </p>
           </div>
         </div>

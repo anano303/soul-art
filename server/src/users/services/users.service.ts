@@ -2529,7 +2529,7 @@ export class UsersService {
 
     const sellers = await this.userModel
       .find(query)
-      .select('name email storeName')
+      .select('name email storeName artistSlug')
       .lean();
 
     if (sellers.length === 0) {
@@ -2548,6 +2548,7 @@ export class UsersService {
           seller.storeName || seller.name,
           subject,
           message,
+          seller.artistSlug,
         );
         sent++;
         this.logger.log(`Email sent to seller: ${seller.email}`);

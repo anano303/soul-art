@@ -41,7 +41,9 @@ export default function SellerNotificationsPage() {
   const [subject, setSubject] = useState("");
   const [message, setMessage] = useState("");
   const [result, setResult] = useState<SendResult | null>(null);
-  const [selectedSellerIds, setSelectedSellerIds] = useState<Set<string>>(new Set());
+  const [selectedSellerIds, setSelectedSellerIds] = useState<Set<string>>(
+    new Set()
+  );
   const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
@@ -79,8 +81,8 @@ export default function SellerNotificationsPage() {
     );
   }, [sellers, searchQuery]);
 
-  const allSelected = useMemo(() => 
-    sellers.length > 0 && selectedSellerIds.size === sellers.length,
+  const allSelected = useMemo(
+    () => sellers.length > 0 && selectedSellerIds.size === sellers.length,
     [sellers.length, selectedSellerIds.size]
   );
 
@@ -104,7 +106,11 @@ export default function SellerNotificationsPage() {
 
   // Send bulk email mutation
   const sendMutation = useMutation({
-    mutationFn: async (data: { subject: string; message: string; sellerIds: string[] }) => {
+    mutationFn: async (data: {
+      subject: string;
+      message: string;
+      sellerIds: string[];
+    }) => {
       const res = await fetchWithAuth("/users/admin/send-bulk-email-sellers", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -148,10 +154,10 @@ export default function SellerNotificationsPage() {
       return;
     }
     setResult(null);
-    sendMutation.mutate({ 
-      subject, 
-      message, 
-      sellerIds: Array.from(selectedSellerIds) 
+    sendMutation.mutate({
+      subject,
+      message,
+      sellerIds: Array.from(selectedSellerIds),
     });
   };
 
@@ -237,7 +243,10 @@ export default function SellerNotificationsPage() {
               type="submit"
               className="submit-btn"
               disabled={
-                sendMutation.isPending || !subject.trim() || !message.trim() || selectedSellerIds.size === 0
+                sendMutation.isPending ||
+                !subject.trim() ||
+                !message.trim() ||
+                selectedSellerIds.size === 0
               }
             >
               {sendMutation.isPending ? (
@@ -256,7 +265,11 @@ export default function SellerNotificationsPage() {
 
           {/* Result */}
           {result && (
-            <div className={`result-banner ${result.success ? "success" : "error"}`}>
+            <div
+              className={`result-banner ${
+                result.success ? "success" : "error"
+              }`}
+            >
               {result.success ? (
                 <>
                   <CheckCircle size={24} />
@@ -270,7 +283,9 @@ export default function SellerNotificationsPage() {
                   <AlertCircle size={24} />
                   <div className="result-content">
                     <strong>შეცდომა</strong>
-                    <span>გაიგზავნა: {result.sent}, წარუმატებელი: {result.failed}</span>
+                    <span>
+                      გაიგზავნა: {result.sent}, წარუმატებელი: {result.failed}
+                    </span>
                     {result.errors.length > 0 && (
                       <ul className="error-list">
                         {result.errors.slice(0, 3).map((err, i) => (
@@ -290,7 +305,9 @@ export default function SellerNotificationsPage() {
           <div className="card-header">
             <Users size={22} />
             <h2>სელერების სია</h2>
-            <span className="recipients-count">{selectedSellerIds.size}/{sellers.length}</span>
+            <span className="recipients-count">
+              {selectedSellerIds.size}/{sellers.length}
+            </span>
           </div>
 
           <div className="recipients-controls">
@@ -336,9 +353,11 @@ export default function SellerNotificationsPage() {
           ) : (
             <div className="recipients-list">
               {filteredSellers.map((seller) => (
-                <div 
-                  key={seller._id} 
-                  className={`recipient-item ${selectedSellerIds.has(seller._id) ? 'selected' : ''}`}
+                <div
+                  key={seller._id}
+                  className={`recipient-item ${
+                    selectedSellerIds.has(seller._id) ? "selected" : ""
+                  }`}
                   onClick={() => toggleSeller(seller._id)}
                 >
                   <div className="recipient-checkbox">
@@ -352,7 +371,9 @@ export default function SellerNotificationsPage() {
                     {(seller.brandName || seller.name).charAt(0).toUpperCase()}
                   </div>
                   <div className="recipient-info">
-                    <span className="recipient-name">{seller.brandName || seller.name}</span>
+                    <span className="recipient-name">
+                      {seller.brandName || seller.name}
+                    </span>
                     <span className="recipient-email">{seller.email}</span>
                   </div>
                 </div>
