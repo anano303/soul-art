@@ -5,6 +5,7 @@ import dynamic from "next/dynamic";
 import HomePagesHead from "@/components/homePagesHead/homePagesHead";
 import TopItems from "@/components/TopItems/TopItems";
 import Banner from "@/components/banner/banner";
+import PremiumRail from "@/components/premiumRail/PremiumRail";
 import DiscountedRail from "@/components/discountedRail/DiscountedRail";
 import { useLanguage } from "@/hooks/LanguageContext";
 import { trackPageView } from "@/lib/ga4-analytics";
@@ -59,6 +60,7 @@ const Home = () => {
       </div> */}
       <TopItems />
       <Banner />
+      <PremiumRail />
       <DiscountedRail />
       <GiftCategories />
       <NewYearPaintings />
