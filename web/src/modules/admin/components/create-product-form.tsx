@@ -844,6 +844,27 @@ export function CreateProductForm({
     const { files } = e.target;
     if (files) {
       const newImages = Array.from(files);
+      const totalImages = formData.images.length + newImages.length;
+      const maxImages = 10;
+      
+      if (totalImages > maxImages) {
+        setErrors((prev) => ({
+          ...prev,
+          images: language === "en"
+            ? `Maximum ${maxImages} images allowed. You tried to add ${newImages.length} but already have ${formData.images.length}.`
+            : `მაქსიმუმ ${maxImages} სურათის ატვირთვა შეიძლება. თქვენ ცდილობთ ${newImages.length}-ის დამატებას, მაგრამ უკვე გაქვთ ${formData.images.length}.`
+        }));
+        // Reset file input
+        e.target.value = '';
+        return;
+      }
+      
+      // Clear any previous image error
+      setErrors((prev) => {
+        const { images, ...rest } = prev;
+        return rest;
+      });
+      
       setFormData((prev) => ({
         ...prev,
         images: [...prev.images, ...newImages],
@@ -1541,84 +1562,91 @@ export function CreateProductForm({
             <p className="create-product-error text-center">{serverError}</p>
           </div>
         )}{" "}
-        <div className="video-upload-section">
-          <label htmlFor="productVideo">
-            {language === "en"
-              ? "Product video (optional)"
-              : "პროდუქტის ვიდეო (არასავალდებულო)"}
-          </label>
-          <p className="video-upload-helper">
-            {language === "en"
-              ? "Uploading a short product video increases the chance of selling your artwork."
-              : "ვიდეოს ატვირთვა გაზრდის გაყიდვების შესაძლებლობას."}
-          </p>
+        {/* Video and Images - Side by Side */}
+        <div className="media-upload-row">
+          {/* Video Section */}
+          <div className="video-upload-section">
+            <label htmlFor="productVideo">
+              {language === "en" ? "Video" : "ვიდეო"}
+              {/* Green checkmark when video uploaded */}
+              {(uploadedYoutubeData || videoFile) && !videoUploading && (
+                <span className="video-success-check" title={language === "en" ? "Uploaded" : "აიტვირთა"}>✓</span>
+              )}
+            </label>
+            
+            {/* Video uploading indicator */}
+            {videoUploading && (
+              <div className="video-uploading-indicator">
+                <div className="video-upload-spinner"></div>
+              </div>
+            )}
+            
+            {!videoUploading && (
+              <input
+                id="productVideo"
+                type="file"
+                accept="video/*"
+                onChange={handleVideoChange}
+                className="video-file-input"
+                disabled={videoUploading}
+              />
+            )}
+            {videoError && <p className="create-product-error">{videoError}</p>}
+          </div>
           
-          {/* Video uploading indicator */}
-          {videoUploading && (
-            <div className="video-uploading-indicator">
-              <div className="video-upload-spinner"></div>
-              <p className="video-upload-status">
-                {videoUploadProgress || (language === "en" 
-                  ? "Uploading video to YouTube..." 
-                  : "ვიდეო იტვირთება YouTube-ზე...")}
+          {/* Images Section */}
+          <div className="images-upload-section">
+            <label htmlFor="images">{t("adminProducts.images")}</label>
+            <input
+              id="images"
+              name="images"
+              type="file"
+              accept="image/*"
+              onChange={handleFileChange}
+              className="create-product-file"
+              multiple
+            />
+            {formData.images.length === 0 && (
+              <p className="upload-reminder">
+                {t("adminProducts.uploadReminder")}
               </p>
-            </div>
-          )}
-          
-          {/* YouTube upload success */}
-          {uploadedYoutubeData && !videoUploading && (
-            <div className="youtube-upload-success">
-              <span className="success-icon">✅</span>
-              <span>
-                {language === "en" 
-                  ? "Video uploaded to YouTube!" 
-                  : "ვიდეო აიტვირთა YouTube-ზე!"}
-              </span>
-              <a 
-                href={uploadedYoutubeData.videoUrl} 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="youtube-link"
-              >
-                {language === "en" ? "View" : "ნახვა"}
-              </a>
-            </div>
-          )}
-          
-          <input
-            id="productVideo"
-            type="file"
-            accept="video/*"
-            onChange={handleVideoChange}
-            className="video-file-input"
-            disabled={videoUploading}
-          />
-          {videoError && <p className="create-product-error">{videoError}</p>}
-          {videoFile && (
-            <div className="selected-video-chip">
-              <span>{videoFile.name}</span>
-              <button
-                type="button"
-                onClick={handleRemoveVideo}
-                className="remove-video-button"
-              >
-                {language === "en" ? "Remove" : "წაშლა"}
-              </button>
-            </div>
-          )}
-          {!videoFile && existingYoutubeVideoUrl && (
-            <a
-              href={existingYoutubeVideoUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="youtube-preview-link"
-            >
-              {language === "en"
-                ? "View current YouTube video"
-                : "იხილეთ ამჟამინდელი YouTube ვიდეო"}
-            </a>
-          )}
+            )}
+          </div>
         </div>
+        
+        {/* Image previews - full width below */}
+        {formData.images.length > 0 && (
+          <div className="image-preview-container">
+            {formData.images.map((image, index) => {
+              const imageUrl =
+                image instanceof File ? URL.createObjectURL(image) : image;
+              return (
+                <div key={index} className="image-preview">
+                  <Image
+                    loader={({ src }) => src}
+                    src={imageUrl}
+                    alt="Product preview"
+                    width={100}
+                    height={100}
+                    unoptimized
+                    className="preview-image"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveImage(index)}
+                    className="remove-image-button"
+                  >
+                    ✕
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        )}
+        {errors.images && (
+          <p className="create-product-error">{errors.images}</p>
+        )}
+
         {/* Discount Section */}
         <div className="discount-section">
           <h3>
@@ -1696,41 +1724,19 @@ export function CreateProductForm({
             </>
           )}
         </div>
-        <div className="form-row-2">
-          <label
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "8px",
-              cursor: "pointer",
-              fontWeight: 500,
-            }}
-          >
-            <input
-              type="checkbox"
-              checked={addToPortfolio}
-              onChange={(e) => setAddToPortfolio(e.target.checked)}
-            />
-            <span>
-              {language === "en"
-                ? "Add this listing to my portfolio automatically"
-                : "ავტომატურად დაამატე ეს პროდუქტი ჩემს პორტფოლიოში"}
-            </span>
-          </label>
-          <small
-            style={{
-              color: "#666",
-              fontSize: "0.85rem",
-              display: "block",
-              marginTop: "4px",
-              lineHeight: "1.4",
-            }}
-          >
+        {/* Portfolio checkbox - compact */}
+        <label className="portfolio-checkbox-compact">
+          <input
+            type="checkbox"
+            checked={addToPortfolio}
+            onChange={(e) => setAddToPortfolio(e.target.checked)}
+          />
+          <span>
             {language === "en"
-              ? "If unchecked, you can publish it later from the portfolio page."
-              : "თუ არ მონიშნავ, პორტფოლიოში მოგვიანებით დამატებასაც შეძლებ."}
-          </small>
-        </div>
+              ? "Add to portfolio"
+              : "პორტფოლიოში დამატება"}
+          </span>
+        </label>
         <div>
           <label htmlFor="name">{t("adminProducts.productNameGe")}</label>
           <input
@@ -2416,132 +2422,79 @@ export function CreateProductForm({
             </div>
           )}
         </div>{" "}
-        {/* Brand and Brand Logo - Side by Side */}
-        <div className="form-row-2">
-          <div>
-            <label htmlFor="brand">{t("adminProducts.brand")}</label>
-            <input
-              id="brand"
-              name="brand"
-              value={formData.brand}
-              onChange={handleChange}
-              placeholder={t("adminProducts.enterBrandName")}
-              className={"create-product-input"}
-              disabled={isSeller}
-              readOnly={isSeller}
-            />
+        {/* Brand Name */}
+        <div>
+          <label htmlFor="brand">{t("adminProducts.brand")}</label>
+          <input
+            id="brand"
+            name="brand"
+            value={formData.brand}
+            onChange={handleChange}
+            placeholder={t("adminProducts.enterBrandName")}
+            className={"create-product-input"}
+            disabled={isSeller}
+            readOnly={isSeller}
+          />
+          {isSeller && (
+            <p className="seller-info-text">
+              {language === "en"
+                ? "Brand name is automatically set to your store name"
+                : "ბრენდის სახელი ავტომატურად დაყენებულია თქვენი მაღაზიის სახელზე, ეს სახელი გამოჩნდება როგორც ავტორი, შეცვლა შეგიძლიათ პროფილიდან"}
+            </p>
+          )}
+          {errors.brand && (
+            <p className="create-product-error">{errors.brand}</p>
+          )}
+        </div>
+        {/* Brand Logo - Hidden but still submitted */}
+        <div style={{ display: 'none' }}>
+          <label htmlFor="brandLogo">{t("adminProducts.brandLogo")}</label>
+          <div className="brand-logo-container">
+            {(user?.storeLogo || typeof formData.brandLogo === "string") && (
+              <div className="image-preview">
+                <Image
+                  loader={({ src }) => src}
+                  alt="Brand logo"
+                  src={
+                    user?.storeLogo ||
+                    (typeof formData.brandLogo === "string"
+                      ? formData.brandLogo
+                      : "")
+                  }
+                  width={100}
+                  height={100}
+                  unoptimized
+                  className="preview-image"
+                />
+              </div>
+            )}
+            {!isSeller && (
+              <input
+                id="brandLogo"
+                name="brandLogo"
+                type="file"
+                accept="image/*"
+                onChange={(e) => {
+                  if (e.target.files?.[0]) {
+                    setFormData((prev) => ({
+                      ...prev,
+                      brandLogo: e.target.files?.[0],
+                    }));
+                  }
+                }}
+                className="create-product-file"
+              />
+            )}
             {isSeller && (
               <p className="seller-info-text">
                 {language === "en"
-                  ? "Brand name is automatically set to your store name"
-                  : "ბრენდის სახელი ავტომატურად დაყენებულია თქვენი მაღაზიის სახელზე, ეს სახელი გამოჩნდება როგორც ავტორი, შეცვლა შეგიძლიათ პროფილიდან"}
+                  ? "Brand logo is automatically set to your store logo. To change it, update your profile."
+                  : "ბრენდის ლოგო ავტომატურად დაყენებულია თქვენი მაღაზიის ლოგოზე. შესაცვლელად განაახლეთ თქვენი პროფილი."}
               </p>
             )}
-            {errors.brand && (
-              <p className="create-product-error">{errors.brand}</p>
-            )}
           </div>
-          <div>
-            <label htmlFor="brandLogo">{t("adminProducts.brandLogo")}</label>
-            <div className="brand-logo-container">
-              {(user?.storeLogo || typeof formData.brandLogo === "string") && (
-                <div className="image-preview">
-                  <Image
-                    loader={({ src }) => src}
-                    alt="Brand logo"
-                    src={
-                      user?.storeLogo ||
-                      (typeof formData.brandLogo === "string"
-                        ? formData.brandLogo
-                        : "")
-                    }
-                    width={100}
-                    height={100}
-                    unoptimized
-                    className="preview-image"
-                  />
-                </div>
-              )}
-              {!isSeller && (
-                <input
-                  id="brandLogo"
-                  name="brandLogo"
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => {
-                    if (e.target.files?.[0]) {
-                      setFormData((prev) => ({
-                        ...prev,
-                        brandLogo: e.target.files?.[0],
-                      }));
-                    }
-                  }}
-                  className="create-product-file"
-                />
-              )}
-              {isSeller && (
-                <p className="seller-info-text">
-                  {language === "en"
-                    ? "Brand logo is automatically set to your store logo. To change it, update your profile."
-                    : "ბრენდის ლოგო ავტომატურად დაყენებულია თქვენი მაღაზიის ლოგოზე. შესაცვლელად განაახლეთ თქვენი პროფილი."}
-                </p>
-              )}
-            </div>
-            {errors.brandLogo && (
-              <p className="create-product-error">{errors.brandLogo}</p>
-            )}
-          </div>
-        </div>
-        {/* Hashtags Field for SEO */}
-        <div>
-          <label htmlFor="images">{t("adminProducts.images")}</label>
-          <small style={{ color: "#666", fontSize: "0.9rem" }}>
-            {language === "en"
-              ? "It's recommended to upload multiple high-quality photos from different angles to better showcase your artwork."
-              : "სასურველია ატვირთოთ რამდენიმე სხვადასხვა ხედის, მაღალი ხარისხის ფოტო, ნამუშევრის უკეთესად წარმოსაჩენად."}
-          </small>
-          <input
-            id="images"
-            name="images"
-            type="file"
-            accept="image/*"
-            onChange={handleFileChange}
-            className="create-product-file"
-            multiple
-          />
-          {formData.images.length === 0 && (
-            <p className="upload-reminder">
-              {t("adminProducts.uploadReminder")}
-            </p>
-          )}
-          <div className="image-preview-container">
-            {formData.images.map((image, index) => {
-              const imageUrl =
-                image instanceof File ? URL.createObjectURL(image) : image;
-              return (
-                <div key={index} className="image-preview">
-                  <Image
-                    loader={({ src }) => src}
-                    src={imageUrl}
-                    alt="Product preview"
-                    width={100}
-                    height={100}
-                    unoptimized
-                    className="preview-image"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => handleRemoveImage(index)}
-                    className="remove-image-button"
-                  >
-                    ✕
-                  </button>
-                </div>
-              );
-            })}
-          </div>
-          {errors.images && (
-            <p className="create-product-error">{errors.images}</p>
+          {errors.brandLogo && (
+            <p className="create-product-error">{errors.brandLogo}</p>
           )}
         </div>
         {/* General Error Display */}
