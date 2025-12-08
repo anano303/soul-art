@@ -249,7 +249,7 @@ export class UsersController {
   ) {
     const pageNumber = parseInt(page, 10);
     const limitNumber = parseInt(limit, 10);
-    
+
     return this.usersService.getFollowers(artistId, pageNumber, limitNumber);
   }
 
@@ -264,12 +264,14 @@ export class UsersController {
   ) {
     // Only allow users to see their own following list
     if (userId !== (user['_id'] as string)) {
-      throw new BadRequestException('You can only view your own following list');
+      throw new BadRequestException(
+        'You can only view your own following list',
+      );
     }
 
     const pageNumber = parseInt(page, 10);
     const limitNumber = parseInt(limit, 10);
-    
+
     return this.usersService.getFollowing(userId, pageNumber, limitNumber);
   }
 
@@ -291,7 +293,10 @@ export class UsersController {
     @CurrentUser() user: User,
     @Body() addressData: CreateAddressDto,
   ) {
-    return this.usersService.addShippingAddress(user['_id'] as string, addressData);
+    return this.usersService.addShippingAddress(
+      user['_id'] as string,
+      addressData,
+    );
   }
 
   @ApiOperation({ summary: 'Update shipping address' })
@@ -316,7 +321,10 @@ export class UsersController {
     @CurrentUser() user: User,
     @Param('addressId') addressId: string,
   ) {
-    return this.usersService.deleteShippingAddress(user['_id'] as string, addressId);
+    return this.usersService.deleteShippingAddress(
+      user['_id'] as string,
+      addressId,
+    );
   }
 
   @ApiOperation({ summary: 'Set default shipping address' })
@@ -326,6 +334,27 @@ export class UsersController {
     @CurrentUser() user: User,
     @Param('addressId') addressId: string,
   ) {
-    return this.usersService.setDefaultAddress(user['_id'] as string, addressId);
+    return this.usersService.setDefaultAddress(
+      user['_id'] as string,
+      addressId,
+    );
+  }
+
+  @ApiOperation({ summary: 'Send bulk email to selected sellers' })
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.Admin)
+  @Post('admin/send-bulk-email-sellers')
+  async sendBulkEmailToSellers(
+    @Body() body: { subject: string; message: string; sellerIds?: string[] },
+  ) {
+    return this.usersService.sendBulkEmailToSellers(body.subject, body.message, body.sellerIds);
+  }
+
+  @ApiOperation({ summary: 'Get all sellers for bulk email preview' })
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.Admin)
+  @Get('admin/sellers-for-email')
+  async getSellersForEmail() {
+    return this.usersService.getSellersForBulkEmail();
   }
 }

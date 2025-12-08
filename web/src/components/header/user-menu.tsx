@@ -24,6 +24,7 @@ import {
   PenSquare,
   Landmark,
   Heart,
+  Mail,
 } from "lucide-react";
 
 // Add a style object for the FiraGo font
@@ -369,6 +370,18 @@ export default function UserMenu({ onNavigate }: { onNavigate?: () => void }) {
               >
                 <Heart size={18} />
                 <span>დონაციები</span>
+              </Link>
+            )}
+
+            {/* Seller Notifications link - Only for Admin */}
+            {user.role?.toLowerCase() === Role.Admin && (
+              <Link
+                href="/admin/seller-notifications"
+                className="dropdown-item"
+                onClick={handleLinkClick}
+              >
+                <Mail size={18} />
+                <span>სელერებისთვის მეილი</span>
               </Link>
             )}
 

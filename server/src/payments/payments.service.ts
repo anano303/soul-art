@@ -97,7 +97,13 @@ export class PaymentsService {
           total_amount: data.product.totalPrice,
           basket,
         },
-        payment_method: ['card', 'google_pay', 'apple_pay', 'bog_loyalty', 'bog_p2p'],
+        payment_method: [
+          'card',
+          'google_pay',
+          'apple_pay',
+          'bog_loyalty',
+          'bog_p2p',
+        ],
         ttl: 10,
         redirect_urls: {
           success: data.successUrl || 'https://soulart.ge/checkout/success',
@@ -211,7 +217,9 @@ export class PaymentsService {
       }
 
       // BOG returns order_status.key = "completed"
-      const statusKey = paymentStatus?.order_status?.key?.toLowerCase() || status?.toLowerCase();
+      const statusKey =
+        paymentStatus?.order_status?.key?.toLowerCase() ||
+        status?.toLowerCase();
 
       const isPaymentSuccessful = statusKey === 'completed';
 

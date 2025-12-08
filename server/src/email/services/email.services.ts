@@ -397,8 +397,8 @@ export class EmailService {
 
     // Use orderDetailsUrl for guest users, profileUrl for registered users
     const viewOrderUrl = orderDetailsUrl || profileUrl;
-    const viewOrderText = orderDetailsUrl 
-      ? 'შეკვეთის დეტალების ნახვა' 
+    const viewOrderText = orderDetailsUrl
+      ? 'შეკვეთის დეტალების ნახვა'
       : 'პროფილიდან';
 
     const itemsList = (orderItems || []).map((item) => {
@@ -856,6 +856,66 @@ export class EmailService {
           
           <hr style="margin: 30px 0; border: none; border-top: 1px solid #e5e7eb;">
           <p style="color: #999; font-size: 12px; text-align: center;">SoulArt Team</p>
+        </div>
+      `,
+    };
+
+    await this.transporter.sendMail(mailOptions);
+  }
+
+  /**
+   * ადმინის შეტყობინება სელერებისთვის (ინდივიდუალური გაგზავნა)
+   */
+  async sendBulkMessageToSeller(
+    to: string,
+    sellerName: string,
+    subject: string,
+    message: string,
+  ): Promise<void> {
+    const mailOptions = {
+      from: emailConfig.from,
+      to, // ინდივიდუალურად იგზავნება ყველა სელერს
+      subject: `SoulArt: ${subject}`,
+      html: `
+        <div style="font-family: 'FiraGO', Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background: #f9fafb;">
+          <div style="background: white; padding: 30px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+            <!-- Header -->
+            <div style="text-align: center; margin-bottom: 30px;">
+              <h1 style="color: #012645; margin: 0; font-size: 24px;">SoulArt</h1>
+              <p style="color: #6b7280; font-size: 14px; margin: 5px 0 0;">შეტყობინება ადმინისტრაციისგან</p>
+            </div>
+            
+            <!-- Greeting -->
+            <p style="color: #374151; font-size: 16px; margin-bottom: 20px;">
+              გამარჯობა, <strong>${sellerName}</strong>!
+            </p>
+            
+            <!-- Message Content -->
+            <div style="background: #f3f4f6; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+              <div style="color: #374151; font-size: 15px; line-height: 1.7; white-space: pre-line;">
+                ${message}
+              </div>
+            </div>
+            
+            <!-- CTA Button -->
+            <div style="text-align: center; margin: 25px 0;">
+              <a href="${process.env.ALLOWED_ORIGINS}/profile" 
+                 style="background: linear-gradient(135deg, #012645, #0f4f75); color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; display: inline-block; font-weight: 600;">
+                პროფილზე გადასვლა
+              </a>
+            </div>
+          </div>
+          
+          <!-- Footer -->
+          <div style="margin-top: 20px; text-align: center;">
+            <hr style="border: none; border-top: 1px solid #e5e7eb; margin-bottom: 20px;">
+            <p style="color: #9ca3af; font-size: 12px; margin: 0;">
+              ეს შეტყობინება გამოგზავნილია SoulArt-ის ადმინისტრაციის მიერ
+            </p>
+            <p style="color: #9ca3af; font-size: 12px; margin: 5px 0 0;">
+              © ${new Date().getFullYear()} SoulArt. ყველა უფლება დაცულია.
+            </p>
+          </div>
         </div>
       `,
     };

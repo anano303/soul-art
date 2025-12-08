@@ -33,6 +33,7 @@ import { ReferralsService } from '@/referrals/services/referrals.service';
 import { OrdersService } from '@/orders/services/orders.service';
 import { UpdateArtistProfileDto } from '../dtos/update-artist-profile.dto';
 import { ArtistSocialLinks } from '../schemas/user.schema';
+import { EmailService } from '@/email/services/email.services';
 
 @Injectable()
 export class UsersService {
@@ -52,6 +53,8 @@ export class UsersService {
     @Optional()
     @Inject(forwardRef(() => OrdersService))
     private readonly ordersService?: OrdersService,
+    @Optional()
+    private readonly emailService?: EmailService,
   ) {}
 
   private normalizeArtistSlug(slug: string): string {
@@ -647,87 +650,95 @@ export class UsersService {
         artistId: artist._id,
       };
 
-      const [
-        products,
-        totalProducts,
-        portfolioPosts,
-        totalPortfolioPosts,
-      ] = await Promise.all([
-        this.productModel
-          .find(productsFilter)
-          .sort({ createdAt: -1 })
-          .skip(skip)
-          .limit(limit)
-          .select([
-            'name',
-            'price',
-            'images',
-            'brand',
-            'brandLogo',
-            'rating',
-            'numReviews',
-            'description',
-            'discountPercentage',
-            'discountStartDate',
-            'discountEndDate',
-            'countInStock',
-            'deliveryType',
-            'minDeliveryDays',
-            'maxDeliveryDays',
-            'createdAt',
-          ])
-          .lean(),
-        this.productModel.countDocuments(productsFilter),
-        this.portfolioPostModel
-          .find(portfolioFilter)
-          .populate({
-            path: 'productId',
-            select: 'status countInStock variants',
-          })
-          .sort({ 
-            isFeatured: -1, 
-            // For featured items, sort by updatedAt (when they were marked as featured)
-            // For non-featured items, this doesn't matter as publishedAt takes precedence
-            updatedAt: -1, 
-            // publishedAt maintains original chronological order for non-featured items
-            publishedAt: -1, 
-            createdAt: -1, 
-            _id: -1 
-          })
-          .limit(60)
-          .select([
-            'productId',
-            'images',
-            'caption',
-            'tags',
-            'likesCount',
-            'commentsCount',
-            'isFeatured',
-            'updatedAt',
-            'publishedAt',
-            'createdAt',
-          ])
-          .lean()
-          .then((posts) => {
-            // Post-process to apply conditional sorting:
-            // Featured items: sort by updatedAt
-            // Non-featured items: sort by publishedAt only
-            const featured = posts.filter(p => (p as any).isFeatured).sort((a, b) => {
-              const aTime = new Date((a as any).updatedAt || (a as any).createdAt).getTime();
-              const bTime = new Date((b as any).updatedAt || (b as any).createdAt).getTime();
-              return bTime - aTime;
-            });
-            
-            const nonFeatured = posts.filter(p => !(p as any).isFeatured).sort((a, b) => {
-              const aTime = new Date((a as any).publishedAt || (a as any).createdAt).getTime();
-              const bTime = new Date((b as any).publishedAt || (b as any).createdAt).getTime();
-              return bTime - aTime;
-            });
-            
-            return [...featured, ...nonFeatured];
-          }),
-        this.portfolioPostModel.countDocuments(portfolioFilter),
-      ]);
+      const [products, totalProducts, portfolioPosts, totalPortfolioPosts] =
+        await Promise.all([
+          this.productModel
+            .find(productsFilter)
+            .sort({ createdAt: -1 })
+            .skip(skip)
+            .limit(limit)
+            .select([
+              'name',
+              'price',
+              'images',
+              'brand',
+              'brandLogo',
+              'rating',
+              'numReviews',
+              'description',
+              'discountPercentage',
+              'discountStartDate',
+              'discountEndDate',
+              'countInStock',
+              'deliveryType',
+              'minDeliveryDays',
+              'maxDeliveryDays',
+              'createdAt',
+            ])
+            .lean(),
+          this.productModel.countDocuments(productsFilter),
+          this.portfolioPostModel
+            .find(portfolioFilter)
+            .populate({
+              path: 'productId',
+              select: 'status countInStock variants',
+            })
+            .sort({
+              isFeatured: -1,
+              // For featured items, sort by updatedAt (when they were marked as featured)
+              // For non-featured items, this doesn't matter as publishedAt takes precedence
+              updatedAt: -1,
+              // publishedAt maintains original chronological order for non-featured items
+              publishedAt: -1,
+              createdAt: -1,
+              _id: -1,
+            })
+            .limit(60)
+            .select([
+              'productId',
+              'images',
+              'caption',
+              'tags',
+              'likesCount',
+              'commentsCount',
+              'isFeatured',
+              'updatedAt',
+              'publishedAt',
+              'createdAt',
+            ])
+            .lean()
+            .then((posts) => {
+              // Post-process to apply conditional sorting:
+              // Featured items: sort by updatedAt
+              // Non-featured items: sort by publishedAt only
+              const featured = posts
+                .filter((p) => (p as any).isFeatured)
+                .sort((a, b) => {
+                  const aTime = new Date(
+                    (a as any).updatedAt || (a as any).createdAt,
+                  ).getTime();
+                  const bTime = new Date(
+                    (b as any).updatedAt || (b as any).createdAt,
+                  ).getTime();
+                  return bTime - aTime;
+                });
+
+              const nonFeatured = posts
+                .filter((p) => !(p as any).isFeatured)
+                .sort((a, b) => {
+                  const aTime = new Date(
+                    (a as any).publishedAt || (a as any).createdAt,
+                  ).getTime();
+                  const bTime = new Date(
+                    (b as any).publishedAt || (b as any).createdAt,
+                  ).getTime();
+                  return bTime - aTime;
+                });
+
+              return [...featured, ...nonFeatured];
+            }),
+          this.portfolioPostModel.countDocuments(portfolioFilter),
+        ]);
 
       const storeLogo = artist.storeLogoPath ?? artist.storeLogo ?? null;
 
@@ -755,7 +766,9 @@ export class UsersService {
       const derivedGalleryUrls = formattedPortfolioPosts.flatMap((post) =>
         post.images
           .map((image) => image.url)
-          .filter((url) => typeof url === 'string' && this.isCloudinaryUrl(url)),
+          .filter(
+            (url) => typeof url === 'string' && this.isCloudinaryUrl(url),
+          ),
       );
 
       const uniqueGalleryUrls: string[] = [];
@@ -771,7 +784,9 @@ export class UsersService {
         this.isCloudinaryUrl(url),
       );
 
-      const galleryUrls = uniqueGalleryUrls.length ? uniqueGalleryUrls : legacyGallery;
+      const galleryUrls = uniqueGalleryUrls.length
+        ? uniqueGalleryUrls
+        : legacyGallery;
 
       return {
         artist: {
@@ -2467,6 +2482,91 @@ export class UsersService {
       artistDirectRating: artist.artistDirectRating ?? 0,
       artistDirectReviewsCount: artist.artistDirectReviewsCount ?? 0,
       reviews: artist.artistDirectReviews ?? [],
+    };
+  }
+
+  /**
+   * მიიღე ყველა სელერი მეილისთვის
+   */
+  async getSellersForBulkEmail(): Promise<
+    Array<{ _id: string; name: string; email: string; brandName?: string }>
+  > {
+    const sellers = await this.userModel
+      .find({ role: Role.Seller })
+      .select('_id name email storeName')
+      .lean();
+
+    return sellers.map((s) => ({
+      _id: s._id.toString(),
+      name: s.name,
+      email: s.email,
+      brandName: s.storeName,
+    }));
+  }
+
+  /**
+   * გაუგზავნე მეილი არჩეულ სელერებს ინდივიდუალურად
+   */
+  async sendBulkEmailToSellers(
+    subject: string,
+    message: string,
+    sellerIds?: string[],
+  ): Promise<{
+    success: boolean;
+    sent: number;
+    failed: number;
+    errors: string[];
+  }> {
+    if (!this.emailService) {
+      throw new BadRequestException('Email service is not available');
+    }
+
+    // თუ sellerIds მითითებულია, მხოლოდ არჩეულ სელერებს ვუგზავნით
+    const query: any = { role: Role.Seller };
+    if (sellerIds && sellerIds.length > 0) {
+      query._id = { $in: sellerIds };
+    }
+
+    const sellers = await this.userModel
+      .find(query)
+      .select('name email storeName')
+      .lean();
+
+    if (sellers.length === 0) {
+      return { success: true, sent: 0, failed: 0, errors: [] };
+    }
+
+    let sent = 0;
+    let failed = 0;
+    const errors: string[] = [];
+
+    // ინდივიდუალურად ვაგზავნით ყველა სელერს
+    for (const seller of sellers) {
+      try {
+        await this.emailService.sendBulkMessageToSeller(
+          seller.email,
+          seller.storeName || seller.name,
+          subject,
+          message,
+        );
+        sent++;
+        this.logger.log(`Email sent to seller: ${seller.email}`);
+
+        // პატარა დაყოვნება რომ არ გადავაჭარბოთ rate limit-ს
+        await new Promise((resolve) => setTimeout(resolve, 100));
+      } catch (error) {
+        failed++;
+        const errorMsg = `Failed to send to ${seller.email}: ${error.message}`;
+        errors.push(errorMsg);
+        this.logger.error(errorMsg);
+      }
+    }
+
+    return {
+      success: failed === 0,
+      sent,
+      failed,
+      errors,
     };
   }
 }
