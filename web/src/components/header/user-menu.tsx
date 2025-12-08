@@ -307,7 +307,7 @@ export default function UserMenu({
               onClick={handleLinkClick}
             >
               <ShoppingBag size={18} />
-              <span>{t("navigation.orders")}</span>
+              <span>{t("navigation.myOrders")}</span>
             </Link>
 
             {/* რეფერალების ლინკი ყველა ავტორიზებული მომხმარებლისთვის */}
