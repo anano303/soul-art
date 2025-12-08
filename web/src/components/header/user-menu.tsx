@@ -385,6 +385,18 @@ export default function UserMenu({ onNavigate }: { onNavigate?: () => void }) {
               </Link>
             )}
 
+            {/* Customer Notifications link - Only for Admin */}
+            {user.role?.toLowerCase() === Role.Admin && (
+              <Link
+                href="/admin/customer-notifications"
+                className="dropdown-item"
+                onClick={handleLinkClick}
+              >
+                <Mail size={18} />
+                <span>მომხმარებლებისთვის მეილი</span>
+              </Link>
+            )}
+
             {user.role?.toLowerCase() === Role.Seller && (
               <Link
                 href="/profile/balance"

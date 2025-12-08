@@ -347,7 +347,11 @@ export class UsersController {
   async sendBulkEmailToSellers(
     @Body() body: { subject: string; message: string; sellerIds?: string[] },
   ) {
-    return this.usersService.sendBulkEmailToSellers(body.subject, body.message, body.sellerIds);
+    return this.usersService.sendBulkEmailToSellers(
+      body.subject,
+      body.message,
+      body.sellerIds,
+    );
   }
 
   @ApiOperation({ summary: 'Get all sellers for bulk email preview' })
@@ -356,5 +360,27 @@ export class UsersController {
   @Get('admin/sellers-for-email')
   async getSellersForEmail() {
     return this.usersService.getSellersForBulkEmail();
+  }
+
+  @ApiOperation({ summary: 'Get all customers for bulk email preview' })
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.Admin)
+  @Get('admin/customers-for-email')
+  async getCustomersForEmail() {
+    return this.usersService.getCustomersForBulkEmail();
+  }
+
+  @ApiOperation({ summary: 'Send bulk email to selected customers' })
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.Admin)
+  @Post('admin/send-bulk-email-customers')
+  async sendBulkEmailToCustomers(
+    @Body() body: { subject: string; message: string; customerIds?: string[] },
+  ) {
+    return this.usersService.sendBulkEmailToCustomers(
+      body.subject,
+      body.message,
+      body.customerIds,
+    );
   }
 }

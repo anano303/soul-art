@@ -16,15 +16,14 @@ import {
   CheckSquare,
   Square,
   Search,
-  Store,
+  ShoppingBag,
 } from "lucide-react";
-import "./seller-notifications.css";
+import "../seller-notifications/seller-notifications.css";
 
-interface Seller {
+interface Customer {
   _id: string;
   name: string;
   email: string;
-  brandName?: string;
 }
 
 interface SendResult {
@@ -34,14 +33,16 @@ interface SendResult {
   errors: string[];
 }
 
-export default function SellerNotificationsPage() {
+export default function CustomerNotificationsPage() {
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
 
   const [subject, setSubject] = useState("");
   const [message, setMessage] = useState("");
   const [result, setResult] = useState<SendResult | null>(null);
-  const [selectedSellerIds, setSelectedSellerIds] = useState<Set<string>>(new Set());
+  const [selectedCustomerIds, setSelectedCustomerIds] = useState<Set<string>>(
+    new Set()
+  );
   const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
@@ -50,66 +51,74 @@ export default function SellerNotificationsPage() {
     }
   }, [user, authLoading, router]);
 
-  // Fetch sellers for preview
-  const { data: sellers = [], isLoading: sellersLoading } = useQuery<Seller[]>({
-    queryKey: ["admin", "sellers-for-email"],
+  // Fetch customers for preview
+  const { data: customers = [], isLoading: customersLoading } = useQuery<
+    Customer[]
+  >({
+    queryKey: ["admin", "customers-for-email"],
     queryFn: async () => {
-      const res = await fetchWithAuth("/users/admin/sellers-for-email");
-      if (!res.ok) throw new Error("Failed to fetch sellers");
+      const res = await fetchWithAuth("/users/admin/customers-for-email");
+      if (!res.ok) throw new Error("Failed to fetch customers");
       return res.json();
     },
     enabled: !!user && user.role?.toLowerCase() === Role.Admin,
   });
 
-  // Select all sellers when they load
+  // Select all customers when they load
   useEffect(() => {
-    if (sellers.length > 0 && selectedSellerIds.size === 0) {
-      setSelectedSellerIds(new Set(sellers.map((s) => s._id)));
+    if (customers.length > 0 && selectedCustomerIds.size === 0) {
+      setSelectedCustomerIds(new Set(customers.map((c) => c._id)));
     }
-  }, [sellers]);
+  }, [customers]);
 
-  const filteredSellers = useMemo(() => {
-    if (!searchQuery.trim()) return sellers;
+  const filteredCustomers = useMemo(() => {
+    if (!searchQuery.trim()) return customers;
     const query = searchQuery.toLowerCase();
-    return sellers.filter(
-      (s) =>
-        s.name.toLowerCase().includes(query) ||
-        s.email.toLowerCase().includes(query) ||
-        (s.brandName && s.brandName.toLowerCase().includes(query))
+    return customers.filter(
+      (c) =>
+        c.name.toLowerCase().includes(query) ||
+        c.email.toLowerCase().includes(query)
     );
-  }, [sellers, searchQuery]);
+  }, [customers, searchQuery]);
 
-  const allSelected = useMemo(() => 
-    sellers.length > 0 && selectedSellerIds.size === sellers.length,
-    [sellers.length, selectedSellerIds.size]
+  const allSelected = useMemo(
+    () => customers.length > 0 && selectedCustomerIds.size === customers.length,
+    [customers.length, selectedCustomerIds.size]
   );
 
   const toggleSelectAll = () => {
     if (allSelected) {
-      setSelectedSellerIds(new Set());
+      setSelectedCustomerIds(new Set());
     } else {
-      setSelectedSellerIds(new Set(sellers.map((s) => s._id)));
+      setSelectedCustomerIds(new Set(customers.map((c) => c._id)));
     }
   };
 
-  const toggleSeller = (sellerId: string) => {
-    const newSet = new Set(selectedSellerIds);
-    if (newSet.has(sellerId)) {
-      newSet.delete(sellerId);
+  const toggleCustomer = (customerId: string) => {
+    const newSet = new Set(selectedCustomerIds);
+    if (newSet.has(customerId)) {
+      newSet.delete(customerId);
     } else {
-      newSet.add(sellerId);
+      newSet.add(customerId);
     }
-    setSelectedSellerIds(newSet);
+    setSelectedCustomerIds(newSet);
   };
 
   // Send bulk email mutation
   const sendMutation = useMutation({
-    mutationFn: async (data: { subject: string; message: string; sellerIds: string[] }) => {
-      const res = await fetchWithAuth("/users/admin/send-bulk-email-sellers", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      });
+    mutationFn: async (data: {
+      subject: string;
+      message: string;
+      customerIds: string[];
+    }) => {
+      const res = await fetchWithAuth(
+        "/users/admin/send-bulk-email-customers",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data),
+        }
+      );
       if (!res.ok) throw new Error("Failed to send emails");
       return res.json() as Promise<SendResult>;
     },
@@ -136,22 +145,22 @@ export default function SellerNotificationsPage() {
       alert("გთხოვთ შეავსოთ თემა და შეტყობინება");
       return;
     }
-    if (selectedSellerIds.size === 0) {
-      alert("გთხოვთ აირჩიოთ მინიმუმ ერთი სელერი");
+    if (selectedCustomerIds.size === 0) {
+      alert("გთხოვთ აირჩიოთ მინიმუმ ერთი მომხმარებელი");
       return;
     }
     if (
       !confirm(
-        `დარწმუნებული ხართ რომ გსურთ ${selectedSellerIds.size} სელერისთვის მეილის გაგზავნა?`
+        `დარწმუნებული ხართ რომ გსურთ ${selectedCustomerIds.size} მომხმარებლისთვის მეილის გაგზავნა?`
       )
     ) {
       return;
     }
     setResult(null);
-    sendMutation.mutate({ 
-      subject, 
-      message, 
-      sellerIds: Array.from(selectedSellerIds) 
+    sendMutation.mutate({
+      subject,
+      message,
+      customerIds: Array.from(selectedCustomerIds),
     });
   };
 
@@ -173,20 +182,20 @@ export default function SellerNotificationsPage() {
   return (
     <div className="notifications-page">
       <div className="notifications-header">
-        <div className="header-icon seller-icon">
-          <Store size={32} />
+        <div className="header-icon customer-icon">
+          <ShoppingBag size={32} />
         </div>
         <div className="header-text">
-          <h1>სელერებისთვის შეტყობინება</h1>
-          <p>გაუგზავნეთ მეილი სელერებს ინდივიდუალურად</p>
+          <h1>მომხმარებლებისთვის შეტყობინება</h1>
+          <p>გაუგზავნეთ მეილი მომხმარებლებს ინდივიდუალურად</p>
         </div>
         <div className="header-stats">
           <div className="stat-item">
-            <span className="stat-number">{sellers.length}</span>
-            <span className="stat-label">სულ სელერი</span>
+            <span className="stat-number">{customers.length}</span>
+            <span className="stat-label">სულ მომხმარებელი</span>
           </div>
           <div className="stat-item">
-            <span className="stat-number">{selectedSellerIds.size}</span>
+            <span className="stat-number">{selectedCustomerIds.size}</span>
             <span className="stat-label">არჩეული</span>
           </div>
         </div>
@@ -211,7 +220,7 @@ export default function SellerNotificationsPage() {
                 id="subject"
                 value={subject}
                 onChange={(e) => setSubject(e.target.value)}
-                placeholder="მაგ: მნიშვნელოვანი სიახლე"
+                placeholder="მაგ: სპეციალური შეთავაზება"
                 className="form-input"
                 disabled={sendMutation.isPending}
               />
@@ -237,7 +246,10 @@ export default function SellerNotificationsPage() {
               type="submit"
               className="submit-btn"
               disabled={
-                sendMutation.isPending || !subject.trim() || !message.trim() || selectedSellerIds.size === 0
+                sendMutation.isPending ||
+                !subject.trim() ||
+                !message.trim() ||
+                selectedCustomerIds.size === 0
               }
             >
               {sendMutation.isPending ? (
@@ -248,7 +260,7 @@ export default function SellerNotificationsPage() {
               ) : (
                 <>
                   <Send size={20} />
-                  გაგზავნა ({selectedSellerIds.size} სელერი)
+                  გაგზავნა ({selectedCustomerIds.size} მომხმარებელი)
                 </>
               )}
             </button>
@@ -256,7 +268,11 @@ export default function SellerNotificationsPage() {
 
           {/* Result */}
           {result && (
-            <div className={`result-banner ${result.success ? "success" : "error"}`}>
+            <div
+              className={`result-banner ${
+                result.success ? "success" : "error"
+              }`}
+            >
               {result.success ? (
                 <>
                   <CheckCircle size={24} />
@@ -270,7 +286,9 @@ export default function SellerNotificationsPage() {
                   <AlertCircle size={24} />
                   <div className="result-content">
                     <strong>შეცდომა</strong>
-                    <span>გაიგზავნა: {result.sent}, წარუმატებელი: {result.failed}</span>
+                    <span>
+                      გაიგზავნა: {result.sent}, წარუმატებელი: {result.failed}
+                    </span>
                     {result.errors.length > 0 && (
                       <ul className="error-list">
                         {result.errors.slice(0, 3).map((err, i) => (
@@ -285,12 +303,14 @@ export default function SellerNotificationsPage() {
           )}
         </div>
 
-        {/* Sellers Preview */}
+        {/* Customers Preview */}
         <div className="notifications-card recipients-card">
           <div className="card-header">
             <Users size={22} />
-            <h2>სელერების სია</h2>
-            <span className="recipients-count">{selectedSellerIds.size}/{sellers.length}</span>
+            <h2>მომხმარებლების სია</h2>
+            <span className="recipients-count">
+              {selectedCustomerIds.size}/{customers.length}
+            </span>
           </div>
 
           <div className="recipients-controls">
@@ -303,7 +323,7 @@ export default function SellerNotificationsPage() {
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
-            {sellers.length > 0 && (
+            {customers.length > 0 && (
               <button
                 type="button"
                 className="select-all-btn"
@@ -324,40 +344,42 @@ export default function SellerNotificationsPage() {
             )}
           </div>
 
-          {sellersLoading ? (
+          {customersLoading ? (
             <div className="loading-state">
               <Loader2 className="animate-spin" size={24} />
             </div>
-          ) : sellers.length === 0 ? (
+          ) : customers.length === 0 ? (
             <div className="empty-state">
               <Users size={48} />
-              <p>სელერები არ მოიძებნა</p>
+              <p>მომხმარებლები არ მოიძებნა</p>
             </div>
           ) : (
             <div className="recipients-list">
-              {filteredSellers.map((seller) => (
-                <div 
-                  key={seller._id} 
-                  className={`recipient-item ${selectedSellerIds.has(seller._id) ? 'selected' : ''}`}
-                  onClick={() => toggleSeller(seller._id)}
+              {filteredCustomers.map((customer) => (
+                <div
+                  key={customer._id}
+                  className={`recipient-item ${
+                    selectedCustomerIds.has(customer._id) ? "selected" : ""
+                  }`}
+                  onClick={() => toggleCustomer(customer._id)}
                 >
                   <div className="recipient-checkbox">
-                    {selectedSellerIds.has(seller._id) ? (
+                    {selectedCustomerIds.has(customer._id) ? (
                       <CheckSquare size={20} className="checkbox-checked" />
                     ) : (
                       <Square size={20} className="checkbox-unchecked" />
                     )}
                   </div>
                   <div className="recipient-avatar">
-                    {(seller.brandName || seller.name).charAt(0).toUpperCase()}
+                    {customer.name.charAt(0).toUpperCase()}
                   </div>
                   <div className="recipient-info">
-                    <span className="recipient-name">{seller.brandName || seller.name}</span>
-                    <span className="recipient-email">{seller.email}</span>
+                    <span className="recipient-name">{customer.name}</span>
+                    <span className="recipient-email">{customer.email}</span>
                   </div>
                 </div>
               ))}
-              {filteredSellers.length === 0 && searchQuery && (
+              {filteredCustomers.length === 0 && searchQuery && (
                 <div className="empty-state small">
                   <p>ძებნის შედეგი არ მოიძებნა</p>
                 </div>

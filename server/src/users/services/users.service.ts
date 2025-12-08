@@ -2569,4 +2569,88 @@ export class UsersService {
       errors,
     };
   }
+
+  /**
+   * მიიღე ყველა მომხმარებელი (კლიენტი) მეილისთვის
+   */
+  async getCustomersForBulkEmail(): Promise<
+    Array<{ _id: string; name: string; email: string }>
+  > {
+    const customers = await this.userModel
+      .find({ role: Role.User })
+      .select('_id name email')
+      .lean();
+
+    return customers.map((c) => ({
+      _id: c._id.toString(),
+      name: c.name,
+      email: c.email,
+    }));
+  }
+
+  /**
+   * გაუგზავნე მეილი არჩეულ მომხმარებლებს ინდივიდუალურად
+   */
+  async sendBulkEmailToCustomers(
+    subject: string,
+    message: string,
+    customerIds?: string[],
+  ): Promise<{
+    success: boolean;
+    sent: number;
+    failed: number;
+    errors: string[];
+  }> {
+    if (!this.emailService) {
+      throw new BadRequestException('Email service is not available');
+    }
+
+    // თუ customerIds მითითებულია, მხოლოდ არჩეულ მომხმარებლებს ვუგზავნით
+    const query: any = { role: Role.User };
+    if (customerIds && customerIds.length > 0) {
+      query._id = { $in: customerIds };
+    }
+
+    const customers = await this.userModel
+      .find(query)
+      .select('name email')
+      .lean();
+
+    if (customers.length === 0) {
+      return { success: true, sent: 0, failed: 0, errors: [] };
+    }
+
+    let sent = 0;
+    let failed = 0;
+    const errors: string[] = [];
+
+    // ინდივიდუალურად ვაგზავნით ყველა მომხმარებელს
+    for (const customer of customers) {
+      try {
+        await this.emailService.sendBulkMessageToSeller(
+          customer.email,
+          customer.name,
+          subject,
+          message,
+        );
+        sent++;
+        this.logger.log(`Email sent to customer: ${customer.email}`);
+
+        // პატარა დაყოვნება რომ არ გადავაჭარბოთ rate limit-ს
+        await new Promise((resolve) => setTimeout(resolve, 100));
+      } catch (error) {
+        failed++;
+        const errorMsg = `Failed to send to ${customer.email}: ${error.message}`;
+        errors.push(errorMsg);
+        this.logger.error(errorMsg);
+      }
+    }
+
+    return {
+      success: failed === 0,
+      sent,
+      failed,
+      errors,
+    };
+  }
 }
