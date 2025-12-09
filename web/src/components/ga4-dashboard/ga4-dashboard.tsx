@@ -61,6 +61,7 @@ interface LiveUserData {
   id: string;
   ip?: string;
   page: string;
+  pages?: string[]; // ყველა გვერდი რაზეც იყო
   device: string;
   browser: string;
   location: string;
@@ -98,7 +99,7 @@ export default function GA4Dashboard() {
   const { language } = useLanguage();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [timeRange, setTimeRange] = useState<"1d" | "7d" | "30d" | "90d">("7d");
+  const [timeRange, setTimeRange] = useState<"1d" | "7d" | "30d" | "90d">("1d");
   const [expandedErrorType, setExpandedErrorType] = useState<string | null>(
     null
   );
@@ -296,6 +297,7 @@ export default function GA4Dashboard() {
           sessionId: v.id,
           ip: v.ip,
           page: v.page,
+          pages: v.pages || [], // ყველა გვერდი რაზეც იყო
           device: v.device,
           browser: v.browser || v.os,
           location: (() => {
@@ -450,7 +452,7 @@ export default function GA4Dashboard() {
                               {language === "en" ? "User" : "მომხმარებელი"}
                             </th>
                             <th>{language === "en" ? "IP" : "IP"}</th>
-                            <th>{language === "en" ? "Page" : "გვერდი"}</th>
+                            <th>{language === "en" ? "Pages" : "გვერდები"}</th>
                             <th>
                               {language === "en" ? "Device" : "მოწყობილობა"}
                             </th>
@@ -487,18 +489,41 @@ export default function GA4Dashboard() {
                               <td className="table-cell-ip" title={user.ip}>
                                 {user.ip || "—"}
                               </td>
-                              <td className="table-cell-page" title={user.page}>
-                                <a
-                                  href={user.page}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  style={{
-                                    color: "#0066cc",
-                                    textDecoration: "underline",
-                                  }}
-                                >
-                                  {user.page}
-                                </a>
+                              <td className="table-cell-page">
+                                {user.pages && user.pages.length > 0 ? (
+                                  <div className="pages-list">
+                                    {user.pages.map((page, pageIndex) => (
+                                      <a
+                                        key={pageIndex}
+                                        href={page}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        style={{
+                                          color: "#0066cc",
+                                          textDecoration: "underline",
+                                          display: "block",
+                                          marginBottom: user.pages!.length > 1 ? "4px" : "0",
+                                          fontSize: user.pages!.length > 3 ? "12px" : "14px",
+                                        }}
+                                        title={page}
+                                      >
+                                        {page.length > 40 ? page.substring(0, 40) + "..." : page}
+                                      </a>
+                                    ))}
+                                  </div>
+                                ) : (
+                                  <a
+                                    href={user.page}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    style={{
+                                      color: "#0066cc",
+                                      textDecoration: "underline",
+                                    }}
+                                  >
+                                    {user.page}
+                                  </a>
+                                )}
                               </td>
                               <td className="table-cell-device">
                                 {user.device}

@@ -83,12 +83,12 @@ export class VisitorTrackingService {
   }
 
   /**
-   * Get active visitors (last 30 minutes) - დუბლირების გარეშე
+   * Get active visitors (last 30 minutes) - IP-ით დათვლილი, ყველა გვერდით
    */
   async getActiveVisitors() {
     const thirtyMinutesAgo = new Date(Date.now() - 30 * 60 * 1000);
 
-    // ჯერ ვიპოვოთ უნიკალური IP-ებით (ბოლო აქტივობით)
+    // ჯერ ვიპოვოთ უნიკალური IP-ებით და ყველა გვერდი შევაგროვოთ
     const activeVisitors = await this.visitorModel.aggregate([
       {
         $match: {
@@ -100,12 +100,13 @@ export class VisitorTrackingService {
         $sort: { lastActivity: -1 },
       },
       {
-        // დავაჯგუფოთ IP-ით და ავიღოთ ბოლო აქტივობა
+        // დავაჯგუფოთ IP-ით და შევაგროვოთ ყველა გვერდი
         $group: {
           _id: '$ip',
           id: { $first: '$_id' },
           ip: { $first: '$ip' },
-          page: { $first: '$page' },
+          pages: { $addToSet: '$page' }, // ყველა უნიკალური გვერდი
+          currentPage: { $first: '$page' }, // ბოლო გვერდი
           device: { $first: '$device' },
           browser: { $first: '$browser' },
           os: { $first: '$os' },
@@ -146,7 +147,8 @@ export class VisitorTrackingService {
       visitors: activeVisitors.map((v: any) => ({
         id: v.id,
         ip: v.ip,
-        page: v.page,
+        page: v.currentPage,
+        pages: v.pages || [], // ყველა გვერდი რაზეც იყო
         device: v.device,
         browser: v.browser,
         os: v.os,
