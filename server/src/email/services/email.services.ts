@@ -121,6 +121,21 @@ export class EmailService {
     });
   }
 
+  /**
+   * Generic email გაგზავნა
+   */
+  async sendMail(options: { to: string; subject: string; html: string; text?: string }) {
+    const mailOptions = {
+      from: emailConfig.from,
+      to: options.to,
+      subject: options.subject,
+      html: options.html,
+      text: options.text,
+    };
+
+    await this.transporter.sendMail(mailOptions);
+  }
+
   async sendPasswordResetEmail(to: string, resetToken: string) {
     const resetLink = `${process.env.ALLOWED_ORIGINS}/reset-password?token=${resetToken}`;
 

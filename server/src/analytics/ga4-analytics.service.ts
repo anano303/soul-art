@@ -83,6 +83,17 @@ export class Ga4AnalyticsService {
     }
   }
 
+  /**
+   * GA4-სთვის სწორი startDate ფორმატი
+   * 1 დღისთვის = "yesterday", დანარჩენისთვის = "NdaysAgo"
+   */
+  private getStartDate(daysAgo: number): string {
+    if (daysAgo <= 1) {
+      return 'yesterday';
+    }
+    return `${daysAgo}daysAgo`;
+  }
+
   async getAnalyticsData(daysAgo: number = 7): Promise<AnalyticsData> {
     if (!this.analyticsDataClient || !this.propertyId) {
       this.logger.error(
@@ -126,10 +137,11 @@ export class Ga4AnalyticsService {
   }
 
   private async getPageViews(daysAgo: number): Promise<PageViewData[]> {
+    const startDate = this.getStartDate(daysAgo);
     const response = await this.analyticsDataClient.properties.runReport({
       property: `properties/${this.propertyId}`,
       requestBody: {
-        dateRanges: [{ startDate: `${daysAgo}daysAgo`, endDate: 'today' }],
+        dateRanges: [{ startDate, endDate: 'today' }],
         dimensions: [{ name: 'pagePath' }, { name: 'pageTitle' }],
         metrics: [{ name: 'screenPageViews' }],
         orderBys: [{ metric: { metricName: 'screenPageViews' }, desc: true }],
@@ -147,10 +159,11 @@ export class Ga4AnalyticsService {
   }
 
   private async getEvents(daysAgo: number) {
+    const startDate = this.getStartDate(daysAgo);
     const response = await this.analyticsDataClient.properties.runReport({
       property: `properties/${this.propertyId}`,
       requestBody: {
-        dateRanges: [{ startDate: `${daysAgo}daysAgo`, endDate: 'today' }],
+        dateRanges: [{ startDate, endDate: 'today' }],
         dimensions: [{ name: 'eventName' }],
         metrics: [{ name: 'eventCount' }],
         orderBys: [{ metric: { metricName: 'eventCount' }, desc: true }],
@@ -178,10 +191,11 @@ export class Ga4AnalyticsService {
       'funnel_purchase_complete',
     ];
 
+    const startDate = this.getStartDate(daysAgo);
     const response = await this.analyticsDataClient.properties.runReport({
       property: `properties/${this.propertyId}`,
       requestBody: {
-        dateRanges: [{ startDate: `${daysAgo}daysAgo`, endDate: 'today' }],
+        dateRanges: [{ startDate, endDate: 'today' }],
         dimensions: [{ name: 'eventName' }],
         metrics: [{ name: 'eventCount' }],
         dimensionFilter: {
@@ -241,11 +255,12 @@ export class Ga4AnalyticsService {
     try {
       this.logger.log('Fetching user journeys from GA4...');
 
+      const startDate = this.getStartDate(daysAgo);
       // Try getting event parameter directly instead of custom dimension
       const response = await this.analyticsDataClient.properties.runReport({
         property: `properties/${this.propertyId}`,
         requestBody: {
-          dateRanges: [{ startDate: `${daysAgo}daysAgo`, endDate: 'today' }],
+          dateRanges: [{ startDate, endDate: 'today' }],
           dimensions: [
             { name: 'eventName' },
             { name: 'eventParameterValue' }, // Get event parameter value
@@ -287,7 +302,7 @@ export class Ga4AnalyticsService {
             property: `properties/${this.propertyId}`,
             requestBody: {
               dateRanges: [
-                { startDate: `${daysAgo}daysAgo`, endDate: 'today' },
+                { startDate, endDate: 'today' },
               ],
               dimensions: [{ name: 'eventName' }],
               metrics: [{ name: 'eventCount' }],
@@ -363,11 +378,12 @@ export class Ga4AnalyticsService {
         error.message,
       );
 
+      const startDateFallback = this.getStartDate(daysAgo);
       // Fallback: Get most visited pages as simple paths
       const response = await this.analyticsDataClient.properties.runReport({
         property: `properties/${this.propertyId}`,
         requestBody: {
-          dateRanges: [{ startDate: `${daysAgo}daysAgo`, endDate: 'today' }],
+          dateRanges: [{ startDate: startDateFallback, endDate: 'today' }],
           dimensions: [{ name: 'pagePath' }],
           metrics: [{ name: 'sessions' }, { name: 'averageSessionDuration' }],
           orderBys: [{ metric: { metricName: 'sessions' }, desc: true }],
@@ -501,10 +517,11 @@ export class Ga4AnalyticsService {
       }
 
       // Fetch ALL error events (increase limit to 1000)
+      const startDate = this.getStartDate(daysAgo);
       const response = await this.analyticsDataClient.properties.runReport({
         property: `properties/${this.propertyId}`,
         requestBody: {
-          dateRanges: [{ startDate: `${daysAgo}daysAgo`, endDate: 'today' }],
+          dateRanges: [{ startDate, endDate: 'today' }],
           dimensions: [
             { name: 'eventName' },
             { name: 'pagePath' },
@@ -828,10 +845,11 @@ export class Ga4AnalyticsService {
 
     try {
       // ჩატის ივენთების წამოღება
+      const startDate = this.getStartDate(daysAgo);
       const response = await this.analyticsDataClient.properties.runReport({
         property: `properties/${this.propertyId}`,
         requestBody: {
-          dateRanges: [{ startDate: `${daysAgo}daysAgo`, endDate: 'today' }],
+          dateRanges: [{ startDate, endDate: 'today' }],
           dimensions: [{ name: 'eventName' }],
           metrics: [{ name: 'eventCount' }],
           dimensionFilter: {
@@ -864,7 +882,7 @@ export class Ga4AnalyticsService {
         await this.analyticsDataClient.properties.runReport({
           property: `properties/${this.propertyId}`,
           requestBody: {
-            dateRanges: [{ startDate: `${daysAgo}daysAgo`, endDate: 'today' }],
+            dateRanges: [{ startDate, endDate: 'today' }],
             dimensions: [{ name: 'date' }],
             metrics: [{ name: 'eventCount' }],
             dimensionFilter: {

@@ -1,10 +1,14 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
 import { ConfigService } from '@nestjs/config';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { ProductsService } from '@/products/services/products.service';
 import { CategoryService } from '@/categories/services/category.service';
 import { BlogService } from '@/blog/blog.service';
 import { BannerService } from '@/banners/services/banner.service';
+import { EmailService } from '@/email/services/email.services';
+import { ChatLog, ChatLogDocument } from './chat-log.schema';
 
 interface ChatMessage {
   role: 'user' | 'assistant' | 'system';
@@ -34,11 +38,13 @@ export class ChatService {
   private cachedBlogTitles: string[] = [];
 
   constructor(
+    @InjectModel(ChatLog.name) private chatLogModel: Model<ChatLogDocument>,
     private configService: ConfigService,
     private productsService: ProductsService,
     private categoryService: CategoryService,
     private blogService: BlogService,
     private bannerService: BannerService,
+    private emailService: EmailService,
   ) {
     const apiKey = this.configService.get<string>('GEMINI_API_KEY');
     if (!apiKey) {
@@ -158,17 +164,45 @@ export class ChatService {
   async chat(
     messages: ChatMessage[],
     searchProducts = false,
+    logInfo?: {
+      sessionId?: string;
+      userIp?: string;
+      userAgent?: string;
+      userId?: string;
+    },
   ): Promise<{
     response: string;
     products?: ProductSearchResult[];
     suggestFacebook?: boolean;
   }> {
+    const startTime = Date.now();
+    const lastMessage = messages[messages.length - 1]?.content || '';
+    const sessionId = logInfo?.sessionId || `session_${Date.now()}`;
+    
     try {
-      const lastMessage = messages[messages.length - 1]?.content || '';
+      // მომხმარებლის მესიჯის ლოგირება
+      if (lastMessage) {
+        await this.logMessage({
+          sessionId,
+          userIp: logInfo?.userIp,
+          role: 'user',
+          message: lastMessage,
+          userAgent: logInfo?.userAgent,
+        });
+      }
 
       // ფიქსირებული პასუხები
       const fixedResponse = this.getFixedResponse(lastMessage);
       if (fixedResponse) {
+        // AI პასუხის ლოგირება
+        await this.logMessage({
+          sessionId,
+          userIp: logInfo?.userIp,
+          role: 'assistant',
+          message: fixedResponse,
+          responseTime: Date.now() - startTime,
+        });
+        
         return {
           response: fixedResponse,
           products: [],
@@ -253,6 +287,16 @@ export class ChatService {
       response = this.fixGeorgianGrammar(response);
 
       const suggestFacebook = this.shouldSuggestFacebook(lastMessage, response);
+
+      // AI პასუხის ლოგირება
+      await this.logMessage({
+        sessionId,
+        userIp: logInfo?.userIp,
+        role: 'assistant',
+        message: response,
+        productIds: products.map((p) => p._id),
+        responseTime: Date.now() - startTime,
+      });
 
       return {
         response,
@@ -730,5 +774,370 @@ export class ChatService {
   // ქეშის განახლება (თუ საჭიროა)
   async refreshCache(): Promise<void> {
     await this.loadCachedData();
+  }
+
+  // ============ CHAT LOGGING ============
+
+  /**
+   * მესიჯის ლოგირება MongoDB-ში
+   */
+  private async logMessage(data: {
+    sessionId: string;
+    userIp?: string;
+    role: 'user' | 'assistant';
+    message: string;
+    productIds?: string[];
+    responseTime?: number;
+    userAgent?: string;
+  }): Promise<void> {
+    try {
+      await this.chatLogModel.create({
+        sessionId: data.sessionId,
+        userIp: data.userIp,
+        role: data.role,
+        message: data.message,
+        productIds: data.productIds || [],
+        responseTime: data.responseTime,
+        userAgent: data.userAgent,
+      });
+    } catch (error) {
+      this.logger.error('Failed to log chat message:', error);
+    }
+  }
+
+  /**
+   * ჩატის ლოგების წამოღება (ადმინისთვის)
+   */
+  async getChatLogs(options: {
+    page?: number;
+    limit?: number;
+    sessionId?: string;
+    search?: string;
+    startDate?: Date;
+    endDate?: Date;
+  } = {}): Promise<{
+    logs: any[];
+    total: number;
+    page: number;
+    totalPages: number;
+  }> {
+    const page = options.page || 1;
+    const limit = options.limit || 50;
+    const skip = (page - 1) * limit;
+
+    const query: any = {};
+
+    if (options.sessionId) {
+      query.sessionId = options.sessionId;
+    }
+
+    if (options.search) {
+      query.message = { $regex: options.search, $options: 'i' };
+    }
+
+    if (options.startDate || options.endDate) {
+      query.createdAt = {};
+      if (options.startDate) {
+        query.createdAt.$gte = options.startDate;
+      }
+      if (options.endDate) {
+        query.createdAt.$lte = options.endDate;
+      }
+    }
+
+    const [logs, total] = await Promise.all([
+      this.chatLogModel
+        .find(query)
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .lean(),
+      this.chatLogModel.countDocuments(query),
+    ]);
+
+    return {
+      logs,
+      total,
+      page,
+      totalPages: Math.ceil(total / limit),
+    };
+  }
+
+  /**
+   * უნიკალური სესიები დაჯგუფებით
+   */
+  async getChatSessions(daysAgo: number = 7): Promise<any[]> {
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - daysAgo);
+
+    const sessions = await this.chatLogModel.aggregate([
+      {
+        $match: {
+          createdAt: { $gte: startDate },
+        },
+      },
+      {
+        $group: {
+          _id: '$sessionId',
+          userIp: { $first: '$userIp' },
+          messageCount: { $sum: 1 },
+          userMessages: {
+            $sum: { $cond: [{ $eq: ['$role', 'user'] }, 1, 0] },
+          },
+          firstMessage: { $first: '$message' },
+          lastMessage: { $last: '$message' },
+          startTime: { $min: '$createdAt' },
+          endTime: { $max: '$createdAt' },
+        },
+      },
+      {
+        $sort: { startTime: -1 },
+      },
+      {
+        $limit: 100,
+      },
+    ]);
+
+    return sessions;
+  }
+
+  /**
+   * ჩატის სტატისტიკა
+   */
+  async getChatStats(daysAgo: number = 7): Promise<{
+    totalSessions: number;
+    totalMessages: number;
+    userMessages: number;
+    aiResponses: number;
+    avgMessagesPerSession: number;
+    avgResponseTime: number;
+    topQueries: { query: string; count: number }[];
+  }> {
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - daysAgo);
+
+    const [stats, topQueries] = await Promise.all([
+      this.chatLogModel.aggregate([
+        {
+          $match: {
+            createdAt: { $gte: startDate },
+          },
+        },
+        {
+          $group: {
+            _id: null,
+            totalMessages: { $sum: 1 },
+            userMessages: {
+              $sum: { $cond: [{ $eq: ['$role', 'user'] }, 1, 0] },
+            },
+            aiResponses: {
+              $sum: { $cond: [{ $eq: ['$role', 'assistant'] }, 1, 0] },
+            },
+            uniqueSessions: { $addToSet: '$sessionId' },
+            avgResponseTime: {
+              $avg: {
+                $cond: [
+                  { $eq: ['$role', 'assistant'] },
+                  '$responseTime',
+                  null,
+                ],
+              },
+            },
+          },
+        },
+      ]),
+      // ხშირად დასმული კითხვები
+      this.chatLogModel.aggregate([
+        {
+          $match: {
+            createdAt: { $gte: startDate },
+            role: 'user',
+          },
+        },
+        {
+          $group: {
+            _id: { $toLower: '$message' },
+            count: { $sum: 1 },
+          },
+        },
+        {
+          $sort: { count: -1 },
+        },
+        {
+          $limit: 20,
+        },
+        {
+          $project: {
+            query: '$_id',
+            count: 1,
+            _id: 0,
+          },
+        },
+      ]),
+    ]);
+
+    const stat = stats[0] || {
+      totalMessages: 0,
+      userMessages: 0,
+      aiResponses: 0,
+      uniqueSessions: [],
+      avgResponseTime: 0,
+    };
+
+    return {
+      totalSessions: stat.uniqueSessions?.length || 0,
+      totalMessages: stat.totalMessages,
+      userMessages: stat.userMessages,
+      aiResponses: stat.aiResponses,
+      avgMessagesPerSession:
+        stat.uniqueSessions?.length > 0
+          ? Math.round(stat.totalMessages / stat.uniqueSessions.length)
+          : 0,
+      avgResponseTime: Math.round(stat.avgResponseTime || 0),
+      topQueries,
+    };
+  }
+
+  /**
+   * ჩატის ლოგების წაშლა
+   */
+  async clearChatLogs(options: {
+    sessionId?: string;
+    beforeDate?: Date;
+  } = {}): Promise<{ success: boolean; deletedCount: number }> {
+    try {
+      const query: any = {};
+
+      if (options.sessionId) {
+        query.sessionId = options.sessionId;
+      }
+
+      if (options.beforeDate) {
+        query.createdAt = { $lt: options.beforeDate };
+      }
+
+      // თუ არაფერი არ არის მითითებული, ყველას წაშლა (სახიფათო!)
+      if (Object.keys(query).length === 0) {
+        const result = await this.chatLogModel.deleteMany({});
+        return { success: true, deletedCount: result.deletedCount };
+      }
+
+      const result = await this.chatLogModel.deleteMany(query);
+      this.logger.log(`Deleted ${result.deletedCount} chat logs`);
+
+      return { success: true, deletedCount: result.deletedCount };
+    } catch (error) {
+      this.logger.error('Failed to clear chat logs:', error);
+      return { success: false, deletedCount: 0 };
+    }
+  }
+
+  /**
+   * ჩატის ლოგების ემაილზე გაგზავნა
+   */
+  async emailChatLogs(
+    email: string,
+    daysAgo: number = 7,
+    sessionId?: string,
+  ): Promise<{ success: boolean; message: string }> {
+    try {
+      const startDate = new Date();
+      startDate.setDate(startDate.getDate() - daysAgo);
+
+      const query: any = { createdAt: { $gte: startDate } };
+      if (sessionId) {
+        query.sessionId = sessionId;
+      }
+
+      const logs = await this.chatLogModel
+        .find(query)
+        .sort({ createdAt: 1 })
+        .lean();
+
+      if (logs.length === 0) {
+        return { success: false, message: 'ლოგები ვერ მოიძებნა' };
+      }
+
+      // სესიებად დაჯგუფება
+      const sessionMap = new Map<string, any[]>();
+      logs.forEach((log: any) => {
+        const sid = log.sessionId;
+        if (!sessionMap.has(sid)) {
+          sessionMap.set(sid, []);
+        }
+        sessionMap.get(sid)!.push(log);
+      });
+
+      // HTML ფორმატირება
+      let htmlContent = `
+        <html>
+        <head>
+          <style>
+            body { font-family: Arial, sans-serif; padding: 20px; }
+            .session { margin-bottom: 30px; border: 1px solid #ddd; padding: 15px; border-radius: 8px; }
+            .session-header { background: #f5f5f5; padding: 10px; margin-bottom: 10px; border-radius: 4px; }
+            .message { padding: 8px 12px; margin: 5px 0; border-radius: 8px; }
+            .user { background: #e3f2fd; text-align: right; }
+            .assistant { background: #f5f5f5; }
+            .meta { font-size: 12px; color: #666; margin-top: 5px; }
+            h1 { color: #012645; }
+            .stats { background: #012645; color: white; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
+          </style>
+        </head>
+        <body>
+          <h1>🤖 Soul Art AI ჩატის ისტორია</h1>
+          <div class="stats">
+            <strong>პერიოდი:</strong> ბოლო ${daysAgo} დღე<br>
+            <strong>სულ მესიჯები:</strong> ${logs.length}<br>
+            <strong>უნიკალური სესიები:</strong> ${sessionMap.size}
+          </div>
+      `;
+
+      sessionMap.forEach((messages, sid) => {
+        const firstMessage = messages[0];
+        const ip = firstMessage.userIp || 'უცნობი';
+        const time = new Date(firstMessage.createdAt).toLocaleString('ka-GE');
+
+        htmlContent += `
+          <div class="session">
+            <div class="session-header">
+              <strong>სესია:</strong> ${sid.substring(0, 20)}...<br>
+              <strong>IP:</strong> ${ip}<br>
+              <strong>დრო:</strong> ${time}
+            </div>
+        `;
+
+        messages.forEach((msg: any) => {
+          const msgTime = new Date(msg.createdAt).toLocaleTimeString('ka-GE');
+          const roleClass = msg.role === 'user' ? 'user' : 'assistant';
+          const roleLabel = msg.role === 'user' ? '👤 მომხმარებელი' : '🤖 AI';
+
+          htmlContent += `
+            <div class="message ${roleClass}">
+              <strong>${roleLabel}</strong><br>
+              ${msg.message}
+              <div class="meta">${msgTime}</div>
+            </div>
+          `;
+        });
+
+        htmlContent += '</div>';
+      });
+
+      htmlContent += '</body></html>';
+
+      // ემაილის გაგზავნა
+      await this.emailService.sendMail({
+        to: email,
+        subject: `Soul Art AI ჩატის ისტორია - ${new Date().toLocaleDateString('ka-GE')}`,
+        html: htmlContent,
+      });
+
+      this.logger.log(`Chat logs sent to ${email}`);
+      return { success: true, message: `ლოგები გაიგზავნა ${email}-ზე` };
+    } catch (error) {
+      this.logger.error('Failed to email chat logs:', error);
+      return { success: false, message: 'ემაილის გაგზავნა ვერ მოხერხდა' };
+    }
   }
 }

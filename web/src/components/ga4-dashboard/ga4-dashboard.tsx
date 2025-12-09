@@ -95,6 +95,42 @@ interface ChatAnalyticsData {
   byDay: { date: string; messages: number }[];
 }
 
+interface ChatLogData {
+  logs: Array<{
+    _id: string;
+    sessionId: string;
+    userIp?: string;
+    role: 'user' | 'assistant';
+    message: string;
+    responseTime?: number;
+    createdAt: string;
+  }>;
+  total: number;
+  page: number;
+  totalPages: number;
+}
+
+interface ChatSession {
+  _id: string;
+  userIp?: string;
+  messageCount: number;
+  userMessages: number;
+  firstMessage: string;
+  lastMessage: string;
+  startTime: string;
+  endTime: string;
+}
+
+interface ChatStats {
+  totalSessions: number;
+  totalMessages: number;
+  userMessages: number;
+  aiResponses: number;
+  avgMessagesPerSession: number;
+  avgResponseTime: number;
+  topQueries: { query: string; count: number }[];
+}
+
 export default function GA4Dashboard() {
   const { language } = useLanguage();
   const [loading, setLoading] = useState(true);
@@ -113,6 +149,18 @@ export default function GA4Dashboard() {
   const [chatAnalytics, setChatAnalytics] = useState<ChatAnalyticsData | null>(
     null
   );
+  
+  // ჩატის ისტორიის state-ები
+  const [activeTab, setActiveTab] = useState<"analytics" | "chat-history">("analytics");
+  const [chatLogs, setChatLogs] = useState<ChatLogData | null>(null);
+  const [chatSessions, setChatSessions] = useState<ChatSession[]>([]);
+  const [chatStats, setChatStats] = useState<ChatStats | null>(null);
+  const [chatLogsLoading, setChatLogsLoading] = useState(false);
+  const [selectedSession, setSelectedSession] = useState<string | null>(null);
+  const [chatSearchQuery, setChatSearchQuery] = useState("");
+  const [emailAddress, setEmailAddress] = useState("");
+  const [emailSending, setEmailSending] = useState(false);
+  
   const [data, setData] = useState<AnalyticsData>({
     pageViews: [],
     homepageEvents: [],
@@ -133,7 +181,7 @@ export default function GA4Dashboard() {
     setError(null);
     setExpandedErrorType(null); // Reset expanded errors when changing period
 
-    const fetchAnalytics = async () => {
+    const fetchAnalytics = async (retryCount = 0) => {
       try {
         const days =
           timeRange === "1d"
@@ -151,6 +199,11 @@ export default function GA4Dashboard() {
         );
 
         if (!response.ok) {
+          // თუ 401/403 და პირველი ცდაა - სცადე ხელახლა
+          if ((response.status === 401 || response.status === 403) && retryCount < 2) {
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            return fetchAnalytics(retryCount + 1);
+          }
           const errorText = await response.text();
           throw new Error(
             `Failed to fetch analytics: ${response.status} ${errorText}`
@@ -186,7 +239,12 @@ export default function GA4Dashboard() {
       }
     };
 
-    fetchAnalytics();
+    // დაელოდე მცირე დროს რომ session დაინიციალიზდეს
+    const timer = setTimeout(() => {
+      fetchAnalytics();
+    }, 100);
+
+    return () => clearTimeout(timer);
   }, [timeRange]);
 
   // Auto-refresh live users every 30 seconds
@@ -339,6 +397,138 @@ export default function GA4Dashboard() {
       setLiveUsersLoading(false);
     }
   };
+
+  // ========== ჩატის ისტორიის ფუნქციები ==========
+  
+  const fetchChatSessions = async () => {
+    try {
+      setChatLogsLoading(true);
+      const days = timeRange === "1d" ? 1 : timeRange === "7d" ? 7 : timeRange === "30d" ? 30 : 90;
+      
+      const [sessionsRes, statsRes] = await Promise.all([
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/chat/admin/sessions?days=${days}`, {
+          credentials: "include",
+        }),
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/chat/admin/stats?days=${days}`, {
+          credentials: "include",
+        }),
+      ]);
+      
+      if (sessionsRes.ok) {
+        const sessionsData = await sessionsRes.json();
+        setChatSessions(sessionsData.sessions || []);
+      }
+      
+      if (statsRes.ok) {
+        const statsData = await statsRes.json();
+        setChatStats(statsData);
+      }
+    } catch (error) {
+      console.error("Error fetching chat sessions:", error);
+    } finally {
+      setChatLogsLoading(false);
+    }
+  };
+
+  const fetchChatLogs = async (sessionId?: string, search?: string, page: number = 1) => {
+    try {
+      setChatLogsLoading(true);
+      const params = new URLSearchParams();
+      params.set("page", page.toString());
+      params.set("limit", "50");
+      if (sessionId) params.set("sessionId", sessionId);
+      if (search) params.set("search", search);
+      
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/chat/admin/logs?${params.toString()}`,
+        { credentials: "include" }
+      );
+      
+      if (res.ok) {
+        const data = await res.json();
+        setChatLogs(data);
+      }
+    } catch (error) {
+      console.error("Error fetching chat logs:", error);
+    } finally {
+      setChatLogsLoading(false);
+    }
+  };
+
+  const handleEmailLogs = async () => {
+    if (!emailAddress) {
+      alert(language === "en" ? "Enter email address" : "შეიყვანეთ ემაილი");
+      return;
+    }
+    
+    try {
+      setEmailSending(true);
+      const days = timeRange === "1d" ? 1 : timeRange === "7d" ? 7 : timeRange === "30d" ? 30 : 90;
+      
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/chat/admin/logs/email`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          email: emailAddress,
+          days,
+          sessionId: selectedSession || undefined,
+        }),
+      });
+      
+      const data = await res.json();
+      if (data.success) {
+        alert(language === "en" ? "Logs sent to email!" : "ლოგები გაიგზავნა ემაილზე!");
+      } else {
+        alert(data.message || "Error");
+      }
+    } catch (error) {
+      console.error("Error sending email:", error);
+      alert(language === "en" ? "Failed to send email" : "ემაილი ვერ გაიგზავნა");
+    } finally {
+      setEmailSending(false);
+    }
+  };
+
+  const handleClearLogs = async () => {
+    const confirmMsg = selectedSession
+      ? (language === "en" ? "Delete this session's logs?" : "წავშალოთ ამ სესიის ლოგები?")
+      : (language === "en" ? "Delete ALL chat logs?" : "წავშალოთ ყველა ჩატის ლოგი?");
+    
+    if (!confirm(confirmMsg)) return;
+    
+    try {
+      const params = new URLSearchParams();
+      if (selectedSession) params.set("sessionId", selectedSession);
+      
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/chat/admin/logs?${params.toString()}`,
+        {
+          method: "DELETE",
+          credentials: "include",
+        }
+      );
+      
+      const data = await res.json();
+      if (data.success) {
+        alert(language === "en" 
+          ? `Deleted ${data.deletedCount} logs` 
+          : `წაიშალა ${data.deletedCount} ლოგი`);
+        fetchChatSessions();
+        setChatLogs(null);
+        setSelectedSession(null);
+      }
+    } catch (error) {
+      console.error("Error clearing logs:", error);
+    }
+  };
+
+  // ტაბის ცვლილებაზე ჩატის სესიების ჩატვირთვა
+  useEffect(() => {
+    if (activeTab === "chat-history") {
+      fetchChatSessions();
+    }
+  }, [activeTab, timeRange]);
 
   const handleLiveUsersClick = () => {
     setShowLiveUsers(!showLiveUsers);
@@ -649,24 +839,202 @@ export default function GA4Dashboard() {
             {language === "en" ? "90 Days" : "90 დღე"}
           </button>
         </div>
+
+        {/* ტაბები - ანალიტიკა vs ჩატის ისტორია */}
+        <div className="ga4-dashboard__tabs">
+          <button
+            className={`tab-btn ${activeTab === "analytics" ? "active" : ""}`}
+            onClick={() => setActiveTab("analytics")}
+          >
+            📊 {language === "en" ? "Analytics" : "ანალიტიკა"}
+          </button>
+          <button
+            className={`tab-btn ${activeTab === "chat-history" ? "active" : ""}`}
+            onClick={() => setActiveTab("chat-history")}
+          >
+            💬 {language === "en" ? "AI Chat History" : "AI ჩატის ისტორია"}
+          </button>
+        </div>
       </div>
 
-      {loading ? (
-        <div className="ga4-dashboard__loading">
-          <div className="spinner"></div>
-          <p>{language === "en" ? "Loading analytics..." : "იტვირთება..."}</p>
+      {/* ჩატის ისტორიის ტაბი */}
+      {activeTab === "chat-history" ? (
+        <div className="chat-history-section">
+          {chatLogsLoading ? (
+            <div className="ga4-dashboard__loading">
+              <div className="spinner"></div>
+              <p>{language === "en" ? "Loading chat history..." : "იტვირთება..."}</p>
+            </div>
+          ) : (
+            <>
+              {/* ჩატის სტატისტიკა */}
+              {chatStats && (
+                <div className="ga4-dashboard__metrics">
+                  <div className="metric-card">
+                    <div className="metric-card__icon">💬</div>
+                    <div className="metric-card__value">{chatStats.totalSessions}</div>
+                    <div className="metric-card__label">
+                      {language === "en" ? "Total Sessions" : "სულ სესიები"}
+                    </div>
+                  </div>
+                  <div className="metric-card">
+                    <div className="metric-card__icon">📝</div>
+                    <div className="metric-card__value">{chatStats.totalMessages}</div>
+                    <div className="metric-card__label">
+                      {language === "en" ? "Total Messages" : "სულ მესიჯები"}
+                    </div>
+                  </div>
+                  <div className="metric-card">
+                    <div className="metric-card__icon">👤</div>
+                    <div className="metric-card__value">{chatStats.userMessages}</div>
+                    <div className="metric-card__label">
+                      {language === "en" ? "User Messages" : "მომხმარებლის"}
+                    </div>
+                  </div>
+                  <div className="metric-card">
+                    <div className="metric-card__icon">🤖</div>
+                    <div className="metric-card__value">{chatStats.aiResponses}</div>
+                    <div className="metric-card__label">
+                      {language === "en" ? "AI Responses" : "AI პასუხები"}
+                    </div>
+                  </div>
+                  <div className="metric-card">
+                    <div className="metric-card__icon">⏱️</div>
+                    <div className="metric-card__value">{chatStats.avgResponseTime}ms</div>
+                    <div className="metric-card__label">
+                      {language === "en" ? "Avg Response" : "საშუალო პასუხი"}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Email & Clear Actions */}
+              <div className="chat-actions-bar">
+                <div className="email-section">
+                  <input
+                    type="email"
+                    placeholder={language === "en" ? "Email address..." : "ემაილი..."}
+                    value={emailAddress}
+                    onChange={(e) => setEmailAddress(e.target.value)}
+                    className="email-input"
+                  />
+                  <button
+                    className="action-btn email-btn"
+                    onClick={handleEmailLogs}
+                    disabled={emailSending}
+                  >
+                    {emailSending ? "..." : "📧"} {language === "en" ? "Send to Email" : "გაგზავნა"}
+                  </button>
+                </div>
+                <button className="action-btn clear-btn" onClick={handleClearLogs}>
+                  🗑️ {selectedSession 
+                    ? (language === "en" ? "Clear Session" : "სესიის წაშლა")
+                    : (language === "en" ? "Clear All" : "ყველას წაშლა")}
+                </button>
+              </div>
+
+              {/* Top Queries */}
+              {chatStats && chatStats.topQueries.length > 0 && (
+                <div className="ga4-dashboard__section">
+                  <h3>🔥 {language === "en" ? "Top Questions" : "ხშირი კითხვები"}</h3>
+                  <div className="top-queries-list">
+                    {chatStats.topQueries.slice(0, 10).map((q, i) => (
+                      <div key={i} className="query-item">
+                        <span className="query-rank">#{i + 1}</span>
+                        <span className="query-text">{q.query}</span>
+                        <span className="query-count">{q.count}x</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Sessions List */}
+              <div className="ga4-dashboard__section">
+                <h3>📋 {language === "en" ? "Chat Sessions" : "ჩატის სესიები"}</h3>
+                {chatSessions.length === 0 ? (
+                  <p className="no-data">{language === "en" ? "No chat sessions found" : "ჩატის სესიები ვერ მოიძებნა"}</p>
+                ) : (
+                  <div className="sessions-list">
+                    {chatSessions.map((session) => (
+                      <div
+                        key={session._id}
+                        className={`session-card ${selectedSession === session._id ? "selected" : ""}`}
+                        onClick={() => {
+                          if (selectedSession === session._id) {
+                            setSelectedSession(null);
+                            setChatLogs(null);
+                          } else {
+                            setSelectedSession(session._id);
+                            fetchChatLogs(session._id);
+                          }
+                        }}
+                      >
+                        <div className="session-header">
+                          <span className="session-ip">🌐 {session.userIp || "Unknown"}</span>
+                          <span className="session-time">
+                            {new Date(session.startTime).toLocaleString("ka-GE")}
+                          </span>
+                        </div>
+                        <div className="session-stats">
+                          <span>💬 {session.messageCount} {language === "en" ? "messages" : "მესიჯი"}</span>
+                          <span>👤 {session.userMessages} {language === "en" ? "user" : "მომხმარებელი"}</span>
+                        </div>
+                        <div className="session-preview">
+                          <strong>{language === "en" ? "First:" : "პირველი:"}</strong> {session.firstMessage?.substring(0, 50)}...
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Selected Session Messages */}
+              {selectedSession && chatLogs && (
+                <div className="ga4-dashboard__section chat-messages-section">
+                  <h3>💭 {language === "en" ? "Conversation" : "საუბარი"}</h3>
+                  <div className="chat-messages">
+                    {chatLogs.logs.map((log) => (
+                      <div key={log._id} className={`chat-message ${log.role}`}>
+                        <div className="message-header">
+                          <span className="message-role">
+                            {log.role === "user" ? "👤" : "🤖"}
+                          </span>
+                          <span className="message-time">
+                            {new Date(log.createdAt).toLocaleTimeString("ka-GE")}
+                          </span>
+                          {log.responseTime && (
+                            <span className="response-time">{log.responseTime}ms</span>
+                          )}
+                        </div>
+                        <div className="message-content">{log.message}</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </>
+          )}
         </div>
       ) : (
+        /* ანალიტიკის ტაბი (არსებული კონტენტი) */
         <>
-          {/* Key Metrics */}
-          <div className="ga4-dashboard__metrics">
-            <div className="metric-card metric-card--primary">
-              <div className="metric-card__icon">🎯</div>
-              <div className="metric-card__value">{conversionRate}%</div>
-              <div className="metric-card__label">
-                {language === "en"
-                  ? "Conversion Rate"
-                  : "კონვერსიის მაჩვენებელი"}
+          {loading ? (
+            <div className="ga4-dashboard__loading">
+              <div className="spinner"></div>
+              <p>{language === "en" ? "Loading analytics..." : "იტვირთება..."}</p>
+            </div>
+          ) : (
+            <>
+              {/* Key Metrics */}
+              <div className="ga4-dashboard__metrics">
+                <div className="metric-card metric-card--primary">
+                  <div className="metric-card__icon">🎯</div>
+                  <div className="metric-card__value">{conversionRate}%</div>
+                  <div className="metric-card__label">
+                    {language === "en"
+                      ? "Conversion Rate"
+                      : "კონვერსიის მაჩვენებელი"}
               </div>
             </div>
 
@@ -1370,6 +1738,8 @@ export default function GA4Dashboard() {
                 : "შენიშვნა: ანალიტიკის მონაცემები მოდის Google Analytics 4-დან. თუ GA4 არ არის კონფიგურირებული, ნაჩვენებია ნიმუშის მონაცემები."}
             </p>
           </div>
+            </>
+          )}
         </>
       )}
     </div>
