@@ -84,6 +84,16 @@ interface RealtimeData {
   error?: string;
 }
 
+interface ChatAnalyticsData {
+  totalChats: number;
+  totalMessages: number;
+  aiResponses: number;
+  facebookClicks: number;
+  productClicks: number;
+  errors: number;
+  byDay: { date: string; messages: number }[];
+}
+
 export default function GA4Dashboard() {
   const { language } = useLanguage();
   const [loading, setLoading] = useState(true);
@@ -99,6 +109,9 @@ export default function GA4Dashboard() {
   const [showLiveUsers, setShowLiveUsers] = useState(false);
   const [liveUsersData, setLiveUsersData] = useState<RealtimeData | null>(null);
   const [liveUsersLoading, setLiveUsersLoading] = useState(false);
+  const [chatAnalytics, setChatAnalytics] = useState<ChatAnalyticsData | null>(
+    null
+  );
   const [data, setData] = useState<AnalyticsData>({
     pageViews: [],
     homepageEvents: [],
@@ -146,6 +159,20 @@ export default function GA4Dashboard() {
         const analyticsData = await response.json();
         setData(analyticsData);
         setError(null);
+
+        // ჩატის ანალიტიკის fetch
+        try {
+          const chatResponse = await fetch(
+            `${process.env.NEXT_PUBLIC_API_URL}/analytics/ga4/chat?days=${days}`,
+            { credentials: "include" }
+          );
+          if (chatResponse.ok) {
+            const chatData = await chatResponse.json();
+            setChatAnalytics(chatData);
+          }
+        } catch (chatError) {
+          console.error("Error fetching chat analytics:", chatError);
+        }
       } catch (error) {
         console.error("Error fetching analytics:", error);
         setError(
@@ -648,6 +675,65 @@ export default function GA4Dashboard() {
               </div>
             </div>
           </div>
+
+          {/* AI Chat Analytics */}
+          {chatAnalytics && (
+            <section className="ga4-section">
+              <h2 className="ga4-section__title">
+                💬 {language === "en" ? "AI Chat Analytics" : "AI ჩატის ანალიტიკა"}
+              </h2>
+              <div className="ga4-dashboard__metrics" style={{ marginBottom: "1rem" }}>
+                <div className="metric-card metric-card--primary">
+                  <div className="metric-card__icon">💬</div>
+                  <div className="metric-card__value">{chatAnalytics.totalChats}</div>
+                  <div className="metric-card__label">
+                    {language === "en" ? "Chat Opens" : "ჩატის გახსნა"}
+                  </div>
+                </div>
+                <div className="metric-card metric-card--success">
+                  <div className="metric-card__icon">📝</div>
+                  <div className="metric-card__value">{chatAnalytics.totalMessages}</div>
+                  <div className="metric-card__label">
+                    {language === "en" ? "Messages Sent" : "გაგზავნილი შეტყობინებები"}
+                  </div>
+                </div>
+                <div className="metric-card metric-card--info">
+                  <div className="metric-card__icon">🤖</div>
+                  <div className="metric-card__value">{chatAnalytics.aiResponses}</div>
+                  <div className="metric-card__label">
+                    {language === "en" ? "AI Responses" : "AI პასუხები"}
+                  </div>
+                </div>
+                <div className="metric-card metric-card--secondary">
+                  <div className="metric-card__icon">🛒</div>
+                  <div className="metric-card__value">{chatAnalytics.productClicks}</div>
+                  <div className="metric-card__label">
+                    {language === "en" ? "Product Clicks" : "პროდუქტზე კლიკი"}
+                  </div>
+                </div>
+              </div>
+              {chatAnalytics.byDay.length > 0 && (
+                <div className="ga4-table">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>{language === "en" ? "Date" : "თარიღი"}</th>
+                        <th>{language === "en" ? "Messages" : "შეტყობინებები"}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {chatAnalytics.byDay.slice(-7).map((day, idx) => (
+                        <tr key={idx}>
+                          <td>{day.date}</td>
+                          <td>{day.messages}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </section>
+          )}
 
           {/* Section 1: Page Views */}
           <section className="ga4-section">

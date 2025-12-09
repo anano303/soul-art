@@ -83,26 +83,69 @@ export class VisitorTrackingService {
   }
 
   /**
-   * Get active visitors (last 30 minutes)
+   * Get active visitors (last 30 minutes) - დუბლირების გარეშე
    */
   async getActiveVisitors() {
     const thirtyMinutesAgo = new Date(Date.now() - 30 * 60 * 1000);
 
-    const activeVisitors = await this.visitorModel
-      .find({
-        lastActivity: { $gte: thirtyMinutesAgo },
-        isActive: true,
-      })
-      .populate('userId', 'name email username') // Populate user details
-      .sort({ lastActivity: -1 })
-      .limit(100)
-      .lean();
+    // ჯერ ვიპოვოთ უნიკალური IP-ებით (ბოლო აქტივობით)
+    const activeVisitors = await this.visitorModel.aggregate([
+      {
+        $match: {
+          lastActivity: { $gte: thirtyMinutesAgo },
+          isActive: true,
+        },
+      },
+      {
+        $sort: { lastActivity: -1 },
+      },
+      {
+        // დავაჯგუფოთ IP-ით და ავიღოთ ბოლო აქტივობა
+        $group: {
+          _id: '$ip',
+          id: { $first: '$_id' },
+          ip: { $first: '$ip' },
+          page: { $first: '$page' },
+          device: { $first: '$device' },
+          browser: { $first: '$browser' },
+          os: { $first: '$os' },
+          country: { $first: '$country' },
+          city: { $first: '$city' },
+          referrer: { $first: '$referrer' },
+          pageViews: { $sum: '$pageViews' },
+          lastActivity: { $first: '$lastActivity' },
+          sessionId: { $first: '$sessionId' },
+          userId: { $first: '$userId' },
+        },
+      },
+      {
+        $sort: { lastActivity: -1 },
+      },
+      {
+        $limit: 100,
+      },
+      {
+        // Populate userId
+        $lookup: {
+          from: 'users',
+          localField: 'userId',
+          foreignField: '_id',
+          as: 'userInfo',
+        },
+      },
+      {
+        $unwind: {
+          path: '$userInfo',
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+    ]);
 
     return {
       total: activeVisitors.length,
       visitors: activeVisitors.map((v: any) => ({
-        id: v._id,
-        ip: v.ip, // Show full IP for admin dashboard
+        id: v.id,
+        ip: v.ip,
         page: v.page,
         device: v.device,
         browser: v.browser,
@@ -112,9 +155,10 @@ export class VisitorTrackingService {
         referrer: v.referrer,
         pageViews: v.pageViews,
         lastActivity: v.lastActivity,
-        userId: v.userId?._id || v.userId,
-        userName: v.userId?.name || v.userId?.username || null,
-        userEmail: v.userId?.email || null,
+        sessionId: v.sessionId,
+        userId: v.userInfo?._id || v.userId,
+        userName: v.userInfo?.name || v.userInfo?.username || null,
+        userEmail: v.userInfo?.email || null,
       })),
     };
   }

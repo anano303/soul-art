@@ -808,4 +808,103 @@ export class Ga4AnalyticsService {
       };
     }
   }
+
+  /**
+   * ჩატის სტატისტიკა GA4-დან
+   */
+  async getChatAnalytics(daysAgo: number = 7) {
+    if (!this.analyticsDataClient || !this.propertyId) {
+      return {
+        totalChats: 0,
+        totalMessages: 0,
+        aiResponses: 0,
+        facebookClicks: 0,
+        productClicks: 0,
+        quickReplies: 0,
+        errors: 0,
+        byDay: [],
+      };
+    }
+
+    try {
+      // ჩატის ივენთების წამოღება
+      const response = await this.analyticsDataClient.properties.runReport({
+        property: `properties/${this.propertyId}`,
+        requestBody: {
+          dateRanges: [{ startDate: `${daysAgo}daysAgo`, endDate: 'today' }],
+          dimensions: [{ name: 'eventName' }],
+          metrics: [{ name: 'eventCount' }],
+          dimensionFilter: {
+            filter: {
+              fieldName: 'eventName',
+              inListFilter: {
+                values: [
+                  'chat_toggle',
+                  'chat_message_sent',
+                  'chat_response_received',
+                  'chat_mode_select',
+                  'chat_product_click',
+                  'chat_error',
+                ],
+              },
+            },
+          },
+        },
+      });
+
+      const eventCounts: Map<string, number> = new Map();
+      response.data.rows?.forEach((row) => {
+        const event = row.dimensionValues[0].value;
+        const count = parseInt(row.metricValues[0].value || '0');
+        eventCounts.set(event, count);
+      });
+
+      // დღეების მიხედვით
+      const dailyResponse =
+        await this.analyticsDataClient.properties.runReport({
+          property: `properties/${this.propertyId}`,
+          requestBody: {
+            dateRanges: [{ startDate: `${daysAgo}daysAgo`, endDate: 'today' }],
+            dimensions: [{ name: 'date' }],
+            metrics: [{ name: 'eventCount' }],
+            dimensionFilter: {
+              filter: {
+                fieldName: 'eventName',
+                stringFilter: { value: 'chat_message_sent' },
+              },
+            },
+            orderBys: [{ dimension: { dimensionName: 'date' } }],
+          },
+        });
+
+      const byDay =
+        dailyResponse.data.rows?.map((row) => ({
+          date: row.dimensionValues[0].value,
+          messages: parseInt(row.metricValues[0].value || '0'),
+        })) || [];
+
+      return {
+        totalChats: eventCounts.get('chat_toggle') || 0,
+        totalMessages: eventCounts.get('chat_message_sent') || 0,
+        aiResponses: eventCounts.get('chat_response_received') || 0,
+        facebookClicks:
+          (eventCounts.get('chat_mode_select') || 0) -
+          (eventCounts.get('chat_message_sent') || 0),
+        productClicks: eventCounts.get('chat_product_click') || 0,
+        errors: eventCounts.get('chat_error') || 0,
+        byDay,
+      };
+    } catch (error) {
+      this.logger.error('Failed to fetch chat analytics:', error.message);
+      return {
+        totalChats: 0,
+        totalMessages: 0,
+        aiResponses: 0,
+        facebookClicks: 0,
+        productClicks: 0,
+        errors: 0,
+        byDay: [],
+      };
+    }
+  }
 }

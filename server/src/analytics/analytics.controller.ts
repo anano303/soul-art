@@ -57,6 +57,14 @@ export class AnalyticsController {
     return this.ga4Service.getRealtimeUsers();
   }
 
+  @Get('ga4/chat')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.Admin)
+  async getChatAnalytics(@Query('days') days?: string) {
+    const daysAgo = days ? parseInt(days) : 7;
+    return this.ga4Service.getChatAnalytics(daysAgo);
+  }
+
   // Visitor Tracking - Public endpoint
   @Post('track-visitor')
   async trackVisitor(@Req() req: Request, @Body() body: any) {
