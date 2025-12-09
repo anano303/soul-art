@@ -45,7 +45,7 @@ export function ChatWidget() {
   const [chatMode, setChatMode] = useState<"select" | "ai" | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const FACEBOOK_URL = "https://m.me/soulart.georgia"; // შეცვალე შენი Facebook page-ით
+  const FACEBOOK_URL = "https://m.me/SoulArtge"; // SoulArt Facebook Messenger
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
