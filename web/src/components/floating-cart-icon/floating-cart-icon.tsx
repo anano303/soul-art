@@ -241,11 +241,32 @@ export function FloatingCartIcon() {
     };
   }, [router]);
 
-  // Tooltip პოზიცია - თუ ზემოთაა, ქვემოთ გამოჩნდეს და პირიქით
-  const tooltipPosition =
-    typeof window !== "undefined" && position.bottom > window.innerHeight / 2
-      ? "below"
-      : "above";
+  // Tooltip პოზიციის გამოთვლა - საით არის მეტი ადგილი
+  const getTooltipPosition = () => {
+    if (typeof window === "undefined") return "right";
+    
+    const screenWidth = window.innerWidth;
+    const screenHeight = window.innerHeight;
+    const buttonLeft = position.left;
+    const buttonBottom = position.bottom;
+    const buttonTop = screenHeight - buttonBottom - BUTTON_SIZE;
+    
+    // ვნახოთ რომელ მხარეს არის მეტი სივრცე
+    const spaceLeft = buttonLeft;
+    const spaceRight = screenWidth - buttonLeft - BUTTON_SIZE;
+    const spaceTop = buttonTop;
+    const spaceBottom = buttonBottom;
+    
+    // პრიორიტეტით ვირჩევთ: მარჯვნივ > მარცხნივ > ზემოთ > ქვემოთ
+    const minSpace = 120; // მინიმალური სივრცე tooltip-ისთვის
+    
+    if (spaceRight >= minSpace) return "right";
+    if (spaceLeft >= minSpace) return "left";
+    if (spaceTop >= 80) return "top";
+    return "bottom";
+  };
+  
+  const tooltipPosition = getTooltipPosition();
 
   if (!isVisible) return null;
 
