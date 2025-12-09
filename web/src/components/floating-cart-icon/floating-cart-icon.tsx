@@ -243,7 +243,9 @@ export function FloatingCartIcon() {
 
   // Tooltip პოზიცია - თუ ზემოთაა, ქვემოთ გამოჩნდეს და პირიქით
   const tooltipPosition =
-    position.bottom > window.innerHeight / 2 ? "below" : "above";
+    typeof window !== "undefined" && position.bottom > window.innerHeight / 2
+      ? "below"
+      : "above";
 
   if (!isVisible) return null;
 
