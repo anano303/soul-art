@@ -470,18 +470,29 @@
   cursor: not-allowed;
 }
 
+/* Tablet Responsive */
+@media (max-width: 768px) {
+  .chat-widget-container {
+    bottom: 75px;
+  }
+
+  .chat-widget-button {
+    bottom: 75px;
+  }
+}
+
 /* Mobile Responsive */
 @media (max-width: 480px) {
   .chat-widget-container {
     width: calc(100vw - 16px);
-    height: calc(100vh - 100px);
-    bottom: 8px;
+    height: calc(100vh - 140px);
+    bottom: 70px;
     right: 8px;
     border-radius: 16px;
   }
 
   .chat-widget-button {
-    bottom: 16px;
+    bottom: 75px;
     right: 16px;
     width: 56px;
     height: 56px;

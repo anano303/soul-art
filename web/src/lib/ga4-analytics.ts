@@ -555,3 +555,81 @@ export const setUserId = (userId: string) => {
     });
   }
 };
+
+// ============================================
+// AI CHAT TRACKING
+// ============================================
+
+/**
+ * ჩატის გახსნა/დახურვა
+ */
+export const trackChatOpen = (isOpen: boolean) => {
+  ga4Event("chat_toggle", {
+    action: isOpen ? "open" : "close",
+    chat_type: "ai_assistant",
+  });
+};
+
+/**
+ * ჩატის მოდის არჩევა (AI ან Facebook)
+ */
+export const trackChatModeSelect = (mode: "ai" | "facebook") => {
+  ga4Event("chat_mode_select", {
+    chat_mode: mode,
+    chat_type: mode === "ai" ? "ai_assistant" : "facebook_messenger",
+  });
+};
+
+/**
+ * მომხმარებლის მესიჯი AI ჩატში
+ */
+export const trackChatMessage = (
+  messageLength: number,
+  messageType: "user" | "quick_reply"
+) => {
+  ga4Event("chat_message_sent", {
+    message_length: messageLength,
+    message_type: messageType,
+    chat_type: "ai_assistant",
+  });
+};
+
+/**
+ * AI პასუხი
+ */
+export const trackChatResponse = (
+  responseLength: number,
+  hasProducts: boolean,
+  productCount: number
+) => {
+  ga4Event("chat_response_received", {
+    response_length: responseLength,
+    has_products: hasProducts,
+    product_count: productCount,
+    chat_type: "ai_assistant",
+  });
+};
+
+/**
+ * ჩატის შეცდომა
+ */
+export const trackChatError = (errorType: string) => {
+  ga4Event("chat_error", {
+    error_type: errorType,
+    chat_type: "ai_assistant",
+  });
+};
+
+/**
+ * პროდუქტზე დაკლიკება ჩატიდან
+ */
+export const trackChatProductClick = (
+  productId: string,
+  productName: string
+) => {
+  ga4Event("chat_product_click", {
+    product_id: productId,
+    product_name: productName,
+    chat_type: "ai_assistant",
+  });
+};

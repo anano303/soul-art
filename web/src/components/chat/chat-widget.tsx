@@ -3,6 +3,14 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { MessageCircle, X, Send, Facebook, Loader2 } from "lucide-react";
 import { apiClient } from "@/lib/axios";
+import {
+  trackChatOpen,
+  trackChatModeSelect,
+  trackChatMessage,
+  trackChatResponse,
+  trackChatError,
+  trackChatProductClick,
+} from "@/lib/ga4-analytics";
 import "./chat-widget.css";
 
 interface Message {
@@ -70,12 +78,19 @@ export function ChatWidget() {
 
   const handleOpen = () => {
     setIsOpen(true);
+    trackChatOpen(true); // GA4 ტრეკინგი
     if (!chatMode) {
       setChatMode("select");
     }
   };
 
+  const handleClose = () => {
+    setIsOpen(false);
+    trackChatOpen(false); // GA4 ტრეკინგი
+  };
+
   const selectChatMode = (mode: "ai" | "facebook") => {
+    trackChatModeSelect(mode); // GA4 ტრეკინგი
     if (mode === "facebook") {
       window.open(FACEBOOK_URL, "_blank");
     } else {
@@ -90,9 +105,12 @@ export function ChatWidget() {
     }
   };
 
-  const sendMessage = async (messageText?: string) => {
+  const sendMessage = async (messageText?: string, isQuickReply = false) => {
     const text = messageText || input.trim();
     if (!text || isLoading) return;
+
+    // GA4 ტრეკინგი - მომხმარებლის მესიჯი
+    trackChatMessage(text.length, isQuickReply ? "quick_reply" : "user");
 
     const userMessage: Message = { role: "user", content: text };
     setMessages((prev) => [...prev, userMessage]);
@@ -117,10 +135,20 @@ export function ChatWidget() {
 
       setMessages((prev) => [...prev, assistantMessage]);
 
+      // GA4 ტრეკინგი - AI პასუხი
+      trackChatResponse(
+        data.response.length,
+        !!(data.products && data.products.length > 0),
+        data.products?.length || 0
+      );
+
       if (data.suggestFacebook) {
         setShowFacebookOption(true);
       }
     } catch {
+      // GA4 ტრეკინგი - შეცდომა
+      trackChatError("api_error");
+
       setMessages((prev) => [
         ...prev,
         {
@@ -178,10 +206,7 @@ export function ChatWidget() {
                   თავიდან
                 </button>
               )}
-              <button
-                onClick={() => setIsOpen(false)}
-                className="chat-widget-close"
-              >
+              <button onClick={handleClose} className="chat-widget-close">
                 <X size={20} />
               </button>
             </div>
@@ -238,6 +263,9 @@ export function ChatWidget() {
                             className="chat-product-card"
                             target="_blank"
                             rel="noopener noreferrer"
+                            onClick={() =>
+                              trackChatProductClick(product._id, product.name)
+                            }
                           >
                             {product.images?.[0] && (
                               <img
@@ -300,7 +328,7 @@ export function ChatWidget() {
                     <button
                       key={idx}
                       className="quick-reply-btn"
-                      onClick={() => sendMessage(reply)}
+                      onClick={() => sendMessage(reply, true)}
                     >
                       {reply}
                     </button>
