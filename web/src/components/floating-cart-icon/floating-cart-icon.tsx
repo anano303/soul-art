@@ -161,16 +161,16 @@ export function FloatingCartIcon() {
     const handleMouseUp = (e: MouseEvent) => {
       const wasDragging = isDraggingRef.current;
       const didDrag = hasDraggedRef.current;
-      
+
       if (wasDragging) {
         isDraggingRef.current = false;
         setIsDragging(false);
-        
+
         // თუ არ გადაადგილდა (კლიკი იყო) - გავხსნათ კალათა
         if (!didDrag && buttonRef.current?.contains(e.target as Node)) {
           router.push("/cart");
         }
-        
+
         hasDraggedRef.current = false;
       }
     };
@@ -213,16 +213,16 @@ export function FloatingCartIcon() {
     const handleTouchEnd = (e: TouchEvent) => {
       const wasDragging = isDraggingRef.current;
       const didDrag = hasDraggedRef.current;
-      
+
       if (wasDragging) {
         isDraggingRef.current = false;
         setIsDragging(false);
-        
+
         // თუ არ გადაადგილდა (tap იყო) - გავხსნათ კალათა
         if (!didDrag && buttonRef.current?.contains(e.target as Node)) {
           router.push("/cart");
         }
-        
+
         hasDraggedRef.current = false;
       }
     };
@@ -244,28 +244,28 @@ export function FloatingCartIcon() {
   // Tooltip პოზიციის გამოთვლა - საით არის მეტი ადგილი
   const getTooltipPosition = () => {
     if (typeof window === "undefined") return "right";
-    
+
     const screenWidth = window.innerWidth;
     const screenHeight = window.innerHeight;
     const buttonLeft = position.left;
     const buttonBottom = position.bottom;
     const buttonTop = screenHeight - buttonBottom - BUTTON_SIZE;
-    
+
     // ვნახოთ რომელ მხარეს არის მეტი სივრცე
     const spaceLeft = buttonLeft;
     const spaceRight = screenWidth - buttonLeft - BUTTON_SIZE;
     const spaceTop = buttonTop;
     const spaceBottom = buttonBottom;
-    
+
     // პრიორიტეტით ვირჩევთ: მარჯვნივ > მარცხნივ > ზემოთ > ქვემოთ
     const minSpace = 120; // მინიმალური სივრცე tooltip-ისთვის
-    
+
     if (spaceRight >= minSpace) return "right";
     if (spaceLeft >= minSpace) return "left";
     if (spaceTop >= 80) return "top";
     return "bottom";
   };
-  
+
   const tooltipPosition = getTooltipPosition();
 
   if (!isVisible) return null;

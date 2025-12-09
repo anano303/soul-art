@@ -124,7 +124,12 @@ export class EmailService {
   /**
    * Generic email გაგზავნა
    */
-  async sendMail(options: { to: string; subject: string; html: string; text?: string }) {
+  async sendMail(options: {
+    to: string;
+    subject: string;
+    html: string;
+    text?: string;
+  }) {
     const mailOptions = {
       from: emailConfig.from,
       to: options.to,

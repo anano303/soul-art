@@ -54,7 +54,7 @@ export class ChatService {
 
     // ინიციალიზაციისას ჩავტვირთოთ მონაცემები
     this.loadCachedData();
-    
+
     // წავშალოთ არასწორი text index თუ არსებობს
     this.dropInvalidTextIndex();
   }
@@ -195,7 +195,7 @@ export class ChatService {
     const startTime = Date.now();
     const lastMessage = messages[messages.length - 1]?.content || '';
     const sessionId = logInfo?.sessionId || `session_${Date.now()}`;
-    
+
     try {
       // მომხმარებლის მესიჯის ლოგირება
       if (lastMessage) {
@@ -219,7 +219,7 @@ export class ChatService {
           message: fixedResponse,
           responseTime: Date.now() - startTime,
         });
-        
+
         return {
           response: fixedResponse,
           products: [],
@@ -825,14 +825,16 @@ export class ChatService {
   /**
    * ჩატის ლოგების წამოღება (ადმინისთვის)
    */
-  async getChatLogs(options: {
-    page?: number;
-    limit?: number;
-    sessionId?: string;
-    search?: string;
-    startDate?: Date;
-    endDate?: Date;
-  } = {}): Promise<{
+  async getChatLogs(
+    options: {
+      page?: number;
+      limit?: number;
+      sessionId?: string;
+      search?: string;
+      startDate?: Date;
+      endDate?: Date;
+    } = {},
+  ): Promise<{
     logs: any[];
     total: number;
     page: number;
@@ -953,11 +955,7 @@ export class ChatService {
             uniqueSessions: { $addToSet: '$sessionId' },
             avgResponseTime: {
               $avg: {
-                $cond: [
-                  { $eq: ['$role', 'assistant'] },
-                  '$responseTime',
-                  null,
-                ],
+                $cond: [{ $eq: ['$role', 'assistant'] }, '$responseTime', null],
               },
             },
           },
@@ -1018,10 +1016,12 @@ export class ChatService {
   /**
    * ჩატის ლოგების წაშლა
    */
-  async clearChatLogs(options: {
-    sessionId?: string;
-    beforeDate?: Date;
-  } = {}): Promise<{ success: boolean; deletedCount: number }> {
+  async clearChatLogs(
+    options: {
+      sessionId?: string;
+      beforeDate?: Date;
+    } = {},
+  ): Promise<{ success: boolean; deletedCount: number }> {
     try {
       const query: any = {};
 

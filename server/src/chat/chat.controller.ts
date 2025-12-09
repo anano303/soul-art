@@ -1,4 +1,13 @@
-import { Controller, Post, Body, Get, Query, Req, Ip, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  Get,
+  Query,
+  Req,
+  Ip,
+  Delete,
+} from '@nestjs/common';
 import { ChatService } from './chat.service';
 import { Request } from 'express';
 
@@ -25,7 +34,7 @@ export class ChatController {
   ) {
     const userAgent = req.headers['user-agent'];
     const realIp = req.headers['x-forwarded-for']?.toString() || ip;
-    
+
     const result = await this.chatService.chat(
       body.messages,
       body.searchProducts,

@@ -301,9 +301,7 @@ export class Ga4AnalyticsService {
           {
             property: `properties/${this.propertyId}`,
             requestBody: {
-              dateRanges: [
-                { startDate, endDate: 'today' },
-              ],
+              dateRanges: [{ startDate, endDate: 'today' }],
               dimensions: [{ name: 'eventName' }],
               metrics: [{ name: 'eventCount' }],
               dimensionFilter: {
@@ -878,8 +876,8 @@ export class Ga4AnalyticsService {
       });
 
       // დღეების მიხედვით
-      const dailyResponse =
-        await this.analyticsDataClient.properties.runReport({
+      const dailyResponse = await this.analyticsDataClient.properties.runReport(
+        {
           property: `properties/${this.propertyId}`,
           requestBody: {
             dateRanges: [{ startDate, endDate: 'today' }],
@@ -893,7 +891,8 @@ export class Ga4AnalyticsService {
             },
             orderBys: [{ dimension: { dimensionName: 'date' } }],
           },
-        });
+        },
+      );
 
       const byDay =
         dailyResponse.data.rows?.map((row) => ({
