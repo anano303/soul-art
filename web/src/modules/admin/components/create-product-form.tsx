@@ -846,25 +846,26 @@ export function CreateProductForm({
       const newImages = Array.from(files);
       const totalImages = formData.images.length + newImages.length;
       const maxImages = 10;
-      
+
       if (totalImages > maxImages) {
         setErrors((prev) => ({
           ...prev,
-          images: language === "en"
-            ? `Maximum ${maxImages} images allowed. You tried to add ${newImages.length} but already have ${formData.images.length}.`
-            : `მაქსიმუმ ${maxImages} სურათის ატვირთვა შეიძლება. თქვენ ცდილობთ ${newImages.length}-ის დამატებას, მაგრამ უკვე გაქვთ ${formData.images.length}.`
+          images:
+            language === "en"
+              ? `Maximum ${maxImages} images allowed. You tried to add ${newImages.length} but already have ${formData.images.length}.`
+              : `მაქსიმუმ ${maxImages} სურათის ატვირთვა შეიძლება. თქვენ ცდილობთ ${newImages.length}-ის დამატებას, მაგრამ უკვე გაქვთ ${formData.images.length}.`,
         }));
         // Reset file input
-        e.target.value = '';
+        e.target.value = "";
         return;
       }
-      
+
       // Clear any previous image error
       setErrors((prev) => {
         const { images, ...rest } = prev;
         return rest;
       });
-      
+
       setFormData((prev) => ({
         ...prev,
         images: [...prev.images, ...newImages],
@@ -1570,21 +1571,28 @@ export function CreateProductForm({
               {language === "en" ? "Video" : "ვიდეო"}
               {/* Green checkmark when video uploaded */}
               {(uploadedYoutubeData || videoFile) && !videoUploading && (
-                <span className="video-success-check" title={language === "en" ? "Uploaded" : "აიტვირთა"}>✓</span>
+                <span
+                  className="video-success-check"
+                  title={language === "en" ? "Uploaded" : "აიტვირთა"}
+                >
+                  ✓
+                </span>
               )}
             </label>
-            
+
             {/* Video uploading indicator */}
             {videoUploading && (
               <div className="video-uploading-indicator">
                 <div className="video-upload-spinner"></div>
               </div>
             )}
-            
-            {!videoUploading && (
-              (uploadedYoutubeData || videoFile) ? (
+
+            {!videoUploading &&
+              (uploadedYoutubeData || videoFile ? (
                 <div className="video-uploaded-input">
-                  <span className="uploaded-text">{language === "en" ? "Uploaded" : "ატვირთულია"}</span>
+                  <span className="uploaded-text">
+                    {language === "en" ? "Uploaded" : "ატვირთულია"}
+                  </span>
                   <button
                     type="button"
                     className="remove-video-btn"
@@ -1592,7 +1600,9 @@ export function CreateProductForm({
                       setVideoFile(null);
                       setUploadedYoutubeData(null);
                     }}
-                  >✕</button>
+                  >
+                    ✕
+                  </button>
                 </div>
               ) : (
                 <input
@@ -1603,11 +1613,10 @@ export function CreateProductForm({
                   className="video-file-input"
                   disabled={videoUploading}
                 />
-              )
-            )}
+              ))}
             {videoError && <p className="create-product-error">{videoError}</p>}
           </div>
-          
+
           {/* Images Section */}
           <div className="images-upload-section">
             <label htmlFor="images">{t("adminProducts.images")}</label>
@@ -1627,7 +1636,6 @@ export function CreateProductForm({
             )}
           </div>
         </div>
-        
         {/* Image previews and video embed - full width below */}
         {(formData.images.length > 0 || uploadedYoutubeData) && (
           <div className="image-preview-container">
@@ -1642,7 +1650,7 @@ export function CreateProductForm({
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                   allowFullScreen
                   title="Video preview"
-                  style={{ pointerEvents: 'none' }}
+                  style={{ pointerEvents: "none" }}
                 ></iframe>
                 <div className="video-overlay-icon">▶</div>
               </div>
@@ -1676,7 +1684,6 @@ export function CreateProductForm({
         {errors.images && (
           <p className="create-product-error">{errors.images}</p>
         )}
-
         {/* Price + Discount + Dates - All in one row on desktop */}
         <div className="price-discount-dates-row">
           <div className="price-input-wrapper">
@@ -1748,9 +1755,7 @@ export function CreateProductForm({
             onChange={(e) => setAddToPortfolio(e.target.checked)}
           />
           <span>
-            {language === "en"
-              ? "Add to portfolio"
-              : "პორტფოლიოში დამატება"}
+            {language === "en" ? "Add to portfolio" : "პორტფოლიოში დამატება"}
           </span>
         </label>
         <div>
@@ -2276,7 +2281,6 @@ export function CreateProductForm({
             )}
           </div>
         )}
-        
         {/* Hashtags Section - moved before delivery */}
         <div>
           <label htmlFor="hashtags">
@@ -2337,7 +2341,6 @@ export function CreateProductForm({
             </div>
           )}
         </div>
-
         <label>
           {language === "en" ? "Delivery Section" : "მიწოდების განყოფილება"}
         </label>
@@ -2451,7 +2454,7 @@ export function CreateProductForm({
           )}
         </div>
         {/* Brand Logo - Hidden but still submitted */}
-        <div style={{ display: 'none' }}>
+        <div style={{ display: "none" }}>
           <label htmlFor="brandLogo">{t("adminProducts.brandLogo")}</label>
           <div className="brand-logo-container">
             {(user?.storeLogo || typeof formData.brandLogo === "string") && (

@@ -1,0 +1,335 @@
+"use client";
+
+import { useState, useRef, useEffect, useCallback } from "react";
+import { MessageCircle, X, Send, Facebook, Loader2 } from "lucide-react";
+import { apiClient } from "@/lib/axios";
+import "./chat-widget.css";
+
+interface Message {
+  role: "user" | "assistant";
+  content: string;
+  products?: ProductResult[];
+}
+
+interface ProductResult {
+  _id: string;
+  name: string;
+  price: number;
+  discountPrice?: number;
+  category: string;
+  images: string[];
+  slug?: string;
+}
+
+interface ChatResponse {
+  response: string;
+  products?: ProductResult[];
+  suggestFacebook?: boolean;
+}
+
+export function ChatWidget() {
+  const [isOpen, setIsOpen] = useState(false);
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [input, setInput] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [quickReplies, setQuickReplies] = useState<string[]>([]);
+  const [showFacebookOption, setShowFacebookOption] = useState(false);
+  const [chatMode, setChatMode] = useState<"select" | "ai" | null>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const FACEBOOK_URL = "https://m.me/soulart.georgia"; // შეცვალე შენი Facebook page-ით
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
+  const loadQuickReplies = useCallback(async () => {
+    try {
+      const { data } = await apiClient.get<{ replies: string[] }>(
+        "/chat/quick-replies"
+      );
+      setQuickReplies(data.replies);
+    } catch {
+      setQuickReplies([
+        "🎨 მინდა ნახატები ვნახო",
+        "💍 სამკაულები მაინტერესებს",
+        "❓ როგორ გავხდე გამყიდველი?",
+      ]);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (isOpen && chatMode === "ai" && quickReplies.length === 0) {
+      loadQuickReplies();
+    }
+  }, [isOpen, chatMode, loadQuickReplies, quickReplies.length]);
+
+  const handleOpen = () => {
+    setIsOpen(true);
+    if (!chatMode) {
+      setChatMode("select");
+    }
+  };
+
+  const selectChatMode = (mode: "ai" | "facebook") => {
+    if (mode === "facebook") {
+      window.open(FACEBOOK_URL, "_blank");
+    } else {
+      setChatMode("ai");
+      setMessages([
+        {
+          role: "assistant",
+          content:
+            "გამარჯობა! 👋 მე ვარ Soul Art-ის AI ასისტენტი. როგორ შემიძლია დაგეხმარო? შემიძლია პროდუქტების მოძებნა, კითხვებზე პასუხი და კონსულტაცია.",
+        },
+      ]);
+    }
+  };
+
+  const sendMessage = async (messageText?: string) => {
+    const text = messageText || input.trim();
+    if (!text || isLoading) return;
+
+    const userMessage: Message = { role: "user", content: text };
+    setMessages((prev) => [...prev, userMessage]);
+    setInput("");
+    setIsLoading(true);
+    setShowFacebookOption(false);
+
+    try {
+      const { data } = await apiClient.post<ChatResponse>("/chat", {
+        messages: [...messages, userMessage].map((m) => ({
+          role: m.role,
+          content: m.content,
+        })),
+        searchProducts: true,
+      });
+
+      const assistantMessage: Message = {
+        role: "assistant",
+        content: data.response,
+        products: data.products,
+      };
+
+      setMessages((prev) => [...prev, assistantMessage]);
+
+      if (data.suggestFacebook) {
+        setShowFacebookOption(true);
+      }
+    } catch {
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "assistant",
+          content:
+            "ბოდიში, დაფიქსირდა შეცდომა. გთხოვთ სცადოთ მოგვიანებით ან დაგვიკავშირდეთ Facebook-ზე.",
+        },
+      ]);
+      setShowFacebookOption(true);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
+    }
+  };
+
+  const resetChat = () => {
+    setMessages([]);
+    setChatMode("select");
+    setShowFacebookOption(false);
+  };
+
+  return (
+    <>
+      {/* Chat Button */}
+      <button
+        className={`chat-widget-button ${isOpen ? "hidden" : ""}`}
+        onClick={handleOpen}
+        aria-label="გახსენი ჩატი"
+      >
+        <MessageCircle size={24} />
+        <span className="chat-widget-button-pulse" />
+      </button>
+
+      {/* Chat Window */}
+      {isOpen && (
+        <div className="chat-widget-container">
+          {/* Header */}
+          <div className="chat-widget-header">
+            <div className="chat-widget-header-info">
+              <div className="chat-widget-avatar">🎨</div>
+              <div>
+                <h3>Soul Art ჩატი</h3>
+                <span className="chat-widget-status">ონლაინ</span>
+              </div>
+            </div>
+            <div className="chat-widget-header-actions">
+              {chatMode === "ai" && (
+                <button onClick={resetChat} className="chat-widget-reset">
+                  თავიდან
+                </button>
+              )}
+              <button
+                onClick={() => setIsOpen(false)}
+                className="chat-widget-close"
+              >
+                <X size={20} />
+              </button>
+            </div>
+          </div>
+
+          {/* Content */}
+          <div className="chat-widget-content">
+            {chatMode === "select" ? (
+              /* Mode Selection */
+              <div className="chat-widget-mode-select">
+                <h4>როგორ გნებავთ დაკავშირება?</h4>
+                <button
+                  className="chat-mode-button ai-mode"
+                  onClick={() => selectChatMode("ai")}
+                >
+                  <MessageCircle size={24} />
+                  <div>
+                    <span className="mode-title">AI ასისტენტი</span>
+                    <span className="mode-desc">
+                      სწრაფი პასუხები, პროდუქტების ძებნა
+                    </span>
+                  </div>
+                </button>
+                <button
+                  className="chat-mode-button fb-mode"
+                  onClick={() => selectChatMode("facebook")}
+                >
+                  <Facebook size={24} />
+                  <div>
+                    <span className="mode-title">Facebook Messenger</span>
+                    <span className="mode-desc">დაგვიკავშირდით პირდაპირ</span>
+                  </div>
+                </button>
+              </div>
+            ) : (
+              /* Chat Messages */
+              <div className="chat-widget-messages">
+                {messages.map((msg, idx) => (
+                  <div
+                    key={idx}
+                    className={`chat-message ${
+                      msg.role === "user" ? "user" : "assistant"
+                    }`}
+                  >
+                    <div className="message-content">{msg.content}</div>
+
+                    {/* Product Results */}
+                    {msg.products && msg.products.length > 0 && (
+                      <div className="chat-products">
+                        {msg.products.map((product) => (
+                          <a
+                            key={product._id}
+                            href={`/products/${product.slug || product._id}`}
+                            className="chat-product-card"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            {product.images?.[0] && (
+                              <img
+                                src={product.images[0]}
+                                alt={product.name}
+                                className="chat-product-image"
+                              />
+                            )}
+                            <div className="chat-product-info">
+                              <span className="chat-product-name">
+                                {product.name}
+                              </span>
+                              <span className="chat-product-price">
+                                {product.discountPrice || product.price}₾
+                              </span>
+                            </div>
+                          </a>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ))}
+
+                {isLoading && (
+                  <div className="chat-message assistant">
+                    <div className="message-content loading">
+                      <Loader2 className="spinner" size={16} />
+                      <span>ვფიქრობ...</span>
+                    </div>
+                  </div>
+                )}
+
+                {showFacebookOption && (
+                  <div className="facebook-suggestion">
+                    <p>გსურთ ადამიანთან საუბარი?</p>
+                    <a
+                      href={FACEBOOK_URL}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="facebook-link"
+                    >
+                      <Facebook size={18} />
+                      Facebook-ზე დაკავშირება
+                    </a>
+                  </div>
+                )}
+
+                <div ref={messagesEndRef} />
+              </div>
+            )}
+          </div>
+
+          {/* Quick Replies & Input */}
+          {chatMode === "ai" && (
+            <div className="chat-widget-footer">
+              {/* Quick Replies */}
+              {messages.length <= 1 && quickReplies.length > 0 && (
+                <div className="quick-replies">
+                  {quickReplies.map((reply, idx) => (
+                    <button
+                      key={idx}
+                      className="quick-reply-btn"
+                      onClick={() => sendMessage(reply)}
+                    >
+                      {reply}
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {/* Input */}
+              <div className="chat-input-container">
+                <input
+                  type="text"
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  onKeyPress={handleKeyPress}
+                  placeholder="დაწერე შეტყობინება..."
+                  disabled={isLoading}
+                />
+                <button
+                  onClick={() => sendMessage()}
+                  disabled={!input.trim() || isLoading}
+                  className="send-button"
+                >
+                  <Send size={18} />
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+    </>
+  );
+}

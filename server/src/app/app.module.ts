@@ -25,6 +25,7 @@ import { BlogModule } from '../blog/blog.module';
 import { YoutubeModule } from '@/youtube/youtube.module';
 import { AnalyticsModule } from '../analytics/analytics.module';
 import { DonationsModule } from '../donations/donations.module';
+import { ChatModule } from '../chat/chat.module';
 
 @Module({
   imports: [
@@ -55,6 +56,7 @@ import { DonationsModule } from '../donations/donations.module';
     YoutubeModule,
     AnalyticsModule,
     DonationsModule,
+    ChatModule,
   ],
   controllers: [AppController],
   providers: [AppService, GoogleStrategy],

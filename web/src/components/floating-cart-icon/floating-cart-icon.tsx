@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { ShoppingCart } from "lucide-react";
 import { useCart } from "@/modules/cart/context/cart-context";
 import { useRouter, usePathname } from "next/navigation";
@@ -11,20 +11,50 @@ export function FloatingCartIcon() {
   const pathname = usePathname();
   const [isVisible, setIsVisible] = useState(false);
   const [isAnimatingOut, setIsAnimatingOut] = useState(false);
+  const [showTooltip, setShowTooltip] = useState(false);
+
+  // Drag state using refs for immediate updates
+  const [position, setPosition] = useState({ bottom: 80, left: 20 });
+  const [isDragging, setIsDragging] = useState(false);
+  const isDraggingRef = useRef(false);
+  const hasDraggedRef = useRef(false);
+  const dragOffsetRef = useRef({ x: 0, y: 0 });
+  const startPositionRef = useRef({ x: 0, y: 0 }); // drag-ის დაწყების პოზიცია
+  const positionRef = useRef({ bottom: 80, left: 20 });
+  const buttonRef = useRef<HTMLDivElement>(null);
+
+  const DRAG_THRESHOLD = 5; // მინიმალური პიქსელი რომ ჩაითვალოს drag-ად
 
   let cartData;
   try {
     cartData = useCart();
   } catch (error) {
-    // თუ CartProvider არ არის available, უბრალოდ არაფერი რენდერი
     console.log("FloatingCartIcon: CartProvider not available");
     return null;
   }
 
-  const { items, totalItems } = cartData;
-  const [showTooltip, setShowTooltip] = useState(false);
+  const { totalItems } = cartData;
 
-  // ფუნქცია რომ განვსაზღვროთ არის თუ არა cart-related გვერდზე
+  // Load saved position from localStorage
+  useEffect(() => {
+    const saved = localStorage.getItem("floatingCartPosition");
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        setPosition(parsed);
+        positionRef.current = parsed;
+      } catch (e) {
+        // ignore
+      }
+    }
+  }, []);
+
+  // Save position to localStorage
+  useEffect(() => {
+    localStorage.setItem("floatingCartPosition", JSON.stringify(position));
+    positionRef.current = position;
+  }, [position]);
+
   const isOnCartRelatedPage = () => {
     if (!pathname) return false;
     return (
@@ -34,9 +64,6 @@ export function FloatingCartIcon() {
     );
   };
 
-  // აჩვენე მხოლოდ მაშინ როცა:
-  // 1. კალათაში რამე არის
-  // 2. არ ვართ კალათის/checkout/orders გვერდებზე
   useEffect(() => {
     const shouldShow = totalItems > 0 && !isOnCartRelatedPage();
 
@@ -52,7 +79,6 @@ export function FloatingCartIcon() {
       return () => clearTimeout(timer);
     }
 
-    // Show tooltip for 3 seconds when cart is updated
     if (shouldShow && totalItems > 0) {
       setShowTooltip(true);
       const timer = setTimeout(() => {
@@ -60,25 +86,186 @@ export function FloatingCartIcon() {
       }, 3000);
       return () => clearTimeout(timer);
     }
-  }, [totalItems, pathname]);
+  }, [totalItems, pathname, isVisible]);
 
-  const handleClick = () => {
-    router.push("/cart");
+  // Mouse drag start
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (e.button !== 0) return;
+
+    isDraggingRef.current = true;
+    hasDraggedRef.current = false;
+    setIsDragging(true);
+
+    startPositionRef.current = { x: e.clientX, y: e.clientY };
+    dragOffsetRef.current = {
+      x: e.clientX - positionRef.current.left,
+      y: e.clientY - (window.innerHeight - positionRef.current.bottom - 60),
+    };
   };
+
+  // Touch drag start
+  const handleTouchStart = (e: React.TouchEvent) => {
+    const touch = e.touches[0];
+
+    isDraggingRef.current = true;
+    hasDraggedRef.current = false;
+    setIsDragging(true);
+
+    startPositionRef.current = { x: touch.clientX, y: touch.clientY };
+    dragOffsetRef.current = {
+      x: touch.clientX - positionRef.current.left,
+      y: touch.clientY - (window.innerHeight - positionRef.current.bottom - 60),
+    };
+  };
+
+  // Safe boundaries - არ შევიდეს header/footer/nav-ში
+  const HEADER_HEIGHT = 80; // header სიმაღლე
+  const FOOTER_HEIGHT = 80; // footer/nav სიმაღლე
+  const BUTTON_SIZE = 60;
+  const PADDING = 10;
+
+  // Global event listeners - always attached
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!isDraggingRef.current) return;
+
+      // შევამოწმოთ საკმარისი მოძრაობა არის თუ არა drag-ად ჩასათვლელად
+      const dx = e.clientX - startPositionRef.current.x;
+      const dy = e.clientY - startPositionRef.current.y;
+      const distance = Math.sqrt(dx * dx + dy * dy);
+
+      if (distance < DRAG_THRESHOLD) return; // ჯერ არ ჩაითვალოს drag-ად
+
+      hasDraggedRef.current = true;
+
+      const newLeft = e.clientX - dragOffsetRef.current.x;
+      const newTop = e.clientY - dragOffsetRef.current.y;
+
+      // საზღვრები - header-ს და footer-ს არ შევეხოთ
+      const minLeft = PADDING;
+      const maxLeft = window.innerWidth - BUTTON_SIZE - PADDING;
+      const minBottom = FOOTER_HEIGHT + PADDING;
+      const maxBottom =
+        window.innerHeight - HEADER_HEIGHT - BUTTON_SIZE - PADDING;
+
+      const left = Math.max(minLeft, Math.min(maxLeft, newLeft));
+      const bottom = Math.max(
+        minBottom,
+        Math.min(maxBottom, window.innerHeight - newTop - BUTTON_SIZE)
+      );
+
+      positionRef.current = { bottom, left };
+      setPosition({ bottom, left });
+    };
+
+    const handleMouseUp = (e: MouseEvent) => {
+      const wasDragging = isDraggingRef.current;
+      const didDrag = hasDraggedRef.current;
+      
+      if (wasDragging) {
+        isDraggingRef.current = false;
+        setIsDragging(false);
+        
+        // თუ არ გადაადგილდა (კლიკი იყო) - გავხსნათ კალათა
+        if (!didDrag && buttonRef.current?.contains(e.target as Node)) {
+          router.push("/cart");
+        }
+        
+        hasDraggedRef.current = false;
+      }
+    };
+
+    const handleTouchMove = (e: TouchEvent) => {
+      if (!isDraggingRef.current) return;
+
+      const touch = e.touches[0];
+
+      // შევამოწმოთ საკმარისი მოძრაობა არის თუ არა drag-ად ჩასათვლელად
+      const dx = touch.clientX - startPositionRef.current.x;
+      const dy = touch.clientY - startPositionRef.current.y;
+      const distance = Math.sqrt(dx * dx + dy * dy);
+
+      if (distance < DRAG_THRESHOLD) return; // ჯერ არ ჩაითვალოს drag-ად
+
+      e.preventDefault();
+      hasDraggedRef.current = true;
+
+      const newLeft = touch.clientX - dragOffsetRef.current.x;
+      const newTop = touch.clientY - dragOffsetRef.current.y;
+
+      // საზღვრები - header-ს და footer-ს არ შევეხოთ
+      const minLeft = PADDING;
+      const maxLeft = window.innerWidth - BUTTON_SIZE - PADDING;
+      const minBottom = FOOTER_HEIGHT + PADDING;
+      const maxBottom =
+        window.innerHeight - HEADER_HEIGHT - BUTTON_SIZE - PADDING;
+
+      const left = Math.max(minLeft, Math.min(maxLeft, newLeft));
+      const bottom = Math.max(
+        minBottom,
+        Math.min(maxBottom, window.innerHeight - newTop - BUTTON_SIZE)
+      );
+
+      positionRef.current = { bottom, left };
+      setPosition({ bottom, left });
+    };
+
+    const handleTouchEnd = (e: TouchEvent) => {
+      const wasDragging = isDraggingRef.current;
+      const didDrag = hasDraggedRef.current;
+      
+      if (wasDragging) {
+        isDraggingRef.current = false;
+        setIsDragging(false);
+        
+        // თუ არ გადაადგილდა (tap იყო) - გავხსნათ კალათა
+        if (!didDrag && buttonRef.current?.contains(e.target as Node)) {
+          router.push("/cart");
+        }
+        
+        hasDraggedRef.current = false;
+      }
+    };
+
+    // Always attach listeners
+    document.addEventListener("mousemove", handleMouseMove);
+    document.addEventListener("mouseup", handleMouseUp);
+    document.addEventListener("touchmove", handleTouchMove, { passive: false });
+    document.addEventListener("touchend", handleTouchEnd);
+
+    return () => {
+      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("mouseup", handleMouseUp);
+      document.removeEventListener("touchmove", handleTouchMove);
+      document.removeEventListener("touchend", handleTouchEnd);
+    };
+  }, [router]);
+
+  // Tooltip პოზიცია - თუ ზემოთაა, ქვემოთ გამოჩნდეს და პირიქით
+  const tooltipPosition =
+    position.bottom > window.innerHeight / 2 ? "below" : "above";
 
   if (!isVisible) return null;
 
   return (
     <div
+      ref={buttonRef}
       className={`floating-cart-icon ${
         isAnimatingOut ? "animate-out" : "animate-in"
-      }`}
-      onClick={handleClick}
+      } ${isDragging ? "dragging" : ""}`}
+      style={{
+        bottom: `${position.bottom}px`,
+        left: `${position.left}px`,
+        right: "auto",
+      }}
+      onMouseDown={handleMouseDown}
+      onTouchStart={handleTouchStart}
       data-cart-toggle="true"
     >
-      {/* Tooltip */}
-      {showTooltip && (
-        <div className="floating-cart-tooltip animate-tooltip">
+      {showTooltip && !isDragging && (
+        <div
+          className={`floating-cart-tooltip animate-tooltip tooltip-${tooltipPosition}`}
+        >
           გადადი კალათში 🛒
         </div>
       )}
@@ -92,8 +279,8 @@ export function FloatingCartIcon() {
         )}
       </div>
 
-      {/* Ripple effect */}
-      <div className="cart-ripple"></div>
+      {!isDragging && <div className="cart-ripple"></div>}
+      <div className="drag-indicator">⋮⋮</div>
     </div>
   );
 }

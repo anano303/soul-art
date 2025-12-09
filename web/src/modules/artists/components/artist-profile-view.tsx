@@ -547,7 +547,7 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
   }, [portfolioPosts, artist.artistGallery]);
 
   const anySocial = socialOrder.some(({ key }) => artist.artistSocials?.[key]);
-  
+
   // Get user ID - could be _id or id depending on source (API vs localStorage)
   const userId = user?._id || (user as { id?: string })?.id;
   const isOwner = !userLoading && !!userId && userId === artist.id;

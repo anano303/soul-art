@@ -2,11 +2,14 @@
 
 import dynamic from "next/dynamic";
 
-// Dynamically import the MessengerChat with no SSR
-const MessengerChat = dynamic(() => import("./MessengerChat"), {
-  ssr: false,
-});
+// Dynamically import the AI ChatWidget with no SSR
+const ChatWidget = dynamic(
+  () => import("../chat/chat-widget").then((mod) => mod.ChatWidget),
+  {
+    ssr: false,
+  }
+);
 
 export default function MessengerChatWrapper() {
-  return <MessengerChat />;
+  return <ChatWidget />;
 }
