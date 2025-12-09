@@ -54,6 +54,23 @@ export class ChatService {
 
     // ინიციალიზაციისას ჩავტვირთოთ მონაცემები
     this.loadCachedData();
+    
+    // წავშალოთ არასწორი text index თუ არსებობს
+    this.dropInvalidTextIndex();
+  }
+
+  // წავშალოთ text index რადგან MongoDB არ მხარდაჭერს ქართულს
+  private async dropInvalidTextIndex(): Promise<void> {
+    try {
+      const indexes = await this.chatLogModel.collection.indexes();
+      const textIndex = indexes.find((idx: any) => idx.key?.message === 'text');
+      if (textIndex) {
+        await this.chatLogModel.collection.dropIndex(textIndex.name);
+        this.logger.log('Dropped invalid text index from chatlogs collection');
+      }
+    } catch (error) {
+      // index არ არსებობს ან უკვე წაშლილია - ეს ნორმალურია
+    }
   }
 
   // ყველა საჭირო მონაცემის ჩატვირთვა

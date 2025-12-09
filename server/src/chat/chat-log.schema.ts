@@ -39,4 +39,6 @@ export const ChatLogSchema = SchemaFactory.createForClass(ChatLog);
 ChatLogSchema.index({ sessionId: 1, createdAt: 1 });
 ChatLogSchema.index({ userId: 1 });
 ChatLogSchema.index({ createdAt: -1 });
-ChatLogSchema.index({ message: 'text' }); // ტექსტური ძიებისთვის
+ChatLogSchema.index({ userIp: 1 });
+// შენიშვნა: text index არ ვიყენებთ რადგან MongoDB არ მხარდაჭერს ქართულ ენას
+// ძიებისთვის გამოიყენება regex
