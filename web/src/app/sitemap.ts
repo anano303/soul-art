@@ -146,6 +146,77 @@ async function getArtists() {
   }
 }
 
+// ბლოგ პოსტების მოტანა
+async function getBlogPosts() {
+  try {
+    const apiUrl =
+      process.env.NEXT_PUBLIC_API_URL || "https://api.soulart.ge/v1";
+    const response = await fetch(`${apiUrl}/blog?publishedOnly=true`, {
+      next: { revalidate: 3600 },
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      console.error("Failed to fetch blog posts for sitemap", response.status);
+      return [];
+    }
+
+    const data = await response.json();
+    if (Array.isArray(data)) {
+      return data;
+    }
+    if (data && Array.isArray(data.items)) {
+      return data.items;
+    }
+    if (data && Array.isArray(data.posts)) {
+      return data.posts;
+    }
+
+    console.warn("Unexpected blog posts response format:", data);
+    return [];
+  } catch (error) {
+    console.error("Error fetching blog posts for sitemap:", error);
+    return [];
+  }
+}
+
+// ქვეკატეგორიების მოტანა
+async function getSubCategories() {
+  try {
+    const apiUrl =
+      process.env.NEXT_PUBLIC_API_URL || "https://api.soulart.ge/v1";
+    const response = await fetch(`${apiUrl}/subcategories`, {
+      next: { revalidate: 3600 },
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      console.error("Failed to fetch subcategories for sitemap", response.status);
+      return [];
+    }
+
+    const data = await response.json();
+    if (Array.isArray(data)) {
+      return data;
+    }
+    if (data && Array.isArray(data.items)) {
+      return data.items;
+    }
+
+    console.warn("Unexpected subcategories response format:", data);
+    return [];
+  } catch (error) {
+    console.error("Error fetching subcategories for sitemap:", error);
+    return [];
+  }
+}
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl =
     process.env.NEXT_PUBLIC_PRODUCTION_URL || "https://soulart.ge";
@@ -248,14 +319,22 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "monthly" as const,
       priority: 0.6,
     },
+    {
+      url: `${baseUrl}/blog`,
+      lastModified: new Date(),
+      changeFrequency: "weekly" as const,
+      priority: 0.8,
+    },
   ];
 
   try {
-    const [products, categories, forumPosts, artists] = await Promise.all([
+    const [products, categories, forumPosts, artists, blogPosts, subCategories] = await Promise.all([
       getProducts(),
       getCategories(),
       getForumPosts(),
       getArtists(),
+      getBlogPosts(),
+      getSubCategories(),
     ]);
 
     // პროდუქტების გვერდები
@@ -322,12 +401,34 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         priority: 0.8,
       }));
 
+    // ბლოგ პოსტების გვერდები
+    const blogPages = blogPosts
+      .filter((post: any) => post && post._id)
+      .map((post: { _id: string; updatedAt?: string; createdAt?: string }) => ({
+        url: `${baseUrl}/blog/${post._id}`,
+        lastModified: new Date(post.updatedAt || post.createdAt || new Date()),
+        changeFrequency: "weekly" as const,
+        priority: 0.75,
+      }));
+
+    // ქვეკატეგორიების გვერდები (მაღაზიაში ფილტრაციისთვის)
+    const subCategoryPages = subCategories
+      .filter((subCat: any) => subCat && (subCat._id || subCat.id) && subCat.name)
+      .map((subCat: { _id?: string; id?: string; name: string; categoryId?: string }) => ({
+        url: `${baseUrl}/shop?subCategory=${subCat._id || subCat.id}`,
+        lastModified: new Date(),
+        changeFrequency: "weekly" as const,
+        priority: 0.7,
+      }));
+
     return [
       ...staticPages,
       ...productPages,
       ...categoryPages,
+      ...subCategoryPages,
       ...artistPages,
       ...forumPages,
+      ...blogPages,
     ];
   } catch (error) {
     console.error("Error generating sitemap:", error);

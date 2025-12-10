@@ -9,6 +9,7 @@ import {
 } from "react";
 import { MessageCircle, X, Send, Facebook, Loader2 } from "lucide-react";
 import { apiClient } from "@/lib/axios";
+import { useUser } from "@/modules/auth/hooks/use-user";
 import {
   trackChatOpen,
   trackChatModeSelect,
@@ -81,6 +82,7 @@ interface ChatResponse {
 }
 
 export function ChatWidget() {
+  const { user } = useUser();
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
@@ -170,6 +172,7 @@ export function ChatWidget() {
           content: m.content,
         })),
         searchProducts: true,
+        userName: user?.name || undefined,
       });
 
       const assistantMessage: Message = {

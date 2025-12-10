@@ -5,6 +5,7 @@ import { ConfigService } from '@nestjs/config';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { ProductsService } from '@/products/services/products.service';
 import { CategoryService } from '@/categories/services/category.service';
+import { SubCategoryService } from '@/categories/services/subCategory.service';
 import { BlogService } from '@/blog/blog.service';
 import { BannerService } from '@/banners/services/banner.service';
 import { EmailService } from '@/email/services/email.services';
@@ -36,6 +37,7 @@ export class ChatService {
   // ქეშირებული მონაცემები - სერვერის გაშვებისას იტვირთება
   private cachedCategories: string[] = [];
   private cachedCategoriesWithIds: { name: string; id: string }[] = [];
+  private cachedSubCategories: string[] = [];
   private cachedBlogTitles: string[] = [];
 
   constructor(
@@ -43,6 +45,7 @@ export class ChatService {
     private configService: ConfigService,
     private productsService: ProductsService,
     private categoryService: CategoryService,
+    private subCategoryService: SubCategoryService,
     private blogService: BlogService,
     private bannerService: BannerService,
     private emailService: EmailService,
@@ -88,6 +91,13 @@ export class ChatService {
         `Loaded ${this.cachedCategories.length} categories for AI: ${this.cachedCategoriesWithIds.map((c) => `${c.name}(${c.id})`).join(', ')}`,
       );
 
+      // ქვეკატეგორიები
+      const subCategories = await this.subCategoryService.findAll();
+      this.cachedSubCategories = subCategories.map((sc: any) => sc.name);
+      this.logger.log(
+        `Loaded ${this.cachedSubCategories.length} subcategories for AI: ${this.cachedSubCategories.slice(0, 10).join(', ')}...`,
+      );
+
       // ბლოგ პოსტები
       const blogs = await this.blogService.findAll(true); // მხოლოდ გამოქვეყნებული
       this.cachedBlogTitles = blogs.map((b: any) => b.title).slice(0, 10);
@@ -103,8 +113,13 @@ export class ChatService {
     // დინამიურად დავამატოთ კატეგორიები
     const categoriesText =
       this.cachedCategories.length > 0
-        ? `კატეგორიები: ${this.cachedCategories.join(', ')}`
+        ? `მთავარი კატეგორიები: ${this.cachedCategories.join(', ')}`
         : 'ნახატი, ხელნაკეთი';
+
+    const subCategoriesText =
+      this.cachedSubCategories.length > 0
+        ? `\nქვეკატეგორიები: ${this.cachedSubCategories.join(', ')}`
+        : '';
 
     const blogText =
       this.cachedBlogTitles.length > 0
@@ -161,7 +176,7 @@ export class ChatService {
 - არასოდეს მოიგონო მხატვრების/პროდუქტების სახელები!
 - თუ "მოძებნილი პროდუქტები" ცარიელია - უთხარი: "ამჟამად ასეთი არ მოიძებნა. რა ტიპის ნივთი გაინტერესებთ?"
 
-## ${categoriesText}${blogText}
+## ${categoriesText}${subCategoriesText}${blogText}
 
 ## მთავარი მიზანი: გაყიდვა!
 
@@ -210,6 +225,7 @@ export class ChatService {
       userIp?: string;
       userAgent?: string;
       userId?: string;
+      userName?: string;
     },
   ): Promise<{
     response: string;
@@ -219,6 +235,7 @@ export class ChatService {
     const startTime = Date.now();
     const lastMessage = messages[messages.length - 1]?.content || '';
     const sessionId = logInfo?.sessionId || `session_${Date.now()}`;
+    const userName = logInfo?.userName;
 
     try {
       // მომხმარებლის მესიჯის ლოგირება
@@ -262,6 +279,11 @@ export class ChatService {
       let products: ProductSearchResult[] = [];
       let productContext = '';
 
+      // მომხმარებლის სახელის კონტექსტი
+      const userNameContext = userName
+        ? `\n\n⚠️ მომხმარებელი დალოგინებულია და მისი სახელია: "${userName}". მიმართე სახელით პირველ პასუხში!`
+        : '';
+
       // 1. AI თავად წყვეტს რა პარამეტრებით მოძებნოს
       const searchParams = await this.askAIForSearchParams(lastMessage);
       this.logger.log(`AI decided: ${JSON.stringify(searchParams)}`);
@@ -297,12 +319,24 @@ export class ChatService {
             )
             .join('\n')}\n\nშესთავაზე ეს პროდუქტები!`;
         } else {
-          productContext = `\n\nპროდუქტები ვერ მოიძებნა ამ კრიტერიუმებით. შესთავაზე სხვა ფასის დიაპაზონი ან კატეგორია.`;
+          // ალტერნატივის შეთავაზება - არ გაუშვა!
+          const alternatives = await this.searchProductsByKeyword('', 500, 0);
+          if (alternatives.length > 0) {
+            productContext = `\n\nზუსტად ეს არ მოიძებნა, მაგრამ შესთავაზე ალტერნატივები:\n${alternatives
+              .slice(0, 3)
+              .map(
+                (p, i) =>
+                  `${i + 1}. "${p.name}" - ${p.discountPrice || p.price}₾`,
+              )
+              .join('\n')}\n\nუთხარი: "ზუსტად ის რაც ეძებთ ამჟამად არ გვაქვს, მაგრამ გირჩევთ გადახედოთ ამ ნამუშევრებს!"`;
+          } else {
+            productContext = `\n\nპროდუქტები ვერ მოიძებნა. შესთავაზე გადახედოს მთელ მაღაზიას: [მაღაზია](https://soulart.ge/shop)`;
+          }
         }
       }
 
       // 2. საბოლოო პასუხის გენერაცია - Gemini
-      const systemPromptText = this.getSystemPrompt() + productContext;
+      const systemPromptText = this.getSystemPrompt() + userNameContext + productContext;
       const model = this.genAI.getGenerativeModel({
         model: this.model,
         systemInstruction: systemPromptText,
