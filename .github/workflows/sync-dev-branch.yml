@@ -1,4 +1,4 @@
-name: Sync Test Branch
+name: Sync Dev Branch
 
 on:
   push:

@@ -1,8 +1,15 @@
 "use client";
 
-import { useState, useRef, useEffect, useCallback, type ReactNode } from "react";
+import {
+  useState,
+  useRef,
+  useEffect,
+  useCallback,
+  type ReactNode,
+} from "react";
 import { MessageCircle, X, Send, Facebook, Loader2 } from "lucide-react";
 import { apiClient } from "@/lib/axios";
+import { useUser } from "@/modules/auth/hooks/use-user";
 import {
   trackChatOpen,
   trackChatModeSelect,
@@ -27,7 +34,7 @@ const formatMessageWithLinks = (content: string): ReactNode => {
     if (match.index > lastIndex) {
       parts.push(content.slice(lastIndex, match.index));
     }
-    
+
     // დაამატე ლინკი
     const [, text, url] = match;
     parts.push(
@@ -75,6 +82,7 @@ interface ChatResponse {
 }
 
 export function ChatWidget() {
+  const { user } = useUser();
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
@@ -164,6 +172,7 @@ export function ChatWidget() {
           content: m.content,
         })),
         searchProducts: true,
+        userName: user?.name || undefined,
       });
 
       const assistantMessage: Message = {
@@ -291,7 +300,7 @@ export function ChatWidget() {
                     }`}
                   >
                     <div className="message-content">
-                      {msg.role === "assistant" 
+                      {msg.role === "assistant"
                         ? formatMessageWithLinks(msg.content)
                         : msg.content}
                     </div>

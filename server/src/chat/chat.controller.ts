@@ -20,6 +20,7 @@ interface ChatRequestDto {
   messages: ChatMessageDto[];
   searchProducts?: boolean;
   sessionId?: string;
+  userName?: string; // მომხმარებლის სახელი თუ დალოგინებულია
 }
 
 @Controller('chat')
@@ -42,6 +43,7 @@ export class ChatController {
         sessionId: body.sessionId,
         userIp: realIp,
         userAgent,
+        userName: body.userName,
       },
     );
     return result;
