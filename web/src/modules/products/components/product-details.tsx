@@ -1145,13 +1145,17 @@ export function ProductDetails({ product }: ProductDetailsProps) {
           </div>
 
           {/* Description - Prominent with label */}
-          {product.description && (
+          {(product.description || product.descriptionEn) && (
             <div className="description-section">
               <h3 className="section-label">
                 {language === "en" ? "Description" : "აღწერა"}
               </h3>
               <div className="description-content">
-                <p>{product.description}</p>
+                <p>
+                  {language === "en" && product.descriptionEn
+                    ? product.descriptionEn
+                    : product.description}
+                </p>
               </div>
             </div>
           )}
