@@ -61,7 +61,6 @@ import {
   storeSchema,
 } from "@/lib/structured-data";
 import GoogleAnalytics from "@/components/GoogleAnalytics";
-import { GoogleAdSenseScript } from "@/components/GoogleAdSense";
 import VercelAnalytics from "@/components/VercelAnalytics";
 import MetaPixel from "@/components/MetaPixel";
 import { FloatingCartIcon } from "@/components/floating-cart-icon/floating-cart-icon";
@@ -281,8 +280,12 @@ export default function RootLayout({
         <link rel="dns-prefetch" href="//www.googletagmanager.com" />
         <link rel="dns-prefetch" href="//www.google-analytics.com" />
 
-        {/* Google AdSense */}
-        <GoogleAdSenseScript />
+        {/* Google AdSense - Server-rendered for crawler visibility */}
+        <script
+          async
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2218295750130717"
+          crossOrigin="anonymous"
+        />
 
         {/* Third-party scripts moved to body end for better LCP */}
       </head>

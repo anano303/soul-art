@@ -4,27 +4,6 @@ import { useEffect, useRef } from "react";
 
 const ADSENSE_CLIENT_ID = "ca-pub-2218295750130717";
 
-/**
- * Global AdSense Script - Add this once in your layout
- * Uses native script injection to avoid Next.js data-nscript attribute
- */
-export function GoogleAdSenseScript() {
-  useEffect(() => {
-    // Check if script already exists
-    if (document.querySelector(`script[src*="pagead2.googlesyndication.com"]`)) {
-      return;
-    }
-
-    const script = document.createElement("script");
-    script.src = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE_CLIENT_ID}`;
-    script.async = true;
-    script.crossOrigin = "anonymous";
-    document.head.appendChild(script);
-  }, []);
-
-  return null;
-}
-
 interface AdUnitProps {
   /** The ad slot ID from Google AdSense */
   slot: string;
@@ -123,6 +102,3 @@ export function AdUnit({
     />
   );
 }
-
-// Export default for convenience
-export default GoogleAdSenseScript;
