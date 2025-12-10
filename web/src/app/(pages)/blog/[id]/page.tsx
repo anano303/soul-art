@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { cache } from "react";
+import Script from "next/script";
 import {
   GLOBAL_KEYWORDS,
   extractKeywordsFromText,
@@ -284,5 +285,53 @@ export default async function BlogPostPage({ params }: BlogPageParams) {
     notFound();
   }
 
-  return <BlogPostClient postId={id} initialPost={post} />;
+  const coverImageUrl = getAbsoluteImageUrl(post.coverImage);
+  const authorName = getAuthorName(post);
+  const canonicalUrl = WEB_BASE_URL
+    ? `${WEB_BASE_URL}/blog/${post._id}`
+    : `https://soulart.ge/blog/${post._id}`;
+
+  // JSON-LD Structured Data for Google Rich Snippets (Article schema)
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": post.postType === PostType.ARTICLE ? "Article" : "BlogPosting",
+    headline: post.title,
+    description: post.intro || post.content?.slice(0, 200) || "",
+    image: coverImageUrl || "/logo.png",
+    datePublished: post.publishDate || post.createdAt,
+    dateModified: post.publishDate || post.createdAt,
+    author: {
+      "@type": "Person",
+      name: authorName || "SoulArt",
+    },
+    publisher: {
+      "@type": "Organization",
+      name: "SoulArt",
+      logo: {
+        "@type": "ImageObject",
+        url: "https://soulart.ge/logo.png",
+      },
+    },
+    mainEntityOfPage: {
+      "@type": "WebPage",
+      "@id": canonicalUrl,
+    },
+    ...(post.artist && {
+      about: {
+        "@type": "Person",
+        name: post.artist,
+      },
+    }),
+  };
+
+  return (
+    <>
+      <Script
+        id="blog-jsonld"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <BlogPostClient postId={id} initialPost={post} />
+    </>
+  );
 }
