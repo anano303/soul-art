@@ -281,6 +281,9 @@ export default function RootLayout({
         <link rel="dns-prefetch" href="//www.googletagmanager.com" />
         <link rel="dns-prefetch" href="//www.google-analytics.com" />
 
+        {/* Google AdSense */}
+        <GoogleAdSenseScript />
+
         {/* Third-party scripts moved to body end for better LCP */}
       </head>
       <body
@@ -470,9 +473,6 @@ export default function RootLayout({
 
         {/* Google Analytics */}
         <GoogleAnalytics />
-
-        {/* Google AdSense */}
-        <GoogleAdSenseScript />
 
         {/* Meta Pixel - Facebook ვიზიტორების ტრაფიკი და კონვერსიები */}
         <Suspense fallback={null}>
