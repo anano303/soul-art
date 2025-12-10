@@ -35,6 +35,7 @@ export class ChatService {
 
   // ქეშირებული მონაცემები - სერვერის გაშვებისას იტვირთება
   private cachedCategories: string[] = [];
+  private cachedCategoriesWithIds: { name: string; id: string }[] = [];
   private cachedBlogTitles: string[] = [];
 
   constructor(
@@ -76,11 +77,15 @@ export class ChatService {
   // ყველა საჭირო მონაცემის ჩატვირთვა
   private async loadCachedData(): Promise<void> {
     try {
-      // კატეგორიები
+      // კატეგორიები (მთავარი კატეგორიები ID-ებით)
       const categories = await this.categoryService.findAll();
       this.cachedCategories = categories.map((c) => c.name);
+      this.cachedCategoriesWithIds = categories.map((c: any) => ({
+        name: c.name,
+        id: c._id?.toString() || c.id,
+      }));
       this.logger.log(
-        `Loaded ${this.cachedCategories.length} categories for AI`,
+        `Loaded ${this.cachedCategories.length} categories for AI: ${this.cachedCategoriesWithIds.map((c) => `${c.name}(${c.id})`).join(', ')}`,
       );
 
       // ბლოგ პოსტები
@@ -99,12 +104,20 @@ export class ChatService {
     const categoriesText =
       this.cachedCategories.length > 0
         ? `კატეგორიები: ${this.cachedCategories.join(', ')}`
-        : 'ნახატი, კერამიკა, სამკაული, აქსესუარები';
+        : 'ნახატი, ხელნაკეთი';
 
     const blogText =
       this.cachedBlogTitles.length > 0
         ? `\nბლოგები: ${this.cachedBlogTitles.slice(0, 5).join(', ')}`
         : '';
+
+    // დინამიური კატეგორიების ლინკები
+    const categoryLinksText =
+      this.cachedCategoriesWithIds.length > 0
+        ? this.cachedCategoriesWithIds
+            .map((c) => `[${c.name}](https://soulart.ge/shop?mainCategory=${c.id})`)
+            .join(', ')
+        : '[ნახატი](https://soulart.ge/shop?mainCategory=68768f6f0b55154655a8e882), [ხელნაკეთი](https://soulart.ge/shop?mainCategory=68768f850b55154655a8e88f)';
 
     return `შენ ხარ Soul Art-ის გაყიდვების მენეჯერი - ქართული ხელოვნების ონლაინ მაღაზია (soulart.ge).
 
@@ -165,8 +178,9 @@ export class ChatService {
 
 ## 🔗 ლინკები - ძალიან მნიშვნელოვანი!
 როდესაც მომხმარებელს გზავნი ლინკს, გამოიყენე მხოლოდ Markdown ფორმატი:
-- მაღაზია: [მაღაზია](https://soulart.ge/products)
-- კატეგორიები: [ნახატები](https://soulart.ge/products?category=ნახატი), [კერამიკა](https://soulart.ge/products?category=კერამიკა), [სამკაული](https://soulart.ge/products?category=სამკაული)
+- მაღაზია: [მაღაზია](https://soulart.ge/shop)
+- კატეგორიები: ${categoryLinksText}
+- ფასდაკლებული: [ფასდაკლება](https://soulart.ge/shop?discounted=true)
 - ბლოგი: [ბლოგი](https://soulart.ge/blog)
 - გაყიდვა: [გაყიდე ნამუშევარი](https://soulart.ge/register)
 
@@ -253,11 +267,25 @@ export class ChatService {
       this.logger.log(`AI decided: ${JSON.stringify(searchParams)}`);
 
       if (searchParams.needsSearch) {
-        products = await this.searchProductsByKeyword(
-          searchParams.keyword || searchParams.category || '',
-          searchParams.maxPrice,
-          searchParams.minPrice,
-        );
+        // თუ ფასდაკლებული პროდუქტები მოითხოვა
+        if (searchParams.discounted) {
+          products = await this.getDiscountedProducts(10);
+          // თუ keyword-იც არის, დამატებით გავფილტროთ
+          if (searchParams.keyword) {
+            const keywordLower = searchParams.keyword.toLowerCase();
+            products = products.filter(
+              (p) =>
+                p.name.toLowerCase().includes(keywordLower) ||
+                p.category.toLowerCase().includes(keywordLower),
+            );
+          }
+        } else {
+          products = await this.searchProductsByKeyword(
+            searchParams.keyword || searchParams.category || '',
+            searchParams.maxPrice,
+            searchParams.minPrice,
+          );
+        }
         this.logger.log(`Found ${products.length} products`);
 
         if (products.length > 0) {
@@ -354,6 +382,7 @@ export class ChatService {
     minPrice?: number;
     maxPrice?: number;
     category?: string;
+    discounted?: boolean;
     needsSearch: boolean;
   }> {
     try {
@@ -369,13 +398,16 @@ export class ChatService {
 კატეგორიები: ${categoriesText}
 
 უპასუხე მხოლოდ JSON ფორმატში:
-{"needsSearch": true/false, "keyword": "სიტყვა", "minPrice": რიცხვი, "maxPrice": რიცხვი, "category": "კატეგორია"}
+{"needsSearch": true/false, "keyword": "სიტყვა", "minPrice": რიცხვი, "maxPrice": რიცხვი, "category": "კატეგორია", "discounted": true/false}
 
 მაგალითები:
 - "8000-11000 ლარამდე რა გაქვს?" → {"needsSearch": true, "minPrice": 8000, "maxPrice": 11000}
 - "100 ლარამდე ნახატები" → {"needsSearch": true, "keyword": "ნახატი", "maxPrice": 100}
 - "იაფი სამკაულები" → {"needsSearch": true, "keyword": "სამკაული", "maxPrice": 150}
 - "კერამიკა გაქვთ?" → {"needsSearch": true, "category": "კერამიკა"}
+- "ფასდაკლებული" → {"needsSearch": true, "discounted": true}
+- "ფასდაკლებული ნახატები" → {"needsSearch": true, "keyword": "ნახატი", "discounted": true}
+- "აქცია", "შეთავაზება" → {"needsSearch": true, "discounted": true}
 - "როგორ ვიყიდო?" → {"needsSearch": false}
 - "გამარჯობა" → {"needsSearch": false}
 
@@ -397,6 +429,7 @@ export class ChatService {
           minPrice: parsed.minPrice ? Number(parsed.minPrice) : undefined,
           maxPrice: parsed.maxPrice ? Number(parsed.maxPrice) : undefined,
           category: parsed.category,
+          discounted: parsed.discounted === true,
           needsSearch: parsed.needsSearch === true,
         };
       }
