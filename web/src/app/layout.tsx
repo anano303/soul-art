@@ -61,6 +61,7 @@ import {
   storeSchema,
 } from "@/lib/structured-data";
 import GoogleAnalytics from "@/components/GoogleAnalytics";
+import { GoogleAdSenseScript } from "@/components/GoogleAdSense";
 import VercelAnalytics from "@/components/VercelAnalytics";
 import MetaPixel from "@/components/MetaPixel";
 import { FloatingCartIcon } from "@/components/floating-cart-icon/floating-cart-icon";
@@ -469,6 +470,9 @@ export default function RootLayout({
 
         {/* Google Analytics */}
         <GoogleAnalytics />
+
+        {/* Google AdSense */}
+        <GoogleAdSenseScript />
 
         {/* Meta Pixel - Facebook ვიზიტორების ტრაფიკი და კონვერსიები */}
         <Suspense fallback={null}>
