@@ -454,12 +454,12 @@ export default function RootLayout({
           {process.env.NODE_ENV === "development" && (
             <CacheManager position="fixed" size="small" />
           )}
-        </Providers>
 
-        {/* Wrap in error boundary */}
-        <ErrorBoundary>
-          <MessengerChatWrapper />
-        </ErrorBoundary>
+          {/* Wrap in error boundary - inside Providers for QueryClient access */}
+          <ErrorBoundary>
+            <MessengerChatWrapper />
+          </ErrorBoundary>
+        </Providers>
 
         {/* Network Status Indicator */}
         <NetworkStatus />

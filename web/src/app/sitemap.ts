@@ -197,7 +197,10 @@ async function getSubCategories() {
     });
 
     if (!response.ok) {
-      console.error("Failed to fetch subcategories for sitemap", response.status);
+      console.error(
+        "Failed to fetch subcategories for sitemap",
+        response.status
+      );
       return [];
     }
 
@@ -328,7 +331,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   ];
 
   try {
-    const [products, categories, forumPosts, artists, blogPosts, subCategories] = await Promise.all([
+    const [
+      products,
+      categories,
+      forumPosts,
+      artists,
+      blogPosts,
+      subCategories,
+    ] = await Promise.all([
       getProducts(),
       getCategories(),
       getForumPosts(),
@@ -413,13 +423,22 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
     // ქვეკატეგორიების გვერდები (მაღაზიაში ფილტრაციისთვის)
     const subCategoryPages = subCategories
-      .filter((subCat: any) => subCat && (subCat._id || subCat.id) && subCat.name)
-      .map((subCat: { _id?: string; id?: string; name: string; categoryId?: string }) => ({
-        url: `${baseUrl}/shop?subCategory=${subCat._id || subCat.id}`,
-        lastModified: new Date(),
-        changeFrequency: "weekly" as const,
-        priority: 0.7,
-      }));
+      .filter(
+        (subCat: any) => subCat && (subCat._id || subCat.id) && subCat.name
+      )
+      .map(
+        (subCat: {
+          _id?: string;
+          id?: string;
+          name: string;
+          categoryId?: string;
+        }) => ({
+          url: `${baseUrl}/shop?subCategory=${subCat._id || subCat.id}`,
+          lastModified: new Date(),
+          changeFrequency: "weekly" as const,
+          priority: 0.7,
+        })
+      );
 
     return [
       ...staticPages,

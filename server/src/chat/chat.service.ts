@@ -130,7 +130,10 @@ export class ChatService {
     const categoryLinksText =
       this.cachedCategoriesWithIds.length > 0
         ? this.cachedCategoriesWithIds
-            .map((c) => `[${c.name}](https://soulart.ge/shop?mainCategory=${c.id})`)
+            .map(
+              (c) =>
+                `[${c.name}](https://soulart.ge/shop?mainCategory=${c.id})`,
+            )
             .join(', ')
         : '[ნახატი](https://soulart.ge/shop?mainCategory=68768f6f0b55154655a8e882), [ხელნაკეთი](https://soulart.ge/shop?mainCategory=68768f850b55154655a8e88f)';
 
@@ -328,7 +331,9 @@ export class ChatService {
                 (p, i) =>
                   `${i + 1}. "${p.name}" - ${p.discountPrice || p.price}₾`,
               )
-              .join('\n')}\n\nუთხარი: "ზუსტად ის რაც ეძებთ ამჟამად არ გვაქვს, მაგრამ გირჩევთ გადახედოთ ამ ნამუშევრებს!"`;
+              .join(
+                '\n',
+              )}\n\nუთხარი: "ზუსტად ის რაც ეძებთ ამჟამად არ გვაქვს, მაგრამ გირჩევთ გადახედოთ ამ ნამუშევრებს!"`;
           } else {
             productContext = `\n\nპროდუქტები ვერ მოიძებნა. შესთავაზე გადახედოს მთელ მაღაზიას: [მაღაზია](https://soulart.ge/shop)`;
           }
@@ -336,7 +341,8 @@ export class ChatService {
       }
 
       // 2. საბოლოო პასუხის გენერაცია - Gemini
-      const systemPromptText = this.getSystemPrompt() + userNameContext + productContext;
+      const systemPromptText =
+        this.getSystemPrompt() + userNameContext + productContext;
       const model = this.genAI.getGenerativeModel({
         model: this.model,
         systemInstruction: systemPromptText,
