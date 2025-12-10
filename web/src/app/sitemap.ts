@@ -379,7 +379,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         })
       );
 
-    // არტისტების გვერდები
+    // არტისტების გვერდები - მაღალი პრიორიტეტი და ხშირი განახლება
     const artistPages = artists
       .map((artist: any) => {
         const slug =
@@ -395,8 +395,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         return {
           url: `${baseUrl}/@${slug}`,
           lastModified: new Date(lastModifiedValue),
-          changeFrequency: "weekly" as const,
-          priority: 0.85,
+          changeFrequency: "daily" as const,
+          priority: 0.9,
         };
       })
       .filter(Boolean) as MetadataRoute.Sitemap;
