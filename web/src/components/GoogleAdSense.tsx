@@ -1,22 +1,28 @@
 "use client";
 
-import Script from "next/script";
 import { useEffect, useRef } from "react";
 
 const ADSENSE_CLIENT_ID = "ca-pub-2218295750130717";
 
 /**
  * Global AdSense Script - Add this once in your layout
+ * Uses native script injection to avoid Next.js data-nscript attribute
  */
 export function GoogleAdSenseScript() {
-  return (
-    <Script
-      async
-      src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE_CLIENT_ID}`}
-      crossOrigin="anonymous"
-      strategy="lazyOnload"
-    />
-  );
+  useEffect(() => {
+    // Check if script already exists
+    if (document.querySelector(`script[src*="pagead2.googlesyndication.com"]`)) {
+      return;
+    }
+
+    const script = document.createElement("script");
+    script.src = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE_CLIENT_ID}`;
+    script.async = true;
+    script.crossOrigin = "anonymous";
+    document.head.appendChild(script);
+  }, []);
+
+  return null;
 }
 
 interface AdUnitProps {
