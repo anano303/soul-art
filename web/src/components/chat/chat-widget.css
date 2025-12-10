@@ -286,6 +286,18 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
+/* ჩათში ლინკების სტილი */
+.chat-link {
+  color: #6366f1;
+  text-decoration: underline;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.chat-link:hover {
+  color: #4f46e5;
+}
+
 .message-content.loading {
   display: flex;
   align-items: center;

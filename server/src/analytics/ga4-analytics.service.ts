@@ -251,151 +251,53 @@ export class Ga4AnalyticsService {
   }
 
   private async getUserJourneys(daysAgo: number): Promise<UserJourney[]> {
-    // Fetch user_path events to get actual sequential journeys
+    // Get user journeys based on page paths and sessions
     try {
       this.logger.log('Fetching user journeys from GA4...');
 
       const startDate = this.getStartDate(daysAgo);
-      // Try getting event parameter directly instead of custom dimension
+
+      // Get page paths with session data - this is the reliable approach
       const response = await this.analyticsDataClient.properties.runReport({
         property: `properties/${this.propertyId}`,
         requestBody: {
           dateRanges: [{ startDate, endDate: 'today' }],
-          dimensions: [
-            { name: 'eventName' },
-            { name: 'eventParameterValue' }, // Get event parameter value
+          dimensions: [{ name: 'pagePath' }],
+          metrics: [
+            { name: 'sessions' },
+            { name: 'averageSessionDuration' },
+            { name: 'screenPageViews' },
           ],
-          metrics: [{ name: 'eventCount' }],
-          dimensionFilter: {
-            andGroup: {
-              expressions: [
-                {
-                  filter: {
-                    fieldName: 'eventName',
-                    stringFilter: { value: 'user_path' },
-                  },
-                },
-                {
-                  filter: {
-                    fieldName: 'eventParameterKey',
-                    stringFilter: { value: 'page_path' },
-                  },
-                },
-              ],
-            },
-          },
-          orderBys: [{ metric: { metricName: 'eventCount' }, desc: true }],
-          limit: 50,
+          orderBys: [{ metric: { metricName: 'sessions' }, desc: true }],
+          limit: 20,
         },
       });
 
       this.logger.log(`GA4 Response rows: ${response.data.rows?.length || 0}`);
 
       if (!response.data.rows || response.data.rows.length === 0) {
-        this.logger.warn(
-          'No user_path events found with page_path parameter. Trying alternative approach...',
-        );
-
-        // Alternative: Get all user_path events and try to extract from event data
-        const altResponse = await this.analyticsDataClient.properties.runReport(
-          {
-            property: `properties/${this.propertyId}`,
-            requestBody: {
-              dateRanges: [{ startDate, endDate: 'today' }],
-              dimensions: [{ name: 'eventName' }],
-              metrics: [{ name: 'eventCount' }],
-              dimensionFilter: {
-                filter: {
-                  fieldName: 'eventName',
-                  stringFilter: { value: 'user_path' },
-                },
-              },
-            },
-          },
-        );
-
-        this.logger.log(
-          `Alternative response - user_path events: ${altResponse.data.rows?.[0]?.metricValues?.[0]?.value || 0}`,
-        );
-
-        if (!altResponse.data.rows || altResponse.data.rows.length === 0) {
-          this.logger.warn(
-            'No user_path events found at all. Users need to navigate through the site.',
-          );
-          return [];
-        }
-
-        // If we have user_path events but can't extract paths, return a message
-        return [
-          {
-            path: 'User path events detected but path data not available. Check GA4 configuration.',
-            count: parseInt(
-              altResponse.data.rows[0]?.metricValues?.[0]?.value || '0',
-            ),
-            avgTime: 0,
-          },
-        ];
-      }
-
-      // Aggregate paths and count occurrences
-      const pathCounts = new Map<string, number>();
-
-      response.data.rows.forEach((row) => {
-        const path = row.dimensionValues[1]?.value || '';
-        const count = parseInt(row.metricValues[0]?.value || '0');
-
-        this.logger.debug(`Path: ${path}, Count: ${count}`);
-
-        if (path && path !== '(not set)' && path.trim() !== '') {
-          pathCounts.set(path, (pathCounts.get(path) || 0) + count);
-        }
-      });
-
-      if (pathCounts.size === 0) {
-        this.logger.warn(
-          'All paths are "(not set)" or empty. GA4 custom dimension may not be configured properly.',
-        );
+        this.logger.warn('No page path data found.');
         return [];
       }
 
-      // Convert to array and sort by count
-      const journeys = Array.from(pathCounts.entries())
-        .map(([path, count]) => ({
-          path,
-          count,
-          avgTime: 0, // Could be calculated if we track session_end with timing
+      // Filter and format page paths
+      const journeys = response.data.rows
+        .filter((row) => {
+          const path = row.dimensionValues[0]?.value || '';
+          return path && path !== '(not set)' && path.trim() !== '';
+        })
+        .map((row) => ({
+          path: row.dimensionValues[0].value,
+          count: parseInt(row.metricValues[0]?.value || '0'),
+          avgTime: Math.round(parseFloat(row.metricValues[1]?.value || '0')),
         }))
-        .sort((a, b) => b.count - a.count)
         .slice(0, 10);
 
-      this.logger.log(`Found ${journeys.length} unique user paths`);
+      this.logger.log(`Found ${journeys.length} page paths`);
       return journeys;
     } catch (error) {
-      this.logger.warn(
-        'Failed to fetch user_path events, falling back to page-based journeys:',
-        error.message,
-      );
-
-      const startDateFallback = this.getStartDate(daysAgo);
-      // Fallback: Get most visited pages as simple paths
-      const response = await this.analyticsDataClient.properties.runReport({
-        property: `properties/${this.propertyId}`,
-        requestBody: {
-          dateRanges: [{ startDate: startDateFallback, endDate: 'today' }],
-          dimensions: [{ name: 'pagePath' }],
-          metrics: [{ name: 'sessions' }, { name: 'averageSessionDuration' }],
-          orderBys: [{ metric: { metricName: 'sessions' }, desc: true }],
-          limit: 5,
-        },
-      });
-
-      return (
-        response.data.rows?.map((row) => ({
-          path: row.dimensionValues[0].value,
-          count: parseInt(row.metricValues[0].value || '0'),
-          avgTime: Math.round(parseFloat(row.metricValues[1].value || '0')),
-        })) || []
-      );
+      this.logger.warn('Failed to fetch page journeys:', error.message);
+      return [];
     }
   }
 

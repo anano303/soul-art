@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback, type ReactNode } from "react";
 import { MessageCircle, X, Send, Facebook, Loader2 } from "lucide-react";
 import { apiClient } from "@/lib/axios";
 import {
@@ -12,6 +12,45 @@ import {
   trackChatProductClick,
 } from "@/lib/ga4-analytics";
 import "./chat-widget.css";
+
+// Markdown ლინკების გარდაქმნა HTML-ში
+const formatMessageWithLinks = (content: string): ReactNode => {
+  // Markdown ლინკების პატერნი: [text](url)
+  const linkRegex = /\[([^\]]+)\]\(([^)]+)\)/g;
+  const parts: ReactNode[] = [];
+  let lastIndex = 0;
+  let match;
+  let keyIndex = 0;
+
+  while ((match = linkRegex.exec(content)) !== null) {
+    // დაამატე ტექსტი ლინკამდე
+    if (match.index > lastIndex) {
+      parts.push(content.slice(lastIndex, match.index));
+    }
+    
+    // დაამატე ლინკი
+    const [, text, url] = match;
+    parts.push(
+      <a
+        key={keyIndex++}
+        href={url}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="chat-link"
+      >
+        {text}
+      </a>
+    );
+    lastIndex = match.index + match[0].length;
+  }
+
+  // დაამატე დარჩენილი ტექსტი
+  if (lastIndex < content.length) {
+    parts.push(content.slice(lastIndex));
+  }
+
+  return <>{parts}</>;
+};
 
 interface Message {
   role: "user" | "assistant";
@@ -251,7 +290,11 @@ export function ChatWidget() {
                       msg.role === "user" ? "user" : "assistant"
                     }`}
                   >
-                    <div className="message-content">{msg.content}</div>
+                    <div className="message-content">
+                      {msg.role === "assistant" 
+                        ? formatMessageWithLinks(msg.content)
+                        : msg.content}
+                    </div>
 
                     {/* Product Results */}
                     {msg.products && msg.products.length > 0 && (
