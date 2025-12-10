@@ -13,6 +13,7 @@ import { OrderSchema } from '@/orders/schemas/order.schema';
 import { Model } from 'mongoose';
 import { ReferralsModule } from '@/referrals/referrals.module';
 import { FacebookPostingService } from './services/facebook-posting.service';
+import { TikTokPostingService } from './services/tiktok-posting.service';
 import { PushNotificationModule } from '@/push/push-notification.module';
 import { YoutubeModule } from '@/youtube/youtube.module';
 import { ProductYoutubeService } from './services/product-youtube.service';
@@ -118,6 +119,7 @@ export class IndexCleanupService implements OnModuleInit {
     AppService,
     IndexCleanupService,
     FacebookPostingService,
+    TikTokPostingService,
     ProductYoutubeService,
   ],
   controllers: [ProductsController],
