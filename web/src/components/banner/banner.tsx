@@ -1,12 +1,13 @@
 "use client";
 
-import React, { useEffect, useState, useCallback, useRef } from "react";
+import React, { useEffect, useState, useCallback, useRef, useMemo } from "react";
 import Link from "next/link";
 import { useLanguage } from "@/hooks/LanguageContext";
 import { fetchActiveBanners } from "@/lib/banner-api";
 import { Banner as BannerType } from "@/types/banner";
 import { trackBannerClick } from "@/lib/ga4-analytics";
 import { optimizeCloudinaryUrl } from "@/lib/utils";
+import { AdUnit } from "@/components/GoogleAdSense";
 import "./banner.css";
 
 const Banner = () => {
@@ -17,6 +18,17 @@ const Banner = () => {
   const [isPaused, setIsPaused] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Create slides array: interleave banners with ads
+  // [banner1, ad, banner2, ad, banner3, ad, ...]
+  const slides = useMemo(
+    () =>
+      banners.flatMap((banner, index) => [
+        { type: "banner" as const, data: banner, key: banner._id || `banner-${index}` },
+        { type: "ad" as const, data: null, key: `ad-${index}` },
+      ]),
+    [banners]
+  );
 
   useEffect(() => {
     const loadBanners = async () => {
@@ -51,18 +63,18 @@ const Banner = () => {
 
   const changeBanner = useCallback(
     (newIndex: number) => {
-      if (newIndex === currentIndex || newIndex >= banners.length) return;
+      if (newIndex === currentIndex || newIndex >= slides.length) return;
 
       // Store current index as previous before changing
       setPreviousIndex(currentIndex);
       setCurrentIndex(newIndex);
     },
-    [currentIndex, banners.length]
+    [currentIndex, slides.length]
   );
 
   // Auto-advance banners
   useEffect(() => {
-    if (banners.length <= 1 || isPaused) {
+    if (slides.length <= 1 || isPaused) {
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
         intervalRef.current = null;
@@ -71,7 +83,7 @@ const Banner = () => {
     }
 
     intervalRef.current = setInterval(() => {
-      changeBanner((currentIndex + 1) % banners.length);
+      changeBanner((currentIndex + 1) % slides.length);
     }, 8000);
 
     return () => {
@@ -80,20 +92,20 @@ const Banner = () => {
         intervalRef.current = null;
       }
     };
-  }, [banners.length, isPaused, currentIndex, changeBanner]);
+  }, [slides.length, isPaused, currentIndex, changeBanner]);
 
   const nextBanner = useCallback(() => {
-    changeBanner((currentIndex + 1) % banners.length);
-  }, [changeBanner, currentIndex, banners.length]);
+    changeBanner((currentIndex + 1) % slides.length);
+  }, [changeBanner, currentIndex, slides.length]);
 
   const prevBanner = useCallback(() => {
-    changeBanner((currentIndex - 1 + banners.length) % banners.length);
-  }, [changeBanner, currentIndex, banners.length]);
+    changeBanner((currentIndex - 1 + slides.length) % slides.length);
+  }, [changeBanner, currentIndex, slides.length]);
 
   // Keyboard navigation
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (banners.length <= 1) return;
+      if (slides.length <= 1) return;
 
       switch (event.key) {
         case "ArrowLeft":
@@ -109,11 +121,11 @@ const Banner = () => {
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [nextBanner, prevBanner, banners.length]);
+  }, [nextBanner, prevBanner, slides.length]);
 
   // Add touch swipe functionality for mobile
   useEffect(() => {
-    if (!banners.length || banners.length <= 1) return;
+    if (!slides.length || slides.length <= 1) return;
 
     let touchStartX = 0;
     let touchEndX = 0;
@@ -154,7 +166,7 @@ const Banner = () => {
         bannerContainer.removeEventListener("touchend", handleTouchEnd);
       };
     }
-  }, [banners.length, nextBanner, prevBanner]);
+  }, [slides.length, nextBanner, prevBanner]);
 
   if (!isLoaded || banners.length === 0) {
     return null; // Don't render anything if no banners
@@ -166,15 +178,39 @@ const Banner = () => {
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >
-      {banners.map((banner, index) => {
+      {slides.map((slide, index) => {
         const isActive = index === currentIndex;
         const isPrevious = index === previousIndex;
 
         if (!isActive && !isPrevious) return null;
 
+        // Render Ad slide
+        if (slide.type === "ad") {
+          return (
+            <div
+              key={slide.key}
+              className={`banner-slide banner-ad-slide ${isActive ? "active" : ""} ${
+                isPrevious ? "previous" : ""
+              }`}
+            >
+              <div className="banner-overlay banner-ad-overlay"></div>
+              <div className="banner-ad-content">
+                <AdUnit
+                  slot="4167693292"
+                  format="auto"
+                  fullWidthResponsive={true}
+                  className="banner-ad-unit"
+                />
+              </div>
+            </div>
+          );
+        }
+
+        // Render Banner slide
+        const banner = slide.data;
         return (
           <div
-            key={banner._id || index}
+            key={slide.key}
             className={`banner-slide ${isActive ? "active" : ""} ${
               isPrevious ? "previous" : ""
             }`}
@@ -214,8 +250,8 @@ const Banner = () => {
         );
       })}
 
-      {/* Carousel navigation (only show if multiple banners) */}
-      {banners.length > 1 && (
+      {/* Carousel navigation (only show if multiple slides) */}
+      {slides.length > 1 && (
         <>
           <button
             className="carousel-btn prev-btn"
@@ -233,14 +269,14 @@ const Banner = () => {
           </button>
 
           <div className="carousel-indicators">
-            {banners.map((_, index) => (
+            {slides.map((_, index) => (
               <button
                 key={index}
                 className={`indicator ${
                   index === currentIndex ? "active" : ""
                 }`}
                 onClick={() => changeBanner(index)}
-                aria-label={`Go to banner ${index + 1}`}
+                aria-label={`Go to slide ${index + 1}`}
               />
             ))}
           </div>
