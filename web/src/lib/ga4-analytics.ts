@@ -3,14 +3,6 @@
  * Comprehensive analytics tracking for SoulArt platform
  */
 
-// Extend window type for gtag
-declare global {
-  interface Window {
-    gtag?: (...args: unknown[]) => void;
-    dataLayer?: unknown[];
-  }
-}
-
 /**
  * Send events to GA4
  */

@@ -4,13 +4,6 @@ import { useEffect } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 import { getUserData } from "@/lib/auth";
 
-declare global {
-  interface Window {
-    fbq: any;
-    _fbq: any;
-  }
-}
-
 export const FB_PIXEL_ID =
   process.env.NEXT_PUBLIC_META_PIXEL_ID || "1189697243076610";
 
