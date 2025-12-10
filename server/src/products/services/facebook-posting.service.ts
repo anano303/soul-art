@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import axios from 'axios';
 import { ProductDocument } from '../schemas/product.schema';
+import { TikTokPostingService, TikTokPostResult } from './tiktok-posting.service';
 
 export interface PostResult {
   success: boolean;
@@ -13,6 +14,7 @@ export interface MultiPostResult {
   pagePost?: PostResult;
   groupPosts?: PostResult[];
   instagramPost?: PostResult;
+  tiktokPost?: TikTokPostResult;
   errors?: any[];
 }
 
@@ -36,6 +38,10 @@ export class FacebookPostingService {
   // Instagram configuration
   private readonly instagramAccountId = process.env.INSTAGRAM_ACCOUNT_ID || '';
 
+  // TikTok configuration
+  private readonly autoPostTikTok =
+    (process.env.TIKTOK_AUTO_POST || 'false').toLowerCase() === 'true';
+
   private readonly autoPostFlag = (
     process.env.FACEBOOK_AUTO_POST || 'true'
   ).toLowerCase();
@@ -46,6 +52,8 @@ export class FacebookPostingService {
 
   private readonly allowedOrigins = process.env.ALLOWED_ORIGINS || '';
   private readonly serverBaseUrl = process.env.SERVER_BASE_URL || '';
+
+  constructor(private readonly tiktokService: TikTokPostingService) {}
 
   private isEnabled(): boolean {
     // Respect FACEBOOK_AUTO_POST=false to disable without removing tokens
@@ -582,6 +590,28 @@ export class FacebookPostingService {
         result.success = false;
         result.errors?.push({ platform: 'Instagram', error });
         this.logger.error('Failed to post to Instagram', error);
+      }
+    }
+
+    // 4. Post to TikTok (only if product has video)
+    if (this.autoPostTikTok && this.tiktokService.isEnabled()) {
+      try {
+        const tiktokResult = await this.tiktokService.postProduct(product);
+        result.tiktokPost = tiktokResult;
+        if (!tiktokResult.success) {
+          // Don't mark as failed if it's just NO_VIDEO_AVAILABLE
+          if (tiktokResult.error !== 'NO_VIDEO_AVAILABLE') {
+            result.errors?.push({
+              platform: 'TikTok',
+              error: tiktokResult.error,
+            });
+          }
+        } else {
+          this.logger.log(`Posted to TikTok: ${tiktokResult.publishId}`);
+        }
+      } catch (error) {
+        result.errors?.push({ platform: 'TikTok', error });
+        this.logger.error('Failed to post to TikTok', error);
       }
     }
 
