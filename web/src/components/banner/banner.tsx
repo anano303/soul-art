@@ -14,10 +14,11 @@ const Banner = () => {
   const { language } = useLanguage();
   const [banners, setBanners] = useState<BannerType[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [previousIndex, setPreviousIndex] = useState(-1);
   const [isPaused, setIsPaused] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const isScrollingRef = useRef(false);
 
   // Create slides array: interleave banners with ads
   // [banner1, ad, banner2, ad, banner3, ad, ...]
@@ -63,14 +64,40 @@ const Banner = () => {
 
   const changeBanner = useCallback(
     (newIndex: number) => {
-      if (newIndex === currentIndex || newIndex >= slides.length) return;
+      if (newIndex === currentIndex || newIndex >= slides.length || newIndex < 0) return;
 
-      // Store current index as previous before changing
-      setPreviousIndex(currentIndex);
       setCurrentIndex(newIndex);
+
+      // Scroll to the new slide
+      if (scrollContainerRef.current) {
+        isScrollingRef.current = true;
+        const slideWidth = scrollContainerRef.current.offsetWidth;
+        scrollContainerRef.current.scrollTo({
+          left: newIndex * slideWidth,
+          behavior: "smooth",
+        });
+        // Reset scrolling flag after animation
+        setTimeout(() => {
+          isScrollingRef.current = false;
+        }, 500);
+      }
     },
     [currentIndex, slides.length]
   );
+
+  // Handle scroll snap - detect which slide is visible
+  const handleScroll = useCallback(() => {
+    if (isScrollingRef.current || !scrollContainerRef.current) return;
+
+    const container = scrollContainerRef.current;
+    const slideWidth = container.offsetWidth;
+    const scrollPosition = container.scrollLeft;
+    const newIndex = Math.round(scrollPosition / slideWidth);
+
+    if (newIndex !== currentIndex && newIndex >= 0 && newIndex < slides.length) {
+      setCurrentIndex(newIndex);
+    }
+  }, [currentIndex, slides.length]);
 
   // Auto-advance banners
   useEffect(() => {
@@ -123,50 +150,24 @@ const Banner = () => {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [nextBanner, prevBanner, slides.length]);
 
-  // Add touch swipe functionality for mobile
+  // Attach scroll listener for snap detection
   useEffect(() => {
-    if (!slides.length || slides.length <= 1) return;
+    const container = scrollContainerRef.current;
+    if (!container || slides.length <= 1) return;
 
-    let touchStartX = 0;
-    let touchEndX = 0;
-
-    const handleTouchStart = (e: Event) => {
-      const touchEvent = e as unknown as TouchEvent;
-      touchStartX = touchEvent.touches[0].clientX;
+    let scrollTimeout: NodeJS.Timeout;
+    const onScroll = () => {
+      // Debounce scroll handler
+      clearTimeout(scrollTimeout);
+      scrollTimeout = setTimeout(handleScroll, 50);
     };
 
-    const handleTouchEnd = (e: Event) => {
-      const touchEvent = e as unknown as TouchEvent;
-      touchEndX = touchEvent.changedTouches[0].clientX;
-      handleSwipe();
+    container.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      container.removeEventListener("scroll", onScroll);
+      clearTimeout(scrollTimeout);
     };
-
-    const handleSwipe = () => {
-      // Determine swipe direction and minimum swipe distance (30px)
-      if (touchEndX < touchStartX - 30) {
-        // Swipe left - go to next banner
-        nextBanner();
-      } else if (touchEndX > touchStartX + 30) {
-        // Swipe right - go to previous banner
-        prevBanner();
-      }
-    };
-
-    const bannerContainer = document.querySelector(".banner-container");
-    if (bannerContainer) {
-      bannerContainer.addEventListener("touchstart", handleTouchStart, {
-        passive: true,
-      });
-      bannerContainer.addEventListener("touchend", handleTouchEnd, {
-        passive: true,
-      });
-
-      return () => {
-        bannerContainer.removeEventListener("touchstart", handleTouchStart);
-        bannerContainer.removeEventListener("touchend", handleTouchEnd);
-      };
-    }
-  }, [slides.length, nextBanner, prevBanner]);
+  }, [handleScroll, slides.length]);
 
   if (!isLoaded || banners.length === 0) {
     return null; // Don't render anything if no banners
@@ -174,81 +175,74 @@ const Banner = () => {
 
   return (
     <div
-      className="banner-container"
+      className="banner-wrapper"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >
-      {slides.map((slide, index) => {
-        const isActive = index === currentIndex;
-        const isPrevious = index === previousIndex;
+      <div className="banner-container" ref={scrollContainerRef}>
+        {slides.map((slide, index) => {
+          // Render Ad slide
+          if (slide.type === "ad") {
+            return (
+              <div
+                key={slide.key}
+                className="banner-slide banner-ad-slide"
+              >
+                <div className="banner-overlay banner-ad-overlay"></div>
+                <div className="banner-ad-content">
+                  <AdUnit
+                    slot="4167693292"
+                    format="auto"
+                    fullWidthResponsive={true}
+                    className="banner-ad-unit"
+                  />
+                </div>
+              </div>
+            );
+          }
 
-        if (!isActive && !isPrevious) return null;
-
-        // Render Ad slide
-        if (slide.type === "ad") {
+          // Render Banner slide
+          const banner = slide.data;
           return (
             <div
               key={slide.key}
-              className={`banner-slide banner-ad-slide ${isActive ? "active" : ""} ${
-                isPrevious ? "previous" : ""
-              }`}
+              className="banner-slide"
+              style={{
+                backgroundImage: `url(${optimizeCloudinaryUrl(banner.imageUrl, {
+                  width: 1920,
+                  quality: "auto:eco",
+                })})`,
+              }}
             >
-              <div className="banner-overlay banner-ad-overlay"></div>
-              <div className="banner-ad-content">
-                <AdUnit
-                  slot="4167693292"
-                  format="auto"
-                  fullWidthResponsive={true}
-                  className="banner-ad-unit"
-                />
+              <div className="banner-overlay"></div>
+              <div className="banner-content">
+                <h2 className="banner-title">
+                  {language === "en" ? banner.titleEn : banner.title}
+                </h2>
+                {banner.buttonText && banner.buttonLink && (
+                  <Link
+                    href={banner.buttonLink}
+                    className="banner-cta-btn"
+                    onClick={() =>
+                      trackBannerClick(
+                        banner._id || `banner-${index}`,
+                        language === "en" ? banner.titleEn : banner.title,
+                        banner.buttonLink
+                      )
+                    }
+                  >
+                    <span className="btn-text">
+                      {language === "en"
+                        ? banner.buttonTextEn
+                        : banner.buttonText}
+                    </span>
+                  </Link>
+                )}
               </div>
             </div>
           );
-        }
-
-        // Render Banner slide
-        const banner = slide.data;
-        return (
-          <div
-            key={slide.key}
-            className={`banner-slide ${isActive ? "active" : ""} ${
-              isPrevious ? "previous" : ""
-            }`}
-            style={{
-              backgroundImage: `url(${optimizeCloudinaryUrl(banner.imageUrl, {
-                width: 1920,
-                quality: "auto:eco",
-              })})`,
-            }}
-          >
-            <div className="banner-overlay"></div>
-            <div className="banner-content">
-              <h2 className="banner-title">
-                {language === "en" ? banner.titleEn : banner.title}
-              </h2>
-              {banner.buttonText && banner.buttonLink && (
-                <Link
-                  href={banner.buttonLink}
-                  className="banner-cta-btn"
-                  onClick={() =>
-                    trackBannerClick(
-                      banner._id || `banner-${index}`,
-                      language === "en" ? banner.titleEn : banner.title,
-                      banner.buttonLink
-                    )
-                  }
-                >
-                  <span className="btn-text">
-                    {language === "en"
-                      ? banner.buttonTextEn
-                      : banner.buttonText}
-                  </span>
-                </Link>
-              )}
-            </div>
-          </div>
-        );
-      })}
+        })}
+      </div>
 
       {/* Carousel navigation (only show if multiple slides) */}
       {slides.length > 1 && (
