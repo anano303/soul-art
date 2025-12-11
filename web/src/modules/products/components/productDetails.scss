@@ -20,9 +20,81 @@ body {
   min-height: 90vh;
   overflow-x: hidden;
   box-sizing: border-box;
+
+  /* Tablet responsive (754px - 1100px) */
+  /* Tablet responsive (768px - 1100px) */
+  @media (min-width: 768px) and (max-width: 1100px) {
+    max-width: 100%;
+    padding: 30px 12px;
+  }
 }
 
 .product-details-container {
+  /* Tablet responsive (768px - 1100px) - single column layout like mobile */
+  @media (min-width: 768px) and (max-width: 1100px) {
+    .grid {
+      grid-template-columns: 1fr !important;
+      gap: 20px;
+      padding: 20px;
+      max-width: 500px;
+    }
+
+    .image-section {
+      max-width: 100%;
+      order: 1;
+    }
+
+    .main-product-info {
+      order: 2;
+    }
+
+    .image-container {
+      padding-top: 60% !important;
+      max-height: 320px;
+    }
+
+    .image-wrapper img {
+      object-fit: contain !important;
+    }
+
+    .thumbnail-container {
+      display: flex !important;
+      flex-wrap: wrap !important;
+      justify-content: center !important;
+      gap: 6px !important;
+      margin-top: 10px !important;
+      padding: 0 !important;
+      grid-template-columns: unset !important;
+    }
+
+    .thumbnail {
+      width: 40px !important;
+      height: 40px !important;
+      min-width: 40px !important;
+      max-width: 40px !important;
+      padding-top: 0 !important;
+      flex: 0 0 40px !important;
+    }
+
+    .info-section {
+      padding: 0 10px;
+    }
+
+    .product-title {
+      font-size: 1.2rem;
+    }
+
+    .price-container {
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .description-section {
+      padding: 10px;
+      font-size: 0.9rem;
+    }
+  }
+
   .grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -891,8 +963,8 @@ body {
     overflow: hidden;
   }
 
-  /* Mobile responsiveness for fullscreen modal */
-  @media (max-width: 768px) {
+  /* Mobile responsiveness for fullscreen modal - extended to 900px */
+  @media (max-width: 900px) {
     &.container {
       max-width: 100%;
       padding: 40px 15px;
