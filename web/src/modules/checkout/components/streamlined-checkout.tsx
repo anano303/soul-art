@@ -785,10 +785,12 @@ export function StreamlinedCheckout() {
                     : `${Number(shippingPrice).toFixed(2)} ₾`}
                 </span>
               </div>
+              {/* საკომისიო დაკომენტარებულია - ბანკის გვერდზე ნახავს
               <div className="summary-row">
                 <span>{t("cart.commission")}</span>
                 <span>{taxPrice.toFixed(2)} ₾</span>
               </div>
+              */}
 
               <div className="summary-divider" />
 
