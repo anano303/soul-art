@@ -174,10 +174,12 @@ export function CartPage() {
                   {isShippingFree ? t("cart.free") : formatPrice(shippingCost)}
                 </span>
               </div>
+              {/* საკომისიო დაკომენტარებულია
               <div className="summary-row">
                 <span className="summary-label">{t("cart.commission")}</span>
                 <span>{formatPrice(tax)}</span>
               </div>
+              */}
               <hr className="separator" />
               <div className="summary-row total">
                 <span>{t("cart.totalCost")}</span>
