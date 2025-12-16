@@ -1,7 +1,10 @@
 import { Injectable, Logger } from '@nestjs/common';
 import axios from 'axios';
 import { ProductDocument } from '../schemas/product.schema';
-import { TikTokPostingService, TikTokPostResult } from './tiktok-posting.service';
+import {
+  TikTokPostingService,
+  TikTokPostResult,
+} from './tiktok-posting.service';
 
 export interface PostResult {
   success: boolean;

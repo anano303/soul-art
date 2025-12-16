@@ -1,5 +1,13 @@
 import { Product } from ".";
-import { Message } from "ai";
+// AI ფუნქციონალი დროებით გამორთულია
+// import { Message } from "ai";
+
+// ლოკალური Message ტიპი AI-ს ნაცვლად
+interface Message {
+  id: string;
+  role: "user" | "assistant" | "system";
+  content: string;
+}
 
 export interface ChatRequest {
   id: string;

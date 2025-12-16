@@ -18,12 +18,12 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 import "./streamlined-checkout.css";
 import { trackInitiateCheckout, trackPurchase } from "@/components/MetaPixel";
-import { 
-  trackBeginCheckout, 
-  trackAddShippingInfo, 
-  trackViewSummary, 
+import {
+  trackBeginCheckout,
+  trackAddShippingInfo,
+  trackViewSummary,
   trackClickPurchase,
-  trackCheckoutLogin
+  trackCheckoutLogin,
 } from "@/lib/ga4-analytics";
 
 type CheckoutStep = "auth" | "guest" | "shipping" | "payment" | "review";
@@ -77,11 +77,11 @@ export function StreamlinedCheckout() {
   // Track Step 3: Begin Checkout (once when items exist)
   useEffect(() => {
     if (items.length > 0 && !hasTrackedBeginCheckoutRef.current) {
-      const cartItems = items.map(item => ({
+      const cartItems = items.map((item) => ({
         item_id: item.productId,
         item_name: item.name,
         price: item.price,
-        quantity: item.qty
+        quantity: item.qty,
       }));
       trackBeginCheckout(totalPrice, cartItems);
       hasTrackedBeginCheckoutRef.current = true;
@@ -126,7 +126,7 @@ export function StreamlinedCheckout() {
     if (isEditing) return;
 
     const previousStep = previousStepRef.current;
-    
+
     if (!user && !isGuestCheckout) {
       setCurrentStep("auth");
     } else if (!user && isGuestCheckout && !guestInfo) {
@@ -136,7 +136,11 @@ export function StreamlinedCheckout() {
       return;
     } else if (!shippingAddress) {
       // Track Step 4: Checkout Login (when user successfully authenticates during checkout)
-      if (previousStep === "auth" && user && !hasTrackedCheckoutLoginRef.current) {
+      if (
+        previousStep === "auth" &&
+        user &&
+        !hasTrackedCheckoutLoginRef.current
+      ) {
         trackCheckoutLogin(false); // false = existing user logging in
         hasTrackedCheckoutLoginRef.current = true;
       }
@@ -146,7 +150,7 @@ export function StreamlinedCheckout() {
       // Auto-set BOG as default payment method
       setPaymentMethod("BOG");
     }
-    
+
     // Update previous step ref
     previousStepRef.current = currentStep;
   }, [
@@ -169,7 +173,7 @@ export function StreamlinedCheckout() {
       trackInitiateCheckout(totalPrice, "GEL", totalUnits);
       hasTrackedInitiateRef.current = true;
     }
-    
+
     // Track Step 5: View Summary (when review step is shown)
     if (currentStep === "review" && !hasTrackedViewSummaryRef.current) {
       trackViewSummary(totalPrice);
@@ -203,7 +207,7 @@ export function StreamlinedCheckout() {
   const handlePlaceOrder = async () => {
     // Track Step 6: Click Purchase (before creating order)
     trackClickPurchase(totalPrice);
-    
+
     setIsValidating(true);
     setUnavailableItems([]);
 

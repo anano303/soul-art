@@ -1138,7 +1138,8 @@ export function ProductDetails({ product }: ProductDetailsProps) {
                 <div className="metadata-value">
                   {dimensions.width && `${dimensions.width} × `}
                   {dimensions.height && `${dimensions.height}`}
-                  {dimensions.depth && ` × ${dimensions.depth}`} {t("product.cm")}
+                  {dimensions.depth && ` × ${dimensions.depth}`}{" "}
+                  {t("product.cm")}
                 </div>
               </div>
             )}
