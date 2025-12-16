@@ -39,11 +39,7 @@ export default function TermsPage() {
           <h2>{language === "en" ? "Quick Overview" : "მოკლე მიმოხილვა"}</h2>
           <div className="summary-grid">
             <div className="summary-item">
-              <h3>
-                {language === "en"
-                  ? "🛒 Shopping"
-                  : "🛒 შოპინგი"}
-              </h3>
+              <h3>{language === "en" ? "🛒 Shopping" : "🛒 შოპინგი"}</h3>
               <p>
                 {language === "en"
                   ? "All products on SoulArt are handmade by Georgian artists. Prices are in Georgian Lari (₾)."
@@ -51,11 +47,7 @@ export default function TermsPage() {
               </p>
             </div>
             <div className="summary-item">
-              <h3>
-                {language === "en"
-                  ? "📦 Delivery"
-                  : "📦 მიწოდება"}
-              </h3>
+              <h3>{language === "en" ? "📦 Delivery" : "📦 მიწოდება"}</h3>
               <p>
                 {language === "en"
                   ? "We deliver throughout Georgia. Delivery times and costs vary depending on location."
@@ -63,11 +55,7 @@ export default function TermsPage() {
               </p>
             </div>
             <div className="summary-item">
-              <h3>
-                {language === "en"
-                  ? "💳 Payments"
-                  : "💳 გადახდა"}
-              </h3>
+              <h3>{language === "en" ? "💳 Payments" : "💳 გადახდა"}</h3>
               <p>
                 {language === "en"
                   ? "We accept secure online payments through Bank of Georgia payment system."
@@ -75,11 +63,7 @@ export default function TermsPage() {
               </p>
             </div>
             <div className="summary-item">
-              <h3>
-                {language === "en"
-                  ? "🔄 Returns"
-                  : "🔄 დაბრუნება"}
-              </h3>
+              <h3>{language === "en" ? "🔄 Returns" : "🔄 დაბრუნება"}</h3>
               <p>
                 {language === "en"
                   ? "Products can be returned within 14 days if unused and in original condition."

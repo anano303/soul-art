@@ -10,12 +10,12 @@ export interface TikTokPostResult {
 
 /**
  * TikTok Content Posting Service
- * 
+ *
  * Uses TikTok's Photo Mode API which:
  * - Uploads photos directly (no video conversion needed)
  * - User can add TikTok's music library songs in the app
  * - No server-side video processing = no server load
- * 
+ *
  * Prerequisites:
  * 1. Create TikTok Developer Account: https://developers.tiktok.com/
  * 2. Create an app and get Client Key & Client Secret
@@ -152,7 +152,7 @@ export class TikTokPostingService {
    * Post photos to TikTok using Photo Mode API
    * Photos are uploaded directly - no video conversion needed!
    * User can add music from TikTok's library in the app
-   * 
+   *
    * @param imageUrls Array of image URLs (max 35 photos)
    * @param caption Caption for the post
    */
@@ -217,10 +217,7 @@ export class TikTokPostingService {
         },
       );
 
-      if (
-        postRes.data?.error?.code &&
-        postRes.data?.error?.code !== 'ok'
-      ) {
+      if (postRes.data?.error?.code && postRes.data?.error?.code !== 'ok') {
         throw new Error(
           postRes.data?.error?.message || 'Failed to post photos',
         );
@@ -317,7 +314,7 @@ export class TikTokPostingService {
    * Post a product to TikTok
    * - If product has video: uploads video
    * - If product has images: uses Photo Mode (no video conversion!)
-   * 
+   *
    * User can add TikTok music from the app after posting
    */
   async postProduct(product: ProductDocument): Promise<TikTokPostResult> {

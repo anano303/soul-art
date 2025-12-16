@@ -9,9 +9,7 @@ import { useLanguage } from "@/hooks/LanguageContext";
 import { useQuery } from "@tanstack/react-query";
 import { fetchWithAuth } from "@/lib/fetch-with-auth";
 import { useCheckout } from "@/modules/checkout/context/checkout-context";
-import {
-  calculateShipping,
-} from "@/lib/shipping";
+import { calculateShipping } from "@/lib/shipping";
 import { trackViewCart } from "@/lib/ga4-analytics";
 import "./cart-page.css";
 import { Color } from "@/types";
