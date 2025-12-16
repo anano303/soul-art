@@ -1842,6 +1842,7 @@ export class UsersService {
         storeName: becomeSellerDto.storeName,
         identificationNumber: becomeSellerDto.identificationNumber,
         accountNumber: becomeSellerDto.accountNumber,
+        beneficiaryBankCode: becomeSellerDto.beneficiaryBankCode,
       };
 
       // Auto-populate owner first and last name from existing user name

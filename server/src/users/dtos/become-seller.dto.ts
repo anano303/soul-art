@@ -62,6 +62,15 @@ export class BecomeSellerDto {
   accountNumber: string;
 
   @ApiProperty({
+    example: 'BAGAGE22',
+    description: 'ბანკის SWIFT/BIC კოდი',
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  beneficiaryBankCode?: string;
+
+  @ApiProperty({
     example: 'ABC12345',
     description: 'რეფერალური კოდი (არაუცილებელო)',
     required: false,
