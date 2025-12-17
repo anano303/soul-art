@@ -28,14 +28,20 @@ export function MobileBottomNav() {
     "/explore",
     "/auction",
     "/sellers-register",
+    "/profile",
     ...(isSeller && user?.artistSlug ? [`/@${user.artistSlug}`] : []),
   ];
 
   // Check if current page is in bottom nav
-  const isBottomNavPage = navRoutes.some((route) => {
-    if (route === "/") return pathname === "/";
-    return pathname.startsWith(route);
-  });
+  // Include product detail pages and admin pages
+  const isBottomNavPage = 
+    navRoutes.some((route) => {
+      if (route === "/") return pathname === "/";
+      return pathname.startsWith(route);
+    }) ||
+    pathname.startsWith("/products/") || // Product detail pages
+    pathname.startsWith("/admin/") || // Admin panel pages
+    pathname.startsWith("/profile"); // Profile pages
 
   // Only show bottom nav on mobile
   useEffect(() => {
@@ -132,6 +138,14 @@ export function MobileBottomNav() {
     icon: Gavel,
     label: language === "en" ? "Auction" : "აუქციონი",
     active: pathname.startsWith("/auction"),
+  });
+
+  // Add profile tab at the end
+  tabs.push({
+    href: "/profile",
+    icon: User,
+    label: language === "en" ? "Profile" : "პროფილი",
+    active: pathname.startsWith("/profile"),
   });
 
   return (
