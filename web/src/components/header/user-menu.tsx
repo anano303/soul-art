@@ -303,7 +303,7 @@ export default function UserMenu({
             )}
 
             <div className="dropdown-label">{t("navigation.profile")}</div>
-            <hr />
+            {/* <hr /> */}
             <Link
               href="/profile"
               className="dropdown-item"
@@ -343,7 +343,7 @@ export default function UserMenu({
               user.role?.toLowerCase() === Role.Seller ||
               user.role?.toLowerCase() === Role.Blogger) && (
               <>
-                <hr />
+                {/* <hr /> */}
                 <div className="dropdown-label">
                   {t("navigation.adminPanel")}
                 </div>
