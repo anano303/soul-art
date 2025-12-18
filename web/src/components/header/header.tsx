@@ -157,8 +157,8 @@ export default function Header() {
             }
           >
             <Image
-              src="/logo-white.webp"
-              alt="logo soulArt"
+              src="/logo-white-text.webp"
+              alt="soulArt"
               width={160}
               height={40}
               style={{
