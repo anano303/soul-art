@@ -142,6 +142,17 @@ export function GalleryViewer({
   >(null);
   const loadMoreTriggeredRef = useRef(false);
   const scrollTimeoutRefs = useRef<Map<number, NodeJS.Timeout>>(new Map());
+  const shouldAutoScrollRef = useRef(false);
+  const prevIsOpenRef = useRef(false);
+
+  // Track when viewer opens to enable initial auto-scroll
+  useEffect(() => {
+    if (isOpen && !prevIsOpenRef.current) {
+      // Viewer just opened - enable auto-scroll for initial positioning
+      shouldAutoScrollRef.current = true;
+    }
+    prevIsOpenRef.current = isOpen;
+  }, [isOpen]);
 
   // Cleanup scroll timeouts on unmount
   useEffect(() => {
@@ -667,18 +678,24 @@ export function GalleryViewer({
   // Track previous post index to detect actual post changes
   const prevPostIndexRef = useRef<number | null>(null);
 
-  // Scroll to post only when post index actually changes or viewer opens
+  // Scroll to post only on initial viewer open, not during manual scrolling
   useEffect(() => {
     if (!isMobile || !isOpen) {
       prevPostIndexRef.current = null;
       return;
     }
 
-    // Only scroll to post if post index changed (not on image swipe)
+    // Only auto-scroll if the flag is set (viewer just opened)
+    if (!shouldAutoScrollRef.current) {
+      // Still track the index, but don't scroll
+      prevPostIndexRef.current = currentPostIndex;
+      return;
+    }
+
     const postChanged = prevPostIndexRef.current !== currentPostIndex;
     prevPostIndexRef.current = currentPostIndex;
 
-    if (postChanged) {
+    if (postChanged || shouldAutoScrollRef.current) {
       const postElement = postRefs.current[currentPostIndex];
       const container = mobileContainerRef.current;
       const header = headerRef.current;
@@ -693,6 +710,9 @@ export function GalleryViewer({
           top: Math.max(0, postTop - headerHeight),
           behavior: "auto",
         });
+        
+        // Disable auto-scroll after initial positioning
+        shouldAutoScrollRef.current = false;
       }
     }
   }, [currentPostIndex, isMobile, isOpen]);
