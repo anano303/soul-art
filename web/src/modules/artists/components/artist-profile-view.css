@@ -21,9 +21,9 @@
   margin-bottom: 0;
   cursor: url("/brush.png"), auto;
   /* On mobile: extend behind header only, add height for safe area */
-  margin-top: calc(-44px - env(safe-area-inset-top));
+  margin-top: calc(-48px - env(safe-area-inset-top));
   /* Extra padding at top: header height + safe area for content positioning */
-  padding-top: calc(44px + env(safe-area-inset-top));
+  padding-top: calc(48px + env(safe-area-inset-top));
   /* Add extra min-height to account for safe area extension */
   min-height: calc(320px + env(safe-area-inset-top));
   /* Remove top border radius on mobile so cover extends to edges */
@@ -1630,7 +1630,7 @@
     padding: 0;
     justify-content: stretch;
     position: sticky;
-    top: calc(44px + env(safe-area-inset-top));
+    top: calc(48px + env(safe-area-inset-top));
   }
 
   .artist-tabs__tab {

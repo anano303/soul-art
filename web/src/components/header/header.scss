@@ -17,10 +17,10 @@
     background-color: transparent;
   }
 
-  /* Smaller header on mobile (Instagram-style ~44px) */
+  /* Smaller header on mobile (Instagram-style ~48px) */
   @media (max-width: 768px) {
-    height: 44px;
-    height: calc(44px + env(safe-area-inset-top));
+    height: 48px;
+    height: calc(48px + env(safe-area-inset-top));
   }
 }
 
@@ -42,12 +42,12 @@ header {
   /* Total height including safe area */
   min-height: calc(65px + env(safe-area-inset-top));
 
-  /* Smaller header on mobile (Instagram-style ~44px) */
+  /* Smaller header on mobile (Instagram-style ~48px) */
   @media (max-width: 768px) {
-    height: 44px;
-    min-height: calc(44px + env(safe-area-inset-top));
-    padding: 6px 12px;
-    padding-top: calc(6px + env(safe-area-inset-top));
+    height: 48px;
+    min-height: calc(48px + env(safe-area-inset-top));
+    padding: 8px 12px;
+    padding-top: calc(8px + env(safe-area-inset-top));
     padding-left: max(12px, env(safe-area-inset-left));
     padding-right: max(12px, env(safe-area-inset-right));
   }
@@ -100,7 +100,7 @@ header {
     position: absolute;
     left: 50%;
     /* Center in the content area below safe area, not entire header */
-    bottom: 22px;
+    bottom: 24px;
     transform: translate(-50%, 50%);
     display: flex;
     align-items: center;
