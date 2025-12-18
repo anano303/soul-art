@@ -1194,13 +1194,6 @@
   pointer-events: auto;
 }
 
-@media (hover: none) {
-  .artist-gallery-card__overlay {
-    opacity: 1;
-    pointer-events: auto;
-  }
-}
-
 .artist-gallery-card__badge {
   position: absolute;
   top: 16px;
@@ -1649,11 +1642,6 @@
     min-height: 140px;
   }
 
-  .artist-gallery-card__overlay {
-    opacity: 1;
-    pointer-events: auto;
-  }
-
   .artist-gallery-card__badge {
     top: 8px;
     left: 8px;
@@ -2036,3 +2024,5 @@
     font-size: 0.8rem;
   }
 }
+
+
