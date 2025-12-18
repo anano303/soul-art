@@ -38,6 +38,7 @@ async function fetchArtistProfile(
 
 type ArtistPageProps = {
   params: Promise<{ slug: string }>;
+  searchParams: Promise<{ post?: string }>;
 };
 
 function resolveBiographyText(
@@ -153,8 +154,10 @@ const collectArtistKeywords = (
 
 export async function generateMetadata({
   params,
+  searchParams,
 }: ArtistPageProps): Promise<Metadata> {
   const { slug: originalSlug } = await params;
+  const { post: postId } = await searchParams;
   let startIndex = 0;
   if (originalSlug.includes("@")) {
     startIndex = originalSlug.indexOf("@") + 1;
@@ -168,18 +171,44 @@ export async function generateMetadata({
     const artist = data.artist;
     const displayName = artist.storeName || artist.name;
     const biography = resolveBiographyText(artist.artistBio);
-    const description = biography
-      ? biography.slice(0, 180) + (biography.length > 180 ? "…" : "")
-      : `${displayName} • SoulArt portfolio showcasing highlights and commissions.`;
-    const canonical = buildAbsoluteUrl(`/@${slug}`);
+    
+    // Check if we have a specific post to show
+    let postImage: string | undefined;
+    let postCaption: string | undefined;
+    
+    if (postId && data.portfolio?.posts?.length) {
+      const post = data.portfolio.posts.find(p => p.id === postId);
+      if (post) {
+        // Get the first image from the post
+        const firstImage = post.images?.[0];
+        if (firstImage?.url) {
+          postImage = firstImage.url;
+        }
+        // Get the caption
+        if (post.caption && typeof post.caption === 'string' && post.caption.trim()) {
+          postCaption = post.caption.trim();
+        }
+      }
+    }
+    
+    // Use post-specific data if available, otherwise fall back to artist data
+    const description = postCaption
+      ? postCaption.slice(0, 180) + (postCaption.length > 180 ? "…" : "")
+      : biography
+        ? biography.slice(0, 180) + (biography.length > 180 ? "…" : "")
+        : `${displayName} • SoulArt portfolio showcasing highlights and commissions.`;
+    
+    const canonical = postId 
+      ? buildAbsoluteUrl(`/@${slug}?post=${postId}`)
+      : buildAbsoluteUrl(`/@${slug}`);
 
-    const logoUrl = artist.storeLogo || undefined;
-    const imageUrl = logoUrl || artist.artistCoverImage || undefined;
+    // Use post image if available, otherwise use artist image
+    const imageUrl = postImage || artist.storeLogo || artist.artistCoverImage || undefined;
     const images = imageUrl
       ? [
           {
             url: imageUrl,
-            alt: displayName,
+            alt: postCaption ? `${displayName} - ${postCaption.slice(0, 50)}` : displayName,
           },
         ]
       : undefined;
