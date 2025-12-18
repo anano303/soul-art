@@ -235,6 +235,8 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
   const pushedPostUrlRef = useRef(false);
   // Track last URL-synced post ID to avoid redundant replaceState calls
   const lastSyncedPostIdRef = useRef<string | null>(null);
+  // Track if we've handled the initial URL (to prevent re-opening on close)
+  const initialUrlHandledRef = useRef(false);
 
   // Products pagination state
   const [productItems, setProductItems] = useState<ArtistProductSummary[]>(
@@ -563,22 +565,29 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
     return `${artistBaseUrl}?post=${postId}`;
   }, [artistBaseUrl]);
 
-  // Handle opening viewer from URL on initial load
+  // Handle opening viewer from URL on initial load (runs only once)
   useEffect(() => {
+    // Only handle initial URL once
+    if (initialUrlHandledRef.current) return;
+    
     const postId = searchParams?.get("post");
-    if (postId && galleryPosts.length > 0 && !viewerOpen) {
+    if (postId && galleryPosts.length > 0) {
       const postIndex = galleryPosts.findIndex(p => p.postId === postId);
       if (postIndex !== -1) {
+        initialUrlHandledRef.current = true;
         setViewerIndex(postIndex);
         setViewerImageIndex(0);
         setViewerOpen(true);
         setActiveTab("gallery");
-        // Mark that we opened from URL (don't need to push, already in URL)
-        pushedPostUrlRef.current = true;
+        // Don't set pushedPostUrlRef - we opened from URL, didn't push
+        // This way closeViewer will use replaceState instead of history.back()
         lastSyncedPostIdRef.current = postId;
       }
+    } else if (galleryPosts.length > 0) {
+      // No post param but gallery loaded - mark as handled
+      initialUrlHandledRef.current = true;
     }
-  }, [searchParams, galleryPosts, viewerOpen]);
+  }, [searchParams, galleryPosts]);
 
   // Handle browser back/forward button
   useEffect(() => {
