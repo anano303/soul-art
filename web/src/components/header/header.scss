@@ -260,24 +260,34 @@ header {
 @media screen and (max-width: 768px) {
   .logo {
     img {
-      max-height: 28px !important;
+      max-height: 40px !important;
       width: auto !important;
     }
   }
 
   .header-center-logo {
     img {
-      max-height: 28px !important;
+      max-height: 40px !important;
       width: auto !important;
     }
   }
 
   .header-back-button {
-    padding: 4px !important;
+    padding: 2px !important;
     
     svg {
-      width: 20px;
-      height: 20px;
+      width: 24px;
+      height: 24px;
     }
+  }
+
+  /* Bigger hamburger menu icon */
+  .mobile-nav-btn {
+    width: 36px !important;
+    height: 36px !important;
+  }
+
+  .hamburger-icon {
+    font-size: 26px !important;
   }
 }
