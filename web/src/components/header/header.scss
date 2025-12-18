@@ -16,6 +16,12 @@
   &.header-placeholder--transparent {
     background-color: transparent;
   }
+
+  /* Smaller header on mobile (Instagram-style ~44px) */
+  @media (max-width: 768px) {
+    height: 44px;
+    height: calc(44px + env(safe-area-inset-top));
+  }
 }
 
 header {
@@ -35,6 +41,16 @@ header {
   height: 65px;
   /* Total height including safe area */
   min-height: calc(65px + env(safe-area-inset-top));
+
+  /* Smaller header on mobile (Instagram-style ~44px) */
+  @media (max-width: 768px) {
+    height: 44px;
+    min-height: calc(44px + env(safe-area-inset-top));
+    padding: 6px 12px;
+    padding-top: calc(6px + env(safe-area-inset-top));
+    padding-left: max(12px, env(safe-area-inset-left));
+    padding-right: max(12px, env(safe-area-inset-right));
+  }
 
   /* Add .flex class */
   .flex {
@@ -77,6 +93,20 @@ header {
     svg {
       display: block;
     }
+  }
+
+  /* Centered logo when back button is shown (mobile) */
+  .header-center-logo {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1;
+    transition: opacity 0.15s ease;
+    -webkit-tap-highlight-color: transparent;
   }
 
   .main-nav {
@@ -194,9 +224,9 @@ header {
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      width: 40px;
-      height: 40px;
-      font-size: 24px;
+      width: 32px;
+      height: 32px;
+      font-size: 20px;
       z-index: 10;
       background: none;
       border: none;
@@ -204,7 +234,7 @@ header {
     }
 
     .hamburger-icon {
-      font-size: 28px;
+      font-size: 22px;
       color: #ffffff;
     }
   }
@@ -226,11 +256,27 @@ header {
   }
 }
 
-@media screen and (max-width: 480px) {
+@media screen and (max-width: 768px) {
   .logo {
-    > div {
-      width: 160px !important;
-      height: 40px !important;
+    img {
+      max-height: 28px !important;
+      width: auto !important;
+    }
+  }
+
+  .header-center-logo {
+    img {
+      max-height: 28px !important;
+      width: auto !important;
+    }
+  }
+
+  .header-back-button {
+    padding: 4px !important;
+    
+    svg {
+      width: 20px;
+      height: 20px;
     }
   }
 }
