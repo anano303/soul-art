@@ -15,6 +15,7 @@ import { useLanguage } from "@/hooks/LanguageContext";
 export default function Header() {
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [headerOpacity, setHeaderOpacity] = useState(1);
   const { user } = useUser();
   const router = useRouter();
   const pathname = usePathname();
@@ -47,6 +48,9 @@ export default function Header() {
 
   const showBackButton = isMobile && !isBottomNavPage();
 
+  // Check if current page is an artist portfolio page
+  const isArtistPortfolioPage = pathname?.startsWith("/@");
+
   useEffect(() => {
     const checkMobile = () => {
       setIsMobile(window.innerWidth <= 768);
@@ -57,6 +61,31 @@ export default function Header() {
 
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
+
+  // Scroll-based header opacity for artist portfolio pages on mobile
+  // Opacity linearly interpolates from 0 (at scroll 0) to 1 (at scroll >= threshold)
+  useEffect(() => {
+    if (!isMobile || !isArtistPortfolioPage) {
+      setHeaderOpacity(1);
+      return;
+    }
+
+    const SCROLL_THRESHOLD = 200; // Fully opaque at 200px scroll
+
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      
+      // Calculate opacity linearly: 0 at top, 1 at threshold
+      const opacity = Math.min(currentScrollY / SCROLL_THRESHOLD, 1);
+      setHeaderOpacity(opacity);
+    };
+
+    // Initial state
+    handleScroll();
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [isMobile, isArtistPortfolioPage]);
 
   // Hide header on explore page only on mobile (after all hooks)
   if (pathname === "/explore" && isMobile) {
@@ -71,10 +100,24 @@ export default function Header() {
     setIsUserMenuOpen(false);
   };
 
+  // Check if header should use dynamic opacity (artist portfolio on mobile)
+  const useTransparentHeader = isMobile && isArtistPortfolioPage;
+
   return (
     <>
-      <div className="header-placeholder" />
-      <header className="header">
+      <div 
+        className={`header-placeholder ${
+          useTransparentHeader ? "header-placeholder--transparent" : ""
+        }`}
+      />
+      <header 
+        className={`header ${useTransparentHeader ? "header--transparent" : ""}`}
+        style={
+          useTransparentHeader
+            ? { backgroundColor: `rgba(1, 38, 69, ${headerOpacity})` }
+            : undefined
+        }
+      >
         <div className="logo">
           {showBackButton ? (
             <button
@@ -91,7 +134,7 @@ export default function Header() {
                 alt="logo soulArt"
                 width={200}
                 height={50}
-                sizes="(max-width: 480px) 160px, 200px"
+                sizes="(max-width: 768px) 120px, 200px"
                 style={{
                   objectFit: "contain",
                   maxWidth: "100%",
@@ -101,6 +144,29 @@ export default function Header() {
             </Link>
           )}
         </div>
+
+        {/* Centered logo when back button is visible (mobile) */}
+        {showBackButton && (
+          <Link 
+            href="/" 
+            className="header-center-logo"
+            style={
+              useTransparentHeader
+                ? { opacity: headerOpacity }
+                : undefined
+            }
+          >
+            <Image
+              src="/logo-white-text.webp"
+              alt="soulArt"
+              width={160}
+              height={40}
+              style={{
+                objectFit: "contain",
+              }}
+            />
+          </Link>
+        )}
         <nav className="main-nav desktop-only">
           <ul>
             <li>
