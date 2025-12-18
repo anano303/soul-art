@@ -10,7 +10,7 @@ import {
   useEffect,
   ChangeEvent,
 } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import {
   ArtistProfileResponse,
@@ -197,6 +197,7 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
   const { language } = useLanguage();
   const { user, isLoading: userLoading } = useUser();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const queryClient = useQueryClient();
   const { artist, products, portfolio } = data;
   const [showEditor, setShowEditor] = useState(false);
@@ -229,6 +230,11 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
   const heroRef = useRef<HTMLElement>(null);
   const coverFileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
+
+  // Track if we pushed a post URL to history (to know whether to pop on close)
+  const pushedPostUrlRef = useRef(false);
+  // Track last URL-synced post ID to avoid redundant replaceState calls
+  const lastSyncedPostIdRef = useRef<string | null>(null);
 
   // Products pagination state
   const [productItems, setProductItems] = useState<ArtistProductSummary[]>(
@@ -545,6 +551,102 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
       galleryItems: imageUrls,
     };
   }, [portfolioPosts, artist.artistGallery]);
+
+  // Build the artist base URL for post links
+  const artistBaseUrl = useMemo(() => {
+    return artist.artistSlug ? `/@${artist.artistSlug}` : `/artists/${artist.id}`;
+  }, [artist.artistSlug, artist.id]);
+
+  // Generate post URL for a given post
+  const getPostUrl = useCallback((postId: string | null) => {
+    if (!postId) return artistBaseUrl;
+    return `${artistBaseUrl}?post=${postId}`;
+  }, [artistBaseUrl]);
+
+  // Handle opening viewer from URL on initial load
+  useEffect(() => {
+    const postId = searchParams?.get("post");
+    if (postId && galleryPosts.length > 0 && !viewerOpen) {
+      const postIndex = galleryPosts.findIndex(p => p.postId === postId);
+      if (postIndex !== -1) {
+        setViewerIndex(postIndex);
+        setViewerImageIndex(0);
+        setViewerOpen(true);
+        setActiveTab("gallery");
+        // Mark that we opened from URL (don't need to push, already in URL)
+        pushedPostUrlRef.current = true;
+        lastSyncedPostIdRef.current = postId;
+      }
+    }
+  }, [searchParams, galleryPosts, viewerOpen]);
+
+  // Handle browser back/forward button
+  useEffect(() => {
+    const handlePopState = () => {
+      const params = new URLSearchParams(window.location.search);
+      const postId = params.get("post");
+      
+      if (postId) {
+        // Navigate to the post
+        const postIndex = galleryPosts.findIndex(p => p.postId === postId);
+        if (postIndex !== -1) {
+          setViewerIndex(postIndex);
+          setViewerImageIndex(0);
+          setViewerOpen(true);
+          lastSyncedPostIdRef.current = postId;
+        }
+      } else {
+        // Close the viewer
+        setViewerOpen(false);
+        pushedPostUrlRef.current = false;
+        lastSyncedPostIdRef.current = null;
+      }
+    };
+
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, [galleryPosts]);
+
+  // Handle opening the viewer - push URL to history
+  const openViewer = useCallback((postIndex: number, imageIndex: number = 0) => {
+    const post = galleryPosts[postIndex];
+    const postId = post?.postId;
+    
+    setViewerIndex(postIndex);
+    setViewerImageIndex(imageIndex);
+    setViewerOpen(true);
+    
+    if (postId) {
+      const newUrl = getPostUrl(postId);
+      window.history.pushState({ postId }, "", newUrl);
+      pushedPostUrlRef.current = true;
+      lastSyncedPostIdRef.current = postId;
+    }
+  }, [galleryPosts, getPostUrl]);
+
+  // Handle post change in viewer (scrolling) - replace URL in history
+  const handleCurrentPostChange = useCallback((postId: string | null) => {
+    if (!postId || postId === lastSyncedPostIdRef.current) return;
+    
+    const newUrl = getPostUrl(postId);
+    window.history.replaceState({ postId }, "", newUrl);
+    lastSyncedPostIdRef.current = postId;
+  }, [getPostUrl]);
+
+  // Handle closing the viewer - go back in history or remove query param
+  const closeViewer = useCallback(() => {
+    if (pushedPostUrlRef.current) {
+      // Go back in history to remove the post URL
+      window.history.back();
+    } else {
+      // Just close the viewer (opened from direct URL)
+      setViewerOpen(false);
+      // Update URL to remove post param
+      window.history.replaceState({}, "", artistBaseUrl);
+    }
+    pushedPostUrlRef.current = false;
+    lastSyncedPostIdRef.current = null;
+  }, [artistBaseUrl]);
 
   const anySocial = socialOrder.some(({ key }) => artist.artistSocials?.[key]);
 
@@ -1047,11 +1149,7 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
                             coverImage.order ?? index
                           }`}
                           className="artist-gallery-card"
-                          onClick={() => {
-                            setViewerIndex(index);
-                            setViewerImageIndex(0);
-                            setViewerOpen(true);
-                          }}
+                          onClick={() => openViewer(index, 0)}
                           style={{ cursor: "pointer" }}
                         >
                           <CloudinaryImage
@@ -1321,14 +1419,20 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
           storeLogo: artist.storeLogo || undefined,
         }}
         isOpen={viewerOpen}
-        onClose={() => setViewerOpen(false)}
+        onClose={closeViewer}
         onPostIndexChange={(postIndex, imageIndex = 0) => {
           setViewerIndex(postIndex);
           setViewerImageIndex(imageIndex);
+          // Sync URL when post changes
+          const newPostId = galleryPosts[postIndex]?.postId;
+          if (newPostId) {
+            handleCurrentPostChange(newPostId);
+          }
         }}
         onImageIndexChange={setViewerImageIndex}
         getStatsForImage={getStatsForImage}
         updateStats={updateStats}
+        artistBaseUrl={artistBaseUrl}
         onPostDelete={async (postId) => {
           const API_BASE =
             process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/v1";
@@ -1344,8 +1448,11 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
             throw new Error(error || "Failed to delete post");
           }
 
-          // Close the viewer first
+          // Close the viewer and clear URL
           setViewerOpen(false);
+          pushedPostUrlRef.current = false;
+          lastSyncedPostIdRef.current = null;
+          window.history.replaceState({}, "", artistBaseUrl);
 
           // Use Next.js router refresh to invalidate server cache and refetch
           router.refresh();
