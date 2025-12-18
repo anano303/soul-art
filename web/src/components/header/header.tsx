@@ -134,7 +134,7 @@ export default function Header() {
                 alt="logo soulArt"
                 width={200}
                 height={50}
-                sizes="(max-width: 480px) 160px, 200px"
+                sizes="(max-width: 768px) 120px, 200px"
                 style={{
                   objectFit: "contain",
                   maxWidth: "100%",
@@ -144,6 +144,29 @@ export default function Header() {
             </Link>
           )}
         </div>
+
+        {/* Centered logo when back button is visible (mobile) */}
+        {showBackButton && (
+          <Link 
+            href="/" 
+            className="header-center-logo"
+            style={
+              useTransparentHeader
+                ? { opacity: headerOpacity }
+                : undefined
+            }
+          >
+            <Image
+              src="/logo-white.webp"
+              alt="logo soulArt"
+              width={160}
+              height={40}
+              style={{
+                objectFit: "contain",
+              }}
+            />
+          </Link>
+        )}
         <nav className="main-nav desktop-only">
           <ul>
             <li>
