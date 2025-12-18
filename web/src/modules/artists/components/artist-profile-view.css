@@ -20,9 +20,12 @@
   box-shadow: 0 -8px 32px -12px rgba(15, 23, 42, 0.15);
   margin-bottom: 0;
   cursor: url("/brush.png"), auto;
-  /* Extend hero behind transparent header AND safe area on mobile */
-  margin-top: calc(-44px - env(safe-area-inset-top));
+  /* On mobile: extend behind header only, add height for safe area */
+  margin-top: -44px;
+  /* Extra padding at top: header height + safe area for content positioning */
   padding-top: calc(44px + env(safe-area-inset-top));
+  /* Add extra min-height to account for safe area extension */
+  min-height: calc(320px + env(safe-area-inset-top));
   /* Remove top border radius on mobile so cover extends to edges */
   border-radius: 0;
 }
@@ -31,6 +34,7 @@
   .artist-hero {
     margin-top: 0;
     padding-top: 0;
+    min-height: 320px;
     border-radius: 24px 24px 0 0;
   }
 }
