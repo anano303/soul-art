@@ -284,13 +284,16 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
     setProductItems((prev) => prev.filter((p) => p.id !== productId));
   }, []);
 
-  // Handle hash navigation for portfolio section
+  // Handle hash navigation for tabs
   useEffect(() => {
-    if (
-      typeof window !== "undefined" &&
-      window.location.hash === "#portfolio"
-    ) {
-      setActiveTab("gallery");
+    if (typeof window !== "undefined") {
+      const hash = window.location.hash;
+      if (hash === "#portfolio") {
+        setActiveTab("gallery");
+      } else if (hash === "#info") {
+        setActiveTab("info");
+      }
+      // No hash or any other hash defaults to "sale" tab (already the default)
     }
   }, []);
 
@@ -1002,7 +1005,10 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
               className={`artist-tabs__tab ${
                 activeTab === "sale" ? "artist-tabs__tab--active" : ""
               }`}
-              onClick={() => setActiveTab("sale")}
+              onClick={() => {
+                setActiveTab("sale");
+                window.history.replaceState(null, "", artistBaseUrl);
+              }}
               title={getSaleCopy(language)}
             >
               <ShoppingBag className="artist-tabs__tab-icon" size={24} />
@@ -1014,7 +1020,7 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
               }`}
               onClick={() => {
                 setActiveTab("gallery");
-                window.history.pushState(null, "", "#portfolio");
+                window.history.replaceState(null, "", "#portfolio");
               }}
               title={getGalleryCopy(language)}
             >
@@ -1025,7 +1031,10 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
               className={`artist-tabs__tab ${
                 activeTab === "info" ? "artist-tabs__tab--active" : ""
               }`}
-              onClick={() => setActiveTab("info")}
+              onClick={() => {
+                setActiveTab("info");
+                window.history.replaceState(null, "", "#info");
+              }}
               title={`${getInfoCopy(language)} ${
                 artistReviewsCount > 0
                   ? `(${artistReviewsCount} ${
