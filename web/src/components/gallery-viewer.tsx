@@ -98,6 +98,7 @@ interface GalleryViewerProps {
   onLoadMore?: () => void;
   hasMore?: boolean;
   isLoadingMore?: boolean;
+  artistBaseUrl?: string;
 }
 
 export function GalleryViewer({
@@ -117,6 +118,7 @@ export function GalleryViewer({
   onLoadMore,
   hasMore = false,
   isLoadingMore = false,
+  artistBaseUrl,
 }: GalleryViewerProps) {
   const { language } = useLanguage();
   const { user } = useUser();
@@ -794,6 +796,58 @@ export function GalleryViewer({
     }
   }, [currentPostIndex, posts.length, isMobile, isOpen, onLoadMore, hasMore, isLoadingMore]);
 
+  // Detect current visible post on mobile scroll using IntersectionObserver
+  useEffect(() => {
+    if (!isMobile || !isOpen) return;
+
+    const container = mobileContainerRef.current;
+    if (!container) return;
+
+    // Track which post is most visible
+    const visibilityMap = new Map<number, number>();
+    let lastReportedIndex = currentPostIndex;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          const index = postRefs.current.indexOf(entry.target as HTMLDivElement);
+          if (index !== -1) {
+            visibilityMap.set(index, entry.intersectionRatio);
+          }
+        });
+
+        // Find the post with highest visibility
+        let maxRatio = 0;
+        let mostVisibleIndex = currentPostIndex;
+        visibilityMap.forEach((ratio, index) => {
+          if (ratio > maxRatio) {
+            maxRatio = ratio;
+            mostVisibleIndex = index;
+          }
+        });
+
+        // Only update if the most visible post changed and has significant visibility
+        if (mostVisibleIndex !== lastReportedIndex && maxRatio > 0.3) {
+          lastReportedIndex = mostVisibleIndex;
+          const imageIndex = mobileImageIndices[mostVisibleIndex] ?? 0;
+          onPostIndexChange(mostVisibleIndex, imageIndex);
+        }
+      },
+      {
+        root: container,
+        threshold: [0, 0.25, 0.5, 0.75, 1],
+        rootMargin: "-10% 0px -10% 0px",
+      }
+    );
+
+    // Observe all post elements
+    postRefs.current.forEach((ref) => {
+      if (ref) observer.observe(ref);
+    });
+
+    return () => observer.disconnect();
+  }, [isMobile, isOpen, currentPostIndex, mobileImageIndices, onPostIndexChange]);
+
   if (!isOpen || !currentPost || !currentImage) {
     return null;
   }
@@ -1102,7 +1156,7 @@ export function GalleryViewer({
                       <span>{imageStats.commentsCount}</span>
                     </button>
                     <ShareButton
-                      url={post.productId ? `/products/${post.productId}` : (post.artist?.artistSlug ? `/@${post.artist.artistSlug}` : `/artists/${post.artist?.id || artist.id}`)}
+                      url={post.postId && artistBaseUrl ? `${artistBaseUrl}?post=${post.postId}` : (post.productId ? `/products/${post.productId}` : (post.artist?.artistSlug ? `/@${post.artist.artistSlug}` : `/artists/${post.artist?.id || artist.id}`))}
                       title={post.caption || (post.artist?.storeName || post.artist?.name || artist.storeName || artist.name)}
                       className="gallery-viewer__share-btn"
                     />
@@ -1456,7 +1510,7 @@ export function GalleryViewer({
             </div>
             <div className="gallery-viewer__stat gallery-viewer__stat--interactive">
               <ShareButton
-                url={currentPost.productId ? `/products/${currentPost.productId}` : (currentPost.artist?.artistSlug ? `/@${currentPost.artist.artistSlug}` : `/artists/${currentPost.artist?.id || artist.id}`)}
+                url={currentPost.postId && artistBaseUrl ? `${artistBaseUrl}?post=${currentPost.postId}` : (currentPost.productId ? `/products/${currentPost.productId}` : (currentPost.artist?.artistSlug ? `/@${currentPost.artist.artistSlug}` : `/artists/${currentPost.artist?.id || artist.id}`))}
                 title={currentPost.caption || (currentPost.artist?.storeName || currentPost.artist?.name || artist.storeName || artist.name)}
                 className="gallery-viewer__share-btn"
               />
