@@ -20,6 +20,16 @@
   box-shadow: 0 -8px 32px -12px rgba(15, 23, 42, 0.15);
   margin-bottom: 0;
   cursor: url("/brush.png"), auto;
+  /* Extend hero behind transparent header on mobile */
+  margin-top: -65px;
+  padding-top: calc(65px + env(safe-area-inset-top));
+}
+
+@media (min-width: 769px) {
+  .artist-hero {
+    margin-top: 0;
+    padding-top: 0;
+  }
 }
 
 /* Share button positioned in bottom right corner of hero */
