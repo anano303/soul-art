@@ -782,6 +782,18 @@ export function GalleryViewer({
     return () => container.removeEventListener('scroll', handleScroll);
   }, [isMobile, isOpen, onLoadMore, hasMore, isLoadingMore]);
 
+  // Also trigger load more when approaching the last few posts (post-based trigger)
+  useEffect(() => {
+    if (!isMobile || !isOpen || !onLoadMore || !hasMore || isLoadingMore) return;
+    
+    // Trigger when within 3 posts of the end
+    const postsFromEnd = posts.length - currentPostIndex;
+    if (postsFromEnd <= 3 && !loadMoreTriggeredRef.current) {
+      loadMoreTriggeredRef.current = true;
+      onLoadMore();
+    }
+  }, [currentPostIndex, posts.length, isMobile, isOpen, onLoadMore, hasMore, isLoadingMore]);
+
   if (!isOpen || !currentPost || !currentImage) {
     return null;
   }
@@ -1100,20 +1112,18 @@ export function GalleryViewer({
                     className="gallery-viewer__mobile-comments-preview"
                     onClick={() => setMobileCommentsOpen({ imageUrl: commentsImageUrl })}
                   >
-                    {index === currentPostIndex && (
-                      <GalleryComments
-                        artistId={post.artist?.id || artist.id}
-                        imageUrl={commentsImageUrl}
-                        initialCommentsCount={imageStats.commentsCount}
-                        onCommentsCountChange={(commentsCount) => {
-                          updateStats(commentsImageUrl, { commentsCount });
-                        }}
-                        autoExpanded={false}
-                        previewMode
-                        maxComments={3}
-                        showButton={false}
-                      />
-                    )}
+                    <GalleryComments
+                      artistId={post.artist?.id || artist.id}
+                      imageUrl={commentsImageUrl}
+                      initialCommentsCount={imageStats.commentsCount}
+                      onCommentsCountChange={(commentsCount) => {
+                        updateStats(commentsImageUrl, { commentsCount });
+                      }}
+                      autoExpanded={false}
+                      previewMode
+                      maxComments={3}
+                      showButton={false}
+                    />
                   </div>
                 </div>
 

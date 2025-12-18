@@ -143,7 +143,13 @@ export function GalleryComments({
           onClick={handleToggleComments}
         >
           <MessageCircle className="gallery-comments__icon" size={iconSize} />
-          <span className="gallery-comments__count">{commentsCount}</span>
+          <span className="gallery-comments__count">
+            {isLoading ? (
+              <span className="gallery-comments__spinner" />
+            ) : (
+              commentsCount
+            )}
+          </span>
         </button>
       )}
 
@@ -153,9 +159,7 @@ export function GalleryComments({
           className="gallery-comments__preview"
           onClick={handleToggleComments}
         >
-          {isLoading ? (
-            <div className="gallery-comments__loading">Loading comments...</div>
-          ) : comments.length > 0 ? (
+          {isLoading ? null : comments.length > 0 ? (
             <>
               {comments.map((comment) => (
                 <div key={comment.id} className="gallery-comment gallery-comment--preview">
