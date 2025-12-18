@@ -15,6 +15,9 @@
 
   &.header-placeholder--transparent {
     background-color: transparent;
+    /* On iOS, don't reserve space for safe area - content extends into it */
+    height: 44px;
+    padding-top: 0;
   }
 
   /* Smaller header on mobile (Instagram-style ~44px) */
