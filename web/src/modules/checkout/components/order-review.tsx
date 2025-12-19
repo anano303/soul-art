@@ -79,7 +79,10 @@ export function OrderReview() {
   const showBothCurrencies = shippingCountry !== "GE";
 
   const taxPrice = Number((itemsPrice * TAX_RATE).toFixed(2));
-  const totalPrice = itemsPrice + shippingPrice + taxPrice;
+  // UI-ში ნაჩვენები ჯამი (საკომისიოს გარეშე)
+  const totalPrice = itemsPrice + shippingPrice;
+  // BOG-ში გადასახდელი ჯამი (2% საკომისიოთი)
+  const totalPriceWithFee = itemsPrice + shippingPrice + taxPrice;
 
   // USD conversion rate (1 GEL = 1/2.8 USD approximately)
   const GEL_TO_USD = 1 / 2.8;
@@ -172,7 +175,7 @@ export function OrderReview() {
         itemsPrice,
         taxPrice,
         shippingPrice,
-        totalPrice,
+        totalPrice: totalPriceWithFee, // BOG-ში გადასახდელი ჯამი (2% საკომისიოთი)
       });
 
       await clearCart();
@@ -374,12 +377,14 @@ export function OrderReview() {
                 {isShippingFree ? t("cart.free") : formatPrice(shippingPrice)}
               </span>
             </div>
+            {/* საკომისიო დაკომენტარებულია - ბანკის გვერდზე ნახავს
             <div className="summary-row flex justify-between">
               <span className="summary-label text-muted-foreground">
                 {t("cart.commission")}
               </span>
               <span>{formatPrice(taxPrice)}</span>
             </div>
+            */}
             <div className="separator" />
             <div className="summary-row flex justify-between font-medium">
               <span>{t("cart.totalCost")}</span>

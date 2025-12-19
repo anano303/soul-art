@@ -71,7 +71,10 @@ export function StreamlinedCheckout() {
   );
   const shippingPrice = itemsPrice > 100 ? 0 : 0;
   const taxPrice = Number((itemsPrice * TAX_RATE).toFixed(2));
-  const totalPrice = itemsPrice + shippingPrice + taxPrice;
+  // UI-ში ნაჩვენები ჯამი (საკომისიოს გარეშე)
+  const totalPrice = itemsPrice + shippingPrice;
+  // BOG-ში გადასახდელი ჯამი (2% საკომისიოთი)
+  const totalPriceWithFee = itemsPrice + shippingPrice + taxPrice;
   const totalUnits = items.reduce((acc, item) => acc + item.qty, 0);
 
   // Track Step 3: Begin Checkout (once when items exist)
@@ -275,7 +278,7 @@ export function StreamlinedCheckout() {
         itemsPrice,
         taxPrice,
         shippingPrice,
-        totalPrice,
+        totalPrice: totalPriceWithFee, // BOG-ში გადასახდელი ჯამი (2% საკომისიოთი)
       };
 
       // Add guest info if guest checkout
