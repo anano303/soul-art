@@ -249,8 +249,12 @@
 
 .gallery-viewer__mobile-carousel {
   display: flex;
-  overflow-x: hidden;
-  scroll-snap-type: none;
+  overflow-x: scroll;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  overscroll-behavior-x: contain;
 }
 
 .gallery-viewer__mobile-carousel::-webkit-scrollbar {
@@ -259,7 +263,9 @@
 
 .gallery-viewer__mobile-slide {
   flex: 0 0 100%;
-  scroll-snap-align: center;
+  min-width: 100%;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -447,6 +453,7 @@
   display: flex;
   align-items: center;
   padding: 0.75rem 1rem;
+  padding-top: calc(0.75rem + env(safe-area-inset-top));
   width: 100%;
 }
 
@@ -587,6 +594,20 @@
   gap: 0.75rem;
 }
 
+.gallery-viewer__mobile-user-link {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  text-decoration: none;
+  color: inherit;
+  flex: 1;
+  min-width: 0;
+}
+
+.gallery-viewer__mobile-user-link:active {
+  opacity: 0.7;
+}
+
 .gallery-viewer__mobile-avatar {
   width: 32px;
   height: 32px;
@@ -596,6 +617,7 @@
 
 .gallery-viewer__mobile-user-info {
   flex: 1;
+  min-width: 0;
 }
 
 .gallery-viewer__mobile-username {

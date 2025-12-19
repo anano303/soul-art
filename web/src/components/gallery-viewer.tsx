@@ -98,6 +98,7 @@ interface GalleryViewerProps {
   onLoadMore?: () => void;
   hasMore?: boolean;
   isLoadingMore?: boolean;
+  artistBaseUrl?: string;
 }
 
 export function GalleryViewer({
@@ -117,6 +118,7 @@ export function GalleryViewer({
   onLoadMore,
   hasMore = false,
   isLoadingMore = false,
+  artistBaseUrl,
 }: GalleryViewerProps) {
   const { language } = useLanguage();
   const { user } = useUser();
@@ -137,13 +139,31 @@ export function GalleryViewer({
   const headerRef = useRef<HTMLDivElement>(null);
   const postRefs = useRef<(HTMLDivElement | null)[]>([]);
   const imageListRefs = useRef<(HTMLDivElement | null)[]>([]);
-  const touchDataRef = useRef<
-    { x: number; y: number; postIndex: number } | null
-  >(null);
   const dragDataRef = useRef<
     { startX: number; startY: number; startScrollTop: number; canDrag: boolean; dragFromHeader: boolean } | null
   >(null);
   const loadMoreTriggeredRef = useRef(false);
+  const scrollTimeoutRefs = useRef<Map<number, NodeJS.Timeout>>(new Map());
+  const shouldAutoScrollRef = useRef(false);
+  const prevIsOpenRef = useRef(false);
+
+  // Track when viewer opens to enable initial auto-scroll
+  useEffect(() => {
+    if (isOpen && !prevIsOpenRef.current) {
+      // Viewer just opened - enable auto-scroll for initial positioning
+      shouldAutoScrollRef.current = true;
+    }
+    prevIsOpenRef.current = isOpen;
+  }, [isOpen]);
+
+  // Cleanup scroll timeouts on unmount
+  useEffect(() => {
+    const timeoutMap = scrollTimeoutRefs.current;
+    return () => {
+      timeoutMap.forEach((timeout) => clearTimeout(timeout));
+      timeoutMap.clear();
+    };
+  }, []);
 
   useEffect(() => {
     const checkMobile = () => {
@@ -494,44 +514,66 @@ export function GalleryViewer({
     };
   }, [handleNextImage, handlePrevImage, isOpen, onClose]);
 
-  const handleTouchStart = useCallback(
-    (event: TouchEvent<HTMLDivElement>, postIndex: number) => {
-      const touch = event.touches[0];
-      touchDataRef.current = { x: touch.clientX, y: touch.clientY, postIndex };
+  // Handle carousel scroll end to update image index based on scroll-snap position
+  const handleCarouselScroll = useCallback(
+    (event: React.UIEvent<HTMLDivElement>, postIndex: number) => {
+      const container = event.currentTarget;
+      const timeoutMap = scrollTimeoutRefs.current;
+      
+      // Clear any existing timeout for this carousel
+      const existingTimeout = timeoutMap.get(postIndex);
+      if (existingTimeout) {
+        clearTimeout(existingTimeout);
+      }
+      
+      // Debounce: wait for scroll to settle
+      const timeout = setTimeout(() => {
+        const width = container.clientWidth;
+        if (width === 0) return;
+        
+        const scrollLeft = container.scrollLeft;
+        const newIndex = Math.round(scrollLeft / width);
+        const currentIndex = mobileImageIndices[postIndex] ?? 0;
+        
+        if (newIndex !== currentIndex && newIndex >= 0) {
+          const post = posts[postIndex];
+          const maxIndex = (post?.images?.length ?? 1) - 1;
+          const boundedIndex = Math.min(newIndex, maxIndex);
+          
+          if (boundedIndex !== currentIndex) {
+            setMobileImageIndices((prev) => {
+              const updated = [...prev];
+              updated[postIndex] = boundedIndex;
+              return updated;
+            });
+            
+            // Only update parent state if this is the current post
+            if (postIndex === currentPostIndex) {
+              onImageIndexChange(boundedIndex);
+            }
+          }
+        }
+        
+        timeoutMap.delete(postIndex);
+      }, 50);
+      
+      timeoutMap.set(postIndex, timeout);
+    },
+    [currentPostIndex, mobileImageIndices, onImageIndexChange, posts]
+  );
 
+  // Touch handler for carousel - only to stop propagation and update current post
+  const handleCarouselTouchStart = useCallback(
+    (event: TouchEvent<HTMLDivElement>, postIndex: number) => {
+      // Stop propagation to prevent drag-to-close from triggering
+      event.stopPropagation();
+      
       if (currentPostIndex !== postIndex) {
         const storedIndex = mobileImageIndices[postIndex] ?? 0;
         syncPostAndImage(postIndex, storedIndex, { scrollBehavior: "auto" });
       }
     },
     [currentPostIndex, mobileImageIndices, syncPostAndImage]
-  );
-
-  const handleTouchEnd = useCallback(
-    (event: TouchEvent<HTMLDivElement>) => {
-      const touchData = touchDataRef.current;
-      if (!touchData) {
-        return;
-      }
-
-      const touch = event.changedTouches[0];
-      const deltaX = touch.clientX - touchData.x;
-      const deltaY = touch.clientY - touchData.y;
-
-      touchDataRef.current = null;
-
-      // Only swipe if: horizontal movement > 60px AND horizontal > 2x vertical (clear horizontal intent)
-      if (Math.abs(deltaX) < 60 || Math.abs(deltaX) < Math.abs(deltaY) * 2) {
-        return;
-      }
-
-      if (deltaX < 0) {
-        goToNextImage(touchData.postIndex);
-      } else {
-        goToPrevImage(touchData.postIndex);
-      }
-    },
-    [goToNextImage, goToPrevImage]
   );
 
   // Drag-to-close handlers (Instagram style - vertical from header/top, horizontal right swipe)
@@ -635,14 +677,52 @@ export function GalleryViewer({
     }
   }, [dragOffset, onClose]);
 
+  // Track previous post index to detect actual post changes
+  const prevPostIndexRef = useRef<number | null>(null);
+
+  // Scroll to post only on initial viewer open, not during manual scrolling
   useEffect(() => {
     if (!isMobile || !isOpen) {
+      prevPostIndexRef.current = null;
       return;
     }
 
-    const postElement = postRefs.current[currentPostIndex];
-    if (postElement) {
-      postElement.scrollIntoView({ behavior: "auto", block: "start" });
+    // Only auto-scroll if the flag is set (viewer just opened)
+    if (!shouldAutoScrollRef.current) {
+      // Still track the index, but don't scroll
+      prevPostIndexRef.current = currentPostIndex;
+      return;
+    }
+
+    const postChanged = prevPostIndexRef.current !== currentPostIndex;
+    prevPostIndexRef.current = currentPostIndex;
+
+    if (postChanged || shouldAutoScrollRef.current) {
+      const postElement = postRefs.current[currentPostIndex];
+      const container = mobileContainerRef.current;
+      const header = headerRef.current;
+      
+      if (postElement && container) {
+        // Get header height to offset scroll position
+        const headerHeight = header?.offsetHeight ?? 56;
+        const postTop = postElement.offsetTop;
+        
+        // Scroll so the post header is visible below the viewer header
+        container.scrollTo({
+          top: Math.max(0, postTop - headerHeight),
+          behavior: "auto",
+        });
+        
+        // Disable auto-scroll after initial positioning
+        shouldAutoScrollRef.current = false;
+      }
+    }
+  }, [currentPostIndex, isMobile, isOpen]);
+
+  // Sync carousel scroll position (separate from post scroll)
+  useEffect(() => {
+    if (!isMobile || !isOpen) {
+      return;
     }
 
     const container = imageListRefs.current[currentPostIndex];
@@ -703,6 +783,70 @@ export function GalleryViewer({
     container.addEventListener('scroll', handleScroll, { passive: true });
     return () => container.removeEventListener('scroll', handleScroll);
   }, [isMobile, isOpen, onLoadMore, hasMore, isLoadingMore]);
+
+  // Also trigger load more when approaching the last few posts (post-based trigger)
+  useEffect(() => {
+    if (!isMobile || !isOpen || !onLoadMore || !hasMore || isLoadingMore) return;
+    
+    // Trigger when within 3 posts of the end
+    const postsFromEnd = posts.length - currentPostIndex;
+    if (postsFromEnd <= 3 && !loadMoreTriggeredRef.current) {
+      loadMoreTriggeredRef.current = true;
+      onLoadMore();
+    }
+  }, [currentPostIndex, posts.length, isMobile, isOpen, onLoadMore, hasMore, isLoadingMore]);
+
+  // Detect current visible post on mobile scroll using IntersectionObserver
+  useEffect(() => {
+    if (!isMobile || !isOpen) return;
+
+    const container = mobileContainerRef.current;
+    if (!container) return;
+
+    // Track which post is most visible
+    const visibilityMap = new Map<number, number>();
+    let lastReportedIndex = currentPostIndex;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          const index = postRefs.current.indexOf(entry.target as HTMLDivElement);
+          if (index !== -1) {
+            visibilityMap.set(index, entry.intersectionRatio);
+          }
+        });
+
+        // Find the post with highest visibility
+        let maxRatio = 0;
+        let mostVisibleIndex = currentPostIndex;
+        visibilityMap.forEach((ratio, index) => {
+          if (ratio > maxRatio) {
+            maxRatio = ratio;
+            mostVisibleIndex = index;
+          }
+        });
+
+        // Only update if the most visible post changed and has significant visibility
+        if (mostVisibleIndex !== lastReportedIndex && maxRatio > 0.3) {
+          lastReportedIndex = mostVisibleIndex;
+          const imageIndex = mobileImageIndices[mostVisibleIndex] ?? 0;
+          onPostIndexChange(mostVisibleIndex, imageIndex);
+        }
+      },
+      {
+        root: container,
+        threshold: [0, 0.25, 0.5, 0.75, 1],
+        rootMargin: "-10% 0px -10% 0px",
+      }
+    );
+
+    // Observe all post elements
+    postRefs.current.forEach((ref) => {
+      if (ref) observer.observe(ref);
+    });
+
+    return () => observer.disconnect();
+  }, [isMobile, isOpen, currentPostIndex, mobileImageIndices, onPostIndexChange]);
 
   if (!isOpen || !currentPost || !currentImage) {
     return null;
@@ -776,6 +920,10 @@ export function GalleryViewer({
           <button
             className="gallery-viewer__back-btn"
             onClick={onClose}
+            onTouchEnd={(e) => {
+              e.stopPropagation();
+              onClose();
+            }}
             type="button"
           >
             <ChevronLeft size={24} />
@@ -811,6 +959,8 @@ export function GalleryViewer({
             }
 
             const imageStats = getStatsForImage(imageUrl);
+            // Use first image URL for comments since comments are per-post, not per-image
+            const commentsImageUrl = postImages[0]?.url ?? imageUrl;
             const entrySellable =
               Boolean(post.productId) &&
               !post.hideBuyButton &&
@@ -830,21 +980,27 @@ export function GalleryViewer({
                 }}
               >
                 <div className="gallery-viewer__mobile-header">
-                  {(post.artist?.profileImageUrl || post.artist?.storeLogo || post.artist?.storeLogoPath || artist.storeLogo) && (
-                    <CloudinaryImage
-                      src={post.artist?.profileImageUrl || post.artist?.storeLogo || post.artist?.storeLogoPath || artist.storeLogo || ''}
-                      alt={post.artist?.artistName || post.artist?.storeName || post.artist?.name || post.artist?.username || artist.storeName || artist.name}
-                      width={32}
-                      height={32}
-                      className="gallery-viewer__mobile-avatar"
-                    />
-                  )}
-                  <div className="gallery-viewer__mobile-user-info">
-                    <h3 className="gallery-viewer__mobile-username">
-                      {post.artist?.artistName || post.artist?.storeName || post.artist?.name || post.artist?.username || artist.storeName || artist.name}
-                    </h3>
-                    <p className="gallery-viewer__mobile-date">{creationDate}</p>
-                  </div>
+                  <Link 
+                    href={post.artist?.artistSlug ? `/@${post.artist.artistSlug}` : `/artists/${post.artist?.id || artist.id}`}
+                    className="gallery-viewer__mobile-user-link"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    {(post.artist?.profileImageUrl || post.artist?.storeLogo || post.artist?.storeLogoPath || artist.storeLogo) && (
+                      <CloudinaryImage
+                        src={post.artist?.profileImageUrl || post.artist?.storeLogo || post.artist?.storeLogoPath || artist.storeLogo || ''}
+                        alt={post.artist?.artistName || post.artist?.storeName || post.artist?.name || post.artist?.username || artist.storeName || artist.name}
+                        width={32}
+                        height={32}
+                        className="gallery-viewer__mobile-avatar"
+                      />
+                    )}
+                    <div className="gallery-viewer__mobile-user-info">
+                      <h3 className="gallery-viewer__mobile-username">
+                        {post.artist?.artistName || post.artist?.storeName || post.artist?.name || post.artist?.username || artist.storeName || artist.name}
+                      </h3>
+                      <p className="gallery-viewer__mobile-date">{creationDate}</p>
+                    </div>
+                  </Link>
                   {user && user._id === artist.id && post.postId && (
                     <div className="gallery-viewer__menu-wrapper">
                       <button
@@ -900,6 +1056,10 @@ export function GalleryViewer({
                     ref={(element) => {
                       imageListRefs.current[index] = element;
                     }}
+                    onScroll={(e) => handleCarouselScroll(e, index)}
+                    onTouchStart={(e) => handleCarouselTouchStart(e, index)}
+                    onTouchMove={(e) => e.stopPropagation()}
+                    onTouchEnd={(e) => e.stopPropagation()}
                   >
                     {postImages.map((image, imageIndex) => {
                       const aspectRatio = getImageAspectRatio(image.url);
@@ -990,13 +1150,13 @@ export function GalleryViewer({
                     <button
                       type="button"
                       className="gallery-viewer__mobile-comment-btn"
-                      onClick={() => setMobileCommentsOpen({ imageUrl })}
+                      onClick={() => setMobileCommentsOpen({ imageUrl: commentsImageUrl })}
                     >
                       <MessageCircle size={24} />
                       <span>{imageStats.commentsCount}</span>
                     </button>
                     <ShareButton
-                      url={post.productId ? `/products/${post.productId}` : (post.artist?.artistSlug ? `/@${post.artist.artistSlug}` : `/artists/${post.artist?.id || artist.id}`)}
+                      url={post.postId && artistBaseUrl ? `${artistBaseUrl}?post=${post.postId}` : (post.productId ? `/products/${post.productId}` : (post.artist?.artistSlug ? `/@${post.artist.artistSlug}` : `/artists/${post.artist?.id || artist.id}`))}
                       title={post.caption || (post.artist?.storeName || post.artist?.name || artist.storeName || artist.name)}
                       className="gallery-viewer__share-btn"
                     />
@@ -1004,22 +1164,20 @@ export function GalleryViewer({
 
                   <div
                     className="gallery-viewer__mobile-comments-preview"
-                    onClick={() => setMobileCommentsOpen({ imageUrl })}
+                    onClick={() => setMobileCommentsOpen({ imageUrl: commentsImageUrl })}
                   >
-                    {index === currentPostIndex && (
-                      <GalleryComments
-                        artistId={post.artist?.id || artist.id}
-                        imageUrl={imageUrl}
-                        initialCommentsCount={imageStats.commentsCount}
-                        onCommentsCountChange={(commentsCount) => {
-                          updateStats(imageUrl, { commentsCount });
-                        }}
-                        autoExpanded={false}
-                        previewMode
-                        maxComments={3}
-                        showButton={false}
-                      />
-                    )}
+                    <GalleryComments
+                      artistId={post.artist?.id || artist.id}
+                      imageUrl={commentsImageUrl}
+                      initialCommentsCount={imageStats.commentsCount}
+                      onCommentsCountChange={(commentsCount) => {
+                        updateStats(commentsImageUrl, { commentsCount });
+                      }}
+                      autoExpanded={false}
+                      previewMode
+                      maxComments={3}
+                      showButton={false}
+                    />
                   </div>
                 </div>
 
@@ -1352,7 +1510,7 @@ export function GalleryViewer({
             </div>
             <div className="gallery-viewer__stat gallery-viewer__stat--interactive">
               <ShareButton
-                url={currentPost.productId ? `/products/${currentPost.productId}` : (currentPost.artist?.artistSlug ? `/@${currentPost.artist.artistSlug}` : `/artists/${currentPost.artist?.id || artist.id}`)}
+                url={currentPost.postId && artistBaseUrl ? `${artistBaseUrl}?post=${currentPost.postId}` : (currentPost.productId ? `/products/${currentPost.productId}` : (currentPost.artist?.artistSlug ? `/@${currentPost.artist.artistSlug}` : `/artists/${currentPost.artist?.id || artist.id}`))}
                 title={currentPost.caption || (currentPost.artist?.storeName || currentPost.artist?.name || artist.storeName || artist.name)}
                 className="gallery-viewer__share-btn"
               />

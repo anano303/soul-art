@@ -20,6 +20,23 @@
   box-shadow: 0 -8px 32px -12px rgba(15, 23, 42, 0.15);
   margin-bottom: 0;
   cursor: url("/brush.png"), auto;
+  /* On mobile: extend behind header only, add height for safe area */
+  margin-top: calc(-48px - env(safe-area-inset-top));
+  /* Extra padding at top: header height + safe area for content positioning */
+  padding-top: calc(48px + env(safe-area-inset-top));
+  /* Add extra min-height to account for safe area extension */
+  min-height: calc(320px + env(safe-area-inset-top));
+  /* Remove top border radius on mobile so cover extends to edges */
+  border-radius: 0;
+}
+
+@media (min-width: 769px) {
+  .artist-hero {
+    margin-top: 0;
+    padding-top: 0;
+    min-height: 320px;
+    border-radius: 24px 24px 0 0;
+  }
 }
 
 /* Share button positioned in bottom right corner of hero */
@@ -1177,13 +1194,6 @@
   pointer-events: auto;
 }
 
-@media (hover: none) {
-  .artist-gallery-card__overlay {
-    opacity: 1;
-    pointer-events: auto;
-  }
-}
-
 .artist-gallery-card__badge {
   position: absolute;
   top: 16px;
@@ -1492,7 +1502,7 @@
   background: #fff;
   position: sticky;
   top: 0;
-  z-index: 10;
+  z-index: 20;
   padding: 0 2rem;
 }
 
@@ -1612,6 +1622,8 @@
   .artist-tabs__nav {
     padding: 0;
     justify-content: stretch;
+    position: sticky;
+    top: calc(48px + env(safe-area-inset-top));
   }
 
   .artist-tabs__tab {
@@ -1628,11 +1640,6 @@
   .artist-gallery-card {
     aspect-ratio: 4/5;
     min-height: 140px;
-  }
-
-  .artist-gallery-card__overlay {
-    opacity: 1;
-    pointer-events: auto;
   }
 
   .artist-gallery-card__badge {
@@ -2017,3 +2024,5 @@
     font-size: 0.8rem;
   }
 }
+
+

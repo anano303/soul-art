@@ -90,6 +90,25 @@
 
 .gallery-comments__count {
   font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  min-width: 12px;
+}
+
+.gallery-comments__spinner {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border: 1.5px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: gallery-comments-spin 0.6s linear infinite;
+}
+
+@keyframes gallery-comments-spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .gallery-comments__toggle--disabled {
