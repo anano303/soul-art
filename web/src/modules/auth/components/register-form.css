@@ -44,7 +44,7 @@
   font-weight: bold;
 }
 
-input {
+.form-container input {
   padding: 8px;
   border: 1px solid var(--primary-color);
   border-radius: 4px;
@@ -54,7 +54,7 @@ input {
   width: 95%;
 }
 
-input:focus {
+.form-container input:focus {
   border: 2px solid var(--primary-color); /* უფრო სქელი და იგივე ფერის ბორდერი */
 }
 
