@@ -119,36 +119,34 @@ export class StockReservationService {
       }
 
       // Refund stock
-      if (
-        product.variants &&
-        product.variants.length > 0 &&
-        (item.size || item.color || item.ageGroup)
-      ) {
-        const variantIndex = product.variants.findIndex(
-          (v) =>
-            v.size === item.size &&
-            v.color === item.color &&
-            v.ageGroup === item.ageGroup,
-        );
+      if (product.variants && product.variants.length > 0) {
+        const hasVariantAttributes = item.size || item.color || item.ageGroup;
+        
+        if (hasVariantAttributes) {
+          const variantIndex = product.variants.findIndex(
+            (v) =>
+              v.size === item.size &&
+              v.color === item.color &&
+              v.ageGroup === item.ageGroup,
+          );
 
-        if (variantIndex >= 0) {
-          product.variants[variantIndex].stock += item.qty;
+          if (variantIndex >= 0) {
+            product.variants[variantIndex].stock += item.qty;
+          } else {
+            product.variants.push({
+              size: item.size,
+              color: item.color,
+              ageGroup: item.ageGroup,
+              stock: item.qty,
+            });
+          }
         } else {
-          product.variants.push({
-            size: item.size,
-            color: item.color,
-            ageGroup: item.ageGroup,
-            stock: item.qty,
-          });
+          // Product has variants but no specific attributes - use first variant
+          product.variants[0].stock += item.qty;
         }
         product.countInStock += item.qty;
       } else {
-        product.variants.push({
-          size: item.size,
-          color: item.color,
-          ageGroup: item.ageGroup,
-          stock: item.qty,
-        });
+        // Legacy products without variants
         product.countInStock += item.qty;
       }
 

@@ -1806,7 +1806,23 @@ function ProductCard({
   const href = `/products/${product.id}`;
 
   const discountPercentage = getActiveDiscountPercentage(product);
-  const countInStock = product.countInStock || 1;
+  
+  // Calculate available stock considering variants
+  const countInStock = useMemo(() => {
+    if (Array.isArray(product.variants) && product.variants.length > 0) {
+      // Check if variants have attributes (size/color/ageGroup)
+      const hasAttributes = product.variants.some(
+        (v) => v.size || v.color || v.ageGroup
+      );
+      if (!hasAttributes) {
+        // No attributes - sum all variant stocks
+        return product.variants.reduce((sum, v) => sum + (v.stock ?? 0), 0);
+      }
+      // Has attributes - use total variant stock
+      return product.variants.reduce((sum, v) => sum + (v.stock ?? 0), 0);
+    }
+    return product.countInStock ?? 0;
+  }, [product]);
 
   const deliveryText = () => {
     console.log("Delivery data:", {

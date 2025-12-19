@@ -332,6 +332,35 @@ export class OrdersService {
             }
             // Reserve stock immediately (subtract from available stock)
             product.variants[variantIndex].stock -= item.qty;
+          } else if (
+            product.variants &&
+            product.variants.length > 0 &&
+            !item.size &&
+            !item.color &&
+            !item.ageGroup
+          ) {
+            // Handle products with variants but no size/color/ageGroup specified
+            // Check if variants have no attributes (just stock)
+            const hasNoAttributes = product.variants.every(
+              (v) => !v.size && !v.color && !v.ageGroup,
+            );
+            if (hasNoAttributes) {
+              // Use the first variant's stock
+              if (product.variants[0].stock < item.qty) {
+                throw new BadRequestException(
+                  `Not enough stock for product ${product.name}. Available: ${product.variants[0].stock}, Requested: ${item.qty}`,
+                );
+              }
+              product.variants[0].stock -= item.qty;
+            } else {
+              // Fall back to countInStock
+              if (product.countInStock < item.qty) {
+                throw new BadRequestException(
+                  `Not enough stock for product ${product.name}. Available: ${product.countInStock}, Requested: ${item.qty}`,
+                );
+              }
+              product.countInStock -= item.qty;
+            }
           } else {
             // Handle legacy products without variants
             if (product.countInStock < item.qty) {
@@ -446,33 +475,44 @@ export class OrdersService {
           }
 
           // Check and reserve stock atomically
-          if (
-            product.variants &&
-            product.variants.length > 0 &&
-            (item.size || item.color || item.ageGroup)
-          ) {
-            // Find the specific variant
-            const variantIndex = product.variants.findIndex(
-              (v) =>
-                v.size === item.size &&
-                v.color === item.color &&
-                v.ageGroup === item.ageGroup,
-            );
-
-            if (variantIndex === -1) {
-              throw new BadRequestException(
-                `Variant not found for product ${product.name} (${item.size}/${item.color}/${item.ageGroup})`,
+          if (product.variants && product.variants.length > 0) {
+            // Check if this product has variants with specific attributes (size/color/ageGroup)
+            const hasVariantAttributes = item.size || item.color || item.ageGroup;
+            
+            if (hasVariantAttributes) {
+              // Find the specific variant
+              const variantIndex = product.variants.findIndex(
+                (v) =>
+                  v.size === item.size &&
+                  v.color === item.color &&
+                  v.ageGroup === item.ageGroup,
               );
-            }
 
-            if (product.variants[variantIndex].stock < item.qty) {
-              throw new BadRequestException(
-                `Not enough stock for product ${product.name} variant (${item.size}/${item.color}/${item.ageGroup}). Available: ${product.variants[variantIndex].stock}, Requested: ${item.qty}`,
-              );
-            }
+              if (variantIndex === -1) {
+                throw new BadRequestException(
+                  `Variant not found for product ${product.name} (${item.size}/${item.color}/${item.ageGroup})`,
+                );
+              }
 
-            // Reserve stock immediately (subtract from available stock)
-            product.variants[variantIndex].stock -= item.qty;
+              if (product.variants[variantIndex].stock < item.qty) {
+                throw new BadRequestException(
+                  `Not enough stock for product ${product.name} variant (${item.size}/${item.color}/${item.ageGroup}). Available: ${product.variants[variantIndex].stock}, Requested: ${item.qty}`,
+                );
+              }
+
+              // Reserve stock immediately (subtract from available stock)
+              product.variants[variantIndex].stock -= item.qty;
+            } else {
+              // Product has variants but no specific attributes - use first variant
+              if (product.variants[0].stock < item.qty) {
+                throw new BadRequestException(
+                  `Not enough stock for product ${product.name}. Available: ${product.variants[0].stock}, Requested: ${item.qty}`,
+                );
+              }
+
+              // Reserve stock from first variant
+              product.variants[0].stock -= item.qty;
+            }
           } else {
             // Handle legacy products without variants
             if (product.countInStock < item.qty) {

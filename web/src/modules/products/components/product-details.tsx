@@ -648,13 +648,29 @@ export function ProductDetails({ product }: ProductDetailsProps) {
     let stock = product.countInStock || 0;
 
     if (product.variants && product.variants.length > 0) {
+      // Try to find variant by selected attributes
       const variant = product.variants.find(
         (v) =>
           (!v.size || v.size === selectedSize) &&
           (!v.color || v.color === selectedColor) &&
           (!v.ageGroup || v.ageGroup === selectedAgeGroup)
       );
-      stock = variant ? variant.stock : 0;
+      
+      if (variant) {
+        stock = variant.stock;
+      } else {
+        // If no matching variant found, check if variants have no attributes (just stock)
+        // In this case, use the first variant's stock or sum of all variant stocks
+        const hasNoAttributes = product.variants.every(
+          (v) => !v.size && !v.color && !v.ageGroup
+        );
+        if (hasNoAttributes) {
+          // Sum all variant stocks for products without attributes
+          stock = product.variants.reduce((sum, v) => sum + (v.stock || 0), 0);
+        } else {
+          stock = 0;
+        }
+      }
     }
 
     return stock;
@@ -1205,7 +1221,9 @@ export function ProductDetails({ product }: ProductDetailsProps) {
           >
             <div className="stock-dot"></div>
             {isOutOfStock ? (
-              <span>{t("shop.outOfStock")}</span>
+              <span>
+                {language === "en" ? "Sold Out" : "გაყიდულია"}
+              </span>
             ) : availableQuantity === 1 ? (
               <span className="hurry-text">
                 🔥{" "}

@@ -36,6 +36,7 @@ const GiftCategories = () => {
       const { items = [] } = await getProducts(1, GIFT_RAIL_LIMIT * 2, {
         sortBy: "rating",
         sortDirection: "desc",
+        excludeOutOfStock: "true",
       });
 
       // Filter products under 200 GEL (considering discounts)

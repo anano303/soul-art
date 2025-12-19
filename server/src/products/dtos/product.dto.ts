@@ -301,6 +301,10 @@ export class FindAllProductsDto {
   @IsOptional()
   @IsString()
   material?: string;
+
+  @IsOptional()
+  @IsString()
+  excludeOutOfStock?: string; // 'true' to exclude out of stock products
 }
 
 // We already have the correct DTO definitions with IsMongoId() decorators for mainCategory and subCategory
