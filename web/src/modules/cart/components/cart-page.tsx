@@ -120,9 +120,7 @@ export function CartPage() {
   const isShippingFree = shippingCost === 0;
   const showBothCurrencies = shippingCountry !== "GE";
 
-  // საკომისიო (2%) - არ ჩანს UI-ში, მაგრამ BOG-ში ემატება
-  const tax = Number((0.02 * subtotal).toFixed(2));
-  // UI-ში ნაჩვენები ჯამი (საკომისიოს გარეშე)
+  // საკომისიო მოხსნილია - რეალური ფასი ყველგან
   const total = subtotal + shippingCost;
 
   // USD conversion rate (1 GEL = 1/2.8 USD approximately)
