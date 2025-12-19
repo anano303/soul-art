@@ -369,42 +369,28 @@ export class ProductsService {
     const skip = (pageNumber - 1) * limitNumber;
 
     const filter: any = {};
+    
+    // Use $and array for all conditions to avoid $or conflicts
+    const andConditions: any[] = [];
 
     // Exclude hidden products from store/home pages (but not from artist profiles)
     if (excludeHiddenFromStore) {
-      filter.$or = [
-        { hideFromStore: { $exists: false } },
-        { hideFromStore: false },
-      ];
+      andConditions.push({
+        $or: [
+          { hideFromStore: { $exists: false } },
+          { hideFromStore: false },
+        ],
+      });
     }
-
-    const addAndCondition = (condition: Record<string, unknown>) => {
-      if (!condition) return;
-
-      if (!filter.$and) {
-        filter.$and = [condition];
-        return;
-      }
-
-      if (Array.isArray(filter.$and)) {
-        filter.$and.push(condition);
-        return;
-      }
-
-      filter.$and = [filter.$and, condition];
-    };
 
     // Exclude out of stock products from shop/store pages
     if (excludeOutOfStock) {
-      // Use aggregation-style filtering for more precise control
       // A product is in stock if:
-      // 1. It has variants with at least one having stock > 0, OR
-      // 2. It has no variants and countInStock > 0
-      addAndCondition({
+      // 1. countInStock > 0, OR
+      // 2. At least one variant has stock > 0
+      andConditions.push({
         $or: [
-          // Products with countInStock > 0 (works for both with and without variants)
           { countInStock: { $gt: 0 } },
-          // Products with variants where at least one variant has stock > 0
           { 'variants.stock': { $gt: 0 } },
         ],
       });
@@ -415,16 +401,18 @@ export class ProductsService {
       const matchingUsers = await this.usersService.findUsersByKeyword(keyword);
       const userIds = matchingUsers.map((u) => u._id);
 
-      filter.$or = [
-        { name: { $regex: keyword, $options: 'i' } },
-        { nameEn: { $regex: keyword, $options: 'i' } },
-        { description: { $regex: keyword, $options: 'i' } },
-        { descriptionEn: { $regex: keyword, $options: 'i' } },
-        { brand: { $regex: keyword, $options: 'i' } },
-        { hashtags: { $in: [new RegExp(keyword, 'i')] } },
-        // Search by seller information
-        ...(userIds.length > 0 ? [{ user: { $in: userIds } }] : []),
-      ];
+      andConditions.push({
+        $or: [
+          { name: { $regex: keyword, $options: 'i' } },
+          { nameEn: { $regex: keyword, $options: 'i' } },
+          { description: { $regex: keyword, $options: 'i' } },
+          { descriptionEn: { $regex: keyword, $options: 'i' } },
+          { brand: { $regex: keyword, $options: 'i' } },
+          { hashtags: { $in: [new RegExp(keyword, 'i')] } },
+          // Search by seller information
+          ...(userIds.length > 0 ? [{ user: { $in: userIds } }] : []),
+        ],
+      });
     }
 
     if (user) {
@@ -516,7 +504,7 @@ export class ProductsService {
     // Filter by original/copy status - treat missing values as original for legacy data
     if (isOriginal !== undefined) {
       if (isOriginal === true) {
-        addAndCondition({
+        andConditions.push({
           $or: [{ isOriginal: true }, { isOriginal: { $exists: false } }],
         });
       } else {
@@ -599,15 +587,15 @@ export class ProductsService {
     // Filter by discount status
     if (discounted === true) {
       const now = new Date();
-      addAndCondition({ discountPercentage: { $exists: true, $gt: 0 } });
-      addAndCondition({
+      andConditions.push({ discountPercentage: { $exists: true, $gt: 0 } });
+      andConditions.push({
         $or: [
           { discountStartDate: { $exists: false } },
           { discountStartDate: null },
           { discountStartDate: { $lte: now } },
         ],
       });
-      addAndCondition({
+      andConditions.push({
         $or: [
           { discountEndDate: { $exists: false } },
           { discountEndDate: null },
@@ -637,6 +625,11 @@ export class ProductsService {
       if (Object.keys(priceFilter).length > 0) {
         filter.price = priceFilter;
       }
+    }
+
+    // Apply all $and conditions to the filter
+    if (andConditions.length > 0) {
+      filter.$and = andConditions;
     }
 
     const sort: any = {};
