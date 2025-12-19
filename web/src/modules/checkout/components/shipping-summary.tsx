@@ -20,7 +20,8 @@ export function ShippingSummary({ subtotal, tax }: ShippingSummaryProps) {
   const shippingCost = calculateShipping(shippingCountry);
   const isShippingFree = shippingCost === 0;
   const showBothCurrencies = shippingCountry !== "GE";
-  const total = subtotal + shippingCost + tax;
+  // UI-ში ნაჩვენები ჯამი (საკომისიოს გარეშე)
+  const total = subtotal + shippingCost;
 
   return (
     <div className="shipping-summary">
@@ -38,10 +39,12 @@ export function ShippingSummary({ subtotal, tax }: ShippingSummaryProps) {
         </span>
       </div>
 
+      {/* საკომისიო დაკომენტარებულია - ბანკის გვერდზე ნახავს
       <div className="summary-row">
         <span>{t("cart.commission")}</span>
         <span>{formatPrice(tax)}</span>
       </div>
+      */}
 
       <hr className="separator" />
 
