@@ -74,6 +74,7 @@ export class ProductsController {
     @Query('isOriginal') isOriginal: string,
     @Query('material') material: string,
     @Query('dimension') dimension: string,
+    @Query('excludeOutOfStock') excludeOutOfStock: string,
   ) {
     // Parse isOriginal parameter to handle multiple values (comma-separated)
     let parsedIsOriginal: boolean | undefined = undefined;
@@ -110,6 +111,7 @@ export class ProductsController {
       material,
       dimension,
       excludeHiddenFromStore: true, // Hide products marked as hidden from store
+      excludeOutOfStock: excludeOutOfStock === 'true', // Hide out of stock products
     });
   }
 
