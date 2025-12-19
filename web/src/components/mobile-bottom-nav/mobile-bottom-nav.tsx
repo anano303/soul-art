@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { Home, Store, Search, User, Gavel, Palette } from "lucide-react";
 import { useUser } from "@/modules/auth/hooks/use-user";
 import { useLanguage } from "@/hooks/LanguageContext";
@@ -10,7 +10,6 @@ import "./mobile-bottom-nav.css";
 
 export function MobileBottomNav() {
   const pathname = usePathname();
-  const router = useRouter();
   const { user } = useUser();
   const { language } = useLanguage();
   const [isVisible, setIsVisible] = useState(true);
@@ -28,7 +27,6 @@ export function MobileBottomNav() {
     "/explore",
     "/auction",
     "/sellers-register",
-    "/profile",
     ...(isSeller && user?.artistSlug ? [`/@${user.artistSlug}`] : []),
   ];
 
@@ -138,14 +136,6 @@ export function MobileBottomNav() {
     icon: Gavel,
     label: language === "en" ? "Auction" : "აუქციონი",
     active: pathname.startsWith("/auction"),
-  });
-
-  // Add profile tab at the end
-  tabs.push({
-    href: "/profile",
-    icon: User,
-    label: language === "en" ? "Profile" : "პროფილი",
-    active: pathname.startsWith("/profile"),
   });
 
   return (
