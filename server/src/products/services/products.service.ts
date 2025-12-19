@@ -63,6 +63,7 @@ interface FindManyParams {
   material?: string;
   dimension?: string;
   excludeHiddenFromStore?: boolean; // If true, exclude products with hideFromStore=true
+  excludeOutOfStock?: boolean; // If true, exclude products with no stock
 }
 
 @Injectable()
@@ -360,6 +361,7 @@ export class ProductsService {
       material,
       dimension,
       excludeHiddenFromStore = false,
+      excludeOutOfStock = false,
     } = params;
 
     const pageNumber = parseInt(page);
@@ -391,6 +393,22 @@ export class ProductsService {
 
       filter.$and = [filter.$and, condition];
     };
+
+    // Exclude out of stock products from shop/store pages
+    if (excludeOutOfStock) {
+      // Use aggregation-style filtering for more precise control
+      // A product is in stock if:
+      // 1. It has variants with at least one having stock > 0, OR
+      // 2. It has no variants and countInStock > 0
+      addAndCondition({
+        $or: [
+          // Products with countInStock > 0 (works for both with and without variants)
+          { countInStock: { $gt: 0 } },
+          // Products with variants where at least one variant has stock > 0
+          { 'variants.stock': { $gt: 0 } },
+        ],
+      });
+    }
 
     if (keyword) {
       // First, find users matching the keyword (by email, name, or store name)
@@ -1304,6 +1322,7 @@ export class ProductsService {
       isOriginal: options.isOriginal,
       material: options.material,
       status: ProductStatus.APPROVED, // Default to approved for public API
+      excludeOutOfStock: options.excludeOutOfStock === 'true', // Hide out of stock products
     });
   }
 
@@ -1595,36 +1614,45 @@ export class ProductsService {
       return;
     }
 
-    // Check if the product has variants and the ordered item has variant specifications
-    if (
-      product.variants &&
-      product.variants.length > 0 &&
-      (size || color || ageGroup)
-    ) {
-      // Find the specific variant
-      const variantIndex = product.variants.findIndex(
-        (v) => v.size === size && v.color === color && v.ageGroup === ageGroup,
-      );
+    // Check if the product has variants
+    if (product.variants && product.variants.length > 0) {
+      const hasVariantAttributes = size || color || ageGroup;
+      
+      if (hasVariantAttributes) {
+        // Find the specific variant by attributes
+        const variantIndex = product.variants.findIndex(
+          (v) => v.size === size && v.color === color && v.ageGroup === ageGroup,
+        );
 
-      if (variantIndex >= 0) {
-        // Update the variant stock
-        product.variants[variantIndex].stock = Math.max(
+        if (variantIndex >= 0) {
+          // Update the variant stock
+          product.variants[variantIndex].stock = Math.max(
+            0,
+            product.variants[variantIndex].stock - qty,
+          );
+          console.log(
+            `Updated variant stock for product ${product.name}, variant: ${size}/${color}/${ageGroup}, new stock: ${product.variants[variantIndex].stock}`,
+          );
+        } else {
+          // If variant not found but attributes were specified, log a warning
+          console.warn(
+            `Variant not found for product ${product.name} with attributes: size=${size}, color=${color}, ageGroup=${ageGroup}`,
+          );
+          // Fall back to updating general stock
+          product.countInStock = Math.max(0, product.countInStock - qty);
+        }
+      } else {
+        // Product has variants but no attributes specified - update first variant
+        product.variants[0].stock = Math.max(
           0,
-          product.variants[variantIndex].stock - qty,
+          product.variants[0].stock - qty,
         );
         console.log(
-          `Updated variant stock for product ${product.name}, variant: ${size}/${color}/${ageGroup}, new stock: ${product.variants[variantIndex].stock}`,
+          `Updated first variant stock for product ${product.name}, new stock: ${product.variants[0].stock}`,
         );
-      } else {
-        // If variant not found but attributes were specified, log a warning
-        console.warn(
-          `Variant not found for product ${product.name} with attributes: size=${size}, color=${color}, ageGroup=${ageGroup}`,
-        );
-        // Fall back to updating general stock
-        product.countInStock = Math.max(0, product.countInStock - qty);
       }
     } else {
-      // Update general product stock if no variants or no variant specifications
+      // Update general product stock if no variants
       product.countInStock = Math.max(0, product.countInStock - qty);
       console.log(
         `Updated general stock for product ${product.name}, new stock: ${product.countInStock}`,

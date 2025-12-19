@@ -643,6 +643,11 @@ export class UsersService {
       const productsFilter = {
         user: artist._id,
         status: ProductStatus.APPROVED,
+        // Exclude out-of-stock products from shop view
+        $or: [
+          { countInStock: { $gt: 0 } },
+          { 'variants.stock': { $gt: 0 } },
+        ],
       };
 
       const skip = (page - 1) * limit;
@@ -670,6 +675,7 @@ export class UsersService {
               'discountStartDate',
               'discountEndDate',
               'countInStock',
+              'variants',
               'deliveryType',
               'minDeliveryDays',
               'maxDeliveryDays',
@@ -874,7 +880,7 @@ export class UsersService {
       }
 
       // If includeOwner is true, include all products (pending, approved, rejected)
-      // Otherwise only show approved products
+      // Otherwise only show approved products that are in stock
       const productsFilter: any = {
         user: artist._id,
       };
@@ -890,6 +896,11 @@ export class UsersService {
         };
       } else {
         productsFilter.status = ProductStatus.APPROVED;
+        // Exclude out-of-stock products from shop view for non-owners
+        productsFilter.$or = [
+          { countInStock: { $gt: 0 } },
+          { 'variants.stock': { $gt: 0 } },
+        ];
       }
 
       const skip = (page - 1) * limit;
@@ -908,6 +919,7 @@ export class UsersService {
         'discountStartDate',
         'discountEndDate',
         'countInStock',
+        'variants',
         'deliveryType',
         'minDeliveryDays',
         'maxDeliveryDays',

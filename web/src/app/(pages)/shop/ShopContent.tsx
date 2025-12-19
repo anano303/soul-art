@@ -298,6 +298,9 @@ const ShopContent = () => {
         if (selectedOriginalTypes.length > 0)
           params.isOriginal = selectedOriginalTypes.join(",");
 
+        // Exclude out of stock products from shop
+        params.excludeOutOfStock = "true";
+
         const response = await getProducts(currentPage, 20, params);
         setProducts(response.items || []);
         setTotalPages(response.pages || 1);

@@ -40,12 +40,13 @@ const PremiumRail = () => {
         return cached;
       }
 
-      // Fetch paintings sorted by price descending
+      // Fetch paintings sorted by price descending, exclude out of stock
       const { items = [] } = await getProducts(1, PREMIUM_RAIL_LIMIT * 3, {
         sortBy: "price",
         sortDirection: "desc",
         minPrice: PREMIUM_PRICE_THRESHOLD.toString(),
         mainCategory: PAINTINGS_CATEGORY_ID,
+        excludeOutOfStock: "true",
       });
 
       const filtered = items
