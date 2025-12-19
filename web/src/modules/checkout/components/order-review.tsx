@@ -5,7 +5,6 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import { apiClient } from "@/lib/axios";
-import { TAX_RATE } from "@/config/constants";
 import { useLanguage } from "@/hooks/LanguageContext";
 import { calculateShipping, getShippingRate } from "@/lib/shipping";
 import Image from "next/image";
@@ -78,11 +77,8 @@ export function OrderReview() {
   const isShippingFree = shippingPrice === 0;
   const showBothCurrencies = shippingCountry !== "GE";
 
-  const taxPrice = Number((itemsPrice * TAX_RATE).toFixed(2));
-  // UI-ში ნაჩვენები ჯამი (საკომისიოს გარეშე)
+  // საკომისიო მოხსნილია - რეალური ფასი ყველგან
   const totalPrice = itemsPrice + shippingPrice;
-  // BOG-ში გადასახდელი ჯამი (2% საკომისიოთი)
-  const totalPriceWithFee = itemsPrice + shippingPrice + taxPrice;
 
   // USD conversion rate (1 GEL = 1/2.8 USD approximately)
   const GEL_TO_USD = 1 / 2.8;
@@ -173,9 +169,9 @@ export function OrderReview() {
         shippingDetails: currentShippingDetails,
         paymentMethod,
         itemsPrice,
-        taxPrice,
+        taxPrice: 0, // საკომისიო მოხსნილია
         shippingPrice,
-        totalPrice: totalPriceWithFee, // BOG-ში გადასახდელი ჯამი (2% საკომისიოთი)
+        totalPrice, // რეალური ფასი საკომისიოს გარეშე
       });
 
       await clearCart();

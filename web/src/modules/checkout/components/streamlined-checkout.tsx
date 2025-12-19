@@ -8,7 +8,6 @@ import { useLanguage } from "@/hooks/LanguageContext";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import { apiClient } from "@/lib/axios";
-import { TAX_RATE } from "@/config/constants";
 import { LoginForm } from "@/modules/auth/components/login-form";
 import { AddressSelector } from "./address-selector";
 import { GuestInfoForm } from "./guest-info-form";
@@ -70,11 +69,8 @@ export function StreamlinedCheckout() {
     0
   );
   const shippingPrice = itemsPrice > 100 ? 0 : 0;
-  const taxPrice = Number((itemsPrice * TAX_RATE).toFixed(2));
-  // UI-ში ნაჩვენები ჯამი (საკომისიოს გარეშე)
+  // საკომისიო მოხსნილია - რეალური ფასი ყველგან
   const totalPrice = itemsPrice + shippingPrice;
-  // BOG-ში გადასახდელი ჯამი (2% საკომისიოთი)
-  const totalPriceWithFee = itemsPrice + shippingPrice + taxPrice;
   const totalUnits = items.reduce((acc, item) => acc + item.qty, 0);
 
   // Track Step 3: Begin Checkout (once when items exist)
@@ -276,9 +272,9 @@ export function StreamlinedCheckout() {
         shippingDetails: shippingAddress,
         paymentMethod,
         itemsPrice,
-        taxPrice,
+        taxPrice: 0, // საკომისიო მოხსნილია
         shippingPrice,
-        totalPrice: totalPriceWithFee, // BOG-ში გადასახდელი ჯამი (2% საკომისიოთი)
+        totalPrice, // რეალური ფასი საკომისიოს გარეშე
       };
 
       // Add guest info if guest checkout
