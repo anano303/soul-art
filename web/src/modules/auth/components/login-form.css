@@ -18,12 +18,12 @@
   gap: 4px;
 }
 
-label {
+.login-container label {
   font-size: 14px;
   font-weight: 600;
 }
 
-input {
+.login-container input {
   padding: 8px;
   border: 1px solid var(--primary-color);
   border-radius: 4px;
@@ -32,7 +32,7 @@ input {
   outline: none;
 }
 
-input:focus {
+.login-container input:focus {
   border: 2px solid var(--primary-color); /* უფრო სქელი და იგივე ფერის ბორდერი */
 }
 
