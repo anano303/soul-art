@@ -42,6 +42,19 @@ export class BalanceService {
   async processOrderEarnings(order: OrderDocument): Promise<void> {
     this.logger.log(`Processing earnings for order: ${order._id}`);
 
+    // Check if earnings have already been processed for this order
+    const existingTransactions = await this.balanceTransactionModel.findOne({
+      order: order._id,
+      type: 'earning',
+    });
+
+    if (existingTransactions) {
+      this.logger.warn(
+        `Earnings already processed for order ${order._id}. Skipping to prevent duplicate credit.`,
+      );
+      return;
+    }
+
     // შეკვეთის ყველა პროდუქტისთვის ცალ-ცალკე გავანგარიშოთ
     for (const item of order.orderItems) {
       // პროდუქტის მონაცემების მიღება
@@ -572,21 +585,10 @@ export class BalanceService {
     sellerBalance.totalWithdrawn += amount;
     await sellerBalance.save();
 
-    // ტრანზაქციის განახლება
+    // ტრანზაქციის განახლება (არ ვქმნით ახალ ტრანზაქციას, მხოლოდ ვაახლებთ არსებულს)
     transaction.type = 'withdrawal_completed';
-    transaction.description = `თანხის გატანა დადასტურებულია ადმინის მიერ - ${transaction.description}`;
+    transaction.description = `თანხის გატანა წარმატებით დასრულდა (${amount} ლარი) - ${transaction.description}`;
     await transaction.save();
-
-    // Success ტრანზაქციის დამატება
-    const completedTransaction = new this.balanceTransactionModel({
-      seller: sellerId,
-      order: null,
-      amount: -amount,
-      type: 'withdrawal_completed',
-      description: `თანხის გატანა წარმატებით დასრულდა (${amount} ლარი)`,
-      finalAmount: -amount,
-    });
-    await completedTransaction.save();
 
     // Email notification სელერისთვის
     try {
