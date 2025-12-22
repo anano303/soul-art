@@ -136,7 +136,7 @@ export function ProductsList() {
     queryFn: async () => {
       const params = new URLSearchParams({
         page: page.toString(),
-        limit: "8",
+        limit: "20",
       });
 
       if (debouncedSearchQuery) params.append("keyword", debouncedSearchQuery); // Use debounced query
@@ -173,7 +173,7 @@ export function ProductsList() {
       // Build params with current filters
       const params = new URLSearchParams({
         page: page.toString(),
-        limit: "8",
+        limit: "20",
       });
 
       if (debouncedSearchQuery) params.append("keyword", debouncedSearchQuery);
