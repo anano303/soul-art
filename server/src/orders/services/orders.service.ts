@@ -782,6 +782,13 @@ export class OrdersService {
       throw new BadRequestException('Invalid order ID.');
     const order = await this.orderModel.findById(id);
     if (!order) throw new NotFoundException('No order with given ID.');
+
+    // Prevent duplicate delivery processing
+    if (order.isDelivered) {
+      this.logger.warn(`Order ${id} is already marked as delivered. Skipping.`);
+      return order;
+    }
+
     order.isDelivered = true;
     order.deliveredAt = Date();
     order.status = 'delivered'; // Update status to delivered

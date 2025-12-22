@@ -4,12 +4,21 @@ import * as dotenv from 'dotenv';
 import * as path from 'path';
 import * as https from 'https';
 import * as http from 'http';
+import * as fs from 'fs';
 
 // Load environment variables
 dotenv.config({ path: path.join(__dirname, '../../.env') });
 
-const OLD_CLOUD_NAME = 'dsufx8uzd';
-const NEW_CLOUD_NAME = process.env.CLOUDINARY_CLOUD_NAME || 'dwfqjtdu2';
+
+// All old cloud names, oldest first, latest old last
+const CLOUD_NAMES = ['dsufx8uzd', 'dwfqjtdu2'];
+const NEW_CLOUD_NAME = process.env.CLOUDINARY_CLOUD_NAME || 'dmvh7vwpu';
+
+// Progress tracking file
+const PROGRESS_FILE = path.join(__dirname, '../../.cloudinary-migration-progress.json');
+
+// Regex to match any old cloud name
+const OLD_CLOUD_REGEX = new RegExp(`(${CLOUD_NAMES.map(n => n.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&')).join('|')})`, 'g');
 
 const EXTENSION_TO_MIME: Record<string, string> = {
   jpg: 'image/jpeg',
@@ -45,6 +54,93 @@ interface MigrationStats {
   failedUploads: number;
   skippedUrls: number;
   errors: Array<{ url: string; error: string }>;
+}
+
+// Cache of existing resources in new account (fetched once at startup)
+let existingResourcesCache: Set<string> = new Set();
+let useProgressFile = false; // Track if we have a progress file
+
+// Progress tracking
+interface MigrationProgress {
+  destinationCloud: string; // The cloud name assets were copied TO
+  completed: string[]; // Public IDs that have been successfully uploaded
+  lastUpdated: string;
+}
+
+function loadProgress(): Set<string> | null {
+  try {
+    if (fs.existsSync(PROGRESS_FILE)) {
+      const data = JSON.parse(fs.readFileSync(PROGRESS_FILE, 'utf-8')) as MigrationProgress;
+      
+      // Check if progress is for the current destination cloud
+      if (data.destinationCloud && data.destinationCloud !== NEW_CLOUD_NAME) {
+        console.log(`⚠️  Progress file is for different cloud (${data.destinationCloud}), ignoring...`);
+        console.log(`   Current destination: ${NEW_CLOUD_NAME}`);
+        return null;
+      }
+      
+      console.log(`📋 Loaded progress file: ${data.completed.length} already uploaded to ${data.destinationCloud || 'unknown'} (last updated: ${data.lastUpdated})`);
+      return new Set(data.completed);
+    }
+  } catch (error) {
+    console.warn('⚠️  Could not load progress file');
+  }
+  return null;
+}
+
+function saveProgress(completed: Set<string>): void {
+  const progress: MigrationProgress = {
+    destinationCloud: NEW_CLOUD_NAME,
+    completed: Array.from(completed),
+    lastUpdated: new Date().toISOString(),
+  };
+  fs.writeFileSync(PROGRESS_FILE, JSON.stringify(progress, null, 2));
+}
+
+/**
+ * Initialize the resources cache
+ * If progress file exists → use it (fast)
+ * If not → we'll check each resource individually via API
+ */
+function initializeCache(): void {
+  const progress = loadProgress();
+  
+  if (progress) {
+    existingResourcesCache = progress;
+    useProgressFile = true;
+    console.log(`✅ Using progress file for skip checks (${progress.size} resources)\n`);
+  } else {
+    existingResourcesCache = new Set();
+    useProgressFile = false;
+    console.log(`ℹ️  No progress file found - will check each resource via API before uploading\n`);
+  }
+}
+
+/**
+ * Check if resource exists in new Cloudinary account via API
+ */
+async function checkResourceExists(publicId: string, resourceType: string): Promise<boolean> {
+  try {
+    const result = await cloudinary.api.resource(publicId, {
+      resource_type: resourceType as any,
+      type: 'upload',
+    });
+    return !!(result && result.public_id);
+  } catch (error: any) {
+    const httpCode = error?.http_code || error?.error?.http_code;
+    // 404 means not found, which is expected
+    if (httpCode === 404) {
+      return false;
+    }
+    // Rate limit - show specific message
+    if (httpCode === 420) {
+      console.warn(`   ⚠️  Rate limited, will try upload`);
+      return false;
+    }
+    // Other error - log and assume not exists
+    console.warn(`   ⚠️  API check failed (${httpCode || 'network error'}), will try upload`);
+    return false;
+  }
 }
 
 interface ExtractedCloudinaryPath {
@@ -198,27 +294,45 @@ async function migrateImage(
     const { publicId, folder, resourceType, format, filenameWithoutExtension } =
       extractCloudinaryPath(url);
 
-    console.log(`   📥 Source URL: ${url}`);
+
+    // Always replace any old cloud name with the latest old cloud name for sourceUrl
+    const LATEST_OLD_CLOUD_NAME = CLOUD_NAMES[CLOUD_NAMES.length - 1];
+    let sourceUrl = url;
+    for (const oldName of CLOUD_NAMES) {
+      if (sourceUrl.includes(oldName)) {
+        sourceUrl = sourceUrl.replace(oldName, LATEST_OLD_CLOUD_NAME);
+      }
+    }
+    // For logging, show if any replacement was made
+    const replacedCloud = CLOUD_NAMES.find(n => url.includes(n) && n !== LATEST_OLD_CLOUD_NAME);
+
+    console.log(`   📥 Original URL: ${url}`);
+    if (replacedCloud) {
+      console.log(`   🔄 Source URL (${replacedCloud}→${LATEST_OLD_CLOUD_NAME}): ${sourceUrl}`);
+    }
     console.log(`      Public ID: ${publicId}`);
     console.log(`      Folder: ${folder || 'root'}`);
 
-    try {
-      await cloudinary.api.resource(publicId, {
-        resource_type: resourceType as any,
-        type: 'upload',
-      });
-      console.log(`   ⏭️  Already exists in new account, skipping`);
-      stats.skippedUrls++;
-      return true;
-    } catch (lookupError: any) {
-      if (lookupError?.http_code && lookupError.http_code !== 404) {
-        console.warn(
-          `   ⚠️  Failed to check existence: ${lookupError.message}`,
-        );
+    // Check if asset already exists
+    if (useProgressFile) {
+      // Fast check using local progress file
+      if (existingResourcesCache.has(publicId)) {
+        console.log(`   ⏭️  Already in progress file, skipping`);
+        stats.skippedUrls++;
+        return true;
+      }
+    } else {
+      // No progress file - check via API
+      const exists = await checkResourceExists(publicId, resourceType);
+      if (exists) {
+        console.log(`   ⏭️  Already exists in new account, skipping`);
+        existingResourcesCache.add(publicId); // Add to cache for progress file
+        stats.skippedUrls++;
+        return true;
       }
     }
 
-    const { buffer, contentType } = await downloadImage(url, format);
+    const { buffer, contentType } = await downloadImage(sourceUrl, format);
     const dataUri = `data:${contentType};base64,${buffer.toString('base64')}`;
 
     const uploadOptions: UploadApiOptions = {
@@ -245,9 +359,18 @@ async function migrateImage(
     await cloudinary.uploader.upload(dataUri, uploadOptions);
 
     console.log(`   ✅ Uploaded successfully`);
-    const newUrl = url.replace(OLD_CLOUD_NAME, NEW_CLOUD_NAME);
+    const newUrl = url.replace(OLD_CLOUD_REGEX, NEW_CLOUD_NAME);
     console.log(`      New URL: ${newUrl}`);
     stats.successfulUploads++;
+    
+    // Track progress locally
+    existingResourcesCache.add(publicId);
+    
+    // Save progress every 10 uploads
+    if (stats.successfulUploads % 10 === 0) {
+      saveProgress(existingResourcesCache);
+    }
+    
     return true;
   } catch (error: any) {
     console.error(`   ❌ Failed: ${error.message}`);
@@ -265,28 +388,28 @@ async function getAllCloudinaryUrls(db: any): Promise<Set<string>> {
 
   console.log('🔍 Collecting URLs from MongoDB...\n');
 
+
+  // Helper to build $or regex for all old cloud names
+  const cloudRegexOr = (field: string) => ({ $or: CLOUD_NAMES.map(name => ({ [field]: { $regex: name } })) });
+  const hasOldCloud = (str: string) => str && CLOUD_NAMES.some(name => str.includes(name));
+
   // Products - images array
   console.log('📦 Checking Products...');
   const products = await db
     .collection('products')
-    .find({
-      images: { $regex: OLD_CLOUD_NAME },
-    })
+    .find(cloudRegexOr('images'))
     .toArray();
 
   for (const product of products) {
     if (product.images && Array.isArray(product.images)) {
       for (const img of product.images) {
-        if (img.includes(OLD_CLOUD_NAME)) {
-          // Remove transformations to get base URL
-          const baseUrl =
-            img.split('/upload/')[0] + '/upload/' + img.split('/upload/')[1];
+        if (hasOldCloud(img)) {
           urls.add(img);
         }
       }
     }
     // Add brandLogo if exists
-    if (product.brandLogo && product.brandLogo.includes(OLD_CLOUD_NAME)) {
+    if (hasOldCloud(product.brandLogo)) {
       urls.add(product.brandLogo);
     }
   }
@@ -295,9 +418,7 @@ async function getAllCloudinaryUrls(db: any): Promise<Set<string>> {
   // Products - thumbnail
   const productsWithThumbnail = await db
     .collection('products')
-    .find({
-      thumbnail: { $regex: OLD_CLOUD_NAME },
-    })
+    .find(cloudRegexOr('thumbnail'))
     .toArray();
 
   for (const product of productsWithThumbnail) {
@@ -305,17 +426,13 @@ async function getAllCloudinaryUrls(db: any): Promise<Set<string>> {
       urls.add(product.thumbnail);
     }
   }
-  console.log(
-    `   Found ${productsWithThumbnail.length} products with old thumbnails`,
-  );
+  console.log(`   Found ${productsWithThumbnail.length} products with old thumbnails`);
 
   // Banners
   console.log('🎨 Checking Banners...');
   const banners = await db
     .collection('banners')
-    .find({
-      imageUrl: { $regex: OLD_CLOUD_NAME },
-    })
+    .find(cloudRegexOr('imageUrl'))
     .toArray();
 
   for (const banner of banners) {
@@ -329,40 +446,32 @@ async function getAllCloudinaryUrls(db: any): Promise<Set<string>> {
   console.log('👤 Checking Users...');
   const users = await db
     .collection('users')
-    .find({
-      $or: [
-        { profileImagePath: { $regex: OLD_CLOUD_NAME } },
-        { storeLogo: { $regex: OLD_CLOUD_NAME } },
-        { storeLogoPath: { $regex: OLD_CLOUD_NAME } },
-        { artistCoverImage: { $regex: OLD_CLOUD_NAME } },
-        { artistGallery: { $regex: OLD_CLOUD_NAME } },
-      ],
-    })
+    .find({ $or: [
+      ...CLOUD_NAMES.map(name => ({ profileImagePath: { $regex: name } })),
+      ...CLOUD_NAMES.map(name => ({ storeLogo: { $regex: name } })),
+      ...CLOUD_NAMES.map(name => ({ storeLogoPath: { $regex: name } })),
+      ...CLOUD_NAMES.map(name => ({ artistCoverImage: { $regex: name } })),
+      ...CLOUD_NAMES.map(name => ({ artistGallery: { $regex: name } })),
+    ]})
     .toArray();
 
   for (const user of users) {
-    if (
-      user.profileImagePath &&
-      user.profileImagePath.includes(OLD_CLOUD_NAME)
-    ) {
+    if (hasOldCloud(user.profileImagePath)) {
       urls.add(user.profileImagePath);
     }
-    if (user.storeLogo && user.storeLogo.includes(OLD_CLOUD_NAME)) {
+    if (hasOldCloud(user.storeLogo)) {
       urls.add(user.storeLogo);
     }
-    if (user.storeLogoPath && user.storeLogoPath.includes(OLD_CLOUD_NAME)) {
+    if (hasOldCloud(user.storeLogoPath)) {
       urls.add(user.storeLogoPath);
     }
-    if (
-      user.artistCoverImage &&
-      user.artistCoverImage.includes(OLD_CLOUD_NAME)
-    ) {
+    if (hasOldCloud(user.artistCoverImage)) {
       urls.add(user.artistCoverImage);
     }
     // Artist Gallery - array of images
     if (user.artistGallery && Array.isArray(user.artistGallery)) {
       for (const img of user.artistGallery) {
-        if (img && img.includes(OLD_CLOUD_NAME)) {
+        if (hasOldCloud(img)) {
           urls.add(img);
         }
       }
@@ -374,21 +483,19 @@ async function getAllCloudinaryUrls(db: any): Promise<Set<string>> {
   console.log('📝 Checking Blog Posts...');
   const blogs = await db
     .collection('blogposts')
-    .find({
-      $or: [
-        { coverImage: { $regex: OLD_CLOUD_NAME } },
-        { images: { $regex: OLD_CLOUD_NAME } },
-      ],
-    })
+    .find({ $or: [
+      ...CLOUD_NAMES.map(name => ({ coverImage: { $regex: name } })),
+      ...CLOUD_NAMES.map(name => ({ images: { $regex: name } })),
+    ]})
     .toArray();
 
   for (const blog of blogs) {
-    if (blog.coverImage && blog.coverImage.includes(OLD_CLOUD_NAME)) {
+    if (hasOldCloud(blog.coverImage)) {
       urls.add(blog.coverImage);
     }
     if (blog.images && Array.isArray(blog.images)) {
       for (const img of blog.images) {
-        if (img.includes(OLD_CLOUD_NAME)) {
+        if (hasOldCloud(img)) {
           urls.add(img);
         }
       }
@@ -396,17 +503,35 @@ async function getAllCloudinaryUrls(db: any): Promise<Set<string>> {
   }
   console.log(`   Found ${blogs.length} blog posts with old URLs`);
 
+  // Portfolio Posts (most important - has 500+ URLs)
+  console.log('🖼️  Checking Portfolio Posts...');
+  const portfolioPosts = await db
+    .collection('portfolioposts')
+    .find({ $or: [
+      ...CLOUD_NAMES.map(name => ({ 'images.url': { $regex: name } })),
+    ]})
+    .toArray();
+
+  for (const post of portfolioPosts) {
+    if (post.images && Array.isArray(post.images)) {
+      for (const img of post.images) {
+        if (img.url && hasOldCloud(img.url)) {
+          urls.add(img.url);
+        }
+      }
+    }
+  }
+  console.log(`   Found ${portfolioPosts.length} portfolio posts with old URLs`);
+
   // Forums
   console.log('💬 Checking Forums...');
   const forums = await db
     .collection('forums')
-    .find({
-      imagePath: { $regex: OLD_CLOUD_NAME },
-    })
+    .find(cloudRegexOr('imagePath'))
     .toArray();
 
   for (const forum of forums) {
-    if (forum.imagePath && forum.imagePath.includes(OLD_CLOUD_NAME)) {
+    if (hasOldCloud(forum.imagePath)) {
       urls.add(forum.imagePath);
     }
   }
@@ -416,9 +541,7 @@ async function getAllCloudinaryUrls(db: any): Promise<Set<string>> {
   console.log('📂 Checking Categories...');
   const categories = await db
     .collection('categories')
-    .find({
-      image: { $regex: OLD_CLOUD_NAME },
-    })
+    .find(cloudRegexOr('image'))
     .toArray();
 
   for (const category of categories) {
@@ -447,12 +570,10 @@ async function runMigration() {
   }
 
   console.log('🚀 Starting Cloudinary Assets Migration (KEEP DB URLs)');
-  console.log(`   Old cloud: ${OLD_CLOUD_NAME}`);
+  console.log(`   Old clouds: ${CLOUD_NAMES.join(', ')}`);
   console.log(`   New cloud: ${NEW_CLOUD_NAME}`);
   console.log(`   Strategy: Copy all assets to new account with same paths`);
-  console.log(
-    `   Database: URLs will NOT be changed (remain ${OLD_CLOUD_NAME})\n`,
-  );
+  console.log(`   Note: Old URLs will be fetched from latest old cloud (${CLOUD_NAMES[CLOUD_NAMES.length - 1]})\n`);
   console.log('='.repeat(80) + '\n');
 
   const client = new MongoClient(mongoUri);
@@ -468,6 +589,9 @@ async function runMigration() {
     await client.connect();
     const db = client.db();
     console.log('✅ Connected to MongoDB\n');
+
+    // Initialize cache (from progress file or empty for API checks)
+    initializeCache();
 
     // Collect all URLs
     const allUrls = await getAllCloudinaryUrls(db);
@@ -506,11 +630,16 @@ async function runMigration() {
     }
   } catch (error) {
     console.error('❌ Migration failed:', error);
+    // Save progress even on failure
+    saveProgress(existingResourcesCache);
     throw error;
   } finally {
     await client.close();
     console.log('\n🔌 Disconnected from MongoDB\n');
   }
+
+  // Save final progress
+  saveProgress(existingResourcesCache);
 
   // Print summary
   console.log('='.repeat(80));
@@ -531,9 +660,9 @@ async function runMigration() {
   }
 
   console.log('\n✅ Migration completed!');
-  console.log('📌 Note: Database URLs remain unchanged (dsufx8uzd)');
-  console.log('📌 All assets are now in new account (dwfqjtdu2)');
-  console.log('📌 Configure cloudinary provider to use new credentials\n');
+  console.log('📌 Note: Database URLs remain unchanged');
+  console.log(`📌 All assets are now copied to new account (${NEW_CLOUD_NAME})`);
+  console.log('📌 The CloudinaryUrlInterceptor will transform URLs at runtime\n');
 }
 
 // Run migration

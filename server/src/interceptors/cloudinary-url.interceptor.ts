@@ -13,16 +13,17 @@ import { map } from 'rxjs/operators';
  * Automatically replaces old Cloudinary account URLs with new account URLs
  * in all API responses without touching the database.
  *
- * Old account: dsufx8uzd
- * New account: dwfqjtdu2
+ * Old accounts: dsufx8uzd, dwfqjtdu2
+ * New account: dmvh7vwpu
  *
  * This allows gradual migration - we copy assets to new account first,
  * then swap URLs on the fly, and finally update database when ready.
  */
 @Injectable()
 export class CloudinaryUrlInterceptor implements NestInterceptor {
-  private readonly OLD_CLOUD_NAME = 'dsufx8uzd';
-  private readonly NEW_CLOUD_NAME = 'dwfqjtdu2';
+  // All previous cloud names that should be replaced
+  private readonly OLD_CLOUD_NAMES = ['dsufx8uzd', 'dwfqjtdu2'];
+  private readonly NEW_CLOUD_NAME = 'dmvh7vwpu';
 
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     return next.handle().pipe(
@@ -41,10 +42,11 @@ export class CloudinaryUrlInterceptor implements NestInterceptor {
 
     // Handle strings first (most common case)
     if (typeof data === 'string' && data.includes('res.cloudinary.com')) {
-      return data.replace(
-        new RegExp(this.OLD_CLOUD_NAME, 'g'),
-        this.NEW_CLOUD_NAME,
-      );
+      let result = data;
+      for (const oldName of this.OLD_CLOUD_NAMES) {
+        result = result.replace(new RegExp(oldName, 'g'), this.NEW_CLOUD_NAME);
+      }
+      return result;
     }
 
     // Handle primitive types
