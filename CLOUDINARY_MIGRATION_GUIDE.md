@@ -1,259 +1,246 @@
 # Cloudinary Migration Guide
 
-## 📋 მიმოხილვა
+## 📋 Overview
 
-ეს გაიდი აღწერს როგორ მოვახდინოთ ყველა სურათის, ვიდეოსა და სხვა ასეთების მიგრაცია ძველი Cloudinary ექაუნტიდან (`dsufx8uzd`) ახალ ექაუნტში (`dwfqjtdu2`).
+This guide describes how to migrate all images, videos, and other assets between Cloudinary accounts using a **runtime URL transformation approach** (no database changes needed).
 
-## 🔍 რა არის შემოწმებული
+## 🔄 Migration History
 
-მიგრაციის სკრიპტები ამოწმებენ შემდეგ კოლექციებს MongoDB-ში:
+| Version | Cloud Name | Status |
+|---------|-----------|--------|
+| v1 | `dsufx8uzd` | ❌ Old (URLs in DB, account closed) |
+| v2 | `dwfqjtdu2` | ⚠️ Previous (assets still accessible) |
+| v3 | `dmvh7vwpu` | ✅ **Current** (new account) |
 
-- **Products** - `images` და `thumbnail` ველები
-- **Users** - `profilePicture` ველი
-- **Banners** - `imageUrl` ველი
-- **Blog Posts** - `image` ველი
-- **Categories** - `image` ველი
-- **.env ფაილი** - `SLIDESHOW_OUTRO_IMAGE_URL` და `SLIDESHOW_AUDIO_URL`
+## 🎯 Migration Strategy
 
-## 📊 სტატისტიკა
+We use a **runtime URL transformation** approach:
 
-```bash
-npm run cloudinary:check
-```
+1. **Copy assets** from old account to new account (same public_id/folder structure)
+2. **CloudinaryUrlInterceptor** transforms URLs in API responses automatically
+3. **No database changes** - DB keeps original URLs, interceptor swaps them
 
-ეს ბრძანება გეტყვით:
+### Why This Approach?
 
-- რამდენი URL უნდა მიგრირდეს თითოეულ კოლექციაში
-- რამდენი URL უკვე გადატანილია ახალ ექაუნტში
-- მაგალითებს ძველი URL-ებიდან
+- ✅ Zero downtime migration
+- ✅ No database modifications
+- ✅ Easy rollback (just disable interceptor)
+- ✅ Supports multiple old cloud names
+- ✅ Works for all collections automatically
 
-## 🚀 მიგრაციის პროცესი
+## 📊 Collections Checked
 
-### ნაბიჯი 1: Dry Run - შემოწმება
+The migration scripts check these MongoDB collections:
 
-ჯერ გაუშვი dry-run რეჟიმში რათა დარწმუნდე რომ ყველაფერი სწორად მუშაობს:
+- **Products** - `images`, `thumbnail`, `brandLogo`
+- **Users** - `profileImagePath`, `storeLogo`, `storeLogoPath`, `artistCoverImage`, `artistGallery`
+- **Banners** - `imageUrl`
+- **Blog Posts** - `coverImage`, `images`
+- **Portfolio Posts** - `images[].url`
+- **Forums** - `imagePath`
+- **Categories** - `image`
 
-#### Database მიგრაცია (Dry Run)
+## 🚀 Migration Process
 
-```bash
-npm run cloudinary:migrate:dry-run
-```
+### Step 1: Update Credentials
 
-#### .env ფაილის მიგრაცია (Dry Run)
-
-```bash
-npm run cloudinary:migrate:env:dry-run
-```
-
-Dry-run რეჟიმში:
-
-- არაფერი შეიცვლება
-- მხოლოდ ეცნობება რას გააკეთებდა სკრიპტი
-- შეგიძლია შეამოწმო რომ ყველაფერი სწორია
-
-### ნაბიჯი 2: .env ფაილის მიგრაცია
-
-ჯერ დავიწყოთ .env ფაილის მიგრაციით (რადგან ეს უფრო სწრაფია):
-
-```bash
-npm run cloudinary:migrate:env
-```
-
-ეს სკრიპტი:
-
-1. ძველი სურათები/ვიდეოები გადმოიწერს
-2. ატვირთავს ახალ Cloudinary ექაუნტში
-3. ავტომატურად განაახლებს .env ფაილს ახალი URL-ებით
-
-### ნაბიჯი 3: Database მიგრაცია
-
-ახლა დავიწყოთ MongoDB-ის მიგრაცია:
-
-```bash
-npm run cloudinary:migrate
-```
-
-⚠️ **გაფრთხილება**: ეს პროცესი შეიძლება დიდხანს გაგრძელდეს (361 პროდუქტი + 3 ბანერი = 364 URL)
-
-სკრიპტი:
-
-1. თითოეული პროდუქტის სურათებს გადმოწერს
-2. ატვირთავს ახალ Cloudinary ექაუნტში
-3. განაახლებს MongoDB დოკუმენტებს ახალი URL-ებით
-4. აჩვენებს დეტალურ პროგრესს
-
-### ნაბიჯი 4: გადამოწმება
-
-მიგრაციის შემდეგ გაუშვი შემოწმება ხელახლა:
-
-```bash
-npm run cloudinary:check
-```
-
-უნდა დაინახო რომ:
-
-- ❌ Old URLs = 0
-- ✅ New URLs = 364 (ან მეტი)
-
-## 📝 მაგალითი Output
-
-### Check Output
-
-```
-📊 CLOUDINARY URL STATISTICS SUMMARY
-================================================================================
-
-📌 products.images
-   ❌ Old URLs (dsufx8uzd): 361
-   ✅ New URLs (dwfqjtdu2): 0
-   📊 Total documents: 361
-
-📌 banners.imageUrl
-   ❌ Old URLs (dsufx8uzd): 3
-   ✅ New URLs (dwfqjtdu2): 0
-   📊 Total documents: 3
-
-================================================================================
-🔢 TOTAL OLD URLs TO MIGRATE: 364
-✅ TOTAL NEW URLs ALREADY PRESENT: 0
-================================================================================
-```
-
-### Migration Output
-
-```
-📊 MIGRATION SUMMARY
-================================================================================
-
-📌 products.images + thumbnail
-   📊 Processed: 361
-   ✅ Successful: 361
-   ❌ Failed: 0
-   ⏭️  Skipped: 0
-
-📌 banners.imageUrl
-   📊 Processed: 3
-   ✅ Successful: 3
-   ❌ Failed: 0
-   ⏭️  Skipped: 0
-
-================================================================================
-📊 TOTAL PROCESSED: 364
-✅ TOTAL SUCCESSFUL: 364
-❌ TOTAL FAILED: 0
-================================================================================
-```
-
-## 🔧 Cloudinary Credentials
-
-დარწმუნდი რომ `.env` ფაილში არის სწორი credentials:
+Update `.env` with new Cloudinary credentials:
 
 ```env
-CLOUDINARY_CLOUD_NAME=dwfqjtdu2
-CLOUDINARY_API_KEY=679616496227618
-CLOUDINARY_API_SECRET=8Fvi8dLo6Y7OSdYFCt92YVxWRPY
+CLOUDINARY_CLOUD_NAME=dmvh7vwpu
+CLOUDINARY_API_KEY=your-api-key
+CLOUDINARY_API_SECRET=your-api-secret
 ```
 
-## ⚙️ სკრიპტების აღწერა
-
-### `check-cloudinary-urls.ts`
-
-- MongoDB-ში ძველი Cloudinary URL-ების აღმოჩენა
-- სტატისტიკის ჩვენება
-- მაგალითების ჩვენება
-
-### `migrate-cloudinary.ts`
-
-- მთავარი მიგრაციის სკრიპტი MongoDB-სთვის
-- გადმოწერს სურათებს ძველი ექაუნტიდან
-- ატვირთავს ახალ ექაუნტში
-- განაახლებს დოკუმენტებს
-
-### `migrate-env-cloudinary.ts`
-
-- .env ფაილის მიგრაცია
-- აბნენებს და ატვირთავს სურათებს/ვიდეოებს
-- ავტომატურად განაახლებს .env ფაილს
-
-## 📁 Folder სტრუქტურა Cloudinary-ში
-
-მიგრაციის შემდეგ ასეთები ინახება შემდეგ folder-ებში:
-
-- `ecommerce/` - პროდუქტების სურათები
-- `users/` - მომხმარებლების პროფილის სურათები
-- `banners/` - ბანერის სურათები
-- `blog/` - ბლოგის სურათები
-- `categories/` - კატეგორიების სურათები
-- `images/` - .env-ის სურათები
-- `audio/` - .env-ის აუდიო ფაილები
-
-## ⚠️ გაფრთხილებები
-
-1. **Backup**: გადადი მონაცემთა ბაზის backup-ის გაკეთება მიგრაციამდე
-2. **დრო**: მთელი პროცესი შეიძლება რამდენიმე საათი გაგრძელდეს
-3. **API Limits**: Cloudinary-ს აქვს API rate limits
-4. **ქსელი**: სტაბილური ინტერნეტ კავშირი აუცილებელია
-5. **ადგილი**: დარწმუნდი რომ ახალ ექაუნტში საკმარისი storage არის
-
-## 🔄 თუ რაიმე არ მუშაობს
-
-### შეცდომა: Rate Limit Exceeded
+### Step 2: Run Dry-Run Check
 
 ```bash
-# დაელოდე 5-10 წუთს და სცადე თავიდან
-npm run cloudinary:migrate
+cd server
+npm run cloudinary:copy:dry-run
 ```
 
-### შეცდომა: Connection Timeout
+This shows:
+- How many URLs need to be copied
+- Sample URLs that would be migrated
+- No actual changes are made
+
+### Step 3: Copy Assets
 
 ```bash
-# შეამოწმე ინტერნეტი და სცადე თავიდან
-npm run cloudinary:migrate
+npm run cloudinary:copy
 ```
 
-### შეცდომა: Authentication Failed
+This script:
+1. Loads progress from `.cloudinary-migration-progress.json` (if exists and matches current destination)
+2. Finds all URLs with old cloud names in MongoDB
+3. Downloads from latest old account (older URLs are fetched from latest old since same public_id)
+4. Uploads to new account with same folder/public_id structure
+5. Skips already uploaded assets (using progress file or API check)
+6. Saves progress every 10 uploads (resumable!)
+7. Shows detailed progress
+
+⚠️ **Note**: The progress file includes the destination cloud name. If you change the destination, the old progress file will be ignored automatically.
+
+### Step 4: Update Interceptor
+
+The `CloudinaryUrlInterceptor` is already configured at:
+`server/src/interceptors/cloudinary-url.interceptor.ts`
+
+```typescript
+// All previous cloud names that should be replaced (oldest first, latest old last)
+private readonly OLD_CLOUD_NAMES = ['dsufx8uzd', 'dwfqjtdu2'];
+private readonly NEW_CLOUD_NAME = 'dmvh7vwpu';
+```
+
+### Step 5: Deploy
+
+Deploy the server with:
+1. Updated `.env` credentials
+2. Updated `CloudinaryUrlInterceptor` cloud names
+
+All API responses will automatically serve URLs from the new account.
+
+## 📝 Available Scripts
 
 ```bash
-# შეამოწმე .env credentials-ები
+# Check how many URLs need migration
+npm run cloudinary:check
+
+# Preview what will be copied (no changes)
+npm run cloudinary:copy:dry-run
+
+# Copy all assets to new account
+npm run cloudinary:copy
+
+# Delete all assets from current account (dangerous!)
+npm run cloudinary:delete:dry-run
+npm run cloudinary:delete
+```
+
+## 🔧 CloudinaryUrlInterceptor
+
+Located at: `server/src/interceptors/cloudinary-url.interceptor.ts`
+
+This interceptor:
+- Runs on all API responses
+- Recursively finds Cloudinary URLs in response data
+- Replaces old cloud names with new cloud name
+- Handles arrays, nested objects, Mongoose documents
+
+### Adding New Old Cloud Names
+
+To add support for migrating from another account, update **both** files:
+
+**1. Interceptor** (`server/src/interceptors/cloudinary-url.interceptor.ts`):
+```typescript
+private readonly OLD_CLOUD_NAMES = ['dsufx8uzd', 'dwfqjtdu2', 'new-old-cloud'];
+private readonly NEW_CLOUD_NAME = 'dmvh7vwpu';
+```
+
+**2. Migration Script** (`server/src/scripts/copy-cloudinary-assets.ts`):
+```typescript
+const CLOUD_NAMES = ['dsufx8uzd', 'dwfqjtdu2', 'new-old-cloud'];
+const NEW_CLOUD_NAME = process.env.CLOUDINARY_CLOUD_NAME || 'dmvh7vwpu';
+```
+
+**3. Check Script** (`server/src/scripts/check-cloudinary-urls.ts`):
+```typescript
+const CLOUD_NAMES = ['dsufx8uzd', 'dwfqjtdu2', 'new-old-cloud'];
+const NEW_CLOUD_NAME = process.env.CLOUDINARY_CLOUD_NAME || 'dmvh7vwpu';
+```
+
+> **Important**: Keep cloud names in order - oldest first, latest old last. The migration script fetches from the **latest old** account.
+
+## 📁 Folder Structure in Cloudinary
+
+Assets are organized in these folders:
+
+- `ecommerce/` - Product images (with transformations)
+- `products/` - Product images (raw)
+- `users/` - User profile images
+- `banners/` - Banner images
+- `blog/` - Blog post images
+- `categories/` - Category images
+- `artist-gallery/` - Artist gallery images
+
+## ⚠️ Important Notes
+
+1. **v1 URLs in DB**: The database still contains v1 (`dsufx8uzd`) URLs, but:
+   - v1 account is closed (returns 401)
+   - Assets exist in v2 with same public_id
+   - Script fetches from v2 when it sees v1 URLs
+
+2. **Interceptor is required**: Without the interceptor, old URLs in DB won't work
+
+3. **New uploads**: New uploads go directly to the new account with new credentials
+
+4. **Rate limits**: Cloudinary has API rate limits. If you hit them, wait and retry.
+
+## 🔄 Future Migrations
+
+For the next migration:
+
+1. **Update scripts** - Add current cloud name to arrays:
+   - `copy-cloudinary-assets.ts` → `CLOUD_NAMES`
+   - `check-cloudinary-urls.ts` → `CLOUD_NAMES`
+   - `cloudinary-url.interceptor.ts` → `OLD_CLOUD_NAMES`
+
+2. **Update `.env`** with new Cloudinary credentials
+
+3. **Delete progress file** to start fresh:
+   ```bash
+   rm server/.cloudinary-migration-progress.json
+   ```
+
+4. **Run migration**:
+   ```bash
+   npm run cloudinary:copy
+   ```
+
+5. **Deploy** with new credentials
+
+## 🛟 Troubleshooting
+
+### Images not showing
+
+1. Check if asset exists in new Cloudinary dashboard
+2. Check browser Network tab for actual URL being requested
+3. Verify interceptor is loaded in `app.module.ts`
+
+### Rate Limit Exceeded
+
+```bash
+# Wait 5-10 minutes and retry
+npm run cloudinary:copy
+```
+
+### Authentication Failed
+
+```bash
+# Verify credentials
 cat .env | grep CLOUDINARY
 ```
 
-## 📈 პროგრესის თვალყურის დევნება
+### Some assets 404
 
-სკრიპტი აჩვენებს რეალურ დროში პროგრესს:
-
-```
-📌 Product [1/361]: სახელი (id)
-   📥 Downloading: https://...
-   📤 Uploading to new Cloudinary account...
-   ✅ Uploaded: https://...
-   ✅ Updated product id
+Run the copy again - it skips already copied assets:
+```bash
+npm run cloudinary:copy
 ```
 
-## ✅ წარმატებული მიგრაციის შემდეგ
+### Migration stuck or need to restart fresh
 
-1. გაუშვი `npm run cloudinary:check` - დარწმუნდი რომ Old URLs = 0
-2. გატესტე რამდენიმე პროდუქტი საიტზე
-3. შეამოწმე რომ სურათები იტვირთება
-4. დარწმუნდი რომ YouTube slideshow-ც მუშაობს
-5. შესაძლოა წაშალო ძველი სურათები ძველი ექაუნტიდან (ფრთხილად!)
+Delete the progress file and run again:
+```bash
+rm server/.cloudinary-migration-progress.json
+npm run cloudinary:copy
+```
 
-## 🛟 დახმარება
+## 🔐 Security
 
-თუ რაიმე პრობლემა გაქვს:
-
-1. გაუშვი dry-run თავიდან
-2. შეამოწმე logs
-3. შეამოწმე credentials
-4. შეამოწმე MongoDB კავშირი
-5. შეამოწმე Cloudinary dashboard
-
-## 🔐 უსაფრთხოება
-
-⚠️ არასოდეს გააზიარო:
-
+Never share or commit:
 - `CLOUDINARY_API_KEY`
 - `CLOUDINARY_API_SECRET`
-- `.env` ფაილი
+- `.env` file
 
-ეს credentials-ები უნდა დარჩეს პრივატული!
+These should remain private!

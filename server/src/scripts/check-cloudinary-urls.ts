@@ -5,8 +5,17 @@ import * as path from 'path';
 // Load environment variables
 dotenv.config({ path: path.join(__dirname, '../../.env') });
 
-const OLD_CLOUD_NAME = 'dsufx8uzd';
-const NEW_CLOUD_NAME = 'dwfqjtdu2';
+// All old cloud names (oldest first, latest old last)
+const CLOUD_NAMES = ['dsufx8uzd', 'dwfqjtdu2'];
+const NEW_CLOUD_NAME = process.env.CLOUDINARY_CLOUD_NAME || 'dmvh7vwpu';
+
+// Helper to check if string contains any old cloud name
+const hasOldCloud = (str: string) => str && CLOUD_NAMES.some(name => str.includes(name));
+
+// Helper to build $or regex query for all old cloud names
+const oldCloudRegex = (field: string) => ({ 
+  $or: CLOUD_NAMES.map(name => ({ [field]: { $regex: name } })) 
+});
 
 interface CloudinaryStats {
   collection: string;
@@ -41,18 +50,14 @@ async function checkCloudinaryUrls() {
     const productCount = await products.countDocuments();
     console.log(`   Total products: ${productCount}`);
 
-    const productsWithOldUrls = await products.countDocuments({
-      images: { $regex: OLD_CLOUD_NAME },
-    });
+    const productsWithOldUrls = await products.countDocuments(oldCloudRegex('images'));
 
     const productsWithNewUrls = await products.countDocuments({
       images: { $regex: NEW_CLOUD_NAME },
     });
 
     const sampleProducts = await products
-      .find({
-        images: { $regex: OLD_CLOUD_NAME },
-      })
+      .find(oldCloudRegex('images'))
       .limit(3)
       .toArray();
 
@@ -64,23 +69,19 @@ async function checkCloudinaryUrls() {
       totalCount: productCount,
       sampleUrls: sampleProducts
         .flatMap((p) => p.images || [])
-        .filter((url: string) => url.includes(OLD_CLOUD_NAME))
+        .filter((url: string) => hasOldCloud(url))
         .slice(0, 3),
     });
 
     // Check Products collection - thumbnail
-    const productsWithOldThumbnail = await products.countDocuments({
-      thumbnail: { $regex: OLD_CLOUD_NAME },
-    });
+    const productsWithOldThumbnail = await products.countDocuments(oldCloudRegex('thumbnail'));
 
     const productsWithNewThumbnail = await products.countDocuments({
       thumbnail: { $regex: NEW_CLOUD_NAME },
     });
 
     const sampleThumbnails = await products
-      .find({
-        thumbnail: { $regex: OLD_CLOUD_NAME },
-      })
+      .find(oldCloudRegex('thumbnail'))
       .limit(3)
       .toArray();
 
@@ -102,18 +103,14 @@ async function checkCloudinaryUrls() {
     const userCount = await users.countDocuments();
     console.log(`   Total users: ${userCount}`);
 
-    const usersWithOldProfile = await users.countDocuments({
-      profilePicture: { $regex: OLD_CLOUD_NAME },
-    });
+    const usersWithOldProfile = await users.countDocuments(oldCloudRegex('profilePicture'));
 
     const usersWithNewProfile = await users.countDocuments({
       profilePicture: { $regex: NEW_CLOUD_NAME },
     });
 
     const sampleUsers = await users
-      .find({
-        profilePicture: { $regex: OLD_CLOUD_NAME },
-      })
+      .find(oldCloudRegex('profilePicture'))
       .limit(3)
       .toArray();
 
@@ -135,18 +132,14 @@ async function checkCloudinaryUrls() {
     const bannerCount = await banners.countDocuments();
     console.log(`   Total banners: ${bannerCount}`);
 
-    const bannersWithOldImage = await banners.countDocuments({
-      imageUrl: { $regex: OLD_CLOUD_NAME },
-    });
+    const bannersWithOldImage = await banners.countDocuments(oldCloudRegex('imageUrl'));
 
     const bannersWithNewImage = await banners.countDocuments({
       imageUrl: { $regex: NEW_CLOUD_NAME },
     });
 
     const sampleBanners = await banners
-      .find({
-        imageUrl: { $regex: OLD_CLOUD_NAME },
-      })
+      .find(oldCloudRegex('imageUrl'))
       .limit(3)
       .toArray();
 
@@ -168,18 +161,14 @@ async function checkCloudinaryUrls() {
     const blogCount = await blogs.countDocuments();
     console.log(`   Total blog posts: ${blogCount}`);
 
-    const blogsWithOldImage = await blogs.countDocuments({
-      image: { $regex: OLD_CLOUD_NAME },
-    });
+    const blogsWithOldImage = await blogs.countDocuments(oldCloudRegex('image'));
 
     const blogsWithNewImage = await blogs.countDocuments({
       image: { $regex: NEW_CLOUD_NAME },
     });
 
     const sampleBlogs = await blogs
-      .find({
-        image: { $regex: OLD_CLOUD_NAME },
-      })
+      .find(oldCloudRegex('image'))
       .limit(3)
       .toArray();
 
@@ -201,18 +190,14 @@ async function checkCloudinaryUrls() {
     const categoryCount = await categories.countDocuments();
     console.log(`   Total categories: ${categoryCount}`);
 
-    const categoriesWithOldImage = await categories.countDocuments({
-      image: { $regex: OLD_CLOUD_NAME },
-    });
+    const categoriesWithOldImage = await categories.countDocuments(oldCloudRegex('image'));
 
     const categoriesWithNewImage = await categories.countDocuments({
       image: { $regex: NEW_CLOUD_NAME },
     });
 
     const sampleCategories = await categories
-      .find({
-        image: { $regex: OLD_CLOUD_NAME },
-      })
+      .find(oldCloudRegex('image'))
       .limit(3)
       .toArray();
 
@@ -241,7 +226,7 @@ async function checkCloudinaryUrls() {
       totalNew += stat.newCount;
 
       console.log(`\n📌 ${stat.collection}.${stat.field}`);
-      console.log(`   ❌ Old URLs (${OLD_CLOUD_NAME}): ${stat.oldCount}`);
+      console.log(`   ❌ Old URLs (${CLOUD_NAMES.join(', ')}): ${stat.oldCount}`);
       console.log(`   ✅ New URLs (${NEW_CLOUD_NAME}): ${stat.newCount}`);
       console.log(`   📊 Total documents: ${stat.totalCount}`);
 
