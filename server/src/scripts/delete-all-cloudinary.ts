@@ -5,7 +5,7 @@ import * as path from 'path';
 // Load environment variables
 dotenv.config({ path: path.join(__dirname, '../../.env') });
 
-const NEW_CLOUD_NAME = process.env.CLOUDINARY_CLOUD_NAME || 'dwfqjtdu2';
+const NEW_CLOUD_NAME = process.env.CLOUDINARY_CLOUD_NAME || 'dmvh7vwpu';
 
 // Configure new Cloudinary account
 cloudinary.config({
