@@ -3,9 +3,12 @@ import {
   NestInterceptor,
   ExecutionContext,
   CallHandler,
+  Inject,
+  Optional,
 } from '@nestjs/common';
-import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { Observable, from } from 'rxjs';
+import { switchMap } from 'rxjs/operators';
+import { CloudinaryMigrationService } from '../cloudinary/services/cloudinary-migration.service';
 
 /**
  * Cloudinary URL Interceptor
@@ -13,21 +16,63 @@ import { map } from 'rxjs/operators';
  * Automatically replaces old Cloudinary account URLs with new account URLs
  * in all API responses without touching the database.
  *
- * Old accounts: dsufx8uzd, dwfqjtdu2
- * New account: dmvh7vwpu
+ * Reads configuration from the database:
+ * - Active cloud name from cloudinary_config collection
+ * - Retired cloud names from retired_clouds collection
  *
- * This allows gradual migration - we copy assets to new account first,
- * then swap URLs on the fly, and finally update database when ready.
+ * Falls back to hardcoded values if database is not available.
  */
 @Injectable()
 export class CloudinaryUrlInterceptor implements NestInterceptor {
-  // All previous cloud names that should be replaced
-  private readonly OLD_CLOUD_NAMES = ['dsufx8uzd', 'dwfqjtdu2'];
-  private readonly NEW_CLOUD_NAME = 'dmvh7vwpu';
+  // Fallback values if DB is not available
+  private readonly FALLBACK_OLD_CLOUD_NAMES = ['dsufx8uzd', 'dwfqjtdu2'];
+  private readonly FALLBACK_NEW_CLOUD_NAME = 'dmvh7vwpu';
+
+  // Cache for cloud names
+  private cachedOldCloudNames: string[] | null = null;
+  private cachedNewCloudName: string | null = null;
+  private cacheExpiry: number = 0;
+  private readonly CACHE_TTL = 60000; // 1 minute
+
+  constructor(
+    @Optional()
+    @Inject(CloudinaryMigrationService)
+    private readonly migrationService?: CloudinaryMigrationService,
+  ) {}
+
+  private async ensureCache(): Promise<void> {
+    if (Date.now() < this.cacheExpiry && this.cachedNewCloudName) {
+      return; // Cache is still valid
+    }
+
+    if (this.migrationService) {
+      try {
+        const [activeCloud, retiredClouds] = await Promise.all([
+          this.migrationService.getActiveCloudName(),
+          this.migrationService.getRetiredCloudNames(),
+        ]);
+
+        if (activeCloud) {
+          this.cachedNewCloudName = activeCloud;
+          this.cachedOldCloudNames = retiredClouds;
+          this.cacheExpiry = Date.now() + this.CACHE_TTL;
+          return;
+        }
+      } catch (error) {
+        console.warn('CloudinaryUrlInterceptor: Failed to fetch from DB, using fallback');
+      }
+    }
+
+    // Use fallback values
+    this.cachedNewCloudName = this.FALLBACK_NEW_CLOUD_NAME;
+    this.cachedOldCloudNames = this.FALLBACK_OLD_CLOUD_NAMES;
+    this.cacheExpiry = Date.now() + this.CACHE_TTL;
+  }
 
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     return next.handle().pipe(
-      map((data) => {
+      switchMap(async (data) => {
+        await this.ensureCache();
         return this.replaceCloudinaryUrls(data);
       }),
     );
@@ -40,11 +85,14 @@ export class CloudinaryUrlInterceptor implements NestInterceptor {
   private replaceCloudinaryUrls(data: any, visited = new WeakSet()): any {
     if (!data) return data;
 
+    const oldCloudNames = this.cachedOldCloudNames || this.FALLBACK_OLD_CLOUD_NAMES;
+    const newCloudName = this.cachedNewCloudName || this.FALLBACK_NEW_CLOUD_NAME;
+
     // Handle strings first (most common case)
     if (typeof data === 'string' && data.includes('res.cloudinary.com')) {
       let result = data;
-      for (const oldName of this.OLD_CLOUD_NAMES) {
-        result = result.replace(new RegExp(oldName, 'g'), this.NEW_CLOUD_NAME);
+      for (const oldName of oldCloudNames) {
+        result = result.replace(new RegExp(oldName, 'g'), newCloudName);
       }
       return result;
     }
