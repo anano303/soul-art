@@ -4,7 +4,23 @@
 
 This guide describes how to migrate all images, videos, and other assets between Cloudinary accounts using a **runtime URL transformation approach** (no database changes needed).
 
-## 🔄 Migration History
+## �️ Admin Panel (Recommended)
+
+The easiest way to manage Cloudinary migrations is through the **Admin Panel**:
+
+1. Go to `/admin/cloudinary` in your browser
+2. Enter new Cloudinary credentials
+3. Click "Validate Credentials" to test
+4. Click "Start Migration" to begin copying assets
+5. Monitor progress in real-time with polling updates
+
+The admin panel provides:
+- ✅ Real-time migration progress
+- ✅ Cancel and resume capabilities
+- ✅ History of retired cloud names
+- ✅ Encrypted credential storage
+
+## �🔄 Migration History
 
 | Version | Cloud Name | Status |
 |---------|-----------|--------|
@@ -126,8 +142,21 @@ This interceptor:
 - Recursively finds Cloudinary URLs in response data
 - Replaces old cloud names with new cloud name
 - Handles arrays, nested objects, Mongoose documents
+- **Reads cloud names from database** (with fallback to hardcoded values)
+- **Caches for 1 minute** to avoid DB queries on every request
 
-### Adding New Old Cloud Names
+### Database Collections
+
+The migration system uses these collections:
+
+| Collection | Purpose |
+|------------|---------|
+| `cloudinary_config` | Active Cloudinary credentials (encrypted) |
+| `retired_clouds` | History of retired cloud names |
+| `cloudinary_migrations` | Migration status & progress |
+| `migrated_files` | Tracks individual migrated files |
+
+### Adding New Old Cloud Names (Legacy - CLI only)
 
 To add support for migrating from another account, update **both** files:
 
@@ -177,6 +206,17 @@ Assets are organized in these folders:
 4. **Rate limits**: Cloudinary has API rate limits. If you hit them, wait and retry.
 
 ## 🔄 Future Migrations
+
+### Option 1: Admin Panel (Recommended)
+
+1. Go to `/admin/cloudinary`
+2. Enter new Cloudinary credentials
+3. Click "Validate Credentials"
+4. Click "Start Migration"
+5. Wait for completion (monitor progress in real-time)
+6. Done! The interceptor reads from DB automatically.
+
+### Option 2: CLI Scripts (Legacy)
 
 For the next migration:
 
@@ -241,6 +281,16 @@ npm run cloudinary:copy
 Never share or commit:
 - `CLOUDINARY_API_KEY`
 - `CLOUDINARY_API_SECRET`
+- `CLOUDINARY_ENCRYPTION_KEY` - Used to encrypt API secrets in database
 - `.env` file
 
-These should remain private!
+### Encryption
+
+API secrets are encrypted using AES-256-CBC before storing in the database. The encryption key is derived from `CLOUDINARY_ENCRYPTION_KEY` in `.env`.
+
+```env
+# Required for secure credential storage
+CLOUDINARY_ENCRYPTION_KEY=your-unique-encryption-key-here
+```
+
+⚠️ **Important**: Use a unique, strong key for production. If you change this key, existing encrypted secrets will become unreadable.

@@ -27,6 +27,7 @@ import {
   Landmark,
   Heart,
   Mail,
+  Cloud,
 } from "lucide-react";
 
 // Add a style object for the FiraGo font
@@ -506,6 +507,18 @@ export default function UserMenu({
               >
                 <Mail size={18} />
                 <span>მომხმარებლებისთვის მეილი</span>
+              </Link>
+            )}
+
+            {/* Cloudinary Migration link - Only for Admin */}
+            {user.role?.toLowerCase() === Role.Admin && (
+              <Link
+                href="/admin/cloudinary"
+                className="dropdown-item"
+                onClick={handleLinkClick}
+              >
+                <Cloud size={18} />
+                <span>Cloudinary</span>
               </Link>
             )}
 
