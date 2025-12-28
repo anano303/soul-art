@@ -32,7 +32,7 @@ export function MobileBottomNav() {
 
   // Check if current page is in bottom nav
   // Include product detail pages and admin pages
-  const isBottomNavPage = 
+  const isBottomNavPage =
     navRoutes.some((route) => {
       if (route === "/") return pathname === "/";
       return pathname.startsWith(route);

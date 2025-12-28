@@ -644,10 +644,7 @@ export class UsersService {
         user: artist._id,
         status: ProductStatus.APPROVED,
         // Exclude out-of-stock products from shop view
-        $or: [
-          { countInStock: { $gt: 0 } },
-          { 'variants.stock': { $gt: 0 } },
-        ],
+        $or: [{ countInStock: { $gt: 0 } }, { 'variants.stock': { $gt: 0 } }],
       };
 
       const skip = (page - 1) * limit;

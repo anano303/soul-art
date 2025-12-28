@@ -298,8 +298,9 @@ const ShopContent = () => {
         if (selectedOriginalTypes.length > 0)
           params.isOriginal = selectedOriginalTypes.join(",");
 
-        // Exclude out of stock products from shop
+        // Exclude out of stock products from shop and include variants for stock check
         params.excludeOutOfStock = "true";
+        params.includeVariants = "true";
 
         const response = await getProducts(currentPage, 20, params);
         setProducts(response.items || []);
@@ -558,34 +559,36 @@ const ShopContent = () => {
                   </h2>
                 </div>
               )}
-        <div className="sort-section">
-          {/* <div className="sort-header">
+              <div className="sort-section">
+                {/* <div className="sort-header">
             <h3 className="sort-title">{t("shop.sortBy")}</h3>
           </div> */}
-          <div className="sort-options">
-            <select
-              className={`sort-select ${
-                isHandmadeCategory() ? "handmade-theme" : ""
-              }`}
-              onChange={(e) => {
-                const value = e.target.value;
-                const [field, direction] = value.split("-");
-                handleSortChange({
-                  field,
-                  direction: direction as "asc" | "desc",
-                });
-              }}
-            >
-              {" "}
-              <option value="createdAt-desc">{t("shop.newest")}</option>{" "}
-              <option value="price-asc">{t("shop.priceLowHigh")}</option>{" "}
-              <option value="price-desc">{t("shop.priceHighLow")}</option>{" "}
-              <option value="name-asc">{t("shop.nameAZ")}</option>{" "}
-              <option value="name-desc">{t("shop.nameZA")}</option>{" "}
-              <option value="rating-desc">{t("shop.ratingHigh")}</option>
-            </select>
-          </div>
-        </div>
+                <div className="sort-options">
+                  <select
+                    className={`sort-select ${
+                      isHandmadeCategory() ? "handmade-theme" : ""
+                    }`}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      const [field, direction] = value.split("-");
+                      handleSortChange({
+                        field,
+                        direction: direction as "asc" | "desc",
+                      });
+                    }}
+                  >
+                    {" "}
+                    <option value="createdAt-desc">
+                      {t("shop.newest")}
+                    </option>{" "}
+                    <option value="price-asc">{t("shop.priceLowHigh")}</option>{" "}
+                    <option value="price-desc">{t("shop.priceHighLow")}</option>{" "}
+                    <option value="name-asc">{t("shop.nameAZ")}</option>{" "}
+                    <option value="name-desc">{t("shop.nameZA")}</option>{" "}
+                    <option value="rating-desc">{t("shop.ratingHigh")}</option>
+                  </select>
+                </div>
+              </div>
 
               <div className="products-area">
                 {isLoading ? (

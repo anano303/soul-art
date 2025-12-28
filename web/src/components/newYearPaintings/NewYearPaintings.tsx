@@ -42,6 +42,7 @@ const NewYearPaintings = () => {
         mainCategory: MAIN_CATEGORY_ID,
         subCategory: SUB_CATEGORY_ID,
         excludeOutOfStock: "true",
+        includeVariants: "true",
       });
 
       const filtered = items.slice(0, RAIL_LIMIT);

@@ -121,7 +121,7 @@ export class StockReservationService {
       // Refund stock
       if (product.variants && product.variants.length > 0) {
         const hasVariantAttributes = item.size || item.color || item.ageGroup;
-        
+
         if (hasVariantAttributes) {
           const variantIndex = product.variants.findIndex(
             (v) =>

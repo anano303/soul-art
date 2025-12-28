@@ -369,17 +369,14 @@ export class ProductsService {
     const skip = (pageNumber - 1) * limitNumber;
 
     const filter: any = {};
-    
+
     // Use $and array for all conditions to avoid $or conflicts
     const andConditions: any[] = [];
 
     // Exclude hidden products from store/home pages (but not from artist profiles)
     if (excludeHiddenFromStore) {
       andConditions.push({
-        $or: [
-          { hideFromStore: { $exists: false } },
-          { hideFromStore: false },
-        ],
+        $or: [{ hideFromStore: { $exists: false } }, { hideFromStore: false }],
       });
     }
 
@@ -389,10 +386,7 @@ export class ProductsService {
       // 1. countInStock > 0, OR
       // 2. At least one variant has stock > 0
       andConditions.push({
-        $or: [
-          { countInStock: { $gt: 0 } },
-          { 'variants.stock': { $gt: 0 } },
-        ],
+        $or: [{ countInStock: { $gt: 0 } }, { 'variants.stock': { $gt: 0 } }],
       });
     }
 
@@ -1610,11 +1604,12 @@ export class ProductsService {
     // Check if the product has variants
     if (product.variants && product.variants.length > 0) {
       const hasVariantAttributes = size || color || ageGroup;
-      
+
       if (hasVariantAttributes) {
         // Find the specific variant by attributes
         const variantIndex = product.variants.findIndex(
-          (v) => v.size === size && v.color === color && v.ageGroup === ageGroup,
+          (v) =>
+            v.size === size && v.color === color && v.ageGroup === ageGroup,
         );
 
         if (variantIndex >= 0) {
@@ -1644,6 +1639,16 @@ export class ProductsService {
           `Updated first variant stock for product ${product.name}, new stock: ${product.variants[0].stock}`,
         );
       }
+
+      // Sync countInStock with total variant stock
+      const totalVariantStock = product.variants.reduce(
+        (sum, v) => sum + (v.stock || 0),
+        0,
+      );
+      product.countInStock = totalVariantStock;
+      console.log(
+        `Synced countInStock for product ${product.name}, new countInStock: ${product.countInStock}`,
+      );
     } else {
       // Update general product stock if no variants
       product.countInStock = Math.max(0, product.countInStock - qty);

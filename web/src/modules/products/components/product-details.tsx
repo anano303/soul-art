@@ -655,7 +655,7 @@ export function ProductDetails({ product }: ProductDetailsProps) {
           (!v.color || v.color === selectedColor) &&
           (!v.ageGroup || v.ageGroup === selectedAgeGroup)
       );
-      
+
       if (variant) {
         stock = variant.stock;
       } else {
@@ -1221,9 +1221,7 @@ export function ProductDetails({ product }: ProductDetailsProps) {
           >
             <div className="stock-dot"></div>
             {isOutOfStock ? (
-              <span>
-                {language === "en" ? "Sold Out" : "გაყიდულია"}
-              </span>
+              <span>{language === "en" ? "Sold Out" : "გაყიდულია"}</span>
             ) : availableQuantity === 1 ? (
               <span className="hurry-text">
                 🔥{" "}

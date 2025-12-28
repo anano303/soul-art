@@ -142,12 +142,37 @@ export function ProductCard({
   const isDiscounted = hasActiveDiscount();
   const discountedPrice = calculateDiscountedPrice();
 
+  // Calculate available stock considering variants
+  const availableStock = (() => {
+    // Check variants first if available
+    if (product.variants && product.variants.length > 0) {
+      // Check if variants have no attributes (just stock)
+      const hasNoAttributes = product.variants.every(
+        (v) => !v.size && !v.color && !v.ageGroup
+      );
+      if (hasNoAttributes) {
+        // Sum all variant stocks for products without attributes
+        return product.variants.reduce((sum, v) => sum + (v.stock || 0), 0);
+      }
+      // For variants with attributes, sum all stocks
+      const variantStock = product.variants.reduce(
+        (sum, v) => sum + (v.stock || 0),
+        0
+      );
+      return variantStock;
+    }
+    // Fall back to countInStock
+    return product.countInStock ?? 0;
+  })();
+
+  const isOutOfStock = availableStock <= 0;
+
   // Handle Buy Now - Add to cart and redirect to checkout
   const handleBuyNow = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
 
-    if (product.countInStock <= 0) {
+    if (isOutOfStock) {
       toast({
         title: language === "en" ? "Out of Stock" : "არ არის მარაგში",
         description:
@@ -374,7 +399,7 @@ export function ProductCard({
         <AddToCartButton
           productId={product._id}
           productName={displayName}
-          countInStock={product.countInStock}
+          countInStock={availableStock}
           className="btn-add-to-cart-icon"
           price={isDiscounted ? discountedPrice : product.price}
           hideQuantity={true}
@@ -383,7 +408,7 @@ export function ProductCard({
         />
         <button
           onClick={handleBuyNow}
-          disabled={product.countInStock <= 0 || isBuying}
+          disabled={isOutOfStock || isBuying}
           className="btn-buy-now"
           title={
             language === "en"
