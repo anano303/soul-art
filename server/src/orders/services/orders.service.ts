@@ -436,7 +436,9 @@ export class OrdersService {
   }
 
   async createGuestOrder(
-    orderAttrs: Partial<Order> & { guestInfo: { email: string; phoneNumber: string; fullName: string } },
+    orderAttrs: Partial<Order> & {
+      guestInfo: { email: string; phoneNumber: string; fullName: string };
+    },
     externalOrderId?: string,
   ): Promise<OrderDocument> {
     const {
@@ -454,8 +456,15 @@ export class OrdersService {
       throw new BadRequestException('No order items received.');
 
     // Validate guest info
-    if (!guestInfo || !guestInfo.email || !guestInfo.phoneNumber || !guestInfo.fullName) {
-      throw new BadRequestException('Guest checkout requires email, phoneNumber, and fullName');
+    if (
+      !guestInfo ||
+      !guestInfo.email ||
+      !guestInfo.phoneNumber ||
+      !guestInfo.fullName
+    ) {
+      throw new BadRequestException(
+        'Guest checkout requires email, phoneNumber, and fullName',
+      );
     }
 
     // Start MongoDB transaction to prevent race conditions
@@ -477,8 +486,9 @@ export class OrdersService {
           // Check and reserve stock atomically
           if (product.variants && product.variants.length > 0) {
             // Check if this product has variants with specific attributes (size/color/ageGroup)
-            const hasVariantAttributes = item.size || item.color || item.ageGroup;
-            
+            const hasVariantAttributes =
+              item.size || item.color || item.ageGroup;
+
             if (hasVariantAttributes) {
               // Find the specific variant
               const variantIndex = product.variants.findIndex(
@@ -649,9 +659,7 @@ export class OrdersService {
       });
 
       if (guestOrders.length === 0) {
-        this.logger.log(
-          `No guest orders found for email: ${lowercaseEmail}`,
-        );
+        this.logger.log(`No guest orders found for email: ${lowercaseEmail}`);
         return { linkedCount: 0 };
       }
 
@@ -948,7 +956,10 @@ export class OrdersService {
         email_address: 'pending@payment.com',
       };
       await order.save();
-      console.log(`Updated order ${orderId} with BOG payment info:`, paymentInfo);
+      console.log(
+        `Updated order ${orderId} with BOG payment info:`,
+        paymentInfo,
+      );
     }
   }
 
@@ -979,15 +990,18 @@ export class OrdersService {
         return;
       }
 
-      const customerName = orderWithData.isGuestOrder && orderWithData.guestInfo?.fullName
-        ? orderWithData.guestInfo.fullName
-        : this.getDisplayName(orderWithData.user);
-      const customerEmail = orderWithData.isGuestOrder && orderWithData.guestInfo?.email 
-        ? orderWithData.guestInfo.email 
-        : orderWithData.user?.email;
-      const customerPhone = orderWithData.isGuestOrder && orderWithData.guestInfo?.phoneNumber
-        ? orderWithData.guestInfo.phoneNumber
-        : orderWithData.user?.phoneNumber;
+      const customerName =
+        orderWithData.isGuestOrder && orderWithData.guestInfo?.fullName
+          ? orderWithData.guestInfo.fullName
+          : this.getDisplayName(orderWithData.user);
+      const customerEmail =
+        orderWithData.isGuestOrder && orderWithData.guestInfo?.email
+          ? orderWithData.guestInfo.email
+          : orderWithData.user?.email;
+      const customerPhone =
+        orderWithData.isGuestOrder && orderWithData.guestInfo?.phoneNumber
+          ? orderWithData.guestInfo.phoneNumber
+          : orderWithData.user?.phoneNumber;
       const shippingDetails = (orderWithData.shippingDetails ??
         {}) as Partial<ShippingDetails>;
       const baseUrl = this.getPrimaryAppUrl();
@@ -1058,7 +1072,10 @@ export class OrdersService {
             emailPayload.orderDetailsUrl = `${baseUrl}/orders/${orderId}`;
           }
 
-          await this.emailService.sendOrderConfirmation(customerEmail, emailPayload);
+          await this.emailService.sendOrderConfirmation(
+            customerEmail,
+            emailPayload,
+          );
         } catch (error) {
           this.logger.error(
             `Failed to send customer confirmation email for order ${orderId}: ${error.message}`,

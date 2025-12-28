@@ -75,7 +75,12 @@ export interface ArtistProductSummary {
   discountStartDate?: string | null;
   discountEndDate?: string | null;
   countInStock?: number;
-  variants?: { stock?: number; size?: string; color?: string; ageGroup?: string }[];
+  variants?: {
+    stock?: number;
+    size?: string;
+    color?: string;
+    ageGroup?: string;
+  }[];
   deliveryType?: "SELLER" | "SoulArt";
   minDeliveryDays?: number;
   maxDeliveryDays?: number;

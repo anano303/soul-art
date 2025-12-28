@@ -559,23 +559,28 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
 
   // Build the artist base URL for post links
   const artistBaseUrl = useMemo(() => {
-    return artist.artistSlug ? `/@${artist.artistSlug}` : `/artists/${artist.id}`;
+    return artist.artistSlug
+      ? `/@${artist.artistSlug}`
+      : `/artists/${artist.id}`;
   }, [artist.artistSlug, artist.id]);
 
   // Generate post URL for a given post
-  const getPostUrl = useCallback((postId: string | null) => {
-    if (!postId) return artistBaseUrl;
-    return `${artistBaseUrl}?post=${postId}`;
-  }, [artistBaseUrl]);
+  const getPostUrl = useCallback(
+    (postId: string | null) => {
+      if (!postId) return artistBaseUrl;
+      return `${artistBaseUrl}?post=${postId}`;
+    },
+    [artistBaseUrl]
+  );
 
   // Handle opening viewer from URL on initial load (runs only once)
   useEffect(() => {
     // Only handle initial URL once
     if (initialUrlHandledRef.current) return;
-    
+
     const postId = searchParams?.get("post");
     if (postId && galleryPosts.length > 0) {
-      const postIndex = galleryPosts.findIndex(p => p.postId === postId);
+      const postIndex = galleryPosts.findIndex((p) => p.postId === postId);
       if (postIndex !== -1) {
         initialUrlHandledRef.current = true;
         setViewerIndex(postIndex);
@@ -597,10 +602,10 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
     const handlePopState = () => {
       const params = new URLSearchParams(window.location.search);
       const postId = params.get("post");
-      
+
       if (postId) {
         // Navigate to the post
-        const postIndex = galleryPosts.findIndex(p => p.postId === postId);
+        const postIndex = galleryPosts.findIndex((p) => p.postId === postId);
         if (postIndex !== -1) {
           setViewerIndex(postIndex);
           setViewerImageIndex(0);
@@ -620,30 +625,36 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
   }, [galleryPosts]);
 
   // Handle opening the viewer - push URL to history
-  const openViewer = useCallback((postIndex: number, imageIndex: number = 0) => {
-    const post = galleryPosts[postIndex];
-    const postId = post?.postId;
-    
-    setViewerIndex(postIndex);
-    setViewerImageIndex(imageIndex);
-    setViewerOpen(true);
-    
-    if (postId) {
-      const newUrl = getPostUrl(postId);
-      window.history.pushState({ postId }, "", newUrl);
-      pushedPostUrlRef.current = true;
-      lastSyncedPostIdRef.current = postId;
-    }
-  }, [galleryPosts, getPostUrl]);
+  const openViewer = useCallback(
+    (postIndex: number, imageIndex: number = 0) => {
+      const post = galleryPosts[postIndex];
+      const postId = post?.postId;
+
+      setViewerIndex(postIndex);
+      setViewerImageIndex(imageIndex);
+      setViewerOpen(true);
+
+      if (postId) {
+        const newUrl = getPostUrl(postId);
+        window.history.pushState({ postId }, "", newUrl);
+        pushedPostUrlRef.current = true;
+        lastSyncedPostIdRef.current = postId;
+      }
+    },
+    [galleryPosts, getPostUrl]
+  );
 
   // Handle post change in viewer (scrolling) - replace URL in history
-  const handleCurrentPostChange = useCallback((postId: string | null) => {
-    if (!postId || postId === lastSyncedPostIdRef.current) return;
-    
-    const newUrl = getPostUrl(postId);
-    window.history.replaceState({ postId }, "", newUrl);
-    lastSyncedPostIdRef.current = postId;
-  }, [getPostUrl]);
+  const handleCurrentPostChange = useCallback(
+    (postId: string | null) => {
+      if (!postId || postId === lastSyncedPostIdRef.current) return;
+
+      const newUrl = getPostUrl(postId);
+      window.history.replaceState({ postId }, "", newUrl);
+      lastSyncedPostIdRef.current = postId;
+    },
+    [getPostUrl]
+  );
 
   // Handle closing the viewer - go back in history or remove query param
   const closeViewer = useCallback(() => {
@@ -1806,7 +1817,7 @@ function ProductCard({
   const href = `/products/${product.id}`;
 
   const discountPercentage = getActiveDiscountPercentage(product);
-  
+
   // Calculate available stock considering variants
   const countInStock = useMemo(() => {
     if (Array.isArray(product.variants) && product.variants.length > 0) {

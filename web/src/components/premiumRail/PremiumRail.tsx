@@ -47,6 +47,7 @@ const PremiumRail = () => {
         minPrice: PREMIUM_PRICE_THRESHOLD.toString(),
         mainCategory: PAINTINGS_CATEGORY_ID,
         excludeOutOfStock: "true",
+        includeVariants: "true",
       });
 
       const filtered = items
