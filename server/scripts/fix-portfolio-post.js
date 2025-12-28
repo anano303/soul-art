@@ -20,11 +20,12 @@ async function fixPortfolioPost() {
             storageProvider: null,
             metadata: {
               source: 'product-image',
-              productId: '694bd3d92cfb62c494528ca7'
-            }
-          }
+              productId: '694bd3d92cfb62c494528ca7',
+            },
+          },
         ],
-        caption: 'ნამუშევარი წარმოადგენს ზღაპრულ-სიმბოლურ კომპოზიციას, რომელშიც ცენტრალურ ფიგურად წარმოდგენილია ბავშვური სახის ანგელოზი, ზამთრის ღამეში.',
+        caption:
+          'ნამუშევარი წარმოადგენს ზღაპრულ-სიმბოლურ კომპოზიციას, რომელშიც ცენტრალურ ფიგურად წარმოდგენილია ბავშვური სახის ანგელოზი, ზამთრის ღამეში.',
         tags: [],
         isFeatured: false,
         isSold: true,
@@ -32,7 +33,7 @@ async function fixPortfolioPost() {
         likesCount: 0,
         commentsCount: 0,
         publishedAt: new Date(),
-        archivedAt: null
+        archivedAt: null,
       },
       $unset: {
         user: '',
@@ -41,15 +42,17 @@ async function fixPortfolioPost() {
         description: '',
         descriptionEn: '',
         likes: '',
-        views: ''
-      }
-    }
+        views: '',
+      },
+    },
   );
 
   console.log('Portfolio post fixed:', result.modifiedCount);
 
   // Verify
-  const post = await db.collection('portfolioposts').findOne({ _id: new ObjectId('695135d6b805101b1d88c43f') });
+  const post = await db
+    .collection('portfolioposts')
+    .findOne({ _id: new ObjectId('695135d6b805101b1d88c43f') });
   console.log('\nUpdated portfolio post:');
   console.log(JSON.stringify(post, null, 2));
 
