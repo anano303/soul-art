@@ -7,15 +7,27 @@ async function findUser() {
   const db = client.db();
 
   // Find users with natia in name or username
-  const users = await db.collection('users').find({
-    $or: [
-      { username: { $regex: 'natia', $options: 'i' } },
-      { name: { $regex: 'ნათია', $options: 'i' } }
-    ]
-  }).toArray();
+  const users = await db
+    .collection('users')
+    .find({
+      $or: [
+        { username: { $regex: 'natia', $options: 'i' } },
+        { name: { $regex: 'ნათია', $options: 'i' } },
+      ],
+    })
+    .toArray();
 
   console.log('Found users:');
-  users.forEach(u => console.log(u._id.toString(), u.name, 'username:', u.username, 'role:', u.role));
+  users.forEach((u) =>
+    console.log(
+      u._id.toString(),
+      u.name,
+      'username:',
+      u.username,
+      'role:',
+      u.role,
+    ),
+  );
 
   await client.close();
 }

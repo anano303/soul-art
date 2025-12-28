@@ -38,12 +38,15 @@ export class BogStatusCheckerService {
         })
         .populate('seller');
 
-      this.logger.log(`Found ${pendingTransactions.length} pending withdrawals`);
+      this.logger.log(
+        `Found ${pendingTransactions.length} pending withdrawals`,
+      );
 
       for (const transaction of pendingTransactions) {
         try {
           // Extract BOG UniqueKey from description
-          const uniqueKeyMatch = transaction.description.match(/UniqueKey: (\d+)/);
+          const uniqueKeyMatch =
+            transaction.description.match(/UniqueKey: (\d+)/);
           if (!uniqueKeyMatch) {
             this.logger.warn(
               `No UniqueKey found in transaction ${transaction._id}`,
@@ -54,7 +57,8 @@ export class BogStatusCheckerService {
           const uniqueKey = parseInt(uniqueKeyMatch[1], 10);
 
           // Check document status
-          const docStatus = await this.bogTransferService.getDocumentStatus(uniqueKey);
+          const docStatus =
+            await this.bogTransferService.getDocumentStatus(uniqueKey);
 
           // ResultCode 1 = Completed
           if (docStatus.ResultCode === 1) {
@@ -62,13 +66,15 @@ export class BogStatusCheckerService {
           }
           // ResultCode < 0 = Failed/Rejected
           else if (docStatus.ResultCode < 0) {
-            await this.markTransferAsFailed(transaction, uniqueKey, docStatus.ResultCode);
+            await this.markTransferAsFailed(
+              transaction,
+              uniqueKey,
+              docStatus.ResultCode,
+            );
           }
           // ResultCode 0 = Still pending signature
           else {
-            this.logger.debug(
-              `Transfer ${uniqueKey} still pending signature`,
-            );
+            this.logger.debug(`Transfer ${uniqueKey} still pending signature`);
           }
         } catch (error) {
           this.logger.error(
@@ -86,10 +92,15 @@ export class BogStatusCheckerService {
   /**
    * Mark transfer as completed
    */
-  private async markTransferAsCompleted(
-    transaction: any,
-    uniqueKey: number,
-  ) {
+  private async markTransferAsCompleted(transaction: any, uniqueKey: number) {
+    // Double-check transaction type to prevent duplicate processing
+    if (transaction.type !== 'withdrawal_pending') {
+      this.logger.warn(
+        `Transaction ${transaction._id} is already ${transaction.type}, skipping duplicate completion`,
+      );
+      return;
+    }
+
     this.logger.log(`Transfer ${uniqueKey} completed, updating status...`);
 
     const seller = transaction.seller as any;
@@ -116,7 +127,8 @@ export class BogStatusCheckerService {
 
     // Send email notification
     try {
-      const sellerName = `${seller.ownerFirstName || ''} ${seller.ownerLastName || ''}`.trim();
+      const sellerName =
+        `${seller.ownerFirstName || ''} ${seller.ownerLastName || ''}`.trim();
       await this.emailService.sendWithdrawalCompletedNotification(
         seller.email,
         sellerName,
@@ -186,12 +198,18 @@ export class BogStatusCheckerService {
     }
 
     const uniqueKey = parseInt(uniqueKeyMatch[1], 10);
-    const docStatus = await this.bogTransferService.getDocumentStatus(uniqueKey);
+    const docStatus =
+      await this.bogTransferService.getDocumentStatus(uniqueKey);
 
     return {
       transactionId: transaction._id,
       uniqueKey,
-      status: docStatus.ResultCode === 1 ? 'completed' : docStatus.ResultCode === 0 ? 'pending' : 'failed',
+      status:
+        docStatus.ResultCode === 1
+          ? 'completed'
+          : docStatus.ResultCode === 0
+            ? 'pending'
+            : 'failed',
       resultCode: docStatus.ResultCode,
       details: docStatus,
     };
