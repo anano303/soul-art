@@ -542,10 +542,28 @@ export class EmailService {
     customerName: string,
     orderId: string,
     orderItems: any[],
+    artists?: Array<{ name: string; slug: string }>,
   ) {
     const itemsList = orderItems
       .map((item) => `<li>${item.name} x ${item.quantity}</li>`)
       .join('');
+
+    // Generate artist rating links section
+    const artistRatingSection = artists && artists.length > 0
+      ? `
+          <div style="background: #fff3cd; padding: 20px; border-radius: 8px; margin: 20px 0; border: 1px solid #ffc107;">
+            <h3 style="color: #012645; margin-top: 0;">⭐ გთხოვთ შეაფასოთ ხელოვანი</h3>
+            <p style="margin-bottom: 16px;">თქვენი შეფასება დაეხმარება სხვა მყიდველებს და წაახალისებს ხელოვანს!</p>
+            ${artists.map(artist => `
+              <a href="https://soulart.ge/@${artist.slug}" 
+                 style="display: inline-block; background: #012645; color: white; padding: 12px 24px; 
+                        text-decoration: none; border-radius: 8px; margin: 4px 8px 4px 0;">
+                შეაფასე ${artist.name}
+              </a>
+            `).join('')}
+          </div>
+        `
+      : '';
 
     const mailOptions = {
       from: emailConfig.from,
@@ -553,12 +571,12 @@ export class EmailService {
       subject: `შეკვეთა მიტანილია #${orderId} - SoulArt`,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <h2 style="color: var(--primary-color, #012645);">მადლობა ${customerName}!</h2>
+          <h2 style="color: #012645;">მადლობა ${customerName}!</h2>
           
-          <p>თქვენი შეკვეთა  მიტანილია წარმატებით.</p>
+          <p>თქვენი შეკვეთა მიტანილია წარმატებით.</p>
           
           <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
-            <h3 style="color: var(--primary-color, #012645); margin-top: 0;">მიტანილი პროდუქტები:</h3>
+            <h3 style="color: #012645; margin-top: 0;">მიტანილი პროდუქტები:</h3>
             <p><strong>შეკვეთის ნომერი:</strong> #${orderId}</p>
             
             <ul style="list-style-type: none; padding: 0;">
@@ -566,9 +584,9 @@ export class EmailService {
             </ul>
           </div>
           
-          <p>იმედი გვაქვს, კმაყოფილი ხართ შენაძენით! ბედნიერი დღე !</p>
+          <p>იმედი გვაქვს, კმაყოფილი ხართ შენაძენით!</p>
           
-
+          ${artistRatingSection}
           
           <hr style="margin: 30px 0; border: none; border-top: 1px solid #e5e7eb;">
           <p style="color: #999; font-size: 12px;">SoulArt Team</p>
