@@ -814,17 +814,59 @@ export class OrdersService {
     try {
       const orderWithData = await this.orderModel
         .findById(id)
-        .populate('user', 'email ownerFirstName ownerLastName');
+        .populate('user', 'email ownerFirstName ownerLastName')
+        .populate({
+          path: 'orderItems.productId',
+          select: 'user brand',
+          populate: {
+            path: 'user',
+            select: 'storeName brandName artistSlug ownerFirstName ownerLastName',
+          },
+        });
 
-      if (orderWithData?.user?.email) {
+      // Get customer email - check guest order first
+      const customerEmail = orderWithData?.isGuestOrder && orderWithData?.guestInfo?.email
+        ? orderWithData.guestInfo.email
+        : orderWithData?.user?.email;
+
+      // Get customer name - check guest order first
+      const customerName = orderWithData?.isGuestOrder && orderWithData?.guestInfo?.fullName
+        ? orderWithData.guestInfo.fullName
+        : `${orderWithData?.user?.ownerFirstName || ''} ${orderWithData?.user?.ownerLastName || ''}`.trim() || 'მყიდველო';
+
+      if (customerEmail) {
+        // Get unique artists from order items
+        const artistsMap = new Map<string, { name: string; slug: string }>();
+        
+        for (const item of orderWithData.orderItems) {
+          const productData: any = item.productId;
+          const seller = productData?.user;
+          
+          if (seller?.artistSlug) {
+            const artistName = seller.brandName || seller.storeName || 
+              `${seller.ownerFirstName || ''} ${seller.ownerLastName || ''}`.trim() || 
+              'ხელოვანი';
+            
+            if (!artistsMap.has(seller.artistSlug)) {
+              artistsMap.set(seller.artistSlug, {
+                name: artistName,
+                slug: seller.artistSlug,
+              });
+            }
+          }
+        }
+        
+        const artists = Array.from(artistsMap.values());
+
         await this.emailService.sendDeliveryConfirmation(
-          orderWithData.user.email,
-          `${orderWithData.user.ownerFirstName} ${orderWithData.user.ownerLastName}`,
+          customerEmail,
+          customerName,
           orderWithData._id.toString(),
           orderWithData.orderItems.map((item) => ({
             name: item.name,
             quantity: item.qty,
           })),
+          artists,
         );
       }
     } catch (error) {
