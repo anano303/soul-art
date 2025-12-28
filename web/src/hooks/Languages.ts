@@ -1377,6 +1377,7 @@ export const TRANSLATIONS: Translations = {
       adminEmail: "ადმინის იმეილი",
       adminPhone: "ადმინის ტელეფონი",
       sellerName: "გამყიდველის სახელი",
+      soulartHandlesDelivery: "მიწოდებას SoulArt უზრუნველყოფს",
     },
 
     // Order Details (General)
@@ -2768,6 +2769,7 @@ export const TRANSLATIONS: Translations = {
       adminEmail: "Admin Email",
       adminPhone: "Admin Phone",
       sellerName: "Seller Name",
+      soulartHandlesDelivery: "Delivery handled by SoulArt",
     },
 
     // Order Details (General)

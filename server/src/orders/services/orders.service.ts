@@ -1129,6 +1129,7 @@ export class OrdersService {
             imageUrl?: string;
           }>;
           subtotal: number;
+          hasSellerDelivery: boolean; // true if any product has SELLER delivery type
         }
       >();
 
@@ -1160,6 +1161,7 @@ export class OrdersService {
         }
 
         const sellerId = sellerData._id.toString();
+        const isSellerDelivery = String(productData?.deliveryType) === 'SELLER';
         const summaryItem = {
           name: item.name,
           quantity: item.qty,
@@ -1176,6 +1178,7 @@ export class OrdersService {
             seller: sellerData,
             items: [],
             subtotal: 0,
+            hasSellerDelivery: false,
           });
         }
 
@@ -1183,12 +1186,19 @@ export class OrdersService {
         entry.items.push(summaryItem);
         entry.subtotal += summaryItem.subtotal;
         entry.seller = sellerData;
+        // If any product has SELLER delivery, the seller needs shipping info
+        if (isSellerDelivery) {
+          entry.hasSellerDelivery = true;
+        }
       }
       await Promise.all(
         Array.from(sellerItemsMap.entries()).map(async ([sellerId, entry]) => {
           const sellerEmail = entry.seller?.email;
           if (sellerEmail) {
             try {
+              // Only include phone and address if seller handles delivery (SELLER deliveryType)
+              const includeShippingInfo = entry.hasSellerDelivery;
+              
               await this.emailService.sendNewOrderNotificationToSeller(
                 sellerEmail,
                 this.getDisplayName(
@@ -1199,8 +1209,9 @@ export class OrdersService {
                   orderId,
                   customerName,
                   customerEmail,
-                  customerPhone,
-                  shippingAddress: shippingDetails,
+                  // Only include phone and address if seller handles delivery
+                  customerPhone: includeShippingInfo ? customerPhone : undefined,
+                  shippingAddress: includeShippingInfo ? shippingDetails : undefined,
                   paymentMethod: orderWithData.paymentMethod,
                   totals: {
                     ...totals,
