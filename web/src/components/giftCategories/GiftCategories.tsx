@@ -37,6 +37,7 @@ const GiftCategories = () => {
         sortBy: "rating",
         sortDirection: "desc",
         excludeOutOfStock: "true",
+        includeVariants: "true",
       });
 
       // Filter products under 200 GEL (considering discounts)

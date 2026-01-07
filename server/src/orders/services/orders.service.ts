@@ -436,7 +436,9 @@ export class OrdersService {
   }
 
   async createGuestOrder(
-    orderAttrs: Partial<Order> & { guestInfo: { email: string; phoneNumber: string; fullName: string } },
+    orderAttrs: Partial<Order> & {
+      guestInfo: { email: string; phoneNumber: string; fullName: string };
+    },
     externalOrderId?: string,
   ): Promise<OrderDocument> {
     const {
@@ -454,8 +456,15 @@ export class OrdersService {
       throw new BadRequestException('No order items received.');
 
     // Validate guest info
-    if (!guestInfo || !guestInfo.email || !guestInfo.phoneNumber || !guestInfo.fullName) {
-      throw new BadRequestException('Guest checkout requires email, phoneNumber, and fullName');
+    if (
+      !guestInfo ||
+      !guestInfo.email ||
+      !guestInfo.phoneNumber ||
+      !guestInfo.fullName
+    ) {
+      throw new BadRequestException(
+        'Guest checkout requires email, phoneNumber, and fullName',
+      );
     }
 
     // Start MongoDB transaction to prevent race conditions
@@ -477,8 +486,9 @@ export class OrdersService {
           // Check and reserve stock atomically
           if (product.variants && product.variants.length > 0) {
             // Check if this product has variants with specific attributes (size/color/ageGroup)
-            const hasVariantAttributes = item.size || item.color || item.ageGroup;
-            
+            const hasVariantAttributes =
+              item.size || item.color || item.ageGroup;
+
             if (hasVariantAttributes) {
               // Find the specific variant
               const variantIndex = product.variants.findIndex(
@@ -649,9 +659,7 @@ export class OrdersService {
       });
 
       if (guestOrders.length === 0) {
-        this.logger.log(
-          `No guest orders found for email: ${lowercaseEmail}`,
-        );
+        this.logger.log(`No guest orders found for email: ${lowercaseEmail}`);
         return { linkedCount: 0 };
       }
 
@@ -806,17 +814,59 @@ export class OrdersService {
     try {
       const orderWithData = await this.orderModel
         .findById(id)
-        .populate('user', 'email ownerFirstName ownerLastName');
+        .populate('user', 'email ownerFirstName ownerLastName')
+        .populate({
+          path: 'orderItems.productId',
+          select: 'user brand',
+          populate: {
+            path: 'user',
+            select: 'storeName brandName artistSlug ownerFirstName ownerLastName',
+          },
+        });
 
-      if (orderWithData?.user?.email) {
+      // Get customer email - check guest order first
+      const customerEmail = orderWithData?.isGuestOrder && orderWithData?.guestInfo?.email
+        ? orderWithData.guestInfo.email
+        : orderWithData?.user?.email;
+
+      // Get customer name - check guest order first
+      const customerName = orderWithData?.isGuestOrder && orderWithData?.guestInfo?.fullName
+        ? orderWithData.guestInfo.fullName
+        : `${orderWithData?.user?.ownerFirstName || ''} ${orderWithData?.user?.ownerLastName || ''}`.trim() || 'მყიდველო';
+
+      if (customerEmail) {
+        // Get unique artists from order items
+        const artistsMap = new Map<string, { name: string; slug: string }>();
+        
+        for (const item of orderWithData.orderItems) {
+          const productData: any = item.productId;
+          const seller = productData?.user;
+          
+          if (seller?.artistSlug) {
+            const artistName = seller.brandName || seller.storeName || 
+              `${seller.ownerFirstName || ''} ${seller.ownerLastName || ''}`.trim() || 
+              'ხელოვანი';
+            
+            if (!artistsMap.has(seller.artistSlug)) {
+              artistsMap.set(seller.artistSlug, {
+                name: artistName,
+                slug: seller.artistSlug,
+              });
+            }
+          }
+        }
+        
+        const artists = Array.from(artistsMap.values());
+
         await this.emailService.sendDeliveryConfirmation(
-          orderWithData.user.email,
-          `${orderWithData.user.ownerFirstName} ${orderWithData.user.ownerLastName}`,
+          customerEmail,
+          customerName,
           orderWithData._id.toString(),
           orderWithData.orderItems.map((item) => ({
             name: item.name,
             quantity: item.qty,
           })),
+          artists,
         );
       }
     } catch (error) {
@@ -948,7 +998,10 @@ export class OrdersService {
         email_address: 'pending@payment.com',
       };
       await order.save();
-      console.log(`Updated order ${orderId} with BOG payment info:`, paymentInfo);
+      console.log(
+        `Updated order ${orderId} with BOG payment info:`,
+        paymentInfo,
+      );
     }
   }
 
@@ -979,15 +1032,18 @@ export class OrdersService {
         return;
       }
 
-      const customerName = orderWithData.isGuestOrder && orderWithData.guestInfo?.fullName
-        ? orderWithData.guestInfo.fullName
-        : this.getDisplayName(orderWithData.user);
-      const customerEmail = orderWithData.isGuestOrder && orderWithData.guestInfo?.email 
-        ? orderWithData.guestInfo.email 
-        : orderWithData.user?.email;
-      const customerPhone = orderWithData.isGuestOrder && orderWithData.guestInfo?.phoneNumber
-        ? orderWithData.guestInfo.phoneNumber
-        : orderWithData.user?.phoneNumber;
+      const customerName =
+        orderWithData.isGuestOrder && orderWithData.guestInfo?.fullName
+          ? orderWithData.guestInfo.fullName
+          : this.getDisplayName(orderWithData.user);
+      const customerEmail =
+        orderWithData.isGuestOrder && orderWithData.guestInfo?.email
+          ? orderWithData.guestInfo.email
+          : orderWithData.user?.email;
+      const customerPhone =
+        orderWithData.isGuestOrder && orderWithData.guestInfo?.phoneNumber
+          ? orderWithData.guestInfo.phoneNumber
+          : orderWithData.user?.phoneNumber;
       const shippingDetails = (orderWithData.shippingDetails ??
         {}) as Partial<ShippingDetails>;
       const baseUrl = this.getPrimaryAppUrl();
@@ -1058,7 +1114,10 @@ export class OrdersService {
             emailPayload.orderDetailsUrl = `${baseUrl}/orders/${orderId}`;
           }
 
-          await this.emailService.sendOrderConfirmation(customerEmail, emailPayload);
+          await this.emailService.sendOrderConfirmation(
+            customerEmail,
+            emailPayload,
+          );
         } catch (error) {
           this.logger.error(
             `Failed to send customer confirmation email for order ${orderId}: ${error.message}`,
@@ -1112,6 +1171,7 @@ export class OrdersService {
             imageUrl?: string;
           }>;
           subtotal: number;
+          hasSellerDelivery: boolean; // true if any product has SELLER delivery type
         }
       >();
 
@@ -1143,6 +1203,7 @@ export class OrdersService {
         }
 
         const sellerId = sellerData._id.toString();
+        const isSellerDelivery = String(productData?.deliveryType) === 'SELLER';
         const summaryItem = {
           name: item.name,
           quantity: item.qty,
@@ -1159,6 +1220,7 @@ export class OrdersService {
             seller: sellerData,
             items: [],
             subtotal: 0,
+            hasSellerDelivery: false,
           });
         }
 
@@ -1166,12 +1228,19 @@ export class OrdersService {
         entry.items.push(summaryItem);
         entry.subtotal += summaryItem.subtotal;
         entry.seller = sellerData;
+        // If any product has SELLER delivery, the seller needs shipping info
+        if (isSellerDelivery) {
+          entry.hasSellerDelivery = true;
+        }
       }
       await Promise.all(
         Array.from(sellerItemsMap.entries()).map(async ([sellerId, entry]) => {
           const sellerEmail = entry.seller?.email;
           if (sellerEmail) {
             try {
+              // Only include phone and address if seller handles delivery (SELLER deliveryType)
+              const includeShippingInfo = entry.hasSellerDelivery;
+              
               await this.emailService.sendNewOrderNotificationToSeller(
                 sellerEmail,
                 this.getDisplayName(
@@ -1182,8 +1251,9 @@ export class OrdersService {
                   orderId,
                   customerName,
                   customerEmail,
-                  customerPhone,
-                  shippingAddress: shippingDetails,
+                  // Only include phone and address if seller handles delivery
+                  customerPhone: includeShippingInfo ? customerPhone : undefined,
+                  shippingAddress: includeShippingInfo ? shippingDetails : undefined,
                   paymentMethod: orderWithData.paymentMethod,
                   totals: {
                     ...totals,

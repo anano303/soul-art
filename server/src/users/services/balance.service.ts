@@ -234,7 +234,8 @@ export class BalanceService {
     let statuses: any[] = [];
     if (uniqueKeys.length > 0) {
       try {
-        statuses = await this.bogTransferService.getDocumentStatuses(uniqueKeys);
+        statuses =
+          await this.bogTransferService.getDocumentStatuses(uniqueKeys);
         this.logger.log(`Fetched ${statuses.length} statuses from BOG API`);
       } catch (error) {
         this.logger.error('Failed to fetch BOG statuses', error);
@@ -248,8 +249,10 @@ export class BalanceService {
         // Check if status changed to completed
         if (status.Status === 'P' && request.type === 'withdrawal_pending') {
           // Document is completed, update to withdrawal_completed
-          this.logger.log(`Document ${status.UniqueKey} is completed, updating DB`);
-          
+          this.logger.log(
+            `Document ${status.UniqueKey} is completed, updating DB`,
+          );
+
           try {
             // Update transaction type to completed
             await this.balanceTransactionModel.findByIdAndUpdate(request._id, {
@@ -282,13 +285,21 @@ export class BalanceService {
               }
             }
           } catch (updateError) {
-            this.logger.error(`Failed to update completed withdrawal ${status.UniqueKey}`, updateError);
+            this.logger.error(
+              `Failed to update completed withdrawal ${status.UniqueKey}`,
+              updateError,
+            );
           }
         }
         // Check if status is rejected/cancelled
-        else if (['R', 'C', 'D'].includes(status.Status) && request.type === 'withdrawal_pending') {
-          this.logger.log(`Document ${status.UniqueKey} is rejected/cancelled, updating DB`);
-          
+        else if (
+          ['R', 'C', 'D'].includes(status.Status) &&
+          request.type === 'withdrawal_pending'
+        ) {
+          this.logger.log(
+            `Document ${status.UniqueKey} is rejected/cancelled, updating DB`,
+          );
+
           try {
             // Return money to seller's balance
             await this.rejectWithdrawal(
@@ -297,7 +308,10 @@ export class BalanceService {
               `BOG Status: ${this.bogTransferService.getStatusText(status.Status)}`,
             );
           } catch (rejectError) {
-            this.logger.error(`Failed to reject withdrawal ${status.UniqueKey}`, rejectError);
+            this.logger.error(
+              `Failed to reject withdrawal ${status.UniqueKey}`,
+              rejectError,
+            );
           }
         }
       }
@@ -313,14 +327,16 @@ export class BalanceService {
     const requestsWithStatus = updatedRequests.map((request) => {
       const match = request.description.match(/UniqueKey: (\d+)/);
       let bogStatus = null;
-      
+
       if (match) {
         const uniqueKey = parseInt(match[1], 10);
         const statusData = statuses.find((s) => s.UniqueKey === uniqueKey);
         if (statusData) {
           bogStatus = {
             status: statusData.Status,
-            statusText: this.bogTransferService.getStatusText(statusData.Status),
+            statusText: this.bogTransferService.getStatusText(
+              statusData.Status,
+            ),
             resultCode: statusData.ResultCode,
             rejectCode: statusData.RejectCode,
           };
@@ -409,8 +425,9 @@ export class BalanceService {
 
       // BOG-ის მეშვეობით ავტომატური გადარიცხვა
       try {
-        const sellerName = `${seller.ownerFirstName || ''} ${seller.ownerLastName || ''}`.trim();
-        
+        const sellerName =
+          `${seller.ownerFirstName || ''} ${seller.ownerLastName || ''}`.trim();
+
         const transferResult = await this.bogTransferService.transferToSeller({
           beneficiaryAccountNumber: formattedAccountNumber,
           beneficiaryInn: seller.identificationNumber,
@@ -423,7 +440,7 @@ export class BalanceService {
         // გადარიცხვა შეიქმნა BOG-ში და ელოდება ხელმოწერას
         // ResultCode 0 = Ready to Sign, ResultCode 1 = Completed
         const isPending = transferResult.resultCode === 0;
-        
+
         if (isPending) {
           // დოკუმენტი შეიქმნა და ელოდება დამტკიცებას
           const transaction = new this.balanceTransactionModel({
@@ -440,11 +457,12 @@ export class BalanceService {
           this.logger.log(
             `Withdrawal document created in BOG, pending approval. Seller: ${sellerId}, amount: ${amount}, BOG UniqueKey: ${transferResult.uniqueKey}`,
           );
-          
+
           return {
             status: 'pending',
             uniqueKey: transferResult.uniqueKey,
-            message: 'გადარიცხვის დოკუმენტი შექმნილია ბანკში და ელოდება ადმინისტრატორის დამტკიცებას.',
+            message:
+              'გადარიცხვის დოკუმენტი შექმნილია ბანკში და ელოდება ადმინისტრატორის დამტკიცებას.',
           };
         } else {
           // გადარიცხვა დასრულდა (ResultCode === 1)
@@ -479,7 +497,7 @@ export class BalanceService {
           this.logger.log(
             `Automatic withdrawal completed for seller: ${sellerId}, amount: ${amount}, BOG UniqueKey: ${transferResult.uniqueKey}`,
           );
-          
+
           return {
             status: 'completed',
             uniqueKey: transferResult.uniqueKey,
@@ -561,8 +579,20 @@ export class BalanceService {
       .findById(transactionId)
       .populate('seller');
 
-    if (!transaction || transaction.type !== 'withdrawal_pending') {
-      throw new Error('ტრანზაქცია არ მოიძებნა ან არ არის დასამუშავებელი');
+    if (!transaction) {
+      throw new Error('ტრანზაქცია არ მოიძებნა');
+    }
+
+    // Check if already completed (prevent double processing)
+    if (transaction.type === 'withdrawal_completed') {
+      this.logger.warn(
+        `Withdrawal ${transactionId} is already completed, skipping duplicate approval`,
+      );
+      return;
+    }
+
+    if (transaction.type !== 'withdrawal_pending') {
+      throw new Error('ტრანზაქცია არ არის დასამუშავებელი');
     }
 
     const sellerId = (transaction.seller as any)._id.toString();
