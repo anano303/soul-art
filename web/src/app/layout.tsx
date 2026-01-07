@@ -283,7 +283,7 @@ export default function RootLayout({
         {/* Google AdSense - Server-rendered for crawler visibility */}
         <script
           async
-          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2218295750130717"
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4844460357634251"
           crossOrigin="anonymous"
         />
 
