@@ -30,32 +30,37 @@ export default function AdminLayout({
 
     const checkAuth = async () => {
       try {
+        // Get the current path for redirect after login
+        const currentPath = typeof window !== 'undefined' ? window.location.pathname : '/admin/products';
+        const redirectPath = encodeURIComponent(currentPath);
+        
         // Check if user is authenticated using the correct function
         if (!isLoggedIn()) {
           console.log("Not authenticated, redirecting to login");
-          router.push("/login?redirect=/admin");
+          router.push(`/login?redirect=${redirectPath}`);
           return;
         }
 
         // Get user data from local storage
         let userData = getUserData();
 
-        if (!userData) {
-          console.log("No cached user data, trying to refresh profile");
-          try {
-            const response = await fetchWithAuth("/auth/profile");
-            if (response.ok) {
-              userData = await response.json();
-              storeUserData(userData);
-            }
-          } catch (error) {
-            console.error("Failed to refresh user profile:", error);
+        // Always try to refresh profile to get the latest role
+        // This is crucial when user becomes a seller - their role changes
+        try {
+          const response = await fetchWithAuth("/auth/profile");
+          if (response.ok) {
+            const freshUserData = await response.json();
+            storeUserData(freshUserData);
+            userData = freshUserData;
           }
+        } catch (error) {
+          console.error("Failed to refresh user profile:", error);
+          // If refresh fails, fall back to cached data
+        }
 
-          if (!userData) {
-            router.push("/login?redirect=/admin");
-            return;
-          }
+        if (!userData) {
+          router.push(`/login?redirect=${redirectPath}`);
+          return;
         }
 
         console.log("Current user role:", userData.role);
@@ -74,7 +79,7 @@ export default function AdminLayout({
         setAuthorized(true);
       } catch (error) {
         console.error("Error checking auth:", error);
-        router.push("/login?redirect=/admin");
+        router.push("/login?redirect=/admin/products");
       } finally {
         setLoading(false);
       }

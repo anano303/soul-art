@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiClient } from "@/lib/axios";
 import { login as loginApi, LoginData } from "@/modules/auth/api/login";
 import { logout as logoutApi } from "@/modules/auth/api/logout";
-import { isLoggedIn, getUserData, clearUserData } from "@/lib/auth";
+import { isLoggedIn, getUserData, clearUserData, storeUserData } from "@/lib/auth";
 
 export function useAuth() {
   const queryClient = useQueryClient();
@@ -23,7 +23,15 @@ export function useAuth() {
 
       try {
         const response = await apiClient.get("/auth/profile");
-        return response.data;
+        const userData = response.data;
+        
+        // Always sync to localStorage when we get fresh data from server
+        // This ensures role changes (like becoming seller) are persisted
+        if (userData) {
+          storeUserData(userData);
+        }
+        
+        return userData;
       } catch (error) {
         console.error("Error fetching user profile:", error);
 
