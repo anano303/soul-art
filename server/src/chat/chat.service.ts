@@ -10,6 +10,7 @@ import { BlogService } from '@/blog/blog.service';
 import { BannerService } from '@/banners/services/banner.service';
 import { EmailService } from '@/email/services/email.services';
 import { ChatLog, ChatLogDocument } from './chat-log.schema';
+import * as cheerio from 'cheerio';
 
 interface ChatMessage {
   role: 'user' | 'assistant' | 'system';
@@ -39,6 +40,23 @@ export class ChatService {
   private cachedCategoriesWithIds: { name: string; id: string }[] = [];
   private cachedSubCategories: string[] = [];
   private cachedBlogTitles: string[] = [];
+  
+  // ვებგვერდების კონტენტის ქეში
+  private cachedPageContent: Map<string, string> = new Map();
+  private readonly websiteBaseUrl = 'https://soulart.ge';
+  private readonly pagesToCache = [
+    '/about',
+    '/referral-info', 
+    '/terms',
+    '/privacy-policy',
+    '/forum',
+    '/contact',
+    '/sellers-register',
+  ];
+  
+  // ქეშის ვადა - 1 კვირა (მილისეკუნდებში)
+  private readonly CACHE_DURATION_MS = 7 * 24 * 60 * 60 * 1000;
+  private lastCacheTime: number = 0;
 
   constructor(
     @InjectModel(ChatLog.name) private chatLogModel: Model<ChatLogDocument>,
@@ -104,9 +122,128 @@ export class ChatService {
       this.logger.log(
         `Loaded ${this.cachedBlogTitles.length} blog posts for AI`,
       );
+      
+      // ვებგვერდების კონტენტის ჩატვირთვა
+      await this.loadWebsiteContent();
     } catch (error) {
       this.logger.error('Failed to load cached data:', error);
     }
+  }
+
+  // ვებგვერდების კონტენტის ჩატვირთვა (1 კვირაში ერთხელ)
+  private async loadWebsiteContent(): Promise<void> {
+    const now = Date.now();
+    
+    // თუ ქეში ჯერ კიდევ ვალიდურია, არ განვაახლოთ
+    if (this.lastCacheTime > 0 && (now - this.lastCacheTime) < this.CACHE_DURATION_MS) {
+      const daysRemaining = Math.ceil((this.CACHE_DURATION_MS - (now - this.lastCacheTime)) / (24 * 60 * 60 * 1000));
+      this.logger.log(`Website content cache is still valid. Next refresh in ${daysRemaining} days.`);
+      return;
+    }
+    
+    this.logger.log('Refreshing website content cache (weekly update)...');
+    
+    for (const pagePath of this.pagesToCache) {
+      try {
+        const url = `${this.websiteBaseUrl}${pagePath}`;
+        const response = await fetch(url, {
+          headers: {
+            'User-Agent': 'SoulArt-AI-Bot/1.0',
+            'Accept': 'text/html',
+          },
+        });
+        
+        if (!response.ok) {
+          this.logger.warn(`Failed to fetch ${url}: ${response.status}`);
+          continue;
+        }
+        
+        const html = await response.text();
+        const textContent = this.extractTextFromHtml(html);
+        
+        if (textContent) {
+          this.cachedPageContent.set(pagePath, textContent);
+          this.logger.log(`Cached content from ${pagePath} (${textContent.length} chars)`);
+        }
+      } catch (error) {
+        this.logger.error(`Failed to load page ${pagePath}:`, error);
+      }
+    }
+    
+    // ქეშის დროის განახლება
+    this.lastCacheTime = Date.now();
+    this.logger.log(`Loaded ${this.cachedPageContent.size} website pages for AI knowledge base. Next refresh in 7 days.`);
+  }
+
+  // HTML-დან ტექსტის ამოღება
+  private extractTextFromHtml(html: string): string {
+    try {
+      const $ = cheerio.load(html);
+      
+      // წავშალოთ არასაჭირო ელემენტები
+      $('script, style, nav, header, footer, .cookie-banner, .chat-widget, noscript, meta, link').remove();
+      
+      // ავიღოთ მთავარი კონტენტი
+      let content = '';
+      
+      // პრიორიტეტული სელექტორები main კონტენტისთვის
+      const mainSelectors = ['main', 'article', '.content', '.page-content', '.about-container', '.referral-info-container', '.terms-container', '.privacy-container'];
+      
+      for (const selector of mainSelectors) {
+        const element = $(selector);
+        if (element.length > 0) {
+          content = element.text();
+          break;
+        }
+      }
+      
+      // თუ ვერ ვიპოვეთ, ავიღოთ body
+      if (!content) {
+        content = $('body').text();
+      }
+      
+      // გავასუფთაოთ ტექსტი
+      content = content
+        .replace(/\s+/g, ' ')  // მრავალი space-ის ერთად გაერთიანება
+        .replace(/\n\s*\n/g, '\n')  // ცარიელი ხაზების წაშლა
+        .trim();
+      
+      // ლიმიტი - მაქსიმუმ 3000 სიმბოლო თითო გვერდიდან
+      if (content.length > 3000) {
+        content = content.substring(0, 3000) + '...';
+      }
+      
+      return content;
+    } catch (error) {
+      this.logger.error('Failed to extract text from HTML:', error);
+      return '';
+    }
+  }
+
+  // ვებგვერდების კონტენტის მიღება system prompt-ისთვის
+  private getWebsiteContentForPrompt(): string {
+    if (this.cachedPageContent.size === 0) {
+      return '';
+    }
+    
+    let content = '\n\n## 📄 ვებსაიტის გვერდების დეტალური ინფორმაცია:\n';
+    
+    const pageNames: Record<string, string> = {
+      '/about': 'ჩვენს შესახებ',
+      '/referral-info': 'რეფერალური პროგრამა',
+      '/terms': 'წესები და პირობები',
+      '/privacy-policy': 'კონფიდენციალურობის პოლიტიკა',
+      '/forum': 'ფორუმი',
+      '/contact': 'კონტაქტი',
+      '/sellers-register': 'სელერად რეგისტრაცია (საკომისიო და პირობები)',
+    };
+    
+    for (const [path, text] of this.cachedPageContent) {
+      const pageName = pageNames[path] || path;
+      content += `\n### ${pageName} (soulart.ge${path}):\n${text}\n`;
+    }
+    
+    return content;
   }
 
   private getSystemPrompt(): string {
@@ -200,7 +337,13 @@ export class ChatService {
 - კატეგორიები: ${categoryLinksText}
 - ფასდაკლებული: [ფასდაკლება](https://soulart.ge/shop?discounted=true)
 - ბლოგი: [ბლოგი](https://soulart.ge/blog)
-- გაყიდვა: [გაყიდე ნამუშევარი](https://soulart.ge/register)
+- გაყიდვა: [გაყიდე ნამუშევარი](https://soulart.ge/sellers-register)
+- ჩვენს შესახებ: [ჩვენს შესახებ](https://soulart.ge/about)
+- კონტაქტი: [კონტაქტი](https://soulart.ge/contact)
+
+- რეფერალური პროგრამა: [რეფერალები](https://soulart.ge/referral-info)
+- წესები და პირობები: [წესები](https://soulart.ge/terms)
+- კონფიდენციალურობა: [კონფიდენციალურობა](https://soulart.ge/privacy-policy)
 
 არასოდეს დაწერო [ბმული ...] ან [ბმული კოლექციაზე] - ეს არ მუშაობს! 
 მხოლოდ რეალური URL-ები გამოიყენე: [ტექსტი](https://soulart.ge/...)
@@ -217,7 +360,16 @@ export class ChatService {
 
 💡 მთავარია: სოციალური ქსელები! რაც მეტ ადამიანს მიაღწევ, მით მეტია გაყიდვის შანსი!
 
-## ინფო: BOG ბარათით გადახდა, უფასო მიწოდება`;
+### ხშირად დასმული კითხვები:
+- "როდის მივიღებ ფულს?" → ფული ირიცხება შეკვეთის მიწოდების დადასტურებისას
+- "როგორ გავიტანო ბალანსი?" → პროფილში → ბალანსი → თანხის მოთხოვნა (მინიმუმ 50 ლარი)
+- "როგორ ავტვირთო პროდუქტი?" → ადმინ პანელი → ატვირთე ნამუშევარი
+- "როგორ შევცვალო პროფილის ფოტო?" → პროფილი → რედაქტირება
+- "რა საკომისიოა?" → 10% (სელერი იღებს 90%-ს)
+- "როგორ გავყიდო მეტი?" → სოციალური ქსელები, პროფილის გამოწერა, ხარისხიანი ფოტოები
+
+## ინფო: BOG ბარათით გადახდა, უფასო მიწოდება
+${this.getWebsiteContentForPrompt()}`;
   }
 
   async chat(
