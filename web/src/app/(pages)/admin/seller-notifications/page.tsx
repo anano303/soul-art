@@ -29,9 +29,12 @@ interface Seller {
 
 interface SendResult {
   success: boolean;
-  sent: number;
-  failed: number;
-  errors: string[];
+  totalQueued?: number;
+  message?: string;
+  // Legacy fields for backwards compatibility
+  sent?: number;
+  failed?: number;
+  errors?: string[];
 }
 
 export default function SellerNotificationsPage() {
@@ -274,8 +277,13 @@ export default function SellerNotificationsPage() {
                 <>
                   <CheckCircle size={24} />
                   <div className="result-content">
-                    <strong>წარმატებით გაიგზავნა!</strong>
-                    <span>{result.sent} მეილი გაიგზავნა</span>
+                    <strong>მეილების გაგზავნა დაიწყო!</strong>
+                    <span>
+                      {result.totalQueued 
+                        ? `${result.totalQueued} სელერისთვის მეილის გაგზავნა მიმდინარეობს ფონურ რეჟიმში`
+                        : result.message || `${result.sent || 0} მეილი გაიგზავნა`
+                      }
+                    </span>
                   </div>
                 </>
               ) : (
@@ -284,9 +292,9 @@ export default function SellerNotificationsPage() {
                   <div className="result-content">
                     <strong>შეცდომა</strong>
                     <span>
-                      გაიგზავნა: {result.sent}, წარუმატებელი: {result.failed}
+                      {result.message || `გაიგზავნა: ${result.sent || 0}, წარუმატებელი: ${result.failed || 0}`}
                     </span>
-                    {result.errors.length > 0 && (
+                    {result.errors && result.errors.length > 0 && (
                       <ul className="error-list">
                         {result.errors.slice(0, 3).map((err, i) => (
                           <li key={i}>{err}</li>

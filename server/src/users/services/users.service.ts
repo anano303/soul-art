@@ -2544,7 +2544,7 @@ export class UsersService {
   }
 
   /**
-   * გაუგზავნე მეილი არჩეულ სელერებს ინდივიდუალურად
+   * გაუგზავნე მეილი არჩეულ სელერებს ინდივიდუალურად (ფონური პროცესი)
    */
   async sendBulkEmailToSellers(
     subject: string,
@@ -2552,9 +2552,8 @@ export class UsersService {
     sellerIds?: string[],
   ): Promise<{
     success: boolean;
-    sent: number;
-    failed: number;
-    errors: string[];
+    totalQueued: number;
+    message: string;
   }> {
     if (!this.emailService) {
       throw new BadRequestException('Email service is not available');
@@ -2572,42 +2571,71 @@ export class UsersService {
       .lean();
 
     if (sellers.length === 0) {
-      return { success: true, sent: 0, failed: 0, errors: [] };
+      return { success: true, totalQueued: 0, message: 'სელერები ვერ მოიძებნა' };
     }
+
+    // დაუყოვნებლივ ვაბრუნებთ response-ს
+    const totalQueued = sellers.length;
+    this.logger.log(`Starting background email send to ${totalQueued} sellers`);
+
+    // ფონურ პროცესში ვგზავნით მეილებს batch-ებად
+    this.sendEmailsInBackground(sellers, subject, message).catch((error) => {
+      this.logger.error(`Background email sending failed: ${error.message}`);
+    });
+
+    return {
+      success: true,
+      totalQueued,
+      message: `${totalQueued} სელერისთვის მეილის გაგზავნა დაიწყო ფონურ რეჟიმში`,
+    };
+  }
+
+  /**
+   * ფონურად გაგზავნა batch-ებად
+   */
+  private async sendEmailsInBackground(
+    sellers: Array<{ email: string; storeName?: string; name: string; artistSlug?: string }>,
+    subject: string,
+    message: string,
+  ): Promise<void> {
+    const BATCH_SIZE = 10; // თითო batch-ში 10 მეილი
+    const DELAY_BETWEEN_BATCHES = 2000; // 2 წამი batch-ებს შორის
+    const DELAY_BETWEEN_EMAILS = 200; // 200ms მეილებს შორის
 
     let sent = 0;
     let failed = 0;
-    const errors: string[] = [];
 
-    // ინდივიდუალურად ვაგზავნით ყველა სელერს
-    for (const seller of sellers) {
-      try {
-        await this.emailService.sendBulkMessageToSeller(
-          seller.email,
-          seller.storeName || seller.name,
-          subject,
-          message,
-          seller.artistSlug,
-        );
-        sent++;
-        this.logger.log(`Email sent to seller: ${seller.email}`);
-
-        // პატარა დაყოვნება რომ არ გადავაჭარბოთ rate limit-ს
-        await new Promise((resolve) => setTimeout(resolve, 100));
-      } catch (error) {
-        failed++;
-        const errorMsg = `Failed to send to ${seller.email}: ${error.message}`;
-        errors.push(errorMsg);
-        this.logger.error(errorMsg);
+    for (let i = 0; i < sellers.length; i += BATCH_SIZE) {
+      const batch = sellers.slice(i, i + BATCH_SIZE);
+      
+      for (const seller of batch) {
+        try {
+          await this.emailService.sendBulkMessageToSeller(
+            seller.email,
+            seller.storeName || seller.name,
+            subject,
+            message,
+            seller.artistSlug,
+          );
+          sent++;
+          this.logger.log(`Email sent to seller: ${seller.email} (${sent}/${sellers.length})`);
+        } catch (error) {
+          failed++;
+          this.logger.error(`Failed to send to ${seller.email}: ${error.message}`);
+        }
+        
+        // დაყოვნება მეილებს შორის
+        await new Promise((resolve) => setTimeout(resolve, DELAY_BETWEEN_EMAILS));
+      }
+      
+      // დაყოვნება batch-ებს შორის (თუ კიდევ არის batch-ები)
+      if (i + BATCH_SIZE < sellers.length) {
+        this.logger.log(`Batch completed. Waiting before next batch... (${sent}/${sellers.length} sent)`);
+        await new Promise((resolve) => setTimeout(resolve, DELAY_BETWEEN_BATCHES));
       }
     }
 
-    return {
-      success: failed === 0,
-      sent,
-      failed,
-      errors,
-    };
+    this.logger.log(`Background email sending completed: ${sent} sent, ${failed} failed`);
   }
 
   /**
@@ -2629,7 +2657,7 @@ export class UsersService {
   }
 
   /**
-   * გაუგზავნე მეილი არჩეულ მომხმარებლებს ინდივიდუალურად
+   * გაუგზავნე მეილი არჩეულ მომხმარებლებს ინდივიდუალურად (ფონური პროცესი)
    */
   async sendBulkEmailToCustomers(
     subject: string,
@@ -2637,9 +2665,8 @@ export class UsersService {
     customerIds?: string[],
   ): Promise<{
     success: boolean;
-    sent: number;
-    failed: number;
-    errors: string[];
+    totalQueued: number;
+    message: string;
   }> {
     if (!this.emailService) {
       throw new BadRequestException('Email service is not available');
@@ -2657,40 +2684,67 @@ export class UsersService {
       .lean();
 
     if (customers.length === 0) {
-      return { success: true, sent: 0, failed: 0, errors: [] };
+      return { success: true, totalQueued: 0, message: 'მომხმარებლები ვერ მოიძებნა' };
     }
+
+    // დაუყოვნებლივ ვაბრუნებთ response-ს
+    const totalQueued = customers.length;
+    this.logger.log(`Starting background email send to ${totalQueued} customers`);
+
+    // ფონურ პროცესში ვგზავნით მეილებს batch-ებად
+    this.sendCustomerEmailsInBackground(customers, subject, message).catch((error) => {
+      this.logger.error(`Background customer email sending failed: ${error.message}`);
+    });
+
+    return {
+      success: true,
+      totalQueued,
+      message: `${totalQueued} მომხმარებლისთვის მეილის გაგზავნა დაიწყო ფონურ რეჟიმში`,
+    };
+  }
+
+  /**
+   * ფონურად გაგზავნა მომხმარებლებისთვის batch-ებად
+   */
+  private async sendCustomerEmailsInBackground(
+    customers: Array<{ email: string; name: string }>,
+    subject: string,
+    message: string,
+  ): Promise<void> {
+    const BATCH_SIZE = 10;
+    const DELAY_BETWEEN_BATCHES = 2000;
+    const DELAY_BETWEEN_EMAILS = 200;
 
     let sent = 0;
     let failed = 0;
-    const errors: string[] = [];
 
-    // ინდივიდუალურად ვაგზავნით ყველა მომხმარებელს
-    for (const customer of customers) {
-      try {
-        await this.emailService.sendBulkMessageToSeller(
-          customer.email,
-          customer.name,
-          subject,
-          message,
-        );
-        sent++;
-        this.logger.log(`Email sent to customer: ${customer.email}`);
-
-        // პატარა დაყოვნება რომ არ გადავაჭარბოთ rate limit-ს
-        await new Promise((resolve) => setTimeout(resolve, 100));
-      } catch (error) {
-        failed++;
-        const errorMsg = `Failed to send to ${customer.email}: ${error.message}`;
-        errors.push(errorMsg);
-        this.logger.error(errorMsg);
+    for (let i = 0; i < customers.length; i += BATCH_SIZE) {
+      const batch = customers.slice(i, i + BATCH_SIZE);
+      
+      for (const customer of batch) {
+        try {
+          await this.emailService.sendBulkMessageToSeller(
+            customer.email,
+            customer.name,
+            subject,
+            message,
+          );
+          sent++;
+          this.logger.log(`Email sent to customer: ${customer.email} (${sent}/${customers.length})`);
+        } catch (error) {
+          failed++;
+          this.logger.error(`Failed to send to ${customer.email}: ${error.message}`);
+        }
+        
+        await new Promise((resolve) => setTimeout(resolve, DELAY_BETWEEN_EMAILS));
+      }
+      
+      if (i + BATCH_SIZE < customers.length) {
+        this.logger.log(`Customer batch completed. Waiting... (${sent}/${customers.length} sent)`);
+        await new Promise((resolve) => setTimeout(resolve, DELAY_BETWEEN_BATCHES));
       }
     }
 
-    return {
-      success: failed === 0,
-      sent,
-      failed,
-      errors,
-    };
+    this.logger.log(`Background customer email sending completed: ${sent} sent, ${failed} failed`);
   }
 }
