@@ -253,6 +253,10 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
   useEffect(() => {
     if (artist.artistSlug) {
       trackArtistProfileView(artist.artistSlug, "link");
+      // Increment profile view count in database
+      apiClient.post(`/artists/${artist.artistSlug}/view`).catch(() => {
+        // Silently fail - view tracking is not critical
+      });
     }
   }, [artist.artistSlug]);
 

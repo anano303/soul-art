@@ -8,9 +8,9 @@ async function checkPost() {
 
   // This is a portfolio post ID
   const postId = new ObjectId('694ff71d2cfb62c49454d285');
-  
+
   const post = await db.collection('portfolioposts').findOne({ _id: postId });
-  
+
   console.log('=== PORTFOLIO POST ===');
   console.log('Post ID:', postId.toString());
   console.log('Artist ID:', post?.artistId);
@@ -22,7 +22,9 @@ async function checkPost() {
 
   // Check the linked product
   if (post?.productId) {
-    const product = await db.collection('products').findOne({ _id: new ObjectId(post.productId.toString()) });
+    const product = await db
+      .collection('products')
+      .findOne({ _id: new ObjectId(post.productId.toString()) });
     console.log('=== LINKED PRODUCT ===');
     console.log('Name:', product?.name);
     console.log('Status:', product?.status);

@@ -7,9 +7,9 @@ async function showAllBalances() {
   const db = client.db();
 
   const sellers = await db.collection('sellerbalances').find({}).toArray();
-  
+
   console.log('=== ALL SELLER BALANCES ===\n');
-  
+
   for (const seller of sellers) {
     const user = await db.collection('users').findOne({ _id: seller.seller });
     console.log(`${user?.name || 'Unknown'} (${seller.seller})`);

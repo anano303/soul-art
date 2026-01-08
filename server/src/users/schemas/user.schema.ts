@@ -225,6 +225,9 @@ export class User {
   @Prop({ type: Number, default: 0 })
   artistDirectReviewsCount?: number; // Count of direct artist reviews
 
+  @Prop({ type: Number, default: 0 })
+  profileViews?: number; // Total profile page views
+
   // Shipping addresses
   @Prop({
     type: [

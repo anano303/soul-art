@@ -7,9 +7,9 @@ async function checkProduct() {
   const db = client.db();
 
   const productId = new ObjectId('695151a72262ea00730709c8');
-  
+
   const product = await db.collection('products').findOne({ _id: productId });
-  
+
   console.log('=== PRODUCT DETAILS ===');
   console.log('Name:', product?.name);
   console.log('Brand:', product?.brand);
@@ -18,9 +18,11 @@ async function checkProduct() {
   console.log('countInStock:', product?.countInStock);
   console.log('variants:', JSON.stringify(product?.variants));
   console.log('');
-  
+
   // Check portfolio post
-  const portfolio = await db.collection('portfolioposts').findOne({ productId: productId });
+  const portfolio = await db
+    .collection('portfolioposts')
+    .findOne({ productId: productId });
   console.log('Has Portfolio Post:', portfolio ? 'YES' : 'NO');
   if (portfolio) {
     console.log('Portfolio ID:', portfolio._id);

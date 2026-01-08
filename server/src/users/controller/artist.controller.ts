@@ -54,6 +54,18 @@ export class ArtistController {
     return this.usersService.listPublicArtists(normalizedLimit);
   }
 
+  @Get('popular/weekly')
+  @ApiOperation({
+    summary: 'Get popular artists of the week by sales and views',
+  })
+  @ApiResponse({ status: 200, description: 'Popular artists data' })
+  async getPopularArtistsOfWeek(@Query('limit') limit: string = '8') {
+    const parsedLimit = parseInt(limit, 10);
+    const normalizedLimit = Math.min(Math.max(parsedLimit || 8, 1), 20);
+
+    return this.usersService.getPopularArtistsOfWeek(normalizedLimit);
+  }
+
   @Get('search')
   @ApiOperation({ summary: 'Search public artists by keyword' })
   @ApiResponse({ status: 200, description: 'Search results for artists' })
@@ -164,6 +176,14 @@ export class ArtistController {
       normalizedPage,
       normalizedLimit,
     );
+  }
+
+  @Post(':identifier/view')
+  @ApiOperation({ summary: 'Increment artist profile view count' })
+  @ApiResponse({ status: 200, description: 'View count incremented' })
+  async incrementProfileView(@Param('identifier') identifier: string) {
+    await this.usersService.incrementArtistProfileView(identifier);
+    return { success: true };
   }
 
   @Patch('profile')

@@ -5,8 +5,14 @@ import { AuthController } from './controller/auth.controller';
 import { ExploreController } from './controller/explore.controller';
 import { User, UserSchema } from './schemas/user.schema';
 import { GalleryLike, GalleryLikeSchema } from './schemas/gallery-like.schema';
-import { GalleryComment, GalleryCommentSchema } from './schemas/gallery-comment.schema';
-import { PortfolioPost, PortfolioPostSchema } from './schemas/portfolio-post.schema';
+import {
+  GalleryComment,
+  GalleryCommentSchema,
+} from './schemas/gallery-comment.schema';
+import {
+  PortfolioPost,
+  PortfolioPostSchema,
+} from './schemas/portfolio-post.schema';
 import { Product, ProductSchema } from '../products/schemas/product.schema';
 import { Order, OrderSchema } from '../orders/schemas/order.schema';
 import {

@@ -1,0 +1,548 @@
+/* Popular Artists Section - Search Page Style */
+
+.popularArtists {
+  padding: 40px 5%;
+  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 30px;
+  margin: 20px 0;
+}
+
+.popularArtists__header {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 24px 40px;
+  background: linear-gradient(
+    135deg,
+    rgba(1, 38, 69, 0.03) 0%,
+    rgba(69, 32, 1, 0.02) 50%,
+    rgba(255, 215, 0, 0.05) 100%
+  );
+  backdrop-filter: blur(8px);
+  border-radius: 16px;
+  position: relative;
+  overflow: hidden;
+}
+
+.popularArtists__header::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--secondary-color, #452001) 20%,
+    var(--primary-color, #012645) 50%,
+    var(--secondary-color, #452001) 80%,
+    transparent
+  );
+  opacity: 0.6;
+}
+
+.popularArtists__header::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 10%;
+  right: 10%;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(1, 38, 69, 0.15) 30%,
+    rgba(1, 38, 69, 0.15) 70%,
+    transparent
+  );
+}
+
+.popularArtists__title {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--primary-color, #012645);
+  text-align: center;
+  letter-spacing: 0.5px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.popularArtists__icon {
+  color: var(--secondary-color, #452001);
+  font-size: 28px;
+  opacity: 0.85;
+  transition: all 0.3s ease;
+}
+
+.popularArtists__header:hover .popularArtists__icon {
+  opacity: 1;
+  transform: scale(1.05);
+}
+
+.popularArtists__loading {
+  width: 100%;
+}
+
+.popularArtists__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 24px;
+  width: 100%;
+  padding: 0;
+}
+
+.popularArtists__skeletonCard {
+  height: 200px;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 16px;
+  border: 2px solid var(--secondary-color, #452001);
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* Card Style - Same as Search Results */
+.popularArtists__card {
+  background: linear-gradient(135deg, #ffffff, #f8f9fa);
+  border-radius: 16px;
+  padding: 24px;
+  border: 2px solid var(--secondary-color, #452001);
+  box-shadow: 0 4px 20px rgba(1, 38, 69, 0.1);
+  transition: all 0.3s ease;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  min-height: 200px;
+  text-decoration: none;
+}
+
+.popularArtists__card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 32px rgba(1, 38, 69, 0.2);
+  border-color: var(--primary-color, #012645);
+}
+
+.popularArtists__rank {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 10;
+  background: rgba(255, 255, 255, 0.95);
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  backdrop-filter: blur(4px);
+}
+
+.popularArtists__avatar {
+  margin-bottom: 16px;
+  position: relative;
+  z-index: 2;
+}
+
+.popularArtists__avatarImg {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid rgba(255, 255, 255, 0.8);
+  transition: all 0.3s ease;
+}
+
+.popularArtists__card:hover .popularArtists__avatarImg {
+  border-color: var(--primary-color, #012645);
+}
+
+.popularArtists__avatarPlaceholder {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.9);
+  border: 3px solid rgba(255, 255, 255, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--primary-color, #012645);
+  transition: all 0.3s ease;
+  backdrop-filter: blur(4px);
+}
+
+.popularArtists__card:hover .popularArtists__avatarPlaceholder {
+  border-color: var(--primary-color, #012645);
+}
+
+.popularArtists__info {
+  width: 100%;
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.popularArtists__name {
+  font-size: 18px;
+  font-weight: 600;
+  color: #ffffff;
+  margin: 0;
+  line-height: 1.3;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+}
+
+.popularArtists__badge {
+  display: inline-block;
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--primary-color, #012645);
+  font-size: 12px;
+  font-weight: 500;
+  padding: 4px 12px;
+  border-radius: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  backdrop-filter: blur(4px);
+}
+
+.popularArtists__slug {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 14px;
+  margin: 0;
+  line-height: 1.4;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);
+}
+
+.popularArtists__stats {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.popularArtists__rating {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 14px;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.4);
+  padding: 4px 10px;
+  border-radius: 12px;
+  backdrop-filter: blur(4px);
+}
+
+.popularArtists__starIcon {
+  color: #ffd700;
+}
+
+.popularArtists__reviewCount {
+  font-size: 12px;
+  opacity: 0.85;
+  margin-left: 2px;
+}
+
+.popularArtists__followers {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.4);
+  padding: 3px 8px;
+  border-radius: 10px;
+  backdrop-filter: blur(4px);
+}
+
+.popularArtists__followers svg {
+  color: #90cdf4;
+  font-size: 11px;
+}
+
+.popularArtists__views {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.4);
+  padding: 3px 8px;
+  border-radius: 10px;
+  backdrop-filter: blur(4px);
+}
+
+.popularArtists__views svg {
+  color: #a0e4a0;
+  font-size: 11px;
+}
+
+/* Card without cover image - darker background */
+.popularArtists__card--noImage {
+  background: linear-gradient(
+    135deg,
+    #1a3a4a 0%,
+    #012645 50%,
+    #0a2035 100%
+  ) !important;
+}
+
+.popularArtists__card--noImage .popularArtists__name,
+.popularArtists__card--noImage .popularArtists__slug {
+  text-shadow: none;
+}
+
+.popularArtists__stat {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.4);
+  padding: 4px 10px;
+  border-radius: 12px;
+  backdrop-filter: blur(4px);
+}
+
+.popularArtists__stat svg {
+  color: #ffd700;
+  font-size: 12px;
+}
+
+.popularArtists__viewAll {
+  display: inline-block;
+  text-decoration: none;
+  color: #ffffff;
+  background: linear-gradient(135deg, var(--primary-color, #012645), #01456b);
+  padding: 12px 32px;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 16px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(1, 38, 69, 0.2);
+}
+
+.popularArtists__viewAll:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(1, 38, 69, 0.3);
+}
+
+/* Tablet */
+@media screen and (max-width: 1024px) {
+  .popularArtists__grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* Mobile Large */
+@media screen and (max-width: 768px) {
+  .popularArtists {
+    padding: 30px 4%;
+    gap: 20px;
+    margin: 10px 0;
+  }
+
+  .popularArtists__header {
+    padding: 20px;
+  }
+
+  .popularArtists__title {
+    font-size: 22px;
+  }
+
+  .popularArtists__icon {
+    font-size: 26px;
+  }
+
+  .popularArtists__grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+
+  .popularArtists__card {
+    padding: 20px 16px;
+    min-height: 180px;
+  }
+
+  .popularArtists__name {
+    font-size: 16px;
+  }
+
+  .popularArtists__avatarImg,
+  .popularArtists__avatarPlaceholder {
+    width: 50px;
+    height: 50px;
+  }
+}
+
+/* Mobile Small */
+@media screen and (max-width: 480px) {
+  .popularArtists {
+    padding: 20px 3%;
+    gap: 16px;
+  }
+
+  .popularArtists__header {
+    padding: 16px;
+    border-radius: 12px;
+  }
+
+  .popularArtists__title {
+    font-size: 18px;
+    gap: 8px;
+  }
+
+  .popularArtists__icon {
+    font-size: 22px;
+  }
+
+  .popularArtists__grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  .popularArtists__card {
+    padding: 16px 12px;
+    min-height: 160px;
+    border-radius: 12px;
+  }
+
+  .popularArtists__skeletonCard {
+    height: 160px;
+    border-radius: 12px;
+  }
+
+  .popularArtists__rank {
+    top: 6px;
+    right: 6px;
+    padding: 4px 8px;
+    font-size: 12px;
+  }
+
+  .popularArtists__avatarImg,
+  .popularArtists__avatarPlaceholder {
+    width: 45px;
+    height: 45px;
+  }
+
+  .popularArtists__name {
+    font-size: 14px;
+  }
+
+  .popularArtists__badge {
+    font-size: 10px;
+    padding: 3px 8px;
+  }
+
+  .popularArtists__slug {
+    font-size: 12px;
+  }
+
+  .popularArtists__stats {
+    gap: 6px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .popularArtists__rating,
+  .popularArtists__stat {
+    font-size: 11px;
+    padding: 3px 8px;
+  }
+
+  .popularArtists__reviewCount {
+    font-size: 10px;
+  }
+
+  .popularArtists__followers {
+    font-size: 10px;
+    padding: 2px 6px;
+  }
+
+  .popularArtists__viewAll {
+    padding: 10px 24px;
+    font-size: 14px;
+  }
+}
+
+/* Interactive Stat Buttons */
+.popularArtists__statBtn {
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+
+.popularArtists__statBtn:hover {
+  transform: scale(1.05);
+  background: rgba(0, 0, 0, 0.6);
+}
+
+.popularArtists__statBtn:active {
+  transform: scale(0.95);
+}
+
+.popularArtists__statBtn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* Rating button */
+.popularArtists__rating.popularArtists__statBtn:hover {
+  box-shadow: 0 0 8px rgba(255, 215, 0, 0.5);
+}
+
+/* Followers button */
+.popularArtists__followers.popularArtists__statBtn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.popularArtists__followers.popularArtists__statBtn:hover {
+  box-shadow: 0 0 8px rgba(144, 205, 244, 0.5);
+}
+
+.popularArtists__followers--following {
+  background: rgba(76, 175, 80, 0.6) !important;
+}
+
+.popularArtists__followers--following svg {
+  color: #90ee90 !important;
+}
+
+/* Loading spinner */
+.popularArtists__loadingSpinner {
+  width: 12px;
+  height: 12px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spinnerRotate 0.6s linear infinite;
+}
+
+@keyframes spinnerRotate {
+  to {
+    transform: rotate(360deg);
+  }
+}

@@ -2571,7 +2571,11 @@ export class UsersService {
       .lean();
 
     if (sellers.length === 0) {
-      return { success: true, totalQueued: 0, message: 'სელერები ვერ მოიძებნა' };
+      return {
+        success: true,
+        totalQueued: 0,
+        message: 'სელერები ვერ მოიძებნა',
+      };
     }
 
     // დაუყოვნებლივ ვაბრუნებთ response-ს
@@ -2594,7 +2598,12 @@ export class UsersService {
    * ფონურად გაგზავნა batch-ებად
    */
   private async sendEmailsInBackground(
-    sellers: Array<{ email: string; storeName?: string; name: string; artistSlug?: string }>,
+    sellers: Array<{
+      email: string;
+      storeName?: string;
+      name: string;
+      artistSlug?: string;
+    }>,
     subject: string,
     message: string,
   ): Promise<void> {
@@ -2607,7 +2616,7 @@ export class UsersService {
 
     for (let i = 0; i < sellers.length; i += BATCH_SIZE) {
       const batch = sellers.slice(i, i + BATCH_SIZE);
-      
+
       for (const seller of batch) {
         try {
           await this.emailService.sendBulkMessageToSeller(
@@ -2618,24 +2627,36 @@ export class UsersService {
             seller.artistSlug,
           );
           sent++;
-          this.logger.log(`Email sent to seller: ${seller.email} (${sent}/${sellers.length})`);
+          this.logger.log(
+            `Email sent to seller: ${seller.email} (${sent}/${sellers.length})`,
+          );
         } catch (error) {
           failed++;
-          this.logger.error(`Failed to send to ${seller.email}: ${error.message}`);
+          this.logger.error(
+            `Failed to send to ${seller.email}: ${error.message}`,
+          );
         }
-        
+
         // დაყოვნება მეილებს შორის
-        await new Promise((resolve) => setTimeout(resolve, DELAY_BETWEEN_EMAILS));
+        await new Promise((resolve) =>
+          setTimeout(resolve, DELAY_BETWEEN_EMAILS),
+        );
       }
-      
+
       // დაყოვნება batch-ებს შორის (თუ კიდევ არის batch-ები)
       if (i + BATCH_SIZE < sellers.length) {
-        this.logger.log(`Batch completed. Waiting before next batch... (${sent}/${sellers.length} sent)`);
-        await new Promise((resolve) => setTimeout(resolve, DELAY_BETWEEN_BATCHES));
+        this.logger.log(
+          `Batch completed. Waiting before next batch... (${sent}/${sellers.length} sent)`,
+        );
+        await new Promise((resolve) =>
+          setTimeout(resolve, DELAY_BETWEEN_BATCHES),
+        );
       }
     }
 
-    this.logger.log(`Background email sending completed: ${sent} sent, ${failed} failed`);
+    this.logger.log(
+      `Background email sending completed: ${sent} sent, ${failed} failed`,
+    );
   }
 
   /**
@@ -2684,17 +2705,27 @@ export class UsersService {
       .lean();
 
     if (customers.length === 0) {
-      return { success: true, totalQueued: 0, message: 'მომხმარებლები ვერ მოიძებნა' };
+      return {
+        success: true,
+        totalQueued: 0,
+        message: 'მომხმარებლები ვერ მოიძებნა',
+      };
     }
 
     // დაუყოვნებლივ ვაბრუნებთ response-ს
     const totalQueued = customers.length;
-    this.logger.log(`Starting background email send to ${totalQueued} customers`);
+    this.logger.log(
+      `Starting background email send to ${totalQueued} customers`,
+    );
 
     // ფონურ პროცესში ვგზავნით მეილებს batch-ებად
-    this.sendCustomerEmailsInBackground(customers, subject, message).catch((error) => {
-      this.logger.error(`Background customer email sending failed: ${error.message}`);
-    });
+    this.sendCustomerEmailsInBackground(customers, subject, message).catch(
+      (error) => {
+        this.logger.error(
+          `Background customer email sending failed: ${error.message}`,
+        );
+      },
+    );
 
     return {
       success: true,
@@ -2720,7 +2751,7 @@ export class UsersService {
 
     for (let i = 0; i < customers.length; i += BATCH_SIZE) {
       const batch = customers.slice(i, i + BATCH_SIZE);
-      
+
       for (const customer of batch) {
         try {
           await this.emailService.sendBulkMessageToSeller(
@@ -2730,21 +2761,408 @@ export class UsersService {
             message,
           );
           sent++;
-          this.logger.log(`Email sent to customer: ${customer.email} (${sent}/${customers.length})`);
+          this.logger.log(
+            `Email sent to customer: ${customer.email} (${sent}/${customers.length})`,
+          );
         } catch (error) {
           failed++;
-          this.logger.error(`Failed to send to ${customer.email}: ${error.message}`);
+          this.logger.error(
+            `Failed to send to ${customer.email}: ${error.message}`,
+          );
         }
-        
-        await new Promise((resolve) => setTimeout(resolve, DELAY_BETWEEN_EMAILS));
+
+        await new Promise((resolve) =>
+          setTimeout(resolve, DELAY_BETWEEN_EMAILS),
+        );
       }
-      
+
       if (i + BATCH_SIZE < customers.length) {
-        this.logger.log(`Customer batch completed. Waiting... (${sent}/${customers.length} sent)`);
-        await new Promise((resolve) => setTimeout(resolve, DELAY_BETWEEN_BATCHES));
+        this.logger.log(
+          `Customer batch completed. Waiting... (${sent}/${customers.length} sent)`,
+        );
+        await new Promise((resolve) =>
+          setTimeout(resolve, DELAY_BETWEEN_BATCHES),
+        );
       }
     }
 
-    this.logger.log(`Background customer email sending completed: ${sent} sent, ${failed} failed`);
+    this.logger.log(
+      `Background customer email sending completed: ${sent} sent, ${failed} failed`,
+    );
+  }
+
+  /**
+   * მიიღე კვირის პოპულარული ხელოვანები გაყიდვებითა და ნახვებით
+   */
+  async getPopularArtistsOfWeek(limit: number = 8): Promise<{
+    bySales: Array<{
+      id: string;
+      name: string;
+      artistSlug: string;
+      storeName: string;
+      coverImage: string;
+      avatarImage: string;
+      rating: number;
+      reviewsCount: number;
+      followersCount: number;
+      weeklySalesCount: number;
+      weeklyViewsCount: number;
+    }>;
+    byViews: Array<{
+      id: string;
+      name: string;
+      artistSlug: string;
+      storeName: string;
+      coverImage: string;
+      avatarImage: string;
+      rating: number;
+      reviewsCount: number;
+      followersCount: number;
+      weeklyViewsCount: number;
+    }>;
+    byFollowers: Array<{
+      id: string;
+      name: string;
+      artistSlug: string;
+      storeName: string;
+      coverImage: string;
+      avatarImage: string;
+      rating: number;
+      reviewsCount: number;
+      followersCount: number;
+      weeklyViewsCount: number;
+    }>;
+    byRating: Array<{
+      id: string;
+      name: string;
+      artistSlug: string;
+      storeName: string;
+      coverImage: string;
+      avatarImage: string;
+      rating: number;
+      reviewsCount: number;
+      followersCount: number;
+      weeklyViewsCount: number;
+    }>;
+  }> {
+    // კვირის დასაწყისი (7 დღის წინ)
+    const weekAgo = new Date();
+    weekAgo.setDate(weekAgo.getDate() - 7);
+
+    // 1. გაყიდვებით პოპულარული ხელოვანები
+    // იღებთ ყველა გადახდილ შეკვეთას ბოლო კვირიდან და ითვლით სელერის მიხედვით
+    const salesAggregation = await this.productModel.aggregate([
+      {
+        $lookup: {
+          from: 'orders',
+          localField: '_id',
+          foreignField: 'orderItems.productId',
+          as: 'orders',
+        },
+      },
+      {
+        $unwind: '$orders',
+      },
+      {
+        $match: {
+          'orders.isPaid': true,
+          'orders.createdAt': { $gte: weekAgo },
+        },
+      },
+      {
+        $group: {
+          _id: '$user',
+          salesCount: { $sum: 1 },
+        },
+      },
+      {
+        $sort: { salesCount: -1 },
+      },
+      {
+        $limit: limit,
+      },
+      {
+        $lookup: {
+          from: 'users',
+          localField: '_id',
+          foreignField: '_id',
+          as: 'seller',
+        },
+      },
+      {
+        $unwind: '$seller',
+      },
+      {
+        $match: {
+          'seller.role': Role.Seller,
+          'seller.artistSlug': { $exists: true, $nin: [null, ''] },
+        },
+      },
+      {
+        $project: {
+          id: '$seller._id',
+          name: '$seller.name',
+          artistSlug: '$seller.artistSlug',
+          storeName: '$seller.storeName',
+          coverImage: { $ifNull: ['$seller.artistCoverImage', ''] },
+          avatarImage: {
+            $ifNull: [
+              '$seller.storeLogo',
+              {
+                $ifNull: [
+                  '$seller.storeLogoPath',
+                  {
+                    $ifNull: [
+                      '$seller.profileImagePath',
+                      { $ifNull: ['$seller.artistCoverImage', ''] },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+          rating: {
+            $ifNull: [
+              '$seller.artistDirectRating',
+              { $ifNull: ['$seller.artistRating', 0] },
+            ],
+          },
+          reviewsCount: {
+            $ifNull: [
+              '$seller.artistDirectReviewsCount',
+              { $ifNull: ['$seller.artistReviewsCount', 0] },
+            ],
+          },
+          followersCount: { $ifNull: ['$seller.followersCount', 0] },
+          weeklySalesCount: '$salesCount',
+        },
+      },
+    ]);
+
+    // 2. ნახვებით პოპულარული ხელოვანები
+    // ვიყენებთ პროდუქტების viewCount-ის ჯამს + profileViews (პროფილის ნახვები)
+    const viewsAggregation = await this.productModel.aggregate([
+      {
+        $match: {
+          status: 'APPROVED',
+        },
+      },
+      {
+        $group: {
+          _id: '$user',
+          productViews: { $sum: { $ifNull: ['$viewCount', 0] } },
+        },
+      },
+      {
+        $lookup: {
+          from: 'users',
+          localField: '_id',
+          foreignField: '_id',
+          as: 'seller',
+        },
+      },
+      {
+        $unwind: '$seller',
+      },
+      {
+        $match: {
+          'seller.role': Role.Seller,
+          'seller.artistSlug': { $exists: true, $nin: [null, ''] },
+        },
+      },
+      {
+        $project: {
+          id: '$seller._id',
+          name: '$seller.name',
+          artistSlug: '$seller.artistSlug',
+          storeName: '$seller.storeName',
+          coverImage: { $ifNull: ['$seller.artistCoverImage', ''] },
+          avatarImage: {
+            $ifNull: [
+              '$seller.storeLogo',
+              {
+                $ifNull: [
+                  '$seller.storeLogoPath',
+                  {
+                    $ifNull: [
+                      '$seller.profileImagePath',
+                      { $ifNull: ['$seller.artistCoverImage', ''] },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+          rating: {
+            $ifNull: [
+              '$seller.artistDirectRating',
+              { $ifNull: ['$seller.artistRating', 0] },
+            ],
+          },
+          reviewsCount: {
+            $ifNull: [
+              '$seller.artistDirectReviewsCount',
+              { $ifNull: ['$seller.artistReviewsCount', 0] },
+            ],
+          },
+          followersCount: { $ifNull: ['$seller.followersCount', 0] },
+          // პროდუქტების ნახვები + პროფილის ნახვები
+          weeklyViewsCount: {
+            $add: ['$productViews', { $ifNull: ['$seller.profileViews', 0] }],
+          },
+        },
+      },
+      {
+        $match: {
+          weeklyViewsCount: { $gt: 0 },
+        },
+      },
+      {
+        $sort: { weeklyViewsCount: -1 },
+      },
+      {
+        $limit: limit,
+      },
+    ]);
+
+    // შევქმნათ ნახვების lookup map ყველა ხელოვანისთვის
+    const allViewsAggregation = await this.productModel.aggregate([
+      {
+        $match: {
+          status: 'APPROVED',
+        },
+      },
+      {
+        $group: {
+          _id: '$user',
+          productViews: { $sum: { $ifNull: ['$viewCount', 0] } },
+        },
+      },
+      {
+        $lookup: {
+          from: 'users',
+          localField: '_id',
+          foreignField: '_id',
+          as: 'seller',
+        },
+      },
+      {
+        $unwind: '$seller',
+      },
+      {
+        $match: {
+          'seller.role': Role.Seller,
+        },
+      },
+      {
+        $project: {
+          id: '$seller._id',
+          totalViews: {
+            $add: ['$productViews', { $ifNull: ['$seller.profileViews', 0] }],
+          },
+        },
+      },
+    ]);
+
+    // შევქმნათ map სწრაფი წვდომისთვის
+    const viewsMap = new Map<string, number>();
+    for (const item of allViewsAggregation) {
+      viewsMap.set(item.id.toString(), item.totalViews || 0);
+    }
+
+    // 3. გამომწერებით პოპულარული ხელოვანები
+    const byFollowers = await this.userModel
+      .find({
+        role: Role.Seller,
+        artistSlug: { $exists: true, $nin: [null, ''] },
+        followersCount: { $gt: 0 },
+      })
+      .sort({ followersCount: -1 })
+      .limit(limit)
+      .select(
+        'name artistSlug storeName artistCoverImage storeLogo storeLogoPath profileImagePath artistRating artistReviewsCount artistDirectRating artistDirectReviewsCount followersCount',
+      )
+      .lean();
+
+    // 4. შეფასებებით პოპულარული ხელოვანები (პირდაპირი შეფასებები)
+    const byRating = await this.userModel
+      .find({
+        role: Role.Seller,
+        artistSlug: { $exists: true, $nin: [null, ''] },
+        $or: [{ artistDirectRating: { $gt: 0 } }, { artistRating: { $gt: 0 } }],
+      })
+      .sort({ artistDirectRating: -1, artistDirectReviewsCount: -1 })
+      .limit(limit)
+      .select(
+        'name artistSlug storeName artistCoverImage storeLogo storeLogoPath profileImagePath artistRating artistReviewsCount artistDirectRating artistDirectReviewsCount followersCount',
+      )
+      .lean();
+
+    const mapArtist = (a: any) => ({
+      id: a._id.toString(),
+      name: a.name,
+      artistSlug: a.artistSlug,
+      storeName: a.storeName,
+      // coverImage - ქოვერ ფოტო ბექგრაუნდისთვის
+      coverImage: a.artistCoverImage || '',
+      // avatarImage - ავატარი/ლოგო პროფილის ფოტოსთვის
+      avatarImage:
+        a.storeLogo ||
+        a.storeLogoPath ||
+        a.profileImagePath ||
+        a.artistCoverImage ||
+        '',
+      // პრიორიტეტით: პირდაპირი შეფასებები > პროდუქტის შეფასებები
+      rating: a.artistDirectRating || a.artistRating || 0,
+      reviewsCount: a.artistDirectReviewsCount || a.artistReviewsCount || 0,
+      followersCount: a.followersCount || 0,
+      weeklyViewsCount: viewsMap.get(a._id.toString()) || 0,
+    });
+
+    return {
+      bySales: salesAggregation.map((a) => ({
+        id: a.id.toString(),
+        name: a.name,
+        artistSlug: a.artistSlug,
+        storeName: a.storeName,
+        coverImage: a.coverImage || '',
+        avatarImage: a.avatarImage || '',
+        rating: a.rating,
+        reviewsCount: a.reviewsCount,
+        followersCount: a.followersCount || 0,
+        weeklySalesCount: a.weeklySalesCount,
+        weeklyViewsCount: viewsMap.get(a.id.toString()) || 0,
+      })),
+      byViews: viewsAggregation.map((a) => ({
+        id: a.id.toString(),
+        name: a.name,
+        artistSlug: a.artistSlug,
+        storeName: a.storeName,
+        coverImage: a.coverImage || '',
+        avatarImage: a.avatarImage || '',
+        rating: a.rating,
+        reviewsCount: a.reviewsCount,
+        followersCount: a.followersCount || 0,
+        weeklyViewsCount: a.weeklyViewsCount,
+      })),
+      byFollowers: byFollowers.map(mapArtist),
+      byRating: byRating.map(mapArtist),
+    };
+  }
+
+  /**
+   * ხელოვანის პროფილის ნახვის დამატება
+   */
+  async incrementArtistProfileView(identifier: string): Promise<void> {
+    if (!identifier) return;
+
+    const query = isValidObjectId(identifier)
+      ? { _id: new Types.ObjectId(identifier) }
+      : { artistSlug: this.normalizeArtistSlug(identifier) };
+
+    await this.userModel.updateOne(
+      { ...query, role: Role.Seller },
+      { $inc: { profileViews: 1 } },
+    );
   }
 }

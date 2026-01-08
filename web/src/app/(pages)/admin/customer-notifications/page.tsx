@@ -282,10 +282,10 @@ export default function CustomerNotificationsPage() {
                   <div className="result-content">
                     <strong>მეილების გაგზავნა დაიწყო!</strong>
                     <span>
-                      {result.totalQueued 
+                      {result.totalQueued
                         ? `${result.totalQueued} მომხმარებლისთვის მეილის გაგზავნა მიმდინარეობს ფონურ რეჟიმში`
-                        : result.message || `${result.sent || 0} მეილი გაიგზავნა`
-                      }
+                        : result.message ||
+                          `${result.sent || 0} მეილი გაიგზავნა`}
                     </span>
                   </div>
                 </>
@@ -295,7 +295,10 @@ export default function CustomerNotificationsPage() {
                   <div className="result-content">
                     <strong>შეცდომა</strong>
                     <span>
-                      {result.message || `გაიგზავნა: ${result.sent || 0}, წარუმატებელი: ${result.failed || 0}`}
+                      {result.message ||
+                        `გაიგზავნა: ${result.sent || 0}, წარუმატებელი: ${
+                          result.failed || 0
+                        }`}
                     </span>
                     {result.errors && result.errors.length > 0 && (
                       <ul className="error-list">

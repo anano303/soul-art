@@ -549,21 +549,26 @@ export class EmailService {
       .join('');
 
     // Generate artist rating links section
-    const artistRatingSection = artists && artists.length > 0
-      ? `
+    const artistRatingSection =
+      artists && artists.length > 0
+        ? `
           <div style="background: #fff3cd; padding: 20px; border-radius: 8px; margin: 20px 0; border: 1px solid #ffc107;">
             <h3 style="color: #012645; margin-top: 0;">⭐ გთხოვთ შეაფასოთ ხელოვანი</h3>
             <p style="margin-bottom: 16px;">თქვენი შეფასება დაეხმარება სხვა მყიდველებს და წაახალისებს ხელოვანს!</p>
-            ${artists.map(artist => `
+            ${artists
+              .map(
+                (artist) => `
               <a href="https://soulart.ge/@${artist.slug}" 
                  style="display: inline-block; background: #012645; color: white; padding: 12px 24px; 
                         text-decoration: none; border-radius: 8px; margin: 4px 8px 4px 0;">
                 შეაფასე ${artist.name}
               </a>
-            `).join('')}
+            `,
+              )
+              .join('')}
           </div>
         `
-      : '';
+        : '';
 
     const mailOptions = {
       from: emailConfig.from,

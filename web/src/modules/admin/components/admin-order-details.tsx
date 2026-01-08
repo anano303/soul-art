@@ -194,7 +194,9 @@ export function AdminOrderDetails({ order }: AdminOrderDetailsProps) {
             userId: order.user?._id,
             orderId: order._id,
             status: "delivered",
-            customerName: order.isGuestOrder ? order.guestInfo?.fullName : (order.user?.ownerFirstName || order.user?.email),
+            customerName: order.isGuestOrder
+              ? order.guestInfo?.fullName
+              : order.user?.ownerFirstName || order.user?.email,
             message: `🎉 თქვენი შეკვეთა #${order._id.slice(
               -6
             )} წარმატებით მიღებულია!`,
@@ -373,26 +375,33 @@ export function AdminOrderDetails({ order }: AdminOrderDetailsProps) {
             <h2>{t("adminOrders.shipping")}</h2>
             {/* Customer name - always visible */}
             <p>
-              <strong>{t("adminOrders.customer")}:</strong> {order.isGuestOrder ? order.guestInfo?.fullName : order.user?.name || "Guest"}
+              <strong>{t("adminOrders.customer")}:</strong>{" "}
+              {order.isGuestOrder
+                ? order.guestInfo?.fullName
+                : order.user?.name || "Guest"}
             </p>
             {/* Customer email - always visible */}
             {(order.user?.email || order.guestInfo?.email) && (
               <p>
-                <strong>Email:</strong> {order.user?.email || order.guestInfo?.email}
+                <strong>Email:</strong>{" "}
+                {order.user?.email || order.guestInfo?.email}
               </p>
             )}
             {/* Phone and address - only visible to admin OR seller with SELLER delivery items */}
             {(isAdmin || sellerDeliveryItems.length > 0) && (
               <>
-                {(order.user?.phoneNumber || order.shippingDetails.phoneNumber) && (
+                {(order.user?.phoneNumber ||
+                  order.shippingDetails.phoneNumber) && (
                   <p>
                     <strong>{t("adminOrders.phone")}:</strong>{" "}
-                    {order.user?.phoneNumber || order.shippingDetails.phoneNumber}
+                    {order.user?.phoneNumber ||
+                      order.shippingDetails.phoneNumber}
                   </p>
                 )}
                 {order.shippingDetails.phoneNumber &&
                   order.user?.phoneNumber &&
-                  order.shippingDetails.phoneNumber !== order.user.phoneNumber && (
+                  order.shippingDetails.phoneNumber !==
+                    order.user.phoneNumber && (
                     <p>
                       <strong>{t("adminOrders.shippingPhone")}:</strong>{" "}
                       {order.shippingDetails.phoneNumber}
