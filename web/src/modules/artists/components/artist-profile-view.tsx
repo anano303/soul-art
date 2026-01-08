@@ -932,7 +932,7 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
                     className="artist-hero__rate-button"
                   >
                     <Star size={16} />
-                    {language === "en" ? "Rate Artist" : "შეაფასე მხატვარი"}
+                    {language === "en" ? "Rate Artist" : "შეაფასე ხელოვანი"}
                   </button>
                 )}
               </div>
