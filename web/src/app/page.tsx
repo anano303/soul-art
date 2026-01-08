@@ -35,6 +35,14 @@ const HomePageShop = dynamic(
   }
 );
 
+const PopularArtists = dynamic(
+  () => import("@/components/popularArtists/PopularArtists"),
+  {
+    loading: () => <div style={{ minHeight: "300px" }} />,
+    ssr: true,
+  }
+);
+
 const HomePageForum = dynamic(
   () => import("@/components/homePageForum/homePageForum"),
   {
@@ -66,6 +74,7 @@ const Home = () => {
       <NewYearPaintings />
       {/* Forcing a full remount of HomePageShop when language changes */}
       <HomePageShop key={`home-shop-${language}`} />
+      <PopularArtists />
       <HomePageForum />
     </div>
   );

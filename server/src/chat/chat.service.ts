@@ -40,20 +40,20 @@ export class ChatService {
   private cachedCategoriesWithIds: { name: string; id: string }[] = [];
   private cachedSubCategories: string[] = [];
   private cachedBlogTitles: string[] = [];
-  
+
   // ვებგვერდების კონტენტის ქეში
   private cachedPageContent: Map<string, string> = new Map();
   private readonly websiteBaseUrl = 'https://soulart.ge';
   private readonly pagesToCache = [
     '/about',
-    '/referral-info', 
+    '/referral-info',
     '/terms',
     '/privacy-policy',
     '/forum',
     '/contact',
     '/sellers-register',
   ];
-  
+
   // ქეშის ვადა - 1 კვირა (მილისეკუნდებში)
   private readonly CACHE_DURATION_MS = 7 * 24 * 60 * 60 * 1000;
   private lastCacheTime: number = 0;
@@ -122,7 +122,7 @@ export class ChatService {
       this.logger.log(
         `Loaded ${this.cachedBlogTitles.length} blog posts for AI`,
       );
-      
+
       // ვებგვერდების კონტენტის ჩატვირთვა
       await this.loadWebsiteContent();
     } catch (error) {
@@ -133,62 +133,85 @@ export class ChatService {
   // ვებგვერდების კონტენტის ჩატვირთვა (1 კვირაში ერთხელ)
   private async loadWebsiteContent(): Promise<void> {
     const now = Date.now();
-    
+
     // თუ ქეში ჯერ კიდევ ვალიდურია, არ განვაახლოთ
-    if (this.lastCacheTime > 0 && (now - this.lastCacheTime) < this.CACHE_DURATION_MS) {
-      const daysRemaining = Math.ceil((this.CACHE_DURATION_MS - (now - this.lastCacheTime)) / (24 * 60 * 60 * 1000));
-      this.logger.log(`Website content cache is still valid. Next refresh in ${daysRemaining} days.`);
+    if (
+      this.lastCacheTime > 0 &&
+      now - this.lastCacheTime < this.CACHE_DURATION_MS
+    ) {
+      const daysRemaining = Math.ceil(
+        (this.CACHE_DURATION_MS - (now - this.lastCacheTime)) /
+          (24 * 60 * 60 * 1000),
+      );
+      this.logger.log(
+        `Website content cache is still valid. Next refresh in ${daysRemaining} days.`,
+      );
       return;
     }
-    
+
     this.logger.log('Refreshing website content cache (weekly update)...');
-    
+
     for (const pagePath of this.pagesToCache) {
       try {
         const url = `${this.websiteBaseUrl}${pagePath}`;
         const response = await fetch(url, {
           headers: {
             'User-Agent': 'SoulArt-AI-Bot/1.0',
-            'Accept': 'text/html',
+            Accept: 'text/html',
           },
         });
-        
+
         if (!response.ok) {
           this.logger.warn(`Failed to fetch ${url}: ${response.status}`);
           continue;
         }
-        
+
         const html = await response.text();
         const textContent = this.extractTextFromHtml(html);
-        
+
         if (textContent) {
           this.cachedPageContent.set(pagePath, textContent);
-          this.logger.log(`Cached content from ${pagePath} (${textContent.length} chars)`);
+          this.logger.log(
+            `Cached content from ${pagePath} (${textContent.length} chars)`,
+          );
         }
       } catch (error) {
         this.logger.error(`Failed to load page ${pagePath}:`, error);
       }
     }
-    
+
     // ქეშის დროის განახლება
     this.lastCacheTime = Date.now();
-    this.logger.log(`Loaded ${this.cachedPageContent.size} website pages for AI knowledge base. Next refresh in 7 days.`);
+    this.logger.log(
+      `Loaded ${this.cachedPageContent.size} website pages for AI knowledge base. Next refresh in 7 days.`,
+    );
   }
 
   // HTML-დან ტექსტის ამოღება
   private extractTextFromHtml(html: string): string {
     try {
       const $ = cheerio.load(html);
-      
+
       // წავშალოთ არასაჭირო ელემენტები
-      $('script, style, nav, header, footer, .cookie-banner, .chat-widget, noscript, meta, link').remove();
-      
+      $(
+        'script, style, nav, header, footer, .cookie-banner, .chat-widget, noscript, meta, link',
+      ).remove();
+
       // ავიღოთ მთავარი კონტენტი
       let content = '';
-      
+
       // პრიორიტეტული სელექტორები main კონტენტისთვის
-      const mainSelectors = ['main', 'article', '.content', '.page-content', '.about-container', '.referral-info-container', '.terms-container', '.privacy-container'];
-      
+      const mainSelectors = [
+        'main',
+        'article',
+        '.content',
+        '.page-content',
+        '.about-container',
+        '.referral-info-container',
+        '.terms-container',
+        '.privacy-container',
+      ];
+
       for (const selector of mainSelectors) {
         const element = $(selector);
         if (element.length > 0) {
@@ -196,23 +219,23 @@ export class ChatService {
           break;
         }
       }
-      
+
       // თუ ვერ ვიპოვეთ, ავიღოთ body
       if (!content) {
         content = $('body').text();
       }
-      
+
       // გავასუფთაოთ ტექსტი
       content = content
-        .replace(/\s+/g, ' ')  // მრავალი space-ის ერთად გაერთიანება
-        .replace(/\n\s*\n/g, '\n')  // ცარიელი ხაზების წაშლა
+        .replace(/\s+/g, ' ') // მრავალი space-ის ერთად გაერთიანება
+        .replace(/\n\s*\n/g, '\n') // ცარიელი ხაზების წაშლა
         .trim();
-      
+
       // ლიმიტი - მაქსიმუმ 3000 სიმბოლო თითო გვერდიდან
       if (content.length > 3000) {
         content = content.substring(0, 3000) + '...';
       }
-      
+
       return content;
     } catch (error) {
       this.logger.error('Failed to extract text from HTML:', error);
@@ -225,9 +248,9 @@ export class ChatService {
     if (this.cachedPageContent.size === 0) {
       return '';
     }
-    
+
     let content = '\n\n## 📄 ვებსაიტის გვერდების დეტალური ინფორმაცია:\n';
-    
+
     const pageNames: Record<string, string> = {
       '/about': 'ჩვენს შესახებ',
       '/referral-info': 'რეფერალური პროგრამა',
@@ -237,12 +260,12 @@ export class ChatService {
       '/contact': 'კონტაქტი',
       '/sellers-register': 'სელერად რეგისტრაცია (საკომისიო და პირობები)',
     };
-    
+
     for (const [path, text] of this.cachedPageContent) {
       const pageName = pageNames[path] || path;
       content += `\n### ${pageName} (soulart.ge${path}):\n${text}\n`;
     }
-    
+
     return content;
   }
 

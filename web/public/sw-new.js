@@ -98,7 +98,25 @@ self.addEventListener("fetch", (event) => {
 
   event.respondWith(
     caches.match(event.request).then((response) => {
-      return response || fetch(event.request);
+      if (response) {
+        return response;
+      }
+      return fetch(event.request).catch(() => {
+        // Network failed, return a simple offline response for navigation requests
+        if (event.request.mode === "navigate") {
+          return caches.match("/offline.html").catch(() => {
+            return new Response("Offline", {
+              status: 503,
+              statusText: "Service Unavailable",
+            });
+          });
+        }
+        // For other requests, just return a network error
+        return new Response("Network error", {
+          status: 503,
+          statusText: "Service Unavailable",
+        });
+      });
     })
   );
 });
@@ -369,68 +387,72 @@ async function handleOfflineNotifications() {
 }
 
 // Link interception for PWA - Make external links open within app
-self.addEventListener('message', (event) => {
-  if (event.data && event.data.type === 'NAVIGATE_TO_URL') {
+self.addEventListener("message", (event) => {
+  if (event.data && event.data.type === "NAVIGATE_TO_URL") {
     const url = event.data.url;
-    console.log('[SW] 🔗 Intercepting navigation to:', url);
+    console.log("[SW] 🔗 Intercepting navigation to:", url);
 
     // Try to find an existing window to navigate
     event.waitUntil(
-      self.clients.matchAll({
-        type: 'window',
-        includeUncontrolled: true
-      }).then((clientList) => {
-        // Find the client that sent the message
-        const client = clientList.find(c => c.id === event.source.id);
-        if (client) {
-          // Navigate the existing client
-          return client.navigate(url);
-        } else if (clientList.length > 0) {
-          // Navigate the first available client
-          return clientList[0].navigate(url);
-        } else {
-          // Open new window if no clients available
-          return self.clients.openWindow(url);
-        }
-      })
+      self.clients
+        .matchAll({
+          type: "window",
+          includeUncontrolled: true,
+        })
+        .then((clientList) => {
+          // Find the client that sent the message
+          const client = clientList.find((c) => c.id === event.source.id);
+          if (client) {
+            // Navigate the existing client
+            return client.navigate(url);
+          } else if (clientList.length > 0) {
+            // Navigate the first available client
+            return clientList[0].navigate(url);
+          } else {
+            // Open new window if no clients available
+            return self.clients.openWindow(url);
+          }
+        })
     );
   }
 });
 
 // Handle URL protocol requests for PWA
-self.addEventListener('fetch', (event) => {
+self.addEventListener("fetch", (event) => {
   const requestUrl = new URL(event.request.url);
-  
+
   // Skip internal Next.js and API requests
   if (
-    requestUrl.pathname.includes('/_next/') ||
-    requestUrl.pathname.includes('/__nextjs') ||
-    requestUrl.pathname.includes('/socket.io') ||
-    requestUrl.pathname.includes('/sockjs') ||
-    requestUrl.pathname.includes('chrome-extension://') ||
-    requestUrl.pathname.includes('vercel-insights') ||
-    requestUrl.pathname.includes('/_vercel') ||
-    requestUrl.pathname.includes('/api/')
+    requestUrl.pathname.includes("/_next/") ||
+    requestUrl.pathname.includes("/__nextjs") ||
+    requestUrl.pathname.includes("/socket.io") ||
+    requestUrl.pathname.includes("/sockjs") ||
+    requestUrl.pathname.includes("chrome-extension://") ||
+    requestUrl.pathname.includes("vercel-insights") ||
+    requestUrl.pathname.includes("/_vercel") ||
+    requestUrl.pathname.includes("/api/")
   ) {
     return;
   }
 
   // For navigation requests (links clicked within PWA)
-  if (event.request.mode === 'navigate') {
-    console.log('[SW] 🌐 Navigation request intercepted:', event.request.url);
-    
+  if (event.request.mode === "navigate") {
+    console.log("[SW] 🌐 Navigation request intercepted:", event.request.url);
+
     // Check if this is a same-origin request
     if (requestUrl.origin === self.location.origin) {
       // Handle same-origin navigation normally
       event.respondWith(
         fetch(event.request).catch(() => {
           // Fallback to offline page if available
-          return caches.match('/offline') || caches.match('/');
+          return caches.match("/offline") || caches.match("/");
         })
       );
     } else {
       // For external links, redirect to internal handler
-      const internalUrl = `/?external_url=${encodeURIComponent(event.request.url)}`;
+      const internalUrl = `/?external_url=${encodeURIComponent(
+        event.request.url
+      )}`;
       event.respondWith(Response.redirect(internalUrl, 302));
     }
   }

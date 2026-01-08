@@ -31,9 +31,12 @@ export default function AdminLayout({
     const checkAuth = async () => {
       try {
         // Get the current path for redirect after login
-        const currentPath = typeof window !== 'undefined' ? window.location.pathname : '/admin/products';
+        const currentPath =
+          typeof window !== "undefined"
+            ? window.location.pathname
+            : "/admin/products";
         const redirectPath = encodeURIComponent(currentPath);
-        
+
         // Check if user is authenticated using the correct function
         if (!isLoggedIn()) {
           console.log("Not authenticated, redirecting to login");

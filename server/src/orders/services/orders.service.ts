@@ -820,33 +820,39 @@ export class OrdersService {
           select: 'user brand',
           populate: {
             path: 'user',
-            select: 'storeName brandName artistSlug ownerFirstName ownerLastName',
+            select:
+              'storeName brandName artistSlug ownerFirstName ownerLastName',
           },
         });
 
       // Get customer email - check guest order first
-      const customerEmail = orderWithData?.isGuestOrder && orderWithData?.guestInfo?.email
-        ? orderWithData.guestInfo.email
-        : orderWithData?.user?.email;
+      const customerEmail =
+        orderWithData?.isGuestOrder && orderWithData?.guestInfo?.email
+          ? orderWithData.guestInfo.email
+          : orderWithData?.user?.email;
 
       // Get customer name - check guest order first
-      const customerName = orderWithData?.isGuestOrder && orderWithData?.guestInfo?.fullName
-        ? orderWithData.guestInfo.fullName
-        : `${orderWithData?.user?.ownerFirstName || ''} ${orderWithData?.user?.ownerLastName || ''}`.trim() || 'მყიდველო';
+      const customerName =
+        orderWithData?.isGuestOrder && orderWithData?.guestInfo?.fullName
+          ? orderWithData.guestInfo.fullName
+          : `${orderWithData?.user?.ownerFirstName || ''} ${orderWithData?.user?.ownerLastName || ''}`.trim() ||
+            'მყიდველო';
 
       if (customerEmail) {
         // Get unique artists from order items
         const artistsMap = new Map<string, { name: string; slug: string }>();
-        
+
         for (const item of orderWithData.orderItems) {
           const productData: any = item.productId;
           const seller = productData?.user;
-          
+
           if (seller?.artistSlug) {
-            const artistName = seller.brandName || seller.storeName || 
-              `${seller.ownerFirstName || ''} ${seller.ownerLastName || ''}`.trim() || 
+            const artistName =
+              seller.brandName ||
+              seller.storeName ||
+              `${seller.ownerFirstName || ''} ${seller.ownerLastName || ''}`.trim() ||
               'ხელოვანი';
-            
+
             if (!artistsMap.has(seller.artistSlug)) {
               artistsMap.set(seller.artistSlug, {
                 name: artistName,
@@ -855,7 +861,7 @@ export class OrdersService {
             }
           }
         }
-        
+
         const artists = Array.from(artistsMap.values());
 
         await this.emailService.sendDeliveryConfirmation(
@@ -1240,7 +1246,7 @@ export class OrdersService {
             try {
               // Only include phone and address if seller handles delivery (SELLER deliveryType)
               const includeShippingInfo = entry.hasSellerDelivery;
-              
+
               await this.emailService.sendNewOrderNotificationToSeller(
                 sellerEmail,
                 this.getDisplayName(
@@ -1252,8 +1258,12 @@ export class OrdersService {
                   customerName,
                   customerEmail,
                   // Only include phone and address if seller handles delivery
-                  customerPhone: includeShippingInfo ? customerPhone : undefined,
-                  shippingAddress: includeShippingInfo ? shippingDetails : undefined,
+                  customerPhone: includeShippingInfo
+                    ? customerPhone
+                    : undefined,
+                  shippingAddress: includeShippingInfo
+                    ? shippingDetails
+                    : undefined,
                   paymentMethod: orderWithData.paymentMethod,
                   totals: {
                     ...totals,

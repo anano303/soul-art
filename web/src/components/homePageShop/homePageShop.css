@@ -199,7 +199,7 @@
   width: 100%;
   margin-bottom: 2rem;
   position: relative;
-  margin-bottom: 4rem;
+  /* margin-bottom: 4rem; */
   border-radius: 15px;
   overflow: hidden;
 }
@@ -847,7 +847,7 @@
 /* კატეგორიების განყოფილებისთვის ფონური ეფექტები */
 .product-section {
   position: relative;
-  margin-bottom: 4rem;
+  /* margin-bottom: 4rem; */
   border-radius: 15px;
   overflow: hidden;
 }

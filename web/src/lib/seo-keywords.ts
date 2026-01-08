@@ -1132,7 +1132,6 @@ const fetchBannerKeywordsInternal = cache(async (): Promise<string[]> => {
         Accept: "application/json",
         "Content-Type": "application/json",
       },
-      cache: "no-store",
     });
 
     if (!response.ok) {
