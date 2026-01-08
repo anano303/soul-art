@@ -106,7 +106,7 @@ export function ArtistReviewModal({
       >
         <div className="artist-review-modal-header">
           <h2>
-            {language === "en" ? "Rate Artist" : "მხატვრის შეფასება"}:{" "}
+            {language === "en" ? "Rate Artist" : "ხელოვანის შეფასება"}:{" "}
             {artistName}
           </h2>
           <button

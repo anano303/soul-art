@@ -57,3 +57,54 @@
     border-radius: 6px;
   }
 }
+
+/* Checkbox styles for mobile */
+.formSection :global(.privacy-policy-group),
+.formSection :global(.contract-policy-group) {
+  margin: 0.75rem 0;
+  padding: 0 0.5rem;
+}
+
+.formSection :global(.privacy-policy-label) {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 0.75rem;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.formSection :global(.privacy-policy-checkbox) {
+  width: 22px;
+  height: 22px;
+  min-width: 22px;
+  min-height: 22px;
+  margin: 0;
+  flex-shrink: 0;
+}
+
+.formSection :global(.privacy-policy-text) {
+  flex: 1;
+  text-align: left;
+}
+
+@media (max-width: 480px) {
+  .formSection :global(.privacy-policy-group),
+  .formSection :global(.contract-policy-group) {
+    margin: 0.5rem 0;
+    padding: 0 0.25rem;
+  }
+  
+  .formSection :global(.privacy-policy-label) {
+    gap: 0.5rem;
+    font-size: 0.8rem;
+    line-height: 1.3;
+  }
+  
+  .formSection :global(.privacy-policy-checkbox) {
+    width: 20px;
+    height: 20px;
+    min-width: 20px;
+    min-height: 20px;
+  }
+}
