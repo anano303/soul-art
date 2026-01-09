@@ -136,6 +136,10 @@ export class Order {
     // Removed TTL index - we handle expiration manually via cron job
   })
   stockReservationExpires!: Date;
+
+  // Sales Manager referral code (from cookie)
+  @Prop({ type: String, default: null })
+  salesRefCode?: string;
 }
 
 export const OrderSchema = SchemaFactory.createForClass(Order);

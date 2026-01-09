@@ -44,13 +44,22 @@ export default function EditUserPage() {
     if (!user) return;
 
     try {
-      // Only include password if it was provided
-      const updateData = {
+      const updateData: Record<string, unknown> = {
         name: user.name,
         email: user.email,
         role: user.role,
         ...(password && { password }),
       };
+
+      // სელერის ველები
+      if (user.role === Role.Seller) {
+        updateData.storeName = user.storeName;
+        updateData.ownerFirstName = user.ownerFirstName;
+        updateData.ownerLastName = user.ownerLastName;
+        updateData.phoneNumber = user.phoneNumber;
+        updateData.identificationNumber = user.identificationNumber;
+        updateData.accountNumber = user.accountNumber;
+      }
 
       const userId = params?.id as string;
       await fetchWithAuth(`/users/${userId}`, {
@@ -74,86 +83,206 @@ export default function EditUserPage() {
     }
   };
 
-  if (loading) return <div>Loading...</div>;
-  if (!user) return <div>User not found</div>;
+  if (loading) return <div className="edit-user-loading">იტვირთება...</div>;
+  if (!user)
+    return <div className="edit-user-not-found">მომხმარებელი ვერ მოიძებნა</div>;
+
+  const isSeller = user.role === Role.Seller;
 
   return (
     <div className="edit-user-container">
-      <h1>Edit User</h1>
+      <h1>მომხმარებლის რედაქტირება</h1>
       <form onSubmit={handleSubmit} className="edit-user-form">
-        <div className="form-group">
-          <label>Name</label>
-          <input
-            type="text"
-            value={user.name}
-            onChange={(e) => setUser({ ...user, name: e.target.value })}
-          />
-        </div>
+        {/* ძირითადი ინფორმაცია */}
+        <div className="form-section">
+          <h2 className="section-title">ძირითადი ინფორმაცია</h2>
 
-        <div className="form-group">
-          <label>Email</label>
-          <input
-            type="email"
-            value={user.email}
-            onChange={(e) => setUser({ ...user, email: e.target.value })}
-          />
-        </div>
-
-        <div className="form-group">
-          <label>Role</label>
-          <select
-            value={user.role}
-            onChange={(e) => setUser({ ...user, role: e.target.value as Role })}
-          >
-            <option value={Role.User}>User</option>
-            <option value={Role.Admin}>Admin</option>
-            <option value={Role.Seller}>Seller</option>
-            <option value={Role.Blogger}>Blogger</option>
-          </select>
-        </div>
-
-        {!showPasswordField ? (
-          <div className="form-action">
-            <button
-              type="button"
-              onClick={() => setShowPasswordField(true)}
-              className="password-button"
-            >
-              Change Password
-            </button>
-          </div>
-        ) : (
           <div className="form-group">
-            <label>New Password</label>
+            <label>სახელი</label>
             <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Enter new password"
+              type="text"
+              value={user.name}
+              onChange={(e) => setUser({ ...user, name: e.target.value })}
             />
-            <button
-              type="button"
-              onClick={() => {
-                setShowPasswordField(false);
-                setPassword("");
-              }}
-              className="cancel-password-button"
+          </div>
+
+          <div className="form-group">
+            <label>ელ. ფოსტა</label>
+            <input
+              type="email"
+              value={user.email}
+              onChange={(e) => setUser({ ...user, email: e.target.value })}
+            />
+          </div>
+
+          <div className="form-group">
+            <label>როლი</label>
+            <select
+              value={user.role}
+              onChange={(e) =>
+                setUser({ ...user, role: e.target.value as Role })
+              }
             >
-              Cancel Password Change
-            </button>
+              <option value={Role.User}>მომხმარებელი</option>
+              <option value={Role.Admin}>ადმინისტრატორი</option>
+              <option value={Role.Seller}>გამყიდველი</option>
+              <option value={Role.Blogger}>ბლოგერი</option>
+              <option value={Role.SalesManager}>Sales Manager</option>
+            </select>
+          </div>
+        </div>
+
+        {/* სელერის ინფორმაცია */}
+        {isSeller && (
+          <div className="form-section seller-section">
+            <h2 className="section-title">გამყიდველის ინფორმაცია</h2>
+
+            <div className="form-row">
+              <div className="form-group">
+                <label>მაღაზიის სახელი</label>
+                <input
+                  type="text"
+                  value={user.storeName || ""}
+                  onChange={(e) =>
+                    setUser({ ...user, storeName: e.target.value })
+                  }
+                />
+              </div>
+            </div>
+
+            <div className="form-row">
+              <div className="form-group">
+                <label>მფლობელის სახელი</label>
+                <input
+                  type="text"
+                  value={user.ownerFirstName || ""}
+                  onChange={(e) =>
+                    setUser({ ...user, ownerFirstName: e.target.value })
+                  }
+                />
+              </div>
+              <div className="form-group">
+                <label>მფლობელის გვარი</label>
+                <input
+                  type="text"
+                  value={user.ownerLastName || ""}
+                  onChange={(e) =>
+                    setUser({ ...user, ownerLastName: e.target.value })
+                  }
+                />
+              </div>
+            </div>
+
+            <div className="form-row">
+              <div className="form-group">
+                <label>ტელეფონის ნომერი</label>
+                <input
+                  type="tel"
+                  value={user.phoneNumber || ""}
+                  onChange={(e) =>
+                    setUser({ ...user, phoneNumber: e.target.value })
+                  }
+                />
+              </div>
+            </div>
+
+            <div className="form-row">
+              <div className="form-group">
+                <label>პირადი ნომერი</label>
+                <input
+                  type="text"
+                  value={user.identificationNumber || ""}
+                  onChange={(e) =>
+                    setUser({ ...user, identificationNumber: e.target.value })
+                  }
+                />
+              </div>
+              <div className="form-group">
+                <label>ანგარიშის ნომერი (IBAN)</label>
+                <input
+                  type="text"
+                  value={user.accountNumber || ""}
+                  onChange={(e) =>
+                    setUser({ ...user, accountNumber: e.target.value })
+                  }
+                />
+              </div>
+            </div>
+
+            {user.storeLogo && (
+              <div className="form-group">
+                <label>მაღაზიის ლოგო</label>
+                <div className="store-logo-preview">
+                  <img src={user.storeLogo} alt="Store Logo" />
+                </div>
+              </div>
+            )}
+
+            {user.artistSlug && (
+              <div className="form-group">
+                <label>გამყიდველის გვერდი</label>
+                <a
+                  href={`/${user.artistSlug}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="seller-page-link"
+                >
+                  <span className="link-icon">🔗</span>
+                  soulart.ge/{user.artistSlug}
+                  <span className="external-icon">↗</span>
+                </a>
+              </div>
+            )}
           </div>
         )}
 
+        {/* პაროლის შეცვლა */}
+        <div className="form-section">
+          <h2 className="section-title">პაროლი</h2>
+
+          {!showPasswordField ? (
+            <div className="form-action">
+              <button
+                type="button"
+                onClick={() => setShowPasswordField(true)}
+                className="password-button"
+              >
+                პაროლის შეცვლა
+              </button>
+            </div>
+          ) : (
+            <div className="form-group">
+              <label>ახალი პაროლი</label>
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="შეიყვანეთ ახალი პაროლი"
+              />
+              <button
+                type="button"
+                onClick={() => {
+                  setShowPasswordField(false);
+                  setPassword("");
+                }}
+                className="cancel-password-button"
+              >
+                გაუქმება
+              </button>
+            </div>
+          )}
+        </div>
+
         <div className="form-actions">
           <button type="submit" className="save-button">
-            Save Changes
+            შენახვა
           </button>
           <button
             type="button"
             onClick={() => router.push("/admin/users")}
             className="cancel-button"
           >
-            Cancel
+            გაუქმება
           </button>
         </div>
       </form>

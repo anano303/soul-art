@@ -9,6 +9,7 @@ import {
   Plus,
   Search,
   Filter,
+  TrendingUp,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { toast } from "@/hooks/use-toast";
@@ -220,6 +221,7 @@ export function UsersList() {
               <option value={Role.Seller}>Sellers</option>
               <option value={Role.User}>Customers</option>
               <option value={Role.Blogger}>Bloggers</option>
+              <option value={Role.SalesManager}>Sales Managers</option>
             </select>
           </label>
         </div>
@@ -290,6 +292,11 @@ export function UsersList() {
                     <span className="usr-badge-blogger">
                       <ShieldCheck className="usr-icon" />
                       Blogger
+                    </span>
+                  ) : user.role === Role.SalesManager ? (
+                    <span className="usr-badge-sales">
+                      <TrendingUp className="usr-icon" />
+                      Sales Manager
                     </span>
                   ) : (
                     <span className="usr-badge">

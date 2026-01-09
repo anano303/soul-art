@@ -198,6 +198,7 @@
   font-weight: 700;
   color: rgba(255, 255, 255, 0.85);
   background: linear-gradient(135deg, #012645, #452001);
+  border-radius: 50%;
 }
 
 .artist-hero__info {
@@ -2024,5 +2025,3 @@
     font-size: 0.8rem;
   }
 }
-
-

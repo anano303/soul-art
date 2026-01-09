@@ -12,6 +12,7 @@ import Link from "next/link";
 import { AlertTriangle } from "lucide-react";
 import "./order-review.css";
 import { useCart } from "@/modules/cart/context/cart-context";
+import Cookies from "js-cookie";
 
 export function OrderReview() {
   const {
@@ -164,6 +165,9 @@ export function OrderReview() {
         ageGroup: item.ageGroup,
       }));
 
+      // Sales Manager referral code from cookie
+      const salesRefCode = Cookies.get("sales_ref") || null;
+
       const response = await apiClient.post("/orders", {
         orderItems,
         shippingDetails: currentShippingDetails,
@@ -172,6 +176,7 @@ export function OrderReview() {
         taxPrice: 0, // საკომისიო მოხსნილია
         shippingPrice,
         totalPrice, // რეალური ფასი საკომისიოს გარეშე
+        salesRefCode,
       });
 
       await clearCart();

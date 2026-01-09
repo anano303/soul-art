@@ -97,27 +97,36 @@ self.addEventListener("fetch", (event) => {
   }
 
   event.respondWith(
-    caches.match(event.request).then((response) => {
-      if (response) {
-        return response;
-      }
-      return fetch(event.request).catch(() => {
-        // Network failed, return a simple offline response for navigation requests
+    (async () => {
+      try {
+        // First try cache
+        const cachedResponse = await caches.match(event.request);
+        if (cachedResponse) {
+          return cachedResponse;
+        }
+
+        // Then try network
+        const networkResponse = await fetch(event.request);
+        return networkResponse;
+      } catch (error) {
+        // Network failed
         if (event.request.mode === "navigate") {
-          return caches.match("/offline.html").catch(() => {
-            return new Response("Offline", {
-              status: 503,
-              statusText: "Service Unavailable",
-            });
+          const offlineResponse = await caches.match("/offline.html");
+          if (offlineResponse) {
+            return offlineResponse;
+          }
+          return new Response("Offline", {
+            status: 503,
+            statusText: "Service Unavailable",
           });
         }
-        // For other requests, just return a network error
+        // For other requests, return network error
         return new Response("Network error", {
           status: 503,
           statusText: "Service Unavailable",
         });
-      });
-    })
+      }
+    })()
   );
 });
 

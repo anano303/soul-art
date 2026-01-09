@@ -25,8 +25,12 @@ export default function AdminOrdersPage() {
       return;
     }
 
-    // Check if user has proper permissions (admin or seller)
-    if (userData.role !== Role.Admin && userData.role !== Role.Seller) {
+    // Check if user has proper permissions (admin, seller, or sales manager)
+    if (
+      userData.role !== Role.Admin &&
+      userData.role !== Role.Seller &&
+      userData.role !== Role.SalesManager
+    ) {
       console.log("User doesn't have permissions for orders page");
       router.push("/");
       return;
@@ -39,6 +43,10 @@ export default function AdminOrdersPage() {
     return <div className="loading-container">იტვირთება...</div>;
   }
 
+  // Get user data for passing to OrdersList
+  const userData = getUserData();
+  const isSalesManager = userData?.role === Role.SalesManager;
+
   return (
     <div
       className="responsive-container"
@@ -49,7 +57,7 @@ export default function AdminOrdersPage() {
         width: "100%",
       }}
     >
-      <OrdersList />
+      <OrdersList salesManagerMode={isSalesManager} />
     </div>
   );
 }

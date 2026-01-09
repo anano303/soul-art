@@ -1,0 +1,635 @@
+import {
+  Injectable,
+  Logger,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model, Types } from 'mongoose';
+import {
+  SalesCommission,
+  SalesCommissionDocument,
+  CommissionStatus,
+} from '../schemas/sales-commission.schema';
+import {
+  SalesTracking,
+  SalesTrackingDocument,
+  TrackingEventType,
+} from '../schemas/sales-tracking.schema';
+import { User, UserDocument } from '../../users/schemas/user.schema';
+import { Order, OrderDocument } from '../../orders/schemas/order.schema';
+import { Role } from '../../types/role.enum';
+
+@Injectable()
+export class SalesCommissionService {
+  private readonly logger = new Logger(SalesCommissionService.name);
+  private readonly COMMISSION_PERCENT = 5; // 5% კომისია
+
+  constructor(
+    @InjectModel(SalesCommission.name)
+    private commissionModel: Model<SalesCommissionDocument>,
+    @InjectModel(SalesTracking.name)
+    private trackingModel: Model<SalesTrackingDocument>,
+    @InjectModel(User.name) private userModel: Model<UserDocument>,
+    @InjectModel(Order.name) private orderModel: Model<OrderDocument>,
+  ) {}
+
+  /**
+   * Sales Manager-ისთვის უნიკალური რეფერალური კოდის გენერაცია
+   * ფორმატი: SM_XXXXXXXX
+   */
+  async generateSalesRefCode(userId: string): Promise<string> {
+    const user = await this.userModel.findById(userId);
+    if (!user) {
+      throw new NotFoundException('მომხმარებელი ვერ მოიძებნა');
+    }
+
+    if (user.role !== Role.SalesManager && user.role !== Role.Admin) {
+      throw new BadRequestException(
+        'მხოლოდ Sales Manager-ს შეუძლია რეფერალური კოდის გენერაცია',
+      );
+    }
+
+    // თუ უკვე აქვს კოდი, დავაბრუნოთ
+    if (user.salesRefCode) {
+      return user.salesRefCode;
+    }
+
+    let salesRefCode: string;
+    let attempts = 0;
+    const maxAttempts = 10;
+
+    do {
+      const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+      let code = '';
+      for (let i = 0; i < 8; i++) {
+        code += chars.charAt(Math.floor(Math.random() * chars.length));
+      }
+      salesRefCode = `SM_${code}`;
+      attempts++;
+
+      const existingUser = await this.userModel.findOne({ salesRefCode });
+      if (!existingUser) {
+        break;
+      }
+
+      if (attempts >= maxAttempts) {
+        throw new BadRequestException('რეფერალური კოდის გენერაციის შეცდომა');
+      }
+    } while (true);
+
+    await this.userModel.findByIdAndUpdate(userId, { salesRefCode });
+    this.logger.log(
+      `Generated sales ref code ${salesRefCode} for user ${userId}`,
+    );
+    return salesRefCode;
+  }
+
+  /**
+   * შეკვეთაზე კომისიის დარიცხვა
+   * გამოიძახება შეკვეთის შექმნისას
+   */
+  async processOrderCommission(
+    orderId: string,
+    salesRefCode: string,
+  ): Promise<SalesCommission | null> {
+    if (!salesRefCode || !salesRefCode.startsWith('SM_')) {
+      return null;
+    }
+
+    this.logger.log(
+      `Processing commission for order ${orderId} with ref code ${salesRefCode}`,
+    );
+
+    // მოვძებნოთ Sales Manager
+    const salesManager = await this.userModel.findOne({ salesRefCode });
+    if (!salesManager) {
+      this.logger.warn(`Sales manager not found for ref code: ${salesRefCode}`);
+      return null;
+    }
+
+    if (
+      salesManager.role !== Role.SalesManager &&
+      salesManager.role !== Role.Admin
+    ) {
+      this.logger.warn(
+        `User ${salesManager.email} has ref code but is not a Sales Manager`,
+      );
+      return null;
+    }
+
+    // მოვძებნოთ შეკვეთა
+    const order = await this.orderModel.findById(orderId).populate('user');
+    if (!order) {
+      this.logger.error(`Order not found: ${orderId}`);
+      return null;
+    }
+
+    // შევამოწმოთ არ არსებობს თუ არა უკვე კომისია ამ შეკვეთაზე
+    const existingCommission = await this.commissionModel.findOne({
+      order: orderId,
+    });
+    if (existingCommission) {
+      this.logger.warn(`Commission already exists for order: ${orderId}`);
+      return existingCommission;
+    }
+
+    // გამოვთვალოთ კომისია
+    const commissionAmount = (order.totalPrice * this.COMMISSION_PERCENT) / 100;
+
+    // Get user ID - order.user can be populated or just an ObjectId
+    const customerId = order.user
+      ? typeof order.user === 'object' && '_id' in order.user
+        ? (order.user as any)._id
+        : order.user
+      : null;
+
+    // შევქმნათ კომისიის ჩანაწერი
+    const commission = await this.commissionModel.create({
+      salesManager: salesManager._id,
+      order: order._id,
+      customer: customerId,
+      guestEmail: order.guestInfo?.email || null,
+      salesRefCode,
+      orderTotal: order.totalPrice,
+      commissionPercent: this.COMMISSION_PERCENT,
+      commissionAmount,
+      status: CommissionStatus.PENDING,
+    });
+
+    this.logger.log(
+      `Commission created: ${commission._id}, amount: ${commissionAmount} GEL for sales manager ${salesManager.email}`,
+    );
+
+    return commission;
+  }
+
+  /**
+   * შეკვეთის მიტანისას კომისიის დამტკიცება
+   */
+  async approveCommission(orderId: string): Promise<SalesCommission | null> {
+    const commission = await this.commissionModel.findOne({ order: orderId });
+    if (!commission) {
+      return null;
+    }
+
+    if (commission.status !== CommissionStatus.PENDING) {
+      return commission;
+    }
+
+    commission.status = CommissionStatus.APPROVED;
+    commission.approvedAt = new Date();
+    await commission.save();
+
+    // დავამატოთ თანხა Sales Manager-ის ბალანსზე
+    await this.userModel.findByIdAndUpdate(commission.salesManager, {
+      $inc: {
+        salesCommissionBalance: commission.commissionAmount,
+        totalSalesCommissions: commission.commissionAmount,
+      },
+    });
+
+    this.logger.log(
+      `Commission approved for order ${orderId}, amount: ${commission.commissionAmount} GEL`,
+    );
+
+    return commission;
+  }
+
+  /**
+   * შეკვეთის გაუქმებისას კომისიის გაუქმება
+   */
+  async cancelCommission(orderId: string): Promise<SalesCommission | null> {
+    const commission = await this.commissionModel.findOne({ order: orderId });
+    if (!commission) {
+      return null;
+    }
+
+    // თუ უკვე დამტკიცებულია, ჩამოვაჭრათ ბალანსიდან
+    if (commission.status === CommissionStatus.APPROVED) {
+      await this.userModel.findByIdAndUpdate(commission.salesManager, {
+        $inc: {
+          salesCommissionBalance: -commission.commissionAmount,
+        },
+      });
+    }
+
+    commission.status = CommissionStatus.CANCELLED;
+    await commission.save();
+
+    this.logger.log(`Commission cancelled for order ${orderId}`);
+
+    return commission;
+  }
+
+  /**
+   * Sales Manager-ის კომისიების მიღება
+   */
+  async getManagerCommissions(
+    salesManagerId: string,
+    page = 1,
+    limit = 20,
+    status?: CommissionStatus,
+  ): Promise<{
+    commissions: SalesCommission[];
+    total: number;
+    page: number;
+    pages: number;
+  }> {
+    const query: any = { salesManager: new Types.ObjectId(salesManagerId) };
+    if (status) {
+      query.status = status;
+    }
+
+    const total = await this.commissionModel.countDocuments(query);
+    const pages = Math.ceil(total / limit);
+    const skip = (page - 1) * limit;
+
+    const commissions = await this.commissionModel
+      .find(query)
+      .populate({
+        path: 'order',
+        select:
+          'totalPrice status createdAt isPaid isDelivered paidAt deliveredAt shippingAddress guestInfo orderItems user deliveryType',
+        populate: [
+          {
+            path: 'user',
+            select: 'name email phoneNumber',
+          },
+          {
+            path: 'orderItems.productId',
+            select: 'name images brand user deliveryType',
+            populate: {
+              path: 'user',
+              select: 'name storeName phoneNumber',
+            },
+          },
+        ],
+      })
+      .populate('customer', 'name email phoneNumber')
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
+
+    return { commissions, total, page, pages };
+  }
+
+  /**
+   * Sales Manager-ის სტატისტიკა
+   */
+  async getManagerStats(salesManagerId: string): Promise<{
+    totalCommissions: number;
+    pendingAmount: number;
+    approvedAmount: number;
+    paidAmount: number;
+    totalOrders: number;
+  }> {
+    const stats = await this.commissionModel.aggregate([
+      { $match: { salesManager: new Types.ObjectId(salesManagerId) } },
+      {
+        $group: {
+          _id: '$status',
+          total: { $sum: '$commissionAmount' },
+          count: { $sum: 1 },
+        },
+      },
+    ]);
+
+    const result = {
+      totalCommissions: 0,
+      pendingAmount: 0,
+      approvedAmount: 0,
+      paidAmount: 0,
+      totalOrders: 0,
+    };
+
+    for (const stat of stats) {
+      result.totalOrders += stat.count;
+      result.totalCommissions += stat.total;
+
+      switch (stat._id) {
+        case CommissionStatus.PENDING:
+          result.pendingAmount = stat.total;
+          break;
+        case CommissionStatus.APPROVED:
+          result.approvedAmount = stat.total;
+          break;
+        case CommissionStatus.PAID:
+          result.paidAmount = stat.total;
+          break;
+      }
+    }
+
+    return result;
+  }
+
+  /**
+   * ყველა Sales Manager-ის სტატისტიკა (Admin-ისთვის)
+   */
+  async getAllManagersStats(): Promise<
+    Array<{
+      manager: User;
+      stats: {
+        totalCommissions: number;
+        pendingAmount: number;
+        approvedAmount: number;
+        totalOrders: number;
+      };
+    }>
+  > {
+    const salesManagers = await this.userModel.find({
+      role: Role.SalesManager,
+    });
+
+    const result = [];
+    for (const manager of salesManagers) {
+      const stats = await this.getManagerStats(manager._id.toString());
+      result.push({ manager, stats });
+    }
+
+    return result;
+  }
+
+  /**
+   * რეფერალური კოდის ვალიდაცია
+   */
+  async validateSalesRefCode(code: string): Promise<boolean> {
+    if (!code || !code.startsWith('SM_')) {
+      return false;
+    }
+
+    const user = await this.userModel.findOne({
+      salesRefCode: code,
+      role: { $in: [Role.SalesManager, Role.Admin] },
+    });
+
+    return !!user;
+  }
+
+  // ========== TRACKING METHODS ==========
+
+  /**
+   * ტრეკინგ ივენტის დამატება
+   */
+  async trackEvent(data: {
+    salesRefCode: string;
+    eventType: TrackingEventType;
+    visitorId?: string;
+    userId?: string;
+    email?: string;
+    orderId?: string;
+    orderAmount?: number;
+    productId?: string;
+    userAgent?: string;
+    ipAddress?: string;
+    referrerUrl?: string;
+    landingPage?: string;
+  }): Promise<SalesTracking | null> {
+    if (!data.salesRefCode || !data.salesRefCode.startsWith('SM_')) {
+      return null;
+    }
+
+    // მოვძებნოთ Sales Manager
+    const salesManager = await this.userModel.findOne({
+      salesRefCode: data.salesRefCode,
+    });
+    if (!salesManager) {
+      this.logger.warn(
+        `Sales manager not found for ref code: ${data.salesRefCode}`,
+      );
+      return null;
+    }
+
+    const tracking = await this.trackingModel.create({
+      salesManager: salesManager._id,
+      salesRefCode: data.salesRefCode,
+      eventType: data.eventType,
+      visitorId: data.visitorId,
+      user: data.userId ? new Types.ObjectId(data.userId) : undefined,
+      email: data.email,
+      orderId: data.orderId ? new Types.ObjectId(data.orderId) : undefined,
+      orderAmount: data.orderAmount,
+      productId: data.productId,
+      userAgent: data.userAgent,
+      ipAddress: data.ipAddress,
+      referrerUrl: data.referrerUrl,
+      landingPage: data.landingPage,
+    });
+
+    this.logger.log(
+      `Tracked ${data.eventType} event for ref code ${data.salesRefCode}`,
+    );
+
+    return tracking;
+  }
+
+  /**
+   * Sales Manager-ის ფანელის (funnel) სტატისტიკა
+   */
+  async getManagerFunnelStats(
+    salesManagerId: string,
+    startDate?: Date,
+    endDate?: Date,
+  ): Promise<{
+    visits: number;
+    uniqueVisitors: number;
+    registrations: number;
+    addToCarts: number;
+    checkoutStarts: number;
+    purchases: number;
+    conversionRate: number;
+    totalRevenue: number;
+  }> {
+    const matchStage: any = {
+      salesManager: new Types.ObjectId(salesManagerId),
+    };
+
+    if (startDate || endDate) {
+      matchStage.createdAt = {};
+      if (startDate) matchStage.createdAt.$gte = startDate;
+      if (endDate) matchStage.createdAt.$lte = endDate;
+    }
+
+    // აგრეგაცია ივენტების ტიპის მიხედვით
+    const eventCounts = await this.trackingModel.aggregate([
+      { $match: matchStage },
+      {
+        $group: {
+          _id: '$eventType',
+          count: { $sum: 1 },
+          totalAmount: { $sum: '$orderAmount' },
+        },
+      },
+    ]);
+
+    // უნიკალური ვიზიტორები
+    const uniqueVisitors = await this.trackingModel.aggregate([
+      {
+        $match: {
+          ...matchStage,
+          eventType: TrackingEventType.VISIT,
+          visitorId: { $ne: null },
+        },
+      },
+      { $group: { _id: '$visitorId' } },
+      { $count: 'count' },
+    ]);
+
+    const result = {
+      visits: 0,
+      uniqueVisitors: uniqueVisitors[0]?.count || 0,
+      registrations: 0,
+      addToCarts: 0,
+      checkoutStarts: 0,
+      purchases: 0,
+      conversionRate: 0,
+      totalRevenue: 0,
+    };
+
+    for (const event of eventCounts) {
+      switch (event._id) {
+        case TrackingEventType.VISIT:
+          result.visits = event.count;
+          break;
+        case TrackingEventType.REGISTRATION:
+          result.registrations = event.count;
+          break;
+        case TrackingEventType.ADD_TO_CART:
+          result.addToCarts = event.count;
+          break;
+        case TrackingEventType.CHECKOUT_START:
+          result.checkoutStarts = event.count;
+          break;
+        case TrackingEventType.PURCHASE:
+          result.purchases = event.count;
+          result.totalRevenue = event.totalAmount || 0;
+          break;
+      }
+    }
+
+    // კონვერსიის მაჩვენებელი (ვიზიტიდან შეძენამდე)
+    if (result.visits > 0) {
+      result.conversionRate = Number(
+        ((result.purchases / result.visits) * 100).toFixed(2),
+      );
+    }
+
+    return result;
+  }
+
+  /**
+   * Sales Manager-ის დეტალური ტრეკინგ მონაცემები
+   */
+  async getManagerTrackingDetails(
+    salesManagerId: string,
+    eventType?: TrackingEventType,
+    page = 1,
+    limit = 50,
+  ): Promise<{
+    events: SalesTracking[];
+    total: number;
+    page: number;
+    pages: number;
+  }> {
+    const query: any = { salesManager: new Types.ObjectId(salesManagerId) };
+    if (eventType) {
+      query.eventType = eventType;
+    }
+
+    const total = await this.trackingModel.countDocuments(query);
+    const pages = Math.ceil(total / limit);
+    const skip = (page - 1) * limit;
+
+    const events = await this.trackingModel
+      .find(query)
+      .populate('user', 'name email')
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
+
+    return { events, total, page, pages };
+  }
+
+  /**
+   * დღიური სტატისტიკა გრაფიკისთვის
+   */
+  async getManagerDailyStats(
+    salesManagerId: string,
+    days = 30,
+  ): Promise<
+    Array<{
+      date: string;
+      visits: number;
+      registrations: number;
+      purchases: number;
+      revenue: number;
+      commission: number;
+    }>
+  > {
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - days);
+    startDate.setHours(0, 0, 0, 0);
+
+    const stats = await this.trackingModel.aggregate([
+      {
+        $match: {
+          salesManager: new Types.ObjectId(salesManagerId),
+          createdAt: { $gte: startDate },
+        },
+      },
+      {
+        $group: {
+          _id: {
+            date: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } },
+            eventType: '$eventType',
+          },
+          count: { $sum: 1 },
+          revenue: { $sum: '$orderAmount' },
+        },
+      },
+      {
+        $group: {
+          _id: '$_id.date',
+          events: {
+            $push: {
+              type: '$_id.eventType',
+              count: '$count',
+              revenue: '$revenue',
+            },
+          },
+        },
+      },
+      { $sort: { _id: 1 } },
+    ]);
+
+    // ფორმატირება
+    return stats.map((day) => {
+      const result = {
+        date: day._id,
+        visits: 0,
+        registrations: 0,
+        purchases: 0,
+        revenue: 0,
+        commission: 0,
+      };
+
+      for (const event of day.events) {
+        switch (event.type) {
+          case TrackingEventType.VISIT:
+            result.visits = event.count;
+            break;
+          case TrackingEventType.REGISTRATION:
+            result.registrations = event.count;
+            break;
+          case TrackingEventType.PURCHASE:
+            result.purchases = event.count;
+            result.revenue = event.revenue || 0;
+            result.commission = (event.revenue || 0) * 0.05; // 5% commission
+            break;
+        }
+      }
+
+      return result;
+    });
+  }
+}

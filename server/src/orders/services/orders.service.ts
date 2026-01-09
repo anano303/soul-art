@@ -3,6 +3,9 @@ import {
   Injectable,
   NotFoundException,
   Logger,
+  Inject,
+  forwardRef,
+  Optional,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { FilterQuery, Model, Types, ClientSession } from 'mongoose';
@@ -20,6 +23,8 @@ import {
 import { Role } from '@/types/role.enum';
 import { InjectConnection } from '@nestjs/mongoose';
 import { Connection } from 'mongoose';
+import { SalesCommissionService } from '../../sales-commission/services/sales-commission.service';
+
 @Injectable()
 export class OrdersService {
   private readonly logger = new Logger(OrdersService.name);
@@ -32,6 +37,9 @@ export class OrdersService {
     private emailService: EmailService,
     private readonly pushNotificationService: PushNotificationService,
     @InjectConnection() private connection: Connection,
+    @Optional()
+    @Inject(forwardRef(() => SalesCommissionService))
+    private readonly salesCommissionService?: SalesCommissionService,
   ) {}
 
   private getPrimaryAppUrl(): string {
@@ -278,7 +286,7 @@ export class OrdersService {
     }
   }
   async create(
-    orderAttrs: Partial<Order>,
+    orderAttrs: Partial<Order> & { salesRefCode?: string },
     userId: string,
     externalOrderId?: string,
   ): Promise<OrderDocument> {
@@ -290,6 +298,7 @@ export class OrdersService {
       taxPrice,
       shippingPrice,
       totalPrice,
+      salesRefCode,
     } = orderAttrs;
     if (orderItems && orderItems.length < 1)
       throw new BadRequestException('No order items received.');
@@ -421,6 +430,7 @@ export class OrdersService {
               shippingPrice,
               totalPrice,
               externalOrderId,
+              salesRefCode: salesRefCode || null,
               stockReservationExpires: new Date(Date.now() + 10 * 60 * 1000), // 10 minutes from now
             },
           ],
@@ -438,6 +448,7 @@ export class OrdersService {
   async createGuestOrder(
     orderAttrs: Partial<Order> & {
       guestInfo: { email: string; phoneNumber: string; fullName: string };
+      salesRefCode?: string;
     },
     externalOrderId?: string,
   ): Promise<OrderDocument> {
@@ -450,6 +461,7 @@ export class OrdersService {
       shippingPrice,
       totalPrice,
       guestInfo,
+      salesRefCode,
     } = orderAttrs;
 
     if (orderItems && orderItems.length < 1)
@@ -591,6 +603,7 @@ export class OrdersService {
               shippingPrice,
               totalPrice,
               externalOrderId,
+              salesRefCode: salesRefCode || null,
               stockReservationExpires: new Date(Date.now() + 10 * 60 * 1000), // 10 minutes from now
             },
           ],
@@ -774,6 +787,33 @@ export class OrdersService {
     // No need to reduce stock again here to prevent double reduction
     const updatedOrder = await order.save();
 
+    // Sales Manager კომისიის შექმნა (თუ არის salesRefCode)
+    this.logger.log(
+      `[SalesCommission] Checking: salesRefCode=${order.salesRefCode}, hasService=${!!this.salesCommissionService}`,
+    );
+    if (order.salesRefCode && this.salesCommissionService) {
+      try {
+        this.logger.log(
+          `[SalesCommission] Creating commission for order ${id} with ref ${order.salesRefCode}`,
+        );
+        await this.salesCommissionService.processOrderCommission(
+          id,
+          order.salesRefCode,
+        );
+        this.logger.log(
+          `[SalesCommission] SUCCESS: Commission created for order ${id}`,
+        );
+      } catch (error) {
+        this.logger.error(
+          `[SalesCommission] FAILED for order ${id}: ${error.message}`,
+        );
+      }
+    } else {
+      this.logger.warn(
+        `[SalesCommission] SKIPPED: No salesRefCode or no service for order ${id}`,
+      );
+    }
+
     try {
       await this.sendOrderPaidNotifications(updatedOrder._id.toString());
     } catch (error) {
@@ -808,6 +848,18 @@ export class OrdersService {
       this.logger.log(`Balance processed for delivered order: ${id}`);
     } catch (error) {
       this.logger.error(`Failed to process balance for order ${id}:`, error);
+    }
+
+    // Sales Manager კომისიის დამტკიცება (თუ არის)
+    if (this.salesCommissionService) {
+      try {
+        await this.salesCommissionService.approveCommission(id);
+        this.logger.log(`Sales commission approved for delivered order: ${id}`);
+      } catch (error) {
+        this.logger.error(
+          `Failed to approve sales commission for order ${id}: ${error.message}`,
+        );
+      }
     }
 
     // Send delivery confirmation email to customer

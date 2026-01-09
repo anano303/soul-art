@@ -24,12 +24,27 @@ const protectedPaths = [
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  
+
   // Check for authentication tokens - Next.js 16 compatible way
   const accessToken = request.cookies.get("access_token");
   const refreshToken = request.cookies.get("refresh_token");
   const hasTokens = !!(accessToken?.value || refreshToken?.value);
   const isAuthenticated = hasTokens;
+
+  // Sales Manager referral tracking - save ref code to cookie (7 days)
+  const refCode = request.nextUrl.searchParams.get("ref");
+  let response: NextResponse | null = null;
+
+  if (refCode && refCode.startsWith("SM_")) {
+    response = NextResponse.next();
+    response.cookies.set("sales_ref", refCode, {
+      maxAge: 60 * 60 * 24 * 7, // 7 days
+      path: "/",
+      httpOnly: false, // Allow JS access for checkout
+      sameSite: "lax",
+      secure: process.env.NODE_ENV === "production",
+    });
+  }
 
   // Skip middleware for non-relevant paths (like api, _next, static files)
   if (
@@ -38,24 +53,25 @@ export function middleware(request: NextRequest) {
     pathname.startsWith("/checkout") ||
     pathname.includes(".")
   ) {
-    return NextResponse.next();
+    return response || NextResponse.next();
   }
 
   // თუ მომხმარებელი ავტორიზებულია და publicPaths-ია, გავუშვათ
+  // თუ მომხმარებელი ავტორიზებულია და publicPaths-ია, გავუშვათ
   if (isAuthenticated && publicPaths.includes(pathname)) {
-    return NextResponse.next();
+    return response || NextResponse.next();
   }
 
   // თუ მომხმარებელი **არ არის** ავტორიზებული და სარეზერვო პაროლის გვერდზეა, უნდა შევუშვათ
   if (!isAuthenticated && publicPaths.includes(pathname)) {
-    return NextResponse.next();
+    return response || NextResponse.next();
   }
 
   // Allow guest access to specific order pages with email parameter
   if (!isAuthenticated && pathname.match(/^\/orders\/[^\/]+$/)) {
     const email = request.nextUrl.searchParams.get("email");
     if (email) {
-      return NextResponse.next();
+      return response || NextResponse.next();
     }
   }
 
@@ -64,41 +80,57 @@ export function middleware(request: NextRequest) {
     !isAuthenticated &&
     protectedPaths.some((path) => pathname.startsWith(path))
   ) {
-    return NextResponse.redirect(new URL("/login", request.url));
+    const redirectResponse = NextResponse.redirect(
+      new URL("/login", request.url)
+    );
+    // Preserve sales_ref cookie on redirect
+    if (response) {
+      const salesRef = response.cookies.get("sales_ref");
+      if (salesRef) {
+        redirectResponse.cookies.set("sales_ref", salesRef.value, {
+          maxAge: 60 * 60 * 24 * 7,
+          path: "/",
+          httpOnly: false,
+          sameSite: "lax",
+          secure: process.env.NODE_ENV === "production",
+        });
+      }
+    }
+    return redirectResponse;
   }
 
   // Filter out Cloudflare cookies in development mode to prevent domain mismatch
   if (process.env.NODE_ENV === "development") {
-    const response = NextResponse.next();
+    const devResponse = response || NextResponse.next();
 
     // Remove problematic Cloudflare cookies
-    response.cookies.delete("__cf_bm");
-    response.cookies.delete("__cfruid");
-    response.cookies.delete("cf_clearance");
+    devResponse.cookies.delete("__cf_bm");
+    devResponse.cookies.delete("__cfruid");
+    devResponse.cookies.delete("cf_clearance");
 
-    return response;
+    return devResponse;
   }
 
   // Add performance headers in production
-  const response = NextResponse.next();
+  const finalResponse = response || NextResponse.next();
 
   // Cache static assets aggressively
   if (
     pathname.match(/\.(js|css|woff2?|ttf|eot|svg|png|jpg|jpeg|gif|webp|ico)$/)
   ) {
-    response.headers.set(
+    finalResponse.headers.set(
       "Cache-Control",
       "public, max-age=31536000, immutable"
     );
   }
 
   // Add preload hints for critical resources
-  response.headers.set(
+  finalResponse.headers.set(
     "Link",
     "</van-gogh.webp>; rel=preload; as=image; fetchpriority=high"
   );
 
-  return response;
+  return finalResponse;
 }
 
 export const config = {
