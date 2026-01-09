@@ -555,3 +555,19 @@
     font-size: 0.85rem;
   }
 }
+
+/* Sales Ref Badge */
+.sales-ref-badge {
+  display: inline-block;
+  background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+  color: white;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  font-family: monospace;
+}
+
+.text-muted {
+  color: #9ca3af;
+}
