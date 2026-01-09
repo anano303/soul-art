@@ -412,6 +412,14 @@ export default function UserMenu({
                   <Users size={18} />
                   <span>{t("navigation.users")}</span>
                 </Link>
+                <Link
+                  href="/admin/sales-managers"
+                  className="dropdown-item"
+                  onClick={handleLinkClick}
+                >
+                  <DollarSign size={18} />
+                  <span>გაყიდვების მენეჯერები</span>
+                </Link>
               </>
             )}
 
