@@ -97,6 +97,24 @@ export class SalesCommissionController {
   }
 
   /**
+   * კონკრეტული მენეჯერის კომისიები (Admin-ისთვის)
+   */
+  @Get('admin/manager/:managerId/commissions')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.Admin)
+  async getManagerCommissionsAdmin(
+    @Param('managerId') managerId: string,
+    @Query('page') page = '1',
+    @Query('limit') limit = '50',
+  ) {
+    return this.salesCommissionService.getManagerCommissions(
+      managerId,
+      parseInt(page),
+      parseInt(limit),
+    );
+  }
+
+  /**
    * რეფერალური კოდის ვალიდაცია (Public)
    */
   @Get('validate/:code')

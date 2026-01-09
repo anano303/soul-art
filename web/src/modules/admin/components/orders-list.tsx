@@ -140,6 +140,7 @@ export function OrdersList({ salesManagerMode = false }: OrdersListProps) {
                 <th>ID</th>
                 <th>USER</th>
                 <th>SELLER</th>
+                {userRole === "admin" && <th>SALES REF</th>}
                 <th>DATE</th>
                 <th>TOTAL</th>
                 <th>DELIVERY TYPE</th>
@@ -213,6 +214,17 @@ export function OrdersList({ salesManagerMode = false }: OrdersListProps) {
                       <span className="text-muted">No products</span>
                     )}
                   </td>
+                  {userRole === "admin" && (
+                    <td>
+                      {(order as any).salesRefCode ? (
+                        <code className="sales-ref-badge">
+                          {(order as any).salesRefCode}
+                        </code>
+                      ) : (
+                        <span className="text-muted">-</span>
+                      )}
+                    </td>
+                  )}
                   <td>
                     {order.createdAt
                       ? new Date(order.createdAt).toLocaleDateString()
