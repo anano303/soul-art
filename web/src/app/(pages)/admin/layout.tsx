@@ -24,7 +24,8 @@ export default function AdminLayout({
       return (
         normalized === Role.Admin ||
         normalized === Role.Seller ||
-        normalized === Role.Blogger
+        normalized === Role.Blogger ||
+        normalized === Role.SalesManager
       );
     };
 

@@ -342,7 +342,8 @@ export default function UserMenu({
 
             {(user.role?.toLowerCase() === Role.Admin ||
               user.role?.toLowerCase() === Role.Seller ||
-              user.role?.toLowerCase() === Role.Blogger) && (
+              user.role?.toLowerCase() === Role.Blogger ||
+              user.role?.toLowerCase() === Role.SalesManager) && (
               <>
                 {/* <hr /> */}
                 <div className="dropdown-label">
@@ -415,7 +416,8 @@ export default function UserMenu({
             )}
 
             {(user.role?.toLowerCase() === Role.Admin ||
-              user.role?.toLowerCase() === Role.Seller) && (
+              user.role?.toLowerCase() === Role.Seller ||
+              user.role?.toLowerCase() === Role.SalesManager) && (
               <Link
                 href="/admin/orders"
                 className="dropdown-item"
@@ -423,6 +425,30 @@ export default function UserMenu({
               >
                 <ShoppingBag size={18} />
                 <span>{t("navigation.orders")}</span>
+              </Link>
+            )}
+
+            {/* Sales Manager Dashboard */}
+            {user.role?.toLowerCase() === Role.SalesManager && (
+              <Link
+                href="/admin/sales-manager"
+                className="dropdown-item"
+                onClick={handleLinkClick}
+              >
+                <DollarSign size={18} />
+                <span>კომისიები</span>
+              </Link>
+            )}
+
+            {/* Sales Manager Analytics */}
+            {user.role?.toLowerCase() === Role.SalesManager && (
+              <Link
+                href="/admin/sales-analytics"
+                className="dropdown-item"
+                onClick={handleLinkClick}
+              >
+                <BarChart3 size={18} />
+                <span>ანალიტიკა</span>
               </Link>
             )}
 

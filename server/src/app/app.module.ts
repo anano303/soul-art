@@ -26,6 +26,7 @@ import { YoutubeModule } from '@/youtube/youtube.module';
 import { AnalyticsModule } from '../analytics/analytics.module';
 import { DonationsModule } from '../donations/donations.module';
 import { ChatModule } from '../chat/chat.module';
+import { SalesCommissionModule } from '../sales-commission/sales-commission.module';
 
 @Module({
   imports: [
@@ -57,6 +58,7 @@ import { ChatModule } from '../chat/chat.module';
     AnalyticsModule,
     DonationsModule,
     ChatModule,
+    SalesCommissionModule,
   ],
   controllers: [AppController],
   providers: [AppService, GoogleStrategy],

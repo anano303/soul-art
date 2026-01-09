@@ -124,6 +124,18 @@ export class User {
   @Prop({ type: Number, default: 0 })
   referralBalance?: number;
 
+  // Sales Manager კომისიების ბალანსი
+  @Prop({ type: Number, default: 0 })
+  salesCommissionBalance?: number;
+
+  // Sales Manager-ის მთლიანი მიღებული კომისიები
+  @Prop({ type: Number, default: 0 })
+  totalSalesCommissions?: number;
+
+  // Sales Manager-ის უნიკალური რეფერალური კოდი (SM_XXXXXXXX)
+  @Prop({ type: String, unique: true, sparse: true })
+  salesRefCode?: string;
+
   // რეფერალების სისტემა
   @Prop({ type: String, unique: true, sparse: true })
   referralCode?: string; // უნიკალური რეფერალური კოდი

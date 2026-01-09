@@ -74,7 +74,7 @@ export default function Header() {
 
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
-      
+
       // Calculate opacity linearly: 0 at top, 1 at threshold
       const opacity = Math.min(currentScrollY / SCROLL_THRESHOLD, 1);
       setHeaderOpacity(opacity);
@@ -105,13 +105,15 @@ export default function Header() {
 
   return (
     <>
-      <div 
+      <div
         className={`header-placeholder ${
           useTransparentHeader ? "header-placeholder--transparent" : ""
         }`}
       />
-      <header 
-        className={`header ${useTransparentHeader ? "header--transparent" : ""}`}
+      <header
+        className={`header ${
+          useTransparentHeader ? "header--transparent" : ""
+        }`}
         style={
           useTransparentHeader
             ? { backgroundColor: `rgba(1, 38, 69, ${headerOpacity})` }
@@ -135,6 +137,7 @@ export default function Header() {
                 width={200}
                 height={50}
                 sizes="(max-width: 768px) 120px, 200px"
+                priority
                 style={{
                   objectFit: "contain",
                   maxWidth: "100%",
@@ -147,13 +150,11 @@ export default function Header() {
 
         {/* Centered logo when back button is visible (mobile) */}
         {showBackButton && (
-          <Link 
-            href="/" 
+          <Link
+            href="/"
             className="header-center-logo"
             style={
-              useTransparentHeader
-                ? { opacity: headerOpacity }
-                : undefined
+              useTransparentHeader ? { opacity: headerOpacity } : undefined
             }
           >
             <Image

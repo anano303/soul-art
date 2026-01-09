@@ -1183,6 +1183,7 @@ export class UsersService {
       [Role.Seller]: 0,
       [Role.User]: 0,
       [Role.Blogger]: 0,
+      [Role.SalesManager]: 0,
     };
 
     roleAggregation.forEach(({ _id, count }) => {
@@ -1343,6 +1344,31 @@ export class UsersService {
       if (updateDto.password && updateDto.password.trim() !== '') {
         this.logger.log('Updating password for user', id);
         updateData.password = await hashPassword(updateDto.password);
+      }
+
+      // სელერის ველების განახლება
+      if (updateDto.storeName !== undefined) {
+        updateData.storeName = updateDto.storeName;
+      }
+
+      if (updateDto.ownerFirstName !== undefined) {
+        updateData.ownerFirstName = updateDto.ownerFirstName;
+      }
+
+      if (updateDto.ownerLastName !== undefined) {
+        updateData.ownerLastName = updateDto.ownerLastName;
+      }
+
+      if (updateDto.phoneNumber !== undefined) {
+        updateData.phoneNumber = updateDto.phoneNumber;
+      }
+
+      if (updateDto.identificationNumber !== undefined) {
+        updateData.identificationNumber = updateDto.identificationNumber;
+      }
+
+      if (updateDto.accountNumber !== undefined) {
+        updateData.accountNumber = updateDto.accountNumber;
       }
 
       if (Object.keys(updateData).length === 0) {

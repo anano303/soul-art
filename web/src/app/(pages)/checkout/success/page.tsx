@@ -9,6 +9,7 @@ import Link from "next/link";
 import "./page.css";
 import { trackPurchase } from "@/components/MetaPixel";
 import { trackPurchaseComplete } from "@/lib/ga4-analytics";
+import { trackPurchase as trackSalesPurchase } from "@/hooks/use-sales-tracking";
 
 interface StoredOrderSummary {
   orderId: string;
@@ -122,6 +123,31 @@ function CheckoutSuccessContent() {
       }
     }
   }, [searchParams, guestInfo, clearCheckout]);
+
+  // Sales Manager Purchase tracking - waits for orderSummary to get correct amount
+  useEffect(() => {
+    if (!orderId) return;
+
+    const salesTracked = sessionStorage.getItem(
+      `sales_purchase_tracked_${orderId}`
+    );
+    if (salesTracked) return;
+
+    // Get order amount - from orderSummary or fetch from API
+    const orderAmount = orderSummary?.totalPrice || 0;
+
+    console.log("[SalesPurchaseTrack] Tracking purchase:", {
+      orderId,
+      orderAmount,
+      email: guestEmail || user?.email,
+      hasCookie:
+        typeof document !== "undefined" &&
+        document.cookie.includes("sales_ref"),
+    });
+
+    trackSalesPurchase(orderId, orderAmount, guestEmail || user?.email);
+    sessionStorage.setItem(`sales_purchase_tracked_${orderId}`, "true");
+  }, [orderId, orderSummary, guestEmail, user?.email]);
 
   useEffect(() => {
     if (!orderId || !orderSummary || hasTrackedPurchaseRef.current) {

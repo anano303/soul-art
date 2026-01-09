@@ -71,6 +71,7 @@ import { GA4UserTracker } from "@/components/ga4-user-tracker";
 import { PageViewTracker } from "@/components/page-view-tracker";
 import { VisitorTracker } from "@/components/visitor-tracker";
 import { IOSGesturePrevention } from "@/components/ios-gesture-prevention";
+import { SalesTracker } from "@/components/SalesTracker";
 import { PWAInstallPrompt } from "@/components/pwa-install-prompt/pwa-install-prompt";
 import { PushNotificationManager } from "@/components/push-notifications/push-notifications";
 import PWAManager from "@/components/pwa-manager";
@@ -267,14 +268,6 @@ export default function RootLayout({
           crossOrigin="anonymous"
         />
 
-        {/* Preload LCP hero image */}
-        <link
-          rel="preload"
-          as="image"
-          href="/van-gogh.webp"
-          fetchPriority="high"
-        />
-
         {/* DNS prefetch for external resources only */}
         <link rel="dns-prefetch" href="//connect.facebook.net" />
         <link rel="dns-prefetch" href="//www.googletagmanager.com" />
@@ -426,6 +419,9 @@ export default function RootLayout({
 
                   {/* Visitor Tracking with IP */}
                   <VisitorTracker />
+
+                  {/* Sales Manager Referral Tracking */}
+                  <SalesTracker />
 
                   {/* iOS Back Swipe Prevention */}
                   <IOSGesturePrevention />

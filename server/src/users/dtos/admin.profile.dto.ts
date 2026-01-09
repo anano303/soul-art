@@ -27,4 +27,29 @@ export class AdminProfileDto {
   @IsEnum(Role)
   @Transform(({ value }) => value as Role)
   role: Role;
+
+  // სელერის ველები
+  @IsOptional()
+  @IsString()
+  storeName?: string;
+
+  @IsOptional()
+  @IsString()
+  ownerFirstName?: string;
+
+  @IsOptional()
+  @IsString()
+  ownerLastName?: string;
+
+  @IsOptional()
+  @IsString()
+  phoneNumber?: string;
+
+  @IsOptional()
+  @IsString()
+  identificationNumber?: string;
+
+  @IsOptional()
+  @IsString()
+  accountNumber?: string;
 }

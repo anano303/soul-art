@@ -1,0 +1,452 @@
+.sales-analytics-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+}
+
+.sales-analytics-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 30px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sales-analytics-header h1 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #fff;
+  font-size: 1.8rem;
+  margin: 0;
+}
+
+.back-button,
+.refresh-button {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.back-button {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+.back-button:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.refresh-button {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #fff;
+}
+
+.refresh-button:hover {
+  transform: scale(1.02);
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+}
+
+/* Date Range Filter */
+.date-range-filter {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 30px;
+  padding: 12px 16px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+}
+
+.date-range-filter svg {
+  color: #667eea;
+}
+
+.date-range-filter button {
+  padding: 8px 16px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.7);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.date-range-filter button:hover {
+  border-color: #667eea;
+  color: #fff;
+}
+
+.date-range-filter button.active {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-color: transparent;
+  color: #fff;
+}
+
+/* Funnel Section */
+.funnel-section {
+  margin-bottom: 40px;
+}
+
+.funnel-section h2,
+.visual-funnel-section h2,
+.daily-stats-section h2 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #fff;
+  font-size: 1.3rem;
+  margin-bottom: 20px;
+}
+
+.funnel-grid {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  overflow-x: auto;
+  padding: 10px 0;
+}
+
+.funnel-card {
+  flex: 1;
+  min-width: 130px;
+  padding: 20px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  text-align: center;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.funnel-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+}
+
+.funnel-card.visits {
+  border-color: #4ade80;
+}
+
+.funnel-card.registrations {
+  border-color: #60a5fa;
+}
+
+.funnel-card.add-to-cart {
+  border-color: #fbbf24;
+}
+
+.funnel-card.checkout {
+  border-color: #f472b6;
+}
+
+.funnel-card.purchases {
+  border-color: #a78bfa;
+}
+
+.funnel-icon {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 50px;
+  height: 50px;
+  margin: 0 auto 12px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.funnel-card.visits .funnel-icon {
+  color: #4ade80;
+  background: rgba(74, 222, 128, 0.2);
+}
+
+.funnel-card.registrations .funnel-icon {
+  color: #60a5fa;
+  background: rgba(96, 165, 250, 0.2);
+}
+
+.funnel-card.add-to-cart .funnel-icon {
+  color: #fbbf24;
+  background: rgba(251, 191, 36, 0.2);
+}
+
+.funnel-card.checkout .funnel-icon {
+  color: #f472b6;
+  background: rgba(244, 114, 182, 0.2);
+}
+
+.funnel-card.purchases .funnel-icon {
+  color: #a78bfa;
+  background: rgba(167, 139, 250, 0.2);
+}
+
+.funnel-data {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.funnel-value {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.funnel-label {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.funnel-rate {
+  font-size: 0.75rem;
+  color: #4ade80;
+  font-weight: 500;
+}
+
+.funnel-rate.overall {
+  color: #a78bfa;
+  font-weight: 600;
+}
+
+.funnel-arrow {
+  color: rgba(255, 255, 255, 0.3);
+  font-size: 1.5rem;
+  flex-shrink: 0;
+}
+
+/* Visual Funnel */
+.visual-funnel-section {
+  margin-bottom: 40px;
+  padding: 25px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.visual-funnel-section h2 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #fff;
+  font-size: 1.3rem;
+  margin-bottom: 20px;
+}
+
+.visual-funnel {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: center;
+}
+
+.funnel-bar {
+  height: 45px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-weight: 600;
+  font-size: 0.95rem;
+  width: 100%;
+  padding: 0 20px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.funnel-bar.visits-bar {
+  background: linear-gradient(90deg, #4ade80 0%, #22c55e 100%);
+}
+
+.funnel-bar.registrations-bar {
+  background: linear-gradient(90deg, #60a5fa 0%, #3b82f6 100%);
+}
+
+.funnel-bar.cart-bar {
+  background: linear-gradient(90deg, #fbbf24 0%, #f59e0b 100%);
+}
+
+.funnel-bar.checkout-bar {
+  background: linear-gradient(90deg, #f472b6 0%, #ec4899 100%);
+}
+
+.funnel-bar.purchases-bar {
+  background: linear-gradient(90deg, #a78bfa 0%, #8b5cf6 100%);
+}
+
+.funnel-rate-inline {
+  margin-left: 10px;
+  font-size: 0.85rem;
+  opacity: 0.9;
+}
+
+.funnel-rate-inline.overall {
+  font-weight: 700;
+}
+
+/* Daily Stats Table */
+.daily-stats-section {
+  margin-bottom: 30px;
+}
+
+.daily-stats-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.daily-stats-table th,
+.daily-stats-table td {
+  padding: 14px 16px;
+  text-align: left;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.daily-stats-table th {
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.8);
+  font-weight: 600;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.daily-stats-table td {
+  color: #fff;
+  font-size: 0.95rem;
+}
+
+.daily-stats-table tr:hover td {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+/* Loading State */
+.sales-analytics-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  color: rgba(255, 255, 255, 0.7);
+  gap: 15px;
+}
+
+.sales-analytics-loading svg {
+  color: #667eea;
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .sales-analytics-container {
+    padding: 15px;
+  }
+
+  .sales-analytics-header {
+    flex-wrap: wrap;
+    gap: 15px;
+  }
+
+  .sales-analytics-header h1 {
+    order: -1;
+    width: 100%;
+    justify-content: center;
+    font-size: 1.4rem;
+  }
+
+  .funnel-grid {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .funnel-arrow {
+    transform: rotate(90deg);
+    text-align: center;
+  }
+
+  .funnel-card {
+    min-width: auto;
+  }
+
+  .date-range-filter {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .daily-stats-table {
+    font-size: 0.85rem;
+  }
+
+  .daily-stats-table th,
+  .daily-stats-table td {
+    padding: 10px 8px;
+  }
+}
+
+/* Revenue Summary */
+.revenue-summary {
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+  margin-top: 30px;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.revenue-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.revenue-label {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.revenue-value {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.revenue-item.commission .revenue-value {
+  color: #4ade80;
+}
+
+.commission-cell {
+  color: #4ade80;
+  font-weight: 600;
+}
+
+@media (max-width: 600px) {
+  .revenue-summary {
+    flex-direction: column;
+    gap: 20px;
+  }
+}

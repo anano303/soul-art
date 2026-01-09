@@ -16,6 +16,7 @@ import { useLanguage } from "@/hooks/LanguageContext";
 import { TermsAndConditions } from "@/components/TermsAndConditions";
 import { PrivacyPolicy } from "@/components/PrivacyPolicy";
 import { trackCompleteRegistration } from "@/components/MetaPixel";
+import { trackRegistration as trackSalesRegistration } from "@/hooks/use-sales-tracking";
 
 type RegisterFormData = z.infer<typeof registerSchema>;
 
@@ -126,6 +127,8 @@ export function RegisterForm() {
             method: "email",
             hasReferral,
           });
+          // Track Sales Manager referral registration
+          trackSalesRegistration("", data.email);
           hasTrackedRegistrationRef.current = true;
         }
 

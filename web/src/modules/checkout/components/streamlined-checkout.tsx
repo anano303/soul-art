@@ -24,6 +24,8 @@ import {
   trackClickPurchase,
   trackCheckoutLogin,
 } from "@/lib/ga4-analytics";
+import { trackCheckoutStart } from "@/hooks/use-sales-tracking";
+import Cookies from "js-cookie";
 
 type CheckoutStep = "auth" | "guest" | "shipping" | "payment" | "review";
 
@@ -83,6 +85,8 @@ export function StreamlinedCheckout() {
         quantity: item.qty,
       }));
       trackBeginCheckout(totalPrice, cartItems);
+      // Sales Manager checkout tracking
+      trackCheckoutStart();
       hasTrackedBeginCheckoutRef.current = true;
     }
   }, [items, totalPrice]);
@@ -267,6 +271,7 @@ export function StreamlinedCheckout() {
         shippingPrice: number;
         totalPrice: number;
         guestInfo?: typeof guestInfo;
+        salesRefCode?: string | null;
       } = {
         orderItems,
         shippingDetails: shippingAddress,
@@ -275,6 +280,7 @@ export function StreamlinedCheckout() {
         taxPrice: 0, // საკომისიო მოხსნილია
         shippingPrice,
         totalPrice, // რეალური ფასი საკომისიოს გარეშე
+        salesRefCode: Cookies.get("sales_ref") || null,
       };
 
       // Add guest info if guest checkout

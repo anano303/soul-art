@@ -19,7 +19,11 @@ import { getUserData } from "@/lib/auth";
 import { getSellerBalance } from "@/modules/balance/api/balance-api";
 import { DonationModal } from "@/components/donation/DonationModal";
 
-export function OrdersList() {
+interface OrdersListProps {
+  salesManagerMode?: boolean;
+}
+
+export function OrdersList({ salesManagerMode = false }: OrdersListProps) {
   const [page, setPage] = useState(1);
   const [userRole, setUserRole] = useState<string | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
@@ -41,9 +45,32 @@ export function OrdersList() {
   });
 
   const { data, isLoading } = useQuery({
-    queryKey: ["orders", page, userRole, userId],
+    queryKey: ["orders", page, userRole, userId, salesManagerMode],
     queryFn: async () => {
       try {
+        // Sales Manager gets orders from their referrals
+        if (salesManagerMode) {
+          const response = await fetchWithAuth(
+            `/sales-commission/my-commissions?page=${page}&limit=50`
+          );
+          if (!response.ok) {
+            console.error("Failed to fetch sales orders:", response.statusText);
+            return { items: [], pages: 0 };
+          }
+          const data = await response.json();
+          // Transform commissions to order format
+          const orders = (data.commissions || []).map((c: any) => ({
+            ...c.order,
+            _id: c.order._id || c.order,
+            commissionAmount: c.commissionAmount,
+            commissionStatus: c.status,
+          }));
+          return {
+            items: orders,
+            pages: data.pages || 1,
+          };
+        }
+
         // Backend now handles role-based filtering
         const response = await fetchWithAuth(`/orders?page=${page}&limit=50`);
         if (!response.ok) {

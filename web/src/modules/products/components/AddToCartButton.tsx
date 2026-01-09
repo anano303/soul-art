@@ -8,6 +8,7 @@ import "./ProductCard.css";
 import { useCart } from "@/modules/cart/context/cart-context";
 import { trackAddToCart as metaTrackAddToCart } from "@/components/MetaPixel";
 import { trackAddToCart } from "@/lib/ga4-analytics";
+import { trackAddToCart as trackSalesAddToCart } from "@/hooks/use-sales-tracking";
 
 interface AddToCartButtonProps {
   productId: string;
@@ -98,18 +99,15 @@ export function AddToCartButton({
           description: `${t("cart.newQuantity")}: ${newQuantity}`,
         });
 
-        trackAddToCart(
-          productId,
-          productName,
-          price ?? 0,
-          quantity
-        );
+        trackAddToCart(productId, productName, price ?? 0, quantity);
         metaTrackAddToCart(
           productName,
           productId,
           (price ?? 0) * quantity,
           currency
         );
+        // Sales Manager tracking
+        trackSalesAddToCart(productId);
       } catch (error) {
         console.error("Update quantity error:", error);
         toast({
@@ -148,18 +146,15 @@ export function AddToCartButton({
             description: `${t("cart.newQuantity")}: ${newQuantity}`,
           });
 
-          trackAddToCart(
-            productId,
-            productName,
-            price ?? 0,
-            quantity
-          );
+          trackAddToCart(productId, productName, price ?? 0, quantity);
           metaTrackAddToCart(
             productName,
             productId,
             (price ?? 0) * quantity,
             currency
           );
+          // Sales Manager tracking
+          trackSalesAddToCart(productId);
         } catch (error) {
           console.error("Update quantity error:", error);
           toast({
@@ -189,18 +184,15 @@ export function AddToCartButton({
             description: t("cart.productAdded"),
           });
 
-          trackAddToCart(
-            productId,
-            productName,
-            price ?? 0,
-            quantity
-          );
+          trackAddToCart(productId, productName, price ?? 0, quantity);
           metaTrackAddToCart(
             productName,
             productId,
             (price ?? 0) * quantity,
             currency
           );
+          // Sales Manager tracking
+          trackSalesAddToCart(productId);
 
           // Open cart if requested
           if (openCartOnAdd) {
