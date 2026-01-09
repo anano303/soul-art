@@ -11,7 +11,13 @@ export const metadata: Metadata = {
 export default function AnalyticsPage() {
   return (
     <div>
-      <Suspense fallback={<div style={{ padding: "40px", textAlign: "center" }}>იტვირთება...</div>}>
+      <Suspense
+        fallback={
+          <div style={{ padding: "40px", textAlign: "center" }}>
+            იტვირთება...
+          </div>
+        }
+      >
         <GA4Dashboard />
       </Suspense>
     </div>

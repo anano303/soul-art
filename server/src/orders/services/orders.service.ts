@@ -619,7 +619,7 @@ export class OrdersService {
     }
   }
 
-  async findAll(): Promise<OrderDocument[]> {
+  async findAll(): Promise<any[]> {
     // Sort by createdAt in descending order (newest first)
     const orders = await this.orderModel
       .find()
@@ -632,7 +632,25 @@ export class OrdersService {
           select: '_id name email phoneNumber storeName',
         },
       })
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .lean();
+
+    // Add sales manager info for orders with salesRefCode
+    const salesRefCodes = [...new Set(orders.filter(o => o.salesRefCode).map(o => o.salesRefCode))];
+    
+    if (salesRefCodes.length > 0) {
+      const salesManagers = await this.userModel.find(
+        { salesRefCode: { $in: salesRefCodes } },
+        { salesRefCode: 1, name: 1, email: 1 }
+      ).lean();
+      
+      const salesManagerMap = new Map(salesManagers.map(sm => [sm.salesRefCode, sm]));
+      
+      return orders.map(order => ({
+        ...order,
+        salesManager: order.salesRefCode ? salesManagerMap.get(order.salesRefCode) || null : null,
+      }));
+    }
 
     return orders;
   }

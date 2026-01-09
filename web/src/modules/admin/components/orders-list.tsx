@@ -216,7 +216,19 @@ export function OrdersList({ salesManagerMode = false }: OrdersListProps) {
                   </td>
                   {userRole === "admin" && (
                     <td>
-                      {(order as any).salesRefCode ? (
+                      {(order as any).salesManager ? (
+                        <div className="sales-manager-info">
+                          <div className="sales-manager-name">
+                            {(order as any).salesManager.name}
+                          </div>
+                          <div className="sales-manager-email">
+                            {(order as any).salesManager.email}
+                          </div>
+                          <code className="sales-ref-badge small">
+                            {(order as any).salesRefCode}
+                          </code>
+                        </div>
+                      ) : (order as any).salesRefCode ? (
                         <code className="sales-ref-badge">
                           {(order as any).salesRefCode}
                         </code>
