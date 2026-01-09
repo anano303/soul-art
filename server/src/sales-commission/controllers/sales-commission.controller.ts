@@ -7,6 +7,7 @@ import {
   UseGuards,
   Param,
   Req,
+  BadRequestException,
 } from '@nestjs/common';
 import { Request } from 'express';
 import { JwtAuthGuard } from '../../guards/jwt-auth.guard';
@@ -209,5 +210,49 @@ export class SalesCommissionController {
       user._id.toString(),
       parseInt(days),
     );
+  }
+
+  /**
+   * Sales Manager-ის ბალანსი (გატანისთვის)
+   */
+  @Get('my-balance')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.SalesManager, Role.Admin)
+  async getMyBalance(@CurrentUser() user: UserDocument) {
+    return this.salesCommissionService.getManagerBalance(user._id.toString());
+  }
+
+  /**
+   * თანხის გატანის მოთხოვნა
+   */
+  @Post('withdrawal/request')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.SalesManager)
+  async requestWithdrawal(
+    @CurrentUser() user: UserDocument,
+    @Body() body: { amount: number },
+  ) {
+    const { amount } = body;
+
+    if (!amount || amount <= 0) {
+      throw new BadRequestException('თანხა უნდა იყოს დადებითი რიცხვი');
+    }
+
+    if (amount < 1) {
+      throw new BadRequestException('მინიმალური გასატანი თანხაა 1 ლარი');
+    }
+
+    try {
+      const result = await this.salesCommissionService.requestWithdrawal(
+        user._id.toString(),
+        amount,
+      );
+      return {
+        success: true,
+        ...result,
+      };
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
   }
 }

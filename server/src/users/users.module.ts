@@ -89,7 +89,7 @@ import { PaymentsModule } from '../payments/payments.module';
       signOptions: { expiresIn: '10m' },
     }),
     CloudinaryModule, // Add Cloudinary module
-    PaymentsModule, // Add PaymentsModule for BOG transfer service
+    forwardRef(() => PaymentsModule), // Add PaymentsModule for BOG transfer service
     forwardRef(() => ReferralsModule), // Add ReferralsModule for dependency injection
     forwardRef(() => OrderModule), // Add OrderModule for guest order linking
   ],
@@ -121,6 +121,7 @@ import { PaymentsModule } from '../payments/payments.module';
     BalanceService,
     BalanceMigrationService,
     EmailService,
+    BankIntegrationService,
     MongooseModule, // Export MongooseModule for User model access
   ],
 })

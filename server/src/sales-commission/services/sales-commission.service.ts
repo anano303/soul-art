@@ -19,6 +19,8 @@ import {
 import { User, UserDocument } from '../../users/schemas/user.schema';
 import { Order, OrderDocument } from '../../orders/schemas/order.schema';
 import { Role } from '../../types/role.enum';
+import { BogTransferService } from '../../payments/services/bog-transfer.service';
+import { BankIntegrationService } from '../../users/services/bog-bank-integration.service';
 
 @Injectable()
 export class SalesCommissionService {
@@ -32,6 +34,8 @@ export class SalesCommissionService {
     private trackingModel: Model<SalesTrackingDocument>,
     @InjectModel(User.name) private userModel: Model<UserDocument>,
     @InjectModel(Order.name) private orderModel: Model<OrderDocument>,
+    private bogTransferService: BogTransferService,
+    private bankIntegrationService: BankIntegrationService,
   ) {}
 
   /**
@@ -304,10 +308,18 @@ export class SalesCommissionService {
     };
 
     for (const stat of stats) {
+      // Normalize status to uppercase for comparison (handle legacy lowercase data)
+      const normalizedStatus = stat._id?.toUpperCase?.() || stat._id;
+
+      // CANCELLED არ ჩაითვალოს totalCommissions-ში და totalOrders-ში
+      if (normalizedStatus === CommissionStatus.CANCELLED) {
+        continue;
+      }
+
       result.totalOrders += stat.count;
       result.totalCommissions += stat.total;
 
-      switch (stat._id) {
+      switch (normalizedStatus) {
         case CommissionStatus.PENDING:
           result.pendingAmount = stat.total;
           break;
@@ -631,5 +643,222 @@ export class SalesCommissionService {
 
       return result;
     });
+  }
+
+  /**
+   * Sales Manager-ის ბალანსის მიღება (მოლოდინში + დამტკიცებული კომისიებიდან)
+   */
+  async getManagerBalance(salesManagerId: string): Promise<{
+    availableBalance: number;
+    pendingWithdrawals: number;
+    totalWithdrawn: number;
+    totalApproved: number;
+  }> {
+    const manager = await this.userModel.findById(salesManagerId);
+    if (!manager) {
+      throw new NotFoundException('Sales Manager ვერ მოიძებნა');
+    }
+
+    // PENDING + APPROVED კომისიები - ეს არის გასატანი ბალანსი
+    // Support both uppercase and lowercase status values for legacy data
+    const availableCommissions = await this.commissionModel.aggregate([
+      {
+        $match: {
+          salesManager: new Types.ObjectId(salesManagerId),
+          $or: [
+            {
+              status: {
+                $in: [
+                  CommissionStatus.PENDING,
+                  CommissionStatus.APPROVED,
+                  'pending',
+                  'approved',
+                ],
+              },
+            },
+          ],
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          total: { $sum: '$commissionAmount' },
+        },
+      },
+    ]);
+
+    // PAID კომისიები - უკვე გატანილი
+    // Support both uppercase and lowercase status values for legacy data
+    const paidCommissions = await this.commissionModel.aggregate([
+      {
+        $match: {
+          salesManager: new Types.ObjectId(salesManagerId),
+          status: { $in: [CommissionStatus.PAID, 'paid'] },
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          total: { $sum: '$commissionAmount' },
+        },
+      },
+    ]);
+
+    const totalAvailable = availableCommissions[0]?.total || 0;
+    const totalWithdrawn = paidCommissions[0]?.total || 0;
+    const pendingWithdrawals = manager.salesPendingWithdrawal || 0;
+    const availableBalance = totalAvailable - pendingWithdrawals;
+
+    return {
+      availableBalance,
+      pendingWithdrawals,
+      totalWithdrawn,
+      totalApproved: totalAvailable,
+    };
+  }
+
+  /**
+   * თანხის გატანის მოთხოვნა
+   */
+  async requestWithdrawal(
+    salesManagerId: string,
+    amount: number,
+  ): Promise<{ status: string; uniqueKey?: number; message: string }> {
+    this.logger.log(
+      `Processing withdrawal request for sales manager: ${salesManagerId}, amount: ${amount}`,
+    );
+
+    if (amount < 1) {
+      throw new BadRequestException('მინიმალური გასატანი თანხაა 1 ლარი');
+    }
+
+    const manager = await this.userModel.findById(salesManagerId);
+    if (!manager) {
+      throw new NotFoundException('Sales Manager ვერ მოიძებნა');
+    }
+
+    // ბალანსის შემოწმება
+    const balance = await this.getManagerBalance(salesManagerId);
+    if (balance.availableBalance < amount) {
+      throw new BadRequestException(
+        `არასაკმარისი ბალანსი. ხელმისაწვდომია: ${balance.availableBalance.toFixed(2)} ₾`,
+      );
+    }
+
+    // ანგარიშის ნომრის შემოწმება
+    if (!manager.accountNumber) {
+      throw new BadRequestException(
+        'ბანკის ანგარიშის ნომერი არ არის მითითებული. გთხოვთ დაამატოთ ანგარიშის ნომერი პროფილის გვერდიდან.',
+      );
+    }
+
+    if (!manager.identificationNumber) {
+      throw new BadRequestException(
+        'პირადი ნომერი არ არის მითითებული. გთხოვთ დაამატოთ პირადი ნომერი პროფილის გვერდიდან.',
+      );
+    }
+
+    // ანგარიშის ფორმატირება და ვალიდაცია
+    const formattedAccountNumber =
+      this.bankIntegrationService.formatAccountNumber(manager.accountNumber);
+    const isValid = this.bankIntegrationService.validateAccountNumber(
+      formattedAccountNumber,
+    );
+
+    if (!isValid) {
+      throw new BadRequestException('არასწორი ბანკის ანგარიშის ფორმატი');
+    }
+
+    try {
+      // pending withdrawal-ის გაზრდა
+      await this.userModel.findByIdAndUpdate(salesManagerId, {
+        $inc: { salesPendingWithdrawal: amount },
+      });
+
+      // BOG-ის მეშვეობით გადარიცხვა
+      const managerName = manager.name || 'Sales Manager';
+
+      const transferResult = await this.bogTransferService.transferToSeller({
+        beneficiaryAccountNumber: formattedAccountNumber,
+        beneficiaryInn: manager.identificationNumber,
+        beneficiaryName: managerName,
+        amount: amount,
+        nomination: 'SoulArt - Sales Manager კომისია',
+        beneficiaryBankCode: manager.beneficiaryBankCode || 'BAGAGE22',
+      });
+
+      const isPending = transferResult.resultCode === 0;
+
+      if (isPending) {
+        this.logger.log(
+          `Withdrawal document created in BOG, pending approval. Manager: ${salesManagerId}, amount: ${amount}, BOG UniqueKey: ${transferResult.uniqueKey}`,
+        );
+
+        return {
+          status: 'pending',
+          uniqueKey: transferResult.uniqueKey,
+          message:
+            'გადარიცხვის დოკუმენტი შექმნილია ბანკში და ელოდება ადმინისტრატორის დამტკიცებას.',
+        };
+      } else {
+        // გადარიცხვა დასრულდა
+        await this.userModel.findByIdAndUpdate(salesManagerId, {
+          $inc: {
+            salesPendingWithdrawal: -amount,
+            salesTotalWithdrawn: amount,
+          },
+        });
+
+        // APPROVED კომისიები გადავიყვანოთ PAID სტატუსში
+        await this.markCommissionsAsPaid(salesManagerId, amount);
+
+        this.logger.log(
+          `Withdrawal completed for sales manager: ${salesManagerId}, amount: ${amount}`,
+        );
+
+        return {
+          status: 'completed',
+          uniqueKey: transferResult.uniqueKey,
+          message: 'თანხა წარმატებით გადაირიცხა.',
+        };
+      }
+    } catch (error) {
+      // შეცდომის შემთხვევაში pending-ის დაბრუნება
+      await this.userModel.findByIdAndUpdate(salesManagerId, {
+        $inc: { salesPendingWithdrawal: -amount },
+      });
+      this.logger.error(`Withdrawal failed: ${error.message}`);
+      throw new BadRequestException(
+        error.message || 'თანხის გატანის მოთხოვნა ვერ გაიგზავნა',
+      );
+    }
+  }
+
+  /**
+   * კომისიების PAID სტატუსში გადაყვანა
+   */
+  private async markCommissionsAsPaid(
+    salesManagerId: string,
+    amount: number,
+  ): Promise<void> {
+    let remainingAmount = amount;
+
+    const approvedCommissions = await this.commissionModel
+      .find({
+        salesManager: new Types.ObjectId(salesManagerId),
+        status: CommissionStatus.APPROVED,
+      })
+      .sort({ createdAt: 1 }); // ძველებს პირველად
+
+    for (const commission of approvedCommissions) {
+      if (remainingAmount <= 0) break;
+
+      if (commission.commissionAmount <= remainingAmount) {
+        commission.status = CommissionStatus.PAID;
+        commission.paidAt = new Date();
+        await commission.save();
+        remainingAmount -= commission.commissionAmount;
+      }
+    }
   }
 }

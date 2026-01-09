@@ -415,13 +415,17 @@ export default function RootLayout({
                   <GA4UserTracker />
 
                   {/* GA4 Page View and User Path Tracking */}
-                  <PageViewTracker />
+                  <Suspense fallback={null}>
+                    <PageViewTracker />
+                  </Suspense>
 
                   {/* Visitor Tracking with IP */}
                   <VisitorTracker />
 
                   {/* Sales Manager Referral Tracking */}
-                  <SalesTracker />
+                  <Suspense fallback={null}>
+                    <SalesTracker />
+                  </Suspense>
 
                   {/* iOS Back Swipe Prevention */}
                   <IOSGesturePrevention />

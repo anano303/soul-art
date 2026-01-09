@@ -6,6 +6,7 @@ import { getUserData } from "@/lib/auth";
 import { Role } from "@/types/role";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { useToast } from "@/hooks/use-toast";
 import "./sales-dashboard.css";
 
 interface CommissionStats {
@@ -14,6 +15,13 @@ interface CommissionStats {
   approvedAmount: number;
   paidAmount: number;
   totalOrders: number;
+}
+
+interface BalanceInfo {
+  availableBalance: number;
+  pendingWithdrawals: number;
+  totalWithdrawn: number;
+  totalApproved: number;
 }
 
 interface Commission {
@@ -44,7 +52,9 @@ interface RefCodeInfo {
 
 export default function SalesManagerDashboard() {
   const router = useRouter();
+  const { toast } = useToast();
   const [stats, setStats] = useState<CommissionStats | null>(null);
+  const [balance, setBalance] = useState<BalanceInfo | null>(null);
   const [commissions, setCommissions] = useState<Commission[]>([]);
   const [refCodeInfo, setRefCodeInfo] = useState<RefCodeInfo | null>(null);
   const [loading, setLoading] = useState(true);
@@ -53,6 +63,8 @@ export default function SalesManagerDashboard() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [statusFilter, setStatusFilter] = useState<string>("");
+  const [withdrawalAmount, setWithdrawalAmount] = useState("");
+  const [isWithdrawing, setIsWithdrawing] = useState(false);
 
   const fetchData = useCallback(async () => {
     try {
@@ -61,6 +73,13 @@ export default function SalesManagerDashboard() {
       if (statsRes.ok) {
         const statsData = await statsRes.json();
         setStats(statsData);
+      }
+
+      // Fetch balance
+      const balanceRes = await fetchWithAuth("/sales-commission/my-balance");
+      if (balanceRes.ok) {
+        const balanceData = await balanceRes.json();
+        setBalance(balanceData);
       }
 
       // Fetch ref code
@@ -128,6 +147,74 @@ export default function SalesManagerDashboard() {
       setTimeout(() => setCopied(false), 2000);
     } catch (error) {
       console.error("Failed to copy:", error);
+    }
+  };
+
+  const handleWithdrawal = async () => {
+    if (!withdrawalAmount || parseFloat(withdrawalAmount) <= 0) {
+      toast({
+        title: "შეცდომა",
+        description: "თანხა უნდა იყოს დადებითი რიცხვი",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (parseFloat(withdrawalAmount) < 1) {
+      toast({
+        title: "შეცდომა",
+        description: "მინიმალური გასატანი თანხაა 1 ლარი",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!balance || parseFloat(withdrawalAmount) > balance.availableBalance) {
+      toast({
+        title: "შეცდომა",
+        description: "არასაკმარისი ბალანსი",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsWithdrawing(true);
+    try {
+      const res = await fetchWithAuth("/sales-commission/withdrawal/request", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ amount: parseFloat(withdrawalAmount) }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        toast({
+          title: "წარმატება",
+          description: data.message,
+        });
+        setWithdrawalAmount("");
+        fetchData(); // Refresh data
+      } else {
+        toast({
+          title: "შეცდომა",
+          description: data.message || "თანხის გატანის მოთხოვნა ვერ გაიგზავნა",
+          variant: "destructive",
+        });
+      }
+    } catch (error: unknown) {
+      toast({
+        title: "შეცდომა",
+        description:
+          error instanceof Error
+            ? error.message
+            : "თანხის გატანის მოთხოვნა ვერ გაიგზავნა",
+        variant: "destructive",
+      });
+    } finally {
+      setIsWithdrawing(false);
     }
   };
 
@@ -243,6 +330,54 @@ export default function SalesManagerDashboard() {
           <h3>შეკვეთები</h3>
           <p className="stat-value">{stats?.totalOrders || 0}</p>
         </div>
+      </div>
+
+      {/* Withdrawal Section */}
+      <div className="withdrawal-section card">
+        <h2>💰 თანხის გატანა</h2>
+        <div className="withdrawal-info-grid">
+          <div className="balance-info-item">
+            <span className="label">ხელმისაწვდომი ბალანსი:</span>
+            <span className="value available">
+              {balance?.availableBalance?.toFixed(2) || "0.00"} ₾
+            </span>
+          </div>
+          <div className="balance-info-item">
+            <span className="label">გატანისთვის მოთხოვნილი:</span>
+            <span className="value pending">
+              {balance?.pendingWithdrawals?.toFixed(2) || "0.00"} ₾
+            </span>
+          </div>
+          <div className="balance-info-item">
+            <span className="label">სულ გატანილი:</span>
+            <span className="value withdrawn">
+              {balance?.totalWithdrawn?.toFixed(2) || "0.00"} ₾
+            </span>
+          </div>
+        </div>
+        <div className="withdrawal-form">
+          <input
+            type="number"
+            value={withdrawalAmount}
+            onChange={(e) => setWithdrawalAmount(e.target.value)}
+            placeholder="შეიყვანეთ თანხა (მინიმუმ 1 ₾)"
+            min="1"
+            max={balance?.availableBalance || 0}
+            className="withdrawal-input"
+          />
+          <button
+            onClick={handleWithdrawal}
+            disabled={isWithdrawing || !balance || balance.availableBalance < 1}
+            className="withdrawal-btn"
+          >
+            {isWithdrawing ? "მოთხოვნის გაგზავნა..." : "თანხის გატანა"}
+          </button>
+        </div>
+        <p className="withdrawal-note">
+          ⚠️ მხოლოდ <strong>დამტკიცებული</strong> კომისიების გატანა შეგიძლიათ.
+          გატანა ხდება BOG ანგარიშზე. პროფილში უნდა გქონდეთ მითითებული ანგარიშის
+          ნომერი და პირადი ნომერი.
+        </p>
       </div>
 
       {/* Navigation */}
