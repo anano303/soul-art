@@ -1061,6 +1061,34 @@ export class OrdersService {
     console.log(
       `Order ${externalOrderId} successfully updated. New isPaid: ${updatedOrder.isPaid}, new status: ${updatedOrder.status}`,
     );
+
+    // Sales Manager კომისიის შექმნა (თუ არის salesRefCode)
+    this.logger.log(
+      `[SalesCommission] Checking in updateOrderByExternalId: salesRefCode=${order.salesRefCode}, hasService=${!!this.salesCommissionService}`,
+    );
+    if (order.salesRefCode && this.salesCommissionService) {
+      try {
+        this.logger.log(
+          `[SalesCommission] Creating commission for order ${order._id} with ref ${order.salesRefCode}`,
+        );
+        await this.salesCommissionService.processOrderCommission(
+          order._id.toString(),
+          order.salesRefCode,
+        );
+        this.logger.log(
+          `[SalesCommission] SUCCESS: Commission created for order ${order._id}`,
+        );
+      } catch (error) {
+        this.logger.error(
+          `[SalesCommission] FAILED for order ${order._id}: ${error.message}`,
+        );
+      }
+    } else {
+      this.logger.warn(
+        `[SalesCommission] SKIPPED: No salesRefCode or no service for order ${order._id}`,
+      );
+    }
+
     try {
       await this.sendOrderPaidNotifications(updatedOrder._id.toString());
     } catch (error) {
