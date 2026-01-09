@@ -13,6 +13,7 @@ import {
 import { User, UserSchema } from '../users/schemas/user.schema';
 import { Order, OrderSchema } from '../orders/schemas/order.schema';
 import { UsersModule } from '../users/users.module';
+import { PaymentsModule } from '../payments/payments.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { UsersModule } from '../users/users.module';
       { name: Order.name, schema: OrderSchema },
     ]),
     forwardRef(() => UsersModule),
+    forwardRef(() => PaymentsModule),
   ],
   controllers: [SalesCommissionController],
   providers: [SalesCommissionService],

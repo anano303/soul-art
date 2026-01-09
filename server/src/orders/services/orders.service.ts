@@ -636,19 +636,29 @@ export class OrdersService {
       .lean();
 
     // Add sales manager info for orders with salesRefCode
-    const salesRefCodes = [...new Set(orders.filter(o => o.salesRefCode).map(o => o.salesRefCode))];
-    
+    const salesRefCodes = [
+      ...new Set(
+        orders.filter((o) => o.salesRefCode).map((o) => o.salesRefCode),
+      ),
+    ];
+
     if (salesRefCodes.length > 0) {
-      const salesManagers = await this.userModel.find(
-        { salesRefCode: { $in: salesRefCodes } },
-        { salesRefCode: 1, name: 1, email: 1 }
-      ).lean();
-      
-      const salesManagerMap = new Map(salesManagers.map(sm => [sm.salesRefCode, sm]));
-      
-      return orders.map(order => ({
+      const salesManagers = await this.userModel
+        .find(
+          { salesRefCode: { $in: salesRefCodes } },
+          { salesRefCode: 1, name: 1, email: 1 },
+        )
+        .lean();
+
+      const salesManagerMap = new Map(
+        salesManagers.map((sm) => [sm.salesRefCode, sm]),
+      );
+
+      return orders.map((order) => ({
         ...order,
-        salesManager: order.salesRefCode ? salesManagerMap.get(order.salesRefCode) || null : null,
+        salesManager: order.salesRefCode
+          ? salesManagerMap.get(order.salesRefCode) || null
+          : null,
       }));
     }
 

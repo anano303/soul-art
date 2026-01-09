@@ -1,69 +1,31 @@
-"use client";
-
-import { useEffect } from "react";
-import { usePathname } from "next/navigation";
 import Link from "next/link";
-import { track404Error } from "@/lib/ga4-analytics";
+import { Suspense } from "react";
+import { NotFoundTracker } from "@/components/NotFoundTracker";
+import "./not-found.css";
 
 export default function NotFound() {
-  const pathname = usePathname();
-
-  useEffect(() => {
-    if (pathname) {
-      track404Error(pathname);
-    }
-  }, [pathname]);
-
   return (
+    <>
+      <Suspense fallback={null}>
+        <NotFoundTracker />
+      </Suspense>
     <main
-      className="Container"
-      style={{
-        paddingTop: "6rem",
-        paddingBottom: "6rem",
-        textAlign: "center",
-        minHeight: "60vh",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-      }}
+      className="Container not-found-container"
     >
-      <h1
-        style={{
-          fontSize: "4rem",
-          fontWeight: "bold",
-          marginBottom: "1rem",
-          color: "#1e293b",
-        }}
-      >
+      <h1 className="not-found-title">
         404
       </h1>
-      <h2 style={{ fontSize: "1.5rem", marginBottom: "1rem", color: "#475569" }}>
+      <h2 className="not-found-subtitle">
         გვერდი ვერ მოიძებნა
       </h2>
-      <p style={{ color: "#64748b", marginBottom: "2rem", maxWidth: "500px" }}>
+      <p className="not-found-description">
         სამწუხაროდ, თქვენ მიერ მოძებნილი გვერდი აღარ არსებობს ან გადატანილია
         სხვა მისამართზე.
       </p>
-      <Link
-        href="/"
-        style={{
-          padding: "0.75rem 1.5rem",
-          backgroundColor: "#000",
-          color: "#fff",
-          borderRadius: "0.5rem",
-          textDecoration: "none",
-          transition: "background-color 0.2s",
-        }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.backgroundColor = "#1e293b";
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.backgroundColor = "#000";
-        }}
-      >
+      <Link href="/" className="not-found-link">
         მთავარ გვერდზე დაბრუნება
       </Link>
     </main>
+    </>
   );
 }

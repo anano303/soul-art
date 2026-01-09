@@ -1,19 +1,12 @@
-"use client";
-
-import { useEffect } from "react";
-import { usePathname } from "next/navigation";
-import { track404Error } from "@/lib/ga4-analytics";
+import { Suspense } from "react";
+import { NotFoundTracker } from "@/components/NotFoundTracker";
 
 export default function ArtistNotFound() {
-  const pathname = usePathname();
-
-  useEffect(() => {
-    if (pathname) {
-      track404Error(pathname);
-    }
-  }, [pathname]);
-
   return (
+    <>
+      <Suspense fallback={null}>
+        <NotFoundTracker />
+      </Suspense>
     <main
       className="Container"
       style={{ paddingTop: "4rem", paddingBottom: "4rem", textAlign: "center" }}
@@ -25,5 +18,6 @@ export default function ArtistNotFound() {
         მოძებნილი არტისტის გვერდი აღარ არსებობს ან ჯერ არ არის გამოქვეყნებული.
       </p>
     </main>
+    </>
   );
 }

@@ -16,7 +16,9 @@ const nextConfig: NextConfig = {
     },
   },
   // Empty turbopack config to acknowledge Turbopack usage
-  turbopack: {},
+  turbopack: {
+    root: __dirname,
+  },
   // Optimize compilation
   compiler: {
     removeConsole: process.env.NODE_ENV === "production",

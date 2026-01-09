@@ -136,6 +136,14 @@ export class User {
   @Prop({ type: String, unique: true, sparse: true })
   salesRefCode?: string;
 
+  // Sales Manager pending withdrawal
+  @Prop({ type: Number, default: 0 })
+  salesPendingWithdrawal?: number;
+
+  // Sales Manager total withdrawn
+  @Prop({ type: Number, default: 0 })
+  salesTotalWithdrawn?: number;
+
   // რეფერალების სისტემა
   @Prop({ type: String, unique: true, sparse: true })
   referralCode?: string; // უნიკალური რეფერალური კოდი

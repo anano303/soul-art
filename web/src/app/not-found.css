@@ -1,0 +1,42 @@
+.not-found-container {
+  padding-top: 6rem;
+  padding-bottom: 6rem;
+  text-align: center;
+  min-height: 60vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.not-found-title {
+  font-size: 4rem;
+  font-weight: bold;
+  margin-bottom: 1rem;
+  color: #1e293b;
+}
+
+.not-found-subtitle {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  color: #475569;
+}
+
+.not-found-description {
+  color: #64748b;
+  margin-bottom: 2rem;
+  max-width: 500px;
+}
+
+.not-found-link {
+  padding: 0.75rem 1.5rem;
+  background-color: #000;
+  color: #fff;
+  border-radius: 0.5rem;
+  text-decoration: none;
+  transition: background-color 0.2s;
+}
+
+.not-found-link:hover {
+  background-color: #1e293b;
+}
