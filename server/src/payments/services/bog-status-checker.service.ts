@@ -123,7 +123,10 @@ export class BogStatusCheckerService {
             await this.bogTransferService.getDocumentStatus(uniqueKey);
 
           if (docStatus.ResultCode === 1) {
-            await this.markSalesManagerTransferAsCompleted(transaction, uniqueKey);
+            await this.markSalesManagerTransferAsCompleted(
+              transaction,
+              uniqueKey,
+            );
           } else if (docStatus.ResultCode < 0) {
             await this.markSalesManagerTransferAsFailed(
               transaction,
@@ -131,7 +134,9 @@ export class BogStatusCheckerService {
               docStatus.ResultCode,
             );
           } else {
-            this.logger.debug(`SM Transfer ${uniqueKey} still pending signature`);
+            this.logger.debug(
+              `SM Transfer ${uniqueKey} still pending signature`,
+            );
           }
         } catch (error) {
           this.logger.error(
@@ -312,7 +317,9 @@ export class BogStatusCheckerService {
     transaction.description = `Sales Manager გადარიცხვა უარყოფილია ბანკის მიერ (კოდი: ${resultCode}) - ბალანსი აღდგენილია - BOG UniqueKey: ${uniqueKey}`;
     await transaction.save();
 
-    this.logger.log(`SM Transfer ${uniqueKey} marked as failed, balance restored`);
+    this.logger.log(
+      `SM Transfer ${uniqueKey} marked as failed, balance restored`,
+    );
   }
 
   /**

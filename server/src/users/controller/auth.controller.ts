@@ -419,7 +419,11 @@ export class AuthController {
     ].some((field) => field in filteredDto);
 
     // Only allow updating seller/sales-manager fields if the user is a seller or sales manager
-    if (hasSellerFields && user.role !== Role.Seller && user.role !== Role.SalesManager) {
+    if (
+      hasSellerFields &&
+      user.role !== Role.Seller &&
+      user.role !== Role.SalesManager
+    ) {
       const sellerFields = [
         'storeName',
         'phoneNumber',

@@ -25,7 +25,7 @@ export const metadata: Metadata = {
     type: "website",
     images: [
       {
-        url: "https://soulart.ge/og-careers.jpg",
+        url: "https://soulart.ge/career.jpg",
         width: 1200,
         height: 630,
         alt: "SoulArt კარიერა - გაყიდვების მენეჯერი",
@@ -37,7 +37,7 @@ export const metadata: Metadata = {
     title: "🎯 გაყიდვების მენეჯერი - SoulArt",
     description:
       "დისტანციური მუშაობა | თავისუფალი გრაფიკი | საკომისიო შეთანხმებით. შემოუერთდი ჩვენს გუნდს!",
-    images: ["https://soulart.ge/og-careers.jpg"],
+    images: ["https://soulart.ge/career.jpg"],
   },
   robots: {
     index: true,

@@ -63,11 +63,15 @@ export default function AdminSalesManagersPage() {
   const router = useRouter();
   const { user, isLoading: authLoading } = useAuth();
   const [managers, setManagers] = useState<ManagerStats[]>([]);
-  const [pendingWithdrawals, setPendingWithdrawals] = useState<PendingWithdrawal[]>([]);
+  const [pendingWithdrawals, setPendingWithdrawals] = useState<
+    PendingWithdrawal[]
+  >([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedManager, setSelectedManager] = useState<string | null>(null);
   const [managerCommissions, setManagerCommissions] = useState<any[]>([]);
-  const [withdrawalTransactions, setWithdrawalTransactions] = useState<WithdrawalTransaction[]>([]);
+  const [withdrawalTransactions, setWithdrawalTransactions] = useState<
+    WithdrawalTransaction[]
+  >([]);
   const [showWithdrawals, setShowWithdrawals] = useState<string | null>(null);
   const [editingRateId, setEditingRateId] = useState<string | null>(null);
   const [editRateValue, setEditRateValue] = useState<number>(5);
@@ -151,7 +155,10 @@ export default function AdminSalesManagersPage() {
         setManagers((prev) =>
           prev.map((m) =>
             m.manager._id === managerId
-              ? { ...m, manager: { ...m.manager, salesCommissionRate: editRateValue } }
+              ? {
+                  ...m,
+                  manager: { ...m.manager, salesCommissionRate: editRateValue },
+                }
               : m
           )
         );
@@ -285,7 +292,9 @@ export default function AdminSalesManagersPage() {
                           max="100"
                           step="0.5"
                           value={editRateValue}
-                          onChange={(e) => setEditRateValue(parseFloat(e.target.value) || 0)}
+                          onChange={(e) =>
+                            setEditRateValue(parseFloat(e.target.value) || 0)
+                          }
                           className="rate-input"
                         />
                         <button
@@ -307,7 +316,12 @@ export default function AdminSalesManagersPage() {
                         <span>{m.manager.salesCommissionRate ?? 3}%</span>
                         <button
                           className="rate-edit-btn"
-                          onClick={() => startEditingRate(m.manager._id, m.manager.salesCommissionRate ?? 3)}
+                          onClick={() =>
+                            startEditingRate(
+                              m.manager._id,
+                              m.manager.salesCommissionRate ?? 3
+                            )
+                          }
                         >
                           <Edit2 size={14} />
                         </button>
@@ -343,7 +357,9 @@ export default function AdminSalesManagersPage() {
                         }
                       >
                         <Eye size={16} />
-                        {selectedManager === m.manager._id ? "დახურვა" : "შეკვეთები"}
+                        {selectedManager === m.manager._id
+                          ? "დახურვა"
+                          : "შეკვეთები"}
                       </button>
                       <button
                         className="view-button history"
@@ -356,7 +372,9 @@ export default function AdminSalesManagersPage() {
                         }
                       >
                         <History size={16} />
-                        {showWithdrawals === m.manager._id ? "დახურვა" : "გატანები"}
+                        {showWithdrawals === m.manager._id
+                          ? "დახურვა"
+                          : "გატანები"}
                       </button>
                     </div>
                   </td>
@@ -434,7 +452,11 @@ export default function AdminSalesManagersPage() {
         <div className="commissions-section withdrawal-history">
           <h2>
             <History size={22} />
-            გატანების ისტორია - {managers.find(m => m.manager._id === showWithdrawals)?.manager.name}
+            გატანების ისტორია -{" "}
+            {
+              managers.find((m) => m.manager._id === showWithdrawals)?.manager
+                .name
+            }
           </h2>
           {withdrawalTransactions.length === 0 ? (
             <p className="no-data">გატანების ისტორია არ მოიძებნა</p>
@@ -451,12 +473,16 @@ export default function AdminSalesManagersPage() {
               <tbody>
                 {withdrawalTransactions.map((t) => (
                   <tr key={t._id}>
+                    <td>{new Date(t.createdAt).toLocaleDateString("ka-GE")}</td>
                     <td>
-                      {new Date(t.createdAt).toLocaleDateString("ka-GE")}
-                    </td>
-                    <td>
-                      <span className={`status-badge ${t.type.includes('completed') ? 'paid' : 'pending'}`}>
-                        {t.type === 'sm_withdrawal_completed' ? 'დასრულებული' : 'მოთხოვნილი'}
+                      <span
+                        className={`status-badge ${
+                          t.type.includes("completed") ? "paid" : "pending"
+                        }`}
+                      >
+                        {t.type === "sm_withdrawal_completed"
+                          ? "დასრულებული"
+                          : "მოთხოვნილი"}
                       </span>
                     </td>
                     <td className="commission-amount">

@@ -75,7 +75,9 @@ export default function SalesManagerDashboard() {
   const [statusFilter, setStatusFilter] = useState<string>("");
   const [withdrawalAmount, setWithdrawalAmount] = useState("");
   const [isWithdrawing, setIsWithdrawing] = useState(false);
-  const [withdrawalHistory, setWithdrawalHistory] = useState<WithdrawalTransaction[]>([]);
+  const [withdrawalHistory, setWithdrawalHistory] = useState<
+    WithdrawalTransaction[]
+  >([]);
   const [withdrawalPage, setWithdrawalPage] = useState(1);
   const [withdrawalTotalPages, setWithdrawalTotalPages] = useState(1);
 
@@ -306,7 +308,8 @@ export default function SalesManagerDashboard() {
             </div>
             <p className="ref-info">
               ეს ლინკი გაუგზავნე კლიენტებს. როცა ამ ლინკით შემოვლენ და იყიდიან,
-              მიიღებ <strong>{balance?.commissionRate ?? 3}%</strong> საკომისიოს!
+              მიიღებ <strong>{balance?.commissionRate ?? 3}%</strong>{" "}
+              საკომისიოს!
             </p>
           </div>
         ) : (
@@ -380,7 +383,12 @@ export default function SalesManagerDashboard() {
         </div>
         {(balance?.pendingCommissions ?? 0) > 0 && (
           <div className="pending-commissions-note">
-            <p>⏳ მოლოდინში (შეკვეთები ჯერ არ მიტანილა): <strong>{balance?.pendingCommissions?.toFixed(2) || "0.00"} ₾</strong></p>
+            <p>
+              ⏳ მოლოდინში (შეკვეთები ჯერ არ მიტანილა):{" "}
+              <strong>
+                {balance?.pendingCommissions?.toFixed(2) || "0.00"} ₾
+              </strong>
+            </p>
           </div>
         )}
         <div className="withdrawal-form">
@@ -402,9 +410,9 @@ export default function SalesManagerDashboard() {
           </button>
         </div>
         <p className="withdrawal-note">
-          ⚠️ მხოლოდ <strong>დამტკიცებული</strong> საკომისიოების გატანა შეგიძლიათ.
-          გატანა ხდება BOG ანგარიშზე. პროფილში უნდა გქონდეთ მითითებული ანგარიშის
-          ნომერი და პირადი ნომერი.
+          ⚠️ მხოლოდ <strong>დამტკიცებული</strong> საკომისიოების გატანა
+          შეგიძლიათ. გატანა ხდება BOG ანგარიშზე. პროფილში უნდა გქონდეთ
+          მითითებული ანგარიშის ნომერი და პირადი ნომერი.
         </p>
       </div>
 
@@ -431,11 +439,26 @@ export default function SalesManagerDashboard() {
                       {new Date(transaction.createdAt).toLocaleDateString("ka")}
                     </td>
                     <td data-label="ტიპი">
-                      <span className={`status-badge ${transaction.type === 'sm_withdrawal_completed' ? 'status-paid' : 'status-pending'}`}>
-                        {transaction.type === 'sm_withdrawal_completed' ? 'დასრულებული' : 'მოთხოვნილი'}
+                      <span
+                        className={`status-badge ${
+                          transaction.type === "sm_withdrawal_completed"
+                            ? "status-paid"
+                            : "status-pending"
+                        }`}
+                      >
+                        {transaction.type === "sm_withdrawal_completed"
+                          ? "დასრულებული"
+                          : "მოთხოვნილი"}
                       </span>
                     </td>
-                    <td data-label="თანხა" className={transaction.type === 'sm_withdrawal_completed' ? 'withdrawal-amount-completed' : 'withdrawal-amount-pending'}>
+                    <td
+                      data-label="თანხა"
+                      className={
+                        transaction.type === "sm_withdrawal_completed"
+                          ? "withdrawal-amount-completed"
+                          : "withdrawal-amount-pending"
+                      }
+                    >
                       {transaction.amount.toFixed(2)} ₾
                     </td>
                     <td data-label="აღწერა">{transaction.description}</td>
@@ -458,7 +481,9 @@ export default function SalesManagerDashboard() {
                 </span>
                 <button
                   onClick={() =>
-                    setWithdrawalPage((p) => Math.min(withdrawalTotalPages, p + 1))
+                    setWithdrawalPage((p) =>
+                      Math.min(withdrawalTotalPages, p + 1)
+                    )
                   }
                   disabled={withdrawalPage === withdrawalTotalPages}
                 >
@@ -534,11 +559,15 @@ export default function SalesManagerDashboard() {
                         commission.guestEmail ||
                         "სტუმარი"}
                     </td>
-                    <td data-label="თანხა">{commission.orderTotal.toFixed(2)} ₾</td>
+                    <td data-label="თანხა">
+                      {commission.orderTotal.toFixed(2)} ₾
+                    </td>
                     <td data-label="საკომისიო" className="commission-amount">
                       +{commission.commissionAmount.toFixed(2)} ₾
                     </td>
-                    <td data-label="სტატუსი">{getStatusBadge(commission.status)}</td>
+                    <td data-label="სტატუსი">
+                      {getStatusBadge(commission.status)}
+                    </td>
                   </tr>
                 ))}
               </tbody>

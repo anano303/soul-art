@@ -322,7 +322,10 @@ export function OrdersList({ salesManagerMode = false }: OrdersListProps) {
                   </td>
                   <td className="orders-actions">
                     {salesManagerMode ? (
-                      <span className="view-link disabled" title="დეტალების ნახვა მხოლოდ ადმინისთვისაა ხელმისაწვდომი">
+                      <span
+                        className="view-link disabled"
+                        title="დეტალების ნახვა მხოლოდ ადმინისთვისაა ხელმისაწვდომი"
+                      >
                         Details
                       </span>
                     ) : (

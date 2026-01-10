@@ -9,23 +9,17 @@ export default function NotFound() {
       <Suspense fallback={null}>
         <NotFoundTracker />
       </Suspense>
-    <main
-      className="Container not-found-container"
-    >
-      <h1 className="not-found-title">
-        404
-      </h1>
-      <h2 className="not-found-subtitle">
-        გვერდი ვერ მოიძებნა
-      </h2>
-      <p className="not-found-description">
-        სამწუხაროდ, თქვენ მიერ მოძებნილი გვერდი აღარ არსებობს ან გადატანილია
-        სხვა მისამართზე.
-      </p>
-      <Link href="/" className="not-found-link">
-        მთავარ გვერდზე დაბრუნება
-      </Link>
-    </main>
+      <main className="Container not-found-container">
+        <h1 className="not-found-title">404</h1>
+        <h2 className="not-found-subtitle">გვერდი ვერ მოიძებნა</h2>
+        <p className="not-found-description">
+          სამწუხაროდ, თქვენ მიერ მოძებნილი გვერდი აღარ არსებობს ან გადატანილია
+          სხვა მისამართზე.
+        </p>
+        <Link href="/" className="not-found-link">
+          მთავარ გვერდზე დაბრუნება
+        </Link>
+      </main>
     </>
   );
 }

@@ -1,4 +1,9 @@
-import { Injectable, OnModuleInit, BadRequestException, ConflictException } from '@nestjs/common';
+import {
+  Injectable,
+  OnModuleInit,
+  BadRequestException,
+  ConflictException,
+} from '@nestjs/common';
 import { InjectModel, InjectConnection } from '@nestjs/mongoose';
 import { Model, Connection } from 'mongoose';
 import { ConfigService } from '@nestjs/config';
@@ -74,7 +79,7 @@ export interface CloudinaryCredentials {
 export class CloudinaryMigrationService implements OnModuleInit {
   private encryptionKey: Buffer;
   private encryptionIV: Buffer;
-  
+
   // Cache for interceptor
   private cachedActiveCloud: string | null = null;
   private cachedRetiredClouds: string[] | null = null;
@@ -86,19 +91,29 @@ export class CloudinaryMigrationService implements OnModuleInit {
   private currentMigrationId: string | null = null;
 
   constructor(
-    @InjectModel(CloudinaryConfig.name) private configModel: Model<CloudinaryConfigDocument>,
-    @InjectModel(RetiredCloud.name) private retiredModel: Model<RetiredCloudDocument>,
-    @InjectModel(CloudinaryMigration.name) private migrationModel: Model<CloudinaryMigrationDocument>,
-    @InjectModel(MigratedFile.name) private migratedFileModel: Model<MigratedFileDocument>,
+    @InjectModel(CloudinaryConfig.name)
+    private configModel: Model<CloudinaryConfigDocument>,
+    @InjectModel(RetiredCloud.name)
+    private retiredModel: Model<RetiredCloudDocument>,
+    @InjectModel(CloudinaryMigration.name)
+    private migrationModel: Model<CloudinaryMigrationDocument>,
+    @InjectModel(MigratedFile.name)
+    private migratedFileModel: Model<MigratedFileDocument>,
     @InjectConnection() private connection: Connection,
     private configService: ConfigService,
   ) {
     // Get encryption key from environment
     const key = this.configService.get<string>('CLOUDINARY_ENCRYPTION_KEY');
     if (!key) {
-      console.warn('⚠️  CLOUDINARY_ENCRYPTION_KEY not set - using fallback (not secure for production)');
+      console.warn(
+        '⚠️  CLOUDINARY_ENCRYPTION_KEY not set - using fallback (not secure for production)',
+      );
       // Fallback key for development - MUST be replaced in production
-      this.encryptionKey = crypto.scryptSync('cloudinary-fallback-key-dev-only', 'salt', 32);
+      this.encryptionKey = crypto.scryptSync(
+        'cloudinary-fallback-key-dev-only',
+        'salt',
+        32,
+      );
     } else {
       this.encryptionKey = crypto.scryptSync(key, 'cloudinary-salt', 32);
     }
@@ -108,14 +123,18 @@ export class CloudinaryMigrationService implements OnModuleInit {
   async onModuleInit() {
     // Seed initial config from environment if none exists
     await this.seedInitialConfig();
-    
+
     // Initialize cache on startup
     await this.refreshCache();
-    
+
     // Check for any in-progress migrations on startup (server restart scenario)
-    const inProgress = await this.migrationModel.findOne({ status: MigrationStatus.InProgress });
+    const inProgress = await this.migrationModel.findOne({
+      status: MigrationStatus.InProgress,
+    });
     if (inProgress) {
-      console.log(`⚠️  Found in-progress migration from ${inProgress.startedAt}. Will be resumed when requested.`);
+      console.log(
+        `⚠️  Found in-progress migration from ${inProgress.startedAt}. Will be resumed when requested.`,
+      );
     }
   }
 
@@ -125,7 +144,9 @@ export class CloudinaryMigrationService implements OnModuleInit {
   private async seedInitialConfig(): Promise<void> {
     const existingConfig = await this.configModel.findOne({ isActive: true });
     if (existingConfig) {
-      console.log(`✅ Cloudinary config exists in DB: ${existingConfig.cloudName}`);
+      console.log(
+        `✅ Cloudinary config exists in DB: ${existingConfig.cloudName}`,
+      );
       return;
     }
 
@@ -135,7 +156,9 @@ export class CloudinaryMigrationService implements OnModuleInit {
     const apiSecret = this.configService.get<string>('CLOUDINARY_API_SECRET');
 
     if (!cloudName || !apiKey || !apiSecret) {
-      console.warn('⚠️  No Cloudinary config in DB and env vars are missing. Please configure via admin panel.');
+      console.warn(
+        '⚠️  No Cloudinary config in DB and env vars are missing. Please configure via admin panel.',
+      );
       return;
     }
 
@@ -155,13 +178,21 @@ export class CloudinaryMigrationService implements OnModuleInit {
       if (!exists) {
         await this.retiredModel.create({
           cloudName: name,
-          retiredAt: new Date(Date.now() - (retiredCloudNames.length - i) * 30 * 24 * 60 * 60 * 1000), // Approximate dates
-          migratedToCloud: i < retiredCloudNames.length - 1 ? retiredCloudNames[i + 1] : cloudName,
+          retiredAt: new Date(
+            Date.now() -
+              (retiredCloudNames.length - i) * 30 * 24 * 60 * 60 * 1000,
+          ), // Approximate dates
+          migratedToCloud:
+            i < retiredCloudNames.length - 1
+              ? retiredCloudNames[i + 1]
+              : cloudName,
         });
       }
     }
 
-    console.log(`✅ Seeded Cloudinary config from env: ${cloudName} (retired: ${retiredCloudNames.join(', ')})`);
+    console.log(
+      `✅ Seeded Cloudinary config from env: ${cloudName} (retired: ${retiredCloudNames.join(', ')})`,
+    );
   }
 
   // ============================================
@@ -169,14 +200,22 @@ export class CloudinaryMigrationService implements OnModuleInit {
   // ============================================
 
   private encrypt(text: string): string {
-    const cipher = crypto.createCipheriv('aes-256-cbc', this.encryptionKey, this.encryptionIV);
+    const cipher = crypto.createCipheriv(
+      'aes-256-cbc',
+      this.encryptionKey,
+      this.encryptionIV,
+    );
     let encrypted = cipher.update(text, 'utf8', 'hex');
     encrypted += cipher.final('hex');
     return encrypted;
   }
 
   private decrypt(encryptedText: string): string {
-    const decipher = crypto.createDecipheriv('aes-256-cbc', this.encryptionKey, this.encryptionIV);
+    const decipher = crypto.createDecipheriv(
+      'aes-256-cbc',
+      this.encryptionKey,
+      this.encryptionIV,
+    );
     let decrypted = decipher.update(encryptedText, 'hex', 'utf8');
     decrypted += decipher.final('utf8');
     return decrypted;
@@ -193,11 +232,15 @@ export class CloudinaryMigrationService implements OnModuleInit {
       this.cachedActiveCloud = activeConfig?.cloudName || null;
 
       // Get retired clouds
-      const retiredClouds = await this.retiredModel.find().sort({ retiredAt: 1 });
-      this.cachedRetiredClouds = retiredClouds.map(r => r.cloudName);
+      const retiredClouds = await this.retiredModel
+        .find()
+        .sort({ retiredAt: 1 });
+      this.cachedRetiredClouds = retiredClouds.map((r) => r.cloudName);
 
       this.cacheExpiry = Date.now() + this.CACHE_TTL;
-      console.log(`🔄 Cloudinary cache refreshed: active=${this.cachedActiveCloud}, retired=[${this.cachedRetiredClouds.join(', ')}]`);
+      console.log(
+        `🔄 Cloudinary cache refreshed: active=${this.cachedActiveCloud}, retired=[${this.cachedRetiredClouds.join(', ')}]`,
+      );
     } catch (error) {
       console.error('Failed to refresh Cloudinary cache:', error);
     }
@@ -223,14 +266,19 @@ export class CloudinaryMigrationService implements OnModuleInit {
   // CONFIGURATION MANAGEMENT
   // ============================================
 
-  async getActiveConfig(): Promise<{ cloudName: string; apiKey: string; apiSecretMasked: string } | null> {
+  async getActiveConfig(): Promise<{
+    cloudName: string;
+    apiKey: string;
+    apiSecretMasked: string;
+  } | null> {
     const config = await this.configModel.findOne({ isActive: true });
     if (!config) return null;
 
     return {
       cloudName: config.cloudName,
       apiKey: config.apiKey,
-      apiSecretMasked: '****' + this.decrypt(config.apiSecretEncrypted).slice(-4),
+      apiSecretMasked:
+        '****' + this.decrypt(config.apiSecretEncrypted).slice(-4),
     };
   }
 
@@ -238,7 +286,9 @@ export class CloudinaryMigrationService implements OnModuleInit {
     return this.retiredModel.find().sort({ retiredAt: -1 });
   }
 
-  async validateCredentials(credentials: CloudinaryCredentials): Promise<boolean> {
+  async validateCredentials(
+    credentials: CloudinaryCredentials,
+  ): Promise<boolean> {
     try {
       // Configure Cloudinary with new credentials temporarily
       const testCloudinary = require('cloudinary').v2;
@@ -266,7 +316,9 @@ export class CloudinaryMigrationService implements OnModuleInit {
   }
 
   async getMigrationProgress(): Promise<MigrationProgress | null> {
-    const migration = await this.migrationModel.findOne({ status: MigrationStatus.InProgress });
+    const migration = await this.migrationModel.findOne({
+      status: MigrationStatus.InProgress,
+    });
     if (!migration) return null;
 
     return {
@@ -276,12 +328,21 @@ export class CloudinaryMigrationService implements OnModuleInit {
       copiedUrls: migration.copiedUrls,
       failedUrls: migration.failedUrls,
       skippedUrls: migration.skippedUrls,
-      percentage: migration.totalUrls > 0 
-        ? Math.round(((migration.copiedUrls + migration.failedUrls + migration.skippedUrls) / migration.totalUrls) * 100) 
-        : 0,
+      percentage:
+        migration.totalUrls > 0
+          ? Math.round(
+              ((migration.copiedUrls +
+                migration.failedUrls +
+                migration.skippedUrls) /
+                migration.totalUrls) *
+                100,
+            )
+          : 0,
       startedAt: migration.startedAt,
       completedAt: migration.completedAt,
-      recentErrors: migration.migrationErrors.slice(-5).map(e => ({ url: e.url, error: e.error })),
+      recentErrors: migration.migrationErrors
+        .slice(-5)
+        .map((e) => ({ url: e.url, error: e.error })),
     };
   }
 
@@ -296,19 +357,23 @@ export class CloudinaryMigrationService implements OnModuleInit {
     // Check if there's already a migration in progress
     const existing = await this.getActiveMigration();
     if (existing) {
-      throw new ConflictException('A migration is already in progress. Please wait or cancel it first.');
+      throw new ConflictException(
+        'A migration is already in progress. Please wait or cancel it first.',
+      );
     }
 
     // Validate new credentials
     const valid = await this.validateCredentials(credentials);
     if (!valid) {
-      throw new BadRequestException('Invalid Cloudinary credentials. Please check and try again.');
+      throw new BadRequestException(
+        'Invalid Cloudinary credentials. Please check and try again.',
+      );
     }
 
     // Get current active config (to move to retired)
     const currentConfig = await this.configModel.findOne({ isActive: true });
     const retiredClouds = await this.retiredModel.find().sort({ retiredAt: 1 });
-    const fromClouds = retiredClouds.map(r => r.cloudName);
+    const fromClouds = retiredClouds.map((r) => r.cloudName);
     if (currentConfig) {
       fromClouds.push(currentConfig.cloudName);
     }
@@ -329,7 +394,11 @@ export class CloudinaryMigrationService implements OnModuleInit {
     // Start migration in background
     this.currentMigrationId = migration._id.toString();
     this.shouldCancelMigration = false;
-    this.runMigration(migration._id.toString(), credentials, currentConfig?.cloudName);
+    this.runMigration(
+      migration._id.toString(),
+      credentials,
+      currentConfig?.cloudName,
+    );
 
     return migration._id.toString();
   }
@@ -341,15 +410,15 @@ export class CloudinaryMigrationService implements OnModuleInit {
     }
 
     this.shouldCancelMigration = true;
-    
+
     // Update status
     await this.migrationModel.updateOne(
       { _id: migration._id },
-      { 
+      {
         status: MigrationStatus.Cancelled,
         cancelledAt: new Date(),
         cancelReason: 'Cancelled by user',
-      }
+      },
     );
 
     this.currentMigrationId = null;
@@ -357,18 +426,24 @@ export class CloudinaryMigrationService implements OnModuleInit {
 
   async continueMigration(): Promise<string> {
     // Look for cancelled or failed migration to continue
-    const migration = await this.migrationModel.findOne({ 
-      status: { $in: [MigrationStatus.Cancelled, MigrationStatus.Failed] } 
-    }).sort({ startedAt: -1 });
+    const migration = await this.migrationModel
+      .findOne({
+        status: { $in: [MigrationStatus.Cancelled, MigrationStatus.Failed] },
+      })
+      .sort({ startedAt: -1 });
 
     if (!migration) {
       throw new BadRequestException('No migration to continue.');
     }
 
     // Get credentials from the NEW config (if it was saved) or require them again
-    const config = await this.configModel.findOne({ cloudName: migration.toCloud });
+    const config = await this.configModel.findOne({
+      cloudName: migration.toCloud,
+    });
     if (!config) {
-      throw new BadRequestException('Credentials for destination cloud not found. Please start a new migration.');
+      throw new BadRequestException(
+        'Credentials for destination cloud not found. Please start a new migration.',
+      );
     }
 
     const credentials: CloudinaryCredentials = {
@@ -380,11 +455,11 @@ export class CloudinaryMigrationService implements OnModuleInit {
     // Update status back to in progress
     await this.migrationModel.updateOne(
       { _id: migration._id },
-      { 
+      {
         status: MigrationStatus.InProgress,
         cancelledAt: null,
         cancelReason: null,
-      }
+      },
     );
 
     // Resume migration
@@ -405,7 +480,9 @@ export class CloudinaryMigrationService implements OnModuleInit {
     previousCloudName?: string,
     isResume = false,
   ): Promise<void> {
-    console.log(`🚀 ${isResume ? 'Resuming' : 'Starting'} Cloudinary migration to ${credentials.cloudName}`);
+    console.log(
+      `🚀 ${isResume ? 'Resuming' : 'Starting'} Cloudinary migration to ${credentials.cloudName}`,
+    );
 
     // Configure Cloudinary with new credentials
     cloudinary.config({
@@ -418,7 +495,7 @@ export class CloudinaryMigrationService implements OnModuleInit {
     if (!db) {
       await this.migrationModel.updateOne(
         { _id: migrationId },
-        { status: MigrationStatus.Failed, completedAt: new Date() }
+        { status: MigrationStatus.Failed, completedAt: new Date() },
       );
       return;
     }
@@ -426,7 +503,7 @@ export class CloudinaryMigrationService implements OnModuleInit {
     try {
       // Get retired cloud names
       const retiredClouds = await this.retiredModel.find();
-      const oldCloudNames = retiredClouds.map(r => r.cloudName);
+      const oldCloudNames = retiredClouds.map((r) => r.cloudName);
       if (previousCloudName && !oldCloudNames.includes(previousCloudName)) {
         oldCloudNames.push(previousCloudName);
       }
@@ -438,16 +515,18 @@ export class CloudinaryMigrationService implements OnModuleInit {
       // Update total count
       await this.migrationModel.updateOne(
         { _id: migrationId },
-        { totalUrls: urlArray.length }
+        { totalUrls: urlArray.length },
       );
 
       console.log(`📊 Total URLs to migrate: ${urlArray.length}`);
 
       // Get already migrated files for this destination
-      const migratedFiles = await this.migratedFileModel.find({ 
-        destinationCloud: credentials.cloudName 
-      }).select('publicId');
-      const migratedSet = new Set(migratedFiles.map(f => f.publicId));
+      const migratedFiles = await this.migratedFileModel
+        .find({
+          destinationCloud: credentials.cloudName,
+        })
+        .select('publicId');
+      const migratedSet = new Set(migratedFiles.map((f) => f.publicId));
 
       let copiedUrls = 0;
       let failedUrls = 0;
@@ -478,26 +557,28 @@ export class CloudinaryMigrationService implements OnModuleInit {
         if ((i + 1) % 5 === 0 || i === urlArray.length - 1) {
           await this.migrationModel.updateOne(
             { _id: migrationId },
-            { copiedUrls, failedUrls, skippedUrls }
+            { copiedUrls, failedUrls, skippedUrls },
           );
         }
 
         // Log progress every 50 files
         if ((i + 1) % 50 === 0) {
-          console.log(`📈 Progress: ${i + 1}/${urlArray.length} (${Math.round(((i + 1) / urlArray.length) * 100)}%)`);
+          console.log(
+            `📈 Progress: ${i + 1}/${urlArray.length} (${Math.round(((i + 1) / urlArray.length) * 100)}%)`,
+          );
         }
       }
 
       // Migration completed successfully
       await this.migrationModel.updateOne(
         { _id: migrationId },
-        { 
+        {
           status: MigrationStatus.Completed,
           completedAt: new Date(),
           copiedUrls,
           failedUrls,
           skippedUrls,
-        }
+        },
       );
 
       // Now update the config and retired clouds
@@ -505,12 +586,14 @@ export class CloudinaryMigrationService implements OnModuleInit {
         await this.finalizeMigration(credentials, previousCloudName);
       }
 
-      console.log(`✅ Migration completed! Copied: ${copiedUrls}, Skipped: ${skippedUrls}, Failed: ${failedUrls}`);
+      console.log(
+        `✅ Migration completed! Copied: ${copiedUrls}, Skipped: ${skippedUrls}, Failed: ${failedUrls}`,
+      );
     } catch (error) {
       console.error('❌ Migration failed:', error);
       await this.migrationModel.updateOne(
         { _id: migrationId },
-        { status: MigrationStatus.Failed, completedAt: new Date() }
+        { status: MigrationStatus.Failed, completedAt: new Date() },
       );
     } finally {
       this.currentMigrationId = null;
@@ -544,7 +627,9 @@ export class CloudinaryMigrationService implements OnModuleInit {
     // Refresh cache
     await this.refreshCache();
 
-    console.log(`🔄 Config updated: ${previousCloudName} → ${credentials.cloudName} (retired list updated)`);
+    console.log(
+      `🔄 Config updated: ${previousCloudName} → ${credentials.cloudName} (retired list updated)`,
+    );
   }
 
   private async migrateImage(
@@ -556,7 +641,13 @@ export class CloudinaryMigrationService implements OnModuleInit {
   ): Promise<'success' | 'skipped' | 'failed'> {
     try {
       const pathInfo = this.extractCloudinaryPath(url);
-      const { publicId, folder, resourceType, format, filenameWithoutExtension } = pathInfo;
+      const {
+        publicId,
+        folder,
+        resourceType,
+        format,
+        filenameWithoutExtension,
+      } = pathInfo;
 
       // Check if already migrated
       if (migratedSet.has(publicId)) {
@@ -573,7 +664,10 @@ export class CloudinaryMigrationService implements OnModuleInit {
       }
 
       // Download image
-      const { buffer, contentType } = await this.downloadImage(sourceUrl, format);
+      const { buffer, contentType } = await this.downloadImage(
+        sourceUrl,
+        format,
+      );
       const dataUri = `data:${contentType};base64,${buffer.toString('base64')}`;
 
       // Upload to new account
@@ -619,9 +713,9 @@ export class CloudinaryMigrationService implements OnModuleInit {
               url,
               error: error.message || 'Unknown error',
               timestamp: new Date(),
-            }
-          }
-        }
+            },
+          },
+        },
       );
       return 'failed';
     }
@@ -755,16 +849,23 @@ export class CloudinaryMigrationService implements OnModuleInit {
     });
   }
 
-  private async getAllCloudinaryUrls(db: any, oldCloudNames: string[]): Promise<Set<string>> {
+  private async getAllCloudinaryUrls(
+    db: any,
+    oldCloudNames: string[],
+  ): Promise<Set<string>> {
     const urls = new Set<string>();
 
-    const cloudRegexOr = (field: string) => ({ 
-      $or: oldCloudNames.map(name => ({ [field]: { $regex: name } })) 
+    const cloudRegexOr = (field: string) => ({
+      $or: oldCloudNames.map((name) => ({ [field]: { $regex: name } })),
     });
-    const hasOldCloud = (str: string) => str && oldCloudNames.some(name => str.includes(name));
+    const hasOldCloud = (str: string) =>
+      str && oldCloudNames.some((name) => str.includes(name));
 
     // Products - images array
-    const products = await db.collection('products').find(cloudRegexOr('images')).toArray();
+    const products = await db
+      .collection('products')
+      .find(cloudRegexOr('images'))
+      .toArray();
     for (const product of products) {
       if (product.images && Array.isArray(product.images)) {
         for (const img of product.images) {
@@ -775,27 +876,40 @@ export class CloudinaryMigrationService implements OnModuleInit {
     }
 
     // Products - thumbnail
-    const productsWithThumbnail = await db.collection('products').find(cloudRegexOr('thumbnail')).toArray();
+    const productsWithThumbnail = await db
+      .collection('products')
+      .find(cloudRegexOr('thumbnail'))
+      .toArray();
     for (const product of productsWithThumbnail) {
       if (product.thumbnail) urls.add(product.thumbnail);
     }
 
     // Banners
-    const banners = await db.collection('banners').find(cloudRegexOr('imageUrl')).toArray();
+    const banners = await db
+      .collection('banners')
+      .find(cloudRegexOr('imageUrl'))
+      .toArray();
     for (const banner of banners) {
       if (banner.imageUrl) urls.add(banner.imageUrl);
     }
 
     // Users
-    const users = await db.collection('users').find({ 
-      $or: [
-        ...oldCloudNames.map(name => ({ profileImagePath: { $regex: name } })),
-        ...oldCloudNames.map(name => ({ storeLogo: { $regex: name } })),
-        ...oldCloudNames.map(name => ({ storeLogoPath: { $regex: name } })),
-        ...oldCloudNames.map(name => ({ artistCoverImage: { $regex: name } })),
-        ...oldCloudNames.map(name => ({ artistGallery: { $regex: name } })),
-      ]
-    }).toArray();
+    const users = await db
+      .collection('users')
+      .find({
+        $or: [
+          ...oldCloudNames.map((name) => ({
+            profileImagePath: { $regex: name },
+          })),
+          ...oldCloudNames.map((name) => ({ storeLogo: { $regex: name } })),
+          ...oldCloudNames.map((name) => ({ storeLogoPath: { $regex: name } })),
+          ...oldCloudNames.map((name) => ({
+            artistCoverImage: { $regex: name },
+          })),
+          ...oldCloudNames.map((name) => ({ artistGallery: { $regex: name } })),
+        ],
+      })
+      .toArray();
 
     for (const user of users) {
       if (hasOldCloud(user.profileImagePath)) urls.add(user.profileImagePath);
@@ -810,12 +924,15 @@ export class CloudinaryMigrationService implements OnModuleInit {
     }
 
     // Blog posts
-    const blogs = await db.collection('blogposts').find({ 
-      $or: [
-        ...oldCloudNames.map(name => ({ coverImage: { $regex: name } })),
-        ...oldCloudNames.map(name => ({ images: { $regex: name } })),
-      ]
-    }).toArray();
+    const blogs = await db
+      .collection('blogposts')
+      .find({
+        $or: [
+          ...oldCloudNames.map((name) => ({ coverImage: { $regex: name } })),
+          ...oldCloudNames.map((name) => ({ images: { $regex: name } })),
+        ],
+      })
+      .toArray();
 
     for (const blog of blogs) {
       if (hasOldCloud(blog.coverImage)) urls.add(blog.coverImage);
@@ -827,9 +944,12 @@ export class CloudinaryMigrationService implements OnModuleInit {
     }
 
     // Portfolio Posts
-    const portfolioPosts = await db.collection('portfolioposts').find({ 
-      $or: oldCloudNames.map(name => ({ 'images.url': { $regex: name } }))
-    }).toArray();
+    const portfolioPosts = await db
+      .collection('portfolioposts')
+      .find({
+        $or: oldCloudNames.map((name) => ({ 'images.url': { $regex: name } })),
+      })
+      .toArray();
 
     for (const post of portfolioPosts) {
       if (post.images && Array.isArray(post.images)) {
@@ -840,13 +960,19 @@ export class CloudinaryMigrationService implements OnModuleInit {
     }
 
     // Forums
-    const forums = await db.collection('forums').find(cloudRegexOr('imagePath')).toArray();
+    const forums = await db
+      .collection('forums')
+      .find(cloudRegexOr('imagePath'))
+      .toArray();
     for (const forum of forums) {
       if (hasOldCloud(forum.imagePath)) urls.add(forum.imagePath);
     }
 
     // Categories
-    const categories = await db.collection('categories').find(cloudRegexOr('image')).toArray();
+    const categories = await db
+      .collection('categories')
+      .find(cloudRegexOr('image'))
+      .toArray();
     for (const category of categories) {
       if (category.image) urls.add(category.image);
     }
@@ -864,8 +990,8 @@ export class CloudinaryMigrationService implements OnModuleInit {
 
     const currentConfig = await this.configModel.findOne({ isActive: true });
     const retiredClouds = await this.retiredModel.find();
-    
-    const oldCloudNames = retiredClouds.map(r => r.cloudName);
+
+    const oldCloudNames = retiredClouds.map((r) => r.cloudName);
     if (currentConfig) {
       oldCloudNames.push(currentConfig.cloudName);
     }

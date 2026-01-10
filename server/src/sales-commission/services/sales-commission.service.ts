@@ -147,7 +147,8 @@ export class SalesCommissionService {
     }
 
     // გამოვთვალოთ კომისია - გამოვიყენოთ Sales Manager-ის ინდივიდუალური პროცენტი
-    const commissionRate = salesManager.salesCommissionRate ?? this.DEFAULT_COMMISSION_PERCENT;
+    const commissionRate =
+      salesManager.salesCommissionRate ?? this.DEFAULT_COMMISSION_PERCENT;
     const commissionAmount = (order.totalPrice * commissionRate) / 100;
 
     // Get user ID - order.user can be populated or just an ObjectId
@@ -349,7 +350,11 @@ export class SalesCommissionService {
    */
   async getAllManagersStats(): Promise<
     Array<{
-      manager: User & { salesTotalWithdrawn?: number; salesPendingWithdrawal?: number; salesCommissionRate?: number };
+      manager: User & {
+        salesTotalWithdrawn?: number;
+        salesPendingWithdrawal?: number;
+        salesCommissionRate?: number;
+      };
       stats: {
         totalCommissions: number;
         pendingAmount: number;
@@ -465,7 +470,8 @@ export class SalesCommissionService {
   }> {
     // მივიღოთ Sales Manager-ის საკომისიო პროცენტი
     const manager = await this.userModel.findById(salesManagerId);
-    const commissionRate = manager?.salesCommissionRate ?? this.DEFAULT_COMMISSION_PERCENT;
+    const commissionRate =
+      manager?.salesCommissionRate ?? this.DEFAULT_COMMISSION_PERCENT;
 
     const matchStage: any = {
       salesManager: new Types.ObjectId(salesManagerId),
@@ -595,7 +601,8 @@ export class SalesCommissionService {
   > {
     // მივიღოთ Sales Manager-ის ინდივიდუალური საკომისიო
     const manager = await this.userModel.findById(salesManagerId);
-    const commissionRate = manager?.salesCommissionRate ?? this.DEFAULT_COMMISSION_PERCENT;
+    const commissionRate =
+      manager?.salesCommissionRate ?? this.DEFAULT_COMMISSION_PERCENT;
 
     const startDate = new Date();
     startDate.setDate(startDate.getDate() - days);
@@ -736,7 +743,8 @@ export class SalesCommissionService {
     const totalWithdrawn = manager.salesTotalWithdrawn || 0;
     const pendingWithdrawals = manager.salesPendingWithdrawal || 0;
     const availableBalance = totalApproved - pendingWithdrawals;
-    const commissionRate = manager.salesCommissionRate ?? this.DEFAULT_COMMISSION_PERCENT;
+    const commissionRate =
+      manager.salesCommissionRate ?? this.DEFAULT_COMMISSION_PERCENT;
 
     return {
       availableBalance,
@@ -859,7 +867,8 @@ export class SalesCommissionService {
       if (isPending) {
         // Admin-ისთვის email notification
         try {
-          const adminEmail = process.env.ADMIN_EMAIL || 'soulartgeorgia@gmail.com';
+          const adminEmail =
+            process.env.ADMIN_EMAIL || 'soulartgeorgia@gmail.com';
           await this.emailService.sendWithdrawalRequestNotification({
             adminEmail,
             requesterName: managerName,
@@ -1004,19 +1013,25 @@ export class SalesCommissionService {
       }>;
     }>
   > {
-    const managers = await this.userModel.find({
-      role: Role.SalesManager,
-      salesPendingWithdrawal: { $gt: 0 },
-    }).select('name email accountNumber identificationNumber beneficiaryBankCode salesPendingWithdrawal salesCommissionBalance salesTotalWithdrawn');
+    const managers = await this.userModel
+      .find({
+        role: Role.SalesManager,
+        salesPendingWithdrawal: { $gt: 0 },
+      })
+      .select(
+        'name email accountNumber identificationNumber beneficiaryBankCode salesPendingWithdrawal salesCommissionBalance salesTotalWithdrawn',
+      );
 
     const result = [];
 
     for (const m of managers) {
       // Get pending transactions with BOG UniqueKey
-      const pendingTxs = await this.balanceTransactionModel.find({
-        seller: m._id,
-        type: 'sm_withdrawal_pending',
-      }).sort({ createdAt: -1 });
+      const pendingTxs = await this.balanceTransactionModel
+        .find({
+          seller: m._id,
+          type: 'sm_withdrawal_pending',
+        })
+        .sort({ createdAt: -1 });
 
       const pendingTransactions = pendingTxs.map((tx) => {
         const uniqueKeyMatch = tx.description.match(/UniqueKey: (\d+)/);

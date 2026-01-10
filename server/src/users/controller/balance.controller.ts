@@ -207,7 +207,10 @@ export class BalanceController {
     }
 
     try {
-      const result = await this.balanceService.requestWithdrawal(sellerId, amount);
+      const result = await this.balanceService.requestWithdrawal(
+        sellerId,
+        amount,
+      );
 
       return {
         success: true,

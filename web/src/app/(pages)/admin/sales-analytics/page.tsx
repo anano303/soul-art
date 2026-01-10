@@ -89,7 +89,8 @@ export default function SalesAnalyticsPage() {
         checkouts: funnelData.checkoutStarts || 0,
         purchases: funnelData.purchases || 0,
         totalRevenue: funnelData.totalRevenue || 0,
-        totalCommission: (funnelData.totalRevenue || 0) * (commissionRate / 100),
+        totalCommission:
+          (funnelData.totalRevenue || 0) * (commissionRate / 100),
         commissionRate: commissionRate,
         conversionRates: {
           visitToRegistration:
@@ -239,7 +240,9 @@ export default function SalesAnalyticsPage() {
                 </span>
               </div>
               <div className="revenue-item commission">
-                <span className="revenue-label">გამომუშავებული ({funnelStats?.commissionRate ?? 3}%):</span>
+                <span className="revenue-label">
+                  გამომუშავებული ({funnelStats?.commissionRate ?? 3}%):
+                </span>
                 <span className="revenue-value">
                   ₾{(funnelStats?.totalCommission || 0).toFixed(2)}
                 </span>
@@ -268,7 +271,9 @@ export default function SalesAnalyticsPage() {
                 <tbody>
                   {dailyStats.map((day) => (
                     <tr key={day.date}>
-                      <td data-label="თარიღი">{new Date(day.date).toLocaleDateString("ka-GE")}</td>
+                      <td data-label="თარიღი">
+                        {new Date(day.date).toLocaleDateString("ka-GE")}
+                      </td>
                       <td data-label="ვიზიტები">{day.visits}</td>
                       <td data-label="რეგისტრაციები">{day.registrations}</td>
                       <td data-label="შეკვეთები">{day.purchases}</td>

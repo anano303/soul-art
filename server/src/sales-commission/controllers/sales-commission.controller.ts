@@ -297,8 +297,14 @@ export class SalesCommissionController {
   ) {
     const { commissionRate } = body;
 
-    if (commissionRate === undefined || commissionRate < 0 || commissionRate > 100) {
-      throw new BadRequestException('საკომისიო პროცენტი უნდა იყოს 0-დან 100-მდე');
+    if (
+      commissionRate === undefined ||
+      commissionRate < 0 ||
+      commissionRate > 100
+    ) {
+      throw new BadRequestException(
+        'საკომისიო პროცენტი უნდა იყოს 0-დან 100-მდე',
+      );
     }
 
     return this.salesCommissionService.updateManagerCommissionRate(

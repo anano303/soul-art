@@ -971,8 +971,9 @@ ${message}
     amount: number;
     accountNumber?: string;
   }) {
-    const typeLabel = data.requesterType === 'seller' ? 'სელერი' : 'Sales Manager';
-    
+    const typeLabel =
+      data.requesterType === 'seller' ? 'სელერი' : 'Sales Manager';
+
     const mailOptions = {
       from: emailConfig.from,
       to: data.adminEmail,
