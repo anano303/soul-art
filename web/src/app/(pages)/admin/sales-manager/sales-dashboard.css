@@ -755,3 +755,25 @@
     font-size: 0.8rem;
   }
 }
+
+/* Withdrawal History Section */
+.withdrawal-history-section {
+  background: linear-gradient(135deg, #fef3c7 0%, #fef9c3 100%);
+  border: 1px solid #fcd34d;
+}
+
+.withdrawal-history-section h2 {
+  font-size: 1.25rem;
+  margin-bottom: 1.5rem;
+  color: #92400e;
+}
+
+.withdrawal-amount-completed {
+  color: #16a34a;
+  font-weight: 600;
+}
+
+.withdrawal-amount-pending {
+  color: #d97706;
+  font-weight: 600;
+}

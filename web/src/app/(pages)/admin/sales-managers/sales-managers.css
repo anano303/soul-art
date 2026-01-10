@@ -182,6 +182,33 @@
   background: #e5e7eb;
 }
 
+.view-button.history {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.view-button.history:hover {
+  background: #fcd34d;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.withdrawal-history {
+  background: linear-gradient(135deg, #fef3c7 0%, #fef9c3 100%);
+  border: 1px solid #fcd34d;
+}
+
+.no-data {
+  text-align: center;
+  padding: 40px;
+  color: #6b7280;
+  font-size: 0.95rem;
+}
+
 /* Commissions Section */
 .commissions-section {
   margin-top: 30px;

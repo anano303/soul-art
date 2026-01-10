@@ -13,6 +13,7 @@ import {
   RefreshCw,
   Eye,
   Wallet,
+  History,
 } from "lucide-react";
 import "./sales-managers.css";
 
@@ -44,6 +45,14 @@ interface PendingWithdrawal {
   salesTotalWithdrawn: number;
 }
 
+interface WithdrawalTransaction {
+  _id: string;
+  type: string;
+  amount: number;
+  description: string;
+  createdAt: string;
+}
+
 export default function AdminSalesManagersPage() {
   const router = useRouter();
   const { user, isLoading: authLoading } = useAuth();
@@ -52,6 +61,8 @@ export default function AdminSalesManagersPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [selectedManager, setSelectedManager] = useState<string | null>(null);
   const [managerCommissions, setManagerCommissions] = useState<any[]>([]);
+  const [withdrawalTransactions, setWithdrawalTransactions] = useState<WithdrawalTransaction[]>([]);
+  const [showWithdrawals, setShowWithdrawals] = useState<string | null>(null);
 
   useEffect(() => {
     if (!authLoading && (!user || user.role !== Role.Admin)) {
@@ -90,6 +101,20 @@ export default function AdminSalesManagersPage() {
     }
   };
 
+  const fetchWithdrawalTransactions = async (managerId: string) => {
+    try {
+      const response = await fetchWithAuth(
+        `/balance/admin/sales-manager/${managerId}/transactions?limit=50`
+      );
+      if (response.ok) {
+        const data = await response.json();
+        setWithdrawalTransactions(data.transactions || []);
+      }
+    } catch (error) {
+      console.error("Error fetching withdrawal transactions:", error);
+    }
+  };
+
   useEffect(() => {
     if (user?.role === Role.Admin) {
       fetchManagers();
@@ -101,6 +126,12 @@ export default function AdminSalesManagersPage() {
       fetchManagerCommissions(selectedManager);
     }
   }, [selectedManager]);
+
+  useEffect(() => {
+    if (showWithdrawals) {
+      fetchWithdrawalTransactions(showWithdrawals);
+    }
+  }, [showWithdrawals]);
 
   if (authLoading || !user || user.role !== Role.Admin) {
     return (
@@ -171,7 +202,7 @@ export default function AdminSalesManagersPage() {
                 <th>დამტკიცებული</th>
                 <th>გადახდილი</th>
                 <th>სულ საკომისიო</th>
-                <th>მოქმედება</th>
+                <th>მოქმედებები</th>
               </tr>
             </thead>
             <tbody>
@@ -205,19 +236,34 @@ export default function AdminSalesManagersPage() {
                     ₾{m.stats.totalCommissions.toFixed(2)}
                   </td>
                   <td>
-                    <button
-                      className="view-button"
-                      onClick={() =>
-                        setSelectedManager(
-                          selectedManager === m.manager._id
-                            ? null
-                            : m.manager._id
-                        )
-                      }
-                    >
-                      <Eye size={16} />
-                      {selectedManager === m.manager._id ? "დახურვა" : "ნახვა"}
-                    </button>
+                    <div className="action-buttons">
+                      <button
+                        className="view-button"
+                        onClick={() =>
+                          setSelectedManager(
+                            selectedManager === m.manager._id
+                              ? null
+                              : m.manager._id
+                          )
+                        }
+                      >
+                        <Eye size={16} />
+                        {selectedManager === m.manager._id ? "დახურვა" : "შეკვეთები"}
+                      </button>
+                      <button
+                        className="view-button history"
+                        onClick={() =>
+                          setShowWithdrawals(
+                            showWithdrawals === m.manager._id
+                              ? null
+                              : m.manager._id
+                          )
+                        }
+                      >
+                        <History size={16} />
+                        {showWithdrawals === m.manager._id ? "დახურვა" : "გატანები"}
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -285,6 +331,48 @@ export default function AdminSalesManagersPage() {
               ))}
             </tbody>
           </table>
+        </div>
+      )}
+
+      {/* Selected Manager Withdrawal Transactions */}
+      {showWithdrawals && (
+        <div className="commissions-section withdrawal-history">
+          <h2>
+            <History size={22} />
+            გატანების ისტორია - {managers.find(m => m.manager._id === showWithdrawals)?.manager.name}
+          </h2>
+          {withdrawalTransactions.length === 0 ? (
+            <p className="no-data">გატანების ისტორია არ მოიძებნა</p>
+          ) : (
+            <table className="commissions-table">
+              <thead>
+                <tr>
+                  <th>თარიღი</th>
+                  <th>ტიპი</th>
+                  <th>თანხა</th>
+                  <th>აღწერა</th>
+                </tr>
+              </thead>
+              <tbody>
+                {withdrawalTransactions.map((t) => (
+                  <tr key={t._id}>
+                    <td>
+                      {new Date(t.createdAt).toLocaleDateString("ka-GE")}
+                    </td>
+                    <td>
+                      <span className={`status-badge ${t.type.includes('completed') ? 'paid' : 'pending'}`}>
+                        {t.type === 'sm_withdrawal_completed' ? 'დასრულებული' : 'მოთხოვნილი'}
+                      </span>
+                    </td>
+                    <td className="commission-amount">
+                      ₾{t.amount.toFixed(2)}
+                    </td>
+                    <td>{t.description}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
         </div>
       )}
     </div>

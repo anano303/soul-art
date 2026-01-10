@@ -51,6 +51,14 @@ interface RefCodeInfo {
   referralLink: string | null;
 }
 
+interface WithdrawalTransaction {
+  _id: string;
+  type: string;
+  amount: number;
+  description: string;
+  createdAt: string;
+}
+
 export default function SalesManagerDashboard() {
   const router = useRouter();
   const { toast } = useToast();
@@ -66,6 +74,9 @@ export default function SalesManagerDashboard() {
   const [statusFilter, setStatusFilter] = useState<string>("");
   const [withdrawalAmount, setWithdrawalAmount] = useState("");
   const [isWithdrawing, setIsWithdrawing] = useState(false);
+  const [withdrawalHistory, setWithdrawalHistory] = useState<WithdrawalTransaction[]>([]);
+  const [withdrawalPage, setWithdrawalPage] = useState(1);
+  const [withdrawalTotalPages, setWithdrawalTotalPages] = useState(1);
 
   const fetchData = useCallback(async () => {
     try {
@@ -100,12 +111,22 @@ export default function SalesManagerDashboard() {
         setCommissions(commData.commissions);
         setTotalPages(commData.pages);
       }
+
+      // Fetch withdrawal history
+      const withdrawalsRes = await fetchWithAuth(
+        `/sales-commission/my-withdrawals?page=${withdrawalPage}&limit=10`
+      );
+      if (withdrawalsRes.ok) {
+        const withdrawalsData = await withdrawalsRes.json();
+        setWithdrawalHistory(withdrawalsData.withdrawals);
+        setWithdrawalTotalPages(withdrawalsData.totalPages);
+      }
     } catch (error) {
       console.error("Failed to fetch data:", error);
     } finally {
       setLoading(false);
     }
-  }, [currentPage, statusFilter]);
+  }, [currentPage, statusFilter, withdrawalPage]);
 
   useEffect(() => {
     // Check if user is sales manager
@@ -384,6 +405,68 @@ export default function SalesManagerDashboard() {
           გატანა ხდება BOG ანგარიშზე. პროფილში უნდა გქონდეთ მითითებული ანგარიშის
           ნომერი და პირადი ნომერი.
         </p>
+      </div>
+
+      {/* Withdrawal History Section */}
+      <div className="withdrawal-history-section card">
+        <h2>📜 გატანების ისტორია</h2>
+        {withdrawalHistory.length === 0 ? (
+          <p className="no-data">გატანების ისტორია არ მოიძებნა</p>
+        ) : (
+          <>
+            <table className="commissions-table">
+              <thead>
+                <tr>
+                  <th>თარიღი</th>
+                  <th>ტიპი</th>
+                  <th>თანხა</th>
+                  <th>აღწერა</th>
+                </tr>
+              </thead>
+              <tbody>
+                {withdrawalHistory.map((transaction) => (
+                  <tr key={transaction._id}>
+                    <td data-label="თარიღი">
+                      {new Date(transaction.createdAt).toLocaleDateString("ka")}
+                    </td>
+                    <td data-label="ტიპი">
+                      <span className={`status-badge ${transaction.type === 'sm_withdrawal_completed' ? 'status-paid' : 'status-pending'}`}>
+                        {transaction.type === 'sm_withdrawal_completed' ? 'დასრულებული' : 'მოთხოვნილი'}
+                      </span>
+                    </td>
+                    <td data-label="თანხა" className={transaction.type === 'sm_withdrawal_completed' ? 'withdrawal-amount-completed' : 'withdrawal-amount-pending'}>
+                      {transaction.amount.toFixed(2)} ₾
+                    </td>
+                    <td data-label="აღწერა">{transaction.description}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+
+            {/* Withdrawal Pagination */}
+            {withdrawalTotalPages > 1 && (
+              <div className="pagination">
+                <button
+                  onClick={() => setWithdrawalPage((p) => Math.max(1, p - 1))}
+                  disabled={withdrawalPage === 1}
+                >
+                  წინა
+                </button>
+                <span>
+                  {withdrawalPage} / {withdrawalTotalPages}
+                </span>
+                <button
+                  onClick={() =>
+                    setWithdrawalPage((p) => Math.min(withdrawalTotalPages, p + 1))
+                  }
+                  disabled={withdrawalPage === withdrawalTotalPages}
+                >
+                  შემდეგი
+                </button>
+              </div>
+            )}
+          </>
+        )}
       </div>
 
       {/* Navigation */}
