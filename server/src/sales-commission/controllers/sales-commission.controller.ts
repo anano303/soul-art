@@ -98,6 +98,16 @@ export class SalesCommissionController {
   }
 
   /**
+   * Pending withdrawal-ები (Admin-ისთვის)
+   */
+  @Get('admin/pending-withdrawals')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.Admin)
+  async getPendingWithdrawals() {
+    return this.salesCommissionService.getPendingWithdrawals();
+  }
+
+  /**
    * კონკრეტული მენეჯერის კომისიები (Admin-ისთვის)
    */
   @Get('admin/manager/:managerId/commissions')

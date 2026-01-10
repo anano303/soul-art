@@ -12,6 +12,7 @@ import {
   ShoppingCart,
   RefreshCw,
   Eye,
+  Wallet,
 } from "lucide-react";
 import "./sales-managers.css";
 
@@ -32,10 +33,22 @@ interface ManagerStats {
   };
 }
 
+interface PendingWithdrawal {
+  _id: string;
+  name: string;
+  email: string;
+  accountNumber: string;
+  identificationNumber: string;
+  salesPendingWithdrawal: number;
+  salesCommissionBalance: number;
+  salesTotalWithdrawn: number;
+}
+
 export default function AdminSalesManagersPage() {
   const router = useRouter();
   const { user, isLoading: authLoading } = useAuth();
   const [managers, setManagers] = useState<ManagerStats[]>([]);
+  const [pendingWithdrawals, setPendingWithdrawals] = useState<PendingWithdrawal[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedManager, setSelectedManager] = useState<string | null>(null);
   const [managerCommissions, setManagerCommissions] = useState<any[]>([]);
