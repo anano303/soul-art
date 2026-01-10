@@ -31,9 +31,21 @@ interface PendingWithdrawal {
   };
 }
 
+interface SalesManagerPendingWithdrawal {
+  _id: string;
+  name: string;
+  email: string;
+  accountNumber: string;
+  identificationNumber: string;
+  salesPendingWithdrawal: number;
+  salesCommissionBalance: number;
+  salesTotalWithdrawn: number;
+}
+
 export default function BogTransfersPage() {
   const [balance, setBalance] = useState<AccountBalance | null>(null);
   const [pendingWithdrawals, setPendingWithdrawals] = useState<PendingWithdrawal[]>([]);
+  const [salesManagerWithdrawals, setSalesManagerWithdrawals] = useState<SalesManagerPendingWithdrawal[]>([]);
   const [loading, setLoading] = useState(false);
   const [otp, setOtp] = useState("");
   const [error, setError] = useState("");
@@ -67,10 +79,23 @@ export default function BogTransfersPage() {
     }
   }, []);
 
+  const fetchSalesManagerWithdrawals = useCallback(async () => {
+    try {
+      const res = await fetchWithAuth("/sales-commission/admin/pending-withdrawals");
+      if (res.ok) {
+        const data = await res.json();
+        setSalesManagerWithdrawals(data || []);
+      }
+    } catch {
+      console.error("Failed to fetch sales manager withdrawals");
+    }
+  }, []);
+
   const fetchData = useCallback(async () => {
     await Promise.all([
       fetchBalance(),
       fetchPendingWithdrawals(),
+      fetchSalesManagerWithdrawals(),
     ]);
   }, [fetchBalance, fetchPendingWithdrawals]);
 
@@ -607,6 +632,77 @@ export default function BogTransfersPage() {
             </div>
           </div>
         </div>
+
+        {/* Sales Manager Pending Withdrawals */}
+        {salesManagerWithdrawals.length > 0 && (
+          <div className="bg-white rounded-lg shadow mb-6 mt-6">
+            <div className="border-b border-gray-200 p-4">
+              <h3 className="text-lg font-semibold flex items-center gap-2">
+                👔 Sales Manager გატანის მოთხოვნები
+                <span className="bg-purple-100 text-purple-600 py-0.5 px-2 rounded-full text-xs">
+                  {salesManagerWithdrawals.length}
+                </span>
+              </h3>
+            </div>
+            <div className="p-6">
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        მენეჯერი
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        ანგარიში
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        პირადი ნომერი
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        მოთხოვნილი თანხა
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        სულ გატანილი
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {salesManagerWithdrawals.map((manager) => (
+                      <tr key={manager._id} className="hover:bg-gray-50">
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm font-medium text-gray-900">
+                            {manager.name}
+                          </div>
+                          <div className="text-sm text-gray-500">
+                            {manager.email}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {manager.accountNumber || <span className="text-red-500">არ არის მითითებული</span>}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {manager.identificationNumber || <span className="text-red-500">არ არის მითითებული</span>}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className="text-sm font-semibold text-purple-600">
+                            {formatCurrency(manager.salesPendingWithdrawal)}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {formatCurrency(manager.salesTotalWithdrawn)}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <p className="mt-4 text-sm text-gray-500">
+                💡 Sales Manager-ის გატანის მოთხოვნები BOG-ში გადაიგზავნება ავტომატურად.
+                ზემოთ სელერების ცხრილში უნდა გამოჩნდეს ხელმოწერის ღილაკი.
+              </p>
+            </div>
+          </div>
+        )}
 
         {/* Auto-refresh indicator */}
         <div className="text-center text-sm text-gray-500 mt-4">

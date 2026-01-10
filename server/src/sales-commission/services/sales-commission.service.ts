@@ -869,4 +869,36 @@ export class SalesCommissionService {
       }
     }
   }
+
+  /**
+   * Admin-ისთვის: ყველა Sales Manager-ის pending withdrawal-ები
+   */
+  async getPendingWithdrawals(): Promise<
+    Array<{
+      _id: string;
+      name: string;
+      email: string;
+      accountNumber: string;
+      identificationNumber: string;
+      salesPendingWithdrawal: number;
+      salesCommissionBalance: number;
+      salesTotalWithdrawn: number;
+    }>
+  > {
+    const managers = await this.userModel.find({
+      role: Role.SalesManager,
+      salesPendingWithdrawal: { $gt: 0 },
+    }).select('name email accountNumber identificationNumber salesPendingWithdrawal salesCommissionBalance salesTotalWithdrawn');
+
+    return managers.map((m) => ({
+      _id: m._id.toString(),
+      name: m.name,
+      email: m.email,
+      accountNumber: m.accountNumber || '',
+      identificationNumber: m.identificationNumber || '',
+      salesPendingWithdrawal: m.salesPendingWithdrawal || 0,
+      salesCommissionBalance: m.salesCommissionBalance || 0,
+      salesTotalWithdrawn: m.salesTotalWithdrawn || 0,
+    }));
+  }
 }
