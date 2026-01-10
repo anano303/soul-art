@@ -31,7 +31,7 @@ export class BogStatusCheckerService {
     this.logger.log('Starting check for pending BOG transfers...');
 
     try {
-      // Find all pending withdrawal transactions
+      // Find all pending withdrawal transactions (Sellers)
       const pendingTransactions = await this.balanceTransactionModel
         .find({
           type: 'withdrawal_pending',
@@ -39,7 +39,7 @@ export class BogStatusCheckerService {
         .populate('seller');
 
       this.logger.log(
-        `Found ${pendingTransactions.length} pending withdrawals`,
+        `Found ${pendingTransactions.length} pending seller withdrawals`,
       );
 
       for (const transaction of pendingTransactions) {
@@ -84,8 +84,65 @@ export class BogStatusCheckerService {
       }
 
       this.logger.log('Finished checking pending BOG transfers');
+
+      // Now check Sales Manager pending withdrawals
+      await this.checkSalesManagerPendingTransfers();
     } catch (error) {
       this.logger.error('Error in checkPendingTransfers:', error);
+    }
+  }
+
+  /**
+   * Check Sales Manager pending BOG transfers
+   */
+  private async checkSalesManagerPendingTransfers() {
+    try {
+      const smPendingTransactions = await this.balanceTransactionModel
+        .find({
+          type: 'sm_withdrawal_pending',
+        })
+        .populate('seller'); // 'seller' field holds salesManagerId
+
+      this.logger.log(
+        `Found ${smPendingTransactions.length} pending Sales Manager withdrawals`,
+      );
+
+      for (const transaction of smPendingTransactions) {
+        try {
+          const uniqueKeyMatch =
+            transaction.description.match(/UniqueKey: (\d+)/);
+          if (!uniqueKeyMatch) {
+            this.logger.warn(
+              `No UniqueKey found in SM transaction ${transaction._id}`,
+            );
+            continue;
+          }
+
+          const uniqueKey = parseInt(uniqueKeyMatch[1], 10);
+          const docStatus =
+            await this.bogTransferService.getDocumentStatus(uniqueKey);
+
+          if (docStatus.ResultCode === 1) {
+            await this.markSalesManagerTransferAsCompleted(transaction, uniqueKey);
+          } else if (docStatus.ResultCode < 0) {
+            await this.markSalesManagerTransferAsFailed(
+              transaction,
+              uniqueKey,
+              docStatus.ResultCode,
+            );
+          } else {
+            this.logger.debug(`SM Transfer ${uniqueKey} still pending signature`);
+          }
+        } catch (error) {
+          this.logger.error(
+            `Error checking SM transaction ${transaction._id}: ${error.message}`,
+          );
+        }
+      }
+
+      this.logger.log('Finished checking pending Sales Manager BOG transfers');
+    } catch (error) {
+      this.logger.error('Error in checkSalesManagerPendingTransfers:', error);
     }
   }
 
@@ -178,6 +235,84 @@ export class BogStatusCheckerService {
     await transaction.save();
 
     this.logger.log(`Transfer ${uniqueKey} marked as failed, balance restored`);
+  }
+
+  /**
+   * Mark Sales Manager transfer as completed
+   */
+  private async markSalesManagerTransferAsCompleted(
+    transaction: any,
+    uniqueKey: number,
+  ) {
+    if (transaction.type !== 'sm_withdrawal_pending') {
+      this.logger.warn(
+        `SM Transaction ${transaction._id} is already ${transaction.type}, skipping`,
+      );
+      return;
+    }
+
+    this.logger.log(`SM Transfer ${uniqueKey} completed, updating status...`);
+
+    const salesManager = transaction.seller as any;
+    const amount = Math.abs(transaction.amount);
+
+    // Update Sales Manager balance
+    await this.userModel.findByIdAndUpdate(salesManager._id, {
+      $inc: {
+        salesPendingWithdrawal: -amount,
+        salesTotalWithdrawn: amount,
+      },
+    });
+
+    // Update transaction type
+    transaction.type = 'sm_withdrawal_completed';
+    transaction.description = transaction.description.replace(
+      'BOG-ში',
+      'დასრულდა - BOG-ში',
+    );
+    await transaction.save();
+
+    // Send email notification
+    try {
+      const managerName = salesManager.name || 'Sales Manager';
+      await this.emailService.sendWithdrawalCompletedNotification(
+        salesManager.email,
+        managerName,
+        amount,
+      );
+    } catch (emailError) {
+      this.logger.warn(`Failed to send email for SM ${salesManager.email}`);
+    }
+
+    this.logger.log(`SM Transfer ${uniqueKey} marked as completed`);
+  }
+
+  /**
+   * Mark Sales Manager transfer as failed and restore balance
+   */
+  private async markSalesManagerTransferAsFailed(
+    transaction: any,
+    uniqueKey: number,
+    resultCode: number,
+  ) {
+    this.logger.log(
+      `SM Transfer ${uniqueKey} failed (code: ${resultCode}), restoring balance...`,
+    );
+
+    const salesManager = transaction.seller as any;
+    const amount = Math.abs(transaction.amount);
+
+    // Restore Sales Manager pending withdrawal
+    await this.userModel.findByIdAndUpdate(salesManager._id, {
+      $inc: { salesPendingWithdrawal: -amount },
+    });
+
+    // Update transaction type
+    transaction.type = 'sm_withdrawal_failed';
+    transaction.description = `Sales Manager გადარიცხვა უარყოფილია ბანკის მიერ (კოდი: ${resultCode}) - ბალანსი აღდგენილია - BOG UniqueKey: ${uniqueKey}`;
+    await transaction.save();
+
+    this.logger.log(`SM Transfer ${uniqueKey} marked as failed, balance restored`);
   }
 
   /**
