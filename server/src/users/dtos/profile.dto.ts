@@ -43,5 +43,9 @@ export class ProfileDto {
 
   @IsOptional()
   @IsString()
+  beneficiaryBankCode?: string;
+
+  @IsOptional()
+  @IsString()
   storeLogo?: string;
 }
