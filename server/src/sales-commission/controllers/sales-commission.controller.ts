@@ -2,6 +2,7 @@ import {
   Controller,
   Get,
   Post,
+  Put,
   Body,
   Query,
   UseGuards,
@@ -282,5 +283,27 @@ export class SalesCommissionController {
     } catch (error) {
       throw new BadRequestException(error.message);
     }
+  }
+
+  /**
+   * Sales Manager-ის საკომისიო პროცენტის განახლება (Admin-ისთვის)
+   */
+  @Put('admin/manager/:managerId/commission-rate')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.Admin)
+  async updateManagerCommissionRate(
+    @Param('managerId') managerId: string,
+    @Body() body: { commissionRate: number },
+  ) {
+    const { commissionRate } = body;
+
+    if (commissionRate === undefined || commissionRate < 0 || commissionRate > 100) {
+      throw new BadRequestException('საკომისიო პროცენტი უნდა იყოს 0-დან 100-მდე');
+    }
+
+    return this.salesCommissionService.updateManagerCommissionRate(
+      managerId,
+      commissionRate,
+    );
   }
 }

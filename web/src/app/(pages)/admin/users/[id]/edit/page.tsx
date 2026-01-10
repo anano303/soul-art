@@ -61,11 +61,12 @@ export default function EditUserPage() {
         updateData.accountNumber = user.accountNumber;
       }
 
-      // Sales Manager-ის საბანკო ველები
+      // Sales Manager-ის საბანკო ველები და საკომისიო
       if (user.role === Role.SalesManager) {
         updateData.phoneNumber = user.phoneNumber;
         updateData.identificationNumber = user.identificationNumber;
         updateData.accountNumber = user.accountNumber;
+        updateData.salesCommissionRate = user.salesCommissionRate;
       }
 
       const userId = params?.id as string;
@@ -248,6 +249,26 @@ export default function EditUserPage() {
         {/* Sales Manager-ის საბანკო რეკვიზიტები */}
         {isSalesManager && (
           <div className="form-section seller-section">
+            <h2 className="section-title">Sales Manager პარამეტრები</h2>
+
+            <div className="form-row">
+              <div className="form-group">
+                <label>საკომისიო პროცენტი (%)</label>
+                <input
+                  type="number"
+                  min="0"
+                  max="100"
+                  step="0.5"
+                  value={user.salesCommissionRate ?? 3}
+                  onChange={(e) =>
+                    setUser({ ...user, salesCommissionRate: parseFloat(e.target.value) || 0 })
+                  }
+                  className="commission-rate-input"
+                />
+                <span className="input-hint">მინიმუმ 0%, მაქსიმუმ 100%</span>
+              </div>
+            </div>
+
             <h2 className="section-title">საბანკო რეკვიზიტები</h2>
 
             <div className="form-row">

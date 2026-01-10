@@ -340,3 +340,90 @@
     font-size: 1.1rem;
   }
 }
+
+/* Commission Rate Edit Styles */
+.commission-rate-cell {
+  min-width: 100px;
+}
+
+.rate-display {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.rate-display span {
+  font-weight: 600;
+  color: #059669;
+}
+
+.rate-edit-btn {
+  background: transparent;
+  border: none;
+  padding: 4px;
+  cursor: pointer;
+  color: #6b7280;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  transition: all 0.2s;
+}
+
+.rate-edit-btn:hover {
+  background: #f3f4f6;
+  color: #3b82f6;
+}
+
+.rate-edit-container {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.rate-input {
+  width: 60px;
+  padding: 4px 8px;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  font-size: 14px;
+  text-align: center;
+}
+
+.rate-input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+.rate-save-btn,
+.rate-cancel-btn {
+  background: transparent;
+  border: none;
+  padding: 4px;
+  cursor: pointer;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  transition: all 0.2s;
+}
+
+.rate-save-btn {
+  color: #059669;
+}
+
+.rate-save-btn:hover {
+  background: #d1fae5;
+}
+
+.rate-save-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.rate-cancel-btn {
+  color: #dc2626;
+}
+
+.rate-cancel-btn:hover {
+  background: #fee2e2;
+}

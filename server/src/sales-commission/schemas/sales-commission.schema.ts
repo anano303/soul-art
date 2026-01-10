@@ -64,7 +64,7 @@ export class SalesCommission {
   @Prop({
     type: Number,
     required: true,
-    default: 5, // 5% კომისია
+    default: 3, // default 3% კომისია (ინდივიდუალურად იცვლება)
   })
   commissionPercent: number;
 
