@@ -348,11 +348,12 @@ export class SalesCommissionService {
    */
   async getAllManagersStats(): Promise<
     Array<{
-      manager: User;
+      manager: User & { salesTotalWithdrawn?: number; salesPendingWithdrawal?: number };
       stats: {
         totalCommissions: number;
         pendingAmount: number;
         approvedAmount: number;
+        paidAmount: number;
         totalOrders: number;
       };
     }>

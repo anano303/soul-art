@@ -159,6 +159,11 @@
   color: #3b82f6;
 }
 
+.managers-table td.withdrawn {
+  color: #8b5cf6;
+  font-weight: 600;
+}
+
 .managers-table td.total {
   font-weight: 600;
   color: #1f2937;

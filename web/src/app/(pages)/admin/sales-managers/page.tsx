@@ -24,6 +24,8 @@ interface ManagerStats {
     email: string;
     salesRefCode: string;
     createdAt: string;
+    salesTotalWithdrawn?: number;
+    salesPendingWithdrawal?: number;
   };
   stats: {
     totalCommissions: number;
@@ -201,6 +203,7 @@ export default function AdminSalesManagersPage() {
                 <th>მოლოდინში</th>
                 <th>დამტკიცებული</th>
                 <th>გადახდილი</th>
+                <th>სულ გატანილი</th>
                 <th>სულ საკომისიო</th>
                 <th>მოქმედებები</th>
               </tr>
@@ -231,6 +234,9 @@ export default function AdminSalesManagersPage() {
                   </td>
                   <td className="paid">
                     ₾{(m.stats.paidAmount || 0).toFixed(2)}
+                  </td>
+                  <td className="withdrawn">
+                    ₾{(m.manager.salesTotalWithdrawn || 0).toFixed(2)}
                   </td>
                   <td className="total">
                     ₾{m.stats.totalCommissions.toFixed(2)}
