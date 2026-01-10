@@ -24,9 +24,9 @@ export class BogStatusCheckerService {
   ) {}
 
   /**
-   * Check pending BOG transfers every 30 minutes
+   * Check pending BOG transfers every 5 minutes
    */
-  @Cron(CronExpression.EVERY_30_MINUTES)
+  @Cron(CronExpression.EVERY_5_MINUTES)
   async checkPendingTransfers() {
     this.logger.log('Starting check for pending BOG transfers...');
 
