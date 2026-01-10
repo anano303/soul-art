@@ -73,6 +73,9 @@ export class UserDto {
   salesRefCode?: string;
 
   @Expose()
+  salesCommissionRate?: number;
+
+  @Expose()
   referralCode?: string;
 
   @Expose()

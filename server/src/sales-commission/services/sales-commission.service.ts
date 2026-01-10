@@ -30,7 +30,7 @@ import {
 @Injectable()
 export class SalesCommissionService {
   private readonly logger = new Logger(SalesCommissionService.name);
-  private readonly COMMISSION_PERCENT = 5; // 5% კომისია
+  private readonly DEFAULT_COMMISSION_PERCENT = 3; // default 3% კომისია
 
   constructor(
     @InjectModel(SalesCommission.name)
@@ -146,8 +146,9 @@ export class SalesCommissionService {
       return existingCommission;
     }
 
-    // გამოვთვალოთ კომისია
-    const commissionAmount = (order.totalPrice * this.COMMISSION_PERCENT) / 100;
+    // გამოვთვალოთ კომისია - გამოვიყენოთ Sales Manager-ის ინდივიდუალური პროცენტი
+    const commissionRate = salesManager.salesCommissionRate ?? this.DEFAULT_COMMISSION_PERCENT;
+    const commissionAmount = (order.totalPrice * commissionRate) / 100;
 
     // Get user ID - order.user can be populated or just an ObjectId
     const customerId = order.user
@@ -164,7 +165,7 @@ export class SalesCommissionService {
       guestEmail: order.guestInfo?.email || null,
       salesRefCode,
       orderTotal: order.totalPrice,
-      commissionPercent: this.COMMISSION_PERCENT,
+      commissionPercent: commissionRate,
       commissionAmount,
       status: CommissionStatus.PENDING,
     });
@@ -348,7 +349,7 @@ export class SalesCommissionService {
    */
   async getAllManagersStats(): Promise<
     Array<{
-      manager: User & { salesTotalWithdrawn?: number; salesPendingWithdrawal?: number };
+      manager: User & { salesTotalWithdrawn?: number; salesPendingWithdrawal?: number; salesCommissionRate?: number };
       stats: {
         totalCommissions: number;
         pendingAmount: number;
@@ -460,7 +461,12 @@ export class SalesCommissionService {
     purchases: number;
     conversionRate: number;
     totalRevenue: number;
+    commissionRate: number;
   }> {
+    // მივიღოთ Sales Manager-ის საკომისიო პროცენტი
+    const manager = await this.userModel.findById(salesManagerId);
+    const commissionRate = manager?.salesCommissionRate ?? this.DEFAULT_COMMISSION_PERCENT;
+
     const matchStage: any = {
       salesManager: new Types.ObjectId(salesManagerId),
     };
@@ -535,7 +541,7 @@ export class SalesCommissionService {
       );
     }
 
-    return result;
+    return { ...result, commissionRate };
   }
 
   /**
@@ -587,6 +593,10 @@ export class SalesCommissionService {
       commission: number;
     }>
   > {
+    // მივიღოთ Sales Manager-ის ინდივიდუალური საკომისიო
+    const manager = await this.userModel.findById(salesManagerId);
+    const commissionRate = manager?.salesCommissionRate ?? this.DEFAULT_COMMISSION_PERCENT;
+
     const startDate = new Date();
     startDate.setDate(startDate.getDate() - days);
     startDate.setHours(0, 0, 0, 0);
@@ -645,7 +655,7 @@ export class SalesCommissionService {
           case TrackingEventType.PURCHASE:
             result.purchases = event.count;
             result.revenue = event.revenue || 0;
-            result.commission = (event.revenue || 0) * 0.05; // 5% commission
+            result.commission = (event.revenue || 0) * (commissionRate / 100);
             break;
         }
       }
@@ -663,6 +673,7 @@ export class SalesCommissionService {
     totalWithdrawn: number;
     totalApproved: number;
     pendingCommissions: number;
+    commissionRate: number;
   }> {
     const manager = await this.userModel.findById(salesManagerId);
     if (!manager) {
@@ -725,6 +736,7 @@ export class SalesCommissionService {
     const totalWithdrawn = manager.salesTotalWithdrawn || 0;
     const pendingWithdrawals = manager.salesPendingWithdrawal || 0;
     const availableBalance = totalApproved - pendingWithdrawals;
+    const commissionRate = manager.salesCommissionRate ?? this.DEFAULT_COMMISSION_PERCENT;
 
     return {
       availableBalance,
@@ -732,6 +744,7 @@ export class SalesCommissionService {
       totalWithdrawn,
       totalApproved,
       pendingCommissions,
+      commissionRate,
     };
   }
 
@@ -1032,5 +1045,39 @@ export class SalesCommissionService {
     }
 
     return result;
+  }
+
+  /**
+   * Sales Manager-ის საკომისიო პროცენტის განახლება (Admin-ისთვის)
+   */
+  async updateManagerCommissionRate(
+    managerId: string,
+    commissionRate: number,
+  ): Promise<{ success: boolean; manager: any }> {
+    const manager = await this.userModel.findById(managerId);
+    if (!manager) {
+      throw new NotFoundException('Sales Manager ვერ მოიძებნა');
+    }
+
+    if (manager.role !== Role.SalesManager && manager.role !== Role.Admin) {
+      throw new BadRequestException('მომხმარებელი არ არის Sales Manager');
+    }
+
+    manager.salesCommissionRate = commissionRate;
+    await manager.save();
+
+    this.logger.log(
+      `Updated commission rate for ${manager.email} to ${commissionRate}%`,
+    );
+
+    return {
+      success: true,
+      manager: {
+        _id: manager._id,
+        name: manager.name,
+        email: manager.email,
+        salesCommissionRate: manager.salesCommissionRate,
+      },
+    };
   }
 }

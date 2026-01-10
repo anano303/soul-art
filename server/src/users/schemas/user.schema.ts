@@ -144,6 +144,10 @@ export class User {
   @Prop({ type: Number, default: 0 })
   salesTotalWithdrawn?: number;
 
+  // Sales Manager ინდივიდუალური საკომისიო პროცენტი (default: 3%)
+  @Prop({ type: Number, default: 3 })
+  salesCommissionRate?: number;
+
   // რეფერალების სისტემა
   @Prop({ type: String, unique: true, sparse: true })
   referralCode?: string; // უნიკალური რეფერალური კოდი

@@ -14,6 +14,9 @@ import {
   Eye,
   Wallet,
   History,
+  Edit2,
+  Save,
+  X,
 } from "lucide-react";
 import "./sales-managers.css";
 
@@ -26,6 +29,7 @@ interface ManagerStats {
     createdAt: string;
     salesTotalWithdrawn?: number;
     salesPendingWithdrawal?: number;
+    salesCommissionRate?: number;
   };
   stats: {
     totalCommissions: number;
@@ -65,6 +69,9 @@ export default function AdminSalesManagersPage() {
   const [managerCommissions, setManagerCommissions] = useState<any[]>([]);
   const [withdrawalTransactions, setWithdrawalTransactions] = useState<WithdrawalTransaction[]>([]);
   const [showWithdrawals, setShowWithdrawals] = useState<string | null>(null);
+  const [editingRateId, setEditingRateId] = useState<string | null>(null);
+  const [editRateValue, setEditRateValue] = useState<number>(5);
+  const [savingRate, setSavingRate] = useState(false);
 
   useEffect(() => {
     if (!authLoading && (!user || user.role !== Role.Admin)) {
@@ -114,6 +121,49 @@ export default function AdminSalesManagersPage() {
       }
     } catch (error) {
       console.error("Error fetching withdrawal transactions:", error);
+    }
+  };
+
+  const startEditingRate = (managerId: string, currentRate: number) => {
+    setEditingRateId(managerId);
+    setEditRateValue(currentRate);
+  };
+
+  const cancelEditingRate = () => {
+    setEditingRateId(null);
+    setEditRateValue(3);
+  };
+
+  const saveCommissionRate = async (managerId: string) => {
+    setSavingRate(true);
+    try {
+      const response = await fetchWithAuth(
+        `/sales-commission/admin/manager/${managerId}/commission-rate`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ commissionRate: editRateValue }),
+        }
+      );
+
+      if (response.ok) {
+        // განვაახლოთ managers სია
+        setManagers((prev) =>
+          prev.map((m) =>
+            m.manager._id === managerId
+              ? { ...m, manager: { ...m.manager, salesCommissionRate: editRateValue } }
+              : m
+          )
+        );
+        setEditingRateId(null);
+      } else {
+        alert("შეცდომა საკომისიოს შეცვლისას");
+      }
+    } catch (error) {
+      console.error("Error saving commission rate:", error);
+      alert("შეცდომა საკომისიოს შეცვლისას");
+    } finally {
+      setSavingRate(false);
     }
   };
 
@@ -199,6 +249,7 @@ export default function AdminSalesManagersPage() {
               <tr>
                 <th>მენეჯერი</th>
                 <th>რეფ. კოდი</th>
+                <th>საკომისიო %</th>
                 <th>შეკვეთები</th>
                 <th>მოლოდინში</th>
                 <th>დამტკიცებული</th>
@@ -224,6 +275,44 @@ export default function AdminSalesManagersPage() {
                   </td>
                   <td>
                     <code className="ref-code">{m.manager.salesRefCode}</code>
+                  </td>
+                  <td className="commission-rate-cell">
+                    {editingRateId === m.manager._id ? (
+                      <div className="rate-edit-container">
+                        <input
+                          type="number"
+                          min="0"
+                          max="100"
+                          step="0.5"
+                          value={editRateValue}
+                          onChange={(e) => setEditRateValue(parseFloat(e.target.value) || 0)}
+                          className="rate-input"
+                        />
+                        <button
+                          className="rate-save-btn"
+                          onClick={() => saveCommissionRate(m.manager._id)}
+                          disabled={savingRate}
+                        >
+                          <Save size={14} />
+                        </button>
+                        <button
+                          className="rate-cancel-btn"
+                          onClick={cancelEditingRate}
+                        >
+                          <X size={14} />
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="rate-display">
+                        <span>{m.manager.salesCommissionRate ?? 3}%</span>
+                        <button
+                          className="rate-edit-btn"
+                          onClick={() => startEditingRate(m.manager._id, m.manager.salesCommissionRate ?? 3)}
+                        >
+                          <Edit2 size={14} />
+                        </button>
+                      </div>
+                    )}
                   </td>
                   <td>{m.stats.totalOrders}</td>
                   <td className="pending">

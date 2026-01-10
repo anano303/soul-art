@@ -6,6 +6,9 @@ import {
   MaxLength,
   IsOptional,
   IsEnum,
+  IsNumber,
+  Min,
+  Max,
 } from 'class-validator';
 import { Transform } from 'class-transformer';
 
@@ -52,4 +55,12 @@ export class AdminProfileDto {
   @IsOptional()
   @IsString()
   accountNumber?: string;
+
+  // Sales Manager საკომისიო პროცენტი
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  @Max(100)
+  @Transform(({ value }) => (value !== undefined ? Number(value) : undefined))
+  salesCommissionRate?: number;
 }

@@ -45,8 +45,8 @@ async function createMissingCommission() {
   
   console.log('Sales manager found:', salesManager.email);
   
-  // Calculate commission (5%)
-  const commissionPercent = 5;
+  // Calculate commission - use individual rate or default 3%
+  const commissionPercent = salesManager.salesCommissionRate || 3;
   const commissionAmount = (order.totalPrice * commissionPercent) / 100;
   
   // Create commission

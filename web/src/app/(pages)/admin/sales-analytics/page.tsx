@@ -16,6 +16,7 @@ interface FunnelStats {
   purchases: number;
   totalRevenue: number;
   totalCommission: number;
+  commissionRate: number;
   conversionRates: {
     visitToRegistration: number;
     registrationToCart: number;
@@ -80,6 +81,7 @@ export default function SalesAnalyticsPage() {
 
       // Transform funnel response to match our interface
       const funnelData = funnelRes.data;
+      const commissionRate = funnelData.commissionRate || 3;
       setFunnelStats({
         visits: funnelData.visits || 0,
         registrations: funnelData.registrations || 0,
@@ -87,7 +89,8 @@ export default function SalesAnalyticsPage() {
         checkouts: funnelData.checkoutStarts || 0,
         purchases: funnelData.purchases || 0,
         totalRevenue: funnelData.totalRevenue || 0,
-        totalCommission: (funnelData.totalRevenue || 0) * 0.05,
+        totalCommission: (funnelData.totalRevenue || 0) * (commissionRate / 100),
+        commissionRate: commissionRate,
         conversionRates: {
           visitToRegistration:
             funnelData.visits > 0
@@ -236,7 +239,7 @@ export default function SalesAnalyticsPage() {
                 </span>
               </div>
               <div className="revenue-item commission">
-                <span className="revenue-label">გამომუშავებული (5%):</span>
+                <span className="revenue-label">გამომუშავებული ({funnelStats?.commissionRate ?? 3}%):</span>
                 <span className="revenue-value">
                   ₾{(funnelStats?.totalCommission || 0).toFixed(2)}
                 </span>

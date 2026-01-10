@@ -1371,6 +1371,11 @@ export class UsersService {
         updateData.accountNumber = updateDto.accountNumber;
       }
 
+      // Sales Manager საკომისიო პროცენტის განახლება
+      if (updateDto.salesCommissionRate !== undefined) {
+        updateData.salesCommissionRate = updateDto.salesCommissionRate;
+      }
+
       if (Object.keys(updateData).length === 0) {
         return user;
       }

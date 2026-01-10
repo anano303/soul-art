@@ -23,6 +23,7 @@ interface BalanceInfo {
   totalWithdrawn: number;
   totalApproved: number;
   pendingCommissions: number;
+  commissionRate: number;
 }
 
 interface Commission {
@@ -305,7 +306,7 @@ export default function SalesManagerDashboard() {
             </div>
             <p className="ref-info">
               ეს ლინკი გაუგზავნე კლიენტებს. როცა ამ ლინკით შემოვლენ და იყიდიან,
-              მიიღებ 5% საკომისიოს!
+              მიიღებ <strong>{balance?.commissionRate ?? 3}%</strong> საკომისიოს!
             </p>
           </div>
         ) : (
