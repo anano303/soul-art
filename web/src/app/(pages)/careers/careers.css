@@ -2,7 +2,7 @@
   min-height: 100vh;
   background: linear-gradient(135deg, #f8f6f0 0%, #fff 50%, #f5f0e8 100%);
   padding: 40px 20px;
-  padding-top: 40px; /* Header-ის სივრცე */
+  padding-top: 140px; /* Header-ის სივრცე */
 }
 
 .careers-container {
@@ -233,4 +233,35 @@
     padding: 12px 30px;
     font-size: 1rem;
   }
+}
+
+/* Share Section */
+.share-section {
+  margin-top: 30px;
+  text-align: center;
+}
+
+.share-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 25px;
+  background: linear-gradient(135deg, #7b5642 0%, #012645 100%);
+  color: white;
+  border: none;
+  border-radius: 30px;
+  font-size: 1rem;
+  font-family: var(--font-bpg-nino-mtavruli), sans-serif;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.share-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 20px rgba(123, 86, 66, 0.3);
+}
+
+.share-button svg {
+  width: 20px;
+  height: 20px;
 }
