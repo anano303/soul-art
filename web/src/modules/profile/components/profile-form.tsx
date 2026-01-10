@@ -170,7 +170,7 @@ export function ProfileForm() {
         setProfileImage(null);
       }
 
-      setIsSellerAccount(user.role?.toUpperCase() === "SELLER");
+      setIsSellerAccount(user.role?.toUpperCase() === "SELLER" || user.role?.toUpperCase() === "SALESMANAGER");
 
       if (user.storeLogo) {
         setLogoError(false);
@@ -778,7 +778,7 @@ export function ProfileForm() {
 
         {user &&
           user.role &&
-          (user.role.toUpperCase() === "SELLER" || isSellerAccount) && (
+          (user.role.toUpperCase() === "SELLER" || user.role.toUpperCase() === "SALESMANAGER" || isSellerAccount) && (
             <div className="seller-section">
               <h2 className="seller-section-title">
                 {t("profile.sellerInfo")}

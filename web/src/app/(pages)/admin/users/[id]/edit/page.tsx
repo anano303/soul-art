@@ -61,6 +61,13 @@ export default function EditUserPage() {
         updateData.accountNumber = user.accountNumber;
       }
 
+      // Sales Manager-ის საბანკო ველები
+      if (user.role === Role.SalesManager) {
+        updateData.phoneNumber = user.phoneNumber;
+        updateData.identificationNumber = user.identificationNumber;
+        updateData.accountNumber = user.accountNumber;
+      }
+
       const userId = params?.id as string;
       await fetchWithAuth(`/users/${userId}`, {
         method: "PUT",
@@ -88,6 +95,8 @@ export default function EditUserPage() {
     return <div className="edit-user-not-found">მომხმარებელი ვერ მოიძებნა</div>;
 
   const isSeller = user.role === Role.Seller;
+  const isSalesManager = user.role === Role.SalesManager;
+  const showBankDetails = isSeller || isSalesManager;
 
   return (
     <div className="edit-user-container">
@@ -233,6 +242,50 @@ export default function EditUserPage() {
                 </a>
               </div>
             )}
+          </div>
+        )}
+
+        {/* Sales Manager-ის საბანკო რეკვიზიტები */}
+        {isSalesManager && (
+          <div className="form-section seller-section">
+            <h2 className="section-title">საბანკო რეკვიზიტები</h2>
+
+            <div className="form-row">
+              <div className="form-group">
+                <label>ტელეფონის ნომერი</label>
+                <input
+                  type="tel"
+                  value={user.phoneNumber || ""}
+                  onChange={(e) =>
+                    setUser({ ...user, phoneNumber: e.target.value })
+                  }
+                />
+              </div>
+            </div>
+
+            <div className="form-row">
+              <div className="form-group">
+                <label>პირადი ნომერი</label>
+                <input
+                  type="text"
+                  value={user.identificationNumber || ""}
+                  onChange={(e) =>
+                    setUser({ ...user, identificationNumber: e.target.value })
+                  }
+                />
+              </div>
+              <div className="form-group">
+                <label>ანგარიშის ნომერი (IBAN)</label>
+                <input
+                  type="text"
+                  value={user.accountNumber || ""}
+                  placeholder="GE..."
+                  onChange={(e) =>
+                    setUser({ ...user, accountNumber: e.target.value })
+                  }
+                />
+              </div>
+            </div>
           </div>
         )}
 
