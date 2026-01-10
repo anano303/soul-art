@@ -395,7 +395,7 @@ export class AuthController {
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.Admin, Role.User, Role.Seller, Role.Blogger)
+  @Roles(Role.Admin, Role.User, Role.Seller, Role.Blogger, Role.SalesManager)
   @Put('profile')
   async updateProfile(
     @CurrentUser() user: UserDocument,
@@ -415,19 +415,21 @@ export class AuthController {
       'phoneNumber',
       'identificationNumber',
       'accountNumber',
+      'beneficiaryBankCode',
     ].some((field) => field in filteredDto);
 
-    // Only allow updating seller fields if the user is actually a seller
-    if (hasSellerFields && user.role !== Role.Seller) {
+    // Only allow updating seller/sales-manager fields if the user is a seller or sales manager
+    if (hasSellerFields && user.role !== Role.Seller && user.role !== Role.SalesManager) {
       const sellerFields = [
         'storeName',
         'phoneNumber',
         'identificationNumber',
         'accountNumber',
+        'beneficiaryBankCode',
       ].filter((field) => field in filteredDto);
 
       throw new BadRequestException(
-        `Only sellers can update the following fields: ${sellerFields.join(', ')}`,
+        `Only sellers and sales managers can update the following fields: ${sellerFields.join(', ')}`,
       );
     }
 
