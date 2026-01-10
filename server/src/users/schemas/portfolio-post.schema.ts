@@ -36,7 +36,7 @@ export class PortfolioPost {
   @Prop({ type: Types.ObjectId, ref: User.name, required: true, index: true })
   artistId: Types.ObjectId;
 
-  @Prop({ type: Types.ObjectId, ref: Product.name, default: null, index: true })
+  @Prop({ type: Types.ObjectId, ref: Product.name, default: null })
   productId?: Types.ObjectId | null;
 
   @Prop({ type: [PortfolioImageSchema], default: [] })

@@ -89,7 +89,6 @@ export const ReferralSchema = SchemaFactory.createForClass(Referral);
 
 // ინდექსები ოპტიმიზაციისთვის
 ReferralSchema.index({ referrer: 1, status: 1 });
-ReferralSchema.index({ referred: 1 });
 ReferralSchema.index({ createdAt: -1 });
 
 // ერთი მომხმარებელი მხოლოდ ერთხელ უნდა დარეგისტრირდეს რეფერალური კოდით

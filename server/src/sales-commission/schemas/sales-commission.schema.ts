@@ -33,7 +33,6 @@ export class SalesCommission {
     type: Types.ObjectId,
     ref: 'Order',
     required: true,
-    index: true,
   })
   order: Order; // შეკვეთა რომელზეც კომისია დაირიცხა
 

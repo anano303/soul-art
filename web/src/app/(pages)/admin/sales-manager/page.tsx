@@ -22,6 +22,7 @@ interface BalanceInfo {
   pendingWithdrawals: number;
   totalWithdrawn: number;
   totalApproved: number;
+  pendingCommissions: number;
 }
 
 interface Commission {
@@ -250,7 +251,7 @@ export default function SalesManagerDashboard() {
     <div className="sales-dashboard">
       <div className="dashboard-header">
         <h1>Sales Manager Dashboard</h1>
-        <p>მართე შენი გაყიდვები და კომისიები</p>
+        <p>მართე შენი გაყიდვები და საკომისიოები</p>
       </div>
 
       {/* Referral Link Section */}
@@ -283,7 +284,7 @@ export default function SalesManagerDashboard() {
             </div>
             <p className="ref-info">
               ეს ლინკი გაუგზავნე კლიენტებს. როცა ამ ლინკით შემოვლენ და იყიდიან,
-              მიიღებ 5% კომისიას!
+              მიიღებ 5% საკომისიოს!
             </p>
           </div>
         ) : (
@@ -303,7 +304,7 @@ export default function SalesManagerDashboard() {
       {/* Stats Section */}
       <div className="stats-grid">
         <div className="stat-card">
-          <h3>მთლიანი კომისია</h3>
+          <h3>მთლიანი საკომისიო</h3>
           <p className="stat-value">
             {stats?.totalCommissions?.toFixed(2) || "0.00"} ₾
           </p>
@@ -355,6 +356,11 @@ export default function SalesManagerDashboard() {
             </span>
           </div>
         </div>
+        {(balance?.pendingCommissions ?? 0) > 0 && (
+          <div className="pending-commissions-note">
+            <p>⏳ მოლოდინში (შეკვეთები ჯერ არ მიტანილა): <strong>{balance?.pendingCommissions?.toFixed(2) || "0.00"} ₾</strong></p>
+          </div>
+        )}
         <div className="withdrawal-form">
           <input
             type="number"
@@ -374,7 +380,7 @@ export default function SalesManagerDashboard() {
           </button>
         </div>
         <p className="withdrawal-note">
-          ⚠️ მხოლოდ <strong>დამტკიცებული</strong> კომისიების გატანა შეგიძლიათ.
+          ⚠️ მხოლოდ <strong>დამტკიცებული</strong> საკომისიოების გატანა შეგიძლიათ.
           გატანა ხდება BOG ანგარიშზე. პროფილში უნდა გქონდეთ მითითებული ანგარიშის
           ნომერი და პირადი ნომერი.
         </p>
@@ -393,7 +399,7 @@ export default function SalesManagerDashboard() {
       {/* Commissions Table */}
       <div className="commissions-section card">
         <div className="section-header">
-          <h2>კომისიების ისტორია</h2>
+          <h2>საკომისიოების ისტორია</h2>
           <select
             value={statusFilter}
             onChange={(e) => {
@@ -411,7 +417,7 @@ export default function SalesManagerDashboard() {
         </div>
 
         {commissions.length === 0 ? (
-          <p className="no-data">კომისიები არ მოიძებნა</p>
+          <p className="no-data">საკომისიოები არ მოიძებნა</p>
         ) : (
           <>
             <table className="commissions-table">
@@ -421,17 +427,17 @@ export default function SalesManagerDashboard() {
                   <th>შეკვეთა</th>
                   <th>კლიენტი</th>
                   <th>თანხა</th>
-                  <th>კომისია</th>
+                  <th>საკომისიო</th>
                   <th>სტატუსი</th>
                 </tr>
               </thead>
               <tbody>
                 {commissions.map((commission) => (
                   <tr key={commission._id}>
-                    <td>
+                    <td data-label="თარიღი">
                       {new Date(commission.createdAt).toLocaleDateString("ka")}
                     </td>
-                    <td>
+                    <td data-label="შეკვეთა">
                       <Link
                         href={`/admin/orders/${commission.order._id}`}
                         className="order-link"
@@ -439,16 +445,16 @@ export default function SalesManagerDashboard() {
                         #{commission.order._id.slice(-6)}
                       </Link>
                     </td>
-                    <td>
+                    <td data-label="კლიენტი">
                       {commission.customer?.email ||
                         commission.guestEmail ||
                         "სტუმარი"}
                     </td>
-                    <td>{commission.orderTotal.toFixed(2)} ₾</td>
-                    <td className="commission-amount">
+                    <td data-label="თანხა">{commission.orderTotal.toFixed(2)} ₾</td>
+                    <td data-label="საკომისიო" className="commission-amount">
                       +{commission.commissionAmount.toFixed(2)} ₾
                     </td>
-                    <td>{getStatusBadge(commission.status)}</td>
+                    <td data-label="სტატუსი">{getStatusBadge(commission.status)}</td>
                   </tr>
                 ))}
               </tbody>

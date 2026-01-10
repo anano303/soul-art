@@ -1,6 +1,6 @@
 .sales-analytics-container {
-  max-width: 1200px;
-  margin: 0 auto;
+  max-width: 100%;
+  margin: 0;
   padding: 20px;
   min-height: 100vh;
   background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
@@ -295,6 +295,8 @@
 /* Daily Stats Table */
 .daily-stats-section {
   margin-bottom: 30px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .daily-stats-table {
@@ -303,6 +305,7 @@
   background: rgba(255, 255, 255, 0.03);
   border-radius: 12px;
   overflow: hidden;
+  min-width: 500px;
 }
 
 .daily-stats-table th,
@@ -376,6 +379,12 @@
     font-size: 1.4rem;
   }
 
+  .back-button,
+  .refresh-button {
+    flex: 1;
+    justify-content: center;
+  }
+
   .funnel-grid {
     flex-direction: column;
     align-items: stretch;
@@ -395,6 +404,33 @@
     justify-content: center;
   }
 
+  .date-range-filter button {
+    flex: 1;
+    min-width: 80px;
+  }
+
+  .visual-funnel-section {
+    padding: 15px;
+  }
+
+  .visual-funnel-section h2 {
+    font-size: 1.1rem;
+    flex-wrap: wrap;
+    gap: 5px;
+  }
+
+  .funnel-bar {
+    height: 40px;
+    font-size: 0.85rem;
+    padding: 0 10px;
+    flex-wrap: wrap;
+    gap: 5px;
+  }
+
+  .funnel-bar span {
+    white-space: nowrap;
+  }
+
   .daily-stats-table {
     font-size: 0.85rem;
   }
@@ -405,7 +441,95 @@
   }
 }
 
-/* Revenue Summary */
+@media (max-width: 600px) {
+  .sales-analytics-container {
+    padding: 10px;
+  }
+
+  .sales-analytics-header h1 {
+    font-size: 1.2rem;
+  }
+
+  .back-button,
+  .refresh-button {
+    padding: 8px 12px;
+    font-size: 13px;
+  }
+
+  .date-range-filter {
+    padding: 10px;
+    gap: 8px;
+  }
+
+  .date-range-filter button {
+    padding: 6px 12px;
+    font-size: 0.85rem;
+  }
+
+  .visual-funnel-section {
+    padding: 12px;
+    border-radius: 12px;
+  }
+
+  .funnel-bar {
+    height: 36px;
+    font-size: 0.8rem;
+    border-radius: 6px;
+  }
+
+  .funnel-rate-inline {
+    font-size: 0.75rem;
+  }
+
+  .revenue-summary {
+    flex-direction: column;
+    gap: 20px;
+    padding: 15px;
+  }
+
+  .revenue-label {
+    font-size: 0.85rem;
+  }
+
+  .revenue-value {
+    font-size: 1.4rem;
+  }
+
+  /* Daily Stats Table - Compact horizontal scroll */
+  .daily-stats-section {
+    margin: 0 -10px;
+    padding: 0 10px;
+  }
+
+  .daily-stats-table {
+    min-width: 450px;
+    font-size: 0.75rem;
+  }
+
+  .daily-stats-table th,
+  .daily-stats-table td {
+    padding: 8px 6px;
+    white-space: nowrap;
+  }
+}
+
+@media (max-width: 400px) {
+  .funnel-bar {
+    flex-direction: column;
+    height: auto;
+    padding: 8px 10px;
+    gap: 2px;
+  }
+
+  .funnel-bar span {
+    font-size: 0.75rem;
+  }
+
+  .funnel-rate-inline {
+    font-size: 0.7rem;
+    margin-left: 0;
+  }
+}
 .revenue-summary {
   display: flex;
   justify-content: center;

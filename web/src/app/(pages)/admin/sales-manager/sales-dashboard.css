@@ -55,6 +55,8 @@
   padding: 1.5rem;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   margin-bottom: 2rem;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 /* Referral Section */
@@ -223,6 +225,11 @@
 }
 
 /* Commissions Section */
+.commissions-section {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
 .commissions-section h2 {
   font-size: 1.25rem;
   margin-bottom: 1rem;
@@ -233,6 +240,8 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 1rem;
+  flex-wrap: wrap;
+  gap: 0.75rem;
 }
 
 .status-filter {
@@ -240,11 +249,13 @@
   border: 1px solid #e5e7eb;
   border-radius: 8px;
   font-size: 0.9rem;
+  min-width: 120px;
 }
 
 .commissions-table {
   width: 100%;
   border-collapse: collapse;
+  min-width: 600px;
 }
 
 .commissions-table th,
@@ -343,14 +354,82 @@
     padding: 1rem;
   }
 
+  .card {
+    padding: 1rem;
+  }
+
+  .dashboard-header h1 {
+    font-size: 1.5rem;
+  }
+
   .stats-grid {
     grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+  }
+
+  .stat-card {
+    padding: 1rem;
+  }
+
+  .stat-card h3 {
+    font-size: 0.75rem;
+  }
+
+  .stat-value {
+    font-size: 1.25rem;
+  }
+
+  .ref-code-box {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .ref-code {
+    font-size: 1.25rem;
+    text-align: center;
   }
 
   .ref-link-box {
     flex-direction: column;
   }
 
+  .ref-link-input {
+    font-size: 0.85rem;
+  }
+
+  .copy-btn {
+    width: 100%;
+  }
+
+  .nav-links {
+    flex-direction: column;
+  }
+
+  .nav-link {
+    text-align: center;
+  }
+
+  .withdrawal-section h2 {
+    font-size: 1.1rem;
+  }
+
+  .withdrawal-info-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .withdrawal-form {
+    flex-direction: column;
+  }
+
+  .withdrawal-input {
+    max-width: 100%;
+  }
+
+  .withdrawal-btn {
+    width: 100%;
+  }
+
+  /* Commissions Table - Mobile Card View */
   .commissions-table {
     font-size: 0.875rem;
   }
@@ -360,14 +439,68 @@
     padding: 0.75rem 0.5rem;
   }
 
-  .funnel-grid {
+  .section-header {
     flex-direction: column;
+    gap: 0.75rem;
     align-items: stretch;
   }
 
-  .funnel-arrow {
-    transform: rotate(90deg);
-    margin: 0.5rem auto;
+  .status-filter {
+    width: 100%;
+  }
+}
+
+@media (max-width: 640px) {
+  .sales-dashboard {
+    padding: 0.75rem;
+  }
+
+  .dashboard-header h1 {
+    font-size: 1.25rem;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
+  }
+
+  .stat-card {
+    padding: 0.75rem;
+  }
+
+  .stat-card h3 {
+    font-size: 0.65rem;
+  }
+
+  .stat-value {
+    font-size: 1rem;
+  }
+
+  .ref-code {
+    font-size: 1rem;
+    padding: 0.5rem 1rem;
+  }
+
+  /* Compact horizontal scroll table */
+  .commissions-table {
+    min-width: 500px;
+    font-size: 0.8rem;
+  }
+
+  .commissions-table th,
+  .commissions-table td {
+    padding: 0.5rem 0.4rem;
+    white-space: nowrap;
+  }
+
+  .pagination {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .pagination button {
+    flex: 1;
+    min-width: 80px;
   }
 }
 
@@ -522,6 +655,20 @@
   color: #2563eb;
 }
 
+.pending-commissions-note {
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  border: 1px solid #f59e0b;
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  margin-bottom: 1rem;
+}
+
+.pending-commissions-note p {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #92400e;
+}
+
 .withdrawal-form {
   display: flex;
   gap: 1rem;
@@ -571,4 +718,40 @@
   background: white;
   border-radius: 6px;
   border-left: 3px solid #f59e0b;
+}
+
+/* Funnel Section Responsive */
+@media (max-width: 768px) {
+  .funnel-grid {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .funnel-arrow {
+    transform: rotate(90deg);
+    margin: 0.5rem auto;
+  }
+
+  .funnel-step {
+    min-width: auto;
+  }
+
+  .funnel-summary {
+    flex-direction: column;
+    gap: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .balance-info-item .value {
+    font-size: 1.25rem;
+  }
+
+  .pending-commissions-note p {
+    font-size: 0.8rem;
+  }
+
+  .withdrawal-note {
+    font-size: 0.8rem;
+  }
 }

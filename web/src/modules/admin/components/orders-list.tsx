@@ -321,12 +321,18 @@ export function OrdersList({ salesManagerMode = false }: OrdersListProps) {
                     )}
                   </td>
                   <td className="orders-actions">
-                    <Link
-                      href={`/admin/orders/${order._id}`}
-                      className="view-link"
-                    >
-                      Details
-                    </Link>
+                    {salesManagerMode ? (
+                      <span className="view-link disabled" title="დეტალების ნახვა მხოლოდ ადმინისთვისაა ხელმისაწვდომი">
+                        Details
+                      </span>
+                    ) : (
+                      <Link
+                        href={`/admin/orders/${order._id}`}
+                        className="view-link"
+                      >
+                        Details
+                      </Link>
+                    )}
                   </td>
                 </tr>
               ))}

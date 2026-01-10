@@ -136,7 +136,7 @@ export default function AdminSalesManagersPage() {
         <div className="summary-card">
           <DollarSign size={24} />
           <div>
-            <p className="summary-label">სულ კომისია</p>
+            <p className="summary-label">სულ საკომისიო</p>
             <p className="summary-value">₾{totalCommissions.toFixed(2)}</p>
           </div>
         </div>
@@ -157,7 +157,7 @@ export default function AdminSalesManagersPage() {
                 <th>მოლოდინში</th>
                 <th>დამტკიცებული</th>
                 <th>გადახდილი</th>
-                <th>სულ კომისია</th>
+                <th>სულ საკომისიო</th>
                 <th>მოქმედება</th>
               </tr>
             </thead>
@@ -227,7 +227,7 @@ export default function AdminSalesManagersPage() {
                 <th>თარიღი</th>
                 <th>მომხმარებელი</th>
                 <th>შეკვეთის თანხა</th>
-                <th>კომისია</th>
+                <th>საკომისიო</th>
                 <th>სტატუსი</th>
               </tr>
             </thead>

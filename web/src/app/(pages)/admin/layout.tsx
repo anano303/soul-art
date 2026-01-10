@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getUserData, isLoggedIn, storeUserData } from "@/lib/auth";
-import { Sidebar } from "lucide-react";
 import { CacheRefreshManager } from "@/components/cache-refresh-manager/cache-refresh-manager";
 import { fetchWithAuth } from "@/lib/fetch-with-auth";
 import { Role } from "@/types/role";
@@ -124,7 +123,6 @@ export default function AdminLayout({
   return (
     <div className="flex">
       <CacheRefreshManager />
-      <Sidebar />
       <main className="flex-1">{children}</main>
     </div>
   );
