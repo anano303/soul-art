@@ -721,7 +721,8 @@ export class SalesCommissionService {
 
     const totalApproved = approvedCommissions[0]?.total || 0;
     const pendingCommissions = pendingCommissionsResult[0]?.total || 0;
-    const totalWithdrawn = paidCommissions[0]?.total || 0;
+    // გატანილი თანხა - User model-ის salesTotalWithdrawn ველიდან (ფაქტიური BOG გადარიცხვები)
+    const totalWithdrawn = manager.salesTotalWithdrawn || 0;
     const pendingWithdrawals = manager.salesPendingWithdrawal || 0;
     const availableBalance = totalApproved - pendingWithdrawals;
 
