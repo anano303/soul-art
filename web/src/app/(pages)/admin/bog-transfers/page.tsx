@@ -52,16 +52,29 @@ interface SalesManagerPendingWithdrawal {
 
 export default function BogTransfersPage() {
   const [balance, setBalance] = useState<AccountBalance | null>(null);
-  const [pendingWithdrawals, setPendingWithdrawals] = useState<PendingWithdrawal[]>([]);
-  const [salesManagerWithdrawals, setSalesManagerWithdrawals] = useState<SalesManagerPendingWithdrawal[]>([]);
+  const [pendingWithdrawals, setPendingWithdrawals] = useState<
+    PendingWithdrawal[]
+  >([]);
+  const [salesManagerWithdrawals, setSalesManagerWithdrawals] = useState<
+    SalesManagerPendingWithdrawal[]
+  >([]);
   const [loading, setLoading] = useState(false);
   const [otp, setOtp] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [showOtpModal, setShowOtpModal] = useState(false);
-  const [selectedDocument, setSelectedDocument] = useState<{ uniqueKey: number; withdrawalId: string } | null>(null);
-  const [isBogAuthenticated, setIsBogAuthenticated] = useState<boolean | null>(null); // null = checking, true = authenticated, false = not authenticated
-  const [bogUser, setBogUser] = useState<{ name?: string; companyId?: string; userId?: string } | null>(null);
+  const [selectedDocument, setSelectedDocument] = useState<{
+    uniqueKey: number;
+    withdrawalId: string;
+  } | null>(null);
+  const [isBogAuthenticated, setIsBogAuthenticated] = useState<boolean | null>(
+    null
+  ); // null = checking, true = authenticated, false = not authenticated
+  const [bogUser, setBogUser] = useState<{
+    name?: string;
+    companyId?: string;
+    userId?: string;
+  } | null>(null);
 
   const fetchBalance = useCallback(async () => {
     try {
@@ -89,7 +102,9 @@ export default function BogTransfersPage() {
 
   const fetchSalesManagerWithdrawals = useCallback(async () => {
     try {
-      const res = await fetchWithAuth("/sales-commission/admin/pending-withdrawals");
+      const res = await fetchWithAuth(
+        "/sales-commission/admin/pending-withdrawals"
+      );
       if (res.ok) {
         const data = await res.json();
         setSalesManagerWithdrawals(data || []);
@@ -113,58 +128,60 @@ export default function BogTransfersPage() {
       try {
         const res = await fetchWithAuth("/admin/bog/auth/status");
         const data = await res.json();
-        console.log('BOG auth status response:', data);
+        console.log("BOG auth status response:", data);
         setIsBogAuthenticated(data.authenticated);
         setBogUser(data.user);
-        
+
         // Only fetch data if authenticated
         if (data.authenticated) {
           await fetchData();
         }
       } catch (error) {
-        console.error('Failed to check BOG auth:', error);
+        console.error("Failed to check BOG auth:", error);
         setIsBogAuthenticated(false);
         setBogUser(null);
       }
     };
 
     checkBogAuth();
-    
+
     // Check if user just came back from OAuth authorization
     const urlParams = new URLSearchParams(window.location.search);
-    const authStatus = urlParams.get('auth');
-    const authError = urlParams.get('error');
-    
-    if (authStatus === 'success') {
+    const authStatus = urlParams.get("auth");
+    const authError = urlParams.get("error");
+
+    if (authStatus === "success") {
       // Check if there's a pending sign operation
-      const pendingSign = sessionStorage.getItem('pendingSign');
+      const pendingSign = sessionStorage.getItem("pendingSign");
       if (pendingSign) {
         const { uniqueKey, withdrawalId } = JSON.parse(pendingSign);
-        sessionStorage.removeItem('pendingSign');
-        
+        sessionStorage.removeItem("pendingSign");
+
         // Clean URL
-        window.history.replaceState({}, '', window.location.pathname);
-        
+        window.history.replaceState({}, "", window.location.pathname);
+
         // Refresh auth status to get user info, then trigger sign
         checkBogAuth().then(() => {
-          setSuccess("ავტორიზაცია წარმატებულია! იწყება დოკუმენტის ხელმოწერა...");
+          setSuccess(
+            "ავტორიზაცია წარმატებულია! იწყება დოკუმენტის ხელმოწერა..."
+          );
           setTimeout(() => {
             handleSignClick(uniqueKey, withdrawalId);
           }, 1000);
         });
       } else {
         setSuccess("ავტორიზაცია წარმატებულია!");
-        window.history.replaceState({}, '', window.location.pathname);
+        window.history.replaceState({}, "", window.location.pathname);
         // Refresh auth status to get user info
         checkBogAuth();
       }
     } else if (authError) {
       setError(`ავტორიზაცია ვერ მოხერხდა: ${authError}`);
-      sessionStorage.removeItem('pendingSign');
-      window.history.replaceState({}, '', window.location.pathname);
+      sessionStorage.removeItem("pendingSign");
+      window.history.replaceState({}, "", window.location.pathname);
       setIsBogAuthenticated(false);
     }
-    
+
     // Refresh every minute if authenticated
     const interval = setInterval(() => {
       if (isBogAuthenticated) {
@@ -248,7 +265,7 @@ export default function BogTransfersPage() {
     if (!confirm("დარწმუნებული ხართ, რომ გსურთ გასვლა BOG-დან?")) {
       return;
     }
-    
+
     try {
       // Call logout endpoint to clear server-side token
       await fetchWithAuth("/admin/bog/auth/logout", {
@@ -257,7 +274,7 @@ export default function BogTransfersPage() {
     } catch {
       // Ignore errors, just log out locally
     }
-    
+
     // Reset local state
     setIsBogAuthenticated(false);
     setBalance(null);
@@ -274,10 +291,13 @@ export default function BogTransfersPage() {
     setSuccess("");
 
     try {
-      const res = await fetchWithAuth(`/balance/admin/withdrawal/${transactionId}/reject`, {
-        method: "POST",
-        body: JSON.stringify({ reason: "ადმინისტრატორის მიერ უარყოფილი" }),
-      });
+      const res = await fetchWithAuth(
+        `/balance/admin/withdrawal/${transactionId}/reject`,
+        {
+          method: "POST",
+          body: JSON.stringify({ reason: "ადმინისტრატორის მიერ უარყოფილი" }),
+        }
+      );
 
       const data = await res.json();
 
@@ -331,15 +351,26 @@ export default function BogTransfersPage() {
           {/* BOG Logo placeholder */}
           <div className="text-center mb-8">
             <div className="bg-gradient-to-r from-[#ff600a] to-[#ff6c1d] w-20 h-20 rounded-2xl mx-auto mb-4 flex items-center justify-center">
-              <svg className="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              <svg
+                className="w-12 h-12 text-white"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
               </svg>
             </div>
             <h1 className="text-3xl font-bold text-gray-900 mb-2">
               BOG ავტორიზაცია
             </h1>
             <p className="text-gray-600">
-              საქართველოს ბანკის გადარიცხვების სისტემის გამოსაყენებლად საჭიროა ავტორიზაცია
+              საქართველოს ბანკის გადარიცხვების სისტემის გამოსაყენებლად საჭიროა
+              ავტორიზაცია
             </p>
           </div>
 
@@ -347,8 +378,16 @@ export default function BogTransfersPage() {
           {error && (
             <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
               <div className="flex">
-                <svg className="w-5 h-5 text-red-600 mt-0.5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                <svg
+                  className="w-5 h-5 text-red-600 mt-0.5 mr-2"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                    clipRule="evenodd"
+                  />
                 </svg>
                 <p className="text-sm text-red-800">{error}</p>
               </div>
@@ -363,8 +402,18 @@ export default function BogTransfersPage() {
             className="w-full bg-gradient-to-r from-[#ff600a] to-[#ff6c1d] hover:from-[#ff6c1d] hover:to-[#fe7f3a] text-white font-semibold py-4 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 transform hover:-translate-y-0.5"
           >
             <div className="flex items-center justify-center">
-              <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+              <svg
+                className="w-5 h-5 mr-2"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"
+                />
               </svg>
               BOG-ში შესვლა
             </div>
@@ -399,19 +448,24 @@ export default function BogTransfersPage() {
             {bogUser && (
               <div className="flex items-center gap-3 bg-white rounded-lg px-4 py-2 border border-gray-200 shadow-sm">
                 <div className="bg-gradient-to-r from-[#ff600a] to-[#ff6c1d] w-10 h-10 rounded-full flex items-center justify-center text-white font-bold">
-                  {bogUser.name ? bogUser.name.charAt(0).toUpperCase() : 'B'}
+                  {bogUser.name ? bogUser.name.charAt(0).toUpperCase() : "B"}
                 </div>
                 <div className="text-left flex-1 min-w-0">
                   <p className="text-sm font-medium text-gray-900 truncate">
-                    {bogUser.name || 'BOG User'}
+                    {bogUser.name || "BOG User"}
                   </p>
                   <div className="space-y-0.5">
                     {bogUser.companyId && (
-                      <p className="text-xs text-gray-500">Company: {bogUser.companyId}</p>
+                      <p className="text-xs text-gray-500">
+                        Company: {bogUser.companyId}
+                      </p>
                     )}
                     {bogUser.userId && (
-                      <p className="text-xs text-gray-400 font-mono truncate max-w-[200px]" title={bogUser.userId}>
-                  User: {bogUser.userId.split(':').pop()}
+                      <p
+                        className="text-xs text-gray-400 font-mono truncate max-w-[200px]"
+                        title={bogUser.userId}
+                      >
+                        User: {bogUser.userId.split(":").pop()}
                       </p>
                     )}
                   </div>
@@ -423,8 +477,18 @@ export default function BogTransfersPage() {
               onClick={handleLogout}
               className="bg-white hover:bg-gray-50 text-gray-700 font-medium py-2 px-4 rounded-lg border border-gray-300 shadow-sm transition-colors flex items-center justify-center gap-2"
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+                />
               </svg>
               გასვლა
             </button>
@@ -471,9 +535,7 @@ export default function BogTransfersPage() {
         <div className="bg-white rounded-lg shadow mb-6">
           <div className="border-b border-gray-200">
             <nav className="flex -mb-px">
-              <button
-                className="py-4 px-6 font-medium text-sm border-b-2 border-blue-500 text-blue-600"
-              >
+              <button className="py-4 px-6 font-medium text-sm border-b-2 border-blue-500 text-blue-600">
                 გასატანი მოთხოვნები
                 {pendingWithdrawals.length > 0 && (
                   <span className="ml-2 bg-blue-100 text-blue-600 py-0.5 px-2 rounded-full text-xs">
@@ -486,179 +548,27 @@ export default function BogTransfersPage() {
 
           {/* Pending Withdrawals Content */}
           <div className="p-6">
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-semibold">გასატანი მოთხოვნები</h3>
-                <button
-                  onClick={fetchPendingWithdrawals}
-                  className="text-blue-600 hover:text-blue-700 text-sm"
-                >
-                  🔄 განახლება
-                </button>
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold">გასატანი მოთხოვნები</h3>
+              <button
+                onClick={fetchPendingWithdrawals}
+                className="text-blue-600 hover:text-blue-700 text-sm"
+              >
+                🔄 განახლება
+              </button>
+            </div>
+
+            {pendingWithdrawals.length === 0 ? (
+              <div className="text-center py-12 text-gray-500">
+                <p className="text-lg">არ არის გასატანი მოთხოვნები</p>
               </div>
-
-              {pendingWithdrawals.length === 0 ? (
-                <div className="text-center py-12 text-gray-500">
-                  <p className="text-lg">არ არის გასატანი მოთხოვნები</p>
-                </div>
-              ) : (
-                <div className="overflow-x-auto">
-                  <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50">
-                      <tr>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          სელერი
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          ანგარიში
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          თანხა
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          თარიღი
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          სტატუსი
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          მოქმედება
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
-                      {pendingWithdrawals.map((withdrawal) => {
-                        const uniqueKey = extractUniqueKey(withdrawal.description);
-                        return (
-                          <tr key={withdrawal._id} className="hover:bg-gray-50">
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="text-sm font-medium text-gray-900">
-                                {withdrawal.seller.ownerFirstName}{" "}
-                                {withdrawal.seller.ownerLastName}
-                              </div>
-                              <div className="text-sm text-gray-500">
-                                {withdrawal.seller.email}
-                              </div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                              {withdrawal.seller.accountNumber}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <span className="text-sm font-semibold text-red-600">
-                                {formatCurrency(Math.abs(withdrawal.amount))}
-                              </span>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                              {formatDate(withdrawal.createdAt)}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="space-y-1">
-                                <span className="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
-                                  ელოდება დამტკიცებას
-                                </span>
-                                {withdrawal.bogStatus && (
-                                  <div className="text-xs text-gray-600">
-                                    BOG: {withdrawal.bogStatus.statusText}
-                                  </div>
-                                )}
-                                {uniqueKey && (
-                                  <div className="text-xs text-gray-500">
-                                    UniqueKey: {uniqueKey}
-                                  </div>
-                                )}
-                              </div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              {uniqueKey ? (
-                                <div className="flex gap-2">
-                                  {/* Only show sign button if status is 'A' (To be Signed) */}
-                                  {withdrawal.bogStatus?.status === 'A' ? (
-                                    <>
-                                      <button
-                                        onClick={() => handleSignClick(uniqueKey, withdrawal._id)}
-                                        disabled={loading}
-                                        className="bg-green-600 text-white px-3 py-1.5 rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
-                                      >
-                                        ხელმოწერა
-                                      </button>
-                                      <button
-                                        onClick={() => rejectWithdrawal(withdrawal._id)}
-                                        disabled={loading}
-                                        className="bg-red-600 text-white px-3 py-1.5 rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
-                                      >
-                                        უარყოფა
-                                      </button>
-                                    </>
-                                  ) : withdrawal.bogStatus?.status === 'S' || withdrawal.bogStatus?.status === 'T' || withdrawal.bogStatus?.status === 'Z' ? (
-                                    <div className="flex items-center gap-2">
-                                      <span className="text-sm text-blue-600 font-medium">
-                                        {withdrawal.bogStatus.status === 'S' && '✓ ხელმოწერილია'}
-                                        {withdrawal.bogStatus.status === 'T' && '⏳ მიმდინარეობს'}
-                                        {withdrawal.bogStatus.status === 'Z' && '🔄 იწერება ხელმოწერა'}
-                                      </span>
-                                      <button
-                                        onClick={() => rejectWithdrawal(withdrawal._id)}
-                                        disabled={loading}
-                                        className="bg-red-600 text-white px-3 py-1.5 rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
-                                      >
-                                        უარყოფა
-                                      </button>
-                                    </div>
-                                  ) : withdrawal.bogStatus?.status === 'P' ? (
-                                    <span className="text-sm text-green-600 font-medium">✓ დასრულებულია</span>
-                                  ) : withdrawal.bogStatus?.status === 'R' ? (
-                                    <span className="text-sm text-red-600 font-medium">✗ უარყოფილია</span>
-                                  ) : (
-                                    <div className="flex gap-2">
-                                      <button
-                                        onClick={() => handleSignClick(uniqueKey, withdrawal._id)}
-                                        disabled={loading}
-                                        className="bg-green-600 text-white px-3 py-1.5 rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
-                                      >
-                                        ხელმოწერა
-                                      </button>
-                                      <button
-                                        onClick={() => rejectWithdrawal(withdrawal._id)}
-                                        disabled={loading}
-                                        className="bg-red-600 text-white px-3 py-1.5 rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
-                                      >
-                                        უარყოფა
-                                      </button>
-                                    </div>
-                                  )}
-                                </div>
-                              ) : (
-                                <span className="text-xs text-gray-400">UniqueKey არარის</span>
-                              )}
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Sales Manager Pending Withdrawals */}
-        {salesManagerWithdrawals.length > 0 && (
-          <div className="bg-white rounded-lg shadow mb-6 mt-6">
-            <div className="border-b border-gray-200 p-4">
-              <h3 className="text-lg font-semibold flex items-center gap-2">
-                👔 Sales Manager გატანის მოთხოვნები
-                <span className="bg-purple-100 text-purple-600 py-0.5 px-2 rounded-full text-xs">
-                  {salesManagerWithdrawals.reduce((sum, m) => sum + m.pendingTransactions.length, 0)}
-                </span>
-              </h3>
-            </div>
-            <div className="p-6">
+            ) : (
               <div className="overflow-x-auto">
                 <table className="min-w-full divide-y divide-gray-200">
                   <thead className="bg-gray-50">
                     <tr>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        მენეჯერი
+                        სელერი
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         ანგარიში
@@ -667,7 +577,10 @@ export default function BogTransfersPage() {
                         თანხა
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        BOG სტატუსი
+                        თარიღი
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        სტატუსი
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         მოქმედება
@@ -675,123 +588,312 @@ export default function BogTransfersPage() {
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
-                    {salesManagerWithdrawals.flatMap((manager) => 
-                      manager.pendingTransactions.map((tx) => (
-                        <tr key={tx._id} className="hover:bg-gray-50">
+                    {pendingWithdrawals.map((withdrawal) => {
+                      const uniqueKey = extractUniqueKey(
+                        withdrawal.description
+                      );
+                      return (
+                        <tr key={withdrawal._id} className="hover:bg-gray-50">
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div className="text-sm font-medium text-gray-900">
-                              {manager.name}
+                              {withdrawal.seller.ownerFirstName}{" "}
+                              {withdrawal.seller.ownerLastName}
                             </div>
                             <div className="text-sm text-gray-500">
-                              {manager.email}
+                              {withdrawal.seller.email}
                             </div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            <div>{manager.accountNumber || <span className="text-red-500">არ არის</span>}</div>
-                            <div className="text-xs text-gray-400">{manager.identificationNumber}</div>
+                            {withdrawal.seller.accountNumber}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
-                            <span className="text-sm font-semibold text-purple-600">
-                              {formatCurrency(tx.amount)}
+                            <span className="text-sm font-semibold text-red-600">
+                              {formatCurrency(Math.abs(withdrawal.amount))}
                             </span>
-                            <div className="text-xs text-gray-400">
-                              {new Date(tx.createdAt).toLocaleDateString('ka-GE')}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {formatDate(withdrawal.createdAt)}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="space-y-1">
+                              <span className="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                                ელოდება დამტკიცებას
+                              </span>
+                              {withdrawal.bogStatus && (
+                                <div className="text-xs text-gray-600">
+                                  BOG: {withdrawal.bogStatus.statusText}
+                                </div>
+                              )}
+                              {uniqueKey && (
+                                <div className="text-xs text-gray-500">
+                                  UniqueKey: {uniqueKey}
+                                </div>
+                              )}
                             </div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
-                            {tx.bogUniqueKey ? (
-                              <div>
-                                <span className="px-2 py-1 text-xs bg-yellow-100 text-yellow-800 rounded">
-                                  ელოდება ხელმოწერას
-                                </span>
-                                <div className="text-xs text-gray-400 mt-1">
-                                  Key: {tx.bogUniqueKey}
-                                </div>
+                            {uniqueKey ? (
+                              <div className="flex gap-2">
+                                {/* Only show sign button if status is 'A' (To be Signed) */}
+                                {withdrawal.bogStatus?.status === "A" ? (
+                                  <>
+                                    <button
+                                      onClick={() =>
+                                        handleSignClick(
+                                          uniqueKey,
+                                          withdrawal._id
+                                        )
+                                      }
+                                      disabled={loading}
+                                      className="bg-green-600 text-white px-3 py-1.5 rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+                                    >
+                                      ხელმოწერა
+                                    </button>
+                                    <button
+                                      onClick={() =>
+                                        rejectWithdrawal(withdrawal._id)
+                                      }
+                                      disabled={loading}
+                                      className="bg-red-600 text-white px-3 py-1.5 rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+                                    >
+                                      უარყოფა
+                                    </button>
+                                  </>
+                                ) : withdrawal.bogStatus?.status === "S" ||
+                                  withdrawal.bogStatus?.status === "T" ||
+                                  withdrawal.bogStatus?.status === "Z" ? (
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-sm text-blue-600 font-medium">
+                                      {withdrawal.bogStatus.status === "S" &&
+                                        "✓ ხელმოწერილია"}
+                                      {withdrawal.bogStatus.status === "T" &&
+                                        "⏳ მიმდინარეობს"}
+                                      {withdrawal.bogStatus.status === "Z" &&
+                                        "🔄 იწერება ხელმოწერა"}
+                                    </span>
+                                    <button
+                                      onClick={() =>
+                                        rejectWithdrawal(withdrawal._id)
+                                      }
+                                      disabled={loading}
+                                      className="bg-red-600 text-white px-3 py-1.5 rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+                                    >
+                                      უარყოფა
+                                    </button>
+                                  </div>
+                                ) : withdrawal.bogStatus?.status === "P" ? (
+                                  <span className="text-sm text-green-600 font-medium">
+                                    ✓ დასრულებულია
+                                  </span>
+                                ) : withdrawal.bogStatus?.status === "R" ? (
+                                  <span className="text-sm text-red-600 font-medium">
+                                    ✗ უარყოფილია
+                                  </span>
+                                ) : (
+                                  <div className="flex gap-2">
+                                    <button
+                                      onClick={() =>
+                                        handleSignClick(
+                                          uniqueKey,
+                                          withdrawal._id
+                                        )
+                                      }
+                                      disabled={loading}
+                                      className="bg-green-600 text-white px-3 py-1.5 rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+                                    >
+                                      ხელმოწერა
+                                    </button>
+                                    <button
+                                      onClick={() =>
+                                        rejectWithdrawal(withdrawal._id)
+                                      }
+                                      disabled={loading}
+                                      className="bg-red-600 text-white px-3 py-1.5 rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+                                    >
+                                      უარყოფა
+                                    </button>
+                                  </div>
+                                )}
                               </div>
                             ) : (
-                              <span className="text-xs text-red-500">BOG Key არ არის</span>
-                            )}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            {tx.bogUniqueKey && (
-                              <button
-                                onClick={() => handleSignClick(tx.bogUniqueKey!, tx._id)}
-                                className="px-3 py-1 bg-green-600 text-white text-sm rounded hover:bg-green-700 flex items-center gap-1"
-                                disabled={loading}
-                              >
-                                ✍️ ხელმოწერა
-                              </button>
+                              <span className="text-xs text-gray-400">
+                                UniqueKey არარის
+                              </span>
                             )}
                           </td>
                         </tr>
-                      ))
-                    )}
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>
-            </div>
+            )}
           </div>
-        )}
-
-        {/* Auto-refresh indicator */}
-        <div className="text-center text-sm text-gray-500 mt-4">
-          მონაცემები ავტომატურად ახლდება ყოველ წუთში
         </div>
+      </div>
 
-        {/* OTP Modal */}
-        {showOtpModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
-              <h3 className="text-lg font-semibold mb-4">
-                OTP კოდის შეყვანა
-              </h3>
-              <p className="text-sm text-gray-600 mb-4">
-                დოკუმენტი: {selectedDocument?.uniqueKey}
-              </p>
-              <p className="text-sm text-green-600 mb-4">
-                OTP კოდი გამოგზავნილია თქვენს ტელეფონზე/ელფოსტაზე
-              </p>
-              
-              {error && (
-                <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded mb-4 text-sm">
-                  {error}
-                </div>
-              )}
-
-              <input
-                type="text"
-                value={otp}
-                onChange={(e) => setOtp(e.target.value)}
-                placeholder="შეიყვანეთ OTP კოდი"
-                className="w-full border border-gray-300 rounded-lg px-4 py-2 mb-4"
-                maxLength={6}
-                autoFocus
-                onKeyPress={(e) => {
-                  if (e.key === 'Enter' && otp) {
-                    signDocumentWithOtp();
-                  }
-                }}
-              />
-
-              <div className="flex gap-3">
-                <button
-                  onClick={signDocumentWithOtp}
-                  disabled={loading || !otp}
-                  className="flex-1 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {loading ? "მიმდინარეობს..." : "ხელმოწერა"}
-                </button>
-                <button
-                  onClick={closeOtpModal}
-                  disabled={loading}
-                  className="flex-1 bg-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-400 disabled:opacity-50"
-                >
-                  გაუქმება
-                </button>
-              </div>
+      {/* Sales Manager Pending Withdrawals */}
+      {salesManagerWithdrawals.length > 0 && (
+        <div className="bg-white rounded-lg shadow mb-6 mt-6">
+          <div className="border-b border-gray-200 p-4">
+            <h3 className="text-lg font-semibold flex items-center gap-2">
+              👔 Sales Manager გატანის მოთხოვნები
+              <span className="bg-purple-100 text-purple-600 py-0.5 px-2 rounded-full text-xs">
+                {salesManagerWithdrawals.reduce(
+                  (sum, m) => sum + m.pendingTransactions.length,
+                  0
+                )}
+              </span>
+            </h3>
+          </div>
+          <div className="p-6">
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      მენეჯერი
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      ანგარიში
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      თანხა
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      BOG სტატუსი
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      მოქმედება
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {salesManagerWithdrawals.flatMap((manager) =>
+                    manager.pendingTransactions.map((tx) => (
+                      <tr key={tx._id} className="hover:bg-gray-50">
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm font-medium text-gray-900">
+                            {manager.name}
+                          </div>
+                          <div className="text-sm text-gray-500">
+                            {manager.email}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          <div>
+                            {manager.accountNumber || (
+                              <span className="text-red-500">არ არის</span>
+                            )}
+                          </div>
+                          <div className="text-xs text-gray-400">
+                            {manager.identificationNumber}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className="text-sm font-semibold text-purple-600">
+                            {formatCurrency(tx.amount)}
+                          </span>
+                          <div className="text-xs text-gray-400">
+                            {new Date(tx.createdAt).toLocaleDateString("ka-GE")}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          {tx.bogUniqueKey ? (
+                            <div>
+                              <span className="px-2 py-1 text-xs bg-yellow-100 text-yellow-800 rounded">
+                                ელოდება ხელმოწერას
+                              </span>
+                              <div className="text-xs text-gray-400 mt-1">
+                                Key: {tx.bogUniqueKey}
+                              </div>
+                            </div>
+                          ) : (
+                            <span className="text-xs text-red-500">
+                              BOG Key არ არის
+                            </span>
+                          )}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          {tx.bogUniqueKey && (
+                            <button
+                              onClick={() =>
+                                handleSignClick(tx.bogUniqueKey!, tx._id)
+                              }
+                              className="px-3 py-1 bg-green-600 text-white text-sm rounded hover:bg-green-700 flex items-center gap-1"
+                              disabled={loading}
+                            >
+                              ✍️ ხელმოწერა
+                            </button>
+                          )}
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
             </div>
           </div>
-        )}
+        </div>
+      )}
+
+      {/* Auto-refresh indicator */}
+      <div className="text-center text-sm text-gray-500 mt-4">
+        მონაცემები ავტომატურად ახლდება ყოველ წუთში
       </div>
+
+      {/* OTP Modal */}
+      {showOtpModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <h3 className="text-lg font-semibold mb-4">OTP კოდის შეყვანა</h3>
+            <p className="text-sm text-gray-600 mb-4">
+              დოკუმენტი: {selectedDocument?.uniqueKey}
+            </p>
+            <p className="text-sm text-green-600 mb-4">
+              OTP კოდი გამოგზავნილია თქვენს ტელეფონზე/ელფოსტაზე
+            </p>
+
+            {error && (
+              <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded mb-4 text-sm">
+                {error}
+              </div>
+            )}
+
+            <input
+              type="text"
+              value={otp}
+              onChange={(e) => setOtp(e.target.value)}
+              placeholder="შეიყვანეთ OTP კოდი"
+              className="w-full border border-gray-300 rounded-lg px-4 py-2 mb-4"
+              maxLength={6}
+              autoFocus
+              onKeyPress={(e) => {
+                if (e.key === "Enter" && otp) {
+                  signDocumentWithOtp();
+                }
+              }}
+            />
+
+            <div className="flex gap-3">
+              <button
+                onClick={signDocumentWithOtp}
+                disabled={loading || !otp}
+                className="flex-1 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {loading ? "მიმდინარეობს..." : "ხელმოწერა"}
+              </button>
+              <button
+                onClick={closeOtpModal}
+                disabled={loading}
+                className="flex-1 bg-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-400 disabled:opacity-50"
+              >
+                გაუქმება
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
   );
 }

@@ -21,7 +21,8 @@ export class PortfolioImage {
   metadata?: Record<string, string> | undefined;
 }
 
-export const PortfolioImageSchema = SchemaFactory.createForClass(PortfolioImage);
+export const PortfolioImageSchema =
+  SchemaFactory.createForClass(PortfolioImage);
 
 @Schema({
   timestamps: true,

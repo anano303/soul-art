@@ -1157,108 +1157,114 @@ export function ProfileForm() {
           )}
 
         {/* Sales Manager Bank Details Section */}
-        {user &&
-          user.role &&
-          user.role === "sales_manager" && (
-            <div className="seller-section">
-              <h2 className="seller-section-title">
-                {language === "en" ? "Bank Details" : "საბანკო რეკვიზიტები"}
-              </h2>
-              <p style={{ fontSize: "0.875rem", color: "#666", marginBottom: "1.5rem" }}>
-                {language === "en" 
-                  ? "Required for commission withdrawal"
-                  : "საჭიროა საკომისიოს გასატანად"}
-              </p>
+        {user && user.role && user.role === "sales_manager" && (
+          <div className="seller-section">
+            <h2 className="seller-section-title">
+              {language === "en" ? "Bank Details" : "საბანკო რეკვიზიტები"}
+            </h2>
+            <p
+              style={{
+                fontSize: "0.875rem",
+                color: "#666",
+                marginBottom: "1.5rem",
+              }}
+            >
+              {language === "en"
+                ? "Required for commission withdrawal"
+                : "საჭიროა საკომისიოს გასატანად"}
+            </p>
 
-              <div className="seller-form-grid">
-                <div className="form-field">
-                  <label htmlFor="phoneNumber" className="label">
-                    {t("profile.phoneNumber")}
-                  </label>
-                  <input
-                    id="phoneNumber"
-                    {...form.register("phoneNumber")}
-                    className="input"
-                    placeholder={t("profile.phoneNumberPlaceholder") as string}
-                  />
-                  {form.formState.errors.phoneNumber && (
-                    <span className="error-message">
-                      {form.formState.errors.phoneNumber.message}
-                    </span>
-                  )}
-                </div>
+            <div className="seller-form-grid">
+              <div className="form-field">
+                <label htmlFor="phoneNumber" className="label">
+                  {t("profile.phoneNumber")}
+                </label>
+                <input
+                  id="phoneNumber"
+                  {...form.register("phoneNumber")}
+                  className="input"
+                  placeholder={t("profile.phoneNumberPlaceholder") as string}
+                />
+                {form.formState.errors.phoneNumber && (
+                  <span className="error-message">
+                    {form.formState.errors.phoneNumber.message}
+                  </span>
+                )}
+              </div>
 
-                <div className="form-field">
-                  <label htmlFor="identificationNumber" className="label">
-                    {t("profile.idNumber")}
-                  </label>
-                  <input
-                    id="identificationNumber"
-                    {...form.register("identificationNumber")}
-                    className="input"
-                    placeholder={language === "en" ? "Personal ID" : "პირადი ნომერი"}
-                  />
-                  {form.formState.errors.identificationNumber && (
-                    <span className="error-message">
-                      {form.formState.errors.identificationNumber.message}
-                    </span>
-                  )}
-                </div>
+              <div className="form-field">
+                <label htmlFor="identificationNumber" className="label">
+                  {t("profile.idNumber")}
+                </label>
+                <input
+                  id="identificationNumber"
+                  {...form.register("identificationNumber")}
+                  className="input"
+                  placeholder={
+                    language === "en" ? "Personal ID" : "პირადი ნომერი"
+                  }
+                />
+                {form.formState.errors.identificationNumber && (
+                  <span className="error-message">
+                    {form.formState.errors.identificationNumber.message}
+                  </span>
+                )}
+              </div>
 
-                <div className="form-field">
-                  <label htmlFor="accountNumber" className="label">
-                    {t("profile.accountNumber")}
-                  </label>
-                  <input
-                    id="accountNumber"
-                    {...form.register("accountNumber")}
-                    className="input"
-                    placeholder="GE..."
-                    onChange={(e) => {
-                      const iban = e.target.value.trim();
-                      const detectedBank = detectBankFromIban(iban);
-                      if (detectedBank) {
-                        form.setValue("beneficiaryBankCode", detectedBank);
-                      } else if (iban.length >= 22) {
-                        form.setValue("beneficiaryBankCode", "");
-                      }
-                      form.register("accountNumber").onChange(e);
-                    }}
-                  />
-                  {form.formState.errors.accountNumber && (
-                    <span className="error-message">
-                      {form.formState.errors.accountNumber.message}
-                    </span>
-                  )}
-                </div>
+              <div className="form-field">
+                <label htmlFor="accountNumber" className="label">
+                  {t("profile.accountNumber")}
+                </label>
+                <input
+                  id="accountNumber"
+                  {...form.register("accountNumber")}
+                  className="input"
+                  placeholder="GE..."
+                  onChange={(e) => {
+                    const iban = e.target.value.trim();
+                    const detectedBank = detectBankFromIban(iban);
+                    if (detectedBank) {
+                      form.setValue("beneficiaryBankCode", detectedBank);
+                    } else if (iban.length >= 22) {
+                      form.setValue("beneficiaryBankCode", "");
+                    }
+                    form.register("accountNumber").onChange(e);
+                  }}
+                />
+                {form.formState.errors.accountNumber && (
+                  <span className="error-message">
+                    {form.formState.errors.accountNumber.message}
+                  </span>
+                )}
+              </div>
 
-                <div className="form-field">
-                  <label htmlFor="beneficiaryBankCode" className="label">
-                    {t("profile.bankName") || "ბანკი"}
-                  </label>
-                  <select
-                    id="beneficiaryBankCode"
-                    {...form.register("beneficiaryBankCode")}
-                    className="input"
-                    disabled={true}
-                  >
-                    <option value="">
-                      {t("profile.selectBank") || "აირჩიეთ ბანკი"}
+              <div className="form-field">
+                <label htmlFor="beneficiaryBankCode" className="label">
+                  {t("profile.bankName") || "ბანკი"}
+                </label>
+                <select
+                  id="beneficiaryBankCode"
+                  {...form.register("beneficiaryBankCode")}
+                  className="input"
+                  disabled={true}
+                >
+                  <option value="">
+                    {t("profile.selectBank") || "აირჩიეთ ბანკი"}
+                  </option>
+                  {GEORGIAN_BANKS.map((bank) => (
+                    <option key={bank.code} value={bank.code}>
+                      {bank.name} ({bank.nameEn})
                     </option>
-                    {GEORGIAN_BANKS.map((bank) => (
-                      <option key={bank.code} value={bank.code}>
-                        {bank.name} ({bank.nameEn})
-                      </option>
-                    ))}
-                  </select>
-                  <p className="text-xs text-gray-500 mt-1">
-                    {t("profile.bankAutoDetect") ||
-                      "ბანკი ავტომატურად დადგინდება ანგარიშის ნომრით"}
-                  </p>
-                </div>
+                  ))}
+                </select>
+                <p className="text-xs text-gray-500 mt-1">
+                  {t("profile.bankAutoDetect") ||
+                    "ბანკი ავტომატურად დადგინდება ანგარიშის ნომრით"}
+                </p>
               </div>
             </div>
-          )}
+          </div>
+        )}
 
         <button
           type="submit"

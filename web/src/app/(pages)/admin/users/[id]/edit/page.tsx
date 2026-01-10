@@ -261,7 +261,10 @@ export default function EditUserPage() {
                   step="0.5"
                   value={user.salesCommissionRate ?? 3}
                   onChange={(e) =>
-                    setUser({ ...user, salesCommissionRate: parseFloat(e.target.value) || 0 })
+                    setUser({
+                      ...user,
+                      salesCommissionRate: parseFloat(e.target.value) || 0,
+                    })
                   }
                   className="commission-rate-input"
                 />

@@ -28,10 +28,10 @@ export class CloudinaryMigration {
   @Prop({ required: true })
   toCloud: string;
 
-  @Prop({ 
-    required: true, 
-    enum: MigrationStatus, 
-    default: MigrationStatus.InProgress 
+  @Prop({
+    required: true,
+    enum: MigrationStatus,
+    default: MigrationStatus.InProgress,
   })
   status: MigrationStatus;
 
@@ -47,7 +47,10 @@ export class CloudinaryMigration {
   @Prop({ default: 0 })
   skippedUrls: number;
 
-  @Prop({ type: [{ url: String, error: String, timestamp: Date }], default: [] })
+  @Prop({
+    type: [{ url: String, error: String, timestamp: Date }],
+    default: [],
+  })
   migrationErrors: MigrationError[];
 
   @Prop({ required: true })
@@ -66,4 +69,5 @@ export class CloudinaryMigration {
   updatedAt?: Date;
 }
 
-export const CloudinaryMigrationSchema = SchemaFactory.createForClass(CloudinaryMigration);
+export const CloudinaryMigrationSchema =
+  SchemaFactory.createForClass(CloudinaryMigration);

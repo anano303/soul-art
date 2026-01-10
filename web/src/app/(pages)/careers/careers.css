@@ -127,7 +127,11 @@
 }
 
 .apply-section {
-  background: linear-gradient(135deg, rgba(123, 86, 66, 0.05), rgba(1, 38, 69, 0.05));
+  background: linear-gradient(
+    135deg,
+    rgba(123, 86, 66, 0.05),
+    rgba(1, 38, 69, 0.05)
+  );
   border-radius: 15px;
   padding: 30px;
   margin-top: 20px;

@@ -492,9 +492,11 @@ export class BalanceService {
 
           // Admin-ისთვის email notification
           try {
-            const adminEmail = process.env.ADMIN_EMAIL || 'soulartgeorgia@gmail.com';
+            const adminEmail =
+              process.env.ADMIN_EMAIL || 'soulartgeorgia@gmail.com';
             const sellerName =
-              `${seller.ownerFirstName || ''} ${seller.ownerLastName || ''}`.trim() || seller.name;
+              `${seller.ownerFirstName || ''} ${seller.ownerLastName || ''}`.trim() ||
+              seller.name;
             await this.emailService.sendWithdrawalRequestNotification({
               adminEmail,
               requesterName: sellerName,
