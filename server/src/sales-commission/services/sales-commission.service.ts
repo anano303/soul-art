@@ -646,37 +646,43 @@ export class SalesCommissionService {
   }
 
   /**
-   * Sales Manager-ის ბალანსის მიღება (მოლოდინში + დამტკიცებული კომისიებიდან)
+   * Sales Manager-ის ბალანსის მიღება (მხოლოდ დამტკიცებული კომისიებიდან)
    */
   async getManagerBalance(salesManagerId: string): Promise<{
     availableBalance: number;
     pendingWithdrawals: number;
     totalWithdrawn: number;
     totalApproved: number;
+    pendingCommissions: number;
   }> {
     const manager = await this.userModel.findById(salesManagerId);
     if (!manager) {
       throw new NotFoundException('Sales Manager ვერ მოიძებნა');
     }
 
-    // PENDING + APPROVED კომისიები - ეს არის გასატანი ბალანსი
+    // მხოლოდ APPROVED კომისიები - ეს არის გასატანი ბალანსი
     // Support both uppercase and lowercase status values for legacy data
-    const availableCommissions = await this.commissionModel.aggregate([
+    const approvedCommissions = await this.commissionModel.aggregate([
       {
         $match: {
           salesManager: new Types.ObjectId(salesManagerId),
-          $or: [
-            {
-              status: {
-                $in: [
-                  CommissionStatus.PENDING,
-                  CommissionStatus.APPROVED,
-                  'pending',
-                  'approved',
-                ],
-              },
-            },
-          ],
+          status: { $in: [CommissionStatus.APPROVED, 'approved'] },
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          total: { $sum: '$commissionAmount' },
+        },
+      },
+    ]);
+
+    // PENDING კომისიები - ჯერ არ არის დამტკიცებული (შეკვეთა ჯერ არ მიტანილა)
+    const pendingCommissionsResult = await this.commissionModel.aggregate([
+      {
+        $match: {
+          salesManager: new Types.ObjectId(salesManagerId),
+          status: { $in: [CommissionStatus.PENDING, 'pending'] },
         },
       },
       {
@@ -704,16 +710,18 @@ export class SalesCommissionService {
       },
     ]);
 
-    const totalAvailable = availableCommissions[0]?.total || 0;
+    const totalApproved = approvedCommissions[0]?.total || 0;
+    const pendingCommissions = pendingCommissionsResult[0]?.total || 0;
     const totalWithdrawn = paidCommissions[0]?.total || 0;
     const pendingWithdrawals = manager.salesPendingWithdrawal || 0;
-    const availableBalance = totalAvailable - pendingWithdrawals;
+    const availableBalance = totalApproved - pendingWithdrawals;
 
     return {
       availableBalance,
       pendingWithdrawals,
       totalWithdrawn,
-      totalApproved: totalAvailable,
+      totalApproved,
+      pendingCommissions,
     };
   }
 

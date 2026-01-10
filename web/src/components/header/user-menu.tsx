@@ -444,7 +444,7 @@ export default function UserMenu({
                 onClick={handleLinkClick}
               >
                 <DollarSign size={18} />
-                <span>კომისიები</span>
+                <span>{t("navigation.salesCommissions")}</span>
               </Link>
             )}
 
@@ -456,7 +456,7 @@ export default function UserMenu({
                 onClick={handleLinkClick}
               >
                 <BarChart3 size={18} />
-                <span>ანალიტიკა</span>
+                <span>{t("navigation.salesAnalytics")}</span>
               </Link>
             )}
 

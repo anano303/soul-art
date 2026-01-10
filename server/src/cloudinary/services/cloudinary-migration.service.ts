@@ -281,7 +281,7 @@ export class CloudinaryMigrationService implements OnModuleInit {
         : 0,
       startedAt: migration.startedAt,
       completedAt: migration.completedAt,
-      recentErrors: migration.errors.slice(-5).map(e => ({ url: e.url, error: e.error })),
+      recentErrors: migration.migrationErrors.slice(-5).map(e => ({ url: e.url, error: e.error })),
     };
   }
 
@@ -322,7 +322,7 @@ export class CloudinaryMigrationService implements OnModuleInit {
       copiedUrls: 0,
       failedUrls: 0,
       skippedUrls: 0,
-      errors: [],
+      migrationErrors: [],
       startedAt: new Date(),
     });
 
@@ -615,7 +615,7 @@ export class CloudinaryMigrationService implements OnModuleInit {
         { _id: migrationId },
         {
           $push: {
-            errors: {
+            migrationErrors: {
               url,
               error: error.message || 'Unknown error',
               timestamp: new Date(),

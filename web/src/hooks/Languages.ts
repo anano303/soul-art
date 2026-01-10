@@ -264,6 +264,8 @@ export const TRANSLATIONS: Translations = {
       adminReferrals: "რეფერალების მართვა",
       banners: "ბანერები",
       analytics: "ანალიტიკა",
+      salesCommissions: "საკომისიოები",
+      salesAnalytics: "ანალიტიკა",
     },
 
     // Error messages
@@ -1733,6 +1735,8 @@ export const TRANSLATIONS: Translations = {
       categories: "Categories",
       banners: "Banners",
       analytics: "Analytics",
+      salesCommissions: "Commissions",
+      salesAnalytics: "Analytics",
     },
 
     // Error messages

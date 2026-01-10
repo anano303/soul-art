@@ -259,18 +259,18 @@ export default function SalesAnalyticsPage() {
                     <th>რეგისტრაციები</th>
                     <th>შეკვეთები</th>
                     <th>შემოსავალი</th>
-                    <th>კომისია</th>
+                    <th>საკომისიო</th>
                   </tr>
                 </thead>
                 <tbody>
                   {dailyStats.map((day) => (
                     <tr key={day.date}>
-                      <td>{new Date(day.date).toLocaleDateString("ka-GE")}</td>
-                      <td>{day.visits}</td>
-                      <td>{day.registrations}</td>
-                      <td>{day.purchases}</td>
-                      <td>₾{day.revenue.toFixed(2)}</td>
-                      <td className="commission-cell">
+                      <td data-label="თარიღი">{new Date(day.date).toLocaleDateString("ka-GE")}</td>
+                      <td data-label="ვიზიტები">{day.visits}</td>
+                      <td data-label="რეგისტრაციები">{day.registrations}</td>
+                      <td data-label="შეკვეთები">{day.purchases}</td>
+                      <td data-label="შემოსავალი">₾{day.revenue.toFixed(2)}</td>
+                      <td data-label="საკომისიო" className="commission-cell">
                         ₾{(day.commission || 0).toFixed(2)}
                       </td>
                     </tr>

@@ -48,7 +48,7 @@ export class CloudinaryMigration {
   skippedUrls: number;
 
   @Prop({ type: [{ url: String, error: String, timestamp: Date }], default: [] })
-  errors: MigrationError[];
+  migrationErrors: MigrationError[];
 
   @Prop({ required: true })
   startedAt: Date;
