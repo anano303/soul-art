@@ -773,6 +773,7 @@ export const TRANSLATIONS: Translations = {
       subscribe: "გამოწერა",
       emailPlaceholder: "შეიყვანეთ თქვენი ელფოსტა",
       referralInfo: "რეფერალები - გამოიმუშავე ფული",
+      careers: "კარიერა",
     },
 
     // Donation
@@ -2240,6 +2241,7 @@ export const TRANSLATIONS: Translations = {
       subscribe: "Subscribe",
       emailPlaceholder: "Enter your email",
       referralInfo: "Referrals - Earn money",
+      careers: "Careers",
     },
 
     // Donation

@@ -61,6 +61,11 @@ export default function Footer() {
               </a>
             </li>
             <li>
+              <a href="/careers" className="footer-link">
+                {t("footer.careers")}
+              </a>
+            </li>
+            <li>
               <button
                 onClick={() => setShowPrivacy(true)}
                 className="footer-link"
