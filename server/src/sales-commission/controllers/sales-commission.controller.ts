@@ -233,6 +233,24 @@ export class SalesCommissionController {
   }
 
   /**
+   * Sales Manager-ის გატანების ისტორია
+   */
+  @Get('my-withdrawals')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.SalesManager, Role.Admin)
+  async getMyWithdrawals(
+    @CurrentUser() user: UserDocument,
+    @Query('page') page = '1',
+    @Query('limit') limit = '10',
+  ) {
+    return this.salesCommissionService.getManagerWithdrawals(
+      user._id.toString(),
+      parseInt(page),
+      parseInt(limit),
+    );
+  }
+
+  /**
    * თანხის გატანის მოთხოვნა
    */
   @Post('withdrawal/request')

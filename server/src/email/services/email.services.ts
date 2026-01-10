@@ -959,4 +959,78 @@ ${message}
 
     await this.transporter.sendMail(mailOptions);
   }
+
+  /**
+   * Withdrawal request notification for admin
+   */
+  async sendWithdrawalRequestNotification(data: {
+    adminEmail: string;
+    requesterName: string;
+    requesterEmail: string;
+    requesterType: 'seller' | 'sales_manager';
+    amount: number;
+    accountNumber?: string;
+  }) {
+    const typeLabel = data.requesterType === 'seller' ? 'სელერი' : 'Sales Manager';
+    
+    const mailOptions = {
+      from: emailConfig.from,
+      to: data.adminEmail,
+      subject: `SoulArt: ახალი გატანის მოთხოვნა - ${data.amount.toFixed(2)} ₾`,
+      html: `
+        <div style="font-family: 'FiraGO', Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff;">
+          <!-- Header -->
+          <div style="background: linear-gradient(135deg, #ff600a, #ff6c1d); padding: 20px; text-align: center;">
+            <h1 style="color: white; margin: 0; font-size: 22px; font-weight: 600;">💰 გატანის მოთხოვნა</h1>
+          </div>
+          
+          <!-- Content -->
+          <div style="padding: 24px;">
+            <div style="background: #fef3c7; border: 1px solid #f59e0b; border-radius: 8px; padding: 16px; margin-bottom: 20px;">
+              <p style="color: #92400e; font-size: 14px; margin: 0; font-weight: 600;">
+                ⚠️ ახალი გატანის მოთხოვნა მოელოდება დადასტურებას!
+              </p>
+            </div>
+            
+            <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+              <tr>
+                <td style="padding: 10px 0; border-bottom: 1px solid #e5e7eb; color: #6b7280;">ტიპი:</td>
+                <td style="padding: 10px 0; border-bottom: 1px solid #e5e7eb; color: #1f2937; font-weight: 600;">${typeLabel}</td>
+              </tr>
+              <tr>
+                <td style="padding: 10px 0; border-bottom: 1px solid #e5e7eb; color: #6b7280;">სახელი:</td>
+                <td style="padding: 10px 0; border-bottom: 1px solid #e5e7eb; color: #1f2937;">${data.requesterName}</td>
+              </tr>
+              <tr>
+                <td style="padding: 10px 0; border-bottom: 1px solid #e5e7eb; color: #6b7280;">ელ-ფოსტა:</td>
+                <td style="padding: 10px 0; border-bottom: 1px solid #e5e7eb; color: #1f2937;">${data.requesterEmail}</td>
+              </tr>
+              <tr>
+                <td style="padding: 10px 0; border-bottom: 1px solid #e5e7eb; color: #6b7280;">ანგარიში:</td>
+                <td style="padding: 10px 0; border-bottom: 1px solid #e5e7eb; color: #1f2937;">${data.accountNumber || 'არ არის მითითებული'}</td>
+              </tr>
+              <tr>
+                <td style="padding: 10px 0; color: #6b7280;">თანხა:</td>
+                <td style="padding: 10px 0; color: #dc2626; font-size: 20px; font-weight: 700;">${data.amount.toFixed(2)} ₾</td>
+              </tr>
+            </table>
+            
+            <a href="https://soulart.ge/admin/bog-transfers" 
+               style="background: #ff600a; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; display: inline-block; font-size: 14px; font-weight: 600;">
+              გადარიცხვების გვერდი →
+            </a>
+          </div>
+          
+          <!-- Footer -->
+          <div style="background: #f3f4f6; padding: 16px; text-align: center; border-top: 1px solid #e5e7eb;">
+            <p style="color: #6b7280; font-size: 12px; margin: 0;">
+              © ${new Date().getFullYear()} SoulArt Admin
+            </p>
+          </div>
+        </div>
+      `,
+    };
+
+    await this.transporter.sendMail(mailOptions);
+  }
 }

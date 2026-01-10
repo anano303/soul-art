@@ -175,6 +175,42 @@ export class BalanceService {
   }
 
   /**
+   * Sales Manager-ის ტრანზაქციების ისტორია (გატანები)
+   */
+  async getSalesManagerTransactions(
+    managerId: string,
+    page: number = 1,
+    limit: number = 20,
+  ): Promise<{
+    transactions: BalanceTransactionDocument[];
+    total: number;
+    totalPages: number;
+  }> {
+    const skip = (page - 1) * limit;
+
+    // მხოლოდ Sales Manager-ის withdrawal ტრანზაქციები
+    const filter = {
+      seller: managerId,
+      type: { $in: ['sm_withdrawal_pending', 'sm_withdrawal_completed'] },
+    };
+
+    const [transactions, total] = await Promise.all([
+      this.balanceTransactionModel
+        .find(filter)
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit),
+      this.balanceTransactionModel.countDocuments(filter),
+    ]);
+
+    return {
+      transactions,
+      total,
+      totalPages: Math.ceil(total / limit),
+    };
+  }
+
+  /**
    * ყველა სელერის ბალანსები (ადმინისთვის)
    */
   async getAllSellerBalances(
@@ -453,6 +489,25 @@ export class BalanceService {
           });
 
           await transaction.save();
+
+          // Admin-ისთვის email notification
+          try {
+            const adminEmail = process.env.ADMIN_EMAIL || 'soulartgeorgia@gmail.com';
+            const sellerName =
+              `${seller.ownerFirstName || ''} ${seller.ownerLastName || ''}`.trim() || seller.name;
+            await this.emailService.sendWithdrawalRequestNotification({
+              adminEmail,
+              requesterName: sellerName,
+              requesterEmail: seller.email,
+              requesterType: 'seller',
+              amount,
+              accountNumber: formattedAccountNumber,
+            });
+          } catch (emailError) {
+            this.logger.warn(
+              `Admin email notification failed for withdrawal request: ${emailError.message}`,
+            );
+          }
 
           this.logger.log(
             `Withdrawal document created in BOG, pending approval. Seller: ${sellerId}, amount: ${amount}, BOG UniqueKey: ${transferResult.uniqueKey}`,

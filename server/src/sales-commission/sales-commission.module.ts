@@ -12,8 +12,13 @@ import {
 } from './schemas/sales-tracking.schema';
 import { User, UserSchema } from '../users/schemas/user.schema';
 import { Order, OrderSchema } from '../orders/schemas/order.schema';
+import {
+  BalanceTransaction,
+  BalanceTransactionSchema,
+} from '../users/schemas/seller-balance.schema';
 import { UsersModule } from '../users/users.module';
 import { PaymentsModule } from '../payments/payments.module';
+import { EmailModule } from '../email/email.module';
 
 @Module({
   imports: [
@@ -22,9 +27,11 @@ import { PaymentsModule } from '../payments/payments.module';
       { name: SalesTracking.name, schema: SalesTrackingSchema },
       { name: User.name, schema: UserSchema },
       { name: Order.name, schema: OrderSchema },
+      { name: BalanceTransaction.name, schema: BalanceTransactionSchema },
     ]),
     forwardRef(() => UsersModule),
     forwardRef(() => PaymentsModule),
+    EmailModule,
   ],
   controllers: [SalesCommissionController],
   providers: [SalesCommissionService],

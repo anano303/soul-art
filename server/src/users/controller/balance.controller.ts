@@ -105,6 +105,27 @@ export class BalanceController {
   }
 
   /**
+   * Sales Manager-ის ტრანზაქციები (ადმინისთვის)
+   */
+  @Get('admin/sales-manager/:managerId/transactions')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.Admin)
+  async getSalesManagerTransactionsByAdmin(
+    @Param('managerId') managerId: string,
+    @Query('page') page: string = '1',
+    @Query('limit') limit: string = '20',
+  ) {
+    const pageNum = parseInt(page) || 1;
+    const limitNum = parseInt(limit) || 20;
+
+    return this.balanceService.getSalesManagerTransactions(
+      managerId,
+      pageNum,
+      limitNum,
+    );
+  }
+
+  /**
    * Pending withdrawal requests (ადმინისთვის)
    */
   @Get('admin/pending-withdrawals')

@@ -21,6 +21,11 @@ import { Order, OrderDocument } from '../../orders/schemas/order.schema';
 import { Role } from '../../types/role.enum';
 import { BogTransferService } from '../../payments/services/bog-transfer.service';
 import { BankIntegrationService } from '../../users/services/bog-bank-integration.service';
+import { EmailService } from '../../email/services/email.services';
+import {
+  BalanceTransaction,
+  BalanceTransactionDocument,
+} from '../../users/schemas/seller-balance.schema';
 
 @Injectable()
 export class SalesCommissionService {
@@ -34,8 +39,11 @@ export class SalesCommissionService {
     private trackingModel: Model<SalesTrackingDocument>,
     @InjectModel(User.name) private userModel: Model<UserDocument>,
     @InjectModel(Order.name) private orderModel: Model<OrderDocument>,
+    @InjectModel(BalanceTransaction.name)
+    private balanceTransactionModel: Model<BalanceTransactionDocument>,
     private bogTransferService: BogTransferService,
     private bankIntegrationService: BankIntegrationService,
+    private emailService: EmailService,
   ) {}
 
   /**
@@ -726,6 +734,42 @@ export class SalesCommissionService {
   }
 
   /**
+   * Sales Manager-ის გატანების ისტორია
+   */
+  async getManagerWithdrawals(
+    salesManagerId: string,
+    page: number = 1,
+    limit: number = 10,
+  ): Promise<{
+    withdrawals: any[];
+    total: number;
+    totalPages: number;
+  }> {
+    const skip = (page - 1) * limit;
+
+    const filter = {
+      seller: new Types.ObjectId(salesManagerId),
+      type: { $in: ['sm_withdrawal_pending', 'sm_withdrawal_completed'] },
+    };
+
+    const [withdrawals, total] = await Promise.all([
+      this.balanceTransactionModel
+        .find(filter)
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .lean(),
+      this.balanceTransactionModel.countDocuments(filter),
+    ]);
+
+    return {
+      withdrawals,
+      total,
+      totalPages: Math.ceil(total / limit),
+    };
+  }
+
+  /**
    * თანხის გატანის მოთხოვნა
    */
   async requestWithdrawal(
@@ -798,9 +842,37 @@ export class SalesCommissionService {
       const isPending = transferResult.resultCode === 0;
 
       if (isPending) {
+        // Admin-ისთვის email notification
+        try {
+          const adminEmail = process.env.ADMIN_EMAIL || 'soulartgeorgia@gmail.com';
+          await this.emailService.sendWithdrawalRequestNotification({
+            adminEmail,
+            requesterName: managerName,
+            requesterEmail: manager.email,
+            requesterType: 'sales_manager',
+            amount,
+            accountNumber: formattedAccountNumber,
+          });
+        } catch (emailError) {
+          this.logger.warn(
+            `Admin email notification failed for withdrawal request: ${emailError.message}`,
+          );
+        }
+
         this.logger.log(
           `Withdrawal document created in BOG, pending approval. Manager: ${salesManagerId}, amount: ${amount}, BOG UniqueKey: ${transferResult.uniqueKey}`,
         );
+
+        // Transaction ჩანაწერი pending withdrawal-ისთვის
+        const pendingTransaction = new this.balanceTransactionModel({
+          seller: salesManagerId, // იყენებს იგივე ველს, Sales Manager-ისთვისაც
+          order: null,
+          amount: -amount,
+          type: 'sm_withdrawal_pending',
+          description: `Sales Manager გატანის მოთხოვნა BOG-ში (${formattedAccountNumber}) - BOG UniqueKey: ${transferResult.uniqueKey}`,
+          finalAmount: -amount,
+        });
+        await pendingTransaction.save();
 
         return {
           status: 'pending',
@@ -819,6 +891,30 @@ export class SalesCommissionService {
 
         // APPROVED კომისიები გადავიყვანოთ PAID სტატუსში
         await this.markCommissionsAsPaid(salesManagerId, amount);
+
+        // Transaction ჩანაწერი დასრულებული withdrawal-ისთვის
+        const completedTransaction = new this.balanceTransactionModel({
+          seller: salesManagerId,
+          order: null,
+          amount: -amount,
+          type: 'sm_withdrawal_completed',
+          description: `Sales Manager თანხის გატანა დასრულდა (${formattedAccountNumber}) - BOG UniqueKey: ${transferResult.uniqueKey}`,
+          finalAmount: -amount,
+        });
+        await completedTransaction.save();
+
+        // Email notification Sales Manager-ს
+        try {
+          await this.emailService.sendWithdrawalCompletedNotification(
+            manager.email,
+            managerName,
+            amount,
+          );
+        } catch (emailError) {
+          this.logger.warn(
+            `Email notification failed for completed withdrawal: ${emailError.message}`,
+          );
+        }
 
         this.logger.log(
           `Withdrawal completed for sales manager: ${salesManagerId}, amount: ${amount}`,
