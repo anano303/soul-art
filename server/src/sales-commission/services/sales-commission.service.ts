@@ -967,7 +967,7 @@ export class SalesCommissionService {
   }
 
   /**
-   * Admin-ისთვის: ყველა Sales Manager-ის pending withdrawal-ები
+   * Admin-ისთვის: ყველა Sales Manager-ის pending withdrawal-ები BOG UniqueKey-ით
    */
   async getPendingWithdrawals(): Promise<
     Array<{
@@ -976,25 +976,59 @@ export class SalesCommissionService {
       email: string;
       accountNumber: string;
       identificationNumber: string;
+      beneficiaryBankCode: string;
       salesPendingWithdrawal: number;
       salesCommissionBalance: number;
       salesTotalWithdrawn: number;
+      pendingTransactions: Array<{
+        _id: string;
+        amount: number;
+        bogUniqueKey: number | null;
+        createdAt: Date;
+        description: string;
+      }>;
     }>
   > {
     const managers = await this.userModel.find({
       role: Role.SalesManager,
       salesPendingWithdrawal: { $gt: 0 },
-    }).select('name email accountNumber identificationNumber salesPendingWithdrawal salesCommissionBalance salesTotalWithdrawn');
+    }).select('name email accountNumber identificationNumber beneficiaryBankCode salesPendingWithdrawal salesCommissionBalance salesTotalWithdrawn');
 
-    return managers.map((m) => ({
-      _id: m._id.toString(),
-      name: m.name,
-      email: m.email,
-      accountNumber: m.accountNumber || '',
-      identificationNumber: m.identificationNumber || '',
-      salesPendingWithdrawal: m.salesPendingWithdrawal || 0,
-      salesCommissionBalance: m.salesCommissionBalance || 0,
-      salesTotalWithdrawn: m.salesTotalWithdrawn || 0,
-    }));
+    const result = [];
+
+    for (const m of managers) {
+      // Get pending transactions with BOG UniqueKey
+      const pendingTxs = await this.balanceTransactionModel.find({
+        seller: m._id,
+        type: 'sm_withdrawal_pending',
+      }).sort({ createdAt: -1 });
+
+      const pendingTransactions = pendingTxs.map((tx) => {
+        const uniqueKeyMatch = tx.description.match(/UniqueKey: (\d+)/);
+        const txObj = tx.toObject() as any;
+        return {
+          _id: tx._id.toString(),
+          amount: Math.abs(tx.amount),
+          bogUniqueKey: uniqueKeyMatch ? parseInt(uniqueKeyMatch[1], 10) : null,
+          createdAt: txObj.createdAt || new Date(),
+          description: tx.description,
+        };
+      });
+
+      result.push({
+        _id: m._id.toString(),
+        name: m.name,
+        email: m.email,
+        accountNumber: m.accountNumber || '',
+        identificationNumber: m.identificationNumber || '',
+        beneficiaryBankCode: m.beneficiaryBankCode || 'BAGAGE22',
+        salesPendingWithdrawal: m.salesPendingWithdrawal || 0,
+        salesCommissionBalance: m.salesCommissionBalance || 0,
+        salesTotalWithdrawn: m.salesTotalWithdrawn || 0,
+        pendingTransactions,
+      });
+    }
+
+    return result;
   }
 }

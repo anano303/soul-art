@@ -37,9 +37,17 @@ interface SalesManagerPendingWithdrawal {
   email: string;
   accountNumber: string;
   identificationNumber: string;
+  beneficiaryBankCode: string;
   salesPendingWithdrawal: number;
   salesCommissionBalance: number;
   salesTotalWithdrawn: number;
+  pendingTransactions: Array<{
+    _id: string;
+    amount: number;
+    bogUniqueKey: number | null;
+    createdAt: string;
+    description: string;
+  }>;
 }
 
 export default function BogTransfersPage() {
@@ -640,7 +648,7 @@ export default function BogTransfersPage() {
               <h3 className="text-lg font-semibold flex items-center gap-2">
                 👔 Sales Manager გატანის მოთხოვნები
                 <span className="bg-purple-100 text-purple-600 py-0.5 px-2 rounded-full text-xs">
-                  {salesManagerWithdrawals.length}
+                  {salesManagerWithdrawals.reduce((sum, m) => sum + m.pendingTransactions.length, 0)}
                 </span>
               </h3>
             </div>
@@ -656,50 +664,71 @@ export default function BogTransfersPage() {
                         ანგარიში
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        პირადი ნომერი
+                        თანხა
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        მოთხოვნილი თანხა
+                        BOG სტატუსი
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        სულ გატანილი
+                        მოქმედება
                       </th>
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
-                    {salesManagerWithdrawals.map((manager) => (
-                      <tr key={manager._id} className="hover:bg-gray-50">
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm font-medium text-gray-900">
-                            {manager.name}
-                          </div>
-                          <div className="text-sm text-gray-500">
-                            {manager.email}
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {manager.accountNumber || <span className="text-red-500">არ არის მითითებული</span>}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {manager.identificationNumber || <span className="text-red-500">არ არის მითითებული</span>}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <span className="text-sm font-semibold text-purple-600">
-                            {formatCurrency(manager.salesPendingWithdrawal)}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {formatCurrency(manager.salesTotalWithdrawn)}
-                        </td>
-                      </tr>
-                    ))}
+                    {salesManagerWithdrawals.flatMap((manager) => 
+                      manager.pendingTransactions.map((tx) => (
+                        <tr key={tx._id} className="hover:bg-gray-50">
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm font-medium text-gray-900">
+                              {manager.name}
+                            </div>
+                            <div className="text-sm text-gray-500">
+                              {manager.email}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            <div>{manager.accountNumber || <span className="text-red-500">არ არის</span>}</div>
+                            <div className="text-xs text-gray-400">{manager.identificationNumber}</div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <span className="text-sm font-semibold text-purple-600">
+                              {formatCurrency(tx.amount)}
+                            </span>
+                            <div className="text-xs text-gray-400">
+                              {new Date(tx.createdAt).toLocaleDateString('ka-GE')}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            {tx.bogUniqueKey ? (
+                              <div>
+                                <span className="px-2 py-1 text-xs bg-yellow-100 text-yellow-800 rounded">
+                                  ელოდება ხელმოწერას
+                                </span>
+                                <div className="text-xs text-gray-400 mt-1">
+                                  Key: {tx.bogUniqueKey}
+                                </div>
+                              </div>
+                            ) : (
+                              <span className="text-xs text-red-500">BOG Key არ არის</span>
+                            )}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            {tx.bogUniqueKey && (
+                              <button
+                                onClick={() => handleSignClick(tx.bogUniqueKey!, tx._id)}
+                                className="px-3 py-1 bg-green-600 text-white text-sm rounded hover:bg-green-700 flex items-center gap-1"
+                                disabled={loading}
+                              >
+                                ✍️ ხელმოწერა
+                              </button>
+                            )}
+                          </td>
+                        </tr>
+                      ))
+                    )}
                   </tbody>
                 </table>
               </div>
-              <p className="mt-4 text-sm text-gray-500">
-                💡 Sales Manager-ის გატანის მოთხოვნები BOG-ში გადაიგზავნება ავტომატურად.
-                ზემოთ სელერების ცხრილში უნდა გამოჩნდეს ხელმოწერის ღილაკი.
-              </p>
             </div>
           </div>
         )}
