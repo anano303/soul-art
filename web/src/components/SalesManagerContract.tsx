@@ -127,22 +127,22 @@ export function SalesManagerContract({
     title: "პარტნიორობის ხელშეკრულება",
     subtitle: "გაყიდვების მენეჯერის (Sales Manager) თანამშრომლობის პირობები",
     effectiveDate: "ძალაშია რეგისტრაციის მომენტიდან",
-    
+
     article1: {
       title: "მუხლი 1. მხარეები",
       content: [
-        "ერთი მხრივ, შპს \"SoulArt\" (შემდგომში \"კომპანია\"), რეგისტრირებული საქართველოს კანონმდებლობის შესაბამისად, რომელიც ოპერირებს ონლაინ პლატფორმას soulart.ge;",
-        "მეორე მხრივ, ფიზიკური პირი, რომელიც რეგისტრირდება პლატფორმაზე გაყიდვების მენეჯერის (Sales Manager) სტატუსით (შემდგომში \"პარტნიორი\").",
-        "წინამდებარე ხელშეკრულების მიღება (რეგისტრაციის დასრულება) ნიშნავს მხარეთა შორის სამართლებრივი ურთიერთობის დამყარებას."
-      ]
+        'ერთი მხრივ, შპს "SoulArt" (შემდგომში "კომპანია"), რეგისტრირებული საქართველოს კანონმდებლობის შესაბამისად, რომელიც ოპერირებს ონლაინ პლატფორმას soulart.ge;',
+        'მეორე მხრივ, ფიზიკური პირი, რომელიც რეგისტრირდება პლატფორმაზე გაყიდვების მენეჯერის (Sales Manager) სტატუსით (შემდგომში "პარტნიორი").',
+        "წინამდებარე ხელშეკრულების მიღება (რეგისტრაციის დასრულება) ნიშნავს მხარეთა შორის სამართლებრივი ურთიერთობის დამყარებას.",
+      ],
     },
 
     article2: {
       title: "მუხლი 2. თანამშრომლობის საგანი",
       content: [
         "პარტნიორი იღებს ვალდებულებას, ხელი შეუწყოს SoulArt-ის პლატფორმაზე გაყიდვების ზრდას საკუთარი რეფერალური ბმულის გაზიარებით.",
-        "კომპანია იღებს ვალდებულებას, გადაუხადოს პარტნიორს საკომისიო თითოეული წარმატებული გაყიდვიდან, რომელიც განხორციელდა პარტნიორის რეფერალური ბმულით."
-      ]
+        "კომპანია იღებს ვალდებულებას, გადაუხადოს პარტნიორს საკომისიო თითოეული წარმატებული გაყიდვიდან, რომელიც განხორციელდა პარტნიორის რეფერალური ბმულით.",
+      ],
     },
 
     article3: {
@@ -151,8 +151,8 @@ export function SalesManagerContract({
         "3.1. სტანდარტული საკომისიო შეადგენს გაყიდვის თანხის 3%-ს (გროსი თანხიდან, ანუ ნებისმიერი ხარჯის გამოკლებამდე).",
         "3.2. საკომისიოს პროცენტი შესაძლებელია შეიცვალოს ინდივიდუალური შეთანხმებით, კომპანიის ადმინისტრაციის გადაწყვეტილებით.",
         "3.3. საკომისიო ირიცხება პარტნიორის პირად ანგარიშზე პლატფორმაზე მყისიერად, გაყიდვის დადასტურებისთანავე.",
-        "3.4. საკომისიო გაიანგარიშება მხოლოდ წარმატებით დასრულებული და გადახდილი შეკვეთებიდან."
-      ]
+        "3.4. საკომისიო გაიანგარიშება მხოლოდ წარმატებით დასრულებული და გადახდილი შეკვეთებიდან.",
+      ],
     },
 
     article4: {
@@ -162,8 +162,8 @@ export function SalesManagerContract({
         "4.2. მინიმალური გატანის თანხა შეადგენს 50 ლარს.",
         "4.3. თანხის გადარიცხვა ხორციელდება პარტნიორის მიერ მითითებულ საბანკო ანგარიშზე.",
         "4.4. გადარიცხვა ხორციელდება მოთხოვნიდან 3 სამუშაო დღის განმავლობაში.",
-        "4.5. პარტნიორი ვალდებულია მიუთითოს ზუსტი საბანკო რეკვიზიტები და პირადი ნომერი. არასწორი მონაცემების შემთხვევაში კომპანია პასუხს არ აგებს დაყოვნებაზე."
-      ]
+        "4.5. პარტნიორი ვალდებულია მიუთითოს ზუსტი საბანკო რეკვიზიტები და პირადი ნომერი. არასწორი მონაცემების შემთხვევაში კომპანია პასუხს არ აგებს დაყოვნებაზე.",
+      ],
     },
 
     article5: {
@@ -172,8 +172,8 @@ export function SalesManagerContract({
         "5.1. პარტნიორი ვალდებულია არ გაავრცელოს ყალბი ან შეცდომაში შემყვანი ინფორმაცია პლატფორმის ან პროდუქტების შესახებ.",
         "5.2. პარტნიორი ვალდებულია დაიცვას კომპანიის რეპუტაცია და საქმიანი ეთიკის ნორმები.",
         "5.3. პარტნიორი ვალდებულია არ გამოიყენოს სპამი, თაღლითური ან არაეთიკური მარკეტინგული მეთოდები.",
-        "5.4. პარტნიორი დამოუკიდებლად აგებს პასუხს საკუთარი საგადასახადო ვალდებულებების შესრულებაზე."
-      ]
+        "5.4. პარტნიორი დამოუკიდებლად აგებს პასუხს საკუთარი საგადასახადო ვალდებულებების შესრულებაზე.",
+      ],
     },
 
     article6: {
@@ -182,8 +182,8 @@ export function SalesManagerContract({
         "6.1. კომპანია ვალდებულია უზრუნველყოს პარტნიორი უნიკალური რეფერალური ბმულით.",
         "6.2. კომპანია ვალდებულია უზრუნველყოს გაყიდვებისა და საკომისიოს თვალყურის დევნების სისტემა (დეშბორდი).",
         "6.3. კომპანია ვალდებულია დროულად გადარიცხოს დაგროვილი საკომისიო მოთხოვნის შემთხვევაში.",
-        "6.4. კომპანია ვალდებულია წინასწარ აცნობოს პარტნიორს საკომისიოს პროცენტის ან გატანის პირობების ცვლილების შესახებ."
-      ]
+        "6.4. კომპანია ვალდებულია წინასწარ აცნობოს პარტნიორს საკომისიოს პროცენტის ან გატანის პირობების ცვლილების შესახებ.",
+      ],
     },
 
     article7: {
@@ -192,24 +192,24 @@ export function SalesManagerContract({
         "7.1. ხელშეკრულება ძალაში შედის რეგისტრაციის მომენტიდან და მოქმედებს განუსაზღვრელი ვადით.",
         "7.2. ნებისმიერ მხარეს უფლება აქვს შეწყვიტოს ხელშეკრულება წერილობითი შეტყობინებით 14 კალენდარული დღით ადრე.",
         "7.3. კომპანიას უფლება აქვს დაუყოვნებლივ შეწყვიტოს ხელშეკრულება პარტნიორის მიერ პირობების დარღვევის შემთხვევაში.",
-        "7.4. ხელშეკრულების შეწყვეტის შემთხვევაში, პარტნიორს უფლება აქვს მოითხოვოს შეწყვეტის მომენტისთვის დაგროვილი საკომისიო."
-      ]
+        "7.4. ხელშეკრულების შეწყვეტის შემთხვევაში, პარტნიორს უფლება აქვს მოითხოვოს შეწყვეტის მომენტისთვის დაგროვილი საკომისიო.",
+      ],
     },
 
     article8: {
       title: "მუხლი 8. კონფიდენციალურობა",
       content: [
         "8.1. მხარეები იღებენ ვალდებულებას არ გაამჟღავნონ კონფიდენციალური ინფორმაცია მესამე პირებისთვის.",
-        "8.2. პარტნიორის პირადი მონაცემები მუშავდება კომპანიის კონფიდენციალურობის პოლიტიკის შესაბამისად."
-      ]
+        "8.2. პარტნიორის პირადი მონაცემები მუშავდება კომპანიის კონფიდენციალურობის პოლიტიკის შესაბამისად.",
+      ],
     },
 
     article9: {
       title: "მუხლი 9. დავების გადაწყვეტა",
       content: [
         "9.1. ნებისმიერი დავა გადაწყდება მოლაპარაკების გზით.",
-        "9.2. შეთანხმების მიუღწევლობის შემთხვევაში, დავა განიხილება საქართველოს კანონმდებლობის შესაბამისად, თბილისის საქალაქო სასამართლოში."
-      ]
+        "9.2. შეთანხმების მიუღწევლობის შემთხვევაში, დავა განიხილება საქართველოს კანონმდებლობის შესაბამისად, თბილისის საქალაქო სასამართლოში.",
+      ],
     },
 
     article10: {
@@ -217,35 +217,35 @@ export function SalesManagerContract({
       content: [
         "10.1. წინამდებარე ხელშეკრულება წარმოადგენს მხარეთა შორის სრულ შეთანხმებას.",
         "10.2. ხელშეკრულებაში ცვლილების შეტანა შესაძლებელია კომპანიის მიერ პარტნიორის წინასწარი შეტყობინებით.",
-        "10.3. რეგისტრაციის დასრულებით პარტნიორი ადასტურებს, რომ გაეცნო და ეთანხმება წინამდებარე პირობებს."
-      ]
+        "10.3. რეგისტრაციის დასრულებით პარტნიორი ადასტურებს, რომ გაეცნო და ეთანხმება წინამდებარე პირობებს.",
+      ],
     },
 
     acceptButton: "ვეთანხმები პირობებს",
     downloadButton: "ჩამოტვირთვა / ბეჭდვა",
-    closeButton: "დახურვა"
+    closeButton: "დახურვა",
   };
 
   const contentEn = {
     title: "Partnership Agreement",
     subtitle: "Sales Manager Collaboration Terms",
     effectiveDate: "Effective from the moment of registration",
-    
+
     article1: {
       title: "Article 1. Parties",
       content: [
-        "On one hand, \"SoulArt\" LLC (hereinafter \"Company\"), registered in accordance with Georgian legislation, operating the online platform soulart.ge;",
-        "On the other hand, an individual who registers on the platform with Sales Manager status (hereinafter \"Partner\").",
-        "Acceptance of this agreement (completion of registration) establishes a legal relationship between the parties."
-      ]
+        'On one hand, "SoulArt" LLC (hereinafter "Company"), registered in accordance with Georgian legislation, operating the online platform soulart.ge;',
+        'On the other hand, an individual who registers on the platform with Sales Manager status (hereinafter "Partner").',
+        "Acceptance of this agreement (completion of registration) establishes a legal relationship between the parties.",
+      ],
     },
 
     article2: {
       title: "Article 2. Subject of Cooperation",
       content: [
         "The Partner undertakes to promote sales growth on the SoulArt platform by sharing their personal referral link.",
-        "The Company undertakes to pay the Partner a commission for each successful sale made through the Partner's referral link."
-      ]
+        "The Company undertakes to pay the Partner a commission for each successful sale made through the Partner's referral link.",
+      ],
     },
 
     article3: {
@@ -254,8 +254,8 @@ export function SalesManagerContract({
         "3.1. The standard commission is 3% of the sale amount (gross amount, before any deductions).",
         "3.2. The commission percentage may be changed by individual agreement at the discretion of the Company's administration.",
         "3.3. Commission is credited to the Partner's personal account on the platform instantly upon sale confirmation.",
-        "3.4. Commission is calculated only from successfully completed and paid orders."
-      ]
+        "3.4. Commission is calculated only from successfully completed and paid orders.",
+      ],
     },
 
     article4: {
@@ -265,8 +265,8 @@ export function SalesManagerContract({
         "4.2. The minimum withdrawal amount is 50 GEL.",
         "4.3. Funds are transferred to the bank account specified by the Partner.",
         "4.4. Transfer is processed within 3 business days of the request.",
-        "4.5. The Partner is obligated to provide accurate banking details and personal ID number. The Company is not responsible for delays caused by incorrect data."
-      ]
+        "4.5. The Partner is obligated to provide accurate banking details and personal ID number. The Company is not responsible for delays caused by incorrect data.",
+      ],
     },
 
     article5: {
@@ -275,8 +275,8 @@ export function SalesManagerContract({
         "5.1. The Partner shall not spread false or misleading information about the platform or products.",
         "5.2. The Partner shall protect the Company's reputation and comply with business ethics standards.",
         "5.3. The Partner shall not use spam, fraudulent, or unethical marketing methods.",
-        "5.4. The Partner is independently responsible for fulfilling their own tax obligations."
-      ]
+        "5.4. The Partner is independently responsible for fulfilling their own tax obligations.",
+      ],
     },
 
     article6: {
@@ -285,8 +285,8 @@ export function SalesManagerContract({
         "6.1. The Company shall provide the Partner with a unique referral link.",
         "6.2. The Company shall provide a sales and commission tracking system (dashboard).",
         "6.3. The Company shall transfer accumulated commission in a timely manner upon request.",
-        "6.4. The Company shall notify the Partner in advance of any changes to commission rates or withdrawal terms."
-      ]
+        "6.4. The Company shall notify the Partner in advance of any changes to commission rates or withdrawal terms.",
+      ],
     },
 
     article7: {
@@ -295,24 +295,24 @@ export function SalesManagerContract({
         "7.1. This agreement comes into force from the moment of registration and remains valid indefinitely.",
         "7.2. Either party may terminate the agreement with 14 calendar days' written notice.",
         "7.3. The Company may terminate the agreement immediately in case of Partner's breach of terms.",
-        "7.4. Upon termination, the Partner has the right to claim commission accumulated up to the termination date."
-      ]
+        "7.4. Upon termination, the Partner has the right to claim commission accumulated up to the termination date.",
+      ],
     },
 
     article8: {
       title: "Article 8. Confidentiality",
       content: [
         "8.1. The parties undertake not to disclose confidential information to third parties.",
-        "8.2. Partner's personal data is processed in accordance with the Company's Privacy Policy."
-      ]
+        "8.2. Partner's personal data is processed in accordance with the Company's Privacy Policy.",
+      ],
     },
 
     article9: {
       title: "Article 9. Dispute Resolution",
       content: [
         "9.1. Any dispute shall be resolved through negotiation.",
-        "9.2. If agreement cannot be reached, disputes shall be resolved in accordance with Georgian legislation at Tbilisi City Court."
-      ]
+        "9.2. If agreement cannot be reached, disputes shall be resolved in accordance with Georgian legislation at Tbilisi City Court.",
+      ],
     },
 
     article10: {
@@ -320,13 +320,13 @@ export function SalesManagerContract({
       content: [
         "10.1. This agreement constitutes the complete agreement between the parties.",
         "10.2. Amendments to the agreement may be made by the Company with prior notice to the Partner.",
-        "10.3. By completing registration, the Partner confirms that they have read and agree to these terms."
-      ]
+        "10.3. By completing registration, the Partner confirms that they have read and agree to these terms.",
+      ],
     },
 
     acceptButton: "I Accept the Terms",
     downloadButton: "Download / Print",
-    closeButton: "Close"
+    closeButton: "Close",
   };
 
   const content = language === "ge" ? contentGe : contentEn;
@@ -423,7 +423,9 @@ export function SalesManagerContract({
           <h3 style={{ textAlign: "center", marginBottom: "5px" }}>
             {content.subtitle}
           </h3>
-          <p style={{ textAlign: "center", color: "#666", marginBottom: "20px" }}>
+          <p
+            style={{ textAlign: "center", color: "#666", marginBottom: "20px" }}
+          >
             {content.effectiveDate}
           </p>
 

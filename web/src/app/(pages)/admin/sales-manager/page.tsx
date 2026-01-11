@@ -132,12 +132,12 @@ export default function SalesManagerDashboard() {
   }, [currentPage, statusFilter, withdrawalPage]);
 
   useEffect(() => {
-    // Check if user is sales manager
+    // Check if user is sales manager or combined role
     const userData = getUserData();
-    if (
-      userData?.role?.toLowerCase() !== Role.SalesManager &&
-      userData?.role?.toLowerCase() !== Role.Admin
-    ) {
+    const role = userData?.role?.toLowerCase();
+    const isSalesManager =
+      role === Role.SalesManager || role === "seller_sales_manager";
+    if (!isSalesManager && role !== Role.Admin) {
       router.push("/admin/products");
       return;
     }

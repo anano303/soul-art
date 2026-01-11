@@ -82,6 +82,23 @@ export function ProfileForm() {
   >("idle");
   const [slugMessage, setSlugMessage] = useState<string>("");
   const [copyState, setCopyState] = useState<"idle" | "copied">("idle");
+
+  // Helper function to check if user has seller role (including combined roles)
+  const isSellerRole = (role?: string) => {
+    if (!role) return false;
+    const upperRole = role.toUpperCase();
+    return upperRole === "SELLER" || upperRole === "SELLER_SALES_MANAGER";
+  };
+
+  // Helper function to check if user has sales manager role (including combined roles)
+  const isSalesManagerRole = (role?: string) => {
+    if (!role) return false;
+    const upperRole = role.toUpperCase();
+    return (
+      upperRole === "SALES_MANAGER" || upperRole === "SELLER_SALES_MANAGER"
+    );
+  };
+
   const portfolioBaseUrl =
     process.env.NEXT_PUBLIC_WEBSITE_URL || "https://soulart.ge";
   const portfolioDisplayBase = portfolioBaseUrl
@@ -164,13 +181,13 @@ export function ProfileForm() {
       // 3. Otherwise, no image (will show initials)
       if (user.profileImage) {
         setProfileImage(user.profileImage);
-      } else if (user.role?.toUpperCase() === "SELLER" && user.storeLogo) {
+      } else if (isSellerRole(user.role) && user.storeLogo) {
         setProfileImage(user.storeLogo);
       } else {
         setProfileImage(null);
       }
 
-      setIsSellerAccount(user.role?.toUpperCase() === "SELLER");
+      setIsSellerAccount(isSellerRole(user.role));
 
       if (user.storeLogo) {
         setLogoError(false);
@@ -225,7 +242,7 @@ export function ProfileForm() {
         }
 
         // Seller-specific fields
-        if (user && user.role?.toUpperCase() === "SELLER") {
+        if (user && isSellerRole(user.role)) {
           if (
             values.storeName !== undefined &&
             values.storeName !== user?.storeName
@@ -318,7 +335,7 @@ export function ProfileForm() {
 
       // If this is a seller and we're potentially updating logo-related data,
       // invalidate product queries as well
-      if (user?.role?.toUpperCase() === "SELLER") {
+      if (isSellerRole(user?.role)) {
         queryClient.invalidateQueries({ queryKey: ["products"] });
         queryClient.invalidateQueries({ queryKey: ["product"] });
         queryClient.invalidateQueries({ queryKey: ["similarProducts"] });
@@ -680,8 +697,8 @@ export function ProfileForm() {
           user.role?.toUpperCase() !== "SELLER" &&
           user.role?.toUpperCase() !== "SELLER_SALES_MANAGER" &&
           user.role?.toUpperCase() !== "ADMIN" && (
-            <BecomeSellerButton 
-              userPhone={user.phoneNumber} 
+            <BecomeSellerButton
+              userPhone={user.phoneNumber}
               userIdentificationNumber={user.identificationNumber}
               userAccountNumber={user.accountNumber}
               userBeneficiaryBankCode={user.beneficiaryBankCode}
@@ -690,7 +707,7 @@ export function ProfileForm() {
       </div>
 
       {/* Balance widget only for sellers, not admins */}
-      {user?.role?.toUpperCase() === "SELLER" && user._id && (
+      {isSellerRole(user?.role) && user._id && (
         <SellerBalanceWidget userId={user._id} />
       )}
 
@@ -814,353 +831,343 @@ export function ProfileForm() {
           )}
         </div>
 
-        {user &&
-          user.role &&
-          (user.role.toUpperCase() === "SELLER" || isSellerAccount) && (
-            <div className="seller-section">
-              <h2 className="seller-section-title">
-                {t("profile.sellerInfo")}
-              </h2>
+        {user && user.role && (isSellerRole(user.role) || isSellerAccount) && (
+          <div className="seller-section">
+            <h2 className="seller-section-title">{t("profile.sellerInfo")}</h2>
 
-              <div className="seller-logo-container">
-                <p
-                  style={{
-                    fontSize: "0.875rem",
-                    color: "#666",
-                    marginBottom: "0.75rem",
-                    textAlign: "center",
-                  }}
-                >
-                  {language === "en"
-                    ? "Your logo will also be used as your profile photo"
-                    : "ლოგო ავტომატურად გამოიყენება პროფილის ფოტოდაც"}
-                </p>
-                {isUploading ? (
-                  <div className="loading-logo">{t("profile.logoLoading")}</div>
-                ) : (
-                  <>
-                    {logoError ? (
-                      <div className="logo-error">{t("profile.logoError")}</div>
-                    ) : storeLogo ? (
-                      <div
-                        className="logo-wrapper"
-                        style={{
-                          position: "relative",
-                          width: "120px",
-                          height: "120px",
-                          marginBottom: "1rem",
-                        }}
-                      >
-                        <Image
-                          src={storeLogo}
-                          alt={t("profile.storeName") as string}
-                          width={120}
-                          height={120}
-                          style={{
-                            objectFit: "cover",
-                            borderRadius: "50%",
-                          }}
-                          key={`logo-${new Date().getTime()}`} // Add key for cache busting
-                          unoptimized
-                          onError={() => {
-                            setLogoError(true);
-                          }}
-                        />
-                      </div>
-                    ) : (
-                      <div
-                        className="no-logo-placeholder"
-                        style={{
-                          width: "120px",
-                          height: "120px",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          backgroundColor: "#f0f0f0",
-                          borderRadius: "8px",
-                          fontSize: "14px",
-                          color: "#666",
-                        }}
-                      >
-                        {t("profile.noLogo")}
-                      </div>
-                    )}
-                  </>
-                )}
-                <button
-                  type="button"
-                  onClick={triggerLogoInput}
-                  className="upload-button"
-                  disabled={isUploading}
-                >
-                  {isUploading
-                    ? t("profile.uploading")
-                    : t("profile.uploadLogo")}
-                </button>
-                <input
-                  type="file"
-                  ref={logoInputRef}
-                  onChange={handleLogoChange}
-                  accept="image/*"
-                  className="file-input"
-                />
-              </div>
-
-              <div className="seller-form-grid">
-                <div className="form-field">
-                  <label htmlFor="storeName" className="label">
-                    {t("profile.storeName")}
-                  </label>
-                  <input
-                    id="storeName"
-                    {...form.register("storeName")}
-                    className="input"
-                  />
-                  {form.formState.errors.storeName && (
-                    <span className="error-message">
-                      {form.formState.errors.storeName.message}
-                    </span>
-                  )}
-                </div>
-
-                <div className="form-field">
-                  <label htmlFor="phoneNumber" className="label">
-                    {t("profile.phoneNumber")}
-                  </label>
-                  <input
-                    id="phoneNumber"
-                    {...form.register("phoneNumber")}
-                    className="input"
-                    placeholder={t("profile.phoneNumberPlaceholder") as string}
-                  />
-                  {form.formState.errors.phoneNumber && (
-                    <span className="error-message">
-                      {form.formState.errors.phoneNumber.message}
-                    </span>
-                  )}
-                </div>
-
-                <div className="form-field">
-                  <label htmlFor="identificationNumber" className="label">
-                    {t("profile.idNumber")}
-                  </label>
-                  <input
-                    id="identificationNumber"
-                    {...form.register("identificationNumber")}
-                    className="input"
-                  />
-                  {form.formState.errors.identificationNumber && (
-                    <span className="error-message">
-                      {form.formState.errors.identificationNumber.message}
-                    </span>
-                  )}
-                </div>
-
-                <div className="form-field">
-                  <label htmlFor="accountNumber" className="label">
-                    {t("profile.accountNumber")}
-                  </label>
-                  <input
-                    id="accountNumber"
-                    {...form.register("accountNumber")}
-                    className="input"
-                    placeholder={
-                      t("profile.accountNumberPlaceholder") as string
-                    }
-                    onChange={(e) => {
-                      // Auto-detect bank from IBAN
-                      const iban = e.target.value.trim();
-                      const detectedBank = detectBankFromIban(iban);
-                      if (detectedBank) {
-                        form.setValue("beneficiaryBankCode", detectedBank);
-                      } else if (iban.length >= 22) {
-                        form.setValue("beneficiaryBankCode", "");
-                      }
-                      // Still register the change
-                      form.register("accountNumber").onChange(e);
-                    }}
-                  />
-                  {form.formState.errors.accountNumber && (
-                    <span className="error-message">
-                      {form.formState.errors.accountNumber.message}
-                    </span>
-                  )}
-                </div>
-
-                <div className="form-field">
-                  <label htmlFor="beneficiaryBankCode" className="label">
-                    {t("profile.bankName") || "ბანკი"}
-                  </label>
-                  <select
-                    id="beneficiaryBankCode"
-                    {...form.register("beneficiaryBankCode")}
-                    className="input"
-                    disabled={true}
-                  >
-                    <option value="">
-                      {t("profile.selectBank") || "აირჩიეთ ბანკი"}
-                    </option>
-                    {GEORGIAN_BANKS.map((bank) => (
-                      <option key={bank.code} value={bank.code}>
-                        {bank.name} ({bank.nameEn})
-                      </option>
-                    ))}
-                  </select>
-                  {form.formState.errors.beneficiaryBankCode && (
-                    <span className="error-message">
-                      {form.formState.errors.beneficiaryBankCode.message}
-                    </span>
-                  )}
-                  <p className="text-xs text-gray-500 mt-1">
-                    {t("profile.bankAutoDetect") ||
-                      "ბანკი ავტომატურად დადგინდება ანგარიშის ნომრით"}
-                  </p>
-                </div>
-
-                <div className="form-field">
-                  <label htmlFor="ownerFirstName" className="label">
-                    {t("profile.ownerFirstName")}
-                  </label>
-                  <input
-                    id="ownerFirstName"
-                    {...form.register("ownerFirstName")}
-                    className="input"
-                  />
-                  {form.formState.errors.ownerFirstName && (
-                    <span className="error-message">
-                      {form.formState.errors.ownerFirstName.message}
-                    </span>
-                  )}
-                </div>
-
-                <div className="form-field">
-                  <label htmlFor="ownerLastName" className="label">
-                    {t("profile.ownerLastName")}
-                  </label>
-                  <input
-                    id="ownerLastName"
-                    {...form.register("ownerLastName")}
-                    className="input"
-                  />
-                  {form.formState.errors.ownerLastName && (
-                    <span className="error-message">
-                      {form.formState.errors.ownerLastName.message}
-                    </span>
-                  )}
-                </div>
-              </div>
-
-              <div className="seller-portfolio-cta">
-                <div className="seller-portfolio-cta__header">
-                  <h3>
-                    {language === "en" ? "Portfolio link" : "პორტფოლიოს ბმული"}
-                  </h3>
-                  <p>
-                    {language === "en"
-                      ? "Choose a short username to unlock your public artist page."
-                      : "აირჩიე მოკლე მეტსახელი და გააქტიურე საჯარო არტისტის გვერდი."}
-                  </p>
-                </div>
-                <div className="seller-portfolio-cta__field">
-                  <label htmlFor="sellerSlug">
-                    {language === "en"
-                      ? "Choose your username"
-                      : "აირჩიე მეტსახელი"}
-                  </label>
-                  <div className="seller-portfolio-cta__input">
-                    <span className="seller-portfolio-cta__prefix">
-                      {slugDisplayPrefix}
-                    </span>
-                    <input
-                      id="sellerSlug"
-                      type="text"
-                      value={slugInput}
-                      autoComplete="off"
-                      spellCheck={false}
-                      onChange={(event) => {
-                        const nextValue = event.target.value
-                          .toLowerCase()
-                          .replace(/[^a-z0-9-]/g, "");
-                        setSlugInput(nextValue);
-                        setSlugStatus("idle");
-                        setSlugMessage("");
+            <div className="seller-logo-container">
+              <p
+                style={{
+                  fontSize: "0.875rem",
+                  color: "#666",
+                  marginBottom: "0.75rem",
+                  textAlign: "center",
+                }}
+              >
+                {language === "en"
+                  ? "Your logo will also be used as your profile photo"
+                  : "ლოგო ავტომატურად გამოიყენება პროფილის ფოტოდაც"}
+              </p>
+              {isUploading ? (
+                <div className="loading-logo">{t("profile.logoLoading")}</div>
+              ) : (
+                <>
+                  {logoError ? (
+                    <div className="logo-error">{t("profile.logoError")}</div>
+                  ) : storeLogo ? (
+                    <div
+                      className="logo-wrapper"
+                      style={{
+                        position: "relative",
+                        width: "120px",
+                        height: "120px",
+                        marginBottom: "1rem",
                       }}
-                      placeholder={language === "en" ? "username" : "მეტსახელი"}
-                    />
-                  </div>
-                </div>
-                <div className="seller-portfolio-cta__actions">
-                  <button
-                    type="button"
-                    className="seller-portfolio-cta__button seller-portfolio-cta__button--ghost"
-                    onClick={handleSlugCheck}
-                    disabled={slugStatus === "checking"}
-                  >
-                    {slugStatus === "checking"
-                      ? language === "en"
-                        ? "Checking..."
-                        : "ვამოწმებ..."
-                      : language === "en"
-                      ? "Check availability"
-                      : "შეამოწმე"}
-                  </button>
-                  <button
-                    type="button"
-                    className="seller-portfolio-cta__button"
-                    onClick={handleSlugSave}
-                    disabled={slugMutation.isPending}
-                  >
-                    {slugMutation.isPending
-                      ? language === "en"
-                        ? "Saving..."
-                        : "ვინახავ..."
-                      : language === "en"
-                      ? "Save username"
-                      : "მეტსახელის შენახვა"}
-                  </button>
-                </div>
-                {slugMessage && (
-                  <p className={slugStatusClass}>{slugMessage}</p>
-                )}
-                {savedPortfolioLink ? (
-                  <div className="seller-portfolio-cta__share">
-                    <p>
-                      {language === "en"
-                        ? "Your live page opens in a new tab. Edit all sections from there."
-                        : "შენი პორტფოლიო ახალ ტაბში გაიხსნება. იქიდან მართე ყველა განყოფილება."}
-                    </p>
-                    <div className="seller-portfolio-cta__share-actions">
-                      <a
-                        href={savedPortfolioLink}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="seller-portfolio-cta__button seller-portfolio-cta__button--ghost"
-                      >
-                        {language === "en"
-                          ? "Visit portfolio"
-                          : "პორტფოლიოს ნახვა"}
-                      </a>
-                      <button
-                        type="button"
-                        className="seller-portfolio-cta__button seller-portfolio-cta__button--outline"
-                        onClick={() =>
-                          handleCopyPortfolioLink(savedPortfolioLink)
-                        }
-                      >
-                        {copyState === "copied"
-                          ? language === "en"
-                            ? "Copied!"
-                            : "დაკოპირდა!"
-                          : language === "en"
-                          ? "Copy link"
-                          : "ბმულის დაკოპირება"}
-                      </button>
+                    >
+                      <Image
+                        src={storeLogo}
+                        alt={t("profile.storeName") as string}
+                        width={120}
+                        height={120}
+                        style={{
+                          objectFit: "cover",
+                          borderRadius: "50%",
+                        }}
+                        key={`logo-${new Date().getTime()}`} // Add key for cache busting
+                        unoptimized
+                        onError={() => {
+                          setLogoError(true);
+                        }}
+                      />
                     </div>
-                  </div>
-                ) : null}
+                  ) : (
+                    <div
+                      className="no-logo-placeholder"
+                      style={{
+                        width: "120px",
+                        height: "120px",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        backgroundColor: "#f0f0f0",
+                        borderRadius: "8px",
+                        fontSize: "14px",
+                        color: "#666",
+                      }}
+                    >
+                      {t("profile.noLogo")}
+                    </div>
+                  )}
+                </>
+              )}
+              <button
+                type="button"
+                onClick={triggerLogoInput}
+                className="upload-button"
+                disabled={isUploading}
+              >
+                {isUploading ? t("profile.uploading") : t("profile.uploadLogo")}
+              </button>
+              <input
+                type="file"
+                ref={logoInputRef}
+                onChange={handleLogoChange}
+                accept="image/*"
+                className="file-input"
+              />
+            </div>
+
+            <div className="seller-form-grid">
+              <div className="form-field">
+                <label htmlFor="storeName" className="label">
+                  {t("profile.storeName")}
+                </label>
+                <input
+                  id="storeName"
+                  {...form.register("storeName")}
+                  className="input"
+                />
+                {form.formState.errors.storeName && (
+                  <span className="error-message">
+                    {form.formState.errors.storeName.message}
+                  </span>
+                )}
+              </div>
+
+              <div className="form-field">
+                <label htmlFor="phoneNumber" className="label">
+                  {t("profile.phoneNumber")}
+                </label>
+                <input
+                  id="phoneNumber"
+                  {...form.register("phoneNumber")}
+                  className="input"
+                  placeholder={t("profile.phoneNumberPlaceholder") as string}
+                />
+                {form.formState.errors.phoneNumber && (
+                  <span className="error-message">
+                    {form.formState.errors.phoneNumber.message}
+                  </span>
+                )}
+              </div>
+
+              <div className="form-field">
+                <label htmlFor="identificationNumber" className="label">
+                  {t("profile.idNumber")}
+                </label>
+                <input
+                  id="identificationNumber"
+                  {...form.register("identificationNumber")}
+                  className="input"
+                />
+                {form.formState.errors.identificationNumber && (
+                  <span className="error-message">
+                    {form.formState.errors.identificationNumber.message}
+                  </span>
+                )}
+              </div>
+
+              <div className="form-field">
+                <label htmlFor="accountNumber" className="label">
+                  {t("profile.accountNumber")}
+                </label>
+                <input
+                  id="accountNumber"
+                  {...form.register("accountNumber")}
+                  className="input"
+                  placeholder={t("profile.accountNumberPlaceholder") as string}
+                  onChange={(e) => {
+                    // Auto-detect bank from IBAN
+                    const iban = e.target.value.trim();
+                    const detectedBank = detectBankFromIban(iban);
+                    if (detectedBank) {
+                      form.setValue("beneficiaryBankCode", detectedBank);
+                    } else if (iban.length >= 22) {
+                      form.setValue("beneficiaryBankCode", "");
+                    }
+                    // Still register the change
+                    form.register("accountNumber").onChange(e);
+                  }}
+                />
+                {form.formState.errors.accountNumber && (
+                  <span className="error-message">
+                    {form.formState.errors.accountNumber.message}
+                  </span>
+                )}
+              </div>
+
+              <div className="form-field">
+                <label htmlFor="beneficiaryBankCode" className="label">
+                  {t("profile.bankName") || "ბანკი"}
+                </label>
+                <select
+                  id="beneficiaryBankCode"
+                  {...form.register("beneficiaryBankCode")}
+                  className="input"
+                  disabled={true}
+                >
+                  <option value="">
+                    {t("profile.selectBank") || "აირჩიეთ ბანკი"}
+                  </option>
+                  {GEORGIAN_BANKS.map((bank) => (
+                    <option key={bank.code} value={bank.code}>
+                      {bank.name} ({bank.nameEn})
+                    </option>
+                  ))}
+                </select>
+                {form.formState.errors.beneficiaryBankCode && (
+                  <span className="error-message">
+                    {form.formState.errors.beneficiaryBankCode.message}
+                  </span>
+                )}
+                <p className="text-xs text-gray-500 mt-1">
+                  {t("profile.bankAutoDetect") ||
+                    "ბანკი ავტომატურად დადგინდება ანგარიშის ნომრით"}
+                </p>
+              </div>
+
+              <div className="form-field">
+                <label htmlFor="ownerFirstName" className="label">
+                  {t("profile.ownerFirstName")}
+                </label>
+                <input
+                  id="ownerFirstName"
+                  {...form.register("ownerFirstName")}
+                  className="input"
+                />
+                {form.formState.errors.ownerFirstName && (
+                  <span className="error-message">
+                    {form.formState.errors.ownerFirstName.message}
+                  </span>
+                )}
+              </div>
+
+              <div className="form-field">
+                <label htmlFor="ownerLastName" className="label">
+                  {t("profile.ownerLastName")}
+                </label>
+                <input
+                  id="ownerLastName"
+                  {...form.register("ownerLastName")}
+                  className="input"
+                />
+                {form.formState.errors.ownerLastName && (
+                  <span className="error-message">
+                    {form.formState.errors.ownerLastName.message}
+                  </span>
+                )}
               </div>
             </div>
-          )}
+
+            <div className="seller-portfolio-cta">
+              <div className="seller-portfolio-cta__header">
+                <h3>
+                  {language === "en" ? "Portfolio link" : "პორტფოლიოს ბმული"}
+                </h3>
+                <p>
+                  {language === "en"
+                    ? "Choose a short username to unlock your public artist page."
+                    : "აირჩიე მოკლე მეტსახელი და გააქტიურე საჯარო არტისტის გვერდი."}
+                </p>
+              </div>
+              <div className="seller-portfolio-cta__field">
+                <label htmlFor="sellerSlug">
+                  {language === "en"
+                    ? "Choose your username"
+                    : "აირჩიე მეტსახელი"}
+                </label>
+                <div className="seller-portfolio-cta__input">
+                  <span className="seller-portfolio-cta__prefix">
+                    {slugDisplayPrefix}
+                  </span>
+                  <input
+                    id="sellerSlug"
+                    type="text"
+                    value={slugInput}
+                    autoComplete="off"
+                    spellCheck={false}
+                    onChange={(event) => {
+                      const nextValue = event.target.value
+                        .toLowerCase()
+                        .replace(/[^a-z0-9-]/g, "");
+                      setSlugInput(nextValue);
+                      setSlugStatus("idle");
+                      setSlugMessage("");
+                    }}
+                    placeholder={language === "en" ? "username" : "მეტსახელი"}
+                  />
+                </div>
+              </div>
+              <div className="seller-portfolio-cta__actions">
+                <button
+                  type="button"
+                  className="seller-portfolio-cta__button seller-portfolio-cta__button--ghost"
+                  onClick={handleSlugCheck}
+                  disabled={slugStatus === "checking"}
+                >
+                  {slugStatus === "checking"
+                    ? language === "en"
+                      ? "Checking..."
+                      : "ვამოწმებ..."
+                    : language === "en"
+                    ? "Check availability"
+                    : "შეამოწმე"}
+                </button>
+                <button
+                  type="button"
+                  className="seller-portfolio-cta__button"
+                  onClick={handleSlugSave}
+                  disabled={slugMutation.isPending}
+                >
+                  {slugMutation.isPending
+                    ? language === "en"
+                      ? "Saving..."
+                      : "ვინახავ..."
+                    : language === "en"
+                    ? "Save username"
+                    : "მეტსახელის შენახვა"}
+                </button>
+              </div>
+              {slugMessage && <p className={slugStatusClass}>{slugMessage}</p>}
+              {savedPortfolioLink ? (
+                <div className="seller-portfolio-cta__share">
+                  <p>
+                    {language === "en"
+                      ? "Your live page opens in a new tab. Edit all sections from there."
+                      : "შენი პორტფოლიო ახალ ტაბში გაიხსნება. იქიდან მართე ყველა განყოფილება."}
+                  </p>
+                  <div className="seller-portfolio-cta__share-actions">
+                    <a
+                      href={savedPortfolioLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="seller-portfolio-cta__button seller-portfolio-cta__button--ghost"
+                    >
+                      {language === "en"
+                        ? "Visit portfolio"
+                        : "პორტფოლიოს ნახვა"}
+                    </a>
+                    <button
+                      type="button"
+                      className="seller-portfolio-cta__button seller-portfolio-cta__button--outline"
+                      onClick={() =>
+                        handleCopyPortfolioLink(savedPortfolioLink)
+                      }
+                    >
+                      {copyState === "copied"
+                        ? language === "en"
+                          ? "Copied!"
+                          : "დაკოპირდა!"
+                        : language === "en"
+                        ? "Copy link"
+                        : "ბმულის დაკოპირება"}
+                    </button>
+                  </div>
+                </div>
+              ) : null}
+            </div>
+          </div>
+        )}
 
         {/* Sales Manager Bank Details Section */}
         {user && user.role && user.role === "sales_manager" && (

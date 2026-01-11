@@ -38,12 +38,26 @@ export class BecomeSellerDto {
 
   @ApiProperty({
     example: '+995555123456',
-    description: 'ტელეფონის ნომერი საერთაშორისო ფორმატში (თუ არ აქვს)',
-    required: false,
+    description: 'ტელეფონის ნომერი საერთაშორისო ფორმატში',
+    required: true,
   })
-  @IsOptional()
-  @IsPhoneNumber()
-  phoneNumber?: string;
+  @IsNotEmpty({ message: 'ტელეფონის ნომერი სავალდებულოა' })
+  @Transform(({ value }) => {
+    if (!value) return value;
+    // Remove spaces and dashes
+    let phone = value.replace(/[\s-]/g, '');
+    // If starts with 5 and is 9 digits, add +995
+    if (/^5\d{8}$/.test(phone)) {
+      return '+995' + phone;
+    }
+    // If starts with 995 without +, add +
+    if (/^995\d{9}$/.test(phone)) {
+      return '+' + phone;
+    }
+    return phone;
+  })
+  @IsPhoneNumber(undefined, { message: 'ტელეფონის ნომერი არასწორი ფორმატისაა' })
+  phoneNumber: string;
 
   @ApiProperty({
     example: '01024085800',

@@ -43,14 +43,20 @@ export default function SalesAnalyticsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [dateRange, setDateRange] = useState<"7d" | "30d" | "all">("7d");
 
+  // Helper to check if user has sales manager role
+  const hasSalesManagerRole = (role?: string) => {
+    if (!role) return false;
+    return role === Role.SalesManager || role === "seller_sales_manager";
+  };
+
   useEffect(() => {
-    if (!authLoading && (!user || user.role !== Role.SalesManager)) {
+    if (!authLoading && (!user || !hasSalesManagerRole(user.role))) {
       router.push("/admin");
     }
   }, [user, authLoading, router]);
 
   const fetchAnalytics = async () => {
-    if (!user || user.role !== Role.SalesManager) return;
+    if (!user || !hasSalesManagerRole(user.role)) return;
 
     setIsLoading(true);
     try {
@@ -126,7 +132,7 @@ export default function SalesAnalyticsPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, dateRange]);
 
-  if (authLoading || !user || user.role !== Role.SalesManager) {
+  if (authLoading || !user || !hasSalesManagerRole(user.role)) {
     return (
       <div className="sales-analytics-loading">
         <RefreshCw className="animate-spin" size={40} />
