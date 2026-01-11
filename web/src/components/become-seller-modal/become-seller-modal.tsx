@@ -61,12 +61,18 @@ interface BecomeSellerModalProps {
   isOpen: boolean;
   onClose: () => void;
   userPhone?: string; // Current user's phone if they have it
+  userIdentificationNumber?: string; // Current user's ID number
+  userAccountNumber?: string; // Current user's bank account (IBAN)
+  userBeneficiaryBankCode?: string; // Current user's bank code
 }
 
 export function BecomeSellerModal({
   isOpen,
   onClose,
   userPhone,
+  userIdentificationNumber,
+  userAccountNumber,
+  userBeneficiaryBankCode,
 }: BecomeSellerModalProps) {
   const { t, language } = useLanguage();
   const queryClient = useQueryClient();
@@ -112,6 +118,9 @@ export function BecomeSellerModal({
     resolver: zodResolver(becomeSellerSchema),
     defaultValues: {
       phoneNumber: userPhone || "",
+      identificationNumber: userIdentificationNumber || "",
+      accountNumber: userAccountNumber || "",
+      beneficiaryBankCode: userBeneficiaryBankCode || "",
       artistSlug: "",
     },
   });

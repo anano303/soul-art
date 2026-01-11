@@ -564,7 +564,7 @@ export class AuthController {
     @UploadedFile() logoFile: Express.Multer.File,
   ) {
     // Check if user is already a seller
-    if (user.role === Role.Seller) {
+    if (user.role === Role.Seller || user.role === Role.SellerAndSalesManager) {
       throw new BadRequestException('User is already a seller');
     }
 

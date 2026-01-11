@@ -678,8 +678,14 @@ export function ProfileForm() {
         {/* Show become seller button only for non-seller users */}
         {user &&
           user.role?.toUpperCase() !== "SELLER" &&
+          user.role?.toUpperCase() !== "SELLER_SALES_MANAGER" &&
           user.role?.toUpperCase() !== "ADMIN" && (
-            <BecomeSellerButton userPhone={user.phoneNumber} />
+            <BecomeSellerButton 
+              userPhone={user.phoneNumber} 
+              userIdentificationNumber={user.identificationNumber}
+              userAccountNumber={user.accountNumber}
+              userBeneficiaryBankCode={user.beneficiaryBankCode}
+            />
           )}
       </div>
 
