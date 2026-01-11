@@ -783,6 +783,8 @@
   cursor: pointer;
   font: inherit;
   padding: 0;
+  display: inline;
+  margin: 0;
 }
 
 .sm-privacy-link:hover {

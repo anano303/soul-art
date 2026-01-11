@@ -8,19 +8,25 @@ import "./become-seller-button.css";
 
 interface BecomeSellerButtonProps {
   userPhone?: string;
+  userIdentificationNumber?: string;
+  userAccountNumber?: string;
+  userBeneficiaryBankCode?: string;
   className?: string;
 }
 
 export function BecomeSellerButton({
   userPhone,
+  userIdentificationNumber,
+  userAccountNumber,
+  userBeneficiaryBankCode,
   className = "",
 }: BecomeSellerButtonProps) {
   const { t } = useLanguage();
   const { user } = useAuth();
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // Don't show button if user is already a seller
-  if (user?.role === "seller") {
+  // Don't show button if user is already a seller or seller+sales_manager
+  if (user?.role === "seller" || user?.role === "seller_sales_manager") {
     return null;
   }
 
@@ -47,6 +53,9 @@ export function BecomeSellerButton({
         isOpen={isModalOpen}
         onClose={handleCloseModal}
         userPhone={userPhone}
+        userIdentificationNumber={userIdentificationNumber}
+        userAccountNumber={userAccountNumber}
+        userBeneficiaryBankCode={userBeneficiaryBankCode}
       />
     </>
   );

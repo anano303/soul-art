@@ -990,7 +990,7 @@ export const TRANSLATIONS: Translations = {
       salesManagerWelcome: "გახდი SoulArt-ის პარტნიორი!",
       salesManagerSubtitle: "შექმენი ანგარიში და დაიწყე შემოსავლის მიღება",
       salesManagerAccountCreated: "ანგარიში წარმატებით შეიქმნა! მალე გადახვალთ პროფილზე.",
-      bankName: "ბანკი",
+      bankName: "ბანკის დასახელება",
       emailVerified: "ელ-ფოსტა დადასტურებულია",
       personalId: "პირადი ნომერი",
     },

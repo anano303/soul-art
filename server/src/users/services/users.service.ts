@@ -1185,6 +1185,7 @@ export class UsersService {
       [Role.User]: 0,
       [Role.Blogger]: 0,
       [Role.SalesManager]: 0,
+      [Role.SellerAndSalesManager]: 0,
     };
 
     roleAggregation.forEach(({ _id, count }) => {
@@ -1924,17 +1925,24 @@ export class UsersService {
         throw new NotFoundException('User not found');
       }
 
-      if (user.role === Role.Seller) {
+      if (user.role === Role.Seller || user.role === Role.SellerAndSalesManager) {
         throw new ConflictException('User is already a seller');
       }
 
+      // Determine the new role based on current role
+      // If user is SalesManager, they become SellerAndSalesManager
+      const newRole = user.role === Role.SalesManager 
+        ? Role.SellerAndSalesManager 
+        : Role.Seller;
+
       // Prepare update data with existing user data
       const updateData: Partial<User> = {
-        role: Role.Seller,
+        role: newRole,
         storeName: becomeSellerDto.storeName,
-        identificationNumber: becomeSellerDto.identificationNumber,
-        accountNumber: becomeSellerDto.accountNumber,
-        beneficiaryBankCode: becomeSellerDto.beneficiaryBankCode,
+        // Use provided data or keep existing data for SalesManager
+        identificationNumber: becomeSellerDto.identificationNumber || user.identificationNumber,
+        accountNumber: becomeSellerDto.accountNumber || user.accountNumber,
+        beneficiaryBankCode: becomeSellerDto.beneficiaryBankCode || user.beneficiaryBankCode,
       };
 
       // Auto-populate owner first and last name from existing user name

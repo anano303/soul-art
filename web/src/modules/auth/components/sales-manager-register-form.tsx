@@ -11,7 +11,9 @@ import { useErrorHandler } from "@/hooks/use-error-handler";
 import "./register-form.css";
 import { useState, useEffect, useRef } from "react";
 import { useLanguage } from "@/hooks/LanguageContext";
+import { SalesManagerContract } from "@/components/SalesManagerContract";
 import { PrivacyPolicy } from "@/components/PrivacyPolicy";
+import { TermsAndConditions } from "@/components/TermsAndConditions";
 import { z } from "zod";
 import { getBankByIban, detectBankFromIban } from "@/utils/georgian-banks";
 import { useQueryClient } from "@tanstack/react-query";
@@ -42,6 +44,9 @@ export function SalesManagerRegisterForm() {
   const [isSuccess, setIsSuccess] = useState(false);
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [showPrivacyPolicy, setShowPrivacyPolicy] = useState(false);
+  const [showTermsAndConditions, setShowTermsAndConditions] = useState(false);
+  const [agreedToPartnership, setAgreedToPartnership] = useState(false);
+  const [showPartnershipContract, setShowPartnershipContract] = useState(false);
 
   const [emailSent, setEmailSent] = useState(false);
   const [verificationCode, setVerificationCode] = useState("");
@@ -351,13 +356,21 @@ export function SalesManagerRegisterForm() {
               className="sm-privacy-checkbox"
             />
             <span className="sm-privacy-text">
-              {t("auth.agreeToTerms")}{" "}
+              ვეთანხმები{" "}
+              <button
+                type="button"
+                onClick={() => setShowTermsAndConditions(true)}
+                className="sm-privacy-link"
+              >
+                წესებსა
+              </button>{" "}
+              და{" "}
               <button
                 type="button"
                 onClick={() => setShowPrivacyPolicy(true)}
                 className="sm-privacy-link"
               >
-                {t("auth.privacyPolicy")}
+                კონფიდენციალურობის პირობებს
               </button>
             </span>
           </label>
@@ -367,13 +380,47 @@ export function SalesManagerRegisterForm() {
         <PrivacyPolicy
           isOpen={showPrivacyPolicy}
           onClose={() => setShowPrivacyPolicy(false)}
+        />
+
+        {/* Terms and Conditions Modal */}
+        <TermsAndConditions
+          isOpen={showTermsAndConditions}
+          onClose={() => setShowTermsAndConditions(false)}
+        />
+
+        {/* Partnership Agreement */}
+        <div className="sm-privacy-group">
+          <label className="sm-privacy-label">
+            <input
+              type="checkbox"
+              checked={agreedToPartnership}
+              onChange={(e) => setAgreedToPartnership(e.target.checked)}
+              className="sm-privacy-checkbox"
+            />
+            <span className="sm-privacy-text">
+              {"ვეთანხმები "}
+              <button
+                type="button"
+                onClick={() => setShowPartnershipContract(true)}
+                className="sm-privacy-link"
+              >
+                {"პარტნიორობის ხელშეკრულებას"}
+              </button>
+            </span>
+          </label>
+        </div>
+
+        {/* Sales Manager Contract Modal */}
+        <SalesManagerContract
+          isOpen={showPartnershipContract}
+          onClose={() => setShowPartnershipContract(false)}
           showAcceptButton={false}
         />
 
         <button
           type="submit"
           className="submit-btn"
-          disabled={isPending || !isVerified || !agreedToTerms}
+          disabled={isPending || !isVerified || !agreedToTerms || !agreedToPartnership}
         >
           {isPending ? t("auth.creatingAccount") : t("auth.createAccount")}
         </button>
