@@ -272,6 +272,7 @@ export interface User {
   identificationNumber?: string;
   accountNumber?: string;
   beneficiaryBankCode?: string;
+  salesRefCode?: string; // Sales Manager-ის რეფერალური კოდი
   salesCommissionRate?: number; // Sales Manager-ის ინდივიდუალური საკომისიო %
   seller?: {
     storeName: string;

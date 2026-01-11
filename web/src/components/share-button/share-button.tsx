@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { Send, Link as LinkIcon, Check, X } from "lucide-react";
 import { useLanguage } from "@/hooks/LanguageContext";
+import { useUser } from "@/modules/auth/hooks/use-user";
 import "./share-button.css";
 
 interface ShareButtonProps {
@@ -11,6 +12,13 @@ interface ShareButtonProps {
   description?: string;
   className?: string;
 }
+
+// Helper to check if user is sales manager
+const isSalesManagerRole = (role?: string) => {
+  if (!role) return false;
+  const lowerRole = role.toLowerCase();
+  return lowerRole === "sales_manager" || lowerRole === "seller_sales_manager";
+};
 
 export function ShareButton({
   url,
@@ -22,10 +30,21 @@ export function ShareButton({
   const [copied, setCopied] = useState(false);
   const [canNativeShare, setCanNativeShare] = useState(false);
   const { language } = useLanguage();
+  const { user } = useUser();
   const menuRef = useRef<HTMLDivElement>(null);
 
-  const shareUrl =
-    typeof window !== "undefined" ? window.location.origin + url : url;
+  // Build share URL with sales ref code if user is sales manager
+  const shareUrl = useMemo(() => {
+    const baseUrl = typeof window !== "undefined" ? window.location.origin + url : url;
+    
+    // If user is sales manager and has ref code, add it to URL
+    if (user && isSalesManagerRole(user.role) && user.salesRefCode) {
+      const separator = baseUrl.includes("?") ? "&" : "?";
+      return `${baseUrl}${separator}ref=${user.salesRefCode}`;
+    }
+    
+    return baseUrl;
+  }, [url, user]);
 
   // Check if native sharing is available
   useEffect(() => {
