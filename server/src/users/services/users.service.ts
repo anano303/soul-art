@@ -1533,6 +1533,30 @@ export class UsersService {
       // IBAN-დან ბანკის SWIFT კოდის ავტომატური დადგენა
       const bankCode = detectBankFromIban(dto.bankAccount);
 
+      // გენერირება უნიკალური რეფერალური კოდი
+      let salesRefCode: string;
+      let attempts = 0;
+      const maxAttempts = 10;
+
+      do {
+        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+        let code = '';
+        for (let i = 0; i < 8; i++) {
+          code += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        salesRefCode = `SM_${code}`;
+        attempts++;
+
+        const existingWithCode = await this.userModel.findOne({ salesRefCode });
+        if (!existingWithCode) {
+          break;
+        }
+
+        if (attempts >= maxAttempts) {
+          throw new ConflictException('რეფერალური კოდის გენერაციის შეცდომა');
+        }
+      } while (true);
+
       const salesManagerData = {
         name: dto.name,
         email: dto.email.toLowerCase(),
@@ -1546,11 +1570,12 @@ export class UsersService {
         salesTotalWithdrawn: 0,
         salesPendingWithdrawal: 0,
         salesCommissionRate: 3, // Default 3%
+        salesRefCode, // ავტომატურად გენერირებული რეფერალური კოდი
       };
 
       const salesManager = await this.create(salesManagerData);
 
-      this.logger.log(`Sales Manager created: ${salesManager._id}`);
+      this.logger.log(`Sales Manager created: ${salesManager._id} with ref code: ${salesRefCode}`);
 
       return salesManager;
     } catch (error: any) {
