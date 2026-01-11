@@ -346,33 +346,22 @@ export function SalesManagerRegisterForm() {
           )}
         </div>
 
-        {/* Privacy Policy Agreement */}
+        {/* Terms, Privacy and Partnership Agreement */}
         <div className="sm-privacy-group">
-          <label className="sm-privacy-label">
+          <label className="sm-privacy-label" style={{ gap: 0 }}>
             <input
               type="checkbox"
-              checked={agreedToTerms}
-              onChange={(e) => setAgreedToTerms(e.target.checked)}
+              checked={agreedToTerms && agreedToPartnership}
+              onChange={(e) => {
+                setAgreedToTerms(e.target.checked);
+                setAgreedToPartnership(e.target.checked);
+              }}
               className="sm-privacy-checkbox"
+              style={{ marginRight: "8px" }}
             />
-            <span className="sm-privacy-text">
-              ვეთანხმები{" "}
-              <button
-                type="button"
-                onClick={() => setShowTermsAndConditions(true)}
-                className="sm-privacy-link"
-              >
-                წესებსა
-              </button>{" "}
-              და{" "}
-              <button
-                type="button"
-                onClick={() => setShowPrivacyPolicy(true)}
-                className="sm-privacy-link"
-              >
-                კონფიდენციალურობის პირობებს
-              </button>
-            </span>
+            <div className="sm-privacy-text">
+              ვეთანხმები <button type="button" onClick={() => setShowTermsAndConditions(true)} className="sm-privacy-link">წესებს</button>, <button type="button" onClick={() => setShowPrivacyPolicy(true)} className="sm-privacy-link">კონფიდენციალურობას</button> და <button type="button" onClick={() => setShowPartnershipContract(true)} className="sm-privacy-link">პარტნიორობის ხელშეკრულებას</button>
+            </div>
           </label>
         </div>
 
@@ -387,28 +376,6 @@ export function SalesManagerRegisterForm() {
           isOpen={showTermsAndConditions}
           onClose={() => setShowTermsAndConditions(false)}
         />
-
-        {/* Partnership Agreement */}
-        <div className="sm-privacy-group">
-          <label className="sm-privacy-label">
-            <input
-              type="checkbox"
-              checked={agreedToPartnership}
-              onChange={(e) => setAgreedToPartnership(e.target.checked)}
-              className="sm-privacy-checkbox"
-            />
-            <span className="sm-privacy-text">
-              {"ვეთანხმები "}
-              <button
-                type="button"
-                onClick={() => setShowPartnershipContract(true)}
-                className="sm-privacy-link"
-              >
-                {"პარტნიორობის ხელშეკრულებას"}
-              </button>
-            </span>
-          </label>
-        </div>
 
         {/* Sales Manager Contract Modal */}
         <SalesManagerContract
