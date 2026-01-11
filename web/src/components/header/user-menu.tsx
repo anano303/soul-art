@@ -54,6 +54,21 @@ export default function UserMenu({
   const menuRef = useRef<HTMLDivElement>(null);
   const { t } = useLanguage();
 
+  // Helper functions for role checking
+  const isSellerRole = (role?: string) => {
+    if (!role) return false;
+    const lowerRole = role.toLowerCase();
+    return lowerRole === Role.Seller || lowerRole === "seller_sales_manager";
+  };
+
+  const isSalesManagerRole = (role?: string) => {
+    if (!role) return false;
+    const lowerRole = role.toLowerCase();
+    return (
+      lowerRole === Role.SalesManager || lowerRole === "seller_sales_manager"
+    );
+  };
+
   // Use external state if provided, otherwise internal
   const isOpen = isOpenExternal !== undefined ? isOpenExternal : isOpenInternal;
   const setIsOpen = (value: boolean) => {
@@ -341,16 +356,16 @@ export default function UserMenu({
             </Link>
 
             {(user.role?.toLowerCase() === Role.Admin ||
-              user.role?.toLowerCase() === Role.Seller ||
+              isSellerRole(user.role) ||
               user.role?.toLowerCase() === Role.Blogger ||
-              user.role?.toLowerCase() === Role.SalesManager) && (
+              isSalesManagerRole(user.role)) && (
               <>
                 {/* <hr /> */}
                 <div className="dropdown-label">
                   {t("navigation.adminPanel")}
                 </div>
                 {(user.role?.toLowerCase() === Role.Admin ||
-                  user.role?.toLowerCase() === Role.Seller) && (
+                  isSellerRole(user.role)) && (
                   <Link
                     href="/admin/products"
                     className="dropdown-item"
@@ -424,8 +439,8 @@ export default function UserMenu({
             )}
 
             {(user.role?.toLowerCase() === Role.Admin ||
-              user.role?.toLowerCase() === Role.Seller ||
-              user.role?.toLowerCase() === Role.SalesManager) && (
+              isSellerRole(user.role) ||
+              isSalesManagerRole(user.role)) && (
               <Link
                 href="/admin/orders"
                 className="dropdown-item"
@@ -437,7 +452,7 @@ export default function UserMenu({
             )}
 
             {/* Sales Manager Dashboard */}
-            {user.role?.toLowerCase() === Role.SalesManager && (
+            {isSalesManagerRole(user.role) && (
               <Link
                 href="/admin/sales-manager"
                 className="dropdown-item"
@@ -449,7 +464,7 @@ export default function UserMenu({
             )}
 
             {/* Sales Manager Analytics */}
-            {user.role?.toLowerCase() === Role.SalesManager && (
+            {isSalesManagerRole(user.role) && (
               <Link
                 href="/admin/sales-analytics"
                 className="dropdown-item"
@@ -556,7 +571,7 @@ export default function UserMenu({
               </Link>
             )}
 
-            {user.role?.toLowerCase() === Role.Seller && (
+            {isSellerRole(user.role) && (
               <Link
                 href="/profile/balance"
                 className="dropdown-item"

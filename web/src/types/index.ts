@@ -271,6 +271,7 @@ export interface User {
   ownerLastName?: string;
   identificationNumber?: string;
   accountNumber?: string;
+  beneficiaryBankCode?: string;
   salesCommissionRate?: number; // Sales Manager-ის ინდივიდუალური საკომისიო %
   seller?: {
     storeName: string;

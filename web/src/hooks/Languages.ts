@@ -478,6 +478,8 @@ export const TRANSLATIONS: Translations = {
       sellerLogoSelected: "ფაილი არჩეულია",
       sellerSubmit: "გახდი სელერი",
       sellerCancel: "გაუქმება",
+      bank: "ბანკი",
+      bankRequired: "ბანკის არჩევა სავალდებულოა",
     },
 
     // Validation messages
@@ -989,7 +991,8 @@ export const TRANSLATIONS: Translations = {
       forInfluencers: "ინფლუენსერებისთვის",
       salesManagerWelcome: "გახდი SoulArt-ის პარტნიორი!",
       salesManagerSubtitle: "შექმენი ანგარიში და დაიწყე შემოსავლის მიღება",
-      salesManagerAccountCreated: "ანგარიში წარმატებით შეიქმნა! მალე გადახვალთ პროფილზე.",
+      salesManagerAccountCreated:
+        "ანგარიში წარმატებით შეიქმნა! მალე გადახვალთ პროფილზე.",
       bankName: "ბანკის დასახელება",
       emailVerified: "ელ-ფოსტა დადასტურებულია",
       personalId: "პირადი ნომერი",
@@ -1956,6 +1959,8 @@ export const TRANSLATIONS: Translations = {
       sellerLogoSelected: "File Selected",
       sellerSubmit: "Become Seller",
       sellerCancel: "Cancel",
+      bank: "Bank",
+      bankRequired: "Bank selection is required",
     },
 
     // Validation messages
@@ -2460,7 +2465,8 @@ export const TRANSLATIONS: Translations = {
       forInfluencers: "For Influencers",
       salesManagerWelcome: "Become a SoulArt Partner!",
       salesManagerSubtitle: "Create an account and start earning",
-      salesManagerAccountCreated: "Account created successfully! Redirecting to your profile.",
+      salesManagerAccountCreated:
+        "Account created successfully! Redirecting to your profile.",
       bankName: "Bank",
       emailVerified: "Email verified",
       personalId: "Personal ID",

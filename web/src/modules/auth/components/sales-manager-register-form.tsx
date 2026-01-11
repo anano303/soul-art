@@ -18,19 +18,31 @@ import { z } from "zod";
 import { getBankByIban, detectBankFromIban } from "@/utils/georgian-banks";
 import { useQueryClient } from "@tanstack/react-query";
 
-const salesManagerRegisterSchema = z.object({
-  name: z.string().min(4, "სახელი ძალიან მოკლეა").max(50, "სახელი ძალიან გრძელია"),
-  email: z.string().email("არასწორი ელ-ფოსტა"),
-  password: z.string().min(5, "პაროლი ძალიან მოკლეა").max(20, "პაროლი ძალიან გრძელია"),
-  confirmPassword: z.string(),
-  phone: z.string().min(9, "ტელეფონის ნომერი ძალიან მოკლეა"),
-  personalId: z.string().regex(/^\d{11}$/, "პირადი ნომერი უნდა შეიცავდეს 11 ციფრს"),
-  bankAccount: z.string().regex(/^GE\d{2}[A-Z]{2}\d{16}$/, "IBAN ფორმატი არასწორია"),
-  bankName: z.string().min(1, "აირჩიეთ ბანკი"),
-}).refine((data) => data.password === data.confirmPassword, {
-  message: "პაროლები არ ემთხვევა",
-  path: ["confirmPassword"],
-});
+const salesManagerRegisterSchema = z
+  .object({
+    name: z
+      .string()
+      .min(4, "სახელი ძალიან მოკლეა")
+      .max(50, "სახელი ძალიან გრძელია"),
+    email: z.string().email("არასწორი ელ-ფოსტა"),
+    password: z
+      .string()
+      .min(5, "პაროლი ძალიან მოკლეა")
+      .max(20, "პაროლი ძალიან გრძელია"),
+    confirmPassword: z.string(),
+    phone: z.string().min(9, "ტელეფონის ნომერი ძალიან მოკლეა"),
+    personalId: z
+      .string()
+      .regex(/^\d{11}$/, "პირადი ნომერი უნდა შეიცავდეს 11 ციფრს"),
+    bankAccount: z
+      .string()
+      .regex(/^GE\d{2}[A-Z]{2}\d{16}$/, "IBAN ფორმატი არასწორია"),
+    bankName: z.string().min(1, "აირჩიეთ ბანკი"),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "პაროლები არ ემთხვევა",
+    path: ["confirmPassword"],
+  });
 
 type SalesManagerFormData = z.infer<typeof salesManagerRegisterSchema>;
 
@@ -144,7 +156,7 @@ export function SalesManagerRegisterForm() {
         if (response?.user) {
           queryClient.setQueryData(["user"], response.user);
         }
-        
+
         setIsSuccess(true);
         toast({
           title: t("auth.registrationSuccessful"),
@@ -231,7 +243,9 @@ export function SalesManagerRegisterForm() {
         {/* Verification Code */}
         {emailSent && !isVerified && (
           <div className="input-group">
-            <label htmlFor="verification-code">{t("auth.verificationCode")}</label>
+            <label htmlFor="verification-code">
+              {t("auth.verificationCode")}
+            </label>
             <input
               id="verification-code"
               type="text"
@@ -253,7 +267,8 @@ export function SalesManagerRegisterForm() {
 
         {isVerified && (
           <div className="verification-success">
-            <FaCheckCircle /> {t("auth.emailVerified") || "ელ-ფოსტა დადასტურებულია"}
+            <FaCheckCircle />{" "}
+            {t("auth.emailVerified") || "ელ-ფოსტა დადასტურებულია"}
           </div>
         )}
 
@@ -301,7 +316,9 @@ export function SalesManagerRegisterForm() {
 
         {/* Personal ID */}
         <div className="input-group">
-          <label htmlFor="personalId">{t("auth.personalId") || "პირადი ნომერი"}</label>
+          <label htmlFor="personalId">
+            {t("auth.personalId") || "პირადი ნომერი"}
+          </label>
           <input
             id="personalId"
             type="text"
@@ -360,7 +377,30 @@ export function SalesManagerRegisterForm() {
               style={{ marginRight: "8px" }}
             />
             <div className="sm-privacy-text">
-              ვეთანხმები <button type="button" onClick={() => setShowTermsAndConditions(true)} className="sm-privacy-link">წესებს</button>, <button type="button" onClick={() => setShowPrivacyPolicy(true)} className="sm-privacy-link">კონფიდენციალურობას</button> და <button type="button" onClick={() => setShowPartnershipContract(true)} className="sm-privacy-link">პარტნიორობის ხელშეკრულებას</button>
+              ვეთანხმები{" "}
+              <button
+                type="button"
+                onClick={() => setShowTermsAndConditions(true)}
+                className="sm-privacy-link"
+              >
+                წესებს
+              </button>
+              ,{" "}
+              <button
+                type="button"
+                onClick={() => setShowPrivacyPolicy(true)}
+                className="sm-privacy-link"
+              >
+                კონფიდენციალურობას
+              </button>{" "}
+              და{" "}
+              <button
+                type="button"
+                onClick={() => setShowPartnershipContract(true)}
+                className="sm-privacy-link"
+              >
+                პარტნიორობის ხელშეკრულებას
+              </button>
             </div>
           </label>
         </div>
@@ -387,7 +427,9 @@ export function SalesManagerRegisterForm() {
         <button
           type="submit"
           className="submit-btn"
-          disabled={isPending || !isVerified || !agreedToTerms || !agreedToPartnership}
+          disabled={
+            isPending || !isVerified || !agreedToTerms || !agreedToPartnership
+          }
         >
           {isPending ? t("auth.creatingAccount") : t("auth.createAccount")}
         </button>

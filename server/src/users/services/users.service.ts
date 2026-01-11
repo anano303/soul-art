@@ -1515,17 +1515,15 @@ export class UsersService {
     }
   }
 
-  async createSalesManager(
-    dto: {
-      name: string;
-      email: string;
-      password: string;
-      phone: string;
-      bankAccount: string;
-      bankName: string;
-      personalId: string;
-    },
-  ): Promise<UserDocument> {
+  async createSalesManager(dto: {
+    name: string;
+    email: string;
+    password: string;
+    phone: string;
+    bankAccount: string;
+    bankName: string;
+    personalId: string;
+  }): Promise<UserDocument> {
     try {
       const existingUser = await this.findByEmail(dto.email.toLowerCase());
       if (existingUser) {
@@ -1925,24 +1923,30 @@ export class UsersService {
         throw new NotFoundException('User not found');
       }
 
-      if (user.role === Role.Seller || user.role === Role.SellerAndSalesManager) {
+      if (
+        user.role === Role.Seller ||
+        user.role === Role.SellerAndSalesManager
+      ) {
         throw new ConflictException('User is already a seller');
       }
 
       // Determine the new role based on current role
       // If user is SalesManager, they become SellerAndSalesManager
-      const newRole = user.role === Role.SalesManager 
-        ? Role.SellerAndSalesManager 
-        : Role.Seller;
+      const newRole =
+        user.role === Role.SalesManager
+          ? Role.SellerAndSalesManager
+          : Role.Seller;
 
       // Prepare update data with existing user data
       const updateData: Partial<User> = {
         role: newRole,
         storeName: becomeSellerDto.storeName,
         // Use provided data or keep existing data for SalesManager
-        identificationNumber: becomeSellerDto.identificationNumber || user.identificationNumber,
+        identificationNumber:
+          becomeSellerDto.identificationNumber || user.identificationNumber,
         accountNumber: becomeSellerDto.accountNumber || user.accountNumber,
-        beneficiaryBankCode: becomeSellerDto.beneficiaryBankCode || user.beneficiaryBankCode,
+        beneficiaryBankCode:
+          becomeSellerDto.beneficiaryBankCode || user.beneficiaryBankCode,
       };
 
       // Auto-populate owner first and last name from existing user name

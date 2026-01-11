@@ -18,42 +18,43 @@ const SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const SLUG_VALIDATION_MESSAGE =
   "სლაგი უნდა შედგებოდეს 3-40 სიმბოლოსგან (პატარა ლათინური ასოები, ციფრები და ჰიფენი)";
 
-const becomeSellerSchema = z.object({
-  storeName: z.string().min(1, "მაღაზიის სახელი აუცილებელია"),
-  identificationNumber: z.string().min(1, "პირადი ნომერი აუცილებელია"),
-  accountNumber: z.string().min(1, "საბანკო ანგარიში აუცილებელია"),
-  beneficiaryBankCode: z.string().min(1, "ბანკი აუცილებელია"),
-  phoneNumber: z.string().optional(),
-  invitationCode: z.string().optional(),
-  artistSlug: z
-    .string()
-    .optional()
-    .transform((value) => (value ?? "").trim())
-    .refine(
-      (value) =>
-        value === "" ||
-        (value.length >= 3 &&
-          value.length <= 40 &&
-          SLUG_PATTERN.test(value)),
-      {
-        message: SLUG_VALIDATION_MESSAGE,
-        path: ["artistSlug"],
+const becomeSellerSchema = z
+  .object({
+    storeName: z.string().min(1, "მაღაზიის სახელი აუცილებელია"),
+    identificationNumber: z.string().min(1, "პირადი ნომერი აუცილებელია"),
+    accountNumber: z.string().min(1, "საბანკო ანგარიში აუცილებელია"),
+    beneficiaryBankCode: z.string().min(1, "ბანკი აუცილებელია"),
+    phoneNumber: z.string().min(1, "ტელეფონის ნომერი აუცილებელია"),
+    invitationCode: z.string().optional(),
+    artistSlug: z
+      .string()
+      .optional()
+      .transform((value) => (value ?? "").trim())
+      .refine(
+        (value) =>
+          value === "" ||
+          (value.length >= 3 && value.length <= 40 && SLUG_PATTERN.test(value)),
+        {
+          message: SLUG_VALIDATION_MESSAGE,
+          path: ["artistSlug"],
+        }
+      ),
+  })
+  .refine(
+    (data) => {
+      if (data.accountNumber && data.accountNumber.trim()) {
+        const iban = data.accountNumber.trim();
+        const detectedBank = detectBankFromIban(iban);
+        return detectedBank !== null;
       }
-    ),
-}).refine(
-  (data) => {
-    if (data.accountNumber && data.accountNumber.trim()) {
-      const iban = data.accountNumber.trim();
-      const detectedBank = detectBankFromIban(iban);
-      return detectedBank !== null;
+      return true;
+    },
+    {
+      message:
+        "არასწორი IBAN. გთხოვთ შეიყვანოთ ქართული IBAN (22 სიმბოლო, იწყება GE-ით)",
+      path: ["accountNumber"],
     }
-    return true;
-  },
-  {
-    message: "არასწორი IBAN. გთხოვთ შეიყვანოთ ქართული IBAN (22 სიმბოლო, იწყება GE-ით)",
-    path: ["accountNumber"],
-  }
-);
+  );
 
 type BecomeSellerFormData = z.infer<typeof becomeSellerSchema>;
 
@@ -125,6 +126,28 @@ export function BecomeSellerModal({
     },
   });
 
+  // Update form values when user data props change
+  useEffect(() => {
+    if (userIdentificationNumber) {
+      setValue("identificationNumber", userIdentificationNumber);
+    }
+    if (userAccountNumber) {
+      setValue("accountNumber", userAccountNumber);
+    }
+    if (userBeneficiaryBankCode) {
+      setValue("beneficiaryBankCode", userBeneficiaryBankCode);
+    }
+    if (userPhone) {
+      setValue("phoneNumber", userPhone);
+    }
+  }, [
+    userIdentificationNumber,
+    userAccountNumber,
+    userBeneficiaryBankCode,
+    userPhone,
+    setValue,
+  ]);
+
   useEffect(() => {
     register("artistSlug");
     return () => {
@@ -162,7 +185,9 @@ export function BecomeSellerModal({
       if (base.length >= 3) {
         return base;
       }
-      return base.length > 0 ? `${base}-${Date.now().toString().slice(-2)}` : "artist";
+      return base.length > 0
+        ? `${base}-${Date.now().toString().slice(-2)}`
+        : "artist";
     },
     [slugify]
   );
@@ -333,7 +358,14 @@ export function BecomeSellerModal({
     }
 
     ensureSuggestedSlug(source);
-  }, [ensureSuggestedSlug, language, portfolioLinkBase, setSlugValue, storeNameValue, suggestedSlug]);
+  }, [
+    ensureSuggestedSlug,
+    language,
+    portfolioLinkBase,
+    setSlugValue,
+    storeNameValue,
+    suggestedSlug,
+  ]);
 
   useEffect(() => {
     if (!isSlugAuto) {
@@ -635,23 +667,21 @@ export function BecomeSellerModal({
             </div>
           </div>
 
-          {!userPhone && (
-            <div className="form-group">
-              <label htmlFor="phoneNumber">{t("profile.phoneNumber")}</label>
-              <input
-                id="phoneNumber"
-                type="tel"
-                placeholder="+995XXXXXXXXX"
-                {...register("phoneNumber")}
-                className="form-input"
-              />
-              {errors.phoneNumber && (
-                <span className="error-message">
-                  {errors.phoneNumber.message}
-                </span>
-              )}
-            </div>
-          )}
+          <div className="form-group">
+            <label htmlFor="phoneNumber">{t("profile.phoneNumber")} *</label>
+            <input
+              id="phoneNumber"
+              type="tel"
+              placeholder="+995XXXXXXXXX"
+              {...register("phoneNumber")}
+              className="form-input"
+            />
+            {errors.phoneNumber && (
+              <span className="error-message">
+                {errors.phoneNumber.message}
+              </span>
+            )}
+          </div>
 
           <div className="form-group">
             <label htmlFor="identificationNumber">
@@ -699,9 +729,7 @@ export function BecomeSellerModal({
           </div>
 
           <div className="form-group">
-            <label htmlFor="beneficiaryBankCode">
-              {t("profile.bank")} *
-            </label>
+            <label htmlFor="beneficiaryBankCode">{t("profile.bank")} *</label>
             <select
               id="beneficiaryBankCode"
               {...register("beneficiaryBankCode")}
@@ -716,9 +744,7 @@ export function BecomeSellerModal({
               ))}
             </select>
             {errors.beneficiaryBankCode && (
-              <span className="error-message">
-                {t("profile.bankRequired")}
-              </span>
+              <span className="error-message">{t("profile.bankRequired")}</span>
             )}
           </div>
 
