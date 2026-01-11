@@ -158,13 +158,20 @@ export default function UserMenu({
         >
           <div className="dropdown open" ref={menuRef}>
             <div className="dropdown-menu">
-              <button
-                className="close-menu-btn"
-                onClick={handleClose}
-                aria-label="Close menu"
-              >
-                <X size={20} />
-              </button>
+              {/* Mobile header with language switcher and close button */}
+              <div className="mobile-menu-header-row">
+                <div className="mobile-menu-left-actions">
+                  <LanguageSwitcher onNavigate={handleLinkClick} />
+                  <CartIcon onNavigate={handleLinkClick} />
+                </div>
+                <button
+                  className="close-menu-btn"
+                  onClick={handleClose}
+                  aria-label="Close menu"
+                >
+                  <X size={20} />
+                </button>
+              </div>
               <Link
                 href="/login"
                 className="dropdown-item"
@@ -172,6 +179,14 @@ export default function UserMenu({
               >
                 <User size={18} />
                 <span>{t("navigation.login")}</span>
+              </Link>
+              <Link
+                href="/register"
+                className="dropdown-item"
+                onClick={handleLinkClick}
+              >
+                <User size={18} />
+                <span>{t("navigation.register")}</span>
               </Link>
             </div>
           </div>
