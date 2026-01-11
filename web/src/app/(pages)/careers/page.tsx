@@ -50,7 +50,7 @@ export default function CareersPage() {
           "თუ დაინტერესდი, დაგვიკავშირდი და მოგვწერე მოკლედ შენს შესახებ. გიამბობთ დეტალებს და შეთანხმებას საკომისიოზე!",
       },
 
-      contactButton: "დაგვიკავშირდი",
+      contactButton: "დარეგისტრირდი",
       backToHome: "მთავარ გვერდზე დაბრუნება",
       share: "გააზიარე",
       shareText:
@@ -97,7 +97,7 @@ export default function CareersPage() {
           "If you're interested, contact us and tell us briefly about yourself. We'll share details and discuss commission rates!",
       },
 
-      contactButton: "Contact Us",
+      contactButton: "Register Now",
       backToHome: "Back to Home",
       share: "Share",
       shareText:
@@ -154,7 +154,7 @@ export default function CareersPage() {
             <h3>{t.position.howToApply}</h3>
             <p>{t.position.applyText}</p>
 
-            <Link href="/contact" className="contact-button">
+            <Link href="/sales-manager-register" className="contact-button">
               {t.contactButton}
             </Link>
           </div>
