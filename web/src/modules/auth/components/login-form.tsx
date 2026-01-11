@@ -4,7 +4,7 @@ import { useForm, SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { loginSchema } from "../validation";
 import { useLogin } from "../hooks/use-auth";
-import { FaGoogle } from "react-icons/fa";
+import { FaGoogle, FaEye, FaEyeSlash } from "react-icons/fa";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
@@ -28,6 +28,7 @@ export function LoginForm({ redirectUrl, onLoginSuccess }: LoginFormProps = {}) 
   const errorHandler = useErrorHandler();
   const { mutate: login, isLoading, error: hookError } = useLogin();
   const [loginError, setLoginError] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
   const [returnUrl, setReturnUrl] = useState("/");
 
@@ -155,13 +156,23 @@ export function LoginForm({ redirectUrl, onLoginSuccess }: LoginFormProps = {}) 
 
         <div className="input-group">
           <label htmlFor="password">{t("auth.password")}</label>
-          <input
-            id="password"
-            type="password"
-            placeholder="********"
-            {...register("password")}
-            className={errors.password || loginError ? "error-input" : ""}
-          />
+          <div className="password-input-wrapper">
+            <input
+              id="password"
+              type={showPassword ? "text" : "password"}
+              placeholder="********"
+              {...register("password")}
+              className={errors.password || loginError ? "error-input" : ""}
+            />
+            <button
+              type="button"
+              className="password-toggle-btn"
+              onClick={() => setShowPassword(!showPassword)}
+              tabIndex={-1}
+            >
+              {showPassword ? <FaEyeSlash /> : <FaEye />}
+            </button>
+          </div>
           {errors.password && (
             <p className="error-text">{errors.password.message}</p>
           )}
