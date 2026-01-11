@@ -692,10 +692,11 @@ export function ProfileForm() {
         }}
       >
         <h2>{t("profile.title")}</h2>
-        {/* Show become seller button only for non-seller users */}
+        {/* Show become seller button only for regular users (not for sellers, admins, or sales managers) */}
         {user &&
           user.role?.toUpperCase() !== "SELLER" &&
           user.role?.toUpperCase() !== "SELLER_SALES_MANAGER" &&
+          user.role?.toUpperCase() !== "SALES_MANAGER" &&
           user.role?.toUpperCase() !== "ADMIN" && (
             <BecomeSellerButton
               userPhone={user.phoneNumber}
