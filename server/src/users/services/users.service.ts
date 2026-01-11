@@ -1575,7 +1575,9 @@ export class UsersService {
 
       const salesManager = await this.create(salesManagerData);
 
-      this.logger.log(`Sales Manager created: ${salesManager._id} with ref code: ${salesRefCode}`);
+      this.logger.log(
+        `Sales Manager created: ${salesManager._id} with ref code: ${salesRefCode}`,
+      );
 
       return salesManager;
     } catch (error: any) {

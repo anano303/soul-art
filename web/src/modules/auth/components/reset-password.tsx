@@ -59,10 +59,10 @@ export function ResetPasswordForm() {
         variant: "default",
       });
 
-      // Redirect to login page
+      // Redirect to login page - use window.location for more reliable redirect
       setTimeout(() => {
-        router.push("/login");
-      }, 2000);
+        window.location.href = "/login";
+      }, 1500);
     } catch (error: unknown) {
       console.error("Password reset failed:", error);
 

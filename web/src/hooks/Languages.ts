@@ -996,6 +996,16 @@ export const TRANSLATIONS: Translations = {
       bankName: "ბანკის დასახელება",
       emailVerified: "ელ-ფოსტა დადასტურებულია",
       personalId: "პირადი ნომერი",
+      sending: "იგზავნება...",
+      sendResetLink: "აღდგენის ბმულის გაგზავნა",
+      success: "წარმატება",
+      checkEmailForResetLink: "პაროლის აღდგენის ბმული გაიგზავნა თქვენს ელ-ფოსტაზე",
+      newPassword: "ახალი პაროლი",
+      resetPassword: "პაროლის აღდგენა",
+      updatingPassword: "მიმდინარეობს განახლება...",
+      invalidResetLink: "აღდგენის ბმული არასწორია ან ვადა გასულია",
+      passwordResetSuccessful: "პაროლი წარმატებით განახლდა",
+      passwordUpdated: "თქვენი პაროლი განახლდა. გადამისამართებთ შესვლის გვერდზე...",
     },
 
     // Device Manager for Hybrid Auth
@@ -2470,6 +2480,16 @@ export const TRANSLATIONS: Translations = {
       bankName: "Bank",
       emailVerified: "Email verified",
       personalId: "Personal ID",
+      sending: "Sending...",
+      sendResetLink: "Send Reset Link",
+      success: "Success",
+      checkEmailForResetLink: "Password reset link has been sent to your email",
+      newPassword: "New Password",
+      resetPassword: "Reset Password",
+      updatingPassword: "Updating...",
+      invalidResetLink: "Reset link is invalid or expired",
+      passwordResetSuccessful: "Password reset successful",
+      passwordUpdated: "Your password has been updated. Redirecting to login...",
     },
 
     // Device Manager for Hybrid Auth

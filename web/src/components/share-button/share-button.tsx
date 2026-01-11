@@ -35,14 +35,15 @@ export function ShareButton({
 
   // Build share URL with sales ref code if user is sales manager
   const shareUrl = useMemo(() => {
-    const baseUrl = typeof window !== "undefined" ? window.location.origin + url : url;
-    
+    const baseUrl =
+      typeof window !== "undefined" ? window.location.origin + url : url;
+
     // If user is sales manager and has ref code, add it to URL
     if (user && isSalesManagerRole(user.role) && user.salesRefCode) {
       const separator = baseUrl.includes("?") ? "&" : "?";
       return `${baseUrl}${separator}ref=${user.salesRefCode}`;
     }
-    
+
     return baseUrl;
   }, [url, user]);
 
