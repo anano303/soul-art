@@ -28,6 +28,7 @@ import { AdminProfileDto } from '../dtos/admin.profile.dto';
 import { UserCloudinaryService } from './user-cloudinary.service';
 import { CloudinaryService } from '@/cloudinary/services/cloudinary.service';
 import { generateBaseArtistSlug } from '@/utils/slug-generator';
+import { detectBankFromIban } from '@/utils/georgian-banks';
 import { BalanceService } from './balance.service';
 import { ReferralsService } from '@/referrals/services/referrals.service';
 import { OrdersService } from '@/orders/services/orders.service';
@@ -1507,6 +1508,57 @@ export class UsersService {
 
       if (error.code === 11000) {
         throw new ConflictException('User with this email already exists');
+      }
+
+      throw error;
+    }
+  }
+
+  async createSalesManager(
+    dto: {
+      name: string;
+      email: string;
+      password: string;
+      phone: string;
+      bankAccount: string;
+      bankName: string;
+      personalId: string;
+    },
+  ): Promise<UserDocument> {
+    try {
+      const existingUser = await this.findByEmail(dto.email.toLowerCase());
+      if (existingUser) {
+        throw new ConflictException('ამ ელ-ფოსტით მომხმარებელი უკვე არსებობს');
+      }
+
+      // IBAN-დან ბანკის SWIFT კოდის ავტომატური დადგენა
+      const bankCode = detectBankFromIban(dto.bankAccount);
+
+      const salesManagerData = {
+        name: dto.name,
+        email: dto.email.toLowerCase(),
+        password: dto.password,
+        role: Role.SalesManager,
+        phoneNumber: dto.phone,
+        accountNumber: dto.bankAccount,
+        beneficiaryBankCode: bankCode || dto.bankName,
+        identificationNumber: dto.personalId,
+        salesTotalEarnings: 0,
+        salesTotalWithdrawn: 0,
+        salesPendingWithdrawal: 0,
+        salesCommissionRate: 3, // Default 3%
+      };
+
+      const salesManager = await this.create(salesManagerData);
+
+      this.logger.log(`Sales Manager created: ${salesManager._id}`);
+
+      return salesManager;
+    } catch (error: any) {
+      this.logger.error(`Failed to create sales manager: ${error.message}`);
+
+      if (error.code === 11000) {
+        throw new ConflictException('ამ ელ-ფოსტით მომხმარებელი უკვე არსებობს');
       }
 
       throw error;

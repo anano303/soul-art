@@ -985,6 +985,14 @@ export const TRANSLATIONS: Translations = {
       referralCodeOptional: "რეფერალური კოდი (არაუცილებელო)",
       referralCodeHint: "თუ გაქვთ რეფერალური კოდი, შეიყვანეთ აქ",
       resendCode: "კოდის ხელახლა გაგზავნა",
+      becomeSeller: "გახდი გამყიდველი",
+      forInfluencers: "ინფლუენსერებისთვის",
+      salesManagerWelcome: "გახდი SoulArt-ის პარტნიორი!",
+      salesManagerSubtitle: "შექმენი ანგარიში და დაიწყე შემოსავლის მიღება",
+      salesManagerAccountCreated: "ანგარიში წარმატებით შეიქმნა! მალე გადახვალთ პროფილზე.",
+      bankName: "ბანკი",
+      emailVerified: "ელ-ფოსტა დადასტურებულია",
+      personalId: "პირადი ნომერი",
     },
 
     // Device Manager for Hybrid Auth
@@ -2448,6 +2456,14 @@ export const TRANSLATIONS: Translations = {
       referralCodeOptional: "Referral Code (Optional)",
       referralCodeHint: "If you have a referral code, enter it here",
       resendCode: "Resend Code",
+      becomeSeller: "Become a Seller",
+      forInfluencers: "For Influencers",
+      salesManagerWelcome: "Become a SoulArt Partner!",
+      salesManagerSubtitle: "Create an account and start earning",
+      salesManagerAccountCreated: "Account created successfully! Redirecting to your profile.",
+      bankName: "Bank",
+      emailVerified: "Email verified",
+      personalId: "Personal ID",
     },
 
     // Device Manager for Hybrid Auth

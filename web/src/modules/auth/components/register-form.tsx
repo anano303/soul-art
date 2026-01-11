@@ -363,6 +363,16 @@ export function RegisterForm() {
             {t("auth.login")}
           </Link>
         </div>
+
+        <div className="text-center special-text-links">
+          <Link href="/sellers-register" className="login-link">
+            {t("auth.becomeSeller")}
+          </Link>
+          {" | "}
+          <Link href="/sales-manager-register" className="login-link">
+            {t("auth.forInfluencers")}
+          </Link>
+        </div>
       </form>
     </div>
   );

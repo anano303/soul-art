@@ -8,7 +8,7 @@
 
 .form {
   width: 100%;
-  max-width: 400px;
+  max-width: 500px;
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -287,9 +287,14 @@
   width: 100%;
 }
 
+.email-container input {
+  width: 95%;
+  padding-right: 35px;
+}
+
 .verified-icon {
   position: absolute;
-  right: 20px;
+  right: calc(5% + 10px);
   color: #4bb543;
   font-size: 16px;
 }
@@ -638,4 +643,148 @@
     padding: 0;
     font-size: inherit;
   }
+}
+
+/* Special Text Links */
+.special-text-links {
+  margin-top: 10px;
+  font-size: 14px;
+}
+
+/* Bank Select Dropdown */
+.bank-select {
+  padding: 8px;
+  border: 1px solid var(--primary-color);
+  border-radius: 4px;
+  font-size: 14px;
+  transition: border 0.3s ease-in-out;
+  outline: none;
+  width: 95%;
+  background-color: white;
+  cursor: pointer;
+  color: var(--primary-color);
+}
+
+.bank-select:focus {
+  border: 2px solid var(--primary-color);
+}
+
+.bank-select option {
+  padding: 8px;
+}
+
+/* Verification Success Badge */
+.verification-success {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  background-color: rgba(75, 181, 67, 0.1);
+  border: 1px solid #4bb543;
+  border-radius: 6px;
+  color: #2e7d32;
+  font-size: 14px;
+  font-weight: 500;
+  width: 95%;
+  box-sizing: border-box;
+}
+
+.verification-success svg {
+  color: #4bb543;
+  font-size: 18px;
+}
+
+/* Verify Button */
+.verify-btn {
+  background-color: transparent;
+  color: var(--primary-color);
+  border: 1px solid var(--primary-color);
+  border-radius: 4px;
+  padding: 8px 16px;
+  cursor: pointer;
+  font-size: 13px;
+  white-space: nowrap;
+  transition: all 0.3s ease;
+}
+
+.verify-btn:hover {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+.verify-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Resend Button */
+.resend-btn {
+  background: none;
+  border: none;
+  color: var(--secondary-color);
+  font-size: 13px;
+  cursor: pointer;
+  text-decoration: underline;
+  padding: 4px 0;
+  margin-top: 4px;
+}
+
+.resend-btn:hover {
+  color: var(--primary-color);
+}
+
+/* Success Icon in Form */
+.success-icon {
+  font-size: 48px;
+  color: #4bb543;
+  margin-bottom: 16px;
+}
+
+/* Sales Manager Privacy Checkbox - Compact Style */
+.sm-privacy-group {
+  margin: 12px 0;
+  width: 100%;
+}
+
+.sm-privacy-label {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  cursor: pointer;
+  font-size: 14px;
+  width: 100%;
+  justify-content: flex-start;
+}
+
+.sm-privacy-checkbox {
+  width: 18px !important;
+  height: 18px !important;
+  min-width: 18px !important;
+  min-height: 18px !important;
+  max-width: 18px !important;
+  max-height: 18px !important;
+  accent-color: var(--secondary-color);
+  cursor: pointer;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.sm-privacy-text {
+  color: var(--primary-color);
+  flex: 1;
+  line-height: 1.4;
+}
+
+.sm-privacy-link {
+  background: none;
+  border: none;
+  color: var(--secondary-color);
+  text-decoration: underline;
+  cursor: pointer;
+  font: inherit;
+  padding: 0;
+}
+
+.sm-privacy-link:hover {
+  color: var(--primary-color);
 }

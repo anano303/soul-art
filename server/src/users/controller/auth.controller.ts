@@ -39,6 +39,7 @@ import { NotAuthenticatedGuard } from '@/guards/not-authenticated.guard';
 import { Response, Request } from 'express';
 import { cookieConfig } from '@/cookie-config';
 import { SellerRegisterDto } from '../dtos/seller-register.dto';
+import { SalesManagerRegisterDto } from '../dtos/sales-manager-register.dto';
 import { BecomeSellerDto } from '../dtos/become-seller.dto';
 import { GoogleAuthGuard } from '@/guards/google-oauth.guard';
 import { ForgotPasswordDto } from '../dtos/forgot-password.dto';
@@ -465,6 +466,50 @@ export class AuthController {
         logoFile,
       );
       const { tokens, user } = await this.authService.login(seller);
+
+      // Set HTTP-only cookies
+      res.cookie(
+        cookieConfig.access.name,
+        tokens.accessToken,
+        cookieConfig.access.options,
+      );
+      res.cookie(
+        cookieConfig.refresh.name,
+        tokens.refreshToken,
+        cookieConfig.refresh.options,
+      );
+
+      // Return user data without tokens
+      return { user };
+    } catch (error) {
+      if (error instanceof ConflictException) {
+        throw new ConflictException(error.message);
+      }
+      throw new BadRequestException('Registration failed: ' + error.message);
+    }
+  }
+
+  @ApiOperation({ summary: 'Register a new sales manager' })
+  @ApiResponse({
+    status: 201,
+    description: 'Sales Manager successfully registered',
+    type: AuthResponseDto,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Bad request - validation error',
+  })
+  @UseInterceptors(createRateLimitInterceptor(authRateLimit))
+  @Post('sales-manager-register')
+  async registerSalesManager(
+    @Body() salesManagerRegisterDto: SalesManagerRegisterDto,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    try {
+      const salesManager = await this.usersService.createSalesManager(
+        salesManagerRegisterDto,
+      );
+      const { tokens, user } = await this.authService.login(salesManager);
 
       // Set HTTP-only cookies
       res.cookie(

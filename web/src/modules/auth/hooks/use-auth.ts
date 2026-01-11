@@ -173,3 +173,32 @@ export function useBecomeSeller() {
     },
   });
 }
+
+// Sales Manager registration data type
+export interface SalesManagerRegisterData {
+  name: string;
+  email: string;
+  password: string;
+  phone: string;
+  personalId: string;
+  bankAccount: string;
+  bankName: string;
+}
+
+// Sales Manager register hook
+export function useSalesManagerRegister() {
+  return useMutation<AuthResponse, Error, SalesManagerRegisterData>({
+    mutationFn: async (data: SalesManagerRegisterData) => {
+      try {
+        const response = await apiClient.post<AuthResponse>(
+          "/auth/sales-manager-register",
+          data
+        );
+        return response.data;
+      } catch (error) {
+        const errorMessage = extractErrorMessage(error);
+        throw new Error(errorMessage);
+      }
+    },
+  });
+}
