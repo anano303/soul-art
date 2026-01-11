@@ -205,7 +205,7 @@
   max-width: 620px;
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  /* gap: 0.75rem; */
 }
 
 @media (max-width: 768px) {
@@ -260,7 +260,6 @@
   align-items: center;
   justify-content: space-between;
   flex-wrap: wrap;
-  gap: 1rem;
 }
 
 .artist-hero__title-row h1 {
@@ -1428,7 +1427,7 @@
   .artist-hero__title-row {
     flex-direction: column;
     align-items: flex-start;
-    gap: 0.75rem;
+    /* gap: 0.75rem; */
   }
 
   .artist-hero__title-row h1 {
@@ -1524,8 +1523,8 @@
 
 .artist-tabs__badge {
   position: absolute;
-  top: 8px;
-  right: 8px;
+  top: 6px;
+  right: calc(50% - 24px);
   background: #fbbf24;
   color: #000;
   font-size: 0.7rem;
