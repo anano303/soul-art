@@ -1,0 +1,211 @@
+.sm-info-container {
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.sm-info-hero {
+  text-align: center;
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+  background: linear-gradient(135deg, rgba(1, 38, 69, 0.05) 0%, rgba(1, 38, 69, 0.1) 100%);
+  border-radius: 16px;
+  border: 1px solid rgba(1, 38, 69, 0.1);
+}
+
+.sm-info-main-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--primary-color);
+  margin-bottom: 0.75rem;
+  line-height: 1.3;
+}
+
+.sm-info-main-description {
+  font-size: 1rem;
+  color: rgba(1, 38, 69, 0.8);
+  line-height: 1.6;
+  margin: 0;
+}
+
+.sm-info-section {
+  margin-bottom: 1.5rem;
+  padding: 1.25rem;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(1, 38, 69, 0.08);
+  border: 1px solid rgba(1, 38, 69, 0.08);
+}
+
+.sm-info-section-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--primary-color);
+  margin: 0 0 1rem 0;
+}
+
+/* Steps */
+.sm-info-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.sm-info-step {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.sm-info-step-number {
+  width: 28px;
+  height: 28px;
+  min-width: 28px;
+  background: linear-gradient(135deg, var(--primary-color) 0%, #03214b 100%);
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+.sm-info-step-text {
+  font-size: 0.95rem;
+  color: rgba(1, 38, 69, 0.85);
+  line-height: 1.5;
+  margin: 0;
+  padding-top: 3px;
+}
+
+/* Earnings */
+.sm-info-earnings {
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.05) 0%, rgba(16, 185, 129, 0.1) 100%);
+  border-color: rgba(34, 197, 94, 0.2);
+}
+
+.sm-info-earnings-description {
+  font-size: 0.95rem;
+  color: rgba(1, 38, 69, 0.85);
+  line-height: 1.6;
+  margin: 0 0 1rem 0;
+}
+
+.sm-info-earnings-highlight {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 1rem;
+  background: linear-gradient(135deg, #22c55e 0%, #10b981 100%);
+  border-radius: 10px;
+  color: white;
+}
+
+.sm-info-percentage {
+  font-size: 2rem;
+  font-weight: 800;
+}
+
+.sm-info-percentage-label {
+  font-size: 0.9rem;
+  font-weight: 500;
+  text-align: left;
+}
+
+/* Benefits List */
+.sm-info-benefits-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.sm-info-benefit-item {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.95rem;
+  color: rgba(1, 38, 69, 0.85);
+}
+
+.sm-info-check-icon {
+  width: 20px;
+  height: 20px;
+  min-width: 20px;
+  background: linear-gradient(135deg, #22c55e 0%, #10b981 100%);
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+/* Mission */
+.sm-info-mission {
+  background: linear-gradient(135deg, rgba(251, 191, 36, 0.05) 0%, rgba(245, 158, 11, 0.1) 100%);
+  border-color: rgba(251, 191, 36, 0.2);
+}
+
+.sm-info-mission-description {
+  font-size: 0.95rem;
+  color: rgba(1, 38, 69, 0.85);
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* CTA */
+.sm-info-cta {
+  text-align: center;
+  padding: 1.5rem;
+  background: linear-gradient(135deg, var(--primary-color) 0%, #03214b 100%);
+  border-radius: 12px;
+  margin-bottom: 2rem;
+}
+
+.sm-info-cta-title {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: white;
+  margin: 0 0 0.5rem 0;
+}
+
+.sm-info-cta-description {
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.9);
+  margin: 0;
+}
+
+/* Responsive */
+@media screen and (max-width: 640px) {
+  .sm-info-container {
+    padding: 0 0.5rem;
+  }
+  
+  .sm-info-hero {
+    padding: 1.25rem;
+  }
+  
+  .sm-info-main-title {
+    font-size: 1.25rem;
+  }
+  
+  .sm-info-section {
+    padding: 1rem;
+  }
+  
+  .sm-info-earnings-highlight {
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+  
+  .sm-info-percentage-label {
+    text-align: center;
+  }
+}
