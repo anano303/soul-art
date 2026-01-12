@@ -86,6 +86,22 @@ export function SalesManagerInfo() {
         </p>
       </div>
 
+      {/* ვიდეო */}
+      <div className="sm-info-section sm-info-video">
+        <h2 className="sm-info-section-title">
+          {t("auth.salesManagerInfo.videoTitle")}
+        </h2>
+        <div className="sm-info-video-wrapper">
+          <iframe
+            src="https://www.youtube.com/embed/6obVRk6Laic"
+            title="SoulArt Partner Program"
+            frameBorder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+          ></iframe>
+        </div>
+      </div>
+
       {/* CTA */}
       <div className="sm-info-cta">
         <h2 className="sm-info-cta-title">

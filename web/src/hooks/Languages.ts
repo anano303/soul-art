@@ -1017,6 +1017,7 @@ export const TRANSLATIONS: Translations = {
         ],
         missionTitle: "🎨 გახდი ქართული ხელოვნების მხარდამჭერი",
         missionDescription: "თქვენი გაზიარებით არა მხოლოდ შემოსავალს იღებთ, არამედ ეხმარებით ქართველ ხელოვანებს - მხატვრებს, სკულპტორებს და ხელოსნებს,მეწარმეებს, რომ მათი ნამუშევრები მეტმა ადამიანმა ნახოს და შეიძინოს.",
+        videoTitle: "🎬 ნახეთ როგორ მუშაობს",
         ctaTitle: "მზად ხარ დასაწყებად?",
         ctaDescription: "შეავსე ფორმა ქვემოთ და გახდი SoulArt-ის პარტნიორი!",
         commissionLabel: "საკომისიო ყველა შეკვეთიდან"
@@ -2527,6 +2528,7 @@ export const TRANSLATIONS: Translations = {
         ],
         missionTitle: "🎨 Become a Supporter of Georgian Art",
         missionDescription: "By sharing, you not only earn income, but also help Georgian artists - painters, sculptors, and craftsmen - to have their work seen and purchased by more people.",
+        videoTitle: "🎬 See How It Works",
         ctaTitle: "Ready to Get Started?",
         ctaDescription: "Fill out the form below and become a SoulArt Partner!",
         commissionLabel: "commission from all orders"
