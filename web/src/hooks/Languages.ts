@@ -941,6 +941,7 @@ export const TRANSLATIONS: Translations = {
       enterNewPassword: "შეიყვანეთ ახალი პაროლი",
       confirmNewPassword: "დაადასტურეთ ახალი პაროლი",
       registrationSuccessful: "რეგისტრაცია წარმატებულია",
+      pleaseLogin: "გთხოვთ გაიაროთ ავტორიზაცია",
       sellerAccountCreatedSuccessfully:
         "გამყიდველის ანგარიში წარმატებით შეიქმნა",
       accountCreatedSuccessfully: "ანგარიში წარმატებით შეიქმნა",
@@ -2456,6 +2457,7 @@ export const TRANSLATIONS: Translations = {
       enterNewPassword: "Enter new password",
       confirmNewPassword: "Confirm new password",
       registrationSuccessful: "Registration Successful",
+      pleaseLogin: "Please log in",
       sellerAccountCreatedSuccessfully: "Seller account created successfully",
       accountCreatedSuccessfully: "Account created successfully",
       redirectingToLogin: "Redirecting to login page",

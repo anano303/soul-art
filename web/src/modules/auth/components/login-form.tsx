@@ -6,7 +6,7 @@ import { loginSchema } from "../validation";
 import { useLogin } from "../hooks/use-auth";
 import { FaGoogle, FaEye, FaEyeSlash } from "react-icons/fa";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState, useEffect } from "react";
 import { toast } from "@/hooks/use-toast";
 import { useLanguage } from "@/hooks/LanguageContext";
@@ -30,9 +30,39 @@ export function LoginForm({ redirectUrl, onLoginSuccess }: LoginFormProps = {}) 
   const [loginError, setLoginError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [returnUrl, setReturnUrl] = useState("/");
+  const [justRegistered, setJustRegistered] = useState(false);
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    setValue,
+  } = useForm<LoginFormData>({
+    resolver: zodResolver(loginSchema),
+  });
 
   useEffect(() => {
+    // Check if user just registered (from sales-manager registration)
+    const emailParam = searchParams?.get("email");
+    const passwordParam = searchParams?.get("password");
+    const registeredParam = searchParams?.get("registered");
+
+    if (emailParam && passwordParam && registeredParam === "true") {
+      // Pre-fill the form with credentials
+      setValue("email", emailParam);
+      setValue("password", passwordParam);
+      setJustRegistered(true);
+
+      // Clean URL (remove credentials from URL for security)
+      const url = new URL(window.location.href);
+      url.searchParams.delete("email");
+      url.searchParams.delete("password");
+      url.searchParams.delete("registered");
+      window.history.replaceState({}, "", url.pathname + url.search);
+    }
+
     // Priority: 1. Prop 2. URL params 3. Current page (if checkout) 4. Default "/"
     if (redirectUrl) {
       setReturnUrl(redirectUrl);
@@ -49,7 +79,7 @@ export function LoginForm({ redirectUrl, onLoginSuccess }: LoginFormProps = {}) 
         setReturnUrl("/");
       }
     }
-  }, [redirectUrl]);
+  }, [redirectUrl, searchParams, setValue]);
 
   // Watch for errors from the hook
   useEffect(() => {
@@ -61,14 +91,6 @@ export function LoginForm({ redirectUrl, onLoginSuccess }: LoginFormProps = {}) 
       setLoginError(errorMessage);
     }
   }, [hookError]);
-
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<LoginFormData>({
-    resolver: zodResolver(loginSchema),
-  });
 
   const onSubmit: SubmitHandler<LoginFormData> = async (data) => {
     setLoginError(null); // Clear previous errors
@@ -141,6 +163,22 @@ export function LoginForm({ redirectUrl, onLoginSuccess }: LoginFormProps = {}) 
 
   return (
     <div className="login-container">
+      {justRegistered && (
+        <div 
+          style={{
+            padding: "12px 16px",
+            backgroundColor: "#e8f5e9",
+            border: "1px solid #a5d6a7",
+            borderRadius: "8px",
+            marginBottom: "16px",
+            color: "#2e7d32",
+            fontSize: "14px",
+            textAlign: "center",
+          }}
+        >
+          ✓ {t("auth.registrationSuccessful")} - {t("auth.pleaseLogin")}
+        </div>
+      )}
       <form onSubmit={handleSubmit(onSubmit)} className="login-form">
         <div className="input-group">
           <label htmlFor="email">{t("auth.email")}</label>

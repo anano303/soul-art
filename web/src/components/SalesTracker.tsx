@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, usePathname } from "next/navigation";
 import Cookies from "js-cookie";
 import { trackVisit } from "@/hooks/use-sales-tracking";
 
@@ -15,14 +15,21 @@ const COOKIE_DAYS = 7; // 7 დღე
 export function SalesTracker() {
   const tracked = useRef(false);
   const searchParams = useSearchParams();
+  const pathname = usePathname();
 
   useEffect(() => {
-    if (tracked.current) return;
+    // შევამოწმოთ URL-ში ref პარამეტრი - ორივე გზით
+    let refFromUrl = searchParams?.get("ref");
+    
+    // თუ useSearchParams-ით ვერ მივიღეთ, პირდაპირ window.location-დან წავიკითხოთ
+    if (!refFromUrl && typeof window !== "undefined") {
+      const urlParams = new URLSearchParams(window.location.search);
+      refFromUrl = urlParams.get("ref");
+    }
 
-    // შევამოწმოთ URL-ში ref პარამეტრი
-    const refFromUrl = searchParams?.get("ref");
     console.log("[SalesTracker] URL ref param:", refFromUrl);
     console.log("[SalesTracker] Current cookie:", Cookies.get(COOKIE_NAME));
+    console.log("[SalesTracker] Pathname:", pathname);
 
     // თუ URL-ში არის SM_ ref, შევინახოთ cookie-ში და localStorage-ში
     if (refFromUrl && refFromUrl.startsWith("SM_")) {
@@ -38,13 +45,21 @@ export function SalesTracker() {
       } catch (e) {
         console.warn("[SalesTracker] Failed to save to localStorage");
       }
+      
+      // Reset session tracking flag to ensure this visit is tracked
+      sessionStorage.removeItem("soulart_visit_tracked");
+      
       // დავატრექოთ ვიზიტი
-      trackVisit();
+      trackVisit().then(result => {
+        console.log("[SalesTracker] Visit tracked:", result);
+      });
       tracked.current = true;
       return;
     }
 
-    // თუ უკვე გვაქვს cookie ან localStorage-ში, მაინც დავატრექოთ
+    // თუ უკვე გვაქვს cookie ან localStorage-ში და ჯერ არ დატრეკილა ეს session
+    if (tracked.current) return;
+
     let salesRef = Cookies.get(COOKIE_NAME);
 
     // თუ cookie არ არის, შევამოწმოთ localStorage
@@ -73,10 +88,12 @@ export function SalesTracker() {
         "[SalesTracker] Tracking visit from existing cookie:",
         salesRef
       );
-      trackVisit();
+      trackVisit().then(result => {
+        console.log("[SalesTracker] Visit tracked from cookie:", result);
+      });
       tracked.current = true;
     }
-  }, [searchParams]);
+  }, [searchParams, pathname]);
 
   return null; // არაფერს არ რენდერავს
 }
