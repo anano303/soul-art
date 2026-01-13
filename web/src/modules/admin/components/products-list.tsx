@@ -14,6 +14,10 @@ import {
   Eye,
   EyeOff,
   Heart,
+  CheckSquare,
+  Square,
+  CheckCircle,
+  Loader2,
 } from "lucide-react";
 import "./productList.css";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -77,6 +81,10 @@ export function ProductsList() {
   const [refreshKey, setRefreshKey] = useState(Date.now());
   const [showDonation, setShowDonation] = useState(false);
 
+  // Bulk selection state
+  const [selectedProducts, setSelectedProducts] = useState<Set<string>>(new Set());
+  const [isBulkApproving, setIsBulkApproving] = useState(false);
+
   const isAdmin = user?.role === Role.Admin;
 
   console.log("ProductsList user check:", {
@@ -86,6 +94,11 @@ export function ProductsList() {
   });
 
   const queryClient = useQueryClient();
+
+  // Clear selection when filters or page change
+  useEffect(() => {
+    setSelectedProducts(new Set());
+  }, [page, debouncedSearchQuery, statusFilter, categoryFilter]);
 
   // Debounce search query - wait 500ms after user stops typing
   useEffect(() => {
@@ -233,8 +246,75 @@ export function ProductsList() {
     queryClient.invalidateQueries({ queryKey: ["products"] });
     queryClient.invalidateQueries({ queryKey: ["pendingProducts"] });
     setRefreshKey(Date.now()); // Add this to force a fresh fetch
+    setSelectedProducts(new Set()); // Clear selection after status change
     refetch();
   }
+
+  // Toggle single product selection
+  const toggleProductSelection = (productId: string) => {
+    setSelectedProducts(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(productId)) {
+        newSet.delete(productId);
+      } else {
+        newSet.add(productId);
+      }
+      return newSet;
+    });
+  };
+
+  // Select all products on current page
+  const selectAllProducts = () => {
+    if (!products || products.length === 0) return;
+    const allSelected = products.every((p: Product) => selectedProducts.has(p._id));
+    if (allSelected) {
+      setSelectedProducts(new Set());
+    } else {
+      setSelectedProducts(new Set(products.map((p: Product) => p._id)));
+    }
+  };
+
+  // Bulk approve selected products
+  const handleBulkApprove = async () => {
+    if (selectedProducts.size === 0) return;
+    
+    const confirmMessage = language === "en" 
+      ? `Are you sure you want to approve ${selectedProducts.size} products?`
+      : `დარწმუნებული ხართ რომ გსურთ ${selectedProducts.size} პროდუქტის დამტკიცება?`;
+    
+    if (!confirm(confirmMessage)) return;
+
+    setIsBulkApproving(true);
+    let successCount = 0;
+    let failCount = 0;
+
+    for (const productId of selectedProducts) {
+      try {
+        const response = await fetchWithAuth(`/products/${productId}/status`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ status: ProductStatus.APPROVED }),
+        });
+        if (response.ok) {
+          successCount++;
+        } else {
+          failCount++;
+        }
+      } catch (error) {
+        console.error(`Failed to approve product ${productId}:`, error);
+        failCount++;
+      }
+    }
+
+    setIsBulkApproving(false);
+    
+    const resultMessage = language === "en"
+      ? `Approved: ${successCount}, Failed: ${failCount}`
+      : `დამტკიცებული: ${successCount}, წარუმატებელი: ${failCount}`;
+    
+    alert(resultMessage);
+    handleStatusChange();
+  };
 
   // State to track which products are being toggled
   const [togglingVisibility, setTogglingVisibility] = useState<Set<string>>(
@@ -444,6 +524,30 @@ export function ProductsList() {
   const products = data?.items || [];
   const totalPages = data?.pages || 1;
 
+  // Check if all pending products are selected
+  const allPendingSelected = pendingProducts && pendingProducts.length > 0 && 
+    pendingProducts.every((p: Product) => selectedProducts.has(p._id));
+
+  // Toggle all pending products selection
+  const toggleAllPendingProducts = () => {
+    if (!pendingProducts) return;
+    if (allPendingSelected) {
+      // Deselect all pending products
+      setSelectedProducts(prev => {
+        const newSet = new Set(prev);
+        pendingProducts.forEach((p: Product) => newSet.delete(p._id));
+        return newSet;
+      });
+    } else {
+      // Select all pending products
+      setSelectedProducts(prev => {
+        const newSet = new Set(prev);
+        pendingProducts.forEach((p: Product) => newSet.add(p._id));
+        return newSet;
+      });
+    }
+  };
+
   // Never show full page loading - always show the UI with loading indicator
   // if (isLoading && !data) return <HeartLoading size="medium" />;
 
@@ -452,11 +556,59 @@ export function ProductsList() {
     <div className="prd-card">
       {isAdmin && pendingProducts && pendingProducts.length > 0 && (
         <div className="pending-products mb-4">
-          <h2 className="text-xl font-bold mb-4">Pending Approvals</h2>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px" }}>
+            <h2 className="text-xl font-bold" style={{ margin: 0 }}>
+              Pending Approvals ({pendingProducts.length})
+            </h2>
+            <button
+              onClick={toggleAllPendingProducts}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+                padding: "8px 16px",
+                backgroundColor: allPendingSelected ? "#e8f5e9" : "#f5f5f5",
+                border: `1px solid ${allPendingSelected ? "#a5d6a7" : "#ddd"}`,
+                borderRadius: "6px",
+                cursor: "pointer",
+                fontSize: "14px",
+                fontWeight: "500",
+                color: allPendingSelected ? "#2e7d32" : "#666",
+              }}
+            >
+              {allPendingSelected ? <CheckSquare size={16} /> : <Square size={16} />}
+              {allPendingSelected 
+                ? (language === "en" ? "Deselect All Pending" : "ყველას მოხსნა")
+                : (language === "en" ? "Select All Pending" : "ყველას მონიშვნა")}
+            </button>
+          </div>
           <table className="prd-table">
             <tbody>
               {pendingProducts.map((product: Product) => (
                 <tr key={product._id} className="prd-tr">
+                  <td className="prd-td" style={{ width: "50px", textAlign: "center" }}>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleProductSelection(product._id);
+                      }}
+                      style={{
+                        background: "none",
+                        border: "none",
+                        cursor: "pointer",
+                        padding: "4px",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                    >
+                      {selectedProducts.has(product._id) ? (
+                        <CheckSquare size={18} color="#2e7d32" />
+                      ) : (
+                        <Square size={18} color="#6c757d" />
+                      )}
+                    </button>
+                  </td>
                   <td className="prd-td prd-td-bold">
                     {" "}
                     #{product._id ? product._id : "No ID"}
@@ -788,9 +940,104 @@ export function ProductsList() {
         )}
       </div>
 
+      {/* Bulk Actions Bar - Only show when products are selected */}
+      {isAdmin && selectedProducts.size > 0 && (
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            padding: "12px 16px",
+            marginBottom: "16px",
+            backgroundColor: "#e8f5e9",
+            borderRadius: "8px",
+            border: "1px solid #a5d6a7",
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+            <CheckSquare size={20} color="#2e7d32" />
+            <span style={{ fontWeight: "500", color: "#2e7d32" }}>
+              {language === "en" 
+                ? `${selectedProducts.size} products selected`
+                : `${selectedProducts.size} პროდუქტი მონიშნულია`}
+            </span>
+          </div>
+          <div style={{ display: "flex", gap: "12px" }}>
+            <button
+              onClick={() => setSelectedProducts(new Set())}
+              style={{
+                padding: "8px 16px",
+                border: "1px solid #6c757d",
+                borderRadius: "6px",
+                backgroundColor: "white",
+                color: "#6c757d",
+                cursor: "pointer",
+                fontSize: "14px",
+                fontWeight: "500",
+              }}
+            >
+              {language === "en" ? "Clear Selection" : "გასუფთავება"}
+            </button>
+            <button
+              onClick={handleBulkApprove}
+              disabled={isBulkApproving}
+              style={{
+                padding: "8px 20px",
+                border: "none",
+                borderRadius: "6px",
+                backgroundColor: "#2e7d32",
+                color: "white",
+                cursor: isBulkApproving ? "wait" : "pointer",
+                fontSize: "14px",
+                fontWeight: "500",
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+                opacity: isBulkApproving ? 0.7 : 1,
+              }}
+            >
+              {isBulkApproving ? (
+                <>
+                  <Loader2 size={16} style={{ animation: "spin 1s linear infinite" }} />
+                  {language === "en" ? "Approving..." : "მტკიცდება..."}
+                </>
+              ) : (
+                <>
+                  <CheckCircle size={16} />
+                  {language === "en" ? "Approve Selected" : "არჩეულის დამტკიცება"}
+                </>
+              )}
+            </button>
+          </div>
+        </div>
+      )}
+
       <table className="prd-table">
         <thead>
           <tr className="prd-thead-row">
+            {isAdmin && (
+              <th className="prd-th" style={{ width: "50px", textAlign: "center" }}>
+                <button
+                  onClick={selectAllProducts}
+                  style={{
+                    background: "none",
+                    border: "none",
+                    cursor: "pointer",
+                    padding: "4px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                  title={language === "en" ? "Select All" : "ყველას მონიშვნა"}
+                >
+                  {products.length > 0 && products.every((p: Product) => selectedProducts.has(p._id)) ? (
+                    <CheckSquare size={18} color="#2e7d32" />
+                  ) : (
+                    <Square size={18} color="#6c757d" />
+                  )}
+                </button>
+              </th>
+            )}
             <th className="prd-th">ID</th>
             <th className="prd-th">IMAGE</th>
             <th className="prd-th">NAME</th>
@@ -809,7 +1056,7 @@ export function ProductsList() {
           {isLoading && products.length === 0 ? (
             <tr>
               <td
-                colSpan={isAdmin ? 12 : 11}
+                colSpan={isAdmin ? 13 : 11}
                 style={{ textAlign: "center", padding: "40px" }}
               >
                 <div
@@ -847,7 +1094,7 @@ export function ProductsList() {
           ) : products.length === 0 ? (
             <tr>
               <td
-                colSpan={isAdmin ? 12 : 11}
+                colSpan={isAdmin ? 13 : 11}
                 style={{
                   textAlign: "center",
                   padding: "40px",
@@ -862,6 +1109,31 @@ export function ProductsList() {
           ) : (
             products.map((product: ProductWithCategories & { user?: User }) => (
               <tr key={product._id} className="prd-tr">
+                {isAdmin && (
+                  <td className="prd-td" style={{ textAlign: "center" }}>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleProductSelection(product._id);
+                      }}
+                      style={{
+                        background: "none",
+                        border: "none",
+                        cursor: "pointer",
+                        padding: "4px",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                    >
+                      {selectedProducts.has(product._id) ? (
+                        <CheckSquare size={18} color="#2e7d32" />
+                      ) : (
+                        <Square size={18} color="#6c757d" />
+                      )}
+                    </button>
+                  </td>
+                )}
                 <td className="prd-td prd-td-bold">
                   {" "}
                   #{product._id ? product._id : "No ID"}
