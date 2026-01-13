@@ -17,8 +17,10 @@ import {
   Edit2,
   Save,
   X,
+  BarChart3,
 } from "lucide-react";
 import "./sales-managers.css";
+import { ManagerAnalyticsModal } from "./manager-analytics-modal";
 
 interface ManagerStats {
   manager: {
@@ -73,6 +75,9 @@ export default function AdminSalesManagersPage() {
     WithdrawalTransaction[]
   >([]);
   const [showWithdrawals, setShowWithdrawals] = useState<string | null>(null);
+  const [analyticsManager, setAnalyticsManager] = useState<
+    ManagerStats["manager"] | null
+  >(null);
   const [editingRateId, setEditingRateId] = useState<string | null>(null);
   const [editRateValue, setEditRateValue] = useState<number>(5);
   const [savingRate, setSavingRate] = useState(false);
@@ -347,6 +352,13 @@ export default function AdminSalesManagersPage() {
                   <td>
                     <div className="action-buttons">
                       <button
+                        className="view-button analytics"
+                        onClick={() => setAnalyticsManager(m.manager)}
+                      >
+                        <BarChart3 size={16} />
+                        ანალიტიკა
+                      </button>
+                      <button
                         className="view-button"
                         onClick={() =>
                           setSelectedManager(
@@ -495,6 +507,14 @@ export default function AdminSalesManagersPage() {
             </table>
           )}
         </div>
+      )}
+
+      {/* Analytics Modal */}
+      {analyticsManager && (
+        <ManagerAnalyticsModal
+          manager={analyticsManager}
+          onClose={() => setAnalyticsManager(null)}
+        />
       )}
     </div>
   );

@@ -52,6 +52,7 @@ export class ChatService {
     '/forum',
     '/contact',
     '/sellers-register',
+    '/sales-manager-register',
   ];
 
   // ქეშის ვადა - 1 კვირა (მილისეკუნდებში)
