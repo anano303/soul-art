@@ -383,4 +383,26 @@ export class UsersController {
       body.customerIds,
     );
   }
+
+  @ApiOperation({ summary: 'Get all sales managers for bulk email preview' })
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.Admin)
+  @Get('admin/sales-managers-for-email')
+  async getSalesManagersForEmail() {
+    return this.usersService.getSalesManagersForBulkEmail();
+  }
+
+  @ApiOperation({ summary: 'Send bulk email to selected sales managers' })
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.Admin)
+  @Post('admin/send-bulk-email-sales-managers')
+  async sendBulkEmailToSalesManagers(
+    @Body() body: { subject: string; message: string; managerIds?: string[] },
+  ) {
+    return this.usersService.sendBulkEmailToSalesManagers(
+      body.subject,
+      body.message,
+      body.managerIds,
+    );
+  }
 }

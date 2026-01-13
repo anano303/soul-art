@@ -109,6 +109,60 @@ export class SalesCommissionController {
   }
 
   /**
+   * კონკრეტული მენეჯერის ფანელის სტატისტიკა (Admin-ისთვის)
+   */
+  @Get('admin/manager/:managerId/funnel')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.Admin)
+  async getManagerFunnelAdmin(
+    @Param('managerId') managerId: string,
+    @Query('startDate') startDate?: string,
+    @Query('endDate') endDate?: string,
+  ) {
+    return this.salesCommissionService.getManagerFunnelStats(
+      managerId,
+      startDate ? new Date(startDate) : undefined,
+      endDate ? new Date(endDate) : undefined,
+    );
+  }
+
+  /**
+   * კონკრეტული მენეჯერის ტრეკინგ მონაცემები (Admin-ისთვის)
+   */
+  @Get('admin/manager/:managerId/tracking')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.Admin)
+  async getManagerTrackingAdmin(
+    @Param('managerId') managerId: string,
+    @Query('eventType') eventType?: TrackingEventType,
+    @Query('page') page = '1',
+    @Query('limit') limit = '50',
+  ) {
+    return this.salesCommissionService.getManagerTrackingDetails(
+      managerId,
+      eventType,
+      parseInt(page),
+      parseInt(limit),
+    );
+  }
+
+  /**
+   * კონკრეტული მენეჯერის დღიური სტატისტიკა (Admin-ისთვის)
+   */
+  @Get('admin/manager/:managerId/daily-stats')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.Admin)
+  async getManagerDailyStatsAdmin(
+    @Param('managerId') managerId: string,
+    @Query('days') days = '30',
+  ) {
+    return this.salesCommissionService.getManagerDailyStats(
+      managerId,
+      parseInt(days),
+    );
+  }
+
+  /**
    * კონკრეტული მენეჯერის კომისიები (Admin-ისთვის)
    */
   @Get('admin/manager/:managerId/commissions')

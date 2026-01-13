@@ -3287,4 +3287,139 @@ export class UsersService {
       { $inc: { profileViews: 1 } },
     );
   }
+
+  /**
+   * მიიღე ყველა გაყიდვების მენეჯერი მეილისთვის
+   */
+  async getSalesManagersForBulkEmail(): Promise<
+    Array<{ _id: string; name: string; email: string; salesRefCode?: string }>
+  > {
+    const managers = await this.userModel
+      .find({ role: { $in: [Role.SalesManager, Role.SellerAndSalesManager] } })
+      .select('_id name email salesRefCode')
+      .lean();
+
+    return managers.map((m) => ({
+      _id: m._id.toString(),
+      name: m.name,
+      email: m.email,
+      salesRefCode: m.salesRefCode,
+    }));
+  }
+
+  /**
+   * გაუგზავნე მეილი არჩეულ გაყიდვების მენეჯერებს ინდივიდუალურად (ფონური პროცესი)
+   */
+  async sendBulkEmailToSalesManagers(
+    subject: string,
+    message: string,
+    managerIds?: string[],
+  ): Promise<{
+    success: boolean;
+    totalQueued: number;
+    message: string;
+  }> {
+    if (!this.emailService) {
+      throw new BadRequestException('Email service is not available');
+    }
+
+    // თუ managerIds მითითებულია, მხოლოდ არჩეულ მენეჯერებს ვუგზავნით
+    const query: any = {
+      role: { $in: [Role.SalesManager, Role.SellerAndSalesManager] },
+    };
+    if (managerIds && managerIds.length > 0) {
+      query._id = { $in: managerIds };
+    }
+
+    const managers = await this.userModel
+      .find(query)
+      .select('name email')
+      .lean();
+
+    if (managers.length === 0) {
+      return {
+        success: true,
+        totalQueued: 0,
+        message: 'გაყიდვების მენეჯერები ვერ მოიძებნა',
+      };
+    }
+
+    // დაუყოვნებლივ ვაბრუნებთ response-ს
+    const totalQueued = managers.length;
+    this.logger.log(
+      `Starting background email send to ${totalQueued} sales managers`,
+    );
+
+    // ფონურ პროცესში ვგზავნით მეილებს batch-ებად
+    this.sendSalesManagerEmailsInBackground(managers, subject, message).catch(
+      (error) => {
+        this.logger.error(
+          `Background sales manager email sending failed: ${error.message}`,
+        );
+      },
+    );
+
+    return {
+      success: true,
+      totalQueued,
+      message: `${totalQueued} გაყიდვების მენეჯერისთვის მეილის გაგზავნა დაიწყო ფონურ რეჟიმში`,
+    };
+  }
+
+  /**
+   * ფონურად გაგზავნა გაყიდვების მენეჯერებისთვის batch-ებად
+   */
+  private async sendSalesManagerEmailsInBackground(
+    managers: Array<{ email: string; name: string }>,
+    subject: string,
+    message: string,
+  ): Promise<void> {
+    const BATCH_SIZE = 10;
+    const DELAY_BETWEEN_BATCHES = 2000;
+    const DELAY_BETWEEN_EMAILS = 200;
+
+    let sent = 0;
+    let failed = 0;
+
+    for (let i = 0; i < managers.length; i += BATCH_SIZE) {
+      const batch = managers.slice(i, i + BATCH_SIZE);
+
+      for (const manager of batch) {
+        try {
+          await this.emailService.sendBulkMessageToSeller(
+            manager.email,
+            manager.name,
+            subject,
+            message,
+          );
+          sent++;
+          this.logger.log(
+            `Email sent to sales manager: ${manager.email} (${sent}/${managers.length})`,
+          );
+        } catch (error) {
+          failed++;
+          this.logger.error(
+            `Failed to send to ${manager.email}: ${error.message}`,
+          );
+        }
+
+        await new Promise((resolve) =>
+          setTimeout(resolve, DELAY_BETWEEN_EMAILS),
+        );
+      }
+
+      if (i + BATCH_SIZE < managers.length) {
+        this.logger.log(
+          `Sales manager batch completed. Waiting... (${sent}/${managers.length} sent)`,
+        );
+        await new Promise((resolve) =>
+          setTimeout(resolve, DELAY_BETWEEN_BATCHES),
+        );
+      }
+    }
+
+    this.logger.log(
+      `Background sales manager email sending completed: ${sent} sent, ${failed} failed`,
+    );
+  }
 }

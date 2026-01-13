@@ -550,27 +550,15 @@ export default function UserMenu({
               </Link>
             )}
 
-            {/* Seller Notifications link - Only for Admin */}
+            {/* Send Email - Only for Admin */}
             {user.role?.toLowerCase() === Role.Admin && (
               <Link
-                href="/admin/seller-notifications"
+                href="/admin/send-email"
                 className="dropdown-item"
                 onClick={handleLinkClick}
               >
                 <Mail size={18} />
-                <span>სელერებისთვის მეილი</span>
-              </Link>
-            )}
-
-            {/* Customer Notifications link - Only for Admin */}
-            {user.role?.toLowerCase() === Role.Admin && (
-              <Link
-                href="/admin/customer-notifications"
-                className="dropdown-item"
-                onClick={handleLinkClick}
-              >
-                <Mail size={18} />
-                <span>მომხმარებლებისთვის მეილი</span>
+                <span>მეილების გაგზავნა</span>
               </Link>
             )}
 

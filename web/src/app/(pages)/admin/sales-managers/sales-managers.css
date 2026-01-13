@@ -187,6 +187,15 @@
   background: #e5e7eb;
 }
 
+.view-button.analytics {
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  color: white;
+}
+
+.view-button.analytics:hover {
+  background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+}
+
 .view-button.history {
   background: #fef3c7;
   color: #92400e;
