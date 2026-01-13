@@ -53,7 +53,8 @@ export default function Header() {
 
   useEffect(() => {
     const checkMobile = () => {
-      setIsMobile(window.innerWidth <= 768);
+      // Match the CSS breakpoint for mobile-header-actions (900px)
+      setIsMobile(window.innerWidth <= 900);
     };
 
     checkMobile();
