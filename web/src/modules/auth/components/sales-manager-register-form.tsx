@@ -16,7 +16,6 @@ import { PrivacyPolicy } from "@/components/PrivacyPolicy";
 import { TermsAndConditions } from "@/components/TermsAndConditions";
 import { z } from "zod";
 import { getBankByIban, detectBankFromIban } from "@/utils/georgian-banks";
-import { useQueryClient } from "@tanstack/react-query";
 
 const salesManagerRegisterSchema = z
   .object({
@@ -50,7 +49,6 @@ export function SalesManagerRegisterForm() {
   const { t } = useLanguage();
   const errorHandler = useErrorHandler();
   const router = useRouter();
-  const queryClient = useQueryClient();
   const { mutate: register, isPending } = useSalesManagerRegister();
   const [registerError, setRegisterError] = useState<string | null>(null);
   const [isSuccess, setIsSuccess] = useState(false);
@@ -150,13 +148,12 @@ export function SalesManagerRegisterForm() {
       bankName: data.bankName,
     };
 
+    // შევინახოთ credentials რეგისტრაციამდე
+    const savedEmail = data.email;
+    const savedPassword = data.password;
+
     register(submitData, {
       onSuccess: (response) => {
-        // შევინახოთ user data cache-ში
-        if (response?.user) {
-          queryClient.setQueryData(["user"], response.user);
-        }
-
         setIsSuccess(true);
         toast({
           title: t("auth.registrationSuccessful"),
@@ -164,8 +161,14 @@ export function SalesManagerRegisterForm() {
           variant: "default",
         });
 
+        // Login გვერდზე გადავიყვანოთ credentials-ებით
         setTimeout(() => {
-          router.push("/profile");
+          const params = new URLSearchParams({
+            email: savedEmail,
+            password: savedPassword,
+            registered: 'true',
+          });
+          router.push(`/login?${params.toString()}`);
         }, 2000);
       },
       onError: (error) => {
