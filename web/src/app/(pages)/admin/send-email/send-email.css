@@ -60,9 +60,10 @@
   font-weight: 500;
 }
 
-.recipient-type-btn:hover {
-  border-color: rgba(255, 255, 255, 0.3);
-  background: rgba(255, 255, 255, 0.05);
+.recipient-type-btn:hover:not(.active) {
+  border-color: rgba(255, 255, 255, 0.4);
+  background: #252542 !important;
+  color: white;
 }
 
 .recipient-type-btn.active {
