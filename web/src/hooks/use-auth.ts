@@ -62,6 +62,8 @@ export function useAuth() {
     retryDelay: 1000,
     // Set a stale time to prevent excessive refetching
     staleTime: 5 * 60 * 1000, // 5 minutes
+    // Always refetch on mount to get fresh data from server
+    refetchOnMount: "always",
   });
   // Login mutation
   const loginMutation = useMutation({
