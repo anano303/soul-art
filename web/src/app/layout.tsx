@@ -72,6 +72,7 @@ import { PageViewTracker } from "@/components/page-view-tracker";
 import { VisitorTracker } from "@/components/visitor-tracker";
 import { IOSGesturePrevention } from "@/components/ios-gesture-prevention";
 import { SalesTracker } from "@/components/SalesTracker";
+import SalesManagerBanner from "@/components/sales-manager-banner/sales-manager-banner";
 import { PWAInstallPrompt } from "@/components/pwa-install-prompt/pwa-install-prompt";
 import { PushNotificationManager } from "@/components/push-notifications/push-notifications";
 import PWAManager from "@/components/pwa-manager";
@@ -440,6 +441,8 @@ export default function RootLayout({
                   >
                     <Header />
                     <main style={{ flex: 1 }} id="main-content" role="main">
+                      {/* Sales Manager Facebook Group Banner */}
+                      <SalesManagerBanner />
                       {children}
                     </main>
                     <Footer />

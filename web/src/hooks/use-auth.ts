@@ -94,6 +94,8 @@ export function useAuth() {
     mutationFn: logoutApi,
     onSuccess: () => {
       queryClient.setQueryData(["user"], null);
+      // Clear sales manager banner dismissed state so it shows again on next login
+      localStorage.removeItem("sales_manager_banner_dismissed");
       window.location.href = "/login"; // Force a full page refresh to reset all state
     },
   });
