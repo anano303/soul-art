@@ -30,13 +30,19 @@ export function ShareButton({
   const [copied, setCopied] = useState(false);
   const [canNativeShare, setCanNativeShare] = useState(false);
   const { language } = useLanguage();
-  const { user } = useUser();
+  const { user, isLoading } = useUser();
   const menuRef = useRef<HTMLDivElement>(null);
 
   // Build share URL with sales ref code if user is sales manager
+  // Recalculate when user data loads
   const shareUrl = useMemo(() => {
     const baseUrl =
       typeof window !== "undefined" ? window.location.origin + url : url;
+
+    // Wait for user to load before adding ref code
+    if (isLoading) {
+      return baseUrl;
+    }
 
     // If user is sales manager and has ref code, add it to URL
     if (user && isSalesManagerRole(user.role) && user.salesRefCode) {
@@ -45,7 +51,7 @@ export function ShareButton({
     }
 
     return baseUrl;
-  }, [url, user]);
+  }, [url, user?.role, user?.salesRefCode, isLoading]);
 
   // Check if native sharing is available
   useEffect(() => {
