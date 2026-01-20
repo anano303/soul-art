@@ -490,23 +490,38 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         if (user) {
           // Load authenticated user cart from server
           const { data } = await apiClient.get("/cart");
-          setItems(data.items || []);
+          const serverItems: CartItem[] = data.items || [];
+          setItems(serverItems);
           
           // Sync guest cart if exists
           const guestCart = localStorage.getItem("guest_cart");
           if (guestCart) {
             const guestItems: CartItem[] = JSON.parse(guestCart);
             if (guestItems.length > 0) {
-              // Merge guest cart items
-              for (const item of guestItems) {
+              // Merge guest cart items - add quantities for existing items
+              for (const guestItem of guestItems) {
                 try {
+                  // Find if this item exists in server cart
+                  const existingItem = serverItems.find(
+                    (serverItem) =>
+                      serverItem.productId === guestItem.productId &&
+                      (serverItem.size || "") === (guestItem.size || "") &&
+                      (serverItem.color || "") === (guestItem.color || "") &&
+                      (serverItem.ageGroup || "") === (guestItem.ageGroup || "")
+                  );
+                  
+                  // Calculate new quantity (add guest qty to existing or use guest qty)
+                  const newQty = existingItem 
+                    ? existingItem.qty + guestItem.qty 
+                    : guestItem.qty;
+                  
                   await apiClient.post("/cart/items", {
-                    productId: item.productId,
-                    qty: item.qty,
-                    size: item.size || "",
-                    color: item.color || "",
-                    ageGroup: item.ageGroup || "",
-                    price: item.price,
+                    productId: guestItem.productId,
+                    qty: newQty,
+                    size: guestItem.size || "",
+                    color: guestItem.color || "",
+                    ageGroup: guestItem.ageGroup || "",
+                    price: guestItem.price,
                   });
                 } catch (error) {
                   console.error("Error syncing guest cart item:", error);
