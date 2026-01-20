@@ -7,7 +7,7 @@ import { Suspense } from "react";
 
 export const dynamic = "force-dynamic";
 
-export default function RegisterPage() {
+function RegisterPageContent() {
   const { t } = useLanguage();
 
   return (
@@ -15,9 +15,15 @@ export default function RegisterPage() {
       title={t("auth.registerWelcome")}
       subtitle={t("auth.registerSubtitle")}
     >
-      <Suspense fallback={<div>Loading...</div>}>
-        <RegisterForm />
-      </Suspense>
+      <RegisterForm />
     </AuthLayout>
+  );
+}
+
+export default function RegisterPage() {
+  return (
+    <Suspense fallback={<div style={{ minHeight: "100vh" }} />}>
+      <RegisterPageContent />
+    </Suspense>
   );
 }
