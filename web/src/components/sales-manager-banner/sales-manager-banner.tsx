@@ -26,7 +26,7 @@ export default function SalesManagerBanner() {
       setIsVisible(false);
       return;
     }
-    
+
     // Check if banner was dismissed
     const dismissed = localStorage.getItem(STORAGE_KEY);
     if (!dismissed) {
@@ -53,7 +53,9 @@ export default function SalesManagerBanner() {
         <Heart className="banner-icon" size={24} />
         <div className="banner-text">
           <p>
-            გთხოვთ დაემატოთ SoulArt-ის გაყიდვების ჯგუფში, კითხვების შემთხვევაში რომ მალე დაგეხმაროთ <Heart size={14} className="inline-heart" fill="currentColor" />
+            გთხოვთ დაემატოთ SoulArt-ის გაყიდვების ჯგუფში, კითხვების შემთხვევაში
+            რომ მალე დაგეხმაროთ{" "}
+            <Heart size={14} className="inline-heart" fill="currentColor" />
           </p>
         </div>
         <button className="join-group-btn" onClick={handleJoinGroup}>

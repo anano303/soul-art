@@ -82,7 +82,9 @@ export function ProductsList() {
   const [showDonation, setShowDonation] = useState(false);
 
   // Bulk selection state
-  const [selectedProducts, setSelectedProducts] = useState<Set<string>>(new Set());
+  const [selectedProducts, setSelectedProducts] = useState<Set<string>>(
+    new Set()
+  );
   const [isBulkApproving, setIsBulkApproving] = useState(false);
 
   const isAdmin = user?.role === Role.Admin;
@@ -252,7 +254,7 @@ export function ProductsList() {
 
   // Toggle single product selection
   const toggleProductSelection = (productId: string) => {
-    setSelectedProducts(prev => {
+    setSelectedProducts((prev) => {
       const newSet = new Set(prev);
       if (newSet.has(productId)) {
         newSet.delete(productId);
@@ -263,25 +265,39 @@ export function ProductsList() {
     });
   };
 
-  // Select all products on current page
+  // Select all PENDING products on current page (only pending products can be bulk approved)
   const selectAllProducts = () => {
     if (!products || products.length === 0) return;
-    const allSelected = products.every((p: Product) => selectedProducts.has(p._id));
-    if (allSelected) {
-      setSelectedProducts(new Set());
+    const pendingProducts = products.filter(
+      (p: Product) => p.status === ProductStatus.PENDING
+    );
+    if (pendingProducts.length === 0) return;
+
+    const allPendingSelected = pendingProducts.every((p: Product) =>
+      selectedProducts.has(p._id)
+    );
+    if (allPendingSelected) {
+      // Deselect all pending products
+      const newSet = new Set(selectedProducts);
+      pendingProducts.forEach((p: Product) => newSet.delete(p._id));
+      setSelectedProducts(newSet);
     } else {
-      setSelectedProducts(new Set(products.map((p: Product) => p._id)));
+      // Select all pending products
+      const newSet = new Set(selectedProducts);
+      pendingProducts.forEach((p: Product) => newSet.add(p._id));
+      setSelectedProducts(newSet);
     }
   };
 
   // Bulk approve selected products
   const handleBulkApprove = async () => {
     if (selectedProducts.size === 0) return;
-    
-    const confirmMessage = language === "en" 
-      ? `Are you sure you want to approve ${selectedProducts.size} products?`
-      : `დარწმუნებული ხართ რომ გსურთ ${selectedProducts.size} პროდუქტის დამტკიცება?`;
-    
+
+    const confirmMessage =
+      language === "en"
+        ? `Are you sure you want to approve ${selectedProducts.size} products?`
+        : `დარწმუნებული ხართ რომ გსურთ ${selectedProducts.size} პროდუქტის დამტკიცება?`;
+
     if (!confirm(confirmMessage)) return;
 
     setIsBulkApproving(true);
@@ -291,7 +307,7 @@ export function ProductsList() {
     for (const productId of selectedProducts) {
       try {
         const response = await fetchWithAuth(`/products/${productId}/status`, {
-          method: "PATCH",
+          method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ status: ProductStatus.APPROVED }),
         });
@@ -307,11 +323,12 @@ export function ProductsList() {
     }
 
     setIsBulkApproving(false);
-    
-    const resultMessage = language === "en"
-      ? `Approved: ${successCount}, Failed: ${failCount}`
-      : `დამტკიცებული: ${successCount}, წარუმატებელი: ${failCount}`;
-    
+
+    const resultMessage =
+      language === "en"
+        ? `Approved: ${successCount}, Failed: ${failCount}`
+        : `დამტკიცებული: ${successCount}, წარუმატებელი: ${failCount}`;
+
     alert(resultMessage);
     handleStatusChange();
   };
@@ -525,7 +542,9 @@ export function ProductsList() {
   const totalPages = data?.pages || 1;
 
   // Check if all pending products are selected
-  const allPendingSelected = pendingProducts && pendingProducts.length > 0 && 
+  const allPendingSelected =
+    pendingProducts &&
+    pendingProducts.length > 0 &&
     pendingProducts.every((p: Product) => selectedProducts.has(p._id));
 
   // Toggle all pending products selection
@@ -533,14 +552,14 @@ export function ProductsList() {
     if (!pendingProducts) return;
     if (allPendingSelected) {
       // Deselect all pending products
-      setSelectedProducts(prev => {
+      setSelectedProducts((prev) => {
         const newSet = new Set(prev);
         pendingProducts.forEach((p: Product) => newSet.delete(p._id));
         return newSet;
       });
     } else {
       // Select all pending products
-      setSelectedProducts(prev => {
+      setSelectedProducts((prev) => {
         const newSet = new Set(prev);
         pendingProducts.forEach((p: Product) => newSet.add(p._id));
         return newSet;
@@ -556,37 +575,98 @@ export function ProductsList() {
     <div className="prd-card">
       {isAdmin && pendingProducts && pendingProducts.length > 0 && (
         <div className="pending-products mb-4">
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px" }}>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              marginBottom: "16px",
+              flexWrap: "wrap",
+              gap: "12px",
+            }}
+          >
             <h2 className="text-xl font-bold" style={{ margin: 0 }}>
               Pending Approvals ({pendingProducts.length})
             </h2>
-            <button
-              onClick={toggleAllPendingProducts}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "8px",
-                padding: "8px 16px",
-                backgroundColor: allPendingSelected ? "#e8f5e9" : "#f5f5f5",
-                border: `1px solid ${allPendingSelected ? "#a5d6a7" : "#ddd"}`,
-                borderRadius: "6px",
-                cursor: "pointer",
-                fontSize: "14px",
-                fontWeight: "500",
-                color: allPendingSelected ? "#2e7d32" : "#666",
-              }}
-            >
-              {allPendingSelected ? <CheckSquare size={16} /> : <Square size={16} />}
-              {allPendingSelected 
-                ? (language === "en" ? "Deselect All Pending" : "ყველას მოხსნა")
-                : (language === "en" ? "Select All Pending" : "ყველას მონიშვნა")}
-            </button>
+            <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+              <button
+                onClick={toggleAllPendingProducts}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
+                  padding: "8px 16px",
+                  backgroundColor: allPendingSelected ? "#e8f5e9" : "#f5f5f5",
+                  border: `1px solid ${
+                    allPendingSelected ? "#a5d6a7" : "#ddd"
+                  }`,
+                  borderRadius: "6px",
+                  cursor: "pointer",
+                  fontSize: "14px",
+                  fontWeight: "500",
+                  color: allPendingSelected ? "#2e7d32" : "#666",
+                }}
+              >
+                {allPendingSelected ? (
+                  <CheckSquare size={16} />
+                ) : (
+                  <Square size={16} />
+                )}
+                {allPendingSelected
+                  ? language === "en"
+                    ? "Deselect All"
+                    : "ყველას მოხსნა"
+                  : language === "en"
+                  ? "Select All"
+                  : "ყველას მონიშვნა"}
+              </button>
+              {selectedProducts.size > 0 && (
+                <button
+                  onClick={handleBulkApprove}
+                  disabled={isBulkApproving}
+                  style={{
+                    padding: "8px 20px",
+                    border: "none",
+                    borderRadius: "6px",
+                    backgroundColor: "#2e7d32",
+                    color: "white",
+                    cursor: isBulkApproving ? "wait" : "pointer",
+                    fontSize: "14px",
+                    fontWeight: "500",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "8px",
+                    opacity: isBulkApproving ? 0.7 : 1,
+                  }}
+                >
+                  {isBulkApproving ? (
+                    <>
+                      <Loader2
+                        size={16}
+                        style={{ animation: "spin 1s linear infinite" }}
+                      />
+                      {language === "en" ? "Approving..." : "მტკიცდება..."}
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle size={16} />
+                      {language === "en"
+                        ? `Approve Selected (${selectedProducts.size})`
+                        : `არჩეულის დამტკიცება (${selectedProducts.size})`}
+                    </>
+                  )}
+                </button>
+              )}
+            </div>
           </div>
           <table className="prd-table">
             <tbody>
               {pendingProducts.map((product: Product) => (
                 <tr key={product._id} className="prd-tr">
-                  <td className="prd-td" style={{ width: "50px", textAlign: "center" }}>
+                  <td
+                    className="prd-td"
+                    style={{ width: "50px", textAlign: "center" }}
+                  >
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
@@ -940,97 +1020,53 @@ export function ProductsList() {
         )}
       </div>
 
-      {/* Bulk Actions Bar - Only show when products are selected */}
-      {isAdmin && selectedProducts.size > 0 && (
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            padding: "12px 16px",
-            marginBottom: "16px",
-            backgroundColor: "#e8f5e9",
-            borderRadius: "8px",
-            border: "1px solid #a5d6a7",
-          }}
-        >
-          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-            <CheckSquare size={20} color="#2e7d32" />
-            <span style={{ fontWeight: "500", color: "#2e7d32" }}>
-              {language === "en" 
-                ? `${selectedProducts.size} products selected`
-                : `${selectedProducts.size} პროდუქტი მონიშნულია`}
-            </span>
-          </div>
-          <div style={{ display: "flex", gap: "12px" }}>
-            <button
-              onClick={() => setSelectedProducts(new Set())}
-              style={{
-                padding: "8px 16px",
-                border: "1px solid #6c757d",
-                borderRadius: "6px",
-                backgroundColor: "white",
-                color: "#6c757d",
-                cursor: "pointer",
-                fontSize: "14px",
-                fontWeight: "500",
-              }}
-            >
-              {language === "en" ? "Clear Selection" : "გასუფთავება"}
-            </button>
-            <button
-              onClick={handleBulkApprove}
-              disabled={isBulkApproving}
-              style={{
-                padding: "8px 20px",
-                border: "none",
-                borderRadius: "6px",
-                backgroundColor: "#2e7d32",
-                color: "white",
-                cursor: isBulkApproving ? "wait" : "pointer",
-                fontSize: "14px",
-                fontWeight: "500",
-                display: "flex",
-                alignItems: "center",
-                gap: "8px",
-                opacity: isBulkApproving ? 0.7 : 1,
-              }}
-            >
-              {isBulkApproving ? (
-                <>
-                  <Loader2 size={16} style={{ animation: "spin 1s linear infinite" }} />
-                  {language === "en" ? "Approving..." : "მტკიცდება..."}
-                </>
-              ) : (
-                <>
-                  <CheckCircle size={16} />
-                  {language === "en" ? "Approve Selected" : "არჩეულის დამტკიცება"}
-                </>
-              )}
-            </button>
-          </div>
-        </div>
-      )}
-
       <table className="prd-table">
         <thead>
           <tr className="prd-thead-row">
             {isAdmin && (
-              <th className="prd-th" style={{ width: "50px", textAlign: "center" }}>
+              <th
+                className="prd-th"
+                style={{ width: "50px", textAlign: "center" }}
+              >
                 <button
                   onClick={selectAllProducts}
                   style={{
                     background: "none",
                     border: "none",
-                    cursor: "pointer",
+                    cursor:
+                      products.filter(
+                        (p: Product) => p.status === ProductStatus.PENDING
+                      ).length > 0
+                        ? "pointer"
+                        : "default",
                     padding: "4px",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
+                    opacity:
+                      products.filter(
+                        (p: Product) => p.status === ProductStatus.PENDING
+                      ).length > 0
+                        ? 1
+                        : 0.3,
                   }}
-                  title={language === "en" ? "Select All" : "ყველას მონიშვნა"}
+                  title={
+                    language === "en"
+                      ? "Select All Pending"
+                      : "ყველა დასადასტურებელის მონიშვნა"
+                  }
+                  disabled={
+                    products.filter(
+                      (p: Product) => p.status === ProductStatus.PENDING
+                    ).length === 0
+                  }
                 >
-                  {products.length > 0 && products.every((p: Product) => selectedProducts.has(p._id)) ? (
+                  {products.filter(
+                    (p: Product) => p.status === ProductStatus.PENDING
+                  ).length > 0 &&
+                  products
+                    .filter((p: Product) => p.status === ProductStatus.PENDING)
+                    .every((p: Product) => selectedProducts.has(p._id)) ? (
                     <CheckSquare size={18} color="#2e7d32" />
                   ) : (
                     <Square size={18} color="#6c757d" />
@@ -1111,27 +1147,34 @@ export function ProductsList() {
               <tr key={product._id} className="prd-tr">
                 {isAdmin && (
                   <td className="prd-td" style={{ textAlign: "center" }}>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        toggleProductSelection(product._id);
-                      }}
-                      style={{
-                        background: "none",
-                        border: "none",
-                        cursor: "pointer",
-                        padding: "4px",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                      }}
-                    >
-                      {selectedProducts.has(product._id) ? (
-                        <CheckSquare size={18} color="#2e7d32" />
-                      ) : (
-                        <Square size={18} color="#6c757d" />
-                      )}
-                    </button>
+                    {/* Only show checkbox for pending products */}
+                    {product.status === ProductStatus.PENDING ? (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleProductSelection(product._id);
+                        }}
+                        style={{
+                          background: "none",
+                          border: "none",
+                          cursor: "pointer",
+                          padding: "4px",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                        }}
+                      >
+                        {selectedProducts.has(product._id) ? (
+                          <CheckSquare size={18} color="#2e7d32" />
+                        ) : (
+                          <Square size={18} color="#6c757d" />
+                        )}
+                      </button>
+                    ) : (
+                      <span
+                        style={{ width: "26px", display: "inline-block" }}
+                      ></span>
+                    )}
                   </td>
                 )}
                 <td className="prd-td prd-td-bold">

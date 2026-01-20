@@ -23,7 +23,10 @@ interface LoginFormProps {
   onLoginSuccess?: () => void; // Callback for successful login without navigation
 }
 
-export function LoginForm({ redirectUrl, onLoginSuccess }: LoginFormProps = {}) {
+export function LoginForm({
+  redirectUrl,
+  onLoginSuccess,
+}: LoginFormProps = {}) {
   const { t } = useLanguage();
   const errorHandler = useErrorHandler();
   const { mutate: login, isLoading, error: hookError } = useLogin();
@@ -69,10 +72,10 @@ export function LoginForm({ redirectUrl, onLoginSuccess }: LoginFormProps = {}) 
     } else {
       const params = new URLSearchParams(window.location.search);
       const urlParam = params.get("returnUrl") || params.get("redirect");
-      
+
       if (urlParam) {
         setReturnUrl(urlParam);
-      } else if (window.location.pathname.includes('/checkout')) {
+      } else if (window.location.pathname.includes("/checkout")) {
         // If we're on checkout page, return to checkout after login
         setReturnUrl(window.location.pathname);
       } else {
@@ -100,18 +103,20 @@ export function LoginForm({ redirectUrl, onLoginSuccess }: LoginFormProps = {}) 
         onSuccess: (response) => {
           if (response.success) {
             // Successfully logged in
-            
+
             // Set GA4 User ID immediately upon login
             if (response.user?._id) {
               setUserId(response.user._id);
-              
+
               // Set user properties for segmentation
               const userProperties: Record<string, string> = {
                 user_role: response.user.role || "user",
               };
 
               if (response.user.isEmailVerified !== undefined) {
-                userProperties.email_verified = String(response.user.isEmailVerified);
+                userProperties.email_verified = String(
+                  response.user.isEmailVerified
+                );
               }
 
               if (response.user.isSeller !== undefined) {
@@ -120,13 +125,13 @@ export function LoginForm({ redirectUrl, onLoginSuccess }: LoginFormProps = {}) 
 
               setUserProperties(userProperties);
             }
-            
+
             toast({
               title: "წარმატებული ავტორიზაცია",
               description: "კეთილი იყოს თქვენი დაბრუნება!",
               variant: "default",
             });
-            
+
             // Use callback if provided (e.g., for checkout flow), otherwise navigate
             if (onLoginSuccess) {
               onLoginSuccess();
@@ -164,7 +169,7 @@ export function LoginForm({ redirectUrl, onLoginSuccess }: LoginFormProps = {}) 
   return (
     <div className="login-container">
       {justRegistered && (
-        <div 
+        <div
           style={{
             padding: "12px 16px",
             backgroundColor: "#e8f5e9",

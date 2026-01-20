@@ -166,7 +166,7 @@ export function SalesManagerRegisterForm() {
           const params = new URLSearchParams({
             email: savedEmail,
             password: savedPassword,
-            registered: 'true',
+            registered: "true",
           });
           router.push(`/login?${params.toString()}`);
         }, 2000);
