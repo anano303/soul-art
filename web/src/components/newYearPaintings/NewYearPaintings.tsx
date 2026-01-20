@@ -15,7 +15,7 @@ const RAIL_LIMIT = 12;
 const CACHE_TTL_SECONDS = 5 * 60;
 const CACHE_STALE_TIME_MS = CACHE_TTL_SECONDS * 1000;
 
-// Hardcoded category IDs for New Year paintings
+// Hardcoded category IDs for Winter paintings
 const MAIN_CATEGORY_ID = "68768f6f0b55154655a8e882";
 const SUB_CATEGORY_ID = "693561ba2a2cfb77791cf514";
 
@@ -26,11 +26,11 @@ const NewYearPaintings = () => {
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
 
-  // Fetch paintings from the specific subcategory
+  // Fetch paintings from the specific subcategory (Winter collection)
   const { data: paintingProducts = [], isLoading } = useQuery<Product[]>({
-    queryKey: ["home", "new-year-paintings"],
+    queryKey: ["home", "winter-paintings"],
     queryFn: async () => {
-      const cacheKey = `home-new-year-paintings`;
+      const cacheKey = `home-winter-paintings`;
       const cached = memoryCache.get<Product[]>(cacheKey);
       if (cached) {
         return cached;

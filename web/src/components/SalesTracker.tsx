@@ -20,7 +20,7 @@ export function SalesTracker() {
   useEffect(() => {
     // შევამოწმოთ URL-ში ref პარამეტრი - ორივე გზით
     let refFromUrl = searchParams?.get("ref");
-    
+
     // თუ useSearchParams-ით ვერ მივიღეთ, პირდაპირ window.location-დან წავიკითხოთ
     if (!refFromUrl && typeof window !== "undefined") {
       const urlParams = new URLSearchParams(window.location.search);
@@ -45,12 +45,12 @@ export function SalesTracker() {
       } catch (e) {
         console.warn("[SalesTracker] Failed to save to localStorage");
       }
-      
+
       // Reset session tracking flag to ensure this visit is tracked
       sessionStorage.removeItem("soulart_visit_tracked");
-      
+
       // დავატრექოთ ვიზიტი
-      trackVisit().then(result => {
+      trackVisit().then((result) => {
         console.log("[SalesTracker] Visit tracked:", result);
       });
       tracked.current = true;
@@ -88,7 +88,7 @@ export function SalesTracker() {
         "[SalesTracker] Tracking visit from existing cookie:",
         salesRef
       );
-      trackVisit().then(result => {
+      trackVisit().then((result) => {
         console.log("[SalesTracker] Visit tracked from cookie:", result);
       });
       tracked.current = true;
