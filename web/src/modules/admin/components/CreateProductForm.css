@@ -899,6 +899,14 @@
   color: #9a3412;
 }
 
+.image-size-hint {
+  color: #64748b;
+  font-size: 0.8rem;
+  margin: 0.25rem 0 0.5rem 0;
+  font-style: italic;
+  font-weight: 400;
+}
+
 .upload-reminder {
   color: #ea580c;
   font-size: 0.85rem;

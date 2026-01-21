@@ -846,6 +846,31 @@ export function CreateProductForm({
       const newImages = Array.from(files);
       const totalImages = formData.images.length + newImages.length;
       const maxImages = 10;
+      const maxFileSizeMB = 10; // Maximum 10MB per image
+
+      // Check file sizes before proceeding
+      const oversizedFiles = newImages.filter(
+        (file) => file.size > maxFileSizeMB * 1024 * 1024
+      );
+
+      if (oversizedFiles.length > 0) {
+        const oversizedNames = oversizedFiles
+          .map(
+            (f) =>
+              `${f.name} (${(f.size / (1024 * 1024)).toFixed(1)}MB)`
+          )
+          .join(", ");
+        setErrors((prev) => ({
+          ...prev,
+          images: t("adminProducts.imageTooLarge", {
+            maxSize: maxFileSizeMB,
+            files: oversizedNames,
+          }),
+        }));
+        // Reset file input
+        e.target.value = "";
+        return;
+      }
 
       if (totalImages > maxImages) {
         setErrors((prev) => ({
@@ -1629,6 +1654,9 @@ export function CreateProductForm({
               className="create-product-file"
               multiple
             />
+            <p className="image-size-hint">
+              {t("adminProducts.imageSizeHint")}
+            </p>
             {formData.images.length === 0 && (
               <p className="upload-reminder">
                 {t("adminProducts.uploadReminder")}
