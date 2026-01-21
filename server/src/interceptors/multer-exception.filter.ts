@@ -37,7 +37,8 @@ export class MulterExceptionFilter implements ExceptionFilter {
         break;
       case 'LIMIT_FILE_SIZE':
         message = 'File too large';
-        details = 'Maximum file size is 50MB';
+        details =
+          'Maximum file size is 10MB for images and 500MB for videos. Please reduce the file size and try again.';
         break;
       case 'LIMIT_FILE_COUNT':
         message = 'Too many files';

@@ -11,12 +11,26 @@ export class AppService {
                    file.originalname.toLowerCase().endsWith('.heic') ||
                    file.originalname.toLowerCase().endsWith('.heif');
 
-    let uploadOptions: any = {};
+    // Apply quality reduction and optimization during upload
+    // This reduces file size and improves loading times
+    let uploadOptions: any = {
+      quality: 'auto:good', // Automatic quality optimization (good balance)
+      fetch_format: 'auto', // Automatically choose best format (webp, avif, etc.)
+      transformation: [
+        {
+          width: 2048, // Max width to prevent huge images
+          height: 2048, // Max height
+          crop: 'limit', // Only resize if larger, maintain aspect ratio
+          quality: 'auto:good',
+        },
+      ],
+    };
+
     if (isHeic) {
       // Convert HEIC to JPEG for web compatibility
       uploadOptions = {
+        ...uploadOptions,
         format: 'jpg',
-        quality: 'auto',
       };
     }
 
@@ -38,12 +52,26 @@ export class AppService {
                    file.originalname.toLowerCase().endsWith('.heic') ||
                    file.originalname.toLowerCase().endsWith('.heif');
 
-    let uploadOptions: any = {};
+    // Apply quality reduction and optimization during upload for banners
+    // Banners need higher quality but still should be optimized
+    let uploadOptions: any = {
+      quality: 'auto:best', // Higher quality for banners
+      fetch_format: 'auto',
+      transformation: [
+        {
+          width: 2560, // Max width for banners (larger than product images)
+          height: 1440, // Max height
+          crop: 'limit',
+          quality: 'auto:best',
+        },
+      ],
+    };
+
     if (isHeic) {
       // Convert HEIC to JPEG for web compatibility
       uploadOptions = {
+        ...uploadOptions,
         format: 'jpg',
-        quality: 'auto',
       };
     }
 

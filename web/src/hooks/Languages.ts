@@ -1240,6 +1240,9 @@ export const TRANSLATIONS: Translations = {
       invalidImageFormat:
         "მხოლოდ JPG, PNG და JPEG ფორმატის სურათებია ნებადართული",
       noImageSelected: "მინიმუმ ერთი სურათის ატვირთვა აუცილებელია",
+      imageTooLarge:
+        "სურათის ზომა არ უნდა აღემატებოდეს {maxSize}MB-ს. შემცირეთ სურათის ზომა. დიდი ზომის ფაილები: {files}",
+      imageSizeHint: "მაქსიმალური ზომა: 10MB თითო სურათზე",
       deliveryDaysRequired:
         "მიწოდების დღეების მითითება აუცილებელია სელერის მიწოდების შემთხვევაში",
       minimumPriceForSoulArt:
@@ -2754,6 +2757,9 @@ export const TRANSLATIONS: Translations = {
       selectSubcategoryError: "Subcategory selection is required",
       invalidImageFormat: "Only JPG, PNG and JPEG image formats are allowed",
       noImageSelected: "At least one image upload is required",
+      imageTooLarge:
+        "Image size must not exceed {maxSize}MB. Please reduce the image size. Large files: {files}",
+      imageSizeHint: "Maximum size: 10MB per image",
       deliveryDaysRequired:
         "Delivery days specification is required for seller delivery",
 

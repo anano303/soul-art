@@ -425,6 +425,9 @@ export class ProductsController {
             return cb(null, true);
           }
 
+          // Note: File size validation happens after upload completes
+          // The 10MB limit for images is enforced by Cloudinary and shown in frontend validation
+
           if (!imageMimeTypes.includes(mimetype)) {
             console.error('❌ Unsupported file type:', file.mimetype);
             return cb(
@@ -782,6 +785,9 @@ export class ProductsController {
             }
             return cb(null, true);
           }
+
+          // Note: File size validation happens after upload completes
+          // The 10MB limit for images is enforced by Cloudinary and shown in frontend validation
 
           if (!imageMimeTypes.includes(mimetype)) {
             console.error('❌ Unsupported file type:', file.mimetype);
