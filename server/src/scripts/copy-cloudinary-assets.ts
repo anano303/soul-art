@@ -11,8 +11,8 @@ dotenv.config({ path: path.join(__dirname, '../../.env') });
 
 
 // All old cloud names, oldest first, latest old last
-const CLOUD_NAMES = ['dsufx8uzd', 'dwfqjtdu2'];
-const NEW_CLOUD_NAME = process.env.CLOUDINARY_CLOUD_NAME || 'dmvh7vwpu';
+const CLOUD_NAMES = ['dsufx8uzd', 'dwfqjtdu2', 'dmvh7vwpu'];
+const NEW_CLOUD_NAME = process.env.CLOUDINARY_CLOUD_NAME || 'dbzlwfzzj';
 
 // Progress tracking file
 const PROGRESS_FILE = path.join(__dirname, '../../.cloudinary-migration-progress.json');

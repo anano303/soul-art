@@ -171,7 +171,7 @@ export class CloudinaryMigrationService implements OnModuleInit {
     });
 
     // Also seed retired clouds based on hardcoded history
-    const retiredCloudNames = ['dsufx8uzd', 'dwfqjtdu2'];
+    const retiredCloudNames = ['dsufx8uzd', 'dwfqjtdu2', 'dmvh7vwpu'];
     for (let i = 0; i < retiredCloudNames.length; i++) {
       const name = retiredCloudNames[i];
       const exists = await this.retiredModel.findOne({ cloudName: name });

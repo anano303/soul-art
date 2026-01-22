@@ -6,8 +6,8 @@ import * as path from 'path';
 dotenv.config({ path: path.join(__dirname, '../../.env') });
 
 // All old cloud names (oldest first, latest old last)
-const CLOUD_NAMES = ['dsufx8uzd', 'dwfqjtdu2'];
-const NEW_CLOUD_NAME = process.env.CLOUDINARY_CLOUD_NAME || 'dmvh7vwpu';
+const CLOUD_NAMES = ['dsufx8uzd', 'dwfqjtdu2', 'dmvh7vwpu'];
+const NEW_CLOUD_NAME = process.env.CLOUDINARY_CLOUD_NAME || 'dbzlwfzzj';
 
 // Helper to check if string contains any old cloud name
 const hasOldCloud = (str: string) => str && CLOUD_NAMES.some(name => str.includes(name));
