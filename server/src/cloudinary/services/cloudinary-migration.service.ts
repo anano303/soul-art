@@ -286,6 +286,21 @@ export class CloudinaryMigrationService implements OnModuleInit {
     return this.retiredModel.find().sort({ retiredAt: -1 });
   }
 
+  /**
+   * Get active Cloudinary credentials (with decrypted secret)
+   * Used by CloudinaryService for uploads
+   */
+  async getActiveCredentials(): Promise<CloudinaryCredentials | null> {
+    const config = await this.configModel.findOne({ isActive: true });
+    if (!config) return null;
+
+    return {
+      cloudName: config.cloudName,
+      apiKey: config.apiKey,
+      apiSecret: this.decrypt(config.apiSecretEncrypted),
+    };
+  }
+
   async validateCredentials(
     credentials: CloudinaryCredentials,
   ): Promise<boolean> {
