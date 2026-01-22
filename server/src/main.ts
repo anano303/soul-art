@@ -12,6 +12,7 @@ import * as express from 'express';
 import { apiRateLimit } from './middleware/security.middleware';
 import { CloudinaryUrlInterceptor } from './interceptors/cloudinary-url.interceptor';
 import { MulterExceptionFilter } from './interceptors/multer-exception.filter';
+import { CloudinaryMigrationService } from './cloudinary/services/cloudinary-migration.service';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
@@ -115,7 +116,9 @@ async function bootstrap() {
   );
 
   // Apply Cloudinary URL transformation to all responses
-  app.useGlobalInterceptors(new CloudinaryUrlInterceptor());
+  // Get the interceptor from DI container to ensure CloudinaryMigrationService is injected
+  const cloudinaryMigrationService = app.get(CloudinaryMigrationService);
+  app.useGlobalInterceptors(new CloudinaryUrlInterceptor(cloudinaryMigrationService));
 
   // Apply Multer exception filter for better upload error handling
   app.useGlobalFilters(new MulterExceptionFilter());
