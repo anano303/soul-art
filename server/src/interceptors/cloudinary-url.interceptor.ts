@@ -25,8 +25,8 @@ import { CloudinaryMigrationService } from '../cloudinary/services/cloudinary-mi
 @Injectable()
 export class CloudinaryUrlInterceptor implements NestInterceptor {
   // Fallback values if DB is not available
-  private readonly FALLBACK_OLD_CLOUD_NAMES = ['dsufx8uzd', 'dwfqjtdu2'];
-  private readonly FALLBACK_NEW_CLOUD_NAME = 'dmvh7vwpu';
+  private readonly FALLBACK_OLD_CLOUD_NAMES = ['dsufx8uzd', 'dwfqjtdu2', 'dmvh7vwpu'];
+  private readonly FALLBACK_NEW_CLOUD_NAME = 'dbzlwfzzj';
 
   // Cache for cloud names
   private cachedOldCloudNames: string[] | null = null;
