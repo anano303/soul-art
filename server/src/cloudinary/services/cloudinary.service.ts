@@ -1,9 +1,71 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, OnModuleInit } from '@nestjs/common';
 import { UploadApiErrorResponse, UploadApiResponse, v2 } from 'cloudinary';
 import { Readable } from 'stream';
+import { CloudinaryMigrationService } from './cloudinary-migration.service';
 
 @Injectable()
-export class CloudinaryService {
+export class CloudinaryService implements OnModuleInit {
+  private isConfigured = false;
+  private currentCloudName: string | null = null;
+
+  constructor(
+    private readonly migrationService: CloudinaryMigrationService,
+  ) {}
+
+  async onModuleInit() {
+    await this.ensureConfigured();
+  }
+
+  /**
+   * Force reconfiguration from DB (call after migration completes)
+   */
+  async refreshConfiguration(): Promise<void> {
+    this.isConfigured = false;
+    await this.ensureConfigured();
+  }
+
+  /**
+   * Ensures Cloudinary is configured with the latest credentials from DB
+   * Falls back to env vars if DB is not available
+   */
+  private async ensureConfigured(): Promise<void> {
+    if (this.isConfigured) return;
+
+    try {
+      const credentials = await this.migrationService.getActiveCredentials();
+      if (credentials) {
+        v2.config({
+          cloud_name: credentials.cloudName,
+          api_key: credentials.apiKey,
+          api_secret: credentials.apiSecret,
+        });
+        this.currentCloudName = credentials.cloudName;
+        console.log(`☁️  Cloudinary configured from DB: ${credentials.cloudName}`);
+        this.isConfigured = true;
+        return;
+      }
+    } catch (error) {
+      console.warn('CloudinaryService: Failed to get credentials from DB, using env vars');
+    }
+
+    // Fallback to env vars
+    v2.config({
+      cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+      api_key: process.env.CLOUDINARY_API_KEY,
+      api_secret: process.env.CLOUDINARY_API_SECRET,
+    });
+    this.currentCloudName = process.env.CLOUDINARY_CLOUD_NAME || null;
+    console.log(`☁️  Cloudinary configured from ENV: ${process.env.CLOUDINARY_CLOUD_NAME}`);
+    this.isConfigured = true;
+  }
+
+  /**
+   * Get the current cloud name being used for uploads
+   */
+  getCurrentCloudName(): string | null {
+    return this.currentCloudName;
+  }
+
   async uploadImage(
     file: Express.Multer.File,
     options: any = {},
