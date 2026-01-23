@@ -2468,3 +2468,45 @@ body {
     }
   }
 }
+
+/* Referral Discount Styles */
+.referral-discount {
+  position: relative;
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.05), rgba(236, 72, 153, 0.05));
+  padding: 16px;
+  border-radius: 12px;
+  border: 1px solid rgba(139, 92, 246, 0.2);
+}
+
+.referral-badge-inline {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  padding: 4px 12px;
+  background: linear-gradient(135deg, #8B5CF6, #EC4899);
+  border-radius: 20px;
+  width: fit-content;
+  
+  .referral-icon {
+    font-size: 14px;
+  }
+  
+  .referral-text {
+    color: white;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+}
+
+.referral-price-highlight {
+  color: #8B5CF6 !important;
+  font-weight: 700;
+}
+
+.referral-discount-badge {
+  background: linear-gradient(135deg, #8B5CF6, #EC4899) !important;
+  color: white !important;
+}

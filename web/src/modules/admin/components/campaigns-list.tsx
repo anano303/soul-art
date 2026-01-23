@@ -301,6 +301,11 @@ function CampaignModal({
   onSave,
   isLoading,
 }: CampaignModalProps) {
+  // Campaign type: "referral" = მუდმივი რეფერალებისთვის, "promo" = დროებითი ყველასთვის
+  const [campaignType, setCampaignType] = useState<"referral" | "promo">(
+    campaign?.appliesTo?.includes("all_visitors") ? "promo" : "referral"
+  );
+  
   const [formData, setFormData] = useState<CreateCampaignDto>({
     name: campaign?.name || "",
     description: campaign?.description || "",
@@ -310,12 +315,46 @@ function CampaignModal({
     endDate: campaign?.endDate?.slice(0, 10) || "",
     appliesTo: campaign?.appliesTo || ["influencer_referrals"],
     onlyProductsWithPermission: campaign?.onlyProductsWithPermission ?? true,
-    discountSource: campaign?.discountSource || "product_referral_discount",
+    discountSource: campaign?.discountSource || "override",
     maxDiscountPercent: campaign?.maxDiscountPercent ?? 15,
-    useMaxAsOverride: campaign?.useMaxAsOverride ?? false,
-    badgeText: campaign?.badgeText || "Campaign price",
-    badgeTextGe: campaign?.badgeTextGe || "აქციის ფასი",
+    useMaxAsOverride: campaign?.useMaxAsOverride ?? true,
+    badgeText: campaign?.badgeText || "Special price",
+    badgeTextGe: campaign?.badgeTextGe || "სპეც. ფასი",
   });
+
+  // Update form based on campaign type
+  const handleTypeChange = (type: "referral" | "promo") => {
+    setCampaignType(type);
+    if (type === "referral") {
+      // რეფერალური აქცია - მუდმივი, მხოლოდ რეფერალებისთვის
+      const farFuture = new Date();
+      farFuture.setFullYear(farFuture.getFullYear() + 10);
+      setFormData({
+        ...formData,
+        appliesTo: ["influencer_referrals"],
+        endDate: farFuture.toISOString().slice(0, 10),
+        onlyProductsWithPermission: true,
+        discountSource: "override",
+        useMaxAsOverride: true,
+        badgeText: "Special price",
+        badgeTextGe: "სპეც. ფასი",
+      });
+    } else {
+      // პრომო აქცია - დროებითი, ყველასთვის
+      const nextWeek = new Date();
+      nextWeek.setDate(nextWeek.getDate() + 7);
+      setFormData({
+        ...formData,
+        appliesTo: ["all_visitors"],
+        endDate: nextWeek.toISOString().slice(0, 10),
+        onlyProductsWithPermission: false,
+        discountSource: "override",
+        useMaxAsOverride: true,
+        badgeText: "Promo price",
+        badgeTextGe: "აქციის ფასი",
+      });
+    }
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -333,6 +372,31 @@ function CampaignModal({
         </div>
 
         <form onSubmit={handleSubmit} className="campaign-form">
+          {/* Campaign Type Selector */}
+          <div className="form-group">
+            <label>აქციის ტიპი *</label>
+            <div className="campaign-type-selector">
+              <button
+                type="button"
+                className={`type-btn ${campaignType === "referral" ? "active" : ""}`}
+                onClick={() => handleTypeChange("referral")}
+              >
+                <span className="type-icon">🔗</span>
+                <span className="type-name">რეფერალური</span>
+                <span className="type-desc">მუდმივი, გაყიდვების მენეჯერებისთვის</span>
+              </button>
+              <button
+                type="button"
+                className={`type-btn ${campaignType === "promo" ? "active" : ""}`}
+                onClick={() => handleTypeChange("promo")}
+              >
+                <span className="type-icon">🎉</span>
+                <span className="type-name">პრომო აქცია</span>
+                <span className="type-desc">დროებითი, ყველა მომხმარებლისთვის</span>
+              </button>
+            </div>
+          </div>
+
           <div className="form-group">
             <label>აქციის სახელი *</label>
             <input
@@ -342,139 +406,16 @@ function CampaignModal({
                 setFormData({ ...formData, name: e.target.value })
               }
               required
-              placeholder="მაგ., გაზაფხულის ფასდაკლება 2026"
+              placeholder={campaignType === "referral" ? "მაგ., რეფერალის ფასდაკლება" : "მაგ., გაზაფხულის აქცია"}
             />
           </div>
 
           <div className="form-group">
-            <label>აღწერა</label>
-            <textarea
-              value={formData.description}
-              onChange={(e) =>
-                setFormData({ ...formData, description: e.target.value })
-              }
-              placeholder="აქციის აღწერა..."
-            />
-          </div>
-
-          <div className="form-row">
-            <div className="form-group">
-              <label>დაწყების თარიღი *</label>
-              <input
-                type="date"
-                value={formData.startDate}
-                onChange={(e) =>
-                  setFormData({ ...formData, startDate: e.target.value })
-                }
-                required
-              />
-            </div>
-            <div className="form-group">
-              <label>დასრულების თარიღი *</label>
-              <input
-                type="date"
-                value={formData.endDate}
-                onChange={(e) =>
-                  setFormData({ ...formData, endDate: e.target.value })
-                }
-                required
-              />
-            </div>
-          </div>
-
-          <div className="form-group">
-            <label>ვრცელდება</label>
-            <div className="checkbox-group">
-              <label className="checkbox-label">
-                <input
-                  type="checkbox"
-                  checked={formData.appliesTo?.includes("influencer_referrals")}
-                  onChange={(e) => {
-                    const current = formData.appliesTo || [];
-                    if (e.target.checked) {
-                      setFormData({
-                        ...formData,
-                        appliesTo: [...current, "influencer_referrals"],
-                      });
-                    } else {
-                      setFormData({
-                        ...formData,
-                        appliesTo: current.filter(
-                          (a) => a !== "influencer_referrals"
-                        ),
-                      });
-                    }
-                  }}
-                />
-                ინფლუენსერების რეფერალები
-              </label>
-              <label className="checkbox-label">
-                <input
-                  type="checkbox"
-                  checked={formData.appliesTo?.includes("all_visitors")}
-                  onChange={(e) => {
-                    const current = formData.appliesTo || [];
-                    if (e.target.checked) {
-                      setFormData({
-                        ...formData,
-                        appliesTo: [...current, "all_visitors"],
-                      });
-                    } else {
-                      setFormData({
-                        ...formData,
-                        appliesTo: current.filter((a) => a !== "all_visitors"),
-                      });
-                    }
-                  }}
-                />
-                ყველა მომხმარებელი
-              </label>
-            </div>
-          </div>
-
-          <div className="form-group">
-            <label className="checkbox-label">
-              <input
-                type="checkbox"
-                checked={formData.onlyProductsWithPermission}
-                onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    onlyProductsWithPermission: e.target.checked,
-                  })
-                }
-              />
-              მხოლოდ ფასდაკლების უფლების მქონე პროდუქტები
-            </label>
-          </div>
-
-          <div className="form-group">
-            <label>ფასდაკლების წყარო</label>
-            <select
-              value={formData.discountSource}
-              onChange={(e) =>
-                setFormData({
-                  ...formData,
-                  discountSource: e.target.value as any,
-                })
-              }
-            >
-              <option value="product_referral_discount">
-                პროდუქტის რეფერალის ფასდაკლება %
-              </option>
-              <option value="artist_default">
-                არტისტის ნაგულისხმევი ფასდაკლება %
-              </option>
-              <option value="override">Override (გამოიყენე მაქს %)</option>
-            </select>
-          </div>
-
-          <div className="form-row">
-            <div className="form-group">
-              <label>მაქსიმალური ფასდაკლება %</label>
+            <label>ფასდაკლების პროცენტი *</label>
+            <div className="discount-input-wrapper">
               <input
                 type="number"
-                min="0"
+                min="1"
                 max="50"
                 value={formData.maxDiscountPercent}
                 onChange={(e) =>
@@ -483,24 +424,43 @@ function CampaignModal({
                     maxDiscountPercent: Number(e.target.value),
                   })
                 }
+                className="discount-input"
               />
+              <span className="discount-percent">%</span>
             </div>
-            <div className="form-group">
-              <label className="checkbox-label" style={{ marginTop: "2rem" }}>
-                <input
-                  type="checkbox"
-                  checked={formData.useMaxAsOverride}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      useMaxAsOverride: e.target.checked,
-                    })
-                  }
-                />
-                Override-ად გამოყენება (არა ზღვარი)
-              </label>
-            </div>
+            <p className="form-hint">
+              {campaignType === "referral" 
+                ? "ეს პროცენტი გამოიყენება ყველა რეფერალურ შეკვეთაზე" 
+                : "ეს პროცენტი გამოიყენება ყველა პროდუქტზე აქციის პერიოდში"}
+            </p>
           </div>
+
+          {campaignType === "promo" && (
+            <div className="form-row">
+              <div className="form-group">
+                <label>დაწყების თარიღი *</label>
+                <input
+                  type="date"
+                  value={formData.startDate}
+                  onChange={(e) =>
+                    setFormData({ ...formData, startDate: e.target.value })
+                  }
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <label>დასრულების თარიღი *</label>
+                <input
+                  type="date"
+                  value={formData.endDate}
+                  onChange={(e) =>
+                    setFormData({ ...formData, endDate: e.target.value })
+                  }
+                  required
+                />
+              </div>
+            </div>
+          )}
 
           <div className="form-row">
             <div className="form-group">
@@ -511,7 +471,7 @@ function CampaignModal({
                 onChange={(e) =>
                   setFormData({ ...formData, badgeText: e.target.value })
                 }
-                placeholder="Campaign price"
+                placeholder="Special price"
               />
             </div>
             <div className="form-group">
@@ -522,7 +482,7 @@ function CampaignModal({
                 onChange={(e) =>
                   setFormData({ ...formData, badgeTextGe: e.target.value })
                 }
-                placeholder="აქციის ფასი"
+                placeholder="სპეც. ფასი"
               />
             </div>
           </div>

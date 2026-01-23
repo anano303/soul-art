@@ -29,6 +29,8 @@ import { trackViewContent } from "@/components/MetaPixel";
 import { useCart } from "@/modules/cart/context/cart-context";
 import { useToast } from "@/hooks/use-toast";
 import { trackAddToCart } from "@/lib/ga4-analytics";
+import { useReferralPricing } from "@/hooks/use-referral-pricing";
+import { Tag } from "lucide-react";
 
 type MediaItem =
   | {
@@ -192,6 +194,9 @@ export function ProductDetails({ product }: ProductDetailsProps) {
   const { t, language } = useLanguage();
   const { addToCart, isItemInCart } = useCart();
   const { toast } = useToast();
+
+  // Referral pricing hook
+  const referralPricing = useReferralPricing(product);
 
   const { resolvedYoutubeEmbedUrl, videoId } = useMemo(() => {
     let embedUrl: string | null = null;
@@ -629,7 +634,12 @@ export function ProductDetails({ product }: ProductDetailsProps) {
   };
 
   const isDiscounted = hasActiveDiscount();
-  const finalPrice = calculateDiscountedPrice();
+  const basePrice = calculateDiscountedPrice();
+  
+  // Use referral price if available, otherwise use regular price
+  const finalPrice = referralPricing.hasReferralDiscount 
+    ? referralPricing.referralPrice 
+    : basePrice;
 
   useEffect(() => {
     hasTrackedViewRef.current = false;
@@ -963,7 +973,29 @@ export function ProductDetails({ product }: ProductDetailsProps) {
           <div className="price-badge-row">
             {/* Price Section */}
             <div className="price-section-modern">
-              {isDiscounted ? (
+              {referralPricing.hasReferralDiscount ? (
+                <div className="price-with-discount referral-discount">
+                  <div className="referral-badge-inline">
+                    <span className="referral-icon">🎁</span>
+                    <span className="referral-text">
+                      {language === "en" ? "Special Price" : "სპეციალური ფასი"}
+                    </span>
+                  </div>
+                  <div className="current-price referral-price-highlight">₾{referralPricing.referralPrice.toFixed(2)}</div>
+                  <div className="price-comparison">
+                    <span className="original-price-strike">
+                      ₾{product.price.toFixed(2)}
+                    </span>
+                    <span className="discount-badge referral-discount-badge">
+                      -{referralPricing.discountPercent}%
+                    </span>
+                  </div>
+                  <div className="savings-text">
+                    {language === "en" ? "You save" : "დაზოგავ"} ₾
+                    {(product.price - referralPricing.referralPrice).toFixed(2)}
+                  </div>
+                </div>
+              ) : isDiscounted ? (
                 <div className="price-with-discount">
                   <div className="current-price">₾{finalPrice.toFixed(2)}</div>
                   <div className="price-comparison">
