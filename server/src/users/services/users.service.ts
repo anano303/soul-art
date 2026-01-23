@@ -18,6 +18,10 @@ import {
   PortfolioPost,
   PortfolioPostDocument,
 } from '../schemas/portfolio-post.schema';
+import {
+  SalesTracking,
+  SalesTrackingDocument,
+} from '../../sales-commission/schemas/sales-tracking.schema';
 import { hashPassword } from '@/utils/password';
 import { generateUsers } from '@/utils/seed-users';
 import { PaginatedResponse } from '@/types';
@@ -45,6 +49,8 @@ export class UsersService {
     @InjectModel(Product.name) private productModel: Model<Product>,
     @InjectModel(PortfolioPost.name)
     private portfolioPostModel: Model<PortfolioPostDocument>,
+    @InjectModel(SalesTracking.name)
+    private salesTrackingModel: Model<SalesTrackingDocument>,
     private readonly userCloudinaryService: UserCloudinaryService,
     private readonly cloudinaryService: CloudinaryService,
     private readonly balanceService: BalanceService,
@@ -1134,6 +1140,7 @@ export class UsersService {
         totalUsers: number;
         roleCounts: Record<Role, number>;
         activeSellers: number;
+        activeSalesManagers: number;
       };
     }
   > {
@@ -1309,6 +1316,15 @@ export class UsersService {
       }
     });
 
+    // Count active sales managers (those who have at least one tracking event)
+    let activeSalesManagersCount = 0;
+    try {
+      const activeSalesManagers = await this.salesTrackingModel.distinct('salesManager');
+      activeSalesManagersCount = activeSalesManagers.length;
+    } catch (err) {
+      this.logger.warn('Failed to count active sales managers', err);
+    }
+
     const totalPages = Math.max(Math.ceil(filteredTotal / normalizedLimit), 1);
 
     // Convert sellerProductStats Map to object for JSON serialization
@@ -1323,6 +1339,7 @@ export class UsersService {
         totalUsers: number;
         roleCounts: Record<Role, number>;
         activeSellers: number;
+        activeSalesManagers: number;
       };
     } = {
       items: users,
@@ -1333,6 +1350,7 @@ export class UsersService {
         totalUsers: overallTotal,
         roleCounts,
         activeSellers: activeSellersCount,
+        activeSalesManagers: activeSalesManagersCount,
       },
     };
 

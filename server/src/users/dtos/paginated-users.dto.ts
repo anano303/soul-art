@@ -13,6 +13,9 @@ class RoleCountsDto {
 
   @Expose()
   blogger!: number;
+
+  @Expose()
+  sales_manager?: number;
 }
 
 class UsersSummaryDto {
@@ -25,6 +28,9 @@ class UsersSummaryDto {
 
   @Expose()
   activeSellers?: number;
+
+  @Expose()
+  activeSalesManagers?: number;
 }
 
 class SellerProductStatsDto {
