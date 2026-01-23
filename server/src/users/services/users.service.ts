@@ -1124,11 +1124,16 @@ export class UsersService {
     limit: number = 20,
     search?: string,
     role?: string,
+    sortBy?: string,
+    sortOrder?: string,
+    activeFilter?: string,
   ): Promise<
     PaginatedResponse<UserDocument> & {
+      sellerProductStats?: Record<string, { productCount: number; lastProductDate: Date | null }>;
       summary: {
         totalUsers: number;
         roleCounts: Record<Role, number>;
+        activeSellers: number;
       };
     }
   > {
@@ -1141,6 +1146,8 @@ export class UsersService {
     const filters: FilterQuery<User> = {};
 
     const normalizedRole = role?.toLowerCase();
+    const isSellerFilter = normalizedRole === Role.Seller || normalizedRole === Role.SellerAndSalesManager;
+    
     if (
       normalizedRole &&
       Object.values(Role).includes(normalizedRole as Role)
@@ -1159,25 +1166,133 @@ export class UsersService {
       ];
     }
 
-    const [users, filteredTotal, overallTotal, roleAggregation] =
-      await Promise.all([
+    // Get seller product stats if filtering by seller role
+    let sellerProductStats: Map<string, { productCount: number; lastProductDate: Date | null }> = new Map();
+    let activeSellersCount = 0;
+    
+    if (isSellerFilter || sortBy === 'productCount') {
+      // Get product counts and last upload date for all sellers
+      const productAggregation = await this.productModel.aggregate([
+        {
+          $group: {
+            _id: '$user',
+            productCount: { $sum: 1 },
+            lastProductDate: { $max: '$createdAt' },
+          },
+        },
+      ]);
+      
+      productAggregation.forEach((stat) => {
+        if (stat._id) {
+          sellerProductStats.set(stat._id.toString(), {
+            productCount: stat.productCount,
+            lastProductDate: stat.lastProductDate,
+          });
+        }
+      });
+      
+      // Count active sellers (those with at least 1 product)
+      activeSellersCount = productAggregation.filter(s => s.productCount > 0).length;
+    }
+
+    // Default sort
+    let sortOptions: Record<string, 1 | -1> = { createdAt: -1 };
+
+    // If sorting by productCount, active, or lastProductDate, we need a different approach
+    let users: UserDocument[];
+    let filteredTotal: number;
+
+    if ((sortBy === 'productCount' || sortBy === 'active' || sortBy === 'lastProductDate' || activeFilter) && isSellerFilter) {
+      // Get all matching users first
+      const allUsers = await this.userModel.find(filters).exec();
+
+      // Add product stats and sort
+      let usersWithStats = allUsers.map((user) => {
+        const stats = sellerProductStats.get(user._id.toString()) || {
+          productCount: 0,
+          lastProductDate: null,
+        };
+        return {
+          user,
+          productCount: stats.productCount,
+          lastProductDate: stats.lastProductDate,
+          isActive: stats.productCount > 0,
+        };
+      });
+
+      // Apply activeFilter
+      if (activeFilter === 'active') {
+        usersWithStats = usersWithStats.filter(u => u.isActive);
+      } else if (activeFilter === 'inactive') {
+        usersWithStats = usersWithStats.filter(u => !u.isActive);
+      }
+
+      filteredTotal = usersWithStats.length;
+
+      // Sort by the chosen field
+      usersWithStats.sort((a, b) => {
+        const multiplier = sortOrder === 'asc' ? 1 : -1;
+        
+        if (sortBy === 'productCount') {
+          return multiplier * (a.productCount - b.productCount);
+        } else if (sortBy === 'active') {
+          // Active first when desc, inactive first when asc
+          return multiplier * ((a.isActive ? 1 : 0) - (b.isActive ? 1 : 0));
+        } else if (sortBy === 'lastProductDate') {
+          const dateA = a.lastProductDate ? new Date(a.lastProductDate).getTime() : 0;
+          const dateB = b.lastProductDate ? new Date(b.lastProductDate).getTime() : 0;
+          return multiplier * (dateA - dateB);
+        }
+        return 0;
+      });
+
+      // Paginate
+      users = usersWithStats
+        .slice(skip, skip + normalizedLimit)
+        .map((s) => s.user);
+    } else {
+      [users, filteredTotal] = await Promise.all([
         this.userModel
           .find(filters)
-          .sort({ createdAt: -1 })
+          .sort(sortOptions)
           .skip(skip)
           .limit(normalizedLimit)
           .exec(),
         this.userModel.countDocuments(filters),
-        this.userModel.countDocuments({}),
-        this.userModel.aggregate<{ _id: Role; count: number }>([
-          {
-            $group: {
-              _id: '$role',
-              count: { $sum: 1 },
-            },
-          },
-        ]),
       ]);
+    }
+
+    const [overallTotal, roleAggregation] = await Promise.all([
+      this.userModel.countDocuments({}),
+      this.userModel.aggregate<{ _id: Role; count: number }>([
+        {
+          $group: {
+            _id: '$role',
+            count: { $sum: 1 },
+          },
+        },
+      ]),
+    ]);
+
+    // Add product stats to seller users
+    if (isSellerFilter || sellerProductStats.size > 0) {
+      // We need to attach stats to users - but UserDocument is immutable
+      // We'll add the stats when mapping in the response
+      users = users.map((user) => {
+        const userObj = user.toObject();
+        const stats = sellerProductStats.get(user._id.toString());
+        if (stats) {
+          (userObj as any).productCount = stats.productCount;
+          (userObj as any).lastProductDate = stats.lastProductDate;
+          (userObj as any).isActive = stats.productCount > 0;
+        } else {
+          (userObj as any).productCount = 0;
+          (userObj as any).lastProductDate = null;
+          (userObj as any).isActive = false;
+        }
+        return userObj as UserDocument;
+      });
+    }
 
     const roleCounts: Record<Role, number> = {
       [Role.Admin]: 0,
@@ -1196,7 +1311,20 @@ export class UsersService {
 
     const totalPages = Math.max(Math.ceil(filteredTotal / normalizedLimit), 1);
 
-    return {
+    // Convert sellerProductStats Map to object for JSON serialization
+    const sellerProductStatsObj: Record<string, { productCount: number; lastProductDate: Date | null }> = {};
+    sellerProductStats.forEach((value, key) => {
+      sellerProductStatsObj[key] = value;
+    });
+
+    const result: PaginatedResponse<UserDocument> & {
+      sellerProductStats?: Record<string, { productCount: number; lastProductDate: Date | null }>;
+      summary: {
+        totalUsers: number;
+        roleCounts: Record<Role, number>;
+        activeSellers: number;
+      };
+    } = {
       items: users,
       total: filteredTotal,
       page: safePage,
@@ -1204,8 +1332,15 @@ export class UsersService {
       summary: {
         totalUsers: overallTotal,
         roleCounts,
+        activeSellers: activeSellersCount,
       },
     };
+
+    if (isSellerFilter) {
+      result.sellerProductStats = sellerProductStatsObj;
+    }
+
+    return result;
   }
 
   async deleteOne(id: string): Promise<void> {
