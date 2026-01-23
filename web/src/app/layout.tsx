@@ -76,6 +76,7 @@ import SalesManagerBanner from "@/components/sales-manager-banner/sales-manager-
 import { PWAInstallPrompt } from "@/components/pwa-install-prompt/pwa-install-prompt";
 import { PushNotificationManager } from "@/components/push-notifications/push-notifications";
 import PWAManager from "@/components/pwa-manager";
+import { CampaignConsentPrompt } from "@/components/campaign-consent/campaign-consent-prompt";
 import "@/lib/cloudflare-cleanup"; // Auto-cleanup Cloudflare cookies in development
 
 export const viewport = {
@@ -448,6 +449,9 @@ export default function RootLayout({
                     <Footer />
                     <FloatingCartIcon />
                     <MobileBottomNav />
+
+                    {/* Campaign Consent Prompt for Sellers */}
+                    <CampaignConsentPrompt />
                   </div>
                 </LanguageProvider>
               </CheckoutProvider>

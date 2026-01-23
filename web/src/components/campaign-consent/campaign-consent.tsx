@@ -206,13 +206,13 @@ export function CampaignConsent({
         <div className="campaign-consent__discount-row">
           <label className="campaign-consent__discount-label">
             {language === "en"
-              ? "Enter max % that SoulArt can discount:"
-              : "შეიყვანე მაქსიმალური % რამდენი შეუძლია დააკლოს SoulArt-ს:"}
+              ? "Enter max % that SoulArt can discount (3% to 50%):"
+              : "შეიყვანე მაქსიმალური % რამდენი შეუძლია დააკლოს SoulArt-ს(3%-დან 50%მდე):"}
           </label>
           <div className="campaign-consent__discount-input-wrapper">
             <input
               type="number"
-              min="1"
+              min="3"
               max="50"
               value={defaultReferralDiscount}
               onChange={(e) =>
