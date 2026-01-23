@@ -221,6 +221,9 @@ export function UsersList() {
       salesManager - activeSalesManagers
     );
 
+    // Campaign consent stats
+    const campaignConsent = data?.summary?.campaignConsent;
+
     return {
       totalUsers: data?.summary?.totalUsers ?? data?.total ?? 0,
       admin: data?.summary?.roleCounts?.admin ?? 0,
@@ -232,6 +235,7 @@ export function UsersList() {
       inactiveSellers,
       activeSalesManagers,
       inactiveSalesManagers,
+      campaignConsent: campaignConsent ?? null,
     };
   }, [data]);
 
@@ -365,6 +369,43 @@ export function UsersList() {
             <span className="usr-summary-value">
               {summary.user.toLocaleString()}
             </span>
+          </div>
+        </div>
+
+        {/* Campaign Consent Stats - always visible for admin */}
+        <div className="usr-campaign-stats">
+          <div className="usr-campaign-stats-header">
+            <span className="usr-campaign-stats-title">
+              🎯 აქციებში მონაწილეობის სტატისტიკა
+            </span>
+          </div>
+          <div className="usr-campaign-stats-grid">
+            <div className="usr-campaign-stat usr-campaign-stat--success">
+              <span className="usr-campaign-stat-value">
+                {summary.campaignConsent?.sellersWithAllProducts ?? 0}
+              </span>
+              <span className="usr-campaign-stat-label">ყველა პროდუქტზე</span>
+            </div>
+            <div className="usr-campaign-stat usr-campaign-stat--info">
+              <span className="usr-campaign-stat-value">
+                {summary.campaignConsent?.sellersWithPerProduct ?? 0}
+              </span>
+              <span className="usr-campaign-stat-label">ცალკეულ პროდუქტზე</span>
+            </div>
+            <div className="usr-campaign-stat usr-campaign-stat--muted">
+              <span className="usr-campaign-stat-value">
+                {summary.campaignConsent?.sellersWithNone ?? 0}
+              </span>
+              <span className="usr-campaign-stat-label">არ მონაწილეობს</span>
+            </div>
+            <div className="usr-campaign-stat usr-campaign-stat--highlight">
+              <span className="usr-campaign-stat-value">
+                {summary.campaignConsent?.totalProductsWithReferral ?? 0}
+              </span>
+              <span className="usr-campaign-stat-label">
+                პროდუქტი რეფ. ფასდაკლებით
+              </span>
+            </div>
           </div>
         </div>
       </div>

@@ -380,9 +380,11 @@ export class SalesCommissionService {
   /**
    * რეფერალური კოდის ვალიდაცია
    */
-  async validateSalesRefCode(code: string): Promise<boolean> {
+  async validateSalesRefCode(
+    code: string,
+  ): Promise<{ valid: boolean; managerName?: string }> {
     if (!code || !code.startsWith('SM_')) {
-      return false;
+      return { valid: false };
     }
 
     const user = await this.userModel.findOne({
@@ -390,7 +392,14 @@ export class SalesCommissionService {
       role: { $in: [Role.SalesManager, Role.Admin] },
     });
 
-    return !!user;
+    if (!user) {
+      return { valid: false };
+    }
+
+    return {
+      valid: true,
+      managerName: user.displayName || user.firstName || 'მენეჯერი',
+    };
   }
 
   // ========== TRACKING METHODS ==========

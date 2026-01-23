@@ -323,5 +323,11 @@ export interface PaginatedResponse<T> {
     };
     activeSellers?: number;
     activeSalesManagers?: number;
+    campaignConsent?: {
+      sellersWithAllProducts: number;
+      sellersWithPerProduct: number;
+      sellersWithNone: number;
+      totalProductsWithReferral: number;
+    };
   };
 }

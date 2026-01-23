@@ -1,0 +1,247 @@
+.ref-code-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Floating variant - fixed position at top right, below header */
+.ref-code-floating {
+  position: fixed;
+  top: 50px;
+  right: 20px;
+  z-index: 9999;
+}
+
+@media (min-width: 768px) {
+  .ref-code-floating {
+    top: 70px;
+  }
+}
+
+.ref-code-floating .ref-code-trigger {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  padding: 10px 16px;
+  font-size: 13px;
+}
+
+.ref-code-floating .ref-code-trigger-text {
+  display: inline !important;
+}
+
+.ref-code-floating .ref-code-input-wrapper {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+.ref-code-floating .ref-code-message {
+  right: 0;
+  left: auto;
+  min-width: 200px;
+}
+
+.ref-code-trigger {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+  border: 1px solid #86efac;
+  border-radius: 20px;
+  color: #166534;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.ref-code-trigger:hover {
+  background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
+  border-color: #4ade80;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(34, 197, 94, 0.2);
+}
+
+.ref-code-trigger-text {
+  display: none;
+}
+
+@media (min-width: 640px) {
+  .ref-code-trigger-text {
+    display: inline;
+  }
+}
+
+.ref-code-input-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: white;
+  border: 1px solid #d1d5db;
+  border-radius: 20px;
+  padding: 2px 4px 2px 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.ref-code-input {
+  width: 100px;
+  border: none;
+  outline: none;
+  font-size: 13px;
+  background: transparent;
+  text-transform: uppercase;
+}
+
+.ref-code-input::placeholder {
+  text-transform: none;
+  color: #9ca3af;
+}
+
+.ref-code-input:disabled {
+  opacity: 0.7;
+}
+
+.ref-code-submit {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background: #22c55e;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.ref-code-submit:hover:not(:disabled) {
+  background: #16a34a;
+}
+
+.ref-code-submit:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.ref-code-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  background: transparent;
+  color: #6b7280;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.ref-code-close:hover {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+.ref-code-message {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  margin-top: 4px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-size: 11px;
+  white-space: nowrap;
+  z-index: 100;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.ref-code-message--error {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #dc2626;
+}
+
+.ref-code-message--success {
+  background: #f0fdf4;
+  border: 1px solid #86efac;
+  color: #166534;
+}
+
+.ref-code-active {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px 4px 10px;
+  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+  border: 1px solid #86efac;
+  border-radius: 16px;
+  color: #166534;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.ref-code-clear {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  background: rgba(0, 0, 0, 0.1);
+  border: none;
+  border-radius: 50%;
+  color: #166534;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.ref-code-clear:hover {
+  background: rgba(0, 0, 0, 0.2);
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .ref-code-trigger {
+    background: linear-gradient(135deg, #14532d 0%, #166534 100%);
+    border-color: #22c55e;
+    color: #bbf7d0;
+  }
+
+  .ref-code-trigger:hover {
+    background: linear-gradient(135deg, #166534 0%, #15803d 100%);
+  }
+
+  .ref-code-input-wrapper {
+    background: #1f2937;
+    border-color: #374151;
+  }
+
+  .ref-code-input {
+    color: white;
+  }
+
+  .ref-code-close:hover {
+    background: #374151;
+    color: #d1d5db;
+  }
+
+  .ref-code-active {
+    background: linear-gradient(135deg, #14532d 0%, #166534 100%);
+    border-color: #22c55e;
+    color: #bbf7d0;
+  }
+}

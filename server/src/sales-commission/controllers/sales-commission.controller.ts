@@ -185,9 +185,7 @@ export class SalesCommissionController {
    */
   @Get('validate/:code')
   async validateCode(@Param('code') code: string) {
-    const isValid =
-      await this.salesCommissionService.validateSalesRefCode(code);
-    return { valid: isValid };
+    return await this.salesCommissionService.validateSalesRefCode(code);
   }
 
   // ========== TRACKING ENDPOINTS ==========

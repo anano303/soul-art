@@ -278,9 +278,9 @@ export default function SalesManagerDashboard() {
         <p>მართე შენი გაყიდვები და საკომისიოები</p>
       </div>
 
-      {/* Referral Link Section */}
+      {/* Promo Code Section */}
       <div className="referral-section card">
-        <h2>შენი რეფერალური ლინკი</h2>
+        <h2>შენი პრომო ლინკი</h2>
         {refCodeInfo?.salesRefCode ? (
           <div className="ref-code-display">
             <div className="ref-code-box">
@@ -314,7 +314,7 @@ export default function SalesManagerDashboard() {
           </div>
         ) : (
           <div className="generate-code">
-            <p>ჯერ არ გაქვს რეფერალური კოდი</p>
+            <p>ჯერ არ გაქვს პრომო კოდი</p>
             <button
               onClick={generateRefCode}
               disabled={generating}
