@@ -195,18 +195,15 @@ export function ProductCard({
       const isInCart = isItemInCart(product._id);
 
       // Calculate the correct price to use
-      const priceToUse = referralPricing.hasReferralDiscount 
-        ? referralPricing.referralPrice 
-        : (isDiscounted ? discountedPrice : product.price);
+      const priceToUse = referralPricing.hasReferralDiscount
+        ? referralPricing.referralPrice
+        : isDiscounted
+        ? discountedPrice
+        : product.price;
 
       if (!isInCart) {
         // Track quick purchase action
-        trackAddToCart(
-          product._id,
-          displayName,
-          priceToUse,
-          1
-        );
+        trackAddToCart(product._id, displayName, priceToUse, 1);
 
         // Prepare referral info for cart
         const referralInfo = referralPricing.hasReferralDiscount
@@ -214,7 +211,8 @@ export function ProductCard({
               originalPrice: product.price,
               hasReferralDiscount: true,
               referralDiscountPercent: referralPricing.referralDiscountPercent,
-              referralDiscountAmount: product.price - referralPricing.referralPrice,
+              referralDiscountAmount:
+                product.price - referralPricing.referralPrice,
             }
           : undefined;
 
@@ -409,14 +407,20 @@ export function ProductCard({
                   >
                     {referralPricing.originalPrice.toFixed(2)} ₾
                   </span>
-                  {isDiscounted && referralPricing.basePrice !== referralPricing.originalPrice && (
-                    <span
-                      className="original-price"
-                      style={{ fontSize: "0.75rem", textDecoration: "line-through", opacity: 0.6 }}
-                    >
-                      {referralPricing.basePrice.toFixed(2)} ₾
-                    </span>
-                  )}
+                  {isDiscounted &&
+                    referralPricing.basePrice !==
+                      referralPricing.originalPrice && (
+                      <span
+                        className="original-price"
+                        style={{
+                          fontSize: "0.75rem",
+                          textDecoration: "line-through",
+                          opacity: 0.6,
+                        }}
+                      >
+                        {referralPricing.basePrice.toFixed(2)} ₾
+                      </span>
+                    )}
                   <h3 className="product-price referral-final-price">
                     {referralPricing.referralPrice.toFixed(2)} ₾
                   </h3>
@@ -448,16 +452,28 @@ export function ProductCard({
           productName={displayName}
           countInStock={availableStock}
           className="btn-add-to-cart-icon"
-          price={referralPricing.hasReferralDiscount ? referralPricing.referralPrice : (isDiscounted ? discountedPrice : product.price)}
+          price={
+            referralPricing.hasReferralDiscount
+              ? referralPricing.referralPrice
+              : isDiscounted
+              ? discountedPrice
+              : product.price
+          }
           hideQuantity={true}
           openCartOnAdd={false}
           iconOnly={true}
-          referralInfo={referralPricing.hasReferralDiscount ? {
-            originalPrice: product.price,
-            hasReferralDiscount: true,
-            referralDiscountPercent: referralPricing.referralDiscountPercent,
-            referralDiscountAmount: product.price - referralPricing.referralPrice,
-          } : undefined}
+          referralInfo={
+            referralPricing.hasReferralDiscount
+              ? {
+                  originalPrice: product.price,
+                  hasReferralDiscount: true,
+                  referralDiscountPercent:
+                    referralPricing.referralDiscountPercent,
+                  referralDiscountAmount:
+                    product.price - referralPricing.referralPrice,
+                }
+              : undefined
+          }
         />
         <button
           onClick={handleBuyNow}
