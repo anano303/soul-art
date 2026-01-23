@@ -53,8 +53,15 @@ export interface CartItem {
   nameEn?: string;
   image: string;
   price: number;
+  originalPrice?: number;
   countInStock: number;
   qty: number;
+  size?: string;
+  color?: string;
+  ageGroup?: string;
+  hasReferralDiscount?: boolean;
+  referralDiscountPercent?: number;
+  referralDiscountAmount?: number;
 }
 
 export interface PaginatedProducts {

@@ -29,6 +29,7 @@ import { useGalleryInteractions } from "@/hooks/useGalleryInteractions";
 import { AddToCartButton } from "@/modules/products/components/AddToCartButton";
 import { useCart } from "@/modules/cart/context/cart-context";
 import { useToast } from "@/hooks/use-toast";
+import { useReferralPricing } from "@/hooks/use-referral-pricing";
 import {
   Grid3X3,
   ShoppingBag,
@@ -1084,12 +1085,7 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
                     initialDiscount={
                       (user as any)?.defaultReferralDiscount || 10
                     }
-                    language={language}
-                    onSave={async (choice, discount) => {
-                      await apiClient.patch("/users/campaign-settings", {
-                        campaignDiscountChoice: choice,
-                        defaultReferralDiscount: discount,
-                      });
+                    onSaved={() => {
                       queryClient.invalidateQueries({ queryKey: ["user"] });
                     }}
                   />
@@ -1842,6 +1838,16 @@ function ProductCard({
   const href = `/products/${product.id}`;
 
   const discountPercentage = getActiveDiscountPercentage(product);
+  
+  // Calculate referral pricing
+  const referralPricing = useReferralPricing({
+    id: product.id,
+    price: product.price,
+    discountPercentage: discountPercentage,
+    discountStartDate: product.discountStartDate ?? undefined,
+    discountEndDate: product.discountEndDate ?? undefined,
+    referralDiscountPercent: product.referralDiscountPercent,
+  });
 
   // Calculate available stock considering variants
   const countInStock = useMemo(() => {
@@ -1947,20 +1953,33 @@ function ProductCard({
       const isInCart = isItemInCart(product.id);
 
       if (!isInCart) {
-        // Calculate discounted price if applicable
-        const isDiscounted = discountPercentage > 0;
-        const discountedPrice = isDiscounted
-          ? product.price * (1 - discountPercentage / 100)
-          : product.price;
+        // Calculate final price - referral takes priority, then regular discount
+        let finalPrice = product.price;
+        if (referralPricing.hasReferralDiscount) {
+          finalPrice = referralPricing.referralPrice;
+        } else if (discountPercentage > 0) {
+          finalPrice = product.price * (1 - discountPercentage / 100);
+        }
 
-        // Add item to cart with discounted price if applicable
+        // Prepare referral info for cart
+        const referralInfo = referralPricing.hasReferralDiscount
+          ? {
+              originalPrice: product.price,
+              hasReferralDiscount: true,
+              referralDiscountPercent: referralPricing.referralDiscountPercent,
+              referralDiscountAmount: product.price - referralPricing.referralPrice,
+            }
+          : undefined;
+
+        // Add item to cart with correct price and referral info
         await addToCart(
           product.id,
           1,
           undefined,
           undefined,
           undefined,
-          isDiscounted ? discountedPrice : product.price
+          finalPrice,
+          referralInfo
         );
       }
 
@@ -2216,13 +2235,21 @@ function ProductCard({
               countInStock={countInStock}
               className="btn-add-to-cart-icon"
               price={
-                discountPercentage > 0
-                  ? product.price * (1 - discountPercentage / 100)
-                  : product.price
+                referralPricing.hasReferralDiscount
+                  ? referralPricing.referralPrice
+                  : discountPercentage > 0
+                    ? product.price * (1 - discountPercentage / 100)
+                    : product.price
               }
               hideQuantity={true}
               openCartOnAdd={false}
               iconOnly={true}
+              referralInfo={referralPricing.hasReferralDiscount ? {
+                originalPrice: product.price,
+                hasReferralDiscount: true,
+                referralDiscountPercent: referralPricing.referralDiscountPercent,
+                referralDiscountAmount: product.price - referralPricing.referralPrice,
+              } : undefined}
             />
           </div>
         </div>

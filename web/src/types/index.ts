@@ -87,6 +87,7 @@ export interface ArtistProductSummary {
   createdAt?: string | null;
   status?: "PENDING" | "APPROVED" | "REJECTED";
   rejectionReason?: string | null;
+  referralDiscountPercent?: number;
 }
 
 export interface ArtistProfileResponse {

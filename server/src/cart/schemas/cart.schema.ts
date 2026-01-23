@@ -25,6 +25,9 @@ export class CartItem {
   @Prop({ required: true, default: 0 })
   price: number;
 
+  @Prop({ required: false })
+  originalPrice?: number;
+
   @Prop({ required: true, default: 0 })
   countInStock: number;
 
@@ -39,6 +42,15 @@ export class CartItem {
 
   @Prop({ required: false, type: String })
   ageGroup?: string;
+
+  @Prop({ required: false, default: false })
+  hasReferralDiscount?: boolean;
+
+  @Prop({ required: false })
+  referralDiscountPercent?: number;
+
+  @Prop({ required: false })
+  referralDiscountAmount?: number;
 }
 
 export const CartItemSchema = SchemaFactory.createForClass(CartItem);

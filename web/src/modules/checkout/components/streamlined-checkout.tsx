@@ -64,6 +64,28 @@ export function StreamlinedCheckout() {
   const hasTrackedViewSummaryRef = useRef(false);
   const hasTrackedCheckoutLoginRef = useRef(false);
   const previousStepRef = useRef<CheckoutStep | null>(null);
+  const [originalPrices, setOriginalPrices] = useState<Record<string, number>>({});
+
+  // Fetch original prices from products API
+  useEffect(() => {
+    const fetchOriginalPrices = async () => {
+      const prices: Record<string, number> = {};
+      await Promise.all(
+        items.map(async (item) => {
+          try {
+            const response = await apiClient.get(`/products/${item.productId}`);
+            prices[item.productId] = response.data.price;
+          } catch {
+            prices[item.productId] = item.price;
+          }
+        })
+      );
+      setOriginalPrices(prices);
+    };
+    if (items.length > 0) {
+      fetchOriginalPrices();
+    }
+  }, [items]);
 
   // Calculate totals
   const itemsPrice = items.reduce(
@@ -74,6 +96,13 @@ export function StreamlinedCheckout() {
   // საკომისიო მოხსნილია - რეალური ფასი ყველგან
   const totalPrice = itemsPrice + shippingPrice;
   const totalUnits = items.reduce((acc, item) => acc + item.qty, 0);
+
+  // Calculate total original price and savings
+  const totalOriginalPrice = items.reduce(
+    (acc, item) => acc + (originalPrices[item.productId] || item.price) * item.qty,
+    0
+  );
+  const totalSavings = totalOriginalPrice - itemsPrice;
 
   // Track Step 3: Begin Checkout (once when items exist)
   useEffect(() => {
@@ -823,6 +852,15 @@ export function StreamlinedCheckout() {
                 <span>{t("cart.totalCost")}</span>
                 <span className="total-amount">{totalPrice.toFixed(2)} ₾</span>
               </div>
+
+              {totalSavings > 0 && (
+                <div className="savings-banner">
+                  <span className="savings-icon">✓</span>
+                  <span className="savings-text">
+                    დაზოგავ: <strong>{totalSavings.toFixed(2)} ₾</strong>
+                  </span>
+                </div>
+              )}
             </div>
 
             {/* Action Buttons in Sidebar */}
