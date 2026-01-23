@@ -6,8 +6,9 @@ import { toast } from "@/hooks/use-toast";
 import { useState, useEffect } from "react";
 import { ProductFormData as BaseProductFormData } from "@/modules/products/validation/product";
 import { useLanguage } from "@/hooks/LanguageContext";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { fetchWithAuth } from "@/lib/fetch-with-auth";
+import { apiClient } from "@/lib/axios";
 import { Color, AgeGroupItem } from "@/types";
 import "./CreateProductForm.css";
 import Image from "next/image";
@@ -40,6 +41,9 @@ interface ProductFormData extends BaseProductFormData {
   discountPercentage?: number;
   discountStartDate?: string;
   discountEndDate?: string;
+  // Campaign/Referral discount fields
+  referralDiscountPercent?: number;
+  useArtistDefaultDiscount?: boolean;
   // New fields are already included in BaseProductFormData
 }
 
@@ -60,6 +64,7 @@ export function CreateProductForm({
 }: CreateProductFormProps) {
   const { language, t } = useLanguage();
   const router = useRouter();
+  const queryClient = useQueryClient();
   const { user, isLoading: userLoading } = useUser();
   const isSeller =
     user?.role?.toLowerCase() === "seller" ||
@@ -143,6 +148,38 @@ export function CreateProductForm({
   const [materialsInput, setMaterialsInput] = useState<string>("");
   const [materialsEn, setMaterialsEn] = useState<string[]>([]);
   const [materialsEnInput, setMaterialsEnInput] = useState<string>("");
+
+  // Campaign/Referral discount states
+  const userDefaultDiscount = (user as any)?.defaultReferralDiscount ?? 0;
+  const [referralDiscountPercent, setReferralDiscountPercent] =
+    useState<number>(
+      initialData?.referralDiscountPercent ?? userDefaultDiscount ?? 10
+    );
+  const [useArtistDefaultDiscount, setUseArtistDefaultDiscount] =
+    useState<boolean>(
+      // Only default to true if user actually has a default discount set
+      userDefaultDiscount > 0
+        ? initialData?.useArtistDefaultDiscount ?? true
+        : false
+    );
+  const [applyDiscountToAll, setApplyDiscountToAll] = useState<boolean>(false);
+
+  // Check if user has per_product campaign choice
+  const hasPerProductChoice =
+    (user as any)?.campaignDiscountChoice === "per_product";
+
+  // Sync referralDiscountPercent when initialData changes (for edit mode)
+  useEffect(() => {
+    if (initialData?.referralDiscountPercent !== undefined) {
+      setReferralDiscountPercent(initialData.referralDiscountPercent);
+    }
+    if (initialData?.useArtistDefaultDiscount !== undefined) {
+      setUseArtistDefaultDiscount(initialData.useArtistDefaultDiscount);
+    }
+  }, [
+    initialData?.referralDiscountPercent,
+    initialData?.useArtistDefaultDiscount,
+  ]);
 
   // Dimensions state
   const [dimensions, setDimensions] = useState<{
@@ -855,10 +892,7 @@ export function CreateProductForm({
 
       if (oversizedFiles.length > 0) {
         const oversizedNames = oversizedFiles
-          .map(
-            (f) =>
-              `${f.name} (${(f.size / (1024 * 1024)).toFixed(1)}MB)`
-          )
+          .map((f) => `${f.name} (${(f.size / (1024 * 1024)).toFixed(1)}MB)`)
           .join(", ");
         setErrors((prev) => ({
           ...prev,
@@ -1203,6 +1237,37 @@ export function CreateProductForm({
       }
       if (discountEndDate) {
         formDataToSend.append("discountEndDate", discountEndDate);
+      }
+
+      // Add campaign/referral discount fields (for sellers with per_product choice)
+      if (hasPerProductChoice) {
+        formDataToSend.append(
+          "useArtistDefaultDiscount",
+          String(useArtistDefaultDiscount)
+        );
+        // Always send referralDiscountPercent
+        formDataToSend.append(
+          "referralDiscountPercent",
+          String(referralDiscountPercent)
+        );
+
+        // If user wants to apply this discount to all products, update their profile
+        if (
+          applyDiscountToAll &&
+          referralDiscountPercent > 0 &&
+          !useArtistDefaultDiscount
+        ) {
+          try {
+            await apiClient.patch("/users/campaign-settings", {
+              campaignDiscountChoice: "all",
+              defaultReferralDiscount: referralDiscountPercent,
+            });
+            // Invalidate user query to refresh the data
+            queryClient.invalidateQueries({ queryKey: ["user"] });
+          } catch (err) {
+            console.error("Failed to update campaign settings:", err);
+          }
+        }
       }
 
       // Add new fields: isOriginal, dimensions, materials
@@ -1587,7 +1652,120 @@ export function CreateProductForm({
           <div className="server-error">
             <p className="create-product-error text-center">{serverError}</p>
           </div>
-        )}{" "}
+        )}
+        {/* Campaign Discount Section - Only for sellers with per_product choice */}
+        {isSeller && hasPerProductChoice && (
+          <div className="campaign-discount-section">
+            <div className="campaign-discount-section__header">
+              <h3 className="campaign-discount-section__title">
+                {language === "en"
+                  ? "Campaign & Influencer Discount"
+                  : "აქციის და ინფლუენსერის ფასდაკლება"}
+              </h3>
+              <p className="campaign-discount-section__subtitle">
+                {language === "en"
+                  ? "Set the maximum discount SoulArt can apply to this product during promotions or for influencer referrals"
+                  : "დააყენე მაქსიმალური ფასდაკლება რამდენიც SoulArt-ს შეუძლია გააკეთოს ამ პროდუქტზე აქციების ან ინფლუენსერის მოწვეული ვიზიტორებისთვის"}
+              </p>
+            </div>
+
+            <div className="campaign-discount-section__options">
+              {/* Only show "use default" option if user has a default discount set */}
+              {userDefaultDiscount > 0 && (
+                <label className="campaign-discount-section__option">
+                  <input
+                    type="radio"
+                    name="campaignDiscountType"
+                    checked={useArtistDefaultDiscount}
+                    onChange={() => setUseArtistDefaultDiscount(true)}
+                  />
+                  <div className="campaign-discount-section__option-content">
+                    <span className="campaign-discount-section__option-title">
+                      {language === "en"
+                        ? `Use my default (${userDefaultDiscount}%)`
+                        : `გამოვიყენო ჩემი საერთო პარამეტრი (${userDefaultDiscount}%)`}
+                    </span>
+                    <span className="campaign-discount-section__option-desc">
+                      {language === "en"
+                        ? "Apply the same discount as your other products"
+                        : "იგივე ფასდაკლება გავრცელდეს, როგორც სხვა ნამუშევრებზე"}
+                    </span>
+                  </div>
+                </label>
+              )}
+
+              <label className="campaign-discount-section__option">
+                <input
+                  type="radio"
+                  name="campaignDiscountType"
+                  checked={
+                    !useArtistDefaultDiscount || userDefaultDiscount === 0
+                  }
+                  onChange={() => setUseArtistDefaultDiscount(false)}
+                />
+                <div className="campaign-discount-section__option-content">
+                  <span className="campaign-discount-section__option-title">
+                    {language === "en"
+                      ? "Set custom discount for this product"
+                      : "ამ პროდუქტისთვის ცალკე ფასდაკლება"}
+                  </span>
+                  {(!useArtistDefaultDiscount || userDefaultDiscount === 0) && (
+                    <>
+                      <div className="campaign-discount-section__input-wrapper">
+                        <input
+                          type="number"
+                          min="0"
+                          max="50"
+                          value={referralDiscountPercent}
+                          onChange={(e) =>
+                            setReferralDiscountPercent(
+                              Math.min(50, Math.max(0, Number(e.target.value)))
+                            )
+                          }
+                          className="campaign-discount-section__input"
+                        />
+                        <span className="campaign-discount-section__input-suffix">
+                          %
+                        </span>
+                        <span className="campaign-discount-section__input-hint">
+                          {language === "en"
+                            ? "(0% = no discount allowed)"
+                            : "(0% = ფასდაკლება არ იქნება)"}
+                        </span>
+                      </div>
+                      {referralDiscountPercent > 0 && (
+                        <label className="campaign-discount-section__apply-all">
+                          <input
+                            type="checkbox"
+                            checked={applyDiscountToAll}
+                            onChange={(e) =>
+                              setApplyDiscountToAll(e.target.checked)
+                            }
+                          />
+                          <span>
+                            {language === "en"
+                              ? "Apply this discount to all my products"
+                              : "ეს ფასდაკლება ყველა ჩემს პროდუქტზე გავრცელდეს"}
+                          </span>
+                        </label>
+                      )}
+                    </>
+                  )}
+                </div>
+              </label>
+            </div>
+          </div>
+        )}
+        <label className="portfolio-checkbox-compact">
+          <input
+            type="checkbox"
+            checked={addToPortfolio}
+            onChange={(e) => setAddToPortfolio(e.target.checked)}
+          />
+          <span>
+            {language === "en" ? "Add to portfolio" : "პორტფოლიოში დამატება"}
+          </span>
+        </label>
         {/* Video and Images - Side by Side */}
         <div className="media-upload-row">
           {/* Video Section */}
@@ -1776,16 +1954,6 @@ export function CreateProductForm({
           )}
         </div>
         {/* Portfolio checkbox - compact */}
-        <label className="portfolio-checkbox-compact">
-          <input
-            type="checkbox"
-            checked={addToPortfolio}
-            onChange={(e) => setAddToPortfolio(e.target.checked)}
-          />
-          <span>
-            {language === "en" ? "Add to portfolio" : "პორტფოლიოში დამატება"}
-          </span>
-        </label>
         <div>
           <label htmlFor="name">{t("adminProducts.productNameGe")}</label>
           <input

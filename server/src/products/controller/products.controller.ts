@@ -593,6 +593,26 @@ export class ProductsController {
         productData.isOriginal = productData.isOriginal === 'true';
       }
 
+      // Parse campaign discount fields
+      const rawReferralDiscountPercent = (productData as any)
+        .referralDiscountPercent;
+      let referralDiscountPercent: number | undefined;
+      if (rawReferralDiscountPercent !== undefined) {
+        referralDiscountPercent = Number(rawReferralDiscountPercent);
+        if (isNaN(referralDiscountPercent)) {
+          referralDiscountPercent = 0;
+        }
+      }
+
+      const rawUseArtistDefaultDiscount = (productData as any)
+        .useArtistDefaultDiscount;
+      let useArtistDefaultDiscount: boolean | undefined;
+      if (typeof rawUseArtistDefaultDiscount === 'string') {
+        useArtistDefaultDiscount = rawUseArtistDefaultDiscount === 'true';
+      } else if (typeof rawUseArtistDefaultDiscount === 'boolean') {
+        useArtistDefaultDiscount = rawUseArtistDefaultDiscount;
+      }
+
       const rawAddToPortfolio = (productData as any).addToPortfolio;
       let addToPortfolio: boolean | undefined;
 
@@ -671,6 +691,9 @@ export class ProductsController {
           images: imageUrls,
           brandLogo: brandLogoUrl,
           videoDescription,
+          // Campaign discount fields
+          referralDiscountPercent,
+          useArtistDefaultDiscount,
           // YouTube data (from form)
           ...(youtubeVideoId && {
             youtubeVideoId,
@@ -1029,6 +1052,39 @@ export class ProductsController {
       updateData.materials = materials;
       updateData.materialsEn = materialsEn;
       updateData.isOriginal = productData.isOriginal;
+
+      // Parse and set campaign discount fields
+      const rawReferralDiscountPercent = (productData as any)
+        .referralDiscountPercent;
+      console.log(
+        '🎯 Campaign discount update - raw value:',
+        rawReferralDiscountPercent,
+      );
+      if (rawReferralDiscountPercent !== undefined) {
+        const parsed = Number(rawReferralDiscountPercent);
+        updateData.referralDiscountPercent = isNaN(parsed) ? 0 : parsed;
+        console.log(
+          '🎯 Campaign discount update - parsed value:',
+          updateData.referralDiscountPercent,
+        );
+      }
+
+      const rawUseArtistDefaultDiscount = (productData as any)
+        .useArtistDefaultDiscount;
+      console.log(
+        '🎯 useArtistDefaultDiscount update - raw value:',
+        rawUseArtistDefaultDiscount,
+      );
+      if (rawUseArtistDefaultDiscount !== undefined) {
+        updateData.useArtistDefaultDiscount =
+          typeof rawUseArtistDefaultDiscount === 'string'
+            ? rawUseArtistDefaultDiscount === 'true'
+            : rawUseArtistDefaultDiscount;
+        console.log(
+          '🎯 useArtistDefaultDiscount update - parsed value:',
+          updateData.useArtistDefaultDiscount,
+        );
+      }
 
       // ========================================
       // GET YOUTUBE DATA FROM FORM (uploaded separately via /upload-video)

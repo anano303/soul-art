@@ -52,6 +52,7 @@ import { ShareButton } from "@/components/share-button/share-button";
 import { trackArtistProfileView } from "@/lib/ga4-analytics";
 import { fetchArtistProducts } from "@/lib/artist-api";
 import { apiClient } from "@/lib/axios";
+import { CampaignConsent } from "@/components/campaign-consent/campaign-consent";
 import "./artist-profile-view.css";
 import "@/components/share-button/share-button.css";
 import "@/components/gallery-interactions.css";
@@ -1074,6 +1075,26 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
                     : "artist-tab-panel--empty"
                 }`}
               >
+                {/* Campaign Consent - Only visible to owner */}
+                {isOwner && user && (
+                  <CampaignConsent
+                    initialChoice={
+                      (user as any)?.campaignDiscountChoice || "none"
+                    }
+                    initialDiscount={
+                      (user as any)?.defaultReferralDiscount || 10
+                    }
+                    language={language}
+                    onSave={async (choice, discount) => {
+                      await apiClient.patch("/users/campaign-settings", {
+                        campaignDiscountChoice: choice,
+                        defaultReferralDiscount: discount,
+                      });
+                      queryClient.invalidateQueries({ queryKey: ["user"] });
+                    }}
+                  />
+                )}
+
                 {productItems.length > 0 ? (
                   <>
                     <div className="artist-grid artist-grid--products">

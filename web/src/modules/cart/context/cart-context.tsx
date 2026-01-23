@@ -166,8 +166,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         setLoading(true);
         try {
           const existingCart = localStorage.getItem("guest_cart");
-          const guestItems: CartItem[] = existingCart ? JSON.parse(existingCart) : [];
-          
+          const guestItems: CartItem[] = existingCart
+            ? JSON.parse(existingCart)
+            : [];
+
           // Find if item already exists
           const existingItemIndex = guestItems.findIndex(
             (item) =>
@@ -292,8 +294,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         setLoading(true);
         try {
           const existingCart = localStorage.getItem("guest_cart");
-          const guestItems: CartItem[] = existingCart ? JSON.parse(existingCart) : [];
-          
+          const guestItems: CartItem[] = existingCart
+            ? JSON.parse(existingCart)
+            : [];
+
           const itemIndex = guestItems.findIndex(
             (item) =>
               item.productId === productId &&
@@ -370,8 +374,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         setLoading(true);
         try {
           const existingCart = localStorage.getItem("guest_cart");
-          const guestItems: CartItem[] = existingCart ? JSON.parse(existingCart) : [];
-          
+          const guestItems: CartItem[] = existingCart
+            ? JSON.parse(existingCart)
+            : [];
+
           const filteredItems = guestItems.filter(
             (item) =>
               !(
@@ -384,7 +390,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
           localStorage.setItem("guest_cart", JSON.stringify(filteredItems));
           setItems(filteredItems);
-          
+
           toast({
             title: "პროდუქტი წაშალდა",
             description: "პროდუქტი წარმატებით წაშალდა კალათიდან",
@@ -393,7 +399,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           console.error("Error removing item from guest cart:", error);
           toast({
             title: "Error",
-            description: "There was a problem removing your item from the cart.",
+            description:
+              "There was a problem removing your item from the cart.",
             variant: "destructive",
           });
         } finally {
@@ -492,7 +499,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           const { data } = await apiClient.get("/cart");
           const serverItems: CartItem[] = data.items || [];
           setItems(serverItems);
-          
+
           // Sync guest cart if exists
           const guestCart = localStorage.getItem("guest_cart");
           if (guestCart) {
@@ -509,12 +516,12 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
                       (serverItem.color || "") === (guestItem.color || "") &&
                       (serverItem.ageGroup || "") === (guestItem.ageGroup || "")
                   );
-                  
+
                   // Calculate new quantity (add guest qty to existing or use guest qty)
-                  const newQty = existingItem 
-                    ? existingItem.qty + guestItem.qty 
+                  const newQty = existingItem
+                    ? existingItem.qty + guestItem.qty
                     : guestItem.qty;
-                  
+
                   await apiClient.post("/cart/items", {
                     productId: guestItem.productId,
                     qty: newQty,

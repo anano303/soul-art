@@ -148,6 +148,15 @@ export class User {
   @Prop({ type: Number, default: 3 })
   salesCommissionRate?: number;
 
+  // Campaign/Referral discount settings for sellers
+  // Choice: 'all' = allow on all products, 'per_product' = choose per product, 'none' = no discounts
+  @Prop({ type: String, enum: ['all', 'per_product', 'none'], default: 'none' })
+  campaignDiscountChoice?: 'all' | 'per_product' | 'none';
+
+  // Default discount % that SoulArt can apply during campaigns (when choice is 'all')
+  @Prop({ type: Number, min: 0, max: 50, default: 0 })
+  defaultReferralDiscount?: number; // 0 = no permission, >0 = allowed %
+
   // რეფერალების სისტემა
   @Prop({ type: String, unique: true, sparse: true })
   referralCode?: string; // უნიკალური რეფერალური კოდი

@@ -228,6 +228,15 @@ export class ProductDto {
   @IsOptional()
   addToPortfolio?: boolean;
 
+  // Campaign/Referral discount permission
+  @IsNumber()
+  @IsOptional()
+  referralDiscountPercent?: number;
+
+  @IsBoolean()
+  @IsOptional()
+  useArtistDefaultDiscount?: boolean;
+
   // Add the missing property for existing images
   @IsString()
   @IsOptional()

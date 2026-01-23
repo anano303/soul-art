@@ -32,7 +32,14 @@ import HeartLoading from "@/components/HeartLoading/HeartLoading";
 
 const STORAGE_KEY = "soulart-admin-users-state";
 type RoleFilter = "all" | Role;
-type SortOption = "none" | "productCount-desc" | "productCount-asc" | "lastProductDate-desc" | "lastProductDate-asc" | "active-desc" | "active-asc";
+type SortOption =
+  | "none"
+  | "productCount-desc"
+  | "productCount-asc"
+  | "lastProductDate-desc"
+  | "lastProductDate-asc"
+  | "active-desc"
+  | "active-asc";
 type ActiveFilter = "all" | "active" | "inactive";
 
 export function UsersList() {
@@ -130,8 +137,25 @@ export function UsersList() {
   }, [sortOption]);
 
   const { data, error, isLoading, isFetching } = useQuery({
-    queryKey: ["users", page, debouncedSearch, roleFilter, sortBy, sortOrder, activeFilter],
-    queryFn: () => getUsers(page, 8, debouncedSearch, roleFilter, sortBy, sortOrder, isSellerFilter ? activeFilter : undefined),
+    queryKey: [
+      "users",
+      page,
+      debouncedSearch,
+      roleFilter,
+      sortBy,
+      sortOrder,
+      activeFilter,
+    ],
+    queryFn: () =>
+      getUsers(
+        page,
+        30,
+        debouncedSearch,
+        roleFilter,
+        sortBy,
+        sortOrder,
+        isSellerFilter ? activeFilter : undefined
+      ),
     retry: false,
     staleTime: 30 * 1000, // 30 seconds
     refetchInterval: 60 * 1000, // Auto-refresh every minute for new users
@@ -173,16 +197,16 @@ export function UsersList() {
     // Calculate active and inactive sellers from sellerProductStats
     let activeSellers = 0;
     let inactiveSellers = 0;
-    
+
     if (data?.sellerProductStats) {
       const stats = Object.values(data.sellerProductStats);
       activeSellers = stats.filter((s: any) => s.productCount > 0).length;
     }
-    
+
     // Get total sellers count
     const totalSellers = data?.summary?.roleCounts?.seller ?? 0;
     inactiveSellers = Math.max(0, totalSellers - activeSellers);
-    
+
     // If we have activeSellers from server summary, use that
     if (data?.summary?.activeSellers !== undefined) {
       activeSellers = data.summary.activeSellers;
@@ -192,8 +216,11 @@ export function UsersList() {
     // Sales managers stats
     const salesManager = data?.summary?.roleCounts?.sales_manager ?? 0;
     const activeSalesManagers = data?.summary?.activeSalesManagers ?? 0;
-    const inactiveSalesManagers = Math.max(0, salesManager - activeSalesManagers);
-    
+    const inactiveSalesManagers = Math.max(
+      0,
+      salesManager - activeSalesManagers
+    );
+
     return {
       totalUsers: data?.summary?.totalUsers ?? data?.total ?? 0,
       admin: data?.summary?.roleCounts?.admin ?? 0,
@@ -311,7 +338,8 @@ export function UsersList() {
               {summary.seller.toLocaleString()}
               {isSellerFilter && (
                 <span className="usr-seller-breakdown">
-                  ({summary.activeSellers} აქტიური / {summary.inactiveSellers} არააქტიური)
+                  ({summary.activeSellers} აქტიური / {summary.inactiveSellers}{" "}
+                  არააქტიური)
                 </span>
               )}
             </span>
@@ -321,7 +349,8 @@ export function UsersList() {
             <span className="usr-summary-value">
               {summary.salesManager.toLocaleString()}
               <span className="usr-seller-breakdown">
-                ({summary.activeSalesManagers} აქტიური / {summary.inactiveSalesManagers} არააქტიური)
+                ({summary.activeSalesManagers} აქტიური /{" "}
+                {summary.inactiveSalesManagers} არააქტიური)
               </span>
             </span>
           </div>
@@ -348,8 +377,8 @@ export function UsersList() {
             <th className="usr-th">ROLE</th>
             {isSellerFilter && (
               <>
-                <th 
-                  className="usr-th usr-th-sortable" 
+                <th
+                  className="usr-th usr-th-sortable"
                   onClick={() => {
                     if (sortOption === "active-desc") {
                       setSortOption("active-asc");
@@ -366,7 +395,7 @@ export function UsersList() {
                     )}
                   </span>
                 </th>
-                <th 
+                <th
                   className="usr-th usr-th-sortable"
                   onClick={() => {
                     if (sortOption === "productCount-desc") {
@@ -384,7 +413,7 @@ export function UsersList() {
                     )}
                   </span>
                 </th>
-                <th 
+                <th
                   className="usr-th usr-th-sortable"
                   onClick={() => {
                     if (sortOption === "lastProductDate-desc") {
@@ -511,7 +540,10 @@ export function UsersList() {
             })
           ) : (
             <tr className="usr-tr usr-empty-row">
-              <td className="usr-td usr-td-center" colSpan={isSellerFilter ? 9 : 6}>
+              <td
+                className="usr-td usr-td-center"
+                colSpan={isSellerFilter ? 9 : 6}
+              >
                 No users found
               </td>
             </tr>

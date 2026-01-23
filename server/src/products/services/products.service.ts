@@ -876,6 +876,12 @@ export class ProductsService {
     if (data.discountEndDate !== undefined)
       updateFields.discountEndDate = data.discountEndDate;
 
+    // Add campaign/referral discount fields
+    if (data.referralDiscountPercent !== undefined)
+      updateFields.referralDiscountPercent = data.referralDiscountPercent;
+    if (data.useArtistDefaultDiscount !== undefined)
+      updateFields.useArtistDefaultDiscount = data.useArtistDefaultDiscount;
+
     // Always update category fields separately to ensure they're set correctly
     if (data.category) updateFields.category = data.category;
     if (data.mainCategory !== undefined) {
