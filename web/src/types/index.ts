@@ -301,6 +301,7 @@ export interface PaginatedResponse<T> {
   total: number;
   page: number;
   pages: number;
+  sellerProductStats?: Record<string, { productCount: number; lastProductDate: Date | null }>;
   summary?: {
     totalUsers: number;
     roleCounts: {
@@ -308,6 +309,9 @@ export interface PaginatedResponse<T> {
       seller: number;
       user: number;
       blogger: number;
+      sales_manager?: number;
     };
+    activeSellers?: number;
+    activeSalesManagers?: number;
   };
 }
