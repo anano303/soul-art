@@ -141,8 +141,8 @@ export function CampaignConsentModal({
           </h2>
           <p className="campaign-modal__subtitle">
             {language === "en"
-              ? "Allow SoulArt to offer special discounts on your products during campaigns and for influencer referrals. This can increase your sales!"
-              : "მიეცი SoulArt-ს უფლება აქციებისა და ინფლუენსერების მოწვეული ვიზიტორების დროს სპეციალური ფასდაკლება გააკეთოს შენს ნამუშევრებზე. ეს გაყიდვებს გაგიზრდის!"}
+              ? "Allow SoulArt to offer special discounts on your products during campaigns and for influencer promo codes. This can increase your sales!"
+              : "მიეცი SoulArt-ს უფლება აქციებისა და ინფლუენსერების გაცემული პრომო კოდის დროს სპეციალური ფასდაკლება გააკეთოს შენს ნამუშევრებზე. ეს გაყიდვებს გაგიზრდის!"}
           </p>
         </div>
 
