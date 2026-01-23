@@ -37,9 +37,14 @@ export class Order {
         qty: { required: true, type: Number },
         image: { required: true, type: String },
         price: { required: true, type: Number },
+        originalPrice: { required: false, type: Number }, // Price before any discounts
         size: { required: false, type: String },
         color: { required: false, type: String },
         ageGroup: { required: false, type: String },
+        // Referral/Campaign discount fields
+        referralDiscountPercent: { required: false, type: Number, default: 0 },
+        referralDiscountAmount: { required: false, type: Number, default: 0 },
+        hasReferralDiscount: { required: false, type: Boolean, default: false },
         productId: {
           type: mongoose.Schema.Types.ObjectId,
           required: true,
@@ -140,6 +145,19 @@ export class Order {
   // Sales Manager referral code (from cookie)
   @Prop({ type: String, default: null })
   salesRefCode?: string;
+
+  // Campaign/Referral discount tracking
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Campaign', default: null })
+  campaignId?: mongoose.Types.ObjectId;
+
+  @Prop({ type: String, default: null })
+  campaignName?: string;
+
+  @Prop({ type: Number, default: 0 })
+  totalReferralDiscount?: number; // Total discount from referral/campaign
+
+  @Prop({ type: Boolean, default: false })
+  hasReferralDiscount?: boolean; // Quick flag to identify referral orders
 }
 
 export const OrderSchema = SchemaFactory.createForClass(Order);

@@ -286,7 +286,11 @@ export class OrdersService {
     }
   }
   async create(
-    orderAttrs: Partial<Order> & { salesRefCode?: string },
+    orderAttrs: Partial<Order> & { 
+      salesRefCode?: string;
+      totalReferralDiscount?: number;
+      hasReferralDiscount?: boolean;
+    },
     userId: string,
     externalOrderId?: string,
   ): Promise<OrderDocument> {
@@ -299,6 +303,8 @@ export class OrdersService {
       shippingPrice,
       totalPrice,
       salesRefCode,
+      totalReferralDiscount,
+      hasReferralDiscount,
     } = orderAttrs;
     if (orderItems && orderItems.length < 1)
       throw new BadRequestException('No order items received.');
@@ -431,6 +437,8 @@ export class OrdersService {
               totalPrice,
               externalOrderId,
               salesRefCode: salesRefCode || null,
+              totalReferralDiscount: totalReferralDiscount || 0,
+              hasReferralDiscount: hasReferralDiscount || false,
               stockReservationExpires: new Date(Date.now() + 10 * 60 * 1000), // 10 minutes from now
             },
           ],
@@ -449,6 +457,8 @@ export class OrdersService {
     orderAttrs: Partial<Order> & {
       guestInfo: { email: string; phoneNumber: string; fullName: string };
       salesRefCode?: string;
+      totalReferralDiscount?: number;
+      hasReferralDiscount?: boolean;
     },
     externalOrderId?: string,
   ): Promise<OrderDocument> {
@@ -462,6 +472,8 @@ export class OrdersService {
       totalPrice,
       guestInfo,
       salesRefCode,
+      totalReferralDiscount,
+      hasReferralDiscount,
     } = orderAttrs;
 
     if (orderItems && orderItems.length < 1)
@@ -604,6 +616,8 @@ export class OrdersService {
               totalPrice,
               externalOrderId,
               salesRefCode: salesRefCode || null,
+              totalReferralDiscount: totalReferralDiscount || 0,
+              hasReferralDiscount: hasReferralDiscount || false,
               stockReservationExpires: new Date(Date.now() + 10 * 60 * 1000), // 10 minutes from now
             },
           ],

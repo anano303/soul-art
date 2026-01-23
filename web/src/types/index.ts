@@ -218,6 +218,9 @@ export interface Product {
   discountPercentage?: number;
   discountStartDate?: string;
   discountEndDate?: string;
+  // Campaign/Referral discount
+  referralDiscountPercent?: number; // Max % discount allowed for referral campaigns
+  useArtistDefaultDiscount?: boolean; // Use artist's default discount instead of custom
   // Store visibility
   hideFromStore?: boolean;
 }

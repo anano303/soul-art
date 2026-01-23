@@ -789,6 +789,55 @@
   color: #c0392b;
 }
 
+/* Referral/Campaign special pricing */
+.referral-price-container {
+  position: relative;
+}
+
+.referral-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  background: linear-gradient(135deg, #8b5cf6, #6366f1);
+  color: white;
+  font-size: 0.65rem;
+  font-weight: 600;
+  border-radius: 4px;
+  margin-bottom: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  animation: pulse-subtle 2s ease-in-out infinite;
+}
+
+.referral-badge svg {
+  width: 10px;
+  height: 10px;
+}
+
+.referral-final-price {
+  color: #7c3aed !important;
+  font-weight: 700;
+}
+
+/* Handmade theme referral price */
+.handmade-theme .referral-badge {
+  background: linear-gradient(135deg, var(--secondary-color), #9b2c2c);
+}
+
+.handmade-theme .referral-final-price {
+  color: var(--secondary-color) !important;
+}
+
+@keyframes pulse-subtle {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.85;
+  }
+}
+
 /* Handmade theme discounted price */
 .handmade-theme .discounted-price {
   color: var(--secondary-color);
