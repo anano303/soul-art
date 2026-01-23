@@ -4,7 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Star } from "lucide-react";
+import { Star, Tag } from "lucide-react";
 import "./ProductCard.css";
 import { Product } from "@/types";
 import { AddToCartButton } from "./AddToCartButton";
@@ -16,6 +16,7 @@ import Star2 from "../../../assets/Images/startHandMade.png";
 import { useLanguage } from "@/hooks/LanguageContext";
 import { trackProductInteraction, trackAddToCart } from "@/lib/ga4-analytics";
 import { optimizeCloudinaryUrl } from "@/lib/utils";
+import { useReferralPricing } from "@/hooks/use-referral-pricing";
 
 interface ProductCardProps {
   product: Product;
@@ -33,6 +34,9 @@ export function ProductCard({
   const { addToCart, isItemInCart } = useCart();
   const { toast } = useToast();
   const [isBuying, setIsBuying] = useState(false);
+
+  // Check for referral pricing
+  const referralPricing = useReferralPricing(product);
 
   // ვამოწმებთ სურათის ვალიდურობას და ვოპტიმიზირებთ Cloudinary URL-ს
   const rawImage = product.images?.[0] || noPhoto.src;
@@ -190,23 +194,28 @@ export function ProductCard({
       // Check if item is already in cart
       const isInCart = isItemInCart(product._id);
 
+      // Calculate the correct price to use
+      const priceToUse = referralPricing.hasReferralDiscount 
+        ? referralPricing.referralPrice 
+        : (isDiscounted ? discountedPrice : product.price);
+
       if (!isInCart) {
         // Track quick purchase action
         trackAddToCart(
           product._id,
           displayName,
-          isDiscounted ? discountedPrice : product.price,
+          priceToUse,
           1
         );
 
-        // Add item to cart with discounted price if applicable
+        // Add item to cart with the correct price
         await addToCart(
           product._id,
           1,
           undefined,
           undefined,
           undefined,
-          isDiscounted ? discountedPrice : product.price
+          priceToUse
         );
       }
 
@@ -374,7 +383,34 @@ export function ProductCard({
         <div className="product-info product-info-bottom">
           <div className="product-details">
             <div className="priceAndRaiting">
-              {isDiscounted ? (
+              {/* Show referral pricing if applicable */}
+              {referralPricing.hasReferralDiscount ? (
+                <div className="price-container referral-price-container">
+                  <div className="referral-badge">
+                    <Tag size={12} />
+                    <span>
+                      {language === "en" ? "Special Price" : "სპეც. ფასი"}
+                    </span>
+                  </div>
+                  <span
+                    className="original-price"
+                    style={{ fontSize: "0.75rem" }}
+                  >
+                    {referralPricing.originalPrice.toFixed(2)} ₾
+                  </span>
+                  {isDiscounted && referralPricing.basePrice !== referralPricing.originalPrice && (
+                    <span
+                      className="original-price"
+                      style={{ fontSize: "0.75rem", textDecoration: "line-through", opacity: 0.6 }}
+                    >
+                      {referralPricing.basePrice.toFixed(2)} ₾
+                    </span>
+                  )}
+                  <h3 className="product-price referral-final-price">
+                    {referralPricing.referralPrice.toFixed(2)} ₾
+                  </h3>
+                </div>
+              ) : isDiscounted ? (
                 <div className="price-container">
                   <span
                     className="original-price"
@@ -401,7 +437,7 @@ export function ProductCard({
           productName={displayName}
           countInStock={availableStock}
           className="btn-add-to-cart-icon"
-          price={isDiscounted ? discountedPrice : product.price}
+          price={referralPricing.hasReferralDiscount ? referralPricing.referralPrice : (isDiscounted ? discountedPrice : product.price)}
           hideQuantity={true}
           openCartOnAdd={false}
           iconOnly={true}

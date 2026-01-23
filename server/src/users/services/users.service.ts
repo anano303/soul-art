@@ -1135,7 +1135,10 @@ export class UsersService {
     activeFilter?: string,
   ): Promise<
     PaginatedResponse<UserDocument> & {
-      sellerProductStats?: Record<string, { productCount: number; lastProductDate: Date | null }>;
+      sellerProductStats?: Record<
+        string,
+        { productCount: number; lastProductDate: Date | null }
+      >;
       summary: {
         totalUsers: number;
         roleCounts: Record<Role, number>;
@@ -1153,8 +1156,10 @@ export class UsersService {
     const filters: FilterQuery<User> = {};
 
     const normalizedRole = role?.toLowerCase();
-    const isSellerFilter = normalizedRole === Role.Seller || normalizedRole === Role.SellerAndSalesManager;
-    
+    const isSellerFilter =
+      normalizedRole === Role.Seller ||
+      normalizedRole === Role.SellerAndSalesManager;
+
     if (
       normalizedRole &&
       Object.values(Role).includes(normalizedRole as Role)
@@ -1174,9 +1179,12 @@ export class UsersService {
     }
 
     // Get seller product stats if filtering by seller role
-    let sellerProductStats: Map<string, { productCount: number; lastProductDate: Date | null }> = new Map();
+    let sellerProductStats: Map<
+      string,
+      { productCount: number; lastProductDate: Date | null }
+    > = new Map();
     let activeSellersCount = 0;
-    
+
     if (isSellerFilter || sortBy === 'productCount') {
       // Get product counts and last upload date for all sellers
       const productAggregation = await this.productModel.aggregate([
@@ -1188,7 +1196,7 @@ export class UsersService {
           },
         },
       ]);
-      
+
       productAggregation.forEach((stat) => {
         if (stat._id) {
           sellerProductStats.set(stat._id.toString(), {
@@ -1197,9 +1205,11 @@ export class UsersService {
           });
         }
       });
-      
+
       // Count active sellers (those with at least 1 product)
-      activeSellersCount = productAggregation.filter(s => s.productCount > 0).length;
+      activeSellersCount = productAggregation.filter(
+        (s) => s.productCount > 0,
+      ).length;
     }
 
     // Default sort
@@ -1209,7 +1219,13 @@ export class UsersService {
     let users: UserDocument[];
     let filteredTotal: number;
 
-    if ((sortBy === 'productCount' || sortBy === 'active' || sortBy === 'lastProductDate' || activeFilter) && isSellerFilter) {
+    if (
+      (sortBy === 'productCount' ||
+        sortBy === 'active' ||
+        sortBy === 'lastProductDate' ||
+        activeFilter) &&
+      isSellerFilter
+    ) {
       // Get all matching users first
       const allUsers = await this.userModel.find(filters).exec();
 
@@ -1229,9 +1245,9 @@ export class UsersService {
 
       // Apply activeFilter
       if (activeFilter === 'active') {
-        usersWithStats = usersWithStats.filter(u => u.isActive);
+        usersWithStats = usersWithStats.filter((u) => u.isActive);
       } else if (activeFilter === 'inactive') {
-        usersWithStats = usersWithStats.filter(u => !u.isActive);
+        usersWithStats = usersWithStats.filter((u) => !u.isActive);
       }
 
       filteredTotal = usersWithStats.length;
@@ -1239,15 +1255,19 @@ export class UsersService {
       // Sort by the chosen field
       usersWithStats.sort((a, b) => {
         const multiplier = sortOrder === 'asc' ? 1 : -1;
-        
+
         if (sortBy === 'productCount') {
           return multiplier * (a.productCount - b.productCount);
         } else if (sortBy === 'active') {
           // Active first when desc, inactive first when asc
           return multiplier * ((a.isActive ? 1 : 0) - (b.isActive ? 1 : 0));
         } else if (sortBy === 'lastProductDate') {
-          const dateA = a.lastProductDate ? new Date(a.lastProductDate).getTime() : 0;
-          const dateB = b.lastProductDate ? new Date(b.lastProductDate).getTime() : 0;
+          const dateA = a.lastProductDate
+            ? new Date(a.lastProductDate).getTime()
+            : 0;
+          const dateB = b.lastProductDate
+            ? new Date(b.lastProductDate).getTime()
+            : 0;
           return multiplier * (dateA - dateB);
         }
         return 0;
@@ -1319,7 +1339,8 @@ export class UsersService {
     // Count active sales managers (those who have at least one tracking event)
     let activeSalesManagersCount = 0;
     try {
-      const activeSalesManagers = await this.salesTrackingModel.distinct('salesManager');
+      const activeSalesManagers =
+        await this.salesTrackingModel.distinct('salesManager');
       activeSalesManagersCount = activeSalesManagers.length;
     } catch (err) {
       this.logger.warn('Failed to count active sales managers', err);
@@ -1328,13 +1349,19 @@ export class UsersService {
     const totalPages = Math.max(Math.ceil(filteredTotal / normalizedLimit), 1);
 
     // Convert sellerProductStats Map to object for JSON serialization
-    const sellerProductStatsObj: Record<string, { productCount: number; lastProductDate: Date | null }> = {};
+    const sellerProductStatsObj: Record<
+      string,
+      { productCount: number; lastProductDate: Date | null }
+    > = {};
     sellerProductStats.forEach((value, key) => {
       sellerProductStatsObj[key] = value;
     });
 
     const result: PaginatedResponse<UserDocument> & {
-      sellerProductStats?: Record<string, { productCount: number; lastProductDate: Date | null }>;
+      sellerProductStats?: Record<
+        string,
+        { productCount: number; lastProductDate: Date | null }
+      >;
       summary: {
         totalUsers: number;
         roleCounts: Record<Role, number>;
@@ -1867,6 +1894,61 @@ export class UsersService {
         'Failed to update profile image: ' + error.message,
       );
     }
+  }
+
+  /**
+   * Update campaign discount settings for a seller
+   */
+  async updateCampaignSettings(
+    userId: string,
+    campaignDiscountChoice: 'all' | 'per_product' | 'none',
+    defaultReferralDiscount: number,
+  ) {
+    const user = await this.userModel.findById(userId);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    user.campaignDiscountChoice = campaignDiscountChoice;
+    user.defaultReferralDiscount =
+      campaignDiscountChoice === 'all' ? defaultReferralDiscount : 0;
+    await user.save();
+
+    // If user chose "all", update all their products to use the default discount
+    if (campaignDiscountChoice === 'all' && defaultReferralDiscount > 0) {
+      await this.productModel.updateMany(
+        { user: new Types.ObjectId(userId) },
+        {
+          $set: {
+            useArtistDefaultDiscount: true,
+            referralDiscountPercent: defaultReferralDiscount,
+          },
+        },
+      );
+      console.log(
+        `🎯 Updated all products for user ${userId} with referralDiscountPercent: ${defaultReferralDiscount}`,
+      );
+    } else if (campaignDiscountChoice === 'none') {
+      // If user chose "none", disable discounts on all products
+      await this.productModel.updateMany(
+        { user: new Types.ObjectId(userId) },
+        {
+          $set: {
+            useArtistDefaultDiscount: false,
+            referralDiscountPercent: 0,
+          },
+        },
+      );
+      console.log(
+        `🎯 Disabled campaign discounts for all products of user ${userId}`,
+      );
+    }
+
+    return {
+      message: 'Campaign settings updated successfully',
+      campaignDiscountChoice: user.campaignDiscountChoice,
+      defaultReferralDiscount: user.defaultReferralDiscount,
+    };
   }
 
   async updateSellerLogo(userId: string, filePath: string, fileBuffer: Buffer) {

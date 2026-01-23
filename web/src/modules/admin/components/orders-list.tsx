@@ -11,6 +11,7 @@ import {
   XCircle,
   Wallet,
   Heart,
+  Tag,
 } from "lucide-react";
 import { Order } from "@/types/order";
 import "./orders-list.css";
@@ -243,7 +244,15 @@ export function OrdersList({ salesManagerMode = false }: OrdersListProps) {
                       : "Unknown"}
                   </td>
                   <td>
-                    {order.totalPrice ? order.totalPrice.toFixed(2) : "0.00"} ₾
+                    <div className="price-cell">
+                      {order.totalPrice ? order.totalPrice.toFixed(2) : "0.00"} ₾
+                      {(order as any).hasReferralDiscount && (
+                        <span className="referral-discount-badge" title={`რეფერალ ფასდაკლება: ${((order as any).totalReferralDiscount || 0).toFixed(2)} ₾`}>
+                          <Tag size={12} />
+                          -{((order as any).totalReferralDiscount || 0).toFixed(2)} ₾
+                        </span>
+                      )}
+                    </div>
                   </td>
                   <td>
                     {order.orderItems &&

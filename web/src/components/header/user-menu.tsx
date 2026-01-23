@@ -28,6 +28,7 @@ import {
   Heart,
   Mail,
   Cloud,
+  Percent,
 } from "lucide-react";
 
 // Add a style object for the FiraGo font
@@ -449,6 +450,14 @@ export default function UserMenu({
                 >
                   <DollarSign size={18} />
                   <span>გაყიდვების მენეჯერები</span>
+                </Link>
+                <Link
+                  href="/admin/campaigns"
+                  className="dropdown-item"
+                  onClick={handleLinkClick}
+                >
+                  <Percent size={18} />
+                  <span>აქციები</span>
                 </Link>
               </>
             )}

@@ -27,6 +27,7 @@ import { AnalyticsModule } from '../analytics/analytics.module';
 import { DonationsModule } from '../donations/donations.module';
 import { ChatModule } from '../chat/chat.module';
 import { SalesCommissionModule } from '../sales-commission/sales-commission.module';
+import { CampaignsModule } from '../campaigns/campaigns.module';
 
 @Module({
   imports: [
@@ -59,6 +60,7 @@ import { SalesCommissionModule } from '../sales-commission/sales-commission.modu
     DonationsModule,
     ChatModule,
     SalesCommissionModule,
+    CampaignsModule,
   ],
   controllers: [AppController],
   providers: [AppService, GoogleStrategy],

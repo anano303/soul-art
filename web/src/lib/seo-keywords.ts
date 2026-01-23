@@ -522,9 +522,20 @@ const fetchProductKeywordsInternal = cache(async (): Promise<string[]> => {
 
     while (page <= PRODUCT_MAX_PAGES) {
       const url = `${apiBase}/products?page=${page}&limit=${PRODUCT_FETCH_LIMIT}&sort=createdAt&direction=desc&populate=user&select=name,nameEn,brand,brandLogo,description,descriptionEn,summary,summaryEn,category,subCategory,mainCategory,hashtags,materials,colors,sizes,ageGroups,images,variants,seoTitle,seoDescription,slug,videoDescription,youtubeVideoId,youtubeVideoUrl,youtubeEmbedUrl,categoryStructure,deliveryType,minDeliveryDays,maxDeliveryDays,discountPercentage,discountStartDate,discountEndDate,dimensions,isOriginal,reviews,viewCount,rating,numReviews,price,countInStock,user`;
-      const response = await fetch(url, {
-        next: { revalidate: 3600 },
-      });
+
+      let response: Response;
+      try {
+        response = await fetch(url, {
+          next: { revalidate: 3600 },
+        });
+      } catch (fetchError) {
+        // Network error - API might be unavailable during build or SSR
+        console.warn(
+          "Network error fetching product keywords, skipping:",
+          fetchError instanceof Error ? fetchError.message : fetchError
+        );
+        break;
+      }
 
       if (!response.ok) {
         console.warn("Failed to fetch product keywords", response.status);
@@ -765,13 +776,23 @@ const fetchArtistKeywordsInternal = cache(async (): Promise<string[]> => {
 
     while (page <= ARTIST_MAX_PAGES) {
       const url = `${apiBase}/artists?limit=${ARTIST_FETCH_LIMIT}&page=${page}`;
-      const response = await fetch(url, {
-        next: { revalidate: 3600 },
-        headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json",
-        },
-      });
+
+      let response: Response;
+      try {
+        response = await fetch(url, {
+          next: { revalidate: 3600 },
+          headers: {
+            Accept: "application/json",
+            "Content-Type": "application/json",
+          },
+        });
+      } catch (fetchError) {
+        console.warn(
+          "Network error fetching artist keywords, skipping:",
+          fetchError instanceof Error ? fetchError.message : fetchError
+        );
+        break;
+      }
 
       if (!response.ok) {
         console.warn("Failed to fetch artist keywords", response.status);
@@ -887,13 +908,23 @@ const fetchForumKeywordsInternal = cache(async (): Promise<string[]> => {
 
     while (page <= FORUM_MAX_PAGES) {
       const url = `${apiBase}/forums?page=${page}&take=${FORUM_FETCH_TAKE}`;
-      const response = await fetch(url, {
-        next: { revalidate: 1800 },
-        headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json",
-        },
-      });
+
+      let response: Response;
+      try {
+        response = await fetch(url, {
+          next: { revalidate: 1800 },
+          headers: {
+            Accept: "application/json",
+            "Content-Type": "application/json",
+          },
+        });
+      } catch (fetchError) {
+        console.warn(
+          "Network error fetching forum keywords, skipping:",
+          fetchError instanceof Error ? fetchError.message : fetchError
+        );
+        break;
+      }
 
       if (!response.ok) {
         console.warn("Failed to fetch forum keywords", response.status);
@@ -974,13 +1005,23 @@ const fetchCategoryKeywordsInternal = cache(async (): Promise<string[]> => {
 
     while (page <= CATEGORY_MAX_PAGES) {
       const url = `${apiBase}/categories?page=${page}&limit=${CATEGORY_FETCH_LIMIT}&includeInactive=true`;
-      const response = await fetch(url, {
-        next: { revalidate: 3600 },
-        headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json",
-        },
-      });
+
+      let response: Response;
+      try {
+        response = await fetch(url, {
+          next: { revalidate: 3600 },
+          headers: {
+            Accept: "application/json",
+            "Content-Type": "application/json",
+          },
+        });
+      } catch (fetchError) {
+        console.warn(
+          "Network error fetching category keywords, skipping:",
+          fetchError instanceof Error ? fetchError.message : fetchError
+        );
+        break;
+      }
 
       if (!response.ok) {
         console.warn("Failed to fetch category keywords", response.status);
@@ -1052,13 +1093,23 @@ const fetchSubCategoryKeywordsInternal = cache(async (): Promise<string[]> => {
 
     while (page <= SUBCATEGORY_MAX_PAGES) {
       const url = `${apiBase}/subcategories?page=${page}&limit=${SUBCATEGORY_FETCH_LIMIT}&includeInactive=true`;
-      const response = await fetch(url, {
-        next: { revalidate: 3600 },
-        headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json",
-        },
-      });
+
+      let response: Response;
+      try {
+        response = await fetch(url, {
+          next: { revalidate: 3600 },
+          headers: {
+            Accept: "application/json",
+            "Content-Type": "application/json",
+          },
+        });
+      } catch (fetchError) {
+        console.warn(
+          "Network error fetching subcategory keywords, skipping:",
+          fetchError instanceof Error ? fetchError.message : fetchError
+        );
+        break;
+      }
 
       if (!response.ok) {
         console.warn("Failed to fetch subcategory keywords", response.status);
@@ -1126,13 +1177,23 @@ const fetchBannerKeywordsInternal = cache(async (): Promise<string[]> => {
 
   try {
     const url = `${apiBase}/banners/active`;
-    const response = await fetch(url, {
-      next: { revalidate: 900 },
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-      },
-    });
+
+    let response: Response;
+    try {
+      response = await fetch(url, {
+        next: { revalidate: 900 },
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+      });
+    } catch (fetchError) {
+      console.warn(
+        "Network error fetching banner keywords, skipping:",
+        fetchError instanceof Error ? fetchError.message : fetchError
+      );
+      return [];
+    }
 
     if (!response.ok) {
       console.warn("Failed to fetch banner keywords", response.status);

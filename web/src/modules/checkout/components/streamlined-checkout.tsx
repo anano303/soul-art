@@ -249,18 +249,30 @@ export function StreamlinedCheckout() {
         return;
       }
 
-      // Create order
+      // Create order with referral discount info
       const orderItems = items.map((item) => ({
         name: item.name,
         nameEn: item.nameEn,
         qty: item.qty,
         image: item.image,
         price: item.price,
+        originalPrice: item.originalPrice,
         productId: item.productId,
         size: item.size,
         color: item.color,
         ageGroup: item.ageGroup,
+        // Include referral discount info if present
+        referralDiscountPercent: item.referralDiscountPercent || 0,
+        referralDiscountAmount: item.referralDiscountAmount || 0,
+        hasReferralDiscount: item.hasReferralDiscount || false,
       }));
+
+      // Calculate total referral discount
+      const totalReferralDiscount = items.reduce(
+        (acc, item) => acc + (item.referralDiscountAmount || 0) * item.qty,
+        0
+      );
+      const hasReferralDiscount = items.some(item => item.hasReferralDiscount);
 
       const orderPayload: {
         orderItems: typeof orderItems;
@@ -272,6 +284,8 @@ export function StreamlinedCheckout() {
         totalPrice: number;
         guestInfo?: typeof guestInfo;
         salesRefCode?: string | null;
+        totalReferralDiscount?: number;
+        hasReferralDiscount?: boolean;
       } = {
         orderItems,
         shippingDetails: shippingAddress,
@@ -281,6 +295,8 @@ export function StreamlinedCheckout() {
         shippingPrice,
         totalPrice, // რეალური ფასი საკომისიოს გარეშე
         salesRefCode: Cookies.get("sales_ref") || null,
+        totalReferralDiscount,
+        hasReferralDiscount,
       };
 
       // Add guest info if guest checkout

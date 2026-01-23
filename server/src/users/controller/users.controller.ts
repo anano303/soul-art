@@ -4,6 +4,7 @@ import {
   Delete,
   Get,
   Param,
+  Patch,
   Post,
   Put,
   Query,
@@ -50,7 +51,43 @@ export class UsersController {
     const pageNumber = parseInt(page, 10);
     const limitNumber = parseInt(limit, 10);
 
-    return this.usersService.findAll(pageNumber, limitNumber, search, role, sortBy, sortOrder, activeFilter);
+    return this.usersService.findAll(
+      pageNumber,
+      limitNumber,
+      search,
+      role,
+      sortBy,
+      sortOrder,
+      activeFilter,
+    );
+  }
+
+  // ============================================
+  // CAMPAIGN DISCOUNT SETTINGS (must be before :id routes)
+  // ============================================
+
+  @ApiOperation({ summary: 'Update campaign discount settings for seller' })
+  @UseGuards(JwtAuthGuard)
+  @Patch('campaign-settings')
+  async updateCampaignSettings(
+    @CurrentUser() user: User,
+    @Body()
+    body: {
+      campaignDiscountChoice: 'all' | 'per_product' | 'none';
+      defaultReferralDiscount?: number;
+    },
+  ) {
+    // Validate the discount percentage
+    const discount = Math.min(
+      50,
+      Math.max(0, body.defaultReferralDiscount || 0),
+    );
+
+    return this.usersService.updateCampaignSettings(
+      user['_id'] as string,
+      body.campaignDiscountChoice,
+      discount,
+    );
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)

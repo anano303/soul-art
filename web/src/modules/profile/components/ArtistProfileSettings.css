@@ -413,6 +413,77 @@
   color: rgba(15, 23, 42, 0.55);
 }
 
+/* Campaign Discount Section */
+.artist-form__campaign-section {
+  margin-top: 1rem;
+  padding: 1.5rem;
+  border: 1px solid rgba(1, 38, 69, 0.12);
+  border-radius: 12px;
+  background: linear-gradient(
+    135deg,
+    rgba(1, 38, 69, 0.03),
+    rgba(69, 32, 1, 0.02)
+  );
+}
+
+.artist-form__section-title {
+  margin: 0 0 1rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #012645;
+}
+
+.artist-form__discount-input {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  max-width: 150px;
+}
+
+.artist-form__number-input {
+  width: 80px;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid rgba(15, 23, 42, 0.15);
+  border-radius: 8px;
+  font-size: 1rem;
+  text-align: center;
+}
+
+.artist-form__number-input:focus {
+  outline: none;
+  border-color: #012645;
+  box-shadow: 0 0 0 2px rgba(1, 38, 69, 0.1);
+}
+
+.artist-form__discount-suffix {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #012645;
+}
+
+.artist-form__campaign-save-btn {
+  margin-top: 1rem;
+  padding: 0.65rem 1.25rem;
+  background: linear-gradient(135deg, #012645, #1a4a73);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.artist-form__campaign-save-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(1, 38, 69, 0.25);
+}
+
+.artist-form__campaign-save-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 @media (max-width: 768px) {
   .artist-settings {
     padding: 1.5rem;
@@ -424,5 +495,9 @@
 
   .artist-form__row--grid {
     grid-template-columns: 1fr;
+  }
+
+  .artist-form__campaign-section {
+    padding: 1rem;
   }
 }

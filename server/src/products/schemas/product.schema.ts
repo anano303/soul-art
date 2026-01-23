@@ -197,6 +197,15 @@ export class Product {
   @Prop({ type: Date })
   discountEndDate?: Date;
 
+  // Campaign/Referral discount permission
+  // This allows the artist to specify what % discount SoulArt can apply during campaigns
+  @Prop({ type: Number, min: 0, max: 50, default: 0 })
+  referralDiscountPercent?: number; // 0 = no permission, >0 = allowed %
+
+  // Whether to use artist's default discount instead of product-specific
+  @Prop({ type: Boolean, default: false })
+  useArtistDefaultDiscount?: boolean;
+
   // Legacy single inventory field (keeping for backward compatibility)
   @Prop({ required: true, default: 0 })
   countInStock!: number;

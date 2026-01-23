@@ -218,6 +218,9 @@ export interface Product {
   discountPercentage?: number;
   discountStartDate?: string;
   discountEndDate?: string;
+  // Campaign/Referral discount
+  referralDiscountPercent?: number; // Max % discount allowed for referral campaigns
+  useArtistDefaultDiscount?: boolean; // Use artist's default discount instead of custom
   // Store visibility
   hideFromStore?: boolean;
 }
@@ -274,6 +277,9 @@ export interface User {
   beneficiaryBankCode?: string;
   salesRefCode?: string; // Sales Manager-ის რეფერალური კოდი
   salesCommissionRate?: number; // Sales Manager-ის ინდივიდუალური საკომისიო %
+  // Campaign discount settings for sellers
+  campaignDiscountChoice?: "all" | "per_product" | "none"; // How seller handles campaign discounts
+  defaultReferralDiscount?: number; // Default discount % for campaigns (0-50)
   seller?: {
     storeName: string;
     storeLogo?: string;
@@ -301,7 +307,10 @@ export interface PaginatedResponse<T> {
   total: number;
   page: number;
   pages: number;
-  sellerProductStats?: Record<string, { productCount: number; lastProductDate: Date | null }>;
+  sellerProductStats?: Record<
+    string,
+    { productCount: number; lastProductDate: Date | null }
+  >;
   summary?: {
     totalUsers: number;
     roleCounts: {
