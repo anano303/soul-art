@@ -22,6 +22,17 @@ class UsersSummaryDto {
   @Expose()
   @Type(() => RoleCountsDto)
   roleCounts!: RoleCountsDto;
+
+  @Expose()
+  activeSellers?: number;
+}
+
+class SellerProductStatsDto {
+  @Expose()
+  productCount!: number;
+
+  @Expose()
+  lastProductDate?: Date | null;
 }
 
 export class PaginatedUsersDto {
@@ -41,4 +52,7 @@ export class PaginatedUsersDto {
   @Expose()
   @Type(() => UsersSummaryDto)
   summary!: UsersSummaryDto;
+
+  @Expose()
+  sellerProductStats?: Record<string, SellerProductStatsDto>;
 }

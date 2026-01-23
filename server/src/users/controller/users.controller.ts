@@ -43,11 +43,14 @@ export class UsersController {
     @Query('limit') limit: string = '20',
     @Query('search') search?: string,
     @Query('role') role?: string,
+    @Query('sortBy') sortBy?: string,
+    @Query('sortOrder') sortOrder?: string,
+    @Query('activeFilter') activeFilter?: string,
   ) {
     const pageNumber = parseInt(page, 10);
     const limitNumber = parseInt(limit, 10);
 
-    return this.usersService.findAll(pageNumber, limitNumber, search, role);
+    return this.usersService.findAll(pageNumber, limitNumber, search, role, sortBy, sortOrder, activeFilter);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
