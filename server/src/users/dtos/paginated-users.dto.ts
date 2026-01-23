@@ -18,6 +18,20 @@ class RoleCountsDto {
   sales_manager?: number;
 }
 
+class CampaignConsentDto {
+  @Expose()
+  sellersWithAllProducts!: number;
+
+  @Expose()
+  sellersWithPerProduct!: number;
+
+  @Expose()
+  sellersWithNone!: number;
+
+  @Expose()
+  totalProductsWithReferral!: number;
+}
+
 class UsersSummaryDto {
   @Expose()
   totalUsers!: number;
@@ -31,6 +45,10 @@ class UsersSummaryDto {
 
   @Expose()
   activeSalesManagers?: number;
+
+  @Expose()
+  @Type(() => CampaignConsentDto)
+  campaignConsent?: CampaignConsentDto;
 }
 
 class SellerProductStatsDto {

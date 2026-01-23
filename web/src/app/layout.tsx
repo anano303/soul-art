@@ -77,6 +77,7 @@ import { PWAInstallPrompt } from "@/components/pwa-install-prompt/pwa-install-pr
 import { PushNotificationManager } from "@/components/push-notifications/push-notifications";
 import PWAManager from "@/components/pwa-manager";
 import { CampaignConsentPrompt } from "@/components/campaign-consent/campaign-consent-prompt";
+import { ReferralCodeInput } from "@/components/referral-code-input/referral-code-input";
 import "@/lib/cloudflare-cleanup"; // Auto-cleanup Cloudflare cookies in development
 
 export const viewport = {
@@ -449,6 +450,9 @@ export default function RootLayout({
                     <Footer />
                     <FloatingCartIcon />
                     <MobileBottomNav />
+
+                    {/* Floating Promo Code Input */}
+                    <ReferralCodeInput variant="floating" />
 
                     {/* Campaign Consent Prompt for Sellers */}
                     <CampaignConsentPrompt />

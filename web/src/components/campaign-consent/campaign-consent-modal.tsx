@@ -44,11 +44,11 @@ export function CampaignConsentModal({
     // Check localStorage for last shown time
     const storageKey = `${STORAGE_KEY}_${userId}`;
     const lastShown = localStorage.getItem(storageKey);
-    
+
     if (lastShown) {
       const lastShownTime = parseInt(lastShown, 10);
       const now = Date.now();
-      
+
       // If less than 24 hours passed, don't show
       if (now - lastShownTime < HOURS_24) {
         return;
@@ -142,7 +142,7 @@ export function CampaignConsentModal({
           <p className="campaign-modal__subtitle">
             {language === "en"
               ? "Allow SoulArt to offer special discounts on your products during campaigns and for influencer referrals. This can increase your sales!"
-              : "მიეცი SoulArt-ს უფლება აქციებისა და ინფლუენსერების დროს სპეციალური ფასდაკლება გააკეთოს შენს ნამუშევრებზე. ეს გაყიდვებს გაგიზრდის!"}
+              : "მიეცი SoulArt-ს უფლება აქციებისა და ინფლუენსერების მოწვეული ვიზიტორების დროს სპეციალური ფასდაკლება გააკეთოს შენს ნამუშევრებზე. ეს გაყიდვებს გაგიზრდის!"}
           </p>
         </div>
 
@@ -201,7 +201,9 @@ export function CampaignConsentModal({
             />
             <div className="campaign-modal__option-content">
               <span className="campaign-modal__option-title">
-                {language === "en" ? "Don't participate" : "არ მინდა მონაწილეობა"}
+                {language === "en"
+                  ? "Don't participate"
+                  : "არ მინდა მონაწილეობა"}
               </span>
             </div>
           </label>

@@ -269,7 +269,7 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
     const salesRef = Cookies.get("sales_ref");
     if (!salesRef?.startsWith("SM_")) return;
     if (!productItems.length) return;
-    
+
     // Check if any product is missing referralDiscountPercent
     const needsEnrichment = productItems.some(
       (p) => p.referralDiscountPercent === undefined
@@ -284,32 +284,34 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
           `${process.env.NEXT_PUBLIC_API_URL || ""}/campaigns/active`,
           { credentials: "include" }
         );
-        
+
         if (!campaignRes.ok) {
           console.log("[ArtistProfile] No active campaign found");
           return;
         }
-        
+
         const campaignData = await campaignRes.json();
         const campaign = campaignData.campaign;
-        
+
         if (!campaign) {
           console.log("[ArtistProfile] No campaign in response");
           return;
         }
-        
+
         // Check if campaign applies to influencer referrals
         if (!campaign.appliesTo?.includes("influencer_referrals")) {
-          console.log("[ArtistProfile] Campaign doesn't apply to influencer_referrals");
+          console.log(
+            "[ArtistProfile] Campaign doesn't apply to influencer_referrals"
+          );
           return;
         }
-        
+
         console.log("[ArtistProfile] Active referral campaign found:", {
           name: campaign.name,
           maxDiscountPercent: campaign.maxDiscountPercent,
           onlyProductsWithPermission: campaign.onlyProductsWithPermission,
         });
-        
+
         // Step 2: Fetch referralDiscountPercent for products
         const productIds = productItems.map((p) => p.id);
         const enrichedData = await Promise.all(
@@ -321,13 +323,16 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
               );
               if (!res.ok) return null;
               const data = await res.json();
-              return { id, referralDiscountPercent: data.referralDiscountPercent };
+              return {
+                id,
+                referralDiscountPercent: data.referralDiscountPercent,
+              };
             } catch {
               return null;
             }
           })
         );
-        
+
         // Create a map for quick lookup
         const discountMap = new Map<string, number>();
         enrichedData.forEach((item) => {
@@ -335,16 +340,20 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
             discountMap.set(item.id, item.referralDiscountPercent);
           }
         });
-        
+
         // Update products with referralDiscountPercent
         setProductItems((prev) =>
           prev.map((p) => ({
             ...p,
-            referralDiscountPercent: discountMap.get(p.id) ?? p.referralDiscountPercent,
+            referralDiscountPercent:
+              discountMap.get(p.id) ?? p.referralDiscountPercent,
           }))
         );
-        
-        console.log("[ArtistProfile] Enriched products with referralDiscountPercent", discountMap);
+
+        console.log(
+          "[ArtistProfile] Enriched products with referralDiscountPercent",
+          discountMap
+        );
       } catch (error) {
         console.error("[ArtistProfile] Failed to enrich products:", error);
       }

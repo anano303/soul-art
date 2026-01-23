@@ -918,3 +918,90 @@
     font-size: 0.75rem;
   }
 }
+
+/* Campaign Consent Stats */
+.usr-campaign-stats {
+  margin-top: 1.5rem;
+  padding: 1.25rem;
+  background: linear-gradient(135deg, #faf5ff 0%, #f0e7ff 100%);
+  border-radius: 12px;
+  border: 1px solid rgba(139, 92, 246, 0.2);
+}
+
+.usr-campaign-stats-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.usr-campaign-stats-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #5b21b6;
+}
+
+.usr-campaign-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+}
+
+.usr-campaign-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1rem;
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.usr-campaign-stat:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.usr-campaign-stat-value {
+  font-size: 1.75rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.usr-campaign-stat-label {
+  font-size: 0.75rem;
+  color: #64748b;
+  text-align: center;
+  margin-top: 0.5rem;
+}
+
+.usr-campaign-stat--success .usr-campaign-stat-value {
+  color: #10b981;
+}
+
+.usr-campaign-stat--info .usr-campaign-stat-value {
+  color: #3b82f6;
+}
+
+.usr-campaign-stat--muted .usr-campaign-stat-value {
+  color: #94a3b8;
+}
+
+.usr-campaign-stat--highlight .usr-campaign-stat-value {
+  color: #8b5cf6;
+}
+
+@media (max-width: 768px) {
+  .usr-campaign-stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .usr-campaign-stat-value {
+    font-size: 1.5rem;
+  }
+
+  .usr-campaign-stat-label {
+    font-size: 0.7rem;
+  }
+}

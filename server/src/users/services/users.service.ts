@@ -1145,6 +1145,12 @@ export class UsersService {
         roleCounts: Record<Role, number>;
         activeSellers: number;
         activeSalesManagers: number;
+        campaignConsent?: {
+          sellersWithAllProducts: number;
+          sellersWithPerProduct: number;
+          sellersWithNone: number;
+          totalProductsWithReferral: number;
+        };
       };
     }
   > {
@@ -1347,6 +1353,55 @@ export class UsersService {
       this.logger.warn('Failed to count active sales managers', err);
     }
 
+    // Campaign consent statistics for sellers - always fetch for admin view
+    let campaignConsentStats: {
+      sellersWithAllProducts: number;
+      sellersWithPerProduct: number;
+      sellersWithNone: number;
+      totalProductsWithReferral: number;
+    } = {
+      sellersWithAllProducts: 0,
+      sellersWithPerProduct: 0,
+      sellersWithNone: 0,
+      totalProductsWithReferral: 0,
+    };
+
+    // Always fetch campaign consent stats (not just for seller filter)
+    try {
+      const [consentAggregation, productsWithReferral] = await Promise.all([
+        this.userModel.aggregate([
+          { $match: { role: Role.Seller } },
+          {
+            $group: {
+              _id: '$campaignDiscountChoice',
+              count: { $sum: 1 },
+            },
+          },
+        ]),
+        this.productModel.countDocuments({
+          referralDiscountPercent: { $gt: 0 },
+        }),
+      ]);
+
+      const consentCounts: Record<string, number> = {};
+      consentAggregation.forEach(({ _id, count }) => {
+        // Handle null, undefined, and missing values - treat them all as 'none'
+        const key = _id === null || _id === undefined ? 'none' : String(_id);
+        // Add to existing count (in case both null and 'none' exist)
+        consentCounts[key] = (consentCounts[key] || 0) + count;
+      });
+
+      campaignConsentStats = {
+        sellersWithAllProducts: consentCounts['all'] || 0,
+        sellersWithPerProduct: consentCounts['per_product'] || 0,
+        sellersWithNone: consentCounts['none'] || 0,
+        totalProductsWithReferral: productsWithReferral,
+      };
+    } catch (err) {
+      this.logger.warn('Failed to get campaign consent stats', err);
+      // Keep default values initialized above
+    }
+
     const totalPages = Math.max(Math.ceil(filteredTotal / normalizedLimit), 1);
 
     // Convert sellerProductStats Map to object for JSON serialization
@@ -1368,6 +1423,12 @@ export class UsersService {
         roleCounts: Record<Role, number>;
         activeSellers: number;
         activeSalesManagers: number;
+        campaignConsent: {
+          sellersWithAllProducts: number;
+          sellersWithPerProduct: number;
+          sellersWithNone: number;
+          totalProductsWithReferral: number;
+        };
       };
     } = {
       items: users,
@@ -1379,6 +1440,7 @@ export class UsersService {
         roleCounts,
         activeSellers: activeSellersCount,
         activeSalesManagers: activeSalesManagersCount,
+        campaignConsent: campaignConsentStats,
       },
     };
 
