@@ -23,6 +23,10 @@ import {
   BalanceTransaction,
   BalanceTransactionSchema,
 } from './schemas/seller-balance.schema';
+import {
+  SalesTracking,
+  SalesTrackingSchema,
+} from '../sales-commission/schemas/sales-tracking.schema';
 import { UsersService } from './services/users.service';
 import { AuthService } from './services/auth.service';
 import { BalanceService } from './services/balance.service';
@@ -80,6 +84,10 @@ import { PaymentsModule } from '../payments/payments.module';
       {
         name: BalanceTransaction.name,
         schema: BalanceTransactionSchema,
+      },
+      {
+        name: SalesTracking.name,
+        schema: SalesTrackingSchema,
       },
     ]),
     PassportModule.register({ defaultStrategy: 'google' }),

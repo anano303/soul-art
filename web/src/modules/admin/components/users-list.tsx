@@ -188,6 +188,11 @@ export function UsersList() {
       activeSellers = data.summary.activeSellers;
       inactiveSellers = totalSellers - activeSellers;
     }
+
+    // Sales managers stats
+    const salesManager = data?.summary?.roleCounts?.sales_manager ?? 0;
+    const activeSalesManagers = data?.summary?.activeSalesManagers ?? 0;
+    const inactiveSalesManagers = Math.max(0, salesManager - activeSalesManagers);
     
     return {
       totalUsers: data?.summary?.totalUsers ?? data?.total ?? 0,
@@ -195,8 +200,11 @@ export function UsersList() {
       seller: data?.summary?.roleCounts?.seller ?? 0,
       blogger: data?.summary?.roleCounts?.blogger ?? 0,
       user: data?.summary?.roleCounts?.user ?? 0,
+      salesManager,
       activeSellers,
       inactiveSellers,
+      activeSalesManagers,
+      inactiveSalesManagers,
     };
   }, [data]);
 
@@ -306,6 +314,15 @@ export function UsersList() {
                   ({summary.activeSellers} აქტიური / {summary.inactiveSellers} არააქტიური)
                 </span>
               )}
+            </span>
+          </div>
+          <div className="usr-summary-card">
+            <span className="usr-summary-label">Sales Managers</span>
+            <span className="usr-summary-value">
+              {summary.salesManager.toLocaleString()}
+              <span className="usr-seller-breakdown">
+                ({summary.activeSalesManagers} აქტიური / {summary.inactiveSalesManagers} არააქტიური)
+              </span>
             </span>
           </div>
           <div className="usr-summary-card">
