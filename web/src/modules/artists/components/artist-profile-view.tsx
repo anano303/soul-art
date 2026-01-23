@@ -54,6 +54,7 @@ import { trackArtistProfileView } from "@/lib/ga4-analytics";
 import { fetchArtistProducts } from "@/lib/artist-api";
 import { apiClient } from "@/lib/axios";
 import { CampaignConsent } from "@/components/campaign-consent/campaign-consent";
+import Cookies from "js-cookie";
 import "./artist-profile-view.css";
 import "@/components/share-button/share-button.css";
 import "@/components/gallery-interactions.css";
@@ -261,6 +262,96 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
       });
     }
   }, [artist.artistSlug]);
+
+  // Enrich products with referralDiscountPercent when sales_ref cookie exists
+  // This is needed because SSR doesn't include this field
+  useEffect(() => {
+    const salesRef = Cookies.get("sales_ref");
+    if (!salesRef?.startsWith("SM_")) return;
+    if (!productItems.length) return;
+    
+    // Check if any product is missing referralDiscountPercent
+    const needsEnrichment = productItems.some(
+      (p) => p.referralDiscountPercent === undefined
+    );
+    if (!needsEnrichment) return;
+
+    // First check if there's an active campaign for influencer referrals
+    const enrichProducts = async () => {
+      try {
+        // Step 1: Check for active campaign
+        const campaignRes = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL || ""}/campaigns/active`,
+          { credentials: "include" }
+        );
+        
+        if (!campaignRes.ok) {
+          console.log("[ArtistProfile] No active campaign found");
+          return;
+        }
+        
+        const campaignData = await campaignRes.json();
+        const campaign = campaignData.campaign;
+        
+        if (!campaign) {
+          console.log("[ArtistProfile] No campaign in response");
+          return;
+        }
+        
+        // Check if campaign applies to influencer referrals
+        if (!campaign.appliesTo?.includes("influencer_referrals")) {
+          console.log("[ArtistProfile] Campaign doesn't apply to influencer_referrals");
+          return;
+        }
+        
+        console.log("[ArtistProfile] Active referral campaign found:", {
+          name: campaign.name,
+          maxDiscountPercent: campaign.maxDiscountPercent,
+          onlyProductsWithPermission: campaign.onlyProductsWithPermission,
+        });
+        
+        // Step 2: Fetch referralDiscountPercent for products
+        const productIds = productItems.map((p) => p.id);
+        const enrichedData = await Promise.all(
+          productIds.map(async (id) => {
+            try {
+              const res = await fetch(
+                `${process.env.NEXT_PUBLIC_API_URL || ""}/products/${id}`,
+                { credentials: "include" }
+              );
+              if (!res.ok) return null;
+              const data = await res.json();
+              return { id, referralDiscountPercent: data.referralDiscountPercent };
+            } catch {
+              return null;
+            }
+          })
+        );
+        
+        // Create a map for quick lookup
+        const discountMap = new Map<string, number>();
+        enrichedData.forEach((item) => {
+          if (item && item.referralDiscountPercent !== undefined) {
+            discountMap.set(item.id, item.referralDiscountPercent);
+          }
+        });
+        
+        // Update products with referralDiscountPercent
+        setProductItems((prev) =>
+          prev.map((p) => ({
+            ...p,
+            referralDiscountPercent: discountMap.get(p.id) ?? p.referralDiscountPercent,
+          }))
+        );
+        
+        console.log("[ArtistProfile] Enriched products with referralDiscountPercent", discountMap);
+      } catch (error) {
+        console.error("[ArtistProfile] Failed to enrich products:", error);
+      }
+    };
+
+    enrichProducts();
+  }, [productItems.length]); // Only run when products are loaded
 
   const handleLoadMore = async () => {
     if (isLoadingMore || !hasMoreProducts) return;
@@ -1838,7 +1929,16 @@ function ProductCard({
   const href = `/products/${product.id}`;
 
   const discountPercentage = getActiveDiscountPercentage(product);
-  
+
+  // DEBUG: Log product data to check if referralDiscountPercent is coming from server
+  console.log("[ProductCard] Product data:", {
+    id: product.id,
+    name: product.name,
+    price: product.price,
+    referralDiscountPercent: product.referralDiscountPercent,
+    fullProduct: product,
+  });
+
   // Calculate referral pricing
   const referralPricing = useReferralPricing({
     id: product.id,
@@ -1967,7 +2067,8 @@ function ProductCard({
               originalPrice: product.price,
               hasReferralDiscount: true,
               referralDiscountPercent: referralPricing.referralDiscountPercent,
-              referralDiscountAmount: product.price - referralPricing.referralPrice,
+              referralDiscountAmount:
+                product.price - referralPricing.referralPrice,
             }
           : undefined;
 
@@ -2132,14 +2233,37 @@ function ProductCard({
             </div>
           )}
           {/* Discount badge */}
-          {discountPercentage > 0 && (
+          {discountPercentage > 0 && !referralPricing.hasReferralDiscount && (
             <div className="artist-product-card__discount-badge">
               -{discountPercentage}%
             </div>
           )}
+          {/* Referral special price badge */}
+          {referralPricing.hasReferralDiscount && (
+            <div className="artist-product-card__referral-badge">
+              🎁 {language === "en" ? "Special Price" : "სპეც ფასი"}
+            </div>
+          )}
           {/* Price - always visible */}
           <div className="artist-product-card__price-overlay">
-            {discountPercentage > 0 ? (
+            {referralPricing.hasReferralDiscount ? (
+              <>
+                <span className="artist-product-card__original-price">
+                  {formatPrice(product.price, language)}
+                </span>
+                {discountPercentage > 0 && (
+                  <span className="artist-product-card__original-price">
+                    {formatPrice(
+                      product.price * (1 - discountPercentage / 100),
+                      language
+                    )}
+                  </span>
+                )}
+                <span className="artist-product-card__referral-price">
+                  {formatPrice(referralPricing.referralPrice, language)}
+                </span>
+              </>
+            ) : discountPercentage > 0 ? (
               <>
                 <span className="artist-product-card__original-price">
                   {formatPrice(product.price, language)}
@@ -2238,18 +2362,24 @@ function ProductCard({
                 referralPricing.hasReferralDiscount
                   ? referralPricing.referralPrice
                   : discountPercentage > 0
-                    ? product.price * (1 - discountPercentage / 100)
-                    : product.price
+                  ? product.price * (1 - discountPercentage / 100)
+                  : product.price
               }
               hideQuantity={true}
               openCartOnAdd={false}
               iconOnly={true}
-              referralInfo={referralPricing.hasReferralDiscount ? {
-                originalPrice: product.price,
-                hasReferralDiscount: true,
-                referralDiscountPercent: referralPricing.referralDiscountPercent,
-                referralDiscountAmount: product.price - referralPricing.referralPrice,
-              } : undefined}
+              referralInfo={
+                referralPricing.hasReferralDiscount
+                  ? {
+                      originalPrice: product.price,
+                      hasReferralDiscount: true,
+                      referralDiscountPercent:
+                        referralPricing.referralDiscountPercent,
+                      referralDiscountAmount:
+                        product.price - referralPricing.referralPrice,
+                    }
+                  : undefined
+              }
             />
           </div>
         </div>

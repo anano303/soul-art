@@ -64,7 +64,9 @@ export function StreamlinedCheckout() {
   const hasTrackedViewSummaryRef = useRef(false);
   const hasTrackedCheckoutLoginRef = useRef(false);
   const previousStepRef = useRef<CheckoutStep | null>(null);
-  const [originalPrices, setOriginalPrices] = useState<Record<string, number>>({});
+  const [originalPrices, setOriginalPrices] = useState<Record<string, number>>(
+    {}
+  );
 
   // Fetch original prices from products API
   useEffect(() => {
@@ -99,7 +101,8 @@ export function StreamlinedCheckout() {
 
   // Calculate total original price and savings
   const totalOriginalPrice = items.reduce(
-    (acc, item) => acc + (originalPrices[item.productId] || item.price) * item.qty,
+    (acc, item) =>
+      acc + (originalPrices[item.productId] || item.price) * item.qty,
     0
   );
   const totalSavings = totalOriginalPrice - itemsPrice;
@@ -301,7 +304,9 @@ export function StreamlinedCheckout() {
         (acc, item) => acc + (item.referralDiscountAmount || 0) * item.qty,
         0
       );
-      const hasReferralDiscount = items.some(item => item.hasReferralDiscount);
+      const hasReferralDiscount = items.some(
+        (item) => item.hasReferralDiscount
+      );
 
       const orderPayload: {
         orderItems: typeof orderItems;

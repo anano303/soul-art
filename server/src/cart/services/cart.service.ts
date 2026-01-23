@@ -139,8 +139,10 @@ export class CartService {
       if (referralInfo) {
         existingItem.originalPrice = referralInfo.originalPrice;
         existingItem.hasReferralDiscount = referralInfo.hasReferralDiscount;
-        existingItem.referralDiscountPercent = referralInfo.referralDiscountPercent;
-        existingItem.referralDiscountAmount = referralInfo.referralDiscountAmount;
+        existingItem.referralDiscountPercent =
+          referralInfo.referralDiscountPercent;
+        existingItem.referralDiscountAmount =
+          referralInfo.referralDiscountAmount;
       }
     } else {
       const cartItem: CartItem = {

@@ -212,8 +212,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
                 ageGroup,
                 countInStock: product.countInStock || 0,
                 hasReferralDiscount: referralInfo?.hasReferralDiscount || false,
-                referralDiscountPercent: referralInfo?.referralDiscountPercent || 0,
-                referralDiscountAmount: referralInfo?.referralDiscountAmount || 0,
+                referralDiscountPercent:
+                  referralInfo?.referralDiscountPercent || 0,
+                referralDiscountAmount:
+                  referralInfo?.referralDiscountAmount || 0,
               });
             } catch (error) {
               console.error("Error fetching product details:", error);
@@ -271,8 +273,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         if (referralInfo) {
           requestData.originalPrice = referralInfo.originalPrice;
           requestData.hasReferralDiscount = referralInfo.hasReferralDiscount;
-          requestData.referralDiscountPercent = referralInfo.referralDiscountPercent;
-          requestData.referralDiscountAmount = referralInfo.referralDiscountAmount;
+          requestData.referralDiscountPercent =
+            referralInfo.referralDiscountPercent;
+          requestData.referralDiscountAmount =
+            referralInfo.referralDiscountAmount;
         }
 
         const { data } = await apiClient.post("/cart/items", requestData);

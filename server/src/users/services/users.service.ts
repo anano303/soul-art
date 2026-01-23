@@ -684,6 +684,7 @@ export class UsersService {
               'minDeliveryDays',
               'maxDeliveryDays',
               'createdAt',
+              'referralDiscountPercent',
             ])
             .lean(),
           this.productModel.countDocuments(productsFilter),

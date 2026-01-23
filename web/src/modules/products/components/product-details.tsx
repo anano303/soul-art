@@ -635,10 +635,10 @@ export function ProductDetails({ product }: ProductDetailsProps) {
 
   const isDiscounted = hasActiveDiscount();
   const basePrice = calculateDiscountedPrice();
-  
+
   // Use referral price if available, otherwise use regular price
-  const finalPrice = referralPricing.hasReferralDiscount 
-    ? referralPricing.referralPrice 
+  const finalPrice = referralPricing.hasReferralDiscount
+    ? referralPricing.referralPrice
     : basePrice;
 
   useEffect(() => {
@@ -718,7 +718,8 @@ export function ProductDetails({ product }: ProductDetailsProps) {
               originalPrice: product.price,
               hasReferralDiscount: true,
               referralDiscountPercent: referralPricing.referralDiscountPercent,
-              referralDiscountAmount: product.price - referralPricing.referralPrice,
+              referralDiscountAmount:
+                product.price - referralPricing.referralPrice,
             }
           : undefined;
 
@@ -997,14 +998,20 @@ export function ProductDetails({ product }: ProductDetailsProps) {
                       {language === "en" ? "Special Price" : "სპეციალური ფასი"}
                     </span>
                   </div>
-                  <div className="current-price referral-price-highlight">₾{referralPricing.referralPrice.toFixed(2)}</div>
+                  <div className="current-price referral-price-highlight">
+                    ₾{referralPricing.referralPrice.toFixed(2)}
+                  </div>
                   <div className="price-comparison">
                     <span className="original-price-strike">
                       ₾{product.price.toFixed(2)}
                     </span>
                     {isDiscounted && (
                       <span className="original-price-strike discounted-strike">
-                        ₾{(product.price * (1 - (product.discountPercentage || 0) / 100)).toFixed(2)}
+                        ₾
+                        {(
+                          product.price *
+                          (1 - (product.discountPercentage || 0) / 100)
+                        ).toFixed(2)}
                       </span>
                     )}
                     <span className="discount-badge referral-discount-badge">
@@ -1415,12 +1422,18 @@ export function ProductDetails({ product }: ProductDetailsProps) {
                   quantity={quantity}
                   price={finalPrice}
                   hideQuantity={true}
-                  referralInfo={referralPricing.hasReferralDiscount ? {
-                    originalPrice: product.price,
-                    hasReferralDiscount: true,
-                    referralDiscountPercent: referralPricing.referralDiscountPercent,
-                    referralDiscountAmount: product.price - referralPricing.referralPrice,
-                  } : undefined}
+                  referralInfo={
+                    referralPricing.hasReferralDiscount
+                      ? {
+                          originalPrice: product.price,
+                          hasReferralDiscount: true,
+                          referralDiscountPercent:
+                            referralPricing.referralDiscountPercent,
+                          referralDiscountAmount:
+                            product.price - referralPricing.referralPrice,
+                        }
+                      : undefined
+                  }
                 />
               </div>
 
@@ -1492,12 +1505,18 @@ export function ProductDetails({ product }: ProductDetailsProps) {
               quantity={quantity}
               price={finalPrice}
               hideQuantity={true}
-              referralInfo={referralPricing.hasReferralDiscount ? {
-                originalPrice: product.price,
-                hasReferralDiscount: true,
-                referralDiscountPercent: referralPricing.referralDiscountPercent,
-                referralDiscountAmount: product.price - referralPricing.referralPrice,
-              } : undefined}
+              referralInfo={
+                referralPricing.hasReferralDiscount
+                  ? {
+                      originalPrice: product.price,
+                      hasReferralDiscount: true,
+                      referralDiscountPercent:
+                        referralPricing.referralDiscountPercent,
+                      referralDiscountAmount:
+                        product.price - referralPricing.referralPrice,
+                    }
+                  : undefined
+              }
             />
           )}
 

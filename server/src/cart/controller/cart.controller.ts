@@ -31,7 +31,19 @@ export class CartController {
   @UseGuards(JwtAuthGuard)
   @Post('items')
   addToCart(
-    @Body() { productId, qty, size, color, ageGroup, price, originalPrice, hasReferralDiscount, referralDiscountPercent, referralDiscountAmount }: AddToCartDto,
+    @Body()
+    {
+      productId,
+      qty,
+      size,
+      color,
+      ageGroup,
+      price,
+      originalPrice,
+      hasReferralDiscount,
+      referralDiscountPercent,
+      referralDiscountAmount,
+    }: AddToCartDto,
     @CurrentUser() user: UserDocument,
   ) {
     if (!productId) {
@@ -45,7 +57,12 @@ export class CartController {
       color,
       ageGroup,
       price,
-      { originalPrice, hasReferralDiscount, referralDiscountPercent, referralDiscountAmount },
+      {
+        originalPrice,
+        hasReferralDiscount,
+        referralDiscountPercent,
+        referralDiscountAmount,
+      },
     );
   }
 
@@ -123,12 +140,14 @@ export class CartController {
     if (user) {
       return this.cartService.validateCartItems(user);
     }
-    
+
     // For guest users, validate the items they send
     if (!body.items || body.items.length === 0) {
-      throw new BadRequestException('Items array is required for guest validation');
+      throw new BadRequestException(
+        'Items array is required for guest validation',
+      );
     }
-    
+
     return this.cartService.validateGuestCartItems(body.items);
   }
 }

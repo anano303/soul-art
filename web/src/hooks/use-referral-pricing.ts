@@ -35,29 +35,29 @@ const CACHE_TTL = 60000; // 1 minute cache
 
 async function fetchActiveCampaign(): Promise<Campaign | null> {
   const now = Date.now();
-  
+
   // Return cached if fresh
   if (cachedCampaign !== null && now - lastFetchTime < CACHE_TTL) {
     return cachedCampaign;
   }
-  
+
   // If already fetching, return that promise
   if (campaignFetchPromise) {
     return campaignFetchPromise;
   }
-  
+
   campaignFetchPromise = (async () => {
     try {
       const baseUrl = process.env.NEXT_PUBLIC_API_URL || "";
       const response = await fetch(`${baseUrl}/campaigns/active`, {
         credentials: "include",
       });
-      
+
       if (!response.ok) {
         console.warn("[useReferralPricing] Failed to fetch active campaign");
         return null;
       }
-      
+
       const data = await response.json();
       cachedCampaign = data.campaign || null;
       lastFetchTime = Date.now();
@@ -70,7 +70,7 @@ async function fetchActiveCampaign(): Promise<Campaign | null> {
       campaignFetchPromise = null;
     }
   })();
-  
+
   return campaignFetchPromise;
 }
 
@@ -102,7 +102,7 @@ export function useReferralPricing(product: MinimalProduct): ReferralPricing {
     const refCode = Cookies.get("sales_ref") || null;
     console.log("[useReferralPricing] sales_ref cookie:", refCode);
     setSalesRefCode(refCode);
-    
+
     // Always fetch campaign (might be promo for all users)
     fetchActiveCampaign().then((c) => {
       console.log("[useReferralPricing] Active campaign:", c);
@@ -113,7 +113,7 @@ export function useReferralPricing(product: MinimalProduct): ReferralPricing {
 
   return useMemo(() => {
     const originalPrice = product.price;
-    
+
     // Calculate base price after regular discount (if any)
     const hasRegularDiscount = (() => {
       if (!product.discountPercentage || product.discountPercentage <= 0) {
@@ -138,7 +138,8 @@ export function useReferralPricing(product: MinimalProduct): ReferralPricing {
     })();
 
     const basePrice = hasRegularDiscount
-      ? originalPrice - (originalPrice * (product.discountPercentage || 0)) / 100
+      ? originalPrice -
+        (originalPrice * (product.discountPercentage || 0)) / 100
       : originalPrice;
 
     // Determine referral discount percent
@@ -149,27 +150,33 @@ export function useReferralPricing(product: MinimalProduct): ReferralPricing {
 
     // Check if campaign applies
     if (campaign) {
-      const appliesToReferrals = campaign.appliesTo.includes("influencer_referrals");
+      const appliesToReferrals = campaign.appliesTo.includes(
+        "influencer_referrals"
+      );
       const hasReferralCode = salesRefCode && salesRefCode.startsWith("SM_");
-      
+
       // რეფერალური აქცია: cookie არსებობს და კამპანია აქტიურია
       if (appliesToReferrals && hasReferralCode) {
         // სელერის ნებართვა - პროდუქტზე დაყენებული referralDiscountPercent
         const sellerPermission = product.referralDiscountPercent || 0;
-        
+
         // მხოლოდ იმ პროდუქტებზე ვრცელდება, სადაც სელერს აქვს ნებართვა (> 0)
         if (sellerPermission > 0) {
           // მინიმუმი სელერის ნებართვასა და ადმინის მაქს პროცენტს შორის
-          referralDiscountPercent = Math.min(sellerPermission, campaign.maxDiscountPercent);
+          referralDiscountPercent = Math.min(
+            sellerPermission,
+            campaign.maxDiscountPercent
+          );
           hasReferralDiscount = true;
           campaignName = campaign.name;
-          badgeText = campaign.badgeTextGe || campaign.badgeText || "სპეც. ფასი";
-          
+          badgeText =
+            campaign.badgeTextGe || campaign.badgeText || "სპეც. ფასი";
+
           console.log("[useReferralPricing] Applying referral discount:", {
             refCode: salesRefCode,
             sellerPermission,
             campaignMax: campaign.maxDiscountPercent,
-            appliedPercent: referralDiscountPercent
+            appliedPercent: referralDiscountPercent,
           });
         }
       }
@@ -202,9 +209,9 @@ export function useReferralPricing(product: MinimalProduct): ReferralPricing {
  * Calculate referral pricing without hooks (for server-side or cart calculations)
  */
 export function calculateReferralPrice(
-  product: { 
-    price: number; 
-    discountPercentage?: number; 
+  product: {
+    price: number;
+    discountPercentage?: number;
     discountStartDate?: string;
     discountEndDate?: string;
     referralDiscountPercent?: number;
@@ -220,7 +227,7 @@ export function calculateReferralPrice(
   referralDiscountAmount: number;
 } {
   const originalPrice = product.price;
-  
+
   // Calculate base price after regular discount
   const hasRegularDiscount = (() => {
     if (!product.discountPercentage || product.discountPercentage <= 0) {
@@ -255,10 +262,10 @@ export function calculateReferralPrice(
   } else {
     referralDiscountPercent = product.referralDiscountPercent || 0;
   }
-  
+
   const hasReferralDiscount = !!(
-    salesRefCode && 
-    salesRefCode.startsWith("SM_") && 
+    salesRefCode &&
+    salesRefCode.startsWith("SM_") &&
     referralDiscountPercent > 0
   );
 
