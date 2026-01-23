@@ -108,6 +108,12 @@ export class CartService {
     color?: string,
     ageGroup?: string,
     price?: number,
+    referralInfo?: {
+      originalPrice?: number;
+      hasReferralDiscount?: boolean;
+      referralDiscountPercent?: number;
+      referralDiscountAmount?: number;
+    },
   ): Promise<CartDocument> {
     const product = await this.productsService.findById(productId);
     if (!product) throw new NotFoundException('Product not found');
@@ -129,6 +135,13 @@ export class CartService {
       if (price !== undefined) {
         existingItem.price = price;
       }
+      // Update referral info if provided
+      if (referralInfo) {
+        existingItem.originalPrice = referralInfo.originalPrice;
+        existingItem.hasReferralDiscount = referralInfo.hasReferralDiscount;
+        existingItem.referralDiscountPercent = referralInfo.referralDiscountPercent;
+        existingItem.referralDiscountAmount = referralInfo.referralDiscountAmount;
+      }
     } else {
       const cartItem: CartItem = {
         productId: product._id.toString(),
@@ -136,6 +149,7 @@ export class CartService {
         nameEn: product.nameEn,
         image: product.images[0],
         price: price ?? product.price, // Use provided price (discounted) or fallback to product price
+        originalPrice: referralInfo?.originalPrice ?? product.price,
         countInStock:
           product.variants?.find(
             (v) =>
@@ -145,6 +159,9 @@ export class CartService {
         size,
         color,
         ageGroup,
+        hasReferralDiscount: referralInfo?.hasReferralDiscount,
+        referralDiscountPercent: referralInfo?.referralDiscountPercent,
+        referralDiscountAmount: referralInfo?.referralDiscountAmount,
       };
       cart.items.push(cartItem);
     }

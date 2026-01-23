@@ -31,7 +31,7 @@ export class CartController {
   @UseGuards(JwtAuthGuard)
   @Post('items')
   addToCart(
-    @Body() { productId, qty, size, color, ageGroup, price }: AddToCartDto,
+    @Body() { productId, qty, size, color, ageGroup, price, originalPrice, hasReferralDiscount, referralDiscountPercent, referralDiscountAmount }: AddToCartDto,
     @CurrentUser() user: UserDocument,
   ) {
     if (!productId) {
@@ -45,6 +45,7 @@ export class CartController {
       color,
       ageGroup,
       price,
+      { originalPrice, hasReferralDiscount, referralDiscountPercent, referralDiscountAmount },
     );
   }
 

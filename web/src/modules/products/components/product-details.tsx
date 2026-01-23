@@ -712,6 +712,16 @@ export function ProductDetails({ product }: ProductDetailsProps) {
         // Track quick purchase action
         trackAddToCart(product._id, displayName, finalPrice, quantity);
 
+        // Prepare referral info for cart
+        const referralInfoForCart = referralPricing.hasReferralDiscount
+          ? {
+              originalPrice: product.price,
+              hasReferralDiscount: true,
+              referralDiscountPercent: referralPricing.referralDiscountPercent,
+              referralDiscountAmount: product.price - referralPricing.referralPrice,
+            }
+          : undefined;
+
         // Add item to cart with discounted price if applicable
         await addToCart(
           product._id,
@@ -719,7 +729,8 @@ export function ProductDetails({ product }: ProductDetailsProps) {
           selectedSize || undefined,
           selectedColor || undefined,
           selectedAgeGroup || undefined,
-          finalPrice
+          finalPrice,
+          referralInfoForCart
         );
       }
 
@@ -834,6 +845,11 @@ export function ProductDetails({ product }: ProductDetailsProps) {
                 {isDiscounted && product.discountPercentage && (
                   <span className="discount-badge">
                     -{product.discountPercentage}% OFF
+                  </span>
+                )}
+                {referralPricing.hasReferralDiscount && (
+                  <span className="discount-badge referral-special-badge">
+                    🎁 {language === "en" ? "Special Price" : "სპეც ფასი"}
                   </span>
                 )}
 
@@ -986,8 +1002,13 @@ export function ProductDetails({ product }: ProductDetailsProps) {
                     <span className="original-price-strike">
                       ₾{product.price.toFixed(2)}
                     </span>
+                    {isDiscounted && (
+                      <span className="original-price-strike discounted-strike">
+                        ₾{(product.price * (1 - (product.discountPercentage || 0) / 100)).toFixed(2)}
+                      </span>
+                    )}
                     <span className="discount-badge referral-discount-badge">
-                      -{referralPricing.discountPercent}%
+                      -{referralPricing.referralDiscountPercent}%
                     </span>
                   </div>
                   <div className="savings-text">
@@ -1394,6 +1415,12 @@ export function ProductDetails({ product }: ProductDetailsProps) {
                   quantity={quantity}
                   price={finalPrice}
                   hideQuantity={true}
+                  referralInfo={referralPricing.hasReferralDiscount ? {
+                    originalPrice: product.price,
+                    hasReferralDiscount: true,
+                    referralDiscountPercent: referralPricing.referralDiscountPercent,
+                    referralDiscountAmount: product.price - referralPricing.referralPrice,
+                  } : undefined}
                 />
               </div>
 
@@ -1465,6 +1492,12 @@ export function ProductDetails({ product }: ProductDetailsProps) {
               quantity={quantity}
               price={finalPrice}
               hideQuantity={true}
+              referralInfo={referralPricing.hasReferralDiscount ? {
+                originalPrice: product.price,
+                hasReferralDiscount: true,
+                referralDiscountPercent: referralPricing.referralDiscountPercent,
+                referralDiscountAmount: product.price - referralPricing.referralPrice,
+              } : undefined}
             />
           )}
 

@@ -74,6 +74,17 @@ async function fetchActiveCampaign(): Promise<Campaign | null> {
   return campaignFetchPromise;
 }
 
+// Minimal product interface for the hook
+interface MinimalProduct {
+  _id?: string;
+  id?: string;
+  price: number;
+  discountPercentage?: number;
+  discountStartDate?: string | Date;
+  discountEndDate?: string | Date;
+  referralDiscountPercent?: number;
+}
+
 /**
  * Hook to calculate referral pricing for a product
  * Checks for:
@@ -81,7 +92,7 @@ async function fetchActiveCampaign(): Promise<Campaign | null> {
  * 2. Active campaign with discount settings
  * 3. Product's referralDiscountPercent or campaign override
  */
-export function useReferralPricing(product: Product): ReferralPricing {
+export function useReferralPricing(product: MinimalProduct): ReferralPricing {
   const [salesRefCode, setSalesRefCode] = useState<string | null>(null);
   const [campaign, setCampaign] = useState<Campaign | null>(null);
   const [isLoading, setIsLoading] = useState(true);

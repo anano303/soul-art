@@ -1,4 +1,4 @@
-import { IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsBoolean, IsNumber, IsOptional, IsString } from 'class-validator';
 import { ProductDocument } from 'src/products/schemas/product.schema';
 
 export class AddToCartDto {
@@ -26,4 +26,21 @@ export class AddToCartDto {
   @IsString()
   @IsOptional()
   ageGroup?: string;
+
+  // Referral discount tracking fields
+  @IsNumber()
+  @IsOptional()
+  originalPrice?: number;
+
+  @IsBoolean()
+  @IsOptional()
+  hasReferralDiscount?: boolean;
+
+  @IsNumber()
+  @IsOptional()
+  referralDiscountPercent?: number;
+
+  @IsNumber()
+  @IsOptional()
+  referralDiscountAmount?: number;
 }

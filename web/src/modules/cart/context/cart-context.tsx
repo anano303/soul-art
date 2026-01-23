@@ -36,7 +36,13 @@ interface CartContextType {
     size?: string,
     color?: string,
     ageGroup?: string,
-    price?: number
+    price?: number,
+    referralInfo?: {
+      originalPrice: number;
+      hasReferralDiscount: boolean;
+      referralDiscountPercent: number;
+      referralDiscountAmount: number;
+    }
   ) => Promise<void>;
   totalItems: number;
   getItemQuantity: (
@@ -158,7 +164,13 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       size = "",
       color = "",
       ageGroup = "",
-      price?: number
+      price?: number,
+      referralInfo?: {
+        originalPrice: number;
+        hasReferralDiscount: boolean;
+        referralDiscountPercent: number;
+        referralDiscountAmount: number;
+      }
     ) => {
       // Support guest checkout - use localStorage if not authenticated
       if (!user) {
@@ -193,11 +205,15 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
                 nameEn: product.nameEn,
                 image: product.images?.[0] || "",
                 price: price || product.price,
+                originalPrice: referralInfo?.originalPrice || product.price,
                 qty: quantity,
                 size,
                 color,
                 ageGroup,
                 countInStock: product.countInStock || 0,
+                hasReferralDiscount: referralInfo?.hasReferralDiscount || false,
+                referralDiscountPercent: referralInfo?.referralDiscountPercent || 0,
+                referralDiscountAmount: referralInfo?.referralDiscountAmount || 0,
               });
             } catch (error) {
               console.error("Error fetching product details:", error);
@@ -234,6 +250,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           color: string;
           ageGroup: string;
           price?: number;
+          originalPrice?: number;
+          hasReferralDiscount?: boolean;
+          referralDiscountPercent?: number;
+          referralDiscountAmount?: number;
         } = {
           productId,
           qty: quantity,
@@ -245,6 +265,14 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         // Add price if provided (discounted price)
         if (price !== undefined) {
           requestData.price = price;
+        }
+
+        // Add referral info if provided
+        if (referralInfo) {
+          requestData.originalPrice = referralInfo.originalPrice;
+          requestData.hasReferralDiscount = referralInfo.hasReferralDiscount;
+          requestData.referralDiscountPercent = referralInfo.referralDiscountPercent;
+          requestData.referralDiscountAmount = referralInfo.referralDiscountAmount;
         }
 
         const { data } = await apiClient.post("/cart/items", requestData);

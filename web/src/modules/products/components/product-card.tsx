@@ -208,6 +208,16 @@ export function ProductCard({
           1
         );
 
+        // Prepare referral info for cart
+        const referralInfo = referralPricing.hasReferralDiscount
+          ? {
+              originalPrice: product.price,
+              hasReferralDiscount: true,
+              referralDiscountPercent: referralPricing.referralDiscountPercent,
+              referralDiscountAmount: product.price - referralPricing.referralPrice,
+            }
+          : undefined;
+
         // Add item to cart with the correct price
         await addToCart(
           product._id,
@@ -215,7 +225,8 @@ export function ProductCard({
           undefined,
           undefined,
           undefined,
-          priceToUse
+          priceToUse,
+          referralInfo
         );
       }
 
@@ -441,6 +452,12 @@ export function ProductCard({
           hideQuantity={true}
           openCartOnAdd={false}
           iconOnly={true}
+          referralInfo={referralPricing.hasReferralDiscount ? {
+            originalPrice: product.price,
+            hasReferralDiscount: true,
+            referralDiscountPercent: referralPricing.referralDiscountPercent,
+            referralDiscountAmount: product.price - referralPricing.referralPrice,
+          } : undefined}
         />
         <button
           onClick={handleBuyNow}

@@ -206,6 +206,31 @@ body {
     font-size: 0.9rem;
   } */
 
+  /* Referral special price badge on image */
+  .referral-special-badge {
+    position: absolute;
+    top: 50px;
+    right: 10px;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    padding: 6px 12px;
+    font-weight: 700;
+    z-index: 2;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.4);
+    animation: pulse-glow 2s infinite;
+  }
+
+  @keyframes pulse-glow {
+    0%, 100% {
+      box-shadow: 0 2px 8px rgba(16, 185, 129, 0.4);
+    }
+    50% {
+      box-shadow: 0 2px 16px rgba(16, 185, 129, 0.6);
+    }
+  }
+
   .image-wrapper img {
     object-fit: contain;
   }
@@ -1541,6 +1566,11 @@ body {
     text-decoration: line-through;
     color: #999;
     font-weight: 500;
+  }
+
+  .original-price-strike.discounted-strike {
+    font-size: 16px;
+    color: #b0b0b0;
   }
 
   /* Discount badge inside price-comparison - NOT absolute positioned */

@@ -24,6 +24,12 @@ interface AddToCartButtonProps {
   hideQuantity?: boolean; // New prop to hide quantity selector
   openCartOnAdd?: boolean; // New prop to open cart after adding
   iconOnly?: boolean; // New prop to show only icon, no text
+  referralInfo?: {
+    originalPrice: number;
+    hasReferralDiscount: boolean;
+    referralDiscountPercent: number;
+    referralDiscountAmount: number;
+  };
 }
 
 export function AddToCartButton({
@@ -40,6 +46,7 @@ export function AddToCartButton({
   hideQuantity = false, // Default to false
   openCartOnAdd = false, // Default to false
   iconOnly = false, // Default to false
+  referralInfo,
 }: AddToCartButtonProps) {
   const { t } = useLanguage();
   const { addToCart, isItemInCart, getItemQuantity, updateQuantity } =
@@ -177,7 +184,8 @@ export function AddToCartButton({
             selectedSize,
             selectedColor,
             selectedAgeGroup,
-            price
+            price,
+            referralInfo
           );
           toast({
             title: t("cart.addedToCart"),
