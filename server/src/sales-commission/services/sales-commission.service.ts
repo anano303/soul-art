@@ -398,7 +398,7 @@ export class SalesCommissionService {
 
     return {
       valid: true,
-      managerName: user.displayName || user.firstName || 'მენეჯერი',
+      managerName: user.name || 'მენეჯერი',
     };
   }
 
