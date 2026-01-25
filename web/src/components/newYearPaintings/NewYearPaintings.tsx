@@ -45,7 +45,9 @@ const NewYearPaintings = () => {
         includeVariants: "true",
       });
 
-      const filtered = items.slice(0, RAIL_LIMIT);
+      const filtered = items
+        .filter(p => (p.countInStock ?? 0) > 0 || (p.variants && p.variants.some(v => (v.stock ?? 0) > 0)))
+        .slice(0, RAIL_LIMIT);
       memoryCache.set(cacheKey, filtered, CACHE_TTL_SECONDS);
       return filtered;
     },
@@ -53,7 +55,9 @@ const NewYearPaintings = () => {
   });
 
   const items = useMemo(() => {
-    return paintingProducts.slice(0, RAIL_LIMIT);
+    return paintingProducts
+      .filter(p => (p.countInStock ?? 0) > 0 || (p.variants && p.variants.some(v => (v.stock ?? 0) > 0)))
+      .slice(0, RAIL_LIMIT);
   }, [paintingProducts]);
 
   const hasItems = items.length > 0;

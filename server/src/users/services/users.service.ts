@@ -650,8 +650,24 @@ export class UsersService {
       const productsFilter = {
         user: artist._id,
         status: ProductStatus.APPROVED,
-        // Exclude out-of-stock products from shop view
-        $or: [{ countInStock: { $gt: 0 } }, { 'variants.stock': { $gt: 0 } }],
+        // Exclude out-of-stock products
+        // If product has variants, check ONLY variants.stock (ignore countInStock)
+        // If product has no variants, check countInStock
+        $or: [
+          // Products WITH variants - at least one variant must have stock > 0
+          {
+            variants: { $exists: true, $not: { $size: 0 } },
+            'variants.stock': { $gt: 0 },
+          },
+          // Products WITHOUT variants - countInStock must be > 0
+          {
+            $or: [
+              { variants: { $exists: false } },
+              { variants: { $size: 0 } },
+            ],
+            countInStock: { $gt: 0 },
+          },
+        ],
       };
 
       const skip = (page - 1) * limit;
@@ -902,9 +918,22 @@ export class UsersService {
       } else {
         productsFilter.status = ProductStatus.APPROVED;
         // Exclude out-of-stock products from shop view for non-owners
+        // If product has variants, check ONLY variants.stock (ignore countInStock)
+        // If product has no variants, check countInStock
         productsFilter.$or = [
-          { countInStock: { $gt: 0 } },
-          { 'variants.stock': { $gt: 0 } },
+          // Products WITH variants - at least one variant must have stock > 0
+          {
+            variants: { $exists: true, $not: { $size: 0 } },
+            'variants.stock': { $gt: 0 },
+          },
+          // Products WITHOUT variants - countInStock must be > 0
+          {
+            $or: [
+              { variants: { $exists: false } },
+              { variants: { $size: 0 } },
+            ],
+            countInStock: { $gt: 0 },
+          },
         ];
       }
 
