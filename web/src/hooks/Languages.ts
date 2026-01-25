@@ -265,7 +265,7 @@ export const TRANSLATIONS: Translations = {
       adminReferrals: "რეფერალების მართვა",
       banners: "ბანერები",
       analytics: "ანალიტიკა",
-      salesCommissions: "საკომისიოები",
+      salesCommissions: "თანხის გამომუშავება",
       salesAnalytics: "ანალიტიკა",
     },
 
@@ -1797,7 +1797,7 @@ export const TRANSLATIONS: Translations = {
       categories: "Categories",
       banners: "Banners",
       analytics: "Analytics",
-      salesCommissions: "Commissions",
+      salesCommissions: "Sales & Commissions",
       salesAnalytics: "Analytics",
     },
 
