@@ -75,10 +75,12 @@ const DiscountedRail = () => {
         discounted: "true",
         sortBy: "discountPercentage",
         sortDirection: "desc",
+        excludeOutOfStock: "true",
       });
 
       const filtered = items
         .filter(hasActiveDiscount)
+        .filter(p => (p.countInStock ?? 0) > 0 || (p.variants && p.variants.some(v => (v.stock ?? 0) > 0)))
         .slice(0, DISCOUNT_RAIL_LIMIT);
 
       memoryCache.set(cacheKey, filtered, CACHE_TTL_SECONDS);
@@ -90,6 +92,7 @@ const DiscountedRail = () => {
   const items = useMemo(() => {
     return discountedProducts
       .filter(hasActiveDiscount)
+      .filter(p => (p.countInStock ?? 0) > 0 || (p.variants && p.variants.some(v => (v.stock ?? 0) > 0)))
       .slice(0, DISCOUNT_RAIL_LIMIT);
   }, [discountedProducts]);
 

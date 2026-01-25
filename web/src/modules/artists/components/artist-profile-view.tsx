@@ -1191,10 +1191,22 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
                   />
                 )}
 
-                {productItems.length > 0 ? (
+                {(() => {
+                  // Filter out sold products for non-owners
+                  const displayProducts = isOwner 
+                    ? productItems 
+                    : productItems.filter((product) => {
+                        // Check if product has stock
+                        if (product.variants && product.variants.length > 0) {
+                          return product.variants.some((v) => (v.stock ?? 0) > 0);
+                        }
+                        return (product.countInStock ?? 0) > 0;
+                      });
+                  
+                  return displayProducts.length > 0 ? (
                   <>
                     <div className="artist-grid artist-grid--products">
-                      {productItems.map((product) => (
+                      {displayProducts.map((product) => (
                         <ProductCard
                           key={product.id}
                           product={product}
@@ -1234,7 +1246,8 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
                     <div className="artist-empty-state__icon">🛒</div>
                     <p className="artist-empty-state__text">{noProductsCopy}</p>
                   </div>
-                )}
+                );
+                })()}
               </section>
             )}
 

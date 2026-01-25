@@ -108,6 +108,11 @@ const HomePageShop = () => {
           // Filter products for this category
           const categoryProds = allProducts
             .filter((product) => {
+              // First check if product is in stock
+              const hasStock = (product.countInStock ?? 0) > 0 || 
+                (product.variants && product.variants.some(v => (v.stock ?? 0) > 0));
+              if (!hasStock) return false;
+              
               if (
                 typeof product.mainCategory === "object" &&
                 product.mainCategory

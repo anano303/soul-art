@@ -214,11 +214,22 @@ export function AddToCartButton({
               }
             }, 300);
           }
-        } catch (error) {
+        } catch (error: unknown) {
           console.error("Add to cart error:", error);
+          
+          // Check if error has response with message about sold out
+          let errorMessage = t("cart.failedToAdd");
+          if (error && typeof error === 'object' && 'response' in error) {
+            const axiosError = error as { response?: { data?: { message?: string } } };
+            const serverMessage = axiosError.response?.data?.message;
+            if (serverMessage && (serverMessage.includes('გაყიდულია') || serverMessage.includes('out of stock'))) {
+              errorMessage = t("cart.productSold");
+            }
+          }
+          
           toast({
             title: t("cart.error"),
-            description: t("cart.failedToAdd"),
+            description: errorMessage,
             variant: "destructive",
           });
         }

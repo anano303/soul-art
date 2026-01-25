@@ -40,9 +40,14 @@ const GiftCategories = () => {
         includeVariants: "true",
       });
 
-      // Filter products under 200 GEL (considering discounts)
+      // Filter products under 200 GEL (considering discounts) and in stock
       const filtered = items
         .filter((product) => {
+          // Check stock first
+          const hasStock = (product.countInStock ?? 0) > 0 || 
+            (product.variants && product.variants.some(v => (v.stock ?? 0) > 0));
+          if (!hasStock) return false;
+          
           const price = product.price;
           const discountedPrice = product.discountPercentage
             ? price * (1 - product.discountPercentage / 100)
@@ -60,6 +65,11 @@ const GiftCategories = () => {
   const items = useMemo(() => {
     return giftProducts
       .filter((product) => {
+        // Check stock first
+        const hasStock = (product.countInStock ?? 0) > 0 || 
+          (product.variants && product.variants.some(v => (v.stock ?? 0) > 0));
+        if (!hasStock) return false;
+        
         const price = product.price;
         const discountedPrice = product.discountPercentage
           ? price * (1 - product.discountPercentage / 100)

@@ -303,7 +303,15 @@ const ShopContent = () => {
         params.includeVariants = "true";
 
         const response = await getProducts(currentPage, 20, params);
-        setProducts(response.items || []);
+        
+        // Filter out products with no stock (double check)
+        const inStockProducts = (response.items || []).filter(product => {
+          const hasStock = (product.countInStock ?? 0) > 0 || 
+            (product.variants && product.variants.some(v => (v.stock ?? 0) > 0));
+          return hasStock;
+        });
+        
+        setProducts(inStockProducts);
         setTotalPages(response.pages || 1);
       } catch (error) {
         console.error(`Failed to fetch products:`, error);

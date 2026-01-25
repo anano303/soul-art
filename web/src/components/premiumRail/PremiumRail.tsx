@@ -52,6 +52,7 @@ const PremiumRail = () => {
 
       const filtered = items
         .filter((p) => p.price >= PREMIUM_PRICE_THRESHOLD)
+        .filter(p => (p.countInStock ?? 0) > 0 || (p.variants && p.variants.some(v => (v.stock ?? 0) > 0)))
         .slice(0, PREMIUM_RAIL_LIMIT);
 
       memoryCache.set(cacheKey, filtered, CACHE_TTL_SECONDS);
@@ -63,6 +64,7 @@ const PremiumRail = () => {
   const items = useMemo(() => {
     return premiumProducts
       .filter((p) => p.price >= PREMIUM_PRICE_THRESHOLD)
+      .filter(p => (p.countInStock ?? 0) > 0 || (p.variants && p.variants.some(v => (v.stock ?? 0) > 0)))
       .slice(0, PREMIUM_RAIL_LIMIT);
   }, [premiumProducts]);
 
