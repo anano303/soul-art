@@ -40,6 +40,7 @@ interface ManagerStats {
     paidAmount: number;
     totalOrders: number;
   };
+  isActive: boolean;
 }
 
 interface PendingWithdrawal {
@@ -260,6 +261,7 @@ export default function AdminSalesManagersPage() {
             <thead>
               <tr>
                 <th>მენეჯერი</th>
+                <th>სტატუსი</th>
                 <th>რეფ. კოდი</th>
                 <th>საკომისიო %</th>
                 <th>შეკვეთები</th>
@@ -284,6 +286,11 @@ export default function AdminSalesManagersPage() {
                       <span className="manager-name">{m.manager.name}</span>
                       <span className="manager-email">{m.manager.email}</span>
                     </div>
+                  </td>
+                  <td>
+                    <span className={`status-badge ${m.isActive ? 'active' : 'inactive'}`}>
+                      {m.isActive ? 'აქტიური' : 'არააქტიური'}
+                    </span>
                   </td>
                   <td>
                     <code className="ref-code">{m.manager.salesRefCode}</code>
