@@ -362,6 +362,7 @@ export class SalesCommissionService {
         paidAmount: number;
         totalOrders: number;
       };
+      isActive: boolean;
     }>
   > {
     const salesManagers = await this.userModel.find({
@@ -371,7 +372,15 @@ export class SalesCommissionService {
     const result = [];
     for (const manager of salesManagers) {
       const stats = await this.getManagerStats(manager._id.toString());
-      result.push({ manager, stats });
+      
+      // აქტიურია თუ აქვს მინიმუმ 1 VISIT ივენთი (ვინმე შემოვიდა მისი ბმულით)
+      const visitCount = await this.trackingModel.countDocuments({
+        salesManager: manager._id,
+        eventType: TrackingEventType.VISIT,
+      });
+      const isActive = visitCount > 0;
+      
+      result.push({ manager, stats, isActive });
     }
 
     return result;
