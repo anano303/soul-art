@@ -709,7 +709,9 @@ const ForumPost = ({
               );
               // Fallback to default avatar
               const imgElement = e.currentTarget as HTMLImageElement;
-              imgElement.src = "/avatar.jpg";
+              if (imgElement && imgElement.isConnected) {
+                imgElement.src = "/avatar.jpg";
+              }
             }}
           />
           <span className="comment-author">{comment.author.name}</span>
@@ -835,6 +837,11 @@ const ForumPost = ({
               );
               // Retry with cache busting
               const imgElement = e.currentTarget as HTMLImageElement;
+
+              // Check if element still exists in DOM
+              if (!imgElement || !imgElement.isConnected) {
+                return;
+              }
 
               // Function to clean S3 URLs
               const cleanS3Url = (url: string): string => {

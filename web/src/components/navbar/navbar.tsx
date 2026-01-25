@@ -35,13 +35,14 @@ const Navbar: React.FC = () => {
     { href: "/about", textKey: "navigation.about", icon: about },
   ];
 
-  // Add referral info only for non-logged users
-  const allMenuItems = user
-    ? menuItems
-    : [
-        ...menuItems,
-        { href: "/referral-info", textKey: "რეფერალები 💰", icon: shopping },
-      ];
+  // Add referral info only for non-logged users - დროებით დაკომენტარებული
+  const allMenuItems = menuItems;
+  // const allMenuItems = user
+  //   ? menuItems
+  //   : [
+  //       ...menuItems,
+  //       { href: "/referral-info", textKey: "რეფერალები 💰", icon: shopping },
+  //     ];
 
   const handleClick = (e: React.MouseEvent, index: number, href: string) => {
     // Remove preventDefault to allow normal navigation

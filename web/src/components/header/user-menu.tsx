@@ -236,6 +236,9 @@ export default function UserMenu({
                 onError={(e) => {
                   console.warn("Failed to load profile image, retrying...");
 
+                  // Capture the element reference before setTimeout
+                  const imgElement = e.currentTarget as HTMLImageElement;
+
                   // Function to clean S3 URLs
                   const cleanS3Url = (url: string): string => {
                     if (url.includes("amazonaws.com") && url.includes("?")) {
@@ -246,7 +249,10 @@ export default function UserMenu({
 
                   // Add retry logic
                   setTimeout(() => {
-                    const imgElement = e.currentTarget as HTMLImageElement;
+                    // Check if element still exists in DOM
+                    if (!imgElement || !imgElement.isConnected) {
+                      return;
+                    }
 
                     // If it's an AWS S3 URL, try with a cleaned version
                     if (
@@ -361,15 +367,15 @@ export default function UserMenu({
               <span>{t("navigation.myOrders")}</span>
             </Link>
 
-            {/* რეფერალების ლინკი ყველა ავტორიზებული მომხმარებლისთვის */}
-            <Link
+            {/* რეფერალების ლინკი დროებით დაკომენტარებული */}
+            {/* <Link
               href="/referrals"
               className="dropdown-item"
               onClick={handleLinkClick}
             >
               <Gift size={18} />
               <span>{t("navigation.referrals")}</span>
-            </Link>
+            </Link> */}
 
             {(user.role?.toLowerCase() === Role.Admin ||
               isSellerRole(user.role) ||
