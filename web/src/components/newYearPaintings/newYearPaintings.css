@@ -342,3 +342,18 @@
     gap: 0.75rem;
   }
 }
+
+/* Fix card height consistency - ensure all cards have same height */
+.new-year-paintings-card .product-card {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.new-year-paintings-card .price-container {
+  min-height: 3.5rem;
+}
+
+.new-year-paintings-scroller {
+  align-items: stretch;
+}
