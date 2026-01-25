@@ -19,10 +19,12 @@ import {
   Store,
   ShoppingBag,
   TrendingUp,
+  Filter,
 } from "lucide-react";
 import "./send-email.css";
 
 type RecipientType = "sellers" | "customers" | "sales-managers";
+type ActiveFilter = "all" | "active" | "inactive";
 
 interface Recipient {
   _id: string;
@@ -30,6 +32,7 @@ interface Recipient {
   email: string;
   brandName?: string;
   salesRefCode?: string;
+  isActive?: boolean;
 }
 
 interface SendResult {
@@ -78,6 +81,7 @@ export default function SendEmailPage() {
   const [result, setResult] = useState<SendResult | null>(null);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [searchQuery, setSearchQuery] = useState("");
+  const [activeFilter, setActiveFilter] = useState<ActiveFilter>("all");
 
   const config = recipientConfig[recipientType];
   const Icon = config.icon;
@@ -93,6 +97,7 @@ export default function SendEmailPage() {
     setSelectedIds(new Set());
     setSearchQuery("");
     setResult(null);
+    setActiveFilter("all");
   }, [recipientType]);
 
   // Fetch recipients
@@ -101,9 +106,14 @@ export default function SendEmailPage() {
     isLoading: recipientsLoading,
     refetch,
   } = useQuery<Recipient[]>({
-    queryKey: ["admin", "recipients-for-email", recipientType],
+    queryKey: ["admin", "recipients-for-email", recipientType, activeFilter],
     queryFn: async () => {
-      const res = await fetchWithAuth(config.fetchUrl);
+      let url = config.fetchUrl;
+      // Add activeFilter only for sellers
+      if (recipientType === "sellers") {
+        url = `${config.fetchUrl}?activeFilter=${activeFilter}`;
+      }
+      const res = await fetchWithAuth(url);
       if (!res.ok) throw new Error("Failed to fetch recipients");
       return res.json();
     },
@@ -295,6 +305,22 @@ export default function SendEmailPage() {
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
+
+          {/* Filter for sellers only */}
+          {recipientType === "sellers" && (
+            <div className="filter-bar">
+              <Filter size={18} />
+              <select
+                value={activeFilter}
+                onChange={(e) => setActiveFilter(e.target.value as ActiveFilter)}
+                className="filter-select"
+              >
+                <option value="all">ყველა სელერი</option>
+                <option value="active">აქტიური (პროდუქტი აქვს)</option>
+                <option value="inactive">არააქტიური (პროდუქტი არ აქვს)</option>
+              </select>
+            </div>
+          )}
 
           <div className="select-all-row">
             <button onClick={toggleSelectAll} className="select-all-btn">

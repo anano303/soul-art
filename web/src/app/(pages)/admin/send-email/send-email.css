@@ -154,6 +154,40 @@
   color: rgba(255, 255, 255, 0.4);
 }
 
+/* Filter bar */
+.recipients-panel .filter-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1.25rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.recipients-panel .filter-bar svg {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.recipients-panel .filter-select {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  color: white;
+  font-size: 0.9rem;
+  padding: 0.5rem 0.75rem;
+  outline: none;
+  cursor: pointer;
+}
+
+.recipients-panel .filter-select:focus {
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+.recipients-panel .filter-select option {
+  background: #1a1a2e;
+  color: white;
+}
+
 .recipients-panel .select-all-row {
   padding: 0.75rem 1.25rem;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);

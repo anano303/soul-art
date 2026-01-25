@@ -398,8 +398,10 @@ export class UsersController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.Admin)
   @Get('admin/sellers-for-email')
-  async getSellersForEmail() {
-    return this.usersService.getSellersForBulkEmail();
+  async getSellersForEmail(
+    @Query('activeFilter') activeFilter?: 'all' | 'active' | 'inactive',
+  ) {
+    return this.usersService.getSellersForBulkEmail(activeFilter || 'all');
   }
 
   @ApiOperation({ summary: 'Get all customers for bulk email preview' })
