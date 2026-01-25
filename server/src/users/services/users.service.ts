@@ -2946,21 +2946,60 @@ export class UsersService {
 
   /**
    * მიიღე ყველა სელერი მეილისთვის
+   * @param activeFilter - 'all' | 'active' | 'inactive'
    */
-  async getSellersForBulkEmail(): Promise<
-    Array<{ _id: string; name: string; email: string; brandName?: string }>
+  async getSellersForBulkEmail(
+    activeFilter: 'all' | 'active' | 'inactive' = 'all',
+  ): Promise<
+    Array<{
+      _id: string;
+      name: string;
+      email: string;
+      brandName?: string;
+      isActive: boolean;
+    }>
   > {
     const sellers = await this.userModel
       .find({ role: Role.Seller })
       .select('_id name email storeName')
       .lean();
 
-    return sellers.map((s) => ({
-      _id: s._id.toString(),
-      name: s.name,
-      email: s.email,
-      brandName: s.storeName,
-    }));
+    // მივიღოთ პროდუქტების რაოდენობა თითოეული სელერისთვის
+    const productCounts = await this.productModel.aggregate([
+      {
+        $group: {
+          _id: '$user',
+          productCount: { $sum: 1 },
+        },
+      },
+    ]);
+
+    const productCountMap = new Map<string, number>();
+    productCounts.forEach((stat) => {
+      if (stat._id) {
+        productCountMap.set(stat._id.toString(), stat.productCount);
+      }
+    });
+
+    let result = sellers.map((s) => {
+      const productCount = productCountMap.get(s._id.toString()) || 0;
+      return {
+        _id: s._id.toString(),
+        name: s.name,
+        email: s.email,
+        brandName: s.storeName,
+        isActive: productCount > 0,
+      };
+    });
+
+    // გავფილტროთ აქტიურობის მიხედვით
+    if (activeFilter === 'active') {
+      result = result.filter((s) => s.isActive);
+    } else if (activeFilter === 'inactive') {
+      result = result.filter((s) => !s.isActive);
+    }
+
+    return result;
   }
 
   /**
