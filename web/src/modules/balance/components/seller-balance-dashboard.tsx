@@ -115,8 +115,8 @@ export function SellerBalanceDashboard() {
     <div className="balance-dashboard">
       <h1 className="dashboard-title">ჩემი ბალანსი</h1>
 
-      {/* Info Alert */}
-      <div
+      {/* Info Alert - დროებით დაკომენტარებული */}
+      {/* <div
         className="info-alert"
         style={{
           background: "#e3f2fd",
@@ -141,7 +141,7 @@ export function SellerBalanceDashboard() {
           </a>
           .
         </div>
-      </div>
+      </div> */}
 
       {/* Balance Cards */}
       <div className="balance-cards-grid">

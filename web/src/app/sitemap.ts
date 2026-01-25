@@ -274,12 +274,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "monthly" as const,
       priority: 0.6,
     },
-    {
-      url: `${baseUrl}/referral-info`,
-      lastModified: new Date(),
-      changeFrequency: "monthly" as const,
-      priority: 0.7,
-    },
+    // referral-info დროებით დაკომენტარებული
+    // {
+    //   url: `${baseUrl}/referral-info`,
+    //   lastModified: new Date(),
+    //   changeFrequency: "monthly" as const,
+    //   priority: 0.7,
+    // },
     {
       url: `${baseUrl}/careers`,
       lastModified: new Date(),

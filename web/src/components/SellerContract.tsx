@@ -356,6 +356,15 @@ export function SellerContract({
                   </li>
                   <li>მაქსიმალური საფასური – 50 ლარი</li>
                 </ul>
+                <p>
+                  <strong>2.5.</strong> გამყიდველი ეთანხმება, რომ პლატფორმის
+                  აქციების/კამპანიების ფარგლებში, SoulArt.ge-ს უფლება აქვს
+                  გამყიდველის მიერ დადგენილ ფასდაკლებაზე დაამატოს პლატფორმის
+                  დამატებითი ფასდაკლება, თუ გამყიდველმა დაადასტურა მონაწილეობა
+                  შესაბამის აქციაში. აქციაში მონაწილეობის დადასტურება ხდება
+                  პლატფორმაზე ელექტრონულად და ითვლება გამყიდველის თანხმობად
+                  აღნიშნული პირობების მიმართ.
+                </p>
               </>
             ) : (
               <>
@@ -380,6 +389,15 @@ export function SellerContract({
                   <li>Fee is 5% of product value, minimum 10 GEL</li>
                   <li>Maximum fee – 50 GEL</li>
                 </ul>
+                <p>
+                  <strong>2.5.</strong> The seller agrees that during platform
+                  promotions/campaigns, SoulArt.ge has the right to add an
+                  additional platform discount on top of the seller&apos;s set
+                  discount, if the seller has confirmed participation in the
+                  respective promotion. Confirmation of participation in a
+                  promotion is done electronically on the platform and is
+                  considered the seller&apos;s consent to these terms.
+                </p>
               </>
             )}
           </div>

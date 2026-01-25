@@ -46,7 +46,7 @@ export class ChatService {
   private readonly websiteBaseUrl = 'https://soulart.ge';
   private readonly pagesToCache = [
     '/about',
-    '/referral-info',
+    // '/referral-info', // დროებით დაკომენტარებული
     '/terms',
     '/privacy-policy',
     '/forum',
@@ -365,7 +365,7 @@ export class ChatService {
 - ჩვენს შესახებ: [ჩვენს შესახებ](https://soulart.ge/about)
 - კონტაქტი: [კონტაქტი](https://soulart.ge/contact)
 
-- რეფერალური პროგრამა: [რეფერალები](https://soulart.ge/referral-info)
+- სეილს მენეჯერად რეგისტრაცია: [სეილს მენეჯერი](https://soulart.ge/sales-manager-register)
 - წესები და პირობები: [წესები](https://soulart.ge/terms)
 - კონფიდენციალურობა: [კონფიდენციალურობა](https://soulart.ge/privacy-policy)
 

@@ -56,7 +56,7 @@ export default function Footer() {
               </a>
             </li>
             <li>
-              <a href="/referral-info" className="footer-link">
+              <a href="/sales-manager-register" className="footer-link">
                 {t("footer.referralInfo")}
               </a>
             </li>
