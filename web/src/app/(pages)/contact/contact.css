@@ -185,6 +185,55 @@
   box-shadow: 0 2px 8px rgba(1, 38, 69, 0.2);
 }
 
+.form-button:disabled {
+  background: linear-gradient(135deg, #9ca3af, #6b7280);
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.form-button:disabled:hover {
+  background: linear-gradient(135deg, #9ca3af, #6b7280);
+  color: white;
+  border: none;
+  box-shadow: none;
+  transform: none;
+}
+
+/* Submit Status Messages */
+.submit-status {
+  padding: 1rem 1.5rem;
+  border-radius: 12px;
+  font-family: var(--font-firago), sans-serif;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  text-align: center;
+  animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.submit-status.success {
+  background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+  color: #065f46;
+  border: 2px solid #10b981;
+}
+
+.submit-status.error {
+  background: linear-gradient(135deg, #fee2e2, #fecaca);
+  color: #991b1b;
+  border: 2px solid #ef4444;
+}
+
 /* Responsive Design */
 @media screen and (max-width: 992px) {
   .contact-container {

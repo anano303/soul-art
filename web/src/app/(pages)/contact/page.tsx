@@ -23,12 +23,19 @@ export default function ContactPage() {
     message: "",
   });
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitStatus, setSubmitStatus] = useState<{
+    type: "success" | "error" | null;
+    message: string;
+  }>({ type: null, message: "" });
+
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
     setErrors((prev) => ({ ...prev, [name]: "" })); // Clear error on input
+    setSubmitStatus({ type: null, message: "" }); // Clear submit status on input
   };
 
   const validateForm = () => {
@@ -43,28 +50,79 @@ export default function ContactPage() {
     return !Object.values(newErrors).some((error) => error);
   };
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    
     const isValid = validateForm();
     if (!isValid) {
-      event.preventDefault();
       return;
     }
 
-    trackLead({
-      lead_type: "contact_form",
-      subject: formData.subject,
-      hasMessage: Boolean(formData.message?.trim()),
-      replyEmail: formData.email,
-    });
+    setIsSubmitting(true);
+    setSubmitStatus({ type: null, message: "" });
+
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/v1";
+      const response = await fetch(`${apiUrl}/contact`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        trackLead({
+          lead_type: "contact_form",
+          subject: formData.subject,
+          hasMessage: Boolean(formData.message?.trim()),
+          replyEmail: formData.email,
+        });
+
+        setSubmitStatus({
+          type: "success",
+          message: t("contact.successMessage") || "შეტყობინება წარმატებით გაიგზავნა!",
+        });
+
+        // Clear form
+        setFormData({
+          name: "",
+          email: "",
+          subject: "",
+          message: "",
+        });
+      } else {
+        setSubmitStatus({
+          type: "error",
+          message: result.message || t("contact.errorMessage") || "შეცდომა მოხდა. გთხოვთ სცადოთ მოგვიანებით.",
+        });
+      }
+    } catch (error) {
+      console.error("Contact form error:", error);
+      setSubmitStatus({
+        type: "error",
+        message: t("contact.errorMessage") || "შეცდომა მოხდა. გთხოვთ სცადოთ მოგვიანებით.",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
+
 
   return (
     <div className="contact-container">
       <h1 className="contact-title">{t("contact.title")}</h1>
       <p className="contact-description">{t("contact.description")}</p>
+      
+      {submitStatus.type && (
+        <div className={`submit-status ${submitStatus.type}`}>
+          {submitStatus.message}
+        </div>
+      )}
+      
       <form
-        action="https://formspree.io/f/movenjpn"
-        method="POST"
         className="contact-form"
         onSubmit={handleSubmit}
       >
@@ -119,8 +177,8 @@ export default function ContactPage() {
           ></textarea>
           {errors.message && <p className="form-error">{errors.message}</p>}
         </div>
-        <button type="submit" className="form-button">
-          {t("contact.send")}
+        <button type="submit" className="form-button" disabled={isSubmitting}>
+          {isSubmitting ? t("contact.sending") || "იგზავნება..." : t("contact.send")}
         </button>
       </form>
     </div>
