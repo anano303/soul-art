@@ -1034,4 +1034,83 @@ ${message}
 
     await this.transporter.sendMail(mailOptions);
   }
+
+  /**
+   * საკონტაქტო ფორმიდან მეილის გაგზავნა ადმინისტრატორთან
+   */
+  async sendContactFormEmail(data: {
+    name: string;
+    email: string;
+    subject: string;
+    message: string;
+  }) {
+    const adminEmail = process.env.ADMIN_EMAIL || 'info@soulart.ge';
+
+    const mailOptions = {
+      from: emailConfig.from,
+      to: adminEmail,
+      replyTo: data.email,
+      subject: `[საკონტაქტო ფორმა] ${data.subject}`,
+      html: `
+        <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+          <!-- Header -->
+          <div style="background: linear-gradient(135deg, #012645 0%, #1a365d 100%); padding: 24px; text-align: center;">
+            <h1 style="color: #ffffff; font-size: 24px; margin: 0;">📧 ახალი შეტყობინება</h1>
+            <p style="color: rgba(255,255,255,0.8); margin: 8px 0 0; font-size: 14px;">საკონტაქტო ფორმიდან</p>
+          </div>
+          
+          <!-- Content -->
+          <div style="padding: 24px;">
+            <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+              <tr>
+                <td style="padding: 12px 0; border-bottom: 1px solid #e5e7eb; color: #6b7280; width: 120px; font-weight: 600;">სახელი:</td>
+                <td style="padding: 12px 0; border-bottom: 1px solid #e5e7eb; color: #1f2937;">${data.name}</td>
+              </tr>
+              <tr>
+                <td style="padding: 12px 0; border-bottom: 1px solid #e5e7eb; color: #6b7280; font-weight: 600;">ელ-ფოსტა:</td>
+                <td style="padding: 12px 0; border-bottom: 1px solid #e5e7eb; color: #1f2937;">
+                  <a href="mailto:${data.email}" style="color: #2563eb; text-decoration: none;">${data.email}</a>
+                </td>
+              </tr>
+              <tr>
+                <td style="padding: 12px 0; border-bottom: 1px solid #e5e7eb; color: #6b7280; font-weight: 600;">თემა:</td>
+                <td style="padding: 12px 0; border-bottom: 1px solid #e5e7eb; color: #1f2937; font-weight: 600;">${data.subject}</td>
+              </tr>
+            </table>
+            
+            <div style="background: #f8fafc; border-radius: 8px; padding: 16px; margin-top: 16px;">
+              <h3 style="color: #374151; margin: 0 0 12px; font-size: 14px; font-weight: 600;">შეტყობინება:</h3>
+              <p style="color: #1f2937; margin: 0; line-height: 1.6; white-space: pre-wrap;">${data.message}</p>
+            </div>
+            
+            <div style="margin-top: 24px; text-align: center;">
+              <a href="mailto:${data.email}?subject=Re: ${encodeURIComponent(data.subject)}" 
+                 style="background: #012645; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; display: inline-block; font-size: 14px; font-weight: 600;">
+                პასუხის გაგზავნა →
+              </a>
+            </div>
+          </div>
+          
+          <!-- Footer -->
+          <div style="background: #f3f4f6; padding: 16px; text-align: center; border-top: 1px solid #e5e7eb;">
+            <p style="color: #6b7280; font-size: 12px; margin: 0;">
+              © ${new Date().getFullYear()} SoulArt - საკონტაქტო ფორმა
+            </p>
+          </div>
+        </div>
+      `,
+      text: `
+ახალი შეტყობინება საკონტაქტო ფორმიდან
+
+სახელი: ${data.name}
+ელ-ფოსტა: ${data.email}
+თემა: ${data.subject}
+
+შეტყობინება:
+${data.message}
+      `,
+    };
+
+    await this.transporter.sendMail(mailOptions);
+  }
 }
