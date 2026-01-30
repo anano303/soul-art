@@ -33,7 +33,7 @@ export interface ProductSearchResult {
 export class ChatService {
   private readonly logger = new Logger(ChatService.name);
   private genAI: GoogleGenerativeAI;
-  private readonly model = 'gemini-2.5-flash-preview-05-20'; // სწრაფი, thinking-ის გარეშე
+  private readonly model = 'gemini-3-flash-preview'; // ახალი მოდელი
 
   // ქეშირებული მონაცემები - სერვერის გაშვებისას იტვირთება
   private cachedCategories: string[] = [];
@@ -550,8 +550,6 @@ ${this.getWebsiteContentForPrompt()}`;
         generationConfig: {
           temperature: 0.7,
           maxOutputTokens: 1500,
-          // @ts-ignore - thinking გამორთვა სწრაფი პასუხებისთვის
-          thinkingConfig: { thinkingBudget: 0 },
         },
       });
 
