@@ -90,8 +90,9 @@ export class PushNotificationController {
     const testPayload = {
       title: 'ტესტური შეტყობინება',
       body: 'თქვენი push notification-ები მუშაობს!',
-      icon: '/logo.png',
-      badge: '/logo.png',
+      icon: '/android-icon-192x192.png',
+      // badge - Android status bar-ში ჩანს, უნდა იყოს monochrome (თეთრი სილუეტი გამჭვირვალე ფონზე)
+      badge: '/notification-badge.png',
       data: {
         url: '/',
         type: 'new_product' as const,
@@ -132,7 +133,8 @@ export class PushNotificationController {
       title: '🆕 ახალი ნამუშევარი SoulArt-ზე!',
       body: `${productName}${priceText}`.trim(),
       icon: productImage || '/android-icon-192x192.png',
-      badge: '/favicon-96x96.png',
+      // badge - Android status bar-ში ჩანს, უნდა იყოს monochrome (თეთრი სილუეტი გამჭვირვალე ფონზე)
+      badge: '/notification-badge.png',
       data: {
         type: 'new_product' as const,
         url: `/products/${productId}`,
