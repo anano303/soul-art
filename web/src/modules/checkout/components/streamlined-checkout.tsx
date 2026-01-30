@@ -749,6 +749,60 @@ export function StreamlinedCheckout() {
                     </button>
                   </div>
 
+                  {/* Payment Method Selection */}
+                  <div className="review-card">
+                    <h3>გადახდის მეთოდი</h3>
+                    <div className="payment-methods-grid">
+                      {/* PayPal Option */}
+                      <label
+                        className={cn(
+                          "payment-method-option",
+                          paymentMethod === "PayPal" && "payment-method-selected paypal-selected"
+                        )}
+                      >
+                        <input
+                          type="radio"
+                          name="paymentMethod"
+                          value="PayPal"
+                          checked={paymentMethod === "PayPal"}
+                          onChange={(e) => setPaymentMethod(e.target.value)}
+                          className="sr-only"
+                        />
+                        <div className="payment-method-content">
+                          <FaPaypal className="payment-method-icon" />
+                          <span className="payment-method-name">PayPal</span>
+                          <span className="payment-method-desc">Visa, Mastercard, PayPal</span>
+                        </div>
+                      </label>
+
+                      {/* BOG Option */}
+                      <label
+                        className={cn(
+                          "payment-method-option",
+                          paymentMethod === "BOG" && "payment-method-selected bog-selected"
+                        )}
+                      >
+                        <input
+                          type="radio"
+                          name="paymentMethod"
+                          value="BOG"
+                          checked={paymentMethod === "BOG"}
+                          onChange={(e) => setPaymentMethod(e.target.value)}
+                          className="sr-only"
+                        />
+                        <div className="payment-method-content">
+                          <svg className="payment-method-icon" width="24" height="24" viewBox="0 0 32 24" fill="none">
+                            <rect x="1" y="1" width="30" height="22" rx="3" stroke="currentColor" strokeWidth="2" fill="rgba(0,0,0,0.05)" />
+                            <line x1="1" y1="7" x2="31" y2="7" stroke="currentColor" strokeWidth="2" />
+                            <rect x="4" y="14" width="10" height="4" rx="1" fill="currentColor" />
+                          </svg>
+                          <span className="payment-method-name">ბარათით გადახდა</span>
+                          <span className="payment-method-desc">ყველა ბარათი მიიღება</span>
+                        </div>
+                      </label>
+                    </div>
+                  </div>
+
                   {/* Order Items */}
                   <div className="review-card">
                     <h3>შეკვეთის პროდუქტები</h3>
@@ -897,89 +951,62 @@ export function StreamlinedCheckout() {
             )}
 
             {currentStep === "review" && (
-              <>
-                {/* Payment Method Selection */}
-                <div className="payment-methods-sidebar">
-                  <h4 className="payment-methods-title">აირჩიე გადახდის მეთოდი</h4>
-                  
-                  {/* PayPal Option */}
-                  <label
-                    className={cn(
-                      "payment-method-card",
-                      paymentMethod === "PayPal" && "payment-method-active paypal-active"
-                    )}
-                  >
-                    <input
-                      type="radio"
-                      name="paymentMethod"
-                      value="PayPal"
-                      checked={paymentMethod === "PayPal"}
-                      onChange={(e) => setPaymentMethod(e.target.value)}
-                      className="sr-only"
-                    />
-                    <div className="payment-card-content">
-                      <FaPaypal className="payment-card-icon" />
-                      <div className="payment-card-text">
-                        <span className="payment-card-title">PayPal</span>
-                        <span className="payment-card-subtitle">Visa, Mastercard, PayPal</span>
-                      </div>
-                    </div>
-                  </label>
-
-                  {/* BOG Option */}
-                  <label
-                    className={cn(
-                      "payment-method-card",
-                      paymentMethod === "BOG" && "payment-method-active bog-active"
-                    )}
-                  >
-                    <input
-                      type="radio"
-                      name="paymentMethod"
-                      value="BOG"
-                      checked={paymentMethod === "BOG"}
-                      onChange={(e) => setPaymentMethod(e.target.value)}
-                      className="sr-only"
-                    />
-                    <div className="payment-card-content">
-                      <svg className="payment-card-icon" width="24" height="24" viewBox="0 0 32 24" fill="none">
-                        <rect x="1" y="1" width="30" height="22" rx="3" stroke="currentColor" strokeWidth="2" fill="rgba(0,0,0,0.05)" />
-                        <line x1="1" y1="7" x2="31" y2="7" stroke="currentColor" strokeWidth="2" />
-                        <rect x="4" y="14" width="10" height="4" rx="1" fill="currentColor" />
-                      </svg>
-                      <div className="payment-card-text">
-                        <span className="payment-card-title">ბარათით გადახდა</span>
-                        <span className="payment-card-subtitle">ყველა ბარათი მიიღება</span>
-                      </div>
-                    </div>
-                  </label>
-                </div>
-
-                {/* Place Order Button */}
-                <button
-                  onClick={handlePlaceOrder}
-                  disabled={
-                    isValidating ||
-                    unavailableItems.length > 0 ||
-                    isProcessingPayment
-                  }
-                  className="btn-bog-payment sidebar-action-btn mobile-place-order"
-                >
-                  <div className="bog-payment-content">
-                    <div className="bog-payment-text">
-                      <span className="bog-payment-title">შეკვეთის დადასტურება</span>
-                    </div>
-                    {(isValidating || isProcessingPayment) && (
-                      <div className="spinner" />
-                    )}
+              <button
+                onClick={handlePlaceOrder}
+                disabled={
+                  isValidating ||
+                  unavailableItems.length > 0 ||
+                  isProcessingPayment
+                }
+                className="btn-bog-payment sidebar-action-btn mobile-place-order"
+              >
+                <div className="bog-payment-content">
+                  <div className="card-icon">
+                    <svg width="32" height="24" viewBox="0 0 32 24" fill="none">
+                      <rect
+                        x="1"
+                        y="1"
+                        width="30"
+                        height="22"
+                        rx="3"
+                        stroke="white"
+                        strokeWidth="2"
+                        fill="rgba(255,255,255,0.2)"
+                      />
+                      <line
+                        x1="1"
+                        y1="7"
+                        x2="31"
+                        y2="7"
+                        stroke="white"
+                        strokeWidth="2"
+                      />
+                      <rect
+                        x="4"
+                        y="14"
+                        width="10"
+                        height="4"
+                        rx="1"
+                        fill="white"
+                      />
+                    </svg>
                   </div>
-                  {!isValidating && !isProcessingPayment && (
-                    <span className="bog-payment-amount">
-                      {totalPrice.toFixed(2)} ₾
+                  <div className="bog-payment-text">
+                    <span className="bog-payment-title">ბარათით გადახდა</span>
+                    <span className="bog-payment-subtitle">
+                      ყველა ბარათი მიიღება
                     </span>
+                  </div>
+                  {(isValidating || isProcessingPayment) && (
+                    <div className="spinner" />
                   )}
-                </button>
-              </>
+                </div>
+                {!isValidating && !isProcessingPayment && (
+                  <span className="bog-payment-amount">
+                    {totalPrice.toFixed(2)} ₾
+                  </span>
+                )}
+              </button>
             )}
           </div>
         </div>
