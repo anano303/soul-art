@@ -33,7 +33,7 @@ export interface ProductSearchResult {
 export class ChatService {
   private readonly logger = new Logger(ChatService.name);
   private genAI: GoogleGenerativeAI;
-  private readonly model = 'gemini-2.0-flash-exp'; // უფასო მოდელი
+  private readonly model = 'gemini-1.5-flash'; // სტაბილური უფასო მოდელი
 
   // ქეშირებული მონაცემები - სერვერის გაშვებისას იტვირთება
   private cachedCategories: string[] = [];
