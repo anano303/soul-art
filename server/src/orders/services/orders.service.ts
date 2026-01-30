@@ -1261,8 +1261,8 @@ export class OrdersService {
             body: `#${orderId} • ${orderWithData.orderItems.length} პროდუქტი • ${totals.totalPrice.toFixed(
               2,
             )} ₾`,
-            icon: `${baseUrl}/android-icon-192x192.png`,
-            badge: `${baseUrl}/android-icon-96x96.png`,
+            icon: `${baseUrl}/icons/android/icon-192x192.png`,
+            badge: `${baseUrl}/icons/pwa/notification-badge.png`,
             data: {
               url: `${baseUrl}/profile/orders/${orderId}`,
               type: 'order_status',
@@ -1412,8 +1412,8 @@ export class OrdersService {
               body: `${entry.items.length} პროდუქტი • ${entry.subtotal.toFixed(
                 2,
               )} ₾`,
-              icon: `${baseUrl}/android-icon-192x192.png`,
-              badge: `${baseUrl}/android-icon-96x96.png`,
+              icon: `${baseUrl}/icons/android/icon-192x192.png`,
+              badge: `${baseUrl}/icons/pwa/notification-badge.png`,
               data: {
                 url: `${baseUrl}/admin/orders/${orderId}`,
                 type: 'order_status',
@@ -1502,8 +1502,8 @@ export class OrdersService {
             body: `#${orderId} • ${orderWithData.orderItems.length} პროდუქტი • ${totals.totalPrice.toFixed(
               2,
             )} ₾`,
-            icon: `${baseUrl}/android-icon-192x192.png`,
-            badge: `${baseUrl}/android-icon-96x96.png`,
+            icon: `${baseUrl}/icons/android/icon-192x192.png`,
+            badge: `${baseUrl}/icons/pwa/notification-badge.png`,
             data: {
               url: `${baseUrl}/admin/orders/${orderId}`,
               type: 'order_status',
@@ -1659,8 +1659,8 @@ export class OrdersService {
           const adminPayload: NotificationPayload = {
             title: '❌ შეკვეთის გადახდა ვერ შესრულდა',
             body: `#${orderIdForDisplay} • სტატუსი: ${status}`,
-            icon: `${baseUrl}/android-icon-192x192.png`,
-            badge: `${baseUrl}/android-icon-96x96.png`,
+            icon: `${baseUrl}/icons/android/icon-192x192.png`,
+            badge: `${baseUrl}/icons/pwa/notification-badge.png`,
             data: {
               url: orderUrl,
               type: 'order_status',

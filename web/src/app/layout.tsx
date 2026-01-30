@@ -149,24 +149,24 @@ export async function generateMetadata(): Promise<Metadata> {
       ICBM: "41.7151, 44.8271",
     },
     icons: {
-      icon: "/soulart_icon_blue_fullsizes.ico",
-      shortcut: "/soulart_icon_blue_fullsizes.ico",
-      apple: "/soulart_icon_blue_fullsizes.ico",
+      icon: "/icons/favicon/favicon-blue.ico",
+      shortcut: "/icons/favicon/favicon-blue.ico",
+      apple: "/icons/ios/icon-180x180.png",
       other: [
         {
           rel: "icon",
-          url: "/soulart_icon_blue_fullsizes.ico",
+          url: "/icons/favicon/favicon-blue.ico",
           type: "image/x-icon",
         },
         {
           rel: "shortcut icon",
-          url: "/soulart_icon_blue_fullsizes.ico",
+          url: "/icons/favicon/favicon-blue.ico",
           type: "image/x-icon",
         },
-        { rel: "apple-touch-icon", url: "/soulart_icon_blue_fullsizes.ico" },
+        { rel: "apple-touch-icon", url: "/icons/ios/icon-180x180.png" },
         {
           rel: "mask-icon",
-          url: "/soulart_icon_blue_fullsizes.ico",
+          url: "/icons/favicon/favicon-blue.ico",
           color: PRIMARY_COLOR,
         },
       ],
@@ -211,23 +211,23 @@ export default function RootLayout({
         {/* Favicon links */}
         <link
           rel="icon"
-          href="/soulart_icon_blue_fullsizes.ico"
+          href="/icons/favicon/favicon-blue.ico"
           type="image/x-icon"
         />
-        <link rel="apple-touch-icon" href="/soulart_icon_blue_fullsizes.ico" />
+        <link rel="apple-touch-icon" href="/icons/ios/icon-180x180.png" />
         <link
           rel="shortcut icon"
-          href="/soulart_icon_blue_fullsizes.ico"
+          href="/icons/favicon/favicon-blue.ico"
           type="image/x-icon"
         />
         <link
           rel="mask-icon"
-          href="/soulart_icon_blue_fullsizes.ico"
+          href="/icons/favicon/favicon-blue.ico"
           color={PRIMARY_COLOR}
         />
         <meta
           name="msapplication-TileImage"
-          content="/soulart_icon_blue_fullsizes.ico"
+          content="/icons/windows/icon-144x144.png"
         />
         {/* PWA Meta Tags */}
         <meta name="theme-color" content={PRIMARY_COLOR} />
