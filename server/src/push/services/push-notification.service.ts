@@ -4,6 +4,8 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import * as webpush from 'web-push';
 import { PushSubscription as PushSubscriptionDoc } from '../schemas/push-subscription.schema';
+import { UserDocument } from '@/users/schemas/user.schema';
+import { Role } from '@/types/role.enum';
 
 interface PushSubscription {
   endpoint: string;
@@ -34,12 +36,12 @@ export interface NotificationPayload {
       | 'order_status'
       | 'product_approved'
       | 'product_rejected'
-      | 'new_forum_post';
+      | 'new_forum_post'
+      | 'pending_product';
     id?: string;
   };
   tag: string;
   requireInteraction: boolean;
-}
 
 @Injectable()
 export class PushNotificationService {
@@ -51,6 +53,8 @@ export class PushNotificationService {
     private configService: ConfigService,
     @InjectModel('PushSubscription')
     private pushSubscriptionModel: Model<PushSubscriptionDoc>,
+    @InjectModel('User')
+    private userModel: Model<UserDocument>,
   ) {
     this.initializeVAPID();
     // Defer loading subscriptions until actually needed for faster startup
@@ -333,6 +337,71 @@ export class PushNotificationService {
         results.errors.push(errorMessage);
         this.logger.error(errorMessage);
       }
+    }
+
+    return results;
+  }
+
+  async sendToAdmins(payload: NotificationPayload) {
+    await this.ensureSubscriptionsLoaded();
+
+    const results = {
+      successful: 0,
+      failed: 0,
+      errors: [] as string[],
+    };
+
+    if (!this.isVAPIDConfigured()) {
+      results.errors.push('VAPID keys არ არის კონფიგურირებული');
+      return results;
+    }
+
+    try {
+      // Get all admin user IDs from database
+      const adminUsers = await this.userModel
+        .find({ role: Role.Admin })
+        .select('_id')
+        .exec();
+
+      if (adminUsers.length === 0) {
+        this.logger.warn('📭 No admin users found in database');
+        return results;
+      }
+
+      const adminUserIds = adminUsers.map((u) => u._id.toString());
+      this.logger.log(`📋 Found ${adminUserIds.length} admin users`);
+
+      // Filter subscriptions to only include admin users
+      const adminSubscriptions = Array.from(this.subscriptions.values()).filter(
+        (sub) => sub.userId && adminUserIds.includes(sub.userId),
+      );
+
+      if (adminSubscriptions.length === 0) {
+        this.logger.log('ℹ️ No admin users have active push subscriptions');
+        return results;
+      }
+
+      this.logger.log(
+        `📤 Sending notification to ${adminSubscriptions.length} admin subscriptions`,
+      );
+
+      for (const subscriptionData of adminSubscriptions) {
+        try {
+          await webpush.sendNotification(
+            subscriptionData.subscription,
+            JSON.stringify(payload),
+          );
+          results.successful++;
+        } catch (error) {
+          results.failed++;
+          const errorMessage = `Failed to send to admin: ${error.message}`;
+          results.errors.push(errorMessage);
+          this.logger.error(errorMessage);
+        }
+      }
+    } catch (error) {
+      this.logger.error('Failed to get admin users:', error);
+      results.errors.push('Failed to get admin users');
     }
 
     return results;

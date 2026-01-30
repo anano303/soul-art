@@ -1,5 +1,6 @@
 import { Body, Controller, Get, Post, Req } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { ConfigService } from '@nestjs/config';
 import {
   NotificationPayload,
   PushNotificationService,
@@ -14,7 +15,15 @@ import { Request } from 'express';
 @ApiTags('push-notifications')
 @Controller('push')
 export class PushNotificationController {
-  constructor(private readonly pushService: PushNotificationService) {}
+  private readonly baseUrl: string;
+
+  constructor(
+    private readonly pushService: PushNotificationService,
+    private readonly configService: ConfigService,
+  ) {
+    this.baseUrl =
+      this.configService.get<string>('FRONTEND_URL') || 'https://soulart.ge';
+  }
 
   @Post('subscribe')
   @ApiOperation({ summary: 'Subscribe to push notifications' })
@@ -90,9 +99,9 @@ export class PushNotificationController {
     const testPayload = {
       title: 'ტესტური შეტყობინება',
       body: 'თქვენი push notification-ები მუშაობს!',
-      icon: '/android-icon-192x192.png',
+      icon: `${this.baseUrl}/android-icon-192x192.png`,
       // badge - Android status bar-ში ჩანს, უნდა იყოს monochrome (თეთრი სილუეტი გამჭვირვალე ფონზე)
-      badge: '/notification-badge.png',
+      badge: `${this.baseUrl}/notification-badge.png`,
       data: {
         url: '/',
         type: 'new_product' as const,
@@ -132,9 +141,9 @@ export class PushNotificationController {
     const payload: NotificationPayload = {
       title: '🆕 ახალი ნამუშევარი SoulArt-ზე!',
       body: `${productName}${priceText}`.trim(),
-      icon: productImage || '/android-icon-192x192.png',
+      icon: productImage || `${this.baseUrl}/android-icon-192x192.png`,
       // badge - Android status bar-ში ჩანს, უნდა იყოს monochrome (თეთრი სილუეტი გამჭვირვალე ფონზე)
-      badge: '/notification-badge.png',
+      badge: `${this.baseUrl}/notification-badge.png`,
       data: {
         type: 'new_product' as const,
         url: `/products/${productId}`,

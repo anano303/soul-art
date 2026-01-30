@@ -295,6 +295,10 @@ self.addEventListener("notificationclick", (event) => {
           ? `/forum/${notificationData.id}`
           : "/forum";
         break;
+      case "pending_product":
+        // Admin notification for pending product approval
+        urlToOpen = "/admin/products?status=PENDING";
+        break;
       default:
         urlToOpen = "/";
     }
