@@ -726,6 +726,18 @@ export class ProductsController {
         }
       }
 
+      // Send push notification to admins for product approval (only in production)
+      if (process.env.NODE_ENV === 'production') {
+        this.sendPendingProductNotification(createdProduct, user.name).catch(
+          (error) => {
+            console.error(
+              'Failed to send pending product notification:',
+              error,
+            );
+          },
+        );
+      }
+
       return createdProduct;
     } catch (error) {
       console.error('Error creating product:', error);
@@ -1392,11 +1404,14 @@ export class ProductsController {
         return;
       }
 
+      const baseUrl =
+        process.env.FRONTEND_URL || 'https://soulart.ge';
+
       const pushPayload = {
         title: '🆕 ახალი ნამუშევარი SoulArt-ზე!',
         body: `${product.name || product.nameEn || 'ახალი ნამუშევარი'} - იხილეთ ახალი შემოთავაზება!`,
-        icon: product.images?.[0] || '/android-icon-192x192.png',
-        badge: '/favicon-96x96.png',
+        icon: product.images?.[0] || `${baseUrl}/android-icon-192x192.png`,
+        badge: `${baseUrl}/notification-badge.png`,
         data: {
           type: 'new_product' as const,
           url: `/products/${product._id}`,
@@ -1456,11 +1471,14 @@ export class ProductsController {
         return;
       }
 
+      const baseUrl =
+        process.env.FRONTEND_URL || 'https://soulart.ge';
+
       const pushPayload = {
         title,
         body,
-        icon: product.images?.[0] || '/android-icon-192x192.png',
-        badge: '/favicon-96x96.png',
+        icon: product.images?.[0] || `${baseUrl}/android-icon-192x192.png`,
+        badge: `${baseUrl}/notification-badge.png`,
         data: {
           type: notificationType,
           url: `/products/${product._id}`,
@@ -1491,6 +1509,59 @@ export class ProductsController {
         error.message,
       );
       // Don't throw error - push notification failure shouldn't break product status update
+    }
+  }
+
+  // Private method to send push notification to admins when new product is uploaded for approval
+  private async sendPendingProductNotification(
+    product: any,
+    sellerName: string,
+  ) {
+    try {
+      // Double-check production environment
+      if (process.env.NODE_ENV !== 'production') {
+        console.log(
+          '⏭️  Skipping pending product push notification (not in production)',
+        );
+        return;
+      }
+
+      const baseUrl =
+        process.env.FRONTEND_URL || 'https://soulart.ge';
+
+      const pushPayload = {
+        title: '📦 ახალი პროდუქტი დასადასტურებლად!',
+        body: `${sellerName}-მა ატვირთა: "${product.name || product.nameEn || 'ახალი პროდუქტი'}"`,
+        icon: product.images?.[0] || `${baseUrl}/android-icon-192x192.png`,
+        badge: `${baseUrl}/notification-badge.png`,
+        data: {
+          type: 'pending_product' as const,
+          url: `/admin/products?status=PENDING`,
+          id: product._id?.toString(),
+        },
+        tag: `pending-product-${product._id}`,
+        requireInteraction: true,
+      };
+
+      console.log(
+        '📤 Sending push notification to admins for pending product:',
+        product.name || product.nameEn,
+      );
+
+      // Send push notification to all admins
+      const results =
+        await this.pushNotificationService.sendToAdmins(pushPayload);
+
+      console.log('✅ Pending product notification sent to admins:', {
+        sent: results.successful,
+        failed: results.failed,
+      });
+    } catch (error) {
+      console.error(
+        '❌ Failed to send pending product notification to admins:',
+        error.message,
+      );
+      // Don't throw error - push notification failure shouldn't break product creation
     }
   }
 }
