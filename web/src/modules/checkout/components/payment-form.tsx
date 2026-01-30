@@ -8,7 +8,7 @@ import { useCheckout } from "../context/checkout-context";
 import { apiClient } from "@/lib/axios";
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/hooks/LanguageContext";
-import { FaPaypal } from "react-icons/fa";
+// import { FaPaypal } from "react-icons/fa";
 // import { CreditCard } from "lucide-react";
 import "./payment-form.css";
 
@@ -39,14 +39,12 @@ export function PaymentForm() {
     if (!currentPaymentMethod && watchedPaymentMethod) {
       form.handleSubmit(onSubmit)();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
     if (watchedPaymentMethod && watchedPaymentMethod !== currentPaymentMethod) {
       form.handleSubmit(onSubmit)();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [watchedPaymentMethod]);
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
@@ -88,12 +86,12 @@ export function PaymentForm() {
             <label className="form-label">{t("checkout.steps.payment")}</label>
             <div className="form-control">
               <div className="grid grid-cols-1 gap-4">
-                {/* PayPal Option */}
-                <div className="form-item">
+                {/* PayPal Option - Temporarily Commented */}
+                {/* <div className="form-item">
                   <div className="form-control">
                     <label
                       htmlFor="PayPal"
-                      className="border rounded-lg p-4 cursor-pointer hover:border-primary [&:has(:checked)]:border-primary [&:has(:checked)]:bg-[#0070ba] [&:has(:checked)]:text-white block transition-all duration-300"
+                      className="border rounded-lg p-4 cursor-pointer hover:border-primary [&:has(:checked)]:border-primary block"
                     >
                       <input
                         type="radio"
@@ -105,13 +103,32 @@ export function PaymentForm() {
                       <div className="flex flex-col items-center space-y-2">
                         <FaPaypal className="h-6 w-6" />
                         <span className="text-sm font-medium">PayPal</span>
-                        <span className="text-xs opacity-75">Visa, Mastercard, PayPal</span>
                       </div>
                     </label>
                   </div>
-                </div>
+                </div> */}
 
-                {/* BOG Option */}
+                {/* Stripe Option - Temporarily Commented */}
+                {/* <div className="form-item">
+                  <div className="form-control">
+                    <label
+                      htmlFor="Stripe"
+                      className="border rounded-lg p-4 cursor-pointer hover:border-primary [&:has(:checked)]:border-primary block"
+                    >
+                      <input
+                        type="radio"
+                        value="Stripe"
+                        id="Stripe"
+                        className="sr-only"
+                        {...form.register("paymentMethod")}
+                      />
+                      <div className="flex flex-col items-center space-y-2">
+                        <CreditCard className="h-6 w-6" />
+                        <span className="text-sm font-medium">Card</span>
+                      </div>
+                    </label>
+                  </div>
+                </div> */}
                 <div className="form-item">
                   <div className="form-control">
                     <label

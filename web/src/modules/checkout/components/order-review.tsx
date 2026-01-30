@@ -78,16 +78,11 @@ export function OrderReview() {
   const isShippingFree = shippingPrice === 0;
   const showBothCurrencies = shippingCountry !== "GE";
 
+  // საკომისიო მოხსნილია - რეალური ფასი ყველგან
+  const totalPrice = itemsPrice + shippingPrice;
+
   // USD conversion rate (1 GEL = 1/2.8 USD approximately)
   const GEL_TO_USD = 1 / 2.8;
-  const USD_TO_GEL = 2.8;
-
-  // PayPal საკომისიო: 3.40% + $0.30 USD (საქართველოში შიდა ტრანზაქციებისთვის)
-  const paypalFee = paymentMethod === 'PayPal' 
-    ? ((itemsPrice + shippingPrice) * 0.034) + (0.30 * USD_TO_GEL)
-    : 0;
-
-  const totalPrice = itemsPrice + shippingPrice + paypalFee;
 
   // Function to format price based on country selection
   const formatPrice = (amount: number) => {
@@ -383,14 +378,6 @@ export function OrderReview() {
                 {isShippingFree ? t("cart.free") : formatPrice(shippingPrice)}
               </span>
             </div>
-            {paypalFee > 0 && (
-              <div className="summary-row flex justify-between">
-                <span className="summary-label text-muted-foreground">
-                  PayPal საკომისიო (3.40% + $0.30)
-                </span>
-                <span>{formatPrice(paypalFee)}</span>
-              </div>
-            )}
             {/* საკომისიო დაკომენტარებულია - ბანკის გვერდზე ნახავს
             <div className="summary-row flex justify-between">
               <span className="summary-label text-muted-foreground">
