@@ -547,6 +547,8 @@ ${this.getWebsiteContentForPrompt()}`;
         generationConfig: {
           temperature: 0.7,
           maxOutputTokens: 1500,
+          // @ts-ignore - thinking გამორთვა სწრაფი პასუხებისთვის
+          thinkingConfig: { thinkingBudget: 0 },
         },
       });
 
