@@ -194,6 +194,72 @@
   margin-bottom: 0.5rem;
 }
 
+/* Payment Methods Grid */
+.payment-methods-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.payment-method-option {
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 1.25rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.payment-method-option:hover {
+  border-color: #d1d5db;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+.payment-method-selected {
+  border-width: 2px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.paypal-selected {
+  border-color: #0070ba;
+  background: linear-gradient(135deg, #0070ba 0%, #1546a0 100%);
+  color: white;
+}
+
+.bog-selected {
+  border-color: #e11d48;
+  background: linear-gradient(135deg, #dc2626 0%, #be185d 100%);
+  color: white;
+}
+
+.payment-method-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  text-align: center;
+}
+
+.payment-method-icon {
+  width: 32px;
+  height: 32px;
+}
+
+.payment-method-name {
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.payment-method-desc {
+  font-size: 0.75rem;
+  opacity: 0.75;
+}
+
 .order-items-review {
   display: flex;
   flex-direction: column;
