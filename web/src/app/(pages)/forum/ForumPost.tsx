@@ -86,7 +86,7 @@ const ForumPost = ({
   const [replyText, setReplyText] = useState<{ [key: string]: string }>({});
   const [commentLikes, setCommentLikes] = useState<Record<string, number>>({});
   const [likedComments, setLikedComments] = useState<Record<string, boolean>>(
-    {}
+    {},
   );
 
   const [error, setError] = useState<string | null>(null);
@@ -185,7 +185,7 @@ const ForumPost = ({
   const deleteCommentMutation = useMutation({
     mutationFn: async (commentId: string) => {
       const isConfirmed = window.confirm(
-        "დარწმუნებული ხართ რომ გსურთ კომენტარის წაშლა?"
+        "დარწმუნებული ხართ რომ გსურთ კომენტარის წაშლა?",
       );
       if (!isConfirmed) {
         throw new Error("Operation canceled by user");
@@ -200,7 +200,7 @@ const ForumPost = ({
             "forum-id": id,
           },
           credentials: "include",
-        }
+        },
       );
       if (!response.ok) {
         const error = await response.json();
@@ -251,7 +251,7 @@ const ForumPost = ({
           body: JSON.stringify({
             content,
           }),
-        }
+        },
       );
       if (!response.ok) {
         const error = await response.json();
@@ -514,7 +514,7 @@ const ForumPost = ({
     mutationFn: async () => {
       try {
         const isConfirmed = window.confirm(
-          "დარწმუნებული ხართ რომ გსურთ პოსტის წაშლა?"
+          "დარწმუნებული ხართ რომ გსურთ პოსტის წაშლა?",
         );
         if (!isConfirmed) {
           throw new Error("Operation canceled by user");
@@ -604,7 +604,7 @@ const ForumPost = ({
   };
 
   const handleEditedFileChange = async (
-    e: React.ChangeEvent<HTMLInputElement>
+    e: React.ChangeEvent<HTMLInputElement>,
   ) => {
     const file = e.target.files?.[0] || null;
     if (!file) {
@@ -705,7 +705,7 @@ const ForumPost = ({
             onError={(e) => {
               console.warn(
                 "Failed to load comment author image:",
-                comment.author.profileImage
+                comment.author.profileImage,
               );
               // Fallback to default avatar
               const imgElement = e.currentTarget as HTMLImageElement;
@@ -833,7 +833,7 @@ const ForumPost = ({
             onError={(e) => {
               console.warn(
                 "Failed to load forum author image:",
-                author.profileImage
+                author.profileImage,
               );
               // Retry with cache busting
               const imgElement = e.currentTarget as HTMLImageElement;
@@ -876,7 +876,7 @@ const ForumPost = ({
                 onClick={() => {
                   console.log(
                     "Edit button clicked, canModifyPost:",
-                    canModifyPost
+                    canModifyPost,
                   );
                   setIsEditingPost(true);
                 }}
@@ -889,7 +889,7 @@ const ForumPost = ({
                 onClick={() => {
                   console.log(
                     "Delete button clicked, canModifyPost:",
-                    canModifyPost
+                    canModifyPost,
                   );
                   deletePostMutation.mutate();
                 }}

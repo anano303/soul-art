@@ -59,7 +59,7 @@ const ShopContent = () => {
 
   const [showDiscountedOnly, setShowDiscountedOnly] = useState<boolean>(false);
   const [selectedOriginalTypes, setSelectedOriginalTypes] = useState<string[]>(
-    []
+    [],
   );
   const [selectedMaterials, setSelectedMaterials] = useState<string[]>([]);
   const [selectedDimensions, setSelectedDimensions] = useState<string[]>([]);
@@ -81,7 +81,7 @@ const ShopContent = () => {
     queryFn: async () => {
       try {
         const response = await fetchWithAuth(
-          "/categories?includeInactive=false"
+          "/categories?includeInactive=false",
         );
         return response.json();
       } catch (err) {
@@ -96,7 +96,7 @@ const ShopContent = () => {
     if (!selectedCategoryId || !categories.length) return "default";
 
     const selectedCategory = categories.find(
-      (cat) => cat.id === selectedCategoryId || cat._id === selectedCategoryId
+      (cat) => cat.id === selectedCategoryId || cat._id === selectedCategoryId,
     );
 
     if (!selectedCategory) return "default";
@@ -150,7 +150,7 @@ const ShopContent = () => {
           "Brand parameter decoded:",
           brandParam,
           "->",
-          decodedBrandParam
+          decodedBrandParam,
         );
       } catch (error) {
         console.error("Error decoding brand parameter:", error);
@@ -181,7 +181,7 @@ const ShopContent = () => {
     setCurrentPage(initialPage);
     setSelectedCategoryId(mainCategoryParam);
     setSelectedSubCategoryIds(
-      subCategoryParam ? subCategoryParam.split(",") : []
+      subCategoryParam ? subCategoryParam.split(",") : [],
     );
     setSelectedAgeGroup(ageGroupParam);
     setSelectedSize(sizeParam);
@@ -203,7 +203,7 @@ const ShopContent = () => {
   const isHandmadeCategory = () => {
     if (!selectedCategoryId || !categories.length) return false;
     const selectedCategory = categories.find(
-      (cat) => cat._id === selectedCategoryId
+      (cat) => cat._id === selectedCategoryId,
     );
     if (!selectedCategory) return false;
 
@@ -303,14 +303,16 @@ const ShopContent = () => {
         params.includeVariants = "true";
 
         const response = await getProducts(currentPage, 20, params);
-        
+
         // Filter out products with no stock (double check)
-        const inStockProducts = (response.items || []).filter(product => {
-          const hasStock = (product.countInStock ?? 0) > 0 || 
-            (product.variants && product.variants.some(v => (v.stock ?? 0) > 0));
+        const inStockProducts = (response.items || []).filter((product) => {
+          const hasStock =
+            (product.countInStock ?? 0) > 0 ||
+            (product.variants &&
+              product.variants.some((v) => (v.stock ?? 0) > 0));
           return hasStock;
         });
-        
+
         setProducts(inStockProducts);
         setTotalPages(response.pages || 1);
       } catch (error) {
@@ -397,7 +399,7 @@ const ShopContent = () => {
         setSelectedColor("");
       }
     },
-    [selectedCategoryId]
+    [selectedCategoryId],
   );
 
   const handleSubCategoryChange = useCallback((subcategoryId: string) => {
@@ -436,12 +438,12 @@ const ShopContent = () => {
         "handleBrandChange called with:",
         brand,
         "previous brand:",
-        selectedBrand
+        selectedBrand,
       );
       setCurrentPage(1);
       setSelectedBrand(brand);
     },
-    [selectedBrand]
+    [selectedBrand],
   );
 
   const handleDiscountFilterChange = useCallback(
@@ -449,7 +451,7 @@ const ShopContent = () => {
       setCurrentPage(1);
       setShowDiscountedOnly(showDiscountedOnly);
     },
-    []
+    [],
   );
 
   const handleOriginalFilterChange = useCallback((type: string) => {
@@ -507,7 +509,7 @@ const ShopContent = () => {
       setCurrentPage(1);
       setSorting(sortOption);
     },
-    []
+    [],
   );
 
   const brandInfo =

@@ -30,7 +30,7 @@ export default function ContactPage() {
   }>({ type: null, message: "" });
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -52,7 +52,7 @@ export default function ContactPage() {
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    
+
     const isValid = validateForm();
     if (!isValid) {
       return;
@@ -62,7 +62,8 @@ export default function ContactPage() {
     setSubmitStatus({ type: null, message: "" });
 
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/v1";
+      const apiUrl =
+        process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/v1";
       const response = await fetch(`${apiUrl}/contact`, {
         method: "POST",
         headers: {
@@ -83,7 +84,8 @@ export default function ContactPage() {
 
         setSubmitStatus({
           type: "success",
-          message: t("contact.successMessage") || "შეტყობინება წარმატებით გაიგზავნა!",
+          message:
+            t("contact.successMessage") || "შეტყობინება წარმატებით გაიგზავნა!",
         });
 
         // Clear form
@@ -96,36 +98,37 @@ export default function ContactPage() {
       } else {
         setSubmitStatus({
           type: "error",
-          message: result.message || t("contact.errorMessage") || "შეცდომა მოხდა. გთხოვთ სცადოთ მოგვიანებით.",
+          message:
+            result.message ||
+            t("contact.errorMessage") ||
+            "შეცდომა მოხდა. გთხოვთ სცადოთ მოგვიანებით.",
         });
       }
     } catch (error) {
       console.error("Contact form error:", error);
       setSubmitStatus({
         type: "error",
-        message: t("contact.errorMessage") || "შეცდომა მოხდა. გთხოვთ სცადოთ მოგვიანებით.",
+        message:
+          t("contact.errorMessage") ||
+          "შეცდომა მოხდა. გთხოვთ სცადოთ მოგვიანებით.",
       });
     } finally {
       setIsSubmitting(false);
     }
   };
 
-
   return (
     <div className="contact-container">
       <h1 className="contact-title">{t("contact.title")}</h1>
       <p className="contact-description">{t("contact.description")}</p>
-      
+
       {submitStatus.type && (
         <div className={`submit-status ${submitStatus.type}`}>
           {submitStatus.message}
         </div>
       )}
-      
-      <form
-        className="contact-form"
-        onSubmit={handleSubmit}
-      >
+
+      <form className="contact-form" onSubmit={handleSubmit}>
         <div className="form-group">
           <label htmlFor="name">{t("contact.name")}</label>
           <input
@@ -178,7 +181,9 @@ export default function ContactPage() {
           {errors.message && <p className="form-error">{errors.message}</p>}
         </div>
         <button type="submit" className="form-button" disabled={isSubmitting}>
-          {isSubmitting ? t("contact.sending") || "იგზავნება..." : t("contact.send")}
+          {isSubmitting
+            ? t("contact.sending") || "იგზავნება..."
+            : t("contact.send")}
         </button>
       </form>
     </div>

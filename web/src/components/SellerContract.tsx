@@ -128,8 +128,8 @@ export function SellerContract({
               <p>${
                 language === "ge" ? "ბოლო განახლების თარიღი:" : "Last updated:"
               } ${new Date().toLocaleDateString(
-          language === "ge" ? "ka-GE" : "en-US"
-        )}</p>
+                language === "ge" ? "ka-GE" : "en-US",
+              )}</p>
             </div>
             ${contractContent.innerHTML}
           </body>
@@ -251,7 +251,7 @@ export function SellerContract({
                 ? "ბოლო განახლების თარიღი: "
                 : "Last updated: "}
               {new Date().toLocaleDateString(
-                language === "ge" ? "ge-GE" : "en-US"
+                language === "ge" ? "ge-GE" : "en-US",
               )}
             </p>
             <p style={{ fontSize: "12px", color: "#666", margin: "5px 0 0 0" }}>

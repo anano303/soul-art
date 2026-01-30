@@ -26,7 +26,7 @@ const HomePageShop = () => {
   const { t, language } = useLanguage();
   const [isLoading, setIsLoading] = useState(true);
   const [categoryProducts, setCategoryProducts] = useState<CategoryProducts[]>(
-    []
+    [],
   );
 
   const sectionRefs = useRef<(HTMLDivElement | null)[]>([]);
@@ -46,7 +46,7 @@ const HomePageShop = () => {
         }
 
         const response = await fetchWithAuth(
-          "/categories?includeInactive=false"
+          "/categories?includeInactive=false",
         );
         const data = await response.json();
 
@@ -74,7 +74,7 @@ const HomePageShop = () => {
         ? category.nameEn
         : category.name;
     },
-    [language]
+    [language],
   );
 
   // Function to process categories and products
@@ -109,10 +109,12 @@ const HomePageShop = () => {
           const categoryProds = allProducts
             .filter((product) => {
               // First check if product is in stock
-              const hasStock = (product.countInStock ?? 0) > 0 || 
-                (product.variants && product.variants.some(v => (v.stock ?? 0) > 0));
+              const hasStock =
+                (product.countInStock ?? 0) > 0 ||
+                (product.variants &&
+                  product.variants.some((v) => (v.stock ?? 0) > 0));
               if (!hasStock) return false;
-              
+
               if (
                 typeof product.mainCategory === "object" &&
                 product.mainCategory
@@ -131,7 +133,7 @@ const HomePageShop = () => {
 
           // Debug logging
           console.log(
-            `Category: ${categoryName}, Products found: ${categoryProds.length}`
+            `Category: ${categoryName}, Products found: ${categoryProds.length}`,
           );
 
           // Only add categories with products
@@ -177,7 +179,7 @@ const HomePageShop = () => {
           const category = categories.find(
             (c) =>
               c.id === categoryProduct.categoryId ||
-              c._id === categoryProduct.categoryId
+              c._id === categoryProduct.categoryId,
           );
 
           if (category) {
@@ -188,7 +190,7 @@ const HomePageShop = () => {
             };
           }
           return categoryProduct;
-        }
+        },
       );
 
       // Only update if names actually changed
@@ -214,7 +216,7 @@ const HomePageShop = () => {
             }
           });
         },
-        { threshold: 0.15, rootMargin: "0px 0px -50px 0px" }
+        { threshold: 0.15, rootMargin: "0px 0px -50px 0px" },
       );
 
       // Observe section elements
@@ -272,9 +274,9 @@ const HomePageShop = () => {
                         categoryData.category === "Handmades"
                           ? "category-handmade"
                           : categoryData.category === "ნახატები" ||
-                            categoryData.category === "Paintings"
-                          ? "category-paintings"
-                          : ""
+                              categoryData.category === "Paintings"
+                            ? "category-paintings"
+                            : ""
                       }`}
                       ref={(el) => {
                         titleRefs.current[index] = el;
@@ -314,7 +316,7 @@ const HomePageShop = () => {
                         onClick={() =>
                           trackSeeMoreClick(
                             categoryData.category,
-                            categoryData.products.length
+                            categoryData.products.length,
                           )
                         }
                       >
@@ -342,7 +344,7 @@ const HomePageShop = () => {
                       onClick={() =>
                         trackSeeMoreClick(
                           categoryData.category,
-                          categoryData.products.length
+                          categoryData.products.length,
                         )
                       }
                     >

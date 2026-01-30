@@ -280,7 +280,7 @@ export function SellerBalanceDashboard() {
                     </div>
                     <div className="transaction-date">
                       {new Date(transaction.createdAt).toLocaleDateString(
-                        "ka-GE"
+                        "ka-GE",
                       )}
                     </div>
                   </div>

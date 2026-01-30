@@ -1,4 +1,10 @@
-import { IsEmail, IsNotEmpty, IsString, MaxLength, MinLength } from 'class-validator';
+import {
+  IsEmail,
+  IsNotEmpty,
+  IsString,
+  MaxLength,
+  MinLength,
+} from 'class-validator';
 
 export class ContactFormDto {
   @IsNotEmpty({ message: 'სახელი სავალდებულოა' })
@@ -20,6 +26,8 @@ export class ContactFormDto {
   @IsNotEmpty({ message: 'შეტყობინება სავალდებულოა' })
   @IsString()
   @MinLength(10, { message: 'შეტყობინება უნდა იყოს მინიმუმ 10 სიმბოლო' })
-  @MaxLength(5000, { message: 'შეტყობინება არ უნდა აღემატებოდეს 5000 სიმბოლოს' })
+  @MaxLength(5000, {
+    message: 'შეტყობინება არ უნდა აღემატებოდეს 5000 სიმბოლოს',
+  })
   message: string;
 }

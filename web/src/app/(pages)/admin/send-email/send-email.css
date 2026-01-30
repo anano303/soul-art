@@ -311,7 +311,9 @@
   padding: 0.875rem 1rem;
   color: white;
   font-size: 1rem;
-  transition: border-color 0.2s, box-shadow 0.2s;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
 }
 
 .email-form-panel .form-group input:focus,
@@ -339,7 +341,9 @@
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
-  transition: opacity 0.2s, transform 0.2s;
+  transition:
+    opacity 0.2s,
+    transform 0.2s;
   width: 100%;
 }
 

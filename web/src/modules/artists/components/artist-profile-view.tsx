@@ -159,7 +159,7 @@ function resolveBiography(
     | Map<string, string>
     | null
     | undefined,
-  language: "en" | "ge"
+  language: "en" | "ge",
 ) {
   if (!bio) {
     return "";
@@ -190,7 +190,7 @@ function resolveBiography(
   }
 
   const fallback = Object.values(record ?? {}).find(
-    (value) => typeof value === "string" && value.trim().length > 0
+    (value) => typeof value === "string" && value.trim().length > 0,
   );
 
   return fallback ? fallback.trim() : "";
@@ -205,21 +205,21 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
   const { artist, products, portfolio } = data;
   const [showEditor, setShowEditor] = useState(false);
   const [activeTab, setActiveTab] = useState<"sale" | "gallery" | "info">(
-    "sale"
+    "sale",
   );
   const [viewerOpen, setViewerOpen] = useState(false);
   const [viewerIndex, setViewerIndex] = useState(0);
   const [viewerImageIndex, setViewerImageIndex] = useState(0);
   const [followersModalOpen, setFollowersModalOpen] = useState(false);
   const [followersCount, setFollowersCount] = useState(
-    artist.followersCount || 0
+    artist.followersCount || 0,
   );
   const [reviewModalOpen, setReviewModalOpen] = useState(false);
   const [artistRating, setArtistRating] = useState(
-    artist.artistDirectRating || 0
+    artist.artistDirectRating || 0,
   );
   const [artistReviewsCount, setArtistReviewsCount] = useState(
-    artist.artistDirectReviewsCount || 0
+    artist.artistDirectReviewsCount || 0,
   );
   const [uploadModalOpen, setUploadModalOpen] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
@@ -228,7 +228,7 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
   const [caption, setCaption] = useState("");
   const [isUploadingCover, setIsUploadingCover] = useState(false);
   const [currentCoverImage, setCurrentCoverImage] = useState(
-    artist.artistCoverImage || null
+    artist.artistCoverImage || null,
   );
   const heroRef = useRef<HTMLElement>(null);
   const coverFileInputRef = useRef<HTMLInputElement>(null);
@@ -243,11 +243,11 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
 
   // Products pagination state
   const [productItems, setProductItems] = useState<ArtistProductSummary[]>(
-    products?.items ?? []
+    products?.items ?? [],
   );
   const [currentPage, setCurrentPage] = useState(products?.page ?? 1);
   const [hasMoreProducts, setHasMoreProducts] = useState(
-    products?.hasMore ?? false
+    products?.hasMore ?? false,
   );
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [ownerProductsLoaded, setOwnerProductsLoaded] = useState(false);
@@ -272,7 +272,7 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
 
     // Check if any product is missing referralDiscountPercent
     const needsEnrichment = productItems.some(
-      (p) => p.referralDiscountPercent === undefined
+      (p) => p.referralDiscountPercent === undefined,
     );
     if (!needsEnrichment) return;
 
@@ -282,7 +282,7 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
         // Step 1: Check for active campaign
         const campaignRes = await fetch(
           `${process.env.NEXT_PUBLIC_API_URL || ""}/campaigns/active`,
-          { credentials: "include" }
+          { credentials: "include" },
         );
 
         if (!campaignRes.ok) {
@@ -301,7 +301,7 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
         // Check if campaign applies to influencer referrals
         if (!campaign.appliesTo?.includes("influencer_referrals")) {
           console.log(
-            "[ArtistProfile] Campaign doesn't apply to influencer_referrals"
+            "[ArtistProfile] Campaign doesn't apply to influencer_referrals",
           );
           return;
         }
@@ -319,7 +319,7 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
             try {
               const res = await fetch(
                 `${process.env.NEXT_PUBLIC_API_URL || ""}/products/${id}`,
-                { credentials: "include" }
+                { credentials: "include" },
               );
               if (!res.ok) return null;
               const data = await res.json();
@@ -330,7 +330,7 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
             } catch {
               return null;
             }
-          })
+          }),
         );
 
         // Create a map for quick lookup
@@ -347,12 +347,12 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
             ...p,
             referralDiscountPercent:
               discountMap.get(p.id) ?? p.referralDiscountPercent,
-          }))
+          })),
         );
 
         console.log(
           "[ArtistProfile] Enriched products with referralDiscountPercent",
-          discountMap
+          discountMap,
         );
       } catch (error) {
         console.error("[ArtistProfile] Failed to enrich products:", error);
@@ -360,7 +360,8 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
     };
 
     enrichProducts();
-  }, [productItems.length]); // Only run when products are loaded
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [productItems.length]); // Only run when products are loaded, productItems reference changes cause infinite loop
 
   const handleLoadMore = async () => {
     if (isLoadingMore || !hasMoreProducts) return;
@@ -372,7 +373,7 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
         artist.artistSlug || artist.id,
         nextPage,
         12,
-        isOwner // Pass isOwner to include pending/rejected products
+        isOwner, // Pass isOwner to include pending/rejected products
       );
 
       setProductItems((prev) => [...prev, ...result.items]);
@@ -466,7 +467,7 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
         event.target.value = "";
       }
     },
-    [language, queryClient, router, toast]
+    [language, queryClient, toast],
   );
 
   const triggerCoverUpload = useCallback(() => {
@@ -536,7 +537,7 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
         event.target.value = "";
       }
     },
-    [language, queryClient, router, toast]
+    [language, queryClient, toast],
   );
 
   const triggerAvatarUpload = useCallback(() => {
@@ -570,7 +571,7 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
           (image) =>
             image &&
             typeof image.url === "string" &&
-            image.url.trim().length > 0
+            image.url.trim().length > 0,
         )
         .map((image, index) => ({
           ...image,
@@ -676,7 +677,7 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
       if (!postId) return artistBaseUrl;
       return `${artistBaseUrl}?post=${postId}`;
     },
-    [artistBaseUrl]
+    [artistBaseUrl],
   );
 
   // Handle opening viewer from URL on initial load (runs only once)
@@ -747,7 +748,7 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
         lastSyncedPostIdRef.current = postId;
       }
     },
-    [galleryPosts, getPostUrl]
+    [galleryPosts, getPostUrl],
   );
 
   // Handle post change in viewer (scrolling) - replace URL in history
@@ -759,7 +760,7 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
       window.history.replaceState({ postId }, "", newUrl);
       lastSyncedPostIdRef.current = postId;
     },
-    [getPostUrl]
+    [getPostUrl],
   );
 
   // Handle closing the viewer - go back in history or remove query param
@@ -792,7 +793,7 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
             artist.artistSlug || artist.id,
             1,
             12,
-            true // includeOwner
+            true, // includeOwner
           );
           setProductItems(result.items);
           setCurrentPage(1);
@@ -809,7 +810,7 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
   // Gallery interactions
   const { getStatsForImage, updateStats } = useGalleryInteractions(
     artist.id,
-    galleryItems
+    galleryItems,
   );
 
   const refreshUserData = useCallback(() => {
@@ -828,7 +829,7 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
       // Also refresh the router cache
       router.refresh();
     },
-    [queryClient, router]
+    [queryClient, router],
   );
 
   // Sync local follower count with artist data
@@ -984,8 +985,8 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
                             ? "Hide editing"
                             : "Edit artist page"
                           : showEditor
-                          ? "დამალე რედაქტირება"
-                          : "რედაქტირება"}
+                            ? "დამალე რედაქტირება"
+                            : "რედაქტირება"}
                       </button>
                     </div>
                   )}
@@ -1029,7 +1030,7 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
                             ? window.location.pathname + window.location.search
                             : "/";
                         router.push(
-                          `/login?redirect=${encodeURIComponent(redirect)}`
+                          `/login?redirect=${encodeURIComponent(redirect)}`,
                         );
                         return;
                       }
@@ -1180,10 +1181,18 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
                 {isOwner && user && (
                   <CampaignConsent
                     initialChoice={
-                      (user as any)?.campaignDiscountChoice || "none"
+                      (
+                        user as {
+                          campaignDiscountChoice?:
+                            | "none"
+                            | "all"
+                            | "per_product";
+                        }
+                      )?.campaignDiscountChoice || "none"
                     }
                     initialDiscount={
-                      (user as any)?.defaultReferralDiscount || 10
+                      (user as { defaultReferralDiscount?: number })
+                        ?.defaultReferralDiscount || 10
                     }
                     onSaved={() => {
                       queryClient.invalidateQueries({ queryKey: ["user"] });
@@ -1193,60 +1202,64 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
 
                 {(() => {
                   // Filter out sold products for non-owners
-                  const displayProducts = isOwner 
-                    ? productItems 
+                  const displayProducts = isOwner
+                    ? productItems
                     : productItems.filter((product) => {
                         // Check if product has stock
                         if (product.variants && product.variants.length > 0) {
-                          return product.variants.some((v) => (v.stock ?? 0) > 0);
+                          return product.variants.some(
+                            (v) => (v.stock ?? 0) > 0,
+                          );
                         }
                         return (product.countInStock ?? 0) > 0;
                       });
-                  
+
                   return displayProducts.length > 0 ? (
-                  <>
-                    <div className="artist-grid artist-grid--products">
-                      {displayProducts.map((product) => (
-                        <ProductCard
-                          key={product.id}
-                          product={product}
-                          language={language}
-                          isOwner={isOwner}
-                          onDelete={handleProductDelete}
-                        />
-                      ))}
-                    </div>
-                    {hasMoreProducts && (
-                      <div
-                        style={{
-                          display: "flex",
-                          justifyContent: "center",
-                          marginTop: "2rem",
-                          marginBottom: "1rem",
-                        }}
-                      >
-                        <button
-                          onClick={handleLoadMore}
-                          disabled={isLoadingMore}
-                          className="artist-load-more-button"
-                        >
-                          {isLoadingMore
-                            ? language === "en"
-                              ? "Loading..."
-                              : "იტვირთება..."
-                            : language === "en"
-                            ? "Load More"
-                            : "მეტის ჩატვირთვა"}
-                        </button>
+                    <>
+                      <div className="artist-grid artist-grid--products">
+                        {displayProducts.map((product) => (
+                          <ProductCard
+                            key={product.id}
+                            product={product}
+                            language={language}
+                            isOwner={isOwner}
+                            onDelete={handleProductDelete}
+                          />
+                        ))}
                       </div>
-                    )}
-                  </>
-                ) : (
-                  <div className="artist-empty-state">
-                    <div className="artist-empty-state__icon">🛒</div>
-                    <p className="artist-empty-state__text">{noProductsCopy}</p>
-                  </div>
-                );
+                      {hasMoreProducts && (
+                        <div
+                          style={{
+                            display: "flex",
+                            justifyContent: "center",
+                            marginTop: "2rem",
+                            marginBottom: "1rem",
+                          }}
+                        >
+                          <button
+                            onClick={handleLoadMore}
+                            disabled={isLoadingMore}
+                            className="artist-load-more-button"
+                          >
+                            {isLoadingMore
+                              ? language === "en"
+                                ? "Loading..."
+                                : "იტვირთება..."
+                              : language === "en"
+                                ? "Load More"
+                                : "მეტის ჩატვირთვა"}
+                          </button>
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <div className="artist-empty-state">
+                      <div className="artist-empty-state__icon">🛒</div>
+                      <p className="artist-empty-state__text">
+                        {noProductsCopy}
+                      </p>
+                    </div>
+                  );
                 })()}
               </section>
             )}
@@ -1303,8 +1316,8 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
                           ? "Sold out"
                           : "გაყიდულია"
                         : language === "en"
-                        ? "Not for sale"
-                        : "არ იყიდება";
+                          ? "Not for sale"
+                          : "არ იყიდება";
                       const showBadge = !isSellable || !post.productId;
                       return (
                         <div
@@ -1361,7 +1374,7 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
                                           headers: {
                                             "Content-Type": "application/json",
                                           },
-                                        }
+                                        },
                                       );
 
                                       if (response.ok) {
@@ -1375,18 +1388,18 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
                                               ? "Removed from featured"
                                               : "წაიშალა რჩეულებიდან"
                                             : language === "en"
-                                            ? "Marked as featured"
-                                            : "მონიშნულია როგორც რჩეული",
+                                              ? "Marked as featured"
+                                              : "მონიშნულია როგორც რჩეული",
                                         });
                                       } else {
                                         throw new Error(
-                                          "Failed to toggle featured"
+                                          "Failed to toggle featured",
                                         );
                                       }
                                     } catch (error) {
                                       console.error(
                                         "Failed to toggle featured:",
-                                        error
+                                        error,
                                       );
                                       toast({
                                         title:
@@ -1407,8 +1420,8 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
                                         ? "Remove from featured"
                                         : "წაშალე რჩეულებიდან"
                                       : language === "en"
-                                      ? "Mark as featured"
-                                      : "მონიშნე როგორც რჩეული"
+                                        ? "Mark as featured"
+                                        : "მონიშნე როგორც რჩეული"
                                   }
                                   title={
                                     post.isFeatured
@@ -1416,8 +1429,8 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
                                         ? "Remove from featured"
                                         : "წაშალე რჩეულებიდან"
                                       : language === "en"
-                                      ? "Mark as featured"
-                                      : "მონიშნე როგორც რჩეული"
+                                        ? "Mark as featured"
+                                        : "მონიშნე როგორც რჩეული"
                                   }
                                 >
                                   <Star
@@ -1522,7 +1535,7 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
                     <p className="artist-info-text">
                       {getCommissionsCopy(
                         language,
-                        Boolean(artist.artistOpenForCommissions)
+                        Boolean(artist.artistOpenForCommissions),
                       )}
                     </p>
                   </div>
@@ -1660,7 +1673,7 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
           // Fetch updated rating without full page refresh
           try {
             const response = await fetch(
-              `${process.env.NEXT_PUBLIC_API_URL}/artists/${artist.id}/reviews`
+              `${process.env.NEXT_PUBLIC_API_URL}/artists/${artist.id}/reviews`,
             );
             if (response.ok) {
               const data = await response.json();
@@ -1822,7 +1835,7 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
                             method: "POST",
                             credentials: "include",
                             body: formData,
-                          }
+                          },
                         );
 
                         if (!uploadResponse.ok) {
@@ -1853,7 +1866,7 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
                               caption: caption.trim() || null,
                               tags: [],
                             }),
-                          }
+                          },
                         );
 
                         if (!createResponse.ok) {
@@ -1976,7 +1989,7 @@ function ProductCard({
     if (Array.isArray(product.variants) && product.variants.length > 0) {
       // Check if variants have attributes (size/color/ageGroup)
       const hasAttributes = product.variants.some(
-        (v) => v.size || v.color || v.ageGroup
+        (v) => v.size || v.color || v.ageGroup,
       );
       if (!hasAttributes) {
         // No attributes - sum all variant stocks
@@ -2102,7 +2115,7 @@ function ProductCard({
           undefined,
           undefined,
           finalPrice,
-          referralInfo
+          referralInfo,
         );
       }
 
@@ -2231,8 +2244,8 @@ function ProductCard({
                     ? "Deleting..."
                     : "იშლება..."
                   : language === "en"
-                  ? "Yes, Delete"
-                  : "დიახ, წაშალე"}
+                    ? "Yes, Delete"
+                    : "დიახ, წაშალე"}
               </button>
             </div>
           </div>
@@ -2277,7 +2290,7 @@ function ProductCard({
                   <span className="artist-product-card__original-price">
                     {formatPrice(
                       product.price * (1 - discountPercentage / 100),
-                      language
+                      language,
                     )}
                   </span>
                 )}
@@ -2293,7 +2306,7 @@ function ProductCard({
                 <span className="artist-product-card__discounted-price">
                   {formatPrice(
                     product.price * (1 - discountPercentage / 100),
-                    language
+                    language,
                   )}
                 </span>
               </>
@@ -2384,8 +2397,8 @@ function ProductCard({
                 referralPricing.hasReferralDiscount
                   ? referralPricing.referralPrice
                   : discountPercentage > 0
-                  ? product.price * (1 - discountPercentage / 100)
-                  : product.price
+                    ? product.price * (1 - discountPercentage / 100)
+                    : product.price
               }
               hideQuantity={true}
               openCartOnAdd={false}

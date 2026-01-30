@@ -58,7 +58,7 @@ self.addEventListener("install", (event) => {
     caches.open(STATIC_CACHE).then((cache) => {
       console.log("Soulart SW: Caching static assets");
       return cache.addAll(STATIC_ASSETS);
-    })
+    }),
   );
   self.skipWaiting();
 });
@@ -78,9 +78,9 @@ self.addEventListener("activate", (event) => {
             console.log("Soulart SW: Deleting old cache:", cacheName);
             return caches.delete(cacheName);
           }
-        })
+        }),
       );
-    })
+    }),
   );
   self.clients.claim();
 });
@@ -288,8 +288,8 @@ self.addEventListener("push", (event) => {
         .showNotification(data.title || "Soulart", options)
         .then(() => console.log("✅ SW: Notification shown successfully"))
         .catch((error) =>
-          console.error("❌ SW: Failed to show notification:", error)
-        )
+          console.error("❌ SW: Failed to show notification:", error),
+        ),
     );
   } else {
     console.log("⚠️ SW: Push event received but no data");
@@ -324,7 +324,7 @@ self.addEventListener("notificationclick", (event) => {
         }
       })
       .catch((error) =>
-        console.error("❌ SW: Error handling notification click:", error)
-      )
+        console.error("❌ SW: Error handling notification click:", error),
+      ),
   );
 });

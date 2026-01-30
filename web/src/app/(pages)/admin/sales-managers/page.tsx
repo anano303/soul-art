@@ -12,7 +12,6 @@ import {
   ShoppingCart,
   RefreshCw,
   Eye,
-  Wallet,
   History,
   Edit2,
   Save,
@@ -43,17 +42,6 @@ interface ManagerStats {
   isActive: boolean;
 }
 
-interface PendingWithdrawal {
-  _id: string;
-  name: string;
-  email: string;
-  accountNumber: string;
-  identificationNumber: string;
-  salesPendingWithdrawal: number;
-  salesCommissionBalance: number;
-  salesTotalWithdrawn: number;
-}
-
 interface WithdrawalTransaction {
   _id: string;
   type: string;
@@ -62,16 +50,31 @@ interface WithdrawalTransaction {
   createdAt: string;
 }
 
+interface Commission {
+  _id: string;
+  order?: {
+    _id: string;
+  };
+  createdAt?: string;
+  customer?: {
+    name?: string;
+    email?: string;
+  };
+  guestEmail?: string;
+  orderTotal?: number;
+  commissionAmount?: number;
+  status: string;
+}
+
 export default function AdminSalesManagersPage() {
   const router = useRouter();
   const { user, isLoading: authLoading } = useAuth();
   const [managers, setManagers] = useState<ManagerStats[]>([]);
-  const [pendingWithdrawals, setPendingWithdrawals] = useState<
-    PendingWithdrawal[]
-  >([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedManager, setSelectedManager] = useState<string | null>(null);
-  const [managerCommissions, setManagerCommissions] = useState<any[]>([]);
+  const [managerCommissions, setManagerCommissions] = useState<Commission[]>(
+    [],
+  );
   const [withdrawalTransactions, setWithdrawalTransactions] = useState<
     WithdrawalTransaction[]
   >([]);
@@ -93,7 +96,7 @@ export default function AdminSalesManagersPage() {
     setIsLoading(true);
     try {
       const response = await fetchWithAuth(
-        "/sales-commission/admin/all-managers"
+        "/sales-commission/admin/all-managers",
       );
       if (response.ok) {
         const data = await response.json();
@@ -109,7 +112,7 @@ export default function AdminSalesManagersPage() {
   const fetchManagerCommissions = async (managerId: string) => {
     try {
       const response = await fetchWithAuth(
-        `/sales-commission/admin/manager/${managerId}/commissions?limit=50`
+        `/sales-commission/admin/manager/${managerId}/commissions?limit=50`,
       );
       if (response.ok) {
         const data = await response.json();
@@ -123,7 +126,7 @@ export default function AdminSalesManagersPage() {
   const fetchWithdrawalTransactions = async (managerId: string) => {
     try {
       const response = await fetchWithAuth(
-        `/balance/admin/sales-manager/${managerId}/transactions?limit=50`
+        `/balance/admin/sales-manager/${managerId}/transactions?limit=50`,
       );
       if (response.ok) {
         const data = await response.json();
@@ -153,7 +156,7 @@ export default function AdminSalesManagersPage() {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ commissionRate: editRateValue }),
-        }
+        },
       );
 
       if (response.ok) {
@@ -165,8 +168,8 @@ export default function AdminSalesManagersPage() {
                   ...m,
                   manager: { ...m.manager, salesCommissionRate: editRateValue },
                 }
-              : m
-          )
+              : m,
+          ),
         );
         setEditingRateId(null);
       } else {
@@ -209,7 +212,7 @@ export default function AdminSalesManagersPage() {
 
   const totalCommissions = managers.reduce(
     (sum, m) => sum + m.stats.totalCommissions,
-    0
+    0,
   );
   const totalOrders = managers.reduce((sum, m) => sum + m.stats.totalOrders, 0);
 
@@ -288,8 +291,10 @@ export default function AdminSalesManagersPage() {
                     </div>
                   </td>
                   <td>
-                    <span className={`status-badge ${m.isActive ? 'active' : 'inactive'}`}>
-                      {m.isActive ? 'აქტიური' : 'არააქტიური'}
+                    <span
+                      className={`status-badge ${m.isActive ? "active" : "inactive"}`}
+                    >
+                      {m.isActive ? "აქტიური" : "არააქტიური"}
                     </span>
                   </td>
                   <td>
@@ -331,7 +336,7 @@ export default function AdminSalesManagersPage() {
                           onClick={() =>
                             startEditingRate(
                               m.manager._id,
-                              m.manager.salesCommissionRate ?? 3
+                              m.manager.salesCommissionRate ?? 3,
                             )
                           }
                         >
@@ -371,7 +376,7 @@ export default function AdminSalesManagersPage() {
                           setSelectedManager(
                             selectedManager === m.manager._id
                               ? null
-                              : m.manager._id
+                              : m.manager._id,
                           )
                         }
                       >
@@ -386,7 +391,7 @@ export default function AdminSalesManagersPage() {
                           setShowWithdrawals(
                             showWithdrawals === m.manager._id
                               ? null
-                              : m.manager._id
+                              : m.manager._id,
                           )
                         }
                       >
@@ -423,7 +428,7 @@ export default function AdminSalesManagersPage() {
               </tr>
             </thead>
             <tbody>
-              {managerCommissions.map((c: any) => (
+              {managerCommissions.map((c) => (
                 <tr key={c._id}>
                   <td>
                     <a
@@ -453,10 +458,10 @@ export default function AdminSalesManagersPage() {
                       {c.status === "pending"
                         ? "მოლოდინში"
                         : c.status === "approved"
-                        ? "დამტკიცებული"
-                        : c.status === "paid"
-                        ? "გადახდილი"
-                        : c.status}
+                          ? "დამტკიცებული"
+                          : c.status === "paid"
+                            ? "გადახდილი"
+                            : c.status}
                     </span>
                   </td>
                 </tr>

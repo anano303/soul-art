@@ -109,7 +109,7 @@ export default function UserMenu({
         if (process.env.NODE_ENV === "development") {
           console.log(
             "Using Cloudinary profile image directly:",
-            user.profileImage
+            user.profileImage,
           );
         }
         setProfileImage(user.profileImage);

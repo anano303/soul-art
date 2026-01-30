@@ -25,7 +25,8 @@ export class ContactController {
       console.error('Contact form email error:', error);
       return {
         success: false,
-        message: 'შეტყობინების გაგზავნა ვერ მოხერხდა. გთხოვთ სცადოთ მოგვიანებით.',
+        message:
+          'შეტყობინების გაგზავნა ვერ მოხერხდა. გთხოვთ სცადოთ მოგვიანებით.',
       };
     }
   }
