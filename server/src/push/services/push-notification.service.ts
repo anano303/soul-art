@@ -42,6 +42,7 @@ export interface NotificationPayload {
   };
   tag: string;
   requireInteraction: boolean;
+}
 
 @Injectable()
 export class PushNotificationService {
