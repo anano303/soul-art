@@ -12,7 +12,6 @@ import { LoginForm } from "@/modules/auth/components/login-form";
 import { AddressSelector } from "./address-selector";
 import { GuestInfoForm } from "./guest-info-form";
 import { Check, AlertTriangle } from "lucide-react";
-import { FaPaypal } from "react-icons/fa";
 import Image from "next/image";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
@@ -96,16 +95,8 @@ export function StreamlinedCheckout() {
     0
   );
   const shippingPrice = itemsPrice > 100 ? 0 : 0;
-  
-  // USD conversion rate (1 GEL = 1/2.8 USD approximately)
-  const USD_TO_GEL = 2.8;
-
-  // PayPal საკომისიო: 3.40% + $0.30 USD (საქართველოში შიდა ტრანზაქციებისთვის)
-  const paypalFee = paymentMethod === 'PayPal' 
-    ? ((itemsPrice + shippingPrice) * 0.034) + (0.30 * USD_TO_GEL)
-    : 0;
-
-  const totalPrice = itemsPrice + shippingPrice + paypalFee;
+  // საკომისიო მოხსნილია - რეალური ფასი ყველგან
+  const totalPrice = itemsPrice + shippingPrice;
   const totalUnits = items.reduce((acc, item) => acc + item.qty, 0);
 
   // Calculate total original price and savings
@@ -749,60 +740,6 @@ export function StreamlinedCheckout() {
                     </button>
                   </div>
 
-                  {/* Payment Method Selection */}
-                  <div className="review-card">
-                    <h3>გადახდის მეთოდი</h3>
-                    <div className="payment-methods-grid">
-                      {/* PayPal Option */}
-                      <label
-                        className={cn(
-                          "payment-method-option",
-                          paymentMethod === "PayPal" && "payment-method-selected paypal-selected"
-                        )}
-                      >
-                        <input
-                          type="radio"
-                          name="paymentMethod"
-                          value="PayPal"
-                          checked={paymentMethod === "PayPal"}
-                          onChange={(e) => setPaymentMethod(e.target.value)}
-                          className="sr-only"
-                        />
-                        <div className="payment-method-content">
-                          <FaPaypal className="payment-method-icon" />
-                          <span className="payment-method-name">PayPal</span>
-                          <span className="payment-method-desc">Visa, Mastercard, PayPal</span>
-                        </div>
-                      </label>
-
-                      {/* BOG Option */}
-                      <label
-                        className={cn(
-                          "payment-method-option",
-                          paymentMethod === "BOG" && "payment-method-selected bog-selected"
-                        )}
-                      >
-                        <input
-                          type="radio"
-                          name="paymentMethod"
-                          value="BOG"
-                          checked={paymentMethod === "BOG"}
-                          onChange={(e) => setPaymentMethod(e.target.value)}
-                          className="sr-only"
-                        />
-                        <div className="payment-method-content">
-                          <svg className="payment-method-icon" width="24" height="24" viewBox="0 0 32 24" fill="none">
-                            <rect x="1" y="1" width="30" height="22" rx="3" stroke="currentColor" strokeWidth="2" fill="rgba(0,0,0,0.05)" />
-                            <line x1="1" y1="7" x2="31" y2="7" stroke="currentColor" strokeWidth="2" />
-                            <rect x="4" y="14" width="10" height="4" rx="1" fill="currentColor" />
-                          </svg>
-                          <span className="payment-method-name">ბარათით გადახდა</span>
-                          <span className="payment-method-desc">ყველა ბარათი მიიღება</span>
-                        </div>
-                      </label>
-                    </div>
-                  </div>
-
                   {/* Order Items */}
                   <div className="review-card">
                     <h3>შეკვეთის პროდუქტები</h3>
@@ -907,12 +844,6 @@ export function StreamlinedCheckout() {
                     : `${Number(shippingPrice).toFixed(2)} ₾`}
                 </span>
               </div>
-              {paypalFee > 0 && (
-                <div className="summary-row">
-                  <span>PayPal საკომისიო (3.40% + $0.30)</span>
-                  <span>{paypalFee.toFixed(2)} ₾</span>
-                </div>
-              )}
               {/* საკომისიო დაკომენტარებულია - ბანკის გვერდზე ნახავს
               <div className="summary-row">
                 <span>{t("cart.commission")}</span>
