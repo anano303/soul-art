@@ -546,7 +546,7 @@ ${this.getWebsiteContentForPrompt()}`;
         history: historyForChat.slice(0, -1), // ბოლო მესიჯის გარდა
         generationConfig: {
           temperature: 0.7,
-          maxOutputTokens: 500,
+          maxOutputTokens: 1500,
         },
       });
 
