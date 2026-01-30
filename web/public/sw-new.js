@@ -139,7 +139,8 @@ self.addEventListener("push", (event) => {
     title: "SoulArt",
     body: "ახალი შეტყობინება",
     icon: "/android-icon-192x192.png",
-    badge: "/android-icon-96x96.png",
+    // badge - Android status bar-ში ჩანს, უნდა იყოს monochrome (თეთრი სილუეტი გამჭვირვალე ფონზე)
+    badge: "/notification-badge.png",
     tag: "soulart-notification",
     requireInteraction: false,
     silent: false,
@@ -152,7 +153,7 @@ self.addEventListener("push", (event) => {
       {
         action: "open",
         title: "გახსნა",
-        icon: "/android-icon-96x96.png",
+        icon: "/notification-badge.png",
       },
       {
         action: "dismiss",
