@@ -10,7 +10,7 @@ const RUNTIME_CACHE = "soulart-runtime-v2.0";
 const STATIC_CACHE_URLS = [
   "/manifest.json",
   "/favicon.ico",
-  "/android-icon-192x192.png",
+  "/icons/android/icon-192x192.png",
   "/android-icon-96x96.png",
 ];
 
@@ -138,9 +138,9 @@ self.addEventListener("push", (event) => {
   const defaultNotification = {
     title: "SoulArt",
     body: "ახალი შეტყობინება",
-    icon: "/android-icon-192x192.png",
+    icon: "/icons/android/icon-192x192.png",
     // badge - Android status bar-ში ჩანს, უნდა იყოს monochrome (თეთრი სილუეტი გამჭვირვალე ფონზე)
-    badge: "/notification-badge.png",
+    badge: "/icons/pwa/notification-badge.png",
     tag: "soulart-notification",
     requireInteraction: false,
     silent: false,
@@ -153,7 +153,7 @@ self.addEventListener("push", (event) => {
       {
         action: "open",
         title: "გახსნა",
-        icon: "/notification-badge.png",
+        icon: "/icons/pwa/notification-badge.png",
       },
       {
         action: "dismiss",

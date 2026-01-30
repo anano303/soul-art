@@ -5,7 +5,7 @@ import { useEffect } from 'react';
 export default function DynamicFavicon() {
   useEffect(() => {
     const updateFavicon = (isDark: boolean) => {
-      const iconPath = isDark ? '/soulart_icon_white_fullsizes.ico' : '/soulart_icon_blue_fullsizes.ico';
+      const iconPath = isDark ? '/icons/favicon/favicon-white.ico' : '/icons/favicon/favicon-blue.ico';
       
       // Remove existing favicon links created by this component
       const existingLinks = document.querySelectorAll('link[data-dynamic-favicon="true"]');

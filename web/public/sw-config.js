@@ -272,9 +272,9 @@ self.addEventListener("push", (event) => {
 
     const options = {
       body: data.body,
-      icon: "/android-icon-192x192.png",
+      icon: "/icons/android/icon-192x192.png",
       // badge - Android status bar-ში ჩანს, უნდა იყოს monochrome (თეთრი სილუეტი გამჭვირვალე ფონზე)
-      badge: "/notification-badge.png",
+      badge: "/icons/pwa/notification-badge.png",
       data: data.url || "/",
       tag: "soulart-notification",
       requireInteraction: true,

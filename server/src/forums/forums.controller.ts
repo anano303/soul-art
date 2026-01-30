@@ -351,8 +351,8 @@ export class ForumsController {
       const pushPayload = {
         title: '💬 ახალი პოსტი ფორუმზე!',
         body: `${user.name || 'ადმინისტრატორი'} დაამატა ახალი პოსტი: ${forum.content || 'უსათაურო პოსტი'}`,
-        icon: forum.imagePath || '/android-icon-192x192.png',
-        badge: '/favicon-96x96.png',
+        icon: forum.imagePath || '/icons/android/icon-192x192.png',
+        badge: '/icons/pwa/notification-badge.png',
         data: {
           type: 'new_forum_post' as const,
           url: `/forum/${forum._id}`,
