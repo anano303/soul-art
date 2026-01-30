@@ -60,13 +60,13 @@ export function AddToCartButton({
     productId,
     selectedSize,
     selectedColor,
-    selectedAgeGroup
+    selectedAgeGroup,
   );
   const currentQuantity = getItemQuantity(
     productId,
     selectedSize,
     selectedColor,
-    selectedAgeGroup
+    selectedAgeGroup,
   );
 
   const handleAddToCart = async () => {
@@ -99,7 +99,7 @@ export function AddToCartButton({
           newQuantity,
           selectedSize,
           selectedColor,
-          selectedAgeGroup
+          selectedAgeGroup,
         );
         toast({
           title: t("cart.quantityUpdated"),
@@ -111,7 +111,7 @@ export function AddToCartButton({
           productName,
           productId,
           (price ?? 0) * quantity,
-          currency
+          currency,
         );
         // Sales Manager tracking
         trackSalesAddToCart(productId);
@@ -129,7 +129,7 @@ export function AddToCartButton({
         productId,
         selectedSize,
         selectedColor,
-        selectedAgeGroup
+        selectedAgeGroup,
       );
       if (doubleCheck) {
         // თუ ამ დროს უკვე კალათაშია (race condition), განვაახლოთ რაოდენობა
@@ -138,7 +138,7 @@ export function AddToCartButton({
             productId,
             selectedSize,
             selectedColor,
-            selectedAgeGroup
+            selectedAgeGroup,
           );
           const newQuantity = currentQty + quantity;
           await updateQuantity(
@@ -146,7 +146,7 @@ export function AddToCartButton({
             newQuantity,
             selectedSize,
             selectedColor,
-            selectedAgeGroup
+            selectedAgeGroup,
           );
           toast({
             title: t("cart.quantityUpdated"),
@@ -158,7 +158,7 @@ export function AddToCartButton({
             productName,
             productId,
             (price ?? 0) * quantity,
-            currency
+            currency,
           );
           // Sales Manager tracking
           trackSalesAddToCart(productId);
@@ -185,7 +185,7 @@ export function AddToCartButton({
             selectedColor,
             selectedAgeGroup,
             price,
-            referralInfo
+            referralInfo,
           );
           toast({
             title: t("cart.addedToCart"),
@@ -197,7 +197,7 @@ export function AddToCartButton({
             productName,
             productId,
             (price ?? 0) * quantity,
-            currency
+            currency,
           );
           // Sales Manager tracking
           trackSalesAddToCart(productId);
@@ -207,7 +207,7 @@ export function AddToCartButton({
             // Trigger cart open by clicking the cart button
             setTimeout(() => {
               const cartButton = document.querySelector(
-                "[data-cart-toggle]"
+                "[data-cart-toggle]",
               ) as HTMLElement;
               if (cartButton) {
                 cartButton.click();
@@ -216,17 +216,23 @@ export function AddToCartButton({
           }
         } catch (error: unknown) {
           console.error("Add to cart error:", error);
-          
+
           // Check if error has response with message about sold out
           let errorMessage = t("cart.failedToAdd");
-          if (error && typeof error === 'object' && 'response' in error) {
-            const axiosError = error as { response?: { data?: { message?: string } } };
+          if (error && typeof error === "object" && "response" in error) {
+            const axiosError = error as {
+              response?: { data?: { message?: string } };
+            };
             const serverMessage = axiosError.response?.data?.message;
-            if (serverMessage && (serverMessage.includes('გაყიდულია') || serverMessage.includes('out of stock'))) {
+            if (
+              serverMessage &&
+              (serverMessage.includes("გაყიდულია") ||
+                serverMessage.includes("out of stock"))
+            ) {
               errorMessage = t("cart.productSold");
             }
           }
-          
+
           toast({
             title: t("cart.error"),
             description: errorMessage,
@@ -289,10 +295,10 @@ export function AddToCartButton({
             ? isOutOfStock
               ? t("cart.outOfStock")
               : loading
-              ? t("cart.adding")
-              : isInCart
-              ? `${t("cart.inCart")} (${currentQuantity})`
-              : t("cart.addToCart")
+                ? t("cart.adding")
+                : isInCart
+                  ? `${t("cart.inCart")} (${currentQuantity})`
+                  : t("cart.addToCart")
             : undefined
         }
       >
@@ -317,10 +323,10 @@ export function AddToCartButton({
             {isOutOfStock
               ? t("cart.outOfStock")
               : loading
-              ? t("cart.adding")
-              : isInCart
-              ? `${t("cart.inCart")} (${currentQuantity})`
-              : t("cart.addToCart")}
+                ? t("cart.adding")
+                : isInCart
+                  ? `${t("cart.inCart")} (${currentQuantity})`
+                  : t("cart.addToCart")}
           </span>
         )}
       </button>

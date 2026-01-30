@@ -13,7 +13,7 @@ async function getProducts() {
           Accept: "application/json",
           "Content-Type": "application/json",
         },
-      }
+      },
     );
 
     if (!response.ok) {
@@ -199,7 +199,7 @@ async function getSubCategories() {
     if (!response.ok) {
       console.error(
         "Failed to fetch subcategories for sitemap",
-        response.status
+        response.status,
       );
       return [];
     }
@@ -367,11 +367,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         (product: { _id: string; updatedAt?: string; createdAt?: string }) => ({
           url: `${baseUrl}/products/${product._id}`,
           lastModified: new Date(
-            product.updatedAt || product.createdAt || new Date()
+            product.updatedAt || product.createdAt || new Date(),
           ),
           changeFrequency: "weekly" as const,
           priority: 0.8,
-        })
+        }),
       );
 
     // კატეგორიების გვერდები
@@ -385,11 +385,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         }) => ({
           url: `${baseUrl}/shop?category=${category._id}`,
           lastModified: new Date(
-            category.updatedAt || category.createdAt || new Date()
+            category.updatedAt || category.createdAt || new Date(),
           ),
           changeFrequency: "weekly" as const,
           priority: 0.7,
-        })
+        }),
       );
 
     // არტისტების გვერდები - მაღალი პრიორიტეტი და ხშირი განახლება
@@ -437,7 +437,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // ქვეკატეგორიების გვერდები (მაღაზიაში ფილტრაციისთვის)
     const subCategoryPages = subCategories
       .filter(
-        (subCat: any) => subCat && (subCat._id || subCat.id) && subCat.name
+        (subCat: any) => subCat && (subCat._id || subCat.id) && subCat.name,
       )
       .map(
         (subCat: {
@@ -450,7 +450,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
           lastModified: new Date(),
           changeFrequency: "weekly" as const,
           priority: 0.7,
-        })
+        }),
       );
 
     return [

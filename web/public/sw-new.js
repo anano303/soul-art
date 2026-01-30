@@ -28,8 +28,8 @@ self.addEventListener("install", (event) => {
           STATIC_CACHE_URLS.map((url) =>
             cache.add(url).catch((err) => {
               console.warn(`[SW] Failed to cache ${url}:`, err);
-            })
-          )
+            }),
+          ),
         );
       })
       .then(() => {
@@ -37,7 +37,7 @@ self.addEventListener("install", (event) => {
       })
       .catch((error) => {
         console.error("[SW] ❌ Cache setup failed:", error);
-      })
+      }),
   );
 
   // Force activation of new service worker
@@ -58,16 +58,16 @@ self.addEventListener("activate", (event) => {
               console.log("[SW] 🗑️ Deleting old cache:", cacheName);
               return caches.delete(cacheName);
             }
-          })
+          }),
         );
       }),
       // Claim all clients
       self.clients.claim(),
-    ])
+    ]),
   );
 
   console.log(
-    "[SW] ✅ Service Worker activated and ready for push notifications"
+    "[SW] ✅ Service Worker activated and ready for push notifications",
   );
 });
 
@@ -126,7 +126,7 @@ self.addEventListener("fetch", (event) => {
           statusText: "Service Unavailable",
         });
       }
-    })()
+    })(),
   );
 });
 
@@ -185,7 +185,7 @@ self.addEventListener("push", (event) => {
     } catch (parseError) {
       console.warn(
         "[SW] ⚠️ Failed to parse JSON payload, using text:",
-        parseError
+        parseError,
       );
       // Fallback to text content
       const textData = event.data.text();
@@ -229,7 +229,7 @@ self.addEventListener("push", (event) => {
       })
       .catch((error) => {
         console.error("[SW] ❌ Failed to show notification:", error);
-      })
+      }),
   );
 });
 
@@ -335,7 +335,7 @@ self.addEventListener("notificationclick", (event) => {
       })
       .catch((error) => {
         console.error("[SW] ❌ Error handling notification click:", error);
-      })
+      }),
   );
 });
 
@@ -363,7 +363,7 @@ self.addEventListener("sync", (event) => {
   if (event.tag === "push-notification-sync") {
     event.waitUntil(
       // Handle offline notifications when back online
-      handleOfflineNotifications()
+      handleOfflineNotifications(),
     );
   }
 });
@@ -383,7 +383,7 @@ async function handleOfflineNotifications() {
       for (const notification of notifications) {
         await self.registration.showNotification(
           notification.title,
-          notification.options
+          notification.options,
         );
       }
 
@@ -422,7 +422,7 @@ self.addEventListener("message", (event) => {
             // Open new window if no clients available
             return self.clients.openWindow(url);
           }
-        })
+        }),
     );
   }
 });
@@ -456,12 +456,12 @@ self.addEventListener("fetch", (event) => {
         fetch(event.request).catch(() => {
           // Fallback to offline page if available
           return caches.match("/offline") || caches.match("/");
-        })
+        }),
       );
     } else {
       // For external links, redirect to internal handler
       const internalUrl = `/?external_url=${encodeURIComponent(
-        event.request.url
+        event.request.url,
       )}`;
       event.respondWith(Response.redirect(internalUrl, 302));
     }
@@ -469,5 +469,5 @@ self.addEventListener("fetch", (event) => {
 });
 
 console.log(
-  "[SW] 🚀 Service Worker initialized with push notification support and link interception"
+  "[SW] 🚀 Service Worker initialized with push notification support and link interception",
 );

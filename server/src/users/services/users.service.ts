@@ -661,10 +661,7 @@ export class UsersService {
           },
           // Products WITHOUT variants - countInStock must be > 0
           {
-            $or: [
-              { variants: { $exists: false } },
-              { variants: { $size: 0 } },
-            ],
+            $or: [{ variants: { $exists: false } }, { variants: { $size: 0 } }],
             countInStock: { $gt: 0 },
           },
         ],
@@ -928,10 +925,7 @@ export class UsersService {
           },
           // Products WITHOUT variants - countInStock must be > 0
           {
-            $or: [
-              { variants: { $exists: false } },
-              { variants: { $size: 0 } },
-            ],
+            $or: [{ variants: { $exists: false } }, { variants: { $size: 0 } }],
             countInStock: { $gt: 0 },
           },
         ];

@@ -38,7 +38,7 @@ export function ReferralCodeInput({
     if (!trimmedCode) {
       setStatus("error");
       setMessage(
-        language === "en" ? "Please enter a code" : "გთხოვთ შეიყვანეთ კოდი"
+        language === "en" ? "Please enter a code" : "გთხოვთ შეიყვანეთ კოდი",
       );
       return;
     }
@@ -53,7 +53,7 @@ export function ReferralCodeInput({
     try {
       // Validate the code with the server
       const response = await apiClient.get(
-        `/sales-commission/validate/${fullCode}`
+        `/sales-commission/validate/${fullCode}`,
       );
 
       if (response.data?.valid) {
@@ -75,7 +75,7 @@ export function ReferralCodeInput({
             eventType: "visit",
             landingPage: window.location.pathname,
           });
-        } catch (e) {
+        } catch {
           // Ignore tracking errors
         }
 
@@ -90,18 +90,19 @@ export function ReferralCodeInput({
         setMessage(
           language === "en"
             ? "Invalid code. Please check and try again."
-            : "არასწორი კოდი. გთხოვთ შეამოწმეთ და სცადეთ თავიდან."
+            : "არასწორი კოდი. გთხოვთ შეამოწმეთ და სცადეთ თავიდან.",
         );
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       setStatus("error");
-      if (error.response?.status === 404) {
+      const axiosError = error as { response?: { status?: number } };
+      if (axiosError.response?.status === 404) {
         setMessage(language === "en" ? "Code not found" : "კოდი ვერ მოიძებნა");
       } else {
         setMessage(
           language === "en"
             ? "Error validating code"
-            : "კოდის შემოწმებისას მოხდა შეცდომა"
+            : "კოდის შემოწმებისას მოხდა შეცდომა",
         );
       }
     }

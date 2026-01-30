@@ -200,7 +200,7 @@ export function UsersList() {
 
     if (data?.sellerProductStats) {
       const stats = Object.values(data.sellerProductStats);
-      activeSellers = stats.filter((s: any) => s.productCount > 0).length;
+      activeSellers = stats.filter((s: { productCount?: number }) => (s.productCount ?? 0) > 0).length;
     }
 
     // Get total sellers count

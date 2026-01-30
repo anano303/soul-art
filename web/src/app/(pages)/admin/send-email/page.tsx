@@ -101,11 +101,9 @@ export default function SendEmailPage() {
   }, [recipientType]);
 
   // Fetch recipients
-  const {
-    data: recipients = [],
-    isLoading: recipientsLoading,
-    refetch,
-  } = useQuery<Recipient[]>({
+  const { data: recipients = [], isLoading: recipientsLoading } = useQuery<
+    Recipient[]
+  >({
     queryKey: ["admin", "recipients-for-email", recipientType, activeFilter],
     queryFn: async () => {
       let url = config.fetchUrl;
@@ -135,13 +133,13 @@ export default function SendEmailPage() {
         r.name.toLowerCase().includes(query) ||
         r.email.toLowerCase().includes(query) ||
         (r.brandName && r.brandName.toLowerCase().includes(query)) ||
-        (r.salesRefCode && r.salesRefCode.toLowerCase().includes(query))
+        (r.salesRefCode && r.salesRefCode.toLowerCase().includes(query)),
     );
   }, [recipients, searchQuery]);
 
   const allSelected = useMemo(
     () => recipients.length > 0 && selectedIds.size === recipients.length,
-    [recipients.length, selectedIds.size]
+    [recipients.length, selectedIds.size],
   );
 
   const toggleSelectAll = () => {
@@ -210,7 +208,7 @@ export default function SendEmailPage() {
       !confirm(
         `დარწმუნებული ხართ რომ გსურთ ${
           selectedIds.size
-        } ${config.label.toLowerCase()}სთვის მეილის გაგზავნა?`
+        } ${config.label.toLowerCase()}სთვის მეილის გაგზავნა?`,
       )
     ) {
       return;
@@ -312,7 +310,9 @@ export default function SendEmailPage() {
               <Filter size={18} />
               <select
                 value={activeFilter}
-                onChange={(e) => setActiveFilter(e.target.value as ActiveFilter)}
+                onChange={(e) =>
+                  setActiveFilter(e.target.value as ActiveFilter)
+                }
                 className="filter-select"
               >
                 <option value="all">ყველა სელერი</option>

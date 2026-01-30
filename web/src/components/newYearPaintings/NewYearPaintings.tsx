@@ -46,7 +46,11 @@ const NewYearPaintings = () => {
       });
 
       const filtered = items
-        .filter(p => (p.countInStock ?? 0) > 0 || (p.variants && p.variants.some(v => (v.stock ?? 0) > 0)))
+        .filter(
+          (p) =>
+            (p.countInStock ?? 0) > 0 ||
+            (p.variants && p.variants.some((v) => (v.stock ?? 0) > 0)),
+        )
         .slice(0, RAIL_LIMIT);
       memoryCache.set(cacheKey, filtered, CACHE_TTL_SECONDS);
       return filtered;
@@ -56,7 +60,11 @@ const NewYearPaintings = () => {
 
   const items = useMemo(() => {
     return paintingProducts
-      .filter(p => (p.countInStock ?? 0) > 0 || (p.variants && p.variants.some(v => (v.stock ?? 0) > 0)))
+      .filter(
+        (p) =>
+          (p.countInStock ?? 0) > 0 ||
+          (p.variants && p.variants.some((v) => (v.stock ?? 0) > 0)),
+      )
       .slice(0, RAIL_LIMIT);
   }, [paintingProducts]);
 
@@ -75,7 +83,7 @@ const NewYearPaintings = () => {
     const updateScrollButtons = () => {
       setCanScrollLeft(scroller.scrollLeft > 10);
       setCanScrollRight(
-        scroller.scrollLeft < scroller.scrollWidth - scroller.clientWidth - 10
+        scroller.scrollLeft < scroller.scrollWidth - scroller.clientWidth - 10,
       );
     };
 
