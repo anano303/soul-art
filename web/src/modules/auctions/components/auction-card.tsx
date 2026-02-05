@@ -59,13 +59,16 @@ interface Auction {
   bids?: Bid[];
   seller: {
     _id?: string;
+    name?: string;
     firstName?: string;
     lastName?: string;
     ownerFirstName?: string;
     ownerLastName?: string;
+    storeName?: string;
   };
   currentWinner?: {
     _id?: string;
+    name?: string;
     firstName?: string;
     lastName?: string;
     ownerFirstName?: string;
@@ -98,11 +101,21 @@ export default function AuctionCard({ auction, onBidPlaced }: AuctionCardProps) 
   const allImages = [currentAuction.mainImage, ...(currentAuction.additionalImages || [])];
 
   const getSellerName = () => {
+    // 1. Try ownerFirstName + ownerLastName (seller profile) - priority
     if (currentAuction.seller.ownerFirstName && currentAuction.seller.ownerLastName) {
       return `${currentAuction.seller.ownerFirstName} ${currentAuction.seller.ownerLastName}`;
     }
-    if (currentAuction.seller.firstName && currentAuction.seller.lastName) {
-      return `${currentAuction.seller.firstName} ${currentAuction.seller.lastName}`;
+    // 2. Try ownerFirstName only
+    if (currentAuction.seller.ownerFirstName) {
+      return currentAuction.seller.ownerFirstName;
+    }
+    // 3. Fallback to name (user's display name)
+    if (currentAuction.seller.name) {
+      return currentAuction.seller.name;
+    }
+    // 4. Try storeName
+    if (currentAuction.seller.storeName) {
+      return currentAuction.seller.storeName;
     }
     return t("auctions.unknownSeller") || "Unknown Artist";
   };
@@ -338,7 +351,9 @@ export default function AuctionCard({ auction, onBidPlaced }: AuctionCardProps) 
           <div className="image-info-overlay">
             <h3 className="auction-title">{currentAuction.title}</h3>
             <div className="overlay-row">
-              <span className="artist-name">{getSellerName()}</span>
+              <span className="artist-name">
+                <span className="artist-label">{t("auctions.seller")}:</span> {getSellerName()}
+              </span>
               <span className="current-price">{formatPrice(currentAuction.currentPrice)}</span>
             </div>
             <div className="overlay-row sub-info">

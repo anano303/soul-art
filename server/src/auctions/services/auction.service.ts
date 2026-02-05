@@ -160,8 +160,8 @@ export class AuctionService {
     const [auctions, total] = await Promise.all([
       this.auctionModel
         .find(query)
-        .populate('seller', 'ownerFirstName ownerLastName')
-        .populate('currentWinner', 'ownerFirstName ownerLastName')
+        .populate('seller', 'name ownerFirstName ownerLastName storeName')
+        .populate('currentWinner', 'name ownerFirstName ownerLastName')
         .sort({ endDate: 1, createdAt: -1 })
         .skip(skip)
         .limit(limit)
@@ -187,9 +187,9 @@ export class AuctionService {
 
     const auction = await this.auctionModel
       .findById(auctionId)
-      .populate('seller', 'ownerFirstName ownerLastName email phone')
-      .populate('currentWinner', 'ownerFirstName ownerLastName')
-      .populate('bids.bidder', 'ownerFirstName ownerLastName');
+      .populate('seller', 'name ownerFirstName ownerLastName storeName email phone')
+      .populate('currentWinner', 'name ownerFirstName ownerLastName')
+      .populate('bids.bidder', 'name ownerFirstName ownerLastName');
 
     if (!auction) {
       throw new NotFoundException('Auction not found');
