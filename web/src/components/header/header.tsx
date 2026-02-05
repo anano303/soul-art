@@ -187,11 +187,11 @@ export default function Header() {
             <li className="shop-dropdown">
               <Link href="/shop?page=1">{t("navigation.shop")}</Link>
               <div className="shop-dropdown-menu">
-                <Link href="/auction">{t("navigation.auction")}</Link>
+                <Link href="/auctions">{t("navigation.auction")}</Link>
               </div>
             </li>
             <li>
-              <Link href="/auction">{t("navigation.auction")}</Link>
+              <Link href="/auctions">{t("navigation.auction")}</Link>
             </li>
           </ul>
         </nav>

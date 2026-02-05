@@ -777,4 +777,62 @@ export class BalanceService {
 
     this.logger.log(`Withdrawal rejected successfully: ${transactionId}`);
   }
+
+  /**
+   * აუქციონიდან შემოსავლის დამატება
+   */
+  async addAuctionEarnings(
+    sellerId: string,
+    amount: number,
+    auctionId: string,
+    auctionTitle: string,
+  ): Promise<void> {
+    this.logger.log(
+      `Adding auction earnings for seller: ${sellerId}, amount: ${amount} GEL`,
+    );
+
+    // შევქმნათ ან განვაახლოთ სელერის ბალანსი
+    let sellerBalance = await this.sellerBalanceModel.findOne({
+      seller: sellerId,
+    });
+
+    if (!sellerBalance) {
+      sellerBalance = new this.sellerBalanceModel({
+        seller: sellerId,
+        totalBalance: amount,
+        totalEarnings: amount,
+        pendingWithdrawals: 0,
+        totalWithdrawn: 0,
+      });
+    } else {
+      sellerBalance.totalBalance += amount;
+      sellerBalance.totalEarnings += amount;
+    }
+
+    await sellerBalance.save();
+
+    // User model-შიც განვაახლოთ ბალანსი
+    await this.userModel.findByIdAndUpdate(sellerId, {
+      $inc: { balance: amount },
+    });
+
+    // შევქმნათ ტრანზაქციის ჩანაწერი
+    const transaction = new this.balanceTransactionModel({
+      seller: sellerId,
+      order: null, // აუქციონისთვის order არ არის
+      amount: amount,
+      type: 'auction_earning',
+      description: `აუქციონიდან შემოსავალი - ${auctionTitle}`,
+      commissionPercentage: 10,
+      commissionAmount: (amount / 0.9) * 0.1, // Original auction price * 10%
+      finalAmount: amount,
+      auctionId: auctionId, // ცალკე ფილდი აუქციონის ID-სთვის
+    });
+
+    await transaction.save();
+
+    this.logger.log(
+      `Auction earnings processed for seller ${sellerId}: ${amount} GEL (Auction: ${auctionTitle})`,
+    );
+  }
 }

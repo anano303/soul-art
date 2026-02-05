@@ -1410,8 +1410,8 @@ export class ProductsController {
       const pushPayload = {
         title: '🆕 ახალი ნამუშევარი SoulArt-ზე!',
         body: `${product.name || product.nameEn || 'ახალი ნამუშევარი'} - იხილეთ ახალი შემოთავაზება!`,
-        icon: product.images?.[0] || `${baseUrl}/icons/android/icon-192x192.png`,
-        badge: `${baseUrl}/icons/pwa/notification-badge.png`,
+        icon: product.images?.[0] || `${baseUrl}/android-icon-192x192.png`,
+        badge: `${baseUrl}/notification-badge.png`,
         data: {
           type: 'new_product' as const,
           url: `/products/${product._id}`,
@@ -1477,8 +1477,8 @@ export class ProductsController {
       const pushPayload = {
         title,
         body,
-        icon: product.images?.[0] || `${baseUrl}/icons/android/icon-192x192.png`,
-        badge: `${baseUrl}/icons/pwa/notification-badge.png`,
+        icon: product.images?.[0] || `${baseUrl}/android-icon-192x192.png`,
+        badge: `${baseUrl}/notification-badge.png`,
         data: {
           type: notificationType,
           url: `/products/${product._id}`,
@@ -1532,8 +1532,8 @@ export class ProductsController {
       const pushPayload = {
         title: '📦 ახალი პროდუქტი დასადასტურებლად!',
         body: `${sellerName}-მა ატვირთა: "${product.name || product.nameEn || 'ახალი პროდუქტი'}"`,
-        icon: product.images?.[0] || `${baseUrl}/icons/android/icon-192x192.png`,
-        badge: `${baseUrl}/icons/pwa/notification-badge.png`,
+        icon: product.images?.[0] || `${baseUrl}/android-icon-192x192.png`,
+        badge: `${baseUrl}/notification-badge.png`,
         data: {
           type: 'pending_product' as const,
           url: `/admin/products?status=PENDING`,

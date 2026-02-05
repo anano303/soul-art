@@ -1,63 +1,118 @@
-import { DeleteObjectCommand, GetObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import {
+  DeleteObjectCommand,
+  GetObjectCommand,
+  PutObjectCommand,
+  PutObjectCommandInput,
+  S3Client,
+  ObjectCannedACL,
+} from '@aws-sdk/client-s3';
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
+interface UploadOptions {
+  contentType?: string;
+  acl?: ObjectCannedACL;
+}
+
 @Injectable()
 export class AwsS3Service {
-  private bucketName
-  private s3
-  constructor(){
-    this.bucketName = process.env.AWS_BUCKET_NAME
+  private readonly bucketName: string;
+  private readonly region: string;
+  private readonly s3: S3Client;
+
+  constructor() {
+    this.bucketName = process.env.AWS_BUCKET_NAME || '';
+    this.region = process.env.AWS_REGION || '';
+
     this.s3 = new S3Client({
       credentials: {
-        accessKeyId: process.env.AWS_ACCESS_KEY,
-        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
+        accessKeyId: process.env.AWS_ACCESS_KEY || '',
+        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY || '',
       },
-      region: process.env.AWS_REGION
-    })
+      region: this.region || process.env.AWS_REGION,
+    });
   }
 
-  async uploadImage(filePath: string, file){
-    if(!filePath || !file) throw new BadRequestException('filepath or file require')
-    const config = {
-      Key: filePath, 
-      Bucket: this.bucketName,
-      Body: file
+  async uploadImage(
+    filePath: string,
+    file: Buffer,
+    options: UploadOptions = {},
+  ): Promise<string> {
+    if (!filePath || !file) {
+      throw new BadRequestException('filepath or file require');
     }
-    const uploadCommand = new PutObjectCommand(config)
-    await this.s3.send(uploadCommand)
-    return filePath
+
+    const config: PutObjectCommandInput = {
+      Key: filePath,
+      Bucket: this.bucketName,
+      Body: file,
+    };
+
+    if (options.contentType) {
+      config.ContentType = options.contentType;
+    }
+
+    if (options.acl) {
+      config.ACL = options.acl;
+    }
+
+    const uploadCommand = new PutObjectCommand(config);
+    await this.s3.send(uploadCommand);
+    return filePath;
   }
 
-  async getImageByFileId(fileId: string){
-    if(!fileId) return null
-    
+  getPublicUrl(key: string): string {
+    if (!key) {
+      return '';
+    }
+
+    const explicitBase = process.env.AWS_PUBLIC_BASE_URL;
+    if (explicitBase) {
+      return `${explicitBase.replace(/\/$/, '')}/${key}`;
+    }
+
+    if (this.bucketName && this.region) {
+      return `https://${this.bucketName}.s3.${this.region}.amazonaws.com/${key}`;
+    }
+
+    if (this.bucketName) {
+      return `https://${this.bucketName}.s3.amazonaws.com/${key}`;
+    }
+
+    return key;
+  }
+
+  async getImageByFileId(fileId: string) {
+    if (!fileId) {
+      return null;
+    }
+
     try {
-      // Instead of downloading the file and converting to base64,
-      // generate a pre-signed URL that provides temporary access to the object
       const command = new GetObjectCommand({
         Bucket: this.bucketName,
         Key: fileId,
       });
-      
-      // Generate a signed URL that expires in 24 hours (86400 seconds)
-      const signedUrl = await getSignedUrl(this.s3, command, { expiresIn: 86400 });
-      return signedUrl;
+
+      return await getSignedUrl(this.s3, command, { expiresIn: 86400 });
     } catch (error) {
       console.error(`Error generating signed URL for ${fileId}:`, error);
       return null;
     }
   }
 
-  async deleteImageByFileId(fileId: string){
-    if(!fileId) throw new BadRequestException('file id required')
+  async deleteImageByFileId(fileId: string) {
+    if (!fileId) {
+      throw new BadRequestException('file id required');
+    }
+
     const config = {
       Key: fileId,
       Bucket: this.bucketName,
-    }
-    const deleteCommand = new DeleteObjectCommand(config)
-    await this.s3.send(deleteCommand)
-    
-    return `image ${fileId} deleted`
+    };
+
+    const deleteCommand = new DeleteObjectCommand(config);
+    await this.s3.send(deleteCommand);
+
+    return `image ${fileId} deleted`;
   }
 }

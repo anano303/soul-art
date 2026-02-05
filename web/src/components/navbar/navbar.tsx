@@ -13,6 +13,7 @@ import shopping from "../../assets/icons/shopping.png";
 import video from "../../assets/icons/video.png";
 import forum from "../../assets/icons/forum.png";
 import about from "../../assets/icons/about.png";
+import auctionIcon from "/brush.png"; // Using public folder brush icon for auctions
 import { useAuth } from "@/hooks/use-auth";
 
 interface MenuItem {
@@ -30,6 +31,7 @@ const Navbar: React.FC = () => {
   const menuItems: MenuItem[] = [
     { href: "/", textKey: "navigation.home", icon: homeIcon },
     { href: "/shop", textKey: "navigation.shop", icon: shopping },
+    { href: "/auctions", textKey: "navigation.auctions", icon: auctionIcon },
     { href: "/video", textKey: "navigation.forum", icon: video },
     { href: "/forum", textKey: "navigation.forum", icon: forum },
     { href: "/about", textKey: "navigation.about", icon: about },

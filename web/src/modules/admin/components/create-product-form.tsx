@@ -335,7 +335,7 @@ export function CreateProductForm({
     }
   }, [subcategories, selectedSubcategory]);
 
-  // Auto-fill seller info when user data loads
+  // Auto-fill seller info when user data loads (for sellers only)
   useEffect(() => {
     if (user && isSeller && !isEdit) {
       setFormData((prevData) => ({
@@ -343,6 +343,11 @@ export function CreateProductForm({
         brand: user.name || user.storeName || "SoulArt",
         brandLogo: user.storeLogo || undefined,
       }));
+      // Pre-fill seller info hint in UI
+      console.log(
+        "✅ Seller auto-fill: Brand set to",
+        user.name || user.storeName
+      );
     }
   }, [user, isSeller, isEdit]);
 

@@ -29,6 +29,7 @@ import {
   Mail,
   Cloud,
   Percent,
+  Gavel,
 } from "lucide-react";
 
 // Add a style object for the FiraGo font
@@ -141,6 +142,7 @@ export default function UserMenu({
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hideButton]);
 
   if (isLoading) {
@@ -395,6 +397,17 @@ export default function UserMenu({
                   >
                     <Package size={18} />
                     <span>{t("navigation.products")}</span>
+                  </Link>
+                )}
+                {(user.role?.toLowerCase() === Role.Admin ||
+                  isSellerRole(user.role)) && (
+                  <Link
+                    href="/admin/auctions"
+                    className="dropdown-item"
+                    onClick={handleLinkClick}
+                  >
+                    <Gavel size={18} />
+                    <span>{t("navigation.auctions")}</span>
                   </Link>
                 )}
                 {(user.role?.toLowerCase() === Role.Admin ||

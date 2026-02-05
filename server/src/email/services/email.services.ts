@@ -1113,4 +1113,121 @@ ${data.message}
 
     await this.transporter.sendMail(mailOptions);
   }
+
+  // აუქციონის მოგების ნოტიფიკაცია
+  async sendAuctionWinnerNotification(
+    email: string,
+    auctionTitle: string,
+    finalPrice: number,
+    paymentDeadline: Date,
+  ) {
+    const mailOptions = {
+      from: emailConfig.from,
+      to: email,
+      subject: `🎉 გიმარჯოთ! თქვენ მოიგეთ აუქციონი - ${auctionTitle}`,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background: #f9f9f9;">
+          <div style="background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+            <h1 style="color: #16a34a; text-align: center; margin-bottom: 30px;">🎉 გილოცავთ მოგებას!</h1>
+            
+            <p style="font-size: 16px; line-height: 1.6; color: #333;">
+              თქვენ მოიგეთ აუქციონი: <strong>${auctionTitle}</strong>
+            </p>
+            
+            <div style="background: #f0f9ff; padding: 20px; border-radius: 8px; margin: 20px 0;">
+              <h3 style="margin: 0 0 10px 0; color: #0369a1;">აუქციონის დეტალები:</h3>
+              <p style="margin: 5px 0;"><strong>ნახატი:</strong> ${auctionTitle}</p>
+              <p style="margin: 5px 0;"><strong>მოგებული ფასი:</strong> ${finalPrice} ₾</p>
+              <p style="margin: 5px 0;"><strong>გადახდის ვადა:</strong> ${paymentDeadline.toLocaleDateString('ka-GE')} ${paymentDeadline.toLocaleTimeString('ka-GE', { hour: '2-digit', minute: '2-digit' })}</p>
+            </div>
+            
+            <div style="background: #fef3c7; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #f59e0b;">
+              <h4 style="margin: 0 0 10px 0; color: #92400e;">⚠️ მნიშვნელოვანი ინფორმაცია:</h4>
+              <ul style="margin: 0; padding-left: 20px; color: #92400e;">
+                <li>თანხა უნდა ჩარიცხოთ 2 სამუშაო დღეში</li>
+                <li>გადახდის შემდეგ სელერი თავად მოგიტანთ ნახატს</li>
+                <li>მიტანის ვადები და დეტალები სელერს ეწერა</li>
+              </ul>
+            </div>
+            
+            <div style="text-align: center; margin-top: 30px;">
+              <a href="${process.env.ALLOWED_ORIGINS}/auctions" 
+                 style="background: #16a34a; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">
+                აუქციონზე გადასვლა
+              </a>
+            </div>
+          </div>
+          
+          <hr style="margin: 30px 0; border: none; border-top: 1px solid #e5e7eb;">
+          <p style="color: #999; font-size: 12px; text-align: center;">SoulArt Team</p>
+        </div>
+      `,
+    };
+
+    await this.transporter.sendMail(mailOptions);
+  }
+
+  // სელერისთვის აუქციონის დასრულების ნოტიფიკაცია
+  async sendAuctionSellerNotification(
+    email: string,
+    auctionTitle: string,
+    finalPrice: number,
+    sellerEarnings: number,
+  ) {
+    const commission = finalPrice - sellerEarnings;
+
+    const mailOptions = {
+      from: emailConfig.from,
+      to: email,
+      subject: `🎯 თქვენი აუქციონი დასრულდა - ${auctionTitle}`,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background: #f9f9f9;">
+          <div style="background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+            <h1 style="color: #3b82f6; text-align: center; margin-bottom: 30px;">🎯 აუქციონი დასრულდა</h1>
+            
+            <p style="font-size: 16px; line-height: 1.6; color: #333;">
+              თქვენი აუქციონი <strong>"${auctionTitle}"</strong> წარმატებით დასრულდა!
+            </p>
+            
+            <div style="background: #f0f9ff; padding: 20px; border-radius: 8px; margin: 20px 0;">
+              <h3 style="margin: 0 0 15px 0; color: #0369a1;">ფინანსური დეტალები:</h3>
+              <div style="border-bottom: 1px solid #e0e7ff; padding-bottom: 10px; margin-bottom: 10px;">
+                <span style="color: #666;">საბოლოო ფასი:</span>
+                <span style="float: right; font-weight: bold;">${finalPrice} ₾</span>
+              </div>
+              <div style="border-bottom: 1px solid #e0e7ff; padding-bottom: 10px; margin-bottom: 10px;">
+                <span style="color: #666;">საკომისიო (10%):</span>
+                <span style="float: right; color: #dc2626;">-${commission} ₾</span>
+              </div>
+              <div style="padding-top: 10px; border-top: 2px solid #3b82f6;">
+                <span style="color: #3b82f6; font-weight: bold;">თქვენი შემოსავალი:</span>
+                <span style="float: right; font-weight: bold; color: #16a34a; font-size: 18px;">${sellerEarnings} ₾</span>
+              </div>
+            </div>
+            
+            <div style="background: #dcfce7; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #16a34a;">
+              <h4 style="margin: 0 0 10px 0; color: #166534;">✅ შემდეგი ნაბიჯები:</h4>
+              <ul style="margin: 0; padding-left: 20px; color: #166534;">
+                <li>მყიდველმა უნდა ჩარიცხოს თანხა 2 სამუშაო დღეში</li>
+                <li>გადახდის შემდეგ თქვენ თავად უნდა მიუტანოთ ნახატი</li>
+                <li>შემოსავალი ბალანსზე ჩაირიცხება გადახდის დადასტურების შემდეგ</li>
+              </ul>
+            </div>
+            
+            <div style="text-align: center; margin-top: 30px;">
+              <a href="${process.env.ALLOWED_ORIGINS}/profile/balance" 
+                 style="background: #3b82f6; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">
+                ბალანსის გვერდზე გადასვლა
+              </a>
+            </div>
+          </div>
+          
+          <hr style="margin: 30px 0; border: none; border-top: 1px solid #e5e7eb;">
+          <p style="color: #999; font-size: 12px; text-align: center;">SoulArt Team</p>
+        </div>
+      `,
+    };
+
+    await this.transporter.sendMail(mailOptions);
+  }
 }

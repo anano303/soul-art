@@ -1,0 +1,166 @@
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { Document, Types } from 'mongoose';
+import { Transform } from 'class-transformer';
+
+export type AuctionDocument = Auction & Document;
+
+export enum AuctionStatus {
+  PENDING = 'PENDING',
+  SCHEDULED = 'SCHEDULED',
+  ACTIVE = 'ACTIVE',
+  ENDED = 'ENDED',
+  CANCELLED = 'CANCELLED',
+}
+
+export enum ArtworkType {
+  ORIGINAL = 'ORIGINAL',
+  REPRODUCTION = 'REPRODUCTION',
+}
+
+@Schema()
+export class AuctionBid {
+  @Prop({ type: Types.ObjectId, ref: 'User', required: true })
+  bidder: Types.ObjectId;
+
+  @Prop({ required: true })
+  amount: number;
+
+  @Prop({ default: Date.now })
+  timestamp: Date;
+
+  @Prop()
+  bidderName: string; // Cache bidder name for quick display
+}
+
+export const AuctionBidSchema = SchemaFactory.createForClass(AuctionBid);
+
+@Schema({ timestamps: true })
+export class Auction {
+  @Transform(({ value }) => value.toString())
+  _id: Types.ObjectId;
+
+  @Prop({ required: true })
+  title: string;
+
+  @Prop({ required: true })
+  description: string;
+
+  @Prop({ type: Types.ObjectId, ref: 'User', required: true })
+  seller: Types.ObjectId;
+
+  // Artwork Details
+  @Prop({ required: true, enum: ArtworkType })
+  artworkType: ArtworkType;
+
+  @Prop({ required: true })
+  dimensions: string; // e.g., "50x70 cm"
+
+  @Prop({ required: true })
+  material: string; // e.g., "Oil on Canvas", "Watercolor", etc.
+
+  // Images
+  @Prop({ required: true })
+  mainImage: string; // Primary high-quality image
+
+  @Prop([String])
+  additionalImages: string[]; // Additional photos
+
+  // Auction Settings
+  @Prop({ required: true })
+  startingPrice: number;
+
+  @Prop({ required: true })
+  minimumBidIncrement: number;
+
+  @Prop({ required: true })
+  startDate: Date;
+
+  @Prop({ required: true })
+  startTime: string; // Format: "HH:MM" in Georgia timezone
+
+  @Prop({ required: true })
+  endDate: Date;
+
+  @Prop({ required: true })
+  endTime: string; // Format: "HH:MM" in Georgia timezone
+
+  // Delivery Information
+  @Prop({ required: true })
+  deliveryDays: number; // Days for delivery after payment
+
+  @Prop({ required: true })
+  deliveryInfo: string; // Additional delivery information
+
+  // Current Auction State
+  @Prop({ default: 0 })
+  currentPrice: number; // Current highest bid
+
+  @Prop({ type: Types.ObjectId, ref: 'User' })
+  currentWinner?: Types.ObjectId;
+
+  @Prop([AuctionBidSchema])
+  bids: AuctionBid[];
+
+  @Prop({ default: 0 })
+  totalBids: number;
+
+  @Prop({ enum: AuctionStatus, default: AuctionStatus.PENDING })
+  status: AuctionStatus;
+
+  @Prop({ default: 0 })
+  relistCount: number;
+
+  @Prop()
+  activatedAt?: Date;
+
+  @Prop()
+  endedAt?: Date;
+
+  // Winner Payment
+  @Prop({ default: false })
+  isPaid: boolean;
+
+  @Prop()
+  paymentDeadline: Date; // 2 working days after auction ends
+
+  @Prop()
+  paymentDate: Date;
+
+  // Commission (10%)
+  @Prop()
+  commissionAmount: number;
+
+  @Prop()
+  sellerEarnings: number;
+
+  // Admin fields
+  @Prop({ default: false })
+  isApproved: boolean;
+
+  @Prop()
+  rejectionReason: string;
+
+  @Prop({ type: Types.ObjectId, ref: 'User' })
+  approvedBy: Types.ObjectId;
+
+  @Prop()
+  approvedAt: Date;
+
+  @Prop({ type: Types.ObjectId, ref: 'User' })
+  cancelledBy?: Types.ObjectId;
+
+  @Prop()
+  cancelledAt?: Date;
+
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export const AuctionSchema = SchemaFactory.createForClass(Auction);
+
+// Indexes for performance
+AuctionSchema.index({ status: 1, endDate: 1 });
+AuctionSchema.index({ status: 1, startDate: 1 });
+AuctionSchema.index({ seller: 1, createdAt: -1 });
+AuctionSchema.index({ currentWinner: 1 });
+AuctionSchema.index({ endDate: 1, status: 1 });

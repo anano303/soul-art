@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document } from 'mongoose';
+import { Document, Types } from 'mongoose';
 import * as mongoose from 'mongoose';
 import { User } from '../../users/schemas/user.schema';
 import { Order } from '../../orders/schemas/order.schema';
@@ -71,6 +71,9 @@ export class BalanceTransaction {
 
   @Prop({ required: false })
   finalAmount?: number; // საბოლოო თანხა ბალანსზე
+
+  @Prop({ required: false, type: Types.ObjectId })
+  auctionId?: Types.ObjectId; // აუქციონის ID (აუქციონის ტრანზაქციებისთვის)
 }
 
 export type BalanceTransactionDocument = BalanceTransaction & Document;

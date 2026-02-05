@@ -1,0 +1,265 @@
+/* Auction Filters Styles - Modern Design with Dark/Light Theme Support */
+
+/* Light Theme Variables (default) */
+.auction-filters {
+  --filters-bg: rgba(255, 255, 255, 0.9);
+  --filters-header-bg: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  --filters-border: rgba(0, 0, 0, 0.06);
+  --filters-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  --filters-text-primary: #1a1a2e;
+  --filters-text-secondary: #64748b;
+  --filters-text-muted: #94a3b8;
+  --filters-accent: #6366f1;
+  --filters-accent-light: rgba(99, 102, 241, 0.1);
+  --filters-input-bg: #ffffff;
+  --filters-input-border: rgba(0, 0, 0, 0.1);
+  --filters-input-focus: rgba(99, 102, 241, 0.15);
+  --filters-danger: #ef4444;
+  --filters-danger-hover: #dc2626;
+}
+
+/* Dark Theme Variables */
+[data-theme="dark"] .auction-filters,
+.dark .auction-filters {
+  --filters-bg: rgba(30, 30, 50, 0.8);
+  --filters-header-bg: linear-gradient(135deg, rgba(40, 40, 65, 0.9) 0%, rgba(30, 30, 50, 0.9) 100%);
+  --filters-border: rgba(255, 255, 255, 0.08);
+  --filters-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+  --filters-text-primary: #f8fafc;
+  --filters-text-secondary: #cbd5e1;
+  --filters-text-muted: #64748b;
+  --filters-accent: #818cf8;
+  --filters-accent-light: rgba(129, 140, 248, 0.15);
+  --filters-input-bg: rgba(20, 20, 35, 0.8);
+  --filters-input-border: rgba(255, 255, 255, 0.1);
+  --filters-input-focus: rgba(129, 140, 248, 0.2);
+  --filters-danger: #f87171;
+  --filters-danger-hover: #ef4444;
+}
+
+.auction-filters {
+  background: var(--filters-bg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: 16px;
+  border: 1px solid var(--filters-border);
+  box-shadow: var(--filters-shadow);
+  overflow: hidden;
+  margin-bottom: 0;
+}
+
+.filters-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 18px 20px;
+  background: var(--filters-header-bg);
+  border-bottom: 1px solid var(--filters-border);
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.3s ease;
+}
+
+.filters-header:hover {
+  background: var(--filters-accent-light);
+}
+
+.filters-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 700;
+  color: var(--filters-text-primary);
+  font-size: 1rem;
+  letter-spacing: -0.01em;
+}
+
+.filters-title svg {
+  color: var(--filters-accent);
+}
+
+.filters-toggle {
+  background: var(--filters-accent-light);
+  border: none;
+  font-size: 1rem;
+  font-weight: bold;
+  color: var(--filters-accent);
+  cursor: pointer;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.filters-toggle:hover {
+  background: var(--filters-accent);
+  color: white;
+}
+
+.filters-content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.filters-content.expanded {
+  max-height: 600px;
+  padding: 24px 20px;
+}
+
+.filter-group {
+  margin-bottom: 20px;
+}
+
+.filter-group:last-child {
+  margin-bottom: 0;
+}
+
+.filter-label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--filters-text-secondary);
+  margin-bottom: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.filter-select {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid var(--filters-input-border);
+  border-radius: 12px;
+  font-size: 0.95rem;
+  background: var(--filters-input-bg);
+  color: var(--filters-text-primary);
+  transition: all 0.3s ease;
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236366f1'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 16px;
+  padding-right: 40px;
+}
+
+.filter-select:focus {
+  outline: none;
+  border-color: var(--filters-accent);
+  box-shadow: 0 0 0 4px var(--filters-input-focus);
+}
+
+/* Price Range */
+.price-range {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.price-input {
+  flex: 1;
+  padding: 12px 14px;
+  border: 1px solid var(--filters-input-border);
+  border-radius: 12px;
+  font-size: 0.95rem;
+  background: var(--filters-input-bg);
+  color: var(--filters-text-primary);
+  transition: all 0.3s ease;
+}
+
+.price-input:focus {
+  outline: none;
+  border-color: var(--filters-accent);
+  box-shadow: 0 0 0 4px var(--filters-input-focus);
+}
+
+.price-input::placeholder {
+  color: var(--filters-text-muted);
+}
+
+.price-separator {
+  color: var(--filters-text-muted);
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+/* Clear Filters Button */
+.clear-filters-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(135deg, var(--filters-danger), var(--filters-danger-hover));
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 12px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 16px;
+  width: 100%;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.25);
+}
+
+.clear-filters-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(239, 68, 68, 0.35);
+}
+
+.clear-filters-btn:active {
+  transform: translateY(0);
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 1024px) {
+  .auction-filters {
+    border-radius: 14px;
+  }
+
+  .filters-content.expanded {
+    padding: 20px 16px;
+  }
+
+  .filters-header {
+    padding: 16px;
+  }
+}
+
+@media (max-width: 768px) {
+  .auction-filters {
+    border-radius: 12px;
+  }
+
+  .filters-content.expanded {
+    padding: 16px;
+  }
+
+  .filters-header {
+    padding: 14px 16px;
+  }
+
+  .price-range {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .price-separator {
+    display: none;
+  }
+
+  .filter-select,
+  .price-input {
+    padding: 10px 12px;
+    border-radius: 10px;
+  }
+
+  .clear-filters-btn {
+    padding: 10px 16px;
+    border-radius: 10px;
+  }
+}

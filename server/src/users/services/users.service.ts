@@ -634,6 +634,12 @@ export class UsersService {
       throw new BadRequestException('Identifier is required');
     }
 
+    // Skip static file requests (e.g., apple-icon-144x144.png)
+    const staticFileExtensions = ['.png', '.ico', '.jpg', '.jpeg', '.gif', '.svg', '.webp', '.css', '.js', '.map'];
+    if (staticFileExtensions.some(ext => identifier.toLowerCase().endsWith(ext))) {
+      throw new NotFoundException('Artist profile not found');
+    }
+
     try {
       const query = isValidObjectId(identifier)
         ? { _id: new Types.ObjectId(identifier) }

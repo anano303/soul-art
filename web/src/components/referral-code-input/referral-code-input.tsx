@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback, useEffect } from "react";
+import { usePathname } from "next/navigation";
 import Cookies from "js-cookie";
 import { Gift, X, Check, Loader2 } from "lucide-react";
 import { useLanguage } from "@/hooks/LanguageContext";
@@ -15,6 +16,7 @@ export function ReferralCodeInput({
   variant = "header",
 }: ReferralCodeInputProps) {
   const { language } = useLanguage();
+  const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
   const [code, setCode] = useState("");
   const [status, setStatus] = useState<
@@ -23,6 +25,10 @@ export function ReferralCodeInput({
   const [message, setMessage] = useState("");
   const [hasActiveCode, setHasActiveCode] = useState(false);
 
+  // Hide on auction pages and admin pages
+  const hiddenPaths = ["/auctions", "/admin"];
+  const shouldHide = hiddenPaths.some((path) => pathname?.startsWith(path));
+
   // Check if user already has a referral code
   useEffect(() => {
     const existingCode = Cookies.get("sales_ref");
@@ -30,6 +36,11 @@ export function ReferralCodeInput({
       setHasActiveCode(true);
     }
   }, []);
+
+  // Don't render if on hidden paths
+  if (shouldHide) {
+    return null;
+  }
 
   const validateAndSaveCode = useCallback(async () => {
     const trimmedCode = code.trim().toUpperCase();

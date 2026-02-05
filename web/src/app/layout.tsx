@@ -7,6 +7,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { AuthProvider } from "@/components/auth-provider";
 
 import { LanguageProvider } from "@/hooks/LanguageContext";
+import { ThemeProvider } from "@/hooks/ThemeContext";
 import Header from "@/components/header/header";
 import Footer from "@/components/footer/footer";
 import MessengerChatWrapper from "@/components/MessengerChat/MessengerChatWrapper";
@@ -414,6 +415,7 @@ export default function RootLayout({
             <CartProvider>
               <CheckoutProvider>
                 <LanguageProvider>
+                  <ThemeProvider>
                   {/* GA4 User ID Tracking */}
                   <GA4UserTracker />
 
@@ -457,6 +459,7 @@ export default function RootLayout({
                     {/* Campaign Consent Prompt for Sellers */}
                     <CampaignConsentPrompt />
                   </div>
+                  </ThemeProvider>
                 </LanguageProvider>
               </CheckoutProvider>
             </CartProvider>
