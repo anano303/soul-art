@@ -189,7 +189,11 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  background: linear-gradient(135deg, var(--filters-danger), var(--filters-danger-hover));
+  background: linear-gradient(
+    135deg,
+    var(--filters-danger),
+    var(--filters-danger-hover)
+  );
   color: white;
   border: none;
   padding: 12px 20px;

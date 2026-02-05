@@ -59,7 +59,11 @@
   right: -200px;
   width: 600px;
   height: 600px;
-  background: radial-gradient(circle, var(--auctions-accent) 0%, transparent 70%);
+  background: radial-gradient(
+    circle,
+    var(--auctions-accent) 0%,
+    transparent 70%
+  );
   opacity: 0.08;
   pointer-events: none;
 }
@@ -71,7 +75,11 @@
   left: -200px;
   width: 800px;
   height: 800px;
-  background: radial-gradient(circle, var(--auctions-gradient-end) 0%, transparent 70%);
+  background: radial-gradient(
+    circle,
+    var(--auctions-gradient-end) 0%,
+    transparent 70%
+  );
   opacity: 0.06;
   pointer-events: none;
 }
@@ -97,7 +105,11 @@
   font-size: 3rem;
   font-weight: 800;
   margin: 0;
-  background: linear-gradient(135deg, var(--auctions-gradient-start), var(--auctions-gradient-end));
+  background: linear-gradient(
+    135deg,
+    var(--auctions-gradient-start),
+    var(--auctions-gradient-end)
+  );
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -173,7 +185,11 @@
 }
 
 .auction-tab.active {
-  background: linear-gradient(135deg, var(--auctions-gradient-start), var(--auctions-gradient-end));
+  background: linear-gradient(
+    135deg,
+    var(--auctions-gradient-start),
+    var(--auctions-gradient-end)
+  );
   color: white;
   box-shadow: 0 4px 16px rgba(44, 82, 130, 0.35);
 }

@@ -18,6 +18,7 @@ import {
   AuctionFilterDto,
   AdminCreateAuctionDto,
   RescheduleAuctionDto,
+  WinnerPaymentDto,
 } from '../dtos/auction.dto';
 import { CurrentUser } from '../../decorators/current-user.decorator';
 import { UserDocument } from '../../users/schemas/user.schema';
@@ -194,6 +195,38 @@ export class AuctionController {
     return this.auctionService.createAuction(
       sellerId,
       auctionData as CreateAuctionDto,
+    );
+  }
+
+  // Winner: Get won auctions pending payment
+  @UseGuards(JwtAuthGuard)
+  @Get('my-wins')
+  async getMyWonAuctions(@CurrentUser() user: UserDocument) {
+    return this.auctionService.getWonAuctions(user._id.toString());
+  }
+
+  // Winner: Get payment details
+  @UseGuards(JwtAuthGuard)
+  @Get(':id/payment-details')
+  async getPaymentDetails(
+    @Param('id') id: string,
+    @CurrentUser() user: UserDocument,
+  ) {
+    return this.auctionService.getPaymentDetails(id, user._id.toString());
+  }
+
+  // Winner: Confirm payment
+  @UseGuards(JwtAuthGuard)
+  @Post(':id/confirm-payment')
+  async confirmPayment(
+    @Param('id') id: string,
+    @CurrentUser() user: UserDocument,
+    @Body() paymentDto: WinnerPaymentDto,
+  ) {
+    return this.auctionService.confirmWinnerPayment(
+      id,
+      user._id.toString(),
+      paymentDto,
     );
   }
 }

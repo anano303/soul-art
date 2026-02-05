@@ -85,11 +85,17 @@ export class Auction {
   endTime: string; // Format: "HH:MM" in Georgia timezone
 
   // Delivery Information
-  @Prop({ required: true })
-  deliveryDays: number; // Days for delivery after payment
+  @Prop({ required: true, enum: ['SOULART', 'ARTIST'], default: 'SOULART' })
+  deliveryType: string; // SOULART or ARTIST
 
-  @Prop({ required: true })
-  deliveryInfo: string; // Additional delivery information
+  @Prop({ required: true, default: 1 })
+  deliveryDaysMin: number; // Minimum days for delivery
+
+  @Prop({ required: true, default: 3 })
+  deliveryDaysMax: number; // Maximum days for delivery
+
+  @Prop()
+  deliveryInfo: string; // Additional delivery information (optional)
 
   // Current Auction State
   @Prop({ default: 0 })
@@ -125,6 +131,17 @@ export class Auction {
 
   @Prop()
   paymentDate: Date;
+
+  // Delivery fee for winner (Tbilisi: 12, Region: 18)
+  @Prop({ enum: ['TBILISI', 'REGION'], default: 'TBILISI' })
+  winnerDeliveryZone?: string;
+
+  @Prop({ default: 0 })
+  deliveryFee: number;
+
+  // Total payment (currentPrice + deliveryFee)
+  @Prop({ default: 0 })
+  totalPayment: number;
 
   // Commission (10%)
   @Prop()

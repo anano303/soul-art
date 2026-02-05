@@ -112,12 +112,12 @@ export async function generateMetadata(): Promise<Metadata> {
     categoryKeywords,
     subCategoryKeywords,
     bannerKeywords,
-    GLOBAL_KEYWORDS
+    GLOBAL_KEYWORDS,
   ).slice(0, 200);
 
   return {
     metadataBase: new URL(
-      process.env.NEXT_PUBLIC_CLIENT_URL || "https://soulart.ge"
+      process.env.NEXT_PUBLIC_CLIENT_URL || "https://soulart.ge",
     ),
     title:
       "Soulart - ნახატების და ხელნაკეთი ნივთების პირველი ონლაინ პლატფორმა   საქართველოში",
@@ -416,49 +416,49 @@ export default function RootLayout({
               <CheckoutProvider>
                 <LanguageProvider>
                   <ThemeProvider>
-                  {/* GA4 User ID Tracking */}
-                  <GA4UserTracker />
+                    {/* GA4 User ID Tracking */}
+                    <GA4UserTracker />
 
-                  {/* GA4 Page View and User Path Tracking */}
-                  <Suspense fallback={null}>
-                    <PageViewTracker />
-                  </Suspense>
+                    {/* GA4 Page View and User Path Tracking */}
+                    <Suspense fallback={null}>
+                      <PageViewTracker />
+                    </Suspense>
 
-                  {/* Visitor Tracking with IP */}
-                  <VisitorTracker />
+                    {/* Visitor Tracking with IP */}
+                    <VisitorTracker />
 
-                  {/* Sales Manager Referral Tracking */}
-                  <Suspense fallback={null}>
-                    <SalesTracker />
-                  </Suspense>
+                    {/* Sales Manager Referral Tracking */}
+                    <Suspense fallback={null}>
+                      <SalesTracker />
+                    </Suspense>
 
-                  {/* iOS Back Swipe Prevention */}
-                  <IOSGesturePrevention />
+                    {/* iOS Back Swipe Prevention */}
+                    <IOSGesturePrevention />
 
-                  <div
-                    style={{
-                      display: "flex",
-                      flexDirection: "column",
-                      minHeight: "100vh",
-                      backgroundColor: "#fefefe",
-                    }}
-                  >
-                    <Header />
-                    <main style={{ flex: 1 }} id="main-content" role="main">
-                      {/* Sales Manager Facebook Group Banner */}
-                      <SalesManagerBanner />
-                      {children}
-                    </main>
-                    <Footer />
-                    <FloatingCartIcon />
-                    <MobileBottomNav />
+                    <div
+                      style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        minHeight: "100vh",
+                        backgroundColor: "#fefefe",
+                      }}
+                    >
+                      <Header />
+                      <main style={{ flex: 1 }} id="main-content" role="main">
+                        {/* Sales Manager Facebook Group Banner */}
+                        <SalesManagerBanner />
+                        {children}
+                      </main>
+                      <Footer />
+                      <FloatingCartIcon />
+                      <MobileBottomNav />
 
-                    {/* Floating Promo Code Input */}
-                    <ReferralCodeInput variant="floating" />
+                      {/* Floating Promo Code Input */}
+                      <ReferralCodeInput variant="floating" />
 
-                    {/* Campaign Consent Prompt for Sellers */}
-                    <CampaignConsentPrompt />
-                  </div>
+                      {/* Campaign Consent Prompt for Sellers */}
+                      <CampaignConsentPrompt />
+                    </div>
                   </ThemeProvider>
                 </LanguageProvider>
               </CheckoutProvider>

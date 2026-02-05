@@ -50,8 +50,9 @@ interface Auction {
   endDate: string;
   status: "ACTIVE" | "ENDED" | "PENDING" | "CANCELLED" | "SCHEDULED";
   totalBids: number;
-  deliveryDays: number;
-  deliveryInfo: string;
+  deliveryDaysMin: number;
+  deliveryDaysMax: number;
+  deliveryType: "SOULART" | "ARTIST";
   bids: Bid[];
   seller: {
     _id: string;
@@ -131,10 +132,10 @@ export default function AuctionDetailPage() {
 
         const days = Math.floor(difference / (1000 * 60 * 60 * 24));
         const hours = Math.floor(
-          (difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
+          (difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60),
         );
         const minutes = Math.floor(
-          (difference % (1000 * 60 * 60)) / (1000 * 60)
+          (difference % (1000 * 60 * 60)) / (1000 * 60),
         );
 
         if (days > 0) {
@@ -164,7 +165,7 @@ export default function AuctionDetailPage() {
 
       const days = Math.floor(difference / (1000 * 60 * 60 * 24));
       const hours = Math.floor(
-        (difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
+        (difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60),
       );
       const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
 
@@ -230,7 +231,7 @@ export default function AuctionDetailPage() {
     const minBid = auction.currentPrice + auction.minimumBidIncrement;
     if (bidAmount < minBid) {
       toast.error(
-        `${t("auctions.bidTooLow")} (${t("auctions.minimumBid")}: ${minBid.toFixed(2)} ₾)`
+        `${t("auctions.bidTooLow")} (${t("auctions.minimumBid")}: ${minBid.toFixed(2)} ₾)`,
       );
       return;
     }
@@ -243,9 +244,12 @@ export default function AuctionDetailPage() {
       });
       toast.success(t("auctions.bidSuccess"));
       fetchAuction(); // Refresh auction data
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const axiosError = error as {
+        response?: { data?: { message?: string } };
+      };
       const message =
-        error.response?.data?.message || t("auctions.bidError");
+        axiosError.response?.data?.message || t("auctions.bidError");
       toast.error(message);
     } finally {
       setBidding(false);
@@ -263,7 +267,7 @@ export default function AuctionDetailPage() {
         day: "numeric",
         hour: "2-digit",
         minute: "2-digit",
-      }
+      },
     );
   };
 
@@ -370,8 +374,12 @@ export default function AuctionDetailPage() {
                 </>
               ) : isEnded ? (
                 <>
-                  <span className="time-label">{t("auctions.auctionEnded")}</span>
-                  <span className="time-value ended">{t("auctions.ended")}</span>
+                  <span className="time-label">
+                    {t("auctions.auctionEnded")}
+                  </span>
+                  <span className="time-value ended">
+                    {t("auctions.ended")}
+                  </span>
                 </>
               ) : (
                 <>
@@ -389,7 +397,9 @@ export default function AuctionDetailPage() {
               <span className="price">{formatPrice(auction.currentPrice)}</span>
             </div>
             <div className="price-row">
-              <span className="label">{t("auctions.startingPrice") || "საწყისი ფასი"}:</span>
+              <span className="label">
+                {t("auctions.startingPrice") || "საწყისი ფასი"}:
+              </span>
               <span className="starting-price">
                 {formatPrice(auction.startingPrice)}
               </span>
@@ -407,8 +417,7 @@ export default function AuctionDetailPage() {
             <div className="stat-item">
               <Users size={20} />
               <span>
-                <strong>{auction.totalBids}</strong>{" "}
-                {t("auctions.bids")}
+                <strong>{auction.totalBids}</strong> {t("auctions.bids")}
               </span>
             </div>
             {auction.currentWinner && (
@@ -420,7 +429,8 @@ export default function AuctionDetailPage() {
                     {auction.currentWinner.ownerFirstName ||
                       auction.currentWinner.firstName}{" "}
                     {auction.currentWinner.ownerLastName?.charAt(0) ||
-                      auction.currentWinner.lastName?.charAt(0)}.
+                      auction.currentWinner.lastName?.charAt(0)}
+                    .
                   </strong>
                 </span>
               </div>
@@ -503,7 +513,9 @@ export default function AuctionDetailPage() {
             <div className="detail-grid">
               <div className="detail-item">
                 <Palette size={18} />
-                <span className="label">{t("auctions.material") || "მასალა"}:</span>
+                <span className="label">
+                  {t("auctions.material") || "მასალა"}:
+                </span>
                 <span className="value">{auction.material}</span>
               </div>
               <div className="detail-item">
@@ -513,9 +525,15 @@ export default function AuctionDetailPage() {
               </div>
               <div className="detail-item">
                 <Package size={18} />
-                <span className="label">{t("auctions.deliveryInfo")}:</span>
+                <span className="label">
+                  {t("auctions.deliveryDays") || "მიწოდების ვადა"}:
+                </span>
                 <span className="value">
-                  {auction.deliveryDays} {t("auctions.days")} - {auction.deliveryInfo}
+                  {auction.deliveryDaysMin === auction.deliveryDaysMax
+                    ? `${auction.deliveryDaysMin} ${t("auctions.days")}`
+                    : `${auction.deliveryDaysMin}-${auction.deliveryDaysMax} ${t("auctions.days")}`}
+                  {auction.deliveryType === "ARTIST" &&
+                    ` (${t("auctions.artistDelivery") || "ხელოვანი"})`}
                 </span>
               </div>
             </div>
@@ -531,7 +549,7 @@ export default function AuctionDetailPage() {
                   .sort(
                     (a, b) =>
                       new Date(b.timestamp).getTime() -
-                      new Date(a.timestamp).getTime()
+                      new Date(a.timestamp).getTime(),
                   )
                   .slice(0, 10)
                   .map((bid, index) => (
@@ -540,7 +558,9 @@ export default function AuctionDetailPage() {
                       className={`bid-item ${index === 0 ? "highest" : ""}`}
                     >
                       <div className="bidder-info">
-                        <span className="bidder-name">{getBidderName(bid)}</span>
+                        <span className="bidder-name">
+                          {getBidderName(bid)}
+                        </span>
                         <span className="bid-time">
                           {formatDate(bid.timestamp)}
                         </span>

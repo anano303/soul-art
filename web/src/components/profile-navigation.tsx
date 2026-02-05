@@ -4,13 +4,13 @@ import { useLanguage } from "@/hooks/LanguageContext";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/hooks/use-auth";
-import { 
-  User, 
-  ShoppingBag, 
-  Wallet, 
+import {
+  User,
+  ShoppingBag,
+  Wallet,
   Smartphone,
   MapPin,
-  Gavel
+  Gavel,
 } from "lucide-react";
 
 const profileNavItems = [
@@ -21,10 +21,10 @@ const profileNavItems = [
     labelKey: "profileNav.profile",
   },
   {
-    key: 'addresses',
-    href: '/profile/addresses',
+    key: "addresses",
+    href: "/profile/addresses",
     icon: MapPin,
-    labelKey: 'profileNav.addresses'
+    labelKey: "profileNav.addresses",
   },
   {
     key: "orders",
@@ -60,7 +60,7 @@ export function ProfileNavigation() {
   const { user } = useAuth();
 
   const filteredNavItems = profileNavItems.filter(
-    (item) => !item.requiresRole || user?.role === item.requiresRole
+    (item) => !item.requiresRole || user?.role === item.requiresRole,
   );
 
   return (
@@ -101,7 +101,7 @@ export function MobileProfileNavigation() {
   const { user } = useAuth();
 
   const filteredNavItems = profileNavItems.filter(
-    (item) => !item.requiresRole || user?.role === item.requiresRole
+    (item) => !item.requiresRole || user?.role === item.requiresRole,
   );
 
   return (

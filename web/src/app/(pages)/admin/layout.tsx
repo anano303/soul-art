@@ -72,7 +72,7 @@ export default function AdminLayout({
         if (!hasAdminAccess(userData.role)) {
           console.log(
             "User doesn't have admin/seller/blogger permissions, role:",
-            userData.role
+            userData.role,
           );
           router.push("/");
           return;

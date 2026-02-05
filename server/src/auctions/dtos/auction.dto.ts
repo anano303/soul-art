@@ -65,13 +65,22 @@ export class CreateAuctionDto {
   @Matches(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/) // HH:MM format
   endTime: string;
 
+  @IsString()
+  @IsOptional()
+  deliveryType?: string; // SOULART or ARTIST
+
   @IsNumber()
   @Min(1)
-  deliveryDays: number;
+  deliveryDaysMin: number;
+
+  @IsNumber()
+  @Min(1)
+  deliveryDaysMax: number;
 
   @IsString()
   @MaxLength(200)
-  deliveryInfo: string;
+  @IsOptional()
+  deliveryInfo?: string;
 }
 
 export class PlaceBidDto {
@@ -132,3 +141,16 @@ export class AdminCreateAuctionDto extends CreateAuctionDto {
 }
 
 export class RescheduleAuctionDto extends CreateAuctionDto {}
+
+// Winner payment DTO
+export class WinnerPaymentDto {
+  @IsString()
+  @IsEnum(['TBILISI', 'REGION'])
+  deliveryZone: 'TBILISI' | 'REGION';
+}
+
+// Delivery fee constants
+export const DELIVERY_FEES = {
+  TBILISI: 12,
+  REGION: 18,
+} as const;

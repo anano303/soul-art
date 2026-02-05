@@ -65,7 +65,7 @@ export function StreamlinedCheckout() {
   const hasTrackedCheckoutLoginRef = useRef(false);
   const previousStepRef = useRef<CheckoutStep | null>(null);
   const [originalPrices, setOriginalPrices] = useState<Record<string, number>>(
-    {}
+    {},
   );
 
   // Fetch original prices from products API
@@ -80,7 +80,7 @@ export function StreamlinedCheckout() {
           } catch {
             prices[item.productId] = item.price;
           }
-        })
+        }),
       );
       setOriginalPrices(prices);
     };
@@ -92,7 +92,7 @@ export function StreamlinedCheckout() {
   // Calculate totals
   const itemsPrice = items.reduce(
     (acc, item) => acc + item.price * item.qty,
-    0
+    0,
   );
   const shippingPrice = itemsPrice > 100 ? 0 : 0;
   // საკომისიო მოხსნილია - რეალური ფასი ყველგან
@@ -103,7 +103,7 @@ export function StreamlinedCheckout() {
   const totalOriginalPrice = items.reduce(
     (acc, item) =>
       acc + (originalPrices[item.productId] || item.price) * item.qty,
-    0
+    0,
   );
   const totalSavings = totalOriginalPrice - itemsPrice;
 
@@ -133,7 +133,7 @@ export function StreamlinedCheckout() {
 
         // Auto-select default address if exists and no address is currently selected
         const defaultAddress = addresses.find(
-          (addr: { isDefault?: boolean }) => addr.isDefault
+          (addr: { isDefault?: boolean }) => addr.isDefault,
         );
         if (defaultAddress && !shippingAddress) {
           setShippingAddress(defaultAddress);
@@ -265,11 +265,11 @@ export function StreamlinedCheckout() {
               item.reason === "out_of_stock"
                 ? "არ არის მარაგში"
                 : item.reason === "not_found"
-                ? "აღარ არსებობს"
-                : item.reason === "insufficient_stock"
-                ? `მარაგში მხოლოდ ${item.availableQuantity} ცალია`
-                : "მიუწვდომელია",
-          })
+                  ? "აღარ არსებობს"
+                  : item.reason === "insufficient_stock"
+                    ? `მარაგში მხოლოდ ${item.availableQuantity} ცალია`
+                    : "მიუწვდომელია",
+          }),
         );
 
         setUnavailableItems(unavailable);
@@ -302,10 +302,10 @@ export function StreamlinedCheckout() {
       // Calculate total referral discount
       const totalReferralDiscount = items.reduce(
         (acc, item) => acc + (item.referralDiscountAmount || 0) * item.qty,
-        0
+        0,
       );
       const hasReferralDiscount = items.some(
-        (item) => item.hasReferralDiscount
+        (item) => item.hasReferralDiscount,
       );
 
       const orderPayload: {
@@ -360,18 +360,18 @@ export function StreamlinedCheckout() {
         try {
           sessionStorage.setItem(
             `order_summary_${orderId}`,
-            JSON.stringify(orderSummary)
+            JSON.stringify(orderSummary),
           );
           localStorage.setItem(
             `order_summary_${orderId}`,
-            JSON.stringify(orderSummary)
+            JSON.stringify(orderSummary),
           );
           sessionStorage.removeItem(`order_summary_${orderId}_tracked`);
           localStorage.removeItem(`order_summary_${orderId}_tracked`);
         } catch (storageError) {
           console.warn(
             "Failed to cache order summary for analytics:",
-            storageError
+            storageError,
           );
         }
       }
@@ -385,7 +385,7 @@ export function StreamlinedCheckout() {
           trackPurchase(
             orderSummary.totalPrice,
             orderSummary.currency,
-            orderId
+            orderId,
           );
           if (typeof window !== "undefined") {
             sessionStorage.setItem(`order_summary_${orderId}_tracked`, "true");
@@ -443,7 +443,7 @@ export function StreamlinedCheckout() {
 
       const response = await apiClient.post(
         "/payments/bog/create",
-        paymentData
+        paymentData,
       );
       const result = response.data;
 
@@ -456,7 +456,7 @@ export function StreamlinedCheckout() {
         const paymentWindow = window.open(
           result.redirect_url,
           "BOGPayment",
-          "width=600,height=700,scrollbars=yes"
+          "width=600,height=700,scrollbars=yes",
         );
 
         setPaymentWindowRef(paymentWindow);
@@ -497,7 +497,7 @@ export function StreamlinedCheckout() {
                 ? `?email=${encodeURIComponent(guestInfo.email)}`
                 : "";
             const orderStatus = await apiClient.get(
-              `/orders/${orderId}${emailParam}`
+              `/orders/${orderId}${emailParam}`,
             );
             if (orderStatus.data.isPaid) {
               clearInterval(pollOrderStatus);
@@ -534,7 +534,7 @@ export function StreamlinedCheckout() {
       const paymentWindow = window.open(
         paymentUrl,
         "BOGPayment",
-        "width=600,height=700,scrollbars=yes"
+        "width=600,height=700,scrollbars=yes",
       );
       setPaymentWindowRef(paymentWindow);
       setPaymentWindowClosed(false);
@@ -596,7 +596,7 @@ export function StreamlinedCheckout() {
               className={cn(
                 "step",
                 (currentStep === "auth" || currentStep === "guest") && "active",
-                (user || guestInfo) && "completed"
+                (user || guestInfo) && "completed",
               )}
             >
               <div className="step-circle">
@@ -610,7 +610,7 @@ export function StreamlinedCheckout() {
               className={cn(
                 "step",
                 currentStep === "shipping" && "active",
-                shippingAddress && "completed"
+                shippingAddress && "completed",
               )}
             >
               <div className="step-circle">

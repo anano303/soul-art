@@ -19,6 +19,8 @@ import {
   PlaceBidDto,
   AuctionFilterDto,
   RescheduleAuctionDto,
+  WinnerPaymentDto,
+  DELIVERY_FEES,
 } from '../dtos/auction.dto';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { BalanceService } from '../../users/services/balance.service';
@@ -187,7 +189,10 @@ export class AuctionService {
 
     const auction = await this.auctionModel
       .findById(auctionId)
-      .populate('seller', 'name ownerFirstName ownerLastName storeName email phone')
+      .populate(
+        'seller',
+        'name ownerFirstName ownerLastName storeName email phone',
+      )
       .populate('currentWinner', 'name ownerFirstName ownerLastName')
       .populate('bids.bidder', 'name ownerFirstName ownerLastName');
 
@@ -440,8 +445,10 @@ export class AuctionService {
     auction.additionalImages = additionalImages;
     auction.startingPrice = payload.startingPrice;
     auction.minimumBidIncrement = payload.minimumBidIncrement;
-    auction.deliveryDays = payload.deliveryDays;
-    auction.deliveryInfo = payload.deliveryInfo;
+    auction.deliveryType = payload.deliveryType || 'SOULART';
+    auction.deliveryDaysMin = payload.deliveryDaysMin;
+    auction.deliveryDaysMax = payload.deliveryDaysMax;
+    auction.deliveryInfo = payload.deliveryInfo || '';
     auction.startDate = startDateTime;
     auction.startTime = payload.startTime;
     auction.endDate = endDateTime;
@@ -498,19 +505,19 @@ export class AuctionService {
     if (!file) {
       throw new BadRequestException('Image file is required');
     }
+    // Note: AVIF/HEIF removed due to sharp compatibility issues on some systems
     const allowedMimeTypes = [
       'image/jpeg',
       'image/jpg',
       'image/png',
       'image/webp',
-      'image/avif',
     ];
 
     const mimeType = file.mimetype?.toLowerCase() ?? '';
 
     if (!allowedMimeTypes.includes(mimeType)) {
       throw new BadRequestException(
-        'Unsupported image format. Use JPG, PNG, WEBP or AVIF.',
+        'Unsupported image format. Use JPG, PNG, or WEBP.',
       );
     }
 
@@ -521,7 +528,7 @@ export class AuctionService {
 
     try {
       // Optimize image with sharp - convert to WebP for better compression
-      const optimizedBuffer = await sharp(file.buffer)
+      const optimizedBuffer = await sharp(file.buffer, { failOn: 'none' })
         .resize(1600, 1600, {
           fit: 'inside',
           withoutEnlargement: true,
@@ -536,10 +543,11 @@ export class AuctionService {
       // Upload to S3
       await this.awsS3Service.uploadImage(key, optimizedBuffer, {
         contentType: 'image/webp',
-        acl: 'public-read',
       });
 
-      const publicUrl = this.awsS3Service.getPublicUrl(key);
+      // Get signed URL for public access (valid for 7 days)
+      const signedUrl = await this.awsS3Service.getImageByFileId(key);
+      const publicUrl = signedUrl || this.awsS3Service.getPublicUrl(key);
 
       this.logger.log(`Auction image uploaded to S3: ${key}`);
 
@@ -548,8 +556,20 @@ export class AuctionService {
         key: key,
       };
     } catch (error) {
-      this.logger.error(`Failed to upload auction image: ${error.message}`);
-      throw new BadRequestException('Image upload failed');
+      const errorMessage = error?.message || 'Unknown error';
+      const errorCode = error?.Code || error?.name || '';
+      this.logger.error(`Failed to upload auction image: ${errorCode} - ${errorMessage}`);
+      
+      // Provide more specific error messages
+      if (errorCode === 'AccessDenied' || errorMessage.includes('Access Denied')) {
+        throw new BadRequestException(
+          'S3 access denied. Please check bucket permissions.',
+        );
+      }
+      
+      throw new BadRequestException(
+        `Image upload failed: ${errorMessage}`,
+      );
     }
   }
 
@@ -610,6 +630,101 @@ export class AuctionService {
       await auction.save();
       this.logger.log(`Scheduled auction activated: ${auction._id}`);
     }
+  }
+
+  // Check payment deadlines and transfer to next bidder if not paid
+  @Cron(CronExpression.EVERY_10_MINUTES)
+  async checkPaymentDeadlines() {
+    const now = new Date();
+
+    // Find ended auctions where payment deadline passed and not paid
+    const unpaidAuctions = await this.auctionModel.find({
+      status: AuctionStatus.ENDED,
+      isPaid: false,
+      paymentDeadline: { $lte: now },
+      currentWinner: { $exists: true, $ne: null },
+    });
+
+    for (const auction of unpaidAuctions) {
+      await this.transferToNextBidder(auction);
+    }
+  }
+
+  // Transfer auction to next bidder when winner doesn't pay
+  private async transferToNextBidder(auction: AuctionDocument) {
+    const bids = auction.bids || [];
+
+    if (bids.length <= 1) {
+      // No other bidders - relist the auction
+      this.logger.log(
+        `No other bidders for auction ${auction._id}, needs manual relist`,
+      );
+      // Reset winner and keep as ended - admin can reschedule
+      auction.currentWinner = undefined;
+      auction.currentPrice = auction.startingPrice;
+      await auction.save();
+      return;
+    }
+
+    // Find the previous bidder (second highest bid)
+    // Bids are stored with newest first, so we need the second unique bidder
+    const currentWinnerId = auction.currentWinner?.toString();
+    let nextBid: AuctionBid | undefined;
+
+    for (const bid of bids) {
+      if (bid.bidder.toString() !== currentWinnerId) {
+        nextBid = bid;
+        break;
+      }
+    }
+
+    if (!nextBid) {
+      this.logger.log(`No valid next bidder found for auction ${auction._id}`);
+      auction.currentWinner = undefined;
+      auction.currentPrice = auction.startingPrice;
+      await auction.save();
+      return;
+    }
+
+    // Transfer to next bidder
+    const previousWinnerId = auction.currentWinner;
+    auction.currentWinner = nextBid.bidder;
+    auction.currentPrice = nextBid.amount;
+
+    // Recalculate commission and earnings
+    const commissionAmount = auction.currentPrice * 0.1;
+    auction.commissionAmount = commissionAmount;
+    auction.sellerEarnings = auction.currentPrice - commissionAmount;
+
+    // Set new payment deadline
+    auction.paymentDeadline = this.calculatePaymentDeadline();
+
+    // Remove the defaulted bidder's bids
+    auction.bids = bids.filter(
+      (bid) => bid.bidder.toString() !== currentWinnerId,
+    );
+    auction.totalBids = auction.bids.length;
+
+    await auction.save();
+
+    // Notify new winner
+    const newWinner = await this.userModel.findById(nextBid.bidder);
+    if (newWinner) {
+      try {
+        await this.emailService.sendAuctionWinnerNotification(
+          newWinner.email,
+          auction.title,
+          auction.currentPrice,
+          auction.paymentDeadline,
+        );
+      } catch (error) {
+        this.logger.error(`Failed to notify new winner: ${error}`);
+      }
+    }
+
+    this.logger.log(
+      `Auction ${auction._id} transferred from ${previousWinnerId} to ${nextBid.bidder}, new price: ${auction.currentPrice} GEL`,
+    );
   }
 
   // End auction and process results
@@ -732,6 +847,110 @@ export class AuctionService {
       `Auction marked as paid: ${auctionId}, Seller earnings: ${auction.sellerEarnings} GEL`,
     );
     return auction;
+  }
+
+  // Get winner's won auctions (pending payment)
+  async getWonAuctions(userId: string) {
+    return this.auctionModel
+      .find({
+        status: AuctionStatus.ENDED,
+        currentWinner: new Types.ObjectId(userId),
+        isPaid: false,
+      })
+      .populate('seller', 'name ownerFirstName ownerLastName storeName')
+      .sort({ endedAt: -1 })
+      .exec();
+  }
+
+  // Get payment details for winner
+  async getPaymentDetails(auctionId: string, userId: string) {
+    const auction = await this.auctionModel.findById(auctionId);
+    if (!auction) {
+      throw new NotFoundException('Auction not found');
+    }
+
+    if (auction.currentWinner?.toString() !== userId) {
+      throw new ForbiddenException('You are not the winner of this auction');
+    }
+
+    if (auction.status !== AuctionStatus.ENDED) {
+      throw new BadRequestException('Auction has not ended yet');
+    }
+
+    if (auction.isPaid) {
+      throw new BadRequestException('Auction is already paid');
+    }
+
+    return {
+      auctionId: auction._id,
+      title: auction.title,
+      mainImage: auction.mainImage,
+      winningBid: auction.currentPrice,
+      deliveryFees: DELIVERY_FEES,
+      paymentDeadline: auction.paymentDeadline,
+      timeRemaining: auction.paymentDeadline
+        ? Math.max(0, auction.paymentDeadline.getTime() - Date.now())
+        : 0,
+    };
+  }
+
+  // Winner confirms payment with delivery zone
+  async confirmWinnerPayment(
+    auctionId: string,
+    userId: string,
+    paymentDto: WinnerPaymentDto,
+  ) {
+    const auction = await this.auctionModel.findById(auctionId);
+    if (!auction) {
+      throw new NotFoundException('Auction not found');
+    }
+
+    if (auction.currentWinner?.toString() !== userId) {
+      throw new ForbiddenException('You are not the winner of this auction');
+    }
+
+    if (auction.status !== AuctionStatus.ENDED) {
+      throw new BadRequestException('Auction has not ended yet');
+    }
+
+    if (auction.isPaid) {
+      throw new BadRequestException('Auction is already paid');
+    }
+
+    // Calculate delivery fee
+    const deliveryFee = DELIVERY_FEES[paymentDto.deliveryZone];
+    const totalPayment = auction.currentPrice + deliveryFee;
+
+    // Update auction with payment info
+    auction.winnerDeliveryZone = paymentDto.deliveryZone;
+    auction.deliveryFee = deliveryFee;
+    auction.totalPayment = totalPayment;
+    auction.isPaid = true;
+    auction.paymentDate = new Date();
+
+    await auction.save();
+
+    // Process seller earnings (only artwork price, not delivery)
+    if (auction.sellerEarnings > 0) {
+      await this.balanceService.addAuctionEarnings(
+        auction.seller.toString(),
+        auction.sellerEarnings,
+        auction._id.toString(),
+        auction.title,
+      );
+    }
+
+    this.logger.log(
+      `Winner payment confirmed: ${auctionId}, Zone: ${paymentDto.deliveryZone}, Delivery: ${deliveryFee} GEL, Total: ${totalPayment} GEL`,
+    );
+
+    return {
+      success: true,
+      auctionId: auction._id,
+      artworkPrice: auction.currentPrice,
+      deliveryFee,
+      totalPaid: totalPayment,
+    };
   }
 
   // Get auction statistics

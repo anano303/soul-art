@@ -68,7 +68,10 @@ export default function AuctionsPage() {
     maxPrice: searchParams?.get("maxPrice") || "",
   });
 
-  const fetchAuctions = async (page: number = 1, status: string = activeTab) => {
+  const fetchAuctions = async (
+    page: number = 1,
+    status: string = activeTab,
+  ) => {
     try {
       setLoading(true);
       const params = new URLSearchParams({
@@ -76,12 +79,12 @@ export default function AuctionsPage() {
         limit: "12",
         status: status,
         ...Object.fromEntries(
-          Object.entries(filters).filter(([, value]) => value !== "")
+          Object.entries(filters).filter(([, value]) => value !== ""),
         ),
       });
 
       const response = await apiClient.get<AuctionResponse>(
-        `/auctions?${params.toString()}`
+        `/auctions?${params.toString()}`,
       );
 
       // For scheduled auctions, filter to only show those starting within 3 days
@@ -136,7 +139,7 @@ export default function AuctionsPage() {
           </button>
         </div>
         <p className="auctions-subtitle">{t("auctions.subtitle")}</p>
-        
+
         {/* Status Tabs */}
         <div className="auctions-tabs">
           <button
@@ -172,11 +175,14 @@ export default function AuctionsPage() {
             </div>
           ) : auctions.length === 0 ? (
             <div className="empty-state">
-              <div className="empty-icon">{activeTab === "SCHEDULED" ? "📅" : "🎨"}</div>
+              <div className="empty-icon">
+                {activeTab === "SCHEDULED" ? "📅" : "🎨"}
+              </div>
               <h3>{t("auctions.noAuctions")}</h3>
               <p>
                 {activeTab === "SCHEDULED"
-                  ? t("auctions.noScheduledDesc") || "უახლოეს 3 დღეში დაგეგმილი აუქციონები არ არის"
+                  ? t("auctions.noScheduledDesc") ||
+                    "უახლოეს 3 დღეში დაგეგმილი აუქციონები არ არის"
                   : t("auctions.noAuctionsDesc")}
               </p>
             </div>

@@ -635,8 +635,21 @@ export class UsersService {
     }
 
     // Skip static file requests (e.g., apple-icon-144x144.png)
-    const staticFileExtensions = ['.png', '.ico', '.jpg', '.jpeg', '.gif', '.svg', '.webp', '.css', '.js', '.map'];
-    if (staticFileExtensions.some(ext => identifier.toLowerCase().endsWith(ext))) {
+    const staticFileExtensions = [
+      '.png',
+      '.ico',
+      '.jpg',
+      '.jpeg',
+      '.gif',
+      '.svg',
+      '.webp',
+      '.css',
+      '.js',
+      '.map',
+    ];
+    if (
+      staticFileExtensions.some((ext) => identifier.toLowerCase().endsWith(ext))
+    ) {
       throw new NotFoundException('Artist profile not found');
     }
 

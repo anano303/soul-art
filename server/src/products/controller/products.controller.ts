@@ -1404,8 +1404,7 @@ export class ProductsController {
         return;
       }
 
-      const baseUrl =
-        process.env.FRONTEND_URL || 'https://soulart.ge';
+      const baseUrl = process.env.FRONTEND_URL || 'https://soulart.ge';
 
       const pushPayload = {
         title: '🆕 ახალი ნამუშევარი SoulArt-ზე!',
@@ -1471,8 +1470,7 @@ export class ProductsController {
         return;
       }
 
-      const baseUrl =
-        process.env.FRONTEND_URL || 'https://soulart.ge';
+      const baseUrl = process.env.FRONTEND_URL || 'https://soulart.ge';
 
       const pushPayload = {
         title,
@@ -1526,8 +1524,7 @@ export class ProductsController {
         return;
       }
 
-      const baseUrl =
-        process.env.FRONTEND_URL || 'https://soulart.ge';
+      const baseUrl = process.env.FRONTEND_URL || 'https://soulart.ge';
 
       const pushPayload = {
         title: '📦 ახალი პროდუქტი დასადასტურებლად!',

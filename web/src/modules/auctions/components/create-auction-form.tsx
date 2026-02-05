@@ -23,8 +23,9 @@ interface AuctionFormInitialData {
   startTime: string;
   endDate: string;
   endTime: string;
-  deliveryDays: number;
-  deliveryInfo: string;
+  deliveryType?: string;
+  deliveryDaysMin: number;
+  deliveryDaysMax: number;
   sellerId?: string;
   sellerName?: string;
   sellerEmail?: string;
@@ -53,8 +54,9 @@ interface FormState {
   startTime: string;
   endDate: string;
   endTime: string;
-  deliveryDays: string;
-  deliveryInfo: string;
+  deliveryType: "artist" | "soulart";
+  deliveryDaysMin: string;
+  deliveryDaysMax: string;
 }
 
 interface SellerOption {
@@ -79,8 +81,9 @@ const INITIAL_STATE: FormState = {
   startTime: "",
   endDate: "",
   endTime: "18:00",
-  deliveryDays: "5",
-  deliveryInfo: "",
+  deliveryType: "soulart",
+  deliveryDaysMin: "1",
+  deliveryDaysMax: "3",
 };
 
 function getDefaultEndDate() {
@@ -144,6 +147,15 @@ function normalizeTimeInput(value: string | undefined, fallback: string) {
 function createInitialState(initialData?: AuctionFormInitialData): FormState {
   const base = { ...INITIAL_STATE };
 
+  // Determine deliveryType from initialData
+  let deliveryType = base.deliveryType;
+  if (initialData?.deliveryType) {
+    deliveryType =
+      initialData.deliveryType.toLowerCase() === "artist"
+        ? "artist"
+        : "soulart";
+  }
+
   return {
     ...base,
     title: initialData?.title ?? base.title,
@@ -163,16 +175,20 @@ function createInitialState(initialData?: AuctionFormInitialData): FormState {
         : base.minimumBidIncrement,
     startDate: normalizeDateInput(
       initialData?.startDate,
-      getDefaultStartDate()
+      getDefaultStartDate(),
     ),
     startTime: normalizeTimeInput(initialData?.startTime, "10:00"),
     endDate: normalizeDateInput(initialData?.endDate, getDefaultEndDate()),
     endTime: normalizeTimeInput(initialData?.endTime, base.endTime),
-    deliveryDays:
-      initialData?.deliveryDays !== undefined
-        ? String(initialData.deliveryDays)
-        : base.deliveryDays,
-    deliveryInfo: initialData?.deliveryInfo ?? base.deliveryInfo,
+    deliveryType,
+    deliveryDaysMin:
+      initialData?.deliveryDaysMin !== undefined
+        ? String(initialData.deliveryDaysMin)
+        : base.deliveryDaysMin,
+    deliveryDaysMax:
+      initialData?.deliveryDaysMax !== undefined
+        ? String(initialData.deliveryDaysMax)
+        : base.deliveryDaysMax,
   };
 }
 
@@ -189,7 +205,7 @@ export function CreateAuctionForm({
   const { user } = useUser();
   const initialFormState = useMemo(
     () => createInitialState(initialData),
-    [initialData]
+    [initialData],
   );
   const [formState, setFormState] = useState<FormState>(initialFormState);
   const [errors, setErrors] = useState<FormErrors>({});
@@ -201,6 +217,7 @@ export function CreateAuctionForm({
     useState<string>(sellerIdFromProps);
   const [isUploadingMainImage, setIsUploadingMainImage] = useState(false);
   const [isUploadingAdditional, setIsUploadingAdditional] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
 
   const isAdmin = mode === "admin";
   const isSeller = mode === "seller";
@@ -224,7 +241,7 @@ export function CreateAuctionForm({
       setSelectedSellerId(user._id);
       console.log(
         "✅ Auto-select for Seller role: Setting seller ID to",
-        user._id
+        user._id,
       );
     }
   }, [user]);
@@ -267,7 +284,7 @@ export function CreateAuctionForm({
       } catch (error: unknown) {
         console.error("Failed to fetch sellers", error);
         toast.error(
-          t("auctionForm.errors.sellers") || "Failed to load sellers"
+          t("auctionForm.errors.sellers") || "Failed to load sellers",
         );
       } finally {
         setSellerLoading(false);
@@ -308,7 +325,7 @@ export function CreateAuctionForm({
   const validateImageFile = (file: File) => {
     if (!ACCEPTED_IMAGE_TYPES.includes(file.type)) {
       toast.error(
-        t("auctionForm.validation.imageType") || "Unsupported image format"
+        t("auctionForm.validation.imageType") || "Unsupported image format",
       );
       return false;
     }
@@ -318,7 +335,7 @@ export function CreateAuctionForm({
       toast.error(
         t("auctionForm.validation.imageSize", {
           size: MAX_IMAGE_SIZE_MB,
-        }) || `Image must be under ${MAX_IMAGE_SIZE_MB}MB`
+        }) || `Image must be under ${MAX_IMAGE_SIZE_MB}MB`,
       );
       return false;
     }
@@ -330,23 +347,31 @@ export function CreateAuctionForm({
     const formData = new FormData();
     formData.append("file", file);
 
-    const response = await apiClient.post("/auctions/media/upload", formData, {
-      headers: { "Content-Type": "multipart/form-data" },
-    });
+    try {
+      const response = await apiClient.post("/auctions/media/upload", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
 
-    const url = response?.data?.url || response?.data?.Location;
+      const url = response?.data?.url || response?.data?.Location;
 
-    if (!url) {
+      if (!url) {
+        throw new Error(
+          t("auctionForm.errors.imageUpload") || "Image upload failed",
+        );
+      }
+
+      return url as string;
+    } catch (error: unknown) {
+      const axiosError = error as { response?: { data?: { message?: string } } };
+      const backendMessage = axiosError?.response?.data?.message;
       throw new Error(
-        t("auctionForm.errors.imageUpload") || "Image upload failed"
+        backendMessage || t("auctionForm.errors.imageUpload") || "Image upload failed",
       );
     }
-
-    return url as string;
   };
 
   const handleMainImageFileChange = async (
-    event: ChangeEvent<HTMLInputElement>
+    event: ChangeEvent<HTMLInputElement>,
   ) => {
     const file = event.target.files?.[0];
     if (!file) {
@@ -359,18 +384,18 @@ export function CreateAuctionForm({
     }
 
     setIsUploadingMainImage(true);
+    setUploadError(null);
 
     try {
       const url = await uploadImage(file);
       handleInputChange("mainImage", url);
+      setUploadError(null);
       toast.success(t("auctionForm.success.imageUploaded") || "Image uploaded");
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       console.error("Failed to upload main image", error);
-      toast.error(
-        error?.message ||
-          t("auctionForm.errors.imageUpload") ||
-          "Image upload failed"
-      );
+      setUploadError(errorMessage || t("auctionForm.errors.imageUpload") || "Image upload failed");
+      toast.error(errorMessage);
     } finally {
       setIsUploadingMainImage(false);
       event.target.value = "";
@@ -378,7 +403,7 @@ export function CreateAuctionForm({
   };
 
   const handleAdditionalImagesUpload = async (
-    event: ChangeEvent<HTMLInputElement>
+    event: ChangeEvent<HTMLInputElement>,
   ) => {
     const files = Array.from(event.target.files || []);
     if (!files.length) {
@@ -393,6 +418,7 @@ export function CreateAuctionForm({
     }
 
     setIsUploadingAdditional(true);
+    setUploadError(null);
 
     try {
       const uploadedUrls: string[] = [];
@@ -413,17 +439,16 @@ export function CreateAuctionForm({
         };
       });
 
+      setUploadError(null);
       toast.success(
         t("auctionForm.success.additionalImagesUploaded") ||
-          "Images added to gallery"
+          "Images added to gallery",
       );
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       console.error("Failed to upload additional images", error);
-      toast.error(
-        error?.message ||
-          t("auctionForm.errors.imageUpload") ||
-          "Image upload failed"
-      );
+      setUploadError(errorMessage || t("auctionForm.errors.imageUpload") || "Image upload failed");
+      toast.error(errorMessage);
     } finally {
       setIsUploadingAdditional(false);
       event.target.value = "";
@@ -473,7 +498,7 @@ export function CreateAuctionForm({
         "selectedSellerId:",
         selectedSellerId,
         "user._id:",
-        user._id
+        user._id,
       );
       const effectiveSellerId = selectedSellerId || user?._id;
       console.log("🔍 effectiveSellerId:", effectiveSellerId);
@@ -508,11 +533,6 @@ export function CreateAuctionForm({
         t("auctionForm.validation.required") || "Required field";
     }
 
-    if (!formState.deliveryInfo.trim()) {
-      newErrors.deliveryInfo =
-        t("auctionForm.validation.required") || "Required field";
-    }
-
     if (!formState.startDate) {
       newErrors.startDate =
         t("auctionForm.validation.required") || "Required field";
@@ -535,10 +555,19 @@ export function CreateAuctionForm({
         t("auctionForm.validation.increment") || "Invalid amount";
     }
 
-    const deliveryDays = Number(formState.deliveryDays);
-    if (Number.isNaN(deliveryDays) || deliveryDays < 1) {
-      newErrors.deliveryDays =
+    const deliveryDaysMin = Number(formState.deliveryDaysMin);
+    const deliveryDaysMax = Number(formState.deliveryDaysMax);
+    if (Number.isNaN(deliveryDaysMin) || deliveryDaysMin < 1) {
+      newErrors.deliveryDaysMin =
         t("auctionForm.validation.delivery") || "Invalid value";
+    }
+    if (Number.isNaN(deliveryDaysMax) || deliveryDaysMax < 1) {
+      newErrors.deliveryDaysMax =
+        t("auctionForm.validation.delivery") || "Invalid value";
+    }
+    if (deliveryDaysMax < deliveryDaysMin) {
+      newErrors.deliveryDaysMax =
+        t("auctionForm.validation.deliveryMaxMin") || "Max must be >= Min";
     }
 
     if (!formState.endDate) {
@@ -556,12 +585,12 @@ export function CreateAuctionForm({
       startDateTime =
         formState.startDate && formState.startTime
           ? new Date(
-              `${formState.startDate}T${formState.startTime}:00.000+04:00`
+              `${formState.startDate}T${formState.startTime}:00.000+04:00`,
             )
           : null;
 
       const endDateTime = new Date(
-        `${formState.endDate}T${formState.endTime}:00.000+04:00`
+        `${formState.endDate}T${formState.endTime}:00.000+04:00`,
       );
 
       if (Number.isNaN(endDateTime.getTime())) {
@@ -600,7 +629,7 @@ export function CreateAuctionForm({
 
     if (!newErrors.startDate && formState.startDate && formState.startTime) {
       const parsedStart = new Date(
-        `${formState.startDate}T${formState.startTime}:00.000+04:00`
+        `${formState.startDate}T${formState.startTime}:00.000+04:00`,
       );
       if (Number.isNaN(parsedStart.getTime())) {
         newErrors.startDate =
@@ -644,8 +673,9 @@ export function CreateAuctionForm({
       startTime: formState.startTime,
       endDate: formState.endDate,
       endTime: formState.endTime,
-      deliveryDays: Number(formState.deliveryDays),
-      deliveryInfo: formState.deliveryInfo.trim(),
+      deliveryType: formState.deliveryType.toUpperCase(),
+      deliveryDaysMin: Number(formState.deliveryDaysMin),
+      deliveryDaysMax: Number(formState.deliveryDaysMax),
     };
 
     if (!payload.additionalImages.length) {
@@ -658,7 +688,7 @@ export function CreateAuctionForm({
         if (!auctionId) {
           toast.error(
             t("auctionForm.errors.missingAuctionId") ||
-              "Missing auction reference"
+              "Missing auction reference",
           );
           setIsSubmitting(false);
           return;
@@ -666,7 +696,7 @@ export function CreateAuctionForm({
 
         response = await apiClient.patch(
           `/auctions/${auctionId}/reschedule`,
-          payload
+          payload,
         );
       } else if (user?.role === "admin") {
         // Admin creating auction for a seller
@@ -686,16 +716,16 @@ export function CreateAuctionForm({
           ? "auctionForm.success.rescheduleAdmin"
           : "auctionForm.success.rescheduleSeller"
         : isAdmin
-        ? "auctionForm.success.admin"
-        : "auctionForm.success.seller";
+          ? "auctionForm.success.admin"
+          : "auctionForm.success.seller";
 
       toast.success(
         t(successKey) ||
           (isReschedule
             ? "Auction updated"
             : isAdmin
-            ? "Auction created"
-            : "Auction submitted")
+              ? "Auction created"
+              : "Auction submitted"),
       );
 
       if (!isReschedule) {
@@ -731,26 +761,26 @@ export function CreateAuctionForm({
       ? "auctionForm.titles.adminReschedule"
       : "auctionForm.titles.sellerReschedule"
     : isAdmin
-    ? "auctionForm.titles.adminCreate"
-    : "auctionForm.titles.sellerCreate";
+      ? "auctionForm.titles.adminCreate"
+      : "auctionForm.titles.sellerCreate";
 
   const subtitleKey = isReschedule
     ? isAdmin
       ? "auctionForm.subtitles.adminReschedule"
       : "auctionForm.subtitles.sellerReschedule"
     : isAdmin
-    ? "auctionForm.subtitles.adminCreate"
-    : "auctionForm.subtitles.sellerCreate";
+      ? "auctionForm.subtitles.adminCreate"
+      : "auctionForm.subtitles.sellerCreate";
 
   const submitLabel = isSubmitting
     ? t("auctionForm.buttons.submitting") || "..."
     : isReschedule
-    ? isAdmin
-      ? t("auctionForm.buttons.rescheduleAdmin") || "Update auction"
-      : t("auctionForm.buttons.rescheduleSeller") || "Resubmit auction"
-    : isAdmin
-    ? t("auctionForm.buttons.submitAdmin") || "Create auction"
-    : t("auctionForm.buttons.submitSeller") || "Submit auction";
+      ? isAdmin
+        ? t("auctionForm.buttons.rescheduleAdmin") || "Update auction"
+        : t("auctionForm.buttons.rescheduleSeller") || "Resubmit auction"
+      : isAdmin
+        ? t("auctionForm.buttons.submitAdmin") || "Create auction"
+        : t("auctionForm.buttons.submitSeller") || "Submit auction";
 
   const titleText =
     t(titleKey) ||
@@ -759,8 +789,8 @@ export function CreateAuctionForm({
         ? "Update seller auction"
         : "Resubmit auction"
       : isAdmin
-      ? "Create auction for seller"
-      : "Submit new auction");
+        ? "Create auction for seller"
+        : "Submit new auction");
 
   const subtitleText =
     t(subtitleKey) ||
@@ -819,8 +849,8 @@ export function CreateAuctionForm({
               {canChangeSeller
                 ? t("auctionForm.helperTexts.selectSeller")
                 : selectedSellerId
-                ? t("auctionForm.helperTexts.sellerLocked")
-                : t("auctionForm.helperTexts.sellerAuto")}
+                  ? t("auctionForm.helperTexts.sellerLocked")
+                  : t("auctionForm.helperTexts.sellerAuto")}
             </div>
             {canChangeSeller ? (
               <div className="seller-select">
@@ -917,7 +947,7 @@ export function CreateAuctionForm({
                 onChange={(event) =>
                   handleInputChange(
                     "artworkType",
-                    event.target.value as FormState["artworkType"]
+                    event.target.value as FormState["artworkType"],
                   )
                 }
                 disabled={isSubmitting}
@@ -1013,6 +1043,11 @@ export function CreateAuctionForm({
               <div className="helper-text">
                 {t("auctionForm.helperTexts.imageUpload")}
               </div>
+              {uploadError && (
+                <div className="upload-error-message">
+                  ⚠️ {uploadError}
+                </div>
+              )}
               {formState.mainImage && (
                 <div className="image-preview">
                   <img
@@ -1226,44 +1261,123 @@ export function CreateAuctionForm({
           <div className="section-title">
             {t("auctionForm.sections.delivery")}
           </div>
-          <div className="field-grid two-columns">
-            <div>
-              <label htmlFor="auction-delivery-days">
-                {t("auctionForm.labels.deliveryDays")}
-              </label>
+
+          {/* Delivery Type Selection */}
+          <div className="delivery-type-selector">
+            <label className="delivery-type-option">
               <input
-                id="auction-delivery-days"
-                type="number"
-                min="1"
-                value={formState.deliveryDays}
-                onChange={(event) =>
-                  handleInputChange("deliveryDays", event.target.value)
-                }
+                type="radio"
+                name="deliveryType"
+                value="soulart"
+                checked={formState.deliveryType === "soulart"}
+                onChange={() => {
+                  handleInputChange("deliveryType", "soulart");
+                  handleInputChange("deliveryDaysMin", "1");
+                  handleInputChange("deliveryDaysMax", "3");
+                }}
                 disabled={isSubmitting}
               />
-              {errors.deliveryDays && (
-                <div className="error-message">{errors.deliveryDays}</div>
-              )}
-            </div>
-            <div>
-              <label htmlFor="auction-delivery-info">
-                {t("auctionForm.labels.deliveryInfo")}
-              </label>
-              <textarea
-                id="auction-delivery-info"
-                value={formState.deliveryInfo}
-                onChange={(event) =>
-                  handleInputChange("deliveryInfo", event.target.value)
-                }
-                placeholder={t("auctionForm.placeholders.deliveryInfo") || ""}
+              <div className="delivery-type-card">
+                <div className="delivery-type-icon">🚚</div>
+                <div className="delivery-type-content">
+                  <div className="delivery-type-title">
+                    {t("auctionForm.deliveryType.soulart") ||
+                      "SoulArt-ის მიწოდება"}
+                  </div>
+                  <div className="delivery-type-desc">
+                    {t("auctionForm.deliveryType.soulartDesc") ||
+                      "სწრაფი მიწოდება 1-3 სამუშაო დღეში"}
+                  </div>
+                </div>
+              </div>
+            </label>
+
+            <label className="delivery-type-option">
+              <input
+                type="radio"
+                name="deliveryType"
+                value="artist"
+                checked={formState.deliveryType === "artist"}
+                onChange={() => {
+                  handleInputChange("deliveryType", "artist");
+                }}
                 disabled={isSubmitting}
-                style={{ minHeight: "80px" }}
               />
-              {errors.deliveryInfo && (
-                <div className="error-message">{errors.deliveryInfo}</div>
-              )}
-            </div>
+              <div className="delivery-type-card">
+                <div className="delivery-type-icon">🎨</div>
+                <div className="delivery-type-content">
+                  <div className="delivery-type-title">
+                    {t("auctionForm.deliveryType.artist") ||
+                      "ხელოვანი თვითონ აწვდის"}
+                  </div>
+                  <div className="delivery-type-desc">
+                    {t("auctionForm.deliveryType.artistDesc") ||
+                      "მიუთითეთ თქვენი მიწოდების ვადა"}
+                  </div>
+                </div>
+              </div>
+            </label>
           </div>
+
+          {/* Artist Delivery Details - only shown when artist delivery selected */}
+          {formState.deliveryType === "artist" && (
+            <div className="artist-delivery-fields">
+              <div className="delivery-days-row">
+                <div className="delivery-days-field">
+                  <label htmlFor="auction-delivery-days-min">
+                    {t("auctionForm.labels.deliveryDaysMin") || "მინ. დღე"}
+                  </label>
+                  <input
+                    id="auction-delivery-days-min"
+                    type="number"
+                    min="1"
+                    value={formState.deliveryDaysMin}
+                    onChange={(event) =>
+                      handleInputChange("deliveryDaysMin", event.target.value)
+                    }
+                    disabled={isSubmitting}
+                  />
+                  {errors.deliveryDaysMin && (
+                    <div className="error-message">
+                      {errors.deliveryDaysMin}
+                    </div>
+                  )}
+                </div>
+                <div className="delivery-days-separator">—</div>
+                <div className="delivery-days-field">
+                  <label htmlFor="auction-delivery-days-max">
+                    {t("auctionForm.labels.deliveryDaysMax") || "მაქს. დღე"}
+                  </label>
+                  <input
+                    id="auction-delivery-days-max"
+                    type="number"
+                    min="1"
+                    value={formState.deliveryDaysMax}
+                    onChange={(event) =>
+                      handleInputChange("deliveryDaysMax", event.target.value)
+                    }
+                    disabled={isSubmitting}
+                  />
+                  {errors.deliveryDaysMax && (
+                    <div className="error-message">
+                      {errors.deliveryDaysMax}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* SoulArt Delivery Info - shown when soulart delivery selected */}
+          {formState.deliveryType === "soulart" && (
+            <div className="soulart-delivery-info">
+              <div className="soulart-delivery-badge">
+                ✓{" "}
+                {t("auctionForm.deliveryType.soulartBadge") ||
+                  "მიწოდება 1-3 სამუშაო დღეში მთელი საქართველოს მასშტაბით"}
+              </div>
+            </div>
+          )}
         </div>
       </div>
 

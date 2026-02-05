@@ -142,15 +142,17 @@ export default function AdminAuctions() {
 
       <div className="admin-auctions-filters">
         <div className="filter-buttons">
-          {["ALL", "PENDING", "SCHEDULED", "ACTIVE", "ENDED", "CANCELLED"].map((status) => (
-            <button
-              key={status}
-              onClick={() => setFilter(status as any)}
-              className={`filter-btn ${filter === status ? "active" : ""}`}
-            >
-              {t(`admin.statusFilter.${status.toLowerCase()}`)}
-            </button>
-          ))}
+          {["ALL", "PENDING", "SCHEDULED", "ACTIVE", "ENDED", "CANCELLED"].map(
+            (status) => (
+              <button
+                key={status}
+                onClick={() => setFilter(status as any)}
+                className={`filter-btn ${filter === status ? "active" : ""}`}
+              >
+                {t(`admin.statusFilter.${status.toLowerCase()}`)}
+              </button>
+            ),
+          )}
         </div>
       </div>
 
@@ -214,7 +216,7 @@ export default function AdminAuctions() {
                         <div className="auction-title">{auction.title}</div>
                         <div className="auction-type">
                           {t(
-                            `auctions.type.${auction.artworkType.toLowerCase()}`
+                            `auctions.type.${auction.artworkType.toLowerCase()}`,
                           )}
                         </div>
                       </div>
@@ -243,7 +245,7 @@ export default function AdminAuctions() {
                     <td>
                       <span
                         className={`status-badge ${getStatusColor(
-                          auction.status
+                          auction.status,
                         )}`}
                       >
                         {t(`auctions.status.${auction.status.toLowerCase()}`)}

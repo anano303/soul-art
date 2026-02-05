@@ -627,6 +627,10 @@ export const TRANSLATIONS: Translations = {
         back: "დაბრუნდი აუქციონებზე",
         button: "აუქციონის შექმნა",
       },
+      auctionsEdit: {
+        title: "აუქციონის რედაქტირება",
+        subtitle: "შეცვალე აუქციონის დეტალები",
+      },
       statusFilter: {
         all: "ყველა",
         pending: "მოლოდინში",
@@ -775,8 +779,9 @@ export const TRANSLATIONS: Translations = {
         startTime: "დაწყების დრო",
         endDate: "დასრულების თარიღი",
         endTime: "დასრულების დრო",
-        deliveryDays: "მიწოდების ვადა (დღე)",
-        deliveryInfo: "მიწოდების პირობები",
+        deliveryDaysMin: "მინ. დღე",
+        deliveryDaysMax: "მაქს. დღე",
+        deliveryInfo: "დამატებითი ინფორმაცია",
       },
       placeholders: {
         seller: "აირჩიე სელერი",
@@ -804,6 +809,7 @@ export const TRANSLATIONS: Translations = {
         scheduleOrder: "დასრულების დრო უნდა იყოს დაწყების შემდეგ",
         imageType: "მხოლოდ JPG, PNG, WEBP ან AVIF ფორმატებია დაშვებული",
         imageSize: "სურათი არ უნდა აღემატებოდეს {{size}}MB-ს",
+        deliveryMaxMin: "მაქს. დღე უნდა იყოს მინ. დღეზე მეტი ან ტოლი",
       },
       errors: {
         sellers: "სელერების ჩამოტვირთვა ვერ მოხერხდა",
@@ -829,6 +835,13 @@ export const TRANSLATIONS: Translations = {
         clearMainImage: "სურათის წაშლა",
         uploadAdditionalImages: "ატვირთე დამატებითი სურათები",
         removeImage: "წაშლა",
+      },
+      deliveryType: {
+        soulart: "SoulArt-ის მიწოდება",
+        soulartDesc: "სწრაფი მიწოდება 1-3 სამუშაო დღეში",
+        soulartBadge: "მიწოდება 1-3 სამუშაო დღეში მთელი საქართველოს მასშტაბით",
+        artist: "ხელოვანი თვითონ აწვდის",
+        artistDesc: "მიუთითეთ თქვენი მიწოდების ვადა",
       },
     },
 
@@ -2485,6 +2498,10 @@ export const TRANSLATIONS: Translations = {
         back: "Back to auctions",
         button: "Create auction",
       },
+      auctionsEdit: {
+        title: "Edit Auction",
+        subtitle: "Modify auction details",
+      },
       statusFilter: {
         all: "All",
         pending: "Pending",
@@ -2554,7 +2571,8 @@ export const TRANSLATIONS: Translations = {
       by: "by",
       backToAuctions: "← Back to Auctions",
       auctionNotFound: "Auction Not Found",
-      auctionNotFoundDesc: "The requested auction does not exist or has been removed.",
+      auctionNotFoundDesc:
+        "The requested auction does not exist or has been removed.",
       originalArtwork: "Original Artwork",
       reproductionArtwork: "Reproduction",
       startingPrice: "Starting Price",
@@ -2629,8 +2647,9 @@ export const TRANSLATIONS: Translations = {
         startTime: "Start time",
         endDate: "End date",
         endTime: "End time",
-        deliveryDays: "Delivery time (days)",
-        deliveryInfo: "Delivery details",
+        deliveryDaysMin: "Min days",
+        deliveryDaysMax: "Max days",
+        deliveryInfo: "Additional info",
       },
       placeholders: {
         seller: "Select seller",
@@ -2652,6 +2671,7 @@ export const TRANSLATIONS: Translations = {
         price: "Enter a valid amount",
         increment: "Enter a valid bid increment",
         delivery: "Enter delivery days",
+        deliveryMaxMin: "Max days must be >= Min days",
         dateFormat: "Invalid date format",
         futureDate: "End date must be in the future",
         startFuture: "Start time must be in the future",
@@ -2683,6 +2703,13 @@ export const TRANSLATIONS: Translations = {
         clearMainImage: "Remove image",
         uploadAdditionalImages: "Upload gallery images",
         removeImage: "Remove",
+      },
+      deliveryType: {
+        soulart: "SoulArt Delivery",
+        soulartDesc: "Fast delivery in 1-3 business days",
+        soulartBadge: "Delivery in 1-3 business days across Georgia",
+        artist: "Artist delivers",
+        artistDesc: "Specify your own delivery timeline",
       },
     },
 
@@ -3663,4 +3690,3 @@ export const TRANSLATIONS: Translations = {
     },
   },
 };
-
