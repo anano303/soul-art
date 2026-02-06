@@ -314,9 +314,9 @@
   align-items: center;
   gap: 12px;
   position: absolute;
-  right: 24px;
-  top: 24px;
-  left: auto;
+  right: auto;
+  top: -40px;
+  left: 10px;
   transform: none;
   z-index: 15;
 }
@@ -738,9 +738,9 @@
 
   .header-actions {
     position: absolute;
-    right: 16px;
+    /* right: 16px;
     top: 16px;
-    left: auto;
+    left: auto; */
     transform: none;
     justify-content: flex-end;
   }
@@ -863,9 +863,9 @@
   }
 
   .header-actions {
-    right: 12px;
+    /* right: 12px;
     top: 12px;
-    left: auto;
+    left: auto; */
     gap: 6px;
   }
 
