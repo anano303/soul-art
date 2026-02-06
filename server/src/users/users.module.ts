@@ -43,6 +43,7 @@ import { ArtistController } from './controller/artist.controller';
 import { GalleryInteractionController } from './controller/gallery-interaction.controller';
 import { PortfolioController } from './controller/portfolio.controller';
 import { GoogleStrategy } from '@/strategies/google.strategy';
+import { FacebookStrategy } from '@/strategies/facebook.strategy';
 import { EmailService } from '@/email/services/email.services';
 import { CloudinaryModule } from '@/cloudinary/cloudinary.module';
 import { UserCloudinaryService } from './services/user-cloudinary.service';
@@ -121,6 +122,7 @@ import { PaymentsModule } from '../payments/payments.module';
     JwtStrategy,
     AuthService,
     GoogleStrategy,
+    FacebookStrategy,
     EmailService,
     UserCloudinaryService, // Add our new service
   ],

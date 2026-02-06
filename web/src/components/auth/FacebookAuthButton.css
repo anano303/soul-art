@@ -1,0 +1,121 @@
+.facebook-auth-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  width: 100%;
+  padding: 12px 20px;
+  background: #1877f2;
+  border: none;
+  border-radius: 8px;
+  color: #ffffff;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.facebook-auth-btn::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.15),
+    transparent
+  );
+  transition: all 0.5s ease;
+}
+
+.facebook-auth-btn:hover:not(:disabled)::before {
+  left: 100%;
+}
+
+.facebook-auth-btn:hover:not(:disabled) {
+  background: #166fe5;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(24, 119, 242, 0.35);
+}
+
+.facebook-auth-btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.facebook-auth-btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+/* Facebook icon */
+.facebook-auth-btn .fb-icon {
+  font-size: 1.25rem;
+  color: #ffffff;
+}
+
+/* Button text */
+.facebook-auth-btn .fb-text {
+  color: #ffffff;
+  letter-spacing: 0.3px;
+}
+
+/* Loading spinner */
+.fb-loading-spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: fb-spin 0.8s linear infinite;
+}
+
+@keyframes fb-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* User avatar when logged in */
+.fb-user-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  flex-shrink: 0;
+}
+
+.fb-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* When user is logged in - personalized button */
+.facebook-auth-btn.has-user {
+  background: linear-gradient(135deg, #1877f2 0%, #166fe5 100%);
+  padding-left: 14px;
+}
+
+.facebook-auth-btn.has-user .fb-text {
+  font-weight: 500;
+}
+
+/* Responsive adjustments */
+@media (max-width: 480px) {
+  .facebook-auth-btn {
+    padding: 10px 16px;
+    font-size: 0.9rem;
+    gap: 10px;
+  }
+
+  .fb-user-avatar {
+    width: 24px;
+    height: 24px;
+  }
+}

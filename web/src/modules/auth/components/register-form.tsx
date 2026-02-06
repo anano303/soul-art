@@ -1,6 +1,6 @@
 "use client";
 
-import { FaCheckCircle, FaGoogle } from "react-icons/fa";
+import { FaCheckCircle, FaGoogle, FaFacebookF } from "react-icons/fa";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { registerSchema } from "../validation";
@@ -146,6 +146,10 @@ export function RegisterForm() {
 
   const handleGoogleAuth = () => {
     window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/auth/google`;
+  };
+
+  const handleFacebookAuth = () => {
+    window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/auth/facebook`;
   };
 
   if (isSuccess) {
@@ -354,6 +358,15 @@ export function RegisterForm() {
               <span>l</span>
               <span>e</span>
             </span>
+          </button>
+          <button
+            type="button"
+            onClick={handleFacebookAuth}
+            className="social-btn facebook-btn"
+            disabled={isPending}
+          >
+            <FaFacebookF className="icon" />
+            <span>Facebook</span>
           </button>
         </div>
 

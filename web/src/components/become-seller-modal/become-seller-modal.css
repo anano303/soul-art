@@ -48,7 +48,7 @@
   padding: 0;
   border-radius: 1rem;
   width: 90%;
-  max-width: 600px;
+  max-width: 700px;
   max-height: none;
   min-height: auto;
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
@@ -394,6 +394,107 @@
   opacity: 1;
 }
 
+/* Two-column grid layout */
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.form-grid .form-group {
+  margin-bottom: 0;
+}
+
+.form-group.full-width {
+  grid-column: 1 / -1;
+}
+
+/* Social auth section */
+.social-auth-section {
+  margin-bottom: 1.5rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid #e0d5c8;
+}
+
+.social-auth-title {
+  font-size: 0.9rem;
+  color: #666;
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.social-auth-buttons {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+}
+
+.social-auth-button {
+  flex: 1;
+  max-width: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid #e0d5c8;
+  border-radius: 8px;
+  background-color: white;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #333;
+  transition: all 0.2s ease;
+}
+
+.social-auth-button:hover {
+  background-color: #f5f5f5;
+  border-color: #d7ccc8;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.social-auth-button.google {
+  color: #4285f4;
+}
+
+.social-auth-button.google:hover {
+  background-color: #f8fbff;
+  border-color: #4285f4;
+}
+
+.social-auth-button.facebook {
+  background-color: #1877f2;
+  color: white;
+  border-color: #1877f2;
+}
+
+.social-auth-button.facebook:hover {
+  background-color: #166fe5;
+  border-color: #166fe5;
+}
+
+.social-auth-divider {
+  display: flex;
+  align-items: center;
+  margin: 1.5rem 0;
+  gap: 1rem;
+}
+
+.social-auth-divider::before,
+.social-auth-divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background-color: #e0d5c8;
+}
+
+.social-auth-divider span {
+  color: #999;
+  font-size: 0.85rem;
+  text-transform: lowercase;
+}
+
 /* Responsive design */
 @media (max-width: 768px) {
   .seller-modal-overlay {
@@ -428,6 +529,19 @@
 
   .form-group {
     margin-bottom: 1rem;
+  }
+
+  /* Stack grid on mobile */
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .social-auth-buttons {
+    flex-direction: column;
+  }
+
+  .social-auth-button {
+    max-width: 100%;
   }
 
   .modal-actions {

@@ -248,6 +248,28 @@
   color: #ea4335; /* Red */
 }
 
+.social-button.facebook-btn {
+  background-color: #1877f2;
+  color: white;
+  border: none;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  transition: background-color 0.3s, box-shadow 0.3s;
+}
+
+.social-button.facebook-btn::before {
+  display: none;
+}
+
+.social-button.facebook-btn:hover {
+  background-color: #166fe5;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.social-button.facebook-btn .icon {
+  color: white;
+  margin-right: 8px;
+}
+
 .icon {
   margin-right: 5px;
 }

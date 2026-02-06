@@ -13,6 +13,7 @@ import Image from "next/image";
 import "./become-seller-modal.css";
 import { GEORGIAN_BANKS, detectBankFromIban } from "@/utils/georgian-banks";
 import { apiClient } from "@/lib/axios";
+import { FaGoogle, FaFacebookF } from "react-icons/fa";
 
 const SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const SLUG_VALIDATION_MESSAGE =
@@ -25,7 +26,6 @@ const becomeSellerSchema = z
     accountNumber: z.string().min(1, "საბანკო ანგარიში აუცილებელია"),
     beneficiaryBankCode: z.string().min(1, "ბანკი აუცილებელია"),
     phoneNumber: z.string().min(1, "ტელეფონის ნომერი აუცილებელია"),
-    invitationCode: z.string().optional(),
     artistSlug: z
       .string()
       .optional()
@@ -544,6 +544,40 @@ export function BecomeSellerModal({
         )}
 
         <form onSubmit={onSubmit} className="become-seller-form">
+          {/* Social auth section */}
+          <div className="social-auth-section">
+            <p className="social-auth-title">
+              {language === "en"
+                ? "Quick registration with social account"
+                : "სწრაფი რეგისტრაცია სოციალური ქსელით"}
+            </p>
+            <div className="social-auth-buttons">
+              <button
+                type="button"
+                className="social-auth-button google"
+                onClick={() => {
+                  window.location.href = `/api/auth/google?redirect=${encodeURIComponent(window.location.pathname)}&sellerMode=true`;
+                }}
+              >
+                <FaGoogle />
+                Google
+              </button>
+              <button
+                type="button"
+                className="social-auth-button facebook"
+                onClick={() => {
+                  window.location.href = `/api/auth/facebook?redirect=${encodeURIComponent(window.location.pathname)}&sellerMode=true`;
+                }}
+              >
+                <FaFacebookF />
+                Facebook
+              </button>
+            </div>
+            <div className="social-auth-divider">
+              <span>{language === "en" ? "or fill in details" : "ან შეავსე ხელით"}</span>
+            </div>
+          </div>
+
           <div className="form-group">
             <label htmlFor="storeName">{t("profile.sellerStoreName")} *</label>
             <input
@@ -676,101 +710,91 @@ export function BecomeSellerModal({
             </div>
           </div>
 
-          <div className="form-group">
-            <label htmlFor="phoneNumber">{t("profile.phoneNumber")} *</label>
-            <input
-              id="phoneNumber"
-              type="tel"
-              placeholder="+995XXXXXXXXX"
-              {...register("phoneNumber")}
-              className="form-input"
-            />
-            {errors.phoneNumber && (
-              <span className="error-message">
-                {errors.phoneNumber.message}
-              </span>
-            )}
+          {/* Two-column grid for phone and ID number */}
+          <div className="form-grid">
+            <div className="form-group">
+              <label htmlFor="phoneNumber">{t("profile.phoneNumber")} *</label>
+              <input
+                id="phoneNumber"
+                type="tel"
+                placeholder="+995XXXXXXXXX"
+                {...register("phoneNumber")}
+                className="form-input"
+              />
+              {errors.phoneNumber && (
+                <span className="error-message">
+                  {errors.phoneNumber.message}
+                </span>
+              )}
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="identificationNumber">
+                {t("profile.sellerIdNumber")} *
+              </label>
+              <input
+                id="identificationNumber"
+                type="text"
+                placeholder={t("profile.sellerIdNumberPlaceholder")}
+                {...register("identificationNumber")}
+                className="form-input"
+              />
+              {errors.identificationNumber && (
+                <span className="error-message">
+                  {t("profile.sellerIdNumberRequired")}
+                </span>
+              )}
+            </div>
           </div>
 
-          <div className="form-group">
-            <label htmlFor="identificationNumber">
-              {t("profile.sellerIdNumber")} *
-            </label>
-            <input
-              id="identificationNumber"
-              type="text"
-              placeholder={t("profile.sellerIdNumberPlaceholder")}
-              {...register("identificationNumber")}
-              className="form-input"
-            />
-            {errors.identificationNumber && (
-              <span className="error-message">
-                {t("profile.sellerIdNumberRequired")}
-              </span>
-            )}
-          </div>
+          {/* Two-column grid for IBAN and bank */}
+          <div className="form-grid" style={{ marginTop: "1rem" }}>
+            <div className="form-group">
+              <label htmlFor="accountNumber">
+                {t("profile.sellerAccountNumber")} *
+              </label>
+              <input
+                id="accountNumber"
+                type="text"
+                placeholder={t("profile.sellerAccountNumberPlaceholder")}
+                {...register("accountNumber")}
+                className="form-input"
+                onChange={(e) => {
+                  const iban = e.target.value.trim();
+                  const detectedBank = detectBankFromIban(iban);
+                  if (detectedBank) {
+                    setValue("beneficiaryBankCode", detectedBank);
+                  } else if (iban.length >= 22) {
+                    setValue("beneficiaryBankCode", "");
+                  }
+                }}
+              />
+              {errors.accountNumber && (
+                <span className="error-message">
+                  {t("profile.sellerAccountNumberRequired")}
+                </span>
+              )}
+            </div>
 
-          <div className="form-group">
-            <label htmlFor="accountNumber">
-              {t("profile.sellerAccountNumber")} *
-            </label>
-            <input
-              id="accountNumber"
-              type="text"
-              placeholder={t("profile.sellerAccountNumberPlaceholder")}
-              {...register("accountNumber")}
-              className="form-input"
-              onChange={(e) => {
-                const iban = e.target.value.trim();
-                const detectedBank = detectBankFromIban(iban);
-                if (detectedBank) {
-                  setValue("beneficiaryBankCode", detectedBank);
-                } else if (iban.length >= 22) {
-                  setValue("beneficiaryBankCode", "");
-                }
-              }}
-            />
-            {errors.accountNumber && (
-              <span className="error-message">
-                {t("profile.sellerAccountNumberRequired")}
-              </span>
-            )}
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="beneficiaryBankCode">{t("profile.bank")} *</label>
-            <select
-              id="beneficiaryBankCode"
-              {...register("beneficiaryBankCode")}
-              className="form-input"
-              disabled={true}
-            >
-              <option value="">{t("profile.selectBank")}</option>
-              {GEORGIAN_BANKS.map((bank) => (
-                <option key={bank.code} value={bank.code}>
-                  {bank.name} ({bank.nameEn})
-                </option>
-              ))}
-            </select>
-            {errors.beneficiaryBankCode && (
-              <span className="error-message">{t("profile.bankRequired")}</span>
-            )}
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="invitationCode">{t("auth.referralCode")}</label>
-            <input
-              id="invitationCode"
-              type="text"
-              placeholder="ABC123"
-              {...register("invitationCode")}
-              className="form-input"
-            />
-            {errors.invitationCode && (
-              <span className="error-message">
-                {errors.invitationCode.message}
-              </span>
-            )}
+            <div className="form-group">
+              <label htmlFor="beneficiaryBankCode">{t("profile.bank")} *</label>
+              <select
+                id="beneficiaryBankCode"
+                {...register("beneficiaryBankCode")}
+                className="form-input"
+                disabled={true}
+              >
+                <option value="">{t("profile.selectBank")}</option>
+                {GEORGIAN_BANKS.map((bank) => (
+                  <option key={bank.code} value={bank.code}>
+                    {bank.name} ({bank.nameEn})
+                  </option>
+                ))}
+              </select>
+              {errors.beneficiaryBankCode && (
+                <span className="error-message">{t("profile.bankRequired")}</span>
+              )}
+            </div>
           </div>
 
           <div className="modal-actions">

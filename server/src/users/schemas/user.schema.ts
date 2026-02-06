@@ -36,6 +36,17 @@ export class User {
 
   @Prop({ type: String, enum: Role, default: Role.User })
   role: Role;
+
+  // OAuth provider IDs
+  @Prop({ type: String, default: null })
+  googleId?: string | null;
+
+  @Prop({ type: String, default: null })
+  facebookId?: string | null;
+
+  @Prop({ type: String, default: null })
+  avatar?: string | null;
+
   @Prop()
   createdAt?: Date;
 

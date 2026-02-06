@@ -42,6 +42,7 @@ import { SellerRegisterDto } from '../dtos/seller-register.dto';
 import { SalesManagerRegisterDto } from '../dtos/sales-manager-register.dto';
 import { BecomeSellerDto } from '../dtos/become-seller.dto';
 import { GoogleAuthGuard } from '@/guards/google-oauth.guard';
+import { FacebookAuthGuard } from '@/guards/facebook-oauth.guard';
 import { ForgotPasswordDto } from '../dtos/forgot-password.dto';
 import { ResetPasswordDto } from '../dtos/reset-password.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -214,6 +215,102 @@ export class AuthController {
       console.error('❌ Google auth error:', error);
       res.redirect(`${process.env.ALLOWED_ORIGINS}/login?error=auth_failed`);
     }
+  }
+
+  @Get('facebook')
+  @UseGuards(FacebookAuthGuard)
+  async facebookAuthInit() {}
+
+  @Get('facebook/callback')
+  @UseGuards(FacebookAuthGuard)
+  async facebookAuthRedirect(@Req() req, @Res() res: Response) {
+    try {
+      console.log('🔍 Facebook OAuth callback received');
+      const { tokens } = await this.authService.signInWithFacebookOAuth({
+        email: req.user.email,
+        name: req.user.name || 'Facebook User',
+        facebookId: req.user.facebookId,
+        avatar: req.user.avatar,
+      });
+      console.log('✅ Facebook auth successful, setting HTTP-only cookies');
+
+      // Set HTTP-only cookies
+      res.cookie(
+        cookieConfig.access.name,
+        tokens.accessToken,
+        cookieConfig.access.options,
+      );
+      res.cookie(
+        cookieConfig.refresh.name,
+        tokens.refreshToken,
+        cookieConfig.refresh.options,
+      );
+
+      console.log(
+        '🔄 Redirecting to:',
+        `${process.env.ALLOWED_ORIGINS}/auth-callback?success=true`,
+      );
+
+      // Redirect to auth callback page with success parameter
+      res.redirect(`${process.env.ALLOWED_ORIGINS}/auth-callback?success=true`);
+    } catch (error) {
+      console.error('❌ Facebook auth error:', error);
+      res.redirect(`${process.env.ALLOWED_ORIGINS}/login?error=auth_failed`);
+    }
+  }
+
+  @Post('facebook')
+  @ApiOperation({ summary: 'Login or register with Facebook (SDK method)' })
+  @ApiResponse({
+    status: 200,
+    description: 'Successfully authenticated with Facebook',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Invalid Facebook token',
+  })
+  async facebookAuth(
+    @Body()
+    body: {
+      accessToken: string;
+      userId: string;
+      email?: string;
+      name: string;
+      picture?: string;
+    },
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    console.log('🔍 Facebook authentication received');
+
+    const deviceInfo = {
+      fingerprint: this.generateDeviceFingerprint(req),
+      userAgent: req.headers['user-agent'],
+    };
+
+    const { tokens, user } = await this.authService.signInWithFacebook(
+      body,
+      deviceInfo,
+    );
+
+    console.log('✅ Facebook auth successful, setting HTTP-only cookies');
+
+    // Set HTTP-only cookies
+    res.cookie(
+      cookieConfig.access.name,
+      tokens.accessToken,
+      cookieConfig.access.options,
+    );
+    res.cookie(
+      cookieConfig.refresh.name,
+      tokens.refreshToken,
+      cookieConfig.refresh.options,
+    );
+
+    return {
+      success: true,
+      user,
+    };
   }
 
   @Post('logout')

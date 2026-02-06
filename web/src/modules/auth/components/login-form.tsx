@@ -4,7 +4,7 @@ import { useForm, SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { loginSchema } from "../validation";
 import { useLogin } from "../hooks/use-auth";
-import { FaGoogle, FaEye, FaEyeSlash } from "react-icons/fa";
+import { FaGoogle, FaEye, FaEyeSlash, FaFacebookF } from "react-icons/fa";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState, useEffect } from "react";
@@ -166,6 +166,10 @@ export function LoginForm({
     window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/auth/google`;
   };
 
+  const handleFacebookAuth = () => {
+    window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/auth/facebook`;
+  };
+
   return (
     <div className="login-container">
       {justRegistered && (
@@ -255,6 +259,14 @@ export function LoginForm({
               <span>l</span>
               <span>e</span>
             </span>
+          </button>
+          <button
+            type="button"
+            onClick={handleFacebookAuth}
+            className="social-button facebook-btn"
+          >
+            <FaFacebookF className="icon" />
+            <span>Facebook</span>
           </button>
         </div>
       </form>
