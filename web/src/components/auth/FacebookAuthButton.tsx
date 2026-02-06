@@ -274,12 +274,12 @@ export function FacebookAuthButton({
   console.log("[FB Auth] Rendering button:", { isSDKLoaded, userInfo, isLoading });
 
   const buttonText = userInfo
-    ? `Continue as ${userInfo.name.split(" ")[0]}`
+    ? `${userInfo.name.split(" ")[0]}`
     : variant === "register"
-    ? "Sign up with Facebook"
+    ? "Facebook"
     : variant === "seller"
-    ? "Register with Facebook"
-    : "Continue with Facebook";
+    ? "Facebook"
+    : "Facebook";
 
   return (
     <button
