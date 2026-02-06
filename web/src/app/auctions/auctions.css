@@ -82,7 +82,7 @@
     ),
     /* Base gradient */
     linear-gradient(180deg, #f8f6f2 0%, #f5f3ef 30%, #faf9f7 70%, #f5f3ef 100%);
-  padding: 60px 0 100px;
+  padding: 0 0 100px;
   position: relative;
   overflow: hidden;
 }
@@ -155,15 +155,41 @@
 }
 
 /* ─────────────────────────────────────────────────────────────────────────────
-   Header Section
+   Header Section - Hero with Background
    ───────────────────────────────────────────────────────────────────────────── */
 
 .auctions-header {
   text-align: center;
   margin-bottom: 56px;
-  padding: 0 24px;
+  padding: 60px 24px 70px;
   position: relative;
   z-index: 1;
+  background: 
+    linear-gradient(
+      to bottom,
+      rgba(0, 0, 0, 0.45) 0%,
+      rgba(0, 0, 0, 0.35) 50%,
+      rgba(0, 0, 0, 0.55) 100%
+    ),
+    url('/auction.jpg') center center / cover no-repeat;
+  border-radius: 0;
+  max-width: none;
+  margin-left: 0;
+  margin-right: 0;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+}
+
+.auctions-header::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(201, 169, 97, 0.15) 0%,
+    transparent 70%
+  );
+  pointer-events: none;
 }
 
 .header-top-row {
@@ -172,6 +198,7 @@
   justify-content: center;
   gap: 20px;
   margin-bottom: 20px;
+  position: relative;
 }
 
 .auctions-title {
@@ -187,10 +214,10 @@
   font-family: "Cinzel Decorative", "Georgia", serif;
   font-size: 2.2rem;
   font-weight: 700;
-  color: var(--auctions-text-primary);
+  color: #ffffff;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+  text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.5);
 }
 
 .auctions-title .title-auctions {
@@ -204,15 +231,16 @@
   text-transform: uppercase;
   background: linear-gradient(
     135deg,
-    var(--auctions-accent) 0%,
-    var(--auctions-accent-light) 50%,
-    var(--auctions-accent) 100%
+    #c9a961 0%,
+    #e8d9b5 40%,
+    #c9a961 60%,
+    #d4b875 100%
   );
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
   text-shadow: none;
-  filter: drop-shadow(2px 2px 4px rgba(1, 38, 69, 0.2));
+  filter: drop-shadow(3px 3px 8px rgba(0, 0, 0, 0.4));
 }
 
 /* Dark theme - use gold for Auctions */
@@ -233,10 +261,10 @@
 .auctions-title .gavel-icon {
   width: 56px;
   height: 56px;
-  color: var(--auctions-accent);
+  color: #c9a961;
   -webkit-text-fill-color: initial;
   animation: gavelBounce 2s ease-in-out infinite;
-  filter: drop-shadow(2px 2px 4px rgba(1, 38, 69, 0.2));
+  filter: drop-shadow(3px 3px 8px rgba(0, 0, 0, 0.4));
 }
 
 /* Dark theme - gold gavel */
@@ -278,37 +306,87 @@
   );
 }
 
-/* Theme Toggle Button - Refined */
-.theme-toggle-btn {
+/* Header Actions Container - Top right of hero */
+.header-actions {
   display: flex;
   align-items: center;
-  justify-content: center;
-  width: 42px;
-  height: 42px;
-  border-radius: 50%;
-  border: 1px solid var(--auctions-border);
-  background: var(--auctions-surface);
-  color: var(--auctions-text-secondary);
+  gap: 12px;
+  position: absolute;
+  right: 24px;
+  top: 24px;
+  transform: none;
+}
+
+/* Create Auction Button */
+.create-auction-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border-radius: 50px;
+  border: 1px solid var(--auctions-gold);
+  background: linear-gradient(135deg, var(--auctions-gold) 0%, #d4b875 100%);
+  color: #012645;
+  font-weight: 600;
+  font-size: 0.9rem;
+  text-decoration: none;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: var(--auctions-shadow-sm);
 }
 
-.theme-toggle-btn:hover {
-  border-color: var(--auctions-gold);
-  color: var(--auctions-gold);
+.create-auction-btn:hover {
   transform: translateY(-2px);
-  box-shadow: var(--auctions-shadow-md);
+  box-shadow:
+    var(--auctions-shadow-md),
+    0 0 20px rgba(201, 169, 97, 0.3);
+}
+
+.create-auction-btn svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* Dark theme */
+[data-theme="dark"] .create-auction-btn,
+.dark .create-auction-btn {
+  color: #0a1520;
+}
+
+/* Theme Toggle Button - Glass effect matching artwork */
+.theme-toggle-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid rgba(201, 169, 97, 0.4);
+  background: rgba(0, 0, 0, 0.25);
+  color: #c9a961;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(10px);
+}
+
+.theme-toggle-btn:hover {
+  background: rgba(201, 169, 97, 0.3);
+  border-color: rgba(201, 169, 97, 0.6);
+  color: #e8d9b5;
+  transform: scale(1.05);
+  box-shadow: 0 6px 25px rgba(0, 0, 0, 0.4);
 }
 
 .auctions-subtitle {
   font-size: 1.1rem;
-  color: var(--auctions-text-secondary);
+  color: rgba(255, 255, 255, 0.9);
   margin: 24px auto 0;
   max-width: 500px;
   line-height: 1.8;
   font-weight: 400;
   letter-spacing: 0.01em;
+  text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.4);
 }
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -318,28 +396,29 @@
 .auctions-tabs {
   display: flex;
   justify-content: center;
-  gap: 8px;
-  margin-top: 40px;
-  padding: 6px;
-  background: var(--auctions-surface);
-  border-radius: 100px;
-  border: 1px solid var(--auctions-border);
+  gap: 4px;
+  margin-top: 32px;
+  padding: 4px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 50px;
+  border: 1px solid rgba(201, 169, 97, 0.3);
   width: fit-content;
   margin-left: auto;
   margin-right: auto;
-  box-shadow: var(--auctions-shadow-sm);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(15px);
 }
 
 .auction-tab {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 14px 28px;
+  gap: 8px;
+  padding: 12px 24px;
   border: none;
-  border-radius: 100px;
+  border-radius: 50px;
   background: transparent;
-  color: var(--auctions-text-secondary);
-  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 0.85rem;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -347,14 +426,15 @@
 }
 
 .auction-tab:hover:not(.active) {
-  color: var(--auctions-text-primary);
-  background: var(--auctions-bg-secondary);
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.1);
 }
 
 .auction-tab.active {
-  background: var(--auctions-accent);
-  color: #ffffff;
-  box-shadow: var(--auctions-shadow-md);
+  background: linear-gradient(135deg, #c9a961 0%, #e8d9b5 50%, #c9a961 100%);
+  color: #012645;
+  font-weight: 600;
+  box-shadow: 0 4px 15px rgba(201, 169, 97, 0.4);
 }
 
 .auction-tab .tab-icon {
@@ -658,6 +738,26 @@
   .auctions-header {
     margin-bottom: 40px;
     padding: 0 20px;
+  }
+
+  .header-top-row {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .header-actions {
+    position: static;
+    transform: none;
+    justify-content: center;
+  }
+
+  .create-auction-btn span {
+    display: none;
+  }
+
+  .create-auction-btn {
+    padding: 10px;
+    border-radius: 50%;
   }
 
   .auctions-title .title-text {

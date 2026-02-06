@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { apiClient } from "@/lib/axios";
 import { useLanguage } from "@/hooks/LanguageContext";
 import { toast } from "react-hot-toast";
@@ -58,7 +59,7 @@ export default function AdminAuctions() {
 
   // Commission settings state
   const [showSettings, setShowSettings] = useState(false);
-  const [settings, setSettings] = useState<CommissionSettings | null>(null);
+  const [, setSettings] = useState<CommissionSettings | null>(null);
   const [auctionAdmins, setAuctionAdmins] = useState<User[]>([]);
   const [settingsLoading, setSettingsLoading] = useState(false);
   const [settingsForm, setSettingsForm] = useState({
@@ -92,8 +93,10 @@ export default function AdminAuctions() {
       const response = await apiClient.get("/auctions/admin/settings");
       setSettings(response.data);
       setSettingsForm({
-        platformCommissionPercent: response.data.platformCommissionPercent || 10,
-        auctionAdminCommissionPercent: response.data.auctionAdminCommissionPercent || 30,
+        platformCommissionPercent:
+          response.data.platformCommissionPercent || 10,
+        auctionAdminCommissionPercent:
+          response.data.auctionAdminCommissionPercent || 30,
         auctionAdminUserId: response.data.auctionAdminUserId || "",
       });
     } catch (error) {
@@ -106,7 +109,9 @@ export default function AdminAuctions() {
   const fetchAuctionAdmins = async () => {
     try {
       // Fetch users with auction_admin role
-      const response = await apiClient.get("/users?role=AUCTION_ADMIN&limit=100");
+      const response = await apiClient.get(
+        "/users?role=AUCTION_ADMIN&limit=100",
+      );
       setAuctionAdmins(response.data.items || []);
     } catch (error) {
       console.error("Failed to fetch auction admins:", error);
@@ -130,6 +135,7 @@ export default function AdminAuctions() {
 
   useEffect(() => {
     fetchAuctions();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filter]);
 
   useEffect(() => {
@@ -274,11 +280,12 @@ export default function AdminAuctions() {
             <div className="settings-field calculated">
               <label>მხატვრის (სელერის) წილი</label>
               <div className="calculated-value">
-                {100 - settingsForm.auctionAdminCommissionPercent - settingsForm.platformCommissionPercent}%
+                {100 -
+                  settingsForm.auctionAdminCommissionPercent -
+                  settingsForm.platformCommissionPercent}
+                %
               </div>
-              <span className="field-hint">
-                დანარჩენს მიიღებს მხატვარი
-              </span>
+              <span className="field-hint">დანარჩენს მიიღებს მხატვარი</span>
             </div>
 
             <div className="settings-field">
@@ -324,8 +331,14 @@ export default function AdminAuctions() {
               </li>
               <li>
                 მხატვრის (სელერის) შემოსავალი:{" "}
-                {1000 - (1000 * settingsForm.auctionAdminCommissionPercent) / 100 - (1000 * settingsForm.platformCommissionPercent) / 100}₾
-                ({100 - settingsForm.auctionAdminCommissionPercent - settingsForm.platformCommissionPercent}%)
+                {1000 -
+                  (1000 * settingsForm.auctionAdminCommissionPercent) / 100 -
+                  (1000 * settingsForm.platformCommissionPercent) / 100}
+                ₾ (
+                {100 -
+                  settingsForm.auctionAdminCommissionPercent -
+                  settingsForm.platformCommissionPercent}
+                %)
               </li>
             </ul>
           </div>
@@ -347,7 +360,7 @@ export default function AdminAuctions() {
             (status) => (
               <button
                 key={status}
-                onClick={() => setFilter(status as any)}
+                onClick={() => setFilter(status as typeof filter)}
                 className={`filter-btn ${filter === status ? "active" : ""}`}
               >
                 {t(`admin.statusFilter.${status.toLowerCase()}`)}
@@ -402,14 +415,13 @@ export default function AdminAuctions() {
                 {auctions.map((auction) => (
                   <tr key={auction._id}>
                     <td>
-                      <img
-                        src={auction.mainImage}
+                      <Image
+                        src={auction.mainImage || "/placeholder-artwork.jpg"}
                         alt={auction.title}
                         className="auction-thumbnail"
-                        onError={(e) => {
-                          (e.target as HTMLImageElement).src =
-                            "/placeholder-artwork.jpg";
-                        }}
+                        width={60}
+                        height={60}
+                        unoptimized
                       />
                     </td>
                     <td>

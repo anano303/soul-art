@@ -217,7 +217,7 @@
   color: white;
 }
 
-/* Info overlay on image */
+/* Info overlay on image - clickable to detail page */
 .image-info-overlay {
   position: absolute;
   bottom: 0;
@@ -227,6 +227,19 @@
   background: var(--overlay-bg);
   color: white;
   z-index: 3;
+  text-decoration: none;
+  display: block;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.image-info-overlay:hover {
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.92),
+    rgba(0, 0, 0, 0.7) 70%,
+    transparent
+  );
 }
 
 .auction-title {
@@ -327,14 +340,18 @@
   transform: rotate(180deg);
 }
 
-/* ============ EXPANDED SECTION ============ */
+/* ============ EXPANDED SECTION - Compact Design ============ */
 .auction-expanded {
-  padding: 20px;
+  padding: 14px 16px;
   display: flex;
   flex-direction: column;
-  gap: 20px;
-  background: var(--accent-bg);
-  animation: slideDown 0.3s ease;
+  gap: 12px;
+  background: linear-gradient(
+    180deg,
+    rgba(99, 102, 241, 0.04) 0%,
+    rgba(139, 92, 246, 0.02) 100%
+  );
+  animation: slideDown 0.2s ease;
 }
 
 @keyframes slideDown {
@@ -348,129 +365,156 @@
   }
 }
 
-/* Price details - redesigned */
+/* Price details - Compact Style */
 .price-details {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  flex-wrap: nowrap;
 }
 
 .price-details .price-row {
   display: flex;
-  flex-direction: column;
-  gap: 4px;
-  padding: 12px 14px;
-  background: var(--card-bg);
-  border-radius: 10px;
-  border: 1px solid var(--card-border);
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 20px;
+  border: none;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.price-details .price-row:last-child {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
 }
 
 .price-details .label {
   font-size: 0.7rem;
   font-weight: 500;
-  color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  color: rgba(255, 255, 255, 0.85);
+  white-space: nowrap;
 }
 
 .price-details .value {
-  font-size: 1.1rem;
+  font-size: 0.85rem;
   font-weight: 700;
-  color: var(--text-primary);
+  color: #ffffff;
+  white-space: nowrap;
 }
 
 .price-details .value.accent {
-  color: var(--success);
+  color: #ffffff;
+  white-space: nowrap;
 }
 
-/* Time details - redesigned */
+/* Time details - Compact Style */
 .time-details {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  flex-wrap: wrap;
 }
 
 .time-details .time-row {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 10px 14px;
-  background: var(--card-bg);
-  border-radius: 8px;
-  border: 1px solid var(--card-border);
-  font-size: 0.8rem;
+  gap: 6px;
+  padding: 6px 10px;
+  background: rgba(99, 102, 241, 0.08);
+  border: 1px solid rgba(99, 102, 241, 0.15);
+  border-radius: 20px;
+  font-size: 0.7rem;
+  font-weight: 500;
   color: var(--text-secondary);
+  transition: all 0.2s ease;
+}
+
+.time-details .time-row:hover {
+  background: rgba(99, 102, 241, 0.12);
+  border-color: rgba(99, 102, 241, 0.25);
 }
 
 .time-details .time-row svg {
-  color: var(--accent);
+  color: #8b5cf6;
   flex-shrink: 0;
+  width: 12px;
+  height: 12px;
 }
 
-/* Description - redesigned */
+/* Description - Compact Style */
 .description-section {
-  padding: 14px;
-  background: var(--card-bg);
-  border-radius: 10px;
-  border: 1px solid var(--card-border);
+  padding: 0;
+  background: transparent;
+  border-radius: 0;
+  border: none;
+  text-align: center;
 }
 
 .description-section h4 {
-  font-size: 0.75rem;
+  font-size: 0.65rem;
   font-weight: 600;
   color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  margin: 0 0 10px;
-  padding-bottom: 8px;
-  border-bottom: 1px solid var(--card-border);
+  margin: 0 0 6px;
+  padding-bottom: 0;
+  border-bottom: none;
 }
 
 .description-section p {
-  font-size: 0.85rem;
-  color: var(--text-primary);
-  line-height: 1.6;
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
   margin: 0;
 }
 
-/* Details grid - redesigned */
+/* Details grid - Compact Pills */
 .details-grid {
   display: flex;
-  flex-wrap: nowrap;
-  gap: 8px;
-  overflow-x: auto;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: center;
 }
 
 .detail-item {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 8px;
-  padding: 10px 14px;
-  background: var(--card-bg);
-  border: 1px solid var(--card-border);
-  border-radius: 8px;
-  font-size: 0.8rem;
+  gap: 5px;
+  padding: 6px 10px;
+  background: rgba(99, 102, 241, 0.08);
+  border: 1px solid rgba(99, 102, 241, 0.15);
+  border-radius: 20px;
+  font-size: 0.72rem;
   font-weight: 500;
-  color: var(--text-primary);
+  color: var(--text-secondary);
   white-space: nowrap;
   flex-shrink: 0;
+  transition: all 0.2s ease;
+}
+
+.detail-item:hover {
+  background: rgba(99, 102, 241, 0.12);
+  border-color: rgba(99, 102, 241, 0.25);
 }
 
 .detail-item svg {
-  color: var(--accent);
+  color: #8b5cf6;
   flex-shrink: 0;
+  width: 12px;
+  height: 12px;
 }
 
-/* Bid section - redesigned */
+/* Bid section - compact */
 .bid-section {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  padding: 18px;
+  gap: 10px;
+  padding: 14px;
   background: var(--card-bg);
   border-radius: 12px;
-  border: 2px solid var(--accent);
-  box-shadow: 0 4px 16px rgba(44, 82, 130, 0.12);
+  border: 1px solid var(--accent);
+  box-shadow: 0 2px 8px rgba(44, 82, 130, 0.08);
 }
 
 .bid-controls {

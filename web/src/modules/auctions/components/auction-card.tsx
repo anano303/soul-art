@@ -233,15 +233,35 @@ export default function AuctionCard({
   const formatPrice = (price: number) => `${price.toFixed(2)} ₾`;
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString(
-      language === "ge" ? "ka-GE" : "en-US",
-      {
-        month: "short",
-        day: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-      },
-    );
+    const date = new Date(dateString);
+    const day = date.getDate();
+    const hour = date.getHours().toString().padStart(2, "0");
+    const minute = date.getMinutes().toString().padStart(2, "0");
+
+    if (language === "ge") {
+      const monthsGe = [
+        "იან",
+        "თებ",
+        "მარ",
+        "აპრ",
+        "მაი",
+        "ივნ",
+        "ივლ",
+        "აგვ",
+        "სექ",
+        "ოქტ",
+        "ნოე",
+        "დეკ",
+      ];
+      return `${day} ${monthsGe[date.getMonth()]}, ${hour}:${minute}`;
+    }
+
+    return date.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
   };
 
   const handleBidChange = (delta: number) => {
@@ -330,10 +350,12 @@ export default function AuctionCard({
       : t("auctions.ended");
 
   const canBid =
-    currentAuction.status === "ACTIVE" &&
+    (currentAuction.status === "ACTIVE" ||
+      currentAuction.status === "SCHEDULED") &&
     user &&
     user._id !== currentAuction.seller._id;
 
+  const isPreBid = currentAuction.status === "SCHEDULED";
   const isScheduled = currentAuction.status === "SCHEDULED";
 
   return (
@@ -390,8 +412,12 @@ export default function AuctionCard({
             )}
           </div>
 
-          {/* Info overlay on image */}
-          <div className="image-info-overlay">
+          {/* Info overlay on image - clickable to detail page */}
+          <Link
+            href={`/auctions/${currentAuction._id}`}
+            className="image-info-overlay"
+            onClick={(e) => e.stopPropagation()}
+          >
             <h3 className="auction-title">{currentAuction.title}</h3>
             <div className="overlay-row">
               <span className="artist-name">
@@ -416,7 +442,7 @@ export default function AuctionCard({
                 {deliveryDaysText}
               </span>
             </div>
-          </div>
+          </Link>
         </div>
 
         {/* Expand button */}
@@ -464,14 +490,14 @@ export default function AuctionCard({
             {/* Time details */}
             <div className="time-details">
               <div className="time-row">
-                <Calendar size={14} />
+                <Calendar size={12} />
                 <span>
                   {language === "ge" ? "დაწყება" : "Start"}:{" "}
                   {formatDate(currentAuction.startDate)}
                 </span>
               </div>
               <div className="time-row">
-                <Clock size={14} />
+                <Clock size={12} />
                 <span>
                   {language === "ge" ? "დასრულება" : "End"}:{" "}
                   {formatDate(currentAuction.endDate)}
@@ -488,15 +514,15 @@ export default function AuctionCard({
             {/* Details */}
             <div className="details-grid">
               <div className="detail-item">
-                <Palette size={16} />
+                <Palette size={12} />
                 <span>{currentAuction.material}</span>
               </div>
               <div className="detail-item">
-                <Ruler size={16} />
+                <Ruler size={12} />
                 <span>{currentAuction.dimensions}</span>
               </div>
               <div className="detail-item">
-                <Package size={16} />
+                <Package size={12} />
                 <span>{deliveryDaysText}</span>
               </div>
             </div>
@@ -547,7 +573,7 @@ export default function AuctionCard({
                   </button>
                 </div>
                 <button
-                  className="place-bid-btn"
+                  className={`place-bid-btn ${isPreBid ? "pre-bid" : ""}`}
                   onClick={handlePlaceBid}
                   disabled={bidding}
                 >
@@ -556,7 +582,11 @@ export default function AuctionCard({
                   ) : (
                     <>
                       <Gavel size={18} />
-                      <span>{t("auctions.placeBid")}</span>
+                      <span>
+                        {isPreBid
+                          ? t("auctions.preBid") || "Pre-Bid"
+                          : t("auctions.placeBid")}
+                      </span>
                     </>
                   )}
                 </button>
@@ -564,12 +594,18 @@ export default function AuctionCard({
             )}
 
             {/* Login notice */}
-            {!user && currentAuction.status === "ACTIVE" && (
-              <div className="login-notice">
-                <span>{t("auctions.loginToPlaceBid")} </span>
-                <Link href="/login">{t("auctions.loginLink")}</Link>
-              </div>
-            )}
+            {!user &&
+              (currentAuction.status === "ACTIVE" ||
+                currentAuction.status === "SCHEDULED") && (
+                <div className="login-notice">
+                  <span>
+                    {currentAuction.status === "SCHEDULED"
+                      ? t("auctions.loginToPreBid") || "შედით Pre-Bid-ისთვის"
+                      : t("auctions.loginToPlaceBid")}{" "}
+                  </span>
+                  <Link href="/login">{t("auctions.loginLink")}</Link>
+                </div>
+              )}
 
             {/* Winner info */}
             {isEnded && currentAuction.currentWinner && (

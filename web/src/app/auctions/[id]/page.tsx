@@ -298,7 +298,10 @@ export default function AuctionDetailPage() {
 
   const allImages = [auction.mainImage, ...(auction.additionalImages || [])];
   const canBid =
-    auction.status === "ACTIVE" && user && user._id !== auction.seller._id;
+    (auction.status === "ACTIVE" || auction.status === "SCHEDULED") &&
+    user &&
+    user._id !== auction.seller._id;
+  const isPreBid = auction.status === "SCHEDULED";
 
   return (
     <div className="auction-detail-container">
@@ -391,24 +394,48 @@ export default function AuctionDetailPage() {
           </div>
 
           {/* Pricing */}
-          <div className="pricing-section">
-            <div className="price-row current">
-              <span className="label">{t("auctions.currentPrice")}:</span>
-              <span className="price">{formatPrice(auction.currentPrice)}</span>
-            </div>
-            <div className="price-row">
-              <span className="label">
-                {t("auctions.startingPrice") || "საწყისი ფასი"}:
+          <div className="pricing-grid">
+            <div className="price-card primary">
+              <span className="price-card-label">
+                {t("auctions.currentPrice") || "მიმდინარე ფასი"}
               </span>
-              <span className="starting-price">
-                {formatPrice(auction.startingPrice)}
+              <span className="price-card-value">
+                {formatPrice(auction.currentPrice)}
               </span>
             </div>
-            <div className="price-row">
-              <span className="label">{t("auctions.minimumBid")}:</span>
-              <span className="min-bid">
+            <div className="price-card accent">
+              <span className="price-card-label">
+                {t("auctions.minimumBid") || "მინიმალური ფსონი"}
+              </span>
+              <span className="price-card-value">
                 +{formatPrice(auction.minimumBidIncrement)}
               </span>
+            </div>
+          </div>
+
+          {/* Dates Grid */}
+          <div className="dates-grid">
+            <div className="date-card">
+              <div className="date-card-icon">📅</div>
+              <div className="date-card-content">
+                <span className="date-card-label">
+                  {t("auctions.startDate") || "დაწყება"}
+                </span>
+                <span className="date-card-value">
+                  {formatDate(auction.startDate)}
+                </span>
+              </div>
+            </div>
+            <div className="date-card">
+              <div className="date-card-icon">⏰</div>
+              <div className="date-card-content">
+                <span className="date-card-label">
+                  {t("auctions.endDate") || "დასრულება"}
+                </span>
+                <span className="date-card-value">
+                  {formatDate(auction.endDate)}
+                </span>
+              </div>
             </div>
           </div>
 
@@ -471,7 +498,7 @@ export default function AuctionDetailPage() {
                 </button>
               </div>
               <button
-                className="place-bid-btn"
+                className={`place-bid-btn ${isPreBid ? "pre-bid" : ""}`}
                 onClick={handlePlaceBid}
                 disabled={bidding}
               >
@@ -480,7 +507,9 @@ export default function AuctionDetailPage() {
                 ) : (
                   <>
                     <Gavel size={20} />
-                    {t("auctions.placeBid")}
+                    {isPreBid
+                      ? t("auctions.preBid") || "Pre-Bid"
+                      : t("auctions.placeBid")}
                   </>
                 )}
               </button>
@@ -488,52 +517,46 @@ export default function AuctionDetailPage() {
           )}
 
           {auction.status === "SCHEDULED" && (
-            <div className="scheduled-notice">
+            <div className="scheduled-notice pre-bid-info">
               <Clock size={20} />
               <span>
-                {t("auctions.scheduledNotice") ||
-                  "ეს აუქციონი ჯერ არ დაწყებულა. დაელოდეთ დაწყების დროს."}
+                {t("auctions.preBidNotice") ||
+                  "აუქციონი ჯერ არ დაწყებულა. შეგიძლიათ Pre-Bid განათავსოთ!"}
               </span>
             </div>
           )}
 
-          {!user && auction.status === "ACTIVE" && (
-            <div className="login-notice">
-              <Link href="/login" className="login-link">
-                {t("auctions.loginRequired")}
-              </Link>
-            </div>
-          )}
+          {!user &&
+            (auction.status === "ACTIVE" || auction.status === "SCHEDULED") && (
+              <div className="login-notice">
+                <Link href="/login" className="login-link">
+                  {auction.status === "SCHEDULED"
+                    ? t("auctions.loginToPreBid") || "შედით Pre-Bid-ისთვის"
+                    : t("auctions.loginRequired")}
+                </Link>
+              </div>
+            )}
 
           {/* Details */}
           <div className="artwork-details">
             <h3>{t("auctions.description")}</h3>
             <p>{auction.description}</p>
 
-            <div className="detail-grid">
-              <div className="detail-item">
-                <Palette size={18} />
-                <span className="label">
-                  {t("auctions.material") || "მასალა"}:
-                </span>
-                <span className="value">{auction.material}</span>
+            <div className="detail-tags">
+              <div className="detail-tag">
+                <Palette size={16} />
+                <span>{auction.material}</span>
               </div>
-              <div className="detail-item">
-                <Ruler size={18} />
-                <span className="label">{t("auctions.dimensions")}:</span>
-                <span className="value">{auction.dimensions}</span>
+              <div className="detail-tag">
+                <Ruler size={16} />
+                <span>{auction.dimensions}</span>
               </div>
-              <div className="detail-item">
-                <Package size={18} />
-                <span className="label">
-                  {t("auctions.deliveryDays") || "მიწოდების ვადა"}:
-                </span>
-                <span className="value">
+              <div className="detail-tag">
+                <Package size={16} />
+                <span>
                   {auction.deliveryDaysMin === auction.deliveryDaysMax
-                    ? `${auction.deliveryDaysMin} ${t("auctions.days")}`
-                    : `${auction.deliveryDaysMin}-${auction.deliveryDaysMax} ${t("auctions.days")}`}
-                  {auction.deliveryType === "ARTIST" &&
-                    ` (${t("auctions.artistDelivery") || "ხელოვანი"})`}
+                    ? `${auction.deliveryDaysMin} ${t("auctions.days") || "დღე"}`
+                    : `${auction.deliveryDaysMin}-${auction.deliveryDaysMax} ${t("auctions.days") || "დღე"}`}
                 </span>
               </div>
             </div>

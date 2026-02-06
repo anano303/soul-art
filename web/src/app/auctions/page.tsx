@@ -2,10 +2,12 @@
 
 import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
+import Link from "next/link";
 import { apiClient } from "@/lib/axios";
 import { useLanguage } from "@/hooks/LanguageContext";
 import { useTheme } from "@/hooks/ThemeContext";
-import { Moon, Sun, Gavel } from "lucide-react";
+import { useUser } from "@/modules/auth/hooks/use-user";
+import { Moon, Sun, Gavel, Plus } from "lucide-react";
 
 import "./auctions.css";
 import { AuctionCard, AuctionFilters } from "@/modules/auctions/components";
@@ -50,8 +52,9 @@ interface AuctionResponse {
 }
 
 function AuctionsContent() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const { theme, toggleTheme } = useTheme();
+  const { user } = useUser();
   const searchParams = useSearchParams();
   const [auctions, setAuctions] = useState<Auction[]>([]);
   const [loading, setLoading] = useState(true);
@@ -126,6 +129,8 @@ function AuctionsContent() {
     setPagination({ current: 1, pages: 1, total: 0 });
   };
 
+  const isSeller = user?.role?.toString().toUpperCase() === "SELLER";
+
   return (
     <div className="auctions-container">
       <div className="auctions-header">
@@ -137,13 +142,29 @@ function AuctionsContent() {
               Auctions
             </span>
           </h1>
-          <button
-            className="theme-toggle-btn"
-            onClick={toggleTheme}
-            title={theme === "light" ? "Dark Mode" : "Light Mode"}
-          >
-            {theme === "light" ? <Moon size={20} /> : <Sun size={20} />}
-          </button>
+          <div className="header-actions">
+            {isSeller && (
+              <Link
+                href="/profile/auctions/create"
+                className="create-auction-btn"
+                title={
+                  language === "en" ? "Create Auction" : "აუქციონის შექმნა"
+                }
+              >
+                <Plus size={18} />
+                <span>
+                  {language === "en" ? "Create Auction" : "აუქციონის შექმნა"}
+                </span>
+              </Link>
+            )}
+            <button
+              className="theme-toggle-btn"
+              onClick={toggleTheme}
+              title={theme === "light" ? "Dark Mode" : "Light Mode"}
+            >
+              {theme === "light" ? <Moon size={20} /> : <Sun size={20} />}
+            </button>
+          </div>
         </div>
         <p className="auctions-subtitle">{t("auctions.subtitle")}</p>
 

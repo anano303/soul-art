@@ -251,13 +251,21 @@ export class AuctionService {
       throw new NotFoundException('Auction not found');
     }
 
-    // Check if auction is active
-    if (auction.status !== AuctionStatus.ACTIVE) {
-      throw new BadRequestException('Auction is not active');
+    // Check if auction is active or scheduled (pre-bid)
+    if (
+      auction.status !== AuctionStatus.ACTIVE &&
+      auction.status !== AuctionStatus.SCHEDULED
+    ) {
+      throw new BadRequestException(
+        'Auction is not active or scheduled for pre-bidding',
+      );
     }
 
-    // Check if auction has ended
-    if (new Date() > auction.endDate) {
+    // Check if auction has ended (only for active auctions)
+    if (
+      auction.status === AuctionStatus.ACTIVE &&
+      new Date() > auction.endDate
+    ) {
       throw new BadRequestException('Auction has ended');
     }
 

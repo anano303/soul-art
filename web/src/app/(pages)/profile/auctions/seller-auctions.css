@@ -40,7 +40,9 @@
   font-weight: 600;
   font-size: 0.95rem;
   text-decoration: none;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .seller-auctions-actions .primary-link:hover {
@@ -74,7 +76,7 @@
 
 .auctions-list-header {
   display: grid;
-  grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
+  grid-template-columns: 2fr 1fr 1fr 0.5fr 1fr 0.75fr;
   background: #f7fafc;
   padding: 0.75rem 1rem;
   font-size: 0.85rem;
@@ -91,7 +93,7 @@
 
 .auction-row {
   display: grid;
-  grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
+  grid-template-columns: 2fr 1fr 1fr 0.5fr 1fr 0.75fr;
   padding: 1rem;
   gap: 0.75rem;
   border-top: 1px solid #edf2f7;
@@ -149,6 +151,55 @@
 .auction-row .value-strong {
   font-weight: 600;
   color: #1a202c;
+}
+
+.auction-actions {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.auction-actions .action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 6px;
+  background: #f7fafc;
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease;
+  font-size: 1rem;
+  text-decoration: none;
+}
+
+.auction-actions .action-btn:hover:not(.disabled) {
+  transform: scale(1.1);
+}
+
+.auction-actions .action-btn.edit-btn {
+  background: #ebf8ff;
+}
+
+.auction-actions .action-btn.edit-btn:hover:not(.disabled) {
+  background: #bee3f8;
+}
+
+.auction-actions .action-btn.edit-btn.disabled {
+  background: #e2e8f0;
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.auction-actions .action-btn.delete-btn {
+  background: #fff5f5;
+}
+
+.auction-actions .action-btn.delete-btn:hover {
+  background: #fed7d7;
 }
 
 .empty-auctions {

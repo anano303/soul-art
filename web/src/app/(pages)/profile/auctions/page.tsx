@@ -49,7 +49,7 @@ export default function SellerAuctionsPage() {
             page: 1,
             limit: 50,
           },
-        }
+        },
       );
 
       setAuctions(response.data.auctions || []);
@@ -59,10 +59,39 @@ export default function SellerAuctionsPage() {
       toast.error(
         error?.response?.data?.message ||
           t("sellerAuctions.errors.load") ||
-          "Failed to load auctions"
+          "Failed to load auctions",
       );
     } finally {
       setLoading(false);
+    }
+  };
+
+  const deleteAuction = async (auctionId: string) => {
+    if (
+      !confirm(
+        language === "en"
+          ? "Are you sure you want to delete this auction?"
+          : "დარწმუნებული ხართ, რომ გსურთ ამ აუქციონის წაშლა?",
+      )
+    )
+      return;
+
+    try {
+      await apiClient.delete(`/auctions/${auctionId}`);
+      toast.success(
+        language === "en"
+          ? "Auction deleted successfully"
+          : "აუქციონი წაიშალა წარმატებით",
+      );
+      fetchAuctions();
+    } catch (error: any) {
+      console.error("Failed to delete auction:", error);
+      toast.error(
+        error?.response?.data?.message ||
+          (language === "en"
+            ? "Failed to delete auction"
+            : "აუქციონის წაშლა ვერ მოხერხდა"),
+      );
     }
   };
 
@@ -130,6 +159,7 @@ export default function SellerAuctionsPage() {
             <span>{t("sellerAuctions.table.currentPrice")}</span>
             <span>{t("sellerAuctions.table.bids")}</span>
             <span>{t("sellerAuctions.table.endDate")}</span>
+            <span>{language === "en" ? "Actions" : "მოქმედებები"}</span>
           </div>
           <div className="auctions-list-body">
             {auctions.map((auction) => (
@@ -162,6 +192,46 @@ export default function SellerAuctionsPage() {
                   <div className="auction-meta">
                     {dateFormatter.format(new Date(auction.endDate))}
                   </div>
+                </div>
+                <div className="auction-actions">
+                  {/* რედაქტირება - დისაბლ იყოს თუ ფსონი აქვს */}
+                  {auction.totalBids > 0 ? (
+                    <button
+                      className="action-btn edit-btn disabled"
+                      disabled
+                      title={
+                        language === "en"
+                          ? "Cannot edit auction with bids"
+                          : "აუქციონის რედაქტირება შეუძლებელია ფსონების არსებობისას"
+                      }
+                    >
+                      ✏️
+                    </button>
+                  ) : (
+                    <Link
+                      href={`/profile/auctions/${auction._id}/edit`}
+                      className="action-btn edit-btn"
+                      title={
+                        language === "en"
+                          ? "Edit auction"
+                          : "აუქციონის რედაქტირება"
+                      }
+                    >
+                      ✏️
+                    </Link>
+                  )}
+                  {/* წაშლა - დამალული იყოს თუ ფსონი აქვს */}
+                  {auction.totalBids === 0 && (
+                    <button
+                      onClick={() => deleteAuction(auction._id)}
+                      className="action-btn delete-btn"
+                      title={
+                        language === "en" ? "Delete auction" : "აუქციონის წაშლა"
+                      }
+                    >
+                      🗑️
+                    </button>
+                  )}
                 </div>
               </div>
             ))}
