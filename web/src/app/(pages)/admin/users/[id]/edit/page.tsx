@@ -138,6 +138,7 @@ export default function EditUserPage() {
               <option value={Role.Seller}>გამყიდველი</option>
               <option value={Role.Blogger}>ბლოგერი</option>
               <option value={Role.SalesManager}>Sales Manager</option>
+              <option value={Role.AuctionAdmin}>აუქციონის ადმინი</option>
             </select>
           </div>
         </div>
