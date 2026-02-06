@@ -138,17 +138,12 @@ export function FacebookAuthButton({
 
     console.log("[FB Auth] Initializing with App ID:", appId);
 
-    // Check if SDK is already loaded
-    if (window.FB) {
-      console.log("[FB Auth] SDK already loaded, checking login status...");
-      setIsSDKLoaded(true);
-      checkLoginStatus();
-      return;
-    }
-
-    // Load the SDK asynchronously
-    window.fbAsyncInit = function () {
-      console.log("[FB Auth] fbAsyncInit called, initializing SDK...");
+    const initFB = () => {
+      if (!window.FB) {
+        console.log("[FB Auth] FB not available yet");
+        return;
+      }
+      console.log("[FB Auth] Initializing FB SDK...");
       window.FB.init({
         appId: appId,
         cookie: true,
@@ -160,6 +155,33 @@ export function FacebookAuthButton({
       checkLoginStatus();
     };
 
+    // Check if SDK is already loaded
+    if (window.FB) {
+      console.log("[FB Auth] SDK already loaded, initializing...");
+      initFB();
+      return;
+    }
+
+    // Check if script is already in the DOM
+    const existingScript = document.getElementById("facebook-jssdk");
+    if (existingScript) {
+      console.log("[FB Auth] Script already exists, waiting for FB...");
+      // Poll for FB to become available
+      const checkFB = setInterval(() => {
+        if (window.FB) {
+          clearInterval(checkFB);
+          initFB();
+        }
+      }, 100);
+      return () => clearInterval(checkFB);
+    }
+
+    // Set up the async init callback
+    window.fbAsyncInit = function () {
+      console.log("[FB Auth] fbAsyncInit called");
+      initFB();
+    };
+
     // Load SDK script
     console.log("[FB Auth] Loading SDK script...");
     const script = document.createElement("script");
@@ -167,18 +189,27 @@ export function FacebookAuthButton({
     script.src = "https://connect.facebook.net/en_US/sdk.js";
     script.async = true;
     script.defer = true;
-    script.onload = () => console.log("[FB Auth] SDK script loaded");
+    script.onload = () => {
+      console.log("[FB Auth] SDK script loaded");
+      // Also try to init after script loads in case fbAsyncInit wasn't called
+      setTimeout(() => {
+        if (window.FB && !isSDKLoaded) {
+          console.log("[FB Auth] FB available after script load, initializing...");
+          initFB();
+        }
+      }, 100);
+    };
     script.onerror = (e) => console.error("[FB Auth] SDK script failed to load:", e);
     document.body.appendChild(script);
 
     return () => {
       // Cleanup if component unmounts before SDK loads
-      const existingScript = document.getElementById("facebook-jssdk");
-      if (existingScript) {
-        existingScript.remove();
+      const scriptToRemove = document.getElementById("facebook-jssdk");
+      if (scriptToRemove) {
+        scriptToRemove.remove();
       }
     };
-  }, [appId, checkLoginStatus]);
+  }, [appId, checkLoginStatus, isSDKLoaded]);
 
   const handleLogin = useCallback(() => {
     console.log("[FB Auth] handleLogin called", { hasFB: !!window.FB, disabled, isLoading });
