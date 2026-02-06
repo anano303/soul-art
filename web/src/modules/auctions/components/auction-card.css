@@ -408,26 +408,28 @@
   white-space: nowrap;
 }
 
-/* Time details - Compact Style */
+/* Time details - Single Line */
 .time-details {
   display: flex;
-  gap: 8px;
+  gap: 6px;
   justify-content: center;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
 }
 
 .time-details .time-row {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 6px 10px;
+  gap: 4px;
+  padding: 5px 8px;
   background: rgba(99, 102, 241, 0.08);
   border: 1px solid rgba(99, 102, 241, 0.15);
   border-radius: 20px;
-  font-size: 0.7rem;
+  font-size: clamp(0.58rem, 1.5vw, 0.68rem);
   font-weight: 500;
   color: var(--text-secondary);
   transition: all 0.2s ease;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .time-details .time-row:hover {
@@ -438,8 +440,8 @@
 .time-details .time-row svg {
   color: #8b5cf6;
   flex-shrink: 0;
-  width: 12px;
-  height: 12px;
+  width: 10px;
+  height: 10px;
 }
 
 /* Description - Compact Style */

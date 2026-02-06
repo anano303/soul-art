@@ -490,16 +490,14 @@ export default function AuctionCard({
             {/* Time details */}
             <div className="time-details">
               <div className="time-row">
-                <Calendar size={12} />
+                <Calendar size={10} />
                 <span>
-                  {language === "ge" ? "დაწყება" : "Start"}:{" "}
                   {formatDate(currentAuction.startDate)}
                 </span>
               </div>
               <div className="time-row">
-                <Clock size={12} />
+                <Clock size={10} />
                 <span>
-                  {language === "ge" ? "დასრულება" : "End"}:{" "}
                   {formatDate(currentAuction.endDate)}
                 </span>
               </div>
