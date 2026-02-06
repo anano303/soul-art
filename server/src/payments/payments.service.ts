@@ -239,11 +239,12 @@ export class PaymentsService {
             console.log(
               `Found auction ${auction._id} for external_order_id: ${external_order_id}`,
             );
-            const auctionResult = await this.auctionService.handleBogPaymentCallback(
-              external_order_id,
-              statusKey,
-              order_id,
-            );
+            const auctionResult =
+              await this.auctionService.handleBogPaymentCallback(
+                external_order_id,
+                statusKey,
+                order_id,
+              );
             return auctionResult;
           }
         } catch (auctionError) {
@@ -453,7 +454,9 @@ export class PaymentsService {
       );
 
       if (error.response) {
-        this.logger.error(`BOG API Response: ${JSON.stringify(error.response.data)}`);
+        this.logger.error(
+          `BOG API Response: ${JSON.stringify(error.response.data)}`,
+        );
         this.logger.error(`BOG API Status: ${error.response.status}`);
       }
 

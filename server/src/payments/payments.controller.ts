@@ -1,4 +1,12 @@
-import { Controller, Post, Body, Get, Param, UseInterceptors, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  Get,
+  Param,
+  UseInterceptors,
+  UseGuards,
+} from '@nestjs/common';
 import { PaymentsService } from './payments.service';
 import { paymentRateLimit } from '@/middleware/security.middleware';
 import { createRateLimitInterceptor } from '@/interceptors/rate-limit.interceptor';
@@ -23,7 +31,7 @@ export class PaymentsController {
             data.product.productId,
             result.uniqueId,
           );
-          
+
           // Store BOG's order_id for status verification
           if (result.order_id) {
             await this.paymentsService['ordersService'].updateOrderPaymentInfo(
@@ -32,7 +40,7 @@ export class PaymentsController {
                 id: result.order_id,
                 status: 'pending',
                 update_time: new Date().toISOString(),
-              }
+              },
             );
           }
         } catch (error) {
@@ -56,8 +64,10 @@ export class PaymentsController {
   @Post('bog/verify/:orderId')
   async verifyBogPayment(@Param('orderId') orderId: string) {
     try {
-      console.log(`Manual payment verification requested for order: ${orderId}`);
-      
+      console.log(
+        `Manual payment verification requested for order: ${orderId}`,
+      );
+
       // Try to find order by _id first, then by externalOrderId
       let order;
       try {
@@ -67,74 +77,83 @@ export class PaymentsController {
         try {
           order = await this.paymentsService.getOrderByExternalId(orderId);
         } catch (e) {
-          return { 
-            success: false, 
-            message: 'Order not found' 
+          return {
+            success: false,
+            message: 'Order not found',
           };
         }
       }
-      
+
       if (!order) {
-        return { 
-          success: false, 
-          message: 'Order not found' 
+        return {
+          success: false,
+          message: 'Order not found',
         };
       }
 
-      console.log(`Found order: ${order._id}, externalOrderId: ${order.externalOrderId}, isPaid: ${order.isPaid}`);
+      console.log(
+        `Found order: ${order._id}, externalOrderId: ${order.externalOrderId}, isPaid: ${order.isPaid}`,
+      );
 
       // If already paid, return success
       if (order.isPaid) {
-        return { 
-          success: true, 
+        return {
+          success: true,
           message: 'Order already marked as paid',
-          isPaid: true
+          isPaid: true,
         };
       }
 
       // Use BOG's order_id from paymentResult to check payment status
       const bogOrderId = order.paymentResult?.id;
-      
+
       if (!bogOrderId) {
         console.log('No BOG order_id found in paymentResult');
-        return { 
-          success: false, 
+        return {
+          success: false,
           message: 'BOG order ID not available yet',
-          isPaid: false
+          isPaid: false,
         };
       }
 
       console.log('Checking payment status with BOG order_id:', bogOrderId);
-      
+
       try {
-        const paymentStatus = await this.paymentsService.getPaymentStatus(bogOrderId);
-        console.log('BOG payment status:', JSON.stringify(paymentStatus, null, 2));
-        
+        const paymentStatus =
+          await this.paymentsService.getPaymentStatus(bogOrderId);
+        console.log(
+          'BOG payment status:',
+          JSON.stringify(paymentStatus, null, 2),
+        );
+
         // BOG returns order_status.key = "completed"
         const statusKey = paymentStatus?.order_status?.key?.toLowerCase();
-        
+
         if (statusKey === 'completed') {
           console.log('Payment completed! Updating order...');
-          
+
           // Update the order
           const paymentResult = {
             id: bogOrderId,
             status: 'COMPLETED',
             update_time: new Date().toISOString(),
-            email_address: paymentStatus.buyer?.email || order.user?.email || 'unknown@unknown.com',
+            email_address:
+              paymentStatus.buyer?.email ||
+              order.user?.email ||
+              'unknown@unknown.com',
           };
-          
+
           await this.paymentsService['ordersService'].updateOrderByExternalId(
             order.externalOrderId,
-            paymentResult
+            paymentResult,
           );
-          
+
           console.log('Order updated successfully to isPaid=true');
-          
-          return { 
-            success: true, 
+
+          return {
+            success: true,
             message: 'Payment verified and order updated',
-            isPaid: true
+            isPaid: true,
           };
         } else {
           console.log('Payment not completed. Status:', statusKey);
@@ -143,17 +162,17 @@ export class PaymentsController {
         console.error('Error fetching payment status from BOG:', error.message);
       }
 
-      return { 
-        success: false, 
+      return {
+        success: false,
         message: 'Payment not completed yet',
-        isPaid: false
+        isPaid: false,
       };
     } catch (error) {
       console.error('Error verifying payment:', error);
-      return { 
-        success: false, 
+      return {
+        success: false,
         message: error.message,
-        isPaid: false
+        isPaid: false,
       };
     }
   }

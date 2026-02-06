@@ -1339,4 +1339,3 @@ export class AuctionService {
     };
   }
 }
-

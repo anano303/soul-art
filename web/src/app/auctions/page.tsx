@@ -155,7 +155,13 @@ function AuctionsContent() {
   };
 
   const isSeller = user?.role?.toString().toUpperCase() === "SELLER";
+  const isAdmin = user?.role?.toString().toLowerCase() === "admin";
+  const isAuctionAdmin = user?.role?.toString().toLowerCase() === "auction_admin";
   const [isSellerModalOpen, setIsSellerModalOpen] = useState(false);
+
+  // All authorized roles use the same unified create auction page
+  const canCreateAuction = isSeller || isAdmin || isAuctionAdmin;
+  const createAuctionLink = canCreateAuction ? "/auctions/create" : null;
 
   return (
     <>
@@ -170,9 +176,9 @@ function AuctionsContent() {
               </span>
             </h1>
             <div className="header-actions">
-              {isSeller ? (
+              {canCreateAuction && createAuctionLink ? (
                 <Link
-                  href="/profile/auctions/create"
+                  href={createAuctionLink}
                   className="create-auction-btn"
                   title={
                     language === "en" ? "Create Auction" : "აუქციონის შექმნა"
