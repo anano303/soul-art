@@ -66,12 +66,15 @@
   box-shadow: var(--card-shadow);
   overflow: hidden;
   transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  z-index: 1;
 }
 
 .auction-card:hover {
   transform: translateY(-4px);
   box-shadow: var(--card-shadow-hover);
   border-color: var(--gold);
+  z-index: 60;
 }
 
 .auction-card.ended {
