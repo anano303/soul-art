@@ -1,10 +1,11 @@
 "use client";
 
-import { FaCheckCircle, FaGoogle, FaFacebookF } from "react-icons/fa";
+import { FaCheckCircle, FaGoogle } from "react-icons/fa";
+import { FacebookAuthButton } from "@/components/auth/FacebookAuthButton";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { registerSchema } from "../validation";
-import { useRegister } from "../hooks/use-auth";
+import { useRegister, useFacebookAuth } from "../hooks/use-auth";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "@/hooks/use-toast";
@@ -26,6 +27,7 @@ export function RegisterForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { mutate: register, isPending } = useRegister();
+  const { mutate: facebookAuth, isPending: isFacebookPending } = useFacebookAuth();
   const [registerError, setRegisterError] = useState<string | null>(null);
   const [isSuccess, setIsSuccess] = useState(false);
   const [agreedToTerms, setAgreedToTerms] = useState(false);
@@ -148,8 +150,30 @@ export function RegisterForm() {
     window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/auth/google`;
   };
 
-  const handleFacebookAuth = () => {
-    window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/auth/facebook`;
+  const handleFacebookSuccess = (data: {
+    accessToken: string;
+    userId: string;
+    email?: string;
+    name: string;
+    picture?: string;
+  }) => {
+    facebookAuth(data, {
+      onSuccess: () => {
+        setIsSuccess(true);
+        toast({
+          title: t("auth.registrationSuccessful"),
+          description: t("auth.accountCreatedSuccessfully"),
+          variant: "default",
+        });
+        setTimeout(() => {
+          router.push("/");
+        }, 1000);
+      },
+      onError: (error) => {
+        errorHandler.showToast(error, t("auth.registrationFailed"));
+        setRegisterError(errorHandler.handle(error).message);
+      },
+    });
   };
 
   if (isSuccess) {
@@ -359,15 +383,13 @@ export function RegisterForm() {
               <span>e</span>
             </span>
           </button>
-          <button
-            type="button"
-            onClick={handleFacebookAuth}
-            className="social-btn facebook-btn"
-            disabled={isPending}
-          >
-            <FaFacebookF className="icon" />
-            <span>Facebook</span>
-          </button>
+          <FacebookAuthButton
+            onSuccess={handleFacebookSuccess}
+            onError={(error) => setRegisterError(error)}
+            disabled={isPending || isFacebookPending}
+            variant="register"
+            className="social-btn"
+          />
         </div>
 
         <div className="text-center">

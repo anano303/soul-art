@@ -5,7 +5,7 @@ import { createPortal } from "react-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { useBecomeSeller } from "@/modules/auth/hooks/use-auth";
+import { useBecomeSeller, useFacebookAuth } from "@/modules/auth/hooks/use-auth";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "@/hooks/use-toast";
 import { useLanguage } from "@/hooks/LanguageContext";
@@ -13,7 +13,8 @@ import Image from "next/image";
 import "./become-seller-modal.css";
 import { GEORGIAN_BANKS, detectBankFromIban } from "@/utils/georgian-banks";
 import { apiClient } from "@/lib/axios";
-import { FaGoogle, FaFacebookF } from "react-icons/fa";
+import { FaGoogle } from "react-icons/fa";
+import { FacebookAuthButton } from "@/components/auth/FacebookAuthButton";
 
 const SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const SLUG_VALIDATION_MESSAGE =
@@ -80,6 +81,7 @@ export function BecomeSellerModal({
   const { t, language } = useLanguage();
   const queryClient = useQueryClient();
   const { mutate: becomeSeller, isPending } = useBecomeSeller();
+  const { mutate: facebookAuth, isPending: isFacebookPending } = useFacebookAuth();
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -100,6 +102,33 @@ export function BecomeSellerModal({
     .replace(/\/$/, "");
   const slugDisplayPrefix = `${portfolioDisplayBase}/@`;
   const portfolioLinkBase = portfolioBaseUrl.replace(/\/$/, "");
+
+  const handleFacebookSuccess = (data: {
+    accessToken: string;
+    userId: string;
+    email?: string;
+    name: string;
+    picture?: string;
+  }) => {
+    facebookAuth(data, {
+      onSuccess: () => {
+        toast({
+          title: t("auth.registrationSuccessful"),
+          description: t("auth.sellerAccountCreatedSuccessfully"),
+          variant: "default",
+        });
+        queryClient.invalidateQueries({ queryKey: ["me"] });
+        onClose();
+      },
+      onError: (error) => {
+        toast({
+          title: t("auth.registrationFailed"),
+          description: error.message,
+          variant: "destructive",
+        });
+      },
+    });
+  };
 
   const slugStatusColors: Record<SlugStatus, string> = {
     idle: "#4b5563",
@@ -562,16 +591,19 @@ export function BecomeSellerModal({
                 <FaGoogle />
                 Google
               </button>
-              <button
-                type="button"
-                className="social-auth-button facebook"
-                onClick={() => {
-                  window.location.href = `/api/auth/facebook?redirect=${encodeURIComponent(window.location.pathname)}&sellerMode=true`;
+              <FacebookAuthButton
+                onSuccess={handleFacebookSuccess}
+                onError={(error) => {
+                  toast({
+                    title: t("auth.registrationFailed"),
+                    description: error,
+                    variant: "destructive",
+                  });
                 }}
-              >
-                <FaFacebookF />
-                Facebook
-              </button>
+                disabled={isPending || isFacebookPending}
+                variant="seller"
+                className="social-auth-button"
+              />
             </div>
             <div className="social-auth-divider">
               <span>{language === "en" ? "or fill in details" : "ან შეავსე ხელით"}</span>

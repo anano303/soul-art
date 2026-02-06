@@ -3,7 +3,7 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { sellerRegisterSchema } from "../validation/seller-register-schema";
-import { useSellerRegister } from "../hooks/use-auth";
+import { useSellerRegister, useFacebookAuth } from "../hooks/use-auth";
 import Link from "next/link";
 import "./register-form.css";
 import type * as z from "zod";
@@ -18,7 +18,8 @@ import { PrivacyPolicy } from "@/components/PrivacyPolicy";
 import { trackCompleteRegistration } from "@/components/MetaPixel";
 import { apiClient } from "@/lib/axios";
 import { GEORGIAN_BANKS, detectBankFromIban } from "@/utils/georgian-banks";
-import { FaGoogle, FaFacebookF } from "react-icons/fa";
+import { FaGoogle } from "react-icons/fa";
+import { FacebookAuthButton } from "@/components/auth/FacebookAuthButton";
 
 type SellerRegisterFormData = z.infer<typeof sellerRegisterSchema>;
 
@@ -31,6 +32,7 @@ export function SellerRegisterForm() {
   const { t, language } = useLanguage();
   const router = useRouter();
   const { mutate: register, isPending } = useSellerRegister();
+  const { mutate: facebookAuth, isPending: isFacebookPending } = useFacebookAuth();
   const [registrationError, setRegistrationError] = useState<string | null>(
     null
   );
@@ -487,8 +489,34 @@ export function SellerRegisterForm() {
     window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/auth/google?sellerMode=true`;
   };
 
-  const handleFacebookAuth = () => {
-    window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/auth/facebook?sellerMode=true`;
+  const handleFacebookSuccess = (data: {
+    accessToken: string;
+    userId: string;
+    email?: string;
+    name: string;
+    picture?: string;
+  }) => {
+    facebookAuth(data, {
+      onSuccess: () => {
+        setIsSuccess(true);
+        toast({
+          title: t("auth.registrationSuccessful"),
+          description: t("auth.sellerAccountCreatedSuccessfully"),
+          variant: "default",
+        });
+        setTimeout(() => {
+          router.push("/login");
+        }, 2000);
+      },
+      onError: (error) => {
+        toast({
+          title: t("auth.registrationFailed"),
+          description: error.message,
+          variant: "destructive",
+        });
+        setRegistrationError(error.message);
+      },
+    });
   };
 
   if (isSuccess) {
@@ -529,14 +557,13 @@ export function SellerRegisterForm() {
                 <span>e</span>
               </span>
             </button>
-            <button
-              type="button"
-              onClick={handleFacebookAuth}
-              className="social-btn facebook-btn"
-            >
-              <FaFacebookF className="icon" />
-              <span>Facebook</span>
-            </button>
+            <FacebookAuthButton
+              onSuccess={handleFacebookSuccess}
+              onError={(error) => setRegistrationError(error)}
+              disabled={isPending || isFacebookPending}
+              variant="seller"
+              className="social-btn"
+            />
           </div>
           <div className="divider" style={{ margin: "1rem 0" }}>
             <span>{language === "en" ? "or fill in details" : "ან შეავსე ხელით"}</span>

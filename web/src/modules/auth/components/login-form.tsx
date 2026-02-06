@@ -3,8 +3,9 @@
 import { useForm, SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { loginSchema } from "../validation";
-import { useLogin } from "../hooks/use-auth";
-import { FaGoogle, FaEye, FaEyeSlash, FaFacebookF } from "react-icons/fa";
+import { useLogin, useFacebookAuth } from "../hooks/use-auth";
+import { FaGoogle, FaEye, FaEyeSlash } from "react-icons/fa";
+import { FacebookAuthButton } from "@/components/auth/FacebookAuthButton";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState, useEffect } from "react";
@@ -30,6 +31,7 @@ export function LoginForm({
   const { t } = useLanguage();
   const errorHandler = useErrorHandler();
   const { mutate: login, isLoading, error: hookError } = useLogin();
+  const { mutate: facebookAuth, isPending: isFacebookPending } = useFacebookAuth();
   const [loginError, setLoginError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
@@ -166,8 +168,31 @@ export function LoginForm({
     window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/auth/google`;
   };
 
-  const handleFacebookAuth = () => {
-    window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/auth/facebook`;
+  const handleFacebookSuccess = (data: {
+    accessToken: string;
+    userId: string;
+    email?: string;
+    name: string;
+    picture?: string;
+  }) => {
+    facebookAuth(data, {
+      onSuccess: () => {
+        toast({
+          title: "წარმატებული ავტორიზაცია",
+          description: "კეთილი იყოს თქვენი დაბრუნება!",
+          variant: "default",
+        });
+        if (onLoginSuccess) {
+          onLoginSuccess();
+        } else {
+          router.push(returnUrl);
+        }
+      },
+      onError: (error) => {
+        errorHandler.showToast(error, t("auth.loginFailed"));
+        setLoginError(errorHandler.handle(error).message);
+      },
+    });
   };
 
   return (
@@ -260,14 +285,13 @@ export function LoginForm({
               <span>e</span>
             </span>
           </button>
-          <button
-            type="button"
-            onClick={handleFacebookAuth}
-            className="social-button facebook-btn"
-          >
-            <FaFacebookF className="icon" />
-            <span>Facebook</span>
-          </button>
+          <FacebookAuthButton
+            onSuccess={handleFacebookSuccess}
+            onError={(error) => setLoginError(error)}
+            disabled={isLoading || isFacebookPending}
+            variant="login"
+            className="social-button"
+          />
         </div>
       </form>
       <div className="forgot-password signup-text">
