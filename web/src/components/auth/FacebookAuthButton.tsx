@@ -85,6 +85,9 @@ export function FacebookAuthButton({
 
   const appId = process.env.NEXT_PUBLIC_FACEBOOK_APP_ID;
 
+  // Log on every render to confirm component is mounting
+  console.log("[FB Auth] Component rendered, appId:", appId ? "set" : "NOT SET");
+
   // Fetch user info from Facebook
   const fetchUserInfo = useCallback(() => {
     if (!window.FB) {
