@@ -131,7 +131,7 @@ export default function AuctionFilters({
               {ARTWORK_TYPES.map((type) => (
                 <button
                   key={type.value}
-                  className={`dropdown-item-auction-auction ${filters.artworkType === type.value ? "active" : ""}`}
+                  className={`dropdown-item-auction ${filters.artworkType === type.value ? "active" : ""}`}
                   onClick={() => handleFilterChange("artworkType", type.value)}
                 >
                   {type.label}
