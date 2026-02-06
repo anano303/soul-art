@@ -81,6 +81,11 @@ export class CreateAuctionDto {
   @MaxLength(200)
   @IsOptional()
   deliveryInfo?: string;
+
+  // Optional sellerId - used by AuctionAdmin to create auction for a seller
+  @IsOptional()
+  @IsMongoId()
+  sellerId?: string;
 }
 
 export class PlaceBidDto {

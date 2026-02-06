@@ -5,6 +5,7 @@ import Link from "next/link";
 import { apiClient } from "@/lib/axios";
 import { useLanguage } from "@/hooks/LanguageContext";
 import { toast } from "react-hot-toast";
+import { Settings, Save, Percent } from "lucide-react";
 import "./admin-auctions.css";
 
 interface Auction {
@@ -30,6 +31,22 @@ interface Auction {
   createdAt: string;
 }
 
+interface CommissionSettings {
+  platformCommissionPercent: number;
+  auctionAdminCommissionPercent: number;
+  auctionAdminUserId?: string;
+}
+
+interface User {
+  _id: string;
+  email: string;
+  firstName?: string;
+  lastName?: string;
+  ownerFirstName?: string;
+  ownerLastName?: string;
+  role: string;
+}
+
 export default function AdminAuctions() {
   const { t } = useLanguage();
   const [auctions, setAuctions] = useState<Auction[]>([]);
@@ -37,6 +54,17 @@ export default function AdminAuctions() {
   const [filter, setFilter] = useState<
     "ALL" | "ACTIVE" | "ENDED" | "PENDING" | "CANCELLED" | "SCHEDULED"
   >("ALL");
+
+  // Commission settings state
+  const [showSettings, setShowSettings] = useState(false);
+  const [settings, setSettings] = useState<CommissionSettings | null>(null);
+  const [auctionAdmins, setAuctionAdmins] = useState<User[]>([]);
+  const [settingsLoading, setSettingsLoading] = useState(false);
+  const [settingsForm, setSettingsForm] = useState({
+    platformCommissionPercent: 10,
+    auctionAdminCommissionPercent: 30,
+    auctionAdminUserId: "",
+  });
 
   const fetchAuctions = async () => {
     try {
@@ -57,9 +85,56 @@ export default function AdminAuctions() {
     }
   };
 
+  const fetchSettings = async () => {
+    try {
+      setSettingsLoading(true);
+      const response = await apiClient.get("/auctions/admin/settings");
+      setSettings(response.data);
+      setSettingsForm({
+        platformCommissionPercent: response.data.platformCommissionPercent || 10,
+        auctionAdminCommissionPercent: response.data.auctionAdminCommissionPercent || 30,
+        auctionAdminUserId: response.data.auctionAdminUserId || "",
+      });
+    } catch (error) {
+      console.error("Failed to fetch settings:", error);
+    } finally {
+      setSettingsLoading(false);
+    }
+  };
+
+  const fetchAuctionAdmins = async () => {
+    try {
+      // Fetch users with auction_admin role
+      const response = await apiClient.get("/admin/users?role=auction_admin&limit=100");
+      setAuctionAdmins(response.data.users || []);
+    } catch (error) {
+      console.error("Failed to fetch auction admins:", error);
+    }
+  };
+
+  const saveSettings = async () => {
+    try {
+      setSettingsLoading(true);
+      await apiClient.patch("/auctions/admin/settings", settingsForm);
+      toast.success("კომისიის პარამეტრები შენახულია");
+      setShowSettings(false);
+      fetchSettings();
+    } catch (error) {
+      console.error("Failed to save settings:", error);
+      toast.error("პარამეტრების შენახვა ვერ მოხერხდა");
+    } finally {
+      setSettingsLoading(false);
+    }
+  };
+
   useEffect(() => {
     fetchAuctions();
   }, [filter]);
+
+  useEffect(() => {
+    fetchSettings();
+    fetchAuctionAdmins();
+  }, []);
 
   const approveAuction = async (auctionId: string) => {
     try {
@@ -132,13 +207,138 @@ export default function AdminAuctions() {
             {t("admin.auctionsSubtitle")}
           </p>
         </div>
-        <Link
-          href="/admin/auctions/create"
-          className="admin-auctions-create-btn"
-        >
-          {t("admin.auctionsCreate.button")}
-        </Link>
+        <div className="header-actions">
+          <button
+            className="admin-auctions-settings-btn"
+            onClick={() => setShowSettings(!showSettings)}
+          >
+            <Settings size={18} />
+            კომისია
+          </button>
+          <Link
+            href="/admin/auctions/create"
+            className="admin-auctions-create-btn"
+          >
+            {t("admin.auctionsCreate.button")}
+          </Link>
+        </div>
       </div>
+
+      {/* Commission Settings Panel */}
+      {showSettings && (
+        <div className="commission-settings-panel">
+          <h3>
+            <Percent size={20} />
+            აუქციონის კომისიის პარამეტრები
+          </h3>
+          <div className="settings-grid">
+            <div className="settings-field">
+              <label>აუქციონ ადმინის წილი (%)</label>
+              <input
+                type="number"
+                min="0"
+                max="100"
+                value={settingsForm.auctionAdminCommissionPercent}
+                onChange={(e) =>
+                  setSettingsForm({
+                    ...settingsForm,
+                    auctionAdminCommissionPercent: Number(e.target.value),
+                  })
+                }
+              />
+              <span className="field-hint">
+                გაყიდვის ფასიდან ამ პროცენტს მიიღებს აუქციონ ადმინი
+              </span>
+            </div>
+
+            <div className="settings-field">
+              <label>პლატფორმის წილი (%)</label>
+              <input
+                type="number"
+                min="0"
+                max="100"
+                value={settingsForm.platformCommissionPercent}
+                onChange={(e) =>
+                  setSettingsForm({
+                    ...settingsForm,
+                    platformCommissionPercent: Number(e.target.value),
+                  })
+                }
+              />
+              <span className="field-hint">
+                გაყიდვის ფასიდან ამ პროცენტს მიიღებს საიტი
+              </span>
+            </div>
+
+            <div className="settings-field calculated">
+              <label>მხატვრის (სელერის) წილი</label>
+              <div className="calculated-value">
+                {100 - settingsForm.auctionAdminCommissionPercent - settingsForm.platformCommissionPercent}%
+              </div>
+              <span className="field-hint">
+                დანარჩენს მიიღებს მხატვარი
+              </span>
+            </div>
+
+            <div className="settings-field">
+              <label>აუქციონ ადმინი</label>
+              <select
+                value={settingsForm.auctionAdminUserId}
+                onChange={(e) =>
+                  setSettingsForm({
+                    ...settingsForm,
+                    auctionAdminUserId: e.target.value,
+                  })
+                }
+              >
+                <option value="">-- აირჩიეთ --</option>
+                {auctionAdmins.map((user) => (
+                  <option key={user._id} value={user._id}>
+                    {user.ownerFirstName || user.firstName}{" "}
+                    {user.ownerLastName || user.lastName} ({user.email})
+                  </option>
+                ))}
+              </select>
+              <span className="field-hint">
+                მომხმარებელს უნდა ჰქონდეს auction_admin როლი
+              </span>
+            </div>
+          </div>
+
+          <div className="settings-info">
+            <p>
+              <strong>მაგალითი:</strong> თუ აუქციონ ადმინის წილი არის{" "}
+              {settingsForm.auctionAdminCommissionPercent}% და პლატფორმის წილი
+              არის {settingsForm.platformCommissionPercent}%, მაშინ 1000₾
+              გაყიდვის შემთხვევაში:
+            </p>
+            <ul>
+              <li>
+                აუქციონ ადმინის შემოსავალი:{" "}
+                {(1000 * settingsForm.auctionAdminCommissionPercent) / 100}₾
+              </li>
+              <li>
+                პლატფორმის შემოსავალი:{" "}
+                {(1000 * settingsForm.platformCommissionPercent) / 100}₾
+              </li>
+              <li>
+                მხატვრის (სელერის) შემოსავალი:{" "}
+                {1000 - (1000 * settingsForm.auctionAdminCommissionPercent) / 100 - (1000 * settingsForm.platformCommissionPercent) / 100}₾
+                ({100 - settingsForm.auctionAdminCommissionPercent - settingsForm.platformCommissionPercent}%)
+              </li>
+            </ul>
+          </div>
+
+          <button
+            className="save-settings-btn"
+            onClick={saveSettings}
+            disabled={settingsLoading}
+          >
+            <Save size={18} />
+            {settingsLoading ? "იტვირთება..." : "შენახვა"}
+          </button>
+        </div>
+      )}
 
       <div className="admin-auctions-filters">
         <div className="filter-buttons">

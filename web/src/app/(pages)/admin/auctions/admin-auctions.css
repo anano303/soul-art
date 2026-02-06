@@ -387,3 +387,160 @@
     max-width: 120px;
   }
 }
+
+/* Header Actions */
+.header-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.admin-auctions-settings-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0.75rem 1.25rem;
+  background: #f7fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  color: #4a5568;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.admin-auctions-settings-btn:hover {
+  background: #edf2f7;
+  border-color: #cbd5e0;
+}
+
+/* Commission Settings Panel */
+.commission-settings-panel {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.commission-settings-panel h3 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #2d3748;
+  margin: 0 0 1.25rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.settings-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.settings-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.settings-field label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #4a5568;
+}
+
+.settings-field input,
+.settings-field select {
+  padding: 0.75rem 1rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 1rem;
+  background: #f7fafc;
+  transition: all 0.2s ease;
+}
+
+.settings-field input:focus,
+.settings-field select:focus {
+  outline: none;
+  border-color: #3182ce;
+  background: white;
+  box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.15);
+}
+
+.settings-field input[type="number"] {
+  width: 100px;
+}
+
+.settings-field.calculated {
+  background: linear-gradient(135deg, #e6fffa 0%, #b2f5ea 100%);
+  padding: 1rem;
+  border-radius: 8px;
+  border: 1px solid #38b2ac;
+}
+
+.calculated-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #234e52;
+}
+
+.field-hint {
+  font-size: 0.75rem;
+  color: #718096;
+}
+
+.settings-info {
+  background: #ebf8ff;
+  border-left: 4px solid #3182ce;
+  padding: 1rem 1.25rem;
+  border-radius: 0 8px 8px 0;
+  margin-bottom: 1.5rem;
+}
+
+.settings-info p {
+  margin: 0 0 0.75rem;
+  color: #2c5282;
+  font-size: 0.9rem;
+}
+
+.settings-info ul {
+  margin: 0;
+  padding-left: 1.25rem;
+  color: #2c5282;
+  font-size: 0.875rem;
+}
+
+.settings-info li {
+  margin-bottom: 4px;
+}
+
+.save-settings-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0.75rem 1.5rem;
+  background: linear-gradient(135deg, #2b6cb0, #3182ce);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.save-settings-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(49, 130, 206, 0.35);
+}
+
+.save-settings-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

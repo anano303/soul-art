@@ -25,7 +25,7 @@ export function MobileBottomNav() {
     "/",
     "/shop",
     "/explore",
-    "/auction",
+    "/auctions",
     "/sellers-register",
     ...(isSeller && user?.artistSlug ? [`/@${user.artistSlug}`] : []),
   ];
@@ -132,10 +132,10 @@ export function MobileBottomNav() {
 
   // Add auction after seller page
   tabs.push({
-    href: "/auction",
+    href: "/auctions",
     icon: Gavel,
     label: language === "en" ? "Auction" : "აუქციონი",
-    active: pathname.startsWith("/auction"),
+    active: pathname.startsWith("/auctions"),
   });
 
   return (

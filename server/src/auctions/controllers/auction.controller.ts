@@ -63,23 +63,28 @@ export class AuctionController {
     return this.auctionService.getAuctionById(id);
   }
 
-  // Seller: Create new auction
+  // Seller or AuctionAdmin: Create new auction
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.Seller)
+  @Roles(Role.Seller, Role.AuctionAdmin)
   @UseInterceptors(createRateLimitInterceptor(auctionRateLimit))
   @Post()
   async createAuction(
     @CurrentUser() user: UserDocument,
     @Body() createAuctionDto: CreateAuctionDto,
   ) {
+    // AuctionAdmin can create auction for any seller (uses sellerId from DTO)
+    // Seller creates auction for themselves
+    const sellerId = user.role === Role.AuctionAdmin && createAuctionDto.sellerId
+      ? createAuctionDto.sellerId
+      : user._id.toString();
     return this.auctionService.createAuction(
-      user._id.toString(),
+      sellerId,
       createAuctionDto,
     );
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.Seller, Role.Admin)
+  @Roles(Role.Seller, Role.Admin, Role.AuctionAdmin)
   @Post('media/upload')
   @UseInterceptors(FileInterceptor('file'))
   async uploadAuctionImage(@UploadedFile() file: Express.Multer.File) {
@@ -113,15 +118,31 @@ export class AuctionController {
     );
   }
 
+  // Seller: Get auction earnings summary
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.Seller, Role.Admin)
+  @Roles(Role.Seller)
+  @Get('seller/earnings')
+  async getSellerAuctionEarnings(
+    @CurrentUser() user: UserDocument,
+    @Query('page') page: number = 1,
+    @Query('limit') limit: number = 10,
+  ) {
+    return this.auctionService.getSellerAuctionEarnings(
+      user._id.toString(),
+      page,
+      limit,
+    );
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.Seller, Role.Admin, Role.AuctionAdmin)
   @Patch(':id/reschedule')
   async rescheduleAuction(
     @Param('id') id: string,
     @CurrentUser() user: UserDocument,
     @Body() payload: RescheduleAuctionDto,
   ) {
-    const isAdmin = user.role === Role.Admin;
+    const isAdmin = user.role === Role.Admin || user.role === Role.AuctionAdmin;
     return this.auctionService.rescheduleAuction(
       id,
       user._id.toString(),
@@ -192,9 +213,9 @@ export class AuctionController {
     return this.auctionService.getAuctionStats();
   }
 
-  // Admin: Create auction for seller
+  // Admin or AuctionAdmin: Create auction for seller
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.Admin)
+  @Roles(Role.Admin, Role.AuctionAdmin)
   @Post('admin')
   async createAuctionForSeller(@Body() adminDto: AdminCreateAuctionDto) {
     const { sellerId, ...auctionData } = adminDto;

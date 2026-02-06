@@ -32,7 +32,7 @@ interface AuctionFormInitialData {
 }
 
 interface CreateAuctionFormProps {
-  mode: "seller" | "admin";
+  mode: "seller" | "admin" | "auction_admin";
   variant?: "create" | "reschedule";
   auctionId?: string;
   initialData?: AuctionFormInitialData;
@@ -219,7 +219,7 @@ export function CreateAuctionForm({
   const [isUploadingAdditional, setIsUploadingAdditional] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
 
-  const isAdmin = mode === "admin";
+  const isAdmin = mode === "admin" || mode === "auction_admin";
   const isSeller = mode === "seller";
   const isReschedule = variant === "reschedule";
   const canChangeSeller = isAdmin && variant === "create" && !lockedSellerId;
@@ -247,8 +247,8 @@ export function CreateAuctionForm({
   }, [user]);
 
   useEffect(() => {
-    // Only load sellers list for actual admin users. Sellers and non-admins don't need the list.
-    if (!isAdmin || !user || user.role !== "admin") {
+    // Load sellers list for admin or auction_admin users
+    if (!isAdmin || !user || (user.role !== "admin" && user.role !== "auction_admin")) {
       return;
     }
 
@@ -698,8 +698,8 @@ export function CreateAuctionForm({
           `/auctions/${auctionId}/reschedule`,
           payload,
         );
-      } else if (user?.role === "admin") {
-        // Admin creating auction for a seller
+      } else if (user?.role === "admin" || user?.role === "auction_admin") {
+        // Admin or AuctionAdmin creating auction for a seller
         response = await apiClient.post("/auctions/admin", {
           ...payload,
           sellerId: selectedSellerId || sellerIdFromProps,
@@ -840,7 +840,7 @@ export function CreateAuctionForm({
       <div className="timezone-note">{timezoneHint}</div>
 
       <div className="form-grid">
-        {isAdmin && user && user.role === "admin" && (
+        {isAdmin && user && (user.role === "admin" || user.role === "auction_admin") && (
           <div className="form-section">
             <div className="section-title">
               {t("auctionForm.sections.seller")}

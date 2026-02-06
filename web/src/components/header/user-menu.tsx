@@ -71,6 +71,11 @@ export default function UserMenu({
     );
   };
 
+  const isAuctionAdminRole = (role?: string) => {
+    if (!role) return false;
+    return role.toLowerCase() === Role.AuctionAdmin;
+  };
+
   // Use external state if provided, otherwise internal
   const isOpen = isOpenExternal !== undefined ? isOpenExternal : isOpenInternal;
   const setIsOpen = (value: boolean) => {
@@ -382,7 +387,8 @@ export default function UserMenu({
             {(user.role?.toLowerCase() === Role.Admin ||
               isSellerRole(user.role) ||
               user.role?.toLowerCase() === Role.Blogger ||
-              isSalesManagerRole(user.role)) && (
+              isSalesManagerRole(user.role) ||
+              isAuctionAdminRole(user.role)) && (
               <>
                 {/* <hr /> */}
                 <div className="dropdown-label">
@@ -408,6 +414,16 @@ export default function UserMenu({
                   >
                     <Gavel size={18} />
                     <span>{t("navigation.auctions")}</span>
+                  </Link>
+                )}
+                {isAuctionAdminRole(user.role) && (
+                  <Link
+                    href="/auction-admin"
+                    className="dropdown-item"
+                    onClick={handleLinkClick}
+                  >
+                    <Gavel size={18} />
+                    <span>აუქციონ ადმინი</span>
                   </Link>
                 )}
                 {(user.role?.toLowerCase() === Role.Admin ||

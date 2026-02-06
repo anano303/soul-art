@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import Link from "next/link";
 import "./footer.css";
 import { useLanguage } from "@/hooks/LanguageContext";
 import { TermsAndConditions } from "@/components/TermsAndConditions";
@@ -23,47 +24,46 @@ export default function Footer() {
           <p className="footer-description">{t("footer.description")}</p>
         </div>
         <div className="footer-section">
-          <h4 className="footer-subtitle">{t("footer.quickLinks")}</h4>
           <ul className="footer-links">
             <li>
-              <a href="/about" className="footer-link">
+              <Link href="/about" className="footer-link">
                 {t("navigation.about")}
-              </a>
+              </Link>
             </li>
             <li>
-              <a href="/contact" className="footer-link">
+              <Link href="/contact" className="footer-link">
                 {t("footer.contact")}
-              </a>
+              </Link>
             </li>
             <li>
-              <a href="/shop" className="footer-link">
+              <Link href="/shop" className="footer-link">
                 {t("navigation.shop")}
-              </a>
+              </Link>
             </li>
             <li>
-              <a href="/forum" className="footer-link">
+              <Link href="/forum" className="footer-link">
                 {t("navigation.forum")}
-              </a>
+              </Link>
             </li>
             <li>
-              <a href="/blog" className="footer-link">
+              <Link href="/blog" className="footer-link">
                 {t("navigation.blog")}
-              </a>
+              </Link>
             </li>
             <li>
-              <a href="/auction" className="footer-link">
+              <Link href="/auctions" className="footer-link">
                 {t("navigation.auction")}
-              </a>
+              </Link>
             </li>
             <li>
-              <a href="/sales-manager-register" className="footer-link">
+              <Link href="/sales-manager-register" className="footer-link">
                 {t("footer.referralInfo")}
-              </a>
+              </Link>
             </li>
             <li>
-              <a href="/careers" className="footer-link">
+              <Link href="/careers" className="footer-link">
                 {t("footer.careers")}
-              </a>
+              </Link>
             </li>
             <li>
               <button

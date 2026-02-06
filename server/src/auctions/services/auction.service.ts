@@ -4,6 +4,8 @@ import {
   BadRequestException,
   NotFoundException,
   ForbiddenException,
+  Inject,
+  forwardRef,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
@@ -26,6 +28,7 @@ import { Cron, CronExpression } from '@nestjs/schedule';
 import { BalanceService } from '../../users/services/balance.service';
 import { EmailService } from '../../email/services/email.services';
 import { AwsS3Service } from '../../aws-s3/aws-s3.service';
+import { AuctionAdminService } from './auction-admin.service';
 import { Role } from '../../types/role.enum';
 import { randomUUID } from 'crypto';
 import { extname } from 'path';
@@ -41,6 +44,8 @@ export class AuctionService {
     private balanceService: BalanceService,
     private emailService: EmailService,
     private readonly awsS3Service: AwsS3Service,
+    @Inject(forwardRef(() => AuctionAdminService))
+    private auctionAdminService: AuctionAdminService,
   ) {}
 
   private combineToDateTime(date: string, time: string): Date {
@@ -75,9 +80,9 @@ export class AuctionService {
   ): Promise<AuctionDocument> {
     // Validate seller exists and has seller role
     const seller = await this.userModel.findById(sellerId);
-    if (!seller || seller.role !== Role.Seller) {
+    if (!seller || (seller.role !== Role.Seller && seller.role !== Role.SellerAndSalesManager)) {
       throw new BadRequestException(
-        'Only verified sellers can create auctions',
+        'Only verified sellers can have auctions created for them',
       );
     }
 
@@ -314,6 +319,74 @@ export class AuctionService {
 
     return {
       auctions,
+      pagination: {
+        current: page,
+        pages: Math.ceil(total / limit),
+        total,
+      },
+    };
+  }
+
+  // Get seller's auction earnings (paid auctions)
+  async getSellerAuctionEarnings(
+    sellerId: string,
+    page: number = 1,
+    limit: number = 10,
+  ) {
+    const skip = (page - 1) * limit;
+
+    // Get paid auctions for this seller
+    const [paidAuctions, total] = await Promise.all([
+      this.auctionModel
+        .find({
+          seller: sellerId,
+          status: 'ENDED',
+          isPaid: true,
+        })
+        .populate('currentWinner', 'name ownerFirstName ownerLastName email')
+        .select('title mainImage currentPrice sellerEarnings commissionAmount deliveryZone deliveryFee totalPayment paymentDate endedAt')
+        .sort({ paymentDate: -1 })
+        .skip(skip)
+        .limit(limit)
+        .lean(),
+      this.auctionModel.countDocuments({
+        seller: sellerId,
+        status: 'ENDED',
+        isPaid: true,
+      }),
+    ]);
+
+    // Calculate totals
+    const allPaidAuctions = await this.auctionModel
+      .find({
+        seller: sellerId,
+        status: 'ENDED',
+        isPaid: true,
+      })
+      .select('sellerEarnings commissionAmount currentPrice')
+      .lean();
+
+    const totalEarnings = allPaidAuctions.reduce(
+      (sum, a) => sum + (a.sellerEarnings || 0),
+      0,
+    );
+    const totalSales = allPaidAuctions.reduce(
+      (sum, a) => sum + (a.currentPrice || 0),
+      0,
+    );
+    const totalCommission = allPaidAuctions.reduce(
+      (sum, a) => sum + (a.commissionAmount || 0),
+      0,
+    );
+
+    return {
+      auctions: paidAuctions,
+      summary: {
+        totalAuctionsSold: total,
+        totalSales,
+        totalCommission,
+        totalEarnings,
+      },
       pagination: {
         current: page,
         pages: Math.ceil(total / limit),
@@ -717,10 +790,15 @@ export class AuctionService {
     auction.currentWinner = nextBid.bidder;
     auction.currentPrice = nextBid.amount;
 
-    // Recalculate commission and earnings
-    const commissionAmount = auction.currentPrice * 0.1;
+    // Recalculate commission and earnings with new system
+    const settings = await this.auctionAdminService.getSettings();
+    const totalCommissionPercent = 
+      settings.auctionAdminCommissionPercent + settings.platformCommissionPercent;
+    const sellerPercent = 100 - totalCommissionPercent;
+    
+    const commissionAmount = (auction.currentPrice * totalCommissionPercent) / 100;
     auction.commissionAmount = commissionAmount;
-    auction.sellerEarnings = auction.currentPrice - commissionAmount;
+    auction.sellerEarnings = (auction.currentPrice * sellerPercent) / 100;
 
     // Set new payment deadline
     auction.paymentDeadline = this.calculatePaymentDeadline();
@@ -763,10 +841,21 @@ export class AuctionService {
       const paymentDeadline = this.calculatePaymentDeadline();
       auction.paymentDeadline = paymentDeadline;
 
-      // Calculate commission and seller earnings
-      const commissionAmount = auction.currentPrice * 0.1; // 10%
+      // Get commission settings
+      const settings = await this.auctionAdminService.getSettings();
+      
+      // NEW COMMISSION STRUCTURE:
+      // Auction Admin: auctionAdminCommissionPercent% (default 30%)
+      // Platform: platformCommissionPercent% (default 10%)
+      // Seller: remaining % (default 60%)
+      const totalCommissionPercent = 
+        settings.auctionAdminCommissionPercent + settings.platformCommissionPercent;
+      const sellerPercent = 100 - totalCommissionPercent;
+      
+      // Calculate amounts
+      const commissionAmount = (auction.currentPrice * totalCommissionPercent) / 100;
       auction.commissionAmount = commissionAmount;
-      auction.sellerEarnings = auction.currentPrice - commissionAmount;
+      auction.sellerEarnings = (auction.currentPrice * sellerPercent) / 100;
 
       await auction.save();
 
@@ -774,7 +863,7 @@ export class AuctionService {
       await this.sendAuctionEndNotifications(auction);
 
       this.logger.log(
-        `Auction ended: ${auction._id}, Winner: ${auction.currentWinner}, Final price: ${auction.currentPrice} GEL`,
+        `Auction ended: ${auction._id}, Winner: ${auction.currentWinner}, Final price: ${auction.currentPrice} GEL, Seller earnings: ${auction.sellerEarnings} GEL`,
       );
     } else {
       await auction.save();
@@ -964,6 +1053,36 @@ export class AuctionService {
         auction._id.toString(),
         auction.title,
       );
+    }
+
+    // Record auction admin earnings (from platform commission, not delivery)
+    try {
+      const seller = await this.userModel.findById(auction.seller).lean();
+      const winner = await this.userModel.findById(auction.currentWinner).lean();
+
+      const sellerName = seller
+        ? `${seller.ownerFirstName || ''} ${seller.ownerLastName || ''}`.trim() ||
+          seller.storeName ||
+          'Unknown'
+        : 'Unknown';
+
+      const buyerName = winner
+        ? `${winner.ownerFirstName || ''} ${winner.ownerLastName || ''}`.trim() ||
+          winner.name ||
+          'Unknown'
+        : 'Unknown';
+
+      await this.auctionAdminService.recordEarnings(
+        auction._id.toString(),
+        auction.currentPrice, // Sale amount (without delivery)
+        auction.seller.toString(),
+        sellerName,
+        auction.currentWinner.toString(),
+        buyerName,
+        auction.title,
+      );
+    } catch (error) {
+      this.logger.warn(`Failed to record auction admin earnings: ${error}`);
     }
 
     this.logger.log(

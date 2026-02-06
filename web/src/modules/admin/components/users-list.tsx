@@ -301,6 +301,7 @@ export function UsersList() {
               <option value={Role.User}>Customers</option>
               <option value={Role.Blogger}>Bloggers</option>
               <option value={Role.SalesManager}>Sales Managers</option>
+              <option value={Role.AuctionAdmin}>Auction Admins</option>
             </select>
           </label>
 
@@ -512,6 +513,11 @@ export function UsersList() {
                       <span className="usr-badge-sales">
                         <TrendingUp className="usr-icon" />
                         Sales Manager
+                      </span>
+                    ) : user.role === Role.AuctionAdmin ? (
+                      <span className="usr-badge-auction-admin">
+                        <ShieldCheck className="usr-icon" />
+                        Auction Admin
                       </span>
                     ) : (
                       <span className="usr-badge">

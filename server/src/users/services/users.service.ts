@@ -1377,6 +1377,7 @@ export class UsersService {
       [Role.Blogger]: 0,
       [Role.SalesManager]: 0,
       [Role.SellerAndSalesManager]: 0,
+      [Role.AuctionAdmin]: 0,
     };
 
     roleAggregation.forEach(({ _id, count }) => {
