@@ -80,7 +80,11 @@ export class AuctionService {
   ): Promise<AuctionDocument> {
     // Validate seller exists and has seller role
     const seller = await this.userModel.findById(sellerId);
-    if (!seller || (seller.role !== Role.Seller && seller.role !== Role.SellerAndSalesManager)) {
+    if (
+      !seller ||
+      (seller.role !== Role.Seller &&
+        seller.role !== Role.SellerAndSalesManager)
+    ) {
       throw new BadRequestException(
         'Only verified sellers can have auctions created for them',
       );
@@ -344,7 +348,9 @@ export class AuctionService {
           isPaid: true,
         })
         .populate('currentWinner', 'name ownerFirstName ownerLastName email')
-        .select('title mainImage currentPrice sellerEarnings commissionAmount deliveryZone deliveryFee totalPayment paymentDate endedAt')
+        .select(
+          'title mainImage currentPrice sellerEarnings commissionAmount deliveryZone deliveryFee totalPayment paymentDate endedAt',
+        )
         .sort({ paymentDate: -1 })
         .skip(skip)
         .limit(limit)
@@ -657,18 +663,21 @@ export class AuctionService {
     } catch (error) {
       const errorMessage = error?.message || 'Unknown error';
       const errorCode = error?.Code || error?.name || '';
-      this.logger.error(`Failed to upload auction image: ${errorCode} - ${errorMessage}`);
-      
+      this.logger.error(
+        `Failed to upload auction image: ${errorCode} - ${errorMessage}`,
+      );
+
       // Provide more specific error messages
-      if (errorCode === 'AccessDenied' || errorMessage.includes('Access Denied')) {
+      if (
+        errorCode === 'AccessDenied' ||
+        errorMessage.includes('Access Denied')
+      ) {
         throw new BadRequestException(
           'S3 access denied. Please check bucket permissions.',
         );
       }
-      
-      throw new BadRequestException(
-        `Image upload failed: ${errorMessage}`,
-      );
+
+      throw new BadRequestException(`Image upload failed: ${errorMessage}`);
     }
   }
 
@@ -792,11 +801,13 @@ export class AuctionService {
 
     // Recalculate commission and earnings with new system
     const settings = await this.auctionAdminService.getSettings();
-    const totalCommissionPercent = 
-      settings.auctionAdminCommissionPercent + settings.platformCommissionPercent;
+    const totalCommissionPercent =
+      settings.auctionAdminCommissionPercent +
+      settings.platformCommissionPercent;
     const sellerPercent = 100 - totalCommissionPercent;
-    
-    const commissionAmount = (auction.currentPrice * totalCommissionPercent) / 100;
+
+    const commissionAmount =
+      (auction.currentPrice * totalCommissionPercent) / 100;
     auction.commissionAmount = commissionAmount;
     auction.sellerEarnings = (auction.currentPrice * sellerPercent) / 100;
 
@@ -843,17 +854,19 @@ export class AuctionService {
 
       // Get commission settings
       const settings = await this.auctionAdminService.getSettings();
-      
+
       // NEW COMMISSION STRUCTURE:
       // Auction Admin: auctionAdminCommissionPercent% (default 30%)
       // Platform: platformCommissionPercent% (default 10%)
       // Seller: remaining % (default 60%)
-      const totalCommissionPercent = 
-        settings.auctionAdminCommissionPercent + settings.platformCommissionPercent;
+      const totalCommissionPercent =
+        settings.auctionAdminCommissionPercent +
+        settings.platformCommissionPercent;
       const sellerPercent = 100 - totalCommissionPercent;
-      
+
       // Calculate amounts
-      const commissionAmount = (auction.currentPrice * totalCommissionPercent) / 100;
+      const commissionAmount =
+        (auction.currentPrice * totalCommissionPercent) / 100;
       auction.commissionAmount = commissionAmount;
       auction.sellerEarnings = (auction.currentPrice * sellerPercent) / 100;
 
@@ -1058,7 +1071,9 @@ export class AuctionService {
     // Record auction admin earnings (from platform commission, not delivery)
     try {
       const seller = await this.userModel.findById(auction.seller).lean();
-      const winner = await this.userModel.findById(auction.currentWinner).lean();
+      const winner = await this.userModel
+        .findById(auction.currentWinner)
+        .lean();
 
       const sellerName = seller
         ? `${seller.ownerFirstName || ''} ${seller.ownerLastName || ''}`.trim() ||

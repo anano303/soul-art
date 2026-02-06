@@ -396,7 +396,14 @@ export class AuthController {
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.Admin, Role.User, Role.Seller, Role.Blogger, Role.SalesManager, Role.AuctionAdmin)
+  @Roles(
+    Role.Admin,
+    Role.User,
+    Role.Seller,
+    Role.Blogger,
+    Role.SalesManager,
+    Role.AuctionAdmin,
+  )
   @Put('profile')
   async updateProfile(
     @CurrentUser() user: UserDocument,

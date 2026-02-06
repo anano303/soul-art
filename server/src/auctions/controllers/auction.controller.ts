@@ -74,13 +74,11 @@ export class AuctionController {
   ) {
     // AuctionAdmin can create auction for any seller (uses sellerId from DTO)
     // Seller creates auction for themselves
-    const sellerId = user.role === Role.AuctionAdmin && createAuctionDto.sellerId
-      ? createAuctionDto.sellerId
-      : user._id.toString();
-    return this.auctionService.createAuction(
-      sellerId,
-      createAuctionDto,
-    );
+    const sellerId =
+      user.role === Role.AuctionAdmin && createAuctionDto.sellerId
+        ? createAuctionDto.sellerId
+        : user._id.toString();
+    return this.auctionService.createAuction(sellerId, createAuctionDto);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)

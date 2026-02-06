@@ -122,7 +122,7 @@ export function UsersList() {
           page,
           search: searchInput,
           role: roleFilter,
-        })
+        }),
       );
     } catch (err) {
       console.error("Failed to persist users list state:", err);
@@ -154,7 +154,7 @@ export function UsersList() {
         roleFilter,
         sortBy,
         sortOrder,
-        isSellerFilter ? activeFilter : undefined
+        isSellerFilter ? activeFilter : undefined,
       ),
     retry: false,
     staleTime: 30 * 1000, // 30 seconds
@@ -200,7 +200,9 @@ export function UsersList() {
 
     if (data?.sellerProductStats) {
       const stats = Object.values(data.sellerProductStats);
-      activeSellers = stats.filter((s: { productCount?: number }) => (s.productCount ?? 0) > 0).length;
+      activeSellers = stats.filter(
+        (s: { productCount?: number }) => (s.productCount ?? 0) > 0,
+      ).length;
     }
 
     // Get total sellers count
@@ -218,7 +220,7 @@ export function UsersList() {
     const activeSalesManagers = data?.summary?.activeSalesManagers ?? 0;
     const inactiveSalesManagers = Math.max(
       0,
-      salesManager - activeSalesManagers
+      salesManager - activeSalesManagers,
     );
 
     // Campaign consent stats

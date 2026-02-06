@@ -4,7 +4,7 @@
    ═══════════════════════════════════════════════════════════════════════════ */
 
 /* Import elegant display fonts */
-@import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Cinzel:wght@400;500;600;700;800;900&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Cinzel:wght@400;500;600;700;800;900&display=swap");
 
 /* ─────────────────────────────────────────────────────────────────────────────
    Theme Variables - Refined Color System
@@ -65,9 +65,21 @@
   min-height: 100vh;
   background: 
     /* Subtle pattern overlay */
-    radial-gradient(circle at 20% 20%, rgba(201, 169, 97, 0.03) 0%, transparent 50%),
-    radial-gradient(circle at 80% 80%, rgba(1, 38, 69, 0.03) 0%, transparent 50%),
-    radial-gradient(circle at 50% 50%, rgba(201, 169, 97, 0.02) 0%, transparent 70%),
+    radial-gradient(
+      circle at 20% 20%,
+      rgba(201, 169, 97, 0.03) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at 80% 80%,
+      rgba(1, 38, 69, 0.03) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at 50% 50%,
+      rgba(201, 169, 97, 0.02) 0%,
+      transparent 70%
+    ),
     /* Base gradient */
     linear-gradient(180deg, #f8f6f2 0%, #f5f3ef 30%, #faf9f7 70%, #f5f3ef 100%);
   padding: 60px 0 100px;
@@ -78,10 +90,22 @@
 /* Dark theme background */
 [data-theme="dark"] .auctions-container,
 .dark .auctions-container {
-  background: 
-    radial-gradient(ellipse at 0% 0%, rgba(201, 169, 97, 0.08) 0%, transparent 50%),
-    radial-gradient(ellipse at 100% 100%, rgba(1, 38, 69, 0.3) 0%, transparent 50%),
-    radial-gradient(circle at 50% 30%, rgba(201, 169, 97, 0.05) 0%, transparent 60%),
+  background:
+    radial-gradient(
+      ellipse at 0% 0%,
+      rgba(201, 169, 97, 0.08) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      ellipse at 100% 100%,
+      rgba(1, 38, 69, 0.3) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at 50% 30%,
+      rgba(201, 169, 97, 0.05) 0%,
+      transparent 60%
+    ),
     linear-gradient(180deg, #0a1520 0%, #0d1a28 40%, #012645 80%, #0d1a28 100%);
 }
 
@@ -94,13 +118,21 @@
   transform: translateX(-50%);
   width: 600px;
   height: 400px;
-  background: radial-gradient(ellipse, rgba(201, 169, 97, 0.08) 0%, transparent 70%);
+  background: radial-gradient(
+    ellipse,
+    rgba(201, 169, 97, 0.08) 0%,
+    transparent 70%
+  );
   pointer-events: none;
 }
 
 [data-theme="dark"] .auctions-container::before,
 .dark .auctions-container::before {
-  background: radial-gradient(ellipse, rgba(201, 169, 97, 0.15) 0%, transparent 70%);
+  background: radial-gradient(
+    ellipse,
+    rgba(201, 169, 97, 0.15) 0%,
+    transparent 70%
+  );
 }
 
 /* Elegant accent line */
@@ -152,7 +184,7 @@
 }
 
 .auctions-title .title-text {
-  font-family: 'Cinzel Decorative', 'Georgia', serif;
+  font-family: "Cinzel Decorative", "Georgia", serif;
   font-size: 2.2rem;
   font-weight: 700;
   color: var(--auctions-text-primary);
@@ -165,12 +197,17 @@
   display: flex;
   align-items: center;
   gap: 16px;
-  font-family: 'Cinzel', 'Georgia', serif;
+  font-family: "Cinzel", "Georgia", serif;
   font-size: 4.5rem;
   font-weight: 900;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  background: linear-gradient(135deg, var(--auctions-accent) 0%, var(--auctions-accent-light) 50%, var(--auctions-accent) 100%);
+  background: linear-gradient(
+    135deg,
+    var(--auctions-accent) 0%,
+    var(--auctions-accent-light) 50%,
+    var(--auctions-accent) 100%
+  );
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -181,7 +218,13 @@
 /* Dark theme - use gold for Auctions */
 [data-theme="dark"] .auctions-title .title-auctions,
 .dark .auctions-title .title-auctions {
-  background: linear-gradient(135deg, var(--auctions-gold) 0%, var(--auctions-gold-light) 40%, var(--auctions-gold) 60%, #d4b875 100%);
+  background: linear-gradient(
+    135deg,
+    var(--auctions-gold) 0%,
+    var(--auctions-gold-light) 40%,
+    var(--auctions-gold) 60%,
+    #d4b875 100%
+  );
   -webkit-background-clip: text;
   background-clip: text;
   filter: drop-shadow(2px 2px 4px rgba(201, 169, 97, 0.3));
@@ -204,7 +247,8 @@
 }
 
 @keyframes gavelBounce {
-  0%, 100% {
+  0%,
+  100% {
     transform: rotate(0deg);
   }
   25% {
@@ -226,7 +270,12 @@
   transform: translateX(-50%);
   width: 100px;
   height: 2px;
-  background: linear-gradient(90deg, transparent, var(--auctions-gold), transparent);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--auctions-gold),
+    transparent
+  );
 }
 
 /* Theme Toggle Button - Refined */
@@ -508,8 +557,12 @@
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .loading-state p {

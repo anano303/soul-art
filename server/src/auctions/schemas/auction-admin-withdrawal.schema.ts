@@ -85,8 +85,9 @@ export class AuctionAdminWithdrawal {
   updatedAt: Date;
 }
 
-export const AuctionAdminWithdrawalSchema =
-  SchemaFactory.createForClass(AuctionAdminWithdrawal);
+export const AuctionAdminWithdrawalSchema = SchemaFactory.createForClass(
+  AuctionAdminWithdrawal,
+);
 
 // Indexes
 AuctionAdminWithdrawalSchema.index({ auctionAdminId: 1, status: 1 });

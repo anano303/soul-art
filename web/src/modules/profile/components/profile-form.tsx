@@ -44,7 +44,7 @@ const formSchema = z
     {
       message: "პაროლები არ ემთხვევა",
       path: ["confirmPassword"],
-    }
+    },
   )
   .refine(
     (data) => {
@@ -59,7 +59,7 @@ const formSchema = z
       message:
         "არასწორი IBAN. გთხოვთ შეიყვანოთ ქართული IBAN (22 სიმბოლო, იწყება GE-ით)",
       path: ["accountNumber"],
-    }
+    },
   );
 
 export function ProfileForm() {
@@ -136,7 +136,7 @@ export function ProfileForm() {
       // Otherwise add API prefix
       return `/api/${imagePath}`;
     },
-    [isCloudinaryUrl]
+    [isCloudinaryUrl],
   );
 
   // Use manual invalidation instead of refetch
@@ -548,7 +548,7 @@ export function ProfileForm() {
       setSlugMessage(
         language === "en"
           ? "Use 3-40 lowercase letters or numbers. Hyphen allowed between words."
-          : "გამოიყენე 3-40 სიმბოლო: პატარა ასოები, რიცხვები და ჰიფენი სიტყვებს შორის."
+          : "გამოიყენე 3-40 სიმბოლო: პატარა ასოები, რიცხვები და ჰიფენი სიტყვებს შორის.",
       );
       return;
     }
@@ -557,7 +557,7 @@ export function ProfileForm() {
     setSlugMessage(
       language === "en"
         ? "Checking availability..."
-        : "მიმდინარეობს თავისუფლების შემოწმება..."
+        : "მიმდინარეობს თავისუფლების შემოწმება...",
     );
 
     try {
@@ -573,14 +573,14 @@ export function ProfileForm() {
         setSlugMessage(
           language === "en"
             ? `Great news! Your portfolio will be ${portfolioBaseUrl}/@${slug}`
-            : `სუპერ! შენი პორტფოლიო იქნება ${portfolioBaseUrl}/@${slug}`
+            : `სუპერ! შენი პორტფოლიო იქნება ${portfolioBaseUrl}/@${slug}`,
         );
       } else {
         setSlugStatus("taken");
         setSlugMessage(
           language === "en"
             ? "Slug is already taken"
-            : "ეს სლაგი უკვე დაკავებულია"
+            : "ეს სლაგი უკვე დაკავებულია",
         );
       }
     } catch (error) {
@@ -589,7 +589,7 @@ export function ProfileForm() {
       setSlugMessage(
         language === "en"
           ? "Couldn't verify slug. Try again later."
-          : "სლაგის შემოწმება ვერ მოხერხდა. სცადე მოგვიანებით."
+          : "სლაგის შემოწმება ვერ მოხერხდა. სცადე მოგვიანებით.",
       );
     }
   };
@@ -607,7 +607,7 @@ export function ProfileForm() {
       setSlugMessage(
         language === "en"
           ? "Use 3-40 lowercase letters or numbers. Hyphen allowed between words."
-          : "გამოიყენე 3-40 სიმბოლო: პატარა ასოები, რიცხვები და ჰიფენი სიტყვებს შორის."
+          : "გამოიყენე 3-40 სიმბოლო: პატარა ასოები, რიცხვები და ჰიფენი სიტყვებს შორის.",
       );
       return;
     }
@@ -1143,8 +1143,8 @@ export function ProfileForm() {
                       ? "Checking..."
                       : "ვამოწმებ..."
                     : language === "en"
-                    ? "Check availability"
-                    : "შეამოწმე"}
+                      ? "Check availability"
+                      : "შეამოწმე"}
                 </button>
                 <button
                   type="button"
@@ -1157,8 +1157,8 @@ export function ProfileForm() {
                       ? "Saving..."
                       : "ვინახავ..."
                     : language === "en"
-                    ? "Save username"
-                    : "მეტსახელის შენახვა"}
+                      ? "Save username"
+                      : "მეტსახელის შენახვა"}
                 </button>
               </div>
               {slugMessage && <p className={slugStatusClass}>{slugMessage}</p>}
@@ -1192,8 +1192,8 @@ export function ProfileForm() {
                           ? "Copied!"
                           : "დაკოპირდა!"
                         : language === "en"
-                        ? "Copy link"
-                        : "ბმულის დაკოპირება"}
+                          ? "Copy link"
+                          : "ბმულის დაკოპირება"}
                     </button>
                   </div>
                 </div>

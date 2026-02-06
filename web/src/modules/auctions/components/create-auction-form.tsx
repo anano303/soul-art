@@ -248,7 +248,11 @@ export function CreateAuctionForm({
 
   useEffect(() => {
     // Load sellers list for admin or auction_admin users
-    if (!isAdmin || !user || (user.role !== "admin" && user.role !== "auction_admin")) {
+    if (
+      !isAdmin ||
+      !user ||
+      (user.role !== "admin" && user.role !== "auction_admin")
+    ) {
       return;
     }
 
@@ -348,9 +352,13 @@ export function CreateAuctionForm({
     formData.append("file", file);
 
     try {
-      const response = await apiClient.post("/auctions/media/upload", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
+      const response = await apiClient.post(
+        "/auctions/media/upload",
+        formData,
+        {
+          headers: { "Content-Type": "multipart/form-data" },
+        },
+      );
 
       const url = response?.data?.url || response?.data?.Location;
 
@@ -362,10 +370,14 @@ export function CreateAuctionForm({
 
       return url as string;
     } catch (error: unknown) {
-      const axiosError = error as { response?: { data?: { message?: string } } };
+      const axiosError = error as {
+        response?: { data?: { message?: string } };
+      };
       const backendMessage = axiosError?.response?.data?.message;
       throw new Error(
-        backendMessage || t("auctionForm.errors.imageUpload") || "Image upload failed",
+        backendMessage ||
+          t("auctionForm.errors.imageUpload") ||
+          "Image upload failed",
       );
     }
   };
@@ -392,9 +404,14 @@ export function CreateAuctionForm({
       setUploadError(null);
       toast.success(t("auctionForm.success.imageUploaded") || "Image uploaded");
     } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
       console.error("Failed to upload main image", error);
-      setUploadError(errorMessage || t("auctionForm.errors.imageUpload") || "Image upload failed");
+      setUploadError(
+        errorMessage ||
+          t("auctionForm.errors.imageUpload") ||
+          "Image upload failed",
+      );
       toast.error(errorMessage);
     } finally {
       setIsUploadingMainImage(false);
@@ -445,9 +462,14 @@ export function CreateAuctionForm({
           "Images added to gallery",
       );
     } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
       console.error("Failed to upload additional images", error);
-      setUploadError(errorMessage || t("auctionForm.errors.imageUpload") || "Image upload failed");
+      setUploadError(
+        errorMessage ||
+          t("auctionForm.errors.imageUpload") ||
+          "Image upload failed",
+      );
       toast.error(errorMessage);
     } finally {
       setIsUploadingAdditional(false);
@@ -840,52 +862,56 @@ export function CreateAuctionForm({
       <div className="timezone-note">{timezoneHint}</div>
 
       <div className="form-grid">
-        {isAdmin && user && (user.role === "admin" || user.role === "auction_admin") && (
-          <div className="form-section">
-            <div className="section-title">
-              {t("auctionForm.sections.seller")}
-            </div>
-            <div className="section-description">
-              {canChangeSeller
-                ? t("auctionForm.helperTexts.selectSeller")
-                : selectedSellerId
-                  ? t("auctionForm.helperTexts.sellerLocked")
-                  : t("auctionForm.helperTexts.sellerAuto")}
-            </div>
-            {canChangeSeller ? (
-              <div className="seller-select">
-                <select
-                  value={selectedSellerId}
-                  onChange={(event) => setSelectedSellerId(event.target.value)}
-                  disabled={sellerSelectionDisabled}
-                >
-                  <option value="">
-                    {sellerLoading
-                      ? t("auctionForm.loading.sellers")
-                      : t("auctionForm.placeholders.seller")}
-                  </option>
-                  {sellers.map((seller) => (
-                    <option key={seller.id} value={seller.id}>
-                      {seller.name} · {seller.email}
-                    </option>
-                  ))}
-                </select>
-                {errors.sellerId && (
-                  <div className="error-message">{errors.sellerId}</div>
-                )}
+        {isAdmin &&
+          user &&
+          (user.role === "admin" || user.role === "auction_admin") && (
+            <div className="form-section">
+              <div className="section-title">
+                {t("auctionForm.sections.seller")}
               </div>
-            ) : (
-              <div className="seller-info-card">
-                <div className="seller-info-primary">{lockedSellerLabel}</div>
-                <div className="helper-text">
-                  {selectedSellerId
+              <div className="section-description">
+                {canChangeSeller
+                  ? t("auctionForm.helperTexts.selectSeller")
+                  : selectedSellerId
                     ? t("auctionForm.helperTexts.sellerLocked")
                     : t("auctionForm.helperTexts.sellerAuto")}
-                </div>
               </div>
-            )}
-          </div>
-        )}
+              {canChangeSeller ? (
+                <div className="seller-select">
+                  <select
+                    value={selectedSellerId}
+                    onChange={(event) =>
+                      setSelectedSellerId(event.target.value)
+                    }
+                    disabled={sellerSelectionDisabled}
+                  >
+                    <option value="">
+                      {sellerLoading
+                        ? t("auctionForm.loading.sellers")
+                        : t("auctionForm.placeholders.seller")}
+                    </option>
+                    {sellers.map((seller) => (
+                      <option key={seller.id} value={seller.id}>
+                        {seller.name} · {seller.email}
+                      </option>
+                    ))}
+                  </select>
+                  {errors.sellerId && (
+                    <div className="error-message">{errors.sellerId}</div>
+                  )}
+                </div>
+              ) : (
+                <div className="seller-info-card">
+                  <div className="seller-info-primary">{lockedSellerLabel}</div>
+                  <div className="helper-text">
+                    {selectedSellerId
+                      ? t("auctionForm.helperTexts.sellerLocked")
+                      : t("auctionForm.helperTexts.sellerAuto")}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
 
         <div className="form-section">
           <div className="section-title">
@@ -1044,9 +1070,7 @@ export function CreateAuctionForm({
                 {t("auctionForm.helperTexts.imageUpload")}
               </div>
               {uploadError && (
-                <div className="upload-error-message">
-                  ⚠️ {uploadError}
-                </div>
+                <div className="upload-error-message">⚠️ {uploadError}</div>
               )}
               {formState.mainImage && (
                 <div className="image-preview">

@@ -32,7 +32,10 @@ import { AwsS3Module } from '../aws-s3/aws-s3.module';
       { name: Auction.name, schema: AuctionSchema },
       { name: AuctionSettings.name, schema: AuctionSettingsSchema },
       { name: AuctionAdminEarnings.name, schema: AuctionAdminEarningsSchema },
-      { name: AuctionAdminWithdrawal.name, schema: AuctionAdminWithdrawalSchema },
+      {
+        name: AuctionAdminWithdrawal.name,
+        schema: AuctionAdminWithdrawalSchema,
+      },
       { name: User.name, schema: UserSchema },
     ]),
     ScheduleModule.forRoot(), // For cron jobs

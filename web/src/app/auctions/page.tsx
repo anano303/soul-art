@@ -220,14 +220,16 @@ function AuctionsContent() {
 
 export default function AuctionsPage() {
   return (
-    <Suspense fallback={
-      <div className="auctions-container">
-        <div className="loading-state">
-          <div className="loading-spinner"></div>
-          <p>იტვირთება...</p>
+    <Suspense
+      fallback={
+        <div className="auctions-container">
+          <div className="loading-state">
+            <div className="loading-spinner"></div>
+            <p>იტვირთება...</p>
+          </div>
         </div>
-      </div>
-    }>
+      }
+    >
       <AuctionsContent />
     </Suspense>
   );

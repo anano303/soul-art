@@ -46,7 +46,9 @@ export default function AuctionFilters({
   useEffect(() => {
     const fetchFilterOptions = async () => {
       try {
-        const response = await apiClient.get<FilterOptions>("/auctions/filters/options");
+        const response = await apiClient.get<FilterOptions>(
+          "/auctions/filters/options",
+        );
         setFilterOptions(response.data);
       } catch (error) {
         console.error("Failed to fetch filter options:", error);
@@ -107,7 +109,9 @@ export default function AuctionFilters({
 
         {/* Material Filter - Dynamic from active auctions */}
         <div className="filter-group">
-          <label className="filter-label">{t("auctions.material") || "მასალა"}</label>
+          <label className="filter-label">
+            {t("auctions.material") || "მასალა"}
+          </label>
           <select
             value={filters.material}
             onChange={(e) => handleFilterChange("material", e.target.value)}
@@ -125,7 +129,9 @@ export default function AuctionFilters({
 
         {/* Dimensions Filter - Dynamic from active auctions */}
         <div className="filter-group">
-          <label className="filter-label">{t("auctions.dimensions") || "ზომა"}</label>
+          <label className="filter-label">
+            {t("auctions.dimensions") || "ზომა"}
+          </label>
           <select
             value={filters.dimensions}
             onChange={(e) => handleFilterChange("dimensions", e.target.value)}

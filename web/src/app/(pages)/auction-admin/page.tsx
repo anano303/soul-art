@@ -92,16 +92,23 @@ export default function AuctionAdminDashboard() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
-  const [activeTab, setActiveTab] = useState<"dashboard" | "withdrawals">("dashboard");
-  
+  const [dashboardData, setDashboardData] = useState<DashboardData | null>(
+    null,
+  );
+  const [activeTab, setActiveTab] = useState<"dashboard" | "withdrawals">(
+    "dashboard",
+  );
+
   // Withdrawal state
   const [withdrawals, setWithdrawals] = useState<WithdrawalData[]>([]);
   const [withdrawalsLoading, setWithdrawalsLoading] = useState(false);
   const [withdrawAmount, setWithdrawAmount] = useState<string>("");
   const [withdrawing, setWithdrawing] = useState(false);
-  const [withdrawMessage, setWithdrawMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
-  
+  const [withdrawMessage, setWithdrawMessage] = useState<{
+    type: "success" | "error";
+    text: string;
+  } | null>(null);
+
   // Profile data for balance display
   const [profile, setProfile] = useState<ProfileData | null>(null);
 
@@ -131,7 +138,9 @@ export default function AuctionAdminDashboard() {
   const fetchDashboard = async () => {
     try {
       setLoading(true);
-      const response = await apiClient.get<DashboardData>("/auctions/admin/dashboard");
+      const response = await apiClient.get<DashboardData>(
+        "/auctions/admin/dashboard",
+      );
       setDashboardData(response.data);
       setError(null);
     } catch (err: unknown) {
@@ -144,7 +153,9 @@ export default function AuctionAdminDashboard() {
 
   const fetchProfile = async () => {
     try {
-      const response = await apiClient.get<ProfileData>("/auctions/admin/profile");
+      const response = await apiClient.get<ProfileData>(
+        "/auctions/admin/profile",
+      );
       setProfile(response.data);
     } catch (err) {
       console.error("Failed to fetch profile:", err);
@@ -154,7 +165,9 @@ export default function AuctionAdminDashboard() {
   const fetchWithdrawals = async () => {
     try {
       setWithdrawalsLoading(true);
-      const response = await apiClient.get<{ withdrawals: WithdrawalData[] }>("/auctions/admin/withdrawals");
+      const response = await apiClient.get<{ withdrawals: WithdrawalData[] }>(
+        "/auctions/admin/withdrawals",
+      );
       setWithdrawals(response.data.withdrawals);
     } catch (err) {
       console.error("Failed to fetch withdrawals:", err);
@@ -167,17 +180,22 @@ export default function AuctionAdminDashboard() {
     try {
       setWithdrawing(true);
       setWithdrawMessage(null);
-      
+
       const amount = withdrawAmount ? parseFloat(withdrawAmount) : undefined;
       await apiClient.post("/auctions/admin/withdrawal", { amount });
-      
-      setWithdrawMessage({ type: "success", text: "გატანის მოთხოვნა წარმატებით გაიგზავნა" });
+
+      setWithdrawMessage({
+        type: "success",
+        text: "გატანის მოთხოვნა წარმატებით გაიგზავნა",
+      });
       setWithdrawAmount("");
       fetchWithdrawals();
       fetchProfile();
       fetchDashboard();
     } catch (err: unknown) {
-      const errorMessage = (err as { response?: { data?: { message?: string } } })?.response?.data?.message || "შეცდომა გატანის მოთხოვნისას";
+      const errorMessage =
+        (err as { response?: { data?: { message?: string } } })?.response?.data
+          ?.message || "შეცდომა გატანის მოთხოვნისას";
       setWithdrawMessage({ type: "error", text: errorMessage });
     } finally {
       setWithdrawing(false);
@@ -212,7 +230,8 @@ export default function AuctionAdminDashboard() {
 
   if (!dashboardData) return null;
 
-  const { settings, summary, recentEarnings, completedAuctions } = dashboardData;
+  const { settings, summary, recentEarnings, completedAuctions } =
+    dashboardData;
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -233,7 +252,15 @@ export default function AuctionAdminDashboard() {
     <div className="auction-admin-page">
       <div className="auction-admin-container">
         <div className="auction-admin-header">
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: "1rem" }}>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "flex-start",
+              flexWrap: "wrap",
+              gap: "1rem",
+            }}
+          >
             <div>
               <h1>აუქციონის ადმინ პანელი</h1>
               <p>მართეთ აუქციონები და თვალყური ადევნეთ შემოსავლებს</p>
@@ -289,7 +316,6 @@ export default function AuctionAdminDashboard() {
                 <strong>{settings.auctionAdminCommissionPercent}%</strong>
               </div>
             </div>
-
             {/* Stats Cards - Only auction admin relevant stats */}
             <div className="stats-grid">
               <div className="stat-card">
@@ -298,7 +324,9 @@ export default function AuctionAdminDashboard() {
                 </div>
                 <div className="stat-content">
                   <span className="stat-label">გაყიდული აუქციონები</span>
-                  <span className="stat-value">{summary.totalAuctionsSold}</span>
+                  <span className="stat-value">
+                    {summary.totalAuctionsSold}
+                  </span>
                 </div>
               </div>
 
@@ -308,7 +336,9 @@ export default function AuctionAdminDashboard() {
                 </div>
                 <div className="stat-content">
                   <span className="stat-label">ჯამური გაყიდვები</span>
-                  <span className="stat-value">{summary.totalSales.toFixed(2)} ₾</span>
+                  <span className="stat-value">
+                    {summary.totalSales.toFixed(2)} ₾
+                  </span>
                 </div>
               </div>
 
@@ -347,7 +377,8 @@ export default function AuctionAdminDashboard() {
                   </span>
                 </div>
               </div>
-            </div>            {/* Recent Earnings */}
+            </div>{" "}
+            {/* Recent Earnings */}
             <div className="section">
               <h2>ბოლო შემოსავლები</h2>
               <div className="table-container">
@@ -380,7 +411,9 @@ export default function AuctionAdminDashboard() {
                           <td>{earning.sellerName}</td>
                           <td>{earning.buyerName}</td>
                           <td>
-                            {new Date(earning.paidAt).toLocaleDateString("ka-GE")}
+                            {new Date(earning.paidAt).toLocaleDateString(
+                              "ka-GE",
+                            )}
                           </td>
                         </tr>
                       ))
@@ -389,7 +422,6 @@ export default function AuctionAdminDashboard() {
                 </table>
               </div>
             </div>
-
             {/* Completed Auctions - Simplified for auction admin */}
             <div className="section">
               <h2>გაყიდული აუქციონები</h2>
@@ -418,11 +450,17 @@ export default function AuctionAdminDashboard() {
                           <td className="title-cell">{auction.title}</td>
                           <td>{auction.currentPrice.toFixed(2)} ₾</td>
                           <td className="earnings-cell">
-                            {((auction.currentPrice * settings.auctionAdminCommissionPercent) / 100).toFixed(2)} ₾
+                            {(
+                              (auction.currentPrice *
+                                settings.auctionAdminCommissionPercent) /
+                              100
+                            ).toFixed(2)}{" "}
+                            ₾
                           </td>
                           <td>
                             {auction.seller?.ownerFirstName}{" "}
-                            {auction.seller?.ownerLastName || auction.seller?.storeName}
+                            {auction.seller?.ownerLastName ||
+                              auction.seller?.storeName}
                           </td>
                           <td>
                             {auction.currentWinner?.ownerFirstName ||
@@ -432,7 +470,9 @@ export default function AuctionAdminDashboard() {
                           </td>
                           <td>
                             {auction.paymentDate
-                              ? new Date(auction.paymentDate).toLocaleDateString("ka-GE")
+                              ? new Date(
+                                  auction.paymentDate,
+                                ).toLocaleDateString("ka-GE")
                               : "-"}
                           </td>
                         </tr>
@@ -445,110 +485,120 @@ export default function AuctionAdminDashboard() {
           </>
         )}
 
-      {/* Withdrawals Tab */}
-      {activeTab === "withdrawals" && (
-        <div className="withdrawals-section">
-          {/* Withdrawal Form */}
-          <div className="withdrawal-form-card">
-            <h3>
-              <Send size={20} />
-              თანხის გატანა
-            </h3>
+        {/* Withdrawals Tab */}
+        {activeTab === "withdrawals" && (
+          <div className="withdrawals-section">
+            {/* Withdrawal Form */}
+            <div className="withdrawal-form-card">
+              <h3>
+                <Send size={20} />
+                თანხის გატანა
+              </h3>
 
-            <div className="available-balance">
-              <span>ხელმისაწვდომი თანხა:</span>
-              <strong>{(profile?.auctionAdminBalance || 0).toFixed(2)} ₾</strong>
+              <div className="available-balance">
+                <span>ხელმისაწვდომი თანხა:</span>
+                <strong>
+                  {(profile?.auctionAdminBalance || 0).toFixed(2)} ₾
+                </strong>
+              </div>
+
+              {withdrawMessage && (
+                <div className={`message ${withdrawMessage.type}`}>
+                  {withdrawMessage.type === "error" ? (
+                    <AlertCircle size={18} />
+                  ) : (
+                    <CheckCircle size={18} />
+                  )}
+                  {withdrawMessage.text}
+                </div>
+              )}
+
+              <div className="withdrawal-input-group">
+                <input
+                  type="number"
+                  value={withdrawAmount}
+                  onChange={(e) => setWithdrawAmount(e.target.value)}
+                  placeholder="თანხა (ცარიელი = მთლიანი ბალანსი)"
+                  min="50"
+                  step="0.01"
+                />
+                <button
+                  className="withdraw-button"
+                  onClick={handleWithdraw}
+                  disabled={
+                    withdrawing || (profile?.auctionAdminBalance || 0) < 50
+                  }
+                >
+                  {withdrawing ? "იგზავნება..." : "გატანის მოთხოვნა"}
+                </button>
+              </div>
+
+              <p className="min-amount-note">მინიმალური თანხა: 50 ₾</p>
             </div>
 
-            {withdrawMessage && (
-              <div className={`message ${withdrawMessage.type}`}>
-                {withdrawMessage.type === "error" ? (
-                  <AlertCircle size={18} />
-                ) : (
-                  <CheckCircle size={18} />
-                )}
-                {withdrawMessage.text}
-              </div>
-            )}
+            {/* Withdrawal History */}
+            <div className="section">
+              <h2>
+                <History size={20} />
+                გატანის ისტორია
+              </h2>
 
-            <div className="withdrawal-input-group">
-              <input
-                type="number"
-                value={withdrawAmount}
-                onChange={(e) => setWithdrawAmount(e.target.value)}
-                placeholder="თანხა (ცარიელი = მთლიანი ბალანსი)"
-                min="50"
-                step="0.01"
-              />
-              <button
-                className="withdraw-button"
-                onClick={handleWithdraw}
-                disabled={withdrawing || (profile?.auctionAdminBalance || 0) < 50}
-              >
-                {withdrawing ? "იგზავნება..." : "გატანის მოთხოვნა"}
-              </button>
-            </div>
-
-            <p className="min-amount-note">მინიმალური თანხა: 50 ₾</p>
-          </div>
-
-          {/* Withdrawal History */}
-          <div className="section">
-            <h2>
-              <History size={20} />
-              გატანის ისტორია
-            </h2>
-
-            {withdrawalsLoading ? (
-              <div className="loading-state">
-                <div className="loading-spinner"></div>
-                <p>იტვირთება...</p>
-              </div>
-            ) : (
-              <div className="table-container">
-                <table className="data-table">
-                  <thead>
-                    <tr>
-                      <th>თანხა</th>
-                      <th>ანგარიში</th>
-                      <th>სტატუსი</th>
-                      <th>მოთხოვნის თარიღი</th>
-                      <th>დამუშავების თარიღი</th>
-                      <th>მიზეზი</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {withdrawals.length === 0 ? (
+              {withdrawalsLoading ? (
+                <div className="loading-state">
+                  <div className="loading-spinner"></div>
+                  <p>იტვირთება...</p>
+                </div>
+              ) : (
+                <div className="table-container">
+                  <table className="data-table">
+                    <thead>
                       <tr>
-                        <td colSpan={6} className="empty-row">
-                          გატანის მოთხოვნები ჯერ არ არის
-                        </td>
+                        <th>თანხა</th>
+                        <th>ანგარიში</th>
+                        <th>სტატუსი</th>
+                        <th>მოთხოვნის თარიღი</th>
+                        <th>დამუშავების თარიღი</th>
+                        <th>მიზეზი</th>
                       </tr>
-                    ) : (
-                      withdrawals.map((withdrawal) => (
-                        <tr key={withdrawal._id}>
-                          <td className="amount-cell">{withdrawal.amount.toFixed(2)} ₾</td>
-                          <td>{withdrawal.accountNumber}</td>
-                          <td>{getStatusBadge(withdrawal.status)}</td>
-                          <td>
-                            {new Date(withdrawal.createdAt).toLocaleDateString("ka-GE")}
+                    </thead>
+                    <tbody>
+                      {withdrawals.length === 0 ? (
+                        <tr>
+                          <td colSpan={6} className="empty-row">
+                            გატანის მოთხოვნები ჯერ არ არის
                           </td>
-                          <td>
-                            {withdrawal.processedAt
-                              ? new Date(withdrawal.processedAt).toLocaleDateString("ka-GE")
-                              : "-"}
-                          </td>
-                          <td>{withdrawal.rejectionReason || "-"}</td>
                         </tr>
-                      ))
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            )}
+                      ) : (
+                        withdrawals.map((withdrawal) => (
+                          <tr key={withdrawal._id}>
+                            <td className="amount-cell">
+                              {withdrawal.amount.toFixed(2)} ₾
+                            </td>
+                            <td>{withdrawal.accountNumber}</td>
+                            <td>{getStatusBadge(withdrawal.status)}</td>
+                            <td>
+                              {new Date(
+                                withdrawal.createdAt,
+                              ).toLocaleDateString("ka-GE")}
+                            </td>
+                            <td>
+                              {withdrawal.processedAt
+                                ? new Date(
+                                    withdrawal.processedAt,
+                                  ).toLocaleDateString("ka-GE")
+                                : "-"}
+                            </td>
+                            <td>{withdrawal.rejectionReason || "-"}</td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
           </div>
-        </div>
-      )}
+        )}
       </div>
     </div>
   );

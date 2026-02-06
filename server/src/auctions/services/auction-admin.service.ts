@@ -47,7 +47,10 @@ export class AuctionAdminService {
       // User has auction_admin role, allow access
       // Also ensure settings has this user set as admin
       const settings = await this.getSettings();
-      if (!settings.auctionAdminUserId || settings.auctionAdminUserId.toString() !== userId) {
+      if (
+        !settings.auctionAdminUserId ||
+        settings.auctionAdminUserId.toString() !== userId
+      ) {
         // Auto-set this user as the auction admin in settings
         await this.auctionSettingsModel.updateOne(
           { key: 'auction_commission' },
@@ -99,17 +102,28 @@ export class AuctionAdminService {
     const settings = await this.getSettings();
 
     if (data.platformCommissionPercent !== undefined) {
-      if (data.platformCommissionPercent < 0 || data.platformCommissionPercent > 100) {
-        throw new BadRequestException('Platform commission must be between 0 and 100');
+      if (
+        data.platformCommissionPercent < 0 ||
+        data.platformCommissionPercent > 100
+      ) {
+        throw new BadRequestException(
+          'Platform commission must be between 0 and 100',
+        );
       }
       settings.platformCommissionPercent = data.platformCommissionPercent;
     }
 
     if (data.auctionAdminCommissionPercent !== undefined) {
-      if (data.auctionAdminCommissionPercent < 0 || data.auctionAdminCommissionPercent > 100) {
-        throw new BadRequestException('Auction admin commission must be between 0 and 100');
+      if (
+        data.auctionAdminCommissionPercent < 0 ||
+        data.auctionAdminCommissionPercent > 100
+      ) {
+        throw new BadRequestException(
+          'Auction admin commission must be between 0 and 100',
+        );
       }
-      settings.auctionAdminCommissionPercent = data.auctionAdminCommissionPercent;
+      settings.auctionAdminCommissionPercent =
+        data.auctionAdminCommissionPercent;
     }
 
     if (data.auctionAdminUserId) {
@@ -261,8 +275,14 @@ export class AuctionAdminService {
     const [auctions, total] = await Promise.all([
       this.auctionModel
         .find({ status: 'ENDED', isPaid: true })
-        .populate('seller', 'name ownerFirstName ownerLastName storeName email phone')
-        .populate('currentWinner', 'name ownerFirstName ownerLastName email phone')
+        .populate(
+          'seller',
+          'name ownerFirstName ownerLastName storeName email phone',
+        )
+        .populate(
+          'currentWinner',
+          'name ownerFirstName ownerLastName email phone',
+        )
         .sort({ paymentDate: -1 })
         .skip(skip)
         .limit(limit)
@@ -438,10 +458,11 @@ export class AuctionAdminService {
     // Select earnings to include (oldest first, up to withdraw amount)
     let amountToAllocate = withdrawAmount;
     const earningsToInclude: Types.ObjectId[] = [];
-    
+
     // Sort by creation date ascending (oldest first)
     const sortedEarnings = availableEarnings.sort(
-      (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
+      (a, b) =>
+        new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
     );
 
     for (const earning of sortedEarnings) {
@@ -549,13 +570,16 @@ export class AuctionAdminService {
     transactionId?: string,
     rejectionReason?: string,
   ) {
-    const withdrawal = await this.auctionAdminWithdrawalModel.findById(withdrawalId);
+    const withdrawal =
+      await this.auctionAdminWithdrawalModel.findById(withdrawalId);
     if (!withdrawal) {
       throw new NotFoundException('Withdrawal request not found');
     }
 
     if (withdrawal.status !== AuctionAdminWithdrawalStatus.PENDING) {
-      throw new BadRequestException('This withdrawal has already been processed');
+      throw new BadRequestException(
+        'This withdrawal has already been processed',
+      );
     }
 
     if (action === 'approve') {

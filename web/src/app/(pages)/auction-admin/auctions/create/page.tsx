@@ -49,20 +49,23 @@ export default function AuctionAdminCreateAuctionPage() {
           <button
             className="theme-toggle-btn"
             onClick={() => setIsDarkTheme(!isDarkTheme)}
-            title={isDarkTheme ? "Switch to Light Theme" : "Switch to Dark Theme"}
+            title={
+              isDarkTheme ? "Switch to Light Theme" : "Switch to Dark Theme"
+            }
           >
             {isDarkTheme ? <Sun /> : <Moon />}
-            {isDarkTheme 
-              ? (language === "en" ? "Light Mode" : "ნათელი თემა")
-              : (language === "en" ? "Dark Mode" : "მუქი თემა")
-            }
+            {isDarkTheme
+              ? language === "en"
+                ? "Light Mode"
+                : "ნათელი თემა"
+              : language === "en"
+                ? "Dark Mode"
+                : "მუქი თემა"}
           </button>
         </div>
-        
+
         <div className="auction-create-header">
-          <h1>
-            {language === "en" ? "Create Auction" : "აუქციონის შექმნა"}
-          </h1>
+          <h1>{language === "en" ? "Create Auction" : "აუქციონის შექმნა"}</h1>
           <p>
             {language === "en"
               ? "Create a new auction for a seller"

@@ -40,6 +40,7 @@ interface CommissionSettings {
 interface User {
   _id: string;
   email: string;
+  name?: string;
   firstName?: string;
   lastName?: string;
   ownerFirstName?: string;
@@ -105,8 +106,8 @@ export default function AdminAuctions() {
   const fetchAuctionAdmins = async () => {
     try {
       // Fetch users with auction_admin role
-      const response = await apiClient.get("/admin/users?role=auction_admin&limit=100");
-      setAuctionAdmins(response.data.users || []);
+      const response = await apiClient.get("/users?role=AUCTION_ADMIN&limit=100");
+      setAuctionAdmins(response.data.items || []);
     } catch (error) {
       console.error("Failed to fetch auction admins:", error);
     }
@@ -213,7 +214,7 @@ export default function AdminAuctions() {
             onClick={() => setShowSettings(!showSettings)}
           >
             <Settings size={18} />
-            კომისია
+            საკომისიო
           </button>
           <Link
             href="/admin/auctions/create"
@@ -294,8 +295,8 @@ export default function AdminAuctions() {
                 <option value="">-- აირჩიეთ --</option>
                 {auctionAdmins.map((user) => (
                   <option key={user._id} value={user._id}>
-                    {user.ownerFirstName || user.firstName}{" "}
-                    {user.ownerLastName || user.lastName} ({user.email})
+                    {user.name || user.ownerFirstName || user.firstName || ""}{" "}
+                    {user.ownerLastName || user.lastName || ""} ({user.email})
                   </option>
                 ))}
               </select>
