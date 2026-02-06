@@ -19,6 +19,8 @@ import {
   ChevronLeft,
   ChevronRight,
   ZoomIn,
+  CreditCard,
+  Trophy,
 } from "lucide-react";
 import { useLanguage } from "@/hooks/LanguageContext";
 import { useAuth } from "@/hooks/useAuth";
@@ -57,6 +59,7 @@ interface Auction {
   deliveryDaysMax?: number;
   status: "ACTIVE" | "ENDED" | "PENDING" | "CANCELLED" | "SCHEDULED";
   totalBids: number;
+  isPaid?: boolean;
   bids?: Bid[];
   seller: {
     _id?: string;
@@ -607,15 +610,74 @@ export default function AuctionCard({
                 <Gavel size={18} />
                 <span>{t("auctions.winner")}: </span>
                 <strong>
-                  {currentAuction.currentWinner.ownerFirstName ||
-                    currentAuction.currentWinner.firstName}{" "}
-                  {(
-                    currentAuction.currentWinner.ownerLastName ||
-                    currentAuction.currentWinner.lastName
-                  )?.charAt(0)}
-                  .
+                  {(() => {
+                    const winner = currentAuction.currentWinner;
+                    // Try name field first
+                    if (winner?.name) return winner.name;
+                    // Then try ownerFirstName + ownerLastName
+                    if (winner?.ownerFirstName && winner?.ownerLastName) {
+                      return `${winner.ownerFirstName} ${winner.ownerLastName}`;
+                    }
+                    // Then try firstName + lastName
+                    if (winner?.firstName && winner?.lastName) {
+                      return `${winner.firstName} ${winner.lastName}`;
+                    }
+                    // Fallback
+                    return t("auctions.anonymousBidder") || "ანონიმური";
+                  })()}
                 </strong>
               </div>
+            )}
+
+            {/* Payment section for ended auctions with winner */}
+            {isEnded && currentAuction.currentWinner && (
+              <div className="winner-payment-section">
+                {currentAuction.isPaid ? (
+                  <div className="paid-badge">
+                    <Trophy size={18} />
+                    <span>{t("auctions.paid") || "გადახდილია"}</span>
+                  </div>
+                ) : (
+                  <Link href={`/checkout/auction/${currentAuction._id}`} className="payment-link-btn">
+                    <CreditCard size={18} />
+                    <span>{t("auctions.payNow") || "გადახდა"}</span>
+                  </Link>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Payment section outside expand - always visible for ended auctions */}
+        {!isExpanded && isEnded && currentAuction.currentWinner && (
+          <div className="winner-payment-standalone">
+            <div className="winner-info-compact">
+              <Gavel size={16} />
+              <span>{t("auctions.winner")}: </span>
+              <strong>
+                {(() => {
+                  const winner = currentAuction.currentWinner;
+                  if (winner?.name) return winner.name;
+                  if (winner?.ownerFirstName && winner?.ownerLastName) {
+                    return `${winner.ownerFirstName} ${winner.ownerLastName}`;
+                  }
+                  if (winner?.firstName && winner?.lastName) {
+                    return `${winner.firstName} ${winner.lastName}`;
+                  }
+                  return t("auctions.anonymousBidder") || "ანონიმური";
+                })()}
+              </strong>
+            </div>
+            {currentAuction.isPaid ? (
+              <div className="paid-badge">
+                <Trophy size={18} />
+                <span>{t("auctions.paid") || "გადახდილია"}</span>
+              </div>
+            ) : (
+              <Link href={`/checkout/auction/${currentAuction._id}`} className="payment-link-btn">
+                <CreditCard size={18} />
+                <span>{t("auctions.payNow") || "გადახდა"}</span>
+              </Link>
             )}
           </div>
         )}

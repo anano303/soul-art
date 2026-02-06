@@ -1,0 +1,720 @@
+/* Auction Checkout Page Styles */
+
+.auction-checkout-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #fefefe 0%, #f8fafc 50%, #f1f5f9 100%);
+  padding: 40px 24px 80px;
+}
+
+[data-theme="dark"] .auction-checkout-container,
+.dark .auction-checkout-container {
+  background: linear-gradient(135deg, #0f0f1a 0%, #1a1a2e 50%, #16213e 100%);
+}
+
+/* Header */
+.auction-checkout-header {
+  max-width: 1200px;
+  margin: 0 auto 32px;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.auction-checkout-header .back-link {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #64748b;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+.auction-checkout-header .back-link:hover {
+  color: #1a1a2e;
+}
+
+[data-theme="dark"] .auction-checkout-header .back-link:hover,
+.dark .auction-checkout-header .back-link:hover {
+  color: #f8fafc;
+}
+
+.checkout-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #1a1a2e;
+  margin: 0;
+}
+
+[data-theme="dark"] .checkout-title,
+.dark .checkout-title {
+  color: #f8fafc;
+}
+
+.checkout-title .trophy-icon {
+  color: #c9a961;
+}
+
+/* Progress Steps */
+.checkout-steps {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  max-width: 600px;
+  margin: 0 auto 40px;
+  padding: 0 20px;
+}
+
+.step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+}
+
+.step-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #e2e8f0;
+  color: #64748b;
+  transition: all 0.3s ease;
+}
+
+.step.active .step-icon {
+  background: linear-gradient(135deg, #c9a961 0%, #e8d9b5 100%);
+  color: #1a1a2e;
+  box-shadow: 0 4px 15px rgba(201, 169, 97, 0.4);
+}
+
+.step.completed .step-icon {
+  background: #10b981;
+  color: white;
+}
+
+.step span {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #64748b;
+}
+
+.step.active span {
+  color: #c9a961;
+  font-weight: 600;
+}
+
+.step.completed span {
+  color: #10b981;
+}
+
+.step-connector {
+  flex: 0.5;
+  height: 2px;
+  background: #e2e8f0;
+}
+
+[data-theme="dark"] .step-icon,
+.dark .step-icon {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="dark"] .step-connector,
+.dark .step-connector {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* Content */
+.checkout-content {
+  display: grid;
+  grid-template-columns: 1fr 1.2fr;
+  gap: 32px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Auction Summary Card */
+.auction-summary-card {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  height: fit-content;
+  position: sticky;
+  top: 24px;
+}
+
+[data-theme="dark"] .auction-summary-card,
+.dark .auction-summary-card {
+  background: rgba(30, 30, 50, 0.9);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+}
+
+.auction-summary-card h2 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1a1a2e;
+  margin: 0 0 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+[data-theme="dark"] .auction-summary-card h2,
+.dark .auction-summary-card h2 {
+  color: #f8fafc;
+  border-bottom-color: rgba(255, 255, 255, 0.1);
+}
+
+.auction-item {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.auction-image {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  border-radius: 12px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.auction-image .image {
+  object-fit: cover;
+}
+
+.auction-details {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.auction-details .auction-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #1a1a2e;
+  margin: 0;
+  line-height: 1.3;
+}
+
+[data-theme="dark"] .auction-details .auction-title,
+.dark .auction-details .auction-title {
+  color: #f8fafc;
+}
+
+.seller-name {
+  font-size: 0.9rem;
+  color: #64748b;
+  margin: 0;
+}
+
+.artwork-info {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.artwork-type {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 20px;
+  background: rgba(201, 169, 97, 0.15);
+  color: #c9a961;
+  text-transform: uppercase;
+}
+
+.dimensions {
+  font-size: 0.85rem;
+  color: #64748b;
+}
+
+.delivery-info {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  color: #64748b;
+}
+
+/* Price Summary */
+.price-summary {
+  padding-top: 20px;
+  border-top: 1px solid #e2e8f0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+[data-theme="dark"] .price-summary,
+.dark .price-summary {
+  border-top-color: rgba(255, 255, 255, 0.1);
+}
+
+.price-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.95rem;
+  color: #64748b;
+}
+
+.price-row.winning .winning-price {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #c9a961;
+}
+
+.price-row.shipping .free {
+  color: #10b981;
+  font-weight: 600;
+}
+
+.price-row.total {
+  padding-top: 12px;
+  border-top: 1px solid #e2e8f0;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #1a1a2e;
+}
+
+[data-theme="dark"] .price-row.total,
+.dark .price-row.total {
+  border-top-color: rgba(255, 255, 255, 0.1);
+  color: #f8fafc;
+}
+
+.total-price {
+  font-size: 1.5rem;
+  color: #10b981;
+}
+
+/* Checkout Form Section */
+.checkout-form-section {
+  background: white;
+  border-radius: 16px;
+  padding: 32px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="dark"] .checkout-form-section,
+.dark .checkout-form-section {
+  background: rgba(30, 30, 50, 0.9);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+}
+
+.checkout-form-section h2 {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #1a1a2e;
+  margin: 0 0 24px;
+}
+
+[data-theme="dark"] .checkout-form-section h2,
+.dark .checkout-form-section h2 {
+  color: #f8fafc;
+}
+
+.checkout-form-section h2 svg {
+  color: #c9a961;
+}
+
+/* Continue Button */
+.continue-btn {
+  width: 100%;
+  padding: 16px 24px;
+  margin-top: 24px;
+  border: none;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #c9a961 0%, #d4b875 100%);
+  color: #1a1a2e;
+  font-size: 1.05rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(201, 169, 97, 0.3);
+}
+
+.continue-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(201, 169, 97, 0.4);
+}
+
+.continue-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Review Step */
+.review-section {
+  background: #f8fafc;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 24px;
+}
+
+[data-theme="dark"] .review-section,
+.dark .review-section {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.review-section h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1a1a2e;
+  margin: 0 0 16px;
+}
+
+[data-theme="dark"] .review-section h3,
+.dark .review-section h3 {
+  color: #f8fafc;
+}
+
+.address-preview {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.address-preview p {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font-size: 0.95rem;
+  color: #64748b;
+}
+
+.address-preview p svg {
+  color: #c9a961;
+  flex-shrink: 0;
+}
+
+.edit-btn {
+  margin-top: 12px;
+  padding: 8px 16px;
+  border: 1px solid #c9a961;
+  border-radius: 8px;
+  background: transparent;
+  color: #c9a961;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.edit-btn:hover {
+  background: rgba(201, 169, 97, 0.1);
+}
+
+/* Payment Button */
+.payment-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 18px 24px;
+  border: none;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  font-size: 1.1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+}
+
+.payment-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+}
+
+.payment-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.payment-btn .spinning {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Loading & Error States */
+.loading-state,
+.error-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  gap: 16px;
+  color: #64748b;
+}
+
+.loading-state .loading-spinner {
+  animation: spin 1s linear infinite;
+  color: #c9a961;
+}
+
+.error-state .back-link {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #c9a961;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+/* Responsive */
+@media (max-width: 968px) {
+  .checkout-content {
+    grid-template-columns: 1fr;
+  }
+
+  .auction-summary-card {
+    position: static;
+    order: -1;
+  }
+}
+
+@media (max-width: 640px) {
+  .auction-checkout-container {
+    padding: 24px 16px 60px;
+  }
+
+  .auction-checkout-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .checkout-title {
+    font-size: 1.35rem;
+  }
+
+  .checkout-steps {
+    gap: 8px;
+  }
+
+  .step-icon {
+    width: 40px;
+    height: 40px;
+  }
+
+  .step span {
+    font-size: 0.75rem;
+  }
+
+  .auction-item {
+    flex-direction: column;
+  }
+
+  .auction-image {
+    width: 100%;
+    height: 200px;
+  }
+
+  .checkout-form-section {
+    padding: 24px 20px;
+  }
+
+  .zone-card {
+    flex-wrap: wrap;
+  }
+
+  .zone-price {
+    width: 100%;
+    text-align: right;
+    margin-top: 8px;
+  }
+}
+
+/* Delivery Zones */
+.delivery-zones {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.zone-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px;
+  background: #f8fafc;
+  border: 2px solid #e2e8f0;
+  border-radius: 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: left;
+  position: relative;
+}
+
+[data-theme="dark"] .zone-card,
+.dark .zone-card {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.zone-card:hover {
+  border-color: #c9a961;
+  background: rgba(201, 169, 97, 0.05);
+}
+
+.zone-card.selected {
+  border-color: #10b981;
+  background: rgba(16, 185, 129, 0.08);
+}
+
+[data-theme="dark"] .zone-card.selected,
+.dark .zone-card.selected {
+  background: rgba(16, 185, 129, 0.15);
+}
+
+.zone-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
+  background: white;
+  color: #64748b;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+}
+
+[data-theme="dark"] .zone-icon,
+.dark .zone-icon {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.zone-card.selected .zone-icon {
+  background: #10b981;
+  color: white;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.zone-info {
+  flex: 1;
+}
+
+.zone-info h3 {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #1a1a2e;
+  margin: 0 0 4px;
+}
+
+[data-theme="dark"] .zone-info h3,
+.dark .zone-info h3 {
+  color: #f8fafc;
+}
+
+.zone-info p {
+  font-size: 0.9rem;
+  color: #64748b;
+  margin: 0;
+}
+
+.zone-price {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #1a1a2e;
+  white-space: nowrap;
+}
+
+[data-theme="dark"] .zone-price,
+.dark .zone-price {
+  color: #f8fafc;
+}
+
+.zone-card.selected .zone-price {
+  color: #10b981;
+}
+
+.selected-check {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #10b981;
+  color: white;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+}
+
+/* Payment Summary */
+.payment-summary {
+  padding: 20px;
+  background: #f8fafc;
+  border-radius: 12px;
+  margin-bottom: 24px;
+}
+
+[data-theme="dark"] .payment-summary,
+.dark .payment-summary {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  font-size: 1rem;
+  color: #64748b;
+}
+
+.summary-row.total {
+  padding-top: 14px;
+  margin-top: 8px;
+  border-top: 2px solid #e2e8f0;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #1a1a2e;
+}
+
+[data-theme="dark"] .summary-row.total,
+.dark .summary-row.total {
+  border-top-color: rgba(255, 255, 255, 0.1);
+  color: #f8fafc;
+}
+
+.summary-row.total span:last-child {
+  color: #10b981;
+}
+
+/* Pending shipping text */
+.price-row.shipping .pending {
+  color: #9ca3af;
+  font-style: italic;
+}

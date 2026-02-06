@@ -14,6 +14,8 @@ import {
   Minus,
   Plus,
   Gavel,
+  Trophy,
+  CreditCard,
 } from "lucide-react";
 import { apiClient } from "@/lib/axios";
 import { useLanguage } from "@/hooks/LanguageContext";
@@ -54,6 +56,7 @@ interface Auction {
   deliveryDaysMin: number;
   deliveryDaysMax: number;
   deliveryType: "SOULART" | "ARTIST";
+  isPaid?: boolean;
   bids: Bid[];
   seller: {
     _id: string;
@@ -93,6 +96,11 @@ export default function AuctionDetailPage() {
   const fetchAuction = useCallback(async () => {
     try {
       const response = await apiClient.get(`/auctions/${auctionId}`);
+      console.log("[Auction Debug] Full auction data:", response.data);
+      console.log("[Auction Debug] Status:", response.data.status);
+      console.log("[Auction Debug] CurrentWinner:", response.data.currentWinner);
+      console.log("[Auction Debug] User ID:", user?._id);
+      console.log("[Auction Debug] Is winner match:", user?._id === response.data.currentWinner?._id);
       setAuction(response.data);
       // Set initial bid amount to minimum next bid
       const minBid =
@@ -105,7 +113,7 @@ export default function AuctionDetailPage() {
     } finally {
       setLoading(false);
     }
-  }, [auctionId, router, t]);
+  }, [auctionId, router, t, user]);
 
   useEffect(() => {
     if (auctionId) {
@@ -214,7 +222,10 @@ export default function AuctionDetailPage() {
   };
 
   const getBidderName = (bid: Bid) => {
-    if (bid.bidderName) return bid.bidderName;
+    // Skip if bidderName is "null null" or similar invalid value
+    if (bid.bidderName && bid.bidderName !== "null null" && !bid.bidderName.includes("null")) {
+      return bid.bidderName;
+    }
     if (!bid.bidder) return t("auctions.anonymousBidder") || "ანონიმური";
     // First try name field (main user name)
     if (bid.bidder.name) {
@@ -229,6 +240,39 @@ export default function AuctionDetailPage() {
       return `${bid.bidder.firstName} ${bid.bidder.lastName}`;
     }
     return t("auctions.anonymousBidder") || "ანონიმური";
+  };
+
+  const getWinnerName = () => {
+    if (!auction?.currentWinner) return null;
+    const winner = auction.currentWinner;
+    // First try name field
+    if (winner.name) {
+      return winner.name;
+    }
+    // Then try ownerFirstName/ownerLastName
+    if (winner.ownerFirstName && winner.ownerLastName) {
+      return `${winner.ownerFirstName} ${winner.ownerLastName}`;
+    }
+    // Legacy firstName/lastName
+    if (winner.firstName && winner.lastName) {
+      return `${winner.firstName} ${winner.lastName}`;
+    }
+    // Fall back to highest bid from bids array
+    if (auction.bids && auction.bids.length > 0) {
+      const sortedBids = [...auction.bids].sort((a, b) => b.amount - a.amount);
+      const highestBid = sortedBids[0];
+      return getBidderName(highestBid);
+    }
+    return t("auctions.anonymousBidder") || "ანონიმური";
+  };
+
+  const isCurrentUserWinner = () => {
+    if (!user || !auction?.currentWinner) return false;
+    return user._id === auction.currentWinner._id;
+  };
+
+  const handlePayment = () => {
+    router.push(`/checkout/auction/${auction?._id}`);
   };
 
   const handleBidChange = (delta: number) => {
@@ -491,16 +535,20 @@ export default function AuctionDetailPage() {
                   {t("auctions.highestBidder") || "ლიდერი"}:{" "}
                   <strong>
                     {(() => {
-                      // First try currentWinner
+                      // First try currentWinner with full name
                       if (auction.currentWinner) {
-                        const firstName =
-                          auction.currentWinner.ownerFirstName ||
-                          auction.currentWinner.firstName;
-                        const lastName =
-                          auction.currentWinner.ownerLastName ||
-                          auction.currentWinner.lastName;
-                        if (firstName && lastName) {
-                          return `${firstName} ${lastName.charAt(0)}.`;
+                        const winner = auction.currentWinner;
+                        // Try name field first
+                        if (winner.name) {
+                          return winner.name;
+                        }
+                        // Then try ownerFirstName/ownerLastName
+                        if (winner.ownerFirstName && winner.ownerLastName) {
+                          return `${winner.ownerFirstName} ${winner.ownerLastName}`;
+                        }
+                        // Then try firstName/lastName
+                        if (winner.firstName && winner.lastName) {
+                          return `${winner.firstName} ${winner.lastName}`;
                         }
                       }
                       // Fall back to highest bid from bids array
@@ -518,6 +566,48 @@ export default function AuctionDetailPage() {
               </div>
             )}
           </div>
+
+          {/* Winner Section - Show when auction is ended */}
+          {auction.status === "ENDED" && auction.currentWinner && (
+            <div
+              className={`winner-section ${isCurrentUserWinner() ? "is-winner" : ""}`}
+            >
+              <div className="winner-header">
+                <Trophy size={24} className="trophy-icon" />
+                <h3>
+                  {t("auctions.auctionWinner") || "აუქციონის გამარჯვებული"}
+                </h3>
+              </div>
+              <div className="winner-info">
+                <span className="winner-name">{getWinnerName()}</span>
+                <span className="winning-amount">
+                  {t("auctions.winningBid") || "მოგებული ფასი"}:{" "}
+                  {formatPrice(auction.currentPrice)}
+                </span>
+              </div>
+              {isCurrentUserWinner() && (
+                <div className="winner-actions">
+                  {auction.isPaid ? (
+                    <p className="paid-notice">
+                      ✅ {t("auctions.alreadyPaid") || "გადახდა შესრულებულია"}
+                    </p>
+                  ) : (
+                    <>
+                      <p className="congratulations">
+                        🎉{" "}
+                        {t("auctions.congratulations") ||
+                          "გილოცავთ! თქვენ მოიგეთ ეს აუქციონი!"}
+                      </p>
+                      <button className="payment-btn" onClick={handlePayment}>
+                        <CreditCard size={20} />
+                        {t("auctions.proceedToPayment") || "გადახდა"}
+                      </button>
+                    </>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Bid Input */}
           {canBid && (

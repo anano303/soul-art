@@ -1036,3 +1036,217 @@
     padding: 14px;
   }
 }
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Winner Section - Auction Winner Display
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.winner-section {
+  background: linear-gradient(
+    135deg,
+    rgba(201, 169, 97, 0.1) 0%,
+    rgba(201, 169, 97, 0.05) 100%
+  );
+  border: 2px solid rgba(201, 169, 97, 0.3);
+  border-radius: 16px;
+  padding: 24px;
+  margin: 24px 0;
+  position: relative;
+  overflow: hidden;
+}
+
+.winner-section::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #c9a961, #e8d9b5, #c9a961);
+}
+
+.winner-section.is-winner {
+  background: linear-gradient(
+    135deg,
+    rgba(16, 185, 129, 0.15) 0%,
+    rgba(16, 185, 129, 0.05) 100%
+  );
+  border-color: rgba(16, 185, 129, 0.4);
+  animation: winnerPulse 2s ease-in-out infinite;
+}
+
+.winner-section.is-winner::before {
+  background: linear-gradient(90deg, #10b981, #34d399, #10b981);
+}
+
+@keyframes winnerPulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 20px 5px rgba(16, 185, 129, 0.2);
+  }
+}
+
+.winner-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.winner-header .trophy-icon {
+  color: #c9a961;
+  animation: trophyBounce 1.5s ease-in-out infinite;
+}
+
+.winner-section.is-winner .trophy-icon {
+  color: #10b981;
+}
+
+@keyframes trophyBounce {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+.winner-header h3 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.winner-info {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px;
+  background: var(--card-bg);
+  border-radius: 12px;
+  border: 1px solid var(--card-border);
+}
+
+.winner-name {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.winning-amount {
+  font-size: 1rem;
+  color: var(--text-secondary);
+}
+
+.winning-amount strong {
+  color: #c9a961;
+  font-size: 1.1rem;
+}
+
+.winner-actions {
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.congratulations {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #10b981;
+  text-align: center;
+  margin: 0;
+  padding: 12px;
+  background: rgba(16, 185, 129, 0.1);
+  border-radius: 8px;
+}
+
+.paid-notice {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #10b981;
+  text-align: center;
+  margin: 0;
+  padding: 16px;
+  background: rgba(16, 185, 129, 0.15);
+  border-radius: 12px;
+  border: 2px solid rgba(16, 185, 129, 0.3);
+}
+
+.payment-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 16px 24px;
+  border: none;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  font-size: 1.1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+}
+
+.payment-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+  background: linear-gradient(135deg, #059669 0%, #047857 100%);
+}
+
+.payment-btn:active {
+  transform: translateY(0);
+}
+
+/* Dark theme adjustments */
+[data-theme="dark"] .winner-section,
+.dark .winner-section {
+  background: linear-gradient(
+    135deg,
+    rgba(201, 169, 97, 0.15) 0%,
+    rgba(201, 169, 97, 0.05) 100%
+  );
+}
+
+[data-theme="dark"] .winner-section.is-winner,
+.dark .winner-section.is-winner {
+  background: linear-gradient(
+    135deg,
+    rgba(16, 185, 129, 0.2) 0%,
+    rgba(16, 185, 129, 0.08) 100%
+  );
+}
+
+[data-theme="dark"] .congratulations,
+.dark .congratulations {
+  background: rgba(16, 185, 129, 0.15);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .winner-section {
+    padding: 20px;
+    margin: 20px 0;
+  }
+
+  .winner-header h3 {
+    font-size: 1.1rem;
+  }
+
+  .winner-name {
+    font-size: 1.1rem;
+  }
+
+  .payment-btn {
+    padding: 14px 20px;
+    font-size: 1rem;
+  }
+}

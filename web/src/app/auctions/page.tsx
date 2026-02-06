@@ -78,6 +78,18 @@ function AuctionsContent() {
     maxPrice: searchParams?.get("maxPrice") || "",
   });
 
+  // Load saved tab from localStorage or URL hash on mount
+  useEffect(() => {
+    const hash = window.location.hash.replace("#", "").toUpperCase();
+    const savedTab = localStorage.getItem("auctionsActiveTab");
+    
+    if (hash === "ACTIVE" || hash === "SCHEDULED" || hash === "ENDED") {
+      setActiveTab(hash as "ACTIVE" | "SCHEDULED" | "ENDED");
+    } else if (savedTab === "ACTIVE" || savedTab === "SCHEDULED" || savedTab === "ENDED") {
+      setActiveTab(savedTab as "ACTIVE" | "SCHEDULED" | "ENDED");
+    }
+  }, []);
+
   const fetchAuctions = async (
     page: number = 1,
     status: string = activeTab,
@@ -133,6 +145,9 @@ function AuctionsContent() {
   const handleTabChange = (tab: "ACTIVE" | "SCHEDULED" | "ENDED") => {
     setActiveTab(tab);
     setPagination({ current: 1, pages: 1, total: 0 });
+    // Save to localStorage and update URL hash
+    localStorage.setItem("auctionsActiveTab", tab);
+    window.history.replaceState(null, "", `#${tab.toLowerCase()}`);
   };
 
   const isSeller = user?.role?.toString().toUpperCase() === "SELLER";

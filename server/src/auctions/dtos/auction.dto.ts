@@ -160,6 +160,6 @@ export class WinnerPaymentDto {
 
 // Delivery fee constants
 export const DELIVERY_FEES = {
-  TBILISI: 12,
+  TBILISI: 0,
   REGION: 18,
 } as const;
