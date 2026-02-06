@@ -491,15 +491,11 @@ export default function AuctionCard({
             <div className="time-details">
               <div className="time-row">
                 <Calendar size={10} />
-                <span>
-                  {formatDate(currentAuction.startDate)}
-                </span>
+                <span>{formatDate(currentAuction.startDate)}</span>
               </div>
               <div className="time-row">
                 <Clock size={10} />
-                <span>
-                  {formatDate(currentAuction.endDate)}
-                </span>
+                <span>{formatDate(currentAuction.endDate)}</span>
               </div>
             </div>
 

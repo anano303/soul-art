@@ -476,6 +476,8 @@
   background: rgba(1, 38, 69, 0.9);
   border-bottom: 1px solid rgba(201, 169, 97, 0.3);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  position: relative;
+  z-index: 50;
 }
 
 @media (max-width: 768px) {
@@ -502,15 +504,10 @@
   padding: 0;
   position: relative;
   z-index: 10;
-  overflow-x: auto;
-  overflow-y: hidden;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
+  overflow: visible;
 }
 
-.auctions-filters-section::-webkit-scrollbar {
-  display: none;
-}
+/* Scrollbar hidden - no longer needed since overflow is visible */
 
 /* ─────────────────────────────────────────────────────────────────────────────
    Content Layout

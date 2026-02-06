@@ -8,6 +8,7 @@ import { useLanguage } from "@/hooks/LanguageContext";
 import { useTheme } from "@/hooks/ThemeContext";
 import { useUser } from "@/modules/auth/hooks/use-user";
 import { Moon, Sun, Gavel, Plus } from "lucide-react";
+import { BecomeSellerModal } from "@/components/become-seller-modal/become-seller-modal";
 
 import "./auctions.css";
 import { AuctionCard, AuctionFilters } from "@/modules/auctions/components";
@@ -31,12 +32,15 @@ interface Auction {
   seller: {
     firstName?: string;
     lastName?: string;
+    name?: string;
     ownerFirstName?: string;
     ownerLastName?: string;
+    storeName?: string;
   };
   currentWinner?: {
     firstName?: string;
     lastName?: string;
+    name?: string;
     ownerFirstName?: string;
     ownerLastName?: string;
   };
@@ -58,7 +62,9 @@ function AuctionsContent() {
   const searchParams = useSearchParams();
   const [auctions, setAuctions] = useState<Auction[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<"ACTIVE" | "SCHEDULED">("ACTIVE");
+  const [activeTab, setActiveTab] = useState<"ACTIVE" | "SCHEDULED" | "ENDED">(
+    "ACTIVE",
+  );
   const [pagination, setPagination] = useState({
     current: 1,
     pages: 1,
@@ -124,118 +130,157 @@ function AuctionsContent() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  const handleTabChange = (tab: "ACTIVE" | "SCHEDULED") => {
+  const handleTabChange = (tab: "ACTIVE" | "SCHEDULED" | "ENDED") => {
     setActiveTab(tab);
     setPagination({ current: 1, pages: 1, total: 0 });
   };
 
   const isSeller = user?.role?.toString().toUpperCase() === "SELLER";
+  const [isSellerModalOpen, setIsSellerModalOpen] = useState(false);
 
   return (
-    <div className="auctions-container">
-      <div className="auctions-header">
-        <div className="header-top-row">
-          <h1 className="auctions-title">
-            <span className="title-text">Soul Art</span>
-            <span className="title-auctions">
-              <Gavel className="gavel-icon" />
-              Auctions
-            </span>
-          </h1>
-          <div className="header-actions">
-            {isSeller && (
-              <Link
-                href="/profile/auctions/create"
-                className="create-auction-btn"
-                title={
-                  language === "en" ? "Create Auction" : "აუქციონის შექმნა"
-                }
+    <>
+      <div className="auctions-container">
+        <div className="auctions-header">
+          <div className="header-top-row">
+            <h1 className="auctions-title">
+              <span className="title-text">Soul Art</span>
+              <span className="title-auctions">
+                <Gavel className="gavel-icon" />
+                Auctions
+              </span>
+            </h1>
+            <div className="header-actions">
+              {isSeller ? (
+                <Link
+                  href="/profile/auctions/create"
+                  className="create-auction-btn"
+                  title={
+                    language === "en" ? "Create Auction" : "აუქციონის შექმნა"
+                  }
+                >
+                  <Plus size={18} />
+                  <span>
+                    {language === "en" ? "Create Auction" : "აუქციონის შექმნა"}
+                  </span>
+                </Link>
+              ) : (
+                <button
+                  onClick={() => setIsSellerModalOpen(true)}
+                  className="create-auction-btn"
+                  title={
+                    language === "en"
+                      ? "Become an Artist to create auctions"
+                      : "აუქციონის შესაქმნელად გახდი ხელოვანი"
+                  }
+                >
+                  <Plus size={18} />
+                  <span>
+                    {language === "en" ? "Create Auction" : "აუქციონის შექმნა"}
+                  </span>
+                </button>
+              )}
+              <button
+                className="theme-toggle-btn"
+                onClick={toggleTheme}
+                title={theme === "light" ? "Dark Mode" : "Light Mode"}
               >
-                <Plus size={18} />
-                <span>
-                  {language === "en" ? "Create Auction" : "აუქციონის შექმნა"}
-                </span>
-              </Link>
-            )}
+                {theme === "light" ? <Moon size={20} /> : <Sun size={20} />}
+              </button>
+            </div>
+          </div>
+          <p className="auctions-subtitle">{t("auctions.subtitle")}</p>
+
+          {/* Status Tabs */}
+          <div className="auctions-tabs">
             <button
-              className="theme-toggle-btn"
-              onClick={toggleTheme}
-              title={theme === "light" ? "Dark Mode" : "Light Mode"}
+              className={`auction-tab ${activeTab === "ACTIVE" ? "active" : ""}`}
+              onClick={() => handleTabChange("ACTIVE")}
             >
-              {theme === "light" ? <Moon size={20} /> : <Sun size={20} />}
+              <span className="tab-icon">🔥</span>
+              {t("auctions.tabActive") || "აქტიური"}
+            </button>
+            <button
+              className={`auction-tab ${activeTab === "SCHEDULED" ? "active" : ""}`}
+              onClick={() => handleTabChange("SCHEDULED")}
+            >
+              <span className="tab-icon">📅</span>
+              {t("auctions.tabScheduled") || "მალე"}
+            </button>
+            <button
+              className={`auction-tab ${activeTab === "ENDED" ? "active" : ""}`}
+              onClick={() => handleTabChange("ENDED")}
+            >
+              <span className="tab-icon">🏆</span>
+              {t("auctions.tabEnded") || "დასრულებული"}
             </button>
           </div>
         </div>
-        <p className="auctions-subtitle">{t("auctions.subtitle")}</p>
 
-        {/* Status Tabs */}
-        <div className="auctions-tabs">
-          <button
-            className={`auction-tab ${activeTab === "ACTIVE" ? "active" : ""}`}
-            onClick={() => handleTabChange("ACTIVE")}
-          >
-            <span className="tab-icon">🔥</span>
-            {t("auctions.tabActive") || "აქტიური"}
-          </button>
-          <button
-            className={`auction-tab ${activeTab === "SCHEDULED" ? "active" : ""}`}
-            onClick={() => handleTabChange("SCHEDULED")}
-          >
-            <span className="tab-icon">📅</span>
-            {t("auctions.tabScheduled") || "მალე დაიწყება"}
-          </button>
+        {/* Filters - Below hero image */}
+        <div className="auctions-filters-wrapper">
+          <div className="auctions-filters-section">
+            <AuctionFilters
+              filters={filters}
+              onFilterChange={handleFilterChange}
+            />
+          </div>
+        </div>
+
+        <div className="auctions-content">
+          <main className="auctions-main">
+            {loading ? (
+              <div className="loading-state">
+                <div className="loading-spinner"></div>
+                <p>{t("auctions.loading")}</p>
+              </div>
+            ) : auctions.length === 0 ? (
+              <div className="empty-state">
+                <div className="empty-icon">
+                  {activeTab === "SCHEDULED" ? "📅" : "🎨"}
+                </div>
+                <h3>{t("auctions.noAuctions")}</h3>
+                <p>
+                  {activeTab === "SCHEDULED"
+                    ? t("auctions.noScheduledDesc") ||
+                      "უახლოეს 3 დღეში დაგეგმილი აუქციონები არ არის"
+                    : t("auctions.noAuctionsDesc")}
+                </p>
+              </div>
+            ) : (
+              <>
+                <div className="auctions-grid">
+                  {auctions.map((auction) => (
+                    <AuctionCard key={auction._id} auction={auction} />
+                  ))}
+                </div>
+
+                {pagination.pages > 1 && (
+                  <div className="auctions-pagination">
+                    <Pagination
+                      currentPage={pagination.current}
+                      totalPages={pagination.pages}
+                      onPageChange={handlePageChange}
+                    />
+                  </div>
+                )}
+              </>
+            )}
+          </main>
         </div>
       </div>
 
-      <div className="auctions-content">
-        <aside className="auctions-sidebar">
-          <AuctionFilters
-            filters={filters}
-            onFilterChange={handleFilterChange}
-          />
-        </aside>
-
-        <main className="auctions-main">
-          {loading ? (
-            <div className="loading-state">
-              <div className="loading-spinner"></div>
-              <p>{t("auctions.loading")}</p>
-            </div>
-          ) : auctions.length === 0 ? (
-            <div className="empty-state">
-              <div className="empty-icon">
-                {activeTab === "SCHEDULED" ? "📅" : "🎨"}
-              </div>
-              <h3>{t("auctions.noAuctions")}</h3>
-              <p>
-                {activeTab === "SCHEDULED"
-                  ? t("auctions.noScheduledDesc") ||
-                    "უახლოეს 3 დღეში დაგეგმილი აუქციონები არ არის"
-                  : t("auctions.noAuctionsDesc")}
-              </p>
-            </div>
-          ) : (
-            <>
-              <div className="auctions-grid">
-                {auctions.map((auction) => (
-                  <AuctionCard key={auction._id} auction={auction} />
-                ))}
-              </div>
-
-              {pagination.pages > 1 && (
-                <div className="auctions-pagination">
-                  <Pagination
-                    currentPage={pagination.current}
-                    totalPages={pagination.pages}
-                    onPageChange={handlePageChange}
-                  />
-                </div>
-              )}
-            </>
-          )}
-        </main>
-      </div>
-    </div>
+      {/* Become Seller Modal */}
+      <BecomeSellerModal
+        isOpen={isSellerModalOpen}
+        onClose={() => setIsSellerModalOpen(false)}
+        customMessage={
+          language === "en"
+            ? "You need to be registered as an artist to create auctions"
+            : "აუქციონის შესაქმნელად საჭიროა იყოთ ხელოვანად დარეგისტრირებული"
+        }
+      />
+    </>
   );
 }
 

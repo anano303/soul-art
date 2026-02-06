@@ -24,6 +24,7 @@ import "./auction-detail.css";
 interface Bid {
   bidder: {
     _id: string;
+    name?: string;
     ownerFirstName?: string;
     ownerLastName?: string;
     firstName?: string;
@@ -56,6 +57,8 @@ interface Auction {
   bids: Bid[];
   seller: {
     _id: string;
+    name?: string;
+    storeName?: string;
     ownerFirstName?: string;
     ownerLastName?: string;
     firstName?: string;
@@ -64,6 +67,7 @@ interface Auction {
   };
   currentWinner?: {
     _id: string;
+    name?: string;
     ownerFirstName?: string;
     ownerLastName?: string;
     firstName?: string;
@@ -168,41 +172,63 @@ export default function AuctionDetailPage() {
         (difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60),
       );
       const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((difference % (1000 * 60)) / 1000);
 
       if (days > 0) {
-        setTimeLeft(`${days}დ ${hours}ს ${minutes}წთ`);
+        setTimeLeft(`${days}დ ${hours}ს ${minutes}წთ ${seconds}წმ`);
       } else if (hours > 0) {
-        setTimeLeft(`${hours}ს ${minutes}წთ`);
+        setTimeLeft(`${hours}ს ${minutes}წთ ${seconds}წმ`);
+      } else if (minutes > 0) {
+        setTimeLeft(`${minutes}წთ ${seconds}წმ`);
       } else {
-        setTimeLeft(`${minutes}წთ`);
+        setTimeLeft(`${seconds}წმ`);
       }
     };
 
     calculateTimeLeft();
-    const interval = setInterval(calculateTimeLeft, 60000);
+    const interval = setInterval(calculateTimeLeft, 1000);
     return () => clearInterval(interval);
   }, [auction, t, fetchAuction]);
 
   const getSellerName = () => {
-    if (!auction) return "";
-    if (auction.seller.ownerFirstName && auction.seller.ownerLastName) {
-      return `${auction.seller.ownerFirstName} ${auction.seller.ownerLastName}`;
+    if (!auction?.seller)
+      return t("auctions.unknownSeller") || "უცნობი ხელოვანი";
+    const seller = auction.seller;
+    // First try storeName for sellers
+    if (seller.storeName) {
+      return seller.storeName;
     }
-    if (auction.seller.firstName && auction.seller.lastName) {
-      return `${auction.seller.firstName} ${auction.seller.lastName}`;
+    // Then try ownerFirstName/ownerLastName
+    if (seller.ownerFirstName && seller.ownerLastName) {
+      return `${seller.ownerFirstName} ${seller.ownerLastName}`;
     }
-    return t("auctions.unknownSeller") || "Unknown Seller";
+    // Then try name field (main user name)
+    if (seller.name) {
+      return seller.name;
+    }
+    // Legacy firstName/lastName
+    if (seller.firstName && seller.lastName) {
+      return `${seller.firstName} ${seller.lastName}`;
+    }
+    return t("auctions.unknownSeller") || "უცნობი ხელოვანი";
   };
 
   const getBidderName = (bid: Bid) => {
     if (bid.bidderName) return bid.bidderName;
+    if (!bid.bidder) return t("auctions.anonymousBidder") || "ანონიმური";
+    // First try name field (main user name)
+    if (bid.bidder.name) {
+      return bid.bidder.name;
+    }
+    // Then try ownerFirstName/ownerLastName (for sellers)
     if (bid.bidder.ownerFirstName && bid.bidder.ownerLastName) {
       return `${bid.bidder.ownerFirstName} ${bid.bidder.ownerLastName}`;
     }
+    // Legacy firstName/lastName
     if (bid.bidder.firstName && bid.bidder.lastName) {
       return `${bid.bidder.firstName} ${bid.bidder.lastName}`;
     }
-    return t("auctions.anonymousBidder") || "Anonymous";
+    return t("auctions.anonymousBidder") || "ანონიმური";
   };
 
   const handleBidChange = (delta: number) => {
@@ -447,17 +473,46 @@ export default function AuctionDetailPage() {
                 <strong>{auction.totalBids}</strong> {t("auctions.bids")}
               </span>
             </div>
-            {auction.currentWinner && (
+            {/* Show highest bid amount */}
+            {auction.currentPrice > auction.startingPrice && (
+              <div className="stat-item highest-bid">
+                <span>
+                  {t("auctions.highestBid") || "მაღალი ფსონი"}:{" "}
+                  <strong>{formatPrice(auction.currentPrice)}</strong>
+                </span>
+              </div>
+            )}
+            {/* Show highest bidder - try currentWinner first, then fall back to bids */}
+            {(auction.currentWinner ||
+              (auction.bids && auction.bids.length > 0)) && (
               <div className="stat-item winner">
                 <Gavel size={20} />
                 <span>
-                  {t("auctions.highestBidder")}:{" "}
+                  {t("auctions.highestBidder") || "ლიდერი"}:{" "}
                   <strong>
-                    {auction.currentWinner.ownerFirstName ||
-                      auction.currentWinner.firstName}{" "}
-                    {auction.currentWinner.ownerLastName?.charAt(0) ||
-                      auction.currentWinner.lastName?.charAt(0)}
-                    .
+                    {(() => {
+                      // First try currentWinner
+                      if (auction.currentWinner) {
+                        const firstName =
+                          auction.currentWinner.ownerFirstName ||
+                          auction.currentWinner.firstName;
+                        const lastName =
+                          auction.currentWinner.ownerLastName ||
+                          auction.currentWinner.lastName;
+                        if (firstName && lastName) {
+                          return `${firstName} ${lastName.charAt(0)}.`;
+                        }
+                      }
+                      // Fall back to highest bid from bids array
+                      if (auction.bids && auction.bids.length > 0) {
+                        const sortedBids = [...auction.bids].sort(
+                          (a, b) => b.amount - a.amount,
+                        );
+                        const highestBid = sortedBids[0];
+                        return getBidderName(highestBid);
+                      }
+                      return t("auctions.anonymousBidder") || "ანონიმური";
+                    })()}
                   </strong>
                 </span>
               </div>

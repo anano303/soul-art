@@ -37,7 +37,7 @@ const becomeSellerSchema = z
         {
           message: SLUG_VALIDATION_MESSAGE,
           path: ["artistSlug"],
-        }
+        },
       ),
   })
   .refine(
@@ -53,7 +53,7 @@ const becomeSellerSchema = z
       message:
         "არასწორი IBAN. გთხოვთ შეიყვანოთ ქართული IBAN (22 სიმბოლო, იწყება GE-ით)",
       path: ["accountNumber"],
-    }
+    },
   );
 
 type BecomeSellerFormData = z.infer<typeof becomeSellerSchema>;
@@ -65,6 +65,7 @@ interface BecomeSellerModalProps {
   userIdentificationNumber?: string; // Current user's ID number
   userAccountNumber?: string; // Current user's bank account (IBAN)
   userBeneficiaryBankCode?: string; // Current user's bank code
+  customMessage?: string; // Custom message to show at the top
 }
 
 export function BecomeSellerModal({
@@ -74,6 +75,7 @@ export function BecomeSellerModal({
   userIdentificationNumber,
   userAccountNumber,
   userBeneficiaryBankCode,
+  customMessage,
 }: BecomeSellerModalProps) {
   const { t, language } = useLanguage();
   const queryClient = useQueryClient();
@@ -165,7 +167,7 @@ export function BecomeSellerModal({
         shouldValidate: options?.validate ?? true,
       });
     },
-    [setValue]
+    [setValue],
   );
 
   const slugify = useCallback((input: string) => {
@@ -189,7 +191,7 @@ export function BecomeSellerModal({
         ? `${base}-${Date.now().toString().slice(-2)}`
         : "artist";
     },
-    [slugify]
+    [slugify],
   );
 
   const ensureSuggestedSlug = useCallback(
@@ -211,7 +213,7 @@ export function BecomeSellerModal({
       setSlugMessage(
         language === "en"
           ? "Checking link availability..."
-          : "მიმდინარეობს ბმულის შემოწმება..."
+          : "მიმდინარეობს ბმულის შემოწმება...",
       );
 
       try {
@@ -234,7 +236,7 @@ export function BecomeSellerModal({
             setSlugMessage(
               language === "en"
                 ? `We'll reserve ${portfolioLinkBase}/@${candidate} for you`
-                : `${portfolioLinkBase}/@${candidate} შენთვის იქნება დაჯავშნილი`
+                : `${portfolioLinkBase}/@${candidate} შენთვის იქნება დაჯავშნილი`,
             );
             return;
           }
@@ -256,11 +258,11 @@ export function BecomeSellerModal({
         setSlugMessage(
           language === "en"
             ? "We couldn't auto-generate a unique link. Please adjust manually."
-            : "ბმულის ავტომატური გენერაცია ვერ მოხერხდა. გთხოვთ, შეცვალოთ ხელით."
+            : "ბმულის ავტომატური გენერაცია ვერ მოხერხდა. გთხოვთ, შეცვალოთ ხელით.",
         );
       }
     },
-    [buildAutoSlug, language, portfolioLinkBase, setSlugValue]
+    [buildAutoSlug, language, portfolioLinkBase, setSlugValue],
   );
 
   const checkSlugManually = useCallback(
@@ -283,7 +285,7 @@ export function BecomeSellerModal({
           setSlugMessage(
             language === "en"
               ? `${portfolioLinkBase}/@${slug} is available`
-              : `${portfolioLinkBase}/@${slug} თავისუფალია`
+              : `${portfolioLinkBase}/@${slug} თავისუფალია`,
           );
         } else {
           setSlugStatus("taken");
@@ -293,8 +295,8 @@ export function BecomeSellerModal({
                 ? "This slug is reserved. Please choose another."
                 : "ეს სლაგი დაჯავშნულია. გთხოვთ, აირჩიოთ სხვა."
               : language === "en"
-              ? "This link is already taken. Try another."
-              : "ეს ბმული უკვე დაკავებულია. სცადე სხვა ვარიანტი."
+                ? "This link is already taken. Try another."
+                : "ეს ბმული უკვე დაკავებულია. სცადე სხვა ვარიანტი.",
           );
         }
       } catch (error) {
@@ -306,11 +308,11 @@ export function BecomeSellerModal({
         setSlugMessage(
           language === "en"
             ? "Couldn't verify link. Try again later."
-            : "ბმულის შემოწმება ვერ მოხერხდა. სცადე მოგვიანებით."
+            : "ბმულის შემოწმება ვერ მოხერხდა. სცადე მოგვიანებით.",
         );
       }
     },
-    [language, portfolioLinkBase]
+    [language, portfolioLinkBase],
   );
 
   const resetSlugState = useCallback(() => {
@@ -339,7 +341,7 @@ export function BecomeSellerModal({
         setSlugMessage("");
       }
     },
-    [setSlugValue, slugify]
+    [setSlugValue, slugify],
   );
 
   const handleUseSuggestedSlug = useCallback(() => {
@@ -353,7 +355,7 @@ export function BecomeSellerModal({
       setSlugMessage(
         language === "en"
           ? `We'll reserve ${portfolioLinkBase}/@${suggestedSlug} for you`
-          : `${portfolioLinkBase}/@${suggestedSlug} შენთვის იქნება დაჯავშნილი`
+          : `${portfolioLinkBase}/@${suggestedSlug} შენთვის იქნება დაჯავშნილი`,
       );
     }
 
@@ -407,7 +409,7 @@ export function BecomeSellerModal({
       setSlugMessage(
         language === "en"
           ? "Use at least 3 characters."
-          : "გამოიყენე მინიმუმ 3 სიმბოლო."
+          : "გამოიყენე მინიმუმ 3 სიმბოლო.",
       );
       return;
     }
@@ -416,7 +418,7 @@ export function BecomeSellerModal({
     setSlugMessage(
       language === "en"
         ? "Checking link availability..."
-        : "მიმდინარეობს ბმულის შემოწმება..."
+        : "მიმდინარეობს ბმულის შემოწმება...",
     );
 
     const timeoutId = setTimeout(() => {
@@ -533,6 +535,13 @@ export function BecomeSellerModal({
             ×
           </button>
         </div>
+
+        {customMessage && (
+          <div className="custom-message-banner">
+            <span className="banner-icon">ℹ️</span>
+            <p>{customMessage}</p>
+          </div>
+        )}
 
         <form onSubmit={onSubmit} className="become-seller-form">
           <div className="form-group">

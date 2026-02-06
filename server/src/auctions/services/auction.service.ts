@@ -227,10 +227,16 @@ export class AuctionService {
       .findById(auctionId)
       .populate(
         'seller',
-        'name ownerFirstName ownerLastName storeName email phone',
+        'name firstName lastName ownerFirstName ownerLastName storeName email phone',
       )
-      .populate('currentWinner', 'name ownerFirstName ownerLastName')
-      .populate('bids.bidder', 'name ownerFirstName ownerLastName');
+      .populate(
+        'currentWinner',
+        'name firstName lastName ownerFirstName ownerLastName',
+      )
+      .populate(
+        'bids.bidder',
+        'name firstName lastName ownerFirstName ownerLastName',
+      );
 
     if (!auction) {
       throw new NotFoundException('Auction not found');

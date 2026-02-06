@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Filter, X } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { ChevronDown, X } from "lucide-react";
 import { useLanguage } from "@/hooks/LanguageContext";
 import { apiClient } from "@/lib/axios";
 import "./auction-filters.css";
@@ -35,12 +35,28 @@ export default function AuctionFilters({
   onFilterChange,
 }: AuctionFiltersProps) {
   const { t } = useLanguage();
-  const [isExpanded, setIsExpanded] = useState(true);
   const [filterOptions, setFilterOptions] = useState<FilterOptions>({
     materials: [],
     dimensions: [],
   });
   const [loading, setLoading] = useState(true);
+  const [openDropdown, setOpenDropdown] = useState<string | null>(null);
+  const dropdownRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (openDropdown) {
+        const ref = dropdownRefs.current[openDropdown];
+        if (ref && !ref.contains(event.target as Node)) {
+          setOpenDropdown(null);
+        }
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [openDropdown]);
 
   // Fetch available filter options from active auctions
   useEffect(() => {
@@ -63,6 +79,7 @@ export default function AuctionFilters({
   const handleFilterChange = (key: keyof FilterState, value: string) => {
     const newFilters = { ...filters, [key]: value };
     onFilterChange(newFilters);
+    setOpenDropdown(null);
   };
 
   const clearAllFilters = () => {
@@ -77,105 +94,144 @@ export default function AuctionFilters({
 
   const hasActiveFilters = Object.values(filters).some((value) => value !== "");
 
+  const toggleDropdown = (name: string) => {
+    setOpenDropdown(openDropdown === name ? null : name);
+  };
+
   return (
-    <div className="auction-filters">
-      <div
-        className="filters-header"
-        onClick={() => setIsExpanded(!isExpanded)}
-      >
-        <div className="filters-title">
-          <Filter size={20} />
-          <span>{t("auctions.filters")}</span>
-        </div>
-        <button className="filters-toggle">{isExpanded ? "−" : "+"}</button>
-      </div>
-
-      <div className={`filters-content ${isExpanded ? "expanded" : ""}`}>
-        {/* Artwork Type Filter */}
-        <div className="filter-group">
-          <label className="filter-label">{t("auctions.artworkType")}</label>
-          <select
-            value={filters.artworkType}
-            onChange={(e) => handleFilterChange("artworkType", e.target.value)}
-            className="filter-select"
+    <div className="auction-filters-dropdown">
+      <div className="filters-row">
+        {/* Artwork Type Dropdown */}
+        <div
+          className="filter-dropdown-container"
+          ref={(el) => {
+            dropdownRefs.current["artworkType"] = el;
+          }}
+        >
+          <button
+            className={`filter-dropdown-btn ${filters.artworkType ? "has-value" : ""}`}
+            onClick={() => toggleDropdown("artworkType")}
           >
-            {ARTWORK_TYPES.map((type) => (
-              <option key={type.value} value={type.value}>
-                {type.label}
-              </option>
-            ))}
-          </select>
+            <span className="filter-label">
+              {t("auctions.artworkType") || "ტიპი"}
+            </span>
+            <span className="filter-value">
+              {filters.artworkType
+                ? ARTWORK_TYPES.find((t) => t.value === filters.artworkType)
+                    ?.label
+                : "ყველა"}
+            </span>
+            <ChevronDown
+              size={16}
+              className={`dropdown-arrow ${openDropdown === "artworkType" ? "open" : ""}`}
+            />
+          </button>
+          {openDropdown === "artworkType" && (
+            <div className="filter-dropdown-menu">
+              {ARTWORK_TYPES.map((type) => (
+                <button
+                  key={type.value}
+                  className={`dropdown-item ${filters.artworkType === type.value ? "active" : ""}`}
+                  onClick={() => handleFilterChange("artworkType", type.value)}
+                >
+                  {type.label}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
 
-        {/* Material Filter - Dynamic from active auctions */}
-        <div className="filter-group">
-          <label className="filter-label">
-            {t("auctions.material") || "მასალა"}
-          </label>
-          <select
-            value={filters.material}
-            onChange={(e) => handleFilterChange("material", e.target.value)}
-            className="filter-select"
+        {/* Material Dropdown */}
+        <div
+          className="filter-dropdown-container"
+          ref={(el) => {
+            dropdownRefs.current["material"] = el;
+          }}
+        >
+          <button
+            className={`filter-dropdown-btn ${filters.material ? "has-value" : ""}`}
+            onClick={() => toggleDropdown("material")}
             disabled={loading}
           >
-            <option value="">ყველა მასალა</option>
-            {filterOptions.materials.map((material) => (
-              <option key={material} value={material}>
-                {material}
-              </option>
-            ))}
-          </select>
+            <span className="filter-label">
+              {t("auctions.material") || "მასალა"}
+            </span>
+            <span className="filter-value">{filters.material || "ყველა"}</span>
+            <ChevronDown
+              size={16}
+              className={`dropdown-arrow ${openDropdown === "material" ? "open" : ""}`}
+            />
+          </button>
+          {openDropdown === "material" && (
+            <div className="filter-dropdown-menu">
+              <button
+                className={`dropdown-item ${!filters.material ? "active" : ""}`}
+                onClick={() => handleFilterChange("material", "")}
+              >
+                ყველა მასალა
+              </button>
+              {filterOptions.materials.map((material) => (
+                <button
+                  key={material}
+                  className={`dropdown-item ${filters.material === material ? "active" : ""}`}
+                  onClick={() => handleFilterChange("material", material)}
+                >
+                  {material}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
 
-        {/* Dimensions Filter - Dynamic from active auctions */}
-        <div className="filter-group">
-          <label className="filter-label">
-            {t("auctions.dimensions") || "ზომა"}
-          </label>
-          <select
-            value={filters.dimensions}
-            onChange={(e) => handleFilterChange("dimensions", e.target.value)}
-            className="filter-select"
+        {/* Dimensions Dropdown */}
+        <div
+          className="filter-dropdown-container"
+          ref={(el) => {
+            dropdownRefs.current["dimensions"] = el;
+          }}
+        >
+          <button
+            className={`filter-dropdown-btn ${filters.dimensions ? "has-value" : ""}`}
+            onClick={() => toggleDropdown("dimensions")}
             disabled={loading}
           >
-            <option value="">ყველა ზომა</option>
-            {filterOptions.dimensions.map((dimension) => (
-              <option key={dimension} value={dimension}>
-                {dimension}
-              </option>
-            ))}
-          </select>
+            <span className="filter-label">
+              {t("auctions.dimensions") || "ზომა"}
+            </span>
+            <span className="filter-value">
+              {filters.dimensions || "ყველა"}
+            </span>
+            <ChevronDown
+              size={16}
+              className={`dropdown-arrow ${openDropdown === "dimensions" ? "open" : ""}`}
+            />
+          </button>
+          {openDropdown === "dimensions" && (
+            <div className="filter-dropdown-menu">
+              <button
+                className={`dropdown-item ${!filters.dimensions ? "active" : ""}`}
+                onClick={() => handleFilterChange("dimensions", "")}
+              >
+                ყველა ზომა
+              </button>
+              {filterOptions.dimensions.map((dimension) => (
+                <button
+                  key={dimension}
+                  className={`dropdown-item ${filters.dimensions === dimension ? "active" : ""}`}
+                  onClick={() => handleFilterChange("dimensions", dimension)}
+                >
+                  {dimension}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
 
-        {/* Price Range Filter */}
-        <div className="filter-group">
-          <label className="filter-label">{t("auctions.priceRange")}</label>
-          <div className="price-range">
-            <input
-              type="number"
-              placeholder={t("auctions.minPrice")}
-              value={filters.minPrice}
-              onChange={(e) => handleFilterChange("minPrice", e.target.value)}
-              className="price-input"
-              min="0"
-            />
-            <span className="price-separator">-</span>
-            <input
-              type="number"
-              placeholder={t("auctions.maxPrice")}
-              value={filters.maxPrice}
-              onChange={(e) => handleFilterChange("maxPrice", e.target.value)}
-              className="price-input"
-              min="0"
-            />
-          </div>
-        </div>
-
-        {/* Clear Filters */}
+        {/* Clear Filters Button */}
         {hasActiveFilters && (
-          <button onClick={clearAllFilters} className="clear-filters-btn">
+          <button className="clear-filters-btn" onClick={clearAllFilters}>
             <X size={16} />
-            {t("auctions.clearFilters")}
+            <span>{t("auctions.clearFilters") || "გასუფთავება"}</span>
           </button>
         )}
       </div>
