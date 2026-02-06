@@ -131,7 +131,7 @@ export default function AuctionFilters({
               {ARTWORK_TYPES.map((type) => (
                 <button
                   key={type.value}
-                  className={`dropdown-item ${filters.artworkType === type.value ? "active" : ""}`}
+                  className={`dropdown-item-auction-auction ${filters.artworkType === type.value ? "active" : ""}`}
                   onClick={() => handleFilterChange("artworkType", type.value)}
                 >
                   {type.label}
@@ -165,7 +165,7 @@ export default function AuctionFilters({
           {openDropdown === "material" && (
             <div className="filter-dropdown-menu">
               <button
-                className={`dropdown-item ${!filters.material ? "active" : ""}`}
+                className={`dropdown-item-auction ${!filters.material ? "active" : ""}`}
                 onClick={() => handleFilterChange("material", "")}
               >
                 ყველა მასალა
@@ -173,7 +173,7 @@ export default function AuctionFilters({
               {filterOptions.materials.map((material) => (
                 <button
                   key={material}
-                  className={`dropdown-item ${filters.material === material ? "active" : ""}`}
+                  className={`dropdown-item-auction ${filters.material === material ? "active" : ""}`}
                   onClick={() => handleFilterChange("material", material)}
                 >
                   {material}
@@ -209,7 +209,7 @@ export default function AuctionFilters({
           {openDropdown === "dimensions" && (
             <div className="filter-dropdown-menu">
               <button
-                className={`dropdown-item ${!filters.dimensions ? "active" : ""}`}
+                className={`dropdown-item-auction ${!filters.dimensions ? "active" : ""}`}
                 onClick={() => handleFilterChange("dimensions", "")}
               >
                 ყველა ზომა
@@ -217,7 +217,7 @@ export default function AuctionFilters({
               {filterOptions.dimensions.map((dimension) => (
                 <button
                   key={dimension}
-                  className={`dropdown-item ${filters.dimensions === dimension ? "active" : ""}`}
+                  className={`dropdown-item-auction ${filters.dimensions === dimension ? "active" : ""}`}
                   onClick={() => handleFilterChange("dimensions", dimension)}
                 >
                   {dimension}

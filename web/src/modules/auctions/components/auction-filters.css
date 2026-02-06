@@ -202,7 +202,7 @@
   }
 }
 
-.dropdown-item {
+.dropdown-item-auction {
   display: block;
   width: 100%;
   padding: 12px 16px;
@@ -215,23 +215,23 @@
   transition: background 0.15s ease;
 }
 
-.dropdown-item:first-child {
+.dropdown-item-auction:first-child {
   border-radius: 12px 12px 0 0;
 }
 
-.dropdown-item:last-child {
+.dropdown-item-auction:last-child {
   border-radius: 0 0 12px 12px;
 }
 
-.dropdown-item:only-child {
+.dropdown-item-auction:only-child {
   border-radius: 12px;
 }
 
-.dropdown-item:hover {
+.dropdown-item-auction:hover {
   background: var(--filters-dropdown-hover);
 }
 
-.dropdown-item.active {
+.dropdown-item-auction.active {
   background: var(--filters-dropdown-active);
   color: var(--filters-gold);
   font-weight: 600;
