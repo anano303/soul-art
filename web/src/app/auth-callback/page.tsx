@@ -16,6 +16,7 @@ export default function AuthCallback() {
         const urlParams = new URLSearchParams(window.location.search);
         const success = urlParams.get('success');
         const errorParam = urlParams.get('error');
+        const isPopup = urlParams.get('popup') === 'true';
         
         if (success === 'true') {
           console.log('🔍 OAuth success detected, processing...');
@@ -23,9 +24,6 @@ export default function AuthCallback() {
           // Successfully authenticated - cookies are already set by server
           // Add a small delay to ensure cookies are properly set
           await new Promise(resolve => setTimeout(resolve, 500));
-          
-          // Log all cookies for debugging
-          console.log('🍪 All cookies:', document.cookie);
           
           // Now fetch the user profile to store user data
           try {
@@ -44,6 +42,21 @@ export default function AuthCallback() {
               
               // Invalidate user query to refetch user data
               queryClient.invalidateQueries({ queryKey: ["user"] });
+              
+              // If this was a popup that fell back to redirect, try to close
+              if (isPopup) {
+                // Set localStorage flag for opener to detect
+                localStorage.setItem('google_auth_success', JSON.stringify({ type: 'GOOGLE_AUTH_SUCCESS' }));
+                
+                // Try to close the window
+                window.close();
+                
+                // If window didn't close (not a popup or blocked), redirect
+                setTimeout(() => {
+                  router.push('/');
+                }, 500);
+                return;
+              }
               
               // Clear the URL params
               window.history.replaceState(null, '', window.location.pathname);

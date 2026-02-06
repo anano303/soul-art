@@ -1312,7 +1312,7 @@ export const TRANSLATIONS: Translations = {
       loginFailed: "შესვლა ვერ მოხერხდა",
       registrationFailed: "რეგისტრაცია ვერ მოხერხდა",
       passwordResetFailed: "პაროლის აღდგენა ვერ მოხერხდა",
-      orContinueWith: "ან გააგრძელეთ",
+      orContinueWith: "ან ელფოსტით",
       forgotPasswordTitle: "განაახლეთ პაროლი",
       forgotPasswordSubtitle: "გთხოვთ, შეავსოთ პაროლის აღდგენის ფორმა",
       agreeToTerms: "ვეთანხმები",
@@ -1322,13 +1322,13 @@ export const TRANSLATIONS: Translations = {
       privacyPolicyRequired:
         "კონფიდენციალურობის პოლიტიკასთან დათანხმება აუცილებელია",
       // Email verification
-      sendVerificationCode: "ვერიფ. კოდი",
-      verificationCode: "ვერიფ. კოდი",
+      sendVerificationCode: "გაგზავნე კოდი",
+      verificationCode: "ვერიფიკაციის კოდი",
       verify: "დადასტურება",
       pleaseVerifyEmail: "გთხოვთ დაადასტურეთ ელ-ფოსტა",
       invalidVerificationCode: "არასწორი ვერიფიკაციის კოდი",
       // Terms and agreements
-      agreeToTermsAndConditions: "ვეთანხმები",
+      agreeToTermsAndConditions: "რეგისტრაციით თქვენ ეთანხმებით",
       termsAndConditions: "საიტის გამოყენების წესებსა და პირობებს",
       and: "და",
       // Creating account
@@ -3199,7 +3199,7 @@ export const TRANSLATIONS: Translations = {
       loginFailed: "Login Failed",
       registrationFailed: "Registration Failed",
       passwordResetFailed: "Password Reset Failed",
-      orContinueWith: "or continue with",
+      orContinueWith: "or with email",
       forgotPasswordTitle: "Reset Your Password",
       forgotPasswordSubtitle: "Please fill in the password recovery form",
       agreeToTerms: "I agree to the",
@@ -3208,13 +3208,13 @@ export const TRANSLATIONS: Translations = {
       agreeToPrivacyPolicy: "I agree to the",
       privacyPolicyRequired: "Privacy Policy agreement is required",
       // Email verification
-      sendVerificationCode: "Send Verification Code",
+      sendVerificationCode: "Send Code",
       verificationCode: "Verification Code",
       verify: "Confirm",
       pleaseVerifyEmail: "Please verify your email",
       invalidVerificationCode: "Invalid verification code",
       // Terms and agreements
-      agreeToTermsAndConditions: "I agree to",
+      agreeToTermsAndConditions: "By registering you agree to",
       termsAndConditions: "Terms and Conditions",
       and: "and",
       // Creating account

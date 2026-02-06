@@ -29,7 +29,7 @@ export default function Header() {
       pathname === "/explore" ||
       pathname === "/auction" ||
       pathname.startsWith("/profile/orders") ||
-      pathname.startsWith("/sellers-register")
+      pathname.startsWith("/become-seller")
     ) {
       return true;
     }
@@ -176,7 +176,7 @@ export default function Header() {
                 href={
                   user?.role === "seller" && user?.artistSlug
                     ? `/@${user.artistSlug}`
-                    : "/sellers-register"
+                    : "/become-seller"
                 }
               >
                 {user?.role === "seller"

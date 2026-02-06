@@ -26,7 +26,7 @@ export function MobileBottomNav() {
     "/shop",
     "/explore",
     "/auctions",
-    "/sellers-register",
+    "/become-seller",
     ...(isSeller && user?.artistSlug ? [`/@${user.artistSlug}`] : []),
   ];
 
@@ -123,10 +123,10 @@ export function MobileBottomNav() {
   } else {
     // If not seller, show seller registration
     tabs.push({
-      href: "/sellers-register",
+      href: "/become-seller",
       icon: Palette,
       label: language === "en" ? "Sell" : "გაყიდე",
-      active: pathname.startsWith("/sellers-register"),
+      active: pathname.startsWith("/become-seller"),
     });
   }
 

@@ -1,0 +1,134 @@
+.sam-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+  animation: sam-fadeIn 0.2s ease;
+}
+
+@keyframes sam-fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.sam-container {
+  position: relative;
+  background: white;
+  border-radius: 16px;
+  max-width: 520px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  animation: sam-slideIn 0.25s ease;
+}
+
+@keyframes sam-slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.sam-close {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: #f3f4f6;
+  border-radius: 50%;
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+  z-index: 1;
+}
+
+.sam-close:hover {
+  background: #e5e7eb;
+}
+
+.sam-header {
+  padding: 1.5rem 2rem 0;
+  text-align: center;
+}
+
+.sam-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin: 0 0 0.5rem 0;
+  color: #111827;
+}
+
+.sam-subtitle {
+  font-size: 0.9rem;
+  color: #6b7280;
+  margin: 0;
+}
+
+.sam-content {
+  padding: 0;
+}
+
+/* Make the flow more compact in modal */
+.sam-content .seller-registration-flow {
+  padding: 1.5rem;
+}
+
+.sam-content .seller-registration-flow.compact {
+  padding: 1rem 1.5rem 1.5rem;
+}
+
+.sam-content .srf-step-indicator {
+  margin-bottom: 1.5rem;
+}
+
+.sam-content .srf-title {
+  font-size: 1.25rem;
+}
+
+.sam-content .srf-subtitle {
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+}
+
+@media (max-width: 480px) {
+  .sam-overlay {
+    padding: 0.5rem;
+  }
+
+  .sam-container {
+    border-radius: 12px;
+    max-height: 95vh;
+  }
+
+  .sam-close {
+    top: 0.5rem;
+    right: 0.5rem;
+  }
+
+  .sam-header {
+    padding: 1.25rem 1rem 0;
+  }
+
+  .sam-content .seller-registration-flow,
+  .sam-content .seller-registration-flow.compact {
+    padding: 1rem;
+  }
+}

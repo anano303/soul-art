@@ -13,15 +13,28 @@ export class FacebookStrategy extends PassportStrategy(Strategy, 'facebook') {
       callbackURL: configService.get('FACEBOOK_CALLBACK_URL'),
       scope: ['email', 'public_profile'],
       profileFields: ['id', 'emails', 'name', 'displayName', 'photos'],
+      passReqToCallback: true,
     });
   }
 
   async validate(
+    req: any,
     accessToken: string,
     refreshToken: string,
     profile: Profile,
     done: (error: any, user?: any) => void,
   ) {
+    // Check if sellerMode was passed via state parameter
+    let sellerMode = false;
+    try {
+      if (req.query?.state) {
+        const state = JSON.parse(req.query.state);
+        sellerMode = state.sellerMode === true;
+      }
+    } catch (e) {
+      // State parsing failed, continue without sellerMode
+    }
+
     const email = profile.emails?.[0]?.value || '';
     const name =
       profile.displayName ||
@@ -35,7 +48,8 @@ export class FacebookStrategy extends PassportStrategy(Strategy, 'facebook') {
       facebookId: profile.id,
       avatar,
       password: '',
-      role: Role.User,
+      role: sellerMode ? Role.Seller : Role.User,
+      sellerMode,
     };
 
     done(null, user);

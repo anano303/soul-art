@@ -8,17 +8,18 @@
   color: black;
 } */
 .auth-layout {
-  min-height: 100vh;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
+  flex-direction: column;
+  width: 100%;
+  margin: 0 auto;
+  padding: 1rem 0.5rem;
+  box-sizing: border-box;
+  min-height: 100vh;
   background-image: url("/abstract-poster-background_670672-10372.avif");
-  background-color: white;
-  padding: 40px;
-  padding-bottom: 80px;
-  background-position: center;
   background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
 }
 /* .auth-bg {
   position: absolute;
@@ -33,17 +34,22 @@
 } */
 
 .auth-layout-inner {
-  margin-top: 80px;
   width: 100%;
-  max-width: 32rem;
-  position: relative;
-  z-index: 1;
-  /* background: rgba(253, 245, 236, 0.52); */
+  max-width: 600px;
+  margin: 0 auto;
+  background-color: transparent;
+  border-radius: 10px;
+  box-shadow: 0 5px 20px rgba(1, 38, 69, 0.25);
+  padding: 0.5rem;
+  box-sizing: border-box;
+}
+
+.auth-layout-content {
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto;
   padding: 2rem;
-  border-radius: 30px;
-  box-shadow: 0 4px 10px rgba(1, 38, 69, 0.75);
-  /* backdrop-filter: blur(10px); 
-  -webkit-backdrop-filter: blur(10px);  */
+  box-sizing: border-box;
 }
 
 .auth-layout-header {
@@ -51,28 +57,61 @@
   flex-direction: column;
   align-items: center;
   text-align: center;
-  gap: 0.5rem; /* space-y-2 */
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
 }
 
 .auth-layout-title {
-  font-size: 1.25rem; /* text-2xl */
-  font-weight: 600; /* font-semibold */
-  letter-spacing: 0.025em; /* tracking-tight */
-  color: var(--primary-color);
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: 0.025em;
+  color: #111827;
 }
 
 .auth-layout-subtitle {
-  font-size: 0.875rem; /* text-sm */
-  color: rgba(1, 38, 69, 0.7);
+  font-size: 0.95rem;
+  color: #6b7280;
 }
 
 .auth-layout-children {
-  margin-top: 2rem; /* mt-8 */
+  /* Children styles handled by form-container */
 }
 
-@media screen and (max-width: 640px) {
+@media (min-width: 768px) {
   .auth-layout {
-    padding: 0;
-    padding-bottom: 70px;
+    padding: 2rem 1rem;
+  }
+
+  .auth-layout-inner {
+    padding: 1rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .auth-layout {
+    padding: 3rem 2rem;
+  }
+
+  .auth-layout-inner {
+    padding: 2rem;
+  }
+}
+
+@media (max-width: 420px) {
+  .auth-layout {
+    padding: 0.5rem 0.25rem;
+  }
+
+  .auth-layout-inner {
+    padding: 0.25rem;
+    border-radius: 6px;
+  }
+
+  .auth-layout-content {
+    padding: 1rem;
+  }
+
+  .auth-layout-title {
+    font-size: 1.25rem;
   }
 }

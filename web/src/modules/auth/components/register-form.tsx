@@ -7,7 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { registerSchema } from "../validation";
 import { useRegister, useFacebookAuth } from "../hooks/use-auth";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { toast } from "@/hooks/use-toast";
 import { useErrorHandler } from "@/hooks/use-error-handler";
 import "./register-form.css";
@@ -25,12 +25,10 @@ export function RegisterForm() {
   const { t } = useLanguage();
   const errorHandler = useErrorHandler();
   const router = useRouter();
-  const searchParams = useSearchParams();
   const { mutate: register, isPending } = useRegister();
   const { mutate: facebookAuth, isPending: isFacebookPending } = useFacebookAuth();
   const [registerError, setRegisterError] = useState<string | null>(null);
   const [isSuccess, setIsSuccess] = useState(false);
-  const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [showTerms, setShowTerms] = useState(false);
   const [showPrivacyPolicy, setShowPrivacyPolicy] = useState(false);
 
@@ -38,7 +36,6 @@ export function RegisterForm() {
     register: registerField,
     handleSubmit,
     formState: { errors },
-    setValue,
   } = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
   });
@@ -55,15 +52,6 @@ export function RegisterForm() {
     setCanSendEmail(email.trim().length > 0);
   }, [email]);
 
-  // Auto-fill referral code from URL parameters
-  useEffect(() => {
-    if (searchParams) {
-      const refCode = searchParams.get("ref");
-      if (refCode) {
-        setValue("invitationCode", refCode);
-      }
-    }
-  }, [searchParams, setValue]);
 
   const sendVerificationEmail = async () => {
     if (!email) return;
@@ -106,13 +94,9 @@ export function RegisterForm() {
       setErrorMessage(t("auth.pleaseVerifyEmail"));
       return;
     }
-    if (!agreedToTerms) {
-      setErrorMessage(t("auth.pleaseAgreeToTerms"));
-      return;
-    }
     setErrorMessage("");
 
-    const hasReferral = Boolean(data.invitationCode?.trim());
+    const hasReferral = false;
 
     register(data, {
       onSuccess: () => {
@@ -190,6 +174,36 @@ export function RegisterForm() {
 
   return (
     <div className="form-container">
+      {/* Social buttons at top */}
+      <div className="social-buttons-vertical">
+        <button
+          type="button"
+          onClick={handleGoogleAuth}
+          className="social-btn google-btn"
+          disabled={isPending}
+        >
+          <FaGoogle className="icon" />
+          <span className="google-text">
+            <span>G</span>
+            <span>o</span>
+            <span>o</span>
+            <span>g</span>
+            <span>l</span>
+            <span>e</span>
+          </span>
+        </button>
+        <FacebookAuthButton
+          onSuccess={handleFacebookSuccess}
+          onError={(error) => setRegisterError(error)}
+          disabled={isPending || isFacebookPending}
+          variant="register"
+        />
+      </div>
+
+      <div className="divider">
+        <span>{t("auth.orContinueWith")}</span>
+      </div>
+
       <form onSubmit={handleSubmit(onSubmit)} className="form">
         <div className="input-group">
           <label htmlFor="name">{t("auth.fullName")}</label>
@@ -267,84 +281,54 @@ export function RegisterForm() {
           )}
         </div>
 
-        <div className="input-group">
-          <label htmlFor="invitationCode">
-            {t("auth.referralCodeOptional")}
-          </label>
-          <input
-            id="invitationCode"
-            type="text"
-            placeholder="ABC12345"
-            {...registerField("invitationCode")}
-          />
-          {errors.invitationCode && (
-            <p className="error-text">{errors.invitationCode.message}</p>
-          )}
-          <p className="input-hint">{t("auth.referralCodeHint")}</p>
-        </div>
-
         {registerError && (
           <div className="error-message">
             <p className="error-text">{registerError}</p>
           </div>
         )}
 
-        <div className="checkbox-group">
-          <label className="checkbox-label">
-            <input
-              type="checkbox"
-              checked={agreedToTerms}
-              onChange={(e) => setAgreedToTerms(e.target.checked)}
-              className="checkbox-input checkbox"
-            />
-            <span className="checkbox-text">
-              {t("auth.agreeToTermsAndConditions")}{" "}
-              <button
-                type="button"
-                onClick={() => setShowTerms(true)}
-                className="contract-link"
-                style={{
-                  background: "none",
-                  border: "none",
-                  color: "#007bff",
-                  textDecoration: "none",
-                  cursor: "pointer",
-                  font: "inherit",
-                  padding: 0,
-                }}
-              >
-                {t("auth.termsAndConditions")}
-              </button>{" "}
-              {t("auth.and")}{" "}
-              <button
-                type="button"
-                onClick={() => setShowPrivacyPolicy(true)}
-                className="contract-link"
-                style={{
-                  background: "none",
-                  border: "none",
-                  color: "#007bff",
-                  textDecoration: "none",
-                  cursor: "pointer",
-                  font: "inherit",
-                  padding: 0,
-                }}
-              >
-                {t("auth.privacyPolicy")}
-              </button>
-            </span>
-          </label>
-        </div>
+        <p className="terms-notice">
+          {t("auth.agreeToTermsAndConditions")}{" "}
+          <button
+            type="button"
+            onClick={() => setShowTerms(true)}
+            className="contract-link"
+            style={{
+              background: "none",
+              border: "none",
+              color: "#007bff",
+              textDecoration: "none",
+              cursor: "pointer",
+              font: "inherit",
+              padding: 0,
+            }}
+          >
+            {t("auth.termsAndConditions")}
+          </button>{" "}
+          {t("auth.and")}{" "}
+          <button
+            type="button"
+            onClick={() => setShowPrivacyPolicy(true)}
+            className="contract-link"
+            style={{
+              background: "none",
+              border: "none",
+              color: "#007bff",
+              textDecoration: "none",
+              cursor: "pointer",
+              font: "inherit",
+              padding: 0,
+            }}
+          >
+            {t("auth.privacyPolicy")}
+          </button>
+        </p>
 
         {/* Terms and Conditions Modal */}
         <TermsAndConditions
           isOpen={showTerms}
           onClose={() => setShowTerms(false)}
-          onAccept={() => {
-            setAgreedToTerms(true);
-            setShowTerms(false);
-          }}
-          showAcceptButton={true}
+          showAcceptButton={false}
         />
 
         {/* Privacy Policy Modal */}
@@ -357,39 +341,10 @@ export function RegisterForm() {
         <button
           type="submit"
           className="submit-btn"
-          disabled={isPending || !isVerified || !agreedToTerms}
+          disabled={isPending || !isVerified}
         >
           {isPending ? t("auth.creatingAccount") : t("auth.createAccount")}
         </button>
-
-        <div className="divider">
-          <span>{t("auth.orContinueWith")}</span>
-        </div>
-
-        <div className="social-buttons">
-          <button
-            type="button"
-            onClick={handleGoogleAuth}
-            className="social-btn google-btn"
-            disabled={isPending}
-          >
-            <FaGoogle className="icon" />
-            <span className="google-text">
-              <span>G</span>
-              <span>o</span>
-              <span>o</span>
-              <span>g</span>
-              <span>l</span>
-              <span>e</span>
-            </span>
-          </button>
-          <FacebookAuthButton
-            onSuccess={handleFacebookSuccess}
-            onError={(error) => setRegisterError(error)}
-            disabled={isPending || isFacebookPending}
-            variant="register"
-          />
-        </div>
 
         <div className="text-center">
           {t("auth.alreadyHaveAccount")}{" "}

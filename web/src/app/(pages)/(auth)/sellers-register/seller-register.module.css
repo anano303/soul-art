@@ -2,25 +2,32 @@
   display: flex;
   flex-direction: column;
   width: 100%;
-  max-width: 1400px;
   margin: 0 auto;
   padding: 1rem 0.5rem;
   gap: 2rem;
   box-sizing: border-box;
+  min-height: 100vh;
+  background-image: url('/abstract-poster-background_670672-10372.avif');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
 }
 
 .benefitsSection {
   width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
   box-sizing: border-box;
 }
 
 .formSection {
   width: 100%;
-  max-width: 1200px;
+  max-width: 600px;
   margin: 0 auto;
-  background-color: white;
+  background-color: transparent;
   border-radius: 10px;
-  box-shadow: 0 5px 15px rgba(1, 38, 69, 0.08);
+  box-shadow: 0 5px 20px rgba(1, 38, 69, 0.25);
   padding: 0.5rem;
   box-sizing: border-box;
 }

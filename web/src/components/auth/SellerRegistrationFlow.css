@@ -1,0 +1,377 @@
+.seller-registration-flow {
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.seller-registration-flow.compact {
+  padding: 1rem;
+}
+
+.srf-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem;
+  font-size: 1rem;
+  color: #6b7280;
+}
+
+/* Step indicator */
+.srf-step-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  margin-bottom: 2rem;
+}
+
+.srf-step {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #e5e7eb;
+  color: #6b7280;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 0.875rem;
+  transition: all 0.2s;
+}
+
+.srf-step.active {
+  background: #2563eb;
+  color: white;
+}
+
+.srf-step.completed {
+  background: #15803d;
+  color: white;
+}
+
+.srf-step-line {
+  width: 60px;
+  height: 2px;
+  background: #e5e7eb;
+}
+
+/* Content */
+.srf-step-content {
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.srf-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0 0 0.5rem 0;
+  text-align: center;
+  color: #111827;
+}
+
+.srf-subtitle {
+  font-size: 0.95rem;
+  color: #6b7280;
+  margin: 0 0 1.5rem 0;
+  text-align: center;
+}
+
+/* Social buttons */
+.srf-social-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.srf-social-buttons button {
+  width: 100%;
+}
+
+/* Divider */
+.srf-divider {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin: 1.5rem 0;
+}
+
+.srf-divider::before,
+.srf-divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: #e5e7eb;
+}
+
+.srf-divider span {
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+/* Form */
+.srf-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.srf-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+.srf-form-group label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #374151;
+}
+
+.srf-form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+@media (max-width: 500px) {
+  .srf-form-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+.srf-input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  font-size: 0.95rem;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  background: white;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.srf-input:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.srf-input:disabled {
+  background: #f3f4f6;
+  cursor: not-allowed;
+}
+
+.srf-error {
+  font-size: 0.8rem;
+  color: #dc2626;
+}
+
+/* Slug wrapper */
+.srf-slug-wrapper {
+  display: flex;
+  align-items: center;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  overflow: hidden;
+  background: white;
+}
+
+.srf-slug-wrapper:focus-within {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.srf-slug-prefix {
+  padding: 0.75rem;
+  background: #f3f4f6;
+  color: #6b7280;
+  font-size: 0.875rem;
+  white-space: nowrap;
+  border-right: 1px solid #d1d5db;
+}
+
+.srf-slug-input {
+  flex: 1;
+  border: none;
+  padding: 0.75rem;
+  font-size: 0.95rem;
+  outline: none;
+}
+
+/* Logo upload */
+.srf-logo-upload {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.srf-logo-preview {
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.srf-upload-btn {
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background: white;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.srf-upload-btn:hover {
+  background: #f3f4f6;
+}
+
+/* Submit button */
+.srf-submit-btn {
+  width: 100%;
+  padding: 0.875rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: white;
+  background: #2563eb;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s;
+  margin-top: 0.5rem;
+}
+
+.srf-submit-btn:hover:not(:disabled) {
+  background: #1d4ed8;
+}
+
+.srf-submit-btn:disabled {
+  background: #93c5fd;
+  cursor: not-allowed;
+}
+
+/* Login link */
+.srf-login-link {
+  margin-top: 1.5rem;
+  text-align: center;
+  font-size: 0.9rem;
+  color: #6b7280;
+}
+
+.srf-login-link a {
+  color: #2563eb;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.srf-login-link a:hover {
+  text-decoration: underline;
+}
+
+/* Email verification */
+.srf-email-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.srf-email-container .srf-input {
+  flex: 1;
+  padding-right: 2.5rem;
+}
+
+.srf-verified-input {
+  background-color: #f0fdf4 !important;
+  border-color: #22c55e !important;
+}
+
+.srf-verified-icon {
+  position: absolute;
+  right: 0.75rem;
+  color: #22c55e;
+  font-size: 1.1rem;
+}
+
+.srf-verify-btn {
+  align-self: flex-start;
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: white;
+  background: #2563eb;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-top: 0.25rem;
+}
+
+.srf-verify-btn:hover {
+  background: #1d4ed8;
+}
+
+.srf-resend-btn {
+  background: none;
+  border: none;
+  color: #2563eb;
+  font-size: 0.8rem;
+  cursor: pointer;
+  text-decoration: underline;
+  padding: 0;
+  margin-top: 0.25rem;
+}
+
+.srf-resend-btn:hover {
+  color: #1d4ed8;
+}
+
+/* Registration type links */
+.srf-type-links {
+  margin-top: 1rem;
+  text-align: center;
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+.srf-type-links a {
+  color: #2563eb;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.srf-type-links a:hover {
+  text-decoration: underline;
+}
+
+/* Terms notice */
+.srf-terms-notice {
+  margin-top: 0.5rem;
+  font-size: 0.8rem;
+  color: #6b7280;
+  line-height: 1.4;
+  text-align: center;
+}
+
+.srf-contract-link {
+  background: none;
+  border: none;
+  color: #2563eb;
+  text-decoration: none;
+  cursor: pointer;
+  font: inherit;
+  padding: 0;
+}
+
+.srf-contract-link:hover {
+  text-decoration: underline;
+}

@@ -303,7 +303,7 @@ export default function AboutPage() {
               functionally nor in terms of reliability.
             </p>
             <p>
-              That's exactly why Ani and Levan decided 👩‍💻👨‍💻 to turn their
+              That&apos;s exactly why Ani and Levan decided 👩‍💻👨‍💻 to turn their
               technical knowledge into real help and create a professional
               platform with human values 💙
             </p>
@@ -337,7 +337,7 @@ export default function AboutPage() {
           <>
             <p>
               No — Soulart.ge is open to everyone who creates unique handmade
-              items ✂️🧵🖌️ — whether it's a painter, ceramicist, textile master,
+              items ✂️🧵🖌️ — whether it&apos;s a painter, ceramicist, textile master,
               or others.
             </p>
             <ul className="about-list">
@@ -374,7 +374,7 @@ export default function AboutPage() {
         </h2>
         {language === "en" ? (
           <>
-            <p>In today's Georgian painting, you can feel:</p>
+            <p>In today&apos;s Georgian painting, you can feel:</p>
             <ul className="about-list">
               <li>🌿 Love of nature</li>
               <li>💫 Spirituality</li>
@@ -437,7 +437,7 @@ export default function AboutPage() {
         )}
         <div className="about-cta-buttons">
           <Link
-            href="/sellers-register"
+            href="/become-seller"
             className="about-button about-seller-button"
           >
             {language === "en"

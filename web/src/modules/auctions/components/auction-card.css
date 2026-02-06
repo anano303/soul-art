@@ -77,10 +77,6 @@
   z-index: 60;
 }
 
-.auction-card.ended {
-  opacity: 0.75;
-}
-
 .auction-card.scheduled {
   border-color: var(--warning);
 }

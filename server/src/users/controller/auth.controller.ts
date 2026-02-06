@@ -183,36 +183,56 @@ export class AuthController {
   @UseGuards(GoogleAuthGuard)
   async googleAuthRedirect(@Req() req, @Res() res: Response) {
     try {
-      console.log('🔍 Google OAuth callback received');
-      const { tokens, user } = await this.authService.singInWithGoogle({
+      const result = await this.authService.singInWithGoogle({
         email: req.user.email,
         name: req.user.name || 'Google User',
         id: req.user.id,
+        sellerMode: req.user.sellerMode,
       });
-      console.log('✅ Google auth successful, setting HTTP-only cookies');
-      console.log('🍪 Setting cookies with config:', cookieConfig);
 
-      // Set HTTP-only cookies instead of URL hash tokens
+      // Set HTTP-only cookies
       res.cookie(
         cookieConfig.access.name,
-        tokens.accessToken,
+        result.tokens.accessToken,
         cookieConfig.access.options,
       );
       res.cookie(
         cookieConfig.refresh.name,
-        tokens.refreshToken,
+        result.tokens.refreshToken,
         cookieConfig.refresh.options,
       );
 
-      console.log(
-        '🔄 Redirecting to:',
-        `${process.env.ALLOWED_ORIGINS}/auth-callback?success=true`,
-      );
+      // If popup mode, redirect to auth-popup-callback on the website domain
+      // This ensures localStorage and postMessage work on the same origin as the opener
+      if (req.user.popup) {
+        const params = new URLSearchParams({
+          success: 'true',
+          isNewUser: String(result.isNewUser),
+          isSeller: String(result.isSeller),
+          needsSellerRegistration: String(result.needsSellerRegistration),
+        });
+        return res.redirect(`${process.env.ALLOWED_ORIGINS}/auth-popup-callback?${params.toString()}`);
+      }
 
-      // Redirect to auth callback page with success parameter
-      res.redirect(`${process.env.ALLOWED_ORIGINS}/auth-callback?success=true`);
+      // Standard redirect flow
+      let redirectPath: string;
+      if (result.isSeller) {
+        redirectPath = '/profile';
+      } else if (result.needsSellerRegistration) {
+        redirectPath = '/become-seller?fromOauth=true';
+      } else {
+        redirectPath = '/auth-callback?success=true';
+      }
+
+      res.redirect(`${process.env.ALLOWED_ORIGINS}${redirectPath}`);
     } catch (error) {
       console.error('❌ Google auth error:', error);
+      
+      // Handle popup error - redirect to callback page with error
+      if (req.user?.popup) {
+        return res.redirect(`${process.env.ALLOWED_ORIGINS}/auth-popup-callback?error=auth_failed`);
+      }
+      
       res.redirect(`${process.env.ALLOWED_ORIGINS}/login?error=auth_failed`);
     }
   }
@@ -226,33 +246,48 @@ export class AuthController {
   async facebookAuthRedirect(@Req() req, @Res() res: Response) {
     try {
       console.log('🔍 Facebook OAuth callback received');
-      const { tokens } = await this.authService.signInWithFacebookOAuth({
+      console.log('📦 User data from Facebook:', { 
+        email: req.user.email, 
+        sellerMode: req.user.sellerMode 
+      });
+      
+      const result = await this.authService.signInWithFacebookOAuth({
         email: req.user.email,
         name: req.user.name || 'Facebook User',
         facebookId: req.user.facebookId,
         avatar: req.user.avatar,
+        sellerMode: req.user.sellerMode,
       });
       console.log('✅ Facebook auth successful, setting HTTP-only cookies');
 
       // Set HTTP-only cookies
       res.cookie(
         cookieConfig.access.name,
-        tokens.accessToken,
+        result.tokens.accessToken,
         cookieConfig.access.options,
       );
       res.cookie(
         cookieConfig.refresh.name,
-        tokens.refreshToken,
+        result.tokens.refreshToken,
         cookieConfig.refresh.options,
       );
 
-      console.log(
-        '🔄 Redirecting to:',
-        `${process.env.ALLOWED_ORIGINS}/auth-callback?success=true`,
-      );
+      // Determine redirect path based on user state
+      let redirectPath: string;
+      if (result.isSeller) {
+        // Already a seller, go to dashboard
+        redirectPath = '/profile';
+      } else if (result.needsSellerRegistration) {
+        // User wants to become seller but needs to fill seller details
+        redirectPath = '/become-seller?fromOauth=true';
+      } else {
+        // Regular user login
+        redirectPath = '/auth-callback?success=true';
+      }
+      
+      console.log('🔄 Redirecting to:', `${process.env.ALLOWED_ORIGINS}${redirectPath}`);
 
-      // Redirect to auth callback page with success parameter
-      res.redirect(`${process.env.ALLOWED_ORIGINS}/auth-callback?success=true`);
+      res.redirect(`${process.env.ALLOWED_ORIGINS}${redirectPath}`);
     } catch (error) {
       console.error('❌ Facebook auth error:', error);
       res.redirect(`${process.env.ALLOWED_ORIGINS}/login?error=auth_failed`);

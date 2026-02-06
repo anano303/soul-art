@@ -4,18 +4,18 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(1, 38, 69, 0.6);
+  background-color: rgba(1, 38, 69, 0.85);
   display: flex;
   align-items: flex-start;
   justify-content: center;
-  z-index: 9999;
+  z-index: 99999;
   backdrop-filter: blur(3px);
   animation: fadeIn 0.3s ease-out;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: none;
   overflow-y: auto;
-  padding-top: max(2rem, env(safe-area-inset-top, 0) + 4rem);
-  padding-bottom: max(2rem, env(safe-area-inset-bottom, 0) + 1rem);
+  padding-top: max(1rem, env(safe-area-inset-top, 0) + 1rem);
+  padding-bottom: max(1rem, env(safe-area-inset-bottom, 0) + 1rem);
   padding-left: max(1rem, env(safe-area-inset-left, 0) + 1rem);
   padding-right: max(1rem, env(safe-area-inset-right, 0) + 1rem);
   box-sizing: border-box;
@@ -66,31 +66,12 @@
   margin-bottom: 1rem;
 }
 
-.modal-content::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 6px;
-  background: linear-gradient(
-    90deg,
-    var(--primary-color),
-    #093d67,
-    var(--primary-color)
-  );
-  background-size: 200% 100%;
-  animation: gradientAnimation 3s infinite alternate;
+.modal-content.has-message {
+  border-radius: 1rem;
+  overflow: hidden;
 }
 
-@keyframes gradientAnimation {
-  0% {
-    background-position: 0% 50%;
-  }
-  100% {
-    background-position: 100% 50%;
-  }
-}
+/* Removed blue top border for cleaner look */
 
 .modal-header {
   display: flex;
@@ -141,8 +122,8 @@
   border-radius: 50%;
   transition: all 0.3s ease;
   position: absolute;
-  right: 1.5rem;
-  top: 1.5rem;
+  right: 1rem;
+  top: 1rem;
   z-index: 10;
 }
 
@@ -152,32 +133,38 @@
   transform: scale(1.1);
 }
 
-/* Custom Message Banner */
+.has-message .close-button {
+  color: white;
+  top: 0.5rem;
+  right: 0.5rem;
+}
+
+.has-message .close-button:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+  color: white;
+}
+
+/* Custom Message Banner - Streamlined */
 .custom-message-banner {
   display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  padding: 16px 20px;
-  margin: 0 24px 16px;
-  background: linear-gradient(
-    135deg,
-    rgba(245, 158, 11, 0.1) 0%,
-    rgba(217, 119, 6, 0.1) 100%
-  );
-  border: 1px solid rgba(245, 158, 11, 0.3);
-  border-radius: 12px;
-  color: #92400e;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  margin: 0;
+  background: #3b82f6;
+  color: white;
+  border-radius: 1rem 1rem 0 0;
 }
 
 .custom-message-banner .banner-icon {
-  font-size: 1.2rem;
+  font-size: 1rem;
   flex-shrink: 0;
 }
 
 .custom-message-banner p {
   margin: 0;
-  font-size: 0.9rem;
-  line-height: 1.5;
+  font-size: 0.85rem;
+  line-height: 1.4;
   font-weight: 500;
 }
 

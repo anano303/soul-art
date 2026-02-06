@@ -66,6 +66,7 @@ export class AuthService {
       name: string;
       id: string;
       sub?: string;
+      sellerMode?: boolean;
     },
     deviceInfo?: {
       fingerprint?: string;
@@ -77,27 +78,44 @@ export class AuthService {
     const email = googleData.email.toLowerCase();
 
     let existUser = await this.userModel.findOne({ email });
+    let isNewUser = false;
 
     console.log('🆕 ახალი მომხმარებლის რეგისტრაცია Google-ით:', googleData);
 
     if (!existUser) {
+      // Create as regular user - seller registration requires additional fields
       const newUser = new this.userModel({
         email,
         name: googleData.name || 'Google User',
-        googleId: googleData.id || googleData.sub, // Google ID უნდა შევინახოთ
-        role: Role.User,
+        googleId: googleData.id || googleData.sub,
+        role: Role.User, // Always create as User first
       });
 
-      await newUser.save(); // ⬅️ აქამდე უკვე აქვს googleId მნიშვნელობა, ამიტომ password არ ითვლება required
-
+      await newUser.save();
       existUser = newUser;
+      isNewUser = true;
       console.log('✅ ახალი მომხმარებელი წარმატებით დაემატა:', existUser);
     }
 
     const { tokens, user: userData } = await this.login(existUser, deviceInfo);
 
     console.log('✅ გენერირებული access_token და refresh_token:', tokens);
-    return { tokens, user: userData };
+    
+    const needsSellerRegistration = googleData.sellerMode && existUser.role !== Role.Seller;
+    const isSeller = existUser.role === Role.Seller;
+    
+    console.log('📊 Auth Result - sellerMode:', googleData.sellerMode);
+    console.log('📊 Auth Result - user role:', existUser.role);
+    console.log('📊 Auth Result - needsSellerRegistration:', needsSellerRegistration);
+    console.log('📊 Auth Result - isSeller:', isSeller);
+    
+    return { 
+      tokens, 
+      user: userData,
+      isNewUser,
+      needsSellerRegistration,
+      isSeller,
+    };
   }
 
   async signInWithFacebook(
@@ -186,6 +204,7 @@ export class AuthService {
     name: string;
     facebookId: string;
     avatar?: string;
+    sellerMode?: boolean;
   }) {
     const email = (facebookData.email || '').toLowerCase();
 
@@ -199,22 +218,25 @@ export class AuthService {
       facebookId: facebookData.facebookId,
       name: facebookData.name,
       email,
+      sellerMode: facebookData.sellerMode,
     });
 
     let existUser = await this.userModel.findOne({ email });
+    let isNewUser = false;
 
     if (!existUser) {
-      // Create new user with Facebook data
+      // Create as regular user - seller registration requires additional fields
       const newUser = new this.userModel({
         email,
         name: facebookData.name,
         facebookId: facebookData.facebookId,
         avatar: facebookData.avatar,
-        role: Role.User,
+        role: Role.User, // Always create as User first
       });
 
       await newUser.save();
       existUser = newUser;
+      isNewUser = true;
       console.log('✅ New user created via Facebook OAuth:', existUser.email);
     } else if (!existUser.facebookId) {
       // Link Facebook account to existing user
@@ -229,7 +251,13 @@ export class AuthService {
     const { tokens, user: userData } = await this.login(existUser);
 
     console.log('✅ Facebook OAuth authentication successful');
-    return { tokens, user: userData };
+    return { 
+      tokens, 
+      user: userData,
+      isNewUser,
+      needsSellerRegistration: facebookData.sellerMode && existUser.role !== Role.Seller,
+      isSeller: existUser.role === Role.Seller,
+    };
   }
 
   async validateUser(email: string, password: string): Promise<UserDocument> {

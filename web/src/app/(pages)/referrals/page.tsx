@@ -127,7 +127,7 @@ export default function ReferralsPage() {
     if (stats?.referralCode) {
       const baseUrl = window.location.origin;
       if (type === "seller") {
-        const link = `${baseUrl}/sellers-register?ref=${stats.referralCode}#seller-register-form`;
+        const link = `${baseUrl}/become-seller?ref=${stats.referralCode}#seller-register-form`;
         console.log("Generated link:", link); // Debug log
         return link;
       }
