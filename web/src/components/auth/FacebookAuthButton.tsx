@@ -87,25 +87,44 @@ export function FacebookAuthButton({
 
   // Fetch user info from Facebook
   const fetchUserInfo = useCallback(() => {
-    if (!window.FB) return;
+    if (!window.FB) {
+      console.log("[FB Auth] fetchUserInfo: FB SDK not available");
+      return;
+    }
 
+    console.log("[FB Auth] Fetching user info from Graph API...");
     window.FB.api("/me?fields=id,name,email,picture.width(100).height(100)", (response: FacebookUserData) => {
+      console.log("[FB Auth] Graph API response:", response);
       if (response && response.name) {
+        console.log("[FB Auth] User info received:", {
+          name: response.name,
+          picture: response.picture?.data?.url,
+        });
         setUserInfo({
           name: response.name,
           picture: response.picture?.data?.url,
         });
+      } else {
+        console.log("[FB Auth] No user name in response");
       }
     });
   }, []);
 
   // Check if user is already logged in with Facebook
   const checkLoginStatus = useCallback(() => {
-    if (!window.FB) return;
+    if (!window.FB) {
+      console.log("[FB Auth] checkLoginStatus: FB SDK not available");
+      return;
+    }
 
+    console.log("[FB Auth] Checking login status...");
     window.FB.getLoginStatus((response) => {
+      console.log("[FB Auth] Login status:", response.status, response);
       if (response.status === "connected") {
+        console.log("[FB Auth] User is connected, fetching user info...");
         fetchUserInfo();
+      } else {
+        console.log("[FB Auth] User not connected to Facebook");
       }
     });
   }, [fetchUserInfo]);
@@ -113,12 +132,15 @@ export function FacebookAuthButton({
   // Initialize Facebook SDK
   useEffect(() => {
     if (!appId) {
-      console.warn("Facebook App ID not configured");
+      console.warn("[FB Auth] Facebook App ID not configured");
       return;
     }
 
+    console.log("[FB Auth] Initializing with App ID:", appId);
+
     // Check if SDK is already loaded
     if (window.FB) {
+      console.log("[FB Auth] SDK already loaded, checking login status...");
       setIsSDKLoaded(true);
       checkLoginStatus();
       return;
@@ -126,22 +148,27 @@ export function FacebookAuthButton({
 
     // Load the SDK asynchronously
     window.fbAsyncInit = function () {
+      console.log("[FB Auth] fbAsyncInit called, initializing SDK...");
       window.FB.init({
         appId: appId,
         cookie: true,
         xfbml: true,
         version: "v18.0",
       });
+      console.log("[FB Auth] SDK initialized successfully");
       setIsSDKLoaded(true);
       checkLoginStatus();
     };
 
     // Load SDK script
+    console.log("[FB Auth] Loading SDK script...");
     const script = document.createElement("script");
     script.id = "facebook-jssdk";
     script.src = "https://connect.facebook.net/en_US/sdk.js";
     script.async = true;
     script.defer = true;
+    script.onload = () => console.log("[FB Auth] SDK script loaded");
+    script.onerror = (e) => console.error("[FB Auth] SDK script failed to load:", e);
     document.body.appendChild(script);
 
     return () => {
@@ -154,17 +181,22 @@ export function FacebookAuthButton({
   }, [appId, checkLoginStatus]);
 
   const handleLogin = useCallback(() => {
+    console.log("[FB Auth] handleLogin called", { hasFB: !!window.FB, disabled, isLoading });
     if (!window.FB || disabled || isLoading) return;
 
     setIsLoading(true);
+    console.log("[FB Auth] Calling FB.login...");
 
     window.FB.login(
       (response) => {
+        console.log("[FB Auth] FB.login response:", response);
         if (response.status === "connected" && response.authResponse) {
+          console.log("[FB Auth] Login successful, fetching user details...");
           // Get user details
           window.FB.api(
             "/me?fields=id,name,email,picture.width(100).height(100)",
             (userResponse: FacebookUserData) => {
+              console.log("[FB Auth] User details response:", userResponse);
               setIsLoading(false);
               
               if (userResponse && userResponse.id) {
@@ -181,12 +213,14 @@ export function FacebookAuthButton({
                   picture: userResponse.picture?.data?.url,
                 });
               } else {
+                console.log("[FB Auth] No user ID in response");
                 onError?.("Failed to get user information from Facebook");
               }
             }
           );
         } else {
           setIsLoading(false);
+          console.log("[FB Auth] Login failed or cancelled:", response.status);
           if (response.status === "not_authorized") {
             onError?.("Authorization was cancelled");
           } else {
@@ -199,8 +233,11 @@ export function FacebookAuthButton({
   }, [disabled, isLoading, onSuccess, onError]);
 
   if (!appId) {
+    console.log("[FB Auth] No App ID configured, not rendering button");
     return null;
   }
+
+  console.log("[FB Auth] Rendering button:", { isSDKLoaded, userInfo, isLoading });
 
   const buttonText = userInfo
     ? `Continue as ${userInfo.name.split(" ")[0]}`
