@@ -1,267 +1,348 @@
-/* Auction Filters Styles - Modern Design with Dark/Light Theme Support */
+/* ═══════════════════════════════════════════════════════════════════════════
+   Auction Filters - Clean & Elegant Design
+   ═══════════════════════════════════════════════════════════════════════════ */
 
-/* Light Theme Variables (default) */
+/* Import elegant fonts */
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&display=swap');
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Theme Variables
+   ───────────────────────────────────────────────────────────────────────────── */
+
 .auction-filters {
-  --filters-bg: rgba(255, 255, 255, 0.9);
-  --filters-header-bg: linear-gradient(135deg, #1e3a5f 0%, #2c5282 100%);
-  --filters-border: rgba(0, 0, 0, 0.06);
-  --filters-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-  --filters-text-primary: #1a1a2e;
-  --filters-text-secondary: #64748b;
-  --filters-text-muted: #94a3b8;
-  --filters-accent: #2c5282;
-  --filters-accent-light: rgba(44, 82, 130, 0.1);
-  --filters-input-bg: #ffffff;
-  --filters-input-border: rgba(0, 0, 0, 0.1);
-  --filters-input-focus: rgba(44, 82, 130, 0.15);
-  --filters-danger: #ef4444;
-  --filters-danger-hover: #dc2626;
+  /* Light Theme */
+  --filters-bg: #ffffff;
+  --filters-border: rgba(1, 38, 69, 0.08);
+  --filters-text: #012645;
+  --filters-text-secondary: #5a6a7a;
+  --filters-text-muted: #9aa5b1;
+  --filters-gold: #c9a961;
+  --filters-gold-hover: #b8984f;
+  --filters-input-bg: #faf9f7;
+  --filters-input-border: rgba(1, 38, 69, 0.1);
+  --filters-input-focus: rgba(201, 169, 97, 0.2);
+  --filters-shadow: 0 2px 12px rgba(1, 38, 69, 0.06);
 }
 
-/* Dark Theme Variables */
+/* Dark Theme */
 [data-theme="dark"] .auction-filters,
 .dark .auction-filters {
-  --filters-bg: rgba(30, 30, 50, 0.8);
-  --filters-header-bg: linear-gradient(135deg, #2c5282 0%, #1e3a5f 100%);
-  --filters-border: rgba(255, 255, 255, 0.08);
-  --filters-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
-  --filters-text-primary: #f8fafc;
-  --filters-text-secondary: #cbd5e1;
-  --filters-text-muted: #64748b;
-  --filters-accent: #63b3ed;
-  --filters-accent-light: rgba(99, 179, 237, 0.15);
-  --filters-input-bg: rgba(20, 20, 35, 0.8);
-  --filters-input-border: rgba(255, 255, 255, 0.1);
-  --filters-input-focus: rgba(99, 179, 237, 0.2);
-  --filters-danger: #f87171;
-  --filters-danger-hover: #ef4444;
+  --filters-bg: rgba(13, 26, 40, 0.95);
+  --filters-border: rgba(201, 169, 97, 0.12);
+  --filters-text: #f5f3ef;
+  --filters-text-secondary: #b8c5d1;
+  --filters-text-muted: #6a7a8a;
+  --filters-gold: #c9a961;
+  --filters-gold-hover: #e8d9b5;
+  --filters-input-bg: rgba(10, 21, 32, 0.8);
+  --filters-input-border: rgba(201, 169, 97, 0.15);
+  --filters-input-focus: rgba(201, 169, 97, 0.25);
+  --filters-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
 }
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Main Container
+   ───────────────────────────────────────────────────────────────────────────── */
 
 .auction-filters {
   background: var(--filters-bg);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-radius: 16px;
   border: 1px solid var(--filters-border);
+  border-radius: 12px;
   box-shadow: var(--filters-shadow);
   overflow: hidden;
-  margin-bottom: 0;
 }
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Header
+   ───────────────────────────────────────────────────────────────────────────── */
 
 .filters-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 16px 20px;
-  background: linear-gradient(135deg, #1e3a5f 0%, #2c5282 100%);
+  padding: 20px 24px;
   cursor: pointer;
-  user-select: none;
-  transition: all 0.3s ease;
+  border-bottom: 1px solid var(--filters-border);
+  transition: background 0.2s ease;
 }
 
 .filters-header:hover {
-  opacity: 0.95;
+  background: rgba(201, 169, 97, 0.04);
 }
 
 .filters-title {
   display: flex;
   align-items: center;
-  gap: 10px;
-  font-weight: 700;
-  color: white;
-  font-size: 0.95rem;
-  letter-spacing: 0.02em;
+  gap: 12px;
 }
 
 .filters-title svg {
-  color: white;
+  color: var(--filters-gold);
+  width: 20px;
+  height: 20px;
+}
+
+.filters-title span {
+  font-family: 'Cormorant Garamond', 'Georgia', serif;
+  font-size: 1.4rem;
+  font-weight: 600;
+  font-style: italic;
+  color: var(--filters-text);
+  letter-spacing: 0.02em;
 }
 
 .filters-toggle {
-  background: rgba(255, 255, 255, 0.2);
-  border: none;
-  font-size: 1rem;
-  font-weight: bold;
-  color: white;
-  cursor: pointer;
-  width: 28px;
-  height: 28px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 8px;
-  transition: all 0.3s ease;
+  width: 28px;
+  height: 28px;
+  background: transparent;
+  border: 1px solid var(--filters-border);
+  border-radius: 6px;
+  color: var(--filters-text-secondary);
+  font-size: 1.1rem;
+  font-weight: 400;
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
 .filters-toggle:hover {
-  background: rgba(255, 255, 255, 0.3);
+  border-color: var(--filters-gold);
+  color: var(--filters-gold);
 }
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Content
+   ───────────────────────────────────────────────────────────────────────────── */
 
 .filters-content {
   max-height: 0;
   overflow: hidden;
-  transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: max-height 0.35s ease, padding 0.35s ease;
 }
 
 .filters-content.expanded {
   max-height: 600px;
-  padding: 24px 20px;
+  padding: 24px;
 }
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Filter Groups
+   ───────────────────────────────────────────────────────────────────────────── */
 
 .filter-group {
   margin-bottom: 20px;
 }
 
-.filter-group:last-child {
+.filter-group:last-of-type {
   margin-bottom: 0;
 }
 
 .filter-label {
   display: block;
-  font-size: 0.85rem;
-  font-weight: 600;
+  font-family: 'Cormorant Garamond', 'Georgia', serif;
+  font-size: 0.95rem;
+  font-weight: 500;
   color: var(--filters-text-secondary);
-  margin-bottom: 10px;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
+  margin-bottom: 8px;
+  letter-spacing: 0.02em;
 }
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Select & Input Styles
+   ───────────────────────────────────────────────────────────────────────────── */
 
 .filter-select {
   width: 100%;
-  padding: 12px 14px;
+  padding: 12px 16px;
+  padding-right: 40px;
   border: 1px solid var(--filters-input-border);
-  border-radius: 12px;
-  font-size: 0.95rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
   background: var(--filters-input-bg);
-  color: var(--filters-text-primary);
-  transition: all 0.3s ease;
+  color: var(--filters-text);
   cursor: pointer;
   appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236366f1'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23c9a961'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 12px center;
   background-size: 16px;
-  padding-right: 40px;
+  transition: all 0.2s ease;
+}
+
+.filter-select:hover {
+  border-color: var(--filters-gold);
 }
 
 .filter-select:focus {
   outline: none;
-  border-color: var(--filters-accent);
-  box-shadow: 0 0 0 4px var(--filters-input-focus);
+  border-color: var(--filters-gold);
+  box-shadow: 0 0 0 3px var(--filters-input-focus);
 }
 
-/* Price Range */
+.filter-select:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Price Range - Improved Layout
+   ───────────────────────────────────────────────────────────────────────────── */
+
 .price-range {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
 }
 
 .price-input {
-  flex: 1;
-  padding: 12px 14px;
+  width: 100%;
+  min-width: 0;
+  padding: 12px 10px;
   border: 1px solid var(--filters-input-border);
-  border-radius: 12px;
-  font-size: 0.95rem;
+  border-radius: 8px;
+  font-size: 0.85rem;
   background: var(--filters-input-bg);
-  color: var(--filters-text-primary);
-  transition: all 0.3s ease;
+  color: var(--filters-text);
+  transition: all 0.2s ease;
+}
+
+.price-input:hover {
+  border-color: var(--filters-gold);
 }
 
 .price-input:focus {
   outline: none;
-  border-color: var(--filters-accent);
-  box-shadow: 0 0 0 4px var(--filters-input-focus);
+  border-color: var(--filters-gold);
+  box-shadow: 0 0 0 3px var(--filters-input-focus);
 }
 
 .price-input::placeholder {
   color: var(--filters-text-muted);
 }
 
-.price-separator {
-  color: var(--filters-text-muted);
-  font-weight: 600;
-  font-size: 0.9rem;
+/* Remove number input spinners */
+.price-input::-webkit-outer-spin-button,
+.price-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
 }
 
-/* Clear Filters Button */
+.price-input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+.price-separator {
+  color: var(--filters-text-muted);
+  font-size: 0.85rem;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Clear Button
+   ───────────────────────────────────────────────────────────────────────────── */
+
 .clear-filters-btn {
   display: flex;
   align-items: center;
-  gap: 8px;
-  background: linear-gradient(
-    135deg,
-    var(--filters-danger),
-    var(--filters-danger-hover)
-  );
-  color: white;
-  border: none;
-  padding: 12px 20px;
-  border-radius: 12px;
-  font-size: 0.9rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  margin-top: 16px;
-  width: 100%;
   justify-content: center;
-  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.25);
+  gap: 8px;
+  width: 100%;
+  padding: 12px 20px;
+  margin-top: 20px;
+  background: transparent;
+  border: 1px solid var(--filters-gold);
+  border-radius: 8px;
+  color: var(--filters-gold);
+  font-family: 'Cormorant Garamond', 'Georgia', serif;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
 .clear-filters-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(239, 68, 68, 0.35);
+  background: var(--filters-gold);
+  color: #ffffff;
 }
 
-.clear-filters-btn:active {
-  transform: translateY(0);
+.clear-filters-btn svg {
+  width: 16px;
+  height: 16px;
 }
 
-/* Mobile Responsiveness */
+/* ═══════════════════════════════════════════════════════════════════════════
+   Responsive Design
+   ═══════════════════════════════════════════════════════════════════════════ */
+
 @media (max-width: 1024px) {
-  .auction-filters {
-    border-radius: 14px;
+  .filters-header {
+    padding: 18px 20px;
   }
 
   .filters-content.expanded {
-    padding: 20px 16px;
-  }
-
-  .filters-header {
-    padding: 16px;
+    padding: 20px;
   }
 }
 
 @media (max-width: 768px) {
   .auction-filters {
-    border-radius: 12px;
-  }
-
-  .filters-content.expanded {
-    padding: 16px;
+    border-radius: 10px;
   }
 
   .filters-header {
-    padding: 14px 16px;
+    padding: 16px 18px;
+  }
+
+  .filters-title span {
+    font-size: 1.25rem;
+  }
+
+  .filters-content.expanded {
+    padding: 18px;
   }
 
   .price-range {
-    flex-direction: column;
-    gap: 10px;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
   }
 
   .price-separator {
     display: none;
   }
 
-  .filter-select,
   .price-input {
-    padding: 10px 12px;
-    border-radius: 10px;
+    padding: 10px 8px;
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .filters-header {
+    padding: 14px 16px;
   }
 
-  .clear-filters-btn {
-    padding: 10px 16px;
-    border-radius: 10px;
+  .filters-title span {
+    font-size: 1.15rem;
+  }
+
+  .filters-content.expanded {
+    padding: 16px;
+  }
+
+  .filter-select {
+    padding: 10px 14px;
+    font-size: 0.85rem;
+  }
+
+  .price-range {
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+  }
+
+  .price-input {
+    padding: 10px 6px;
+    font-size: 0.78rem;
   }
 }

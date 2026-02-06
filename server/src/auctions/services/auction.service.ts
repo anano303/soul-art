@@ -124,6 +124,7 @@ export class AuctionService {
       minPrice,
       maxPrice,
       material,
+      dimensions,
       page = 1,
       limit = 12,
     } = filters;
@@ -150,6 +151,7 @@ export class AuctionService {
 
     if (artworkType) query.artworkType = artworkType;
     if (material) query.material = new RegExp(material, 'i');
+    if (dimensions) query.dimensions = new RegExp(dimensions, 'i');
 
     if (minPrice || maxPrice) {
       query.currentPrice = {};
@@ -178,6 +180,31 @@ export class AuctionService {
         pages: Math.ceil(total / limit),
         total,
       },
+    };
+  }
+
+  // Get unique materials and dimensions from active auctions for filter dropdowns
+  async getFilterOptions() {
+    const activeAuctions = await this.auctionModel
+      .find({ status: { $in: ['ACTIVE', 'SCHEDULED'] } })
+      .select('material dimensions')
+      .lean();
+
+    const materialsSet = new Set<string>();
+    const dimensionsSet = new Set<string>();
+
+    activeAuctions.forEach((auction) => {
+      if (auction.material && auction.material.trim()) {
+        materialsSet.add(auction.material.trim());
+      }
+      if (auction.dimensions && auction.dimensions.trim()) {
+        dimensionsSet.add(auction.dimensions.trim());
+      }
+    });
+
+    return {
+      materials: Array.from(materialsSet).sort(),
+      dimensions: Array.from(dimensionsSet).sort(),
     };
   }
 
@@ -545,9 +572,8 @@ export class AuctionService {
         contentType: 'image/webp',
       });
 
-      // Get signed URL for public access (valid for 7 days)
-      const signedUrl = await this.awsS3Service.getImageByFileId(key);
-      const publicUrl = signedUrl || this.awsS3Service.getPublicUrl(key);
+      // Get public URL (bucket has public access enabled)
+      const publicUrl = this.awsS3Service.getPublicUrl(key);
 
       this.logger.log(`Auction image uploaded to S3: ${key}`);
 

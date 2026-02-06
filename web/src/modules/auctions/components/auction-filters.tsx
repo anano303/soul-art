@@ -1,15 +1,22 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Filter, X } from "lucide-react";
 import { useLanguage } from "@/hooks/LanguageContext";
+import { apiClient } from "@/lib/axios";
 import "./auction-filters.css";
 
 interface FilterState {
   artworkType: string;
   material: string;
+  dimensions: string;
   minPrice: string;
   maxPrice: string;
+}
+
+interface FilterOptions {
+  materials: string[];
+  dimensions: string[];
 }
 
 interface AuctionFiltersProps {
@@ -23,22 +30,33 @@ const ARTWORK_TYPES = [
   { value: "REPRODUCTION", label: "ასლი" },
 ];
 
-const MATERIALS = [
-  { value: "", label: "ყველა მასალა" },
-  { value: "ზეთი", label: "ზეთი" },
-  { value: "აკვარელი", label: "აკვარელი" },
-  { value: "აკრილი", label: "აკრილი" },
-  { value: "გრაფიტი", label: "გრაფიტი" },
-  { value: "ფანქარი", label: "ფანქარი" },
-  { value: "შერეული", label: "შერეული ტექნიკა" },
-];
-
 export default function AuctionFilters({
   filters,
   onFilterChange,
 }: AuctionFiltersProps) {
   const { t } = useLanguage();
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(true);
+  const [filterOptions, setFilterOptions] = useState<FilterOptions>({
+    materials: [],
+    dimensions: [],
+  });
+  const [loading, setLoading] = useState(true);
+
+  // Fetch available filter options from active auctions
+  useEffect(() => {
+    const fetchFilterOptions = async () => {
+      try {
+        const response = await apiClient.get<FilterOptions>("/auctions/filters/options");
+        setFilterOptions(response.data);
+      } catch (error) {
+        console.error("Failed to fetch filter options:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchFilterOptions();
+  }, []);
 
   const handleFilterChange = (key: keyof FilterState, value: string) => {
     const newFilters = { ...filters, [key]: value };
@@ -49,6 +67,7 @@ export default function AuctionFilters({
     onFilterChange({
       artworkType: "",
       material: "",
+      dimensions: "",
       minPrice: "",
       maxPrice: "",
     });
@@ -86,17 +105,37 @@ export default function AuctionFilters({
           </select>
         </div>
 
-        {/* Material Filter */}
+        {/* Material Filter - Dynamic from active auctions */}
         <div className="filter-group">
-          <label className="filter-label">{t("auctions.material")}</label>
+          <label className="filter-label">{t("auctions.material") || "მასალა"}</label>
           <select
             value={filters.material}
             onChange={(e) => handleFilterChange("material", e.target.value)}
             className="filter-select"
+            disabled={loading}
           >
-            {MATERIALS.map((material) => (
-              <option key={material.value} value={material.value}>
-                {material.label}
+            <option value="">ყველა მასალა</option>
+            {filterOptions.materials.map((material) => (
+              <option key={material} value={material}>
+                {material}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* Dimensions Filter - Dynamic from active auctions */}
+        <div className="filter-group">
+          <label className="filter-label">{t("auctions.dimensions") || "ზომა"}</label>
+          <select
+            value={filters.dimensions}
+            onChange={(e) => handleFilterChange("dimensions", e.target.value)}
+            className="filter-select"
+            disabled={loading}
+          >
+            <option value="">ყველა ზომა</option>
+            {filterOptions.dimensions.map((dimension) => (
+              <option key={dimension} value={dimension}>
+                {dimension}
               </option>
             ))}
           </select>

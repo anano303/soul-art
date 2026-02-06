@@ -5,7 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { apiClient } from "@/lib/axios";
 import { useLanguage } from "@/hooks/LanguageContext";
 import { useTheme } from "@/hooks/ThemeContext";
-import { Moon, Sun } from "lucide-react";
+import { Moon, Sun, Gavel } from "lucide-react";
 
 import "./auctions.css";
 import { AuctionCard, AuctionFilters } from "@/modules/auctions/components";
@@ -64,6 +64,7 @@ function AuctionsContent() {
   const [filters, setFilters] = useState({
     artworkType: searchParams?.get("artworkType") || "",
     material: searchParams?.get("material") || "",
+    dimensions: searchParams?.get("dimensions") || "",
     minPrice: searchParams?.get("minPrice") || "",
     maxPrice: searchParams?.get("maxPrice") || "",
   });
@@ -129,7 +130,13 @@ function AuctionsContent() {
     <div className="auctions-container">
       <div className="auctions-header">
         <div className="header-top-row">
-          <h1 className="auctions-title">{t("auctions.title")}</h1>
+          <h1 className="auctions-title">
+            <span className="title-text">Soul Art</span>
+            <span className="title-auctions">
+              <Gavel className="gavel-icon" />
+              Auctions
+            </span>
+          </h1>
           <button
             className="theme-toggle-btn"
             onClick={toggleTheme}

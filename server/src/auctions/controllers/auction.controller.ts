@@ -51,6 +51,12 @@ export class AuctionController {
     return this.auctionService.getAuctions(filters);
   }
 
+  // Public: Get available filter options (materials and dimensions from active auctions)
+  @Get('filters/options')
+  async getFilterOptions() {
+    return this.auctionService.getFilterOptions();
+  }
+
   // Public: Get single auction
   @Get(':id')
   async getAuction(@Param('id') id: string) {

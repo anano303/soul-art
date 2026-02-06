@@ -125,6 +125,10 @@ export class AuctionFilterDto {
   material?: string;
 
   @IsOptional()
+  @IsString()
+  dimensions?: string;
+
+  @IsOptional()
   @IsNumber()
   @Type(() => Number)
   page?: number = 1;
