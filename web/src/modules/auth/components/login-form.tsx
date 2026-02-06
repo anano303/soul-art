@@ -290,7 +290,6 @@ export function LoginForm({
             onError={(error) => setLoginError(error)}
             disabled={isLoading || isFacebookPending}
             variant="login"
-            className="social-button"
           />
         </div>
       </form>

@@ -602,7 +602,6 @@ export function BecomeSellerModal({
                 }}
                 disabled={isPending || isFacebookPending}
                 variant="seller"
-                className="social-auth-button"
               />
             </div>
             <div className="social-auth-divider">

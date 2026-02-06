@@ -388,7 +388,6 @@ export function RegisterForm() {
             onError={(error) => setRegisterError(error)}
             disabled={isPending || isFacebookPending}
             variant="register"
-            className="social-btn"
           />
         </div>
 

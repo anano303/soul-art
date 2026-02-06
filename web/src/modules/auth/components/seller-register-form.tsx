@@ -562,7 +562,6 @@ export function SellerRegisterForm() {
               onError={(error) => setRegistrationError(error)}
               disabled={isPending || isFacebookPending}
               variant="seller"
-              className="social-btn"
             />
           </div>
           <div className="divider" style={{ margin: "1rem 0" }}>
