@@ -19,6 +19,7 @@ import {
   AdminCreateAuctionDto,
   RescheduleAuctionDto,
   WinnerPaymentDto,
+  InitializeBogPaymentDto,
 } from '../dtos/auction.dto';
 import { CurrentUser } from '../../decorators/current-user.decorator';
 import { UserDocument } from '../../users/schemas/user.schema';
@@ -240,7 +241,7 @@ export class AuctionController {
     return this.auctionService.getPaymentDetails(id, user._id.toString());
   }
 
-  // Winner: Confirm payment
+  // Winner: Confirm payment (legacy - without BOG)
   @UseGuards(JwtAuthGuard)
   @Post(':id/confirm-payment')
   async confirmPayment(
@@ -253,5 +254,30 @@ export class AuctionController {
       user._id.toString(),
       paymentDto,
     );
+  }
+
+  // Winner: Initialize BOG payment
+  @UseGuards(JwtAuthGuard)
+  @Post(':id/bog/initialize')
+  async initializeBogPayment(
+    @Param('id') id: string,
+    @CurrentUser() user: UserDocument,
+    @Body() paymentDto: InitializeBogPaymentDto,
+  ) {
+    return this.auctionService.initializeBogPayment(
+      id,
+      user._id.toString(),
+      paymentDto.deliveryZone,
+    );
+  }
+
+  // Winner: Verify BOG payment status
+  @UseGuards(JwtAuthGuard)
+  @Get(':id/bog/verify')
+  async verifyBogPayment(
+    @Param('id') id: string,
+    @CurrentUser() user: UserDocument,
+  ) {
+    return this.auctionService.verifyBogPayment(id, user._id.toString());
   }
 }

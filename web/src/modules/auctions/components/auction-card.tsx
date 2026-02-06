@@ -638,7 +638,10 @@ export default function AuctionCard({
                     <span>{t("auctions.paid") || "გადახდილია"}</span>
                   </div>
                 ) : (
-                  <Link href={`/checkout/auction/${currentAuction._id}`} className="payment-link-btn">
+                  <Link
+                    href={`/checkout/auction/${currentAuction._id}`}
+                    className="payment-link-btn"
+                  >
                     <CreditCard size={18} />
                     <span>{t("auctions.payNow") || "გადახდა"}</span>
                   </Link>
@@ -674,7 +677,10 @@ export default function AuctionCard({
                 <span>{t("auctions.paid") || "გადახდილია"}</span>
               </div>
             ) : (
-              <Link href={`/checkout/auction/${currentAuction._id}`} className="payment-link-btn">
+              <Link
+                href={`/checkout/auction/${currentAuction._id}`}
+                className="payment-link-btn"
+              >
                 <CreditCard size={18} />
                 <span>{t("auctions.payNow") || "გადახდა"}</span>
               </Link>

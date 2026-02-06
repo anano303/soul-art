@@ -1,7 +1,10 @@
-import { Controller, Post, Body, Get, Param, UseInterceptors } from '@nestjs/common';
+import { Controller, Post, Body, Get, Param, UseInterceptors, UseGuards } from '@nestjs/common';
 import { PaymentsService } from './payments.service';
 import { paymentRateLimit } from '@/middleware/security.middleware';
 import { createRateLimitInterceptor } from '@/interceptors/rate-limit.interceptor';
+import { JwtAuthGuard } from '@/guards/jwt-auth.guard';
+import { CurrentUser } from '@/decorators/current-user.decorator';
+import { UserDocument } from '@/users/schemas/user.schema';
 
 @Controller('payments')
 export class PaymentsController {
@@ -169,5 +172,42 @@ export class PaymentsController {
       status: result.success ? 'success' : 'failed',
       message: result.message,
     };
+  }
+
+  // Create BOG payment for auction
+  @UseGuards(JwtAuthGuard)
+  @UseInterceptors(createRateLimitInterceptor(paymentRateLimit))
+  @Post('bog/auction/create')
+  async createAuctionBogPayment(
+    @CurrentUser() user: UserDocument,
+    @Body()
+    data: {
+      auctionId: string;
+      externalOrderId: string;
+      title: string;
+      artworkPrice: number;
+      deliveryFee: number;
+      totalPayment: number;
+    },
+  ) {
+    try {
+      console.log('Creating BOG payment for auction:', data.auctionId);
+
+      const result = await this.paymentsService.createAuctionPayment({
+        auctionId: data.auctionId,
+        externalOrderId: data.externalOrderId,
+        title: data.title,
+        artworkPrice: data.artworkPrice,
+        deliveryFee: data.deliveryFee,
+        totalPayment: data.totalPayment,
+        successUrl: `https://soulart.ge/auctions/${data.auctionId}?paid=true`,
+        failUrl: `https://soulart.ge/checkout/auction/${data.auctionId}?error=payment_failed`,
+      });
+
+      return result;
+    } catch (error) {
+      console.error('Auction BOG Payment Error:', error);
+      throw error;
+    }
   }
 }

@@ -158,6 +158,13 @@ export class WinnerPaymentDto {
   deliveryZone: 'TBILISI' | 'REGION';
 }
 
+// BOG Payment initialization DTO
+export class InitializeBogPaymentDto {
+  @IsString()
+  @IsEnum(['TBILISI', 'REGION'])
+  deliveryZone: 'TBILISI' | 'REGION';
+}
+
 // Delivery fee constants
 export const DELIVERY_FEES = {
   TBILISI: 0,

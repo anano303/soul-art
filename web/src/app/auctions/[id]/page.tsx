@@ -98,9 +98,15 @@ export default function AuctionDetailPage() {
       const response = await apiClient.get(`/auctions/${auctionId}`);
       console.log("[Auction Debug] Full auction data:", response.data);
       console.log("[Auction Debug] Status:", response.data.status);
-      console.log("[Auction Debug] CurrentWinner:", response.data.currentWinner);
+      console.log(
+        "[Auction Debug] CurrentWinner:",
+        response.data.currentWinner,
+      );
       console.log("[Auction Debug] User ID:", user?._id);
-      console.log("[Auction Debug] Is winner match:", user?._id === response.data.currentWinner?._id);
+      console.log(
+        "[Auction Debug] Is winner match:",
+        user?._id === response.data.currentWinner?._id,
+      );
       setAuction(response.data);
       // Set initial bid amount to minimum next bid
       const minBid =
@@ -223,7 +229,11 @@ export default function AuctionDetailPage() {
 
   const getBidderName = (bid: Bid) => {
     // Skip if bidderName is "null null" or similar invalid value
-    if (bid.bidderName && bid.bidderName !== "null null" && !bid.bidderName.includes("null")) {
+    if (
+      bid.bidderName &&
+      bid.bidderName !== "null null" &&
+      !bid.bidderName.includes("null")
+    ) {
       return bid.bidderName;
     }
     if (!bid.bidder) return t("auctions.anonymousBidder") || "ანონიმური";

@@ -25,6 +25,7 @@ import { User, UserSchema } from '../users/schemas/user.schema';
 import { UsersModule } from '../users/users.module';
 import { EmailModule } from '../email/email.module';
 import { AwsS3Module } from '../aws-s3/aws-s3.module';
+import { PaymentsModule } from '../payments/payments.module';
 
 @Module({
   imports: [
@@ -42,6 +43,7 @@ import { AwsS3Module } from '../aws-s3/aws-s3.module';
     forwardRef(() => UsersModule), // For BalanceService and User model
     EmailModule,
     AwsS3Module,
+    forwardRef(() => PaymentsModule), // For BOG payment integration
   ],
   controllers: [AuctionController, AuctionAdminController],
   providers: [AuctionService, AuctionAdminService],

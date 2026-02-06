@@ -143,6 +143,21 @@ export class Auction {
   @Prop({ default: 0 })
   totalPayment: number;
 
+  // BOG Payment Info
+  @Prop()
+  bogOrderId?: string; // BOG's internal order ID
+
+  @Prop()
+  externalOrderId?: string; // Our generated unique ID for BOG callback
+
+  @Prop({ type: Object })
+  paymentResult?: {
+    id: string;
+    status: string;
+    update_time: string;
+    email_address?: string;
+  };
+
   // Commission (10%)
   @Prop()
   commissionAmount: number;

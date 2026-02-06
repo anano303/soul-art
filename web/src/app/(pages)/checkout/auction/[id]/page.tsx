@@ -131,7 +131,7 @@ export default function AuctionCheckoutPage() {
   useEffect(() => {
     // Wait for auth to finish loading
     if (authLoading) return;
-    
+
     if (auctionId && user) {
       fetchData();
     } else if (!user) {
@@ -147,18 +147,37 @@ export default function AuctionCheckoutPage() {
 
     setProcessing(true);
     try {
-      const response = await apiClient.post(
-        `/auctions/${auctionId}/confirm-payment`,
+      // Step 1: Initialize BOG payment on backend
+      const initResponse = await apiClient.post(
+        `/auctions/${auctionId}/bog/initialize`,
         {
           deliveryZone,
         },
       );
 
-      if (response.data.success) {
-        toast.success(
-          t("auctions.paymentSuccess") || "გადახდა წარმატებით დასრულდა!",
-        );
-        router.push(`/auctions/${auctionId}?paid=true`);
+      const {
+        externalOrderId,
+        title,
+        artworkPrice,
+        deliveryFee,
+        totalPayment,
+      } = initResponse.data;
+
+      // Step 2: Create BOG payment and get redirect URL
+      const bogResponse = await apiClient.post(`/payments/bog/auction/create`, {
+        auctionId,
+        externalOrderId,
+        title,
+        artworkPrice,
+        deliveryFee,
+        totalPayment,
+      });
+
+      // Step 3: Redirect to BOG payment page
+      if (bogResponse.data.redirectUrl) {
+        window.location.href = bogResponse.data.redirectUrl;
+      } else {
+        throw new Error("No redirect URL received from BOG");
       }
     } catch (error: unknown) {
       console.error("Payment error:", error);
@@ -170,7 +189,6 @@ export default function AuctionCheckoutPage() {
           t("auctions.paymentError") ||
           "გადახდის შეცდომა",
       );
-    } finally {
       setProcessing(false);
     }
   };

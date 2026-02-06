@@ -1154,4 +1154,189 @@ export class AuctionService {
       totalValue: totalValue[0]?.total || 0,
     };
   }
+
+  // Initialize BOG payment for auction winner
+  async initializeBogPayment(
+    auctionId: string,
+    userId: string,
+    deliveryZone: 'TBILISI' | 'REGION',
+  ) {
+    const auction = await this.auctionModel.findById(auctionId);
+    if (!auction) {
+      throw new NotFoundException('Auction not found');
+    }
+
+    if (auction.currentWinner?.toString() !== userId) {
+      throw new ForbiddenException('You are not the winner of this auction');
+    }
+
+    if (auction.status !== AuctionStatus.ENDED) {
+      throw new BadRequestException('Auction has not ended yet');
+    }
+
+    if (auction.isPaid) {
+      throw new BadRequestException('Auction is already paid');
+    }
+
+    const deliveryFee = DELIVERY_FEES[deliveryZone];
+    const totalPayment = auction.currentPrice + deliveryFee;
+
+    // Generate unique external order ID
+    const externalOrderId = randomUUID();
+
+    // Update auction with delivery zone and external order ID
+    auction.winnerDeliveryZone = deliveryZone;
+    auction.deliveryFee = deliveryFee;
+    auction.totalPayment = totalPayment;
+    auction.externalOrderId = externalOrderId;
+    await auction.save();
+
+    this.logger.log(
+      `BOG payment initialized for auction ${auctionId}, externalOrderId: ${externalOrderId}, total: ${totalPayment} GEL`,
+    );
+
+    return {
+      auctionId: auction._id.toString(),
+      externalOrderId,
+      title: auction.title,
+      artworkPrice: auction.currentPrice,
+      deliveryFee,
+      totalPayment,
+      mainImage: auction.mainImage,
+    };
+  }
+
+  // Update auction with BOG payment info after payment creation
+  async updateBogPaymentInfo(
+    auctionId: string,
+    bogOrderId: string,
+    externalOrderId: string,
+  ) {
+    const auction = await this.auctionModel.findById(auctionId);
+    if (!auction) {
+      throw new NotFoundException('Auction not found');
+    }
+
+    auction.bogOrderId = bogOrderId;
+    auction.externalOrderId = externalOrderId;
+    await auction.save();
+
+    this.logger.log(
+      `Updated auction ${auctionId} with BOG order ID: ${bogOrderId}`,
+    );
+  }
+
+  // Handle BOG payment callback for auction
+  async handleBogPaymentCallback(
+    externalOrderId: string,
+    status: string,
+    bogOrderId?: string,
+  ) {
+    const auction = await this.auctionModel.findOne({ externalOrderId });
+    if (!auction) {
+      this.logger.warn(
+        `Auction not found for externalOrderId: ${externalOrderId}`,
+      );
+      return { success: false, message: 'Auction not found' };
+    }
+
+    if (auction.isPaid) {
+      return { success: true, message: 'Auction already paid' };
+    }
+
+    const isPaymentSuccessful = status.toLowerCase() === 'completed';
+
+    if (isPaymentSuccessful) {
+      // Update payment status
+      auction.isPaid = true;
+      auction.paymentDate = new Date();
+      auction.paymentResult = {
+        id: bogOrderId || externalOrderId,
+        status: 'COMPLETED',
+        update_time: new Date().toISOString(),
+      };
+
+      if (bogOrderId) {
+        auction.bogOrderId = bogOrderId;
+      }
+
+      await auction.save();
+
+      // Process seller earnings
+      if (auction.sellerEarnings > 0) {
+        await this.balanceService.addAuctionEarnings(
+          auction.seller.toString(),
+          auction.sellerEarnings,
+          auction._id.toString(),
+          auction.title,
+        );
+      }
+
+      // Record auction admin earnings
+      try {
+        const seller = await this.userModel.findById(auction.seller).lean();
+        const winner = await this.userModel
+          .findById(auction.currentWinner)
+          .lean();
+
+        const sellerName = seller
+          ? `${seller.ownerFirstName || ''} ${seller.ownerLastName || ''}`.trim() ||
+            seller.storeName ||
+            'Unknown'
+          : 'Unknown';
+
+        const buyerName = winner
+          ? `${winner.ownerFirstName || ''} ${winner.ownerLastName || ''}`.trim() ||
+            winner.name ||
+            'Unknown'
+          : 'Unknown';
+
+        await this.auctionAdminService.recordEarnings(
+          auction._id.toString(),
+          auction.currentPrice,
+          auction.seller.toString(),
+          sellerName,
+          auction.currentWinner.toString(),
+          buyerName,
+          auction.title,
+        );
+      } catch (error) {
+        this.logger.warn(`Failed to record auction admin earnings: ${error}`);
+      }
+
+      this.logger.log(
+        `Auction ${auction._id} payment completed via BOG callback`,
+      );
+
+      return { success: true, message: 'Payment processed successfully' };
+    }
+
+    return { success: false, message: 'Payment not completed' };
+  }
+
+  // Find auction by external order ID
+  async findByExternalOrderId(externalOrderId: string) {
+    return this.auctionModel.findOne({ externalOrderId });
+  }
+
+  // Verify BOG payment status for auction
+  async verifyBogPayment(auctionId: string, userId: string) {
+    const auction = await this.auctionModel.findById(auctionId);
+    if (!auction) {
+      throw new NotFoundException('Auction not found');
+    }
+
+    if (auction.currentWinner?.toString() !== userId) {
+      throw new ForbiddenException('You are not the winner of this auction');
+    }
+
+    return {
+      auctionId: auction._id.toString(),
+      isPaid: auction.isPaid,
+      bogOrderId: auction.bogOrderId,
+      externalOrderId: auction.externalOrderId,
+      paymentResult: auction.paymentResult,
+    };
+  }
 }
+

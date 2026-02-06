@@ -82,10 +82,14 @@ function AuctionsContent() {
   useEffect(() => {
     const hash = window.location.hash.replace("#", "").toUpperCase();
     const savedTab = localStorage.getItem("auctionsActiveTab");
-    
+
     if (hash === "ACTIVE" || hash === "SCHEDULED" || hash === "ENDED") {
       setActiveTab(hash as "ACTIVE" | "SCHEDULED" | "ENDED");
-    } else if (savedTab === "ACTIVE" || savedTab === "SCHEDULED" || savedTab === "ENDED") {
+    } else if (
+      savedTab === "ACTIVE" ||
+      savedTab === "SCHEDULED" ||
+      savedTab === "ENDED"
+    ) {
       setActiveTab(savedTab as "ACTIVE" | "SCHEDULED" | "ENDED");
     }
   }, []);

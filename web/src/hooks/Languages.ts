@@ -2634,7 +2634,6 @@ export const TRANSLATIONS: Translations = {
       alreadyPaid: "Auction already paid",
       loadError: "Failed to load data",
       notFound: "Auction not found",
-      backToAuctions: "Back to Auctions",
       anonymousBidder: "Anonymous",
     },
 
