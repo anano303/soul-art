@@ -86,7 +86,7 @@
 /* Images Section */
 .auction-images-section {
   position: sticky;
-  top: 24px;
+  top: 84px;
 }
 
 .main-image-container {
@@ -1250,3 +1250,126 @@
     font-size: 1rem;
   }
 }
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Flip Clock Section - Real-time Timer
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.flip-clock-section {
+  position: relative;
+  padding: 24px;
+  background: linear-gradient(
+    135deg,
+    rgba(99, 102, 241, 0.08) 0%,
+    rgba(139, 92, 246, 0.08) 100%
+  );
+  border-radius: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.time-extended-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  border-radius: 50px;
+  font-weight: 700;
+  font-size: 0.9rem;
+  animation: extendedBounce 0.5s ease-out;
+}
+
+@keyframes extendedBounce {
+  0% { transform: scale(0.5); opacity: 0; }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   New Bid Animation
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.pricing-grid.new-bid-pulse {
+  animation: bidPulse 0.5s ease-out;
+}
+
+@keyframes bidPulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.02); }
+  100% { transform: scale(1); }
+}
+
+.price-card.primary .new-bid-indicator {
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: #10b981;
+  color: white;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+  animation: slideUp 0.3s ease-out;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+@keyframes slideUp {
+  from { transform: translateX(-50%) translateY(10px); opacity: 0; }
+  to { transform: translateX(-50%) translateY(0); opacity: 1; }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Guest Bidding Styles
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.guest-label {
+  color: var(--warning);
+  font-weight: 600;
+}
+
+.place-bid-btn.guest-bid {
+  background: linear-gradient(135deg, #1877f2 0%, #166fe5 100%);
+}
+
+.place-bid-btn.guest-bid:hover:not(:disabled) {
+  box-shadow: 0 12px 32px rgba(24, 119, 242, 0.4);
+}
+
+.guest-bid-hint {
+  text-align: center;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin: 8px 0 0;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Real-time Updates Indicator
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.stat-item.highest-bid strong {
+  color: var(--success);
+}
+
+/* Mobile adjustments for flip clock */
+@media (max-width: 768px) {
+  .flip-clock-section {
+    padding: 16px;
+    border-radius: 16px;
+  }
+
+  .time-extended-badge {
+    font-size: 0.8rem;
+    padding: 6px 12px;
+  }
+}
+

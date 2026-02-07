@@ -37,20 +37,20 @@ const profileNavItems = [
     href: "/profile/balance",
     icon: Wallet,
     labelKey: "profileNav.balance",
-    requiresRole: "SELLER",
-  },
-  {
-    key: "devices",
-    href: "/profile/devices",
-    icon: Smartphone,
-    labelKey: "profileNav.devices",
+    requiresRole: "seller",
   },
   {
     key: "auctions",
     href: "/profile/auctions",
     icon: Gavel,
     labelKey: "profileNav.auctions",
-    requiresRole: "SELLER",
+    requiresRole: "seller",
+  },
+  {
+    key: "devices",
+    href: "/profile/devices",
+    icon: Smartphone,
+    labelKey: "profileNav.devices",
   },
 ];
 
@@ -60,7 +60,7 @@ export function ProfileNavigation() {
   const { user } = useAuth();
 
   const filteredNavItems = profileNavItems.filter(
-    (item) => !item.requiresRole || user?.role === item.requiresRole,
+    (item) => !item.requiresRole || user?.role?.toLowerCase() === item.requiresRole.toLowerCase(),
   );
 
   return (
@@ -101,7 +101,7 @@ export function MobileProfileNavigation() {
   const { user } = useAuth();
 
   const filteredNavItems = profileNavItems.filter(
-    (item) => !item.requiresRole || user?.role === item.requiresRole,
+    (item) => !item.requiresRole || user?.role?.toLowerCase() === item.requiresRole.toLowerCase(),
   );
 
   return (

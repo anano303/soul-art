@@ -4,6 +4,8 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { useRouter } from "next/navigation";
 import { apiClient } from "@/lib/axios";
+import Image from "next/image";
+import { toast } from "react-hot-toast";
 import {
   DollarSign,
   TrendingUp,
@@ -15,6 +17,8 @@ import {
   History,
   AlertCircle,
   Plus,
+  Gavel,
+  X,
 } from "lucide-react";
 import Link from "next/link";
 import "./auction-admin.css";
@@ -87,6 +91,31 @@ interface WithdrawalData {
   rejectionReason?: string;
 }
 
+interface Auction {
+  _id: string;
+  title: string;
+  description: string;
+  mainImage: string;
+  artworkType: "ORIGINAL" | "REPRODUCTION";
+  dimensions: string;
+  material: string;
+  startingPrice: number;
+  currentPrice: number;
+  endDate: string;
+  status: "ACTIVE" | "ENDED" | "PENDING" | "CANCELLED" | "SCHEDULED";
+  totalBids: number;
+  seller: {
+    ownerFirstName?: string;
+    ownerLastName?: string;
+    firstName?: string;
+    lastName?: string;
+    email: string;
+  };
+  createdAt: string;
+}
+
+type AuctionFilter = "ALL" | "ACTIVE" | "ENDED" | "PENDING" | "CANCELLED" | "SCHEDULED";
+
 export default function AuctionAdminDashboard() {
   const { user, isLoading } = useAuth();
   const router = useRouter();
@@ -95,7 +124,7 @@ export default function AuctionAdminDashboard() {
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(
     null,
   );
-  const [activeTab, setActiveTab] = useState<"dashboard" | "withdrawals">(
+  const [activeTab, setActiveTab] = useState<"dashboard" | "auctions" | "withdrawals">(
     "dashboard",
   );
 
@@ -111,6 +140,14 @@ export default function AuctionAdminDashboard() {
 
   // Profile data for balance display
   const [profile, setProfile] = useState<ProfileData | null>(null);
+
+  // Auctions management state
+  const [auctions, setAuctions] = useState<Auction[]>([]);
+  const [auctionsLoading, setAuctionsLoading] = useState(false);
+  const [auctionFilter, setAuctionFilter] = useState<AuctionFilter>("ALL");
+  const [rejectModalOpen, setRejectModalOpen] = useState(false);
+  const [rejectingAuctionId, setRejectingAuctionId] = useState<string | null>(null);
+  const [rejectReason, setRejectReason] = useState("");
 
   useEffect(() => {
     if (isLoading) return;
@@ -134,6 +171,12 @@ export default function AuctionAdminDashboard() {
       fetchProfile();
     }
   }, [activeTab, withdrawals.length]);
+
+  useEffect(() => {
+    if (activeTab === "auctions") {
+      fetchAuctions();
+    }
+  }, [activeTab, auctionFilter]);
 
   const fetchDashboard = async () => {
     try {
@@ -202,6 +245,102 @@ export default function AuctionAdminDashboard() {
     }
   };
 
+  const fetchAuctions = async () => {
+    try {
+      setAuctionsLoading(true);
+      const params = new URLSearchParams({
+        page: "1",
+        limit: "50",
+        status: auctionFilter,
+      });
+      const response = await apiClient.get(`/auctions?${params.toString()}`);
+      setAuctions(response.data.auctions || []);
+    } catch (err) {
+      console.error("Failed to fetch auctions:", err);
+      toast.error("აუქციონების ჩატვირთვა ვერ მოხერხდა");
+    } finally {
+      setAuctionsLoading(false);
+    }
+  };
+
+  const approveAuction = async (auctionId: string) => {
+    try {
+      await apiClient.patch(`/auctions/${auctionId}/approve`);
+      toast.success("აუქციონი დადასტურებულია");
+      fetchAuctions();
+    } catch (err) {
+      console.error("Failed to approve auction:", err);
+      toast.error("აუქციონის დამტკიცება ვერ მოხერხდა");
+    }
+  };
+
+  const openRejectModal = (auctionId: string) => {
+    setRejectingAuctionId(auctionId);
+    setRejectReason("");
+    setRejectModalOpen(true);
+  };
+
+  const rejectAuction = async () => {
+    if (!rejectingAuctionId) return;
+    try {
+      await apiClient.patch(`/auctions/${rejectingAuctionId}/reject`, {
+        reason: rejectReason || "არ არის მითითებული",
+      });
+      toast.success("აუქციონი უარყოფილია");
+      setRejectModalOpen(false);
+      setRejectingAuctionId(null);
+      setRejectReason("");
+      fetchAuctions();
+    } catch (err) {
+      console.error("Failed to reject auction:", err);
+      toast.error("აუქციონის უარყოფა ვერ მოხერხდა");
+    }
+  };
+
+  const deleteAuction = async (auctionId: string) => {
+    if (!confirm("დარწმუნებული ხართ, რომ გსურთ აუქციონის წაშლა?")) return;
+    try {
+      await apiClient.delete(`/auctions/${auctionId}`);
+      toast.success("აუქციონი წაშლილია");
+      fetchAuctions();
+    } catch (err) {
+      console.error("Failed to delete auction:", err);
+      toast.error("აუქციონის წაშლა ვერ მოხერხდა");
+    }
+  };
+
+  const getSellerName = (seller: Auction["seller"]) => {
+    if (seller.ownerFirstName && seller.ownerLastName) {
+      return `${seller.ownerFirstName} ${seller.ownerLastName}`;
+    }
+    if (seller.firstName && seller.lastName) {
+      return `${seller.firstName} ${seller.lastName}`;
+    }
+    return seller.email;
+  };
+
+  const getAuctionStatusClass = (status: string) => {
+    switch (status) {
+      case "ACTIVE": return "status-active";
+      case "ENDED": return "status-ended";
+      case "PENDING": return "status-pending";
+      case "CANCELLED": return "status-cancelled";
+      case "SCHEDULED": return "status-scheduled";
+      default: return "";
+    }
+  };
+
+  const getAuctionStatusText = (status: string) => {
+    switch (status) {
+      case "ACTIVE": return "აქტიური";
+      case "ENDED": return "დასრულებული";
+      case "PENDING": return "მოლოდინში";
+      case "CANCELLED": return "გაუქმებული";
+      case "SCHEDULED": return "დაგეგმილი";
+      default: return status;
+    }
+  };
+
   if (isLoading || loading) {
     return (
       <div className="auction-admin-page">
@@ -266,7 +405,7 @@ export default function AuctionAdminDashboard() {
               <p>მართეთ აუქციონები და თვალყური ადევნეთ შემოსავლებს</p>
             </div>
             <Link
-              href="/auction-admin/auctions/create"
+              href="/auctions/create"
               className="create-auction-btn"
               style={{
                 display: "inline-flex",
@@ -295,6 +434,13 @@ export default function AuctionAdminDashboard() {
           >
             <TrendingUp size={18} />
             დეშბორდი
+          </button>
+          <button
+            className={`tab-button ${activeTab === "auctions" ? "active" : ""}`}
+            onClick={() => setActiveTab("auctions")}
+          >
+            <Gavel size={18} />
+            აუქციონები
           </button>
           <button
             className={`tab-button ${activeTab === "withdrawals" ? "active" : ""}`}
@@ -483,6 +629,188 @@ export default function AuctionAdminDashboard() {
               </div>
             </div>
           </>
+        )}
+
+        {/* Auctions Management Tab */}
+        {activeTab === "auctions" && (
+          <div className="auctions-management-section">
+            {/* Filter Buttons */}
+            <div className="auction-filters">
+              {(["ALL", "PENDING", "SCHEDULED", "ACTIVE", "ENDED", "CANCELLED"] as AuctionFilter[]).map((status) => (
+                <button
+                  key={status}
+                  onClick={() => setAuctionFilter(status)}
+                  className={`filter-btn ${auctionFilter === status ? "active" : ""}`}
+                >
+                  {status === "ALL" && "ყველა"}
+                  {status === "PENDING" && "მოლოდინში"}
+                  {status === "SCHEDULED" && "დაგეგმილი"}
+                  {status === "ACTIVE" && "აქტიური"}
+                  {status === "ENDED" && "დასრულებული"}
+                  {status === "CANCELLED" && "გაუქმებული"}
+                </button>
+              ))}
+            </div>
+
+            {/* Stats */}
+            <div className="auction-stats-row">
+              <div className="auction-stat">
+                <span className="stat-number">{auctions.length}</span>
+                <span className="stat-label">სულ</span>
+              </div>
+              <div className="auction-stat pending">
+                <span className="stat-number">{auctions.filter(a => a.status === "PENDING").length}</span>
+                <span className="stat-label">მოლოდინში</span>
+              </div>
+              <div className="auction-stat active">
+                <span className="stat-number">{auctions.filter(a => a.status === "ACTIVE").length}</span>
+                <span className="stat-label">აქტიური</span>
+              </div>
+            </div>
+
+            {/* Auctions Table */}
+            {auctionsLoading ? (
+              <div className="loading-state">
+                <div className="loading-spinner"></div>
+                <p>იტვირთება...</p>
+              </div>
+            ) : auctions.length === 0 ? (
+              <div className="empty-state-card">
+                <Gavel size={48} />
+                <h3>აუქციონები არ მოიძებნა</h3>
+                <p>ამ სტატუსის აუქციონები არ არის</p>
+              </div>
+            ) : (
+              <div className="table-container">
+                <table className="data-table auctions-table">
+                  <thead>
+                    <tr>
+                      <th>სურათი</th>
+                      <th>სათაური</th>
+                      <th>გამყიდველი</th>
+                      <th>ფასი</th>
+                      <th>ბიდები</th>
+                      <th>სტატუსი</th>
+                      <th>თარიღი</th>
+                      <th>მოქმედებები</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {auctions.map((auction) => (
+                      <tr key={auction._id}>
+                        <td>
+                          <Image
+                            src={auction.mainImage || "/placeholder-artwork.jpg"}
+                            alt={auction.title}
+                            className="auction-thumbnail"
+                            width={60}
+                            height={60}
+                            unoptimized
+                          />
+                        </td>
+                        <td>
+                          <div className="auction-info-cell">
+                            <span className="auction-title">{auction.title}</span>
+                            <span className="auction-type">
+                              {auction.artworkType === "ORIGINAL" ? "ორიგინალი" : "რეპროდუქცია"}
+                            </span>
+                          </div>
+                        </td>
+                        <td>
+                          <div className="seller-info-cell">
+                            <span className="seller-name">{getSellerName(auction.seller)}</span>
+                            <span className="seller-email">{auction.seller.email}</span>
+                          </div>
+                        </td>
+                        <td>
+                          <div className="price-info-cell">
+                            <span className="current-price">{auction.currentPrice} ₾</span>
+                            <span className="starting-price">საწყისი: {auction.startingPrice} ₾</span>
+                          </div>
+                        </td>
+                        <td className="bid-count">{auction.totalBids}</td>
+                        <td>
+                          <span className={`auction-status-badge ${getAuctionStatusClass(auction.status)}`}>
+                            {getAuctionStatusText(auction.status)}
+                          </span>
+                        </td>
+                        <td className="date-cell">
+                          {new Date(auction.createdAt).toLocaleDateString("ka-GE")}
+                        </td>
+                        <td>
+                          <div className="action-buttons">
+                            <Link
+                              href={`/auctions/${auction._id}`}
+                              className="action-btn view-btn"
+                              title="ნახვა"
+                            >
+                              👁️
+                            </Link>
+                            {auction.status === "PENDING" && (
+                              <>
+                                <button
+                                  onClick={() => approveAuction(auction._id)}
+                                  className="action-btn approve-btn"
+                                  title="დამტკიცება"
+                                >
+                                  ✓
+                                </button>
+                                <button
+                                  onClick={() => openRejectModal(auction._id)}
+                                  className="action-btn reject-btn"
+                                  title="უარყოფა"
+                                >
+                                  ✗
+                                </button>
+                              </>
+                            )}
+                            <button
+                              onClick={() => deleteAuction(auction._id)}
+                              className="action-btn delete-btn"
+                              title="წაშლა"
+                            >
+                              🗑️
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Reject Modal */}
+        {rejectModalOpen && (
+          <div className="modal-overlay" onClick={() => setRejectModalOpen(false)}>
+            <div className="reject-modal" onClick={(e) => e.stopPropagation()}>
+              <div className="modal-header">
+                <h3>აუქციონის უარყოფა</h3>
+                <button className="modal-close" onClick={() => setRejectModalOpen(false)}>
+                  <X size={20} />
+                </button>
+              </div>
+              <div className="modal-body">
+                <label>უარყოფის მიზეზი</label>
+                <textarea
+                  value={rejectReason}
+                  onChange={(e) => setRejectReason(e.target.value)}
+                  placeholder="მიუთითეთ უარყოფის მიზეზი..."
+                  rows={4}
+                />
+              </div>
+              <div className="modal-footer">
+                <button className="btn-cancel" onClick={() => setRejectModalOpen(false)}>
+                  გაუქმება
+                </button>
+                <button className="btn-reject" onClick={rejectAuction}>
+                  უარყოფა
+                </button>
+              </div>
+            </div>
+          </div>
         )}
 
         {/* Withdrawals Tab */}

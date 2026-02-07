@@ -448,28 +448,38 @@ export default function AuctionCard({
           </Link>
         </div>
 
-        {/* Expand button */}
-        <button
-          className="expand-btn"
-          onClick={(e) => {
-            e.stopPropagation();
-            setIsExpanded(!isExpanded);
-          }}
-        >
-          {isExpanded ? (
-            <>
-              <span>{language === "ge" ? "ნაკლები" : "Less"}</span>
-              <ChevronUp size={18} />
-            </>
-          ) : (
-            <>
-              <span>
-                {language === "ge" ? "მეტი ინფო და ბიდი" : "More info & Bid"}
-              </span>
-              <ChevronDown size={18} />
-            </>
-          )}
-        </button>
+        {/* Expand button + View link */}
+        <div className="card-actions-row">
+          <Link
+            href={`/auctions/${currentAuction._id}`}
+            className="view-auction-link"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <Gavel size={16} />
+            <span>{language === "ge" ? "ნახვა" : "View"}</span>
+          </Link>
+          <button
+            className="expand-btn"
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsExpanded(!isExpanded);
+            }}
+          >
+            {isExpanded ? (
+              <>
+                <span>{language === "ge" ? "ნაკლები" : "Less"}</span>
+                <ChevronUp size={18} />
+              </>
+            ) : (
+              <>
+                <span>
+                  {language === "ge" ? "მეტი ინფო და ბიდი" : "More info & Bid"}
+                </span>
+                <ChevronDown size={18} />
+              </>
+            )}
+          </button>
+        </div>
 
         {/* Expanded Details */}
         {isExpanded && (

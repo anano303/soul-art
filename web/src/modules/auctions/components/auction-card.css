@@ -302,17 +302,47 @@
   color: var(--gold-light);
 }
 
+/* ============ CARD ACTIONS ROW ============ */
+.card-actions-row {
+  display: flex;
+  align-items: stretch;
+  border-top: 1px solid var(--card-border);
+}
+
+.view-auction-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 14px 16px;
+  background: var(--gold);
+  color: var(--card-bg);
+  font-weight: 600;
+  font-size: 0.85rem;
+  text-decoration: none;
+  transition: all 0.25s ease;
+  white-space: nowrap;
+}
+
+.view-auction-link:hover {
+  background: var(--gold-light);
+  color: var(--accent);
+}
+
+.view-auction-link svg {
+  flex-shrink: 0;
+}
+
 /* ============ EXPAND BUTTON ============ */
 .expand-btn {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  width: 100%;
+  flex: 1;
   padding: 14px 20px;
   background: var(--accent);
   border: none;
-  border-top: 1px solid var(--card-border);
   color: white;
   font-weight: 500;
   font-size: 0.85rem;

@@ -58,6 +58,37 @@ export class AuctionController {
     return this.auctionService.getFilterOptions();
   }
 
+  // Public: Get lightweight bid status for polling (no auth required)
+  @Get(':id/bid-status')
+  async getBidStatus(@Param('id') id: string) {
+    return this.auctionService.getAuctionBidStatus(id);
+  }
+
+  // Public: Get auction comments
+  @Get(':id/comments')
+  async getComments(
+    @Param('id') id: string,
+    @Query('page') page: string = '1',
+    @Query('limit') limit: string = '20',
+  ) {
+    return this.auctionService.getAuctionComments(
+      id,
+      parseInt(page, 10),
+      parseInt(limit, 10),
+    );
+  }
+
+  // Authenticated: Add comment to auction
+  @UseGuards(JwtAuthGuard)
+  @Post(':id/comments')
+  async addComment(
+    @Param('id') id: string,
+    @CurrentUser() user: UserDocument,
+    @Body('content') content: string,
+  ) {
+    return this.auctionService.addAuctionComment(id, user, content);
+  }
+
   // Public: Get single auction
   @Get(':id')
   async getAuction(@Param('id') id: string) {
@@ -161,9 +192,9 @@ export class AuctionController {
     return this.auctionService.getUserBids(user._id.toString(), page, limit);
   }
 
-  // Admin: Approve auction
+  // Admin or AuctionAdmin: Approve auction
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.Admin)
+  @Roles(Role.Admin, Role.AuctionAdmin)
   @Patch(':id/approve')
   async approveAuction(
     @Param('id') id: string,
@@ -172,9 +203,9 @@ export class AuctionController {
     return this.auctionService.approveAuction(id, user._id.toString());
   }
 
-  // Admin: Reject auction
+  // Admin or AuctionAdmin: Reject auction
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.Admin)
+  @Roles(Role.Admin, Role.AuctionAdmin)
   @Patch(':id/reject')
   async rejectAuction(
     @Param('id') id: string,
@@ -184,17 +215,17 @@ export class AuctionController {
     return this.auctionService.rejectAuction(id, reason, user._id.toString());
   }
 
-  // Admin: Mark as paid
+  // Admin or AuctionAdmin: Mark as paid
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.Admin)
+  @Roles(Role.Admin, Role.AuctionAdmin)
   @Patch(':id/mark-paid')
   async markAsPaid(@Param('id') id: string, @CurrentUser() user: UserDocument) {
     return this.auctionService.markAuctionAsPaid(id, user._id.toString());
   }
 
-  // Admin: Cancel auction
+  // Admin or AuctionAdmin: Cancel auction
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.Admin)
+  @Roles(Role.Admin, Role.AuctionAdmin)
   @Delete(':id')
   async cancelAuction(
     @Param('id') id: string,
@@ -204,9 +235,9 @@ export class AuctionController {
     return this.auctionService.cancelAuction(id, user._id.toString(), reason);
   }
 
-  // Admin: Get auction statistics
+  // Admin or AuctionAdmin: Get auction statistics
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.Admin)
+  @Roles(Role.Admin, Role.AuctionAdmin)
   @Get('admin/stats')
   async getAuctionStats() {
     return this.auctionService.getAuctionStats();

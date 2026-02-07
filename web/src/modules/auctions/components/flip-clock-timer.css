@@ -1,0 +1,361 @@
+/* Flip Clock Timer Styles */
+.flip-clock-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 20px;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  border-radius: 16px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+.flip-clock-container::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+.flip-clock-container.warning {
+  background: linear-gradient(135deg, #3d2c1e 0%, #4a3728 100%);
+}
+
+.flip-clock-container.urgent {
+  background: linear-gradient(135deg, #3d1e1e 0%, #4a2828 100%);
+  animation: urgentPulse 1s ease-in-out infinite;
+}
+
+@keyframes urgentPulse {
+  0%, 100% {
+    box-shadow: 0 10px 40px rgba(220, 53, 69, 0.3);
+  }
+  50% {
+    box-shadow: 0 10px 50px rgba(220, 53, 69, 0.5);
+  }
+}
+
+.flip-clock-container.extended .extension-badge {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.extension-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  background: linear-gradient(135deg, #28a745, #20903d);
+  border-radius: 20px;
+  color: white;
+  font-size: 0.85rem;
+  font-weight: 600;
+  opacity: 0;
+  transform: translateY(-10px);
+  transition: all 0.3s ease;
+  animation: bounceIn 0.5s ease forwards;
+}
+
+@keyframes bounceIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.8) translateY(-10px);
+  }
+  50% {
+    transform: scale(1.1) translateY(0);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.extension-icon {
+  font-size: 1rem;
+}
+
+.flip-clock {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.flip-unit {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.flip-unit-digits {
+  display: flex;
+  gap: 4px;
+}
+
+.flip-unit-label {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.flip-separator {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.5);
+  margin: 0 2px;
+  margin-bottom: 24px;
+}
+
+/* Flip Card Styles */
+.flip-card {
+  position: relative;
+  width: 48px;
+  height: 64px;
+  perspective: 400px;
+}
+
+.flip-card-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+}
+
+/* Top and bottom halves (static display) */
+.flip-card-top-half,
+.flip-card-bottom-half {
+  position: absolute;
+  width: 100%;
+  height: 50%;
+  overflow: hidden;
+  background: linear-gradient(180deg, #2d2d44 0%, #252540 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.flip-card-top-half {
+  top: 0;
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.3);
+  align-items: flex-end;
+  padding-bottom: 0;
+}
+
+.flip-card-top-half span {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1;
+  transform: translateY(50%);
+  font-family: 'SF Mono', 'Menlo', 'Monaco', 'Courier New', monospace;
+}
+
+.flip-card-bottom-half {
+  bottom: 0;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+  align-items: flex-start;
+  padding-top: 0;
+  background: linear-gradient(180deg, #252540 0%, #1d1d35 100%);
+}
+
+.flip-card-bottom-half span {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1;
+  transform: translateY(-50%);
+  font-family: 'SF Mono', 'Menlo', 'Monaco', 'Courier New', monospace;
+}
+
+/* Flip animation cards */
+.flip-card-front,
+.flip-card-back {
+  position: absolute;
+  width: 100%;
+  height: 50%;
+  backface-visibility: hidden;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(180deg, #2d2d44 0%, #252540 100%);
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.flip-card-front {
+  top: 0;
+  z-index: 3;
+  transform-origin: bottom center;
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+  align-items: flex-end;
+}
+
+.flip-card-front span {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1;
+  transform: translateY(50%);
+  font-family: 'SF Mono', 'Menlo', 'Monaco', 'Courier New', monospace;
+}
+
+.flip-card-back {
+  bottom: 0;
+  z-index: 2;
+  transform-origin: top center;
+  transform: rotateX(180deg);
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+  align-items: flex-start;
+  background: linear-gradient(180deg, #252540 0%, #1d1d35 100%);
+}
+
+.flip-card-back span {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1;
+  transform: translateY(-50%) rotateX(180deg);
+  font-family: 'SF Mono', 'Menlo', 'Monaco', 'Courier New', monospace;
+}
+
+/* Flip Animation */
+.flip-card.flip .flip-card-front {
+  animation: flipDown 0.6s ease-in-out forwards;
+}
+
+.flip-card.flip .flip-card-back {
+  animation: flipUp 0.6s ease-in-out forwards;
+}
+
+@keyframes flipDown {
+  0% {
+    transform: rotateX(0deg);
+    z-index: 3;
+  }
+  100% {
+    transform: rotateX(-180deg);
+    z-index: 1;
+  }
+}
+
+@keyframes flipUp {
+  0% {
+    transform: rotateX(180deg);
+    z-index: 2;
+  }
+  100% {
+    transform: rotateX(0deg);
+    z-index: 4;
+  }
+}
+
+/* Auction Ended Overlay */
+.auction-ended-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 16px;
+  animation: fadeIn 0.3s ease;
+}
+
+.auction-ended-overlay span {
+  color: white;
+  font-size: 1.25rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 480px) {
+  .flip-clock-container {
+    padding: 16px 12px;
+  }
+
+  .flip-card {
+    width: 36px;
+    height: 50px;
+  }
+
+  .flip-card-top-half span,
+  .flip-card-bottom-half span,
+  .flip-card-front span,
+  .flip-card-back span {
+    font-size: 1.8rem;
+  }
+
+  .flip-separator {
+    font-size: 1.8rem;
+    margin-bottom: 18px;
+  }
+
+  .flip-unit-label {
+    font-size: 0.65rem;
+  }
+
+  .extension-badge {
+    font-size: 0.75rem;
+    padding: 4px 10px;
+  }
+}
+
+/* Urgent state specific styling */
+.flip-clock-container.urgent .flip-card-top-half,
+.flip-clock-container.urgent .flip-card-front {
+  background: linear-gradient(180deg, #4a2020 0%, #3d1a1a 100%);
+}
+
+.flip-clock-container.urgent .flip-card-bottom-half,
+.flip-clock-container.urgent .flip-card-back {
+  background: linear-gradient(180deg, #3d1a1a 0%, #301515 100%);
+}
+
+.flip-clock-container.urgent .flip-card-top-half span,
+.flip-clock-container.urgent .flip-card-bottom-half span,
+.flip-clock-container.urgent .flip-card-front span,
+.flip-clock-container.urgent .flip-card-back span {
+  color: #ff6b6b;
+}
+
+/* Warning state specific styling */
+.flip-clock-container.warning .flip-card-top-half,
+.flip-clock-container.warning .flip-card-front {
+  background: linear-gradient(180deg, #4a3620 0%, #3d2c1a 100%);
+}
+
+.flip-clock-container.warning .flip-card-bottom-half,
+.flip-clock-container.warning .flip-card-back {
+  background: linear-gradient(180deg, #3d2c1a 0%, #302515 100%);
+}
+
+.flip-clock-container.warning .flip-card-top-half span,
+.flip-clock-container.warning .flip-card-bottom-half span,
+.flip-clock-container.warning .flip-card-front span,
+.flip-clock-container.warning .flip-card-back span {
+  color: #ffc107;
+}

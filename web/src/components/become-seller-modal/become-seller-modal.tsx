@@ -74,7 +74,7 @@ export function BecomeSellerModal({
 
         <SellerRegistrationFlow
           onComplete={handleComplete}
-          redirectTo="/profile/auctions/create"
+          redirectTo="/auctions/create"
           showLoginLink={true}
           compact={true}
         />

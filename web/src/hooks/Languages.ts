@@ -242,6 +242,7 @@ export const TRANSLATIONS: Translations = {
       shop: "შეიძინე ნამუშევრები",
       auction: "აუქციონი",
       auctions: "აუქციონები",
+      myAuctions: "ჩემი აუქციონები",
       myOrders: "ჩემი შეკვეთები",
       sellArtwork: "გაყიდე ნამუშევრები",
       myArtworks: "ჩემი ნამუშევრები",
@@ -666,6 +667,7 @@ export const TRANSLATIONS: Translations = {
       bids: "ფსონი",
       ended: "დასრულდა",
       placeBid: "ფსონის განთავსება",
+      preBid: "წინასწარი ფსონი",
       bidAmount: "ფსონის თანხა",
       minimumBid: "მინ. ფსონი",
       timeLeft: "დარჩენილი დრო",
@@ -738,6 +740,30 @@ export const TRANSLATIONS: Translations = {
       loadError: "მონაცემების ჩატვირთვა ვერ მოხერხდა",
       notFound: "აუქციონი ვერ მოიძებნა",
       anonymousBidder: "ანონიმური",
+      // Real-time and extended features
+      newBidReceived: "ახალი ფსონი შემოვიდა!",
+      timeExtended: "დრო გაგრძელდა! +10 წამი",
+      timeWasExtended: "+10 წამი!",
+      yourBidExtendedTime: "თქვენი ფსონით დრო გაგრძელდა!",
+      priceJustUpdated: "ახლახან განახლდა!",
+      guestBidding: "სტუმარი",
+      bidNow: "დადე ფსონი",
+      loginRequiredAfterBid: "ფსონის დასადებად საჭიროა ავტორიზაცია",
+      preBidNotice: "აუქციონი ჯერ არ დაწყებულა. შეგიძლიათ წინასწარი ფსონი განათავსოთ!",
+      // Related auctions
+      relatedAuctions: "სხვა აუქციონები",
+      viewAllAuctions: "ყველა აუქციონის ნახვა",
+      // Comments
+      comments: "კომენტარები",
+      writeComment: "დაწერეთ კომენტარი...",
+      loginToComment: "კომენტარისთვის გაიარეთ ავტორიზაცია",
+      commentAdded: "კომენტარი დაემატა",
+      commentError: "კომენტარის დამატება ვერ მოხერხდა",
+      noComments: "ჯერ არ არის კომენტარები. იყავით პირველი!",
+      loadMoreComments: "მეტი კომენტარის ჩატვირთვა",
+      // Dates
+      startDate: "დაწყების თარიღი",
+      endDate: "დასრულების თარიღი",
     },
 
     auctionForm: {
@@ -2140,6 +2166,7 @@ export const TRANSLATIONS: Translations = {
       shop: "Shop Artwork",
       auction: "Auction",
       auctions: "Auctions",
+      myAuctions: "My Auctions",
       myOrders: "My Orders",
       sellArtwork: "Sell Artwork",
       myArtworks: "My Artworks",
@@ -2562,6 +2589,7 @@ export const TRANSLATIONS: Translations = {
       bids: "bids",
       ended: "Ended",
       placeBid: "Place Bid",
+      preBid: "Pre-Bid",
       bidAmount: "Bid Amount",
       minimumBid: "Minimum Bid",
       timeLeft: "Time Left",
@@ -2635,6 +2663,30 @@ export const TRANSLATIONS: Translations = {
       loadError: "Failed to load data",
       notFound: "Auction not found",
       anonymousBidder: "Anonymous",
+      // Real-time and extended features
+      newBidReceived: "New bid received!",
+      timeExtended: "Time extended! +10 seconds",
+      timeWasExtended: "+10 seconds!",
+      yourBidExtendedTime: "Your bid extended the auction time!",
+      priceJustUpdated: "Just updated!",
+      guestBidding: "Guest",
+      bidNow: "Bid Now",
+      loginRequiredAfterBid: "Login required to place a bid",
+      preBidNotice: "Auction hasn't started yet. You can place a Pre-Bid!",
+      // Related auctions
+      relatedAuctions: "Other Auctions",
+      viewAllAuctions: "View all auctions",
+      // Comments
+      comments: "Comments",
+      writeComment: "Write a comment...",
+      loginToComment: "Login to comment",
+      commentAdded: "Comment added",
+      commentError: "Failed to add comment",
+      noComments: "No comments yet. Be the first!",
+      loadMoreComments: "Load more comments",
+      // Dates
+      startDate: "Start Date",
+      endDate: "End Date",
     },
 
     auctionForm: {

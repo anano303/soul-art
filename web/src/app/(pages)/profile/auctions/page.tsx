@@ -130,7 +130,7 @@ export default function SellerAuctionsPage() {
           </p>
         </div>
         <div className="seller-auctions-actions">
-          <Link href="/profile/auctions/create" className="primary-link">
+          <Link href="/auctions/create" className="primary-link">
             {t("sellerAuctions.actions.create")}
           </Link>
           <button

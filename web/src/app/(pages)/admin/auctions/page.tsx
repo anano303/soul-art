@@ -223,7 +223,7 @@ export default function AdminAuctions() {
             საკომისიო
           </button>
           <Link
-            href="/admin/auctions/create"
+            href="/auctions/create"
             className="admin-auctions-create-btn"
           >
             {t("admin.auctionsCreate.button")}

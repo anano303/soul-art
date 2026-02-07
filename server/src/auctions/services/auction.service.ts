@@ -140,13 +140,23 @@ export class AuctionService {
 
     const query: any = {};
 
-    let normalizedStatus = status?.toString().toUpperCase();
+    const normalizedStatus = status?.toString().toUpperCase();
 
     if (!normalizedStatus) {
-      normalizedStatus = AuctionStatus.ACTIVE;
-    }
-
-    if (normalizedStatus !== 'ALL') {
+      query.status = AuctionStatus.ACTIVE;
+    } else if (normalizedStatus === 'ALL') {
+      // No status filter - get all
+    } else if (normalizedStatus.includes(',')) {
+      // Handle comma-separated status values like "ACTIVE,SCHEDULED"
+      const statuses = normalizedStatus.split(',').map((s) => s.trim());
+      const validStatuses = statuses.filter((s) =>
+        Object.values(AuctionStatus).includes(s as AuctionStatus),
+      );
+      if (validStatuses.length === 0) {
+        throw new BadRequestException('Invalid auction status filter');
+      }
+      query.status = { $in: validStatuses };
+    } else {
       if (
         !Object.values(AuctionStatus).includes(
           normalizedStatus as AuctionStatus,
@@ -154,7 +164,6 @@ export class AuctionService {
       ) {
         throw new BadRequestException('Invalid auction status filter');
       }
-
       query.status = normalizedStatus;
     }
 
@@ -245,11 +254,55 @@ export class AuctionService {
     return auction;
   }
 
+  // Get lightweight bid status for polling (minimal data transfer)
+  async getAuctionBidStatus(auctionId: string) {
+    if (!Types.ObjectId.isValid(auctionId)) {
+      throw new BadRequestException('Invalid auction ID');
+    }
+
+    const auction = await this.auctionModel
+      .findById(auctionId)
+      .select(
+        'currentPrice endDate status totalBids currentWinner bids minimumBidIncrement',
+      )
+      .populate('currentWinner', 'ownerFirstName ownerLastName')
+      .lean();
+
+    if (!auction) {
+      throw new NotFoundException('Auction not found');
+    }
+
+    // Return only the last 5 bids for efficiency
+    const recentBids = (auction.bids || [])
+      .slice(-5)
+      .reverse()
+      .map((bid: any) => ({
+        amount: bid.amount,
+        timestamp: bid.timestamp,
+        bidderName: bid.bidderName,
+      }));
+
+    return {
+      currentPrice: auction.currentPrice,
+      endDate: auction.endDate,
+      status: auction.status,
+      totalBids: auction.totalBids,
+      minimumBidIncrement: auction.minimumBidIncrement,
+      currentWinner: auction.currentWinner
+        ? {
+            name: `${(auction.currentWinner as any).ownerFirstName || ''} ${(auction.currentWinner as any).ownerLastName || ''}`.trim(),
+          }
+        : null,
+      recentBids,
+      serverTime: new Date(), // For client time sync
+    };
+  }
+
   // Place a bid
   async placeBid(
     bidderId: string,
     placeBidDto: PlaceBidDto,
-  ): Promise<AuctionDocument> {
+  ) {
     const { auctionId, bidAmount } = placeBidDto;
 
     const auction = await this.auctionModel.findById(auctionId);
@@ -300,6 +353,26 @@ export class AuctionService {
       bidderName: `${bidder.ownerFirstName} ${bidder.ownerLastName}`,
     };
 
+    // Bid extension logic: if bid placed in last 10 seconds, extend by 10 seconds
+    const BID_EXTENSION_THRESHOLD_MS = 10000; // 10 seconds
+    const BID_EXTENSION_AMOUNT_MS = 10000; // 10 seconds
+    const now = new Date();
+    const timeRemaining = auction.endDate.getTime() - now.getTime();
+    let wasExtended = false;
+
+    if (
+      auction.status === AuctionStatus.ACTIVE &&
+      timeRemaining > 0 &&
+      timeRemaining <= BID_EXTENSION_THRESHOLD_MS
+    ) {
+      // Extend auction end time by 10 seconds
+      auction.endDate = new Date(auction.endDate.getTime() + BID_EXTENSION_AMOUNT_MS);
+      wasExtended = true;
+      this.logger.log(
+        `Auction ${auctionId} extended by 10 seconds due to last-second bid. New end time: ${auction.endDate}`,
+      );
+    }
+
     // Update auction
     auction.bids.push(newBid);
     auction.currentPrice = bidAmount;
@@ -309,12 +382,18 @@ export class AuctionService {
     await auction.save();
 
     this.logger.log(
-      `New bid placed: ${bidAmount} GEL on auction ${auctionId} by ${bidder.ownerFirstName} ${bidder.ownerLastName}`,
+      `New bid placed: ${bidAmount} GEL on auction ${auctionId} by ${bidder.ownerFirstName} ${bidder.ownerLastName}${wasExtended ? ' (time extended)' : ''}`,
     );
 
     // TODO: Send notifications to previous bidders
 
-    return auction;
+    // Return auction with extension info for frontend
+    const auctionObj = auction.toObject();
+    return {
+      ...auctionObj,
+      wasExtended,
+      newEndDate: wasExtended ? auction.endDate : undefined,
+    };
   }
 
   // Get seller's auctions
@@ -1336,6 +1415,78 @@ export class AuctionService {
       bogOrderId: auction.bogOrderId,
       externalOrderId: auction.externalOrderId,
       paymentResult: auction.paymentResult,
+    };
+  }
+
+  // Get auction comments with pagination
+  async getAuctionComments(auctionId: string, page = 1, limit = 20) {
+    const auction = await this.auctionModel.findById(auctionId).select('comments').lean();
+    if (!auction) {
+      throw new NotFoundException('Auction not found');
+    }
+
+    const comments = auction.comments || [];
+    
+    // Sort by newest first
+    const sortedComments = [...comments].sort(
+      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    );
+
+    // Paginate
+    const startIndex = (page - 1) * limit;
+    const paginatedComments = sortedComments.slice(startIndex, startIndex + limit);
+
+    return {
+      comments: paginatedComments,
+      total: comments.length,
+      page,
+      limit,
+      hasMore: startIndex + limit < comments.length,
+    };
+  }
+
+  // Add comment to auction
+  async addAuctionComment(auctionId: string, user: any, content: string) {
+    if (!content || content.trim().length === 0) {
+      throw new BadRequestException('Comment content is required');
+    }
+
+    if (content.length > 1000) {
+      throw new BadRequestException('Comment is too long (max 1000 characters)');
+    }
+
+    const auction = await this.auctionModel.findById(auctionId);
+    if (!auction) {
+      throw new NotFoundException('Auction not found');
+    }
+
+    // Get user name
+    const userName = user.name || 
+      `${user.ownerFirstName || ''} ${user.ownerLastName || ''}`.trim() ||
+      user.storeName ||
+      'Anonymous';
+
+    const comment = {
+      user: user._id,
+      content: content.trim(),
+      createdAt: new Date(),
+      userName,
+      userAvatar: user.profilePicture || user.picture,
+    };
+
+    auction.comments = auction.comments || [];
+    auction.comments.push(comment);
+    await auction.save();
+
+    this.logger.log(`Comment added to auction ${auctionId} by user ${user._id}`);
+
+    return {
+      ...comment,
+      user: {
+        _id: user._id,
+        name: userName,
+        avatar: comment.userAvatar,
+      },
     };
   }
 }

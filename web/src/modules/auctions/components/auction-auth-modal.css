@@ -1,0 +1,371 @@
+/* Auction Auth Modal Styles */
+.auction-auth-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 20px;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.auction-auth-modal {
+  background: white;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 420px;
+  padding: 32px;
+  position: relative;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  animation: slideUp 0.3s ease;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.auction-auth-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 36px;
+  height: 36px;
+  border: none;
+  background: #f5f5f5;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #666;
+  transition: all 0.2s ease;
+}
+
+.auction-auth-close:hover {
+  background: #e0e0e0;
+  color: #333;
+}
+
+.auction-auth-header {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.auction-auth-icon {
+  width: 60px;
+  height: 60px;
+  background: linear-gradient(135deg, #012645 0%, #1a4a6e 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 16px;
+  color: white;
+  font-size: 24px;
+}
+
+.auction-auth-header h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #012645;
+  margin: 0 0 8px 0;
+}
+
+.auction-auth-subtitle {
+  font-size: 0.9rem;
+  color: #666;
+  margin: 0;
+}
+
+.auction-auth-context {
+  margin-top: 16px;
+  padding: 12px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.auction-title-preview {
+  font-size: 0.85rem;
+  color: #444;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.auction-price-preview {
+  font-size: 0.85rem;
+  color: #666;
+}
+
+.auction-price-preview strong {
+  color: #012645;
+  font-size: 1rem;
+}
+
+.auction-auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.auction-auth-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.auction-auth-input-group label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.auction-auth-input-group input {
+  width: 100%;
+  padding: 12px 14px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.auction-auth-input-group input:focus {
+  border-color: #012645;
+  box-shadow: 0 0 0 3px rgba(1, 38, 69, 0.1);
+}
+
+.auction-auth-input-group input.error {
+  border-color: #dc3545;
+}
+
+.password-wrapper {
+  position: relative;
+}
+
+.password-wrapper input {
+  padding-right: 48px;
+}
+
+.password-toggle {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #666;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.password-toggle:hover {
+  color: #333;
+}
+
+.input-error {
+  font-size: 0.8rem;
+  color: #dc3545;
+}
+
+.auction-auth-error {
+  padding: 12px;
+  background: #fce4e4;
+  border: 1px solid #dc3545;
+  border-radius: 8px;
+  color: #dc3545;
+  font-size: 0.85rem;
+  text-align: center;
+}
+
+.auction-auth-submit {
+  width: 100%;
+  padding: 14px;
+  background: linear-gradient(135deg, #012645 0%, #1a4a6e 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.auction-auth-submit:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(1, 38, 69, 0.3);
+}
+
+.auction-auth-submit:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.loading-spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.auction-auth-divider {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin: 20px 0;
+}
+
+.auction-auth-divider::before,
+.auction-auth-divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: #e0e0e0;
+}
+
+.auction-auth-divider span {
+  font-size: 0.85rem;
+  color: #999;
+  text-transform: uppercase;
+}
+
+.auction-auth-social {
+  display: flex;
+  gap: 12px;
+}
+
+.auction-auth-social .social-btn {
+  flex: 1;
+  padding: 12px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  background: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.auction-auth-social .social-btn:hover:not(:disabled) {
+  border-color: #ccc;
+  background: #f8f9fa;
+}
+
+.auction-auth-social .social-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.auction-auth-social .social-btn.google {
+  color: #4285f4;
+}
+
+.auction-auth-social .social-btn.google:hover:not(:disabled) {
+  background: #f0f7ff;
+  border-color: #4285f4;
+}
+
+/* Override Facebook button in this context */
+.auction-auth-social .facebook-auth-button {
+  flex: 1;
+  padding: 12px;
+  border-radius: 8px;
+}
+
+.auction-auth-footer {
+  margin-top: 24px;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.auction-auth-footer a {
+  color: #012645;
+  text-decoration: none;
+  font-size: 0.85rem;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.auction-auth-footer a:hover {
+  color: #1a4a6e;
+  text-decoration: underline;
+}
+
+.auction-auth-footer .separator {
+  color: #ccc;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 480px) {
+  .auction-auth-modal {
+    padding: 24px 20px;
+    margin: 10px;
+    max-height: 85vh;
+  }
+
+  .auction-auth-header h2 {
+    font-size: 1.25rem;
+  }
+
+  .auction-auth-icon {
+    width: 50px;
+    height: 50px;
+    font-size: 20px;
+  }
+
+  .auction-auth-social {
+    flex-direction: column;
+  }
+
+  .auction-auth-footer {
+    gap: 8px;
+  }
+}

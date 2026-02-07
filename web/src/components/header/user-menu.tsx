@@ -405,8 +405,7 @@ export default function UserMenu({
                     <span>{t("navigation.products")}</span>
                   </Link>
                 )}
-                {(user.role?.toLowerCase() === Role.Admin ||
-                  isSellerRole(user.role)) && (
+                {user.role?.toLowerCase() === Role.Admin && (
                   <Link
                     href="/admin/auctions"
                     className="dropdown-item"
@@ -414,6 +413,16 @@ export default function UserMenu({
                   >
                     <Gavel size={18} />
                     <span>{t("navigation.auctions")}</span>
+                  </Link>
+                )}
+                {isSellerRole(user.role) && (
+                  <Link
+                    href="/profile/auctions"
+                    className="dropdown-item"
+                    onClick={handleLinkClick}
+                  >
+                    <Gavel size={18} />
+                    <span>{t("navigation.myAuctions")}</span>
                   </Link>
                 )}
                 {isAuctionAdminRole(user.role) && (

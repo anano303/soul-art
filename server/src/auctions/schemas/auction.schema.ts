@@ -34,6 +34,26 @@ export class AuctionBid {
 
 export const AuctionBidSchema = SchemaFactory.createForClass(AuctionBid);
 
+@Schema()
+export class AuctionComment {
+  @Prop({ type: Types.ObjectId, ref: 'User', required: true })
+  user: Types.ObjectId;
+
+  @Prop({ required: true })
+  content: string;
+
+  @Prop({ default: Date.now })
+  createdAt: Date;
+
+  @Prop()
+  userName: string; // Cache user name for quick display
+
+  @Prop()
+  userAvatar?: string; // Cache user avatar
+}
+
+export const AuctionCommentSchema = SchemaFactory.createForClass(AuctionComment);
+
 @Schema({ timestamps: true })
 export class Auction {
   @Transform(({ value }) => value.toString())
@@ -106,6 +126,9 @@ export class Auction {
 
   @Prop([AuctionBidSchema])
   bids: AuctionBid[];
+
+  @Prop([AuctionCommentSchema])
+  comments: AuctionComment[];
 
   @Prop({ default: 0 })
   totalBids: number;

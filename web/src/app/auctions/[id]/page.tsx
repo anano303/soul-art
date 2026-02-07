@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
@@ -16,11 +16,22 @@ import {
   Gavel,
   Trophy,
   CreditCard,
+  TrendingUp,
+  Zap,
 } from "lucide-react";
 import { apiClient } from "@/lib/axios";
 import { useLanguage } from "@/hooks/LanguageContext";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "react-hot-toast";
+import { useAuctionPolling } from "@/hooks/useAuctionPolling";
+import {
+  FlipClockTimer,
+  AuctionAuthModal,
+  useAuctionAuthModal,
+  FacebookContinueButton,
+  RelatedAuctions,
+  AuctionComments,
+} from "@/modules/auctions/components";
 import "./auction-detail.css";
 
 interface Bid {
@@ -78,12 +89,25 @@ interface Auction {
   };
 }
 
+// Reserved route IDs that should not be treated as auction IDs
+const RESERVED_ROUTES = ["create", "admin", "new"];
+
 export default function AuctionDetailPage() {
   const { t, language } = useLanguage();
   const { user } = useAuth();
   const params = useParams();
   const router = useRouter();
   const auctionId = params.id as string;
+
+  // Auth modal for guest bidders
+  const authModal = useAuctionAuthModal();
+
+  // Handle reserved route IDs - redirect to the correct page
+  useEffect(() => {
+    if (RESERVED_ROUTES.includes(auctionId?.toLowerCase())) {
+      router.replace(`/auctions/${auctionId}`);
+    }
+  }, [auctionId, router]);
 
   const [auction, setAuction] = useState<Auction | null>(null);
   const [loading, setLoading] = useState(true);
@@ -92,8 +116,43 @@ export default function AuctionDetailPage() {
   const [timeLeft, setTimeLeft] = useState("");
   const [isEnded, setIsEnded] = useState(false);
   const [selectedImage, setSelectedImage] = useState(0);
+  const [showNewBidAnimation, setShowNewBidAnimation] = useState(false);
+  const lastBidCountRef = useRef(0);
+
+  // Real-time polling for bid updates
+  const { bidStatus, isExtended, refresh: refreshBidStatus } = useAuctionPolling({
+    auctionId,
+    enabled: auction?.status === "ACTIVE",
+    onBidUpdate: (data) => {
+      // Show animation when new bid comes in
+      if (lastBidCountRef.current > 0 && data.totalBids > lastBidCountRef.current) {
+        setShowNewBidAnimation(true);
+        setTimeout(() => setShowNewBidAnimation(false), 2000);
+        // Update bid amount to new minimum
+        if (auction) {
+          setBidAmount(data.currentPrice + auction.minimumBidIncrement);
+        }
+        toast.success(t("auctions.newBidReceived") || "ახალი ფსონი შემოვიდა!");
+      }
+      lastBidCountRef.current = data.totalBids;
+    },
+  });
+
+  // Show time extension animation
+  useEffect(() => {
+    if (isExtended) {
+      toast.success(t("auctions.timeExtended") || "დრო გაგრძელდა! +10 წამი", {
+        icon: "⏰",
+        duration: 3000,
+      });
+    }
+  }, [isExtended, t]);
 
   const fetchAuction = useCallback(async () => {
+    // Skip API call for reserved routes
+    if (RESERVED_ROUTES.includes(auctionId?.toLowerCase())) {
+      return;
+    }
     try {
       const response = await apiClient.get(`/auctions/${auctionId}`);
       console.log("[Auction Debug] Full auction data:", response.data);
@@ -122,7 +181,8 @@ export default function AuctionDetailPage() {
   }, [auctionId, router, t, user]);
 
   useEffect(() => {
-    if (auctionId) {
+    // Skip fetching for reserved routes - they will be redirected
+    if (auctionId && !RESERVED_ROUTES.includes(auctionId?.toLowerCase())) {
       fetchAuction();
     }
   }, [auctionId, fetchAuction]);
@@ -301,8 +361,11 @@ export default function AuctionDetailPage() {
 
   const handlePlaceBid = async () => {
     if (!user) {
-      toast.error(t("auctions.loginRequired"));
-      router.push("/login");
+      // Show auth modal instead of redirecting
+      authModal.open(() => {
+        // This callback runs after successful login
+        handlePlaceBid();
+      });
       return;
     }
 
@@ -318,12 +381,23 @@ export default function AuctionDetailPage() {
 
     setBidding(true);
     try {
-      await apiClient.post("/auctions/bid", {
+      const response = await apiClient.post("/auctions/bid", {
         auctionId: auction._id,
         bidAmount: bidAmount,
       });
-      toast.success(t("auctions.bidSuccess"));
+      
+      // Check for time extension
+      if (response.data.wasExtended) {
+        toast.success(t("auctions.yourBidExtendedTime") || "თქვენი ფსონით დრო გაგრძელდა!", {
+          icon: "⏰",
+          duration: 4000,
+        });
+      } else {
+        toast.success(t("auctions.bidSuccess"));
+      }
+      
       fetchAuction(); // Refresh auction data
+      refreshBidStatus(); // Refresh polling data
     } catch (error: unknown) {
       const axiosError = error as {
         response?: { data?: { message?: string } };
@@ -377,10 +451,10 @@ export default function AuctionDetailPage() {
   }
 
   const allImages = [auction.mainImage, ...(auction.additionalImages || [])];
-  const canBid =
+  // Allow guests to see bid section - auth modal will handle login
+  const canShowBidSection =
     (auction.status === "ACTIVE" || auction.status === "SCHEDULED") &&
-    user &&
-    user._id !== auction.seller._id;
+    (!user || user._id !== auction.seller._id);
   const isPreBid = auction.status === "SCHEDULED";
 
   return (
@@ -444,44 +518,73 @@ export default function AuctionDetailPage() {
             <span className="value">{getSellerName()}</span>
           </div>
 
-          {/* Time Info */}
-          <div className="time-info-box">
-            <Clock className="time-icon" size={24} />
-            <div className="time-details">
-              {auction.status === "SCHEDULED" ? (
-                <>
-                  <span className="time-label">
-                    {t("auctions.startsIn") || "დაიწყება"}
-                  </span>
-                  <span className="time-value scheduled">{timeLeft}</span>
-                </>
-              ) : isEnded ? (
-                <>
-                  <span className="time-label">
-                    {t("auctions.auctionEnded")}
-                  </span>
-                  <span className="time-value ended">
-                    {t("auctions.ended")}
-                  </span>
-                </>
-              ) : (
-                <>
-                  <span className="time-label">{t("auctions.timeLeft")}</span>
-                  <span className="time-value">{timeLeft}</span>
-                </>
+          {/* Time Info - Flip Clock */}
+          {auction.status === "ACTIVE" && !isEnded && (
+            <div className="flip-clock-section">
+              <FlipClockTimer
+                endDate={new Date(bidStatus?.endDate || auction.endDate)}
+                onTimeEnd={() => {
+                  setIsEnded(true);
+                  fetchAuction();
+                }}
+                isExtended={isExtended}
+                language={language === "ge" ? "ge" : "en"}
+              />
+              {isExtended && (
+                <div className="time-extended-badge">
+                  <Zap size={16} />
+                  <span>{t("auctions.timeWasExtended") || "+10 წამი!"}</span>
+                </div>
               )}
             </div>
-          </div>
+          )}
 
-          {/* Pricing */}
-          <div className="pricing-grid">
+          {/* Fallback for non-active states */}
+          {(auction.status !== "ACTIVE" || isEnded) && (
+            <div className="time-info-box">
+              <Clock className="time-icon" size={24} />
+              <div className="time-details">
+                {auction.status === "SCHEDULED" ? (
+                  <>
+                    <span className="time-label">
+                      {t("auctions.startsIn") || "დაიწყება"}
+                    </span>
+                    <span className="time-value scheduled">{timeLeft}</span>
+                  </>
+                ) : isEnded ? (
+                  <>
+                    <span className="time-label">
+                      {t("auctions.auctionEnded")}
+                    </span>
+                    <span className="time-value ended">
+                      {t("auctions.ended")}
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    <span className="time-label">{t("auctions.timeLeft")}</span>
+                    <span className="time-value">{timeLeft}</span>
+                  </>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Pricing - with real-time updates */}
+          <div className={`pricing-grid ${showNewBidAnimation ? "new-bid-pulse" : ""}`}>
             <div className="price-card primary">
               <span className="price-card-label">
                 {t("auctions.currentPrice") || "მიმდინარე ფასი"}
               </span>
               <span className="price-card-value">
-                {formatPrice(auction.currentPrice)}
+                {formatPrice(bidStatus?.currentPrice ?? auction.currentPrice)}
               </span>
+              {showNewBidAnimation && (
+                <div className="new-bid-indicator">
+                  <TrendingUp size={20} />
+                  <span>{t("auctions.priceJustUpdated") || "ახლახან განახლდა!"}</span>
+                </div>
+              )}
             </div>
             <div className="price-card accent">
               <span className="price-card-label">
@@ -519,12 +622,12 @@ export default function AuctionDetailPage() {
             </div>
           </div>
 
-          {/* Bid Stats */}
+          {/* Bid Stats - with real-time updates */}
           <div className="bid-stats">
             <div className="stat-item">
               <Users size={20} />
               <span>
-                <strong>{auction.totalBids}</strong> {t("auctions.bids")}
+                <strong>{bidStatus?.totalBids ?? auction.totalBids}</strong> {t("auctions.bids")}
               </span>
             </div>
             {/* Show highest bid amount */}
@@ -619,17 +722,20 @@ export default function AuctionDetailPage() {
             </div>
           )}
 
-          {/* Bid Input */}
-          {canBid && (
+          {/* Bid Input - Now shows for guests too, auth modal handles login */}
+          {canShowBidSection && (
             <div className="bid-input-section">
-              <label className="bid-label">{t("auctions.yourBid")}:</label>
+              <label className="bid-label">
+                {!user && <span className="guest-label">({t("auctions.guestBidding") || "სტუმარი"}) </span>}
+                {t("auctions.yourBid")}:
+              </label>
               <div className="bid-controls">
                 <button
                   className="bid-step-btn"
                   onClick={() => handleBidChange(-1)}
                   disabled={
                     bidAmount <=
-                    auction.currentPrice + auction.minimumBidIncrement
+                    (bidStatus?.currentPrice ?? auction.currentPrice) + auction.minimumBidIncrement
                   }
                 >
                   <Minus size={20} />
@@ -640,7 +746,7 @@ export default function AuctionDetailPage() {
                     className="bid-input"
                     value={bidAmount}
                     onChange={handleBidInputChange}
-                    min={auction.currentPrice + auction.minimumBidIncrement}
+                    min={(bidStatus?.currentPrice ?? auction.currentPrice) + auction.minimumBidIncrement}
                     step={auction.minimumBidIncrement}
                   />
                   <span className="currency">₾</span>
@@ -653,7 +759,7 @@ export default function AuctionDetailPage() {
                 </button>
               </div>
               <button
-                className={`place-bid-btn ${isPreBid ? "pre-bid" : ""}`}
+                className={`place-bid-btn ${isPreBid ? "pre-bid" : ""} ${!user ? "guest-bid" : ""}`}
                 onClick={handlePlaceBid}
                 disabled={bidding}
               >
@@ -662,12 +768,19 @@ export default function AuctionDetailPage() {
                 ) : (
                   <>
                     <Gavel size={20} />
-                    {isPreBid
-                      ? t("auctions.preBid") || "Pre-Bid"
-                      : t("auctions.placeBid")}
+                    {!user 
+                      ? t("auctions.bidNow") || "დადე ფსონი"
+                      : isPreBid
+                        ? t("auctions.preBid") || "Pre-Bid"
+                        : t("auctions.placeBid")}
                   </>
                 )}
               </button>
+              {!user && (
+                <p className="guest-bid-hint">
+                  {t("auctions.loginRequiredAfterBid") || "ფსონის დასადებად საჭიროა ავტორიზაცია"}
+                </p>
+              )}
             </div>
           )}
 
@@ -680,17 +793,6 @@ export default function AuctionDetailPage() {
               </span>
             </div>
           )}
-
-          {!user &&
-            (auction.status === "ACTIVE" || auction.status === "SCHEDULED") && (
-              <div className="login-notice">
-                <Link href="/login" className="login-link">
-                  {auction.status === "SCHEDULED"
-                    ? t("auctions.loginToPreBid") || "შედით Pre-Bid-ისთვის"
-                    : t("auctions.loginRequired")}
-                </Link>
-              </div>
-            )}
 
           {/* Details */}
           <div className="artwork-details">
@@ -753,6 +855,24 @@ export default function AuctionDetailPage() {
           )}
         </div>
       </div>
+
+      {/* Facebook Continue Button for returning FB users */}
+      <FacebookContinueButton />
+
+      {/* Related Auctions Section */}
+      <RelatedAuctions currentAuctionId={auctionId} maxItems={4} />
+
+      {/* Comments Section */}
+      <AuctionComments auctionId={auctionId} onAuthRequired={authModal.open} />
+
+      {/* Auth Modal for guest bidders */}
+      <AuctionAuthModal
+        isOpen={authModal.isOpen}
+        onClose={authModal.close}
+        onLoginSuccess={authModal.onLoginSuccess}
+        auctionTitle={auction.title}
+        currentPrice={bidAmount}
+      />
     </div>
   );
 }
