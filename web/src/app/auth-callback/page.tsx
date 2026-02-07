@@ -17,6 +17,8 @@ export default function AuthCallback() {
         const success = urlParams.get('success');
         const errorParam = urlParams.get('error');
         const isPopup = urlParams.get('popup') === 'true';
+        const isSeller = urlParams.get('isSeller') === 'true';
+        const needsSellerRegistration = urlParams.get('needsSellerRegistration') === 'true';
         
         if (success === 'true') {
           console.log('🔍 OAuth success detected, processing...');
@@ -40,6 +42,10 @@ export default function AuthCallback() {
               console.log('👤 User data received:', userData);
               storeUserData(userData);
               
+              // Set a client-side cookie that middleware can see
+              // This bridges the gap between HTTP-only API cookies and Next.js middleware
+              document.cookie = 'auth_session=active; path=/; max-age=3600; SameSite=Lax';
+              
               // Invalidate user query to refetch user data
               queryClient.invalidateQueries({ queryKey: ["user"] });
               
@@ -58,12 +64,17 @@ export default function AuthCallback() {
                 return;
               }
               
-              // Clear the URL params
-              window.history.replaceState(null, '', window.location.pathname);
-              
               console.log('✅ OAuth process completed successfully');
-              // Redirect to home
-              router.push('/');
+              
+              // Use window.location.href for full page reload to ensure cookie is sent with request
+              // router.push does client-side navigation which may not pick up the fresh cookie
+              if (needsSellerRegistration) {
+                window.location.href = '/become-seller?fromOauth=true';
+              } else if (isSeller) {
+                window.location.href = '/profile';
+              } else {
+                window.location.href = '/';
+              }
             } else {
               console.error('❌ Failed to fetch user profile:', response.status, response.statusText);
               const errorText = await response.text();

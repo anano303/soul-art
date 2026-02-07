@@ -149,6 +149,8 @@ export function RegisterForm() {
           description: t("auth.accountCreatedSuccessfully"),
           variant: "default",
         });
+        // Set bridge cookie for middleware auth check
+        document.cookie = 'auth_session=active; path=/; max-age=3600; SameSite=Lax';
         setTimeout(() => {
           router.push("/");
         }, 1000);

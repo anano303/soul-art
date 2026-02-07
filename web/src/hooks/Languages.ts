@@ -761,6 +761,7 @@ export const TRANSLATIONS: Translations = {
       commentError: "კომენტარის დამატება ვერ მოხერხდა",
       noComments: "ჯერ არ არის კომენტარები. იყავით პირველი!",
       loadMoreComments: "მეტი კომენტარის ჩატვირთვა",
+      loadPreviousComments: "წინა კომენტარების ჩატვირთვა",
       // Dates
       startDate: "დაწყების თარიღი",
       endDate: "დასრულების თარიღი",
@@ -2684,6 +2685,7 @@ export const TRANSLATIONS: Translations = {
       commentError: "Failed to add comment",
       noComments: "No comments yet. Be the first!",
       loadMoreComments: "Load more comments",
+      loadPreviousComments: "Load previous comments",
       // Dates
       startDate: "Start Date",
       endDate: "End Date",

@@ -41,18 +41,21 @@ export function AuctionComments({
   const [newComment, setNewComment] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
+  const COMMENTS_PER_PAGE = 5;
+
   const fetchComments = useCallback(
-    async (pageNum: number, append = false) => {
+    async (pageNum: number, prepend = false) => {
       try {
         const response = await apiClient.get(
           `/auctions/${auctionId}/comments`,
           {
-            params: { page: pageNum, limit: 20 },
+            params: { page: pageNum, limit: COMMENTS_PER_PAGE },
           }
         );
 
-        if (append) {
-          setComments((prev) => [...prev, ...response.data.comments]);
+        if (prepend) {
+          // Prepend older comments at the beginning
+          setComments((prev) => [...response.data.comments, ...prev]);
         } else {
           setComments(response.data.comments);
         }
@@ -73,7 +76,7 @@ export function AuctionComments({
     fetchComments(1);
   }, [fetchComments]);
 
-  const handleLoadMore = () => {
+  const handleLoadPrevious = () => {
     if (loadingMore || !hasMore) return;
     setLoadingMore(true);
     const nextPage = page + 1;
@@ -257,25 +260,27 @@ export function AuctionComments({
               </div>
             ))}
 
-            {hasMore && (
-              <button
-                onClick={handleLoadMore}
-                disabled={loadingMore}
-                className="load-more-comments"
-              >
-                {loadingMore ? (
-                  <div className="comment-spinner" />
-                ) : (
-                  <>
-                    <ChevronDown size={18} />
-                    {t("auctions.loadMoreComments") || "მეტი კომენტარის ჩატვირთვა"}
-                  </>
-                )}
-              </button>
-            )}
           </>
         )}
       </div>
+
+      {/* Load Previous Button - at the bottom */}
+      {hasMore && (
+        <button
+          onClick={handleLoadPrevious}
+          disabled={loadingMore}
+          className="load-more-comments"
+        >
+          {loadingMore ? (
+            <div className="comment-spinner" />
+          ) : (
+            <>
+              <ChevronDown size={18} />
+              {t("auctions.loadPreviousComments") || "წინა კომენტარების ჩატვირთვა"}
+            </>
+          )}
+        </button>
+      )}
     </section>
   );
 }

@@ -298,6 +298,38 @@ export class AuctionService {
     };
   }
 
+  // Long-polling: Wait for auction updates
+  async getAuctionBidStatusLongPoll(
+    auctionId: string,
+    lastTotalBids?: number,
+    lastEndDate?: string,
+    timeoutMs = 30000,
+  ) {
+    const startTime = Date.now();
+    const pollInterval = 200; // Check every 200ms
+
+    while (Date.now() - startTime < timeoutMs) {
+      const status = await this.getAuctionBidStatus(auctionId);
+
+      // Check if there's an update
+      const hasUpdate =
+        (lastTotalBids !== undefined && status.totalBids !== lastTotalBids) ||
+        (lastEndDate && status.endDate.toISOString() !== lastEndDate) ||
+        status.status === 'ENDED';
+
+      if (hasUpdate) {
+        return { ...status, hasUpdate: true };
+      }
+
+      // Wait before next check
+      await new Promise((resolve) => setTimeout(resolve, pollInterval));
+    }
+
+    // Timeout - return current state with no update flag
+    const status = await this.getAuctionBidStatus(auctionId);
+    return { ...status, hasUpdate: false };
+  }
+
   // Place a bid
   async placeBid(
     bidderId: string,

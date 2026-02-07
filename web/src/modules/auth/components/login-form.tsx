@@ -134,6 +134,9 @@ export function LoginForm({
               variant: "default",
             });
 
+            // Set bridge cookie for middleware auth check
+            document.cookie = 'auth_session=active; path=/; max-age=3600; SameSite=Lax';
+
             // Use callback if provided (e.g., for checkout flow), otherwise navigate
             if (onLoginSuccess) {
               onLoginSuccess();
@@ -165,9 +168,7 @@ export function LoginForm({
   };
 
   const handleGoogleAuth = () => {
-    const googleUrl = `${process.env.NEXT_PUBLIC_API_URL}/auth/google`;
-    console.log("🔍 Google Auth URL:", googleUrl);
-    window.location.href = googleUrl;
+    window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/auth/google`;
   };
 
   const handleFacebookSuccess = (data: {
@@ -184,6 +185,8 @@ export function LoginForm({
           description: "კეთილი იყოს თქვენი დაბრუნება!",
           variant: "default",
         });
+        // Set bridge cookie for middleware auth check
+        document.cookie = 'auth_session=active; path=/; max-age=3600; SameSite=Lax';
         if (onLoginSuccess) {
           onLoginSuccess();
         } else {

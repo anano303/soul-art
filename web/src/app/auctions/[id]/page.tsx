@@ -543,7 +543,7 @@ export default function AuctionDetailPage() {
           {auction.status === "ACTIVE" && !isEnded && (
             <div className="flip-clock-section">
               <FlipClockTimer
-                endDate={new Date(bidStatus?.endDate || auction.endDate)}
+                endDate={bidStatus?.endDate || auction.endDate}
                 onTimeEnd={() => {
                   setIsEnded(true);
                   fetchAuction();
@@ -880,11 +880,11 @@ export default function AuctionDetailPage() {
       {/* Facebook Continue Button for returning FB users */}
       <FacebookContinueButton />
 
-      {/* Related Auctions Section */}
-      <RelatedAuctions currentAuctionId={auctionId} maxItems={4} />
-
       {/* Comments Section */}
       <AuctionComments auctionId={auctionId} onAuthRequired={authModal.open} />
+
+      {/* Related Auctions Section */}
+      <RelatedAuctions currentAuctionId={auctionId} maxItems={4} />
 
       {/* Auth Modal for guest bidders */}
       <AuctionAuthModal

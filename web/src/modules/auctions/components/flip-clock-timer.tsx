@@ -1,10 +1,10 @@
 "use client";
 
-import React, { useEffect, useState, useRef, useCallback } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import "./flip-clock-timer.css";
 
 interface FlipClockTimerProps {
-  endDate: Date;
+  endDate: Date | string;
   onTimeEnd?: () => void;
   isExtended?: boolean;
   language?: "ge" | "en";
@@ -46,7 +46,7 @@ const FlipDigit: React.FC<{ digit: string; prevDigit: string }> = ({
         <span>{digit}</span>
       </div>
       <div className="flip-card-bottom-half">
-        <span>{prevDigit}</span>
+        <span>{digit}</span>
       </div>
     </div>
   );
@@ -77,15 +77,21 @@ export const FlipClockTimer: React.FC<FlipClockTimerProps> = ({
   isExtended = false,
   language = "ge",
 }) => {
-  const calculateTimeLeft = useCallback((): TimeLeft => {
-    const now = new Date().getTime();
-    const end = new Date(endDate).getTime();
-    const difference = end - now;
+  // Convert to timestamp for stable dependency
+  const endTimestamp = new Date(endDate).getTime();
+  
+  // Use ref for callback to avoid interval restarts
+  const onTimeEndRef = useRef(onTimeEnd);
+  useEffect(() => {
+    onTimeEndRef.current = onTimeEnd;
+  }, [onTimeEnd]);
 
+  const [timeLeft, setTimeLeft] = useState<TimeLeft>(() => {
+    const now = Date.now();
+    const difference = endTimestamp - now;
     if (difference <= 0) {
       return { days: 0, hours: 0, minutes: 0, seconds: 0, total: 0 };
     }
-
     return {
       days: Math.floor(difference / (1000 * 60 * 60 * 24)),
       hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
@@ -93,35 +99,55 @@ export const FlipClockTimer: React.FC<FlipClockTimerProps> = ({
       seconds: Math.floor((difference / 1000) % 60),
       total: difference,
     };
-  }, [endDate]);
-
-  const [timeLeft, setTimeLeft] = useState<TimeLeft>(calculateTimeLeft);
+  });
   const [prevTimeLeft, setPrevTimeLeft] = useState<TimeLeft>(timeLeft);
   const hasEndedRef = useRef(false);
 
   useEffect(() => {
+    // Reset state when endTimestamp changes
+    hasEndedRef.current = false;
+    const now = Date.now();
+    const difference = endTimestamp - now;
+    const initial = difference <= 0
+      ? { days: 0, hours: 0, minutes: 0, seconds: 0, total: 0 }
+      : {
+          days: Math.floor(difference / (1000 * 60 * 60 * 24)),
+          hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
+          minutes: Math.floor((difference / (1000 * 60)) % 60),
+          seconds: Math.floor((difference / 1000) % 60),
+          total: difference,
+        };
+    setTimeLeft(initial);
+    setPrevTimeLeft(initial);
+
     const timer = setInterval(() => {
+      const now = Date.now();
+      const difference = endTimestamp - now;
+      
+      const newTimeLeft = difference <= 0
+        ? { days: 0, hours: 0, minutes: 0, seconds: 0, total: 0 }
+        : {
+            days: Math.floor(difference / (1000 * 60 * 60 * 24)),
+            hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
+            minutes: Math.floor((difference / (1000 * 60)) % 60),
+            seconds: Math.floor((difference / 1000) % 60),
+            total: difference,
+          };
+
       setTimeLeft((prev) => {
-        const newTimeLeft = calculateTimeLeft();
         setPrevTimeLeft(prev);
-        
-        if (newTimeLeft.total <= 0 && !hasEndedRef.current) {
-          hasEndedRef.current = true;
-          onTimeEnd?.();
-          clearInterval(timer);
-        }
-        
         return newTimeLeft;
       });
+
+      if (newTimeLeft.total <= 0 && !hasEndedRef.current) {
+        hasEndedRef.current = true;
+        onTimeEndRef.current?.();
+        clearInterval(timer);
+      }
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [calculateTimeLeft, onTimeEnd]);
-
-  // Reset hasEndedRef when endDate changes (for extensions)
-  useEffect(() => {
-    hasEndedRef.current = false;
-  }, [endDate]);
+  }, [endTimestamp]);
 
   const labels = {
     ge: { days: "დღე", hours: "სთ", minutes: "წთ", seconds: "წმ" },

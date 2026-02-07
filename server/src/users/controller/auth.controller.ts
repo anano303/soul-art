@@ -214,17 +214,17 @@ export class AuthController {
         return res.redirect(`${process.env.ALLOWED_ORIGINS}/auth-popup-callback?${params.toString()}`);
       }
 
-      // Standard redirect flow
-      let redirectPath: string;
-      if (result.isSeller) {
-        redirectPath = '/profile';
-      } else if (result.needsSellerRegistration) {
-        redirectPath = '/become-seller?fromOauth=true';
-      } else {
-        redirectPath = '/auth-callback?success=true';
-      }
+      // Standard redirect flow - always go through auth-callback
+      // The callback page will fetch user data and then redirect appropriately
+      // This is necessary because cookies set here (localhost:4000) aren't visible
+      // to Next.js middleware (localhost:3000) in development
+      const params = new URLSearchParams({
+        success: 'true',
+        isSeller: String(result.isSeller),
+        needsSellerRegistration: String(result.needsSellerRegistration),
+      });
 
-      res.redirect(`${process.env.ALLOWED_ORIGINS}${redirectPath}`);
+      res.redirect(`${process.env.ALLOWED_ORIGINS}/auth-callback?${params.toString()}`);
     } catch (error) {
       console.error('❌ Google auth error:', error);
       
@@ -272,22 +272,17 @@ export class AuthController {
         cookieConfig.refresh.options,
       );
 
-      // Determine redirect path based on user state
-      let redirectPath: string;
-      if (result.isSeller) {
-        // Already a seller, go to dashboard
-        redirectPath = '/profile';
-      } else if (result.needsSellerRegistration) {
-        // User wants to become seller but needs to fill seller details
-        redirectPath = '/become-seller?fromOauth=true';
-      } else {
-        // Regular user login
-        redirectPath = '/auth-callback?success=true';
-      }
+      // Always redirect through auth-callback for consistent behavior
+      // The callback page will fetch user data and redirect appropriately
+      const params = new URLSearchParams({
+        success: 'true',
+        isSeller: String(result.isSeller),
+        needsSellerRegistration: String(result.needsSellerRegistration),
+      });
       
-      console.log('🔄 Redirecting to:', `${process.env.ALLOWED_ORIGINS}${redirectPath}`);
+      console.log('🔄 Redirecting to:', `${process.env.ALLOWED_ORIGINS}/auth-callback?${params.toString()}`);
 
-      res.redirect(`${process.env.ALLOWED_ORIGINS}${redirectPath}`);
+      res.redirect(`${process.env.ALLOWED_ORIGINS}/auth-callback?${params.toString()}`);
     } catch (error) {
       console.error('❌ Facebook auth error:', error);
       res.redirect(`${process.env.ALLOWED_ORIGINS}/login?error=auth_failed`);

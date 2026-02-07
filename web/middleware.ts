@@ -7,6 +7,8 @@ const publicPaths = [
   "/register",
   "/forgot-password",
   "/reset-password",
+  "/auth-callback",
+  "/become-seller",
   "/forum",
   "/checkout",
   "/checkout/success",
@@ -28,7 +30,8 @@ export function middleware(request: NextRequest) {
   // Check for authentication tokens - Next.js 16 compatible way
   const accessToken = request.cookies.get("access_token");
   const refreshToken = request.cookies.get("refresh_token");
-  const hasTokens = !!(accessToken?.value || refreshToken?.value);
+  const authSession = request.cookies.get("auth_session"); // Client-set cookie for middleware
+  const hasTokens = !!(accessToken?.value || refreshToken?.value || authSession?.value);
   const isAuthenticated = hasTokens;
 
   // Sales Manager referral tracking - save ref code to cookie (7 days)

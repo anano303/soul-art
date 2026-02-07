@@ -64,6 +64,22 @@ export class AuctionController {
     return this.auctionService.getAuctionBidStatus(id);
   }
 
+  // Public: Long-polling endpoint - waits for updates
+  @Get(':id/bid-status/poll')
+  async getBidStatusPoll(
+    @Param('id') id: string,
+    @Query('lastTotalBids') lastTotalBids: string,
+    @Query('lastEndDate') lastEndDate: string,
+    @Query('timeout') timeout: string = '30000',
+  ) {
+    return this.auctionService.getAuctionBidStatusLongPoll(
+      id,
+      lastTotalBids ? parseInt(lastTotalBids, 10) : undefined,
+      lastEndDate,
+      Math.min(parseInt(timeout, 10) || 30000, 30000), // Cap at 30 seconds
+    );
+  }
+
   // Public: Get auction comments
   @Get(':id/comments')
   async getComments(
