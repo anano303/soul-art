@@ -32,6 +32,8 @@ import {
   RelatedAuctions,
   AuctionComments,
 } from "@/modules/auctions/components";
+import { ShareButton } from "@/components/share-button/share-button";
+import "@/components/share-button/share-button.css";
 import "./auction-detail.css";
 
 interface Bid {
@@ -515,19 +517,29 @@ export default function AuctionDetailPage() {
 
         {/* Right: Details */}
         <div className="auction-info-section">
-          <div className="artwork-type-badge">
-            <span className={auction.artworkType.toLowerCase()}>
-              {auction.artworkType === "ORIGINAL"
-                ? t("auctions.type.original")
-                : t("auctions.type.reproduction")}
-            </span>
+          {/* Compact Header Row */}
+          <div className="auction-header-row">
+            <div className="artwork-type-badge">
+              <span className={auction.artworkType.toLowerCase()}>
+                {auction.artworkType === "ORIGINAL"
+                  ? t("auctions.type.original")
+                  : t("auctions.type.reproduction")}
+              </span>
+            </div>
+            <h1 className="auction-title">{auction.title}</h1>
           </div>
 
-          <h1 className="auction-title">{auction.title}</h1>
-
-          <div className="seller-info">
-            <span className="label">{t("auctions.seller")}:</span>
-            <span className="value">{getSellerName()}</span>
+          <div className="seller-share-row">
+            <div className="seller-info">
+              <span className="label">{t("auctions.seller")}:</span>
+              <span className="value">{getSellerName()}</span>
+            </div>
+            <ShareButton
+              url={`/auctions/${auction._id}`}
+              title={auction.title}
+              description={auction.description}
+              className="auction-share-btn"
+            />
           </div>
 
           {/* ═══════════════════════════════════════════════════════════════════
