@@ -701,7 +701,7 @@ export const TRANSLATIONS: Translations = {
         scheduled: "დაგეგმილი",
       },
       by: "ავტორი:",
-      backToAuctions: "← აუქციონებზე დაბრუნება",
+      backToAuctions: "აუქციონებზე დაბრუნება",
       auctionNotFound: "აუქციონი ვერ მოიძებნა",
       auctionNotFoundDesc: "მოთხოვნილი აუქციონი არ არსებობს ან წაშლილია.",
       originalArtwork: "ორიგინალური ნამუშევარი",
@@ -752,6 +752,7 @@ export const TRANSLATIONS: Translations = {
       preBidNotice: "აუქციონი ჯერ არ დაწყებულა. შეგიძლიათ წინასწარი ფსონი განათავსოთ!",
       // Related auctions
       relatedAuctions: "სხვა აუქციონები",
+      viewAll: "ყველას ნახვა",
       viewAllAuctions: "ყველა აუქციონის ნახვა",
       // Comments
       comments: "კომენტარები",
@@ -765,6 +766,7 @@ export const TRANSLATIONS: Translations = {
       // Dates
       startDate: "დაწყების თარიღი",
       endDate: "დასრულების თარიღი",
+      endsAt: "დასრულდება",
     },
 
     auctionForm: {
@@ -2624,7 +2626,7 @@ export const TRANSLATIONS: Translations = {
         scheduled: "Scheduled",
       },
       by: "by",
-      backToAuctions: "← Back to Auctions",
+      backToAuctions: "Back to Auctions",
       auctionNotFound: "Auction Not Found",
       auctionNotFoundDesc:
         "The requested auction does not exist or has been removed.",
@@ -2676,6 +2678,7 @@ export const TRANSLATIONS: Translations = {
       preBidNotice: "Auction hasn't started yet. You can place a Pre-Bid!",
       // Related auctions
       relatedAuctions: "Other Auctions",
+      viewAll: "View all",
       viewAllAuctions: "View all auctions",
       // Comments
       comments: "Comments",
@@ -2689,6 +2692,7 @@ export const TRANSLATIONS: Translations = {
       // Dates
       startDate: "Start Date",
       endDate: "End Date",
+      endsAt: "Ends at",
     },
 
     auctionForm: {

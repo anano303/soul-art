@@ -113,7 +113,6 @@ export default function AuctionDetailPage() {
   const [loading, setLoading] = useState(true);
   const [bidAmount, setBidAmount] = useState(0);
   const [bidding, setBidding] = useState(false);
-  const [timeLeft, setTimeLeft] = useState("");
   const [isEnded, setIsEnded] = useState(false);
   const [selectedImage, setSelectedImage] = useState(0);
   const [showNewBidAnimation, setShowNewBidAnimation] = useState(false);
@@ -187,82 +186,30 @@ export default function AuctionDetailPage() {
     }
   }, [auctionId, fetchAuction]);
 
-  // Update time left
+  // Handle auction status changes
   useEffect(() => {
     if (!auction) return;
 
-    if (auction.status === "CANCELLED") {
+    // Mark as ended for cancelled auctions
+    if (auction.status === "CANCELLED" || auction.status === "ENDED") {
       setIsEnded(true);
-      setTimeLeft(t("auctions.status.cancelled"));
       return;
     }
 
+    // For scheduled auctions, poll to check if it has started
     if (auction.status === "SCHEDULED") {
-      const calculateStartTime = () => {
+      const checkIfStarted = () => {
         const now = new Date().getTime();
         const startTime = new Date(auction.startDate).getTime();
-        const difference = startTime - now;
-
-        if (difference <= 0) {
+        if (now >= startTime) {
           fetchAuction(); // Refresh to get updated status
-          return;
-        }
-
-        const days = Math.floor(difference / (1000 * 60 * 60 * 24));
-        const hours = Math.floor(
-          (difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60),
-        );
-        const minutes = Math.floor(
-          (difference % (1000 * 60 * 60)) / (1000 * 60),
-        );
-
-        if (days > 0) {
-          setTimeLeft(`${days}დ ${hours}ს ${minutes}წთ`);
-        } else if (hours > 0) {
-          setTimeLeft(`${hours}ს ${minutes}წთ`);
-        } else {
-          setTimeLeft(`${minutes}წთ`);
         }
       };
 
-      calculateStartTime();
-      const interval = setInterval(calculateStartTime, 60000);
+      const interval = setInterval(checkIfStarted, 10000); // Check every 10 seconds
       return () => clearInterval(interval);
     }
-
-    const calculateTimeLeft = () => {
-      const now = new Date().getTime();
-      const endTime = new Date(auction.endDate).getTime();
-      const difference = endTime - now;
-
-      if (difference <= 0 || auction.status === "ENDED") {
-        setIsEnded(true);
-        setTimeLeft(t("auctions.ended"));
-        return;
-      }
-
-      const days = Math.floor(difference / (1000 * 60 * 60 * 24));
-      const hours = Math.floor(
-        (difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60),
-      );
-      const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
-      const seconds = Math.floor((difference % (1000 * 60)) / 1000);
-
-      if (days > 0) {
-        setTimeLeft(`${days}დ ${hours}ს ${minutes}წთ ${seconds}წმ`);
-      } else if (hours > 0) {
-        setTimeLeft(`${hours}ს ${minutes}წთ ${seconds}წმ`);
-      } else if (minutes > 0) {
-        setTimeLeft(`${minutes}წთ ${seconds}წმ`);
-      } else {
-        setTimeLeft(`${seconds}წმ`);
-      }
-    };
-
-    calculateTimeLeft();
-    const interval = setInterval(calculateTimeLeft, 1000);
-    return () => clearInterval(interval);
-  }, [auction, t, fetchAuction]);
+  }, [auction, fetchAuction]);
 
   const getSellerName = () => {
     if (!auction?.seller)
@@ -539,109 +486,171 @@ export default function AuctionDetailPage() {
             <span className="value">{getSellerName()}</span>
           </div>
 
-          {/* Time Info - Flip Clock */}
-          {auction.status === "ACTIVE" && !isEnded && (
-            <div className="flip-clock-section">
-              <FlipClockTimer
-                endDate={bidStatus?.endDate || auction.endDate}
-                onTimeEnd={() => {
-                  setIsEnded(true);
-                  fetchAuction();
-                }}
-                isExtended={isExtended}
-                language={language === "ge" ? "ge" : "en"}
-              />
-              {isExtended && (
-                <div className="time-extended-badge">
-                  <Zap size={16} />
-                  <span>{t("auctions.timeWasExtended") || "+10 წამი!"}</span>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Fallback for non-active states */}
-          {(auction.status !== "ACTIVE" || isEnded) && (
-            <div className="time-info-box">
-              <Clock className="time-icon" size={24} />
-              <div className="time-details">
+          {/* ═══════════════════════════════════════════════════════════════════
+              UNIFIED BIDDING CARD - Timer, Price, and Bid Controls
+              ═══════════════════════════════════════════════════════════════════ */}
+          {(auction.status === "ACTIVE" || auction.status === "SCHEDULED") && !isEnded && (
+            <div className={`bidding-card ${auction.status === "SCHEDULED" ? "scheduled" : ""}`}>
+              {/* Timer Label */}
+              <div className="bidding-card-timer-label">
                 {auction.status === "SCHEDULED" ? (
-                  <>
-                    <span className="time-label">
-                      {t("auctions.startsIn") || "დაიწყება"}
-                    </span>
-                    <span className="time-value scheduled">{timeLeft}</span>
-                  </>
-                ) : isEnded ? (
-                  <>
-                    <span className="time-label">
-                      {t("auctions.auctionEnded")}
-                    </span>
-                    <span className="time-value ended">
-                      {t("auctions.ended")}
-                    </span>
-                  </>
+                  <span className="timer-label scheduled">{t("auctions.startsIn") || "დაიწყება"}</span>
                 ) : (
-                  <>
-                    <span className="time-label">{t("auctions.timeLeft")}</span>
-                    <span className="time-value">{timeLeft}</span>
-                  </>
+                  <span className="timer-label">{t("auctions.timeLeft") || "დარჩენილია"}</span>
                 )}
               </div>
-            </div>
-          )}
 
-          {/* Pricing - with real-time updates */}
-          <div className={`pricing-grid ${showNewBidAnimation ? "new-bid-pulse" : ""}`}>
-            <div className="price-card primary">
-              <span className="price-card-label">
-                {t("auctions.currentPrice") || "მიმდინარე ფასი"}
-              </span>
-              <span className="price-card-value">
-                {formatPrice(bidStatus?.currentPrice ?? auction.currentPrice)}
-              </span>
-              {showNewBidAnimation && (
-                <div className="new-bid-indicator">
-                  <TrendingUp size={20} />
-                  <span>{t("auctions.priceJustUpdated") || "ახლახან განახლდა!"}</span>
+              {/* Compact Timer */}
+              <div className="bidding-card-timer">
+                <FlipClockTimer
+                  endDate={auction.status === "SCHEDULED" ? auction.startDate : (bidStatus?.endDate || auction.endDate)}
+                  onTimeEnd={() => {
+                    if (auction.status === "SCHEDULED") {
+                      // Refresh auction when it starts
+                      fetchAuction();
+                    } else {
+                      setIsEnded(true);
+                      fetchAuction();
+                    }
+                  }}
+                  isExtended={isExtended}
+                  language={language === "ge" ? "ge" : "en"}
+                />
+                {isExtended && auction.status === "ACTIVE" && (
+                  <div className="time-extended-badge compact">
+                    <Zap size={14} />
+                    <span>{t("auctions.timeWasExtended") || "+10 წამი!"}</span>
+                  </div>
+                )}
+              </div>
+
+              {/* Compact Price Info */}
+              <div className={`bidding-card-pricing ${showNewBidAnimation ? "new-bid-pulse" : ""}`}>
+                <div className="price-info-row">
+                  <div className="price-item current">
+                    <span className="price-label">
+                      {auction.status === "SCHEDULED" 
+                        ? (t("auctions.startingPrice") || "საწყისი ფასი")
+                        : (t("auctions.currentPrice") || "მიმდინარე ფასი")}
+                    </span>
+                    <span className="price-value">{formatPrice(bidStatus?.currentPrice ?? auction.currentPrice)}</span>
+                    {showNewBidAnimation && (
+                      <div className="price-updated-badge">
+                        <TrendingUp size={14} />
+                      </div>
+                    )}
+                  </div>
+                  <div className="price-divider" />
+                  <div className="price-item step">
+                    <span className="price-label">{t("auctions.minimumBid") || "მინ. ფსონი"}</span>
+                    <span className="price-value">+{formatPrice(auction.minimumBidIncrement)}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Bid Input - Now inside the card */}
+              {canShowBidSection && (
+                <div className="bidding-card-controls">
+                  <div className="bid-controls-compact">
+                    <button
+                      className="bid-step-btn"
+                      onClick={() => handleBidChange(-1)}
+                      disabled={
+                        bidAmount <=
+                        (bidStatus?.currentPrice ?? auction.currentPrice) + auction.minimumBidIncrement
+                      }
+                    >
+                      <Minus size={18} />
+                    </button>
+                    <div className="bid-input-wrapper">
+                      <input
+                        type="number"
+                        className="bid-input"
+                        value={bidAmount}
+                        onChange={handleBidInputChange}
+                        min={(bidStatus?.currentPrice ?? auction.currentPrice) + auction.minimumBidIncrement}
+                        step={auction.minimumBidIncrement}
+                      />
+                      <span className="currency">₾</span>
+                    </div>
+                    <button
+                      className="bid-step-btn"
+                      onClick={() => handleBidChange(1)}
+                    >
+                      <Plus size={18} />
+                    </button>
+                  </div>
+                  <button
+                    className={`place-bid-btn ${isPreBid ? "pre-bid" : ""} ${!user ? "guest-bid" : ""}`}
+                    onClick={handlePlaceBid}
+                    disabled={bidding}
+                  >
+                    {bidding ? (
+                      <span className="loading-text">...</span>
+                    ) : (
+                      <>
+                        <Gavel size={18} />
+                        {!user 
+                          ? t("auctions.bidNow") || "დადე ფსონი"
+                          : isPreBid
+                            ? t("auctions.preBid") || "Pre-Bid"
+                            : t("auctions.placeBid")}
+                      </>
+                    )}
+                  </button>
+                  {!user && (
+                    <p className="guest-bid-hint">{t("auctions.loginRequiredAfterBid") || "ფსონის დასადებად საჭიროა ავტორიზაცია"}</p>
+                  )}
+                </div>
+              )}
+
+              {auction.status === "SCHEDULED" && (
+                <div className="pre-bid-notice">
+                  <Clock size={16} />
+                  <span>{t("auctions.preBidNotice") || "აუქციონი ჯერ არ დაწყებულა. შეგიძლიათ Pre-Bid განათავსოთ!"}</span>
                 </div>
               )}
             </div>
-            <div className="price-card accent">
-              <span className="price-card-label">
-                {t("auctions.minimumBid") || "მინიმალური ფსონი"}
-              </span>
-              <span className="price-card-value">
-                +{formatPrice(auction.minimumBidIncrement)}
-              </span>
-            </div>
-          </div>
+          )}
 
-          {/* Dates Grid */}
-          <div className="dates-grid">
-            <div className="date-card">
-              <div className="date-card-icon">📅</div>
-              <div className="date-card-content">
-                <span className="date-card-label">
-                  {t("auctions.startDate") || "დაწყება"}
-                </span>
-                <span className="date-card-value">
-                  {formatDate(auction.startDate)}
-                </span>
+          {/* Fallback for ended auction */}
+          {(auction.status === "ENDED" || isEnded) && (
+            <div className="time-info-box ended-state">
+              <Clock className="time-icon" size={24} />
+              <div className="time-details">
+                <span className="time-label">{t("auctions.auctionEnded")}</span>
+                <span className="time-value ended">{t("auctions.ended")}</span>
               </div>
             </div>
-            <div className="date-card">
-              <div className="date-card-icon">⏰</div>
-              <div className="date-card-content">
-                <span className="date-card-label">
-                  {t("auctions.endDate") || "დასრულება"}
-                </span>
-                <span className="date-card-value">
-                  {formatDate(auction.endDate)}
-                </span>
+          )}
+
+          {/* End Date - Only show for active auction (start date is irrelevant once started) */}
+          {auction.status === "ACTIVE" && !isEnded && (
+            <div className="end-date-info">
+              <span className="end-date-label">{t("auctions.endsAt") || "დასრულდება"}:</span>
+              <span className="end-date-value">{formatDate(bidStatus?.endDate || auction.endDate)}</span>
+            </div>
+          )}
+
+          {/* For scheduled auctions, show both dates */}
+          {auction.status === "SCHEDULED" && (
+            <div className="dates-grid">
+              <div className="date-card">
+                <div className="date-card-icon">📅</div>
+                <div className="date-card-content">
+                  <span className="date-card-label">{t("auctions.startDate") || "დაწყება"}</span>
+                  <span className="date-card-value">{formatDate(auction.startDate)}</span>
+                </div>
+              </div>
+              <div className="date-card">
+                <div className="date-card-icon">⏰</div>
+                <div className="date-card-content">
+                  <span className="date-card-label">{t("auctions.endDate") || "დასრულება"}</span>
+                  <span className="date-card-value">{formatDate(auction.endDate)}</span>
+                </div>
               </div>
             </div>
-          </div>
+          )}
 
           {/* Bid Stats - with real-time updates */}
           <div className="bid-stats">
@@ -740,78 +749,6 @@ export default function AuctionDetailPage() {
                   )}
                 </div>
               )}
-            </div>
-          )}
-
-          {/* Bid Input - Now shows for guests too, auth modal handles login */}
-          {canShowBidSection && (
-            <div className="bid-input-section">
-              <label className="bid-label">
-                {!user && <span className="guest-label">({t("auctions.guestBidding") || "სტუმარი"}) </span>}
-                {t("auctions.yourBid")}:
-              </label>
-              <div className="bid-controls">
-                <button
-                  className="bid-step-btn"
-                  onClick={() => handleBidChange(-1)}
-                  disabled={
-                    bidAmount <=
-                    (bidStatus?.currentPrice ?? auction.currentPrice) + auction.minimumBidIncrement
-                  }
-                >
-                  <Minus size={20} />
-                </button>
-                <div className="bid-input-wrapper">
-                  <input
-                    type="number"
-                    className="bid-input"
-                    value={bidAmount}
-                    onChange={handleBidInputChange}
-                    min={(bidStatus?.currentPrice ?? auction.currentPrice) + auction.minimumBidIncrement}
-                    step={auction.minimumBidIncrement}
-                  />
-                  <span className="currency">₾</span>
-                </div>
-                <button
-                  className="bid-step-btn"
-                  onClick={() => handleBidChange(1)}
-                >
-                  <Plus size={20} />
-                </button>
-              </div>
-              <button
-                className={`place-bid-btn ${isPreBid ? "pre-bid" : ""} ${!user ? "guest-bid" : ""}`}
-                onClick={handlePlaceBid}
-                disabled={bidding}
-              >
-                {bidding ? (
-                  <span className="loading-text">...</span>
-                ) : (
-                  <>
-                    <Gavel size={20} />
-                    {!user 
-                      ? t("auctions.bidNow") || "დადე ფსონი"
-                      : isPreBid
-                        ? t("auctions.preBid") || "Pre-Bid"
-                        : t("auctions.placeBid")}
-                  </>
-                )}
-              </button>
-              {!user && (
-                <p className="guest-bid-hint">
-                  {t("auctions.loginRequiredAfterBid") || "ფსონის დასადებად საჭიროა ავტორიზაცია"}
-                </p>
-              )}
-            </div>
-          )}
-
-          {auction.status === "SCHEDULED" && (
-            <div className="scheduled-notice pre-bid-info">
-              <Clock size={20} />
-              <span>
-                {t("auctions.preBidNotice") ||
-                  "აუქციონი ჯერ არ დაწყებულა. შეგიძლიათ Pre-Bid განათავსოთ!"}
-              </span>
             </div>
           )}
 
