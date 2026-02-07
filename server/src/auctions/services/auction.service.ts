@@ -1115,6 +1115,18 @@ export class AuctionService {
       .exec();
   }
 
+  // Get all won auctions for a user (both paid and unpaid)
+  async getAllWonAuctions(userId: string) {
+    return this.auctionModel
+      .find({
+        status: AuctionStatus.ENDED,
+        currentWinner: new Types.ObjectId(userId),
+      })
+      .populate('seller', 'name ownerFirstName ownerLastName storeName')
+      .sort({ endedAt: -1 })
+      .exec();
+  }
+
   // Get payment details for winner
   async getPaymentDetails(auctionId: string, userId: string) {
     const auction = await this.auctionModel.findById(auctionId);
@@ -1271,6 +1283,13 @@ export class AuctionService {
     auctionId: string,
     userId: string,
     deliveryZone: 'TBILISI' | 'REGION',
+    shippingAddress?: {
+      address?: string;
+      city?: string;
+      postalCode?: string;
+      country?: string;
+      phoneNumber?: string;
+    },
   ) {
     const auction = await this.auctionModel.findById(auctionId);
     if (!auction) {
@@ -1295,11 +1314,17 @@ export class AuctionService {
     // Generate unique external order ID
     const externalOrderId = randomUUID();
 
-    // Update auction with delivery zone and external order ID
+    // Update auction with delivery zone, shipping address, and external order ID
     auction.winnerDeliveryZone = deliveryZone;
     auction.deliveryFee = deliveryFee;
     auction.totalPayment = totalPayment;
     auction.externalOrderId = externalOrderId;
+    
+    // Store shipping address if provided
+    if (shippingAddress) {
+      (auction as any).shippingAddress = shippingAddress;
+    }
+    
     await auction.save();
 
     this.logger.log(

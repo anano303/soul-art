@@ -225,7 +225,7 @@
   padding: 24px 18px 18px;
   background: var(--overlay-bg);
   color: white;
-  z-index: 3;
+  z-index: 5;
   text-decoration: none;
   display: block;
   cursor: pointer;

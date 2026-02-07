@@ -14,4 +14,10 @@ export interface CartItem {
   referralDiscountPercent?: number;
   referralDiscountAmount?: number;
   hasReferralDiscount?: boolean;
+  // Auction item support
+  auctionId?: string;
+  isAuction?: boolean;
+  sellerId?: string;
+  deliveryDaysMin?: number;
+  deliveryDaysMax?: number;
 }

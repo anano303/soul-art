@@ -1487,6 +1487,7 @@ export const TRANSLATIONS: Translations = {
       balance: "ბალანსი",
       devices: "მოწყობილობები",
       auctions: "ჩემი აუქციონები",
+      wonAuctions: "მოგებული აუქციონები",
       settings: "პარამეტრები",
     },
 
@@ -3396,6 +3397,7 @@ export const TRANSLATIONS: Translations = {
       balance: "Balance",
       devices: "Devices",
       auctions: "Auctions",
+      wonAuctions: "Won Auctions",
       settings: "Settings",
     },
 

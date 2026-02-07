@@ -278,6 +278,13 @@ export class AuctionController {
     return this.auctionService.getWonAuctions(user._id.toString());
   }
 
+  // Winner: Get all won auctions (both paid and unpaid)
+  @UseGuards(JwtAuthGuard)
+  @Get('my-wins/all')
+  async getAllMyWonAuctions(@CurrentUser() user: UserDocument) {
+    return this.auctionService.getAllWonAuctions(user._id.toString());
+  }
+
   // Winner: Get payment details
   @UseGuards(JwtAuthGuard)
   @Get(':id/payment-details')
@@ -315,6 +322,7 @@ export class AuctionController {
       id,
       user._id.toString(),
       paymentDto.deliveryZone,
+      paymentDto.shippingAddress,
     );
   }
 

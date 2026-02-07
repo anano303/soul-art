@@ -158,11 +158,39 @@ export class WinnerPaymentDto {
   deliveryZone: 'TBILISI' | 'REGION';
 }
 
+// Shipping address for auction checkout
+export class AuctionShippingAddressDto {
+  @IsString()
+  @IsOptional()
+  address?: string;
+
+  @IsString()
+  @IsOptional()
+  city?: string;
+
+  @IsString()
+  @IsOptional()
+  postalCode?: string;
+
+  @IsString()
+  @IsOptional()
+  country?: string;
+
+  @IsString()
+  @IsOptional()
+  phoneNumber?: string;
+}
+
 // BOG Payment initialization DTO
 export class InitializeBogPaymentDto {
   @IsString()
   @IsEnum(['TBILISI', 'REGION'])
   deliveryZone: 'TBILISI' | 'REGION';
+
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => AuctionShippingAddressDto)
+  shippingAddress?: AuctionShippingAddressDto;
 }
 
 // Delivery fee constants

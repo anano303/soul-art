@@ -3,13 +3,13 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   Clock,
   Users,
   Palette,
   Ruler,
   ChevronDown,
-  ChevronUp,
   Minus,
   Plus,
   Gavel,
@@ -91,6 +91,7 @@ export default function AuctionCard({
 }: AuctionCardProps) {
   const { t, language } = useLanguage();
   const { user } = useAuth();
+  const router = useRouter();
   const [timeLeft, setTimeLeft] = useState("");
   const [startsIn, setStartsIn] = useState("");
   const [isEnded, setIsEnded] = useState(false);
@@ -109,6 +110,28 @@ export default function AuctionCard({
     currentAuction.mainImage,
     ...(currentAuction.additionalImages || []),
   ];
+
+  // Handle payment for won auctions
+  const handlePayment = () => {
+    // Store auction checkout data in sessionStorage
+    const auctionCheckoutItem = {
+      auctionId: currentAuction._id,
+      productId: currentAuction._id,
+      isAuction: true,
+      name: currentAuction.title,
+      image: currentAuction.mainImage,
+      price: currentAuction.currentPrice,
+      countInStock: 1,
+      qty: 1,
+      sellerId: currentAuction.seller._id,
+      deliveryDaysMin: currentAuction.deliveryDaysMin || 3,
+      deliveryDaysMax: currentAuction.deliveryDaysMax || 7,
+    };
+    sessionStorage.setItem("auction_checkout_item", JSON.stringify(auctionCheckoutItem));
+    
+    // Redirect to streamlined checkout with auction param
+    router.push(`/checkout/streamlined?auction=${currentAuction._id}`);
+  };
 
   const getSellerName = () => {
     // 1. Try ownerFirstName + ownerLastName (seller profile) - priority
@@ -465,19 +488,12 @@ export default function AuctionCard({
               setIsExpanded(!isExpanded);
             }}
           >
-            {isExpanded ? (
-              <>
-                <span>{language === "ge" ? "ნაკლები" : "Less"}</span>
-                <ChevronUp size={18} />
-              </>
-            ) : (
-              <>
-                <span>
-                  {language === "ge" ? "მეტი ინფო და ბიდი" : "More info & Bid"}
-                </span>
-                <ChevronDown size={18} />
-              </>
-            )}
+            <span>
+              {isExpanded
+                ? (language === "ge" ? "ნაკლები" : "Less")
+                : (language === "ge" ? "მეტი ინფო და ბიდი" : "More info & Bid")}
+            </span>
+            <ChevronDown size={18} />
           </button>
         </div>
 
@@ -639,8 +655,8 @@ export default function AuctionCard({
               </div>
             )}
 
-            {/* Payment section for ended auctions with winner */}
-            {isEnded && currentAuction.currentWinner && (
+            {/* Payment section for ended auctions with winner - only show to winner */}
+            {isEnded && currentAuction.currentWinner && user && user._id === currentAuction.currentWinner._id && (
               <div className="winner-payment-section">
                 {currentAuction.isPaid ? (
                   <div className="paid-badge">
@@ -648,21 +664,21 @@ export default function AuctionCard({
                     <span>{t("auctions.paid") || "გადახდილია"}</span>
                   </div>
                 ) : (
-                  <Link
-                    href={`/checkout/auction/${currentAuction._id}`}
+                  <button
+                    onClick={handlePayment}
                     className="payment-link-btn"
                   >
                     <CreditCard size={18} />
                     <span>{t("auctions.payNow") || "გადახდა"}</span>
-                  </Link>
+                  </button>
                 )}
               </div>
             )}
           </div>
         )}
 
-        {/* Payment section outside expand - always visible for ended auctions */}
-        {!isExpanded && isEnded && currentAuction.currentWinner && (
+        {/* Payment section outside expand - only visible to winner for ended auctions */}
+        {!isExpanded && isEnded && currentAuction.currentWinner && user && user._id === currentAuction.currentWinner._id && (
           <div className="winner-payment-standalone">
             <div className="winner-info-compact">
               <Gavel size={16} />
@@ -687,13 +703,13 @@ export default function AuctionCard({
                 <span>{t("auctions.paid") || "გადახდილია"}</span>
               </div>
             ) : (
-              <Link
-                href={`/checkout/auction/${currentAuction._id}`}
+              <button
+                onClick={handlePayment}
                 className="payment-link-btn"
               >
                 <CreditCard size={18} />
                 <span>{t("auctions.payNow") || "გადახდა"}</span>
-              </Link>
+              </button>
             )}
           </div>
         )}

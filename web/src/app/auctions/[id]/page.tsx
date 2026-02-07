@@ -314,7 +314,26 @@ export default function AuctionDetailPage() {
   };
 
   const handlePayment = () => {
-    router.push(`/checkout/auction/${auction?._id}`);
+    if (!auction) return;
+    
+    // Store auction checkout data in sessionStorage
+    const auctionCheckoutItem = {
+      auctionId: auction._id,
+      productId: auction._id,
+      isAuction: true,
+      name: auction.title,
+      image: auction.mainImage,
+      price: auction.currentPrice,
+      countInStock: 1,
+      qty: 1,
+      sellerId: auction.seller._id,
+      deliveryDaysMin: auction.deliveryDaysMin,
+      deliveryDaysMax: auction.deliveryDaysMax,
+    };
+    sessionStorage.setItem("auction_checkout_item", JSON.stringify(auctionCheckoutItem));
+    
+    // Redirect to streamlined checkout with auction param
+    router.push(`/checkout/streamlined?auction=${auction._id}`);
   };
 
   const handleBidChange = (delta: number) => {

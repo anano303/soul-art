@@ -11,6 +11,7 @@ import {
   Smartphone,
   MapPin,
   Gavel,
+  Trophy,
 } from "lucide-react";
 
 const profileNavItems = [
@@ -31,6 +32,12 @@ const profileNavItems = [
     href: "/profile/orders",
     icon: ShoppingBag,
     labelKey: "profileNav.orders",
+  },
+  {
+    key: "won-auctions",
+    href: "/profile/won-auctions",
+    icon: Trophy,
+    labelKey: "profileNav.wonAuctions",
   },
   {
     key: "balance",

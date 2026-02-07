@@ -166,6 +166,16 @@ export class Auction {
   @Prop({ default: 0 })
   totalPayment: number;
 
+  // Shipping Address for winner
+  @Prop({ type: Object })
+  shippingAddress?: {
+    address?: string;
+    city?: string;
+    postalCode?: string;
+    country?: string;
+    phoneNumber?: string;
+  };
+
   // BOG Payment Info
   @Prop()
   bogOrderId?: string; // BOG's internal order ID
