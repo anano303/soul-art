@@ -117,14 +117,17 @@ export default function AuctionDetailPage() {
   const [selectedImage, setSelectedImage] = useState(0);
   const [showNewBidAnimation, setShowNewBidAnimation] = useState(false);
   const lastBidCountRef = useRef(0);
+  const fetchAuctionRef = useRef<(() => Promise<void>) | undefined>(undefined);
 
   // Real-time polling for bid updates
   const { bidStatus, isExtended, refresh: refreshBidStatus } = useAuctionPolling({
     auctionId,
     enabled: auction?.status === "ACTIVE",
     onBidUpdate: (data) => {
+      console.log("[Bid Update] Received update:", data.totalBids, "vs previous:", lastBidCountRef.current);
       // Show animation when new bid comes in
       if (lastBidCountRef.current > 0 && data.totalBids > lastBidCountRef.current) {
+        console.log("[Bid Update] New bid detected! Triggering refresh...");
         setShowNewBidAnimation(true);
         setTimeout(() => setShowNewBidAnimation(false), 2000);
         // Update bid amount to new minimum
@@ -132,6 +135,15 @@ export default function AuctionDetailPage() {
           setBidAmount(data.currentPrice + auction.minimumBidIncrement);
         }
         toast.success(t("auctions.newBidReceived") || "ახალი ფსონი შემოვიდა!");
+        // Refresh full auction data to update bid history
+        console.log("[Bid Update] fetchAuctionRef.current exists:", !!fetchAuctionRef.current);
+        if (fetchAuctionRef.current) {
+          fetchAuctionRef.current().then(() => {
+            console.log("[Bid Update] Auction data refreshed successfully");
+          }).catch((err) => {
+            console.error("[Bid Update] Failed to refresh auction:", err);
+          });
+        }
       }
       lastBidCountRef.current = data.totalBids;
     },
@@ -153,9 +165,11 @@ export default function AuctionDetailPage() {
       return;
     }
     try {
+      console.log("[Auction Debug] Fetching auction data...");
       const response = await apiClient.get(`/auctions/${auctionId}`);
       console.log("[Auction Debug] Full auction data:", response.data);
       console.log("[Auction Debug] Status:", response.data.status);
+      console.log("[Auction Debug] Bids count:", response.data.bids?.length);
       console.log(
         "[Auction Debug] CurrentWinner:",
         response.data.currentWinner,
@@ -166,6 +180,12 @@ export default function AuctionDetailPage() {
         user?._id === response.data.currentWinner?._id,
       );
       setAuction(response.data);
+      console.log("[Auction Debug] Auction state updated");
+      // Initialize bid count ref for new bid detection (only on initial load)
+      if (lastBidCountRef.current === 0) {
+        lastBidCountRef.current = response.data.totalBids || 0;
+        console.log("[Auction Debug] Initialized lastBidCountRef:", lastBidCountRef.current);
+      }
       // Set initial bid amount to minimum next bid
       const minBid =
         response.data.currentPrice + response.data.minimumBidIncrement;
@@ -178,6 +198,11 @@ export default function AuctionDetailPage() {
       setLoading(false);
     }
   }, [auctionId, router, t, user]);
+
+  // Keep ref updated with fetchAuction for long-polling callback
+  useEffect(() => {
+    fetchAuctionRef.current = fetchAuction;
+  }, [fetchAuction]);
 
   useEffect(() => {
     // Skip fetching for reserved routes - they will be redirected
