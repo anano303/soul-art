@@ -413,16 +413,37 @@ export default function AuctionDetailPage() {
   const formatPrice = (price: number) => `${price.toFixed(2)} ₾`;
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString(
-      language === "ge" ? "ka-GE" : "en-US",
-      {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-      },
-    );
+    const date = new Date(dateString);
+    const day = date.getDate();
+    const year = date.getFullYear();
+    const hour = date.getHours().toString().padStart(2, "0");
+    const minute = date.getMinutes().toString().padStart(2, "0");
+
+    if (language === "ge") {
+      const monthsGe = [
+        "იანვარი",
+        "თებერვალი",
+        "მარტი",
+        "აპრილი",
+        "მაისი",
+        "ივნისი",
+        "ივლისი",
+        "აგვისტო",
+        "სექტემბერი",
+        "ოქტომბერი",
+        "ნოემბერი",
+        "დეკემბერი",
+      ];
+      return `${day} ${monthsGe[date.getMonth()]}, ${year} - ${hour}:${minute}`;
+    }
+
+    return date.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
   };
 
   if (loading) {

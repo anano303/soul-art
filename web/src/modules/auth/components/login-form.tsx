@@ -165,7 +165,9 @@ export function LoginForm({
   };
 
   const handleGoogleAuth = () => {
-    window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/auth/google`;
+    const googleUrl = `${process.env.NEXT_PUBLIC_API_URL}/auth/google`;
+    console.log("🔍 Google Auth URL:", googleUrl);
+    window.location.href = googleUrl;
   };
 
   const handleFacebookSuccess = (data: {

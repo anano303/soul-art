@@ -90,15 +90,6 @@ export function ProfileForm() {
     return upperRole === "SELLER" || upperRole === "SELLER_SALES_MANAGER";
   };
 
-  // Helper function to check if user has sales manager role (including combined roles)
-  const isSalesManagerRole = (role?: string) => {
-    if (!role) return false;
-    const upperRole = role.toUpperCase();
-    return (
-      upperRole === "SALES_MANAGER" || upperRole === "SELLER_SALES_MANAGER"
-    );
-  };
-
   const portfolioBaseUrl =
     process.env.NEXT_PUBLIC_WEBSITE_URL || "https://soulart.ge";
   const portfolioDisplayBase = portfolioBaseUrl
@@ -730,12 +721,7 @@ export function ProfileForm() {
           user.role?.toUpperCase() !== "SALES_MANAGER" &&
           user.role?.toUpperCase() !== "ADMIN" &&
           user.role?.toUpperCase() !== "AUCTION_ADMIN" && (
-            <BecomeSellerButton
-              userPhone={user.phoneNumber}
-              userIdentificationNumber={user.identificationNumber}
-              userAccountNumber={user.accountNumber}
-              userBeneficiaryBankCode={user.beneficiaryBankCode}
-            />
+            <BecomeSellerButton />
           )}
       </div>
 
