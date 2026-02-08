@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-// API base URL for server-side fetching (without /v1 suffix, we add it in the fetch)
+// API base URL for server-side fetching
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/v1";
 
 interface AuctionData {
@@ -27,12 +27,11 @@ interface AuctionData {
 async function getAuction(id: string): Promise<AuctionData | null> {
   try {
     const res = await fetch(`${API_BASE_URL}/auctions/${id}`, {
-      next: { revalidate: 60 }, // Revalidate every 60 seconds
+      cache: "no-store", // Always fetch fresh data for metadata
     });
     if (!res.ok) return null;
     return res.json();
-  } catch (error) {
-    console.error("Failed to fetch auction for metadata:", error);
+  } catch {
     return null;
   }
 }
@@ -51,9 +50,9 @@ function formatPrice(price: number): string {
 export async function generateMetadata({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }): Promise<Metadata> {
-  const auctionId = params.id;
+  const { id: auctionId } = await params;
 
   // Skip metadata generation for reserved routes
   if (["create", "admin", "new"].includes(auctionId?.toLowerCase())) {
@@ -103,20 +102,17 @@ export async function generateMetadata({
   const formattedEndDate = endDate.toLocaleDateString("ka-GE", {
     day: "numeric",
     month: "long",
-    year: "numeric",
     hour: "2-digit",
     minute: "2-digit",
   });
 
-  // Rich description for SEO
-  const description = `🎨 ${auction.title} - ${artworkTypeGe} ნამუშევარი მხატვრისგან ${sellerName}. 
-💰 საწყისი ფასი: ${formatPrice(auction.startingPrice)} | მიმდინარე ბიდი: ${formatPrice(auction.currentPrice)} | ბიდების რაოდენობა: ${auction.totalBids}
-📐 ზომა: ${auction.dimensions} | მასალა: ${auction.material}
-⏰ აუქციონი სრულდება: ${formattedEndDate}
-🖼️ იყიდე უნიკალური ხელოვნების ნიმუში SoulArt აუქციონზე!`;
+  // Compact description for social sharing (shows in preview)
+  const socialDescription = `💰 ${formatPrice(auction.currentPrice)} | 🎨 ${sellerName} | ${artworkTypeGe}
+📐 ${auction.dimensions} | ${auction.material}
+⏰ სრულდება: ${formattedEndDate}`;
 
-  // Short description for social sharing
-  const shortDescription = `${auction.title} - ${artworkTypeGe} | მიმდინარე ფასი: ${formatPrice(auction.currentPrice)} | მხატვარი: ${sellerName}`;
+  // Short description for meta description
+  const shortDescription = `${auction.title} - ${artworkTypeGe} | ფასი: ${formatPrice(auction.currentPrice)} | მხატვარი: ${sellerName} | ზომა: ${auction.dimensions}`;
 
   // Keywords for SEO
   const keywords = [
@@ -172,8 +168,8 @@ export async function generateMetadata({
       locale: "ka_GE",
       url: auctionUrl,
       siteName: "SoulArt - ქართული ხელოვნების მარკეტფლეისი",
-      title: `🎨 ${auction.title} | აუქციონი`,
-      description,
+      title: `🎨 ${auction.title} | ${formatPrice(auction.currentPrice)}`,
+      description: socialDescription,
       images: [
         {
           url: auction.mainImage,
@@ -194,8 +190,8 @@ export async function generateMetadata({
       card: "summary_large_image",
       site: "@soulart_ge",
       creator: "@soulart_ge",
-      title: `🎨 ${auction.title} | SoulArt აუქციონი`,
-      description: shortDescription,
+      title: `🎨 ${auction.title} | ${formatPrice(auction.currentPrice)}`,
+      description: socialDescription,
       images: [auction.mainImage],
     },
     other: {
