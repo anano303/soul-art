@@ -126,6 +126,24 @@ export function OrdersList({
   const orders = data?.items || [];
   const totalPages = data?.pages || 0;
 
+  // სელერისთვის მხოლოდ მისი პროდუქტების ჯამის გამოთვლა
+  const getSellerItemsTotal = (order: Order): number => {
+    if (userRole !== "seller" || !userId) {
+      return order.itemsPrice || order.totalPrice || 0;
+    }
+
+    // სელერისთვის მხოლოდ მისი პროდუქტების ფასი (მიტანის გარეშე)
+    return (order.orderItems || []).reduce((sum, item) => {
+      const product = item.productId as any;
+      const productUserId =
+        product?.user?._id?.toString() || product?.user?.toString();
+      if (productUserId === userId) {
+        return sum + item.price * item.qty;
+      }
+      return sum;
+    }, 0);
+  };
+
   return (
     <div className="orders-container">
       <div className="orders-header">
@@ -290,7 +308,12 @@ export function OrdersList({
                   </td>
                   <td>
                     <div className="price-cell">
-                      {order.totalPrice ? order.totalPrice.toFixed(2) : "0.00"}{" "}
+                      {/* სელერისთვის მხოლოდ პროდუქტების ფასი (მიტანის გარეშე) */}
+                      {userRole === "seller"
+                        ? getSellerItemsTotal(order).toFixed(2)
+                        : order.totalPrice
+                          ? order.totalPrice.toFixed(2)
+                          : "0.00"}{" "}
                       ₾
                       {(order as any).hasReferralDiscount && (
                         <span

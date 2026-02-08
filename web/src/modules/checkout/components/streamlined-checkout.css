@@ -359,6 +359,23 @@
   color: #007bff;
 }
 
+/* Tbilisi Free Delivery Note */
+.tbilisi-free-note {
+  font-size: 0.85rem;
+  color: #0891b2;
+  background: #ecfeff;
+  border-left: 3px solid #06b6d4;
+  padding: 0.5rem 0.75rem;
+  margin-top: 0.5rem;
+  border-radius: 0 6px 6px 0;
+}
+
+[data-theme="dark"] .tbilisi-free-note {
+  background: rgba(6, 182, 212, 0.1);
+  color: #67e8f9;
+  border-left-color: #22d3ee;
+}
+
 /* Savings Banner */
 .savings-banner {
   display: flex;

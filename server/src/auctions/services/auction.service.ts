@@ -7,6 +7,7 @@ import {
   Inject,
   forwardRef,
 } from '@nestjs/common';
+import { ModuleRef } from '@nestjs/core';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import {
@@ -51,6 +52,7 @@ export class AuctionService {
     @Inject(forwardRef(() => AuctionAdminService))
     private auctionAdminService: AuctionAdminService,
     private pushNotificationService: PushNotificationService,
+    private moduleRef: ModuleRef,
   ) {
     this.baseUrl = process.env.FRONTEND_URL || 'https://soulart.ge';
   }
@@ -612,7 +614,10 @@ export class AuctionService {
       // Get seller name
       const seller = await this.userModel.findById(auction.seller);
       const sellerName = seller
-        ? seller.storeName || `${seller.firstName} ${seller.lastName}`
+        ? seller.storeName ||
+          `${seller.ownerFirstName || ''} ${seller.ownerLastName || ''}`.trim() ||
+          seller.name ||
+          'უცნობი მხატვარი'
         : 'უცნობი მხატვარი';
 
       // Format dates
@@ -1223,7 +1228,7 @@ export class AuctionService {
     auction.endedAt = new Date();
 
     if (auction.currentWinner && auction.bids.length > 0) {
-      // Calculate payment deadline (2 working days)
+      // Calculate payment deadline (24 hours)
       const paymentDeadline = this.calculatePaymentDeadline();
       auction.paymentDeadline = paymentDeadline;
 
@@ -1408,7 +1413,10 @@ export class AuctionService {
       // Get seller info
       const seller = await this.userModel.findById(auction.seller);
       const sellerName = seller
-        ? seller.storeName || `${seller.firstName} ${seller.lastName}`
+        ? seller.storeName ||
+          `${seller.ownerFirstName || ''} ${seller.ownerLastName || ''}`.trim() ||
+          seller.name ||
+          'უცნობი'
         : 'უცნობი';
 
       // Get winner info
@@ -1416,7 +1424,10 @@ export class AuctionService {
       if (auction.currentWinner) {
         const winner = await this.userModel.findById(auction.currentWinner);
         if (winner) {
-          winnerName = `${winner.firstName} ${winner.lastName}`;
+          winnerName =
+            `${winner.ownerFirstName || ''} ${winner.ownerLastName || ''}`.trim() ||
+            winner.name ||
+            'უცნობი';
 
           // Notify winner
           await this.emailService.sendAuctionWinnerNotification(
@@ -1803,12 +1814,24 @@ export class AuctionService {
       throw new BadRequestException('Auction is already paid');
     }
 
+    // Calculate delivery fee based on deliveryType
+    let deliveryFee = 0;
+    if (auction.deliveryType === 'SOULART') {
+      // SoulArt delivery: 5% of price, min 15₾, max 50₾
+      const fivePercent = auction.currentPrice * 0.05;
+      deliveryFee = Math.max(15, Math.min(50, fivePercent));
+      deliveryFee = Math.round(deliveryFee * 100) / 100;
+    }
+    // ARTIST delivery: free for buyer (0₾)
+
     return {
       auctionId: auction._id,
       title: auction.title,
       mainImage: auction.mainImage,
       winningBid: auction.currentPrice,
-      deliveryFees: DELIVERY_FEES,
+      deliveryType: auction.deliveryType,
+      deliveryFee,
+      totalPayment: auction.currentPrice + deliveryFee,
       paymentDeadline: auction.paymentDeadline,
       timeRemaining: auction.paymentDeadline
         ? Math.max(0, auction.paymentDeadline.getTime() - Date.now())
@@ -1839,8 +1862,16 @@ export class AuctionService {
       throw new BadRequestException('Auction is already paid');
     }
 
-    // Calculate delivery fee
-    const deliveryFee = DELIVERY_FEES[paymentDto.deliveryZone];
+    // Calculate delivery fee based on deliveryType
+    let deliveryFee = 0;
+    if (auction.deliveryType === 'SOULART') {
+      // SoulArt delivery: 5% of price, min 15₾, max 50₾
+      const fivePercent = auction.currentPrice * 0.05;
+      deliveryFee = Math.max(15, Math.min(50, fivePercent));
+      deliveryFee = Math.round(deliveryFee * 100) / 100; // Round to 2 decimals
+    }
+    // ARTIST delivery: free for buyer (0₾)
+
     const totalPayment = auction.currentPrice + deliveryFee;
 
     // Update auction with payment info
@@ -1974,7 +2005,16 @@ export class AuctionService {
       throw new BadRequestException('Auction is already paid');
     }
 
-    const deliveryFee = DELIVERY_FEES[deliveryZone];
+    // Calculate delivery fee based on deliveryType
+    let deliveryFee = 0;
+    if (auction.deliveryType === 'SOULART') {
+      // SoulArt delivery: 5% of price, min 15₾, max 50₾
+      const fivePercent = auction.currentPrice * 0.05;
+      deliveryFee = Math.max(15, Math.min(50, fivePercent));
+      deliveryFee = Math.round(deliveryFee * 100) / 100; // Round to 2 decimals
+    }
+    // ARTIST delivery: free for buyer (0₾)
+
     const totalPayment = auction.currentPrice + deliveryFee;
 
     // Generate unique external order ID
@@ -2130,7 +2170,7 @@ export class AuctionService {
     return this.auctionModel.findOne({ externalOrderId });
   }
 
-  // Verify BOG payment status for auction
+  // Verify BOG payment status for auction and update if paid
   async verifyBogPayment(auctionId: string, userId: string) {
     const auction = await this.auctionModel.findById(auctionId);
     if (!auction) {
@@ -2139,6 +2179,57 @@ export class AuctionService {
 
     if (auction.currentWinner?.toString() !== userId) {
       throw new ForbiddenException('You are not the winner of this auction');
+    }
+
+    // If already marked as paid, just return the status
+    if (auction.isPaid) {
+      return {
+        auctionId: auction._id.toString(),
+        isPaid: true,
+        bogOrderId: auction.bogOrderId,
+        externalOrderId: auction.externalOrderId,
+        paymentResult: auction.paymentResult,
+      };
+    }
+
+    // If we have a bogOrderId, check payment status from BOG API
+    if (auction.bogOrderId) {
+      try {
+        const paymentsService = await this.moduleRef.get('PaymentsService', {
+          strict: false,
+        });
+        const paymentStatus = await paymentsService.getPaymentStatus(
+          auction.bogOrderId,
+        );
+
+        const statusKey = paymentStatus?.order_status?.key?.toLowerCase() || '';
+        const isPaymentSuccessful = statusKey === 'completed';
+
+        if (isPaymentSuccessful && !auction.isPaid) {
+          // Update auction as paid
+          await this.handleBogPaymentCallback(
+            auction.externalOrderId,
+            'completed',
+            auction.bogOrderId,
+          );
+
+          this.logger.log(
+            `Auction ${auctionId} payment verified and updated to paid via BOG API check`,
+          );
+
+          return {
+            auctionId: auction._id.toString(),
+            isPaid: true,
+            bogOrderId: auction.bogOrderId,
+            externalOrderId: auction.externalOrderId,
+            paymentResult: { status: 'COMPLETED' },
+          };
+        }
+      } catch (error) {
+        this.logger.warn(
+          `Failed to verify payment status from BOG API for auction ${auctionId}: ${error.message}`,
+        );
+      }
     }
 
     return {

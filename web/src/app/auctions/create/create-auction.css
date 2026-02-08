@@ -482,6 +482,138 @@
   line-height: 1.3;
 }
 
+/* Inline delivery info (inside card) */
+.auction-create-page .create-auction-form .delivery-info-inline {
+  margin-top: 8px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.auction-create-page .create-auction-form .delivery-info-inline.soulart-info {
+  background: rgba(14, 165, 233, 0.15);
+  color: #7dd3fc;
+  border: 1px solid rgba(14, 165, 233, 0.3);
+}
+
+.auction-create-page .create-auction-form .delivery-info-inline.artist-info {
+  background: rgba(245, 158, 11, 0.15);
+  color: #fcd34d;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+/* Delivery Info Boxes */
+.auction-create-page .create-auction-form .delivery-info-box {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  margin-top: 12px;
+  margin-bottom: 0;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.auction-create-page .create-auction-form .delivery-info-box .info-icon {
+  font-size: 1.25rem;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.auction-create-page .create-auction-form .delivery-info-box .info-text {
+  font-size: 0.85rem;
+  line-height: 1.5;
+  flex: 1;
+  min-width: 0;
+}
+
+.auction-create-page .create-auction-form .delivery-info-box .info-text strong {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 0.9rem;
+  word-wrap: break-word;
+}
+
+.auction-create-page .create-auction-form .delivery-info-box .info-details {
+  font-size: 0.8rem;
+  opacity: 0.85;
+  display: block;
+  word-wrap: break-word;
+}
+
+.auction-create-page .create-auction-form .soulart-delivery-info {
+  background: linear-gradient(
+    135deg,
+    rgba(14, 165, 233, 0.15) 0%,
+    rgba(14, 165, 233, 0.08) 100%
+  );
+  border: 1px solid rgba(14, 165, 233, 0.35);
+}
+
+.auction-create-page
+  .create-auction-form
+  .soulart-delivery-info
+  .info-text
+  strong {
+  color: #7dd3fc;
+}
+
+.auction-create-page .create-auction-form .soulart-delivery-info .info-details {
+  color: rgba(125, 211, 252, 0.8);
+}
+
+.auction-create-page .create-auction-form .artist-delivery-info {
+  background: linear-gradient(
+    135deg,
+    rgba(245, 158, 11, 0.15) 0%,
+    rgba(245, 158, 11, 0.08) 100%
+  );
+  border: 1px solid rgba(245, 158, 11, 0.35);
+}
+
+.auction-create-page
+  .create-auction-form
+  .artist-delivery-info
+  .info-text
+  strong {
+  color: #fcd34d;
+}
+
+.auction-create-page .create-auction-form .artist-delivery-info .info-details {
+  color: rgba(252, 211, 77, 0.8);
+}
+
+/* Responsive delivery info box */
+@media (max-width: 480px) {
+  .auction-create-page .create-auction-form .delivery-info-box {
+    padding: 12px;
+    gap: 10px;
+  }
+
+  .auction-create-page .create-auction-form .delivery-info-box .info-icon {
+    font-size: 1.1rem;
+  }
+
+  .auction-create-page .create-auction-form .delivery-info-box .info-text {
+    font-size: 0.8rem;
+  }
+
+  .auction-create-page
+    .create-auction-form
+    .delivery-info-box
+    .info-text
+    strong {
+    font-size: 0.85rem;
+  }
+
+  .auction-create-page .create-auction-form .delivery-info-box .info-details {
+    font-size: 0.75rem;
+  }
+}
+
 /* Artist Delivery Fields - Compact */
 .auction-create-page .create-auction-form .artist-delivery-fields {
   margin-top: 10px;
@@ -838,6 +970,47 @@
   background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
   color: #ffffff;
   box-shadow: 0 4px 16px rgba(59, 130, 246, 0.3);
+}
+
+/* Light Theme Delivery Info Boxes */
+.auction-create-page.light-theme .create-auction-form .soulart-delivery-info {
+  background: linear-gradient(135deg, #e0f2fe 0%, #f0f9ff 100%);
+  border-color: #7dd3fc;
+}
+
+.auction-create-page.light-theme
+  .create-auction-form
+  .soulart-delivery-info
+  .info-text
+  strong {
+  color: #0369a1;
+}
+
+.auction-create-page.light-theme
+  .create-auction-form
+  .soulart-delivery-info
+  .info-details {
+  color: #475569;
+}
+
+.auction-create-page.light-theme .create-auction-form .artist-delivery-info {
+  background: linear-gradient(135deg, #fef3c7 0%, #fffbeb 100%);
+  border-color: #fcd34d;
+}
+
+.auction-create-page.light-theme
+  .create-auction-form
+  .artist-delivery-info
+  .info-text
+  strong {
+  color: #b45309;
+}
+
+.auction-create-page.light-theme
+  .create-auction-form
+  .artist-delivery-info
+  .info-details {
+  color: #78350f;
 }
 
 .auction-create-page.light-theme

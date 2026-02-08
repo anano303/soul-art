@@ -3,12 +3,18 @@
 import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { apiClient } from "@/lib/axios";
 import { useLanguage } from "@/hooks/LanguageContext";
 import { useUser } from "@/modules/auth/hooks/use-user";
 import { toast } from "react-hot-toast";
-import { Trophy, CreditCard, CheckCircle, Clock, ExternalLink } from "lucide-react";
+import {
+  Trophy,
+  CreditCard,
+  CheckCircle,
+  Clock,
+  ExternalLink,
+} from "lucide-react";
 import "./won-auctions.css";
 
 interface WonAuction {
@@ -33,6 +39,7 @@ interface WonAuction {
 export default function WonAuctionsPage() {
   const { language } = useLanguage();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { user, isLoading } = useUser();
   const [auctions, setAuctions] = useState<WonAuction[]>([]);
   const [loading, setLoading] = useState(true);
@@ -40,14 +47,16 @@ export default function WonAuctionsPage() {
   const fetchWonAuctions = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await apiClient.get<WonAuction[]>("/auctions/my-wins/all");
+      const response = await apiClient.get<WonAuction[]>(
+        "/auctions/my-wins/all",
+      );
       setAuctions(response.data || []);
     } catch (error: unknown) {
       console.error("Failed to load won auctions", error);
       toast.error(
         language === "en"
           ? "Failed to load won auctions"
-          : "მოგებული აუქციონების ჩატვირთვა ვერ მოხერხდა"
+          : "მოგებული აუქციონების ჩატვირთვა ვერ მოხერხდა",
       );
     } finally {
       setLoading(false);
@@ -60,9 +69,24 @@ export default function WonAuctionsPage() {
     }
   }, [isLoading, user, fetchWonAuctions]);
 
+  // Show success toast if redirected from payment success
+  useEffect(() => {
+    const paidAuctionId = searchParams?.get("paid");
+    if (paidAuctionId) {
+      toast.success(
+        language === "en"
+          ? "Payment completed successfully!"
+          : "გადახდა წარმატებით დასრულდა!",
+      );
+      // Remove the query param from URL without refreshing
+      router.replace("/profile/won-auctions", { scroll: false });
+    }
+  }, [searchParams, language, router]);
+
   const getSellerName = (auction: WonAuction) => {
     const seller = auction.seller;
-    if (!seller) return language === "en" ? "Unknown Artist" : "უცნობი ხელოვანი";
+    if (!seller)
+      return language === "en" ? "Unknown Artist" : "უცნობი ხელოვანი";
     if (seller.storeName) return seller.storeName;
     if (seller.ownerFirstName && seller.ownerLastName) {
       return `${seller.ownerFirstName} ${seller.ownerLastName}`;
@@ -86,8 +110,11 @@ export default function WonAuctionsPage() {
       deliveryDaysMin: auction.deliveryDaysMin,
       deliveryDaysMax: auction.deliveryDaysMax,
     };
-    sessionStorage.setItem("auction_checkout_item", JSON.stringify(auctionCheckoutItem));
-    
+    sessionStorage.setItem(
+      "auction_checkout_item",
+      JSON.stringify(auctionCheckoutItem),
+    );
+
     // Redirect to streamlined checkout with auction param
     router.push(`/checkout/streamlined?auction=${auction._id}`);
   };
@@ -98,8 +125,18 @@ export default function WonAuctionsPage() {
     const date = new Date(dateString);
     if (language === "ge") {
       const monthsGe = [
-        "იანვარი", "თებერვალი", "მარტი", "აპრილი", "მაისი", "ივნისი",
-        "ივლისი", "აგვისტო", "სექტემბერი", "ოქტომბერი", "ნოემბერი", "დეკემბერი"
+        "იანვარი",
+        "თებერვალი",
+        "მარტი",
+        "აპრილი",
+        "მაისი",
+        "ივნისი",
+        "ივლისი",
+        "აგვისტო",
+        "სექტემბერი",
+        "ოქტომბერი",
+        "ნოემბერი",
+        "დეკემბერი",
       ];
       return `${date.getDate()} ${monthsGe[date.getMonth()]}, ${date.getFullYear()}`;
     }
@@ -110,8 +147,8 @@ export default function WonAuctionsPage() {
     });
   };
 
-  const pendingAuctions = auctions.filter(a => !a.isPaid);
-  const paidAuctions = auctions.filter(a => a.isPaid);
+  const pendingAuctions = auctions.filter((a) => !a.isPaid);
+  const paidAuctions = auctions.filter((a) => a.isPaid);
 
   if (loading) {
     return (
@@ -135,7 +172,7 @@ export default function WonAuctionsPage() {
             {language === "en" ? "Won Auctions" : "მოგებული აუქციონები"}
           </h1>
           <p className="won-auctions-subtitle">
-            {language === "en" 
+            {language === "en"
               ? "View all auctions you've won and manage payments"
               : "ნახეთ ყველა მოგებული აუქციონი და მართეთ გადახდები"}
           </p>
@@ -145,7 +182,11 @@ export default function WonAuctionsPage() {
       {auctions.length === 0 ? (
         <div className="empty-state">
           <Trophy size={64} className="empty-icon" />
-          <h3>{language === "en" ? "No won auctions yet" : "ჯერ არ გაქვთ მოგებული აუქციონი"}</h3>
+          <h3>
+            {language === "en"
+              ? "No won auctions yet"
+              : "ჯერ არ გაქვთ მოგებული აუქციონი"}
+          </h3>
           <p>
             {language === "en"
               ? "When you win an auction, it will appear here"
@@ -179,18 +220,27 @@ export default function WonAuctionsPage() {
                       />
                       <div className="status-badge pending">
                         <Clock size={14} />
-                        <span>{language === "en" ? "Awaiting Payment" : "გადახდის მოლოდინში"}</span>
+                        <span>
+                          {language === "en"
+                            ? "Awaiting Payment"
+                            : "გადახდის მოლოდინში"}
+                        </span>
                       </div>
                     </div>
                     <div className="auction-details">
                       <h3 className="auction-title">{auction.title}</h3>
                       <p className="seller-name">{getSellerName(auction)}</p>
                       <div className="price-row">
-                        <span className="label">{language === "en" ? "Won for:" : "მოიგეთ:"}</span>
-                        <span className="price">{formatPrice(auction.currentPrice)}</span>
+                        <span className="label">
+                          {language === "en" ? "Won for:" : "მოიგეთ:"}
+                        </span>
+                        <span className="price">
+                          {formatPrice(auction.currentPrice)}
+                        </span>
                       </div>
                       <p className="date">
-                        {language === "en" ? "Ended:" : "დასრულდა:"} {formatDate(auction.endedAt || auction.endDate)}
+                        {language === "en" ? "Ended:" : "დასრულდა:"}{" "}
+                        {formatDate(auction.endedAt || auction.endDate)}
                       </p>
                       <button
                         onClick={() => handlePayment(auction)}
@@ -235,15 +285,25 @@ export default function WonAuctionsPage() {
                       <h3 className="auction-title">{auction.title}</h3>
                       <p className="seller-name">{getSellerName(auction)}</p>
                       <div className="price-row">
-                        <span className="label">{language === "en" ? "Won for:" : "მოიგეთ:"}</span>
-                        <span className="price">{formatPrice(auction.currentPrice)}</span>
+                        <span className="label">
+                          {language === "en" ? "Won for:" : "მოიგეთ:"}
+                        </span>
+                        <span className="price">
+                          {formatPrice(auction.currentPrice)}
+                        </span>
                       </div>
                       <p className="date">
-                        {language === "en" ? "Ended:" : "დასრულდა:"} {formatDate(auction.endedAt || auction.endDate)}
+                        {language === "en" ? "Ended:" : "დასრულდა:"}{" "}
+                        {formatDate(auction.endedAt || auction.endDate)}
                       </p>
-                      <Link href={`/auctions/${auction._id}`} className="view-btn">
+                      <Link
+                        href={`/auctions/${auction._id}`}
+                        className="view-btn"
+                      >
                         <ExternalLink size={16} />
-                        <span>{language === "en" ? "View Details" : "დეტალები"}</span>
+                        <span>
+                          {language === "en" ? "View Details" : "დეტალები"}
+                        </span>
                       </Link>
                     </div>
                   </div>

@@ -52,7 +52,8 @@ export class AuctionComment {
   userAvatar?: string; // Cache user avatar
 }
 
-export const AuctionCommentSchema = SchemaFactory.createForClass(AuctionComment);
+export const AuctionCommentSchema =
+  SchemaFactory.createForClass(AuctionComment);
 
 @Schema({ timestamps: true })
 export class Auction {
@@ -150,7 +151,7 @@ export class Auction {
   isPaid: boolean;
 
   @Prop()
-  paymentDeadline: Date; // 2 working days after auction ends
+  paymentDeadline: Date; // 24 საათი გადახდისთვის
 
   @Prop()
   paymentDate: Date;

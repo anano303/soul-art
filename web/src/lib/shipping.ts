@@ -58,14 +58,26 @@ export function getShippingRate(countryCode: string): ShippingRate | null {
   return shippingRates.find((rate) => rate.countryCode === countryCode) || null;
 }
 
-export function calculateShipping(countryCode: string): number {
+// Georgia domestic shipping: Tbilisi = 0₾, Region = 18₾
+export function calculateDomesticShipping(city: string = ""): number {
+  const cityLower = city.toLowerCase();
+  const isTbilisi =
+    cityLower.includes("tbilisi") || cityLower.includes("თბილისი");
+  return isTbilisi ? 0 : 18;
+}
+
+export function calculateShipping(countryCode: string, city?: string): number {
+  if (countryCode === "GE") {
+    // For Georgia, use city-based calculation
+    return calculateDomesticShipping(city || "");
+  }
   const rate = getShippingRate(countryCode);
   return rate ? rate.cost : 0;
 }
 
 export function formatShippingCost(
   countryCode: string,
-  showBothCurrencies: boolean = false
+  showBothCurrencies: boolean = false,
 ): string {
   const rate = getShippingRate(countryCode);
 

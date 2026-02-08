@@ -24,16 +24,19 @@ function CheckoutSuccessContent() {
   const { user } = useAuth();
   const { guestInfo, clearCheckout } = useCheckout();
   const [orderId, setOrderId] = useState<string | null>(null);
+  const [auctionId, setAuctionId] = useState<string | null>(null);
   const [guestEmail, setGuestEmail] = useState<string | null>(null);
   const [orderSummary, setOrderSummary] = useState<StoredOrderSummary | null>(
-    null
+    null,
   );
   const hasTrackedPurchaseRef = useRef(false);
 
   useEffect(() => {
     if (searchParams) {
       const orderIdParam = searchParams.get("orderId");
+      const auctionIdParam = searchParams.get("auctionId");
       setOrderId(orderIdParam);
+      setAuctionId(auctionIdParam);
 
       if (orderIdParam) {
         try {
@@ -95,13 +98,33 @@ function CheckoutSuccessContent() {
               {
                 method: "POST",
                 credentials: "include",
-              }
+              },
             );
           } catch (error) {
             console.error("Failed to verify payment:", error);
           }
         };
         verifyPayment();
+      }
+
+      // Verify auction payment status with backend
+      if (auctionIdParam) {
+        const verifyAuctionPayment = async () => {
+          try {
+            await fetch(
+              `${
+                process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"
+              }/auctions/${auctionIdParam}/bog/verify`,
+              {
+                method: "GET",
+                credentials: "include",
+              },
+            );
+          } catch (error) {
+            console.error("Failed to verify auction payment:", error);
+          }
+        };
+        verifyAuctionPayment();
       }
 
       // Clear checkout context after successful payment
@@ -129,7 +152,7 @@ function CheckoutSuccessContent() {
     if (!orderId) return;
 
     const salesTracked = sessionStorage.getItem(
-      `sales_purchase_tracked_${orderId}`
+      `sales_purchase_tracked_${orderId}`,
     );
     if (salesTracked) return;
 
@@ -167,14 +190,14 @@ function CheckoutSuccessContent() {
       trackPurchase(
         orderSummary.totalPrice ?? 0,
         orderSummary.currency || "GEL",
-        orderId
+        orderId,
       );
 
       // Track in GA4 as well
       trackPurchaseComplete(
         orderId,
         orderSummary.totalPrice ?? 0,
-        orderSummary.items || []
+        orderSummary.items || [],
       );
 
       // Track Google Ads purchase conversion (Enhanced)
@@ -224,10 +247,27 @@ function CheckoutSuccessContent() {
             </div>
           )}
 
+          {auctionId && !orderId && (
+            <div className="order-info">
+              <p className="order-info-text">
+                <span className="order-info-label">
+                  {t("payment.success.auctionId")}
+                </span>{" "}
+                {auctionId}
+              </p>
+            </div>
+          )}
+
           <div className="buttons-container">
-            <Link href={`/orders/${orderId}`} className="btn-primary">
-              {t("payment.success.viewOrderDetails")}
-            </Link>
+            {orderId ? (
+              <Link href={`/orders/${orderId}`} className="btn-primary">
+                {t("payment.success.viewOrderDetails")}
+              </Link>
+            ) : auctionId ? (
+              <Link href="/profile/won-auctions" className="btn-primary">
+                {t("payment.success.viewPurchases")}
+              </Link>
+            ) : null}
 
             <Link href="/shop" className="btn-secondary">
               {t("payment.success.viewOtherProducts")}

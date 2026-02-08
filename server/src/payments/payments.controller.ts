@@ -219,8 +219,8 @@ export class PaymentsController {
         artworkPrice: data.artworkPrice,
         deliveryFee: data.deliveryFee,
         totalPayment: data.totalPayment,
-        successUrl: `https://soulart.ge/auctions/${data.auctionId}?paid=true`,
-        failUrl: `https://soulart.ge/checkout/auction/${data.auctionId}?error=payment_failed`,
+        successUrl: `https://soulart.ge/checkout/success?auctionId=${data.auctionId}`,
+        failUrl: `https://soulart.ge/checkout/fail?auctionId=${data.auctionId}`,
       });
 
       return result;

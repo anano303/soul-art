@@ -497,6 +497,11 @@ export const TRANSLATIONS: Translations = {
       loginError: "ავტორიზაციის შეცდომა",
     },
 
+    // Common
+    common: {
+      back: "უკან",
+    },
+
     // Cart & Checkout
     cart: {
       yourCart: "თქვენი კალათა",
@@ -509,6 +514,7 @@ export const TRANSLATIONS: Translations = {
       freeShipping: "უფასო მიწოდება",
       shippingCost: "მიწოდების ღირებულება",
       shippingNotSupported: "ამ ქვეყანაში მიწოდება არ ხორციელდება",
+      tbilisiFreeNote: "💡 თბილისში მიწოდება უფასოა",
       free: "უფასო",
       commission: "საკომისიო",
       totalCost: "სრული ღირებულება",
@@ -749,7 +755,8 @@ export const TRANSLATIONS: Translations = {
       guestBidding: "სტუმარი",
       bidNow: "დადე ფსონი",
       loginRequiredAfterBid: "ფსონის დასადებად საჭიროა ავტორიზაცია",
-      preBidNotice: "აუქციონი ჯერ არ დაწყებულა. შეგიძლიათ წინასწარი ფსონი განათავსოთ!",
+      preBidNotice:
+        "აუქციონი ჯერ არ დაწყებულა. შეგიძლიათ წინასწარი ფსონი განათავსოთ!",
       // Related auctions
       relatedAuctions: "სხვა აუქციონები",
       viewAll: "ყველას ნახვა",
@@ -1059,7 +1066,9 @@ export const TRANSLATIONS: Translations = {
         title: "გადახდა წარმატებით დასრულდა!",
         thanksForPurchase: "მადლობა შეძენისთვის !",
         orderNumber: "შეკვეთის ნომერი:",
+        auctionId: "აუქციონის ID:",
         viewOrderDetails: "შეკვეთის დეტალების ნახვა",
+        viewPurchases: "შენაძენების ნახვა",
         viewOtherProducts: "სხვა პროდუქტების ნახვა",
         guestPrompt:
           "შექმენით ანგარიში თქვენი შეკვეთის თვალთვალის გასაადვილებლად",
@@ -2423,6 +2432,11 @@ export const TRANSLATIONS: Translations = {
       loginError: "Login error",
     },
 
+    // Common
+    common: {
+      back: "Back",
+    },
+
     // Cart & Checkout
     cart: {
       yourCart: "Your Cart",
@@ -2435,6 +2449,7 @@ export const TRANSLATIONS: Translations = {
       freeShipping: "Free Shipping",
       shippingCost: "Shipping Cost",
       shippingNotSupported: "Shipping not available to this country",
+      tbilisiFreeNote: "💡 Free delivery in Tbilisi",
       free: "Free",
       commission: "Fee",
       totalCost: "Total",
@@ -2980,7 +2995,9 @@ export const TRANSLATIONS: Translations = {
         title: "Payment Completed Successfully!",
         thanksForPurchase: "Thank you for your purchase!",
         orderNumber: "Order Number:",
+        auctionId: "Auction ID:",
         viewOrderDetails: "View Order Details",
+        viewPurchases: "View Purchases",
         viewOtherProducts: "View Other Products",
         guestPrompt: "Create an account to easily track your orders",
         createAccount: "Create Account",

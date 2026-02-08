@@ -817,22 +817,83 @@
 }
 
 @media (max-width: 480px) {
+  .auction-admin-container {
+    padding: 16px 12px;
+  }
+
   .auction-admin-header h1 {
-    font-size: 1.5rem;
+    font-size: 1.35rem;
+    margin-bottom: 8px;
+  }
+
+  .auction-admin-header p {
+    font-size: 0.9rem;
+  }
+
+  .admin-tabs {
+    padding: 3px;
+    gap: 3px;
+    border-radius: 12px;
   }
 
   .tab-button {
-    padding: 10px 14px;
-    font-size: 0.85rem;
+    padding: 8px 12px;
+    font-size: 0.8rem;
+    gap: 6px;
+    border-radius: 8px;
+  }
+
+  .tab-button svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  .stat-card {
+    padding: 14px;
+    border-radius: 12px;
   }
 
   .stat-icon {
-    width: 48px;
-    height: 48px;
+    width: 40px;
+    height: 40px;
+  }
+
+  .stat-icon svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .stat-value {
+    font-size: 1.25rem;
+  }
+
+  .stat-label {
+    font-size: 0.75rem;
   }
 
   .balance-value {
-    font-size: 1.2rem;
+    font-size: 1.1rem;
+  }
+
+  .profile-form-card,
+  .withdrawal-form-card {
+    padding: 16px;
+    border-radius: 12px;
+  }
+
+  .commission-info-card {
+    padding: 14px 16px;
+    border-radius: 10px;
+  }
+
+  .data-table th,
+  .data-table td {
+    padding: 10px 12px;
+    font-size: 0.75rem;
+  }
+
+  .table-container {
+    padding: 12px;
   }
 }
 

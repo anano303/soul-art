@@ -220,6 +220,7 @@ export function CreateAuctionForm({
   const [uploadError, setUploadError] = useState<string | null>(null);
 
   const isAdmin = mode === "admin" || mode === "auction_admin";
+  const isMainAdmin = mode === "admin"; // მთავარ ადმინს შეუზღუდავი თარიღი აქვს
   const isSeller = mode === "seller";
   const isReschedule = variant === "reschedule";
   const canChangeSeller = isAdmin && variant === "create" && !lockedSellerId;
@@ -1209,7 +1210,7 @@ export function CreateAuctionForm({
               <input
                 id="auction-start-date"
                 type="date"
-                min={todayDate}
+                min={isMainAdmin ? undefined : todayDate}
                 value={formState.startDate}
                 onChange={(event) =>
                   handleInputChange("startDate", event.target.value)
@@ -1246,7 +1247,7 @@ export function CreateAuctionForm({
               <input
                 id="auction-end-date"
                 type="date"
-                min={formState.startDate || todayDate}
+                min={isMainAdmin ? undefined : formState.startDate || todayDate}
                 value={formState.endDate}
                 onChange={(event) =>
                   handleInputChange("endDate", event.target.value)
@@ -1312,6 +1313,11 @@ export function CreateAuctionForm({
                     {t("auctionForm.deliveryType.soulartDesc") ||
                       "სწრაფი მიწოდება 1-3 სამუშაო დღეში"}
                   </div>
+                  {formState.deliveryType === "soulart" && (
+                    <div className="delivery-info-inline soulart-info">
+                      ✓ მიწოდება 1-3 სამუშაო დღეში მთელი საქართველოს მასშტაბით
+                    </div>
+                  )}
                 </div>
               </div>
             </label>
@@ -1338,10 +1344,42 @@ export function CreateAuctionForm({
                     {t("auctionForm.deliveryType.artistDesc") ||
                       "მიუთითეთ თქვენი მიწოდების ვადა"}
                   </div>
+                  {formState.deliveryType === "artist" && (
+                    <div className="delivery-info-inline artist-info">
+                      ✓ მიტანა თქვენი მოვალეობაა, მინოდების ვადა
+                    </div>
+                  )}
                 </div>
               </div>
             </label>
           </div>
+
+          {/* Delivery info message - shown below selector */}
+          {formState.deliveryType === "soulart" && (
+            <div className="delivery-info-box soulart-delivery-info">
+              <div className="info-icon">💡</div>
+              <div className="info-text">
+                <strong>მიტანის სერვისს ემატება გაყიდულის 5%</strong>
+                <span className="info-details">
+                  მინიმუმ 15₾, მაქსიმუმ 50₾. გთხოვთ საწყისს ფასში გაითვალისწინოთ
+                  ეს თანხაც.
+                </span>
+              </div>
+            </div>
+          )}
+          {formState.deliveryType === "artist" && (
+            <div className="delivery-info-box artist-delivery-info">
+              <div className="info-icon">⚠️</div>
+              <div className="info-text">
+                <strong>
+                  გთხოვთ საწყისს ფასში გაითვალისწინოთ მიტანის ღირებულებაც!
+                </strong>
+                <span className="info-details">
+                  მყიდველისთვის მიტანა უნდა იყოს უფასო.
+                </span>
+              </div>
+            </div>
+          )}
 
           {/* Artist Delivery Details - only shown when artist delivery selected */}
           {formState.deliveryType === "artist" && (

@@ -414,10 +414,10 @@ export class PaymentsService {
         redirect_urls: {
           success:
             data.successUrl ||
-            `https://soulart.ge/auctions/${data.auctionId}?paid=true`,
+            `https://soulart.ge/checkout/success?auctionId=${data.auctionId}`,
           fail:
             data.failUrl ||
-            `https://soulart.ge/checkout/auction/${data.auctionId}?error=payment_failed`,
+            `https://soulart.ge/checkout/fail?auctionId=${data.auctionId}`,
         },
       };
 
