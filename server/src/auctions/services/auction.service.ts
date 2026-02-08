@@ -1814,15 +1814,11 @@ export class AuctionService {
       throw new BadRequestException('Auction is already paid');
     }
 
-    // Calculate delivery fee based on deliveryType
-    let deliveryFee = 0;
-    if (auction.deliveryType === 'SOULART') {
-      // SoulArt delivery: 5% of price, min 15₾, max 50₾
-      const fivePercent = auction.currentPrice * 0.05;
-      deliveryFee = Math.max(15, Math.min(50, fivePercent));
-      deliveryFee = Math.round(deliveryFee * 100) / 100;
-    }
+    // Delivery fee for buyer:
+    // SoulArt delivery: Tbilisi = 0₾, Region = 18₾ (determined at checkout)
     // ARTIST delivery: free for buyer (0₾)
+    // Note: We can't calculate exact fee here without knowing the zone,
+    // so we return info about delivery type. Frontend will calculate based on zone.
 
     return {
       auctionId: auction._id,
@@ -1830,8 +1826,9 @@ export class AuctionService {
       mainImage: auction.mainImage,
       winningBid: auction.currentPrice,
       deliveryType: auction.deliveryType,
-      deliveryFee,
-      totalPayment: auction.currentPrice + deliveryFee,
+      // Don't include deliveryFee here - it depends on zone selected at checkout
+      tbilisiDeliveryFee: 0,
+      regionDeliveryFee: auction.deliveryType === 'SOULART' ? 18 : 0,
       paymentDeadline: auction.paymentDeadline,
       timeRemaining: auction.paymentDeadline
         ? Math.max(0, auction.paymentDeadline.getTime() - Date.now())
@@ -2005,15 +2002,13 @@ export class AuctionService {
       throw new BadRequestException('Auction is already paid');
     }
 
-    // Calculate delivery fee based on deliveryType
-    let deliveryFee = 0;
-    if (auction.deliveryType === 'SOULART') {
-      // SoulArt delivery: 5% of price, min 15₾, max 50₾
-      const fivePercent = auction.currentPrice * 0.05;
-      deliveryFee = Math.max(15, Math.min(50, fivePercent));
-      deliveryFee = Math.round(deliveryFee * 100) / 100; // Round to 2 decimals
-    }
+    // Calculate delivery fee for buyer based on delivery zone
+    // SoulArt delivery: Tbilisi = 0₾ (free), Region = 18₾
     // ARTIST delivery: free for buyer (0₾)
+    let deliveryFee = 0;
+    if (auction.deliveryType === 'SOULART' && deliveryZone === 'REGION') {
+      deliveryFee = 18; // Regional delivery fee paid by buyer
+    }
 
     const totalPayment = auction.currentPrice + deliveryFee;
 
