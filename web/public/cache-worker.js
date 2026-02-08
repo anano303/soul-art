@@ -98,7 +98,7 @@ self.addEventListener("fetch", (event) => {
         if (response) {
           // Check if cached response is still fresh
           const cacheTime = new Date(
-            response.headers.get("sw-cache-time") || 0
+            response.headers.get("sw-cache-time") || 0,
           );
           const now = new Date();
 
@@ -127,7 +127,7 @@ self.addEventListener("fetch", (event) => {
 
           return response;
         });
-      })
+      }),
     );
   }
 });

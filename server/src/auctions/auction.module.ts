@@ -27,6 +27,7 @@ import { UsersModule } from '../users/users.module';
 import { EmailModule } from '../email/email.module';
 import { AwsS3Module } from '../aws-s3/aws-s3.module';
 import { PaymentsModule } from '../payments/payments.module';
+import { PushNotificationModule } from '../push/push-notification.module';
 
 @Module({
   imports: [
@@ -46,6 +47,7 @@ import { PaymentsModule } from '../payments/payments.module';
     EmailModule,
     AwsS3Module,
     forwardRef(() => PaymentsModule), // For BOG payment integration
+    PushNotificationModule,
   ],
   controllers: [AuctionController, AuctionAdminController],
   providers: [AuctionService, AuctionAdminService],

@@ -30,6 +30,7 @@ import { BalanceService } from '../../users/services/balance.service';
 import { EmailService } from '../../email/services/email.services';
 import { AwsS3Service } from '../../aws-s3/aws-s3.service';
 import { AuctionAdminService } from './auction-admin.service';
+import { PushNotificationService } from '../../push/services/push-notification.service';
 import { Role } from '../../types/role.enum';
 import { randomUUID } from 'crypto';
 import { extname } from 'path';
@@ -38,6 +39,7 @@ import sharp from 'sharp';
 @Injectable()
 export class AuctionService {
   private readonly logger = new Logger(AuctionService.name);
+  private readonly baseUrl: string;
 
   constructor(
     @InjectModel(Auction.name) private auctionModel: Model<Auction>,
@@ -48,7 +50,10 @@ export class AuctionService {
     private readonly awsS3Service: AwsS3Service,
     @Inject(forwardRef(() => AuctionAdminService))
     private auctionAdminService: AuctionAdminService,
-  ) {}
+    private pushNotificationService: PushNotificationService,
+  ) {
+    this.baseUrl = process.env.FRONTEND_URL || 'https://soulart.ge';
+  }
 
   private combineToDateTime(date: string, time: string): Date {
     return new Date(`${date}T${time}:00.000+04:00`);
@@ -594,8 +599,58 @@ export class AuctionService {
 
     await auction.save();
 
+    // Send push notification to all users about new auction
+    await this.sendNewAuctionPushNotification(auction);
+
     this.logger.log(`Auction approved: ${auctionId} by admin: ${adminId}`);
     return auction;
+  }
+
+  // Send push notification when new auction is approved
+  private async sendNewAuctionPushNotification(auction: AuctionDocument) {
+    try {
+      // Get seller name
+      const seller = await this.userModel.findById(auction.seller);
+      const sellerName = seller
+        ? seller.storeName || `${seller.firstName} ${seller.lastName}`
+        : 'უცნობი მხატვარი';
+
+      // Format dates
+      const startDateStr = auction.startDate.toLocaleDateString('ka-GE', {
+        day: '2-digit',
+        month: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+      });
+      const endDateStr = auction.endDate.toLocaleDateString('ka-GE', {
+        day: '2-digit',
+        month: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+      });
+
+      const payload = {
+        title: '🔨 ახალი აუქციონი SoulArt-ზე!',
+        body: `${auction.title}\n💰 საწყისი ფასი: ${auction.startingPrice} ₾\n🎨 ${sellerName}\n📅 ${startDateStr} - ${endDateStr}`,
+        icon: auction.mainImage || `${this.baseUrl}/android-icon-192x192.png`,
+        badge: `${this.baseUrl}/notification-badge.png`,
+        data: {
+          type: 'new_auction' as const,
+          url: `/auctions/${auction._id}`,
+          id: auction._id.toString(),
+        },
+        tag: `new-auction-${auction._id}`,
+        requireInteraction: true,
+      };
+
+      // Send to all users (not admins-only notification)
+      const results = await this.pushNotificationService.sendToAll(payload);
+      this.logger.log(
+        `New auction push sent: ${results.successful} success, ${results.failed} failed`,
+      );
+    } catch (error) {
+      this.logger.error(`Failed to send new auction push: ${error}`);
+    }
   }
 
   // Admin: Cancel auction
@@ -918,7 +973,7 @@ export class AuctionService {
     const bids = auction.bids || [];
 
     if (bids.length <= 1) {
-      // No other bidders - relist the auction
+      // No other bidders - send notifications about auction failure
       this.logger.log(
         `No other bidders for auction ${auction._id}, needs manual relist`,
       );
@@ -926,6 +981,9 @@ export class AuctionService {
       auction.currentWinner = undefined;
       auction.currentPrice = auction.startingPrice;
       await auction.save();
+
+      // Notify all parties about auction failure
+      await this.sendAuctionFailureNotifications(auction, 'all_defaulted');
       return;
     }
 
@@ -946,6 +1004,9 @@ export class AuctionService {
       auction.currentWinner = undefined;
       auction.currentPrice = auction.startingPrice;
       await auction.save();
+
+      // Notify all parties about auction failure
+      await this.sendAuctionFailureNotifications(auction, 'all_defaulted');
       return;
     }
 
@@ -994,48 +1055,162 @@ export class AuctionService {
       }
     }
 
-    // Notify seller about new winner
+    // Get previous winner info for notifications
+    const previousWinner = await this.userModel.findById(previousWinnerId);
+    const previousWinnerName = previousWinner?.name || 'უცნობი';
+
+    // Get settings for commission calculation
+    const transferSettings = await this.auctionAdminService.getSettings();
+    const auctionAdminCommissionPercent =
+      transferSettings.auctionAdminCommissionPercent || 30;
+    const adminCommission =
+      (auction.currentPrice * auctionAdminCommissionPercent) / 100;
+
+    // Notify seller about transfer (previous winner defaulted)
     const seller = await this.userModel.findById(auction.seller);
     if (seller) {
       try {
-        await this.emailService.sendAuctionSellerNotification(
+        await this.emailService.sendAuctionTransferNotification(
           seller.email,
           auction.title,
+          previousWinnerName,
+          newWinner?.name || 'ახალი მყიდველი',
           auction.currentPrice,
           auction.sellerEarnings,
+          auction.paymentDeadline,
+          'seller',
           auction.mainImage,
-          auction.deliveryType,
         );
       } catch (error) {
-        this.logger.error(`Failed to notify seller about new winner: ${error}`);
+        this.logger.error(`Failed to notify seller about transfer: ${error}`);
       }
     }
 
-    // Notify auction admin about new winner
+    // Notify auction admin about transfer
     try {
-      const settings = await this.auctionAdminService.getSettings();
-      if (settings.auctionAdminUserId) {
+      if (transferSettings.auctionAdminUserId) {
         const auctionAdmin = await this.userModel.findById(
-          settings.auctionAdminUserId,
+          transferSettings.auctionAdminUserId,
         );
         if (auctionAdmin) {
-          const auctionAdminCommissionPercent =
-            settings.auctionAdminCommissionPercent || 30;
-          const adminCommission =
-            (auction.currentPrice * auctionAdminCommissionPercent) / 100;
-
-          await this.emailService.sendAuctionAdminNotification(
+          await this.emailService.sendAuctionTransferNotification(
             auctionAdmin.email,
             auction.title,
+            previousWinnerName,
+            newWinner?.name || 'ახალი მყიდველი',
             auction.currentPrice,
-            adminCommission,
+            auction.sellerEarnings,
+            auction.paymentDeadline,
+            'auctionAdmin',
             auction.mainImage,
+            adminCommission,
           );
         }
       }
     } catch (error) {
-      this.logger.error(`Failed to notify auction admin about new winner: ${error}`);
+      this.logger.error(
+        `Failed to notify auction admin about transfer: ${error}`,
+      );
     }
+
+    // Notify main admin about transfer
+    try {
+      const mainAdminEmail =
+        process.env.ADMIN_EMAIL || 'soulartgeorgia@gmail.com';
+      await this.emailService.sendAuctionTransferNotification(
+        mainAdminEmail,
+        auction.title,
+        previousWinnerName,
+        newWinner?.name || 'ახალი მყიდველი',
+        auction.currentPrice,
+        auction.sellerEarnings,
+        auction.paymentDeadline,
+        'mainAdmin',
+        auction.mainImage,
+      );
+    } catch (error) {
+      this.logger.error(`Failed to notify main admin about transfer: ${error}`);
+    }
+
+    // === PUSH NOTIFICATIONS for transfer ===
+    // Push to new winner
+    if (newWinner) {
+      const newWinnerPayload = {
+        title: '🎉 აუქციონი მოიგეთ!',
+        body: `"${auction.title}"\n💰 ფასი: ${auction.currentPrice} ₾\n⏰ გადახდის ვადა: 24 საათი`,
+        icon: auction.mainImage || `${this.baseUrl}/android-icon-192x192.png`,
+        badge: `${this.baseUrl}/notification-badge.png`,
+        data: {
+          type: 'auction_won' as const,
+          url: `/auctions/${auction._id}`,
+          id: auction._id.toString(),
+        },
+        tag: `auction-won-${auction._id}`,
+        requireInteraction: true,
+      };
+      await this.pushNotificationService.sendToUser(
+        nextBid.bidder.toString(),
+        newWinnerPayload,
+      );
+    }
+
+    // Push to seller (only their new earnings info)
+    if (seller) {
+      const sellerPayload = {
+        title: '🔄 აუქციონის მოგებული შეიცვალა',
+        body: `"${auction.title}"\n💰 ახალი შემოსავალი: ${auction.sellerEarnings} ₾\n⏰ ახალი ვადა: 24სთ`,
+        icon: auction.mainImage || `${this.baseUrl}/android-icon-192x192.png`,
+        badge: `${this.baseUrl}/notification-badge.png`,
+        data: {
+          type: 'auction_transferred' as const,
+          url: `/profile/balance`,
+          id: auction._id.toString(),
+        },
+        tag: `auction-transfer-seller-${auction._id}`,
+        requireInteraction: true,
+      };
+      await this.pushNotificationService.sendToUser(
+        auction.seller.toString(),
+        sellerPayload,
+      );
+    }
+
+    // Push to auction admin (only their new commission)
+    if (transferSettings.auctionAdminUserId) {
+      const auctionAdminPayload = {
+        title: '🔄 აუქციონის მოგებული შეიცვალა',
+        body: `"${auction.title}"\n💰 ახალი საკომისიო: ${adminCommission} ₾`,
+        icon: auction.mainImage || `${this.baseUrl}/android-icon-192x192.png`,
+        badge: `${this.baseUrl}/notification-badge.png`,
+        data: {
+          type: 'auction_transferred' as const,
+          url: `/auction-admin`,
+          id: auction._id.toString(),
+        },
+        tag: `auction-transfer-admin-${auction._id}`,
+        requireInteraction: true,
+      };
+      await this.pushNotificationService.sendToUser(
+        transferSettings.auctionAdminUserId.toString(),
+        auctionAdminPayload,
+      );
+    }
+
+    // Push to main admin (full info)
+    const mainAdminTransferPayload = {
+      title: '🔄 აუქციონი გადაეცა ახალ მოგებულს',
+      body: `"${auction.title}"\n❌ ${previousWinnerName} არ გადაიხადა\n✅ ახალი მოგებული: ${newWinner?.name || 'უცნობი'}`,
+      icon: auction.mainImage || `${this.baseUrl}/android-icon-192x192.png`,
+      badge: `${this.baseUrl}/notification-badge.png`,
+      data: {
+        type: 'auction_transferred' as const,
+        url: `/admin/auctions`,
+        id: auction._id.toString(),
+      },
+      tag: `auction-transfer-main-${auction._id}`,
+      requireInteraction: true,
+    };
+    await this.pushNotificationService.sendToAdmins(mainAdminTransferPayload);
 
     this.logger.log(
       `Auction ${auction._id} transferred from ${previousWinnerId} to ${nextBid.bidder}, new price: ${auction.currentPrice} GEL`,
@@ -1080,8 +1255,144 @@ export class AuctionService {
       );
     } else {
       await auction.save();
+      // Notify about auction with no bids
+      await this.sendAuctionFailureNotifications(auction, 'no_bids');
       this.logger.log(`Auction ended without bids: ${auction._id}`);
     }
+  }
+
+  // Send notifications when auction fails (no bids or all defaulted)
+  private async sendAuctionFailureNotifications(
+    auction: AuctionDocument,
+    reason: 'no_bids' | 'all_defaulted',
+  ) {
+    try {
+      // Notify seller
+      const seller = await this.userModel.findById(auction.seller);
+      if (seller) {
+        await this.emailService.sendAuctionNoWinnerNotification(
+          seller.email,
+          auction.title,
+          reason,
+          'seller',
+          auction.mainImage,
+        );
+      }
+    } catch (error) {
+      this.logger.error(
+        `Failed to notify seller about auction failure: ${error}`,
+      );
+    }
+
+    // Notify auction admin
+    try {
+      const settings = await this.auctionAdminService.getSettings();
+      if (settings.auctionAdminUserId) {
+        const auctionAdmin = await this.userModel.findById(
+          settings.auctionAdminUserId,
+        );
+        if (auctionAdmin) {
+          await this.emailService.sendAuctionNoWinnerNotification(
+            auctionAdmin.email,
+            auction.title,
+            reason,
+            'auctionAdmin',
+            auction.mainImage,
+          );
+        }
+      }
+    } catch (error) {
+      this.logger.error(
+        `Failed to notify auction admin about failure: ${error}`,
+      );
+    }
+
+    // Notify main admin
+    try {
+      const mainAdminEmail =
+        process.env.ADMIN_EMAIL || 'soulartgeorgia@gmail.com';
+      await this.emailService.sendAuctionNoWinnerNotification(
+        mainAdminEmail,
+        auction.title,
+        reason,
+        'mainAdmin',
+        auction.mainImage,
+      );
+    } catch (error) {
+      this.logger.error(
+        `Failed to notify main admin about auction failure: ${error}`,
+      );
+    }
+
+    // === PUSH NOTIFICATIONS for auction failure ===
+    const reasonText =
+      reason === 'no_bids'
+        ? 'აუქციონზე არავინ მიიღო მონაწილეობა'
+        : 'ყველა მოგებულმა გადაუხდელობით დატოვა';
+
+    // Push to seller
+    const seller = await this.userModel.findById(auction.seller);
+    if (seller) {
+      const sellerPayload = {
+        title: '❌ აუქციონი დასრულდა უშედეგოდ',
+        body: `"${auction.title}"\n${reasonText}`,
+        icon: auction.mainImage || `${this.baseUrl}/android-icon-192x192.png`,
+        badge: `${this.baseUrl}/notification-badge.png`,
+        data: {
+          type: 'auction_no_winner' as const,
+          url: `/profile`,
+          id: auction._id.toString(),
+        },
+        tag: `auction-no-winner-${auction._id}`,
+        requireInteraction: true,
+      };
+      await this.pushNotificationService.sendToUser(
+        auction.seller.toString(),
+        sellerPayload,
+      );
+    }
+
+    // Push to auction admin
+    try {
+      const pushSettings = await this.auctionAdminService.getSettings();
+      if (pushSettings.auctionAdminUserId) {
+        const auctionAdminPayload = {
+          title: '❌ აუქციონი დასრულდა უშედეგოდ',
+          body: `"${auction.title}"\n${reasonText}`,
+          icon: auction.mainImage || `${this.baseUrl}/android-icon-192x192.png`,
+          badge: `${this.baseUrl}/notification-badge.png`,
+          data: {
+            type: 'auction_no_winner' as const,
+            url: `/auction-admin`,
+            id: auction._id.toString(),
+          },
+          tag: `auction-no-winner-admin-${auction._id}`,
+          requireInteraction: true,
+        };
+        await this.pushNotificationService.sendToUser(
+          pushSettings.auctionAdminUserId.toString(),
+          auctionAdminPayload,
+        );
+      }
+    } catch (error) {
+      this.logger.error(`Failed to push notify auction admin: ${error}`);
+    }
+
+    // Push to main admin
+    const mainAdminPayload = {
+      title: '❌ აუქციონი დასრულდა უშედეგოდ',
+      body: `"${auction.title}"\n${reasonText}`,
+      icon: auction.mainImage || `${this.baseUrl}/android-icon-192x192.png`,
+      badge: `${this.baseUrl}/notification-badge.png`,
+      data: {
+        type: 'auction_no_winner' as const,
+        url: `/admin/auctions`,
+        id: auction._id.toString(),
+      },
+      tag: `auction-no-winner-main-${auction._id}`,
+      requireInteraction: true,
+    };
+    await this.pushNotificationService.sendToAdmins(mainAdminPayload);
   }
 
   // Calculate payment deadline (24 hours from now)
@@ -1175,6 +1486,86 @@ export class AuctionService {
         sellerName,
         winnerName,
       );
+
+      // === PUSH NOTIFICATIONS ===
+      // 1. Push to winner (only their info)
+      if (auction.currentWinner) {
+        const winnerPayload = {
+          title: '🎉 აუქციონი მოიგეთ!',
+          body: `"${auction.title}"\n💰 ფასი: ${auction.currentPrice} ₾\n⏰ გადახდის ვადა: 24 საათი`,
+          icon: auction.mainImage || `${this.baseUrl}/android-icon-192x192.png`,
+          badge: `${this.baseUrl}/notification-badge.png`,
+          data: {
+            type: 'auction_won' as const,
+            url: `/auctions/${auction._id}`,
+            id: auction._id.toString(),
+          },
+          tag: `auction-won-${auction._id}`,
+          requireInteraction: true,
+        };
+        await this.pushNotificationService.sendToUser(
+          auction.currentWinner.toString(),
+          winnerPayload,
+        );
+      }
+
+      // 2. Push to seller (only their info)
+      if (seller) {
+        const sellerPayload = {
+          title: '🎨 თქვენი აუქციონი გაიყიდა!',
+          body: `"${auction.title}"\n💰 თქვენი შემოსავალი: ${auction.sellerEarnings} ₾`,
+          icon: auction.mainImage || `${this.baseUrl}/android-icon-192x192.png`,
+          badge: `${this.baseUrl}/notification-badge.png`,
+          data: {
+            type: 'auction_sold' as const,
+            url: `/profile/balance`,
+            id: auction._id.toString(),
+          },
+          tag: `auction-sold-${auction._id}`,
+          requireInteraction: true,
+        };
+        await this.pushNotificationService.sendToUser(
+          auction.seller.toString(),
+          sellerPayload,
+        );
+      }
+
+      // 3. Push to auction admin (only their commission)
+      if (settings.auctionAdminUserId) {
+        const auctionAdminPayload = {
+          title: '🔨 აუქციონი დასრულდა',
+          body: `"${auction.title}"\n💰 თქვენი საკომისიო: ${auctionAdminCommission} ₾`,
+          icon: auction.mainImage || `${this.baseUrl}/android-icon-192x192.png`,
+          badge: `${this.baseUrl}/notification-badge.png`,
+          data: {
+            type: 'auction_ended' as const,
+            url: `/auction-admin`,
+            id: auction._id.toString(),
+          },
+          tag: `auction-ended-admin-${auction._id}`,
+          requireInteraction: true,
+        };
+        await this.pushNotificationService.sendToUser(
+          settings.auctionAdminUserId.toString(),
+          auctionAdminPayload,
+        );
+      }
+
+      // 4. Push to main admin (full info)
+      const mainAdminPayload = {
+        title: '📊 აუქციონი დასრულდა - სრული ინფო',
+        body: `"${auction.title}"\n💰 ფასი: ${auction.currentPrice} ₾\n🎨 გამყიდველი: ${sellerName}\n🏆 მყიდველი: ${winnerName}`,
+        icon: auction.mainImage || `${this.baseUrl}/android-icon-192x192.png`,
+        badge: `${this.baseUrl}/notification-badge.png`,
+        data: {
+          type: 'auction_ended' as const,
+          url: `/admin/auctions`,
+          id: auction._id.toString(),
+        },
+        tag: `auction-ended-main-${auction._id}`,
+        requireInteraction: true,
+      };
+      await this.pushNotificationService.sendToAdmins(mainAdminPayload);
     } catch (error) {
       this.logger.error('Failed to send auction end notifications:', error);
     }
@@ -1251,7 +1642,69 @@ export class AuctionService {
             adminCommission,
             auction.mainImage,
           );
+
+          // Push to auction admin
+          const auctionAdminPayload = {
+            title: '💳 აუქციონის გადახდა მიღებულია',
+            body: `"${auction.title}"\n💰 თქვენი საკომისიო: ${adminCommission} ₾`,
+            icon:
+              auction.mainImage || `${this.baseUrl}/android-icon-192x192.png`,
+            badge: `${this.baseUrl}/notification-badge.png`,
+            data: {
+              type: 'auction_payment_received' as const,
+              url: `/auction-admin`,
+              id: auction._id.toString(),
+            },
+            tag: `auction-payment-admin-${auction._id}`,
+            requireInteraction: true,
+          };
+          await this.pushNotificationService.sendToUser(
+            settings.auctionAdminUserId.toString(),
+            auctionAdminPayload,
+          );
         }
+      }
+
+      // Push to seller about payment
+      if (seller) {
+        const sellerPayload = {
+          title: '💳 გადახდა მიღებულია',
+          body: `"${auction.title}"\n💰 თქვენი შემოსავალი: ${auction.sellerEarnings} ₾\n${auction.deliveryType === 'ARTIST' ? '📦 მიტანა თქვენს მოვალეობაა' : ''}`,
+          icon: auction.mainImage || `${this.baseUrl}/android-icon-192x192.png`,
+          badge: `${this.baseUrl}/notification-badge.png`,
+          data: {
+            type: 'auction_payment_received' as const,
+            url: `/profile/balance`,
+            id: auction._id.toString(),
+          },
+          tag: `auction-payment-seller-${auction._id}`,
+          requireInteraction: true,
+        };
+        await this.pushNotificationService.sendToUser(
+          auction.seller.toString(),
+          sellerPayload,
+        );
+      }
+
+      // Push to winner confirmation
+      if (winner) {
+        const winnerPayload = {
+          title: '✅ გადახდა წარმატებულია',
+          body: `"${auction.title}"\n💰 გადახდილია: ${totalPayment} ₾`,
+          icon: auction.mainImage || `${this.baseUrl}/android-icon-192x192.png`,
+          badge: `${this.baseUrl}/notification-badge.png`,
+          data: {
+            type: 'auction_payment_received' as const,
+            url: `/auctions/${auction._id}`,
+            id: auction._id.toString(),
+          },
+          tag: `auction-payment-buyer-${auction._id}`,
+          requireInteraction: true,
+        };
+        await this.pushNotificationService.sendToUser(
+          auction.currentWinner.toString(),
+          winnerPayload,
+        );
       }
 
       this.logger.log(

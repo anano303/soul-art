@@ -37,7 +37,14 @@ export interface NotificationPayload {
       | 'product_approved'
       | 'product_rejected'
       | 'new_forum_post'
-      | 'pending_product';
+      | 'pending_product'
+      | 'new_auction'
+      | 'auction_ended'
+      | 'auction_won'
+      | 'auction_sold'
+      | 'auction_payment_received'
+      | 'auction_transferred'
+      | 'auction_no_winner';
     id?: string;
   };
   tag: string;
@@ -403,6 +410,158 @@ export class PushNotificationService {
     } catch (error) {
       this.logger.error('Failed to get admin users:', error);
       results.errors.push('Failed to get admin users');
+    }
+
+    return results;
+  }
+
+  // გამყიდველებს გაგზავნა (seller როლის მქონეებს)
+  async sendToSellers(payload: NotificationPayload) {
+    await this.ensureSubscriptionsLoaded();
+
+    const results = {
+      successful: 0,
+      failed: 0,
+      errors: [] as string[],
+    };
+
+    if (!this.isVAPIDConfigured()) {
+      results.errors.push('VAPID keys არ არის კონფიგურირებული');
+      return results;
+    }
+
+    try {
+      const sellerUsers = await this.userModel
+        .find({ role: Role.Seller })
+        .select('_id')
+        .exec();
+
+      if (sellerUsers.length === 0) {
+        this.logger.warn('📭 No seller users found in database');
+        return results;
+      }
+
+      const sellerUserIds = sellerUsers.map((u) => u._id.toString());
+
+      const sellerSubscriptions = Array.from(
+        this.subscriptions.values(),
+      ).filter((sub) => sub.userId && sellerUserIds.includes(sub.userId));
+
+      if (sellerSubscriptions.length === 0) {
+        this.logger.log('ℹ️ No seller users have active push subscriptions');
+        return results;
+      }
+
+      for (const subscriptionData of sellerSubscriptions) {
+        try {
+          await webpush.sendNotification(
+            subscriptionData.subscription,
+            JSON.stringify(payload),
+          );
+          results.successful++;
+        } catch (error) {
+          results.failed++;
+          results.errors.push(`Failed to send to seller: ${error.message}`);
+        }
+      }
+    } catch (error) {
+      this.logger.error('Failed to get seller users:', error);
+    }
+
+    return results;
+  }
+
+  // ყველა მომხმარებელს გარდა ადმინებისა და გამყიდველებისა (მხოლოდ User როლი)
+  async sendToRegularUsers(payload: NotificationPayload) {
+    await this.ensureSubscriptionsLoaded();
+
+    const results = {
+      successful: 0,
+      failed: 0,
+      errors: [] as string[],
+    };
+
+    if (!this.isVAPIDConfigured()) {
+      results.errors.push('VAPID keys არ არის კონფიგურირებული');
+      return results;
+    }
+
+    try {
+      const regularUsers = await this.userModel
+        .find({ role: Role.User })
+        .select('_id')
+        .exec();
+
+      if (regularUsers.length === 0) {
+        this.logger.warn('📭 No regular users found in database');
+        return results;
+      }
+
+      const regularUserIds = regularUsers.map((u) => u._id.toString());
+
+      const userSubscriptions = Array.from(this.subscriptions.values()).filter(
+        (sub) => sub.userId && regularUserIds.includes(sub.userId),
+      );
+
+      if (userSubscriptions.length === 0) {
+        this.logger.log('ℹ️ No regular users have active push subscriptions');
+        return results;
+      }
+
+      for (const subscriptionData of userSubscriptions) {
+        try {
+          await webpush.sendNotification(
+            subscriptionData.subscription,
+            JSON.stringify(payload),
+          );
+          results.successful++;
+        } catch (error) {
+          results.failed++;
+          results.errors.push(`Failed to send to user: ${error.message}`);
+        }
+      }
+    } catch (error) {
+      this.logger.error('Failed to get regular users:', error);
+    }
+
+    return results;
+  }
+
+  // კონკრეტულ მომხმარებლებს გაგზავნა (ID-ების სიით)
+  async sendToMultipleUsers(userIds: string[], payload: NotificationPayload) {
+    await this.ensureSubscriptionsLoaded();
+
+    const results = {
+      successful: 0,
+      failed: 0,
+      errors: [] as string[],
+    };
+
+    if (!this.isVAPIDConfigured()) {
+      results.errors.push('VAPID keys არ არის კონფიგურირებული');
+      return results;
+    }
+
+    const userSubscriptions = Array.from(this.subscriptions.values()).filter(
+      (sub) => sub.userId && userIds.includes(sub.userId),
+    );
+
+    if (userSubscriptions.length === 0) {
+      this.logger.log('ℹ️ No specified users have active push subscriptions');
+      return results;
+    }
+
+    for (const subscriptionData of userSubscriptions) {
+      try {
+        await webpush.sendNotification(
+          subscriptionData.subscription,
+          JSON.stringify(payload),
+        );
+        results.successful++;
+      } catch (error) {
+        results.failed++;
+        results.errors.push(`Failed to send: ${error.message}`);
+      }
     }
 
     return results;
