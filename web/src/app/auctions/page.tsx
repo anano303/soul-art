@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
+import { useState, useEffect, Suspense, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { apiClient } from "@/lib/axios";
@@ -94,48 +94,48 @@ function AuctionsContent() {
     }
   }, []);
 
-  const fetchAuctions = async (
-    page: number = 1,
-    status: string = activeTab,
-  ) => {
-    try {
-      setLoading(true);
-      const params = new URLSearchParams({
-        page: page.toString(),
-        limit: "12",
-        status: status,
-        ...Object.fromEntries(
-          Object.entries(filters).filter(([, value]) => value !== ""),
-        ),
-      });
-
-      const response = await apiClient.get<AuctionResponse>(
-        `/auctions?${params.toString()}`,
-      );
-
-      // For scheduled auctions, filter to only show those starting within 3 days
-      let filteredAuctions = response.data.auctions;
-      if (status === "SCHEDULED") {
-        const threeDaysFromNow = new Date();
-        threeDaysFromNow.setDate(threeDaysFromNow.getDate() + 3);
-        filteredAuctions = response.data.auctions.filter((auction) => {
-          const startDate = new Date(auction.startDate);
-          return startDate <= threeDaysFromNow;
+  const fetchAuctions = useCallback(
+    async (page: number = 1, status: string = activeTab) => {
+      try {
+        setLoading(true);
+        const params = new URLSearchParams({
+          page: page.toString(),
+          limit: "12",
+          status: status,
+          ...Object.fromEntries(
+            Object.entries(filters).filter(([, value]) => value !== ""),
+          ),
         });
-      }
 
-      setAuctions(filteredAuctions);
-      setPagination(response.data.pagination);
-    } catch (error) {
-      console.error("Failed to fetch auctions:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+        const response = await apiClient.get<AuctionResponse>(
+          `/auctions?${params.toString()}`,
+        );
+
+        // For scheduled auctions, filter to only show those starting within 3 days
+        let filteredAuctions = response.data.auctions;
+        if (status === "SCHEDULED") {
+          const threeDaysFromNow = new Date();
+          threeDaysFromNow.setDate(threeDaysFromNow.getDate() + 3);
+          filteredAuctions = response.data.auctions.filter((auction) => {
+            const startDate = new Date(auction.startDate);
+            return startDate <= threeDaysFromNow;
+          });
+        }
+
+        setAuctions(filteredAuctions);
+        setPagination(response.data.pagination);
+      } catch (error) {
+        console.error("Failed to fetch auctions:", error);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [filters, activeTab],
+  );
 
   useEffect(() => {
     fetchAuctions(1, activeTab);
-  }, [filters, activeTab]);
+  }, [fetchAuctions, activeTab]);
 
   const handleFilterChange = (newFilters: typeof filters) => {
     setFilters(newFilters);

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { useRouter } from "next/navigation";
 import { apiClient } from "@/lib/axios";
@@ -191,6 +191,25 @@ export default function AuctionAdminDashboard() {
   );
   const [rejectReason, setRejectReason] = useState("");
 
+  // Define fetchAuctions before useEffect that uses it
+  const fetchAuctions = useCallback(async () => {
+    try {
+      setAuctionsLoading(true);
+      const params = new URLSearchParams({
+        page: "1",
+        limit: "50",
+        status: auctionFilter,
+      });
+      const response = await apiClient.get(`/auctions?${params.toString()}`);
+      setAuctions(response.data.auctions || []);
+    } catch (err) {
+      console.error("Failed to fetch auctions:", err);
+      toast.error("აუქციონების ჩატვირთვა ვერ მოხერხდა");
+    } finally {
+      setAuctionsLoading(false);
+    }
+  }, [auctionFilter]);
+
   useEffect(() => {
     if (isLoading) return;
 
@@ -218,7 +237,7 @@ export default function AuctionAdminDashboard() {
     if (activeTab === "auctions") {
       fetchAuctions();
     }
-  }, [activeTab, auctionFilter]);
+  }, [activeTab, auctionFilter, fetchAuctions]);
 
   const fetchDashboard = async () => {
     try {
@@ -284,24 +303,6 @@ export default function AuctionAdminDashboard() {
       setWithdrawMessage({ type: "error", text: errorMessage });
     } finally {
       setWithdrawing(false);
-    }
-  };
-
-  const fetchAuctions = async () => {
-    try {
-      setAuctionsLoading(true);
-      const params = new URLSearchParams({
-        page: "1",
-        limit: "50",
-        status: auctionFilter,
-      });
-      const response = await apiClient.get(`/auctions?${params.toString()}`);
-      setAuctions(response.data.auctions || []);
-    } catch (err) {
-      console.error("Failed to fetch auctions:", err);
-      toast.error("აუქციონების ჩატვირთვა ვერ მოხერხდა");
-    } finally {
-      setAuctionsLoading(false);
     }
   };
 

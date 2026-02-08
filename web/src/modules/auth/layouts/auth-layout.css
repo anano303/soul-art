@@ -73,10 +73,6 @@
   color: #6b7280;
 }
 
-.auth-layout-children {
-  /* Children styles handled by form-container */
-}
-
 @media (min-width: 768px) {
   .auth-layout {
     padding: 2rem 1rem;
