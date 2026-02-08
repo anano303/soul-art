@@ -444,15 +444,22 @@ export class AuctionService {
   ) {
     const skip = (page - 1) * limit;
 
+    // Convert string to ObjectId for proper matching
+    const sellerObjectId = new Types.ObjectId(sellerId);
+
+    this.logger.log(`Fetching auctions for seller: ${sellerId}`);
+
     const [auctions, total] = await Promise.all([
       this.auctionModel
-        .find({ seller: sellerId })
+        .find({ seller: sellerObjectId })
         .populate('currentWinner', 'ownerFirstName ownerLastName')
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit),
-      this.auctionModel.countDocuments({ seller: sellerId }),
+      this.auctionModel.countDocuments({ seller: sellerObjectId }),
     ]);
+
+    this.logger.log(`Found ${total} auctions for seller: ${sellerId}`);
 
     return {
       auctions,
@@ -1747,6 +1754,21 @@ export class AuctionService {
 
     if (auction.isPaid) {
       throw new BadRequestException('Auction is already marked as paid');
+    }
+
+    // Calculate seller earnings if not already set
+    if (!auction.sellerEarnings || auction.sellerEarnings <= 0) {
+      const settings = await this.auctionAdminService.getSettings();
+      const totalCommissionPercent =
+        settings.auctionAdminCommissionPercent +
+        settings.platformCommissionPercent;
+      const sellerPercent = 100 - totalCommissionPercent;
+      auction.sellerEarnings = (auction.currentPrice * sellerPercent) / 100;
+      auction.commissionAmount =
+        (auction.currentPrice * totalCommissionPercent) / 100;
+      this.logger.log(
+        `Calculated seller earnings for auction ${auctionId}: ${auction.sellerEarnings} GEL`,
+      );
     }
 
     auction.isPaid = true;

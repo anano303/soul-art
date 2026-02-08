@@ -131,18 +131,18 @@ export function OrdersList({
   // მიტანის ფასს მომხმარებელი იხდის, მაგრამ სელერს/აუქციონ ადმინს ბალანსიდან აკლდება
   const getDisplayTotal = (order: Order): number => {
     const shippingPrice = (order as any).shippingPrice || 0;
-    
+
     // ადმინისთვის სრული ფასი (მიტანიანად)
     if (userRole === "admin" && !auctionAdminMode) {
       return order.totalPrice || 0;
     }
-    
+
     // სელერისთვის და აუქციონ ადმინისთვის - გამოაკელი მიტანის ფასი
     // რადგან საკომისიო პროდუქტის ფასიდან იანგარიშება
     if (userRole === "seller" || auctionAdminMode) {
       return (order.totalPrice || 0) - shippingPrice;
     }
-    
+
     return order.totalPrice || 0;
   };
 
@@ -245,7 +245,8 @@ export function OrdersList({
                   </td>
                   <td>
                     {/* Show seller info - for auction orders from auctionId, for regular from orderItems */}
-                    {order.orderType === "auction" && order.auctionId?.seller ? (
+                    {order.orderType === "auction" &&
+                    order.auctionId?.seller ? (
                       <Link
                         href={`/admin/users/${order.auctionId.seller._id}/edit`}
                         className="seller-info seller-link"

@@ -21,6 +21,7 @@ import {
 } from '../schemas/auction-admin-withdrawal.schema';
 import { Auction, AuctionDocument } from '../schemas/auction.schema';
 import { User, UserDocument } from '../../users/schemas/user.schema';
+import { EmailService } from '../../email/services/email.services';
 
 @Injectable()
 export class AuctionAdminService {
@@ -37,6 +38,7 @@ export class AuctionAdminService {
     private auctionModel: Model<AuctionDocument>,
     @InjectModel(User.name)
     private userModel: Model<UserDocument>,
+    private emailService: EmailService,
   ) {}
 
   // Verify user has auction admin access
@@ -604,6 +606,26 @@ export class AuctionAdminService {
         { _id: { $in: withdrawal.earningsIncluded } },
         { withdrawnAt: new Date() },
       );
+
+      // Send email notification to auction admin
+      const auctionAdmin = await this.userModel
+        .findById(withdrawal.auctionAdminId)
+        .lean();
+      if (auctionAdmin?.email) {
+        const adminName =
+          auctionAdmin.name ||
+          auctionAdmin.ownerFirstName ||
+          auctionAdmin.storeName ||
+          'აუქციონ ადმინი';
+        await this.emailService.sendWithdrawalCompletedNotification(
+          auctionAdmin.email,
+          adminName,
+          withdrawal.amount,
+        );
+        this.logger.log(
+          `Withdrawal completion email sent to: ${auctionAdmin.email}`,
+        );
+      }
 
       this.logger.log(
         `Auction admin withdrawal approved: ${withdrawal.amount} GEL, ID: ${withdrawalId}`,

@@ -2,7 +2,8 @@ const mongoose = require('mongoose');
 require('dotenv').config();
 
 const AUCTION_ID = process.argv[2] || '6988afd8ee4eb609b4283791';
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/soulart';
+const MONGODB_URI =
+  process.env.MONGODB_URI || 'mongodb://localhost:27017/soulart';
 
 console.log('Connecting to MongoDB...');
 console.log('Auction ID:', AUCTION_ID);

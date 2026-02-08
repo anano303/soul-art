@@ -150,7 +150,7 @@ export class AuctionController {
 
   // Seller: Get own auctions
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.Seller)
+  @Roles(Role.Seller, Role.SellerAndSalesManager)
   @Get('seller/my-auctions')
   async getSellerAuctions(
     @CurrentUser() user: UserDocument,
@@ -166,7 +166,7 @@ export class AuctionController {
 
   // Seller: Get auction earnings summary
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.Seller)
+  @Roles(Role.Seller, Role.SellerAndSalesManager)
   @Get('seller/earnings')
   async getSellerAuctionEarnings(
     @CurrentUser() user: UserDocument,

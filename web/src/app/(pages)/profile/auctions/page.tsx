@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { apiClient } from "@/lib/axios";
 import { useLanguage } from "@/hooks/LanguageContext";
@@ -12,10 +13,12 @@ import "./seller-auctions.css";
 interface AuctionSummary {
   _id: string;
   title: string;
+  mainImage?: string;
   currentPrice: number;
   startingPrice: number;
   endDate: string;
-  status: "ACTIVE" | "ENDED" | "PENDING" | "CANCELLED";
+  status: "ACTIVE" | "ENDED" | "PENDING" | "CANCELLED" | "SCHEDULED";
+  isPaid?: boolean;
   totalBids: number;
   createdAt: string;
 }
@@ -42,6 +45,7 @@ export default function SellerAuctionsPage() {
   const fetchAuctions = async () => {
     try {
       setLoading(true);
+      console.log("Fetching seller auctions...");
       const response = await apiClient.get<SellerAuctionsResponse>(
         "/auctions/seller/my-auctions",
         {
@@ -52,10 +56,15 @@ export default function SellerAuctionsPage() {
         },
       );
 
+      console.log("API Response:", response.data);
+      console.log("Auctions count:", response.data.auctions?.length || 0);
+
       setAuctions(response.data.auctions || []);
       setPagination(response.data.pagination || null);
     } catch (error: any) {
       console.error("Failed to load seller auctions", error);
+      console.error("Error response:", error?.response?.data);
+      console.error("Error status:", error?.response?.status);
       toast.error(
         error?.response?.data?.message ||
           t("sellerAuctions.errors.load") ||
@@ -96,15 +105,31 @@ export default function SellerAuctionsPage() {
   };
 
   useEffect(() => {
-    if (!isLoading) {
-      const role = user?.role?.toString().toUpperCase();
-      if (role !== "SELLER") {
+    if (!isLoading && user) {
+      const role = user?.role?.toString().toLowerCase();
+      console.log("User role for auctions page:", role, user);
+      // Allow both "seller" and "seller_sales_manager" roles
+      const isSellerRole = role === "seller" || role === "seller_sales_manager";
+      if (!isSellerRole) {
+        console.log("Not a seller role, redirecting...");
         router.replace("/profile");
         return;
       }
       fetchAuctions();
     }
   }, [isLoading, user, router]);
+
+  // Show loading while user is loading
+  if (isLoading) {
+    return (
+      <div className="seller-auctions-page">
+        <div className="loading-spinner">
+          <div className="spinner"></div>
+          <p>იტვირთება...</p>
+        </div>
+      </div>
+    );
+  }
 
   const locale = language === "en" ? "en-US" : "ka-GE";
   const currencyFormatter = new Intl.NumberFormat(locale, {
@@ -120,6 +145,11 @@ export default function SellerAuctionsPage() {
     minute: "2-digit",
   });
 
+  // Calculate stats
+  const activeCount = auctions.filter((a) => a.status === "ACTIVE").length;
+  const endedCount = auctions.filter((a) => a.status === "ENDED").length;
+  const pendingCount = auctions.filter((a) => a.status === "PENDING").length;
+
   return (
     <div className="seller-auctions-page">
       <div className="seller-auctions-header">
@@ -131,7 +161,7 @@ export default function SellerAuctionsPage() {
         </div>
         <div className="seller-auctions-actions">
           <Link href="/auctions/create" className="primary-link">
-            {t("sellerAuctions.actions.create")}
+            ➕ {t("sellerAuctions.actions.create")}
           </Link>
           <button
             type="button"
@@ -139,6 +169,7 @@ export default function SellerAuctionsPage() {
             onClick={fetchAuctions}
             disabled={loading}
           >
+            🔄{" "}
             {loading
               ? t("sellerAuctions.actions.refreshing")
               : t("sellerAuctions.actions.refresh")}
@@ -146,105 +177,171 @@ export default function SellerAuctionsPage() {
         </div>
       </div>
 
-      {auctions.length === 0 ? (
+      {/* Stats Cards */}
+      <div className="seller-auctions-stats">
+        <div className="stat-card">
+          <div className="stat-number">{auctions.length}</div>
+          <div className="stat-label">სულ აუქციონი</div>
+        </div>
+        <div className="stat-card">
+          <div className="stat-number">{activeCount}</div>
+          <div className="stat-label">აქტიური</div>
+        </div>
+        <div className="stat-card">
+          <div className="stat-number">{endedCount}</div>
+          <div className="stat-label">დასრულებული</div>
+        </div>
+        <div className="stat-card">
+          <div className="stat-number">{pendingCount}</div>
+          <div className="stat-label">მოლოდინში</div>
+        </div>
+      </div>
+
+      {/* Info Banner */}
+      <div className="info-banner">
+        <div className="info-banner-icon">💡</div>
+        <div className="info-banner-content">
+          <strong>მნიშვნელოვანი:</strong> აუქციონზე გადახდის შემდეგ, შეკვეთა
+          ავტომატურად აისახება ადმინ პანელის შეკვეთების სექციაში და თქვენ
+          მიიღებთ შეტყობინებას. თქვენი შემოსავალი ჩაირიცხება ბალანსზე მიწოდების
+          დასრულების შემდეგ.
+        </div>
+      </div>
+
+      {loading ? (
+        <div className="loading-spinner">
+          <div className="spinner"></div>
+          <p>აუქციონების ჩატვირთვა...</p>
+        </div>
+      ) : auctions.length === 0 ? (
         <div className="empty-auctions">
           <h3>{t("sellerAuctions.empty.title")}</h3>
           <p>{t("sellerAuctions.empty.description")}</p>
         </div>
       ) : (
         <div className="auctions-list-card">
-          <div className="auctions-list-header">
-            <span>{t("sellerAuctions.table.title")}</span>
-            <span>{t("sellerAuctions.table.status")}</span>
-            <span>{t("sellerAuctions.table.currentPrice")}</span>
-            <span>{t("sellerAuctions.table.bids")}</span>
-            <span>{t("sellerAuctions.table.endDate")}</span>
-            <span>{language === "en" ? "Actions" : "მოქმედებები"}</span>
-          </div>
-          <div className="auctions-list-body">
-            {auctions.map((auction) => (
-              <div key={auction._id} className="auction-row">
-                <div>
-                  <div className="auction-title">{auction.title}</div>
-                  <div className="auction-meta">
-                    {t("sellerAuctions.table.created", {
-                      date: dateFormatter.format(new Date(auction.createdAt)),
-                    })}
-                  </div>
-                </div>
-                <div>
-                  <span
-                    className={`auction-status-badge status-${auction.status.toLowerCase()}`}
-                  >
-                    {t(`auctions.status.${auction.status.toLowerCase()}`)}
-                  </span>
-                </div>
-                <div className="value-strong">
-                  {currencyFormatter.format(auction.currentPrice || 0)}
-                  <div className="auction-meta">
-                    {t("sellerAuctions.table.starting", {
-                      price: currencyFormatter.format(auction.startingPrice),
-                    })}
-                  </div>
-                </div>
-                <div className="value-strong">{auction.totalBids}</div>
-                <div>
-                  <div className="auction-meta">
-                    {dateFormatter.format(new Date(auction.endDate))}
-                  </div>
-                </div>
-                <div className="auction-actions">
-                  {/* რედაქტირება - დისაბლ იყოს თუ ფსონი აქვს */}
-                  {auction.totalBids > 0 ? (
-                    <button
-                      className="action-btn edit-btn disabled"
-                      disabled
-                      title={
-                        language === "en"
-                          ? "Cannot edit auction with bids"
-                          : "აუქციონის რედაქტირება შეუძლებელია ფსონების არსებობისას"
-                      }
-                    >
-                      ✏️
-                    </button>
-                  ) : (
-                    <Link
-                      href={`/profile/auctions/${auction._id}/edit`}
-                      className="action-btn edit-btn"
-                      title={
-                        language === "en"
-                          ? "Edit auction"
-                          : "აუქციონის რედაქტირება"
-                      }
-                    >
-                      ✏️
+          <div className="auctions-table-wrapper">
+            <div className="auctions-list-header">
+              <span>სურათი</span>
+              <span>{t("sellerAuctions.table.title")}</span>
+              <span>{t("sellerAuctions.table.status")}</span>
+              <span>გადახდა</span>
+              <span>{t("sellerAuctions.table.currentPrice")}</span>
+              <span>{t("sellerAuctions.table.bids")}</span>
+              <span>{t("sellerAuctions.table.endDate")}</span>
+              <span>{language === "en" ? "Actions" : "მოქმედებები"}</span>
+            </div>
+            <div className="auctions-list-body">
+              {auctions.map((auction) => (
+                <div key={auction._id} className="auction-row">
+                  <div className="auction-image-cell">
+                    <Link href={`/auctions/${auction._id}`}>
+                      <Image
+                        src={auction.mainImage || "/placeholder-artwork.jpg"}
+                        alt={auction.title}
+                        width={55}
+                        height={55}
+                        className="auction-thumbnail"
+                        unoptimized
+                      />
                     </Link>
-                  )}
-                  {/* წაშლა - დამალული იყოს თუ ფსონი აქვს */}
-                  {auction.totalBids === 0 && (
-                    <button
-                      onClick={() => deleteAuction(auction._id)}
-                      className="action-btn delete-btn"
-                      title={
-                        language === "en" ? "Delete auction" : "აუქციონის წაშლა"
-                      }
+                  </div>
+                  <div>
+                    <Link
+                      href={`/auctions/${auction._id}`}
+                      className="auction-title-link"
                     >
-                      🗑️
-                    </button>
-                  )}
+                      <div className="auction-title">{auction.title}</div>
+                    </Link>
+                    <div className="auction-meta">
+                      {t("sellerAuctions.table.created", {
+                        date: dateFormatter.format(new Date(auction.createdAt)),
+                      })}
+                    </div>
+                  </div>
+                  <div>
+                    <span
+                      className={`auction-status-badge status-${auction.status.toLowerCase()}`}
+                    >
+                      {t(`auctions.status.${auction.status.toLowerCase()}`)}
+                    </span>
+                  </div>
+                  <div>
+                    {auction.status === "ENDED" ? (
+                      auction.isPaid ? (
+                        <span className="payment-badge paid">✓ გადახდილი</span>
+                      ) : (
+                        <span className="payment-badge unpaid">გადაუხდელი</span>
+                      )
+                    ) : (
+                      <span className="payment-badge na">—</span>
+                    )}
+                  </div>
+                  <div className="value-strong">
+                    {currencyFormatter.format(auction.currentPrice || 0)}
+                    <div className="auction-meta">
+                      {t("sellerAuctions.table.starting", {
+                        price: currencyFormatter.format(auction.startingPrice),
+                      })}
+                    </div>
+                  </div>
+                  <div className="value-strong">{auction.totalBids}</div>
+                  <div>
+                    <div className="auction-meta">
+                      {dateFormatter.format(new Date(auction.endDate))}
+                    </div>
+                  </div>
+                  <div className="auction-actions">
+                    {/* რედაქტირება - დისაბლ იყოს თუ ფსონი აქვს */}
+                    {auction.totalBids > 0 ? (
+                      <button
+                        className="action-btn edit-btn disabled"
+                        disabled
+                        title={
+                          language === "en"
+                            ? "Cannot edit auction with bids"
+                            : "აუქციონის რედაქტირება შეუძლებელია ფსონების არსებობისას"
+                        }
+                      >
+                        ✏️
+                      </button>
+                    ) : (
+                      <Link
+                        href={`/profile/auctions/${auction._id}/edit`}
+                        className="action-btn edit-btn"
+                        title={
+                          language === "en"
+                            ? "Edit auction"
+                            : "აუქციონის რედაქტირება"
+                        }
+                      >
+                        ✏️
+                      </Link>
+                    )}
+                    {/* წაშლა - დამალული იყოს თუ ფსონი აქვს */}
+                    {auction.totalBids === 0 && (
+                      <button
+                        onClick={() => deleteAuction(auction._id)}
+                        className="action-btn delete-btn"
+                        title={
+                          language === "en"
+                            ? "Delete auction"
+                            : "აუქციონის წაშლა"
+                        }
+                      >
+                        🗑️
+                      </button>
+                    )}
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
       )}
 
-      {pagination && (
-        <div className="auction-meta" style={{ color: "#718096" }}>
-          {t("sellerAuctions.meta.summary", {
-            total: pagination.total,
-          })}
-        </div>
+      {pagination && pagination.total > 0 && (
+        <div className="pagination-info">სულ {pagination.total} აუქციონი</div>
       )}
     </div>
   );

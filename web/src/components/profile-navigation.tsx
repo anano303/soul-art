@@ -67,7 +67,9 @@ export function ProfileNavigation() {
   const { user } = useAuth();
 
   const filteredNavItems = profileNavItems.filter(
-    (item) => !item.requiresRole || user?.role?.toLowerCase() === item.requiresRole.toLowerCase(),
+    (item) =>
+      !item.requiresRole ||
+      user?.role?.toLowerCase() === item.requiresRole.toLowerCase(),
   );
 
   return (
@@ -108,13 +110,22 @@ export function MobileProfileNavigation() {
   const { user } = useAuth();
 
   const filteredNavItems = profileNavItems.filter(
-    (item) => !item.requiresRole || user?.role?.toLowerCase() === item.requiresRole.toLowerCase(),
+    (item) =>
+      !item.requiresRole ||
+      user?.role?.toLowerCase() === item.requiresRole.toLowerCase(),
   );
 
   return (
-    <div className="lg:hidden mb-6 sticky top-16 z-[1000]">
+    <div
+      className="lg:hidden mb-6 sticky top-16 z-[1000] w-full -mx-4 px-0"
+      style={{
+        marginLeft: "-1rem",
+        marginRight: "-1rem",
+        width: "calc(100% + 2rem)",
+      }}
+    >
       <div className="bg-white border-b border-gray-200">
-        <div className="flex overflow-x-auto">
+        <div className="flex overflow-x-auto scrollbar-hide">
           {filteredNavItems.map((item) => {
             const Icon = item.icon;
             const isActive = pathname === item.href;

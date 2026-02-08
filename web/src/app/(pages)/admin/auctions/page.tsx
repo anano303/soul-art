@@ -6,7 +6,16 @@ import Image from "next/image";
 import { apiClient } from "@/lib/axios";
 import { useLanguage } from "@/hooks/LanguageContext";
 import { toast } from "react-hot-toast";
-import { Settings, Save, Percent } from "lucide-react";
+import {
+  Settings,
+  Save,
+  Percent,
+  Wallet,
+  CheckCircle,
+  XCircle,
+  Clock,
+} from "lucide-react";
+import { getUserData } from "@/lib/auth";
 import "./admin-auctions.css";
 
 interface Auction {
@@ -21,6 +30,7 @@ interface Auction {
   currentPrice: number;
   endDate: string;
   status: "ACTIVE" | "ENDED" | "PENDING" | "CANCELLED" | "SCHEDULED";
+  isPaid?: boolean;
   totalBids: number;
   seller: {
     ownerFirstName?: string;
@@ -49,6 +59,23 @@ interface User {
   ownerFirstName?: string;
   ownerLastName?: string;
   role: string;
+  phoneNumber?: string;
+}
+
+interface AuctionAdminWithdrawal {
+  _id: string;
+  auctionAdminId: User;
+  amount: number;
+  accountNumber: string;
+  accountHolderName: string;
+  identificationNumber: string;
+  beneficiaryBankCode?: string;
+  bankName?: string;
+  status: "PENDING" | "PROCESSED" | "REJECTED";
+  createdAt: string;
+  processedAt?: string;
+  transactionId?: string;
+  rejectionReason?: string;
 }
 
 export default function AdminAuctions() {
@@ -58,6 +85,10 @@ export default function AdminAuctions() {
   const [filter, setFilter] = useState<
     "ALL" | "ACTIVE" | "ENDED" | "PENDING" | "CANCELLED" | "SCHEDULED"
   >("ALL");
+
+  // User role for showing admin-only features
+  const [userRole, setUserRole] = useState<string | null>(null);
+  const isMainAdmin = userRole === "admin";
 
   // Commission settings state
   const [showSettings, setShowSettings] = useState(false);
@@ -69,6 +100,18 @@ export default function AdminAuctions() {
     auctionAdminCommissionPercent: 30,
     auctionAdminUserId: "",
   });
+
+  // Tab state: "auctions" or "withdrawals"
+  const [activeTab, setActiveTab] = useState<"auctions" | "withdrawals">(
+    "auctions",
+  );
+
+  // Auction admin withdrawals state
+  const [withdrawals, setWithdrawals] = useState<AuctionAdminWithdrawal[]>([]);
+  const [withdrawalsLoading, setWithdrawalsLoading] = useState(false);
+  const [processingWithdrawal, setProcessingWithdrawal] = useState<
+    string | null
+  >(null);
 
   const fetchAuctions = async () => {
     try {
@@ -144,6 +187,65 @@ export default function AdminAuctions() {
     fetchSettings();
     fetchAuctionAdmins();
   }, []);
+
+  // Fetch auction admin pending withdrawals
+  const fetchWithdrawals = async () => {
+    try {
+      setWithdrawalsLoading(true);
+      const response = await apiClient.get(
+        "/auctions/admin/pending-withdrawals",
+      );
+      setWithdrawals(response.data.withdrawals || []);
+    } catch (error) {
+      console.error("Failed to fetch withdrawals:", error);
+      toast.error("გატანის მოთხოვნების ჩატვირთვა ვერ მოხერხდა");
+    } finally {
+      setWithdrawalsLoading(false);
+    }
+  };
+
+  // Process withdrawal (approve/reject)
+  const processWithdrawal = async (
+    withdrawalId: string,
+    action: "approve" | "reject",
+    rejectionReason?: string,
+  ) => {
+    try {
+      setProcessingWithdrawal(withdrawalId);
+      await apiClient.patch(
+        `/auctions/admin/withdrawals/${withdrawalId}/process`,
+        {
+          action,
+          rejectionReason,
+        },
+      );
+      toast.success(
+        action === "approve"
+          ? "გატანის მოთხოვნა დადასტურდა"
+          : "გატანის მოთხოვნა უარყოფილია",
+      );
+      fetchWithdrawals();
+    } catch (error) {
+      console.error("Failed to process withdrawal:", error);
+      toast.error("მოთხოვნის დამუშავება ვერ მოხერხდა");
+    } finally {
+      setProcessingWithdrawal(null);
+    }
+  };
+
+  useEffect(() => {
+    // Get user role
+    const userData = getUserData();
+    if (userData) {
+      setUserRole(userData.role);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (activeTab === "withdrawals" && isMainAdmin) {
+      fetchWithdrawals();
+    }
+  }, [activeTab, isMainAdmin]);
 
   const approveAuction = async (auctionId: string) => {
     try {
@@ -232,14 +334,33 @@ export default function AdminAuctions() {
             <Settings size={18} />
             საკომისიო
           </button>
-          <Link
-            href="/auctions/create"
-            className="admin-auctions-create-btn"
-          >
+          <Link href="/auctions/create" className="admin-auctions-create-btn">
             {t("admin.auctionsCreate.button")}
           </Link>
         </div>
       </div>
+
+      {/* Main Tabs - Only show for main admin */}
+      {isMainAdmin && (
+        <div className="admin-main-tabs">
+          <button
+            className={`main-tab ${activeTab === "auctions" ? "active" : ""}`}
+            onClick={() => setActiveTab("auctions")}
+          >
+            🎨 აუქციონები
+          </button>
+          <button
+            className={`main-tab ${activeTab === "withdrawals" ? "active" : ""}`}
+            onClick={() => setActiveTab("withdrawals")}
+          >
+            <Wallet size={16} />
+            აუქციონ ადმინის გატანები
+            {withdrawals.length > 0 && (
+              <span className="tab-badge">{withdrawals.length}</span>
+            )}
+          </button>
+        </div>
+      )}
 
       {/* Commission Settings Panel */}
       {showSettings && (
@@ -364,153 +485,315 @@ export default function AdminAuctions() {
         </div>
       )}
 
-      <div className="admin-auctions-filters">
-        <div className="filter-buttons">
-          {["ALL", "PENDING", "SCHEDULED", "ACTIVE", "ENDED", "CANCELLED"].map(
-            (status) => (
-              <button
-                key={status}
-                onClick={() => setFilter(status as typeof filter)}
-                className={`filter-btn ${filter === status ? "active" : ""}`}
-              >
-                {t(`admin.statusFilter.${status.toLowerCase()}`)}
-              </button>
-            ),
+      {(activeTab === "auctions" || !isMainAdmin) && (
+        <>
+          <div className="admin-auctions-filters">
+            <div className="filter-buttons">
+              {[
+                "ALL",
+                "PENDING",
+                "SCHEDULED",
+                "ACTIVE",
+                "ENDED",
+                "CANCELLED",
+              ].map((status) => (
+                <button
+                  key={status}
+                  onClick={() => setFilter(status as typeof filter)}
+                  className={`filter-btn ${filter === status ? "active" : ""}`}
+                >
+                  {t(`admin.statusFilter.${status.toLowerCase()}`)}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="admin-auctions-stats">
+            <div className="stat-card">
+              <div className="stat-number">{auctions.length}</div>
+              <div className="stat-label">{t("admin.totalAuctions")}</div>
+            </div>
+            <div className="stat-card">
+              <div className="stat-number">
+                {auctions.filter((a) => a.status === "ACTIVE").length}
+              </div>
+              <div className="stat-label">{t("admin.activeAuctions")}</div>
+            </div>
+            <div className="stat-card">
+              <div className="stat-number">
+                {auctions.filter((a) => a.status === "PENDING").length}
+              </div>
+              <div className="stat-label">{t("admin.pendingAuctions")}</div>
+            </div>
+          </div>
+
+          <div className="admin-auctions-table">
+            {auctions.length === 0 ? (
+              <div className="empty-state">
+                <div className="empty-icon">🏆</div>
+                <h3>{t("admin.noAuctions")}</h3>
+                <p>{t("admin.noAuctionsDesc")}</p>
+              </div>
+            ) : (
+              <div className="table-container">
+                <table className="auctions-table">
+                  <thead>
+                    <tr>
+                      <th>{t("admin.image")}</th>
+                      <th>{t("admin.title")}</th>
+                      <th>{t("admin.seller")}</th>
+                      <th>{t("admin.price")}</th>
+                      <th>{t("admin.bids")}</th>
+                      <th>{t("admin.status")}</th>
+                      <th>გადახდა</th>
+                      <th>{t("admin.created")}</th>
+                      <th>{t("admin.actions")}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {auctions.map((auction) => (
+                      <tr key={auction._id}>
+                        <td>
+                          <Image
+                            src={
+                              auction.mainImage || "/placeholder-artwork.jpg"
+                            }
+                            alt={auction.title}
+                            className="auction-thumbnail"
+                            width={60}
+                            height={60}
+                            unoptimized
+                          />
+                        </td>
+                        <td>
+                          <div className="auction-info">
+                            <div className="auction-title">{auction.title}</div>
+                            <div className="auction-type">
+                              {t(
+                                `auctions.type.${auction.artworkType.toLowerCase()}`,
+                              )}
+                            </div>
+                          </div>
+                        </td>
+                        <td>
+                          <div className="seller-info">
+                            <div className="seller-name">
+                              {getSellerName(auction.seller)}
+                            </div>
+                            <div className="seller-email">
+                              {auction.seller.email}
+                            </div>
+                          </div>
+                        </td>
+                        <td>
+                          <div className="price-info">
+                            <div className="current-price">
+                              {auction.currentPrice} ₾
+                            </div>
+                            <div className="starting-price">
+                              {t("admin.starting")}: {auction.startingPrice} ₾
+                            </div>
+                          </div>
+                        </td>
+                        <td className="bid-count">{auction.totalBids}</td>
+                        <td>
+                          <span
+                            className={`status-badge ${getStatusColor(
+                              auction.status,
+                            )}`}
+                          >
+                            {t(
+                              `auctions.status.${auction.status.toLowerCase()}`,
+                            )}
+                          </span>
+                        </td>
+                        <td>
+                          {auction.status === "ENDED" ? (
+                            auction.isPaid ? (
+                              <span className="payment-badge paid">
+                                გადახდილი ✓
+                              </span>
+                            ) : (
+                              <span className="payment-badge unpaid">
+                                გადაუხდელი
+                              </span>
+                            )
+                          ) : (
+                            <span className="payment-badge na">-</span>
+                          )}
+                        </td>
+                        <td className="created-date">
+                          {new Date(auction.createdAt).toLocaleDateString()}
+                        </td>
+                        <td>
+                          <div className="action-buttons">
+                            <Link
+                              href={`/admin/auctions/${auction._id}/edit`}
+                              className="action-btn edit-btn"
+                              title={t("admin.edit")}
+                            >
+                              ✏️
+                            </Link>
+                            {auction.status === "PENDING" && (
+                              <button
+                                onClick={() => approveAuction(auction._id)}
+                                className="action-btn approve-btn"
+                                title={t("admin.approve")}
+                              >
+                                ✓
+                              </button>
+                            )}
+                            <button
+                              onClick={() => deleteAuction(auction._id)}
+                              className="action-btn delete-btn"
+                              title={t("admin.delete")}
+                            >
+                              🗑️
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        </>
+      )}
+
+      {/* Withdrawals Tab - Only for main admin */}
+      {activeTab === "withdrawals" && isMainAdmin && (
+        <div className="withdrawals-section">
+          <div className="withdrawals-header">
+            <h2>აუქციონ ადმინის გატანის მოთხოვნები</h2>
+            <p>აუქციონ ადმინების ბალანსის გატანის მოთხოვნების მართვა</p>
+          </div>
+
+          {withdrawalsLoading ? (
+            <div className="loading-state">
+              <Clock size={48} className="spinning" />
+              <p>იტვირთება...</p>
+            </div>
+          ) : withdrawals.length === 0 ? (
+            <div className="empty-state">
+              <Wallet size={48} />
+              <h3>გატანის მოთხოვნები არ არის</h3>
+              <p>ახალი მოთხოვნები გამოჩნდება აქ</p>
+            </div>
+          ) : (
+            <div className="table-container">
+              <table className="withdrawals-table">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>თარიღი</th>
+                    <th>მომხმარებელი</th>
+                    <th>თანხა</th>
+                    <th>ბანკი</th>
+                    <th>ანგარიშის ნომერი</th>
+                    <th>სტატუსი</th>
+                    <th>მოქმედებები</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {withdrawals.map((withdrawal, index) => (
+                    <tr key={withdrawal._id}>
+                      <td className="withdrawal-id">{index + 1}</td>
+                      <td className="withdrawal-date">
+                        {new Date(withdrawal.createdAt).toLocaleDateString(
+                          "ka-GE",
+                        )}
+                      </td>
+                      <td>
+                        <div className="user-info">
+                          <div className="user-name">
+                            {withdrawal.auctionAdminId?.name ||
+                              withdrawal.auctionAdminId?.firstName ||
+                              "უცნობი"}
+                          </div>
+                          <div className="user-email">
+                            {withdrawal.auctionAdminId?.email}
+                          </div>
+                        </div>
+                      </td>
+                      <td className="withdrawal-amount">
+                        <strong>{withdrawal.amount.toFixed(2)} ₾</strong>
+                      </td>
+                      <td className="withdrawal-bank">
+                        {withdrawal.bankName || "-"}
+                      </td>
+                      <td className="withdrawal-account">
+                        {withdrawal.accountNumber || "-"}
+                      </td>
+                      <td>
+                        <span
+                          className={`status-badge ${
+                            withdrawal.status === "PENDING"
+                              ? "pending"
+                              : withdrawal.status === "PROCESSED"
+                                ? "approved"
+                                : "rejected"
+                          }`}
+                        >
+                          {withdrawal.status === "PENDING" && (
+                            <>
+                              <Clock size={14} /> მოლოდინში
+                            </>
+                          )}
+                          {withdrawal.status === "PROCESSED" && (
+                            <>
+                              <CheckCircle size={14} /> დადასტურებული
+                            </>
+                          )}
+                          {withdrawal.status === "REJECTED" && (
+                            <>
+                              <XCircle size={14} /> უარყოფილი
+                            </>
+                          )}
+                        </span>
+                      </td>
+                      <td>
+                        {withdrawal.status === "PENDING" && (
+                          <div className="action-buttons">
+                            <button
+                              className="action-btn approve-btn"
+                              onClick={() =>
+                                processWithdrawal(withdrawal._id, "approve")
+                              }
+                              disabled={processingWithdrawal === withdrawal._id}
+                              title="დადასტურება"
+                            >
+                              {processingWithdrawal === withdrawal._id ? (
+                                "..."
+                              ) : (
+                                <CheckCircle size={16} />
+                              )}
+                            </button>
+                            <button
+                              className="action-btn reject-btn"
+                              onClick={() =>
+                                processWithdrawal(withdrawal._id, "reject")
+                              }
+                              disabled={processingWithdrawal === withdrawal._id}
+                              title="უარყოფა"
+                            >
+                              <XCircle size={16} />
+                            </button>
+                          </div>
+                        )}
+                        {withdrawal.status !== "PENDING" && (
+                          <span className="processed-label">დამუშავებული</span>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           )}
         </div>
-      </div>
-
-      <div className="admin-auctions-stats">
-        <div className="stat-card">
-          <div className="stat-number">{auctions.length}</div>
-          <div className="stat-label">{t("admin.totalAuctions")}</div>
-        </div>
-        <div className="stat-card">
-          <div className="stat-number">
-            {auctions.filter((a) => a.status === "ACTIVE").length}
-          </div>
-          <div className="stat-label">{t("admin.activeAuctions")}</div>
-        </div>
-        <div className="stat-card">
-          <div className="stat-number">
-            {auctions.filter((a) => a.status === "PENDING").length}
-          </div>
-          <div className="stat-label">{t("admin.pendingAuctions")}</div>
-        </div>
-      </div>
-
-      <div className="admin-auctions-table">
-        {auctions.length === 0 ? (
-          <div className="empty-state">
-            <div className="empty-icon">🏆</div>
-            <h3>{t("admin.noAuctions")}</h3>
-            <p>{t("admin.noAuctionsDesc")}</p>
-          </div>
-        ) : (
-          <div className="table-container">
-            <table className="auctions-table">
-              <thead>
-                <tr>
-                  <th>{t("admin.image")}</th>
-                  <th>{t("admin.title")}</th>
-                  <th>{t("admin.seller")}</th>
-                  <th>{t("admin.price")}</th>
-                  <th>{t("admin.bids")}</th>
-                  <th>{t("admin.status")}</th>
-                  <th>{t("admin.created")}</th>
-                  <th>{t("admin.actions")}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {auctions.map((auction) => (
-                  <tr key={auction._id}>
-                    <td>
-                      <Image
-                        src={auction.mainImage || "/placeholder-artwork.jpg"}
-                        alt={auction.title}
-                        className="auction-thumbnail"
-                        width={60}
-                        height={60}
-                        unoptimized
-                      />
-                    </td>
-                    <td>
-                      <div className="auction-info">
-                        <div className="auction-title">{auction.title}</div>
-                        <div className="auction-type">
-                          {t(
-                            `auctions.type.${auction.artworkType.toLowerCase()}`,
-                          )}
-                        </div>
-                      </div>
-                    </td>
-                    <td>
-                      <div className="seller-info">
-                        <div className="seller-name">
-                          {getSellerName(auction.seller)}
-                        </div>
-                        <div className="seller-email">
-                          {auction.seller.email}
-                        </div>
-                      </div>
-                    </td>
-                    <td>
-                      <div className="price-info">
-                        <div className="current-price">
-                          {auction.currentPrice} ₾
-                        </div>
-                        <div className="starting-price">
-                          {t("admin.starting")}: {auction.startingPrice} ₾
-                        </div>
-                      </div>
-                    </td>
-                    <td className="bid-count">{auction.totalBids}</td>
-                    <td>
-                      <span
-                        className={`status-badge ${getStatusColor(
-                          auction.status,
-                        )}`}
-                      >
-                        {t(`auctions.status.${auction.status.toLowerCase()}`)}
-                      </span>
-                    </td>
-                    <td className="created-date">
-                      {new Date(auction.createdAt).toLocaleDateString()}
-                    </td>
-                    <td>
-                      <div className="action-buttons">
-                        <Link
-                          href={`/admin/auctions/${auction._id}/edit`}
-                          className="action-btn edit-btn"
-                          title={t("admin.edit")}
-                        >
-                          ✏️
-                        </Link>
-                        {auction.status === "PENDING" && (
-                          <button
-                            onClick={() => approveAuction(auction._id)}
-                            className="action-btn approve-btn"
-                            title={t("admin.approve")}
-                          >
-                            ✓
-                          </button>
-                        )}
-                        <button
-                          onClick={() => deleteAuction(auction._id)}
-                          className="action-btn delete-btn"
-                          title={t("admin.delete")}
-                        >
-                          🗑️
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
+      )}
     </div>
   );
 }
