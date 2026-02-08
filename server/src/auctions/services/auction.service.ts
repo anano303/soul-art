@@ -986,6 +986,7 @@ export class AuctionService {
           auction.title,
           auction.currentPrice,
           auction.paymentDeadline,
+          auction.mainImage,
         );
       } catch (error) {
         this.logger.error(`Failed to notify new winner: ${error}`);
@@ -1072,6 +1073,7 @@ export class AuctionService {
             auction.title,
             auction.currentPrice,
             auction.paymentDeadline,
+            auction.mainImage,
           );
         }
       }
@@ -1084,6 +1086,7 @@ export class AuctionService {
           auction.title,
           auction.currentPrice,
           auction.sellerEarnings,
+          auction.mainImage,
         );
       }
     } catch (error) {

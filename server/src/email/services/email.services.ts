@@ -1120,7 +1120,15 @@ ${data.message}
     auctionTitle: string,
     finalPrice: number,
     paymentDeadline: Date,
+    auctionImage?: string,
   ) {
+    const imageSection = auctionImage
+      ? `<div style="text-align: center; margin-bottom: 20px;">
+           <img src="${auctionImage}" alt="${auctionTitle}" 
+                style="max-width: 100%; max-height: 300px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+         </div>`
+      : '';
+
     const mailOptions = {
       from: emailConfig.from,
       to: email,
@@ -1129,6 +1137,8 @@ ${data.message}
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background: #f9f9f9;">
           <div style="background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
             <h1 style="color: #16a34a; text-align: center; margin-bottom: 30px;">🎉 გილოცავთ მოგებას!</h1>
+            
+            ${imageSection}
             
             <p style="font-size: 16px; line-height: 1.6; color: #333;">
               თქვენ მოიგეთ აუქციონი: <strong>${auctionTitle}</strong>
@@ -1173,8 +1183,16 @@ ${data.message}
     auctionTitle: string,
     finalPrice: number,
     sellerEarnings: number,
+    auctionImage?: string,
   ) {
     const commission = finalPrice - sellerEarnings;
+
+    const imageSection = auctionImage
+      ? `<div style="text-align: center; margin-bottom: 20px;">
+           <img src="${auctionImage}" alt="${auctionTitle}" 
+                style="max-width: 100%; max-height: 300px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+         </div>`
+      : '';
 
     const mailOptions = {
       from: emailConfig.from,
@@ -1184,6 +1202,8 @@ ${data.message}
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background: #f9f9f9;">
           <div style="background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
             <h1 style="color: #3b82f6; text-align: center; margin-bottom: 30px;">🎯 აუქციონი დასრულდა</h1>
+            
+            ${imageSection}
             
             <p style="font-size: 16px; line-height: 1.6; color: #333;">
               თქვენი აუქციონი <strong>"${auctionTitle}"</strong> წარმატებით დასრულდა!
