@@ -426,14 +426,24 @@ export default function UserMenu({
                   </Link>
                 )}
                 {isAuctionAdminRole(user.role) && (
-                  <Link
-                    href="/auction-admin"
-                    className="dropdown-item"
-                    onClick={handleLinkClick}
-                  >
-                    <Gavel size={18} />
-                    <span>აუქციონ ადმინი</span>
-                  </Link>
+                  <>
+                    <Link
+                      href="/auction-admin"
+                      className="dropdown-item"
+                      onClick={handleLinkClick}
+                    >
+                      <Gavel size={18} />
+                      <span>აუქციონ ადმინი</span>
+                    </Link>
+                    <Link
+                      href="/auction-admin/orders"
+                      className="dropdown-item"
+                      onClick={handleLinkClick}
+                    >
+                      <Package size={18} />
+                      <span>აუქციონის შეკვეთები</span>
+                    </Link>
+                  </>
                 )}
                 {(user.role?.toLowerCase() === Role.Admin ||
                   user.role?.toLowerCase() === Role.Blogger) && (

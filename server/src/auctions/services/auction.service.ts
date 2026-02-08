@@ -191,7 +191,7 @@ export class AuctionService {
     const [auctions, total] = await Promise.all([
       this.auctionModel
         .find(query)
-        .populate('seller', 'name ownerFirstName ownerLastName storeName')
+        .populate('seller', 'name email ownerFirstName ownerLastName storeName')
         .populate('currentWinner', 'name ownerFirstName ownerLastName')
         .sort({ endDate: 1, createdAt: -1 })
         .skip(skip)
@@ -2137,6 +2137,17 @@ export class AuctionService {
           auction.currentWinner.toString(),
           buyerName,
           auction.title,
+        );
+
+        // გადახდის დადასტურების მეილების გაგზავნა (BOG callback-იდან)
+        const deliveryFee = auction.deliveryFee || 0;
+        const totalPayment = auction.currentPrice + deliveryFee;
+        await this.sendPaymentConfirmationNotifications(
+          auction,
+          seller,
+          winner,
+          deliveryFee,
+          totalPayment,
         );
       } catch (error) {
         this.logger.warn(`Failed to record auction admin earnings: ${error}`);

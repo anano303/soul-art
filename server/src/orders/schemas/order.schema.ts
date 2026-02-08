@@ -103,10 +103,10 @@ export class Order {
   @Prop({
     required: false,
     type: {
-      id: { required: true, type: String },
-      status: { required: true, type: String },
-      update_time: { required: true, type: String },
-      email_address: { required: true, type: String },
+      id: { required: false, type: String },
+      status: { required: false, type: String },
+      update_time: { required: false, type: String },
+      email_address: { required: false, type: String },
     },
   })
   paymentResult!: PaymentResult;

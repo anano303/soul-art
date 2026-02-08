@@ -34,20 +34,11 @@ export function AdminOrderDetails({ order }: AdminOrderDetailsProps) {
   const isSeller = userData?.role === Role.Seller;
   const userId = userData?._id;
 
-  // სელერისთვის მხოლოდ მისი პროდუქტების ჯამი (მიტანის გარეშე)
-  const getSellerItemsTotal = (): number => {
-    if (!isSeller || !userId) {
-      return order.itemsPrice || 0;
-    }
-    return (order.orderItems || []).reduce((sum, item) => {
-      const product = item.productId as any;
-      const productUserId =
-        product?.user?._id?.toString() || product?.user?.toString();
-      if (productUserId === userId) {
-        return sum + item.price * item.qty;
-      }
-      return sum;
-    }, 0);
+  // სელერისთვის totalPrice - shippingPrice (მიტანის გარეშე)
+  // რადგან საკომისიო პროდუქტის ფასიდან იანგარიშება
+  const getSellerDisplayTotal = (): number => {
+    const shippingPrice = order.shippingPrice || 0;
+    return (order.totalPrice || 0) - shippingPrice;
   };
 
   // Fetch all colors for proper nameEn support
@@ -487,7 +478,38 @@ export function AdminOrderDetails({ order }: AdminOrderDetailsProps) {
             <div className="card">
               <h2>{t("adminOrders.sellerInfo")}</h2>
 
-              {isLoadingSellerInfo ? (
+              {/* For auction orders, show seller from auctionId */}
+              {order.orderType === "auction" && order.auctionId?.seller ? (
+                <div className="seller-info">
+                  <div className="seller-details-grid">
+                    {/* Seller info */}
+                    {order.auctionId.seller.storeName && (
+                      <p>
+                        <strong>{t("adminOrders.storeName")}:</strong>{" "}
+                        {order.auctionId.seller.storeName}
+                      </p>
+                    )}
+                    {order.auctionId.seller.name && (
+                      <p>
+                        <strong>{t("adminOrders.ownerName")}:</strong>{" "}
+                        {order.auctionId.seller.name}
+                      </p>
+                    )}
+                    {order.auctionId.seller.email && (
+                      <p>
+                        <strong>{t("adminOrders.sellerEmail")}:</strong>{" "}
+                        {order.auctionId.seller.email}
+                      </p>
+                    )}
+                    {order.auctionId.seller.phoneNumber && (
+                      <p>
+                        <strong>{t("adminOrders.sellerPhone")}:</strong>{" "}
+                        {order.auctionId.seller.phoneNumber}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              ) : isLoadingSellerInfo ? (
                 <div className="loading-state">
                   <p>{t("adminOrders.loading")}</p>
                 </div>
@@ -1021,13 +1043,7 @@ export function AdminOrderDetails({ order }: AdminOrderDetailsProps) {
             <h2>{t("adminOrders.orderSummary")}</h2>
             <div className="summary-item">
               <span>{t("adminOrders.items")}</span>
-              {/* სელერისთვის მხოლოდ მისი პროდუქტების ფასი */}
-              <span>
-                ₾
-                {isSeller
-                  ? getSellerItemsTotal().toFixed(2)
-                  : order.itemsPrice.toFixed(2)}
-              </span>
+              <span>₾{order.itemsPrice.toFixed(2)}</span>
             </div>
             {/* სელერისთვის მიტანა და გადასახადი არ ჩანს */}
             {!isSeller && (
@@ -1047,14 +1063,12 @@ export function AdminOrderDetails({ order }: AdminOrderDetailsProps) {
               </>
             )}
             <div className="summary-total">
-              <span>
-                {isSeller ? t("adminOrders.items") : t("adminOrders.total")}
-              </span>
-              {/* სელერისთვის მხოლოდ პროდუქტების ჯამი */}
+              <span>{t("adminOrders.total")}</span>
+              {/* სელერისთვის totalPrice - shippingPrice */}
               <span>
                 ₾
                 {isSeller
-                  ? getSellerItemsTotal().toFixed(2)
+                  ? getSellerDisplayTotal().toFixed(2)
                   : order.totalPrice.toFixed(2)}
               </span>
             </div>

@@ -658,7 +658,14 @@ export class OrdersService {
           select: '_id name email phoneNumber storeName',
         },
       })
-      .populate('auctionId', 'title mainImage seller currentWinner')
+      .populate({
+        path: 'auctionId',
+        select: 'title mainImage seller currentWinner',
+        populate: {
+          path: 'seller',
+          select: '_id name email phoneNumber storeName',
+        },
+      })
       .sort({ createdAt: -1 })
       .lean();
 
@@ -696,7 +703,15 @@ export class OrdersService {
       throw new BadRequestException('Invalid order ID.');
     const order = await this.orderModel
       .findById(id)
-      .populate('user', 'name email');
+      .populate('user', 'name email phoneNumber')
+      .populate({
+        path: 'auctionId',
+        select: 'title mainImage seller',
+        populate: {
+          path: 'seller',
+          select: '_id name email phoneNumber storeName',
+        },
+      });
     if (!order) throw new NotFoundException('No order with given ID.');
     return order;
   }
@@ -921,14 +936,23 @@ export class OrdersService {
     try {
       const orderWithData = await this.orderModel
         .findById(id)
-        .populate('user', 'email ownerFirstName ownerLastName')
+        .populate('user', 'email ownerFirstName ownerLastName name')
         .populate({
           path: 'orderItems.productId',
           select: 'user brand',
           populate: {
             path: 'user',
             select:
-              'storeName brandName artistSlug ownerFirstName ownerLastName',
+              'storeName brandName artistSlug ownerFirstName ownerLastName email',
+          },
+        })
+        .populate({
+          path: 'auctionId',
+          select: 'title mainImage seller',
+          populate: {
+            path: 'seller',
+            select:
+              'storeName brandName artistSlug ownerFirstName ownerLastName email',
           },
         });
 
@@ -943,9 +967,65 @@ export class OrdersService {
         orderWithData?.isGuestOrder && orderWithData?.guestInfo?.fullName
           ? orderWithData.guestInfo.fullName
           : `${orderWithData?.user?.ownerFirstName || ''} ${orderWithData?.user?.ownerLastName || ''}`.trim() ||
+            orderWithData?.user?.name ||
             'მყიდველო';
 
-      if (customerEmail) {
+      // Check if this is an auction order
+      const isAuctionOrder =
+        orderWithData.orderType === 'auction' && orderWithData.auctionId;
+
+      let orderItemsForEmail: Array<{ name: string; quantity: number }> = [];
+      let artists: Array<{ name: string; slug: string }> = [];
+      let auctionImage: string | undefined;
+
+      if (isAuctionOrder) {
+        // For auction orders, use auction data
+        const auction = orderWithData.auctionId as any;
+        orderItemsForEmail = [
+          {
+            name: auction.title || 'აუქციონის ნახატი',
+            quantity: 1,
+          },
+        ];
+        auctionImage = auction.mainImage;
+
+        // Get seller info from auction
+        const seller = auction.seller;
+        if (seller?.artistSlug) {
+          artists = [
+            {
+              name:
+                seller.brandName ||
+                seller.storeName ||
+                `${seller.ownerFirstName || ''} ${seller.ownerLastName || ''}`.trim() ||
+                'ხელოვანი',
+              slug: seller.artistSlug,
+            },
+          ];
+        }
+
+        // Send delivery notification to auction seller
+        if (seller?.email) {
+          try {
+            await this.emailService.sendAuctionDeliveryConfirmationToSeller(
+              seller.email,
+              auction.title,
+              customerName,
+              auctionImage,
+            );
+          } catch (error) {
+            this.logger.error(
+              `Failed to send auction delivery email to seller: ${error.message}`,
+            );
+          }
+        }
+      } else {
+        // For regular orders
+        orderItemsForEmail = orderWithData.orderItems.map((item) => ({
+          name: item.name,
+          quantity: item.qty,
+        }));
+
         // Get unique artists from order items
         const artistsMap = new Map<string, { name: string; slug: string }>();
 
@@ -953,33 +1033,51 @@ export class OrdersService {
           const productData: any = item.productId;
           const seller = productData?.user;
 
-          if (seller?.artistSlug) {
-            const artistName =
-              seller.brandName ||
-              seller.storeName ||
-              `${seller.ownerFirstName || ''} ${seller.ownerLastName || ''}`.trim() ||
-              'ხელოვანი';
+          // Get seller name for email
+          const sellerName =
+            seller?.brandName ||
+            seller?.storeName ||
+            `${seller?.ownerFirstName || ''} ${seller?.ownerLastName || ''}`.trim() ||
+            'ხელოვანი';
 
+          if (seller?.artistSlug) {
             if (!artistsMap.has(seller.artistSlug)) {
               artistsMap.set(seller.artistSlug, {
-                name: artistName,
+                name: sellerName,
                 slug: seller.artistSlug,
               });
             }
           }
+
+          // Send delivery notification to each seller
+          if (seller?.email) {
+            try {
+              await this.emailService.sendDeliveryNotificationToSeller(
+                seller.email,
+                sellerName,
+                orderWithData._id.toString(),
+                [{ name: item.name, quantity: item.qty }],
+              );
+            } catch (error) {
+              this.logger.error(
+                `Failed to send delivery email to seller ${seller.email}: ${error.message}`,
+              );
+            }
+          }
         }
 
-        const artists = Array.from(artistsMap.values());
+        artists = Array.from(artistsMap.values());
+      }
 
+      // Send delivery confirmation to customer
+      if (customerEmail) {
         await this.emailService.sendDeliveryConfirmation(
           customerEmail,
           customerName,
           orderWithData._id.toString(),
-          orderWithData.orderItems.map((item) => ({
-            name: item.name,
-            quantity: item.qty,
-          })),
+          orderItemsForEmail,
           artists,
+          auctionImage,
         );
       }
     } catch (error) {
@@ -1403,7 +1501,10 @@ export class OrdersService {
                   paymentMethod: orderWithData.paymentMethod,
                   totals: {
                     ...totals,
-                    sellerSubtotal: entry.subtotal,
+                    // სელერისთვის: totalPrice - shippingPrice (მიტანის გარეშე)
+                    // რადგან საკომისიო პროდუქტის ფასიდან იანგარიშება
+                    sellerSubtotal:
+                      (totals.totalPrice || 0) - (totals.shippingPrice || 0),
                   },
                   orderItems: entry.items,
                 },
@@ -1421,9 +1522,12 @@ export class OrdersService {
           }
 
           try {
+            // სელერისთვის: totalPrice - shippingPrice
+            const sellerDisplayTotal =
+              (totals.totalPrice || 0) - (totals.shippingPrice || 0);
             const sellerPayload: NotificationPayload = {
               title: '🛒 ახალი შეკვეთა',
-              body: `${entry.items.length} პროდუქტი • ${entry.subtotal.toFixed(
+              body: `${entry.items.length} პროდუქტი • ${sellerDisplayTotal.toFixed(
                 2,
               )} ₾`,
               icon: `${baseUrl}/icons/android/icon-192x192.png`,
@@ -1852,7 +1956,7 @@ export class OrdersService {
     }
   }
   async findOrdersBySeller(sellerId: string): Promise<OrderDocument[]> {
-    // Find all orders that contain products created by this seller
+    // Find all orders that contain products created by this seller OR auction orders where seller owns the auction
     const orders = await this.orderModel
       .find()
       .populate('user', 'name email phoneNumber')
@@ -1864,53 +1968,48 @@ export class OrdersService {
           select: '_id name email phoneNumber storeName',
         },
       })
+      .populate({
+        path: 'auctionId',
+        select: 'title mainImage seller currentWinner',
+        populate: {
+          path: 'seller',
+          select: '_id name email phoneNumber storeName',
+        },
+      })
       .sort({ createdAt: -1 });
-    // Filter orders to only include those containing seller's products
+
+    // Filter orders to include:
+    // 1. Regular orders containing seller's products
+    // 2. Auction orders where the seller owns the auction
     const sellerOrders = orders.filter((order) => {
-      console.log(
-        'Checking order:',
-        order._id,
-        'Items count:',
-        order.orderItems?.length,
-      );
+      // Check for auction orders where this seller owns the auction
+      if (order.orderType === 'auction' && order.auctionId) {
+        const auctionSellerId =
+          typeof (order.auctionId as any).seller === 'string'
+            ? (order.auctionId as any).seller
+            : (order.auctionId as any).seller?._id?.toString() ||
+              (order.auctionId as any).seller?.toString();
+        if (auctionSellerId === sellerId) {
+          console.log(
+            'Found auction order for seller:',
+            order._id,
+            'Auction seller:',
+            auctionSellerId,
+          );
+          return true;
+        }
+      }
+
+      // Check for regular orders with seller's products
       const hasSellerProduct =
         order.orderItems &&
-        order.orderItems.some((item, index) => {
-          console.log(`Item ${index}:`, {
-            hasProductId: !!item.productId,
-            productIdType: typeof item.productId,
-            productId: item.productId
-              ? (item.productId as any)._id
-              : 'no productId',
-            hasUser: !!(item.productId as any)?.user,
-            userType: typeof (item.productId as any)?.user,
-            userId:
-              (item.productId as any)?.user?._id ||
-              (item.productId as any)?.user,
-          });
+        order.orderItems.some((item) => {
           if (!item.productId || !(item.productId as any).user) return false;
           const productUserId =
             typeof (item.productId as any).user === 'string'
               ? (item.productId as any).user
               : (item.productId as any).user._id?.toString();
-          const isMatch = productUserId === sellerId;
-          console.log(
-            'Comparing:',
-            productUserId,
-            'vs',
-            sellerId,
-            'Match:',
-            isMatch,
-          );
-          if (isMatch) {
-            console.log(
-              'Found order with seller product:',
-              order._id,
-              'Product user:',
-              productUserId,
-            );
-          }
-          return isMatch;
+          return productUserId === sellerId;
         });
       return hasSellerProduct;
     });

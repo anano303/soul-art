@@ -27,6 +27,8 @@ interface Auction {
     ownerLastName?: string;
     firstName?: string;
     lastName?: string;
+    name?: string;
+    storeName?: string;
     email: string;
   };
   createdAt: string;
@@ -168,11 +170,19 @@ export default function AdminAuctions() {
   };
 
   const getSellerName = (seller: Auction["seller"]) => {
+    // პირველ რიგში მაღაზიის სახელი
+    if (seller.storeName) {
+      return seller.storeName;
+    }
+    // თუ არაა, მაშინ სახელი და გვარი
     if (seller.ownerFirstName && seller.ownerLastName) {
       return `${seller.ownerFirstName} ${seller.ownerLastName}`;
     }
     if (seller.firstName && seller.lastName) {
       return `${seller.firstName} ${seller.lastName}`;
+    }
+    if (seller.name) {
+      return seller.name;
     }
     return seller.email;
   };

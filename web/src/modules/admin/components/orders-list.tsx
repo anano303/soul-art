@@ -126,22 +126,24 @@ export function OrdersList({
   const orders = data?.items || [];
   const totalPages = data?.pages || 0;
 
-  // სელერისთვის მხოლოდ მისი პროდუქტების ჯამის გამოთვლა
-  const getSellerItemsTotal = (order: Order): number => {
-    if (userRole !== "seller" || !userId) {
-      return order.itemsPrice || order.totalPrice || 0;
+  // შეკვეთის თანხის გამოსათვლელად სელერისა და აუქციონ ადმინისთვის
+  // მიტანის ფასი გამოიკლება რადგან საკომისიო პროდუქტის ფასიდან იანგარიშება, არა მიტანიდან
+  // მიტანის ფასს მომხმარებელი იხდის, მაგრამ სელერს/აუქციონ ადმინს ბალანსიდან აკლდება
+  const getDisplayTotal = (order: Order): number => {
+    const shippingPrice = (order as any).shippingPrice || 0;
+    
+    // ადმინისთვის სრული ფასი (მიტანიანად)
+    if (userRole === "admin" && !auctionAdminMode) {
+      return order.totalPrice || 0;
     }
-
-    // სელერისთვის მხოლოდ მისი პროდუქტების ფასი (მიტანის გარეშე)
-    return (order.orderItems || []).reduce((sum, item) => {
-      const product = item.productId as any;
-      const productUserId =
-        product?.user?._id?.toString() || product?.user?.toString();
-      if (productUserId === userId) {
-        return sum + item.price * item.qty;
-      }
-      return sum;
-    }, 0);
+    
+    // სელერისთვის და აუქციონ ადმინისთვის - გამოაკელი მიტანის ფასი
+    // რადგან საკომისიო პროდუქტის ფასიდან იანგარიშება
+    if (userRole === "seller" || auctionAdminMode) {
+      return (order.totalPrice || 0) - shippingPrice;
+    }
+    
+    return order.totalPrice || 0;
   };
 
   return (
@@ -216,7 +218,12 @@ export function OrdersList({
             <tbody>
               {orders.map((order: Order) => (
                 <tr key={order._id}>
-                  <td>#{order._id}</td>
+                  <td>
+                    #{order._id}
+                    {order.orderType === "auction" && (
+                      <span className="auction-badge">#აუქციონი</span>
+                    )}
+                  </td>
                   <td>
                     {order.user ? (
                       <div className="user-info">
@@ -237,8 +244,30 @@ export function OrdersList({
                     )}
                   </td>
                   <td>
-                    {/* Show seller info from first product */}
-                    {order.orderItems && order.orderItems.length > 0 ? (
+                    {/* Show seller info - for auction orders from auctionId, for regular from orderItems */}
+                    {order.orderType === "auction" && order.auctionId?.seller ? (
+                      <Link
+                        href={`/admin/users/${order.auctionId.seller._id}/edit`}
+                        className="seller-info seller-link"
+                      >
+                        <div className="seller-name">
+                          <Gavel className="icon" size={14} />
+                          {order.auctionId.seller.storeName ||
+                            order.auctionId.seller.name ||
+                            "Unknown Artist"}
+                        </div>
+                        {order.auctionId.seller.email && (
+                          <div className="seller-email">
+                            📧 {order.auctionId.seller.email}
+                          </div>
+                        )}
+                        {order.auctionId.seller.phoneNumber && (
+                          <div className="seller-phone">
+                            📞 {order.auctionId.seller.phoneNumber}
+                          </div>
+                        )}
+                      </Link>
+                    ) : order.orderItems && order.orderItems.length > 0 ? (
                       (() => {
                         const firstProductData = order.orderItems[0].productId;
                         if (
@@ -247,7 +276,10 @@ export function OrdersList({
                         ) {
                           const seller = firstProductData.user;
                           return (
-                            <div className="seller-info">
+                            <Link
+                              href={`/admin/users/${seller._id}/edit`}
+                              className="seller-info seller-link"
+                            >
                               <div className="seller-name">
                                 <Store className="icon" size={14} />
                                 {seller.storeName ||
@@ -264,7 +296,7 @@ export function OrdersList({
                                   🏷️ {firstProductData.brand}
                                 </div>
                               )}
-                            </div>
+                            </Link>
                           );
                         }
                         return (
@@ -308,13 +340,8 @@ export function OrdersList({
                   </td>
                   <td>
                     <div className="price-cell">
-                      {/* სელერისთვის მხოლოდ პროდუქტების ფასი (მიტანის გარეშე) */}
-                      {userRole === "seller"
-                        ? getSellerItemsTotal(order).toFixed(2)
-                        : order.totalPrice
-                          ? order.totalPrice.toFixed(2)
-                          : "0.00"}{" "}
-                      ₾
+                      {/* სელერისთვის და აუქციონ ადმინისთვის რეგიონის მიტანის გარეშე */}
+                      {getDisplayTotal(order).toFixed(2)} ₾
                       {(order as any).hasReferralDiscount && (
                         <span
                           className="referral-discount-badge"
@@ -405,7 +432,7 @@ export function OrdersList({
                     )}
                   </td>
                   <td className="orders-actions">
-                    {salesManagerMode ? (
+                    {salesManagerMode || auctionAdminMode ? (
                       <span
                         className="view-link disabled"
                         title="დეტალების ნახვა მხოლოდ ადმინისთვისაა ხელმისაწვდომი"

@@ -543,10 +543,19 @@ export class EmailService {
     orderId: string,
     orderItems: any[],
     artists?: Array<{ name: string; slug: string }>,
+    auctionImage?: string,
   ) {
     const itemsList = orderItems
       .map((item) => `<li>${item.name} x ${item.quantity}</li>`)
       .join('');
+
+    // Image section for auction orders
+    const imageSection = auctionImage
+      ? `<div style="text-align: center; margin-bottom: 20px;">
+           <img src="${auctionImage}" alt="შეკვეთის სურათი" 
+                style="max-width: 100%; max-height: 300px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+         </div>`
+      : '';
 
     // Generate artist rating links section
     const artistRatingSection =
@@ -580,6 +589,8 @@ export class EmailService {
           
           <p>თქვენი შეკვეთა მიტანილია წარმატებით.</p>
           
+          ${imageSection}
+          
           <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
             <h3 style="color: #012645; margin-top: 0;">მიტანილი პროდუქტები:</h3>
             <p><strong>შეკვეთის ნომერი:</strong> #${orderId}</p>
@@ -592,6 +603,99 @@ export class EmailService {
           <p>იმედი გვაქვს, კმაყოფილი ხართ შენაძენით!</p>
           
           ${artistRatingSection}
+          
+          <hr style="margin: 30px 0; border: none; border-top: 1px solid #e5e7eb;">
+          <p style="color: #999; font-size: 12px;">SoulArt Team</p>
+        </div>
+      `,
+    };
+
+    await this.transporter.sendMail(mailOptions);
+  }
+
+  // სელერისთვის მიტანის დადასტურების მეილი (ჩვეულებრივი შეკვეთისთვის)
+  async sendDeliveryNotificationToSeller(
+    to: string,
+    sellerName: string,
+    orderId: string,
+    orderItems: Array<{ name: string; quantity: number }>,
+  ) {
+    const itemsList = orderItems
+      .map((item) => `<li>${item.name} x ${item.quantity}</li>`)
+      .join('');
+
+    const mailOptions = {
+      from: emailConfig.from,
+      to,
+      subject: `შეკვეთა ჩაბარებულია #${orderId} - SoulArt`,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h2 style="color: #16a34a;">✅ შეკვეთა ჩაბარებულია!</h2>
+          
+          <p>მოგესალმებით ${sellerName}!</p>
+          
+          <p>შეკვეთა <strong>#${orderId}</strong> წარმატებით ჩაბარდა მყიდველს.</p>
+          
+          <div style="background: #dcfce7; padding: 20px; border-radius: 8px; margin: 20px 0;">
+            <h3 style="color: #166534; margin-top: 0;">ჩაბარებული პროდუქტები:</h3>
+            <ul style="list-style-type: none; padding: 0; margin: 0;">
+              ${itemsList}
+            </ul>
+          </div>
+          
+          <div style="background: #f0f9ff; padding: 15px; border-radius: 8px; border-left: 4px solid #3b82f6;">
+            <p style="margin: 0; color: #0369a1;">
+              💰 თანხა დაემატა თქვენს ბალანსს. შეგიძლიათ გატანოთ 
+              <a href="${process.env.ALLOWED_ORIGINS}/profile/balance" style="color: #012645; font-weight: 600;">ბალანსის გვერდიდან</a>.
+            </p>
+          </div>
+          
+          <hr style="margin: 30px 0; border: none; border-top: 1px solid #e5e7eb;">
+          <p style="color: #999; font-size: 12px;">SoulArt Team</p>
+        </div>
+      `,
+    };
+
+    await this.transporter.sendMail(mailOptions);
+  }
+
+  // აუქციონის სელერისთვის მიტანის დადასტურების მეილი
+  async sendAuctionDeliveryConfirmationToSeller(
+    to: string,
+    auctionTitle: string,
+    buyerName: string,
+    auctionImage?: string,
+  ) {
+    const imageSection = auctionImage
+      ? `<div style="text-align: center; margin-bottom: 20px;">
+           <img src="${auctionImage}" alt="${auctionTitle}" 
+                style="max-width: 100%; max-height: 300px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+         </div>`
+      : '';
+
+    const mailOptions = {
+      from: emailConfig.from,
+      to,
+      subject: `აუქციონის ნახატი ჩაბარებულია - ${auctionTitle} - SoulArt`,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h2 style="color: #16a34a;">✅ აუქციონის ნახატი ჩაბარებულია!</h2>
+          
+          ${imageSection}
+          
+          <p>თქვენი აუქციონის ნახატი <strong>"${auctionTitle}"</strong> წარმატებით ჩაბარდა მყიდველს <strong>${buyerName}</strong>.</p>
+          
+          <div style="background: #dcfce7; padding: 20px; border-radius: 8px; margin: 20px 0;">
+            <h3 style="color: #166534; margin-top: 0;">🎉 გილოცავთ გაყიდვას!</h3>
+            <p style="margin: 0;">თანხა დაემატა თქვენს ბალანსს.</p>
+          </div>
+          
+          <div style="background: #f0f9ff; padding: 15px; border-radius: 8px; border-left: 4px solid #3b82f6;">
+            <p style="margin: 0; color: #0369a1;">
+              💰 შეგიძლიათ თანხის გატანა 
+              <a href="${process.env.ALLOWED_ORIGINS}/profile/balance" style="color: #012645; font-weight: 600;">ბალანსის გვერდიდან</a>.
+            </p>
+          </div>
           
           <hr style="margin: 30px 0; border: none; border-top: 1px solid #e5e7eb;">
           <p style="color: #999; font-size: 12px;">SoulArt Team</p>
