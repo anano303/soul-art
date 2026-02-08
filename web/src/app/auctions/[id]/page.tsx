@@ -471,8 +471,77 @@ export default function AuctionDetailPage() {
     (!user || user._id !== auction.seller._id);
   const isPreBid = auction.status === "SCHEDULED";
 
+  // Generate seller name for structured data
+  const sellerFullName = auction.seller.ownerFirstName && auction.seller.ownerLastName
+    ? `${auction.seller.ownerFirstName} ${auction.seller.ownerLastName}`
+    : auction.seller.storeName || auction.seller.name || "SoulArt Artist";
+
+  // JSON-LD structured data for SEO
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: auction.title,
+    description: auction.description,
+    image: allImages,
+    brand: {
+      "@type": "Brand",
+      name: "SoulArt",
+    },
+    creator: {
+      "@type": "Person",
+      name: sellerFullName,
+    },
+    offers: {
+      "@type": "AggregateOffer",
+      priceCurrency: "GEL",
+      lowPrice: auction.startingPrice,
+      highPrice: auction.currentPrice || auction.startingPrice,
+      offerCount: auction.totalBids || 0,
+      availability: auction.status === "ACTIVE" 
+        ? "https://schema.org/InStock" 
+        : auction.status === "ENDED"
+          ? "https://schema.org/SoldOut"
+          : "https://schema.org/PreOrder",
+      priceValidUntil: auction.endDate,
+      url: `https://soulart.ge/auctions/${auction._id}`,
+    },
+    additionalProperty: [
+      {
+        "@type": "PropertyValue",
+        name: "Artwork Type",
+        value: auction.artworkType === "ORIGINAL" ? "ორიგინალი" : "რეპროდუქცია",
+      },
+      {
+        "@type": "PropertyValue",
+        name: "Dimensions",
+        value: auction.dimensions,
+      },
+      {
+        "@type": "PropertyValue",
+        name: "Material",
+        value: auction.material,
+      },
+      {
+        "@type": "PropertyValue",
+        name: "Current Bid",
+        value: `${auction.currentPrice} ₾`,
+      },
+      {
+        "@type": "PropertyValue",
+        name: "Total Bids",
+        value: auction.totalBids?.toString() || "0",
+      },
+    ],
+  };
+
   return (
-    <div className="auction-detail-container">
+    <>
+      {/* JSON-LD Structured Data for SEO */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <div className="auction-detail-container">
       <div className="auction-detail-header">
         <Link href="/auctions" className="back-link">
           <ArrowLeft size={20} />
@@ -887,6 +956,7 @@ export default function AuctionDetailPage() {
         auctionTitle={auction.title}
         currentPrice={bidAmount}
       />
-    </div>
+      </div>
+    </>
   );
 }

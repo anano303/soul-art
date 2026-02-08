@@ -164,8 +164,52 @@ function AuctionsContent() {
   const canCreateAuction = isSeller || isAdmin || isAuctionAdmin;
   const createAuctionLink = canCreateAuction ? "/auctions/create" : null;
 
+  // JSON-LD structured data for auctions list page
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    name: "ხელოვნების აუქციონები | SoulArt",
+    description:
+      "იყიდეთ უნიკალური ხელოვნების ნიმუშები SoulArt აუქციონზე! ორიგინალი ნახატები და თანამედროვე ქართველი მხატვრების ნამუშევრები.",
+    url: "https://soulart.ge/auctions",
+    isPartOf: {
+      "@type": "WebSite",
+      name: "SoulArt",
+      url: "https://soulart.ge",
+    },
+    mainEntity: {
+      "@type": "ItemList",
+      numberOfItems: totalAuctions,
+      itemListElement: filteredAuctions.slice(0, 10).map((auction, index) => ({
+        "@type": "ListItem",
+        position: index + 1,
+        item: {
+          "@type": "Product",
+          name: auction.title,
+          image: auction.mainImage,
+          description: auction.description?.substring(0, 200),
+          offers: {
+            "@type": "Offer",
+            priceCurrency: "GEL",
+            price: auction.currentPrice || auction.startingPrice,
+            availability:
+              auction.status === "ACTIVE"
+                ? "https://schema.org/InStock"
+                : "https://schema.org/OutOfStock",
+          },
+          url: `https://soulart.ge/auctions/${auction._id}`,
+        },
+      })),
+    },
+  };
+
   return (
     <>
+      {/* JSON-LD Structured Data for SEO */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <div className="auc-container">
         <div className="auc-header">
           <div className="auc-header-top-row">
