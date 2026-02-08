@@ -113,6 +113,7 @@ interface Auction {
     ownerLastName?: string;
     firstName?: string;
     lastName?: string;
+    storeName?: string;
     email: string;
   };
   createdAt: string;
@@ -356,6 +357,10 @@ export default function AuctionAdminDashboard() {
   };
 
   const getSellerName = (seller: Auction["seller"]) => {
+    // პირველ რიგში მაღაზიის სახელი თუ არსებობს
+    if (seller.storeName) {
+      return seller.storeName;
+    }
     if (seller.ownerFirstName && seller.ownerLastName) {
       return `${seller.ownerFirstName} ${seller.ownerLastName}`;
     }
