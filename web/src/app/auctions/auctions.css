@@ -10,58 +10,58 @@
    Theme Variables - Refined Color System
    ───────────────────────────────────────────────────────────────────────────── */
 
-.auctions-container {
+.auc-container {
   /* Light Theme - Warm Gallery Atmosphere */
-  --auctions-bg-primary: #faf9f7;
-  --auctions-bg-secondary: #f5f3ef;
-  --auctions-surface: #ffffff;
-  --auctions-surface-elevated: #ffffff;
-  --auctions-text-primary: #012645;
-  --auctions-text-secondary: #4a5d6e;
-  --auctions-text-muted: #8a9bab;
-  --auctions-accent: #012645;
-  --auctions-accent-light: #023a66;
-  --auctions-accent-warm: #452001;
-  --auctions-gold: #c9a961;
-  --auctions-gold-light: #e8d9b5;
-  --auctions-border: rgba(1, 38, 69, 0.08);
-  --auctions-border-subtle: rgba(1, 38, 69, 0.04);
-  --auctions-shadow-sm: 0 1px 3px rgba(1, 38, 69, 0.06);
-  --auctions-shadow-md: 0 4px 16px rgba(1, 38, 69, 0.08);
-  --auctions-shadow-lg: 0 8px 32px rgba(1, 38, 69, 0.12);
-  --auctions-shadow-glow: 0 0 40px rgba(201, 169, 97, 0.15);
-  --auctions-overlay: rgba(1, 38, 69, 0.6);
+  --auc-bg-primary: #faf9f7;
+  --auc-bg-secondary: #f5f3ef;
+  --auc-surface: #ffffff;
+  --auc-surface-elevated: #ffffff;
+  --auc-text-primary: #012645;
+  --auc-text-secondary: #4a5d6e;
+  --auc-text-muted: #8a9bab;
+  --auc-accent: #012645;
+  --auc-accent-light: #023a66;
+  --auc-accent-warm: #452001;
+  --auc-gold: #c9a961;
+  --auc-gold-light: #e8d9b5;
+  --auc-border: rgba(1, 38, 69, 0.08);
+  --auc-border-subtle: rgba(1, 38, 69, 0.04);
+  --auc-shadow-sm: 0 1px 3px rgba(1, 38, 69, 0.06);
+  --auc-shadow-md: 0 4px 16px rgba(1, 38, 69, 0.08);
+  --auc-shadow-lg: 0 8px 32px rgba(1, 38, 69, 0.12);
+  --auc-shadow-glow: 0 0 40px rgba(201, 169, 97, 0.15);
+  --auc-overlay: rgba(1, 38, 69, 0.6);
 }
 
 /* Dark Theme - Luxurious Gallery Night Mode */
-[data-theme="dark"] .auctions-container,
-.dark .auctions-container {
-  --auctions-bg-primary: #0a1520;
-  --auctions-bg-secondary: #0d1a28;
-  --auctions-surface: rgba(13, 26, 40, 0.95);
-  --auctions-surface-elevated: rgba(18, 35, 52, 0.98);
-  --auctions-text-primary: #f5f3ef;
-  --auctions-text-secondary: #b8c5d1;
-  --auctions-text-muted: #6a7a8a;
-  --auctions-accent: #c9a961;
-  --auctions-accent-light: #e8d9b5;
-  --auctions-accent-warm: #d4a574;
-  --auctions-gold: #c9a961;
-  --auctions-gold-light: #e8d9b5;
-  --auctions-border: rgba(201, 169, 97, 0.12);
-  --auctions-border-subtle: rgba(201, 169, 97, 0.06);
-  --auctions-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
-  --auctions-shadow-md: 0 4px 16px rgba(0, 0, 0, 0.4);
-  --auctions-shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.5);
-  --auctions-shadow-glow: 0 0 60px rgba(201, 169, 97, 0.2);
-  --auctions-overlay: rgba(0, 0, 0, 0.7);
+[data-theme="dark"] .auc-container,
+.dark .auc-container {
+  --auc-bg-primary: #0a1520;
+  --auc-bg-secondary: #0d1a28;
+  --auc-surface: rgba(13, 26, 40, 0.95);
+  --auc-surface-elevated: rgba(18, 35, 52, 0.98);
+  --auc-text-primary: #f5f3ef;
+  --auc-text-secondary: #b8c5d1;
+  --auc-text-muted: #6a7a8a;
+  --auc-accent: #c9a961;
+  --auc-accent-light: #e8d9b5;
+  --auc-accent-warm: #d4a574;
+  --auc-gold: #c9a961;
+  --auc-gold-light: #e8d9b5;
+  --auc-border: rgba(201, 169, 97, 0.12);
+  --auc-border-subtle: rgba(201, 169, 97, 0.06);
+  --auc-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
+  --auc-shadow-md: 0 4px 16px rgba(0, 0, 0, 0.4);
+  --auc-shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.5);
+  --auc-shadow-glow: 0 0 60px rgba(201, 169, 97, 0.2);
+  --auc-overlay: rgba(0, 0, 0, 0.7);
 }
 
 /* ─────────────────────────────────────────────────────────────────────────────
    Main Container
    ───────────────────────────────────────────────────────────────────────────── */
 
-.auctions-container {
+.auc-container {
   min-height: 100vh;
   background: 
     /* Subtle pattern overlay */
@@ -88,8 +88,8 @@
 }
 
 /* Dark theme background */
-[data-theme="dark"] .auctions-container,
-.dark .auctions-container {
+[data-theme="dark"] .auc-container,
+.dark .auc-container {
   background:
     radial-gradient(
       ellipse at 0% 0%,
@@ -110,7 +110,7 @@
 }
 
 /* Decorative top glow */
-.auctions-container::before {
+.auc-container::before {
   content: "";
   position: absolute;
   top: -100px;
@@ -126,8 +126,8 @@
   pointer-events: none;
 }
 
-[data-theme="dark"] .auctions-container::before,
-.dark .auctions-container::before {
+[data-theme="dark"] .auc-container::before,
+.dark .auc-container::before {
   background: radial-gradient(
     ellipse,
     rgba(201, 169, 97, 0.15) 0%,
@@ -136,7 +136,7 @@
 }
 
 /* Elegant accent line */
-.auctions-container::after {
+.auc-container::after {
   content: "";
   position: absolute;
   top: 0;
@@ -146,7 +146,7 @@
   height: 150px;
   background: linear-gradient(
     180deg,
-    var(--auctions-gold) 0%,
+    var(--auc-gold) 0%,
     rgba(201, 169, 97, 0.3) 50%,
     transparent 100%
   );
@@ -158,7 +158,7 @@
    Header Section - Hero with Background
    ───────────────────────────────────────────────────────────────────────────── */
 
-.auctions-header {
+.auc-header {
   text-align: center;
 
   padding: 60px 24px 70px;
@@ -180,7 +180,7 @@
   overflow: hidden;
 }
 
-.auctions-header::before {
+.auc-header::before {
   content: "";
   position: absolute;
   inset: 0;
@@ -192,7 +192,7 @@
   pointer-events: none;
 }
 
-.header-top-row {
+.auc-header-top-row {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -201,7 +201,7 @@
   position: relative;
 }
 
-.auctions-title {
+.auc-title {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -210,7 +210,7 @@
   position: relative;
 }
 
-.auctions-title .title-text {
+.auc-title .auc-title-text {
   font-family: "Cinzel Decorative", "Georgia", serif;
   font-size: 2.2rem;
   font-weight: 700;
@@ -222,7 +222,7 @@
     0 4px 12px rgba(0, 0, 0, 0.6);
 }
 
-.auctions-title .title-auctions {
+.auc-title .auc-title-auctions {
   display: flex;
   align-items: center;
   gap: 16px;
@@ -246,13 +246,13 @@
 }
 
 /* Dark theme - use gold for Auctions */
-[data-theme="dark"] .auctions-title .title-auctions,
-.dark .auctions-title .title-auctions {
+[data-theme="dark"] .auc-title .auc-title-auctions,
+.dark .auc-title .auc-title-auctions {
   background: linear-gradient(
     135deg,
-    var(--auctions-gold) 0%,
-    var(--auctions-gold-light) 40%,
-    var(--auctions-gold) 60%,
+    var(--auc-gold) 0%,
+    var(--auc-gold-light) 40%,
+    var(--auc-gold) 60%,
     #d4b875 100%
   );
   -webkit-background-clip: text;
@@ -260,23 +260,23 @@
   filter: drop-shadow(2px 2px 4px rgba(201, 169, 97, 0.3));
 }
 
-.auctions-title .gavel-icon {
+.auc-title .auc-gavel-icon {
   width: 56px;
   height: 56px;
   color: #c9a961;
   -webkit-text-fill-color: initial;
-  animation: gavelBounce 2s ease-in-out infinite;
+  animation: aucGavelBounce 2s ease-in-out infinite;
   filter: drop-shadow(2px 4px 6px rgba(0, 0, 0, 0.7));
 }
 
 /* Dark theme - gold gavel */
-[data-theme="dark"] .auctions-title .gavel-icon,
-.dark .auctions-title .gavel-icon {
-  color: var(--auctions-gold);
+[data-theme="dark"] .auc-title .auc-gavel-icon,
+.dark .auc-title .auc-gavel-icon {
+  color: var(--auc-gold);
   filter: drop-shadow(2px 2px 4px rgba(201, 169, 97, 0.4));
 }
 
-@keyframes gavelBounce {
+@keyframes aucGavelBounce {
   0%,
   100% {
     transform: rotate(0deg);
@@ -292,7 +292,7 @@
   }
 }
 
-.auctions-title::after {
+.auc-title::after {
   content: "";
   position: absolute;
   bottom: -16px;
@@ -303,13 +303,13 @@
   background: linear-gradient(
     90deg,
     transparent,
-    var(--auctions-gold),
+    var(--auc-gold),
     transparent
   );
 }
 
 /* Header Actions Container - Top right of hero */
-.header-actions {
+.auc-header-actions {
   display: flex;
   align-items: center;
   gap: 12px;
@@ -322,43 +322,43 @@
 }
 
 /* Create Auction Button */
-.create-auction-btn {
+.auc-create-btn {
   display: flex;
   align-items: center;
   gap: 8px;
   padding: 10px 20px;
   border-radius: 50px;
-  border: 1px solid var(--auctions-gold);
-  background: linear-gradient(135deg, var(--auctions-gold) 0%, #d4b875 100%);
+  border: 1px solid var(--auc-gold);
+  background: linear-gradient(135deg, var(--auc-gold) 0%, #d4b875 100%);
   color: #012645;
   font-weight: 600;
   font-size: 0.9rem;
   text-decoration: none;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: var(--auctions-shadow-sm);
+  box-shadow: var(--auc-shadow-sm);
 }
 
-.create-auction-btn:hover {
+.auc-create-btn:hover {
   transform: translateY(-2px);
   box-shadow:
-    var(--auctions-shadow-md),
+    var(--auc-shadow-md),
     0 0 20px rgba(201, 169, 97, 0.3);
 }
 
-.create-auction-btn svg {
+.auc-create-btn svg {
   width: 18px;
   height: 18px;
 }
 
 /* Dark theme */
-[data-theme="dark"] .create-auction-btn,
-.dark .create-auction-btn {
+[data-theme="dark"] .auc-create-btn,
+.dark .auc-create-btn {
   color: #0a1520;
 }
 
 /* Theme Toggle Button - Glass effect matching artwork */
-.theme-toggle-btn {
+.auc-theme-toggle {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -374,7 +374,7 @@
   backdrop-filter: blur(10px);
 }
 
-.theme-toggle-btn:hover {
+.auc-theme-toggle:hover {
   background: rgba(201, 169, 97, 0.3);
   border-color: rgba(201, 169, 97, 0.6);
   color: #e8d9b5;
@@ -382,7 +382,7 @@
   box-shadow: 0 6px 25px rgba(0, 0, 0, 0.4);
 }
 
-.auctions-subtitle {
+.auc-subtitle {
   font-size: 1.1rem;
   color: rgba(255, 255, 255, 0.95);
   margin: 24px auto 0;
@@ -399,7 +399,7 @@
    Tabs Navigation
    ───────────────────────────────────────────────────────────────────────────── */
 
-.auctions-tabs {
+.auc-tabs {
   display: flex;
   justify-content: center;
   gap: 4px;
@@ -415,7 +415,7 @@
   backdrop-filter: blur(15px);
 }
 
-.auction-tab {
+.auc-tab {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -431,24 +431,24 @@
   letter-spacing: 0.02em;
 }
 
-.auction-tab:hover:not(.active) {
+.auc-tab:hover:not(.active) {
   color: #ffffff;
   background: rgba(255, 255, 255, 0.1);
 }
 
-.auction-tab.active {
+.auc-tab.active {
   background: linear-gradient(135deg, #c9a961 0%, #e8d9b5 50%, #c9a961 100%);
   color: #012645;
   font-weight: 600;
   box-shadow: 0 4px 15px rgba(201, 169, 97, 0.4);
 }
 
-.auction-tab .tab-icon {
+.auc-tab .auc-tab-icon {
   font-size: 1.1rem;
   opacity: 0.85;
 }
 
-.auction-tab .tab-count {
+.auc-tab .auc-tab-count {
   background: rgba(255, 255, 255, 0.2);
   padding: 3px 10px;
   border-radius: 100px;
@@ -456,16 +456,16 @@
   font-weight: 600;
 }
 
-.auction-tab:not(.active) .tab-count {
-  background: var(--auctions-border);
-  color: var(--auctions-text-muted);
+.auc-tab:not(.active) .auc-tab-count {
+  background: var(--auc-border);
+  color: var(--auc-text-muted);
 }
 
 /* ─────────────────────────────────────────────────────────────────────────────
    Filters Wrapper - Full Width Below Hero
    ───────────────────────────────────────────────────────────────────────────── */
 
-.auctions-filters-wrapper {
+.auc-filters-wrapper {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -481,14 +481,14 @@
 }
 
 @media (max-width: 768px) {
-  .auctions-filters-wrapper {
+  .auc-filters-wrapper {
     padding: 0;
   }
 }
 
 /* Dark theme */
-[data-theme="dark"] .auctions-filters-wrapper,
-.dark .auctions-filters-wrapper {
+[data-theme="dark"] .auc-filters-wrapper,
+.dark .auc-filters-wrapper {
   background: rgba(10, 21, 32, 0.95);
   border-bottom-color: rgba(201, 169, 97, 0.25);
 }
@@ -497,7 +497,7 @@
    Filters Section - Inside wrapper
    ───────────────────────────────────────────────────────────────────────────── */
 
-.auctions-filters-section {
+.auc-filters-section {
   width: 100%;
   max-width: 1400px;
   margin: 0 auto;
@@ -513,7 +513,7 @@
    Content Layout
    ───────────────────────────────────────────────────────────────────────────── */
 
-.auctions-content {
+.auc-content {
   display: block;
   max-width: 1400px;
   margin: 0 auto;
@@ -526,12 +526,12 @@
    Auctions Grid
    ───────────────────────────────────────────────────────────────────────────── */
 
-.auctions-main {
+.auc-main {
   min-width: 0;
   width: 100%;
 }
 
-.auctions-grid {
+.auc-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
   gap: 28px;
@@ -543,7 +543,7 @@
    Empty State
    ───────────────────────────────────────────────────────────────────────────── */
 
-.empty-state {
+.auc-empty-state {
   grid-column: 1 / -1;
   display: flex;
   flex-direction: column;
@@ -551,39 +551,39 @@
   justify-content: center;
   padding: 80px 40px;
   text-align: center;
-  background: var(--auctions-surface);
-  border: 1px dashed var(--auctions-border);
+  background: var(--auc-surface);
+  border: 1px dashed var(--auc-border);
   border-radius: 20px;
 }
 
-.empty-icon {
+.auc-empty-icon {
   font-size: 4rem;
   margin-bottom: 24px;
   opacity: 0.4;
 }
 
-.empty-state h3 {
+.auc-empty-state h3 {
   font-size: 1.5rem;
   font-weight: 500;
-  color: var(--auctions-text-primary);
+  color: var(--auc-text-primary);
   margin: 0 0 12px;
   letter-spacing: 0.02em;
 }
 
-.empty-state p {
-  color: var(--auctions-text-secondary);
+.auc-empty-state p {
+  color: var(--auc-text-secondary);
   margin: 0 0 32px;
   font-size: 1rem;
   line-height: 1.6;
   max-width: 400px;
 }
 
-.empty-state-btn {
+.auc-empty-state-btn {
   display: inline-flex;
   align-items: center;
   gap: 10px;
   padding: 14px 32px;
-  background: var(--auctions-accent);
+  background: var(--auc-accent);
   color: #ffffff;
   border: none;
   border-radius: 100px;
@@ -595,17 +595,17 @@
   letter-spacing: 0.02em;
 }
 
-.empty-state-btn:hover {
-  background: var(--auctions-accent-light);
+.auc-empty-state-btn:hover {
+  background: var(--auc-accent-light);
   transform: translateY(-2px);
-  box-shadow: var(--auctions-shadow-md);
+  box-shadow: var(--auc-shadow-md);
 }
 
 /* ─────────────────────────────────────────────────────────────────────────────
    Loading State
    ───────────────────────────────────────────────────────────────────────────── */
 
-.loading-state {
+.auc-loading-state {
   grid-column: 1 / -1;
   display: flex;
   flex-direction: column;
@@ -615,17 +615,17 @@
   text-align: center;
 }
 
-.loading-spinner {
+.auc-loading-spinner {
   width: 48px;
   height: 48px;
-  border: 2px solid var(--auctions-border);
-  border-top: 2px solid var(--auctions-gold);
+  border: 2px solid var(--auc-border);
+  border-top: 2px solid var(--auc-gold);
   border-radius: 50%;
-  animation: spin 1s linear infinite;
+  animation: aucSpin 1s linear infinite;
   margin-bottom: 24px;
 }
 
-@keyframes spin {
+@keyframes aucSpin {
   0% {
     transform: rotate(0deg);
   }
@@ -634,8 +634,8 @@
   }
 }
 
-.loading-state p {
-  color: var(--auctions-text-secondary);
+.auc-loading-state p {
+  color: var(--auc-text-secondary);
   margin: 0;
   font-size: 1rem;
   font-weight: 400;
@@ -646,42 +646,42 @@
    Pagination
    ───────────────────────────────────────────────────────────────────────────── */
 
-.auctions-pagination {
+.auc-pagination {
   display: flex;
   justify-content: center;
   margin-top: 60px;
   gap: 8px;
 }
 
-.pagination-btn {
+.auc-pagination-btn {
   display: flex;
   align-items: center;
   justify-content: center;
   min-width: 44px;
   height: 44px;
   padding: 0 16px;
-  border: 1px solid var(--auctions-border);
+  border: 1px solid var(--auc-border);
   border-radius: 10px;
-  background: var(--auctions-surface);
-  color: var(--auctions-text-secondary);
+  background: var(--auc-surface);
+  color: var(--auc-text-secondary);
   font-size: 0.9rem;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
-.pagination-btn:hover:not(.active):not(:disabled) {
-  border-color: var(--auctions-gold);
-  color: var(--auctions-gold);
+.auc-pagination-btn:hover:not(.active):not(:disabled) {
+  border-color: var(--auc-gold);
+  color: var(--auc-gold);
 }
 
-.pagination-btn.active {
-  background: var(--auctions-accent);
-  border-color: var(--auctions-accent);
+.auc-pagination-btn.active {
+  background: var(--auc-accent);
+  border-color: var(--auc-accent);
   color: #ffffff;
 }
 
-.pagination-btn:disabled {
+.auc-pagination-btn:disabled {
   opacity: 0.4;
   cursor: not-allowed;
 }
@@ -691,53 +691,53 @@
    ═══════════════════════════════════════════════════════════════════════════ */
 
 @media (max-width: 1200px) {
-  .auctions-filters-section {
+  .auc-filters-section {
     padding: 0 24px;
     /* margin: -25px auto 32px; */
   }
 
-  .auctions-content {
+  .auc-content {
     padding: 0 24px;
   }
 
-  .auctions-grid {
+  .auc-grid {
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     gap: 24px;
   }
 }
 
 @media (max-width: 1024px) {
-  .auctions-filters-section {
+  .auc-filters-section {
     padding: 0 20px;
     /* margin: -20px auto 28px; */
   }
 
-  .auctions-content {
+  .auc-content {
     padding: 0 20px;
   }
 
-  .auctions-grid {
+  .auc-grid {
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
     gap: 24px;
   }
 }
 
 @media (max-width: 768px) {
-  .auctions-container {
+  .auc-container {
     padding: 0 0 80px;
   }
 
-  .auctions-header {
+  .auc-header {
     margin-bottom: 0;
     padding: 50px 16px 50px;
   }
 
-  .header-top-row {
+  .auc-header-top-row {
     flex-direction: column;
     gap: 16px;
   }
 
-  .header-actions {
+  .auc-header-actions {
     position: absolute;
     /* right: 16px;
     top: 16px;
@@ -746,100 +746,100 @@
     justify-content: flex-end;
   }
 
-  .create-auction-btn span {
+  .auc-create-btn span {
     display: none;
   }
 
-  .create-auction-btn {
+  .auc-create-btn {
     padding: 10px;
     border-radius: 50%;
   }
 
-  .auctions-title .title-text {
+  .auc-title .auc-title-text {
     font-size: 1.5rem;
     letter-spacing: 0.08em;
   }
 
-  .auctions-title .title-auctions {
+  .auc-title .auc-title-auctions {
     font-size: 3rem;
     gap: 10px;
   }
 
-  .auctions-title .gavel-icon {
+  .auc-title .auc-gavel-icon {
     width: 36px;
     height: 36px;
   }
 
-  .auctions-subtitle {
+  .auc-subtitle {
     font-size: 1rem;
     margin-top: 20px;
   }
 
-  .auctions-tabs {
+  .auc-tabs {
     gap: 6px;
     padding: 5px;
     margin-top: 32px;
   }
 
-  .auction-tab {
+  .auc-tab {
     padding: 12px 20px;
     font-size: 0.85rem;
   }
 
-  .auctions-filters-section {
+  .auc-filters-section {
     /* padding: 0 16px; */
     /* margin: -15px auto 24px; */
   }
 
-  .auctions-content {
+  .auc-content {
     padding: 0 16px;
   }
 
-  .auctions-grid {
+  .auc-grid {
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     gap: 20px;
   }
 
-  .empty-state,
-  .loading-state {
+  .auc-empty-state,
+  .auc-loading-state {
     padding: 60px 24px;
     border-radius: 16px;
   }
 
-  .empty-icon {
+  .auc-empty-icon {
     font-size: 3.5rem;
   }
 
-  .empty-state h3 {
+  .auc-empty-state h3 {
     font-size: 1.35rem;
   }
 }
 
 @media (max-width: 480px) {
-  .auctions-container {
+  .auc-container {
     padding: 0 0 60px;
   }
 
-  .auctions-container::after {
+  .auc-container::after {
     display: none;
   }
 
-  .auctions-title .title-text {
+  .auc-title .auc-title-text {
     font-size: 1.2rem;
     letter-spacing: 0.06em;
   }
 
-  .auctions-title .title-auctions {
+  .auc-title .auc-title-auctions {
     font-size: 2.4rem;
     gap: 8px;
   }
 
-  .auctions-title .gavel-icon {
+  .auc-title .auc-gavel-icon {
     width: 28px;
     height: 28px;
   }
 
-  .auctions-tabs {
+  .auc-tabs {
     flex-direction: row;
     flex-wrap: nowrap;
     gap: 3px;
@@ -849,7 +849,7 @@
     padding: 3px;
   }
 
-  .auction-tab {
+  .auc-tab {
     flex: 1;
     justify-content: center;
     padding: 8px 6px;
@@ -859,59 +859,59 @@
     white-space: nowrap;
   }
 
-  .auction-tab .tab-icon {
+  .auc-tab .auc-tab-icon {
     font-size: 0.8rem;
   }
 
-  .header-actions {
+  .auc-header-actions {
     /* right: 12px;
     top: 12px;
     left: auto; */
     gap: 6px;
   }
 
-  .create-auction-btn {
+  .auc-create-btn {
     padding: 8px;
     border-radius: 50%;
   }
 
-  .create-auction-btn span {
+  .auc-create-btn span {
     display: none;
   }
 
-  .theme-toggle-btn {
+  .auc-theme-toggle {
     width: 34px;
     height: 34px;
   }
 
-  .auctions-filters-section {
+  .auc-filters-section {
     /* padding: 0 12px; */
   }
 
-  .auctions-content {
+  .auc-content {
     padding: 0 12px;
   }
 
-  .auctions-grid {
+  .auc-grid {
     grid-template-columns: 1fr;
     gap: 16px;
   }
 
-  .empty-state,
-  .loading-state {
+  .auc-empty-state,
+  .auc-loading-state {
     padding: 48px 20px;
     border-radius: 14px;
   }
 
-  .empty-icon {
+  .auc-empty-icon {
     font-size: 3rem;
   }
 
-  .empty-state h3 {
+  .auc-empty-state h3 {
     font-size: 1.25rem;
   }
 
-  .empty-state-btn {
+  .auc-empty-state-btn {
     width: 100%;
     justify-content: center;
     padding: 16px 24px;

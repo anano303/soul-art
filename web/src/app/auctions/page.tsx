@@ -166,21 +166,21 @@ function AuctionsContent() {
 
   return (
     <>
-      <div className="auctions-container">
-        <div className="auctions-header">
-          <div className="header-top-row">
-            <h1 className="auctions-title">
-              <span className="title-text">Soul Art</span>
-              <span className="title-auctions">
-                <Gavel className="gavel-icon" />
+      <div className="auc-container">
+        <div className="auc-header">
+          <div className="auc-header-top-row">
+            <h1 className="auc-title">
+              <span className="auc-title-text">Soul Art</span>
+              <span className="auc-title-auctions">
+                <Gavel className="auc-gavel-icon" />
                 Auctions
               </span>
             </h1>
-            <div className="header-actions">
+            <div className="auc-header-actions">
               {canCreateAuction && createAuctionLink ? (
                 <Link
                   href={createAuctionLink}
-                  className="create-auction-btn"
+                  className="auc-create-btn"
                   title={
                     language === "en" ? "Create Auction" : "აუქციონის შექმნა"
                   }
@@ -193,7 +193,7 @@ function AuctionsContent() {
               ) : (
                 <button
                   onClick={() => setIsSellerModalOpen(true)}
-                  className="create-auction-btn"
+                  className="auc-create-btn"
                   title={
                     language === "en"
                       ? "Become an Artist to create auctions"
@@ -207,7 +207,7 @@ function AuctionsContent() {
                 </button>
               )}
               <button
-                className="theme-toggle-btn"
+                className="auc-theme-toggle"
                 onClick={toggleTheme}
                 title={theme === "light" ? "Dark Mode" : "Light Mode"}
               >
@@ -215,37 +215,37 @@ function AuctionsContent() {
               </button>
             </div>
           </div>
-          <p className="auctions-subtitle">{t("auctions.subtitle")}</p>
+          <p className="auc-subtitle">{t("auctions.subtitle")}</p>
 
           {/* Status Tabs */}
-          <div className="auctions-tabs">
+          <div className="auc-tabs">
             <button
-              className={`auction-tab ${activeTab === "ACTIVE" ? "active" : ""}`}
+              className={`auc-tab ${activeTab === "ACTIVE" ? "active" : ""}`}
               onClick={() => handleTabChange("ACTIVE")}
             >
-              <span className="tab-icon">🔥</span>
+              <span className="auc-tab-icon">🔥</span>
               {t("auctions.tabActive") || "აქტიური"}
             </button>
             <button
-              className={`auction-tab ${activeTab === "SCHEDULED" ? "active" : ""}`}
+              className={`auc-tab ${activeTab === "SCHEDULED" ? "active" : ""}`}
               onClick={() => handleTabChange("SCHEDULED")}
             >
-              <span className="tab-icon">📅</span>
+              <span className="auc-tab-icon">📅</span>
               {t("auctions.tabScheduled") || "მალე"}
             </button>
             <button
-              className={`auction-tab ${activeTab === "ENDED" ? "active" : ""}`}
+              className={`auc-tab ${activeTab === "ENDED" ? "active" : ""}`}
               onClick={() => handleTabChange("ENDED")}
             >
-              <span className="tab-icon">🏆</span>
+              <span className="auc-tab-icon">🏆</span>
               {t("auctions.tabEnded") || "დასრულებული"}
             </button>
           </div>
         </div>
 
         {/* Filters - Below hero image */}
-        <div className="auctions-filters-wrapper">
-          <div className="auctions-filters-section">
+        <div className="auc-filters-wrapper">
+          <div className="auc-filters-section">
             <AuctionFilters
               filters={filters}
               onFilterChange={handleFilterChange}
@@ -253,16 +253,16 @@ function AuctionsContent() {
           </div>
         </div>
 
-        <div className="auctions-content">
-          <main className="auctions-main">
+        <div className="auc-content">
+          <main className="auc-main">
             {loading ? (
-              <div className="loading-state">
-                <div className="loading-spinner"></div>
+              <div className="auc-loading-state">
+                <div className="auc-loading-spinner"></div>
                 <p>{t("auctions.loading")}</p>
               </div>
             ) : auctions.length === 0 ? (
-              <div className="empty-state">
-                <div className="empty-icon">
+              <div className="auc-empty-state">
+                <div className="auc-empty-icon">
                   {activeTab === "SCHEDULED" ? "📅" : "🎨"}
                 </div>
                 <h3>{t("auctions.noAuctions")}</h3>
@@ -275,14 +275,14 @@ function AuctionsContent() {
               </div>
             ) : (
               <>
-                <div className="auctions-grid">
+                <div className="auc-grid">
                   {auctions.map((auction) => (
                     <AuctionCard key={auction._id} auction={auction} />
                   ))}
                 </div>
 
                 {pagination.pages > 1 && (
-                  <div className="auctions-pagination">
+                  <div className="auc-pagination">
                     <Pagination
                       currentPage={pagination.current}
                       totalPages={pagination.pages}
@@ -314,9 +314,9 @@ export default function AuctionsPage() {
   return (
     <Suspense
       fallback={
-        <div className="auctions-container">
-          <div className="loading-state">
-            <div className="loading-spinner"></div>
+        <div className="auc-container">
+          <div className="auc-loading-state">
+            <div className="auc-loading-spinner"></div>
             <p>იტვირთება...</p>
           </div>
         </div>
