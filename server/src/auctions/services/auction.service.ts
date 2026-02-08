@@ -1064,22 +1064,32 @@ export class AuctionService {
   // Send notifications when auction ends
   private async sendAuctionEndNotifications(auction: AuctionDocument) {
     try {
-      // Notify winner
+      // Get seller info
+      const seller = await this.userModel.findById(auction.seller);
+      const sellerName = seller
+        ? seller.storeName || `${seller.firstName} ${seller.lastName}`
+        : 'უცნობი';
+
+      // Get winner info
+      let winnerName = 'უცნობი';
       if (auction.currentWinner) {
         const winner = await this.userModel.findById(auction.currentWinner);
         if (winner) {
+          winnerName = `${winner.firstName} ${winner.lastName}`;
+
+          // Notify winner
           await this.emailService.sendAuctionWinnerNotification(
             winner.email,
             auction.title,
             auction.currentPrice,
             auction.paymentDeadline,
             auction.mainImage,
+            auction.deliveryType, // SOULART or ARTIST
           );
         }
       }
 
       // Notify seller
-      const seller = await this.userModel.findById(auction.seller);
       if (seller) {
         await this.emailService.sendAuctionSellerNotification(
           seller.email,
@@ -1087,8 +1097,54 @@ export class AuctionService {
           auction.currentPrice,
           auction.sellerEarnings,
           auction.mainImage,
+          auction.deliveryType, // SOULART or ARTIST
         );
       }
+
+      // Get settings for commission calculation
+      const settings = await this.auctionAdminService.getSettings();
+      const auctionAdminCommissionPercent =
+        settings.auctionAdminCommissionPercent || 30;
+      const platformCommissionPercent =
+        settings.platformCommissionPercent || 10;
+
+      const auctionAdminCommission =
+        (auction.currentPrice * auctionAdminCommissionPercent) / 100;
+      const platformCommission =
+        (auction.currentPrice * platformCommissionPercent) / 100;
+
+      // Notify auction admin (only their commission)
+      if (settings.auctionAdminUserId) {
+        const auctionAdmin = await this.userModel.findById(
+          settings.auctionAdminUserId,
+        );
+        if (auctionAdmin) {
+          await this.emailService.sendAuctionAdminNotification(
+            auctionAdmin.email,
+            auction.title,
+            auction.currentPrice,
+            auctionAdminCommission,
+            auction.mainImage,
+          );
+        }
+      }
+
+      // Notify main admin (full info including delivery fee if SOULART)
+      const mainAdminEmail =
+        process.env.ADMIN_EMAIL || 'soulartgeorgia@gmail.com';
+      await this.emailService.sendMainAdminAuctionNotification(
+        mainAdminEmail,
+        auction.title,
+        auction.currentPrice,
+        auction.sellerEarnings,
+        auctionAdminCommission,
+        platformCommission,
+        auction.deliveryFee || 0,
+        auction.deliveryType,
+        auction.mainImage,
+        sellerName,
+        winnerName,
+      );
     } catch (error) {
       this.logger.error('Failed to send auction end notifications:', error);
     }
