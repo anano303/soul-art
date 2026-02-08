@@ -1133,13 +1133,13 @@ ${data.message}
     // მიტანის ტექსტი deliveryType-ის მიხედვით
     const deliveryText =
       deliveryType === 'ARTIST'
-        ? 'გადახდის შემდეგ სელერი თავად მოგიტანთ ნახატს'
+        ? 'გადახდის შემდეგ ხელოვანი თავად მოგიტანთ ნახატს'
         : 'გადახდის შემდეგ ჩვენ დაგიკავშირდებით მიტანის დეტალებზე';
 
     const mailOptions = {
       from: emailConfig.from,
       to: email,
-      subject: `🎉 გიმარჯოთ! თქვენ მოიგეთ აუქციონი - ${auctionTitle}`,
+      subject: `🎉 გამარჯობა! გილოცავთ! თქვენ მოიგეთ აუქციონი - ${auctionTitle}`,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background: #f9f9f9;">
           <div style="background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
@@ -1153,7 +1153,7 @@ ${data.message}
             
             <div style="background: #f0f9ff; padding: 20px; border-radius: 8px; margin: 20px 0;">
               <h3 style="margin: 0 0 10px 0; color: #0369a1;">აუქციონის დეტალები:</h3>
-              <p style="margin: 5px 0;"><strong>ნახატი:</strong> ${auctionTitle}</p>
+              <p style="margin: 5px 0;"><strong>ნამუშევარი:</strong> ${auctionTitle}</p>
               <p style="margin: 5px 0;"><strong>მოგებული ფასი:</strong> ${finalPrice} ₾</p>
               <p style="margin: 5px 0;"><strong>გადახდის ვადა:</strong> ${paymentDeadline.toLocaleDateString('ka-GE')} ${paymentDeadline.toLocaleTimeString('ka-GE', { hour: '2-digit', minute: '2-digit' })}</p>
             </div>
@@ -1205,59 +1205,99 @@ ${data.message}
     const deliveryText =
       deliveryType === 'ARTIST'
         ? 'გადახდის შემდეგ თქვენ თავად უნდა მიუტანოთ ნახატი მყიდველს'
-        : 'დაგიკავშირდებით ნამუშევრის წასაღებად. ნამუშევრის ჩაბარებისთანავე აგესაღებათ თანხა გასატანად';
+        : 'დაგიკავშირდებით ნამუშევრის წასაღებად. ნამუშევრის ჩაბარებისთანავე აგესახებათ თანხა ბალანსზე გასატანად';
 
     const mailOptions = {
       from: emailConfig.from,
       to: email,
       subject: `🎯 თქვენი აუქციონი დასრულდა - ${auctionTitle}`,
       html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background: #f9f9f9;">
-          <div style="background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
-            <h1 style="color: #3b82f6; text-align: center; margin-bottom: 30px;">🎯 აუქციონი დასრულდა</h1>
-            
-            ${imageSection}
-            
-            <p style="font-size: 16px; line-height: 1.6; color: #333;">
-              თქვენი აუქციონი <strong>"${auctionTitle}"</strong> წარმატებით დასრულდა!
-            </p>
-            
-            <div style="background: #f0f9ff; padding: 20px; border-radius: 8px; margin: 20px 0;">
-              <h3 style="margin: 0 0 15px 0; color: #0369a1;">ფინანსური დეტალები:</h3>
-              <div style="border-bottom: 1px solid #e0e7ff; padding-bottom: 10px; margin-bottom: 10px;">
-                <span style="color: #666;">საბოლოო ფასი:</span>
-                <span style="float: right; font-weight: bold;">${finalPrice} ₾</span>
-              </div>
-              <div style="border-bottom: 1px solid #e0e7ff; padding-bottom: 10px; margin-bottom: 10px;">
-                <span style="color: #666;">საკომისიო :</span>
-                <span style="float: right; color: #dc2626;">-${commission} ₾</span>
-              </div>
-              <div style="padding-top: 10px; border-top: 2px solid #3b82f6;">
-                <span style="color: #3b82f6; font-weight: bold;">თქვენი შემოსავალი:</span>
-                <span style="float: right; font-weight: bold; color: #16a34a; font-size: 18px;">${sellerEarnings} ₾</span>
-              </div>
-            </div>
-            
-            <div style="background: #dcfce7; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #16a34a;">
-              <h4 style="margin: 0 0 10px 0; color: #166534;">✅ შემდეგი ნაბიჯები:</h4>
-              <ul style="margin: 0; padding-left: 20px; color: #166534;">
-                <li>მყიდველმა უნდა ჩარიცხოს თანხა 2 სამუშაო დღეში</li>
-                <li>${deliveryText}</li>
-                <li>შემოსავალი ბალანსზე ჩაირიცხება გადახდის დადასტურების შემდეგ</li>
-              </ul>
-            </div>
-            
-            <div style="text-align: center; margin-top: 30px;">
-              <a href="${process.env.ALLOWED_ORIGINS}/profile/balance" 
-                 style="background: #3b82f6; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">
-                ბალანსის გვერდზე გადასვლა
-              </a>
-            </div>
-          </div>
-          
-          <hr style="margin: 30px 0; border: none; border-top: 1px solid #e5e7eb;">
-          <p style="color: #999; font-size: 12px; text-align: center;">SoulArt Team</p>
-        </div>
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>აუქციონი დასრულდა</title>
+        </head>
+        <body style="margin: 0; padding: 0; background: #f9f9f9;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background: #f9f9f9;">
+          <tr>
+            <td style="padding: 8px;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width: 600px; margin: 0 auto; font-family: Arial, sans-serif;">
+                <tr>
+                  <td style="background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                    <h1 style="color: #3b82f6; text-align: center; margin: 0 0 20px 0; font-size: 22px;">🎯 აუქციონი დასრულდა</h1>
+                    
+                    ${imageSection}
+                    
+                    <p style="font-size: 15px; line-height: 1.5; color: #333; margin: 0 0 15px 0;">
+                      თქვენი აუქციონი <strong>"${auctionTitle}"</strong> წარმატებით დასრულდა!
+                    </p>
+                    
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background: #f0f9ff; border-radius: 8px; margin: 15px 0;">
+                      <tr>
+                        <td style="padding: 15px;">
+                          <h3 style="margin: 0 0 12px 0; color: #0369a1; font-size: 16px;">ფინანსური დეტალები:</h3>
+                          <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                            <tr>
+                              <td style="padding: 8px 0; border-bottom: 1px solid #e0e7ff; font-size: 14px;">
+                                <span style="color: #666;">საბოლოო ფასი:</span>
+                              </td>
+                              <td style="padding: 8px 0; border-bottom: 1px solid #e0e7ff; text-align: right; font-weight: bold; font-size: 14px;">${finalPrice} ₾</td>
+                            </tr>
+                            <tr>
+                              <td style="padding: 8px 0; border-bottom: 1px solid #e0e7ff; font-size: 14px;">
+                                <span style="color: #666;">საკომისიო:</span>
+                              </td>
+                              <td style="padding: 8px 0; border-bottom: 1px solid #e0e7ff; text-align: right; color: #dc2626; font-size: 14px;">-${commission} ₾</td>
+                            </tr>
+                            <tr>
+                              <td style="padding: 10px 0 0 0; border-top: 2px solid #3b82f6; font-size: 14px;">
+                                <span style="color: #3b82f6; font-weight: bold;">თქვენი შემოსავალი:</span>
+                              </td>
+                              <td style="padding: 10px 0 0 0; border-top: 2px solid #3b82f6; text-align: right; font-weight: bold; color: #16a34a; font-size: 16px;">${sellerEarnings} ₾</td>
+                            </tr>
+                          </table>
+                        </td>
+                      </tr>
+                    </table>
+                    
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background: #dcfce7; border-radius: 8px; border-left: 4px solid #16a34a; margin: 15px 0;">
+                      <tr>
+                        <td style="padding: 12px;">
+                          <h4 style="margin: 0 0 8px 0; color: #166534; font-size: 14px;">✅ შემდეგი ნაბიჯები:</h4>
+                          <ul style="margin: 0; padding-left: 18px; color: #166534; font-size: 13px;">
+                            <li style="margin-bottom: 4px;">მყიდველმა უნდა ჩარიცხოს თანხა 2 სამუშაო დღეში</li>
+                            <li style="margin-bottom: 4px;">${deliveryText}</li>
+                            <li>შემოსავალი ბალანსზე ჩაირიცხება გადახდის დადასტურების შემდეგ</li>
+                          </ul>
+                        </td>
+                      </tr>
+                    </table>
+                    
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                      <tr>
+                        <td style="text-align: center; padding-top: 20px;">
+                          <a href="${process.env.ALLOWED_ORIGINS}/profile/balance" 
+                             style="background: #3b82f6; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block; font-size: 14px;">
+                            ბალანსის გვერდზე გადასვლა
+                          </a>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding: 20px 0; text-align: center;">
+                    <p style="color: #999; font-size: 12px; margin: 0;">SoulArt Team</p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+        </table>
+        </body>
+        </html>
       `,
     };
 
@@ -1284,39 +1324,84 @@ ${data.message}
       to: email,
       subject: `💰 აუქციონი დასრულდა - ${auctionTitle}`,
       html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background: #f9f9f9;">
-          <div style="background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
-            <h1 style="color: #8b5cf6; text-align: center; margin-bottom: 30px;">💰 აუქციონი დასრულდა</h1>
-            
-            ${imageSection}
-            
-            <p style="font-size: 16px; line-height: 1.6; color: #333;">
-              აუქციონი <strong>"${auctionTitle}"</strong> წარმატებით დასრულდა!
-            </p>
-            
-            <div style="background: #f5f3ff; padding: 20px; border-radius: 8px; margin: 20px 0;">
-              <h3 style="margin: 0 0 15px 0; color: #6d28d9;">თქვენი საკომისიო:</h3>
-              <div style="border-bottom: 1px solid #ddd6fe; padding-bottom: 10px; margin-bottom: 10px;">
-                <span style="color: #666;">გაიყიდა:</span>
-                <span style="float: right; font-weight: bold;">${finalPrice} ₾</span>
-              </div>
-              <div style="padding-top: 10px; border-top: 2px solid #8b5cf6;">
-                <span style="color: #8b5cf6; font-weight: bold;">თქვენი საკომისიო:</span>
-                <span style="float: right; font-weight: bold; color: #16a34a; font-size: 18px;">${adminCommission} ₾</span>
-              </div>
-            </div>
-            
-            <div style="text-align: center; margin-top: 30px;">
-              <a href="${process.env.ALLOWED_ORIGINS}/auction-admin" 
-                 style="background: #8b5cf6; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">
-                აუქციონის პანელზე გადასვლა
-              </a>
-            </div>
-          </div>
-          
-          <hr style="margin: 30px 0; border: none; border-top: 1px solid #e5e7eb;">
-          <p style="color: #999; font-size: 12px; text-align: center;">SoulArt Team</p>
-        </div>
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>აუქციონი დასრულდა</title>
+        </head>
+        <body style="margin: 0; padding: 0; background: #f9f9f9;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background: #f9f9f9;">
+          <tr>
+            <td style="padding: 8px;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width: 600px; margin: 0 auto; font-family: Arial, sans-serif;">
+                <tr>
+                  <td style="background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                    <h1 style="color: #8b5cf6; text-align: center; margin: 0 0 20px 0; font-size: 22px;">💰 აუქციონი დასრულდა</h1>
+                    
+                    ${imageSection}
+                    
+                    <p style="font-size: 15px; line-height: 1.5; color: #333; margin: 0 0 15px 0;">
+                      აუქციონი <strong>"${auctionTitle}"</strong> წარმატებით დასრულდა!
+                    </p>
+                    
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background: #f5f3ff; border-radius: 8px; margin: 15px 0;">
+                      <tr>
+                        <td style="padding: 15px;">
+                          <h3 style="margin: 0 0 12px 0; color: #6d28d9; font-size: 16px;">თქვენი საკომისიო:</h3>
+                          <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                            <tr>
+                              <td style="padding: 8px 0; border-bottom: 1px solid #ddd6fe; font-size: 14px;">
+                                <span style="color: #666;">გაიყიდა:</span>
+                              </td>
+                              <td style="padding: 8px 0; border-bottom: 1px solid #ddd6fe; text-align: right; font-weight: bold; font-size: 14px;">${finalPrice} ₾</td>
+                            </tr>
+                            <tr>
+                              <td style="padding: 10px 0 0 0; border-top: 2px solid #8b5cf6; font-size: 14px;">
+                                <span style="color: #8b5cf6; font-weight: bold;">თქვენი საკომისიო:</span>
+                              </td>
+                              <td style="padding: 10px 0 0 0; border-top: 2px solid #8b5cf6; text-align: right; font-weight: bold; color: #16a34a; font-size: 16px;">${adminCommission} ₾</td>
+                            </tr>
+                          </table>
+                        </td>
+                      </tr>
+                    </table>
+                    
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background: #fef3c7; border-radius: 8px; border-left: 4px solid #f59e0b; margin: 15px 0;">
+                      <tr>
+                        <td style="padding: 12px;">
+                          <h4 style="margin: 0 0 8px 0; color: #92400e; font-size: 14px;">📌 მნიშვნელოვანი:</h4>
+                          <p style="margin: 0; color: #92400e; font-size: 13px;">
+                            თანხის გატანას შეძლებთ მას შემდეგ რაც მყიდველი ჩაიბარებს ნახატს.
+                          </p>
+                        </td>
+                      </tr>
+                    </table>
+                    
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                      <tr>
+                        <td style="text-align: center; padding-top: 20px;">
+                          <a href="${process.env.ALLOWED_ORIGINS}/auction-admin" 
+                             style="background: #8b5cf6; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block; font-size: 14px;">
+                            აუქციონის პანელზე გადასვლა
+                          </a>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding: 20px 0; text-align: center;">
+                    <p style="color: #999; font-size: 12px; margin: 0;">SoulArt Team</p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+        </table>
+        </body>
+        </html>
       `,
     };
 
@@ -1358,64 +1443,121 @@ ${data.message}
       to: email,
       subject: `📊 აუქციონი დასრულდა - ${auctionTitle} - სრული ანგარიში`,
       html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background: #f9f9f9;">
-          <div style="background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
-            <h1 style="color: #dc2626; text-align: center; margin-bottom: 30px;">📊 აუქციონის სრული ანგარიში</h1>
-            
-            ${imageSection}
-            
-            <p style="font-size: 16px; line-height: 1.6; color: #333;">
-              აუქციონი <strong>"${auctionTitle}"</strong> წარმატებით დასრულდა!
-            </p>
-            
-            <div style="background: #fef2f2; padding: 20px; border-radius: 8px; margin: 20px 0;">
-              <h3 style="margin: 0 0 15px 0; color: #dc2626;">მონაწილეები:</h3>
-              <div style="border-bottom: 1px solid #fecaca; padding-bottom: 10px; margin-bottom: 10px;">
-                <span style="color: #666;">გამყიდველი:</span>
-                <span style="float: right; font-weight: bold;">${sellerName || 'უცნობი'}</span>
-              </div>
-              <div style="border-bottom: 1px solid #fecaca; padding-bottom: 10px; margin-bottom: 10px;">
-                <span style="color: #666;">გამარჯვებული:</span>
-                <span style="float: right; font-weight: bold;">${winnerName || 'უცნობი'}</span>
-              </div>
-              <div>
-                <span style="color: #666;">მიტანის ტიპი:</span>
-                <span style="float: right; font-weight: bold;">${deliveryType === 'SOULART' ? 'SoulArt მიტანა' : 'სელერის მიტანა'}</span>
-              </div>
-            </div>
-            
-            <div style="background: #f0f9ff; padding: 20px; border-radius: 8px; margin: 20px 0;">
-              <h3 style="margin: 0 0 15px 0; color: #0369a1;">ფინანსური დეტალები:</h3>
-              <div style="border-bottom: 1px solid #e0e7ff; padding-bottom: 10px; margin-bottom: 10px;">
-                <span style="color: #666;">საბოლოო ფასი:</span>
-                <span style="float: right; font-weight: bold;">${finalPrice} ₾</span>
-              </div>
-              ${deliverySection}
-              <div style="border-bottom: 1px solid #e0e7ff; padding-bottom: 10px; margin-bottom: 10px;">
-                <span style="color: #666;">გამყიდველის შემოსავალი:</span>
-                <span style="float: right; font-weight: bold;">${sellerEarnings} ₾</span>
-              </div>
-              <div style="border-bottom: 1px solid #e0e7ff; padding-bottom: 10px; margin-bottom: 10px;">
-                <span style="color: #666;">აუქციონის ადმინის საკომისიო:</span>
-                <span style="float: right; font-weight: bold;">${auctionAdminCommission} ₾</span>
-              </div>
-              <div style="padding-top: 10px; border-top: 2px solid #3b82f6;">
-                <span style="color: #3b82f6; font-weight: bold;">პლატფორმის საკომისიო:</span>
-                <span style="float: right; font-weight: bold; color: #16a34a; font-size: 18px;">${platformCommission} ₾</span>
-              </div>
-            </div>
-            
-            <div style="text-align: center; margin-top: 30px;">
-              <a href="${process.env.ALLOWED_ORIGINS}/admin" 
-                 style="background: #dc2626; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">
-                ადმინ პანელზე გადასვლა
-              </a>
-            </div>
-          </div>
-          
-          <hr style="margin: 30px 0; border: none; border-top: 1px solid #e5e7eb;">
-          <p style="color: #999; font-size: 12px; text-align: center;">SoulArt Team</p>
-        </div>
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>აუქციონის სრული ანგარიში</title>
+        </head>
+        <body style="margin: 0; padding: 0; background: #f9f9f9;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background: #f9f9f9;">
+          <tr>
+            <td style="padding: 8px;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width: 600px; margin: 0 auto; font-family: Arial, sans-serif;">
+                <tr>
+                  <td style="background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                    <h1 style="color: #dc2626; text-align: center; margin: 0 0 20px 0; font-size: 22px;">📊 აუქციონის სრული ანგარიში</h1>
+                    
+                    ${imageSection}
+                    
+                    <p style="font-size: 15px; line-height: 1.5; color: #333; margin: 0 0 15px 0;">
+                      აუქციონი <strong>"${auctionTitle}"</strong> წარმატებით დასრულდა!
+                    </p>
+                    
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background: #fef2f2; border-radius: 8px; margin: 15px 0;">
+                      <tr>
+                        <td style="padding: 15px;">
+                          <h3 style="margin: 0 0 12px 0; color: #dc2626; font-size: 16px;">მონაწილეები:</h3>
+                          <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                            <tr>
+                              <td style="padding: 8px 0; border-bottom: 1px solid #fecaca; font-size: 14px;">
+                                <span style="color: #666;">გამყიდველი:</span>
+                              </td>
+                              <td style="padding: 8px 0; border-bottom: 1px solid #fecaca; text-align: right; font-weight: bold; font-size: 14px;">${sellerName || 'უცნობი'}</td>
+                            </tr>
+                            <tr>
+                              <td style="padding: 8px 0; border-bottom: 1px solid #fecaca; font-size: 14px;">
+                                <span style="color: #666;">გამარჯვებული:</span>
+                              </td>
+                              <td style="padding: 8px 0; border-bottom: 1px solid #fecaca; text-align: right; font-weight: bold; font-size: 14px;">${winnerName || 'უცნობი'}</td>
+                            </tr>
+                            <tr>
+                              <td style="padding: 8px 0; font-size: 14px;">
+                                <span style="color: #666;">მიტანის ტიპი:</span>
+                              </td>
+                              <td style="padding: 8px 0; text-align: right; font-weight: bold; font-size: 14px;">${deliveryType === 'SOULART' ? 'SoulArt მიტანა' : 'სელერის მიტანა'}</td>
+                            </tr>
+                          </table>
+                        </td>
+                      </tr>
+                    </table>
+                    
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background: #f0f9ff; border-radius: 8px; margin: 15px 0;">
+                      <tr>
+                        <td style="padding: 15px;">
+                          <h3 style="margin: 0 0 12px 0; color: #0369a1; font-size: 16px;">ფინანსური დეტალები:</h3>
+                          <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                            <tr>
+                              <td style="padding: 8px 0; border-bottom: 1px solid #e0e7ff; font-size: 14px;">
+                                <span style="color: #666;">საბოლოო ფასი:</span>
+                              </td>
+                              <td style="padding: 8px 0; border-bottom: 1px solid #e0e7ff; text-align: right; font-weight: bold; font-size: 14px;">${finalPrice} ₾</td>
+                            </tr>
+                            ${deliveryType === 'SOULART' && deliveryFee > 0 ? `
+                            <tr>
+                              <td style="padding: 8px 0; border-bottom: 1px solid #e0e7ff; font-size: 14px;">
+                                <span style="color: #666;">მიტანის საფასური:</span>
+                              </td>
+                              <td style="padding: 8px 0; border-bottom: 1px solid #e0e7ff; text-align: right; font-weight: bold; font-size: 14px;">${deliveryFee} ₾</td>
+                            </tr>
+                            ` : ''}
+                            <tr>
+                              <td style="padding: 8px 0; border-bottom: 1px solid #e0e7ff; font-size: 14px;">
+                                <span style="color: #666;">გამყიდველის შემოსავალი:</span>
+                              </td>
+                              <td style="padding: 8px 0; border-bottom: 1px solid #e0e7ff; text-align: right; font-weight: bold; font-size: 14px;">${sellerEarnings} ₾</td>
+                            </tr>
+                            <tr>
+                              <td style="padding: 8px 0; border-bottom: 1px solid #e0e7ff; font-size: 14px;">
+                                <span style="color: #666;">აუქციონის ადმინის საკომისიო:</span>
+                              </td>
+                              <td style="padding: 8px 0; border-bottom: 1px solid #e0e7ff; text-align: right; font-weight: bold; font-size: 14px;">${auctionAdminCommission} ₾</td>
+                            </tr>
+                            <tr>
+                              <td style="padding: 10px 0 0 0; border-top: 2px solid #3b82f6; font-size: 14px;">
+                                <span style="color: #3b82f6; font-weight: bold;">პლატფორმის საკომისიო:</span>
+                              </td>
+                              <td style="padding: 10px 0 0 0; border-top: 2px solid #3b82f6; text-align: right; font-weight: bold; color: #16a34a; font-size: 16px;">${platformCommission} ₾</td>
+                            </tr>
+                          </table>
+                        </td>
+                      </tr>
+                    </table>
+                    
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                      <tr>
+                        <td style="text-align: center; padding-top: 20px;">
+                          <a href="${process.env.ALLOWED_ORIGINS}/admin" 
+                             style="background: #dc2626; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block; font-size: 14px;">
+                            ადმინ პანელზე გადასვლა
+                          </a>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding: 20px 0; text-align: center;">
+                    <p style="color: #999; font-size: 12px; margin: 0;">SoulArt Team</p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+        </table>
+        </body>
+        </html>
       `,
     };
 
