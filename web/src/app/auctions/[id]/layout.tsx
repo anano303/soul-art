@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
-// API base URL for server-side fetching
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+// API base URL for server-side fetching (without /v1 suffix, we add it in the fetch)
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/v1";
 
 interface AuctionData {
   _id: string;
