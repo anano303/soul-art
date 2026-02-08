@@ -64,10 +64,35 @@ export async function generateMetadata({
 
   const auction = await getAuction(auctionId);
 
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://soulart.ge";
+
   if (!auction) {
+    // Fallback metadata when auction not found or API unavailable
     return {
-      title: "აუქციონი ვერ მოიძებნა | SoulArt",
-      description: "მოთხოვნილი აუქციონი არ არსებობს ან წაშლილია.",
+      title: "აუქციონი | SoulArt",
+      description: "SoulArt აუქციონი - იყიდეთ უნიკალური ხელოვნების ნიმუშები!",
+      openGraph: {
+        type: "website",
+        locale: "ka_GE",
+        url: `${siteUrl}/auctions/${auctionId}`,
+        siteName: "SoulArt - ქართული ხელოვნების მარკეტფლეისი",
+        title: "🎨 აუქციონი | SoulArt",
+        description: "იყიდეთ უნიკალური ხელოვნების ნიმუშები SoulArt აუქციონზე!",
+        images: [
+          {
+            url: `${siteUrl}/auction.jpg`,
+            width: 1200,
+            height: 630,
+            alt: "SoulArt აუქციონები",
+          },
+        ],
+      },
+      twitter: {
+        card: "summary_large_image",
+        title: "🎨 აუქციონი | SoulArt",
+        description: "იყიდეთ უნიკალური ხელოვნების ნიმუშები!",
+        images: [`${siteUrl}/auction.jpg`],
+      },
     };
   }
 
@@ -115,7 +140,6 @@ export async function generateMetadata({
     "თანამედროვე მხატვრობა",
   ].join(", ");
 
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://soulart.ge";
   const auctionUrl = `${siteUrl}/auctions/${auctionId}`;
 
   return {

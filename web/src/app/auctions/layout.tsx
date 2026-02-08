@@ -63,7 +63,7 @@ export const metadata: Metadata = {
       "იყიდეთ უნიკალური ხელოვნების ნიმუშები აუქციონზე! ორიგინალი ნახატები, რეპროდუქციები და თანამედროვე ქართველი მხატვრების ნამუშევრები.",
     images: [
       {
-        url: `${siteUrl}/images/auction-og-image.jpg`,
+        url: `${siteUrl}/auction.jpg`,
         width: 1200,
         height: 630,
         alt: "SoulArt აუქციონები - ხელოვნების ონლაინ აუქციონი",
@@ -78,7 +78,7 @@ export const metadata: Metadata = {
     title: "🎨 ხელოვნების აუქციონები | SoulArt",
     description:
       "იყიდეთ უნიკალური ხელოვნების ნიმუშები აუქციონზე! ორიგინალი ნახატები და თანამედროვე ქართველი მხატვრების ნამუშევრები.",
-    images: [`${siteUrl}/images/auction-og-image.jpg`],
+    images: [`${siteUrl}/auction.jpg`],
   },
   other: {
     "fb:app_id": process.env.NEXT_PUBLIC_FACEBOOK_APP_ID || "",
