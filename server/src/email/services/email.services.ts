@@ -1161,7 +1161,7 @@ ${data.message}
             <div style="background: #fef3c7; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #f59e0b;">
               <h4 style="margin: 0 0 10px 0; color: #92400e;">⚠️ მნიშვნელოვანი ინფორმაცია:</h4>
               <ul style="margin: 0; padding-left: 20px; color: #92400e;">
-                <li>თანხა უნდა ჩარიცხოთ 2 სამუშაო დღეში</li>
+                <li>თანხა უნდა ჩარიცხოთ 24 საათის განმავლობაში</li>
                 <li>${deliveryText}</li>
               </ul>
             </div>
@@ -1267,7 +1267,7 @@ ${data.message}
                         <td style="padding: 12px;">
                           <h4 style="margin: 0 0 8px 0; color: #166534; font-size: 14px;">✅ შემდეგი ნაბიჯები:</h4>
                           <ul style="margin: 0; padding-left: 18px; color: #166534; font-size: 13px;">
-                            <li style="margin-bottom: 4px;">მყიდველმა უნდა ჩარიცხოს თანხა 2 სამუშაო დღეში</li>
+                            <li style="margin-bottom: 4px;">მყიდველმა უნდა ჩარიცხოს თანხა 24 საათის განმავლობაში</li>
                             <li style="margin-bottom: 4px;">${deliveryText}</li>
                             <li>შემოსავალი ბალანსზე ჩაირიცხება გადახდის დადასტურების შემდეგ</li>
                           </ul>

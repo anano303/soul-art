@@ -987,10 +987,54 @@ export class AuctionService {
           auction.currentPrice,
           auction.paymentDeadline,
           auction.mainImage,
+          auction.deliveryType,
         );
       } catch (error) {
         this.logger.error(`Failed to notify new winner: ${error}`);
       }
+    }
+
+    // Notify seller about new winner
+    const seller = await this.userModel.findById(auction.seller);
+    if (seller) {
+      try {
+        await this.emailService.sendAuctionSellerNotification(
+          seller.email,
+          auction.title,
+          auction.currentPrice,
+          auction.sellerEarnings,
+          auction.mainImage,
+          auction.deliveryType,
+        );
+      } catch (error) {
+        this.logger.error(`Failed to notify seller about new winner: ${error}`);
+      }
+    }
+
+    // Notify auction admin about new winner
+    try {
+      const settings = await this.auctionAdminService.getSettings();
+      if (settings.auctionAdminUserId) {
+        const auctionAdmin = await this.userModel.findById(
+          settings.auctionAdminUserId,
+        );
+        if (auctionAdmin) {
+          const auctionAdminCommissionPercent =
+            settings.auctionAdminCommissionPercent || 30;
+          const adminCommission =
+            (auction.currentPrice * auctionAdminCommissionPercent) / 100;
+
+          await this.emailService.sendAuctionAdminNotification(
+            auctionAdmin.email,
+            auction.title,
+            auction.currentPrice,
+            adminCommission,
+            auction.mainImage,
+          );
+        }
+      }
+    } catch (error) {
+      this.logger.error(`Failed to notify auction admin about new winner: ${error}`);
     }
 
     this.logger.log(
@@ -1040,24 +1084,10 @@ export class AuctionService {
     }
   }
 
-  // Calculate payment deadline (2 working days, excluding weekends)
+  // Calculate payment deadline (24 hours from now)
   private calculatePaymentDeadline(): Date {
     const deadline = new Date();
-    let workingDays = 0;
-
-    while (workingDays < 2) {
-      deadline.setDate(deadline.getDate() + 1);
-      const dayOfWeek = deadline.getDay();
-
-      // Skip weekends (Saturday = 6, Sunday = 0)
-      if (dayOfWeek !== 0 && dayOfWeek !== 6) {
-        workingDays++;
-      }
-    }
-
-    // Set deadline to end of business day (18:00)
-    deadline.setHours(18, 0, 0, 0);
-
+    deadline.setHours(deadline.getHours() + 24);
     return deadline;
   }
 
