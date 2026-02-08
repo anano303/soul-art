@@ -11,7 +11,9 @@ import "./create-auction.css";
 
 type UserRole = "admin" | "auction_admin" | "seller";
 
-function getFormMode(role: string | undefined): "admin" | "auction_admin" | "seller" {
+function getFormMode(
+  role: string | undefined,
+): "admin" | "auction_admin" | "seller" {
   const normalizedRole = role?.toLowerCase();
   if (normalizedRole === "admin") return "admin";
   if (normalizedRole === "auction_admin") return "auction_admin";
@@ -64,7 +66,8 @@ export default function CreateAuctionPage() {
 
   const formMode = getFormMode(userRole);
   const backUrl = getBackUrl(userRole);
-  const isAdminOrAuctionAdmin = userRole === "admin" || userRole === "auction_admin";
+  const isAdminOrAuctionAdmin =
+    userRole === "admin" || userRole === "auction_admin";
 
   const handleSuccess = () => {
     router.push(backUrl);

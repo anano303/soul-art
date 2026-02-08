@@ -156,7 +156,8 @@ function AuctionsContent() {
 
   const isSeller = user?.role?.toString().toUpperCase() === "SELLER";
   const isAdmin = user?.role?.toString().toLowerCase() === "admin";
-  const isAuctionAdmin = user?.role?.toString().toLowerCase() === "auction_admin";
+  const isAuctionAdmin =
+    user?.role?.toString().toLowerCase() === "auction_admin";
   const [isSellerModalOpen, setIsSellerModalOpen] = useState(false);
 
   // All authorized roles use the same unified create auction page

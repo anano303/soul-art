@@ -422,7 +422,10 @@
   cursor: pointer;
 }
 
-.auction-create-page .create-auction-form .delivery-type-option input[type="radio"] {
+.auction-create-page
+  .create-auction-form
+  .delivery-type-option
+  input[type="radio"] {
   position: absolute;
   opacity: 0;
   width: 0;
@@ -440,11 +443,18 @@
   transition: all 0.3s ease;
 }
 
-.auction-create-page .create-auction-form .delivery-type-option:hover .delivery-type-card {
+.auction-create-page
+  .create-auction-form
+  .delivery-type-option:hover
+  .delivery-type-card {
   border-color: rgba(201, 169, 97, 0.3);
 }
 
-.auction-create-page .create-auction-form .delivery-type-option input:checked + .delivery-type-card {
+.auction-create-page
+  .create-auction-form
+  .delivery-type-option
+  input:checked
+  + .delivery-type-card {
   border-color: #c9a961;
   background: rgba(201, 169, 97, 0.12);
 }
@@ -778,11 +788,18 @@
   background: #ffffff;
 }
 
-.auction-create-page.light-theme .create-auction-form .delivery-type-option:hover .delivery-type-card {
+.auction-create-page.light-theme
+  .create-auction-form
+  .delivery-type-option:hover
+  .delivery-type-card {
   border-color: #3b82f6;
 }
 
-.auction-create-page.light-theme .create-auction-form .delivery-type-option input:checked + .delivery-type-card {
+.auction-create-page.light-theme
+  .create-auction-form
+  .delivery-type-option
+  input:checked
+  + .delivery-type-card {
   border-color: #3b82f6;
   background: #eff6ff;
 }
@@ -800,11 +817,17 @@
   border-color: #bfdbfe;
 }
 
-.auction-create-page.light-theme .create-auction-form .delivery-days-field label {
+.auction-create-page.light-theme
+  .create-auction-form
+  .delivery-days-field
+  label {
   color: #475569;
 }
 
-.auction-create-page.light-theme .create-auction-form .delivery-days-field input {
+.auction-create-page.light-theme
+  .create-auction-form
+  .delivery-days-field
+  input {
   background: #ffffff;
   border-color: #cbd5e1;
   color: #1e293b;
@@ -817,7 +840,9 @@
   box-shadow: 0 4px 16px rgba(59, 130, 246, 0.3);
 }
 
-.auction-create-page.light-theme .create-auction-form .primary-button:hover:not(:disabled) {
+.auction-create-page.light-theme
+  .create-auction-form
+  .primary-button:hover:not(:disabled) {
   box-shadow: 0 8px 24px rgba(59, 130, 246, 0.4);
 }
 

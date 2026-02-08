@@ -15,6 +15,7 @@ import { GoogleAuthPopup } from "@/components/auth/GoogleAuthPopup";
 import { FacebookAuthButton } from "@/components/auth/FacebookAuthButton";
 import { TermsAndConditions } from "@/components/TermsAndConditions";
 import { PrivacyPolicy } from "@/components/PrivacyPolicy";
+import { SellerContract } from "@/components/SellerContract";
 import { FaCheckCircle } from "react-icons/fa";
 import Image from "next/image";
 import Link from "next/link";
@@ -92,6 +93,7 @@ export function SellerRegistrationFlow({
   // Terms and conditions state
   const [showTerms, setShowTerms] = useState(false);
   const [showPrivacyPolicy, setShowPrivacyPolicy] = useState(false);
+  const [showSellerContract, setShowSellerContract] = useState(false);
 
   // Step 2 state
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
@@ -839,6 +841,26 @@ export function SellerRegistrationFlow({
                 )}
               </div>
             </div>
+
+            <p className="srf-terms-notice">
+              {language === "en" 
+                ? "By completing registration, you agree to the" 
+                : "რეგისტრაციის დასრულებით ეთანხმებით"}{" "}
+              <button
+                type="button"
+                onClick={() => setShowSellerContract(true)}
+                className="srf-contract-link"
+              >
+                {language === "en" ? "Seller Agreement" : "გამყიდველის ხელშეკრულებას"}
+              </button>
+            </p>
+
+            {/* Seller Contract Modal */}
+            <SellerContract
+              isOpen={showSellerContract}
+              onClose={() => setShowSellerContract(false)}
+              showAcceptButton={false}
+            />
 
             <button type="submit" className="srf-submit-btn" disabled={isPending}>
               {isPending
