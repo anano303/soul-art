@@ -20,6 +20,7 @@ import {
   AuctionAdminWithdrawalSchema,
 } from './schemas/auction-admin-withdrawal.schema';
 import { User, UserSchema } from '../users/schemas/user.schema';
+import { Order, OrderSchema } from '../orders/schemas/order.schema';
 
 // Import related modules
 import { UsersModule } from '../users/users.module';
@@ -38,6 +39,7 @@ import { PaymentsModule } from '../payments/payments.module';
         schema: AuctionAdminWithdrawalSchema,
       },
       { name: User.name, schema: UserSchema },
+      { name: Order.name, schema: OrderSchema },
     ]),
     ScheduleModule.forRoot(), // For cron jobs
     forwardRef(() => UsersModule), // For BalanceService and User model

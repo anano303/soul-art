@@ -16,6 +16,7 @@ import {
   AuctionBid,
 } from '../schemas/auction.schema';
 import { User, UserDocument } from '../../users/schemas/user.schema';
+import { Order, OrderDocument } from '../../orders/schemas/order.schema';
 import {
   CreateAuctionDto,
   PlaceBidDto,
@@ -41,6 +42,7 @@ export class AuctionService {
   constructor(
     @InjectModel(Auction.name) private auctionModel: Model<Auction>,
     @InjectModel(User.name) private userModel: Model<User>,
+    @InjectModel(Order.name) private orderModel: Model<OrderDocument>,
     private balanceService: BalanceService,
     private emailService: EmailService,
     private readonly awsS3Service: AwsS3Service,
@@ -1440,6 +1442,14 @@ export class AuctionService {
         this.logger.warn(`Failed to record auction admin earnings: ${error}`);
       }
 
+      // Create order record for the auction
+      try {
+        await this.createAuctionOrder(auction);
+        this.logger.log(`Order created for auction ${auction._id}`);
+      } catch (error) {
+        this.logger.warn(`Failed to create order for auction: ${error}`);
+      }
+
       this.logger.log(
         `Auction ${auction._id} payment completed via BOG callback`,
       );
@@ -1545,5 +1555,54 @@ export class AuctionService {
         avatar: comment.userAvatar,
       },
     };
+  }
+
+  // Create order record for a paid auction
+  private async createAuctionOrder(auction: AuctionDocument) {
+    const winner = await this.userModel.findById(auction.currentWinner).lean();
+    if (!winner) {
+      throw new Error('Winner not found');
+    }
+
+    // Get shipping address from auction
+    const shippingAddress = (auction as any).shippingAddress || {};
+
+    const order = new this.orderModel({
+      user: auction.currentWinner,
+      orderType: 'auction',
+      auctionId: auction._id,
+      orderItems: [
+        {
+          name: auction.title,
+          nameEn: auction.title,
+          qty: 1,
+          image: auction.mainImage,
+          price: auction.currentPrice,
+          originalPrice: auction.currentPrice,
+          productId: new Types.ObjectId(), // Placeholder, auction items don't have product IDs
+        },
+      ],
+      shippingDetails: {
+        address: shippingAddress.address || '',
+        city: shippingAddress.city || '',
+        postalCode: shippingAddress.postalCode || '',
+        country: shippingAddress.country || 'Georgia',
+        phoneNumber: shippingAddress.phoneNumber || winner.phoneNumber || '',
+      },
+      paymentMethod: 'BOG',
+      paymentResult: auction.paymentResult,
+      taxPrice: 0,
+      shippingPrice: auction.deliveryFee || 0,
+      itemsPrice: auction.currentPrice,
+      totalPrice: auction.totalPayment || auction.currentPrice + (auction.deliveryFee || 0),
+      isPaid: true,
+      paidAt: new Date().toISOString(),
+      status: 'paid',
+      externalOrderId: auction.externalOrderId,
+      isGuestOrder: false,
+    });
+
+    await order.save();
+    return order;
   }
 }

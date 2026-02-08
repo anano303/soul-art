@@ -63,6 +63,46 @@
   font-family: var(--font-firago), sans-serif;
 }
 
+/* Order Type Tabs */
+.orders-tabs {
+  display: flex;
+  gap: 8px;
+  margin-left: 24px;
+}
+
+.orders-tab {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 18px;
+  border: 1px solid rgba(1, 38, 69, 0.15);
+  border-radius: 50px;
+  background: #ffffff;
+  color: var(--primary-color, #012645);
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: var(--font-firago), sans-serif;
+}
+
+.orders-tab:hover {
+  background: rgba(1, 38, 69, 0.05);
+  border-color: var(--primary-color, #012645);
+}
+
+.orders-tab.active {
+  background: linear-gradient(135deg, var(--primary-color, #012645), #1a4a73);
+  color: white;
+  border-color: transparent;
+  box-shadow: 0 4px 12px rgba(1, 38, 69, 0.2);
+}
+
+.orders-tab svg {
+  width: 16px;
+  height: 16px;
+}
+
 .orders-table {
   width: 100%;
   border-collapse: collapse;

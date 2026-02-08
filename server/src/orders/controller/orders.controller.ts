@@ -71,15 +71,24 @@ export class OrdersController {
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.Admin, Role.Seller)
+  @Roles(Role.Admin, Role.Seller, Role.AuctionAdmin)
   @Get()
-  async getOrders(@CurrentUser() user: UserDocument) {
+  async getOrders(
+    @CurrentUser() user: UserDocument,
+    @Query('orderType') orderType?: string,
+  ) {
     console.log('Getting orders for user:', user.email, 'Role:', user.role);
 
-    // If user is an admin, return all orders
+    // If user is auction_admin, only return auction orders
+    if (user.role === Role.AuctionAdmin) {
+      console.log('User is auction_admin, fetching only auction orders');
+      return this.ordersService.findAll('auction');
+    }
+
+    // If user is an admin, return orders filtered by orderType
     if (user.role === Role.Admin) {
-      console.log('User is admin, fetching all orders');
-      return this.ordersService.findAll();
+      console.log('User is admin, fetching orders with type:', orderType || 'all');
+      return this.ordersService.findAll(orderType);
     }
 
     // If user is a seller, return only orders containing their products

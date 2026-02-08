@@ -12,6 +12,8 @@ import {
   Wallet,
   Heart,
   Tag,
+  Gavel,
+  ShoppingBag,
 } from "lucide-react";
 import { Order } from "@/types/order";
 import "./orders-list.css";
@@ -22,13 +24,15 @@ import { DonationModal } from "@/components/donation/DonationModal";
 
 interface OrdersListProps {
   salesManagerMode?: boolean;
+  auctionAdminMode?: boolean;
 }
 
-export function OrdersList({ salesManagerMode = false }: OrdersListProps) {
+export function OrdersList({ salesManagerMode = false, auctionAdminMode = false }: OrdersListProps) {
   const [page, setPage] = useState(1);
   const [userRole, setUserRole] = useState<string | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
   const [showDonation, setShowDonation] = useState(false);
+  const [orderTypeTab, setOrderTypeTab] = useState<"regular" | "auction">(auctionAdminMode ? "auction" : "regular");
 
   useEffect(() => {
     const userData = getUserData();
@@ -46,7 +50,7 @@ export function OrdersList({ salesManagerMode = false }: OrdersListProps) {
   });
 
   const { data, isLoading } = useQuery({
-    queryKey: ["orders", page, userRole, userId, salesManagerMode],
+    queryKey: ["orders", page, userRole, userId, salesManagerMode, auctionAdminMode, orderTypeTab],
     queryFn: async () => {
       try {
         // Sales Manager gets orders from their referrals
@@ -73,7 +77,8 @@ export function OrdersList({ salesManagerMode = false }: OrdersListProps) {
         }
 
         // Backend now handles role-based filtering
-        const response = await fetchWithAuth(`/orders?page=${page}&limit=50`);
+        const orderTypeParam = auctionAdminMode ? "auction" : orderTypeTab;
+        const response = await fetchWithAuth(`/orders?page=${page}&limit=50&orderType=${orderTypeParam}`);
         if (!response.ok) {
           console.error("Failed to fetch orders:", response.statusText);
           return { items: [], pages: 0 };
@@ -111,6 +116,25 @@ export function OrdersList({ salesManagerMode = false }: OrdersListProps) {
       <div className="orders-header">
         <div className="orders-header-left">
           <h1 className="orders-title">Orders</h1>
+          {/* Order type tabs - only show for admin, not for auction_admin or sales manager */}
+          {!auctionAdminMode && !salesManagerMode && userRole === "admin" && (
+            <div className="orders-tabs">
+              <button
+                className={`orders-tab ${orderTypeTab === "regular" ? "active" : ""}`}
+                onClick={() => { setOrderTypeTab("regular"); setPage(1); }}
+              >
+                <ShoppingBag size={16} />
+                ჩვეულებრივი
+              </button>
+              <button
+                className={`orders-tab ${orderTypeTab === "auction" ? "active" : ""}`}
+                onClick={() => { setOrderTypeTab("auction"); setPage(1); }}
+              >
+                <Gavel size={16} />
+                აუქციონის
+              </button>
+            </div>
+          )}
         </div>
         {userRole === "seller" && (
           <div className="orders-header-right">

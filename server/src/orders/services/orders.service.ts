@@ -633,10 +633,19 @@ export class OrdersService {
     }
   }
 
-  async findAll(): Promise<any[]> {
+  async findAll(orderType?: string): Promise<any[]> {
+    // Build filter based on orderType
+    const filter: FilterQuery<Order> = {};
+    if (orderType === 'auction') {
+      filter.orderType = 'auction';
+    } else if (orderType === 'regular') {
+      filter.$or = [{ orderType: 'regular' }, { orderType: { $exists: false } }];
+    }
+    // If no orderType specified, return all orders
+
     // Sort by createdAt in descending order (newest first)
     const orders = await this.orderModel
-      .find()
+      .find(filter)
       .populate('user', 'name email phoneNumber')
       .populate({
         path: 'orderItems.productId',
@@ -646,6 +655,7 @@ export class OrdersService {
           select: '_id name email phoneNumber storeName',
         },
       })
+      .populate('auctionId', 'title mainImage seller currentWinner')
       .sort({ createdAt: -1 })
       .lean();
 
@@ -980,6 +990,7 @@ export class OrdersService {
     // Sort by createdAt in descending order (newest first)
     const orders = await this.orderModel
       .find({ user: userId })
+      .populate('auctionId', 'title mainImage seller')
       .sort({ createdAt: -1 });
     return orders;
   }

@@ -28,6 +28,18 @@ export class Order {
   @Prop({ default: false })
   isGuestOrder!: boolean;
 
+  // Order type: regular (product orders) or auction (auction winner orders)
+  @Prop({
+    type: String,
+    enum: ['regular', 'auction'],
+    default: 'regular',
+  })
+  orderType!: string;
+
+  // Auction reference (only for auction orders)
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Auction', required: false })
+  auctionId?: mongoose.Types.ObjectId;
+
   @Prop({
     required: true,
     type: [
