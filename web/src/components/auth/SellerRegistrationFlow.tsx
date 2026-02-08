@@ -42,8 +42,9 @@ const step2Schema = z
       .optional()
       .transform((v) => (v ?? "").trim())
       .refine(
-        (v) => v === "" || (v.length >= 3 && v.length <= 40 && SLUG_PATTERN.test(v)),
-        { message: "სლაგი უნდა შედგებოდეს 3-40 სიმბოლოსგან" }
+        (v) =>
+          v === "" || (v.length >= 3 && v.length <= 40 && SLUG_PATTERN.test(v)),
+        { message: "სლაგი უნდა შედგებოდეს 3-40 სიმბოლოსგან" },
       ),
   })
   .refine(
@@ -53,7 +54,7 @@ const step2Schema = z
       }
       return true;
     },
-    { message: "არასწორი IBAN", path: ["accountNumber"] }
+    { message: "არასწორი IBAN", path: ["accountNumber"] },
   );
 
 type Step1Data = z.infer<typeof step1Schema>;
@@ -76,12 +77,17 @@ export function SellerRegistrationFlow({
   const { language, t } = useLanguage();
   const queryClient = useQueryClient();
   const { user, isLoading: authLoading } = useAuth();
-  const { mutate: becomeSeller, isPending: becomeSellerPending } = useBecomeSeller();
+  const { mutate: becomeSeller, isPending: becomeSellerPending } =
+    useBecomeSeller();
 
   // Step state - if user is authenticated, skip to step 2
   const [step, setStep] = useState<1 | 2>(1);
   const [isAuthenticating, setIsAuthenticating] = useState(false);
-  const [pendingEmailData, setPendingEmailData] = useState<{ email: string; password: string; name: string } | null>(null);
+  const [pendingEmailData, setPendingEmailData] = useState<{
+    email: string;
+    password: string;
+    name: string;
+  } | null>(null);
 
   // Email verification state
   const [emailSent, setEmailSent] = useState(false);
@@ -105,7 +111,8 @@ export function SellerRegistrationFlow({
   const slugRequestIdRef = useRef(0);
   const manualCheckIdRef = useRef(0);
 
-  const portfolioBaseUrl = process.env.NEXT_PUBLIC_WEBSITE_URL || "https://soulart.ge";
+  const portfolioBaseUrl =
+    process.env.NEXT_PUBLIC_WEBSITE_URL || "https://soulart.ge";
   const slugDisplayPrefix = `${portfolioBaseUrl.replace(/^https?:\/\//, "").replace(/\/$/, "")}/@`;
 
   // Step 1 form
@@ -124,8 +131,6 @@ export function SellerRegistrationFlow({
       artistSlug: "",
     },
   });
-
-
 
   const storeNameValue = step2Form.watch("storeName");
 
@@ -146,9 +151,12 @@ export function SellerRegistrationFlow({
   useEffect(() => {
     if (user && step === 2) {
       if (user.phoneNumber) step2Form.setValue("phoneNumber", user.phoneNumber);
-      if (user.identificationNumber) step2Form.setValue("identificationNumber", user.identificationNumber);
-      if (user.accountNumber) step2Form.setValue("accountNumber", user.accountNumber);
-      if (user.beneficiaryBankCode) step2Form.setValue("beneficiaryBankCode", user.beneficiaryBankCode);
+      if (user.identificationNumber)
+        step2Form.setValue("identificationNumber", user.identificationNumber);
+      if (user.accountNumber)
+        step2Form.setValue("accountNumber", user.accountNumber);
+      if (user.beneficiaryBankCode)
+        step2Form.setValue("beneficiaryBankCode", user.beneficiaryBankCode);
     }
   }, [user, step, step2Form]);
 
@@ -167,7 +175,7 @@ export function SellerRegistrationFlow({
         shouldValidate: options?.validate ?? true,
       });
     },
-    [step2Form]
+    [step2Form],
   );
 
   const slugify = useCallback((input: string) => {
@@ -184,9 +192,13 @@ export function SellerRegistrationFlow({
   const buildAutoSlug = useCallback(
     (input: string) => {
       const base = slugify(input);
-      return base.length >= 3 ? base : base.length > 0 ? `${base}-${Date.now().toString().slice(-2)}` : "artist";
+      return base.length >= 3
+        ? base
+        : base.length > 0
+          ? `${base}-${Date.now().toString().slice(-2)}`
+          : "artist";
     },
-    [slugify]
+    [slugify],
   );
 
   const ensureSuggestedSlug = useCallback(
@@ -211,13 +223,19 @@ export function SellerRegistrationFlow({
         let candidate = baseCandidate;
 
         while (true) {
-          const { data } = await apiClient.get("/artists/slug/check", { params: { slug: candidate } });
+          const { data } = await apiClient.get("/artists/slug/check", {
+            params: { slug: candidate },
+          });
           if (slugRequestIdRef.current !== requestId) return;
 
           if (data.available) {
             setSlugValue(candidate, { validate: true });
             setSlugStatus("available");
-            setSlugMessage(language === "en" ? `${candidate} is available` : `${candidate} თავისუფალია`);
+            setSlugMessage(
+              language === "en"
+                ? `${candidate} is available`
+                : `${candidate} თავისუფალია`,
+            );
             return;
           }
 
@@ -229,17 +247,21 @@ export function SellerRegistrationFlow({
         if (slugRequestIdRef.current !== requestId) return;
         setSlugValue(baseCandidate, { validate: true });
         setSlugStatus("error");
-        setSlugMessage(language === "en" ? "Couldn't verify" : "შემოწმება ვერ მოხერხდა");
+        setSlugMessage(
+          language === "en" ? "Couldn't verify" : "შემოწმება ვერ მოხერხდა",
+        );
       }
     },
-    [buildAutoSlug, language, setSlugValue]
+    [buildAutoSlug, language, setSlugValue],
   );
 
   const checkSlugManually = useCallback(
     async (slug: string, checkId: number) => {
       if (!slug) return;
       try {
-        const { data } = await apiClient.get("/artists/slug/check", { params: { slug } });
+        const { data } = await apiClient.get("/artists/slug/check", {
+          params: { slug },
+        });
         if (manualCheckIdRef.current !== checkId) return;
 
         if (data.available) {
@@ -255,7 +277,7 @@ export function SellerRegistrationFlow({
         setSlugMessage(language === "en" ? "Check failed" : "შეცდომა");
       }
     },
-    [language]
+    [language],
   );
 
   const handleSlugInputChange = useCallback(
@@ -269,7 +291,7 @@ export function SellerRegistrationFlow({
         setSlugMessage("");
       }
     },
-    [setSlugValue, slugify]
+    [setSlugValue, slugify],
   );
 
   // Auto-generate slug from store name
@@ -303,7 +325,10 @@ export function SellerRegistrationFlow({
     }
 
     setSlugStatus("checking");
-    const timeoutId = setTimeout(() => checkSlugManually(trimmed, checkId), 400);
+    const timeoutId = setTimeout(
+      () => checkSlugManually(trimmed, checkId),
+      400,
+    );
     return () => clearTimeout(timeoutId);
   }, [checkSlugManually, isSlugAuto, language, slugInput, step]);
 
@@ -331,7 +356,10 @@ export function SellerRegistrationFlow({
       console.error("Error fetching user after Google auth:", err);
       toast({
         title: language === "en" ? "Error" : "შეცდომა",
-        description: language === "en" ? "Authentication failed" : "ავტორიზაცია ვერ მოხერხდა",
+        description:
+          language === "en"
+            ? "Authentication failed"
+            : "ავტორიზაცია ვერ მოხერხდა",
         variant: "destructive",
       });
     } finally {
@@ -340,7 +368,13 @@ export function SellerRegistrationFlow({
   }, [queryClient, language, onComplete, redirectTo]);
 
   const handleFacebookSuccess = useCallback(
-    async (data: { accessToken: string; userId: string; email?: string; name: string; picture?: string }) => {
+    async (data: {
+      accessToken: string;
+      userId: string;
+      email?: string;
+      name: string;
+      picture?: string;
+    }) => {
       setIsAuthenticating(true);
       try {
         // Call backend to verify FB token and create session
@@ -369,7 +403,7 @@ export function SellerRegistrationFlow({
         setIsAuthenticating(false);
       }
     },
-    [queryClient, language, onComplete, redirectTo]
+    [queryClient, language, onComplete, redirectTo],
   );
 
   // Email verification handlers
@@ -385,10 +419,18 @@ export function SellerRegistrationFlow({
       if (res.ok) {
         setEmailSent(true);
       } else {
-        setVerificationError(language === "en" ? "Failed to send code" : "კოდის გაგზავნა ვერ მოხერხდა");
+        setVerificationError(
+          language === "en"
+            ? "Failed to send code"
+            : "კოდის გაგზავნა ვერ მოხერხდა",
+        );
       }
     } catch {
-      setVerificationError(language === "en" ? "Failed to send code" : "კოდის გაგზავნა ვერ მოხერხდა");
+      setVerificationError(
+        language === "en"
+          ? "Failed to send code"
+          : "კოდის გაგზავნა ვერ მოხერხდა",
+      );
     }
   };
 
@@ -404,10 +446,14 @@ export function SellerRegistrationFlow({
         setIsEmailVerified(true);
         setVerificationError("");
       } else {
-        setVerificationError(language === "en" ? "Invalid code" : "არასწორი კოდი");
+        setVerificationError(
+          language === "en" ? "Invalid code" : "არასწორი კოდი",
+        );
       }
     } catch {
-      setVerificationError(language === "en" ? "Verification failed" : "შემოწმება ვერ მოხერხდა");
+      setVerificationError(
+        language === "en" ? "Verification failed" : "შემოწმება ვერ მოხერხდა",
+      );
     }
   };
 
@@ -431,7 +477,11 @@ export function SellerRegistrationFlow({
 
   const onStep1Submit = step1Form.handleSubmit((data) => {
     if (!isEmailVerified) {
-      setVerificationError(language === "en" ? "Please verify your email first" : "გთხოვთ, ჯერ დაადასტუროთ ელფოსტა");
+      setVerificationError(
+        language === "en"
+          ? "Please verify your email first"
+          : "გთხოვთ, ჯერ დაადასტუროთ ელფოსტა",
+      );
       return;
     }
     // Store email/password data for complete registration in step 2
@@ -441,7 +491,7 @@ export function SellerRegistrationFlow({
 
   const onStep2Submit = step2Form.handleSubmit(async (data) => {
     const formData = new FormData();
-    
+
     // If we have pending email data (new user via email), use full seller register
     if (pendingEmailData) {
       formData.append("email", pendingEmailData.email);
@@ -450,7 +500,7 @@ export function SellerRegistrationFlow({
       formData.append("ownerFirstName", nameParts[0] || pendingEmailData.name);
       formData.append("ownerLastName", nameParts.slice(1).join(" ") || "");
     }
-    
+
     Object.entries(data).forEach(([key, value]) => {
       if (value !== undefined && value !== "") {
         formData.append(key, value as string);
@@ -473,7 +523,10 @@ export function SellerRegistrationFlow({
         setIsAuthenticating(false);
         toast({
           title: language === "en" ? "Success!" : "წარმატება!",
-          description: language === "en" ? "Account created! Please verify your email." : "ანგარიში შეიქმნა! გთხოვთ დაადასტუროთ ელფოსტა.",
+          description:
+            language === "en"
+              ? "Account created! Please verify your email."
+              : "ანგარიში შეიქმნა! გთხოვთ დაადასტუროთ ელფოსტა.",
           variant: "default",
         });
         queryClient.invalidateQueries({ queryKey: ["user"] });
@@ -481,8 +534,11 @@ export function SellerRegistrationFlow({
         else window.location.href = redirectTo;
       } catch (error: unknown) {
         setIsAuthenticating(false);
-        const errMsg = error instanceof Error ? error.message : 
-          (error as { response?: { data?: { message?: string } } })?.response?.data?.message || "Unknown error";
+        const errMsg =
+          error instanceof Error
+            ? error.message
+            : (error as { response?: { data?: { message?: string } } })
+                ?.response?.data?.message || "Unknown error";
         toast({
           title: language === "en" ? "Error" : "შეცდომა",
           description: errMsg,
@@ -495,7 +551,10 @@ export function SellerRegistrationFlow({
         onSuccess: () => {
           toast({
             title: language === "en" ? "Success!" : "წარმატება!",
-            description: language === "en" ? "You are now a seller" : "შენ ახლა გამყიდველი ხარ",
+            description:
+              language === "en"
+                ? "You are now a seller"
+                : "შენ ახლა გამყიდველი ხარ",
             variant: "default",
           });
           queryClient.invalidateQueries({ queryKey: ["user"] });
@@ -535,7 +594,9 @@ export function SellerRegistrationFlow({
     <div className={`seller-registration-flow ${compact ? "compact" : ""}`}>
       {/* Step indicator */}
       <div className="srf-step-indicator">
-        <div className={`srf-step ${step >= 1 ? "active" : ""} ${step > 1 ? "completed" : ""}`}>
+        <div
+          className={`srf-step ${step >= 1 ? "active" : ""} ${step > 1 ? "completed" : ""}`}
+        >
           {step > 1 ? "✓" : "1"}
         </div>
         <div className="srf-step-line" />
@@ -557,13 +618,25 @@ export function SellerRegistrationFlow({
           <div className="srf-social-buttons">
             <GoogleAuthPopup
               onSuccess={handleGoogleSuccess}
-              onError={(err) => toast({ title: "Error", description: err, variant: "destructive" })}
+              onError={(err) =>
+                toast({
+                  title: "Error",
+                  description: err,
+                  variant: "destructive",
+                })
+              }
               sellerMode={true}
               disabled={isPending}
             />
             <FacebookAuthButton
               onSuccess={handleFacebookSuccess}
-              onError={(err) => toast({ title: "Error", description: err, variant: "destructive" })}
+              onError={(err) =>
+                toast({
+                  title: "Error",
+                  description: err,
+                  variant: "destructive",
+                })
+              }
               variant="seller"
               disabled={isPending}
             />
@@ -576,7 +649,9 @@ export function SellerRegistrationFlow({
           {/* Email form */}
           <form onSubmit={onStep1Submit} className="srf-form">
             <div className="srf-form-group">
-              <label htmlFor="name">{language === "en" ? "Full Name" : "სახელი და გვარი"}</label>
+              <label htmlFor="name">
+                {language === "en" ? "Full Name" : "სახელი და გვარი"}
+              </label>
               <input
                 id="name"
                 type="text"
@@ -585,12 +660,16 @@ export function SellerRegistrationFlow({
                 className="srf-input"
               />
               {step1Form.formState.errors.name && (
-                <span className="srf-error">{step1Form.formState.errors.name.message}</span>
+                <span className="srf-error">
+                  {step1Form.formState.errors.name.message}
+                </span>
               )}
             </div>
 
             <div className="srf-form-group">
-              <label htmlFor="email">{language === "en" ? "Email" : "ელფოსტა"}</label>
+              <label htmlFor="email">
+                {language === "en" ? "Email" : "ელფოსტა"}
+              </label>
               <div className="srf-email-container">
                 <input
                   id="email"
@@ -599,13 +678,18 @@ export function SellerRegistrationFlow({
                   disabled={isEmailVerified}
                   className={`srf-input ${isEmailVerified ? "srf-verified-input" : ""}`}
                   {...step1Form.register("email", {
-                    onChange: (e) => !isEmailVerified && setEmailValue(e.target.value),
+                    onChange: (e) =>
+                      !isEmailVerified && setEmailValue(e.target.value),
                   })}
                 />
-                {isEmailVerified && <FaCheckCircle className="srf-verified-icon" />}
+                {isEmailVerified && (
+                  <FaCheckCircle className="srf-verified-icon" />
+                )}
               </div>
               {step1Form.formState.errors.email && (
-                <span className="srf-error">{step1Form.formState.errors.email.message}</span>
+                <span className="srf-error">
+                  {step1Form.formState.errors.email.message}
+                </span>
               )}
               {emailValue && !emailSent && !isEmailVerified && (
                 <button
@@ -621,23 +705,35 @@ export function SellerRegistrationFlow({
             {emailSent && !isEmailVerified && (
               <div className="srf-form-group">
                 <label htmlFor="verification-code">
-                  {language === "en" ? "Verification Code" : "ვერიფიკაციის კოდი"}
+                  {language === "en"
+                    ? "Verification Code"
+                    : "ვერიფიკაციის კოდი"}
                 </label>
                 <input
                   id="verification-code"
                   type="text"
-                  placeholder={language === "en" ? "Enter code" : "შეიყვანე კოდი"}
+                  placeholder={
+                    language === "en" ? "Enter code" : "შეიყვანე კოდი"
+                  }
                   value={verificationCode}
                   onChange={(e) => setVerificationCode(e.target.value)}
                   className="srf-input"
                 />
-                <button type="button" onClick={verifyEmailCode} className="srf-verify-btn">
+                <button
+                  type="button"
+                  onClick={verifyEmailCode}
+                  className="srf-verify-btn"
+                >
                   {language === "en" ? "Verify" : "დადასტურება"}
                 </button>
                 {verificationError && (
                   <>
                     <span className="srf-error">{verificationError}</span>
-                    <button type="button" onClick={resendVerificationCode} className="srf-resend-btn">
+                    <button
+                      type="button"
+                      onClick={resendVerificationCode}
+                      className="srf-resend-btn"
+                    >
                       {language === "en" ? "Resend Code" : "ხელახლა გაგზავნა"}
                     </button>
                   </>
@@ -646,7 +742,9 @@ export function SellerRegistrationFlow({
             )}
 
             <div className="srf-form-group">
-              <label htmlFor="password">{language === "en" ? "Password" : "პაროლი"}</label>
+              <label htmlFor="password">
+                {language === "en" ? "Password" : "პაროლი"}
+              </label>
               <input
                 id="password"
                 type="password"
@@ -655,7 +753,9 @@ export function SellerRegistrationFlow({
                 className="srf-input"
               />
               {step1Form.formState.errors.password && (
-                <span className="srf-error">{step1Form.formState.errors.password.message}</span>
+                <span className="srf-error">
+                  {step1Form.formState.errors.password.message}
+                </span>
               )}
             </div>
 
@@ -671,8 +771,8 @@ export function SellerRegistrationFlow({
                 className="srf-contract-link"
               >
                 {t("auth.termsAndConditions")}
-              </button>
-              {" "}{t("auth.and")}{" "}
+              </button>{" "}
+              {t("auth.and")}{" "}
               <button
                 type="button"
                 onClick={() => setShowPrivacyPolicy(true)}
@@ -696,15 +796,23 @@ export function SellerRegistrationFlow({
               showAcceptButton={false}
             />
 
-            <button type="submit" className="srf-submit-btn" disabled={isPending || !isEmailVerified}>
+            <button
+              type="submit"
+              className="srf-submit-btn"
+              disabled={isPending || !isEmailVerified}
+            >
               {language === "en" ? "Continue" : "გაგრძელება"}
             </button>
           </form>
 
           {showLoginLink && (
             <p className="srf-login-link">
-              {language === "en" ? "Already have an account?" : "უკვე გაქვს ანგარიში?"}{" "}
-              <Link href="/login">{language === "en" ? "Log in" : "შესვლა"}</Link>
+              {language === "en"
+                ? "Already have an account?"
+                : "უკვე გაქვს ანგარიში?"}{" "}
+              <Link href="/login">
+                {language === "en" ? "Log in" : "შესვლა"}
+              </Link>
             </p>
           )}
         </div>
@@ -713,7 +821,9 @@ export function SellerRegistrationFlow({
       {step === 2 && (
         <div className="srf-step-content">
           <h2 className="srf-title">
-            {language === "en" ? "Complete Your Seller Profile" : "შეავსე გამყიდველის პროფილი"}
+            {language === "en"
+              ? "Complete Your Seller Profile"
+              : "შეავსე გამყიდველის პროფილი"}
           </h2>
           {user && (
             <p className="srf-subtitle">
@@ -725,21 +835,29 @@ export function SellerRegistrationFlow({
 
           <form onSubmit={onStep2Submit} className="srf-form">
             <div className="srf-form-group">
-              <label htmlFor="storeName">{language === "en" ? "Store Name" : "მაღაზიის სახელი"} *</label>
+              <label htmlFor="storeName">
+                {language === "en" ? "Store Name" : "მაღაზიის სახელი"} *
+              </label>
               <input
                 id="storeName"
                 type="text"
-                placeholder={language === "en" ? "Your store name" : "მაღაზიის სახელი"}
+                placeholder={
+                  language === "en" ? "Your store name" : "მაღაზიის სახელი"
+                }
                 {...step2Form.register("storeName")}
                 className="srf-input"
               />
               {step2Form.formState.errors.storeName && (
-                <span className="srf-error">{step2Form.formState.errors.storeName.message}</span>
+                <span className="srf-error">
+                  {step2Form.formState.errors.storeName.message}
+                </span>
               )}
             </div>
 
             <div className="srf-form-group">
-              <label>{language === "en" ? "Portfolio Link" : "პორტფოლიოს ბმული"}</label>
+              <label>
+                {language === "en" ? "Portfolio Link" : "პორტფოლიოს ბმული"}
+              </label>
               <div className="srf-slug-wrapper">
                 <span className="srf-slug-prefix">{slugDisplayPrefix}</span>
                 <input
@@ -750,7 +868,14 @@ export function SellerRegistrationFlow({
                 />
               </div>
               {slugMessage && (
-                <span style={{ color: slugStatusColors[slugStatus], fontSize: "0.85rem" }}>{slugMessage}</span>
+                <span
+                  style={{
+                    color: slugStatusColors[slugStatus],
+                    fontSize: "0.85rem",
+                  }}
+                >
+                  {slugMessage}
+                </span>
               )}
             </div>
 
@@ -758,7 +883,13 @@ export function SellerRegistrationFlow({
               <label>{language === "en" ? "Store Logo" : "ლოგო"}</label>
               <div className="srf-logo-upload">
                 {logoPreview && (
-                  <Image src={logoPreview} alt="Logo" width={60} height={60} className="srf-logo-preview" />
+                  <Image
+                    src={logoPreview}
+                    alt="Logo"
+                    width={60}
+                    height={60}
+                    className="srf-logo-preview"
+                  />
                 )}
                 <input
                   ref={fileInputRef}
@@ -767,15 +898,27 @@ export function SellerRegistrationFlow({
                   onChange={handleLogoChange}
                   style={{ display: "none" }}
                 />
-                <button type="button" onClick={() => fileInputRef.current?.click()} className="srf-upload-btn">
-                  {logoPreview ? (language === "en" ? "Change" : "შეცვლა") : (language === "en" ? "Upload" : "ატვირთვა")}
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="srf-upload-btn"
+                >
+                  {logoPreview
+                    ? language === "en"
+                      ? "Change"
+                      : "შეცვლა"
+                    : language === "en"
+                      ? "Upload"
+                      : "ატვირთვა"}
                 </button>
               </div>
             </div>
 
             <div className="srf-form-row">
               <div className="srf-form-group">
-                <label htmlFor="phoneNumber">{language === "en" ? "Phone" : "ტელეფონი"} *</label>
+                <label htmlFor="phoneNumber">
+                  {language === "en" ? "Phone" : "ტელეფონი"} *
+                </label>
                 <input
                   id="phoneNumber"
                   type="tel"
@@ -784,12 +927,16 @@ export function SellerRegistrationFlow({
                   className="srf-input"
                 />
                 {step2Form.formState.errors.phoneNumber && (
-                  <span className="srf-error">{step2Form.formState.errors.phoneNumber.message}</span>
+                  <span className="srf-error">
+                    {step2Form.formState.errors.phoneNumber.message}
+                  </span>
                 )}
               </div>
 
               <div className="srf-form-group">
-                <label htmlFor="identificationNumber">{language === "en" ? "ID Number" : "პირადი ნომერი"} *</label>
+                <label htmlFor="identificationNumber">
+                  {language === "en" ? "ID Number" : "პირადი ნომერი"} *
+                </label>
                 <input
                   id="identificationNumber"
                   type="text"
@@ -797,7 +944,9 @@ export function SellerRegistrationFlow({
                   className="srf-input"
                 />
                 {step2Form.formState.errors.identificationNumber && (
-                  <span className="srf-error">{step2Form.formState.errors.identificationNumber.message}</span>
+                  <span className="srf-error">
+                    {step2Form.formState.errors.identificationNumber.message}
+                  </span>
                 )}
               </div>
             </div>
@@ -815,43 +964,56 @@ export function SellerRegistrationFlow({
                     const iban = e.target.value.trim();
                     const bank = detectBankFromIban(iban);
                     if (bank) step2Form.setValue("beneficiaryBankCode", bank);
-                    else if (iban.length >= 22) step2Form.setValue("beneficiaryBankCode", "");
+                    else if (iban.length >= 22)
+                      step2Form.setValue("beneficiaryBankCode", "");
                   }}
                 />
                 {step2Form.formState.errors.accountNumber && (
-                  <span className="srf-error">{step2Form.formState.errors.accountNumber.message}</span>
+                  <span className="srf-error">
+                    {step2Form.formState.errors.accountNumber.message}
+                  </span>
                 )}
               </div>
 
               <div className="srf-form-group">
-                <label htmlFor="beneficiaryBankCode">{language === "en" ? "Bank" : "ბანკი"} *</label>
+                <label htmlFor="beneficiaryBankCode">
+                  {language === "en" ? "Bank" : "ბანკი"} *
+                </label>
                 <select
                   id="beneficiaryBankCode"
                   {...step2Form.register("beneficiaryBankCode")}
                   className="srf-input"
                   disabled
                 >
-                  <option value="">{language === "en" ? "Select" : "აირჩიე"}</option>
+                  <option value="">
+                    {language === "en" ? "Select" : "აირჩიე"}
+                  </option>
                   {GEORGIAN_BANKS.map((bank) => (
-                    <option key={bank.code} value={bank.code}>{bank.name}</option>
+                    <option key={bank.code} value={bank.code}>
+                      {bank.name}
+                    </option>
                   ))}
                 </select>
                 {step2Form.formState.errors.beneficiaryBankCode && (
-                  <span className="srf-error">{step2Form.formState.errors.beneficiaryBankCode.message}</span>
+                  <span className="srf-error">
+                    {step2Form.formState.errors.beneficiaryBankCode.message}
+                  </span>
                 )}
               </div>
             </div>
 
             <p className="srf-terms-notice">
-              {language === "en" 
-                ? "By completing registration, you agree to the" 
+              {language === "en"
+                ? "By completing registration, you agree to the"
                 : "რეგისტრაციის დასრულებით ეთანხმებით"}{" "}
               <button
                 type="button"
                 onClick={() => setShowSellerContract(true)}
                 className="srf-contract-link"
               >
-                {language === "en" ? "Seller Agreement" : "გამყიდველის ხელშეკრულებას"}
+                {language === "en"
+                  ? "Seller Agreement"
+                  : "გამყიდველის ხელშეკრულებას"}
               </button>
             </p>
 
@@ -862,10 +1024,18 @@ export function SellerRegistrationFlow({
               showAcceptButton={false}
             />
 
-            <button type="submit" className="srf-submit-btn" disabled={isPending}>
+            <button
+              type="submit"
+              className="srf-submit-btn"
+              disabled={isPending}
+            >
               {isPending
-                ? (language === "en" ? "Submitting..." : "იგზავნება...")
-                : (language === "en" ? "Complete Registration" : "დაასრულე რეგისტრაცია")}
+                ? language === "en"
+                  ? "Submitting..."
+                  : "იგზავნება..."
+                : language === "en"
+                  ? "Complete Registration"
+                  : "დაასრულე რეგისტრაცია"}
             </button>
           </form>
         </div>

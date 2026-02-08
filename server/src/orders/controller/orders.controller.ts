@@ -39,8 +39,15 @@ export class OrdersController {
         return await this.ordersService.create(body, user._id.toString());
       } else {
         // Guest checkout - require guest info
-        if (!body.guestInfo || !body.guestInfo.email || !body.guestInfo.phoneNumber || !body.guestInfo.fullName) {
-          throw new BadRequestException('Guest checkout requires email, phoneNumber, and fullName');
+        if (
+          !body.guestInfo ||
+          !body.guestInfo.email ||
+          !body.guestInfo.phoneNumber ||
+          !body.guestInfo.fullName
+        ) {
+          throw new BadRequestException(
+            'Guest checkout requires email, phoneNumber, and fullName',
+          );
         }
         return await this.ordersService.createGuestOrder(body);
       }
@@ -87,7 +94,10 @@ export class OrdersController {
 
     // If user is an admin, return orders filtered by orderType
     if (user.role === Role.Admin) {
-      console.log('User is admin, fetching orders with type:', orderType || 'all');
+      console.log(
+        'User is admin, fetching orders with type:',
+        orderType || 'all',
+      );
       return this.ordersService.findAll(orderType);
     }
 
@@ -119,7 +129,7 @@ export class OrdersController {
     @Query('email') guestEmail?: string,
   ) {
     const order = await this.ordersService.findById(id);
-    
+
     // If user is authenticated, check if order belongs to them
     if (user) {
       if (order.user && order.user.toString() === user._id.toString()) {
@@ -130,15 +140,17 @@ export class OrdersController {
         return order;
       }
     }
-    
+
     // For guest orders, allow public access (no authentication required)
     // Guest orders are public and can be viewed by anyone with the order ID
     if (order.isGuestOrder) {
       return order;
     }
-    
+
     // If it's a registered user's order but user is not authenticated, deny access
-    throw new UnauthorizedException('You do not have permission to view this order');
+    throw new UnauthorizedException(
+      'You do not have permission to view this order',
+    );
   }
 
   @UseGuards(JwtAuthGuard)

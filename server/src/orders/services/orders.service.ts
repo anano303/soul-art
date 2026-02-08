@@ -286,7 +286,7 @@ export class OrdersService {
     }
   }
   async create(
-    orderAttrs: Partial<Order> & { 
+    orderAttrs: Partial<Order> & {
       salesRefCode?: string;
       totalReferralDiscount?: number;
       hasReferralDiscount?: boolean;
@@ -639,7 +639,10 @@ export class OrdersService {
     if (orderType === 'auction') {
       filter.orderType = 'auction';
     } else if (orderType === 'regular') {
-      filter.$or = [{ orderType: 'regular' }, { orderType: { $exists: false } }];
+      filter.$or = [
+        { orderType: 'regular' },
+        { orderType: { $exists: false } },
+      ];
     }
     // If no orderType specified, return all orders
 

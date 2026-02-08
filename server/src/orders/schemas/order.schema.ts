@@ -37,7 +37,11 @@ export class Order {
   orderType!: string;
 
   // Auction reference (only for auction orders)
-  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Auction', required: false })
+  @Prop({
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Auction',
+    required: false,
+  })
   auctionId?: mongoose.Types.ObjectId;
 
   @Prop({
@@ -159,7 +163,11 @@ export class Order {
   salesRefCode?: string;
 
   // Campaign/Referral discount tracking
-  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Campaign', default: null })
+  @Prop({
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Campaign',
+    default: null,
+  })
   campaignId?: mongoose.Types.ObjectId;
 
   @Prop({ type: String, default: null })

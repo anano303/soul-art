@@ -27,12 +27,17 @@ interface OrdersListProps {
   auctionAdminMode?: boolean;
 }
 
-export function OrdersList({ salesManagerMode = false, auctionAdminMode = false }: OrdersListProps) {
+export function OrdersList({
+  salesManagerMode = false,
+  auctionAdminMode = false,
+}: OrdersListProps) {
   const [page, setPage] = useState(1);
   const [userRole, setUserRole] = useState<string | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
   const [showDonation, setShowDonation] = useState(false);
-  const [orderTypeTab, setOrderTypeTab] = useState<"regular" | "auction">(auctionAdminMode ? "auction" : "regular");
+  const [orderTypeTab, setOrderTypeTab] = useState<"regular" | "auction">(
+    auctionAdminMode ? "auction" : "regular",
+  );
 
   useEffect(() => {
     const userData = getUserData();
@@ -50,13 +55,21 @@ export function OrdersList({ salesManagerMode = false, auctionAdminMode = false 
   });
 
   const { data, isLoading } = useQuery({
-    queryKey: ["orders", page, userRole, userId, salesManagerMode, auctionAdminMode, orderTypeTab],
+    queryKey: [
+      "orders",
+      page,
+      userRole,
+      userId,
+      salesManagerMode,
+      auctionAdminMode,
+      orderTypeTab,
+    ],
     queryFn: async () => {
       try {
         // Sales Manager gets orders from their referrals
         if (salesManagerMode) {
           const response = await fetchWithAuth(
-            `/sales-commission/my-commissions?page=${page}&limit=50`
+            `/sales-commission/my-commissions?page=${page}&limit=50`,
           );
           if (!response.ok) {
             console.error("Failed to fetch sales orders:", response.statusText);
@@ -78,7 +91,9 @@ export function OrdersList({ salesManagerMode = false, auctionAdminMode = false 
 
         // Backend now handles role-based filtering
         const orderTypeParam = auctionAdminMode ? "auction" : orderTypeTab;
-        const response = await fetchWithAuth(`/orders?page=${page}&limit=50&orderType=${orderTypeParam}`);
+        const response = await fetchWithAuth(
+          `/orders?page=${page}&limit=50&orderType=${orderTypeParam}`,
+        );
         if (!response.ok) {
           console.error("Failed to fetch orders:", response.statusText);
           return { items: [], pages: 0 };
@@ -121,14 +136,20 @@ export function OrdersList({ salesManagerMode = false, auctionAdminMode = false 
             <div className="orders-tabs">
               <button
                 className={`orders-tab ${orderTypeTab === "regular" ? "active" : ""}`}
-                onClick={() => { setOrderTypeTab("regular"); setPage(1); }}
+                onClick={() => {
+                  setOrderTypeTab("regular");
+                  setPage(1);
+                }}
               >
                 <ShoppingBag size={16} />
                 ჩვეულებრივი
               </button>
               <button
                 className={`orders-tab ${orderTypeTab === "auction" ? "active" : ""}`}
-                onClick={() => { setOrderTypeTab("auction"); setPage(1); }}
+                onClick={() => {
+                  setOrderTypeTab("auction");
+                  setPage(1);
+                }}
               >
                 <Gavel size={16} />
                 აუქციონის
@@ -269,11 +290,18 @@ export function OrdersList({ salesManagerMode = false, auctionAdminMode = false 
                   </td>
                   <td>
                     <div className="price-cell">
-                      {order.totalPrice ? order.totalPrice.toFixed(2) : "0.00"} ₾
+                      {order.totalPrice ? order.totalPrice.toFixed(2) : "0.00"}{" "}
+                      ₾
                       {(order as any).hasReferralDiscount && (
-                        <span className="referral-discount-badge" title={`რეფერალ ფასდაკლება: ${((order as any).totalReferralDiscount || 0).toFixed(2)} ₾`}>
-                          <Tag size={12} />
-                          -{((order as any).totalReferralDiscount || 0).toFixed(2)} ₾
+                        <span
+                          className="referral-discount-badge"
+                          title={`რეფერალ ფასდაკლება: ${((order as any).totalReferralDiscount || 0).toFixed(2)} ₾`}
+                        >
+                          <Tag size={12} />-
+                          {((order as any).totalReferralDiscount || 0).toFixed(
+                            2,
+                          )}{" "}
+                          ₾
                         </span>
                       )}
                     </div>
@@ -285,7 +313,7 @@ export function OrdersList({ salesManagerMode = false, auctionAdminMode = false 
                         item.productId &&
                         typeof item.productId === "object" &&
                         item.productId.deliveryType &&
-                        String(item.productId.deliveryType) === "SELLER"
+                        String(item.productId.deliveryType) === "SELLER",
                     ) ? (
                       <span className="delivery-badge seller">
                         <Store className="icon" />
@@ -296,7 +324,7 @@ export function OrdersList({ salesManagerMode = false, auctionAdminMode = false 
                               item.productId &&
                               typeof item.productId === "object" &&
                               item.productId.deliveryType &&
-                              String(item.productId.deliveryType) === "SELLER"
+                              String(item.productId.deliveryType) === "SELLER",
                           )
                           .map((item, itemIndex) =>
                             item.productId &&
@@ -310,7 +338,7 @@ export function OrdersList({ salesManagerMode = false, auctionAdminMode = false 
                                 {item.productId.minDeliveryDays}-
                                 {item.productId.maxDeliveryDays} დღე
                               </span>
-                            ) : null
+                            ) : null,
                           )}
                       </span>
                     ) : (

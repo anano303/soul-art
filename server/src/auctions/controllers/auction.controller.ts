@@ -188,7 +188,8 @@ export class AuctionController {
     @CurrentUser() user: UserDocument,
     @Body() payload: RescheduleAuctionDto,
   ) {
-    const isAdmin = user.role === Role.Admin || user.role === Role.AuctionAdmin;
+    // Only main admin has full privileges, auction_admin is treated like seller for restrictions
+    const isAdmin = user.role === Role.Admin;
     return this.auctionService.rescheduleAuction(
       id,
       user._id.toString(),
@@ -248,7 +249,8 @@ export class AuctionController {
     @CurrentUser() user: UserDocument,
     @Query('reason') reason?: string,
   ) {
-    return this.auctionService.cancelAuction(id, user._id.toString(), reason);
+    const isAdmin = user.role === Role.Admin;
+    return this.auctionService.cancelAuction(id, user._id.toString(), reason, isAdmin);
   }
 
   // Admin or AuctionAdmin: Get auction statistics

@@ -300,12 +300,7 @@
   transform: translateX(-50%);
   width: 100px;
   height: 2px;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    var(--auc-gold),
-    transparent
-  );
+  background: linear-gradient(90deg, transparent, var(--auc-gold), transparent);
 }
 
 /* Header Actions Container - Top right of hero */

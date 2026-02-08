@@ -333,10 +333,7 @@ export class AuctionService {
   }
 
   // Place a bid
-  async placeBid(
-    bidderId: string,
-    placeBidDto: PlaceBidDto,
-  ) {
+  async placeBid(bidderId: string, placeBidDto: PlaceBidDto) {
     const { auctionId, bidAmount } = placeBidDto;
 
     const auction = await this.auctionModel.findById(auctionId);
@@ -400,7 +397,9 @@ export class AuctionService {
       timeRemaining <= BID_EXTENSION_THRESHOLD_MS
     ) {
       // Extend auction end time by 10 seconds
-      auction.endDate = new Date(auction.endDate.getTime() + BID_EXTENSION_AMOUNT_MS);
+      auction.endDate = new Date(
+        auction.endDate.getTime() + BID_EXTENSION_AMOUNT_MS,
+      );
       wasExtended = true;
       this.logger.log(
         `Auction ${auctionId} extended by 10 seconds due to last-second bid. New end time: ${auction.endDate}`,
@@ -604,6 +603,7 @@ export class AuctionService {
     auctionId: string,
     adminId: string,
     reason?: string,
+    isAdmin: boolean = true,
   ): Promise<AuctionDocument> {
     const auction = await this.auctionModel.findById(auctionId);
     if (!auction) {
@@ -616,6 +616,19 @@ export class AuctionService {
 
     if (auction.status === AuctionStatus.ENDED && auction.isPaid) {
       throw new BadRequestException('Cannot cancel auctions that are paid');
+    }
+
+    // Auction admin restrictions: can only cancel PENDING or SCHEDULED auctions with no bids
+    if (!isAdmin) {
+      const canAuctionAdminCancel = 
+        (auction.status === AuctionStatus.PENDING || auction.status === AuctionStatus.SCHEDULED) &&
+        auction.totalBids === 0;
+
+      if (!canAuctionAdminCancel) {
+        throw new ForbiddenException(
+          'აუქციონ ადმინს მხოლოდ მოლოდინში ან დაგეგმილი აუქციონების გაუქმება შეუძლია, რომლებსაც ბიდები არ აქვს',
+        );
+      }
     }
 
     auction.status = AuctionStatus.CANCELLED;
@@ -648,12 +661,21 @@ export class AuctionService {
     }
 
     if (!isAdmin && auction.seller.toString() !== requesterId) {
-      throw new ForbiddenException('You cannot modify this auction');
+      throw new ForbiddenException('თქვენ არ გაქვთ ამ აუქციონის რედაქტირების უფლება');
     }
 
     if (!isAdmin && auction.totalBids > 0) {
       throw new BadRequestException(
-        'Auctions with bids cannot be rescheduled. Please contact support.',
+        'რედაქტირება შეუძლებელია: აუქციონს უკვე აქვს ბიდები',
+      );
+    }
+
+    // Check auction status for non-admin users
+    if (!isAdmin && (auction.status === 'ACTIVE' || auction.status === 'ENDED')) {
+      throw new BadRequestException(
+        auction.status === 'ACTIVE' 
+          ? 'რედაქტირება შეუძლებელია: აუქციონი აქტიურია'
+          : 'რედაქტირება შეუძლებელია: აუქციონი დასრულებულია',
       );
     }
 
@@ -1321,12 +1343,12 @@ export class AuctionService {
     auction.deliveryFee = deliveryFee;
     auction.totalPayment = totalPayment;
     auction.externalOrderId = externalOrderId;
-    
+
     // Store shipping address if provided
     if (shippingAddress) {
       (auction as any).shippingAddress = shippingAddress;
     }
-    
+
     await auction.save();
 
     this.logger.log(
@@ -1420,6 +1442,7 @@ export class AuctionService {
         const sellerName = seller
           ? `${seller.ownerFirstName || ''} ${seller.ownerLastName || ''}`.trim() ||
             seller.storeName ||
+            seller.name ||
             'Unknown'
           : 'Unknown';
 
@@ -1487,21 +1510,28 @@ export class AuctionService {
 
   // Get auction comments with pagination
   async getAuctionComments(auctionId: string, page = 1, limit = 20) {
-    const auction = await this.auctionModel.findById(auctionId).select('comments').lean();
+    const auction = await this.auctionModel
+      .findById(auctionId)
+      .select('comments')
+      .lean();
     if (!auction) {
       throw new NotFoundException('Auction not found');
     }
 
     const comments = auction.comments || [];
-    
+
     // Sort by newest first
     const sortedComments = [...comments].sort(
-      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      (a, b) =>
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
     );
 
     // Paginate
     const startIndex = (page - 1) * limit;
-    const paginatedComments = sortedComments.slice(startIndex, startIndex + limit);
+    const paginatedComments = sortedComments.slice(
+      startIndex,
+      startIndex + limit,
+    );
 
     return {
       comments: paginatedComments,
@@ -1519,7 +1549,9 @@ export class AuctionService {
     }
 
     if (content.length > 1000) {
-      throw new BadRequestException('Comment is too long (max 1000 characters)');
+      throw new BadRequestException(
+        'Comment is too long (max 1000 characters)',
+      );
     }
 
     const auction = await this.auctionModel.findById(auctionId);
@@ -1528,7 +1560,8 @@ export class AuctionService {
     }
 
     // Get user name
-    const userName = user.name || 
+    const userName =
+      user.name ||
       `${user.ownerFirstName || ''} ${user.ownerLastName || ''}`.trim() ||
       user.storeName ||
       'Anonymous';
@@ -1545,7 +1578,9 @@ export class AuctionService {
     auction.comments.push(comment);
     await auction.save();
 
-    this.logger.log(`Comment added to auction ${auctionId} by user ${user._id}`);
+    this.logger.log(
+      `Comment added to auction ${auctionId} by user ${user._id}`,
+    );
 
     return {
       ...comment,
@@ -1594,7 +1629,9 @@ export class AuctionService {
       taxPrice: 0,
       shippingPrice: auction.deliveryFee || 0,
       itemsPrice: auction.currentPrice,
-      totalPrice: auction.totalPayment || auction.currentPrice + (auction.deliveryFee || 0),
+      totalPrice:
+        auction.totalPayment ||
+        auction.currentPrice + (auction.deliveryFee || 0),
       isPaid: true,
       paidAt: new Date().toISOString(),
       status: 'paid',

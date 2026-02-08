@@ -234,9 +234,9 @@ export class AuctionAdminService {
       .reduce((sum, e) => sum + e.auctionAdminEarnings, 0);
     const pendingEarnings = totalEarnings - withdrawnEarnings;
 
-    // Get recent completed auctions
+    // Get recent completed auctions (both paid and unpaid)
     const completedAuctions = await this.auctionModel
-      .find({ status: 'ENDED', isPaid: true })
+      .find({ status: 'ENDED', currentWinner: { $ne: null } })
       .populate('seller', 'name ownerFirstName ownerLastName storeName')
       .populate('currentWinner', 'name ownerFirstName ownerLastName')
       .sort({ endedAt: -1 })

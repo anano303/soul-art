@@ -159,7 +159,9 @@
   border: 1px solid #d1d5db;
   border-radius: 8px;
   background: white;
-  transition: border-color 0.2s, box-shadow 0.2s;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
 }
 
 .srf-input:focus {

@@ -1170,6 +1170,25 @@
   background: rgba(239, 68, 68, 0.25);
 }
 
+.action-btn.edit-btn {
+  background: rgba(59, 130, 246, 0.15);
+  color: #60a5fa;
+}
+
+.action-btn.edit-btn:hover {
+  background: rgba(59, 130, 246, 0.25);
+}
+
+.action-btn.disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.action-btn.disabled:hover {
+  transform: none;
+}
+
 /* Empty State Card */
 .empty-state-card {
   display: flex;

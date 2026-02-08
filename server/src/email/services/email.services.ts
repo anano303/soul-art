@@ -1196,7 +1196,7 @@ ${data.message}
                 <span style="float: right; font-weight: bold;">${finalPrice} ₾</span>
               </div>
               <div style="border-bottom: 1px solid #e0e7ff; padding-bottom: 10px; margin-bottom: 10px;">
-                <span style="color: #666;">საკომისიო (10%):</span>
+                <span style="color: #666;">საკომისიო :</span>
                 <span style="float: right; color: #dc2626;">-${commission} ₾</span>
               </div>
               <div style="padding-top: 10px; border-top: 2px solid #3b82f6;">
