@@ -1150,6 +1150,91 @@ export class AuctionService {
     }
   }
 
+  // გადახდის დადასტურების მეილების გაგზავნა
+  private async sendPaymentConfirmationNotifications(
+    auction: AuctionDocument,
+    seller: any,
+    winner: any,
+    deliveryFee: number,
+    totalPayment: number,
+  ) {
+    try {
+      // შევქმნათ მისამართის სტრინგი
+      const shippingAddress = auction.shippingAddress
+        ? [
+            auction.shippingAddress.address,
+            auction.shippingAddress.city,
+            auction.shippingAddress.postalCode,
+            auction.shippingAddress.country,
+          ]
+            .filter(Boolean)
+            .join(', ')
+        : '';
+
+      const buyerName = winner
+        ? `${winner.firstName || ''} ${winner.lastName || ''}`.trim() ||
+          winner.name ||
+          'უცნობი'
+        : 'უცნობი';
+
+      // 1. მყიდველს გადახდის დადასტურება
+      if (winner?.email) {
+        await this.emailService.sendAuctionPaymentConfirmationToBuyer(
+          winner.email,
+          auction.title,
+          auction.currentPrice,
+          deliveryFee,
+          totalPayment,
+          auction.deliveryType,
+          auction.mainImage,
+        );
+      }
+
+      // 2. გამყიდველს გადახდის დადასტურება
+      if (seller?.email) {
+        await this.emailService.sendAuctionPaymentConfirmationToSeller(
+          seller.email,
+          auction.title,
+          auction.sellerEarnings,
+          auction.deliveryType,
+          buyerName,
+          shippingAddress,
+          auction.mainImage,
+        );
+      }
+
+      // 3. აუქციონის ადმინს გადახდის დადასტურება
+      const settings = await this.auctionAdminService.getSettings();
+      if (settings.auctionAdminUserId) {
+        const auctionAdmin = await this.userModel.findById(
+          settings.auctionAdminUserId,
+        );
+        if (auctionAdmin?.email) {
+          const auctionAdminCommissionPercent =
+            settings.auctionAdminCommissionPercent || 30;
+          const adminCommission =
+            (auction.currentPrice * auctionAdminCommissionPercent) / 100;
+
+          await this.emailService.sendAuctionPaymentConfirmationToAdmin(
+            auctionAdmin.email,
+            auction.title,
+            adminCommission,
+            auction.mainImage,
+          );
+        }
+      }
+
+      this.logger.log(
+        `Payment confirmation emails sent for auction: ${auction._id}`,
+      );
+    } catch (error) {
+      this.logger.error(
+        'Failed to send payment confirmation notifications:',
+        error,
+      );
+    }
+  }
+
   // Mark auction as paid
   async markAuctionAsPaid(
     auctionId: string,
@@ -1321,6 +1406,15 @@ export class AuctionService {
         auction.currentWinner.toString(),
         buyerName,
         auction.title,
+      );
+
+      // გადახდის დადასტურების მეილების გაგზავნა
+      await this.sendPaymentConfirmationNotifications(
+        auction,
+        seller,
+        winner,
+        deliveryFee,
+        totalPayment,
       );
     } catch (error) {
       this.logger.warn(`Failed to record auction admin earnings: ${error}`);
