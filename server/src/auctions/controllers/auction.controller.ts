@@ -250,7 +250,12 @@ export class AuctionController {
     @Query('reason') reason?: string,
   ) {
     const isAdmin = user.role === Role.Admin;
-    return this.auctionService.cancelAuction(id, user._id.toString(), reason, isAdmin);
+    return this.auctionService.cancelAuction(
+      id,
+      user._id.toString(),
+      reason,
+      isAdmin,
+    );
   }
 
   // Admin or AuctionAdmin: Get auction statistics

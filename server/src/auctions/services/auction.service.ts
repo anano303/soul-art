@@ -620,8 +620,9 @@ export class AuctionService {
 
     // Auction admin restrictions: can only cancel PENDING or SCHEDULED auctions with no bids
     if (!isAdmin) {
-      const canAuctionAdminCancel = 
-        (auction.status === AuctionStatus.PENDING || auction.status === AuctionStatus.SCHEDULED) &&
+      const canAuctionAdminCancel =
+        (auction.status === AuctionStatus.PENDING ||
+          auction.status === AuctionStatus.SCHEDULED) &&
         auction.totalBids === 0;
 
       if (!canAuctionAdminCancel) {
@@ -661,7 +662,9 @@ export class AuctionService {
     }
 
     if (!isAdmin && auction.seller.toString() !== requesterId) {
-      throw new ForbiddenException('თქვენ არ გაქვთ ამ აუქციონის რედაქტირების უფლება');
+      throw new ForbiddenException(
+        'თქვენ არ გაქვთ ამ აუქციონის რედაქტირების უფლება',
+      );
     }
 
     if (!isAdmin && auction.totalBids > 0) {
@@ -671,9 +674,12 @@ export class AuctionService {
     }
 
     // Check auction status for non-admin users
-    if (!isAdmin && (auction.status === 'ACTIVE' || auction.status === 'ENDED')) {
+    if (
+      !isAdmin &&
+      (auction.status === 'ACTIVE' || auction.status === 'ENDED')
+    ) {
       throw new BadRequestException(
-        auction.status === 'ACTIVE' 
+        auction.status === 'ACTIVE'
           ? 'რედაქტირება შეუძლებელია: აუქციონი აქტიურია'
           : 'რედაქტირება შეუძლებელია: აუქციონი დასრულებულია',
       );

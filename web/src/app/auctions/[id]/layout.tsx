@@ -72,7 +72,8 @@ export async function generateMetadata({
   }
 
   const sellerName = getSellerName(auction.seller);
-  const artworkTypeGe = auction.artworkType === "ORIGINAL" ? "ორიგინალი" : "რეპროდუქცია";
+  const artworkTypeGe =
+    auction.artworkType === "ORIGINAL" ? "ორიგინალი" : "რეპროდუქცია";
   const endDate = new Date(auction.endDate);
   const formattedEndDate = endDate.toLocaleDateString("ka-GE", {
     day: "numeric",
@@ -181,8 +182,10 @@ export async function generateMetadata({
       // Price info for rich snippets
       "product:price:amount": auction.currentPrice.toString(),
       "product:price:currency": "GEL",
-      "product:availability": auction.status === "ACTIVE" ? "in stock" : "out of stock",
-      "product:condition": auction.artworkType === "ORIGINAL" ? "new" : "refurbished",
+      "product:availability":
+        auction.status === "ACTIVE" ? "in stock" : "out of stock",
+      "product:condition":
+        auction.artworkType === "ORIGINAL" ? "new" : "refurbished",
       // Auction specific
       "auction:start_price": auction.startingPrice.toString(),
       "auction:current_bid": auction.currentPrice.toString(),

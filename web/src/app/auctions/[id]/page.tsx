@@ -122,13 +122,25 @@ export default function AuctionDetailPage() {
   const fetchAuctionRef = useRef<(() => Promise<void>) | undefined>(undefined);
 
   // Real-time polling for bid updates
-  const { bidStatus, isExtended, refresh: refreshBidStatus } = useAuctionPolling({
+  const {
+    bidStatus,
+    isExtended,
+    refresh: refreshBidStatus,
+  } = useAuctionPolling({
     auctionId,
     enabled: auction?.status === "ACTIVE",
     onBidUpdate: (data) => {
-      console.log("[Bid Update] Received update:", data.totalBids, "vs previous:", lastBidCountRef.current);
+      console.log(
+        "[Bid Update] Received update:",
+        data.totalBids,
+        "vs previous:",
+        lastBidCountRef.current,
+      );
       // Show animation when new bid comes in
-      if (lastBidCountRef.current > 0 && data.totalBids > lastBidCountRef.current) {
+      if (
+        lastBidCountRef.current > 0 &&
+        data.totalBids > lastBidCountRef.current
+      ) {
         console.log("[Bid Update] New bid detected! Triggering refresh...");
         setShowNewBidAnimation(true);
         setTimeout(() => setShowNewBidAnimation(false), 2000);
@@ -138,13 +150,19 @@ export default function AuctionDetailPage() {
         }
         toast.success(t("auctions.newBidReceived") || "ახალი ფსონი შემოვიდა!");
         // Refresh full auction data to update bid history
-        console.log("[Bid Update] fetchAuctionRef.current exists:", !!fetchAuctionRef.current);
+        console.log(
+          "[Bid Update] fetchAuctionRef.current exists:",
+          !!fetchAuctionRef.current,
+        );
         if (fetchAuctionRef.current) {
-          fetchAuctionRef.current().then(() => {
-            console.log("[Bid Update] Auction data refreshed successfully");
-          }).catch((err) => {
-            console.error("[Bid Update] Failed to refresh auction:", err);
-          });
+          fetchAuctionRef
+            .current()
+            .then(() => {
+              console.log("[Bid Update] Auction data refreshed successfully");
+            })
+            .catch((err) => {
+              console.error("[Bid Update] Failed to refresh auction:", err);
+            });
         }
       }
       lastBidCountRef.current = data.totalBids;
@@ -186,7 +204,10 @@ export default function AuctionDetailPage() {
       // Initialize bid count ref for new bid detection (only on initial load)
       if (lastBidCountRef.current === 0) {
         lastBidCountRef.current = response.data.totalBids || 0;
-        console.log("[Auction Debug] Initialized lastBidCountRef:", lastBidCountRef.current);
+        console.log(
+          "[Auction Debug] Initialized lastBidCountRef:",
+          lastBidCountRef.current,
+        );
       }
       // Set initial bid amount to minimum next bid
       const minBid =
@@ -317,7 +338,7 @@ export default function AuctionDetailPage() {
 
   const handlePayment = () => {
     if (!auction) return;
-    
+
     // Store auction checkout data in sessionStorage
     const auctionCheckoutItem = {
       auctionId: auction._id,
@@ -332,8 +353,11 @@ export default function AuctionDetailPage() {
       deliveryDaysMin: auction.deliveryDaysMin,
       deliveryDaysMax: auction.deliveryDaysMax,
     };
-    sessionStorage.setItem("auction_checkout_item", JSON.stringify(auctionCheckoutItem));
-    
+    sessionStorage.setItem(
+      "auction_checkout_item",
+      JSON.stringify(auctionCheckoutItem),
+    );
+
     // Redirect to streamlined checkout with auction param
     router.push(`/checkout/streamlined?auction=${auction._id}`);
   };
@@ -378,17 +402,20 @@ export default function AuctionDetailPage() {
         auctionId: auction._id,
         bidAmount: bidAmount,
       });
-      
+
       // Check for time extension
       if (response.data.wasExtended) {
-        toast.success(t("auctions.yourBidExtendedTime") || "თქვენი ფსონით დრო გაგრძელდა!", {
-          icon: "⏰",
-          duration: 4000,
-        });
+        toast.success(
+          t("auctions.yourBidExtendedTime") || "თქვენი ფსონით დრო გაგრძელდა!",
+          {
+            icon: "⏰",
+            duration: 4000,
+          },
+        );
       } else {
         toast.success(t("auctions.bidSuccess"));
       }
-      
+
       fetchAuction(); // Refresh auction data
       refreshBidStatus(); // Refresh polling data
     } catch (error: unknown) {
@@ -472,9 +499,10 @@ export default function AuctionDetailPage() {
   const isPreBid = auction.status === "SCHEDULED";
 
   // Generate seller name for structured data
-  const sellerFullName = auction.seller.ownerFirstName && auction.seller.ownerLastName
-    ? `${auction.seller.ownerFirstName} ${auction.seller.ownerLastName}`
-    : auction.seller.storeName || auction.seller.name || "SoulArt Artist";
+  const sellerFullName =
+    auction.seller.ownerFirstName && auction.seller.ownerLastName
+      ? `${auction.seller.ownerFirstName} ${auction.seller.ownerLastName}`
+      : auction.seller.storeName || auction.seller.name || "SoulArt Artist";
 
   // JSON-LD structured data for SEO
   const jsonLd = {
@@ -497,11 +525,12 @@ export default function AuctionDetailPage() {
       lowPrice: auction.startingPrice,
       highPrice: auction.currentPrice || auction.startingPrice,
       offerCount: auction.totalBids || 0,
-      availability: auction.status === "ACTIVE" 
-        ? "https://schema.org/InStock" 
-        : auction.status === "ENDED"
-          ? "https://schema.org/SoldOut"
-          : "https://schema.org/PreOrder",
+      availability:
+        auction.status === "ACTIVE"
+          ? "https://schema.org/InStock"
+          : auction.status === "ENDED"
+            ? "https://schema.org/SoldOut"
+            : "https://schema.org/PreOrder",
       priceValidUntil: auction.endDate,
       url: `https://soulart.ge/auctions/${auction._id}`,
     },
@@ -542,420 +571,478 @@ export default function AuctionDetailPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
       <div className="auction-detail-container">
-      <div className="auction-detail-header">
-        <Link href="/auctions" className="back-link">
-          <ArrowLeft size={20} />
-          {t("auctions.backToAuctions") || "ყველა აუქციონი"}
-        </Link>
-      </div>
+        <div className="auction-detail-header">
+          <Link href="/auctions" className="back-link">
+            <ArrowLeft size={20} />
+            {t("auctions.backToAuctions") || "ყველა აუქციონი"}
+          </Link>
+        </div>
 
-      <div className="auction-detail-content">
-        {/* Left: Images */}
-        <div className="auction-images-section">
-          <div className="main-image-container">
-            <Image
-              src={allImages[selectedImage]}
-              alt={auction.title}
-              fill
-              className="main-image"
-              priority
-            />
-            {auction.status !== "ACTIVE" && (
-              <div className="status-overlay">
-                <span className="status-text">
-                  {t(`auctions.status.${auction.status.toLowerCase()}`)}
-                </span>
+        <div className="auction-detail-content">
+          {/* Left: Images */}
+          <div className="auction-images-section">
+            <div className="main-image-container">
+              <Image
+                src={allImages[selectedImage]}
+                alt={auction.title}
+                fill
+                className="main-image"
+                priority
+              />
+              {auction.status !== "ACTIVE" && (
+                <div className="status-overlay">
+                  <span className="status-text">
+                    {t(`auctions.status.${auction.status.toLowerCase()}`)}
+                  </span>
+                </div>
+              )}
+            </div>
+
+            {allImages.length > 1 && (
+              <div className="image-thumbnails">
+                {allImages.map((img, index) => (
+                  <button
+                    key={index}
+                    className={`thumbnail ${selectedImage === index ? "active" : ""}`}
+                    onClick={() => setSelectedImage(index)}
+                  >
+                    <Image
+                      src={img}
+                      alt={`${auction.title} ${index + 1}`}
+                      fill
+                    />
+                  </button>
+                ))}
               </div>
             )}
           </div>
 
-          {allImages.length > 1 && (
-            <div className="image-thumbnails">
-              {allImages.map((img, index) => (
-                <button
-                  key={index}
-                  className={`thumbnail ${selectedImage === index ? "active" : ""}`}
-                  onClick={() => setSelectedImage(index)}
-                >
-                  <Image src={img} alt={`${auction.title} ${index + 1}`} fill />
-                </button>
-              ))}
+          {/* Right: Details */}
+          <div className="auction-info-section">
+            {/* Compact Header Row */}
+            <div className="auction-header-row">
+              <div className="artwork-type-badge">
+                <span className={auction.artworkType.toLowerCase()}>
+                  {auction.artworkType === "ORIGINAL"
+                    ? t("auctions.type.original")
+                    : t("auctions.type.reproduction")}
+                </span>
+              </div>
+              <h1 className="auction-title">{auction.title}</h1>
             </div>
-          )}
-        </div>
 
-        {/* Right: Details */}
-        <div className="auction-info-section">
-          {/* Compact Header Row */}
-          <div className="auction-header-row">
-            <div className="artwork-type-badge">
-              <span className={auction.artworkType.toLowerCase()}>
-                {auction.artworkType === "ORIGINAL"
-                  ? t("auctions.type.original")
-                  : t("auctions.type.reproduction")}
-              </span>
+            <div className="seller-share-row">
+              <div className="seller-info">
+                <span className="label">{t("auctions.seller")}:</span>
+                <span className="value">{getSellerName()}</span>
+              </div>
+              <ShareButton
+                url={`/auctions/${auction._id}`}
+                title={auction.title}
+                description={auction.description}
+                className="auction-share-btn"
+              />
             </div>
-            <h1 className="auction-title">{auction.title}</h1>
-          </div>
 
-          <div className="seller-share-row">
-            <div className="seller-info">
-              <span className="label">{t("auctions.seller")}:</span>
-              <span className="value">{getSellerName()}</span>
-            </div>
-            <ShareButton
-              url={`/auctions/${auction._id}`}
-              title={auction.title}
-              description={auction.description}
-              className="auction-share-btn"
-            />
-          </div>
-
-          {/* ═══════════════════════════════════════════════════════════════════
+            {/* ═══════════════════════════════════════════════════════════════════
               UNIFIED BIDDING CARD - Timer, Price, and Bid Controls
               ═══════════════════════════════════════════════════════════════════ */}
-          {(auction.status === "ACTIVE" || auction.status === "SCHEDULED") && !isEnded && (
-            <div className={`bidding-card ${auction.status === "SCHEDULED" ? "scheduled" : ""}`}>
-              {/* Timer Label */}
-              <div className="bidding-card-timer-label">
-                {auction.status === "SCHEDULED" ? (
-                  <span className="timer-label scheduled">{t("auctions.startsIn") || "დაიწყება"}</span>
-                ) : (
-                  <span className="timer-label">{t("auctions.timeLeft") || "დარჩენილია"}</span>
-                )}
-              </div>
-
-              {/* Compact Timer */}
-              <div className="bidding-card-timer">
-                <FlipClockTimer
-                  endDate={auction.status === "SCHEDULED" ? auction.startDate : (bidStatus?.endDate || auction.endDate)}
-                  onTimeEnd={() => {
-                    if (auction.status === "SCHEDULED") {
-                      // Refresh auction when it starts
-                      fetchAuction();
-                    } else {
-                      setIsEnded(true);
-                      fetchAuction();
-                    }
-                  }}
-                  isExtended={isExtended}
-                  language={language === "ge" ? "ge" : "en"}
-                />
-                {isExtended && auction.status === "ACTIVE" && (
-                  <div className="time-extended-badge compact">
-                    <Zap size={14} />
-                    <span>{t("auctions.timeWasExtended") || "+10 წამი!"}</span>
-                  </div>
-                )}
-              </div>
-
-              {/* Compact Price Info */}
-              <div className={`bidding-card-pricing ${showNewBidAnimation ? "new-bid-pulse" : ""}`}>
-                <div className="price-info-row">
-                  <div className="price-item current">
-                    <span className="price-label">
-                      {auction.status === "SCHEDULED" 
-                        ? (t("auctions.startingPrice") || "საწყისი ფასი")
-                        : (t("auctions.currentPrice") || "მიმდინარე ფასი")}
-                    </span>
-                    <span className="price-value">{formatPrice(bidStatus?.currentPrice ?? auction.currentPrice)}</span>
-                    {showNewBidAnimation && (
-                      <div className="price-updated-badge">
-                        <TrendingUp size={14} />
-                      </div>
-                    )}
-                  </div>
-                  <div className="price-divider" />
-                  <div className="price-item step">
-                    <span className="price-label">{t("auctions.minimumBid") || "მინ. ფსონი"}</span>
-                    <span className="price-value">+{formatPrice(auction.minimumBidIncrement)}</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Bid Input - Now inside the card */}
-              {canShowBidSection && (
-                <div className="bidding-card-controls">
-                  <div className="bid-controls-compact">
-                    <button
-                      className="bid-step-btn"
-                      onClick={() => handleBidChange(-1)}
-                      disabled={
-                        bidAmount <=
-                        (bidStatus?.currentPrice ?? auction.currentPrice) + auction.minimumBidIncrement
-                      }
-                    >
-                      <Minus size={18} />
-                    </button>
-                    <div className="bid-input-wrapper">
-                      <input
-                        type="number"
-                        className="bid-input"
-                        value={bidAmount}
-                        onChange={handleBidInputChange}
-                        min={(bidStatus?.currentPrice ?? auction.currentPrice) + auction.minimumBidIncrement}
-                        step={auction.minimumBidIncrement}
-                      />
-                      <span className="currency">₾</span>
-                    </div>
-                    <button
-                      className="bid-step-btn"
-                      onClick={() => handleBidChange(1)}
-                    >
-                      <Plus size={18} />
-                    </button>
-                  </div>
-                  <button
-                    className={`place-bid-btn ${isPreBid ? "pre-bid" : ""} ${!user ? "guest-bid" : ""}`}
-                    onClick={handlePlaceBid}
-                    disabled={bidding}
-                  >
-                    {bidding ? (
-                      <span className="loading-text">...</span>
+            {(auction.status === "ACTIVE" || auction.status === "SCHEDULED") &&
+              !isEnded && (
+                <div
+                  className={`bidding-card ${auction.status === "SCHEDULED" ? "scheduled" : ""}`}
+                >
+                  {/* Timer Label */}
+                  <div className="bidding-card-timer-label">
+                    {auction.status === "SCHEDULED" ? (
+                      <span className="timer-label scheduled">
+                        {t("auctions.startsIn") || "დაიწყება"}
+                      </span>
                     ) : (
-                      <>
-                        <Gavel size={18} />
-                        {!user 
-                          ? t("auctions.bidNow") || "დადე ფსონი"
-                          : isPreBid
-                            ? t("auctions.preBid") || "Pre-Bid"
-                            : t("auctions.placeBid")}
-                      </>
+                      <span className="timer-label">
+                        {t("auctions.timeLeft") || "დარჩენილია"}
+                      </span>
                     )}
-                  </button>
-                  {!user && (
-                    <p className="guest-bid-hint">{t("auctions.loginRequiredAfterBid") || "ფსონის დასადებად საჭიროა ავტორიზაცია"}</p>
-                  )}
-                </div>
-              )}
+                  </div>
 
-              {auction.status === "SCHEDULED" && (
-                <div className="pre-bid-notice">
-                  <Clock size={16} />
-                  <span>{t("auctions.preBidNotice") || "აუქციონი ჯერ არ დაწყებულა. შეგიძლიათ Pre-Bid განათავსოთ!"}</span>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Fallback for ended auction */}
-          {(auction.status === "ENDED" || isEnded) && (
-            <div className="time-info-box ended-state">
-              <Clock className="time-icon" size={24} />
-              <div className="time-details">
-                <span className="time-label">{t("auctions.auctionEnded")}</span>
-                <span className="time-value ended">{t("auctions.ended")}</span>
-              </div>
-            </div>
-          )}
-
-          {/* End Date - Only show for active auction (start date is irrelevant once started) */}
-          {auction.status === "ACTIVE" && !isEnded && (
-            <div className="end-date-info">
-              <span className="end-date-label">{t("auctions.endsAt") || "დასრულდება"}:</span>
-              <span className="end-date-value">{formatDate(bidStatus?.endDate || auction.endDate)}</span>
-            </div>
-          )}
-
-          {/* For scheduled auctions, show both dates */}
-          {auction.status === "SCHEDULED" && (
-            <div className="dates-grid">
-              <div className="date-card">
-                <div className="date-card-icon">📅</div>
-                <div className="date-card-content">
-                  <span className="date-card-label">{t("auctions.startDate") || "დაწყება"}</span>
-                  <span className="date-card-value">{formatDate(auction.startDate)}</span>
-                </div>
-              </div>
-              <div className="date-card">
-                <div className="date-card-icon">⏰</div>
-                <div className="date-card-content">
-                  <span className="date-card-label">{t("auctions.endDate") || "დასრულება"}</span>
-                  <span className="date-card-value">{formatDate(auction.endDate)}</span>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Bid Stats - with real-time updates */}
-          <div className="bid-stats">
-            <div className="stat-item">
-              <Users size={20} />
-              <span>
-                <strong>{bidStatus?.totalBids ?? auction.totalBids}</strong> {t("auctions.bids")}
-              </span>
-            </div>
-            {/* Show highest bid amount */}
-            {auction.currentPrice > auction.startingPrice && (
-              <div className="stat-item highest-bid">
-                <span>
-                  {t("auctions.highestBid") || "მაღალი ფსონი"}:{" "}
-                  <strong>{formatPrice(auction.currentPrice)}</strong>
-                </span>
-              </div>
-            )}
-            {/* Show highest bidder - try currentWinner first, then fall back to bids */}
-            {(auction.currentWinner ||
-              (auction.bids && auction.bids.length > 0)) && (
-              <div className="stat-item winner">
-                <Gavel size={20} />
-                <span>
-                  {t("auctions.highestBidder") || "ლიდერი"}:{" "}
-                  <strong>
-                    {(() => {
-                      // First try currentWinner with full name
-                      if (auction.currentWinner) {
-                        const winner = auction.currentWinner;
-                        // Try name field first
-                        if (winner.name) {
-                          return winner.name;
-                        }
-                        // Then try ownerFirstName/ownerLastName
-                        if (winner.ownerFirstName && winner.ownerLastName) {
-                          return `${winner.ownerFirstName} ${winner.ownerLastName}`;
-                        }
-                        // Then try firstName/lastName
-                        if (winner.firstName && winner.lastName) {
-                          return `${winner.firstName} ${winner.lastName}`;
-                        }
+                  {/* Compact Timer */}
+                  <div className="bidding-card-timer">
+                    <FlipClockTimer
+                      endDate={
+                        auction.status === "SCHEDULED"
+                          ? auction.startDate
+                          : bidStatus?.endDate || auction.endDate
                       }
-                      // Fall back to highest bid from bids array
-                      if (auction.bids && auction.bids.length > 0) {
-                        const sortedBids = [...auction.bids].sort(
-                          (a, b) => b.amount - a.amount,
-                        );
-                        const highestBid = sortedBids[0];
-                        return getBidderName(highestBid);
-                      }
-                      return t("auctions.anonymousBidder") || "ანონიმური";
-                    })()}
-                  </strong>
-                </span>
-              </div>
-            )}
-          </div>
-
-          {/* Winner Section - Show when auction is ended */}
-          {auction.status === "ENDED" && auction.currentWinner && (
-            <div
-              className={`winner-section ${isCurrentUserWinner() ? "is-winner" : ""}`}
-            >
-              <div className="winner-header">
-                <Trophy size={24} className="trophy-icon" />
-                <h3>
-                  {t("auctions.auctionWinner") || "აუქციონის გამარჯვებული"}
-                </h3>
-              </div>
-              <div className="winner-info">
-                <span className="winner-name">{getWinnerName()}</span>
-                <span className="winning-amount">
-                  {t("auctions.winningBid") || "მოგებული ფასი"}:{" "}
-                  {formatPrice(auction.currentPrice)}
-                </span>
-              </div>
-              {isCurrentUserWinner() && (
-                <div className="winner-actions">
-                  {auction.isPaid ? (
-                    <p className="paid-notice">
-                      ✅ {t("auctions.alreadyPaid") || "გადახდა შესრულებულია"}
-                    </p>
-                  ) : (
-                    <>
-                      <p className="congratulations">
-                        🎉{" "}
-                        {t("auctions.congratulations") ||
-                          "გილოცავთ! თქვენ მოიგეთ ეს აუქციონი!"}
-                      </p>
-                      <button className="payment-btn" onClick={handlePayment}>
-                        <CreditCard size={20} />
-                        {t("auctions.proceedToPayment") || "გადახდა"}
-                      </button>
-                    </>
-                  )}
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Details */}
-          <div className="artwork-details">
-            <h3>{t("auctions.description")}</h3>
-            <p>{auction.description}</p>
-
-            <div className="detail-tags">
-              <div className="detail-tag">
-                <Palette size={16} />
-                <span>{auction.material}</span>
-              </div>
-              <div className="detail-tag">
-                <Ruler size={16} />
-                <span>{auction.dimensions}</span>
-              </div>
-              <div className="detail-tag">
-                <Package size={16} />
-                <span>
-                  {auction.deliveryDaysMin === auction.deliveryDaysMax
-                    ? `${auction.deliveryDaysMin} ${t("auctions.days") || "დღე"}`
-                    : `${auction.deliveryDaysMin}-${auction.deliveryDaysMax} ${t("auctions.days") || "დღე"}`}
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {/* Bid History */}
-          {auction.bids && auction.bids.length > 0 && (
-            <div className="bid-history">
-              <h3>{t("auctions.bidHistory")}</h3>
-              <div className="bid-list">
-                {auction.bids
-                  .slice()
-                  .sort(
-                    (a, b) =>
-                      new Date(b.timestamp).getTime() -
-                      new Date(a.timestamp).getTime(),
-                  )
-                  .slice(0, 10)
-                  .map((bid, index) => (
-                    <div
-                      key={index}
-                      className={`bid-item ${index === 0 ? "highest" : ""}`}
-                    >
-                      <div className="bidder-info">
-                        <span className="bidder-name">
-                          {getBidderName(bid)}
-                        </span>
-                        <span className="bid-time">
-                          {formatDate(bid.timestamp)}
+                      onTimeEnd={() => {
+                        if (auction.status === "SCHEDULED") {
+                          // Refresh auction when it starts
+                          fetchAuction();
+                        } else {
+                          setIsEnded(true);
+                          fetchAuction();
+                        }
+                      }}
+                      isExtended={isExtended}
+                      language={language === "ge" ? "ge" : "en"}
+                    />
+                    {isExtended && auction.status === "ACTIVE" && (
+                      <div className="time-extended-badge compact">
+                        <Zap size={14} />
+                        <span>
+                          {t("auctions.timeWasExtended") || "+10 წამი!"}
                         </span>
                       </div>
-                      <span className="bid-amount">
-                        {formatPrice(bid.amount)}
+                    )}
+                  </div>
+
+                  {/* Compact Price Info */}
+                  <div
+                    className={`bidding-card-pricing ${showNewBidAnimation ? "new-bid-pulse" : ""}`}
+                  >
+                    <div className="price-info-row">
+                      <div className="price-item current">
+                        <span className="price-label">
+                          {auction.status === "SCHEDULED"
+                            ? t("auctions.startingPrice") || "საწყისი ფასი"
+                            : t("auctions.currentPrice") || "მიმდინარე ფასი"}
+                        </span>
+                        <span className="price-value">
+                          {formatPrice(
+                            bidStatus?.currentPrice ?? auction.currentPrice,
+                          )}
+                        </span>
+                        {showNewBidAnimation && (
+                          <div className="price-updated-badge">
+                            <TrendingUp size={14} />
+                          </div>
+                        )}
+                      </div>
+                      <div className="price-divider" />
+                      <div className="price-item step">
+                        <span className="price-label">
+                          {t("auctions.minimumBid") || "მინ. ფსონი"}
+                        </span>
+                        <span className="price-value">
+                          +{formatPrice(auction.minimumBidIncrement)}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Bid Input - Now inside the card */}
+                  {canShowBidSection && (
+                    <div className="bidding-card-controls">
+                      <div className="bid-controls-compact">
+                        <button
+                          className="bid-step-btn"
+                          onClick={() => handleBidChange(-1)}
+                          disabled={
+                            bidAmount <=
+                            (bidStatus?.currentPrice ?? auction.currentPrice) +
+                              auction.minimumBidIncrement
+                          }
+                        >
+                          <Minus size={18} />
+                        </button>
+                        <div className="bid-input-wrapper">
+                          <input
+                            type="number"
+                            className="bid-input"
+                            value={bidAmount}
+                            onChange={handleBidInputChange}
+                            min={
+                              (bidStatus?.currentPrice ??
+                                auction.currentPrice) +
+                              auction.minimumBidIncrement
+                            }
+                            step={auction.minimumBidIncrement}
+                          />
+                          <span className="currency">₾</span>
+                        </div>
+                        <button
+                          className="bid-step-btn"
+                          onClick={() => handleBidChange(1)}
+                        >
+                          <Plus size={18} />
+                        </button>
+                      </div>
+                      <button
+                        className={`place-bid-btn ${isPreBid ? "pre-bid" : ""} ${!user ? "guest-bid" : ""}`}
+                        onClick={handlePlaceBid}
+                        disabled={bidding}
+                      >
+                        {bidding ? (
+                          <span className="loading-text">...</span>
+                        ) : (
+                          <>
+                            <Gavel size={18} />
+                            {!user
+                              ? t("auctions.bidNow") || "დადე ფსონი"
+                              : isPreBid
+                                ? t("auctions.preBid") || "Pre-Bid"
+                                : t("auctions.placeBid")}
+                          </>
+                        )}
+                      </button>
+                      {!user && (
+                        <p className="guest-bid-hint">
+                          {t("auctions.loginRequiredAfterBid") ||
+                            "ფსონის დასადებად საჭიროა ავტორიზაცია"}
+                        </p>
+                      )}
+                    </div>
+                  )}
+
+                  {auction.status === "SCHEDULED" && (
+                    <div className="pre-bid-notice">
+                      <Clock size={16} />
+                      <span>
+                        {t("auctions.preBidNotice") ||
+                          "აუქციონი ჯერ არ დაწყებულა. შეგიძლიათ Pre-Bid განათავსოთ!"}
                       </span>
                     </div>
-                  ))}
+                  )}
+                </div>
+              )}
+
+            {/* Fallback for ended auction */}
+            {(auction.status === "ENDED" || isEnded) && (
+              <div className="time-info-box ended-state">
+                <Clock className="time-icon" size={24} />
+                <div className="time-details">
+                  <span className="time-label">
+                    {t("auctions.auctionEnded")}
+                  </span>
+                  <span className="time-value ended">
+                    {t("auctions.ended")}
+                  </span>
+                </div>
+              </div>
+            )}
+
+            {/* End Date - Only show for active auction (start date is irrelevant once started) */}
+            {auction.status === "ACTIVE" && !isEnded && (
+              <div className="end-date-info">
+                <span className="end-date-label">
+                  {t("auctions.endsAt") || "დასრულდება"}:
+                </span>
+                <span className="end-date-value">
+                  {formatDate(bidStatus?.endDate || auction.endDate)}
+                </span>
+              </div>
+            )}
+
+            {/* For scheduled auctions, show both dates */}
+            {auction.status === "SCHEDULED" && (
+              <div className="dates-grid">
+                <div className="date-card">
+                  <div className="date-card-icon">📅</div>
+                  <div className="date-card-content">
+                    <span className="date-card-label">
+                      {t("auctions.startDate") || "დაწყება"}
+                    </span>
+                    <span className="date-card-value">
+                      {formatDate(auction.startDate)}
+                    </span>
+                  </div>
+                </div>
+                <div className="date-card">
+                  <div className="date-card-icon">⏰</div>
+                  <div className="date-card-content">
+                    <span className="date-card-label">
+                      {t("auctions.endDate") || "დასრულება"}
+                    </span>
+                    <span className="date-card-value">
+                      {formatDate(auction.endDate)}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Bid Stats - with real-time updates */}
+            <div className="bid-stats">
+              <div className="stat-item">
+                <Users size={20} />
+                <span>
+                  <strong>{bidStatus?.totalBids ?? auction.totalBids}</strong>{" "}
+                  {t("auctions.bids")}
+                </span>
+              </div>
+              {/* Show highest bid amount */}
+              {auction.currentPrice > auction.startingPrice && (
+                <div className="stat-item highest-bid">
+                  <span>
+                    {t("auctions.highestBid") || "მაღალი ფსონი"}:{" "}
+                    <strong>{formatPrice(auction.currentPrice)}</strong>
+                  </span>
+                </div>
+              )}
+              {/* Show highest bidder - try currentWinner first, then fall back to bids */}
+              {(auction.currentWinner ||
+                (auction.bids && auction.bids.length > 0)) && (
+                <div className="stat-item winner">
+                  <Gavel size={20} />
+                  <span>
+                    {t("auctions.highestBidder") || "ლიდერი"}:{" "}
+                    <strong>
+                      {(() => {
+                        // First try currentWinner with full name
+                        if (auction.currentWinner) {
+                          const winner = auction.currentWinner;
+                          // Try name field first
+                          if (winner.name) {
+                            return winner.name;
+                          }
+                          // Then try ownerFirstName/ownerLastName
+                          if (winner.ownerFirstName && winner.ownerLastName) {
+                            return `${winner.ownerFirstName} ${winner.ownerLastName}`;
+                          }
+                          // Then try firstName/lastName
+                          if (winner.firstName && winner.lastName) {
+                            return `${winner.firstName} ${winner.lastName}`;
+                          }
+                        }
+                        // Fall back to highest bid from bids array
+                        if (auction.bids && auction.bids.length > 0) {
+                          const sortedBids = [...auction.bids].sort(
+                            (a, b) => b.amount - a.amount,
+                          );
+                          const highestBid = sortedBids[0];
+                          return getBidderName(highestBid);
+                        }
+                        return t("auctions.anonymousBidder") || "ანონიმური";
+                      })()}
+                    </strong>
+                  </span>
+                </div>
+              )}
+            </div>
+
+            {/* Winner Section - Show when auction is ended */}
+            {auction.status === "ENDED" && auction.currentWinner && (
+              <div
+                className={`winner-section ${isCurrentUserWinner() ? "is-winner" : ""}`}
+              >
+                <div className="winner-header">
+                  <Trophy size={24} className="trophy-icon" />
+                  <h3>
+                    {t("auctions.auctionWinner") || "აუქციონის გამარჯვებული"}
+                  </h3>
+                </div>
+                <div className="winner-info">
+                  <span className="winner-name">{getWinnerName()}</span>
+                  <span className="winning-amount">
+                    {t("auctions.winningBid") || "მოგებული ფასი"}:{" "}
+                    {formatPrice(auction.currentPrice)}
+                  </span>
+                </div>
+                {isCurrentUserWinner() && (
+                  <div className="winner-actions">
+                    {auction.isPaid ? (
+                      <p className="paid-notice">
+                        ✅ {t("auctions.alreadyPaid") || "გადახდა შესრულებულია"}
+                      </p>
+                    ) : (
+                      <>
+                        <p className="congratulations">
+                          🎉{" "}
+                          {t("auctions.congratulations") ||
+                            "გილოცავთ! თქვენ მოიგეთ ეს აუქციონი!"}
+                        </p>
+                        <button className="payment-btn" onClick={handlePayment}>
+                          <CreditCard size={20} />
+                          {t("auctions.proceedToPayment") || "გადახდა"}
+                        </button>
+                      </>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Details */}
+            <div className="artwork-details">
+              <h3>{t("auctions.description")}</h3>
+              <p>{auction.description}</p>
+
+              <div className="detail-tags">
+                <div className="detail-tag">
+                  <Palette size={16} />
+                  <span>{auction.material}</span>
+                </div>
+                <div className="detail-tag">
+                  <Ruler size={16} />
+                  <span>{auction.dimensions}</span>
+                </div>
+                <div className="detail-tag">
+                  <Package size={16} />
+                  <span>
+                    {auction.deliveryDaysMin === auction.deliveryDaysMax
+                      ? `${auction.deliveryDaysMin} ${t("auctions.days") || "დღე"}`
+                      : `${auction.deliveryDaysMin}-${auction.deliveryDaysMax} ${t("auctions.days") || "დღე"}`}
+                  </span>
+                </div>
               </div>
             </div>
-          )}
+
+            {/* Bid History */}
+            {auction.bids && auction.bids.length > 0 && (
+              <div className="bid-history">
+                <h3>{t("auctions.bidHistory")}</h3>
+                <div className="bid-list">
+                  {auction.bids
+                    .slice()
+                    .sort(
+                      (a, b) =>
+                        new Date(b.timestamp).getTime() -
+                        new Date(a.timestamp).getTime(),
+                    )
+                    .slice(0, 10)
+                    .map((bid, index) => (
+                      <div
+                        key={index}
+                        className={`bid-item ${index === 0 ? "highest" : ""}`}
+                      >
+                        <div className="bidder-info">
+                          <span className="bidder-name">
+                            {getBidderName(bid)}
+                          </span>
+                          <span className="bid-time">
+                            {formatDate(bid.timestamp)}
+                          </span>
+                        </div>
+                        <span className="bid-amount">
+                          {formatPrice(bid.amount)}
+                        </span>
+                      </div>
+                    ))}
+                </div>
+              </div>
+            )}
+          </div>
         </div>
-      </div>
 
-      {/* Facebook Continue Button for returning FB users */}
-      <FacebookContinueButton />
+        {/* Facebook Continue Button for returning FB users */}
+        <FacebookContinueButton />
 
-      {/* Comments Section */}
-      <AuctionComments auctionId={auctionId} onAuthRequired={authModal.open} />
+        {/* Comments Section */}
+        <AuctionComments
+          auctionId={auctionId}
+          onAuthRequired={authModal.open}
+        />
 
-      {/* Related Auctions Section */}
-      <RelatedAuctions currentAuctionId={auctionId} maxItems={4} />
+        {/* Related Auctions Section */}
+        <RelatedAuctions currentAuctionId={auctionId} maxItems={4} />
 
-      {/* Auth Modal for guest bidders */}
-      <AuctionAuthModal
-        isOpen={authModal.isOpen}
-        onClose={authModal.close}
-        onLoginSuccess={authModal.onLoginSuccess}
-        auctionTitle={auction.title}
-        currentPrice={bidAmount}
-      />
+        {/* Auth Modal for guest bidders */}
+        <AuctionAuthModal
+          isOpen={authModal.isOpen}
+          onClose={authModal.close}
+          onLoginSuccess={authModal.onLoginSuccess}
+          auctionTitle={auction.title}
+          currentPrice={bidAmount}
+        />
       </div>
     </>
   );

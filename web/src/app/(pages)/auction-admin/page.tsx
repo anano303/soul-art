@@ -134,28 +134,32 @@ export default function AuctionAdminDashboard() {
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(
     null,
   );
-  
+
   const [activeTab, setActiveTab] = useState<
     "dashboard" | "auctions" | "withdrawals"
   >("dashboard");
 
   // Update tab from URL hash on mount
   useEffect(() => {
-    const hash = window.location.hash.replace('#', '');
-    if (hash === 'auctions' || hash === 'withdrawals' || hash === 'dashboard') {
+    const hash = window.location.hash.replace("#", "");
+    if (hash === "auctions" || hash === "withdrawals" || hash === "dashboard") {
       setActiveTab(hash);
     }
-    
+
     // Listen for hash changes
     const handleHashChange = () => {
-      const newHash = window.location.hash.replace('#', '');
-      if (newHash === 'auctions' || newHash === 'withdrawals' || newHash === 'dashboard') {
+      const newHash = window.location.hash.replace("#", "");
+      if (
+        newHash === "auctions" ||
+        newHash === "withdrawals" ||
+        newHash === "dashboard"
+      ) {
         setActiveTab(newHash);
       }
     };
-    
-    window.addEventListener('hashchange', handleHashChange);
-    return () => window.removeEventListener('hashchange', handleHashChange);
+
+    window.addEventListener("hashchange", handleHashChange);
+    return () => window.removeEventListener("hashchange", handleHashChange);
   }, []);
 
   // Update URL hash when tab changes
@@ -664,12 +668,16 @@ export default function AuctionAdminDashboard() {
                             )}
                           </td>
                           <td>
-                            {auction.seller?.ownerFirstName && auction.seller?.ownerLastName
+                            {auction.seller?.ownerFirstName &&
+                            auction.seller?.ownerLastName
                               ? `${auction.seller.ownerFirstName} ${auction.seller.ownerLastName}`
-                              : auction.seller?.storeName || auction.seller?.name || "-"}
+                              : auction.seller?.storeName ||
+                                auction.seller?.name ||
+                                "-"}
                           </td>
                           <td>
-                            {auction.currentWinner?.ownerFirstName && auction.currentWinner?.ownerLastName
+                            {auction.currentWinner?.ownerFirstName &&
+                            auction.currentWinner?.ownerLastName
                               ? `${auction.currentWinner.ownerFirstName} ${auction.currentWinner.ownerLastName}`
                               : auction.currentWinner?.name || "-"}
                           </td>
@@ -871,9 +879,12 @@ export default function AuctionAdminDashboard() {
                             )}
                             {/* Auction admin can only edit/delete PENDING or SCHEDULED auctions with no bids */}
                             {(() => {
-                              const canEdit = (auction.status === "PENDING" || auction.status === "SCHEDULED") && auction.totalBids === 0;
-                              const editTooltip = !canEdit 
-                                ? auction.totalBids > 0 
+                              const canEdit =
+                                (auction.status === "PENDING" ||
+                                  auction.status === "SCHEDULED") &&
+                                auction.totalBids === 0;
+                              const editTooltip = !canEdit
+                                ? auction.totalBids > 0
                                   ? "რედაქტირება შეუძლებელია: აუქციონს უკვე აქვს ბიდები"
                                   : auction.status === "ACTIVE"
                                     ? "რედაქტირება შეუძლებელია: აუქციონი აქტიურია"
@@ -881,8 +892,8 @@ export default function AuctionAdminDashboard() {
                                       ? "რედაქტირება შეუძლებელია: აუქციონი დასრულებულია"
                                       : "რედაქტირება შეუძლებელია"
                                 : "რედაქტირება";
-                              const deleteTooltip = !canEdit 
-                                ? auction.totalBids > 0 
+                              const deleteTooltip = !canEdit
+                                ? auction.totalBids > 0
                                   ? "წაშლა შეუძლებელია: აუქციონს უკვე აქვს ბიდები"
                                   : auction.status === "ACTIVE"
                                     ? "წაშლა შეუძლებელია: აუქციონი აქტიურია"
@@ -893,8 +904,12 @@ export default function AuctionAdminDashboard() {
                               return (
                                 <>
                                   <Link
-                                    href={canEdit ? `/admin/auctions/${auction._id}/edit` : "#"}
-                                    className={`action-btn edit-btn ${!canEdit ? 'disabled' : ''}`}
+                                    href={
+                                      canEdit
+                                        ? `/admin/auctions/${auction._id}/edit`
+                                        : "#"
+                                    }
+                                    className={`action-btn edit-btn ${!canEdit ? "disabled" : ""}`}
                                     title={editTooltip}
                                     onClick={(e) => {
                                       if (!canEdit) {
@@ -902,7 +917,14 @@ export default function AuctionAdminDashboard() {
                                         toast.error(editTooltip);
                                       }
                                     }}
-                                    style={!canEdit ? { opacity: 0.4, cursor: 'not-allowed' } : {}}
+                                    style={
+                                      !canEdit
+                                        ? {
+                                            opacity: 0.4,
+                                            cursor: "not-allowed",
+                                          }
+                                        : {}
+                                    }
                                   >
                                     ✏️
                                   </Link>
@@ -914,9 +936,16 @@ export default function AuctionAdminDashboard() {
                                       }
                                       deleteAuction(auction._id);
                                     }}
-                                    className={`action-btn delete-btn ${!canEdit ? 'disabled' : ''}`}
+                                    className={`action-btn delete-btn ${!canEdit ? "disabled" : ""}`}
                                     title={deleteTooltip}
-                                    style={!canEdit ? { opacity: 0.4, cursor: 'not-allowed' } : {}}
+                                    style={
+                                      !canEdit
+                                        ? {
+                                            opacity: 0.4,
+                                            cursor: "not-allowed",
+                                          }
+                                        : {}
+                                    }
                                   >
                                     🗑️
                                   </button>

@@ -179,27 +179,29 @@ function AuctionsContent() {
     },
     mainEntity: {
       "@type": "ItemList",
-      numberOfItems: totalAuctions,
-      itemListElement: filteredAuctions.slice(0, 10).map((auction, index) => ({
-        "@type": "ListItem",
-        position: index + 1,
-        item: {
-          "@type": "Product",
-          name: auction.title,
-          image: auction.mainImage,
-          description: auction.description?.substring(0, 200),
-          offers: {
-            "@type": "Offer",
-            priceCurrency: "GEL",
-            price: auction.currentPrice || auction.startingPrice,
-            availability:
-              auction.status === "ACTIVE"
-                ? "https://schema.org/InStock"
-                : "https://schema.org/OutOfStock",
+      numberOfItems: pagination.total || auctions.length,
+      itemListElement: auctions
+        .slice(0, 10)
+        .map((auction: Auction, index: number) => ({
+          "@type": "ListItem",
+          position: index + 1,
+          item: {
+            "@type": "Product",
+            name: auction.title,
+            image: auction.mainImage,
+            description: auction.description?.substring(0, 200),
+            offers: {
+              "@type": "Offer",
+              priceCurrency: "GEL",
+              price: auction.currentPrice || auction.startingPrice,
+              availability:
+                auction.status === "ACTIVE"
+                  ? "https://schema.org/InStock"
+                  : "https://schema.org/OutOfStock",
+            },
+            url: `https://soulart.ge/auctions/${auction._id}`,
           },
-          url: `https://soulart.ge/auctions/${auction._id}`,
-        },
-      })),
+        })),
     },
   };
 
