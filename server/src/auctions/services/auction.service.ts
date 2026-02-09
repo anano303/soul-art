@@ -1701,7 +1701,30 @@ export class AuctionService {
             settings.auctionAdminUserId.toString(),
             auctionAdminPayload,
           );
+          this.logger.log(`Payment confirmation email sent to auction admin: ${auctionAdmin.email}`);
+        } else {
+          this.logger.warn(`Auction admin ${settings.auctionAdminUserId} has no email`);
         }
+      } else {
+        this.logger.warn(`No auctionAdminUserId in settings, skipping auction admin email`);
+      }
+
+      // 4. მთავარ ადმინს გადახდის დადასტურება (ინფორმაციისთვის)
+      const mainAdminEmail = process.env.ADMIN_EMAIL || 'soulartgeorgia@gmail.com';
+      try {
+        // Main admin-ს ვაჩვენებთ მთლიანი გადახდის ინფორმაციას
+        // Auction admin-ის საკომისიო = currentPrice - sellerEarnings
+        const auctionAdminCommission = auction.currentPrice - auction.sellerEarnings;
+        
+        await this.emailService.sendAuctionPaymentConfirmationToAdmin(
+          mainAdminEmail,
+          auction.title,
+          auctionAdminCommission, // ვაჩვენებთ auction admin-ის საკომისიოს
+          auction.mainImage,
+        );
+        this.logger.log(`Payment confirmation email sent to main admin: ${mainAdminEmail}`);
+      } catch (emailError) {
+        this.logger.error(`Failed to send email to main admin ${mainAdminEmail}:`, emailError);
       }
 
       // Push to seller about payment
