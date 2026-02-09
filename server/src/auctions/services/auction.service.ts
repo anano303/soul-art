@@ -1597,6 +1597,13 @@ export class AuctionService {
     deliveryFee: number,
     totalPayment: number,
   ) {
+    this.logger.log(
+      `Starting payment confirmation notifications for auction: ${auction._id}`,
+    );
+    this.logger.log(
+      `Seller: ${seller?.email || 'NO EMAIL'}, Winner: ${winner?.email || 'NO EMAIL'}`,
+    );
+
     try {
       // შევქმნათ მისამართის სტრინგი
       const shippingAddress = auction.shippingAddress
@@ -1618,28 +1625,42 @@ export class AuctionService {
 
       // 1. მყიდველს გადახდის დადასტურება
       if (winner?.email) {
-        await this.emailService.sendAuctionPaymentConfirmationToBuyer(
-          winner.email,
-          auction.title,
-          auction.currentPrice,
-          deliveryFee,
-          totalPayment,
-          auction.deliveryType,
-          auction.mainImage,
-        );
+        try {
+          await this.emailService.sendAuctionPaymentConfirmationToBuyer(
+            winner.email,
+            auction.title,
+            auction.currentPrice,
+            deliveryFee,
+            totalPayment,
+            auction.deliveryType,
+            auction.mainImage,
+          );
+          this.logger.log(`Payment confirmation email sent to buyer: ${winner.email}`);
+        } catch (emailError) {
+          this.logger.error(`Failed to send email to buyer ${winner.email}:`, emailError);
+        }
+      } else {
+        this.logger.warn(`No email for winner, skipping buyer email`);
       }
 
       // 2. გამყიდველს გადახდის დადასტურება
       if (seller?.email) {
-        await this.emailService.sendAuctionPaymentConfirmationToSeller(
-          seller.email,
-          auction.title,
-          auction.sellerEarnings,
-          auction.deliveryType,
-          buyerName,
-          shippingAddress,
-          auction.mainImage,
-        );
+        try {
+          await this.emailService.sendAuctionPaymentConfirmationToSeller(
+            seller.email,
+            auction.title,
+            auction.sellerEarnings,
+            auction.deliveryType,
+            buyerName,
+            shippingAddress,
+            auction.mainImage,
+          );
+          this.logger.log(`Payment confirmation email sent to seller: ${seller.email}`);
+        } catch (emailError) {
+          this.logger.error(`Failed to send email to seller ${seller.email}:`, emailError);
+        }
+      } else {
+        this.logger.warn(`No email for seller, skipping seller email`);
       }
 
       // 3. აუქციონის ადმინს გადახდის დადასტურება
@@ -2131,26 +2152,27 @@ export class AuctionService {
         );
       }
 
+      // Get seller and winner for notifications
+      const seller = await this.userModel.findById(auction.seller).lean();
+      const winner = await this.userModel
+        .findById(auction.currentWinner)
+        .lean();
+
+      const sellerName = seller
+        ? `${seller.ownerFirstName || ''} ${seller.ownerLastName || ''}`.trim() ||
+          seller.storeName ||
+          seller.name ||
+          'Unknown'
+        : 'Unknown';
+
+      const buyerName = winner
+        ? `${winner.ownerFirstName || ''} ${winner.ownerLastName || ''}`.trim() ||
+          winner.name ||
+          'Unknown'
+        : 'Unknown';
+
       // Record auction admin earnings
       try {
-        const seller = await this.userModel.findById(auction.seller).lean();
-        const winner = await this.userModel
-          .findById(auction.currentWinner)
-          .lean();
-
-        const sellerName = seller
-          ? `${seller.ownerFirstName || ''} ${seller.ownerLastName || ''}`.trim() ||
-            seller.storeName ||
-            seller.name ||
-            'Unknown'
-          : 'Unknown';
-
-        const buyerName = winner
-          ? `${winner.ownerFirstName || ''} ${winner.ownerLastName || ''}`.trim() ||
-            winner.name ||
-            'Unknown'
-          : 'Unknown';
-
         await this.auctionAdminService.recordEarnings(
           auction._id.toString(),
           auction.currentPrice,
@@ -2160,8 +2182,12 @@ export class AuctionService {
           buyerName,
           auction.title,
         );
+      } catch (error) {
+        this.logger.warn(`Failed to record auction admin earnings: ${error}`);
+      }
 
-        // გადახდის დადასტურების მეილების გაგზავნა (BOG callback-იდან)
+      // გადახდის დადასტურების მეილების გაგზავნა (BOG callback-იდან)
+      try {
         const deliveryFee = auction.deliveryFee || 0;
         const totalPayment = auction.currentPrice + deliveryFee;
         await this.sendPaymentConfirmationNotifications(
@@ -2172,7 +2198,7 @@ export class AuctionService {
           totalPayment,
         );
       } catch (error) {
-        this.logger.warn(`Failed to record auction admin earnings: ${error}`);
+        this.logger.error(`Failed to send payment confirmation emails: ${error}`);
       }
 
       // Create order record for the auction
@@ -2365,6 +2391,7 @@ export class AuctionService {
 
     const order = new this.orderModel({
       user: auction.currentWinner,
+      seller: auction.seller, // დავამატეთ seller ველი რომ სელერს უჩანდეს შეკვეთა
       orderType: 'auction',
       auctionId: auction._id,
       orderItems: [
@@ -2376,6 +2403,7 @@ export class AuctionService {
           price: auction.currentPrice,
           originalPrice: auction.currentPrice,
           productId: new Types.ObjectId(), // Placeholder, auction items don't have product IDs
+          seller: auction.seller, // დავამატეთ seller orderItem-შიც
         },
       ],
       shippingDetails: {
@@ -2401,6 +2429,9 @@ export class AuctionService {
     });
 
     await order.save();
+    this.logger.log(
+      `Auction order created: ${order._id} for auction ${auction._id}, seller: ${auction.seller}`,
+    );
     return order;
   }
 }
