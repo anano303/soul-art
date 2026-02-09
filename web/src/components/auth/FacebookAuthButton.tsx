@@ -83,7 +83,10 @@ export function FacebookAuthButton({
     picture?: string;
   } | null>(null);
 
-  const appId = process.env.NEXT_PUBLIC_FACEBOOK_APP_ID;
+  // Use auth-specific App ID if available, otherwise fall back to main app ID
+  const appId =
+    process.env.NEXT_PUBLIC_FACEBOOK_AUTH_APP_ID ||
+    process.env.NEXT_PUBLIC_FACEBOOK_APP_ID;
 
   // Log on every render to confirm component is mounting
   console.log("[FB Auth] Component rendered, appId:", appId ? "set" : "NOT SET");

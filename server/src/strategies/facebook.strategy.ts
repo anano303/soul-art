@@ -7,10 +7,18 @@ import { Role } from '../types/role.enum';
 @Injectable()
 export class FacebookStrategy extends PassportStrategy(Strategy, 'facebook') {
   constructor(private configService: ConfigService) {
+    // Use auth-specific credentials if available, otherwise fall back to main app credentials
+    const clientID =
+      configService.get('FACEBOOK_AUTH_APP_ID') ||
+      configService.get('FACEBOOK_APP_ID');
+    const clientSecret =
+      configService.get('FACEBOOK_AUTH_APP_SECRET') ||
+      configService.get('FACEBOOK_APP_SECRET');
+
     super({
-      clientID: configService.get('FACEBOOK_APP_ID'),
-      clientSecret: configService.get('FACEBOOK_APP_SECRET'),
-      callbackURL: configService.get('FACEBOOK_CALLBACK_URL'),
+      clientID,
+      clientSecret,
+      callbackURL: configService.get('FACEBOOK_AUTH_CALLBACK_URL'),
       scope: ['email', 'public_profile'],
       profileFields: ['id', 'emails', 'name', 'displayName', 'photos'],
       passReqToCallback: true,
