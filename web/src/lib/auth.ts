@@ -92,6 +92,8 @@ export const clearUserData = () => {
 
   try {
     localStorage.removeItem(USER_DATA_KEY);
+    // Clear the bridge cookie used for middleware auth check
+    document.cookie = 'auth_session=; path=/; max-age=0; SameSite=Lax';
   } catch (error) {
     console.error("Failed to clear user data:", error);
   }

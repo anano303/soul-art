@@ -4,4 +4,5 @@ export enum Role {
   Seller = "seller",
   Blogger = "blogger",
   SalesManager = "sales_manager",
+  AuctionAdmin = "auction_admin",
 }

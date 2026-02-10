@@ -3,13 +3,13 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   Clock,
   Users,
   Palette,
   Ruler,
   ChevronDown,
-  ChevronUp,
   Minus,
   Plus,
   Gavel,
@@ -19,6 +19,8 @@ import {
   ChevronLeft,
   ChevronRight,
   ZoomIn,
+  CreditCard,
+  Trophy,
 } from "lucide-react";
 import { useLanguage } from "@/hooks/LanguageContext";
 import { useAuth } from "@/hooks/useAuth";
@@ -52,10 +54,12 @@ interface Auction {
   minimumBidIncrement: number;
   startDate: string;
   endDate: string;
-  deliveryDays?: number;
-  deliveryInfo?: string;
+  deliveryType?: string;
+  deliveryDaysMin?: number;
+  deliveryDaysMax?: number;
   status: "ACTIVE" | "ENDED" | "PENDING" | "CANCELLED" | "SCHEDULED";
   totalBids: number;
+  isPaid?: boolean;
   bids?: Bid[];
   seller: {
     _id?: string;
@@ -81,28 +85,60 @@ interface AuctionCardProps {
   onBidPlaced?: () => void;
 }
 
-export default function AuctionCard({ auction, onBidPlaced }: AuctionCardProps) {
+export default function AuctionCard({
+  auction,
+  onBidPlaced,
+}: AuctionCardProps) {
   const { t, language } = useLanguage();
   const { user } = useAuth();
+  const router = useRouter();
   const [timeLeft, setTimeLeft] = useState("");
   const [startsIn, setStartsIn] = useState("");
   const [isEnded, setIsEnded] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const [bidAmount, setBidAmount] = useState(
-    auction.currentPrice + auction.minimumBidIncrement
+    auction.currentPrice + auction.minimumBidIncrement,
   );
   const [bidding, setBidding] = useState(false);
   const [currentAuction, setCurrentAuction] = useState(auction);
-  
+
   // Gallery/Lightbox state
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
-  const allImages = [currentAuction.mainImage, ...(currentAuction.additionalImages || [])];
+  const allImages = [
+    currentAuction.mainImage,
+    ...(currentAuction.additionalImages || []),
+  ];
+
+  // Handle payment for won auctions
+  const handlePayment = () => {
+    // Store auction checkout data in sessionStorage
+    const auctionCheckoutItem = {
+      auctionId: currentAuction._id,
+      productId: currentAuction._id,
+      isAuction: true,
+      name: currentAuction.title,
+      image: currentAuction.mainImage,
+      price: currentAuction.currentPrice,
+      countInStock: 1,
+      qty: 1,
+      sellerId: currentAuction.seller._id,
+      deliveryDaysMin: currentAuction.deliveryDaysMin || 3,
+      deliveryDaysMax: currentAuction.deliveryDaysMax || 7,
+    };
+    sessionStorage.setItem("auction_checkout_item", JSON.stringify(auctionCheckoutItem));
+    
+    // Redirect to streamlined checkout with auction param
+    router.push(`/checkout/streamlined?auction=${currentAuction._id}`);
+  };
 
   const getSellerName = () => {
     // 1. Try ownerFirstName + ownerLastName (seller profile) - priority
-    if (currentAuction.seller.ownerFirstName && currentAuction.seller.ownerLastName) {
+    if (
+      currentAuction.seller.ownerFirstName &&
+      currentAuction.seller.ownerLastName
+    ) {
       return `${currentAuction.seller.ownerFirstName} ${currentAuction.seller.ownerLastName}`;
     }
     // 2. Try ownerFirstName only
@@ -141,14 +177,18 @@ export default function AuctionCard({ auction, onBidPlaced }: AuctionCardProps) 
 
       const days = Math.floor(difference / (1000 * 60 * 60 * 24));
       const hours = Math.floor(
-        (difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
+        (difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60),
       );
       const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
 
       if (days > 0) {
-        setStartsIn(`${days}${t("auctions.days")} ${hours}${t("auctions.hours")}`);
+        setStartsIn(
+          `${days}${t("auctions.days")} ${hours}${t("auctions.hours")}`,
+        );
       } else if (hours > 0) {
-        setStartsIn(`${hours}${t("auctions.hours")} ${minutes}${t("auctions.minutes")}`);
+        setStartsIn(
+          `${hours}${t("auctions.hours")} ${minutes}${t("auctions.minutes")}`,
+        );
       } else {
         setStartsIn(`${minutes}${t("auctions.minutes")}`);
       }
@@ -184,14 +224,18 @@ export default function AuctionCard({ auction, onBidPlaced }: AuctionCardProps) 
 
       const days = Math.floor(difference / (1000 * 60 * 60 * 24));
       const hours = Math.floor(
-        (difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
+        (difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60),
       );
       const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
 
       if (days > 0) {
-        setTimeLeft(`${days}${t("auctions.days")} ${hours}${t("auctions.hours")} ${minutes}${t("auctions.minutes")}`);
+        setTimeLeft(
+          `${days}${t("auctions.days")} ${hours}${t("auctions.hours")} ${minutes}${t("auctions.minutes")}`,
+        );
       } else if (hours > 0) {
-        setTimeLeft(`${hours}${t("auctions.hours")} ${minutes}${t("auctions.minutes")}`);
+        setTimeLeft(
+          `${hours}${t("auctions.hours")} ${minutes}${t("auctions.minutes")}`,
+        );
       } else {
         setTimeLeft(`${minutes}${t("auctions.minutes")}`);
       }
@@ -202,22 +246,53 @@ export default function AuctionCard({ auction, onBidPlaced }: AuctionCardProps) 
     return () => clearInterval(interval);
   }, [currentAuction.endDate, currentAuction.status, t]);
 
+  // Computed delivery days text
+  const deliveryDaysText = (() => {
+    const minDays = currentAuction.deliveryDaysMin ?? 1;
+    const maxDays = currentAuction.deliveryDaysMax ?? 3;
+    const daysLabel = language === "ge" ? "დღე" : "days";
+    return minDays === maxDays
+      ? `${minDays} ${daysLabel}`
+      : `${minDays}-${maxDays} ${daysLabel}`;
+  })();
+
   const formatPrice = (price: number) => `${price.toFixed(2)} ₾`;
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString(
-      language === "ge" ? "ka-GE" : "en-US",
-      {
-        month: "short",
-        day: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-      }
-    );
+    const date = new Date(dateString);
+    const day = date.getDate();
+    const hour = date.getHours().toString().padStart(2, "0");
+    const minute = date.getMinutes().toString().padStart(2, "0");
+
+    if (language === "ge") {
+      const monthsGe = [
+        "იან",
+        "თებ",
+        "მარ",
+        "აპრ",
+        "მაი",
+        "ივნ",
+        "ივლ",
+        "აგვ",
+        "სექ",
+        "ოქტ",
+        "ნოე",
+        "დეკ",
+      ];
+      return `${day} ${monthsGe[date.getMonth()]}, ${hour}:${minute}`;
+    }
+
+    return date.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
   };
 
   const handleBidChange = (delta: number) => {
-    const minBid = currentAuction.currentPrice + currentAuction.minimumBidIncrement;
+    const minBid =
+      currentAuction.currentPrice + currentAuction.minimumBidIncrement;
     const newAmount = bidAmount + delta * currentAuction.minimumBidIncrement;
     if (newAmount >= minBid) {
       setBidAmount(newAmount);
@@ -226,15 +301,18 @@ export default function AuctionCard({ auction, onBidPlaced }: AuctionCardProps) 
 
   const handlePlaceBid = async (e: React.MouseEvent) => {
     e.stopPropagation();
-    
+
     if (!user) {
       toast.error(t("auctions.loginRequired"));
       return;
     }
 
-    const minBid = currentAuction.currentPrice + currentAuction.minimumBidIncrement;
+    const minBid =
+      currentAuction.currentPrice + currentAuction.minimumBidIncrement;
     if (bidAmount < minBid) {
-      toast.error(`${t("auctions.bidTooLow")} (${t("auctions.minimumBid")}: ${minBid.toFixed(2)} ₾)`);
+      toast.error(
+        `${t("auctions.bidTooLow")} (${t("auctions.minimumBid")}: ${minBid.toFixed(2)} ₾)`,
+      );
       return;
     }
 
@@ -245,22 +323,25 @@ export default function AuctionCard({ auction, onBidPlaced }: AuctionCardProps) 
         bidAmount: bidAmount,
       });
       toast.success(t("auctions.bidSuccess"));
-      
+
       if (response.data) {
-        setCurrentAuction(prev => ({
+        setCurrentAuction((prev) => ({
           ...prev,
           currentPrice: bidAmount,
           totalBids: prev.totalBids + 1,
         }));
         setBidAmount(bidAmount + currentAuction.minimumBidIncrement);
       }
-      
+
       if (onBidPlaced) {
         onBidPlaced();
       }
     } catch (error: unknown) {
-      const axiosError = error as { response?: { data?: { message?: string } } };
-      const message = axiosError.response?.data?.message || t("auctions.bidError");
+      const axiosError = error as {
+        response?: { data?: { message?: string } };
+      };
+      const message =
+        axiosError.response?.data?.message || t("auctions.bidError");
       toast.error(message);
     } finally {
       setBidding(false);
@@ -271,12 +352,12 @@ export default function AuctionCard({ auction, onBidPlaced }: AuctionCardProps) 
   const openLightbox = (index: number = 0) => {
     setCurrentImageIndex(index);
     setLightboxOpen(true);
-    document.body.style.overflow = 'hidden';
+    document.body.style.overflow = "hidden";
   };
 
   const closeLightbox = () => {
     setLightboxOpen(false);
-    document.body.style.overflow = '';
+    document.body.style.overflow = "";
   };
 
   const nextImage = () => {
@@ -284,7 +365,9 @@ export default function AuctionCard({ auction, onBidPlaced }: AuctionCardProps) 
   };
 
   const prevImage = () => {
-    setCurrentImageIndex((prev) => (prev - 1 + allImages.length) % allImages.length);
+    setCurrentImageIndex(
+      (prev) => (prev - 1 + allImages.length) % allImages.length,
+    );
   };
 
   const endedLabel =
@@ -293,15 +376,19 @@ export default function AuctionCard({ auction, onBidPlaced }: AuctionCardProps) 
       : t("auctions.ended");
 
   const canBid =
-    currentAuction.status === "ACTIVE" &&
+    (currentAuction.status === "ACTIVE" ||
+      currentAuction.status === "SCHEDULED") &&
     user &&
     user._id !== currentAuction.seller._id;
 
+  const isPreBid = currentAuction.status === "SCHEDULED";
   const isScheduled = currentAuction.status === "SCHEDULED";
 
   return (
     <>
-      <div className={`auction-card ${isEnded ? "ended" : ""} ${isExpanded ? "expanded" : ""} ${isScheduled ? "scheduled" : ""}`}>
+      <div
+        className={`auction-card ${isEnded ? "ended" : ""} ${isExpanded ? "expanded" : ""} ${isScheduled ? "scheduled" : ""}`}
+      >
         {/* Image with overlay info */}
         <div className="auction-image-section" onClick={() => openLightbox(0)}>
           <div className="auction-main-image">
@@ -312,7 +399,7 @@ export default function AuctionCard({ auction, onBidPlaced }: AuctionCardProps) 
               className="auction-image"
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             />
-            
+
             {/* Zoom indicator */}
             <div className="zoom-indicator">
               <ZoomIn size={20} />
@@ -327,7 +414,9 @@ export default function AuctionCard({ auction, onBidPlaced }: AuctionCardProps) 
 
             {/* Status badges */}
             <div className="auction-badges">
-              <span className={`type-badge ${currentAuction.artworkType.toLowerCase()}`}>
+              <span
+                className={`type-badge ${currentAuction.artworkType.toLowerCase()}`}
+              >
                 {currentAuction.artworkType === "ORIGINAL"
                   ? t("auctions.type.original")
                   : t("auctions.type.reproduction")}
@@ -342,19 +431,28 @@ export default function AuctionCard({ auction, onBidPlaced }: AuctionCardProps) 
             )}
             {isScheduled && (
               <div className="status-overlay scheduled">
-                <span>{t("auctions.startsIn")}: {startsIn}</span>
+                <span>
+                  {t("auctions.startsIn")}: {startsIn}
+                </span>
               </div>
             )}
           </div>
 
-          {/* Info overlay on image */}
-          <div className="image-info-overlay">
+          {/* Info overlay on image - clickable to detail page */}
+          <Link
+            href={`/auctions/${currentAuction._id}`}
+            className="image-info-overlay"
+            onClick={(e) => e.stopPropagation()}
+          >
             <h3 className="auction-title">{currentAuction.title}</h3>
             <div className="overlay-row">
               <span className="artist-name">
-                <span className="artist-label">{t("auctions.seller")}:</span> {getSellerName()}
+                <span className="artist-label">{t("auctions.seller")}:</span>{" "}
+                {getSellerName()}
               </span>
-              <span className="current-price">{formatPrice(currentAuction.currentPrice)}</span>
+              <span className="current-price">
+                {formatPrice(currentAuction.currentPrice)}
+              </span>
             </div>
             <div className="overlay-row sub-info">
               <span className="time-info">
@@ -365,30 +463,39 @@ export default function AuctionCard({ auction, onBidPlaced }: AuctionCardProps) 
                 <Users size={14} />
                 {currentAuction.totalBids} {t("auctions.bids")}
               </span>
+              <span className="delivery-info">
+                <Package size={14} />
+                {deliveryDaysText}
+              </span>
             </div>
-          </div>
+          </Link>
         </div>
 
-        {/* Expand button */}
-        <button
-          className="expand-btn"
-          onClick={(e) => {
-            e.stopPropagation();
-            setIsExpanded(!isExpanded);
-          }}
-        >
-          {isExpanded ? (
-            <>
-              <span>{language === "ge" ? "ნაკლები" : "Less"}</span>
-              <ChevronUp size={18} />
-            </>
-          ) : (
-            <>
-              <span>{language === "ge" ? "მეტი ინფო და ბიდი" : "More info & Bid"}</span>
-              <ChevronDown size={18} />
-            </>
-          )}
-        </button>
+        {/* Expand button + View link */}
+        <div className="card-actions-row">
+          <Link
+            href={`/auctions/${currentAuction._id}`}
+            className="view-auction-link"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <Gavel size={16} />
+            <span>{language === "ge" ? "ნახვა" : "View"}</span>
+          </Link>
+          <button
+            className="expand-btn"
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsExpanded(!isExpanded);
+            }}
+          >
+            <span>
+              {isExpanded
+                ? (language === "ge" ? "ნაკლები" : "Less")
+                : (language === "ge" ? "მეტი ინფო და ბიდი" : "More info & Bid")}
+            </span>
+            <ChevronDown size={18} />
+          </button>
+        </div>
 
         {/* Expanded Details */}
         {isExpanded && (
@@ -397,23 +504,27 @@ export default function AuctionCard({ auction, onBidPlaced }: AuctionCardProps) 
             <div className="price-details">
               <div className="price-row">
                 <span className="label">{t("auctions.startingPrice")}:</span>
-                <span className="value">{formatPrice(currentAuction.startingPrice)}</span>
+                <span className="value">
+                  {formatPrice(currentAuction.startingPrice)}
+                </span>
               </div>
               <div className="price-row">
                 <span className="label">{t("auctions.minimumBid")}:</span>
-                <span className="value accent">+{formatPrice(currentAuction.minimumBidIncrement)}</span>
+                <span className="value accent">
+                  +{formatPrice(currentAuction.minimumBidIncrement)}
+                </span>
               </div>
             </div>
 
             {/* Time details */}
             <div className="time-details">
               <div className="time-row">
-                <Calendar size={14} />
-                <span>{language === "ge" ? "დაწყება" : "Start"}: {formatDate(currentAuction.startDate)}</span>
+                <Calendar size={10} />
+                <span>{formatDate(currentAuction.startDate)}</span>
               </div>
               <div className="time-row">
-                <Clock size={14} />
-                <span>{language === "ge" ? "დასრულება" : "End"}: {formatDate(currentAuction.endDate)}</span>
+                <Clock size={10} />
+                <span>{formatDate(currentAuction.endDate)}</span>
               </div>
             </div>
 
@@ -426,19 +537,17 @@ export default function AuctionCard({ auction, onBidPlaced }: AuctionCardProps) 
             {/* Details */}
             <div className="details-grid">
               <div className="detail-item">
-                <Palette size={16} />
+                <Palette size={12} />
                 <span>{currentAuction.material}</span>
               </div>
               <div className="detail-item">
-                <Ruler size={16} />
+                <Ruler size={12} />
                 <span>{currentAuction.dimensions}</span>
               </div>
-              {currentAuction.deliveryDays && (
-                <div className="detail-item">
-                  <Package size={16} />
-                  <span>{currentAuction.deliveryDays} {t("auctions.deliveryDays")}</span>
-                </div>
-              )}
+              <div className="detail-item">
+                <Package size={12} />
+                <span>{deliveryDaysText}</span>
+              </div>
             </div>
 
             {/* Bid Section */}
@@ -451,7 +560,11 @@ export default function AuctionCard({ auction, onBidPlaced }: AuctionCardProps) 
                       e.stopPropagation();
                       handleBidChange(-1);
                     }}
-                    disabled={bidAmount <= currentAuction.currentPrice + currentAuction.minimumBidIncrement}
+                    disabled={
+                      bidAmount <=
+                      currentAuction.currentPrice +
+                        currentAuction.minimumBidIncrement
+                    }
                   >
                     <Minus size={18} />
                   </button>
@@ -460,9 +573,14 @@ export default function AuctionCard({ auction, onBidPlaced }: AuctionCardProps) 
                       type="number"
                       className="bid-input"
                       value={bidAmount}
-                      onChange={(e) => setBidAmount(parseFloat(e.target.value) || 0)}
+                      onChange={(e) =>
+                        setBidAmount(parseFloat(e.target.value) || 0)
+                      }
                       onClick={(e) => e.stopPropagation()}
-                      min={currentAuction.currentPrice + currentAuction.minimumBidIncrement}
+                      min={
+                        currentAuction.currentPrice +
+                        currentAuction.minimumBidIncrement
+                      }
                       step={currentAuction.minimumBidIncrement}
                     />
                     <span className="currency">₾</span>
@@ -478,14 +596,20 @@ export default function AuctionCard({ auction, onBidPlaced }: AuctionCardProps) 
                   </button>
                 </div>
                 <button
-                  className="place-bid-btn"
+                  className={`place-bid-btn ${isPreBid ? "pre-bid" : ""}`}
                   onClick={handlePlaceBid}
                   disabled={bidding}
                 >
-                  {bidding ? "..." : (
+                  {bidding ? (
+                    "..."
+                  ) : (
                     <>
                       <Gavel size={18} />
-                      <span>{t("auctions.placeBid")}</span>
+                      <span>
+                        {isPreBid
+                          ? t("auctions.preBid") || "Pre-Bid"
+                          : t("auctions.placeBid")}
+                      </span>
                     </>
                   )}
                 </button>
@@ -493,12 +617,18 @@ export default function AuctionCard({ auction, onBidPlaced }: AuctionCardProps) 
             )}
 
             {/* Login notice */}
-            {!user && currentAuction.status === "ACTIVE" && (
-              <div className="login-notice">
-                <span>{t("auctions.loginToPlaceBid")} </span>
-                <Link href="/login">{t("auctions.loginLink")}</Link>
-              </div>
-            )}
+            {!user &&
+              (currentAuction.status === "ACTIVE" ||
+                currentAuction.status === "SCHEDULED") && (
+                <div className="login-notice">
+                  <span>
+                    {currentAuction.status === "SCHEDULED"
+                      ? t("auctions.loginToPreBid") || "შედით Pre-Bid-ისთვის"
+                      : t("auctions.loginToPlaceBid")}{" "}
+                  </span>
+                  <Link href="/login">{t("auctions.loginLink")}</Link>
+                </div>
+              )}
 
             {/* Winner info */}
             {isEnded && currentAuction.currentWinner && (
@@ -506,10 +636,80 @@ export default function AuctionCard({ auction, onBidPlaced }: AuctionCardProps) 
                 <Gavel size={18} />
                 <span>{t("auctions.winner")}: </span>
                 <strong>
-                  {currentAuction.currentWinner.ownerFirstName || currentAuction.currentWinner.firstName}{" "}
-                  {(currentAuction.currentWinner.ownerLastName || currentAuction.currentWinner.lastName)?.charAt(0)}.
+                  {(() => {
+                    const winner = currentAuction.currentWinner;
+                    // Try name field first
+                    if (winner?.name) return winner.name;
+                    // Then try ownerFirstName + ownerLastName
+                    if (winner?.ownerFirstName && winner?.ownerLastName) {
+                      return `${winner.ownerFirstName} ${winner.ownerLastName}`;
+                    }
+                    // Then try firstName + lastName
+                    if (winner?.firstName && winner?.lastName) {
+                      return `${winner.firstName} ${winner.lastName}`;
+                    }
+                    // Fallback
+                    return t("auctions.anonymousBidder") || "ანონიმური";
+                  })()}
                 </strong>
               </div>
+            )}
+
+            {/* Payment section for ended auctions with winner - only show to winner */}
+            {isEnded && currentAuction.currentWinner && user && user._id === currentAuction.currentWinner._id && (
+              <div className="winner-payment-section">
+                {currentAuction.isPaid ? (
+                  <div className="paid-badge">
+                    <Trophy size={18} />
+                    <span>{t("auctions.paid") || "გადახდილია"}</span>
+                  </div>
+                ) : (
+                  <button
+                    onClick={handlePayment}
+                    className="payment-link-btn"
+                  >
+                    <CreditCard size={18} />
+                    <span>{t("auctions.payNow") || "გადახდა"}</span>
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Payment section outside expand - only visible to winner for ended auctions */}
+        {!isExpanded && isEnded && currentAuction.currentWinner && user && user._id === currentAuction.currentWinner._id && (
+          <div className="winner-payment-standalone">
+            <div className="winner-info-compact">
+              <Gavel size={16} />
+              <span>{t("auctions.winner")}: </span>
+              <strong>
+                {(() => {
+                  const winner = currentAuction.currentWinner;
+                  if (winner?.name) return winner.name;
+                  if (winner?.ownerFirstName && winner?.ownerLastName) {
+                    return `${winner.ownerFirstName} ${winner.ownerLastName}`;
+                  }
+                  if (winner?.firstName && winner?.lastName) {
+                    return `${winner.firstName} ${winner.lastName}`;
+                  }
+                  return t("auctions.anonymousBidder") || "ანონიმური";
+                })()}
+              </strong>
+            </div>
+            {currentAuction.isPaid ? (
+              <div className="paid-badge">
+                <Trophy size={18} />
+                <span>{t("auctions.paid") || "გადახდილია"}</span>
+              </div>
+            ) : (
+              <button
+                onClick={handlePayment}
+                className="payment-link-btn"
+              >
+                <CreditCard size={18} />
+                <span>{t("auctions.payNow") || "გადახდა"}</span>
+              </button>
             )}
           </div>
         )}
@@ -518,11 +718,14 @@ export default function AuctionCard({ auction, onBidPlaced }: AuctionCardProps) 
       {/* Lightbox Modal */}
       {lightboxOpen && (
         <div className="lightbox-overlay" onClick={closeLightbox}>
-          <div className="lightbox-content" onClick={(e) => e.stopPropagation()}>
+          <div
+            className="lightbox-content"
+            onClick={(e) => e.stopPropagation()}
+          >
             <button className="lightbox-close" onClick={closeLightbox}>
               <X size={24} />
             </button>
-            
+
             <div className="lightbox-image-container">
               <Image
                 src={allImages[currentImageIndex]}
@@ -543,7 +746,7 @@ export default function AuctionCard({ auction, onBidPlaced }: AuctionCardProps) 
                 <button className="lightbox-nav next" onClick={nextImage}>
                   <ChevronRight size={32} />
                 </button>
-                
+
                 {/* Thumbnails */}
                 <div className="lightbox-thumbnails">
                   {allImages.map((img, index) => (
@@ -556,7 +759,7 @@ export default function AuctionCard({ auction, onBidPlaced }: AuctionCardProps) 
                     </button>
                   ))}
                 </div>
-                
+
                 {/* Counter */}
                 <div className="lightbox-counter">
                   {currentImageIndex + 1} / {allImages.length}

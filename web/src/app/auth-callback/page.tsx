@@ -16,6 +16,9 @@ export default function AuthCallback() {
         const urlParams = new URLSearchParams(window.location.search);
         const success = urlParams.get('success');
         const errorParam = urlParams.get('error');
+        const isPopup = urlParams.get('popup') === 'true';
+        const isSeller = urlParams.get('isSeller') === 'true';
+        const needsSellerRegistration = urlParams.get('needsSellerRegistration') === 'true';
         
         if (success === 'true') {
           console.log('🔍 OAuth success detected, processing...');
@@ -23,9 +26,6 @@ export default function AuthCallback() {
           // Successfully authenticated - cookies are already set by server
           // Add a small delay to ensure cookies are properly set
           await new Promise(resolve => setTimeout(resolve, 500));
-          
-          // Log all cookies for debugging
-          console.log('🍪 All cookies:', document.cookie);
           
           // Now fetch the user profile to store user data
           try {
@@ -42,15 +42,39 @@ export default function AuthCallback() {
               console.log('👤 User data received:', userData);
               storeUserData(userData);
               
+              // Set a client-side cookie that middleware can see
+              // This bridges the gap between HTTP-only API cookies and Next.js middleware
+              document.cookie = 'auth_session=active; path=/; max-age=3600; SameSite=Lax';
+              
               // Invalidate user query to refetch user data
               queryClient.invalidateQueries({ queryKey: ["user"] });
               
-              // Clear the URL params
-              window.history.replaceState(null, '', window.location.pathname);
+              // If this was a popup that fell back to redirect, try to close
+              if (isPopup) {
+                // Set localStorage flag for opener to detect
+                localStorage.setItem('google_auth_success', JSON.stringify({ type: 'GOOGLE_AUTH_SUCCESS' }));
+                
+                // Try to close the window
+                window.close();
+                
+                // If window didn't close (not a popup or blocked), redirect
+                setTimeout(() => {
+                  router.push('/');
+                }, 500);
+                return;
+              }
               
               console.log('✅ OAuth process completed successfully');
-              // Redirect to home
-              router.push('/');
+              
+              // Use window.location.href for full page reload to ensure cookie is sent with request
+              // router.push does client-side navigation which may not pick up the fresh cookie
+              if (needsSellerRegistration) {
+                window.location.href = '/become-seller?fromOauth=true';
+              } else if (isSeller) {
+                window.location.href = '/profile';
+              } else {
+                window.location.href = '/';
+              }
             } else {
               console.error('❌ Failed to fetch user profile:', response.status, response.statusText);
               const errorText = await response.text();

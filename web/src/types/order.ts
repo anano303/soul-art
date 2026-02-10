@@ -24,6 +24,19 @@ export interface Order {
     phoneNumber: string;
     fullName: string;
   };
+  orderType?: "regular" | "auction";
+  auctionId?: {
+    _id: string;
+    title: string;
+    mainImage?: string;
+    seller?: {
+      _id: string;
+      name?: string;
+      storeName?: string;
+      email?: string;
+      phoneNumber?: string;
+    };
+  };
   orderItems: OrderItem[];
   shippingDetails: ShippingDetails;
   paymentMethod: string;

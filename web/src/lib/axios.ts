@@ -22,6 +22,7 @@ const publicRoutes = [
   "/login",
   "/register",
   "/sellers-register",
+  "/become-seller",
   "forgot-password",
   "reset-password",
   "logout",

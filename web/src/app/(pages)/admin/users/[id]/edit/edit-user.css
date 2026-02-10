@@ -4,6 +4,28 @@
   padding: 20px;
 }
 
+.back-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1.2rem;
+  background: transparent;
+  color: var(--primary-color, #012645);
+  border: 1px solid var(--primary-color, #012645);
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  font-family: var(--font-firago);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-bottom: 1rem;
+}
+
+.back-button:hover {
+  background: var(--primary-color, #012645);
+  color: white;
+}
+
 .edit-user-container h1 {
   font-size: 1.8rem;
   font-weight: 700;

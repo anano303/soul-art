@@ -7,18 +7,10 @@ import { BecomeSellerModal } from "../become-seller-modal/become-seller-modal";
 import "./become-seller-button.css";
 
 interface BecomeSellerButtonProps {
-  userPhone?: string;
-  userIdentificationNumber?: string;
-  userAccountNumber?: string;
-  userBeneficiaryBankCode?: string;
   className?: string;
 }
 
 export function BecomeSellerButton({
-  userPhone,
-  userIdentificationNumber,
-  userAccountNumber,
-  userBeneficiaryBankCode,
   className = "",
 }: BecomeSellerButtonProps) {
   const { t } = useLanguage();
@@ -52,10 +44,6 @@ export function BecomeSellerButton({
       <BecomeSellerModal
         isOpen={isModalOpen}
         onClose={handleCloseModal}
-        userPhone={userPhone}
-        userIdentificationNumber={userIdentificationNumber}
-        userAccountNumber={userAccountNumber}
-        userBeneficiaryBankCode={userBeneficiaryBankCode}
       />
     </>
   );

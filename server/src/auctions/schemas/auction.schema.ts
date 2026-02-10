@@ -34,6 +34,27 @@ export class AuctionBid {
 
 export const AuctionBidSchema = SchemaFactory.createForClass(AuctionBid);
 
+@Schema()
+export class AuctionComment {
+  @Prop({ type: Types.ObjectId, ref: 'User', required: true })
+  user: Types.ObjectId;
+
+  @Prop({ required: true })
+  content: string;
+
+  @Prop({ default: Date.now })
+  createdAt: Date;
+
+  @Prop()
+  userName: string; // Cache user name for quick display
+
+  @Prop()
+  userAvatar?: string; // Cache user avatar
+}
+
+export const AuctionCommentSchema =
+  SchemaFactory.createForClass(AuctionComment);
+
 @Schema({ timestamps: true })
 export class Auction {
   @Transform(({ value }) => value.toString())
@@ -85,11 +106,17 @@ export class Auction {
   endTime: string; // Format: "HH:MM" in Georgia timezone
 
   // Delivery Information
-  @Prop({ required: true })
-  deliveryDays: number; // Days for delivery after payment
+  @Prop({ required: true, enum: ['SOULART', 'ARTIST'], default: 'SOULART' })
+  deliveryType: string; // SOULART or ARTIST
 
-  @Prop({ required: true })
-  deliveryInfo: string; // Additional delivery information
+  @Prop({ required: true, default: 1 })
+  deliveryDaysMin: number; // Minimum days for delivery
+
+  @Prop({ required: true, default: 3 })
+  deliveryDaysMax: number; // Maximum days for delivery
+
+  @Prop()
+  deliveryInfo: string; // Additional delivery information (optional)
 
   // Current Auction State
   @Prop({ default: 0 })
@@ -100,6 +127,9 @@ export class Auction {
 
   @Prop([AuctionBidSchema])
   bids: AuctionBid[];
+
+  @Prop([AuctionCommentSchema])
+  comments: AuctionComment[];
 
   @Prop({ default: 0 })
   totalBids: number;
@@ -121,10 +151,46 @@ export class Auction {
   isPaid: boolean;
 
   @Prop()
-  paymentDeadline: Date; // 2 working days after auction ends
+  paymentDeadline: Date; // 24 საათი გადახდისთვის
 
   @Prop()
   paymentDate: Date;
+
+  // Delivery fee for winner (Tbilisi: 12, Region: 18)
+  @Prop({ enum: ['TBILISI', 'REGION'], default: 'TBILISI' })
+  winnerDeliveryZone?: string;
+
+  @Prop({ default: 0 })
+  deliveryFee: number;
+
+  // Total payment (currentPrice + deliveryFee)
+  @Prop({ default: 0 })
+  totalPayment: number;
+
+  // Shipping Address for winner
+  @Prop({ type: Object })
+  shippingAddress?: {
+    address?: string;
+    city?: string;
+    postalCode?: string;
+    country?: string;
+    phoneNumber?: string;
+  };
+
+  // BOG Payment Info
+  @Prop()
+  bogOrderId?: string; // BOG's internal order ID
+
+  @Prop()
+  externalOrderId?: string; // Our generated unique ID for BOG callback
+
+  @Prop({ type: Object })
+  paymentResult?: {
+    id: string;
+    status: string;
+    update_time: string;
+    email_address?: string;
+  };
 
   // Commission (10%)
   @Prop()

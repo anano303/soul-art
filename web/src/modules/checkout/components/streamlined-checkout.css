@@ -3,6 +3,24 @@
   margin: 0 auto;
 }
 
+/* Auction Checkout Banner */
+.auction-checkout-banner {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background: linear-gradient(135deg, #fef3c7, #fde68a);
+  border: 1px solid #f59e0b;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  color: #92400e;
+  font-weight: 600;
+}
+
+.auction-checkout-banner svg {
+  color: #f59e0b;
+}
+
 .back-button {
   display: inline-flex;
   align-items: center;
@@ -339,6 +357,23 @@
 
 .total-amount {
   color: #007bff;
+}
+
+/* Tbilisi Free Delivery Note */
+.tbilisi-free-note {
+  font-size: 0.85rem;
+  color: #0891b2;
+  background: #ecfeff;
+  border-left: 3px solid #06b6d4;
+  padding: 0.5rem 0.75rem;
+  margin-top: 0.5rem;
+  border-radius: 0 6px 6px 0;
+}
+
+[data-theme="dark"] .tbilisi-free-note {
+  background: rgba(6, 182, 212, 0.1);
+  color: #67e8f9;
+  border-left-color: #22d3ee;
 }
 
 /* Savings Banner */

@@ -44,6 +44,16 @@ interface CartContextType {
       referralDiscountAmount: number;
     }
   ) => Promise<void>;
+  addAuctionToCart: (auctionData: {
+    auctionId: string;
+    title: string;
+    image: string;
+    currentPrice: number;
+    sellerId: string;
+    deliveryDaysMin: number;
+    deliveryDaysMax: number;
+  }) => void;
+  clearAuctionItems: () => void;
   totalItems: number;
   getItemQuantity: (
     productId: string,
@@ -599,6 +609,43 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     loadCart();
   }, [user, toast]);
 
+  // Add auction item to cart (for won auctions checkout)
+  const addAuctionToCart = useCallback(
+    (auctionData: {
+      auctionId: string;
+      title: string;
+      image: string;
+      currentPrice: number;
+      sellerId: string;
+      deliveryDaysMin: number;
+      deliveryDaysMax: number;
+    }) => {
+      // Create auction cart item
+      const auctionItem: CartItem = {
+        productId: auctionData.auctionId, // Use auctionId as productId for compatibility
+        auctionId: auctionData.auctionId,
+        isAuction: true,
+        name: auctionData.title,
+        image: auctionData.image,
+        price: auctionData.currentPrice,
+        countInStock: 1, // Auction items always have qty 1
+        qty: 1,
+        sellerId: auctionData.sellerId,
+        deliveryDaysMin: auctionData.deliveryDaysMin,
+        deliveryDaysMax: auctionData.deliveryDaysMax,
+      };
+
+      // Store auction item separately to not mix with regular cart
+      sessionStorage.setItem("auction_checkout_item", JSON.stringify(auctionItem));
+    },
+    []
+  );
+
+  // Clear auction items from session
+  const clearAuctionItems = useCallback(() => {
+    sessionStorage.removeItem("auction_checkout_item");
+  }, []);
+
   return (
     <CartContext.Provider
       value={{
@@ -609,6 +656,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         updateQuantity,
         clearCart,
         addToCart,
+        addAuctionToCart,
+        clearAuctionItems,
         totalItems,
         getItemQuantity,
         isItemInCart,

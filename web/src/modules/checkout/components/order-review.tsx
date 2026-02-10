@@ -55,7 +55,7 @@ export function OrderReview() {
 
   const itemsPrice = items.reduce(
     (acc, item) => acc + item.price * item.qty,
-    0
+    0,
   );
 
   // Calculate shipping based on selected country
@@ -74,7 +74,8 @@ export function OrderReview() {
   }
 
   const shippingCountry = currentShippingDetails?.country || "GE";
-  const shippingPrice = calculateShipping(shippingCountry);
+  const shippingCity = currentShippingDetails?.city || "";
+  const shippingPrice = calculateShipping(shippingCountry, shippingCity);
   const isShippingFree = shippingPrice === 0;
   const showBothCurrencies = shippingCountry !== "GE";
 
@@ -134,11 +135,11 @@ export function OrderReview() {
               item.reason === "out_of_stock"
                 ? "არ არის მარაგში"
                 : item.reason === "not_found"
-                ? "აღარ არსებობს"
-                : item.reason === "insufficient_stock"
-                ? `მარაგში მხოლოდ ${item.availableQuantity} ცალია`
-                : "მიუწვდომელია",
-          })
+                  ? "აღარ არსებობს"
+                  : item.reason === "insufficient_stock"
+                    ? `მარაგში მხოლოდ ${item.availableQuantity} ცალია`
+                    : "მიუწვდომელია",
+          }),
         );
 
         setUnavailableItems(unavailable);
@@ -198,10 +199,10 @@ export function OrderReview() {
             item.reason === "out_of_stock"
               ? "არ არის მარაგში"
               : item.reason === "not_found"
-              ? "აღარ არსებობს"
-              : item.reason === "insufficient_stock"
-              ? `მარაგში მხოლოდ ${item.availableQuantity} ცალია`
-              : "მიუწვდომელია",
+                ? "აღარ არსებობს"
+                : item.reason === "insufficient_stock"
+                  ? `მარაგში მხოლოდ ${item.availableQuantity} ცალია`
+                  : "მიუწვდომელია",
         }));
 
         setUnavailableItems(unavailable);

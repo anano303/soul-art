@@ -1,0 +1,208 @@
+/* Facebook Continue Button - Floating */
+.fb-continue-container {
+  position: fixed;
+  top: 80px; /* Below header */
+  right: 20px;
+  z-index: 1000;
+  display: flex;
+  align-items: flex-start;
+  gap: 4px;
+  animation: slideInRight 0.4s ease-out;
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.fb-continue-button {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px 10px 10px;
+  background: linear-gradient(135deg, #1877f2 0%, #166fe5 100%);
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  box-shadow: 
+    0 4px 12px rgba(24, 119, 242, 0.3),
+    0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+  color: white;
+}
+
+.fb-continue-button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 
+    0 6px 16px rgba(24, 119, 242, 0.4),
+    0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.fb-continue-button:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.fb-continue-button:disabled {
+  opacity: 0.8;
+  cursor: not-allowed;
+}
+
+.fb-continue-avatar {
+  position: relative;
+  width: 36px;
+  height: 36px;
+}
+
+.fb-continue-avatar-img {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 2px solid white;
+  object-fit: cover;
+}
+
+.fb-badge {
+  position: absolute;
+  bottom: -2px;
+  right: -2px;
+  width: 16px;
+  height: 16px;
+  background: #1877f2;
+  border: 2px solid white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.fb-badge svg {
+  font-size: 8px;
+  color: white;
+}
+
+.fb-continue-icon {
+  width: 36px;
+  height: 36px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.fb-continue-icon svg {
+  font-size: 18px;
+  color: white;
+}
+
+.fb-continue-text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+}
+
+.fb-continue-label {
+  font-size: 0.7rem;
+  opacity: 0.9;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.fb-continue-name {
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.fb-continue-close {
+  width: 24px;
+  height: 24px;
+  background: rgba(0, 0, 0, 0.5);
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  transition: all 0.2s ease;
+  padding: 0;
+  margin-top: 4px;
+}
+
+.fb-continue-close:hover {
+  background: rgba(0, 0, 0, 0.7);
+}
+
+.fb-continue-close svg {
+  font-size: 10px;
+}
+
+.fb-loading-spinner-small {
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin: 8px 20px;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 640px) {
+  .fb-continue-container {
+    top: auto;
+    bottom: 20px;
+    right: 10px;
+    left: 10px;
+  }
+
+  .fb-continue-button {
+    flex: 1;
+    justify-content: center;
+  }
+
+  .fb-continue-close {
+    position: absolute;
+    top: -8px;
+    right: -4px;
+  }
+}
+
+/* Animation for pulse effect when first appearing */
+.fb-continue-button::after {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border: 2px solid #1877f2;
+  border-radius: 16px;
+  opacity: 0;
+  animation: pulse-ring 2s ease-out 0.5s;
+}
+
+@keyframes pulse-ring {
+  0% {
+    opacity: 0;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.15);
+  }
+}

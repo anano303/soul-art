@@ -3,7 +3,7 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { sellerRegisterSchema } from "../validation/seller-register-schema";
-import { useSellerRegister } from "../hooks/use-auth";
+import { useSellerRegister, useFacebookAuth } from "../hooks/use-auth";
 import Link from "next/link";
 import "./register-form.css";
 import type * as z from "zod";
@@ -18,6 +18,8 @@ import { PrivacyPolicy } from "@/components/PrivacyPolicy";
 import { trackCompleteRegistration } from "@/components/MetaPixel";
 import { apiClient } from "@/lib/axios";
 import { GEORGIAN_BANKS, detectBankFromIban } from "@/utils/georgian-banks";
+import { FaGoogle } from "react-icons/fa";
+import { FacebookAuthButton } from "@/components/auth/FacebookAuthButton";
 
 type SellerRegisterFormData = z.infer<typeof sellerRegisterSchema>;
 
@@ -30,6 +32,7 @@ export function SellerRegisterForm() {
   const { t, language } = useLanguage();
   const router = useRouter();
   const { mutate: register, isPending } = useSellerRegister();
+  const { mutate: facebookAuth, isPending: isFacebookPending } = useFacebookAuth();
   const [registrationError, setRegistrationError] = useState<string | null>(
     null
   );
@@ -482,6 +485,40 @@ export function SellerRegisterForm() {
     }
   };
 
+  const handleGoogleAuth = () => {
+    window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/auth/google?sellerMode=true`;
+  };
+
+  const handleFacebookSuccess = (data: {
+    accessToken: string;
+    userId: string;
+    email?: string;
+    name: string;
+    picture?: string;
+  }) => {
+    facebookAuth(data, {
+      onSuccess: () => {
+        setIsSuccess(true);
+        toast({
+          title: t("auth.registrationSuccessful"),
+          description: t("auth.sellerAccountCreatedSuccessfully"),
+          variant: "default",
+        });
+        setTimeout(() => {
+          router.push("/login");
+        }, 2000);
+      },
+      onError: (error) => {
+        toast({
+          title: t("auth.registrationFailed"),
+          description: error.message,
+          variant: "destructive",
+        });
+        setRegistrationError(error.message);
+      },
+    });
+  };
+
   if (isSuccess) {
     return (
       <div className="form-container">
@@ -497,6 +534,41 @@ export function SellerRegisterForm() {
   return (
     <div className="form-container" id="seller-register-form">
       <form onSubmit={onSubmit} className="form">
+        {/* Social auth section */}
+        <div className="social-auth-section" style={{ marginBottom: "1.5rem", paddingBottom: "1.5rem", borderBottom: "1px solid #e0d5c8" }}>
+          <p style={{ fontSize: "0.9rem", color: "#666", textAlign: "center", marginBottom: "1rem" }}>
+            {language === "en"
+              ? "Quick registration with social account"
+              : "სწრაფი რეგისტრაცია სოციალური ქსელით"}
+          </p>
+          <div className="social-buttons">
+            <button
+              type="button"
+              onClick={handleGoogleAuth}
+              className="social-btn google-btn"
+            >
+              <FaGoogle className="icon" />
+              <span className="google-text">
+                <span>G</span>
+                <span>o</span>
+                <span>o</span>
+                <span>g</span>
+                <span>l</span>
+                <span>e</span>
+              </span>
+            </button>
+            <FacebookAuthButton
+              onSuccess={handleFacebookSuccess}
+              onError={(error) => setRegistrationError(error)}
+              disabled={isPending || isFacebookPending}
+              variant="seller"
+            />
+          </div>
+          <div className="divider" style={{ margin: "1rem 0" }}>
+            <span>{language === "en" ? "or fill in details" : "ან შეავსე ხელით"}</span>
+          </div>
+        </div>
+
         <div className="input-group">
           <label htmlFor="storeName">{t("auth.companyName")}</label>
           <input

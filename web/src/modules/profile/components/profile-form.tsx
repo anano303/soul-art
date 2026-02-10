@@ -44,7 +44,7 @@ const formSchema = z
     {
       message: "პაროლები არ ემთხვევა",
       path: ["confirmPassword"],
-    }
+    },
   )
   .refine(
     (data) => {
@@ -59,7 +59,7 @@ const formSchema = z
       message:
         "არასწორი IBAN. გთხოვთ შეიყვანოთ ქართული IBAN (22 სიმბოლო, იწყება GE-ით)",
       path: ["accountNumber"],
-    }
+    },
   );
 
 export function ProfileForm() {
@@ -88,15 +88,6 @@ export function ProfileForm() {
     if (!role) return false;
     const upperRole = role.toUpperCase();
     return upperRole === "SELLER" || upperRole === "SELLER_SALES_MANAGER";
-  };
-
-  // Helper function to check if user has sales manager role (including combined roles)
-  const isSalesManagerRole = (role?: string) => {
-    if (!role) return false;
-    const upperRole = role.toUpperCase();
-    return (
-      upperRole === "SALES_MANAGER" || upperRole === "SELLER_SALES_MANAGER"
-    );
   };
 
   const portfolioBaseUrl =
@@ -136,7 +127,7 @@ export function ProfileForm() {
       // Otherwise add API prefix
       return `/api/${imagePath}`;
     },
-    [isCloudinaryUrl]
+    [isCloudinaryUrl],
   );
 
   // Use manual invalidation instead of refetch
@@ -288,6 +279,37 @@ export function ProfileForm() {
 
         // Sales Manager bank details
         if (user && user.role === "sales_manager") {
+          if (
+            values.phoneNumber !== undefined &&
+            values.phoneNumber !== user?.phoneNumber
+          ) {
+            payload.phoneNumber = values.phoneNumber;
+          }
+
+          if (
+            values.identificationNumber !== undefined &&
+            values.identificationNumber !== user?.identificationNumber
+          ) {
+            payload.identificationNumber = values.identificationNumber;
+          }
+
+          if (
+            values.accountNumber !== undefined &&
+            values.accountNumber !== user?.accountNumber
+          ) {
+            payload.accountNumber = values.accountNumber;
+          }
+
+          if (
+            values.beneficiaryBankCode !== undefined &&
+            values.beneficiaryBankCode !== user?.beneficiaryBankCode
+          ) {
+            payload.beneficiaryBankCode = values.beneficiaryBankCode;
+          }
+        }
+
+        // Auction Admin bank details
+        if (user && user.role === "auction_admin") {
           if (
             values.phoneNumber !== undefined &&
             values.phoneNumber !== user?.phoneNumber
@@ -517,7 +539,7 @@ export function ProfileForm() {
       setSlugMessage(
         language === "en"
           ? "Use 3-40 lowercase letters or numbers. Hyphen allowed between words."
-          : "გამოიყენე 3-40 სიმბოლო: პატარა ასოები, რიცხვები და ჰიფენი სიტყვებს შორის."
+          : "გამოიყენე 3-40 სიმბოლო: პატარა ასოები, რიცხვები და ჰიფენი სიტყვებს შორის.",
       );
       return;
     }
@@ -526,7 +548,7 @@ export function ProfileForm() {
     setSlugMessage(
       language === "en"
         ? "Checking availability..."
-        : "მიმდინარეობს თავისუფლების შემოწმება..."
+        : "მიმდინარეობს თავისუფლების შემოწმება...",
     );
 
     try {
@@ -542,14 +564,14 @@ export function ProfileForm() {
         setSlugMessage(
           language === "en"
             ? `Great news! Your portfolio will be ${portfolioBaseUrl}/@${slug}`
-            : `სუპერ! შენი პორტფოლიო იქნება ${portfolioBaseUrl}/@${slug}`
+            : `სუპერ! შენი პორტფოლიო იქნება ${portfolioBaseUrl}/@${slug}`,
         );
       } else {
         setSlugStatus("taken");
         setSlugMessage(
           language === "en"
             ? "Slug is already taken"
-            : "ეს სლაგი უკვე დაკავებულია"
+            : "ეს სლაგი უკვე დაკავებულია",
         );
       }
     } catch (error) {
@@ -558,7 +580,7 @@ export function ProfileForm() {
       setSlugMessage(
         language === "en"
           ? "Couldn't verify slug. Try again later."
-          : "სლაგის შემოწმება ვერ მოხერხდა. სცადე მოგვიანებით."
+          : "სლაგის შემოწმება ვერ მოხერხდა. სცადე მოგვიანებით.",
       );
     }
   };
@@ -576,7 +598,7 @@ export function ProfileForm() {
       setSlugMessage(
         language === "en"
           ? "Use 3-40 lowercase letters or numbers. Hyphen allowed between words."
-          : "გამოიყენე 3-40 სიმბოლო: პატარა ასოები, რიცხვები და ჰიფენი სიტყვებს შორის."
+          : "გამოიყენე 3-40 სიმბოლო: პატარა ასოები, რიცხვები და ჰიფენი სიტყვებს შორის.",
       );
       return;
     }
@@ -692,18 +714,14 @@ export function ProfileForm() {
         }}
       >
         <h2>{t("profile.title")}</h2>
-        {/* Show become seller button only for regular users (not for sellers, admins, or sales managers) */}
+        {/* Show become seller button only for regular users (not for sellers, admins, sales managers, or auction admins) */}
         {user &&
           user.role?.toUpperCase() !== "SELLER" &&
           user.role?.toUpperCase() !== "SELLER_SALES_MANAGER" &&
           user.role?.toUpperCase() !== "SALES_MANAGER" &&
-          user.role?.toUpperCase() !== "ADMIN" && (
-            <BecomeSellerButton
-              userPhone={user.phoneNumber}
-              userIdentificationNumber={user.identificationNumber}
-              userAccountNumber={user.accountNumber}
-              userBeneficiaryBankCode={user.beneficiaryBankCode}
-            />
+          user.role?.toUpperCase() !== "ADMIN" &&
+          user.role?.toUpperCase() !== "AUCTION_ADMIN" && (
+            <BecomeSellerButton />
           )}
       </div>
 
@@ -1111,8 +1129,8 @@ export function ProfileForm() {
                       ? "Checking..."
                       : "ვამოწმებ..."
                     : language === "en"
-                    ? "Check availability"
-                    : "შეამოწმე"}
+                      ? "Check availability"
+                      : "შეამოწმე"}
                 </button>
                 <button
                   type="button"
@@ -1125,8 +1143,8 @@ export function ProfileForm() {
                       ? "Saving..."
                       : "ვინახავ..."
                     : language === "en"
-                    ? "Save username"
-                    : "მეტსახელის შენახვა"}
+                      ? "Save username"
+                      : "მეტსახელის შენახვა"}
                 </button>
               </div>
               {slugMessage && <p className={slugStatusClass}>{slugMessage}</p>}
@@ -1160,8 +1178,8 @@ export function ProfileForm() {
                           ? "Copied!"
                           : "დაკოპირდა!"
                         : language === "en"
-                        ? "Copy link"
-                        : "ბმულის დაკოპირება"}
+                          ? "Copy link"
+                          : "ბმულის დაკოპირება"}
                     </button>
                   </div>
                 </div>
@@ -1172,6 +1190,116 @@ export function ProfileForm() {
 
         {/* Sales Manager Bank Details Section */}
         {user && user.role && user.role === "sales_manager" && (
+          <div className="seller-section">
+            <h2 className="seller-section-title">
+              {language === "en" ? "Bank Details" : "საბანკო რეკვიზიტები"}
+            </h2>
+            <p
+              style={{
+                fontSize: "0.875rem",
+                color: "#666",
+                marginBottom: "1.5rem",
+              }}
+            >
+              {language === "en"
+                ? "Required for commission withdrawal"
+                : "საჭიროა საკომისიოს გასატანად"}
+            </p>
+
+            <div className="seller-form-grid">
+              <div className="form-field">
+                <label htmlFor="phoneNumber" className="label">
+                  {t("profile.phoneNumber")}
+                </label>
+                <input
+                  id="phoneNumber"
+                  {...form.register("phoneNumber")}
+                  className="input"
+                  placeholder={t("profile.phoneNumberPlaceholder") as string}
+                />
+                {form.formState.errors.phoneNumber && (
+                  <span className="error-message">
+                    {form.formState.errors.phoneNumber.message}
+                  </span>
+                )}
+              </div>
+
+              <div className="form-field">
+                <label htmlFor="identificationNumber" className="label">
+                  {t("profile.idNumber")}
+                </label>
+                <input
+                  id="identificationNumber"
+                  {...form.register("identificationNumber")}
+                  className="input"
+                  placeholder={
+                    language === "en" ? "Personal ID" : "პირადი ნომერი"
+                  }
+                />
+                {form.formState.errors.identificationNumber && (
+                  <span className="error-message">
+                    {form.formState.errors.identificationNumber.message}
+                  </span>
+                )}
+              </div>
+
+              <div className="form-field">
+                <label htmlFor="accountNumber" className="label">
+                  {t("profile.accountNumber")}
+                </label>
+                <input
+                  id="accountNumber"
+                  {...form.register("accountNumber")}
+                  className="input"
+                  placeholder="GE..."
+                  onChange={(e) => {
+                    const iban = e.target.value.trim();
+                    const detectedBank = detectBankFromIban(iban);
+                    if (detectedBank) {
+                      form.setValue("beneficiaryBankCode", detectedBank);
+                    } else if (iban.length >= 22) {
+                      form.setValue("beneficiaryBankCode", "");
+                    }
+                    form.register("accountNumber").onChange(e);
+                  }}
+                />
+                {form.formState.errors.accountNumber && (
+                  <span className="error-message">
+                    {form.formState.errors.accountNumber.message}
+                  </span>
+                )}
+              </div>
+
+              <div className="form-field">
+                <label htmlFor="beneficiaryBankCode" className="label">
+                  {t("profile.bankName") || "ბანკი"}
+                </label>
+                <select
+                  id="beneficiaryBankCode"
+                  {...form.register("beneficiaryBankCode")}
+                  className="input"
+                  disabled={true}
+                >
+                  <option value="">
+                    {t("profile.selectBank") || "აირჩიეთ ბანკი"}
+                  </option>
+                  {GEORGIAN_BANKS.map((bank) => (
+                    <option key={bank.code} value={bank.code}>
+                      {bank.name} ({bank.nameEn})
+                    </option>
+                  ))}
+                </select>
+                <p className="text-xs text-gray-500 mt-1">
+                  {t("profile.bankAutoDetect") ||
+                    "ბანკი ავტომატურად დადგინდება ანგარიშის ნომრით"}
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Auction Admin Bank Details Section */}
+        {user && user.role && user.role.toLowerCase() === "auction_admin" && (
           <div className="seller-section">
             <h2 className="seller-section-title">
               {language === "en" ? "Bank Details" : "საბანკო რეკვიზიტები"}

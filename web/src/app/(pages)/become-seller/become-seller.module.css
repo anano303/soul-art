@@ -1,0 +1,21 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+  box-sizing: border-box;
+}
+
+@media (min-width: 768px) {
+  .container {
+    padding: 3rem 2rem;
+  }
+}
+
+@media (max-width: 420px) {
+  .container {
+    padding: 1rem 0.5rem;
+  }
+}

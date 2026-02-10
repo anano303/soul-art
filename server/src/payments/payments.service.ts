@@ -1,8 +1,9 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, Inject, forwardRef } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import axios from 'axios';
 import { v4 as uuidv4 } from 'uuid';
 import { OrdersService } from '../orders/services/orders.service';
+import { AuctionService } from '../auctions/services/auction.service';
 
 interface BogTokenResponse {
   access_token: string;
@@ -23,6 +24,8 @@ export class PaymentsService {
   constructor(
     private readonly configService: ConfigService,
     private readonly ordersService: OrdersService,
+    @Inject(forwardRef(() => AuctionService))
+    private readonly auctionService: AuctionService,
   ) {}
 
   private async getToken(): Promise<string> {
@@ -228,6 +231,30 @@ export class PaymentsService {
       );
 
       if (isPaymentSuccessful && external_order_id) {
+        // First, try to find auction with this external_order_id
+        try {
+          const auction =
+            await this.auctionService.findByExternalOrderId(external_order_id);
+          if (auction) {
+            console.log(
+              `Found auction ${auction._id} for external_order_id: ${external_order_id}`,
+            );
+            const auctionResult =
+              await this.auctionService.handleBogPaymentCallback(
+                external_order_id,
+                statusKey,
+                order_id,
+              );
+            return auctionResult;
+          }
+        } catch (auctionError) {
+          console.log(
+            'Not an auction payment, trying order:',
+            auctionError.message,
+          );
+        }
+
+        // If not an auction, try to update order
         try {
           const paymentResult = {
             id: order_id || external_order_id,
@@ -328,5 +355,112 @@ export class PaymentsService {
 
   async getOrderByExternalId(externalOrderId: string) {
     return this.ordersService.findByExternalOrderId(externalOrderId);
+  }
+
+  // Create BOG payment for auction
+  async createAuctionPayment(data: {
+    auctionId: string;
+    externalOrderId: string;
+    title: string;
+    artworkPrice: number;
+    deliveryFee: number;
+    totalPayment: number;
+    successUrl?: string;
+    failUrl?: string;
+  }) {
+    try {
+      const token = await this.getToken();
+
+      const basket = [
+        {
+          quantity: 1,
+          unit_price: data.artworkPrice,
+          product_id: data.auctionId,
+          description: `Auction: ${data.title}`,
+        },
+      ];
+
+      // Add delivery as separate item if there's a fee
+      if (data.deliveryFee > 0) {
+        basket.push({
+          quantity: 1,
+          unit_price: data.deliveryFee,
+          product_id: `${data.auctionId}-delivery`,
+          description: 'Delivery fee',
+        });
+      }
+
+      const callbackUrl =
+        this.configService.get('BOG_AUCTION_CALLBACK_URL') ||
+        this.configService.get('BOG_CALLBACK_URL');
+
+      const payload = {
+        callback_url: callbackUrl,
+        capture: 'automatic',
+        external_order_id: data.externalOrderId,
+        purchase_units: {
+          currency: 'GEL',
+          total_amount: data.totalPayment,
+          basket,
+        },
+        payment_method: [
+          'card',
+          'google_pay',
+          'apple_pay',
+          'bog_loyalty',
+          'bog_p2p',
+        ],
+        ttl: 10,
+        redirect_urls: {
+          success:
+            data.successUrl ||
+            `https://soulart.ge/checkout/success?auctionId=${data.auctionId}`,
+          fail:
+            data.failUrl ||
+            `https://soulart.ge/checkout/fail?auctionId=${data.auctionId}`,
+        },
+      };
+
+      this.logger.log(
+        `Creating BOG payment for auction ${data.auctionId}, total: ${data.totalPayment} GEL`,
+      );
+
+      const response = await axios.post<BogPaymentResponse>(
+        'https://api.bog.ge/payments/v1/ecommerce/orders',
+        payload,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+            'Accept-Language': 'ka',
+            'Idempotency-Key': uuidv4(),
+          },
+        },
+      );
+
+      this.logger.log(
+        `BOG Auction Payment Created: ${response.data.id}, externalOrderId: ${data.externalOrderId}`,
+      );
+
+      return {
+        bogOrderId: response.data.id,
+        redirectUrl: response.data._links.redirect.href,
+        externalOrderId: data.externalOrderId,
+      };
+    } catch (error) {
+      this.logger.error(
+        `BOG Auction Payment Error: ${error.message}`,
+        error.stack,
+      );
+
+      if (error.response) {
+        this.logger.error(
+          `BOG API Response: ${JSON.stringify(error.response.data)}`,
+        );
+        this.logger.error(`BOG API Status: ${error.response.status}`);
+      }
+
+      throw new Error(error.message || 'Auction payment service error');
+    }
   }
 }

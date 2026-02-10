@@ -5,13 +5,13 @@ import { useAuth } from "@/hooks/use-auth";
 import { useCart } from "@/modules/cart/context/cart-context";
 import { useCheckout } from "../context/checkout-context";
 import { useLanguage } from "@/hooks/LanguageContext";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import { apiClient } from "@/lib/axios";
 import { LoginForm } from "@/modules/auth/components/login-form";
 import { AddressSelector } from "./address-selector";
 import { GuestInfoForm } from "./guest-info-form";
-import { Check, AlertTriangle } from "lucide-react";
+import { Check, AlertTriangle, Trophy } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
@@ -26,12 +26,18 @@ import {
 } from "@/lib/ga4-analytics";
 import { trackCheckoutStart } from "@/hooks/use-sales-tracking";
 import Cookies from "js-cookie";
+import { CartItem } from "@/types/cart";
 
 type CheckoutStep = "auth" | "guest" | "shipping" | "payment" | "review";
 
+interface AuctionCheckoutItem extends CartItem {
+  auctionId: string;
+  isAuction: true;
+}
+
 export function StreamlinedCheckout() {
   const { user } = useAuth();
-  const { items, clearCart } = useCart();
+  const { items, clearCart, clearAuctionItems } = useCart();
   const {
     shippingAddress,
     setShippingAddress,
@@ -43,7 +49,14 @@ export function StreamlinedCheckout() {
   } = useCheckout();
   const { language, t } = useLanguage();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { toast } = useToast();
+
+  // Auction mode state
+  const [isAuctionMode, setIsAuctionMode] = useState(false);
+  const [auctionItem, setAuctionItem] = useState<AuctionCheckoutItem | null>(
+    null,
+  );
 
   const [currentStep, setCurrentStep] = useState<CheckoutStep>("auth");
   const [isValidating, setIsValidating] = useState(false);
@@ -65,11 +78,33 @@ export function StreamlinedCheckout() {
   const hasTrackedCheckoutLoginRef = useRef(false);
   const previousStepRef = useRef<CheckoutStep | null>(null);
   const [originalPrices, setOriginalPrices] = useState<Record<string, number>>(
-    {}
+    {},
   );
 
-  // Fetch original prices from products API
+  // Check for auction checkout mode on mount
   useEffect(() => {
+    const auctionId = searchParams.get("auction");
+    if (auctionId) {
+      // Load auction item from sessionStorage
+      const storedAuctionItem = sessionStorage.getItem("auction_checkout_item");
+      if (storedAuctionItem) {
+        try {
+          const parsed = JSON.parse(storedAuctionItem);
+          if (parsed.auctionId === auctionId) {
+            setAuctionItem(parsed);
+            setIsAuctionMode(true);
+          }
+        } catch (e) {
+          console.error("Failed to parse auction checkout item:", e);
+        }
+      }
+    }
+  }, [searchParams]);
+
+  // Fetch original prices from products API (skip for auction mode)
+  useEffect(() => {
+    if (isAuctionMode) return;
+
     const fetchOriginalPrices = async () => {
       const prices: Record<string, number> = {};
       await Promise.all(
@@ -80,30 +115,39 @@ export function StreamlinedCheckout() {
           } catch {
             prices[item.productId] = item.price;
           }
-        })
+        }),
       );
       setOriginalPrices(prices);
     };
     if (items.length > 0) {
       fetchOriginalPrices();
     }
-  }, [items]);
+  }, [items, isAuctionMode]);
+
+  // Get checkout items - either auction item or cart items
+  const checkoutItems = isAuctionMode && auctionItem ? [auctionItem] : items;
 
   // Calculate totals
-  const itemsPrice = items.reduce(
+  const itemsPrice = checkoutItems.reduce(
     (acc, item) => acc + item.price * item.qty,
-    0
+    0,
   );
-  const shippingPrice = itemsPrice > 100 ? 0 : 0;
+
+  // Delivery zone based on city: Tbilisi = 0₾, Region = 18₾
+  const cityName = shippingAddress?.city?.toLowerCase() || "";
+  const isTbilisi =
+    cityName.includes("tbilisi") || cityName.includes("თბილისი");
+  const shippingPrice = isTbilisi ? 0 : shippingAddress ? 18 : 0;
+
   // საკომისიო მოხსნილია - რეალური ფასი ყველგან
   const totalPrice = itemsPrice + shippingPrice;
-  const totalUnits = items.reduce((acc, item) => acc + item.qty, 0);
+  const totalUnits = checkoutItems.reduce((acc, item) => acc + item.qty, 0);
 
   // Calculate total original price and savings
   const totalOriginalPrice = items.reduce(
     (acc, item) =>
       acc + (originalPrices[item.productId] || item.price) * item.qty,
-    0
+    0,
   );
   const totalSavings = totalOriginalPrice - itemsPrice;
 
@@ -133,7 +177,7 @@ export function StreamlinedCheckout() {
 
         // Auto-select default address if exists and no address is currently selected
         const defaultAddress = addresses.find(
-          (addr: { isDefault?: boolean }) => addr.isDefault
+          (addr: { isDefault?: boolean }) => addr.isDefault,
         );
         if (defaultAddress && !shippingAddress) {
           setShippingAddress(defaultAddress);
@@ -161,6 +205,17 @@ export function StreamlinedCheckout() {
     if (isEditing) return;
 
     const previousStep = previousStepRef.current;
+
+    // For auction mode, user must be authenticated (they won), skip to shipping
+    if (isAuctionMode && user && !shippingAddress) {
+      setCurrentStep("shipping");
+      return;
+    }
+    if (isAuctionMode && user && shippingAddress) {
+      setCurrentStep("review");
+      setPaymentMethod("BOG");
+      return;
+    }
 
     if (!user && !isGuestCheckout) {
       setCurrentStep("auth");
@@ -197,6 +252,7 @@ export function StreamlinedCheckout() {
     isEditing,
     addressesLoaded,
     currentStep,
+    isAuctionMode,
   ]);
 
   useEffect(() => {
@@ -238,8 +294,158 @@ export function StreamlinedCheckout() {
     }
   };
 
+  // Handle auction order placement (won auction checkout)
+  const handleAuctionPlaceOrder = async () => {
+    if (!auctionItem || !shippingAddress) {
+      toast({
+        title: t("checkout.error") || "შეცდომა",
+        description: t("checkout.missingInfo") || "შეავსეთ მისამართი",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    trackClickPurchase(totalPrice);
+    setIsProcessingPayment(true);
+
+    try {
+      // Determine delivery zone from city
+      const city = shippingAddress.city?.toLowerCase() || "";
+      const deliveryZone: "TBILISI" | "REGION" =
+        city.includes("tbilisi") || city.includes("თბილისი")
+          ? "TBILISI"
+          : "REGION";
+
+      // Filter shipping address to only include required fields (exclude _id, label, isDefault, etc.)
+      const filteredShippingAddress = {
+        address: shippingAddress.address,
+        city: shippingAddress.city,
+        postalCode: shippingAddress.postalCode,
+        country: shippingAddress.country,
+        phoneNumber: shippingAddress.phoneNumber,
+      };
+
+      // Step 1: Initialize BOG payment on auction backend
+      const initResponse = await apiClient.post(
+        `/auctions/${auctionItem.auctionId}/bog/initialize`,
+        {
+          deliveryZone,
+          shippingAddress: filteredShippingAddress,
+        },
+      );
+
+      const {
+        externalOrderId,
+        title,
+        artworkPrice,
+        deliveryFee,
+        totalPayment,
+      } = initResponse.data;
+
+      // Step 2: Create BOG payment and get redirect URL
+      const bogResponse = await apiClient.post(`/payments/bog/auction/create`, {
+        auctionId: auctionItem.auctionId,
+        externalOrderId,
+        title,
+        artworkPrice,
+        deliveryFee,
+        totalPayment,
+      });
+
+      // Step 3: Handle payment redirect
+      if (bogResponse.data.redirectUrl) {
+        setPaymentUrl(bogResponse.data.redirectUrl);
+        setShowPaymentModal(true);
+        setPaymentWindowClosed(false);
+
+        // Open payment in new window
+        const paymentWindow = window.open(
+          bogResponse.data.redirectUrl,
+          "BOGPayment",
+          "width=600,height=700,scrollbars=yes",
+        );
+
+        setPaymentWindowRef(paymentWindow);
+
+        // Check if window was closed
+        const checkWindowClosed = setInterval(() => {
+          if (paymentWindow && paymentWindow.closed) {
+            setPaymentWindowClosed(true);
+            clearInterval(checkWindowClosed);
+          }
+        }, 500);
+
+        // Listen for payment completion via postMessage
+        const handlePaymentMessage = (event: MessageEvent) => {
+          if (event.data.type === "payment_success") {
+            clearAuctionItems();
+            clearCheckout();
+            setShowPaymentModal(false);
+            if (paymentWindow && !paymentWindow.closed) paymentWindow.close();
+            window.removeEventListener("message", handlePaymentMessage);
+            router.push(`/checkout/success?auctionId=${auctionItem.auctionId}`);
+          } else if (event.data.type === "payment_fail") {
+            setShowPaymentModal(false);
+            if (paymentWindow && !paymentWindow.closed) paymentWindow.close();
+            window.removeEventListener("message", handlePaymentMessage);
+            router.push(`/checkout/fail?auctionId=${auctionItem.auctionId}`);
+          }
+        };
+
+        window.addEventListener("message", handlePaymentMessage);
+
+        // Poll auction status as backup
+        const pollAuctionStatus = setInterval(async () => {
+          try {
+            const auctionStatus = await apiClient.get(
+              `/auctions/${auctionItem.auctionId}`,
+            );
+            if (auctionStatus.data.isPaid) {
+              clearInterval(pollAuctionStatus);
+              clearAuctionItems();
+              clearCheckout();
+              setShowPaymentModal(false);
+              if (paymentWindow && !paymentWindow.closed) paymentWindow.close();
+              window.removeEventListener("message", handlePaymentMessage);
+              router.push(
+                `/checkout/success?auctionId=${auctionItem.auctionId}`,
+              );
+            }
+          } catch {
+            // Continue polling
+          }
+        }, 3000);
+
+        // Stop polling after 10 minutes
+        setTimeout(() => clearInterval(pollAuctionStatus), 600000);
+      } else {
+        throw new Error("No redirect URL received from BOG");
+      }
+    } catch (error: unknown) {
+      console.error("Auction payment error:", error);
+      const axiosError = error as {
+        response?: { data?: { message?: string } };
+      };
+      toast({
+        title: t("auctions.paymentError") || "გადახდის შეცდომა",
+        description:
+          axiosError.response?.data?.message ||
+          t("common.tryAgain") ||
+          "სცადეთ ხელახლა",
+        variant: "destructive",
+      });
+    } finally {
+      setIsProcessingPayment(false);
+    }
+  };
+
   // Handle order placement
   const handlePlaceOrder = async () => {
+    // If auction mode, use auction-specific flow
+    if (isAuctionMode && auctionItem) {
+      return handleAuctionPlaceOrder();
+    }
+
     // Track Step 6: Click Purchase (before creating order)
     trackClickPurchase(totalPrice);
 
@@ -265,11 +471,11 @@ export function StreamlinedCheckout() {
               item.reason === "out_of_stock"
                 ? "არ არის მარაგში"
                 : item.reason === "not_found"
-                ? "აღარ არსებობს"
-                : item.reason === "insufficient_stock"
-                ? `მარაგში მხოლოდ ${item.availableQuantity} ცალია`
-                : "მიუწვდომელია",
-          })
+                  ? "აღარ არსებობს"
+                  : item.reason === "insufficient_stock"
+                    ? `მარაგში მხოლოდ ${item.availableQuantity} ცალია`
+                    : "მიუწვდომელია",
+          }),
         );
 
         setUnavailableItems(unavailable);
@@ -302,10 +508,10 @@ export function StreamlinedCheckout() {
       // Calculate total referral discount
       const totalReferralDiscount = items.reduce(
         (acc, item) => acc + (item.referralDiscountAmount || 0) * item.qty,
-        0
+        0,
       );
       const hasReferralDiscount = items.some(
-        (item) => item.hasReferralDiscount
+        (item) => item.hasReferralDiscount,
       );
 
       const orderPayload: {
@@ -360,18 +566,18 @@ export function StreamlinedCheckout() {
         try {
           sessionStorage.setItem(
             `order_summary_${orderId}`,
-            JSON.stringify(orderSummary)
+            JSON.stringify(orderSummary),
           );
           localStorage.setItem(
             `order_summary_${orderId}`,
-            JSON.stringify(orderSummary)
+            JSON.stringify(orderSummary),
           );
           sessionStorage.removeItem(`order_summary_${orderId}_tracked`);
           localStorage.removeItem(`order_summary_${orderId}_tracked`);
         } catch (storageError) {
           console.warn(
             "Failed to cache order summary for analytics:",
-            storageError
+            storageError,
           );
         }
       }
@@ -385,7 +591,7 @@ export function StreamlinedCheckout() {
           trackPurchase(
             orderSummary.totalPrice,
             orderSummary.currency,
-            orderId
+            orderId,
           );
           if (typeof window !== "undefined") {
             sessionStorage.setItem(`order_summary_${orderId}_tracked`, "true");
@@ -443,7 +649,7 @@ export function StreamlinedCheckout() {
 
       const response = await apiClient.post(
         "/payments/bog/create",
-        paymentData
+        paymentData,
       );
       const result = response.data;
 
@@ -456,7 +662,7 @@ export function StreamlinedCheckout() {
         const paymentWindow = window.open(
           result.redirect_url,
           "BOGPayment",
-          "width=600,height=700,scrollbars=yes"
+          "width=600,height=700,scrollbars=yes",
         );
 
         setPaymentWindowRef(paymentWindow);
@@ -497,7 +703,7 @@ export function StreamlinedCheckout() {
                 ? `?email=${encodeURIComponent(guestInfo.email)}`
                 : "";
             const orderStatus = await apiClient.get(
-              `/orders/${orderId}${emailParam}`
+              `/orders/${orderId}${emailParam}`,
             );
             if (orderStatus.data.isPaid) {
               clearInterval(pollOrderStatus);
@@ -534,7 +740,7 @@ export function StreamlinedCheckout() {
       const paymentWindow = window.open(
         paymentUrl,
         "BOGPayment",
-        "width=600,height=700,scrollbars=yes"
+        "width=600,height=700,scrollbars=yes",
       );
       setPaymentWindowRef(paymentWindow);
       setPaymentWindowClosed(false);
@@ -569,21 +775,47 @@ export function StreamlinedCheckout() {
     }
   };
 
-  if (items.length === 0) {
+  // Check for empty checkout (no items and not auction mode, or auction mode with no auction item)
+  if (
+    (!isAuctionMode && items.length === 0) ||
+    (isAuctionMode && !auctionItem)
+  ) {
     return (
       <div className="empty-cart">
         <h2>{t("checkout.emptyCart")}</h2>
-        <Link href="/products">{t("checkout.continueShopping")}</Link>
+        <Link href={isAuctionMode ? "/auctions" : "/products"}>
+          {isAuctionMode
+            ? t("auctions.backToAuctions") || "აუქციონებზე დაბრუნება"
+            : t("checkout.continueShopping")}
+        </Link>
       </div>
     );
   }
 
   return (
     <div className="streamlined-checkout">
-      {/* Back to Cart Button */}
+      {/* Auction indicator banner */}
+      {isAuctionMode && auctionItem && (
+        <div className="auction-checkout-banner">
+          <Trophy size={20} />
+          <span>{t("auctions.wonAuction") || "მოგებული აუქციონი"}</span>
+        </div>
+      )}
+
+      {/* Back button */}
       <div className="back-button-wrapper">
-        <Link href="/cart" className="back-button">
-          ← {t("checkout.backToCart")}
+        <Link
+          href={
+            isAuctionMode && auctionItem
+              ? `/auctions/${auctionItem.auctionId}`
+              : "/cart"
+          }
+          className="back-button"
+        >
+          ←{" "}
+          {isAuctionMode
+            ? t("common.back") || "უკან"
+            : t("checkout.backToCart")}
         </Link>
       </div>
 
@@ -596,7 +828,7 @@ export function StreamlinedCheckout() {
               className={cn(
                 "step",
                 (currentStep === "auth" || currentStep === "guest") && "active",
-                (user || guestInfo) && "completed"
+                (user || guestInfo) && "completed",
               )}
             >
               <div className="step-circle">
@@ -610,7 +842,7 @@ export function StreamlinedCheckout() {
               className={cn(
                 "step",
                 currentStep === "shipping" && "active",
-                shippingAddress && "completed"
+                shippingAddress && "completed",
               )}
             >
               <div className="step-circle">
@@ -742,13 +974,20 @@ export function StreamlinedCheckout() {
 
                   {/* Order Items */}
                   <div className="review-card">
-                    <h3>შეკვეთის პროდუქტები</h3>
+                    <h3>
+                      {isAuctionMode
+                        ? t("auctions.wonAuction") || "მოგებული აუქციონი"
+                        : "შეკვეთის პროდუქტები"}
+                    </h3>
                     <div className="order-items-review">
-                      {items.map((item) => {
+                      {checkoutItems.map((item) => {
                         const displayName =
                           language === "en" && item.nameEn
                             ? item.nameEn
                             : item.name;
+                        const itemLink = item.isAuction
+                          ? `/auctions/${item.auctionId}`
+                          : `/products/${item.productId}`;
                         return (
                           <div
                             key={`${item.productId}-${item.color ?? "c"}-${
@@ -765,10 +1004,7 @@ export function StreamlinedCheckout() {
                               />
                             </div>
                             <div className="item-details">
-                              <Link
-                                href={`/products/${item.productId}`}
-                                className="item-name"
-                              >
+                              <Link href={itemLink} className="item-name">
                                 {displayName}
                               </Link>
                               <p className="item-price">
@@ -789,10 +1025,14 @@ export function StreamlinedCheckout() {
         {/* Right Sidebar - Order Summary */}
         <div className="order-summary-sidebar">
           <div className="summary-sticky">
-            <h3 className="summary-title">შეკვეთის მონაცემები</h3>
+            <h3 className="summary-title">
+              {isAuctionMode
+                ? t("auctions.wonAuction") || "მოგებული აუქციონი"
+                : "შეკვეთის მონაცემები"}
+            </h3>
 
             <div className="summary-items">
-              {items.slice(0, 3).map((item) => {
+              {checkoutItems.slice(0, 3).map((item) => {
                 const displayName =
                   language === "en" && item.nameEn ? item.nameEn : item.name;
                 return (
@@ -822,9 +1062,9 @@ export function StreamlinedCheckout() {
                   </div>
                 );
               })}
-              {items.length > 3 && (
+              {checkoutItems.length > 3 && (
                 <p className="summary-more">
-                  + {items.length - 3} სხვა პროდუქტი
+                  + {checkoutItems.length - 3} სხვა პროდუქტი
                 </p>
               )}
             </div>
@@ -844,6 +1084,12 @@ export function StreamlinedCheckout() {
                     : `${Number(shippingPrice).toFixed(2)} ₾`}
                 </span>
               </div>
+              {/* თბილისში უფასო მიწოდების შეტყობინება */}
+              {shippingPrice > 0 && shippingAddress && (
+                <div className="tbilisi-free-note">
+                  {t("cart.tbilisiFreeNote")}
+                </div>
+              )}
               {/* საკომისიო დაკომენტარებულია - ბანკის გვერდზე ნახავს
               <div className="summary-row">
                 <span>{t("cart.commission")}</span>
@@ -858,7 +1104,8 @@ export function StreamlinedCheckout() {
                 <span className="total-amount">{totalPrice.toFixed(2)} ₾</span>
               </div>
 
-              {totalSavings > 0 && (
+              {/* აუქციონისთვის savings არ ჩანდეს */}
+              {!isAuctionMode && totalSavings > 0 && (
                 <div className="savings-banner">
                   <span className="savings-icon">✓</span>
                   <span className="savings-text">

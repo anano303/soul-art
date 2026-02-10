@@ -73,16 +73,23 @@ export class BalanceService {
         continue;
       }
 
-      // გავანგარიშოთ კომისიები
+      // პროდუქტის ფასი (ფასდაკლებით თუ არსებობს)
       const itemTotalPrice = item.price * item.qty;
-      const siteCommission = itemTotalPrice * 0.1; // 10% საიტის კომისია
 
-      // მიტანის კომისია (თუ delivery type არის SoulArt)
+      // 10% საიტის საკომისიო (პროდუქტის ფასიდან)
+      const siteCommission = itemTotalPrice * 0.1;
+
+      // SoulArt მიტანის საკომისიო (თუ delivery type არის SoulArt)
+      // ფორმულა: 5% მინ. 10 ლარი, მაქს. 50 ლარი
       let deliveryCommission = 0;
       if (product.deliveryType === 'SoulArt') {
-        deliveryCommission = Math.min(Math.max(itemTotalPrice * 0.05, 10), 50); // 5% მინ. 10 ლარი, მაქს. 50 ლარი
+        deliveryCommission = Math.min(Math.max(itemTotalPrice * 0.05, 10), 50);
       }
 
+      // სელერის საბოლოო შემოსავალი:
+      // პროდუქტის ფასი - 10% საკომისიო - SoulArt მიტანის საკომისიო (თუ არსებობს)
+      // შენიშვნა: რეგიონის ფასი (shippingPrice=18₾) არ შედის პროდუქტის ფასში,
+      // ის ცალკე გადახდილია და პირდაპირ SoulArt-ს რჩება
       const totalCommissions = siteCommission + deliveryCommission;
       const finalAmount = itemTotalPrice - totalCommissions;
 

@@ -101,6 +101,13 @@ export default function EditUserPage() {
 
   return (
     <div className="edit-user-container">
+      <button
+        type="button"
+        className="back-button"
+        onClick={() => router.back()}
+      >
+        ← უკან დაბრუნება
+      </button>
       <h1>მომხმარებლის რედაქტირება</h1>
       <form onSubmit={handleSubmit} className="edit-user-form">
         {/* ძირითადი ინფორმაცია */}
@@ -138,6 +145,7 @@ export default function EditUserPage() {
               <option value={Role.Seller}>გამყიდველი</option>
               <option value={Role.Blogger}>ბლოგერი</option>
               <option value={Role.SalesManager}>Sales Manager</option>
+              <option value={Role.AuctionAdmin}>აუქციონის ადმინი</option>
             </select>
           </div>
         </div>

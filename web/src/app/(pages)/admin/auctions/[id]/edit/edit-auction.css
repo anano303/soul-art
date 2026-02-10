@@ -1,0 +1,630 @@
+/* ============================================
+   AUCTION EDIT PAGE - PROFESSIONAL DESIGN
+   Theme-aware with dark mode support
+============================================ */
+
+.edit-auction-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  padding: 2rem 1rem;
+}
+
+[data-theme="dark"] .edit-auction-page {
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+}
+
+.edit-auction-container {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+/* ============ HEADER ============ */
+.edit-header {
+  margin-bottom: 2rem;
+}
+
+.edit-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  font-size: 0.875rem;
+}
+
+.breadcrumb-link {
+  color: #64748b;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.breadcrumb-link:hover {
+  color: #3182ce;
+}
+
+[data-theme="dark"] .breadcrumb-link {
+  color: #94a3b8;
+}
+
+[data-theme="dark"] .breadcrumb-link:hover {
+  color: #63b3ed;
+}
+
+.breadcrumb-separator {
+  color: #cbd5e1;
+}
+
+[data-theme="dark"] .breadcrumb-separator {
+  color: #475569;
+}
+
+.breadcrumb-current {
+  color: #1e293b;
+  font-weight: 600;
+}
+
+[data-theme="dark"] .breadcrumb-current {
+  color: #f1f5f9;
+}
+
+.edit-header-content {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.edit-title-section {
+  flex: 1;
+}
+
+.edit-page-title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+[data-theme="dark"] .edit-page-title {
+  color: #f1f5f9;
+}
+
+.edit-page-title svg {
+  color: #3182ce;
+}
+
+[data-theme="dark"] .edit-page-title svg {
+  color: #63b3ed;
+}
+
+.edit-page-subtitle {
+  color: #64748b;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+[data-theme="dark"] .edit-page-subtitle {
+  color: #94a3b8;
+}
+
+.role-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.role-badge.admin {
+  background: linear-gradient(135deg, #2c5282 0%, #3182ce 100%);
+  color: white;
+}
+
+.role-badge.seller {
+  background: linear-gradient(135deg, #276749 0%, #38a169 100%);
+  color: white;
+}
+
+/* ============ AUCTION PREVIEW ============ */
+.edit-preview-card {
+  background: white;
+  border-radius: 16px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+[data-theme="dark"] .edit-preview-card {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+.preview-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #64748b;
+  margin-bottom: 1rem;
+}
+
+[data-theme="dark"] .preview-header {
+  color: #94a3b8;
+}
+
+.preview-content {
+  display: flex;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.preview-image-container {
+  position: relative;
+  width: 140px;
+  height: 140px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #f1f5f9;
+  flex-shrink: 0;
+}
+
+[data-theme="dark"] .preview-image-container {
+  background: #0f172a;
+}
+
+.preview-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.preview-image-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #94a3b8;
+}
+
+.preview-details {
+  flex: 1;
+  min-width: 200px;
+}
+
+.preview-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 0.5rem;
+}
+
+[data-theme="dark"] .preview-title {
+  color: #f1f5f9;
+}
+
+.preview-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.preview-meta-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: #64748b;
+}
+
+[data-theme="dark"] .preview-meta-item {
+  color: #94a3b8;
+}
+
+.preview-meta-item svg {
+  color: #3182ce;
+}
+
+[data-theme="dark"] .preview-meta-item svg {
+  color: #63b3ed;
+}
+
+.preview-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.375rem 0.875rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.preview-status.active {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.preview-status.pending {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.preview-status.ended {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.preview-status.scheduled {
+  background: #e0e7ff;
+  color: #3730a3;
+}
+
+.preview-status.cancelled {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+[data-theme="dark"] .preview-status.active {
+  background: #166534;
+  color: #dcfce7;
+}
+
+[data-theme="dark"] .preview-status.pending {
+  background: #92400e;
+  color: #fef3c7;
+}
+
+[data-theme="dark"] .preview-status.ended {
+  background: #991b1b;
+  color: #fee2e2;
+}
+
+[data-theme="dark"] .preview-status.scheduled {
+  background: #3730a3;
+  color: #e0e7ff;
+}
+
+[data-theme="dark"] .preview-status.cancelled {
+  background: #475569;
+  color: #f1f5f9;
+}
+
+/* ============ GALLERY THUMBNAILS ============ */
+.preview-gallery {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  flex-wrap: wrap;
+}
+
+.gallery-thumb {
+  width: 50px;
+  height: 50px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 2px solid #e2e8f0;
+  transition: border-color 0.2s ease;
+}
+
+.gallery-thumb:hover {
+  border-color: #3182ce;
+}
+
+[data-theme="dark"] .gallery-thumb {
+  border-color: #334155;
+}
+
+[data-theme="dark"] .gallery-thumb:hover {
+  border-color: #63b3ed;
+}
+
+.gallery-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.gallery-more {
+  width: 50px;
+  height: 50px;
+  border-radius: 8px;
+  background: #f1f5f9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #64748b;
+}
+
+[data-theme="dark"] .gallery-more {
+  background: #0f172a;
+  color: #94a3b8;
+}
+
+/* ============ FORM WRAPPER ============ */
+.edit-form-wrapper {
+  background: white;
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+[data-theme="dark"] .edit-form-wrapper {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+.edit-form-wrapper .create-auction-form {
+  border: none;
+  box-shadow: none;
+  border-radius: 0;
+  max-width: none;
+  margin: 0;
+}
+
+[data-theme="dark"] .edit-form-wrapper .create-auction-form {
+  background: transparent;
+}
+
+/* ============ LOADING STATE ============ */
+.edit-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  gap: 1rem;
+}
+
+.edit-loading-spinner {
+  width: 48px;
+  height: 48px;
+  border: 4px solid #e2e8f0;
+  border-top: 4px solid #3182ce;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+[data-theme="dark"] .edit-loading-spinner {
+  border-color: #334155;
+  border-top-color: #63b3ed;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.edit-loading-text {
+  color: #64748b;
+  font-size: 0.95rem;
+}
+
+[data-theme="dark"] .edit-loading-text {
+  color: #94a3b8;
+}
+
+/* ============ ERROR STATE ============ */
+.edit-error {
+  background: white;
+  border-radius: 16px;
+  padding: 3rem 2rem;
+  text-align: center;
+  border: 1px solid #e2e8f0;
+}
+
+[data-theme="dark"] .edit-error {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+.edit-error-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+.edit-error-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 0.5rem;
+}
+
+[data-theme="dark"] .edit-error-title {
+  color: #f1f5f9;
+}
+
+.edit-error-message {
+  color: #64748b;
+  margin-bottom: 1.5rem;
+}
+
+[data-theme="dark"] .edit-error-message {
+  color: #94a3b8;
+}
+
+.edit-error-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #3182ce;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.edit-error-link:hover {
+  color: #2c5282;
+}
+
+[data-theme="dark"] .edit-error-link {
+  color: #63b3ed;
+}
+
+[data-theme="dark"] .edit-error-link:hover {
+  color: #90cdf4;
+}
+
+/* ============ RESPONSIVE ============ */
+@media (max-width: 768px) {
+  .edit-auction-page {
+    padding: 1rem 0.75rem;
+  }
+
+  .edit-page-title {
+    font-size: 1.35rem;
+  }
+
+  .edit-page-title svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .edit-page-subtitle {
+    font-size: 0.85rem;
+  }
+
+  .edit-header-content {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .role-badge {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.7rem;
+    align-self: flex-start;
+  }
+
+  .edit-breadcrumb {
+    font-size: 0.75rem;
+    flex-wrap: wrap;
+    margin-bottom: 1rem;
+  }
+
+  .preview-content {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 1rem;
+  }
+
+  .preview-image-container {
+    width: 120px;
+    height: 120px;
+  }
+
+  .preview-details {
+    width: 100%;
+  }
+
+  .preview-title {
+    font-size: 1rem;
+  }
+
+  .preview-meta {
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .preview-meta-item {
+    font-size: 0.8rem;
+  }
+
+  .preview-gallery {
+    justify-content: center;
+  }
+
+  .preview-status {
+    font-size: 0.7rem;
+    padding: 0.25rem 0.6rem;
+  }
+
+  .edit-preview-card {
+    padding: 1rem;
+    border-radius: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .edit-auction-page {
+    padding: 0.75rem 0.5rem;
+  }
+
+  .edit-page-title {
+    font-size: 1.15rem;
+    gap: 0.5rem;
+  }
+
+  .edit-page-title svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .edit-page-subtitle {
+    font-size: 0.8rem;
+  }
+
+  .edit-breadcrumb {
+    font-size: 0.7rem;
+  }
+
+  .edit-preview-card {
+    padding: 0.75rem;
+    margin-bottom: 1rem;
+  }
+
+  .preview-header {
+    font-size: 0.75rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .preview-image-container {
+    width: 90px;
+    height: 90px;
+  }
+
+  .preview-title {
+    font-size: 0.9rem;
+  }
+
+  .preview-meta-item {
+    font-size: 0.75rem;
+    gap: 0.25rem;
+  }
+
+  .preview-meta-item svg {
+    width: 12px;
+    height: 12px;
+  }
+
+  .gallery-thumb {
+    width: 36px;
+    height: 36px;
+  }
+
+  .gallery-more {
+    width: 36px;
+    height: 36px;
+    font-size: 0.7rem;
+  }
+}

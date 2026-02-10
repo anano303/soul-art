@@ -12,6 +12,8 @@ import {
   Wallet,
   Heart,
   Tag,
+  Gavel,
+  ShoppingBag,
 } from "lucide-react";
 import { Order } from "@/types/order";
 import "./orders-list.css";
@@ -22,13 +24,20 @@ import { DonationModal } from "@/components/donation/DonationModal";
 
 interface OrdersListProps {
   salesManagerMode?: boolean;
+  auctionAdminMode?: boolean;
 }
 
-export function OrdersList({ salesManagerMode = false }: OrdersListProps) {
+export function OrdersList({
+  salesManagerMode = false,
+  auctionAdminMode = false,
+}: OrdersListProps) {
   const [page, setPage] = useState(1);
   const [userRole, setUserRole] = useState<string | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
   const [showDonation, setShowDonation] = useState(false);
+  const [orderTypeTab, setOrderTypeTab] = useState<"regular" | "auction">(
+    auctionAdminMode ? "auction" : "regular",
+  );
 
   useEffect(() => {
     const userData = getUserData();
@@ -46,13 +55,21 @@ export function OrdersList({ salesManagerMode = false }: OrdersListProps) {
   });
 
   const { data, isLoading } = useQuery({
-    queryKey: ["orders", page, userRole, userId, salesManagerMode],
+    queryKey: [
+      "orders",
+      page,
+      userRole,
+      userId,
+      salesManagerMode,
+      auctionAdminMode,
+      orderTypeTab,
+    ],
     queryFn: async () => {
       try {
         // Sales Manager gets orders from their referrals
         if (salesManagerMode) {
           const response = await fetchWithAuth(
-            `/sales-commission/my-commissions?page=${page}&limit=50`
+            `/sales-commission/my-commissions?page=${page}&limit=50`,
           );
           if (!response.ok) {
             console.error("Failed to fetch sales orders:", response.statusText);
@@ -73,7 +90,10 @@ export function OrdersList({ salesManagerMode = false }: OrdersListProps) {
         }
 
         // Backend now handles role-based filtering
-        const response = await fetchWithAuth(`/orders?page=${page}&limit=50`);
+        const orderTypeParam = auctionAdminMode ? "auction" : orderTypeTab;
+        const response = await fetchWithAuth(
+          `/orders?page=${page}&limit=50&orderType=${orderTypeParam}`,
+        );
         if (!response.ok) {
           console.error("Failed to fetch orders:", response.statusText);
           return { items: [], pages: 0 };
@@ -106,11 +126,56 @@ export function OrdersList({ salesManagerMode = false }: OrdersListProps) {
   const orders = data?.items || [];
   const totalPages = data?.pages || 0;
 
+  // შეკვეთის თანხის გამოსათვლელად სელერისა და აუქციონ ადმინისთვის
+  // მიტანის ფასი გამოიკლება რადგან საკომისიო პროდუქტის ფასიდან იანგარიშება, არა მიტანიდან
+  // მიტანის ფასს მომხმარებელი იხდის, მაგრამ სელერს/აუქციონ ადმინს ბალანსიდან აკლდება
+  const getDisplayTotal = (order: Order): number => {
+    const shippingPrice = (order as any).shippingPrice || 0;
+
+    // ადმინისთვის სრული ფასი (მიტანიანად)
+    if (userRole === "admin" && !auctionAdminMode) {
+      return order.totalPrice || 0;
+    }
+
+    // სელერისთვის და აუქციონ ადმინისთვის - გამოაკელი მიტანის ფასი
+    // რადგან საკომისიო პროდუქტის ფასიდან იანგარიშება
+    if (userRole === "seller" || auctionAdminMode) {
+      return (order.totalPrice || 0) - shippingPrice;
+    }
+
+    return order.totalPrice || 0;
+  };
+
   return (
     <div className="orders-container">
       <div className="orders-header">
         <div className="orders-header-left">
           <h1 className="orders-title">Orders</h1>
+          {/* Order type tabs - only show for admin, not for auction_admin or sales manager */}
+          {!auctionAdminMode && !salesManagerMode && userRole === "admin" && (
+            <div className="orders-tabs">
+              <button
+                className={`orders-tab ${orderTypeTab === "regular" ? "active" : ""}`}
+                onClick={() => {
+                  setOrderTypeTab("regular");
+                  setPage(1);
+                }}
+              >
+                <ShoppingBag size={16} />
+                ჩვეულებრივი
+              </button>
+              <button
+                className={`orders-tab ${orderTypeTab === "auction" ? "active" : ""}`}
+                onClick={() => {
+                  setOrderTypeTab("auction");
+                  setPage(1);
+                }}
+              >
+                <Gavel size={16} />
+                აუქციონის
+              </button>
+            </div>
+          )}
         </div>
         {userRole === "seller" && (
           <div className="orders-header-right">
@@ -153,7 +218,12 @@ export function OrdersList({ salesManagerMode = false }: OrdersListProps) {
             <tbody>
               {orders.map((order: Order) => (
                 <tr key={order._id}>
-                  <td>#{order._id}</td>
+                  <td>
+                    #{order._id}
+                    {order.orderType === "auction" && (
+                      <span className="auction-badge">#აუქციონი</span>
+                    )}
+                  </td>
                   <td>
                     {order.user ? (
                       <div className="user-info">
@@ -174,8 +244,31 @@ export function OrdersList({ salesManagerMode = false }: OrdersListProps) {
                     )}
                   </td>
                   <td>
-                    {/* Show seller info from first product */}
-                    {order.orderItems && order.orderItems.length > 0 ? (
+                    {/* Show seller info - for auction orders from auctionId, for regular from orderItems */}
+                    {order.orderType === "auction" &&
+                    order.auctionId?.seller ? (
+                      <Link
+                        href={`/admin/users/${order.auctionId.seller._id}/edit`}
+                        className="seller-info seller-link"
+                      >
+                        <div className="seller-name">
+                          <Gavel className="icon" size={14} />
+                          {order.auctionId.seller.storeName ||
+                            order.auctionId.seller.name ||
+                            "Unknown Artist"}
+                        </div>
+                        {order.auctionId.seller.email && (
+                          <div className="seller-email">
+                            📧 {order.auctionId.seller.email}
+                          </div>
+                        )}
+                        {order.auctionId.seller.phoneNumber && (
+                          <div className="seller-phone">
+                            📞 {order.auctionId.seller.phoneNumber}
+                          </div>
+                        )}
+                      </Link>
+                    ) : order.orderItems && order.orderItems.length > 0 ? (
                       (() => {
                         const firstProductData = order.orderItems[0].productId;
                         if (
@@ -184,7 +277,10 @@ export function OrdersList({ salesManagerMode = false }: OrdersListProps) {
                         ) {
                           const seller = firstProductData.user;
                           return (
-                            <div className="seller-info">
+                            <Link
+                              href={`/admin/users/${seller._id}/edit`}
+                              className="seller-info seller-link"
+                            >
                               <div className="seller-name">
                                 <Store className="icon" size={14} />
                                 {seller.storeName ||
@@ -201,7 +297,7 @@ export function OrdersList({ salesManagerMode = false }: OrdersListProps) {
                                   🏷️ {firstProductData.brand}
                                 </div>
                               )}
-                            </div>
+                            </Link>
                           );
                         }
                         return (
@@ -245,11 +341,18 @@ export function OrdersList({ salesManagerMode = false }: OrdersListProps) {
                   </td>
                   <td>
                     <div className="price-cell">
-                      {order.totalPrice ? order.totalPrice.toFixed(2) : "0.00"} ₾
+                      {/* სელერისთვის და აუქციონ ადმინისთვის რეგიონის მიტანის გარეშე */}
+                      {getDisplayTotal(order).toFixed(2)} ₾
                       {(order as any).hasReferralDiscount && (
-                        <span className="referral-discount-badge" title={`რეფერალ ფასდაკლება: ${((order as any).totalReferralDiscount || 0).toFixed(2)} ₾`}>
-                          <Tag size={12} />
-                          -{((order as any).totalReferralDiscount || 0).toFixed(2)} ₾
+                        <span
+                          className="referral-discount-badge"
+                          title={`რეფერალ ფასდაკლება: ${((order as any).totalReferralDiscount || 0).toFixed(2)} ₾`}
+                        >
+                          <Tag size={12} />-
+                          {((order as any).totalReferralDiscount || 0).toFixed(
+                            2,
+                          )}{" "}
+                          ₾
                         </span>
                       )}
                     </div>
@@ -261,7 +364,7 @@ export function OrdersList({ salesManagerMode = false }: OrdersListProps) {
                         item.productId &&
                         typeof item.productId === "object" &&
                         item.productId.deliveryType &&
-                        String(item.productId.deliveryType) === "SELLER"
+                        String(item.productId.deliveryType) === "SELLER",
                     ) ? (
                       <span className="delivery-badge seller">
                         <Store className="icon" />
@@ -272,7 +375,7 @@ export function OrdersList({ salesManagerMode = false }: OrdersListProps) {
                               item.productId &&
                               typeof item.productId === "object" &&
                               item.productId.deliveryType &&
-                              String(item.productId.deliveryType) === "SELLER"
+                              String(item.productId.deliveryType) === "SELLER",
                           )
                           .map((item, itemIndex) =>
                             item.productId &&
@@ -286,7 +389,7 @@ export function OrdersList({ salesManagerMode = false }: OrdersListProps) {
                                 {item.productId.minDeliveryDays}-
                                 {item.productId.maxDeliveryDays} დღე
                               </span>
-                            ) : null
+                            ) : null,
                           )}
                       </span>
                     ) : (
@@ -330,7 +433,7 @@ export function OrdersList({ salesManagerMode = false }: OrdersListProps) {
                     )}
                   </td>
                   <td className="orders-actions">
-                    {salesManagerMode ? (
+                    {salesManagerMode || auctionAdminMode ? (
                       <span
                         className="view-link disabled"
                         title="დეტალების ნახვა მხოლოდ ადმინისთვისაა ხელმისაწვდომი"

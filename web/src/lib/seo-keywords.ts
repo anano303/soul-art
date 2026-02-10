@@ -696,8 +696,8 @@ const fetchProductKeywordsInternal = cache(async (): Promise<string[]> => {
           registerBooleanKeyword(
             map,
             item.user.artistOpenForCommissions,
-            ["commissions open", "კომისია ღიაა"],
-            ["commissions closed", "კომისია დახურულია"]
+            ["commissions open", "საკომისიო ღიაა"],
+            ["commissions closed", "საკომისიო დახურულია"]
           );
 
           registerKeywordFromNumber(map, item.user.followersCount, "followers");
@@ -827,8 +827,8 @@ const fetchArtistKeywordsInternal = cache(async (): Promise<string[]> => {
         registerBooleanKeyword(
           map,
           artist.artistOpenForCommissions,
-          ["commissions open", "კომისია ღიაა"],
-          ["commissions closed", "კომისია დახურულია"]
+          ["commissions open", "საკომისიო ღიაა"],
+          ["commissions closed", "საკომისიო დახურულია"]
         );
 
         registerKeywordFromNumber(map, artist.followersCount, "followers");

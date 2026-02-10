@@ -15,10 +15,8 @@ const nextConfig: NextConfig = {
       static: 180,
     },
   },
-  // Empty turbopack config to acknowledge Turbopack usage
-  turbopack: {
-    root: __dirname,
-  },
+  // Empty turbopack config to silence warning about webpack config
+  turbopack: {},
   // Optimize compilation
   compiler: {
     removeConsole: process.env.NODE_ENV === "production",

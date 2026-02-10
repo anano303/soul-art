@@ -1,26 +1,20 @@
 "use client";
 
-import { AuthLayout } from "@/modules/auth/layouts/auth-layout";
-import { SellerRegisterForm } from "@/modules/auth/components/seller-register-form";
-import SellerBenefits from "@/components/sellerBenefits/sellerBenefits";
+import { useRouter } from "next/navigation";
+import { SellerRegistrationFlow } from "@/components/auth/SellerRegistrationFlow";
 import styles from "./seller-register.module.css";
-import { useLanguage } from "@/hooks/LanguageContext";
 
 export default function SellerRegisterPage() {
-  const { t } = useLanguage();
+  const router = useRouter();
 
   return (
     <div className={styles.sellerRegisterContainer}>
-      <div className={styles.benefitsSection}>
-        <SellerBenefits />
-      </div>
-      <div className={styles.formSection}>
-        <AuthLayout
-          title={t("auth.sellerWelcome")}
-          subtitle={t("auth.sellerSubtitle")}
-        >
-          <SellerRegisterForm />
-        </AuthLayout>
+      <div id="seller-register-form" className={styles.formSection}>
+        <SellerRegistrationFlow
+          onComplete={() => router.push("/profile")}
+          redirectTo="/profile"
+          showLoginLink={true}
+        />
       </div>
     </div>
   );

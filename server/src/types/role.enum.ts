@@ -5,4 +5,5 @@ export enum Role {
   Blogger = 'blogger',
   SalesManager = 'sales_manager',
   SellerAndSalesManager = 'seller_sales_manager',
+  AuctionAdmin = 'auction_admin',
 }

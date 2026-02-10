@@ -37,7 +37,7 @@ export class UsersController {
 
   @Serialize(PaginatedUsersDto)
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.Admin)
+  @Roles(Role.Admin, Role.AuctionAdmin)
   @Get()
   async getUsers(
     @Query('page') page: string = '1',

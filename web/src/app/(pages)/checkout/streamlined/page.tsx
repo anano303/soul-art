@@ -1,9 +1,20 @@
+import { Suspense } from "react";
 import { StreamlinedCheckout } from "@/modules/checkout/components/streamlined-checkout";
+
+function CheckoutLoading() {
+  return (
+    <div className="flex items-center justify-center min-h-[400px]">
+      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
+    </div>
+  );
+}
 
 export default function StreamlinedCheckoutPage() {
   return (
     <div className="Container">
-      <StreamlinedCheckout />
+      <Suspense fallback={<CheckoutLoading />}>
+        <StreamlinedCheckout />
+      </Suspense>
     </div>
   );
 }

@@ -37,11 +37,6 @@ export function ReferralCodeInput({
     }
   }, []);
 
-  // Don't render if on hidden paths
-  if (shouldHide) {
-    return null;
-  }
-
   const validateAndSaveCode = useCallback(async () => {
     const trimmedCode = code.trim().toUpperCase();
 
@@ -136,6 +131,11 @@ export function ReferralCodeInput({
     setMessage("");
     window.location.reload();
   }, []);
+
+  // Don't render if on hidden paths
+  if (shouldHide) {
+    return null;
+  }
 
   // Don't show if user already has active code (unless they want to change it)
   if (hasActiveCode && !isOpen) {

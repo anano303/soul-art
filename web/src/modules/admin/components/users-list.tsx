@@ -122,7 +122,7 @@ export function UsersList() {
           page,
           search: searchInput,
           role: roleFilter,
-        })
+        }),
       );
     } catch (err) {
       console.error("Failed to persist users list state:", err);
@@ -154,7 +154,7 @@ export function UsersList() {
         roleFilter,
         sortBy,
         sortOrder,
-        isSellerFilter ? activeFilter : undefined
+        isSellerFilter ? activeFilter : undefined,
       ),
     retry: false,
     staleTime: 30 * 1000, // 30 seconds
@@ -200,7 +200,9 @@ export function UsersList() {
 
     if (data?.sellerProductStats) {
       const stats = Object.values(data.sellerProductStats);
-      activeSellers = stats.filter((s: { productCount?: number }) => (s.productCount ?? 0) > 0).length;
+      activeSellers = stats.filter(
+        (s: { productCount?: number }) => (s.productCount ?? 0) > 0,
+      ).length;
     }
 
     // Get total sellers count
@@ -218,7 +220,7 @@ export function UsersList() {
     const activeSalesManagers = data?.summary?.activeSalesManagers ?? 0;
     const inactiveSalesManagers = Math.max(
       0,
-      salesManager - activeSalesManagers
+      salesManager - activeSalesManagers,
     );
 
     // Campaign consent stats
@@ -301,6 +303,7 @@ export function UsersList() {
               <option value={Role.User}>Customers</option>
               <option value={Role.Blogger}>Bloggers</option>
               <option value={Role.SalesManager}>Sales Managers</option>
+              <option value={Role.AuctionAdmin}>Auction Admins</option>
             </select>
           </label>
 
@@ -512,6 +515,11 @@ export function UsersList() {
                       <span className="usr-badge-sales">
                         <TrendingUp className="usr-icon" />
                         Sales Manager
+                      </span>
+                    ) : user.role === Role.AuctionAdmin ? (
+                      <span className="usr-badge-auction-admin">
+                        <ShieldCheck className="usr-icon" />
+                        Auction Admin
                       </span>
                     ) : (
                       <span className="usr-badge">

@@ -42,6 +42,7 @@ import { SellerRegisterDto } from '../dtos/seller-register.dto';
 import { SalesManagerRegisterDto } from '../dtos/sales-manager-register.dto';
 import { BecomeSellerDto } from '../dtos/become-seller.dto';
 import { GoogleAuthGuard } from '@/guards/google-oauth.guard';
+import { FacebookAuthGuard } from '@/guards/facebook-oauth.guard';
 import { ForgotPasswordDto } from '../dtos/forgot-password.dto';
 import { ResetPasswordDto } from '../dtos/reset-password.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -182,38 +183,164 @@ export class AuthController {
   @UseGuards(GoogleAuthGuard)
   async googleAuthRedirect(@Req() req, @Res() res: Response) {
     try {
-      console.log('🔍 Google OAuth callback received');
-      const { tokens, user } = await this.authService.singInWithGoogle({
+      const result = await this.authService.singInWithGoogle({
         email: req.user.email,
         name: req.user.name || 'Google User',
         id: req.user.id,
+        sellerMode: req.user.sellerMode,
       });
-      console.log('✅ Google auth successful, setting HTTP-only cookies');
-      console.log('🍪 Setting cookies with config:', cookieConfig);
 
-      // Set HTTP-only cookies instead of URL hash tokens
+      // Set HTTP-only cookies
       res.cookie(
         cookieConfig.access.name,
-        tokens.accessToken,
+        result.tokens.accessToken,
         cookieConfig.access.options,
       );
       res.cookie(
         cookieConfig.refresh.name,
-        tokens.refreshToken,
+        result.tokens.refreshToken,
         cookieConfig.refresh.options,
       );
 
-      console.log(
-        '🔄 Redirecting to:',
-        `${process.env.ALLOWED_ORIGINS}/auth-callback?success=true`,
-      );
+      // If popup mode, redirect to auth-popup-callback on the website domain
+      // This ensures localStorage and postMessage work on the same origin as the opener
+      if (req.user.popup) {
+        const params = new URLSearchParams({
+          success: 'true',
+          isNewUser: String(result.isNewUser),
+          isSeller: String(result.isSeller),
+          needsSellerRegistration: String(result.needsSellerRegistration),
+        });
+        return res.redirect(`${process.env.ALLOWED_ORIGINS}/auth-popup-callback?${params.toString()}`);
+      }
 
-      // Redirect to auth callback page with success parameter
-      res.redirect(`${process.env.ALLOWED_ORIGINS}/auth-callback?success=true`);
+      // Standard redirect flow - always go through auth-callback
+      // The callback page will fetch user data and then redirect appropriately
+      // This is necessary because cookies set here (localhost:4000) aren't visible
+      // to Next.js middleware (localhost:3000) in development
+      const params = new URLSearchParams({
+        success: 'true',
+        isSeller: String(result.isSeller),
+        needsSellerRegistration: String(result.needsSellerRegistration),
+      });
+
+      res.redirect(`${process.env.ALLOWED_ORIGINS}/auth-callback?${params.toString()}`);
     } catch (error) {
       console.error('❌ Google auth error:', error);
+      
+      // Handle popup error - redirect to callback page with error
+      if (req.user?.popup) {
+        return res.redirect(`${process.env.ALLOWED_ORIGINS}/auth-popup-callback?error=auth_failed`);
+      }
+      
       res.redirect(`${process.env.ALLOWED_ORIGINS}/login?error=auth_failed`);
     }
+  }
+
+  @Get('facebook')
+  @UseGuards(FacebookAuthGuard)
+  async facebookAuthInit() {}
+
+  @Get('facebook/callback')
+  @UseGuards(FacebookAuthGuard)
+  async facebookAuthRedirect(@Req() req, @Res() res: Response) {
+    try {
+      console.log('🔍 Facebook OAuth callback received');
+      console.log('📦 User data from Facebook:', { 
+        email: req.user.email, 
+        sellerMode: req.user.sellerMode 
+      });
+      
+      const result = await this.authService.signInWithFacebookOAuth({
+        email: req.user.email,
+        name: req.user.name || 'Facebook User',
+        facebookId: req.user.facebookId,
+        avatar: req.user.avatar,
+        sellerMode: req.user.sellerMode,
+      });
+      console.log('✅ Facebook auth successful, setting HTTP-only cookies');
+
+      // Set HTTP-only cookies
+      res.cookie(
+        cookieConfig.access.name,
+        result.tokens.accessToken,
+        cookieConfig.access.options,
+      );
+      res.cookie(
+        cookieConfig.refresh.name,
+        result.tokens.refreshToken,
+        cookieConfig.refresh.options,
+      );
+
+      // Always redirect through auth-callback for consistent behavior
+      // The callback page will fetch user data and redirect appropriately
+      const params = new URLSearchParams({
+        success: 'true',
+        isSeller: String(result.isSeller),
+        needsSellerRegistration: String(result.needsSellerRegistration),
+      });
+      
+      console.log('🔄 Redirecting to:', `${process.env.ALLOWED_ORIGINS}/auth-callback?${params.toString()}`);
+
+      res.redirect(`${process.env.ALLOWED_ORIGINS}/auth-callback?${params.toString()}`);
+    } catch (error) {
+      console.error('❌ Facebook auth error:', error);
+      res.redirect(`${process.env.ALLOWED_ORIGINS}/login?error=auth_failed`);
+    }
+  }
+
+  @Post('facebook')
+  @ApiOperation({ summary: 'Login or register with Facebook (SDK method)' })
+  @ApiResponse({
+    status: 200,
+    description: 'Successfully authenticated with Facebook',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Invalid Facebook token',
+  })
+  async facebookAuth(
+    @Body()
+    body: {
+      accessToken: string;
+      userId: string;
+      email?: string;
+      name: string;
+      picture?: string;
+    },
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    console.log('🔍 Facebook authentication received');
+
+    const deviceInfo = {
+      fingerprint: this.generateDeviceFingerprint(req),
+      userAgent: req.headers['user-agent'],
+    };
+
+    const { tokens, user } = await this.authService.signInWithFacebook(
+      body,
+      deviceInfo,
+    );
+
+    console.log('✅ Facebook auth successful, setting HTTP-only cookies');
+
+    // Set HTTP-only cookies
+    res.cookie(
+      cookieConfig.access.name,
+      tokens.accessToken,
+      cookieConfig.access.options,
+    );
+    res.cookie(
+      cookieConfig.refresh.name,
+      tokens.refreshToken,
+      cookieConfig.refresh.options,
+    );
+
+    return {
+      success: true,
+      user,
+    };
   }
 
   @Post('logout')
@@ -396,7 +523,14 @@ export class AuthController {
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.Admin, Role.User, Role.Seller, Role.Blogger, Role.SalesManager)
+  @Roles(
+    Role.Admin,
+    Role.User,
+    Role.Seller,
+    Role.Blogger,
+    Role.SalesManager,
+    Role.AuctionAdmin,
+  )
   @Put('profile')
   async updateProfile(
     @CurrentUser() user: UserDocument,
@@ -410,7 +544,7 @@ export class AuthController {
         return obj;
       }, {});
 
-    // Check if the update contains seller-specific fields
+    // Check if the update contains seller-specific fields (bank details, etc.)
     const hasSellerFields = [
       'storeName',
       'phoneNumber',
@@ -419,11 +553,13 @@ export class AuthController {
       'beneficiaryBankCode',
     ].some((field) => field in filteredDto);
 
-    // Only allow updating seller/sales-manager fields if the user is a seller or sales manager
+    // Only allow updating seller/sales-manager/auction-admin fields if the user has appropriate role
     if (
       hasSellerFields &&
       user.role !== Role.Seller &&
-      user.role !== Role.SalesManager
+      user.role !== Role.SalesManager &&
+      user.role !== Role.AuctionAdmin &&
+      user.role !== Role.SellerAndSalesManager
     ) {
       const sellerFields = [
         'storeName',
@@ -434,7 +570,7 @@ export class AuthController {
       ].filter((field) => field in filteredDto);
 
       throw new BadRequestException(
-        `Only sellers and sales managers can update the following fields: ${sellerFields.join(', ')}`,
+        `Only sellers, sales managers, and auction admins can update the following fields: ${sellerFields.join(', ')}`,
       );
     }
 

@@ -220,6 +220,47 @@ async function getSubCategories() {
   }
 }
 
+// აუქციონების მოტანა - დინამიური SEO-სთვის
+async function getAuctions() {
+  try {
+    const apiUrl =
+      process.env.NEXT_PUBLIC_API_URL || "https://api.soulart.ge/v1";
+    // Fetch active and ended auctions for sitemap
+    const response = await fetch(
+      `${apiUrl}/auctions?status=ACTIVE,ENDED,SCHEDULED&limit=500`,
+      {
+        next: { revalidate: 1800 }, // 30 წუთი cache - აუქციონები ხშირად იცვლება
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+      },
+    );
+
+    if (!response.ok) {
+      console.error("Failed to fetch auctions for sitemap", response.status);
+      return [];
+    }
+
+    const data = await response.json();
+    if (Array.isArray(data)) {
+      return data;
+    }
+    if (data && Array.isArray(data.auctions)) {
+      return data.auctions;
+    }
+    if (data && Array.isArray(data.items)) {
+      return data.items;
+    }
+
+    console.warn("Unexpected auctions response format:", data);
+    return [];
+  } catch (error) {
+    console.error("Error fetching auctions for sitemap:", error);
+    return [];
+  }
+}
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl =
     process.env.NEXT_PUBLIC_PRODUCTION_URL || "https://soulart.ge";
@@ -269,10 +310,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.7,
     },
     {
-      url: `${baseUrl}/auction`,
+      url: `${baseUrl}/auctions`,
       lastModified: new Date(),
-      changeFrequency: "monthly" as const,
-      priority: 0.6,
+      changeFrequency: "hourly" as const,
+      priority: 0.9,
     },
     // referral-info დროებით დაკომენტარებული
     // {
@@ -324,6 +365,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.4,
     },
     {
+      url: `${baseUrl}/become-seller`,
+      lastModified: new Date(),
+      changeFrequency: "monthly" as const,
+      priority: 0.6,
+    },
+    {
       url: `${baseUrl}/sellers-register`,
       lastModified: new Date(),
       changeFrequency: "monthly" as const,
@@ -351,6 +398,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       artists,
       blogPosts,
       subCategories,
+      auctions,
     ] = await Promise.all([
       getProducts(),
       getCategories(),
@@ -358,6 +406,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       getArtists(),
       getBlogPosts(),
       getSubCategories(),
+      getAuctions(),
     ]);
 
     // პროდუქტების გვერდები
@@ -453,6 +502,38 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         }),
       );
 
+    // აუქციონების გვერდები - დინამიური მონაცემებით
+    const auctionPages = auctions
+      .filter((auction: any) => auction && auction._id)
+      .map(
+        (auction: {
+          _id: string;
+          title?: string;
+          description?: string;
+          status?: string;
+          updatedAt?: string;
+          createdAt?: string;
+          endDate?: string;
+        }) => {
+          // აქტიური აუქციონები უფრო ხშირად უნდა განახლდეს
+          const isActive = auction.status === "ACTIVE";
+          const isScheduled = auction.status === "SCHEDULED";
+
+          return {
+            url: `${baseUrl}/auctions/${auction._id}`,
+            lastModified: new Date(
+              auction.updatedAt || auction.createdAt || new Date(),
+            ),
+            changeFrequency: isActive
+              ? ("hourly" as const)
+              : isScheduled
+                ? ("daily" as const)
+                : ("weekly" as const),
+            priority: isActive ? 0.95 : isScheduled ? 0.85 : 0.7,
+          };
+        },
+      );
+
     return [
       ...staticPages,
       ...productPages,
@@ -461,6 +542,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       ...artistPages,
       ...forumPages,
       ...blogPages,
+      ...auctionPages,
     ];
   } catch (error) {
     console.error("Error generating sitemap:", error);

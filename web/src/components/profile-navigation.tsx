@@ -4,13 +4,14 @@ import { useLanguage } from "@/hooks/LanguageContext";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/hooks/use-auth";
-import { 
-  User, 
-  ShoppingBag, 
-  Wallet, 
+import {
+  User,
+  ShoppingBag,
+  Wallet,
   Smartphone,
   MapPin,
-  Gavel
+  Gavel,
+  Trophy,
 } from "lucide-react";
 
 const profileNavItems = [
@@ -21,10 +22,10 @@ const profileNavItems = [
     labelKey: "profileNav.profile",
   },
   {
-    key: 'addresses',
-    href: '/profile/addresses',
+    key: "addresses",
+    href: "/profile/addresses",
     icon: MapPin,
-    labelKey: 'profileNav.addresses'
+    labelKey: "profileNav.addresses",
   },
   {
     key: "orders",
@@ -33,24 +34,30 @@ const profileNavItems = [
     labelKey: "profileNav.orders",
   },
   {
+    key: "won-auctions",
+    href: "/profile/won-auctions",
+    icon: Trophy,
+    labelKey: "profileNav.wonAuctions",
+  },
+  {
     key: "balance",
     href: "/profile/balance",
     icon: Wallet,
     labelKey: "profileNav.balance",
-    requiresRole: "SELLER",
-  },
-  {
-    key: "devices",
-    href: "/profile/devices",
-    icon: Smartphone,
-    labelKey: "profileNav.devices",
+    requiresRole: "seller",
   },
   {
     key: "auctions",
     href: "/profile/auctions",
     icon: Gavel,
     labelKey: "profileNav.auctions",
-    requiresRole: "SELLER",
+    requiresRole: "seller",
+  },
+  {
+    key: "devices",
+    href: "/profile/devices",
+    icon: Smartphone,
+    labelKey: "profileNav.devices",
   },
 ];
 
@@ -60,7 +67,9 @@ export function ProfileNavigation() {
   const { user } = useAuth();
 
   const filteredNavItems = profileNavItems.filter(
-    (item) => !item.requiresRole || user?.role === item.requiresRole
+    (item) =>
+      !item.requiresRole ||
+      user?.role?.toLowerCase() === item.requiresRole.toLowerCase(),
   );
 
   return (
@@ -101,13 +110,22 @@ export function MobileProfileNavigation() {
   const { user } = useAuth();
 
   const filteredNavItems = profileNavItems.filter(
-    (item) => !item.requiresRole || user?.role === item.requiresRole
+    (item) =>
+      !item.requiresRole ||
+      user?.role?.toLowerCase() === item.requiresRole.toLowerCase(),
   );
 
   return (
-    <div className="lg:hidden mb-6 sticky top-16 z-[1000]">
+    <div
+      className="lg:hidden mb-6 sticky top-16 z-[1000] w-full -mx-4 px-0"
+      style={{
+        marginLeft: "-1rem",
+        marginRight: "-1rem",
+        width: "calc(100% + 2rem)",
+      }}
+    >
       <div className="bg-white border-b border-gray-200">
-        <div className="flex overflow-x-auto">
+        <div className="flex overflow-x-auto scrollbar-hide">
           {filteredNavItems.map((item) => {
             const Icon = item.icon;
             const isActive = pathname === item.href;

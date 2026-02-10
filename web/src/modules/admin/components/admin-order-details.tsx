@@ -31,6 +31,15 @@ export function AdminOrderDetails({ order }: AdminOrderDetailsProps) {
   // Check user role to determine what information to show
   const userData = getUserData();
   const isAdmin = userData?.role === Role.Admin;
+  const isSeller = userData?.role === Role.Seller;
+  const userId = userData?._id;
+
+  // სელერისთვის totalPrice - shippingPrice (მიტანის გარეშე)
+  // რადგან საკომისიო პროდუქტის ფასიდან იანგარიშება
+  const getSellerDisplayTotal = (): number => {
+    const shippingPrice = order.shippingPrice || 0;
+    return (order.totalPrice || 0) - shippingPrice;
+  };
 
   // Fetch all colors for proper nameEn support
   const { data: availableColors = [] } = useQuery<Color[]>({
@@ -56,7 +65,7 @@ export function AdminOrderDetails({ order }: AdminOrderDetailsProps) {
     queryFn: async () => {
       try {
         const response = await fetchWithAuth(
-          "/categories/attributes/age-groups"
+          "/categories/attributes/age-groups",
         );
         if (!response.ok) {
           return [];
@@ -77,7 +86,7 @@ export function AdminOrderDetails({ order }: AdminOrderDetailsProps) {
     if (language === "en") {
       // Find the color in availableColors to get its English name
       const colorObj = availableColors.find(
-        (color) => color.name === colorName
+        (color) => color.name === colorName,
       );
       return colorObj?.nameEn || colorName;
     }
@@ -89,7 +98,7 @@ export function AdminOrderDetails({ order }: AdminOrderDetailsProps) {
     if (language === "en") {
       // Find the age group in availableAgeGroups to get its English name
       const ageGroupObj = availableAgeGroups.find(
-        (ageGroup) => ageGroup.name === ageGroupName
+        (ageGroup) => ageGroup.name === ageGroupName,
       );
       return ageGroupObj?.nameEn || ageGroupName;
     }
@@ -103,11 +112,11 @@ export function AdminOrderDetails({ order }: AdminOrderDetailsProps) {
 
   // Group order items by delivery type with fixed logic for string comparison
   const sellerDeliveryItems = order.orderItems.filter(
-    (item) => item.product && String(item.product.deliveryType) === "SELLER"
+    (item) => item.product && String(item.product.deliveryType) === "SELLER",
   );
 
   const soulartDeliveryItems = order.orderItems.filter(
-    (item) => !item.product || String(item.product.deliveryType) !== "SELLER"
+    (item) => !item.product || String(item.product.deliveryType) !== "SELLER",
   );
 
   const shippingSummary = [
@@ -138,13 +147,13 @@ export function AdminOrderDetails({ order }: AdminOrderDetailsProps) {
           productIds.map(async (productId) => {
             try {
               const response = await fetchWithAuth(
-                `/products/${productId}/seller`
+                `/products/${productId}/seller`,
               );
 
               // Handle 404 specifically to indicate endpoint not implemented
               if (response.status === 404) {
                 console.log(
-                  `Seller endpoint not available for product ${productId} (404 Not Found)`
+                  `Seller endpoint not available for product ${productId} (404 Not Found)`,
                 );
                 return { productId, seller: null, endpointMissing: true };
               }
@@ -159,11 +168,11 @@ export function AdminOrderDetails({ order }: AdminOrderDetailsProps) {
             } catch (error) {
               console.error(
                 `Error fetching seller info for product ${productId}:`,
-                error
+                error,
               );
               return { productId, seller: null };
             }
-          })
+          }),
         );
 
         return sellerData;
@@ -198,7 +207,7 @@ export function AdminOrderDetails({ order }: AdminOrderDetailsProps) {
               ? order.guestInfo?.fullName
               : order.user?.ownerFirstName || order.user?.email,
             message: `🎉 თქვენი შეკვეთა #${order._id.slice(
-              -6
+              -6,
             )} წარმატებით მიღებულია!`,
           }),
         });
@@ -206,7 +215,7 @@ export function AdminOrderDetails({ order }: AdminOrderDetailsProps) {
       } catch (notificationError) {
         console.error(
           "❌ Failed to send delivery notification:",
-          notificationError
+          notificationError,
         );
       }
 
@@ -348,15 +357,15 @@ export function AdminOrderDetails({ order }: AdminOrderDetailsProps) {
               order.status === "cancelled"
                 ? "cancelled"
                 : order.status === "paid" || order.isPaid
-                ? "paid"
-                : "pending"
+                  ? "paid"
+                  : "pending"
             }`}
           >
             {order.status === "cancelled"
               ? t("adminOrders.cancelled")
               : order.status === "paid" || order.isPaid
-              ? t("adminOrders.paid")
-              : t("adminOrders.pendingPayment")}
+                ? t("adminOrders.paid")
+                : t("adminOrders.pendingPayment")}
           </span>
           {(order.status === "paid" || order.isPaid) &&
             !order.isDelivered &&
@@ -440,8 +449,8 @@ export function AdminOrderDetails({ order }: AdminOrderDetailsProps) {
                 order.status === "cancelled"
                   ? "cancelled"
                   : order.status === "paid" || order.isPaid
-                  ? "success"
-                  : "error"
+                    ? "success"
+                    : "error"
               }`}
             >
               {order.status === "cancelled" ? (
@@ -457,10 +466,10 @@ export function AdminOrderDetails({ order }: AdminOrderDetailsProps) {
                       reason: order.statusReason || "Unknown reason",
                     })
                   : order.status === "paid" || order.isPaid
-                  ? t("adminOrders.paidOn", {
-                      date: new Date(order.paidAt!).toLocaleDateString(),
-                    })
-                  : t("adminOrders.notPaid")}
+                    ? t("adminOrders.paidOn", {
+                        date: new Date(order.paidAt!).toLocaleDateString(),
+                      })
+                    : t("adminOrders.notPaid")}
               </span>
             </div>
           </div>
@@ -469,7 +478,38 @@ export function AdminOrderDetails({ order }: AdminOrderDetailsProps) {
             <div className="card">
               <h2>{t("adminOrders.sellerInfo")}</h2>
 
-              {isLoadingSellerInfo ? (
+              {/* For auction orders, show seller from auctionId */}
+              {order.orderType === "auction" && order.auctionId?.seller ? (
+                <div className="seller-info">
+                  <div className="seller-details-grid">
+                    {/* Seller info */}
+                    {order.auctionId.seller.storeName && (
+                      <p>
+                        <strong>{t("adminOrders.storeName")}:</strong>{" "}
+                        {order.auctionId.seller.storeName}
+                      </p>
+                    )}
+                    {order.auctionId.seller.name && (
+                      <p>
+                        <strong>{t("adminOrders.ownerName")}:</strong>{" "}
+                        {order.auctionId.seller.name}
+                      </p>
+                    )}
+                    {order.auctionId.seller.email && (
+                      <p>
+                        <strong>{t("adminOrders.sellerEmail")}:</strong>{" "}
+                        {order.auctionId.seller.email}
+                      </p>
+                    )}
+                    {order.auctionId.seller.phoneNumber && (
+                      <p>
+                        <strong>{t("adminOrders.sellerPhone")}:</strong>{" "}
+                        {order.auctionId.seller.phoneNumber}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              ) : isLoadingSellerInfo ? (
                 <div className="loading-state">
                   <p>{t("adminOrders.loading")}</p>
                 </div>
@@ -489,7 +529,7 @@ export function AdminOrderDetails({ order }: AdminOrderDetailsProps) {
                       ? item.productId
                       : item.productId._id;
                   const productSellerInfo = sellerInfo.find(
-                    (info) => info.productId === productId
+                    (info) => info.productId === productId,
                   )?.seller;
 
                   return (
@@ -555,7 +595,7 @@ export function AdminOrderDetails({ order }: AdminOrderDetailsProps) {
                                             target.style.display = "none";
                                             const fallback =
                                               target.parentElement?.querySelector(
-                                                ".avatar-fallback"
+                                                ".avatar-fallback",
                                               ) as HTMLElement;
                                             if (fallback)
                                               fallback.style.display = "flex";
@@ -629,7 +669,7 @@ export function AdminOrderDetails({ order }: AdminOrderDetailsProps) {
                                             target.style.display = "none";
                                             const fallback =
                                               target.parentElement?.querySelector(
-                                                ".avatar-fallback"
+                                                ".avatar-fallback",
                                               ) as HTMLElement;
                                             if (fallback)
                                               fallback.style.display = "flex";
@@ -733,7 +773,7 @@ export function AdminOrderDetails({ order }: AdminOrderDetailsProps) {
                                               target.style.display = "none";
                                               const fallback =
                                                 target.parentElement?.querySelector(
-                                                  ".avatar-fallback"
+                                                  ".avatar-fallback",
                                                 ) as HTMLElement;
                                               if (fallback)
                                                 fallback.style.display = "flex";
@@ -747,7 +787,7 @@ export function AdminOrderDetails({ order }: AdminOrderDetailsProps) {
                                       className="avatar-fallback"
                                       style={{
                                         display: getSellerImage(
-                                          productSellerInfo
+                                          productSellerInfo,
                                         )
                                           ? "none"
                                           : "flex",
@@ -1005,21 +1045,32 @@ export function AdminOrderDetails({ order }: AdminOrderDetailsProps) {
               <span>{t("adminOrders.items")}</span>
               <span>₾{order.itemsPrice.toFixed(2)}</span>
             </div>
-            <div className="summary-item">
-              <span>{t("adminOrders.shipping")}</span>
-              <span>
-                {order.shippingPrice === 0
-                  ? t("cart.free")
-                  : `₾${order.shippingPrice.toFixed(2)}`}
-              </span>
-            </div>
-            <div className="summary-item">
-              <span>{t("adminOrders.tax")}</span>
-              <span>₾{order.taxPrice.toFixed(2)}</span>
-            </div>
+            {/* სელერისთვის მიტანა და გადასახადი არ ჩანს */}
+            {!isSeller && (
+              <>
+                <div className="summary-item">
+                  <span>{t("adminOrders.shipping")}</span>
+                  <span>
+                    {order.shippingPrice === 0
+                      ? t("cart.free")
+                      : `₾${order.shippingPrice.toFixed(2)}`}
+                  </span>
+                </div>
+                <div className="summary-item">
+                  <span>{t("adminOrders.tax")}</span>
+                  <span>₾{order.taxPrice.toFixed(2)}</span>
+                </div>
+              </>
+            )}
             <div className="summary-total">
               <span>{t("adminOrders.total")}</span>
-              <span>₾{order.totalPrice.toFixed(2)}</span>
+              {/* სელერისთვის totalPrice - shippingPrice */}
+              <span>
+                ₾
+                {isSeller
+                  ? getSellerDisplayTotal().toFixed(2)
+                  : order.totalPrice.toFixed(2)}
+              </span>
             </div>
           </div>
         </div>

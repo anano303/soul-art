@@ -1,32 +1,19 @@
 "use client";
 
+import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
-import { CreateAuctionForm } from "@/modules/auctions/components/create-auction-form";
-import { useLanguage } from "@/hooks/LanguageContext";
-import "../admin-auctions.css";
 
+// This page redirects to the unified /auctions/create page
 export default function AdminCreateAuctionPage() {
-  const { t } = useLanguage();
   const router = useRouter();
 
+  useEffect(() => {
+    router.replace("/auctions/create");
+  }, [router]);
+
   return (
-    <div className="admin-auctions-container" style={{ maxWidth: "960px" }}>
-      <div className="admin-auctions-header" style={{ marginBottom: "1.5rem" }}>
-        <h1 className="admin-auctions-title">
-          {t("admin.auctionsCreate.title")}
-        </h1>
-        <p className="admin-auctions-subtitle">
-          {t("admin.auctionsCreate.subtitle")}
-        </p>
-        <Link href="/admin/auctions" className="admin-back-link">
-          ← {t("admin.auctionsCreate.back")}
-        </Link>
-      </div>
-      <CreateAuctionForm
-        mode="admin"
-        onSuccess={() => router.push("/admin/auctions")}
-      />
+    <div className="flex items-center justify-center min-h-[50vh]">
+      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
     </div>
   );
 }

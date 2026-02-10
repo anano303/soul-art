@@ -202,3 +202,30 @@ export function useSalesManagerRegister() {
     },
   });
 }
+
+// Facebook authentication data type
+export interface FacebookAuthData {
+  accessToken: string;
+  userId: string;
+  email?: string;
+  name: string;
+  picture?: string;
+}
+
+// Facebook auth hook
+export function useFacebookAuth() {
+  return useMutation<AuthResponse, Error, FacebookAuthData>({
+    mutationFn: async (data: FacebookAuthData) => {
+      try {
+        const response = await apiClient.post<AuthResponse>(
+          "/auth/facebook",
+          data
+        );
+        return response.data;
+      } catch (error) {
+        const errorMessage = extractErrorMessage(error);
+        throw new Error(errorMessage);
+      }
+    },
+  });
+}

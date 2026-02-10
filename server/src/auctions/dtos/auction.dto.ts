@@ -65,13 +65,27 @@ export class CreateAuctionDto {
   @Matches(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/) // HH:MM format
   endTime: string;
 
+  @IsString()
+  @IsOptional()
+  deliveryType?: string; // SOULART or ARTIST
+
   @IsNumber()
   @Min(1)
-  deliveryDays: number;
+  deliveryDaysMin: number;
+
+  @IsNumber()
+  @Min(1)
+  deliveryDaysMax: number;
 
   @IsString()
   @MaxLength(200)
-  deliveryInfo: string;
+  @IsOptional()
+  deliveryInfo?: string;
+
+  // Optional sellerId - used by AuctionAdmin to create auction for a seller
+  @IsOptional()
+  @IsMongoId()
+  sellerId?: string;
 }
 
 export class PlaceBidDto {
@@ -116,6 +130,10 @@ export class AuctionFilterDto {
   material?: string;
 
   @IsOptional()
+  @IsString()
+  dimensions?: string;
+
+  @IsOptional()
   @IsNumber()
   @Type(() => Number)
   page?: number = 1;
@@ -132,3 +150,51 @@ export class AdminCreateAuctionDto extends CreateAuctionDto {
 }
 
 export class RescheduleAuctionDto extends CreateAuctionDto {}
+
+// Winner payment DTO
+export class WinnerPaymentDto {
+  @IsString()
+  @IsEnum(['TBILISI', 'REGION'])
+  deliveryZone: 'TBILISI' | 'REGION';
+}
+
+// Shipping address for auction checkout
+export class AuctionShippingAddressDto {
+  @IsString()
+  @IsOptional()
+  address?: string;
+
+  @IsString()
+  @IsOptional()
+  city?: string;
+
+  @IsString()
+  @IsOptional()
+  postalCode?: string;
+
+  @IsString()
+  @IsOptional()
+  country?: string;
+
+  @IsString()
+  @IsOptional()
+  phoneNumber?: string;
+}
+
+// BOG Payment initialization DTO
+export class InitializeBogPaymentDto {
+  @IsString()
+  @IsEnum(['TBILISI', 'REGION'])
+  deliveryZone: 'TBILISI' | 'REGION';
+
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => AuctionShippingAddressDto)
+  shippingAddress?: AuctionShippingAddressDto;
+}
+
+// Delivery fee constants
+export const DELIVERY_FEES = {
+  TBILISI: 0,
+  REGION: 18,
+} as const;

@@ -36,6 +36,17 @@ export class User {
 
   @Prop({ type: String, enum: Role, default: Role.User })
   role: Role;
+
+  // OAuth provider IDs
+  @Prop({ type: String, default: null })
+  googleId?: string | null;
+
+  @Prop({ type: String, default: null })
+  facebookId?: string | null;
+
+  @Prop({ type: String, default: null })
+  avatar?: string | null;
+
   @Prop()
   createdAt?: Date;
 
@@ -178,6 +189,19 @@ export class User {
 
   @Prop({ type: Date, default: null })
   lastWithdrawalReset?: Date; // ბოლო თვიური რესეტის თარიღი
+
+  // Auction Admin fields
+  @Prop({ type: Number, default: 0 })
+  auctionAdminBalance?: number; // Available balance for withdrawal
+
+  @Prop({ type: Number, default: 0 })
+  auctionAdminPendingWithdrawal?: number; // Pending withdrawal amount
+
+  @Prop({ type: Number, default: 0 })
+  auctionAdminTotalEarnings?: number; // Total earned from auctions
+
+  @Prop({ type: Number, default: 0 })
+  auctionAdminTotalWithdrawn?: number; // Total amount withdrawn
 
   // Artist profile enhancements
   @Prop({ type: String, unique: true, sparse: true, index: true })

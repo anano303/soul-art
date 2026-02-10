@@ -204,7 +204,7 @@ ${window.location.origin}`;
             <p className="cta-description">{t("referral.cta.description")}</p>
             <div className="cta-buttons">
               <Link
-                href="/sellers-register#seller-register-form"
+                href="/sellers-register"
                 className="btn btn-primary"
               >
                 {t("referral.cta.sellerRegister")}

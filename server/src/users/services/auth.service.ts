@@ -66,6 +66,7 @@ export class AuthService {
       name: string;
       id: string;
       sub?: string;
+      sellerMode?: boolean;
     },
     deviceInfo?: {
       fingerprint?: string;
@@ -77,27 +78,186 @@ export class AuthService {
     const email = googleData.email.toLowerCase();
 
     let existUser = await this.userModel.findOne({ email });
+    let isNewUser = false;
 
     console.log('🆕 ახალი მომხმარებლის რეგისტრაცია Google-ით:', googleData);
 
     if (!existUser) {
+      // Create as regular user - seller registration requires additional fields
       const newUser = new this.userModel({
         email,
         name: googleData.name || 'Google User',
-        googleId: googleData.id || googleData.sub, // Google ID უნდა შევინახოთ
-        role: Role.User,
+        googleId: googleData.id || googleData.sub,
+        role: Role.User, // Always create as User first
       });
 
-      await newUser.save(); // ⬅️ აქამდე უკვე აქვს googleId მნიშვნელობა, ამიტომ password არ ითვლება required
-
+      await newUser.save();
       existUser = newUser;
+      isNewUser = true;
       console.log('✅ ახალი მომხმარებელი წარმატებით დაემატა:', existUser);
     }
 
     const { tokens, user: userData } = await this.login(existUser, deviceInfo);
 
     console.log('✅ გენერირებული access_token და refresh_token:', tokens);
-    return { tokens, user: userData };
+    
+    const needsSellerRegistration = googleData.sellerMode && existUser.role !== Role.Seller;
+    const isSeller = existUser.role === Role.Seller;
+    
+    console.log('📊 Auth Result - sellerMode:', googleData.sellerMode);
+    console.log('📊 Auth Result - user role:', existUser.role);
+    console.log('📊 Auth Result - needsSellerRegistration:', needsSellerRegistration);
+    console.log('📊 Auth Result - isSeller:', isSeller);
+    
+    return { 
+      tokens, 
+      user: userData,
+      isNewUser,
+      needsSellerRegistration,
+      isSeller,
+    };
+  }
+
+  async signInWithFacebook(
+    facebookData: {
+      accessToken: string;
+      userId: string;
+      email?: string;
+      name: string;
+      picture?: string;
+    },
+    deviceInfo?: {
+      fingerprint?: string;
+      userAgent?: string;
+      trusted?: boolean;
+    },
+  ) {
+    // Verify the token with Facebook Graph API
+    const verifyUrl = `https://graph.facebook.com/me?fields=id,name,email,picture&access_token=${facebookData.accessToken}`;
+
+    try {
+      const response = await fetch(verifyUrl);
+      const fbUser = await response.json();
+
+      if (!fbUser.id || fbUser.id !== facebookData.userId) {
+        throw new UnauthorizedException('Invalid Facebook token');
+      }
+
+      // Use email from Facebook response if available, otherwise from client
+      const email = (fbUser.email || facebookData.email || '').toLowerCase();
+
+      if (!email) {
+        throw new BadRequestException(
+          'Facebook account must have an email address. Please grant email permission or use another method.',
+        );
+      }
+
+      console.log('🆕 Facebook authentication:', {
+        id: fbUser.id,
+        name: fbUser.name,
+        email,
+      });
+
+      let existUser = await this.userModel.findOne({ email });
+
+      if (!existUser) {
+        // Create new user with Facebook data
+        const newUser = new this.userModel({
+          email,
+          name: fbUser.name || facebookData.name || 'Facebook User',
+          facebookId: fbUser.id,
+          avatar: fbUser.picture?.data?.url || facebookData.picture,
+          role: Role.User,
+        });
+
+        await newUser.save();
+        existUser = newUser;
+        console.log('✅ New user created via Facebook:', existUser.email);
+      } else if (!existUser.facebookId) {
+        // Link Facebook account to existing user
+        existUser.facebookId = fbUser.id;
+        if (!existUser.avatar && (fbUser.picture?.data?.url || facebookData.picture)) {
+          existUser.avatar = fbUser.picture?.data?.url || facebookData.picture;
+        }
+        await existUser.save();
+        console.log('✅ Facebook account linked to existing user:', existUser.email);
+      }
+
+      const { tokens, user: userData } = await this.login(existUser, deviceInfo);
+
+      console.log('✅ Facebook authentication successful');
+      return { tokens, user: userData };
+    } catch (error) {
+      if (error instanceof UnauthorizedException || error instanceof BadRequestException) {
+        throw error;
+      }
+      console.error('Facebook verification failed:', error);
+      throw new UnauthorizedException('Facebook authentication failed');
+    }
+  }
+
+  /**
+   * Sign in with Facebook using Passport.js OAuth flow (similar to Google)
+   */
+  async signInWithFacebookOAuth(facebookData: {
+    email?: string;
+    name: string;
+    facebookId: string;
+    avatar?: string;
+    sellerMode?: boolean;
+  }) {
+    const email = (facebookData.email || '').toLowerCase();
+
+    if (!email) {
+      throw new BadRequestException(
+        'Facebook account must have an email address. Please grant email permission or use another method.',
+      );
+    }
+
+    console.log('🆕 Facebook OAuth authentication:', {
+      facebookId: facebookData.facebookId,
+      name: facebookData.name,
+      email,
+      sellerMode: facebookData.sellerMode,
+    });
+
+    let existUser = await this.userModel.findOne({ email });
+    let isNewUser = false;
+
+    if (!existUser) {
+      // Create as regular user - seller registration requires additional fields
+      const newUser = new this.userModel({
+        email,
+        name: facebookData.name,
+        facebookId: facebookData.facebookId,
+        avatar: facebookData.avatar,
+        role: Role.User, // Always create as User first
+      });
+
+      await newUser.save();
+      existUser = newUser;
+      isNewUser = true;
+      console.log('✅ New user created via Facebook OAuth:', existUser.email);
+    } else if (!existUser.facebookId) {
+      // Link Facebook account to existing user
+      existUser.facebookId = facebookData.facebookId;
+      if (!existUser.avatar && facebookData.avatar) {
+        existUser.avatar = facebookData.avatar;
+      }
+      await existUser.save();
+      console.log('✅ Facebook account linked to existing user:', existUser.email);
+    }
+
+    const { tokens, user: userData } = await this.login(existUser);
+
+    console.log('✅ Facebook OAuth authentication successful');
+    return { 
+      tokens, 
+      user: userData,
+      isNewUser,
+      needsSellerRegistration: facebookData.sellerMode && existUser.role !== Role.Seller,
+      isSeller: existUser.role === Role.Seller,
+    };
   }
 
   async validateUser(email: string, password: string): Promise<UserDocument> {

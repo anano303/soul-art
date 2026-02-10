@@ -25,8 +25,8 @@ export function MobileBottomNav() {
     "/",
     "/shop",
     "/explore",
-    "/auction",
-    "/sellers-register",
+    "/auctions",
+    "/become-seller",
     ...(isSeller && user?.artistSlug ? [`/@${user.artistSlug}`] : []),
   ];
 
@@ -123,19 +123,19 @@ export function MobileBottomNav() {
   } else {
     // If not seller, show seller registration
     tabs.push({
-      href: "/sellers-register",
+      href: "/become-seller",
       icon: Palette,
       label: language === "en" ? "Sell" : "გაყიდე",
-      active: pathname.startsWith("/sellers-register"),
+      active: pathname.startsWith("/become-seller"),
     });
   }
 
   // Add auction after seller page
   tabs.push({
-    href: "/auction",
+    href: "/auctions",
     icon: Gavel,
     label: language === "en" ? "Auction" : "აუქციონი",
-    active: pathname.startsWith("/auction"),
+    active: pathname.startsWith("/auctions"),
   });
 
   return (

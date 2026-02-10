@@ -286,10 +286,16 @@ export function SellerBalanceDashboard() {
                   </div>
                   <div
                     className={`transaction-amount ${
-                      transaction.type === "earning" ? "positive" : "negative"
+                      transaction.type === "earning" ||
+                      transaction.type === "auction_earning"
+                        ? "positive"
+                        : "negative"
                     }`}
                   >
-                    {transaction.type === "earning" ? "+" : "-"}
+                    {transaction.type === "earning" ||
+                    transaction.type === "auction_earning"
+                      ? "+"
+                      : "-"}
                     {Math.abs(transaction.amount).toFixed(2)} ₾
                   </div>
                 </div>

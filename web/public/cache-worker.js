@@ -2,6 +2,7 @@
 // ეს ფაილი ამოწმებს cache-ის სიახლეს და ავტომატურად ახალებს
 
 const CACHE_VERSION = "soulart-v1";
+const API_CACHE_NAME = `api-cache-${CACHE_VERSION}`;
 const CACHE_UPDATE_INTERVAL = 10 * 60 * 1000; // 10 minutes
 const API_CACHE_DURATION = 5 * 60 * 1000; // 5 minutes for API calls
 
@@ -24,7 +25,7 @@ self.addEventListener("activate", () => {
 async function updateCacheIfNeeded() {
   try {
     // Check if API cache is stale
-    const apiCache = await caches.open("api-cache");
+    const apiCache = await caches.open(API_CACHE_NAME);
     const cacheKeys = await apiCache.keys();
 
     for (const request of cacheKeys) {
@@ -60,14 +61,14 @@ async function updateCacheIfNeeded() {
                 });
               });
             }
-          } catch (error) {
+          } catch {
             console.log("Failed to update cache for:", request.url);
           }
         }
       }
     }
-  } catch (error) {
-    console.error("Cache update check failed:", error);
+  } catch (err) {
+    console.error("Cache update check failed:", err);
   }
 }
 
@@ -83,8 +84,8 @@ async function clearAllCaches() {
         type: "CACHE_CLEARED",
       });
     });
-  } catch (error) {
-    console.error("Failed to clear caches:", error);
+  } catch (err) {
+    console.error("Failed to clear caches:", err);
   }
 }
 
@@ -97,7 +98,7 @@ self.addEventListener("fetch", (event) => {
         if (response) {
           // Check if cached response is still fresh
           const cacheTime = new Date(
-            response.headers.get("sw-cache-time") || 0
+            response.headers.get("sw-cache-time") || 0,
           );
           const now = new Date();
 
@@ -119,14 +120,14 @@ self.addEventListener("fetch", (event) => {
               },
             });
 
-            caches.open("api-cache").then((cache) => {
+            caches.open(API_CACHE_NAME).then((cache) => {
               cache.put(event.request, responseWithTime);
             });
           }
 
           return response;
         });
-      })
+      }),
     );
   }
 });

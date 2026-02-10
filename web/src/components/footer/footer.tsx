@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import Link from "next/link";
 import "./footer.css";
 import { useLanguage } from "@/hooks/LanguageContext";
 import { TermsAndConditions } from "@/components/TermsAndConditions";
@@ -24,7 +25,6 @@ export default function Footer() {
           <p className="footer-description">{t("footer.description")}</p>
         </div>
         <div className="footer-section">
-          <h4 className="footer-subtitle">{t("footer.quickLinks")}</h4>
           <ul className="footer-links">
             <li>
               <Link href="/about" className="footer-link">
@@ -52,7 +52,7 @@ export default function Footer() {
               </Link>
             </li>
             <li>
-              <Link href="/auction" className="footer-link">
+              <Link href="/auctions" className="footer-link">
                 {t("navigation.auction")}
               </Link>
             </li>
@@ -67,10 +67,9 @@ export default function Footer() {
               </Link>
             </li>
             <li>
-            <Link href="/privacy-policy" className="footer-link">
+              <Link href="/privacy-policy" className="footer-link">
                 {t("footer.privacyPolicy")}
               </Link>
-              
             </li>
             <li>
               <Link href="/terms" className="footer-link">

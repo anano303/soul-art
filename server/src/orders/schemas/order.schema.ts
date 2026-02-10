@@ -28,6 +28,22 @@ export class Order {
   @Prop({ default: false })
   isGuestOrder!: boolean;
 
+  // Order type: regular (product orders) or auction (auction winner orders)
+  @Prop({
+    type: String,
+    enum: ['regular', 'auction'],
+    default: 'regular',
+  })
+  orderType!: string;
+
+  // Auction reference (only for auction orders)
+  @Prop({
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Auction',
+    required: false,
+  })
+  auctionId?: mongoose.Types.ObjectId;
+
   @Prop({
     required: true,
     type: [
@@ -87,10 +103,10 @@ export class Order {
   @Prop({
     required: false,
     type: {
-      id: { required: true, type: String },
-      status: { required: true, type: String },
-      update_time: { required: true, type: String },
-      email_address: { required: true, type: String },
+      id: { required: false, type: String },
+      status: { required: false, type: String },
+      update_time: { required: false, type: String },
+      email_address: { required: false, type: String },
     },
   })
   paymentResult!: PaymentResult;
@@ -147,7 +163,11 @@ export class Order {
   salesRefCode?: string;
 
   // Campaign/Referral discount tracking
-  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Campaign', default: null })
+  @Prop({
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Campaign',
+    default: null,
+  })
   campaignId?: mongoose.Types.ObjectId;
 
   @Prop({ type: String, default: null })

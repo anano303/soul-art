@@ -1,39 +1,44 @@
 .login-container {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 1rem;
   width: 100%;
-  color: var(--primary-color);
+  color: #374151;
 }
 
 .login-form {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 1rem;
 }
 
 .input-group {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 0.375rem;
 }
 
 .login-container label {
-  font-size: 14px;
-  font-weight: 600;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #374151;
 }
 
 .login-container input {
-  padding: 8px;
-  border: 1px solid var(--primary-color);
-  border-radius: 4px;
-  font-size: 14px;
-  transition: border 0.3s ease-in-out;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  font-size: 0.95rem;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  background: white;
+  transition: border-color 0.2s, box-shadow 0.2s;
   outline: none;
+  box-sizing: border-box;
 }
 
 .login-container input:focus {
-  border: 2px solid var(--primary-color); /* უფრო სქელი და იგივე ფერის ბორდერი */
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
 }
 
 .error-text {
@@ -93,21 +98,26 @@
 }
 
 .login-button {
-  padding: 10px 20px;
-  background: linear-gradient(to left, #03214b, var(--primary-color));
-  background-size: 130% 100%; /* გრადიენტის ზომა */
+  width: 100%;
+  padding: 0.875rem;
+  font-size: 1rem;
+  font-weight: 600;
   color: white;
+  background: #2563eb;
   border: none;
-  border-radius: 4px;
-  cursor: url("/brush.png"), pointer;
-  font-size: 16px;
-  font-weight: bold;
-  transition: background-position 0.9s ease-in-out; /* ნელი მოძრაობა */
-  background-position: right;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s;
+  margin-top: 0.5rem;
 }
 
-.login-button:hover {
-  background-position: left; /* ფერები ნელა იცვლება */
+.login-button:hover:not(:disabled) {
+  background: #1d4ed8;
+}
+
+.login-button:disabled {
+  background: #93c5fd;
+  cursor: not-allowed;
 }
 
 .loading-spinner {
@@ -129,84 +139,65 @@
 }
 
 .separator {
-  text-align: center;
-  margin: 10px 0;
-  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin: 1rem 0;
+  width: 100%;
 }
 
 .separator::before,
 .separator::after {
   content: "";
-  display: block;
-  width: 100%;
+  flex: 1;
   height: 1px;
-  background-color: rgba(1, 38, 69, 0.7);
-  position: absolute;
-  top: 50%;
-  left: 0;
+  background: #e5e7eb;
 }
 
 .separator-text {
-  background: white;
-  padding: 0 10px;
-  position: relative;
-  z-index: 1;
-  font-size: 12px;
-  color: rgba(1, 38, 69, 0.7);
+  font-size: 0.875rem;
+  color: #6b7280;
+  background: transparent;
 }
 
 .social-buttons {
   display: flex;
-  gap: 10px;
+  flex-direction: column;
+  gap: 0.75rem;
+  width: 100%;
 }
 
 .social-button {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 10px;
+  padding: 0.75rem 1rem;
   background-color: #f5f5f5;
-  border: 2px solid transparent;
-  border-radius: 4px;
-  cursor: url("/brush.png"), pointer;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  cursor: pointer;
   width: 100%;
-  font-weight: bold;
+  font-weight: 500;
+  font-size: 0.95rem;
   color: #333;
-  transition: border 1.5s ease-in-out, color 0.5s ease-in-out;
-  background-clip: padding-box;
+  transition: all 0.2s;
   position: relative;
 }
 
 .social-button::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: 4px;
-  padding: 1px; /* ბორდერის სისქე */
-  background: linear-gradient(to right, var(--primary-color), #03214b);
-  mask: linear-gradient(white, white) content-box, linear-gradient(white, white);
-  mask-composite: exclude;
-  -webkit-mask: linear-gradient(white, white) content-box,
-    linear-gradient(white, white);
-  -webkit-mask-composite: xor;
-
-  transition: background-position 1.5s ease-in-out;
+  display: none;
 }
 
-.social-button:hover::before {
-  background: linear-gradient(to left, var(--primary-color), #03214b);
+.social-button:hover {
+  background-color: #f9fafb;
 }
 
 .social-button.google-btn {
   background-color: white;
   color: rgba(0, 0, 0, 0.87);
-  border: 1px solid #dadce0;
+  border: 1px solid #d1d5db;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-  transition: box-shadow 0.3s;
-}
-
-.social-button.google-btn::before {
-  display: none;
+  transition: all 0.2s;
 }
 
 .social-button.google-btn:hover {
@@ -248,20 +239,39 @@
   color: #ea4335; /* Red */
 }
 
+.social-button.facebook-btn {
+  background-color: #1877f2;
+  color: white;
+  border: none;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s;
+}
+
+.social-button.facebook-btn:hover {
+  background-color: #166fe5;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.social-button.facebook-btn .icon {
+  color: white;
+  margin-right: 8px;
+}
+
 .icon {
-  margin-right: 5px;
+  margin-right: 8px;
 }
 
 .signup-text {
   text-align: center;
-  font-size: 14px;
-  color: rgba(1, 38, 69, 0.7);
+  font-size: 0.9rem;
+  color: #6b7280;
+  margin-top: 1.5rem;
 }
 
 .signup-link {
-  color: var(--primary-color);
+  color: #2563eb;
   text-decoration: none;
-  font-weight: 600;
+  font-weight: 500;
 }
 
 .signup-link:hover {

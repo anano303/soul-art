@@ -97,6 +97,7 @@ export function CreateUserModal({ onClose, onSuccess }: CreateUserModalProps) {
               <option value={Role.Seller}>Seller</option>
               <option value={Role.Blogger}>Blogger</option>
               <option value={Role.SalesManager}>Sales Manager</option>
+              <option value={Role.AuctionAdmin}>Auction Admin</option>
             </select>
           </div>
 
