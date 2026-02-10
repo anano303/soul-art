@@ -1,10 +1,11 @@
 "use client";
 
 import { useAuth as useGlobalAuth } from "@/hooks/use-auth";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiClient } from "@/lib/axios";
 import axios, { AxiosError } from "axios";
 import { User } from "@/types";
+import { storeUserData } from "@/lib/auth";
 
 // Define response types
 interface AuthResponse {
@@ -214,6 +215,8 @@ export interface FacebookAuthData {
 
 // Facebook auth hook
 export function useFacebookAuth() {
+  const queryClient = useQueryClient();
+  
   return useMutation<AuthResponse, Error, FacebookAuthData>({
     mutationFn: async (data: FacebookAuthData) => {
       try {
@@ -225,6 +228,14 @@ export function useFacebookAuth() {
       } catch (error) {
         const errorMessage = extractErrorMessage(error);
         throw new Error(errorMessage);
+      }
+    },
+    onSuccess: (data) => {
+      // Store user data in localStorage and update query cache
+      if (data.user) {
+        storeUserData(data.user);
+        queryClient.setQueryData(["user"], data.user);
+        queryClient.invalidateQueries({ queryKey: ["user"] });
       }
     },
   });
