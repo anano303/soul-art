@@ -293,7 +293,11 @@ export function FacebookAuthButton({
     >
       {isLoading ? (
         <div className="fb-loading-spinner" />
-      ) : userInfo?.picture ? (
+      ) : !userInfo ? (
+        <FaFacebookF className="fb-icon" />
+      ) : null}
+      <span className="fb-text">{buttonText}</span>
+      {userInfo?.picture && (
         <div className="fb-user-avatar">
           <Image
             src={userInfo.picture}
@@ -303,10 +307,7 @@ export function FacebookAuthButton({
             className="fb-avatar-img"
           />
         </div>
-      ) : (
-        <FaFacebookF className="fb-icon" />
       )}
-      <span className="fb-text">{buttonText}</span>
     </button>
   );
 }
