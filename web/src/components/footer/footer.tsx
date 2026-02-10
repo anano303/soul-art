@@ -8,6 +8,7 @@ import { TermsAndConditions } from "@/components/TermsAndConditions";
 import { SellerContract } from "@/components/SellerContract";
 import { PrivacyPolicy } from "@/components/PrivacyPolicy";
 import { DonationModal } from "@/components/donation/DonationModal";
+import Link from "next/link";
 
 export default function Footer() {
   const { t } = useLanguage();
