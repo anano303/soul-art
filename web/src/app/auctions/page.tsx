@@ -372,21 +372,3 @@ export default function AuctionsPage() {
     </Suspense>
   );
 }
-
-function AuctionsLoading() {
-  return (
-    <div className="auctions-container">
-      <div className="loading-state">
-        <div className="loading-spinner"></div>
-      </div>
-    </div>
-  );
-}
-
-export default function AuctionsPage() {
-  return (
-    <Suspense fallback={<AuctionsLoading />}>
-      <AuctionsContent />
-    </Suspense>
-  );
-}
