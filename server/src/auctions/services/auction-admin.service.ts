@@ -435,8 +435,8 @@ export class AuctionAdminService {
 
     const withdrawAmount = amount || totalAvailable;
 
-    if (withdrawAmount < 50) {
-      throw new BadRequestException('Minimum withdrawal amount is 50 GEL');
+    if (withdrawAmount < 10) {
+      throw new BadRequestException('Minimum withdrawal amount is 10 GEL');
     }
 
     if (withdrawAmount > totalAvailable) {

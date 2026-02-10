@@ -1043,21 +1043,21 @@ export default function AuctionAdminDashboard() {
                   value={withdrawAmount}
                   onChange={(e) => setWithdrawAmount(e.target.value)}
                   placeholder="თანხა (ცარიელი = მთლიანი ბალანსი)"
-                  min="50"
+                  min="10"
                   step="0.01"
                 />
                 <button
                   className="withdraw-button"
                   onClick={handleWithdraw}
                   disabled={
-                    withdrawing || (profile?.auctionAdminBalance || 0) < 50
+                    withdrawing || (profile?.auctionAdminBalance || 0) < 10
                   }
                 >
                   {withdrawing ? "იგზავნება..." : "გატანის მოთხოვნა"}
                 </button>
               </div>
 
-              <p className="min-amount-note">მინიმალური თანხა: 50 ₾</p>
+              <p className="min-amount-note">მინიმალური თანხა: 10 ₾</p>
             </div>
 
             {/* Withdrawal History */}
