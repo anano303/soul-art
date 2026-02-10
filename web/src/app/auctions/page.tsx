@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { apiClient } from "@/lib/axios";
 import { useLanguage } from "@/hooks/LanguageContext";
@@ -49,7 +49,7 @@ interface AuctionResponse {
   };
 }
 
-export default function AuctionsPage() {
+function AuctionsContent() {
   const { t } = useLanguage();
   const { theme, toggleTheme } = useTheme();
   const searchParams = useSearchParams();
@@ -202,5 +202,23 @@ export default function AuctionsPage() {
         </main>
       </div>
     </div>
+  );
+}
+
+function AuctionsLoading() {
+  return (
+    <div className="auctions-container">
+      <div className="loading-state">
+        <div className="loading-spinner"></div>
+      </div>
+    </div>
+  );
+}
+
+export default function AuctionsPage() {
+  return (
+    <Suspense fallback={<AuctionsLoading />}>
+      <AuctionsContent />
+    </Suspense>
   );
 }
