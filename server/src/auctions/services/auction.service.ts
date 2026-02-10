@@ -2376,12 +2376,18 @@ export class AuctionService {
       user.storeName ||
       'Anonymous';
 
+    // Get user avatar - sellers use storeLogo, others use profileImagePath or avatar
+    const userAvatar =
+      user.role === 'seller'
+        ? user.storeLogo || user.profileImagePath || user.avatar
+        : user.profileImagePath || user.avatar || user.storeLogo;
+
     const comment = {
       user: user._id,
       content: content.trim(),
       createdAt: new Date(),
       userName,
-      userAvatar: user.profilePicture || user.picture,
+      userAvatar,
     };
 
     auction.comments = auction.comments || [];
