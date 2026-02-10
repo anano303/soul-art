@@ -67,17 +67,10 @@ export default function Footer() {
               </Link>
             </li>
             <li>
-              <button
-                onClick={() => setShowPrivacy(true)}
-                className="footer-link"
-                style={{
-                  background: "none",
-                  border: "none",
-                  paddingLeft: 0,
-                }}
-              >
+            <Link href="/privacy-policy" className="footer-link">
                 {t("footer.privacyPolicy")}
               </Link>
+              
             </li>
             <li>
               <Link href="/terms" className="footer-link">
