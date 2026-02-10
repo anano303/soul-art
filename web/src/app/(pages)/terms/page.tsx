@@ -62,14 +62,14 @@ export default function TermsPage() {
                   : "ვიღებთ უსაფრთხო ონლაინ გადახდებს საქართველოს ბანკის გადახდის სისტემით."}
               </p>
             </div>
-            <div className="summary-item">
+            {/* <div className="summary-item">
               <h3>{language === "en" ? "🔄 Returns" : "🔄 დაბრუნება"}</h3>
               <p>
                 {language === "en"
                   ? "Products can be returned within 14 days if unused and in original condition."
                   : "პროდუქტის დაბრუნება შესაძლებელია 14 დღის განმავლობაში, თუ არ არის გამოყენებული."}
               </p>
-            </div>
+            </div> */}
           </div>
         </div>
       </div>
