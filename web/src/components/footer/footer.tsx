@@ -7,6 +7,7 @@ import { TermsAndConditions } from "@/components/TermsAndConditions";
 import { SellerContract } from "@/components/SellerContract";
 import { PrivacyPolicy } from "@/components/PrivacyPolicy";
 import { DonationModal } from "@/components/donation/DonationModal";
+import Link from "next/link";
 
 export default function Footer() {
   const { t } = useLanguage();
@@ -26,70 +27,54 @@ export default function Footer() {
           <h4 className="footer-subtitle">{t("footer.quickLinks")}</h4>
           <ul className="footer-links">
             <li>
-              <a href="/about" className="footer-link">
+              <Link href="/about" className="footer-link">
                 {t("navigation.about")}
-              </a>
+              </Link>
             </li>
             <li>
-              <a href="/contact" className="footer-link">
+              <Link href="/contact" className="footer-link">
                 {t("footer.contact")}
-              </a>
+              </Link>
             </li>
             <li>
-              <a href="/shop" className="footer-link">
+              <Link href="/shop" className="footer-link">
                 {t("navigation.shop")}
-              </a>
+              </Link>
             </li>
             <li>
-              <a href="/forum" className="footer-link">
+              <Link href="/forum" className="footer-link">
                 {t("navigation.forum")}
-              </a>
+              </Link>
             </li>
             <li>
-              <a href="/blog" className="footer-link">
+              <Link href="/blog" className="footer-link">
                 {t("navigation.blog")}
-              </a>
+              </Link>
             </li>
             <li>
-              <a href="/auction" className="footer-link">
+              <Link href="/auction" className="footer-link">
                 {t("navigation.auction")}
-              </a>
+              </Link>
             </li>
             <li>
-              <a href="/sales-manager-register" className="footer-link">
+              <Link href="/sales-manager-register" className="footer-link">
                 {t("footer.referralInfo")}
-              </a>
+              </Link>
             </li>
             <li>
-              <a href="/careers" className="footer-link">
+              <Link href="/careers" className="footer-link">
                 {t("footer.careers")}
-              </a>
+              </Link>
             </li>
             <li>
-              <button
-                onClick={() => setShowPrivacy(true)}
-                className="footer-link"
-                style={{
-                  background: "none",
-                  border: "none",
-                  paddingLeft: 0,
-                }}
-              >
+              <Link href="/privacy-policy" className="footer-link">
                 {t("footer.privacyPolicy")}
-              </button>
+              </Link>
             </li>
             <li>
-              <button
-                onClick={() => setShowTerms(true)}
-                className="footer-link"
-                style={{
-                  background: "none",
-                  border: "none",
-                  paddingLeft: 0,
-                }}
-              >
+              <Link href="/terms" className="footer-link">
                 {t("footer.termsAndConditions")}
-              </button>
+              </Link>
             </li>
           </ul>
         </div>
