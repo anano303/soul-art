@@ -20,10 +20,10 @@ async function createSettings() {
 
   // Check if settings already exist
   const existing = await db.collection('auctionadminsettings').findOne({});
-  
+
   if (existing) {
     console.log('⚠️ Settings already exist:', existing);
-    
+
     // Update with admin user
     await db.collection('auctionadminsettings').updateOne(
       { _id: existing._id },

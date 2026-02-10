@@ -23,9 +23,12 @@ async function check() {
   console.log('   createdAt:', auction?.createdAt);
 
   // Check if there are any auction orders
-  const auctionOrders = await db.collection('auctionorders').find({
-    auctionId: new mongoose.Types.ObjectId(auctionId),
-  }).toArray();
+  const auctionOrders = await db
+    .collection('auctionorders')
+    .find({
+      auctionId: new mongoose.Types.ObjectId(auctionId),
+    })
+    .toArray();
 
   console.log('\n📦 AUCTION ORDERS:', auctionOrders.length);
   if (auctionOrders.length > 0) {
@@ -39,7 +42,11 @@ async function check() {
   // Check for auction-related orders
   for (const order of orders) {
     const orderStr = JSON.stringify(order);
-    if (orderStr.includes(auctionId) || orderStr.includes('auction') || order.auction) {
+    if (
+      orderStr.includes(auctionId) ||
+      orderStr.includes('auction') ||
+      order.auction
+    ) {
       console.log('\n🔗 Related order found:');
       console.log('   _id:', order._id);
       console.log('   user:', order.user);

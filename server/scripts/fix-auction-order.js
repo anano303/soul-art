@@ -8,10 +8,12 @@ const MONGODB_URI = process.env.MONGODB_URI;
 
 async function fixAuctionOrder() {
   const auctionId = process.argv[2];
-  
+
   if (!auctionId) {
     console.log('Usage: node scripts/fix-auction-order.js <auctionId>');
-    console.log('Example: node scripts/fix-auction-order.js 6985861597785a099494119f');
+    console.log(
+      'Example: node scripts/fix-auction-order.js 6985861597785a099494119f',
+    );
     process.exit(1);
   }
 
@@ -27,7 +29,7 @@ async function fixAuctionOrder() {
 
     // Find the auction
     const auction = await auctions.findOne({ _id: new ObjectId(auctionId) });
-    
+
     if (!auction) {
       console.log('Auction not found:', auctionId);
       process.exit(1);
@@ -66,15 +68,15 @@ async function fixAuctionOrder() {
 
     // Update order with seller
     console.log('\n=== Fixing Order ===');
-    
+
     const updateResult = await orders.updateOne(
       { _id: order._id },
       {
         $set: {
           seller: auction.seller,
           'orderItems.0.seller': auction.seller,
-        }
-      }
+        },
+      },
     );
 
     if (updateResult.modifiedCount > 0) {
@@ -88,7 +90,6 @@ async function fixAuctionOrder() {
     const updatedOrder = await orders.findOne({ _id: order._id });
     console.log('\n=== Updated Order ===');
     console.log('Seller in order:', updatedOrder.seller?.toString());
-
   } catch (error) {
     console.error('Error:', error);
   } finally {

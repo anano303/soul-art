@@ -8,7 +8,7 @@ const MONGODB_URI = process.env.MONGODB_URI;
 
 async function checkAuctionPayment() {
   const auctionId = process.argv[2];
-  
+
   if (!auctionId) {
     console.log('Usage: node scripts/check-auction-payment.js <auctionId>');
     process.exit(1);
@@ -27,7 +27,7 @@ async function checkAuctionPayment() {
 
     // Find the auction
     const auction = await auctions.findOne({ _id: new ObjectId(auctionId) });
-    
+
     if (!auction) {
       console.log('Auction not found:', auctionId);
       process.exit(1);
@@ -35,7 +35,9 @@ async function checkAuctionPayment() {
 
     // Find seller and winner
     const seller = await users.findOne({ _id: auction.seller });
-    const winner = auction.currentWinner ? await users.findOne({ _id: auction.currentWinner }) : null;
+    const winner = auction.currentWinner
+      ? await users.findOne({ _id: auction.currentWinner })
+      : null;
 
     console.log('=== AUCTION INFO ===');
     console.log('ID:', auction._id.toString());
@@ -79,12 +81,15 @@ async function checkAuctionPayment() {
     console.log('Winner has email:', winner?.email ? '✅ YES' : '❌ NO');
 
     if (!seller?.email) {
-      console.log('\n⚠️ WARNING: Seller has no email - payment confirmation email could not be sent!');
+      console.log(
+        '\n⚠️ WARNING: Seller has no email - payment confirmation email could not be sent!',
+      );
     }
     if (!winner?.email) {
-      console.log('\n⚠️ WARNING: Winner has no email - payment confirmation email could not be sent!');
+      console.log(
+        '\n⚠️ WARNING: Winner has no email - payment confirmation email could not be sent!',
+      );
     }
-
   } catch (error) {
     console.error('Error:', error);
   } finally {

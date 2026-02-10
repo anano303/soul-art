@@ -46,7 +46,9 @@ async function sendEmails() {
     const settings = await db.collection('auctionadminsettings').findOne({});
     const auctionAdmin = settings?.auctionAdminUserId
       ? await db.collection('users').findOne({
-          _id: new mongoose.Types.ObjectId(settings.auctionAdminUserId.toString()),
+          _id: new mongoose.Types.ObjectId(
+            settings.auctionAdminUserId.toString(),
+          ),
         })
       : null;
 
@@ -118,7 +120,10 @@ async function sendEmails() {
 
     // 3. Send to Auction Admin
     if (auctionAdmin?.email) {
-      const adminCommission = (auction.currentPrice * (settings?.auctionAdminCommissionPercent || 30)) / 100;
+      const adminCommission =
+        (auction.currentPrice *
+          (settings?.auctionAdminCommissionPercent || 30)) /
+        100;
       console.log(`\n📧 Sending to AUCTION ADMIN: ${auctionAdmin.email}`);
       try {
         await transporter.sendMail({
@@ -138,7 +143,8 @@ async function sendEmails() {
     }
 
     // 4. Send to Main Admin
-    const mainAdminEmail = process.env.ADMIN_EMAIL || 'soulartgeorgia@gmail.com';
+    const mainAdminEmail =
+      process.env.ADMIN_EMAIL || 'soulartgeorgia@gmail.com';
     console.log(`\n📧 Sending to MAIN ADMIN: ${mainAdminEmail}`);
     try {
       await transporter.sendMail({

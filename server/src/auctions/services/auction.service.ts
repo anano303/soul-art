@@ -1635,9 +1635,14 @@ export class AuctionService {
             auction.deliveryType,
             auction.mainImage,
           );
-          this.logger.log(`Payment confirmation email sent to buyer: ${winner.email}`);
+          this.logger.log(
+            `Payment confirmation email sent to buyer: ${winner.email}`,
+          );
         } catch (emailError) {
-          this.logger.error(`Failed to send email to buyer ${winner.email}:`, emailError);
+          this.logger.error(
+            `Failed to send email to buyer ${winner.email}:`,
+            emailError,
+          );
         }
       } else {
         this.logger.warn(`No email for winner, skipping buyer email`);
@@ -1655,9 +1660,14 @@ export class AuctionService {
             shippingAddress,
             auction.mainImage,
           );
-          this.logger.log(`Payment confirmation email sent to seller: ${seller.email}`);
+          this.logger.log(
+            `Payment confirmation email sent to seller: ${seller.email}`,
+          );
         } catch (emailError) {
-          this.logger.error(`Failed to send email to seller ${seller.email}:`, emailError);
+          this.logger.error(
+            `Failed to send email to seller ${seller.email}:`,
+            emailError,
+          );
         }
       } else {
         this.logger.warn(`No email for seller, skipping seller email`);
@@ -1701,30 +1711,43 @@ export class AuctionService {
             settings.auctionAdminUserId.toString(),
             auctionAdminPayload,
           );
-          this.logger.log(`Payment confirmation email sent to auction admin: ${auctionAdmin.email}`);
+          this.logger.log(
+            `Payment confirmation email sent to auction admin: ${auctionAdmin.email}`,
+          );
         } else {
-          this.logger.warn(`Auction admin ${settings.auctionAdminUserId} has no email`);
+          this.logger.warn(
+            `Auction admin ${settings.auctionAdminUserId} has no email`,
+          );
         }
       } else {
-        this.logger.warn(`No auctionAdminUserId in settings, skipping auction admin email`);
+        this.logger.warn(
+          `No auctionAdminUserId in settings, skipping auction admin email`,
+        );
       }
 
       // 4. მთავარ ადმინს გადახდის დადასტურება (ინფორმაციისთვის)
-      const mainAdminEmail = process.env.ADMIN_EMAIL || 'soulartgeorgia@gmail.com';
+      const mainAdminEmail =
+        process.env.ADMIN_EMAIL || 'soulartgeorgia@gmail.com';
       try {
         // Main admin-ს ვაჩვენებთ მთლიანი გადახდის ინფორმაციას
         // Auction admin-ის საკომისიო = currentPrice - sellerEarnings
-        const auctionAdminCommission = auction.currentPrice - auction.sellerEarnings;
-        
+        const auctionAdminCommission =
+          auction.currentPrice - auction.sellerEarnings;
+
         await this.emailService.sendAuctionPaymentConfirmationToAdmin(
           mainAdminEmail,
           auction.title,
           auctionAdminCommission, // ვაჩვენებთ auction admin-ის საკომისიოს
           auction.mainImage,
         );
-        this.logger.log(`Payment confirmation email sent to main admin: ${mainAdminEmail}`);
+        this.logger.log(
+          `Payment confirmation email sent to main admin: ${mainAdminEmail}`,
+        );
       } catch (emailError) {
-        this.logger.error(`Failed to send email to main admin ${mainAdminEmail}:`, emailError);
+        this.logger.error(
+          `Failed to send email to main admin ${mainAdminEmail}:`,
+          emailError,
+        );
       }
 
       // Push to seller about payment
@@ -2221,7 +2244,9 @@ export class AuctionService {
           totalPayment,
         );
       } catch (error) {
-        this.logger.error(`Failed to send payment confirmation emails: ${error}`);
+        this.logger.error(
+          `Failed to send payment confirmation emails: ${error}`,
+        );
       }
 
       // Create order record for the auction

@@ -9,9 +9,12 @@ async function fixCommentAvatars() {
   console.log('🔧 Fixing auction comment avatars...');
 
   // Get all auctions with comments
-  const auctions = await db.collection('auctions').find({
-    'comments.0': { $exists: true },
-  }).toArray();
+  const auctions = await db
+    .collection('auctions')
+    .find({
+      'comments.0': { $exists: true },
+    })
+    .toArray();
 
   console.log(`Found ${auctions.length} auctions with comments`);
 
@@ -39,7 +42,9 @@ async function fixCommentAvatars() {
 
         if (userAvatar) {
           needsUpdate = true;
-          console.log(`  ✅ Fixed avatar for ${comment.userName}: ${userAvatar.substring(0, 50)}...`);
+          console.log(
+            `  ✅ Fixed avatar for ${comment.userName}: ${userAvatar.substring(0, 50)}...`,
+          );
         }
       }
 
@@ -50,10 +55,12 @@ async function fixCommentAvatars() {
     }
 
     if (needsUpdate) {
-      await db.collection('auctions').updateOne(
-        { _id: auction._id },
-        { $set: { comments: updatedComments } },
-      );
+      await db
+        .collection('auctions')
+        .updateOne(
+          { _id: auction._id },
+          { $set: { comments: updatedComments } },
+        );
       fixed++;
     }
   }

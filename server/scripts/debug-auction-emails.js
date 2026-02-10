@@ -49,7 +49,10 @@ async function debugEmails() {
         console.log(`   Role: ${seller.role}`);
         console.log(`   All email fields:`);
         for (const key of Object.keys(seller)) {
-          if (key.toLowerCase().includes('email') || key.toLowerCase().includes('mail')) {
+          if (
+            key.toLowerCase().includes('email') ||
+            key.toLowerCase().includes('mail')
+          ) {
             console.log(`      ${key}: ${seller[key]}`);
           }
         }
@@ -80,18 +83,26 @@ async function debugEmails() {
 
     console.log('\n⚙️ AUCTION ADMIN SETTINGS:');
     if (settings) {
-      console.log(`   auctionAdminUserId: ${settings.auctionAdminUserId || 'NOT SET!'}`);
-      console.log(`   auctionAdminCommissionPercent: ${settings.auctionAdminCommissionPercent || 30}`);
+      console.log(
+        `   auctionAdminUserId: ${settings.auctionAdminUserId || 'NOT SET!'}`,
+      );
+      console.log(
+        `   auctionAdminCommissionPercent: ${settings.auctionAdminCommissionPercent || 30}`,
+      );
 
       if (settings.auctionAdminUserId) {
         const auctionAdmin = await db.collection('users').findOne({
-          _id: new mongoose.Types.ObjectId(settings.auctionAdminUserId.toString()),
+          _id: new mongoose.Types.ObjectId(
+            settings.auctionAdminUserId.toString(),
+          ),
         });
 
         console.log('\n👑 AUCTION ADMIN USER:');
         if (auctionAdmin) {
           console.log(`   ID: ${auctionAdmin._id}`);
-          console.log(`   Name: ${auctionAdmin.name || auctionAdmin.storeName || 'N/A'}`);
+          console.log(
+            `   Name: ${auctionAdmin.name || auctionAdmin.storeName || 'N/A'}`,
+          );
           console.log(`   Email: ${auctionAdmin.email || 'NO EMAIL!'}`);
           console.log(`   Role: ${auctionAdmin.role}`);
         } else {
@@ -157,16 +168,28 @@ async function debugEmails() {
 
     const auctionAdmin = settings?.auctionAdminUserId
       ? await db.collection('users').findOne({
-          _id: new mongoose.Types.ObjectId(settings.auctionAdminUserId.toString()),
+          _id: new mongoose.Types.ObjectId(
+            settings.auctionAdminUserId.toString(),
+          ),
         })
       : null;
 
-    console.log(`\n1. BUYER EMAIL: ${winner?.email ? '✅ ' + winner.email : '❌ No email'}`);
-    console.log(`2. SELLER EMAIL: ${seller?.email ? '✅ ' + seller.email : '❌ No email'}`);
-    console.log(`3. AUCTION ADMIN EMAIL: ${auctionAdmin?.email ? '✅ ' + auctionAdmin.email : '❌ No email or admin not set'}`);
-    console.log(`4. MAIN ADMIN EMAIL: ${mainAdmin?.email ? '⚠️ NOT IN CODE - ' + mainAdmin.email : '❌ No main admin'}`);
+    console.log(
+      `\n1. BUYER EMAIL: ${winner?.email ? '✅ ' + winner.email : '❌ No email'}`,
+    );
+    console.log(
+      `2. SELLER EMAIL: ${seller?.email ? '✅ ' + seller.email : '❌ No email'}`,
+    );
+    console.log(
+      `3. AUCTION ADMIN EMAIL: ${auctionAdmin?.email ? '✅ ' + auctionAdmin.email : '❌ No email or admin not set'}`,
+    );
+    console.log(
+      `4. MAIN ADMIN EMAIL: ${mainAdmin?.email ? '⚠️ NOT IN CODE - ' + mainAdmin.email : '❌ No main admin'}`,
+    );
 
-    console.log('\n⚠️ NOTE: Main admin does NOT receive payment confirmation emails!');
+    console.log(
+      '\n⚠️ NOTE: Main admin does NOT receive payment confirmation emails!',
+    );
     console.log('   Only push notification is sent to main admin.');
   } catch (error) {
     console.error('❌ Error:', error);

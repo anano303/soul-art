@@ -16,10 +16,22 @@ async function testBogAuth() {
   const apiUrl = process.env.BOG_API_URL;
 
   console.log('Environment Variables:');
-  console.log('BOG_WITHDRAWAL_CLIENT_ID:', withdrawalClientId ? '✅ Set' : '❌ Missing');
-  console.log('BOG_WITHDRAWAL_CLIENT_SECRET:', withdrawalClientSecret ? '✅ Set' : '❌ Missing');
-  console.log('BOG_BONLINE_CLIENT_ID:', bonlineClientId ? '✅ Set' : '❌ Missing');
-  console.log('BOG_BONLINE_CLIENT_SECRET:', bonlineClientSecret ? '✅ Set' : '❌ Missing');
+  console.log(
+    'BOG_WITHDRAWAL_CLIENT_ID:',
+    withdrawalClientId ? '✅ Set' : '❌ Missing',
+  );
+  console.log(
+    'BOG_WITHDRAWAL_CLIENT_SECRET:',
+    withdrawalClientSecret ? '✅ Set' : '❌ Missing',
+  );
+  console.log(
+    'BOG_BONLINE_CLIENT_ID:',
+    bonlineClientId ? '✅ Set' : '❌ Missing',
+  );
+  console.log(
+    'BOG_BONLINE_CLIENT_SECRET:',
+    bonlineClientSecret ? '✅ Set' : '❌ Missing',
+  );
   console.log('BOG_COMPANY_IBAN:', companyIban ? '✅ Set' : '❌ Missing');
   console.log('BOG_API_URL:', apiUrl ? '✅ Set' : '❌ Missing');
 
@@ -31,13 +43,16 @@ async function testBogAuth() {
 
   // Test authentication
   console.log('\n=== Testing BOG Withdrawal Authentication ===');
-  const authEndpoint = 'https://account.bog.ge/auth/realms/bog/protocol/openid-connect/token';
-  
+  const authEndpoint =
+    'https://account.bog.ge/auth/realms/bog/protocol/openid-connect/token';
+
   try {
     console.log('Requesting token from:', authEndpoint);
     console.log('Using Client ID:', withdrawalClientId.substring(0, 8) + '...');
 
-    const basicAuth = Buffer.from(`${withdrawalClientId}:${withdrawalClientSecret}`).toString('base64');
+    const basicAuth = Buffer.from(
+      `${withdrawalClientId}:${withdrawalClientSecret}`,
+    ).toString('base64');
 
     const response = await axios.post(
       authEndpoint,
@@ -49,16 +64,18 @@ async function testBogAuth() {
       {
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
-          'Authorization': `Basic ${basicAuth}`,
+          Authorization: `Basic ${basicAuth}`,
         },
-      }
+      },
     );
 
     console.log('\n✅ Authentication Successful!');
-    console.log('Access Token:', response.data.access_token?.substring(0, 50) + '...');
+    console.log(
+      'Access Token:',
+      response.data.access_token?.substring(0, 50) + '...',
+    );
     console.log('Token Type:', response.data.token_type);
     console.log('Expires In:', response.data.expires_in, 'seconds');
-
   } catch (error) {
     console.log('\n❌ Authentication Failed!');
     if (error.response) {
@@ -67,10 +84,14 @@ async function testBogAuth() {
     } else {
       console.log('Error:', error.message);
     }
-    
+
     console.log('\n=== Possible Solutions ===');
-    console.log('1. Check if BOG_WITHDRAWAL_CLIENT_ID and BOG_WITHDRAWAL_CLIENT_SECRET are correct');
-    console.log('2. The credentials may have expired - contact BOG bank to renew');
+    console.log(
+      '1. Check if BOG_WITHDRAWAL_CLIENT_ID and BOG_WITHDRAWAL_CLIENT_SECRET are correct',
+    );
+    console.log(
+      '2. The credentials may have expired - contact BOG bank to renew',
+    );
     console.log('3. Check if the API access is still active for this client');
     console.log('4. Verify network connectivity to account.bog.ge');
   }
