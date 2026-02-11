@@ -818,27 +818,36 @@
 
 .price-container {
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 2px;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: nowrap;
 }
 
 .original-price {
   text-decoration: line-through;
   color: #888;
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   font-weight: 500;
   opacity: 0.8;
+  white-space: nowrap;
+  order: 2;
 }
 
 .discounted-price {
   color: #dc2626;
   font-weight: 700;
+  order: 1;
 }
 
 /* Referral/Campaign special pricing */
 .referral-price-container {
   position: relative;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 
 .referral-badge {
