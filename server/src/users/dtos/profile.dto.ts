@@ -24,6 +24,15 @@ export class ProfileDto {
   @MaxLength(20, { message: 'Password must not exceed 20 characters' })
   password?: string;
 
+  // Seller owner info
+  @IsOptional()
+  @IsString()
+  ownerFirstName?: string;
+
+  @IsOptional()
+  @IsString()
+  ownerLastName?: string;
+
   // Seller specific fields
   @IsOptional()
   @IsString()
