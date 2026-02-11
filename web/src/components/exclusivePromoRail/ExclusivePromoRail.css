@@ -87,14 +87,8 @@
   gap: 8px;
   padding: 0.7rem 1.4rem;
   background:
-    repeating-linear-gradient(
-      45deg,
-      transparent,
-      transparent 3px,
-      rgba(255, 255, 255, 0.08) 3px,
-      rgba(255, 255, 255, 0.08) 6px
-    ),
-    linear-gradient(135deg, #10b981 0%, #059669 100%);
+    repeating-linear-gradient(45deg, #0000, #0000 3px, #ffffff14 3px 6px),
+    linear-gradient(135deg, #10b981 0%, #065f46 100%);
   color: white;
   text-decoration: none;
   border-radius: 8px;
