@@ -1222,6 +1222,25 @@ export class ProductsService {
 
       console.log('Creating product with hashtags:', data.hashtags);
 
+      // Auto-apply seller's campaign discount settings if user has chosen 'all'
+      // and no specific referralDiscountPercent is provided for this product
+      const userDoc = productData.user as UserDocument;
+      if (
+        userDoc &&
+        userDoc.campaignDiscountChoice === 'all' &&
+        userDoc.defaultReferralDiscount &&
+        userDoc.defaultReferralDiscount > 0 &&
+        (data.referralDiscountPercent === undefined ||
+          data.referralDiscountPercent === null ||
+          data.referralDiscountPercent === 0)
+      ) {
+        data.referralDiscountPercent = userDoc.defaultReferralDiscount;
+        data.useArtistDefaultDiscount = true;
+        console.log(
+          `🎯 Auto-applying seller's campaign discount: ${userDoc.defaultReferralDiscount}% for new product`,
+        );
+      }
+
       // Parse variants if it's a string
       if (data.variants && typeof data.variants === 'string') {
         try {

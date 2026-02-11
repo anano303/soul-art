@@ -117,7 +117,7 @@ export function useRegister() {
       try {
         const response = await apiClient.post<AuthResponse>(
           "/auth/register",
-          userData
+          userData,
         );
         return response.data;
       } catch (error) {
@@ -145,7 +145,7 @@ export function useSellerRegister() {
             headers: {
               "Content-Type": "multipart/form-data",
             },
-          }
+          },
         );
         return response.data;
       } catch (error) {
@@ -193,7 +193,7 @@ export function useSalesManagerRegister() {
       try {
         const response = await apiClient.post<AuthResponse>(
           "/auth/sales-manager-register",
-          data
+          data,
         );
         return response.data;
       } catch (error) {
@@ -216,13 +216,13 @@ export interface FacebookAuthData {
 // Facebook auth hook
 export function useFacebookAuth() {
   const queryClient = useQueryClient();
-  
+
   return useMutation<AuthResponse, Error, FacebookAuthData>({
     mutationFn: async (data: FacebookAuthData) => {
       try {
         const response = await apiClient.post<AuthResponse>(
           "/auth/facebook",
-          data
+          data,
         );
         return response.data;
       } catch (error) {

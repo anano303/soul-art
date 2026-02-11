@@ -16,13 +16,15 @@ declare global {
       }) => void;
       login: (
         callback: (response: FacebookAuthResponse) => void,
-        options?: { scope: string }
+        options?: { scope: string },
       ) => void;
       logout: (callback?: () => void) => void;
-      getLoginStatus: (callback: (response: FacebookAuthResponse) => void) => void;
+      getLoginStatus: (
+        callback: (response: FacebookAuthResponse) => void,
+      ) => void;
       api: (
         path: string,
-        callback: (response: FacebookUserData) => void
+        callback: (response: FacebookUserData) => void,
       ) => void;
     };
     fbAsyncInit: () => void;
@@ -89,7 +91,10 @@ export function FacebookAuthButton({
     process.env.NEXT_PUBLIC_FACEBOOK_APP_ID;
 
   // Log on every render to confirm component is mounting
-  console.log("[FB Auth] Component rendered, appId:", appId ? "set" : "NOT SET");
+  console.log(
+    "[FB Auth] Component rendered, appId:",
+    appId ? "set" : "NOT SET",
+  );
 
   // Fetch user info from Facebook
   const fetchUserInfo = useCallback(() => {
@@ -99,21 +104,24 @@ export function FacebookAuthButton({
     }
 
     console.log("[FB Auth] Fetching user info from Graph API...");
-    window.FB.api("/me?fields=id,name,email,picture.width(100).height(100)", (response: FacebookUserData) => {
-      console.log("[FB Auth] Graph API response:", response);
-      if (response && response.name) {
-        console.log("[FB Auth] User info received:", {
-          name: response.name,
-          picture: response.picture?.data?.url,
-        });
-        setUserInfo({
-          name: response.name,
-          picture: response.picture?.data?.url,
-        });
-      } else {
-        console.log("[FB Auth] No user name in response");
-      }
-    });
+    window.FB.api(
+      "/me?fields=id,name,email,picture.width(100).height(100)",
+      (response: FacebookUserData) => {
+        console.log("[FB Auth] Graph API response:", response);
+        if (response && response.name) {
+          console.log("[FB Auth] User info received:", {
+            name: response.name,
+            picture: response.picture?.data?.url,
+          });
+          setUserInfo({
+            name: response.name,
+            picture: response.picture?.data?.url,
+          });
+        } else {
+          console.log("[FB Auth] No user name in response");
+        }
+      },
+    );
   }, []);
 
   // Check if user is already logged in with Facebook
@@ -200,12 +208,15 @@ export function FacebookAuthButton({
       // Also try to init after script loads in case fbAsyncInit wasn't called
       setTimeout(() => {
         if (window.FB && !isSDKLoaded) {
-          console.log("[FB Auth] FB available after script load, initializing...");
+          console.log(
+            "[FB Auth] FB available after script load, initializing...",
+          );
           initFB();
         }
       }, 100);
     };
-    script.onerror = (e) => console.error("[FB Auth] SDK script failed to load:", e);
+    script.onerror = (e) =>
+      console.error("[FB Auth] SDK script failed to load:", e);
     document.body.appendChild(script);
 
     return () => {
@@ -218,7 +229,11 @@ export function FacebookAuthButton({
   }, [appId, checkLoginStatus, isSDKLoaded]);
 
   const handleLogin = useCallback(() => {
-    console.log("[FB Auth] handleLogin called", { hasFB: !!window.FB, disabled, isLoading });
+    console.log("[FB Auth] handleLogin called", {
+      hasFB: !!window.FB,
+      disabled,
+      isLoading,
+    });
     if (!window.FB || disabled || isLoading) return;
 
     setIsLoading(true);
@@ -235,7 +250,7 @@ export function FacebookAuthButton({
             (userResponse: FacebookUserData) => {
               console.log("[FB Auth] User details response:", userResponse);
               setIsLoading(false);
-              
+
               if (userResponse && userResponse.id) {
                 setUserInfo({
                   name: userResponse.name,
@@ -253,7 +268,7 @@ export function FacebookAuthButton({
                 console.log("[FB Auth] No user ID in response");
                 onError?.("Failed to get user information from Facebook");
               }
-            }
+            },
           );
         } else {
           setIsLoading(false);
@@ -265,7 +280,7 @@ export function FacebookAuthButton({
           }
         }
       },
-      { scope: "email,public_profile" }
+      { scope: "email,public_profile" },
     );
   }, [disabled, isLoading, onSuccess, onError]);
 
@@ -274,15 +289,19 @@ export function FacebookAuthButton({
     return null;
   }
 
-  console.log("[FB Auth] Rendering button:", { isSDKLoaded, userInfo, isLoading });
+  console.log("[FB Auth] Rendering button:", {
+    isSDKLoaded,
+    userInfo,
+    isLoading,
+  });
 
   const buttonText = userInfo
     ? `გააგრძელე როგორც ${userInfo.name.split(" ")[0]}`
     : variant === "register"
-    ? "Facebook"
-    : variant === "seller"
-    ? "Facebook"
-    : "Facebook";
+      ? "Facebook"
+      : variant === "seller"
+        ? "Facebook"
+        : "Facebook";
 
   return (
     <button
