@@ -5,6 +5,7 @@
   background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 50%, #a7f3d0 100%);
   position: relative;
   overflow: hidden;
+  box-shadow: 1px -20px 80px 40px #065f46;
 }
 
 .exclusive-promo-section::before {
@@ -84,7 +85,7 @@
   align-items: center;
   gap: 8px;
   padding: 0.7rem 1.4rem;
-  background: 
+  background:
     repeating-linear-gradient(
       45deg,
       transparent,
@@ -107,7 +108,7 @@
 }
 
 .exclusive-view-all:hover {
-  background: 
+  background:
     repeating-linear-gradient(
       45deg,
       transparent,
@@ -136,19 +137,19 @@
   display: flex !important;
   flex-direction: row !important;
   flex-wrap: nowrap !important;
-  gap: 56px !important;
+  gap: 26px !important;
   padding: 0.5rem 1rem !important;
   align-items: stretch !important;
 }
 
 /* ===== CARD WRAPPER - WIDER CARDS ===== */
 .exclusive-product-wrapper {
-  flex: 0 0 450px !important;
-  width: 450px !important;
+  /* flex: 0 0 450px !important; */
+  /* width: 450px !important;
   min-width: 450px !important;
   max-width: 450px !important;
   margin-right: 0 !important;
-  display: flex !important;
+  display: flex !important; */
 }
 
 /* ===== MAIN CARD STYLING ===== */
@@ -187,9 +188,9 @@
   .product-card
   .product-image,
 section.exclusive-promo-section .product-image {
-  height: 320px !important;
-  min-height: 320px !important;
-  max-height: 320px !important;
+  height: 300px !important;
+  min-height: 300px !important;
+  max-height: 300px !important;
   width: 100% !important;
   overflow: visible !important;
   clip-path: none !important;
@@ -444,7 +445,7 @@ section.exclusive-promo-section .product-image {
   width: 36px !important;
   height: 36px !important;
   min-width: 36px !important;
-  background: 
+  background:
     repeating-linear-gradient(
       45deg,
       transparent,
@@ -465,7 +466,7 @@ section.exclusive-promo-section .product-image {
 }
 
 .exclusive-promo-section .btn-add-to-cart-icon:hover {
-  background: 
+  background:
     repeating-linear-gradient(
       45deg,
       transparent,
@@ -481,7 +482,7 @@ section.exclusive-promo-section .product-image {
 .exclusive-promo-section .btn-buy-now {
   flex: 1 !important;
   height: 36px !important;
-  background: 
+  background:
     repeating-linear-gradient(
       45deg,
       transparent,
@@ -507,7 +508,7 @@ section.exclusive-promo-section .product-image {
 }
 
 .exclusive-promo-section .btn-buy-now:hover {
-  background: 
+  background:
     repeating-linear-gradient(
       45deg,
       transparent,
@@ -550,10 +551,10 @@ section.exclusive-promo-section .product-image {
   }
 
   .exclusive-product-wrapper {
-    flex: 0 0 220px !important;
-    width: 220px !important;
+    /* flex: 0 0 220px !important; */
+    /* width: 220px !important;
     min-width: 220px !important;
-    max-width: 220px !important;
+    max-width: 220px !important; */
   }
 
   .exclusive-promo-section .product-image {
@@ -586,16 +587,16 @@ section.exclusive-promo-section .product-image {
   }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 600px) {
   .exclusive-products-container {
     gap: 16px !important;
   }
 
   .exclusive-product-wrapper {
-    flex: 0 0 260px !important;
-    width: 260px !important;
+    /* flex: 0 0 260px !important; */
+    /* width: 260px !important;
     min-width: 260px !important;
-    max-width: 260px !important;
+    max-width: 260px !important; */
   }
 
   .exclusive-promo-header {
