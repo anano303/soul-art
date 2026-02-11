@@ -484,12 +484,13 @@ export class AuctionAdminService {
       earningsIncluded: earningsToInclude,
     });
 
-    // Update user pending withdrawal
+    // Update user pending withdrawal and decrease balance
     await this.userModel.updateOne(
       { _id: auctionAdminId },
       {
         $inc: {
           auctionAdminPendingWithdrawal: withdrawAmount,
+          auctionAdminBalance: -withdrawAmount,
         },
       },
     );
@@ -668,12 +669,13 @@ export class AuctionAdminService {
       withdrawal.processedBy = new Types.ObjectId(adminId);
       withdrawal.rejectionReason = rejectionReason;
 
-      // Restore pending withdrawal
+      // Restore pending withdrawal and balance
       await this.userModel.updateOne(
         { _id: withdrawal.auctionAdminId },
         {
           $inc: {
             auctionAdminPendingWithdrawal: -withdrawal.amount,
+            auctionAdminBalance: withdrawal.amount,
           },
         },
       );
