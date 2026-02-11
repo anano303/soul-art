@@ -82,7 +82,6 @@ export function StreamlinedCheckout() {
     {},
   );
   const [showPayPalButtons, setShowPayPalButtons] = useState(false);
-  const [paypalOrderId, setPaypalOrderId] = useState<string | null>(null);
 
   // Check for auction checkout mode on mount
   useEffect(() => {
@@ -591,7 +590,7 @@ export function StreamlinedCheckout() {
       if (methodToUse === "BOG") {
         await handleBOGPayment(orderId, orderSummary.totalPrice);
       } else if (methodToUse === "PAYPAL") {
-        await handlePayPalPayment(orderId, orderSummary.totalPrice);
+        await handlePayPalPayment(orderId);
       } else {
         // For other payment methods, redirect to order page
         try {
@@ -742,7 +741,7 @@ export function StreamlinedCheckout() {
   };
 
   // Handle PayPal payment - Show SDK buttons instead of redirect
-  const handlePayPalPayment = async (orderId: string, _amount: number) => {
+  const handlePayPalPayment = async (orderId: string) => {
     setIsProcessingPayment(false);
     setCurrentOrderId(orderId);
     // Show PayPal SDK buttons modal instead of redirect
@@ -1000,7 +999,7 @@ export function StreamlinedCheckout() {
                     <h3>
                       {isAuctionMode
                         ? t("auctions.wonAuction") || "მოგებული აუქციონი"
-                        : "შეკვეთის პროდუქტები"}
+                        : t("payment.orderProducts")}
                     </h3>
                     <div className="order-items-review">
                       {checkoutItems.map((item) => {
@@ -1051,7 +1050,7 @@ export function StreamlinedCheckout() {
             <h3 className="summary-title">
               {isAuctionMode
                 ? t("auctions.wonAuction") || "მოგებული აუქციონი"
-                : "შეკვეთის მონაცემები"}
+                : t("payment.orderSummary")}
             </h3>
 
             <div className="summary-items">
@@ -1153,7 +1152,7 @@ export function StreamlinedCheckout() {
 
             {currentStep === "review" && (
               <div className="payment-methods-section">
-                <h4 className="payment-methods-title">გადახდის მეთოდი</h4>
+                <h4 className="payment-methods-title">{t("payment.paymentMethod")}</h4>
 
                 {/* BOG Payment Option */}
                 <button
@@ -1205,9 +1204,9 @@ export function StreamlinedCheckout() {
                       </svg>
                     </div>
                     <div className="bog-payment-text">
-                      <span className="bog-payment-title">ბარათით გადახდა</span>
+                      <span className="bog-payment-title">{t("payment.cardPayment")}</span>
                       <span className="bog-payment-subtitle">
-                        ყველა ბარათი მიიღება
+                        {t("payment.allCardsAccepted")}
                       </span>
                     </div>
                     {(isValidating || isProcessingPayment) &&
@@ -1270,7 +1269,7 @@ export function StreamlinedCheckout() {
                     <div className="paypal-payment-text">
                       <span className="paypal-payment-title">PayPal</span>
                       <span className="paypal-payment-subtitle">
-                        საერთაშორისო ბარათები
+                        {t("payment.paypal.internationalCards")}
                       </span>
                     </div>
                     {(isValidating || isProcessingPayment) &&
@@ -1380,17 +1379,17 @@ export function StreamlinedCheckout() {
             </button>
 
             <div className="payment-modal-header">
-              <h2>საერთაშორისო გადახდა</h2>
+              <h2>{t("payment.paypal.title")}</h2>
               <p className="payment-modal-subtitle">
-                აირჩიეთ გადახდის მეთოდი: PayPal ან ბარათი
+                {t("payment.paypal.subtitle")}
               </p>
             </div>
 
             <div className="paypal-buttons-wrapper">
-              {/* Convert GEL to USD: 1 USD = 2.6 GEL */}
+              {/* Convert GEL to USD: 1 USD = 2.5 GEL */}
               <PayPalButton
                 orderId={currentOrderId}
-                amount={Number((totalPrice / 2.6).toFixed(2))}
+                amount={Number((totalPrice / 2.5).toFixed(2))}
                 onPaymentSuccess={handlePayPalSuccess}
                 showCardButton={true}
                 shippingAddress={shippingAddress ? {
@@ -1398,21 +1397,21 @@ export function StreamlinedCheckout() {
                   city: shippingAddress.city,
                   postalCode: shippingAddress.postalCode || "",
                   country: shippingAddress.country || "საქართველო",
-                  fullName: user?.name || guestInfo?.name || "",
-                  phone: shippingAddress.phone || "",
+                  fullName: user?.name || guestInfo?.fullName || "",
+                  phone: shippingAddress.phoneNumber || "",
                 } : undefined}
               />
               <p className="paypal-conversion-note">
-                {totalPrice.toFixed(2)} ₾ ≈ ${(totalPrice / 2.6).toFixed(2)} USD
+                {totalPrice.toFixed(2)} ₾ ≈ ${(totalPrice / 2.5).toFixed(2)} USD
               </p>
             </div>
 
             <div className="payment-modal-footer">
               <p className="payment-modal-note">
-                🔒 უსაფრთხო გადახდა PayPal-ის საშუალებით
+                🔒 {t("payment.paypal.securePayment")}
               </p>
               <p className="payment-modal-cards">
-                Visa, Mastercard, American Express და სხვა საერთაშორისო ბარათები
+                {t("payment.paypal.acceptedCards")}
               </p>
             </div>
           </div>
