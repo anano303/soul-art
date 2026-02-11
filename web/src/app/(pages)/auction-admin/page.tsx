@@ -191,6 +191,7 @@ export default function AuctionAdminDashboard() {
     null,
   );
   const [rejectReason, setRejectReason] = useState("");
+  const [approvingAuctionId, setApprovingAuctionId] = useState<string | null>(null);
 
   // Define fetchAuctions before useEffect that uses it
   const fetchAuctions = useCallback(async () => {
@@ -309,12 +310,16 @@ export default function AuctionAdminDashboard() {
 
   const approveAuction = async (auctionId: string) => {
     try {
+      setApprovingAuctionId(auctionId);
       await apiClient.patch(`/auctions/${auctionId}/approve`);
       toast.success("აუქციონი დადასტურებულია");
-      fetchAuctions();
+      // Force refresh auctions list
+      await fetchAuctions();
     } catch (err) {
       console.error("Failed to approve auction:", err);
       toast.error("აუქციონის დამტკიცება ვერ მოხერხდა");
+    } finally {
+      setApprovingAuctionId(null);
     }
   };
 
@@ -871,13 +876,19 @@ export default function AuctionAdminDashboard() {
                                   onClick={() => approveAuction(auction._id)}
                                   className="action-btn approve-btn"
                                   title="დამტკიცება"
+                                  disabled={approvingAuctionId === auction._id}
                                 >
-                                  ✓
+                                  {approvingAuctionId === auction._id ? (
+                                    <span className="spinner-small">⏳</span>
+                                  ) : (
+                                    "✓"
+                                  )}
                                 </button>
                                 <button
                                   onClick={() => openRejectModal(auction._id)}
                                   className="action-btn reject-btn"
                                   title="უარყოფა"
+                                  disabled={approvingAuctionId === auction._id}
                                 >
                                   ✗
                                 </button>

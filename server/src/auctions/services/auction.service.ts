@@ -444,19 +444,19 @@ export class AuctionService {
   ) {
     const skip = (page - 1) * limit;
 
-    // Convert string to ObjectId for proper matching
+    // Try both string and ObjectId for seller field (some old records may have string)
     const sellerObjectId = new Types.ObjectId(sellerId);
 
     this.logger.log(`Fetching auctions for seller: ${sellerId}`);
 
     const [auctions, total] = await Promise.all([
       this.auctionModel
-        .find({ seller: sellerObjectId })
+        .find({ $or: [{ seller: sellerObjectId }, { seller: sellerId }] })
         .populate('currentWinner', 'ownerFirstName ownerLastName')
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit),
-      this.auctionModel.countDocuments({ seller: sellerObjectId }),
+      this.auctionModel.countDocuments({ $or: [{ seller: sellerObjectId }, { seller: sellerId }] }),
     ]);
 
     this.logger.log(`Found ${total} auctions for seller: ${sellerId}`);
@@ -478,12 +478,14 @@ export class AuctionService {
     limit: number = 10,
   ) {
     const skip = (page - 1) * limit;
+    const sellerObjectId = new Types.ObjectId(sellerId);
+    const sellerQuery = { $or: [{ seller: sellerObjectId }, { seller: sellerId }] };
 
     // Get paid auctions for this seller
     const [paidAuctions, total] = await Promise.all([
       this.auctionModel
         .find({
-          seller: sellerId,
+          ...sellerQuery,
           status: 'ENDED',
           isPaid: true,
         })
@@ -496,7 +498,7 @@ export class AuctionService {
         .limit(limit)
         .lean(),
       this.auctionModel.countDocuments({
-        seller: sellerId,
+        ...sellerQuery,
         status: 'ENDED',
         isPaid: true,
       }),
@@ -505,7 +507,7 @@ export class AuctionService {
     // Calculate totals
     const allPaidAuctions = await this.auctionModel
       .find({
-        seller: sellerId,
+        ...sellerQuery,
         status: 'ENDED',
         isPaid: true,
       })

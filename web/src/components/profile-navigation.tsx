@@ -122,6 +122,7 @@ export function MobileProfileNavigation() {
         marginLeft: "-1rem",
         marginRight: "-1rem",
         width: "calc(100% + 2rem)",
+        maxWidth: "100vw",
       }}
     >
       <div className="bg-white border-b border-gray-200">
