@@ -1,6 +1,6 @@
 /**
  * Fix existing products that should have referralDiscountPercent
- * 
+ *
  * This script finds all sellers with campaignDiscountChoice = 'all'
  * and updates their products that don't have referralDiscountPercent set.
  */
@@ -19,12 +19,16 @@ async function fixExistingProductsPromo() {
     const productsCollection = db.collection('products');
 
     // Find all sellers with campaignDiscountChoice = 'all' and defaultReferralDiscount > 0
-    const sellersWithPromo = await usersCollection.find({
-      campaignDiscountChoice: 'all',
-      defaultReferralDiscount: { $gt: 0 }
-    }).toArray();
+    const sellersWithPromo = await usersCollection
+      .find({
+        campaignDiscountChoice: 'all',
+        defaultReferralDiscount: { $gt: 0 },
+      })
+      .toArray();
 
-    console.log(`\n📊 Found ${sellersWithPromo.length} sellers with promo enabled:\n`);
+    console.log(
+      `\n📊 Found ${sellersWithPromo.length} sellers with promo enabled:\n`,
+    );
 
     let totalFixed = 0;
 
@@ -33,21 +37,25 @@ async function fixExistingProductsPromo() {
       console.log(`   Discount: ${seller.defaultReferralDiscount}%`);
 
       // Find products without referralDiscountPercent or with 0
-      const productsToFix = await productsCollection.find({
-        user: seller._id,
-        $or: [
-          { referralDiscountPercent: { $exists: false } },
-          { referralDiscountPercent: null },
-          { referralDiscountPercent: 0 }
-        ]
-      }).toArray();
+      const productsToFix = await productsCollection
+        .find({
+          user: seller._id,
+          $or: [
+            { referralDiscountPercent: { $exists: false } },
+            { referralDiscountPercent: null },
+            { referralDiscountPercent: 0 },
+          ],
+        })
+        .toArray();
 
       if (productsToFix.length === 0) {
         console.log('   ✅ All products already have promo discount');
         continue;
       }
 
-      console.log(`   🔧 Found ${productsToFix.length} products without promo discount`);
+      console.log(
+        `   🔧 Found ${productsToFix.length} products without promo discount`,
+      );
 
       // Update these products
       const result = await productsCollection.updateMany(
@@ -56,15 +64,15 @@ async function fixExistingProductsPromo() {
           $or: [
             { referralDiscountPercent: { $exists: false } },
             { referralDiscountPercent: null },
-            { referralDiscountPercent: 0 }
-          ]
+            { referralDiscountPercent: 0 },
+          ],
         },
         {
           $set: {
             referralDiscountPercent: seller.defaultReferralDiscount,
-            useArtistDefaultDiscount: true
-          }
-        }
+            useArtistDefaultDiscount: true,
+          },
+        },
       );
 
       console.log(`   ✅ Fixed ${result.modifiedCount} products`);
@@ -73,7 +81,6 @@ async function fixExistingProductsPromo() {
 
     console.log(`\n\n🎉 Total products fixed: ${totalFixed}`);
     console.log('✅ Script completed successfully!\n');
-
   } catch (error) {
     console.error('❌ Error:', error);
   } finally {

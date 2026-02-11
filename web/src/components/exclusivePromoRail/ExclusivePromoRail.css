@@ -1,0 +1,662 @@
+/* ===== EXCLUSIVE PROMO SECTION - PROFESSIONAL COMPACT CARDS ===== */
+
+.exclusive-promo-section {
+  padding: 2rem 1rem;
+  background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 50%, #a7f3d0 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.exclusive-promo-section::before {
+  content: "";
+  position: absolute;
+  top: -50%;
+  right: -10%;
+  width: 300px;
+  height: 300px;
+  background: radial-gradient(
+    circle,
+    rgba(16, 185, 129, 0.15) 0%,
+    transparent 70%
+  );
+  pointer-events: none;
+}
+
+.exclusive-promo-section::after {
+  content: "";
+  position: absolute;
+  bottom: -30%;
+  left: -5%;
+  width: 200px;
+  height: 200px;
+  background: radial-gradient(
+    circle,
+    rgba(5, 150, 105, 0.1) 0%,
+    transparent 70%
+  );
+  pointer-events: none;
+}
+
+.exclusive-promo-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  padding: 0 0.5rem;
+}
+
+.exclusive-promo-icon {
+  font-size: 2.5rem;
+  animation: bounce-gentle 2s ease-in-out infinite;
+}
+
+@keyframes bounce-gentle {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+.exclusive-promo-titles {
+  flex: 1;
+}
+
+.exclusive-promo-title {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #065f46;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.exclusive-promo-subtitle {
+  font-size: 0.95rem;
+  color: #047857;
+  margin: 0.25rem 0 0 0;
+  font-weight: 500;
+}
+
+.exclusive-view-all {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0.7rem 1.4rem;
+  background: 
+    repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 3px,
+      rgba(255, 255, 255, 0.08) 3px,
+      rgba(255, 255, 255, 0.08) 6px
+    ),
+    linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  text-decoration: none;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  white-space: nowrap;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
+  letter-spacing: 0.02em;
+  position: relative;
+  overflow: hidden;
+}
+
+.exclusive-view-all:hover {
+  background: 
+    repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 3px,
+      rgba(255, 255, 255, 0.12) 3px,
+      rgba(255, 255, 255, 0.12) 6px
+    ),
+    linear-gradient(135deg, #34d399 0%, #10b981 100%);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(16, 185, 129, 0.5);
+}
+
+.exclusive-products-scroll {
+  overflow-x: auto;
+  margin: 0;
+  padding: 1rem 0;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.exclusive-products-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.exclusive-products-container {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+  gap: 56px !important;
+  padding: 0.5rem 1rem !important;
+  align-items: stretch !important;
+}
+
+/* ===== CARD WRAPPER - WIDER CARDS ===== */
+.exclusive-product-wrapper {
+  flex: 0 0 450px !important;
+  width: 450px !important;
+  min-width: 450px !important;
+  max-width: 450px !important;
+  margin-right: 0 !important;
+  display: flex !important;
+}
+
+/* ===== MAIN CARD STYLING ===== */
+.exclusive-promo-section .product-card {
+  position: relative !important;
+  border-radius: 16px !important;
+  overflow: hidden !important;
+  background: #065f46 !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15) !important;
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease !important;
+  display: flex !important;
+  flex-direction: column !important;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.exclusive-promo-section .product-card:hover {
+  transform: translateY(-6px) !important;
+  box-shadow: 0 16px 40px rgba(16, 185, 129, 0.3) !important;
+}
+
+/* ===== IMAGE - LARGE FULL VIEW WITH GRADIENT OVERLAY ===== */
+/* Override ProductCard.css styles with maximum specificity */
+.exclusive-promo-section
+  .exclusive-product-wrapper
+  .exclusive-card-override
+  .product-card
+  .product-image,
+.exclusive-promo-section .exclusive-card-override .product-card .product-image,
+.exclusive-card-override .product-card .product-image,
+.exclusive-promo-section .product-card .product-image,
+.exclusive-promo-section
+  .exclusive-product-wrapper
+  .product-card
+  .product-image,
+section.exclusive-promo-section .product-image {
+  height: 320px !important;
+  min-height: 320px !important;
+  max-height: 320px !important;
+  width: 100% !important;
+  overflow: visible !important;
+  clip-path: none !important;
+  position: relative !important;
+  flex-shrink: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: #065f46 !important;
+}
+
+/* Blur edges on left and right sides of image */
+.exclusive-promo-section .product-image::before {
+  content: "" !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 40px !important;
+  height: 100% !important;
+  background: linear-gradient(
+    to right,
+    #065f46 0%,
+    transparent 100%
+  ) !important;
+  pointer-events: none !important;
+  z-index: 6 !important;
+}
+
+/* Right blur edge */
+.exclusive-promo-section .product-card .product-image::after {
+  content: "" !important;
+  position: absolute !important;
+  top: 0 !important;
+  right: 0 !important;
+  width: 40px !important;
+  height: 100% !important;
+  background: linear-gradient(to left, #065f46 0%, transparent 100%) !important;
+  pointer-events: none !important;
+  z-index: 6 !important;
+}
+
+/* Gradient blur overlay on image bottom */
+.exclusive-promo-section .product-image::after {
+  content: "" !important;
+  position: absolute !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  height: 80px !important;
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    rgba(6, 95, 70, 0.5) 40%,
+    rgba(6, 95, 70, 0.9) 80%,
+    rgba(6, 95, 70, 1) 100%
+  ) !important;
+  pointer-events: none !important;
+  z-index: 5 !important;
+}
+
+/* Image inside - full size contain */
+.exclusive-card-override .product-card .product-image img,
+.exclusive-card-override .product-card .product-image .image,
+.exclusive-promo-section .exclusive-card-override .product-image img,
+.exclusive-promo-section .exclusive-card-override .product-image .image,
+.exclusive-promo-section .product-card .product-image img,
+.exclusive-promo-section .product-card .product-image .image,
+.exclusive-promo-section .product-image img,
+.exclusive-promo-section .product-image .image {
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 340px !important;
+  object-fit: contain !important;
+  object-position: center !important;
+  transition: transform 0.5s ease !important;
+  background: transparent !important;
+}
+
+.exclusive-promo-section .product-card:hover .product-image img,
+.exclusive-promo-section .product-card:hover .product-image .image {
+  transform: scale(1.08) !important;
+}
+
+/* Remove default overlay */
+.exclusive-promo-section .product-card-overlay {
+  display: none !important;
+}
+
+/* ===== INFO SECTIONS - COMPACT GREEN BACKGROUND ===== */
+.exclusive-promo-section .product-info,
+.exclusive-promo-section .product-info-top,
+.exclusive-promo-section .product-info-bottom {
+  position: relative !important;
+  background: rgba(6, 95, 70, 0.98) !important;
+  padding: 4px 10px !important;
+  margin: 0 !important;
+}
+
+/* Product name container - compact */
+.exclusive-promo-section .product-info-top {
+  min-height: auto !important;
+  padding: 6px 10px 2px !important;
+}
+
+/* ===== PRODUCT NAME & RATING ===== */
+.exclusive-promo-section .product-name-rating {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  gap: 6px !important;
+  background: transparent !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+.exclusive-promo-section .product-name {
+  color: white !important;
+  font-size: 0.85rem !important;
+  font-weight: 700 !important;
+  margin: 0 !important;
+  line-height: 1.15 !important;
+  text-align: left !important;
+  display: -webkit-box !important;
+  -webkit-line-clamp: 1 !important;
+  -webkit-box-orient: vertical !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  flex: 1 !important;
+}
+
+.exclusive-promo-section .product-rating {
+  background: rgba(255, 255, 255, 0.15) !important;
+  color: white !important;
+  padding: 2px 5px !important;
+  border-radius: 6px !important;
+  font-size: 0.65rem !important;
+  flex-shrink: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 2px !important;
+}
+
+.exclusive-promo-section .product-rating img {
+  width: 10px !important;
+  height: 10px !important;
+}
+
+/* ===== AUTHOR TEXT - COMPACT ===== */
+.exclusive-promo-section .product-info p,
+.exclusive-promo-section .product-info span,
+.exclusive-promo-section .author {
+  color: rgba(255, 255, 255, 0.8) !important;
+  font-size: 0.72rem !important;
+  margin: 0 !important;
+}
+
+/* Author section - compact */
+.exclusive-promo-section .product-card > .product-info:nth-of-type(2) {
+  min-height: auto !important;
+  padding: 2px 10px 4px !important;
+}
+
+.exclusive-promo-section .product-info p a,
+.exclusive-promo-section .author a {
+  color: white !important;
+  text-decoration: none !important;
+}
+
+.exclusive-promo-section .product-info p a:hover,
+.exclusive-promo-section .author a:hover {
+  text-decoration: underline !important;
+}
+
+/* ===== PRICE SECTION - COMPACT ===== */
+.exclusive-promo-section .product-details {
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+/* Price section - compact horizontal layout */
+.exclusive-promo-section .product-info-bottom {
+  min-height: auto !important;
+  padding: 4px 10px 6px !important;
+}
+
+.exclusive-promo-section .priceAndRaiting {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  flex-wrap: nowrap !important;
+}
+
+.exclusive-promo-section .price-container,
+.exclusive-promo-section .referral-price-container {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  flex-wrap: nowrap !important;
+  flex-direction: row !important;
+}
+
+.exclusive-promo-section .product-price,
+.exclusive-promo-section .referral-final-price {
+  color: #4ade80 !important;
+  font-weight: 800 !important;
+  font-size: 1rem !important;
+  margin: 0 !important;
+  white-space: nowrap !important;
+}
+
+.exclusive-promo-section .original-price,
+.exclusive-promo-section .old-price,
+.exclusive-promo-section .referral-original-price {
+  color: rgba(255, 255, 255, 0.5) !important;
+  text-decoration: line-through !important;
+  font-size: 0.75rem !important;
+  white-space: nowrap !important;
+  margin: 0 !important;
+}
+
+/* Hide referral badge to save space */
+.exclusive-promo-section .referral-badge {
+  display: none !important;
+}
+
+/* ===== DISCOUNT BADGE ===== */
+.exclusive-promo-section .discount-badge {
+  position: absolute !important;
+  top: 10px !important;
+  right: 10px !important;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+  color: white !important;
+  padding: 4px 10px !important;
+  border-radius: 16px !important;
+  font-size: 0.8rem !important;
+  font-weight: 700 !important;
+  z-index: 20 !important;
+  box-shadow: 0 3px 10px rgba(5, 150, 105, 0.4) !important;
+}
+
+/* ===== ACTION BUTTONS - COMPACT ===== */
+.exclusive-promo-section .product-card-actions {
+  display: flex !important;
+  gap: 6px !important;
+  padding: 6px 10px 10px !important;
+  background: rgba(4, 70, 55, 1) !important;
+  margin: 0 !important;
+  margin-top: auto !important;
+}
+
+.exclusive-promo-section .btn-add-to-cart-icon {
+  width: 36px !important;
+  height: 36px !important;
+  min-width: 36px !important;
+  background: 
+    repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 2px,
+      rgba(255, 255, 255, 0.06) 2px,
+      rgba(255, 255, 255, 0.06) 4px
+    ),
+    rgba(255, 255, 255, 0.1) !important;
+  border: 2px solid rgba(255, 255, 255, 0.3) !important;
+  border-radius: 8px !important;
+  color: white !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transition: all 0.3s ease !important;
+  cursor: pointer !important;
+  overflow: hidden !important;
+}
+
+.exclusive-promo-section .btn-add-to-cart-icon:hover {
+  background: 
+    repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 2px,
+      rgba(255, 255, 255, 0.1) 2px,
+      rgba(255, 255, 255, 0.1) 4px
+    ),
+    rgba(255, 255, 255, 0.2) !important;
+  border-color: white !important;
+  transform: scale(1.05) !important;
+}
+
+.exclusive-promo-section .btn-buy-now {
+  flex: 1 !important;
+  height: 36px !important;
+  background: 
+    repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 2px,
+      rgba(255, 255, 255, 0.08) 2px,
+      rgba(255, 255, 255, 0.08) 4px
+    ),
+    linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+  border: none !important;
+  border-radius: 8px !important;
+  color: white !important;
+  font-size: 0.8rem !important;
+  font-weight: 600 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 5px !important;
+  transition: all 0.3s ease !important;
+  box-shadow: 0 3px 12px rgba(5, 150, 105, 0.35) !important;
+  cursor: pointer !important;
+  position: relative !important;
+  overflow: hidden !important;
+}
+
+.exclusive-promo-section .btn-buy-now:hover {
+  background: 
+    repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 2px,
+      rgba(255, 255, 255, 0.12) 2px,
+      rgba(255, 255, 255, 0.12) 4px
+    ),
+    linear-gradient(135deg, #34d399 0%, #10b981 100%) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 5px 18px rgba(5, 150, 105, 0.5) !important;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+  .exclusive-promo-section {
+    padding: 1.5rem 0.5rem;
+  }
+
+  .exclusive-promo-header {
+    flex-wrap: wrap;
+  }
+
+  .exclusive-promo-title {
+    font-size: 1.25rem;
+  }
+
+  .exclusive-promo-subtitle {
+    font-size: 0.85rem;
+  }
+
+  .exclusive-promo-icon {
+    font-size: 2rem;
+  }
+
+  .exclusive-view-all {
+    order: 3;
+    /* width: 100%; */
+    justify-content: center;
+    margin-top: 0.75rem;
+  }
+
+  .exclusive-product-wrapper {
+    flex: 0 0 220px !important;
+    width: 220px !important;
+    min-width: 220px !important;
+    max-width: 220px !important;
+  }
+
+  .exclusive-promo-section .product-image {
+    height: 190px !important;
+  }
+
+  .exclusive-promo-section .product-name {
+    font-size: 0.82rem !important;
+    min-height: 2em !important;
+  }
+
+  .exclusive-promo-section .product-price,
+  .exclusive-promo-section .referral-final-price {
+    font-size: 0.95rem !important;
+  }
+
+  .exclusive-promo-section .product-card-actions {
+    padding: 8px 10px 10px !important;
+  }
+
+  .exclusive-promo-section .btn-add-to-cart-icon {
+    width: 36px !important;
+    height: 36px !important;
+    min-width: 36px !important;
+  }
+
+  .exclusive-promo-section .btn-buy-now {
+    height: 36px !important;
+    font-size: 0.78rem !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .exclusive-products-container {
+    gap: 16px !important;
+  }
+
+  .exclusive-product-wrapper {
+    flex: 0 0 260px !important;
+    width: 260px !important;
+    min-width: 260px !important;
+    max-width: 260px !important;
+  }
+
+  .exclusive-promo-header {
+    gap: 0.5rem;
+  }
+
+  .exclusive-promo-title {
+    font-size: 1rem;
+  }
+
+  .exclusive-promo-section .product-image {
+    height: 100px !important;
+    min-height: 100px !important;
+    max-height: 100px !important;
+  }
+
+  .exclusive-promo-section .product-image img,
+  .exclusive-promo-section .product-image .image {
+    min-height: 100px !important;
+  }
+
+  .exclusive-promo-section .product-info,
+  .exclusive-promo-section .product-info-top,
+  .exclusive-promo-section .product-info-bottom {
+    padding: 3px 8px !important;
+  }
+
+  .exclusive-promo-section .product-name {
+    font-size: 0.72rem !important;
+  }
+
+  .exclusive-promo-section .product-card-actions {
+    padding: 4px 6px 6px !important;
+    gap: 4px !important;
+  }
+
+  .exclusive-promo-section .btn-add-to-cart-icon {
+    width: 28px !important;
+    height: 28px !important;
+    min-width: 28px !important;
+  }
+
+  .exclusive-promo-section .btn-buy-now {
+    height: 28px !important;
+    font-size: 0.68rem !important;
+  }
+
+  .exclusive-promo-section .product-price,
+  .exclusive-promo-section .referral-final-price {
+    font-size: 0.8rem !important;
+  }
+
+  .exclusive-promo-section .original-price,
+  .exclusive-promo-section .old-price,
+  .exclusive-promo-section .referral-original-price {
+    font-size: 0.6rem !important;
+  }
+
+  .exclusive-promo-section .product-info p,
+  .exclusive-promo-section .product-info span,
+  .exclusive-promo-section .author {
+    font-size: 0.65rem !important;
+  }
+}

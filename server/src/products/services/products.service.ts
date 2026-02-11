@@ -64,6 +64,7 @@ interface FindManyParams {
   dimension?: string;
   excludeHiddenFromStore?: boolean; // If true, exclude products with hideFromStore=true
   excludeOutOfStock?: boolean; // If true, exclude products with no stock
+  hasPromo?: boolean; // If true, only products with referralDiscountPercent > 0
 }
 
 @Injectable()
@@ -362,6 +363,7 @@ export class ProductsService {
       dimension,
       excludeHiddenFromStore = false,
       excludeOutOfStock = false,
+      hasPromo = false,
     } = params;
 
     const pageNumber = parseInt(page);
@@ -595,6 +597,13 @@ export class ProductsService {
           { discountEndDate: null },
           { discountEndDate: { $gte: now } },
         ],
+      });
+    }
+
+    // Filter by promo/referral discount (products with special campaign pricing)
+    if (hasPromo === true) {
+      andConditions.push({
+        referralDiscountPercent: { $exists: true, $gt: 0 },
       });
     }
 

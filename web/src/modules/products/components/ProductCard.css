@@ -10,7 +10,9 @@
   overflow: visible; /* Changed to visible to show tooltip */
   /* background-color: var(--primary-color); */
   box-shadow: 2px 9px 10px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+  transition:
+    transform 0.3s ease-in-out,
+    box-shadow 0.3s ease-in-out;
   text-decoration: none;
   margin: 0px;
   position: relative;
@@ -151,6 +153,44 @@
     0% 95%
   );
   max-height: min-content;
+}
+
+/* ===== EXCLUSIVE PROMO SECTION - LARGE IMAGE ===== */
+.exclusive-promo-section .product-image {
+  height: 380px;
+  min-height: 380px;
+  clip-path: none;
+  overflow: visible;
+  background: #065f46;
+}
+
+.exclusive-promo-section .product-image::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 50px;
+  height: 100%;
+  background: linear-gradient(to right, #065f46 0%, transparent 100%);
+  pointer-events: none;
+  z-index: 5;
+}
+
+.exclusive-promo-section .product-image::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 50px;
+  height: 100%;
+  background: linear-gradient(to left, #065f46 0%, transparent 100%);
+  pointer-events: none;
+  z-index: 5;
+}
+
+.exclusive-promo-section .image {
+  object-fit: contain;
+  background: #065f46;
 }
 
 .image {
@@ -315,7 +355,9 @@
   font-weight: 500;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
   backdrop-filter: blur(4px);
-  transition: opacity 0.2s ease, transform 0.2s ease;
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease;
 }
 
 .buy-button-wrapper::after {
@@ -329,7 +371,9 @@
   opacity: 0;
   pointer-events: none;
   z-index: 100;
-  transition: opacity 0.2s ease, transform 0.2s ease;
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease;
 }
 
 .product-card-actions-compact:hover .buy-button-wrapper::before,
@@ -776,17 +820,20 @@
   display: flex;
   flex-direction: column;
   align-items: flex-start;
+  gap: 2px;
 }
 
 .original-price {
   text-decoration: line-through;
-  color: #666;
-  font-size: 0.9rem;
-  margin-right: 8px;
+  color: #888;
+  font-size: 0.85rem;
+  font-weight: 500;
+  opacity: 0.8;
 }
 
 .discounted-price {
-  color: #c0392b;
+  color: #dc2626;
+  font-weight: 700;
 }
 
 /* Referral/Campaign special pricing */
@@ -798,26 +845,28 @@
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  padding: 2px 8px;
-  background: linear-gradient(135deg, #8b5cf6, #6366f1);
+  padding: 4px 10px;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
   color: white;
-  font-size: 0.65rem;
-  font-weight: 600;
-  border-radius: 4px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  border-radius: 16px;
   margin-bottom: 4px;
   text-transform: uppercase;
   letter-spacing: 0.02em;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.4);
   animation: pulse-subtle 2s ease-in-out infinite;
 }
 
 .referral-badge svg {
-  width: 10px;
-  height: 10px;
+  width: 12px;
+  height: 12px;
 }
 
 .referral-final-price {
-  color: #7c3aed !important;
-  font-weight: 700;
+  color: #059669 !important;
+  font-weight: 800;
+  font-size: 1.1rem;
 }
 
 /* Handmade theme referral price */
