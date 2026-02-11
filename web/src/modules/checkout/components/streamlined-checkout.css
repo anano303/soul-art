@@ -1060,6 +1060,8 @@
 /* PayPal SDK Buttons Modal */
 .paypal-buttons-modal {
   max-width: 450px;
+  max-height: 90vh;
+  overflow-y: auto;
   padding: 2rem;
 }
 
@@ -1131,6 +1133,16 @@
 .paypal-buttons-modal .payment-modal-cards {
   font-size: 0.75rem;
   color: #9ca3af;
+}
+
+.paypal-conversion-note {
+  text-align: center;
+  font-size: 0.85rem;
+  color: #6b7280;
+  margin-top: 0.75rem;
+  padding: 0.5rem;
+  background: #f3f4f6;
+  border-radius: 6px;
 }
 
 @media (max-width: 480px) {

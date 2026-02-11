@@ -1387,12 +1387,24 @@ export function StreamlinedCheckout() {
             </div>
 
             <div className="paypal-buttons-wrapper">
+              {/* Convert GEL to USD: 1 USD = 2.6 GEL */}
               <PayPalButton
                 orderId={currentOrderId}
-                amount={totalPrice}
+                amount={Number((totalPrice / 2.6).toFixed(2))}
                 onPaymentSuccess={handlePayPalSuccess}
                 showCardButton={true}
+                shippingAddress={shippingAddress ? {
+                  address: shippingAddress.address,
+                  city: shippingAddress.city,
+                  postalCode: shippingAddress.postalCode || "",
+                  country: shippingAddress.country || "საქართველო",
+                  fullName: user?.name || guestInfo?.name || "",
+                  phone: shippingAddress.phone || "",
+                } : undefined}
               />
+              <p className="paypal-conversion-note">
+                {totalPrice.toFixed(2)} ₾ ≈ ${(totalPrice / 2.6).toFixed(2)} USD
+              </p>
             </div>
 
             <div className="payment-modal-footer">

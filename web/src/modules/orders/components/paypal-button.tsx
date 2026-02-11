@@ -19,14 +19,24 @@ import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import { PaymentResult } from "@/types/shipping";
 
+interface ShippingAddress {
+  address: string;
+  city: string;
+  postalCode: string;
+  country: string;
+  fullName?: string;
+  phone?: string;
+}
+
 interface PayPalButtonProps {
   orderId: string;
   amount: number;
   onPaymentSuccess?: () => void;
   showCardButton?: boolean;
+  shippingAddress?: ShippingAddress;
 }
 
-function PayPalButtonWrapper({ orderId, amount, onPaymentSuccess, showCardButton = true }: PayPalButtonProps) {
+function PayPalButtonWrapper({ orderId, amount, onPaymentSuccess, showCardButton = true, shippingAddress }: PayPalButtonProps) {
   const [{ isPending }] = usePayPalScriptReducer();
   const { toast } = useToast();
   const router = useRouter();
@@ -57,16 +67,43 @@ function PayPalButtonWrapper({ orderId, amount, onPaymentSuccess, showCardButton
     _data: CreateOrderData,
     actions: CreateOrderActions
   ): Promise<string> => {
+    // Build purchase unit with optional shipping address
+    const purchaseUnit: {
+      amount: { value: string; currency_code: string };
+      shipping?: {
+        name: { full_name: string };
+        address: {
+          address_line_1: string;
+          admin_area_2: string;
+          postal_code: string;
+          country_code: string;
+        };
+      };
+    } = {
+      amount: {
+        value: amount.toString(),
+        currency_code: "USD",
+      },
+    };
+
+    // Add shipping address if provided (will be used as billing too)
+    if (shippingAddress) {
+      purchaseUnit.shipping = {
+        name: {
+          full_name: shippingAddress.fullName || "Customer",
+        },
+        address: {
+          address_line_1: shippingAddress.address,
+          admin_area_2: shippingAddress.city,
+          postal_code: shippingAddress.postalCode || "0000",
+          country_code: shippingAddress.country === "საქართველო" ? "GE" : shippingAddress.country.substring(0, 2).toUpperCase(),
+        },
+      };
+    }
+
     return actions.order.create({
       intent: "CAPTURE",
-      purchase_units: [
-        {
-          amount: {
-            value: amount.toString(),
-            currency_code: "USD",
-          },
-        },
-      ],
+      purchase_units: [purchaseUnit],
     });
   };
 
