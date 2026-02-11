@@ -111,6 +111,20 @@ export class Order {
   })
   paymentResult!: PaymentResult;
 
+  @Prop({
+    required: false,
+    type: {
+      id: { required: false, type: String },
+      status: { required: false, type: String },
+      paymentMethod: { required: false, type: String },
+    },
+  })
+  payment!: {
+    id: string;
+    status: string;
+    paymentMethod: string;
+  };
+
   @Prop({ required: true, default: 0.0 })
   taxPrice!: number;
 

@@ -229,4 +229,41 @@ export class PaymentsController {
       throw error;
     }
   }
+
+  // PayPal Payment - Create order
+  @UseInterceptors(createRateLimitInterceptor(paymentRateLimit))
+  @Post('paypal/create')
+  async createPayPalPayment(
+    @Body()
+    data: {
+      orderId: string;
+      amount: number;
+      currency?: string;
+      successUrl: string;
+      cancelUrl: string;
+    },
+  ) {
+    try {
+      console.log('Creating PayPal payment for order:', data.orderId);
+
+      const result = await this.paymentsService.createPayPalPayment(data);
+      return result;
+    } catch (error) {
+      console.error('PayPal Payment Error:', error);
+      throw error;
+    }
+  }
+
+  @Post('paypal/verify/:orderId')
+  async verifyPayPalPayment(@Param('orderId') orderId: string) {
+    try {
+      console.log('Verifying PayPal payment for order:', orderId);
+
+      const result = await this.paymentsService.verifyPayPalPayment(orderId);
+      return result;
+    } catch (error) {
+      console.error('PayPal Verify Error:', error);
+      throw error;
+    }
+  }
 }

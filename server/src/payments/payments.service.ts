@@ -463,4 +463,256 @@ export class PaymentsService {
       throw new Error(error.message || 'Auction payment service error');
     }
   }
+
+  // PayPal Payment Methods
+  private async getPayPalToken(): Promise<string> {
+    try {
+      const clientId = this.configService.get<string>('PAYPAL_CLIENT_ID');
+      const clientSecret = this.configService.get<string>(
+        'PAYPAL_CLIENT_SECRET',
+      );
+
+      if (!clientId || !clientSecret) {
+        throw new Error('PayPal credentials are not configured');
+      }
+
+      const response = await axios.post(
+        'https://api-m.paypal.com/v1/oauth2/token',
+        'grant_type=client_credentials',
+        {
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            Authorization:
+              'Basic ' +
+              Buffer.from(`${clientId}:${clientSecret}`).toString('base64'),
+          },
+        },
+      );
+
+      return response.data.access_token;
+    } catch (error) {
+      this.logger.error('PayPal Token Error:', error.message);
+      throw error;
+    }
+  }
+
+  async createPayPalPayment(data: {
+    orderId: string;
+    amount: number;
+    currency?: string;
+    successUrl: string;
+    cancelUrl: string;
+  }) {
+    try {
+      console.log(
+        'PayPal createPayPalPayment called with:',
+        JSON.stringify(data, null, 2),
+      );
+      const token = await this.getPayPalToken();
+      console.log('PayPal token received:', token ? 'YES' : 'NO');
+
+      // Convert GEL to USD (approximate rate - you may want to fetch real-time rates)
+      const gelToUsdRate = 0.37; // 1 GEL ≈ 0.37 USD
+      const amountUsd = (data.amount * gelToUsdRate).toFixed(2);
+
+      const payload = {
+        intent: 'CAPTURE',
+        purchase_units: [
+          {
+            reference_id: data.orderId,
+            amount: {
+              currency_code: 'USD',
+              value: amountUsd,
+            },
+            description: 'Sales revenue from SoulArt',
+          },
+        ],
+        application_context: {
+          brand_name: 'SoulArt',
+          landing_page: 'LOGIN',
+          user_action: 'PAY_NOW',
+          return_url: data.successUrl,
+          cancel_url: data.cancelUrl,
+        },
+      };
+
+      const response = await axios.post(
+        'https://api-m.paypal.com/v2/checkout/orders',
+        payload,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+
+      this.logger.log(
+        `PayPal Order Created: ${response.data.id} for order ${data.orderId}`,
+      );
+
+      // Find approval link
+      const approvalLink = response.data.links.find(
+        (link: { rel: string; href: string }) => link.rel === 'approve',
+      );
+
+      if (!approvalLink) {
+        throw new Error('No approval URL in PayPal response');
+      }
+
+      // Update order with PayPal ID
+      await this.ordersService.updateOrderPaymentInfo(data.orderId, {
+        id: response.data.id,
+        status: 'CREATED',
+        update_time: new Date().toISOString(),
+        paymentMethod: 'PAYPAL',
+      });
+
+      return {
+        success: true,
+        paypalOrderId: response.data.id,
+        approvalUrl: approvalLink.href,
+      };
+    } catch (error) {
+      this.logger.error(`PayPal Payment Error: ${error.message}`, error.stack);
+
+      if (error.response) {
+        this.logger.error(
+          `PayPal API Response: ${JSON.stringify(error.response.data)}`,
+        );
+      }
+
+      return {
+        success: false,
+        message:
+          'PayPal გადახდა ვერ მოხერხდა. გთხოვთ გამოიყენოთ ბარათით გადახდა.',
+        approvalUrl: null,
+      };
+    }
+  }
+
+  // Capture PayPal payment after user approval
+  async capturePayPalPayment(paypalOrderId: string, orderId: string) {
+    try {
+      const token = await this.getPayPalToken();
+
+      const response = await axios.post(
+        `https://api-m.paypal.com/v2/checkout/orders/${paypalOrderId}/capture`,
+        {},
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+
+      this.logger.log(
+        `PayPal Order Captured: ${paypalOrderId}, Status: ${response.data.status}`,
+      );
+
+      if (response.data.status === 'COMPLETED') {
+        // Mark order as paid
+        await this.ordersService.updateOrderPaymentInfo(orderId, {
+          id: paypalOrderId,
+          status: 'COMPLETED',
+          update_time: new Date().toISOString(),
+          paymentMethod: 'PAYPAL',
+        });
+
+        return {
+          success: true,
+          status: 'COMPLETED',
+          orderId,
+          paypalOrderId,
+        };
+      }
+
+      return {
+        success: false,
+        status: response.data.status,
+        message: 'Payment not completed',
+      };
+    } catch (error) {
+      this.logger.error(`PayPal Capture Error: ${error.message}`, error.stack);
+
+      if (error.response) {
+        this.logger.error(
+          `PayPal Capture Response: ${JSON.stringify(error.response.data)}`,
+        );
+      }
+
+      return {
+        success: false,
+        message: 'გადახდის დადასტურება ვერ მოხერხდა',
+      };
+    }
+  }
+
+  // Verify PayPal payment status
+  async verifyPayPalPayment(orderId: string) {
+    try {
+      const order = await this.ordersService.findById(orderId);
+
+      if (!order) {
+        return { success: false, message: 'Order not found' };
+      }
+
+      // Check if order is already paid
+      if (order.isPaid) {
+        return { success: true, isPaid: true, status: 'COMPLETED' };
+      }
+
+      // If order has PayPal ID, check its status
+      if (order.payment?.id && order.payment?.paymentMethod === 'PAYPAL') {
+        const token = await this.getPayPalToken();
+
+        const response = await axios.get(
+          `https://api-m.paypal.com/v2/checkout/orders/${order.payment.id}`,
+          {
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${token}`,
+            },
+          },
+        );
+
+        this.logger.log(
+          `PayPal Order Status: ${response.data.status} for order ${orderId}`,
+        );
+
+        // If approved but not captured, capture it
+        if (response.data.status === 'APPROVED') {
+          return await this.capturePayPalPayment(order.payment.id, orderId);
+        }
+
+        if (response.data.status === 'COMPLETED') {
+          // Mark order as paid if not already
+          await this.ordersService.updateOrderPaymentInfo(orderId, {
+            id: order.payment.id,
+            status: 'COMPLETED',
+            update_time: new Date().toISOString(),
+            paymentMethod: 'PAYPAL',
+          });
+
+          return { success: true, isPaid: true, status: 'COMPLETED' };
+        }
+
+        return {
+          success: false,
+          isPaid: false,
+          status: response.data.status,
+        };
+      }
+
+      return {
+        success: false,
+        isPaid: false,
+        message: 'No PayPal payment found',
+      };
+    } catch (error) {
+      this.logger.error(`PayPal Verify Error: ${error.message}`, error.stack);
+      return { success: false, message: 'Verification failed' };
+    }
+  }
 }

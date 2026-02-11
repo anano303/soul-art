@@ -440,7 +440,9 @@ export function StreamlinedCheckout() {
   };
 
   // Handle order placement
-  const handlePlaceOrder = async () => {
+  const handlePlaceOrder = async (selectedMethod?: "BOG" | "PAYPAL") => {
+    const methodToUse = selectedMethod || paymentMethod;
+
     // If auction mode, use auction-specific flow
     if (isAuctionMode && auctionItem) {
       return handleAuctionPlaceOrder();
@@ -517,7 +519,7 @@ export function StreamlinedCheckout() {
       const orderPayload: {
         orderItems: typeof orderItems;
         shippingDetails: typeof shippingAddress;
-        paymentMethod: typeof paymentMethod;
+        paymentMethod: typeof methodToUse;
         itemsPrice: number;
         taxPrice: number;
         shippingPrice: number;
@@ -529,7 +531,7 @@ export function StreamlinedCheckout() {
       } = {
         orderItems,
         shippingDetails: shippingAddress,
-        paymentMethod,
+        paymentMethod: methodToUse,
         itemsPrice,
         taxPrice: 0, // საკომისიო მოხსნილია
         shippingPrice,
@@ -583,8 +585,10 @@ export function StreamlinedCheckout() {
       }
 
       // If BOG payment, initiate payment flow
-      if (paymentMethod === "BOG") {
+      if (methodToUse === "BOG") {
         await handleBOGPayment(orderId, orderSummary.totalPrice);
+      } else if (methodToUse === "PAYPAL") {
+        await handlePayPalPayment(orderId, orderSummary.totalPrice);
       } else {
         // For other payment methods, redirect to order page
         try {
@@ -726,6 +730,115 @@ export function StreamlinedCheckout() {
       console.error("BOG Payment Error:", error);
       toast({
         title: "გადახდის შეცდომა",
+        description: "გთხოვთ, სცადოთ ხელახლა",
+        variant: "destructive",
+      });
+    } finally {
+      setIsProcessingPayment(false);
+    }
+  };
+
+  // Handle PayPal payment
+  const handlePayPalPayment = async (orderId: string, amount: number) => {
+    setIsProcessingPayment(true);
+    setCurrentOrderId(orderId);
+    try {
+      const paymentData = {
+        orderId,
+        amount,
+        currency: "USD", // PayPal uses USD
+        successUrl: `${window.location.origin}/checkout/success?orderId=${orderId}`,
+        cancelUrl: `${window.location.origin}/checkout/fail?orderId=${orderId}`,
+      };
+
+      const response = await apiClient.post(
+        "/payments/paypal/create",
+        paymentData,
+      );
+      const result = response.data;
+
+      if (result?.approvalUrl) {
+        setPaymentUrl(result.approvalUrl);
+        setShowPaymentModal(true);
+        setPaymentWindowClosed(false);
+
+        // Open payment in new window
+        const paymentWindow = window.open(
+          result.approvalUrl,
+          "PayPalPayment",
+          "width=600,height=700,scrollbars=yes",
+        );
+
+        setPaymentWindowRef(paymentWindow);
+
+        // Check if window was closed
+        const checkWindowClosed = setInterval(() => {
+          if (paymentWindow && paymentWindow.closed) {
+            setPaymentWindowClosed(true);
+            clearInterval(checkWindowClosed);
+          }
+        }, 500);
+
+        // Listen for payment completion via postMessage
+        const handlePaymentMessage = (event: MessageEvent) => {
+          if (event.data.type === "payment_success") {
+            clearCart();
+            clearCheckout();
+            setShowPaymentModal(false);
+            if (paymentWindow && !paymentWindow.closed) paymentWindow.close();
+            window.removeEventListener("message", handlePaymentMessage);
+            router.push(`/checkout/success?orderId=${orderId}`);
+          } else if (event.data.type === "payment_fail") {
+            setShowPaymentModal(false);
+            if (paymentWindow && !paymentWindow.closed) paymentWindow.close();
+            window.removeEventListener("message", handlePaymentMessage);
+            router.push(`/checkout/fail?orderId=${orderId}`);
+          }
+        };
+
+        window.addEventListener("message", handlePaymentMessage);
+
+        // Also poll the order status as backup
+        const pollOrderStatus = setInterval(async () => {
+          try {
+            const emailParam =
+              !user && guestInfo?.email
+                ? `?email=${encodeURIComponent(guestInfo.email)}`
+                : "";
+            const orderStatus = await apiClient.get(
+              `/orders/${orderId}${emailParam}`,
+            );
+            if (orderStatus.data.isPaid) {
+              clearInterval(pollOrderStatus);
+              clearCart();
+              clearCheckout();
+              setShowPaymentModal(false);
+              if (paymentWindow && !paymentWindow.closed) paymentWindow.close();
+              window.removeEventListener("message", handlePaymentMessage);
+              router.push(`/checkout/success?orderId=${orderId}`);
+            }
+          } catch {
+            // Continue polling
+          }
+        }, 3000);
+
+        // Stop polling after 10 minutes
+        setTimeout(() => clearInterval(pollOrderStatus), 600000);
+      } else if (result?.message) {
+        // PayPal not available yet
+        toast({
+          title: "PayPal",
+          description: result.message,
+          variant: "destructive",
+        });
+        return;
+      } else {
+        throw new Error("No approval URL received from PayPal");
+      }
+    } catch (error) {
+      console.error("PayPal Payment Error:", error);
+      toast({
+        title: "PayPal გადახდის შეცდომა",
         description: "გთხოვთ, სცადოთ ხელახლა",
         variant: "destructive",
       });
@@ -1129,62 +1242,132 @@ export function StreamlinedCheckout() {
             )}
 
             {currentStep === "review" && (
-              <button
-                onClick={handlePlaceOrder}
-                disabled={
-                  isValidating ||
-                  unavailableItems.length > 0 ||
-                  isProcessingPayment
-                }
-                className="btn-bog-payment sidebar-action-btn mobile-place-order"
-              >
-                <div className="bog-payment-content">
-                  <div className="card-icon">
-                    <svg width="32" height="24" viewBox="0 0 32 24" fill="none">
-                      <rect
-                        x="1"
-                        y="1"
-                        width="30"
-                        height="22"
-                        rx="3"
-                        stroke="white"
-                        strokeWidth="2"
-                        fill="rgba(255,255,255,0.2)"
-                      />
-                      <line
-                        x1="1"
-                        y1="7"
-                        x2="31"
-                        y2="7"
-                        stroke="white"
-                        strokeWidth="2"
-                      />
-                      <rect
-                        x="4"
-                        y="14"
-                        width="10"
-                        height="4"
-                        rx="1"
-                        fill="white"
-                      />
-                    </svg>
+              <div className="payment-methods-section">
+                <h4 className="payment-methods-title">გადახდის მეთოდი</h4>
+
+                {/* BOG Payment Option */}
+                <button
+                  onClick={() => {
+                    setPaymentMethod("BOG");
+                    handlePlaceOrder("BOG");
+                  }}
+                  disabled={
+                    isValidating ||
+                    unavailableItems.length > 0 ||
+                    isProcessingPayment
+                  }
+                  className={`btn-bog-payment sidebar-action-btn mobile-place-order ${paymentMethod === "BOG" ? "selected" : ""}`}
+                >
+                  <div className="bog-payment-content">
+                    <div className="card-icon">
+                      <svg
+                        width="32"
+                        height="24"
+                        viewBox="0 0 32 24"
+                        fill="none"
+                      >
+                        <rect
+                          x="1"
+                          y="1"
+                          width="30"
+                          height="22"
+                          rx="3"
+                          stroke="white"
+                          strokeWidth="2"
+                          fill="rgba(255,255,255,0.2)"
+                        />
+                        <line
+                          x1="1"
+                          y1="7"
+                          x2="31"
+                          y2="7"
+                          stroke="white"
+                          strokeWidth="2"
+                        />
+                        <rect
+                          x="4"
+                          y="14"
+                          width="10"
+                          height="4"
+                          rx="1"
+                          fill="white"
+                        />
+                      </svg>
+                    </div>
+                    <div className="bog-payment-text">
+                      <span className="bog-payment-title">ბარათით გადახდა</span>
+                      <span className="bog-payment-subtitle">
+                        ყველა ბარათი მიიღება
+                      </span>
+                    </div>
+                    {(isValidating || isProcessingPayment) &&
+                      paymentMethod === "BOG" && <div className="spinner" />}
                   </div>
-                  <div className="bog-payment-text">
-                    <span className="bog-payment-title">ბარათით გადახდა</span>
-                    <span className="bog-payment-subtitle">
-                      ყველა ბარათი მიიღება
+                  {!isValidating && !isProcessingPayment && (
+                    <span className="bog-payment-amount">
+                      {totalPrice.toFixed(2)} ₾
                     </span>
-                  </div>
-                  {(isValidating || isProcessingPayment) && (
-                    <div className="spinner" />
                   )}
-                </div>
-                {!isValidating && !isProcessingPayment && (
-                  <span className="bog-payment-amount">
-                    {totalPrice.toFixed(2)} ₾
-                  </span>
-                )}
-              </button>
+                </button>
+
+                {/* PayPal Payment Option */}
+                <button
+                  onClick={() => {
+                    setPaymentMethod("PAYPAL");
+                    handlePlaceOrder("PAYPAL");
+                  }}
+                  disabled={
+                    isValidating ||
+                    unavailableItems.length > 0 ||
+                    isProcessingPayment
+                  }
+                  className={`btn-paypal-payment sidebar-action-btn ${paymentMethod === "PAYPAL" ? "selected" : ""}`}
+                >
+                  <div className="paypal-payment-content">
+                    <div className="paypal-icon">
+                      <svg
+                        width="80"
+                        height="20"
+                        viewBox="0 0 100 26"
+                        fill="none"
+                      >
+                        <path
+                          d="M12.237 4.306H6.187c-.417 0-.771.302-.836.71L3.144 20.25c-.05.31.19.59.507.59h2.896c.418 0 .772-.302.837-.71l.595-3.77c.065-.407.42-.71.837-.71h1.929c4.02 0 6.34-1.946 6.943-5.805.272-1.688.011-3.013-.775-3.944-.863-1.022-2.392-1.595-4.676-1.595zm.703 5.72c-.333 2.19-2.004 2.19-3.621 2.19h-.92l.645-4.086c.039-.246.25-.428.5-.428h.422c1.1 0 2.139 0 2.675.627.32.374.418.93.299 1.697z"
+                          fill="#253B80"
+                        />
+                        <path
+                          d="M35.654 9.963h-2.907c-.25 0-.46.182-.5.428l-.127.81-.203-.294c-.628-.912-2.028-1.217-3.425-1.217-3.205 0-5.942 2.43-6.475 5.837-.277 1.699.116 3.324 1.08 4.459.884 1.043 2.148 1.477 3.652 1.477 2.583 0 4.015-1.66 4.015-1.66l-.129.805c-.05.31.19.59.507.59h2.62c.418 0 .772-.302.837-.71l1.573-9.935c.05-.31-.19-.59-.518-.59zm-4.043 5.65c-.28 1.657-1.593 2.77-3.275 2.77-.845 0-1.521-.272-1.955-.786-.431-.51-.593-1.238-.458-2.047.26-1.642 1.597-2.79 3.252-2.79.826 0 1.497.274 1.94.791.446.523.622 1.256.496 2.062z"
+                          fill="#253B80"
+                        />
+                        <path
+                          d="M55.737 9.963h-2.922c-.28 0-.543.14-.7.373l-4.042 5.954-1.713-5.723c-.107-.358-.436-.604-.81-.604h-2.872c-.352 0-.597.34-.478.668l3.226 9.47-3.034 4.28c-.24.34.01.806.424.806h2.918c.278 0 .538-.136.696-.365l9.742-14.068c.235-.338-.017-.791-.435-.791z"
+                          fill="#253B80"
+                        />
+                        <path
+                          d="M67.863 4.306h-6.05c-.417 0-.772.302-.836.71l-2.207 14.234c-.05.31.19.59.506.59h3.095c.292 0 .54-.212.586-.497l.627-3.983c.064-.407.419-.71.836-.71h1.929c4.02 0 6.34-1.946 6.943-5.805.272-1.688.012-3.013-.775-3.944-.863-1.022-2.391-1.595-4.654-1.595zm.703 5.72c-.333 2.19-2.004 2.19-3.62 2.19h-.92l.645-4.086c.039-.246.25-.428.5-.428h.422c1.1 0 2.14 0 2.675.627.32.374.418.93.298 1.697z"
+                          fill="#179BD7"
+                        />
+                        <path
+                          d="M91.28 9.963h-2.907c-.25 0-.461.182-.5.428l-.128.81-.202-.294c-.628-.912-2.028-1.217-3.426-1.217-3.204 0-5.941 2.43-6.474 5.837-.277 1.699.116 3.324 1.08 4.459.884 1.043 2.147 1.477 3.651 1.477 2.583 0 4.016-1.66 4.016-1.66l-.13.805c-.05.31.19.59.508.59h2.62c.417 0 .771-.302.836-.71l1.573-9.935c.05-.31-.19-.59-.517-.59zm-4.043 5.65c-.28 1.657-1.593 2.77-3.275 2.77-.845 0-1.52-.272-1.955-.786-.431-.51-.593-1.238-.457-2.047.26-1.642 1.596-2.79 3.252-2.79.825 0 1.496.274 1.94.791.446.523.621 1.256.495 2.062z"
+                          fill="#179BD7"
+                        />
+                        <path
+                          d="M94.254 4.72l-2.242 14.27c-.05.31.19.59.507.59h2.502c.418 0 .772-.302.837-.71l2.208-14.234c.05-.31-.19-.59-.507-.59h-2.799c-.25 0-.461.182-.506.428v.246z"
+                          fill="#179BD7"
+                        />
+                      </svg>
+                    </div>
+                    <div className="paypal-payment-text">
+                      <span className="paypal-payment-title">PayPal</span>
+                      <span className="paypal-payment-subtitle">
+                        საერთაშორისო ბარათები
+                      </span>
+                    </div>
+                    {(isValidating || isProcessingPayment) &&
+                      paymentMethod === "PAYPAL" && <div className="spinner" />}
+                  </div>
+                </button>
+              </div>
             )}
           </div>
         </div>

@@ -112,7 +112,9 @@ export default function AdminAuctions() {
   const [processingWithdrawal, setProcessingWithdrawal] = useState<
     string | null
   >(null);
-  const [approvingAuctionId, setApprovingAuctionId] = useState<string | null>(null);
+  const [approvingAuctionId, setApprovingAuctionId] = useState<string | null>(
+    null,
+  );
 
   const fetchAuctions = async () => {
     try {
@@ -193,9 +195,7 @@ export default function AdminAuctions() {
   const fetchWithdrawals = async () => {
     try {
       setWithdrawalsLoading(true);
-      const response = await apiClient.get(
-        "/auctions/admin/all-withdrawals",
-      );
+      const response = await apiClient.get("/auctions/admin/all-withdrawals");
       setWithdrawals(response.data.withdrawals || []);
     } catch (error) {
       console.error("Failed to fetch withdrawals:", error);
