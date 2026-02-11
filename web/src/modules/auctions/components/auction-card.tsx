@@ -134,24 +134,24 @@ export default function AuctionCard({
   };
 
   const getSellerName = () => {
-    // 1. Try ownerFirstName + ownerLastName (seller profile) - priority
+    // 1. Try storeName (store/brand name) - priority
+    if (currentAuction.seller.storeName) {
+      return currentAuction.seller.storeName;
+    }
+    // 2. Try ownerFirstName + ownerLastName (seller profile)
     if (
       currentAuction.seller.ownerFirstName &&
       currentAuction.seller.ownerLastName
     ) {
       return `${currentAuction.seller.ownerFirstName} ${currentAuction.seller.ownerLastName}`;
     }
-    // 2. Try ownerFirstName only
+    // 3. Try ownerFirstName only
     if (currentAuction.seller.ownerFirstName) {
       return currentAuction.seller.ownerFirstName;
     }
-    // 3. Fallback to name (user's display name)
+    // 4. Fallback to name (user's display name)
     if (currentAuction.seller.name) {
       return currentAuction.seller.name;
-    }
-    // 4. Try storeName
-    if (currentAuction.seller.storeName) {
-      return currentAuction.seller.storeName;
     }
     return t("auctions.unknownSeller") || "Unknown Artist";
   };
