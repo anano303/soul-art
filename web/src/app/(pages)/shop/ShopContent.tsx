@@ -30,6 +30,7 @@ const ShopContent = () => {
     color: string;
     brand: string;
     showDiscountedOnly: boolean;
+    showPromoOnly: boolean;
     priceRange: [number, number];
     sorting: { field: string; direction: "asc" | "desc" };
   } | null>(null);
@@ -58,6 +59,7 @@ const ShopContent = () => {
   const [selectedBrand, setSelectedBrand] = useState<string>(initialBrand);
 
   const [showDiscountedOnly, setShowDiscountedOnly] = useState<boolean>(false);
+  const [showPromoOnly, setShowPromoOnly] = useState<boolean>(false);
   const [selectedOriginalTypes, setSelectedOriginalTypes] = useState<string[]>(
     [],
   );
@@ -159,6 +161,7 @@ const ShopContent = () => {
     }
 
     const discountParam = searchParams?.get("discountOnly") === "true";
+    const promoParam = searchParams?.get("promo") === "true";
     const minPriceParam = parseInt(searchParams?.get("minPrice") || "0");
     const maxPriceParam = parseInt(searchParams?.get("maxPrice") || "1000");
     const sortByParam = searchParams?.get("sortBy") || "createdAt";
@@ -174,6 +177,7 @@ const ShopContent = () => {
       color: colorParam,
       brand: decodedBrandParam,
       showDiscountedOnly: discountParam,
+      showPromoOnly: promoParam,
       priceRange: [minPriceParam, maxPriceParam],
       sorting: { field: sortByParam, direction: sortDirectionParam },
     };
@@ -188,6 +192,7 @@ const ShopContent = () => {
     setSelectedColor(colorParam);
     setSelectedBrand(decodedBrandParam);
     setShowDiscountedOnly(discountParam);
+    setShowPromoOnly(promoParam);
     setPriceRange([minPriceParam, maxPriceParam]);
     setSorting({ field: sortByParam, direction: sortDirectionParam });
 
@@ -236,6 +241,7 @@ const ShopContent = () => {
       selectedColor === pending.color &&
       selectedBrand === pending.brand &&
       showDiscountedOnly === pending.showDiscountedOnly &&
+      showPromoOnly === pending.showPromoOnly &&
       priceMatches &&
       sortingMatches
     ) {
@@ -251,6 +257,7 @@ const ShopContent = () => {
     selectedColor,
     selectedBrand,
     showDiscountedOnly,
+    showPromoOnly,
     priceRange,
     sorting.field,
     sorting.direction,
@@ -295,6 +302,7 @@ const ShopContent = () => {
         }
 
         if (showDiscountedOnly) params.discounted = "true";
+        if (showPromoOnly) params.hasPromo = "true";
         if (selectedOriginalTypes.length > 0)
           params.isOriginal = selectedOriginalTypes.join(",");
 
@@ -338,6 +346,7 @@ const ShopContent = () => {
     priceRange,
     sorting,
     showDiscountedOnly,
+    showPromoOnly,
     selectedOriginalTypes,
   ]);
 
@@ -365,6 +374,7 @@ const ShopContent = () => {
       params.set("sortDirection", sorting.direction);
     if (currentPage > 1) params.set("page", currentPage.toString());
     if (showDiscountedOnly) params.set("discounted", "true");
+    if (showPromoOnly) params.set("promo", "true");
 
     const urlString = `/shop?${params.toString()}`;
     router.replace(urlString);
@@ -380,6 +390,7 @@ const ShopContent = () => {
     sorting,
     currentPage,
     showDiscountedOnly,
+    showPromoOnly,
   ]);
 
   const handlePageChange = (page: number) => {

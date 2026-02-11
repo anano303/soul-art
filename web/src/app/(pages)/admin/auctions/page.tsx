@@ -112,6 +112,7 @@ export default function AdminAuctions() {
   const [processingWithdrawal, setProcessingWithdrawal] = useState<
     string | null
   >(null);
+  const [approvingAuctionId, setApprovingAuctionId] = useState<string | null>(null);
 
   const fetchAuctions = async () => {
     try {
@@ -249,12 +250,16 @@ export default function AdminAuctions() {
 
   const approveAuction = async (auctionId: string) => {
     try {
+      setApprovingAuctionId(auctionId);
       await apiClient.patch(`/auctions/${auctionId}/approve`);
       toast.success(t("admin.auctionApproved"));
-      fetchAuctions();
+      // Force refresh auctions list
+      await fetchAuctions();
     } catch (error) {
       console.error("Failed to approve auction:", error);
       toast.error(t("admin.auctionApproveError"));
+    } finally {
+      setApprovingAuctionId(null);
     }
   };
 
@@ -639,8 +644,13 @@ export default function AdminAuctions() {
                                 onClick={() => approveAuction(auction._id)}
                                 className="action-btn approve-btn"
                                 title={t("admin.approve")}
+                                disabled={approvingAuctionId === auction._id}
                               >
-                                ✓
+                                {approvingAuctionId === auction._id ? (
+                                  <span className="spinner-small">⏳</span>
+                                ) : (
+                                  "✓"
+                                )}
                               </button>
                             )}
                             <button

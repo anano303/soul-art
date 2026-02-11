@@ -328,7 +328,9 @@
   font-weight: 600;
   font-size: 0.9rem;
   cursor: pointer;
-  transition: background 0.2s ease, transform 0.2s ease;
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease;
 }
 
 .artist-edit-button:hover {
@@ -483,7 +485,10 @@
   color: #fff;
   font-size: 0.9rem;
   font-weight: 500;
-  transition: background 0.25s ease, color 0.25s ease, transform 0.2s ease;
+  transition:
+    background 0.25s ease,
+    color 0.25s ease,
+    transform 0.2s ease;
   text-decoration: none;
 }
 
@@ -568,7 +573,9 @@
   letter-spacing: 0.01em;
   box-shadow: 0 16px 32px -28px rgba(15, 23, 42, 0.55);
   backdrop-filter: blur(6px);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .artist-chip:hover {
@@ -629,7 +636,9 @@
   overflow: hidden;
   border: 1px solid rgba(15, 23, 42, 0.07);
   background: #fff;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
   min-height: 100%;
   position: relative;
 }
@@ -924,13 +933,21 @@
 
 .artist-product-card__original-price {
   text-decoration: line-through;
-  opacity: 0.6;
-  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 0.95rem;
+  font-weight: 500;
+  background: rgba(0, 0, 0, 0.4);
+  padding: 2px 8px;
+  border-radius: 4px;
 }
 
 .artist-product-card__discounted-price {
   color: #fbbf24;
   font-size: 1.2rem;
+  font-weight: 700;
+  background: rgba(0, 0, 0, 0.5);
+  padding: 4px 10px;
+  border-radius: 6px;
 }
 
 /* Discount Badge */
@@ -957,32 +974,41 @@
   right: 10px;
   background: linear-gradient(135deg, #10b981 0%, #059669 100%);
   color: #fff;
-  padding: 0.35rem 0.75rem;
+  padding: 0.4rem 0.85rem;
   border-radius: 20px;
-  font-size: 0.8rem;
+  font-size: 0.85rem;
   font-weight: 700;
   z-index: 10;
   pointer-events: none;
-  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.4);
+  box-shadow: 0 3px 12px rgba(16, 185, 129, 0.5);
   animation: referral-pulse 2s infinite;
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
 @keyframes referral-pulse {
   0%,
   100% {
-    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.4);
+    box-shadow: 0 3px 12px rgba(16, 185, 129, 0.5);
+    transform: scale(1);
   }
   50% {
-    box-shadow: 0 2px 16px rgba(16, 185, 129, 0.6);
+    box-shadow: 0 4px 20px rgba(16, 185, 129, 0.7);
+    transform: scale(1.02);
   }
 }
 
-/* Referral Price */
+/* Referral Price - bright green, clearly visible */
 .artist-product-card__referral-price {
   color: #10b981;
-  font-size: 1.3rem;
-  font-weight: 700;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  font-size: 1.4rem;
+  font-weight: 800;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  background: rgba(0, 0, 0, 0.6);
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: 2px solid #10b981;
 }
 
 .artist-product-card__description {
@@ -1066,7 +1092,9 @@
   font-weight: 600;
   border: none;
   cursor: pointer;
-  transition: background 0.2s ease, transform 0.2s ease;
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease;
   backdrop-filter: blur(10px);
   pointer-events: auto;
 }
@@ -1092,7 +1120,9 @@
   font-weight: 600;
   border: none;
   cursor: pointer;
-  transition: background 0.2s ease, transform 0.2s ease;
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease;
   backdrop-filter: blur(10px);
   pointer-events: auto;
 }
@@ -1124,7 +1154,10 @@
   border: 2px solid #012645;
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease,
+    transform 0.2s ease;
 }
 
 .artist-product-card__add-to-cart:hover {
@@ -1277,7 +1310,9 @@
   background: rgba(0, 0, 0, 0.6);
   color: #fff;
   text-decoration: none;
-  transition: transform 0.2s ease, background 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    background 0.2s ease;
   backdrop-filter: blur(8px);
   cursor: pointer;
   border: none;

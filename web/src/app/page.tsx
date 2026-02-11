@@ -7,6 +7,7 @@ import TopItems from "@/components/TopItems/TopItems";
 import Banner from "@/components/banner/banner";
 import PremiumRail from "@/components/premiumRail/PremiumRail";
 import DiscountedRail from "@/components/discountedRail/DiscountedRail";
+import ExclusivePromoRail from "@/components/exclusivePromoRail/ExclusivePromoRail";
 import { useLanguage } from "@/hooks/LanguageContext";
 import { trackPageView } from "@/lib/ga4-analytics";
 
@@ -16,7 +17,7 @@ const GiftCategories = dynamic(
   {
     loading: () => <div style={{ minHeight: "200px" }} />,
     ssr: true,
-  }
+  },
 );
 
 const NewYearPaintings = dynamic(
@@ -24,7 +25,7 @@ const NewYearPaintings = dynamic(
   {
     loading: () => <div style={{ minHeight: "300px" }} />,
     ssr: true,
-  }
+  },
 );
 
 const HomePageShop = dynamic(
@@ -32,7 +33,7 @@ const HomePageShop = dynamic(
   {
     loading: () => <div style={{ minHeight: "400px" }} />,
     ssr: true,
-  }
+  },
 );
 
 const PopularArtists = dynamic(
@@ -40,7 +41,7 @@ const PopularArtists = dynamic(
   {
     loading: () => <div style={{ minHeight: "300px" }} />,
     ssr: true,
-  }
+  },
 );
 
 const HomePageForum = dynamic(
@@ -48,7 +49,7 @@ const HomePageForum = dynamic(
   {
     loading: () => <div style={{ minHeight: "300px" }} />,
     ssr: true,
-  }
+  },
 );
 
 const Home = () => {
@@ -62,6 +63,8 @@ const Home = () => {
   return (
     <div>
       <HomePagesHead />
+      {/* Exclusive promo section - only visible when user has promo code */}
+      <ExclusivePromoRail />
       {/* <div>
         <GuestReferralBanner />
         <ReferralPromoBanner />

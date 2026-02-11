@@ -89,7 +89,7 @@ const HomePageShop = () => {
 
       // Fetch products - increased to get more products per category
       // Exclude out of stock products from home page
-      const response = await getProducts(1, 100, {
+      const response = await getProducts(1, 300, {
         excludeOutOfStock: "true",
         includeVariants: "true",
       });

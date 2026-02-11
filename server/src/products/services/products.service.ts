@@ -64,6 +64,7 @@ interface FindManyParams {
   dimension?: string;
   excludeHiddenFromStore?: boolean; // If true, exclude products with hideFromStore=true
   excludeOutOfStock?: boolean; // If true, exclude products with no stock
+  hasPromo?: boolean; // If true, only products with referralDiscountPercent > 0
 }
 
 @Injectable()
@@ -362,6 +363,7 @@ export class ProductsService {
       dimension,
       excludeHiddenFromStore = false,
       excludeOutOfStock = false,
+      hasPromo = false,
     } = params;
 
     const pageNumber = parseInt(page);
@@ -595,6 +597,13 @@ export class ProductsService {
           { discountEndDate: null },
           { discountEndDate: { $gte: now } },
         ],
+      });
+    }
+
+    // Filter by promo/referral discount (products with special campaign pricing)
+    if (hasPromo === true) {
+      andConditions.push({
+        referralDiscountPercent: { $exists: true, $gt: 0 },
       });
     }
 
@@ -1221,6 +1230,25 @@ export class ProductsService {
         : [];
 
       console.log('Creating product with hashtags:', data.hashtags);
+
+      // Auto-apply seller's campaign discount settings if user has chosen 'all'
+      // and no specific referralDiscountPercent is provided for this product
+      const userDoc = productData.user as UserDocument;
+      if (
+        userDoc &&
+        userDoc.campaignDiscountChoice === 'all' &&
+        userDoc.defaultReferralDiscount &&
+        userDoc.defaultReferralDiscount > 0 &&
+        (data.referralDiscountPercent === undefined ||
+          data.referralDiscountPercent === null ||
+          data.referralDiscountPercent === 0)
+      ) {
+        data.referralDiscountPercent = userDoc.defaultReferralDiscount;
+        data.useArtistDefaultDiscount = true;
+        console.log(
+          `🎯 Auto-applying seller's campaign discount: ${userDoc.defaultReferralDiscount}% for new product`,
+        );
+      }
 
       // Parse variants if it's a string
       if (data.variants && typeof data.variants === 'string') {

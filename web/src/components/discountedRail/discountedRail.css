@@ -36,8 +36,8 @@
   padding: 0.25rem 0.75rem;
   border-radius: 4px;
   background: rgba(220, 38, 127, 0.08);
-  border: 1px solid rgba(220, 38, 127, 0.2);
-  color: #dc267f;
+  border: 1px solid red;
+  color: red;
   font-weight: 700;
   letter-spacing: 0.05em;
   text-transform: uppercase;
@@ -63,7 +63,7 @@
   padding: 0.125rem 0.5rem;
   border-radius: 999px;
   background: rgba(220, 38, 127, 0.1);
-  color: #dc267f;
+  color: red;
   font-weight: 600;
   font-size: 0.625rem;
   text-transform: uppercase;

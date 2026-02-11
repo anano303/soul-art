@@ -1,10 +1,11 @@
 "use client";
 
 import { useAuth as useGlobalAuth } from "@/hooks/use-auth";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiClient } from "@/lib/axios";
 import axios, { AxiosError } from "axios";
 import { User } from "@/types";
+import { storeUserData } from "@/lib/auth";
 
 // Define response types
 interface AuthResponse {
@@ -116,7 +117,7 @@ export function useRegister() {
       try {
         const response = await apiClient.post<AuthResponse>(
           "/auth/register",
-          userData
+          userData,
         );
         return response.data;
       } catch (error) {
@@ -144,7 +145,7 @@ export function useSellerRegister() {
             headers: {
               "Content-Type": "multipart/form-data",
             },
-          }
+          },
         );
         return response.data;
       } catch (error) {
@@ -192,7 +193,7 @@ export function useSalesManagerRegister() {
       try {
         const response = await apiClient.post<AuthResponse>(
           "/auth/sales-manager-register",
-          data
+          data,
         );
         return response.data;
       } catch (error) {
@@ -214,17 +215,27 @@ export interface FacebookAuthData {
 
 // Facebook auth hook
 export function useFacebookAuth() {
+  const queryClient = useQueryClient();
+
   return useMutation<AuthResponse, Error, FacebookAuthData>({
     mutationFn: async (data: FacebookAuthData) => {
       try {
         const response = await apiClient.post<AuthResponse>(
           "/auth/facebook",
-          data
+          data,
         );
         return response.data;
       } catch (error) {
         const errorMessage = extractErrorMessage(error);
         throw new Error(errorMessage);
+      }
+    },
+    onSuccess: (data) => {
+      // Store user data in localStorage and update query cache
+      if (data.user) {
+        storeUserData(data.user);
+        queryClient.setQueryData(["user"], data.user);
+        queryClient.invalidateQueries({ queryKey: ["user"] });
       }
     },
   });
