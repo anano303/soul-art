@@ -564,6 +564,38 @@ export class AuctionAdminService {
     };
   }
 
+  // Admin: Get all withdrawals (history) with optional status filter
+  async getAllWithdrawals(page: number = 1, limit: number = 50, status?: string) {
+    const skip = (page - 1) * limit;
+    
+    // Build query filter
+    const filter: any = {};
+    if (status && status !== 'ALL') {
+      filter.status = status;
+    }
+
+    const [withdrawals, total] = await Promise.all([
+      this.auctionAdminWithdrawalModel
+        .find(filter)
+        .populate('auctionAdminId', 'name email phoneNumber firstName lastName')
+        .populate('processedBy', 'name email')
+        .sort({ createdAt: -1 }) // Newest first
+        .skip(skip)
+        .limit(limit)
+        .lean(),
+      this.auctionAdminWithdrawalModel.countDocuments(filter),
+    ]);
+
+    return {
+      withdrawals,
+      pagination: {
+        current: page,
+        pages: Math.ceil(total / limit),
+        total,
+      },
+    };
+  }
+
   // Admin: Process withdrawal (approve/reject)
   async processWithdrawal(
     adminId: string,

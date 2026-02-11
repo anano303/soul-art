@@ -31,7 +31,7 @@ export class AuctionAdminWithdrawal {
   @Prop({
     type: Number,
     required: true,
-    min: 50, // Minimum 50 GEL
+    min: 10, // Minimum 10 GEL
   })
   amount: number;
 

@@ -189,12 +189,12 @@ export default function AdminAuctions() {
     fetchAuctionAdmins();
   }, []);
 
-  // Fetch auction admin pending withdrawals
+  // Fetch auction admin withdrawals (all history)
   const fetchWithdrawals = async () => {
     try {
       setWithdrawalsLoading(true);
       const response = await apiClient.get(
-        "/auctions/admin/pending-withdrawals",
+        "/auctions/admin/all-withdrawals",
       );
       setWithdrawals(response.data.withdrawals || []);
     } catch (error) {

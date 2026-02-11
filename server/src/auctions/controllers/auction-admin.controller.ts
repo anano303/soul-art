@@ -152,6 +152,18 @@ export class AuctionAdminController {
     return this.auctionAdminService.getAllPendingWithdrawals(page, limit);
   }
 
+  // Admin: Get all withdrawals (history)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.Admin)
+  @Get('all-withdrawals')
+  async getAllWithdrawals(
+    @Query('page') page: number = 1,
+    @Query('limit') limit: number = 50,
+    @Query('status') status?: string,
+  ) {
+    return this.auctionAdminService.getAllWithdrawals(page, limit, status);
+  }
+
   // Admin: Process withdrawal (approve/reject)
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.Admin)
