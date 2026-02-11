@@ -238,8 +238,31 @@
   background-color: var(--primary-color, #012645);
 }
 
+.handmade-theme .product-image {
+  background: var(--secondary-color, #7d5a35);
+}
+
 .handmade-theme .product-image img {
   background-color: var(--secondary-color);
+}
+
+/* Handmade theme blur edges */
+.handmade-theme .product-image::before {
+  background: linear-gradient(
+    to right,
+    var(--secondary-color, #7d5a35) 0%,
+    transparent 100%
+  );
+}
+
+.handmade-theme .product-image::after {
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    rgba(125, 90, 53, 0.3) 40%,
+    rgba(125, 90, 53, 0.7) 80%,
+    rgba(125, 90, 53, 0.95) 100%
+  );
 }
 
 .product-card:hover .image {
