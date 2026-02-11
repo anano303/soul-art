@@ -4,7 +4,14 @@ import {
   PayPalButtons,
   PayPalScriptProvider,
   usePayPalScriptReducer,
+  FUNDING,
 } from "@paypal/react-paypal-js";
+import type {
+  CreateOrderData,
+  CreateOrderActions,
+  OnApproveData,
+  OnApproveActions,
+} from "@paypal/paypal-js";
 import { apiClient } from "@/lib/axios";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
@@ -15,9 +22,11 @@ import { PaymentResult } from "@/types/shipping";
 interface PayPalButtonProps {
   orderId: string;
   amount: number;
+  onPaymentSuccess?: () => void;
+  showCardButton?: boolean;
 }
 
-function PayPalButtonWrapper({ orderId, amount }: PayPalButtonProps) {
+function PayPalButtonWrapper({ orderId, amount, onPaymentSuccess, showCardButton = true }: PayPalButtonProps) {
   const [{ isPending }] = usePayPalScriptReducer();
   const { toast } = useToast();
   const router = useRouter();
@@ -29,7 +38,12 @@ function PayPalButtonWrapper({ orderId, amount }: PayPalButtonProps) {
         title: "Payment Successful",
         description: "Your order has been paid successfully.",
       });
-      router.refresh();
+      
+      if (onPaymentSuccess) {
+        onPaymentSuccess();
+      } else {
+        router.refresh();
+      }
     } catch {
       toast({
         title: "Payment Error",
@@ -39,60 +53,100 @@ function PayPalButtonWrapper({ orderId, amount }: PayPalButtonProps) {
     }
   };
 
+  const createOrderHandler = async (
+    _data: CreateOrderData,
+    actions: CreateOrderActions
+  ): Promise<string> => {
+    return actions.order.create({
+      intent: "CAPTURE",
+      purchase_units: [
+        {
+          amount: {
+            value: amount.toString(),
+            currency_code: "USD",
+          },
+        },
+      ],
+    });
+  };
+
+  const onApproveHandler = async (
+    _data: OnApproveData,
+    actions: OnApproveActions
+  ) => {
+    const details = await actions.order?.capture();
+    if (!details) {
+      throw new Error("Failed to capture order");
+    }
+
+    const email_address =
+      (details.payment_source?.paypal as { email_address?: string })?.email_address ||
+      details.payer?.email_address;
+    if (!email_address) {
+      throw new Error("Missing payment information");
+    }
+
+    const paymentResult: PaymentResult = {
+      id: details.id || "",
+      status: details.status || "",
+      update_time: details.update_time || "",
+      email_address,
+    };
+
+    handlePaymentSuccess(paymentResult);
+  };
+
+  const onErrorHandler = () => {
+    toast({
+      title: "PayPal Error",
+      description: "There was an error with PayPal. Please try again.",
+      variant: "destructive",
+    });
+  };
+
   if (isPending) {
     return (
-      <button disabled className="w-full">
+      <div className="w-full flex items-center justify-center py-4">
         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-        Loading PayPal...
-      </button>
+        <span>Loading PayPal...</span>
+      </div>
     );
   }
 
   return (
-    <PayPalButtons
-      createOrder={(_, actions) => {
-        return actions.order.create({
-          intent: "CAPTURE",
-          purchase_units: [
-            {
-              amount: {
-                value: amount.toString(),
-                currency_code: "USD",
-              },
-            },
-          ],
-        });
-      }}
-      onApprove={async (_, actions) => {
-        const details = await actions.order?.capture();
-        if (!details) {
-          throw new Error("Failed to capture order");
-        }
-
-        const email_address =
-          details.payment_source?.paypal?.email_address ||
-          details.payer?.email_address;
-        if (!email_address) {
-          throw new Error("Missing payment information");
-        }
-
-        const paymentResult: PaymentResult = {
-          id: details.id || "",
-          status: details.status || "",
-          update_time: details.update_time || "",
-          email_address,
-        };
-
-        handlePaymentSuccess(paymentResult);
-      }}
-      onError={() => {
-        toast({
-          title: "PayPal Error",
-          description: "There was an error with PayPal. Please try again.",
-          variant: "destructive",
-        });
-      }}
-    />
+    <div className="paypal-buttons-container space-y-3">
+      {/* PayPal Button */}
+      <PayPalButtons
+        fundingSource={FUNDING.PAYPAL}
+        style={{
+          layout: "vertical",
+          color: "gold",
+          shape: "rect",
+          label: "paypal",
+          height: 45,
+        }}
+        createOrder={createOrderHandler}
+        onApprove={onApproveHandler}
+        onError={onErrorHandler}
+      />
+      
+      {/* Card Button - Debit or Credit Card */}
+      {showCardButton && (
+        <PayPalButtons
+          fundingSource={FUNDING.CARD}
+          style={{
+            layout: "vertical",
+            color: "black",
+            shape: "rect",
+            label: "pay",
+            height: 45,
+          }}
+          createOrder={createOrderHandler}
+          onApprove={onApproveHandler}
+          onError={onErrorHandler}
+        />
+      )}
+    </div>
   );
 }
 

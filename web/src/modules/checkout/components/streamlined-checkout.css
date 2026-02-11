@@ -1056,3 +1056,86 @@
     max-height: none;
   }
 }
+
+/* PayPal SDK Buttons Modal */
+.paypal-buttons-modal {
+  max-width: 450px;
+  padding: 2rem;
+}
+
+.paypal-buttons-modal .payment-modal-header {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.paypal-buttons-modal .payment-modal-header h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #012645;
+  margin-bottom: 0.5rem;
+}
+
+.paypal-buttons-modal .payment-modal-subtitle {
+  font-size: 0.9rem;
+  color: #6b7280;
+}
+
+.paypal-buttons-wrapper {
+  padding: 1rem 0;
+  min-height: 150px;
+}
+
+.paypal-buttons-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.paypal-divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1rem;
+}
+
+.paypal-divider span {
+  background: white;
+  padding: 0 1rem;
+  color: #6b7280;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.paypal-button-wrapper,
+.paypal-card-button-wrapper {
+  min-height: 45px;
+}
+
+.paypal-buttons-loading {
+  padding: 1rem 0;
+}
+
+.paypal-buttons-modal .payment-modal-footer {
+  text-align: center;
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.paypal-buttons-modal .payment-modal-note {
+  font-size: 0.85rem;
+  color: #6b7280;
+  margin-bottom: 0.5rem;
+}
+
+.paypal-buttons-modal .payment-modal-cards {
+  font-size: 0.75rem;
+  color: #9ca3af;
+}
+
+@media (max-width: 480px) {
+  .paypal-buttons-modal {
+    padding: 1.5rem;
+    max-width: 95%;
+  }
+}

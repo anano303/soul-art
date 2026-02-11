@@ -27,6 +27,7 @@ import {
 import { trackCheckoutStart } from "@/hooks/use-sales-tracking";
 import Cookies from "js-cookie";
 import { CartItem } from "@/types/cart";
+import { PayPalButton } from "@/modules/orders/components/paypal-button";
 
 type CheckoutStep = "auth" | "guest" | "shipping" | "payment" | "review";
 
@@ -80,6 +81,8 @@ export function StreamlinedCheckout() {
   const [originalPrices, setOriginalPrices] = useState<Record<string, number>>(
     {},
   );
+  const [showPayPalButtons, setShowPayPalButtons] = useState(false);
+  const [paypalOrderId, setPaypalOrderId] = useState<string | null>(null);
 
   // Check for auction checkout mode on mount
   useEffect(() => {
@@ -738,113 +741,20 @@ export function StreamlinedCheckout() {
     }
   };
 
-  // Handle PayPal payment
-  const handlePayPalPayment = async (orderId: string, amount: number) => {
-    setIsProcessingPayment(true);
+  // Handle PayPal payment - Show SDK buttons instead of redirect
+  const handlePayPalPayment = async (orderId: string, _amount: number) => {
+    setIsProcessingPayment(false);
     setCurrentOrderId(orderId);
-    try {
-      const paymentData = {
-        orderId,
-        amount,
-        currency: "USD", // PayPal uses USD
-        successUrl: `${window.location.origin}/checkout/success?orderId=${orderId}`,
-        cancelUrl: `${window.location.origin}/checkout/fail?orderId=${orderId}`,
-      };
+    // Show PayPal SDK buttons modal instead of redirect
+    setShowPayPalButtons(true);
+  };
 
-      const response = await apiClient.post(
-        "/payments/paypal/create",
-        paymentData,
-      );
-      const result = response.data;
-
-      if (result?.approvalUrl) {
-        setPaymentUrl(result.approvalUrl);
-        setShowPaymentModal(true);
-        setPaymentWindowClosed(false);
-
-        // Open payment in new window
-        const paymentWindow = window.open(
-          result.approvalUrl,
-          "PayPalPayment",
-          "width=600,height=700,scrollbars=yes",
-        );
-
-        setPaymentWindowRef(paymentWindow);
-
-        // Check if window was closed
-        const checkWindowClosed = setInterval(() => {
-          if (paymentWindow && paymentWindow.closed) {
-            setPaymentWindowClosed(true);
-            clearInterval(checkWindowClosed);
-          }
-        }, 500);
-
-        // Listen for payment completion via postMessage
-        const handlePaymentMessage = (event: MessageEvent) => {
-          if (event.data.type === "payment_success") {
-            clearCart();
-            clearCheckout();
-            setShowPaymentModal(false);
-            if (paymentWindow && !paymentWindow.closed) paymentWindow.close();
-            window.removeEventListener("message", handlePaymentMessage);
-            router.push(`/checkout/success?orderId=${orderId}`);
-          } else if (event.data.type === "payment_fail") {
-            setShowPaymentModal(false);
-            if (paymentWindow && !paymentWindow.closed) paymentWindow.close();
-            window.removeEventListener("message", handlePaymentMessage);
-            router.push(`/checkout/fail?orderId=${orderId}`);
-          }
-        };
-
-        window.addEventListener("message", handlePaymentMessage);
-
-        // Also poll the order status as backup
-        const pollOrderStatus = setInterval(async () => {
-          try {
-            const emailParam =
-              !user && guestInfo?.email
-                ? `?email=${encodeURIComponent(guestInfo.email)}`
-                : "";
-            const orderStatus = await apiClient.get(
-              `/orders/${orderId}${emailParam}`,
-            );
-            if (orderStatus.data.isPaid) {
-              clearInterval(pollOrderStatus);
-              clearCart();
-              clearCheckout();
-              setShowPaymentModal(false);
-              if (paymentWindow && !paymentWindow.closed) paymentWindow.close();
-              window.removeEventListener("message", handlePaymentMessage);
-              router.push(`/checkout/success?orderId=${orderId}`);
-            }
-          } catch {
-            // Continue polling
-          }
-        }, 3000);
-
-        // Stop polling after 10 minutes
-        setTimeout(() => clearInterval(pollOrderStatus), 600000);
-      } else if (result?.message) {
-        // PayPal not available yet
-        toast({
-          title: "PayPal",
-          description: result.message,
-          variant: "destructive",
-        });
-        return;
-      } else {
-        throw new Error("No approval URL received from PayPal");
-      }
-    } catch (error) {
-      console.error("PayPal Payment Error:", error);
-      toast({
-        title: "PayPal გადახდის შეცდომა",
-        description: "გთხოვთ, სცადოთ ხელახლა",
-        variant: "destructive",
-      });
-    } finally {
-      setIsProcessingPayment(false);
-    }
+  // Handle PayPal SDK success - called from PayPalButton component
+  const handlePayPalSuccess = async () => {
+    setShowPayPalButtons(false);
+    await clearCart();
+    clearCheckout();
+    router.push(`/checkout/success?orderId=${currentOrderId}`);
   };
 
   // Reopen payment window
@@ -1452,6 +1362,45 @@ export function StreamlinedCheckout() {
               <p className="payment-modal-note">
                 💡 გადახდის დასრულების შემდეგ ავტომატურად გადამოგიყვანთ
                 დადასტურების გვერდზე
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* PayPal SDK Buttons Modal */}
+      {showPayPalButtons && currentOrderId && (
+        <div className="payment-modal-overlay">
+          <div className="payment-modal-content paypal-buttons-modal">
+            <button
+              className="payment-modal-close"
+              onClick={() => setShowPayPalButtons(false)}
+            >
+              ✕
+            </button>
+
+            <div className="payment-modal-header">
+              <h2>საერთაშორისო გადახდა</h2>
+              <p className="payment-modal-subtitle">
+                აირჩიეთ გადახდის მეთოდი: PayPal ან ბარათი
+              </p>
+            </div>
+
+            <div className="paypal-buttons-wrapper">
+              <PayPalButton
+                orderId={currentOrderId}
+                amount={totalPrice}
+                onPaymentSuccess={handlePayPalSuccess}
+                showCardButton={true}
+              />
+            </div>
+
+            <div className="payment-modal-footer">
+              <p className="payment-modal-note">
+                🔒 უსაფრთხო გადახდა PayPal-ის საშუალებით
+              </p>
+              <p className="payment-modal-cards">
+                Visa, Mastercard, American Express და სხვა საერთაშორისო ბარათები
               </p>
             </div>
           </div>

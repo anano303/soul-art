@@ -254,6 +254,27 @@ export class PaymentsController {
     }
   }
 
+  // PayPal Payment - Capture (for SDK buttons)
+  @UseInterceptors(createRateLimitInterceptor(paymentRateLimit))
+  @Post('paypal/capture/:paypalOrderId')
+  async capturePayPalPayment(
+    @Param('paypalOrderId') paypalOrderId: string,
+    @Body() data: { orderId: string },
+  ) {
+    try {
+      console.log('Capturing PayPal payment:', paypalOrderId, 'for order:', data.orderId);
+
+      const result = await this.paymentsService.capturePayPalPayment(
+        paypalOrderId,
+        data.orderId,
+      );
+      return result;
+    } catch (error) {
+      console.error('PayPal Capture Error:', error);
+      throw error;
+    }
+  }
+
   @Post('paypal/verify/:orderId')
   async verifyPayPalPayment(@Param('orderId') orderId: string) {
     try {
