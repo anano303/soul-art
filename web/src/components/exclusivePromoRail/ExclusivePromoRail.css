@@ -5,7 +5,7 @@
   background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 50%, #a7f3d0 100%);
   position: relative;
   overflow: hidden;
-  box-shadow: 1px -20px 80px 40px #065f46;
+  box-shadow: rgb(6 95 70 / 67%) 1px -20px 80px 40px;
 }
 
 .exclusive-promo-section::before {
