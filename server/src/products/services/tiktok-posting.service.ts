@@ -382,16 +382,24 @@ export class TikTokPostingService {
 
       const caption = this.buildCaption(product);
 
-      // Check if product has a video
-      const existingVideoUrl =
-        (product as any).youtubeVideoUrl ||
+      // Check if product has a DIRECT video file URL (not YouTube/webpage links)
+      // YouTube URLs are webpage URLs, not direct video files - TikTok can't pull from them
+      // Only use direct video file URLs (.mp4, .mov, .webm, etc.)
+      const candidateVideoUrl =
+        (product as any).tiktokVideoUrl ||
         (product as any).videoUrl ||
-        (product as any).tiktokVideoUrl;
+        '';
 
-      if (existingVideoUrl) {
-        // Use existing video
+      const isDirectVideoUrl =
+        candidateVideoUrl &&
+        !candidateVideoUrl.includes('youtube.com') &&
+        !candidateVideoUrl.includes('youtu.be') &&
+        /\.(mp4|mov|webm|avi)(\?|$)/i.test(candidateVideoUrl);
+
+      if (isDirectVideoUrl) {
+        // Use direct video file
         this.logger.log(`Posting video for product ${product._id}`);
-        return await this.postVideo(existingVideoUrl, caption);
+        return await this.postVideo(candidateVideoUrl, caption);
       }
 
       // No video - use Photo Mode with images
