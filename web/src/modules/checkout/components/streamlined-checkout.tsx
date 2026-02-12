@@ -140,7 +140,9 @@ export function StreamlinedCheckout() {
 
   // Delivery cost based on country and city
   const shippingCountry = shippingAddress?.country || "GE";
-  const shippingPrice = shippingAddress ? calculateShipping(shippingCountry, shippingAddress?.city) : 0;
+  const shippingPrice = shippingAddress
+    ? calculateShipping(shippingCountry, shippingAddress?.city)
+    : 0;
 
   // საკომისიო მოხსნილია - რეალური ფასი ყველგან
   const totalPrice = itemsPrice + shippingPrice;
@@ -1416,7 +1418,8 @@ export function StreamlinedCheckout() {
                 }
               />
               <p className="paypal-conversion-note">
-                {totalPrice.toFixed(2)} ₾ ≈ ${(totalPrice / usdRate).toFixed(2)} USD
+                {totalPrice.toFixed(2)} ₾ ≈ ${(totalPrice / usdRate).toFixed(2)}{" "}
+                USD
               </p>
             </div>
 

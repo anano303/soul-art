@@ -102,6 +102,36 @@
   color: #1877f2;
 }
 
+/* TikTok post button */
+.space-x-2 button.tiktok-btn {
+  color: #010101;
+  border-color: rgba(1, 1, 1, 0.3);
+}
+
+.space-x-2 button.tiktok-btn:hover:not(:disabled) {
+  background: linear-gradient(
+    135deg,
+    rgba(254, 44, 85, 0.1),
+    rgba(37, 244, 238, 0.1)
+  );
+  border-color: #fe2c55;
+}
+
+.space-x-2 button.tiktok-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.actions.tiktok-icon {
+  color: #010101;
+  width: 18px;
+  height: 18px;
+}
+
+.space-x-2 button.tiktok-btn:hover:not(:disabled) .actions.tiktok-icon {
+  color: #fe2c55;
+}
+
 .actions.spin {
   animation: spin 0.9s linear infinite;
 }

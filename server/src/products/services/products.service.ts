@@ -1026,7 +1026,7 @@ export class ProductsService {
         autoPostEnabled
       ) {
         try {
-          // Use postToAllPlatforms to post to Page, Groups, and Instagram
+          // Use postToAllPlatforms to post to Page, Groups, Instagram, and TikTok
           // best-effort, don't await to not block response
           this.facebookPostingService
             .postToAllPlatforms(updatedProduct)
@@ -1037,6 +1037,7 @@ export class ProductsService {
                 if (res.groupPosts?.some((g) => g.success))
                   platforms.push('FB Groups');
                 if (res.instagramPost?.success) platforms.push('Instagram');
+                if (res.tiktokPost?.success) platforms.push('TikTok');
 
                 console.log(
                   `[Social Media] Posted new product ${updatedProduct._id?.toString?.()} to: ${platforms.join(', ')}`,

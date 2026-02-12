@@ -517,7 +517,24 @@ export class FacebookPostingService {
   }
 
   /**
-   * Post to all enabled platforms (Page, Groups, Instagram)
+   * Post to TikTok only
+   */
+  async postToTikTok(product: ProductDocument) {
+    if (!this.tiktokService.isEnabled()) {
+      return { success: false, error: 'TikTok posting is not configured' };
+    }
+    return this.tiktokService.postProduct(product);
+  }
+
+  /**
+   * Check if TikTok is enabled
+   */
+  isTikTokEnabled(): boolean {
+    return this.tiktokService.isEnabled();
+  }
+
+  /**
+   * Post to all enabled platforms (Page, Groups, Instagram, TikTok)
    */
   async postToAllPlatforms(product: ProductDocument): Promise<MultiPostResult> {
     const result: MultiPostResult = {

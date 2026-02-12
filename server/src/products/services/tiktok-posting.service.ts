@@ -1,4 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { Cron } from '@nestjs/schedule';
 import axios from 'axios';
 import { ProductDocument } from '../schemas/product.schema';
 
@@ -35,7 +36,8 @@ export class TikTokPostingService {
 
   private readonly clientKey = process.env.TIKTOK_CLIENT_KEY || '';
   private readonly clientSecret = process.env.TIKTOK_CLIENT_SECRET || '';
-  private readonly accessToken = process.env.TIKTOK_ACCESS_TOKEN || '';
+  private currentAccessToken = process.env.TIKTOK_ACCESS_TOKEN || '';
+  private currentRefreshToken = process.env.TIKTOK_REFRESH_TOKEN || '';
   private readonly autoPost =
     (process.env.TIKTOK_AUTO_POST || 'false').toLowerCase() === 'true';
 
@@ -43,10 +45,39 @@ export class TikTokPostingService {
   private readonly serverBaseUrl = process.env.SERVER_BASE_URL || '';
 
   /**
+   * Auto-refresh TikTok token every 12 hours
+   * TikTok access tokens expire after 24 hours
+   */
+  @Cron('0 */12 * * *')
+  async handleTokenRefresh() {
+    if (!this.isEnabled() || !this.currentRefreshToken) return;
+
+    this.logger.log('Auto-refreshing TikTok access token...');
+    const result = await this.refreshAccessToken(this.currentRefreshToken);
+
+    if (result.accessToken) {
+      this.currentAccessToken = result.accessToken;
+      if (result.refreshToken) {
+        this.currentRefreshToken = result.refreshToken;
+      }
+      this.logger.log('TikTok access token refreshed successfully');
+    } else {
+      this.logger.error('Failed to refresh TikTok token:', result.error);
+    }
+  }
+
+  /**
+   * Get current access token (may be auto-refreshed)
+   */
+  getAccessToken(): string {
+    return this.currentAccessToken;
+  }
+
+  /**
    * Check if TikTok posting is enabled
    */
   isEnabled(): boolean {
-    return Boolean(this.clientKey && this.accessToken && this.autoPost);
+    return Boolean(this.clientKey && this.currentAccessToken && this.autoPost);
   }
 
   /**
@@ -179,7 +210,7 @@ export class TikTokPostingService {
         {},
         {
           headers: {
-            Authorization: `Bearer ${this.accessToken}`,
+            Authorization: `Bearer ${this.currentAccessToken}`,
             'Content-Type': 'application/json; charset=UTF-8',
           },
         },
@@ -211,7 +242,7 @@ export class TikTokPostingService {
         },
         {
           headers: {
-            Authorization: `Bearer ${this.accessToken}`,
+            Authorization: `Bearer ${this.currentAccessToken}`,
             'Content-Type': 'application/json; charset=UTF-8',
           },
         },
@@ -256,7 +287,7 @@ export class TikTokPostingService {
         {},
         {
           headers: {
-            Authorization: `Bearer ${this.accessToken}`,
+            Authorization: `Bearer ${this.currentAccessToken}`,
             'Content-Type': 'application/json; charset=UTF-8',
           },
         },
@@ -286,7 +317,7 @@ export class TikTokPostingService {
         },
         {
           headers: {
-            Authorization: `Bearer ${this.accessToken}`,
+            Authorization: `Bearer ${this.currentAccessToken}`,
             'Content-Type': 'application/json; charset=UTF-8',
           },
         },
@@ -377,7 +408,7 @@ export class TikTokPostingService {
         },
         {
           headers: {
-            Authorization: `Bearer ${this.accessToken}`,
+            Authorization: `Bearer ${this.currentAccessToken}`,
             'Content-Type': 'application/json; charset=UTF-8',
           },
         },

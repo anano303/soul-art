@@ -42,6 +42,7 @@ export function ProductsActions({
   const { user } = useUser();
   const { language } = useLanguage();
   const [isPosting, setIsPosting] = useState(false);
+  const [isPostingTikTok, setIsPostingTikTok] = useState(false);
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [rejectionReason, setRejectionReason] = useState("");
   const [isRejecting, setIsRejecting] = useState(false);
@@ -101,7 +102,7 @@ export function ProductsActions({
 
   const handleStatusChange = async (
     newStatus: ProductStatus,
-    reason?: string
+    reason?: string,
   ) => {
     try {
       const body: { status: ProductStatus; rejectionReason?: string } = {
@@ -133,8 +134,8 @@ export function ProductsActions({
               ? "Product has been approved"
               : "პროდუქტი დამტკიცდა"
             : language === "en"
-            ? "Product has been rejected"
-            : "პროდუქტი უარყოფილია",
+              ? "Product has been rejected"
+              : "პროდუქტი უარყოფილია",
       });
 
       // Don't use router.refresh() - let the parent component handle the update
@@ -164,14 +165,14 @@ export function ProductsActions({
         `/products/${product._id}/post-to-facebook`,
         {
           method: "POST",
-        }
+        },
       );
 
       const data = await response.json().catch(() => ({}));
 
       if (!response.ok) {
         throw new Error(
-          data?.message || data?.error || "Failed to post to social media"
+          data?.message || data?.error || "Failed to post to social media",
         );
       }
 
@@ -191,6 +192,48 @@ export function ProductsActions({
       });
     } finally {
       setIsPosting(false);
+    }
+  };
+
+  const handlePostToTikTok = async () => {
+    if (!product._id) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Invalid product ID. Please refresh the page.",
+      });
+      return;
+    }
+
+    try {
+      setIsPostingTikTok(true);
+      const response = await fetchWithAuth(
+        `/products/${product._id}/post-to-tiktok`,
+        {
+          method: "POST",
+        },
+      );
+
+      const data = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        throw new Error(
+          data?.message || data?.error || "Failed to post to TikTok",
+        );
+      }
+
+      toast({
+        title: "Posted to TikTok",
+        description: "Successfully posted to TikTok!",
+      });
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "TikTok post failed",
+        description: error?.message || "Please check server logs and config",
+      });
+    } finally {
+      setIsPostingTikTok(false);
     }
   };
 
@@ -271,13 +314,13 @@ export function ProductsActions({
                       ? "Rejecting..."
                       : "უარყოფა..."
                     : language === "en"
-                    ? "Reject Product"
-                    : "პროდუქტის უარყოფა"}
+                      ? "Reject Product"
+                      : "პროდუქტის უარყოფა"}
                 </button>
               </div>
             </div>
           </div>,
-          document.body
+          document.body,
         )}
 
       <div className="space-x-2">
@@ -324,6 +367,29 @@ export function ProductsActions({
               <Loader2 className="actions fb-post spin" />
             ) : (
               <Megaphone className="actions fb-post" />
+            )}
+          </button>
+        )}
+
+        {isAdmin && (
+          <button
+            className="tiktok-btn"
+            onClick={handlePostToTikTok}
+            title="Post to TikTok"
+            disabled={isPostingTikTok}
+          >
+            {isPostingTikTok ? (
+              <Loader2 className="actions tiktok-icon spin" />
+            ) : (
+              <svg
+                className="actions tiktok-icon"
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+              >
+                <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1v-3.5a6.37 6.37 0 0 0-.79-.05A6.34 6.34 0 0 0 3.15 15.2a6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.34-6.34V8.7a8.16 8.16 0 0 0 4.76 1.52v-3.4a4.85 4.85 0 0 1-1-.13z" />
+              </svg>
             )}
           </button>
         )}

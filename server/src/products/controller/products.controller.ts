@@ -1285,7 +1285,7 @@ export class ProductsController {
   @Roles(Role.Admin)
   @ApiOperation({
     summary:
-      'Manually post a product to all platforms (Facebook, Instagram, Groups)',
+      'Manually post a product to all platforms (Facebook, Instagram, Groups, TikTok)',
   })
   @ApiParam({ name: 'id', description: 'Product ID' })
   async postProductToFacebook(@Param('id') id: string) {
@@ -1325,6 +1325,7 @@ export class ProductsController {
     if (result.groupPosts?.some((g) => g.success))
       platforms.push('Facebook Groups');
     if (result.instagramPost?.success) platforms.push('Instagram');
+    if (result.tiktokPost?.success) platforms.push('TikTok');
 
     return {
       ok: true,
@@ -1332,7 +1333,52 @@ export class ProductsController {
       pagePost: result.pagePost,
       groupPosts: result.groupPosts,
       instagramPost: result.instagramPost,
+      tiktokPost: result.tiktokPost,
     };
+  }
+
+  @Post(':id/post-to-tiktok')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.Admin)
+  @ApiOperation({
+    summary: 'Manually post a product to TikTok only',
+  })
+  @ApiParam({ name: 'id', description: 'Product ID' })
+  async postProductToTikTok(@Param('id') id: string) {
+    const product = await this.productsService.findByIdWithUser(id);
+
+    if (!product) {
+      throw new BadRequestException('Product not found');
+    }
+
+    if (!this.facebookPostingService.isTikTokEnabled()) {
+      throw new BadRequestException(
+        'TikTok posting is not configured. Set TIKTOK_AUTO_POST=true, TIKTOK_CLIENT_KEY, and TIKTOK_ACCESS_TOKEN.',
+      );
+    }
+
+    try {
+      const tiktokResult = await this.facebookPostingService.postToTikTok(
+        product as any,
+      );
+
+      if (!tiktokResult.success) {
+        throw new BadRequestException(
+          tiktokResult.error || 'Failed to post to TikTok',
+        );
+      }
+
+      return {
+        ok: true,
+        platforms: ['TikTok'],
+        tiktokPost: tiktokResult,
+      };
+    } catch (error: any) {
+      if (error instanceof BadRequestException) throw error;
+      throw new BadRequestException(
+        error?.message || 'Failed to post to TikTok',
+      );
+    }
   }
 
   @Get('colors')
