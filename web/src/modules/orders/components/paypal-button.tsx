@@ -36,7 +36,13 @@ interface PayPalButtonProps {
   shippingAddress?: ShippingAddress;
 }
 
-function PayPalButtonWrapper({ orderId, amount, onPaymentSuccess, showCardButton = true, shippingAddress }: PayPalButtonProps) {
+function PayPalButtonWrapper({
+  orderId,
+  amount,
+  onPaymentSuccess,
+  showCardButton = true,
+  shippingAddress,
+}: PayPalButtonProps) {
   const [{ isPending }] = usePayPalScriptReducer();
   const { toast } = useToast();
   const router = useRouter();
@@ -48,7 +54,7 @@ function PayPalButtonWrapper({ orderId, amount, onPaymentSuccess, showCardButton
         title: "Payment Successful",
         description: "Your order has been paid successfully.",
       });
-      
+
       if (onPaymentSuccess) {
         onPaymentSuccess();
       } else {
@@ -65,7 +71,7 @@ function PayPalButtonWrapper({ orderId, amount, onPaymentSuccess, showCardButton
 
   const createOrderHandler = async (
     _data: CreateOrderData,
-    actions: CreateOrderActions
+    actions: CreateOrderActions,
   ): Promise<string> => {
     // Build purchase unit with optional shipping address
     const purchaseUnit: {
@@ -96,7 +102,10 @@ function PayPalButtonWrapper({ orderId, amount, onPaymentSuccess, showCardButton
           address_line_1: shippingAddress.address,
           admin_area_2: shippingAddress.city,
           postal_code: shippingAddress.postalCode || "0000",
-          country_code: shippingAddress.country === "საქართველო" ? "GE" : shippingAddress.country.substring(0, 2).toUpperCase(),
+          country_code:
+            shippingAddress.country === "საქართველო"
+              ? "GE"
+              : shippingAddress.country.substring(0, 2).toUpperCase(),
         },
       };
     }
@@ -109,7 +118,7 @@ function PayPalButtonWrapper({ orderId, amount, onPaymentSuccess, showCardButton
 
   const onApproveHandler = async (
     _data: OnApproveData,
-    actions: OnApproveActions
+    actions: OnApproveActions,
   ) => {
     const details = await actions.order?.capture();
     if (!details) {
@@ -117,8 +126,8 @@ function PayPalButtonWrapper({ orderId, amount, onPaymentSuccess, showCardButton
     }
 
     const email_address =
-      (details.payment_source?.paypal as { email_address?: string })?.email_address ||
-      details.payer?.email_address;
+      (details.payment_source?.paypal as { email_address?: string })
+        ?.email_address || details.payer?.email_address;
     if (!email_address) {
       throw new Error("Missing payment information");
     }
@@ -166,7 +175,7 @@ function PayPalButtonWrapper({ orderId, amount, onPaymentSuccess, showCardButton
         onApprove={onApproveHandler}
         onError={onErrorHandler}
       />
-      
+
       {/* Card Button - Debit or Credit Card */}
       {showCardButton && (
         <PayPalButtons

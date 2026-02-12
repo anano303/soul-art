@@ -28,6 +28,7 @@ import { trackCheckoutStart } from "@/hooks/use-sales-tracking";
 import Cookies from "js-cookie";
 import { CartItem } from "@/types/cart";
 import { PayPalButton } from "@/modules/orders/components/paypal-button";
+import { useUsdRate } from "@/hooks/useUsdRate";
 
 type CheckoutStep = "auth" | "guest" | "shipping" | "payment" | "review";
 
@@ -52,6 +53,7 @@ export function StreamlinedCheckout() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { toast } = useToast();
+  const { usdRate } = useUsdRate();
 
   // Auction mode state
   const [isAuctionMode, setIsAuctionMode] = useState(false);
@@ -1152,7 +1154,9 @@ export function StreamlinedCheckout() {
 
             {currentStep === "review" && (
               <div className="payment-methods-section">
-                <h4 className="payment-methods-title">{t("payment.paymentMethod")}</h4>
+                <h4 className="payment-methods-title">
+                  {t("payment.paymentMethod")}
+                </h4>
 
                 {/* BOG Payment Option */}
                 <button
@@ -1204,7 +1208,9 @@ export function StreamlinedCheckout() {
                       </svg>
                     </div>
                     <div className="bog-payment-text">
-                      <span className="bog-payment-title">{t("payment.cardPayment")}</span>
+                      <span className="bog-payment-title">
+                        {t("payment.cardPayment")}
+                      </span>
                       <span className="bog-payment-subtitle">
                         {t("payment.allCardsAccepted")}
                       </span>
@@ -1275,6 +1281,11 @@ export function StreamlinedCheckout() {
                     {(isValidating || isProcessingPayment) &&
                       paymentMethod === "PAYPAL" && <div className="spinner" />}
                   </div>
+                  {!isValidating && !isProcessingPayment && (
+                    <span className="bog-payment-amount">
+                      ${(totalPrice / usdRate).toFixed(2)}
+                    </span>
+                  )}
                 </button>
               </div>
             )}
@@ -1386,23 +1397,27 @@ export function StreamlinedCheckout() {
             </div>
 
             <div className="paypal-buttons-wrapper">
-              {/* Convert GEL to USD: 1 USD = 2.5 GEL */}
+              {/* Convert GEL to USD using dynamic rate */}
               <PayPalButton
                 orderId={currentOrderId}
-                amount={Number((totalPrice / 2.5).toFixed(2))}
+                amount={Number((totalPrice / usdRate).toFixed(2))}
                 onPaymentSuccess={handlePayPalSuccess}
                 showCardButton={true}
-                shippingAddress={shippingAddress ? {
-                  address: shippingAddress.address,
-                  city: shippingAddress.city,
-                  postalCode: shippingAddress.postalCode || "",
-                  country: shippingAddress.country || "საქართველო",
-                  fullName: user?.name || guestInfo?.fullName || "",
-                  phone: shippingAddress.phoneNumber || "",
-                } : undefined}
+                shippingAddress={
+                  shippingAddress
+                    ? {
+                        address: shippingAddress.address,
+                        city: shippingAddress.city,
+                        postalCode: shippingAddress.postalCode || "",
+                        country: shippingAddress.country || "საქართველო",
+                        fullName: user?.name || guestInfo?.fullName || "",
+                        phone: shippingAddress.phoneNumber || "",
+                      }
+                    : undefined
+                }
               />
               <p className="paypal-conversion-note">
-                {totalPrice.toFixed(2)} ₾ ≈ ${(totalPrice / 2.5).toFixed(2)} USD
+                {totalPrice.toFixed(2)} ₾ ≈ ${(totalPrice / usdRate).toFixed(2)} USD
               </p>
             </div>
 

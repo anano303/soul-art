@@ -29,6 +29,7 @@ import { ChatModule } from '../chat/chat.module';
 import { SalesCommissionModule } from '../sales-commission/sales-commission.module';
 import { CampaignsModule } from '../campaigns/campaigns.module';
 import { AuctionModule } from '../auctions/auction.module';
+import { SettingsModule } from '../settings/settings.module';
 
 @Module({
   imports: [
@@ -63,6 +64,7 @@ import { AuctionModule } from '../auctions/auction.module';
     SalesCommissionModule,
     CampaignsModule,
     AuctionModule,
+    SettingsModule,
   ],
   controllers: [AppController],
   providers: [AppService, GoogleStrategy],

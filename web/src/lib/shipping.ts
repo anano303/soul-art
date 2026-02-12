@@ -6,8 +6,8 @@ export interface ShippingRate {
   isFree: boolean;
 }
 
-// Exchange rate GEL to USD (1 GEL = 1/2.8 USD)
-const GEL_TO_USD = 1 / 2.8;
+// Exchange rate GEL to USD (1 USD = 2.5 GEL)
+const GEL_TO_USD = 1 / 2.5;
 
 export const shippingRates: ShippingRate[] = [
   {

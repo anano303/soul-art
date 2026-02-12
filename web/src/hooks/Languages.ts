@@ -1087,7 +1087,8 @@ export const TRANSLATIONS: Translations = {
         title: "საერთაშორისო გადახდა",
         subtitle: "აირჩიეთ გადახდის მეთოდი: PayPal ან ბარათი",
         securePayment: "უსაფრთხო გადახდა PayPal-ის საშუალებით",
-        acceptedCards: "Visa, Mastercard, American Express და სხვა საერთაშორისო ბარათები",
+        acceptedCards:
+          "Visa, Mastercard, American Express და სხვა საერთაშორისო ბარათები",
         conversionNote: "{gelAmount} ₾ ≈ ${usdAmount} USD",
         internationalPayment: "საერთაშორისო გადახდა",
         internationalCards: "საერთაშორისო ბარათები",
@@ -3027,7 +3028,8 @@ export const TRANSLATIONS: Translations = {
         title: "International Payment",
         subtitle: "Choose payment method: PayPal or Card",
         securePayment: "Secure payment via PayPal",
-        acceptedCards: "Visa, Mastercard, American Express and other international cards",
+        acceptedCards:
+          "Visa, Mastercard, American Express and other international cards",
         conversionNote: "{gelAmount} ₾ ≈ ${usdAmount} USD",
         internationalPayment: "International Payment",
         internationalCards: "International Cards",

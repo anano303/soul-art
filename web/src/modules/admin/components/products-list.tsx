@@ -30,6 +30,8 @@ import HeartLoading from "@/components/HeartLoading/HeartLoading";
 import { DonationModal } from "@/components/donation/DonationModal";
 import { ProductStatus } from "@/types";
 import { updateProductVisibility } from "@/modules/products/api/update-product-visibility";
+import { useUsdRate } from "@/hooks/useUsdRate";
+import { toast } from "@/hooks/use-toast";
 
 // Extended Product type to include mainCategory and subCategory properties
 interface ProductWithCategories extends Product {
@@ -80,6 +82,11 @@ export function ProductsList() {
   const { language } = useLanguage();
   const [refreshKey, setRefreshKey] = useState(Date.now());
   const [showDonation, setShowDonation] = useState(false);
+
+  // USD Rate state for admin
+  const { usdRate, updateRate: updateUsdRate, loading: usdRateLoading } = useUsdRate();
+  const [editingUsdRate, setEditingUsdRate] = useState<string>("");
+  const [showUsdRateEdit, setShowUsdRateEdit] = useState(false);
 
   // Bulk selection state
   const [selectedProducts, setSelectedProducts] = useState<Set<string>>(
@@ -790,6 +797,133 @@ export function ProductsList() {
           </Link>
         </div>
       </div>
+
+      {/* USD Rate Editor - Only for Admin */}
+      {isAdmin && (
+        <div
+          style={{
+            background: "linear-gradient(135deg, #fef3c7 0%, #fde68a 100%)",
+            border: "1px solid #f59e0b",
+            borderRadius: "12px",
+            padding: "12px 16px",
+            marginBottom: "16px",
+            display: "flex",
+            alignItems: "center",
+            gap: "12px",
+            flexWrap: "wrap",
+          }}
+        >
+          <span style={{ fontWeight: 600, color: "#92400e", fontSize: "0.95rem" }}>
+            💱 {language === "en" ? "USD Exchange Rate" : "დოლარის კურსი"}:
+          </span>
+          <span
+            style={{
+              fontWeight: 700,
+              color: "#78350f",
+              fontSize: "1.1rem",
+              background: "white",
+              padding: "4px 12px",
+              borderRadius: "6px",
+              boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
+            }}
+          >
+            1 USD = {usdRateLoading ? "..." : usdRate} GEL
+          </span>
+          {!showUsdRateEdit ? (
+            <button
+              onClick={() => {
+                setEditingUsdRate(usdRate.toString());
+                setShowUsdRateEdit(true);
+              }}
+              style={{
+                background: "#f59e0b",
+                color: "white",
+                border: "none",
+                padding: "6px 14px",
+                borderRadius: "6px",
+                fontSize: "0.85rem",
+                fontWeight: 500,
+                cursor: "pointer",
+              }}
+            >
+              {language === "en" ? "Edit" : "შეცვლა"}
+            </button>
+          ) : (
+            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+              <input
+                type="number"
+                step="0.01"
+                min="0.1"
+                value={editingUsdRate}
+                onChange={(e) => setEditingUsdRate(e.target.value)}
+                style={{
+                  width: "80px",
+                  padding: "6px 8px",
+                  border: "2px solid #f59e0b",
+                  borderRadius: "6px",
+                  fontSize: "0.95rem",
+                  fontWeight: 600,
+                  textAlign: "center",
+                }}
+                placeholder="2.5"
+              />
+              <button
+                onClick={async () => {
+                  const newRate = parseFloat(editingUsdRate);
+                  if (newRate > 0) {
+                    const success = await updateUsdRate(newRate);
+                    if (success) {
+                      toast({
+                        title: language === "en" ? "Rate Updated" : "კურსი განახლდა",
+                        description: `1 USD = ${newRate} GEL`,
+                      });
+                      setShowUsdRateEdit(false);
+                    } else {
+                      toast({
+                        title: language === "en" ? "Error" : "შეცდომა",
+                        description: language === "en" ? "Failed to update rate" : "კურსის განახლება ვერ მოხერხდა",
+                        variant: "destructive",
+                      });
+                    }
+                  }
+                }}
+                style={{
+                  background: "#10b981",
+                  color: "white",
+                  border: "none",
+                  padding: "6px 12px",
+                  borderRadius: "6px",
+                  fontSize: "0.85rem",
+                  fontWeight: 500,
+                  cursor: "pointer",
+                }}
+              >
+                {language === "en" ? "Save" : "შენახვა"}
+              </button>
+              <button
+                onClick={() => setShowUsdRateEdit(false)}
+                style={{
+                  background: "#6b7280",
+                  color: "white",
+                  border: "none",
+                  padding: "6px 12px",
+                  borderRadius: "6px",
+                  fontSize: "0.85rem",
+                  fontWeight: 500,
+                  cursor: "pointer",
+                }}
+              >
+                {language === "en" ? "Cancel" : "გაუქმება"}
+              </button>
+            </div>
+          )}
+          <span style={{ fontSize: "0.8rem", color: "#92400e", opacity: 0.8, marginLeft: "auto" }}>
+            {language === "en" 
+              ? "Used for international payment conversions"
+              : "საერთაშორისო გადახდების კონვერტაციისთვის"}
+          </span>
+        </div>
+      )}
 
       {/* Search and Filter Section */}
       <div

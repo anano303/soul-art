@@ -11,6 +11,7 @@ import { fetchWithAuth } from "@/lib/fetch-with-auth";
 import { useCheckout } from "@/modules/checkout/context/checkout-context";
 import { calculateShipping } from "@/lib/shipping";
 import { trackViewCart } from "@/lib/ga4-analytics";
+import { useUsdRate } from "@/hooks/useUsdRate";
 import "./cart-page.css";
 import { Color } from "@/types";
 
@@ -123,8 +124,9 @@ export function CartPage() {
   // საკომისიო მოხსნილია - რეალური ფასი ყველგან
   const total = subtotal + shippingCost;
 
-  // USD conversion rate (1 GEL = 1/2.8 USD approximately)
-  const GEL_TO_USD = 1 / 2.8;
+  // USD conversion rate from API
+  const { usdRate } = useUsdRate();
+  const GEL_TO_USD = 1 / usdRate;
 
   // Function to format price based on country selection
   const formatPrice = (amount: number) => {

@@ -262,7 +262,12 @@ export class PaymentsController {
     @Body() data: { orderId: string },
   ) {
     try {
-      console.log('Capturing PayPal payment:', paypalOrderId, 'for order:', data.orderId);
+      console.log(
+        'Capturing PayPal payment:',
+        paypalOrderId,
+        'for order:',
+        data.orderId,
+      );
 
       const result = await this.paymentsService.capturePayPalPayment(
         paypalOrderId,

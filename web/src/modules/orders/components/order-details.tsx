@@ -12,23 +12,8 @@ import { Order, OrderItem } from "@/types/order";
 import { PayPalButton } from "./paypal-button";
 import { StripeButton } from "./stripe-button";
 import { BOGButton } from "./bog-button";
+import { useUsdRate } from "@/hooks/useUsdRate";
 import "./order-details.css";
-
-// GEL to USD conversion rate (1 GEL = ~0.37 USD)
-const GEL_TO_USD_RATE = 2.8;
-
-// Format price based on shipping country (show dual currency for non-Georgia countries)
-const formatPrice = (priceInGel: number, shippingCountry?: string): string => {
-  const isGeorgia =
-    shippingCountry === "Georgia" || shippingCountry === "საქართველო";
-
-  if (isGeorgia) {
-    return `${priceInGel.toFixed(2)} ₾`;
-  } else {
-    const priceInUsd = (priceInGel / GEL_TO_USD_RATE).toFixed(2);
-    return `${priceInGel.toFixed(2)} ₾ ($${priceInUsd})`;
-  }
-};
 
 interface OrderDetailsProps {
   order: Order;
@@ -37,6 +22,20 @@ interface OrderDetailsProps {
 export function OrderDetails({ order }: OrderDetailsProps) {
   const { t, language } = useLanguage();
   const router = useRouter();
+  const { usdRate } = useUsdRate();
+
+  // Format price based on shipping country (show dual currency for non-Georgia countries)
+  const formatPrice = (priceInGel: number, shippingCountry?: string): string => {
+    const isGeorgia =
+      shippingCountry === "Georgia" || shippingCountry === "საქართველო";
+
+    if (isGeorgia) {
+      return `${priceInGel.toFixed(2)} ₾`;
+    } else {
+      const priceInUsd = (priceInGel / usdRate).toFixed(2);
+      return `${priceInGel.toFixed(2)} ₾ ($${priceInUsd})`;
+    }
+  };
 
   // Check if stock reservation has expired
   const isStockExpired = order.stockReservationExpires
@@ -128,7 +127,7 @@ export function OrderDetails({ order }: OrderDetailsProps) {
   );
 
   // Convert GEL to USD for payment
-  const totalPriceInUSD = +(order.totalPrice / GEL_TO_USD_RATE).toFixed(2);
+  const totalPriceInUSD = +(order.totalPrice / usdRate).toFixed(2);
 
   // Helper function to get display name based on language
   const getDisplayName = (item: OrderItem) => {
