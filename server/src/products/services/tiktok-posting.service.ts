@@ -81,16 +81,11 @@ export class TikTokPostingService {
   }
 
   /**
-   * Get the public base URL for product links
+   * Get the public base URL for product links (frontend URL)
    */
   private getPublicBaseUrl(): string {
-    const firstOrigin = this.allowedOrigins
-      .split(',')
-      .map((s) => s.trim())
-      .filter(Boolean)[0];
-
-    const base = (firstOrigin || this.serverBaseUrl || '').replace(/\/$/, '');
-    return base;
+    // Always use the main frontend URL for product links
+    return 'https://soulart.ge';
   }
 
   /**
@@ -163,15 +158,25 @@ export class TikTokPostingService {
     const title = product.name || product.nameEn || 'პროდუქტი';
     const price = this.formatPrice(product);
     const hashtags = this.formatHashtags(product);
+    const productUrl = this.buildProductUrl(product);
+
+    // Artist/store name from product brand or user
+    const artistName =
+      (product as any).brand ||
+      (product as any).user?.storeName ||
+      (product as any).user?.name ||
+      '';
 
     // Keep it short and engaging for TikTok
     const parts: string[] = [
       `✨ ${title}`,
+      artistName ? `🎨 ${artistName}` : '',
       `💰 ${price}`,
-      `🔗 Link in bio: soulart.ge`,
+      '',
+      `🔗 ${productUrl}`,
       '',
       hashtags,
-    ];
+    ].filter(Boolean);
 
     const caption = parts.join('\n');
 
