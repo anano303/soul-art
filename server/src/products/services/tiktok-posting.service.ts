@@ -222,22 +222,26 @@ export class TikTokPostingService {
         );
       }
 
-      // Step 2: Post photos using Photo Mode (MEDIA_UPLOAD mode)
-      // TikTok will create a slideshow, user can add music from TikTok's library
+      // Step 2: Post photos using Photo Mode
+      // TikTok photo_images is list<string> of public URLs
+      this.logger.debug(`Photo URLs: ${JSON.stringify(photos)}`);
+
       const postRes = await axios.post(
         'https://open.tiktokapis.com/v2/post/publish/content/init/',
         {
           post_info: {
-            title: caption.slice(0, 150), // TikTok title limit
-            description: caption,
+            title: caption.slice(0, 90), // TikTok photo title limit is 90
+            description: caption.slice(0, 4000), // description up to 4000
+            privacy_level: 'SELF_ONLY',
+            disable_comment: false,
+            auto_add_music: true,
           },
           source_info: {
             source: 'PULL_FROM_URL',
             photo_images: photos,
-            photo_cover_index: 0, // First photo as cover
+            photo_cover_index: 0,
           },
-          // Required parameters for photo upload
-          post_mode: 'MEDIA_UPLOAD',
+          post_mode: 'DIRECT_POST',
           media_type: 'PHOTO',
         },
         {
@@ -304,8 +308,8 @@ export class TikTokPostingService {
         'https://open.tiktokapis.com/v2/post/publish/video/init/',
         {
           post_info: {
-            title: caption.slice(0, 150),
-            privacy_level: 'PUBLIC_TO_EVERYONE',
+            title: caption.slice(0, 2200),
+            privacy_level: 'SELF_ONLY',
             disable_duet: false,
             disable_comment: false,
             disable_stitch: false,
