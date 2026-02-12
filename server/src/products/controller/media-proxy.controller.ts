@@ -1,5 +1,5 @@
-import { Controller, Get, Query, Res, Param, Logger } from '@nestjs/common';
-import { Response } from 'express';
+import { Controller, Get, Req, Res, Logger } from '@nestjs/common';
+import { Request, Response } from 'express';
 import axios from 'axios';
 
 /**
@@ -10,6 +10,9 @@ import axios from 'axios';
  *
  * TikTok requires PULL_FROM_URL images to come from a verified domain.
  * Since our images are on Cloudinary, we proxy them through our API.
+ *
+ * URL format: /v1/media/img/<base64url-encoded-original-url>
+ * This is path-based so TikTok domain verification works.
  */
 @Controller('media')
 export class MediaProxyController {
@@ -25,7 +28,6 @@ export class MediaProxyController {
 
   /**
    * TikTok domain verification endpoint
-   * Serves the verification file for TikTok URL ownership
    */
   @Get('proxy/tiktokHlBF3iktVuBIuI1BVmRyzrsXFgBSmV5j.txt')
   getTikTokVerification(@Res() res: Response): void {
@@ -35,22 +37,42 @@ export class MediaProxyController {
     );
   }
 
-  @Get('proxy')
+  /**
+   * Path-based image proxy for TikTok
+   * URL format: /v1/media/proxy/<base64url-encoded-url>
+   * Matches verified TikTok URL prefix: https://api.soulart.ge/v1/media/proxy/
+   */
+  @Get('proxy/*')
   async proxyImage(
-    @Query('url') url: string,
+    @Req() req: Request,
     @Res() res: Response,
   ): Promise<void> {
     try {
-      if (!url) {
-        res.status(400).json({ error: 'URL parameter is required' });
+      // Extract the base64url part after /media/proxy/
+      const fullPath = req.path; // e.g. /media/proxy/aHR0cHM6Ly9yZXMu...
+      const base64Part = fullPath.replace(/^\/media\/proxy\//, '');
+      // Skip TikTok verification file
+      if (base64Part.startsWith('tiktok')) {
         return;
       }
 
-      // Decode URL if needed
-      const decodedUrl = decodeURIComponent(url);
+      if (!base64Part) {
+        res.status(400).json({ error: 'Image ID is required' });
+        return;
+      }
+
+      // Decode base64url to original URL
+      const originalUrl = Buffer.from(base64Part, 'base64url').toString(
+        'utf-8',
+      );
+
+      if (!originalUrl.startsWith('https://')) {
+        res.status(400).json({ error: 'Invalid image URL' });
+        return;
+      }
 
       // Security: only allow whitelisted domains
-      const parsedUrl = new URL(decodedUrl);
+      const parsedUrl = new URL(originalUrl);
       const isAllowed = this.allowedDomains.some(
         (domain) =>
           parsedUrl.hostname === domain ||
@@ -64,9 +86,9 @@ export class MediaProxyController {
       }
 
       // Fetch the image
-      const response = await axios.get(decodedUrl, {
+      const response = await axios.get(originalUrl, {
         responseType: 'stream',
-        timeout: 30000, // 30 second timeout
+        timeout: 60000, // 60 second timeout for TikTok downloads
         headers: {
           'User-Agent': 'SoulArt-MediaProxy/1.0',
         },
@@ -84,6 +106,8 @@ export class MediaProxyController {
 
       // Cache for 1 hour
       res.setHeader('Cache-Control', 'public, max-age=3600');
+      // No redirect - serve directly
+      res.setHeader('X-Content-Type-Options', 'nosniff');
 
       // Pipe the image stream to response
       response.data.pipe(res);
