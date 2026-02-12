@@ -87,10 +87,11 @@ function CheckoutSuccessContent() {
         }
       }
 
-      // Verify payment status with backend
+      // Verify payment status with backend (try both BOG and PayPal)
       if (orderIdParam) {
         const verifyPayment = async () => {
           try {
+            // Try BOG verify first
             await fetch(
               `${
                 process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"
@@ -101,7 +102,22 @@ function CheckoutSuccessContent() {
               },
             );
           } catch (error) {
-            console.error("Failed to verify payment:", error);
+            console.error("Failed to verify BOG payment:", error);
+          }
+
+          try {
+            // Also try PayPal verify
+            await fetch(
+              `${
+                process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"
+              }/payments/paypal/verify/${orderIdParam}`,
+              {
+                method: "POST",
+                credentials: "include",
+              },
+            );
+          } catch (error) {
+            console.error("Failed to verify PayPal payment:", error);
           }
         };
         verifyPayment();

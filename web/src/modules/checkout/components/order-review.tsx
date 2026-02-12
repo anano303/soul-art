@@ -7,6 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 import { apiClient } from "@/lib/axios";
 import { useLanguage } from "@/hooks/LanguageContext";
 import { calculateShipping, getShippingRate } from "@/lib/shipping";
+import { useUsdRate } from "@/hooks/useUsdRate";
 import Image from "next/image";
 import Link from "next/link";
 import { AlertTriangle } from "lucide-react";
@@ -77,13 +78,15 @@ export function OrderReview() {
   const shippingCity = currentShippingDetails?.city || "";
   const shippingPrice = calculateShipping(shippingCountry, shippingCity);
   const isShippingFree = shippingPrice === 0;
-  const showBothCurrencies = shippingCountry !== "GE";
+  const isGeorgia = shippingCountry === "GE" || shippingCountry === "საქართველო" || shippingCountry === "Georgia";
+  const showBothCurrencies = !isGeorgia;
 
   // საკომისიო მოხსნილია - რეალური ფასი ყველგან
   const totalPrice = itemsPrice + shippingPrice;
 
-  // USD conversion rate (1 GEL = 1/2.8 USD approximately)
-  const GEL_TO_USD = 1 / 2.8;
+  // USD conversion rate from API
+  const { usdRate } = useUsdRate();
+  const GEL_TO_USD = 1 / usdRate;
 
   // Function to format price based on country selection
   const formatPrice = (amount: number) => {

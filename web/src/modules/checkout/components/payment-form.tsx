@@ -8,7 +8,7 @@ import { useCheckout } from "../context/checkout-context";
 import { apiClient } from "@/lib/axios";
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/hooks/LanguageContext";
-// import { FaPaypal } from "react-icons/fa";
+import { FaPaypal } from "react-icons/fa";
 // import { CreditCard } from "lucide-react";
 import "./payment-form.css";
 

@@ -11,6 +11,7 @@ import { fetchWithAuth } from "@/lib/fetch-with-auth";
 import { useCheckout } from "@/modules/checkout/context/checkout-context";
 import { calculateShipping } from "@/lib/shipping";
 import { trackViewCart } from "@/lib/ga4-analytics";
+import { useUsdRate } from "@/hooks/useUsdRate";
 import "./cart-page.css";
 import { Color } from "@/types";
 
@@ -19,6 +20,7 @@ export function CartPage() {
   const router = useRouter();
   const { t, language } = useLanguage(); // Added language here
   const { shippingAddress } = useCheckout();
+  const { usdRate } = useUsdRate();
 
   // Force re-render when localStorage changes
   const [, setForceUpdate] = useState(0);
@@ -115,16 +117,18 @@ export function CartPage() {
     // Use context fallback
   }
 
-  const shippingCountry = currentShippingAddress?.country || "GE"; // Default to Georgia
-  const shippingCost = calculateShipping(shippingCountry);
-  const isShippingFree = shippingCost === 0;
-  const showBothCurrencies = shippingCountry !== "GE";
+  const hasShippingAddress = !!currentShippingAddress?.country;
+  const shippingCountry = currentShippingAddress?.country || "";
+  const shippingCost = hasShippingAddress ? calculateShipping(shippingCountry, currentShippingAddress?.city) : 0;
+  const isShippingFree = hasShippingAddress && shippingCost === 0;
+  const isGeorgia = shippingCountry === "GE" || shippingCountry === "საქართველო" || shippingCountry === "Georgia";
+  const showBothCurrencies = hasShippingAddress && !isGeorgia;
 
   // საკომისიო მოხსნილია - რეალური ფასი ყველგან
   const total = subtotal + shippingCost;
 
-  // USD conversion rate (1 GEL = 1/2.8 USD approximately)
-  const GEL_TO_USD = 1 / 2.8;
+  // USD conversion rate from API
+  const GEL_TO_USD = 1 / usdRate;
 
   // Function to format price based on country selection
   const formatPrice = (amount: number) => {
@@ -168,10 +172,20 @@ export function CartPage() {
               </div>
               <div className="summary-row">
                 <span className="summary-label">{t("cart.delivery")}</span>
-                <span>
-                  {isShippingFree ? t("cart.free") : formatPrice(shippingCost)}
+                <span className="delivery-value">
+                  {!hasShippingAddress
+                    ? <span className="delivery-at-checkout">{t("cart.calculatedAtCheckout")}</span>
+                    : isShippingFree
+                    ? <span className="delivery-free">{t("cart.free")}</span>
+                    : formatPrice(shippingCost)}
                 </span>
               </div>
+              {!hasShippingAddress && (
+                <div className="delivery-note">
+                  <span className="delivery-note-icon">🚚</span>
+                  <span>{t("cart.tbilisiFreeNote")}</span>
+                </div>
+              )}
               {/* საკომისიო დაკომენტარებულია
               <div className="summary-row">
                 <span className="summary-label">{t("cart.commission")}</span>

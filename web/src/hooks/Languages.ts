@@ -516,6 +516,7 @@ export const TRANSLATIONS: Translations = {
       shippingNotSupported: "ამ ქვეყანაში მიწოდება არ ხორციელდება",
       tbilisiFreeNote: "💡 თბილისში მიწოდება უფასოა",
       free: "უფასო",
+      calculatedAtCheckout: "გამოითვლება checkout-ზე",
       commission: "საკომისიო",
       totalCost: "სრული ღირებულება",
       checkout: "შეკვეთის გაფორმება",
@@ -1083,6 +1084,19 @@ export const TRANSLATIONS: Translations = {
         backToCart: "კალათაში დაბრუნება",
         viewOtherProducts: "სხვა პროდუქტების ნახვა",
       },
+      paypal: {
+        title: "საერთაშორისო გადახდა",
+        subtitle: "აირჩიეთ გადახდის მეთოდი: PayPal ან ბარათი",
+        securePayment: "უსაფრთხო გადახდა PayPal-ის საშუალებით",
+        acceptedCards:
+          "Visa, Mastercard, American Express და სხვა საერთაშორისო ბარათები",
+        conversionNote: "{gelAmount} ₾ ≈ ${usdAmount} USD",
+        internationalPayment: "საერთაშორისო გადახდა",
+        internationalCards: "საერთაშორისო ბარათები",
+      },
+      orderSummary: "შეკვეთის მონაცემები",
+      orderProducts: "შეკვეთის პროდუქტები",
+      paymentMethod: "გადახდის მეთოდი",
     },
 
     // About page
@@ -2451,6 +2465,7 @@ export const TRANSLATIONS: Translations = {
       shippingNotSupported: "Shipping not available to this country",
       tbilisiFreeNote: "💡 Free delivery in Tbilisi",
       free: "Free",
+      calculatedAtCheckout: "Calculated at checkout",
       commission: "Fee",
       totalCost: "Total",
       checkout: "Checkout",
@@ -3011,6 +3026,19 @@ export const TRANSLATIONS: Translations = {
         backToCart: "Back to Cart",
         viewOtherProducts: "View Other Products",
       },
+      paypal: {
+        title: "International Payment",
+        subtitle: "Choose payment method: PayPal or Card",
+        securePayment: "Secure payment via PayPal",
+        acceptedCards:
+          "Visa, Mastercard, American Express and other international cards",
+        conversionNote: "{gelAmount} ₾ ≈ ${usdAmount} USD",
+        internationalPayment: "International Payment",
+        internationalCards: "International Cards",
+      },
+      orderSummary: "Order Summary",
+      orderProducts: "Order Products",
+      paymentMethod: "Payment Method",
     },
 
     // About page

@@ -566,9 +566,13 @@ export class AuctionAdminService {
   }
 
   // Admin: Get all withdrawals (history) with optional status filter
-  async getAllWithdrawals(page: number = 1, limit: number = 50, status?: string) {
+  async getAllWithdrawals(
+    page: number = 1,
+    limit: number = 50,
+    status?: string,
+  ) {
     const skip = (page - 1) * limit;
-    
+
     // Build query filter
     const filter: any = {};
     if (status && status !== 'ALL') {

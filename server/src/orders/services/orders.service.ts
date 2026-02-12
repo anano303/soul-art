@@ -1229,7 +1229,12 @@ export class OrdersService {
 
   async updateOrderPaymentInfo(
     orderId: string,
-    paymentInfo: { id: string; status: string; update_time: string },
+    paymentInfo: {
+      id: string;
+      status: string;
+      update_time: string;
+      paymentMethod?: string;
+    },
   ): Promise<void> {
     const order = await this.orderModel.findById(orderId);
     if (order) {
@@ -1237,11 +1242,16 @@ export class OrdersService {
         ...paymentInfo,
         email_address: 'pending@payment.com',
       };
+      // Store PayPal order ID in payment field for capture
+      if (paymentInfo.paymentMethod) {
+        order.payment = {
+          id: paymentInfo.id,
+          status: paymentInfo.status,
+          paymentMethod: paymentInfo.paymentMethod,
+        };
+      }
       await order.save();
-      console.log(
-        `Updated order ${orderId} with BOG payment info:`,
-        paymentInfo,
-      );
+      console.log(`Updated order ${orderId} with payment info:`, paymentInfo);
     }
   }
 
