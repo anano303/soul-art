@@ -48,16 +48,18 @@ export class MediaProxyController {
     @Res() res: Response,
   ): Promise<void> {
     try {
-      // Extract the base64url part after /media/proxy/
-      const fullPath = req.path; // e.g. /media/proxy/aHR0cHM6Ly9yZXMu...
-      const base64Part = fullPath.replace(/^\/media\/proxy\//, '');
-      // Skip TikTok verification file
-      if (base64Part.startsWith('tiktok')) {
-        return;
-      }
+      // NestJS wildcard params are in req.params['0']
+      const base64Part =
+        (req.params as any)['0'] ||
+        (req.params as any)[0] ||
+        '';
 
-      if (!base64Part) {
-        res.status(400).json({ error: 'Image ID is required' });
+      this.logger.debug(
+        `Proxy request - params: ${JSON.stringify(req.params)}, path: ${req.path}`,
+      );
+
+      // Skip TikTok verification file
+      if (!base64Part || base64Part.startsWith('tiktok')) {
         return;
       }
 
