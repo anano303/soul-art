@@ -1337,6 +1337,17 @@ export class ProductsController {
     };
   }
 
+  @Get(':id/tiktok-debug')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.Admin)
+  @ApiOperation({ summary: 'Debug TikTok proxy URLs for a product' })
+  @ApiParam({ name: 'id', description: 'Product ID' })
+  async debugTikTokUrls(@Param('id') id: string) {
+    const product = await this.productsService.findByIdWithUser(id);
+    if (!product) throw new BadRequestException('Product not found');
+    return this.facebookPostingService.debugTikTokProxyUrls(product as any);
+  }
+
   @Post(':id/post-to-tiktok')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.Admin)

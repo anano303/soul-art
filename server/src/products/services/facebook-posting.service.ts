@@ -534,6 +534,13 @@ export class FacebookPostingService {
   }
 
   /**
+   * Debug TikTok proxy URLs for a product
+   */
+  debugTikTokProxyUrls(product: ProductDocument): any {
+    return this.tiktokService.debugProxyUrls(product);
+  }
+
+  /**
    * Post to all enabled platforms (Page, Groups, Instagram, TikTok)
    */
   async postToAllPlatforms(product: ProductDocument): Promise<MultiPostResult> {

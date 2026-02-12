@@ -213,11 +213,12 @@ export class TikTokPostingService {
       // NOT the DigitalOcean URL (seal-app-tilvb.ondigitalocean.app)
       const tiktokProxyBase = 'https://api.soulart.ge';
       const photos = imageUrls.slice(0, 35).map((url) => {
-        // If already our domain, use as-is
-        if (url.includes('api.soulart.ge') || url.includes('soulart.ge')) {
+        // If already a verified proxy URL, use as-is
+        if (url.startsWith(`${tiktokProxyBase}/v1/media/proxy/`)) {
           return url;
         }
-        // Proxy through our verified domain using base64url encoding in path
+        // ALL images must go through our verified proxy domain
+        // TikTok only accepts URLs from the verified prefix: https://api.soulart.ge/v1/media/proxy/
         const encoded = Buffer.from(url).toString('base64url');
         return `${tiktokProxyBase}/v1/media/proxy/${encoded}`;
       });
@@ -242,7 +243,7 @@ export class TikTokPostingService {
 
       // Step 2: Post photos using Photo Mode
       // TikTok photo_images is list<string> of public URLs
-      this.logger.debug(`Photo URLs: ${JSON.stringify(photos)}`);
+      this.logger.log(`TikTok posting ${photos.length} photos. First URL: ${photos[0]?.substring(0, 100)}...`);
 
       const postRes = await axios.post(
         'https://open.tiktokapis.com/v2/post/publish/content/init/',
@@ -285,7 +286,9 @@ export class TikTokPostingService {
       return { success: true, publishId };
     } catch (error: any) {
       const errPayload = error?.response?.data || { message: error.message };
-      this.logger.error('TikTok photo post failed', errPayload);
+      this.logger.error(
+        `TikTok photo post failed: ${JSON.stringify(errPayload)}`,
+      );
       return { success: false, error: errPayload };
     }
   }
@@ -413,6 +416,35 @@ export class TikTokPostingService {
       this.logger.error('TikTok product post failed', error);
       return { success: false, error: error.message };
     }
+  }
+
+  /**
+   * Debug: show what proxy URLs would be generated for a product
+   */
+  debugProxyUrls(product: ProductDocument): any {
+    const images = Array.isArray(product.images)
+      ? product.images.filter(Boolean)
+      : [];
+
+    const tiktokProxyBase = 'https://api.soulart.ge';
+    const photos = images.slice(0, 35).map((url) => {
+      if (url.startsWith(`${tiktokProxyBase}/v1/media/proxy/`)) {
+        return url;
+      }
+      const encoded = Buffer.from(url).toString('base64url');
+      return `${tiktokProxyBase}/v1/media/proxy/${encoded}`;
+    });
+
+    return {
+      serverBaseUrl: this.serverBaseUrl,
+      tiktokProxyBase,
+      originalImages: images,
+      proxyUrls: photos,
+      tokenPrefix: this.currentAccessToken?.substring(0, 20) || 'NO_TOKEN',
+      isEnabled: this.isEnabled(),
+      autoPost: this.autoPost,
+      hasClientKey: !!this.clientKey,
+    };
   }
 
   /**

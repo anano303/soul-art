@@ -43,16 +43,11 @@ export class MediaProxyController {
    * Matches verified TikTok URL prefix: https://api.soulart.ge/v1/media/proxy/
    */
   @Get('proxy/*')
-  async proxyImage(
-    @Req() req: Request,
-    @Res() res: Response,
-  ): Promise<void> {
+  async proxyImage(@Req() req: Request, @Res() res: Response): Promise<void> {
     try {
       // NestJS wildcard params are in req.params['0']
       const base64Part =
-        (req.params as any)['0'] ||
-        (req.params as any)[0] ||
-        '';
+        (req.params as any)['0'] || (req.params as any)[0] || '';
 
       this.logger.debug(
         `Proxy request - params: ${JSON.stringify(req.params)}, path: ${req.path}`,
