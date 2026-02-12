@@ -6,6 +6,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { useLanguage } from "@/hooks/LanguageContext";
 import { apiClient } from "@/lib/axios";
 import { Edit2, Check, Plus } from "lucide-react";
+import { getCountries } from "@/lib/countries";
 import "./address-selector.css";
 
 interface ShippingAddress {
@@ -266,7 +267,11 @@ export function AddressSelector({ onAddressSelected }: AddressSelectorProps) {
                           setFormData({ ...formData, country: e.target.value })
                         }
                       >
-                        <option value="Georgia">{t("addresses.form.countryGeorgia")}</option>
+                        {getCountries().map((country) => (
+                          <option key={country.code} value={country.name}>
+                            {country.name}
+                          </option>
+                        ))}
                       </select>
                     </div>
                     <div className="form-field">
@@ -460,7 +465,11 @@ export function AddressSelector({ onAddressSelected }: AddressSelectorProps) {
                     setFormData({ ...formData, country: e.target.value })
                   }
                 >
-                  <option value="Georgia">{t("addresses.form.countryGeorgia")}</option>
+                  {getCountries().map((country) => (
+                    <option key={country.code} value={country.name}>
+                      {country.name}
+                    </option>
+                  ))}
                 </select>
               </div>
               <div className="form-field">

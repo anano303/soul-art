@@ -78,7 +78,8 @@ export function OrderReview() {
   const shippingCity = currentShippingDetails?.city || "";
   const shippingPrice = calculateShipping(shippingCountry, shippingCity);
   const isShippingFree = shippingPrice === 0;
-  const showBothCurrencies = shippingCountry !== "GE";
+  const isGeorgia = shippingCountry === "GE" || shippingCountry === "საქართველო" || shippingCountry === "Georgia";
+  const showBothCurrencies = !isGeorgia;
 
   // საკომისიო მოხსნილია - რეალური ფასი ყველგან
   const totalPrice = itemsPrice + shippingPrice;

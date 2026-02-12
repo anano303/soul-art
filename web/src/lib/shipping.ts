@@ -58,6 +58,42 @@ export function getShippingRate(countryCode: string): ShippingRate | null {
   return shippingRates.find((rate) => rate.countryCode === countryCode) || null;
 }
 
+// Find shipping rate by country name (e.g., "საქართველო", "Italy")
+export function getShippingRateByName(countryName: string): ShippingRate | null {
+  return shippingRates.find((rate) => rate.countryName === countryName) || null;
+}
+
+// Resolve country code from either code or name
+function resolveCountryCode(countryCodeOrName: string): string {
+  // If it's already a valid country code
+  const byCode = shippingRates.find((rate) => rate.countryCode === countryCodeOrName);
+  if (byCode) return byCode.countryCode;
+
+  // Try matching by name
+  const byName = shippingRates.find((rate) => rate.countryName === countryCodeOrName);
+  if (byName) return byName.countryCode;
+
+  // Handle common aliases
+  const aliases: Record<string, string> = {
+    "Georgia": "GE",
+    "georgia": "GE",
+    "საქართველო": "GE",
+    "Italy": "IT",
+    "italy": "IT",
+    "Germany": "DE",
+    "germany": "DE",
+    "France": "FR",
+    "france": "FR",
+    "Spain": "ES",
+    "spain": "ES",
+    "United States": "US",
+    "united states": "US",
+    "USA": "US",
+  };
+
+  return aliases[countryCodeOrName] || countryCodeOrName;
+}
+
 // Georgia domestic shipping: Tbilisi = 0₾, Region = 18₾
 export function calculateDomesticShipping(city: string = ""): number {
   const cityLower = city.toLowerCase();
@@ -66,20 +102,22 @@ export function calculateDomesticShipping(city: string = ""): number {
   return isTbilisi ? 0 : 18;
 }
 
-export function calculateShipping(countryCode: string, city?: string): number {
-  if (countryCode === "GE") {
+export function calculateShipping(countryCodeOrName: string, city?: string): number {
+  const code = resolveCountryCode(countryCodeOrName);
+  if (code === "GE") {
     // For Georgia, use city-based calculation
     return calculateDomesticShipping(city || "");
   }
-  const rate = getShippingRate(countryCode);
+  const rate = getShippingRate(code);
   return rate ? rate.cost : 0;
 }
 
 export function formatShippingCost(
-  countryCode: string,
+  countryCodeOrName: string,
   showBothCurrencies: boolean = false,
 ): string {
-  const rate = getShippingRate(countryCode);
+  const code = resolveCountryCode(countryCodeOrName);
+  const rate = getShippingRate(code);
 
   if (!rate) {
     return "0 ₾";
@@ -96,6 +134,7 @@ export function formatShippingCost(
   return `${rate.cost} ₾`;
 }
 
-export function isShippingSupported(countryCode: string): boolean {
-  return shippingRates.some((rate) => rate.countryCode === countryCode);
+export function isShippingSupported(countryCodeOrName: string): boolean {
+  const code = resolveCountryCode(countryCodeOrName);
+  return shippingRates.some((rate) => rate.countryCode === code);
 }

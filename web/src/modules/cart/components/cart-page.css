@@ -161,6 +161,41 @@
   height: 1px;
 }
 
+/* Delivery styling */
+.delivery-value {
+  text-align: right;
+}
+
+.delivery-at-checkout {
+  color: #6b7280;
+  font-size: 0.85rem;
+  font-style: italic;
+}
+
+.delivery-free {
+  color: #10b981;
+  font-weight: 700;
+}
+
+.delivery-note {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: linear-gradient(135deg, #ecfdf5, #d1fae5);
+  border: 1px solid #a7f3d0;
+  border-radius: 8px;
+  padding: 0.6rem 0.8rem;
+  margin: -0.5rem 0 1rem 0;
+  font-size: 0.82rem;
+  color: #065f46;
+  font-weight: 500;
+}
+
+.delivery-note-icon {
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
 .total {
   font-weight: 700;
   font-size: 1.2rem;

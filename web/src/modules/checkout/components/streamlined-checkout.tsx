@@ -29,6 +29,7 @@ import Cookies from "js-cookie";
 import { CartItem } from "@/types/cart";
 import { PayPalButton } from "@/modules/orders/components/paypal-button";
 import { useUsdRate } from "@/hooks/useUsdRate";
+import { calculateShipping } from "@/lib/shipping";
 
 type CheckoutStep = "auth" | "guest" | "shipping" | "payment" | "review";
 
@@ -137,11 +138,9 @@ export function StreamlinedCheckout() {
     0,
   );
 
-  // Delivery zone based on city: Tbilisi = 0₾, Region = 18₾
-  const cityName = shippingAddress?.city?.toLowerCase() || "";
-  const isTbilisi =
-    cityName.includes("tbilisi") || cityName.includes("თბილისი");
-  const shippingPrice = isTbilisi ? 0 : shippingAddress ? 18 : 0;
+  // Delivery cost based on country and city
+  const shippingCountry = shippingAddress?.country || "GE";
+  const shippingPrice = shippingAddress ? calculateShipping(shippingCountry, shippingAddress?.city) : 0;
 
   // საკომისიო მოხსნილია - რეალური ფასი ყველგან
   const totalPrice = itemsPrice + shippingPrice;
