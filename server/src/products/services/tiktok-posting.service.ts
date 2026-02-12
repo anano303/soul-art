@@ -244,7 +244,7 @@ export class TikTokPostingService {
           post_info: {
             title: caption.slice(0, 90), // TikTok photo title limit is 90
             description: caption.slice(0, 4000), // description up to 4000
-            privacy_level: 'SELF_ONLY',
+            privacy_level: 'PUBLIC_TO_EVERYONE',
             disable_comment: false,
             auto_add_music: true,
           },
@@ -321,7 +321,7 @@ export class TikTokPostingService {
         {
           post_info: {
             title: caption.slice(0, 2200),
-            privacy_level: 'SELF_ONLY',
+            privacy_level: 'PUBLIC_TO_EVERYONE',
             disable_duet: false,
             disable_comment: false,
             disable_stitch: false,
