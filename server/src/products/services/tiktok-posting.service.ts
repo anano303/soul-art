@@ -204,8 +204,9 @@ export class TikTokPostingService {
       // TikTok Photo Mode supports up to 35 photos
       // Convert to proxy URLs so TikTok's URL ownership verification passes
       // TikTok requires images from a verified domain
-      // Verified URL prefix: https://api.soulart.ge/v1/media/proxy/
-      const serverBaseUrl = this.serverBaseUrl || 'https://api.soulart.ge';
+      // MUST use api.soulart.ge (verified in TikTok Developer Portal)
+      // NOT the DigitalOcean URL (seal-app-tilvb.ondigitalocean.app)
+      const tiktokProxyBase = 'https://api.soulart.ge';
       const photos = imageUrls.slice(0, 35).map((url) => {
         // If already our domain, use as-is
         if (url.includes('api.soulart.ge') || url.includes('soulart.ge')) {
@@ -213,7 +214,7 @@ export class TikTokPostingService {
         }
         // Proxy through our verified domain using base64url encoding in path
         const encoded = Buffer.from(url).toString('base64url');
-        return `${serverBaseUrl}/v1/media/proxy/${encoded}`;
+        return `${tiktokProxyBase}/v1/media/proxy/${encoded}`;
       });
 
       // Step 1: Verify creator info
