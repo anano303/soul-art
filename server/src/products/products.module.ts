@@ -1,6 +1,7 @@
 import { Logger, Module, OnModuleInit, forwardRef } from '@nestjs/common';
 import { ProductsService } from './services/products.service';
 import { ProductsController } from './controller/products.controller';
+import { MediaProxyController } from './controller/media-proxy.controller';
 import { InjectModel, MongooseModule, getModelToken } from '@nestjs/mongoose';
 import { Product, ProductSchema } from './schemas/product.schema';
 import { AppService } from '@/app/services/app.service';
@@ -122,7 +123,7 @@ export class IndexCleanupService implements OnModuleInit {
     TikTokPostingService,
     ProductYoutubeService,
   ],
-  controllers: [ProductsController],
+  controllers: [ProductsController, MediaProxyController],
   exports: [
     ProductsService,
     MongooseModule.forFeature([
