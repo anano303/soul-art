@@ -9,7 +9,6 @@ import {
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
-import { useRouter } from "next/navigation";
 import { toast } from "@/hooks/use-toast";
 import { Product, ProductStatus } from "@/types";
 import { fetchWithAuth } from "@/lib/fetch-with-auth";
@@ -35,10 +34,7 @@ export function ProductsActions({
   product,
   onStatusChange,
   onDelete,
-  materials,
-  dimensions,
 }: ProductsActionsProps) {
-  const router = useRouter();
   const { user } = useUser();
   const { language } = useLanguage();
   const [isPosting, setIsPosting] = useState(false);
@@ -184,11 +180,15 @@ export function ProductsActions({
         title: "Posted to Social Media",
         description: `Successfully posted to: ${platformsText}`,
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : "Please check server logs and config";
       toast({
         variant: "destructive",
         title: "Social media post failed",
-        description: error?.message || "Please check server logs and config",
+        description: message,
       });
     } finally {
       setIsPosting(false);
@@ -226,11 +226,15 @@ export function ProductsActions({
         title: "Posted to TikTok",
         description: "Successfully posted to TikTok!",
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : "Please check server logs and config";
       toast({
         variant: "destructive",
         title: "TikTok post failed",
-        description: error?.message || "Please check server logs and config",
+        description: message,
       });
     } finally {
       setIsPostingTikTok(false);
