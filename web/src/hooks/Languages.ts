@@ -3159,8 +3159,8 @@ export const TRANSLATIONS: Translations = {
 
     // Home page
     home: {
-      heroTitle: "Georgian Artists' Artworks",
-      heroSubtitle: "Original art directly from creators",
+      heroTitle: "Discover 400+ Georgian Artists",
+      heroSubtitle: "From the homeland of Pirosmani — original art shipped worldwide.",
       trustBadges: {
         freeShipping: "Free Shipping",
         freeShippingDesc: "On orders 30₾+",
@@ -3169,7 +3169,7 @@ export const TRANSLATIONS: Translations = {
         fastRefund: "Fast Refund",
         fastRefundDesc: "On late delivery",
         securePayment: "Secure Payment",
-        securePaymentDesc: "BOG & Card",
+        securePaymentDesc: "PayPal, BOG & Card",
       },
       cta: {
         browseArt: "Browse Art",
