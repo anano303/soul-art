@@ -1172,7 +1172,7 @@ export const TRANSLATIONS: Translations = {
 
     // Footer
     footer: {
-      copyright: "© 2023 SoulArt. ყველა უფლება დაცულია.",
+      copyright: "© 2026 SoulArt. ყველა უფლება დაცულია.",
       description:
         "აღმოაჩინე და შეიძინე უნიკალური ხელოვნების ნიმუშები ნიჭიერი ხელოვანებისგან მსოფლიოს სხვადასხვა კუთხიდან. შექმენი შენი პირადი გალერეა და გახდი კოლექციონერი ან ხელოვანი.",
       quickLinks: "სწრაფი ბმულები",
@@ -3114,7 +3114,7 @@ export const TRANSLATIONS: Translations = {
 
     // Footer
     footer: {
-      copyright: "© 2023 SoulArt. All rights reserved.",
+      copyright: "© 2026 SoulArt. All rights reserved.",
       description:
         "Discover and purchase unique art pieces from talented artists around the world. Create your personal gallery and become a collector or artist.",
       quickLinks: "Quick Links",

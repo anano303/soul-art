@@ -64,6 +64,7 @@ export interface PortfolioPostSummary {
 export interface ArtistProductSummary {
   id: string;
   name: string;
+  nameEn?: string;
   price: number;
   images: string[];
   brand?: string | null;
@@ -71,6 +72,7 @@ export interface ArtistProductSummary {
   rating?: number;
   numReviews?: number;
   description?: string;
+  descriptionEn?: string;
   discountPercentage?: number;
   discountStartDate?: string | null;
   discountEndDate?: string | null;

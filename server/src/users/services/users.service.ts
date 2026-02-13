@@ -700,6 +700,7 @@ export class UsersService {
             .limit(limit)
             .select([
               'name',
+              'nameEn',
               'price',
               'images',
               'brand',
@@ -707,6 +708,7 @@ export class UsersService {
               'rating',
               'numReviews',
               'description',
+              'descriptionEn',
               'discountPercentage',
               'discountStartDate',
               'discountEndDate',
@@ -862,6 +864,7 @@ export class UsersService {
           items: products.map((product) => ({
             id: product._id.toString(),
             name: product.name,
+            nameEn: (product as any).nameEn ?? null,
             price: product.price,
             images: product.images,
             brand: product.brand,
@@ -869,14 +872,17 @@ export class UsersService {
             rating: product.rating,
             numReviews: product.numReviews,
             description: product.description,
+            descriptionEn: (product as any).descriptionEn ?? null,
             discountPercentage: product.discountPercentage,
             discountStartDate: product.discountStartDate ?? null,
             discountEndDate: product.discountEndDate ?? null,
             countInStock: product.countInStock,
+            variants: (product as any).variants ?? [],
             deliveryType: product.deliveryType,
             minDeliveryDays: product.minDeliveryDays,
             maxDeliveryDays: product.maxDeliveryDays,
             createdAt: (product as any).createdAt ?? null,
+            referralDiscountPercent: (product as any).referralDiscountPercent ?? null,
           })),
         },
         portfolio: {

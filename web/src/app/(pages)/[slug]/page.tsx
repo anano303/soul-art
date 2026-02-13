@@ -15,14 +15,14 @@ const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/v1";
 const SITE_BASE = process.env.NEXT_PUBLIC_CLIENT_URL || "https://soulart.ge";
 
 async function fetchArtistProfile(
-  slug: string
+  slug: string,
 ): Promise<ArtistProfileResponse> {
   const response = await fetch(
     `${API_BASE}/artists/${encodeURIComponent(slug)}`,
     {
       next: { revalidate: 0 }, // Disable cache - always fetch fresh data
       cache: "no-store",
-    }
+    },
   );
 
   if (response.status === 404) {
@@ -42,7 +42,7 @@ type ArtistPageProps = {
 };
 
 function resolveBiographyText(
-  bio: ArtistProfileResponse["artist"]["artistBio"] | undefined | null
+  bio: ArtistProfileResponse["artist"]["artistBio"] | undefined | null,
 ) {
   if (!bio) return "";
 
@@ -63,7 +63,7 @@ function resolveBiographyText(
   const ge = record?.ge?.trim();
   if (ge) return ge;
   const fallback = Object.values(record || {}).find(
-    (value) => typeof value === "string" && value.trim().length > 0
+    (value) => typeof value === "string" && value.trim().length > 0,
   );
   return fallback ? fallback.trim() : "";
 }
@@ -79,7 +79,7 @@ function buildAbsoluteUrl(path: string) {
 const collectArtistKeywords = (
   artist: ArtistProfileResponse["artist"],
   biography: string,
-  products: ArtistProfileResponse["products"] | null
+  products: ArtistProfileResponse["products"] | null,
 ): string[] => {
   const keywordMap = new Map<string, string>();
 
@@ -129,7 +129,7 @@ const collectArtistKeywords = (
 
   if (artist.artistBio) {
     Object.values(artist.artistBio).forEach((value) =>
-      registerText(typeof value === "string" ? value : undefined)
+      registerText(typeof value === "string" ? value : undefined),
     );
   }
 
@@ -171,13 +171,13 @@ export async function generateMetadata({
     const artist = data.artist;
     const displayName = artist.storeName || artist.name;
     const biography = resolveBiographyText(artist.artistBio);
-    
+
     // Check if we have a specific post to show
     let postImage: string | undefined;
     let postCaption: string | undefined;
-    
+
     if (postId && data.portfolio?.posts?.length) {
-      const post = data.portfolio.posts.find(p => p.id === postId);
+      const post = data.portfolio.posts.find((p) => p.id === postId);
       if (post) {
         // Get the first image from the post
         const firstImage = post.images?.[0];
@@ -185,30 +185,37 @@ export async function generateMetadata({
           postImage = firstImage.url;
         }
         // Get the caption
-        if (post.caption && typeof post.caption === 'string' && post.caption.trim()) {
+        if (
+          post.caption &&
+          typeof post.caption === "string" &&
+          post.caption.trim()
+        ) {
           postCaption = post.caption.trim();
         }
       }
     }
-    
+
     // Use post-specific data if available, otherwise fall back to artist data
     const description = postCaption
       ? postCaption.slice(0, 180) + (postCaption.length > 180 ? "…" : "")
       : biography
         ? biography.slice(0, 180) + (biography.length > 180 ? "…" : "")
         : `${displayName} • SoulArt portfolio showcasing highlights and commissions.`;
-    
-    const canonical = postId 
+
+    const canonical = postId
       ? buildAbsoluteUrl(`/@${slug}?post=${postId}`)
       : buildAbsoluteUrl(`/@${slug}`);
 
     // Use post image if available, otherwise use artist image
-    const imageUrl = postImage || artist.storeLogo || artist.artistCoverImage || undefined;
+    const imageUrl =
+      postImage || artist.storeLogo || artist.artistCoverImage || undefined;
     const images = imageUrl
       ? [
           {
             url: imageUrl,
-            alt: postCaption ? `${displayName} - ${postCaption.slice(0, 50)}` : displayName,
+            alt: postCaption
+              ? `${displayName} - ${postCaption.slice(0, 50)}`
+              : displayName,
           },
         ]
       : undefined;
@@ -216,7 +223,7 @@ export async function generateMetadata({
     const artistKeywordSet = collectArtistKeywords(
       artist,
       biography,
-      data.products ?? null
+      data.products ?? null,
     );
 
     const [productKeywords, globalArtistKeywords] = await Promise.all([
@@ -228,7 +235,7 @@ export async function generateMetadata({
       artistKeywordSet,
       productKeywords,
       globalArtistKeywords,
-      GLOBAL_KEYWORDS
+      GLOBAL_KEYWORDS,
     ).slice(0, 200);
 
     return {
@@ -284,7 +291,7 @@ export default async function ArtistPage({ params }: ArtistPageProps) {
     startIndex = slug.indexOf("%40") + 3;
   }
   const data = await fetchArtistProfile(
-    slug.toLowerCase().substring(startIndex)
+    slug.toLowerCase().substring(startIndex),
   );
 
   return (

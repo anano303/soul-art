@@ -25,7 +25,7 @@ const protectedPaths = [
 ];
 
 export function middleware(request: NextRequest) {
-  const { pathname } = request.nextUrl;
+  let { pathname } = request.nextUrl;
 
   // Check for authentication tokens - Next.js 16 compatible way
   const accessToken = request.cookies.get("access_token");
