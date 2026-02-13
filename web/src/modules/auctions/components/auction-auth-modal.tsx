@@ -5,9 +5,11 @@ import { createPortal } from "react-dom";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { FaGoogle, FaEye, FaEyeSlash, FaTimes, FaGavel } from "react-icons/fa";
+import { FaEye, FaEyeSlash, FaTimes, FaGavel } from "react-icons/fa";
 import { FacebookAuthButton } from "@/components/auth/FacebookAuthButton";
+import { GoogleAuthPopup } from "@/components/auth/GoogleAuthPopup";
 import { useLogin, useFacebookAuth } from "@/modules/auth/hooks/use-auth";
+import { useQueryClient } from "@tanstack/react-query";
 import { useLanguage } from "@/hooks/LanguageContext";
 import { useErrorHandler } from "@/hooks/use-error-handler";
 import { toast } from "@/hooks/use-toast";
@@ -38,6 +40,7 @@ export function AuctionAuthModal({
 }: AuctionAuthModalProps) {
   const { t, language } = useLanguage();
   const errorHandler = useErrorHandler();
+  const queryClient = useQueryClient();
   const { mutate: login, isLoading } = useLogin();
   const { mutate: facebookAuth, isPending: isFacebookPending } = useFacebookAuth();
   const [loginError, setLoginError] = useState<string | null>(null);
@@ -105,10 +108,18 @@ export function AuctionAuthModal({
     });
   };
 
-  const handleGoogleAuth = () => {
-    // Store current auction page URL for redirect after auth
-    sessionStorage.setItem("auctionReturnUrl", window.location.href);
-    window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/auth/google?returnUrl=${encodeURIComponent(window.location.href)}`;
+  const handleGoogleSuccess = () => {
+    // Set bridge cookie for middleware auth check
+    document.cookie = 'auth_session=active; path=/; max-age=3600; SameSite=Lax';
+    // Invalidate user query to refetch fresh user data stored by popup callback
+    queryClient.invalidateQueries({ queryKey: ["user"] });
+    toast({
+      title: language === "ge" ? "წარმატებული ავტორიზაცია" : "Login Successful",
+      description: language === "ge" ? "ახლა შეგიძლიათ ფსონის დადება!" : "You can now place your bid!",
+      variant: "default",
+    });
+    onLoginSuccess();
+    onClose();
   };
 
   const handleFacebookSuccess = (data: {
@@ -246,15 +257,12 @@ export function AuctionAuthModal({
         </div>
 
         <div className="auction-auth-social">
-          <button
-            type="button"
-            onClick={handleGoogleAuth}
-            className="social-btn google"
+          <GoogleAuthPopup
+            onSuccess={handleGoogleSuccess}
+            onError={(error) => setLoginError(error)}
             disabled={isLoading || isFacebookPending}
-          >
-            <FaGoogle />
-            <span>Google</span>
-          </button>
+            className="social-btn google"
+          />
           <FacebookAuthButton
             onSuccess={handleFacebookSuccess}
             onError={(error) => setLoginError(error)}
