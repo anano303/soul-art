@@ -519,11 +519,18 @@ export class FacebookPostingService {
   /**
    * Post to TikTok only
    */
-  async postToTikTok(product: ProductDocument) {
+  async postToTikTok(product: ProductDocument, options?: any) {
     if (!this.tiktokService.isEnabled()) {
       return { success: false, error: 'TikTok posting is not configured' };
     }
-    return this.tiktokService.postProduct(product);
+    return this.tiktokService.postProduct(product, options);
+  }
+
+  /**
+   * Query TikTok creator info for UX display
+   */
+  async queryTikTokCreatorInfo() {
+    return this.tiktokService.queryCreatorInfo();
   }
 
   /**

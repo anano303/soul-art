@@ -165,6 +165,27 @@ export class ProductsController {
     };
   }
 
+  @Get('tiktok/creator-info')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.Admin)
+  @ApiOperation({
+    summary: 'Get TikTok creator info for posting UX',
+  })
+  async getTikTokCreatorInfo() {
+    if (!this.facebookPostingService.isTikTokEnabled()) {
+      throw new BadRequestException('TikTok posting is not configured');
+    }
+
+    const result = await this.facebookPostingService.queryTikTokCreatorInfo();
+    if (!result.success) {
+      throw new BadRequestException(
+        result.error || 'Failed to get creator info',
+      );
+    }
+
+    return result.data;
+  }
+
   @Get(':id')
   @ApiOperation({ summary: 'Get product by ID' })
   @ApiParam({ name: 'id', description: 'Product ID' })
@@ -1355,7 +1376,7 @@ export class ProductsController {
     summary: 'Manually post a product to TikTok only',
   })
   @ApiParam({ name: 'id', description: 'Product ID' })
-  async postProductToTikTok(@Param('id') id: string) {
+  async postProductToTikTok(@Param('id') id: string, @Body() body?: any) {
     const product = await this.productsService.findByIdWithUser(id);
 
     if (!product) {
@@ -1369,8 +1390,11 @@ export class ProductsController {
     }
 
     try {
+      // Pass UX options from the frontend modal
+      const options = body?.options || undefined;
       const tiktokResult = await this.facebookPostingService.postToTikTok(
         product as any,
+        options,
       );
 
       if (!tiktokResult.success) {

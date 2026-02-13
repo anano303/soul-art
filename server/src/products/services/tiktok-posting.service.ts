@@ -9,6 +9,28 @@ export interface TikTokPostResult {
   error?: any;
 }
 
+export interface TikTokCreatorInfo {
+  creator_avatar_url: string;
+  creator_username: string;
+  creator_nickname: string;
+  privacy_level_options: string[];
+  comment_disabled: boolean;
+  duet_disabled: boolean;
+  stitch_disabled: boolean;
+  max_video_post_duration_sec: number;
+}
+
+export interface TikTokPostOptions {
+  privacy_level: string;
+  disable_comment: boolean;
+  disable_duet: boolean;
+  disable_stitch: boolean;
+  brand_content_toggle: boolean;
+  brand_organic_toggle: boolean;
+  is_branded_content?: boolean;
+  title?: string;
+}
+
 /**
  * TikTok Content Posting Service
  *
@@ -78,6 +100,48 @@ export class TikTokPostingService {
    */
   isEnabled(): boolean {
     return Boolean(this.clientKey && this.currentAccessToken && this.autoPost);
+  }
+
+  /**
+   * Query TikTok Creator Info - required before posting
+   * Returns creator's avatar, name, privacy options, interaction settings
+   */
+  async queryCreatorInfo(): Promise<{
+    success: boolean;
+    data?: TikTokCreatorInfo;
+    error?: any;
+  }> {
+    try {
+      if (!this.isEnabled()) {
+        return { success: false, error: 'TIKTOK_DISABLED' };
+      }
+
+      const res = await axios.post(
+        'https://open.tiktokapis.com/v2/post/publish/creator_info/query/',
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${this.currentAccessToken}`,
+            'Content-Type': 'application/json; charset=UTF-8',
+          },
+        },
+      );
+
+      if (res.data?.error?.code !== 'ok') {
+        throw new Error(
+          res.data?.error?.message || 'Failed to get creator info',
+        );
+      }
+
+      return {
+        success: true,
+        data: res.data?.data as TikTokCreatorInfo,
+      };
+    } catch (error: any) {
+      const errPayload = error?.response?.data || { message: error.message };
+      this.logger.error('Failed to query creator info', errPayload);
+      return { success: false, error: errPayload };
+    }
   }
 
   /**
@@ -195,6 +259,7 @@ export class TikTokPostingService {
   async postPhotos(
     imageUrls: string[],
     caption: string,
+    options?: TikTokPostOptions,
   ): Promise<TikTokPostResult> {
     try {
       if (!this.isEnabled()) {
@@ -245,16 +310,31 @@ export class TikTokPostingService {
       // TikTok photo_images is list<string> of public URLs
       this.logger.log(`TikTok posting ${photos.length} photos. First URL: ${photos[0]?.substring(0, 100)}...`);
 
+      // Build post_info from user-selected options (required for TikTok audit)
+      const postInfo: any = {
+        title: (options?.title || caption).slice(0, 90),
+        description: caption.slice(0, 4000),
+        privacy_level: options?.privacy_level || 'SELF_ONLY',
+        disable_comment: options?.disable_comment ?? false,
+        auto_add_music: true,
+      };
+
+      // Commercial content disclosure (required for audit)
+      if (options?.brand_content_toggle) {
+        if (options.brand_organic_toggle) {
+          postInfo.brand_content_toggle = true;
+          postInfo.brand_organic_toggle = true;
+        }
+        if (options.is_branded_content) {
+          postInfo.brand_content_toggle = true;
+          postInfo.is_branded_content = true;
+        }
+      }
+
       const postRes = await axios.post(
         'https://open.tiktokapis.com/v2/post/publish/content/init/',
         {
-          post_info: {
-            title: caption.slice(0, 90), // TikTok photo title limit is 90
-            description: caption.slice(0, 4000), // description up to 4000
-            privacy_level: 'SELF_ONLY',
-            disable_comment: false,
-            auto_add_music: true,
-          },
+          post_info: postInfo,
           source_info: {
             source: 'PULL_FROM_URL',
             photo_images: photos,
@@ -299,6 +379,7 @@ export class TikTokPostingService {
   async postVideo(
     videoUrl: string,
     caption: string,
+    options?: TikTokPostOptions,
   ): Promise<TikTokPostResult> {
     try {
       if (!this.isEnabled()) {
@@ -324,16 +405,17 @@ export class TikTokPostingService {
         );
       }
 
-      // Step 2: Initialize video upload
+      // Step 2: Initialize video upload with user-selected options
       const initRes = await axios.post(
         'https://open.tiktokapis.com/v2/post/publish/video/init/',
         {
           post_info: {
-            title: caption.slice(0, 2200),
-            privacy_level: 'SELF_ONLY',
-            disable_duet: false,
-            disable_comment: false,
-            disable_stitch: false,
+            title: (options?.title || caption).slice(0, 2200),
+            privacy_level: options?.privacy_level || 'SELF_ONLY',
+            disable_duet: options?.disable_duet ?? false,
+            disable_comment: options?.disable_comment ?? false,
+            disable_stitch: options?.disable_stitch ?? false,
+            ...(options?.brand_content_toggle ? { brand_content_toggle: true, brand_organic_toggle: !!options.brand_organic_toggle, is_branded_content: !!options.is_branded_content } : {}),
           },
           source_info: {
             source: 'PULL_FROM_URL',
@@ -373,7 +455,7 @@ export class TikTokPostingService {
    *
    * User can add TikTok music from the app after posting
    */
-  async postProduct(product: ProductDocument): Promise<TikTokPostResult> {
+  async postProduct(product: ProductDocument, options?: TikTokPostOptions): Promise<TikTokPostResult> {
     try {
       if (!this.isEnabled()) {
         this.logger.debug('TikTok posting disabled or not configured');
@@ -399,7 +481,7 @@ export class TikTokPostingService {
       if (isDirectVideoUrl) {
         // Use direct video file
         this.logger.log(`Posting video for product ${product._id}`);
-        return await this.postVideo(candidateVideoUrl, caption);
+        return await this.postVideo(candidateVideoUrl, caption, options);
       }
 
       // No video - use Photo Mode with images
@@ -419,7 +501,7 @@ export class TikTokPostingService {
       this.logger.log(
         `Posting ${images.length} photos for product ${product._id} using Photo Mode`,
       );
-      return await this.postPhotos(images, caption);
+      return await this.postPhotos(images, caption, options);
     } catch (error: any) {
       this.logger.error('TikTok product post failed', error);
       return { success: false, error: error.message };
