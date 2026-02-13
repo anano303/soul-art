@@ -98,7 +98,20 @@ export function useAuth() {
       queryClient.setQueryData(["user"], null);
       // Clear sales manager banner dismissed state so it shows again on next login
       localStorage.removeItem("sales_manager_banner_dismissed");
-      window.location.href = "/login"; // Force a full page refresh to reset all state
+
+      // Only redirect to login if the current page requires authentication
+      const protectedPaths = ["/profile", "/orders", "/admin"];
+      const currentPath = window.location.pathname;
+      const isProtectedPage = protectedPaths.some((path) =>
+        currentPath.startsWith(path)
+      );
+
+      if (isProtectedPage) {
+        window.location.href = "/login";
+      } else {
+        // Stay on the same page, just refresh to reset all state
+        window.location.reload();
+      }
     },
   });
 
