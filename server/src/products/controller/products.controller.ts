@@ -147,6 +147,14 @@ export class ProductsController {
     return this.productsService.findByStatus(ProductStatus.PENDING);
   }
 
+  @Get('stats')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.Admin)
+  @ApiOperation({ summary: 'Get product statistics (total value, commission)' })
+  async getProductStats() {
+    return this.productsService.getProductStats();
+  }
+
   @Get('brands')
   @ApiOperation({ summary: 'Get all available brands' })
   async getBrands() {

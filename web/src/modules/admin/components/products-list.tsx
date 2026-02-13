@@ -187,6 +187,18 @@ export function ProductsList() {
     refetchOnWindowFocus: true, // Refetch when user focuses window
   });
 
+  // Product stats for admin (total value, commission)
+  const { data: productStats } = useQuery({
+    queryKey: ["productStats"],
+    queryFn: async () => {
+      const response = await fetchWithAuth("/products/stats");
+      return response.json();
+    },
+    enabled: isAdmin,
+    staleTime: 60 * 1000, // 1 minute
+    refetchOnWindowFocus: true,
+  });
+
   // Add a function to directly fetch the updated product data after returning from an edit
   const refreshProductData = useCallback(async () => {
     try {
@@ -922,6 +934,78 @@ export function ProductsList() {
               ? "Used for international payment conversions"
               : "საერთაშორისო გადახდების კონვერტაციისთვის"}
           </span>
+        </div>
+      )}
+
+      {/* Product Stats - Only for Admin */}
+      {isAdmin && productStats && (
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+            gap: "12px",
+            marginBottom: "16px",
+          }}
+        >
+          <div
+            style={{
+              background: "linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%)",
+              border: "1px solid #3b82f6",
+              borderRadius: "12px",
+              padding: "16px",
+              textAlign: "center",
+            }}
+          >
+            <div style={{ fontSize: "0.8rem", color: "#1e40af", fontWeight: 500, marginBottom: "4px" }}>
+              📦 {language === "en" ? "Active Products" : "აქტიური პროდუქცია"}
+            </div>
+            <div style={{ fontSize: "1.5rem", fontWeight: 700, color: "#1e3a8a" }}>
+              {productStats.totalProducts}
+            </div>
+            <div style={{ fontSize: "0.75rem", color: "#3b82f6", marginTop: "2px" }}>
+              {productStats.totalItems} {language === "en" ? "items in stock" : "ერთეული მარაგში"}
+            </div>
+          </div>
+
+          <div
+            style={{
+              background: "linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%)",
+              border: "1px solid #22c55e",
+              borderRadius: "12px",
+              padding: "16px",
+              textAlign: "center",
+            }}
+          >
+            <div style={{ fontSize: "0.8rem", color: "#166534", fontWeight: 500, marginBottom: "4px" }}>
+              💰 {language === "en" ? "Total Product Value" : "ჯამური ღირებულება"}
+            </div>
+            <div style={{ fontSize: "1.5rem", fontWeight: 700, color: "#14532d" }}>
+              {productStats.totalValue?.toLocaleString()} ₾
+            </div>
+            <div style={{ fontSize: "0.75rem", color: "#22c55e", marginTop: "2px" }}>
+              {language === "en" ? "Approved & in stock" : "დამტკიცებული და მარაგში"}
+            </div>
+          </div>
+
+          <div
+            style={{
+              background: "linear-gradient(135deg, #fef9c3 0%, #fde047 40%, #facc15 100%)",
+              border: "1px solid #eab308",
+              borderRadius: "12px",
+              padding: "16px",
+              textAlign: "center",
+            }}
+          >
+            <div style={{ fontSize: "0.8rem", color: "#854d0e", fontWeight: 500, marginBottom: "4px" }}>
+              🏦 {language === "en" ? "Estimated Commission" : "სავარაუდო საკომისიო"}
+            </div>
+            <div style={{ fontSize: "1.5rem", fontWeight: 700, color: "#713f12" }}>
+              {productStats.estimatedCommission?.toLocaleString()} ₾
+            </div>
+            <div style={{ fontSize: "0.75rem", color: "#a16207", marginTop: "2px" }}>
+              {productStats.commissionRate}% {language === "en" ? "site commission" : "საიტის საკომისიო"}
+            </div>
+          </div>
         </div>
       )}
 

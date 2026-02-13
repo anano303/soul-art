@@ -1096,6 +1096,68 @@ export class ProductsService {
     return updatedProduct;
   }
 
+  /**
+   * პროდუქციის სტატისტიკა ადმინისთვის:
+   * - ჯამური ღირებულება (APPROVED + მარაგში)
+   * - სავარაუდო საკომისიო (10%)
+   * - პროდუქტების რაოდენობა
+   */
+  async getProductStats() {
+    const result = await this.productModel.aggregate([
+      {
+        $match: {
+          status: 'APPROVED',
+          $or: [
+            { countInStock: { $gt: 0 } },
+            { 'variants.stock': { $gt: 0 } },
+          ],
+        },
+      },
+      {
+        $project: {
+          price: 1,
+          countInStock: 1,
+          variants: 1,
+          // თითოეული პროდუქტის ჯამური მარაგი
+          totalStock: {
+            $cond: {
+              if: { $gt: [{ $size: { $ifNull: ['$variants', []] } }, 0] },
+              then: { $sum: '$variants.stock' },
+              else: '$countInStock',
+            },
+          },
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          totalProducts: { $sum: 1 },
+          totalValue: {
+            $sum: { $multiply: ['$price', '$totalStock'] },
+          },
+          totalItems: { $sum: '$totalStock' },
+        },
+      },
+    ]);
+
+    const stats = result[0] || {
+      totalProducts: 0,
+      totalValue: 0,
+      totalItems: 0,
+    };
+
+    const commissionRate = 0.1; // 10% საკომისიო
+    const estimatedCommission = Math.round(stats.totalValue * commissionRate);
+
+    return {
+      totalProducts: stats.totalProducts,
+      totalValue: Math.round(stats.totalValue),
+      totalItems: stats.totalItems,
+      estimatedCommission,
+      commissionRate: commissionRate * 100,
+    };
+  }
+
   async findByStatus(status: ProductStatus): Promise<Product[]> {
     return this.productModel
       .find({ status })
