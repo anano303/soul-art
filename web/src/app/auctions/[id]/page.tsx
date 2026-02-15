@@ -376,16 +376,8 @@ export default function AuctionDetailPage() {
     setBidAmount(value);
   };
 
-  const handlePlaceBid = async () => {
-    if (!user) {
-      // Show auth modal instead of redirecting
-      authModal.open(() => {
-        // This callback runs after successful login
-        handlePlaceBid();
-      });
-      return;
-    }
-
+  // Core bid submission logic (no auth check - caller must ensure user is authenticated)
+  const submitBid = useCallback(async () => {
     if (!auction) return;
 
     const minBid = auction.currentPrice + auction.minimumBidIncrement;
@@ -428,6 +420,21 @@ export default function AuctionDetailPage() {
     } finally {
       setBidding(false);
     }
+  }, [auction, bidAmount, t, fetchAuction, refreshBidStatus]);
+
+  const handlePlaceBid = async () => {
+    if (!user) {
+      // Show auth modal - after login, directly submit the bid
+      authModal.open(() => {
+        // Dispatch event so useAuth picks up new user data
+        window.dispatchEvent(new Event('auth-state-changed'));
+        // Directly submit bid - user is now authenticated (cookies set)
+        submitBid();
+      });
+      return;
+    }
+
+    submitBid();
   };
 
   const formatPrice = (price: number) => `${price.toFixed(2)} ₾`;

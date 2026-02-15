@@ -58,7 +58,15 @@ export const useAuth = (): AuthState => {
     };
 
     window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
+
+    // Listen for auth state changes (e.g., login from auction modal)
+    const handleAuthChange = () => checkAuthStatus();
+    window.addEventListener('auth-state-changed', handleAuthChange);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('auth-state-changed', handleAuthChange);
+    };
   }, []);
 
   return authState;

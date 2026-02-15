@@ -305,12 +305,15 @@ export function useAuctionAuthModal() {
   };
 
   const handleLoginSuccess = () => {
-    if (pendingAction) {
+    const action = pendingAction;
+    setIsOpen(false);
+    setPendingAction(null);
+    if (action) {
+      // Wait for modal to close and auth state to propagate
       setTimeout(() => {
-        pendingAction();
-      }, 100);
+        action();
+      }, 300);
     }
-    close();
   };
 
   return {
