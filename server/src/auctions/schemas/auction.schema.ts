@@ -30,6 +30,9 @@ export class AuctionBid {
 
   @Prop()
   bidderName: string; // Cache bidder name for quick display
+
+  @Prop({ default: false })
+  isAutoBid: boolean; // True when this bid was placed automatically by proxy bidding
 }
 
 export const AuctionBidSchema = SchemaFactory.createForClass(AuctionBid);
@@ -120,10 +123,17 @@ export class Auction {
 
   // Current Auction State
   @Prop({ default: 0 })
-  currentPrice: number; // Current highest bid
+  currentPrice: number; // Current displayed winning bid (proxy bidding visible price)
 
   @Prop({ type: Types.ObjectId, ref: 'User' })
   currentWinner?: Types.ObjectId;
+
+  // Proxy bidding: hidden maximum bid amount placed by the current leader
+  @Prop({ default: 0 })
+  maxBid: number;
+
+  @Prop({ type: Types.ObjectId, ref: 'User' })
+  maxBidder?: Types.ObjectId;
 
   @Prop([AuctionBidSchema])
   bids: AuctionBid[];

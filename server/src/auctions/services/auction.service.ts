@@ -191,6 +191,7 @@ export class AuctionService {
     const [auctions, total] = await Promise.all([
       this.auctionModel
         .find(query)
+        .select('-maxBid -maxBidder')
         .populate('seller', 'name email ownerFirstName ownerLastName storeName')
         .populate('currentWinner', 'name ownerFirstName ownerLastName')
         .sort({ endDate: 1, createdAt: -1 })
@@ -236,7 +237,7 @@ export class AuctionService {
   }
 
   // Get single auction with full details
-  async getAuctionById(auctionId: string): Promise<AuctionDocument | null> {
+  async getAuctionById(auctionId: string) {
     if (!Types.ObjectId.isValid(auctionId)) {
       throw new BadRequestException('Invalid auction ID');
     }
@@ -260,7 +261,11 @@ export class AuctionService {
       throw new NotFoundException('Auction not found');
     }
 
-    return auction;
+    // Strip hidden proxy bidding fields from public response
+    const auctionObj = auction.toObject();
+    delete auctionObj.maxBid;
+    delete auctionObj.maxBidder;
+    return auctionObj;
   }
 
   // Get lightweight bid status for polling (minimal data transfer)
@@ -339,7 +344,10 @@ export class AuctionService {
     return { ...status, hasUpdate: false };
   }
 
-  // Place a bid
+  // Place a bid (proxy bidding system)
+  // When a user bids more than the next step, only the next step is shown as the displayed price.
+  // The extra amount is stored as a hidden maxBid. Other users are automatically outbid
+  // until someone bids higher than the maxBid.
   async placeBid(bidderId: string, placeBidDto: PlaceBidDto) {
     const { auctionId, bidAmount } = placeBidDto;
 
@@ -383,13 +391,8 @@ export class AuctionService {
       throw new BadRequestException('Bidder not found');
     }
 
-    // Create new bid
-    const newBid: AuctionBid = {
-      bidder: new Types.ObjectId(bidderId),
-      amount: bidAmount,
-      timestamp: new Date(),
-      bidderName: `${bidder.ownerFirstName} ${bidder.ownerLastName}`,
-    };
+    const bidderName = `${bidder.ownerFirstName || ''} ${bidder.ownerLastName || ''}`.trim() || bidder.name || 'Anonymous';
+    const isCurrentMaxBidder = auction.maxBidder?.toString() === bidderId;
 
     // Bid extension logic: if bid placed in last 10 seconds, extend by 10 seconds
     const BID_EXTENSION_THRESHOLD_MS = 10000; // 10 seconds
@@ -403,7 +406,6 @@ export class AuctionService {
       timeRemaining > 0 &&
       timeRemaining <= BID_EXTENSION_THRESHOLD_MS
     ) {
-      // Extend auction end time by 10 seconds
       auction.endDate = new Date(
         auction.endDate.getTime() + BID_EXTENSION_AMOUNT_MS,
       );
@@ -413,22 +415,138 @@ export class AuctionService {
       );
     }
 
-    // Update auction
+    let wasAutoOutbid = false;
+    let displayedPrice: number;
+
+    // CASE 1: Current max bidder is raising their own max bid
+    if (isCurrentMaxBidder) {
+      if (bidAmount <= auction.maxBid) {
+        throw new BadRequestException(
+          `თქვენი მაქსიმალური ფსონი უკვე ${auction.maxBid} ₾-ია. შეიყვანეთ მეტი თანხა.`,
+        );
+      }
+      // Just update the hidden max bid, no visible change
+      auction.maxBid = bidAmount;
+      // Record the max bid update in bids for history (but displayed price stays same)
+      // We don't push a new visible bid here since the displayed price doesn't change
+      await auction.save();
+
+      this.logger.log(
+        `Max bid raised to ${bidAmount} GEL on auction ${auctionId} by ${bidderName}`,
+      );
+
+      const auctionObj = auction.toObject();
+      delete auctionObj.maxBid;
+      delete auctionObj.maxBidder;
+      return {
+        ...auctionObj,
+        wasExtended,
+        newEndDate: wasExtended ? auction.endDate : undefined,
+        maxBidUpdated: true,
+        yourMaxBid: bidAmount,
+      };
+    }
+
+    // CASE 2: New bidder challenges the current max bidder
+    if (auction.maxBidder && bidAmount <= auction.maxBid) {
+      // The current max bidder's proxy auto-outbids this challenger.
+      // Displayed price rises to challenger's bid + one increment (or the maxBid if that's less).
+      const autoBidAmount = Math.min(
+        bidAmount + auction.minimumBidIncrement,
+        auction.maxBid,
+      );
+
+      // Record challenger's bid
+      const challengerBid: AuctionBid = {
+        bidder: new Types.ObjectId(bidderId),
+        amount: bidAmount,
+        timestamp: new Date(),
+        bidderName,
+        isAutoBid: false,
+      };
+      auction.bids.push(challengerBid);
+
+      // Record auto-bid on behalf of max bidder
+      const maxBidder = await this.userModel.findById(auction.maxBidder);
+      const maxBidderName = maxBidder
+        ? `${maxBidder.ownerFirstName || ''} ${maxBidder.ownerLastName || ''}`.trim() || maxBidder.name || 'Anonymous'
+        : 'Anonymous';
+
+      const autoBidEntry: AuctionBid = {
+        bidder: auction.maxBidder,
+        amount: autoBidAmount,
+        timestamp: new Date(Date.now() + 1), // +1ms to ensure ordering after challenger
+        bidderName: maxBidderName,
+        isAutoBid: true,
+      };
+      auction.bids.push(autoBidEntry);
+
+      auction.currentPrice = autoBidAmount;
+      auction.currentWinner = auction.maxBidder;
+      auction.totalBids = auction.bids.length;
+      displayedPrice = autoBidAmount;
+      wasAutoOutbid = true;
+
+      await auction.save();
+
+      this.logger.log(
+        `Bid of ${bidAmount} GEL auto-outbid on auction ${auctionId}. Auto-bid: ${autoBidAmount} GEL by ${maxBidderName}`,
+      );
+
+      const auctionObj = auction.toObject();
+      delete auctionObj.maxBid;
+      delete auctionObj.maxBidder;
+      return {
+        ...auctionObj,
+        wasExtended,
+        newEndDate: wasExtended ? auction.endDate : undefined,
+        wasAutoOutbid: true,
+        autoOutbidPrice: autoBidAmount,
+      };
+    }
+
+    // CASE 3: New bidder beats the current max bid (or first bid on auction)
+    // If there was a previous max bidder, the displayed price becomes: previous maxBid + increment
+    // (unless the new bid equals exactly maxBid + increment, then it's just that amount)
+    if (auction.maxBidder && auction.maxBid > 0) {
+      // Someone is outbidding the previous maxBidder
+      displayedPrice = Math.min(
+        auction.maxBid + auction.minimumBidIncrement,
+        bidAmount,
+      );
+    } else {
+      // First bid on auction – displayed price is the minimum bid
+      displayedPrice = Math.min(
+        auction.currentPrice + auction.minimumBidIncrement,
+        bidAmount,
+      );
+    }
+
+    // Record the winning bid at the displayed price
+    const newBid: AuctionBid = {
+      bidder: new Types.ObjectId(bidderId),
+      amount: displayedPrice,
+      timestamp: new Date(),
+      bidderName,
+      isAutoBid: false,
+    };
+
     auction.bids.push(newBid);
-    auction.currentPrice = bidAmount;
+    auction.currentPrice = displayedPrice;
     auction.currentWinner = new Types.ObjectId(bidderId);
+    auction.maxBid = bidAmount;
+    auction.maxBidder = new Types.ObjectId(bidderId);
     auction.totalBids = auction.bids.length;
 
     await auction.save();
 
     this.logger.log(
-      `New bid placed: ${bidAmount} GEL on auction ${auctionId} by ${bidder.ownerFirstName} ${bidder.ownerLastName}${wasExtended ? ' (time extended)' : ''}`,
+      `New winning bid on auction ${auctionId}: displayed ${displayedPrice} GEL, max ${bidAmount} GEL by ${bidderName}${wasExtended ? ' (time extended)' : ''}`,
     );
 
-    // TODO: Send notifications to previous bidders
-
-    // Return auction with extension info for frontend
     const auctionObj = auction.toObject();
+    delete auctionObj.maxBid;
+    delete auctionObj.maxBidder;
     return {
       ...auctionObj,
       wasExtended,
@@ -452,6 +570,7 @@ export class AuctionService {
     const [auctions, total] = await Promise.all([
       this.auctionModel
         .find({ $or: [{ seller: sellerObjectId }, { seller: sellerId }] })
+        .select('-maxBid -maxBidder')
         .populate('currentWinner', 'ownerFirstName ownerLastName')
         .sort({ createdAt: -1 })
         .skip(skip)

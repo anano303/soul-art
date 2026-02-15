@@ -1777,6 +1777,26 @@
   margin: 0;
 }
 
+.bidding-card-controls .max-bid-hint {
+  text-align: center;
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  margin: 0;
+  opacity: 0.7;
+}
+
+.auto-bid-tag {
+  display: inline-block;
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: #f59e0b;
+  background: rgba(245, 158, 11, 0.12);
+  padding: 1px 6px;
+  border-radius: 4px;
+  margin-left: 6px;
+  vertical-align: middle;
+}
+
 /* Pre-bid notice inside bidding card */
 .pre-bid-notice {
   display: flex;

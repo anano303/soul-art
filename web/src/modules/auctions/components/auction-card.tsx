@@ -322,15 +322,32 @@ export default function AuctionCard({
         auctionId: currentAuction._id,
         bidAmount: bidAmount,
       });
-      toast.success(t("auctions.bidSuccess"));
+
+      if (response.data.wasAutoOutbid) {
+        toast.error(
+          language === "ge"
+            ? `თქვენი ფსონი ავტომატურად გადაფარა! მიმდინარე ფასი: ${response.data.autoOutbidPrice} ₾`
+            : `You were automatically outbid! Current price: ${response.data.autoOutbidPrice} ₾`,
+          { duration: 5000 },
+        );
+      } else if (response.data.maxBidUpdated) {
+        toast.success(
+          language === "ge"
+            ? `მაქსიმალური ფსონი განახლდა: ${response.data.yourMaxBid} ₾`
+            : `Max bid updated to ${response.data.yourMaxBid} ₾`,
+        );
+      } else {
+        toast.success(t("auctions.bidSuccess"));
+      }
 
       if (response.data) {
+        const newPrice = response.data.currentPrice ?? currentAuction.currentPrice;
         setCurrentAuction((prev) => ({
           ...prev,
-          currentPrice: bidAmount,
-          totalBids: prev.totalBids + 1,
+          currentPrice: newPrice,
+          totalBids: response.data.totalBids ?? prev.totalBids + 1,
         }));
-        setBidAmount(bidAmount + currentAuction.minimumBidIncrement);
+        setBidAmount(newPrice + currentAuction.minimumBidIncrement);
       }
 
       if (onBidPlaced) {

@@ -48,6 +48,7 @@ interface Bid {
   amount: number;
   timestamp: string;
   bidderName?: string;
+  isAutoBid?: boolean;
 }
 
 interface Auction {
@@ -395,8 +396,21 @@ export default function AuctionDetailPage() {
         bidAmount: bidAmount,
       });
 
-      // Check for time extension
-      if (response.data.wasExtended) {
+      // Handle proxy bidding responses
+      if (response.data.wasAutoOutbid) {
+        toast.error(
+          language === "ge"
+            ? `თქვენი ფსონი ავტომატურად გადაფარა! მიმდინარე ფასი: ${response.data.autoOutbidPrice} ₾`
+            : `You were automatically outbid! Current price: ${response.data.autoOutbidPrice} ₾`,
+          { duration: 5000 },
+        );
+      } else if (response.data.maxBidUpdated) {
+        toast.success(
+          language === "ge"
+            ? `მაქსიმალური ფსონი განახლდა: ${response.data.yourMaxBid} ₾`
+            : `Max bid updated to ${response.data.yourMaxBid} ₾`,
+        );
+      } else if (response.data.wasExtended) {
         toast.success(
           t("auctions.yourBidExtendedTime") || "თქვენი ფსონით დრო გაგრძელდა!",
           {
@@ -420,7 +434,7 @@ export default function AuctionDetailPage() {
     } finally {
       setBidding(false);
     }
-  }, [auction, bidAmount, t, fetchAuction, refreshBidStatus]);
+  }, [auction, bidAmount, t, language, fetchAuction, refreshBidStatus]);
 
   const handlePlaceBid = async () => {
     if (!user) {
@@ -797,6 +811,12 @@ export default function AuctionDetailPage() {
                             "ფსონის დასადებად საჭიროა ავტორიზაცია"}
                         </p>
                       )}
+                      {user && (
+                        <p className="max-bid-hint">
+                          {t("auctions.maxBidHint") ||
+                            "შეიყვანეთ მაქსიმალური თანხა"}
+                        </p>
+                      )}
                     </div>
                   )}
 
@@ -1014,6 +1034,11 @@ export default function AuctionDetailPage() {
                         <div className="bidder-info">
                           <span className="bidder-name">
                             {getBidderName(bid)}
+                            {bid.isAutoBid && (
+                              <span className="auto-bid-tag">
+                                {t("auctions.autoBid") || "Auto-bid"}
+                              </span>
+                            )}
                           </span>
                           <span className="bid-time">
                             {formatDate(bid.timestamp)}
