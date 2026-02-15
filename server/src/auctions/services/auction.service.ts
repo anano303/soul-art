@@ -1002,13 +1002,14 @@ export class AuctionService {
     }
 
     // Find the previous bidder (second highest bid)
-    // Bids are stored with newest first, so we need the second unique bidder
+    // Bids are stored oldest-first (via push), so iterate from the END
+    // to find the highest bid from a different bidder
     const currentWinnerId = auction.currentWinner?.toString();
     let nextBid: AuctionBid | undefined;
 
-    for (const bid of bids) {
-      if (bid.bidder.toString() !== currentWinnerId) {
-        nextBid = bid;
+    for (let i = bids.length - 1; i >= 0; i--) {
+      if (bids[i].bidder.toString() !== currentWinnerId) {
+        nextBid = bids[i];
         break;
       }
     }
