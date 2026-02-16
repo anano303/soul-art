@@ -634,26 +634,21 @@ export class FacebookPostingService {
       }
     }
 
-    // 4. Post to TikTok (only if product has video)
+    // 4. TikTok — NOT auto-posted from here.
+    // TikTok Content Posting API guidelines require manual user interaction:
+    // - Privacy level must be selected by user (no defaults)
+    // - Comment/Duet/Stitch settings must be explicitly chosen
+    // - Commercial content disclosure must be acknowledged
+    // - Music usage consent must be given
+    // Use the dedicated TikTok Post Modal (POST /:id/post-to-tiktok) instead.
     if (this.autoPostTikTok && this.tiktokService.isEnabled()) {
-      try {
-        const tiktokResult = await this.tiktokService.postProduct(product);
-        result.tiktokPost = tiktokResult;
-        if (!tiktokResult.success) {
-          // Don't mark as failed if it's just NO_VIDEO_AVAILABLE
-          if (tiktokResult.error !== 'NO_VIDEO_AVAILABLE') {
-            result.errors?.push({
-              platform: 'TikTok',
-              error: tiktokResult.error,
-            });
-          }
-        } else {
-          this.logger.log(`Posted to TikTok: ${tiktokResult.publishId}`);
-        }
-      } catch (error) {
-        result.errors?.push({ platform: 'TikTok', error });
-        this.logger.error('Failed to post to TikTok', error);
-      }
+      this.logger.log(
+        'TikTok auto-post skipped — use TikTok Post Modal for compliance. Product: ' + (product._id || ''),
+      );
+      result.tiktokPost = {
+        success: false,
+        error: 'TIKTOK_REQUIRES_MANUAL_POST',
+      };
     }
 
     return result;
