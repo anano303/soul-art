@@ -548,6 +548,13 @@ export class FacebookPostingService {
   }
 
   /**
+   * Check TikTok publish status
+   */
+  async checkTikTokPublishStatus(publishId: string) {
+    return this.tiktokService.checkPublishStatus(publishId);
+  }
+
+  /**
    * Post to all enabled platforms (Page, Groups, Instagram, TikTok)
    */
   async postToAllPlatforms(product: ProductDocument): Promise<MultiPostResult> {

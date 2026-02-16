@@ -194,6 +194,15 @@ export class ProductsController {
     return result.data;
   }
 
+  @Get('tiktok/publish-status/:publishId')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.Admin)
+  @ApiOperation({ summary: 'Check TikTok publish status' })
+  async getTikTokPublishStatus(@Param('publishId') publishId: string) {
+    const result = await this.facebookPostingService.checkTikTokPublishStatus(publishId);
+    return result;
+  }
+
   @Get(':id')
   @ApiOperation({ summary: 'Get product by ID' })
   @ApiParam({ name: 'id', description: 'Product ID' })

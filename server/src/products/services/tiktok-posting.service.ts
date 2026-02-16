@@ -29,6 +29,7 @@ export interface TikTokPostOptions {
   brand_organic_toggle: boolean;
   is_branded_content?: boolean;
   title?: string;
+  description?: string;
 }
 
 /**
@@ -405,6 +406,12 @@ export class TikTokPostingService {
         );
       }
 
+      // Log max video duration for compliance (TikTok validates server-side)
+      const maxDuration = creatorInfoRes.data?.data?.max_video_post_duration_sec;
+      if (maxDuration) {
+        this.logger.log(`TikTok max video duration for creator: ${maxDuration}s`);
+      }
+
       // Step 2: Initialize video upload with user-selected options
       const initRes = await axios.post(
         'https://open.tiktokapis.com/v2/post/publish/video/init/',
@@ -462,7 +469,8 @@ export class TikTokPostingService {
         return { success: false, error: 'TIKTOK_DISABLED' };
       }
 
-      const caption = this.buildCaption(product);
+      // Use user-provided description if available, otherwise auto-generate
+      const caption = options?.description || this.buildCaption(product);
 
       // Check if product has a DIRECT video file URL (not YouTube/webpage links)
       // YouTube URLs are webpage URLs, not direct video files - TikTok can't pull from them

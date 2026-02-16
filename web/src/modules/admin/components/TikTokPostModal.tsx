@@ -59,6 +59,11 @@ export function TikTokPostModal({
 
   // Content preview
   const [editableTitle, setEditableTitle] = useState("");
+  const [editableDescription, setEditableDescription] = useState("");
+
+  // Publish status tracking
+  const [, setPublishId] = useState<string | null>(null);
+  const [publishStatus, setPublishStatus] = useState<string | null>(null);
 
   // Music usage consent
   const [consentGiven, setConsentGiven] = useState(false);
@@ -86,6 +91,23 @@ export function TikTokPostModal({
         // Set initial title from product name
         setEditableTitle(product.name || product.nameEn || "");
 
+        // Build default description with hashtags and link
+        const price = product.discountPercentage && product.discountPercentage > 0
+          ? `${Math.round(product.price * (1 - product.discountPercentage / 100))}₾ (${product.discountPercentage}% OFF!)`
+          : `${product.price}₾`;
+        const hashtags = [
+          ...(product.hashtags || []),
+          'soulart', 'handmade', 'art', 'georgia'
+        ].filter((v, i, a) => a.indexOf(v) === i).slice(0, 10).map(t => `#${t.replace(/^#/, '')}`).join(' ');
+        const slug = (product as Product & { slug?: string }).slug || product._id;
+        setEditableDescription(
+          `✨ ${product.name || product.nameEn || ''}\n💰 ${price}\n\n🔗 https://soulart.ge/products/${slug}\n\n${hashtags}`
+        );
+
+        // Reset publish status
+        setPublishId(null);
+        setPublishStatus(null);
+
         // Reset selections on open
         setPrivacyLevel("");
         setAllowComment(false);
@@ -105,6 +127,7 @@ export function TikTokPostModal({
     };
 
     fetchCreatorInfo();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, product.name, product.nameEn]);
 
   // Validation
@@ -140,6 +163,7 @@ export function TikTokPostModal({
         brand_organic_toggle: yourBrand,
         is_branded_content: brandedContent,
         title: editableTitle,
+        description: editableDescription,
       };
 
       const res = await fetchWithAuth(
@@ -159,12 +183,19 @@ export function TikTokPostModal({
         );
       }
 
+      // Start polling for publish status
+      const pId = data?.tiktokPost?.publishId;
+      if (pId) {
+        setPublishId(pId);
+        setPublishStatus("PROCESSING");
+        pollPublishStatus(pId);
+      }
+
       toast({
         title: "Posted to TikTok! 🎵",
         description:
           "Your content has been submitted. It may take a few minutes to process and appear on your profile.",
       });
-      onClose();
     } catch (err: unknown) {
       const message =
         err instanceof Error ? err.message : "Failed to post to TikTok";
@@ -176,6 +207,49 @@ export function TikTokPostModal({
     } finally {
       setPosting(false);
     }
+  };
+
+  // Poll TikTok publish status
+  const pollPublishStatus = async (pId: string) => {
+    let attempts = 0;
+    const maxAttempts = 10;
+    const interval = 5000; // 5 seconds
+
+    const poll = async () => {
+      if (attempts >= maxAttempts) {
+        setPublishStatus("TIMEOUT");
+        return;
+      }
+      attempts++;
+      try {
+        const res = await fetchWithAuth(`/products/tiktok/publish-status/${pId}`);
+        const data = await res.json().catch(() => ({}));
+        const status = data?.status || "UNKNOWN";
+        setPublishStatus(status);
+
+        if (status === "PUBLISH_COMPLETE") {
+          toast({
+            title: "✅ TikTok post is live!",
+            description: "Your content is now visible on your TikTok profile.",
+          });
+          return;
+        }
+        if (status === "FAILED" || status === "ERROR") {
+          toast({
+            variant: "destructive",
+            title: "TikTok post failed",
+            description: data?.error || "The post could not be published.",
+          });
+          return;
+        }
+        // Continue polling
+        setTimeout(poll, interval);
+      } catch {
+        setPublishStatus("ERROR");
+      }
+    };
+
+    setTimeout(poll, interval);
   };
 
   // Get consent text based on commercial content selections
@@ -314,6 +388,11 @@ export function TikTokPostModal({
                       ? `📸 ${product.images?.length || 0} photo(s)`
                       : "🎥 Video"}
                   </p>
+                  {!isPhotoPost && creatorInfo?.max_video_post_duration_sec && (
+                    <p className="tiktok-modal__preview-hint" style={{ fontSize: '12px', color: '#888', marginTop: '4px' }}>
+                      ⏱ Max video duration: {Math.floor(creatorInfo.max_video_post_duration_sec / 60)}min {creatorInfo.max_video_post_duration_sec % 60}s
+                    </p>
+                  )}
                 </div>
               </div>
 
@@ -333,6 +412,26 @@ export function TikTokPostModal({
                 />
                 <span className="tiktok-modal__char-count">
                   {editableTitle.length}/90
+                </span>
+              </div>
+
+              {/* Editable Description / Caption */}
+              <div className="tiktok-modal__section">
+                <label className="tiktok-modal__label" htmlFor="tiktok-description">
+                  Description / Hashtags
+                </label>
+                <textarea
+                  id="tiktok-description"
+                  value={editableDescription}
+                  onChange={(e) => setEditableDescription(e.target.value)}
+                  maxLength={2200}
+                  rows={5}
+                  className="tiktok-modal__input tiktok-modal__textarea"
+                  placeholder="Enter description, hashtags, links..."
+                  style={{ resize: "vertical", minHeight: "80px", fontFamily: "inherit" }}
+                />
+                <span className="tiktok-modal__char-count">
+                  {editableDescription.length}/2200
                 </span>
               </div>
 
@@ -535,6 +634,21 @@ export function TikTokPostModal({
                   </div>
                 )}
               </div>
+
+              {/* Publish Status */}
+              {publishStatus && (
+                <div className={`tiktok-modal__notice ${publishStatus === "PUBLISH_COMPLETE" ? "tiktok-modal__notice--success" : publishStatus === "FAILED" || publishStatus === "ERROR" ? "tiktok-modal__notice--error" : ""}`}>
+                  <AlertCircle size={16} />
+                  <span>
+                    {publishStatus === "PROCESSING" && "⏳ Processing your post on TikTok..."}
+                    {publishStatus === "PUBLISH_COMPLETE" && "✅ Your post is live on TikTok!"}
+                    {publishStatus === "FAILED" && "❌ Post failed on TikTok."}
+                    {publishStatus === "ERROR" && "❌ Error checking post status."}
+                    {publishStatus === "TIMEOUT" && "⏰ Status check timed out. Check your TikTok profile."}
+                    {!["PROCESSING", "PUBLISH_COMPLETE", "FAILED", "ERROR", "TIMEOUT"].includes(publishStatus) && `Status: ${publishStatus}`}
+                  </span>
+                </div>
+              )}
 
               {/* Processing Notice */}
               <div className="tiktok-modal__notice">
