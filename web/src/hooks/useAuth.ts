@@ -1,9 +1,6 @@
-import { useState, useEffect } from 'react';
-import { 
-  getUserData,
-  isLoggedIn
-} from '@/lib/auth';
-import { User } from '@/types';
+import { useState, useEffect } from "react";
+import { getUserData, isLoggedIn } from "@/lib/auth";
+import { User } from "@/types";
 
 export interface AuthState {
   isAuthenticated: boolean;
@@ -26,7 +23,7 @@ export const useAuth = (): AuthState => {
     const checkAuthStatus = () => {
       try {
         const userData = getUserData();
-        
+
         const authenticated = isLoggedIn();
 
         setAuthState({
@@ -37,7 +34,7 @@ export const useAuth = (): AuthState => {
           loading: false,
         });
       } catch (error) {
-        console.error('Failed to check auth status:', error);
+        console.error("Failed to check auth status:", error);
         setAuthState({
           isAuthenticated: false,
           isSessionValid: false,
@@ -52,20 +49,20 @@ export const useAuth = (): AuthState => {
 
     // Listen for storage changes (for cross-tab synchronization)
     const handleStorageChange = (e: StorageEvent) => {
-      if (e.key?.includes('soulart_')) {
+      if (e.key?.includes("soulart_")) {
         checkAuthStatus();
       }
     };
 
-    window.addEventListener('storage', handleStorageChange);
+    window.addEventListener("storage", handleStorageChange);
 
     // Listen for auth state changes (e.g., login from auction modal)
     const handleAuthChange = () => checkAuthStatus();
-    window.addEventListener('auth-state-changed', handleAuthChange);
+    window.addEventListener("auth-state-changed", handleAuthChange);
 
     return () => {
-      window.removeEventListener('storage', handleStorageChange);
-      window.removeEventListener('auth-state-changed', handleAuthChange);
+      window.removeEventListener("storage", handleStorageChange);
+      window.removeEventListener("auth-state-changed", handleAuthChange);
     };
   }, []);
 
@@ -75,13 +72,14 @@ export const useAuth = (): AuthState => {
 // Hook specifically for checking if extended authentication is available
 export const useExtendedAuth = () => {
   const { isAuthenticated, isSessionValid, isDeviceTrusted } = useAuth();
-  
+
   return {
     // User has basic authentication
     hasBasicAuth: isAuthenticated,
     // User has extended session (trusted device)
     hasExtendedAuth: isAuthenticated && isSessionValid && isDeviceTrusted,
     // User can perform sensitive operations without re-authentication
-    canPerformSensitiveOps: isAuthenticated && isSessionValid && isDeviceTrusted,
+    canPerformSensitiveOps:
+      isAuthenticated && isSessionValid && isDeviceTrusted,
   };
 };

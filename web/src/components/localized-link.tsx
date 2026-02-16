@@ -22,7 +22,7 @@ interface LocalizedLinkProps extends Omit<LinkProps, "href"> {
 /**
  * A wrapper around Next.js Link that automatically adds /en prefix
  * when the current language is English.
- * 
+ *
  * Usage: Replace `<Link href="/products/123">` with `<LocalizedLink href="/products/123">`
  * When language is English, it renders as `/en/products/123`
  * When language is Georgian, it renders as `/products/123`
@@ -42,5 +42,5 @@ export const LocalizedLink = forwardRef<HTMLAnchorElement, LocalizedLinkProps>(
         {children}
       </Link>
     );
-  }
+  },
 );

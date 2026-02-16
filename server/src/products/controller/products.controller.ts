@@ -199,7 +199,8 @@ export class ProductsController {
   @Roles(Role.Admin)
   @ApiOperation({ summary: 'Check TikTok publish status' })
   async getTikTokPublishStatus(@Param('publishId') publishId: string) {
-    const result = await this.facebookPostingService.checkTikTokPublishStatus(publishId);
+    const result =
+      await this.facebookPostingService.checkTikTokPublishStatus(publishId);
     return result;
   }
 

@@ -309,7 +309,9 @@ export class TikTokPostingService {
 
       // Step 2: Post photos using Photo Mode
       // TikTok photo_images is list<string> of public URLs
-      this.logger.log(`TikTok posting ${photos.length} photos. First URL: ${photos[0]?.substring(0, 100)}...`);
+      this.logger.log(
+        `TikTok posting ${photos.length} photos. First URL: ${photos[0]?.substring(0, 100)}...`,
+      );
 
       // Build post_info from user-selected options (required for TikTok audit)
       const postInfo: any = {
@@ -407,9 +409,12 @@ export class TikTokPostingService {
       }
 
       // Log max video duration for compliance (TikTok validates server-side)
-      const maxDuration = creatorInfoRes.data?.data?.max_video_post_duration_sec;
+      const maxDuration =
+        creatorInfoRes.data?.data?.max_video_post_duration_sec;
       if (maxDuration) {
-        this.logger.log(`TikTok max video duration for creator: ${maxDuration}s`);
+        this.logger.log(
+          `TikTok max video duration for creator: ${maxDuration}s`,
+        );
       }
 
       // Step 2: Initialize video upload with user-selected options
@@ -422,7 +427,13 @@ export class TikTokPostingService {
             disable_duet: options?.disable_duet ?? false,
             disable_comment: options?.disable_comment ?? false,
             disable_stitch: options?.disable_stitch ?? false,
-            ...(options?.brand_content_toggle ? { brand_content_toggle: true, brand_organic_toggle: !!options.brand_organic_toggle, is_branded_content: !!options.is_branded_content } : {}),
+            ...(options?.brand_content_toggle
+              ? {
+                  brand_content_toggle: true,
+                  brand_organic_toggle: !!options.brand_organic_toggle,
+                  is_branded_content: !!options.is_branded_content,
+                }
+              : {}),
           },
           source_info: {
             source: 'PULL_FROM_URL',
@@ -462,7 +473,10 @@ export class TikTokPostingService {
    *
    * User can add TikTok music from the app after posting
    */
-  async postProduct(product: ProductDocument, options?: TikTokPostOptions): Promise<TikTokPostResult> {
+  async postProduct(
+    product: ProductDocument,
+    options?: TikTokPostOptions,
+  ): Promise<TikTokPostResult> {
     try {
       if (!this.isEnabled()) {
         this.logger.debug('TikTok posting disabled or not configured');
@@ -476,9 +490,7 @@ export class TikTokPostingService {
       // YouTube URLs are webpage URLs, not direct video files - TikTok can't pull from them
       // Only use direct video file URLs (.mp4, .mov, .webm, etc.)
       const candidateVideoUrl =
-        (product as any).tiktokVideoUrl ||
-        (product as any).videoUrl ||
-        '';
+        (product as any).tiktokVideoUrl || (product as any).videoUrl || '';
 
       const isDirectVideoUrl =
         candidateVideoUrl &&

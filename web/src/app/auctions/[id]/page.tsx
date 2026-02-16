@@ -427,7 +427,7 @@ export default function AuctionDetailPage() {
       // Show auth modal - after login, directly submit the bid
       authModal.open(() => {
         // Dispatch event so useAuth picks up new user data
-        window.dispatchEvent(new Event('auth-state-changed'));
+        window.dispatchEvent(new Event("auth-state-changed"));
         // Directly submit bid - user is now authenticated (cookies set)
         submitBid();
       });

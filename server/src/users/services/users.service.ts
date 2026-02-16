@@ -882,7 +882,8 @@ export class UsersService {
             minDeliveryDays: product.minDeliveryDays,
             maxDeliveryDays: product.maxDeliveryDays,
             createdAt: (product as any).createdAt ?? null,
-            referralDiscountPercent: (product as any).referralDiscountPercent ?? null,
+            referralDiscountPercent:
+              (product as any).referralDiscountPercent ?? null,
           })),
         },
         portfolio: {

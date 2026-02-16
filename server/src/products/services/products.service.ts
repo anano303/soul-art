@@ -1107,10 +1107,7 @@ export class ProductsService {
       {
         $match: {
           status: 'APPROVED',
-          $or: [
-            { countInStock: { $gt: 0 } },
-            { 'variants.stock': { $gt: 0 } },
-          ],
+          $or: [{ countInStock: { $gt: 0 } }, { 'variants.stock': { $gt: 0 } }],
         },
       },
       {

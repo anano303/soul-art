@@ -84,13 +84,17 @@ export function ProductsList() {
   const [showDonation, setShowDonation] = useState(false);
 
   // USD Rate state for admin
-  const { usdRate, updateRate: updateUsdRate, loading: usdRateLoading } = useUsdRate();
+  const {
+    usdRate,
+    updateRate: updateUsdRate,
+    loading: usdRateLoading,
+  } = useUsdRate();
   const [editingUsdRate, setEditingUsdRate] = useState<string>("");
   const [showUsdRateEdit, setShowUsdRateEdit] = useState(false);
 
   // Bulk selection state
   const [selectedProducts, setSelectedProducts] = useState<Set<string>>(
-    new Set()
+    new Set(),
   );
   const [isBulkApproving, setIsBulkApproving] = useState(false);
 
@@ -175,7 +179,7 @@ export function ProductsList() {
       });
 
       const response = await fetchWithAuth(
-        `/products/user?${params.toString()}`
+        `/products/user?${params.toString()}`,
       );
       const result = await response.json();
       console.log("Products fetch result:", result);
@@ -216,7 +220,7 @@ export function ProductsList() {
         params.append("mainCategory", categoryFilter);
 
       const response = await fetchWithAuth(
-        `/products/user?${params.toString()}`
+        `/products/user?${params.toString()}`,
       );
       const freshData = await response.json();
       return freshData;
@@ -288,12 +292,12 @@ export function ProductsList() {
   const selectAllProducts = () => {
     if (!products || products.length === 0) return;
     const pendingProducts = products.filter(
-      (p: Product) => p.status === ProductStatus.PENDING
+      (p: Product) => p.status === ProductStatus.PENDING,
     );
     if (pendingProducts.length === 0) return;
 
     const allPendingSelected = pendingProducts.every((p: Product) =>
-      selectedProducts.has(p._id)
+      selectedProducts.has(p._id),
     );
     if (allPendingSelected) {
       // Deselect all pending products
@@ -354,20 +358,20 @@ export function ProductsList() {
 
   // State to track which products are being toggled
   const [togglingVisibility, setTogglingVisibility] = useState<Set<string>>(
-    new Set()
+    new Set(),
   );
 
   // Handle visibility toggle for admin
   async function handleVisibilityToggle(
     productId: string,
-    currentHideFromStore: boolean
+    currentHideFromStore: boolean,
   ): Promise<void> {
     setTogglingVisibility((prev) => new Set(prev).add(productId));
 
     try {
       const result = await updateProductVisibility(
         productId,
-        !currentHideFromStore
+        !currentHideFromStore,
       );
       if (result) {
         // Refresh the products list
@@ -436,7 +440,7 @@ export function ProductsList() {
     queryKey: ["all-subcategories", refreshKey], // Add refreshKey to force re-fetch
     queryFn: async () => {
       const response = await fetchWithAuth(
-        `/subcategories?includeInactive=false`
+        `/subcategories?includeInactive=false`,
       );
       return response.json();
     },
@@ -450,7 +454,7 @@ export function ProductsList() {
 
     const category = categoriesData.find(
       (cat: { id?: string; _id?: string; name: string; nameEn?: string }) =>
-        cat.id === categoryId || cat._id === categoryId
+        cat.id === categoryId || cat._id === categoryId,
     );
 
     if (!category) return "Unknown Category";
@@ -467,7 +471,7 @@ export function ProductsList() {
 
     const subcategory = subcategoriesData?.find(
       (subcat: { id?: string; _id?: string; name: string; nameEn?: string }) =>
-        subcat.id === subcategoryId || subcat._id === subcategoryId
+        subcat.id === subcategoryId || subcat._id === subcategoryId,
     );
 
     if (!subcategory) return "Unknown Subcategory";
@@ -636,8 +640,8 @@ export function ProductsList() {
                     ? "Deselect All"
                     : "ყველას მოხსნა"
                   : language === "en"
-                  ? "Select All"
-                  : "ყველას მონიშვნა"}
+                    ? "Select All"
+                    : "ყველას მონიშვნა"}
               </button>
               {selectedProducts.size > 0 && (
                 <button
@@ -825,7 +829,9 @@ export function ProductsList() {
             flexWrap: "wrap",
           }}
         >
-          <span style={{ fontWeight: 600, color: "#92400e", fontSize: "0.95rem" }}>
+          <span
+            style={{ fontWeight: 600, color: "#92400e", fontSize: "0.95rem" }}
+          >
             💱 {language === "en" ? "USD Exchange Rate" : "დოლარის კურსი"}:
           </span>
           <span
@@ -886,14 +892,18 @@ export function ProductsList() {
                     const success = await updateUsdRate(newRate);
                     if (success) {
                       toast({
-                        title: language === "en" ? "Rate Updated" : "კურსი განახლდა",
+                        title:
+                          language === "en" ? "Rate Updated" : "კურსი განახლდა",
                         description: `1 USD = ${newRate} GEL`,
                       });
                       setShowUsdRateEdit(false);
                     } else {
                       toast({
                         title: language === "en" ? "Error" : "შეცდომა",
-                        description: language === "en" ? "Failed to update rate" : "კურსის განახლება ვერ მოხერხდა",
+                        description:
+                          language === "en"
+                            ? "Failed to update rate"
+                            : "კურსის განახლება ვერ მოხერხდა",
                         variant: "destructive",
                       });
                     }
@@ -929,8 +939,15 @@ export function ProductsList() {
               </button>
             </div>
           )}
-          <span style={{ fontSize: "0.8rem", color: "#92400e", opacity: 0.8, marginLeft: "auto" }}>
-            {language === "en" 
+          <span
+            style={{
+              fontSize: "0.8rem",
+              color: "#92400e",
+              opacity: 0.8,
+              marginLeft: "auto",
+            }}
+          >
+            {language === "en"
               ? "Used for international payment conversions"
               : "საერთაშორისო გადახდების კონვერტაციისთვის"}
           </span>
@@ -956,14 +973,30 @@ export function ProductsList() {
               textAlign: "center",
             }}
           >
-            <div style={{ fontSize: "0.8rem", color: "#1e40af", fontWeight: 500, marginBottom: "4px" }}>
+            <div
+              style={{
+                fontSize: "0.8rem",
+                color: "#1e40af",
+                fontWeight: 500,
+                marginBottom: "4px",
+              }}
+            >
               📦 {language === "en" ? "Active Products" : "აქტიური პროდუქცია"}
             </div>
-            <div style={{ fontSize: "1.5rem", fontWeight: 700, color: "#1e3a8a" }}>
+            <div
+              style={{ fontSize: "1.5rem", fontWeight: 700, color: "#1e3a8a" }}
+            >
               {productStats.totalProducts}
             </div>
-            <div style={{ fontSize: "0.75rem", color: "#3b82f6", marginTop: "2px" }}>
-              {productStats.totalItems} {language === "en" ? "items in stock" : "ერთეული მარაგში"}
+            <div
+              style={{
+                fontSize: "0.75rem",
+                color: "#3b82f6",
+                marginTop: "2px",
+              }}
+            >
+              {productStats.totalItems}{" "}
+              {language === "en" ? "items in stock" : "ერთეული მარაგში"}
             </div>
           </div>
 
@@ -976,34 +1009,72 @@ export function ProductsList() {
               textAlign: "center",
             }}
           >
-            <div style={{ fontSize: "0.8rem", color: "#166534", fontWeight: 500, marginBottom: "4px" }}>
-              💰 {language === "en" ? "Total Product Value" : "ჯამური ღირებულება"}
+            <div
+              style={{
+                fontSize: "0.8rem",
+                color: "#166534",
+                fontWeight: 500,
+                marginBottom: "4px",
+              }}
+            >
+              💰{" "}
+              {language === "en" ? "Total Product Value" : "ჯამური ღირებულება"}
             </div>
-            <div style={{ fontSize: "1.5rem", fontWeight: 700, color: "#14532d" }}>
+            <div
+              style={{ fontSize: "1.5rem", fontWeight: 700, color: "#14532d" }}
+            >
               {productStats.totalValue?.toLocaleString()} ₾
             </div>
-            <div style={{ fontSize: "0.75rem", color: "#22c55e", marginTop: "2px" }}>
-              {language === "en" ? "Approved & in stock" : "დამტკიცებული და მარაგში"}
+            <div
+              style={{
+                fontSize: "0.75rem",
+                color: "#22c55e",
+                marginTop: "2px",
+              }}
+            >
+              {language === "en"
+                ? "Approved & in stock"
+                : "დამტკიცებული და მარაგში"}
             </div>
           </div>
 
           <div
             style={{
-              background: "linear-gradient(135deg, #fef9c3 0%, #fde047 40%, #facc15 100%)",
+              background:
+                "linear-gradient(135deg, #fef9c3 0%, #fde047 40%, #facc15 100%)",
               border: "1px solid #eab308",
               borderRadius: "12px",
               padding: "16px",
               textAlign: "center",
             }}
           >
-            <div style={{ fontSize: "0.8rem", color: "#854d0e", fontWeight: 500, marginBottom: "4px" }}>
-              🏦 {language === "en" ? "Estimated Commission" : "სავარაუდო საკომისიო"}
+            <div
+              style={{
+                fontSize: "0.8rem",
+                color: "#854d0e",
+                fontWeight: 500,
+                marginBottom: "4px",
+              }}
+            >
+              🏦{" "}
+              {language === "en"
+                ? "Estimated Commission"
+                : "სავარაუდო საკომისიო"}
             </div>
-            <div style={{ fontSize: "1.5rem", fontWeight: 700, color: "#713f12" }}>
+            <div
+              style={{ fontSize: "1.5rem", fontWeight: 700, color: "#713f12" }}
+            >
               {productStats.estimatedCommission?.toLocaleString()} ₾
             </div>
-            <div style={{ fontSize: "0.75rem", color: "#a16207", marginTop: "2px" }}>
-              {productStats.commissionRate}% {language === "en" ? "site commission" : "საიტის საკომისიო"}
+            <div
+              style={{
+                fontSize: "0.75rem",
+                color: "#a16207",
+                marginTop: "2px",
+              }}
+            >
+              {productStats.commissionRate}%{" "}
+              {language === "en" ? "site commission" : "საიტის საკომისიო"}
             </div>
           </div>
         </div>
@@ -1253,7 +1324,7 @@ export function ProductsList() {
                     border: "none",
                     cursor:
                       products.filter(
-                        (p: Product) => p.status === ProductStatus.PENDING
+                        (p: Product) => p.status === ProductStatus.PENDING,
                       ).length > 0
                         ? "pointer"
                         : "default",
@@ -1263,7 +1334,7 @@ export function ProductsList() {
                     justifyContent: "center",
                     opacity:
                       products.filter(
-                        (p: Product) => p.status === ProductStatus.PENDING
+                        (p: Product) => p.status === ProductStatus.PENDING,
                       ).length > 0
                         ? 1
                         : 0.3,
@@ -1275,12 +1346,12 @@ export function ProductsList() {
                   }
                   disabled={
                     products.filter(
-                      (p: Product) => p.status === ProductStatus.PENDING
+                      (p: Product) => p.status === ProductStatus.PENDING,
                     ).length === 0
                   }
                 >
                   {products.filter(
-                    (p: Product) => p.status === ProductStatus.PENDING
+                    (p: Product) => p.status === ProductStatus.PENDING,
                   ).length > 0 &&
                   products
                     .filter((p: Product) => p.status === ProductStatus.PENDING)
@@ -1461,7 +1532,7 @@ export function ProductsList() {
                       onClick={() =>
                         handleVisibilityToggle(
                           product._id,
-                          product.hideFromStore || false
+                          product.hideFromStore || false,
                         )
                       }
                       disabled={togglingVisibility.has(product._id)}
@@ -1476,8 +1547,8 @@ export function ProductsList() {
                             ? "Hidden from store - Click to show"
                             : "დამალულია მაღაზიიდან - დააჭირე გამოსაჩენად"
                           : language === "en"
-                          ? "Visible in store - Click to hide"
-                          : "ჩანს მაღაზიაში - დააჭირე დასამალად"
+                            ? "Visible in store - Click to hide"
+                            : "ჩანს მაღაზიაში - დააჭირე დასამალად"
                       }
                       style={{
                         display: "flex",
@@ -1520,8 +1591,8 @@ export function ProductsList() {
                             ? "Hidden"
                             : "დამალული"
                           : language === "en"
-                          ? "Visible"
-                          : "ხილული"}
+                            ? "Visible"
+                            : "ხილული"}
                       </span>
                     </button>
                   </td>

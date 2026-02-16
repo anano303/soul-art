@@ -31,7 +31,11 @@ export function middleware(request: NextRequest) {
   const accessToken = request.cookies.get("access_token");
   const refreshToken = request.cookies.get("refresh_token");
   const authSession = request.cookies.get("auth_session"); // Client-set cookie for middleware
-  const hasTokens = !!(accessToken?.value || refreshToken?.value || authSession?.value);
+  const hasTokens = !!(
+    accessToken?.value ||
+    refreshToken?.value ||
+    authSession?.value
+  );
   const isAuthenticated = hasTokens;
 
   // Sales Manager referral tracking - save ref code to cookie (7 days)
@@ -84,7 +88,7 @@ export function middleware(request: NextRequest) {
     protectedPaths.some((path) => pathname.startsWith(path))
   ) {
     const redirectResponse = NextResponse.redirect(
-      new URL("/login", request.url)
+      new URL("/login", request.url),
     );
     // Preserve sales_ref cookie on redirect
     if (response) {
@@ -123,14 +127,14 @@ export function middleware(request: NextRequest) {
   ) {
     finalResponse.headers.set(
       "Cache-Control",
-      "public, max-age=31536000, immutable"
+      "public, max-age=31536000, immutable",
     );
   }
 
   // Add preload hints for critical resources
   finalResponse.headers.set(
     "Link",
-    "</van-gogh.webp>; rel=preload; as=image; fetchpriority=high"
+    "</van-gogh.webp>; rel=preload; as=image; fetchpriority=high",
   );
 
   return finalResponse;

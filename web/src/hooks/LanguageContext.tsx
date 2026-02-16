@@ -29,7 +29,7 @@ interface LanguageContextType {
 }
 
 const LanguageContext = createContext<LanguageContextType | undefined>(
-  undefined
+  undefined,
 );
 
 interface LanguageProviderProps {
@@ -100,7 +100,10 @@ export function LanguageProvider({ children }: LanguageProviderProps) {
       detectedLang = urlLang;
     } else if (cookieLang) {
       detectedLang = cookieLang;
-    } else if (savedLanguage && (savedLanguage === "en" || savedLanguage === "ge")) {
+    } else if (
+      savedLanguage &&
+      (savedLanguage === "en" || savedLanguage === "ge")
+    ) {
       detectedLang = savedLanguage;
     }
 
@@ -108,7 +111,7 @@ export function LanguageProvider({ children }: LanguageProviderProps) {
     languageRef.current = detectedLang;
     localStorage.setItem("language", detectedLang);
     document.cookie = `language=${detectedLang}; path=/; max-age=${60 * 60 * 24 * 365}; samesite=lax`;
-    
+
     // Sync URL with detected language
     syncUrlWithLanguage(detectedLang);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
@@ -124,20 +127,23 @@ export function LanguageProvider({ children }: LanguageProviderProps) {
   }, [pathname, syncUrlWithLanguage]);
 
   // Update URL when language changes
-  const setLanguage = useCallback((lang: Language) => {
-    setLanguageState(lang);
-    languageRef.current = lang;
-    localStorage.setItem("language", lang);
-    
-    // Set cookie for middleware and server-side detection
-    document.cookie = `language=${lang}; path=/; max-age=${60 * 60 * 24 * 365}; samesite=lax`;
+  const setLanguage = useCallback(
+    (lang: Language) => {
+      setLanguageState(lang);
+      languageRef.current = lang;
+      localStorage.setItem("language", lang);
 
-    // Update <html lang> attribute for accessibility and SEO
-    document.documentElement.lang = lang === "en" ? "en" : "ka";
+      // Set cookie for middleware and server-side detection
+      document.cookie = `language=${lang}; path=/; max-age=${60 * 60 * 24 * 365}; samesite=lax`;
 
-    // Sync URL prefix
-    syncUrlWithLanguage(lang);
-  }, [syncUrlWithLanguage]);
+      // Update <html lang> attribute for accessibility and SEO
+      document.documentElement.lang = lang === "en" ? "en" : "ka";
+
+      // Sync URL prefix
+      syncUrlWithLanguage(lang);
+    },
+    [syncUrlWithLanguage],
+  );
 
   // Update <html lang> when language changes
   useEffect(() => {
@@ -205,7 +211,7 @@ export function LanguageProvider({ children }: LanguageProviderProps) {
   // Helper function to replace placeholders with values
   const interpolateValues = (
     text: string,
-    values?: Record<string, string | number>
+    values?: Record<string, string | number>,
   ): string => {
     if (!values) return text;
 
@@ -213,7 +219,7 @@ export function LanguageProvider({ children }: LanguageProviderProps) {
     Object.keys(values).forEach((key) => {
       interpolatedText = interpolatedText.replace(
         new RegExp(`{${key}}`, "g"),
-        String(values[key])
+        String(values[key]),
       );
     });
 
@@ -221,19 +227,29 @@ export function LanguageProvider({ children }: LanguageProviderProps) {
   };
 
   // Helper to add /en prefix when language is English
-  const localizedPath = useCallback((path: string): string => {
-    if (language === "en") {
-      // Don't double-prefix
-      if (path.startsWith("/en")) return path;
-      // Don't prefix API routes, _next, or external URLs
-      if (path.startsWith("/api") || path.startsWith("/_next") || path.startsWith("http")) return path;
-      return `/en${path === "/" ? "" : path}` || "/en";
-    }
-    return path;
-  }, [language]);
+  const localizedPath = useCallback(
+    (path: string): string => {
+      if (language === "en") {
+        // Don't double-prefix
+        if (path.startsWith("/en")) return path;
+        // Don't prefix API routes, _next, or external URLs
+        if (
+          path.startsWith("/api") ||
+          path.startsWith("/_next") ||
+          path.startsWith("http")
+        )
+          return path;
+        return `/en${path === "/" ? "" : path}` || "/en";
+      }
+      return path;
+    },
+    [language],
+  );
 
   return (
-    <LanguageContext.Provider value={{ language, setLanguage, t, localizedPath }}>
+    <LanguageContext.Provider
+      value={{ language, setLanguage, t, localizedPath }}
+    >
       {children}
     </LanguageContext.Provider>
   );

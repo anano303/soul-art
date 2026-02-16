@@ -3160,7 +3160,8 @@ export const TRANSLATIONS: Translations = {
     // Home page
     home: {
       heroTitle: "Discover 400+ Georgian Artists",
-      heroSubtitle: "From the homeland of Pirosmani — original art shipped worldwide.",
+      heroSubtitle:
+        "From the homeland of Pirosmani — original art shipped worldwide.",
       trustBadges: {
         freeShipping: "Free Shipping",
         freeShippingDesc: "On orders 30₾+",

@@ -41,7 +41,7 @@ export function TikTokPostModal({
   const [loading, setLoading] = useState(true);
   const [posting, setPosting] = useState(false);
   const [creatorInfo, setCreatorInfo] = useState<TikTokCreatorInfo | null>(
-    null
+    null,
   );
   const [error, setError] = useState<string | null>(null);
 
@@ -92,16 +92,25 @@ export function TikTokPostModal({
         setEditableTitle(product.name || product.nameEn || "");
 
         // Build default description with hashtags and link
-        const price = product.discountPercentage && product.discountPercentage > 0
-          ? `${Math.round(product.price * (1 - product.discountPercentage / 100))}₾ (${product.discountPercentage}% OFF!)`
-          : `${product.price}₾`;
+        const price =
+          product.discountPercentage && product.discountPercentage > 0
+            ? `${Math.round(product.price * (1 - product.discountPercentage / 100))}₾ (${product.discountPercentage}% OFF!)`
+            : `${product.price}₾`;
         const hashtags = [
           ...(product.hashtags || []),
-          'soulart', 'handmade', 'art', 'georgia'
-        ].filter((v, i, a) => a.indexOf(v) === i).slice(0, 10).map(t => `#${t.replace(/^#/, '')}`).join(' ');
-        const slug = (product as Product & { slug?: string }).slug || product._id;
+          "soulart",
+          "handmade",
+          "art",
+          "georgia",
+        ]
+          .filter((v, i, a) => a.indexOf(v) === i)
+          .slice(0, 10)
+          .map((t) => `#${t.replace(/^#/, "")}`)
+          .join(" ");
+        const slug =
+          (product as Product & { slug?: string }).slug || product._id;
         setEditableDescription(
-          `✨ ${product.name || product.nameEn || ''}\n💰 ${price}\n\n🔗 https://soulart.ge/products/${slug}\n\n${hashtags}`
+          `✨ ${product.name || product.nameEn || ""}\n💰 ${price}\n\n🔗 https://soulart.ge/products/${slug}\n\n${hashtags}`,
         );
 
         // Reset publish status
@@ -119,7 +128,7 @@ export function TikTokPostModal({
         setConsentGiven(false);
       } catch (err: unknown) {
         setError(
-          err instanceof Error ? err.message : "Failed to load creator info"
+          err instanceof Error ? err.message : "Failed to load creator info",
         );
       } finally {
         setLoading(false);
@@ -127,14 +136,15 @@ export function TikTokPostModal({
     };
 
     fetchCreatorInfo();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, product.name, product.nameEn]);
 
   // Validation
   const isPhotoPost = !!(product.images && product.images.length > 0);
 
   // Branded content can't be private
-  const brandedContentBlocksPrivate = brandedContent && privacyLevel === "SELF_ONLY";
+  const brandedContentBlocksPrivate =
+    brandedContent && privacyLevel === "SELF_ONLY";
 
   // If commercial toggle is on, at least one option must be selected
   const commercialValid =
@@ -147,7 +157,9 @@ export function TikTokPostModal({
     !brandedContentBlocksPrivate;
 
   // Creator can't post check
-  const creatorCanPost = creatorInfo?.privacy_level_options && creatorInfo.privacy_level_options.length > 0;
+  const creatorCanPost =
+    creatorInfo?.privacy_level_options &&
+    creatorInfo.privacy_level_options.length > 0;
 
   const handlePost = async () => {
     if (!canPost || !creatorCanPost) return;
@@ -159,7 +171,8 @@ export function TikTokPostModal({
         disable_comment: !allowComment,
         disable_duet: !allowDuet,
         disable_stitch: !allowStitch,
-        brand_content_toggle: commercialContentEnabled && (yourBrand || brandedContent),
+        brand_content_toggle:
+          commercialContentEnabled && (yourBrand || brandedContent),
         brand_organic_toggle: yourBrand,
         is_branded_content: brandedContent,
         title: editableTitle,
@@ -172,14 +185,14 @@ export function TikTokPostModal({
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ options }),
-        }
+        },
       );
 
       const data = await res.json().catch(() => ({}));
 
       if (!res.ok) {
         throw new Error(
-          data?.message || data?.error || "Failed to post to TikTok"
+          data?.message || data?.error || "Failed to post to TikTok",
         );
       }
 
@@ -222,7 +235,9 @@ export function TikTokPostModal({
       }
       attempts++;
       try {
-        const res = await fetchWithAuth(`/products/tiktok/publish-status/${pId}`);
+        const res = await fetchWithAuth(
+          `/products/tiktok/publish-status/${pId}`,
+        );
         const data = await res.json().catch(() => ({}));
         const status = data?.status || "UNKNOWN";
         setPublishStatus(status);
@@ -338,7 +353,10 @@ export function TikTokPostModal({
           ) : !creatorCanPost ? (
             <div className="tiktok-modal__error">
               <AlertCircle size={32} />
-              <p>This account cannot make more posts at this moment. Please try again later.</p>
+              <p>
+                This account cannot make more posts at this moment. Please try
+                again later.
+              </p>
               <button onClick={onClose}>Close</button>
             </div>
           ) : (
@@ -389,8 +407,17 @@ export function TikTokPostModal({
                       : "🎥 Video"}
                   </p>
                   {!isPhotoPost && creatorInfo?.max_video_post_duration_sec && (
-                    <p className="tiktok-modal__preview-hint" style={{ fontSize: '12px', color: '#888', marginTop: '4px' }}>
-                      ⏱ Max video duration: {Math.floor(creatorInfo.max_video_post_duration_sec / 60)}min {creatorInfo.max_video_post_duration_sec % 60}s
+                    <p
+                      className="tiktok-modal__preview-hint"
+                      style={{
+                        fontSize: "12px",
+                        color: "#888",
+                        marginTop: "4px",
+                      }}
+                    >
+                      ⏱ Max video duration:{" "}
+                      {Math.floor(creatorInfo.max_video_post_duration_sec / 60)}
+                      min {creatorInfo.max_video_post_duration_sec % 60}s
                     </p>
                   )}
                 </div>
@@ -417,7 +444,10 @@ export function TikTokPostModal({
 
               {/* Editable Description / Caption */}
               <div className="tiktok-modal__section">
-                <label className="tiktok-modal__label" htmlFor="tiktok-description">
+                <label
+                  className="tiktok-modal__label"
+                  htmlFor="tiktok-description"
+                >
                   Description / Hashtags
                 </label>
                 <textarea
@@ -428,7 +458,11 @@ export function TikTokPostModal({
                   rows={5}
                   className="tiktok-modal__input tiktok-modal__textarea"
                   placeholder="Enter description, hashtags, links..."
-                  style={{ resize: "vertical", minHeight: "80px", fontFamily: "inherit" }}
+                  style={{
+                    resize: "vertical",
+                    minHeight: "80px",
+                    fontFamily: "inherit",
+                  }}
                 />
                 <span className="tiktok-modal__char-count">
                   {editableDescription.length}/2200
@@ -445,7 +479,9 @@ export function TikTokPostModal({
                   value={privacyLevel}
                   onChange={(e) => setPrivacyLevel(e.target.value)}
                   className={`tiktok-modal__select ${
-                    privacyLevel === "" ? "tiktok-modal__select--placeholder" : ""
+                    privacyLevel === ""
+                      ? "tiktok-modal__select--placeholder"
+                      : ""
                   }`}
                 >
                   <option value="" disabled>
@@ -455,9 +491,7 @@ export function TikTokPostModal({
                     <option
                       key={opt}
                       value={opt}
-                      disabled={
-                        opt === "SELF_ONLY" && brandedContent
-                      }
+                      disabled={opt === "SELF_ONLY" && brandedContent}
                     >
                       {PRIVACY_LABELS[opt] || opt}
                       {opt === "SELF_ONLY" && brandedContent
@@ -570,7 +604,9 @@ export function TikTokPostModal({
                     }}
                   />
                   <span className="tiktok-modal__toggle-slider" />
-                  <span>This content promotes a brand, product, or service</span>
+                  <span>
+                    This content promotes a brand, product, or service
+                  </span>
                 </label>
 
                 {commercialContentEnabled && (
@@ -621,8 +657,8 @@ export function TikTokPostModal({
 
                     {!commercialValid && (
                       <p className="tiktok-modal__hint tiktok-modal__hint--error">
-                        You need to indicate if your content promotes yourself, a
-                        third party, or both.
+                        You need to indicate if your content promotes yourself,
+                        a third party, or both.
                       </p>
                     )}
 
@@ -637,15 +673,27 @@ export function TikTokPostModal({
 
               {/* Publish Status */}
               {publishStatus && (
-                <div className={`tiktok-modal__notice ${publishStatus === "PUBLISH_COMPLETE" ? "tiktok-modal__notice--success" : publishStatus === "FAILED" || publishStatus === "ERROR" ? "tiktok-modal__notice--error" : ""}`}>
+                <div
+                  className={`tiktok-modal__notice ${publishStatus === "PUBLISH_COMPLETE" ? "tiktok-modal__notice--success" : publishStatus === "FAILED" || publishStatus === "ERROR" ? "tiktok-modal__notice--error" : ""}`}
+                >
                   <AlertCircle size={16} />
                   <span>
-                    {publishStatus === "PROCESSING" && "⏳ Processing your post on TikTok..."}
-                    {publishStatus === "PUBLISH_COMPLETE" && "✅ Your post is live on TikTok!"}
+                    {publishStatus === "PROCESSING" &&
+                      "⏳ Processing your post on TikTok..."}
+                    {publishStatus === "PUBLISH_COMPLETE" &&
+                      "✅ Your post is live on TikTok!"}
                     {publishStatus === "FAILED" && "❌ Post failed on TikTok."}
-                    {publishStatus === "ERROR" && "❌ Error checking post status."}
-                    {publishStatus === "TIMEOUT" && "⏰ Status check timed out. Check your TikTok profile."}
-                    {!["PROCESSING", "PUBLISH_COMPLETE", "FAILED", "ERROR", "TIMEOUT"].includes(publishStatus) && `Status: ${publishStatus}`}
+                    {publishStatus === "ERROR" &&
+                      "❌ Error checking post status."}
+                    {publishStatus === "TIMEOUT" &&
+                      "⏰ Status check timed out. Check your TikTok profile."}
+                    {![
+                      "PROCESSING",
+                      "PUBLISH_COMPLETE",
+                      "FAILED",
+                      "ERROR",
+                      "TIMEOUT",
+                    ].includes(publishStatus) && `Status: ${publishStatus}`}
                   </span>
                 </div>
               )}
@@ -708,6 +756,6 @@ export function TikTokPostModal({
         )}
       </div>
     </div>,
-    document.body
+    document.body,
   );
 }

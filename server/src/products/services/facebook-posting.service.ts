@@ -749,7 +749,8 @@ export class FacebookPostingService {
     // Use the dedicated TikTok Post Modal (POST /:id/post-to-tiktok) instead.
     if (this.autoPostTikTok && this.tiktokService.isEnabled()) {
       this.logger.log(
-        'TikTok auto-post skipped — use TikTok Post Modal for compliance. Product: ' + (product._id || ''),
+        'TikTok auto-post skipped — use TikTok Post Modal for compliance. Product: ' +
+          (product._id || ''),
       );
       result.tiktokPost = {
         success: false,

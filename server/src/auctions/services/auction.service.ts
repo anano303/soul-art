@@ -456,7 +456,9 @@ export class AuctionService {
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit),
-      this.auctionModel.countDocuments({ $or: [{ seller: sellerObjectId }, { seller: sellerId }] }),
+      this.auctionModel.countDocuments({
+        $or: [{ seller: sellerObjectId }, { seller: sellerId }],
+      }),
     ]);
 
     this.logger.log(`Found ${total} auctions for seller: ${sellerId}`);
@@ -479,7 +481,9 @@ export class AuctionService {
   ) {
     const skip = (page - 1) * limit;
     const sellerObjectId = new Types.ObjectId(sellerId);
-    const sellerQuery = { $or: [{ seller: sellerObjectId }, { seller: sellerId }] };
+    const sellerQuery = {
+      $or: [{ seller: sellerObjectId }, { seller: sellerId }],
+    };
 
     // Get paid auctions for this seller
     const [paidAuctions, total] = await Promise.all([

@@ -42,7 +42,8 @@ export function AuctionAuthModal({
   const errorHandler = useErrorHandler();
   const queryClient = useQueryClient();
   const { mutate: login, isLoading } = useLogin();
-  const { mutate: facebookAuth, isPending: isFacebookPending } = useFacebookAuth();
+  const { mutate: facebookAuth, isPending: isFacebookPending } =
+    useFacebookAuth();
   const [loginError, setLoginError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
   const [mounted, setMounted] = useState(false);
@@ -68,7 +69,7 @@ export function AuctionAuthModal({
         onClose();
       }
     },
-    [onClose]
+    [onClose],
   );
 
   useEffect(() => {
@@ -91,8 +92,14 @@ export function AuctionAuthModal({
       onSuccess: (response) => {
         if (response.success) {
           toast({
-            title: language === "ge" ? "წარმატებული ავტორიზაცია" : "Login Successful",
-            description: language === "ge" ? "ახლა შეგიძლიათ ფსონის დადება!" : "You can now place your bid!",
+            title:
+              language === "ge"
+                ? "წარმატებული ავტორიზაცია"
+                : "Login Successful",
+            description:
+              language === "ge"
+                ? "ახლა შეგიძლიათ ფსონის დადება!"
+                : "You can now place your bid!",
             variant: "default",
           });
           onLoginSuccess();
@@ -110,12 +117,15 @@ export function AuctionAuthModal({
 
   const handleGoogleSuccess = () => {
     // Set bridge cookie for middleware auth check
-    document.cookie = 'auth_session=active; path=/; max-age=3600; SameSite=Lax';
+    document.cookie = "auth_session=active; path=/; max-age=3600; SameSite=Lax";
     // Invalidate user query to refetch fresh user data stored by popup callback
     queryClient.invalidateQueries({ queryKey: ["user"] });
     toast({
       title: language === "ge" ? "წარმატებული ავტორიზაცია" : "Login Successful",
-      description: language === "ge" ? "ახლა შეგიძლიათ ფსონის დადება!" : "You can now place your bid!",
+      description:
+        language === "ge"
+          ? "ახლა შეგიძლიათ ფსონის დადება!"
+          : "You can now place your bid!",
       variant: "default",
     });
     onLoginSuccess();
@@ -132,8 +142,12 @@ export function AuctionAuthModal({
     facebookAuth(data, {
       onSuccess: () => {
         toast({
-          title: language === "ge" ? "წარმატებული ავტორიზაცია" : "Login Successful",
-          description: language === "ge" ? "ახლა შეგიძლიათ ფსონის დადება!" : "You can now place your bid!",
+          title:
+            language === "ge" ? "წარმატებული ავტორიზაცია" : "Login Successful",
+          description:
+            language === "ge"
+              ? "ახლა შეგიძლიათ ფსონის დადება!"
+              : "You can now place your bid!",
           variant: "default",
         });
         onLoginSuccess();
@@ -233,9 +247,7 @@ export function AuctionAuthModal({
             )}
           </div>
 
-          {loginError && (
-            <div className="auction-auth-error">{loginError}</div>
-          )}
+          {loginError && <div className="auction-auth-error">{loginError}</div>}
 
           <button
             type="submit"

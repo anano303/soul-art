@@ -2257,14 +2257,21 @@ function ProductCard({
           {image ? (
             <CloudinaryImage
               src={image}
-              alt={language === "en" && product.nameEn ? product.nameEn : product.name}
+              alt={
+                language === "en" && product.nameEn
+                  ? product.nameEn
+                  : product.name
+              }
               width={400}
               height={400}
               className="artist-product-card__image"
             />
           ) : (
             <div className="artist-product-card__image-placeholder">
-              {(language === "en" && product.nameEn ? product.nameEn : product.name).charAt(0)}
+              {(language === "en" && product.nameEn
+                ? product.nameEn
+                : product.name
+              ).charAt(0)}
             </div>
           )}
           {/* Discount badge */}
@@ -2320,7 +2327,9 @@ function ProductCard({
           <div className="artist-product-card__overlay">
             {(product.description || product.descriptionEn) && (
               <div className="artist-product-card__description">
-                {language === "en" && product.descriptionEn ? product.descriptionEn : product.description}
+                {language === "en" && product.descriptionEn
+                  ? product.descriptionEn
+                  : product.description}
               </div>
             )}
             {deliveryText() && (
@@ -2387,10 +2396,18 @@ function ProductCard({
         </div>
         <div className="artist-product-card__info">
           <div className="artist-product-card__title-row">
-            <h3 className="artist-product-card__title">{language === "en" && product.nameEn ? product.nameEn : product.name}</h3>
+            <h3 className="artist-product-card__title">
+              {language === "en" && product.nameEn
+                ? product.nameEn
+                : product.name}
+            </h3>
             <AddToCartButton
               productId={product.id}
-              productName={language === "en" && product.nameEn ? product.nameEn : product.name}
+              productName={
+                language === "en" && product.nameEn
+                  ? product.nameEn
+                  : product.name
+              }
               countInStock={countInStock}
               className="btn-add-to-cart-icon"
               price={

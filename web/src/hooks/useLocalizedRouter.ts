@@ -7,8 +7,8 @@ import { useCallback, useMemo } from "react";
 /**
  * A wrapper around Next.js useRouter that automatically adds /en prefix
  * when the current language is English.
- * 
- * Usage: 
+ *
+ * Usage:
  *   const router = useLocalizedRouter();
  *   router.push("/products/123"); // becomes /en/products/123 when English
  */
@@ -21,7 +21,7 @@ export function useLocalizedRouter() {
       const localized = href.startsWith("/") ? localizedPath(href) : href;
       return router.push(localized, options);
     },
-    [router, localizedPath]
+    [router, localizedPath],
   );
 
   const replace = useCallback(
@@ -29,7 +29,7 @@ export function useLocalizedRouter() {
       const localized = href.startsWith("/") ? localizedPath(href) : href;
       return router.replace(localized, options);
     },
-    [router, localizedPath]
+    [router, localizedPath],
   );
 
   return useMemo(
@@ -38,6 +38,6 @@ export function useLocalizedRouter() {
       push,
       replace,
     }),
-    [router, push, replace]
+    [router, push, replace],
   );
 }
