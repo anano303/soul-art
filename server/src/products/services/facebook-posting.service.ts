@@ -130,10 +130,8 @@ export class FacebookPostingService {
     const title = product.name || product.nameEn || 'პროდუქტი';
     const desc = product.description || product.descriptionEn || '';
     const { message: priceBlock } = this.formatPrice(product);
-    const url = this.buildProductUrl(product);
     const tags = this.formatHashtags(product);
     const author = this.getAuthor(product);
-    const sellerUrl = this.getSellerProfileUrl(product);
 
     // Add material, dimensions, and original info
     const materialInfo = this.formatMaterials(product);
@@ -148,12 +146,81 @@ export class FacebookPostingService {
       materialInfo ? `${materialInfo}` : '',
       dimensionInfo ? `${dimensionInfo}` : '',
       `${priceBlock}`,
-      url ? `🔗 ნახვა/ყიდვა: ${url}` : '',
-      sellerUrl ? `👤 ავტორის გვერდი: ${sellerUrl}` : '',
+      // Links are posted as a comment (better for FB/IG algorithm reach)
       tags ? `${tags}` : '',
     ].filter(Boolean);
 
     return parts.join('\n');
+  }
+
+  /**
+   * Build comment text with links (product URL + seller profile)
+   * Links in comments don't hurt reach like links in captions do.
+   */
+  private buildCommentText(product: ProductDocument): string {
+    const url = this.buildProductUrl(product);
+    const sellerUrl = this.getSellerProfileUrl(product);
+
+    const lines: string[] = [];
+    if (url) lines.push(`🔗 ნახვა/ყიდვა: ${url}`);
+    if (sellerUrl) lines.push(`👤 ავტორის გვერდი: ${sellerUrl}`);
+
+    return lines.join('\n');
+  }
+
+  /**
+   * Add a comment with links to a Facebook post
+   */
+  private async addCommentToPost(
+    postId: string,
+    message: string,
+  ): Promise<void> {
+    try {
+      if (!message) return;
+      await axios.post(
+        `https://graph.facebook.com/v19.0/${postId}/comments`,
+        null,
+        {
+          params: {
+            message,
+            access_token: this.pageAccessToken,
+          },
+        },
+      );
+      this.logger.log(`Comment with links added to post ${postId}`);
+    } catch (err: any) {
+      // Non-critical: log but don't fail the post
+      this.logger.warn(
+        `Failed to add comment to post ${postId}: ${err?.response?.data?.error?.message || err.message}`,
+      );
+    }
+  }
+
+  /**
+   * Add a comment with links to an Instagram post
+   */
+  private async addCommentToInstagramPost(
+    mediaId: string,
+    message: string,
+  ): Promise<void> {
+    try {
+      if (!message) return;
+      await axios.post(
+        `https://graph.facebook.com/v19.0/${mediaId}/comments`,
+        null,
+        {
+          params: {
+            message,
+            access_token: this.pageAccessToken,
+          },
+        },
+      );
+      this.logger.log(`Comment with links added to Instagram post ${mediaId}`);
+    } catch (err: any) {
+      this.logger.warn(
+        `Failed to add comment to Instagram post ${mediaId}: ${err?.response?.data?.error?.message || err.message}`,
+      );
+    }
   }
 
   private formatOriginalStatus(product: ProductDocument): string | null {
@@ -291,6 +358,9 @@ export class FacebookPostingService {
       const imageLimit = 5;
       const imagesToPost = images.slice(0, imageLimit);
 
+      // Build comment text with links
+      const commentText = this.buildCommentText(product);
+
       if (imagesToPost.length === 1) {
         const res = await axios.post(
           `https://graph.facebook.com/v19.0/${this.pageId}/photos`,
@@ -304,7 +374,12 @@ export class FacebookPostingService {
             },
           },
         );
-        return { success: true, postId: res.data?.post_id || res.data?.id };
+        const postId = res.data?.post_id || res.data?.id;
+        // Add links as comment (better for reach)
+        if (postId && commentText) {
+          await this.addCommentToPost(postId, commentText);
+        }
+        return { success: true, postId };
       }
 
       let attached_media: { media_fbid: string }[] = [];
@@ -327,7 +402,12 @@ export class FacebookPostingService {
         },
       );
 
-      return { success: true, postId: res.data?.id };
+      const postId = res.data?.id;
+      // Add links as comment (better for reach)
+      if (postId && commentText) {
+        await this.addCommentToPost(postId, commentText);
+      }
+      return { success: true, postId };
     } catch (error: any) {
       const errPayload = error?.response?.data || { message: error.message };
       // Add friendlier hint for common permission mistake
@@ -369,8 +449,16 @@ export class FacebookPostingService {
             },
           },
         );
-        return { success: true, postId: res.data?.id };
+        const postId = res.data?.id;
+        const commentTextNoImg = this.buildCommentText(product);
+        if (postId && commentTextNoImg) {
+          await this.addCommentToPost(postId, commentTextNoImg);
+        }
+        return { success: true, postId };
       }
+
+      // Build comment text with links
+      const commentText = this.buildCommentText(product);
 
       if (images.length === 1) {
         // Single photo post
@@ -385,7 +473,11 @@ export class FacebookPostingService {
             },
           },
         );
-        return { success: true, postId: res.data?.id };
+        const postId = res.data?.id;
+        if (postId && commentText) {
+          await this.addCommentToPost(postId, commentText);
+        }
+        return { success: true, postId };
       }
 
       // Multiple photos - upload unpublished first
@@ -407,7 +499,11 @@ export class FacebookPostingService {
         },
       );
 
-      return { success: true, postId: res.data?.id };
+      const groupPostId = res.data?.id;
+      if (groupPostId && commentText) {
+        await this.addCommentToPost(groupPostId, commentText);
+      }
+      return { success: true, postId: groupPostId };
     } catch (error: any) {
       const errPayload = error?.response?.data || { message: error.message };
       this.logger.error(`Facebook Group ${groupId} post failed`, errPayload);
@@ -508,7 +604,17 @@ export class FacebookPostingService {
         },
       );
 
-      return { success: true, postId: publishRes.data?.id };
+      const igPostId = publishRes.data?.id;
+
+      // Add links as first comment (Instagram penalizes links in captions)
+      if (igPostId) {
+        const commentText = this.buildCommentText(product);
+        if (commentText) {
+          await this.addCommentToInstagramPost(igPostId, commentText);
+        }
+      }
+
+      return { success: true, postId: igPostId };
     } catch (error: any) {
       const errPayload = error?.response?.data || { message: error.message };
       this.logger.error('Instagram post failed', errPayload);
