@@ -155,7 +155,7 @@ export async function middleware(request: NextRequest) {
   // 🌍 Geolocation Detection - Use IP-based (respects VPN)
   // Skip Vercel Edge geo as it detects real location, not VPN location
   
-  let geo = {
+  let geo: { country: string | null; region: string | null; city: string | null; latitude: string | null; longitude: string | null } = {
     country: null,
     region: null,
     city: null,
@@ -163,8 +163,24 @@ export async function middleware(request: NextRequest) {
     longitude: null,
   };
 
-  // If Vercel Edge geo is not available, use IP-based geolocation
-  if (!geo.country) {
+  // Check if we already have geo cookies - if so, reuse them instead of calling API again
+  // This prevents overwriting correct data when the API fails on subsequent requests
+  const existingCountry = request.cookies.get("user_country")?.value;
+  const existingCurrency = request.cookies.get("user_currency")?.value;
+  const existingCity = request.cookies.get("user_city")?.value;
+  const existingRegion = request.cookies.get("user_region")?.value;
+  
+  if (existingCountry && existingCurrency) {
+    // Reuse cached geo data from cookies
+    console.log("[Middleware] ♻️ Reusing cached geo from cookies - Country:", existingCountry, "Currency:", existingCurrency);
+    geo = {
+      country: existingCountry,
+      region: existingRegion || null,
+      city: existingCity || null,
+      latitude: null,
+      longitude: null,
+    };
+  } else {
     // Get IP address - Vercel Edge provides request.ip in production
     const vercelIp = (request as NextRequest & { ip?: string }).ip;
     const forwardedFor = request.headers.get("x-forwarded-for");
@@ -199,7 +215,7 @@ export async function middleware(request: NextRequest) {
       console.log("[Middleware] ❌ IP is invalid or localhost:", ip, "- using defaults");
       geo = { country: null, region: null, city: null, latitude: null, longitude: null };
     }
-  }
+  } // end of else (no existing cookies)
 
   // Debug logging (only in development or for geo-test page)
   if (process.env.NODE_ENV === 'development' || pathname.includes('/geo-test')) {
@@ -318,60 +334,66 @@ export async function middleware(request: NextRequest) {
   }
 
   // 🍪 Save geo data to cookies for client-side access
-  // Always set cookies, use defaults if geo detection failed
-  const countryToSet = geo.country || "GE"; // Default to Georgia only if detection failed
-  const currencyToSet = geo.country ? detectedCurrency : "GEL"; // Default to GEL only if detection failed
+  // Only set cookies if we did a fresh geo lookup (not when reusing cached cookies)
+  const needsCookieUpdate = !existingCountry || !existingCurrency;
   
-  console.log("[Middleware] 🍪 Setting cookies - Country:", countryToSet, "(detected:", geo.country, "), Currency:", currencyToSet);
-  
-  response.cookies.set("user_country", countryToSet, {
-    maxAge: 60 * 60 * 24 * 7, // 7 days
-    path: "/",
-    httpOnly: false, // Allow JS access
-    sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
-  });
+  if (needsCookieUpdate) {
+    const countryToSet = geo.country || "GE"; // Default to Georgia only if detection failed
+    const currencyToSet = geo.country ? detectedCurrency : "GEL"; // Default to GEL only if detection failed
+    
+    console.log("[Middleware] 🍪 Setting NEW cookies - Country:", countryToSet, "(detected:", geo.country, "), Currency:", currencyToSet);
+    
+    response.cookies.set("user_country", countryToSet, {
+      maxAge: 60 * 60 * 24 * 7, // 7 days
+      path: "/",
+      httpOnly: false, // Allow JS access
+      sameSite: "lax",
+      secure: process.env.NODE_ENV === "production",
+    });
 
-  response.cookies.set("user_currency", currencyToSet, {
-    maxAge: 60 * 60 * 24 * 7, // 7 days
-    path: "/",
-    httpOnly: false,
-    sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
-  });
-
-  if (geo.city) {
-    response.cookies.set("user_city", geo.city, {
-      maxAge: 60 * 60 * 24 * 7,
+    response.cookies.set("user_currency", currencyToSet, {
+      maxAge: 60 * 60 * 24 * 7, // 7 days
       path: "/",
       httpOnly: false,
       sameSite: "lax",
       secure: process.env.NODE_ENV === "production",
     });
-  }
 
-  if (geo.region) {
-    response.cookies.set("user_region", geo.region, {
-      maxAge: 60 * 60 * 24 * 7,
-      path: "/",
-      httpOnly: false,
-      sameSite: "lax",
-      secure: process.env.NODE_ENV === "production",
-    });
-  }
-
-  // Save geo metadata for debugging
-  response.cookies.set(
-    "geo_detected_at",
-    new Date().toISOString(),
-    {
-      maxAge: 60 * 60 * 24 * 7,
-      path: "/",
-      httpOnly: false,
-      sameSite: "lax",
-      secure: process.env.NODE_ENV === "production",
+    if (geo.city) {
+      response.cookies.set("user_city", geo.city, {
+        maxAge: 60 * 60 * 24 * 7,
+        path: "/",
+        httpOnly: false,
+        sameSite: "lax",
+        secure: process.env.NODE_ENV === "production",
+      });
     }
-  );
+
+    if (geo.region) {
+      response.cookies.set("user_region", geo.region, {
+        maxAge: 60 * 60 * 24 * 7,
+        path: "/",
+        httpOnly: false,
+        sameSite: "lax",
+        secure: process.env.NODE_ENV === "production",
+      });
+    }
+
+    // Save geo metadata for debugging
+    response.cookies.set(
+      "geo_detected_at",
+      new Date().toISOString(),
+      {
+        maxAge: 60 * 60 * 24 * 7,
+        path: "/",
+        httpOnly: false,
+        sameSite: "lax",
+        secure: process.env.NODE_ENV === "production",
+      }
+    );
+  } else {
+    console.log("[Middleware] ♻️ Skipping cookie write - using cached values");
+  }
 
   // 🌐 Set preferred language cookie (only if not already set by user and geo was detected)
   if (!preferredLanguage && autoLanguage) {
