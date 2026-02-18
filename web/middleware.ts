@@ -12,6 +12,32 @@ interface VercelRequest extends NextRequest {
   };
 }
 
+// IP Geolocation lookup (lightweight, works everywhere)
+async function getGeoFromIP(ip: string) {
+  try {
+    // Use ip-api.com free tier (45 requests/min) or similar
+    // For production, consider upgrading to ip-api Pro or another service
+    const response = await fetch(`https://ipapi.co/${ip}/json/`, {
+      // This endpoint works without API key
+      headers: { "User-Agent": "soul-art-geo-detection" },
+    });
+    
+    if (!response.ok) return null;
+    
+    const data = await response.json();
+    return {
+      country: data.country_code || null,
+      city: data.city || null,
+      region: data.region || null,
+      latitude: data.latitude?.toString() || null,
+      longitude: data.longitude?.toString() || null,
+    };
+  } catch (error) {
+    console.error("[Middleware] IP geolocation fetch failed:", error);
+    return null;
+  }
+}
+
 const publicPaths = [
   "/",
   "/login",
@@ -35,7 +61,7 @@ const protectedPaths = [
   // This prevents redirect issues when cookies aren't accessible in middleware
 ];
 
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Check for authentication tokens - Next.js 16 compatible way
@@ -49,9 +75,9 @@ export function middleware(request: NextRequest) {
   );
   const isAuthenticated = hasTokens;
 
-  // 🌍 Geolocation Detection - Extract from Vercel Edge
+  // 🌍 Geolocation Detection - Try Vercel Edge first, fallback to IP lookup
   const vercelRequest = request as VercelRequest;
-  const geo = {
+  let geo = {
     country: vercelRequest.geo?.country || null,
     region: vercelRequest.geo?.region || null,
     city: vercelRequest.geo?.city || null,
@@ -59,11 +85,24 @@ export function middleware(request: NextRequest) {
     longitude: vercelRequest.geo?.longitude || null,
   };
 
+  // If Vercel Edge geo is not available, use IP-based geolocation
+  if (!geo.country) {
+    const ip = request.headers.get("x-forwarded-for")?.split(",")[0].trim() ||
+               request.headers.get("x-real-ip") ||
+               "1.1.1.1"; // Fallback IP
+    
+    console.log("[Middleware] Vercel Edge geo unavailable, trying IP lookup for:", ip);
+    const ipGeo = await getGeoFromIP(ip);
+    if (ipGeo) {
+      geo = ipGeo;
+    }
+  }
+
   // Debug logging (only in development or for geo-test page)
   if (process.env.NODE_ENV === 'development' || pathname.includes('/geo-test')) {
     console.log('[Middleware] Processing:', pathname);
     console.log('[Middleware] Geo data:', geo);
-    console.log('[Middleware] Full request.geo:', vercelRequest.geo);
+    console.log('[Middleware] Vercel Edge geo:', vercelRequest.geo);
   }
 
   // Currency mapping based on country
