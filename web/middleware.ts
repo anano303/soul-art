@@ -1,17 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-// Extend NextRequest to include Vercel's geo property
-interface VercelRequest extends NextRequest {
-  geo?: {
-    city?: string;
-    country?: string;
-    region?: string;
-    latitude?: string;
-    longitude?: string;
-  };
-}
-
 // IP Geolocation lookup (lightweight, works everywhere)
 async function getGeoFromIP(ip: string) {
   try {
@@ -92,14 +81,15 @@ export async function middleware(request: NextRequest) {
   );
   const isAuthenticated = hasTokens;
 
-  // 🌍 Geolocation Detection - Try Vercel Edge first, fallback to IP lookup
-  const vercelRequest = request as VercelRequest;
+  // 🌍 Geolocation Detection - Use IP-based (respects VPN)
+  // Skip Vercel Edge geo as it detects real location, not VPN location
+  
   let geo = {
-    country: vercelRequest.geo?.country || null,
-    region: vercelRequest.geo?.region || null,
-    city: vercelRequest.geo?.city || null,
-    latitude: vercelRequest.geo?.latitude || null,
-    longitude: vercelRequest.geo?.longitude || null,
+    country: null,
+    region: null,
+    city: null,
+    latitude: null,
+    longitude: null,
   };
 
   // If Vercel Edge geo is not available, use IP-based geolocation
@@ -108,7 +98,7 @@ export async function middleware(request: NextRequest) {
     const realIp = request.headers.get("x-real-ip");
     const ip = forwardedFor?.split(",")[0].trim() || realIp || "1.1.1.1";
     
-    console.log("[Middleware] Vercel Edge geo unavailable, trying IP lookup");
+    console.log("[Middleware] Detecting geo via IP (Vercel Edge unavailable or development mode)");
     console.log("[Middleware] x-forwarded-for:", forwardedFor);
     console.log("[Middleware] x-real-ip:", realIp);
     console.log("[Middleware] Using IP:", ip);
@@ -125,8 +115,8 @@ export async function middleware(request: NextRequest) {
   // Debug logging (only in development or for geo-test page)
   if (process.env.NODE_ENV === 'development' || pathname.includes('/geo-test')) {
     console.log('[Middleware] Processing:', pathname);
+    console.log('[Middleware] Using IP-based geo (skipping Vercel Edge to respect VPN)');
     console.log('[Middleware] Geo data:', geo);
-    console.log('[Middleware] Vercel Edge geo:', vercelRequest.geo);
   }
 
   // 🌐 Language Detection & Redirect
