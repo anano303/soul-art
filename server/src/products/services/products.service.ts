@@ -722,12 +722,15 @@ export class ProductsService {
 
     const products = await productQuery.exec();
 
+    // Convert to plain objects so we can add dynamic fields
+    const plainProducts = products.map(p => p.toObject());
+
     // Enrich with multi-currency pricing
-    await this.enrichWithCurrencyPricing(products);
+    await this.enrichWithCurrencyPricing(plainProducts);
 
     // Return in consistent format that matches PaginatedResponse
     return {
-      items: products,
+      items: plainProducts,
       total: count,
       page: pageNumber,
       pages: Math.ceil(count / limitNumber),
@@ -798,10 +801,11 @@ export class ProductsService {
       };
     }
 
-    // Enrich with multi-currency pricing
-    await this.enrichWithCurrencyPricing(product);
+    // Convert to plain object and enrich with multi-currency pricing
+    const plainProduct = product.toObject();
+    await this.enrichWithCurrencyPricing(plainProduct);
 
-    return product;
+    return plainProduct as any;
   }
 
   async findByIdWithUser(id: string): Promise<ProductDocument> {
@@ -819,10 +823,11 @@ export class ProductsService {
 
     if (!product) throw new NotFoundException('No product with given ID.');
 
-    // Enrich with multi-currency pricing
-    await this.enrichWithCurrencyPricing(product);
+    // Convert to plain object and enrich with multi-currency pricing
+    const plainProduct = product.toObject();
+    await this.enrichWithCurrencyPricing(plainProduct);
 
-    return product;
+    return plainProduct as any;
   }
 
   async incrementViewCount(id: string): Promise<void> {
@@ -847,10 +852,11 @@ export class ProductsService {
       .populate('subCategory')
       .exec();
 
-    // Enrich with multi-currency pricing
-    await this.enrichWithCurrencyPricing(products);
+    // Convert to plain objects and enrich with multi-currency pricing
+    const plainProducts = products.map(p => p.toObject());
+    await this.enrichWithCurrencyPricing(plainProducts);
 
-    return products;
+    return plainProducts as any;
   }
 
   async createMany(products: Partial<Product>[]): Promise<ProductDocument[]> {
