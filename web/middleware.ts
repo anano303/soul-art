@@ -1,6 +1,17 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
+// Extend NextRequest to include Vercel's geo property
+interface VercelRequest extends NextRequest {
+  geo?: {
+    city?: string;
+    country?: string;
+    region?: string;
+    latitude?: string;
+    longitude?: string;
+  };
+}
+
 const publicPaths = [
   "/",
   "/login",
@@ -25,7 +36,7 @@ const protectedPaths = [
 ];
 
 export function middleware(request: NextRequest) {
-  let { pathname } = request.nextUrl;
+  const { pathname } = request.nextUrl;
 
   // Check for authentication tokens - Next.js 16 compatible way
   const accessToken = request.cookies.get("access_token");
@@ -39,12 +50,13 @@ export function middleware(request: NextRequest) {
   const isAuthenticated = hasTokens;
 
   // 🌍 Geolocation Detection - Extract from Vercel Edge
+  const vercelRequest = request as VercelRequest;
   const geo = {
-    country: request.geo?.country || null,
-    region: request.geo?.region || null,
-    city: request.geo?.city || null,
-    latitude: request.geo?.latitude || null,
-    longitude: request.geo?.longitude || null,
+    country: vercelRequest.geo?.country || null,
+    region: vercelRequest.geo?.region || null,
+    city: vercelRequest.geo?.city || null,
+    latitude: vercelRequest.geo?.latitude || null,
+    longitude: vercelRequest.geo?.longitude || null,
   };
 
   // Currency mapping based on country
