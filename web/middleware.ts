@@ -17,23 +17,40 @@ async function getGeoFromIP(ip: string) {
   try {
     // Use ip-api.com free tier (45 requests/min) or similar
     // For production, consider upgrading to ip-api Pro or another service
+    console.log("[Middleware] Starting IP geolocation lookup for IP:", ip);
+    
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+    
     const response = await fetch(`https://ipapi.co/${ip}/json/`, {
       // This endpoint works without API key
       headers: { "User-Agent": "soul-art-geo-detection" },
+      signal: controller.signal,
     });
     
-    if (!response.ok) return null;
+    clearTimeout(timeout);
+    console.log("[Middleware] IP API response status:", response.status);
+    
+    if (!response.ok) {
+      console.log("[Middleware] IP API failed with status:", response.status);
+      return null;
+    }
     
     const data = await response.json();
-    return {
+    console.log("[Middleware] IP API response data:", data);
+    
+    const result = {
       country: data.country_code || null,
       city: data.city || null,
       region: data.region || null,
       latitude: data.latitude?.toString() || null,
       longitude: data.longitude?.toString() || null,
     };
+    
+    console.log("[Middleware] Extracted geo data:", result);
+    return result;
   } catch (error) {
-    console.error("[Middleware] IP geolocation fetch failed:", error);
+    console.error("[Middleware] IP geolocation fetch failed:", error instanceof Error ? error.message : error);
     return null;
   }
 }
@@ -87,14 +104,21 @@ export async function middleware(request: NextRequest) {
 
   // If Vercel Edge geo is not available, use IP-based geolocation
   if (!geo.country) {
-    const ip = request.headers.get("x-forwarded-for")?.split(",")[0].trim() ||
-               request.headers.get("x-real-ip") ||
-               "1.1.1.1"; // Fallback IP
+    const forwardedFor = request.headers.get("x-forwarded-for");
+    const realIp = request.headers.get("x-real-ip");
+    const ip = forwardedFor?.split(",")[0].trim() || realIp || "1.1.1.1";
     
-    console.log("[Middleware] Vercel Edge geo unavailable, trying IP lookup for:", ip);
+    console.log("[Middleware] Vercel Edge geo unavailable, trying IP lookup");
+    console.log("[Middleware] x-forwarded-for:", forwardedFor);
+    console.log("[Middleware] x-real-ip:", realIp);
+    console.log("[Middleware] Using IP:", ip);
+    
     const ipGeo = await getGeoFromIP(ip);
     if (ipGeo) {
+      console.log("[Middleware] IP geo lookup succeeded:", ipGeo);
       geo = ipGeo;
+    } else {
+      console.log("[Middleware] IP geo lookup returned null");
     }
   }
 
