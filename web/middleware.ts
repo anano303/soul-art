@@ -2,57 +2,82 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 // IP Geolocation lookup (lightweight, works everywhere)
+// Use ip-api.io as primary (CORS-friendly), fall back to ipapi.co
 async function getGeoFromIP(ip: string) {
   try {
-    // Use ip-api.com free tier (45 requests/min) or similar
-    // For production, consider upgrading to ip-api Pro or another service
     console.log("[Middleware] Starting IP geolocation lookup for IP:", ip);
     
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+    const timeout = setTimeout(() => controller.abort(), 8000); // 8 second timeout
     
-    const response = await fetch(`https://ipapi.co/${ip}/json/`, {
-      // This endpoint works without API key
-      headers: { 
-        "User-Agent": "soul-art-geo-detection",
-        "Accept": "application/json",
-      },
-      signal: controller.signal,
-    });
-    
-    clearTimeout(timeout);
-    console.log("[Middleware] IP API response status:", response.status);
-    
-    if (!response.ok) {
-      console.log("[Middleware] IP API failed with status:", response.status);
+    try {
+      // Try ip-api.io first (more reliable CORS)
+      console.log("[Middleware] Trying ip-api.io...");
+      let response = await fetch(`https://ip-api.io/json/${ip}`, {
+        headers: { 
+          "User-Agent": "soul-art-geo-detection",
+          "Accept": "application/json",
+        },
+        signal: controller.signal,
+      });
+      
+      if (!response.ok && response.status === 404) {
+        // Fallback to ipapi.co
+        console.log("[Middleware] ip-api.io returned 404, trying ipapi.co...");
+        response = await fetch(`https://ipapi.co/${ip}/json/`, {
+          headers: { 
+            "User-Agent": "soul-art-geo-detection",
+            "Accept": "application/json",
+          },
+          signal: controller.signal,
+        });
+      }
+      
+      clearTimeout(timeout);
+      console.log("[Middleware] IP API response status:", response.status);
+      
+      if (!response.ok) {
+        console.log("[Middleware] IP API failed with status:", response.status);
+        return null;
+      }
+      
+      const data = await response.json();
+      console.log("[Middleware] IP API response (first 300 chars):", JSON.stringify(data).substring(0, 300));
+      
+      // Check if ipapi returned an error
+      if (data.error) {
+        console.log("[Middleware] IP API returned error:", data.error, data.reason || "");
+        return null;
+      }
+      
+      // Handle both api-io and ipapi.co response formats
+      const countryCode = data.country_code || data.country || null;
+      if (!countryCode) {
+        console.log("[Middleware] IP API missing country/country_code in response");
+        return null;
+      }
+      
+      const result = {
+        country: countryCode,
+        city: data.city || null,
+        region: data.region || data.state || null,
+        latitude: data.latitude?.toString() || null,
+        longitude: data.longitude?.toString() || null,
+      };
+      
+      console.log("[Middleware] ✅ Extracted geo data:", result);
+      return result;
+    } catch (fetchError) {
+      clearTimeout(timeout);
+      if (fetchError instanceof Error && fetchError.name === "AbortError") {
+        console.log("[Middleware] ⏱️ IP geolocation timed out (network issue or blocked)");
+      } else {
+        console.error("[Middleware] ❌ IP API fetch failed:", fetchError instanceof Error ? fetchError.message : String(fetchError));
+      }
       return null;
     }
-    
-    const data = await response.json();
-    console.log("[Middleware] IP API response data:", data);
-    
-    // Check if ipapi.co returned an error (they return 200 with error key)
-    if (data.error) {
-      console.log("[Middleware] IP API returned error:", data.error, data.reason);
-      return null;
-    }
-    
-    const result = {
-      country: data.country_code || null,
-      city: data.city || null,
-      region: data.region || null,
-      latitude: data.latitude?.toString() || null,
-      longitude: data.longitude?.toString() || null,
-    };
-    
-    console.log("[Middleware] Extracted geo data:", result);
-    return result;
   } catch (error) {
-    console.error("[Middleware] IP geolocation fetch failed:", error instanceof Error ? error.message : error);
-    // In incognito mode or with strict privacy settings, fetch might be blocked
-    if (error instanceof Error && error.name === "AbortError") {
-      console.log("[Middleware] IP geolocation timed out (might be blocked by privacy settings)");
-    }
+    console.error("[Middleware] ❌ Unexpected error in getGeoFromIP:", error instanceof Error ? error.message : String(error));
     return null;
   }
 }
@@ -119,19 +144,22 @@ export async function middleware(request: NextRequest) {
     console.log("[Middleware] request.ip (Vercel):", vercelIp);
     console.log("[Middleware] x-forwarded-for:", forwardedFor);
     console.log("[Middleware] x-real-ip:", realIp);
-    console.log("[Middleware] Using IP:", ip);
+    console.log("[Middleware] Final IP to use:", ip);
     
     // Only attempt IP lookup if we have a valid IP
-    if (ip && !ip.startsWith("127.") && !ip.startsWith("::1") && ip !== "1.1.1.1") {
+    if (ip && !ip.startsWith("127.") && !ip.startsWith("::1") && ip.trim() !== "") {
+      console.log("[Middleware] IP is valid, attempting geo lookup");
       const ipGeo = await getGeoFromIP(ip);
-      if (ipGeo) {
-        console.log("[Middleware] IP geo lookup succeeded:", ipGeo);
+      if (ipGeo && ipGeo.country) {
+        console.log("[Middleware] ✅ IP geo lookup succeeded:", ipGeo.country);
         geo = ipGeo;
       } else {
-        console.log("[Middleware] IP geo lookup returned null");
+        console.log("[Middleware] ❌ IP geo lookup returned null or no country");
+        geo = { country: null, region: null, city: null, latitude: null, longitude: null };
       }
     } else {
-      console.log("[Middleware] No valid IP for geolocation, using defaults");
+      console.log("[Middleware] ❌ IP is invalid or localhost:", ip, "- using defaults");
+      geo = { country: null, region: null, city: null, latitude: null, longitude: null };
     }
   }
 
@@ -253,8 +281,10 @@ export async function middleware(request: NextRequest) {
 
   // 🍪 Save geo data to cookies for client-side access
   // Always set cookies, use defaults if geo detection failed
-  const countryToSet = geo.country || "GE"; // Default to Georgia
-  const currencyToSet = geo.country ? detectedCurrency : "GEL"; // Default to GEL
+  const countryToSet = geo.country || "GE"; // Default to Georgia only if detection failed
+  const currencyToSet = geo.country ? detectedCurrency : "GEL"; // Default to GEL only if detection failed
+  
+  console.log("[Middleware] 🍪 Setting cookies - Country:", countryToSet, "(detected:", geo.country, "), Currency:", currencyToSet);
   
   response.cookies.set("user_country", countryToSet, {
     maxAge: 60 * 60 * 24 * 7, // 7 days
