@@ -59,6 +59,13 @@ export function middleware(request: NextRequest) {
     longitude: vercelRequest.geo?.longitude || null,
   };
 
+  // Debug logging (only in development or for geo-test page)
+  if (process.env.NODE_ENV === 'development' || pathname.includes('/geo-test')) {
+    console.log('[Middleware] Processing:', pathname);
+    console.log('[Middleware] Geo data:', geo);
+    console.log('[Middleware] Full request.geo:', vercelRequest.geo);
+  }
+
   // Currency mapping based on country
   const currencyMap: Record<string, string> = {
     GE: "GEL", // Georgia

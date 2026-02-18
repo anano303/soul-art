@@ -50,6 +50,10 @@ export default function GeoTestPage() {
       detectedAt: getCookie("geo_detected_at"),
     };
 
+    // Debug logging
+    console.log('[Geo Test] All cookies:', document.cookie);
+    console.log('[Geo Test] Parsed geo cookies:', cookies);
+
     setGeoData((prev) => ({
       ...prev,
       cookies,
@@ -153,6 +157,39 @@ export default function GeoTestPage() {
       </div>
 
       <div className="grid gap-6">
+        {/* Environment Info */}
+        <div className="bg-purple-50 rounded-lg shadow-md p-6 border border-purple-200">
+          <h2 className="text-2xl font-semibold mb-4">🔍 Environment Info</h2>
+          <div className="space-y-2">
+            <div className="flex justify-between p-3 bg-white rounded-lg">
+              <span className="font-medium">Current URL:</span>
+              <code className="text-sm bg-gray-100 px-2 py-1 rounded">
+                {typeof window !== 'undefined' ? window.location.href : 'SSR'}
+              </code>
+            </div>
+            <div className="flex justify-between p-3 bg-white rounded-lg">
+              <span className="font-medium">Running On:</span>
+              <code className="text-sm bg-gray-100 px-2 py-1 rounded">
+                {typeof window !== 'undefined' && window.location.hostname.includes('vercel.app') 
+                  ? '✅ Vercel Production' 
+                  : typeof window !== 'undefined' && window.location.hostname.includes('localhost')
+                  ? '⚠️ Localhost (geo won\'t work)'
+                  : typeof window !== 'undefined' 
+                  ? `🌐 ${window.location.hostname}`
+                  : 'Unknown'}
+              </code>
+            </div>
+            <div className="flex justify-between p-3 bg-white rounded-lg">
+              <span className="font-medium">Middleware Cookies Set:</span>
+              <code className="text-sm bg-gray-100 px-2 py-1 rounded">
+                {typeof window !== 'undefined' && document.cookie.includes('geo_detected_at') 
+                  ? '✅ Yes' 
+                  : '❌ No'}
+              </code>
+            </div>
+          </div>
+        </div>
+
         {/* Frontend (Middleware) Section */}
         <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200">
           <div className="flex items-center justify-between mb-4">
