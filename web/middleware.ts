@@ -131,22 +131,27 @@ export async function middleware(request: NextRequest) {
 
   // 🌐 Language Detection & Redirect
   const preferredLanguage = request.cookies.get("preferred_language")?.value as "en" | "ge" | undefined;
-  const autoLanguage = geo.country === "GE" ? "ge" : "en";
+  
+  // Only auto-detect language if geo was successfully detected
+  // If geo is null, don't set a language preference - let it be manually chosen
+  const autoLanguage = geo.country === "GE" ? "ge" : (geo.country ? "en" : null);
   
   // Debug logging for language detection
   if (pathname.includes('/geo-test')) {
     console.log('[Middleware] Preferred language:', preferredLanguage);
     console.log('[Middleware] Auto-detected language:', autoLanguage);
     console.log('[Middleware] Country:', geo.country);
+    console.log('[Middleware] Geo detection success:', !!geo.country);
   }
 
   // Check if we need to redirect to /en for non-Georgian users without a language preference
+  // Only redirect if we successfully detected the country AND it's not Georgia AND user has no preference
   const hasEnPrefix = pathname === "/en" || pathname.startsWith("/en/");
-  const shouldBeInEnglish = !preferredLanguage && autoLanguage === "en";
+  const shouldBeInEnglish = !preferredLanguage && geo.country && geo.country !== "GE" && !hasEnPrefix;
   
   if (shouldBeInEnglish && !hasEnPrefix && !pathname.startsWith("/api") && !pathname.startsWith("/_next")) {
-    // User is outside Georgia with no preferred language → redirect to /en
-    console.log('[Middleware] Redirecting to /en for non-Georgian user');
+    // User is detected outside Georgia with no preferred language → redirect to /en
+    console.log('[Middleware] Redirecting to /en for non-Georgian user (country:', geo.country, ')');
     const redirectUrl = new URL(`/en${pathname}`, request.url);
     redirectUrl.search = request.nextUrl.search;
     const redirectResponse = NextResponse.redirect(redirectUrl);
@@ -274,8 +279,8 @@ export async function middleware(request: NextRequest) {
     }
   );
 
-  // 🌐 Set preferred language cookie (only if not already set by user)
-  if (!preferredLanguage) {
+  // 🌐 Set preferred language cookie (only if not already set by user and geo was detected)
+  if (!preferredLanguage && autoLanguage) {
     response.cookies.set("preferred_language", autoLanguage, {
       maxAge: 60 * 60 * 24 * 365, // 1 year
       path: "/",
