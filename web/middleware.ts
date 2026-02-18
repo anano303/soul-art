@@ -13,7 +13,10 @@ async function getGeoFromIP(ip: string) {
     
     const response = await fetch(`https://ipapi.co/${ip}/json/`, {
       // This endpoint works without API key
-      headers: { "User-Agent": "soul-art-geo-detection" },
+      headers: { 
+        "User-Agent": "soul-art-geo-detection",
+        "Accept": "application/json",
+      },
       signal: controller.signal,
     });
     
@@ -28,6 +31,12 @@ async function getGeoFromIP(ip: string) {
     const data = await response.json();
     console.log("[Middleware] IP API response data:", data);
     
+    // Check if ipapi.co returned an error (they return 200 with error key)
+    if (data.error) {
+      console.log("[Middleware] IP API returned error:", data.error, data.reason);
+      return null;
+    }
+    
     const result = {
       country: data.country_code || null,
       city: data.city || null,
@@ -40,6 +49,10 @@ async function getGeoFromIP(ip: string) {
     return result;
   } catch (error) {
     console.error("[Middleware] IP geolocation fetch failed:", error instanceof Error ? error.message : error);
+    // In incognito mode or with strict privacy settings, fetch might be blocked
+    if (error instanceof Error && error.name === "AbortError") {
+      console.log("[Middleware] IP geolocation timed out (might be blocked by privacy settings)");
+    }
     return null;
   }
 }
@@ -94,21 +107,31 @@ export async function middleware(request: NextRequest) {
 
   // If Vercel Edge geo is not available, use IP-based geolocation
   if (!geo.country) {
+    // Get IP address - Vercel Edge provides request.ip in production
+    const vercelIp = (request as NextRequest & { ip?: string }).ip;
     const forwardedFor = request.headers.get("x-forwarded-for");
     const realIp = request.headers.get("x-real-ip");
-    const ip = forwardedFor?.split(",")[0].trim() || realIp || "1.1.1.1";
+    
+    // Priority: Vercel's request.ip > x-real-ip > x-forwarded-for first IP
+    const ip = vercelIp || realIp || forwardedFor?.split(",")[0].trim() || null;
     
     console.log("[Middleware] Detecting geo via IP (Vercel Edge unavailable or development mode)");
+    console.log("[Middleware] request.ip (Vercel):", vercelIp);
     console.log("[Middleware] x-forwarded-for:", forwardedFor);
     console.log("[Middleware] x-real-ip:", realIp);
     console.log("[Middleware] Using IP:", ip);
     
-    const ipGeo = await getGeoFromIP(ip);
-    if (ipGeo) {
-      console.log("[Middleware] IP geo lookup succeeded:", ipGeo);
-      geo = ipGeo;
+    // Only attempt IP lookup if we have a valid IP
+    if (ip && !ip.startsWith("127.") && !ip.startsWith("::1") && ip !== "1.1.1.1") {
+      const ipGeo = await getGeoFromIP(ip);
+      if (ipGeo) {
+        console.log("[Middleware] IP geo lookup succeeded:", ipGeo);
+        geo = ipGeo;
+      } else {
+        console.log("[Middleware] IP geo lookup returned null");
+      }
     } else {
-      console.log("[Middleware] IP geo lookup returned null");
+      console.log("[Middleware] No valid IP for geolocation, using defaults");
     }
   }
 
@@ -229,23 +252,25 @@ export async function middleware(request: NextRequest) {
   }
 
   // 🍪 Save geo data to cookies for client-side access
-  if (geo.country) {
-    response.cookies.set("user_country", geo.country, {
-      maxAge: 60 * 60 * 24 * 7, // 7 days
-      path: "/",
-      httpOnly: false, // Allow JS access
-      sameSite: "lax",
-      secure: process.env.NODE_ENV === "production",
-    });
+  // Always set cookies, use defaults if geo detection failed
+  const countryToSet = geo.country || "GE"; // Default to Georgia
+  const currencyToSet = geo.country ? detectedCurrency : "GEL"; // Default to GEL
+  
+  response.cookies.set("user_country", countryToSet, {
+    maxAge: 60 * 60 * 24 * 7, // 7 days
+    path: "/",
+    httpOnly: false, // Allow JS access
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+  });
 
-    response.cookies.set("user_currency", detectedCurrency, {
-      maxAge: 60 * 60 * 24 * 7, // 7 days
-      path: "/",
-      httpOnly: false,
-      sameSite: "lax",
-      secure: process.env.NODE_ENV === "production",
-    });
-  }
+  response.cookies.set("user_currency", currencyToSet, {
+    maxAge: 60 * 60 * 24 * 7, // 7 days
+    path: "/",
+    httpOnly: false,
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+  });
 
   if (geo.city) {
     response.cookies.set("user_city", geo.city, {
