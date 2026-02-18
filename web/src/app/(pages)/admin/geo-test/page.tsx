@@ -60,13 +60,13 @@ export default function GeoTestPage() {
   const testBackend = async () => {
     setTesting(true);
     try {
-      const country = getCookie("user_country") || "GE";
+      const country = getCookie("user_country"); // Don't fallback - show real state
       
       const response = await fetchWithAuth("/geo/test", {
         method: "GET",
-        headers: {
+        headers: country ? {
           "X-User-Country": country,
-        },
+        } : {}, // Only send header if cookie exists
       });
 
       if (response.ok) {
@@ -211,6 +211,15 @@ export default function GeoTestPage() {
                 <li>Vercel Edge is disabled or not deployed</li>
                 <li>Middleware is not processing requests</li>
               </ul>
+              <div className="mt-3 p-3 bg-blue-50 border border-blue-300 rounded">
+                <p className="text-blue-800 text-sm font-semibold">💡 To test with real geo data:</p>
+                <p className="text-blue-700 text-xs mt-1">
+                  Deploy to Vercel and visit: <code className="bg-blue-100 px-1">https://your-app.vercel.app/admin/geo-test</code>
+                </p>
+                <p className="text-blue-700 text-xs mt-1">
+                  Vercel Edge geolocation only works on their network, not localhost.
+                </p>
+              </div>
             </div>
           )}
         </div>
@@ -227,9 +236,14 @@ export default function GeoTestPage() {
               <div className="grid grid-cols-2 gap-4">
                 <div className="bg-gray-50 p-4 rounded-lg">
                   <p className="text-sm text-gray-600 mb-1">Received Country Header</p>
-                  <p className="text-xl font-mono font-bold text-purple-600">
-                    {geoData.backend.receivedCountry || "❌ Not received"}
+                  <p className={`text-xl font-mono font-bold ${geoData.backend.receivedCountry ? 'text-purple-600' : 'text-red-600'}`}>
+                    {geoData.backend.receivedCountry || "❌ Not sent"}
                   </p>
+                  {!geoData.backend.receivedCountry && (
+                    <p className="text-xs text-gray-500 mt-1">
+                      Frontend didn&apos;t send country header (no cookie)
+                    </p>
+                  )}
                 </div>
 
                 <div className="bg-gray-50 p-4 rounded-lg">
