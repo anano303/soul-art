@@ -21,9 +21,27 @@ async function getGeoFromIP(ip: string) {
         signal: controller.signal,
       });
       
-      if (!response.ok && response.status === 404) {
+      let data = null;
+      let shouldTryFallback = false;
+      
+      if (response.ok) {
+        data = await response.json();
+        // Check if the response has country data
+        const hasCountry = data.country_code || data.country || data.cc;
+        console.log("[Middleware] ip-api.io response ok, has country:", !!hasCountry);
+        
+        if (!hasCountry) {
+          console.log("[Middleware] ip-api.io missing country data, trying fallback");
+          shouldTryFallback = true;
+        }
+      } else {
+        console.log("[Middleware] ip-api.io returned", response.status, "trying fallback");
+        shouldTryFallback = true;
+      }
+      
+      if (shouldTryFallback) {
         // Fallback to ipapi.co
-        console.log("[Middleware] ip-api.io returned 404, trying ipapi.co...");
+        console.log("[Middleware] Trying ipapi.co as fallback...");
         response = await fetch(`https://ipapi.co/${ip}/json/`, {
           headers: { 
             "User-Agent": "soul-art-geo-detection",
@@ -31,18 +49,19 @@ async function getGeoFromIP(ip: string) {
           },
           signal: controller.signal,
         });
+        
+        if (!response.ok) {
+          clearTimeout(timeout);
+          console.log("[Middleware] ipapi.co also failed with status:", response.status);
+          return null;
+        }
+        
+        data = await response.json();
       }
       
       clearTimeout(timeout);
-      console.log("[Middleware] IP API response status:", response.status);
-      
-      if (!response.ok) {
-        console.log("[Middleware] IP API failed with status:", response.status);
-        return null;
-      }
-      
-      const data = await response.json();
-      console.log("[Middleware] IP API response (first 300 chars):", JSON.stringify(data).substring(0, 300));
+      console.log("[Middleware] IP API full response keys:", Object.keys(data));
+      console.log("[Middleware] IP API response (full):", JSON.stringify(data));
       
       // Check if ipapi returned an error
       if (data.error) {
@@ -51,9 +70,16 @@ async function getGeoFromIP(ip: string) {
       }
       
       // Handle both api-io and ipapi.co response formats
-      const countryCode = data.country_code || data.country || null;
+      // Possible field names for country: country_code, country, country_name, cc, country_capital
+      const countryCode = 
+        data.country_code ||    // ipapi.co format
+        data.country ||         // ip-api.io format  
+        data.cc ||              // Sometimes used
+        null;
+      
       if (!countryCode) {
-        console.log("[Middleware] IP API missing country/country_code in response");
+        console.log("[Middleware] ❌ IP API missing country data. Available fields:", Object.keys(data).join(", "));
+        console.log("[Middleware] Full response:", JSON.stringify(data));
         return null;
       }
       
