@@ -69,24 +69,31 @@ async function getGeoFromIP(ip: string) {
         return null;
       }
       
-      // Handle both api-io and ipapi.co response formats
-      // Possible field names for country: country_code, country, country_name, cc, country_capital
+      // Try many possible field names for country (different APIs use different names)
       const countryCode = 
-        data.country_code ||    // ipapi.co format
-        data.country ||         // ip-api.io format  
-        data.cc ||              // Sometimes used
+        data.country_code ||    // ipapi.co, ip-api.io
+        data.country ||         // Some APIs
+        data.cc ||              // Shorthand
+        data.iso2 ||            // ISO 3166-1 alpha-2
+        data.countryCode ||     // camelCase variant
         null;
       
       if (!countryCode) {
-        console.log("[Middleware] ❌ IP API missing country data. Available fields:", Object.keys(data).join(", "));
-        console.log("[Middleware] Full response:", JSON.stringify(data));
-        return null;
+        console.log("[Middleware] ❌ IP API missing country code. Available fields:", Object.keys(data).join(", "));
+        // Still return partial data if we got city/region - better than nothing
+        return {
+          country: null,
+          city: data.city || null,
+          region: data.region || data.state || data.province || null,
+          latitude: data.latitude?.toString() || null,
+          longitude: data.longitude?.toString() || null,
+        };
       }
       
       const result = {
         country: countryCode,
         city: data.city || null,
-        region: data.region || data.state || null,
+        region: data.region || data.state || data.province || null,
         latitude: data.latitude?.toString() || null,
         longitude: data.longitude?.toString() || null,
       };
@@ -176,11 +183,16 @@ export async function middleware(request: NextRequest) {
     if (ip && !ip.startsWith("127.") && !ip.startsWith("::1") && ip.trim() !== "") {
       console.log("[Middleware] IP is valid, attempting geo lookup");
       const ipGeo = await getGeoFromIP(ip);
-      if (ipGeo && ipGeo.country) {
-        console.log("[Middleware] ✅ IP geo lookup succeeded:", ipGeo.country);
+      if (ipGeo) {
+        console.log("[Middleware] ✅ IP geo lookup succeeded:", {
+          country: ipGeo.country,
+          city: ipGeo.city,
+          region: ipGeo.region,
+        });
+        // Use the response even if country is missing - at least we get city/region
         geo = ipGeo;
       } else {
-        console.log("[Middleware] ❌ IP geo lookup returned null or no country");
+        console.log("[Middleware] ❌ IP geo lookup failed completely");
         geo = { country: null, region: null, city: null, latitude: null, longitude: null };
       }
     } else {
