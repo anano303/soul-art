@@ -149,6 +149,17 @@ export async function middleware(request: NextRequest) {
   const hasEnPrefix = pathname === "/en" || pathname.startsWith("/en/");
   const shouldBeInEnglish = !preferredLanguage && geo.country && geo.country !== "GE" && !hasEnPrefix;
   
+  if (pathname.includes('/geo-test') || pathname === '/' || pathname === '') {
+    console.log('[Middleware] === REDIRECT DECISION ===');
+    console.log('[Middleware] pathname:', pathname);
+    console.log('[Middleware] preferredLanguage:', preferredLanguage, '→ !preferredLanguage:', !preferredLanguage);
+    console.log('[Middleware] geo.country:', geo.country, '→ truthy:', !!geo.country);
+    console.log('[Middleware] geo.country !== "GE":', geo.country !== "GE");
+    console.log('[Middleware] hasEnPrefix:', hasEnPrefix, '→ !hasEnPrefix:', !hasEnPrefix);
+    console.log('[Middleware] shouldBeInEnglish:', shouldBeInEnglish);
+    console.log('[Middleware] Will redirect:', shouldBeInEnglish && !pathname.startsWith("/api") && !pathname.startsWith("/_next"));
+  }
+  
   if (shouldBeInEnglish && !hasEnPrefix && !pathname.startsWith("/api") && !pathname.startsWith("/_next")) {
     // User is detected outside Georgia with no preferred language → redirect to /en
     console.log('[Middleware] Redirecting to /en for non-Georgian user (country:', geo.country, ')');
