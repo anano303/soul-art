@@ -47,6 +47,12 @@ function getLanguageFromUrl(): Language | null {
 // Helper: read language cookie
 function getLanguageFromCookie(): Language | null {
   if (typeof window === "undefined") return null;
+  // Check for preferred_language cookie first (user's explicit choice)
+  const preferredMatch = document.cookie.match(/(?:^|;\s*)preferred_language=(\w+)/);
+  if (preferredMatch && (preferredMatch[1] === "en" || preferredMatch[1] === "ge")) {
+    return preferredMatch[1] as Language;
+  }
+  // Fall back to general language cookie for compatibility
   const match = document.cookie.match(/(?:^|;\s*)language=(\w+)/);
   if (match && (match[1] === "en" || match[1] === "ge")) {
     return match[1] as Language;
@@ -110,7 +116,9 @@ export function LanguageProvider({ children }: LanguageProviderProps) {
     setLanguageState(detectedLang);
     languageRef.current = detectedLang;
     localStorage.setItem("language", detectedLang);
+    // Set both cookies for middleware and client-side detection
     document.cookie = `language=${detectedLang}; path=/; max-age=${60 * 60 * 24 * 365}; samesite=lax`;
+    document.cookie = `preferred_language=${detectedLang}; path=/; max-age=${60 * 60 * 24 * 365}; samesite=lax`;
 
     // Sync URL with detected language
     syncUrlWithLanguage(detectedLang);
@@ -133,7 +141,10 @@ export function LanguageProvider({ children }: LanguageProviderProps) {
       languageRef.current = lang;
       localStorage.setItem("language", lang);
 
-      // Set cookie for middleware and server-side detection
+      // Set both language and preferred_language cookies
+      // preferred_language = user's explicit choice (1 year)
+      // language = for backward compatibility (1 year)
+      document.cookie = `preferred_language=${lang}; path=/; max-age=${60 * 60 * 24 * 365}; samesite=lax`;
       document.cookie = `language=${lang}; path=/; max-age=${60 * 60 * 24 * 365}; samesite=lax`;
 
       // Update <html lang> attribute for accessibility and SEO
