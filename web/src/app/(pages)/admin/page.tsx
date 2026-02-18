@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useMemo } from "react";
 import Link from "next/link";
 import { useAuth } from "@/hooks/use-auth";
 import { useLanguage } from "@/hooks/LanguageContext";
@@ -90,6 +90,13 @@ export default function AdminDashboard() {
       href: "/admin/settings",
       icon: "⚙️",
       description: t("admin.settingsDesc"),
+      roles: ["admin"], // მთავარი ადმინი
+    },
+    {
+      title: t("admin.geoTest"),
+      href: "/admin/geo-test",
+      icon: "🌍",
+      description: t("admin.geoTestDesc"),
       roles: ["admin"], // მთავარი ადმინი
     },
   ];

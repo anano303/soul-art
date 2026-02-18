@@ -75,6 +75,7 @@ async function bootstrap() {
       'Accept',
       'Cache-Control',
       'X-Requested-With',
+      'X-User-Country',
       'Access-Control-Request-Method',
       'Access-Control-Request-Headers',
     ],

@@ -30,6 +30,7 @@ import { SalesCommissionModule } from '../sales-commission/sales-commission.modu
 import { CampaignsModule } from '../campaigns/campaigns.module';
 import { AuctionModule } from '../auctions/auction.module';
 import { SettingsModule } from '../settings/settings.module';
+import { GeoModule } from '../geo/geo.module';
 
 @Module({
   imports: [
@@ -65,6 +66,7 @@ import { SettingsModule } from '../settings/settings.module';
     CampaignsModule,
     AuctionModule,
     SettingsModule,
+    GeoModule,
   ],
   controllers: [AppController],
   providers: [AppService, GoogleStrategy],
