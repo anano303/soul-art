@@ -17,6 +17,7 @@ import { useLanguage } from "@/hooks/LanguageContext";
 import { trackProductInteraction, trackAddToCart } from "@/lib/ga4-analytics";
 import { optimizeCloudinaryUrl } from "@/lib/utils";
 import { useReferralPricing } from "@/hooks/use-referral-pricing";
+import { useCurrency } from "@/hooks/use-currency";
 
 interface ProductCardProps {
   product: Product;
@@ -34,6 +35,7 @@ export function ProductCard({
   const { addToCart, isItemInCart } = useCart();
   const { toast } = useToast();
   const [isBuying, setIsBuying] = useState(false);
+  const { formatPrice } = useCurrency();
 
   // Check for referral pricing
   const referralPricing = useReferralPricing(product);
@@ -405,7 +407,7 @@ export function ProductCard({
                     className="original-price"
                     style={{ fontSize: "0.75rem" }}
                   >
-                    {referralPricing.originalPrice.toFixed(2)} ₾
+                    {formatPrice(referralPricing.originalPrice, product.convertedPrices)}
                   </span>
                   {isDiscounted &&
                     referralPricing.basePrice !==
@@ -418,11 +420,11 @@ export function ProductCard({
                           opacity: 0.6,
                         }}
                       >
-                        {referralPricing.basePrice.toFixed(2)} ₾
+                        {formatPrice(referralPricing.basePrice, product.convertedDiscountedPrices)}
                       </span>
                     )}
                   <h3 className="product-price referral-final-price">
-                    {referralPricing.referralPrice.toFixed(2)} ₾
+                    {formatPrice(referralPricing.referralPrice, product.convertedDiscountedPrices)}
                   </h3>
                 </div>
               ) : isDiscounted ? (
@@ -431,14 +433,16 @@ export function ProductCard({
                     className="original-price"
                     style={{ fontSize: "0.8rem" }}
                   >
-                    {product.price.toFixed(2)} ₾
+                    {formatPrice(product.price, product.convertedPrices)}
                   </span>
                   <h3 className="product-price discounted-price">
-                    {discountedPrice.toFixed(2)} ₾
+                    {formatPrice(discountedPrice, product.convertedDiscountedPrices)}
                   </h3>
                 </div>
               ) : (
-                <h3 className="product-price">{product.price} ₾</h3>
+                <h3 className="product-price">
+                  {formatPrice(product.price, product.convertedPrices)}
+                </h3>
               )}
             </div>
           </div>

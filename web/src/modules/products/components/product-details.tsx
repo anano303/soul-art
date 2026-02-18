@@ -4,8 +4,6 @@ import { useState, useEffect, useMemo, useRef } from "react";
 import Image from "next/image";
 import { StarIcon, X, Truck, Ruler, Package, Play } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ReviewForm } from "./review-form";
-import { ProductReviews } from "./product-reviews";
 import { useRouter } from "next/navigation";
 import "./productDetails.scss";
 
@@ -30,7 +28,7 @@ import { useCart } from "@/modules/cart/context/cart-context";
 import { useToast } from "@/hooks/use-toast";
 import { trackAddToCart } from "@/lib/ga4-analytics";
 import { useReferralPricing } from "@/hooks/use-referral-pricing";
-import { Tag } from "lucide-react";
+import { useCurrency } from "@/hooks/use-currency";
 
 type MediaItem =
   | {
@@ -177,7 +175,6 @@ export function ProductDetails({ product }: ProductDetailsProps) {
   const [currentProduct, setCurrentProduct] = useState<Product>(product);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [quantity, setQuantity] = useState(1);
-  const [activeTab, setActiveTab] = useState("reviews");
   const [isRoomViewerOpen, setIsRoomViewerOpen] = useState(false);
   const [isFullscreenOpen, setIsFullscreenOpen] = useState(false);
   const [selectedSize, setSelectedSize] = useState<string>("");
@@ -194,6 +191,7 @@ export function ProductDetails({ product }: ProductDetailsProps) {
   const { t, language } = useLanguage();
   const { addToCart, isItemInCart } = useCart();
   const { toast } = useToast();
+  const { formatPrice } = useCurrency();
 
   // Referral pricing hook
   const referralPricing = useReferralPricing(product);
@@ -255,8 +253,6 @@ export function ProductDetails({ product }: ProductDetailsProps) {
     return `https://www.youtube.com/embed/${videoId}?${params.toString()}`;
   }, [videoId]);
 
-  const hasVideo = Boolean(resolvedYoutubeEmbedUrl || product.videoDescription);
-
   const mediaItems = useMemo<MediaItem[]>(() => {
     const items: MediaItem[] = [];
 
@@ -305,10 +301,6 @@ export function ProductDetails({ product }: ProductDetailsProps) {
       return acc;
     }, []);
   }, [mediaItems]);
-
-  const firstImageMediaIndex = useMemo(() => {
-    return imageMediaIndexes.length > 0 ? imageMediaIndexes[0] : -1;
-  }, [imageMediaIndexes]);
 
   const currentMediaItem = mediaItems[currentImageIndex] ?? null;
 
@@ -999,19 +991,19 @@ export function ProductDetails({ product }: ProductDetailsProps) {
                     </span>
                   </div>
                   <div className="current-price referral-price-highlight">
-                    ₾{referralPricing.referralPrice.toFixed(2)}
+                    {formatPrice(referralPricing.referralPrice, product.convertedDiscountedPrices)}
                   </div>
                   <div className="price-comparison">
                     <span className="original-price-strike">
-                      ₾{product.price.toFixed(2)}
+                      {formatPrice(product.price, product.convertedPrices)}
                     </span>
                     {isDiscounted && (
                       <span className="original-price-strike discounted-strike">
-                        ₾
-                        {(
+                        {formatPrice(
                           product.price *
-                          (1 - (product.discountPercentage || 0) / 100)
-                        ).toFixed(2)}
+                          (1 - (product.discountPercentage || 0) / 100),
+                          product.convertedDiscountedPrices
+                        )}
                       </span>
                     )}
                     <span className="discount-badge referral-discount-badge">
@@ -1019,28 +1011,32 @@ export function ProductDetails({ product }: ProductDetailsProps) {
                     </span>
                   </div>
                   <div className="savings-text">
-                    {language === "en" ? "You save" : "დაზოგავ"} ₾
-                    {(product.price - referralPricing.referralPrice).toFixed(2)}
+                    {language === "en" ? "You save" : "დაზოგავ"} {formatPrice(
+                      product.price - referralPricing.referralPrice,
+                      product.convertedPrices
+                    )}
                   </div>
                 </div>
               ) : isDiscounted ? (
                 <div className="price-with-discount">
-                  <div className="current-price">₾{finalPrice.toFixed(2)}</div>
+                  <div className="current-price">{formatPrice(finalPrice, product.convertedDiscountedPrices)}</div>
                   <div className="price-comparison">
                     <span className="original-price-strike">
-                      ₾{product.price.toFixed(2)}
+                      {formatPrice(product.price, product.convertedPrices)}
                     </span>
                     <span className="discount-badge">
                       -{product.discountPercentage}%
                     </span>
                   </div>
                   <div className="savings-text">
-                    {language === "en" ? "You save" : "დაზოგავ"} ₾
-                    {(product.price - finalPrice).toFixed(2)}
+                    {language === "en" ? "You save" : "დაზოგავ"} {formatPrice(
+                      product.price - finalPrice,
+                      product.convertedPrices
+                    )}
                   </div>
                 </div>
               ) : (
-                <div className="current-price">₾{product.price.toFixed(2)}</div>
+                <div className="current-price">{formatPrice(product.price, product.convertedPrices)}</div>
               )}
             </div>
 

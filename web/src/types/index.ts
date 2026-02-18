@@ -191,6 +191,17 @@ export interface Product {
   colors?: string[];
   categoryStructure?: CategoryStructure;
   price: number;
+  // Multi-currency pricing (added by backend)
+  convertedPrices?: {
+    USD?: number;
+    EUR?: number;
+    GEL?: number;
+  };
+  convertedDiscountedPrices?: {
+    USD?: number;
+    EUR?: number;
+    GEL?: number;
+  };
   countInStock: number;
   rating: number;
   numReviews: number;

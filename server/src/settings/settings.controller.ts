@@ -34,6 +34,25 @@ export class SettingsController {
     return { rate: newRate, success: true };
   }
 
+  // Public endpoint - get foreign payment fee
+  @Get('foreign-payment-fee')
+  async getForeignPaymentFee() {
+    const fee = await this.settingsService.getForeignPaymentFee();
+    return { fee };
+  }
+
+  // Admin only - update foreign payment fee
+  @Put('foreign-payment-fee')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.Admin)
+  async setForeignPaymentFee(@Body('fee') fee: number) {
+    if (fee == null || fee < 0) {
+      return { error: 'Invalid fee percentage', success: false };
+    }
+    const newFee = await this.settingsService.setForeignPaymentFee(fee);
+    return { fee: newFee, success: true };
+  }
+
   // Admin only - get all settings
   @Get()
   @UseGuards(JwtAuthGuard, RolesGuard)

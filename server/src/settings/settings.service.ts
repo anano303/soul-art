@@ -12,6 +12,8 @@ export class SettingsService {
 
   // Default USD rate (1 USD = 2.5 GEL)
   private readonly DEFAULT_USD_RATE = 2.5;
+  // Default foreign payment fee (20%)
+  private readonly DEFAULT_FOREIGN_FEE = 20;
 
   async getUsdRate(): Promise<number> {
     const setting = await this.settingsModel.findOne({ key: 'usd_rate' });
@@ -29,6 +31,24 @@ export class SettingsService {
       { upsert: true, new: true },
     );
     return rate;
+  }
+
+  async getForeignPaymentFee(): Promise<number> {
+    const setting = await this.settingsModel.findOne({ key: 'foreign_payment_fee' });
+    return setting?.value ?? this.DEFAULT_FOREIGN_FEE;
+  }
+
+  async setForeignPaymentFee(feePercent: number): Promise<number> {
+    await this.settingsModel.findOneAndUpdate(
+      { key: 'foreign_payment_fee' },
+      { 
+        key: 'foreign_payment_fee',
+        value: feePercent,
+        description: 'Additional fee percentage for foreign currency payments (e.g., 20 = +20%)'
+      },
+      { upsert: true, new: true },
+    );
+    return feePercent;
   }
 
   async getSetting(key: string): Promise<any> {

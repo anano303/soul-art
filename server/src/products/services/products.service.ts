@@ -40,6 +40,8 @@ import {
   PortfolioPost,
   PortfolioPostDocument,
 } from '@/users/schemas/portfolio-post.schema';
+import { ExchangeRateService } from '@/exchange-rate/exchange-rate.service';
+import { SettingsService } from '@/settings/settings.service';
 
 interface FindManyParams {
   keyword?: string;
@@ -77,6 +79,8 @@ export class ProductsService {
     private portfolioPostModel: Model<PortfolioPostDocument>,
     @Inject(forwardRef(() => UsersService))
     private usersService: UsersService,
+    private exchangeRateService: ExchangeRateService,
+    private settingsService: SettingsService,
     @Optional()
     @Inject(forwardRef(() => 'ReferralsService'))
     private referralsService?: any, // ტიპი ასე დავტოვოთ circular dependency-ის გამო
@@ -116,6 +120,65 @@ export class ProductsService {
     }
 
     return null;
+  }
+
+  /**
+   * Enrich product(s) with multi-currency pricing
+   * Adds convertedPrices object with USD and EUR prices
+   */
+  private async enrichWithCurrencyPricing(
+    product: ProductDocument | ProductDocument[],
+  ): Promise<void> {
+    try {
+      // Get foreign payment fee from settings
+      const foreignFee = await this.settingsService.getForeignPaymentFee();
+
+      // Get latest exchange rates
+      const rates = await this.exchangeRateService.getLatestRates();
+
+      const enrichProduct = (p: any) => {
+        const basePrice = p.price || 0;
+
+        // Calculate converted prices
+        const usdPrice = this.exchangeRateService.convertPrice(
+          basePrice,
+          'USD',
+          foreignFee,
+        );
+        const eurPrice = this.exchangeRateService.convertPrice(
+          basePrice,
+          'EUR',
+          foreignFee,
+        );
+
+        // Add to product object
+        p.convertedPrices = {
+          USD: Math.ceil(basePrice * (1 + foreignFee / 100) * rates.USD),
+          EUR: Math.ceil(basePrice * (1 + foreignFee / 100) * rates.EUR),
+          GEL: basePrice,
+        };
+
+        // Also handle discounted prices if available
+        if (p.discountPercentage && p.discountPercentage > 0) {
+          const discountedGEL =
+            basePrice - (basePrice * p.discountPercentage) / 100;
+          p.convertedDiscountedPrices = {
+            USD: Math.ceil(discountedGEL * (1 + foreignFee / 100) * rates.USD),
+            EUR: Math.ceil(discountedGEL * (1 + foreignFee / 100) * rates.EUR),
+            GEL: discountedGEL,
+          };
+        }
+      };
+
+      if (Array.isArray(product)) {
+        product.forEach(enrichProduct);
+      } else {
+        enrichProduct(product);
+      }
+    } catch (error) {
+      // If enrichment fails, log but don't throw - products should still work without this
+      console.error('Failed to enrich products with currency pricing:', error);
+    }
   }
 
   private async buildProductCaption(
@@ -659,6 +722,9 @@ export class ProductsService {
 
     const products = await productQuery.exec();
 
+    // Enrich with multi-currency pricing
+    await this.enrichWithCurrencyPricing(products);
+
     // Return in consistent format that matches PaginatedResponse
     return {
       items: products,
@@ -732,6 +798,9 @@ export class ProductsService {
       };
     }
 
+    // Enrich with multi-currency pricing
+    await this.enrichWithCurrencyPricing(product);
+
     return product;
   }
 
@@ -750,6 +819,9 @@ export class ProductsService {
 
     if (!product) throw new NotFoundException('No product with given ID.');
 
+    // Enrich with multi-currency pricing
+    await this.enrichWithCurrencyPricing(product);
+
     return product;
   }
 
@@ -764,16 +836,21 @@ export class ProductsService {
     );
   }
 
-  findByIds(productIds: string[]): Promise<ProductDocument[]> {
+  async findByIds(productIds: string[]): Promise<ProductDocument[]> {
     if (!productIds || productIds.length === 0) {
       return Promise.resolve([]);
     }
 
-    return this.productModel
+    const products = await this.productModel
       .find({ _id: { $in: productIds } })
       .populate('mainCategory')
       .populate('subCategory')
       .exec();
+
+    // Enrich with multi-currency pricing
+    await this.enrichWithCurrencyPricing(products);
+
+    return products;
   }
 
   async createMany(products: Partial<Product>[]): Promise<ProductDocument[]> {

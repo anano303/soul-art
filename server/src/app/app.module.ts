@@ -31,6 +31,7 @@ import { CampaignsModule } from '../campaigns/campaigns.module';
 import { AuctionModule } from '../auctions/auction.module';
 import { SettingsModule } from '../settings/settings.module';
 import { GeoModule } from '../geo/geo.module';
+import { ExchangeRateModule } from '../exchange-rate/exchange-rate.module';
 
 @Module({
   imports: [
@@ -67,6 +68,7 @@ import { GeoModule } from '../geo/geo.module';
     AuctionModule,
     SettingsModule,
     GeoModule,
+    ExchangeRateModule,
   ],
   controllers: [AppController],
   providers: [AppService, GoogleStrategy],

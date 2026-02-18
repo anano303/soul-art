@@ -18,6 +18,8 @@ import { TikTokPostingService } from './services/tiktok-posting.service';
 import { PushNotificationModule } from '@/push/push-notification.module';
 import { YoutubeModule } from '@/youtube/youtube.module';
 import { ProductYoutubeService } from './services/product-youtube.service';
+import { ExchangeRateModule } from '@/exchange-rate/exchange-rate.module';
+import { SettingsModule } from '@/settings/settings.module';
 
 // Add a provider to manually drop the problematic index on module initialization
 export class IndexCleanupService implements OnModuleInit {
@@ -114,6 +116,8 @@ export class IndexCleanupService implements OnModuleInit {
     forwardRef(() => ReferralsModule), // Add ReferralsModule
     PushNotificationModule,
     YoutubeModule,
+    ExchangeRateModule,
+    SettingsModule,
   ],
   providers: [
     ProductsService,
