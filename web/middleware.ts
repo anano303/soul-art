@@ -163,16 +163,19 @@ export async function middleware(request: NextRequest) {
     longitude: null,
   };
 
-  // Check if we already have geo cookies - if so, reuse them instead of calling API again
-  // This prevents overwriting correct data when the API fails on subsequent requests
+  // Check if we already have REAL (detected) geo cookies - if so, skip API call.
+  // If cookies are defaults (geo_source=default) or missing, always retry the API.
   const existingCountry = request.cookies.get("user_country")?.value;
   const existingCurrency = request.cookies.get("user_currency")?.value;
   const existingCity = request.cookies.get("user_city")?.value;
   const existingRegion = request.cookies.get("user_region")?.value;
+  const geoSource = request.cookies.get("geo_source")?.value; // "detected" or "default"
   
-  if (existingCountry && existingCurrency) {
-    // Reuse cached geo data from cookies
-    console.log("[Middleware] ♻️ Reusing cached geo from cookies - Country:", existingCountry, "Currency:", existingCurrency);
+  const hasRealGeo = existingCountry && existingCurrency && geoSource === "detected";
+  
+  if (hasRealGeo) {
+    // Reuse cached geo data - this was a real detection, no need to re-check
+    console.log("[Middleware] ♻️ Reusing DETECTED geo from cookies - Country:", existingCountry, "Currency:", existingCurrency);
     geo = {
       country: existingCountry,
       region: existingRegion || null,
@@ -181,6 +184,9 @@ export async function middleware(request: NextRequest) {
       longitude: null,
     };
   } else {
+    if (geoSource === "default") {
+      console.log("[Middleware] 🔄 Previous detection was default/fallback, retrying API...");
+    }
     // Get IP address - Vercel Edge provides request.ip in production
     const vercelIp = (request as NextRequest & { ip?: string }).ip;
     const forwardedFor = request.headers.get("x-forwarded-for");
@@ -334,14 +340,16 @@ export async function middleware(request: NextRequest) {
   }
 
   // 🍪 Save geo data to cookies for client-side access
-  // Only set cookies if we did a fresh geo lookup (not when reusing cached cookies)
-  const needsCookieUpdate = !existingCountry || !existingCurrency;
+  // Only write cookies if we did a fresh geo lookup (not when reusing cached detected cookies)
+  const needsCookieUpdate = !hasRealGeo;
   
   if (needsCookieUpdate) {
     const countryToSet = geo.country || "GE"; // Default to Georgia only if detection failed
     const currencyToSet = geo.country ? detectedCurrency : "GEL"; // Default to GEL only if detection failed
+    // Track whether this was a real detection or a fallback default
+    const sourceToSet = geo.country ? "detected" : "default";
     
-    console.log("[Middleware] 🍪 Setting NEW cookies - Country:", countryToSet, "(detected:", geo.country, "), Currency:", currencyToSet);
+    console.log("[Middleware] 🍪 Setting cookies - Country:", countryToSet, "(detected:", geo.country, "), Currency:", currencyToSet, "Source:", sourceToSet);
     
     response.cookies.set("user_country", countryToSet, {
       maxAge: 60 * 60 * 24 * 7, // 7 days
@@ -379,6 +387,15 @@ export async function middleware(request: NextRequest) {
       });
     }
 
+    // Track whether this was a real API detection or a fallback
+    response.cookies.set("geo_source", sourceToSet, {
+      maxAge: 60 * 60 * 24 * 7,
+      path: "/",
+      httpOnly: false,
+      sameSite: "lax",
+      secure: process.env.NODE_ENV === "production",
+    });
+
     // Save geo metadata for debugging
     response.cookies.set(
       "geo_detected_at",
@@ -392,7 +409,7 @@ export async function middleware(request: NextRequest) {
       }
     );
   } else {
-    console.log("[Middleware] ♻️ Skipping cookie write - using cached values");
+    console.log("[Middleware] ♻️ Skipping cookie write - using cached detected values");
   }
 
   // 🌐 Set preferred language cookie (only if not already set by user and geo was detected)
