@@ -41,7 +41,7 @@ export function AddressSelector({ onAddressSelected }: AddressSelectorProps) {
     address: "",
     city: "",
     postalCode: "",
-    country: "Georgia",
+    country: "GE",
     phoneNumber: "",
   });
 
@@ -139,7 +139,7 @@ export function AddressSelector({ onAddressSelected }: AddressSelectorProps) {
       address: "",
       city: "",
       postalCode: "",
-      country: "Georgia",
+      country: "GE",
       phoneNumber: user?.phoneNumber || "",
     });
   };
@@ -172,7 +172,7 @@ export function AddressSelector({ onAddressSelected }: AddressSelectorProps) {
       address: "",
       city: "",
       postalCode: "",
-      country: "Georgia",
+      country: "GE",
       phoneNumber: guestInfo?.phoneNumber || user?.phoneNumber || "",
     });
     setSaveNewAddress(false);
@@ -270,7 +270,7 @@ export function AddressSelector({ onAddressSelected }: AddressSelectorProps) {
                         disabled={loadingCountries}
                       >
                         {shippingCountries.map((country) => (
-                          <option key={country.countryCode} value={country.countryName}>
+                          <option key={country.countryCode} value={country.countryCode}>
                             {country.countryName}
                           </option>
                         ))}
@@ -341,7 +341,9 @@ export function AddressSelector({ onAddressSelected }: AddressSelectorProps) {
                     <p>
                       {address.city}, {address.postalCode}
                     </p>
-                    <p>{address.country === 'Georgia' ? t("addresses.form.countryGeorgia") : address.country}</p>
+                    <p>
+                      {shippingCountries.find(c => c.countryCode === address.country)?.countryName || address.country}
+                    </p>
                     <p className="phone">{address.phoneNumber}</p>
                   </div>
                 </>
@@ -469,7 +471,7 @@ export function AddressSelector({ onAddressSelected }: AddressSelectorProps) {
                   disabled={loadingCountries}
                 >
                   {shippingCountries.map((country) => (
-                    <option key={country.countryCode} value={country.countryName}>
+                    <option key={country.countryCode} value={country.countryCode}>
                       {country.countryName}
                     </option>
                   ))}

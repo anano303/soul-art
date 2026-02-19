@@ -30,6 +30,7 @@ import { CartItem } from "@/types/cart";
 import { PayPalButton } from "@/modules/orders/components/paypal-button";
 import { calculateShipping, fetchShippingRates } from "@/lib/shipping";
 import { useCurrency } from "@/hooks/use-currency";
+import { useShippingRates } from "@/lib/use-shipping-rates";
 
 type CheckoutStep = "auth" | "guest" | "shipping" | "payment" | "review";
 
@@ -55,6 +56,7 @@ export function StreamlinedCheckout() {
   const searchParams = useSearchParams();
   const { toast } = useToast();
   const { currency } = useCurrency();
+  const { rates: shippingCountries } = useShippingRates();
 
   // Auction mode state
   const [isAuctionMode, setIsAuctionMode] = useState(false);
@@ -1041,7 +1043,8 @@ export function StreamlinedCheckout() {
                     <h3>{t("checkout.shippingAddress")}</h3>
                     <p>
                       {shippingAddress.address}, {shippingAddress.city},{" "}
-                      {shippingAddress.postalCode}, {shippingAddress.country}
+                      {shippingAddress.postalCode},{" "}
+                      {shippingCountries.find(c => c.countryCode === shippingAddress.country)?.countryName || shippingAddress.country}
                     </p>
                     <p>
                       <strong>{t("auth.phoneNumber")}:</strong>{" "}
@@ -1451,7 +1454,7 @@ export function StreamlinedCheckout() {
                         address: shippingAddress.address,
                         city: shippingAddress.city,
                         postalCode: shippingAddress.postalCode || "",
-                        country: shippingAddress.country || "საქართველო",
+                        country: shippingAddress.country || "GE",
                         fullName: user?.name || guestInfo?.fullName || "",
                         phone: shippingAddress.phoneNumber || "",
                       }

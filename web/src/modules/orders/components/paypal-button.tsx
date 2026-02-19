@@ -104,10 +104,7 @@ function PayPalButtonWrapper({
           address_line_1: shippingAddress.address,
           admin_area_2: shippingAddress.city,
           postal_code: shippingAddress.postalCode || "0000",
-          country_code:
-            shippingAddress.country === "საქართველო"
-              ? "GE"
-              : shippingAddress.country.substring(0, 2).toUpperCase(),
+          country_code: shippingAddress.country.toUpperCase(),
         },
       };
     }
