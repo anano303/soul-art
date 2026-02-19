@@ -30,6 +30,7 @@ import { CartItem } from "@/types/cart";
 import { PayPalButton } from "@/modules/orders/components/paypal-button";
 import { useUsdRate } from "@/hooks/useUsdRate";
 import { calculateShipping } from "@/lib/shipping";
+import { useCurrency } from "@/hooks/use-currency";
 
 type CheckoutStep = "auth" | "guest" | "shipping" | "payment" | "review";
 
@@ -55,6 +56,10 @@ export function StreamlinedCheckout() {
   const searchParams = useSearchParams();
   const { toast } = useToast();
   const { usdRate } = useUsdRate();
+  const { currency } = useCurrency();
+
+  // Determine if this is a foreign (non-Georgian) checkout
+  const isForeignCheckout = currency !== "GEL";
 
   // Auction mode state
   const [isAuctionMode, setIsAuctionMode] = useState(false);
@@ -85,6 +90,9 @@ export function StreamlinedCheckout() {
     {},
   );
   const [showPayPalButtons, setShowPayPalButtons] = useState(false);
+  const [exchangeRates, setExchangeRates] = useState<{ USD: number; EUR: number } | null>(null);
+  const [foreignShippingFee, setForeignShippingFee] = useState<number>(0);
+  const [foreignPaymentFee, setForeignPaymentFee] = useState<number>(20); // Default 20%
 
   // Check for auction checkout mode on mount
   useEffect(() => {
@@ -105,6 +113,39 @@ export function StreamlinedCheckout() {
       }
     }
   }, [searchParams]);
+
+  // Fetch exchange rates and foreign fees on mount
+  useEffect(() => {
+    const fetchExchangeData = async () => {
+      try {
+        const [ratesRes, shippingRes, feeRes] = await Promise.all([
+          fetch(`${process.env.NEXT_PUBLIC_API_URL}/exchange-rate/latest`),
+          fetch(`${process.env.NEXT_PUBLIC_API_URL}/settings/foreign-shipping-fee`),
+          fetch(`${process.env.NEXT_PUBLIC_API_URL}/settings/foreign-payment-fee`),
+        ]);
+
+        if (ratesRes.ok) {
+          const data = await ratesRes.json();
+          setExchangeRates(data.rates);
+        }
+
+        if (shippingRes.ok) {
+          const data = await shippingRes.json();
+          setForeignShippingFee(data.fee || 10);
+        }
+
+        if (feeRes.ok) {
+          const data = await feeRes.json();
+          setForeignPaymentFee(data.fee || 20);
+        }
+      } catch (error) {
+        console.error("Failed to fetch exchange data:", error);
+        // Use fallback values already set in state
+      }
+    };
+
+    fetchExchangeData();
+  }, []);
 
   // Fetch original prices from products API (skip for auction mode)
   useEffect(() => {
@@ -132,26 +173,62 @@ export function StreamlinedCheckout() {
   // Get checkout items - either auction item or cart items
   const checkoutItems = isAuctionMode && auctionItem ? [auctionItem] : items;
 
-  // Calculate totals
+  /**
+   * Convert GEL price to user's currency
+   * Applies foreign payment fee for non-GEL currencies
+   */
+  const convertPrice = (gelPrice: number): number => {
+    if (currency === "GEL" || !exchangeRates) {
+      return gelPrice;
+    }
+
+    // Apply foreign payment fee: price * (1 + fee%)
+    const priceWithFee = gelPrice * (1 + foreignPaymentFee / 100);
+
+    // Convert to foreign currency
+    const rate = exchangeRates[currency];
+    if (!rate) return gelPrice;
+
+    return Math.ceil(priceWithFee * rate);
+  };
+
+  // Calculate totals in user's currency
   const itemsPrice = checkoutItems.reduce(
-    (acc, item) => acc + item.price * item.qty,
+    (acc, item) => acc + convertPrice(item.price) * item.qty,
     0,
   );
 
-  // Delivery cost based on country and city
+  // Delivery cost based on country and city (in GEL first)
   const shippingCountry = shippingAddress?.country || "GE";
-  const shippingPrice = shippingAddress
+  const baseShippingGel = shippingAddress
     ? calculateShipping(shippingCountry, shippingAddress?.city)
     : 0;
+  
+  // Add foreign shipping fee if applicable (in GEL)
+  const totalShippingGel = isForeignCheckout 
+   ? baseShippingGel + foreignShippingFee
+    : baseShippingGel;
+  
+  // Convert shipping to user's currency
+  const shippingPrice = convertPrice(totalShippingGel);
 
-  // საკომისიო მოხსნილია - რეალური ფასი ყველგან
+  // Total price in user's currency
   const totalPrice = itemsPrice + shippingPrice;
   const totalUnits = checkoutItems.reduce((acc, item) => acc + item.qty, 0);
 
-  // Calculate total original price and savings
+  // Currency symbol
+  const currencySymbol = currency === "USD" ? "$" : currency === "EUR" ? "€" : "₾";
+  
+  // Format price with currency symbol
+  const formatPrice = (amount: number): string => {
+    const formatted = amount.toFixed(2);
+    return currency === "USD" ? `${currencySymbol}${formatted}` : `${formatted} ${currencySymbol}`;
+  };
+
+  // Calculate total original price and savings (in user's currency)
   const totalOriginalPrice = items.reduce(
     (acc, item) =>
-      acc + (originalPrices[item.productId] || item.price) * item.qty,
+      acc + convertPrice(originalPrices[item.productId] || item.price) * item.qty,
     0,
   );
   const totalSavings = totalOriginalPrice - itemsPrice;
@@ -1033,8 +1110,8 @@ export function StreamlinedCheckout() {
                                 {displayName}
                               </Link>
                               <p className="item-price">
-                                {item.qty} x {item.price} ₾ ={" "}
-                                {item.qty * item.price} ₾
+                                {item.qty} x {formatPrice(convertPrice(item.price))} ={" "}
+                                {formatPrice(convertPrice(item.price) * item.qty)}
                               </p>
                             </div>
                           </div>
@@ -1078,11 +1155,11 @@ export function StreamlinedCheckout() {
                     <div className="summary-item-details">
                       <p className="summary-item-name">{displayName}</p>
                       <p className="summary-item-qty">
-                        {item.qty} x {item.price} ₾
+                        {item.qty} x {formatPrice(convertPrice(item.price))}
                       </p>
                     </div>
                     <p className="summary-item-total">
-                      {(item.qty * item.price).toFixed(2)} ₾
+                      {formatPrice(convertPrice(item.price) * item.qty)}
                     </p>
                   </div>
                 );
@@ -1099,20 +1176,26 @@ export function StreamlinedCheckout() {
             <div className="summary-totals">
               <div className="summary-row">
                 <span>{t("cart.items")}</span>
-                <span>{itemsPrice.toFixed(2)} ₾</span>
+                <span>{formatPrice(itemsPrice)}</span>
               </div>
               <div className="summary-row">
                 <span>{t("cart.delivery")}</span>
                 <span>
                   {shippingPrice === 0
                     ? t("cart.free")
-                    : `${Number(shippingPrice).toFixed(2)} ₾`}
+                    : formatPrice(shippingPrice)}
                 </span>
               </div>
-              {/* თბილისში უფასო მიწოდების შეტყობინება */}
-              {shippingPrice > 0 && shippingAddress && (
+              {/* თბილისში უფასო მიწოდების შეტყობინება - only for Georgian customers */}
+              {shippingPrice > 0 && shippingAddress && currency === "GEL" && (
                 <div className="tbilisi-free-note">
                   {t("cart.tbilisiFreeNote")}
+                </div>
+              )}
+              {/* Foreign shipping fee note */}
+              {isForeignCheckout && foreignShippingFee > 0 && (
+                <div className="tbilisi-free-note">
+                  International shipping: +{formatPrice(convertPrice(foreignShippingFee))} ({foreignShippingFee} GEL)
                 </div>
               )}
               {/* საკომისიო დაკომენტარებულია - ბანკის გვერდზე ნახავს
@@ -1126,7 +1209,7 @@ export function StreamlinedCheckout() {
 
               <div className="summary-row summary-total">
                 <span>{t("cart.totalCost")}</span>
-                <span className="total-amount">{totalPrice.toFixed(2)} ₾</span>
+                <span className="total-amount">{formatPrice(totalPrice)}</span>
               </div>
 
               {/* აუქციონისთვის savings არ ჩანდეს */}
@@ -1134,7 +1217,7 @@ export function StreamlinedCheckout() {
                 <div className="savings-banner">
                   <span className="savings-icon">✓</span>
                   <span className="savings-text">
-                    დაზოგავ: <strong>{totalSavings.toFixed(2)} ₾</strong>
+                    {currency === "GEL" ? "დაზოგავ" : "You save"}: <strong>{formatPrice(totalSavings)}</strong>
                   </span>
                 </div>
               )}
@@ -1159,86 +1242,89 @@ export function StreamlinedCheckout() {
                   {t("payment.paymentMethod")}
                 </h4>
 
-                {/* BOG Payment Option */}
-                <button
-                  onClick={() => {
-                    setPaymentMethod("BOG");
-                    handlePlaceOrder("BOG");
-                  }}
-                  disabled={
-                    isValidating ||
-                    unavailableItems.length > 0 ||
-                    isProcessingPayment
-                  }
-                  className={`btn-bog-payment sidebar-action-btn mobile-place-order ${paymentMethod === "BOG" ? "selected" : ""}`}
-                >
-                  <div className="bog-payment-content">
-                    <div className="card-icon">
-                      <svg
-                        width="32"
-                        height="24"
-                        viewBox="0 0 32 24"
-                        fill="none"
-                      >
-                        <rect
-                          x="1"
-                          y="1"
-                          width="30"
-                          height="22"
-                          rx="3"
-                          stroke="white"
-                          strokeWidth="2"
-                          fill="rgba(255,255,255,0.2)"
-                        />
-                        <line
-                          x1="1"
-                          y1="7"
-                          x2="31"
-                          y2="7"
-                          stroke="white"
-                          strokeWidth="2"
-                        />
-                        <rect
-                          x="4"
-                          y="14"
-                          width="10"
-                          height="4"
-                          rx="1"
-                          fill="white"
-                        />
-                      </svg>
+                {/* BOG Payment Option - Georgian customers only */}
+                {currency === "GEL" && (
+                  <button
+                    onClick={() => {
+                      setPaymentMethod("BOG");
+                      handlePlaceOrder("BOG");
+                    }}
+                    disabled={
+                      isValidating ||
+                      unavailableItems.length > 0 ||
+                      isProcessingPayment
+                    }
+                    className={`btn-bog-payment sidebar-action-btn mobile-place-order ${paymentMethod === "BOG" ? "selected" : ""}`}
+                  >
+                    <div className="bog-payment-content">
+                      <div className="card-icon">
+                        <svg
+                          width="32"
+                          height="24"
+                          viewBox="0 0 32 24"
+                          fill="none"
+                        >
+                          <rect
+                            x="1"
+                            y="1"
+                            width="30"
+                            height="22"
+                            rx="3"
+                            stroke="white"
+                            strokeWidth="2"
+                            fill="rgba(255,255,255,0.2)"
+                          />
+                          <line
+                            x1="1"
+                            y1="7"
+                            x2="31"
+                            y2="7"
+                            stroke="white"
+                            strokeWidth="2"
+                          />
+                          <rect
+                            x="4"
+                            y="14"
+                            width="10"
+                            height="4"
+                            rx="1"
+                            fill="white"
+                          />
+                        </svg>
+                      </div>
+                      <div className="bog-payment-text">
+                        <span className="bog-payment-title">
+                          {t("payment.cardPayment")}
+                        </span>
+                        <span className="bog-payment-subtitle">
+                          {t("payment.allCardsAccepted")}
+                        </span>
+                      </div>
+                      {(isValidating || isProcessingPayment) &&
+                        paymentMethod === "BOG" && <div className="spinner" />}
                     </div>
-                    <div className="bog-payment-text">
-                      <span className="bog-payment-title">
-                        {t("payment.cardPayment")}
+                    {!isValidating && !isProcessingPayment && (
+                      <span className="bog-payment-amount">
+                        {formatPrice(totalPrice)}
                       </span>
-                      <span className="bog-payment-subtitle">
-                        {t("payment.allCardsAccepted")}
-                      </span>
-                    </div>
-                    {(isValidating || isProcessingPayment) &&
-                      paymentMethod === "BOG" && <div className="spinner" />}
-                  </div>
-                  {!isValidating && !isProcessingPayment && (
-                    <span className="bog-payment-amount">
-                      {totalPrice.toFixed(2)} ₾
-                    </span>
-                  )}
-                </button>
+                    )}
+                  </button>
+                )}
 
-                {/* PayPal Payment Option */}
-                <button
-                  onClick={() => {
-                    setPaymentMethod("PAYPAL");
-                    handlePlaceOrder("PAYPAL");
-                  }}
-                  disabled={
-                    isValidating ||
-                    unavailableItems.length > 0 ||
-                    isProcessingPayment
-                  }
-                  className={`btn-paypal-payment sidebar-action-btn ${paymentMethod === "PAYPAL" ? "selected" : ""}`}
-                >
+                {/* PayPal Payment Option - Foreign customers only */}
+                {currency !== "GEL" && (
+                  <button
+                    onClick={() => {
+                      setPaymentMethod("PAYPAL");
+                      handlePlaceOrder("PAYPAL");
+                    }}
+                    disabled={
+                      isValidating ||
+                      unavailableItems.length > 0 ||
+                      isProcessingPayment
+                    }
+                    className={`btn-paypal-payment sidebar-action-btn ${paymentMethod === "PAYPAL" ? "selected" : ""}`}
+                  >
                   <div className="paypal-payment-content">
                     <div className="paypal-icon">
                       <svg
@@ -1284,10 +1370,11 @@ export function StreamlinedCheckout() {
                   </div>
                   {!isValidating && !isProcessingPayment && (
                     <span className="bog-payment-amount">
-                      ${(totalPrice / usdRate).toFixed(2)}
+                      {formatPrice(totalPrice)}
                     </span>
                   )}
                 </button>
+                )}
               </div>
             )}
           </div>

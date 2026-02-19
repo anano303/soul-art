@@ -279,11 +279,12 @@ export async function middleware(request: NextRequest) {
   }
 
   // Currency mapping based on country
+  // GEL: Georgia only
+  // EUR: Eurozone + European countries that commonly prefer EUR (non-eurozone nearby EU countries)
+  // USD: Everyone else
   const currencyMap: Record<string, string> = {
     GE: "GEL", // Georgia
-    US: "USD", // United States
-    GB: "GBP", // United Kingdom
-    EU: "EUR", // Eurozone (generic)
+    // Eurozone countries
     DE: "EUR", // Germany
     FR: "EUR", // France
     IT: "EUR", // Italy
@@ -294,29 +295,32 @@ export async function middleware(request: NextRequest) {
     IE: "EUR", // Ireland
     PT: "EUR", // Portugal
     GR: "EUR", // Greece
-    RU: "RUB", // Russia
-    TR: "TRY", // Turkey
-    AM: "AMD", // Armenia
-    AZ: "AZN", // Azerbaijan
-    UA: "UAH", // Ukraine
-    KZ: "KZT", // Kazakhstan
-    BY: "BYN", // Belarus
-    UZ: "UZS", // Uzbekistan
-    CN: "CNY", // China
-    JP: "JPY", // Japan
-    IN: "INR", // India
-    AU: "AUD", // Australia
-    CA: "CAD", // Canada
-    CH: "CHF", // Switzerland
-    SE: "SEK", // Sweden
-    NO: "NOK", // Norway
-    DK: "DKK", // Denmark
-    PL: "PLN", // Poland
-    CZ: "CZK", // Czech Republic
+    FI: "EUR", // Finland
+    EE: "EUR", // Estonia
+    LV: "EUR", // Latvia
+    LT: "EUR", // Lithuania
+    SK: "EUR", // Slovakia
+    SI: "EUR", // Slovenia
+    CY: "EUR", // Cyprus
+   MT: "EUR", // Malta
+    LU: "EUR", // Luxembourg
+    // Non-eurozone European countries that commonly prefer EUR
+    PL: "EUR", // Poland
+    CZ: "EUR", // Czech Republic 
+    HU: "EUR", // Hungary
+    RO: "EUR", // Romania
+    BG: "EUR", // Bulgaria
+    HR: "EUR", // Croatia (uses EUR now)
+    DK: "EUR", // Denmark (close to eurozone, often uses EUR)
+    SE: "EUR", // Sweden (close to eurozone, often uses EUR)
+    NO: "EUR", // Norway (close to eurozone, often uses EUR)
+    CH: "EUR", // Switzerland (surrounded by eurozone)
+    GB: "EUR", // UK (geographically European, often prefer EUR in international commerce)
+    // All other countries default to USD via fallback
   };
 
   const detectedCurrency = geo.country
-    ? currencyMap[geo.country] || "GEL"
+    ? currencyMap[geo.country] || "USD" // Default to USD for any country not in map
     : "GEL";
 
   // Sales Manager referral tracking - save ref code to cookie (7 days)

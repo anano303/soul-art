@@ -12,6 +12,7 @@ interface Setting {
 
 export default function SettingsPage() {
   const [foreignFee, setForeignFee] = useState<number>(20);
+  const [foreignShipping, setForeignShipping] = useState<number>(10);
   const [usdRate, setUsdRate] = useState<number>(2.5);
   const [exchangeRates, setExchangeRates] = useState<{ USD: number; EUR: number } | null>(null);
   const [loading, setLoading] = useState(true);
@@ -28,8 +29,9 @@ export default function SettingsPage() {
       setLoading(true);
 
       // Load all settings
-      const [feeRes, usdRes, ratesRes, allRes] = await Promise.all([
+      const [feeRes, shippingRes, usdRes, ratesRes, allRes] = await Promise.all([
         fetchWithAuth("/settings/foreign-payment-fee"),
+        fetchWithAuth("/settings/foreign-shipping-fee"),
         fetchWithAuth("/settings/usd-rate"),
         fetch(`${process.env.NEXT_PUBLIC_API_URL}/exchange-rate/latest`),
         fetchWithAuth("/settings"),
@@ -38,6 +40,11 @@ export default function SettingsPage() {
       if (feeRes.ok) {
         const data = await feeRes.json();
         setForeignFee(data.fee);
+      }
+
+      if (shippingRes.ok) {
+        const data = await shippingRes.json();
+        setForeignShipping(data.fee);
       }
 
       if (usdRes.ok) {
@@ -83,6 +90,32 @@ export default function SettingsPage() {
     } catch (error) {
       console.error("Error updating fee:", error);
       setMessage("❌ Error updating fee");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const updateForeignShipping = async () => {
+    try {
+      setSaving(true);
+      setMessage("");
+
+      const response = await fetchWithAuth("/settings/foreign-shipping-fee", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ fee: foreignShipping }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setMessage("✅ Foreign shipping fee updated successfully");
+      } else {
+        setMessage(`❌ Error: ${data.error}`);
+      }
+    } catch (error) {
+      console.error("Error updating shipping fee:", error);
+      setMessage("❌ Error updating shipping fee");
     } finally {
       setSaving(false);
     }
@@ -199,6 +232,47 @@ export default function SettingsPage() {
           <div className="mt-4 p-3 bg-blue-50 rounded text-sm">
             <strong>Example:</strong> If a product costs 100 GEL and fee is {foreignFee}%,
             foreign customers pay: 100 × (1 + {foreignFee}/100) = {100 * (1 + foreignFee / 100)} GEL equivalent
+          </div>
+        </div>
+
+        {/* Foreign Shipping Fee */}
+        <div className="bg-white shadow rounded-lg p-6 mb-6">
+          <h2 className="text-xl font-semibold mb-4">Foreign Shipping Fee</h2>
+          <p className="text-gray-600 mb-4">
+            Additional fixed shipping fee (in GEL) for orders shipped to countries outside Georgia.
+            Applied on top of standard shipping cost.
+          </p>
+
+          <div className="flex items-end gap-4">
+            <div className="flex-1">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Shipping Fee (GEL)
+              </label>
+              <div className="flex items-center gap-2">
+                <input
+                  type="number"
+                  min="0"
+                  step="1"
+                  value={foreignShipping}
+                  onChange={(e) => setForeignShipping(parseFloat(e.target.value))}
+                  className="flex-1 border border-gray-300 rounded px-4 py-2"
+                />
+                <span className="text-gray-600">₾</span>
+              </div>
+            </div>
+
+            <button
+              onClick={updateForeignShipping}
+              disabled={saving}
+              className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 disabled:bg-gray-400"
+            >
+              {saving ? "Saving..." : "Update Fee"}
+            </button>
+          </div>
+
+          <div className="mt-4 p-3 bg-blue-50 rounded text-sm">
+            <strong>Example:</strong> If shipping within Georgia is 5 GEL and foreign fee is {foreignShipping} GEL,
+            foreign customers pay: 5 + {foreignShipping} = {5 + foreignShipping} GEL for shipping
           </div>
         </div>
 

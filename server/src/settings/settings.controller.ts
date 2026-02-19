@@ -53,6 +53,25 @@ export class SettingsController {
     return { fee: newFee, success: true };
   }
 
+  // Public endpoint - get foreign shipping fee
+  @Get('foreign-shipping-fee')
+  async getForeignShippingFee() {
+    const fee = await this.settingsService.getForeignShippingFee();
+    return { fee };
+  }
+
+  // Admin only - update foreign shipping fee
+  @Put('foreign-shipping-fee')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.Admin)
+  async setForeignShippingFee(@Body('fee') fee: number) {
+    if (fee == null || fee < 0) {
+      return { error: 'Invalid shipping fee', success: false };
+    }
+    const newFee = await this.settingsService.setForeignShippingFee(fee);
+    return { fee: newFee, success: true };
+  }
+
   // Admin only - get all settings
   @Get()
   @UseGuards(JwtAuthGuard, RolesGuard)
