@@ -29,7 +29,7 @@ import Cookies from "js-cookie";
 import { CartItem } from "@/types/cart";
 import { PayPalButton } from "@/modules/orders/components/paypal-button";
 import { useUsdRate } from "@/hooks/useUsdRate";
-import { calculateShipping } from "@/lib/shipping";
+import { calculateShipping, fetchShippingRates } from "@/lib/shipping";
 import { useCurrency } from "@/hooks/use-currency";
 
 type CheckoutStep = "auth" | "guest" | "shipping" | "payment" | "review";
@@ -57,9 +57,6 @@ export function StreamlinedCheckout() {
   const { toast } = useToast();
   const { usdRate } = useUsdRate();
   const { currency } = useCurrency();
-
-  // Determine if this is a foreign (non-Georgian) checkout
-  const isForeignCheckout = currency !== "GEL";
 
   // Auction mode state
   const [isAuctionMode, setIsAuctionMode] = useState(false);
@@ -91,7 +88,6 @@ export function StreamlinedCheckout() {
   );
   const [showPayPalButtons, setShowPayPalButtons] = useState(false);
   const [exchangeRates, setExchangeRates] = useState<{ USD: number; EUR: number } | null>(null);
-  const [foreignShippingFee, setForeignShippingFee] = useState<number>(0);
   const [foreignPaymentFee, setForeignPaymentFee] = useState<number>(20); // Default 20%
 
   // Check for auction checkout mode on mount
@@ -118,20 +114,15 @@ export function StreamlinedCheckout() {
   useEffect(() => {
     const fetchExchangeData = async () => {
       try {
-        const [ratesRes, shippingRes, feeRes] = await Promise.all([
+        const [ratesRes, feeRes] = await Promise.all([
           fetch(`${process.env.NEXT_PUBLIC_API_URL}/exchange-rate/latest`),
-          fetch(`${process.env.NEXT_PUBLIC_API_URL}/settings/foreign-shipping-fee`),
           fetch(`${process.env.NEXT_PUBLIC_API_URL}/settings/foreign-payment-fee`),
+          fetchShippingRates(), // Fetch and cache shipping rates from API
         ]);
 
         if (ratesRes.ok) {
           const data = await ratesRes.json();
           setExchangeRates(data.rates);
-        }
-
-        if (shippingRes.ok) {
-          const data = await shippingRes.json();
-          setForeignShippingFee(data.fee || 10);
         }
 
         if (feeRes.ok) {
@@ -204,13 +195,8 @@ export function StreamlinedCheckout() {
     ? calculateShipping(shippingCountry, shippingAddress?.city)
     : 0;
   
-  // Add foreign shipping fee if applicable (in GEL)
-  const totalShippingGel = isForeignCheckout 
-   ? baseShippingGel + foreignShippingFee
-    : baseShippingGel;
-  
   // Convert shipping to user's currency
-  const shippingPrice = convertPrice(totalShippingGel);
+  const shippingPrice = convertPrice(baseShippingGel);
 
   // Total price in user's currency
   const totalPrice = itemsPrice + shippingPrice;
@@ -1190,12 +1176,6 @@ export function StreamlinedCheckout() {
               {shippingPrice > 0 && shippingAddress && currency === "GEL" && (
                 <div className="tbilisi-free-note">
                   {t("cart.tbilisiFreeNote")}
-                </div>
-              )}
-              {/* Foreign shipping fee note */}
-              {isForeignCheckout && foreignShippingFee > 0 && (
-                <div className="tbilisi-free-note">
-                  International shipping: +{formatPrice(convertPrice(foreignShippingFee))} ({foreignShippingFee} GEL)
                 </div>
               )}
               {/* საკომისიო დაკომენტარებულია - ბანკის გვერდზე ნახავს

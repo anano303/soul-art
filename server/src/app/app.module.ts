@@ -32,6 +32,7 @@ import { AuctionModule } from '../auctions/auction.module';
 import { SettingsModule } from '../settings/settings.module';
 import { GeoModule } from '../geo/geo.module';
 import { ExchangeRateModule } from '../exchange-rate/exchange-rate.module';
+import { ShippingCountriesModule } from '../shipping-countries/shipping-countries.module';
 
 @Module({
   imports: [
@@ -69,6 +70,7 @@ import { ExchangeRateModule } from '../exchange-rate/exchange-rate.module';
     SettingsModule,
     GeoModule,
     ExchangeRateModule,
+    ShippingCountriesModule,
   ],
   controllers: [AppController],
   providers: [AppService, GoogleStrategy],

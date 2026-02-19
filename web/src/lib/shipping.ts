@@ -6,10 +6,14 @@ export interface ShippingRate {
   isFree: boolean;
 }
 
-// Exchange rate GEL to USD (1 USD = 2.5 GEL)
+// Exchange rate GEL to USD (1 USD = 2.5 GEL) - used for fallback calculations
 const GEL_TO_USD = 1 / 2.5;
 
-export const shippingRates: ShippingRate[] = [
+// Module-level cache for shipping rates fetched from API
+let cachedShippingRates: ShippingRate[] | null = null;
+
+// Hardcoded fallback rates (used if API hasn't been called yet or fails)
+const fallbackShippingRates: ShippingRate[] = [
   {
     countryCode: "GE",
     countryName: "საქართველო",
@@ -54,23 +58,62 @@ export const shippingRates: ShippingRate[] = [
   },
 ];
 
+// Get current shipping rates (cached or fallback)
+export function getShippingRates(): ShippingRate[] {
+  return cachedShippingRates || fallbackShippingRates;
+}
+
+// Fetch shipping rates from API and cache them
+export async function fetchShippingRates(): Promise<ShippingRate[]> {
+  try {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/shipping-countries`);
+    if (res.ok) {
+      const countries = await res.json();
+      // Transform API response to ShippingRate format
+      cachedShippingRates = countries.map((c: any) => ({
+        countryCode: c.countryCode,
+        countryName: c.countryName,
+        cost: c.cost,
+        costUSD: Math.round(c.cost * GEL_TO_USD),
+        isFree: c.isFree,
+      }));
+      return cachedShippingRates;
+    }
+  } catch (error) {
+    console.error("Error fetching shipping rates:", error);
+  }
+  // Return fallback if fetch fails
+  return fallbackShippingRates;
+}
+
+// Manually set shipping rates (useful for SSR or custom sources)
+export function setShippingRates(rates: ShippingRate[]): void {
+  cachedShippingRates = rates;
+}
+
+export const shippingRates: ShippingRate[] = fallbackShippingRates;
+
 export function getShippingRate(countryCode: string): ShippingRate | null {
-  return shippingRates.find((rate) => rate.countryCode === countryCode) || null;
+  const rates = getShippingRates();
+  return rates.find((rate) => rate.countryCode === countryCode) || null;
 }
 
 // Find shipping rate by country name (e.g., "საქართველო", "Italy")
 export function getShippingRateByName(countryName: string): ShippingRate | null {
-  return shippingRates.find((rate) => rate.countryName === countryName) || null;
+  const rates = getShippingRates();
+  return rates.find((rate) => rate.countryName === countryName) || null;
 }
 
 // Resolve country code from either code or name
 function resolveCountryCode(countryCodeOrName: string): string {
+  const rates = getShippingRates();
+  
   // If it's already a valid country code
-  const byCode = shippingRates.find((rate) => rate.countryCode === countryCodeOrName);
+  const byCode = rates.find((rate) => rate.countryCode === countryCodeOrName);
   if (byCode) return byCode.countryCode;
 
   // Try matching by name
-  const byName = shippingRates.find((rate) => rate.countryName === countryCodeOrName);
+  const byName = rates.find((rate) => rate.countryName === countryCodeOrName);
   if (byName) return byName.countryCode;
 
   // Handle common aliases
@@ -136,5 +179,6 @@ export function formatShippingCost(
 
 export function isShippingSupported(countryCodeOrName: string): boolean {
   const code = resolveCountryCode(countryCodeOrName);
-  return shippingRates.some((rate) => rate.countryCode === code);
+  const rates = getShippingRates();
+  return rates.some((rate) => rate.countryCode === code);
 }

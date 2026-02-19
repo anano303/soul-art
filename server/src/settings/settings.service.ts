@@ -14,8 +14,6 @@ export class SettingsService {
   private readonly DEFAULT_USD_RATE = 2.5;
   // Default foreign payment fee (20%)
   private readonly DEFAULT_FOREIGN_FEE = 20;
-  // Default foreign shipping fee (10 GEL)
-  private readonly DEFAULT_FOREIGN_SHIPPING = 10;
 
   async getUsdRate(): Promise<number> {
     const setting = await this.settingsModel.findOne({ key: 'usd_rate' });
@@ -51,24 +49,6 @@ export class SettingsService {
       { upsert: true, new: true },
     );
     return feePercent;
-  }
-
-  async getForeignShippingFee(): Promise<number> {
-    const setting = await this.settingsModel.findOne({ key: 'foreign_shipping_fee' });
-    return setting?.value ?? this.DEFAULT_FOREIGN_SHIPPING;
-  }
-
-  async setForeignShippingFee(feeGel: number): Promise<number> {
-    await this.settingsModel.findOneAndUpdate(
-      { key: 'foreign_shipping_fee' },
-      { 
-        key: 'foreign_shipping_fee',
-        value: feeGel,
-        description: 'Additional fixed shipping fee for foreign countries (in GEL)'
-      },
-      { upsert: true, new: true },
-    );
-    return feeGel;
   }
 
   async getSetting(key: string): Promise<any> {
