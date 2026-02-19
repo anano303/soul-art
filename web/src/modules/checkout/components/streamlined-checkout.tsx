@@ -1457,6 +1457,7 @@ export function StreamlinedCheckout() {
                         country: shippingAddress.country || "GE",
                         fullName: user?.name || guestInfo?.fullName || "",
                         phone: shippingAddress.phoneNumber || "",
+                        email: user?.email || guestInfo?.email || "",
                       }
                     : undefined
                 }

@@ -26,6 +26,7 @@ interface ShippingAddress {
   country: string;
   fullName?: string;
   phone?: string;
+  email?: string;
 }
 
 interface PayPalButtonProps {
@@ -135,6 +136,11 @@ function PayPalButtonWrapper({
           country_code: shippingAddress.country.toUpperCase(),
         },
       };
+
+      // Add email if available
+      if (shippingAddress.email) {
+        orderPayload.payer.email_address = shippingAddress.email;
+      }
 
       // Add phone if available (extract country code from full number)
       if (shippingAddress.phone) {
