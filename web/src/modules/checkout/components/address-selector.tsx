@@ -6,7 +6,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { useLanguage } from "@/hooks/LanguageContext";
 import { apiClient } from "@/lib/axios";
 import { Edit2, Check, Plus } from "lucide-react";
-import { getCountries } from "@/lib/countries";
+import { useShippingRates } from "@/lib/use-shipping-rates";
 import "./address-selector.css";
 
 interface ShippingAddress {
@@ -28,6 +28,7 @@ export function AddressSelector({ onAddressSelected }: AddressSelectorProps) {
   const { shippingAddress, setShippingAddress, guestInfo } = useCheckout();
   const { user } = useAuth();
   const { t } = useLanguage();
+  const { rates: shippingCountries, loading: loadingCountries } = useShippingRates();
   const [savedAddresses, setSavedAddresses] = useState<ShippingAddress[]>([]);
   const [selectedAddressId, setSelectedAddressId] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -266,10 +267,11 @@ export function AddressSelector({ onAddressSelected }: AddressSelectorProps) {
                         onChange={(e) =>
                           setFormData({ ...formData, country: e.target.value })
                         }
+                        disabled={loadingCountries}
                       >
-                        {getCountries().map((country) => (
-                          <option key={country.code} value={country.name}>
-                            {country.name}
+                        {shippingCountries.map((country) => (
+                          <option key={country.countryCode} value={country.countryName}>
+                            {country.countryName}
                           </option>
                         ))}
                       </select>
@@ -464,10 +466,11 @@ export function AddressSelector({ onAddressSelected }: AddressSelectorProps) {
                   onChange={(e) =>
                     setFormData({ ...formData, country: e.target.value })
                   }
+                  disabled={loadingCountries}
                 >
-                  {getCountries().map((country) => (
-                    <option key={country.code} value={country.name}>
-                      {country.name}
+                  {shippingCountries.map((country) => (
+                    <option key={country.countryCode} value={country.countryName}>
+                      {country.countryName}
                     </option>
                   ))}
                 </select>

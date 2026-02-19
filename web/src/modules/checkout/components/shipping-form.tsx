@@ -5,13 +5,13 @@ import { useEffect } from "react";
 import { apiClient } from "@/lib/axios";
 import { useToast } from "@/hooks/use-toast";
 import { useCheckout } from "../context/checkout-context";
-import { getCountries } from "@/lib/countries";
 import { useLanguage } from "@/hooks/LanguageContext";
 import {
   formatShippingCost,
   isShippingSupported,
   getShippingRate,
 } from "@/lib/shipping";
+import { useShippingRates } from "@/lib/use-shipping-rates";
 
 import "./shipping-form.css";
 
@@ -27,6 +27,7 @@ export function ShippingForm() {
   const { shippingAddress, setShippingAddress } = useCheckout();
   const { toast } = useToast();
   const { t } = useLanguage();
+  const { rates: shippingCountries, loading: loadingCountries } = useShippingRates();
 
   const {
     register,
@@ -155,13 +156,15 @@ export function ShippingForm() {
             control={control}
             rules={{ required: t("checkout.countryRequired") }}
             render={({ field }) => (
-              <select {...field}>
+              <select {...field} disabled={loadingCountries}>
                 <option value="" disabled>
-                  {t("checkout.selectCountry")}
+                  {loadingCountries 
+                    ? t("checkout.loadingCountries") || "Loading countries..."
+                    : t("checkout.selectCountry")}
                 </option>
-                {getCountries().map((country) => (
-                  <option key={country.code} value={country.code}>
-                    {country.name}
+                {shippingCountries.map((country) => (
+                  <option key={country.countryCode} value={country.countryCode}>
+                    {country.countryName}
                   </option>
                 ))}
               </select>
