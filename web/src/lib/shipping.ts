@@ -70,14 +70,15 @@ export async function fetchShippingRates(): Promise<ShippingRate[]> {
     if (res.ok) {
       const countries = await res.json();
       // Transform API response to ShippingRate format
-      cachedShippingRates = countries.map((c: any) => ({
+      const rates = countries.map((c: any) => ({
         countryCode: c.countryCode,
         countryName: c.countryName,
         cost: c.cost,
         costUSD: Math.round(c.cost * GEL_TO_USD),
         isFree: c.isFree,
       }));
-      return cachedShippingRates;
+      cachedShippingRates = rates;
+      return rates;
     }
   } catch (error) {
     console.error("Error fetching shipping rates:", error);
