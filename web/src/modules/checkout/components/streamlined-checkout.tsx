@@ -28,7 +28,6 @@ import { trackCheckoutStart } from "@/hooks/use-sales-tracking";
 import Cookies from "js-cookie";
 import { CartItem } from "@/types/cart";
 import { PayPalButton } from "@/modules/orders/components/paypal-button";
-import { useUsdRate } from "@/hooks/useUsdRate";
 import { calculateShipping, fetchShippingRates } from "@/lib/shipping";
 import { useCurrency } from "@/hooks/use-currency";
 
@@ -55,7 +54,6 @@ export function StreamlinedCheckout() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { toast } = useToast();
-  const { usdRate } = useUsdRate();
   const { currency } = useCurrency();
 
   // Auction mode state
@@ -1440,10 +1438,11 @@ export function StreamlinedCheckout() {
             </div>
 
             <div className="paypal-buttons-wrapper">
-              {/* Convert GEL to USD using dynamic rate */}
+              {/* PayPal with user's selected currency - no conversion needed */}
               <PayPalButton
                 orderId={currentOrderId}
-                amount={Number((totalPrice / usdRate).toFixed(2))}
+                amount={Number(totalPrice.toFixed(2))}
+                currency={currency as "USD" | "EUR"}
                 onPaymentSuccess={handlePayPalSuccess}
                 showCardButton={true}
                 shippingAddress={
@@ -1460,8 +1459,7 @@ export function StreamlinedCheckout() {
                 }
               />
               <p className="paypal-conversion-note">
-                {totalPrice.toFixed(2)} ₾ ≈ ${(totalPrice / usdRate).toFixed(2)}{" "}
-                USD
+                {t("payment.paypal.total") || "Total"}: {formatPrice(totalPrice)}
               </p>
             </div>
 

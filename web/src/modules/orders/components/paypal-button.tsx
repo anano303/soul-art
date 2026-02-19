@@ -31,6 +31,7 @@ interface ShippingAddress {
 interface PayPalButtonProps {
   orderId: string;
   amount: number;
+  currency?: "USD" | "EUR";
   onPaymentSuccess?: () => void;
   showCardButton?: boolean;
   shippingAddress?: ShippingAddress;
@@ -39,6 +40,7 @@ interface PayPalButtonProps {
 function PayPalButtonWrapper({
   orderId,
   amount,
+  currency = "USD",
   onPaymentSuccess,
   showCardButton = true,
   shippingAddress,
@@ -88,7 +90,7 @@ function PayPalButtonWrapper({
     } = {
       amount: {
         value: amount.toString(),
-        currency_code: "USD",
+        currency_code: currency,
       },
     };
 
@@ -201,7 +203,7 @@ export function PayPalButton(props: PayPalButtonProps) {
     <PayPalScriptProvider
       options={{
         clientId: process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID!,
-        currency: "USD",
+        currency: props.currency || "USD",
       }}
     >
       <PayPalButtonWrapper {...props} />
