@@ -94,7 +94,7 @@ function PayPalButtonWrapper({
       },
     };
 
-    // Add shipping address if provided (will be used as billing too)
+    // Add shipping address if provided
     if (shippingAddress) {
       purchaseUnit.shipping = {
         name: {
@@ -109,10 +109,63 @@ function PayPalButtonWrapper({
       };
     }
 
-    return actions.order.create({
+    // Build order payload with payer info to prefill billing address
+    // Using any to bypass PayPal's complex type requirements
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const orderPayload: any = {
       intent: "CAPTURE",
       purchase_units: [purchaseUnit],
-    });
+    };
+
+    // Prefill payer (billing) info from shipping address
+    if (shippingAddress) {
+      const nameParts = (shippingAddress.fullName || "Customer").split(" ");
+      const givenName = nameParts[0] || "Customer";
+      const surname = nameParts.slice(1).join(" ") || "";
+
+      orderPayload.payer = {
+        name: {
+          given_name: givenName,
+          surname: surname || givenName,
+        },
+        address: {
+          address_line_1: shippingAddress.address,
+          admin_area_2: shippingAddress.city,
+          postal_code: shippingAddress.postalCode || "0000",
+          country_code: shippingAddress.country.toUpperCase(),
+        },
+      };
+
+      // Add phone if available (extract country code from full number)
+      if (shippingAddress.phone) {
+        const cleanPhone = shippingAddress.phone.replace(/\D/g, "");
+        // Extract country code (assumes format like +995... or 995...)
+        let countryCode = "1"; // Default to US
+        let nationalNumber = cleanPhone;
+        
+        if (cleanPhone.startsWith("995")) {
+          countryCode = "995"; // Georgia
+          nationalNumber = cleanPhone.substring(3);
+        } else if (cleanPhone.startsWith("1")) {
+          countryCode = "1"; // US/Canada
+          nationalNumber = cleanPhone.substring(1);
+        } else if (cleanPhone.length > 10) {
+          // Try to extract country code (1-3 digits)
+          countryCode = cleanPhone.substring(0, cleanPhone.length - 10);
+          nationalNumber = cleanPhone.substring(cleanPhone.length - 10);
+        }
+
+        orderPayload.payer.phone = {
+          phone_type: "MOBILE",
+          phone_number: {
+            country_code: countryCode,
+            national_number: nationalNumber,
+          },
+        };
+      }
+    }
+
+    return actions.order.create(orderPayload);
   };
 
   const onApproveHandler = async (
