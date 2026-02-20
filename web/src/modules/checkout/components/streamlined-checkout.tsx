@@ -183,9 +183,15 @@ export function StreamlinedCheckout() {
     return Math.ceil(priceWithFee * rate);
   };
 
-  // Calculate totals in user's currency
+  // Calculate totals in user's currency (converted)
   const itemsPrice = checkoutItems.reduce(
     (acc, item) => acc + convertPrice(item.price) * item.qty,
+    0,
+  );
+
+  // Calculate totals in GEL (base prices for sellers/admin)
+  const itemsPriceGEL = checkoutItems.reduce(
+    (acc, item) => acc + item.price * item.qty,
     0,
   );
 
@@ -198,8 +204,12 @@ export function StreamlinedCheckout() {
   // Convert shipping to user's currency
   const shippingPrice = convertPrice(baseShippingGel);
 
-  // Total price in user's currency
+  // Total price in user's currency (what buyer pays)
   const totalPrice = itemsPrice + shippingPrice;
+
+  // Total price in GEL (base prices)
+  const totalPriceGEL = itemsPriceGEL + baseShippingGel;
+
   const totalUnits = checkoutItems.reduce((acc, item) => acc + item.qty, 0);
 
   // Currency symbol
@@ -592,6 +602,9 @@ export function StreamlinedCheckout() {
         taxPrice: number;
         shippingPrice: number;
         totalPrice: number;
+        currency: string;
+        paidAmount: number;
+        paidCurrency: string;
         guestInfo?: typeof guestInfo;
         salesRefCode?: string | null;
         totalReferralDiscount?: number;
@@ -600,10 +613,13 @@ export function StreamlinedCheckout() {
         orderItems,
         shippingDetails: shippingAddress,
         paymentMethod: methodToUse,
-        itemsPrice,
+        itemsPrice: itemsPriceGEL, // GEL base prices (for sellers)
         taxPrice: 0, // საკომისიო მოხსნილია
-        shippingPrice,
-        totalPrice, // რეალური ფასი საკომისიოს გარეშე
+        shippingPrice: baseShippingGel, // GEL shipping cost
+        totalPrice: totalPriceGEL, // Total in GEL (base accounting)
+        currency: "GEL", // Base currency for accounting
+        paidAmount: totalPrice, // Amount customer actually pays in their currency
+        paidCurrency: currency, // Currency customer pays in (GEL/USD/EUR)
         salesRefCode: Cookies.get("sales_ref") || null,
         totalReferralDiscount,
         hasReferralDiscount,

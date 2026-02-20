@@ -1072,6 +1072,16 @@ export function AdminOrderDetails({ order }: AdminOrderDetailsProps) {
                   : order.totalPrice.toFixed(2)}
               </span>
             </div>
+            {/* Show what customer paid for admins (multi-currency info) */}
+            {isAdmin && order.paidCurrency && order.paidCurrency !== "GEL" && order.paidAmount && (
+              <div className="summary-item" style={{ marginTop: "0.5rem", fontStyle: "italic", fontSize: "0.9em", borderTop: "1px solid #e5e7eb", paddingTop: "0.5rem" }}>
+                <span>Customer paid:</span>
+                <span>
+                  {order.paidCurrency === "USD" ? "$" : "€"}
+                  {order.paidAmount.toFixed(2)} {order.paidCurrency}
+                </span>
+              </div>
+            )}
           </div>
         </div>
       </div>

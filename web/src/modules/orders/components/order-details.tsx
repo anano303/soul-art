@@ -24,17 +24,42 @@ export function OrderDetails({ order }: OrderDetailsProps) {
   const router = useRouter();
   const { usdRate } = useUsdRate();
 
-  // Format price based on shipping country (show dual currency for non-Georgia countries)
-  const formatPrice = (priceInGel: number, shippingCountry?: string): string => {
-    const isGeorgia =
-      shippingCountry === "Georgia" || shippingCountry === "საქართველო";
-
-    if (isGeorgia) {
-      return `${priceInGel.toFixed(2)} ₾`;
-    } else {
-      const priceInUsd = (priceInGel / usdRate).toFixed(2);
-      return `${priceInGel.toFixed(2)} ₾ ($${priceInUsd})`;
+  // Determine which currency and amounts to show
+  // Buyers see what they paid (paidCurrency/paidAmount)
+  // If no paidCurrency, fall back to GEL with dual display for non-Georgia
+  const displayCurrency = order.paidCurrency || "GEL";
+  const displayAmount = order.paidAmount || order.totalPrice;
+  
+  // Currency symbol
+  const getCurrencySymbol = (curr: string) => {
+    switch (curr) {
+      case "USD":
+        return "$";
+      case "EUR":
+        return "€";
+      default:
+        return "₾";
     }
+  };
+
+  const currencySymbol = getCurrencySymbol(displayCurrency);
+
+  // Format price in the display currency
+  const formatPrice = (gelPrice: number, quantity = 1): string => {
+    // If order has paidCurrency, calculate proportional amount in that currency
+    if (order.paidCurrency && order.paidAmount && order.totalPrice > 0) {
+      // Calculate the proportion of this item to total
+      const proportion = (gelPrice * quantity) / order.totalPrice;
+      const amountInPaidCurrency = proportion * order.paidAmount;
+      const formatted = amountInPaidCurrency.toFixed(2);
+      
+      return displayCurrency === "USD"
+        ? `${currencySymbol}${formatted}`
+        : `${formatted} ${currencySymbol}`;
+    }
+    
+    // Fallback to GEL display
+    return `${gelPrice.toFixed(2)} ₾`;
   };
 
   // Check if stock reservation has expired
@@ -126,8 +151,20 @@ export function OrderDetails({ order }: OrderDetailsProps) {
     (item) => !item.product || String(item.product.deliveryType) !== "SELLER"
   );
 
-  // Convert GEL to USD for payment
-  const totalPriceInUSD = +(order.totalPrice / usdRate).toFixed(2);
+  // Payment amount logic
+  // For USD/EUR orders, use paidAmount directly
+  // For GEL orders or legacy orders without paidAmount, calculate from totalPrice
+  const paymentAmount =
+    order.paidCurrency === "USD" || order.paidCurrency === "EUR"
+      ? order.paidAmount || order.totalPrice
+      : order.totalPrice;
+
+  const paymentAmountUSD =
+    order.paidCurrency === "USD"
+      ? order.paidAmount || +(order.totalPrice / usdRate).toFixed(2)
+      : +(order.totalPrice / usdRate).toFixed(2);
+
+  const paymentAmountGEL = order.totalPrice;
 
   // Helper function to get display name based on language
   const getDisplayName = (item: OrderItem) => {
@@ -268,12 +305,9 @@ export function OrderDetails({ order }: OrderDetailsProps) {
                       )}
                       <p>
                         {item.qty} x{" "}
-                        {formatPrice(item.price, order.shippingDetails.country)}{" "}
+                        {formatPrice(item.price, 1)}{" "}
                         ={" "}
-                        {formatPrice(
-                          item.qty * item.price,
-                          order.shippingDetails.country
-                        )}
+                        {formatPrice(item.price, item.qty)}
                       </p>
                       {item.product?.minDeliveryDays &&
                         item.product?.maxDeliveryDays && (
@@ -341,12 +375,9 @@ export function OrderDetails({ order }: OrderDetailsProps) {
                       )}
                       <p>
                         {item.qty} x{" "}
-                        {formatPrice(item.price, order.shippingDetails.country)}
+                        {formatPrice(item.price, 1)}
                         ={" "}
-                        {formatPrice(
-                          item.qty * item.price,
-                          order.shippingDetails.country
-                        )}
+                        {formatPrice(item.price, item.qty)}
                       </p>
                     </div>
                   </div>
@@ -364,7 +395,7 @@ export function OrderDetails({ order }: OrderDetailsProps) {
               <div className="summary-item">
                 <span>{t("order.items")}</span>
                 <span>
-                  {formatPrice(order.itemsPrice, order.shippingDetails.country)}
+                  {formatPrice(order.itemsPrice, 1)}
                 </span>
               </div>
               <div className="summary-item">
@@ -372,23 +403,20 @@ export function OrderDetails({ order }: OrderDetailsProps) {
                 <span>
                   {order.shippingPrice === 0
                     ? t("order.free")
-                    : formatPrice(
-                        order.shippingPrice,
-                        order.shippingDetails.country
-                      )}
+                    : formatPrice(order.shippingPrice, 1)}
                 </span>
               </div>
               <div className="summary-item">
                 <span>{t("order.tax")}</span>
                 <span>
-                  {formatPrice(order.taxPrice, order.shippingDetails.country)}
+                  {formatPrice(order.taxPrice, 1)}
                 </span>
               </div>
               <hr />
               <div className="summary-total">
                 <span>{t("order.total")}</span>
                 <span>
-                  {formatPrice(order.totalPrice, order.shippingDetails.country)}
+                  {formatPrice(displayAmount, 1)}
                 </span>
               </div>
               {/* Stock expiration warning */}
@@ -430,11 +458,15 @@ export function OrderDetails({ order }: OrderDetailsProps) {
                 !isStockExpired &&
                 order.status !== "cancelled" &&
                 (order.paymentMethod === "PayPal" ? (
-                  <PayPalButton orderId={order._id} amount={totalPriceInUSD} />
+                  <PayPalButton
+                    orderId={order._id}
+                    amount={paymentAmountUSD}
+                    currency={(order.paidCurrency as "USD" | "EUR") || "USD"}
+                  />
                 ) : order.paymentMethod === "BOG" ? (
-                  <BOGButton orderId={order._id} amount={order.totalPrice} />
+                  <BOGButton orderId={order._id} amount={paymentAmountGEL} />
                 ) : (
-                  <StripeButton orderId={order._id} amount={totalPriceInUSD} />
+                  <StripeButton orderId={order._id} amount={paymentAmountUSD} />
                 ))}
             </div>
           </div>

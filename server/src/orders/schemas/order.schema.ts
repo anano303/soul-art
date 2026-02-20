@@ -137,6 +137,16 @@ export class Order {
   @Prop({ required: true, default: 0.0 })
   totalPrice!: number;
 
+  // Currency and amount paid by customer (for foreign currency orders)
+  @Prop({ type: String, default: 'GEL' })
+  currency!: string;
+
+  @Prop({ required: false })
+  paidAmount?: number; // Amount customer paid in their currency (with fees, converted)
+
+  @Prop({ required: false })
+  paidCurrency?: string; // Currency customer paid in (USD/EUR/GEL)
+
   @Prop({ default: false })
   isPaid!: boolean;
 

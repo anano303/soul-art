@@ -435,6 +435,9 @@ export class OrdersService {
               taxPrice,
               shippingPrice,
               totalPrice,
+              currency: (orderAttrs as any).currency || 'GEL',
+              paidAmount: (orderAttrs as any).paidAmount,
+              paidCurrency: (orderAttrs as any).paidCurrency,
               externalOrderId,
               salesRefCode: salesRefCode || null,
               totalReferralDiscount: totalReferralDiscount || 0,
@@ -459,6 +462,9 @@ export class OrdersService {
       salesRefCode?: string;
       totalReferralDiscount?: number;
       hasReferralDiscount?: boolean;
+      currency?: string;
+      paidAmount?: number;
+      paidCurrency?: string;
     },
     externalOrderId?: string,
   ): Promise<OrderDocument> {
@@ -474,6 +480,9 @@ export class OrdersService {
       salesRefCode,
       totalReferralDiscount,
       hasReferralDiscount,
+      currency,
+      paidAmount,
+      paidCurrency,
     } = orderAttrs;
 
     if (orderItems && orderItems.length < 1)
@@ -614,6 +623,9 @@ export class OrdersService {
               taxPrice,
               shippingPrice,
               totalPrice,
+              currency: currency || 'GEL',
+              paidAmount,
+              paidCurrency,
               externalOrderId,
               salesRefCode: salesRefCode || null,
               totalReferralDiscount: totalReferralDiscount || 0,

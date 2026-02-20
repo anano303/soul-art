@@ -45,6 +45,9 @@ export interface Order {
   taxPrice: number;
   shippingPrice: number;
   totalPrice: number;
+  currency?: string; // Base currency for accounting (typically GEL)
+  paidAmount?: number; // Amount customer actually paid in their currency
+  paidCurrency?: string; // Currency customer paid in (GEL/USD/EUR)
   isPaid: boolean;
   paidAt?: string;
   isDelivered: boolean;
