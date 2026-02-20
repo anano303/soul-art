@@ -6,20 +6,25 @@ import { fetchWithAuth } from "@/lib/fetch-with-auth";
 import { Color, AgeGroupItem } from "@/types";
 import Image from "next/image";
 import Link from "next/link";
-import { formatPrice } from "@/lib/utils";
 import "./cart-item.css";
 
 interface CartItemProps {
   item: CartItemType;
   getLocalizedColorName?: (colorName: string) => string;
+  formatItemPrice?: (price: number) => string;
 }
 
 export function CartItem({
   item,
   getLocalizedColorName: propGetLocalizedColorName,
+  formatItemPrice,
 }: CartItemProps) {
   const { updateQuantity, removeItem } = useCart();
   const { t, language } = useLanguage();
+
+  // Default price formatter if not provided
+  const defaultFormatPrice = (price: number) => `${price.toFixed(2)} ₾`;
+  const formatPrice = formatItemPrice || defaultFormatPrice;
 
   // Fetch all colors for proper nameEn support (only if not provided via props)
   const { data: availableColors = [] } = useQuery<Color[]>({
@@ -112,7 +117,7 @@ export function CartItem({
           <Link href={`/products/${item.productId}`} className="cart-item-name">
             {displayName}
           </Link>
-          <p className="cart-item-price">{formatPrice(item.price)}</p>{" "}
+          <p className="cart-item-price">{formatPrice(item.price)}</p>
           {/* Display variant information if available */}
           {(item.size || item.color || item.ageGroup) && (
             <div className="cart-item-variants">

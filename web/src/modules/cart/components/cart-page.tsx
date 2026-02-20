@@ -11,7 +11,7 @@ import { fetchWithAuth } from "@/lib/fetch-with-auth";
 import { useCheckout } from "@/modules/checkout/context/checkout-context";
 import { calculateShipping } from "@/lib/shipping";
 import { trackViewCart } from "@/lib/ga4-analytics";
-import { useUsdRate } from "@/hooks/useUsdRate";
+import { useCurrency } from "@/hooks/use-currency";
 import "./cart-page.css";
 import { Color } from "@/types";
 
@@ -20,10 +20,38 @@ export function CartPage() {
   const router = useRouter();
   const { t, language } = useLanguage(); // Added language here
   const { shippingAddress } = useCheckout();
-  const { usdRate } = useUsdRate();
+  const { currency } = useCurrency();
+  const [exchangeRates, setExchangeRates] = useState<{ USD: number; EUR: number } | null>(null);
+  const [foreignPaymentFee, setForeignPaymentFee] = useState<number>(20);
 
   // Force re-render when localStorage changes
   const [, setForceUpdate] = useState(0);
+
+  // Fetch exchange rates and foreign fees on mount
+  useEffect(() => {
+    const fetchExchangeData = async () => {
+      try {
+        const [ratesRes, feeRes] = await Promise.all([
+          fetch(`${process.env.NEXT_PUBLIC_API_URL}/exchange-rate/latest`),
+          fetch(`${process.env.NEXT_PUBLIC_API_URL}/settings/foreign-payment-fee`),
+        ]);
+
+        if (ratesRes.ok) {
+          const data = await ratesRes.json();
+          setExchangeRates(data.rates);
+        }
+
+        if (feeRes.ok) {
+          const data = await feeRes.json();
+          setForeignPaymentFee(data.fee || 20);
+        }
+      } catch (error) {
+        console.error("Failed to fetch exchange data:", error);
+      }
+    };
+
+    fetchExchangeData();
+  }, []);
 
   // Track cart view
   useEffect(() => {
@@ -121,21 +149,42 @@ export function CartPage() {
   const shippingCountry = currentShippingAddress?.country || "";
   const shippingCost = hasShippingAddress ? calculateShipping(shippingCountry, currentShippingAddress?.city) : 0;
   const isShippingFree = hasShippingAddress && shippingCost === 0;
-  const isGeorgia = shippingCountry === "GE" || shippingCountry === "საქართველო" || shippingCountry === "Georgia";
-  const showBothCurrencies = hasShippingAddress && !isGeorgia;
 
-  // საკომისიო მოხსნილია - რეალური ფასი ყველგან
-  const total = subtotal + shippingCost;
-
-  // USD conversion rate from API
-  const GEL_TO_USD = 1 / usdRate;
-
-  // Function to format price based on country selection
-  const formatPrice = (amount: number) => {
-    if (showBothCurrencies) {
-      return `${amount.toFixed(2)} ₾ ($${(amount * GEL_TO_USD).toFixed(2)})`;
+  /**
+   * Convert GEL price to user's currency
+   * Applies foreign payment fee for non-GEL currencies
+   */
+  const convertPrice = (gelPrice: number): number => {
+    if (currency === "GEL" || !exchangeRates) {
+      return gelPrice;
     }
-    return `${amount.toFixed(2)} ₾`;
+
+    // Apply foreign payment fee: price * (1 + fee%)
+    const priceWithFee = gelPrice * (1 + foreignPaymentFee / 100);
+
+    // Convert to foreign currency
+    const rate = exchangeRates[currency];
+    return priceWithFee * rate;
+  };
+
+  // Calculate totals in user's currency
+  const subtotalInCurrency = convertPrice(subtotal);
+  const shippingCostInCurrency = convertPrice(shippingCost);
+  const totalInCurrency = subtotalInCurrency + shippingCostInCurrency;
+
+  // Currency symbol
+  const currencySymbol = currency === "USD" ? "$" : currency === "EUR" ? "€" : "₾";
+
+  // Format price with currency symbol
+  const formatPrice = (amount: number): string => {
+    const formatted = amount.toFixed(2);
+    return currency === "USD" ? `${currencySymbol}${formatted}` : `${formatted} ${currencySymbol}`;
+  };
+
+  // Format item price (convert from GEL to target currency)
+  const formatItemPrice = (gelPrice: number): string => {
+    const convertedPrice = convertPrice(gelPrice);
+    return formatPrice(convertedPrice);
   };
 
   return (
@@ -158,6 +207,7 @@ export function CartPage() {
                 }-${item.ageGroup ?? "a"}`}
                 item={item}
                 getLocalizedColorName={getLocalizedColorName}
+                formatItemPrice={formatItemPrice}
               />
             );
           })}
@@ -168,7 +218,7 @@ export function CartPage() {
             <div className="summary-details">
               <div className="summary-row">
                 <span className="summary-label">{t("cart.total")}</span>
-                <span>{formatPrice(subtotal)}</span>
+                <span>{formatPrice(subtotalInCurrency)}</span>
               </div>
               <div className="summary-row">
                 <span className="summary-label">{t("cart.delivery")}</span>
@@ -177,7 +227,7 @@ export function CartPage() {
                     ? <span className="delivery-at-checkout">{t("cart.calculatedAtCheckout")}</span>
                     : isShippingFree
                     ? <span className="delivery-free">{t("cart.free")}</span>
-                    : formatPrice(shippingCost)}
+                    : formatPrice(shippingCostInCurrency)}
                 </span>
               </div>
               {!hasShippingAddress && (
@@ -195,7 +245,7 @@ export function CartPage() {
               <hr className="separator" />
               <div className="summary-row total">
                 <span>{t("cart.totalCost")}</span>
-                <span>{formatPrice(total)}</span>
+                <span>{formatPrice(totalInCurrency)}</span>
               </div>
               <button
                 className="checkout-button"
