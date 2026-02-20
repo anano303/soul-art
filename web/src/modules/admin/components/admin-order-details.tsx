@@ -32,7 +32,6 @@ export function AdminOrderDetails({ order }: AdminOrderDetailsProps) {
   const userData = getUserData();
   const isAdmin = userData?.role === Role.Admin;
   const isSeller = userData?.role === Role.Seller;
-  const userId = userData?._id;
 
   // სელერისთვის totalPrice - shippingPrice (მიტანის გარეშე)
   // რადგან საკომისიო პროდუქტის ფასიდან იანგარიშება
