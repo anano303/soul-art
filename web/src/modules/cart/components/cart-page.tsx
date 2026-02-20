@@ -128,8 +128,6 @@ export function CartPage() {
     return <CartEmpty />;
   }
 
-  const subtotal = items.reduce((acc, item) => acc + item.price * item.qty, 0);
-
   // Calculate shipping based on selected country
   // Get the latest shipping address from localStorage if context is stale
   let currentShippingAddress = shippingAddress;
@@ -164,11 +162,17 @@ export function CartPage() {
 
     // Convert to foreign currency
     const rate = exchangeRates[currency];
-    return priceWithFee * rate;
+    if (!rate) return gelPrice;
+
+    return Math.ceil(priceWithFee * rate);
   };
 
   // Calculate totals in user's currency
-  const subtotalInCurrency = convertPrice(subtotal);
+  // Convert each item price individually, then multiply by quantity (same as checkout)
+  const subtotalInCurrency = items.reduce(
+    (acc, item) => acc + convertPrice(item.price) * item.qty,
+    0,
+  );
   const shippingCostInCurrency = convertPrice(shippingCost);
   const totalInCurrency = subtotalInCurrency + shippingCostInCurrency;
 
