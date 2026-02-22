@@ -517,7 +517,7 @@ export function SellerRegistrationFlow({
       // New user via email - need to create account + seller
       setIsAuthenticating(true);
       try {
-        await apiClient.post("/auth/seller-register", formData, {
+        await apiClient.post("/auth/sellers-register", formData, {
           headers: { "Content-Type": "multipart/form-data" },
         });
         setIsAuthenticating(false);
