@@ -213,15 +213,89 @@
 }
 
 /* Logo upload */
-.srf-logo-upload {
+.srf-logo-dropzone {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  justify-content: center;
+  border: 2px dashed #d1d5db;
+  border-radius: 12px;
+  padding: 1.5rem;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  background: #fafafa;
+  min-height: 120px;
+}
+
+.srf-logo-dropzone:hover {
+  border-color: #2563eb;
+  background: #eff6ff;
+}
+
+.srf-logo-dropzone.has-preview {
+  border-style: solid;
+  border-color: #e5e7eb;
+  padding: 1rem;
+  background: white;
+}
+
+.srf-logo-dropzone.has-preview:hover {
+  border-color: #2563eb;
+}
+
+.srf-logo-preview-wrapper {
+  position: relative;
+  border-radius: 12px;
+  overflow: hidden;
 }
 
 .srf-logo-preview {
-  border-radius: 8px;
+  border-radius: 12px;
   object-fit: cover;
+  display: block;
+}
+
+.srf-logo-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 500;
+  border-radius: 12px;
+}
+
+.srf-logo-preview-wrapper:hover .srf-logo-overlay {
+  opacity: 1;
+}
+
+.srf-logo-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  color: #9ca3af;
+}
+
+.srf-logo-placeholder svg {
+  color: #b0b8c4;
+}
+
+.srf-logo-placeholder-text {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #6b7280;
+}
+
+.srf-logo-placeholder-hint {
+  font-size: 0.75rem;
+  color: #9ca3af;
 }
 
 .srf-upload-btn {

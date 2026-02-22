@@ -1929,19 +1929,18 @@ export class UsersService {
 
       const seller = await this.create(sellerData);
 
-      // If logo file is provided, upload it to S3
+      // If logo file is provided, upload it to Cloudinary
       if (logoFile) {
         try {
-          const timestamp = Date.now();
-          const filePath = `seller-logos/${timestamp}-${logoFile.originalname.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
-
-          // Upload logo to Cloudinary instead of S3
+          // Upload logo to Cloudinary
           const logoUrl =
             await this.userCloudinaryService.uploadSellerLogo(logoFile);
 
-          // Update the seller record with the logo URL
+          // Update the seller record with the logo URL (both fields)
           await this.userModel.findByIdAndUpdate(seller._id, {
             storeLogoPath: logoUrl,
+            storeLogo: logoUrl,
+            profileImagePath: logoUrl,
           });
 
           this.logger.log(`Logo uploaded for seller ${seller._id}`);
@@ -2369,14 +2368,13 @@ export class UsersService {
           throw new BadRequestException('The file must be less than 5 MB.');
         }
 
-        const timestamp = Date.now();
-        const filePath = `seller-logos/${timestamp}-${logoFile.originalname.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
-
         try {
-          // Upload logo to cloud storage
-          const logoUrl = await this.uploadImage(filePath, logoFile.buffer);
-          updateData.storeLogoPath = filePath;
+          // Upload logo to Cloudinary
+          const logoUrl =
+            await this.userCloudinaryService.uploadSellerLogo(logoFile);
+          updateData.storeLogoPath = logoUrl;
           updateData.storeLogo = logoUrl;
+          updateData.profileImagePath = logoUrl;
         } catch (uploadError) {
           this.logger.error('Failed to upload seller logo:', uploadError);
           throw new BadRequestException('Failed to upload store logo');

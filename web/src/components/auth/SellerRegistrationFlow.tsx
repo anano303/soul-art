@@ -36,7 +36,13 @@ const step2Schema = z
     identificationNumber: z.string().min(1, "პირადი ნომერი აუცილებელია"),
     accountNumber: z.string().min(1, "საბანკო ანგარიში აუცილებელია"),
     beneficiaryBankCode: z.string().min(1, "ბანკი აუცილებელია"),
-    phoneNumber: z.string().min(1, "ტელეფონის ნომერი აუცილებელია"),
+    phoneNumber: z
+      .string()
+      .min(1, "ტელეფონის ნომერი აუცილებელია")
+      .regex(
+        /^\+995\d{9}$/,
+        "ტელეფონის ნომერი უნდა იყოს +995XXXXXXXXX ფორმატში (მაგ: +995555123456)",
+      ),
     artistSlug: z
       .string()
       .optional()
@@ -836,13 +842,18 @@ export function SellerRegistrationFlow({
           <form onSubmit={onStep2Submit} className="srf-form">
             <div className="srf-form-group">
               <label htmlFor="storeName">
-                {language === "en" ? "Store Name" : "მაღაზიის სახელი"} *
+                {language === "en"
+                  ? "Store / Author Name (displayed on site)"
+                  : "მაღაზიის ან ავტორის სახელი (რაც გამოჩნდება საიტზე)"}{" "}
+                *
               </label>
               <input
                 id="storeName"
                 type="text"
                 placeholder={
-                  language === "en" ? "Your store name" : "მაღაზიის სახელი"
+                  language === "en"
+                    ? "e.g. Art Studio / John Doe"
+                    : "მაგ: ხელოვნების სტუდია / გიორგი გიორგაძე"
                 }
                 {...step2Form.register("storeName")}
                 className="srf-input"
@@ -880,16 +891,77 @@ export function SellerRegistrationFlow({
             </div>
 
             <div className="srf-form-group">
-              <label>{language === "en" ? "Store Logo" : "ლოგო"}</label>
-              <div className="srf-logo-upload">
-                {logoPreview && (
-                  <Image
-                    src={logoPreview}
-                    alt="Logo"
-                    width={60}
-                    height={60}
-                    className="srf-logo-preview"
-                  />
+              <label>
+                {language === "en"
+                  ? "Your Brand Image"
+                  : "თქვენი ბრენდის სურათი"}
+              </label>
+              <div
+                className={`srf-logo-dropzone ${logoPreview ? "has-preview" : ""}`}
+                onClick={() => fileInputRef.current?.click()}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ")
+                    fileInputRef.current?.click();
+                }}
+              >
+                {logoPreview ? (
+                  <div className="srf-logo-preview-wrapper">
+                    <Image
+                      src={logoPreview}
+                      alt="Logo"
+                      width={80}
+                      height={80}
+                      className="srf-logo-preview"
+                    />
+                    <div className="srf-logo-overlay">
+                      <svg
+                        width="20"
+                        height="20"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
+                        <circle cx="12" cy="13" r="4" />
+                      </svg>
+                      <span>{language === "en" ? "Change" : "შეცვლა"}</span>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="srf-logo-placeholder">
+                    <svg
+                      width="32"
+                      height="32"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                      <circle cx="8.5" cy="8.5" r="1.5" />
+                      <polyline points="21 15 16 10 5 21" />
+                    </svg>
+                    <span className="srf-logo-placeholder-text">
+                      {language === "en"
+                        ? "Upload your photo or logo"
+                        : "ატვირთეთ თქვენი ფოტო ან ლოგო"}
+                    </span>
+                    <span className="srf-logo-placeholder-hint">
+                      {language === "en"
+                        ? "This will be displayed on your profile"
+                        : "ეს გამოჩნდება საიტზე თქვენს პროფილზე"}
+                    </span>
+                    <span className="srf-logo-placeholder-hint">
+                      PNG, JPG, WEBP (მაქს. 5MB)
+                    </span>
+                  </div>
                 )}
                 <input
                   ref={fileInputRef}
@@ -898,19 +970,6 @@ export function SellerRegistrationFlow({
                   onChange={handleLogoChange}
                   style={{ display: "none" }}
                 />
-                <button
-                  type="button"
-                  onClick={() => fileInputRef.current?.click()}
-                  className="srf-upload-btn"
-                >
-                  {logoPreview
-                    ? language === "en"
-                      ? "Change"
-                      : "შეცვლა"
-                    : language === "en"
-                      ? "Upload"
-                      : "ატვირთვა"}
-                </button>
               </div>
             </div>
 
@@ -922,7 +981,7 @@ export function SellerRegistrationFlow({
                 <input
                   id="phoneNumber"
                   type="tel"
-                  placeholder="+995..."
+                  placeholder="+995555123456"
                   {...step2Form.register("phoneNumber")}
                   className="srf-input"
                 />
