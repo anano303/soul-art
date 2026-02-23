@@ -81,7 +81,7 @@ export default function Footer() {
           <h4 className="footer-subtitle">{t("footer.follow")}</h4>
           <div className="footer-socials">
             <a
-              href="https://facebook.com"
+              href="https://www.facebook.com/SoulArtge"
               target="_blank"
               rel="noopener noreferrer"
               className="social-icon facebook"
@@ -89,7 +89,7 @@ export default function Footer() {
               Facebook
             </a>
             <a
-              href="https://instagram.com"
+              href="https://www.instagram.com/soulart.ge"
               target="_blank"
               rel="noopener noreferrer"
               className="social-icon instagram"
@@ -97,12 +97,12 @@ export default function Footer() {
               Instagram
             </a>
             <a
-              href="https://twitter.com"
+              href="https://www.tiktok.com/@soulart.ge"
               target="_blank"
               rel="noopener noreferrer"
-              className="social-icon twitter"
+              className="social-icon tiktok"
             >
-              Twitter
+              TikTok
             </a>
           </div>
 
