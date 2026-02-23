@@ -1,6 +1,6 @@
 "use client";
 
-import { FaCheckCircle, FaGoogle } from "react-icons/fa";
+import { FaCheckCircle, FaGoogle, FaStore, FaHandshake } from "react-icons/fa";
 import { FacebookAuthButton } from "@/components/auth/FacebookAuthButton";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -355,13 +355,20 @@ export function RegisterForm() {
           </Link>
         </div>
 
-        <div className="text-center special-text-links">
-          <Link href="/sellers-register" className="login-link">
-            {t("auth.becomeSeller")}
+        <div className="register-cta-links">
+          <Link href="/sellers-register" className="register-cta-card">
+            <FaStore className="register-cta-icon" />
+            <span className="register-cta-text">
+              <span className="register-cta-title">{t("auth.becomeSeller")}</span>
+              <span className="register-cta-subtitle">{t("auth.becomeSellerHint")}</span>
+            </span>
           </Link>
-          {" | "}
-          <Link href="/sales-manager-register" className="login-link">
-            {t("auth.forInfluencers")}
+          <Link href="/sales-manager-register" className="register-cta-card">
+            <FaHandshake className="register-cta-icon" />
+            <span className="register-cta-text">
+              <span className="register-cta-title">{t("auth.forInfluencers")}</span>
+              <span className="register-cta-subtitle">{t("auth.forInfluencersHint")}</span>
+            </span>
           </Link>
         </div>
       </form>

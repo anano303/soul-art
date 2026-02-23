@@ -23,16 +23,14 @@ export default function Footer() {
           <h3 className="footer-title">SoulArt</h3>
           <p className="footer-description">{t("footer.description")}</p>
         </div>
+
+        {/* Navigation links */}
         <div className="footer-section">
+          <h4 className="footer-subtitle">{t("footer.navigation")}</h4>
           <ul className="footer-links">
             <li>
               <Link href="/about" className="footer-link">
                 {t("navigation.about")}
-              </Link>
-            </li>
-            <li>
-              <Link href="/contact" className="footer-link">
-                {t("footer.contact")}
               </Link>
             </li>
             <li>
@@ -41,8 +39,8 @@ export default function Footer() {
               </Link>
             </li>
             <li>
-              <Link href="/forum" className="footer-link">
-                {t("navigation.forum")}
+              <Link href="/auctions" className="footer-link">
+                {t("navigation.auction")}
               </Link>
             </li>
             <li>
@@ -51,32 +49,60 @@ export default function Footer() {
               </Link>
             </li>
             <li>
-              <Link href="/auctions" className="footer-link">
-                {t("navigation.auction")}
+              <Link href="/forum" className="footer-link">
+                {t("navigation.forum")}
               </Link>
             </li>
             <li>
-              <Link href="/sales-manager-register" className="footer-link">
-                {t("footer.referralInfo")}
+              <Link href="/contact" className="footer-link">
+                {t("footer.contact")}
               </Link>
             </li>
+          </ul>
+        </div>
+
+        {/* Join us + Legal */}
+        <div className="footer-section">
+          <h4 className="footer-subtitle">{t("footer.joinUs")}</h4>
+          <ul className="footer-links">
+            <li>
+              <Link href="/become-seller" className="footer-link footer-link-highlight">
+                🎨 {t("footer.becomeSeller")}
+                <span className="footer-link-sub">
+                  {t("footer.becomeSellerSub")}
+                </span>
+              </Link>
+            </li>
+            <li>
+              <Link href="/sales-manager-register" className="footer-link footer-link-highlight">
+                🤝 {t("footer.referralInfo")}
+                <span className="footer-link-sub">
+                  {t("footer.referralSub")}
+                </span>
+              </Link>
+            </li>
+          </ul>
+
+          <ul className="footer-links">
             <li>
               <Link href="/careers" className="footer-link">
                 {t("footer.careers")}
               </Link>
             </li>
-            <li>
-              <Link href="/privacy-policy" className="footer-link">
-                {t("footer.privacyPolicy")}
-              </Link>
-            </li>
-            <li>
-              <Link href="/terms" className="footer-link">
-                {t("footer.termsAndConditions")}
-              </Link>
-            </li>
           </ul>
+
+          <div className="footer-legal">
+            <Link href="/privacy-policy" className="footer-link-small">
+              {t("footer.privacyPolicy")}
+            </Link>
+            <span className="footer-legal-divider">·</span>
+            <Link href="/terms" className="footer-link-small">
+              {t("footer.termsAndConditions")}
+            </Link>
+          </div>
         </div>
+
+        {/* Social + Donate */}
         <div className="footer-section">
           <h4 className="footer-subtitle">{t("footer.follow")}</h4>
           <div className="footer-socials">
