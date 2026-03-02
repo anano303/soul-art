@@ -87,73 +87,66 @@ const HomePageShop = () => {
         return;
       }
 
-      // Fetch products - increased to get more products per category
-      // Exclude out of stock products from home page
-      const response = await getProducts(1, 300, {
-        excludeOutOfStock: "true",
-        includeVariants: "true",
-      });
-      const allProducts = response.items || [];
-
-      // Group products by category
-      const productsByCategory: CategoryProducts[] = [];
-
-      // Process each category
-      for (const category of categories) {
-        if (category.id || category._id) {
-          const categoryId = category.id || category._id || "";
-          // Get the category name based on current language
-          const categoryName = getCategoryName(category);
-
-          // Filter products for this category
-          const categoryProds = allProducts
-            .filter((product) => {
-              // First check if product is in stock
-              const hasStock =
-                (product.countInStock ?? 0) > 0 ||
-                (product.variants &&
-                  product.variants.some((v) => (v.stock ?? 0) > 0));
-              if (!hasStock) return false;
-
-              if (
-                typeof product.mainCategory === "object" &&
-                product.mainCategory
-              ) {
-                return (
-                  product.mainCategory.id === categoryId ||
-                  product.mainCategory._id === categoryId
-                );
-              }
-              if (typeof product.mainCategory === "string") {
-                return product.mainCategory === categoryId;
-              }
-              return false;
-            })
-            .slice(0, 8);
-
-          // Debug logging
-          console.log(
-            `Category: ${categoryName}, Products found: ${categoryProds.length}`,
-          );
-
-          // Only add categories with products
-          if (categoryProds.length > 0) {
-            productsByCategory.push({
-              category: categoryName,
-              categoryId: categoryId,
-              products: categoryProds,
-            });
-          }
-        }
+      const cacheKey = `home-category-products-${language}`;
+      const cached = memoryCache.get<CategoryProducts[]>(cacheKey);
+      if (cached) {
+        setCategoryProducts(cached);
+        setIsLoading(false);
+        return;
       }
 
+      // Fetch products per category in parallel (8 per category instead of 300 total)
+      const fetchPromises = categories
+        .filter((cat) => cat.id || cat._id)
+        .map(async (category) => {
+          const categoryId = category.id || category._id || "";
+          const categoryName = getCategoryName(category);
+
+          try {
+            const { items = [] } = await getProducts(1, 12, {
+              mainCategory: categoryId,
+              excludeOutOfStock: "true",
+              includeVariants: "true",
+              sortBy: "createdAt",
+              sortDirection: "desc",
+            });
+
+            const categoryProds = items
+              .filter(
+                (p) =>
+                  (p.countInStock ?? 0) > 0 ||
+                  (p.variants &&
+                    p.variants.some((v) => (v.stock ?? 0) > 0))
+              )
+              .slice(0, 8);
+
+            if (categoryProds.length > 0) {
+              return {
+                category: categoryName,
+                categoryId,
+                products: categoryProds,
+              };
+            }
+          } catch (err) {
+            console.error(`Error fetching products for ${categoryName}:`, err);
+          }
+          return null;
+        });
+
+      const results = await Promise.all(fetchPromises);
+      const productsByCategory = results.filter(
+        (r): r is CategoryProducts => r !== null
+      );
+
+      // Cache for 5 minutes
+      memoryCache.set(cacheKey, productsByCategory, 5 * 60 * 1000);
       setCategoryProducts(productsByCategory);
       setIsLoading(false);
     } catch (error) {
       console.error("Error processing categories and products:", error);
       setIsLoading(false);
     }
-  }, [categories, getCategoryName]);
+  }, [categories, getCategoryName, language]);
 
   // Process categories and products when categories or getCategoryName changes
   useEffect(() => {
@@ -167,15 +160,9 @@ const HomePageShop = () => {
   useEffect(() => {
     // Skip on initial render or if there's no data yet
     if (categoryProducts.length > 0 && categories.length > 0) {
-      // Using a reference comparison to avoid unnecessary updates
-      const currentCategoryNames = categoryProducts
-        .map((cp) => cp.category)
-        .join(",");
-
-      // Update category names based on current language
+      // Update category names based on current language without refetching
       const updatedCategoryProducts = categoryProducts.map(
         (categoryProduct) => {
-          // Find the category
           const category = categories.find(
             (c) =>
               c.id === categoryProduct.categoryId ||
@@ -183,25 +170,24 @@ const HomePageShop = () => {
           );
 
           if (category) {
-            // Update the category name
-            return {
-              ...categoryProduct,
-              category: getCategoryName(category),
-            };
+            const newName = getCategoryName(category);
+            if (newName !== categoryProduct.category) {
+              return { ...categoryProduct, category: newName };
+            }
           }
           return categoryProduct;
         },
       );
 
-      // Only update if names actually changed
-      const updatedCategoryNames = updatedCategoryProducts
-        .map((cp) => cp.category)
-        .join(",");
-      if (currentCategoryNames !== updatedCategoryNames) {
+      // Only update state if something actually changed
+      const changed = updatedCategoryProducts.some(
+        (cp, i) => cp.category !== categoryProducts[i].category,
+      );
+      if (changed) {
         setCategoryProducts(updatedCategoryProducts);
       }
     }
-  }, [language, getCategoryName, categoryProducts, categories]);
+  }, [language, getCategoryName, categories]);
 
   useEffect(() => {
     // Animation observer
