@@ -349,7 +349,7 @@ const ShopContent = () => {
           totalPagesResult = response.pages || 1;
         } else {
           // Normal single-keyword or no-keyword fetch
-          const params = { ...baseParams, page: currentPage.toString(), limit: "20" };
+          const params: Record<string, string> = { ...baseParams, page: currentPage.toString(), limit: "20" };
           if (keyword) params.keyword = keyword;
 
           const response = await getProducts(currentPage, 20, params);
