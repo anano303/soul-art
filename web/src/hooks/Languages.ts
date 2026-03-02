@@ -1271,6 +1271,14 @@ export const TRANSLATIONS: Translations = {
         viewAll: "ყველა ნამუშევარი",
         ariaLabel: "ზამთრის ნამუშევრების სქროლი",
       },
+      springCollection: {
+        eyebrow: "გაზაფხულის კოლექცია",
+        title: "გაზაფხულის ფერები შენს სივრცეში",
+        subtitle:
+          "აღმოაჩინე ყვავილებით, ბუნებითა და სიცოცხლით სავსე ნამუშევრები — შთაგონება გაზაფხულიდან",
+        viewAll: "ყველას ნახვა",
+        ariaLabel: "გაზაფხულის კოლექციის სქროლი",
+      },
     },
 
     // Timer translations
@@ -3221,6 +3229,14 @@ export const TRANSLATIONS: Translations = {
           "Create a winter atmosphere in your space - snowy landscapes, warm colors and coziness",
         viewAll: "All paintings",
         ariaLabel: "Winter paintings carousel",
+      },
+      springCollection: {
+        eyebrow: "Spring Collection",
+        title: "Spring Colors in Your Space",
+        subtitle:
+          "Discover artworks full of flowers, nature and life — inspired by spring",
+        viewAll: "View all",
+        ariaLabel: "Spring collection carousel",
       },
     },
 

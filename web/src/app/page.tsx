@@ -20,8 +20,8 @@ const GiftCategories = dynamic(
   },
 );
 
-const NewYearPaintings = dynamic(
-  () => import("@/components/newYearPaintings/NewYearPaintings"),
+const SpringCollection = dynamic(
+  () => import("@/components/SpringCollection/SpringCollection"),
   {
     loading: () => <div style={{ minHeight: "300px" }} />,
     ssr: true,
@@ -74,7 +74,7 @@ const Home = () => {
       <PremiumRail />
       <DiscountedRail />
       <GiftCategories />
-      <NewYearPaintings />
+      <SpringCollection />
       {/* Forcing a full remount of HomePageShop when language changes */}
       <HomePageShop key={`home-shop-${language}`} />
       <PopularArtists />

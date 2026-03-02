@@ -11,6 +11,15 @@ import { useQuery } from "@tanstack/react-query";
 
 const PRIMARY_COLOR = "#012645";
 const SHOP_PAGE_STORAGE_KEY = "shopCurrentPage";
+
+/** Spring collection keywords for multi-search */
+const SPRING_KEYWORDS = [
+  "ყვავილ", "გაზაფხულ", "ბაღ", "ბუნებ", "მზესუმზირ", "მზესუმზირა",
+  "იასამან", "იასამნ", "ყაყაჩო", "ვარდ", "იის", "ტიტა", "ნარგიზ",
+  "ტულიპ", "პეონ", "ქრიზანთემ",
+  "spring", "flower", "blossom", "garden", "bloom",
+  "sunflower", "poppy", "rose", "lilac", "tulip", "daisy", "peony",
+];
 import { fetchWithAuth } from "@/lib/fetch-with-auth";
 import "./ShopPage.css";
 import Image from "next/image";
@@ -29,6 +38,7 @@ const ShopContent = () => {
     size: string;
     color: string;
     brand: string;
+    keyword: string;
     showDiscountedOnly: boolean;
     showPromoOnly: boolean;
     priceRange: [number, number];
@@ -57,6 +67,12 @@ const ShopContent = () => {
   })();
 
   const [selectedBrand, setSelectedBrand] = useState<string>(initialBrand);
+  const [keyword, setKeyword] = useState<string>(
+    searchParams?.get("keyword") || ""
+  );
+  const [collection, setCollection] = useState<string>(
+    searchParams?.get("collection") || ""
+  );
 
   const [showDiscountedOnly, setShowDiscountedOnly] = useState<boolean>(false);
   const [showPromoOnly, setShowPromoOnly] = useState<boolean>(false);
@@ -160,6 +176,8 @@ const ShopContent = () => {
       }
     }
 
+    const keywordParam = searchParams?.get("keyword") || "";
+    const collectionParam = searchParams?.get("collection") || "";
     const discountParam = searchParams?.get("discountOnly") === "true";
     const promoParam = searchParams?.get("promo") === "true";
     const minPriceParam = parseInt(searchParams?.get("minPrice") || "0");
@@ -176,6 +194,7 @@ const ShopContent = () => {
       size: sizeParam,
       color: colorParam,
       brand: decodedBrandParam,
+      keyword: keywordParam,
       showDiscountedOnly: discountParam,
       showPromoOnly: promoParam,
       priceRange: [minPriceParam, maxPriceParam],
@@ -191,6 +210,8 @@ const ShopContent = () => {
     setSelectedSize(sizeParam);
     setSelectedColor(colorParam);
     setSelectedBrand(decodedBrandParam);
+    setKeyword(keywordParam);
+    setCollection(collectionParam);
     setShowDiscountedOnly(discountParam);
     setShowPromoOnly(promoParam);
     setPriceRange([minPriceParam, maxPriceParam]);
@@ -240,6 +261,7 @@ const ShopContent = () => {
       selectedSize === pending.size &&
       selectedColor === pending.color &&
       selectedBrand === pending.brand &&
+      keyword === pending.keyword &&
       showDiscountedOnly === pending.showDiscountedOnly &&
       showPromoOnly === pending.showPromoOnly &&
       priceMatches &&
@@ -256,6 +278,7 @@ const ShopContent = () => {
     selectedSize,
     selectedColor,
     selectedBrand,
+    keyword,
     showDiscountedOnly,
     showPromoOnly,
     priceRange,
@@ -276,44 +299,66 @@ const ShopContent = () => {
     const loadProducts = async () => {
       setIsLoading(true);
       try {
-        const params: Record<string, string> = {
-          page: currentPage.toString(),
-          limit: "20",
+        const baseParams: Record<string, string> = {
           sortBy: sorting.field,
           sortDirection: sorting.direction,
         };
 
-        if (selectedCategoryId) params.mainCategory = selectedCategoryId;
+        if (selectedCategoryId) baseParams.mainCategory = selectedCategoryId;
         if (selectedSubCategoryIds.length > 0)
-          params.subCategory = selectedSubCategoryIds.join(",");
-        if (selectedAgeGroup) params.ageGroup = selectedAgeGroup;
-        if (selectedSize) params.size = selectedSize;
-        if (selectedColor) params.color = selectedColor;
-        if (selectedBrand) params.brand = selectedBrand;
+          baseParams.subCategory = selectedSubCategoryIds.join(",");
+        if (selectedAgeGroup) baseParams.ageGroup = selectedAgeGroup;
+        if (selectedSize) baseParams.size = selectedSize;
+        if (selectedColor) baseParams.color = selectedColor;
+        if (selectedBrand) baseParams.brand = selectedBrand;
         if (selectedMaterials.length > 0)
-          params.material = selectedMaterials.join(",");
+          baseParams.material = selectedMaterials.join(",");
         if (selectedDimensions.length > 0)
-          params.dimension = selectedDimensions.join(",");
+          baseParams.dimension = selectedDimensions.join(",");
 
         // Always send price parameters if they differ from defaults
         if (priceRange[0] !== 0 || priceRange[1] !== 1000) {
-          params.minPrice = priceRange[0].toString();
-          params.maxPrice = priceRange[1].toString();
+          baseParams.minPrice = priceRange[0].toString();
+          baseParams.maxPrice = priceRange[1].toString();
         }
 
-        if (showDiscountedOnly) params.discounted = "true";
-        if (showPromoOnly) params.hasPromo = "true";
+        if (showDiscountedOnly) baseParams.discounted = "true";
+        if (showPromoOnly) baseParams.hasPromo = "true";
         if (selectedOriginalTypes.length > 0)
-          params.isOriginal = selectedOriginalTypes.join(",");
+          baseParams.isOriginal = selectedOriginalTypes.join(",");
 
         // Exclude out of stock products from shop and include variants for stock check
-        params.excludeOutOfStock = "true";
-        params.includeVariants = "true";
+        baseParams.excludeOutOfStock = "true";
+        baseParams.includeVariants = "true";
 
-        const response = await getProducts(currentPage, 20, params);
+        let allItems: Product[] = [];
+        let totalPagesResult = 1;
+
+        // Collection mode: combine all keywords into one regex OR search
+        if (collection === "spring") {
+          const regexKeyword = SPRING_KEYWORDS.join("|");
+          const params = {
+            ...baseParams,
+            keyword: regexKeyword,
+            page: currentPage.toString(),
+            limit: "20",
+          };
+
+          const response = await getProducts(currentPage, 20, params);
+          allItems = response.items || [];
+          totalPagesResult = response.pages || 1;
+        } else {
+          // Normal single-keyword or no-keyword fetch
+          const params = { ...baseParams, page: currentPage.toString(), limit: "20" };
+          if (keyword) params.keyword = keyword;
+
+          const response = await getProducts(currentPage, 20, params);
+          allItems = response.items || [];
+          totalPagesResult = response.pages || 1;
+        }
 
         // Filter out products with no stock (double check)
-        const inStockProducts = (response.items || []).filter((product) => {
+        const inStockProducts = allItems.filter((product) => {
           const hasStock =
             (product.countInStock ?? 0) > 0 ||
             (product.variants &&
@@ -322,7 +367,7 @@ const ShopContent = () => {
         });
 
         setProducts(inStockProducts);
-        setTotalPages(response.pages || 1);
+        setTotalPages(totalPagesResult);
       } catch (error) {
         console.error(`Failed to fetch products:`, error);
         setProducts([]);
@@ -341,6 +386,8 @@ const ShopContent = () => {
     selectedSize,
     selectedColor,
     selectedBrand,
+    keyword,
+    collection,
     selectedMaterials,
     selectedDimensions,
     priceRange,
@@ -362,6 +409,8 @@ const ShopContent = () => {
     if (selectedColor) params.set("color", selectedColor);
     if (selectedBrand && selectedBrand.trim())
       params.set("brand", selectedBrand.trim());
+    if (keyword) params.set("keyword", keyword);
+    if (collection) params.set("collection", collection);
 
     // Always set price parameters if they differ from defaults
     if (priceRange[0] !== 0 || priceRange[1] !== 1000) {
@@ -386,6 +435,8 @@ const ShopContent = () => {
     selectedSize,
     selectedColor,
     selectedBrand,
+    keyword,
+    collection,
     priceRange,
     sorting,
     currentPage,

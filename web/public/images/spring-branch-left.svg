@@ -1,0 +1,134 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" fill="none">
+  <!-- Main branch -->
+  <path d="M-10 -5 Q 60 40, 120 70 Q 180 100, 250 105 Q 300 108, 360 95" 
+        stroke="#8B6347" stroke-width="6" stroke-linecap="round" fill="none" opacity="0.7"/>
+  <!-- Secondary branch -->
+  <path d="M80 50 Q 110 90, 130 130" 
+        stroke="#8B6347" stroke-width="3.5" stroke-linecap="round" fill="none" opacity="0.6"/>
+  <!-- Small twig -->
+  <path d="M170 85 Q 185 55, 195 30" 
+        stroke="#8B6347" stroke-width="2.5" stroke-linecap="round" fill="none" opacity="0.55"/>
+  <!-- Another twig -->
+  <path d="M240 100 Q 250 130, 265 155" 
+        stroke="#8B6347" stroke-width="2.5" stroke-linecap="round" fill="none" opacity="0.5"/>
+  <!-- Small twig up -->
+  <path d="M300 97 Q 310 70, 325 50" 
+        stroke="#8B6347" stroke-width="2" stroke-linecap="round" fill="none" opacity="0.45"/>
+
+  <!-- Flower 1 - large, at branch start -->
+  <g transform="translate(55, 30)" opacity="0.9">
+    <ellipse cx="0" cy="-10" rx="7" ry="11" fill="#fff5f7" transform="rotate(0)"/>
+    <ellipse cx="0" cy="-10" rx="7" ry="11" fill="#fff5f7" transform="rotate(72)"/>
+    <ellipse cx="0" cy="-10" rx="7" ry="11" fill="#fff5f7" transform="rotate(144)"/>
+    <ellipse cx="0" cy="-10" rx="7" ry="11" fill="#fff5f7" transform="rotate(216)"/>
+    <ellipse cx="0" cy="-10" rx="7" ry="11" fill="#fff5f7" transform="rotate(288)"/>
+    <circle cx="0" cy="0" r="4.5" fill="#f472b6"/>
+    <circle cx="0" cy="0" r="2.5" fill="#ec4899"/>
+  </g>
+
+  <!-- Flower 2 - medium -->
+  <g transform="translate(115, 60)" opacity="0.85">
+    <ellipse cx="0" cy="-8" rx="6" ry="9.5" fill="#fff0f3" transform="rotate(15)"/>
+    <ellipse cx="0" cy="-8" rx="6" ry="9.5" fill="#fff0f3" transform="rotate(87)"/>
+    <ellipse cx="0" cy="-8" rx="6" ry="9.5" fill="#fff0f3" transform="rotate(159)"/>
+    <ellipse cx="0" cy="-8" rx="6" ry="9.5" fill="#fff0f3" transform="rotate(231)"/>
+    <ellipse cx="0" cy="-8" rx="6" ry="9.5" fill="#fff0f3" transform="rotate(303)"/>
+    <circle cx="0" cy="0" r="4" fill="#f9a8d4"/>
+    <circle cx="0" cy="0" r="2" fill="#ec4899"/>
+  </g>
+
+  <!-- Flower 3 - large -->
+  <g transform="translate(185, 78)" opacity="0.9">
+    <ellipse cx="0" cy="-10" rx="7.5" ry="12" fill="#fff5f7" transform="rotate(10)"/>
+    <ellipse cx="0" cy="-10" rx="7.5" ry="12" fill="#fff5f7" transform="rotate(82)"/>
+    <ellipse cx="0" cy="-10" rx="7.5" ry="12" fill="#fff5f7" transform="rotate(154)"/>
+    <ellipse cx="0" cy="-10" rx="7.5" ry="12" fill="#fff5f7" transform="rotate(226)"/>
+    <ellipse cx="0" cy="-10" rx="7.5" ry="12" fill="#fff5f7" transform="rotate(298)"/>
+    <circle cx="0" cy="0" r="5" fill="#f472b6"/>
+    <circle cx="0" cy="0" r="2.8" fill="#ec4899"/>
+  </g>
+
+  <!-- Flower 4 - small on twig -->
+  <g transform="translate(90, 95)" opacity="0.8">
+    <ellipse cx="0" cy="-7" rx="5" ry="8" fill="#fce7f3" transform="rotate(5)"/>
+    <ellipse cx="0" cy="-7" rx="5" ry="8" fill="#fce7f3" transform="rotate(77)"/>
+    <ellipse cx="0" cy="-7" rx="5" ry="8" fill="#fce7f3" transform="rotate(149)"/>
+    <ellipse cx="0" cy="-7" rx="5" ry="8" fill="#fce7f3" transform="rotate(221)"/>
+    <ellipse cx="0" cy="-7" rx="5" ry="8" fill="#fce7f3" transform="rotate(293)"/>
+    <circle cx="0" cy="0" r="3.5" fill="#f9a8d4"/>
+    <circle cx="0" cy="0" r="1.8" fill="#ec4899"/>
+  </g>
+
+  <!-- Flower 5 - medium -->
+  <g transform="translate(260, 95)" opacity="0.85">
+    <ellipse cx="0" cy="-9" rx="6.5" ry="10" fill="#fff0f3" transform="rotate(20)"/>
+    <ellipse cx="0" cy="-9" rx="6.5" ry="10" fill="#fff0f3" transform="rotate(92)"/>
+    <ellipse cx="0" cy="-9" rx="6.5" ry="10" fill="#fff0f3" transform="rotate(164)"/>
+    <ellipse cx="0" cy="-9" rx="6.5" ry="10" fill="#fff0f3" transform="rotate(236)"/>
+    <ellipse cx="0" cy="-9" rx="6.5" ry="10" fill="#fff0f3" transform="rotate(308)"/>
+    <circle cx="0" cy="0" r="4" fill="#f472b6"/>
+    <circle cx="0" cy="0" r="2.2" fill="#ec4899"/>
+  </g>
+
+  <!-- Flower 6 - on upper twig -->
+  <g transform="translate(190, 35)" opacity="0.75">
+    <ellipse cx="0" cy="-7" rx="5.5" ry="8.5" fill="#fff5f7" transform="rotate(30)"/>
+    <ellipse cx="0" cy="-7" rx="5.5" ry="8.5" fill="#fff5f7" transform="rotate(102)"/>
+    <ellipse cx="0" cy="-7" rx="5.5" ry="8.5" fill="#fff5f7" transform="rotate(174)"/>
+    <ellipse cx="0" cy="-7" rx="5.5" ry="8.5" fill="#fff5f7" transform="rotate(246)"/>
+    <ellipse cx="0" cy="-7" rx="5.5" ry="8.5" fill="#fff5f7" transform="rotate(318)"/>
+    <circle cx="0" cy="0" r="3.5" fill="#f9a8d4"/>
+    <circle cx="0" cy="0" r="2" fill="#ec4899"/>
+  </g>
+
+  <!-- Flower 7 - large, on main branch end -->
+  <g transform="translate(330, 88)" opacity="0.8">
+    <ellipse cx="0" cy="-9" rx="6" ry="10" fill="#fce7f3" transform="rotate(8)"/>
+    <ellipse cx="0" cy="-9" rx="6" ry="10" fill="#fce7f3" transform="rotate(80)"/>
+    <ellipse cx="0" cy="-9" rx="6" ry="10" fill="#fce7f3" transform="rotate(152)"/>
+    <ellipse cx="0" cy="-9" rx="6" ry="10" fill="#fce7f3" transform="rotate(224)"/>
+    <ellipse cx="0" cy="-9" rx="6" ry="10" fill="#fce7f3" transform="rotate(296)"/>
+    <circle cx="0" cy="0" r="4" fill="#f472b6"/>
+    <circle cx="0" cy="0" r="2.2" fill="#ec4899"/>
+  </g>
+
+  <!-- Flower 8 - small bud on lower twig -->
+  <g transform="translate(125, 125)" opacity="0.7">
+    <ellipse cx="0" cy="-6" rx="4.5" ry="7" fill="#fce7f3" transform="rotate(25)"/>
+    <ellipse cx="0" cy="-6" rx="4.5" ry="7" fill="#fce7f3" transform="rotate(97)"/>
+    <ellipse cx="0" cy="-6" rx="4.5" ry="7" fill="#fce7f3" transform="rotate(169)"/>
+    <ellipse cx="0" cy="-6" rx="4.5" ry="7" fill="#fce7f3" transform="rotate(241)"/>
+    <ellipse cx="0" cy="-6" rx="4.5" ry="7" fill="#fce7f3" transform="rotate(313)"/>
+    <circle cx="0" cy="0" r="3" fill="#f9a8d4"/>
+    <circle cx="0" cy="0" r="1.5" fill="#ec4899"/>
+  </g>
+
+  <!-- Flower 9 - on right lower twig -->
+  <g transform="translate(258, 148)" opacity="0.7">
+    <ellipse cx="0" cy="-7" rx="5" ry="8.5" fill="#fff5f7" transform="rotate(12)"/>
+    <ellipse cx="0" cy="-7" rx="5" ry="8.5" fill="#fff5f7" transform="rotate(84)"/>
+    <ellipse cx="0" cy="-7" rx="5" ry="8.5" fill="#fff5f7" transform="rotate(156)"/>
+    <ellipse cx="0" cy="-7" rx="5" ry="8.5" fill="#fff5f7" transform="rotate(228)"/>
+    <ellipse cx="0" cy="-7" rx="5" ry="8.5" fill="#fff5f7" transform="rotate(300)"/>
+    <circle cx="0" cy="0" r="3.5" fill="#f472b6"/>
+    <circle cx="0" cy="0" r="1.8" fill="#ec4899"/>
+  </g>
+
+  <!-- Flower 10 - on upper right twig -->
+  <g transform="translate(320, 52)" opacity="0.65">
+    <ellipse cx="0" cy="-6.5" rx="5" ry="7.5" fill="#fce7f3" transform="rotate(35)"/>
+    <ellipse cx="0" cy="-6.5" rx="5" ry="7.5" fill="#fce7f3" transform="rotate(107)"/>
+    <ellipse cx="0" cy="-6.5" rx="5" ry="7.5" fill="#fce7f3" transform="rotate(179)"/>
+    <ellipse cx="0" cy="-6.5" rx="5" ry="7.5" fill="#fce7f3" transform="rotate(251)"/>
+    <ellipse cx="0" cy="-6.5" rx="5" ry="7.5" fill="#fce7f3" transform="rotate(323)"/>
+    <circle cx="0" cy="0" r="3" fill="#f9a8d4"/>
+    <circle cx="0" cy="0" r="1.5" fill="#ec4899"/>
+  </g>
+
+  <!-- Small buds (unopened) -->
+  <circle cx="145" cy="80" r="3.5" fill="#fbcfe8" opacity="0.6"/>
+  <circle cx="220" cy="92" r="3" fill="#fce7f3" opacity="0.55"/>
+  <circle cx="295" cy="100" r="2.5" fill="#fbcfe8" opacity="0.5"/>
+  <circle cx="105" cy="108" r="2.5" fill="#fce7f3" opacity="0.5"/>
+  <circle cx="350" cy="75" r="3" fill="#fbcfe8" opacity="0.45"/>
+</svg>
