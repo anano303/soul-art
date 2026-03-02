@@ -3,14 +3,14 @@
    ============================================ */
 
 .spring-section {
-  padding: clamp(1.5rem, 4vw, 2.5rem) 0 clamp(2rem, 5vw, 3rem);
+  padding: clamp(1.25rem, 3vw, 2rem) 0 clamp(1.5rem, 4vw, 2.5rem);
   background: linear-gradient(
     160deg,
-    #fdf2f8 0%,
-    #fce7f3 20%,
-    #fff1f2 40%,
-    #f0fdf4 70%,
-    #ecfdf5 100%
+    #fef7fb 0%,
+    #fdf2f8 25%,
+    #fefcfd 45%,
+    #f5fdf8 70%,
+    #f0fdf4 100%
   );
   position: relative;
   overflow: hidden;
@@ -34,26 +34,26 @@
   z-index: 1;
 }
 
-/* Soft pink/green glow overlay */
+/* Soft subtle glow overlay */
 .spring-section::before {
   content: "";
   position: absolute;
   inset: 0;
   background:
     radial-gradient(
-      ellipse at 5% 0%,
-      rgba(251, 191, 207, 0.4) 0%,
-      transparent 40%
+      ellipse at 10% 0%,
+      rgba(251, 191, 207, 0.18) 0%,
+      transparent 35%
     ),
     radial-gradient(
-      ellipse at 95% 0%,
-      rgba(251, 191, 207, 0.35) 0%,
-      transparent 40%
+      ellipse at 90% 0%,
+      rgba(251, 191, 207, 0.15) 0%,
+      transparent 35%
     ),
     radial-gradient(
       ellipse at 50% 100%,
-      rgba(167, 243, 208, 0.2) 0%,
-      transparent 50%
+      rgba(167, 243, 208, 0.12) 0%,
+      transparent 40%
     );
   pointer-events: none;
   z-index: 0;
@@ -62,13 +62,14 @@
 /* ── Cherry blossom branches (SVG images) ── */
 .spring-branch {
   position: absolute;
-  top: -10px;
-  width: clamp(180px, 25vw, 320px);
-  height: clamp(100px, 18vw, 220px);
+  top: -15px;
+  width: clamp(220px, 30vw, 420px);
+  height: clamp(130px, 22vw, 280px);
   z-index: 0;
   pointer-events: none;
   background-size: contain;
   background-repeat: no-repeat;
+  opacity: 0.85;
 }
 
 .spring-branch--left {
@@ -319,7 +320,7 @@
   font-weight: 600;
   font-size: 0.875rem;
   color: var(--primary-color, #012645);
-  background: #ffffff00;
+  background: transparent;
   border: 2px solid rgba(1, 38, 69, 0.25);
   box-shadow: 0 1px 4px rgba(1, 38, 69, 0.1);
   transition: all 0.2s ease;
@@ -456,8 +457,8 @@
   }
 
   .spring-branch--right {
-    width: 140px;
-    height: 90px;
+    width: 160px;
+    height: 100px;
   }
 }
 
