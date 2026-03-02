@@ -23,45 +23,24 @@
 }
 
 .see-more-btn {
-  border: none;
-  background: transparent;
+  border: 2px solid rgba(1, 38, 69, 0.2);
+  background: rgba(1, 38, 69, 0.04);
   color: var(--primary-color, #012645);
-  font-weight: bold;
-  float: right;
-  transition: all 0.3s ease-in-out;
+  font-weight: 600;
+  transition: all 0.2s ease;
   cursor: pointer;
-  position: relative;
-  overflow: hidden;
-  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  font-family: FiraGo, serif;
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
-  padding: 8px 40px;
-  border-radius: 8px;
+  font-family: "FiraGo", serif;
+  font-size: 0.875rem;
+  padding: 0.5rem 1.25rem;
+  border-radius: 4px;
+  white-space: nowrap;
 }
+
 .see-more-btn:hover {
-  color: #2a5530;
-  transition: all 0.3s ease-in-out;
-  cursor: pointer;
-}
-
-.see-more-btn::after {
-  content: "👀";
-  position: absolute;
-  right: 8px;
-  top: 50%;
-  transform: translateY(-50%);
-  font-size: 0.8em;
-  opacity: 0;
-  transition: all 0.3s ease;
-}
-
-.see-more-btn:hover::after {
-  opacity: 1;
-  right: 12px;
-}
-
-.see-more-btn:active {
-  transform: translateY(0) scale(0.95);
+  background: rgba(1, 38, 69, 0.08);
+  border-color: rgba(1, 38, 69, 0.35);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(1, 38, 69, 0.15);
 }
 
 .two-column-layout .product-columns {
@@ -87,8 +66,44 @@
 
 .shop-container {
   position: relative;
-
   overflow: hidden;
+  padding: clamp(1.5rem, 4vw, 2.5rem) 0 clamp(2rem, 5vw, 3rem);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 253, 250, 1) 0%,
+    rgba(253, 250, 246, 1) 50%,
+    rgba(250, 247, 242, 1) 100%
+  );
+}
+
+.shop-container::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(69, 32, 1, 0.15),
+    transparent
+  );
+}
+
+.shop-container::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(69, 32, 1, 0.15),
+    transparent
+  );
 }
 
 .shop-animated-icons-container {
@@ -177,7 +192,10 @@
 }
 
 .shop-container .content {
+  width: 100%;
+
   margin: 0 auto;
+
   position: relative;
   z-index: 2;
 }
@@ -197,28 +215,25 @@
 
 .product-section {
   width: 100%;
-  margin-bottom: 2rem;
+  margin-bottom: 0;
+  padding: clamp(1.5rem, 3vw, 2.5rem) 0;
   position: relative;
-  /* margin-bottom: 4rem; */
-  border-radius: 15px;
-  overflow: hidden;
 }
 
-.product-section::before {
+.product-section + .product-section::before {
   content: "";
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
-  bottom: 0;
+  height: 1px;
   background: linear-gradient(
-    45deg,
-    rgba(255, 255, 255, 0.02) 0%,
-    rgba(248, 246, 240, 0.05) 50%,
-    rgba(255, 255, 255, 0.02) 100%
+    90deg,
+    transparent,
+    rgba(69, 32, 1, 0.12),
+    transparent
   );
   pointer-events: none;
-  z-index: -1;
 }
 
 /* .product-section:nth-child(odd)::before {
@@ -239,58 +254,19 @@
   );
 } */
 
-.see-more-mobile {
-  display: none; /* Hide on desktop */
+.see-more-mobile.see-more {
+  display: none; /* Hide on desktop — must beat .shop-container .see-more */
 }
 .section-title {
-  font-size: 2.8rem;
+  font-family: "FiraGo", serif;
+  font-size: clamp(1.5rem, 3vw, 2.2rem);
   font-weight: 800;
-  margin-bottom: 2.5rem;
-  text-align: left;
-  position: relative;
+  margin: 0;
   color: var(--primary-color, #012645);
-  font-family: FiraGo;
-  text-shadow: 3px 3px 8px rgba(0, 0, 0, 0.2);
-  padding-bottom: 1.5rem;
-  overflow: hidden;
-  letter-spacing: 1px;
-  line-height: 1.2;
-}
-
-.section-title::before {
-  content: "";
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 120px;
-  height: 6px;
-  background: linear-gradient(
-    90deg,
-    var(--secondary-color, var(--secondary-color)),
-    var(--primary-color, #012645),
-    #f48c06
-  );
-  border-radius: 3px;
-  transition: all 0.8s ease;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-  animation: shimmerBase 4s ease-in-out infinite;
-}
-
-@keyframes shimmerBase {
-  0%,
-  100% {
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-  }
-  50% {
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
-  }
-}
-
-.section-title:hover::before {
-  width: 250px;
-  height: 8px;
-  margin-left: 15px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  letter-spacing: 0.3px;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 /* 
 .section-title::after {
@@ -317,37 +293,16 @@
   }
 }
 
-/* კატეგორიების სპეციფიური ეფექტები */
-.section-title:first-child {
-  background: linear-gradient(135deg, var(--primary-color, #012645), #01456b);
-  -webkit-background-clip: text;
-  /* -webkit-text-fill-color: transparent; */
-  background-clip: text;
-}
-
-.section-title:last-child {
-  background: linear-gradient(135deg, var(--secondary-color), #654932);
-  -webkit-background-clip: text;
-  /* -webkit-text-fill-color: transparent; */
-  background-clip: text;
-}
-
 /* ანიმაცია */
 .section-title {
-  transform: translateY(30px);
+  transform: translateY(15px);
   opacity: 0;
-  transition: all 0.8s ease;
+  transition: all 0.5s ease;
 }
 
 .section-title.animate-visible {
   transform: translateY(0);
   opacity: 1;
-}
-
-/* ეფექტი hover-ზე */
-.section-title:hover {
-  transform: translateX(10px);
-  transition: all 0.4s ease;
 }
 
 /* ღია ყავისფერი ლურჯი კატეგორიებისთვის */
@@ -404,64 +359,20 @@
 }
 
 /* "ნახე ყველა" ღილაკების რესპონსივი ჩვენება */
-.see-more-desktop {
-  display: none; /* დაიმალოს დესკტოპზე */
+.see-more-desktop.see-more {
+  display: block;
 }
 
-.see-more-mobile {
-  display: block; /* იჩნდეს მობილურზე */
+.shop-container .see-more-mobile.see-more {
+  display: none;
 }
 
 .shop-container .see-more {
   display: flex;
   justify-content: center;
-  margin-top: 2rem;
-}
-
-.shop-container .see-more-btn {
-  background: linear-gradient(
-    135deg,
-    var(--secondary-color),
-    var(--primary-color, #012645)
-  );
-  color: white;
-  padding: 3px 25px;
-  border: none;
-  /* border-radius: 25px; */
-  cursor: pointer;
-  font-weight: 600;
-  font-size: 1rem;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(123, 86, 66, 0.3);
-  position: relative;
-  overflow: hidden;
-  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  font-family: FiraGo, serif;
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
-}
-
-.shop-container .see-more-btn::after {
-  content: "👀";
-  position: absolute;
-  right: 8px;
-  top: 50%;
-  transform: translateY(-50%);
-  font-size: 0.8em;
-  opacity: 0;
-  transition: all 0.3s ease;
-}
-
-.shop-container .see-more-btn:hover::after {
-  opacity: 1;
-  right: 12px;
-}
-
-.shop-container .see-more-btn:active {
-  transform: translateY(0) scale(0.95);
-}
-
-.shop-container .see-more-btn:hover {
-  animation: buttonPulse 2s infinite;
+  margin-top: 1.5rem;
+  margin-right: 0;
+  margin-bottom: 0;
 }
 
 /* pulse ეფექტი */
@@ -507,11 +418,7 @@
 
 /* ხელნაკეთი კატეგორიისთვის სპეციალური ეფექტები - ყავისფერი */
 .section-title.category-handmade {
-  position: relative;
   color: var(--secondary-color);
-  font-weight: 900;
-  text-shadow: 3px 3px 8px rgba(123, 86, 66, 0.4),
-    0 0 20px rgba(123, 86, 66, 0.2);
 }
 
 @keyframes handmadeTextGradient {
@@ -581,10 +488,7 @@
 
 /* ნახატების კატეგორიისთვის სპეციალური ეფექტები - ლურჯი */
 .section-title.category-paintings {
-  position: relative;
   color: var(--primary-color, #012645);
-  font-weight: 900;
-  /* text-shadow: 3px 3px 8px rgba(1, 38, 69, 0.4), 0 0 20px rgba(1, 38, 69, 0.2); */
 }
 
 @keyframes paintingsTextGradient {
@@ -695,9 +599,6 @@
   /* text-shadow: 4px 4px 12px rgba(1, 38, 69, 0.6), 0 0 30px rgba(1, 38, 69, 0.4),
     0 0 40px rgba(42, 90, 122, 0.3); */
 }
-.section-title {
-  font-family: FiraGo;
-}
 
 /* დამატებითი ეფექტები */
 /* .section-title.category-handmade::after {
@@ -747,12 +648,6 @@
     font-size: 2.2rem;
     margin-bottom: 2rem;
     letter-spacing: 0.5px;
-  }
-  .see-more-desktop {
-    display: none !important; /* Hide on mobile */
-  }
-  .see-more-mobile {
-    display: block; /* Show on mobile */
   }
 
   .category-emoji {
@@ -889,77 +784,30 @@
 
 /* სექციის header-ისთვის დამატებითი სტილები */
 .section-header {
-  position: relative;
-  margin-bottom: 2rem;
-  padding-bottom: 1rem;
-}
-
-.section-header::after {
-  content: "";
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 1px;
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    rgba(123, 86, 66, 0.3) 25%,
-    rgba(1, 38, 69, 0.3) 75%,
-    transparent 100%
-  );
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: clamp(1rem, 2.5vw, 1.5rem);
 }
 
 /* კატეგორიების მონაცვლეობითი ფერები */
 .product-section:nth-child(odd) .section-title {
-  color: var(--primary-color, #012645); /* ლურჯი - ნახატები */
-  padding-left: 5px;
-  padding-top: 5px;
-  display: flex;
-  align-items: center;
+  color: var(--primary-color, #012645);
 }
 
 .product-section:nth-child(even) .section-title {
-  color: var(--secondary-color); /* ყავისფერი - ხელნაკეთი */
-  padding-left: 5px;
-  padding-top: 5px;
-  display: flex;
-  align-items: center;
-}
-
-.product-section:nth-child(odd) .see-more-btn {
-  background: linear-gradient(135deg, var(--primary-color, #012645), #01456b);
-}
-
-.product-section:nth-child(odd) .see-more-btn:hover {
-  background: linear-gradient(135deg, #01456b, var(--primary-color, #012645));
-  box-shadow: 0 6px 20px rgba(1, 38, 69, 0.4);
-}
-
-.product-section:nth-child(even) .see-more-btn {
-  background: linear-gradient(135deg, var(--secondary-color), #8b6f47);
-}
-
-.product-section:nth-child(even) .see-more-btn:hover {
-  background: linear-gradient(135deg, #8b6f47, var(--secondary-color));
-  box-shadow: 0 6px 20px rgba(123, 86, 66, 0.4);
-}
-
-/* დესკტოპზე "ნახე ყველა" ღილაკების დამალვა */
-@media (min-width: 769px) {
-  .see-more-desktop {
-    display: none !important;
-  }
+  color: var(--secondary-color);
 }
 
 /* მობილურზე "ნახე ყველა" ღილაკების ჩვენება */
 @media (max-width: 768px) {
-  .see-more-desktop {
+  .see-more-desktop.see-more {
     display: none;
   }
 
-  .see-more-mobile {
-    display: block;
+  .shop-container .see-more-mobile.see-more {
+    display: flex;
   }
 
   .shop-container .see-more-btn {
@@ -976,66 +824,34 @@
   }
 }
 
-/* ღილაკების ნაცრისფერი ტექსტი */
-.shop-container .see-more-btn {
-  font-family: "FiraGo", serif;
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
-}
-
-/* რიბონის ეფექტი */
-.shop-container .see-more-btn::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(255, 255, 255, 0.4),
-    transparent
-  );
-  transition: left 0.6s ease;
-  z-index: 1;
-}
-
-.shop-container .see-more-btn:hover::before {
-  left: 100%;
-}
-
-/* ღილაკის ტექსტი */
-.shop-container .see-more-btn span {
-  position: relative;
-  z-index: 2;
-}
-
-/* კატეგორიის მიხედვით ღილაკების სპეციფიური ეფექტები */
+/* Button styles per category */
 .product-section:nth-child(odd) .see-more-btn {
-  background: linear-gradient(135deg, var(--primary-color, #012645), #01456b);
-  box-shadow: 0 4px 15px rgba(1, 38, 69, 0.3);
-}
-
-.product-section:nth-child(even) .see-more-btn {
-  background: linear-gradient(135deg, var(--secondary-color), #8b6f47);
-  box-shadow: 0 4px 15px rgba(123, 86, 66, 0.3);
+  color: var(--primary-color, #012645);
+  background: rgba(1, 38, 69, 0.04);
+  border: 2px solid rgba(1, 38, 69, 0.2);
+  box-shadow: 0 1px 3px rgba(1, 38, 69, 0.1);
 }
 
 .product-section:nth-child(odd) .see-more-btn:hover {
-  background: linear-gradient(135deg, #01456b, var(--primary-color, #012645));
-  box-shadow: 0 6px 20px rgba(1, 38, 69, 0.4);
-  animation: bluePulse 2s infinite;
+  background: rgba(1, 38, 69, 0.08);
+  border-color: rgba(1, 38, 69, 0.35);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(1, 38, 69, 0.15);
+}
+
+.product-section:nth-child(even) .see-more-btn {
+  color: var(--secondary-color, #7b5642);
+  background: rgba(123, 86, 66, 0.04);
+  border: 2px solid rgba(123, 86, 66, 0.2);
+  box-shadow: 0 1px 3px rgba(123, 86, 66, 0.1);
 }
 
 .product-section:nth-child(even) .see-more-btn:hover {
-  background: linear-gradient(135deg, #8b6f47, var(--secondary-color));
-  box-shadow: 0 6px 20px rgba(123, 86, 66, 0.4);
-  animation: brownPulse 2s infinite;
+  background: rgba(123, 86, 66, 0.08);
+  border-color: rgba(123, 86, 66, 0.35);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(123, 86, 66, 0.15);
 }
-.section-title {
-  font-size: 24px !important;
-}
-
 /* @keyframes bluePulse {
   0% {
     box-shadow: 0 6px 20px rgba(1, 38, 69, 0.4);
