@@ -73,7 +73,10 @@ export class SellerRegisterDto {
     }
     return phone;
   })
-  @IsPhoneNumber(undefined, { message: 'ტელეფონის ნომერი არასწორი ფორმატისაა. გამოიყენეთ +995XXXXXXXXX ფორმატი' })
+  @IsPhoneNumber(undefined, {
+    message:
+      'ტელეფონის ნომერი არასწორი ფორმატისაა. გამოიყენეთ +995XXXXXXXXX ფორმატი',
+  })
   phoneNumber: string;
 
   @ApiProperty({
