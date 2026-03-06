@@ -62,6 +62,20 @@ $ npm run test:cov
 
 When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
 
+### DigitalOcean App Platform (avoid "status degraded" / high RAM)
+
+If the app shows high RAM (e.g. 90%) and restarts or "Unknown issue" on DO:
+
+1. **Set Node heap limit** in your App Spec or Component env so the process doesn’t use all container RAM and get killed:
+   - Add env: `NODE_OPTIONS=--max-old-space-size=384` (for a 512MB instance; use ~75% of instance RAM).
+   - For 1GB instance use `--max-old-space-size=768` or similar.
+
+2. **Optional env vars** (already have safe defaults in code):
+   - `BODY_LIMIT` – request body limit (default `10mb`). Set to `50mb` only if you need large uploads and have enough RAM.
+   - `ARGON2_MEMORY_COST` – password hashing memory (default `16384` = 16 MiB). Increase only if you have RAM to spare.
+
+3. **Resource sizing**: Prefer **increasing RAM** per instance or **more instances** with lower RAM each, so autoscaling can absorb traffic without each instance hitting 90% memory.
+
 If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
 
 ```bash

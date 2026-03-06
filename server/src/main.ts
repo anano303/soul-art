@@ -84,10 +84,12 @@ async function bootstrap() {
     optionsSuccessStatus: 204,
   });
 
-  // Configure express middleware for larger file uploads (after CORS)
-  app.use(express.json({ limit: '50mb' }));
-  app.use(express.urlencoded({ limit: '50mb', extended: true }));
-  app.use(express.raw({ limit: '50mb' }));
+  // Body limits: lower than 50mb to avoid high RAM on small instances (e.g. DO).
+  // Each request holds the body in memory; use e.g. BODY_LIMIT=50mb only if needed.
+  const bodyLimit = process.env.BODY_LIMIT || '50mb';
+  app.use(express.json({ limit: bodyLimit }));
+  app.use(express.urlencoded({ limit: bodyLimit, extended: true }));
+  app.use(express.raw({ limit: bodyLimit }));
 
   // Security middleware (configured to work with CORS)
   app.use(
