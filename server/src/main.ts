@@ -11,8 +11,45 @@ import * as fs from 'fs';
 import * as express from 'express';
 import { apiRateLimit } from './middleware/security.middleware';
 import { CloudinaryUrlInterceptor } from './interceptors/cloudinary-url.interceptor';
-import { MulterExceptionFilter } from './interceptors/multer-exception.filter';
+import { GlobalExceptionFilter } from './filters/global-exception.filter';
 import { CloudinaryMigrationService } from './cloudinary/services/cloudinary-migration.service';
+
+const logCrash = (tag: string, err: unknown, context?: string) => {
+  const msg = err instanceof Error ? err.message : String(err);
+  const stack = err instanceof Error ? err.stack : undefined;
+  const out = [
+    `[CRASH][${tag}]`,
+    context ?? '',
+    msg,
+    stack ?? '',
+  ]
+    .filter(Boolean)
+    .join(' ');
+  console.error(out);
+};
+
+function setupGlobalErrorHandlers() {
+  process.on('uncaughtException', (err: Error) => {
+    logCrash('uncaughtException', err);
+    process.exit(1);
+  });
+
+  process.on('unhandledRejection', (reason: unknown, promise: Promise<unknown>) => {
+    logCrash('unhandledRejection', reason, `promise=${String(promise)}`);
+  });
+
+  process.on('SIGTERM', () => {
+    console.error('[CRASH][SIGTERM] Process received SIGTERM (e.g. platform restart or OOM).');
+    process.exit(0);
+  });
+
+  process.on('SIGINT', () => {
+    console.error('[CRASH][SIGINT] Process received SIGINT.');
+    process.exit(0);
+  });
+}
+
+setupGlobalErrorHandlers();
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
@@ -58,10 +95,8 @@ async function bootstrap() {
         origin.includes('.vercel.app') ||
         origin.includes('soulart.ge') // Allow all soulart.ge subdomains
       ) {
-        console.log(`✅ CORS allowed origin: ${origin || 'no-origin'}`);
         callback(null, true);
       } else {
-        console.warn(`❌ CORS blocked origin: ${origin}`);
         callback(new Error('Not allowed by CORS'), false);
       }
     },
@@ -123,8 +158,8 @@ async function bootstrap() {
   const cloudinaryMigrationService = app.get(CloudinaryMigrationService);
   app.useGlobalInterceptors(new CloudinaryUrlInterceptor(cloudinaryMigrationService));
 
-  // Apply Multer exception filter for better upload error handling
-  app.useGlobalFilters(new MulterExceptionFilter());
+  // Global exception filter: logs all errors with [CRASH][HTTP] for debugging restarts
+  app.useGlobalFilters(new GlobalExceptionFilter());
 
   app.use('/favicon.ico', (req, res) => res.status(204).send());
 
