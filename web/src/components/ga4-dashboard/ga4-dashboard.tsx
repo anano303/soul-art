@@ -154,6 +154,7 @@ export default function GA4Dashboard() {
   const [dauData, setDauData] = useState<DauData | null>(null);
   const [dauDays, setDauDays] = useState<7 | 30 | 90>(30);
   const [dauLoading, setDauLoading] = useState(false);
+  const [dauTooltip, setDauTooltip] = useState<{ date: string; activeUsers: number; x: number; y: number } | null>(null);
   const [chatAnalytics, setChatAnalytics] = useState<ChatAnalyticsData | null>(
     null
   );
@@ -899,82 +900,6 @@ export default function GA4Dashboard() {
                 : "მონაცემები ჯერ არ არის ხელმისაწვდომი. GA4 Data API-ს ჩვეულებრივ 24-48 საათი სჭირდება მონაცემების დამუშავებისთვის. ივენთები ტრექინგში არიან - შეამოწმეთ GA4 Real-time რეპორტები ან ბრაუზერის კონსოლი '[GA4] Event sent:' შეტყობინებებისთვის."}
             </div>
           )}
-
-          {/* DAU - Daily Active Users */}
-          <section className="dau-section">
-            <h3 className="dau-section__title">
-              📈 {language === "en" ? "Daily Active Users (DAU)" : "ყოველდღიური აქტიური მომხმარებლები (DAU)"}
-            </h3>
-            {dauLoading ? (
-              <div className="dau-loading">
-                <div className="spinner" />
-                <span>{language === "en" ? "Loading..." : "იტვირთება..."}</span>
-              </div>
-            ) : dauData ? (
-              <>
-                <div className="dau-today-row">
-                  <div className="dau-today-card">
-                    <span className="dau-today-value">{dauData.dauToday}</span>
-                    <span className="dau-today-label">
-                      {language === "en" ? "Today" : "დღეს"}
-                    </span>
-                  </div>
-                </div>
-                <div className="dau-period-tabs">
-                  {([7, 30, 90] as const).map((d) => (
-                    <button
-                      key={d}
-                      className={`dau-period-tab ${dauDays === d ? "active" : ""}`}
-                      onClick={() => setDauDays(d)}
-                    >
-                      {d === 7
-                        ? language === "en"
-                          ? "7 days"
-                          : "7 დღე"
-                        : d === 30
-                        ? language === "en"
-                          ? "30 days"
-                          : "30 დღე"
-                        : language === "en"
-                        ? "90 days"
-                        : "90 დღე"}
-                    </button>
-                  ))}
-                </div>
-                <div className="dau-chart-wrapper">
-                  <div className="dau-chart" role="img" aria-label="DAU over time">
-                    {dauData.dailyData.map((day) => {
-                      const max = Math.max(
-                        ...dauData.dailyData.map((x) => x.activeUsers),
-                        1
-                      );
-                      const heightPct = max > 0 ? (day.activeUsers / max) * 100 : 0;
-                      const label = new Date(day.date).toLocaleDateString(
-                        language === "en" ? "en-US" : "ka-GE",
-                        { month: "short", day: "numeric" }
-                      );
-                      return (
-                        <div key={day.date} className="dau-chart-bar-wrap" title={`${label}: ${day.activeUsers}`}>
-                          <div
-                            className="dau-chart-bar"
-                            style={{ height: `${heightPct}%` }}
-                          />
-                          <span className="dau-chart-label">{label}</span>
-                          <span className="dau-chart-value">{day.activeUsers}</span>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              </>
-            ) : (
-              <div className="dau-empty">
-                {language === "en"
-                  ? "No DAU data available. Visitor tracking may not have enough history yet."
-                  : "DAU მონაცემები არ არის. ვიზიტორების ტრექინგს შეიძლება ჯერ არ ჰქონდეს საკმარისი ისტორია."}
-              </div>
-            )}
-          </section>
         </div>
 
         <div className="ga4-dashboard__time-range">
@@ -1291,6 +1216,205 @@ export default function GA4Dashboard() {
                 </div>
               </div>
 
+              {/* DAU + Funnel row (half width each), before AI Chat Analytics */}
+              <div className="ga4-dau-funnel-row">
+                <section className="dau-section dau-section--half">
+                  <h3 className="dau-section__title">
+                    📈 {language === "en" ? "Daily Active Users (DAU)" : "ყოველდღიური აქტიური მომხმარებლები (DAU)"}
+                  </h3>
+                  {dauLoading ? (
+                    <div className="dau-loading">
+                      <div className="spinner" />
+                      <span>{language === "en" ? "Loading..." : "იტვირთება..."}</span>
+                    </div>
+                  ) : dauData ? (
+                    <>
+                      <div className="dau-today-row">
+                        <div className="dau-today-card">
+                          <span className="dau-today-value">{dauData.dauToday}</span>
+                          <span className="dau-today-label">
+                            {language === "en" ? "Today" : "დღეს"}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="dau-period-tabs">
+                        {([7, 30, 90] as const).map((d) => (
+                          <button
+                            key={d}
+                            className={`dau-period-tab ${dauDays === d ? "active" : ""}`}
+                            onClick={() => setDauDays(d)}
+                          >
+                            {d === 7
+                              ? language === "en"
+                                ? "7 days"
+                                : "7 დღე"
+                              : d === 30
+                              ? language === "en"
+                                ? "30 days"
+                                : "30 დღე"
+                              : language === "en"
+                              ? "90 days"
+                              : "90 დღე"}
+                          </button>
+                        ))}
+                      </div>
+                      <div className="dau-chart-legend">
+                        <span className="dau-chart-legend__dot" />
+                        <span className="dau-chart-legend__text">
+                          {language === "en" ? "Active users" : "აქტიური მომხმარებლები"}
+                        </span>
+                      </div>
+                      <div className="dau-chart-wrapper" onMouseLeave={() => setDauTooltip(null)}>
+                        {(() => {
+                          const rawData = dauData.dailyData;
+                          const maxVal = Math.max(...rawData.map((x) => x.activeUsers), 1);
+                          const vw = 800;
+                          const vh = 280;
+                          const pad = { top: 20, right: 16, bottom: 36, left: 48 };
+                          const chartW = vw - pad.left - pad.right;
+                          const chartH = vh - pad.top - pad.bottom;
+                          const n = rawData.length;
+                          const yTicks = 5;
+                          const formatY = (v: number) => (v >= 1000 ? `${(v / 1000).toFixed(1)}k` : String(v));
+                          const points = rawData.map((d, i) => {
+                            const x = pad.left + (n > 1 ? (i / (n - 1)) * chartW : chartW / 2);
+                            const y = pad.top + chartH - (d.activeUsers / maxVal) * chartH;
+                            return { x, y, ...d };
+                          });
+                          const linePath = points.map((p, i) => `${i === 0 ? "M" : "L"} ${p.x} ${p.y}`).join(" ");
+                          const areaPath =
+                            linePath +
+                            ` L ${points[points.length - 1].x} ${pad.top + chartH} L ${points[0].x} ${pad.top + chartH} Z`;
+                          const labelStep = n <= 7 ? 1 : n <= 14 ? 2 : n <= 30 ? Math.ceil(n / 6) : Math.ceil(n / 8);
+                          return (
+                            <>
+                              <svg
+                                className="dau-line-chart"
+                                viewBox={`0 0 ${vw} ${vh}`}
+                                preserveAspectRatio="xMidYMid meet"
+                                role="img"
+                                aria-label="Daily active users over time"
+                              >
+                                <defs>
+                                  <linearGradient id="dau-area-grad" x1="0" y1="0" x2="0" y2="1">
+                                    <stop offset="0%" stopColor="#3b82f6" stopOpacity={0.18} />
+                                    <stop offset="100%" stopColor="#3b82f6" stopOpacity={0.02} />
+                                  </linearGradient>
+                                </defs>
+                                {Array.from({ length: yTicks }).map((_, i) => {
+                                  const y = pad.top + (i / (yTicks - 1)) * chartH;
+                                  const val = i === yTicks - 1 ? 0 : Math.round((1 - i / (yTicks - 1)) * maxVal);
+                                  return (
+                                    <g key={i}>
+                                      <line x1={pad.left} y1={y} x2={pad.left + chartW} y2={y} className="dau-grid-line" />
+                                      <text x={pad.left - 10} y={y + 4} textAnchor="end" className="dau-y-label">{formatY(val)}</text>
+                                    </g>
+                                  );
+                                })}
+                                <path d={areaPath} fill="url(#dau-area-grad)" />
+                                <path d={linePath} fill="none" stroke="#3b82f6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                {points.map((p) => (
+                                  <circle key={p.date} cx={p.x} cy={p.y} r={n > 60 ? 2 : 3} fill="#3b82f6" stroke="#fff" strokeWidth="1.5" className="dau-line-dot" />
+                                ))}
+                                {points.map((p) => (
+                                  <rect
+                                    key={`hit-${p.date}`}
+                                    x={p.x - (chartW / n) / 2}
+                                    y={pad.top}
+                                    width={chartW / n}
+                                    height={chartH}
+                                    fill="transparent"
+                                    onMouseEnter={(e) => {
+                                      const svg = e.currentTarget.closest("svg");
+                                      if (!svg) return;
+                                      const rect = svg.getBoundingClientRect();
+                                      const xPct = (p.x / vw) * rect.width;
+                                      const yPct = (p.y / vh) * rect.height;
+                                      setDauTooltip({ date: p.date, activeUsers: p.activeUsers, x: xPct, y: yPct });
+                                    }}
+                                    onMouseLeave={() => setDauTooltip(null)}
+                                  />
+                                ))}
+                                {points.filter((_, idx) => idx % labelStep === 0 || idx === n - 1).map((p) => (
+                                  <text key={`lbl-${p.date}`} x={p.x} y={vh - 10} textAnchor="middle" className="dau-axis-label">
+                                    {new Date(p.date).toLocaleDateString(language === "en" ? "en-US" : "ka-GE", { month: "short", day: "numeric" })}
+                                  </text>
+                                ))}
+                              </svg>
+                              {dauTooltip && (
+                                <div className="dau-html-tooltip" style={{ left: dauTooltip.x, top: dauTooltip.y }}>
+                                  <div className="dau-html-tooltip__date">
+                                    {new Date(dauTooltip.date).toLocaleDateString(language === "en" ? "en-US" : "ka-GE", { month: "long", day: "numeric", year: "numeric" })}
+                                  </div>
+                                  <div className="dau-html-tooltip__value">
+                                    <span className="dau-html-tooltip__dot" />
+                                    {dauTooltip.activeUsers.toLocaleString()} {language === "en" ? "users" : "მომხმარებელი"}
+                                  </div>
+                                </div>
+                              )}
+                            </>
+                          );
+                        })()}
+                      </div>
+                    </>
+                  ) : (
+                    <div className="dau-empty">
+                      {language === "en"
+                        ? "No DAU data available."
+                        : "DAU მონაცემები არ არის."}
+                    </div>
+                  )}
+                </section>
+                <section className="ga4-section ga4-section--half funnel-section--half">
+                  <h2 className="ga4-section__title">
+                    🛒 {language === "en" ? "Purchase Funnel" : "შეძენის ფუნელი"}
+                  </h2>
+                  <div className="funnel-bars">
+                    {data.purchaseFunnel.map((step, i) => {
+                      const firstCount = data.purchaseFunnel[0]?.count || 1;
+                      const pct = firstCount > 0 ? ((step.count / firstCount) * 100) : 0;
+                      const barWidth = Math.max(pct, 3);
+                      const dropoff = step.dropoff !== undefined && i > 0 ? step.dropoff : null;
+                      const hue = 152 - (i / Math.max(data.purchaseFunnel.length - 1, 1)) * 30;
+                      return (
+                        <div key={i} className="funnel-bar-row">
+                          <div className="funnel-bar-track">
+                            <div
+                              className="funnel-bar-fill"
+                              style={{
+                                width: `${barWidth}%`,
+                                background: `linear-gradient(90deg, hsl(${hue}, 72%, 32%) 0%, hsl(${hue}, 68%, 44%) 100%)`,
+                              }}
+                            />
+                            <div className="funnel-bar-inner">
+                              <span className="funnel-bar-name">{step.step}</span>
+                              <span className="funnel-bar-stats">
+                                <span className="funnel-bar-count">{step.count.toLocaleString()}</span>
+                                <span className="funnel-bar-pct">{pct.toFixed(0)}%</span>
+                                {dropoff !== null && (
+                                  <span className={`funnel-bar-dropoff ${dropoff > 0 ? "funnel-bar-dropoff--loss" : "funnel-bar-dropoff--gain"}`}>
+                                    {dropoff > 0 ? "▼" : "▲"} {Math.abs(dropoff).toFixed(1)}%
+                                  </span>
+                                )}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                    <div className="funnel-v2-summary">
+                      <div className="funnel-v2-summary-label">
+                        {language === "en" ? "Overall conversion" : "საერთო კონვერსია"}
+                      </div>
+                      <div className="funnel-v2-summary-value">{conversionRate}%</div>
+                      <div className="funnel-v2-summary-detail">
+                        {data.purchaseFunnel[data.purchaseFunnel.length - 1]?.count || 0} {language === "en" ? "purchases" : "შესყიდვა"} → {data.purchaseFunnel[0]?.count || 0} {language === "en" ? "started" : "დაწყება"}
+                      </div>
+                    </div>
+                  </div>
+                </section>
+              </div>
+
               {/* AI Chat Analytics */}
               {chatAnalytics && (
                 <section className="ga4-section">
@@ -1555,64 +1679,7 @@ export default function GA4Dashboard() {
                 )}
               </section>
 
-              {/* Section 4: Purchase Funnel */}
-              <section className="ga4-section">
-                <h2 className="ga4-section__title">
-                  🛒 {language === "en" ? "Purchase Funnel" : "შეძენის ფუნელი"}
-                </h2>
-                <div className="funnel-chart">
-                  {data.purchaseFunnel.map((step, index) => (
-                    <div key={index} className="funnel-step">
-                      <div className="funnel-step__bar-container">
-                        <div
-                          className="funnel-step__bar"
-                          style={{ width: `${step.percentage}%` }}
-                        >
-                          <span className="funnel-step__label">
-                            {step.step}
-                          </span>
-                        </div>
-                      </div>
-                      <div className="funnel-step__stats">
-                        <span className="funnel-step__count">
-                          {step.count.toLocaleString()}{" "}
-                          {language === "en" ? "users" : "მომხმარებელი"}
-                        </span>
-                        {step.dropoff !== undefined && (
-                          <span
-                            className="funnel-step__dropoff"
-                            style={{
-                              color: step.dropoff < 0 ? "#10b981" : "#ef4444",
-                            }}
-                          >
-                            {-step.dropoff.toFixed(1)}%
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                <div className="funnel-summary">
-                  <p>
-                    <strong>
-                      {language === "en"
-                        ? "Conversion Rate:"
-                        : "კონვერსიის მაჩვენებელი:"}
-                    </strong>{" "}
-                    {conversionRate}% (
-                    {data.purchaseFunnel[data.purchaseFunnel.length - 1]
-                      ?.count || 0}{" "}
-                    {language === "en" ? "purchases from" : "შესყიდვა"}{" "}
-                    {data.purchaseFunnel[0]?.count || 0}{" "}
-                    {language === "en"
-                      ? "cart additions"
-                      : "კალათაში დამატებიდან"}
-                    )
-                  </p>
-                </div>
-              </section>
-
-              {/* Section 5: Errors & API Metrics */}
+              {/* Errors & API Metrics */}
               <div className="ga4-section-row">
                 <section className="ga4-section ga4-section--half">
                   <h2 className="ga4-section__title">
