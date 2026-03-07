@@ -23,8 +23,9 @@ export function formatPrice(price: number) {
 }
 
 /**
- * Optimize Cloudinary image URLs for better performance
- * Adds auto format (webp/avif), quality optimization, and optional sizing
+ * Optimize image URLs for better performance
+ * - Cloudinary URLs: Adds auto format (webp/avif), quality optimization, and optional sizing
+ * - S3 URLs: Returns as-is (already optimized by sharp on upload)
  */
 export function optimizeCloudinaryUrl(
   url: string | undefined | null,
@@ -43,6 +44,11 @@ export function optimizeCloudinaryUrl(
   } = {}
 ): string {
   if (!url) return "";
+
+  // S3 URL-ები უკვე ოპტიმიზებულია (sharp-ით WebP) - პირდაპირ დააბრუნე
+  if (url.includes('.s3.') || url.includes('s3.amazonaws.com') || url.includes('soulart-s3')) {
+    return url;
+  }
 
   // Only optimize Cloudinary URLs
   if (!url.includes("cloudinary.com")) {

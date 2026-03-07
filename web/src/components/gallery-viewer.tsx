@@ -24,9 +24,13 @@ import { useToast } from "@/hooks/use-toast";
 import { GalleryInteractionStats } from "@/lib/gallery-interaction.service";
 import "./gallery-viewer.css";
 
-// Extract aspect ratio from Cloudinary URL
+// Extract aspect ratio from Cloudinary URL (S3 URLs don't have this info)
 function getImageAspectRatio(url: string): number | null {
   try {
+    // S3 URL-ებს არ აქვთ ტრანსფორმაციის ინფო - default 1:1
+    if (url.includes('.s3.') || url.includes('s3.amazonaws.com') || url.includes('soulart-s3')) {
+      return 1;
+    }
     // Cloudinary URLs often have dimensions in the transformation path
     // Format: .../upload/w_XXX,h_YYY/... or .../upload/c_fill,w_XXX,h_YYY/...
     const match = url.match(/\/upload\/(?:[^/]*,)?w_(\d+)(?:,|\/)(?:[^/]*,)?h_(\d+)/);

@@ -9,6 +9,7 @@ import {
 import { Observable, from } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 import { CloudinaryMigrationService } from '../cloudinary/services/cloudinary-migration.service';
+import { ConfigService } from '@nestjs/config';
 
 /**
  * Cloudinary URL Interceptor
@@ -34,10 +35,16 @@ export class CloudinaryUrlInterceptor implements NestInterceptor {
   private cacheExpiry: number = 0;
   private readonly CACHE_TTL = 60000; // 1 minute
 
+  // S3 URL-ების ცნობა (ეს URL-ები არ უნდა შეიცვალოს)
+  private readonly S3_URL_PATTERNS = ['.s3.', 's3.amazonaws.com', 'soulart-s3'];
+
   constructor(
     @Optional()
     @Inject(CloudinaryMigrationService)
     private readonly migrationService?: CloudinaryMigrationService,
+    @Optional()
+    @Inject(ConfigService)
+    private readonly configService?: ConfigService,
   ) {}
 
   private async ensureCache(): Promise<void> {
@@ -89,12 +96,19 @@ export class CloudinaryUrlInterceptor implements NestInterceptor {
     const newCloudName = this.cachedNewCloudName || this.FALLBACK_NEW_CLOUD_NAME;
 
     // Handle strings first (most common case)
-    if (typeof data === 'string' && data.includes('res.cloudinary.com')) {
-      let result = data;
-      for (const oldName of oldCloudNames) {
-        result = result.replace(new RegExp(oldName, 'g'), newCloudName);
+    if (typeof data === 'string') {
+      // S3 URL-ები არ უნდა შეიცვალოს
+      if (this.S3_URL_PATTERNS.some(pattern => data.includes(pattern))) {
+        return data;
       }
-      return result;
+      if (data.includes('res.cloudinary.com')) {
+        let result = data;
+        for (const oldName of oldCloudNames) {
+          result = result.replace(new RegExp(oldName, 'g'), newCloudName);
+        }
+        return result;
+      }
+      return data;
     }
 
     // Handle primitive types

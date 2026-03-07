@@ -33,6 +33,7 @@ import { SettingsModule } from '../settings/settings.module';
 import { GeoModule } from '../geo/geo.module';
 import { ExchangeRateModule } from '../exchange-rate/exchange-rate.module';
 import { ShippingCountriesModule } from '../shipping-countries/shipping-countries.module';
+import { StorageModule } from '../storage/storage.module';
 
 @Module({
   imports: [
@@ -52,6 +53,7 @@ import { ShippingCountriesModule } from '../shipping-countries/shipping-countrie
     OrderModule,
     PaymentsModule,
     CloudinaryModule,
+    StorageModule,
     AiModule,
     // SeedsModule,
     ForumsModule,

@@ -6,6 +6,7 @@ import {
   SupportedImageModel,
 } from '../interfaces/image-generation.interface';
 import { CloudinaryService } from '@/cloudinary/services/cloudinary.service';
+import { StorageService } from '@/storage/storage.service';
 
 @Injectable()
 export class ImageGenerationService {
@@ -14,6 +15,7 @@ export class ImageGenerationService {
   constructor(
     private aiConfig: AiConfigService,
     private cloudinary: CloudinaryService,
+    private storageService: StorageService,
   ) {}
 
   async generateProductImage(
@@ -41,7 +43,15 @@ export class ImageGenerationService {
       const urls: string[] = await Promise.all(
         // @ts-ignore
         output.map(async (item: Buffer, index: number) => {
-          return this.cloudinary.uploadBuffer(item);
+          if (this.storageService.isS3Enabled()) {
+            const result = await this.storageService.uploadBuffer(item, {
+              folder: 'ai-generated',
+              contentType: 'image/png',
+            });
+            return result.url;
+          }
+          const result = await this.cloudinary.uploadBuffer(item);
+          return result.secure_url;
         }),
       );
 

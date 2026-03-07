@@ -42,9 +42,17 @@ const nextConfig: NextConfig = {
         port: "",
         pathname: "**",
       },
+      {
+        protocol: "https",
+        hostname: "soulart-s3.s3.eu-north-1.amazonaws.com",
+        port: "",
+        pathname: "**",
+      },
     ],
-    // Optimize image loading
-    unoptimized: true, // Disable image optimization to prevent 402 errors with Cloudinary
+    // S3-ზე სურათები უკვე ოპტიმიზებულია (sharp-ით WebP),
+    // ამიტომ Next.js-ის ოპტიმიზაცია გამორთულია - ზედმეტი პროცესინგი აღარ სჭირდება.
+    // Cloudinary-ზეც unoptimized იყო 402 შეცდომების გამო.
+    unoptimized: true,
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
     formats: ["image/webp", "image/avif"], // Modern image formats

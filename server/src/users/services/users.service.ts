@@ -31,6 +31,7 @@ import { BecomeSellerDto } from '../dtos/become-seller.dto';
 import { AdminProfileDto } from '../dtos/admin.profile.dto';
 import { UserCloudinaryService } from './user-cloudinary.service';
 import { CloudinaryService } from '@/cloudinary/services/cloudinary.service';
+import { StorageService } from '@/storage/storage.service';
 import { generateBaseArtistSlug } from '@/utils/slug-generator';
 import { detectBankFromIban } from '@/utils/georgian-banks';
 import { BalanceService } from './balance.service';
@@ -53,6 +54,7 @@ export class UsersService {
     private salesTrackingModel: Model<SalesTrackingDocument>,
     private readonly userCloudinaryService: UserCloudinaryService,
     private readonly cloudinaryService: CloudinaryService,
+    private readonly storageService: StorageService,
     private readonly balanceService: BalanceService,
     @Optional()
     @Inject(forwardRef(() => ReferralsService))
@@ -2136,7 +2138,16 @@ export class UsersService {
 
   async uploadImage(filePath: string, fileBuffer: Buffer): Promise<string> {
     try {
-      // Use CloudinaryService directly for buffer uploads
+      // Use StorageService (S3 or Cloudinary based on AWS_ENABLED)
+      if (this.storageService.isS3Enabled()) {
+        const result = await this.storageService.uploadBuffer(fileBuffer, {
+          folder: 'artists/profiles',
+          contentType: 'image/jpeg',
+        });
+        return result.url;
+      }
+
+      // Fallback to CloudinaryService directly for buffer uploads
       const result = await this.cloudinaryService.uploadBuffer(
         fileBuffer,
         undefined, // Let Cloudinary generate public ID
@@ -2242,13 +2253,11 @@ export class UsersService {
     // Remove user's profile image if exists
     if (user.profileImagePath) {
       try {
-        // Extract public ID from Cloudinary URL and delete
-        const publicId = this.extractPublicIdFromUrl(
+        // Delete image from appropriate storage provider
+        await this.storageService.deleteFile(
           user.profileImagePath as string,
+          'image',
         );
-        if (publicId) {
-          await this.cloudinaryService.deleteResource(publicId, 'image');
-        }
       } catch (error) {
         console.error('Failed to delete profile image', error);
         // Continue even if image deletion fails

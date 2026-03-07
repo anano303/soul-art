@@ -5,7 +5,12 @@ interface CloudinaryImageProps extends Omit<ImageProps, "src"> {
   src: string;
 }
 
+/**
+ * Image component that handles both Cloudinary and S3 URLs.
+ * S3 images are already optimized (WebP via sharp) so no extra processing needed.
+ * Cloudinary images use unoptimized to avoid Next.js double-processing.
+ */
 export function CloudinaryImage({ src, alt, ...props }: CloudinaryImageProps) {
-  // Use direct source from Cloudinary without Next.js image optimization
+  // S3 URL-ები უკვე ოპტიმიზებულია - unoptimized რომ ზედმეტი პროცესინგი არ მოხდეს
   return <Image src={src} alt={alt || "Image"} unoptimized={true} {...props} />;
 }

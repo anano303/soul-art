@@ -12,6 +12,7 @@ import { isValidObjectId, Model, Types } from 'mongoose';
 import { UsersService } from '@/users/services/users.service';
 import { queryParamsDto } from './dto/queryParams.dto';
 import { CloudinaryService } from '@/cloudinary/services/cloudinary.service';
+import { StorageService } from '@/storage/storage.service';
 import { AddCommentDto } from './dto/addComment.dto';
 import { SearchForumDto } from './dto/search-forum.dto';
 import * as mongoose from 'mongoose';
@@ -23,6 +24,7 @@ export class ForumsService {
     @InjectModel(Comment.name) private commentModel: Model<Comment>,
     private userService: UsersService,
     private cloudinaryService: CloudinaryService,
+    private storageService: StorageService,
   ) {}
 
   // Helper method to resolve image URLs (all images are now on Cloudinary)
@@ -57,8 +59,24 @@ export class ForumsService {
           return forum;
         }
 
-        // If file buffer provided, upload to Cloudinary
+        // If file buffer provided, upload image
         try {
+          if (this.storageService.isS3Enabled()) {
+            const uploadResult = await this.storageService.uploadImage(file, {
+              folder: 'forums',
+              maxWidth: 1200,
+              maxHeight: 1200,
+            });
+            const forum = await this.forumModel.create({
+              ...createForumDto,
+              user: user._id,
+              imagePath: uploadResult.url,
+            });
+            console.log('Forum created with image:', forum.imagePath);
+            return forum;
+          }
+
+          // Original Cloudinary upload
           console.log('Uploading image to Cloudinary...');
           const uploadResult = await this.cloudinaryService.uploadImage(file);
           console.log('Cloudinary upload result:', uploadResult);
@@ -77,7 +95,7 @@ export class ForumsService {
           console.log('Forum created with image:', forum.imagePath);
           return forum;
         } catch (uploadError) {
-          console.error('Cloudinary upload failed:', uploadError);
+          console.error('Image upload failed:', uploadError);
           throw new BadRequestException(
             `Image upload failed: ${uploadError.message}`,
           );
@@ -559,20 +577,30 @@ export class ForumsService {
 
     let imagePath = forum.imagePath;
     if (file) {
-      // If file buffer provided, upload to Cloudinary
+      // If file buffer provided, upload image
       try {
-        console.log('Uploading updated image to Cloudinary...');
-        const uploadResult = await this.cloudinaryService.uploadImage(file);
-        console.log('Cloudinary update upload result:', uploadResult);
+        if (this.storageService.isS3Enabled()) {
+          const uploadResult = await this.storageService.uploadImage(file, {
+            folder: 'forums',
+            maxWidth: 1200,
+            maxHeight: 1200,
+          });
+          imagePath = uploadResult.url;
+        } else {
+          // Original Cloudinary upload
+          console.log('Uploading updated image to Cloudinary...');
+          const uploadResult = await this.cloudinaryService.uploadImage(file);
+          console.log('Cloudinary update upload result:', uploadResult);
 
-        if (!uploadResult || !uploadResult.secure_url) {
-          throw new BadRequestException('Failed to upload image to Cloudinary');
+          if (!uploadResult || !uploadResult.secure_url) {
+            throw new BadRequestException('Failed to upload image to Cloudinary');
+          }
+
+          imagePath = uploadResult.secure_url;
         }
-
-        imagePath = uploadResult.secure_url;
         console.log('Forum updated with new image:', imagePath);
       } catch (uploadError) {
-        console.error('Cloudinary upload failed:', uploadError);
+        console.error('Image upload failed:', uploadError);
         throw new BadRequestException(
           `Image upload failed: ${uploadError.message}`,
         );
@@ -610,12 +638,11 @@ export class ForumsService {
     const fileId = deletedForum.imagePath;
     if (fileId) {
       try {
-        // Use Cloudinary to delete image
-        await this.cloudinaryService.deleteResource(fileId, 'image');
+        // Delete image from appropriate storage provider
+        await this.storageService.deleteFile(fileId, 'image');
       } catch (error) {
-        throw new BadRequestException(
-          'Failed to delete the image from Cloudinary',
-        );
+        console.warn('Failed to delete image from storage:', error);
+        // Don't throw - continue even if image deletion fails
       }
     }
 
