@@ -111,12 +111,16 @@ export class AnalyticsController {
     return this.visitorService.getActiveVisitors();
   }
 
-  // Daily Active Users (DAU) - Admin only
+  // Daily Active Users (DAU) - Admin only. Uses GA4 when configured, else visitor tracking.
   @Get('daily-active-users')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.Admin)
   async getDailyActiveUsers(@Query('days') days?: string) {
     const daysNum = days ? Math.min(90, Math.max(1, parseInt(days, 10) || 30)) : 30;
-    return this.visitorService.getDailyActiveUsers(daysNum);
+    try {
+      return await this.ga4Service.getDailyActiveUsers(daysNum);
+    } catch {
+      return this.visitorService.getDailyActiveUsers(daysNum);
+    }
   }
 }

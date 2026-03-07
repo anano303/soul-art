@@ -625,6 +625,66 @@ export class Ga4AnalyticsService {
   }
 
   /**
+   * Get Daily Active Users (DAU) from GA4 Data API.
+   * Returns activeUsers per day for the last N days (same shape as visitor-tracking DAU).
+   */
+  async getDailyActiveUsers(days: number = 30): Promise<{
+    dauToday: number;
+    dailyData: Array<{ date: string; activeUsers: number }>;
+  }> {
+    if (!this.analyticsDataClient || !this.propertyId) {
+      throw new Error('GA4 Analytics not configured');
+    }
+
+    const startDate = days <= 1 ? 'yesterday' : `${days}daysAgo`;
+
+    const response = await this.analyticsDataClient.properties.runReport({
+      property: `properties/${this.propertyId}`,
+      requestBody: {
+        dateRanges: [{ startDate, endDate: 'today' }],
+        dimensions: [{ name: 'date' }],
+        metrics: [{ name: 'activeUsers' }],
+        orderBys: [{ dimension: { dimensionName: 'date' } }],
+      },
+    });
+
+    const byDate = new Map<string, number>();
+    response.data.rows?.forEach((row) => {
+      const ga4Date = row.dimensionValues?.[0]?.value; // YYYYMMDD
+      const activeUsers = parseInt(row.metricValues?.[0]?.value || '0', 10);
+      if (ga4Date && ga4Date.length === 8) {
+        const normalized = `${ga4Date.slice(0, 4)}-${ga4Date.slice(4, 6)}-${ga4Date.slice(6, 8)}`;
+        byDate.set(normalized, activeUsers);
+      }
+    });
+
+    const now = new Date();
+    const todayStr = now.toISOString().slice(0, 10);
+    const dauToday = byDate.get(todayStr) ?? 0;
+
+    const dailyData: Array<{ date: string; activeUsers: number }> = [];
+    const d = new Date(now);
+    d.setUTCDate(d.getUTCDate() - days);
+    d.setUTCHours(0, 0, 0, 0);
+    const end = new Date(now);
+
+    while (d <= end) {
+      const dateStr = d.toISOString().slice(0, 10);
+      dailyData.push({
+        date: dateStr,
+        activeUsers: byDate.get(dateStr) ?? 0,
+      });
+      d.setUTCDate(d.getUTCDate() + 1);
+    }
+
+    this.logger.log(
+      `DAU from GA4: today=${dauToday}, days=${days}, points=${dailyData.length}`,
+    );
+
+    return { dauToday, dailyData };
+  }
+
+  /**
    * Get real-time active users with detailed information (last 30 minutes)
    */
   async getRealtimeUsers() {
