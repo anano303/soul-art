@@ -2031,3 +2031,150 @@
     max-width: 95%;
   }
 }
+
+/* DAU - Daily Active Users */
+.dau-section {
+  background: white;
+  border-radius: 1rem;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+}
+
+.dau-section__title {
+  margin: 0 0 1rem 0;
+  font-size: 1.25rem;
+  color: #1a202c;
+}
+
+.dau-loading {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 2rem;
+  color: #64748b;
+}
+
+.dau-today-row {
+  margin-bottom: 1rem;
+}
+
+.dau-today-card {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1rem 1.5rem;
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
+  border-radius: 0.75rem;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.dau-today-value {
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.dau-today-label {
+  font-size: 0.875rem;
+  opacity: 0.9;
+  margin-top: 0.25rem;
+}
+
+.dau-period-tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.25rem;
+}
+
+.dau-period-tab {
+  padding: 0.5rem 1rem;
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
+  color: #64748b;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.dau-period-tab:hover {
+  background: #f1f5f9;
+  color: #334155;
+}
+
+.dau-period-tab.active {
+  background: #3b82f6;
+  color: white;
+  border-color: #3b82f6;
+}
+
+.dau-chart-wrapper {
+  overflow-x: auto;
+  padding-bottom: 0.5rem;
+}
+
+.dau-chart {
+  display: flex;
+  align-items: flex-end;
+  gap: 4px;
+  min-height: 180px;
+  padding: 0.5rem 0;
+}
+
+.dau-chart-bar-wrap {
+  flex: 1;
+  min-width: 24px;
+  max-width: 48px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.dau-chart-bar {
+  width: 100%;
+  min-height: 4px;
+  border-radius: 4px 4px 0 0;
+  background: linear-gradient(180deg, #3b82f6 0%, #60a5fa 100%);
+  transition: height 0.3s ease;
+}
+
+.dau-chart-label {
+  font-size: 0.65rem;
+  color: #64748b;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+  text-align: center;
+}
+
+.dau-chart-value {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.dau-empty {
+  padding: 2rem;
+  text-align: center;
+  color: #64748b;
+  font-size: 0.9rem;
+}
+
+@media (max-width: 768px) {
+  .dau-today-value {
+    font-size: 1.5rem;
+  }
+
+  .dau-chart-bar-wrap {
+    min-width: 20px;
+    max-width: 32px;
+  }
+
+  .dau-chart-label {
+    font-size: 0.6rem;
+  }
+}

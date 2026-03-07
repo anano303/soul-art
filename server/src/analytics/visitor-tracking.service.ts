@@ -167,6 +167,67 @@ export class VisitorTrackingService {
   }
 
   /**
+   * Get Daily Active Users (DAU) - unique IPs per calendar day.
+   * Returns today's DAU and daily breakdown for the last N days.
+   */
+  async getDailyActiveUsers(days: number = 30): Promise<{
+    dauToday: number;
+    dailyData: Array<{ date: string; activeUsers: number }>;
+  }> {
+    const now = new Date();
+    const startDate = new Date(now);
+    startDate.setUTCDate(startDate.getUTCDate() - days);
+    startDate.setUTCHours(0, 0, 0, 0);
+
+    const todayStr = now.toISOString().slice(0, 10);
+
+    const raw = await this.visitorModel.aggregate([
+      {
+        $match: {
+          lastActivity: { $gte: startDate },
+        },
+      },
+      {
+        $group: {
+          _id: {
+            date: {
+              $dateToString: { format: '%Y-%m-%d', date: '$lastActivity' },
+            },
+            ip: '$ip',
+          },
+        },
+      },
+      {
+        $group: {
+          _id: '$_id.date',
+          activeUsers: { $sum: 1 },
+        },
+      },
+      { $sort: { _id: 1 } },
+    ]);
+
+    const byDate = new Map<string, number>();
+    raw.forEach((r: { _id: string; activeUsers: number }) => {
+      byDate.set(r._id, r.activeUsers);
+    });
+
+    const dauToday = byDate.get(todayStr) ?? 0;
+
+    const dailyData: Array<{ date: string; activeUsers: number }> = [];
+    const d = new Date(startDate);
+    while (d <= now) {
+      const dateStr = d.toISOString().slice(0, 10);
+      dailyData.push({
+        date: dateStr,
+        activeUsers: byDate.get(dateStr) ?? 0,
+      });
+      d.setUTCDate(d.getUTCDate() + 1);
+    }
+
+    return { dauToday, dailyData };
+  }
+
+  /**
    * Mark inactive visitors (older than 30 minutes)
    */
   async markInactiveVisitors() {

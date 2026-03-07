@@ -131,6 +131,11 @@ interface ChatStats {
   topQueries: { query: string; count: number }[];
 }
 
+interface DauData {
+  dauToday: number;
+  dailyData: Array<{ date: string; activeUsers: number }>;
+}
+
 export default function GA4Dashboard() {
   const { language } = useLanguage();
   const [loading, setLoading] = useState(true);
@@ -146,6 +151,9 @@ export default function GA4Dashboard() {
   const [showLiveUsers, setShowLiveUsers] = useState(false);
   const [liveUsersData, setLiveUsersData] = useState<RealtimeData | null>(null);
   const [liveUsersLoading, setLiveUsersLoading] = useState(false);
+  const [dauData, setDauData] = useState<DauData | null>(null);
+  const [dauDays, setDauDays] = useState<7 | 30 | 90>(30);
+  const [dauLoading, setDauLoading] = useState(false);
   const [chatAnalytics, setChatAnalytics] = useState<ChatAnalyticsData | null>(
     null
   );
@@ -159,7 +167,6 @@ export default function GA4Dashboard() {
   const [chatStats, setChatStats] = useState<ChatStats | null>(null);
   const [chatLogsLoading, setChatLogsLoading] = useState(false);
   const [selectedSession, setSelectedSession] = useState<string | null>(null);
-  const [chatSearchQuery, setChatSearchQuery] = useState("");
   const [emailAddress, setEmailAddress] = useState("");
   const [emailSending, setEmailSending] = useState(false);
 
@@ -355,6 +362,7 @@ export default function GA4Dashboard() {
 
       // Combine data - prioritize our tracking (has IP)
       const combinedUsers =
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         visitorsData?.visitors?.map((v: any) => ({
           id: v.id,
           sessionId: v.id,
@@ -584,6 +592,30 @@ export default function GA4Dashboard() {
       fetchLiveUsers();
     }
   };
+
+  const fetchDau = async (days: number) => {
+    try {
+      setDauLoading(true);
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/analytics/daily-active-users?days=${days}`,
+        { credentials: "include" }
+      );
+      if (res.ok) {
+        const data = await res.json();
+        setDauData(data);
+      } else {
+        setDauData(null);
+      }
+    } catch {
+      setDauData(null);
+    } finally {
+      setDauLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchDau(dauDays);
+  }, [dauDays]);
 
   const successRate =
     data.apiMetrics.total > 0
@@ -867,6 +899,82 @@ export default function GA4Dashboard() {
                 : "მონაცემები ჯერ არ არის ხელმისაწვდომი. GA4 Data API-ს ჩვეულებრივ 24-48 საათი სჭირდება მონაცემების დამუშავებისთვის. ივენთები ტრექინგში არიან - შეამოწმეთ GA4 Real-time რეპორტები ან ბრაუზერის კონსოლი '[GA4] Event sent:' შეტყობინებებისთვის."}
             </div>
           )}
+
+          {/* DAU - Daily Active Users */}
+          <section className="dau-section">
+            <h3 className="dau-section__title">
+              📈 {language === "en" ? "Daily Active Users (DAU)" : "ყოველდღიური აქტიური მომხმარებლები (DAU)"}
+            </h3>
+            {dauLoading ? (
+              <div className="dau-loading">
+                <div className="spinner" />
+                <span>{language === "en" ? "Loading..." : "იტვირთება..."}</span>
+              </div>
+            ) : dauData ? (
+              <>
+                <div className="dau-today-row">
+                  <div className="dau-today-card">
+                    <span className="dau-today-value">{dauData.dauToday}</span>
+                    <span className="dau-today-label">
+                      {language === "en" ? "Today" : "დღეს"}
+                    </span>
+                  </div>
+                </div>
+                <div className="dau-period-tabs">
+                  {([7, 30, 90] as const).map((d) => (
+                    <button
+                      key={d}
+                      className={`dau-period-tab ${dauDays === d ? "active" : ""}`}
+                      onClick={() => setDauDays(d)}
+                    >
+                      {d === 7
+                        ? language === "en"
+                          ? "7 days"
+                          : "7 დღე"
+                        : d === 30
+                        ? language === "en"
+                          ? "30 days"
+                          : "30 დღე"
+                        : language === "en"
+                        ? "90 days"
+                        : "90 დღე"}
+                    </button>
+                  ))}
+                </div>
+                <div className="dau-chart-wrapper">
+                  <div className="dau-chart" role="img" aria-label="DAU over time">
+                    {dauData.dailyData.map((day) => {
+                      const max = Math.max(
+                        ...dauData.dailyData.map((x) => x.activeUsers),
+                        1
+                      );
+                      const heightPct = max > 0 ? (day.activeUsers / max) * 100 : 0;
+                      const label = new Date(day.date).toLocaleDateString(
+                        language === "en" ? "en-US" : "ka-GE",
+                        { month: "short", day: "numeric" }
+                      );
+                      return (
+                        <div key={day.date} className="dau-chart-bar-wrap" title={`${label}: ${day.activeUsers}`}>
+                          <div
+                            className="dau-chart-bar"
+                            style={{ height: `${heightPct}%` }}
+                          />
+                          <span className="dau-chart-label">{label}</span>
+                          <span className="dau-chart-value">{day.activeUsers}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </>
+            ) : (
+              <div className="dau-empty">
+                {language === "en"
+                  ? "No DAU data available. Visitor tracking may not have enough history yet."
+                  : "DAU მონაცემები არ არის. ვიზიტორების ტრექინგს შეიძლება ჯერ არ ჰქონდეს საკმარისი ისტორია."}
+              </div>
+            )}
+          </section>
         </div>
 
         <div className="ga4-dashboard__time-range">

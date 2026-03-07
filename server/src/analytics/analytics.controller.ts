@@ -110,4 +110,13 @@ export class AnalyticsController {
   async getLiveVisitors() {
     return this.visitorService.getActiveVisitors();
   }
+
+  // Daily Active Users (DAU) - Admin only
+  @Get('daily-active-users')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.Admin)
+  async getDailyActiveUsers(@Query('days') days?: string) {
+    const daysNum = days ? Math.min(90, Math.max(1, parseInt(days, 10) || 30)) : 30;
+    return this.visitorService.getDailyActiveUsers(daysNum);
+  }
 }
