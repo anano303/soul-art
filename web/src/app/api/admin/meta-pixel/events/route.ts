@@ -164,17 +164,25 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // If all methods failed, return error
+    // If all methods failed, return empty success response instead of error
+    // (token may be expired - dashboard should still work with local tracking)
     if (!finalData) {
-      return NextResponse.json(
-        {
-          error: "Failed to fetch data from Facebook Graph API",
-          details: lastError,
-          suggestion:
-            "The 'activities' endpoint has been deprecated. Try using Facebook Events Manager directly.",
+      console.warn("⚠️ Facebook Graph API unavailable (token expired?), returning empty data");
+      return NextResponse.json({
+        success: true,
+        source: "unavailable",
+        events: [],
+        eventSummary: {
+          summary: {},
+          recentEvents: [],
+          advancedMatchingData: [],
+          totalEvents: 0,
+          eventsWithMatching: 0,
+          matchingRate: 0,
         },
-        { status: 400 }
-      );
+        lastUpdated: new Date().toISOString(),
+        note: "Facebook API unavailable. Use Events Manager for detailed stats: https://business.facebook.com/events_manager2",
+      });
     }
 
     return NextResponse.json(finalData);
