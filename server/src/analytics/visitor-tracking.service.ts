@@ -83,30 +83,36 @@ export class VisitorTrackingService {
   }
 
   /**
-   * Get active visitors (last 30 minutes) - IP-ით დათვლილი, ყველა გვერდით
+   * Get active visitors (last 30 minutes) - IP-ით დათვლილი, ყველა გვერდით.
+   * Total count is accurate; visitors list is limited to 100 for performance.
    */
   async getActiveVisitors() {
     const thirtyMinutesAgo = new Date(Date.now() - 30 * 60 * 1000);
 
-    // ჯერ ვიპოვოთ უნიკალური IP-ებით და ყველა გვერდი შევაგროვოთ
+    const matchStage = {
+      lastActivity: { $gte: thirtyMinutesAgo },
+      isActive: true,
+    };
+
+    // Get actual total count (unique IPs) without limit
+    const [totalResult] = await this.visitorModel.aggregate([
+      { $match: matchStage },
+      { $group: { _id: '$ip' } },
+      { $count: 'count' },
+    ]);
+    const total = totalResult?.count ?? 0;
+
+    // Get up to 100 visitors for the list (same grouping + lookup as before)
     const activeVisitors = await this.visitorModel.aggregate([
+      { $match: matchStage },
+      { $sort: { lastActivity: -1 } },
       {
-        $match: {
-          lastActivity: { $gte: thirtyMinutesAgo },
-          isActive: true,
-        },
-      },
-      {
-        $sort: { lastActivity: -1 },
-      },
-      {
-        // დავაჯგუფოთ IP-ით და შევაგროვოთ ყველა გვერდი
         $group: {
           _id: '$ip',
           id: { $first: '$_id' },
           ip: { $first: '$ip' },
-          pages: { $addToSet: '$page' }, // ყველა უნიკალური გვერდი
-          currentPage: { $first: '$page' }, // ბოლო გვერდი
+          pages: { $addToSet: '$page' },
+          currentPage: { $first: '$page' },
           device: { $first: '$device' },
           browser: { $first: '$browser' },
           os: { $first: '$os' },
@@ -119,14 +125,9 @@ export class VisitorTrackingService {
           userId: { $first: '$userId' },
         },
       },
+      { $sort: { lastActivity: -1 } },
+      { $limit: 100 },
       {
-        $sort: { lastActivity: -1 },
-      },
-      {
-        $limit: 100,
-      },
-      {
-        // Populate userId
         $lookup: {
           from: 'users',
           localField: 'userId',
@@ -143,7 +144,7 @@ export class VisitorTrackingService {
     ]);
 
     return {
-      total: activeVisitors.length,
+      total,
       visitors: activeVisitors.map((v: any) => ({
         id: v.id,
         ip: v.ip,
