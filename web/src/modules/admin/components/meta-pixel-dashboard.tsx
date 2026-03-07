@@ -196,31 +196,58 @@ function buildCountsFromEvents(events?: unknown[]): Record<string, number> {
   }, {});
 }
 
-// Real-time User Activity Component
+// Live visitor from backend
+interface LiveVisitor {
+  id: string;
+  ip: string;
+  page: string;
+  pages: string[];
+  device: string;
+  browser: string;
+  os: string;
+  country: string;
+  city: string;
+  referrer: string;
+  pageViews: number;
+  lastActivity: string;
+  sessionId: string;
+  userId?: string;
+  userName?: string;
+  userEmail?: string;
+}
+
+// Real-time User Activity Component - uses backend visitor tracking (MongoDB)
 function RealtimeUserList() {
-  const [users, setUsers] = useState<RealtimeUser[]>([]);
+  const [visitors, setVisitors] = useState<LiveVisitor[]>([]);
+  const [totalActive, setTotalActive] = useState(0);
   const [loading, setLoading] = useState(true);
   const [lastUpdate, setLastUpdate] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 20;
 
-  const fetchUserActivity = async () => {
+  const fetchLiveVisitors = async () => {
     try {
-      const response = await fetch("/api/admin/user-activity?limit=10");
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/v1";
+      const response = await fetch(`${apiUrl}/analytics/live-visitors`, {
+        credentials: "include",
+      });
       if (response.ok) {
         const data = await response.json();
-        setUsers(data.summary?.recentUsers || []);
-        setLastUpdate(data.lastUpdated || null);
+        setVisitors(data.visitors || []);
+        setTotalActive(data.total || 0);
+        setLastUpdate(new Date().toISOString());
       }
     } catch (error) {
-      console.error("Failed to fetch user activity:", error);
+      console.error("Failed to fetch live visitors:", error);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchUserActivity();
-    // Auto-refresh every 5 seconds
-    const interval = setInterval(fetchUserActivity, 5000);
+    fetchLiveVisitors();
+    // Auto-refresh every 10 seconds
+    const interval = setInterval(fetchLiveVisitors, 10000);
     return () => clearInterval(interval);
   }, []);
 
@@ -237,6 +264,13 @@ function RealtimeUserList() {
     return `${diffHours} საათის წინ`;
   };
 
+  // Pagination
+  const totalPages = Math.ceil(visitors.length / ITEMS_PER_PAGE);
+  const paginatedVisitors = visitors.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  );
+
   if (loading) {
     return (
       <div className="user-activity-loading">
@@ -248,10 +282,24 @@ function RealtimeUserList() {
 
   return (
     <div className="realtime-users-container">
+      {/* Big active user count */}
+      <div className="active-users-banner">
+        <div className="active-count-circle">
+          <span className="active-count-number">{totalActive}</span>
+        </div>
+        <div className="active-count-info">
+          <span className="active-count-label">აქტიური მომხმარებელი ახლა</span>
+          <span className="active-count-sub">ბოლო 30 წუთი</span>
+        </div>
+        <div className="active-count-pulse" />
+      </div>
+
       <div className="users-header">
         <div className="users-count">
           <Activity size={16} />
-          <span>{users.length} აქტიური მომხმარებელი</span>
+          <span>
+            ნაჩვენებია {paginatedVisitors.length} / {visitors.length} ვიზიტორი
+          </span>
         </div>
         {lastUpdate && (
           <div className="last-update">
@@ -260,63 +308,132 @@ function RealtimeUserList() {
         )}
       </div>
 
-      <div className="users-list">
-        {users.map((user, index) => (
-          <div key={index} className="user-activity-item">
+      {/* Scrollable users list */}
+      <div className="users-list-scroll">
+        {paginatedVisitors.map((visitor, index) => (
+          <div key={visitor.id || index} className="user-activity-item">
             <div className="user-info">
               <div className="user-avatar">
-                <User size={20} />
+                {visitor.userName ? (
+                  <span className="avatar-letter">
+                    {visitor.userName.charAt(0).toUpperCase()}
+                  </span>
+                ) : (
+                  <User size={20} />
+                )}
               </div>
               <div className="user-details">
                 <div className="user-name">
-                  {user.name !== "Anonymous" ? user.name : "🔍 მომხმარებელი"}
-                  {user.hasAdvancedMatching && (
-                    <span className="verified-badge">✓ verified</span>
+                  {visitor.userName || "🔍 მომხმარებელი"}
+                  {visitor.userEmail && (
+                    <span className="verified-badge">✓ რეგისტრირებული</span>
                   )}
                 </div>
                 <div className="user-activity-info">
-                  <span className="activity-url">{user.url}</span>
+                  <span className="activity-url" title={visitor.page}>
+                    {visitor.page}
+                  </span>
                   <span className="activity-time">
-                    {formatTimeAgo(user.timestamp)}
+                    {formatTimeAgo(visitor.lastActivity)}
                   </span>
                 </div>
+                {visitor.pages && visitor.pages.length > 1 && (
+                  <div className="user-pages-visited">
+                    <Eye size={11} />
+                    <span>{visitor.pageViews} გვერდი ნანახი</span>
+                    <span className="pages-list" title={visitor.pages.join(", ")}>
+                      ({visitor.pages.slice(0, 3).join(", ")}
+                      {visitor.pages.length > 3 ? ` +${visitor.pages.length - 3}` : ""})
+                    </span>
+                  </div>
+                )}
               </div>
             </div>
 
             <div className="user-meta">
               <div className="device-info">
-                {user.device === "Mobile" ? (
+                {visitor.device === "Mobile" || visitor.device === "mobile" ? (
                   <Smartphone size={14} />
                 ) : (
                   <Monitor size={14} />
                 )}
-                <span>{user.device}</span>
+                <span>{visitor.device}</span>
               </div>
 
-              {user.email && (
-                <div className="contact-info">
-                  <Mail size={12} />
-                  <span>{user.email}</span>
+              {visitor.browser && (
+                <div className="browser-tag">
+                  <Globe size={12} />
+                  <span>{visitor.browser}</span>
                 </div>
               )}
 
-              {user.phone && (
+              {visitor.userEmail && (
                 <div className="contact-info">
-                  <Phone size={12} />
-                  <span>{user.phone}</span>
+                  <Mail size={12} />
+                  <span>{visitor.userEmail}</span>
+                </div>
+              )}
+
+              {visitor.city && visitor.city !== "Unknown" && (
+                <div className="location-info">
+                  <Globe size={12} />
+                  <span>
+                    {visitor.city}
+                    {visitor.country && visitor.country !== "Unknown"
+                      ? `, ${visitor.country}`
+                      : ""}
+                  </span>
                 </div>
               )}
 
               <div className="ip-info">
-                <Globe size={12} />
-                <span>{user.ip}</span>
+                <Monitor size={12} />
+                <span>{visitor.ip}</span>
               </div>
+
+              {visitor.referrer && visitor.referrer !== "Direct" && (
+                <div className="referrer-info">
+                  <ExternalLink size={12} />
+                  <span>{visitor.referrer}</span>
+                </div>
+              )}
             </div>
           </div>
         ))}
       </div>
 
-      {users.length === 0 && (
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="users-pagination">
+          <button
+            className="pagination-btn"
+            onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+            disabled={currentPage === 1}
+          >
+            ← წინა
+          </button>
+          <div className="pagination-pages">
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+              <button
+                key={page}
+                className={`pagination-page ${currentPage === page ? "active" : ""}`}
+                onClick={() => setCurrentPage(page)}
+              >
+                {page}
+              </button>
+            ))}
+          </div>
+          <button
+            className="pagination-btn"
+            onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+            disabled={currentPage === totalPages}
+          >
+            შემდეგი →
+          </button>
+        </div>
+      )}
+
+      {visitors.length === 0 && (
         <div className="no-users">
           <Users size={48} />
           <p>მომხმარებლების აქტივობა არ მოიძებნა</p>
