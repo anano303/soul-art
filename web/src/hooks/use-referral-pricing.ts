@@ -151,14 +151,17 @@ export function useReferralPricing(product: MinimalProduct): ReferralPricing {
     if (campaign) {
       const appliesToAllVisitors = campaign.appliesTo.includes("all_visitors");
       const appliesToReferrals = campaign.appliesTo.includes(
-        "influencer_referrals"
+        "influencer_referrals",
       );
-      const hasReferralCode = !!(salesRefCode && salesRefCode.startsWith("SM_"));
+      const hasReferralCode = !!(
+        salesRefCode && salesRefCode.startsWith("SM_")
+      );
 
       // კამპანია ვრცელდება თუ:
       // 1. all_visitors - ყველაზე ვრცელდება (კოდის გარეშეც)
       // 2. influencer_referrals - მხოლოდ SM_ cookie-ით მოსულებზე
-      const campaignApplies = appliesToAllVisitors || (appliesToReferrals && hasReferralCode);
+      const campaignApplies =
+        appliesToAllVisitors || (appliesToReferrals && hasReferralCode);
 
       if (campaignApplies) {
         // სელერის ნებართვა - პროდუქტზე დაყენებული referralDiscountPercent
@@ -169,7 +172,10 @@ export function useReferralPricing(product: MinimalProduct): ReferralPricing {
           // პროდუქტს არ აქვს ნებართვა, ფასდაკლება არ ვრცელდება
         } else {
           // ფასდაკლება = min(სელერის ნებართვა, ადმინის მაქსიმუმი)
-          const discountPercent = Math.min(sellerPermission, campaign.maxDiscountPercent);
+          const discountPercent = Math.min(
+            sellerPermission,
+            campaign.maxDiscountPercent,
+          );
 
           if (discountPercent > 0) {
             referralDiscountPercent = discountPercent;
@@ -231,7 +237,7 @@ export function calculateReferralPrice(
     maxDiscountPercent: number;
     appliesTo: string[];
     onlyProductsWithPermission?: boolean;
-  }
+  },
 ): {
   hasReferralDiscount: boolean;
   referralDiscountPercent: number;
@@ -282,9 +288,12 @@ export function calculateReferralPrice(
 
   // Determine if campaign applies to this visitor
   const appliesToAllVisitors = campaignInfo.appliesTo.includes("all_visitors");
-  const appliesToReferrals = campaignInfo.appliesTo.includes("influencer_referrals");
+  const appliesToReferrals = campaignInfo.appliesTo.includes(
+    "influencer_referrals",
+  );
   const hasReferralCode = !!(salesRefCode && salesRefCode.startsWith("SM_"));
-  const campaignApplies = appliesToAllVisitors || (appliesToReferrals && hasReferralCode);
+  const campaignApplies =
+    appliesToAllVisitors || (appliesToReferrals && hasReferralCode);
 
   let referralDiscountPercent = 0;
   if (campaignApplies) {
@@ -295,7 +304,10 @@ export function calculateReferralPrice(
       // Product doesn't have permission - no discount
     } else {
       // discount = min(seller permission, admin max)
-      referralDiscountPercent = Math.min(sellerPermission, campaignInfo.maxDiscountPercent);
+      referralDiscountPercent = Math.min(
+        sellerPermission,
+        campaignInfo.maxDiscountPercent,
+      );
     }
   }
 

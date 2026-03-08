@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
     if (!pixelId || !accessToken) {
       return NextResponse.json(
         { error: "Missing Meta Pixel configuration" },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
@@ -31,7 +31,7 @@ export async function GET(request: NextRequest) {
           `${GRAPH_API_URL}/${pixelId}/stats?access_token=${accessToken}`,
           {
             cache: "no-store",
-          }
+          },
         );
 
         if (statsResponse.ok) {
@@ -51,7 +51,7 @@ export async function GET(request: NextRequest) {
             console.log(
               "⚠️ Facebook API returned empty data, using cached data with",
               lastSuccessfulData.eventSummary.totalEvents,
-              "events"
+              "events",
             );
             return NextResponse.json({
               ...lastSuccessfulData,
@@ -75,14 +75,14 @@ export async function GET(request: NextRequest) {
                 advancedMatchingData: [],
                 totalEvents: processedStats.totalEvents || 0,
                 eventsWithMatching: Math.floor(
-                  (processedStats.totalEvents || 0) * 0.15
+                  (processedStats.totalEvents || 0) * 0.15,
                 ), // Estimate 15% have advanced matching
                 matchingRate:
                   processedStats.totalEvents > 0
                     ? Math.floor(
                         ((processedStats.totalEvents * 0.15) /
                           processedStats.totalEvents) *
-                          100
+                          100,
                       )
                     : 0,
                 hourlyBreakdown: processedStats.hourlyBreakdown || {},
@@ -95,7 +95,7 @@ export async function GET(request: NextRequest) {
             console.log(
               "💾 Cached successful API response with",
               processedStats.totalEvents,
-              "events"
+              "events",
             );
           } else {
             console.log("⚠️ Facebook API returned empty data, clearing cache");
@@ -135,7 +135,7 @@ export async function GET(request: NextRequest) {
           `${GRAPH_API_URL}/${pixelId}?fields=id,name,creation_time,last_fired_time&access_token=${accessToken}`,
           {
             cache: "no-store",
-          }
+          },
         );
 
         if (pixelResponse.ok) {
@@ -167,7 +167,9 @@ export async function GET(request: NextRequest) {
     // If all methods failed, return empty success response instead of error
     // (token may be expired - dashboard should still work with local tracking)
     if (!finalData) {
-      console.warn("⚠️ Facebook Graph API unavailable (token expired?), returning empty data");
+      console.warn(
+        "⚠️ Facebook Graph API unavailable (token expired?), returning empty data",
+      );
       return NextResponse.json({
         success: true,
         source: "unavailable",
@@ -193,7 +195,7 @@ export async function GET(request: NextRequest) {
         error: "Internal server error",
         details: error instanceof Error ? error.message : String(error),
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

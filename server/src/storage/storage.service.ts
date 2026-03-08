@@ -209,14 +209,20 @@ export class StorageService implements OnModuleInit {
       const optimizedBuffer = await pipeline.toBuffer();
 
       // ლოგი ოპტიმიზაციის შედეგის
-      const savings = ((1 - optimizedBuffer.length / buffer.length) * 100).toFixed(1);
+      const savings = (
+        (1 - optimizedBuffer.length / buffer.length) *
+        100
+      ).toFixed(1);
       console.log(
         `🖼️ Image optimized: ${(buffer.length / 1024).toFixed(0)}KB → ${(optimizedBuffer.length / 1024).toFixed(0)}KB (${savings}% saved, ${format})`,
       );
 
       return { buffer: optimizedBuffer, contentType, extension };
     } catch (error) {
-      console.warn('⚠️ Image optimization failed, uploading original:', error.message);
+      console.warn(
+        '⚠️ Image optimization failed, uploading original:',
+        error.message,
+      );
       // ოპტიმიზაცია თუ ვერ მოხერხდა, ორიგინალი აიტვირთოს
       return {
         buffer,
@@ -236,12 +242,15 @@ export class StorageService implements OnModuleInit {
     },
   ): Promise<UploadResult> {
     // ოპტიმიზაცია sharp-ით ატვირთვამდე (Cloudinary q_auto,f_auto ეკვივალენტი)
-    const { buffer, contentType, extension } = await this.optimizeImage(file.buffer, {
-      maxWidth: optimizeOptions?.maxWidth || 2048,
-      maxHeight: optimizeOptions?.maxHeight || 2048,
-      quality: 82,
-      format: optimizeOptions?.format || 'webp',
-    });
+    const { buffer, contentType, extension } = await this.optimizeImage(
+      file.buffer,
+      {
+        maxWidth: optimizeOptions?.maxWidth || 2048,
+        maxHeight: optimizeOptions?.maxHeight || 2048,
+        quality: 82,
+        format: optimizeOptions?.format || 'webp',
+      },
+    );
 
     const uniqueId = crypto.randomBytes(16).toString('hex');
     const key = `${folder}/${uniqueId}${extension}`;
@@ -267,11 +276,16 @@ export class StorageService implements OnModuleInit {
     const cloudinaryOptions: any = {};
     if (options.folder) cloudinaryOptions.folder = options.folder;
     if (options.quality) cloudinaryOptions.quality = options.quality;
-    if (options.fetch_format) cloudinaryOptions.fetch_format = options.fetch_format;
-    if (options.transformation) cloudinaryOptions.transformation = options.transformation;
+    if (options.fetch_format)
+      cloudinaryOptions.fetch_format = options.fetch_format;
+    if (options.transformation)
+      cloudinaryOptions.transformation = options.transformation;
     if (options.format) cloudinaryOptions.format = options.format;
 
-    const result = await this.cloudinaryService.uploadImage(file, cloudinaryOptions);
+    const result = await this.cloudinaryService.uploadImage(
+      file,
+      cloudinaryOptions,
+    );
 
     return {
       url: result.secure_url,

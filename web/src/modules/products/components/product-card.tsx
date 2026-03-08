@@ -57,7 +57,7 @@ export function ProductCard({
           name?: string | null;
           nameEn?: string | null;
         }
-      | null
+      | null,
   ) => {
     if (!value) return "";
     if (typeof value === "string") return value;
@@ -73,7 +73,7 @@ export function ProductCard({
           name?: string | null;
           nameEn?: string | null;
         }
-      | null
+      | null,
   ) => {
     if (!value) return "";
     if (typeof value === "string") return value;
@@ -154,7 +154,7 @@ export function ProductCard({
     if (product.variants && product.variants.length > 0) {
       // Check if variants have no attributes (just stock)
       const hasNoAttributes = product.variants.every(
-        (v) => !v.size && !v.color && !v.ageGroup
+        (v) => !v.size && !v.color && !v.ageGroup,
       );
       if (hasNoAttributes) {
         // Sum all variant stocks for products without attributes
@@ -163,7 +163,7 @@ export function ProductCard({
       // For variants with attributes, sum all stocks
       const variantStock = product.variants.reduce(
         (sum, v) => sum + (v.stock || 0),
-        0
+        0,
       );
       return variantStock;
     }
@@ -200,8 +200,8 @@ export function ProductCard({
       const priceToUse = referralPricing.hasReferralDiscount
         ? referralPricing.referralPrice
         : isDiscounted
-        ? discountedPrice
-        : product.price;
+          ? discountedPrice
+          : product.price;
 
       if (!isInCart) {
         // Track quick purchase action
@@ -226,7 +226,7 @@ export function ProductCard({
           undefined,
           undefined,
           priceToUse,
-          referralInfo
+          referralInfo,
         );
       }
 
@@ -257,9 +257,16 @@ export function ProductCard({
 
   return (
     <div className={`product-card ${theme} ${className}`}>
-      {/* Discount badge */}
+      {/* Discount badges */}
       {isDiscounted && (
         <div className="discount-badge">-{product.discountPercentage}%</div>
+      )}
+      {referralPricing.hasReferralDiscount && (
+        <div
+          className={`discount-badge campaign-discount-badge${isDiscounted ? " has-regular-discount" : ""}`}
+        >
+          -{referralPricing.referralDiscountPercent}%
+        </div>
       )}
 
       {/* Product image and name - clickable link to product */}
@@ -326,8 +333,8 @@ export function ProductCard({
                 ? "Artist: "
                 : "მხატვარი: "
               : language === "en"
-              ? "Author: "
-              : "ავტორი: "}
+                ? "Author: "
+                : "ავტორი: "}
           </span>
           {product.user?.artistSlug ? (
             <Link
@@ -407,16 +414,21 @@ export function ProductCard({
                     className="original-price"
                     style={{ fontSize: "0.75rem" }}
                   >
-                    {formatPrice(referralPricing.originalPrice, product.convertedPrices)}
+                    {formatPrice(
+                      referralPricing.originalPrice,
+                      product.convertedPrices,
+                    )}
                   </span>
-                  {isDiscounted && referralPricing.basePrice !== referralPricing.originalPrice && (
-                    <span
-                      className="original-price"
-                      style={{ fontSize: "0.75rem" }}
-                    >
-                      {formatPrice(referralPricing.basePrice)}
-                    </span>
-                  )}
+                  {isDiscounted &&
+                    referralPricing.basePrice !==
+                      referralPricing.originalPrice && (
+                      <span
+                        className="original-price"
+                        style={{ fontSize: "0.75rem" }}
+                      >
+                        {formatPrice(referralPricing.basePrice)}
+                      </span>
+                    )}
                   <h3 className="product-price referral-final-price">
                     {formatPrice(referralPricing.referralPrice)}
                   </h3>
@@ -430,7 +442,10 @@ export function ProductCard({
                     {formatPrice(product.price, product.convertedPrices)}
                   </span>
                   <h3 className="product-price discounted-price">
-                    {formatPrice(discountedPrice, product.convertedDiscountedPrices)}
+                    {formatPrice(
+                      discountedPrice,
+                      product.convertedDiscountedPrices,
+                    )}
                   </h3>
                 </div>
               ) : (
@@ -454,8 +469,8 @@ export function ProductCard({
             referralPricing.hasReferralDiscount
               ? referralPricing.referralPrice
               : isDiscounted
-              ? discountedPrice
-              : product.price
+                ? discountedPrice
+                : product.price
           }
           hideQuantity={true}
           openCartOnAdd={false}

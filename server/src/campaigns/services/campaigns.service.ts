@@ -205,7 +205,10 @@ export class CampaignsService {
     }
 
     // Discount = min(seller permission, admin max)
-    const discountPercent = Math.min(productDiscount, campaign.maxDiscountPercent);
+    const discountPercent = Math.min(
+      productDiscount,
+      campaign.maxDiscountPercent,
+    );
 
     // Calculate amounts
     const discountAmount = Math.round(product.price * (discountPercent / 100));

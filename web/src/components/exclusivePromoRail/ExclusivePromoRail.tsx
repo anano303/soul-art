@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import Cookies from "js-cookie";
 import Link from "next/link";
 import Image from "next/image";
@@ -20,68 +20,92 @@ export default function ExclusivePromoRail({
   const { language } = useLanguage();
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [hasPromoCode, setHasPromoCode] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
+  const [promoTitle, setPromoTitle] = useState({
+    en: "Exclusive for You!",
+    ge: "ექსკლუზიურად შენთვის!",
+  });
+  const [promoSubtitle, setPromoSubtitle] = useState({
+    en: "Special prices just for you",
+    ge: "განსაკუთრებული ფასები მხოლოდ შენთვის",
+  });
+  const fetchedRef = useRef(false);
 
   useEffect(() => {
-    // Check for sales_ref cookie (promo code)
+    // Prevent double-fetch in strict mode
+    if (fetchedRef.current) return;
+    fetchedRef.current = true;
+
+    const baseUrl = process.env.NEXT_PUBLIC_API_URL || "";
+
+    // Check cookie synchronously
     const salesRef = Cookies.get("sales_ref");
-    console.log("[ExclusivePromoRail] sales_ref cookie:", salesRef);
+    const hasReferralCode = !!(salesRef && salesRef.startsWith("SM_"));
 
-    if (!salesRef || !salesRef.startsWith("SM_")) {
-      setHasPromoCode(false);
-      setIsLoading(false);
-      return;
-    }
+    // Fetch campaign and promo products IN PARALLEL for speed
+    const campaignPromise = fetch(`${baseUrl}/campaigns/active`, {
+      credentials: "include",
+    })
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => data?.campaign || null)
+      .catch(() => null);
 
-    setHasPromoCode(true);
+    const productsPromise = apiClient
+      .get("/products", {
+        params: { limit: maxProducts * 2, hasPromo: "true" },
+      })
+      .then((res) => res.data.items || res.data.products || [])
+      .catch(() => [] as Product[]);
 
-    // Fetch products - we'll filter by referralDiscountPercent on client
-    const fetchExclusiveProducts = async () => {
-      try {
-        // Fetch more products and filter on client side
-        const response = await apiClient.get("/products", {
-          params: {
-            limit: 200,
-          },
-        });
-
-        // API returns 'items' not 'products'
-        const allProducts = response.data.items || response.data.products || [];
-        console.log(
-          "[ExclusivePromoRail] Fetched products:",
-          allProducts.length,
+    Promise.all([campaignPromise, productsPromise]).then(
+      ([campaign, allProducts]) => {
+        const isAllVisitors = campaign?.appliesTo?.includes("all_visitors");
+        const isReferralCampaign = campaign?.appliesTo?.includes(
+          "influencer_referrals",
         );
 
-        // Filter products that have referral discount > 0
-        const productsWithDiscount = allProducts.filter(
-          (p: Product) =>
-            p.referralDiscountPercent && p.referralDiscountPercent > 0,
-        );
+        // Show if: all_visitors campaign OR referral campaign + cookie
+        if (!isAllVisitors && !(isReferralCampaign && hasReferralCode)) {
+          setIsVisible(false);
+          setIsLoading(false);
+          return;
+        }
 
-        // Shuffle and take maxProducts
-        const shuffled = productsWithDiscount.sort(() => Math.random() - 0.5);
+        // Update titles based on campaign type
+        if (isAllVisitors) {
+          setPromoTitle({
+            en: campaign?.badgeText || "Special Promotion!",
+            ge: campaign?.badgeTextGe || "აქცია!",
+          });
+          setPromoSubtitle({
+            en: "This week only — artworks at special prices",
+            ge: "შეზღუდული დროით — ნამუშევრები წარმოუდგენლად დაბალ ფასად",
+          });
+        }
+
+        setIsVisible(true);
+
+        // Shuffle and take maxProducts (backend already filtered hasPromo)
+        const shuffled = (allProducts as Product[]).sort(
+          () => Math.random() - 0.5,
+        );
         const selected = shuffled.slice(0, maxProducts);
 
         console.log(
-          "[ExclusivePromoRail] Products with referral discount:",
-          productsWithDiscount.length,
+          "[ExclusivePromoRail] Promo products:",
+          (allProducts as Product[]).length,
           "showing:",
           selected.length,
         );
 
         setProducts(selected);
-      } catch (error) {
-        console.error("Failed to fetch exclusive products:", error);
-      } finally {
         setIsLoading(false);
-      }
-    };
-
-    fetchExclusiveProducts();
+      },
+    );
   }, [maxProducts]);
 
-  // Don't render if no promo code
-  if (!hasPromoCode) {
+  // Don't render if campaign doesn't apply
+  if (!isVisible) {
     return null;
   }
 
@@ -91,7 +115,7 @@ export default function ExclusivePromoRail({
       <section className="exclusive-promo-section">
         <div className="exclusive-promo-header">
           <div className="exclusive-promo-icon">
-            <Image src="/image.jpg" alt="Gift" width={64} height={64} />
+            <Image src="/git.png" alt="Gift" width={64} height={64} />
           </div>
           <div className="exclusive-promo-titles">
             <h2 className="exclusive-promo-title">
@@ -113,16 +137,14 @@ export default function ExclusivePromoRail({
     <section className="exclusive-promo-section">
       <div className="exclusive-promo-header">
         <div className="exclusive-promo-icon">
-          <Image src="/image.jpg" alt="Gift" width={64} height={64} />
+          <Image src="/git.png" alt="Gift" width={64} height={64} />
         </div>
         <div className="exclusive-promo-titles">
           <h2 className="exclusive-promo-title">
-            {language === "en" ? "Exclusive for You!" : "ექსკლუზიურად შენთვის!"}
+            {language === "en" ? promoTitle.en : promoTitle.ge}
           </h2>
           <p className="exclusive-promo-subtitle">
-            {language === "en"
-              ? "Special prices just for you"
-              : "განსაკუთრებული ფასები მხოლოდ შენთვის"}
+            {language === "en" ? promoSubtitle.en : promoSubtitle.ge}
           </p>
         </div>
         <Link href="/shop?promo=true" className="exclusive-view-all">

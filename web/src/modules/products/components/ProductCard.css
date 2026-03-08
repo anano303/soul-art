@@ -876,6 +876,21 @@
   font-size: 0.9rem;
 }
 
+/* Campaign/Referral discount badge */
+.campaign-discount-badge {
+  background: linear-gradient(135deg, #10b981, #059669) !important;
+  left: 10px;
+  right: auto;
+  font-size: 0.85rem;
+  box-shadow: 0 2px 6px rgba(16, 185, 129, 0.4);
+}
+
+/* When only campaign badge exists (no regular), keep it on the right */
+.campaign-discount-badge:not(.has-regular-discount) {
+  left: auto;
+  right: 10px;
+}
+
 .price-container {
   display: flex;
   flex-direction: row;

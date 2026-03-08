@@ -106,7 +106,7 @@ const TRACKED_EVENT_LOOKUP = TRACKED_EVENT_NAMES.reduce<Record<string, string>>(
     acc[sanitizeEventKey(eventName)] = eventName;
     return acc;
   },
-  {}
+  {},
 );
 
 const EVENT_NAME_ALIASES: Record<string, string> = {
@@ -137,7 +137,7 @@ function normalizeEventName(rawName?: string | null): string | null {
 }
 
 function normalizeCountsRecord(
-  record?: Record<string, number> | null
+  record?: Record<string, number> | null,
 ): Record<string, number> {
   if (!record) {
     return {};
@@ -158,7 +158,7 @@ function normalizeCountsRecord(
       acc[normalized] = (acc[normalized] || 0) + numericValue;
       return acc;
     },
-    {}
+    {},
   );
 }
 
@@ -177,10 +177,10 @@ function buildCountsFromEvents(events?: unknown[]): Record<string, number> {
       typeof eventObject.event_name === "string"
         ? eventObject.event_name
         : typeof eventObject.name === "string"
-        ? eventObject.name
-        : typeof eventObject.eventName === "string"
-        ? eventObject.eventName
-        : null;
+          ? eventObject.name
+          : typeof eventObject.eventName === "string"
+            ? eventObject.eventName
+            : null;
 
     if (!nameCandidate) {
       return acc;
@@ -227,7 +227,8 @@ function RealtimeUserList() {
 
   const fetchLiveVisitors = async () => {
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/v1";
+      const apiUrl =
+        process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/v1";
       const response = await fetch(`${apiUrl}/analytics/live-visitors`, {
         credentials: "include",
       });
@@ -268,7 +269,7 @@ function RealtimeUserList() {
   const totalPages = Math.ceil(visitors.length / ITEMS_PER_PAGE);
   const paginatedVisitors = visitors.slice(
     (currentPage - 1) * ITEMS_PER_PAGE,
-    currentPage * ITEMS_PER_PAGE
+    currentPage * ITEMS_PER_PAGE,
   );
 
   if (loading) {
@@ -341,9 +342,15 @@ function RealtimeUserList() {
                   <div className="user-pages-visited">
                     <Eye size={11} />
                     <span>{visitor.pageViews} გვერდი ნანახი</span>
-                    <span className="pages-list" title={visitor.pages.join(", ")}>
+                    <span
+                      className="pages-list"
+                      title={visitor.pages.join(", ")}
+                    >
                       ({visitor.pages.slice(0, 3).join(", ")}
-                      {visitor.pages.length > 3 ? ` +${visitor.pages.length - 3}` : ""})
+                      {visitor.pages.length > 3
+                        ? ` +${visitor.pages.length - 3}`
+                        : ""}
+                      )
                     </span>
                   </div>
                 )}
@@ -477,8 +484,8 @@ export function MetaPixelDashboard() {
           typeof value === "number"
             ? value
             : typeof value === "string"
-            ? Number(value)
-            : 0;
+              ? Number(value)
+              : 0;
 
         acc[name] = Number.isFinite(numericValue)
           ? Math.max(0, numericValue)
@@ -513,7 +520,7 @@ export function MetaPixelDashboard() {
         `/api/admin/meta-pixel/events?t=${timestamp}`,
         {
           cache: "no-store",
-        }
+        },
       );
 
       if (!response.ok) {
@@ -565,12 +572,12 @@ export function MetaPixelDashboard() {
 
   const eventCountsFromEvents = useMemo(
     () => buildCountsFromEvents(eventData?.events),
-    [eventData]
+    [eventData],
   );
 
   const eventSummaryCounts = useMemo(
     () => normalizeCountsRecord(eventData?.eventSummary?.summary),
-    [eventData]
+    [eventData],
   );
 
   useEffect(() => {
@@ -606,11 +613,11 @@ export function MetaPixelDashboard() {
           acc[name] = eventCounts[name] ?? 0;
           return acc;
         },
-        {}
+        {},
       );
       window.localStorage.setItem(
         EVENT_COUNT_STORAGE_KEY,
-        JSON.stringify(payload)
+        JSON.stringify(payload),
       );
     } catch (storageError) {
       console.warn("Failed to persist Meta Pixel event counts", storageError);
@@ -636,7 +643,7 @@ export function MetaPixelDashboard() {
   const openFacebookEvents = () => {
     window.open(
       `https://business.facebook.com/events_manager2/list/pixel/${pixelInfo.pixelId}/test_events`,
-      "_blank"
+      "_blank",
     );
   };
 
@@ -684,13 +691,13 @@ export function MetaPixelDashboard() {
 
   const secondaryEvents = useMemo(() => {
     return trackedEvents.filter(
-      (event) => !PRIMARY_EVENT_NAMES.includes(event.name)
+      (event) => !PRIMARY_EVENT_NAMES.includes(event.name),
     );
   }, [trackedEvents]);
 
   const totalEventsFallback = useMemo(
     () => Object.values(eventCounts).reduce((acc, value) => acc + value, 0),
-    [eventCounts]
+    [eventCounts],
   );
 
   const totalEvents =

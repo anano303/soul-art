@@ -92,7 +92,7 @@ function SimilarProducts({
         });
 
         const response = await fetchWithAuth(
-          `/products?${searchParams.toString()}`
+          `/products?${searchParams.toString()}`,
         );
 
         if (!response.ok) {
@@ -376,7 +376,7 @@ export function ProductDetails({ product }: ProductDetailsProps) {
     queryFn: async () => {
       try {
         const response = await fetchWithAuth(
-          "/categories/attributes/age-groups"
+          "/categories/attributes/age-groups",
         );
         if (!response.ok) {
           return [];
@@ -401,7 +401,7 @@ export function ProductDetails({ product }: ProductDetailsProps) {
           name?: string | null;
           nameEn?: string | null;
         }
-      | null
+      | null,
   ) => {
     if (!value) return "";
     if (typeof value === "string") return value;
@@ -417,7 +417,7 @@ export function ProductDetails({ product }: ProductDetailsProps) {
           name?: string | null;
           nameEn?: string | null;
         }
-      | null
+      | null,
   ) => {
     if (!value) return "";
     if (typeof value === "string") return value;
@@ -448,7 +448,7 @@ export function ProductDetails({ product }: ProductDetailsProps) {
 
   const mainCategoryRawName = getRawName(product.mainCategory).toLowerCase();
   const mainCategoryLocalizedName = getLocalizedName(
-    product.mainCategory
+    product.mainCategory,
   ).toLowerCase();
   const categoryStructureMain = (
     product.categoryStructure?.main || ""
@@ -512,7 +512,7 @@ export function ProductDetails({ product }: ProductDetailsProps) {
 
     // Check if this product has already been viewed in this session (using sessionStorage)
     const viewedProducts = new Set(
-      JSON.parse(sessionStorage.getItem("viewedProducts") || "[]")
+      JSON.parse(sessionStorage.getItem("viewedProducts") || "[]"),
     );
 
     // If already viewed in this session, skip entirely
@@ -539,14 +539,14 @@ export function ProductDetails({ product }: ProductDetailsProps) {
         });
         console.log(
           "View increment API call completed for product:",
-          product._id
+          product._id,
         );
 
         // Mark this product as viewed in sessionStorage
         viewedProducts.add(product._id);
         sessionStorage.setItem(
           "viewedProducts",
-          JSON.stringify([...viewedProducts])
+          JSON.stringify([...viewedProducts]),
         );
 
         // Remove the incrementing flag
@@ -571,7 +571,7 @@ export function ProductDetails({ product }: ProductDetailsProps) {
   const getLocalizedColorName = (colorName: string): string => {
     if (language === "en") {
       const colorObj = availableColors.find(
-        (color) => color.name === colorName
+        (color) => color.name === colorName,
       );
       return colorObj?.nameEn || colorName;
     }
@@ -582,7 +582,7 @@ export function ProductDetails({ product }: ProductDetailsProps) {
   const getLocalizedAgeGroupName = (ageGroupName: string): string => {
     if (language === "en") {
       const ageGroupObj = availableAgeGroups.find(
-        (ageGroup) => ageGroup.name === ageGroupName
+        (ageGroup) => ageGroup.name === ageGroupName,
       );
       return ageGroupObj?.nameEn || ageGroupName;
     }
@@ -655,7 +655,7 @@ export function ProductDetails({ product }: ProductDetailsProps) {
         (v) =>
           (!v.size || v.size === selectedSize) &&
           (!v.color || v.color === selectedColor) &&
-          (!v.ageGroup || v.ageGroup === selectedAgeGroup)
+          (!v.ageGroup || v.ageGroup === selectedAgeGroup),
       );
 
       if (variant) {
@@ -664,7 +664,7 @@ export function ProductDetails({ product }: ProductDetailsProps) {
         // If no matching variant found, check if variants have no attributes (just stock)
         // In this case, use the first variant's stock or sum of all variant stocks
         const hasNoAttributes = product.variants.every(
-          (v) => !v.size && !v.color && !v.ageGroup
+          (v) => !v.size && !v.color && !v.ageGroup,
         );
         if (hasNoAttributes) {
           // Sum all variant stocks for products without attributes
@@ -723,7 +723,7 @@ export function ProductDetails({ product }: ProductDetailsProps) {
           selectedColor || undefined,
           selectedAgeGroup || undefined,
           finalPrice,
-          referralInfoForCart
+          referralInfoForCart,
         );
       }
 
@@ -775,12 +775,12 @@ export function ProductDetails({ product }: ProductDetailsProps) {
       if (e.key === "ArrowLeft") {
         e.preventDefault();
         setCurrentImageIndex((prevIndex) =>
-          prevIndex === 0 ? mediaItems.length - 1 : prevIndex - 1
+          prevIndex === 0 ? mediaItems.length - 1 : prevIndex - 1,
         );
       } else if (e.key === "ArrowRight") {
         e.preventDefault();
         setCurrentImageIndex((prevIndex) =>
-          prevIndex === mediaItems.length - 1 ? 0 : prevIndex + 1
+          prevIndex === mediaItems.length - 1 ? 0 : prevIndex + 1,
         );
       } else if (e.key === "Escape" && isFullscreenOpen) {
         closeFullscreen();
@@ -1012,14 +1012,18 @@ export function ProductDetails({ product }: ProductDetailsProps) {
                     </span>
                   </div>
                   <div className="savings-text">
-                    {language === "en" ? "You save" : "დაზოგავ"} {formatPrice(
-                      referralPricing.originalPrice - referralPricing.referralPrice
+                    {language === "en" ? "You save" : "დაზოგავ"}{" "}
+                    {formatPrice(
+                      referralPricing.originalPrice -
+                        referralPricing.referralPrice,
                     )}
                   </div>
                 </div>
               ) : isDiscounted ? (
                 <div className="price-with-discount">
-                  <div className="current-price">{formatPrice(finalPrice, product.convertedDiscountedPrices)}</div>
+                  <div className="current-price">
+                    {formatPrice(finalPrice, product.convertedDiscountedPrices)}
+                  </div>
                   <div className="price-comparison">
                     <span className="original-price-strike">
                       {formatPrice(product.price, product.convertedPrices)}
@@ -1029,14 +1033,17 @@ export function ProductDetails({ product }: ProductDetailsProps) {
                     </span>
                   </div>
                   <div className="savings-text">
-                    {language === "en" ? "You save" : "დაზოგავ"} {formatPrice(
+                    {language === "en" ? "You save" : "დაზოგავ"}{" "}
+                    {formatPrice(
                       product.price - finalPrice,
-                      product.convertedPrices
+                      product.convertedPrices,
                     )}
                   </div>
                 </div>
               ) : (
-                <div className="current-price">{formatPrice(product.price, product.convertedPrices)}</div>
+                <div className="current-price">
+                  {formatPrice(product.price, product.convertedPrices)}
+                </div>
               )}
             </div>
 
@@ -1052,8 +1059,8 @@ export function ProductDetails({ product }: ProductDetailsProps) {
                     ? "Original"
                     : "ორიგინალი"
                   : language === "en"
-                  ? "Copy"
-                  : "ასლი"}
+                    ? "Copy"
+                    : "ასლი"}
               </span>
             </div>
           </div>
@@ -1072,8 +1079,8 @@ export function ProductDetails({ product }: ProductDetailsProps) {
                   ? `Visit ${product.brand}'s portfolio`
                   : `View all products by ${product.brand}`
                 : product.user?.artistSlug
-                ? `${product.brand}-ის პორტფოლიო`
-                : `ნახე ${product.brand}-ის ყველა ნამუშევარი`
+                  ? `${product.brand}-ის პორტფოლიო`
+                  : `ნახე ${product.brand}-ის ყველა ნამუშევარი`
             }
           >
             {product.brandLogo && product.brandLogo.trim() !== "" ? (
@@ -1269,10 +1276,10 @@ export function ProductDetails({ product }: ProductDetailsProps) {
               isOutOfStock
                 ? "out-of-stock"
                 : availableQuantity === 1
-                ? "last-item"
-                : availableQuantity <= 5
-                ? "low-stock"
-                : "in-stock"
+                  ? "last-item"
+                  : availableQuantity <= 5
+                    ? "low-stock"
+                    : "in-stock"
             }`}
           >
             <div className="stock-dot"></div>
