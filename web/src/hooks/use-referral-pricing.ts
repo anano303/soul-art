@@ -164,15 +164,11 @@ export function useReferralPricing(product: MinimalProduct): ReferralPricing {
         // სელერის ნებართვა - პროდუქტზე დაყენებული referralDiscountPercent
         const sellerPermission = product.referralDiscountPercent || 0;
 
-        // თუ კამპანია მოითხოვს ნებართვას და პროდუქტს არ აქვს - გამოვტოვოთ
-        if (campaign.onlyProductsWithPermission && sellerPermission <= 0) {
+        // სელერის ნებართვა სავალდებულოა - თუ 0-ია, ფასდაკლება არ ვრცელდება
+        if (sellerPermission <= 0) {
           // პროდუქტს არ აქვს ნებართვა, ფასდაკლება არ ვრცელდება
-        } else if (sellerPermission <= 0) {
-          // სელერს არ მიუცია ნებართვა - ფასდაკლება არ ვრცელდება
         } else {
           // ფასდაკლება = min(სელერის ნებართვა, ადმინის მაქსიმუმი)
-          // ადმინის % არის ჭერი - მეტი ვერ იქნება
-          // სელერის % არის ნებართვა - თუ ნაკლებია, მისია უპირატესი
           const discountPercent = Math.min(sellerPermission, campaign.maxDiscountPercent);
 
           if (discountPercent > 0) {
@@ -294,11 +290,9 @@ export function calculateReferralPrice(
   if (campaignApplies) {
     const sellerPermission = product.referralDiscountPercent || 0;
 
-    // Check product permission requirement
-    if (campaignInfo.onlyProductsWithPermission && sellerPermission <= 0) {
-      // Product doesn't have permission
-    } else if (sellerPermission <= 0) {
-      // Seller hasn't given permission - no discount
+    // სელერის ნებართვა სავალდებულოა - თუ 0-ია, ფასდაკლება არ ვრცელდება
+    if (sellerPermission <= 0) {
+      // Product doesn't have permission - no discount
     } else {
       // discount = min(seller permission, admin max)
       referralDiscountPercent = Math.min(sellerPermission, campaignInfo.maxDiscountPercent);

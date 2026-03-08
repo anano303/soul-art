@@ -117,13 +117,23 @@ export class CampaignsService {
   async getActiveCampaign(): Promise<CampaignDocument | null> {
     const now = new Date();
 
-    return this.campaignModel
-      .findOne({
+    // Find all active campaigns
+    const campaigns = await this.campaignModel
+      .find({
         status: CampaignStatus.ACTIVE,
         startDate: { $lte: now },
         endDate: { $gte: now },
       })
       .exec();
+
+    if (campaigns.length === 0) return null;
+
+    // Prioritize all_visitors campaign over referral-only
+    const allVisitorsCampaign = campaigns.find((c) =>
+      c.appliesTo.includes(CampaignAppliesTo.ALL_VISITORS),
+    );
+
+    return allVisitorsCampaign || campaigns[0];
   }
 
   /**
@@ -187,21 +197,14 @@ export class CampaignsService {
       // For now, allow it
     }
 
-    // Check if product has permission (seller must give permission > 0)
+    // სელერის ნებართვა სავალდებულოა - თუ 0-ია, ფასდაკლება არ ვრცელდება
     const productDiscount = product.referralDiscountPercent ?? 0;
 
-    if (campaign.onlyProductsWithPermission && productDiscount === 0) {
-      return null; // Product doesn't allow campaign discounts
-    }
-
-    // If seller hasn't given any permission, no discount applies
     if (productDiscount <= 0) {
-      return null;
+      return null; // Product doesn't have seller permission - no discount
     }
 
     // Discount = min(seller permission, admin max)
-    // Admin's maxDiscountPercent is the ceiling - cannot exceed it
-    // Seller's referralDiscountPercent is the permission - if less, it takes priority
     const discountPercent = Math.min(productDiscount, campaign.maxDiscountPercent);
 
     // Calculate amounts
