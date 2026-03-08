@@ -11,7 +11,6 @@ import {
   CampaignDocument,
   CampaignStatus,
   CampaignAppliesTo,
-  CampaignDiscountSource,
 } from '../schemas/campaign.schema';
 import { CreateCampaignDto } from '../dtos/create-campaign.dto';
 import { UpdateCampaignDto } from '../dtos/update-campaign.dto';
@@ -188,35 +187,22 @@ export class CampaignsService {
       // For now, allow it
     }
 
-    // Check if product has permission
+    // Check if product has permission (seller must give permission > 0)
     const productDiscount = product.referralDiscountPercent ?? 0;
 
     if (campaign.onlyProductsWithPermission && productDiscount === 0) {
       return null; // Product doesn't allow campaign discounts
     }
 
-    // Determine discount percent based on source
-    let discountPercent = 0;
-
-    switch (campaign.discountSource) {
-      case CampaignDiscountSource.PRODUCT_REFERRAL_DISCOUNT:
-        discountPercent = productDiscount;
-        break;
-      case CampaignDiscountSource.ARTIST_DEFAULT:
-        discountPercent = artistDefaultDiscount ?? productDiscount;
-        break;
-      case CampaignDiscountSource.OVERRIDE:
-        discountPercent = campaign.maxDiscountPercent;
-        break;
+    // If seller hasn't given any permission, no discount applies
+    if (productDiscount <= 0) {
+      return null;
     }
 
-    // Apply cap if not using override
-    if (
-      !campaign.useMaxAsOverride &&
-      discountPercent > campaign.maxDiscountPercent
-    ) {
-      discountPercent = campaign.maxDiscountPercent;
-    }
+    // Discount = min(seller permission, admin max)
+    // Admin's maxDiscountPercent is the ceiling - cannot exceed it
+    // Seller's referralDiscountPercent is the permission - if less, it takes priority
+    const discountPercent = Math.min(productDiscount, campaign.maxDiscountPercent);
 
     // Calculate amounts
     const discountAmount = Math.round(product.price * (discountPercent / 100));

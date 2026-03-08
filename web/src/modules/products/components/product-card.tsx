@@ -409,22 +409,16 @@ export function ProductCard({
                   >
                     {formatPrice(referralPricing.originalPrice, product.convertedPrices)}
                   </span>
-                  {isDiscounted &&
-                    referralPricing.basePrice !==
-                      referralPricing.originalPrice && (
-                      <span
-                        className="original-price"
-                        style={{
-                          fontSize: "0.75rem",
-                          textDecoration: "line-through",
-                          opacity: 0.6,
-                        }}
-                      >
-                        {formatPrice(referralPricing.basePrice, product.convertedDiscountedPrices)}
-                      </span>
-                    )}
+                  {isDiscounted && referralPricing.basePrice !== referralPricing.originalPrice && (
+                    <span
+                      className="original-price"
+                      style={{ fontSize: "0.75rem" }}
+                    >
+                      {formatPrice(referralPricing.basePrice)}
+                    </span>
+                  )}
                   <h3 className="product-price referral-final-price">
-                    {formatPrice(referralPricing.referralPrice, product.convertedDiscountedPrices)}
+                    {formatPrice(referralPricing.referralPrice)}
                   </h3>
                 </div>
               ) : isDiscounted ? (

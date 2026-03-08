@@ -991,20 +991,21 @@ export function ProductDetails({ product }: ProductDetailsProps) {
                     </span>
                   </div>
                   <div className="current-price referral-price-highlight">
-                    {formatPrice(referralPricing.referralPrice, product.convertedDiscountedPrices)}
+                    {formatPrice(referralPricing.referralPrice)}
                   </div>
                   <div className="price-comparison">
                     <span className="original-price-strike">
                       {formatPrice(product.price, product.convertedPrices)}
                     </span>
                     {isDiscounted && (
-                      <span className="original-price-strike discounted-strike">
-                        {formatPrice(
-                          product.price *
-                          (1 - (product.discountPercentage || 0) / 100),
-                          product.convertedDiscountedPrices
-                        )}
-                      </span>
+                      <>
+                        <span className="discount-badge">
+                          -{product.discountPercentage}%
+                        </span>
+                        <span className="original-price-strike">
+                          {formatPrice(referralPricing.basePrice)}
+                        </span>
+                      </>
                     )}
                     <span className="discount-badge referral-discount-badge">
                       -{referralPricing.referralDiscountPercent}%
@@ -1012,8 +1013,7 @@ export function ProductDetails({ product }: ProductDetailsProps) {
                   </div>
                   <div className="savings-text">
                     {language === "en" ? "You save" : "დაზოგავ"} {formatPrice(
-                      product.price - referralPricing.referralPrice,
-                      product.convertedPrices
+                      referralPricing.originalPrice - referralPricing.referralPrice
                     )}
                   </div>
                 </div>
