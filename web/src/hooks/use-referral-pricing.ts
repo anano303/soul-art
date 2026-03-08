@@ -9,6 +9,7 @@ interface Campaign {
   name: string;
   maxDiscountPercent: number;
   discountSource: string;
+  useMaxAsOverride?: boolean;
   onlyProductsWithPermission: boolean;
   appliesTo: string[];
   badgeText?: string;
@@ -150,34 +151,66 @@ export function useReferralPricing(product: MinimalProduct): ReferralPricing {
 
     // Check if campaign applies
     if (campaign) {
+      const appliesToAllVisitors = campaign.appliesTo.includes("all_visitors");
       const appliesToReferrals = campaign.appliesTo.includes(
         "influencer_referrals"
       );
-      const hasReferralCode = salesRefCode && salesRefCode.startsWith("SM_");
+      const hasReferralCode = !!(salesRefCode && salesRefCode.startsWith("SM_"));
 
-      // რეფერალური აქცია: cookie არსებობს და კამპანია აქტიურია
-      if (appliesToReferrals && hasReferralCode) {
+      // კამპანია ვრცელდება თუ:
+      // 1. all_visitors - ყველაზე ვრცელდება (კოდის გარეშეც)
+      // 2. influencer_referrals - მხოლოდ SM_ cookie-ით მოსულებზე
+      const campaignApplies = appliesToAllVisitors || (appliesToReferrals && hasReferralCode);
+
+      if (campaignApplies) {
         // სელერის ნებართვა - პროდუქტზე დაყენებული referralDiscountPercent
         const sellerPermission = product.referralDiscountPercent || 0;
 
-        // მხოლოდ იმ პროდუქტებზე ვრცელდება, სადაც სელერს აქვს ნებართვა (> 0)
-        if (sellerPermission > 0) {
-          // მინიმუმი სელერის ნებართვასა და ადმინის მაქს პროცენტს შორის
-          referralDiscountPercent = Math.min(
-            sellerPermission,
-            campaign.maxDiscountPercent
-          );
-          hasReferralDiscount = true;
-          campaignName = campaign.name;
-          badgeText =
-            campaign.badgeTextGe || campaign.badgeText || "სპეც. ფასი";
+        // თუ კამპანია მოითხოვს ნებართვას და პროდუქტს არ აქვს - გამოვტოვოთ
+        if (campaign.onlyProductsWithPermission && sellerPermission <= 0) {
+          // პროდუქტს არ აქვს ნებართვა, ფასდაკლება არ ვრცელდება
+        } else {
+          // განვსაზღვროთ ფასდაკლების პროცენტი discountSource-ის მიხედვით
+          let discountPercent = 0;
 
-          console.log("[useReferralPricing] Applying referral discount:", {
-            refCode: salesRefCode,
-            sellerPermission,
-            campaignMax: campaign.maxDiscountPercent,
-            appliedPercent: referralDiscountPercent,
-          });
+          switch (campaign.discountSource) {
+            case 'override':
+              // Override: პირდაპირ კამპანიის პროცენტი
+              discountPercent = campaign.maxDiscountPercent;
+              break;
+            case 'artist_default':
+              // Artist default: სელერის default-ი ან პროდუქტის
+              discountPercent = sellerPermission;
+              break;
+            case 'product_referral_discount':
+            default:
+              // Product setting: პროდუქტის referralDiscountPercent
+              discountPercent = sellerPermission;
+              break;
+          }
+
+          // Cap: თუ override არ არის, ვზღუდავთ maxDiscountPercent-ით
+          if (!campaign.useMaxAsOverride && discountPercent > campaign.maxDiscountPercent) {
+            discountPercent = campaign.maxDiscountPercent;
+          }
+
+          if (discountPercent > 0) {
+            referralDiscountPercent = discountPercent;
+            hasReferralDiscount = true;
+            campaignName = campaign.name;
+            badgeText =
+              campaign.badgeTextGe || campaign.badgeText || "სპეც. ფასი";
+
+            console.log("[useReferralPricing] Applying campaign discount:", {
+              refCode: salesRefCode,
+              appliesToAllVisitors,
+              appliesToReferrals,
+              hasReferralCode,
+              sellerPermission,
+              campaignMax: campaign.maxDiscountPercent,
+              appliedPercent: referralDiscountPercent,
+            });
+          }
         }
       }
     }
@@ -217,7 +250,13 @@ export function calculateReferralPrice(
     referralDiscountPercent?: number;
   },
   salesRefCode: string | null,
-  campaignMaxDiscount?: number
+  campaignInfo?: {
+    maxDiscountPercent: number;
+    appliesTo: string[];
+    discountSource?: string;
+    useMaxAsOverride?: boolean;
+    onlyProductsWithPermission?: boolean;
+  }
 ): {
   hasReferralDiscount: boolean;
   referralDiscountPercent: number;
@@ -255,19 +294,51 @@ export function calculateReferralPrice(
     ? originalPrice - (originalPrice * (product.discountPercentage || 0)) / 100
     : originalPrice;
 
-  // Use campaign max if provided, otherwise product's discount
-  let referralDiscountPercent = 0;
-  if (campaignMaxDiscount && campaignMaxDiscount > 0) {
-    referralDiscountPercent = campaignMaxDiscount;
-  } else {
-    referralDiscountPercent = product.referralDiscountPercent || 0;
+  if (!campaignInfo) {
+    return {
+      hasReferralDiscount: false,
+      referralDiscountPercent: 0,
+      referralPrice: Math.round(basePrice * 100) / 100,
+      basePrice: Math.round(basePrice * 100) / 100,
+      originalPrice,
+      referralDiscountAmount: 0,
+    };
   }
 
-  const hasReferralDiscount = !!(
-    salesRefCode &&
-    salesRefCode.startsWith("SM_") &&
-    referralDiscountPercent > 0
-  );
+  // Determine if campaign applies to this visitor
+  const appliesToAllVisitors = campaignInfo.appliesTo.includes("all_visitors");
+  const appliesToReferrals = campaignInfo.appliesTo.includes("influencer_referrals");
+  const hasReferralCode = !!(salesRefCode && salesRefCode.startsWith("SM_"));
+  const campaignApplies = appliesToAllVisitors || (appliesToReferrals && hasReferralCode);
+
+  let referralDiscountPercent = 0;
+  if (campaignApplies) {
+    const sellerPermission = product.referralDiscountPercent || 0;
+
+    // Check product permission requirement
+    if (campaignInfo.onlyProductsWithPermission && sellerPermission <= 0) {
+      // Product doesn't have permission
+    } else {
+      // Determine discount based on source
+      switch (campaignInfo.discountSource) {
+        case 'override':
+          referralDiscountPercent = campaignInfo.maxDiscountPercent;
+          break;
+        case 'artist_default':
+        case 'product_referral_discount':
+        default:
+          referralDiscountPercent = sellerPermission;
+          break;
+      }
+
+      // Apply cap if not override mode
+      if (!campaignInfo.useMaxAsOverride && referralDiscountPercent > campaignInfo.maxDiscountPercent) {
+        referralDiscountPercent = campaignInfo.maxDiscountPercent;
+      }
+    }
+  }
+
+  const hasReferralDiscount = referralDiscountPercent > 0 && campaignApplies;
 
   const referralDiscountAmount = hasReferralDiscount
     ? (basePrice * referralDiscountPercent) / 100
