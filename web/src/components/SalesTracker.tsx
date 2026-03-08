@@ -31,8 +31,8 @@ export function SalesTracker() {
     console.log("[SalesTracker] Current cookie:", Cookies.get(COOKIE_NAME));
     console.log("[SalesTracker] Pathname:", pathname);
 
-    // თუ URL-ში არის SM_ ref, შევინახოთ cookie-ში და localStorage-ში
-    if (refFromUrl && refFromUrl.startsWith("SM_")) {
+    // თუ URL-ში არის PROMO ან SM_ ref, შევინახოთ cookie-ში და localStorage-ში
+    if (refFromUrl && (refFromUrl.startsWith("PROMO") || refFromUrl.startsWith("SM_"))) {
       console.log("[SalesTracker] Setting cookie from URL:", refFromUrl);
       Cookies.set(COOKIE_NAME, refFromUrl, {
         expires: COOKIE_DAYS,
@@ -83,7 +83,7 @@ export function SalesTracker() {
       }
     }
 
-    if (salesRef && salesRef.startsWith("SM_")) {
+    if (salesRef && (salesRef.startsWith("PROMO") || salesRef.startsWith("SM_"))) {
       console.log(
         "[SalesTracker] Tracking visit from existing cookie:",
         salesRef

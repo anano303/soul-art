@@ -60,7 +60,7 @@ const sendTrackingEvent = async (data: TrackingData): Promise<boolean> => {
 
   console.log("[SalesTracking] Cookie sales_ref:", salesRefCode);
 
-  if (!salesRefCode || !salesRefCode.startsWith("SM_")) {
+  if (!salesRefCode || (!salesRefCode.startsWith("PROMO") && !salesRefCode.startsWith("SM_"))) {
     console.log("[SalesTracking] No valid sales_ref cookie, skipping tracking");
     return false;
   }
@@ -159,7 +159,7 @@ export const useSalesTracking = () => {
     if (tracked.current) return;
 
     const salesRef = Cookies.get("sales_ref");
-    if (salesRef && salesRef.startsWith("SM_")) {
+    if (salesRef && (salesRef.startsWith("PROMO") || salesRef.startsWith("SM_"))) {
       trackVisit();
       tracked.current = true;
     }

@@ -40,7 +40,7 @@ export default function ExclusivePromoRail({
 
     // Check cookie synchronously
     const salesRef = Cookies.get("sales_ref");
-    const hasReferralCode = !!(salesRef && salesRef.startsWith("SM_"));
+    const hasReferralCode = !!(salesRef && (salesRef.startsWith("PROMO") || salesRef.startsWith("SM_")));
 
     // Fetch campaign and promo products IN PARALLEL for speed
     const campaignPromise = fetch(`${baseUrl}/campaigns/active`, {

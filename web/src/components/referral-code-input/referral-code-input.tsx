@@ -32,7 +32,7 @@ export function ReferralCodeInput({
   // Check if user already has a referral code
   useEffect(() => {
     const existingCode = Cookies.get("sales_ref");
-    if (existingCode && existingCode.startsWith("SM_")) {
+    if (existingCode && (existingCode.startsWith("PROMO") || existingCode.startsWith("SM_"))) {
       setHasActiveCode(true);
     }
   }, []);
@@ -49,10 +49,10 @@ export function ReferralCodeInput({
       return;
     }
 
-    // Add SM_ prefix if not present
-    const fullCode = trimmedCode.startsWith("SM_")
+    // Accept as-is if starts with PROMO or SM_, otherwise add PROMO prefix
+    const fullCode = trimmedCode.startsWith("PROMO") || trimmedCode.startsWith("SM_")
       ? trimmedCode
-      : `SM_${trimmedCode}`;
+      : `PROMO${trimmedCode}`;
 
     setStatus("loading");
 

@@ -154,12 +154,12 @@ export function useReferralPricing(product: MinimalProduct): ReferralPricing {
         "influencer_referrals",
       );
       const hasReferralCode = !!(
-        salesRefCode && salesRefCode.startsWith("SM_")
+        salesRefCode && (salesRefCode.startsWith("PROMO") || salesRefCode.startsWith("SM_"))
       );
 
       // კამპანია ვრცელდება თუ:
       // 1. all_visitors - ყველაზე ვრცელდება (კოდის გარეშეც)
-      // 2. influencer_referrals - მხოლოდ SM_ cookie-ით მოსულებზე
+      // 2. influencer_referrals - მხოლოდ PROMO/SM_ cookie-ით მოსულებზე
       const campaignApplies =
         appliesToAllVisitors || (appliesToReferrals && hasReferralCode);
 
@@ -291,7 +291,7 @@ export function calculateReferralPrice(
   const appliesToReferrals = campaignInfo.appliesTo.includes(
     "influencer_referrals",
   );
-  const hasReferralCode = !!(salesRefCode && salesRefCode.startsWith("SM_"));
+  const hasReferralCode = !!(salesRefCode && (salesRefCode.startsWith("PROMO") || salesRefCode.startsWith("SM_")));
   const campaignApplies =
     appliesToAllVisitors || (appliesToReferrals && hasReferralCode);
 

@@ -143,7 +143,7 @@ export class User {
   @Prop({ type: Number, default: 0 })
   totalSalesCommissions?: number;
 
-  // Sales Manager-ის უნიკალური რეფერალური კოდი (SM_XXXXXXXX)
+  // Sales Manager-ის უნიკალური რეფერალური კოდი (PROMO12345)
   @Prop({ type: String, unique: true, sparse: true })
   salesRefCode?: string;
 

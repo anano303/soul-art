@@ -267,7 +267,7 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
   // This is needed because SSR doesn't include this field
   useEffect(() => {
     const salesRef = Cookies.get("sales_ref");
-    if (!salesRef?.startsWith("SM_")) return;
+    if (!salesRef?.startsWith("PROMO") && !salesRef?.startsWith("SM_")) return;
     if (!productItems.length) return;
 
     // Check if any product is missing referralDiscountPercent

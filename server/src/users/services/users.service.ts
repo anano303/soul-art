@@ -1834,12 +1834,8 @@ export class UsersService {
       const maxAttempts = 10;
 
       do {
-        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-        let code = '';
-        for (let i = 0; i < 8; i++) {
-          code += chars.charAt(Math.floor(Math.random() * chars.length));
-        }
-        salesRefCode = `SM_${code}`;
+        const num = Math.floor(10000 + Math.random() * 90000);
+        salesRefCode = `PROMO${num}`;
         attempts++;
 
         const existingWithCode = await this.userModel.findOne({ salesRefCode });

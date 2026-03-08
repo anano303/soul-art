@@ -48,7 +48,7 @@ export class SalesCommissionService {
 
   /**
    * Sales Manager-ისთვის უნიკალური რეფერალური კოდის გენერაცია
-   * ფორმატი: SM_XXXXXXXX
+   * ფორმატი: PROMO + 5 ციფრი (მაგ. PROMO55658)
    */
   async generateSalesRefCode(userId: string): Promise<string> {
     const user = await this.userModel.findById(userId);
@@ -72,12 +72,8 @@ export class SalesCommissionService {
     const maxAttempts = 10;
 
     do {
-      const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-      let code = '';
-      for (let i = 0; i < 8; i++) {
-        code += chars.charAt(Math.floor(Math.random() * chars.length));
-      }
-      salesRefCode = `SM_${code}`;
+      const num = Math.floor(10000 + Math.random() * 90000);
+      salesRefCode = `PROMO${num}`;
       attempts++;
 
       const existingUser = await this.userModel.findOne({ salesRefCode });
@@ -105,7 +101,7 @@ export class SalesCommissionService {
     orderId: string,
     salesRefCode: string,
   ): Promise<SalesCommission | null> {
-    if (!salesRefCode || !salesRefCode.startsWith('SM_')) {
+    if (!salesRefCode || (!salesRefCode.startsWith('PROMO') && !salesRefCode.startsWith('SM_'))) {
       return null;
     }
 
@@ -392,7 +388,7 @@ export class SalesCommissionService {
   async validateSalesRefCode(
     code: string,
   ): Promise<{ valid: boolean; managerName?: string }> {
-    if (!code || !code.startsWith('SM_')) {
+    if (!code || (!code.startsWith('PROMO') && !code.startsWith('SM_'))) {
       return { valid: false };
     }
 
@@ -430,7 +426,7 @@ export class SalesCommissionService {
     referrerUrl?: string;
     landingPage?: string;
   }): Promise<SalesTracking | null> {
-    if (!data.salesRefCode || !data.salesRefCode.startsWith('SM_')) {
+    if (!data.salesRefCode || (!data.salesRefCode.startsWith('PROMO') && !data.salesRefCode.startsWith('SM_'))) {
       return null;
     }
 

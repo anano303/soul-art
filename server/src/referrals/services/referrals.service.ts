@@ -53,12 +53,8 @@ export class ReferralsService {
 
   // რეფერალური კოდის გენერაცია
   private generateReferralCode(): string {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-    let result = '';
-    for (let i = 0; i < 8; i++) {
-      result += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-    return result;
+    const num = Math.floor(10000 + Math.random() * 90000); // 5 ციფრი: 10000-99999
+    return `PROMO${num}`;
   }
 
   // მომხმარებლისთვის რეფერალური კოდის შექმნა
