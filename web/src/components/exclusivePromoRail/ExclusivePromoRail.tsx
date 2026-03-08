@@ -115,7 +115,7 @@ export default function ExclusivePromoRail({
       <section className="exclusive-promo-section">
         <div className="exclusive-promo-header">
           <div className="exclusive-promo-icon">
-            <Image src="/git.png" alt="Gift" width={64} height={64} />
+            <Image src="/git.png" alt="Gift" width={90} height={90} />
           </div>
           <div className="exclusive-promo-titles">
             <h2 className="exclusive-promo-title">
@@ -137,7 +137,7 @@ export default function ExclusivePromoRail({
     <section className="exclusive-promo-section">
       <div className="exclusive-promo-header">
         <div className="exclusive-promo-icon">
-          <Image src="/git.png" alt="Gift" width={64} height={64} />
+          <Image src="/git.png" alt="Gift" width={90} height={90} />
         </div>
         <div className="exclusive-promo-titles">
           <h2 className="exclusive-promo-title">
