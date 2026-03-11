@@ -79,6 +79,7 @@ import { PushNotificationManager } from "@/components/push-notifications/push-no
 import PWAManager from "@/components/pwa-manager";
 import { CampaignConsentPrompt } from "@/components/campaign-consent/campaign-consent-prompt";
 import { ReferralCodeInput } from "@/components/referral-code-input/referral-code-input";
+import { CallRequestPopup } from "@/components/call-request-popup/call-request-popup";
 import "@/lib/cloudflare-cleanup"; // Auto-cleanup Cloudflare cookies in development
 
 export const viewport = {
@@ -457,7 +458,10 @@ export default function RootLayout({
                       <ReferralCodeInput variant="floating" />
 
                       {/* Campaign Consent Prompt for Sellers */}
-                      <CampaignConsentPrompt />
+                      <CampaignConsentPrompt>
+
+                      {/* Call Request Popup - 2 წუთის შემდეგ */}
+                      <CallRequestPopup />
                     </div>
                   </ThemeProvider>
                 </LanguageProvider>

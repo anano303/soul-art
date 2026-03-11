@@ -1,0 +1,259 @@
+/* ===== CALL REQUEST POPUP ===== */
+
+.call-popup-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  animation: fadeIn 0.3s ease;
+}
+
+.call-popup {
+  background: white;
+  border-radius: 20px;
+  padding: 2rem;
+  max-width: 420px;
+  width: 100%;
+  position: relative;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+  animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.call-popup-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: #f3f4f6;
+  border: none;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #6b7280;
+  transition: all 0.2s;
+}
+
+.call-popup-close:hover {
+  background: #e5e7eb;
+  color: #374151;
+}
+
+/* ===== HEADER ===== */
+.call-popup-header {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.call-popup-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #10b981, #059669);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1rem;
+  color: white;
+  animation: pulse-ring 2s ease-in-out infinite;
+}
+
+.call-popup-title {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #1f2937;
+  margin: 0 0 0.5rem;
+  font-family: FiraGo, sans-serif;
+}
+
+.call-popup-subtitle {
+  font-size: 0.9rem;
+  color: #6b7280;
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* ===== FORM ===== */
+.call-popup-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.call-popup-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.call-popup-field label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #374151;
+}
+
+.call-popup-field input {
+  padding: 0.7rem 0.9rem;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  outline: none;
+  transition: border-color 0.2s;
+  font-family: inherit;
+}
+
+.call-popup-field input:focus {
+  border-color: #10b981;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+}
+
+.call-popup-field input::placeholder {
+  color: #9ca3af;
+}
+
+.call-popup-error {
+  color: #ef4444;
+  font-size: 0.8rem;
+  margin: 0;
+  text-align: center;
+}
+
+/* ===== SUBMIT BUTTON ===== */
+.call-popup-submit {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0.85rem 1.5rem;
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s;
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
+  margin-top: 0.3rem;
+  font-family: inherit;
+}
+
+.call-popup-submit:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.45);
+}
+
+.call-popup-submit:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.call-popup-submit .spin {
+  animation: spin 1s linear infinite;
+}
+
+/* ===== SUCCESS STATE ===== */
+.call-popup-success {
+  text-align: center;
+  padding: 2rem 1rem;
+}
+
+.call-popup-success-icon {
+  color: #10b981;
+  margin-bottom: 1rem;
+  animation: scaleIn 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.call-popup-success h3 {
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: #1f2937;
+  margin: 0 0 0.5rem;
+}
+
+.call-popup-success p {
+  font-size: 0.95rem;
+  color: #6b7280;
+  margin: 0;
+}
+
+/* ===== ANIMATIONS ===== */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes pulse-ring {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 12px rgba(16, 185, 129, 0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    transform: scale(0.3);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ===== MOBILE ===== */
+@media (max-width: 480px) {
+  .call-popup {
+    padding: 1.5rem;
+    border-radius: 16px;
+    margin: 0.5rem;
+  }
+
+  .call-popup-title {
+    font-size: 1.15rem;
+  }
+
+  .call-popup-subtitle {
+    font-size: 0.82rem;
+  }
+
+  .call-popup-icon {
+    width: 52px;
+    height: 52px;
+  }
+
+  .call-popup-icon svg {
+    width: 22px;
+    height: 22px;
+  }
+}
