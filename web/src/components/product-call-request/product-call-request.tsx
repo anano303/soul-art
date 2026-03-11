@@ -1,49 +1,43 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import { X, Phone, Loader2, CheckCircle } from "lucide-react";
+import { useState, useCallback } from "react";
+import { X, Phone, Loader2, CheckCircle, MessageCircle } from "lucide-react";
 import { useLanguage } from "@/hooks/LanguageContext";
-import "./call-request-popup.css";
+import "./product-call-request.css";
 
-const STORAGE_KEY = "soulart_call_popup_dismissed";
-const POPUP_DELAY_MS = 2 * 60 * 1000; // 2 წუთი
-const DISMISS_DAYS = 7; // 7 დღეში ხელახლა აჩვენებს
+interface ProductCallRequestProps {
+  productName: string;
+  productId: string;
+  isOpen: boolean;
+  onClose: () => void;
+}
 
-export function CallRequestPopup() {
+export function ProductCallRequest({
+  productName,
+  productId,
+  isOpen,
+  onClose,
+}: ProductCallRequestProps) {
   const { language } = useLanguage();
-  const [isVisible, setIsVisible] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     phone: "",
     email: "",
+    question: "",
   });
   const [error, setError] = useState("");
 
-  useEffect(() => {
-    // შევამოწმოთ ადრე დახურა თუ არა
-    const dismissed = localStorage.getItem(STORAGE_KEY);
-    if (dismissed) {
-      const dismissedAt = parseInt(dismissed, 10);
-      const daysSince = (Date.now() - dismissedAt) / (1000 * 60 * 60 * 24);
-      if (daysSince < DISMISS_DAYS) {
-        return; // ჯერ კიდევ დახურულია
-      }
-    }
-
-    // 2 წუთის შემდეგ აჩვენე
-    const timer = setTimeout(() => {
-      setIsVisible(true);
-    }, POPUP_DELAY_MS);
-
-    return () => clearTimeout(timer);
-  }, []);
-
-  const handleDismiss = useCallback(() => {
-    setIsVisible(false);
-    localStorage.setItem(STORAGE_KEY, Date.now().toString());
-  }, []);
+  const handleClose = useCallback(() => {
+    onClose();
+    // Reset form after close animation
+    setTimeout(() => {
+      setIsSuccess(false);
+      setFormData({ name: "", phone: "", email: "", question: "" });
+      setError("");
+    }, 300);
+  }, [onClose]);
 
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {
@@ -78,6 +72,9 @@ export function CallRequestPopup() {
             name: formData.name.trim(),
             phone: formData.phone.trim(),
             email: formData.email.trim() || undefined,
+            question: formData.question.trim() || undefined,
+            productName,
+            productId,
           }),
         });
 
@@ -86,11 +83,10 @@ export function CallRequestPopup() {
         }
 
         setIsSuccess(true);
-        localStorage.setItem(STORAGE_KEY, Date.now().toString());
 
         // 3 წამის შემდეგ დახურე
         setTimeout(() => {
-          setIsVisible(false);
+          handleClose();
         }, 3000);
       } catch {
         setError(
@@ -102,52 +98,46 @@ export function CallRequestPopup() {
         setIsSubmitting(false);
       }
     },
-    [formData, language]
+    [formData, language, productName, productId, handleClose]
   );
 
-  if (!isVisible) return null;
+  if (!isOpen) return null;
 
   return (
-    <div className="call-popup-overlay" onClick={handleDismiss}>
-      <div className="call-popup" onClick={(e) => e.stopPropagation()}>
-        <button className="call-popup-close" onClick={handleDismiss}>
+    <div className="pcr-overlay" onClick={handleClose}>
+      <div className="pcr-modal" onClick={(e) => e.stopPropagation()}>
+        <button className="pcr-close" onClick={handleClose}>
           <X size={20} />
         </button>
 
         {isSuccess ? (
-          <div className="call-popup-success">
-            <CheckCircle size={48} className="call-popup-success-icon" />
+          <div className="pcr-success">
+            <CheckCircle size={48} className="pcr-success-icon" />
             <h3>
-              {language === "en"
-                ? "Request Sent!"
-                : "მოთხოვნა გაიგზავნა!"}
+              {language === "en" ? "Request Sent!" : "მოთხოვნა გაიგზავნა!"}
             </h3>
             <p>
               {language === "en"
-                ? "We will call you shortly"
+                ? "We will contact you shortly"
                 : "მალე დაგიკავშირდებით"}
             </p>
           </div>
         ) : (
           <>
-            <div className="call-popup-header">
-              <div className="call-popup-icon">
-                <Phone size={28} />
+            <div className="pcr-header">
+              <div className="pcr-icon">
+                <MessageCircle size={28} />
               </div>
-              <h3 className="call-popup-title">
+              <h3 className="pcr-title">
                 {language === "en"
-                  ? "Need help choosing?"
-                  : "დახმარება გჭირდება ?"}
+                  ? "Request a Call / More Info"
+                  : "მოითხოვე ზარი / მეტი ინფორმაცია"}
               </h3>
-              <p className="call-popup-subtitle">
-                {language === "en"
-                  ? "Request a free callback and we'll help you find the perfect artwork or handmade item"
-                  : "მოითხოვე  ზარი და დაგეხმარებით სასურველი ნახატის ან ხელნაკეთი ნივთის შერჩევაში"}
-              </p>
+              <p className="pcr-product-name">{productName}</p>
             </div>
 
-            <form className="call-popup-form" onSubmit={handleSubmit}>
-              <div className="call-popup-field">
+            <form className="pcr-form" onSubmit={handleSubmit}>
+              <div className="pcr-field">
                 <label>
                   {language === "en" ? "Name *" : "სახელი, გვარი *"}
                 </label>
@@ -164,7 +154,7 @@ export function CallRequestPopup() {
                 />
               </div>
 
-              <div className="call-popup-field">
+              <div className="pcr-field">
                 <label>
                   {language === "en"
                     ? "Phone number *"
@@ -181,7 +171,7 @@ export function CallRequestPopup() {
                 />
               </div>
 
-              <div className="call-popup-field">
+              <div className="pcr-field">
                 <label>
                   {language === "en"
                     ? "Email (optional)"
@@ -198,24 +188,44 @@ export function CallRequestPopup() {
                 />
               </div>
 
-              {error && <p className="call-popup-error">{error}</p>}
+              <div className="pcr-field">
+                <label>
+                  {language === "en"
+                    ? "What interests you?"
+                    : "რა გაინტერესებთ?"}
+                </label>
+                <textarea
+                  value={formData.question}
+                  onChange={(e) =>
+                    setFormData({ ...formData, question: e.target.value })
+                  }
+                  placeholder={
+                    language === "en"
+                      ? "Write your question or what information you need..."
+                      : "დაწერეთ თქვენი შეკითხვა ან რა ინფორმაცია გჭირდებათ..."
+                  }
+                  rows={3}
+                />
+              </div>
+
+              {error && <p className="pcr-error">{error}</p>}
 
               <button
                 type="submit"
-                className="call-popup-submit"
+                className="pcr-submit"
                 disabled={isSubmitting}
               >
                 {isSubmitting ? (
                   <>
-                    <Loader2 size={18} className="spin" />
+                    <Loader2 size={18} className="pcr-spin" />
                     {language === "en" ? "Sending..." : "იგზავნება..."}
                   </>
                 ) : (
                   <>
                     <Phone size={18} />
                     {language === "en"
-                      ? "Request a Callback"
-                      : "ზარის მოთხოვნა"}
+                      ? "Send Request"
+                      : "მოთხოვნის გაგზავნა"}
                   </>
                 )}
               </button>

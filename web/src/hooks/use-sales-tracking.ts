@@ -53,7 +53,7 @@ const sendTrackingEvent = async (data: TrackingData): Promise<boolean> => {
           salesRefCode
         );
       }
-    } catch (e) {
+    } catch {
       console.warn("[SalesTracking] Failed to read localStorage");
     }
   }

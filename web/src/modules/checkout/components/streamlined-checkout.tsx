@@ -103,8 +103,8 @@ export function StreamlinedCheckout() {
             setAuctionItem(parsed);
             setIsAuctionMode(true);
           }
-        } catch (e) {
-          console.error("Failed to parse auction checkout item:", e);
+        } catch (_e) {
+          console.error("Failed to parse auction checkout item:", _e);
         }
       }
     }

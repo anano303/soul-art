@@ -33,8 +33,8 @@ export default function AuthPopupCallback() {
             console.log('[Popup Callback] User data received');
             storeUserData(userData);
           }
-        } catch (e) {
-          console.error('[Popup Callback] Failed to fetch user profile:', e);
+        } catch (_e) {
+          console.error('[Popup Callback] Failed to fetch user profile:', _e);
         }
         
         const messageData = { 
@@ -53,8 +53,8 @@ export default function AuthPopupCallback() {
           try {
             window.opener.postMessage(messageData, window.location.origin);
             console.log('[Popup Callback] postMessage sent');
-          } catch (e) {
-            console.error('[Popup Callback] postMessage failed:', e);
+          } catch (_e) {
+            console.error('[Popup Callback] postMessage failed:', _e);
           }
         }
         
@@ -72,8 +72,8 @@ export default function AuthPopupCallback() {
               { type: 'GOOGLE_AUTH_ERROR', error },
               window.location.origin
             );
-          } catch (e) {
-            console.error('[Popup Callback] postMessage failed:', e);
+          } catch (_e) {
+            console.error('[Popup Callback] postMessage failed:', _e);
           }
         }
         

@@ -91,8 +91,8 @@ export default function AdminReferralsPage() {
         const data = await response.json();
         setReferrals(data);
       }
-    } catch (e) {
-      console.error("Failed to fetch referrals", e);
+    } catch (_e) {
+      console.error("Failed to fetch referrals", _e);
     }
   }, [selectedStatus]);
 

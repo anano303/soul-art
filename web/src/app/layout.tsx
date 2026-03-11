@@ -458,7 +458,7 @@ export default function RootLayout({
                       <ReferralCodeInput variant="floating" />
 
                       {/* Campaign Consent Prompt for Sellers */}
-                      <CampaignConsentPrompt>
+                      <CampaignConsentPrompt />
 
                       {/* Call Request Popup - 2 წუთის შემდეგ */}
                       <CallRequestPopup />

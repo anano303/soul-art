@@ -43,7 +43,7 @@ export function FloatingCartIcon() {
         const parsed = JSON.parse(saved);
         setPosition(parsed);
         positionRef.current = parsed;
-      } catch (e) {
+      } catch {
         // ignore
       }
     }

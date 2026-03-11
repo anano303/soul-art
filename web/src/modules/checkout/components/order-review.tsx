@@ -45,7 +45,7 @@ export function OrderReview() {
           if (parsed.country !== shippingDetails?.country) {
             setForceUpdate((prev: number) => prev + 1);
           }
-        } catch (e) {
+        } catch {
           // ignore
         }
       }
@@ -70,7 +70,7 @@ export function OrderReview() {
         currentShippingDetails = parsed;
       }
     }
-  } catch (e) {
+  } catch {
     // Use context fallback
   }
 

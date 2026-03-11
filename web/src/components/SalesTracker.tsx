@@ -42,7 +42,7 @@ export function SalesTracker() {
       // Backup localStorage-ში (popup window-ებისთვის)
       try {
         localStorage.setItem(COOKIE_NAME, refFromUrl);
-      } catch (e) {
+      } catch {
         console.warn("[SalesTracker] Failed to save to localStorage");
       }
 
@@ -78,7 +78,7 @@ export function SalesTracker() {
             salesRef
           );
         }
-      } catch (e) {
+      } catch {
         console.warn("[SalesTracker] Failed to read localStorage");
       }
     }

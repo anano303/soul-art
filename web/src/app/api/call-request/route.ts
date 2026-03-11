@@ -3,7 +3,8 @@ import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
   try {
-    const { name, phone, email } = await req.json();
+    const { name, phone, email, question, productName, productId } =
+      await req.json();
 
     if (!name || !phone) {
       return NextResponse.json(
@@ -31,18 +32,39 @@ export async function POST(req: Request) {
     // ადმინისტრატორის მეილზე გაგზავნა
     const adminEmail = process.env.CALL_REQUEST_EMAIL || process.env.EMAIL_USER;
 
+    const isProductRequest = !!productName;
+    const subject = isProductRequest
+      ? `🛍️ პროდუქტის შესახებ მოთხოვნა - ${productName}`
+      : `🔔 ზარის მოთხოვნა - ${name}`;
+    const headerTitle = isProductRequest
+      ? "🛍️ პროდუქტის შესახებ მოთხოვნა"
+      : "📞 ახალი ზარის მოთხოვნა";
+    const headerSubtitle = isProductRequest
+      ? `SoulArt - მომხმარებელს აინტერესებს პროდუქტი`
+      : "SoulArt - მომხმარებელს ესაჭიროება დახმარება";
+
     await transporter.sendMail({
       from: process.env.EMAIL_USER,
       to: adminEmail,
-      subject: `🔔 ზარის მოთხოვნა - ${name}`,
+      subject,
       html: `
         <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 500px; margin: 0 auto; border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden;">
-          <div style="background: linear-gradient(135deg, #065f46, #059669); padding: 24px; text-align: center;">
-            <h2 style="color: white; margin: 0; font-size: 20px;">📞 ახალი ზარის მოთხოვნა</h2>
-            <p style="color: rgba(255,255,255,0.8); margin: 8px 0 0; font-size: 14px;">SoulArt - მომხმარებელს ესაჭიროება დახმარება</p>
+          <div style="background: linear-gradient(135deg, ${isProductRequest ? "#1e3a5f, #2563eb" : "#065f46, #059669"}); padding: 24px; text-align: center;">
+            <h2 style="color: white; margin: 0; font-size: 20px;">${headerTitle}</h2>
+            <p style="color: rgba(255,255,255,0.8); margin: 8px 0 0; font-size: 14px;">${headerSubtitle}</p>
           </div>
           <div style="padding: 24px;">
             <table style="width: 100%; border-collapse: collapse;">
+              ${
+                isProductRequest
+                  ? `<tr>
+                <td style="padding: 10px 0; border-bottom: 1px solid #f3f4f6; color: #6b7280; font-size: 14px; width: 120px;">პროდუქტი</td>
+                <td style="padding: 10px 0; border-bottom: 1px solid #f3f4f6; font-weight: 600; font-size: 15px;">
+                  <a href="https://soulart.ge/products/${productId}" style="color: #2563eb; text-decoration: none;">${productName}</a>
+                </td>
+              </tr>`
+                  : ""
+              }
               <tr>
                 <td style="padding: 10px 0; border-bottom: 1px solid #f3f4f6; color: #6b7280; font-size: 14px; width: 120px;">სახელი, გვარი</td>
                 <td style="padding: 10px 0; border-bottom: 1px solid #f3f4f6; font-weight: 600; font-size: 15px;">${name}</td>
@@ -63,6 +85,14 @@ export async function POST(req: Request) {
               </tr>`
                   : ""
               }
+              ${
+                question
+                  ? `<tr>
+                <td style="padding: 10px 0; border-bottom: 1px solid #f3f4f6; color: #6b7280; font-size: 14px;">შეკითხვა</td>
+                <td style="padding: 10px 0; border-bottom: 1px solid #f3f4f6; font-size: 15px; line-height: 1.5;">${question}</td>
+              </tr>`
+                  : ""
+              }
               <tr>
                 <td style="padding: 10px 0; color: #6b7280; font-size: 14px;">დრო</td>
                 <td style="padding: 10px 0; font-size: 14px; color: #9ca3af;">${now}</td>
@@ -76,7 +106,9 @@ export async function POST(req: Request) {
       `,
     });
 
-    console.log(`[CallRequest] Sent for ${name} - ${phone}`);
+    console.log(
+      `[CallRequest] Sent for ${name} - ${phone}${isProductRequest ? ` (Product: ${productName})` : ""}`
+    );
 
     return NextResponse.json({ success: true });
   } catch (error) {

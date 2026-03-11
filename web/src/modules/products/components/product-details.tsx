@@ -29,6 +29,7 @@ import { useToast } from "@/hooks/use-toast";
 import { trackAddToCart } from "@/lib/ga4-analytics";
 import { useReferralPricing } from "@/hooks/use-referral-pricing";
 import { useCurrency } from "@/hooks/use-currency";
+import { ProductCallRequest } from "@/components/product-call-request/product-call-request";
 
 type MediaItem =
   | {
@@ -186,6 +187,7 @@ export function ProductDetails({ product }: ProductDetailsProps) {
     depth?: number;
   } | null>(null);
   const [isBuying, setIsBuying] = useState(false);
+  const [isCallRequestOpen, setIsCallRequestOpen] = useState(false);
   const hasTrackedViewRef = useRef(false);
   const router = useRouter();
   const { t, language } = useLanguage();
@@ -487,8 +489,8 @@ export function ProductDetails({ product }: ProductDetailsProps) {
       } else {
         setDimensions(product.dimensions);
       }
-    } catch (e) {
-      console.error("Error parsing dimensions:", e);
+    } catch (_e) {
+      console.error("Error parsing dimensions:", _e);
       setDimensions(null);
     }
   }, [product.dimensions]);
@@ -1495,6 +1497,40 @@ export function ProductDetails({ product }: ProductDetailsProps) {
               </button>
             </div>
           )}
+
+          {/* Request Call / More Info Button */}
+          <button
+            type="button"
+            className="btn-request-call"
+            onClick={() => setIsCallRequestOpen(true)}
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
+            </svg>
+            <span>
+              {language === "en"
+                ? "Request a Call / More Info"
+                : "მოითხოვე ზარი / მეტი ინფორმაცია"}
+            </span>
+          </button>
+
+          {/* Product Call Request Modal */}
+          <ProductCallRequest
+            productName={displayName}
+            productId={product._id}
+            isOpen={isCallRequestOpen}
+            onClose={() => setIsCallRequestOpen(false)}
+          />
 
           {isOutOfStock && (
             <AddToCartButton

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo } from "react";
 import Cookies from "js-cookie";
-import { Product } from "@/types";
+// import { Product } from "@/types";
 
 interface Campaign {
   _id: string;
@@ -94,7 +94,7 @@ interface MinimalProduct {
 export function useReferralPricing(product: MinimalProduct): ReferralPricing {
   const [salesRefCode, setSalesRefCode] = useState<string | null>(null);
   const [campaign, setCampaign] = useState<Campaign | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [, setIsLoading] = useState(true);
 
   useEffect(() => {
     // Check for sales_ref cookie
@@ -218,7 +218,7 @@ export function useReferralPricing(product: MinimalProduct): ReferralPricing {
       campaignName,
       badgeText,
     };
-  }, [product, salesRefCode, campaign, isLoading]);
+  }, [product, salesRefCode, campaign]);
 }
 
 /**
