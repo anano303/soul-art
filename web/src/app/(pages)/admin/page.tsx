@@ -102,6 +102,13 @@ export default function AdminDashboard() {
         roles: ["admin"], // მთავარი ადმინი
       },
       {
+        title: "FAQ / ხშირად დასმული კითხვები",
+        href: "/admin/faq",
+        icon: "❓",
+        description: "კითხვების მართვა - დამატება, რედაქტირება, თანმიმდევრობა",
+        roles: ["admin"], // მთავარი ადმინი
+      },
+      {
         title: t("admin.geoTest"),
         href: "/admin/geo-test",
         icon: "🌍",

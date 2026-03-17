@@ -34,6 +34,7 @@ import { GeoModule } from '../geo/geo.module';
 import { ExchangeRateModule } from '../exchange-rate/exchange-rate.module';
 import { ShippingCountriesModule } from '../shipping-countries/shipping-countries.module';
 import { StorageModule } from '../storage/storage.module';
+import { FaqModule } from '../faq/faq.module';
 
 @Module({
   imports: [
@@ -73,6 +74,7 @@ import { StorageModule } from '../storage/storage.module';
     GeoModule,
     ExchangeRateModule,
     ShippingCountriesModule,
+    FaqModule,
   ],
   controllers: [AppController],
   providers: [AppService, GoogleStrategy],

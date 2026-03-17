@@ -30,6 +30,7 @@ import {
   Cloud,
   Percent,
   Gavel,
+  HelpCircle,
 } from "lucide-react";
 
 // Add a style object for the FiraGo font
@@ -512,6 +513,14 @@ export default function UserMenu({
                 >
                   <Percent size={18} />
                   <span>აქციები</span>
+                </Link>
+                <Link
+                  href="/admin/faq"
+                  className="dropdown-item"
+                  onClick={handleLinkClick}
+                >
+                  <HelpCircle size={18} />
+                  <span>FAQ</span>
                 </Link>
               </>
             )}

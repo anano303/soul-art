@@ -10,7 +10,7 @@ import { PrivacyPolicy } from "@/components/PrivacyPolicy";
 import { DonationModal } from "@/components/donation/DonationModal";
 
 export default function Footer() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [showTerms, setShowTerms] = useState(false);
   const [showContract, setShowContract] = useState(false);
   const [showPrivacy, setShowPrivacy] = useState(false);
@@ -56,6 +56,11 @@ export default function Footer() {
             <li>
               <Link href="/contact" className="footer-link">
                 {t("footer.contact")}
+              </Link>
+            </li>
+            <li>
+              <Link href="/faq" className="footer-link">
+                {language === "en" ? "FAQ" : "ხშირად დასმული კითხვები"}
               </Link>
             </li>
           </ul>

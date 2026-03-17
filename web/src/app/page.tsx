@@ -52,6 +52,14 @@ const HomePageForum = dynamic(
   },
 );
 
+const HomeFAQ = dynamic(
+  () => import("@/components/homeFAQ/HomeFAQ"),
+  {
+    loading: () => <div style={{ minHeight: "200px" }} />,
+    ssr: true,
+  },
+);
+
 const Home = () => {
   const { language } = useLanguage();
 
@@ -78,6 +86,7 @@ const Home = () => {
       {/* Forcing a full remount of HomePageShop when language changes */}
       <HomePageShop key={`home-shop-${language}`} />
       <PopularArtists />
+      <HomeFAQ />
       <HomePageForum />
     </div>
   );
