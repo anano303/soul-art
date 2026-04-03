@@ -1,0 +1,130 @@
+.announcement-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.65);
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  backdrop-filter: blur(4px);
+}
+
+.announcement-modal {
+  background: #fff;
+  border-radius: 16px;
+  max-width: 520px;
+  width: 100%;
+  padding: 32px 28px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  text-align: center;
+  animation: announcement-slide-in 0.35s ease-out;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+@keyframes announcement-slide-in {
+  from {
+    opacity: 0;
+    transform: translateY(30px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.announcement-icon {
+  font-size: 48px;
+  margin-bottom: 8px;
+}
+
+.announcement-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: #b91c1c;
+  margin: 0 0 20px;
+}
+
+.announcement-body {
+  text-align: left;
+  font-size: 15px;
+  line-height: 1.7;
+  color: #374151;
+}
+
+.announcement-body p {
+  margin: 0 0 12px;
+}
+
+.announcement-action-box {
+  background: #fef3c7;
+  border: 1px solid #f59e0b;
+  border-radius: 10px;
+  padding: 14px 18px;
+  margin: 16px 0;
+}
+
+.announcement-action-title {
+  font-weight: 600;
+  color: #92400e;
+  margin: 0 0 8px !important;
+}
+
+.announcement-action-box ul {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.announcement-action-box li {
+  color: #92400e;
+  margin-bottom: 4px;
+  font-weight: 500;
+}
+
+.announcement-apology {
+  font-style: italic;
+  color: #6b7280;
+}
+
+.announcement-close-btn {
+  display: inline-block;
+  margin-top: 20px;
+  padding: 12px 40px;
+  background: #012645;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.announcement-close-btn:hover {
+  background: #023b6a;
+}
+
+.announcement-signature {
+  margin: 14px 0 0;
+  font-size: 14px;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+@media (max-width: 480px) {
+  .announcement-modal {
+    padding: 24px 18px;
+  }
+
+  .announcement-title {
+    font-size: 19px;
+  }
+
+  .announcement-body {
+    font-size: 14px;
+  }
+}

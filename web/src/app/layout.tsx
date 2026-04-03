@@ -80,6 +80,7 @@ import PWAManager from "@/components/pwa-manager";
 import { CampaignConsentPrompt } from "@/components/campaign-consent/campaign-consent-prompt";
 import { ReferralCodeInput } from "@/components/referral-code-input/referral-code-input";
 import { CallRequestPopup } from "@/components/call-request-popup/call-request-popup";
+import { ServerAnnouncement } from "@/components/server-announcement/server-announcement";
 import "@/lib/cloudflare-cleanup"; // Auto-cleanup Cloudflare cookies in development
 
 export const viewport = {
@@ -462,6 +463,9 @@ export default function RootLayout({
 
                       {/* Call Request Popup - 2 წუთის შემდეგ */}
                       <CallRequestPopup />
+
+                      {/* Server Announcement - ერთჯერადი შეტყობინება */}
+                      <ServerAnnouncement />
                     </div>
                   </ThemeProvider>
                 </LanguageProvider>

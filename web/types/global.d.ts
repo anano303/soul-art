@@ -4,6 +4,8 @@
  * Global type declarations for third-party scripts
  */
 
+declare module "*.css" {}
+
 interface Window {
   // Google AdSense - array-like object that accepts push calls
   adsbygoogle: Array<Record<string, unknown>>;
