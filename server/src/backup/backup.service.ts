@@ -6,6 +6,8 @@ import * as nodemailer from 'nodemailer';
 import archiver = require('archiver');
 import { emailConfig } from '@/email.config';
 
+const BACKUP_RECIPIENT = process.env.EMAIL_USER || 'admin@soulart.ge';
+
 @Injectable()
 export class BackupService {
   private readonly logger = new Logger(BackupService.name);
@@ -27,7 +29,7 @@ export class BackupService {
     try {
       await this.createAndSendBackup();
       this.logger.log('✅ ბექაფი წარმატებით გაიგზავნა მეილზე');
-    } catch (error) {
+    } catch (error: any) {
       this.logger.error('❌ ბექაფის შეცდომა:', error.message);
     }
   }
@@ -80,7 +82,7 @@ export class BackupService {
             this.logger.log(
               `  📄 ${col.name}: ${docs.length} დოკუმენტი`,
             );
-          } catch (err) {
+          } catch (err: any) {
             this.logger.warn(
               `  ⚠️ ${col.name} ვერ წაეკითხა: ${err.message}`,
             );
@@ -103,7 +105,7 @@ export class BackupService {
 
     await this.transporter.sendMail({
       from: emailConfig.from,
-      to: process.env.BACKUP_EMAIL || process.env.EMAIL_USER,
+      to: BACKUP_RECIPIENT,
       subject: `🗄️ SoulArt DB Backup — ${date}`,
       html: `
         <div style="font-family: sans-serif; padding: 20px;">
@@ -148,7 +150,7 @@ export class BackupService {
 
       await this.transporter.sendMail({
         from: emailConfig.from,
-        to: process.env.BACKUP_EMAIL || process.env.EMAIL_USER,
+        to: BACKUP_RECIPIENT,
         subject: `🗄️ SoulArt DB Backup — ${date} (ნაწილი ${i + 1}/${totalParts})`,
         html: `
           <div style="font-family: sans-serif; padding: 20px;">
