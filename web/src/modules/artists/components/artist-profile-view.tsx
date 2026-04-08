@@ -203,6 +203,9 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
   const searchParams = useSearchParams();
   const queryClient = useQueryClient();
   const { artist, products, portfolio } = data;
+  const totalWorksCount =
+    Math.max(products?.total ?? 0, products?.items?.length ?? 0) +
+    Math.max(portfolio?.total ?? 0, portfolio?.posts?.length ?? 0);
   const [showEditor, setShowEditor] = useState(false);
   const [activeTab, setActiveTab] = useState<"sale" | "gallery" | "info">(
     "sale",
@@ -1046,6 +1049,14 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
 
               {/* Followers stats and Follow button */}
               <div className="artist-hero__stats">
+                <div className="artist-hero__stat">
+                  <span className="artist-hero__stat-number">
+                    {totalWorksCount}
+                  </span>
+                  <span className="artist-hero__stat-label">
+                    {language === "en" ? "total works" : "ნამუშევარი სულ"}
+                  </span>
+                </div>
                 {isOwner ? (
                   <button
                     type="button"
