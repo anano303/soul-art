@@ -44,6 +44,10 @@ import { EmailService } from '@/email/services/email.services';
 @Injectable()
 export class UsersService {
   private readonly logger = new Logger(UsersService.name);
+  private readonly artistSlugAliases: Record<string, string[]> = {
+    'giga-art': ['giga-art', 'gskkart'],
+    gskkart: ['giga-art', 'gskkart'],
+  };
 
   constructor(
     @InjectModel(User.name) private userModel: Model<User>,
@@ -68,6 +72,21 @@ export class UsersService {
 
   private normalizeArtistSlug(slug: string): string {
     return slug.trim().toLowerCase();
+  }
+
+  private getArtistIdentifierQuery(identifier: string) {
+    if (isValidObjectId(identifier)) {
+      return { _id: new Types.ObjectId(identifier) };
+    }
+
+    const normalized = this.normalizeArtistSlug(identifier);
+    const aliases = this.artistSlugAliases[normalized];
+
+    if (aliases?.length) {
+      return { artistSlug: { $in: aliases } };
+    }
+
+    return { artistSlug: normalized };
   }
 
   private isCloudinaryUrl(url?: string | null): boolean {
@@ -656,9 +675,7 @@ export class UsersService {
     }
 
     try {
-      const query = isValidObjectId(identifier)
-        ? { _id: new Types.ObjectId(identifier) }
-        : { artistSlug: this.normalizeArtistSlug(identifier) };
+      const query = this.getArtistIdentifierQuery(identifier);
 
       const artist = await this.userModel
         .findOne({ ...query, role: Role.Seller })
@@ -913,9 +930,7 @@ export class UsersService {
     }
 
     try {
-      const query = isValidObjectId(identifier)
-        ? { _id: new Types.ObjectId(identifier) }
-        : { artistSlug: this.normalizeArtistSlug(identifier) };
+      const query = this.getArtistIdentifierQuery(identifier);
 
       const artist = await this.userModel
         .findOne({ ...query, role: Role.Seller })
@@ -3668,9 +3683,7 @@ export class UsersService {
   async incrementArtistProfileView(identifier: string): Promise<void> {
     if (!identifier) return;
 
-    const query = isValidObjectId(identifier)
-      ? { _id: new Types.ObjectId(identifier) }
-      : { artistSlug: this.normalizeArtistSlug(identifier) };
+    const query = this.getArtistIdentifierQuery(identifier);
 
     await this.userModel.updateOne(
       { ...query, role: Role.Seller },
