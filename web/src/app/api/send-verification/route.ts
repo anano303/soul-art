@@ -11,8 +11,6 @@ const EXPIRATION = +(process.env.EXPIRATION || 60000);
 
 export async function POST(req: Request) {
   const { email } = await req.json();
-  console.log("EMAIL_USER:", process.env.EMAIL_USER); // Log email username
-  console.log("EMAIL_PASS:", process.env.EMAIL_PASS); // Log email password
   // Validate email format
   if (!email || !/\S+@\S+\.\S+/.test(email)) {
     console.log("Invalid email address:", req.body);
@@ -20,6 +18,33 @@ export async function POST(req: Request) {
       JSON.stringify({ success: false, message: "Invalid email address" }),
       { status: 400, headers: { "Content-Type": "application/json" } }
     );
+  }
+
+  // Check if email already registered
+  try {
+    const apiUrl =
+      process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/v1";
+    const checkRes = await fetch(`${apiUrl}/auth/check-email`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email }),
+    });
+    if (checkRes.ok) {
+      const checkData = await checkRes.json();
+      if (checkData.exists) {
+        return new Response(
+          JSON.stringify({
+            success: false,
+            code: "EMAIL_EXISTS",
+            message: "ეს ელფოსტა უკვე რეგისტრირებულია. გთხოვთ გაიაროთ ავტორიზაცია.",
+          }),
+          { status: 409, headers: { "Content-Type": "application/json" } }
+        );
+      }
+    }
+  } catch (err) {
+    console.error("Email existence check failed:", err);
+    // Continue with sending verification — don't block if check fails
   }
 
   const verificationCode = generateVerificationCode();

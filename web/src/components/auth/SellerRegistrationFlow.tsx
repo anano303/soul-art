@@ -431,11 +431,28 @@ export function SellerRegistrationFlow({
       if (res.ok) {
         setEmailSent(true);
       } else {
-        setVerificationError(
-          language === "en"
-            ? "Failed to send code"
-            : "კოდის გაგზავნა ვერ მოხერხდა",
-        );
+        try {
+          const data = await res.json();
+          if (data.code === "EMAIL_EXISTS") {
+            setVerificationError(
+              language === "en"
+                ? "This email is already registered. Please log in."
+                : "ეს ელფოსტა უკვე რეგისტრირებულია. გთხოვთ გაიაროთ ავტორიზაცია.",
+            );
+          } else {
+            setVerificationError(
+              language === "en"
+                ? "Failed to send code"
+                : "კოდის გაგზავნა ვერ მოხერხდა",
+            );
+          }
+        } catch {
+          setVerificationError(
+            language === "en"
+              ? "Failed to send code"
+              : "კოდის გაგზავნა ვერ მოხერხდა",
+          );
+        }
       }
     } catch {
       setVerificationError(

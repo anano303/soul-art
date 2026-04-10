@@ -22,7 +22,7 @@ import { trackRegistration as trackSalesRegistration } from "@/hooks/use-sales-t
 type RegisterFormData = z.infer<typeof registerSchema>;
 
 export function RegisterForm() {
-  const { t } = useLanguage();
+  const { language, t } = useLanguage();
   const errorHandler = useErrorHandler();
   const router = useRouter();
   const { mutate: register, isPending } = useRegister();
@@ -55,6 +55,7 @@ export function RegisterForm() {
 
   const sendVerificationEmail = async () => {
     if (!email) return;
+    setErrorMessage("");
     const res = await fetch("/api/send-verification", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -63,6 +64,29 @@ export function RegisterForm() {
     if (res.ok) {
       setEmailSent(true);
       setErrorMessage(""); // Clear any previous errors
+    } else {
+      try {
+        const data = await res.json();
+        if (data.code === "EMAIL_EXISTS") {
+          setErrorMessage(
+            language === "en"
+              ? "This email is already registered. Please log in."
+              : "ეს ელფოსტა უკვე რეგისტრირებულია. გთხოვთ გაიაროთ ავტორიზაცია."
+          );
+        } else {
+          setErrorMessage(
+            language === "en"
+              ? "Failed to send verification code"
+              : "კოდის გაგზავნა ვერ მოხერხდა"
+          );
+        }
+      } catch {
+        setErrorMessage(
+          language === "en"
+            ? "Failed to send verification code"
+            : "კოდის გაგზავნა ვერ მოხერხდა"
+        );
+      }
     }
   };
 
