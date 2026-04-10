@@ -31,6 +31,7 @@ import {
   Percent,
   Gavel,
   HelpCircle,
+  BellRing,
 } from "lucide-react";
 
 // Add a style object for the FiraGo font
@@ -631,6 +632,17 @@ export default function UserMenu({
               >
                 <Mail size={18} />
                 <span>მეილების გაგზავნა</span>
+              </Link>
+            )}
+
+            {user.role?.toLowerCase() === Role.Admin && (
+              <Link
+                href="/admin/seller-notifications"
+                className="dropdown-item"
+                onClick={handleLinkClick}
+              >
+                <BellRing size={18} />
+                <span>სელერების ნოტიფიკაციები</span>
               </Link>
             )}
 

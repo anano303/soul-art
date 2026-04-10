@@ -1153,6 +1153,22 @@ export class ProductsService {
       );
     }
 
+    if (status === ProductStatus.APPROVED && !wasApprovedBefore) {
+      try {
+        await this.usersService.createGlobalNewProductNotification({
+          productId: updatedProduct._id.toString(),
+          productTitle: updatedProduct.name || 'ახალი პროდუქტი',
+          sellerName: (updatedProduct.user as any)?.storeName ||
+            (updatedProduct.user as any)?.name,
+        });
+      } catch (error) {
+        console.warn(
+          '[Notifications] Failed to create global product notification',
+          error?.message || error,
+        );
+      }
+    }
+
     return updatedProduct;
   }
 

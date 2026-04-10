@@ -8,6 +8,7 @@ import { ArrowLeft } from "lucide-react";
 import { CartIcon } from "@/modules/cart/components/cart-icon";
 import "./header.scss";
 import UserMenu from "./user-menu";
+import { SellerNotifications } from "./seller-notifications";
 import { useUser } from "@/modules/auth/hooks/use-user";
 import { LanguageSwitcher } from "@/components/language-switcher/language-switcher";
 import { useLanguage } from "@/hooks/LanguageContext";
@@ -199,12 +200,14 @@ export default function Header() {
           <div className="language-switcher-container">
             <LanguageSwitcher />
           </div>
+          <SellerNotifications />
           <UserMenu />
           <CartIcon />
         </div>
 
         {/* Mobile: Only hamburger menu - visibility controlled by CSS */}
         <div className="mobile-header-actions">
+          <SellerNotifications />
           <button
             className="mobile-nav-btn"
             onClick={toggleUserMenu}

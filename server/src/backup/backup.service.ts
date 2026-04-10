@@ -13,9 +13,7 @@ export class BackupService {
   private readonly logger = new Logger(BackupService.name);
   private readonly transporter: nodemailer.Transporter;
 
-  constructor(
-    @InjectConnection() private readonly connection: Connection,
-  ) {
+  constructor(@InjectConnection() private readonly connection: Connection) {
     this.transporter = nodemailer.createTransport(emailConfig);
   }
 
@@ -44,7 +42,9 @@ export class BackupService {
     const zipBuffer = await this.createZipBuffer(db, collections);
 
     const sizeInMB = (zipBuffer.length / (1024 * 1024)).toFixed(2);
-    this.logger.log(`📦 ბექაფის ზომა: ${sizeInMB} MB, კოლექციები: ${collections.length}`);
+    this.logger.log(
+      `📦 ბექაფის ზომა: ${sizeInMB} MB, კოლექციები: ${collections.length}`,
+    );
 
     // Gmail-ის ლიმიტი 25MB-ია attachment-ისთვის
     if (zipBuffer.length > 24 * 1024 * 1024) {
@@ -71,21 +71,14 @@ export class BackupService {
       const exportPromise = (async () => {
         for (const col of collections) {
           try {
-            const docs = await db
-              .collection(col.name)
-              .find({})
-              .toArray();
+            const docs = await db.collection(col.name).find({}).toArray();
 
             const json = JSON.stringify(docs, null, 2);
             archive.append(json, { name: `${col.name}.json` });
 
-            this.logger.log(
-              `  📄 ${col.name}: ${docs.length} დოკუმენტი`,
-            );
+            this.logger.log(`  📄 ${col.name}: ${docs.length} დოკუმენტი`);
           } catch (err: any) {
-            this.logger.warn(
-              `  ⚠️ ${col.name} ვერ წაეკითხა: ${err.message}`,
-            );
+            this.logger.warn(`  ⚠️ ${col.name} ვერ წაეკითხა: ${err.message}`);
           }
         }
         archive.finalize();
