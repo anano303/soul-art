@@ -57,16 +57,62 @@ const isSellerRole = (role?: string) => {
   return normalized === "seller" || normalized === "seller_sales_manager";
 };
 
-const formatTimestamp = (value: string) => {
+const formatTimestamp = (value: string, lang: string = "ge") => {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "";
-  return new Intl.DateTimeFormat("ka-GE", {
+  return new Intl.DateTimeFormat(lang === "en" ? "en-US" : "ka-GE", {
     month: "short",
     day: "numeric",
     hour: "2-digit",
     minute: "2-digit",
   }).format(date);
 };
+
+// Known Georgian → English title translations
+const TITLE_MAP: Record<string, string> = {
+  "ახალი გამომწერი": "New follower",
+  "ახალი შეფასება": "New review",
+  "ახალი პროდუქტი დაემატა": "New product added",
+  "🎨 გამოიწერე და შეაფასე ხელოვანი": "🎨 Follow & rate an artist",
+};
+
+const LABEL_MAP: Record<string, string> = {
+  "პროფილი": "Profile",
+  "ნახვა": "View",
+  "გამოწერა": "Follow",
+};
+
+// Regex-based message translations (Georgian pattern → English replacement)
+const MESSAGE_PATTERNS: Array<{ pattern: RegExp; replacement: string }> = [
+  { pattern: /^(.+) გამოგიწერათ! 🎉$/, replacement: "$1 followed you! 🎉" },
+  { pattern: /^(.+) შეგაფასათ (.+) \((\d+\/5)\)(.*)$/, replacement: "$1 rated you $2 ($3)$4" },
+  { pattern: /^(.+)-მა დაამატა ახალი პროდუქტი: (.+)$/, replacement: "$1 added a new product: $2" },
+  { pattern: /^ახალი პროდუქტი: (.+)$/, replacement: "New product: $1" },
+  { pattern: /^გაიცანი დღის ხელოვანი: (.+)\. გამოიწერე და შეაფასე მისი ნამუშევრები!$/, replacement: "Meet today's artist: $1. Follow and rate their work!" },
+];
+
+function translateNotification(
+  title: string,
+  message: string,
+  actionLabel: string | null | undefined,
+  isEn: boolean,
+): { title: string; message: string; actionLabel: string | null | undefined } {
+  if (!isEn) return { title, message, actionLabel };
+
+  const translatedTitle = TITLE_MAP[title] || title;
+
+  let translatedMessage = message;
+  for (const { pattern, replacement } of MESSAGE_PATTERNS) {
+    if (pattern.test(message)) {
+      translatedMessage = message.replace(pattern, replacement);
+      break;
+    }
+  }
+
+  const translatedLabel = actionLabel ? (LABEL_MAP[actionLabel] || actionLabel) : actionLabel;
+
+  return { title: translatedTitle, message: translatedMessage, actionLabel: translatedLabel };
+}
 
 export function SellerNotifications() {
   const { user } = useAuth();
@@ -280,18 +326,30 @@ export function SellerNotifications() {
                       : "is-unread"
                   }`}
                 >
-                  <div className="seller-header-notifications__item-top">
-                    <strong>{notification.title}</strong>
-                    <time dateTime={notification.createdAt}>
-                      {formatTimestamp(notification.createdAt)}
-                    </time>
-                  </div>
-                  {notification.category === "admin" && (
-                    <div className="seller-header-notifications__admin-badge">
-                      {isEn ? "Important" : "მნიშვნელოვანი"}
-                    </div>
-                  )}
-                  <p>{notification.message}</p>
+                  {(() => {
+                    const t = translateNotification(
+                      notification.title,
+                      notification.message,
+                      notification.actionLabel,
+                      isEn,
+                    );
+                    return (
+                      <>
+                        <div className="seller-header-notifications__item-top">
+                          <strong>{t.title}</strong>
+                          <time dateTime={notification.createdAt}>
+                            {formatTimestamp(notification.createdAt, language)}
+                          </time>
+                        </div>
+                        {notification.category === "admin" && (
+                          <div className="seller-header-notifications__admin-badge">
+                            {isEn ? "Important" : "მნიშვნელოვანი"}
+                          </div>
+                        )}
+                        <p>{t.message}</p>
+                      </>
+                    );
+                  })()}
                   {isAdmin && (
                     <div
                       className="seller-header-notifications__admin-stats"
@@ -317,7 +375,7 @@ export function SellerNotifications() {
                                 >
                                   <strong>{reader.name}</strong>
                                   <span>{reader.email || ""}</span>
-                                  <time>{formatTimestamp(reader.readAt)}</time>
+                                  <time>{formatTimestamp(reader.readAt, language)}</time>
                                 </div>
                               ))
                             ) : (
@@ -339,7 +397,15 @@ export function SellerNotifications() {
                         navigateToAction(notification.actionUrl, notification.category);
                       }}
                     >
-                      {notification.actionLabel || (isEn ? "Open" : "გახსნა")}
+                      {(() => {
+                        const t = translateNotification(
+                          notification.title,
+                          notification.message,
+                          notification.actionLabel,
+                          isEn,
+                        );
+                        return t.actionLabel || (isEn ? "Open" : "გახსნა");
+                      })()}
                     </button>
                   )}
                 </article>
