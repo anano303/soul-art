@@ -5,6 +5,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Bell, BellRing, CheckCheck } from "lucide-react";
 import { fetchWithAuth } from "@/lib/fetch-with-auth";
 import { useAuth } from "@/hooks/use-auth";
+import { useLanguage } from "@/hooks/LanguageContext";
 import { useRouter } from "next/navigation";
 import "./seller-notifications.css";
 
@@ -69,6 +70,8 @@ const formatTimestamp = (value: string) => {
 
 export function SellerNotifications() {
   const { user } = useAuth();
+  const { language } = useLanguage();
+  const isEn = language === "en";
   const router = useRouter();
   const queryClient = useQueryClient();
   const [isOpen, setIsOpen] = useState(false);
@@ -243,28 +246,28 @@ export function SellerNotifications() {
         <div className="seller-header-notifications__panel">
           <div className="seller-header-notifications__panel-header">
             <div>
-              <h3>შეტყობინებები</h3>
+              <h3>{isEn ? "Notifications" : "შეტყობინებები"}</h3>
               <p>
                 {isAdmin
-                  ? "სრული ისტორია + ნახვების სტატისტიკა"
-                  : "ახალი პროდუქტები, შეთავაზებები და მნიშვნელოვანი განახლებები"}
+                  ? (isEn ? "Full history + view statistics" : "სრული ისტორია + ნახვების სტატისტიკა")
+                  : (isEn ? "New products, offers and important updates" : "ახალი პროდუქტები, შეთავაზებები და მნიშვნელოვანი განახლებები")}
               </p>
             </div>
             {unreadCount === 0 && (
               <span className="seller-header-notifications__read-state">
                 <CheckCheck size={14} />
-                ნანახია
+                {isEn ? "All read" : "ნანახია"}
               </span>
             )}
           </div>
 
           {(isAdmin ? adminHistoryQuery.isLoading : notificationsQuery.isLoading) ? (
             <div className="seller-header-notifications__empty">
-              იტვირთება...
+              {isEn ? "Loading..." : "იტვირთება..."}
             </div>
           ) : visibleNotifications.length === 0 ? (
             <div className="seller-header-notifications__empty">
-              ჯერ შეტყობინება არ არის.
+              {isEn ? "No notifications yet." : "ჯერ შეტყობინება არ არის."}
             </div>
           ) : (
             <div className="seller-header-notifications__list">
@@ -285,7 +288,7 @@ export function SellerNotifications() {
                   </div>
                   {notification.category === "admin" && (
                     <div className="seller-header-notifications__admin-badge">
-                      მნიშვნელოვანი
+                      {isEn ? "Important" : "მნიშვნელოვანი"}
                     </div>
                   )}
                   <p>{notification.message}</p>
@@ -296,14 +299,14 @@ export function SellerNotifications() {
                       onMouseLeave={() => setHoveredNotificationId(null)}
                     >
                       <span className="seller-header-notifications__admin-seen">
-                        ნანახი: {(notification as AdminHistoryNotification).readByUsersCount || 0}
+                        {isEn ? "Seen" : "ნანახი"}: {(notification as AdminHistoryNotification).readByUsersCount || 0}
                       </span>
                       <span className="seller-header-notifications__admin-arrow">▸</span>
 
                       {hoveredNotificationId === notification.id && (
                         <div className="seller-header-notifications__seen-popover">
                           <div className="seller-header-notifications__seen-title">
-                            ვინ ნახა
+                            {isEn ? "Seen by" : "ვინ ნახა"}
                           </div>
                           <div className="seller-header-notifications__seen-list">
                             {((notification as AdminHistoryNotification).readByUsers || []).length > 0 ? (
@@ -319,7 +322,7 @@ export function SellerNotifications() {
                               ))
                             ) : (
                               <div className="seller-header-notifications__seen-empty">
-                                ჯერ არავის უნახავს
+                                {isEn ? "No one has seen this yet" : "ჯერ არავის უნახავს"}
                               </div>
                             )}
                           </div>
@@ -336,7 +339,7 @@ export function SellerNotifications() {
                         navigateToAction(notification.actionUrl, notification.category);
                       }}
                     >
-                      {notification.actionLabel || "გახსნა"}
+                      {notification.actionLabel || (isEn ? "Open" : "გახსნა")}
                     </button>
                   )}
                 </article>
