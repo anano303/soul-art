@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useCallback, useRef } from "react";
+import { useEffect, useCallback } from "react";
 import { useUser } from "@/modules/auth/hooks/use-user";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -15,7 +15,6 @@ const VAPID_KEY =
  */
 export function PushNotificationManager() {
   const { user } = useUser();
-  const hasRun = useRef(false);
 
   const isPushSupported = useCallback(() => {
     return (
@@ -96,52 +95,55 @@ export function PushNotificationManager() {
       }
     }, []);
 
-  const autoSubscribe = useCallback(async () => {
+  // Run on mount — request permission & subscribe
+  useEffect(() => {
     if (!isPushSupported()) return;
 
-    try {
-      // 1. Register service worker for everyone
-      const registration = await ensureServiceWorker();
-      if (!registration) return;
+    let cancelled = false;
 
-      // 2. If permission already granted — subscribe silently
-      if (Notification.permission === "granted") {
-        await ensureSubscription(registration);
-        return;
+    const run = async () => {
+      try {
+        const registration = await ensureServiceWorker();
+        if (!registration || cancelled) return;
+
+        // Already granted — just ensure subscription
+        if (Notification.permission === "granted") {
+          await ensureSubscription(registration);
+          return;
+        }
+
+        // Denied — nothing we can do
+        if (Notification.permission === "denied") return;
+
+        // "default" — show native prompt after delay
+        const lastAsked = localStorage.getItem("push-auto-asked");
+        if (
+          lastAsked &&
+          (Date.now() - parseInt(lastAsked)) / (1000 * 60 * 60 * 24) < 7
+        ) {
+          return;
+        }
+
+        await new Promise((r) => setTimeout(r, 3000));
+        if (cancelled) return;
+
+        const permission = await Notification.requestPermission();
+        if (permission === "granted") {
+          await ensureSubscription(registration);
+        } else {
+          localStorage.setItem("push-auto-asked", Date.now().toString());
+        }
+      } catch (e) {
+        console.warn("[Push] auto-subscribe failed:", e);
       }
+    };
 
-      // 3. If denied — nothing we can do
-      if (Notification.permission === "denied") return;
+    run();
 
-      // 4. Permission is "default" — show native prompt after delay
-      const lastAsked = localStorage.getItem("push-auto-asked");
-      if (
-        lastAsked &&
-        (Date.now() - parseInt(lastAsked)) / (1000 * 60 * 60 * 24) < 7
-      ) {
-        return; // Asked recently
-      }
-
-      // Small delay so the page loads first
-      await new Promise((r) => setTimeout(r, 3000));
-
-      const permission = await Notification.requestPermission();
-      if (permission === "granted") {
-        await ensureSubscription(registration);
-      } else {
-        localStorage.setItem("push-auto-asked", Date.now().toString());
-      }
-    } catch (e) {
-      console.warn("[Push] auto-subscribe failed:", e);
-    }
+    return () => {
+      cancelled = true;
+    };
   }, [isPushSupported, ensureServiceWorker, ensureSubscription]);
-
-  // Run once on mount
-  useEffect(() => {
-    if (hasRun.current) return;
-    hasRun.current = true;
-    autoSubscribe();
-  }, [autoSubscribe]);
 
   // Re-link userId whenever user logs in
   useEffect(() => {
