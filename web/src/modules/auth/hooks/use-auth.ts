@@ -49,7 +49,7 @@ export function useLogout() {
 }
 
 // Enhanced error handling function for consistent backend error extraction
-function extractErrorMessage(error: unknown): string {
+export function extractErrorMessage(error: unknown): string {
   if (axios.isAxiosError(error)) {
     const axiosError = error as AxiosError<{
       message?: string | string[];

@@ -5,7 +5,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useAuth } from "@/hooks/use-auth";
-import { useBecomeSeller } from "@/modules/auth/hooks/use-auth";
+import { useBecomeSeller, extractErrorMessage } from "@/modules/auth/hooks/use-auth";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "@/hooks/use-toast";
 import { useLanguage } from "@/hooks/LanguageContext";
@@ -25,7 +25,13 @@ import "./SellerRegistrationFlow.css";
 const step1Schema = z.object({
   email: z.string().email("არასწორი ელფოსტა"),
   password: z.string().min(6, "პაროლი მინიმუმ 6 სიმბოლო"),
-  name: z.string().min(1, "სახელი აუცილებელია"),
+  name: z
+    .string()
+    .min(1, "სახელი აუცილებელია")
+    .refine(
+      (v) => v.trim().includes(" "),
+      "გთხოვთ შეიყვანოთ სახელი და გვარი (მაგ: გიორგი გიორგაძე)",
+    ),
 });
 
 // Step 2 Schema - Seller details
@@ -540,14 +546,9 @@ export function SellerRegistrationFlow({
         else window.location.href = redirectTo;
       } catch (error: unknown) {
         setIsAuthenticating(false);
-        const errMsg =
-          error instanceof Error
-            ? error.message
-            : (error as { response?: { data?: { message?: string } } })
-                ?.response?.data?.message || "Unknown error";
         toast({
           title: language === "en" ? "Error" : "შეცდომა",
-          description: errMsg,
+          description: extractErrorMessage(error),
           variant: "destructive",
         });
       }
@@ -570,7 +571,7 @@ export function SellerRegistrationFlow({
         onError: (error) => {
           toast({
             title: language === "en" ? "Error" : "შეცდომა",
-            description: error.message,
+            description: extractErrorMessage(error),
             variant: "destructive",
           });
         },
