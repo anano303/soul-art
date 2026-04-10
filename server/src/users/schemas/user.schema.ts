@@ -285,6 +285,46 @@ export class User {
   @Prop({ type: Number, default: 0 })
   profileViews?: number; // Total profile page views
 
+  @Prop({
+    type: [
+      {
+        id: { type: String, required: true },
+        title: { type: String, required: true },
+        message: { type: String, required: true },
+        type: {
+          type: String,
+          enum: ['info', 'warning', 'success'],
+          default: 'info',
+        },
+        category: {
+          type: String,
+          enum: ['admin', 'product', 'suggestion', 'system'],
+          default: 'system',
+        },
+        priority: { type: Number, default: 0 },
+        actionUrl: { type: String, default: null },
+        actionLabel: { type: String, default: null },
+        createdAt: { type: Date, default: Date.now },
+        createdByUserId: { type: String, default: null },
+        readAt: { type: Date, default: null },
+      },
+    ],
+    default: [],
+  })
+  sellerNotifications?: Array<{
+    id: string;
+    title: string;
+    message: string;
+    type: 'info' | 'warning' | 'success';
+    category?: 'admin' | 'product' | 'suggestion' | 'system';
+    priority?: number;
+    actionUrl?: string | null;
+    actionLabel?: string | null;
+    createdAt: Date;
+    createdByUserId?: string | null;
+    readAt?: Date | null;
+  }>;
+
   // Shipping addresses
   @Prop({
     type: [

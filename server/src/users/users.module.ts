@@ -50,6 +50,7 @@ import { UserCloudinaryService } from './services/user-cloudinary.service';
 import { ReferralsModule } from '../referrals/referrals.module';
 import { OrderModule } from '../orders/order.module';
 import { PaymentsModule } from '../payments/payments.module';
+import { SettingsModule } from '@/settings/settings.module';
 
 @Module({
   imports: [
@@ -98,6 +99,7 @@ import { PaymentsModule } from '../payments/payments.module';
       signOptions: { expiresIn: '10m' },
     }),
     CloudinaryModule, // Add Cloudinary module
+    SettingsModule,
     forwardRef(() => PaymentsModule), // Add PaymentsModule for BOG transfer service
     forwardRef(() => ReferralsModule), // Add ReferralsModule for dependency injection
     forwardRef(() => OrderModule), // Add OrderModule for guest order linking

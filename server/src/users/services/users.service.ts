@@ -3255,7 +3255,8 @@ export class UsersService {
   async getMySellerNotifications(userId: string) {
     const user = await this.userModel
       .findById(userId)
-      .select('role sellerNotifications');
+      .select('role sellerNotifications')
+      .lean();
 
     if (!user) {
       throw new NotFoundException('User not found');
@@ -3301,8 +3302,8 @@ export class UsersService {
 
     const ids = notificationIds?.length ? new Set(notificationIds) : null;
     let updatedCount = 0;
-    const notifications = Array.isArray(user.sellerNotifications)
-      ? user.sellerNotifications
+    const notifications = Array.isArray((user as any).sellerNotifications)
+      ? (user as any).sellerNotifications
       : [];
 
     for (const notification of notifications) {
@@ -3356,7 +3357,8 @@ export class UsersService {
   }> {
     const users = await this.userModel
       .find({ role: { $ne: null } })
-      .select('name email sellerNotifications');
+      .select('name email sellerNotifications')
+      .lean();
 
     // Aggregate all notifications with statistics
     const notificationMap = new Map<
@@ -3502,7 +3504,7 @@ export class UsersService {
             // Count recipients who also appear in followers
             const allRecipientIds = users
               .filter(u => {
-                const notifs = Array.isArray(u.sellerNotifications) ? u.sellerNotifications : [];
+                const notifs = Array.isArray((u as any).sellerNotifications) ? (u as any).sellerNotifications : [];
                 return notifs.some(n => n.id === notif.id);
               })
               .map(u => u._id.toString());

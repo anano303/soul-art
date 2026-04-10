@@ -5,7 +5,10 @@ import {
   Body,
   UseGuards,
 } from '@nestjs/common';
-import { SettingsService } from './settings.service';
+import {
+  SellerNotificationSuggestion,
+  SettingsService,
+} from './settings.service';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { RolesGuard } from '../guards/roles.guard';
 import { Roles } from '../decorators/roles.decorator';
@@ -51,6 +54,32 @@ export class SettingsController {
     }
     const newFee = await this.settingsService.setForeignPaymentFee(fee);
     return { fee: newFee, success: true };
+  }
+
+  @Get('seller-notification-suggestions')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.Admin)
+  async getSellerNotificationSuggestions() {
+    const suggestions =
+      await this.settingsService.getSellerNotificationSuggestions();
+    return { suggestions };
+  }
+
+  @Put('seller-notification-suggestions')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.Admin)
+  async setSellerNotificationSuggestions(
+    @Body('suggestions') suggestions: SellerNotificationSuggestion[],
+  ) {
+    if (!Array.isArray(suggestions)) {
+      return { error: 'Invalid suggestions payload', success: false };
+    }
+
+    const normalized = await this.settingsService.setSellerNotificationSuggestions(
+      suggestions,
+    );
+
+    return { success: true, suggestions: normalized };
   }
 
   // Admin only - get all settings
