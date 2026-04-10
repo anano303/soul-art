@@ -11,6 +11,7 @@ import {
   forwardRef,
   Optional,
 } from '@nestjs/common';
+import { Cron, CronExpression } from '@nestjs/schedule';
 
 import { User, UserDocument } from '../schemas/user.schema';
 import { Product, ProductStatus } from '../../products/schemas/product.schema';
@@ -40,6 +41,7 @@ import { OrdersService } from '@/orders/services/orders.service';
 import { UpdateArtistProfileDto } from '../dtos/update-artist-profile.dto';
 import { ArtistSocialLinks } from '../schemas/user.schema';
 import { EmailService } from '@/email/services/email.services';
+import { SettingsService } from '@/settings/settings.service';
 
 @Injectable()
 export class UsersService {
@@ -60,6 +62,7 @@ export class UsersService {
     private readonly cloudinaryService: CloudinaryService,
     private readonly storageService: StorageService,
     private readonly balanceService: BalanceService,
+    private readonly settingsService: SettingsService,
     @Optional()
     @Inject(forwardRef(() => ReferralsService))
     private readonly referralsService?: ReferralsService,
@@ -2498,6 +2501,43 @@ export class UsersService {
   // ============================================
 
   /**
+   * Follow an artist by slug — silently ignores if already following
+   */
+  async followBySlug(followerId: string, slug: string): Promise<{ followed: boolean; artistId?: string }> {
+    const artist = await this.userModel.findOne({
+      artistSlug: slug.toLowerCase().trim(),
+      role: Role.Seller,
+    }).lean();
+
+    if (!artist) {
+      return { followed: false };
+    }
+
+    const artistId = artist._id.toString();
+    if (followerId === artistId) {
+      return { followed: false };
+    }
+
+    const follower = await this.findById(followerId);
+    if (!follower) {
+      return { followed: false };
+    }
+
+    // Already following — return success silently
+    const followingList = (follower.following || []).map(String);
+    if (followingList.includes(artistId)) {
+      return { followed: true, artistId };
+    }
+
+    try {
+      await this.followUser(followerId, artistId);
+      return { followed: true, artistId };
+    } catch {
+      return { followed: false, artistId };
+    }
+  }
+
+  /**
    * Follow an artist/seller
    */
   async followUser(followerId: string, targetUserId: string): Promise<void> {
@@ -2554,6 +2594,37 @@ export class UsersService {
       this.logger.log(`User ${followerId} followed artist ${targetUserId}`);
     } finally {
       await session.endSession();
+    }
+
+    // Send in-app notification to the artist about new follower
+    try {
+      const followerName = follower.name || 'მომხმარებელი';
+      const artistSlug = target.artistSlug;
+      const notification = this.buildSellerNotification(
+        'ახალი გამომწერი',
+        `${followerName} გამოგიწერათ! 🎉`,
+        undefined,
+        {
+          category: 'system',
+          priority: 10,
+          actionUrl: artistSlug ? `/@${artistSlug}` : null,
+          actionLabel: 'პროფილი',
+        },
+      );
+
+      await this.userModel.updateOne(
+        { _id: targetUserId },
+        {
+          $push: {
+            sellerNotifications: {
+              $each: [notification],
+              $slice: -80,
+            },
+          },
+        },
+      );
+    } catch (error) {
+      this.logger.error(`Failed to send follow notification: ${error.message}`);
     }
   }
 
@@ -2985,6 +3056,39 @@ export class UsersService {
       `User ${userId} reviewed artist ${artistId} with rating ${rating}`,
     );
 
+    // Send in-app notification to the artist about new review
+    try {
+      const reviewer = await this.findById(userId);
+      const reviewerName = reviewer?.name || 'მომხმარებელი';
+      const stars = '⭐'.repeat(rating);
+      const artistSlug = artist.artistSlug;
+      const notification = this.buildSellerNotification(
+        'ახალი შეფასება',
+        `${reviewerName} შეგაფასათ ${stars} (${rating}/5)${comment ? ` - "${comment}"` : ''}`,
+        undefined,
+        {
+          category: 'system',
+          priority: 15,
+          actionUrl: artistSlug ? `/@${artistSlug}` : null,
+          actionLabel: 'პროფილი',
+        },
+      );
+
+      await this.userModel.updateOne(
+        { _id: artistId },
+        {
+          $push: {
+            sellerNotifications: {
+              $each: [notification],
+              $slice: -80,
+            },
+          },
+        },
+      );
+    } catch (error) {
+      this.logger.error(`Failed to send review notification: ${error.message}`);
+    }
+
     return {
       message: 'Review submitted successfully',
       artistDirectRating: artist.artistDirectRating,
@@ -3070,6 +3174,521 @@ export class UsersService {
     return result;
   }
 
+  private ensureInternalActionUrl(actionUrl?: string): string | null {
+    if (!actionUrl) return null;
+
+    const value = actionUrl.trim();
+    if (!value.startsWith('/')) {
+      return null;
+    }
+
+    return value;
+  }
+
+  private buildSellerNotification(
+    subject: string,
+    message: string,
+    createdByUserId?: string,
+    options?: {
+      category?: 'admin' | 'product' | 'suggestion' | 'system';
+      priority?: number;
+      actionUrl?: string;
+      actionLabel?: string;
+    },
+  ) {
+    return {
+      id: new Types.ObjectId().toString(),
+      title: subject.trim(),
+      message: message.trim(),
+      type: 'info' as const,
+      category: options?.category || 'system',
+      priority: options?.priority ?? 0,
+      actionUrl: this.ensureInternalActionUrl(options?.actionUrl),
+      actionLabel: options?.actionLabel || null,
+      createdAt: new Date(),
+      createdByUserId: createdByUserId || null,
+      readAt: null,
+    };
+  }
+
+  private async createSellerInAppNotifications(
+    subject: string,
+    message: string,
+    sellerIds?: string[],
+    createdByUserId?: string,
+  ): Promise<number> {
+    const query: any = { role: Role.Seller };
+    if (sellerIds && sellerIds.length > 0) {
+      query._id = { $in: sellerIds };
+    }
+
+    const sellers = await this.userModel.find(query).select('_id').lean();
+    if (sellers.length === 0) {
+      return 0;
+    }
+
+    const notification = this.buildSellerNotification(
+      subject,
+      message,
+      createdByUserId,
+      {
+        category: 'admin',
+        priority: 100,
+      },
+    );
+
+    await this.userModel.updateMany(
+      { _id: { $in: sellers.map((seller) => seller._id) } },
+      {
+        $push: {
+          sellerNotifications: {
+            $each: [notification],
+            $slice: -80,
+          },
+        },
+      },
+    );
+
+    return sellers.length;
+  }
+
+  async getMySellerNotifications(userId: string) {
+    const user = await this.userModel
+      .findById(userId)
+      .select('role sellerNotifications');
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    const notifications = Array.isArray(user.sellerNotifications)
+      ? [...user.sellerNotifications]
+          .sort(
+            (a, b) =>
+              (b.priority ?? 0) - (a.priority ?? 0) ||
+              new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+          )
+          .map((notification) => ({
+            id: notification.id,
+            title: notification.title,
+            message: notification.message,
+            type: notification.type || 'info',
+            category: notification.category || 'system',
+            priority: notification.priority ?? 0,
+            actionUrl: this.ensureInternalActionUrl(notification.actionUrl),
+            actionLabel: notification.actionLabel || null,
+            createdAt: notification.createdAt,
+            createdByUserId: notification.createdByUserId || null,
+            readAt: notification.readAt || null,
+            isRead: !!notification.readAt,
+          }))
+      : [];
+
+    return { notifications };
+  }
+
+  async markMySellerNotificationsRead(
+    userId: string,
+    notificationIds?: string[],
+  ): Promise<{ success: boolean; updatedCount: number }> {
+    const user = await this.userModel
+      .findById(userId)
+      .select('sellerNotifications');
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    const ids = notificationIds?.length ? new Set(notificationIds) : null;
+    let updatedCount = 0;
+    const notifications = Array.isArray(user.sellerNotifications)
+      ? user.sellerNotifications
+      : [];
+
+    for (const notification of notifications) {
+      const shouldMark = !notification.readAt && (!ids || ids.has(notification.id));
+      if (shouldMark) {
+        notification.readAt = new Date();
+        updatedCount++;
+      }
+    }
+
+    if (updatedCount > 0) {
+      user.markModified('sellerNotifications');
+      await user.save();
+    }
+
+    return { success: true, updatedCount };
+  }
+
+  async getSellerNotificationsHistory(
+    limit: number = 50,
+    offset: number = 0,
+    filters?: {
+      category?: string;
+      query?: string;
+      onlyUnread?: boolean;
+    },
+  ): Promise<{
+    notifications: Array<{
+      id: string;
+      title: string;
+      message: string;
+      type: string;
+      category?: string;
+      priority?: number;
+      actionUrl?: string;
+      createdAt: Date;
+      readAt?: Date;
+      createdByUserId?: string;
+      createdByUserName?: string;
+      receivedByUsersCount: number;
+      readByUsersCount: number;
+      followedCount?: number;
+      readByUsers: Array<{
+        userId: string;
+        name: string;
+        email?: string;
+        readAt: Date;
+      }>;
+    }>;
+    total: number;
+  }> {
+    const users = await this.userModel
+      .find({ role: { $ne: null } })
+      .select('name email sellerNotifications');
+
+    // Aggregate all notifications with statistics
+    const notificationMap = new Map<
+      string,
+      {
+        id: string;
+        title: string;
+        message: string;
+        type: string;
+        category?: string;
+        priority?: number;
+        actionUrl?: string;
+        createdAt: Date;
+        readAt?: Date;
+        createdByUserId?: string;
+        receivedByUsersCount: number;
+        readByUsersCount: number;
+        followedCount?: number;
+        readByUsers: Array<{
+          userId: string;
+          name: string;
+          email?: string;
+          readAt: Date;
+        }>;
+        createdByUserName?: string;
+      }
+    >();
+
+    for (const currentUser of users) {
+      const notifications = Array.isArray(currentUser.sellerNotifications)
+        ? currentUser.sellerNotifications
+        : [];
+      for (const notification of notifications) {
+        const key = notification.id;
+        if (!notificationMap.has(key)) {
+          notificationMap.set(key, {
+            id: notification.id,
+            title: notification.title,
+            message: notification.message,
+            type: notification.type || 'info',
+            category: notification.category || 'system',
+            priority: notification.priority ?? 0,
+            actionUrl: this.ensureInternalActionUrl(notification.actionUrl),
+            createdAt: notification.createdAt,
+            readAt: notification.readAt,
+            createdByUserId: notification.createdByUserId,
+            receivedByUsersCount: 0,
+            readByUsersCount: 0,
+            readByUsers: [],
+          });
+        }
+        const notifData = notificationMap.get(key);
+        notifData.receivedByUsersCount += 1;
+        if (notification.readAt) {
+          notifData.readByUsersCount += 1;
+          notifData.readByUsers.push({
+            userId: currentUser._id.toString(),
+            name: currentUser.name,
+            email: currentUser.email,
+            readAt: notification.readAt,
+          });
+        }
+      }
+    }
+
+    const normalizedQuery = String(filters?.query || '')
+      .trim()
+      .toLowerCase();
+    const normalizedCategory = String(filters?.category || '')
+      .trim()
+      .toLowerCase();
+
+    // Sort by creation date descending
+    const allNotifications = Array.from(notificationMap.values())
+      .filter((item) => {
+        if (normalizedCategory && item.category !== normalizedCategory) {
+          return false;
+        }
+
+        if (filters?.onlyUnread && item.readByUsersCount >= item.receivedByUsersCount) {
+          return false;
+        }
+
+        if (!normalizedQuery) {
+          return true;
+        }
+
+        const haystack = [
+          item.title,
+          item.message,
+          item.createdByUserName,
+          item.actionUrl,
+          item.category,
+        ]
+          .filter(Boolean)
+          .join(' ')
+          .toLowerCase();
+
+        return haystack.includes(normalizedQuery);
+      })
+      .sort((a, b) => {
+        return (
+          (b.priority ?? 0) - (a.priority ?? 0) ||
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        );
+      });
+
+    // Get admin name for createdByUserId
+    for (const notification of allNotifications) {
+      notification.readByUsers.sort(
+        (a, b) => new Date(b.readAt).getTime() - new Date(a.readAt).getTime(),
+      );
+
+      if (notification.createdByUserId) {
+        try {
+          const admin = await this.userModel
+            .findById(notification.createdByUserId)
+            .select('name');
+          if (admin) {
+            notification.createdByUserName = admin.name;
+          }
+        } catch (error) {
+          this.logger.warn(
+            `Could not find admin user ${notification.createdByUserId}`,
+          );
+        }
+      }
+    }
+
+    // Compute followedCount for suggestion notifications
+    const paginatedBefore = allNotifications.slice(offset, offset + limit);
+    for (const notif of paginatedBefore) {
+      if (notif.category === 'suggestion' && notif.actionUrl?.startsWith('/@')) {
+        const slug = notif.actionUrl.slice(2);
+        if (slug) {
+          const artist = await this.userModel.findOne({
+            artistSlug: slug.toLowerCase(),
+            role: Role.Seller,
+          }).select('followers').lean();
+          if (artist?.followers?.length) {
+            const followerSet = new Set(artist.followers.map(String));
+            const recipientIds = notif.readByUsers.map(r => r.userId);
+            // Count recipients who also appear in followers
+            const allRecipientIds = users
+              .filter(u => {
+                const notifs = Array.isArray(u.sellerNotifications) ? u.sellerNotifications : [];
+                return notifs.some(n => n.id === notif.id);
+              })
+              .map(u => u._id.toString());
+            notif.followedCount = allRecipientIds.filter(id => followerSet.has(id)).length;
+          } else {
+            notif.followedCount = 0;
+          }
+        }
+      }
+    }
+
+    // Apply pagination
+    const total = allNotifications.length;
+
+    return {
+      notifications: paginatedBefore,
+      total,
+    };
+  }
+
+  async createGlobalNewProductNotification(input: {
+    productId: string;
+    productTitle: string;
+    sellerName?: string;
+  }): Promise<number> {
+    const notification = this.buildSellerNotification(
+      'ახალი პროდუქტი დაემატა',
+      input.sellerName
+        ? `${input.sellerName}-მა დაამატა ახალი პროდუქტი: ${input.productTitle}`
+        : `ახალი პროდუქტი: ${input.productTitle}`,
+      undefined,
+      {
+        category: 'product',
+        priority: 40,
+        actionUrl: `/products/${input.productId}`,
+        actionLabel: 'ნახვა',
+      },
+    );
+
+    const users = await this.userModel.find({ role: { $ne: null } }).select('_id').lean();
+    if (!users.length) return 0;
+
+    await this.userModel.updateMany(
+      { _id: { $in: users.map((u) => u._id) } },
+      {
+        $push: {
+          sellerNotifications: {
+            $each: [notification],
+            $slice: -80,
+          },
+        },
+      },
+    );
+
+    return users.length;
+  }
+
+  @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT, { timeZone: 'Asia/Tbilisi' })
+  async sendDailySlugSuggestion(): Promise<void> {
+    const suggestions = await this.settingsService.getSellerNotificationSuggestions();
+    if (!suggestions.length) {
+      this.logger.warn('Daily slug suggestion skipped: no suggestions configured');
+      return;
+    }
+
+    // Filter to only existing artist slugs
+    const existingSlugs = await this.userModel
+      .find({ role: Role.Seller, artistSlug: { $in: suggestions.map(s => s.slug) } })
+      .select('artistSlug')
+      .lean();
+    const validSlugs = new Set(existingSlugs.map(s => s.artistSlug));
+    const validSuggestions = suggestions.filter(s => validSlugs.has(s.slug));
+
+    if (!validSuggestions.length) {
+      this.logger.warn('Daily slug suggestion skipped: no valid artist slugs found');
+      return;
+    }
+
+    const todayIndex = new Date().getDate() % validSuggestions.length;
+    const selected = validSuggestions[todayIndex];
+    const notification = this.buildSellerNotification(
+      '🎨 გამოიწერე და შეაფასე ხელოვანი',
+      `გაიცანი დღის ხელოვანი: ${selected.label}. გამოიწერე და შეაფასე მისი ნამუშევრები!`,
+      undefined,
+      {
+        category: 'suggestion',
+        priority: 20,
+        actionUrl: `/@${selected.slug}`,
+        actionLabel: 'გამოწერა',
+      },
+    );
+
+    await this.userModel.updateMany(
+      { role: { $ne: null } },
+      {
+        $push: {
+          sellerNotifications: {
+            $each: [notification],
+            $slice: -80,
+          },
+        },
+      },
+    );
+
+    this.logger.log(`Daily slug suggestion sent: ${selected.slug}`);
+  }
+
+  /**
+   * ადმინის მიერ ხელით შეთავაზების გაგზავნა ყველა მომხმარებელს
+   */
+  async sendManualArtistSuggestion(
+    artistSlug: string,
+    artistLabel: string,
+    customMessage?: string,
+  ): Promise<{ success: boolean; sentTo: number }> {
+    // Validate artist exists
+    const artist = await this.userModel.findOne({
+      role: Role.Seller,
+      artistSlug: artistSlug,
+    }).select('_id name artistSlug').lean();
+
+    if (!artist) {
+      throw new BadRequestException(`ხელოვანი slug "${artistSlug}" არ არსებობს`);
+    }
+
+    const message = customMessage
+      || `გაიცანი დღის ხელოვანი: ${artistLabel}. გამოიწერე და შეაფასე მისი ნამუშევრები!`;
+
+    const notification = this.buildSellerNotification(
+      '🎨 გამოიწერე და შეაფასე ხელოვანი',
+      message,
+      undefined,
+      {
+        category: 'suggestion',
+        priority: 20,
+        actionUrl: `/@${artistSlug}`,
+        actionLabel: 'გამოწერა',
+      },
+    );
+
+    const result = await this.userModel.updateMany(
+      { role: { $ne: null } },
+      {
+        $push: {
+          sellerNotifications: {
+            $each: [notification],
+            $slice: -80,
+          },
+        },
+      },
+    );
+
+    const sentTo = result.modifiedCount || 0;
+    this.logger.log(`Manual artist suggestion sent: ${artistSlug} to ${sentTo} users`);
+
+    return { success: true, sentTo };
+  }
+
+  /**
+   * აქტიური სელერების სია slug-ებით (საგესჩენებისთვის)
+   */
+  async getSellersWithSlugs(): Promise<Array<{ slug: string; label: string; productCount: number }>> {
+    const sellers = await this.userModel
+      .find({
+        role: Role.Seller,
+        artistSlug: { $exists: true, $nin: [null, ''] },
+      })
+      .select('name storeName artistSlug')
+      .lean();
+
+    // Get product counts per seller
+    const productCounts = await this.productModel.aggregate([
+      { $match: { status: ProductStatus.APPROVED } },
+      { $group: { _id: '$user', count: { $sum: 1 } } },
+    ]);
+    const countMap = new Map(productCounts.map(p => [p._id.toString(), p.count]));
+
+    return sellers
+      .map(s => ({
+        slug: s.artistSlug,
+        label: s.storeName || s.name,
+        productCount: countMap.get(s._id.toString()) || 0,
+      }))
+      .sort((a, b) => b.productCount - a.productCount);
+  }
+
   /**
    * გაუგზავნე მეილი არჩეულ სელერებს ინდივიდუალურად (ფონური პროცესი)
    */
@@ -3077,16 +3696,34 @@ export class UsersService {
     subject: string,
     message: string,
     sellerIds?: string[],
+    options?: {
+      notificationMode?: 'none' | 'header-only' | 'both';
+      // Legacy support
+      createInAppNotification?: boolean;
+      createdByUserId?: string;
+    },
   ): Promise<{
     success: boolean;
     totalQueued: number;
     message: string;
+    notificationsCreated?: number;
   }> {
-    if (!this.emailService) {
+    // Determine notification mode (with fallback for legacy boolean flag)
+    let notificationMode: 'none' | 'header-only' | 'both' = 'none';
+    if (options?.notificationMode) {
+      notificationMode = options.notificationMode;
+    } else if (options?.createInAppNotification) {
+      notificationMode = 'both';
+    }
+
+    const shouldSendEmail = notificationMode === 'both';
+    const shouldCreateNotification =
+      notificationMode === 'header-only' || notificationMode === 'both';
+
+    if (!this.emailService && shouldSendEmail) {
       throw new BadRequestException('Email service is not available');
     }
 
-    // თუ sellerIds მითითებულია, მხოლოდ არჩეულ სელერებს ვუგზავნით
     const query: any = { role: Role.Seller };
     if (sellerIds && sellerIds.length > 0) {
       query._id = { $in: sellerIds };
@@ -3102,22 +3739,41 @@ export class UsersService {
         success: true,
         totalQueued: 0,
         message: 'სელერები ვერ მოიძებნა',
+        notificationsCreated: 0,
       };
     }
 
-    // დაუყოვნებლივ ვაბრუნებთ response-ს
     const totalQueued = sellers.length;
-    this.logger.log(`Starting background email send to ${totalQueued} sellers`);
+    let notificationsCreated = 0;
 
-    // ფონურ პროცესში ვგზავნით მეილებს batch-ებად
-    this.sendEmailsInBackground(sellers, subject, message).catch((error) => {
-      this.logger.error(`Background email sending failed: ${error.message}`);
-    });
+    if (shouldCreateNotification) {
+      notificationsCreated = await this.createSellerInAppNotifications(
+        subject,
+        message,
+        sellerIds,
+        options.createdByUserId,
+      );
+    }
+
+    if (shouldSendEmail) {
+      this.logger.log(`Starting background email send to ${totalQueued} sellers`);
+      this.sendEmailsInBackground(sellers, subject, message).catch((error) => {
+        this.logger.error(`Background email sending failed: ${error.message}`);
+      });
+    } else {
+      this.logger.log(
+        `Notification ${notificationMode} mode - email sending skipped`,
+      );
+    }
 
     return {
       success: true,
       totalQueued,
-      message: `${totalQueued} სელერისთვის მეილის გაგზავნა დაიწყო ფონურ რეჟიმში`,
+      message:
+        notificationMode === 'header-only'
+          ? `${totalQueued} სელერისთვის header notification დაემატა`
+          : `${totalQueued} სელერისთვის მეილის გაგზავნა დაიწყო ფონურ რეჟიმში`,
+      notificationsCreated,
     };
   }
 

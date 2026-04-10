@@ -244,6 +244,16 @@ export class UsersController {
   // FOLLOWER SYSTEM ENDPOINTS
   // ============================================
 
+  @ApiOperation({ summary: 'Follow an artist by slug (used from suggestion notifications)' })
+  @UseGuards(JwtAuthGuard)
+  @Post('follow-by-slug/:slug')
+  async followBySlug(
+    @Param('slug') slug: string,
+    @CurrentUser() user: User,
+  ) {
+    return this.usersService.followBySlug(user['_id'] as string, slug);
+  }
+
   @ApiOperation({ summary: 'Follow an artist' })
   @UseGuards(JwtAuthGuard)
   @Post(':userId/follow')
@@ -380,17 +390,103 @@ export class UsersController {
     );
   }
 
+  @ApiOperation({ summary: 'Get current seller notifications for the logged-in user' })
+  @UseGuards(JwtAuthGuard)
+  @Get('me/seller-notifications')
+  async getMySellerNotifications(@CurrentUser() user: User) {
+    return this.usersService.getMySellerNotifications(user['_id'] as string);
+  }
+
+  @ApiOperation({ summary: 'Mark seller notifications as read for the logged-in user' })
+  @UseGuards(JwtAuthGuard)
+  @Patch('me/seller-notifications/read')
+  async markMySellerNotificationsRead(
+    @CurrentUser() user: User,
+    @Body() body: { notificationIds?: string[] },
+  ) {
+    return this.usersService.markMySellerNotificationsRead(
+      user['_id'] as string,
+      body.notificationIds,
+    );
+  }
+
   @ApiOperation({ summary: 'Send bulk email to selected sellers' })
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.Admin)
   @Post('admin/send-bulk-email-sellers')
   async sendBulkEmailToSellers(
-    @Body() body: { subject: string; message: string; sellerIds?: string[] },
+    @CurrentUser() user: User,
+    @Body()
+    body: {
+      subject: string;
+      message: string;
+      sellerIds?: string[];
+      notificationMode?: 'none' | 'header-only' | 'both';
+      // Legacy support
+      createInAppNotification?: boolean;
+    },
   ) {
     return this.usersService.sendBulkEmailToSellers(
       body.subject,
       body.message,
       body.sellerIds,
+      {
+        notificationMode: body.notificationMode,
+        createInAppNotification: body.createInAppNotification,
+        createdByUserId: user['_id'] as string,
+      },
+    );
+  }
+
+  @ApiOperation({ summary: 'Manually send artist suggestion to all users' })
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.Admin)
+  @Post('admin/send-artist-suggestion')
+  async sendArtistSuggestion(
+    @Body()
+    body: {
+      artistSlug: string;
+      artistLabel: string;
+      customMessage?: string;
+    },
+  ) {
+    if (!body.artistSlug || !body.artistLabel) {
+      throw new BadRequestException('artistSlug და artistLabel სავალდებულოა');
+    }
+    return this.usersService.sendManualArtistSuggestion(
+      body.artistSlug,
+      body.artistLabel,
+      body.customMessage,
+    );
+  }
+
+  @ApiOperation({ summary: 'Get active sellers with slugs for suggestion picker' })
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.Admin)
+  @Get('admin/sellers-with-slugs')
+  async getSellersWithSlugs() {
+    return this.usersService.getSellersWithSlugs();
+  }
+
+  @ApiOperation({ summary: 'Get seller notifications history for admin' })
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.Admin)
+  @Get('admin/seller-notifications-history')
+  async getSellerNotificationsHistory(
+    @Query('limit') limit?: string,
+    @Query('offset') offset?: string,
+    @Query('category') category?: string,
+    @Query('query') query?: string,
+    @Query('onlyUnread') onlyUnread?: string,
+  ) {
+    return this.usersService.getSellerNotificationsHistory(
+      parseInt(limit || '50'),
+      parseInt(offset || '0'),
+      {
+        category,
+        query,
+        onlyUnread: onlyUnread === 'true',
+      },
     );
   }
 
