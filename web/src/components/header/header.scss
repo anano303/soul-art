@@ -322,9 +322,8 @@ header {
   .header-center-logo {
     position: absolute;
     left: 50%;
-    /* Center in the content area below safe area, not entire header */
-    bottom: 24px;
-    transform: translate(-50%, 50%);
+    top: 50%;
+    transform: translate(-50%, -50%);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -507,6 +506,7 @@ header {
       display: flex;
       align-items: center;
       gap: 12px;
+      height: 100%;
     }
 
     .main-nav {
@@ -519,15 +519,13 @@ header {
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      min-width: 44px;
-      min-height: 44px;
-      width: 44px;
-      height: 44px;
+      width: 36px;
+      height: 36px;
       font-size: 20px;
       z-index: 1001;
       background: none;
       border: none;
-      padding: 8px;
+      padding: 0;
       position: relative;
     }
 
@@ -535,6 +533,7 @@ header {
       font-size: 24px;
       color: #ffffff;
       pointer-events: none;
+      line-height: 1;
     }
   }
 }
@@ -565,7 +564,7 @@ header {
 
   .header-center-logo {
     img {
-      max-height: 40px !important;
+      max-height: 32px !important;
       width: auto !important;
     }
   }
@@ -574,19 +573,18 @@ header {
     padding: 2px !important;
 
     svg {
-      width: 24px;
-      height: 24px;
+      width: 22px;
+      height: 22px;
     }
   }
 
-  /* Bigger hamburger menu icon */
   .mobile-nav-btn {
-    width: 36px !important;
-    height: 36px !important;
+    width: 32px !important;
+    height: 32px !important;
   }
 
   .hamburger-icon {
-    font-size: 26px !important;
+    font-size: 22px !important;
   }
 }
 
@@ -601,24 +599,31 @@ header {
 
   .header-center-logo {
     img {
-      max-height: 34px !important;
+      max-height: 28px !important;
       width: auto !important;
     }
   }
 
   .mobile-nav-btn {
-    width: 32px !important;
-    height: 32px !important;
-    min-width: 32px !important;
-    min-height: 32px !important;
-    padding: 4px !important;
+    width: 28px !important;
+    height: 28px !important;
+    padding: 0 !important;
   }
 
   .hamburger-icon {
-    font-size: 22px !important;
+    font-size: 20px !important;
   }
 
   .mobile-header-actions {
-    gap: 8px !important;
+    gap: 6px !important;
+  }
+
+  .header-back-button {
+    padding: 0 !important;
+
+    svg {
+      width: 20px;
+      height: 20px;
+    }
   }
 }

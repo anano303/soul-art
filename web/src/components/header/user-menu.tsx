@@ -304,7 +304,7 @@ export default function UserMenu({
               </button>
             )}
 
-            <div className="dropdown-label">{t("navigation.profile")}</div>
+            {/* <div className="dropdown-label">{t("navigation.profile")}</div> */}
             {/* <hr /> */}
             <Link
               href="/profile"

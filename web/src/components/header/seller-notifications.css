@@ -263,8 +263,8 @@
 
 @media (max-width: 900px) {
   .seller-header-notifications__trigger {
-    width: 38px;
-    height: 38px;
+    width: 32px;
+    height: 32px;
   }
 
   .seller-header-notifications__panel {
