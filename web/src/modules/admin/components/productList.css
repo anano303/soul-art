@@ -302,7 +302,7 @@
 @media (max-width: 768px) {
   .prd-card {
     max-height: 95vh;
-   
+
     border-radius: 8px;
   }
 
@@ -351,6 +351,7 @@
     flex-direction: row;
     gap: 0.4rem;
     flex-wrap: wrap;
+    align-items: center;
   }
 
   .prd-btn,

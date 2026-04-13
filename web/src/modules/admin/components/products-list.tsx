@@ -564,6 +564,12 @@ export function ProductsList() {
   const products = data?.items || [];
   const totalPages = data?.pages || 1;
 
+  // Generate short display ID: SOULART00777, SOULART00778, ...
+  const getShortId = (index: number) => {
+    const num = (page - 1) * 20 + index + 777;
+    return `#SOULART${String(num).padStart(5, "0")}`;
+  };
+
   // Check if all pending products are selected
   const allPendingSelected =
     pendingProducts &&
@@ -685,7 +691,7 @@ export function ProductsList() {
           </div>
           <table className="prd-table">
             <tbody>
-              {pendingProducts.map((product: Product) => (
+              {pendingProducts.map((product: Product, pIndex: number) => (
                 <tr key={product._id} className="prd-tr">
                   <td
                     className="prd-td"
@@ -713,9 +719,8 @@ export function ProductsList() {
                       )}
                     </button>
                   </td>
-                  <td className="prd-td prd-td-bold">
-                    {" "}
-                    #{product._id ? product._id : "No ID"}
+                  <td className="prd-td prd-td-bold" style={{ fontSize: "0.75rem" }}>
+                    {`P-${String(pIndex + 1).padStart(3, "0")}`}
                   </td>
                   <td className="prd-td">
                     <div className="prd-img-wrapper">
@@ -1451,7 +1456,7 @@ export function ProductsList() {
               </td>
             </tr>
           ) : (
-            products.map((product: ProductWithCategories & { user?: User }) => (
+            products.map((product: ProductWithCategories & { user?: User }, idx: number) => (
               <tr key={product._id} className="prd-tr">
                 {isAdmin && (
                   <td className="prd-td" style={{ textAlign: "center" }}>
@@ -1485,9 +1490,8 @@ export function ProductsList() {
                     )}
                   </td>
                 )}
-                <td className="prd-td prd-td-bold">
-                  {" "}
-                  #{product._id ? product._id : "No ID"}
+                <td className="prd-td prd-td-bold" style={{ fontSize: "0.75rem", whiteSpace: "nowrap" }}>
+                  {getShortId(idx)}
                 </td>
                 <td className="prd-td">
                   <div className="prd-img-wrapper">
