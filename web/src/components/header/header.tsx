@@ -107,6 +107,54 @@ export default function Header() {
 
   return (
     <>
+      {/* Mobile top bar: Language, Cart, Profile/Login - visible only on small screens */}
+      {isMobile && (
+        <div
+          className="mobile-top-bar"
+          style={
+            useTransparentHeader
+              ? { backgroundColor: `rgba(0, 20, 40, ${headerOpacity})` }
+              : undefined
+          }
+        >
+          <div className="mobile-top-bar__left">
+            <LanguageSwitcher />
+          </div>
+          <div className="mobile-top-bar__right">
+            <CartIcon />
+            {user ? (
+              <Link
+                href={
+                  (user.role === "seller" || user.isSeller) && user.artistSlug
+                    ? `/@${user.artistSlug}`
+                    : "/profile"
+                }
+                className="mobile-top-bar__user"
+              >
+                <Image
+                  src={user.profileImage || "/avatar.jpg"}
+                  alt={user.name || "profile"}
+                  width={22}
+                  height={22}
+                  className="mobile-top-bar__avatar"
+                  unoptimized
+                />
+                <span className="mobile-top-bar__name">{user.name}</span>
+              </Link>
+            ) : (
+              <div className="mobile-top-bar__auth">
+                <Link href="/login" className="mobile-top-bar__auth-link">
+                  {t("navigation.login")}
+                </Link>
+                <span className="mobile-top-bar__auth-sep">/</span>
+                <Link href="/register" className="mobile-top-bar__auth-link">
+                  {t("navigation.register")}
+                </Link>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
       <div
         className={`header-placeholder ${
           useTransparentHeader ? "header-placeholder--transparent" : ""

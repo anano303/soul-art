@@ -99,6 +99,26 @@ async function migratePortfolioPosts(): Promise<void> {
 
     console.log('Starting portfolio post migration...');
 
+    // Drop the old sparse unique index on productId and recreate with partialFilterExpression
+    try {
+      await portfolioPostModel.collection.dropIndex('productId_1');
+      console.log('Dropped old productId_1 sparse unique index.');
+    } catch (e: any) {
+      if (e?.codeName !== 'IndexNotFound') {
+        console.warn('Could not drop productId_1 index:', e.message);
+      }
+    }
+
+    try {
+      await portfolioPostModel.collection.createIndex(
+        { productId: 1 },
+        { unique: true, partialFilterExpression: { productId: { $type: 'objectId' } } },
+      );
+      console.log('Created new productId partial unique index.');
+    } catch (e: any) {
+      console.warn('Could not create productId index:', e.message);
+    }
+
     const productPostsCreated = await createProductBackedPosts(
       portfolioPostModel,
       productModel,
@@ -381,7 +401,7 @@ async function createLegacyGalleryPosts(
 
       await portfolioPostModel.create({
         artistId,
-        productId: null,
+        // productId intentionally omitted (not null) to avoid sparse unique index conflict
         images: [
           {
             url,

@@ -7,8 +7,6 @@ import "./user-menu.css";
 import { Role } from "@/types/role";
 import { useAuth } from "@/hooks/use-auth";
 import { useLanguage } from "@/hooks/LanguageContext";
-import { LanguageSwitcher } from "@/components/language-switcher/language-switcher";
-import { CartIcon } from "@/modules/cart/components/cart-icon";
 import {
   X,
   User,
@@ -168,12 +166,8 @@ export default function UserMenu({
         >
           <div className="dropdown open" ref={menuRef}>
             <div className="dropdown-menu">
-              {/* Mobile header with language switcher and close button */}
               <div className="mobile-menu-header-row">
-                <div className="mobile-menu-left-actions">
-                  <LanguageSwitcher onNavigate={handleLinkClick} />
-                  <CartIcon onNavigate={handleLinkClick} />
-                </div>
+                <span />
                 <button
                   className="close-menu-btn"
                   onClick={handleClose}
@@ -182,14 +176,6 @@ export default function UserMenu({
                   <X size={20} />
                 </button>
               </div>
-              <Link
-                href="/login"
-                className="dropdown-item"
-                onClick={handleLinkClick}
-              >
-                <User size={18} />
-                <span>{t("navigation.login")}</span>
-              </Link>
               <Link
                 href="/register"
                 className="dropdown-item"
@@ -293,13 +279,10 @@ export default function UserMenu({
         )}
         {isOpen && (
           <div className="dropdown-menu">
-            {/* Mobile only: Header row with language/cart on left, X on right */}
+            {/* Mobile only: Close button */}
             {hideButton && (
               <div className="mobile-menu-header-row">
-                <div className="mobile-menu-left-actions">
-                  <LanguageSwitcher onNavigate={handleLinkClick} />
-                  <CartIcon onNavigate={handleLinkClick} />
-                </div>
+                <span />
                 <button
                   className="close-menu-btn"
                   onClick={handleClose}
@@ -319,34 +302,6 @@ export default function UserMenu({
               >
                 <X size={20} />
               </button>
-            )}
-
-            {/* Mobile only: Profile header with image - clickable for sellers */}
-            {hideButton && (
-              <Link
-                href={
-                  (user.role === "seller" || user.isSeller) && user.artistSlug
-                    ? `/@${user.artistSlug}`
-                    : "/profile"
-                }
-                className="mobile-profile-header"
-                onClick={handleLinkClick}
-              >
-                <div className="user-avatar">
-                  <Image
-                    src={profileImage || "/avatar.jpg"}
-                    alt={user.name}
-                    width={40}
-                    height={40}
-                    className="avatar-image"
-                    loading="eager"
-                    unoptimized
-                  />
-                </div>
-                <span className="profile-name">
-                  {user.name || t("navigation.profile")}
-                </span>
-              </Link>
             )}
 
             <div className="dropdown-label">{t("navigation.profile")}</div>

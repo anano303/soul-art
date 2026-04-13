@@ -1,5 +1,158 @@
 /* styles/Header.scss */
 @use "../../../styles/mixins" as *;
+@use "sass:color";
+
+/* ── Mobile Top Bar (Language, Cart, Login) ── */
+.mobile-top-bar {
+  display: none; /* Hidden on desktop */
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 10001; /* Above the main header */
+  background-color: color.adjust($primary-color, $lightness: -5%);
+  height: 32px;
+  padding: 0 12px;
+  padding-top: env(safe-area-inset-top);
+  min-height: calc(32px + env(safe-area-inset-top));
+  align-items: center;
+  justify-content: space-between;
+
+  @media (max-width: 900px) {
+    display: flex;
+  }
+
+  &__left,
+  &__right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  &__right {
+    gap: 14px;
+  }
+
+  &__login,
+  &__profile {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    color: #ffffff;
+    text-decoration: none;
+    font-size: 12px;
+    white-space: nowrap;
+    opacity: 0.9;
+    transition: opacity 0.2s;
+    -webkit-tap-highlight-color: transparent;
+
+    &:hover {
+      opacity: 1;
+    }
+
+    svg {
+      flex-shrink: 0;
+    }
+  }
+
+  /* Authenticated user: avatar + name */
+  &__user {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: #ffffff;
+    text-decoration: none;
+    -webkit-tap-highlight-color: transparent;
+    transition: opacity 0.2s;
+
+    &:hover {
+      opacity: 0.85;
+    }
+  }
+
+  &__avatar {
+    width: 22px !important;
+    height: 22px !important;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1.5px solid rgba(255, 255, 255, 0.5);
+    flex-shrink: 0;
+  }
+
+  &__name {
+    font-size: 12px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 90px;
+  }
+
+  /* Not authenticated: login / register */
+  &__auth {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    font-size: 12px;
+  }
+
+  &__auth-link {
+    color: #ffffff;
+    text-decoration: none;
+    white-space: nowrap;
+    opacity: 0.9;
+    transition: opacity 0.2s;
+    -webkit-tap-highlight-color: transparent;
+
+    &:hover {
+      opacity: 1;
+      text-decoration: underline;
+    }
+  }
+
+  &__auth-sep {
+    color: rgba(255, 255, 255, 0.5);
+  }
+
+  /* Override language-switcher styles inside top bar */
+  .language-switcher {
+    .language-button {
+      font-size: 11px;
+      padding: 2px 6px;
+      min-height: unset;
+      height: 22px;
+    }
+
+    .language-dropdown {
+      top: 100%;
+      margin-top: 2px;
+    }
+  }
+
+  /* Override cart icon styles inside top bar */
+  .cart-icon-container {
+    display: flex !important;
+    align-items: center;
+    position: relative;
+
+    img,
+    .shopping-cart-icon {
+      width: 20px !important;
+      height: 20px !important;
+      display: block;
+    }
+  }
+
+  .cartIconsSpan {
+    font-size: 9px !important;
+    width: 14px !important;
+    height: 14px !important;
+    min-width: 14px !important;
+    top: -5px !important;
+    right: -6px !important;
+    padding: 1px !important;
+    border-width: 1px !important;
+  }
+}
 
 .header-placeholder {
   height: 65px;
@@ -17,10 +170,15 @@
     background-color: transparent;
   }
 
-  /* Smaller header on mobile (Instagram-style ~48px) */
+  /* Smaller header on mobile + space for mobile top bar */
+  @media (max-width: 900px) {
+    height: calc(48px + 32px);
+    height: calc(48px + 32px + env(safe-area-inset-top));
+  }
+
   @media (max-width: 768px) {
-    height: 48px;
-    height: calc(48px + env(safe-area-inset-top));
+    height: calc(48px + 32px);
+    height: calc(48px + 32px + env(safe-area-inset-top));
   }
 }
 
@@ -42,12 +200,20 @@ header {
   /* Total height including safe area */
   min-height: calc(65px + env(safe-area-inset-top));
 
-  /* Smaller header on mobile (Instagram-style ~48px) */
+  /* Smaller header on mobile - positioned below mobile top bar */
+  @media (max-width: 900px) {
+    top: calc(32px + env(safe-area-inset-top));
+    height: 48px;
+    min-height: 48px;
+    padding: 8px 12px;
+    padding-left: max(12px, env(safe-area-inset-left));
+    padding-right: max(12px, env(safe-area-inset-right));
+  }
+
   @media (max-width: 768px) {
     height: 48px;
-    min-height: calc(48px + env(safe-area-inset-top));
+    min-height: 48px;
     padding: 8px 12px;
-    padding-top: calc(8px + env(safe-area-inset-top));
     padding-left: max(12px, env(safe-area-inset-left));
     padding-right: max(12px, env(safe-area-inset-right));
   }
