@@ -335,14 +335,14 @@ header {
 
   .main-nav {
     flex-grow: 2;
-    margin-left: 20px;
+    margin-left: 40px;
     ul {
       display: flex;
       justify-content: space-between;
       align-items: center;
       justify-content: flex-start;
       list-style: none;
-      gap: min(10%);
+      gap: 32px;
 
       a {
         text-decoration: none;
@@ -353,11 +353,11 @@ header {
 
   .auth-cart {
     display: flex;
-    align-items: center;
-    gap: 16px;
+    // align-items: center;
+    gap: 12px;
 
     .language-switcher-container {
-      margin-right: 8px;
+      margin-right: 4px;
       display: flex;
       align-items: center;
     }
@@ -421,6 +421,34 @@ header {
 
   .mobile-header-actions {
     display: none;
+  }
+
+  /* Compact header for narrow desktop / tablet landscape */
+  @media (max-width: 1100px) and (min-width: 901px) {
+    .main-nav {
+      margin-left: 20px;
+
+      ul {
+        gap: 16px;
+
+        a {
+          font-size: 13px;
+        }
+      }
+    }
+
+    .auth-cart {
+      gap: 8px;
+
+      .language-switcher-container {
+        margin-right: 2px;
+      }
+    }
+
+    .logo img {
+      max-height: 40px !important;
+      width: auto !important;
+    }
   }
 
   /* Mobile responsiveness */

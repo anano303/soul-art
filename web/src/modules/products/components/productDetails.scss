@@ -850,7 +850,7 @@ body {
     justify-content: center;
     z-index: 120000;
     padding: 20px;
-    padding-top: 70px;
+    padding-top: calc(var(--header-total, 65px) + 5px);
     padding-bottom: 20px;
     overflow: auto;
     box-sizing: border-box;
@@ -1010,7 +1010,7 @@ body {
 
     .fullscreen-modal {
       padding: 15px;
-      padding-top: 65px;
+      padding-top: calc(var(--header-total, 80px) + 5px);
     }
 
     .fullscreen-image-container {

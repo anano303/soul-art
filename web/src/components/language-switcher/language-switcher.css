@@ -8,8 +8,8 @@
   background: linear-gradient(135deg, var(--primary-color) 0%, #034b8a 100%);
   border: none;
   color: white;
-  padding: 1px;
-  font-size: 0.9rem;
+  padding: 2px 6px;
+  font-size: 0.8rem;
   cursor: pointer;
   transition: all 0.3s ease;
   font-weight: 600;
@@ -18,7 +18,9 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  min-width: 52px;
+  min-width: 44px;
+  height: 28px;
+  border-radius: 4px;
 }
 
 .language-button:hover {

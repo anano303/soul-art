@@ -25,9 +25,11 @@ export function ReferralCodeInput({
   const [message, setMessage] = useState("");
   const [hasActiveCode, setHasActiveCode] = useState(false);
 
-  // Hide on auction pages and admin pages
-  const hiddenPaths = ["/auctions", "/admin"];
-  const shouldHide = hiddenPaths.some((path) => pathname?.startsWith(path));
+  // Only show on main page, shop page, and cart page
+  const allowedPaths = ["/", "/shop", "/cart"];
+  const shouldHide = !allowedPaths.some(
+    (path) => pathname === path || (path !== "/" && pathname?.startsWith(path + "?"))
+  );
 
   // Check if user already has a referral code
   useEffect(() => {

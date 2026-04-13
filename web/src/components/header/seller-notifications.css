@@ -4,8 +4,8 @@
 
 .seller-header-notifications__trigger {
   position: relative;
-  width: 40px;
-  height: 40px;
+  width: 32px;
+  height: 32px;
   border-radius: 999px;
   border: 1px solid rgba(224, 216, 73, 0.35);
   background: radial-gradient(circle at top, rgba(224, 216, 73, 0.24), rgba(255, 255, 255, 0.05));
@@ -26,15 +26,15 @@
 
 .seller-header-notifications__badge {
   position: absolute;
-  top: -5px;
-  right: -5px;
-  min-width: 20px;
-  height: 20px;
-  padding: 0 5px;
+  top: -4px;
+  right: -4px;
+  min-width: 17px;
+  height: 17px;
+  padding: 0 4px;
   border-radius: 999px;
   background: linear-gradient(135deg, #ffcc4d, #f97316);
   color: #08243b;
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 800;
   display: inline-flex;
   align-items: center;

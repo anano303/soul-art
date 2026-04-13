@@ -1,7 +1,7 @@
 .shop-container {
   position: relative;
   min-height: 100vh;
-  padding: 20px 0;
+  padding: 0 0 20px;
   color: #ffffff;
   max-width: 100vw;
   z-index: 1;
@@ -50,8 +50,9 @@
   width: 100%;
   max-width: 1760px;
   margin: 0 auto;
-  padding: 0 24px;
+  padding: 10px 24px 0;
   box-sizing: border-box;
+  min-height: 100vh;
 }
 
 .shop-main {
@@ -251,14 +252,14 @@
 
 .filters-sidebar {
   position: sticky;
-  top: 85px;
+  top: calc(var(--header-total, 65px) + 5px);
   flex: 0 0 320px;
   width: 320px;
   align-self: flex-start;
 }
 
 .filters-sidebar .product-filters {
-  max-height: calc(100vh - 100px);
+  max-height: calc(100vh - var(--header-total, 65px) - 15px);
   overflow-y: auto;
 }
 

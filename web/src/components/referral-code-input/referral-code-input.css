@@ -8,14 +8,14 @@
 /* Floating variant - fixed position at top right, below header */
 .ref-code-floating {
   position: fixed;
-  top: 85px;
+  top: calc(var(--header-total, 80px) + 10px);
   right: 20px;
   z-index: 9999;
 }
 
 @media (min-width: 901px) {
   .ref-code-floating {
-    top: 70px;
+    top: calc(var(--header-total, 65px) + 10px);
   }
 }
 

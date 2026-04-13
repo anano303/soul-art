@@ -43,11 +43,11 @@
 .dropdown .button {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   background: none;
   border: none;
   cursor: pointer;
-  font-size: 16px;
+  font-size: 14px;
   text-decoration: none;
   color: #e0d849;
   font-weight: bolder;
@@ -72,11 +72,11 @@
 }
 
 .user-avatar {
-  width: 32px;
-  height: 32px;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
   overflow: hidden;
-  margin-right: 8px;
+  margin-right: 6px;
   border: 1px solid #e0d849;
 }
 

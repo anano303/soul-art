@@ -8,6 +8,25 @@
     "Segoe UI", Roboto, sans-serif;
   --primary-color: #012645;
   --secondary-color: #452001;
+  --header-height: 65px;
+  --mobile-topbar-height: 32px;
+  --mobile-header-height: 48px;
+  --header-total: var(--header-height);
+}
+
+@media (max-width: 900px) {
+  :root {
+    --header-total: calc(
+      var(--mobile-topbar-height) + var(--mobile-header-height)
+    );
+  }
+}
+
+@media (max-width: 400px) {
+  :root {
+    --mobile-topbar-height: 28px;
+    --mobile-header-height: 44px;
+  }
 }
 
 body {

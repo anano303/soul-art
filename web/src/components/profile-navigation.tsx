@@ -73,7 +73,7 @@ export function ProfileNavigation() {
   );
 
   return (
-    <aside className="w-64 bg-white border-r border-gray-200 h-fit sticky top-16 z-[1000] lg:block hidden">
+    <aside className="w-64 bg-white border-r border-gray-200 h-fit sticky z-[1000] lg:block hidden" style={{ top: 'calc(var(--header-total, 65px) + 5px)' }}>
       <nav className="p-4">
         <h2 className="text-lg font-semibold text-gray-900 mb-4 pb-2 border-b border-gray-200">
           {t("profileNav.title") || "Profile"}
@@ -117,8 +117,9 @@ export function MobileProfileNavigation() {
 
   return (
     <div
-      className="lg:hidden mb-6 sticky top-16 z-[1000] w-full -mx-4 px-0"
+      className="lg:hidden mb-6 sticky z-[1000] w-full -mx-4 px-0"
       style={{
+        top: 'calc(var(--header-total, 80px))',
         marginLeft: "-1rem",
         marginRight: "-1rem",
         width: "calc(100% + 2rem)",
