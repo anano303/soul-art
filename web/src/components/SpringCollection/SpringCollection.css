@@ -402,9 +402,9 @@
   flex-direction: column;
 }
 
-.spring-card .price-container {
+/* .spring-card .price-container {
   min-height: 3.5rem;
-}
+} */
 
 /* ── Loader ── */
 .spring-loader {

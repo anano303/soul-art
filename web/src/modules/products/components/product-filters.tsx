@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useRef, useMemo } from "react";
+import { useEffect, useLayoutEffect, useState, useRef, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { fetchWithAuth } from "@/lib/fetch-with-auth";
 import "./product-filters.css";
@@ -91,6 +91,13 @@ export function ProductFilters({
   const filterButtonRef = useRef<HTMLButtonElement>(null);
   const filterContainerRef = useRef<HTMLDivElement>(null);
 
+  // Set initial desktop state synchronously before paint to avoid layout flash
+  useLayoutEffect(() => {
+    const desktop = window.innerWidth >= 1024;
+    setIsDesktop(desktop);
+    setShowFilters(desktop);
+  }, []);
+
   useEffect(() => {
     const handleResize = () => {
       const desktop = window.innerWidth >= 1024;
@@ -107,7 +114,6 @@ export function ProductFilters({
       }
     };
 
-    handleResize();
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, [isDesktop]);

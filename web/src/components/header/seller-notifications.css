@@ -1,5 +1,7 @@
 .seller-header-notifications {
   position: relative;
+  display: inline-flex;
+  align-items: center;
 }
 
 .seller-header-notifications__trigger {
@@ -8,13 +10,20 @@
   height: 32px;
   border-radius: 999px;
   border: 1px solid rgba(224, 216, 73, 0.35);
-  background: radial-gradient(circle at top, rgba(224, 216, 73, 0.24), rgba(255, 255, 255, 0.05));
+  background: radial-gradient(
+    circle at top,
+    rgba(224, 216, 73, 0.24),
+    rgba(255, 255, 255, 0.05)
+  );
   color: #f5f0a8;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: transform 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease;
 }
 
 .seller-header-notifications__trigger:hover,

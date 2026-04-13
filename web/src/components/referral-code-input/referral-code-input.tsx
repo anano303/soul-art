@@ -28,13 +28,17 @@ export function ReferralCodeInput({
   // Only show on main page, shop page, and cart page
   const allowedPaths = ["/", "/shop", "/cart"];
   const shouldHide = !allowedPaths.some(
-    (path) => pathname === path || (path !== "/" && pathname?.startsWith(path + "?"))
+    (path) =>
+      pathname === path || (path !== "/" && pathname?.startsWith(path + "?")),
   );
 
   // Check if user already has a referral code
   useEffect(() => {
     const existingCode = Cookies.get("sales_ref");
-    if (existingCode && (existingCode.startsWith("PROMO") || existingCode.startsWith("SM_"))) {
+    if (
+      existingCode &&
+      (existingCode.startsWith("PROMO") || existingCode.startsWith("SM_"))
+    ) {
       setHasActiveCode(true);
     }
   }, []);
@@ -52,9 +56,10 @@ export function ReferralCodeInput({
     }
 
     // Accept as-is if starts with PROMO or SM_, otherwise add PROMO prefix
-    const fullCode = trimmedCode.startsWith("PROMO") || trimmedCode.startsWith("SM_")
-      ? trimmedCode
-      : `PROMO${trimmedCode}`;
+    const fullCode =
+      trimmedCode.startsWith("PROMO") || trimmedCode.startsWith("SM_")
+        ? trimmedCode
+        : `PROMO${trimmedCode}`;
 
     setStatus("loading");
 

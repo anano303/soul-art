@@ -13,8 +13,13 @@ export function CartIcon({ onNavigate }: { onNavigate?: () => void }) {
 
   return (
     <Link href="/cart" className="cart-icon-container" onClick={onNavigate}>
-      <Image src={cart} alt="cart" className="shopping-cart-icon"
-      width={26} height={26} />
+      <Image
+        src={cart}
+        alt="cart"
+        className="shopping-cart-icon"
+        width={26}
+        height={26}
+      />
 
       {itemCount > 0 && <span className="cartIconsSpan">{itemCount}</span>}
     </Link>

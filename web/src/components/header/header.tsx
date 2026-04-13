@@ -233,11 +233,8 @@ export default function Header() {
                   : t("navigation.sellArtwork")}
               </Link>
             </li>
-            <li className="shop-dropdown">
+            <li>
               <Link href="/shop?page=1">{t("navigation.shop")}</Link>
-              <div className="shop-dropdown-menu">
-                <Link href="/auctions">{t("navigation.auction")}</Link>
-              </div>
             </li>
             <li>
               <Link href="/auctions">{t("navigation.auction")}</Link>
@@ -245,12 +242,12 @@ export default function Header() {
           </ul>
         </nav>
         <div className="auth-cart desktop-only">
-          <div className="language-switcher-container">
-            <LanguageSwitcher />
-          </div>
           <SellerNotifications />
           <UserMenu />
           <CartIcon />
+          <div className="language-switcher-container">
+            <LanguageSwitcher />
+          </div>
         </div>
 
         {/* Mobile: Only hamburger menu - visibility controlled by CSS */}

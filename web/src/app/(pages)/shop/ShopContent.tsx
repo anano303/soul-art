@@ -1,7 +1,13 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState, useRef, useCallback } from "react";
+import {
+  useEffect,
+  useLayoutEffect,
+  useState,
+  useRef,
+  useCallback,
+} from "react";
 import { ProductGrid } from "@/modules/products/components/product-grid";
 import { ProductFilters } from "@/modules/products/components/product-filters";
 import { getProducts } from "@/modules/products/api/get-products";
@@ -14,11 +20,34 @@ const SHOP_PAGE_STORAGE_KEY = "shopCurrentPage";
 
 /** Spring collection keywords for multi-search */
 const SPRING_KEYWORDS = [
-  "ყვავილ", "გაზაფხულ", "ბაღ", "ბუნებ", "მზესუმზირ", "მზესუმზირა",
-  "იასამან", "იასამნ", "ყაყაჩო", "ვარდ", "იის", "ტიტა", "ნარგიზ",
-  "ტულიპ", "პეონ", "ქრიზანთემ",
-  "spring", "flower", "blossom", "garden", "bloom",
-  "sunflower", "poppy", "rose", "lilac", "tulip", "daisy", "peony",
+  "ყვავილ",
+  "გაზაფხულ",
+  "ბაღ",
+  "ბუნებ",
+  "მზესუმზირ",
+  "მზესუმზირა",
+  "იასამან",
+  "იასამნ",
+  "ყაყაჩო",
+  "ვარდ",
+  "იის",
+  "ტიტა",
+  "ნარგიზ",
+  "ტულიპ",
+  "პეონ",
+  "ქრიზანთემ",
+  "spring",
+  "flower",
+  "blossom",
+  "garden",
+  "bloom",
+  "sunflower",
+  "poppy",
+  "rose",
+  "lilac",
+  "tulip",
+  "daisy",
+  "peony",
 ];
 import { fetchWithAuth } from "@/lib/fetch-with-auth";
 import "./ShopPage.css";
@@ -68,10 +97,10 @@ const ShopContent = () => {
 
   const [selectedBrand, setSelectedBrand] = useState<string>(initialBrand);
   const [keyword, setKeyword] = useState<string>(
-    searchParams?.get("keyword") || ""
+    searchParams?.get("keyword") || "",
   );
   const [collection, setCollection] = useState<string>(
-    searchParams?.get("collection") || ""
+    searchParams?.get("collection") || "",
   );
 
   const [showDiscountedOnly, setShowDiscountedOnly] = useState<boolean>(false);
@@ -90,9 +119,10 @@ const ShopContent = () => {
     direction: "desc",
   });
 
-  useEffect(() => {
-    console.log("selectedBrand state changed to:", selectedBrand);
-  }, [selectedBrand]);
+  // Use layoutEffect to reset scroll before paint - fixes sticky sidebar on client-side nav
+  useLayoutEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   const { data: categories = [] } = useQuery<Category[]>({
     queryKey: ["categories"],
@@ -349,7 +379,11 @@ const ShopContent = () => {
           totalPagesResult = response.pages || 1;
         } else {
           // Normal single-keyword or no-keyword fetch
-          const params: Record<string, string> = { ...baseParams, page: currentPage.toString(), limit: "20" };
+          const params: Record<string, string> = {
+            ...baseParams,
+            page: currentPage.toString(),
+            limit: "20",
+          };
           if (keyword) params.keyword = keyword;
 
           const response = await getProducts(currentPage, 20, params);

@@ -6,7 +6,7 @@
   min-width: 320px;
   max-width: 25%;
   /* padding: 15px; */
-  border-radius: 16px;
+  border-radius: 55px 5px 55px 5px;
   overflow: hidden;
   /* background-color: var(--primary-color); */
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
@@ -158,7 +158,7 @@
 }
 
 /* Blur edges on left and right sides of image */
-.product-image::before {
+/* .product-image::before {
   content: "";
   position: absolute;
   top: 0;
@@ -172,8 +172,8 @@
   );
   pointer-events: none;
   z-index: 6;
-}
-
+} */
+/* 
 .product-image::after {
   content: "";
   position: absolute;
@@ -190,7 +190,7 @@
   );
   pointer-events: none;
   z-index: 5;
-}
+} */
 
 /* ===== EXCLUSIVE PROMO SECTION - LARGE IMAGE ===== */
 .exclusive-promo-section .product-image {
@@ -247,15 +247,15 @@
 }
 
 /* Handmade theme blur edges */
-.handmade-theme .product-image::before {
+/* .handmade-theme .product-image::before {
   background: linear-gradient(
     to right,
     var(--secondary-color, #7d5a35) 0%,
     transparent 100%
   );
-}
+} */
 
-.handmade-theme .product-image::after {
+/* .handmade-theme .product-image::after {
   background: linear-gradient(
     to bottom,
     transparent 0%,
@@ -263,7 +263,7 @@
     rgba(125, 90, 53, 0.7) 80%,
     rgba(125, 90, 53, 0.95) 100%
   );
-}
+} */
 
 .product-card:hover .image {
   transform: scale(1.1); /* Zoom in effect on hover */
@@ -577,7 +577,7 @@
   display: flex;
   gap: 4px;
   padding: 0 8px 8px 8px;
-  align-items: stretch;
+  align-items: center;
 }
 
 /* Cart actions wrapper inside product-card-actions */

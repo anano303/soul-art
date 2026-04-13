@@ -289,8 +289,8 @@ export default function RootLayout({
         {/* Third-party scripts moved to body end for better LCP */}
       </head>
       <body
-        className={`${firago.variable} antialiased min-h-screen flex flex-col overflow-x-hidden`}
-        style={{ maxWidth: "100vw" }}
+        className={`${firago.variable} antialiased min-h-screen flex flex-col`}
+        style={{ maxWidth: "100vw", overflowX: "clip" }}
         suppressHydrationWarning={true}
       >
         {/* Suppress CSS preload warnings and third-party errors */}

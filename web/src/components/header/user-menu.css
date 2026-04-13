@@ -1,3 +1,9 @@
+/* User menu container - flex for vertical alignment in header */
+.user-menu-container {
+  display: flex;
+  align-items: center;
+}
+
 /* Mobile menu should not affect layout - it's a fixed overlay */
 .user-menu-container.mobile-menu-open {
   position: fixed;
@@ -52,6 +58,8 @@
   color: #e0d849;
   font-weight: bolder;
   transition: all 0.2s ease;
+  padding: 0;
+  line-height: 1;
 }
 
 .dropdown .button:hover {
@@ -92,7 +100,8 @@
 
 .dropdown {
   position: relative;
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
 }
 
 .dropdown-menu {
@@ -392,7 +401,8 @@
       rgba(224, 216, 73, 0.8),
       rgba(224, 216, 73, 0.5)
     );
-    box-shadow: 0 0 10px rgba(224, 216, 73, 0.5),
+    box-shadow:
+      0 0 10px rgba(224, 216, 73, 0.5),
       inset 0 0 3px rgba(0, 0, 0, 0.3);
   }
 

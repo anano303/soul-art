@@ -7,6 +7,7 @@
   z-index: 1;
   box-sizing: border-box;
   width: 100%;
+  overflow: visible !important;
 }
 .brand-info {
   display: flex;
@@ -690,7 +691,6 @@
 @media (max-width: 768px) {
   .shop-container {
     max-width: 100%;
-    overflow-x: hidden;
   }
 
   .content {
