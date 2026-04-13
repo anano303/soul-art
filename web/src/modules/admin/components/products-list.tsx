@@ -609,7 +609,8 @@ export function ProductsList() {
             }}
           >
             <h2 className="text-xl font-bold" style={{ margin: 0 }}>
-              Pending Approvals ({pendingProducts.length})
+              {language === "en" ? "Pending Approvals" : "დასადასტურებელი"} (
+              {pendingProducts.length})
             </h2>
             <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
               <button
@@ -790,7 +791,9 @@ export function ProductsList() {
         </div>
       )}
       <div className="prd-header">
-        <h1 className="prd-title">Products</h1>
+        <h1 className="prd-title">
+          {language === "en" ? "Products" : "პროდუქტები"}
+        </h1>
         <div className="prd-actions">
           <button
             onClick={() => setShowDonation(true)}
@@ -802,15 +805,15 @@ export function ProductsList() {
           <Link href="/admin/products/create">
             <button className="prd-btn-outline">
               <Plus className="prd-icon" />
-              Add Product
+              {language === "en" ? "Add Product" : "დამატება"}
             </button>
           </Link>
-          <Link href="/admin/products/ai">
+          {/* <Link href="/admin/products/ai">
             <button className="prd-btn">
               <Sparkles className="prd-icon" />
               Create Products with AI
             </button>
-          </Link>
+          </Link> */}
         </div>
       </div>
 
@@ -1364,17 +1367,33 @@ export function ProductsList() {
               </th>
             )}
             <th className="prd-th">ID</th>
-            <th className="prd-th">IMAGE</th>
-            <th className="prd-th">NAME</th>
-            <th className="prd-th">PRICE</th>
-            <th className="prd-th">CATEGORY</th>
-            <th className="prd-th">SUBCATEGORY</th>
-            <th className="prd-th">STOCK</th>
-            <th className="prd-th">Status</th>
-            {isAdmin && <th className="prd-th">VISIBILITY</th>}
-            <th className="prd-th">DELIVERY</th>
-            <th className="prd-th">SELLER INFO</th>
-            <th className="prd-th prd-th-right">ACTIONS</th>
+            <th className="prd-th">{language === "en" ? "IMAGE" : "სურათი"}</th>
+            <th className="prd-th">{language === "en" ? "NAME" : "სახელი"}</th>
+            <th className="prd-th">{language === "en" ? "PRICE" : "ფასი"}</th>
+            <th className="prd-th">
+              {language === "en" ? "CATEGORY" : "კატეგორია"}
+            </th>
+            <th className="prd-th">
+              {language === "en" ? "SUBCATEGORY" : "ქვეკატეგორია"}
+            </th>
+            <th className="prd-th">{language === "en" ? "STOCK" : "მარაგი"}</th>
+            <th className="prd-th">
+              {language === "en" ? "Status" : "სტატუსი"}
+            </th>
+            {isAdmin && (
+              <th className="prd-th">
+                {language === "en" ? "VISIBILITY" : "ხილვადობა"}
+              </th>
+            )}
+            <th className="prd-th">
+              {language === "en" ? "DELIVERY" : "მიწოდება"}
+            </th>
+            <th className="prd-th">
+              {language === "en" ? "SELLER INFO" : "გამყიდველი"}
+            </th>
+            <th className="prd-th prd-th-right">
+              {language === "en" ? "ACTIONS" : "მოქმედება"}
+            </th>
           </tr>
         </thead>
         <tbody>
