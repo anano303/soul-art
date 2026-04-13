@@ -33,6 +33,49 @@
     gap: 14px;
   }
 
+  /* Small screen adjustments */
+  @media (max-width: 400px) {
+    height: 28px;
+    min-height: calc(28px + env(safe-area-inset-top));
+    padding: 0 8px;
+    padding-top: env(safe-area-inset-top);
+
+    &__left,
+    &__right {
+      gap: 8px;
+    }
+
+    &__right {
+      gap: 10px;
+    }
+
+    &__name {
+      font-size: 11px;
+      max-width: 60px;
+    }
+
+    &__avatar {
+      width: 18px !important;
+      height: 18px !important;
+    }
+
+    &__auth {
+      font-size: 11px;
+    }
+
+    .language-switcher .language-button {
+      font-size: 10px;
+      padding: 1px 4px;
+      height: 20px;
+    }
+
+    .cart-icon-container img,
+    .cart-icon-container .shopping-cart-icon {
+      width: 16px !important;
+      height: 16px !important;
+    }
+  }
+
   &__login,
   &__profile {
     display: flex;
@@ -180,6 +223,11 @@
     height: calc(48px + 32px);
     height: calc(48px + 32px + env(safe-area-inset-top));
   }
+
+  @media (max-width: 400px) {
+    height: calc(44px + 28px);
+    height: calc(44px + 28px + env(safe-area-inset-top));
+  }
 }
 
 header {
@@ -216,6 +264,15 @@ header {
     padding: 8px 12px;
     padding-left: max(12px, env(safe-area-inset-left));
     padding-right: max(12px, env(safe-area-inset-right));
+  }
+
+  @media (max-width: 400px) {
+    top: calc(28px + env(safe-area-inset-top));
+    height: 44px;
+    min-height: 44px;
+    padding: 6px 8px;
+    padding-left: max(8px, env(safe-area-inset-left));
+    padding-right: max(8px, env(safe-area-inset-right));
   }
 
   /* Add .flex class */
@@ -459,5 +516,38 @@ header {
 
   .hamburger-icon {
     font-size: 26px !important;
+  }
+}
+
+/* Extra small screens (380px and below) */
+@media screen and (max-width: 400px) {
+  .logo {
+    img {
+      max-height: 34px !important;
+      width: auto !important;
+    }
+  }
+
+  .header-center-logo {
+    img {
+      max-height: 34px !important;
+      width: auto !important;
+    }
+  }
+
+  .mobile-nav-btn {
+    width: 32px !important;
+    height: 32px !important;
+    min-width: 32px !important;
+    min-height: 32px !important;
+    padding: 4px !important;
+  }
+
+  .hamburger-icon {
+    font-size: 22px !important;
+  }
+
+  .mobile-header-actions {
+    gap: 8px !important;
   }
 }
