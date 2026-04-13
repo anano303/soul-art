@@ -1,0 +1,5068 @@
+{
+  "scannedPosts": 700,
+  "existingSellerSlugCount": 190,
+  "missingSlugCount": 59,
+  "highConfidenceCount": 59,
+  "highConfidence": [
+    {
+      "slug": "nino-tatarashvilis-art",
+      "authorNames": [
+        "Nino Tatarashvili's Art"
+      ],
+      "count": 45,
+      "latestPost": "2026-03-03T15:48:07+0000",
+      "bestCandidate": {
+        "email": "nsoulart.georgia@gmail.com",
+        "score": 29,
+        "sources": [
+          "recovered-chat-users"
+        ],
+        "recoveredName": "Nsoulart Georgia"
+      },
+      "confidence": "high",
+      "matchedExistingUser": null,
+      "candidates": [
+        {
+          "email": "nsoulart.georgia@gmail.com",
+          "score": 29,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Nsoulart Georgia"
+        },
+        {
+          "email": "soulart-analytics@your-project.iam.gserviceaccount.com",
+          "score": 29,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Soulart Analytics"
+        },
+        {
+          "email": "ga4-analytics-reader@soulart-analytics.iam.gserviceaccount.com",
+          "score": 27,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Ga4 Analytics Reader"
+        },
+        {
+          "email": "kristina.kupunia.kris@mail.ru",
+          "score": 27,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Kristina Kupunia Kris"
+        },
+        {
+          "email": "soulart.georgia@gmail.com",
+          "score": 25,
+          "sources": [
+            "recovered-chat-users",
+            "sent-mail"
+          ],
+          "recoveredName": "Soul Art"
+        },
+        {
+          "email": "soulartani@gmail.com",
+          "score": 25,
+          "sources": [
+            "recovered-chat-users",
+            "sent-mail"
+          ],
+          "recoveredName": "Soul Art"
+        },
+        {
+          "email": "doijashvili.mariami@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Mariam doijashvili"
+        },
+        {
+          "email": "guram.jokhadze60@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "გურამ ჯოხაძე"
+        }
+      ]
+    },
+    {
+      "slug": "natia-chijavadze",
+      "authorNames": [
+        "Natia Chijavadze"
+      ],
+      "count": 20,
+      "latestPost": "2026-03-22T18:58:10+0000",
+      "bestCandidate": {
+        "email": "ga4-analytics-reader@soulart-analytics.iam.gserviceaccount.com",
+        "score": 27,
+        "sources": [
+          "recovered-chat-users"
+        ],
+        "recoveredName": "Ga4 Analytics Reader"
+      },
+      "confidence": "high",
+      "matchedExistingUser": null,
+      "candidates": [
+        {
+          "email": "ga4-analytics-reader@soulart-analytics.iam.gserviceaccount.com",
+          "score": 27,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Ga4 Analytics Reader"
+        },
+        {
+          "email": "kristina.kupunia.kris@mail.ru",
+          "score": 27,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Kristina Kupunia Kris"
+        },
+        {
+          "email": "doijashvili.mariami@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Mariam doijashvili"
+        },
+        {
+          "email": "guram.jokhadze60@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "გურამ ჯოხაძე"
+        },
+        {
+          "email": "mariamighonghadze81@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "mariami ghonghadze"
+        },
+        {
+          "email": "naniko.rigavava@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Naniko Rigavava"
+        },
+        {
+          "email": "ncaterina_inasaridze@yahoo.it",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Ncaterina Inasaridze"
+        },
+        {
+          "email": "nkhubashvilinatia4@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Nkhubashvilinatia4"
+        }
+      ]
+    },
+    {
+      "slug": "kkl-beads",
+      "authorNames": [
+        "KKL beads"
+      ],
+      "count": 20,
+      "latestPost": "2026-02-22T10:56:01+0000",
+      "bestCandidate": {
+        "email": "ga4-analytics-reader@soulart-analytics.iam.gserviceaccount.com",
+        "score": 27,
+        "sources": [
+          "recovered-chat-users"
+        ],
+        "recoveredName": "Ga4 Analytics Reader"
+      },
+      "confidence": "high",
+      "matchedExistingUser": null,
+      "candidates": [
+        {
+          "email": "ga4-analytics-reader@soulart-analytics.iam.gserviceaccount.com",
+          "score": 27,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Ga4 Analytics Reader"
+        },
+        {
+          "email": "kristina.kupunia.kris@mail.ru",
+          "score": 27,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Kristina Kupunia Kris"
+        },
+        {
+          "email": "doijashvili.mariami@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Mariam doijashvili"
+        },
+        {
+          "email": "guram.jokhadze60@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "გურამ ჯოხაძე"
+        },
+        {
+          "email": "mariamighonghadze81@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "mariami ghonghadze"
+        },
+        {
+          "email": "naniko.rigavava@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Naniko Rigavava"
+        },
+        {
+          "email": "ncaterina_inasaridze@yahoo.it",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Ncaterina Inasaridze"
+        },
+        {
+          "email": "nmarina.aptsiauri61@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Nmarina Aptsiauri61"
+        }
+      ]
+    },
+    {
+      "slug": "ninis-gift-shop",
+      "authorNames": [
+        "Nini's gift shop"
+      ],
+      "count": 18,
+      "latestPost": "2026-03-28T08:29:11+0000",
+      "bestCandidate": {
+        "email": "ga4-analytics-reader@soulart-analytics.iam.gserviceaccount.com",
+        "score": 27,
+        "sources": [
+          "recovered-chat-users"
+        ],
+        "recoveredName": "Ga4 Analytics Reader"
+      },
+      "confidence": "high",
+      "matchedExistingUser": null,
+      "candidates": [
+        {
+          "email": "ga4-analytics-reader@soulart-analytics.iam.gserviceaccount.com",
+          "score": 27,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Ga4 Analytics Reader"
+        },
+        {
+          "email": "kristina.kupunia.kris@mail.ru",
+          "score": 27,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Kristina Kupunia Kris"
+        },
+        {
+          "email": "doijashvili.mariami@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Mariam doijashvili"
+        },
+        {
+          "email": "guram.jokhadze60@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "გურამ ჯოხაძე"
+        },
+        {
+          "email": "mariamighonghadze81@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "mariami ghonghadze"
+        },
+        {
+          "email": "naniko.rigavava@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Naniko Rigavava"
+        },
+        {
+          "email": "ncaterina_inasaridze@yahoo.it",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Ncaterina Inasaridze"
+        },
+        {
+          "email": "nmarina.aptsiauri61@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Nmarina Aptsiauri61"
+        }
+      ]
+    },
+    {
+      "slug": "temod",
+      "authorNames": [
+        "TemoD"
+      ],
+      "count": 14,
+      "latestPost": "2026-01-30T13:30:45+0000",
+      "bestCandidate": {
+        "email": "ga4-analytics-reader@soulart-analytics.iam.gserviceaccount.com",
+        "score": 27,
+        "sources": [
+          "recovered-chat-users"
+        ],
+        "recoveredName": "Ga4 Analytics Reader"
+      },
+      "confidence": "high",
+      "matchedExistingUser": null,
+      "candidates": [
+        {
+          "email": "ga4-analytics-reader@soulart-analytics.iam.gserviceaccount.com",
+          "score": 27,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Ga4 Analytics Reader"
+        },
+        {
+          "email": "kristina.kupunia.kris@mail.ru",
+          "score": 27,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Kristina Kupunia Kris"
+        },
+        {
+          "email": "doijashvili.mariami@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Mariam doijashvili"
+        },
+        {
+          "email": "guram.jokhadze60@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "გურამ ჯოხაძე"
+        },
+        {
+          "email": "mariamighonghadze81@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "mariami ghonghadze"
+        },
+        {
+          "email": "naniko.rigavava@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Naniko Rigavava"
+        },
+        {
+          "email": "ncaterina_inasaridze@yahoo.it",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Ncaterina Inasaridze"
+        },
+        {
+          "email": "nmarina.aptsiauri61@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Nmarina Aptsiauri61"
+        }
+      ]
+    },
+    {
+      "slug": "mariam-kiparoidze",
+      "authorNames": [
+        "Mariam kiparoidze"
+      ],
+      "count": 8,
+      "latestPost": "2026-03-19T19:09:48+0000",
+      "bestCandidate": {
+        "email": "mariamighonghadze81@gmail.com",
+        "score": 36,
+        "sources": [
+          "recovered-chat-users",
+          "sent-mail"
+        ],
+        "recoveredName": "mariami ghonghadze"
+      },
+      "confidence": "high",
+      "matchedExistingUser": {
+        "email": "mariamighonghadze81@gmail.com",
+        "role": "user",
+        "artistSlug": "",
+        "name": "mariami ghonghadze"
+      },
+      "candidates": [
+        {
+          "email": "mariamighonghadze81@gmail.com",
+          "score": 36,
+          "sources": [
+            "recovered-chat-users",
+            "sent-mail"
+          ],
+          "recoveredName": "mariami ghonghadze"
+        },
+        {
+          "email": "doijashvili.mariami@gmail.com",
+          "score": 30,
+          "sources": [
+            "recovered-chat-users",
+            "sent-mail"
+          ],
+          "recoveredName": "Mariam doijashvili"
+        },
+        {
+          "email": "mariamsadgobelashvili09@gmail.com",
+          "score": 30,
+          "sources": [
+            "recovered-chat-users",
+            "sent-mail"
+          ],
+          "recoveredName": "Mariamsadgobelashvili09"
+        },
+        {
+          "email": "ga4-analytics-reader@soulart-analytics.iam.gserviceaccount.com",
+          "score": 27,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Ga4 Analytics Reader"
+        },
+        {
+          "email": "kristina.kupunia.kris@mail.ru",
+          "score": 27,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Kristina Kupunia Kris"
+        },
+        {
+          "email": "guram.jokhadze60@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "გურამ ჯოხაძე"
+        },
+        {
+          "email": "mariamchakvetadze2025@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Mariamchakvetadze2025"
+        },
+        {
+          "email": "mariammiqo@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Mariammiqo"
+        }
+      ]
+    },
+    {
+      "slug": "irmatsindeliani-art",
+      "authorNames": [
+        "Irma Tsindeliani"
+      ],
+      "count": 7,
+      "latestPost": "2026-03-13T14:56:14+0000",
+      "bestCandidate": {
+        "email": "tsindelianiirma20@gmail.com",
+        "score": 75,
+        "sources": [
+          "chat-context",
+          "recovered-chat-users"
+        ],
+        "recoveredName": "Irma Tsindeliani"
+      },
+      "confidence": "high",
+      "matchedExistingUser": {
+        "email": "tsindelianiirma20@gmail.com",
+        "role": "user",
+        "artistSlug": "",
+        "name": "Irma Tsindeliani"
+      },
+      "candidates": [
+        {
+          "email": "tsindelianiirma20@gmail.com",
+          "score": 75,
+          "sources": [
+            "chat-context",
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Irma Tsindeliani"
+        },
+        {
+          "email": "ga4-analytics-reader@soulart-analytics.iam.gserviceaccount.com",
+          "score": 27,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Ga4 Analytics Reader"
+        },
+        {
+          "email": "kristina.kupunia.kris@mail.ru",
+          "score": 27,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Kristina Kupunia Kris"
+        },
+        {
+          "email": "nsoulart.georgia@gmail.com",
+          "score": 26,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Nsoulart Georgia"
+        },
+        {
+          "email": "soulart-analytics@your-project.iam.gserviceaccount.com",
+          "score": 26,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Soulart Analytics"
+        },
+        {
+          "email": "doijashvili.mariami@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Mariam doijashvili"
+        },
+        {
+          "email": "guram.jokhadze60@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "გურამ ჯოხაძე"
+        },
+        {
+          "email": "mariamighonghadze81@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "mariami ghonghadze"
+        }
+      ]
+    },
+    {
+      "slug": "gigauri",
+      "authorNames": [
+        "mamuka gigauri"
+      ],
+      "count": 7,
+      "latestPost": "2026-03-10T05:49:54+0000",
+      "bestCandidate": {
+        "email": "ga4-analytics-reader@soulart-analytics.iam.gserviceaccount.com",
+        "score": 27,
+        "sources": [
+          "recovered-chat-users"
+        ],
+        "recoveredName": "Ga4 Analytics Reader"
+      },
+      "confidence": "high",
+      "matchedExistingUser": null,
+      "candidates": [
+        {
+          "email": "ga4-analytics-reader@soulart-analytics.iam.gserviceaccount.com",
+          "score": 27,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Ga4 Analytics Reader"
+        },
+        {
+          "email": "kristina.kupunia.kris@mail.ru",
+          "score": 27,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Kristina Kupunia Kris"
+        },
+        {
+          "email": "doijashvili.mariami@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Mariam doijashvili"
+        },
+        {
+          "email": "guram.jokhadze60@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "გურამ ჯოხაძე"
+        },
+        {
+          "email": "mariamighonghadze81@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "mariami ghonghadze"
+        },
+        {
+          "email": "naniko.rigavava@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Naniko Rigavava"
+        },
+        {
+          "email": "ncaterina_inasaridze@yahoo.it",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Ncaterina Inasaridze"
+        },
+        {
+          "email": "nmarina.aptsiauri61@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Nmarina Aptsiauri61"
+        }
+      ]
+    },
+    {
+      "slug": "miriani",
+      "authorNames": [
+        "Miriani"
+      ],
+      "count": 7,
+      "latestPost": "2026-02-04T20:28:38+0000",
+      "bestCandidate": {
+        "email": "ga4-analytics-reader@soulart-analytics.iam.gserviceaccount.com",
+        "score": 27,
+        "sources": [
+          "recovered-chat-users"
+        ],
+        "recoveredName": "Ga4 Analytics Reader"
+      },
+      "confidence": "high",
+      "matchedExistingUser": null,
+      "candidates": [
+        {
+          "email": "ga4-analytics-reader@soulart-analytics.iam.gserviceaccount.com",
+          "score": 27,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Ga4 Analytics Reader"
+        },
+        {
+          "email": "kristina.kupunia.kris@mail.ru",
+          "score": 27,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Kristina Kupunia Kris"
+        },
+        {
+          "email": "doijashvili.mariami@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Mariam doijashvili"
+        },
+        {
+          "email": "guram.jokhadze60@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "გურამ ჯოხაძე"
+        },
+        {
+          "email": "mariamighonghadze81@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "mariami ghonghadze"
+        },
+        {
+          "email": "naniko.rigavava@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Naniko Rigavava"
+        },
+        {
+          "email": "ncaterina_inasaridze@yahoo.it",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Ncaterina Inasaridze"
+        },
+        {
+          "email": "nmarina.aptsiauri61@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Nmarina Aptsiauri61"
+        }
+      ]
+    },
+    {
+      "slug": "ninogudadzeart",
+      "authorNames": [
+        "ნინო გუდაძე"
+      ],
+      "count": 7,
+      "latestPost": "2026-01-13T12:10:49+0000",
+      "bestCandidate": {
+        "email": "ga4-analytics-reader@soulart-analytics.iam.gserviceaccount.com",
+        "score": 27,
+        "sources": [
+          "recovered-chat-users"
+        ],
+        "recoveredName": "Ga4 Analytics Reader"
+      },
+      "confidence": "high",
+      "matchedExistingUser": null,
+      "candidates": [
+        {
+          "email": "ga4-analytics-reader@soulart-analytics.iam.gserviceaccount.com",
+          "score": 27,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Ga4 Analytics Reader"
+        },
+        {
+          "email": "kristina.kupunia.kris@mail.ru",
+          "score": 27,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Kristina Kupunia Kris"
+        },
+        {
+          "email": "nsoulart.georgia@gmail.com",
+          "score": 26,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Nsoulart Georgia"
+        },
+        {
+          "email": "soulart-analytics@your-project.iam.gserviceaccount.com",
+          "score": 26,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Soulart Analytics"
+        },
+        {
+          "email": "doijashvili.mariami@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Mariam doijashvili"
+        },
+        {
+          "email": "guram.jokhadze60@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "გურამ ჯოხაძე"
+        },
+        {
+          "email": "mariamighonghadze81@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "mariami ghonghadze"
+        },
+        {
+          "email": "naniko.rigavava@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Naniko Rigavava"
+        }
+      ]
+    },
+    {
+      "slug": "ketos-art",
+      "authorNames": [
+        "keto chekurishvili"
+      ],
+      "count": 5,
+      "latestPost": "2026-03-18T17:43:58+0000",
+      "bestCandidate": {
+        "email": "ga4-analytics-reader@soulart-analytics.iam.gserviceaccount.com",
+        "score": 27,
+        "sources": [
+          "recovered-chat-users"
+        ],
+        "recoveredName": "Ga4 Analytics Reader"
+      },
+      "confidence": "high",
+      "matchedExistingUser": null,
+      "candidates": [
+        {
+          "email": "ga4-analytics-reader@soulart-analytics.iam.gserviceaccount.com",
+          "score": 27,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Ga4 Analytics Reader"
+        },
+        {
+          "email": "kristina.kupunia.kris@mail.ru",
+          "score": 27,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Kristina Kupunia Kris"
+        },
+        {
+          "email": "nsoulart.georgia@gmail.com",
+          "score": 26,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Nsoulart Georgia"
+        },
+        {
+          "email": "soulart-analytics@your-project.iam.gserviceaccount.com",
+          "score": 26,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Soulart Analytics"
+        },
+        {
+          "email": "doijashvili.mariami@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Mariam doijashvili"
+        },
+        {
+          "email": "guram.jokhadze60@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "გურამ ჯოხაძე"
+        },
+        {
+          "email": "mariamighonghadze81@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "mariami ghonghadze"
+        },
+        {
+          "email": "naniko.rigavava@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Naniko Rigavava"
+        }
+      ]
+    },
+    {
+      "slug": "is-ari",
+      "authorNames": [
+        "ისარი"
+      ],
+      "count": 5,
+      "latestPost": "2026-02-12T09:14:13+0000",
+      "bestCandidate": {
+        "email": "ga4-analytics-reader@soulart-analytics.iam.gserviceaccount.com",
+        "score": 27,
+        "sources": [
+          "recovered-chat-users"
+        ],
+        "recoveredName": "Ga4 Analytics Reader"
+      },
+      "confidence": "high",
+      "matchedExistingUser": null,
+      "candidates": [
+        {
+          "email": "ga4-analytics-reader@soulart-analytics.iam.gserviceaccount.com",
+          "score": 27,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Ga4 Analytics Reader"
+        },
+        {
+          "email": "kristina.kupunia.kris@mail.ru",
+          "score": 27,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Kristina Kupunia Kris"
+        },
+        {
+          "email": "doijashvili.mariami@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Mariam doijashvili"
+        },
+        {
+          "email": "guram.jokhadze60@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "გურამ ჯოხაძე"
+        },
+        {
+          "email": "mariamighonghadze81@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "mariami ghonghadze"
+        },
+        {
+          "email": "naniko.rigavava@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Naniko Rigavava"
+        },
+        {
+          "email": "ncaterina_inasaridze@yahoo.it",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Ncaterina Inasaridze"
+        },
+        {
+          "email": "nmarina.aptsiauri61@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Nmarina Aptsiauri61"
+        }
+      ]
+    },
+    {
+      "slug": "ekaterinesubelianiart",
+      "authorNames": [
+        "EkaterineSubelianiArt"
+      ],
+      "count": 5,
+      "latestPost": "2026-01-16T19:56:47+0000",
+      "bestCandidate": {
+        "email": "ga4-analytics-reader@soulart-analytics.iam.gserviceaccount.com",
+        "score": 27,
+        "sources": [
+          "recovered-chat-users"
+        ],
+        "recoveredName": "Ga4 Analytics Reader"
+      },
+      "confidence": "high",
+      "matchedExistingUser": null,
+      "candidates": [
+        {
+          "email": "ga4-analytics-reader@soulart-analytics.iam.gserviceaccount.com",
+          "score": 27,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Ga4 Analytics Reader"
+        },
+        {
+          "email": "kristina.kupunia.kris@mail.ru",
+          "score": 27,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Kristina Kupunia Kris"
+        },
+        {
+          "email": "nsoulart.georgia@gmail.com",
+          "score": 26,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Nsoulart Georgia"
+        },
+        {
+          "email": "otiashvilitornike891@gmail.com",
+          "score": 26,
+          "sources": [
+            "chat-context",
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Tornike Otiashvili"
+        },
+        {
+          "email": "soulart-analytics@your-project.iam.gserviceaccount.com",
+          "score": 26,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Soulart Analytics"
+        },
+        {
+          "email": "tamarbasilia789@gmail.com",
+          "score": 26,
+          "sources": [
+            "chat-context",
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Tamar Basilia's Art"
+        },
+        {
+          "email": "doijashvili.mariami@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Mariam doijashvili"
+        },
+        {
+          "email": "guram.jokhadze60@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "გურამ ჯოხაძე"
+        }
+      ]
+    },
+    {
+      "slug": "liza-mumladze",
+      "authorNames": [
+        "liza mumladze"
+      ],
+      "count": 5,
+      "latestPost": "2026-01-07T17:25:16+0000",
+      "bestCandidate": {
+        "email": "ga4-analytics-reader@soulart-analytics.iam.gserviceaccount.com",
+        "score": 27,
+        "sources": [
+          "recovered-chat-users"
+        ],
+        "recoveredName": "Ga4 Analytics Reader"
+      },
+      "confidence": "high",
+      "matchedExistingUser": null,
+      "candidates": [
+        {
+          "email": "ga4-analytics-reader@soulart-analytics.iam.gserviceaccount.com",
+          "score": 27,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Ga4 Analytics Reader"
+        },
+        {
+          "email": "kristina.kupunia.kris@mail.ru",
+          "score": 27,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Kristina Kupunia Kris"
+        },
+        {
+          "email": "doijashvili.mariami@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Mariam doijashvili"
+        },
+        {
+          "email": "guram.jokhadze60@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "გურამ ჯოხაძე"
+        },
+        {
+          "email": "mariamighonghadze81@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "mariami ghonghadze"
+        },
+        {
+          "email": "naniko.rigavava@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Naniko Rigavava"
+        },
+        {
+          "email": "ncaterina_inasaridze@yahoo.it",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Ncaterina Inasaridze"
+        },
+        {
+          "email": "nmarina.aptsiauri61@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Nmarina Aptsiauri61"
+        }
+      ]
+    },
+    {
+      "slug": "kristi-artspace",
+      "authorNames": [
+        "Kristi artspace"
+      ],
+      "count": 5,
+      "latestPost": "2025-12-16T22:04:52+0000",
+      "bestCandidate": {
+        "email": "kristina.kupunia.kris@mail.ru",
+        "score": 39,
+        "sources": [
+          "recovered-chat-users",
+          "sent-mail"
+        ],
+        "recoveredName": "Kristina Kupunia Kris"
+      },
+      "confidence": "high",
+      "matchedExistingUser": {
+        "email": "kristina.kupunia.kris@mail.ru",
+        "role": "sales_manager",
+        "artistSlug": "",
+        "name": "Kristina Kupunia Kris"
+      },
+      "candidates": [
+        {
+          "email": "kristina.kupunia.kris@mail.ru",
+          "score": 39,
+          "sources": [
+            "recovered-chat-users",
+            "sent-mail"
+          ],
+          "recoveredName": "Kristina Kupunia Kris"
+        },
+        {
+          "email": "ga4-analytics-reader@soulart-analytics.iam.gserviceaccount.com",
+          "score": 27,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Ga4 Analytics Reader"
+        },
+        {
+          "email": "nsoulart.georgia@gmail.com",
+          "score": 26,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Nsoulart Georgia"
+        },
+        {
+          "email": "soulart-analytics@your-project.iam.gserviceaccount.com",
+          "score": 26,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Soulart Analytics"
+        },
+        {
+          "email": "doijashvili.mariami@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Mariam doijashvili"
+        },
+        {
+          "email": "guram.jokhadze60@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "გურამ ჯოხაძე"
+        },
+        {
+          "email": "mariamighonghadze81@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "mariami ghonghadze"
+        },
+        {
+          "email": "naniko.rigavava@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Naniko Rigavava"
+        }
+      ]
+    },
+    {
+      "slug": "nonagvimradze",
+      "authorNames": [
+        "ნონა ასლამაზიშვილი"
+      ],
+      "count": 5,
+      "latestPost": "2025-11-24T20:14:23+0000",
+      "bestCandidate": {
+        "email": "ga4-analytics-reader@soulart-analytics.iam.gserviceaccount.com",
+        "score": 27,
+        "sources": [
+          "recovered-chat-users"
+        ],
+        "recoveredName": "Ga4 Analytics Reader"
+      },
+      "confidence": "high",
+      "matchedExistingUser": null,
+      "candidates": [
+        {
+          "email": "ga4-analytics-reader@soulart-analytics.iam.gserviceaccount.com",
+          "score": 27,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Ga4 Analytics Reader"
+        },
+        {
+          "email": "kristina.kupunia.kris@mail.ru",
+          "score": 27,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Kristina Kupunia Kris"
+        },
+        {
+          "email": "doijashvili.mariami@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Mariam doijashvili"
+        },
+        {
+          "email": "guram.jokhadze60@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "გურამ ჯოხაძე"
+        },
+        {
+          "email": "mariamighonghadze81@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "mariami ghonghadze"
+        },
+        {
+          "email": "naniko.rigavava@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Naniko Rigavava"
+        },
+        {
+          "email": "ncaterina_inasaridze@yahoo.it",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Ncaterina Inasaridze"
+        },
+        {
+          "email": "nmarina.aptsiauri61@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Nmarina Aptsiauri61"
+        }
+      ]
+    },
+    {
+      "slug": "dona",
+      "authorNames": [
+        "Madona Gigauri"
+      ],
+      "count": 4,
+      "latestPost": "2026-02-19T07:45:48+0000",
+      "bestCandidate": {
+        "email": "ga4-analytics-reader@soulart-analytics.iam.gserviceaccount.com",
+        "score": 27,
+        "sources": [
+          "recovered-chat-users"
+        ],
+        "recoveredName": "Ga4 Analytics Reader"
+      },
+      "confidence": "high",
+      "matchedExistingUser": null,
+      "candidates": [
+        {
+          "email": "ga4-analytics-reader@soulart-analytics.iam.gserviceaccount.com",
+          "score": 27,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Ga4 Analytics Reader"
+        },
+        {
+          "email": "kristina.kupunia.kris@mail.ru",
+          "score": 27,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Kristina Kupunia Kris"
+        },
+        {
+          "email": "doijashvili.mariami@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Mariam doijashvili"
+        },
+        {
+          "email": "guram.jokhadze60@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "გურამ ჯოხაძე"
+        },
+        {
+          "email": "mariamighonghadze81@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "mariami ghonghadze"
+        },
+        {
+          "email": "naniko.rigavava@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Naniko Rigavava"
+        },
+        {
+          "email": "ncaterina_inasaridze@yahoo.it",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Ncaterina Inasaridze"
+        },
+        {
+          "email": "nmarina.aptsiauri61@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Nmarina Aptsiauri61"
+        }
+      ]
+    },
+    {
+      "slug": "keto",
+      "authorNames": [
+        "ქეთო ივანელაშვილი"
+      ],
+      "count": 4,
+      "latestPost": "2026-02-04T20:28:35+0000",
+      "bestCandidate": {
+        "email": "ga4-analytics-reader@soulart-analytics.iam.gserviceaccount.com",
+        "score": 27,
+        "sources": [
+          "recovered-chat-users"
+        ],
+        "recoveredName": "Ga4 Analytics Reader"
+      },
+      "confidence": "high",
+      "matchedExistingUser": null,
+      "candidates": [
+        {
+          "email": "ga4-analytics-reader@soulart-analytics.iam.gserviceaccount.com",
+          "score": 27,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Ga4 Analytics Reader"
+        },
+        {
+          "email": "kristina.kupunia.kris@mail.ru",
+          "score": 27,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Kristina Kupunia Kris"
+        },
+        {
+          "email": "qetoivanelashvili@gmail.com",
+          "score": 27,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Qetoivanelashvili"
+        },
+        {
+          "email": "doijashvili.mariami@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Mariam doijashvili"
+        },
+        {
+          "email": "guram.jokhadze60@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "გურამ ჯოხაძე"
+        },
+        {
+          "email": "mariamighonghadze81@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "mariami ghonghadze"
+        },
+        {
+          "email": "naniko.rigavava@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Naniko Rigavava"
+        },
+        {
+          "email": "ncaterina_inasaridze@yahoo.it",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Ncaterina Inasaridze"
+        }
+      ]
+    },
+    {
+      "slug": "lumina",
+      "authorNames": [
+        "lumina მინის სტუდია"
+      ],
+      "count": 4,
+      "latestPost": "2026-01-17T19:13:56+0000",
+      "bestCandidate": {
+        "email": "ga4-analytics-reader@soulart-analytics.iam.gserviceaccount.com",
+        "score": 27,
+        "sources": [
+          "recovered-chat-users"
+        ],
+        "recoveredName": "Ga4 Analytics Reader"
+      },
+      "confidence": "high",
+      "matchedExistingUser": null,
+      "candidates": [
+        {
+          "email": "ga4-analytics-reader@soulart-analytics.iam.gserviceaccount.com",
+          "score": 27,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Ga4 Analytics Reader"
+        },
+        {
+          "email": "kristina.kupunia.kris@mail.ru",
+          "score": 27,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Kristina Kupunia Kris"
+        },
+        {
+          "email": "doijashvili.mariami@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Mariam doijashvili"
+        },
+        {
+          "email": "guram.jokhadze60@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "გურამ ჯოხაძე"
+        },
+        {
+          "email": "mariamighonghadze81@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "mariami ghonghadze"
+        },
+        {
+          "email": "naniko.rigavava@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Naniko Rigavava"
+        },
+        {
+          "email": "ncaterina_inasaridze@yahoo.it",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Ncaterina Inasaridze"
+        },
+        {
+          "email": "nmarina.aptsiauri61@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Nmarina Aptsiauri61"
+        }
+      ]
+    },
+    {
+      "slug": "dvalidvali",
+      "authorNames": [
+        "Tamara Dvali"
+      ],
+      "count": 4,
+      "latestPost": "2026-01-08T19:27:25+0000",
+      "bestCandidate": {
+        "email": "ga4-analytics-reader@soulart-analytics.iam.gserviceaccount.com",
+        "score": 27,
+        "sources": [
+          "recovered-chat-users"
+        ],
+        "recoveredName": "Ga4 Analytics Reader"
+      },
+      "confidence": "high",
+      "matchedExistingUser": null,
+      "candidates": [
+        {
+          "email": "ga4-analytics-reader@soulart-analytics.iam.gserviceaccount.com",
+          "score": 27,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Ga4 Analytics Reader"
+        },
+        {
+          "email": "kristina.kupunia.kris@mail.ru",
+          "score": 27,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Kristina Kupunia Kris"
+        },
+        {
+          "email": "tamarbasilia789@gmail.com",
+          "score": 25,
+          "sources": [
+            "chat-context",
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Tamar Basilia's Art"
+        },
+        {
+          "email": "doijashvili.mariami@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Mariam doijashvili"
+        },
+        {
+          "email": "guram.jokhadze60@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "გურამ ჯოხაძე"
+        },
+        {
+          "email": "mariamighonghadze81@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "mariami ghonghadze"
+        },
+        {
+          "email": "naniko.rigavava@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Naniko Rigavava"
+        },
+        {
+          "email": "ncaterina_inasaridze@yahoo.it",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Ncaterina Inasaridze"
+        }
+      ]
+    },
+    {
+      "slug": "nini-pochkhidze",
+      "authorNames": [
+        "Nini Pochkhidze"
+      ],
+      "count": 4,
+      "latestPost": "2025-12-29T13:49:40+0000",
+      "bestCandidate": {
+        "email": "ga4-analytics-reader@soulart-analytics.iam.gserviceaccount.com",
+        "score": 27,
+        "sources": [
+          "recovered-chat-users"
+        ],
+        "recoveredName": "Ga4 Analytics Reader"
+      },
+      "confidence": "high",
+      "matchedExistingUser": null,
+      "candidates": [
+        {
+          "email": "ga4-analytics-reader@soulart-analytics.iam.gserviceaccount.com",
+          "score": 27,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Ga4 Analytics Reader"
+        },
+        {
+          "email": "kristina.kupunia.kris@mail.ru",
+          "score": 27,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Kristina Kupunia Kris"
+        },
+        {
+          "email": "doijashvili.mariami@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Mariam doijashvili"
+        },
+        {
+          "email": "guram.jokhadze60@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "გურამ ჯოხაძე"
+        },
+        {
+          "email": "mariamighonghadze81@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "mariami ghonghadze"
+        },
+        {
+          "email": "naniko.rigavava@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Naniko Rigavava"
+        },
+        {
+          "email": "ncaterina_inasaridze@yahoo.it",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Ncaterina Inasaridze"
+        },
+        {
+          "email": "nmarina.aptsiauri61@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Nmarina Aptsiauri61"
+        }
+      ]
+    },
+    {
+      "slug": "artist-14ia",
+      "authorNames": [
+        "ია"
+      ],
+      "count": 4,
+      "latestPost": "2025-11-18T11:38:31+0000",
+      "bestCandidate": {
+        "email": "info@soulart.ge",
+        "score": 177,
+        "sources": [
+          "chat-context",
+          "recovered-chat-users"
+        ],
+        "recoveredName": "Info"
+      },
+      "confidence": "high",
+      "matchedExistingUser": {
+        "email": "info@soulart.ge",
+        "role": "user",
+        "artistSlug": "",
+        "name": "Info"
+      },
+      "candidates": [
+        {
+          "email": "info@soulart.ge",
+          "score": 177,
+          "sources": [
+            "chat-context",
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Info"
+        },
+        {
+          "email": "soulart.georgia@gmail.com",
+          "score": 67,
+          "sources": [
+            "chat-context",
+            "recovered-chat-users",
+            "sent-mail"
+          ],
+          "recoveredName": "Soul Art"
+        },
+        {
+          "email": "kristina.kupunia.kris@mail.ru",
+          "score": 31,
+          "sources": [
+            "chat-context",
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Kristina Kupunia Kris"
+        },
+        {
+          "email": "soulartgeorgia@gmail.com",
+          "score": 30,
+          "sources": [
+            "chat-context",
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Soulartgeorgia"
+        },
+        {
+          "email": "shioshvilimariam47@gmail.com",
+          "score": 29,
+          "sources": [
+            "chat-context"
+          ],
+          "recoveredName": ""
+        },
+        {
+          "email": "ga4-analytics-reader@soulart-analytics.iam.gserviceaccount.com",
+          "score": 27,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Ga4 Analytics Reader"
+        },
+        {
+          "email": "nsoulart.georgia@gmail.com",
+          "score": 26,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Nsoulart Georgia"
+        },
+        {
+          "email": "otiashvilitornike891@gmail.com",
+          "score": 26,
+          "sources": [
+            "chat-context",
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Tornike Otiashvili"
+        }
+      ]
+    },
+    {
+      "slug": "ekaterinasart",
+      "authorNames": [
+        "Ekaterine"
+      ],
+      "count": 3,
+      "latestPost": "2026-03-20T10:45:20+0000",
+      "bestCandidate": {
+        "email": "ga4-analytics-reader@soulart-analytics.iam.gserviceaccount.com",
+        "score": 27,
+        "sources": [
+          "recovered-chat-users"
+        ],
+        "recoveredName": "Ga4 Analytics Reader"
+      },
+      "confidence": "high",
+      "matchedExistingUser": null,
+      "candidates": [
+        {
+          "email": "ga4-analytics-reader@soulart-analytics.iam.gserviceaccount.com",
+          "score": 27,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Ga4 Analytics Reader"
+        },
+        {
+          "email": "kristina.kupunia.kris@mail.ru",
+          "score": 27,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Kristina Kupunia Kris"
+        },
+        {
+          "email": "nsoulart.georgia@gmail.com",
+          "score": 26,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Nsoulart Georgia"
+        },
+        {
+          "email": "soulart-analytics@your-project.iam.gserviceaccount.com",
+          "score": 26,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Soulart Analytics"
+        },
+        {
+          "email": "otiashvilitornike891@gmail.com",
+          "score": 25,
+          "sources": [
+            "chat-context",
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Tornike Otiashvili"
+        },
+        {
+          "email": "tamarbasilia789@gmail.com",
+          "score": 25,
+          "sources": [
+            "chat-context",
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Tamar Basilia's Art"
+        },
+        {
+          "email": "doijashvili.mariami@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Mariam doijashvili"
+        },
+        {
+          "email": "guram.jokhadze60@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "გურამ ჯოხაძე"
+        }
+      ]
+    },
+    {
+      "slug": "ioane-kravelidze",
+      "authorNames": [
+        "იოანე კრაველიძე",
+        "ვანო კრაველიძე"
+      ],
+      "count": 3,
+      "latestPost": "2026-03-18T18:08:24+0000",
+      "bestCandidate": {
+        "email": "ga4-analytics-reader@soulart-analytics.iam.gserviceaccount.com",
+        "score": 27,
+        "sources": [
+          "recovered-chat-users"
+        ],
+        "recoveredName": "Ga4 Analytics Reader"
+      },
+      "confidence": "high",
+      "matchedExistingUser": null,
+      "candidates": [
+        {
+          "email": "ga4-analytics-reader@soulart-analytics.iam.gserviceaccount.com",
+          "score": 27,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Ga4 Analytics Reader"
+        },
+        {
+          "email": "kristina.kupunia.kris@mail.ru",
+          "score": 27,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Kristina Kupunia Kris"
+        },
+        {
+          "email": "doijashvili.mariami@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Mariam doijashvili"
+        },
+        {
+          "email": "guram.jokhadze60@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "გურამ ჯოხაძე"
+        },
+        {
+          "email": "mariamighonghadze81@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "mariami ghonghadze"
+        },
+        {
+          "email": "naniko.rigavava@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Naniko Rigavava"
+        },
+        {
+          "email": "ncaterina_inasaridze@yahoo.it",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Ncaterina Inasaridze"
+        },
+        {
+          "email": "nmarina.aptsiauri61@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Nmarina Aptsiauri61"
+        }
+      ]
+    },
+    {
+      "slug": "apas",
+      "authorNames": [
+        "თემო"
+      ],
+      "count": 3,
+      "latestPost": "2026-03-04T15:20:21+0000",
+      "bestCandidate": {
+        "email": "ga4-analytics-reader@soulart-analytics.iam.gserviceaccount.com",
+        "score": 27,
+        "sources": [
+          "recovered-chat-users"
+        ],
+        "recoveredName": "Ga4 Analytics Reader"
+      },
+      "confidence": "high",
+      "matchedExistingUser": null,
+      "candidates": [
+        {
+          "email": "ga4-analytics-reader@soulart-analytics.iam.gserviceaccount.com",
+          "score": 27,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Ga4 Analytics Reader"
+        },
+        {
+          "email": "kristina.kupunia.kris@mail.ru",
+          "score": 27,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Kristina Kupunia Kris"
+        },
+        {
+          "email": "doijashvili.mariami@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Mariam doijashvili"
+        },
+        {
+          "email": "guram.jokhadze60@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "გურამ ჯოხაძე"
+        },
+        {
+          "email": "mariamighonghadze81@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "mariami ghonghadze"
+        },
+        {
+          "email": "naniko.rigavava@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Naniko Rigavava"
+        },
+        {
+          "email": "ncaterina_inasaridze@yahoo.it",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Ncaterina Inasaridze"
+        },
+        {
+          "email": "nmarina.aptsiauri61@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Nmarina Aptsiauri61"
+        }
+      ]
+    },
+    {
+      "slug": "tamari",
+      "authorNames": [
+        "Tamari"
+      ],
+      "count": 3,
+      "latestPost": "2026-03-02T17:53:50+0000",
+      "bestCandidate": {
+        "email": "tamari.dardaganidze.1@gmail.com",
+        "score": 142,
+        "sources": [
+          "chat-context",
+          "recovered-chat-users",
+          "sent-mail"
+        ],
+        "recoveredName": "Tamari Dardaganidze 1"
+      },
+      "confidence": "high",
+      "matchedExistingUser": {
+        "email": "tamari.dardaganidze.1@gmail.com",
+        "role": "sales_manager",
+        "artistSlug": "",
+        "name": "Tamari Dardaganidze 1"
+      },
+      "candidates": [
+        {
+          "email": "tamari.dardaganidze.1@gmail.com",
+          "score": 142,
+          "sources": [
+            "chat-context",
+            "recovered-chat-users",
+            "sent-mail"
+          ],
+          "recoveredName": "Tamari Dardaganidze 1"
+        },
+        {
+          "email": "ntamariqomet441@gmail.com",
+          "score": 122,
+          "sources": [
+            "chat-context",
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Ntamariqomet441"
+        },
+        {
+          "email": "ga4-analytics-reader@soulart-analytics.iam.gserviceaccount.com",
+          "score": 27,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Ga4 Analytics Reader"
+        },
+        {
+          "email": "kristina.kupunia.kris@mail.ru",
+          "score": 27,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Kristina Kupunia Kris"
+        },
+        {
+          "email": "nchkenkeli.leko@gmail.com",
+          "score": 25,
+          "sources": [
+            "chat-context",
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Nchkenkeli Leko"
+        },
+        {
+          "email": "doijashvili.mariami@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Mariam doijashvili"
+        },
+        {
+          "email": "guram.jokhadze60@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "გურამ ჯოხაძე"
+        },
+        {
+          "email": "mariamighonghadze81@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "mariami ghonghadze"
+        }
+      ]
+    },
+    {
+      "slug": "actress",
+      "authorNames": [
+        "Actress"
+      ],
+      "count": 3,
+      "latestPost": "2026-02-06T19:23:31+0000",
+      "bestCandidate": {
+        "email": "ga4-analytics-reader@soulart-analytics.iam.gserviceaccount.com",
+        "score": 27,
+        "sources": [
+          "recovered-chat-users"
+        ],
+        "recoveredName": "Ga4 Analytics Reader"
+      },
+      "confidence": "high",
+      "matchedExistingUser": null,
+      "candidates": [
+        {
+          "email": "ga4-analytics-reader@soulart-analytics.iam.gserviceaccount.com",
+          "score": 27,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Ga4 Analytics Reader"
+        },
+        {
+          "email": "kristina.kupunia.kris@mail.ru",
+          "score": 27,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Kristina Kupunia Kris"
+        },
+        {
+          "email": "doijashvili.mariami@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Mariam doijashvili"
+        },
+        {
+          "email": "guram.jokhadze60@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "გურამ ჯოხაძე"
+        },
+        {
+          "email": "mariamighonghadze81@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "mariami ghonghadze"
+        },
+        {
+          "email": "naniko.rigavava@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Naniko Rigavava"
+        },
+        {
+          "email": "ncaterina_inasaridze@yahoo.it",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Ncaterina Inasaridze"
+        },
+        {
+          "email": "nmarina.aptsiauri61@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Nmarina Aptsiauri61"
+        }
+      ]
+    },
+    {
+      "slug": "mikavastudiogallery",
+      "authorNames": [
+        "Mikava Studio Gallery"
+      ],
+      "count": 3,
+      "latestPost": "2026-02-05T15:23:54+0000",
+      "bestCandidate": {
+        "email": "ga4-analytics-reader@soulart-analytics.iam.gserviceaccount.com",
+        "score": 27,
+        "sources": [
+          "recovered-chat-users"
+        ],
+        "recoveredName": "Ga4 Analytics Reader"
+      },
+      "confidence": "high",
+      "matchedExistingUser": null,
+      "candidates": [
+        {
+          "email": "ga4-analytics-reader@soulart-analytics.iam.gserviceaccount.com",
+          "score": 27,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Ga4 Analytics Reader"
+        },
+        {
+          "email": "kristina.kupunia.kris@mail.ru",
+          "score": 27,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Kristina Kupunia Kris"
+        },
+        {
+          "email": "doijashvili.mariami@gmail.com",
+          "score": 25,
+          "sources": [
+            "chat-context",
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Mariam doijashvili"
+        },
+        {
+          "email": "otiashvilitornike891@gmail.com",
+          "score": 25,
+          "sources": [
+            "chat-context",
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Tornike Otiashvili"
+        },
+        {
+          "email": "guram.jokhadze60@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "გურამ ჯოხაძე"
+        },
+        {
+          "email": "mariamighonghadze81@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "mariami ghonghadze"
+        },
+        {
+          "email": "naniko.rigavava@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Naniko Rigavava"
+        },
+        {
+          "email": "ncaterina_inasaridze@yahoo.it",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Ncaterina Inasaridze"
+        }
+      ]
+    },
+    {
+      "slug": "tomalapatinagmailcom",
+      "authorNames": [
+        "ტომა"
+      ],
+      "count": 3,
+      "latestPost": "2026-01-08T19:27:19+0000",
+      "bestCandidate": {
+        "email": "ga4-analytics-reader@soulart-analytics.iam.gserviceaccount.com",
+        "score": 27,
+        "sources": [
+          "recovered-chat-users"
+        ],
+        "recoveredName": "Ga4 Analytics Reader"
+      },
+      "confidence": "high",
+      "matchedExistingUser": null,
+      "candidates": [
+        {
+          "email": "ga4-analytics-reader@soulart-analytics.iam.gserviceaccount.com",
+          "score": 27,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Ga4 Analytics Reader"
+        },
+        {
+          "email": "kristina.kupunia.kris@mail.ru",
+          "score": 27,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Kristina Kupunia Kris"
+        },
+        {
+          "email": "doijashvili.mariami@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Mariam doijashvili"
+        },
+        {
+          "email": "guram.jokhadze60@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "გურამ ჯოხაძე"
+        },
+        {
+          "email": "mariamighonghadze81@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "mariami ghonghadze"
+        },
+        {
+          "email": "naniko.rigavava@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Naniko Rigavava"
+        },
+        {
+          "email": "ncaterina_inasaridze@yahoo.it",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Ncaterina Inasaridze"
+        },
+        {
+          "email": "nmarina.aptsiauri61@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Nmarina Aptsiauri61"
+        }
+      ]
+    },
+    {
+      "slug": "velora",
+      "authorNames": [
+        "Velora"
+      ],
+      "count": 3,
+      "latestPost": "2025-12-14T14:19:13+0000",
+      "bestCandidate": {
+        "email": "ga4-analytics-reader@soulart-analytics.iam.gserviceaccount.com",
+        "score": 27,
+        "sources": [
+          "recovered-chat-users"
+        ],
+        "recoveredName": "Ga4 Analytics Reader"
+      },
+      "confidence": "high",
+      "matchedExistingUser": null,
+      "candidates": [
+        {
+          "email": "ga4-analytics-reader@soulart-analytics.iam.gserviceaccount.com",
+          "score": 27,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Ga4 Analytics Reader"
+        },
+        {
+          "email": "kristina.kupunia.kris@mail.ru",
+          "score": 27,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Kristina Kupunia Kris"
+        },
+        {
+          "email": "doijashvili.mariami@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Mariam doijashvili"
+        },
+        {
+          "email": "guram.jokhadze60@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "გურამ ჯოხაძე"
+        },
+        {
+          "email": "mariamighonghadze81@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "mariami ghonghadze"
+        },
+        {
+          "email": "naniko.rigavava@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Naniko Rigavava"
+        },
+        {
+          "email": "ncaterina_inasaridze@yahoo.it",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Ncaterina Inasaridze"
+        },
+        {
+          "email": "nmarina.aptsiauri61@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Nmarina Aptsiauri61"
+        }
+      ]
+    },
+    {
+      "slug": "sofiaarty",
+      "authorNames": [
+        "ARTSOFI undefined"
+      ],
+      "count": 2,
+      "latestPost": "2026-03-28T08:28:59+0000",
+      "bestCandidate": {
+        "email": "ga4-analytics-reader@soulart-analytics.iam.gserviceaccount.com",
+        "score": 27,
+        "sources": [
+          "recovered-chat-users"
+        ],
+        "recoveredName": "Ga4 Analytics Reader"
+      },
+      "confidence": "high",
+      "matchedExistingUser": null,
+      "candidates": [
+        {
+          "email": "ga4-analytics-reader@soulart-analytics.iam.gserviceaccount.com",
+          "score": 27,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Ga4 Analytics Reader"
+        },
+        {
+          "email": "kristina.kupunia.kris@mail.ru",
+          "score": 27,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Kristina Kupunia Kris"
+        },
+        {
+          "email": "nsoulart.georgia@gmail.com",
+          "score": 26,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Nsoulart Georgia"
+        },
+        {
+          "email": "soulart-analytics@your-project.iam.gserviceaccount.com",
+          "score": 26,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Soulart Analytics"
+        },
+        {
+          "email": "doijashvili.mariami@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Mariam doijashvili"
+        },
+        {
+          "email": "guram.jokhadze60@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "გურამ ჯოხაძე"
+        },
+        {
+          "email": "mariamighonghadze81@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "mariami ghonghadze"
+        },
+        {
+          "email": "naniko.rigavava@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Naniko Rigavava"
+        }
+      ]
+    },
+    {
+      "slug": "omia",
+      "authorNames": [
+        "Kakhaber Omiadze"
+      ],
+      "count": 2,
+      "latestPost": "2026-03-01T09:29:26+0000",
+      "bestCandidate": {
+        "email": "ga4-analytics-reader@soulart-analytics.iam.gserviceaccount.com",
+        "score": 27,
+        "sources": [
+          "recovered-chat-users"
+        ],
+        "recoveredName": "Ga4 Analytics Reader"
+      },
+      "confidence": "high",
+      "matchedExistingUser": null,
+      "candidates": [
+        {
+          "email": "ga4-analytics-reader@soulart-analytics.iam.gserviceaccount.com",
+          "score": 27,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Ga4 Analytics Reader"
+        },
+        {
+          "email": "kristina.kupunia.kris@mail.ru",
+          "score": 27,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Kristina Kupunia Kris"
+        },
+        {
+          "email": "doijashvili.mariami@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Mariam doijashvili"
+        },
+        {
+          "email": "guram.jokhadze60@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "გურამ ჯოხაძე"
+        },
+        {
+          "email": "mariamighonghadze81@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "mariami ghonghadze"
+        },
+        {
+          "email": "naniko.rigavava@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Naniko Rigavava"
+        },
+        {
+          "email": "ncaterina_inasaridze@yahoo.it",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Ncaterina Inasaridze"
+        },
+        {
+          "email": "nmarina.aptsiauri61@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Nmarina Aptsiauri61"
+        }
+      ]
+    },
+    {
+      "slug": "keti-abulashvili",
+      "authorNames": [
+        "KETI ABULASHVILI"
+      ],
+      "count": 2,
+      "latestPost": "2026-02-28T18:08:26+0000",
+      "bestCandidate": {
+        "email": "ga4-analytics-reader@soulart-analytics.iam.gserviceaccount.com",
+        "score": 27,
+        "sources": [
+          "recovered-chat-users"
+        ],
+        "recoveredName": "Ga4 Analytics Reader"
+      },
+      "confidence": "high",
+      "matchedExistingUser": null,
+      "candidates": [
+        {
+          "email": "ga4-analytics-reader@soulart-analytics.iam.gserviceaccount.com",
+          "score": 27,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Ga4 Analytics Reader"
+        },
+        {
+          "email": "kristina.kupunia.kris@mail.ru",
+          "score": 27,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Kristina Kupunia Kris"
+        },
+        {
+          "email": "doijashvili.mariami@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Mariam doijashvili"
+        },
+        {
+          "email": "guram.jokhadze60@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "გურამ ჯოხაძე"
+        },
+        {
+          "email": "mariamighonghadze81@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "mariami ghonghadze"
+        },
+        {
+          "email": "naniko.rigavava@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Naniko Rigavava"
+        },
+        {
+          "email": "ncaterina_inasaridze@yahoo.it",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Ncaterina Inasaridze"
+        },
+        {
+          "email": "nmarina.aptsiauri61@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Nmarina Aptsiauri61"
+        }
+      ]
+    },
+    {
+      "slug": "mintnikusha",
+      "authorNames": [
+        "ნიკოლოზ ასანიძე"
+      ],
+      "count": 2,
+      "latestPost": "2026-02-24T14:49:36+0000",
+      "bestCandidate": {
+        "email": "ga4-analytics-reader@soulart-analytics.iam.gserviceaccount.com",
+        "score": 27,
+        "sources": [
+          "recovered-chat-users"
+        ],
+        "recoveredName": "Ga4 Analytics Reader"
+      },
+      "confidence": "high",
+      "matchedExistingUser": null,
+      "candidates": [
+        {
+          "email": "ga4-analytics-reader@soulart-analytics.iam.gserviceaccount.com",
+          "score": 27,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Ga4 Analytics Reader"
+        },
+        {
+          "email": "kristina.kupunia.kris@mail.ru",
+          "score": 27,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Kristina Kupunia Kris"
+        },
+        {
+          "email": "doijashvili.mariami@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Mariam doijashvili"
+        },
+        {
+          "email": "guram.jokhadze60@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "გურამ ჯოხაძე"
+        },
+        {
+          "email": "mariamighonghadze81@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "mariami ghonghadze"
+        },
+        {
+          "email": "naniko.rigavava@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Naniko Rigavava"
+        },
+        {
+          "email": "ncaterina_inasaridze@yahoo.it",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Ncaterina Inasaridze"
+        },
+        {
+          "email": "nmarina.aptsiauri61@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Nmarina Aptsiauri61"
+        }
+      ]
+    },
+    {
+      "slug": "naniko-gigolashvili",
+      "authorNames": [
+        "Naniko gigolashvili"
+      ],
+      "count": 2,
+      "latestPost": "2026-01-24T11:24:11+0000",
+      "bestCandidate": {
+        "email": "maikogigolashvili909@gmail.com",
+        "score": 31,
+        "sources": [
+          "chat-context",
+          "recovered-chat-users"
+        ],
+        "recoveredName": "Maikogigolashvili909"
+      },
+      "confidence": "high",
+      "matchedExistingUser": {
+        "email": "maikogigolashvili909@gmail.com",
+        "role": "user",
+        "artistSlug": "",
+        "name": "Maikogigolashvili909"
+      },
+      "candidates": [
+        {
+          "email": "maikogigolashvili909@gmail.com",
+          "score": 31,
+          "sources": [
+            "chat-context",
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Maikogigolashvili909"
+        },
+        {
+          "email": "ga4-analytics-reader@soulart-analytics.iam.gserviceaccount.com",
+          "score": 27,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Ga4 Analytics Reader"
+        },
+        {
+          "email": "kristina.kupunia.kris@mail.ru",
+          "score": 27,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Kristina Kupunia Kris"
+        },
+        {
+          "email": "doijashvili.mariami@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Mariam doijashvili"
+        },
+        {
+          "email": "guram.jokhadze60@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "გურამ ჯოხაძე"
+        },
+        {
+          "email": "mariamighonghadze81@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "mariami ghonghadze"
+        },
+        {
+          "email": "naniko.rigavava@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Naniko Rigavava"
+        },
+        {
+          "email": "ncaterina_inasaridze@yahoo.it",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Ncaterina Inasaridze"
+        }
+      ]
+    },
+    {
+      "slug": "plushiflora",
+      "authorNames": [
+        "ნინო ფუტკარაძე"
+      ],
+      "count": 2,
+      "latestPost": "2026-01-19T08:32:49+0000",
+      "bestCandidate": {
+        "email": "ga4-analytics-reader@soulart-analytics.iam.gserviceaccount.com",
+        "score": 27,
+        "sources": [
+          "recovered-chat-users"
+        ],
+        "recoveredName": "Ga4 Analytics Reader"
+      },
+      "confidence": "high",
+      "matchedExistingUser": null,
+      "candidates": [
+        {
+          "email": "ga4-analytics-reader@soulart-analytics.iam.gserviceaccount.com",
+          "score": 27,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Ga4 Analytics Reader"
+        },
+        {
+          "email": "kristina.kupunia.kris@mail.ru",
+          "score": 27,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Kristina Kupunia Kris"
+        },
+        {
+          "email": "doijashvili.mariami@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Mariam doijashvili"
+        },
+        {
+          "email": "guram.jokhadze60@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "გურამ ჯოხაძე"
+        },
+        {
+          "email": "mariamighonghadze81@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "mariami ghonghadze"
+        },
+        {
+          "email": "naniko.rigavava@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Naniko Rigavava"
+        },
+        {
+          "email": "ncaterina_inasaridze@yahoo.it",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Ncaterina Inasaridze"
+        },
+        {
+          "email": "nmarina.aptsiauri61@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Nmarina Aptsiauri61"
+        }
+      ]
+    },
+    {
+      "slug": "natela",
+      "authorNames": [
+        "ნათელა"
+      ],
+      "count": 2,
+      "latestPost": "2026-01-14T15:05:18+0000",
+      "bestCandidate": {
+        "email": "ga4-analytics-reader@soulart-analytics.iam.gserviceaccount.com",
+        "score": 27,
+        "sources": [
+          "recovered-chat-users"
+        ],
+        "recoveredName": "Ga4 Analytics Reader"
+      },
+      "confidence": "high",
+      "matchedExistingUser": null,
+      "candidates": [
+        {
+          "email": "ga4-analytics-reader@soulart-analytics.iam.gserviceaccount.com",
+          "score": 27,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Ga4 Analytics Reader"
+        },
+        {
+          "email": "kristina.kupunia.kris@mail.ru",
+          "score": 27,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Kristina Kupunia Kris"
+        },
+        {
+          "email": "doijashvili.mariami@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Mariam doijashvili"
+        },
+        {
+          "email": "guram.jokhadze60@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "გურამ ჯოხაძე"
+        },
+        {
+          "email": "mariamighonghadze81@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "mariami ghonghadze"
+        },
+        {
+          "email": "naniko.rigavava@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Naniko Rigavava"
+        },
+        {
+          "email": "ncaterina_inasaridze@yahoo.it",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Ncaterina Inasaridze"
+        },
+        {
+          "email": "nmarina.aptsiauri61@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Nmarina Aptsiauri61"
+        }
+      ]
+    },
+    {
+      "slug": "de-08",
+      "authorNames": [
+        "D&E"
+      ],
+      "count": 2,
+      "latestPost": "2026-01-10T10:50:22+0000",
+      "bestCandidate": {
+        "email": "ga4-analytics-reader@soulart-analytics.iam.gserviceaccount.com",
+        "score": 27,
+        "sources": [
+          "recovered-chat-users"
+        ],
+        "recoveredName": "Ga4 Analytics Reader"
+      },
+      "confidence": "high",
+      "matchedExistingUser": null,
+      "candidates": [
+        {
+          "email": "ga4-analytics-reader@soulart-analytics.iam.gserviceaccount.com",
+          "score": 27,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Ga4 Analytics Reader"
+        },
+        {
+          "email": "kristina.kupunia.kris@mail.ru",
+          "score": 27,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Kristina Kupunia Kris"
+        },
+        {
+          "email": "doijashvili.mariami@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Mariam doijashvili"
+        },
+        {
+          "email": "guram.jokhadze60@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "გურამ ჯოხაძე"
+        },
+        {
+          "email": "mariamighonghadze81@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "mariami ghonghadze"
+        },
+        {
+          "email": "naniko.rigavava@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Naniko Rigavava"
+        },
+        {
+          "email": "ncaterina_inasaridze@yahoo.it",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Ncaterina Inasaridze"
+        },
+        {
+          "email": "nmarina.aptsiauri61@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Nmarina Aptsiauri61"
+        }
+      ]
+    },
+    {
+      "slug": "ninasdecorations",
+      "authorNames": [
+        "Nina's Decorations"
+      ],
+      "count": 2,
+      "latestPost": "2025-12-11T19:18:04+0000",
+      "bestCandidate": {
+        "email": "ga4-analytics-reader@soulart-analytics.iam.gserviceaccount.com",
+        "score": 27,
+        "sources": [
+          "recovered-chat-users"
+        ],
+        "recoveredName": "Ga4 Analytics Reader"
+      },
+      "confidence": "high",
+      "matchedExistingUser": null,
+      "candidates": [
+        {
+          "email": "ga4-analytics-reader@soulart-analytics.iam.gserviceaccount.com",
+          "score": 27,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Ga4 Analytics Reader"
+        },
+        {
+          "email": "kristina.kupunia.kris@mail.ru",
+          "score": 27,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Kristina Kupunia Kris"
+        },
+        {
+          "email": "doijashvili.mariami@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Mariam doijashvili"
+        },
+        {
+          "email": "guram.jokhadze60@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "გურამ ჯოხაძე"
+        },
+        {
+          "email": "mariamighonghadze81@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "mariami ghonghadze"
+        },
+        {
+          "email": "naniko.rigavava@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Naniko Rigavava"
+        },
+        {
+          "email": "ncaterina_inasaridze@yahoo.it",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Ncaterina Inasaridze"
+        },
+        {
+          "email": "ninanm777@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users",
+            "sent-mail"
+          ],
+          "recoveredName": "Ninanm777"
+        }
+      ]
+    },
+    {
+      "slug": "keti-chechelashvili",
+      "authorNames": [
+        "Keti Chechelashvili"
+      ],
+      "count": 2,
+      "latestPost": "2025-12-11T09:29:42+0000",
+      "bestCandidate": {
+        "email": "ga4-analytics-reader@soulart-analytics.iam.gserviceaccount.com",
+        "score": 27,
+        "sources": [
+          "recovered-chat-users"
+        ],
+        "recoveredName": "Ga4 Analytics Reader"
+      },
+      "confidence": "high",
+      "matchedExistingUser": null,
+      "candidates": [
+        {
+          "email": "ga4-analytics-reader@soulart-analytics.iam.gserviceaccount.com",
+          "score": 27,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Ga4 Analytics Reader"
+        },
+        {
+          "email": "kristina.kupunia.kris@mail.ru",
+          "score": 27,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Kristina Kupunia Kris"
+        },
+        {
+          "email": "doijashvili.mariami@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Mariam doijashvili"
+        },
+        {
+          "email": "guram.jokhadze60@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "გურამ ჯოხაძე"
+        },
+        {
+          "email": "mariamighonghadze81@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "mariami ghonghadze"
+        },
+        {
+          "email": "naniko.rigavava@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Naniko Rigavava"
+        },
+        {
+          "email": "ncaterina_inasaridze@yahoo.it",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Ncaterina Inasaridze"
+        },
+        {
+          "email": "nmarina.aptsiauri61@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Nmarina Aptsiauri61"
+        }
+      ]
+    },
+    {
+      "slug": "leli-sartania",
+      "authorNames": [
+        "Leli Sartania"
+      ],
+      "count": 2,
+      "latestPost": "2025-12-09T15:09:48+0000",
+      "bestCandidate": {
+        "email": "ga4-analytics-reader@soulart-analytics.iam.gserviceaccount.com",
+        "score": 27,
+        "sources": [
+          "recovered-chat-users"
+        ],
+        "recoveredName": "Ga4 Analytics Reader"
+      },
+      "confidence": "high",
+      "matchedExistingUser": null,
+      "candidates": [
+        {
+          "email": "ga4-analytics-reader@soulart-analytics.iam.gserviceaccount.com",
+          "score": 27,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Ga4 Analytics Reader"
+        },
+        {
+          "email": "kristina.kupunia.kris@mail.ru",
+          "score": 27,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Kristina Kupunia Kris"
+        },
+        {
+          "email": "nsoulart.georgia@gmail.com",
+          "score": 26,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Nsoulart Georgia"
+        },
+        {
+          "email": "soulart-analytics@your-project.iam.gserviceaccount.com",
+          "score": 26,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Soulart Analytics"
+        },
+        {
+          "email": "doijashvili.mariami@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Mariam doijashvili"
+        },
+        {
+          "email": "guram.jokhadze60@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "გურამ ჯოხაძე"
+        },
+        {
+          "email": "mariamighonghadze81@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "mariami ghonghadze"
+        },
+        {
+          "email": "naniko.rigavava@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Naniko Rigavava"
+        }
+      ]
+    },
+    {
+      "slug": "shalvatetrashvili",
+      "authorNames": [
+        "შალვა თეთრაშვილი"
+      ],
+      "count": 2,
+      "latestPost": "2025-12-05T18:00:33+0000",
+      "bestCandidate": {
+        "email": "ga4-analytics-reader@soulart-analytics.iam.gserviceaccount.com",
+        "score": 27,
+        "sources": [
+          "recovered-chat-users"
+        ],
+        "recoveredName": "Ga4 Analytics Reader"
+      },
+      "confidence": "high",
+      "matchedExistingUser": null,
+      "candidates": [
+        {
+          "email": "ga4-analytics-reader@soulart-analytics.iam.gserviceaccount.com",
+          "score": 27,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Ga4 Analytics Reader"
+        },
+        {
+          "email": "kristina.kupunia.kris@mail.ru",
+          "score": 27,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Kristina Kupunia Kris"
+        },
+        {
+          "email": "doijashvili.mariami@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Mariam doijashvili"
+        },
+        {
+          "email": "guram.jokhadze60@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "გურამ ჯოხაძე"
+        },
+        {
+          "email": "mariamighonghadze81@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "mariami ghonghadze"
+        },
+        {
+          "email": "naniko.rigavava@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Naniko Rigavava"
+        },
+        {
+          "email": "ncaterina_inasaridze@yahoo.it",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Ncaterina Inasaridze"
+        },
+        {
+          "email": "nmarina.aptsiauri61@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Nmarina Aptsiauri61"
+        }
+      ]
+    },
+    {
+      "slug": "davidd",
+      "authorNames": [
+        "დავით მელიქიშვილი"
+      ],
+      "count": 2,
+      "latestPost": "2025-11-25T16:49:53+0000",
+      "bestCandidate": {
+        "email": "davituri.tamar@mail.ru",
+        "score": 30,
+        "sources": [
+          "recovered-chat-users",
+          "sent-mail"
+        ],
+        "recoveredName": "TAMAR Art. &. Design"
+      },
+      "confidence": "high",
+      "matchedExistingUser": {
+        "email": "davituri.tamar@mail.ru",
+        "role": "seller",
+        "artistSlug": "tamarartdesign",
+        "name": "TAMAR Art. &. Design"
+      },
+      "candidates": [
+        {
+          "email": "davituri.tamar@mail.ru",
+          "score": 30,
+          "sources": [
+            "recovered-chat-users",
+            "sent-mail"
+          ],
+          "recoveredName": "TAMAR Art. &. Design"
+        },
+        {
+          "email": "ga4-analytics-reader@soulart-analytics.iam.gserviceaccount.com",
+          "score": 27,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Ga4 Analytics Reader"
+        },
+        {
+          "email": "kristina.kupunia.kris@mail.ru",
+          "score": 27,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Kristina Kupunia Kris"
+        },
+        {
+          "email": "abramishvilidaviti.98@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Abramishvilidaviti 98"
+        },
+        {
+          "email": "doijashvili.mariami@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Mariam doijashvili"
+        },
+        {
+          "email": "guram.jokhadze60@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "გურამ ჯოხაძე"
+        },
+        {
+          "email": "mariamighonghadze81@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "mariami ghonghadze"
+        },
+        {
+          "email": "naniko.rigavava@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Naniko Rigavava"
+        }
+      ]
+    },
+    {
+      "slug": "sophospheri",
+      "authorNames": [
+        "სოფოსფერი"
+      ],
+      "count": 1,
+      "latestPost": "2026-03-18T18:08:27+0000",
+      "bestCandidate": {
+        "email": "ga4-analytics-reader@soulart-analytics.iam.gserviceaccount.com",
+        "score": 27,
+        "sources": [
+          "recovered-chat-users"
+        ],
+        "recoveredName": "Ga4 Analytics Reader"
+      },
+      "confidence": "high",
+      "matchedExistingUser": null,
+      "candidates": [
+        {
+          "email": "ga4-analytics-reader@soulart-analytics.iam.gserviceaccount.com",
+          "score": 27,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Ga4 Analytics Reader"
+        },
+        {
+          "email": "kristina.kupunia.kris@mail.ru",
+          "score": 27,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Kristina Kupunia Kris"
+        },
+        {
+          "email": "doijashvili.mariami@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Mariam doijashvili"
+        },
+        {
+          "email": "guram.jokhadze60@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "გურამ ჯოხაძე"
+        },
+        {
+          "email": "mariamighonghadze81@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "mariami ghonghadze"
+        },
+        {
+          "email": "naniko.rigavava@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Naniko Rigavava"
+        },
+        {
+          "email": "ncaterina_inasaridze@yahoo.it",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Ncaterina Inasaridze"
+        },
+        {
+          "email": "nmarina.aptsiauri61@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Nmarina Aptsiauri61"
+        }
+      ]
+    },
+    {
+      "slug": "mariam",
+      "authorNames": [
+        "Mariam"
+      ],
+      "count": 1,
+      "latestPost": "2026-03-18T17:44:00+0000",
+      "bestCandidate": {
+        "email": "shioshvilimariam47@gmail.com",
+        "score": 21044,
+        "sources": [
+          "chat-context",
+          "recovered-chat-users",
+          "sent-mail"
+        ],
+        "recoveredName": "mariami’s art"
+      },
+      "confidence": "high",
+      "matchedExistingUser": {
+        "email": "shioshvilimariam47@gmail.com",
+        "role": "seller",
+        "artistSlug": "mariamisart",
+        "name": "mariami’s art"
+      },
+      "candidates": [
+        {
+          "email": "shioshvilimariam47@gmail.com",
+          "score": 21044,
+          "sources": [
+            "chat-context",
+            "recovered-chat-users",
+            "sent-mail"
+          ],
+          "recoveredName": "mariami’s art"
+        },
+        {
+          "email": "nmariam47@gmail.com",
+          "score": 206,
+          "sources": [
+            "chat-context",
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Nmariam47"
+        },
+        {
+          "email": "doijashvili.mariami@gmail.com",
+          "score": 184,
+          "sources": [
+            "chat-context",
+            "recovered-chat-users",
+            "sent-mail"
+          ],
+          "recoveredName": "Mariam doijashvili"
+        },
+        {
+          "email": "mariamighonghadze81@gmail.com",
+          "score": 148,
+          "sources": [
+            "chat-context",
+            "recovered-chat-users",
+            "sent-mail"
+          ],
+          "recoveredName": "mariami ghonghadze"
+        },
+        {
+          "email": "mariamtyesheliaze@gmali.com",
+          "score": 128,
+          "sources": [
+            "chat-context",
+            "recovered-chat-users",
+            "sent-mail"
+          ],
+          "recoveredName": "M A R I A M I"
+        },
+        {
+          "email": "mariamsadgobelashvili09@gmail.com",
+          "score": 100,
+          "sources": [
+            "chat-context",
+            "recovered-chat-users",
+            "sent-mail"
+          ],
+          "recoveredName": "Mariamsadgobelashvili09"
+        },
+        {
+          "email": "ghonghadzemariam@icloud.com",
+          "score": 86,
+          "sources": [
+            "chat-context",
+            "recovered-chat-users",
+            "sent-mail"
+          ],
+          "recoveredName": "ბროწეულა"
+        },
+        {
+          "email": "mariamchakvetadze2025@gmail.com",
+          "score": 80,
+          "sources": [
+            "chat-context",
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Mariamchakvetadze2025"
+        }
+      ]
+    },
+    {
+      "slug": "geoart",
+      "authorNames": [
+        "GeoArt"
+      ],
+      "count": 1,
+      "latestPost": "2026-03-10T18:33:41+0000",
+      "bestCandidate": {
+        "email": "ga4-analytics-reader@soulart-analytics.iam.gserviceaccount.com",
+        "score": 27,
+        "sources": [
+          "recovered-chat-users"
+        ],
+        "recoveredName": "Ga4 Analytics Reader"
+      },
+      "confidence": "high",
+      "matchedExistingUser": null,
+      "candidates": [
+        {
+          "email": "ga4-analytics-reader@soulart-analytics.iam.gserviceaccount.com",
+          "score": 27,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Ga4 Analytics Reader"
+        },
+        {
+          "email": "kristina.kupunia.kris@mail.ru",
+          "score": 27,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Kristina Kupunia Kris"
+        },
+        {
+          "email": "nsoulart.georgia@gmail.com",
+          "score": 26,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Nsoulart Georgia"
+        },
+        {
+          "email": "soulart-analytics@your-project.iam.gserviceaccount.com",
+          "score": 26,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Soulart Analytics"
+        },
+        {
+          "email": "doijashvili.mariami@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Mariam doijashvili"
+        },
+        {
+          "email": "guram.jokhadze60@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "გურამ ჯოხაძე"
+        },
+        {
+          "email": "mariamighonghadze81@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "mariami ghonghadze"
+        },
+        {
+          "email": "naniko.rigavava@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Naniko Rigavava"
+        }
+      ]
+    },
+    {
+      "slug": "bacho-shonia",
+      "authorNames": [
+        "Bacho Shonia"
+      ],
+      "count": 1,
+      "latestPost": "2026-03-10T05:49:47+0000",
+      "bestCandidate": {
+        "email": "ga4-analytics-reader@soulart-analytics.iam.gserviceaccount.com",
+        "score": 27,
+        "sources": [
+          "recovered-chat-users"
+        ],
+        "recoveredName": "Ga4 Analytics Reader"
+      },
+      "confidence": "high",
+      "matchedExistingUser": null,
+      "candidates": [
+        {
+          "email": "ga4-analytics-reader@soulart-analytics.iam.gserviceaccount.com",
+          "score": 27,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Ga4 Analytics Reader"
+        },
+        {
+          "email": "kristina.kupunia.kris@mail.ru",
+          "score": 27,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Kristina Kupunia Kris"
+        },
+        {
+          "email": "doijashvili.mariami@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Mariam doijashvili"
+        },
+        {
+          "email": "guram.jokhadze60@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "გურამ ჯოხაძე"
+        },
+        {
+          "email": "mariamighonghadze81@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "mariami ghonghadze"
+        },
+        {
+          "email": "naniko.rigavava@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Naniko Rigavava"
+        },
+        {
+          "email": "ncaterina_inasaridze@yahoo.it",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Ncaterina Inasaridze"
+        },
+        {
+          "email": "nmarina.aptsiauri61@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Nmarina Aptsiauri61"
+        }
+      ]
+    },
+    {
+      "slug": "fennandart",
+      "authorNames": [
+        "FennAndArt"
+      ],
+      "count": 1,
+      "latestPost": "2026-03-10T05:49:44+0000",
+      "bestCandidate": {
+        "email": "ga4-analytics-reader@soulart-analytics.iam.gserviceaccount.com",
+        "score": 27,
+        "sources": [
+          "recovered-chat-users"
+        ],
+        "recoveredName": "Ga4 Analytics Reader"
+      },
+      "confidence": "high",
+      "matchedExistingUser": null,
+      "candidates": [
+        {
+          "email": "ga4-analytics-reader@soulart-analytics.iam.gserviceaccount.com",
+          "score": 27,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Ga4 Analytics Reader"
+        },
+        {
+          "email": "kristina.kupunia.kris@mail.ru",
+          "score": 27,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Kristina Kupunia Kris"
+        },
+        {
+          "email": "nsoulart.georgia@gmail.com",
+          "score": 26,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Nsoulart Georgia"
+        },
+        {
+          "email": "soulart-analytics@your-project.iam.gserviceaccount.com",
+          "score": 26,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Soulart Analytics"
+        },
+        {
+          "email": "doijashvili.mariami@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Mariam doijashvili"
+        },
+        {
+          "email": "guram.jokhadze60@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "გურამ ჯოხაძე"
+        },
+        {
+          "email": "mariamighonghadze81@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "mariami ghonghadze"
+        },
+        {
+          "email": "naniko.rigavava@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Naniko Rigavava"
+        }
+      ]
+    },
+    {
+      "slug": "tikiart",
+      "authorNames": [
+        "Tiki Halloway"
+      ],
+      "count": 1,
+      "latestPost": "2026-02-28T20:49:52+0000",
+      "bestCandidate": {
+        "email": "ga4-analytics-reader@soulart-analytics.iam.gserviceaccount.com",
+        "score": 27,
+        "sources": [
+          "recovered-chat-users"
+        ],
+        "recoveredName": "Ga4 Analytics Reader"
+      },
+      "confidence": "high",
+      "matchedExistingUser": null,
+      "candidates": [
+        {
+          "email": "ga4-analytics-reader@soulart-analytics.iam.gserviceaccount.com",
+          "score": 27,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Ga4 Analytics Reader"
+        },
+        {
+          "email": "kristina.kupunia.kris@mail.ru",
+          "score": 27,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Kristina Kupunia Kris"
+        },
+        {
+          "email": "nsoulart.georgia@gmail.com",
+          "score": 26,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Nsoulart Georgia"
+        },
+        {
+          "email": "soulart-analytics@your-project.iam.gserviceaccount.com",
+          "score": 26,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Soulart Analytics"
+        },
+        {
+          "email": "doijashvili.mariami@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Mariam doijashvili"
+        },
+        {
+          "email": "guram.jokhadze60@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "გურამ ჯოხაძე"
+        },
+        {
+          "email": "mariamighonghadze81@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "mariami ghonghadze"
+        },
+        {
+          "email": "naniko.rigavava@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Naniko Rigavava"
+        }
+      ]
+    },
+    {
+      "slug": "zazart",
+      "authorNames": [
+        "zaza tsimakuridze"
+      ],
+      "count": 1,
+      "latestPost": "2026-02-27T08:46:31+0000",
+      "bestCandidate": {
+        "email": "ga4-analytics-reader@soulart-analytics.iam.gserviceaccount.com",
+        "score": 27,
+        "sources": [
+          "recovered-chat-users"
+        ],
+        "recoveredName": "Ga4 Analytics Reader"
+      },
+      "confidence": "high",
+      "matchedExistingUser": null,
+      "candidates": [
+        {
+          "email": "ga4-analytics-reader@soulart-analytics.iam.gserviceaccount.com",
+          "score": 27,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Ga4 Analytics Reader"
+        },
+        {
+          "email": "kristina.kupunia.kris@mail.ru",
+          "score": 27,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Kristina Kupunia Kris"
+        },
+        {
+          "email": "nsoulart.georgia@gmail.com",
+          "score": 26,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Nsoulart Georgia"
+        },
+        {
+          "email": "soulart-analytics@your-project.iam.gserviceaccount.com",
+          "score": 26,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Soulart Analytics"
+        },
+        {
+          "email": "doijashvili.mariami@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Mariam doijashvili"
+        },
+        {
+          "email": "guram.jokhadze60@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "გურამ ჯოხაძე"
+        },
+        {
+          "email": "mariamighonghadze81@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "mariami ghonghadze"
+        },
+        {
+          "email": "naniko.rigavava@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Naniko Rigavava"
+        }
+      ]
+    },
+    {
+      "slug": "ratigogshelidze",
+      "authorNames": [
+        "რატი205"
+      ],
+      "count": 1,
+      "latestPost": "2026-02-25T15:04:59+0000",
+      "bestCandidate": {
+        "email": "ga4-analytics-reader@soulart-analytics.iam.gserviceaccount.com",
+        "score": 27,
+        "sources": [
+          "recovered-chat-users"
+        ],
+        "recoveredName": "Ga4 Analytics Reader"
+      },
+      "confidence": "high",
+      "matchedExistingUser": null,
+      "candidates": [
+        {
+          "email": "ga4-analytics-reader@soulart-analytics.iam.gserviceaccount.com",
+          "score": 27,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Ga4 Analytics Reader"
+        },
+        {
+          "email": "kristina.kupunia.kris@mail.ru",
+          "score": 27,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Kristina Kupunia Kris"
+        },
+        {
+          "email": "doijashvili.mariami@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Mariam doijashvili"
+        },
+        {
+          "email": "guram.jokhadze60@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "გურამ ჯოხაძე"
+        },
+        {
+          "email": "mariamighonghadze81@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "mariami ghonghadze"
+        },
+        {
+          "email": "naniko.rigavava@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Naniko Rigavava"
+        },
+        {
+          "email": "ncaterina_inasaridze@yahoo.it",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Ncaterina Inasaridze"
+        },
+        {
+          "email": "nmarina.aptsiauri61@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Nmarina Aptsiauri61"
+        }
+      ]
+    },
+    {
+      "slug": "tokesi",
+      "authorNames": [
+        "Tornike Xosikuridze"
+      ],
+      "count": 1,
+      "latestPost": "2026-02-24T19:09:53+0000",
+      "bestCandidate": {
+        "email": "otiashvilitornike891@gmail.com",
+        "score": 30,
+        "sources": [
+          "recovered-chat-users",
+          "sent-mail"
+        ],
+        "recoveredName": "Tornike Otiashvili"
+      },
+      "confidence": "high",
+      "matchedExistingUser": {
+        "email": "otiashvilitornike891@gmail.com",
+        "role": "seller",
+        "artistSlug": "tornikeotiashvili",
+        "name": "Tornike Otiashvili"
+      },
+      "candidates": [
+        {
+          "email": "otiashvilitornike891@gmail.com",
+          "score": 30,
+          "sources": [
+            "recovered-chat-users",
+            "sent-mail"
+          ],
+          "recoveredName": "Tornike Otiashvili"
+        },
+        {
+          "email": "ga4-analytics-reader@soulart-analytics.iam.gserviceaccount.com",
+          "score": 27,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Ga4 Analytics Reader"
+        },
+        {
+          "email": "kristina.kupunia.kris@mail.ru",
+          "score": 27,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Kristina Kupunia Kris"
+        },
+        {
+          "email": "doijashvili.mariami@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Mariam doijashvili"
+        },
+        {
+          "email": "guram.jokhadze60@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "გურამ ჯოხაძე"
+        },
+        {
+          "email": "mariamighonghadze81@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "mariami ghonghadze"
+        },
+        {
+          "email": "naniko.rigavava@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Naniko Rigavava"
+        },
+        {
+          "email": "ncaterina_inasaridze@yahoo.it",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Ncaterina Inasaridze"
+        }
+      ]
+    },
+    {
+      "slug": "nino-abuladze-art",
+      "authorNames": [
+        "Nino Abuladze art"
+      ],
+      "count": 1,
+      "latestPost": "2026-02-05T08:45:58+0000",
+      "bestCandidate": {
+        "email": "nsoulart.georgia@gmail.com",
+        "score": 29,
+        "sources": [
+          "recovered-chat-users"
+        ],
+        "recoveredName": "Nsoulart Georgia"
+      },
+      "confidence": "high",
+      "matchedExistingUser": null,
+      "candidates": [
+        {
+          "email": "nsoulart.georgia@gmail.com",
+          "score": 29,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Nsoulart Georgia"
+        },
+        {
+          "email": "soulart-analytics@your-project.iam.gserviceaccount.com",
+          "score": 29,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Soulart Analytics"
+        },
+        {
+          "email": "ga4-analytics-reader@soulart-analytics.iam.gserviceaccount.com",
+          "score": 27,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Ga4 Analytics Reader"
+        },
+        {
+          "email": "kristina.kupunia.kris@mail.ru",
+          "score": 27,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Kristina Kupunia Kris"
+        },
+        {
+          "email": "soulart.georgia@gmail.com",
+          "score": 25,
+          "sources": [
+            "recovered-chat-users",
+            "sent-mail"
+          ],
+          "recoveredName": "Soul Art"
+        },
+        {
+          "email": "soulartani@gmail.com",
+          "score": 25,
+          "sources": [
+            "recovered-chat-users",
+            "sent-mail"
+          ],
+          "recoveredName": "Soul Art"
+        },
+        {
+          "email": "doijashvili.mariami@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Mariam doijashvili"
+        },
+        {
+          "email": "guram.jokhadze60@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "გურამ ჯოხაძე"
+        }
+      ]
+    },
+    {
+      "slug": "natialobzhanidze",
+      "authorNames": [
+        "ნათია"
+      ],
+      "count": 1,
+      "latestPost": "2026-01-27T15:49:36+0000",
+      "bestCandidate": {
+        "email": "ga4-analytics-reader@soulart-analytics.iam.gserviceaccount.com",
+        "score": 27,
+        "sources": [
+          "recovered-chat-users"
+        ],
+        "recoveredName": "Ga4 Analytics Reader"
+      },
+      "confidence": "high",
+      "matchedExistingUser": null,
+      "candidates": [
+        {
+          "email": "ga4-analytics-reader@soulart-analytics.iam.gserviceaccount.com",
+          "score": 27,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Ga4 Analytics Reader"
+        },
+        {
+          "email": "kristina.kupunia.kris@mail.ru",
+          "score": 27,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Kristina Kupunia Kris"
+        },
+        {
+          "email": "doijashvili.mariami@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Mariam doijashvili"
+        },
+        {
+          "email": "guram.jokhadze60@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "გურამ ჯოხაძე"
+        },
+        {
+          "email": "mariamighonghadze81@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "mariami ghonghadze"
+        },
+        {
+          "email": "naniko.rigavava@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Naniko Rigavava"
+        },
+        {
+          "email": "ncaterina_inasaridze@yahoo.it",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Ncaterina Inasaridze"
+        },
+        {
+          "email": "nkhubashvilinatia4@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Nkhubashvilinatia4"
+        }
+      ]
+    },
+    {
+      "slug": "babi",
+      "authorNames": [
+        "Babi"
+      ],
+      "count": 1,
+      "latestPost": "2026-01-22T17:07:57+0000",
+      "bestCandidate": {
+        "email": "ga4-analytics-reader@soulart-analytics.iam.gserviceaccount.com",
+        "score": 27,
+        "sources": [
+          "recovered-chat-users"
+        ],
+        "recoveredName": "Ga4 Analytics Reader"
+      },
+      "confidence": "high",
+      "matchedExistingUser": null,
+      "candidates": [
+        {
+          "email": "ga4-analytics-reader@soulart-analytics.iam.gserviceaccount.com",
+          "score": 27,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Ga4 Analytics Reader"
+        },
+        {
+          "email": "kristina.kupunia.kris@mail.ru",
+          "score": 27,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Kristina Kupunia Kris"
+        },
+        {
+          "email": "doijashvili.mariami@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Mariam doijashvili"
+        },
+        {
+          "email": "guram.jokhadze60@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "გურამ ჯოხაძე"
+        },
+        {
+          "email": "mariamighonghadze81@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "mariami ghonghadze"
+        },
+        {
+          "email": "naniko.rigavava@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Naniko Rigavava"
+        },
+        {
+          "email": "ncaterina_inasaridze@yahoo.it",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Ncaterina Inasaridze"
+        },
+        {
+          "email": "nmarina.aptsiauri61@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Nmarina Aptsiauri61"
+        }
+      ]
+    },
+    {
+      "slug": "bellge",
+      "authorNames": [
+        "Bella Tsikaridze"
+      ],
+      "count": 1,
+      "latestPost": "2026-01-04T08:15:31+0000",
+      "bestCandidate": {
+        "email": "ga4-analytics-reader@soulart-analytics.iam.gserviceaccount.com",
+        "score": 27,
+        "sources": [
+          "recovered-chat-users"
+        ],
+        "recoveredName": "Ga4 Analytics Reader"
+      },
+      "confidence": "high",
+      "matchedExistingUser": null,
+      "candidates": [
+        {
+          "email": "ga4-analytics-reader@soulart-analytics.iam.gserviceaccount.com",
+          "score": 27,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Ga4 Analytics Reader"
+        },
+        {
+          "email": "kristina.kupunia.kris@mail.ru",
+          "score": 27,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Kristina Kupunia Kris"
+        },
+        {
+          "email": "doijashvili.mariami@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Mariam doijashvili"
+        },
+        {
+          "email": "guram.jokhadze60@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "გურამ ჯოხაძე"
+        },
+        {
+          "email": "mariamighonghadze81@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "mariami ghonghadze"
+        },
+        {
+          "email": "naniko.rigavava@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Naniko Rigavava"
+        },
+        {
+          "email": "ncaterina_inasaridze@yahoo.it",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Ncaterina Inasaridze"
+        },
+        {
+          "email": "nmarina.aptsiauri61@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Nmarina Aptsiauri61"
+        }
+      ]
+    },
+    {
+      "slug": "marin-pura",
+      "authorNames": [
+        "Marin Pura"
+      ],
+      "count": 1,
+      "latestPost": "2025-12-15T18:09:04+0000",
+      "bestCandidate": {
+        "email": "nmarina.aptsiauri61@gmail.com",
+        "score": 30,
+        "sources": [
+          "recovered-chat-users"
+        ],
+        "recoveredName": "Nmarina Aptsiauri61"
+      },
+      "confidence": "high",
+      "matchedExistingUser": null,
+      "candidates": [
+        {
+          "email": "nmarina.aptsiauri61@gmail.com",
+          "score": 30,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Nmarina Aptsiauri61"
+        },
+        {
+          "email": "ga4-analytics-reader@soulart-analytics.iam.gserviceaccount.com",
+          "score": 27,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Ga4 Analytics Reader"
+        },
+        {
+          "email": "kristina.kupunia.kris@mail.ru",
+          "score": 27,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Kristina Kupunia Kris"
+        },
+        {
+          "email": "doijashvili.mariami@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Mariam doijashvili"
+        },
+        {
+          "email": "guram.jokhadze60@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "გურამ ჯოხაძე"
+        },
+        {
+          "email": "mariamighonghadze81@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "mariami ghonghadze"
+        },
+        {
+          "email": "naniko.rigavava@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Naniko Rigavava"
+        },
+        {
+          "email": "ncaterina_inasaridze@yahoo.it",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Ncaterina Inasaridze"
+        }
+      ]
+    },
+    {
+      "slug": "harra",
+      "authorNames": [
+        "Harra"
+      ],
+      "count": 1,
+      "latestPost": "2025-12-15T10:34:40+0000",
+      "bestCandidate": {
+        "email": "ga4-analytics-reader@soulart-analytics.iam.gserviceaccount.com",
+        "score": 27,
+        "sources": [
+          "recovered-chat-users"
+        ],
+        "recoveredName": "Ga4 Analytics Reader"
+      },
+      "confidence": "high",
+      "matchedExistingUser": null,
+      "candidates": [
+        {
+          "email": "ga4-analytics-reader@soulart-analytics.iam.gserviceaccount.com",
+          "score": 27,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Ga4 Analytics Reader"
+        },
+        {
+          "email": "kristina.kupunia.kris@mail.ru",
+          "score": 27,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Kristina Kupunia Kris"
+        },
+        {
+          "email": "doijashvili.mariami@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Mariam doijashvili"
+        },
+        {
+          "email": "guram.jokhadze60@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "გურამ ჯოხაძე"
+        },
+        {
+          "email": "mariamighonghadze81@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "mariami ghonghadze"
+        },
+        {
+          "email": "naniko.rigavava@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Naniko Rigavava"
+        },
+        {
+          "email": "ncaterina_inasaridze@yahoo.it",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Ncaterina Inasaridze"
+        },
+        {
+          "email": "nmarina.aptsiauri61@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Nmarina Aptsiauri61"
+        }
+      ]
+    },
+    {
+      "slug": "thuna",
+      "authorNames": [
+        "თუნა ხასია"
+      ],
+      "count": 1,
+      "latestPost": "2025-11-24T05:02:25+0000",
+      "bestCandidate": {
+        "email": "ga4-analytics-reader@soulart-analytics.iam.gserviceaccount.com",
+        "score": 27,
+        "sources": [
+          "recovered-chat-users"
+        ],
+        "recoveredName": "Ga4 Analytics Reader"
+      },
+      "confidence": "high",
+      "matchedExistingUser": null,
+      "candidates": [
+        {
+          "email": "ga4-analytics-reader@soulart-analytics.iam.gserviceaccount.com",
+          "score": 27,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Ga4 Analytics Reader"
+        },
+        {
+          "email": "kristina.kupunia.kris@mail.ru",
+          "score": 27,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Kristina Kupunia Kris"
+        },
+        {
+          "email": "doijashvili.mariami@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Mariam doijashvili"
+        },
+        {
+          "email": "guram.jokhadze60@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "გურამ ჯოხაძე"
+        },
+        {
+          "email": "mariamighonghadze81@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "mariami ghonghadze"
+        },
+        {
+          "email": "naniko.rigavava@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Naniko Rigavava"
+        },
+        {
+          "email": "ncaterina_inasaridze@yahoo.it",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Ncaterina Inasaridze"
+        },
+        {
+          "email": "nmarina.aptsiauri61@gmail.com",
+          "score": 24,
+          "sources": [
+            "recovered-chat-users"
+          ],
+          "recoveredName": "Nmarina Aptsiauri61"
+        }
+      ]
+    }
+  ],
+  "mediumConfidence": [],
+  "noEmail": [],
+  "applied": []
+}

@@ -1,41 +1,31 @@
 #!/usr/bin/env node
 /**
- * Import tornikeotiashvili products from FB page.
- * Uses published_posts endpoint, parses product fields, uploads images to S3,
- * then inserts products for target artist.
+ * Import natiajanturidze products from FB page.
+ * Uses published_posts endpoint. Dedup by FB post ID.
+ * Re-uploads images to S3. Target: natiajanturidze user.
  */
 const { MongoClient, ObjectId } = require('mongodb');
 const { S3Client, PutObjectCommand } = require('@aws-sdk/client-s3');
 const https = require('https');
 const http = require('http');
 const { URL } = require('url');
-const path = require('path');
-require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
 
-const MONGODB_URI = process.env.MONGODB_URI;
-const PAGE_ID =
-  process.env.FACEBOOK_POSTS_PAGE_ID || process.env.FACEBOOK_PAGE_ID;
+const MONGODB_URI =
+  'mongodb+srv://soulartgeorgia_db_user:hzO24rdfnjaT6kWI@soulart.gacy33l.mongodb.net/?appName=SoulArt';
+const PAGE_ID = '542501458957000';
 const ACCESS_TOKEN =
-  process.env.FACEBOOK_POSTS_PAGE_ACCESS_TOKEN ||
-  process.env.FACEBOOK_PAGE_ACCESS_TOKEN;
-
-const USER_ID = '68e8fe72f10079410087add2'; // tornikeotiashvili
-const ARTIST_SLUG = 'tornikeotiashvili';
-const ARTIST_BRAND = 'Tornike Otiashvili';
-const MAX_SCAN = 700;
+  'EAAh5uzqZCKRIBP22uG9wc5sKNWz53S9gfuRzehCmVDcZAX6grP5X9XHU0eNY7wNoos9vXKc9Toq4qN2tXioAiGwalBZC93NQOj4u4nCE4doJQ2Rwp9HPH5Md4jUD0qIZAHoNoVjBHNZBa7xZCeByKykCXzxhe8ZAZCwSUupRku3qqiWv7vdUe068UX8ZBoutrK7n6ZAaBi';
+const USER_ID = '6912f0db231e458e759a80c3'; // natiajanturidze
+const KEYWORD = 'natiajanturidze';
 
 const s3 = new S3Client({
-  region: process.env.AWS_REGION || 'eu-north-1',
+  region: 'eu-north-1',
   credentials: {
     accessKeyId: process.env.AWS_ACCESS_KEY,
     secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
   },
 });
-const BUCKET = process.env.AWS_BUCKET_NAME || 'soulart-s3';
-
-function sleep(ms) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
+const BUCKET = 'soulart-s3';
 
 function downloadImage(imageUrl) {
   return new Promise((resolve, reject) => {
@@ -72,7 +62,11 @@ async function uploadToS3(buffer, key) {
       ContentType: 'image/jpeg',
     }),
   );
-  return `https://${BUCKET}.s3.${process.env.AWS_REGION || 'eu-north-1'}.amazonaws.com/${key}`;
+  return `https://${BUCKET}.s3.eu-north-1.amazonaws.com/${key}`;
+}
+
+function sleep(ms) {
+  return new Promise((r) => setTimeout(r, ms));
 }
 
 async function fetchPosts(after = null) {
@@ -91,21 +85,20 @@ async function fetchPosts(after = null) {
     const res = await fetch(url.toString());
     const data = await res.json();
     if (data.error) {
-      console.log(`   API retry ${attempt + 1}/5: ${data.error.message}`);
+      console.log(`   ⏳ API retry ${attempt + 1}/5: ${data.error.message}`);
       await sleep((attempt + 1) * 3000);
       continue;
     }
     return data;
   }
-
   throw new Error('FB API failed after 5 retries');
 }
 
 function parsePostMessage(message) {
   const product = {};
-  const lines = String(message || '').split('\n');
+  const lines = message.split('\n');
 
-  const titleMatch = String(message || '').match(/📌\s*(.+)/);
+  const titleMatch = message.match(/📌\s*(.+)/);
   product.name = titleMatch ? titleMatch[1].trim() : 'უსათაურო';
 
   const descLines = [];
@@ -113,13 +106,11 @@ function parsePostMessage(message) {
   for (const rawLine of lines) {
     const line = rawLine.trim();
     if (!line) continue;
-
     if (line.startsWith('✍️')) {
       foundAuthor = true;
       continue;
     }
     if (!foundAuthor) continue;
-
     const isStructured =
       line.startsWith('✅') ||
       line.startsWith('🖼️') ||
@@ -131,19 +122,16 @@ function parsePostMessage(message) {
       line.startsWith('🔗') ||
       line.startsWith('👤') ||
       line.startsWith('#');
-
     const isDecorator =
       /^[\p{Emoji}\p{Emoji_Component}\uFE0F\u200D\s]+$/u.test(line) &&
       line.length < 30;
-
     if (isStructured || isDecorator) break;
     descLines.push(line);
   }
-
   product.description = descLines.join('\n');
-  product.isOriginal = String(message || '').includes('✅ ორიგინალი');
+  product.isOriginal = message.includes('✅ ორიგინალი');
 
-  const matMatch = String(message || '').match(/🎨\s*მასალა:\s*(.+)/);
+  const matMatch = message.match(/🎨\s*მასალა:\s*(.+)/);
   product.materials = matMatch
     ? matMatch[1]
         .split(',')
@@ -151,7 +139,7 @@ function parsePostMessage(message) {
         .filter(Boolean)
     : [];
 
-  const dimMatch = String(message || '').match(
+  const dimMatch = message.match(
     /📏\s*ზომა:\s*([\d.]+)[×xX*]([\d.]+)(?:[×xX*]([\d.]+))?\s*სმ/i,
   );
   if (dimMatch) {
@@ -162,24 +150,21 @@ function parsePostMessage(message) {
     if (dimMatch[3]) product.dimensions.depth = parseFloat(dimMatch[3]);
   }
 
-  const priceMatch = String(message || '').match(/💰\s*ფასი:\s*([\d.]+)/);
+  const priceMatch = message.match(/💰\s*ფასი:\s*([\d.]+)/);
   product.price = priceMatch ? parseFloat(priceMatch[1]) : 0;
 
-  const discountMatch = String(message || '').match(
-    /🔻\s*ფასდაკლება:\s*(\d+)%/,
-  );
+  const discountMatch = message.match(/🔻\s*ფასდაკლება:\s*(\d+)%/);
   if (discountMatch) {
-    product.discountPercentage = parseInt(discountMatch[1], 10);
-    const oldPriceMatch = String(message || '').match(/ძველი ფასი\s*([\d.]+)/);
+    product.discountPercentage = parseInt(discountMatch[1]);
+    const oldPriceMatch = message.match(/ძველი ფასი\s*([\d.]+)/);
     if (oldPriceMatch) product.price = parseFloat(oldPriceMatch[1]);
   }
 
   const hashtags = [];
   const tagRegex = /#([\p{L}\p{N}_-]+)/gu;
   let tagMatch;
-  while ((tagMatch = tagRegex.exec(String(message || ''))) !== null) {
+  while ((tagMatch = tagRegex.exec(message)) !== null)
     hashtags.push(tagMatch[1]);
-  }
   product.hashtags = hashtags;
 
   return product;
@@ -188,7 +173,6 @@ function parsePostMessage(message) {
 function extractImages(post) {
   const images = [];
   const attachments = post.attachments?.data || [];
-
   for (const att of attachments) {
     const subs = att.subattachments?.data || [];
     for (const sub of subs) {
@@ -197,106 +181,110 @@ function extractImages(post) {
     if (subs.length === 0 && att.media?.image?.src)
       images.push(att.media.image.src);
   }
-
   if (images.length === 0 && post.full_picture) images.push(post.full_picture);
   return images;
 }
 
-function postBelongsToArtist(message) {
-  const msg = String(message || '').toLowerCase();
-  return (
-    msg.includes(`(${ARTIST_SLUG.toLowerCase()})`) ||
-    msg.includes(`@${ARTIST_SLUG.toLowerCase()}`) ||
-    msg.includes(ARTIST_SLUG.toLowerCase())
-  );
-}
-
 async function main() {
-  console.log(`Fetching all ${ARTIST_SLUG} posts from FB page...\n`);
-
+  console.log(`🔍 Fetching all "${KEYWORD}" posts from FB page...\n`);
   const allPosts = [];
   const seenIds = new Set();
   let after = null;
   let totalScanned = 0;
 
+  const MAX_SCAN = 700; // FB page has ~676 posts
   while (totalScanned < MAX_SCAN) {
     const data = await fetchPosts(after);
     if (!data.data || data.data.length === 0) break;
-
     for (const post of data.data) {
       totalScanned++;
-      if (post.message && postBelongsToArtist(post.message)) {
+      if (
+        post.message &&
+        post.message.toLowerCase().includes(KEYWORD.toLowerCase())
+      ) {
         if (!seenIds.has(post.id)) {
           seenIds.add(post.id);
           allPosts.push(post);
         }
       }
     }
-
     console.log(
-      `   Scanned ${totalScanned}, found ${allPosts.length} matching posts`,
+      `   Scanned ${totalScanned}, found ${allPosts.length} unique posts`,
     );
-
     if (
       data.paging?.cursors?.after &&
       data.data.length > 0 &&
       totalScanned < MAX_SCAN
     ) {
       after = data.paging.cursors.after;
-      await sleep(120);
-    } else {
-      break;
-    }
+      await sleep(150);
+    } else break;
   }
 
+  // Sort by created_time ascending (oldest first)
   allPosts.sort((a, b) => new Date(a.created_time) - new Date(b.created_time));
 
-  console.log(`\nTotal matching posts: ${allPosts.length}\n`);
+  console.log(
+    `\n✅ Total: ${allPosts.length} unique posts (sorted by date ascending)\n`,
+  );
+
   if (allPosts.length === 0) {
-    console.log('No posts found. Stopping.');
+    console.log('No posts found!');
     return;
   }
 
   const products = allPosts.map((post) => {
     const parsed = parsePostMessage(post.message);
+    const images = extractImages(post);
     return {
       ...parsed,
-      images: extractImages(post),
+      images,
       fbPostId: post.id,
       createdTime: post.created_time,
     };
   });
 
+  const withDesc = products.filter((p) => p.description.length > 0).length;
+  console.log(
+    `📊 ${products.length} products | ${withDesc} with desc | ${products.length - withDesc} without`,
+  );
+  console.log(`\nOldest: "${products[0].name}" (${products[0].createdTime})`);
+  console.log(
+    `Newest: "${products[products.length - 1].name}" (${products[products.length - 1].createdTime})\n`,
+  );
+
+  // Connect and clean old products
   const client = new MongoClient(MONGODB_URI);
   await client.connect();
-
   const db = client.db();
   const productsCol = db.collection('products');
   const userId = new ObjectId(USER_ID);
 
   const oldCount = await productsCol.countDocuments({ user: userId });
   if (oldCount > 0) {
-    console.log(`Deleting ${oldCount} old products for ${ARTIST_SLUG}...`);
+    console.log(`🗑️  Deleting ${oldCount} old products...`);
     await productsCol.deleteMany({ user: userId });
   }
 
-  console.log(`Importing ${products.length} products...\n`);
+  console.log(
+    `🚀 Inserting ${products.length} products for natiajanturidze...\n`,
+  );
 
   let inserted = 0;
   for (let idx = 0; idx < products.length; idx++) {
     const p = products[idx];
     process.stdout.write(
-      `[${idx + 1}/${products.length}] ${String(p.name).slice(0, 40)} ... `,
+      `📦 ${idx + 1}/${products.length}: ${p.name.substring(0, 40)} ... `,
     );
 
     const s3Images = [];
     for (let i = 0; i < p.images.length; i++) {
       try {
         const buffer = await downloadImage(p.images[i]);
-        const key = `products/${ARTIST_SLUG}-${Date.now()}-${idx}-${i}.jpg`;
-        const s3Url = await uploadToS3(buffer, key);
+        const s3Key = `products/natia-${Date.now()}-${idx}-${i}.jpg`;
+        const s3Url = await uploadToS3(buffer, s3Key);
         s3Images.push(s3Url);
-      } catch {
+      } catch (err) {
         s3Images.push(p.images[i]);
       }
     }
@@ -304,7 +292,7 @@ async function main() {
     const doc = {
       user: userId,
       name: p.name,
-      brand: ARTIST_BRAND,
+      brand: 'ნათია ჭანტურიძე',
       description: p.description || p.name,
       price: p.price,
       images: s3Images,
@@ -334,12 +322,12 @@ async function main() {
       updatedAt: new Date(),
     };
 
-    await productsCol.insertOne(doc);
+    const result = await productsCol.insertOne(doc);
     inserted++;
-    console.log('OK');
+    console.log(`✅`);
   }
 
-  console.log(`\nDone. Imported ${inserted} products for @${ARTIST_SLUG}`);
+  console.log(`\n🎉 Done! ${inserted} products imported for @natiajanturidze`);
   await client.close();
 }
 

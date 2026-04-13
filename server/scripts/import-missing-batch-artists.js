@@ -1,0 +1,439 @@
+#!/usr/bin/env node
+const { MongoClient, ObjectId } = require('mongodb');
+const { S3Client, PutObjectCommand } = require('@aws-sdk/client-s3');
+const https = require('https');
+const http = require('http');
+const { URL } = require('url');
+const path = require('path');
+const axios = require('axios');
+
+require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
+
+const MONGODB_URI = process.env.MONGODB_URI;
+const PAGE_ID = process.env.FACEBOOK_POSTS_PAGE_ID || process.env.FACEBOOK_PAGE_ID;
+const ACCESS_TOKEN =
+  process.env.FACEBOOK_POSTS_PAGE_ACCESS_TOKEN ||
+  process.env.FACEBOOK_PAGE_ACCESS_TOKEN;
+
+const GRAPH_API = 'https://graph.facebook.com/v19.0';
+const MAX_SCAN = 700;
+const PAINTINGS_CATEGORY_ID = '68768f6f0b55154655a8e882';
+const ABSTRACTION_SUBCATEGORY_ID = '68768f990b55154655a8e89d';
+
+const TARGET_ARTISTS = [
+  {
+    slug: 'dimitri',
+    userId: '6912114a231e458e759a39a3',
+    brand: 'dimitri ',
+  },
+  {
+    slug: 'maka30',
+    userId: '68448304d53e41a14d1a6a2b',
+    brand: 'Maka',
+  },
+  {
+    slug: 'gogajashiashviliart',
+    userId: '690bb2d1303c8bd68b45a047',
+    brand: 'გოგა ჯაშიაშვილი ART',
+  },
+  {
+    slug: 'david',
+    userId: '68e78dc86d8ca03daa70fb65',
+    brand: 'David',
+  },
+];
+
+const s3 = new S3Client({
+  region: process.env.AWS_REGION || 'eu-north-1',
+  credentials: {
+    accessKeyId: process.env.AWS_ACCESS_KEY,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+  },
+});
+
+const BUCKET = process.env.AWS_BUCKET_NAME || 'soulart-s3';
+
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function belongsToArtist(message, slug) {
+  const text = String(message || '').toLowerCase();
+  return (
+    text.includes(`(${slug})`) ||
+    text.includes(`@${slug}`) ||
+    text.includes(slug)
+  );
+}
+
+function extractOriginalProductId(text) {
+  const match = String(text || '').match(/soulart\.ge\/products?\/([a-f0-9]{24})/i);
+  return match ? match[1] : null;
+}
+
+function parsePostMessage(message) {
+  const product = {};
+  const text = String(message || '');
+  const lines = text.split('\n');
+
+  const titleMatch = text.match(/📌\s*(.+)/);
+  product.name = titleMatch ? titleMatch[1].trim() : 'უსათაურო';
+
+  const descLines = [];
+  let foundAuthor = false;
+  for (const rawLine of lines) {
+    const line = rawLine.trim();
+    if (!line) continue;
+
+    if (line.startsWith('✍️')) {
+      foundAuthor = true;
+      continue;
+    }
+    if (!foundAuthor) continue;
+
+    const isStructured =
+      line.startsWith('✅') ||
+      line.startsWith('🖼️') ||
+      (line.startsWith('🎨') && line.includes('მასალა')) ||
+      line.startsWith('📏') ||
+      line.startsWith('💰') ||
+      line.startsWith('🔻') ||
+      line.startsWith('⏳') ||
+      line.startsWith('🔗') ||
+      line.startsWith('👤') ||
+      line.startsWith('#');
+
+    const isDecorator =
+      /^[\p{Emoji}\p{Emoji_Component}\uFE0F\u200D\s]+$/u.test(line) &&
+      line.length < 30;
+
+    if (isStructured || isDecorator) break;
+    descLines.push(line);
+  }
+
+  product.description = descLines.join('\n');
+  product.isOriginal = text.includes('✅ ორიგინალი');
+
+  const materialMatch = text.match(/🎨\s*მასალა:\s*(.+)/);
+  product.materials = materialMatch
+    ? materialMatch[1]
+        .split(',')
+        .map((item) => item.trim())
+        .filter(Boolean)
+    : [];
+
+  const dimensionMatch = text.match(
+    /📏\s*ზომა:\s*([\d.]+)[×xX*]([\d.]+)(?:[×xX*]([\d.]+))?\s*სმ/i,
+  );
+  if (dimensionMatch) {
+    product.dimensions = {
+      width: parseFloat(dimensionMatch[1]),
+      height: parseFloat(dimensionMatch[2]),
+    };
+    if (dimensionMatch[3]) {
+      product.dimensions.depth = parseFloat(dimensionMatch[3]);
+    }
+  }
+
+  const priceMatch = text.match(/💰\s*ფასი:\s*([\d.]+)/);
+  product.price = priceMatch ? parseFloat(priceMatch[1]) : 0;
+
+  const discountMatch = text.match(/🔻\s*ფასდაკლება:\s*(\d+)%/);
+  if (discountMatch) {
+    product.discountPercentage = parseInt(discountMatch[1], 10);
+    const oldPriceMatch = text.match(/ძველი ფასი\s*([\d.]+)/);
+    if (oldPriceMatch) {
+      product.price = parseFloat(oldPriceMatch[1]);
+    }
+  }
+
+  const hashtags = [];
+  const tagRegex = /#([\p{L}\p{N}_-]+)/gu;
+  let tagMatch;
+  while ((tagMatch = tagRegex.exec(text)) !== null) {
+    hashtags.push(tagMatch[1]);
+  }
+  product.hashtags = hashtags;
+
+  return product;
+}
+
+function extractImages(post) {
+  const images = [];
+  const attachments = post.attachments?.data || [];
+
+  for (const attachment of attachments) {
+    const subattachments = attachment.subattachments?.data || [];
+    for (const subattachment of subattachments) {
+      if (subattachment.media?.image?.src) {
+        images.push(subattachment.media.image.src);
+      }
+    }
+    if (subattachments.length === 0 && attachment.media?.image?.src) {
+      images.push(attachment.media.image.src);
+    }
+  }
+
+  if (images.length === 0 && post.full_picture) {
+    images.push(post.full_picture);
+  }
+
+  return images;
+}
+
+async function fetchPosts(after = null) {
+  const url = new URL(`${GRAPH_API}/${PAGE_ID}/published_posts`);
+  url.searchParams.set('access_token', ACCESS_TOKEN);
+  url.searchParams.set('limit', '100');
+  url.searchParams.set(
+    'fields',
+    'id,message,created_time,full_picture,attachments{media,subattachments{media}}',
+  );
+  if (after) {
+    url.searchParams.set('after', after);
+  }
+
+  for (let attempt = 0; attempt < 5; attempt++) {
+    const response = await fetch(url.toString());
+    const data = await response.json();
+    if (data.error) {
+      console.log(`API retry ${attempt + 1}/5: ${data.error.message}`);
+      await sleep((attempt + 1) * 3000);
+      continue;
+    }
+    return data;
+  }
+
+  throw new Error('Facebook API failed after 5 retries');
+}
+
+async function fetchComments(postId) {
+  try {
+    const response = await axios.get(`${GRAPH_API}/${postId}/comments`, {
+      params: {
+        access_token: ACCESS_TOKEN,
+        limit: 100,
+      },
+    });
+    return response.data.data || [];
+  } catch {
+    return [];
+  }
+}
+
+function downloadImage(imageUrl) {
+  return new Promise((resolve, reject) => {
+    const parsed = new URL(imageUrl);
+    const client = parsed.protocol === 'https:' ? https : http;
+    client
+      .get(imageUrl, { headers: { 'User-Agent': 'SoulArt/1.0' } }, (res) => {
+        if (
+          res.statusCode >= 300 &&
+          res.statusCode < 400 &&
+          res.headers.location
+        ) {
+          return downloadImage(res.headers.location)
+            .then(resolve)
+            .catch(reject);
+        }
+        if (res.statusCode !== 200) {
+          return reject(new Error(`HTTP ${res.statusCode}`));
+        }
+        const chunks = [];
+        res.on('data', (chunk) => chunks.push(chunk));
+        res.on('end', () => resolve(Buffer.concat(chunks)));
+        res.on('error', reject);
+      })
+      .on('error', reject);
+  });
+}
+
+async function uploadToS3(buffer, key) {
+  await s3.send(
+    new PutObjectCommand({
+      Bucket: BUCKET,
+      Key: key,
+      Body: buffer,
+      ContentType: 'image/jpeg',
+    }),
+  );
+
+  return `https://${BUCKET}.s3.${process.env.AWS_REGION || 'eu-north-1'}.amazonaws.com/${key}`;
+}
+
+async function scanMatchingPostsForSlug(slug) {
+  const matches = [];
+  const seenPostIds = new Set();
+  let after = null;
+  let scanned = 0;
+
+  while (scanned < MAX_SCAN) {
+    const data = await fetchPosts(after);
+    if (!data.data || data.data.length === 0) break;
+
+    for (const post of data.data) {
+      scanned++;
+      if (post.message && belongsToArtist(post.message, slug) && !seenPostIds.has(post.id)) {
+        seenPostIds.add(post.id);
+        matches.push(post);
+      }
+    }
+
+    if (
+      data.paging?.cursors?.after &&
+      data.data.length > 0 &&
+      scanned < MAX_SCAN
+    ) {
+      after = data.paging.cursors.after;
+      await sleep(120);
+    } else {
+      break;
+    }
+  }
+
+  matches.sort((a, b) => new Date(a.created_time) - new Date(b.created_time));
+  return { scanned, matches };
+}
+
+async function importForArtist(productsCol, artist) {
+  console.log(`\n=== ${artist.slug} ===`);
+  const { scanned, matches } = await scanMatchingPostsForSlug(artist.slug);
+  console.log(`Scanned ${scanned}, found ${matches.length} matching posts`);
+
+  const userObjectId = new ObjectId(artist.userId);
+  const existingProducts = await productsCol
+    .find({ user: userObjectId }, { projection: { _id: 1 } })
+    .toArray();
+  const existingIds = new Set(existingProducts.map((product) => String(product._id)));
+
+  let imported = 0;
+  let skippedExisting = 0;
+  let skippedNoId = 0;
+  let conflicts = 0;
+
+  for (let index = 0; index < matches.length; index++) {
+    const post = matches[index];
+    const parsed = parsePostMessage(post.message);
+
+    let originalId = extractOriginalProductId(post.message);
+    if (!originalId) {
+      const comments = await fetchComments(post.id);
+      for (const comment of comments) {
+        const commentId = extractOriginalProductId(comment.message);
+        if (commentId) {
+          originalId = commentId;
+          break;
+        }
+      }
+    }
+
+    if (!originalId) {
+      skippedNoId++;
+      console.log(`SKIP no original ID: ${parsed.name}`);
+      continue;
+    }
+
+    if (existingIds.has(originalId)) {
+      skippedExisting++;
+      continue;
+    }
+
+    const existingById = await productsCol.findOne(
+      { _id: new ObjectId(originalId) },
+      { projection: { _id: 1, user: 1 } },
+    );
+    if (existingById) {
+      conflicts++;
+      console.log(`SKIP conflict ID ${originalId}: belongs to user ${existingById.user}`);
+      continue;
+    }
+
+    process.stdout.write(`[${index + 1}/${matches.length}] ${parsed.name} ... `);
+
+    const originalImages = extractImages(post);
+    const s3Images = [];
+    for (let imageIndex = 0; imageIndex < originalImages.length; imageIndex++) {
+      try {
+        const buffer = await downloadImage(originalImages[imageIndex]);
+        const key = `products/${artist.slug}-${originalId}-${imageIndex}.jpg`;
+        const s3Url = await uploadToS3(buffer, key);
+        s3Images.push(s3Url);
+      } catch {
+        s3Images.push(originalImages[imageIndex]);
+      }
+    }
+
+    const doc = {
+      _id: new ObjectId(originalId),
+      user: userObjectId,
+      name: parsed.name,
+      brand: artist.brand,
+      description: parsed.description || parsed.name,
+      price: parsed.price,
+      images: s3Images,
+      category: 'ნახატები',
+      mainCategory: new ObjectId(PAINTINGS_CATEGORY_ID),
+      mainCategoryEn: 'Painting',
+      subCategory: new ObjectId(ABSTRACTION_SUBCATEGORY_ID),
+      subCategoryEn: 'Abstraction',
+      countInStock: 1,
+      status: 'APPROVED',
+      reviews: [],
+      rating: 0,
+      numReviews: 0,
+      hashtags: parsed.hashtags || [],
+      deliveryType: 'SoulArt',
+      materials: parsed.materials || [],
+      materialsEn: [],
+      dimensions: parsed.dimensions || {},
+      isOriginal: parsed.isOriginal !== false,
+      hideFromStore: false,
+      viewCount: 0,
+      variants: [],
+      ageGroups: [],
+      sizes: [],
+      colors: [],
+      colorsEn: [],
+      discountPercentage: parsed.discountPercentage || 0,
+      referralDiscountPercent: 0,
+      useArtistDefaultDiscount: false,
+      createdAt: new Date(post.created_time || Date.now()),
+      updatedAt: new Date(),
+    };
+
+    await productsCol.insertOne(doc);
+    existingIds.add(originalId);
+    imported++;
+    console.log('OK');
+  }
+
+  const finalCount = await productsCol.countDocuments({ user: userObjectId });
+  console.log('Summary:', {
+    scanned,
+    matchingPosts: matches.length,
+    imported,
+    skippedExisting,
+    skippedNoId,
+    conflicts,
+    finalCount,
+  });
+}
+
+async function main() {
+  const client = new MongoClient(MONGODB_URI);
+  await client.connect();
+
+  const db = client.db();
+  const productsCol = db.collection('products');
+
+  for (const artist of TARGET_ARTISTS) {
+    await importForArtist(productsCol, artist);
+  }
+
+  await client.close();
+}
+
+main().catch((error) => {
+  console.error('Fatal:', error);
+  process.exit(1);
+});

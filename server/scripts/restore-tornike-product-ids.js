@@ -9,8 +9,11 @@ const path = require('path');
 require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
 
 const MONGODB_URI = process.env.MONGODB_URI;
-const PAGE_ID = process.env.FACEBOOK_POSTS_PAGE_ID || process.env.FACEBOOK_PAGE_ID;
-const ACCESS_TOKEN = process.env.FACEBOOK_POSTS_PAGE_ACCESS_TOKEN || process.env.FACEBOOK_PAGE_ACCESS_TOKEN;
+const PAGE_ID =
+  process.env.FACEBOOK_POSTS_PAGE_ID || process.env.FACEBOOK_PAGE_ID;
+const ACCESS_TOKEN =
+  process.env.FACEBOOK_POSTS_PAGE_ACCESS_TOKEN ||
+  process.env.FACEBOOK_PAGE_ACCESS_TOKEN;
 
 const API = 'https://graph.facebook.com/v19.0';
 const ARTIST_SLUG = 'tornikeotiashvili';
@@ -65,7 +68,9 @@ async function main() {
   const url = `${API}/${PAGE_ID}/published_posts?fields=id,message,created_time&limit=100&access_token=${ACCESS_TOKEN}`;
   const allPosts = await fetchAllPosts(url, []);
   const artistPosts = allPosts.filter((p) => isArtistPost(p.message));
-  console.log(`Scanned ${allPosts.length}, matched ${artistPosts.length} posts`);
+  console.log(
+    `Scanned ${allPosts.length}, matched ${artistPosts.length} posts`,
+  );
 
   const fbEntries = [];
 
@@ -87,7 +92,12 @@ async function main() {
     }
 
     if (originalId && title) {
-      fbEntries.push({ originalId, title, price, createdTime: post.created_time });
+      fbEntries.push({
+        originalId,
+        title,
+        price,
+        createdTime: post.created_time,
+      });
     }
   }
 
@@ -151,7 +161,9 @@ async function main() {
       restored++;
       usedCurrentIds.add(String(doc._id));
 
-      const idx = currentProducts.findIndex((x) => String(x._id) === String(doc._id));
+      const idx = currentProducts.findIndex(
+        (x) => String(x._id) === String(doc._id),
+      );
       if (idx !== -1) currentProducts.splice(idx, 1);
     } catch {
       noMatch++;

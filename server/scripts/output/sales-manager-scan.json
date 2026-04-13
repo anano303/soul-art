@@ -1,0 +1,1240 @@
+[
+  {
+    "email": "shioshvilimariam47@gmail.com",
+    "smSignals": 556,
+    "fileCount": 474,
+    "inDb": true,
+    "currentRole": "seller",
+    "dbRef": "VFXL11XW",
+    "dbPhone": "+995599759271",
+    "phoneCandidates": [
+      "+995577300480",
+      "+995504034447"
+    ],
+    "refCodeCandidates": [
+      "TS2367",
+      "TS2339",
+      "15T21",
+      "TS2307",
+      "15T17",
+      "A2701",
+      "TS2304",
+      "TOOLCALLS",
+      "MRA58N"
+    ],
+    "progress": [
+      "47%",
+      "1%",
+      "400 ლარ",
+      "100 ლარ",
+      "300 ლარ"
+    ],
+    "contextSample": "01.2026, 22:12:36   ERROR [BogTransferService] Status: 400\r [Nest] 23140  - 10.01.2026, 22:12:36   ERROR [BogTransferService] Data: {\r   \"error\": \"invalid_client\",\r   \"error_description\": \"Invalid client credentials\"\r }\r [Nest] 23140  - 10.01.2026, 22:12:37   ERROR [SalesCommissionService] Withdrawa"
+  },
+  {
+    "email": "text2sale@gmail.com",
+    "smSignals": 161,
+    "fileCount": 65,
+    "inDb": true,
+    "currentRole": "sales_manager",
+    "dbRef": null,
+    "dbPhone": "+995577300480",
+    "phoneCandidates": [
+      "+995577300480"
+    ],
+    "refCodeCandidates": [
+      "UNDEFINED",
+      "255B7",
+      "255B3",
+      "PROMO67909",
+      "PROMO57317",
+      "PROMO47977",
+      "PROMO55728",
+      "PROMO67029",
+      "PROMO30975",
+      "PROMO23157"
+    ],
+    "progress": [
+      "7%",
+      "3%"
+    ],
+    "contextSample": "des agent slashCommands name list disambiguation contentReferences codeCitations timestamp modelId copilot/claude-opus-4.5 requestId request_988431d2-e776-4bb4-a9ae-31a60cb1eae8 message parts range start endExclusive editorRange startLineNumber startColumn endLineNumber endColumn text [Fast Refresh]"
+  },
+  {
+    "email": "sales@gmail.com",
+    "smSignals": 120,
+    "fileCount": 37,
+    "inDb": true,
+    "currentRole": "sales_manager",
+    "dbRef": null,
+    "dbPhone": "+995577300480",
+    "phoneCandidates": [
+      "+995577300480",
+      "+995599784188",
+      "+995595343735",
+      "+995599346985",
+      "+995595390055",
+      "+995571500889",
+      "+995577270012",
+      "+995511169905",
+      "+995571705335",
+      "+995568949572",
+      "+995558175655",
+      "+995557000514",
+      "+995599550593",
+      "+995592014132"
+    ],
+    "refCodeCandidates": [
+      "255B3",
+      "10T19",
+      "09T19",
+      "PROMO99292",
+      "PROMO67909",
+      "PROMO57317",
+      "PROMO47977",
+      "PROMO55728",
+      "PROMO67029",
+      "PROMO30975"
+    ],
+    "progress": [
+      "0.05 GEL",
+      "3%",
+      "1 ლარ",
+      "1 GEL",
+      "30%"
+    ],
+    "contextSample": "re type priority text lineBreakBefore type priority text c:\\Users\\a.beroshvili\\Documents\\GitHub\\soul-art\\server\\scripts\\create-missing-commission.js lineBreakBefore type priority text lineBreakBefore props references toolu_vrtx_01MyhJdFnx6998xeUsRJqFbh__vscode-1766005533055 $mid content $mid value N"
+  },
+  {
+    "email": "info@soulart.ge",
+    "smSignals": 114,
+    "fileCount": 73,
+    "inDb": true,
+    "currentRole": "user",
+    "dbRef": null,
+    "dbPhone": "+995551000059",
+    "phoneCandidates": [
+      "+995551000059"
+    ],
+    "refCodeCandidates": [],
+    "progress": [
+      "1 GEL"
+    ],
+    "contextSample": ",\r       },\r     },\r \r     // Footer\r     footer: {\r       copyright: \"© 2023 SoulArt. ყველა უფლება დაცულია.\",\r       description:\r         \"აღმოაჩინე და შეიძინე უნიკალური ხელოვნების ნიმუშები ნიჭიერი ხელოვანებისგან მსოფლიოს სხვადასხვა კუთხიდან. შექმენი შენი პირადი გალერეა და გახდი კოლექციონერი ან ხე"
+  },
+  {
+    "email": "admin@gmail.com",
+    "smSignals": 85,
+    "fileCount": 35,
+    "inDb": true,
+    "currentRole": "admin",
+    "dbRef": "C9N59LHG",
+    "dbPhone": null,
+    "phoneCandidates": [],
+    "refCodeCandidates": [
+      "10T19",
+      "09T21",
+      "09T20",
+      "255B7",
+      "255B3"
+    ],
+    "progress": [
+      "7%",
+      "3%",
+      "60₾",
+      "80₾",
+      "20₾"
+    ],
+    "contextSample": "335510\",\r             \"finalAmount\": -1,\r             \"createdAt\": \"2026-01-10T19:12:50.602Z\",\r             \"updatedAt\": \"2026-01-10T19:12:50.602Z\",\r             \"__v\": 0\r         }\r     ],\r     \"total\": 1,\r     \"totalPages\": 1\r }{\r     \"commissions\": [\r         {\r             \"_id\": \"696179b92db8e1"
+  },
+  {
+    "email": "soulartgeorgia@gmail.com",
+    "smSignals": 66,
+    "fileCount": 23,
+    "inDb": true,
+    "currentRole": "user",
+    "dbRef": null,
+    "dbPhone": null,
+    "phoneCandidates": [],
+    "refCodeCandidates": [
+      "BAGAGE22"
+    ],
+    "progress": [
+      "30%",
+      "10%",
+      "70%",
+      "0₾"
+    ],
+    "contextSample": "fsPath c:\\Users\\a.beroshvili\\Documents\\GitHub\\soul-art\\server\\src\\sales-commission\\services\\sales-commission.service.ts _sep external file:///c%3A/Users/a.beroshvili/Documents/GitHub/soul-art/server/src/sales-commission/services/sales-commission.service.ts path /c:/Users/a.beroshvili/Documents/GitH"
+  },
+  {
+    "email": "beroshviliani100@gmail.com",
+    "smSignals": 49,
+    "fileCount": 24,
+    "inDb": true,
+    "currentRole": "seller",
+    "dbRef": null,
+    "dbPhone": "+995577300480",
+    "phoneCandidates": [
+      "+995577300480"
+    ],
+    "refCodeCandidates": [
+      "2V7D7AYF",
+      "29T21",
+      "26T00",
+      "23T19",
+      "18T17",
+      "SHA256",
+      "2F20250918",
+      "08T18",
+      "TBCBGE22",
+      "08T19"
+    ],
+    "progress": [
+      "20250918%",
+      "1%",
+      "3%"
+    ],
+    "contextSample": ":25.661+00:00\r updatedAt\r 2025-09-29T21:34:55.545+00:00\r __v\r 0\r passwordResetExpires\r 2025-03-26T00:15:34.886+00:00\r passwordResetToken\r \"c3d45e88-8bb4-48f6-938d-8213c5399a54\"\r balance\r 0\r referralBalance\r 0\r lastActivity\r 2025-09-23T19:34:47.485+00:00\r sessionId\r \"881211f7-6df1-4d48-9627-adef40d3d"
+  },
+  {
+    "email": "salesanni@gmail.com",
+    "smSignals": 40,
+    "fileCount": 24,
+    "inDb": true,
+    "currentRole": "user",
+    "dbRef": null,
+    "dbPhone": "+995577300480",
+    "phoneCandidates": [
+      "+995577300480"
+    ],
+    "refCodeCandidates": [
+      "PROMO66563",
+      "PROMO65847",
+      "PROMO19683",
+      "PROMO30782",
+      "PROMO31422",
+      "PROMO92771",
+      "PROMO26539",
+      "PROMO30335"
+    ],
+    "progress": [],
+    "contextSample": "de: SM_53BXL84I\r share-button.tsx:41 [ShareButton] User: Ani Beroshvili Role: sales_manager SalesRefCode: SM_53BXL84I\r share-button.tsx:41 [ShareButton] User: Ani Beroshvili Role: sales_manager SalesRefCode: SM_53BXL84I\r share-button.tsx:41 [ShareButton] User: Ani Beroshvili Role: sales_manager Sale"
+  },
+  {
+    "email": "sverunasveri@gmail.com",
+    "smSignals": 21,
+    "fileCount": 15,
+    "inDb": true,
+    "currentRole": "seller",
+    "dbRef": null,
+    "dbPhone": null,
+    "phoneCandidates": [],
+    "refCodeCandidates": [],
+    "progress": [],
+    "contextSample": "pending Sales Manager BOG transfers\r [Nest] 20836  - 06.02.2026, 00:55:00     LOG [ReferralsService] [approveSellerAndPayBonus] approvedProducts=1 for seller=shioshvilimariam47@gmail.com\r [Nest] 20836  - 06.02.2026, 00:55:00     LOG [ReferralsService] Seller shioshvilimariam47@gmail.com has 1 appro"
+  },
+  {
+    "email": "artadmin@gmail.com",
+    "smSignals": 18,
+    "fileCount": 3,
+    "inDb": true,
+    "currentRole": "admin",
+    "dbRef": null,
+    "dbPhone": null,
+    "phoneCandidates": [],
+    "refCodeCandidates": [
+      "06T07"
+    ],
+    "progress": [],
+    "contextSample": "Commands name list disambiguation contentReferences codeCitations timestamp confirmation Continue modelId copilot/claude-opus-4.5 requestId request_492b6aea-5c03-484d-bd1e-d3b58652baab message parts range start endExclusive editorRange startLineNumber startColumn endLineNumber endColumn text საკომის"
+  },
+  {
+    "email": "otiashvilitornike891@gmail.com",
+    "smSignals": 18,
+    "fileCount": 17,
+    "inDb": true,
+    "currentRole": "seller",
+    "dbRef": "3Z07PR9M",
+    "dbPhone": "+995571068108",
+    "phoneCandidates": [],
+    "refCodeCandidates": [
+      "255B7",
+      "255B3",
+      "5RT7AVWA",
+      "3Z07PR9M",
+      "PC2JU95C",
+      "UL028J53"
+    ],
+    "progress": [
+      "10%",
+      "7%",
+      "3%",
+      "0%"
+    ],
+    "contextSample": "nal\" isConfirmed type isComplete source type internal label Built-In toolSpecificData kind terminal terminalToolSessionId fd6fea87-f7ad-4c7a-86c6-d9aa805c9378 terminalCommandId tool-3542b9b7-b100-4190-a859-b952389a6b47 commandLine original cd c:\\Users\\a.beroshvili\\Documents\\GitHub\\soul-art\\server; n"
+  },
+  {
+    "email": "lberoshvili9@gmail.com",
+    "smSignals": 16,
+    "fileCount": 6,
+    "inDb": true,
+    "currentRole": "seller",
+    "dbRef": "5RT7AVWA",
+    "dbPhone": "+995596000054",
+    "phoneCandidates": [
+      "+995596000054"
+    ],
+    "refCodeCandidates": [
+      "5RT7AVWA",
+      "23T15",
+      "27T19",
+      "3Z07PR9M",
+      "PC2JU95C"
+    ],
+    "progress": [
+      "10%"
+    ],
+    "contextSample": "\"user\": {\r         \"storeLogoPath\": null,\r         \"profileImagePath\": null,\r         \"referredBy\": null,\r         \"sellerApprovedAt\": null,\r         \"lastWithdrawalReset\": null,\r         \"artistCoverImage\": null,\r         \"artistDisciplines\": [],\r         \"artistLocation\": null,\r         \"artistOpe"
+  },
+  {
+    "email": "salesani@gmail.com",
+    "smSignals": 15,
+    "fileCount": 3,
+    "inDb": true,
+    "currentRole": "sales_manager",
+    "dbRef": null,
+    "dbPhone": null,
+    "phoneCandidates": [],
+    "refCodeCandidates": [
+      "11T10"
+    ],
+    "progress": [],
+    "contextSample": "pilot.editsAgent description Edit files in your workspace in agent mode when config.chat.agent.enabled metadata themeIcon tools hasFollowups supportIssueReporting name agent fullName GitHub Copilot isDefault locations panel modes agent slashCommands name list disambiguation contentReferences codeCit"
+  },
+  {
+    "email": "seller@gmail.com",
+    "smSignals": 13,
+    "fileCount": 9,
+    "inDb": true,
+    "currentRole": "seller",
+    "dbRef": "W0U2GQ9K",
+    "dbPhone": "+995577300480",
+    "phoneCandidates": [
+      "+995577300480"
+    ],
+    "refCodeCandidates": [
+      "W0U2GQ9K",
+      "18T21",
+      "12T21"
+    ],
+    "progress": [
+      "20%",
+      "15%",
+      "10%",
+      "30%"
+    ],
+    "contextSample": "000538528874\"\r profileImagePath\r \"https://res.cloudinary.com/dsufx8uzd/image/upload/v1753018460/ecommerc…\"\r createdAt\r 2025-07-18T21:29:05.328+00:00\r updatedAt\r 2025-10-12T21:25:49.931+00:00\r __v\r 0\r storeNameEn\r \"LDT ANI\"\r balance\r -9.699999999999998\r referralCode\r \"W0U2GQ9K\"\r totalReferrals\r 1\r re"
+  },
+  {
+    "email": "earjevanidzee@gmail.com",
+    "smSignals": 11,
+    "fileCount": 3,
+    "inDb": true,
+    "currentRole": "user",
+    "dbRef": null,
+    "dbPhone": null,
+    "phoneCandidates": [],
+    "refCodeCandidates": [
+      "PROMO42462",
+      "PROMO63143",
+      "PROMO25661",
+      "PROMO81750",
+      "PROMO59547",
+      "PROMO33276",
+      "PROMO76030",
+      "PROMO60345",
+      "PROMO99292",
+      "PROMO67909"
+    ],
+    "progress": [],
+    "contextSample": "CQ | /admin/users | 13.1.2026, 02:40:15   VISIT | SM_UQGM42CQ | /sales-manager-register | 13.1.2026, 02:09:01   VISIT | SM_UQGM42CQ | / | 12.1.2026, 19:00:46   VISIT | SM_UQGM42CQ | / | 12.1.2026, 16:57:18   VISIT | SM_UQGM42CQ | /login | 12.1.2026, 14:35:21 👥 Total sales managers: 9 📎 Sales mana"
+  },
+  {
+    "email": "teasamadashvili1980@gmail.com",
+    "smSignals": 10,
+    "fileCount": 3,
+    "inDb": true,
+    "currentRole": "user",
+    "dbRef": null,
+    "dbPhone": null,
+    "phoneCandidates": [],
+    "refCodeCandidates": [
+      "PROMO66563",
+      "PROMO65847",
+      "PROMO19683",
+      "PROMO30782",
+      "PROMO31422",
+      "PROMO92771",
+      "PROMO26539"
+    ],
+    "progress": [],
+    "contextSample": "📈 Events by type:   VISIT: 35   CHECKOUT_START: 12   PURCHASE: 5   ADD_TO_CART: 1 👤 Top sales managers by tracking events:   SM_UQGM42CQ: 52 events   SM_53BXL84I: 1 events 🕐 Recent tracking events:   VISIT | SM_UQGM42CQ | /admin/users | 13.1.2026, 02:40:15   VISIT | SM_UQGM42CQ | /sales-manager"
+  },
+  {
+    "email": "mayabekauri@gmail.com",
+    "smSignals": 9,
+    "fileCount": 3,
+    "inDb": true,
+    "currentRole": "user",
+    "dbRef": null,
+    "dbPhone": null,
+    "phoneCandidates": [],
+    "refCodeCandidates": [
+      "PROMO19683",
+      "PROMO30782",
+      "PROMO31422",
+      "PROMO92771",
+      "PROMO26539",
+      "PROMO30335",
+      "PROMO60702",
+      "PROMO34158",
+      "PROMO42462"
+    ],
+    "progress": [],
+    "contextSample": "1 events 🕐 Recent tracking events:   VISIT | SM_UQGM42CQ | /admin/users | 13.1.2026, 02:40:15   VISIT | SM_UQGM42CQ | /sales-manager-register | 13.1.2026, 02:09:01   VISIT | SM_UQGM42CQ | / | 12.1.2026, 19:00:46   VISIT | SM_UQGM42CQ | / | 12.1.2026, 16:57:18   VISIT | SM_UQGM42CQ | /login | 12.1."
+  },
+  {
+    "email": "teonazarandia29@gmail.com",
+    "smSignals": 9,
+    "fileCount": 2,
+    "inDb": true,
+    "currentRole": "user",
+    "dbRef": null,
+    "dbPhone": null,
+    "phoneCandidates": [],
+    "refCodeCandidates": [
+      "PROMO47977",
+      "PROMO55728",
+      "PROMO67029",
+      "PROMO30975",
+      "PROMO23157",
+      "PROMO81723",
+      "PROMO41635"
+    ],
+    "progress": [
+      "100%"
+    ],
+    "contextSample": "log('ყველა ნომერი ერთად (კოპირებისთვის):'); >>   console.log(phones.join(', ')); >>   process.exit(0); >> }).catch(e => { console.error(e); process.exit(1); }); >> \" გაყიდვების მენეჯერების ტელეფონები: ================================ ყველა ნომერი ერთად (კოპირებისთვის): toolu_vrtx_017nMzMgs7XMXkpA"
+  },
+  {
+    "email": "tsuladzekato@gmail.com",
+    "smSignals": 8,
+    "fileCount": 2,
+    "inDb": true,
+    "currentRole": "user",
+    "dbRef": null,
+    "dbPhone": null,
+    "phoneCandidates": [],
+    "refCodeCandidates": [
+      "PROMO66563",
+      "PROMO65847",
+      "PROMO19683",
+      "PROMO30782",
+      "PROMO31422",
+      "PROMO92771",
+      "PROMO26539",
+      "PROMO30335",
+      "PROMO60702"
+    ],
+    "progress": [],
+    "contextSample": "king events:   SM_UQGM42CQ: 52 events   SM_53BXL84I: 1 events 🕐 Recent tracking events:   VISIT | SM_UQGM42CQ | /admin/users | 13.1.2026, 02:40:15   VISIT | SM_UQGM42CQ | /sales-manager-register | 13.1.2026, 02:09:01   VISIT | SM_UQGM42CQ | / | 12.1.2026, 19:00:46   VISIT | SM_UQGM42CQ | / | 12.1."
+  },
+  {
+    "email": "tony.johnes@ymail.com",
+    "smSignals": 8,
+    "fileCount": 2,
+    "inDb": true,
+    "currentRole": "user",
+    "dbRef": null,
+    "dbPhone": null,
+    "phoneCandidates": [],
+    "refCodeCandidates": [
+      "PROMO33276",
+      "PROMO76030",
+      "PROMO60345",
+      "PROMO99292",
+      "PROMO67909",
+      "PROMO57317",
+      "PROMO47977",
+      "PROMO55728",
+      "PROMO67029",
+      "PROMO30975"
+    ],
+    "progress": [],
+    "contextSample": "xit(0); >> }).catch(e => { console.error(e); process.exit(1); }); >> \" გაყიდვების მენეჯერების ტელეფონები: ================================ ყველა ნომერი ერთად (კოპირებისთვის): toolu_vrtx_017nMzMgs7XMXkpAKKGMhpqe__vscode-1768418898547 $mid content $mid value გაყიდვების მენეჯერები (16 სულ): ========"
+  },
+  {
+    "email": "lberoshvili@soulart.ge",
+    "smSignals": 8,
+    "fileCount": 4,
+    "inDb": true,
+    "currentRole": "admin",
+    "dbRef": "RM711K5N",
+    "dbPhone": null,
+    "phoneCandidates": [],
+    "refCodeCandidates": [
+      "09T22"
+    ],
+    "progress": [
+      "2 ₾",
+      "1.4 ₾"
+    ],
+    "contextSample": "lineBreakBefore type priority text lineBreakBefore type priority text c:\\Users\\a.beroshvili\\Documents\\GitHub\\soul-art\\server\\scripts\\create-auction-admin-settings.js lineBreakBefore type priority text lineBreakBefore props references toolu_vrtx_01LhsAmU7fpiYAtYxrKJG4Ju__vscode-1770543805012 $mid co"
+  },
+  {
+    "email": "tamari.dardaganidze.1@gmail.com",
+    "smSignals": 7,
+    "fileCount": 2,
+    "inDb": true,
+    "currentRole": "user",
+    "dbRef": null,
+    "dbPhone": null,
+    "phoneCandidates": [],
+    "refCodeCandidates": [
+      "PROMO55728",
+      "PROMO67029",
+      "PROMO30975",
+      "PROMO23157",
+      "PROMO81723",
+      "PROMO41635"
+    ],
+    "progress": [
+      "100%"
+    ],
+    "contextSample": "ის მენეჯერები (16 სულ): ================================ სახელი: Sales Manager Email: sales@gmail.com ტელეფონი: არ არის შევსებული --- სახელი: Ani Beroshvili Email: salesanni@gmail.com ტელეფონი: არ არის შევსებული --- სახელი: თეონა Email: teonazarandia29@gmail.com ტელეფონი: არ არის შევსებული --- სახელ"
+  },
+  {
+    "email": "mxatvari123@gmail.com",
+    "smSignals": 7,
+    "fileCount": 4,
+    "inDb": true,
+    "currentRole": "seller",
+    "dbRef": "97J9O014",
+    "dbPhone": "+995551000059",
+    "phoneCandidates": [],
+    "refCodeCandidates": [],
+    "progress": [
+      "2 ₾",
+      "1.4 ₾"
+    ],
+    "contextSample": "implified the command to `node scripts/debug-auction-emails.js 6985861597785a099494119f`, and this is the output of running that command instead: ction-emails.js 6985861597785a099494119f                                        🔍 Debugging Auction Emails =============================================="
+  },
+  {
+    "email": "hr.higia@gmail.com",
+    "smSignals": 5,
+    "fileCount": 1,
+    "inDb": true,
+    "currentRole": "user",
+    "dbRef": null,
+    "dbPhone": null,
+    "phoneCandidates": [],
+    "refCodeCandidates": [
+      "PROMO57317",
+      "PROMO47977",
+      "PROMO55728",
+      "PROMO67029",
+      "PROMO30975",
+      "PROMO23157",
+      "PROMO81723",
+      "PROMO41635"
+    ],
+    "progress": [],
+    "contextSample": ": SM_RKKUAAZ4 → PROMO57317      Orders: 0, Commissions: 0, Tracking: 0, Balance: 0   ✅ ნინა მეტრეველი (ninanm777@gmail.com): SM_RS7FTEMJ → PROMO47977      Orders: 0, Commissions: 0, Tracking: 0, Balance: 0   ✅ მარიამ მიქელაძე (mariammiqo@gmail.com): SM_S4OGI4G9 → PROMO55728      Orders: 0, Commissio"
+  },
+  {
+    "email": "tamarbasilia789@gmail.com",
+    "smSignals": 5,
+    "fileCount": 4,
+    "inDb": true,
+    "currentRole": "seller",
+    "dbRef": "PC2JU95C",
+    "dbPhone": "+995593390027",
+    "phoneCandidates": [],
+    "refCodeCandidates": [
+      "5RT7AVWA",
+      "3Z07PR9M",
+      "PC2JU95C",
+      "UL028J53",
+      "8ZAZKZ4T"
+    ],
+    "progress": [
+      "0%",
+      "10%"
+    ],
+    "contextSample": "x-existing-products-promo.js` - გაასწორებს არსებულ პროდუქტებს 2. კოდის ფიქსი ავტომატურად იმუშავებს ახალ პროდუქტებზე toolCalls toolInputRetry 3b7c4d9c-01c5-42f7-9cf5-4f24baba1ab6 toolCallResults toolu_vrtx_01T9WvnRLUT89j3GfAgKJjz5__vscode-1770719019719 $mid content $mid value Note: The tool simplifie"
+  },
+  {
+    "email": "tabatadzedali33@gmail.com",
+    "smSignals": 4,
+    "fileCount": 1,
+    "inDb": true,
+    "currentRole": "user",
+    "dbRef": null,
+    "dbPhone": null,
+    "phoneCandidates": [],
+    "refCodeCandidates": [
+      "8XCGN3",
+      "PROMO59547",
+      "PROMO33276",
+      "PROMO76030",
+      "PROMO60345",
+      "PROMO99292",
+      "PROMO67909",
+      "PROMO57317",
+      "PROMO47977",
+      "PROMO55728"
+    ],
+    "progress": [],
+    "contextSample": "8XCGN3 → PROMO59547      Orders: 0, Commissions: 0, Tracking: 18, Balance: 0   ✅ ჯილდა არჯევანიძე (earjevanidzee@gmail.com): SM_IQ62QZ52 → PROMO33276      Orders: 0, Commissions: 0, Tracking: 0, Balance: 0   ✅ თამთა (tamtanarimanidze8@gmail.com): SM_K2IV7JBX → PROMO76030      Orders: 0, Commissions:"
+  },
+  {
+    "email": "ninanm777@gmail.com",
+    "smSignals": 4,
+    "fileCount": 1,
+    "inDb": true,
+    "currentRole": "user",
+    "dbRef": null,
+    "dbPhone": null,
+    "phoneCandidates": [],
+    "refCodeCandidates": [
+      "PROMO76030",
+      "PROMO60345",
+      "PROMO99292",
+      "PROMO67909",
+      "PROMO57317",
+      "PROMO47977",
+      "PROMO55728",
+      "PROMO67029",
+      "PROMO30975",
+      "PROMO23157"
+    ],
+    "progress": [],
+    "contextSample": "PROMO76030      Orders: 0, Commissions: 0, Tracking: 0, Balance: 0   ✅ George Avsa (georgeavsa1@gmail.com): SM_L2ZOG0WF → PROMO60345      Orders: 0, Commissions: 0, Tracking: 0, Balance: 0   ✅ მარიამი (mariamsadgobelashvili09@gmail.com): SM_OMRL54PB → PROMO99292      Orders: 0, Commissions: 0, Track"
+  },
+  {
+    "email": "mariammiqo@gmail.com",
+    "smSignals": 4,
+    "fileCount": 1,
+    "inDb": true,
+    "currentRole": "user",
+    "dbRef": null,
+    "dbPhone": null,
+    "phoneCandidates": [],
+    "refCodeCandidates": [
+      "OMO60345",
+      "PROMO99292",
+      "PROMO67909",
+      "PROMO57317",
+      "PROMO47977",
+      "PROMO55728",
+      "PROMO67029",
+      "PROMO30975",
+      "PROMO23157",
+      "PROMO81723"
+    ],
+    "progress": [],
+    "contextSample": "OMO60345      Orders: 0, Commissions: 0, Tracking: 0, Balance: 0   ✅ მარიამი (mariamsadgobelashvili09@gmail.com): SM_OMRL54PB → PROMO99292      Orders: 0, Commissions: 0, Tracking: 0, Balance: 0   ✅ Dali Tabatadze (tabatadzedali33@gmail.com): SM_RCO9USSU → PROMO67909      Orders: 0, Commissions: 0,"
+  },
+  {
+    "email": "x.kilasonia97@gmail.com",
+    "smSignals": 3,
+    "fileCount": 1,
+    "inDb": true,
+    "currentRole": "user",
+    "dbRef": null,
+    "dbPhone": null,
+    "phoneCandidates": [],
+    "refCodeCandidates": [
+      "PROMO66563",
+      "PROMO65847",
+      "PROMO19683",
+      "PROMO30782",
+      "PROMO31422"
+    ],
+    "progress": [],
+    "contextSample": "3nhzJNku6MVRzzwk__vscode-1772905252852 $mid content $mid value node type ctor ctorName children type priority text The following files were successfully edited: lineBreakBefore type priority text lineBreakBefore type priority text c:\\Users\\a.beroshvili\\Documents\\GitHub\\soul-art\\server\\scripts\\migrat"
+  },
+  {
+    "email": "mrmgoletiani@gmail.com",
+    "smSignals": 3,
+    "fileCount": 1,
+    "inDb": true,
+    "currentRole": "user",
+    "dbRef": null,
+    "dbPhone": null,
+    "phoneCandidates": [],
+    "refCodeCandidates": [
+      "PROMO66563",
+      "PROMO65847",
+      "PROMO19683",
+      "PROMO30782",
+      "PROMO31422",
+      "PROMO92771"
+    ],
+    "progress": [],
+    "contextSample": "iles were successfully edited: lineBreakBefore type priority text lineBreakBefore type priority text c:\\Users\\a.beroshvili\\Documents\\GitHub\\soul-art\\server\\scripts\\migrate-sm-to-promo.js lineBreakBefore type priority text lineBreakBefore props references tooluse_pQfeVmGCNDx6EkHWG6DjxH__vscode-177290"
+  },
+  {
+    "email": "salokhozrevanidze21@gmail.com",
+    "smSignals": 3,
+    "fileCount": 1,
+    "inDb": true,
+    "currentRole": "user",
+    "dbRef": null,
+    "dbPhone": null,
+    "phoneCandidates": [],
+    "refCodeCandidates": [
+      "MO66563",
+      "PROMO65847",
+      "PROMO19683",
+      "PROMO30782",
+      "PROMO31422",
+      "PROMO92771",
+      "PROMO26539",
+      "PROMO30335",
+      "PROMO60702",
+      "PROMO34158"
+    ],
+    "progress": [],
+    "contextSample": "MO66563      Orders: 0, Commissions: 0, Tracking: 29, Balance: 0   ✅ mariam goletiani (mrmgoletiani@gmail.com): SM_1SN0ZM5W → PROMO65847      Orders: 0, Commissions: 0, Tracking: 13, Balance: 0   ✅ თეა სამადაშვილი (teasamadashvili1980@gmail.com): SM_39GDNCY7 → PROMO19683      Orders: 0, Commissions:"
+  },
+  {
+    "email": "kristina.kupunia.kris@mail.ru",
+    "smSignals": 3,
+    "fileCount": 1,
+    "inDb": true,
+    "currentRole": "user",
+    "dbRef": null,
+    "dbPhone": null,
+    "phoneCandidates": [],
+    "refCodeCandidates": [
+      "PROMO19683",
+      "PROMO30782",
+      "PROMO31422",
+      "PROMO92771",
+      "PROMO26539",
+      "PROMO30335",
+      "PROMO60702",
+      "PROMO34158",
+      "PROMO42462",
+      "PROMO63143"
+    ],
+    "progress": [],
+    "contextSample": "→ PROMO19683      Orders: 0, Commissions: 0, Tracking: 0, Balance: 0   ✅ Ani Beroshvili (salesanni@gmail.com): SM_53BXL84I → PROMO30782      Orders: 0, Commissions: 0, Tracking: 1, Balance: 0   ✅ Kato tsuladze (tsuladzekato@gmail.com): SM_8BS5XSED → PROMO31422      Orders: 0, Commissions: 0, Trackin"
+  },
+  {
+    "email": "your@email.com",
+    "smSignals": 3,
+    "fileCount": 1,
+    "inDb": false,
+    "currentRole": "NOT_IN_DB",
+    "dbRef": null,
+    "dbPhone": null,
+    "phoneCandidates": [],
+    "refCodeCandidates": [],
+    "progress": [],
+    "contextSample": "oshvili/Documents/GitHub/soul-art/ scheme file kind inlineReference inlineReference name .env kind containerName location range startLineNumber startColumn endLineNumber endColumn $mid fsPath c:\\Users\\a.beroshvili\\Documents\\GitHub\\soul-art\\server\\node_modules\\@types\\node\\process.d.ts _sep external f"
+  },
+  {
+    "email": "tamuna777@yahoo.com",
+    "smSignals": 2,
+    "fileCount": 1,
+    "inDb": true,
+    "currentRole": "user",
+    "dbRef": null,
+    "dbPhone": null,
+    "phoneCandidates": [],
+    "refCodeCandidates": [
+      "PROMO31422",
+      "PROMO92771",
+      "PROMO26539",
+      "PROMO30335",
+      "PROMO60702",
+      "PROMO34158",
+      "PROMO42462",
+      "PROMO63143",
+      "PROMO25661"
+    ],
+    "progress": [],
+    "contextSample": "782      Orders: 0, Commissions: 0, Tracking: 1, Balance: 0   ✅ Kato tsuladze (tsuladzekato@gmail.com): SM_8BS5XSED → PROMO31422      Orders: 0, Commissions: 0, Tracking: 0, Balance: 0   ✅ სალომე ხოზრევანიძე (salokhozrevanidze21@gmail.com): SM_9XXNJE2X → PROMO92771      Orders: 0, Commissions: 0, Tr"
+  },
+  {
+    "email": "anakvirikashvili055@gmail.com",
+    "smSignals": 2,
+    "fileCount": 1,
+    "inDb": true,
+    "currentRole": "user",
+    "dbRef": null,
+    "dbPhone": null,
+    "phoneCandidates": [],
+    "refCodeCandidates": [
+      "PROMO92771",
+      "PROMO26539",
+      "PROMO30335",
+      "PROMO60702",
+      "PROMO34158",
+      "PROMO42462",
+      "PROMO63143",
+      "PROMO25661",
+      "PROMO81750"
+    ],
+    "progress": [],
+    "contextSample": "422      Orders: 0, Commissions: 0, Tracking: 0, Balance: 0   ✅ სალომე ხოზრევანიძე (salokhozrevanidze21@gmail.com): SM_9XXNJE2X → PROMO92771      Orders: 0, Commissions: 0, Tracking: 0, Balance: 0   ✅ მაია ბექაური (mayabekauri@gmail.com): SM_BBZQGUIZ → PROMO26539      Orders: 0, Commissions: 0, Trac"
+  },
+  {
+    "email": "iingushka@gmail.com",
+    "smSignals": 2,
+    "fileCount": 1,
+    "inDb": true,
+    "currentRole": "user",
+    "dbRef": null,
+    "dbPhone": null,
+    "phoneCandidates": [],
+    "refCodeCandidates": [
+      "PROMO26539",
+      "PROMO30335",
+      "PROMO60702",
+      "PROMO34158",
+      "PROMO42462",
+      "PROMO63143",
+      "PROMO25661",
+      "PROMO81750",
+      "PROMO59547"
+    ],
+    "progress": [],
+    "contextSample": "92771      Orders: 0, Commissions: 0, Tracking: 0, Balance: 0   ✅ მაია ბექაური (mayabekauri@gmail.com): SM_BBZQGUIZ → PROMO26539      Orders: 0, Commissions: 0, Tracking: 45, Balance: 0   ✅ ქრისტინე ყუფუნია (kristina.kupunia.kris@mail.ru): SM_BEYVUFWK → PROMO30335      Orders: 0, Commissions: 0, Tra"
+  },
+  {
+    "email": "torchinavasophio@gmail.com",
+    "smSignals": 2,
+    "fileCount": 1,
+    "inDb": true,
+    "currentRole": "user",
+    "dbRef": null,
+    "dbPhone": null,
+    "phoneCandidates": [],
+    "refCodeCandidates": [
+      "PROMO26539",
+      "PROMO30335",
+      "PROMO60702",
+      "PROMO34158",
+      "PROMO42462",
+      "PROMO63143",
+      "PROMO25661",
+      "PROMO81750",
+      "PROMO59547",
+      "PROMO33276"
+    ],
+    "progress": [],
+    "contextSample": "Z → PROMO26539      Orders: 0, Commissions: 0, Tracking: 45, Balance: 0   ✅ ქრისტინე ყუფუნია (kristina.kupunia.kris@mail.ru): SM_BEYVUFWK → PROMO30335      Orders: 0, Commissions: 0, Tracking: 0, Balance: 0   ✅ თამარ ჩლაიძე  (tamuna777@yahoo.com): SM_DLK9DC0B → PROMO60702      Orders: 0, Commissions"
+  },
+  {
+    "email": "mirandasulamanidze2018@gmail.com",
+    "smSignals": 2,
+    "fileCount": 1,
+    "inDb": true,
+    "currentRole": "user",
+    "dbRef": null,
+    "dbPhone": null,
+    "phoneCandidates": [],
+    "refCodeCandidates": [
+      "PROMO30335",
+      "PROMO60702",
+      "PROMO34158",
+      "PROMO42462",
+      "PROMO63143",
+      "PROMO25661",
+      "PROMO81750",
+      "PROMO59547",
+      "PROMO33276",
+      "PROMO76030"
+    ],
+    "progress": [],
+    "contextSample": "): SM_BEYVUFWK → PROMO30335      Orders: 0, Commissions: 0, Tracking: 0, Balance: 0   ✅ თამარ ჩლაიძე  (tamuna777@yahoo.com): SM_DLK9DC0B → PROMO60702      Orders: 0, Commissions: 0, Tracking: 0, Balance: 0   ✅ ანა კვირიკაშვილი (anakvirikashvili055@gmail.com): SM_DNGC0492 → PROMO34158      Orders: 0,"
+  },
+  {
+    "email": "iamageorgiansoldier@gmail.com",
+    "smSignals": 2,
+    "fileCount": 1,
+    "inDb": true,
+    "currentRole": "user",
+    "dbRef": null,
+    "dbPhone": null,
+    "phoneCandidates": [],
+    "refCodeCandidates": [
+      "PROMO60702",
+      "PROMO34158",
+      "PROMO42462",
+      "PROMO63143",
+      "PROMO25661",
+      "PROMO81750",
+      "PROMO59547",
+      "PROMO33276",
+      "PROMO76030",
+      "PROMO60345"
+    ],
+    "progress": [],
+    "contextSample": "DC0B → PROMO60702      Orders: 0, Commissions: 0, Tracking: 0, Balance: 0   ✅ ანა კვირიკაშვილი (anakvirikashvili055@gmail.com): SM_DNGC0492 → PROMO34158      Orders: 0, Commissions: 0, Tracking: 3, Balance: 0   ✅ ინგა ჯანეზაშვილი (iingushka@gmail.com): SM_EBFD2K5L → PROMO42462      Orders: 0, Commis"
+  },
+  {
+    "email": "temurimakaradze@gmail.com",
+    "smSignals": 2,
+    "fileCount": 1,
+    "inDb": true,
+    "currentRole": "user",
+    "dbRef": null,
+    "dbPhone": null,
+    "phoneCandidates": [],
+    "refCodeCandidates": [
+      "GC0492",
+      "PROMO34158",
+      "PROMO42462",
+      "PROMO63143",
+      "PROMO25661",
+      "PROMO81750",
+      "PROMO59547",
+      "PROMO33276",
+      "PROMO76030",
+      "PROMO60345"
+    ],
+    "progress": [],
+    "contextSample": "GC0492 → PROMO34158      Orders: 0, Commissions: 0, Tracking: 3, Balance: 0   ✅ ინგა ჯანეზაშვილი (iingushka@gmail.com): SM_EBFD2K5L → PROMO42462      Orders: 0, Commissions: 0, Tracking: 0, Balance: 0   ✅ Sopia (torchinavasophio@gmail.com): SM_FWCYUWOS → PROMO63143      Orders: 0, Commissions: 0, Tr"
+  },
+  {
+    "email": "tamtanarimanidze8@gmail.com",
+    "smSignals": 2,
+    "fileCount": 1,
+    "inDb": true,
+    "currentRole": "user",
+    "dbRef": null,
+    "dbPhone": null,
+    "phoneCandidates": [],
+    "refCodeCandidates": [
+      "PROMO63143",
+      "PROMO25661",
+      "PROMO81750",
+      "PROMO59547",
+      "PROMO33276",
+      "PROMO76030",
+      "PROMO60345",
+      "PROMO99292",
+      "PROMO67909",
+      "PROMO57317"
+    ],
+    "progress": [],
+    "contextSample": "OS → PROMO63143      Orders: 0, Commissions: 0, Tracking: 0, Balance: 0   ✅ მირანდა (mirandasulamanidze2018@gmail.com): SM_GN9ZDX7R → PROMO25661      Orders: 0, Commissions: 0, Tracking: 0, Balance: 0   ✅ ალექსანდრე (iamageorgiansoldier@gmail.com): SM_HEDUJI7U → PROMO81750      Orders: 0, Commission"
+  },
+  {
+    "email": "georgeavsa1@gmail.com",
+    "smSignals": 2,
+    "fileCount": 1,
+    "inDb": true,
+    "currentRole": "user",
+    "dbRef": null,
+    "dbPhone": null,
+    "phoneCandidates": [],
+    "refCodeCandidates": [
+      "PROMO25661",
+      "PROMO81750",
+      "PROMO59547",
+      "PROMO33276",
+      "PROMO76030",
+      "PROMO60345",
+      "PROMO99292",
+      "PROMO67909",
+      "PROMO57317",
+      "PROMO47977"
+    ],
+    "progress": [],
+    "contextSample": "X7R → PROMO25661      Orders: 0, Commissions: 0, Tracking: 0, Balance: 0   ✅ ალექსანდრე (iamageorgiansoldier@gmail.com): SM_HEDUJI7U → PROMO81750      Orders: 0, Commissions: 0, Tracking: 0, Balance: 0   ✅ თემურ მაკარაძე (temurimakaradze@gmail.com): SM_IK8XCGN3 → PROMO59547      Orders: 0, Commissio"
+  },
+  {
+    "email": "mariamsadgobelashvili09@gmail.com",
+    "smSignals": 2,
+    "fileCount": 1,
+    "inDb": true,
+    "currentRole": "user",
+    "dbRef": null,
+    "dbPhone": null,
+    "phoneCandidates": [],
+    "refCodeCandidates": [
+      "PROMO81750",
+      "PROMO59547",
+      "PROMO33276",
+      "PROMO76030",
+      "PROMO60345",
+      "PROMO99292",
+      "PROMO67909",
+      "PROMO57317",
+      "PROMO47977",
+      "PROMO55728"
+    ],
+    "progress": [],
+    "contextSample": "): SM_HEDUJI7U → PROMO81750      Orders: 0, Commissions: 0, Tracking: 0, Balance: 0   ✅ თემურ მაკარაძე (temurimakaradze@gmail.com): SM_IK8XCGN3 → PROMO59547      Orders: 0, Commissions: 0, Tracking: 18, Balance: 0   ✅ ჯილდა არჯევანიძე (earjevanidzee@gmail.com): SM_IQ62QZ52 → PROMO33276      Orders:"
+  },
+  {
+    "email": "marina.aptsiauri61@gmail.com",
+    "smSignals": 2,
+    "fileCount": 2,
+    "inDb": true,
+    "currentRole": "seller",
+    "dbRef": null,
+    "dbPhone": "+995551515759",
+    "phoneCandidates": [],
+    "refCodeCandidates": [],
+    "progress": [],
+    "contextSample": "- discount: undefined lberoshvili@outlook.com : undefined - discount: undefined lbero20@freeuni.edu.ge : undefined - discount: undefined irene@gmail.com : undefined - discount: undefined Irina123@gmail.com : undefined - discount: undefined irina777@gmail.com : undefined - discount: undefined i.dalak"
+  },
+  {
+    "email": "nakodesigner21@gmail.com",
+    "smSignals": 2,
+    "fileCount": 2,
+    "inDb": true,
+    "currentRole": "seller",
+    "dbRef": null,
+    "dbPhone": "+995599499181",
+    "phoneCandidates": [],
+    "refCodeCandidates": [],
+    "progress": [],
+    "contextSample": "count: undefined lbero20@freeuni.edu.ge : undefined - discount: undefined irene@gmail.com : undefined - discount: undefined Irina123@gmail.com : undefined - discount: undefined irina777@gmail.com : undefined - discount: undefined i.dalakishvili@primeinsurance.ge : undefined - discount: undefined khu"
+  },
+  {
+    "email": "chkenkeli.leko@gmail.com",
+    "smSignals": 2,
+    "fileCount": 2,
+    "inDb": true,
+    "currentRole": "seller",
+    "dbRef": null,
+    "dbPhone": "+995551001300",
+    "phoneCandidates": [],
+    "refCodeCandidates": [],
+    "progress": [],
+    "contextSample": "unt: undefined irene@gmail.com : undefined - discount: undefined Irina123@gmail.com : undefined - discount: undefined irina777@gmail.com : undefined - discount: undefined i.dalakishvili@primeinsurance.ge : undefined - discount: undefined khubashvilinatia4@gmail.com : undefined - discount: undefined"
+  },
+  {
+    "email": "ma1975gda@gmail.com",
+    "smSignals": 2,
+    "fileCount": 2,
+    "inDb": true,
+    "currentRole": "seller",
+    "dbRef": null,
+    "dbPhone": "+995593612452",
+    "phoneCandidates": [],
+    "refCodeCandidates": [],
+    "progress": [],
+    "contextSample": "fined Irina123@gmail.com : undefined - discount: undefined irina777@gmail.com : undefined - discount: undefined i.dalakishvili@primeinsurance.ge : undefined - discount: undefined khubashvilinatia4@gmail.com : undefined - discount: undefined sofiotenadze@gmail.com : undefined - discount: undefined so"
+  },
+  {
+    "email": "msaxvadze777@gmail.com",
+    "smSignals": 2,
+    "fileCount": 2,
+    "inDb": true,
+    "currentRole": "seller",
+    "dbRef": null,
+    "dbPhone": "+995558189728",
+    "phoneCandidates": [],
+    "refCodeCandidates": [],
+    "progress": [],
+    "contextSample": "ined irina777@gmail.com : undefined - discount: undefined i.dalakishvili@primeinsurance.ge : undefined - discount: undefined khubashvilinatia4@gmail.com : undefined - discount: undefined sofiotenadze@gmail.com : undefined - discount: undefined sophikakhidze@gmail.com : undefined - discount: undefine"
+  },
+  {
+    "email": "makasekhniashvili30@gmail.com",
+    "smSignals": 2,
+    "fileCount": 2,
+    "inDb": true,
+    "currentRole": "seller",
+    "dbRef": "OEIH0948",
+    "dbPhone": "+995599989559",
+    "phoneCandidates": [],
+    "refCodeCandidates": [],
+    "progress": [],
+    "contextSample": "i.dalakishvili@primeinsurance.ge : undefined - discount: undefined khubashvilinatia4@gmail.com : undefined - discount: undefined sofiotenadze@gmail.com : undefined - discount: undefined sophikakhidze@gmail.com : undefined - discount: undefined caterina_inasaridze@yahoo.it : undefined - discount: un"
+  },
+  {
+    "email": "tamariqomet441@gmail.com",
+    "smSignals": 2,
+    "fileCount": 2,
+    "inDb": true,
+    "currentRole": "seller",
+    "dbRef": null,
+    "dbPhone": "+995599047183",
+    "phoneCandidates": [],
+    "refCodeCandidates": [],
+    "progress": [],
+    "contextSample": "ned khubashvilinatia4@gmail.com : undefined - discount: undefined sofiotenadze@gmail.com : undefined - discount: undefined sophikakhidze@gmail.com : undefined - discount: undefined caterina_inasaridze@yahoo.it : undefined - discount: undefined marina.aptsiauri61@gmail.com : undefined - discount: und"
+  },
+  {
+    "email": "aberoshvili91@gmail.com",
+    "smSignals": 2,
+    "fileCount": 2,
+    "inDb": true,
+    "currentRole": "seller",
+    "dbRef": "IEEH8PL4",
+    "dbPhone": "+995551000053",
+    "phoneCandidates": [],
+    "refCodeCandidates": [],
+    "progress": [],
+    "contextSample": "**ყველა პროდუქტზე: 1** (ერთი სელერი დაეთანხმა) - **ცალკეულ პროდუქტზე: 0** - **არ მონაწილეობს: 260** (259 null + 1 \"none\") - **პროდუქტი რეფ. ფასდაკლებით: 4** როცა სერვერი სრულად ჩაიტვირთება (ნახავთ \"Nest application successfully started\" ლოგს), განაახლეთ გვერდი. toolCalls toolInputRetry 7683e8f7-01"
+  },
+  {
+    "email": "mariam47@gmail.com",
+    "smSignals": 2,
+    "fileCount": 2,
+    "inDb": false,
+    "currentRole": "NOT_IN_DB",
+    "dbRef": null,
+    "dbPhone": null,
+    "phoneCandidates": [],
+    "refCodeCandidates": [],
+    "progress": [],
+    "contextSample": "aded 8 website pages  for AI knowledge base. Next refresh in 7 days.                                  ✅ CORS allowed origin: http://localhost:3000 ✅ CORS allowed origin: http://localhost:3000 [Nest] 11360  - 24.01.2026, 02:23:00     LOG [ReferralsService] [approveSellerAnd PayBonus] start sellerId=6"
+  },
+  {
+    "email": "sales@x.ai",
+    "smSignals": 2,
+    "fileCount": 2,
+    "inDb": false,
+    "currentRole": "NOT_IN_DB",
+    "dbRef": null,
+    "dbPhone": null,
+    "phoneCandidates": [],
+    "refCodeCandidates": [],
+    "progress": [],
+    "contextSample": "rack and review all user actions and API key usage with comprehensive, detailed logs.  [Image: Image] [Authorization controls](https://console.x.ai/) Precisely manage access through role-based access controls and fine-grained permissions.  [Image: Image] [Compliance](https://trust.x.ai/) Meet st"
+  },
+  {
+    "email": "tamuna999@gmail.com",
+    "smSignals": 2,
+    "fileCount": 1,
+    "inDb": true,
+    "currentRole": "seller",
+    "dbRef": "UL028J53",
+    "dbPhone": "+995599399669",
+    "phoneCandidates": [],
+    "refCodeCandidates": [
+      "3Z07PR9M",
+      "PC2JU95C",
+      "UL028J53",
+      "8ZAZKZ4T",
+      "T7AVWA"
+    ],
+    "progress": [],
+    "contextSample": "T7AVWA\"    totalReferrals: 1    campaignDiscountChoice: \"all\"    defaultReferralDiscount: 10 ================================================== Name: Tornike Otiashvili Email: otiashvilitornike891@gmail.com    referralBalance: 0    totalReferrals: 0    referralCode: \"3Z07PR9M\"    campaignDiscountCho"
+  },
+  {
+    "email": "davituri.tamar@mail.ru",
+    "smSignals": 2,
+    "fileCount": 1,
+    "inDb": true,
+    "currentRole": "seller",
+    "dbRef": "8ZAZKZ4T",
+    "dbPhone": "+995555251559",
+    "phoneCandidates": [],
+    "refCodeCandidates": [
+      "3Z07PR9M",
+      "PC2JU95C",
+      "UL028J53",
+      "8ZAZKZ4T"
+    ],
+    "progress": [],
+    "contextSample": "otiashvilitornike891@gmail.com    referralBalance: 0    totalReferrals: 0    referralCode: \"3Z07PR9M\"    campaignDiscountChoice: \"all\"    defaultReferralDiscount: 10 ================================================== Name: Tamar Basilia's Art Email: tamarbasilia789@gmail.com    referralBalance: 0"
+  },
+  {
+    "email": "lev.ani.comp@gmail.com",
+    "smSignals": 2,
+    "fileCount": 1,
+    "inDb": true,
+    "currentRole": "user",
+    "dbRef": null,
+    "dbPhone": null,
+    "phoneCandidates": [],
+    "refCodeCandidates": [
+      "PC2JU95C",
+      "UL028J53",
+      "8ZAZKZ4T"
+    ],
+    "progress": [],
+    "contextSample": "========================================= Name: Tamar Basilia's Art Email: tamarbasilia789@gmail.com    referralBalance: 0    totalReferrals: 0    referralCode: \"PC2JU95C\" ================================================== Name: Tamara Dvali Email: tamuna999@gmail.com    referralBalance: 0    totalR"
+  },
+  {
+    "email": "soulart.georgia@gmail.com",
+    "smSignals": 1,
+    "fileCount": 1,
+    "inDb": true,
+    "currentRole": "user",
+    "dbRef": null,
+    "dbPhone": null,
+    "phoneCandidates": [],
+    "refCodeCandidates": [],
+    "progress": [],
+    "contextSample": "urs ago\r Expanding our NVIDIA partnership: Now shipping A4X Max, Vertex AI Training, and more\r 16 hours ago\r Read all news\r \r Read all release notes\r \r Documentation\r Learn about Compute Engine\r Learn about Cloud Storage\r Learn about Cloud Run რა ავირჩიო </userRequest> type cacheType ephemeral tool"
+  },
+  {
+    "email": "lberoshvili@outlook.com",
+    "smSignals": 1,
+    "fileCount": 1,
+    "inDb": true,
+    "currentRole": "seller",
+    "dbRef": null,
+    "dbPhone": "+995596000054",
+    "phoneCandidates": [],
+    "refCodeCandidates": [],
+    "progress": [],
+    "contextSample": "\"none\") - **პროდუქტი რეფ. ფასდაკლებით: 4** როცა სერვერი სრულად ჩაიტვირთება (ნახავთ \"Nest application successfully started\" ლოგს), განაახლეთ გვერდი. toolCalls toolInputRetry 7683e8f7-0130-4f47-8b0a-fe72dc9df88d toolCallResults toolu_vrtx_01KiS1sMbg3ayv7yYpdoxsME__vscode-1768418899792 $mid content $m"
+  },
+  {
+    "email": "vexsi007@gmail.com",
+    "smSignals": 1,
+    "fileCount": 1,
+    "inDb": true,
+    "currentRole": "user",
+    "dbRef": "72TJDBCT",
+    "dbPhone": "+995577300480",
+    "phoneCandidates": [],
+    "refCodeCandidates": [],
+    "progress": [],
+    "contextSample": "33752  - 13.11.2025, 02:07:44     LOG [IndexCleanupService] Index cleanup completed [Nest] 33752  - 13.11.2025, 02:07:44     LOG [ReferralMaintenanceService] ⚡ Skipping referral main tenance in development mode for faster startup                                                     🔄 Starting devic"
+  },
+  {
+    "email": "mxatvari@gmail.com",
+    "smSignals": 1,
+    "fileCount": 1,
+    "inDb": true,
+    "currentRole": "seller",
+    "dbRef": "HK35V6WJ",
+    "dbPhone": "+995551000059",
+    "phoneCandidates": [],
+    "refCodeCandidates": [],
+    "progress": [],
+    "contextSample": "025, 02:07:44     LOG [ReferralMaintenanceService] ⚡ Skipping referral main tenance in development mode for faster startup                                                     🔄 Starting device tokens migration... Found 189 users with devices ✅ Updated user beroshviliani100@gmail.com - migrated 1 de"
+  },
+  {
+    "email": "nino.kvitashvili.1@iliauni.edu.ge",
+    "smSignals": 1,
+    "fileCount": 1,
+    "inDb": true,
+    "currentRole": "seller",
+    "dbRef": "EAO3AQRA",
+    "dbPhone": "+995597143445",
+    "phoneCandidates": [],
+    "refCodeCandidates": [],
+    "progress": [
+      "20%",
+      "15%",
+      "10%",
+      "30%"
+    ],
+    "contextSample": "ce: all defaultReferralDiscount: 10 Total products: 21 With promo: 17 Without promo: 4 toolu_vrtx_011ST8JvfR7DPsSQVwwV5G4W__vscode-1770719019747 $mid content $mid value Note: The tool simplified the command to `node scripts/fix-existing-products-promo.js`, and this is the output of running that com"
+  }
+]

@@ -5,7 +5,9 @@ require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
 const USER_ID = '68e8fe72f10079410087add2';
 
 function normalizeText(value) {
-  return String(value || '').replace(/\s+/g, ' ').trim();
+  return String(value || '')
+    .replace(/\s+/g, ' ')
+    .trim();
 }
 
 function normalizeDimensions(dimensions) {
@@ -13,7 +15,9 @@ function normalizeDimensions(dimensions) {
   const width = Number(dimensions.width || 0);
   const height = Number(dimensions.height || 0);
   const depth = Number(dimensions.depth || 0);
-  const unit = String(dimensions.unit || 'cm').trim().toLowerCase();
+  const unit = String(dimensions.unit || 'cm')
+    .trim()
+    .toLowerCase();
   return `${width}|${height}|${depth}|${unit}`;
 }
 
@@ -33,7 +37,10 @@ async function main() {
   const col = db.collection('products');
 
   const uid = new ObjectId(USER_ID);
-  const docs = await col.find({ user: uid }).sort({ createdAt: 1, _id: 1 }).toArray();
+  const docs = await col
+    .find({ user: uid })
+    .sort({ createdAt: 1, _id: 1 })
+    .toArray();
   const seen = new Map();
   const dupeIds = [];
 

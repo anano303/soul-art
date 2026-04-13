@@ -1,0 +1,1422 @@
+{
+  "scannedFiles": 87,
+  "extractedEmails": 169,
+  "filteredEmails": 153,
+  "emailsWithPhoneCandidates": 14,
+  "filteredOut": [
+    "124179773+anano303@users.noreply.github.com",
+    "admin@cluster0.1jq3b.mongodb.net",
+    "admin@example.com",
+    "api@bog.ge",
+    "customer@example.com",
+    "hello@ollama.com",
+    "integration@bog.ge",
+    "jane@example.com",
+    "john@example.com",
+    "name@example.com",
+    "niko@example.ge",
+    "no-reply@example.com",
+    "test2@example.com",
+    "test@example.com",
+    "test@example.ge",
+    "user@example.com"
+  ],
+  "missingUsers": [],
+  "existingUsers": [
+    {
+      "_id": "67d9f49d2b4e2ec3e66a8d91",
+      "email": "aberoshvili91@gmail.com",
+      "name": "Ani Beroshvili",
+      "role": "seller",
+      "phoneNumber": "+995551000053"
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a3e",
+      "email": "abramishvilidaviti.98@gmail.com",
+      "name": "Abramishvilidaviti 98",
+      "role": "user",
+      "phoneNumber": null
+    },
+    {
+      "_id": "67ddd2f32148c94ba0ebd89f",
+      "email": "admin@gmail.com",
+      "name": "SoulArt",
+      "role": "admin",
+      "phoneNumber": null
+    },
+    {
+      "_id": "69cf6c5bddb4cc92abe95232",
+      "email": "admin@soulart.ge",
+      "name": "Admin",
+      "role": "admin",
+      "phoneNumber": null
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a3f",
+      "email": "anakvirikashvili055@gmail.com",
+      "name": "Anakvirikashvili055",
+      "role": "user",
+      "phoneNumber": null
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a40",
+      "email": "anano303@mail.ru",
+      "name": "Anano303",
+      "role": "user",
+      "phoneNumber": null
+    },
+    {
+      "_id": "67da9c42cb0788b4418840c9",
+      "email": "anano3031@gmail.com",
+      "name": "ani beroshvili",
+      "role": "user",
+      "phoneNumber": null
+    },
+    {
+      "_id": "68da9daeef78827aa775d382",
+      "email": "archilkux@gmail.com",
+      "name": "არჩილ კუხიანიძე",
+      "role": "seller",
+      "phoneNumber": "+995555657161"
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a41",
+      "email": "artadmin@gmail.com",
+      "name": "Artadmin",
+      "role": "user",
+      "phoneNumber": null
+    },
+    {
+      "_id": "69cf7c5f4a134117ed38dd70",
+      "email": "beroshviliani100@gmail.com",
+      "name": "უცნობი",
+      "role": "seller",
+      "phoneNumber": "+995577300480"
+    },
+    {
+      "_id": "68eb9ceaec74a1f3d8c54aea",
+      "email": "davituri.tamar@mail.ru",
+      "name": "TAMAR Art. &. Design",
+      "role": "seller",
+      "phoneNumber": "+995555251559"
+    },
+    {
+      "_id": "68e8204ef10079410087249b",
+      "email": "doijashvili.mariami@gmail.com",
+      "name": "Mariam doijashvili",
+      "role": "seller",
+      "phoneNumber": "+995598252997"
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a42",
+      "email": "earjevanidzee@gmail.com",
+      "name": "Earjevanidzee",
+      "role": "user",
+      "phoneNumber": null
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a43",
+      "email": "eka.soubeliani@yahoo.com",
+      "name": "Eka Soubeliani",
+      "role": "user",
+      "phoneNumber": null
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a44",
+      "email": "elo_mai@yahoo.com",
+      "name": "Elo Mai",
+      "role": "user",
+      "phoneNumber": null
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a45",
+      "email": "example@mail.com",
+      "name": "Example",
+      "role": "user",
+      "phoneNumber": "+995555123456"
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a46",
+      "email": "ga4-analytics-reader@soulart-analytics.iam.gserviceaccount.com",
+      "name": "Ga4 Analytics Reader",
+      "role": "user",
+      "phoneNumber": null
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a47",
+      "email": "georgeavsa1@gmail.com",
+      "name": "Georgeavsa1",
+      "role": "user",
+      "phoneNumber": null
+    },
+    {
+      "_id": "68dc257cef0b5ad53f30adf2",
+      "email": "ghonghadzemariam@icloud.com",
+      "name": "ბროწეულა",
+      "role": "seller",
+      "phoneNumber": "+995500902558"
+    },
+    {
+      "_id": "68ef5ace07ac24b303df5e7b",
+      "email": "guram.jokhadze60@gmail.com",
+      "name": "გურამ ჯოხაძე",
+      "role": "user",
+      "phoneNumber": null
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a48",
+      "email": "hr.higia@gmail.com",
+      "name": "Hr Higia",
+      "role": "user",
+      "phoneNumber": null
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a49",
+      "email": "iamageorgiansoldier@gmail.com",
+      "name": "Iamageorgiansoldier",
+      "role": "user",
+      "phoneNumber": null
+    },
+    {
+      "_id": "68ea075af10079410088533a",
+      "email": "ichegiani7@gmail.com",
+      "name": "Irine chegiani",
+      "role": "user",
+      "phoneNumber": null
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a4a",
+      "email": "iingushka@gmail.com",
+      "name": "Iingushka",
+      "role": "user",
+      "phoneNumber": null
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a4b",
+      "email": "ikaadeishvili79@gmail.com",
+      "name": "Ikaadeishvili79",
+      "role": "user",
+      "phoneNumber": "+995558750458"
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a4c",
+      "email": "info@bestsoft.ge",
+      "name": "Info",
+      "role": "user",
+      "phoneNumber": null
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a4d",
+      "email": "info@soulart.ge",
+      "name": "Info",
+      "role": "user",
+      "phoneNumber": "+995551000059"
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a4e",
+      "email": "johndoe@gmail.com",
+      "name": "Johndoe",
+      "role": "user",
+      "phoneNumber": "+995555000000"
+    },
+    {
+      "_id": "68ea06e7f1007941008852cc",
+      "email": "kapusha1818@gmail.com",
+      "name": "beka kapanadze",
+      "role": "user",
+      "phoneNumber": null
+    },
+    {
+      "_id": "68d910e083c6d6636d5734ff",
+      "email": "kiladzelali49@gmail.com",
+      "name": "Lali Kiladze",
+      "role": "user",
+      "phoneNumber": null
+    },
+    {
+      "_id": "68d911df83c6d6636d57358b",
+      "email": "kiladzelali49@gmaill.com",
+      "name": "lali kiladze",
+      "role": "seller",
+      "phoneNumber": "+995599194502"
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a4f",
+      "email": "kristina.kupunia.kris@mail.ru",
+      "name": "Kristina Kupunia Kris",
+      "role": "user",
+      "phoneNumber": null
+    },
+    {
+      "_id": "68b2765cf24e3c8efcb2db84",
+      "email": "lbero15@freeuni.edu.ge",
+      "name": "Levan Beroshvili",
+      "role": "user",
+      "phoneNumber": null
+    },
+    {
+      "_id": "67ebcd702830ad8fd4656ea6",
+      "email": "lbero20@freeuni.edu.ge",
+      "name": "Levan Beroshvili",
+      "role": "user",
+      "phoneNumber": null
+    },
+    {
+      "_id": "68dbbfb26c24b05d08e6162a",
+      "email": "lberoshvili@soulart.ge",
+      "name": "Levan Beroshvili",
+      "role": "admin",
+      "phoneNumber": null
+    },
+    {
+      "_id": "67e022806b9d0cba1fa30d5e",
+      "email": "lberoshvili9@gmail.com",
+      "name": "Levan Beroshvili",
+      "role": "seller",
+      "phoneNumber": "+995596000054"
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a50",
+      "email": "lev.ani.comp@gmail.com",
+      "name": "Lev Ani Comp",
+      "role": "user",
+      "phoneNumber": null
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a51",
+      "email": "maikogigolashvili909@gmail.com",
+      "name": "Maikogigolashvili909",
+      "role": "user",
+      "phoneNumber": null
+    },
+    {
+      "_id": "68448304d53e41a14d1a6a2b",
+      "email": "makasekhniashvili30@gmail.com",
+      "name": "Maka",
+      "role": "seller",
+      "phoneNumber": "+995599989559"
+    },
+    {
+      "_id": "68fa62f1a245530b73c66f37",
+      "email": "margalita2024@gmail.com",
+      "name": "Mari.Anna. undefined",
+      "role": "user",
+      "phoneNumber": null
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a52",
+      "email": "mariamchakvetadze2025@gmail.com",
+      "name": "Mariamchakvetadze2025",
+      "role": "user",
+      "phoneNumber": null
+    },
+    {
+      "_id": "68dc20f7b13b17af25353767",
+      "email": "mariamighonghadze81@gmail.com",
+      "name": "mariami ghonghadze",
+      "role": "user",
+      "phoneNumber": null
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a53",
+      "email": "mariammiqo@gmail.com",
+      "name": "Mariammiqo",
+      "role": "user",
+      "phoneNumber": null
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a54",
+      "email": "mariamsadgobelashvili09@gmail.com",
+      "name": "Mariamsadgobelashvili09",
+      "role": "user",
+      "phoneNumber": null
+    },
+    {
+      "_id": "68d9742d83c6d6636d5761d8",
+      "email": "mariamtyesheliaze@gmali.com",
+      "name": "M A R I A M I",
+      "role": "seller",
+      "phoneNumber": "+995597764366"
+    },
+    {
+      "_id": "68d7b7e204476495418cd58a",
+      "email": "marian.suyashvili@gmail.com",
+      "name": "Mariam Suyashvili",
+      "role": "user",
+      "phoneNumber": null
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a55",
+      "email": "mayabekauri@gmail.com",
+      "name": "Mayabekauri",
+      "role": "user",
+      "phoneNumber": null
+    },
+    {
+      "_id": "68ea83d2f10079410088c75f",
+      "email": "meskhigalaqtion@gmail.com",
+      "name": "Meskhiart",
+      "role": "seller",
+      "phoneNumber": "+995579946337"
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a56",
+      "email": "mirandasulamanidze2018@gmail.com",
+      "name": "Mirandasulamanidze2018",
+      "role": "user",
+      "phoneNumber": null
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a57",
+      "email": "mrmgoletiani@gmail.com",
+      "name": "Mrmgoletiani",
+      "role": "user",
+      "phoneNumber": null
+    },
+    {
+      "_id": "68d166a53345873bd598f9cd",
+      "email": "mxatvari@gmail.com",
+      "name": "მხატვარი",
+      "role": "seller",
+      "phoneNumber": "+995551000059"
+    },
+    {
+      "_id": "68d168813345873bd598fbb0",
+      "email": "mxatvari123@gmail.com",
+      "name": "შპს მხატვარი",
+      "role": "seller",
+      "phoneNumber": "+995551000059"
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a58",
+      "email": "n@soulart.ge",
+      "name": "N",
+      "role": "user",
+      "phoneNumber": null
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a59",
+      "email": "naberoshvili91@gmail.com",
+      "name": "Naberoshvili91",
+      "role": "user",
+      "phoneNumber": null
+    },
+    {
+      "_id": "680f2241fbb0ca048b87366a",
+      "email": "nakodesigner21@gmail.com",
+      "name": "NAKO design and sewing scool",
+      "role": "seller",
+      "phoneNumber": "+995599499181"
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a5a",
+      "email": "naniko.rigavava@gmail.com",
+      "name": "Naniko Rigavava",
+      "role": "user",
+      "phoneNumber": null
+    },
+    {
+      "_id": "68dbf6c9b13b17af253530b4",
+      "email": "naxatebi@gmail.com",
+      "name": "შპს ნახატები",
+      "role": "seller",
+      "phoneNumber": "+995551000059"
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a5b",
+      "email": "nberoshviliani100@gmail.com",
+      "name": "Nberoshviliani100",
+      "role": "user",
+      "phoneNumber": null
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a5c",
+      "email": "ncaterina_inasaridze@yahoo.it",
+      "name": "Ncaterina Inasaridze",
+      "role": "user",
+      "phoneNumber": null
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a5d",
+      "email": "nchkenkeli.leko@gmail.com",
+      "name": "Nchkenkeli Leko",
+      "role": "user",
+      "phoneNumber": null
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a5e",
+      "email": "newadmin@gmail.com",
+      "name": "Newadmin",
+      "role": "user",
+      "phoneNumber": null
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a5f",
+      "email": "ni.dalakishvili@primeinsurance.ge",
+      "name": "Ni Dalakishvili",
+      "role": "user",
+      "phoneNumber": null
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a60",
+      "email": "niinsudadze0123@gmail.com",
+      "name": "Niinsudadze0123",
+      "role": "user",
+      "phoneNumber": null
+    },
+    {
+      "_id": "68448557d53e41a14d1a6c0d",
+      "email": "nikalana2024@gmail.com",
+      "name": "Nika Muxa",
+      "role": "user",
+      "phoneNumber": null
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a61",
+      "email": "ninanm777@gmail.com",
+      "name": "Ninanm777",
+      "role": "user",
+      "phoneNumber": null
+    },
+    {
+      "_id": "68d2fbb06e5b230d0a69ef59",
+      "email": "ninaratchvelishvili@gmail.com",
+      "name": "Nina Ratchvelishvili",
+      "role": "user",
+      "phoneNumber": null
+    },
+    {
+      "_id": "6900a9ba5f495a4929c593e2",
+      "email": "ninibaramashvili02@gmail.com",
+      "name": "Nini",
+      "role": "blogger",
+      "phoneNumber": null
+    },
+    {
+      "_id": "68dd2de98443c8f8dbec1497",
+      "email": "nino.kvitashvili.1@iliauni.edu.ge",
+      "name": "Jeweluxe ",
+      "role": "seller",
+      "phoneNumber": "+995597143445"
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a62",
+      "email": "nirene@gmail.com",
+      "name": "Nirene",
+      "role": "user",
+      "phoneNumber": null
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a63",
+      "email": "nirina123@gmail.com",
+      "name": "Nirina123",
+      "role": "user",
+      "phoneNumber": null
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a64",
+      "email": "nirina777@gmail.com",
+      "name": "Nirina777",
+      "role": "user",
+      "phoneNumber": null
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a65",
+      "email": "nkhubashvilinatia4@gmail.com",
+      "name": "Nkhubashvilinatia4",
+      "role": "user",
+      "phoneNumber": null
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a66",
+      "email": "nlbero20@freeuni.edu.ge",
+      "name": "Nlbero20",
+      "role": "user",
+      "phoneNumber": null
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a68",
+      "email": "nlberoshvili@outlook.com",
+      "name": "Nlberoshvili",
+      "role": "user",
+      "phoneNumber": null
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a67",
+      "email": "nlberoshvili9@gmail.com",
+      "name": "Nlberoshvili9",
+      "role": "user",
+      "phoneNumber": null
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a69",
+      "email": "nma1975gda@gmail.com",
+      "name": "Nma1975gda",
+      "role": "user",
+      "phoneNumber": null
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a6a",
+      "email": "nmakasekhniashvili30@gmail.com",
+      "name": "Nmakasekhniashvili30",
+      "role": "user",
+      "phoneNumber": null
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a6b",
+      "email": "nmariam47@gmail.com",
+      "name": "Nmariam47",
+      "role": "user",
+      "phoneNumber": null
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a6c",
+      "email": "nmarina.aptsiauri61@gmail.com",
+      "name": "Nmarina Aptsiauri61",
+      "role": "user",
+      "phoneNumber": null
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a6d",
+      "email": "nmsaxvadze777@gmail.com",
+      "name": "Nmsaxvadze777",
+      "role": "user",
+      "phoneNumber": null
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a6e",
+      "email": "nna@gmail.com",
+      "name": "Nna",
+      "role": "user",
+      "phoneNumber": null
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a6f",
+      "email": "nnakodesigner21@gmail.com",
+      "name": "Nnakodesigner21",
+      "role": "user",
+      "phoneNumber": null
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a70",
+      "email": "noreply@soulart.ge",
+      "name": "Noreply",
+      "role": "user",
+      "phoneNumber": null
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a71",
+      "email": "notifications@soulart.ge",
+      "name": "Notifications",
+      "role": "user",
+      "phoneNumber": null
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a72",
+      "email": "nsofiotenadze@gmail.com",
+      "name": "Nsofiotenadze",
+      "role": "user",
+      "phoneNumber": null
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a73",
+      "email": "nsophikakhidze@gmail.com",
+      "name": "Nsophikakhidze",
+      "role": "user",
+      "phoneNumber": null
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a74",
+      "email": "nsoulart.georgia@gmail.com",
+      "name": "Nsoulart Georgia",
+      "role": "user",
+      "phoneNumber": null
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a75",
+      "email": "nsoulartani@gmail.com",
+      "name": "Nsoulartani",
+      "role": "user",
+      "phoneNumber": null
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a76",
+      "email": "nsupport@veli.store",
+      "name": "Nsupport",
+      "role": "user",
+      "phoneNumber": null
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a77",
+      "email": "ntamariqomet441@gmail.com",
+      "name": "Ntamariqomet441",
+      "role": "user",
+      "phoneNumber": null
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a78",
+      "email": "ofcsandro31@gmail.com",
+      "name": "Ofcsandro31",
+      "role": "user",
+      "phoneNumber": null
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a79",
+      "email": "ofsandro31@gmail.com",
+      "name": "Ofsandro31",
+      "role": "user",
+      "phoneNumber": null
+    },
+    {
+      "_id": "68e8fe72f10079410087add2",
+      "email": "otiashvilitornike891@gmail.com",
+      "name": "Tornike Otiashvili",
+      "role": "seller",
+      "phoneNumber": "+995571068108"
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a7a",
+      "email": "pending@payment.com",
+      "name": "Pending",
+      "role": "user",
+      "phoneNumber": null
+    },
+    {
+      "_id": "68ea44a5f100794100888f2f",
+      "email": "picasso9804@gmail.com",
+      "name": "Omari Alania",
+      "role": "user",
+      "phoneNumber": null
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a7b",
+      "email": "pngwing.com@gmail.com",
+      "name": "Pngwing Com",
+      "role": "user",
+      "phoneNumber": null
+    },
+    {
+      "_id": "68d7cfe79536899269b3b110",
+      "email": "pxakadze200@gmail.com",
+      "name": "Გიორგი undefined",
+      "role": "user",
+      "phoneNumber": null
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a7c",
+      "email": "qazqaz111@soulart.b16ew.mongodb.net",
+      "name": "Qazqaz111",
+      "role": "user",
+      "phoneNumber": null
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a7d",
+      "email": "qetoivanelashvili@gmail.com",
+      "name": "Qetoivanelashvili",
+      "role": "user",
+      "phoneNumber": null
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a7e",
+      "email": "real@user.com",
+      "name": "Real",
+      "role": "user",
+      "phoneNumber": null
+    },
+    {
+      "_id": "690895714dd08fbc597ab143",
+      "email": "rusamoo6@gmail.com",
+      "name": "რუსუდანი",
+      "role": "user",
+      "phoneNumber": null
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a7f",
+      "email": "sales@gmail.com",
+      "name": "Sales",
+      "role": "user",
+      "phoneNumber": "+995577300480"
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a80",
+      "email": "sales@x.ai",
+      "name": "Sales",
+      "role": "user",
+      "phoneNumber": null
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a81",
+      "email": "salesani@gmail.com",
+      "name": "Salesani",
+      "role": "user",
+      "phoneNumber": null
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a82",
+      "email": "salesanni@gmail.com",
+      "name": "Salesanni",
+      "role": "user",
+      "phoneNumber": "+995577300480"
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a83",
+      "email": "salokhozrevanidze21@gmail.com",
+      "name": "Salokhozrevanidze21",
+      "role": "user",
+      "phoneNumber": null
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a84",
+      "email": "samkharadzenini31@gamil.com",
+      "name": "Samkharadzenini31",
+      "role": "user",
+      "phoneNumber": null
+    },
+    {
+      "_id": "68dcb19d8443c8f8dbebfd56",
+      "email": "sarishvilianushka@mail.ru",
+      "name": "ანა",
+      "role": "seller",
+      "phoneNumber": "+995598898598"
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a85",
+      "email": "sel@bestsoft.ge",
+      "name": "Sel",
+      "role": "user",
+      "phoneNumber": null
+    },
+    {
+      "_id": "687abca13318016b07bdd9ac",
+      "email": "seller@gmail.com",
+      "name": "Painter Ani",
+      "role": "seller",
+      "phoneNumber": "+995577300480"
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a86",
+      "email": "seller2222@gmail.com",
+      "name": "Seller2222",
+      "role": "user",
+      "phoneNumber": null
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a87",
+      "email": "selleras@gmail.com",
+      "name": "Selleras",
+      "role": "user",
+      "phoneNumber": null
+    },
+    {
+      "_id": "68df8e58614abcab4a2bab64",
+      "email": "shioshvilimariam47@gmail.com",
+      "name": "mariami’s art",
+      "role": "seller",
+      "phoneNumber": "+995599759271"
+    },
+    {
+      "_id": "68d966af83c6d6636d575ef7",
+      "email": "sofo.pataraia@list.ru",
+      "name": "სოფო ",
+      "role": "seller",
+      "phoneNumber": "+995579277071"
+    },
+    {
+      "_id": "68dab515ef78827aa775db0c",
+      "email": "sosoafriamashvili24@gmail.com",
+      "name": "OTO ART",
+      "role": "seller",
+      "phoneNumber": "+995598111926"
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a88",
+      "email": "soulart-analytics@your-project.iam.gserviceaccount.com",
+      "name": "Soulart Analytics",
+      "role": "user",
+      "phoneNumber": null
+    },
+    {
+      "_id": "691500bdcd3a7d8dd482cc1e",
+      "email": "soulart.georgia@gmail.com",
+      "name": "Soul Art",
+      "role": "user",
+      "phoneNumber": null
+    },
+    {
+      "_id": "67dffdfb8001df3ab22cfff3",
+      "email": "soulartani@gmail.com",
+      "name": "Soul Art",
+      "role": "user",
+      "phoneNumber": null
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a89",
+      "email": "soulartani@soulart.b16ew.mongodb.net",
+      "name": "Soulartani",
+      "role": "user",
+      "phoneNumber": null
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a8a",
+      "email": "soulartgeorgia@gmail.com",
+      "name": "Soulartgeorgia",
+      "role": "user",
+      "phoneNumber": null
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a8b",
+      "email": "support@soulart.ge",
+      "name": "Support",
+      "role": "user",
+      "phoneNumber": null
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a8c",
+      "email": "support@veli.store",
+      "name": "Support",
+      "role": "user",
+      "phoneNumber": null
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a8d",
+      "email": "support@x.ai",
+      "name": "Support",
+      "role": "user",
+      "phoneNumber": null
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a8e",
+      "email": "sverunasveri@gmail.com",
+      "name": "Sverunasveri",
+      "role": "user",
+      "phoneNumber": null
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a8f",
+      "email": "tabatadzedali33@gmail.com",
+      "name": "Tabatadzedali33",
+      "role": "user",
+      "phoneNumber": null
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a90",
+      "email": "tadminnew@gmail.com",
+      "name": "Tadminnew",
+      "role": "user",
+      "phoneNumber": null
+    },
+    {
+      "_id": "68e9e11bf100794100883461",
+      "email": "tamarbasilia789@gmail.com",
+      "name": "Tamar Basilia's Art",
+      "role": "seller",
+      "phoneNumber": "+995593390027"
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a91",
+      "email": "tamari.dardaganidze.1@gmail.com",
+      "name": "Tamari Dardaganidze 1",
+      "role": "user",
+      "phoneNumber": null
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a92",
+      "email": "tamtanarimanidze8@gmail.com",
+      "name": "Tamtanarimanidze8",
+      "role": "user",
+      "phoneNumber": null
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a93",
+      "email": "tamuna777@yahoo.com",
+      "name": "Tamuna777",
+      "role": "user",
+      "phoneNumber": null
+    },
+    {
+      "_id": "68e8dfd1f10079410087962a",
+      "email": "tamuna999@gmail.com",
+      "name": "Tamara Dvali",
+      "role": "seller",
+      "phoneNumber": "+995599399669"
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a94",
+      "email": "teasamadashvili1980@gmail.com",
+      "name": "Teasamadashvili1980",
+      "role": "user",
+      "phoneNumber": null
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a95",
+      "email": "temurimakaradze@gmail.com",
+      "name": "Temurimakaradze",
+      "role": "user",
+      "phoneNumber": null
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a96",
+      "email": "teonazarandia29@gmail.com",
+      "name": "Teonazarandia29",
+      "role": "user",
+      "phoneNumber": null
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a97",
+      "email": "test@production.com",
+      "name": "Test",
+      "role": "user",
+      "phoneNumber": null
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a98",
+      "email": "test@soulart.ge",
+      "name": "Test",
+      "role": "user",
+      "phoneNumber": null
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a99",
+      "email": "testref@gmail.com",
+      "name": "Testref",
+      "role": "user",
+      "phoneNumber": null
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a9a",
+      "email": "text2sale@gmail.com",
+      "name": "Text2sale",
+      "role": "user",
+      "phoneNumber": "+995577300480"
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a9b",
+      "email": "tony.johnes@ymail.com",
+      "name": "Tony Johnes",
+      "role": "user",
+      "phoneNumber": null
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a9c",
+      "email": "torchinavasophio@gmail.com",
+      "name": "Torchinavasophio",
+      "role": "user",
+      "phoneNumber": null
+    },
+    {
+      "_id": "69cf89dbe95e07bbacb8ef3a",
+      "email": "tsindelianiirma20@gmail.com",
+      "name": "Irma Tsindeliani",
+      "role": "user",
+      "phoneNumber": null
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a9d",
+      "email": "tsuladzekato@gmail.com",
+      "name": "Tsuladzekato",
+      "role": "user",
+      "phoneNumber": null
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a9e",
+      "email": "ttexaseli@gmail.ru",
+      "name": "Ttexaseli",
+      "role": "user",
+      "phoneNumber": null
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a9f",
+      "email": "unknown@unknown.com",
+      "name": "Unknown",
+      "role": "user",
+      "phoneNumber": null
+    },
+    {
+      "_id": "68ae28730c19e3d8ee9ce1ac",
+      "email": "vasoratchvelishvili@gmail.com",
+      "name": "Vaso Ratchvelishvili",
+      "role": "user",
+      "phoneNumber": null
+    },
+    {
+      "_id": "69d751dce0897a364fcd2aa0",
+      "email": "verifyemailbybestsoft@gmail.com",
+      "name": "Verifyemailbybestsoft",
+      "role": "user",
+      "phoneNumber": null
+    },
+    {
+      "_id": "67f58331a1ebbaf22ac1daa2",
+      "email": "vexsi007@gmail.com",
+      "name": "Vaso Ratchvelishvili",
+      "role": "user",
+      "phoneNumber": "+995577300480"
+    },
+    {
+      "_id": "69d751dce0897a364fcd2aa1",
+      "email": "x.kilasonia97@gmail.com",
+      "name": "X Kilasonia97",
+      "role": "user",
+      "phoneNumber": null
+    },
+    {
+      "_id": "69d751dce0897a364fcd2aa5",
+      "email": "your_email@gmail.com",
+      "name": "Your Email",
+      "role": "user",
+      "phoneNumber": null
+    },
+    {
+      "_id": "69d751dce0897a364fcd2aa6",
+      "email": "your_password@cluster.mongodb.net",
+      "name": "Your Password",
+      "role": "user",
+      "phoneNumber": null
+    },
+    {
+      "_id": "69d751dce0897a364fcd2aa2",
+      "email": "your-email@domain.com",
+      "name": "Your Email",
+      "role": "user",
+      "phoneNumber": null
+    },
+    {
+      "_id": "69d751dce0897a364fcd2aa3",
+      "email": "your-email@gmail.com",
+      "name": "Your Email",
+      "role": "user",
+      "phoneNumber": null
+    },
+    {
+      "_id": "69d751dce0897a364fcd2aa4",
+      "email": "your@email.com",
+      "name": "Your",
+      "role": "user",
+      "phoneNumber": null
+    }
+  ],
+  "insertedUsers": 0,
+  "phoneUpdatesForExistingUsers": [],
+  "appliedPhoneUpdates": 0,
+  "roleUpdatesForExistingUsers": [
+    {
+      "_id": "69d751dce0897a364fcd2a3f",
+      "email": "anakvirikashvili055@gmail.com",
+      "oldRole": "user",
+      "newRole": "sales_manager"
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a40",
+      "email": "anano303@mail.ru",
+      "oldRole": "user",
+      "newRole": "seller"
+    },
+    {
+      "_id": "67da9c42cb0788b4418840c9",
+      "email": "anano3031@gmail.com",
+      "oldRole": "user",
+      "newRole": "admin"
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a41",
+      "email": "artadmin@gmail.com",
+      "oldRole": "user",
+      "newRole": "admin"
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a47",
+      "email": "georgeavsa1@gmail.com",
+      "oldRole": "user",
+      "newRole": "sales_manager"
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a48",
+      "email": "hr.higia@gmail.com",
+      "oldRole": "user",
+      "newRole": "sales_manager"
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a49",
+      "email": "iamageorgiansoldier@gmail.com",
+      "oldRole": "user",
+      "newRole": "sales_manager"
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a4a",
+      "email": "iingushka@gmail.com",
+      "oldRole": "user",
+      "newRole": "sales_manager"
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a4b",
+      "email": "ikaadeishvili79@gmail.com",
+      "oldRole": "user",
+      "newRole": "seller"
+    },
+    {
+      "_id": "68d910e083c6d6636d5734ff",
+      "email": "kiladzelali49@gmail.com",
+      "oldRole": "user",
+      "newRole": "seller"
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a4f",
+      "email": "kristina.kupunia.kris@mail.ru",
+      "oldRole": "user",
+      "newRole": "sales_manager"
+    },
+    {
+      "_id": "68b2765cf24e3c8efcb2db84",
+      "email": "lbero15@freeuni.edu.ge",
+      "oldRole": "user",
+      "newRole": "seller"
+    },
+    {
+      "_id": "67ebcd702830ad8fd4656ea6",
+      "email": "lbero20@freeuni.edu.ge",
+      "oldRole": "user",
+      "newRole": "seller"
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a50",
+      "email": "lev.ani.comp@gmail.com",
+      "oldRole": "user",
+      "newRole": "seller"
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a53",
+      "email": "mariammiqo@gmail.com",
+      "oldRole": "user",
+      "newRole": "sales_manager"
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a54",
+      "email": "mariamsadgobelashvili09@gmail.com",
+      "oldRole": "user",
+      "newRole": "sales_manager"
+    },
+    {
+      "_id": "68d7b7e204476495418cd58a",
+      "email": "marian.suyashvili@gmail.com",
+      "oldRole": "user",
+      "newRole": "seller"
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a55",
+      "email": "mayabekauri@gmail.com",
+      "oldRole": "user",
+      "newRole": "sales_manager"
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a56",
+      "email": "mirandasulamanidze2018@gmail.com",
+      "oldRole": "user",
+      "newRole": "sales_manager"
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a57",
+      "email": "mrmgoletiani@gmail.com",
+      "oldRole": "user",
+      "newRole": "sales_manager"
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a59",
+      "email": "naberoshvili91@gmail.com",
+      "oldRole": "user",
+      "newRole": "seller"
+    },
+    {
+      "_id": "68448557d53e41a14d1a6c0d",
+      "email": "nikalana2024@gmail.com",
+      "oldRole": "user",
+      "newRole": "seller"
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a61",
+      "email": "ninanm777@gmail.com",
+      "oldRole": "user",
+      "newRole": "sales_manager"
+    },
+    {
+      "_id": "68d2fbb06e5b230d0a69ef59",
+      "email": "ninaratchvelishvili@gmail.com",
+      "oldRole": "user",
+      "newRole": "seller"
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a68",
+      "email": "nlberoshvili@outlook.com",
+      "oldRole": "user",
+      "newRole": "seller"
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a67",
+      "email": "nlberoshvili9@gmail.com",
+      "oldRole": "user",
+      "newRole": "seller"
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a6b",
+      "email": "nmariam47@gmail.com",
+      "oldRole": "user",
+      "newRole": "seller"
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a6e",
+      "email": "nna@gmail.com",
+      "oldRole": "user",
+      "newRole": "admin"
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a76",
+      "email": "nsupport@veli.store",
+      "oldRole": "user",
+      "newRole": "seller"
+    },
+    {
+      "_id": "68d7cfe79536899269b3b110",
+      "email": "pxakadze200@gmail.com",
+      "oldRole": "user",
+      "newRole": "seller"
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a7f",
+      "email": "sales@gmail.com",
+      "oldRole": "user",
+      "newRole": "sales_manager"
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a81",
+      "email": "salesani@gmail.com",
+      "oldRole": "user",
+      "newRole": "sales_manager"
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a83",
+      "email": "salokhozrevanidze21@gmail.com",
+      "oldRole": "user",
+      "newRole": "sales_manager"
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a88",
+      "email": "soulart-analytics@your-project.iam.gserviceaccount.com",
+      "oldRole": "user",
+      "newRole": "admin"
+    },
+    {
+      "_id": "67dffdfb8001df3ab22cfff3",
+      "email": "soulartani@gmail.com",
+      "oldRole": "user",
+      "newRole": "seller"
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a8c",
+      "email": "support@veli.store",
+      "oldRole": "user",
+      "newRole": "seller"
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a8e",
+      "email": "sverunasveri@gmail.com",
+      "oldRole": "user",
+      "newRole": "seller"
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a8f",
+      "email": "tabatadzedali33@gmail.com",
+      "oldRole": "user",
+      "newRole": "sales_manager"
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a91",
+      "email": "tamari.dardaganidze.1@gmail.com",
+      "oldRole": "user",
+      "newRole": "sales_manager"
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a92",
+      "email": "tamtanarimanidze8@gmail.com",
+      "oldRole": "user",
+      "newRole": "sales_manager"
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a93",
+      "email": "tamuna777@yahoo.com",
+      "oldRole": "user",
+      "newRole": "sales_manager"
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a94",
+      "email": "teasamadashvili1980@gmail.com",
+      "oldRole": "user",
+      "newRole": "sales_manager"
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a95",
+      "email": "temurimakaradze@gmail.com",
+      "oldRole": "user",
+      "newRole": "sales_manager"
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a96",
+      "email": "teonazarandia29@gmail.com",
+      "oldRole": "user",
+      "newRole": "sales_manager"
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a9a",
+      "email": "text2sale@gmail.com",
+      "oldRole": "user",
+      "newRole": "sales_manager"
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a9b",
+      "email": "tony.johnes@ymail.com",
+      "oldRole": "user",
+      "newRole": "sales_manager"
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a9c",
+      "email": "torchinavasophio@gmail.com",
+      "oldRole": "user",
+      "newRole": "sales_manager"
+    },
+    {
+      "_id": "69cf89dbe95e07bbacb8ef3a",
+      "email": "tsindelianiirma20@gmail.com",
+      "oldRole": "user",
+      "newRole": "seller"
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a9d",
+      "email": "tsuladzekato@gmail.com",
+      "oldRole": "user",
+      "newRole": "sales_manager"
+    },
+    {
+      "_id": "68ae28730c19e3d8ee9ce1ac",
+      "email": "vasoratchvelishvili@gmail.com",
+      "oldRole": "user",
+      "newRole": "seller"
+    },
+    {
+      "_id": "67f58331a1ebbaf22ac1daa2",
+      "email": "vexsi007@gmail.com",
+      "oldRole": "user",
+      "newRole": "seller"
+    },
+    {
+      "_id": "69d751dce0897a364fcd2aa1",
+      "email": "x.kilasonia97@gmail.com",
+      "oldRole": "user",
+      "newRole": "sales_manager"
+    },
+    {
+      "_id": "69d751dce0897a364fcd2aa5",
+      "email": "your_email@gmail.com",
+      "oldRole": "user",
+      "newRole": "admin"
+    }
+  ],
+  "appliedRoleUpdates": 0
+}

@@ -1,0 +1,278 @@
+{
+  "scannedChatFiles": 87,
+  "detectedCohortCreatedAt": "2026-04-09T07:14:36.648Z",
+  "importedCohortCount": 105,
+  "deleteCandidates": [
+    {
+      "_id": "69d751dce0897a364fcd2a45",
+      "email": "example@mail.com",
+      "reason": "placeholder/system email"
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a46",
+      "email": "ga4-analytics-reader@soulart-analytics.iam.gserviceaccount.com",
+      "reason": "placeholder/system email"
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a59",
+      "email": "naberoshvili91@gmail.com",
+      "reason": "prefixed duplicate of aberoshvili91@gmail.com"
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a5b",
+      "email": "nberoshviliani100@gmail.com",
+      "reason": "prefixed duplicate of beroshviliani100@gmail.com"
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a5c",
+      "email": "ncaterina_inasaridze@yahoo.it",
+      "reason": "prefixed duplicate of caterina_inasaridze@yahoo.it"
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a5d",
+      "email": "nchkenkeli.leko@gmail.com",
+      "reason": "prefixed duplicate of chkenkeli.leko@gmail.com"
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a5f",
+      "email": "ni.dalakishvili@primeinsurance.ge",
+      "reason": "prefixed duplicate of i.dalakishvili@primeinsurance.ge"
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a62",
+      "email": "nirene@gmail.com",
+      "reason": "prefixed duplicate of irene@gmail.com"
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a63",
+      "email": "nirina123@gmail.com",
+      "reason": "prefixed duplicate of irina123@gmail.com"
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a64",
+      "email": "nirina777@gmail.com",
+      "reason": "prefixed duplicate of irina777@gmail.com"
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a65",
+      "email": "nkhubashvilinatia4@gmail.com",
+      "reason": "prefixed duplicate of khubashvilinatia4@gmail.com"
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a66",
+      "email": "nlbero20@freeuni.edu.ge",
+      "reason": "prefixed duplicate of lbero20@freeuni.edu.ge"
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a67",
+      "email": "nlberoshvili9@gmail.com",
+      "reason": "prefixed duplicate of lberoshvili9@gmail.com"
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a68",
+      "email": "nlberoshvili@outlook.com",
+      "reason": "prefixed duplicate of lberoshvili@outlook.com"
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a69",
+      "email": "nma1975gda@gmail.com",
+      "reason": "prefixed duplicate of ma1975gda@gmail.com"
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a6a",
+      "email": "nmakasekhniashvili30@gmail.com",
+      "reason": "prefixed duplicate of makasekhniashvili30@gmail.com"
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a6c",
+      "email": "nmarina.aptsiauri61@gmail.com",
+      "reason": "prefixed duplicate of marina.aptsiauri61@gmail.com"
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a6d",
+      "email": "nmsaxvadze777@gmail.com",
+      "reason": "prefixed duplicate of msaxvadze777@gmail.com"
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a6f",
+      "email": "nnakodesigner21@gmail.com",
+      "reason": "prefixed duplicate of nakodesigner21@gmail.com"
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a70",
+      "email": "noreply@soulart.ge",
+      "reason": "placeholder/system email"
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a72",
+      "email": "nsofiotenadze@gmail.com",
+      "reason": "prefixed duplicate of sofiotenadze@gmail.com"
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a73",
+      "email": "nsophikakhidze@gmail.com",
+      "reason": "prefixed duplicate of sophikakhidze@gmail.com"
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a74",
+      "email": "nsoulart.georgia@gmail.com",
+      "reason": "prefixed duplicate of soulart.georgia@gmail.com"
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a75",
+      "email": "nsoulartani@gmail.com",
+      "reason": "prefixed duplicate of soulartani@gmail.com"
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a76",
+      "email": "nsupport@veli.store",
+      "reason": "prefixed duplicate of support@veli.store"
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a77",
+      "email": "ntamariqomet441@gmail.com",
+      "reason": "prefixed duplicate of tamariqomet441@gmail.com"
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a7a",
+      "email": "pending@payment.com",
+      "reason": "placeholder/system email"
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a7c",
+      "email": "qazqaz111@soulart.b16ew.mongodb.net",
+      "reason": "placeholder/system email"
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a7e",
+      "email": "real@user.com",
+      "reason": "placeholder/system email"
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a80",
+      "email": "sales@x.ai",
+      "reason": "placeholder/system email"
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a88",
+      "email": "soulart-analytics@your-project.iam.gserviceaccount.com",
+      "reason": "placeholder/system email"
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a89",
+      "email": "soulartani@soulart.b16ew.mongodb.net",
+      "reason": "placeholder/system email"
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a8d",
+      "email": "support@x.ai",
+      "reason": "placeholder/system email"
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a97",
+      "email": "test@production.com",
+      "reason": "placeholder/system email"
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a98",
+      "email": "test@soulart.ge",
+      "reason": "placeholder/system email"
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a99",
+      "email": "testref@gmail.com",
+      "reason": "placeholder/system email"
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a9f",
+      "email": "unknown@unknown.com",
+      "reason": "placeholder/system email"
+    },
+    {
+      "_id": "69d751dce0897a364fcd2aa2",
+      "email": "your-email@domain.com",
+      "reason": "placeholder/system email"
+    },
+    {
+      "_id": "69d751dce0897a364fcd2aa3",
+      "email": "your-email@gmail.com",
+      "reason": "placeholder/system email"
+    },
+    {
+      "_id": "69d751dce0897a364fcd2aa4",
+      "email": "your@email.com",
+      "reason": "placeholder/system email"
+    },
+    {
+      "_id": "69d751dce0897a364fcd2aa5",
+      "email": "your_email@gmail.com",
+      "reason": "placeholder/system email"
+    },
+    {
+      "_id": "69d751dce0897a364fcd2aa6",
+      "email": "your_password@cluster.mongodb.net",
+      "reason": "placeholder/system email"
+    }
+  ],
+  "updateCandidates": [
+    {
+      "_id": "69d751dce0897a364fcd2a40",
+      "email": "anano303@mail.ru",
+      "patch": {
+        "role": "seller",
+        "updatedAt": "2026-04-09T07:35:18.908Z"
+      }
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a41",
+      "email": "artadmin@gmail.com",
+      "patch": {
+        "role": "admin",
+        "updatedAt": "2026-04-09T07:35:18.908Z"
+      }
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a7f",
+      "email": "sales@gmail.com",
+      "patch": {
+        "role": "sales_manager",
+        "updatedAt": "2026-04-09T07:35:18.909Z"
+      }
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a81",
+      "email": "salesani@gmail.com",
+      "patch": {
+        "role": "sales_manager",
+        "updatedAt": "2026-04-09T07:35:18.909Z"
+      }
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a8c",
+      "email": "support@veli.store",
+      "patch": {
+        "role": "seller",
+        "updatedAt": "2026-04-09T07:35:18.909Z"
+      }
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a8e",
+      "email": "sverunasveri@gmail.com",
+      "patch": {
+        "role": "seller",
+        "updatedAt": "2026-04-09T07:35:18.909Z"
+      }
+    },
+    {
+      "_id": "69d751dce0897a364fcd2a9a",
+      "email": "text2sale@gmail.com",
+      "patch": {
+        "role": "sales_manager",
+        "updatedAt": "2026-04-09T07:35:18.909Z"
+      }
+    }
+  ],
+  "deletedCount": 42,
+  "updatedCount": 7,
+  "mode": "APPLY"
+}

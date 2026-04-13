@@ -1225,7 +1225,7 @@ export const TRANSLATIONS: Translations = {
 
     // Home page
     home: {
-      heroTitle: "ქართველი მხატვრების და ხელოვანების ნამუშევრები",
+      heroTitle: "500-ზე მეტი ქართველი ხელოვანის ნამუშევარი ერთ სივრცეში",
       heroSubtitle: "ორიგინალი ხელოვნების ნიმუშები პირდაპირ შემქმნელებისგან",
       trustBadges: {
         freeShipping: "უფასო მიწოდება",
