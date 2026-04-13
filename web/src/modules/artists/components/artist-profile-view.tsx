@@ -203,9 +203,6 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
   const searchParams = useSearchParams();
   const queryClient = useQueryClient();
   const { artist, products, portfolio } = data;
-  const totalWorksCount =
-    Math.max(products?.total ?? 0, products?.items?.length ?? 0) +
-    Math.max(portfolio?.total ?? 0, portfolio?.posts?.length ?? 0);
   const [showEditor, setShowEditor] = useState(false);
   const [activeTab, setActiveTab] = useState<"sale" | "gallery" | "info">(
     "sale",
@@ -254,6 +251,16 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
   );
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [ownerProductsLoaded, setOwnerProductsLoaded] = useState(false);
+
+  // Dynamic total works count - updates when productItems change (e.g., owner loads all products)
+  // Only count portfolio posts that are NOT linked to a product to avoid double-counting
+  const totalWorksCount = useMemo(() => {
+    const productCount = Math.max(products?.total ?? 0, productItems.length);
+    const standalonePortfolioCount = (portfolio?.posts ?? []).filter(
+      (post) => !post.productId,
+    ).length;
+    return productCount + standalonePortfolioCount;
+  }, [productItems.length, products?.total, portfolio?.posts]);
 
   // Track artist profile view
   useEffect(() => {
