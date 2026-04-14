@@ -115,6 +115,13 @@ export default function AdminDashboard() {
         description: t("admin.geoTestDesc"),
         roles: ["admin"], // მთავარი ადმინი
       },
+      {
+        title: "რეკლამები",
+        href: "/admin/promotions",
+        icon: "🚀",
+        description: "რეკლამის მოთხოვნების მართვა და დადასტურება",
+        roles: ["admin", "seller"],
+      },
     ];
     
     return allAdminSections.filter((section) =>

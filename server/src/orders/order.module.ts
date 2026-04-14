@@ -10,6 +10,7 @@ import { ProductsModule } from '@/products/products.module';
 import { UsersModule } from '@/users/users.module';
 import { PushNotificationModule } from '@/push/push-notification.module';
 import { SalesCommissionModule } from '../sales-commission/sales-commission.module';
+import { PromotionModule } from '../promotions/promotion.module';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { SalesCommissionModule } from '../sales-commission/sales-commission.modu
     forwardRef(() => UsersModule), // This will make BalanceService available
     PushNotificationModule,
     forwardRef(() => SalesCommissionModule),
+    forwardRef(() => PromotionModule),
   ],
   controllers: [OrdersController],
   providers: [OrdersService, StockReservationService],

@@ -269,6 +269,7 @@ export const TRANSLATIONS: Translations = {
       analytics: "ანალიტიკა",
       salesCommissions: "თანხის გამომუშავება",
       salesAnalytics: "ანალიტიკა",
+      promotions: "რეკლამები",
     },
 
     // Error messages
@@ -1975,6 +1976,12 @@ export const TRANSLATIONS: Translations = {
       processSuccess: "მოთხოვნა წარმატებით დამუშავდა!",
       processFailed: "დამუშავება ვერ მოხერხდა",
     },
+    promotion: {
+      title: "რეკლამების მართვა",
+      myTitle: "ჩემი რეკლამები",
+      description: "რეკლამის მოთხოვნების მართვა და დადასტურება",
+      sellerDescription: "თქვენი გაშვებული რეკლამების ნახვა და სტატისტიკა",
+    },
   },
 
   en: {
@@ -2239,6 +2246,7 @@ export const TRANSLATIONS: Translations = {
       analytics: "Analytics",
       salesCommissions: "Sales & Commissions",
       salesAnalytics: "Analytics",
+      promotions: "Promotions",
     },
 
     // Error messages
@@ -3880,6 +3888,12 @@ export const TRANSLATIONS: Translations = {
       ტექსტილი: "Textile",
       მინანქარი: "Enamel",
       სკულპტურები: "Sculptures",
+    },
+    promotion: {
+      title: "Promotions Management",
+      myTitle: "My Promotions",
+      description: "Manage and confirm promotion requests",
+      sellerDescription: "View your active promotions and statistics",
     },
   },
 };

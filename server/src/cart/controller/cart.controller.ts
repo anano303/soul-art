@@ -17,10 +17,14 @@ import { AddToCartDto } from '../dtos/add-to-cart.dto';
 import { SaveShippingDetailsDto } from '../dtos/save-shipping-details.dto';
 import { SavePaymentMethodDto } from '../dtos/save-payment-method.dto';
 import { UserDocument } from '../../users/schemas/user.schema';
+import { PromotionService } from '../../promotions/promotion.service';
 
 @Controller('cart')
 export class CartController {
-  constructor(private cartService: CartService) {}
+  constructor(
+    private cartService: CartService,
+    private promotionService: PromotionService,
+  ) {}
 
   @UseGuards(JwtAuthGuard)
   @Get()
@@ -49,6 +53,8 @@ export class CartController {
     if (!productId) {
       throw new BadRequestException('Product ID is required');
     }
+    // Track add-to-cart for active promotions
+    this.promotionService.trackStat(productId, 'statsAddToCart').catch(() => {});
     return this.cartService.addCartItem(
       productId,
       qty,

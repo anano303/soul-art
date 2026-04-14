@@ -30,6 +30,8 @@ import { trackAddToCart } from "@/lib/ga4-analytics";
 import { useReferralPricing } from "@/hooks/use-referral-pricing";
 import { useCurrency } from "@/hooks/use-currency";
 import { ProductCallRequest } from "@/components/product-call-request/product-call-request";
+import { useAuth } from "@/hooks/use-auth";
+import { PromoteModal } from "@/modules/admin/components/promote-modal";
 
 type MediaItem =
   | {
@@ -188,12 +190,14 @@ export function ProductDetails({ product }: ProductDetailsProps) {
   } | null>(null);
   const [isBuying, setIsBuying] = useState(false);
   const [isCallRequestOpen, setIsCallRequestOpen] = useState(false);
+  const [showPromoteModal, setShowPromoteModal] = useState(false);
   const hasTrackedViewRef = useRef(false);
   const router = useRouter();
   const { t, language } = useLanguage();
   const { addToCart, isItemInCart } = useCart();
   const { toast } = useToast();
   const { formatPrice } = useCurrency();
+  const { user: currentUser } = useAuth();
 
   // Referral pricing hook
   const referralPricing = useReferralPricing(product);
@@ -1168,6 +1172,28 @@ export function ProductDetails({ product }: ProductDetailsProps) {
               />
             </svg>
           </Link>
+
+          {/* Promote button - visible only to product owner */}
+          {currentUser &&
+            (currentUser._id === (product.user?._id || product.user) ||
+              currentUser.role === "admin") && (
+              <button
+                className="promote-product-btn"
+                onClick={() => setShowPromoteModal(true)}
+                title={
+                  language === "en" ? "Boost views" : "ნახვების გაზრდა"
+                }
+              >
+                🚀{" "}
+                {language === "en" ? "Boost Views" : "ნახვების გაზრდა"}
+              </button>
+            )}
+
+          <PromoteModal
+            product={product}
+            isOpen={showPromoteModal}
+            onClose={() => setShowPromoteModal(false)}
+          />
 
           {/* Enhanced Rating Section */}
           {product.numReviews > 0 && (

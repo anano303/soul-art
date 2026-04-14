@@ -24,6 +24,7 @@ import { Role } from '@/types/role.enum';
 import { InjectConnection } from '@nestjs/mongoose';
 import { Connection } from 'mongoose';
 import { SalesCommissionService } from '../../sales-commission/services/sales-commission.service';
+import { PromotionService } from '../../promotions/promotion.service';
 
 @Injectable()
 export class OrdersService {
@@ -40,6 +41,9 @@ export class OrdersService {
     @Optional()
     @Inject(forwardRef(() => SalesCommissionService))
     private readonly salesCommissionService?: SalesCommissionService,
+    @Optional()
+    @Inject(forwardRef(() => PromotionService))
+    private readonly promotionService?: PromotionService,
   ) {}
 
   private getPrimaryAppUrl(): string {
@@ -450,6 +454,15 @@ export class OrdersService {
         return createdOrder[0];
       });
 
+      // Track promotion stats for orders (fire-and-forget, outside transaction)
+      if (this.promotionService && createdOrder && orderItems) {
+        for (const item of orderItems) {
+          this.promotionService
+            .trackStat(item.productId?.toString(), 'statsOrders')
+            .catch(() => {});
+        }
+      }
+
       return createdOrder;
     } finally {
       await session.endSession();
@@ -638,6 +651,15 @@ export class OrdersService {
 
         return createdOrder[0];
       });
+
+      // Track promotion stats for guest orders (fire-and-forget, outside transaction)
+      if (this.promotionService && createdOrder && orderItems) {
+        for (const item of orderItems) {
+          this.promotionService
+            .trackStat(item.productId?.toString(), 'statsOrders')
+            .catch(() => {});
+        }
+      }
 
       return createdOrder;
     } finally {

@@ -4,6 +4,8 @@ import axios from 'axios';
 import { v4 as uuidv4 } from 'uuid';
 import { OrdersService } from '../orders/services/orders.service';
 import { AuctionService } from '../auctions/services/auction.service';
+import { EmailService } from '../email/services/email.services';
+import { PromotionService } from '../promotions/promotion.service';
 
 interface BogTokenResponse {
   access_token: string;
@@ -21,11 +23,15 @@ interface BogPaymentResponse {
 @Injectable()
 export class PaymentsService {
   private readonly logger = new Logger(PaymentsService.name);
+
   constructor(
     private readonly configService: ConfigService,
     private readonly ordersService: OrdersService,
     @Inject(forwardRef(() => AuctionService))
     private readonly auctionService: AuctionService,
+    private readonly emailService: EmailService,
+    @Inject(forwardRef(() => PromotionService))
+    private readonly promotionService: PromotionService,
   ) {}
 
   private async getToken(): Promise<string> {
@@ -231,6 +237,38 @@ export class PaymentsService {
       );
 
       if (isPaymentSuccessful && external_order_id) {
+        // Check if this is a promotion payment
+        if (external_order_id.startsWith('promo_')) {
+          const promo =
+            await this.promotionService.findByExternalOrderId(
+              external_order_id,
+            );
+          if (promo) {
+            try {
+              await this.sendPromotionAdminEmail(promo);
+              this.logger.log(
+                `Promotion payment confirmed for product ${promo.productId}`,
+              );
+            } catch (emailError) {
+              this.logger.error(
+                `Failed to send promotion admin email: ${emailError.message}`,
+              );
+            }
+            return {
+              success: true,
+              message: 'Promotion payment processed successfully',
+            };
+          } else {
+            this.logger.warn(
+              `Promotion payment callback received but no DB record for: ${external_order_id}`,
+            );
+            return {
+              success: true,
+              message: 'Promotion payment received but details not found',
+            };
+          }
+        }
+
         // First, try to find auction with this external_order_id
         try {
           const auction =
@@ -462,6 +500,187 @@ export class PaymentsService {
 
       throw new Error(error.message || 'Auction payment service error');
     }
+  }
+
+  // Create BOG payment for product promotion
+  async createPromotionPayment(data: {
+    productId: string;
+    productName: string;
+    productPrice: number;
+    productImage: string;
+    platforms: string[];
+    duration: number;
+    totalPrice: number;
+    note?: string;
+    sellerId: string;
+    sellerName: string;
+    sellerEmail: string;
+    successUrl?: string;
+    failUrl?: string;
+  }) {
+    try {
+      const token = await this.getToken();
+      const externalOrderId = `promo_${uuidv4()}`;
+      const productUrl = `${process.env.ALLOWED_ORIGINS || 'https://soulart.ge'}/products/${data.productId}`;
+
+      const payload = {
+        callback_url: this.configService.get('BOG_CALLBACK_URL'),
+        capture: 'automatic',
+        external_order_id: externalOrderId,
+        purchase_units: {
+          currency: 'GEL',
+          total_amount: data.totalPrice,
+          basket: [
+            {
+              quantity: 1,
+              unit_price: data.totalPrice,
+              product_id: data.productId,
+              description: 'რეკლამის საფასური',
+            },
+          ],
+        },
+        payment_method: [
+          'card',
+          'google_pay',
+          'apple_pay',
+          'bog_loyalty',
+          'bog_p2p',
+        ],
+        ttl: 10,
+        redirect_urls: {
+          success:
+            data.successUrl ||
+            `${process.env.ALLOWED_ORIGINS || 'https://soulart.ge'}/products/${data.productId}?promo=success`,
+          fail:
+            data.failUrl ||
+            `${process.env.ALLOWED_ORIGINS || 'https://soulart.ge'}/products/${data.productId}?promo=fail`,
+        },
+      };
+
+      this.logger.log(
+        `Creating BOG promotion payment for product ${data.productId}, total: ${data.totalPrice} GEL`,
+      );
+
+      const response = await axios.post<BogPaymentResponse>(
+        'https://api.bog.ge/payments/v1/ecommerce/orders',
+        payload,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+            'Accept-Language': 'ka',
+            'Idempotency-Key': uuidv4(),
+          },
+        },
+      );
+
+      this.logger.log(
+        `BOG Promotion Payment Created: ${response.data.id}, externalOrderId: ${externalOrderId}`,
+      );
+
+      // Pre-save promotion record (status will be updated by callback)
+      await this.promotionService.create({
+        productId: data.productId,
+        productName: data.productName,
+        productPrice: data.productPrice,
+        productImage: data.productImage,
+        productUrl,
+        platforms: data.platforms,
+        duration: data.duration,
+        totalPrice: data.totalPrice,
+        note: data.note,
+        sellerId: data.sellerId,
+        sellerName: data.sellerName,
+        sellerEmail: data.sellerEmail,
+        externalOrderId,
+      });
+
+      return {
+        bogOrderId: response.data.id,
+        redirectUrl: response.data._links.redirect.href,
+        externalOrderId,
+      };
+    } catch (error) {
+      this.logger.error(
+        `BOG Promotion Payment Error: ${error.message}`,
+        error.stack,
+      );
+      throw new Error(error.message || 'Promotion payment service error');
+    }
+  }
+
+  private async sendPromotionAdminEmail(promo: any) {
+    const platformLabels: Record<string, string> = {
+      facebook: 'Facebook',
+      instagram: 'Instagram',
+      google: 'Google Ads',
+      tiktok: 'TikTok',
+    };
+    const selectedPlatforms = promo.platforms
+      .map((p) => platformLabels[p] || p)
+      .join(', ');
+
+    const adminEmail = process.env.EMAIL_USER || 'soulart.georgia@gmail.com';
+
+    const html = `
+      <div style="font-family: 'FiraGo', Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #fff; border-radius: 12px; overflow: hidden; border: 1px solid #e0e0e0;">
+        <div style="background: linear-gradient(135deg, #012645, #7B5642); padding: 24px; text-align: center;">
+          <h1 style="color: #fff; margin: 0; font-size: 22px;">🚀 რეკლამის საფასური გადახდილია!</h1>
+        </div>
+        <div style="padding: 24px;">
+          ${promo.productImage ? `<img src="${promo.productImage}" alt="${promo.productName}" style="width: 100%; max-height: 300px; object-fit: cover; border-radius: 8px; margin-bottom: 16px;" />` : ''}
+          
+          <h2 style="color: #012645; margin: 0 0 16px;">📦 პროდუქტი: ${promo.productName}</h2>
+          
+          <table style="width: 100%; border-collapse: collapse; margin-bottom: 16px;">
+            <tr>
+              <td style="padding: 8px 0; border-bottom: 1px solid #eee; color: #666;">💰 პროდუქტის ფასი:</td>
+              <td style="padding: 8px 0; border-bottom: 1px solid #eee; font-weight: bold;">${promo.productPrice}₾</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px 0; border-bottom: 1px solid #eee; color: #666;">📢 პლატფორმები:</td>
+              <td style="padding: 8px 0; border-bottom: 1px solid #eee; font-weight: bold;">${selectedPlatforms}</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px 0; border-bottom: 1px solid #eee; color: #666;">💵 გადახდილი თანხა:</td>
+              <td style="padding: 8px 0; border-bottom: 1px solid #eee; font-weight: bold; color: #28a745;">${promo.totalPrice}₾</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px 0; border-bottom: 1px solid #eee; color: #666;">⏱️ ხანგრძლივობა:</td>
+              <td style="padding: 8px 0; border-bottom: 1px solid #eee; font-weight: bold;">${promo.duration} დღე</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px 0; border-bottom: 1px solid #eee; color: #666;">👤 სელერი:</td>
+              <td style="padding: 8px 0; border-bottom: 1px solid #eee; font-weight: bold;">${promo.sellerName}</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px 0; border-bottom: 1px solid #eee; color: #666;">📧 მეილი:</td>
+              <td style="padding: 8px 0; border-bottom: 1px solid #eee;">${promo.sellerEmail}</td>
+            </tr>
+            ${promo.note ? `<tr><td style="padding: 8px 0; color: #666;">📝 შენიშვნა:</td><td style="padding: 8px 0;">${promo.note}</td></tr>` : ''}
+          </table>
+
+          <div style="background: #fff3cd; border: 1px solid #ffc107; border-radius: 8px; padding: 12px; margin-bottom: 16px;">
+            <strong>⚠️ რეკლამა უნდა გაეშვას მომდევნო 24 საათის განმავლობაში!</strong>
+          </div>
+
+          <a href="${promo.productUrl}" style="display: inline-block; background: #012645; color: #fff; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: bold;">🔗 პროდუქტის ნახვა</a>
+        </div>
+        <div style="background: #f5f5f5; padding: 16px; text-align: center; color: #888; font-size: 12px;">
+          SoulArt რეკლამის სისტემა • ${new Date().toLocaleDateString('ka-GE')}
+        </div>
+      </div>
+    `;
+
+    await this.emailService.sendMail({
+      to: adminEmail,
+      subject: `🚀 რეკლამა გადახდილია: ${promo.productName} — ${promo.totalPrice}₾ / ${promo.duration} დღე`,
+      html,
+    });
+
+    this.logger.log(
+      `Promotion admin email sent for product ${promo.productId}`,
+    );
   }
 
   // PayPal Payment Methods

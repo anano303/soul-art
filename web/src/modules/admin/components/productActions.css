@@ -78,6 +78,21 @@
   border-color: #17a2b8;
 }
 
+/* Promote button */
+.space-x-2 .promote-btn {
+  color: #f59e0b;
+  border-color: rgba(245, 158, 11, 0.3);
+}
+
+.space-x-2 .promote-btn:hover {
+  background: linear-gradient(
+    135deg,
+    rgba(245, 158, 11, 0.15),
+    rgba(245, 158, 11, 0.05)
+  );
+  border-color: #f59e0b;
+}
+
 /* Facebook post button */
 .space-x-2 button.fb-btn {
   color: #1877f2;

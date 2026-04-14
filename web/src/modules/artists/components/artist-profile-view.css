@@ -678,6 +678,30 @@
   box-shadow: 0 4px 12px rgba(1, 38, 69, 0.3);
 }
 
+/* Owner Promote Button */
+.artist-product-card__promote-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.95);
+  border: 2px solid rgba(245, 158, 11, 0.3);
+  color: #f59e0b;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.artist-product-card__promote-btn:hover {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  border-color: #f59e0b;
+  color: #fff;
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+}
+
 /* Owner Delete Button */
 .artist-product-card__delete-btn {
   display: flex;

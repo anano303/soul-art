@@ -36,6 +36,7 @@ import { ShippingCountriesModule } from '../shipping-countries/shipping-countrie
 import { StorageModule } from '../storage/storage.module';
 import { FaqModule } from '../faq/faq.module';
 import { BackupModule } from '../backup/backup.module';
+import { PromotionModule } from '../promotions/promotion.module';
 
 @Module({
   imports: [
@@ -77,6 +78,7 @@ import { BackupModule } from '../backup/backup.module';
     ShippingCountriesModule,
     FaqModule,
     BackupModule,
+    PromotionModule,
   ],
   controllers: [AppController],
   providers: [AppService, GoogleStrategy],

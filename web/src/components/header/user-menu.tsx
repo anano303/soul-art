@@ -30,6 +30,7 @@ import {
   Gavel,
   HelpCircle,
   BellRing,
+  Rocket,
 } from "lucide-react";
 
 // Add a style object for the FiraGo font
@@ -610,6 +611,18 @@ export default function UserMenu({
               >
                 <Cloud size={18} />
                 <span>Cloudinary</span>
+              </Link>
+            )}
+
+            {(user.role?.toLowerCase() === Role.Admin ||
+              isSellerRole(user.role)) && (
+              <Link
+                href="/admin/promotions"
+                className="dropdown-item"
+                onClick={handleLinkClick}
+              >
+                <Rocket size={18} />
+                <span>{t("navigation.promotions")}</span>
               </Link>
             )}
 

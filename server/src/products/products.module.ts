@@ -20,6 +20,8 @@ import { YoutubeModule } from '@/youtube/youtube.module';
 import { ProductYoutubeService } from './services/product-youtube.service';
 import { ExchangeRateModule } from '@/exchange-rate/exchange-rate.module';
 import { SettingsModule } from '@/settings/settings.module';
+import { EmailModule } from '@/email/email.module';
+import { PromotionModule } from '@/promotions/promotion.module';
 
 // Add a provider to manually drop the problematic index on module initialization
 export class IndexCleanupService implements OnModuleInit {
@@ -118,6 +120,8 @@ export class IndexCleanupService implements OnModuleInit {
     YoutubeModule,
     ExchangeRateModule,
     SettingsModule,
+    EmailModule,
+    forwardRef(() => PromotionModule),
   ],
   providers: [
     ProductsService,

@@ -193,6 +193,43 @@ export class PaymentsController {
     };
   }
 
+  // Create BOG payment for product promotion
+  @UseGuards(JwtAuthGuard)
+  @UseInterceptors(createRateLimitInterceptor(paymentRateLimit))
+  @Post('bog/promotion/create')
+  async createPromotionBogPayment(
+    @CurrentUser() user: UserDocument,
+    @Body()
+    data: {
+      productId: string;
+      productName: string;
+      productPrice: number;
+      productImage: string;
+      platforms: string[];
+      duration: number;
+      totalPrice: number;
+      note?: string;
+    },
+  ) {
+    try {
+      console.log('Creating BOG promotion payment for product:', data.productId);
+
+      const result = await this.paymentsService.createPromotionPayment({
+        ...data,
+        sellerId: user._id.toString(),
+        sellerName: user.name || user.email,
+        sellerEmail: user.email,
+        successUrl: `https://soulart.ge/products/${data.productId}?promo=success`,
+        failUrl: `https://soulart.ge/products/${data.productId}?promo=fail`,
+      });
+
+      return result;
+    } catch (error) {
+      console.error('Promotion BOG Payment Error:', error);
+      throw error;
+    }
+  }
+
   // Create BOG payment for auction
   @UseGuards(JwtAuthGuard)
   @UseInterceptors(createRateLimitInterceptor(paymentRateLimit))

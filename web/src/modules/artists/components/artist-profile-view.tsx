@@ -43,7 +43,9 @@ import {
   Clock,
   XCircle,
   AlertTriangle,
+  Rocket,
 } from "lucide-react";
+import { PromoteModal } from "@/modules/admin/components/promote-modal";
 import BrushTrail from "@/components/BrushTrail/BrushTrail";
 import { FollowButton } from "@/components/follow-button/follow-button";
 import { FollowersModal } from "@/components/followers-modal/followers-modal";
@@ -1978,6 +1980,7 @@ function ProductCard({
   const [isBuying, setIsBuying] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [showPromoteModal, setShowPromoteModal] = useState(false);
   const image = product.images?.[0];
   const href = `/products/${product.id}`;
 
@@ -2204,6 +2207,20 @@ function ProductCard({
       {/* Owner action buttons */}
       {isOwner && (
         <div className="artist-product-card__owner-actions">
+          {(!product.status || product.status === "APPROVED") && (
+            <button
+              type="button"
+              className="artist-product-card__promote-btn"
+              onClick={(e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                setShowPromoteModal(true);
+              }}
+              title={language === "en" ? "Boost views" : "ნახვების გაზრდა"}
+            >
+              <Rocket size={16} />
+            </button>
+          )}
           <Link
             href={{
               pathname: `/admin/products/edit`,
@@ -2224,6 +2241,15 @@ function ProductCard({
             <Trash2 size={16} />
           </button>
         </div>
+      )}
+
+      {/* Promote Modal */}
+      {showPromoteModal && (
+        <PromoteModal
+          product={product}
+          isOpen={showPromoteModal}
+          onClose={() => setShowPromoteModal(false)}
+        />
       )}
 
       {/* Delete confirmation overlay */}

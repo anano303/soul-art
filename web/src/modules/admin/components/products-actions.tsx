@@ -6,6 +6,7 @@ import {
   Megaphone,
   Loader2,
   X,
+  Rocket,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
@@ -18,6 +19,7 @@ import { Role } from "@/types/role";
 import Link from "next/link";
 import { useLanguage } from "@/hooks/LanguageContext";
 import { TikTokPostModal } from "./TikTokPostModal";
+import { PromoteModal } from "./promote-modal";
 
 interface ProductsActionsProps {
   product: Product;
@@ -41,6 +43,7 @@ export function ProductsActions({
   const [isPosting, setIsPosting] = useState(false);
   const [showTikTokModal, setShowTikTokModal] = useState(false);
   const [showRejectModal, setShowRejectModal] = useState(false);
+  const [showPromoteModal, setShowPromoteModal] = useState(false);
   const [rejectionReason, setRejectionReason] = useState("");
   const [isRejecting, setIsRejecting] = useState(false);
   const [mounted, setMounted] = useState(false);
@@ -358,6 +361,26 @@ export function ProductsActions({
           isOpen={showTikTokModal}
           onClose={() => setShowTikTokModal(false)}
         />
+
+        {/* Promote Modal */}
+        <PromoteModal
+          product={product}
+          isOpen={showPromoteModal}
+          onClose={() => setShowPromoteModal(false)}
+        />
+
+        {/* Promote button - visible to sellers and admins */}
+        {product.status === ProductStatus.APPROVED && (
+          <button
+            className="promote-btn"
+            onClick={() => setShowPromoteModal(true)}
+            title={
+              language === "en" ? "Boost views" : "ნახვების გაზრდა"
+            }
+          >
+            <Rocket size={18} />
+          </button>
+        )}
 
         <button
           className="text-red-500 hover:text-red-600"

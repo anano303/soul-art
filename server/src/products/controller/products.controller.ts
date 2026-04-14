@@ -35,10 +35,12 @@ import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
 import axios from 'axios';
 import { PushNotificationService } from '@/push/services/push-notification.service';
 import { FacebookPostingService } from '@/products/services/facebook-posting.service';
+import { EmailService } from '@/email/services/email.services';
 import {
   BackgroundUploadFile,
   ProductYoutubeService,
 } from '@/products/services/product-youtube.service';
+import { PromotionService } from '@/promotions/promotion.service';
 import { memoryStorage, diskStorage } from 'multer';
 
 @ApiTags('products')
@@ -51,6 +53,8 @@ export class ProductsController {
     private productExpertAgent: ProductExpertAgent,
     private pushNotificationService: PushNotificationService,
     private facebookPostingService: FacebookPostingService,
+    private emailService: EmailService,
+    private promotionService: PromotionService,
   ) {}
 
   @Get()
@@ -222,6 +226,8 @@ export class ProductsController {
   @ApiResponse({ status: 404, description: 'Product not found' })
   async incrementView(@Param('id') id: string) {
     await this.productsService.incrementViewCount(id);
+    // Track view for active promotions
+    this.promotionService.trackStat(id, 'statsViews').catch(() => {});
     return { message: 'View count incremented successfully' };
   }
 
@@ -1288,6 +1294,30 @@ export class ProductsController {
     @Body() { hideFromStore }: { hideFromStore: boolean },
   ) {
     return this.productsService.updateProductVisibility(id, hideFromStore);
+  }
+
+  @Post(':id/promote')
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Validate product promotion eligibility' })
+  @ApiParam({ name: 'id', description: 'Product ID' })
+  async requestPromotion(
+    @Param('id') id: string,
+    @CurrentUser() user: UserDocument,
+  ) {
+    const product = await this.productsService.findByIdWithUser(id);
+    if (!product) {
+      throw new BadRequestException('Product not found');
+    }
+
+    // Verify ownership (seller can only promote their own products, admin can promote any)
+    const isAdmin = user.role === Role.Admin;
+    const isOwner = product.user?.toString() === user._id.toString() ||
+      (product as any).user?._id?.toString() === user._id.toString();
+    if (!isAdmin && !isOwner) {
+      throw new UnauthorizedException('You can only promote your own products');
+    }
+
+    return { ok: true, eligible: true };
   }
 
   private prepareFileForBackground(

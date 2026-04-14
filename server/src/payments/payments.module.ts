@@ -18,11 +18,13 @@ import {
 } from '../users/schemas/seller-balance.schema';
 import { User, UserSchema } from '../users/schemas/user.schema';
 import { AuctionModule } from '../auctions/auction.module';
+import { PromotionModule } from '../promotions/promotion.module';
 
 @Module({
   imports: [
     forwardRef(() => OrderModule),
     forwardRef(() => AuctionModule),
+    forwardRef(() => PromotionModule),
     ScheduleModule.forRoot(),
     MongooseModule.forFeature([
       { name: BalanceTransaction.name, schema: BalanceTransactionSchema },
