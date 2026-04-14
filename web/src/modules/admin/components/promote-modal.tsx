@@ -23,7 +23,7 @@ interface PromoteModalProps {
 }
 
 const PLATFORM_OPTIONS = [
-  { id: "facebook", label: "Facebook", icon: "📘", pricePerDay: 1 },
+  { id: "facebook", label: "Facebook", icon: "📘", pricePerDay: 5 },
   { id: "instagram", label: "Instagram", icon: "📸", pricePerDay: 5 },
   { id: "google", label: "Google Ads", icon: "🔍", pricePerDay: 10 },
   { id: "tiktok", label: "TikTok", icon: "🎵", pricePerDay: 7 },
