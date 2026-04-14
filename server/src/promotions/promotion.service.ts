@@ -72,6 +72,129 @@ export class PromotionService {
     return this.promotionModel.findOne({ externalOrderId }).lean();
   }
 
+  // Notify seller and admin when payment is received
+  async notifyPaymentReceived(promo: PromotionDocument) {
+    const platformLabels: Record<string, string> = {
+      facebook: 'Facebook',
+      instagram: 'Instagram',
+      google: 'Google Ads',
+      tiktok: 'TikTok',
+    };
+    const platformStr = promo.platforms
+      .map((p) => platformLabels[p] || p)
+      .join(', ');
+
+    // 1. Seller in-app notification
+    const sellerNotification = {
+      id: new Types.ObjectId().toString(),
+      title: '✅ გადახდა მიღებულია!',
+      message: `${promo.productName} (${platformStr}, ${promo.duration} დღე) — რეკლამა გაეშვება ადმინის დადასტურებისთანავე. შეტყობინებას მიიღებთ.`,
+      type: 'success' as const,
+      category: 'system' as const,
+      priority: 100,
+      actionUrl: promo.productUrl,
+      actionLabel: 'პროდუქტის ნახვა',
+      createdAt: new Date(),
+      createdByUserId: null,
+      readAt: null,
+    };
+
+    await this.userModel.updateOne(
+      { _id: promo.sellerId },
+      {
+        $push: {
+          sellerNotifications: {
+            $each: [sellerNotification],
+            $slice: -80,
+          },
+        },
+      },
+    );
+
+    // Seller push notification
+    try {
+      await this.pushNotificationService.sendToUser(
+        promo.sellerId.toString(),
+        {
+          title: '✅ გადახდა მიღებულია!',
+          body: `${promo.productName} — რეკლამა გაეშვება დადასტურებისთანავე`,
+          icon: '/icons/icon-192x192.png',
+          badge: '/icons/icon-72x72.png',
+          data: {
+            url: promo.productUrl,
+            type: 'product_approved',
+          },
+          tag: `promo-paid-${promo._id}`,
+          requireInteraction: false,
+        },
+      );
+    } catch (err: any) {
+      this.logger.warn(`Seller push notification failed: ${err.message}`);
+    }
+
+    // 2. Admin in-app notification
+    const adminNotification = {
+      id: new Types.ObjectId().toString(),
+      title: '🚀 ახალი რეკლამის მოთხოვნა!',
+      message: `${promo.sellerName} — ${promo.productName} (${platformStr}, ${promo.duration} დღე, ${promo.totalPrice}₾). დაადასტურეთ ადმინ პანელში.`,
+      type: 'warning' as const,
+      category: 'system' as const,
+      priority: 100,
+      actionUrl: '/admin/promotions',
+      actionLabel: 'რეკლამების მართვა',
+      createdAt: new Date(),
+      createdByUserId: null,
+      readAt: null,
+    };
+
+    // Find all admins and notify them
+    const admins = await this.userModel.find(
+      { role: { $regex: /^admin$/i } },
+      { _id: 1 },
+    );
+
+    if (admins.length > 0) {
+      await this.userModel.updateMany(
+        { _id: { $in: admins.map((a) => a._id) } },
+        {
+          $push: {
+            sellerNotifications: {
+              $each: [adminNotification],
+              $slice: -80,
+            },
+          },
+        },
+      );
+
+      // Push to all admins
+      for (const admin of admins) {
+        try {
+          await this.pushNotificationService.sendToUser(
+            admin._id.toString(),
+            {
+              title: '🚀 ახალი რეკლამის მოთხოვნა!',
+              body: `${promo.sellerName}: ${promo.productName} — ${promo.totalPrice}₾`,
+              icon: '/icons/icon-192x192.png',
+              badge: '/icons/icon-72x72.png',
+              data: {
+                url: '/admin/promotions',
+                type: 'product_approved',
+              },
+              tag: `promo-admin-${promo._id}`,
+              requireInteraction: true,
+            },
+          );
+        } catch (err: any) {
+          this.logger.warn(`Admin push notification failed: ${err.message}`);
+        }
+      }
+    }
+
+    this.logger.log(
+      `Payment received notifications sent for promo ${promo._id} (seller: ${promo.sellerId}, admins: ${admins.length})`,
+    );
+  }
+
   // Increment stat for active promotions of a product
   async trackStat(
     productId: string,

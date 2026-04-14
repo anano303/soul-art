@@ -239,21 +239,38 @@ export class PaymentsService {
       if (isPaymentSuccessful && external_order_id) {
         // Check if this is a promotion payment
         if (external_order_id.startsWith('promo_')) {
+          this.logger.log(
+            `Processing promotion payment callback: ${external_order_id}`,
+          );
           const promo =
             await this.promotionService.findByExternalOrderId(
               external_order_id,
             );
           if (promo) {
+            // Send admin email
             try {
               await this.sendPromotionAdminEmail(promo);
               this.logger.log(
-                `Promotion payment confirmed for product ${promo.productId}`,
+                `Promotion admin email sent for product ${promo.productId}`,
               );
             } catch (emailError) {
               this.logger.error(
                 `Failed to send promotion admin email: ${emailError.message}`,
               );
             }
+
+            // Send in-app + push notifications to seller and admin
+            try {
+              await this.promotionService.notifyPaymentReceived(promo);
+              this.logger.log(
+                `Promotion notifications sent for product ${promo.productId}`,
+              );
+            } catch (notifError) {
+              this.logger.error(
+                `Failed to send promotion notifications: ${notifError.message}`,
+              );
+            }
+
             return {
               success: true,
               message: 'Promotion payment processed successfully',
