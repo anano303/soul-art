@@ -1,7 +1,7 @@
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "გახდი SoulArt-ის ნაწილი - დაიწყე გაყიდვა SoulArt-ზე | SoulArt",
+  title: "გახდი გამყიდველი SoulArt-ზე - დაიწყე გაყიდვა | SoulArt",
   description:
     "შექმენი შენი ონლაინ მაღაზია SoulArt-ზე. გაყიდე შენი ნახატები, ხელნაკეთი ნივთები და ხელოვნების ნამუშევრები. უფასო რეგისტრაცია, მარტივი მართვა, ფართო აუდიტორია.",
   keywords: [
@@ -44,10 +44,10 @@ export const metadata: Metadata = {
     },
   },
   openGraph: {
-    title: "გახდი SoulArt-ის ნაწილი - დაიწყე გაყიდვა SoulArt-ზე",
+    title: "გახდი გამყიდველი SoulArt-ზე - დაიწყე გაყიდვა",
     description:
       "შექმენი შენი ონლაინ მაღაზია SoulArt-ზე. გაყიდე შენი ნახატები და ხელნაკეთი ნივთები ფართო აუდიტორიასთან.",
-    url: "https://soulart.ge/sellers-register",
+    url: "https://soulart.ge/become-seller",
     siteName: "SoulArt",
     images: [
       {
@@ -62,17 +62,17 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "გახდი SoulArt-ის ნაწილი - დაიწყე გაყიდვა SoulArt-ზე",
+    title: "გახდი გამყიდველი SoulArt-ზე - დაიწყე გაყიდვა",
     description:
       "შექმენი შენი ონლაინ მაღაზია SoulArt-ზე. გაყიდე შენი ნახატები და ხელნაკეთი ნივთები.",
     images: ["https://soulart.ge/seller.png"],
   },
   alternates: {
-    canonical: "https://soulart.ge/sellers-register",
+    canonical: "https://soulart.ge/become-seller",
   },
 };
 
-export default function SellersRegisterLayout({
+export default function BecomeSellerLayout({
   children,
 }: {
   children: React.ReactNode;
