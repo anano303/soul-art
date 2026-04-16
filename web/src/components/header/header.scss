@@ -10,13 +10,14 @@
   left: 0;
   width: 100%;
   z-index: 10001; /* Above the main header */
-  background-color: color.adjust($primary-color, $lightness: -5%);
+  background-color: color.adjust($primary-color);
   height: 32px;
   padding: 0 12px;
   padding-top: env(safe-area-inset-top);
   min-height: calc(32px + env(safe-area-inset-top));
   align-items: center;
   justify-content: space-between;
+  border-bottom: 1px solid #404964;
 
   @media (max-width: 900px) {
     display: flex;
