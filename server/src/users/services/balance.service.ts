@@ -76,8 +76,10 @@ export class BalanceService {
       // პროდუქტის ფასი (ფასდაკლებით თუ არსებობს)
       const itemTotalPrice = item.price * item.qty;
 
-      // 10% საიტის საკომისიო (პროდუქტის ფასიდან)
-      const siteCommission = itemTotalPrice * 0.1;
+      // საიტის საკომისიო (პროდუქტის ფასიდან)
+      // განვადებით შეძენისას 15%, სხვა შემთხვევაში 10%
+      const commissionRate = order.paymentMethod === 'CredoInstallment' ? 0.15 : 0.1;
+      const siteCommission = itemTotalPrice * commissionRate;
 
       // SoulArt მიტანის საკომისიო (თუ delivery type არის SoulArt)
       // ფორმულა: 5% მინ. 10 ლარი, მაქს. 50 ლარი
@@ -87,7 +89,7 @@ export class BalanceService {
       }
 
       // სელერის საბოლოო შემოსავალი:
-      // პროდუქტის ფასი - 10% საკომისიო - SoulArt მიტანის საკომისიო (თუ არსებობს)
+      // პროდუქტის ფასი - საკომისიო (10% ან 15% განვადებისას) - SoulArt მიტანის საკომისიო (თუ არსებობს)
       // შენიშვნა: რეგიონის ფასი (shippingPrice=18₾) არ შედის პროდუქტის ფასში,
       // ის ცალკე გადახდილია და პირდაპირ SoulArt-ს რჩება
       const totalCommissions = siteCommission + deliveryCommission;
@@ -124,7 +126,7 @@ export class BalanceService {
         amount: finalAmount,
         type: 'earning',
         description: `გაყიდვიდან შემოსავალი - ${item.name}`,
-        commissionPercentage: 10,
+        commissionPercentage: order.paymentMethod === 'CredoInstallment' ? 15 : 10,
         commissionAmount: siteCommission,
         deliveryCommissionAmount: deliveryCommission,
         productPrice: itemTotalPrice,
