@@ -12,6 +12,7 @@ import { useCheckout } from "@/modules/checkout/context/checkout-context";
 import { calculateShipping } from "@/lib/shipping";
 import { trackViewCart } from "@/lib/ga4-analytics";
 import { useCurrency } from "@/hooks/use-currency";
+import Image from "next/image";
 import "./cart-page.css";
 import { Color } from "@/types";
 
@@ -257,6 +258,54 @@ export function CartPage() {
               >
                 {t("cart.checkout")}
               </button>
+
+              {/* Credo Installment Button */}
+              {currency === "GEL" && (
+                <button
+                  onClick={() => {
+                    // Set payment method to CredoInstallment before navigating
+                    try {
+                      localStorage.setItem("preferred_payment_method", "CredoInstallment");
+                    } catch {}
+                    router.push("/checkout/streamlined");
+                  }}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: "8px",
+                    width: "100%",
+                    padding: "12px 18px",
+                    borderRadius: "10px",
+                    border: "1.5px solid #bfdbfe",
+                    backgroundColor: "#eff6ff",
+                    cursor: "pointer",
+                    transition: "all 0.2s",
+                    marginTop: "8px",
+                    fontFamily: "inherit",
+                    fontSize: "14px",
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = "#dbeafe";
+                    e.currentTarget.style.borderColor = "#93c5fd";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = "#eff6ff";
+                    e.currentTarget.style.borderColor = "#bfdbfe";
+                  }}
+                >
+                  <Image
+                    src="/dayavi.webp"
+                    alt="კრედო და-ყა-ვი"
+                    width={96}
+                    height={32}
+                    style={{ height: "32px", width: "auto", objectFit: "contain" }}
+                  />
+                  <span style={{ fontWeight: 600, color: "#1d4ed8" }}>
+                    {language === "en" ? "Split into 3-4 months interest-free" : "დაყავი 3-4 თვემდე უპროცენტოდ"}
+                  </span>
+                </button>
+              )}
             </div>
           </div>
         </div>

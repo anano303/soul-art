@@ -13,7 +13,7 @@ import { FaPaypal } from "react-icons/fa";
 import "./payment-form.css";
 
 const formSchema = z.object({
-  paymentMethod: z.enum(["PayPal", "Stripe", "BOG"], {
+  paymentMethod: z.enum(["PayPal", "Stripe", "BOG", "CredoInstallment"], {
     required_error: "Please select a payment method.",
   }),
 });
@@ -22,13 +22,13 @@ export function PaymentForm() {
   const { setPaymentMethod, paymentMethod: currentPaymentMethod } =
     useCheckout();
   const { toast } = useToast();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       paymentMethod:
-        (currentPaymentMethod as "PayPal" | "Stripe" | "BOG") || "BOG",
+        (currentPaymentMethod as "PayPal" | "Stripe" | "BOG" | "CredoInstallment") || "BOG",
     },
   });
 
@@ -157,6 +157,43 @@ export function PaymentForm() {
                         </svg>
                         <span className="text-sm font-medium">
                           {t("checkout.continueToPayment")}
+                        </span>
+                      </div>
+                    </label>
+                  </div>
+                </div>
+
+                {/* Credo Installment Option */}
+                <div className="form-item">
+                  <div className="form-control">
+                    <label
+                      htmlFor="CredoInstallment"
+                      className="border rounded-lg p-4 cursor-pointer hover:border-blue-500 [&:has(:checked)]:border-blue-600 [&:has(:checked)]:bg-gradient-to-r [&:has(:checked)]:from-blue-600 [&:has(:checked)]:to-blue-800 [&:has(:checked)]:text-white block transition-all duration-300"
+                      style={{
+                        fontFamily: "FiraGo, serif",
+                      }}
+                    >
+                      <input
+                        type="radio"
+                        value="CredoInstallment"
+                        id="CredoInstallment"
+                        className="sr-only"
+                        {...form.register("paymentMethod")}
+                      />
+                      <div className="flex flex-col items-center space-y-2">
+                        <svg
+                          className="h-6 w-6"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <rect x="2" y="4" width="20" height="16" rx="3" stroke="currentColor" strokeWidth="2" />
+                          <path d="M2 10H22" stroke="currentColor" strokeWidth="2" />
+                          <path d="M6 15H10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                          <path d="M14 15H16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                        </svg>
+                        <span className="text-sm font-medium">
+                          {language === "ge" ? "კრედო განვადება" : "Credo Installment"}
                         </span>
                       </div>
                     </label>

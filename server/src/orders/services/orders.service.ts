@@ -446,7 +446,10 @@ export class OrdersService {
               salesRefCode: salesRefCode || null,
               totalReferralDiscount: totalReferralDiscount || 0,
               hasReferralDiscount: hasReferralDiscount || false,
-              stockReservationExpires: new Date(Date.now() + 10 * 60 * 1000), // 10 minutes from now
+              // Credo installment needs longer reservation (7 days) since approval takes time
+              stockReservationExpires: paymentMethod === 'CredoInstallment'
+                ? new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+                : new Date(Date.now() + 10 * 60 * 1000),
             },
           ],
           { session },
@@ -643,7 +646,10 @@ export class OrdersService {
               salesRefCode: salesRefCode || null,
               totalReferralDiscount: totalReferralDiscount || 0,
               hasReferralDiscount: hasReferralDiscount || false,
-              stockReservationExpires: new Date(Date.now() + 10 * 60 * 1000), // 10 minutes from now
+              // Credo installment needs longer reservation (7 days) since approval takes time
+              stockReservationExpires: paymentMethod === 'CredoInstallment'
+                ? new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+                : new Date(Date.now() + 10 * 60 * 1000),
             },
           ],
           { session },

@@ -3,9 +3,11 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { ScheduleModule } from '@nestjs/schedule';
 import { PaymentsController } from './payments.controller';
 import { BogAdminController } from './controllers/bog-admin.controller';
+import { CredoInstallmentController } from './controllers/credo-installment.controller';
 import { PaymentsService } from './payments.service';
 import { BogTransferService } from './services/bog-transfer.service';
 import { BogStatusCheckerService } from './services/bog-status-checker.service';
+import { CredoInstallmentService } from './services/credo-installment.service';
 import { OrderModule } from '../orders/order.module';
 import { EmailService } from '../email/services/email.services';
 import {
@@ -32,13 +34,14 @@ import { PromotionModule } from '../promotions/promotion.module';
       { name: User.name, schema: UserSchema },
     ]),
   ],
-  controllers: [PaymentsController, BogAdminController],
+  controllers: [PaymentsController, BogAdminController, CredoInstallmentController],
   providers: [
     PaymentsService,
     BogTransferService,
     BogStatusCheckerService,
+    CredoInstallmentService,
     EmailService,
   ],
-  exports: [PaymentsService, BogTransferService, BogStatusCheckerService],
+  exports: [PaymentsService, BogTransferService, BogStatusCheckerService, CredoInstallmentService],
 })
 export class PaymentsModule {}

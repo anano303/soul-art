@@ -285,7 +285,7 @@ export class CartService {
   }
 
   validatePaymentMethod(paymentMethod: string): string {
-    const validMethods = ['PayPal', 'Stripe', 'BOG'];
+    const validMethods = ['PayPal', 'Stripe', 'BOG', 'CredoInstallment'];
 
     if (!validMethods.includes(paymentMethod)) {
       throw new BadRequestException('Invalid payment method');

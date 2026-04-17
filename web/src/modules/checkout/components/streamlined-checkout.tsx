@@ -518,7 +518,7 @@ export function StreamlinedCheckout() {
   };
 
   // Handle order placement
-  const handlePlaceOrder = async (selectedMethod?: "BOG" | "PAYPAL") => {
+  const handlePlaceOrder = async (selectedMethod?: "BOG" | "PAYPAL" | "CredoInstallment") => {
     const methodToUse = selectedMethod || paymentMethod;
 
     // If auction mode, use auction-specific flow
@@ -671,6 +671,8 @@ export function StreamlinedCheckout() {
       // If BOG payment, initiate payment flow
       if (methodToUse === "BOG") {
         await handleBOGPayment(orderId, orderSummary.totalPrice);
+      } else if (methodToUse === "CredoInstallment") {
+        await handleCredoInstallment(orderId);
       } else if (methodToUse === "PAYPAL") {
         await handlePayPalPayment(orderId);
       } else {
@@ -815,6 +817,46 @@ export function StreamlinedCheckout() {
       toast({
         title: "გადახდის შეცდომა",
         description: "გთხოვთ, სცადოთ ხელახლა",
+        variant: "destructive",
+      });
+    } finally {
+      setIsProcessingPayment(false);
+    }
+  };
+
+  // Handle Credo Installment payment
+  const handleCredoInstallment = async (orderId: string) => {
+    setIsProcessingPayment(true);
+    setCurrentOrderId(orderId);
+    try {
+      const products = items.map((item) => ({
+        id: item.productId,
+        title: item.name,
+        amount: item.qty,
+        price: item.price,
+      }));
+
+      const response = await apiClient.post(
+        "/payments/credo/installment/create",
+        {
+          orderId,
+          products,
+        },
+      );
+
+      const result = response.data;
+
+      if (result?.success && result?.redirectUrl) {
+        // Redirect to Credo installment page
+        window.location.href = result.redirectUrl;
+      } else {
+        throw new Error("კრედო განვადების ბმული ვერ მოიძებნა");
+      }
+    } catch (error) {
+      console.error("Credo Installment Error:", error);
+      toast({
+        title: "განვადების შეცდომა",
+        description: "კრედო განვადების მოთხოვნა ვერ მოხერხდა. გთხოვთ, სცადოთ ხელახლა",
         variant: "destructive",
       });
     } finally {
@@ -1302,6 +1344,58 @@ export function StreamlinedCheckout() {
                     </div>
                     {!isValidating && !isProcessingPayment && (
                       <span className="bog-payment-amount">
+                        {formatPrice(totalPrice)}
+                      </span>
+                    )}
+                  </button>
+                )}
+
+                {/* Credo Installment Option - Georgian customers only */}
+                {currency === "GEL" && (
+                  <button
+                    onClick={() => {
+                      setPaymentMethod("CredoInstallment");
+                      handlePlaceOrder("CredoInstallment");
+                    }}
+                    disabled={
+                      isValidating ||
+                      unavailableItems.length > 0 ||
+                      isProcessingPayment
+                    }
+                    className={`btn-credo-installment sidebar-action-btn ${paymentMethod === "CredoInstallment" ? "selected" : ""}`}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      width: "100%",
+                      padding: "14px 18px",
+                      borderRadius: "12px",
+                      border: paymentMethod === "CredoInstallment" ? "2px solid #2563eb" : "1.5px solid #e5e7eb",
+                      backgroundColor: paymentMethod === "CredoInstallment" ? "#eff6ff" : "#fff",
+                      cursor: isProcessingPayment ? "not-allowed" : "pointer",
+                      transition: "all 0.2s",
+                      marginTop: "8px",
+                    }}
+                  >
+                    <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                      <img
+                        src="/dayavi.webp"
+                        alt="კრედო და-ყა-ვი"
+                        style={{ height: "36px", objectFit: "contain", borderRadius: "6px" }}
+                      />
+                      <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start" }}>
+                        <span style={{ fontWeight: 600, fontSize: "15px", color: "#1e293b" }}>
+                          {language === "ge" ? "დაყავი" : "Split Payment"}
+                        </span>
+                        <span style={{ fontSize: "12px", color: "#6b7280" }}>
+                          {language === "ge" ? "3-4 თვემდე უპროცენტოდ" : "3-4 months interest-free"}
+                        </span>
+                      </div>
+                      {(isValidating || isProcessingPayment) &&
+                        paymentMethod === "CredoInstallment" && <div className="spinner" />}
+                    </div>
+                    {!isValidating && !isProcessingPayment && (
+                      <span style={{ fontWeight: 700, fontSize: "15px", color: "#1e293b" }}>
                         {formatPrice(totalPrice)}
                       </span>
                     )}

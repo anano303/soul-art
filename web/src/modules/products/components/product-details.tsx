@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo, useRef } from "react";
+import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import Image from "next/image";
 import { StarIcon, X, Truck, Ruler, Package, Play } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -196,7 +196,7 @@ export function ProductDetails({ product }: ProductDetailsProps) {
   const { t, language } = useLanguage();
   const { addToCart, isItemInCart } = useCart();
   const { toast } = useToast();
-  const { formatPrice } = useCurrency();
+  const { formatPrice, currency } = useCurrency();
   const { user: currentUser } = useAuth();
 
   // Referral pricing hook
@@ -767,9 +767,9 @@ export function ProductDetails({ product }: ProductDetailsProps) {
   };
 
   // Function to close fullscreen image
-  const closeFullscreen = () => {
+  const closeFullscreen = useCallback(() => {
     setIsFullscreenOpen(false);
-  };
+  }, []);
 
   // Keyboard navigation for gallery
   useEffect(() => {
@@ -1069,6 +1069,38 @@ export function ProductDetails({ product }: ProductDetailsProps) {
                     : "ასლი"}
               </span>
             </div>
+
+            {/* Credo Installment Badge */}
+            {!isOutOfStock && finalPrice >= 100 && (
+              <div
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "6px",
+                  padding: "6px 14px",
+                  borderRadius: "8px",
+                  backgroundColor: "#eff6ff",
+                  border: "1px solid #bfdbfe",
+                  marginTop: "8px",
+                  cursor: "default",
+                }}
+              >
+                <Image
+                  src="/dayavi.webp"
+                  alt="კრედო და-ყა-ვი"
+                  width={90}
+                  height={30}
+                  style={{ height: "30px", width: "auto", objectFit: "contain" }}
+                />
+                <span style={{ fontSize: "13px", fontWeight: 600, color: "#1d4ed8" }}>
+                  {language === "en" ? "Split 3-4 months 0%" : "დაყავი 3-4 თვემდე"}
+                </span>
+                <span style={{ fontSize: "12px", color: "#6b7280" }}>
+                  | {language === "en" ? "from" : "დან"}{" "}
+                  {(finalPrice / 4).toFixed(0)}₾/{language === "en" ? "mo" : "თვე"}
+                </span>
+              </div>
+            )}
           </div>
 
           {/* Brand with hover tooltip - Under price */}
@@ -1521,6 +1553,59 @@ export function ProductDetails({ product }: ProductDetailsProps) {
                   </>
                 )}
               </button>
+
+              {/* Credo Installment Button - Georgian customers only */}
+              {currency === "GEL" && finalPrice >= 100 && (
+                <button
+                  onClick={() => {
+                    try {
+                      localStorage.setItem("preferred_payment_method", "CredoInstallment");
+                    } catch {}
+                    handleBuyNow();
+                  }}
+                  disabled={isOutOfStock || isBuying}
+                  className="btn-credo-installment"
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: "8px",
+                    width: "100%",
+                    padding: "12px 18px",
+                    borderRadius: "10px",
+                    border: "1.5px solid #bfdbfe",
+                    backgroundColor: "#eff6ff",
+                    cursor: isOutOfStock || isBuying ? "not-allowed" : "pointer",
+                    transition: "all 0.2s",
+                    fontFamily: "inherit",
+                    fontSize: "14px",
+                    opacity: isOutOfStock || isBuying ? 0.5 : 1,
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!isOutOfStock && !isBuying) {
+                      e.currentTarget.style.backgroundColor = "#dbeafe";
+                      e.currentTarget.style.borderColor = "#93c5fd";
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!isOutOfStock && !isBuying) {
+                      e.currentTarget.style.backgroundColor = "#eff6ff";
+                      e.currentTarget.style.borderColor = "#bfdbfe";
+                    }
+                  }}
+                >
+                  <Image
+                    src="/dayavi.webp"
+                    alt="კრედო და-ყა-ვი"
+                    width={96}
+                    height={32}
+                    style={{ height: "32px", width: "auto", objectFit: "contain" }}
+                  />
+                  <span style={{ fontWeight: 600, color: "#1d4ed8" }}>
+                    {language === "en" ? "Split 3-4 months interest-free" : "დაყავი 3-4 თვემდე უპროცენტოდ"}
+                  </span>
+                </button>
+              )}
             </div>
           )}
 

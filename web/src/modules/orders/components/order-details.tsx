@@ -1,9 +1,10 @@
 "use client";
 
-import { CheckCircle2, XCircle, Store, ArrowLeft } from "lucide-react";
+import { CheckCircle2, XCircle, Store, ArrowLeft, Clock, RefreshCw } from "lucide-react";
 import { useLanguage } from "@/hooks/LanguageContext";
 import { useQuery } from "@tanstack/react-query";
 import { fetchWithAuth } from "@/lib/fetch-with-auth";
+import { apiClient } from "@/lib/axios";
 import { Color, AgeGroupItem } from "@/types";
 import Image from "next/image";
 import Link from "next/link";
@@ -12,6 +13,7 @@ import { Order, OrderItem } from "@/types/order";
 import { PayPalButton } from "./paypal-button";
 import { StripeButton } from "./stripe-button";
 import { BOGButton } from "./bog-button";
+import { CredoInstallmentButton } from "./credo-installment-button";
 import { useUsdRate } from "@/hooks/useUsdRate";
 import "./order-details.css";
 
@@ -118,6 +120,30 @@ export function OrderDetails({ order }: OrderDetailsProps) {
     refetchOnWindowFocus: false,
   });
 
+  // Credo installment status polling (only for CredoInstallment orders that aren't paid yet)
+  const credoOrderCode = order.paymentMethod === "CredoInstallment" && order.paymentResult?.id
+    ? order.paymentResult.id
+    : null;
+
+  const { data: credoStatus, refetch: refetchCredoStatus } = useQuery({
+    queryKey: ["credoStatus", credoOrderCode],
+    queryFn: async () => {
+      if (!credoOrderCode) return null;
+      try {
+        const response = await apiClient.get(
+          `/payments/credo/installment/status/${credoOrderCode}`
+        );
+        return response.data;
+      } catch {
+        return null;
+      }
+    },
+    enabled: !!credoOrderCode && !order.isPaid,
+    refetchInterval: 60000, // Poll every 60 seconds
+    refetchOnWindowFocus: true,
+    retry: 1,
+  });
+
   // Get localized color name based on current language
   const getLocalizedColorName = (colorName: string): string => {
     if (language === "en") {
@@ -150,14 +176,6 @@ export function OrderDetails({ order }: OrderDetailsProps) {
   const soulArtDeliveryItems = order.orderItems.filter(
     (item) => !item.product || String(item.product.deliveryType) !== "SELLER"
   );
-
-  // Payment amount logic
-  // For USD/EUR orders, use paidAmount directly
-  // For GEL orders or legacy orders without paidAmount, calculate from totalPrice
-  const paymentAmount =
-    order.paidCurrency === "USD" || order.paidCurrency === "EUR"
-      ? order.paidAmount || order.totalPrice
-      : order.totalPrice;
 
   const paymentAmountUSD =
     order.paidCurrency === "USD"
@@ -231,7 +249,9 @@ export function OrderDetails({ order }: OrderDetailsProps) {
             <h2 className="order-subtitle">{t("order.payment")}</h2>
             <p>
               <span className="font-medium">{t("order.method")}: </span>
-              {order.paymentMethod}
+              {order.paymentMethod === "CredoInstallment"
+                ? (language === "ge" ? "კრედო განვადება (0%)" : "Credo Installment (0%)")
+                : order.paymentMethod}
             </p>
             <div className={`alert ${order.isPaid ? "success" : "error"}`}>
               {order.isPaid ? (
@@ -248,6 +268,187 @@ export function OrderDetails({ order }: OrderDetailsProps) {
               </span>
             </div>
           </div>
+
+          {/* Credo Installment Status */}
+          {order.paymentMethod === "CredoInstallment" && !order.isPaid && (
+            <div className="order-card">
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "12px" }}>
+                <h2 className="order-subtitle" style={{ margin: 0 }}>
+                  {language === "ge" ? "განვადების სტატუსი" : "Installment Status"}
+                </h2>
+                <button
+                  onClick={() => refetchCredoStatus()}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "4px",
+                    padding: "4px 12px",
+                    borderRadius: "6px",
+                    border: "1px solid #e5e7eb",
+                    backgroundColor: "#f9fafb",
+                    cursor: "pointer",
+                    fontSize: "13px",
+                    color: "#6b7280",
+                  }}
+                  title={language === "ge" ? "სტატუსის განახლება" : "Refresh status"}
+                >
+                  <RefreshCw style={{ width: "14px", height: "14px" }} />
+                  {language === "ge" ? "განახლება" : "Refresh"}
+                </button>
+              </div>
+
+              {credoStatus?.success ? (
+                <div>
+                  {/* Status badge */}
+                  <div style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "8px",
+                    padding: "12px 16px",
+                    borderRadius: "10px",
+                    backgroundColor: credoStatus.isSuccessful || credoStatus.isReadyForShipment
+                      ? "#ecfdf5"
+                      : credoStatus.isFailed
+                        ? "#fef2f2"
+                        : "#fffbeb",
+                    border: `1px solid ${
+                      credoStatus.isSuccessful || credoStatus.isReadyForShipment
+                        ? "#a7f3d0"
+                        : credoStatus.isFailed
+                          ? "#fecaca"
+                          : "#fde68a"
+                    }`,
+                    marginBottom: "12px",
+                  }}>
+                    {credoStatus.isSuccessful || credoStatus.isReadyForShipment ? (
+                      <CheckCircle2 style={{ width: "20px", height: "20px", color: "#059669" }} />
+                    ) : credoStatus.isFailed ? (
+                      <XCircle style={{ width: "20px", height: "20px", color: "#dc2626" }} />
+                    ) : (
+                      <Clock style={{ width: "20px", height: "20px", color: "#d97706" }} />
+                    )}
+                    <div>
+                      <div style={{
+                        fontWeight: 600,
+                        color: credoStatus.isSuccessful || credoStatus.isReadyForShipment
+                          ? "#059669"
+                          : credoStatus.isFailed
+                            ? "#dc2626"
+                            : "#d97706",
+                      }}>
+                        {credoStatus.statusName}
+                      </div>
+                      <div style={{ fontSize: "13px", color: "#6b7280", marginTop: "2px" }}>
+                        {credoStatus.isSuccessful || credoStatus.isReadyForShipment
+                          ? (language === "ge" ? "განვადება დამტკიცებულია" : "Installment approved")
+                          : credoStatus.isFailed
+                            ? (language === "ge" ? "სამწუხაროდ, განვადება არ დამტკიცდა" : "Installment was not approved")
+                            : (language === "ge" ? "განვადების განაცხადი მუშავდება" : "Installment application is being processed")}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Additional info */}
+                  {credoStatus.isPending && (
+                    <div style={{
+                      padding: "10px 14px",
+                      borderRadius: "8px",
+                      backgroundColor: "#f0f9ff",
+                      border: "1px solid #bae6fd",
+                      fontSize: "13px",
+                      color: "#0369a1",
+                    }}>
+                      {language === "ge"
+                        ? "მარაგი დარეზერვებულია თქვენთვის. განვადების დამტკიცების შემდეგ შეკვეთა ავტომატურად დადასტურდება."
+                        : "Stock is reserved for you. After installment approval, the order will be automatically confirmed."}
+                    </div>
+                  )}
+
+                  {credoStatus.isReadyForShipment && (
+                    <div style={{
+                      padding: "10px 14px",
+                      borderRadius: "8px",
+                      backgroundColor: "#ecfdf5",
+                      border: "1px solid #a7f3d0",
+                      fontSize: "13px",
+                      color: "#065f46",
+                    }}>
+                      {language === "ge"
+                        ? "ხელშეკრულება ხელმოწერილია. პროდუქტი მალე გამოგეგზავნებათ."
+                        : "Contract signed. Your product will be shipped soon."}
+                    </div>
+                  )}
+
+                  {credoStatus.isFailed && (
+                    <div style={{
+                      padding: "10px 14px",
+                      borderRadius: "8px",
+                      backgroundColor: "#fef2f2",
+                      border: "1px solid #fecaca",
+                      fontSize: "13px",
+                      color: "#991b1b",
+                    }}>
+                      <p style={{ marginBottom: "8px" }}>
+                        {language === "ge"
+                          ? "განვადება არ დამტკიცდა. შეკვეთა გაუქმდა და სტოკი გათავისუფლდა. შეგიძლიათ ხელახლა შეუკვეთოთ სხვა გადახდის მეთოდით."
+                          : "Installment was not approved. The order has been cancelled and stock released. You can re-order with a different payment method."}
+                      </p>
+                      <Link
+                        href="/shop"
+                        style={{
+                          display: "inline-block",
+                          padding: "8px 16px",
+                          borderRadius: "8px",
+                          backgroundColor: "#1e293b",
+                          color: "white",
+                          fontSize: "13px",
+                          fontWeight: 600,
+                          textDecoration: "none",
+                        }}
+                      >
+                        {language === "ge" ? "მაღაზიაში დაბრუნება" : "Back to Shop"}
+                      </Link>
+                    </div>
+                  )}
+                </div>
+              ) : credoOrderCode ? (
+                <div style={{
+                  padding: "12px 16px",
+                  borderRadius: "10px",
+                  backgroundColor: "#fffbeb",
+                  border: "1px solid #fde68a",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
+                }}>
+                  <Clock style={{ width: "20px", height: "20px", color: "#d97706" }} />
+                  <div>
+                    <div style={{ fontWeight: 600, color: "#d97706" }}>
+                      {language === "ge" ? "განაცხადი გაგზავნილია" : "Application submitted"}
+                    </div>
+                    <div style={{ fontSize: "13px", color: "#6b7280", marginTop: "2px" }}>
+                      {language === "ge"
+                        ? "კრედო ბანკი განიხილავს თქვენს განაცხადს. სტატუსი განახლდება ავტომატურად."
+                        : "Credo Bank is reviewing your application. Status will update automatically."}
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div style={{
+                  padding: "12px 16px",
+                  borderRadius: "10px",
+                  backgroundColor: "#f3f4f6",
+                  border: "1px solid #e5e7eb",
+                  fontSize: "13px",
+                  color: "#6b7280",
+                }}>
+                  {language === "ge"
+                    ? "განვადების მოთხოვნის გასაგზავნად დააჭირეთ ქვემოთ მოცემულ ღილაკს."
+                    : "Click the button below to submit your installment request."}
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Order Items - Grouped by delivery type with fixed string comparison */}
           <div className="order-card">
@@ -465,6 +666,16 @@ export function OrderDetails({ order }: OrderDetailsProps) {
                   />
                 ) : order.paymentMethod === "BOG" ? (
                   <BOGButton orderId={order._id} amount={paymentAmountGEL} />
+                ) : order.paymentMethod === "CredoInstallment" ? (
+                  <CredoInstallmentButton
+                    orderId={order._id}
+                    items={order.orderItems.map((item: OrderItem) => ({
+                      productId: typeof item.productId === 'string' ? item.productId : (item.productId as { _id?: { toString(): string } })?._id?.toString() || '',
+                      name: item.name,
+                      qty: item.qty,
+                      price: item.price,
+                    }))}
+                  />
                 ) : (
                   <StripeButton orderId={order._id} amount={paymentAmountUSD} />
                 ))}

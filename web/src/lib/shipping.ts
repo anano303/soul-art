@@ -66,7 +66,9 @@ export function getShippingRates(): ShippingRate[] {
 // Fetch shipping rates from API and cache them
 export async function fetchShippingRates(): Promise<ShippingRate[]> {
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/shipping-countries`);
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/shipping-countries`,
+    );
     if (res.ok) {
       const countries = await res.json();
       // Transform API response to ShippingRate format
@@ -100,7 +102,9 @@ export function getShippingRate(countryCode: string): ShippingRate | null {
 }
 
 // Find shipping rate by country name (e.g., "საქართველო", "Italy")
-export function getShippingRateByName(countryName: string): ShippingRate | null {
+export function getShippingRateByName(
+  countryName: string,
+): ShippingRate | null {
   const rates = getShippingRates();
   return rates.find((rate) => rate.countryName === countryName) || null;
 }
@@ -108,7 +112,7 @@ export function getShippingRateByName(countryName: string): ShippingRate | null 
 // Resolve country code from either code or name
 function resolveCountryCode(countryCodeOrName: string): string {
   const rates = getShippingRates();
-  
+
   // If it's already a valid country code
   const byCode = rates.find((rate) => rate.countryCode === countryCodeOrName);
   if (byCode) return byCode.countryCode;
@@ -119,20 +123,20 @@ function resolveCountryCode(countryCodeOrName: string): string {
 
   // Handle common aliases
   const aliases: Record<string, string> = {
-    "Georgia": "GE",
-    "georgia": "GE",
-    "საქართველო": "GE",
-    "Italy": "IT",
-    "italy": "IT",
-    "Germany": "DE",
-    "germany": "DE",
-    "France": "FR",
-    "france": "FR",
-    "Spain": "ES",
-    "spain": "ES",
+    Georgia: "GE",
+    georgia: "GE",
+    საქართველო: "GE",
+    Italy: "IT",
+    italy: "IT",
+    Germany: "DE",
+    germany: "DE",
+    France: "FR",
+    france: "FR",
+    Spain: "ES",
+    spain: "ES",
     "United States": "US",
     "united states": "US",
-    "USA": "US",
+    USA: "US",
   };
 
   return aliases[countryCodeOrName] || countryCodeOrName;
@@ -146,7 +150,10 @@ export function calculateDomesticShipping(city: string = ""): number {
   return isTbilisi ? 0 : 18;
 }
 
-export function calculateShipping(countryCodeOrName: string, city?: string): number {
+export function calculateShipping(
+  countryCodeOrName: string,
+  city?: string,
+): number {
   const code = resolveCountryCode(countryCodeOrName);
   if (code === "GE") {
     // For Georgia, use city-based calculation

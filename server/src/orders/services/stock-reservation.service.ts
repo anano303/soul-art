@@ -63,10 +63,13 @@ export class StockReservationService {
             await this.refundStockForOrder(freshOrder, session);
 
             // Mark order as cancelled instead of deleting it
+            const isCredoInstallment = freshOrder.paymentMethod === 'CredoInstallment';
             freshOrder.set('status', 'cancelled');
             freshOrder.set(
               'statusReason',
-              'Stock reservation expired after 30 minutes',
+              isCredoInstallment
+                ? 'განვადება არ დამტკიცდა - რეზერვაცია გაუქმდა'
+                : 'Stock reservation expired - payment not completed in time',
             );
             freshOrder.set('cancelledAt', new Date());
             await freshOrder.save({ session });
