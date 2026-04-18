@@ -1076,27 +1076,22 @@ export function ProductDetails({ product }: ProductDetailsProps) {
                 style={{
                   display: "inline-flex",
                   alignItems: "center",
-                  gap: "6px",
-                  padding: "6px 14px",
-                  borderRadius: "8px",
-                  backgroundColor: "#eff6ff",
-                  border: "1px solid #bfdbfe",
+                  gap: "8px",
+                  padding: "8px 14px",
+                  borderRadius: "20px",
+                  background: "linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%)",
+                  border: "1px solid #86efac",
                   marginTop: "8px",
                   cursor: "default",
                 }}
               >
-                <Image
-                  src="/dayavi.webp"
-                  alt="კრედო და-ყა-ვი"
-                  width={90}
-                  height={30}
-                  style={{ height: "30px", width: "auto", objectFit: "contain" }}
-                />
-                <span style={{ fontSize: "13px", fontWeight: 600, color: "#1d4ed8" }}>
-                  {language === "en" ? "Split 3-4 months 0%" : "დაყავი 3-4 თვემდე"}
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="20 6 9 17 4 12" />
+                </svg>
+                <span style={{ fontSize: "13px", fontWeight: 600, color: "#15803d" }}>
+                  {language === "en" ? "0% installment available" : "განვადება 0%-ით"}
                 </span>
-                <span style={{ fontSize: "12px", color: "#6b7280" }}>
-                  | {language === "en" ? "from" : "დან"}{" "}
+                <span style={{ fontSize: "12px", fontWeight: 700, color: "#166534", backgroundColor: "#bbf7d0", padding: "2px 8px", borderRadius: "10px" }}>
                   {(finalPrice / 4).toFixed(0)}₾/{language === "en" ? "mo" : "თვე"}
                 </span>
               </div>
@@ -1569,40 +1564,53 @@ export function ProductDetails({ product }: ProductDetailsProps) {
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    gap: "8px",
+                    gap: "10px",
                     width: "100%",
-                    padding: "12px 18px",
-                    borderRadius: "10px",
-                    border: "1.5px solid #bfdbfe",
-                    backgroundColor: "#eff6ff",
+                    padding: "13px 18px",
+                    borderRadius: "12px",
+                    border: "none",
+                    background: "linear-gradient(135deg, #1e3a5f 0%, #0d47a1 50%, #1565c0 100%)",
                     cursor: isOutOfStock || isBuying ? "not-allowed" : "pointer",
-                    transition: "all 0.2s",
+                    transition: "all 0.3s ease",
                     fontFamily: "inherit",
-                    fontSize: "14px",
+                    fontSize: "15px",
                     opacity: isOutOfStock || isBuying ? 0.5 : 1,
+                    boxShadow: "0 2px 8px rgba(13, 71, 161, 0.3)",
                   }}
                   onMouseEnter={(e) => {
                     if (!isOutOfStock && !isBuying) {
-                      e.currentTarget.style.backgroundColor = "#dbeafe";
-                      e.currentTarget.style.borderColor = "#93c5fd";
+                      e.currentTarget.style.background = "linear-gradient(135deg, #0d47a1 0%, #1565c0 50%, #1976d2 100%)";
+                      e.currentTarget.style.boxShadow = "0 4px 12px rgba(13, 71, 161, 0.4)";
+                      e.currentTarget.style.transform = "translateY(-1px)";
                     }
                   }}
                   onMouseLeave={(e) => {
                     if (!isOutOfStock && !isBuying) {
-                      e.currentTarget.style.backgroundColor = "#eff6ff";
-                      e.currentTarget.style.borderColor = "#bfdbfe";
+                      e.currentTarget.style.background = "linear-gradient(135deg, #1e3a5f 0%, #0d47a1 50%, #1565c0 100%)";
+                      e.currentTarget.style.boxShadow = "0 2px 8px rgba(13, 71, 161, 0.3)";
+                      e.currentTarget.style.transform = "translateY(0)";
                     }
                   }}
                 >
                   <Image
                     src="/dayavi.webp"
                     alt="კრედო და-ყა-ვი"
-                    width={96}
-                    height={32}
-                    style={{ height: "32px", width: "auto", objectFit: "contain" }}
+                    width={90}
+                    height={30}
+                    style={{ height: "28px", width: "auto", objectFit: "contain" }}
                   />
-                  <span style={{ fontWeight: 600, color: "#1d4ed8" }}>
-                    {language === "en" ? "Split 3-4 months interest-free" : "დაყავი 3-4 თვემდე უპროცენტოდ"}
+                  <span style={{ fontWeight: 600, color: "white", letterSpacing: "0.3px" }}>
+                    {language === "en" ? "Buy in installments" : "განვადებით ყიდვა"}
+                  </span>
+                  <span style={{
+                    fontWeight: 700,
+                    color: "white",
+                    backgroundColor: "rgba(255,255,255,0.2)",
+                    padding: "2px 10px",
+                    borderRadius: "8px",
+                    fontSize: "13px",
+                  }}>
+                    0%
                   </span>
                 </button>
               )}

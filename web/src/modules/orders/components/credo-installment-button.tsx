@@ -1,7 +1,6 @@
 "use client";
 
 import React from "react";
-import Image from "next/image";
 import { apiClient } from "@/lib/axios";
 
 interface CredoInstallmentButtonProps {
@@ -80,47 +79,49 @@ export function CredoInstallmentButton({
     <button
       onClick={handleCredoInstallment}
       disabled={isProcessing}
-      className="w-full font-semibold py-3 px-6 rounded-lg transition-all duration-300 flex items-center justify-center space-x-3 disabled:opacity-50 disabled:cursor-not-allowed"
       style={{
-        fontFamily: '"FiraGo", "ALK Life", serif',
-        fontSize: "18px",
-        letterSpacing: "0.5px",
+        fontFamily: '"FiraGo", "ALK Life", sans-serif',
+        fontSize: "15px",
         color: "white",
-        backgroundColor: isProcessing ? "#6b7280" : "#0066CC",
+        background: isProcessing
+          ? "#6b7280"
+          : "linear-gradient(135deg, #1e3a5f 0%, #0d47a1 50%, #1565c0 100%)",
         width: "100%",
-        padding: "14px 24px",
+        padding: "12px 16px",
         border: "none",
         borderRadius: "12px",
         cursor: isProcessing ? "not-allowed" : "pointer",
-        transition: "background-color 0.3s, transform 0.2s",
+        transition: "all 0.3s ease",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        gap: "10px",
+        gap: "8px",
+        flexWrap: "wrap" as const,
+        boxShadow: isProcessing ? "none" : "0 2px 8px rgba(13, 71, 161, 0.3)",
+        opacity: isProcessing ? 0.6 : 1,
       }}
       onMouseEnter={(e) => {
         if (!isProcessing) {
-          e.currentTarget.style.backgroundColor = "#0052A3";
+          e.currentTarget.style.background = "linear-gradient(135deg, #0d47a1 0%, #1565c0 50%, #1976d2 100%)";
+          e.currentTarget.style.boxShadow = "0 4px 12px rgba(13, 71, 161, 0.4)";
           e.currentTarget.style.transform = "translateY(-1px)";
         }
       }}
       onMouseLeave={(e) => {
         if (!isProcessing) {
-          e.currentTarget.style.backgroundColor = "#0066CC";
+          e.currentTarget.style.background = "linear-gradient(135deg, #1e3a5f 0%, #0d47a1 50%, #1565c0 100%)";
+          e.currentTarget.style.boxShadow = "0 2px 8px rgba(13, 71, 161, 0.3)";
           e.currentTarget.style.transform = "translateY(0)";
         }
       }}
     >
-      {/* Credo და-ყა-ვი Logo */}
-      <Image
+      <img
         src="/dayavi.webp"
         alt="კრედო და-ყა-ვი"
-        width={84}
-        height={28}
-        style={{ height: "28px", width: "auto", objectFit: "contain" }}
+        style={{ height: "24px", width: "auto", objectFit: "contain", flexShrink: 0 }}
       />
-      <span className="font-medium">
-        {isProcessing ? "იტვირთება..." : "დაყავი 3-4 თვემდე უპროცენტოდ"}
+      <span style={{ fontWeight: 600, whiteSpace: "nowrap" }}>
+        {isProcessing ? "იტვირთება..." : "განვადება 0%"}
       </span>
     </button>
   );

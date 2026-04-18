@@ -1362,40 +1362,41 @@ export function StreamlinedCheckout() {
                       unavailableItems.length > 0 ||
                       isProcessingPayment
                     }
-                    className={`btn-credo-installment sidebar-action-btn ${paymentMethod === "CredoInstallment" ? "selected" : ""}`}
+                    className={`btn-bog-payment sidebar-action-btn mobile-place-order ${paymentMethod === "CredoInstallment" ? "selected" : ""}`}
                     style={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                      width: "100%",
-                      padding: "14px 18px",
-                      borderRadius: "12px",
-                      border: paymentMethod === "CredoInstallment" ? "2px solid #2563eb" : "1.5px solid #e5e7eb",
-                      backgroundColor: paymentMethod === "CredoInstallment" ? "#eff6ff" : "#fff",
-                      cursor: isProcessingPayment ? "not-allowed" : "pointer",
-                      transition: "all 0.2s",
                       marginTop: "8px",
+                      background: "linear-gradient(135deg, #1e3a5f 0%, #0d47a1 50%, #1565c0 100%)",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.background = "linear-gradient(135deg, #0d47a1 0%, #1565c0 50%, #1976d2 100%)";
+                      e.currentTarget.style.transform = "translateY(-2px)";
+                      e.currentTarget.style.boxShadow = "0 6px 20px rgba(13, 71, 161, 0.4)";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.background = "linear-gradient(135deg, #1e3a5f 0%, #0d47a1 50%, #1565c0 100%)";
+                      e.currentTarget.style.transform = "translateY(0)";
+                      e.currentTarget.style.boxShadow = "";
                     }}
                   >
-                    <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                    <div className="bog-payment-content">
                       <img
                         src="/dayavi.webp"
                         alt="კრედო და-ყა-ვი"
-                        style={{ height: "36px", objectFit: "contain", borderRadius: "6px" }}
+                        style={{ height: "66px", width: "auto", objectFit: "contain", flexShrink: 0 }}
                       />
-                      <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start" }}>
-                        <span style={{ fontWeight: 600, fontSize: "15px", color: "#1e293b" }}>
-                          {language === "ge" ? "დაყავი" : "Split Payment"}
+                      <div className="bog-payment-text">
+                        <span className="bog-payment-title">
+                          {language === "ge" ? "განვადება 0%-ით" : "0% Installment"}
                         </span>
-                        <span style={{ fontSize: "12px", color: "#6b7280" }}>
-                          {language === "ge" ? "3-4 თვემდე უპროცენტოდ" : "3-4 months interest-free"}
+                        <span className="bog-payment-subtitle">
+                          {language === "ge" ? "კრედო ბანკი • 3-4 თვე" : "Credo Bank • 3-4 months"}
                         </span>
                       </div>
                       {(isValidating || isProcessingPayment) &&
                         paymentMethod === "CredoInstallment" && <div className="spinner" />}
                     </div>
                     {!isValidating && !isProcessingPayment && (
-                      <span style={{ fontWeight: 700, fontSize: "15px", color: "#1e293b" }}>
+                      <span className="bog-payment-amount">
                         {formatPrice(totalPrice)}
                       </span>
                     )}
