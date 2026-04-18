@@ -1233,10 +1233,8 @@ export function CreateProductForm({
         formDataToSend.append("maxDeliveryDays", maxDeliveryDays);
       }
 
-      // Add discount fields
-      if (discountPercentage && parseFloat(discountPercentage) > 0) {
-        formDataToSend.append("discountPercentage", discountPercentage);
-      }
+      // Add discount fields - always send discountPercentage so 0 can clear existing discount
+      formDataToSend.append("discountPercentage", discountPercentage && parseFloat(discountPercentage) > 0 ? discountPercentage : "0");
       if (discountStartDate) {
         formDataToSend.append("discountStartDate", discountStartDate);
       }

@@ -88,14 +88,16 @@ export class CredoInstallmentService {
     return merchantId;
   }
 
-  private getSecret(): string {
+  private getSecretBuffer(): Buffer {
     const secret = this.configService.get<string>(
       'CREDO_INSTALLMENT_SECRET',
     );
     if (!secret) {
       throw new Error('CREDO_INSTALLMENT_SECRET is not configured');
     }
-    return secret;
+    // Parse PHP-style escape sequences: \0 = NULL byte, \00 = NULL + "0", etc.
+    const parsed = secret.replace(/\\0/g, '\x00');
+    return Buffer.from(parsed, 'binary');
   }
 
   /**
@@ -108,9 +110,13 @@ export class CredoInstallmentService {
       stringToHash +=
         product.id + product.title + product.amount + product.price + product.type;
     }
-    stringToHash += this.getSecret();
+    const productBuf = Buffer.from(stringToHash, 'utf8');
+    const secretBuf = this.getSecretBuffer();
 
-    return crypto.createHash('md5').update(stringToHash).digest('hex');
+    return crypto
+      .createHash('md5')
+      .update(Buffer.concat([productBuf, secretBuf]))
+      .digest('hex');
   }
 
   /**
@@ -118,8 +124,15 @@ export class CredoInstallmentService {
    * Formula: MD5(merchantId + orderCode + secret)
    */
   private generateStatusHash(orderCode: string): string {
-    const stringToHash = this.getMerchantId() + orderCode + this.getSecret();
-    return crypto.createHash('md5').update(stringToHash).digest('hex');
+    const prefixBuf = Buffer.from(
+      this.getMerchantId() + orderCode,
+      'utf8',
+    );
+    const secretBuf = this.getSecretBuffer();
+    return crypto
+      .createHash('md5')
+      .update(Buffer.concat([prefixBuf, secretBuf]))
+      .digest('hex');
   }
 
   /**
@@ -177,11 +190,15 @@ export class CredoInstallmentService {
       );
     } catch (error) {
       if (axios.isAxiosError(error)) {
+        const errData = error.response?.data;
         this.logger.error(
-          `Credo API error: ${error.response?.status} - ${JSON.stringify(error.response?.data)}`,
+          `Credo API error: ${error.response?.status} - ${JSON.stringify(errData)}`,
         );
+        // Forward the exact Credo error for debugging
+        const credoErrorCode = errData?.errors?.code || '';
+        const credoErrorMsg = errData?.errors?.message || errData?.message || error.message;
         throw new Error(
-          `Credo API error: ${error.response?.data?.message || error.message}`,
+          `Credo API error: ${credoErrorCode} - ${credoErrorMsg}`,
         );
       }
       throw error;

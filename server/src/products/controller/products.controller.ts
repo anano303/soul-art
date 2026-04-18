@@ -1094,8 +1094,8 @@ export class ProductsController {
         hashtags,
         variants: parseVariants,
         videoDescription: productData.videoDescription,
-        // Add discount fields
-        discountPercentage: productData.discountPercentage
+        // Add discount fields - handle "0" to clear discount
+        discountPercentage: productData.discountPercentage !== undefined
           ? Number(productData.discountPercentage)
           : undefined,
         discountStartDate: productData.discountStartDate

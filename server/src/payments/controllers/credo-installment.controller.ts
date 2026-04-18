@@ -64,8 +64,8 @@ export class CredoInstallmentController {
         }
       }
 
-      // Generate unique orderCode using orderId
-      const orderCode = `SA_${orderId}`;
+      // Generate unique orderCode using orderId + timestamp to allow retries
+      const orderCode = `SA_${orderId}_${Date.now()}`;
 
       // Convert product prices from GEL to tetri (multiply by 100)
       const credoProducts: CredoProduct[] = products.map((p) => ({
@@ -169,7 +169,8 @@ export class CredoInstallmentController {
         // If status is REJECTED or CANCELED, cancel the order and release stock
         if (isFailed) {
           try {
-            const orderId = orderCode.replace('SA_', '');
+            // Extract orderId from orderCode format: SA_<orderId>_<timestamp>
+            const orderId = orderCode.replace(/^SA_/, '').replace(/_\d+$/, '');
             await this.ordersService.cancelOrder(
               orderId,
               `კრედო განვადება ${statusId === 6 ? 'უარყოფილია' : 'გაუქმებულია'} (სტატუსი: ${statusName})`,
