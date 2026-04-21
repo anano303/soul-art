@@ -15,10 +15,13 @@ import {
   XCircle,
   ArrowUpDown,
   Clock,
+  LogIn,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { toast } from "@/hooks/use-toast";
 import { deleteUser } from "@/modules/admin/api/delete-user";
+import { apiClient } from "@/lib/axios";
+import { storeUserData } from "@/lib/auth";
 import { Role } from "@/types/role";
 import "./usersList.css";
 import {
@@ -164,6 +167,22 @@ export function UsersList() {
     placeholderData: keepPreviousData,
     enabled: isInitialized,
   });
+
+  const handleImpersonate = async (userId: string, userName: string) => {
+    if (!confirm(`შეხვიდე სისტემაში როგორც "${userName}"?`)) return;
+    try {
+      const { data } = await apiClient.post(`/auth/impersonate/${userId}`);
+      if (data.user) {
+        localStorage.setItem("impersonating_admin_id", data.impersonatingAdminId);
+        storeUserData(data.user);
+        toast({ title: `შესული ხარ როგორც: ${data.user.name || userName}` });
+        window.location.href = "/";
+      }
+    } catch (err) {
+      console.error("Impersonate failed:", err);
+      toast({ title: "შეცდომა", description: "ვერ მოხერხდა", variant: "destructive" });
+    }
+  };
 
   const handleDelete = async (userId: string) => {
     if (confirm("Are you sure you want to delete this user?")) {
@@ -575,6 +594,13 @@ export function UsersList() {
                         title="Edit user"
                       >
                         <Pencil className="usr-icon" />
+                      </button>
+                      <button
+                        className="usr-btn"
+                        onClick={() => handleImpersonate(user._id, user.name)}
+                        title="შესვლა ამ მომხმარებლით"
+                      >
+                        <LogIn className="usr-icon" />
                       </button>
                       <button
                         className="usr-btn usr-btn-danger"

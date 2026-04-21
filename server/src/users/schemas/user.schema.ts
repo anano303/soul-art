@@ -203,6 +203,10 @@ export class User {
   @Prop({ type: Number, default: 0 })
   auctionAdminTotalWithdrawn?: number; // Total amount withdrawn
 
+  // Managed brands - allows user to edit products of these brands
+  @Prop({ type: [String], default: [] })
+  managedBrands?: string[];
+
   // Artist profile enhancements
   @Prop({ type: String, unique: true, sparse: true, index: true })
   artistSlug?: string | null;

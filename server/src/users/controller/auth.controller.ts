@@ -758,6 +758,109 @@ export class AuthController {
     return { message: 'Password reset successful. You can now log in.' };
   }
 
+  // Admin-only: impersonate a user (login as them without password)
+  @Post('impersonate/:userId')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.Admin)
+  @ApiOperation({ summary: 'Impersonate a user (Admin only)' })
+  async impersonate(
+    @Param('userId') userId: string,
+    @CurrentUser() admin: UserDocument,
+    @Res({ passthrough: true }) res: Response,
+    @Req() req: Request,
+  ) {
+    const targetUser = await this.authService.getUserById(userId);
+
+    const deviceInfo = {
+      fingerprint: this.generateDeviceFingerprint(req),
+      userAgent: req.headers['user-agent'] || '',
+      trusted: true,
+    };
+
+    const { tokens, user: userData } =
+      await this.authService.login(targetUser, deviceInfo);
+
+    let profileImage = null;
+    if (targetUser.profileImagePath) {
+      profileImage = await this.usersService.getProfileImageUrl(
+        targetUser.profileImagePath,
+      );
+    }
+
+    // Set HTTP-only cookies for the target user
+    res.cookie(
+      cookieConfig.access.name,
+      tokens.accessToken,
+      cookieConfig.access.options,
+    );
+    res.cookie(
+      cookieConfig.refresh.name,
+      tokens.refreshToken,
+      cookieConfig.refresh.options,
+    );
+
+    console.log(
+      `🔑 Admin ${admin.email} impersonated user ${targetUser.email} (${targetUser._id})`,
+    );
+
+    return {
+      user: {
+        ...userData,
+        profileImage,
+      },
+      impersonatingAdminId: admin._id.toString(),
+    };
+  }
+
+  // Return to admin after impersonation
+  @Post('return-to-admin')
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Return to admin account after impersonation' })
+  async returnToAdmin(
+    @Body() body: { adminId: string },
+    @Res({ passthrough: true }) res: Response,
+    @Req() req: Request,
+  ) {
+    const adminUser = await this.authService.getUserById(body.adminId);
+    if (adminUser.role !== Role.Admin) {
+      throw new UnauthorizedException('Target user is not an admin');
+    }
+
+    const deviceInfo = {
+      fingerprint: this.generateDeviceFingerprint(req),
+      userAgent: req.headers['user-agent'] || '',
+      trusted: true,
+    };
+
+    const { tokens, user: userData } =
+      await this.authService.login(adminUser, deviceInfo);
+
+    let profileImage = null;
+    if (adminUser.profileImagePath) {
+      profileImage = await this.usersService.getProfileImageUrl(
+        adminUser.profileImagePath,
+      );
+    }
+
+    res.cookie(
+      cookieConfig.access.name,
+      tokens.accessToken,
+      cookieConfig.access.options,
+    );
+    res.cookie(
+      cookieConfig.refresh.name,
+      tokens.refreshToken,
+      cookieConfig.refresh.options,
+    );
+
+    return {
+      user: {
+        ...userData,
+        profileImage,
+      },
+    };
+  }
+
   // Helper method to generate device fingerprint
   private generateDeviceFingerprint(req: Request): string {
     const crypto = require('crypto');
