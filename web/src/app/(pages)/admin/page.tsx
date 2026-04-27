@@ -130,7 +130,7 @@ export default function AdminDashboard() {
         roles: ["admin", "seller"],
       },
     ];
-    
+
     return allAdminSections.filter((section) =>
       section.roles.includes(userRole),
     );
