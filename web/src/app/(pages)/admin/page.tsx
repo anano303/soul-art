@@ -74,6 +74,13 @@ export default function AdminDashboard() {
         roles: ["admin"], // მთავარი ადმინი
       },
       {
+        title: "Hero სლაიდები",
+        href: "/admin/hero-slides",
+        icon: "🎠",
+        description: "მთავარი გვერდის Hero სლაიდების მართვა",
+        roles: ["admin"], // მთავარი ადმინი
+      },
+      {
         title: t("admin.balances"),
         href: "/admin/balances",
         icon: "💰",

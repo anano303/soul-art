@@ -1,4 +1,4 @@
-import { IsString, IsBoolean, IsOptional, IsNumber } from 'class-validator';
+import { IsString, IsBoolean, IsOptional, IsNumber, IsIn } from 'class-validator';
 
 export class CreateBannerDto {
   @IsString()
@@ -26,6 +26,11 @@ export class CreateBannerDto {
   @IsNumber()
   @IsOptional()
   sortOrder?: number;
+
+  @IsString()
+  @IsOptional()
+  @IsIn(['banner', 'hero'])
+  type?: string;
 
   // Allow images field for file upload (will be handled by interceptor)
   @IsOptional()
@@ -64,6 +69,11 @@ export class UpdateBannerDto {
   @IsNumber()
   @IsOptional()
   sortOrder?: number;
+
+  @IsString()
+  @IsOptional()
+  @IsIn(['banner', 'hero'])
+  type?: string;
 
   // Allow images field for file upload (will be handled by interceptor)
   @IsOptional()

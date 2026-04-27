@@ -44,6 +44,20 @@ export async function getActiveHeroSlides(): Promise<{
   }
 }
 
+export async function getAllHeroSlides(): Promise<{
+  success: boolean;
+  data?: Banner[];
+  error?: string;
+}> {
+  try {
+    const response = await apiClient.get(`/banners/hero/all`);
+    return { success: true, data: response.data };
+  } catch (error) {
+    console.error("Error fetching all hero slides:", error);
+    return { success: false, error: "Network error" };
+  }
+}
+
 export async function createBanner(
   bannerData: CreateBannerData,
   image?: File,
