@@ -97,8 +97,8 @@ export async function createBanner(
         bannerData.title.toLowerCase().includes("discount") ||
         bannerData.title.toLowerCase().includes("აქცია") ||
         bannerData.title.toLowerCase().includes("sale") ||
-        bannerData.buttonText.toLowerCase().includes("ფასდაკლება") ||
-        bannerData.buttonText.toLowerCase().includes("discount"))
+        bannerData.buttonText?.toLowerCase().includes("ფასდაკლება") ||
+        bannerData.buttonText?.toLowerCase().includes("discount"))
     ) {
       try {
         await fetch("/api/push/discount", {
