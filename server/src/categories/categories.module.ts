@@ -13,6 +13,7 @@ import { AgeGroup, AgeGroupSchema } from './schemas/age-group.schema';
 import { ColorService } from './services/color.service';
 import { SizeService } from './services/size.service';
 import { AgeGroupService } from './services/age-group.service';
+import { Product, ProductSchema } from '../products/schemas/product.schema';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { AgeGroupService } from './services/age-group.service';
       { name: Color.name, schema: ColorSchema },
       { name: Size.name, schema: SizeSchema },
       { name: AgeGroup.name, schema: AgeGroupSchema },
+      { name: Product.name, schema: ProductSchema },
     ]),
   ],
   controllers: [

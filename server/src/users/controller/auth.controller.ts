@@ -211,7 +211,9 @@ export class AuthController {
           isSeller: String(result.isSeller),
           needsSellerRegistration: String(result.needsSellerRegistration),
         });
-        return res.redirect(`${process.env.ALLOWED_ORIGINS}/auth-popup-callback?${params.toString()}`);
+        return res.redirect(
+          `${process.env.ALLOWED_ORIGINS}/auth-popup-callback?${params.toString()}`,
+        );
       }
 
       // Standard redirect flow - always go through auth-callback
@@ -224,15 +226,19 @@ export class AuthController {
         needsSellerRegistration: String(result.needsSellerRegistration),
       });
 
-      res.redirect(`${process.env.ALLOWED_ORIGINS}/auth-callback?${params.toString()}`);
+      res.redirect(
+        `${process.env.ALLOWED_ORIGINS}/auth-callback?${params.toString()}`,
+      );
     } catch (error) {
       console.error('❌ Google auth error:', error);
-      
+
       // Handle popup error - redirect to callback page with error
       if (req.user?.popup) {
-        return res.redirect(`${process.env.ALLOWED_ORIGINS}/auth-popup-callback?error=auth_failed`);
+        return res.redirect(
+          `${process.env.ALLOWED_ORIGINS}/auth-popup-callback?error=auth_failed`,
+        );
       }
-      
+
       res.redirect(`${process.env.ALLOWED_ORIGINS}/login?error=auth_failed`);
     }
   }
@@ -246,11 +252,11 @@ export class AuthController {
   async facebookAuthRedirect(@Req() req, @Res() res: Response) {
     try {
       console.log('🔍 Facebook OAuth callback received');
-      console.log('📦 User data from Facebook:', { 
-        email: req.user.email, 
-        sellerMode: req.user.sellerMode 
+      console.log('📦 User data from Facebook:', {
+        email: req.user.email,
+        sellerMode: req.user.sellerMode,
       });
-      
+
       const result = await this.authService.signInWithFacebookOAuth({
         email: req.user.email,
         name: req.user.name || 'Facebook User',
@@ -279,10 +285,15 @@ export class AuthController {
         isSeller: String(result.isSeller),
         needsSellerRegistration: String(result.needsSellerRegistration),
       });
-      
-      console.log('🔄 Redirecting to:', `${process.env.ALLOWED_ORIGINS}/auth-callback?${params.toString()}`);
 
-      res.redirect(`${process.env.ALLOWED_ORIGINS}/auth-callback?${params.toString()}`);
+      console.log(
+        '🔄 Redirecting to:',
+        `${process.env.ALLOWED_ORIGINS}/auth-callback?${params.toString()}`,
+      );
+
+      res.redirect(
+        `${process.env.ALLOWED_ORIGINS}/auth-callback?${params.toString()}`,
+      );
     } catch (error) {
       console.error('❌ Facebook auth error:', error);
       res.redirect(`${process.env.ALLOWED_ORIGINS}/login?error=auth_failed`);
@@ -777,8 +788,10 @@ export class AuthController {
       trusted: true,
     };
 
-    const { tokens, user: userData } =
-      await this.authService.login(targetUser, deviceInfo);
+    const { tokens, user: userData } = await this.authService.login(
+      targetUser,
+      deviceInfo,
+    );
 
     let profileImage = null;
     if (targetUser.profileImagePath) {
@@ -832,8 +845,10 @@ export class AuthController {
       trusted: true,
     };
 
-    const { tokens, user: userData } =
-      await this.authService.login(adminUser, deviceInfo);
+    const { tokens, user: userData } = await this.authService.login(
+      adminUser,
+      deviceInfo,
+    );
 
     let profileImage = null;
     if (adminUser.profileImagePath) {

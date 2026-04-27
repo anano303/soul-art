@@ -143,6 +143,7 @@ export interface SubCategory {
   sizes: string[];
   colors: string[];
   isActive: boolean;
+  productCount?: number;
 }
 
 export interface CategoryStructure {

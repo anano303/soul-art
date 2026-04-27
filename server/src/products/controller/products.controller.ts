@@ -898,11 +898,14 @@ export class ProductsController {
     },
   ) {
     const product = await this.productsService.findById(id);
-    const isOwner = (product.user as any)._id.toString() === user._id.toString();
-    const isBrandManager = Array.isArray((user as any).managedBrands) &&
+    const isOwner =
+      (product.user as any)._id.toString() === user._id.toString();
+    const isBrandManager =
+      Array.isArray((user as any).managedBrands) &&
       product.brand &&
       (user as any).managedBrands.some(
-        (b: string) => b.toLowerCase() === (product.brand as string).toLowerCase(),
+        (b: string) =>
+          b.toLowerCase() === (product.brand as string).toLowerCase(),
       );
     if (user.role !== Role.Admin && !isOwner && !isBrandManager) {
       throw new UnauthorizedException('You can only edit your own products');
@@ -1098,9 +1101,10 @@ export class ProductsController {
         variants: parseVariants,
         videoDescription: productData.videoDescription,
         // Add discount fields - handle "0" to clear discount
-        discountPercentage: productData.discountPercentage !== undefined
-          ? Number(productData.discountPercentage)
-          : undefined,
+        discountPercentage:
+          productData.discountPercentage !== undefined
+            ? Number(productData.discountPercentage)
+            : undefined,
         discountStartDate: productData.discountStartDate
           ? new Date(productData.discountStartDate)
           : undefined,
@@ -1314,12 +1318,15 @@ export class ProductsController {
 
     // Verify ownership (seller can only promote their own products, admin can promote any)
     const isAdmin = user.role === Role.Admin;
-    const isOwner = product.user?.toString() === user._id.toString() ||
+    const isOwner =
+      product.user?.toString() === user._id.toString() ||
       (product as any).user?._id?.toString() === user._id.toString();
-    const isBrandMgr = Array.isArray((user as any).managedBrands) &&
+    const isBrandMgr =
+      Array.isArray((user as any).managedBrands) &&
       (product as any).brand &&
       (user as any).managedBrands.some(
-        (b: string) => b.toLowerCase() === ((product as any).brand as string).toLowerCase(),
+        (b: string) =>
+          b.toLowerCase() === ((product as any).brand as string).toLowerCase(),
       );
     if (!isAdmin && !isOwner && !isBrandMgr) {
       throw new UnauthorizedException('You can only promote your own products');

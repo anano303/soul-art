@@ -96,6 +96,18 @@ export class BannerController {
     return this.bannerService.findActive();
   }
 
+  @Get('hero')
+  async findActiveHero() {
+    return this.bannerService.findActiveHero();
+  }
+
+  @Get('hero/all')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.Admin)
+  async findAllHero() {
+    return this.bannerService.findAllHero();
+  }
+
   @Get(':id')
   async findOne(@Param('id') id: string) {
     return this.bannerService.findOne(id);

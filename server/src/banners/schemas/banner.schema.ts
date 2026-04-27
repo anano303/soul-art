@@ -9,13 +9,13 @@ export class Banner extends Document {
   @Prop({ required: true })
   titleEn: string;
 
-  @Prop({ required: true })
+  @Prop({ default: '' })
   buttonText: string;
 
-  @Prop({ required: true })
+  @Prop({ default: '' })
   buttonTextEn: string;
 
-  @Prop({ required: true })
+  @Prop({ default: '' })
   buttonLink: string;
 
   @Prop({ required: true })
@@ -26,6 +26,9 @@ export class Banner extends Document {
 
   @Prop({ default: 0 })
   sortOrder: number;
+
+  @Prop({ default: 'banner', enum: ['banner', 'hero'] })
+  type: string;
 }
 
 export const BannerSchema = SchemaFactory.createForClass(Banner);

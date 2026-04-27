@@ -98,13 +98,18 @@ export function optimizeCloudinaryUrl(
 
     // Check if there are already transformations
     // If the path after /upload/ starts with v followed by a number, it's a version
-    // If it contains commas or transformation patterns, add to existing
+    // If it contains commas or transformation patterns, replace existing transforms
     if (/^v\d+\//.test(afterUpload)) {
       // Has version, insert transforms before version
       return `${beforeUpload}${transformString}/${afterUpload}`;
     } else if (afterUpload.includes(",") || /^[a-z]_/.test(afterUpload)) {
-      // Already has transformations, prepend new ones
-      return `${beforeUpload}${transformString},${afterUpload}`;
+      // Already has transformations - replace them (find the version part)
+      const versionMatch = afterUpload.match(/(v\d+\/.*)/);
+      if (versionMatch) {
+        return `${beforeUpload}${transformString}/${versionMatch[1]}`;
+      }
+      // No version found, just replace all transforms
+      return `${beforeUpload}${transformString}/${afterUpload}`;
     } else {
       // No transformations, add them
       return `${beforeUpload}${transformString}/${afterUpload}`;

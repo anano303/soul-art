@@ -30,9 +30,23 @@ export async function getActiveBanners(): Promise<{
   }
 }
 
+export async function getActiveHeroSlides(): Promise<{
+  success: boolean;
+  data?: Banner[];
+  error?: string;
+}> {
+  try {
+    const response = await apiClient.get(`/banners/hero`);
+    return { success: true, data: response.data };
+  } catch (error) {
+    console.error("Error fetching hero slides:", error);
+    return { success: false, error: "Network error" };
+  }
+}
+
 export async function createBanner(
   bannerData: CreateBannerData,
-  image?: File
+  image?: File,
 ): Promise<Banner> {
   try {
     const formData = new FormData();
@@ -58,7 +72,7 @@ export async function createBanner(
           // Don't set Content-Type, let axios/browser handle multipart/form-data
         },
         withCredentials: true,
-      }
+      },
     );
     const data = response.data;
 
@@ -89,7 +103,7 @@ export async function createBanner(
       } catch (notificationError) {
         console.error(
           "❌ Failed to send discount notification:",
-          notificationError
+          notificationError,
         );
       }
     }
@@ -104,7 +118,7 @@ export async function createBanner(
 export async function updateBanner(
   id: string,
   bannerData: Partial<CreateBannerData>,
-  image?: File
+  image?: File,
 ): Promise<Banner> {
   try {
     const formData = new FormData();
@@ -130,7 +144,7 @@ export async function updateBanner(
           // Don't set Content-Type, let axios/browser handle multipart/form-data
         },
         withCredentials: true,
-      }
+      },
     );
     return response.data;
   } catch (error) {

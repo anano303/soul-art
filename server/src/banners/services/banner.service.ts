@@ -19,7 +19,21 @@ export class BannerService {
 
   async findActive(): Promise<Banner[]> {
     return this.bannerModel
-      .find({ isActive: true })
+      .find({ isActive: true, type: { $ne: 'hero' } })
+      .sort({ sortOrder: 1, createdAt: -1 })
+      .exec();
+  }
+
+  async findActiveHero(): Promise<Banner[]> {
+    return this.bannerModel
+      .find({ isActive: true, type: 'hero' })
+      .sort({ sortOrder: 1, createdAt: -1 })
+      .exec();
+  }
+
+  async findAllHero(): Promise<Banner[]> {
+    return this.bannerModel
+      .find({ type: 'hero' })
       .sort({ sortOrder: 1, createdAt: -1 })
       .exec();
   }

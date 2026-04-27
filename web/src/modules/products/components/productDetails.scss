@@ -1206,17 +1206,26 @@ body {
       gap: 8px;
     }
 
+    .cart-actions-container .quantity-selector-wrapper {
+      flex: 0 0 auto;
+    }
+
     .cart-actions-container .add-to-cart-btn-wrapper {
-      flex: 1 1 45%;
+      flex: 1 1 35%;
       min-width: 120px;
     }
 
     .cart-actions-container .btn-buy-now {
-      flex: 1 1 45%;
+      flex: 1 1 35%;
       min-width: 120px;
       font-size: 13px;
       padding: 10px 12px;
       height: 44px;
+    }
+
+    .cart-actions-container .btn-credo-installment {
+      flex: 1 1 100%;
+      width: 100%;
     }
 
     /* Image action buttons responsive */
@@ -1285,6 +1294,13 @@ body {
       padding: 12px 16px;
       height: 46px;
     }
+
+    .cart-actions-container .btn-credo-installment {
+      flex: 1 1 100%;
+      width: 100%;
+      font-size: 13px;
+      padding: 10px 14px !important;
+    }
   }
 
   /* Responsive adjustments for very small devices */
@@ -1316,9 +1332,15 @@ body {
     }
 
     .cart-actions-container .add-to-cart-btn-wrapper,
-    .cart-actions-container .btn-buy-now {
+    .cart-actions-container .btn-buy-now,
+    .cart-actions-container .btn-credo-installment {
       flex: 1 1 100%;
       width: 100%;
+    }
+
+    .cart-actions-container .btn-credo-installment {
+      font-size: 12px;
+      padding: 8px 10px !important;
     }
 
     .image-action-buttons {
@@ -2087,8 +2109,15 @@ body {
   .cart-actions-container {
     display: flex;
     align-items: center;
+    flex-wrap: wrap;
     gap: 10px;
     margin: 8px 0 16px 0;
+  }
+
+  /* Credo Installment Button - always full width row */
+  .cart-actions-container > .btn-credo-installment {
+    flex: 1 1 100%;
+    width: 100%;
   }
 
   .quantity-selector-wrapper {

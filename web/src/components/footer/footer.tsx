@@ -104,7 +104,7 @@ export default function Footer() {
               className="footer-link-small"
               style={{ background: "none", border: "none", cursor: "pointer", padding: 0, font: "inherit", color: "inherit", display: "inline-flex", alignItems: "center", gap: "4px" }}
             >
-              <Image src="/dayavi.webp" alt="" width={42} height={14} style={{ height: "14px", width: "auto", objectFit: "contain" }} />
+              <Image src="/dayavi.webp" alt="" width={66} height={22} style={{ height: "22px", width: "auto", objectFit: "contain" }} />
               {language === "en" ? "Installment Terms" : "განვადების პირობები"}
             </button>
             <span className="footer-legal-divider">·</span>

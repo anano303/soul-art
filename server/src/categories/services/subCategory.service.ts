@@ -16,6 +16,7 @@ import {
   UpdateSubCategoryDto,
 } from '../dto/subcategory.dto';
 import { Category } from '../schemas/category.schema';
+import { Product } from '../../products/schemas/product.schema';
 import { ColorService } from './color.service';
 import { SizeService } from './size.service';
 import { AgeGroupService } from './age-group.service';
@@ -26,6 +27,7 @@ export class SubCategoryService {
     @InjectModel(SubCategory.name)
     private subCategoryModel: Model<SubCategoryDocument>,
     @InjectModel(Category.name) private categoryModel: Model<Category>,
+    @InjectModel(Product.name) private productModel: Model<Product>,
     private readonly colorService: ColorService,
     private readonly sizeService: SizeService,
     private readonly ageGroupService: AgeGroupService,
@@ -103,19 +105,30 @@ export class SubCategoryService {
         .sort({ name: 1 })
         .exec();
 
-      console.log(
-        `[SubCategoryService] Database query returned ${subcategories.length} subcategories.`,
-      );
+      // Count approved products per subcategory
       if (subcategories.length > 0) {
-        console.log(
-          '[SubCategoryService] Example of first subcategory found:',
-          JSON.stringify(subcategories[0]),
+        const subIds = subcategories.map((s) => s._id);
+        const counts = await this.productModel.aggregate([
+          {
+            $match: {
+              subCategory: { $in: subIds },
+              status: 'APPROVED',
+            },
+          },
+          { $group: { _id: '$subCategory', count: { $sum: 1 } } },
+        ]);
+        const countMap = new Map(
+          counts.map((c) => [c._id.toString(), c.count]),
         );
-      } else if (categoryId) {
-        console.log(
-          `[SubCategoryService] No subcategories found for categoryId: "${categoryId}" with current filters.`,
-        );
+        return subcategories.map((sub) => {
+          const obj = sub.toJSON ? sub.toJSON() : sub;
+          return {
+            ...obj,
+            productCount: countMap.get(sub._id.toString()) || 0,
+          };
+        });
       }
+
       return subcategories;
     } catch (error) {
       console.error(

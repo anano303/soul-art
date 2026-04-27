@@ -173,14 +173,21 @@ export function UsersList() {
     try {
       const { data } = await apiClient.post(`/auth/impersonate/${userId}`);
       if (data.user) {
-        localStorage.setItem("impersonating_admin_id", data.impersonatingAdminId);
+        localStorage.setItem(
+          "impersonating_admin_id",
+          data.impersonatingAdminId,
+        );
         storeUserData(data.user);
         toast({ title: `შესული ხარ როგორც: ${data.user.name || userName}` });
         window.location.href = "/";
       }
     } catch (err) {
       console.error("Impersonate failed:", err);
-      toast({ title: "შეცდომა", description: "ვერ მოხერხდა", variant: "destructive" });
+      toast({
+        title: "შეცდომა",
+        description: "ვერ მოხერხდა",
+        variant: "destructive",
+      });
     }
   };
 

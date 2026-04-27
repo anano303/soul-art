@@ -8,6 +8,7 @@ export interface Banner {
   imageUrl: string;
   isActive: boolean;
   sortOrder: number;
+  type?: "banner" | "hero";
   createdAt: string;
   updatedAt: string;
 }
@@ -15,10 +16,11 @@ export interface Banner {
 export interface CreateBannerData {
   title: string;
   titleEn: string;
-  buttonText: string;
-  buttonTextEn: string;
-  buttonLink: string;
+  buttonText?: string;
+  buttonTextEn?: string;
+  buttonLink?: string;
   imageUrl: string;
   isActive?: boolean;
   sortOrder?: number;
+  type?: "banner" | "hero";
 }

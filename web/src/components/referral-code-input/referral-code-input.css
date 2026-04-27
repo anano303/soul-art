@@ -25,6 +25,22 @@
   font-size: 13px;
 }
 
+@media (max-width: 768px) {
+  .ref-code-floating .ref-code-trigger {
+    padding: 5px 8px;
+    font-size: 10px;
+    gap: 4px;
+  }
+
+  .ref-code-floating .ref-code-trigger-text {
+    display: none !important;
+  }
+
+  .ref-code-floating {
+    right: 10px;
+  }
+}
+
 .ref-code-floating .ref-code-trigger-text {
   display: inline !important;
 }

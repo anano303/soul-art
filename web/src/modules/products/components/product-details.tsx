@@ -1563,10 +1563,9 @@ export function ProductDetails({ product }: ProductDetailsProps) {
                   style={{
                     display: "flex",
                     alignItems: "center",
-                    justifyContent: "center",
                     gap: "10px",
                     width: "100%",
-                    padding: "13px 18px",
+                    padding: "0 0 0 18px",
                     borderRadius: "12px",
                     border: "none",
                     background: "linear-gradient(135deg, #1e3a5f 0%, #0d47a1 50%, #1565c0 100%)",
@@ -1576,6 +1575,7 @@ export function ProductDetails({ product }: ProductDetailsProps) {
                     fontSize: "15px",
                     opacity: isOutOfStock || isBuying ? 0.5 : 1,
                     boxShadow: "0 2px 8px rgba(13, 71, 161, 0.3)",
+                    overflow: "hidden",
                   }}
                   onMouseEnter={(e) => {
                     if (!isOutOfStock && !isBuying) {
@@ -1592,13 +1592,6 @@ export function ProductDetails({ product }: ProductDetailsProps) {
                     }
                   }}
                 >
-                  <Image
-                    src="/dayavi.webp"
-                    alt="კრედო და-ყა-ვი"
-                    width={90}
-                    height={30}
-                    style={{ height: "28px", width: "auto", objectFit: "contain" }}
-                  />
                   <span style={{ fontWeight: 600, color: "white", letterSpacing: "0.3px" }}>
                     {language === "en" ? "Buy in installments" : "განვადებით ყიდვა"}
                   </span>
@@ -1612,6 +1605,13 @@ export function ProductDetails({ product }: ProductDetailsProps) {
                   }}>
                     0%
                   </span>
+                  <Image
+                    src="/dayavi.webp"
+                    alt="კრედო და-ყა-ვი"
+                    width={200}
+                    height={40}
+                    style={{ width: "140px", height: "auto", objectFit: "contain", marginLeft: "auto", display: "block" }}
+                  />
                 </button>
               )}
             </div>

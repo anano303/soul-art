@@ -198,7 +198,7 @@ export function ProductFilters({
     queryFn: async () => {
       try {
         const response = await fetchWithAuth(
-          "/categories?includeInactive=false"
+          "/categories?includeInactive=false",
         );
         if (!response.ok) {
           throw new Error(`Error fetching categories: ${response.status}`);
@@ -225,7 +225,7 @@ export function ProductFilters({
       try {
         if (!selectedCategoryId) return [];
         const response = await fetchWithAuth(
-          `/subcategories?categoryId=${selectedCategoryId}&includeInactive=false`
+          `/subcategories?categoryId=${selectedCategoryId}&includeInactive=false`,
         );
         if (!response.ok) {
           throw new Error(`Error fetching subcategories: ${response.status}`);
@@ -254,7 +254,7 @@ export function ProductFilters({
         if (!response.ok) {
           // Try alternative endpoint
           const altResponse = await fetchWithAuth(
-            "/products?page=1&limit=1000"
+            "/products?page=1&limit=1000",
           );
           if (!altResponse.ok) {
             return []; // Silently fail if brands endpoint doesn't exist
@@ -266,7 +266,7 @@ export function ProductFilters({
             ...new Set(
               products
                 .map((product: { brand?: string }) => product.brand)
-                .filter(Boolean)
+                .filter(Boolean),
             ),
           ];
           console.log("Fallback brands from products:", brands);
@@ -310,7 +310,7 @@ export function ProductFilters({
     queryFn: async () => {
       try {
         const response = await fetchWithAuth(
-          "/categories/attributes/age-groups"
+          "/categories/attributes/age-groups",
         );
         if (!response.ok) {
           console.error("Failed to fetch age groups:", response.status);
@@ -391,7 +391,7 @@ export function ProductFilters({
                   translationMap.set(normalizedMaterial, normalizedTranslation);
                 }
               });
-            }
+            },
           );
 
           return {
@@ -427,8 +427,8 @@ export function ProductFilters({
       new Set(
         availableMaterialsData.values
           .map((material) => material.trim())
-          .filter((material) => material.length > 0)
-      )
+          .filter((material) => material.length > 0),
+      ),
     );
 
     return uniqueMaterials.sort((valueA, valueB) => {
@@ -507,9 +507,9 @@ export function ProductFilters({
                     }
                   }
                   return null;
-                }
+                },
               )
-              .filter(Boolean) as string[]
+              .filter(Boolean) as string[],
           ),
         ];
         return dimensions.sort((a, b) => {
@@ -561,7 +561,7 @@ export function ProductFilters({
 
   // Get available attributes based on selected subcategory
   const getAvailableAttributes = (
-    attributeType: "ageGroups" | "sizes" | "colors"
+    attributeType: "ageGroups" | "sizes" | "colors",
   ): string[] => {
     if (!subcategories || subcategories.length === 0) return [];
 
@@ -569,8 +569,8 @@ export function ProductFilters({
     const selectedIds = Array.isArray(selectedSubCategoryId)
       ? selectedSubCategoryId.filter(Boolean).map((id) => id.toString())
       : selectedSubCategoryId
-      ? [selectedSubCategoryId.toString()]
-      : [];
+        ? [selectedSubCategoryId.toString()]
+        : [];
 
     const relevantSubcategories =
       selectedIds.length > 0
@@ -628,7 +628,7 @@ export function ProductFilters({
     }
 
     return Array.from(allAttributes).sort((a, b) =>
-      a.localeCompare(b, undefined, { numeric: true, sensitivity: "base" })
+      a.localeCompare(b, undefined, { numeric: true, sensitivity: "base" }),
     );
   };
   // Get localized color name based on current language
@@ -636,7 +636,7 @@ export function ProductFilters({
     if (language === "en") {
       // Find the color in availableColors to get its English name
       const colorObj = availableColors.find(
-        (color) => color.name === colorName
+        (color) => color.name === colorName,
       );
       return colorObj?.nameEn || colorName;
     }
@@ -648,7 +648,7 @@ export function ProductFilters({
     if (language === "en") {
       // Find the age group in availableAgeGroups to get its English name
       const ageGroupObj = availableAgeGroups.find(
-        (ageGroup) => ageGroup.name === ageGroupName
+        (ageGroup) => ageGroup.name === ageGroupName,
       );
       return ageGroupObj?.nameEn || ageGroupName;
     }
@@ -661,7 +661,7 @@ export function ProductFilters({
       "getFilteredBrands called with availableBrands:",
       availableBrands,
       "searchTerm:",
-      brandSearchTerm
+      brandSearchTerm,
     );
     if (!brandSearchTerm.trim()) {
       return availableBrands;
@@ -710,7 +710,7 @@ export function ProductFilters({
   // Translate category/subcategory names based on language
   const getLocalizedName = (
     name: string,
-    originalItem?: { nameEn?: string }
+    originalItem?: { nameEn?: string },
   ): string => {
     if (language === "en") {
       // First check if the item has an English name field
@@ -773,7 +773,7 @@ export function ProductFilters({
       "handleBrandSelect called with:",
       brand,
       "current selectedBrand:",
-      selectedBrand
+      selectedBrand,
     );
     onBrandChange(brand === selectedBrand ? "" : brand);
     setBrandSearchTerm("");
@@ -819,7 +819,7 @@ export function ProductFilters({
   useEffect(() => {
     const checkScroll = () => {
       const gridElement = document.querySelector(
-        ".main-categories-grid"
+        ".main-categories-grid",
       ) as HTMLElement;
       if (gridElement) {
         const hasScroll = gridElement.scrollWidth > gridElement.clientWidth;
@@ -840,10 +840,10 @@ export function ProductFilters({
     const adjustSubcategoryPositioning = () => {
       if (window.innerWidth <= 768 && showSubcategories && selectedCategoryId) {
         const selectedCategory = document.querySelector(
-          ".main-category-option.selected"
+          ".main-category-option.selected",
         );
         const subcategoryOverlay = document.querySelector(
-          ".subcategories-overlay"
+          ".subcategories-overlay",
         ) as HTMLElement;
 
         if (selectedCategory && subcategoryOverlay) {
@@ -887,7 +887,7 @@ export function ProductFilters({
     if (selectedCategoryId && window.innerWidth <= 768) {
       setTimeout(() => {
         const selectedCategory = document.querySelector(
-          ".main-category-option.selected"
+          ".main-category-option.selected",
         );
         if (selectedCategory) {
           selectedCategory.scrollIntoView({
@@ -907,7 +907,7 @@ export function ProductFilters({
         const target = event.target as HTMLElement;
         const categoriesGrid = document.querySelector(".main-categories-grid");
         const subcategoriesOverlay = document.querySelector(
-          ".subcategories-overlay"
+          ".subcategories-overlay",
         );
 
         // Check if click is outside both the categories grid and subcategories overlay
@@ -983,9 +983,9 @@ export function ProductFilters({
                           category.nameEn === "Handmade"
                             ? "category-handmade"
                             : category.name === "ნახატები" ||
-                              category.nameEn === "Paintings"
-                            ? "category-paintings"
-                            : ""
+                                category.nameEn === "Paintings"
+                              ? "category-paintings"
+                              : ""
                         }`}
                         onClick={() => {
                           const categoryId = category.id || category._id || "";
@@ -1019,7 +1019,7 @@ export function ProductFilters({
               className="subcategories-section"
               data-category={(() => {
                 const selectedCategory = categories.find(
-                  (cat) => (cat.id || cat._id) === selectedCategoryId
+                  (cat) => (cat.id || cat._id) === selectedCategoryId,
                 );
                 if (!selectedCategory) return "";
 
@@ -1081,13 +1081,16 @@ export function ProductFilters({
                       </span>
                     </div>
 
-                    {/* Individual subcategory pills with X icon */}
+                    {/* Individual subcategory pills - hide empty ones */}
                     {subcategories.map((sub) => {
                       const subId = sub.id || sub._id || "";
                       const selectedIds = Array.isArray(selectedSubCategoryId)
                         ? selectedSubCategoryId
                         : [];
                       const isSelected = selectedIds.includes(subId);
+
+                      // Skip subcategories with 0 products
+                      if (sub.productCount === 0) return null;
 
                       return (
                         <div
@@ -1196,7 +1199,7 @@ export function ProductFilters({
                             }`}
                             onClick={() =>
                               onAgeGroupChange(
-                                ageGroup === selectedAgeGroup ? "" : ageGroup
+                                ageGroup === selectedAgeGroup ? "" : ageGroup,
                               )
                             }
                           >
@@ -1272,7 +1275,7 @@ export function ProductFilters({
                             }`}
                             onClick={() =>
                               onColorChange(
-                                color === selectedColor ? "" : color
+                                color === selectedColor ? "" : color,
                               )
                             }
                           >
@@ -1475,8 +1478,8 @@ export function ProductFilters({
                             ? "Hide"
                             : "დამალე"
                           : language === "en"
-                          ? "Show"
-                          : "გახსენი"}
+                            ? "Show"
+                            : "გახსენი"}
                       </button>
                     </div>
                   </div>
@@ -1554,8 +1557,8 @@ export function ProductFilters({
                             ? "Hide"
                             : "დამალე"
                           : language === "en"
-                          ? "Show"
-                          : "გახსენი"}
+                            ? "Show"
+                            : "გახსენი"}
                       </button>
                     </div>
                   </div>
@@ -1569,7 +1572,7 @@ export function ProductFilters({
                           const normalizedDimension = dimension.trim();
                           const isChecked =
                             normalizedSelectedDimensions.includes(
-                              normalizedDimension
+                              normalizedDimension,
                             );
 
                           return (
