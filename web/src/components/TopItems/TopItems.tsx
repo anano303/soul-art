@@ -83,27 +83,18 @@ const TopItems: React.FC = () => {
     let isPaused = false;
     let isUserScrolling = false;
     let userScrollTimeout: NodeJS.Timeout;
-    let ignoreNextScrollEvent = false;
-    let ignoreResetId: number | null = null;
+    let lastProgrammaticScrollTime = 0;
 
     // Faster speed for mobile
     const isMobile =
       /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
         navigator.userAgent,
       );
-    const scrollSpeed = isMobile ? 2.5 : 1.2; // Increased speed for both desktop and mobile
-
-    const resetIgnoreFlag = () => {
-      if (ignoreResetId) cancelAnimationFrame(ignoreResetId);
-      ignoreResetId = requestAnimationFrame(() => {
-        ignoreNextScrollEvent = false;
-        ignoreResetId = null;
-      });
-    };
+    const scrollSpeed = isMobile ? 2.5 : 1.2;
 
     const autoScroll = () => {
       if (!isPaused && !isUserScrolling && scroller) {
-        ignoreNextScrollEvent = true;
+        lastProgrammaticScrollTime = performance.now();
         scroller.scrollLeft += scrollSpeed;
 
         // Seamless loop: reset when reaching the original content width
@@ -111,8 +102,6 @@ const TopItems: React.FC = () => {
         if (scroller.scrollLeft >= originalWidth) {
           scroller.scrollLeft = 0;
         }
-
-        resetIgnoreFlag();
       }
       animationId = requestAnimationFrame(autoScroll);
     };
@@ -152,7 +141,8 @@ const TopItems: React.FC = () => {
 
     // Detect user scrolling (only manual scroll, not programmatic)
     const handleUserScroll = () => {
-      if (ignoreNextScrollEvent) {
+      // Ignore scroll events within 100ms of programmatic scroll
+      if (performance.now() - lastProgrammaticScrollTime < 100) {
         return;
       }
 
@@ -181,9 +171,6 @@ const TopItems: React.FC = () => {
       scroller.removeEventListener("scroll", handleUserScroll);
       scroller.removeEventListener("touchstart", handleTouchStart);
       scroller.removeEventListener("touchmove", handleTouchMove);
-      if (ignoreResetId) {
-        cancelAnimationFrame(ignoreResetId);
-      }
       if (clone && clone.parentElement) {
         clone.parentElement.removeChild(clone);
       }
