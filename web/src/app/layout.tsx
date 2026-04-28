@@ -81,6 +81,7 @@ import { CampaignConsentPrompt } from "@/components/campaign-consent/campaign-co
 import { ReferralCodeInput } from "@/components/referral-code-input/referral-code-input";
 import { CallRequestPopup } from "@/components/call-request-popup/call-request-popup";
 import { ImpersonationBanner } from "@/components/ImpersonationBanner/ImpersonationBanner";
+import InsurancePromo from "@/components/insurance-promo/insurance-promo";
 // import { ServerAnnouncement } from "@/components/server-announcement/server-announcement";
 import "@/lib/cloudflare-cleanup"; // Auto-cleanup Cloudflare cookies in development
 
@@ -467,6 +468,9 @@ export default function RootLayout({
 
                       {/* Admin Impersonation Banner */}
                       <ImpersonationBanner />
+
+                      {/* Insurance Promo - 4 წუთის შემდეგ */}
+                      <InsurancePromo />
 
                       {/* Server Announcement - გათიშულია */}
                       {/* <ServerAnnouncement /> */}
