@@ -270,11 +270,6 @@ export default function RootLayout({
           href="https://fonts.gstatic.com"
           crossOrigin="anonymous"
         />
-        <link
-          rel="preconnect"
-          href="https://res.cloudinary.com"
-          crossOrigin="anonymous"
-        />
 
         {/* DNS prefetch for external resources only */}
         <link rel="dns-prefetch" href="//connect.facebook.net" />

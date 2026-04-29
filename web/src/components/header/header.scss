@@ -348,14 +348,14 @@ header {
         text-decoration: none;
         color: #ffffff;
         font-size: 15px;
-
-        @media (min-width: 1200px) {
-          font-size: 17px;
-        }
         transition:
           color 0.2s ease,
           opacity 0.2s ease;
         position: relative;
+
+        @media (min-width: 1200px) {
+          font-size: 17px;
+        }
 
         &:hover {
           color: #e0d849;

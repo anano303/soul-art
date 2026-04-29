@@ -743,6 +743,8 @@ export function ProfileForm() {
                   height={150}
                   className="profile-image"
                   unoptimized
+                  loading="eager"
+                  priority
                   key={`profile-${new Date().getTime()}`} // Add key for cache busting
                   onError={() => {
                     setProfileImage(null); // Show initials on error

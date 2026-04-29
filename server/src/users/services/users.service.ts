@@ -51,6 +51,28 @@ export class UsersService {
     gskkart: ['giga-art', 'gskkart'],
   };
 
+  // In-memory TTL cache for heavy admin aggregations on the users page.
+  // Stats don't change every second; a 30s TTL is a safe trade-off.
+  private readonly statsCache = new Map<
+    string,
+    { value: any; expiresAt: number }
+  >();
+  private async cachedStats<T>(
+    key: string,
+    ttlMs: number,
+    loader: () => Promise<T>,
+  ): Promise<T> {
+    const now = Date.now();
+    const hit = this.statsCache.get(key);
+    if (hit && hit.expiresAt > now) return hit.value as T;
+    const value = await loader();
+    this.statsCache.set(key, { value, expiresAt: now + ttlMs });
+    return value;
+  }
+  private invalidateStatsCache() {
+    this.statsCache.clear();
+  }
+
   constructor(
     @InjectModel(User.name) private userModel: Model<User>,
     @InjectModel(Product.name) private productModel: Model<Product>,
@@ -1262,16 +1284,20 @@ export class UsersService {
     let activeSellersCount = 0;
 
     if (isSellerFilter || sortBy === 'productCount') {
-      // Get product counts and last upload date for all sellers
-      const productAggregation = await this.productModel.aggregate([
-        {
-          $group: {
-            _id: '$user',
-            productCount: { $sum: 1 },
-            lastProductDate: { $max: '$createdAt' },
+      // Get product counts and last upload date for all sellers (cached 30s)
+      const productAggregation = await this.cachedStats<
+        Array<{ _id: any; productCount: number; lastProductDate: Date | null }>
+      >('productAggregation', 30_000, () =>
+        this.productModel.aggregate([
+          {
+            $group: {
+              _id: '$user',
+              productCount: { $sum: 1 },
+              lastProductDate: { $max: '$createdAt' },
+            },
           },
-        },
-      ]);
+        ]),
+      );
 
       productAggregation.forEach((stat) => {
         if (stat._id) {
@@ -1366,15 +1392,22 @@ export class UsersService {
     }
 
     const [overallTotal, roleAggregation] = await Promise.all([
-      this.userModel.countDocuments({}),
-      this.userModel.aggregate<{ _id: Role; count: number }>([
-        {
-          $group: {
-            _id: '$role',
-            count: { $sum: 1 },
-          },
-        },
-      ]),
+      this.cachedStats('overallTotal', 30_000, () =>
+        this.userModel.countDocuments({}),
+      ),
+      this.cachedStats<Array<{ _id: Role; count: number }>>(
+        'roleAggregation',
+        30_000,
+        () =>
+          this.userModel.aggregate<{ _id: Role; count: number }>([
+            {
+              $group: {
+                _id: '$role',
+                count: { $sum: 1 },
+              },
+            },
+          ]),
+      ),
     ]);
 
     // Add product stats to seller users
@@ -1416,8 +1449,11 @@ export class UsersService {
     // Count active sales managers (those who have at least one tracking event)
     let activeSalesManagersCount = 0;
     try {
-      const activeSalesManagers =
-        await this.salesTrackingModel.distinct('salesManager');
+      const activeSalesManagers = await this.cachedStats<any[]>(
+        'activeSalesManagers',
+        30_000,
+        () => this.salesTrackingModel.distinct('salesManager'),
+      );
       activeSalesManagersCount = activeSalesManagers.length;
     } catch (err) {
       this.logger.warn('Failed to count active sales managers', err);
@@ -1436,21 +1472,28 @@ export class UsersService {
       totalProductsWithReferral: 0,
     };
 
-    // Always fetch campaign consent stats (not just for seller filter)
+    // Always fetch campaign consent stats (not just for seller filter) - cached 30s
     try {
       const [consentAggregation, productsWithReferral] = await Promise.all([
-        this.userModel.aggregate([
-          { $match: { role: Role.Seller } },
-          {
-            $group: {
-              _id: '$campaignDiscountChoice',
-              count: { $sum: 1 },
-            },
-          },
-        ]),
-        this.productModel.countDocuments({
-          referralDiscountPercent: { $gt: 0 },
-        }),
+        this.cachedStats<Array<{ _id: any; count: number }>>(
+          'consentAggregation',
+          30_000,
+          () =>
+            this.userModel.aggregate([
+              { $match: { role: Role.Seller } },
+              {
+                $group: {
+                  _id: '$campaignDiscountChoice',
+                  count: { $sum: 1 },
+                },
+              },
+            ]),
+        ),
+        this.cachedStats('productsWithReferral', 30_000, () =>
+          this.productModel.countDocuments({
+            referralDiscountPercent: { $gt: 0 },
+          }),
+        ),
       ]);
 
       const consentCounts: Record<string, number> = {};
@@ -3355,81 +3398,21 @@ export class UsersService {
     }>;
     total: number;
   }> {
-    // Only load users who actually have sellerNotifications
-    const users = await this.userModel
-      .find({
-        sellerNotifications: { $exists: true, $ne: [] },
-      })
-      .select('name email sellerNotifications')
-      .lean();
+    const cacheKey = `sellerNotificationsHistory:${limit}:${offset}:${filters?.category || ''}:${filters?.query || ''}:${filters?.onlyUnread ? '1' : '0'}`;
+    return this.cachedStats(cacheKey, 120_000, () =>
+      this.fetchSellerNotificationsHistory(limit, offset, filters),
+    );
+  }
 
-    // Aggregate all notifications with statistics
-    const notificationMap = new Map<
-      string,
-      {
-        id: string;
-        title: string;
-        message: string;
-        type: string;
-        category?: string;
-        priority?: number;
-        actionUrl?: string;
-        createdAt: Date;
-        readAt?: Date;
-        createdByUserId?: string;
-        receivedByUsersCount: number;
-        readByUsersCount: number;
-        followedCount?: number;
-        readByUsers: Array<{
-          userId: string;
-          name: string;
-          email?: string;
-          readAt: Date;
-        }>;
-        createdByUserName?: string;
-        _recipientUserIds?: string[];
-      }
-    >();
-
-    for (const currentUser of users) {
-      const notifications = Array.isArray(currentUser.sellerNotifications)
-        ? currentUser.sellerNotifications
-        : [];
-      for (const notification of notifications) {
-        const key = notification.id;
-        if (!notificationMap.has(key)) {
-          notificationMap.set(key, {
-            id: notification.id,
-            title: notification.title,
-            message: notification.message,
-            type: notification.type || 'info',
-            category: notification.category || 'system',
-            priority: notification.priority ?? 0,
-            actionUrl: this.ensureInternalActionUrl(notification.actionUrl),
-            createdAt: notification.createdAt,
-            readAt: notification.readAt,
-            createdByUserId: notification.createdByUserId,
-            receivedByUsersCount: 0,
-            readByUsersCount: 0,
-            readByUsers: [],
-            _recipientUserIds: [],
-          });
-        }
-        const notifData = notificationMap.get(key);
-        notifData.receivedByUsersCount += 1;
-        notifData._recipientUserIds.push(currentUser._id.toString());
-        if (notification.readAt) {
-          notifData.readByUsersCount += 1;
-          notifData.readByUsers.push({
-            userId: currentUser._id.toString(),
-            name: currentUser.name,
-            email: currentUser.email,
-            readAt: notification.readAt,
-          });
-        }
-      }
-    }
-
+  private async fetchSellerNotificationsHistory(
+    limit: number = 50,
+    offset: number = 0,
+    filters?: {
+      category?: string;
+      query?: string;
+      onlyUnread?: boolean;
+    },
+  ): Promise<any> {
     const normalizedQuery = String(filters?.query || '')
       .trim()
       .toLowerCase();
@@ -3437,47 +3420,134 @@ export class UsersService {
       .trim()
       .toLowerCase();
 
-    // Sort by creation date descending
-    const allNotifications = Array.from(notificationMap.values())
-      .filter((item) => {
-        if (normalizedCategory && item.category !== normalizedCategory) {
-          return false;
-        }
+    // ────────────────────────────────────────────────────────────────────
+    // Heavy lifting in MongoDB instead of Node memory.
+    // 1) Match users that actually have notifications
+    // 2) Unwind so each notification becomes a row
+    // 3) Group by notification id, computing counts + readByUsers in DB
+    // 4) Filter / sort / paginate in DB via $facet
+    // ────────────────────────────────────────────────────────────────────
 
-        if (filters?.onlyUnread && item.readByUsersCount >= item.receivedByUsersCount) {
-          return false;
-        }
+    type AggResult = {
+      items: Array<{
+        _id: string;
+        title: string;
+        message: string;
+        type: string;
+        category?: string;
+        priority?: number;
+        actionUrl?: string | null;
+        createdAt: Date;
+        createdByUserId?: string | null;
+        receivedByUsersCount: number;
+        readByUsersCount: number;
+        readByUsers: Array<{
+          userId: any;
+          name: string;
+          email?: string;
+          readAt: Date;
+        }>;
+        recipientUserIds: any[];
+      }>;
+      totalArr: Array<{ count: number }>;
+    };
 
-        if (!normalizedQuery) {
-          return true;
-        }
+    const matchStage: any = {
+      sellerNotifications: { $exists: true, $not: { $size: 0 } },
+      role: { $in: [Role.Seller, 'seller_sales_manager'] },
+    };
 
-        const haystack = [
-          item.title,
-          item.message,
-          item.createdByUserName,
-          item.actionUrl,
-          item.category,
-        ]
-          .filter(Boolean)
-          .join(' ')
-          .toLowerCase();
+    const postGroupMatch: any = {};
+    if (normalizedCategory) {
+      postGroupMatch.category = normalizedCategory;
+    }
+    if (normalizedQuery) {
+      postGroupMatch.$or = [
+        { title: { $regex: this.escapeRegex(normalizedQuery), $options: 'i' } },
+        {
+          message: { $regex: this.escapeRegex(normalizedQuery), $options: 'i' },
+        },
+        {
+          actionUrl: {
+            $regex: this.escapeRegex(normalizedQuery),
+            $options: 'i',
+          },
+        },
+      ];
+    }
+    if (filters?.onlyUnread) {
+      postGroupMatch.$expr = { $lt: ['$readByUsersCount', '$receivedByUsersCount'] };
+    }
 
-        return haystack.includes(normalizedQuery);
-      })
-      .sort((a, b) => {
-        return (
-          (b.priority ?? 0) - (a.priority ?? 0) ||
-          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    const [aggregation] = await this.userModel.aggregate<AggResult>([
+      { $match: matchStage },
+      { $project: { _id: 1, name: 1, email: 1, sellerNotifications: 1 } },
+      { $unwind: '$sellerNotifications' },
+      {
+        $group: {
+          _id: '$sellerNotifications.id',
+          title: { $first: '$sellerNotifications.title' },
+          message: { $first: '$sellerNotifications.message' },
+          type: { $first: '$sellerNotifications.type' },
+          category: { $first: '$sellerNotifications.category' },
+          priority: { $first: '$sellerNotifications.priority' },
+          actionUrl: { $first: '$sellerNotifications.actionUrl' },
+          createdAt: { $first: '$sellerNotifications.createdAt' },
+          createdByUserId: { $first: '$sellerNotifications.createdByUserId' },
+          receivedByUsersCount: { $sum: 1 },
+          _allReaders: {
+            $push: {
+              userId: '$_id',
+              name: '$name',
+              email: '$email',
+              readAt: '$sellerNotifications.readAt',
+            },
+          },
+          recipientUserIds: { $push: '$_id' },
+        },
+      },
+      {
+        $addFields: {
+          readByUsers: {
+            $filter: {
+              input: '$_allReaders',
+              as: 'r',
+              cond: { $ifNull: ['$$r.readAt', false] },
+            },
+          },
+        },
+      },
+      { $addFields: { readByUsersCount: { $size: '$readByUsers' } } },
+      ...(Object.keys(postGroupMatch).length ? [{ $match: postGroupMatch }] : []),
+      { $sort: { priority: -1, createdAt: -1 } },
+      {
+        $facet: {
+          items: [{ $skip: offset }, { $limit: limit }],
+          totalArr: [{ $count: 'count' }],
+        },
+      },
+    ]).option({ allowDiskUse: true });
+
+    const items = aggregation?.items ?? [];
+    const total = aggregation?.totalArr?.[0]?.count ?? 0;
+
+    // Sort readByUsers desc by readAt + ensure internal action URL
+    for (const item of items) {
+      if (Array.isArray(item.readByUsers)) {
+        item.readByUsers.sort(
+          (a, b) => new Date(b.readAt).getTime() - new Date(a.readAt).getTime(),
         );
-      });
+      } else {
+        item.readByUsers = [];
+      }
+    }
 
-    // Batch-load admin names for createdByUserId (instead of N+1 queries)
+    // Batch-load admin names for createdByUserId
     const adminIds = [
       ...new Set(
-        allNotifications
+        items
           .map((n) => n.createdByUserId)
-          .filter(Boolean),
+          .filter((id): id is string => !!id && Types.ObjectId.isValid(id)),
       ),
     ];
     const adminMap = new Map<string, string>();
@@ -3491,35 +3561,23 @@ export class UsersService {
       }
     }
 
-    for (const notification of allNotifications) {
-      notification.readByUsers.sort(
-        (a, b) => new Date(b.readAt).getTime() - new Date(a.readAt).getTime(),
-      );
-      if (notification.createdByUserId) {
-        notification.createdByUserName =
-          adminMap.get(notification.createdByUserId) || undefined;
-      }
-    }
-
-    // Apply pagination
-    const paginatedBefore = allNotifications.slice(offset, offset + limit);
-
-    // Batch-load followedCount for suggestion notifications (instead of N+1 queries)
-    const suggestionSlugs = paginatedBefore
-      .filter((n) => n.category === 'suggestion' && n.actionUrl?.startsWith('/@'))
-      .map((n) => n.actionUrl.slice(2).toLowerCase())
+    // Batch-load followedCount for suggestion notifications
+    const suggestionSlugs = items
+      .filter(
+        (n) =>
+          n.category === 'suggestion' &&
+          typeof n.actionUrl === 'string' &&
+          n.actionUrl.startsWith('/@'),
+      )
+      .map((n) => (n.actionUrl as string).slice(2).toLowerCase())
       .filter(Boolean);
 
+    const artistFollowerMap = new Map<string, Set<string>>();
     if (suggestionSlugs.length > 0) {
       const artists = await this.userModel
-        .find({
-          artistSlug: { $in: suggestionSlugs },
-          role: Role.Seller,
-        })
+        .find({ artistSlug: { $in: suggestionSlugs }, role: Role.Seller })
         .select('artistSlug followers')
         .lean();
-
-      const artistFollowerMap = new Map<string, Set<string>>();
       for (const artist of artists) {
         if (artist.artistSlug && artist.followers?.length) {
           artistFollowerMap.set(
@@ -3528,33 +3586,51 @@ export class UsersService {
           );
         }
       }
+    }
 
-      for (const notif of paginatedBefore) {
-        if (notif.category === 'suggestion' && notif.actionUrl?.startsWith('/@')) {
-          const slug = notif.actionUrl.slice(2).toLowerCase();
-          const followerSet = artistFollowerMap.get(slug);
-          if (followerSet) {
-            notif.followedCount = (notif._recipientUserIds || []).filter(
-              (id) => followerSet.has(id),
-            ).length;
-          } else {
-            notif.followedCount = 0;
-          }
-        }
+    // Map to final response shape
+    const notifications = items.map((item) => {
+      const notif: any = {
+        id: item._id,
+        title: item.title,
+        message: item.message,
+        type: item.type || 'info',
+        category: item.category || 'system',
+        priority: item.priority ?? 0,
+        actionUrl: this.ensureInternalActionUrl(item.actionUrl ?? undefined),
+        createdAt: item.createdAt,
+        createdByUserId: item.createdByUserId,
+        createdByUserName:
+          (item.createdByUserId && adminMap.get(String(item.createdByUserId))) ||
+          undefined,
+        receivedByUsersCount: item.receivedByUsersCount,
+        readByUsersCount: item.readByUsersCount,
+        readByUsers: (item.readByUsers || []).map((r) => ({
+          userId: String(r.userId),
+          name: r.name,
+          email: r.email,
+          readAt: r.readAt,
+        })),
+      };
+
+      if (
+        notif.category === 'suggestion' &&
+        typeof notif.actionUrl === 'string' &&
+        notif.actionUrl.startsWith('/@')
+      ) {
+        const slug = notif.actionUrl.slice(2).toLowerCase();
+        const followerSet = artistFollowerMap.get(slug);
+        notif.followedCount = followerSet
+          ? (item.recipientUserIds || []).filter((id) =>
+              followerSet.has(String(id)),
+            ).length
+          : 0;
       }
-    }
 
-    // Clean up internal-only fields before returning
-    for (const notif of paginatedBefore) {
-      delete (notif as any)._recipientUserIds;
-    }
+      return notif;
+    });
 
-    const total = allNotifications.length;
-
-    return {
-      notifications: paginatedBefore,
-      total,
-    };
+    return { notifications, total };
   }
 
   async createGlobalNewProductNotification(input: {

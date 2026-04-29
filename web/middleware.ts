@@ -497,12 +497,6 @@ export async function middleware(request: NextRequest) {
     );
   }
 
-  // Add preload hints for critical resources
-  finalResponse.headers.set(
-    "Link",
-    "</van-gogh.webp>; rel=preload; as=image; fetchpriority=high",
-  );
-
   return finalResponse;
 }
 

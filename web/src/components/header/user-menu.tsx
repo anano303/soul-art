@@ -103,27 +103,12 @@ export default function UserMenu({
     }, 400); // Delay to allow animation to complete
   };
 
-  // Check if URL is from Cloudinary
-  const isCloudinaryUrl = (url: string): boolean => {
-    return url.includes("cloudinary.com");
-  };
-
   // Update profile image when user changes
   useEffect(() => {
     if (user?.profileImage) {
-      // For Cloudinary images, we can use them directly without validation
-      if (isCloudinaryUrl(user.profileImage)) {
-        if (process.env.NODE_ENV === "development") {
-          console.log(
-            "Using Cloudinary profile image directly:",
-            user.profileImage,
-          );
-        }
-        setProfileImage(user.profileImage);
-      } else {
-        // For other sources like S3, set immediately but validate in the background
-        setProfileImage(user.profileImage);
-      }
+      // Set the URL directly. If it fails to load (e.g. dead Cloudinary URL),
+      // the <Image onError> handler below falls back to /avatar.jpg.
+      setProfileImage(user.profileImage);
     } else {
       setProfileImage("/avatar.jpg");
     }

@@ -193,6 +193,10 @@ const BrandLogos = () => {
                     width={120}
                     height={60}
                     className="brand-logo-image"
+                    onError={(e) => {
+                      const img = e.currentTarget as HTMLImageElement;
+                      if (img.src !== noPhoto.src) img.src = noPhoto.src;
+                    }}
                   />
                 </div>
                 <div className="brand-name">{brand.name}</div>
@@ -213,6 +217,10 @@ const BrandLogos = () => {
                     width={120}
                     height={60}
                     className="brand-logo-image"
+                    onError={(e) => {
+                      const img = e.currentTarget as HTMLImageElement;
+                      if (img.src !== noPhoto.src) img.src = noPhoto.src;
+                    }}
                   />
                 </div>
                 <div className="brand-name">{brand.name}</div>

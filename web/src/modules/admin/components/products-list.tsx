@@ -728,6 +728,7 @@ export function ProductsList() {
                         src={product.images[0]}
                         alt={getDisplayName(product)}
                         fill
+                        sizes="60px"
                         className="prd-img"
                       />
                     </div>
@@ -1499,6 +1500,7 @@ export function ProductsList() {
                       src={product.images[0]}
                       alt={getDisplayName(product)}
                       fill
+                      sizes="60px"
                       className="prd-img"
                     />
                   </div>

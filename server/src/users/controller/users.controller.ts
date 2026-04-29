@@ -90,6 +90,48 @@ export class UsersController {
     );
   }
 
+  // ============================================
+  // ADMIN ROUTES (must be BEFORE :id to avoid matching "admin" as :id)
+  // ============================================
+
+  @ApiOperation({ summary: 'Get active sellers with slugs for suggestion picker' })
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.Admin)
+  @Get('admin/sellers-with-slugs')
+  async getSellersWithSlugs() {
+    return this.usersService.getSellersWithSlugs();
+  }
+
+  @ApiOperation({ summary: 'Get seller notifications history for admin' })
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.Admin)
+  @Get('admin/seller-notifications-history')
+  async getSellerNotificationsHistory(
+    @Query('limit') limit?: string,
+    @Query('offset') offset?: string,
+    @Query('category') category?: string,
+    @Query('query') query?: string,
+    @Query('onlyUnread') onlyUnread?: string,
+  ) {
+    console.log('[ADMIN-NOTIF] Hit getSellerNotificationsHistory route, limit:', limit, 'offset:', offset);
+    try {
+      const result = await this.usersService.getSellerNotificationsHistory(
+        parseInt(limit || '50'),
+        parseInt(offset || '0'),
+        {
+          category,
+          query,
+          onlyUnread: onlyUnread === 'true',
+        },
+      );
+      console.log('[ADMIN-NOTIF] Success, notifications:', result?.notifications?.length, 'total:', result?.total);
+      return result;
+    } catch (error) {
+      console.error('[ADMIN-NOTIF] Error:', error.message, error.stack);
+      throw error;
+    }
+  }
+
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.Admin)
   @Delete(':id')
@@ -457,36 +499,6 @@ export class UsersController {
       body.artistSlug,
       body.artistLabel,
       body.customMessage,
-    );
-  }
-
-  @ApiOperation({ summary: 'Get active sellers with slugs for suggestion picker' })
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.Admin)
-  @Get('admin/sellers-with-slugs')
-  async getSellersWithSlugs() {
-    return this.usersService.getSellersWithSlugs();
-  }
-
-  @ApiOperation({ summary: 'Get seller notifications history for admin' })
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.Admin)
-  @Get('admin/seller-notifications-history')
-  async getSellerNotificationsHistory(
-    @Query('limit') limit?: string,
-    @Query('offset') offset?: string,
-    @Query('category') category?: string,
-    @Query('query') query?: string,
-    @Query('onlyUnread') onlyUnread?: string,
-  ) {
-    return this.usersService.getSellerNotificationsHistory(
-      parseInt(limit || '50'),
-      parseInt(offset || '0'),
-      {
-        category,
-        query,
-        onlyUnread: onlyUnread === 'true',
-      },
     );
   }
 

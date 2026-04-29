@@ -129,14 +129,22 @@ export function SellerNotifications() {
   const enabled = !!user;
   const isAdmin = user?.role?.toLowerCase() === "admin";
 
+  console.log('[SellerNotifications] user:', user?.email, 'role:', user?.role, 'enabled:', enabled, 'isAdmin:', isAdmin);
+
   const notificationsQuery = useQuery<SellerNotificationsResponse>({
     queryKey: ["seller-notifications"],
     queryFn: async () => {
+      console.log('[SellerNotifications] Fetching /users/me/seller-notifications...');
       const response = await fetchWithAuth("/users/me/seller-notifications");
+      console.log('[SellerNotifications] /me/seller-notifications status:', response.status);
       if (!response.ok) {
+        const text = await response.text();
+        console.error('[SellerNotifications] /me/seller-notifications ERROR:', text);
         throw new Error("Failed to fetch seller notifications");
       }
-      return response.json();
+      const data = await response.json();
+      console.log('[SellerNotifications] /me/seller-notifications data:', data?.notifications?.length, 'items');
+      return data;
     },
     enabled,
     refetchInterval: 60000,
@@ -146,19 +154,25 @@ export function SellerNotifications() {
   const adminHistoryQuery = useQuery<AdminHistoryResponse>({
     queryKey: ["admin", "seller-notifications-history", "header"],
     queryFn: async () => {
+      console.log('[SellerNotifications] Fetching /users/admin/seller-notifications-history...');
       const response = await fetchWithAuth(
-        "/users/admin/seller-notifications-history?limit=80&offset=0",
+        "/users/admin/seller-notifications-history?limit=20&offset=0",
       );
+      console.log('[SellerNotifications] admin-history status:', response.status);
       if (!response.ok) {
+        const text = await response.text();
+        console.error('[SellerNotifications] admin-history ERROR:', text);
         throw new Error("Failed to fetch admin notifications history");
       }
-      return response.json();
+      const data = await response.json();
+      console.log('[SellerNotifications] admin-history data:', data?.notifications?.length, 'items, total:', data?.total);
+      return data;
     },
     enabled: enabled && isAdmin,
-    refetchInterval: 60000,
-    staleTime: 30000,
-    retry: 2,
-    retryDelay: (attempt) => Math.min(1000 * 2 ** attempt, 5000),
+    refetchInterval: 120000,
+    staleTime: 120000,
+    gcTime: 300000,
+    retry: 1,
   });
 
   const notifications = useMemo(() => {

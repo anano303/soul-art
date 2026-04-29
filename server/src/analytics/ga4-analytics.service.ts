@@ -55,6 +55,25 @@ export class Ga4AnalyticsService {
   private analyticsDataClient;
   private propertyId: string;
 
+  // Simple in-memory TTL cache to avoid repeated GA4 API calls (which are slow ~1-3s each).
+  // GA4 data is delayed anyway so a short TTL is safe.
+  private readonly cache = new Map<string, { value: any; expiresAt: number }>();
+
+  private async cached<T>(
+    key: string,
+    ttlMs: number,
+    loader: () => Promise<T>,
+  ): Promise<T> {
+    const now = Date.now();
+    const hit = this.cache.get(key);
+    if (hit && hit.expiresAt > now) {
+      return hit.value as T;
+    }
+    const value = await loader();
+    this.cache.set(key, { value, expiresAt: now + ttlMs });
+    return value;
+  }
+
   constructor(private configService: ConfigService) {
     // Initialize GA4 Data API
     const credentials = this.configService.get('GA4_CREDENTIALS');
@@ -104,6 +123,7 @@ export class Ga4AnalyticsService {
       );
     }
 
+    return this.cached(`analytics:${daysAgo}`, 60_000, async () => {
     try {
       const [pageViews, events, funnel] = await Promise.all([
         this.getPageViews(daysAgo),
@@ -134,6 +154,7 @@ export class Ga4AnalyticsService {
         `Failed to fetch analytics data: ${error.message || 'Unknown error'}`,
       );
     }
+    });
   }
 
   private async getPageViews(daysAgo: number): Promise<PageViewData[]> {
@@ -395,6 +416,8 @@ export class Ga4AnalyticsService {
       throw new Error('GA4 Analytics not configured');
     }
 
+    const cacheKey = `errors:${daysAgo}:${errorType || 'all'}:${page}:${limit}`;
+    return this.cached(cacheKey, 60_000, async () => {
     try {
       // Determine which event name to query based on error type
       let eventNames = [
@@ -622,6 +645,7 @@ export class Ga4AnalyticsService {
         },
       };
     }
+    });
   }
 
   /**
@@ -636,6 +660,15 @@ export class Ga4AnalyticsService {
       throw new Error('GA4 Analytics not configured');
     }
 
+    return this.cached(`dau:${days}`, 5 * 60_000, () =>
+      this.fetchDailyActiveUsers(days),
+    );
+  }
+
+  private async fetchDailyActiveUsers(days: number): Promise<{
+    dauToday: number;
+    dailyData: Array<{ date: string; activeUsers: number }>;
+  }> {
     const startDate = days <= 1 ? 'yesterday' : `${days}daysAgo`;
 
     const response = await this.analyticsDataClient.properties.runReport({
@@ -803,6 +836,7 @@ export class Ga4AnalyticsService {
       };
     }
 
+    return this.cached(`chat:${daysAgo}`, 60_000, async () => {
     try {
       // ჩატის ივენთების წამოღება
       const startDate = this.getStartDate(daysAgo);
@@ -885,5 +919,6 @@ export class Ga4AnalyticsService {
         byDay: [],
       };
     }
+    });
   }
 }
