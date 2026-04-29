@@ -7,6 +7,7 @@ import { User } from '../../schemas/user.schema';
 import { Product } from '../../../products/schemas/product.schema';
 import { Order } from '../../../orders/schemas/order.schema';
 import { BankIntegrationService } from '../bog-bank-integration.service';
+import { BogTransferService } from '@/payments/services/bog-transfer.service';
 import { EmailService } from '../../../email/services/email.services';
 
 describe('BalanceService', () => {
@@ -67,6 +68,10 @@ describe('BalanceService', () => {
           useValue: {},
         },
         {
+          provide: BogTransferService,
+          useValue: {},
+        },
+        {
           provide: EmailService,
           useValue: mockEmailService,
         },
@@ -113,14 +118,6 @@ describe('BalanceService', () => {
 
       mockSellerBalanceModel.findOne.mockResolvedValue(mockSellerBalance);
 
-      // Mock constructor for new transaction
-      const mockNewTransaction = {
-        save: jest.fn().mockResolvedValue(true),
-      };
-      jest
-        .spyOn(service as any, 'balanceTransactionModel')
-        .mockImplementation(() => mockNewTransaction);
-
       // Execute
       await service.approveWithdrawal(transactionId, adminId);
 
@@ -142,10 +139,10 @@ describe('BalanceService', () => {
 
       await expect(
         service.approveWithdrawal('invalidId', 'adminId'),
-      ).rejects.toThrow('ტრანზაქცია არ მოიძებნა ან არ არის დასამუშავებელი');
+      ).rejects.toThrow('ტრანზაქცია არ მოიძებნა');
     });
 
-    it('should throw error if transaction is not pending', async () => {
+    it('should silently return if transaction is already completed', async () => {
       const mockTransaction = {
         type: 'withdrawal_completed',
         seller: { _id: 'sellerId' },
@@ -155,9 +152,10 @@ describe('BalanceService', () => {
         populate: jest.fn().mockResolvedValue(mockTransaction),
       });
 
+      // Should not throw - silently returns for already completed
       await expect(
         service.approveWithdrawal('transactionId', 'adminId'),
-      ).rejects.toThrow('ტრანზაქცია არ მოიძებნა ან არ არის დასამუშავებელი');
+      ).resolves.toBeUndefined();
     });
   });
 });

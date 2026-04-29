@@ -7,6 +7,7 @@ import {
   Loader2,
   X,
   Rocket,
+  Copy,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
@@ -298,6 +299,17 @@ export function ProductsActions({
           className="prd-action-link prd-action-edit"
         >
           <Pencil className="actions edit" />
+        </Link>
+
+        <Link
+          href={{
+            pathname: `/admin/products/create`,
+            query: { duplicate: product._id },
+          }}
+          className="prd-action-link prd-action-edit"
+          title={language === "en" ? "Duplicate product" : "პროდუქტის დაკოპირება"}
+        >
+          <Copy className="actions edit" />
         </Link>
 
         {/* Showing status buttons? {isAdmin && product.status === ProductStatus.PENDING} */}

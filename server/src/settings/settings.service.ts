@@ -48,9 +48,20 @@ export class SettingsService {
     return rate;
   }
 
+  // In-memory cache for foreign payment fee
+  private cachedForeignFee: number | null = null;
+  private feeCacheTimestamp = 0;
+  private readonly FEE_CACHE_TTL_MS = 10 * 60 * 1000; // 10 minutes
+
   async getForeignPaymentFee(): Promise<number> {
+    const now = Date.now();
+    if (this.cachedForeignFee !== null && now - this.feeCacheTimestamp < this.FEE_CACHE_TTL_MS) {
+      return this.cachedForeignFee;
+    }
     const setting = await this.settingsModel.findOne({ key: 'foreign_payment_fee' });
-    return setting?.value ?? this.DEFAULT_FOREIGN_FEE;
+    this.cachedForeignFee = setting?.value ?? this.DEFAULT_FOREIGN_FEE;
+    this.feeCacheTimestamp = now;
+    return this.cachedForeignFee;
   }
 
   async setForeignPaymentFee(feePercent: number): Promise<number> {
@@ -64,6 +75,8 @@ export class SettingsService {
       },
       { upsert: true, new: true },
     );
+    this.cachedForeignFee = feePercent;
+    this.feeCacheTimestamp = Date.now();
     return feePercent;
   }
 

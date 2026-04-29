@@ -44,6 +44,7 @@ import {
   XCircle,
   AlertTriangle,
   Rocket,
+  Copy,
 } from "lucide-react";
 import { PromoteModal } from "@/modules/admin/components/promote-modal";
 import BrushTrail from "@/components/BrushTrail/BrushTrail";
@@ -2231,6 +2232,17 @@ function ProductCard({
             title={language === "en" ? "Edit product" : "რედაქტირება"}
           >
             <Pencil size={16} />
+          </Link>
+          <Link
+            href={{
+              pathname: `/admin/products/create`,
+              query: { duplicate: product.id },
+            }}
+            className="artist-product-card__edit-btn"
+            onClick={(e) => e.stopPropagation()}
+            title={language === "en" ? "Duplicate product" : "დაკოპირება"}
+          >
+            <Copy size={16} />
           </Link>
           <button
             type="button"

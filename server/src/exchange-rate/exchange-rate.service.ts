@@ -8,6 +8,11 @@ import { ExchangeRate, ExchangeRateDocument } from './schemas/exchange-rate.sche
 export class ExchangeRateService {
   private readonly logger = new Logger(ExchangeRateService.name);
 
+  // In-memory cache for rates (refreshed every 10 minutes)
+  private cachedRates: { USD: number; EUR: number } | null = null;
+  private cacheTimestamp = 0;
+  private readonly CACHE_TTL_MS = 10 * 60 * 1000; // 10 minutes
+
   constructor(
     @InjectModel(ExchangeRate.name)
     private exchangeRateModel: Model<ExchangeRateDocument>,
@@ -74,6 +79,8 @@ export class ExchangeRateService {
       );
 
       this.logger.log(`Successfully updated exchange rates: 1 GEL = ${usdRate.toFixed(4)} USD, ${eurRate.toFixed(4)} EUR`);
+      // Invalidate cache so next request picks up new rates
+      this.cachedRates = null;
     } catch (error) {
       this.logger.error('Failed to fetch exchange rates from NBG:', error.message);
       throw error;
@@ -115,15 +122,22 @@ export class ExchangeRateService {
   }
 
   /**
-   * Get all latest exchange rates
+   * Get all latest exchange rates (cached)
    */
   async getLatestRates(): Promise<{ USD: number; EUR: number }> {
+    const now = Date.now();
+    if (this.cachedRates && now - this.cacheTimestamp < this.CACHE_TTL_MS) {
+      return this.cachedRates;
+    }
+
     const [usd, eur] = await Promise.all([
       this.getLatestRate('USD'),
       this.getLatestRate('EUR'),
     ]);
 
-    return { USD: usd, EUR: eur };
+    this.cachedRates = { USD: usd, EUR: eur };
+    this.cacheTimestamp = now;
+    return this.cachedRates;
   }
 
   /**

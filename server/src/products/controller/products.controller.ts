@@ -514,38 +514,53 @@ export class ProductsController {
     const { brandLogo } = allFiles;
     const videoFile = allFiles.video?.[0] || null;
 
-    if (!files || files.length === 0) {
+    // Parse existing images from duplicate
+    let existingImageUrls: string[] = [];
+    if ((productData as any).existingImages) {
+      try {
+        existingImageUrls = JSON.parse((productData as any).existingImages);
+      } catch (e) {
+        console.error('Error parsing existingImages in create:', e);
+      }
+    }
+
+    if ((!files || files.length === 0) && existingImageUrls.length === 0) {
       throw new BadRequestException('At least one image is required');
     }
 
     try {
       // Process images with error handling to prevent server crashes
-      const imageUrls = await Promise.all(
-        files.map(async (file) => {
-          try {
-            const fileBuffer = require('fs').readFileSync(file.path);
-            const fileWithBuffer = {
-              ...file,
-              buffer: fileBuffer,
-            };
-            return await this.appService.uploadImageToCloudinary(
-              fileWithBuffer,
-            );
-          } catch (uploadError) {
-            console.error('Failed to upload image to Cloudinary:', uploadError);
-            throw new BadRequestException(
-              `Failed to upload image: ${file.originalname}`,
-            );
-          } finally {
-            // Clean up temp file
-            try {
-              require('fs').unlinkSync(file.path);
-            } catch (cleanupError) {
-              console.warn('Failed to cleanup temp file:', cleanupError);
-            }
-          }
-        }),
-      );
+      const uploadedImageUrls = files && files.length > 0
+        ? await Promise.all(
+            files.map(async (file) => {
+              try {
+                const fileBuffer = require('fs').readFileSync(file.path);
+                const fileWithBuffer = {
+                  ...file,
+                  buffer: fileBuffer,
+                };
+                return await this.appService.uploadImageToCloudinary(
+                  fileWithBuffer,
+                );
+              } catch (uploadError) {
+                console.error('Failed to upload image to Cloudinary:', uploadError);
+                throw new BadRequestException(
+                  `Failed to upload image: ${file.originalname}`,
+                );
+              } finally {
+                // Clean up temp file
+                try {
+                  require('fs').unlinkSync(file.path);
+                } catch (cleanupError) {
+                  console.warn('Failed to cleanup temp file:', cleanupError);
+                }
+              }
+            }),
+          )
+        : [];
+
+      // Combine existing images (from duplicate) with newly uploaded ones
+      const imageUrls = [...existingImageUrls, ...uploadedImageUrls];
 
       let brandLogoUrl = null;
 
@@ -684,8 +699,9 @@ export class ProductsController {
         mainCategory,
         subCategory,
         videoDescription,
+        existingImages: _existingImages,
         ...otherProductData
-      } = productData;
+      } = productData as any;
 
       // ========================================
       // GET YOUTUBE DATA FROM FORM (uploaded separately via /upload-video)
@@ -754,15 +770,17 @@ export class ProductsController {
       );
 
       // Cleanup image temp files
-      files.forEach((file) => {
-        try {
-          if (file.path && require('fs').existsSync(file.path)) {
-            require('fs').unlinkSync(file.path);
+      if (files) {
+        files.forEach((file) => {
+          try {
+            if (file.path && require('fs').existsSync(file.path)) {
+              require('fs').unlinkSync(file.path);
+            }
+          } catch (cleanupError) {
+            console.warn('Failed to cleanup temp image file:', cleanupError);
           }
-        } catch (cleanupError) {
-          console.warn('Failed to cleanup temp image file:', cleanupError);
-        }
-      });
+        });
+      }
 
       // Cleanup brandLogo temp file
       if (brandLogo && brandLogo.length > 0 && brandLogo[0].path) {
