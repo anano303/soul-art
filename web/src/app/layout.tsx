@@ -61,12 +61,8 @@ import {
   websiteSchema,
   storeSchema,
 } from "@/lib/structured-data";
-import GoogleAnalytics from "@/components/GoogleAnalytics";
-import VercelAnalytics from "@/components/VercelAnalytics";
 import { FloatingCartIcon } from "@/components/floating-cart-icon/floating-cart-icon";
 import { MobileBottomNav } from "@/components/mobile-bottom-nav/mobile-bottom-nav";
-import { GA4UserTracker } from "@/components/ga4-user-tracker";
-import { PageViewTracker } from "@/components/page-view-tracker";
 import "@/lib/cloudflare-cleanup"; // Auto-cleanup Cloudflare cookies in development
 
 // Lazy-load non-critical components (code-split but still SSR)
@@ -85,6 +81,10 @@ const ReferralCodeInput = dynamic(() => import("@/components/referral-code-input
 const CallRequestPopup = dynamic(() => import("@/components/call-request-popup/call-request-popup").then(m => ({ default: m.CallRequestPopup })));
 const ImpersonationBanner = dynamic(() => import("@/components/ImpersonationBanner/ImpersonationBanner").then(m => ({ default: m.ImpersonationBanner })));
 const InsurancePromo = dynamic(() => import("@/components/insurance-promo/insurance-promo"));
+const GoogleAnalytics = dynamic(() => import("@/components/GoogleAnalytics"));
+const VercelAnalytics = dynamic(() => import("@/components/VercelAnalytics"));
+const GA4UserTracker = dynamic(() => import("@/components/ga4-user-tracker").then(m => ({ default: m.GA4UserTracker })));
+const PageViewTracker = dynamic(() => import("@/components/page-view-tracker").then(m => ({ default: m.PageViewTracker })));
 
 export const viewport = {
   width: "device-width",
@@ -263,26 +263,13 @@ export default function RootLayout({
         {/* Optimized resource hints */}
         <link
           rel="preconnect"
-          href="https://fonts.googleapis.com"
-          crossOrigin="anonymous"
-        />
-        <link
-          rel="preconnect"
-          href="https://fonts.gstatic.com"
-          crossOrigin="anonymous"
+          href="https://res.cloudinary.com"
         />
 
         {/* DNS prefetch for external resources only */}
         <link rel="dns-prefetch" href="//connect.facebook.net" />
         <link rel="dns-prefetch" href="//www.googletagmanager.com" />
         <link rel="dns-prefetch" href="//www.google-analytics.com" />
-
-        {/* Google AdSense - Server-rendered for crawler visibility */}
-        <script
-          async
-          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4844460357634251"
-          crossOrigin="anonymous"
-        />
 
         {/* Third-party scripts moved to body end for better LCP */}
       </head>
@@ -296,121 +283,11 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{
             __html: `
               (function() {
-                // Block Madgicx requests completely
-                var originalFetch = window.fetch;
-                window.fetch = function(url, options) {
-                  var urlStr = String(url || '');
-                  if (urlStr.includes('madgicx') || urlStr.includes('capig.')) {
-                    return Promise.resolve(new Response('{}', { status: 200 }));
-                  }
-                  return originalFetch.apply(this, arguments);
-                };
-                
-                // Block XMLHttpRequest to Madgicx
-                var originalXHROpen = XMLHttpRequest.prototype.open;
-                XMLHttpRequest.prototype.open = function(method, url) {
-                  var urlStr = String(url || '');
-                  if (urlStr.includes('madgicx') || urlStr.includes('capig.')) {
-                    this._blocked = true;
-                    return;
-                  }
-                  return originalXHROpen.apply(this, arguments);
-                };
-                
-                var originalXHRSend = XMLHttpRequest.prototype.send;
-                XMLHttpRequest.prototype.send = function() {
-                  if (this._blocked) {
-                    return;
-                  }
-                  return originalXHRSend.apply(this, arguments);
-                };
-                
-                // Suppress console warnings
-                var originalWarn = console.warn;
-                console.warn = function() {
-                  var message = String(Array.prototype.join.call(arguments, ' '));
-                  if (message.includes('preload') ||
-                      message.includes('CSS') ||
-                      message.includes('chunk') ||
-                      message.includes('link') ||
-                      message.includes('seconds') ||
-                      message.includes('was preloaded') ||
-                      message.includes('Download') ||
-                      message.includes('Third-party') ||
-                      message.includes('cookie')) {
-                    return;
-                  }
-                  originalWarn.apply(console, arguments);
-                };
-                
-                // Auto-reload on chunk load failure (after new deploy)
-                window.addEventListener('error', function(e) {
-                  var message = String(e.message || '');
-                  if (message.includes('Loading chunk') || 
-                      message.includes('Failed to load') ||
-                      message.includes('ChunkLoadError')) {
-                    var reloadKey = 'chunk_reload_' + Date.now().toString().slice(0, -4);
-                    if (!sessionStorage.getItem(reloadKey)) {
-                      sessionStorage.setItem(reloadKey, '1');
-                      window.location.reload();
-                    }
-                  }
-                }, true);
-                
-                // Suppress console errors
-                var originalError = console.error;
-                console.error = function() {
-                  var message = String(Array.prototype.join.call(arguments, ' '));
-                  if (message.includes('madgicx') ||
-                      message.includes('capig') ||
-                      message.includes('facebook') ||
-                      message.includes('fbevents') ||
-                      message.includes('googletagmanager') ||
-                      message.includes('analytics') ||
-                      message.includes('Failed to load') ||
-                      message.includes('Loading chunk') ||
-                      message.includes('ChunkLoadError') ||
-                      message.includes('net::ERR') ||
-                      message.includes('TypeError') ||
-                      message.includes('reading') ||
-                      message.includes('hydrat')) {
-                    return;
-                  }
-                  originalError.apply(console, arguments);
-                };
-                
-                // Global error handler
-                window.onerror = function(msg, url, line, col, error) {
-                  var message = String(msg || '');
-                  if (url && (url.includes('madgicx') || 
-                      url.includes('capig') ||
-                      url.includes('facebook') ||
-                      url.includes('googletagmanager') ||
-                      url.includes('connect.facebook'))) {
-                    return true;
-                  }
-                  // Suppress browser extension errors
-                  if (message.includes('__AutoFillCallbackHandler') ||
-                      message.includes('webkit.messageHandlers') ||
-                      message.includes('postMessage')) {
-                    return true;
-                  }
-                  return false;
-                };
-                
-                // Unhandled rejection handler
-                window.onunhandledrejection = function(e) {
-                  var reason = String(e.reason || '');
-                  if (reason.includes('madgicx') ||
-                      reason.includes('capig') ||
-                      reason.includes('facebook') ||
-                      reason.includes('Failed to fetch') ||
-                      reason.includes('__AutoFillCallbackHandler') ||
-                      reason.includes('webkit.messageHandlers')) {
-                    e.preventDefault();
-                    return true;
-                  }
-                };
+                var ow=console.warn,oe=console.error;
+                console.warn=function(){var m=String(Array.prototype.join.call(arguments,' '));if(/(preload|CSS|chunk|link|seconds|was preloaded|Download|Third-party|cookie)/.test(m))return;ow.apply(console,arguments)};
+                console.error=function(){var m=String(Array.prototype.join.call(arguments,' '));if(/(madgicx|capig|facebook|fbevents|googletagmanager|analytics|Failed to load|Loading chunk|ChunkLoadError|net::ERR|hydrat)/.test(m))return;oe.apply(console,arguments)};
+                window.addEventListener('error',function(e){if(e.filename&&/(madgicx|capig|facebook|googletagmanager|connect\.facebook)/.test(e.filename))return true},true);
+                window.addEventListener('error',function(e){var m=String(e.message||'');if(/(Loading chunk|Failed to load|ChunkLoadError)/.test(m)){var k='cr_'+Date.now().toString().slice(0,-4);if(!sessionStorage.getItem(k)){sessionStorage.setItem(k,'1');location.reload()}}},true);
               })();
             `,
           }}
@@ -543,21 +420,31 @@ export default function RootLayout({
           id="deferred-third-party"
           dangerouslySetInnerHTML={{
             __html: `
-              // Google Ads - defer by 2 seconds
-              setTimeout(function() {
+              // Load third-party scripts only after page is idle
+              var _defer = window.requestIdleCallback || function(cb){setTimeout(cb,3000)};
+              _defer(function() {
+                // Google Ads
                 var gtagScript = document.createElement('script');
                 gtagScript.async = true;
                 gtagScript.src = 'https://www.googletagmanager.com/gtag/js?id=AW-17709570539';
                 document.head.appendChild(gtagScript);
-                
                 window.dataLayer = window.dataLayer || [];
                 function gtag(){dataLayer.push(arguments);}
                 window.gtag = gtag;
                 gtag('js', new Date());
                 gtag('config', 'AW-17709570539');
-              }, 2000);
+              });
               
-              // Meta Pixel - defer by 2.5 seconds
+              _defer(function() {
+                // Google AdSense
+                var adsScript = document.createElement('script');
+                adsScript.async = true;
+                adsScript.crossOrigin = 'anonymous';
+                adsScript.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4844460357634251';
+                document.head.appendChild(adsScript);
+              });
+
+              // Meta Pixel - defer by 5 seconds
               setTimeout(function() {
                 !function(f,b,e,v,n,t,s)
                 {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
@@ -571,9 +458,9 @@ export default function RootLayout({
                   process.env.NEXT_PUBLIC_META_PIXEL_ID || "1189697243076610"
                 }');
                 fbq('track', 'PageView');
-              }, 2500);
+              }, 5000);
               
-              // Facebook SDK - defer by 3 seconds
+              // Facebook SDK - defer by 7 seconds
               setTimeout(function() {
                 var fbScript = document.createElement('script');
                 fbScript.async = true;
@@ -583,7 +470,7 @@ export default function RootLayout({
                   process.env.NEXT_PUBLIC_FACEBOOK_APP_ID
                 }&autoLogAppEvents=1';
                 document.body.appendChild(fbScript);
-              }, 3000);
+              }, 7000);
             `,
           }}
         />

@@ -8,7 +8,7 @@ async function getGeoFromIP(ip: string) {
     console.log("[Middleware] Starting IP geolocation lookup for IP:", ip);
     
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 8000); // 8 second timeout
+    const timeout = setTimeout(() => controller.abort(), 1500); // 1.5 second timeout
     
     try {
       // Try ip-api.io first (more reliable CORS)
@@ -152,8 +152,8 @@ export async function middleware(request: NextRequest) {
   );
   const isAuthenticated = hasTokens;
 
-  // 🌍 Geolocation Detection - Use IP-based (respects VPN)
-  // Skip Vercel Edge geo as it detects real location, not VPN location
+  // 🌍 Geolocation Detection - Use Vercel Edge headers first (instant, no API call)
+  // Only fall back to IP API if Vercel headers unavailable AND no cookies
   
   let geo: { country: string | null; region: string | null; city: string | null; latitude: string | null; longitude: string | null } = {
     country: null,
@@ -163,8 +163,7 @@ export async function middleware(request: NextRequest) {
     longitude: null,
   };
 
-  // Check if we already have REAL (detected) geo cookies - if so, skip API call.
-  // If cookies are defaults (geo_source=default) or missing, always retry the API.
+  // Check if we already have REAL (detected) geo cookies - if so, skip entirely
   const existingCountry = request.cookies.get("user_country")?.value;
   const existingCurrency = request.cookies.get("user_currency")?.value;
   const existingCity = request.cookies.get("user_city")?.value;
@@ -174,8 +173,7 @@ export async function middleware(request: NextRequest) {
   const hasRealGeo = existingCountry && existingCurrency && geoSource === "detected";
   
   if (hasRealGeo) {
-    // Reuse cached geo data - this was a real detection, no need to re-check
-    console.log("[Middleware] ♻️ Reusing DETECTED geo from cookies - Country:", existingCountry, "Currency:", existingCurrency);
+    // Reuse cached geo data - no API call needed
     geo = {
       country: existingCountry,
       region: existingRegion || null,
@@ -184,42 +182,32 @@ export async function middleware(request: NextRequest) {
       longitude: null,
     };
   } else {
-    if (geoSource === "default") {
-      console.log("[Middleware] 🔄 Previous detection was default/fallback, retrying API...");
-    }
-    // Get IP address - Vercel Edge provides request.ip in production
-    const vercelIp = (request as NextRequest & { ip?: string }).ip;
-    const forwardedFor = request.headers.get("x-forwarded-for");
-    const realIp = request.headers.get("x-real-ip");
+    // Try Vercel Edge geo headers first (instant, no network call)
+    const vercelCountry = request.headers.get("x-vercel-ip-country");
+    const vercelCity = request.headers.get("x-vercel-ip-city");
+    const vercelRegion = request.headers.get("x-vercel-ip-country-region");
     
-    // Priority: Vercel's request.ip > x-real-ip > x-forwarded-for first IP
-    const ip = vercelIp || realIp || forwardedFor?.split(",")[0].trim() || null;
-    
-    console.log("[Middleware] Detecting geo via IP (Vercel Edge unavailable or development mode)");
-    console.log("[Middleware] request.ip (Vercel):", vercelIp);
-    console.log("[Middleware] x-forwarded-for:", forwardedFor);
-    console.log("[Middleware] x-real-ip:", realIp);
-    console.log("[Middleware] Final IP to use:", ip);
-    
-    // Only attempt IP lookup if we have a valid IP
-    if (ip && !ip.startsWith("127.") && !ip.startsWith("::1") && ip.trim() !== "") {
-      console.log("[Middleware] IP is valid, attempting geo lookup");
-      const ipGeo = await getGeoFromIP(ip);
-      if (ipGeo) {
-        console.log("[Middleware] ✅ IP geo lookup succeeded:", {
-          country: ipGeo.country,
-          city: ipGeo.city,
-          region: ipGeo.region,
-        });
-        // Use the response even if country is missing - at least we get city/region
-        geo = ipGeo;
-      } else {
-        console.log("[Middleware] ❌ IP geo lookup failed completely");
-        geo = { country: null, region: null, city: null, latitude: null, longitude: null };
-      }
+    if (vercelCountry) {
+      geo = {
+        country: vercelCountry,
+        city: vercelCity ? decodeURIComponent(vercelCity) : null,
+        region: vercelRegion || null,
+        latitude: request.headers.get("x-vercel-ip-latitude"),
+        longitude: request.headers.get("x-vercel-ip-longitude"),
+      };
     } else {
-      console.log("[Middleware] ❌ IP is invalid or localhost:", ip, "- using defaults");
-      geo = { country: null, region: null, city: null, latitude: null, longitude: null };
+      // Fallback: IP API call with very short timeout (1.5s max)
+      const vercelIp = (request as NextRequest & { ip?: string }).ip;
+      const forwardedFor = request.headers.get("x-forwarded-for");
+      const realIp = request.headers.get("x-real-ip");
+      const ip = vercelIp || realIp || forwardedFor?.split(",")[0].trim() || null;
+      
+      if (ip && !ip.startsWith("127.") && !ip.startsWith("::1") && ip.trim() !== "") {
+        const ipGeo = await getGeoFromIP(ip);
+        if (ipGeo) {
+          geo = ipGeo;
+        }
+      }
     }
   } // end of else (no existing cookies)
 

@@ -2,7 +2,6 @@
 
 import { useEffect } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { usePerformanceOptimizations } from "@/hooks/usePerformanceOptimizations";
 // Initialize API client with interceptors by importing it
 import "@/lib/axios";
@@ -45,7 +44,6 @@ export function Providers({ children }: { children: React.ReactNode }) {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <ReactQueryDevtools />
       {children}
     </QueryClientProvider>
   );

@@ -5,6 +5,7 @@
  */
 
 declare module "*.css" {}
+declare module "*.scss" {}
 
 interface Window {
   // Google AdSense - array-like object that accepts push calls

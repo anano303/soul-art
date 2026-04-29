@@ -3,10 +3,18 @@
 import { useEffect } from "react";
 import dynamic from "next/dynamic";
 import HomePagesHead from "@/components/homePagesHead/homePagesHead";
-import TopItems from "@/components/TopItems/TopItems";
-import Banner from "@/components/banner/banner";
 import { useLanguage } from "@/hooks/LanguageContext";
 import { trackPageView } from "@/lib/ga4-analytics";
+
+// Below-the-fold components - lazy loaded for better FCP/LCP
+const TopItems = dynamic(() => import("@/components/TopItems/TopItems"), {
+  ssr: false,
+  loading: () => <div style={{ height: "310px" }} />,
+});
+const Banner = dynamic(() => import("@/components/banner/banner"), {
+  ssr: false,
+  loading: () => <div style={{ height: "80px" }} />,
+});
 
 // Lazy load below-the-fold components for better LCP
 const PremiumRail = dynamic(
