@@ -2,7 +2,6 @@
 
 import { useEffect } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { usePerformanceOptimizations } from "@/hooks/usePerformanceOptimizations";
 // Initialize API client with interceptors by importing it
 import "@/lib/axios";
 
@@ -27,9 +26,6 @@ export const queryClient = new QueryClient({
 
 
 export function Providers({ children }: { children: React.ReactNode }) {
-  // Initialize performance optimizations
-  usePerformanceOptimizations();
-
   // Make queryClient globally accessible for auth reset during refresh failures
   // Set up global queryClient access after hydration
   useEffect(() => {

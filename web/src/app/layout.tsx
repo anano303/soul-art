@@ -1,6 +1,4 @@
 import type { Metadata } from "next";
-import { Suspense } from "react";
-import dynamic from "next/dynamic";
 import localFont from "next/font/local";
 import "./globals.css";
 import { Providers } from "./providers";
@@ -10,7 +8,6 @@ import { AuthProvider } from "@/components/auth-provider";
 import { LanguageProvider } from "@/hooks/LanguageContext";
 import { ThemeProvider } from "@/hooks/ThemeContext";
 import Header from "@/components/header/header";
-import Footer from "@/components/footer/footer";
 import {
   GLOBAL_KEYWORDS,
   getArtistKeywords,
@@ -61,30 +58,8 @@ import {
   websiteSchema,
   storeSchema,
 } from "@/lib/structured-data";
-import { FloatingCartIcon } from "@/components/floating-cart-icon/floating-cart-icon";
-import { MobileBottomNav } from "@/components/mobile-bottom-nav/mobile-bottom-nav";
 import "@/lib/cloudflare-cleanup"; // Auto-cleanup Cloudflare cookies in development
-
-// Lazy-load non-critical components (code-split but still SSR)
-const MessengerChatWrapper = dynamic(() => import("@/components/MessengerChat/MessengerChatWrapper"));
-const MetaPixel = dynamic(() => import("@/components/MetaPixel"));
-const NetworkStatus = dynamic(() => import("@/components/network-status/network-status").then(m => ({ default: m.NetworkStatus })));
-const VisitorTracker = dynamic(() => import("@/components/visitor-tracker").then(m => ({ default: m.VisitorTracker })));
-const IOSGesturePrevention = dynamic(() => import("@/components/ios-gesture-prevention").then(m => ({ default: m.IOSGesturePrevention })));
-const SalesTracker = dynamic(() => import("@/components/SalesTracker").then(m => ({ default: m.SalesTracker })));
-const SalesManagerBanner = dynamic(() => import("@/components/sales-manager-banner/sales-manager-banner"));
-const PWAInstallPrompt = dynamic(() => import("@/components/pwa-install-prompt/pwa-install-prompt").then(m => ({ default: m.PWAInstallPrompt })));
-const PushNotificationManager = dynamic(() => import("@/components/push-notifications/push-notifications").then(m => ({ default: m.PushNotificationManager })));
-const PWAManager = dynamic(() => import("@/components/pwa-manager"));
-const CampaignConsentPrompt = dynamic(() => import("@/components/campaign-consent/campaign-consent-prompt").then(m => ({ default: m.CampaignConsentPrompt })));
-const ReferralCodeInput = dynamic(() => import("@/components/referral-code-input/referral-code-input").then(m => ({ default: m.ReferralCodeInput })));
-const CallRequestPopup = dynamic(() => import("@/components/call-request-popup/call-request-popup").then(m => ({ default: m.CallRequestPopup })));
-const ImpersonationBanner = dynamic(() => import("@/components/ImpersonationBanner/ImpersonationBanner").then(m => ({ default: m.ImpersonationBanner })));
-const InsurancePromo = dynamic(() => import("@/components/insurance-promo/insurance-promo"));
-const GoogleAnalytics = dynamic(() => import("@/components/GoogleAnalytics"));
-const VercelAnalytics = dynamic(() => import("@/components/VercelAnalytics"));
-const GA4UserTracker = dynamic(() => import("@/components/ga4-user-tracker").then(m => ({ default: m.GA4UserTracker })));
-const PageViewTracker = dynamic(() => import("@/components/page-view-tracker").then(m => ({ default: m.PageViewTracker })));
+import { LayoutDeferredComponents, LayoutFooter } from "./layout-deferred";
 
 export const viewport = {
   width: "device-width",
@@ -302,25 +277,6 @@ export default function RootLayout({
               <CheckoutProvider>
                 <LanguageProvider>
                   <ThemeProvider>
-                    {/* GA4 User ID Tracking */}
-                    <GA4UserTracker />
-
-                    {/* GA4 Page View and User Path Tracking */}
-                    <Suspense fallback={null}>
-                      <PageViewTracker />
-                    </Suspense>
-
-                    {/* Visitor Tracking with IP */}
-                    <VisitorTracker />
-
-                    {/* Sales Manager Referral Tracking */}
-                    <Suspense fallback={null}>
-                      <SalesTracker />
-                    </Suspense>
-
-                    {/* iOS Back Swipe Prevention */}
-                    <IOSGesturePrevention />
-
                     <div
                       style={{
                         display: "flex",
@@ -331,66 +287,18 @@ export default function RootLayout({
                     >
                       <Header />
                       <main style={{ flex: 1 }} id="main-content" role="main">
-                        {/* Sales Manager Facebook Group Banner */}
-                        <SalesManagerBanner />
                         {children}
                       </main>
-                      <Footer />
-                      <FloatingCartIcon />
-                      <MobileBottomNav />
-
-                      {/* Floating Promo Code Input */}
-                      <ReferralCodeInput variant="floating" />
-
-                      {/* Campaign Consent Prompt for Sellers */}
-                      <CampaignConsentPrompt />
-
-                      {/* Call Request Popup - 2 წუთის შემდეგ */}
-                      <CallRequestPopup />
-
-                      {/* Admin Impersonation Banner */}
-                      <ImpersonationBanner />
-
-                      {/* Insurance Promo - 4 წუთის შემდეგ */}
-                      <InsurancePromo />
-
-                      {/* Server Announcement - გათიშულია */}
-                      {/* <ServerAnnouncement /> */}
+                      <LayoutFooter />
                     </div>
+                    {/* All non-critical components deferred with ssr:false */}
+                    <LayoutDeferredComponents />
                   </ThemeProvider>
                 </LanguageProvider>
               </CheckoutProvider>
             </CartProvider>
           </AuthProvider>
-
-          {/* Push Notifications - moved inside Providers for QueryClient access */}
-          <PushNotificationManager />
-
-          {/* PWA Manager - Conditional PWA functionality */}
-          <PWAManager />
-
-          {/* Wrap in error boundary - inside Providers for QueryClient access */}
-          <ErrorBoundary>
-            <MessengerChatWrapper />
-          </ErrorBoundary>
         </Providers>
-
-        {/* Network Status Indicator */}
-        <NetworkStatus />
-
-        {/* PWA Install Prompt */}
-        <PWAInstallPrompt />
-
-        {/* Google Analytics */}
-        <GoogleAnalytics />
-
-        {/* Meta Pixel */}
-        <Suspense fallback={null}>
-          <MetaPixel />
-        </Suspense>
-
-        {/* Vercel Analytics */}
-        <VercelAnalytics />
 
         {/* Toast notifications */}
         <Toaster />
@@ -477,9 +385,4 @@ export default function RootLayout({
       </body>
     </html>
   );
-}
-
-// Simple error boundary component
-function ErrorBoundary({ children }: { children: React.ReactNode }) {
-  return <div>{children}</div>;
 }
