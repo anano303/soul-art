@@ -309,19 +309,27 @@ const MainPhoto = () => {
     <div className="home-container">
       <BrushTrail containerRef={heroRef} />
       <div className="main-hero-section" ref={heroRef}>
-        {/* Slide images */}
-        {slides.map((slide, index) => (
-          <Image
-            key={slide.id}
-            src={slide.imageUrl}
-            alt={slide.title || "SoulArt Hero"}
-            fill
-            priority={index === 0}
-            quality={75}
-            sizes="100vw"
-            className={`hero-slide-img ${index === currentSlide ? "hero-slide-active" : ""}`}
-          />
-        ))}
+        {/* Slide images - only render current, previous and next for performance */}
+        {slides.map((slide, index) => {
+          const isVisible = index === currentSlide;
+          const isAdjacent =
+            index === (currentSlide + 1) % totalSlides ||
+            index === (currentSlide - 1 + totalSlides) % totalSlides;
+          if (!isVisible && !isAdjacent) return null;
+          return (
+            <Image
+              key={slide.id}
+              src={slide.imageUrl}
+              alt={slide.title || "SoulArt Hero"}
+              fill
+              priority={index === 0 || index === currentSlide}
+              quality={60}
+              sizes="100vw"
+              fetchPriority={index === currentSlide ? "high" : "auto"}
+              className={`hero-slide-img ${isVisible ? "hero-slide-active" : ""}`}
+            />
+          );
+        })}
 
         <div className="hero-bg-overlay" />
 

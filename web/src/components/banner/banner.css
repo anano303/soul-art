@@ -8,6 +8,11 @@
   background-color: var(--primary-color);
 }
 
+/* Placeholder while loading to prevent CLS */
+.banner-wrapper--placeholder {
+  box-shadow: none;
+}
+
 /* Scroll container with snap */
 .banner-container {
   display: flex;

@@ -1,10 +1,11 @@
 .container {
   width: 100%;
-  overflow-y: visible;
+  overflow: hidden;
   position: relative;
   padding: 10px 0;
   height: 310px;
   z-index: 2;
+  contain: layout style;
 }
 
 /* Badge Board Styles - on easels like paintings */

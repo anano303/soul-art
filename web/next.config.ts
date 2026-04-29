@@ -49,10 +49,7 @@ const nextConfig: NextConfig = {
         pathname: "**",
       },
     ],
-    // S3-ზე სურათები უკვე ოპტიმიზებულია (sharp-ით WebP),
-    // ამიტომ Next.js-ის ოპტიმიზაცია გამორთულია - ზედმეტი პროცესინგი აღარ სჭირდება.
-    // Cloudinary-ზეც unoptimized იყო 402 შეცდომების გამო.
-    unoptimized: true,
+    // Next.js ოპტიმიზაცია ჩართულია - S3 სურათებს ავტომატურად resize/compress აკეთებს
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
     formats: ["image/webp", "image/avif"], // Modern image formats

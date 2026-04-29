@@ -158,7 +158,7 @@ const Banner = () => {
   }, [handleScroll, banners.length]);
 
   if (!isLoaded || banners.length === 0) {
-    return null; // Don't render anything if no banners
+    return <div className="banner-wrapper banner-wrapper--placeholder" />;
   }
 
   return (

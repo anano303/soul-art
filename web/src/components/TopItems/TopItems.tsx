@@ -67,17 +67,6 @@ const TopItems: React.FC = () => {
     const clone = inner.cloneNode(true) as HTMLElement;
     scroller.appendChild(clone);
 
-    // Enable overflow-x for manual scrolling
-    scroller.style.overflowX = "auto";
-
-    // Apply margin-top to every second .easel element
-    const easels = document.querySelectorAll(`.${styles.easel}`);
-    easels.forEach((easel, index) => {
-      if ((index + 1) % 2 === 0) {
-        (easel as HTMLElement).style.marginTop = "20%";
-      }
-    });
-
     // Auto-scroll animation
     let animationId: number;
     let isPaused = false;
