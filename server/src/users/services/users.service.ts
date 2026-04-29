@@ -1321,6 +1321,24 @@ export class UsersService {
     let users: UserDocument[];
     let filteredTotal: number;
 
+    // Projection for list view - exclude heavy fields not needed in admin table
+    const listProjection = {
+      name: 1,
+      email: 1,
+      role: 1,
+      phoneNumber: 1,
+      storeName: 1,
+      createdAt: 1,
+      slug: 1,
+      profileImage: 1,
+      campaignDiscountChoice: 1,
+      salesRefCode: 1,
+      salesCommissionRate: 1,
+      salesTotalWithdrawn: 1,
+      salesPendingWithdrawal: 1,
+      isVerified: 1,
+    };
+
     if (
       (sortBy === 'productCount' ||
         sortBy === 'active' ||
@@ -1328,8 +1346,8 @@ export class UsersService {
         activeFilter) &&
       isSellerFilter
     ) {
-      // Get all matching users first
-      const allUsers = await this.userModel.find(filters).exec();
+      // Get all matching users first (with projection to reduce data transfer)
+      const allUsers = await this.userModel.find(filters).select(listProjection).lean().exec() as any[];
 
       // Add product stats and sort
       let usersWithStats = allUsers.map((user) => {
@@ -1383,10 +1401,12 @@ export class UsersService {
       [users, filteredTotal] = await Promise.all([
         this.userModel
           .find(filters)
+          .select(listProjection)
           .sort(sortOptions)
           .skip(skip)
           .limit(normalizedLimit)
-          .exec(),
+          .lean()
+          .exec() as any,
         this.userModel.countDocuments(filters),
       ]);
     }
@@ -1412,11 +1432,9 @@ export class UsersService {
 
     // Add product stats to seller users
     if (isSellerFilter || sellerProductStats.size > 0) {
-      // We need to attach stats to users - but UserDocument is immutable
-      // We'll add the stats when mapping in the response
       users = users.map((user) => {
-        const userObj = user.toObject();
-        const stats = sellerProductStats.get(user._id.toString());
+        const userObj = typeof user.toObject === 'function' ? user.toObject() : { ...user };
+        const stats = sellerProductStats.get((user._id || (user as any)._id).toString());
         if (stats) {
           (userObj as any).productCount = stats.productCount;
           (userObj as any).lastProductDate = stats.lastProductDate;

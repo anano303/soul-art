@@ -365,21 +365,74 @@ export class SalesCommissionService {
       role: Role.SalesManager,
     });
 
-    const result = [];
-    for (const manager of salesManagers) {
-      const stats = await this.getManagerStats(manager._id.toString());
+    if (salesManagers.length === 0) return [];
 
-      // აქტიურია თუ აქვს მინიმუმ 1 VISIT ივენთი (ვინმე შემოვიდა მისი ბმულით)
-      const visitCount = await this.trackingModel.countDocuments({
-        salesManager: manager._id,
+    const managerIds = salesManagers.map((m) => m._id);
+
+    // Batch: get all commission stats in one aggregation
+    const [allCommissionStats, activeManagerIds] = await Promise.all([
+      this.commissionModel.aggregate([
+        { $match: { salesManager: { $in: managerIds } } },
+        {
+          $group: {
+            _id: { salesManager: '$salesManager', status: '$status' },
+            total: { $sum: '$commissionAmount' },
+            count: { $sum: 1 },
+          },
+        },
+      ]),
+      // Batch: get all managers who have at least 1 VISIT event
+      this.trackingModel.distinct('salesManager', {
+        salesManager: { $in: managerIds },
         eventType: TrackingEventType.VISIT,
-      });
-      const isActive = visitCount > 0;
+      }),
+    ]);
 
-      result.push({ manager, stats, isActive });
+    // Build stats map per manager
+    const statsMap = new Map<
+      string,
+      { totalCommissions: number; pendingAmount: number; approvedAmount: number; paidAmount: number; totalOrders: number }
+    >();
+
+    for (const stat of allCommissionStats) {
+      const managerId = stat._id.salesManager.toString();
+      const normalizedStatus = stat._id.status?.toUpperCase?.() || stat._id.status;
+
+      if (normalizedStatus === CommissionStatus.CANCELLED) continue;
+
+      if (!statsMap.has(managerId)) {
+        statsMap.set(managerId, { totalCommissions: 0, pendingAmount: 0, approvedAmount: 0, paidAmount: 0, totalOrders: 0 });
+      }
+      const entry = statsMap.get(managerId)!;
+      entry.totalOrders += stat.count;
+      entry.totalCommissions += stat.total;
+
+      switch (normalizedStatus) {
+        case CommissionStatus.PENDING:
+          entry.pendingAmount = stat.total;
+          break;
+        case CommissionStatus.APPROVED:
+          entry.approvedAmount = stat.total;
+          break;
+        case CommissionStatus.PAID:
+          entry.paidAmount = stat.total;
+          break;
+      }
     }
 
-    return result;
+    // Build active set
+    const activeSet = new Set(activeManagerIds.map((id) => id.toString()));
+
+    return salesManagers.map((manager) => {
+      const stats = statsMap.get(manager._id.toString()) || {
+        totalCommissions: 0,
+        pendingAmount: 0,
+        approvedAmount: 0,
+        paidAmount: 0,
+        totalOrders: 0,
+      };
+      return { manager, stats, isActive: activeSet.has(manager._id.toString()) };
+    });
   }
 
   /**
