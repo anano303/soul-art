@@ -3355,8 +3355,11 @@ export class UsersService {
     }>;
     total: number;
   }> {
+    // Only load users who actually have sellerNotifications
     const users = await this.userModel
-      .find({ role: { $ne: null } })
+      .find({
+        sellerNotifications: { $exists: true, $ne: [] },
+      })
       .select('name email sellerNotifications')
       .lean();
 
@@ -3384,6 +3387,7 @@ export class UsersService {
           readAt: Date;
         }>;
         createdByUserName?: string;
+        _recipientUserIds?: string[];
       }
     >();
 
@@ -3408,10 +3412,12 @@ export class UsersService {
             receivedByUsersCount: 0,
             readByUsersCount: 0,
             readByUsers: [],
+            _recipientUserIds: [],
           });
         }
         const notifData = notificationMap.get(key);
         notifData.receivedByUsersCount += 1;
+        notifData._recipientUserIds.push(currentUser._id.toString());
         if (notification.readAt) {
           notifData.readByUsersCount += 1;
           notifData.readByUsers.push({
@@ -3466,49 +3472,71 @@ export class UsersService {
         );
       });
 
-    // Get admin name for createdByUserId
+    // Batch-load admin names for createdByUserId (instead of N+1 queries)
+    const adminIds = [
+      ...new Set(
+        allNotifications
+          .map((n) => n.createdByUserId)
+          .filter(Boolean),
+      ),
+    ];
+    const adminMap = new Map<string, string>();
+    if (adminIds.length > 0) {
+      const admins = await this.userModel
+        .find({ _id: { $in: adminIds } })
+        .select('name')
+        .lean();
+      for (const admin of admins) {
+        adminMap.set(admin._id.toString(), admin.name);
+      }
+    }
+
     for (const notification of allNotifications) {
       notification.readByUsers.sort(
         (a, b) => new Date(b.readAt).getTime() - new Date(a.readAt).getTime(),
       );
-
       if (notification.createdByUserId) {
-        try {
-          const admin = await this.userModel
-            .findById(notification.createdByUserId)
-            .select('name');
-          if (admin) {
-            notification.createdByUserName = admin.name;
-          }
-        } catch (error) {
-          this.logger.warn(
-            `Could not find admin user ${notification.createdByUserId}`,
-          );
-        }
+        notification.createdByUserName =
+          adminMap.get(notification.createdByUserId) || undefined;
       }
     }
 
-    // Compute followedCount for suggestion notifications
+    // Apply pagination
     const paginatedBefore = allNotifications.slice(offset, offset + limit);
-    for (const notif of paginatedBefore) {
-      if (notif.category === 'suggestion' && notif.actionUrl?.startsWith('/@')) {
-        const slug = notif.actionUrl.slice(2);
-        if (slug) {
-          const artist = await this.userModel.findOne({
-            artistSlug: slug.toLowerCase(),
-            role: Role.Seller,
-          }).select('followers').lean();
-          if (artist?.followers?.length) {
-            const followerSet = new Set(artist.followers.map(String));
-            const recipientIds = notif.readByUsers.map(r => r.userId);
-            // Count recipients who also appear in followers
-            const allRecipientIds = users
-              .filter(u => {
-                const notifs = Array.isArray((u as any).sellerNotifications) ? (u as any).sellerNotifications : [];
-                return notifs.some(n => n.id === notif.id);
-              })
-              .map(u => u._id.toString());
-            notif.followedCount = allRecipientIds.filter(id => followerSet.has(id)).length;
+
+    // Batch-load followedCount for suggestion notifications (instead of N+1 queries)
+    const suggestionSlugs = paginatedBefore
+      .filter((n) => n.category === 'suggestion' && n.actionUrl?.startsWith('/@'))
+      .map((n) => n.actionUrl.slice(2).toLowerCase())
+      .filter(Boolean);
+
+    if (suggestionSlugs.length > 0) {
+      const artists = await this.userModel
+        .find({
+          artistSlug: { $in: suggestionSlugs },
+          role: Role.Seller,
+        })
+        .select('artistSlug followers')
+        .lean();
+
+      const artistFollowerMap = new Map<string, Set<string>>();
+      for (const artist of artists) {
+        if (artist.artistSlug && artist.followers?.length) {
+          artistFollowerMap.set(
+            artist.artistSlug.toLowerCase(),
+            new Set(artist.followers.map(String)),
+          );
+        }
+      }
+
+      for (const notif of paginatedBefore) {
+        if (notif.category === 'suggestion' && notif.actionUrl?.startsWith('/@')) {
+          const slug = notif.actionUrl.slice(2).toLowerCase();
+          const followerSet = artistFollowerMap.get(slug);
+          if (followerSet) {
+            notif.followedCount = (notif._recipientUserIds || []).filter(
+              (id) => followerSet.has(id),
+            ).length;
           } else {
             notif.followedCount = 0;
           }
@@ -3516,7 +3544,11 @@ export class UsersService {
       }
     }
 
-    // Apply pagination
+    // Clean up internal-only fields before returning
+    for (const notif of paginatedBefore) {
+      delete (notif as any)._recipientUserIds;
+    }
+
     const total = allNotifications.length;
 
     return {

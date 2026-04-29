@@ -157,6 +157,8 @@ export function SellerNotifications() {
     enabled: enabled && isAdmin,
     refetchInterval: 60000,
     staleTime: 30000,
+    retry: 2,
+    retryDelay: (attempt) => Math.min(1000 * 2 ** attempt, 5000),
   });
 
   const notifications = useMemo(() => {
@@ -310,6 +312,24 @@ export function SellerNotifications() {
           {(isAdmin ? adminHistoryQuery.isLoading : notificationsQuery.isLoading) ? (
             <div className="seller-header-notifications__empty">
               {isEn ? "Loading..." : "იტვირთება..."}
+            </div>
+          ) : (isAdmin ? adminHistoryQuery.isError : notificationsQuery.isError) ? (
+            <div className="seller-header-notifications__empty">
+              <p>{isEn ? "Failed to load" : "ჩატვირთვა ვერ მოხერხდა"}</p>
+              <button
+                type="button"
+                className="seller-header-notifications__action"
+                onClick={() => {
+                  if (isAdmin) {
+                    adminHistoryQuery.refetch();
+                  } else {
+                    notificationsQuery.refetch();
+                  }
+                }}
+                style={{ marginTop: 8 }}
+              >
+                {isEn ? "Retry" : "თავიდან ცდა"}
+              </button>
             </div>
           ) : visibleNotifications.length === 0 ? (
             <div className="seller-header-notifications__empty">
