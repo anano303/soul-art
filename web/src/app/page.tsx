@@ -5,11 +5,24 @@ import dynamic from "next/dynamic";
 import HomePagesHead from "@/components/homePagesHead/homePagesHead";
 import TopItems from "@/components/TopItems/TopItems";
 import Banner from "@/components/banner/banner";
-import PremiumRail from "@/components/premiumRail/PremiumRail";
-import DiscountedRail from "@/components/discountedRail/DiscountedRail";
-import ExclusivePromoRail from "@/components/exclusivePromoRail/ExclusivePromoRail";
 import { useLanguage } from "@/hooks/LanguageContext";
 import { trackPageView } from "@/lib/ga4-analytics";
+
+// Lazy load below-the-fold components for better LCP
+const PremiumRail = dynamic(
+  () => import("@/components/premiumRail/PremiumRail"),
+  { ssr: true },
+);
+
+const DiscountedRail = dynamic(
+  () => import("@/components/discountedRail/DiscountedRail"),
+  { ssr: true },
+);
+
+const ExclusivePromoRail = dynamic(
+  () => import("@/components/exclusivePromoRail/ExclusivePromoRail"),
+  { ssr: false },
+);
 
 // Lazy load below-the-fold components for better LCP
 const GiftCategories = dynamic(

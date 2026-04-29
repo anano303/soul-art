@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
+import dynamic from "next/dynamic";
 import localFont from "next/font/local";
 import "./globals.css";
 import { Providers } from "./providers";
@@ -10,7 +11,6 @@ import { LanguageProvider } from "@/hooks/LanguageContext";
 import { ThemeProvider } from "@/hooks/ThemeContext";
 import Header from "@/components/header/header";
 import Footer from "@/components/footer/footer";
-import MessengerChatWrapper from "@/components/MessengerChat/MessengerChatWrapper";
 import {
   GLOBAL_KEYWORDS,
   getArtistKeywords,
@@ -63,27 +63,28 @@ import {
 } from "@/lib/structured-data";
 import GoogleAnalytics from "@/components/GoogleAnalytics";
 import VercelAnalytics from "@/components/VercelAnalytics";
-import MetaPixel from "@/components/MetaPixel";
 import { FloatingCartIcon } from "@/components/floating-cart-icon/floating-cart-icon";
 import { MobileBottomNav } from "@/components/mobile-bottom-nav/mobile-bottom-nav";
-import { NetworkStatus } from "@/components/network-status/network-status";
-import { CacheManager } from "@/components/cache-manager/cache-manager";
 import { GA4UserTracker } from "@/components/ga4-user-tracker";
 import { PageViewTracker } from "@/components/page-view-tracker";
-import { VisitorTracker } from "@/components/visitor-tracker";
-import { IOSGesturePrevention } from "@/components/ios-gesture-prevention";
-import { SalesTracker } from "@/components/SalesTracker";
-import SalesManagerBanner from "@/components/sales-manager-banner/sales-manager-banner";
-import { PWAInstallPrompt } from "@/components/pwa-install-prompt/pwa-install-prompt";
-import { PushNotificationManager } from "@/components/push-notifications/push-notifications";
-import PWAManager from "@/components/pwa-manager";
-import { CampaignConsentPrompt } from "@/components/campaign-consent/campaign-consent-prompt";
-import { ReferralCodeInput } from "@/components/referral-code-input/referral-code-input";
-import { CallRequestPopup } from "@/components/call-request-popup/call-request-popup";
-import { ImpersonationBanner } from "@/components/ImpersonationBanner/ImpersonationBanner";
-import InsurancePromo from "@/components/insurance-promo/insurance-promo";
-// import { ServerAnnouncement } from "@/components/server-announcement/server-announcement";
 import "@/lib/cloudflare-cleanup"; // Auto-cleanup Cloudflare cookies in development
+
+// Lazy-load non-critical components (code-split but still SSR)
+const MessengerChatWrapper = dynamic(() => import("@/components/MessengerChat/MessengerChatWrapper"));
+const MetaPixel = dynamic(() => import("@/components/MetaPixel"));
+const NetworkStatus = dynamic(() => import("@/components/network-status/network-status").then(m => ({ default: m.NetworkStatus })));
+const VisitorTracker = dynamic(() => import("@/components/visitor-tracker").then(m => ({ default: m.VisitorTracker })));
+const IOSGesturePrevention = dynamic(() => import("@/components/ios-gesture-prevention").then(m => ({ default: m.IOSGesturePrevention })));
+const SalesTracker = dynamic(() => import("@/components/SalesTracker").then(m => ({ default: m.SalesTracker })));
+const SalesManagerBanner = dynamic(() => import("@/components/sales-manager-banner/sales-manager-banner"));
+const PWAInstallPrompt = dynamic(() => import("@/components/pwa-install-prompt/pwa-install-prompt").then(m => ({ default: m.PWAInstallPrompt })));
+const PushNotificationManager = dynamic(() => import("@/components/push-notifications/push-notifications").then(m => ({ default: m.PushNotificationManager })));
+const PWAManager = dynamic(() => import("@/components/pwa-manager"));
+const CampaignConsentPrompt = dynamic(() => import("@/components/campaign-consent/campaign-consent-prompt").then(m => ({ default: m.CampaignConsentPrompt })));
+const ReferralCodeInput = dynamic(() => import("@/components/referral-code-input/referral-code-input").then(m => ({ default: m.ReferralCodeInput })));
+const CallRequestPopup = dynamic(() => import("@/components/call-request-popup/call-request-popup").then(m => ({ default: m.CallRequestPopup })));
+const ImpersonationBanner = dynamic(() => import("@/components/ImpersonationBanner/ImpersonationBanner").then(m => ({ default: m.ImpersonationBanner })));
+const InsurancePromo = dynamic(() => import("@/components/insurance-promo/insurance-promo"));
 
 export const viewport = {
   width: "device-width",
@@ -491,11 +492,6 @@ export default function RootLayout({
           {/* PWA Manager - Conditional PWA functionality */}
           <PWAManager />
 
-          {/* Cache Manager - მხოლოდ development-ში */}
-          {process.env.NODE_ENV === "development" && (
-            <CacheManager position="fixed" size="small" />
-          )}
-
           {/* Wrap in error boundary - inside Providers for QueryClient access */}
           <ErrorBoundary>
             <MessengerChatWrapper />
@@ -511,12 +507,12 @@ export default function RootLayout({
         {/* Google Analytics */}
         <GoogleAnalytics />
 
-        {/* Meta Pixel - Facebook ვიზიტორების ტრაფიკი და კონვერსიები */}
+        {/* Meta Pixel */}
         <Suspense fallback={null}>
-          <MetaPixel /> {/* Temporarily disabled for testing */}
+          <MetaPixel />
         </Suspense>
 
-        {/* Vercel Analytics - ვიზიტორების ტრაფიკი და Performance */}
+        {/* Vercel Analytics */}
         <VercelAnalytics />
 
         {/* Toast notifications */}

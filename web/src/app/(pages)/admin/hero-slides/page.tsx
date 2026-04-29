@@ -1,5 +1,6 @@
 "use client";
 
+import { Suspense } from "react";
 import { HeroSlideList } from "@/modules/admin/components/hero-slide-list";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -7,6 +8,14 @@ import { isLoggedIn, getUserData } from "@/lib/auth";
 import { Role } from "@/types/role";
 
 export default function AdminHeroSlidesPage() {
+  return (
+    <Suspense fallback={<div className="loading-container">იტვირთება...</div>}>
+      <HeroSlidesContent />
+    </Suspense>
+  );
+}
+
+function HeroSlidesContent() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
 

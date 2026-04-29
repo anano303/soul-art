@@ -2,6 +2,7 @@
 import { useRef, useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import {
   ChevronLeft,
   ChevronRight,
@@ -18,7 +19,6 @@ import { useLanguage } from "@/hooks/LanguageContext";
 import { useAuth } from "@/hooks/use-auth";
 import { Role } from "@/types/role";
 import SearchBox from "../SearchBox/search-box";
-import BrushTrail from "../BrushTrail/BrushTrail";
 import {
   getActiveHeroSlides,
   getAllHeroSlides,
@@ -28,6 +28,8 @@ import {
 } from "@/modules/admin/api/banner";
 import { Banner, CreateBannerData } from "@/types/banner";
 import { toast } from "@/hooks/use-toast";
+
+const BrushTrail = dynamic(() => import("../BrushTrail/BrushTrail"), { ssr: false });
 
 const CATEGORIES = [
   {
