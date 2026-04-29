@@ -2,6 +2,8 @@
 .user-menu-container {
   display: flex;
   align-items: center;
+  min-width: 40px;
+  min-height: 40px;
 }
 
 /* Mobile menu should not affect layout - it's a fixed overlay */

@@ -71,14 +71,10 @@ const Home = () => {
   return (
     <div>
       <HomePagesHead />
-      {/* Exclusive promo section - only visible when user has promo code */}
-      <ExclusivePromoRail />
-      {/* <div>
-        <GuestReferralBanner />
-        <ReferralPromoBanner />
-      </div> */}
       <TopItems />
       <Banner />
+      {/* Exclusive promo section - moved below fold to prevent CLS */}
+      <ExclusivePromoRail />
       <PremiumRail />
       <DiscountedRail />
       <GiftCategories />

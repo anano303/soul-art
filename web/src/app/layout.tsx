@@ -380,11 +380,18 @@ export default function RootLayout({
                 
                 // Global error handler
                 window.onerror = function(msg, url, line, col, error) {
+                  var message = String(msg || '');
                   if (url && (url.includes('madgicx') || 
                       url.includes('capig') ||
                       url.includes('facebook') ||
                       url.includes('googletagmanager') ||
                       url.includes('connect.facebook'))) {
+                    return true;
+                  }
+                  // Suppress browser extension errors
+                  if (message.includes('__AutoFillCallbackHandler') ||
+                      message.includes('webkit.messageHandlers') ||
+                      message.includes('postMessage')) {
                     return true;
                   }
                   return false;
@@ -396,7 +403,9 @@ export default function RootLayout({
                   if (reason.includes('madgicx') ||
                       reason.includes('capig') ||
                       reason.includes('facebook') ||
-                      reason.includes('Failed to fetch')) {
+                      reason.includes('Failed to fetch') ||
+                      reason.includes('__AutoFillCallbackHandler') ||
+                      reason.includes('webkit.messageHandlers')) {
                     e.preventDefault();
                     return true;
                   }

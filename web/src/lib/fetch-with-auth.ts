@@ -231,12 +231,17 @@ export async function fetchWithAuth(url: string, config: RequestInit = {}) {
     }
 
     // Track detailed error with proper categorization
-    trackNetworkError(url, errorMessage, {
-      error_type: errorType,
-      api_endpoint: url,
-      api_method: method,
-      error_stack: error instanceof Error ? error.stack : undefined,
-    });
+    // Skip tracking for expected 404s (deleted products, missing artists)
+    const is404 = errorMessage.includes("404") || errorMessage.includes("Not Found") || errorMessage.includes("not found");
+    const isExpected404 = is404 && (url.includes("/products/") || url.includes("/artists/"));
+    if (!isExpected404) {
+      trackNetworkError(url, errorMessage, {
+        error_type: errorType,
+        api_endpoint: url,
+        api_method: method,
+        error_stack: error instanceof Error ? error.stack : undefined,
+      });
+    }
 
     // Re-throw the error for handling by the caller
     throw error;

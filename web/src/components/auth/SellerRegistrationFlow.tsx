@@ -1035,15 +1035,16 @@ export function SellerRegistrationFlow({
                   id="accountNumber"
                   type="text"
                   placeholder="GE29TB..."
-                  {...step2Form.register("accountNumber")}
+                  {...step2Form.register("accountNumber", {
+                    onChange: (e) => {
+                      const iban = e.target?.value?.trim() || "";
+                      const bank = detectBankFromIban(iban);
+                      if (bank) step2Form.setValue("beneficiaryBankCode", bank);
+                      else if (iban.length >= 22)
+                        step2Form.setValue("beneficiaryBankCode", "");
+                    },
+                  })}
                   className="srf-input"
-                  onChange={(e) => {
-                    const iban = e.target.value.trim();
-                    const bank = detectBankFromIban(iban);
-                    if (bank) step2Form.setValue("beneficiaryBankCode", bank);
-                    else if (iban.length >= 22)
-                      step2Form.setValue("beneficiaryBankCode", "");
-                  }}
                 />
                 {step2Form.formState.errors.accountNumber && (
                   <span className="srf-error">

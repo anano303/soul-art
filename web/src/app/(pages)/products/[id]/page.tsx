@@ -35,16 +35,20 @@ export default function ProductPage() {
     }
   }, [searchParams, id, toast]);
 
-  const { data: product, isLoading } = useQuery({
+  const { data: product, isLoading, isError } = useQuery({
     queryKey: ["product", id],
     queryFn: async () => {
       const response = await fetchWithAuth(`/products/${id}`);
       return response.json();
     },
+    retry: false,
   });
 
   if (isLoading) return <HeartLoading size="medium" />;
-  if (!product) return <div>Product not found</div>;
+  if (isError || !product) return <div className="Container" style={{ textAlign: 'center', padding: '60px 20px' }}>
+    <h2>პროდუქტი ვერ მოიძებნა</h2>
+    <p style={{ marginTop: '10px', color: '#666' }}>ეს პროდუქტი წაშლილია ან არ არსებობს.</p>
+  </div>;
 
   return (
     <div className="Container">

@@ -129,22 +129,14 @@ export function SellerNotifications() {
   const enabled = !!user;
   const isAdmin = user?.role?.toLowerCase() === "admin";
 
-  console.log('[SellerNotifications] user:', user?.email, 'role:', user?.role, 'enabled:', enabled, 'isAdmin:', isAdmin);
-
   const notificationsQuery = useQuery<SellerNotificationsResponse>({
     queryKey: ["seller-notifications"],
     queryFn: async () => {
-      console.log('[SellerNotifications] Fetching /users/me/seller-notifications...');
       const response = await fetchWithAuth("/users/me/seller-notifications");
-      console.log('[SellerNotifications] /me/seller-notifications status:', response.status);
       if (!response.ok) {
-        const text = await response.text();
-        console.error('[SellerNotifications] /me/seller-notifications ERROR:', text);
         throw new Error("Failed to fetch seller notifications");
       }
-      const data = await response.json();
-      console.log('[SellerNotifications] /me/seller-notifications data:', data?.notifications?.length, 'items');
-      return data;
+      return response.json();
     },
     enabled,
     refetchInterval: 60000,
@@ -154,19 +146,13 @@ export function SellerNotifications() {
   const adminHistoryQuery = useQuery<AdminHistoryResponse>({
     queryKey: ["admin", "seller-notifications-history", "header"],
     queryFn: async () => {
-      console.log('[SellerNotifications] Fetching /users/admin/seller-notifications-history...');
       const response = await fetchWithAuth(
         "/users/admin/seller-notifications-history?limit=20&offset=0",
       );
-      console.log('[SellerNotifications] admin-history status:', response.status);
       if (!response.ok) {
-        const text = await response.text();
-        console.error('[SellerNotifications] admin-history ERROR:', text);
         throw new Error("Failed to fetch admin notifications history");
       }
-      const data = await response.json();
-      console.log('[SellerNotifications] admin-history data:', data?.notifications?.length, 'items, total:', data?.total);
-      return data;
+      return response.json();
     },
     enabled: enabled && isAdmin,
     refetchInterval: 120000,

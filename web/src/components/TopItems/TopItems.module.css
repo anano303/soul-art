@@ -3,9 +3,10 @@
   overflow: hidden;
   position: relative;
   padding: 10px 0;
+  min-height: 310px;
   height: 310px;
   z-index: 2;
-  contain: layout style;
+  contain: layout style size;
 }
 
 /* Badge Board Styles - on easels like paintings */

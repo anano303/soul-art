@@ -54,6 +54,7 @@
   position: relative;
   backdrop-filter: blur(3px);
   min-height: 90px;
+  contain: layout style;
 }
 
 .hero-text h1 {
@@ -474,7 +475,8 @@
   width: 55vw;
   margin-top: 16px;
   z-index: 2;
-  min-height: 42px;
+  min-height: 46px;
+  contain: layout style;
 }
 
 /* Category buttons on hero */

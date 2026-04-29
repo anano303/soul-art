@@ -383,6 +383,8 @@ header {
     display: flex;
     align-items: center;
     gap: 12px;
+    min-width: 180px;
+    justify-content: flex-end;
 
     .language-switcher-container {
       margin-left: 4px;
