@@ -119,5 +119,6 @@ export const SalesTrackingSchema = SchemaFactory.createForClass(SalesTracking);
 
 // Compound indexes for efficient queries
 SalesTrackingSchema.index({ salesManager: 1, createdAt: -1 });
+SalesTrackingSchema.index({ salesManager: 1, eventType: 1 });
 SalesTrackingSchema.index({ salesRefCode: 1, eventType: 1 });
 SalesTrackingSchema.index({ visitorId: 1, salesRefCode: 1 });

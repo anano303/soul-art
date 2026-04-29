@@ -362,7 +362,7 @@ export class SalesCommissionService {
     }>
   > {
     const salesManagers = await this.userModel.find({
-      role: Role.SalesManager,
+      role: { $in: [Role.SalesManager, Role.SellerAndSalesManager] },
     });
 
     if (salesManagers.length === 0) return [];
@@ -381,11 +381,11 @@ export class SalesCommissionService {
           },
         },
       ]),
-      // Batch: get all managers who have at least 1 VISIT event
-      this.trackingModel.distinct('salesManager', {
-        salesManager: { $in: managerIds },
-        eventType: TrackingEventType.VISIT,
-      }),
+      // Batch: get managers with at least 1 VISIT event using aggregation (uses index)
+      this.trackingModel.aggregate([
+        { $match: { salesManager: { $in: managerIds }, eventType: TrackingEventType.VISIT } },
+        { $group: { _id: '$salesManager' } },
+      ]).then((results) => results.map((r) => r._id)),
     ]);
 
     // Build stats map per manager
