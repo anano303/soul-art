@@ -28,6 +28,7 @@ export function AdminOrderDetails({ order }: AdminOrderDetailsProps) {
   console.log("Order shipping details:", order.shippingDetails);
   console.log("Order user phone:", order.user?.phoneNumber);
 
+  
   // Check user role to determine what information to show
   const userData = getUserData();
   const isAdmin = userData?.role === Role.Admin;
