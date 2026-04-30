@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 
 const SESSION_ID_KEY = "visitor_session_id";
 const SESSION_DURATION = 30 * 60 * 1000; // 30 minutes
+const TRACK_THROTTLE = 10 * 1000; // Minimum 10s between track calls
 
 // Simple UUID generator
 function generateUUID() {
@@ -16,6 +17,7 @@ function generateUUID() {
 }
 
 export function useVisitorTracking() {
+  const lastTracked = useRef(0);
   // Get user from React Query cache
   const { data: user } = useQuery({
     queryKey: ["user"],
@@ -39,33 +41,33 @@ export function useVisitorTracking() {
 
     localStorage.setItem("last_activity", now.toString());
 
-    // Track visitor
+    // Track visitor (throttled)
     const trackVisitor = async () => {
+      const currentTime = Date.now();
+      if (currentTime - lastTracked.current < TRACK_THROTTLE) return;
+      lastTracked.current = currentTime;
+
       try {
         const userId = (user as any)?._id || (user as any)?.id;
 
-        const response = await fetch(
+        await fetch(
           `${process.env.NEXT_PUBLIC_API_URL}/analytics/track-visitor`,
           {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
             },
-            credentials: "include", // Important for auth cookies
+            credentials: "include",
             body: JSON.stringify({
               page: window.location.pathname,
               referrer: document.referrer || "Direct",
               sessionId,
-              userId: userId, // Get from React Query cache
+              userId: userId,
             }),
           }
         );
-
-        if (!response.ok) {
-          console.error("Failed to track visitor");
-        }
-      } catch (error) {
-        console.error("Error tracking visitor:", error);
+      } catch {
+        // Silent fail - tracking is non-critical
       }
     };
 
@@ -80,19 +82,8 @@ export function useVisitorTracking() {
     // Listen for route changes (for SPAs)
     window.addEventListener("popstate", handlePageChange);
 
-    // Track visibility changes
-    const handleVisibilityChange = () => {
-      if (!document.hidden) {
-        localStorage.setItem("last_activity", Date.now().toString());
-        trackVisitor();
-      }
-    };
-
-    document.addEventListener("visibilitychange", handleVisibilityChange);
-
     return () => {
       window.removeEventListener("popstate", handlePageChange);
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
   }, [user]); // Add user as dependency
 }

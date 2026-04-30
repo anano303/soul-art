@@ -80,8 +80,6 @@ export class AuthService {
     let existUser = await this.userModel.findOne({ email });
     let isNewUser = false;
 
-    console.log('🆕 ახალი მომხმარებლის რეგისტრაცია Google-ით:', googleData);
-
     if (!existUser) {
       // Create as regular user - seller registration requires additional fields
       const newUser = new this.userModel({
@@ -94,21 +92,13 @@ export class AuthService {
       await newUser.save();
       existUser = newUser;
       isNewUser = true;
-      console.log('✅ ახალი მომხმარებელი წარმატებით დაემატა:', existUser);
     }
 
     const { tokens, user: userData } = await this.login(existUser, deviceInfo);
 
-    console.log('✅ გენერირებული access_token და refresh_token:', tokens);
-    
     const needsSellerRegistration = googleData.sellerMode && existUser.role !== Role.Seller;
     const isSeller = existUser.role === Role.Seller;
-    
-    console.log('📊 Auth Result - sellerMode:', googleData.sellerMode);
-    console.log('📊 Auth Result - user role:', existUser.role);
-    console.log('📊 Auth Result - needsSellerRegistration:', needsSellerRegistration);
-    console.log('📊 Auth Result - isSeller:', isSeller);
-    
+
     return { 
       tokens, 
       user: userData,
@@ -152,12 +142,6 @@ export class AuthService {
         );
       }
 
-      console.log('🆕 Facebook authentication:', {
-        id: fbUser.id,
-        name: fbUser.name,
-        email,
-      });
-
       let existUser = await this.userModel.findOne({ email });
 
       if (!existUser) {
@@ -172,7 +156,6 @@ export class AuthService {
 
         await newUser.save();
         existUser = newUser;
-        console.log('✅ New user created via Facebook:', existUser.email);
       } else if (!existUser.facebookId) {
         // Link Facebook account to existing user
         existUser.facebookId = fbUser.id;
@@ -180,18 +163,15 @@ export class AuthService {
           existUser.avatar = fbUser.picture?.data?.url || facebookData.picture;
         }
         await existUser.save();
-        console.log('✅ Facebook account linked to existing user:', existUser.email);
       }
 
       const { tokens, user: userData } = await this.login(existUser, deviceInfo);
 
-      console.log('✅ Facebook authentication successful');
       return { tokens, user: userData };
     } catch (error) {
       if (error instanceof UnauthorizedException || error instanceof BadRequestException) {
         throw error;
       }
-      console.error('Facebook verification failed:', error);
       throw new UnauthorizedException('Facebook authentication failed');
     }
   }

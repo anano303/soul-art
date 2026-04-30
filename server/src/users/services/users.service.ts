@@ -2114,9 +2114,6 @@ export class UsersService {
           },
         },
       );
-      console.log(
-        `🎯 Updated all products for user ${userId} with referralDiscountPercent: ${defaultReferralDiscount}`,
-      );
     } else if (campaignDiscountChoice === 'none') {
       // If user chose "none", disable discounts on all products
       await this.productModel.updateMany(
@@ -2127,9 +2124,6 @@ export class UsersService {
             referralDiscountPercent: 0,
           },
         },
-      );
-      console.log(
-        `🎯 Disabled campaign discounts for all products of user ${userId}`,
       );
     }
 
@@ -2775,13 +2769,6 @@ export class UsersService {
       throw new BadRequestException('Only artists have followers');
     }
 
-    console.log('Artist found:', {
-      id: artist._id,
-      name: artist.name,
-      followersArray: artist.followers,
-      followersCount: artist.followersCount,
-    });
-
     const skip = (page - 1) * limit;
 
     const followers = await this.userModel.aggregate([
@@ -2815,11 +2802,6 @@ export class UsersService {
         },
       },
     ]);
-
-    console.log('Aggregation result:', {
-      followersFound: followers.length,
-      followers: followers,
-    });
 
     const total = artist.followersCount || 0;
     const totalPages = Math.ceil(total / limit);

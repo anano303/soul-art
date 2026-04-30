@@ -19,7 +19,7 @@ export class StockReservationService {
    * Runs every 10 minutes to check for expired stock reservations
    * Automatically releases expired stock reservations and marks orders as cancelled
    */
-  @Cron('0 */1 * * * *') // Every 1 minutes
+  @Cron('0 */5 * * * *') // Every 5 minutes
   async releaseExpiredStockReservations() {
     const now = new Date();
 

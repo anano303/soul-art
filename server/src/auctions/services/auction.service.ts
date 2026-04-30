@@ -933,7 +933,7 @@ export class AuctionService {
   }
 
   // Cron job to end auctions
-  @Cron(CronExpression.EVERY_MINUTE)
+  @Cron(CronExpression.EVERY_5_MINUTES)
   async checkEndedAuctions() {
     const now = new Date();
 
@@ -947,7 +947,7 @@ export class AuctionService {
     }
   }
 
-  @Cron(CronExpression.EVERY_MINUTE)
+  @Cron(CronExpression.EVERY_5_MINUTES)
   async activateScheduledAuctions() {
     const now = new Date();
 

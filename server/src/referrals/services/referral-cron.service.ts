@@ -19,8 +19,8 @@ export class ReferralCronService {
     private readonly referralsService: ReferralsService,
   ) {}
 
-  // Check every minute for seller referrals that should auto-approve
-  @Cron(CronExpression.EVERY_MINUTE)
+  // Check every 10 minutes for seller referrals that should auto-approve
+  @Cron(CronExpression.EVERY_10_MINUTES)
   async autoApproveSellers(): Promise<void> {
     try {
       const pendingSellerReferrals = await this.referralModel
