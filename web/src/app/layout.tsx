@@ -8,16 +8,7 @@ import { AuthProvider } from "@/components/auth-provider";
 import { LanguageProvider } from "@/hooks/LanguageContext";
 import { ThemeProvider } from "@/hooks/ThemeContext";
 import Header from "@/components/header/header";
-import {
-  GLOBAL_KEYWORDS,
-  getArtistKeywords,
-  getBannerKeywords,
-  getCategoryKeywords,
-  getSubCategoryKeywords,
-  getForumKeywords,
-  getProductKeywords,
-  mergeKeywordSets,
-} from "@/lib/seo-keywords";
+import { GLOBAL_KEYWORDS } from "@/lib/seo-keywords";
 
 const PRIMARY_COLOR = "#012645";
 
@@ -69,41 +60,15 @@ export const viewport = {
   viewportFit: "cover",
 };
 
-export async function generateMetadata(): Promise<Metadata> {
-  const [
-    productKeywords,
-    artistKeywords,
-    forumKeywords,
-    categoryKeywords,
-    subCategoryKeywords,
-    bannerKeywords,
-  ] = await Promise.all([
-    getProductKeywords(),
-    getArtistKeywords(),
-    getForumKeywords(),
-    getCategoryKeywords(),
-    getSubCategoryKeywords(),
-    getBannerKeywords(),
-  ]);
-  const keywords = mergeKeywordSets(
-    productKeywords,
-    artistKeywords,
-    forumKeywords,
-    categoryKeywords,
-    subCategoryKeywords,
-    bannerKeywords,
-    GLOBAL_KEYWORDS,
-  ).slice(0, 200);
-
-  return {
-    metadataBase: new URL(
-      process.env.NEXT_PUBLIC_CLIENT_URL || "https://soulart.ge",
-    ),
-    title:
-      "Soulart - ნახატების და ხელნაკეთი ნივთების პირველი ონლაინ პლატფორმა   საქართველოში",
-    description:
-      "უნიკალური ხელნაკეთი ნივთები, ნახატები, ხელოვნების ნამუშევრები. ხარისხი, სანდოობა, ფასი. Unique handmade items, paintings, artworks in Georgia",
-    keywords,
+export const metadata: Metadata = {
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_CLIENT_URL || "https://soulart.ge",
+  ),
+  title:
+    "Soulart - ნახატების და ხელნაკეთი ნივთების პირველი ონლაინ პლატფორმა   საქართველოში",
+  description:
+    "უნიკალური ხელნაკეთი ნივთები, ნახატები, ხელოვნების ნამუშევრები. ხარისხი, სანდოობა, ფასი. Unique handmade items, paintings, artworks in Georgia",
+  keywords: GLOBAL_KEYWORDS.slice(0, 200),
     authors: [{ name: "Soulart" }],
     creator: "Soulart",
     publisher: "Soulart",
@@ -179,7 +144,6 @@ export async function generateMetadata(): Promise<Metadata> {
       images: ["/van-gogh.webp"],
     },
   };
-}
 
 export default function RootLayout({
   children,

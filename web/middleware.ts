@@ -1,494 +1,208 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-// IP Geolocation lookup (lightweight, works everywhere)
-// Use ip-api.io as primary (CORS-friendly), fall back to ipapi.co
+// Bot detection — skip expensive geo operations for crawlers
+function isBot(ua: string): boolean {
+  return /bot|crawl|spider|slurp|googlebot|bingbot|yandex|baidu|duckduckbot|facebookexternalhit|twitterbot|linkedinbot|applebot|semrushbot|ahrefsbot|mj12bot|dotbot|petalbot|bytespider|GPTBot|ClaudeBot/i.test(ua);
+}
+
+// IP Geolocation lookup — minimal, 1.5s timeout
 async function getGeoFromIP(ip: string) {
   try {
-    console.log("[Middleware] Starting IP geolocation lookup for IP:", ip);
-    
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 1500); // 1.5 second timeout
-    
+    const timeout = setTimeout(() => controller.abort(), 1500);
+
     try {
-      // Try ip-api.io first (more reliable CORS)
-      console.log("[Middleware] Trying ip-api.io...");
       let response = await fetch(`https://ip-api.io/json/${ip}`, {
-        headers: { 
-          "User-Agent": "soul-art-geo-detection",
-          "Accept": "application/json",
-        },
+        headers: { "User-Agent": "soul-art-geo", "Accept": "application/json" },
         signal: controller.signal,
       });
-      
+
       let data = null;
-      let shouldTryFallback = false;
-      
+
       if (response.ok) {
         data = await response.json();
-        // Check if the response has country data
         const hasCountry = data.country_code || data.country || data.cc;
-        console.log("[Middleware] ip-api.io response ok, has country:", !!hasCountry);
-        
-        if (!hasCountry) {
-          console.log("[Middleware] ip-api.io missing country data, trying fallback");
-          shouldTryFallback = true;
-        }
-      } else {
-        console.log("[Middleware] ip-api.io returned", response.status, "trying fallback");
-        shouldTryFallback = true;
+        if (!hasCountry) data = null; // try fallback
       }
-      
-      if (shouldTryFallback) {
-        // Fallback to ipapi.co
-        console.log("[Middleware] Trying ipapi.co as fallback...");
+
+      if (!data) {
         response = await fetch(`https://ipapi.co/${ip}/json/`, {
-          headers: { 
-            "User-Agent": "soul-art-geo-detection",
-            "Accept": "application/json",
-          },
+          headers: { "User-Agent": "soul-art-geo", "Accept": "application/json" },
           signal: controller.signal,
         });
-        
-        if (!response.ok) {
-          clearTimeout(timeout);
-          console.log("[Middleware] ipapi.co also failed with status:", response.status);
-          return null;
-        }
-        
+        if (!response.ok) { clearTimeout(timeout); return null; }
         data = await response.json();
       }
-      
+
       clearTimeout(timeout);
-      console.log("[Middleware] IP API full response keys:", Object.keys(data));
-      console.log("[Middleware] IP API response (full):", JSON.stringify(data));
-      
-      // Check if ipapi returned an error
-      if (data.error) {
-        console.log("[Middleware] IP API returned error:", data.error, data.reason || "");
-        return null;
-      }
-      
-      // Try many possible field names for country (different APIs use different names)
-      const countryCode = 
-        data.country_code ||    // ipapi.co, ip-api.io
-        data.country ||         // Some APIs
-        data.cc ||              // Shorthand
-        data.iso2 ||            // ISO 3166-1 alpha-2
-        data.countryCode ||     // camelCase variant
-        null;
-      
-      if (!countryCode) {
-        console.log("[Middleware] ❌ IP API missing country code. Available fields:", Object.keys(data).join(", "));
-        // Still return partial data if we got city/region - better than nothing
-        return {
-          country: null,
-          city: data.city || null,
-          region: data.region || data.state || data.province || null,
-          latitude: data.latitude?.toString() || null,
-          longitude: data.longitude?.toString() || null,
-        };
-      }
-      
-      const result = {
+      if (data.error) return null;
+
+      const countryCode =
+        data.country_code || data.country || data.cc ||
+        data.iso2 || data.countryCode || null;
+
+      return {
         country: countryCode,
         city: data.city || null,
         region: data.region || data.state || data.province || null,
         latitude: data.latitude?.toString() || null,
         longitude: data.longitude?.toString() || null,
       };
-      
-      console.log("[Middleware] ✅ Extracted geo data:", result);
-      return result;
-    } catch (fetchError) {
+    } catch {
       clearTimeout(timeout);
-      if (fetchError instanceof Error && fetchError.name === "AbortError") {
-        console.log("[Middleware] ⏱️ IP geolocation timed out (network issue or blocked)");
-      } else {
-        console.error("[Middleware] ❌ IP API fetch failed:", fetchError instanceof Error ? fetchError.message : String(fetchError));
-      }
       return null;
     }
-  } catch (error) {
-    console.error("[Middleware] ❌ Unexpected error in getGeoFromIP:", error instanceof Error ? error.message : String(error));
+  } catch {
     return null;
   }
 }
 
 const publicPaths = [
-  "/",
-  "/login",
-  "/register",
-  "/forgot-password",
-  "/reset-password",
-  "/auth-callback",
-  "/become-seller",
-  "/forum",
-  "/checkout",
-  "/checkout/success",
-  "/checkout/fail",
-  "/donation",
-  "/donation/success",
-  "/donation/fail",
+  "/", "/login", "/register", "/forgot-password", "/reset-password",
+  "/auth-callback", "/become-seller", "/forum",
+  "/checkout", "/checkout/success", "/checkout/fail",
+  "/donation", "/donation/success", "/donation/fail",
 ];
-const protectedPaths = [
-  "/profile",
-  "/orders",
-  // Admin paths removed - admin layout handles its own auth via localStorage
-  // This prevents redirect issues when cookies aren't accessible in middleware
-];
+
+const protectedPaths = ["/profile", "/orders"];
+
+// Currency mapping
+const currencyMap: Record<string, string> = {
+  GE: "GEL",
+  DE: "EUR", FR: "EUR", IT: "EUR", ES: "EUR", NL: "EUR", BE: "EUR",
+  AT: "EUR", IE: "EUR", PT: "EUR", GR: "EUR", FI: "EUR", EE: "EUR",
+  LV: "EUR", LT: "EUR", SK: "EUR", SI: "EUR", CY: "EUR", MT: "EUR",
+  LU: "EUR", PL: "EUR", CZ: "EUR", HU: "EUR", RO: "EUR", BG: "EUR",
+  HR: "EUR", DK: "EUR", SE: "EUR", NO: "EUR", CH: "EUR", GB: "EUR",
+};
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Check for authentication tokens - Next.js 16 compatible way
+  // 🤖 EARLY EXIT for bots — no geo detection, no cookies, just pass through
+  const ua = request.headers.get("user-agent") || "";
+  if (isBot(ua)) {
+    return NextResponse.next();
+  }
+
+  // Auth check
   const accessToken = request.cookies.get("access_token");
   const refreshToken = request.cookies.get("refresh_token");
-  const authSession = request.cookies.get("auth_session"); // Client-set cookie for middleware
-  const hasTokens = !!(
-    accessToken?.value ||
-    refreshToken?.value ||
-    authSession?.value
-  );
-  const isAuthenticated = hasTokens;
+  const authSession = request.cookies.get("auth_session");
+  const isAuthenticated = !!(accessToken?.value || refreshToken?.value || authSession?.value);
 
-  // 🌍 Geolocation Detection - Use Vercel Edge headers first (instant, no API call)
-  // Only fall back to IP API if Vercel headers unavailable AND no cookies
-  
-  let geo: { country: string | null; region: string | null; city: string | null; latitude: string | null; longitude: string | null } = {
-    country: null,
-    region: null,
-    city: null,
-    latitude: null,
-    longitude: null,
-  };
+  // 🌍 Geo Detection
+  let geo = { country: null as string | null, region: null as string | null, city: null as string | null, latitude: null as string | null, longitude: null as string | null };
 
-  // Check if we already have REAL (detected) geo cookies - if so, skip entirely
   const existingCountry = request.cookies.get("user_country")?.value;
   const existingCurrency = request.cookies.get("user_currency")?.value;
-  const existingCity = request.cookies.get("user_city")?.value;
-  const existingRegion = request.cookies.get("user_region")?.value;
-  const geoSource = request.cookies.get("geo_source")?.value; // "detected" or "default"
-  
+  const geoSource = request.cookies.get("geo_source")?.value;
   const hasRealGeo = existingCountry && existingCurrency && geoSource === "detected";
-  
+
   if (hasRealGeo) {
-    // Reuse cached geo data - no API call needed
-    geo = {
-      country: existingCountry,
-      region: existingRegion || null,
-      city: existingCity || null,
-      latitude: null,
-      longitude: null,
-    };
+    geo.country = existingCountry;
+    geo.region = request.cookies.get("user_region")?.value || null;
+    geo.city = request.cookies.get("user_city")?.value || null;
   } else {
-    // Try Vercel Edge geo headers first (instant, no network call)
+    // Try Vercel Edge geo headers (instant, no network call)
     const vercelCountry = request.headers.get("x-vercel-ip-country");
-    const vercelCity = request.headers.get("x-vercel-ip-city");
-    const vercelRegion = request.headers.get("x-vercel-ip-country-region");
-    
     if (vercelCountry) {
       geo = {
         country: vercelCountry,
-        city: vercelCity ? decodeURIComponent(vercelCity) : null,
-        region: vercelRegion || null,
+        city: request.headers.get("x-vercel-ip-city") ? decodeURIComponent(request.headers.get("x-vercel-ip-city")!) : null,
+        region: request.headers.get("x-vercel-ip-country-region") || null,
         latitude: request.headers.get("x-vercel-ip-latitude"),
         longitude: request.headers.get("x-vercel-ip-longitude"),
       };
     } else {
-      // Fallback: IP API call with very short timeout (1.5s max)
+      // Fallback: IP API (only if no Vercel headers available)
       const vercelIp = (request as NextRequest & { ip?: string }).ip;
       const forwardedFor = request.headers.get("x-forwarded-for");
       const realIp = request.headers.get("x-real-ip");
       const ip = vercelIp || realIp || forwardedFor?.split(",")[0].trim() || null;
-      
+
       if (ip && !ip.startsWith("127.") && !ip.startsWith("::1") && ip.trim() !== "") {
         const ipGeo = await getGeoFromIP(ip);
-        if (ipGeo) {
-          geo = ipGeo;
-        }
+        if (ipGeo) geo = ipGeo;
       }
     }
-  } // end of else (no existing cookies)
-
-  // Debug logging (only in development or for geo-test page)
-  if (process.env.NODE_ENV === 'development' || pathname.includes('/geo-test')) {
-    console.log('[Middleware] Processing:', pathname);
-    console.log('[Middleware] Using IP-based geo (skipping Vercel Edge to respect VPN)');
-    console.log('[Middleware] Geo data:', geo);
   }
 
-  // 🌐 Language Detection & Redirect
+  // 🌐 Language Detection
   const preferredLanguage = request.cookies.get("preferred_language")?.value as "en" | "ge" | undefined;
-  
-  // Only auto-detect language if geo was successfully detected
-  // If geo is null, don't set a language preference - let it be manually chosen
   const autoLanguage = geo.country === "GE" ? "ge" : (geo.country ? "en" : null);
-  
-  // Debug logging for language detection
-  if (pathname.includes('/geo-test')) {
-    console.log('[Middleware] Preferred language:', preferredLanguage);
-    console.log('[Middleware] Auto-detected language:', autoLanguage);
-    console.log('[Middleware] Country:', geo.country);
-    console.log('[Middleware] Geo detection success:', !!geo.country);
-  }
 
-  // Check if we need to redirect to /en for non-Georgian users without a language preference
-  // Only redirect if we successfully detected the country AND it's not Georgia AND user has no preference
+  // Redirect non-Georgian users to /en
   const hasEnPrefix = pathname === "/en" || pathname.startsWith("/en/");
   const shouldBeInEnglish = !preferredLanguage && geo.country && geo.country !== "GE" && !hasEnPrefix;
-  
-  if (pathname.includes('/geo-test') || pathname === '/' || pathname === '') {
-    console.log('[Middleware] === REDIRECT DECISION ===');
-    console.log('[Middleware] pathname:', pathname);
-    console.log('[Middleware] preferredLanguage:', preferredLanguage, '→ !preferredLanguage:', !preferredLanguage);
-    console.log('[Middleware] geo.country:', geo.country, '→ truthy:', !!geo.country);
-    console.log('[Middleware] geo.country !== "GE":', geo.country !== "GE");
-    console.log('[Middleware] hasEnPrefix:', hasEnPrefix, '→ !hasEnPrefix:', !hasEnPrefix);
-    console.log('[Middleware] shouldBeInEnglish:', shouldBeInEnglish);
-    console.log('[Middleware] Will redirect:', shouldBeInEnglish && !pathname.startsWith("/api") && !pathname.startsWith("/_next"));
-  }
-  
-  if (shouldBeInEnglish && !hasEnPrefix && !pathname.startsWith("/api") && !pathname.startsWith("/_next")) {
-    // User is detected outside Georgia with no preferred language → redirect to /en
-    console.log('[Middleware] Redirecting to /en for non-Georgian user (country:', geo.country, ')');
+
+  if (shouldBeInEnglish) {
     const redirectUrl = new URL(`/en${pathname}`, request.url);
     redirectUrl.search = request.nextUrl.search;
     const redirectResponse = NextResponse.redirect(redirectUrl);
-    // Set preferred language cookie on redirect
     redirectResponse.cookies.set("preferred_language", "en", {
-      maxAge: 60 * 60 * 24 * 365, // 1 year
-      path: "/",
-      httpOnly: false,
-      sameSite: "lax",
+      maxAge: 60 * 60 * 24 * 365, path: "/", httpOnly: false, sameSite: "lax",
       secure: process.env.NODE_ENV === "production",
     });
     return redirectResponse;
   }
 
-  // Currency mapping based on country
-  // GEL: Georgia only
-  // EUR: Eurozone + European countries that commonly prefer EUR (non-eurozone nearby EU countries)
-  // USD: Everyone else
-  const currencyMap: Record<string, string> = {
-    GE: "GEL", // Georgia
-    // Eurozone countries
-    DE: "EUR", // Germany
-    FR: "EUR", // France
-    IT: "EUR", // Italy
-    ES: "EUR", // Spain
-    NL: "EUR", // Netherlands
-    BE: "EUR", // Belgium
-    AT: "EUR", // Austria
-    IE: "EUR", // Ireland
-    PT: "EUR", // Portugal
-    GR: "EUR", // Greece
-    FI: "EUR", // Finland
-    EE: "EUR", // Estonia
-    LV: "EUR", // Latvia
-    LT: "EUR", // Lithuania
-    SK: "EUR", // Slovakia
-    SI: "EUR", // Slovenia
-    CY: "EUR", // Cyprus
-   MT: "EUR", // Malta
-    LU: "EUR", // Luxembourg
-    // Non-eurozone European countries that commonly prefer EUR
-    PL: "EUR", // Poland
-    CZ: "EUR", // Czech Republic 
-    HU: "EUR", // Hungary
-    RO: "EUR", // Romania
-    BG: "EUR", // Bulgaria
-    HR: "EUR", // Croatia (uses EUR now)
-    DK: "EUR", // Denmark (close to eurozone, often uses EUR)
-    SE: "EUR", // Sweden (close to eurozone, often uses EUR)
-    NO: "EUR", // Norway (close to eurozone, often uses EUR)
-    CH: "EUR", // Switzerland (surrounded by eurozone)
-    GB: "EUR", // UK (geographically European, often prefer EUR in international commerce)
-    // All other countries default to USD via fallback
-  };
-
-  const detectedCurrency = geo.country
-    ? currencyMap[geo.country] || "USD" // Default to USD for any country not in map
-    : "GEL";
-
-  // Sales Manager referral tracking - save ref code to cookie (7 days)
+  // Build response
+  const detectedCurrency = geo.country ? (currencyMap[geo.country] || "USD") : "GEL";
   const refCode = request.nextUrl.searchParams.get("ref");
-  let response: NextResponse | null = null;
+  const response = NextResponse.next();
 
+  // Sales ref cookie
   if (refCode && refCode.startsWith("SM_")) {
-    response = NextResponse.next();
     response.cookies.set("sales_ref", refCode, {
-      maxAge: 60 * 60 * 24 * 7, // 7 days
-      path: "/",
-      httpOnly: false, // Allow JS access for checkout
-      sameSite: "lax",
+      maxAge: 60 * 60 * 24 * 7, path: "/", httpOnly: false, sameSite: "lax",
       secure: process.env.NODE_ENV === "production",
     });
   }
 
-  // Initialize response if not already set
-  if (!response) {
-    response = NextResponse.next();
-  }
-
-  // 🍪 Save geo data to cookies for client-side access
-  // Only write cookies if we did a fresh geo lookup (not when reusing cached detected cookies)
-  const needsCookieUpdate = !hasRealGeo;
-  
-  if (needsCookieUpdate) {
-    const countryToSet = geo.country || "GE"; // Default to Georgia only if detection failed
-    const currencyToSet = geo.country ? detectedCurrency : "GEL"; // Default to GEL only if detection failed
-    // Track whether this was a real detection or a fallback default
+  // 🍪 Set geo cookies (only if fresh lookup needed)
+  if (!hasRealGeo) {
+    const countryToSet = geo.country || "GE";
+    const currencyToSet = geo.country ? detectedCurrency : "GEL";
     const sourceToSet = geo.country ? "detected" : "default";
-    
-    console.log("[Middleware] 🍪 Setting cookies - Country:", countryToSet, "(detected:", geo.country, "), Currency:", currencyToSet, "Source:", sourceToSet);
-    
-    response.cookies.set("user_country", countryToSet, {
-      maxAge: 60 * 60 * 24 * 7, // 7 days
-      path: "/",
-      httpOnly: false, // Allow JS access
-      sameSite: "lax",
-      secure: process.env.NODE_ENV === "production",
-    });
+    const cookieOpts = { maxAge: 60 * 60 * 24 * 7, path: "/", httpOnly: false, sameSite: "lax" as const, secure: process.env.NODE_ENV === "production" };
 
-    response.cookies.set("user_currency", currencyToSet, {
-      maxAge: 60 * 60 * 24 * 7, // 7 days
-      path: "/",
-      httpOnly: false,
-      sameSite: "lax",
-      secure: process.env.NODE_ENV === "production",
-    });
-
-    if (geo.city) {
-      response.cookies.set("user_city", geo.city, {
-        maxAge: 60 * 60 * 24 * 7,
-        path: "/",
-        httpOnly: false,
-        sameSite: "lax",
-        secure: process.env.NODE_ENV === "production",
-      });
-    }
-
-    if (geo.region) {
-      response.cookies.set("user_region", geo.region, {
-        maxAge: 60 * 60 * 24 * 7,
-        path: "/",
-        httpOnly: false,
-        sameSite: "lax",
-        secure: process.env.NODE_ENV === "production",
-      });
-    }
-
-    // Track whether this was a real API detection or a fallback
-    response.cookies.set("geo_source", sourceToSet, {
-      maxAge: 60 * 60 * 24 * 7,
-      path: "/",
-      httpOnly: false,
-      sameSite: "lax",
-      secure: process.env.NODE_ENV === "production",
-    });
-
-    // Save geo metadata for debugging
-    response.cookies.set(
-      "geo_detected_at",
-      new Date().toISOString(),
-      {
-        maxAge: 60 * 60 * 24 * 7,
-        path: "/",
-        httpOnly: false,
-        sameSite: "lax",
-        secure: process.env.NODE_ENV === "production",
-      }
-    );
-  } else {
-    console.log("[Middleware] ♻️ Skipping cookie write - using cached detected values");
+    response.cookies.set("user_country", countryToSet, cookieOpts);
+    response.cookies.set("user_currency", currencyToSet, cookieOpts);
+    response.cookies.set("geo_source", sourceToSet, cookieOpts);
+    if (geo.city) response.cookies.set("user_city", geo.city, cookieOpts);
+    if (geo.region) response.cookies.set("user_region", geo.region, cookieOpts);
   }
 
-  // 🌐 Set preferred language cookie (only if not already set by user and geo was detected)
+  // Set preferred language (only if not already set)
   if (!preferredLanguage && autoLanguage) {
     response.cookies.set("preferred_language", autoLanguage, {
-      maxAge: 60 * 60 * 24 * 365, // 1 year
-      path: "/",
-      httpOnly: false, // Allow JS access
-      sameSite: "lax",
+      maxAge: 60 * 60 * 24 * 365, path: "/", httpOnly: false, sameSite: "lax",
       secure: process.env.NODE_ENV === "production",
     });
   }
 
-  // Skip middleware for non-relevant paths (like api, _next, static files)
-  if (
-    pathname.startsWith("/_next") ||
-    pathname.startsWith("/api") ||
-    pathname.startsWith("/checkout") ||
-    pathname.includes(".")
-  ) {
-    return response;
-  }
-
-  // თუ მომხმარებელი ავტორიზებულია და publicPaths-ია, გავუშვათ
-  // თუ მომხმარებელი ავტორიზებულია და publicPaths-ია, გავუშვათ
-  if (isAuthenticated && publicPaths.includes(pathname)) {
-    return response;
-  }
-
-  // თუ მომხმარებელი **არ არის** ავტორიზებული და სარეზერვო პაროლის გვერდზეა, უნდა შევუშვათ
-  if (!isAuthenticated && publicPaths.includes(pathname)) {
-    return response;
-  }
-
-  // Allow guest access to specific order pages with email parameter
+  // Auth routing
   if (!isAuthenticated && pathname.match(/^\/orders\/[^\/]+$/)) {
-    const email = request.nextUrl.searchParams.get("email");
-    if (email) {
-      return response;
-    }
+    if (request.nextUrl.searchParams.get("email")) return response;
   }
 
-  // Redirect unauthenticated users trying to access protected pages
-  if (
-    !isAuthenticated &&
-    protectedPaths.some((path) => pathname.startsWith(path))
-  ) {
-    const redirectResponse = NextResponse.redirect(
-      new URL("/login", request.url),
-    );
-    // Preserve geo cookies on redirect
+  if (!isAuthenticated && protectedPaths.some((path) => pathname.startsWith(path))) {
+    const redirectResponse = NextResponse.redirect(new URL("/login", request.url));
     const userCountry = response.cookies.get("user_country");
     const userCurrency = response.cookies.get("user_currency");
-    const salesRef = response.cookies.get("sales_ref");
-    
     if (userCountry) redirectResponse.cookies.set("user_country", userCountry.value, userCountry);
     if (userCurrency) redirectResponse.cookies.set("user_currency", userCurrency.value, userCurrency);
-    if (salesRef) redirectResponse.cookies.set("sales_ref", salesRef.value, salesRef);
-    
     return redirectResponse;
   }
 
-  // Filter out Cloudflare cookies in development mode to prevent domain mismatch
-  if (process.env.NODE_ENV === "development") {
-    // Remove problematic Cloudflare cookies
-    response.cookies.delete("__cf_bm");
-    response.cookies.delete("__cfruid");
-    response.cookies.delete("cf_clearance");
-  }
-
-  // Add performance headers in production
-  const finalResponse = response;
-
-  // Cache static assets aggressively
-  if (
-    pathname.match(/\.(js|css|woff2?|ttf|eot|svg|png|jpg|jpeg|gif|webp|ico)$/)
-  ) {
-    finalResponse.headers.set(
-      "Cache-Control",
-      "public, max-age=31536000, immutable",
-    );
-  }
-
-  return finalResponse;
+  return response;
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|public/).*)"],
-  runtime: 'edge', // Explicitly use Edge Runtime for Vercel geo features
+  // Only run on page navigations — excludes static files, images, API, etc.
+  matcher: [
+    "/((?!_next/static|_next/image|_next/data|favicon.ico|public|api|icons|fonts|manifest|robots|sitemap|sw|workbox|.*\\..*).*)",
+  ],
 };
