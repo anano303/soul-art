@@ -15,7 +15,7 @@ export default function AnalyticsDashboard() {
     fetchDetailedErrors,
   } = useAnalytics();
   const [expandedErrorType, setExpandedErrorType] = useState<string | null>(
-    null
+    null,
   );
   const [selectedDays, setSelectedDays] = useState<number>(7);
 
@@ -25,7 +25,7 @@ export default function AnalyticsDashboard() {
     // Refresh data every 5 minutes
     const interval = setInterval(
       () => fetchAnalytics(selectedDays),
-      5 * 60 * 1000
+      5 * 60 * 1000,
     );
 
     return () => clearInterval(interval);
@@ -56,7 +56,7 @@ export default function AnalyticsDashboard() {
 
   return (
     <div className="analytics-dashboard">
-      <h2>📊 SoulArt - Vercel Analytics Dashboard</h2>
+      <h2>📊 SoulArt - Analytics Dashboard (GA4)</h2>
 
       {/* Period Tabs */}
       <div className="period-tabs">
@@ -228,7 +228,7 @@ export default function AnalyticsDashboard() {
                                       {ep.count} errors
                                     </span>
                                   </div>
-                                )
+                                ),
                               )}
                             </div>
                           </div>
@@ -254,7 +254,7 @@ export default function AnalyticsDashboard() {
                                       {status.count} errors
                                     </span>
                                   </div>
-                                )
+                                ),
                               )}
                             </div>
                           </div>

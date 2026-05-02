@@ -21,6 +21,14 @@ interface AnalyticsData {
     failed: number;
     avgDuration: number;
   };
+  summaryMetrics: {
+    totalUsers: number;
+    newUsers: number;
+    sessions: number;
+    screenPageViews: number;
+    bounceRate: number;
+    avgSessionDuration: number;
+  };
 }
 
 interface DetailedErrorData {
@@ -142,7 +150,7 @@ export default function GA4Dashboard() {
   const [error, setError] = useState<string | null>(null);
   const [timeRange, setTimeRange] = useState<"1d" | "7d" | "30d" | "90d">("1d");
   const [expandedErrorType, setExpandedErrorType] = useState<string | null>(
-    null
+    null,
   );
   const [detailedErrors, setDetailedErrors] =
     useState<DetailedErrorData | null>(null);
@@ -154,14 +162,19 @@ export default function GA4Dashboard() {
   const [dauData, setDauData] = useState<DauData | null>(null);
   const [dauDays, setDauDays] = useState<7 | 30 | 90>(30);
   const [dauLoading, setDauLoading] = useState(false);
-  const [dauTooltip, setDauTooltip] = useState<{ date: string; activeUsers: number; x: number; y: number } | null>(null);
+  const [dauTooltip, setDauTooltip] = useState<{
+    date: string;
+    activeUsers: number;
+    x: number;
+    y: number;
+  } | null>(null);
   const [chatAnalytics, setChatAnalytics] = useState<ChatAnalyticsData | null>(
-    null
+    null,
   );
 
   // ჩატის ისტორიის state-ები
   const [activeTab, setActiveTab] = useState<"analytics" | "chat-history">(
-    "analytics"
+    "analytics",
   );
   const [chatLogs, setChatLogs] = useState<ChatLogData | null>(null);
   const [chatSessions, setChatSessions] = useState<ChatSession[]>([]);
@@ -183,6 +196,14 @@ export default function GA4Dashboard() {
       failed: 0,
       avgDuration: 0,
     },
+    summaryMetrics: {
+      totalUsers: 0,
+      newUsers: 0,
+      sessions: 0,
+      screenPageViews: 0,
+      bounceRate: 0,
+      avgSessionDuration: 0,
+    },
   });
 
   useEffect(() => {
@@ -197,15 +218,15 @@ export default function GA4Dashboard() {
           timeRange === "1d"
             ? 1
             : timeRange === "7d"
-            ? 7
-            : timeRange === "30d"
-            ? 30
-            : 90;
+              ? 7
+              : timeRange === "30d"
+                ? 30
+                : 90;
         const response = await fetch(
           `${process.env.NEXT_PUBLIC_API_URL}/analytics/ga4?days=${days}`,
           {
             credentials: "include",
-          }
+          },
         );
 
         if (!response.ok) {
@@ -219,7 +240,7 @@ export default function GA4Dashboard() {
           }
           const errorText = await response.text();
           throw new Error(
-            `Failed to fetch analytics: ${response.status} ${errorText}`
+            `Failed to fetch analytics: ${response.status} ${errorText}`,
           );
         }
 
@@ -231,7 +252,7 @@ export default function GA4Dashboard() {
         try {
           const chatResponse = await fetch(
             `${process.env.NEXT_PUBLIC_API_URL}/analytics/ga4/chat?days=${days}`,
-            { credentials: "include" }
+            { credentials: "include" },
           );
           if (chatResponse.ok) {
             const chatData = await chatResponse.json();
@@ -245,7 +266,7 @@ export default function GA4Dashboard() {
         setError(
           error instanceof Error
             ? error.message
-            : "Failed to fetch analytics data"
+            : "Failed to fetch analytics data",
         );
       } finally {
         setLoading(false);
@@ -286,13 +307,13 @@ export default function GA4Dashboard() {
         timeRange === "1d"
           ? 1
           : timeRange === "7d"
-          ? 7
-          : timeRange === "30d"
-          ? 30
-          : 90;
+            ? 7
+            : timeRange === "30d"
+              ? 30
+              : 90;
 
       const url = new URL(
-        `${process.env.NEXT_PUBLIC_API_URL}/analytics/ga4/errors`
+        `${process.env.NEXT_PUBLIC_API_URL}/analytics/ga4/errors`,
       );
       url.searchParams.append("days", days.toString());
       url.searchParams.append("errorType", errorType);
@@ -421,23 +442,23 @@ export default function GA4Dashboard() {
         timeRange === "1d"
           ? 1
           : timeRange === "7d"
-          ? 7
-          : timeRange === "30d"
-          ? 30
-          : 90;
+            ? 7
+            : timeRange === "30d"
+              ? 30
+              : 90;
 
       const [sessionsRes, statsRes] = await Promise.all([
         fetch(
           `${process.env.NEXT_PUBLIC_API_URL}/chat/admin/sessions?days=${days}`,
           {
             credentials: "include",
-          }
+          },
         ),
         fetch(
           `${process.env.NEXT_PUBLIC_API_URL}/chat/admin/stats?days=${days}`,
           {
             credentials: "include",
-          }
+          },
         ),
       ]);
 
@@ -460,7 +481,7 @@ export default function GA4Dashboard() {
   const fetchChatLogs = async (
     sessionId?: string,
     search?: string,
-    page: number = 1
+    page: number = 1,
   ) => {
     try {
       setChatLogsLoading(true);
@@ -474,7 +495,7 @@ export default function GA4Dashboard() {
         `${
           process.env.NEXT_PUBLIC_API_URL
         }/chat/admin/logs?${params.toString()}`,
-        { credentials: "include" }
+        { credentials: "include" },
       );
 
       if (res.ok) {
@@ -500,10 +521,10 @@ export default function GA4Dashboard() {
         timeRange === "1d"
           ? 1
           : timeRange === "7d"
-          ? 7
-          : timeRange === "30d"
-          ? 30
-          : 90;
+            ? 7
+            : timeRange === "30d"
+              ? 30
+              : 90;
 
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/chat/admin/logs/email`,
@@ -516,7 +537,7 @@ export default function GA4Dashboard() {
             days,
             sessionId: selectedSession || undefined,
           }),
-        }
+        },
       );
 
       const data = await res.json();
@@ -524,7 +545,7 @@ export default function GA4Dashboard() {
         alert(
           language === "en"
             ? "Logs sent to email!"
-            : "ლოგები გაიგზავნა ემაილზე!"
+            : "ლოგები გაიგზავნა ემაილზე!",
         );
       } else {
         alert(data.message || "Error");
@@ -532,7 +553,7 @@ export default function GA4Dashboard() {
     } catch (error) {
       console.error("Error sending email:", error);
       alert(
-        language === "en" ? "Failed to send email" : "ემაილი ვერ გაიგზავნა"
+        language === "en" ? "Failed to send email" : "ემაილი ვერ გაიგზავნა",
       );
     } finally {
       setEmailSending(false);
@@ -545,8 +566,8 @@ export default function GA4Dashboard() {
         ? "Delete this session's logs?"
         : "წავშალოთ ამ სესიის ლოგები?"
       : language === "en"
-      ? "Delete ALL chat logs?"
-      : "წავშალოთ ყველა ჩატის ლოგი?";
+        ? "Delete ALL chat logs?"
+        : "წავშალოთ ყველა ჩატის ლოგი?";
 
     if (!confirm(confirmMsg)) return;
 
@@ -561,7 +582,7 @@ export default function GA4Dashboard() {
         {
           method: "DELETE",
           credentials: "include",
-        }
+        },
       );
 
       const data = await res.json();
@@ -569,7 +590,7 @@ export default function GA4Dashboard() {
         alert(
           language === "en"
             ? `Deleted ${data.deletedCount} logs`
-            : `წაიშალა ${data.deletedCount} ლოგი`
+            : `წაიშალა ${data.deletedCount} ლოგი`,
         );
         fetchChatSessions();
         setChatLogs(null);
@@ -599,7 +620,7 @@ export default function GA4Dashboard() {
       setDauLoading(true);
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/analytics/daily-active-users?days=${days}`,
-        { credentials: "include" }
+        { credentials: "include" },
       );
       if (res.ok) {
         const data = await res.json();
@@ -836,10 +857,10 @@ export default function GA4Dashboard() {
                     <small>
                       {language === "en"
                         ? `Last updated: ${new Date(
-                            liveUsersData.timestamp
+                            liveUsersData.timestamp,
                           ).toLocaleTimeString()}`
                         : `ბოლო განახლება: ${new Date(
-                            liveUsersData.timestamp
+                            liveUsersData.timestamp,
                           ).toLocaleTimeString()}`}
                     </small>
                     <small style={{ opacity: 0.7 }}>
@@ -1042,8 +1063,8 @@ export default function GA4Dashboard() {
                       ? "Clear Session"
                       : "სესიის წაშლა"
                     : language === "en"
-                    ? "Clear All"
-                    : "ყველას წაშლა"}
+                      ? "Clear All"
+                      : "ყველას წაშლა"}
                 </button>
               </div>
 
@@ -1100,7 +1121,7 @@ export default function GA4Dashboard() {
                           </span>
                           <span className="session-time">
                             {new Date(session.startTime).toLocaleString(
-                              "ka-GE"
+                              "ka-GE",
                             )}
                           </span>
                         </div>
@@ -1139,7 +1160,7 @@ export default function GA4Dashboard() {
                           </span>
                           <span className="message-time">
                             {new Date(log.createdAt).toLocaleTimeString(
-                              "ka-GE"
+                              "ka-GE",
                             )}
                           </span>
                           {log.responseTime && (
@@ -1172,34 +1193,69 @@ export default function GA4Dashboard() {
               {/* Key Metrics */}
               <div className="ga4-dashboard__metrics">
                 <div className="metric-card metric-card--primary">
-                  <div className="metric-card__icon">🎯</div>
-                  <div className="metric-card__value">{conversionRate}%</div>
+                  <div className="metric-card__icon">👥</div>
+                  <div className="metric-card__value">
+                    {(data.summaryMetrics?.totalUsers ?? 0).toLocaleString()}
+                  </div>
                   <div className="metric-card__label">
-                    {language === "en"
-                      ? "Conversion Rate"
-                      : "კონვერსიის მაჩვენებელი"}
+                    {language === "en" ? "Total Users" : "სულ ვიზიტორები"}
                   </div>
                 </div>
 
                 <div className="metric-card metric-card--success">
-                  <div className="metric-card__icon">✅</div>
-                  <div className="metric-card__value">{successRate}%</div>
+                  <div className="metric-card__icon">🆕</div>
+                  <div className="metric-card__value">
+                    {(data.summaryMetrics?.newUsers ?? 0).toLocaleString()}
+                  </div>
                   <div className="metric-card__label">
-                    {language === "en"
-                      ? "API Success Rate"
-                      : "API წარმატების %"}
+                    {language === "en" ? "New Users" : "ახალი მომხმარებლები"}
+                  </div>
+                </div>
+
+                <div className="metric-card">
+                  <div className="metric-card__icon">🔄</div>
+                  <div className="metric-card__value">
+                    {(data.summaryMetrics?.sessions ?? 0).toLocaleString()}
+                  </div>
+                  <div className="metric-card__label">
+                    {language === "en" ? "Sessions" : "სესიები"}
                   </div>
                 </div>
 
                 <div className="metric-card metric-card--info">
                   <div className="metric-card__icon">📄</div>
                   <div className="metric-card__value">
-                    {data.pageViews
-                      .reduce((sum, p) => sum + p.views, 0)
-                      .toLocaleString()}
+                    {(
+                      data.summaryMetrics?.screenPageViews ?? 0
+                    ).toLocaleString()}
                   </div>
                   <div className="metric-card__label">
-                    {language === "en" ? "Total Page Views" : "გვერდის ნახვები"}
+                    {language === "en" ? "Page Views" : "გვერდის ნახვები"}
+                  </div>
+                </div>
+
+                <div className="metric-card">
+                  <div className="metric-card__icon">↩️</div>
+                  <div className="metric-card__value">
+                    {(data.summaryMetrics?.bounceRate ?? 0).toFixed(1)}%
+                  </div>
+                  <div className="metric-card__label">
+                    {language === "en" ? "Bounce Rate" : "Bounce Rate"}
+                  </div>
+                </div>
+
+                <div className="metric-card">
+                  <div className="metric-card__icon">⏱️</div>
+                  <div className="metric-card__value">
+                    {(() => {
+                      const s = data.summaryMetrics?.avgSessionDuration ?? 0;
+                      const m = Math.floor(s / 60);
+                      const sec = String(Math.round(s % 60)).padStart(2, "0");
+                      return `${m}:${sec}`;
+                    })()}
+                  </div>
+                  <div className="metric-card__label">
+                    {language === "en" ? "Avg. Session" : "საშ. სესია"}
                   </div>
                 </div>
 
@@ -1214,26 +1270,54 @@ export default function GA4Dashboard() {
                       : "შეცდომების რაოდენობა"}
                   </div>
                 </div>
+
+                <div className="metric-card metric-card--primary">
+                  <div className="metric-card__icon">🎯</div>
+                  <div className="metric-card__value">{conversionRate}%</div>
+                  <div className="metric-card__label">
+                    {language === "en"
+                      ? "Conversion Rate"
+                      : "კონვერსია (checkout)"}
+                  </div>
+                </div>
               </div>
 
               {/* DAU + Funnel row (half width each), before AI Chat Analytics */}
               <div className="ga4-dau-funnel-row">
                 <section className="dau-section dau-section--half">
                   <h3 className="dau-section__title">
-                    📈 {language === "en" ? "Daily Active Users (DAU)" : "ყოველდღიური აქტიური მომხმარებლები (DAU)"}
+                    📈{" "}
+                    {language === "en"
+                      ? "Daily Active Users (DAU)"
+                      : "ყოველდღიური აქტიური მომხმარებლები (DAU)"}
                   </h3>
                   {dauLoading ? (
                     <div className="dau-loading">
                       <div className="spinner" />
-                      <span>{language === "en" ? "Loading..." : "იტვირთება..."}</span>
+                      <span>
+                        {language === "en" ? "Loading..." : "იტვირთება..."}
+                      </span>
                     </div>
                   ) : dauData ? (
                     <>
                       <div className="dau-today-row">
                         <div className="dau-today-card">
-                          <span className="dau-today-value">{dauData.dauToday}</span>
+                          <span className="dau-today-value">
+                            {/* Realtime active users is more accurate for "today".
+                                Fall back to GA4 processed dauToday only if realtime unavailable. */}
+                            {liveUsersData?.activeUsers != null &&
+                            liveUsersData.activeUsers > 0
+                              ? liveUsersData.activeUsers
+                              : dauData.dauToday}
+                          </span>
                           <span className="dau-today-label">
-                            {language === "en" ? "Today" : "დღეს"}
+                            {language === "en"
+                              ? liveUsersData?.activeUsers
+                                ? "Active now (last 30min)"
+                                : "Yesterday"
+                              : liveUsersData?.activeUsers
+                                ? "ეხლა აქტიური (30 წთ)"
+                                : "გუშინ"}
                           </span>
                         </div>
                       </div>
@@ -1249,43 +1333,73 @@ export default function GA4Dashboard() {
                                 ? "7 days"
                                 : "7 დღე"
                               : d === 30
-                              ? language === "en"
-                                ? "30 days"
-                                : "30 დღე"
-                              : language === "en"
-                              ? "90 days"
-                              : "90 დღე"}
+                                ? language === "en"
+                                  ? "30 days"
+                                  : "30 დღე"
+                                : language === "en"
+                                  ? "90 days"
+                                  : "90 დღე"}
                           </button>
                         ))}
                       </div>
                       <div className="dau-chart-legend">
                         <span className="dau-chart-legend__dot" />
                         <span className="dau-chart-legend__text">
-                          {language === "en" ? "Active users" : "აქტიური მომხმარებლები"}
+                          {language === "en"
+                            ? "Active users"
+                            : "აქტიური მომხმარებლები"}
                         </span>
                       </div>
-                      <div className="dau-chart-wrapper" onMouseLeave={() => setDauTooltip(null)}>
+                      <div
+                        className="dau-chart-wrapper"
+                        onMouseLeave={() => setDauTooltip(null)}
+                      >
                         {(() => {
                           const rawData = dauData.dailyData;
-                          const maxVal = Math.max(...rawData.map((x) => x.activeUsers), 1);
+                          const maxVal = Math.max(
+                            ...rawData.map((x) => x.activeUsers),
+                            1,
+                          );
                           const vw = 800;
                           const vh = 280;
-                          const pad = { top: 20, right: 16, bottom: 36, left: 48 };
+                          const pad = {
+                            top: 20,
+                            right: 16,
+                            bottom: 36,
+                            left: 48,
+                          };
                           const chartW = vw - pad.left - pad.right;
                           const chartH = vh - pad.top - pad.bottom;
                           const n = rawData.length;
                           const yTicks = 5;
-                          const formatY = (v: number) => (v >= 1000 ? `${(v / 1000).toFixed(1)}k` : String(v));
+                          const formatY = (v: number) =>
+                            v >= 1000 ? `${(v / 1000).toFixed(1)}k` : String(v);
                           const points = rawData.map((d, i) => {
-                            const x = pad.left + (n > 1 ? (i / (n - 1)) * chartW : chartW / 2);
-                            const y = pad.top + chartH - (d.activeUsers / maxVal) * chartH;
+                            const x =
+                              pad.left +
+                              (n > 1 ? (i / (n - 1)) * chartW : chartW / 2);
+                            const y =
+                              pad.top +
+                              chartH -
+                              (d.activeUsers / maxVal) * chartH;
                             return { x, y, ...d };
                           });
-                          const linePath = points.map((p, i) => `${i === 0 ? "M" : "L"} ${p.x} ${p.y}`).join(" ");
+                          const linePath = points
+                            .map(
+                              (p, i) => `${i === 0 ? "M" : "L"} ${p.x} ${p.y}`,
+                            )
+                            .join(" ");
                           const areaPath =
                             linePath +
                             ` L ${points[points.length - 1].x} ${pad.top + chartH} L ${points[0].x} ${pad.top + chartH} Z`;
-                          const labelStep = n <= 7 ? 1 : n <= 14 ? 2 : n <= 30 ? Math.ceil(n / 6) : Math.ceil(n / 8);
+                          const labelStep =
+                            n <= 7
+                              ? 1
+                              : n <= 14
+                                ? 2
+                                : n <= 30
+                                  ? Math.ceil(n / 6)
+                                  : Math.ceil(n / 8);
                           return (
                             <>
                               <svg
@@ -1296,59 +1410,146 @@ export default function GA4Dashboard() {
                                 aria-label="Daily active users over time"
                               >
                                 <defs>
-                                  <linearGradient id="dau-area-grad" x1="0" y1="0" x2="0" y2="1">
-                                    <stop offset="0%" stopColor="#3b82f6" stopOpacity={0.18} />
-                                    <stop offset="100%" stopColor="#3b82f6" stopOpacity={0.02} />
+                                  <linearGradient
+                                    id="dau-area-grad"
+                                    x1="0"
+                                    y1="0"
+                                    x2="0"
+                                    y2="1"
+                                  >
+                                    <stop
+                                      offset="0%"
+                                      stopColor="#3b82f6"
+                                      stopOpacity={0.18}
+                                    />
+                                    <stop
+                                      offset="100%"
+                                      stopColor="#3b82f6"
+                                      stopOpacity={0.02}
+                                    />
                                   </linearGradient>
                                 </defs>
                                 {Array.from({ length: yTicks }).map((_, i) => {
-                                  const y = pad.top + (i / (yTicks - 1)) * chartH;
-                                  const val = i === yTicks - 1 ? 0 : Math.round((1 - i / (yTicks - 1)) * maxVal);
+                                  const y =
+                                    pad.top + (i / (yTicks - 1)) * chartH;
+                                  const val =
+                                    i === yTicks - 1
+                                      ? 0
+                                      : Math.round(
+                                          (1 - i / (yTicks - 1)) * maxVal,
+                                        );
                                   return (
                                     <g key={i}>
-                                      <line x1={pad.left} y1={y} x2={pad.left + chartW} y2={y} className="dau-grid-line" />
-                                      <text x={pad.left - 10} y={y + 4} textAnchor="end" className="dau-y-label">{formatY(val)}</text>
+                                      <line
+                                        x1={pad.left}
+                                        y1={y}
+                                        x2={pad.left + chartW}
+                                        y2={y}
+                                        className="dau-grid-line"
+                                      />
+                                      <text
+                                        x={pad.left - 10}
+                                        y={y + 4}
+                                        textAnchor="end"
+                                        className="dau-y-label"
+                                      >
+                                        {formatY(val)}
+                                      </text>
                                     </g>
                                   );
                                 })}
                                 <path d={areaPath} fill="url(#dau-area-grad)" />
-                                <path d={linePath} fill="none" stroke="#3b82f6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                <path
+                                  d={linePath}
+                                  fill="none"
+                                  stroke="#3b82f6"
+                                  strokeWidth="2"
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                />
                                 {points.map((p) => (
-                                  <circle key={p.date} cx={p.x} cy={p.y} r={n > 60 ? 2 : 3} fill="#3b82f6" stroke="#fff" strokeWidth="1.5" className="dau-line-dot" />
+                                  <circle
+                                    key={p.date}
+                                    cx={p.x}
+                                    cy={p.y}
+                                    r={n > 60 ? 2 : 3}
+                                    fill="#3b82f6"
+                                    stroke="#fff"
+                                    strokeWidth="1.5"
+                                    className="dau-line-dot"
+                                  />
                                 ))}
                                 {points.map((p) => (
                                   <rect
                                     key={`hit-${p.date}`}
-                                    x={p.x - (chartW / n) / 2}
+                                    x={p.x - chartW / n / 2}
                                     y={pad.top}
                                     width={chartW / n}
                                     height={chartH}
                                     fill="transparent"
                                     onMouseEnter={(e) => {
-                                      const svg = e.currentTarget.closest("svg");
+                                      const svg =
+                                        e.currentTarget.closest("svg");
                                       if (!svg) return;
                                       const rect = svg.getBoundingClientRect();
                                       const xPct = (p.x / vw) * rect.width;
                                       const yPct = (p.y / vh) * rect.height;
-                                      setDauTooltip({ date: p.date, activeUsers: p.activeUsers, x: xPct, y: yPct });
+                                      setDauTooltip({
+                                        date: p.date,
+                                        activeUsers: p.activeUsers,
+                                        x: xPct,
+                                        y: yPct,
+                                      });
                                     }}
                                     onMouseLeave={() => setDauTooltip(null)}
                                   />
                                 ))}
-                                {points.filter((_, idx) => idx % labelStep === 0 || idx === n - 1).map((p) => (
-                                  <text key={`lbl-${p.date}`} x={p.x} y={vh - 10} textAnchor="middle" className="dau-axis-label">
-                                    {new Date(p.date).toLocaleDateString(language === "en" ? "en-US" : "ka-GE", { month: "short", day: "numeric" })}
-                                  </text>
-                                ))}
+                                {points
+                                  .filter(
+                                    (_, idx) =>
+                                      idx % labelStep === 0 || idx === n - 1,
+                                  )
+                                  .map((p) => (
+                                    <text
+                                      key={`lbl-${p.date}`}
+                                      x={p.x}
+                                      y={vh - 10}
+                                      textAnchor="middle"
+                                      className="dau-axis-label"
+                                    >
+                                      {new Date(p.date).toLocaleDateString(
+                                        language === "en" ? "en-US" : "ka-GE",
+                                        { month: "short", day: "numeric" },
+                                      )}
+                                    </text>
+                                  ))}
                               </svg>
                               {dauTooltip && (
-                                <div className="dau-html-tooltip" style={{ left: dauTooltip.x, top: dauTooltip.y }}>
+                                <div
+                                  className="dau-html-tooltip"
+                                  style={{
+                                    left: dauTooltip.x,
+                                    top: dauTooltip.y,
+                                  }}
+                                >
                                   <div className="dau-html-tooltip__date">
-                                    {new Date(dauTooltip.date).toLocaleDateString(language === "en" ? "en-US" : "ka-GE", { month: "long", day: "numeric", year: "numeric" })}
+                                    {new Date(
+                                      dauTooltip.date,
+                                    ).toLocaleDateString(
+                                      language === "en" ? "en-US" : "ka-GE",
+                                      {
+                                        month: "long",
+                                        day: "numeric",
+                                        year: "numeric",
+                                      },
+                                    )}
                                   </div>
                                   <div className="dau-html-tooltip__value">
                                     <span className="dau-html-tooltip__dot" />
-                                    {dauTooltip.activeUsers.toLocaleString()} {language === "en" ? "users" : "მომხმარებელი"}
+                                    {dauTooltip.activeUsers.toLocaleString()}{" "}
+                                    {language === "en"
+                                      ? "users"
+                                      : "მომხმარებელი"}
                                   </div>
                                 </div>
                               )}
@@ -1367,15 +1568,22 @@ export default function GA4Dashboard() {
                 </section>
                 <section className="ga4-section ga4-section--half funnel-section--half">
                   <h2 className="ga4-section__title">
-                    🛒 {language === "en" ? "Purchase Funnel" : "შეძენის ფუნელი"}
+                    🛒{" "}
+                    {language === "en" ? "Purchase Funnel" : "შეძენის ფუნელი"}
                   </h2>
                   <div className="funnel-bars">
                     {data.purchaseFunnel.map((step, i) => {
                       const firstCount = data.purchaseFunnel[0]?.count || 1;
-                      const pct = firstCount > 0 ? ((step.count / firstCount) * 100) : 0;
+                      const pct =
+                        firstCount > 0 ? (step.count / firstCount) * 100 : 0;
                       const barWidth = Math.max(pct, 3);
-                      const dropoff = step.dropoff !== undefined && i > 0 ? step.dropoff : null;
-                      const hue = 152 - (i / Math.max(data.purchaseFunnel.length - 1, 1)) * 30;
+                      const dropoff =
+                        step.dropoff !== undefined && i > 0
+                          ? step.dropoff
+                          : null;
+                      const hue =
+                        152 -
+                        (i / Math.max(data.purchaseFunnel.length - 1, 1)) * 30;
                       return (
                         <div key={i} className="funnel-bar-row">
                           <div className="funnel-bar-track">
@@ -1387,13 +1595,22 @@ export default function GA4Dashboard() {
                               }}
                             />
                             <div className="funnel-bar-inner">
-                              <span className="funnel-bar-name">{step.step}</span>
+                              <span className="funnel-bar-name">
+                                {step.step}
+                              </span>
                               <span className="funnel-bar-stats">
-                                <span className="funnel-bar-count">{step.count.toLocaleString()}</span>
-                                <span className="funnel-bar-pct">{pct.toFixed(0)}%</span>
+                                <span className="funnel-bar-count">
+                                  {step.count.toLocaleString()}
+                                </span>
+                                <span className="funnel-bar-pct">
+                                  {pct.toFixed(0)}%
+                                </span>
                                 {dropoff !== null && (
-                                  <span className={`funnel-bar-dropoff ${dropoff > 0 ? "funnel-bar-dropoff--loss" : "funnel-bar-dropoff--gain"}`}>
-                                    {dropoff > 0 ? "▼" : "▲"} {Math.abs(dropoff).toFixed(1)}%
+                                  <span
+                                    className={`funnel-bar-dropoff ${dropoff > 0 ? "funnel-bar-dropoff--loss" : "funnel-bar-dropoff--gain"}`}
+                                  >
+                                    {dropoff > 0 ? "▼" : "▲"}{" "}
+                                    {Math.abs(dropoff).toFixed(1)}%
                                   </span>
                                 )}
                               </span>
@@ -1404,11 +1621,19 @@ export default function GA4Dashboard() {
                     })}
                     <div className="funnel-v2-summary">
                       <div className="funnel-v2-summary-label">
-                        {language === "en" ? "Overall conversion" : "საერთო კონვერსია"}
+                        {language === "en"
+                          ? "Overall conversion"
+                          : "საერთო კონვერსია"}
                       </div>
-                      <div className="funnel-v2-summary-value">{conversionRate}%</div>
+                      <div className="funnel-v2-summary-value">
+                        {conversionRate}%
+                      </div>
                       <div className="funnel-v2-summary-detail">
-                        {data.purchaseFunnel[data.purchaseFunnel.length - 1]?.count || 0} {language === "en" ? "purchases" : "შესყიდვა"} → {data.purchaseFunnel[0]?.count || 0} {language === "en" ? "started" : "დაწყება"}
+                        {data.purchaseFunnel[data.purchaseFunnel.length - 1]
+                          ?.count || 0}{" "}
+                        {language === "en" ? "purchases" : "შესყიდვა"} →{" "}
+                        {data.purchaseFunnel[0]?.count || 0}{" "}
+                        {language === "en" ? "started" : "დაწყება"}
                       </div>
                     </div>
                   </div>
@@ -1512,10 +1737,10 @@ export default function GA4Dashboard() {
                       {data.pageViews.map((page, index) => {
                         const totalViews = data.pageViews.reduce(
                           (sum, p) => sum + p.views,
-                          0
+                          0,
                         );
                         const share = ((page.views / totalViews) * 100).toFixed(
-                          1
+                          1,
                         );
 
                         return (
@@ -1845,7 +2070,7 @@ export default function GA4Dashboard() {
                                               {status.count}
                                             </span>
                                           </div>
-                                        )
+                                        ),
                                       )}
                                     </div>
                                   </div>
@@ -1941,7 +2166,7 @@ export default function GA4Dashboard() {
                                                 </span>
                                               </div>
                                             </div>
-                                          )
+                                          ),
                                         )}
                                       </div>
                                     ) : (
@@ -2095,7 +2320,7 @@ export default function GA4Dashboard() {
                 <p>
                   🔄 {language === "en" ? "Last updated:" : "ბოლო განახლება:"}{" "}
                   {new Date().toLocaleString(
-                    language === "en" ? "en-US" : "ka-GE"
+                    language === "en" ? "en-US" : "ka-GE",
                   )}
                 </p>
                 <p className="ga4-dashboard__note">

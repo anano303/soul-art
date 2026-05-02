@@ -47,6 +47,14 @@ export interface AnalyticsData {
   purchaseFunnel: FunnelStep[];
   errors: ErrorData[];
   apiMetrics: ApiMetrics;
+  summaryMetrics: {
+    totalUsers: number;
+    newUsers: number;
+    sessions: number;
+    screenPageViews: number;
+    bounceRate: number;
+    avgSessionDuration: number;
+  };
 }
 
 @Injectable()
@@ -124,37 +132,104 @@ export class Ga4AnalyticsService {
     }
 
     return this.cached(`analytics:${daysAgo}`, 60_000, async () => {
+      try {
+        const [pageViews, events, funnel, summaryMetrics] = await Promise.all([
+          this.getPageViews(daysAgo),
+          this.getEvents(daysAgo),
+          this.getPurchaseFunnel(daysAgo),
+          this.getSummaryMetrics(daysAgo),
+        ]);
+
+        const homepageEvents = this.extractHomepageEvents(events);
+        const errors = this.extractErrors(events);
+        const apiMetrics = this.extractApiMetrics(events);
+        const userJourneys = await this.getUserJourneys(daysAgo);
+
+        this.logger.log(
+          `Successfully fetched GA4 data: ${pageViews.length} pages, ${events.length} events, ${funnel.length} funnel steps, ${summaryMetrics.totalUsers} users`,
+        );
+
+        return {
+          pageViews,
+          homepageEvents,
+          userJourneys,
+          purchaseFunnel: funnel,
+          errors,
+          apiMetrics,
+          summaryMetrics,
+        };
+      } catch (error) {
+        this.logger.error('Failed to fetch GA4 data:', error.message || error);
+        throw new Error(
+          `Failed to fetch analytics data: ${error.message || 'Unknown error'}`,
+        );
+      }
+    });
+  }
+
+  /**
+   * Fetch aggregate summary metrics (no dimensions) — totalUsers, sessions,
+   * screenPageViews, bounceRate, avgSessionDuration.
+   * A single runReport call with no dimensions gives the totals for the period.
+   */
+  private async getSummaryMetrics(daysAgo: number): Promise<{
+    totalUsers: number;
+    newUsers: number;
+    sessions: number;
+    screenPageViews: number;
+    bounceRate: number;
+    avgSessionDuration: number;
+  }> {
     try {
-      const [pageViews, events, funnel] = await Promise.all([
-        this.getPageViews(daysAgo),
-        this.getEvents(daysAgo),
-        this.getPurchaseFunnel(daysAgo),
-      ]);
+      const startDate = this.getStartDate(daysAgo);
+      const response = await this.analyticsDataClient.properties.runReport({
+        property: `properties/${this.propertyId}`,
+        requestBody: {
+          dateRanges: [{ startDate, endDate: 'today' }],
+          metrics: [
+            { name: 'totalUsers' },
+            { name: 'newUsers' },
+            { name: 'sessions' },
+            { name: 'screenPageViews' },
+            { name: 'bounceRate' },
+            { name: 'averageSessionDuration' },
+          ],
+        },
+      });
 
-      const homepageEvents = this.extractHomepageEvents(events);
-      const errors = this.extractErrors(events);
-      const apiMetrics = this.extractApiMetrics(events);
-      const userJourneys = await this.getUserJourneys(daysAgo);
-
-      this.logger.log(
-        `Successfully fetched GA4 data: ${pageViews.length} pages, ${events.length} events, ${funnel.length} funnel steps`,
-      );
-
+      const row = response.data.rows?.[0];
+      if (!row) {
+        return {
+          totalUsers: 0,
+          newUsers: 0,
+          sessions: 0,
+          screenPageViews: 0,
+          bounceRate: 0,
+          avgSessionDuration: 0,
+        };
+      }
+      const vals = row.metricValues || [];
       return {
-        pageViews,
-        homepageEvents,
-        userJourneys,
-        purchaseFunnel: funnel,
-        errors,
-        apiMetrics,
+        totalUsers: parseInt(vals[0]?.value || '0'),
+        newUsers: parseInt(vals[1]?.value || '0'),
+        sessions: parseInt(vals[2]?.value || '0'),
+        screenPageViews: parseInt(vals[3]?.value || '0'),
+        bounceRate: parseFloat(
+          (parseFloat(vals[4]?.value || '0') * 100).toFixed(1),
+        ),
+        avgSessionDuration: Math.round(parseFloat(vals[5]?.value || '0')),
       };
     } catch (error) {
-      this.logger.error('Failed to fetch GA4 data:', error.message || error);
-      throw new Error(
-        `Failed to fetch analytics data: ${error.message || 'Unknown error'}`,
-      );
+      this.logger.warn('getSummaryMetrics failed:', error.message);
+      return {
+        totalUsers: 0,
+        newUsers: 0,
+        sessions: 0,
+        screenPageViews: 0,
+        bounceRate: 0,
+        avgSessionDuration: 0,
+      };
     }
-    });
   }
 
   private async getPageViews(daysAgo: number): Promise<PageViewData[]> {
@@ -166,7 +241,7 @@ export class Ga4AnalyticsService {
         dimensions: [{ name: 'pagePath' }, { name: 'pageTitle' }],
         metrics: [{ name: 'screenPageViews' }],
         orderBys: [{ metric: { metricName: 'screenPageViews' }, desc: true }],
-        limit: 10,
+        limit: 20,
       },
     });
 
@@ -418,233 +493,234 @@ export class Ga4AnalyticsService {
 
     const cacheKey = `errors:${daysAgo}:${errorType || 'all'}:${page}:${limit}`;
     return this.cached(cacheKey, 60_000, async () => {
-    try {
-      // Determine which event name to query based on error type
-      let eventNames = [
-        'error_occurred',
-        'api_error',
-        'network_error',
-        'page_not_found',
-      ];
+      try {
+        // Determine which event name to query based on error type
+        let eventNames = [
+          'error_occurred',
+          'api_error',
+          'network_error',
+          'page_not_found',
+        ];
 
-      if (errorType) {
-        if (errorType.includes('404')) {
-          eventNames = ['page_not_found'];
-        } else if (errorType.includes('API')) {
-          eventNames = ['api_error'];
-        } else if (errorType.includes('Network')) {
-          eventNames = ['network_error'];
-        } else if (errorType.includes('General')) {
-          eventNames = ['error_occurred'];
+        if (errorType) {
+          if (errorType.includes('404')) {
+            eventNames = ['page_not_found'];
+          } else if (errorType.includes('API')) {
+            eventNames = ['api_error'];
+          } else if (errorType.includes('Network')) {
+            eventNames = ['network_error'];
+          } else if (errorType.includes('General')) {
+            eventNames = ['error_occurred'];
+          }
         }
-      }
 
-      // Fetch ALL error events (increase limit to 1000)
-      const startDate = this.getStartDate(daysAgo);
-      const response = await this.analyticsDataClient.properties.runReport({
-        property: `properties/${this.propertyId}`,
-        requestBody: {
-          dateRanges: [{ startDate, endDate: 'today' }],
-          dimensions: [
-            { name: 'eventName' },
-            { name: 'pagePath' },
-            { name: 'pageTitle' },
-            { name: 'customEvent:error_message' }, // თქვენი GA4-ში არსებული dimension
-            { name: 'customEvent:error_type' }, // თქვენი GA4-ში არსებული dimension
-          ],
-          metrics: [{ name: 'eventCount' }],
-          dimensionFilter: {
-            filter: {
-              fieldName: 'eventName',
-              inListFilter: {
-                values: eventNames,
+        // Fetch ALL error events (increase limit to 1000)
+        const startDate = this.getStartDate(daysAgo);
+        const response = await this.analyticsDataClient.properties.runReport({
+          property: `properties/${this.propertyId}`,
+          requestBody: {
+            dateRanges: [{ startDate, endDate: 'today' }],
+            dimensions: [
+              { name: 'eventName' },
+              { name: 'pagePath' },
+              { name: 'pageTitle' },
+              { name: 'customEvent:error_message' }, // თქვენი GA4-ში არსებული dimension
+              { name: 'customEvent:error_type' }, // თქვენი GA4-ში არსებული dimension
+            ],
+            metrics: [{ name: 'eventCount' }],
+            dimensionFilter: {
+              filter: {
+                fieldName: 'eventName',
+                inListFilter: {
+                  values: eventNames,
+                },
               },
             },
+            orderBys: [{ metric: { metricName: 'eventCount' }, desc: true }],
+            limit: 1000, // Get up to 1000 errors
           },
-          orderBys: [{ metric: { metricName: 'eventCount' }, desc: true }],
-          limit: 1000, // Get up to 1000 errors
-        },
-      });
-
-      const allErrorDetails: any[] = [];
-      let totalErrors = 0;
-      const pageErrors: Record<string, number> = {};
-
-      response.data.rows?.forEach((row) => {
-        const eventName = row.dimensionValues[0]?.value || 'unknown';
-        const pagePath = row.dimensionValues[1]?.value || '/';
-        const title = row.dimensionValues[2]?.value || 'Untitled';
-        const errorMessage = row.dimensionValues[3]?.value || '';
-        const errorType = row.dimensionValues[4]?.value || '';
-        const count = parseInt(row.metricValues[0]?.value || '0');
-
-        if (count === 0) return;
-
-        totalErrors += count;
-
-        // Map event names to user-friendly messages with MORE detail
-        let message = '';
-        let endpoint = 'N/A';
-        let status = 'N/A';
-
-        switch (eventName) {
-          case 'page_not_found':
-            message = `404 Error: Page "${pagePath}" not found`;
-            status = '404';
-            endpoint = pagePath;
-            break;
-          case 'api_error':
-            message = errorMessage || `API Error on page: ${pagePath}`;
-            endpoint = `API call from ${pagePath}`;
-            status = '500';
-            if (errorMessage) {
-              message = `API Error: ${errorMessage}`;
-            }
-            break;
-          case 'network_error':
-            message =
-              errorMessage || `Network Error: Connection failed on ${pagePath}`;
-            endpoint = `Network from ${pagePath}`;
-            status = 'Network';
-            break;
-          case 'error_occurred':
-            // For general errors, show actual error message if available
-            if (errorMessage && errorMessage !== '(not set)') {
-              message = errorMessage;
-              // Try to extract error type for status
-              if (errorType && errorType !== '(not set)') {
-                status = errorType;
-              } else if (errorMessage.includes('TypeError')) {
-                status = 'TypeError';
-              } else if (errorMessage.includes('ReferenceError')) {
-                status = 'ReferenceError';
-              } else if (errorMessage.includes('SyntaxError')) {
-                status = 'SyntaxError';
-              } else {
-                status = 'JS Error';
-              }
-            } else {
-              message = `JavaScript Error on ${pagePath}`;
-              status = 'JS Error';
-            }
-            endpoint = pagePath;
-            break;
-          default:
-            message = `${eventName} on ${pagePath}`;
-        }
-
-        allErrorDetails.push({
-          message,
-          endpoint,
-          status,
-          page: pagePath,
-          count,
         });
 
-        // Count errors by page
-        if (!pageErrors[pagePath]) {
-          pageErrors[pagePath] = 0;
-        }
-        pageErrors[pagePath] += count;
-      });
+        const allErrorDetails: any[] = [];
+        let totalErrors = 0;
+        const pageErrors: Record<string, number> = {};
 
-      // Calculate pagination
-      const totalItems = allErrorDetails.length;
-      const totalPages = Math.ceil(totalItems / limit);
-      const startIndex = (page - 1) * limit;
-      const endIndex = startIndex + limit;
-      const paginatedDetails = allErrorDetails.slice(startIndex, endIndex);
+        response.data.rows?.forEach((row) => {
+          const eventName = row.dimensionValues[0]?.value || 'unknown';
+          const pagePath = row.dimensionValues[1]?.value || '/';
+          const title = row.dimensionValues[2]?.value || 'Untitled';
+          const errorMessage = row.dimensionValues[3]?.value || '';
+          const errorType = row.dimensionValues[4]?.value || '';
+          const count = parseInt(row.metricValues[0]?.value || '0');
 
-      // Top failing pages
-      const topFailingEndpoints = Object.entries(pageErrors)
-        .map(([pagePath, count]) => ({ endpoint: pagePath, count }))
-        .sort((a, b) => b.count - a.count)
-        .slice(0, 10);
+          if (count === 0) return;
 
-      // Status distribution (simplified)
-      const statusCounts: Record<string, number> = {};
-      allErrorDetails.forEach((err) => {
-        if (!statusCounts[err.status]) {
-          statusCounts[err.status] = 0;
-        }
-        statusCounts[err.status] += err.count;
-      });
+          totalErrors += count;
 
-      const statusDistribution = Object.entries(statusCounts)
-        .map(([status, count]) => ({
-          status,
-          count,
-          category:
-            status === '404' || status.startsWith('4')
-              ? 'client_error'
-              : status === '500' || status.startsWith('5')
-                ? 'server_error'
-                : 'other',
-        }))
-        .sort((a, b) => b.count - a.count);
+          // Map event names to user-friendly messages with MORE detail
+          let message = '';
+          let endpoint = 'N/A';
+          let status = 'N/A';
 
-      this.logger.log(
-        `Fetched ${totalErrors} error events from GA4 (${totalItems} unique errors, page ${page}/${totalPages})`,
-      );
+          switch (eventName) {
+            case 'page_not_found':
+              message = `404 Error: Page "${pagePath}" not found`;
+              status = '404';
+              endpoint = pagePath;
+              break;
+            case 'api_error':
+              message = errorMessage || `API Error on page: ${pagePath}`;
+              endpoint = `API call from ${pagePath}`;
+              status = '500';
+              if (errorMessage) {
+                message = `API Error: ${errorMessage}`;
+              }
+              break;
+            case 'network_error':
+              message =
+                errorMessage ||
+                `Network Error: Connection failed on ${pagePath}`;
+              endpoint = `Network from ${pagePath}`;
+              status = 'Network';
+              break;
+            case 'error_occurred':
+              // For general errors, show actual error message if available
+              if (errorMessage && errorMessage !== '(not set)') {
+                message = errorMessage;
+                // Try to extract error type for status
+                if (errorType && errorType !== '(not set)') {
+                  status = errorType;
+                } else if (errorMessage.includes('TypeError')) {
+                  status = 'TypeError';
+                } else if (errorMessage.includes('ReferenceError')) {
+                  status = 'ReferenceError';
+                } else if (errorMessage.includes('SyntaxError')) {
+                  status = 'SyntaxError';
+                } else {
+                  status = 'JS Error';
+                }
+              } else {
+                message = `JavaScript Error on ${pagePath}`;
+                status = 'JS Error';
+              }
+              endpoint = pagePath;
+              break;
+            default:
+              message = `${eventName} on ${pagePath}`;
+          }
 
-      return {
-        total: totalErrors,
-        summary: [
-          {
-            type: errorType || 'All Errors',
-            count: totalErrors,
-            uniqueErrors: totalItems,
-            details: paginatedDetails,
+          allErrorDetails.push({
+            message,
+            endpoint,
+            status,
+            page: pagePath,
+            count,
+          });
+
+          // Count errors by page
+          if (!pageErrors[pagePath]) {
+            pageErrors[pagePath] = 0;
+          }
+          pageErrors[pagePath] += count;
+        });
+
+        // Calculate pagination
+        const totalItems = allErrorDetails.length;
+        const totalPages = Math.ceil(totalItems / limit);
+        const startIndex = (page - 1) * limit;
+        const endIndex = startIndex + limit;
+        const paginatedDetails = allErrorDetails.slice(startIndex, endIndex);
+
+        // Top failing pages
+        const topFailingEndpoints = Object.entries(pageErrors)
+          .map(([pagePath, count]) => ({ endpoint: pagePath, count }))
+          .sort((a, b) => b.count - a.count)
+          .slice(0, 10);
+
+        // Status distribution (simplified)
+        const statusCounts: Record<string, number> = {};
+        allErrorDetails.forEach((err) => {
+          if (!statusCounts[err.status]) {
+            statusCounts[err.status] = 0;
+          }
+          statusCounts[err.status] += err.count;
+        });
+
+        const statusDistribution = Object.entries(statusCounts)
+          .map(([status, count]) => ({
+            status,
+            count,
+            category:
+              status === '404' || status.startsWith('4')
+                ? 'client_error'
+                : status === '500' || status.startsWith('5')
+                  ? 'server_error'
+                  : 'other',
+          }))
+          .sort((a, b) => b.count - a.count);
+
+        this.logger.log(
+          `Fetched ${totalErrors} error events from GA4 (${totalItems} unique errors, page ${page}/${totalPages})`,
+        );
+
+        return {
+          total: totalErrors,
+          summary: [
+            {
+              type: errorType || 'All Errors',
+              count: totalErrors,
+              uniqueErrors: totalItems,
+              details: paginatedDetails,
+            },
+          ],
+          topFailingEndpoints,
+          statusDistribution,
+          period: `Last ${daysAgo} ${daysAgo === 1 ? 'day' : 'days'}`,
+          pagination: {
+            page,
+            limit,
+            totalItems,
+            totalPages,
+            hasNextPage: page < totalPages,
+            hasPrevPage: page > 1,
           },
-        ],
-        topFailingEndpoints,
-        statusDistribution,
-        period: `Last ${daysAgo} ${daysAgo === 1 ? 'day' : 'days'}`,
-        pagination: {
-          page,
-          limit,
-          totalItems,
-          totalPages,
-          hasNextPage: page < totalPages,
-          hasPrevPage: page > 1,
-        },
-      };
-    } catch (error) {
-      this.logger.error('Failed to fetch detailed errors:', error.message);
+        };
+      } catch (error) {
+        this.logger.error('Failed to fetch detailed errors:', error.message);
 
-      // Return empty data with helpful message
-      return {
-        total: 0,
-        summary: [
-          {
-            type: errorType || 'All Errors',
-            count: 0,
-            uniqueErrors: 0,
-            details: [
-              {
-                message:
-                  'No error data available yet. Make sure error tracking events are being sent.',
-                endpoint: 'Check console logs',
-                status: 'N/A',
-                page: 'N/A',
-                count: 0,
-              },
-            ],
+        // Return empty data with helpful message
+        return {
+          total: 0,
+          summary: [
+            {
+              type: errorType || 'All Errors',
+              count: 0,
+              uniqueErrors: 0,
+              details: [
+                {
+                  message:
+                    'No error data available yet. Make sure error tracking events are being sent.',
+                  endpoint: 'Check console logs',
+                  status: 'N/A',
+                  page: 'N/A',
+                  count: 0,
+                },
+              ],
+            },
+          ],
+          topFailingEndpoints: [],
+          statusDistribution: [],
+          period: `Last ${daysAgo} ${daysAgo === 1 ? 'day' : 'days'}`,
+          pagination: {
+            page: 1,
+            limit,
+            totalItems: 0,
+            totalPages: 0,
+            hasNextPage: false,
+            hasPrevPage: false,
           },
-        ],
-        topFailingEndpoints: [],
-        statusDistribution: [],
-        period: `Last ${daysAgo} ${daysAgo === 1 ? 'day' : 'days'}`,
-        pagination: {
-          page: 1,
-          limit,
-          totalItems: 0,
-          totalPages: 0,
-          hasNextPage: false,
-          hasPrevPage: false,
-        },
-      };
-    }
+        };
+      }
     });
   }
 
@@ -837,88 +913,87 @@ export class Ga4AnalyticsService {
     }
 
     return this.cached(`chat:${daysAgo}`, 60_000, async () => {
-    try {
-      // ჩატის ივენთების წამოღება
-      const startDate = this.getStartDate(daysAgo);
-      const response = await this.analyticsDataClient.properties.runReport({
-        property: `properties/${this.propertyId}`,
-        requestBody: {
-          dateRanges: [{ startDate, endDate: 'today' }],
-          dimensions: [{ name: 'eventName' }],
-          metrics: [{ name: 'eventCount' }],
-          dimensionFilter: {
-            filter: {
-              fieldName: 'eventName',
-              inListFilter: {
-                values: [
-                  'chat_toggle',
-                  'chat_message_sent',
-                  'chat_response_received',
-                  'chat_mode_select',
-                  'chat_product_click',
-                  'chat_error',
-                ],
-              },
-            },
-          },
-        },
-      });
-
-      const eventCounts: Map<string, number> = new Map();
-      response.data.rows?.forEach((row) => {
-        const event = row.dimensionValues[0].value;
-        const count = parseInt(row.metricValues[0].value || '0');
-        eventCounts.set(event, count);
-      });
-
-      // დღეების მიხედვით
-      const dailyResponse = await this.analyticsDataClient.properties.runReport(
-        {
+      try {
+        // ჩატის ივენთების წამოღება
+        const startDate = this.getStartDate(daysAgo);
+        const response = await this.analyticsDataClient.properties.runReport({
           property: `properties/${this.propertyId}`,
           requestBody: {
             dateRanges: [{ startDate, endDate: 'today' }],
-            dimensions: [{ name: 'date' }],
+            dimensions: [{ name: 'eventName' }],
             metrics: [{ name: 'eventCount' }],
             dimensionFilter: {
               filter: {
                 fieldName: 'eventName',
-                stringFilter: { value: 'chat_message_sent' },
+                inListFilter: {
+                  values: [
+                    'chat_toggle',
+                    'chat_message_sent',
+                    'chat_response_received',
+                    'chat_mode_select',
+                    'chat_product_click',
+                    'chat_error',
+                  ],
+                },
               },
             },
-            orderBys: [{ dimension: { dimensionName: 'date' } }],
           },
-        },
-      );
+        });
 
-      const byDay =
-        dailyResponse.data.rows?.map((row) => ({
-          date: row.dimensionValues[0].value,
-          messages: parseInt(row.metricValues[0].value || '0'),
-        })) || [];
+        const eventCounts: Map<string, number> = new Map();
+        response.data.rows?.forEach((row) => {
+          const event = row.dimensionValues[0].value;
+          const count = parseInt(row.metricValues[0].value || '0');
+          eventCounts.set(event, count);
+        });
 
-      return {
-        totalChats: eventCounts.get('chat_toggle') || 0,
-        totalMessages: eventCounts.get('chat_message_sent') || 0,
-        aiResponses: eventCounts.get('chat_response_received') || 0,
-        facebookClicks:
-          (eventCounts.get('chat_mode_select') || 0) -
-          (eventCounts.get('chat_message_sent') || 0),
-        productClicks: eventCounts.get('chat_product_click') || 0,
-        errors: eventCounts.get('chat_error') || 0,
-        byDay,
-      };
-    } catch (error) {
-      this.logger.error('Failed to fetch chat analytics:', error.message);
-      return {
-        totalChats: 0,
-        totalMessages: 0,
-        aiResponses: 0,
-        facebookClicks: 0,
-        productClicks: 0,
-        errors: 0,
-        byDay: [],
-      };
-    }
+        // დღეების მიხედვით
+        const dailyResponse =
+          await this.analyticsDataClient.properties.runReport({
+            property: `properties/${this.propertyId}`,
+            requestBody: {
+              dateRanges: [{ startDate, endDate: 'today' }],
+              dimensions: [{ name: 'date' }],
+              metrics: [{ name: 'eventCount' }],
+              dimensionFilter: {
+                filter: {
+                  fieldName: 'eventName',
+                  stringFilter: { value: 'chat_message_sent' },
+                },
+              },
+              orderBys: [{ dimension: { dimensionName: 'date' } }],
+            },
+          });
+
+        const byDay =
+          dailyResponse.data.rows?.map((row) => ({
+            date: row.dimensionValues[0].value,
+            messages: parseInt(row.metricValues[0].value || '0'),
+          })) || [];
+
+        return {
+          totalChats: eventCounts.get('chat_toggle') || 0,
+          totalMessages: eventCounts.get('chat_message_sent') || 0,
+          aiResponses: eventCounts.get('chat_response_received') || 0,
+          facebookClicks:
+            (eventCounts.get('chat_mode_select') || 0) -
+            (eventCounts.get('chat_message_sent') || 0),
+          productClicks: eventCounts.get('chat_product_click') || 0,
+          errors: eventCounts.get('chat_error') || 0,
+          byDay,
+        };
+      } catch (error) {
+        this.logger.error('Failed to fetch chat analytics:', error.message);
+        return {
+          totalChats: 0,
+          totalMessages: 0,
+          aiResponses: 0,
+          facebookClicks: 0,
+          productClicks: 0,
+          errors: 0,
+          byDay: [],
+        };
+      }
     });
   }
 }
