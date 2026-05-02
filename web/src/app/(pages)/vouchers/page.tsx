@@ -270,7 +270,7 @@ export default function VouchersShopPage() {
             <div className="vsp-purchase-row">
               <span>{language === "en" ? "Delivery:" : "მიტანა:"}</span>
               <span className="vsp-green">
-                {language === "en" ? "Digital · instant" : "ციფრული · მყისიერი"}
+                {language === "en" ? "Digital · instant" : "ციფრული · მომენტალური"}
               </span>
             </div>
             <div className="vsp-purchase-row">
@@ -380,7 +380,7 @@ export default function VouchersShopPage() {
                   {
                     n: "02",
                     t: "მიიღე კოდი",
-                    d: "შეკვეთაში მყისიერად გამოჩნდება შენი უნიკალური კოდი და QR.",
+                    d: "შეკვეთაში მომენტალურად გამოჩნდება შენი უნიკალური კოდი და QR.",
                   },
                   {
                     n: "03",
