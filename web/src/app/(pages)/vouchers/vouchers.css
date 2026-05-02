@@ -471,33 +471,121 @@
   line-height: 1.6;
 }
 
-/* Responsive */
+/* ── Responsive ── */
+
+@media (max-width: 900px) {
+  .vsp-amounts {
+    gap: 1rem;
+  }
+  .vsp-amount-card {
+    width: 180px;
+    min-height: 240px;
+  }
+}
+
 @media (max-width: 700px) {
+  .vsp-hero {
+    padding: 2.5rem 0 3rem;
+  }
   .vsp-hero-inner {
     flex-direction: column;
+    align-items: center;
     text-align: center;
+    gap: 2rem;
+  }
+  .vsp-hero-text {
+    min-width: unset;
+    width: 100%;
+  }
+  .vsp-hero-title {
+    font-size: clamp(1.6rem, 7vw, 2.2rem);
+  }
+  .vsp-hero-subtitle {
+    font-size: 0.9rem;
+    margin: 0 auto 1.25rem;
+    max-width: 100%;
   }
   .vsp-hero-badges {
     justify-content: center;
   }
-  .vsp-hero-subtitle {
-    margin: 0 auto 1.5rem;
+  .vsp-badge {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.65rem;
+  }
+  .vsp-preview-card {
+    width: 100%;
+    display: flex;
+    justify-content: center;
   }
   .vsp-card-inner {
     transform: rotate(0deg);
-    width: 260px;
+    width: min(260px, 90vw);
   }
+  .vsp-card-amount {
+    font-size: 2.4rem;
+  }
+
+  .vsp-content {
+    padding: 2rem 0.75rem 4rem;
+    gap: 2rem;
+  }
+  .vsp-section-title {
+    font-size: 1.15rem;
+    margin-bottom: 1rem;
+  }
+
   .vsp-amounts {
     justify-content: center;
-  }
-  .vsp-purchase-box {
-    max-width: 100%;
+    gap: 0.75rem;
   }
   .vsp-amount-card {
-    width: 160px;
-    min-height: 220px;
+    width: 150px;
+    min-height: 210px;
+    padding: 1rem 0.85rem;
   }
   .vsp-amount-value {
-    font-size: 2rem;
+    font-size: 1.9rem;
+  }
+  .vsp-amount-brand {
+    font-size: 0.85rem;
+  }
+
+  .vsp-purchase-box {
+    max-width: 100%;
+    padding: 1.5rem;
+  }
+
+  .vsp-benefits {
+    grid-template-columns: 1fr;
+  }
+  .vsp-benefit-card {
+    padding: 1.25rem;
+  }
+
+  .vsp-step {
+    padding: 1rem 1.25rem;
+    gap: 1rem;
+  }
+  .vsp-step-num {
+    font-size: 1.25rem;
+    min-width: 32px;
+  }
+}
+
+@media (max-width: 400px) {
+  .vsp-amounts {
+    flex-direction: column;
+    align-items: center;
+  }
+  .vsp-amount-card {
+    width: min(300px, 85vw);
+    min-height: auto;
+    padding: 1rem;
+  }
+  .vsp-amount-qr-row {
+    justify-content: space-between;
+  }
+  .vsp-card-inner {
+    width: min(280px, 88vw);
   }
 }
