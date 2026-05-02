@@ -73,8 +73,14 @@ export class BalanceService {
         continue;
       }
 
-      // პროდუქტის ფასი (ფასდაკლებით თუ არსებობს)
-      const itemTotalPrice = item.price * item.qty;
+      // პროდუქტის ფასი — ვაუჩერის ფასდაკლება არ ასახვება სელერის შემოსავალზე,
+      // ამიტომ ვიყენებთ ორიგინალ item.price-ს. თუ ის 0-ია (edge case),
+      // გამოვიყენებთ პროდუქტის ამჟამინდელ ფასს DB-დან.
+      const rawPrice =
+        item.price && item.price > 0
+          ? item.price
+          : (product as any).price ?? 0;
+      const itemTotalPrice = rawPrice * item.qty;
 
       // საიტის საკომისიო (პროდუქტის ფასიდან)
       // განვადებით შეძენისას 15%, სხვა შემთხვევაში 10%

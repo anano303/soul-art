@@ -156,7 +156,7 @@ export default function VouchersShopPage() {
             <p className="vsp-hero-subtitle">
               {language === "en"
                 ? "A beautifully designed gift voucher for SoulArt — original Georgian artworks, jewelry and gifts. Choose an amount, pay online and receive the code instantly."
-                : "SoulArt-ის საჩუქრის ვაუჩერი — ორიგინალური ქართული ნამუშევრები, სამკაულები და საჩუქრები. აირჩიე თანხა, გადაიხადე ონლაინ და კოდი მყისიერად გეძლევა."}
+                : "SoulArt-ის საჩუქრის ვაუჩერი — ორიგინალური ქართული ნამუშევრები, ხელნაკეთი ნივთები და საჩუქრები. აირჩიე თანხა, გადაიხადე ონლაინ და მიიღე ვაუჩერი მომენტალურად."}
             </p>
             <div className="vsp-hero-badges">
               <span className="vsp-badge">

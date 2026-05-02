@@ -464,6 +464,14 @@ export default function UserMenu({
                   <HelpCircle size={18} />
                   <span>FAQ</span>
                 </Link>
+                <Link
+                  href="/admin/vouchers"
+                  className="dropdown-item"
+                  onClick={handleLinkClick}
+                >
+                  <Gift size={18} />
+                  <span>ვაუჩერები</span>
+                </Link>
               </>
             )}
 

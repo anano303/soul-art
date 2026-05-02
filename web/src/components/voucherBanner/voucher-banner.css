@@ -10,6 +10,8 @@
   justify-content: space-between;
   gap: 2.5rem;
   flex-wrap: wrap;
+  padding-left: 16px;
+  padding-right: 16px;
 }
 
 /* ── Text side ── */
