@@ -151,7 +151,7 @@ export default function VouchersShopPage() {
               ← {language === "en" ? "მთავარი" : "მთავარი"}
             </Link>
             <h1 className="vsp-hero-title">
-              {language === "en" ? "Give the gift of art" : "გაუჩუქე ხელოვნება"}
+              {language === "en" ? "Give the gift of art" : "აჩუქე ემოცია"}
             </h1>
             <p className="vsp-hero-subtitle">
               {language === "en"

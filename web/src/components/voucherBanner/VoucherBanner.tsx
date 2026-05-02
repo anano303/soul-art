@@ -23,7 +23,7 @@ export default function VoucherBanner() {
             🎟 {language === "en" ? "Gift Vouchers" : "საჩუქრის ვაუჩერები"}
           </span>
           <h2 className="voucher-banner-title">
-            {language === "en" ? "Give the gift of art" : "გაუჩუქე ხელოვნება"}
+            {language === "en" ? "Give the gift of art" : "აჩუქე ემოცია"}
           </h2>
           <p className="voucher-banner-desc">
             {language === "en"
