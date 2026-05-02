@@ -64,6 +64,19 @@ export class VoucherController {
     return this.voucherService.batchCreate(body);
   }
 
+  @Get('purchased-orders')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.Admin)
+  async getPurchasedOrders(
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+  ) {
+    return this.voucherService.getPurchasedOrders(
+      page ? parseInt(page) : 1,
+      limit ? parseInt(limit) : 50,
+    );
+  }
+
   @Get()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.Admin)

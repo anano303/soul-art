@@ -7,6 +7,7 @@ import {
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { Voucher, VoucherDocument } from '../schemas/voucher.schema';
+import { Order, OrderDocument } from '../../orders/schemas/order.schema';
 import * as crypto from 'crypto';
 
 function generateCode(): string {
@@ -26,6 +27,7 @@ export class VoucherService {
 
   constructor(
     @InjectModel(Voucher.name) private voucherModel: Model<VoucherDocument>,
+    @InjectModel(Order.name) private orderModel: Model<OrderDocument>,
   ) {}
 
   /**
@@ -172,6 +174,30 @@ export class VoucherService {
     ]);
 
     return { items: items as VoucherDocument[], total };
+  }
+
+  /**
+   * Admin: list voucher purchase orders (paid orders with orderType='voucher')
+   */
+  async getPurchasedOrders(
+    page = 1,
+    limit = 50,
+  ): Promise<{ items: any[]; total: number }> {
+    const filter = { orderType: 'voucher', isPaid: true };
+    const [items, total] = await Promise.all([
+      this.orderModel
+        .find(filter)
+        .sort({ paidAt: -1 })
+        .skip((page - 1) * limit)
+        .limit(limit)
+        .populate('user', 'email name ownerFirstName ownerLastName')
+        .select(
+          '_id issuedVoucherCode issuedVoucherAmount issuedVoucherCurrency isPaid paidAt createdAt user totalPrice externalOrderId',
+        )
+        .lean(),
+      this.orderModel.countDocuments(filter),
+    ]);
+    return { items, total };
   }
 
   /**
