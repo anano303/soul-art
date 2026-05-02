@@ -2232,7 +2232,8 @@ export class OrdersService {
       );
     }
     if (order.isPaid) {
-      throw new BadRequestException('Voucher order is already paid.');
+      // Idempotent: already fulfilled, return existing data
+      return { order, voucherCode: order.issuedVoucherCode || '' };
     }
     if (order.orderType !== 'voucher') {
       throw new BadRequestException('Order is not a voucher order.');
