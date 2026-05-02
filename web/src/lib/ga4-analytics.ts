@@ -36,7 +36,7 @@ export const ga4Event = (
  */
 export const ga4PageView = (url: string, title?: string) => {
   if (typeof window !== "undefined" && window.gtag) {
-    window.gtag("config", process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID, {
+    window.gtag("config", 'G-Q70MY6FWYL', {
       page_path: url,
       page_title: title,
     });
@@ -542,7 +542,7 @@ export const setUserProperties = (properties: Record<string, unknown>) => {
 
 export const setUserId = (userId: string) => {
   if (typeof window !== "undefined" && window.gtag) {
-    window.gtag("config", process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID, {
+    window.gtag("config", 'G-Q70MY6FWYL', {
       user_id: userId,
     });
   }
