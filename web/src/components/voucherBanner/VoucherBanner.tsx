@@ -46,7 +46,7 @@ export default function VoucherBanner() {
           <div className="vbc-label">
             {language === "en" ? "Gift Voucher" : "საჩუქრის ვაუჩერი"}
           </div>
-          <div className="vbc-amount">{amounts[1]}</div>
+          <div className="vbc-amount">{amounts[100]}</div>
           <div className="vbc-code">SOUL-XXXX-XXXX</div>
         </div>
       </div>

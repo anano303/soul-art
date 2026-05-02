@@ -135,7 +135,7 @@
 
 @media (max-width: 768px) {
   .voucher-banner-section {
-    padding: 2rem 0;
+    padding: 2rem 10px;
   }
   .voucher-banner-title {
     font-size: 1.6rem;
@@ -144,7 +144,7 @@
 
 @media (max-width: 640px) {
   .voucher-banner-section {
-    padding: 1.75rem 0;
+    padding: 1.75rem 20px;
   }
   .voucher-banner-inner {
     flex-direction: column;
