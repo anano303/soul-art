@@ -44,10 +44,16 @@ export class GlobalExceptionFilter implements ExceptionFilter {
 
     const stack = exception instanceof Error ? exception.stack : undefined;
 
-    this.logger.error(
-      `[CRASH][HTTP] ${req.method} ${req.url} → ${status} ${message}` +
-        (stack ? `\n${stack}` : ''),
-    );
+    // Suppress noisy 404s caused by browsers requesting static assets on API routes
+    const isStaticAssetMiss =
+      status === 404 && /\.(?:png|ico|jpg|jpeg|webp|svg|gif|js|css|map|txt|xml|json)$/.test(req.url);
+
+    if (!isStaticAssetMiss) {
+      this.logger.error(
+        `[CRASH][HTTP] ${req.method} ${req.url} → ${status} ${message}` +
+          (stack ? `\n${stack}` : ''),
+      );
+    }
 
     const body =
       exception instanceof HttpException

@@ -4,6 +4,7 @@ import {
   Controller,
   Delete,
   Get,
+  NotFoundException,
   Param,
   Post,
   Patch,
@@ -164,6 +165,10 @@ export class ArtistController {
     @Query('page') page: string = '1',
     @Query('limit') limit: string = '12',
   ) {
+    // Ignore static asset requests that accidentally hit this dynamic route
+    if (/\.\w{2,5}$/.test(identifier)) {
+      throw new NotFoundException('Not found');
+    }
     const parsedPage = parseInt(page, 10);
     const parsedLimit = parseInt(limit, 10);
     const normalizedPage =
