@@ -295,16 +295,20 @@ export default function RootLayout({
               // Load third-party scripts only after page is idle
               var _defer = window.requestIdleCallback || function(cb){setTimeout(cb,3000)};
               _defer(function() {
-                // Google Ads
+                // GA4 + Google Ads — load GA4 first so events are attributed correctly
+                var ga4Id = '${process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID || ""}';
+                var adsId = 'AW-17709570539';
+                var firstId = ga4Id || adsId;
                 var gtagScript = document.createElement('script');
                 gtagScript.async = true;
-                gtagScript.src = 'https://www.googletagmanager.com/gtag/js?id=AW-17709570539';
+                gtagScript.src = 'https://www.googletagmanager.com/gtag/js?id=' + firstId;
                 document.head.appendChild(gtagScript);
                 window.dataLayer = window.dataLayer || [];
                 function gtag(){dataLayer.push(arguments);}
                 window.gtag = gtag;
                 gtag('js', new Date());
-                gtag('config', 'AW-17709570539');
+                if (ga4Id) { gtag('config', ga4Id); }
+                gtag('config', adsId);
               });
               
               _defer(function() {
