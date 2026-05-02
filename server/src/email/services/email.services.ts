@@ -2306,4 +2306,217 @@ ${data.message}
 
     await this.transporter.sendMail(mailOptions);
   }
+
+  /**
+   * ვაუჩერის დადასტურება მყიდველისთვის (კოდი + QR + print ღილაკი)
+   */
+  async sendVoucherConfirmation(data: {
+    to: string;
+    customerName: string;
+    voucherCode: string;
+    amount: number;
+    currency: string;
+    orderDetailsUrl: string;
+  }) {
+    const { to, customerName, voucherCode, amount, currency, orderDetailsUrl } =
+      data;
+
+    const currencyLabel =
+      currency === 'USD' ? `$${amount}` : `${amount} ${currency === 'EUR' ? '€' : '₾'}`;
+
+    // QR code via Google Charts API (works in all email clients)
+    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${encodeURIComponent(voucherCode)}&bgcolor=1a1a2e&color=ffffff&margin=8`;
+
+    const mailOptions = {
+      from: emailConfig.from,
+      to,
+      subject: `🎟 შენი SoulArt ვაუჩერი — ${currencyLabel}`,
+      html: `
+<!DOCTYPE html>
+<html lang="ka">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <style>
+    @media only screen and (max-width: 600px) {
+      .email-wrap { padding: 12px 8px !important; }
+      .email-body { border-radius: 12px !important; }
+      .email-header { padding: 22px 20px !important; }
+      .email-header div:first-child { font-size: 22px !important; }
+      .email-pad { padding-left: 16px !important; padding-right: 16px !important; }
+      .card-inner { padding: 18px 16px 16px !important; }
+      .card-amount { font-size: 38px !important; }
+      .card-code-text { font-size: 14px !important; letter-spacing: 0.06em !important; }
+      .qr-cell { display: block !important; width: 100% !important; text-align: center; padding-bottom: 12px; }
+      .qr-spacer { display: none !important; }
+      .code-cell { display: block !important; width: 100% !important; text-align: center; }
+      .code-highlight { font-size: 20px !important; }
+      .cta-btn { padding: 12px 24px !important; font-size: 14px !important; }
+    }
+  </style>
+</head>
+<body style="margin:0;padding:0;background:#f3f4f6;font-family:'Segoe UI',Arial,sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0" class="email-wrap" style="background:#f3f4f6;padding:32px 16px;">
+  <tr><td align="center">
+    <table width="600" cellpadding="0" cellspacing="0" class="email-body" style="max-width:600px;width:100%;background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.10);">
+
+      <!-- Header -->
+      <tr>
+        <td class="email-header" style="background:linear-gradient(135deg,#0f0c29 0%,#302b63 55%,#1a1060 100%);padding:28px 32px;text-align:center;">
+          <div style="font-size:26px;font-weight:900;color:#fff;letter-spacing:0.06em;">SoulArt</div>
+          <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.18em;color:rgba(255,255,255,0.5);margin-top:4px;">Gift Voucher · საჩუქრის ვაუჩერი</div>
+        </td>
+      </tr>
+
+      <!-- Greeting -->
+      <tr>
+        <td class="email-pad" style="padding:24px 32px 0;">
+          <p style="margin:0 0 20px;color:#374151;font-size:15px;line-height:1.7;">
+            გამარჯობა, <strong style="color:#111827;">${customerName}</strong>! 🎉<br/>
+            შენი გადახდა წარმატებით დადასტურდა.<br/>
+            ქვემოთ მოცემულია შენი ვაუჩერი.
+          </p>
+        </td>
+      </tr>
+
+      <!-- Gift card -->
+      <tr>
+        <td class="email-pad" style="padding:0 32px 20px;">
+          <table width="100%" cellpadding="0" cellspacing="0" style="background:linear-gradient(145deg,#1a1a2e 0%,#16213e 50%,#0f3460 100%);border-radius:18px;overflow:hidden;">
+            <tr>
+              <td class="card-inner" style="padding:22px 24px 18px;">
+                <!-- brand row -->
+                <table width="100%" cellpadding="0" cellspacing="0">
+                  <tr>
+                    <td style="font-weight:900;font-size:18px;color:#fff;letter-spacing:0.04em;">SoulArt</td>
+                    <td align="right" style="font-size:10px;text-transform:uppercase;letter-spacing:0.15em;color:rgba(255,255,255,0.4);">საჩუქრის ვაუჩერი</td>
+                  </tr>
+                </table>
+                <!-- amount -->
+                <div class="card-amount" style="font-size:48px;font-weight:900;color:#fff;line-height:1;margin:14px 0 16px;letter-spacing:-0.02em;">${currencyLabel}</div>
+                <!-- divider -->
+                <div style="border-top:1px solid rgba(255,255,255,0.12);margin-bottom:16px;"></div>
+                <!-- QR + code row — stacks on mobile -->
+                <table width="100%" cellpadding="0" cellspacing="0">
+                  <tr>
+                    <td class="qr-cell" width="108" valign="middle" style="padding-right:0;">
+                      <img src="${qrUrl}" width="96" height="96" alt="QR" style="display:block;border-radius:8px;"/>
+                    </td>
+                    <td class="qr-spacer" width="14"></td>
+                    <td class="code-cell" valign="middle">
+                      <div class="card-code-text" style="font-family:'Courier New',monospace;font-size:17px;font-weight:700;letter-spacing:0.1em;color:#fff;background:rgba(255,255,255,0.1);border:1px dashed rgba(255,255,255,0.3);border-radius:8px;padding:9px 13px;display:inline-block;">${voucherCode}</div>
+                      <div style="font-size:11px;color:rgba(255,255,255,0.38);margin-top:7px;">მოქმედი · 1 თვე · ერთჯერადი · soulart.ge</div>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+
+      <!-- Code highlight -->
+      <tr>
+        <td class="email-pad" style="padding:0 32px 16px;">
+          <table width="100%" cellpadding="0" cellspacing="0" style="background:#f0fdf4;border:2px solid #86efac;border-radius:12px;">
+            <tr>
+              <td style="padding:14px 16px;text-align:center;">
+                <div style="font-size:12px;font-weight:700;color:#15803d;margin-bottom:5px;">✅ ვაუჩერის კოდი</div>
+                <div class="code-highlight" style="font-family:'Courier New',monospace;font-size:24px;font-weight:700;color:#111827;letter-spacing:0.14em;">${voucherCode}</div>
+                <div style="font-size:11px;color:#6b7280;margin-top:5px;">შეინახე ეს კოდი — გამოიყენე checkout-ზე</div>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+
+      <!-- How to use -->
+      <tr>
+        <td class="email-pad" style="padding:0 32px 20px;">
+          <table width="100%" cellpadding="0" cellspacing="0" style="background:#f9fafb;border-radius:12px;">
+            <tr>
+              <td style="padding:18px 20px;">
+                <div style="font-size:14px;font-weight:700;color:#111827;margin-bottom:10px;">როგორ გამოვიყენო?</div>
+                <div style="color:#374151;font-size:13px;line-height:2.0;">
+                  1 · შედი soulart.ge-ზე და აირჩიე პროდუქტი<br/>
+                  2 · გადადი შეკვეთის გვერდზე (Checkout)<br/>
+                  3 · შეიყვანე კოდი <strong>${voucherCode}</strong> "ვაუჩერი" ველში<br/>
+                  4 · ფასდაკლება ავტომატურად გამოიქვითება ✓
+                </div>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+
+      <!-- CTA -->
+      <tr>
+        <td class="email-pad" style="padding:0 32px 28px;text-align:center;">
+          <a href="${orderDetailsUrl}" class="cta-btn"
+            style="display:inline-block;background:linear-gradient(135deg,#0f0c29,#302b63);color:#fff;padding:13px 32px;border-radius:50px;text-decoration:none;font-weight:700;font-size:15px;letter-spacing:0.02em;">
+            შეკვეთის ნახვა →
+          </a>
+        </td>
+      </tr>
+
+      <!-- Footer -->
+      <tr>
+        <td style="background:#f9fafb;border-top:1px solid #e5e7eb;padding:16px 32px;text-align:center;">
+          <p style="margin:0;color:#9ca3af;font-size:12px;line-height:1.8;">
+            SoulArt Team · <a href="https://soulart.ge" style="color:#9ca3af;text-decoration:none;">soulart.ge</a><br/>
+            ვაუჩერი მოქმედებს 1 თვე შეძენიდან. ერთჯერადი გამოყენება.
+          </p>
+        </td>
+      </tr>
+
+    </table>
+  </td></tr>
+</table>
+</body>
+</html>
+      `,
+    };
+
+    await this.transporter.sendMail(mailOptions);
+  }
+
+  /**
+   * ვაუჩერის შეძენის ადმინ-შეტყობინება
+   */
+  async sendVoucherAdminNotification(data: {
+    voucherCode: string;
+    amount: number;
+    currency: string;
+    buyerEmail: string;
+    buyerName: string;
+    orderId: string;
+  }) {
+    const { voucherCode, amount, currency, buyerEmail, buyerName, orderId } =
+      data;
+    const adminEmail =
+      process.env.ADMIN_EMAIL ||
+      emailConfig.from;
+    const currencyLabel =
+      currency === 'USD' ? `$${amount}` : `${amount} ${currency === 'EUR' ? '€' : '₾'}`;
+
+    const mailOptions = {
+      from: emailConfig.from,
+      to: adminEmail,
+      subject: `🎟 ვაუჩერი გაიყიდა: ${currencyLabel} — ${buyerEmail}`,
+      html: `
+        <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 500px; margin: 0 auto; color: #111827;">
+          <h2 style="color: #012645;">🎟 ახალი ვაუჩერი გაიყიდა</h2>
+          <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+            <tr><td style="padding: 6px 0; color: #6b7280; width: 140px;">კოდი:</td><td style="font-family: monospace; font-weight: 700; font-size: 16px; letter-spacing: 0.1em;">${voucherCode}</td></tr>
+            <tr><td style="padding: 6px 0; color: #6b7280;">ნომინალი:</td><td><strong>${currencyLabel}</strong></td></tr>
+            <tr><td style="padding: 6px 0; color: #6b7280;">მყიდველი:</td><td>${buyerName} (${buyerEmail})</td></tr>
+            <tr><td style="padding: 6px 0; color: #6b7280;">შეკვეთის ID:</td><td>${orderId}</td></tr>
+            <tr><td style="padding: 6px 0; color: #6b7280;">თარიღი:</td><td>${new Date().toLocaleString('ka-GE')}</td></tr>
+          </table>
+        </div>
+      `,
+    };
+
+    await this.transporter.sendMail(mailOptions);
+  }
 }

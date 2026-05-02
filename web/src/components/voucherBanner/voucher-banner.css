@@ -1,0 +1,152 @@
+.voucher-banner-section {
+  padding: 3rem 0;
+  background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+  overflow: hidden;
+}
+
+.voucher-banner-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2.5rem;
+  flex-wrap: wrap;
+}
+
+/* ── Text side ── */
+.voucher-banner-text {
+  flex: 1;
+  min-width: 260px;
+  color: #fff;
+}
+
+.voucher-banner-tag {
+  display: inline-block;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 100px;
+  padding: 0.3rem 0.85rem;
+  font-size: 0.8rem;
+  letter-spacing: 0.04em;
+  margin-bottom: 1rem;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.voucher-banner-title {
+  font-size: 2rem;
+  font-weight: 800;
+  line-height: 1.2;
+  margin: 0 0 0.75rem;
+  color: #fff;
+}
+
+.voucher-banner-desc {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.95rem;
+  line-height: 1.6;
+  margin-bottom: 1.25rem;
+  max-width: 400px;
+}
+
+.voucher-banner-amounts {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.5rem;
+}
+
+.voucher-amount-pill {
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 8px;
+  padding: 0.3rem 0.75rem;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.btn-voucher-cta {
+  display: inline-block;
+  padding: 0.75rem 2rem;
+  background: #e53e3e;
+  color: #fff;
+  border-radius: 50px;
+  font-weight: 700;
+  font-size: 0.95rem;
+  text-decoration: none;
+  transition:
+    background 0.2s,
+    transform 0.15s;
+  white-space: nowrap;
+}
+.btn-voucher-cta:hover {
+  background: #c53030;
+  transform: translateY(-2px);
+}
+
+/* ── Decorative card ── */
+.voucher-banner-card {
+  width: 240px;
+  min-height: 260px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 20px;
+  backdrop-filter: blur(8px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 2rem 1.5rem;
+  color: #fff;
+  flex-shrink: 0;
+  transform: rotate(3deg);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.3);
+}
+
+.vbc-logo {
+  font-size: 1.2rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  opacity: 0.9;
+}
+.vbc-label {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  opacity: 0.55;
+}
+.vbc-amount {
+  font-size: 3rem;
+  font-weight: 900;
+  line-height: 1;
+}
+.vbc-code {
+  font-family: "Courier New", monospace;
+  font-size: 0.85rem;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px dashed rgba(255, 255, 255, 0.3);
+  border-radius: 6px;
+  padding: 0.4rem 0.75rem;
+  letter-spacing: 0.1em;
+  opacity: 0.8;
+}
+
+@media (max-width: 640px) {
+  .voucher-banner-inner {
+    flex-direction: column;
+    text-align: center;
+  }
+  .voucher-banner-amounts {
+    justify-content: center;
+  }
+  .voucher-banner-desc {
+    margin: 0 auto 1.25rem;
+  }
+  .voucher-banner-card {
+    transform: rotate(0deg);
+    width: 100%;
+    max-width: 280px;
+    min-height: auto;
+    padding: 1.5rem;
+  }
+}

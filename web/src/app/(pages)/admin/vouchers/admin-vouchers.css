@@ -1,0 +1,391 @@
+.admin-vouchers {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 1.5rem;
+  font-family: inherit;
+}
+
+.vouchers-loading {
+  padding: 2rem;
+  text-align: center;
+  color: #6b7280;
+}
+
+/* ── Header ── */
+.vouchers-header {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.vouchers-header h1 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.btn-back {
+  background: none;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  font-size: 0.875rem;
+  color: #374151;
+  transition: background 0.2s;
+}
+
+.btn-back:hover {
+  background: #f3f4f6;
+}
+
+/* ── Create section ── */
+.vouchers-create-section,
+.vouchers-list-section {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.vouchers-create-section h2,
+.vouchers-list-section h2 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0 0 1.25rem;
+}
+
+.create-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.form-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.form-row label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  min-width: 90px;
+  color: #374151;
+}
+
+.amount-buttons,
+.currency-buttons {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.amount-btn,
+.currency-btn {
+  padding: 0.4rem 0.9rem;
+  border: 2px solid #d1d5db;
+  border-radius: 8px;
+  background: #fff;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all 0.15s;
+}
+
+.amount-btn.active,
+.currency-btn.active {
+  border-color: #111827;
+  background: #111827;
+  color: #fff;
+}
+
+.amount-btn:hover:not(.active),
+.currency-btn:hover:not(.active) {
+  border-color: #6b7280;
+}
+
+.count-input {
+  width: 80px;
+  padding: 0.4rem 0.6rem;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  outline: none;
+}
+
+.create-preview {
+  font-size: 0.875rem;
+  color: #6b7280;
+  background: #f9fafb;
+  padding: 0.6rem 1rem;
+  border-radius: 8px;
+}
+
+.btn-create {
+  align-self: flex-start;
+  padding: 0.6rem 1.5rem;
+  background: #111827;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-create:hover:not(:disabled) {
+  background: #374151;
+}
+
+.btn-create:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.create-error {
+  color: #dc2626;
+  font-size: 0.85rem;
+}
+
+.create-success {
+  background: #ecfdf5;
+  border: 1px solid #10b981;
+  border-radius: 10px;
+  padding: 1rem;
+}
+
+.create-success p {
+  margin: 0 0 0.75rem;
+  font-weight: 600;
+  color: #065f46;
+}
+
+.created-codes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.created-code {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: #fff;
+  border: 1px solid #d1fae5;
+  border-radius: 6px;
+  padding: 0.3rem 0.7rem;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.created-code:hover {
+  background: #d1fae5;
+}
+
+.created-code code {
+  font-size: 0.85rem;
+  letter-spacing: 0.05em;
+}
+
+.copy-hint {
+  font-size: 0.75rem;
+}
+
+/* ── List section ── */
+.list-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.list-header h2 {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.total-badge {
+  background: #e5e7eb;
+  border-radius: 20px;
+  padding: 0.15rem 0.6rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #374151;
+}
+
+.list-filters {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.list-filters select {
+  padding: 0.4rem 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  background: #fff;
+  cursor: pointer;
+  outline: none;
+}
+
+.btn-refresh {
+  padding: 0.4rem 0.6rem;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  background: #fff;
+  cursor: pointer;
+  font-size: 0.875rem;
+}
+
+.btn-refresh:hover {
+  background: #f3f4f6;
+}
+
+.list-error {
+  color: #dc2626;
+  font-size: 0.875rem;
+}
+
+.list-loading {
+  padding: 2rem;
+  text-align: center;
+  color: #6b7280;
+}
+
+/* ── Table ── */
+.vouchers-table-wrap {
+  overflow-x: auto;
+}
+
+.vouchers-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.vouchers-table th {
+  text-align: left;
+  padding: 0.6rem 0.75rem;
+  border-bottom: 2px solid #e5e7eb;
+  font-weight: 600;
+  color: #374151;
+  white-space: nowrap;
+}
+
+.vouchers-table td {
+  padding: 0.6rem 0.75rem;
+  border-bottom: 1px solid #f3f4f6;
+  vertical-align: middle;
+}
+
+.vouchers-table tr.used td {
+  opacity: 0.6;
+}
+
+.vouchers-table tr.inactive td {
+  opacity: 0.5;
+}
+
+.voucher-code-cell {
+  font-size: 0.8rem;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  color: #111827;
+  background: #f3f4f6;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+}
+
+.voucher-code-cell:hover {
+  background: #e5e7eb;
+}
+
+.currency-tag {
+  display: inline-block;
+  background: #e5e7eb;
+  border-radius: 4px;
+  padding: 0.1rem 0.5rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 0.2rem 0.6rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.status-badge.active {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.status-badge.used {
+  background: #e5e7eb;
+  color: #6b7280;
+}
+
+.status-badge.inactive {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.status-badge.expired {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.btn-deactivate {
+  padding: 0.25rem 0.6rem;
+  background: none;
+  border: 1px solid #dc2626;
+  border-radius: 6px;
+  color: #dc2626;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.btn-deactivate:hover {
+  background: #dc2626;
+  color: #fff;
+}
+
+/* ── Pagination ── */
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 1.25rem;
+  font-size: 0.875rem;
+  color: #374151;
+}
+
+.page-btn {
+  padding: 0.4rem 0.8rem;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background: #fff;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.page-btn:hover:not(:disabled) {
+  background: #f3f4f6;
+}
+
+.page-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}

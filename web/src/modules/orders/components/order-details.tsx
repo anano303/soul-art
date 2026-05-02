@@ -1,6 +1,13 @@
 "use client";
 
-import { CheckCircle2, XCircle, Store, ArrowLeft, Clock, RefreshCw } from "lucide-react";
+import {
+  CheckCircle2,
+  XCircle,
+  Store,
+  ArrowLeft,
+  Clock,
+  RefreshCw,
+} from "lucide-react";
 import { useLanguage } from "@/hooks/LanguageContext";
 import { useQuery } from "@tanstack/react-query";
 import { fetchWithAuth } from "@/lib/fetch-with-auth";
@@ -15,6 +22,7 @@ import { StripeButton } from "./stripe-button";
 import { BOGButton } from "./bog-button";
 import { CredoInstallmentButton } from "./credo-installment-button";
 import { useUsdRate } from "@/hooks/useUsdRate";
+import { QRCodeSVG } from "qrcode.react";
 import "./order-details.css";
 
 interface OrderDetailsProps {
@@ -31,7 +39,7 @@ export function OrderDetails({ order }: OrderDetailsProps) {
   // If no paidCurrency, fall back to GEL with dual display for non-Georgia
   const displayCurrency = order.paidCurrency || "GEL";
   const displayAmount = order.paidAmount || order.totalPrice;
-  
+
   // Currency symbol
   const getCurrencySymbol = (curr: string) => {
     switch (curr) {
@@ -54,12 +62,12 @@ export function OrderDetails({ order }: OrderDetailsProps) {
       const proportion = (gelPrice * quantity) / order.totalPrice;
       const amountInPaidCurrency = proportion * order.paidAmount;
       const formatted = amountInPaidCurrency.toFixed(2);
-      
+
       return displayCurrency === "USD"
         ? `${currencySymbol}${formatted}`
         : `${formatted} ${currencySymbol}`;
     }
-    
+
     // Fallback to GEL display
     return `${gelPrice.toFixed(2)} ₾`;
   };
@@ -106,7 +114,7 @@ export function OrderDetails({ order }: OrderDetailsProps) {
     queryFn: async () => {
       try {
         const response = await fetchWithAuth(
-          "/categories/attributes/age-groups"
+          "/categories/attributes/age-groups",
         );
         if (!response.ok) {
           return [];
@@ -121,9 +129,10 @@ export function OrderDetails({ order }: OrderDetailsProps) {
   });
 
   // Credo installment status polling (only for CredoInstallment orders that aren't paid yet)
-  const credoOrderCode = order.paymentMethod === "CredoInstallment" && order.paymentResult?.id
-    ? order.paymentResult.id
-    : null;
+  const credoOrderCode =
+    order.paymentMethod === "CredoInstallment" && order.paymentResult?.id
+      ? order.paymentResult.id
+      : null;
 
   const { data: credoStatus, refetch: refetchCredoStatus } = useQuery({
     queryKey: ["credoStatus", credoOrderCode],
@@ -131,7 +140,7 @@ export function OrderDetails({ order }: OrderDetailsProps) {
       if (!credoOrderCode) return null;
       try {
         const response = await apiClient.get(
-          `/payments/credo/installment/status/${credoOrderCode}`
+          `/payments/credo/installment/status/${credoOrderCode}`,
         );
         return response.data;
       } catch {
@@ -149,7 +158,7 @@ export function OrderDetails({ order }: OrderDetailsProps) {
     if (language === "en") {
       // Find the color in availableColors to get its English name
       const colorObj = availableColors.find(
-        (color) => color.name === colorName
+        (color) => color.name === colorName,
       );
       return colorObj?.nameEn || colorName;
     }
@@ -161,7 +170,7 @@ export function OrderDetails({ order }: OrderDetailsProps) {
     if (language === "en") {
       // Find the age group in availableAgeGroups to get its English name
       const ageGroupObj = availableAgeGroups.find(
-        (ageGroup) => ageGroup.name === ageGroupName
+        (ageGroup) => ageGroup.name === ageGroupName,
       );
       return ageGroupObj?.nameEn || ageGroupName;
     }
@@ -170,11 +179,11 @@ export function OrderDetails({ order }: OrderDetailsProps) {
 
   // Group order items by delivery type - fixed to check string equality
   const sellerDeliveryItems = order.orderItems.filter(
-    (item) => item.product && String(item.product.deliveryType) === "SELLER"
+    (item) => item.product && String(item.product.deliveryType) === "SELLER",
   );
 
   const soulArtDeliveryItems = order.orderItems.filter(
-    (item) => !item.product || String(item.product.deliveryType) !== "SELLER"
+    (item) => !item.product || String(item.product.deliveryType) !== "SELLER",
   );
 
   const paymentAmountUSD =
@@ -224,33 +233,49 @@ export function OrderDetails({ order }: OrderDetailsProps) {
           {/* Shipping Info */}
           <div className="order-card">
             <h2 className="order-subtitle">{t("order.shipping")}</h2>
-            <p>
-              <span className="font-medium">{t("order.address")}: </span>
-              {shippingSummary}
-            </p>
-            <div className={`alert ${order.isDelivered ? "success" : "error"}`}>
-              {order.isDelivered ? (
-                <CheckCircle2 className="icon" />
-              ) : (
-                <XCircle className="icon" />
-              )}
-              <span>
-                {order.isDelivered
-                  ? `${t("order.deliveredOn")} ${new Date(
-                      order.deliveredAt!
-                    ).toLocaleDateString()}`
-                  : t("order.notDelivered")}
-              </span>
-            </div>
+            {order.orderType === "voucher" ? (
+              <>
+                <p>
+                  <span className="font-medium">{t("order.address")}: </span>
+                  {language === "ge" ? "ციფრული მიწოდება" : "Digital delivery"}
+                </p>
+                <div className="alert success">
+                  <CheckCircle2 className="icon" />
+                  <span>{language === "ge" ? "მიწოდებულია · ციფრულად · მყისიერად" : "Delivered · Digital · Instant"}</span>
+                </div>
+              </>
+            ) : (
+              <>
+                <p>
+                  <span className="font-medium">{t("order.address")}: </span>
+                  {shippingSummary}
+                </p>
+                <div className={`alert ${order.isDelivered ? "success" : "error"}`}>
+                  {order.isDelivered ? (
+                    <CheckCircle2 className="icon" />
+                  ) : (
+                    <XCircle className="icon" />
+                  )}
+                  <span>
+                    {order.isDelivered
+                      ? `${t("order.deliveredOn")} ${new Date(
+                          order.deliveredAt!,
+                        ).toLocaleDateString()}`
+                      : t("order.notDelivered")}
+                  </span>
+                </div>
+              </>
+            )}
           </div>
-
           {/* Payment Info */}
           <div className="order-card">
             <h2 className="order-subtitle">{t("order.payment")}</h2>
             <p>
               <span className="font-medium">{t("order.method")}: </span>
               {order.paymentMethod === "CredoInstallment"
-                ? (language === "ge" ? "კრედო განვადება (0%)" : "Credo Installment (0%)")
+                ? language === "ge"
+                  ? "კრედო განვადება (0%)"
+                  : "Credo Installment (0%)"
                 : order.paymentMethod}
             </p>
             <div className={`alert ${order.isPaid ? "success" : "error"}`}>
@@ -262,19 +287,27 @@ export function OrderDetails({ order }: OrderDetailsProps) {
               <span>
                 {order.isPaid
                   ? `${t("order.paidOn")} ${new Date(
-                      order.paidAt!
+                      order.paidAt!,
                     ).toLocaleDateString()}`
                   : t("order.notPaid")}
               </span>
             </div>
           </div>
-
           {/* Credo Installment Status */}
           {order.paymentMethod === "CredoInstallment" && !order.isPaid && (
             <div className="order-card">
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "12px" }}>
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  marginBottom: "12px",
+                }}
+              >
                 <h2 className="order-subtitle" style={{ margin: 0 }}>
-                  {language === "ge" ? "განვადების სტატუსი" : "Installment Status"}
+                  {language === "ge"
+                    ? "განვადების სტატუსი"
+                    : "Installment Status"}
                 </h2>
                 <button
                   onClick={() => refetchCredoStatus()}
@@ -290,7 +323,9 @@ export function OrderDetails({ order }: OrderDetailsProps) {
                     fontSize: "13px",
                     color: "#6b7280",
                   }}
-                  title={language === "ge" ? "სტატუსის განახლება" : "Refresh status"}
+                  title={
+                    language === "ge" ? "სტატუსის განახლება" : "Refresh status"
+                  }
                 >
                   <RefreshCw style={{ width: "14px", height: "14px" }} />
                   {language === "ge" ? "განახლება" : "Refresh"}
@@ -300,64 +335,107 @@ export function OrderDetails({ order }: OrderDetailsProps) {
               {credoStatus?.success ? (
                 <div>
                   {/* Status badge */}
-                  <div style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "8px",
-                    padding: "12px 16px",
-                    borderRadius: "10px",
-                    backgroundColor: credoStatus.isSuccessful || credoStatus.isReadyForShipment
-                      ? "#ecfdf5"
-                      : credoStatus.isFailed
-                        ? "#fef2f2"
-                        : "#fffbeb",
-                    border: `1px solid ${
-                      credoStatus.isSuccessful || credoStatus.isReadyForShipment
-                        ? "#a7f3d0"
-                        : credoStatus.isFailed
-                          ? "#fecaca"
-                          : "#fde68a"
-                    }`,
-                    marginBottom: "12px",
-                  }}>
-                    {credoStatus.isSuccessful || credoStatus.isReadyForShipment ? (
-                      <CheckCircle2 style={{ width: "20px", height: "20px", color: "#059669" }} />
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "8px",
+                      padding: "12px 16px",
+                      borderRadius: "10px",
+                      backgroundColor:
+                        credoStatus.isSuccessful ||
+                        credoStatus.isReadyForShipment
+                          ? "#ecfdf5"
+                          : credoStatus.isFailed
+                            ? "#fef2f2"
+                            : "#fffbeb",
+                      border: `1px solid ${
+                        credoStatus.isSuccessful ||
+                        credoStatus.isReadyForShipment
+                          ? "#a7f3d0"
+                          : credoStatus.isFailed
+                            ? "#fecaca"
+                            : "#fde68a"
+                      }`,
+                      marginBottom: "12px",
+                    }}
+                  >
+                    {credoStatus.isSuccessful ||
+                    credoStatus.isReadyForShipment ? (
+                      <CheckCircle2
+                        style={{
+                          width: "20px",
+                          height: "20px",
+                          color: "#059669",
+                        }}
+                      />
                     ) : credoStatus.isFailed ? (
-                      <XCircle style={{ width: "20px", height: "20px", color: "#dc2626" }} />
+                      <XCircle
+                        style={{
+                          width: "20px",
+                          height: "20px",
+                          color: "#dc2626",
+                        }}
+                      />
                     ) : (
-                      <Clock style={{ width: "20px", height: "20px", color: "#d97706" }} />
+                      <Clock
+                        style={{
+                          width: "20px",
+                          height: "20px",
+                          color: "#d97706",
+                        }}
+                      />
                     )}
                     <div>
-                      <div style={{
-                        fontWeight: 600,
-                        color: credoStatus.isSuccessful || credoStatus.isReadyForShipment
-                          ? "#059669"
-                          : credoStatus.isFailed
-                            ? "#dc2626"
-                            : "#d97706",
-                      }}>
+                      <div
+                        style={{
+                          fontWeight: 600,
+                          color:
+                            credoStatus.isSuccessful ||
+                            credoStatus.isReadyForShipment
+                              ? "#059669"
+                              : credoStatus.isFailed
+                                ? "#dc2626"
+                                : "#d97706",
+                        }}
+                      >
                         {credoStatus.statusName}
                       </div>
-                      <div style={{ fontSize: "13px", color: "#6b7280", marginTop: "2px" }}>
-                        {credoStatus.isSuccessful || credoStatus.isReadyForShipment
-                          ? (language === "ge" ? "განვადება დამტკიცებულია" : "Installment approved")
+                      <div
+                        style={{
+                          fontSize: "13px",
+                          color: "#6b7280",
+                          marginTop: "2px",
+                        }}
+                      >
+                        {credoStatus.isSuccessful ||
+                        credoStatus.isReadyForShipment
+                          ? language === "ge"
+                            ? "განვადება დამტკიცებულია"
+                            : "Installment approved"
                           : credoStatus.isFailed
-                            ? (language === "ge" ? "სამწუხაროდ, განვადება არ დამტკიცდა" : "Installment was not approved")
-                            : (language === "ge" ? "განვადების განაცხადი მუშავდება" : "Installment application is being processed")}
+                            ? language === "ge"
+                              ? "სამწუხაროდ, განვადება არ დამტკიცდა"
+                              : "Installment was not approved"
+                            : language === "ge"
+                              ? "განვადების განაცხადი მუშავდება"
+                              : "Installment application is being processed"}
                       </div>
                     </div>
                   </div>
 
                   {/* Additional info */}
                   {credoStatus.isPending && (
-                    <div style={{
-                      padding: "10px 14px",
-                      borderRadius: "8px",
-                      backgroundColor: "#f0f9ff",
-                      border: "1px solid #bae6fd",
-                      fontSize: "13px",
-                      color: "#0369a1",
-                    }}>
+                    <div
+                      style={{
+                        padding: "10px 14px",
+                        borderRadius: "8px",
+                        backgroundColor: "#f0f9ff",
+                        border: "1px solid #bae6fd",
+                        fontSize: "13px",
+                        color: "#0369a1",
+                      }}
+                    >
                       {language === "ge"
                         ? "მარაგი დარეზერვებულია თქვენთვის. განვადების დამტკიცების შემდეგ შეკვეთა ავტომატურად დადასტურდება."
                         : "Stock is reserved for you. After installment approval, the order will be automatically confirmed."}
@@ -365,14 +443,16 @@ export function OrderDetails({ order }: OrderDetailsProps) {
                   )}
 
                   {credoStatus.isReadyForShipment && (
-                    <div style={{
-                      padding: "10px 14px",
-                      borderRadius: "8px",
-                      backgroundColor: "#ecfdf5",
-                      border: "1px solid #a7f3d0",
-                      fontSize: "13px",
-                      color: "#065f46",
-                    }}>
+                    <div
+                      style={{
+                        padding: "10px 14px",
+                        borderRadius: "8px",
+                        backgroundColor: "#ecfdf5",
+                        border: "1px solid #a7f3d0",
+                        fontSize: "13px",
+                        color: "#065f46",
+                      }}
+                    >
                       {language === "ge"
                         ? "ხელშეკრულება ხელმოწერილია. პროდუქტი მალე გამოგეგზავნებათ."
                         : "Contract signed. Your product will be shipped soon."}
@@ -380,14 +460,16 @@ export function OrderDetails({ order }: OrderDetailsProps) {
                   )}
 
                   {credoStatus.isFailed && (
-                    <div style={{
-                      padding: "10px 14px",
-                      borderRadius: "8px",
-                      backgroundColor: "#fef2f2",
-                      border: "1px solid #fecaca",
-                      fontSize: "13px",
-                      color: "#991b1b",
-                    }}>
+                    <div
+                      style={{
+                        padding: "10px 14px",
+                        borderRadius: "8px",
+                        backgroundColor: "#fef2f2",
+                        border: "1px solid #fecaca",
+                        fontSize: "13px",
+                        color: "#991b1b",
+                      }}
+                    >
                       <p style={{ marginBottom: "8px" }}>
                         {language === "ge"
                           ? "განვადება არ დამტკიცდა. შეკვეთა გაუქმდა და სტოკი გათავისუფლდა. შეგიძლიათ ხელახლა შეუკვეთოთ სხვა გადახდის მეთოდით."
@@ -406,27 +488,41 @@ export function OrderDetails({ order }: OrderDetailsProps) {
                           textDecoration: "none",
                         }}
                       >
-                        {language === "ge" ? "მაღაზიაში დაბრუნება" : "Back to Shop"}
+                        {language === "ge"
+                          ? "მაღაზიაში დაბრუნება"
+                          : "Back to Shop"}
                       </Link>
                     </div>
                   )}
                 </div>
               ) : credoOrderCode ? (
-                <div style={{
-                  padding: "12px 16px",
-                  borderRadius: "10px",
-                  backgroundColor: "#fffbeb",
-                  border: "1px solid #fde68a",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "8px",
-                }}>
-                  <Clock style={{ width: "20px", height: "20px", color: "#d97706" }} />
+                <div
+                  style={{
+                    padding: "12px 16px",
+                    borderRadius: "10px",
+                    backgroundColor: "#fffbeb",
+                    border: "1px solid #fde68a",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "8px",
+                  }}
+                >
+                  <Clock
+                    style={{ width: "20px", height: "20px", color: "#d97706" }}
+                  />
                   <div>
                     <div style={{ fontWeight: 600, color: "#d97706" }}>
-                      {language === "ge" ? "განაცხადი გაგზავნილია" : "Application submitted"}
+                      {language === "ge"
+                        ? "განაცხადი გაგზავნილია"
+                        : "Application submitted"}
                     </div>
-                    <div style={{ fontSize: "13px", color: "#6b7280", marginTop: "2px" }}>
+                    <div
+                      style={{
+                        fontSize: "13px",
+                        color: "#6b7280",
+                        marginTop: "2px",
+                      }}
+                    >
                       {language === "ge"
                         ? "კრედო ბანკი განიხილავს თქვენს განაცხადს. სტატუსი განახლდება ავტომატურად."
                         : "Credo Bank is reviewing your application. Status will update automatically."}
@@ -434,14 +530,16 @@ export function OrderDetails({ order }: OrderDetailsProps) {
                   </div>
                 </div>
               ) : (
-                <div style={{
-                  padding: "12px 16px",
-                  borderRadius: "10px",
-                  backgroundColor: "#f3f4f6",
-                  border: "1px solid #e5e7eb",
-                  fontSize: "13px",
-                  color: "#6b7280",
-                }}>
+                <div
+                  style={{
+                    padding: "12px 16px",
+                    borderRadius: "10px",
+                    backgroundColor: "#f3f4f6",
+                    border: "1px solid #e5e7eb",
+                    fontSize: "13px",
+                    color: "#6b7280",
+                  }}
+                >
                   {language === "ge"
                     ? "განვადების მოთხოვნის გასაგზავნად დააჭირეთ ქვემოთ მოცემულ ღილაკს."
                     : "Click the button below to submit your installment request."}
@@ -449,155 +547,245 @@ export function OrderDetails({ order }: OrderDetailsProps) {
               )}
             </div>
           )}
-
-          {/* Order Items - Grouped by delivery type with fixed string comparison */}
-          <div className="order-card">
-            <h2 className="order-subtitle">{t("order.orderItems")}</h2>
-
-            {sellerDeliveryItems.length > 0 && (
-              <div className="delivery-group">
-                <div className="delivery-group-header">
-                  <Store className="icon" />
-                  <h3>{t("order.sellerDelivery")}</h3>
-                </div>
-                {sellerDeliveryItems.map((item) => (
-                  <div
-                    key={`${item.productId}-${item.color ?? "c"}-${
-                      item.size ?? "s"
-                    }-${item.ageGroup ?? "a"}`}
-                    className="order-item"
-                  >
-                    <div className="order-item-image">
-                      <Image
-                        src={item.image}
-                        alt={getDisplayName(item)}
-                        fill
-                        className="object-cover rounded-md"
-                      />
-                    </div>{" "}
-                    <div className="order-item-details">
-                      <Link
-                        href={`/products/${item.productId}`}
-                        className="order-item-link"
-                      >
-                        {getDisplayName(item)}
-                      </Link>{" "}
-                      {/* Display variant information if available */}
-                      {(item.size || item.color || item.ageGroup) && (
-                        <div className="variant-info">
-                          {item.size && (
-                            <span className="variant-tag">
-                              {t("cart.size")}: {item.size}
-                            </span>
-                          )}
-                          {item.color && (
-                            <span className="variant-tag">
-                              {t("cart.color")}:{" "}
-                              {getLocalizedColorName(item.color)}
-                            </span>
-                          )}
-                          {item.ageGroup && (
-                            <span className="variant-tag">
-                              {t("cart.age")}:{" "}
-                              {getLocalizedAgeGroupName(item.ageGroup)}
-                            </span>
-                          )}
+          {/* ── Voucher purchase: show issued voucher code ── */}
+          {order.orderType === "voucher" && (
+            <div className="order-card">
+              <h2 className="order-subtitle">
+                🎟 {language === "ge" ? "შენი ვაუჩერი" : "Your Voucher"}
+              </h2>
+              {order.isPaid && order.issuedVoucherCode ? (
+                <>
+                  {/* ── Gift card visual ── */}
+                  <div className="ivc-card">
+                    <div className="ivc-card-top">
+                      <span className="ivc-brand">SoulArt</span>
+                      <span className="ivc-label">{language === "ge" ? "საჩუქრის ვაუჩერი" : "Gift Voucher"}</span>
+                    </div>
+                    <div className="ivc-amount">
+                      {order.issuedVoucherCurrency === "USD"
+                        ? `$${order.issuedVoucherAmount}`
+                        : `${order.issuedVoucherAmount} ${order.issuedVoucherCurrency === "EUR" ? "€" : "₾"}`}
+                    </div>
+                    <div className="ivc-divider" />
+                    <div className="ivc-bottom">
+                      <div className="ivc-qr">
+                        <QRCodeSVG
+                          value={order.issuedVoucherCode!}
+                          size={80}
+                          bgColor="transparent"
+                          fgColor="rgba(255,255,255,0.85)"
+                          level="M"
+                        />
+                      </div>
+                      <div className="ivc-meta">
+                        <div className="ivc-code">{order.issuedVoucherCode}</div>
+                        <div className="ivc-valid">
+                          {language === "ge" ? "მოქმედი · 1 თვე · soulart.ge" : "Valid · 1 month · soulart.ge"}
                         </div>
-                      )}
-                      <p>
-                        {item.qty} x{" "}
-                        {formatPrice(item.price, 1)}{" "}
-                        ={" "}
-                        {formatPrice(item.price, item.qty)}
-                      </p>
-                      {item.product?.minDeliveryDays &&
-                        item.product?.maxDeliveryDays && (
-                          <p className="delivery-time">
-                            {t("order.deliveryTime")}:{" "}
-                            {item.product.minDeliveryDays}-
-                            {item.product.maxDeliveryDays} {t("order.days")}
-                          </p>
-                        )}
+                      </div>
                     </div>
                   </div>
-                ))}
-              </div>
-            )}
 
-            {soulArtDeliveryItems.length > 0 && (
-              <div className="delivery-group">
-                {/* <div className="delivery-group-header">
+                  {/* ── Code highlight + copy ── */}
+                  <div className="ivc-code-box">
+                    <div className="ivc-code-label">✅ {language === "ge" ? "ვაუჩერის კოდი" : "Voucher Code"}</div>
+                    <div className="ivc-code-value">{order.issuedVoucherCode}</div>
+                    <button
+                      className="btn-copy-voucher"
+                      onClick={() => {
+                        navigator.clipboard.writeText(order.issuedVoucherCode!);
+                      }}
+                    >
+                      📋 {language === "ge" ? "კოდის კოპირება" : "Copy Code"}
+                    </button>
+                  </div>
+
+                  {/* ── Print button ── */}
+                  <button
+                    className="btn-print-voucher"
+                    onClick={() => {
+                      const win = window.open("", "PrintVoucher", "width=520,height=420");
+                      if (!win) return;
+                      const sym = order.issuedVoucherCurrency === "USD" ? "$" : order.issuedVoucherCurrency === "EUR" ? "€" : "₾";
+                      const amtStr = order.issuedVoucherCurrency === "USD" ? `${sym}${order.issuedVoucherAmount}` : `${order.issuedVoucherAmount} ${sym}`;
+                      win.document.write(`<html><head><title>SoulArt Gift Voucher</title>
+                        <style>body{font-family:Georgia,serif;background:#fff;padding:40px;text-align:center;}
+                        .card{border-radius:20px;padding:40px 32px;max-width:440px;margin:0 auto;background:linear-gradient(145deg,#1a1a2e,#0f3460);color:#fff;}
+                        .logo{font-size:1.6rem;font-weight:900;letter-spacing:.05em;margin-bottom:6px;}
+                        .label{font-size:.7rem;text-transform:uppercase;letter-spacing:.2em;opacity:.5;margin-bottom:20px;}
+                        .amount{font-size:3.8rem;font-weight:900;margin-bottom:20px;}
+                        hr{border:none;border-top:1px solid rgba(255,255,255,.15);margin-bottom:20px;}
+                        .code{background:rgba(255,255,255,.12);border:1px dashed rgba(255,255,255,.35);border-radius:10px;padding:12px 24px;font-size:1.5rem;font-weight:700;letter-spacing:.12em;display:inline-block;margin-bottom:12px;font-family:'Courier New',monospace;}
+                        .hint{font-size:.7rem;opacity:.45;margin-top:8px;}</style></head><body>
+                        <div class="card">
+                          <div class="logo">SoulArt</div>
+                          <div class="label">Gift Voucher · საჩუქრის ვაუჩერი</div>
+                          <div class="amount">${amtStr}</div>
+                          <hr/>
+                          <div class="code">${order.issuedVoucherCode}</div>
+                          <div class="hint">Valid 1 month · Single use · soulart.ge</div>
+                        </div></body></html>`);
+                      win.document.close(); win.focus(); win.print();
+                    }}
+                  >
+                    🖨 {language === "ge" ? "ამობეჭდვა" : "Print Voucher"}
+                  </button>
+                </>
+              ) : (
+                <div className="alert error">
+                  <XCircle className="icon" />
+                  <span>
+                    {language === "ge"
+                      ? "ვაუჩერი გადახდის შემდეგ გამოჩნდება."
+                      : "Your voucher code will appear after payment is confirmed."}
+                  </span>
+                </div>
+              )}
+            </div>
+          )}
+          {/* Order Items - Grouped by delivery type with fixed string comparison */}
+          {order.orderType !== "voucher" && (
+            <div className="order-card">
+              <h2 className="order-subtitle">{t("order.orderItems")}</h2>
+
+              {sellerDeliveryItems.length > 0 && (
+                <div className="delivery-group">
+                  <div className="delivery-group-header">
+                    <Store className="icon" />
+                    <h3>{t("order.sellerDelivery")}</h3>
+                  </div>
+                  {sellerDeliveryItems.map((item) => (
+                    <div
+                      key={`${item.productId}-${item.color ?? "c"}-${
+                        item.size ?? "s"
+                      }-${item.ageGroup ?? "a"}`}
+                      className="order-item"
+                    >
+                      <div className="order-item-image">
+                        <Image
+                          src={item.image}
+                          alt={getDisplayName(item)}
+                          fill
+                          className="object-cover rounded-md"
+                        />
+                      </div>{" "}
+                      <div className="order-item-details">
+                        <Link
+                          href={`/products/${item.productId}`}
+                          className="order-item-link"
+                        >
+                          {getDisplayName(item)}
+                        </Link>{" "}
+                        {/* Display variant information if available */}
+                        {(item.size || item.color || item.ageGroup) && (
+                          <div className="variant-info">
+                            {item.size && (
+                              <span className="variant-tag">
+                                {t("cart.size")}: {item.size}
+                              </span>
+                            )}
+                            {item.color && (
+                              <span className="variant-tag">
+                                {t("cart.color")}:{" "}
+                                {getLocalizedColorName(item.color)}
+                              </span>
+                            )}
+                            {item.ageGroup && (
+                              <span className="variant-tag">
+                                {t("cart.age")}:{" "}
+                                {getLocalizedAgeGroupName(item.ageGroup)}
+                              </span>
+                            )}
+                          </div>
+                        )}
+                        <p>
+                          {item.qty} x {formatPrice(item.price, 1)} ={" "}
+                          {formatPrice(item.price, item.qty)}
+                        </p>
+                        {item.product?.minDeliveryDays &&
+                          item.product?.maxDeliveryDays && (
+                            <p className="delivery-time">
+                              {t("order.deliveryTime")}:{" "}
+                              {item.product.minDeliveryDays}-
+                              {item.product.maxDeliveryDays} {t("order.days")}
+                            </p>
+                          )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {soulArtDeliveryItems.length > 0 && (
+                <div className="delivery-group">
+                  {/* <div className="delivery-group-header">
                   <Truck className="icon" />
                   <h3>{t("soulArt Courier")}</h3>
                 </div> */}
-                {soulArtDeliveryItems.map((item) => (
-                  <div
-                    key={`${item.productId}-${item.color ?? "c"}-${
-                      item.size ?? "s"
-                    }-${item.ageGroup ?? "a"}`}
-                    className="order-item"
-                  >
-                    <div className="order-item-image">
-                      <Image
-                        src={item.image}
-                        alt={getDisplayName(item)}
-                        fill
-                        className="object-cover rounded-md"
-                      />
-                    </div>{" "}
-                    <div className="order-item-details">
-                      <Link
-                        href={`/products/${item.productId}`}
-                        className="order-item-link"
-                      >
-                        {getDisplayName(item)}
-                      </Link>{" "}
-                      {/* Display variant information if available */}
-                      {(item.size || item.color || item.ageGroup) && (
-                        <div className="variant-info">
-                          {item.size && (
-                            <span className="variant-tag">
-                              {t("cart.size")}: {item.size}
-                            </span>
-                          )}
-                          {item.color && (
-                            <span className="variant-tag">
-                              {t("cart.color")}:{" "}
-                              {getLocalizedColorName(item.color)}
-                            </span>
-                          )}
-                          {item.ageGroup && (
-                            <span className="variant-tag">
-                              {t("cart.age")}:{" "}
-                              {getLocalizedAgeGroupName(item.ageGroup)}
-                            </span>
-                          )}
-                        </div>
-                      )}
-                      <p>
-                        {item.qty} x{" "}
-                        {formatPrice(item.price, 1)}
-                        ={" "}
-                        {formatPrice(item.price, item.qty)}
-                      </p>
+                  {soulArtDeliveryItems.map((item) => (
+                    <div
+                      key={`${item.productId}-${item.color ?? "c"}-${
+                        item.size ?? "s"
+                      }-${item.ageGroup ?? "a"}`}
+                      className="order-item"
+                    >
+                      <div className="order-item-image">
+                        <Image
+                          src={item.image}
+                          alt={getDisplayName(item)}
+                          fill
+                          className="object-cover rounded-md"
+                        />
+                      </div>{" "}
+                      <div className="order-item-details">
+                        <Link
+                          href={`/products/${item.productId}`}
+                          className="order-item-link"
+                        >
+                          {getDisplayName(item)}
+                        </Link>{" "}
+                        {/* Display variant information if available */}
+                        {(item.size || item.color || item.ageGroup) && (
+                          <div className="variant-info">
+                            {item.size && (
+                              <span className="variant-tag">
+                                {t("cart.size")}: {item.size}
+                              </span>
+                            )}
+                            {item.color && (
+                              <span className="variant-tag">
+                                {t("cart.color")}:{" "}
+                                {getLocalizedColorName(item.color)}
+                              </span>
+                            )}
+                            {item.ageGroup && (
+                              <span className="variant-tag">
+                                {t("cart.age")}:{" "}
+                                {getLocalizedAgeGroupName(item.ageGroup)}
+                              </span>
+                            )}
+                          </div>
+                        )}
+                        <p>
+                          {item.qty} x {formatPrice(item.price, 1)}={" "}
+                          {formatPrice(item.price, item.qty)}
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}{" "}
+          {/* end order.orderType !== "voucher" */}
         </div>
-
-        {/* Order Summary */}
         <div className="order-right">
           <div className="order-card">
             <h2 className="order-subtitle">{t("order.orderSummary")}</h2>
             <div className="order-summary">
               <div className="summary-item">
                 <span>{t("order.items")}</span>
-                <span>
-                  {formatPrice(order.itemsPrice, 1)}
-                </span>
+                <span>{formatPrice(order.itemsPrice, 1)}</span>
               </div>
               <div className="summary-item">
                 <span>{t("order.shipping")}</span>
@@ -609,16 +797,12 @@ export function OrderDetails({ order }: OrderDetailsProps) {
               </div>
               <div className="summary-item">
                 <span>{t("order.tax")}</span>
-                <span>
-                  {formatPrice(order.taxPrice, 1)}
-                </span>
+                <span>{formatPrice(order.taxPrice, 1)}</span>
               </div>
               <hr />
               <div className="summary-total">
                 <span>{t("order.total")}</span>
-                <span>
-                  {formatPrice(displayAmount, 1)}
-                </span>
+                <span>{formatPrice(displayAmount, 1)}</span>
               </div>
               {/* Stock expiration warning */}
               {!order.isPaid && isStockExpired && (
@@ -670,7 +854,12 @@ export function OrderDetails({ order }: OrderDetailsProps) {
                   <CredoInstallmentButton
                     orderId={order._id}
                     items={order.orderItems.map((item: OrderItem) => ({
-                      productId: typeof item.productId === 'string' ? item.productId : (item.productId as { _id?: { toString(): string } })?._id?.toString() || '',
+                      productId:
+                        typeof item.productId === "string"
+                          ? item.productId
+                          : (
+                              item.productId as { _id?: { toString(): string } }
+                            )?._id?.toString() || "",
                       name: item.name,
                       qty: item.qty,
                       price: item.price,

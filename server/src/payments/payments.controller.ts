@@ -143,10 +143,19 @@ export class PaymentsController {
               'unknown@unknown.com',
           };
 
-          await this.paymentsService['ordersService'].updateOrderByExternalId(
-            order.externalOrderId,
-            paymentResult,
-          );
+          // Voucher orders need special fulfillment (creates voucher code)
+          if (order.orderType === 'voucher') {
+            console.log('Voucher order detected, calling fulfillVoucherOrder...');
+            await this.paymentsService['ordersService'].fulfillVoucherOrder(
+              order.externalOrderId,
+              paymentResult,
+            );
+          } else {
+            await this.paymentsService['ordersService'].updateOrderByExternalId(
+              order.externalOrderId,
+              paymentResult,
+            );
+          }
 
           console.log('Order updated successfully to isPaid=true');
 

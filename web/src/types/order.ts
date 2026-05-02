@@ -24,7 +24,7 @@ export interface Order {
     phoneNumber: string;
     fullName: string;
   };
-  orderType?: "regular" | "auction";
+  orderType?: "regular" | "auction" | "voucher";
   auctionId?: {
     _id: string;
     title: string;
@@ -58,4 +58,11 @@ export interface Order {
   status: "pending" | "paid" | "delivered" | "cancelled";
   statusReason?: string;
   stockReservationExpires?: string;
+  // Voucher used to pay for this order
+  voucherCode?: string;
+  voucherDiscountAmount?: number;
+  // Voucher issued BY this order (voucher purchase)
+  issuedVoucherCode?: string;
+  issuedVoucherAmount?: number;
+  issuedVoucherCurrency?: string;
 }

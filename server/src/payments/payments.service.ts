@@ -237,6 +237,39 @@ export class PaymentsService {
       );
 
       if (isPaymentSuccessful && external_order_id) {
+        // ── Voucher purchase callback ───────────────────────────────────────
+        if (external_order_id.startsWith('voucher_')) {
+          this.logger.log(
+            `Processing voucher purchase callback: ${external_order_id}`,
+          );
+          try {
+            const paymentResult = {
+              id: order_id || external_order_id,
+              status: 'COMPLETED',
+              update_time: new Date().toISOString(),
+              email_address:
+                paymentStatus?.buyer?.email || 'unknown@unknown.com',
+            };
+            await this.ordersService.fulfillVoucherOrder(
+              external_order_id,
+              paymentResult,
+            );
+            return {
+              success: true,
+              message: 'Voucher order fulfilled successfully',
+            };
+          } catch (error) {
+            this.logger.error(
+              `Failed to fulfill voucher order ${external_order_id}: ${error.message}`,
+            );
+            return {
+              success: false,
+              message: 'Failed to fulfill voucher order: ' + error.message,
+            };
+          }
+        }
+        // ───────────────────────────────────────────────────────────────────
+
         // Check if this is a promotion payment
         if (external_order_id.startsWith('promo_')) {
           this.logger.log(
@@ -848,13 +881,31 @@ export class PaymentsService {
       );
 
       if (response.data.status === 'COMPLETED') {
-        // Mark order as paid
-        await this.ordersService.updateOrderPaymentInfo(orderId, {
-          id: paypalOrderId,
-          status: 'COMPLETED',
-          update_time: new Date().toISOString(),
-          paymentMethod: 'PAYPAL',
-        });
+        // Check if this is a voucher order — requires special fulfillment
+        const order = await this.ordersService.findById(orderId);
+        if (order?.orderType === 'voucher') {
+          // Fulfil voucher: create code, mark paid, send emails
+          await this.ordersService.fulfillVoucherOrder(
+            (order as any).externalOrderId || `voucher_${orderId}`,
+            {
+              id: paypalOrderId,
+              status: 'COMPLETED',
+              update_time: new Date().toISOString(),
+              email_address:
+                (response.data as any)?.purchase_units?.[0]?.payments
+                  ?.captures?.[0]?.seller_receivable_breakdown?.paypal_fee
+                  ?.value ?? '',
+            },
+          );
+        } else {
+          // Regular / auction order
+          await this.ordersService.updateOrderPaymentInfo(orderId, {
+            id: paypalOrderId,
+            status: 'COMPLETED',
+            update_time: new Date().toISOString(),
+            paymentMethod: 'PAYPAL',
+          });
+        }
 
         return {
           success: true,

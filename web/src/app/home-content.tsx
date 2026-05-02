@@ -5,6 +5,7 @@ import dynamic from "next/dynamic";
 import HomePagesHead from "@/components/homePagesHead/homePagesHead";
 import { useLanguage } from "@/hooks/LanguageContext";
 import { trackPageView } from "@/lib/ga4-analytics";
+import VoucherBanner from "@/components/voucherBanner/VoucherBanner";
 
 // Above-the-fold: hero slider
 // Below-the-fold components - all ssr: false to prevent hydration blocking
@@ -57,10 +58,10 @@ const HomePageForum = dynamic(
   { ssr: false, loading: () => <div style={{ minHeight: "300px" }} /> },
 );
 
-const HomeFAQ = dynamic(
-  () => import("@/components/homeFAQ/HomeFAQ"),
-  { ssr: false, loading: () => <div style={{ minHeight: "200px" }} /> },
-);
+const HomeFAQ = dynamic(() => import("@/components/homeFAQ/HomeFAQ"), {
+  ssr: false,
+  loading: () => <div style={{ minHeight: "200px" }} />,
+});
 
 export default function HomeContent() {
   const { language } = useLanguage();
@@ -78,6 +79,7 @@ export default function HomeContent() {
       <PremiumRail />
       <DiscountedRail />
       <GiftCategories />
+      <VoucherBanner />
       <SpringCollection />
       <HomePageShop key={`home-shop-${language}`} />
       <PopularArtists />

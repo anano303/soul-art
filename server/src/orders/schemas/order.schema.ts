@@ -31,7 +31,7 @@ export class Order {
   // Order type: regular (product orders) or auction (auction winner orders)
   @Prop({
     type: String,
-    enum: ['regular', 'auction'],
+    enum: ['regular', 'auction', 'voucher'],
     default: 'regular',
   })
   orderType!: string;
@@ -202,6 +202,26 @@ export class Order {
 
   @Prop({ type: Boolean, default: false })
   hasReferralDiscount?: boolean; // Quick flag to identify referral orders
+
+  // Voucher discount
+  @Prop({ type: String, default: null })
+  voucherCode?: string | null;
+
+  @Prop({ type: Number, default: 0 })
+  voucherDiscountAmount?: number; // Discount in user's paid currency
+
+  @Prop({ type: String, default: null })
+  voucherCurrency?: string | null; // Currency of the voucher used
+
+  // ── Fields for orders that ARE a voucher purchase ────────────────────────
+  @Prop({ type: String, default: null })
+  issuedVoucherCode?: string | null; // The voucher code generated when this order was paid
+
+  @Prop({ type: Number, default: null })
+  issuedVoucherAmount?: number | null;
+
+  @Prop({ type: String, default: null })
+  issuedVoucherCurrency?: string | null;
 }
 
 export const OrderSchema = SchemaFactory.createForClass(Order);

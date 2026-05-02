@@ -4,34 +4,144 @@ import { Suspense } from "react";
 import dynamic from "next/dynamic";
 
 // All non-critical components loaded with ssr: false to prevent hydration blocking
-const MessengerChatWrapper = dynamic(() => import("@/components/MessengerChat/MessengerChatWrapper"), { ssr: false });
-const MetaPixel = dynamic(() => import("@/components/MetaPixel"), { ssr: false });
-const NetworkStatus = dynamic(() => import("@/components/network-status/network-status").then(m => ({ default: m.NetworkStatus })), { ssr: false });
-const VisitorTracker = dynamic(() => import("@/components/visitor-tracker").then(m => ({ default: m.VisitorTracker })), { ssr: false });
-const IOSGesturePrevention = dynamic(() => import("@/components/ios-gesture-prevention").then(m => ({ default: m.IOSGesturePrevention })), { ssr: false });
-const SalesTracker = dynamic(() => import("@/components/SalesTracker").then(m => ({ default: m.SalesTracker })), { ssr: false });
-const SalesManagerBanner = dynamic(() => import("@/components/sales-manager-banner/sales-manager-banner"), { ssr: false });
-const PWAInstallPrompt = dynamic(() => import("@/components/pwa-install-prompt/pwa-install-prompt").then(m => ({ default: m.PWAInstallPrompt })), { ssr: false });
-const PushNotificationManager = dynamic(() => import("@/components/push-notifications/push-notifications").then(m => ({ default: m.PushNotificationManager })), { ssr: false });
-const PWAManager = dynamic(() => import("@/components/pwa-manager"), { ssr: false });
-const CampaignConsentPrompt = dynamic(() => import("@/components/campaign-consent/campaign-consent-prompt").then(m => ({ default: m.CampaignConsentPrompt })), { ssr: false });
-const ReferralCodeInput = dynamic(() => import("@/components/referral-code-input/referral-code-input").then(m => ({ default: m.ReferralCodeInput })), { ssr: false });
-const CallRequestPopup = dynamic(() => import("@/components/call-request-popup/call-request-popup").then(m => ({ default: m.CallRequestPopup })), { ssr: false });
-const ImpersonationBanner = dynamic(() => import("@/components/ImpersonationBanner/ImpersonationBanner").then(m => ({ default: m.ImpersonationBanner })), { ssr: false });
-const InsurancePromo = dynamic(() => import("@/components/insurance-promo/insurance-promo"), { ssr: false });
-const GoogleAnalytics = dynamic(() => import("@/components/GoogleAnalytics"), { ssr: false });
-const VercelAnalytics = dynamic(() => import("@/components/VercelAnalytics"), { ssr: false });
-const GA4UserTracker = dynamic(() => import("@/components/ga4-user-tracker").then(m => ({ default: m.GA4UserTracker })), { ssr: false });
-const PageViewTracker = dynamic(() => import("@/components/page-view-tracker").then(m => ({ default: m.PageViewTracker })), { ssr: false });
-const FloatingCartIcon = dynamic(() => import("@/components/floating-cart-icon/floating-cart-icon").then(m => ({ default: m.FloatingCartIcon })), { ssr: false });
-const MobileBottomNav = dynamic(() => import("@/components/mobile-bottom-nav/mobile-bottom-nav").then(m => ({ default: m.MobileBottomNav })), { ssr: false });
-const Footer = dynamic(() => import("@/components/footer/footer"), { ssr: false });
+const MessengerChatWrapper = dynamic(
+  () => import("@/components/MessengerChat/MessengerChatWrapper"),
+  { ssr: false },
+);
+const MetaPixel = dynamic(() => import("@/components/MetaPixel"), {
+  ssr: false,
+});
+const NetworkStatus = dynamic(
+  () =>
+    import("@/components/network-status/network-status").then((m) => ({
+      default: m.NetworkStatus,
+    })),
+  { ssr: false },
+);
+const VisitorTracker = dynamic(
+  () =>
+    import("@/components/visitor-tracker").then((m) => ({
+      default: m.VisitorTracker,
+    })),
+  { ssr: false },
+);
+const IOSGesturePrevention = dynamic(
+  () =>
+    import("@/components/ios-gesture-prevention").then((m) => ({
+      default: m.IOSGesturePrevention,
+    })),
+  { ssr: false },
+);
+const SalesTracker = dynamic(
+  () =>
+    import("@/components/SalesTracker").then((m) => ({
+      default: m.SalesTracker,
+    })),
+  { ssr: false },
+);
+const SalesManagerBanner = dynamic(
+  () => import("@/components/sales-manager-banner/sales-manager-banner"),
+  { ssr: false },
+);
+const PWAInstallPrompt = dynamic(
+  () =>
+    import("@/components/pwa-install-prompt/pwa-install-prompt").then((m) => ({
+      default: m.PWAInstallPrompt,
+    })),
+  { ssr: false },
+);
+const PushNotificationManager = dynamic(
+  () =>
+    import("@/components/push-notifications/push-notifications").then((m) => ({
+      default: m.PushNotificationManager,
+    })),
+  { ssr: false },
+);
+const PWAManager = dynamic(() => import("@/components/pwa-manager"), {
+  ssr: false,
+});
+const CampaignConsentPrompt = dynamic(
+  () =>
+    import("@/components/campaign-consent/campaign-consent-prompt").then(
+      (m) => ({ default: m.CampaignConsentPrompt }),
+    ),
+  { ssr: false },
+);
+const ReferralCodeInput = dynamic(
+  () =>
+    import("@/components/referral-code-input/referral-code-input").then(
+      (m) => ({ default: m.ReferralCodeInput }),
+    ),
+  { ssr: false },
+);
+const CallRequestPopup = dynamic(
+  () =>
+    import("@/components/call-request-popup/call-request-popup").then((m) => ({
+      default: m.CallRequestPopup,
+    })),
+  { ssr: false },
+);
+const ImpersonationBanner = dynamic(
+  () =>
+    import("@/components/ImpersonationBanner/ImpersonationBanner").then(
+      (m) => ({ default: m.ImpersonationBanner }),
+    ),
+  { ssr: false },
+);
+const InsurancePromo = dynamic(
+  () => import("@/components/insurance-promo/insurance-promo"),
+  { ssr: false },
+);
+const GoogleAnalytics = dynamic(() => import("@/components/GoogleAnalytics"), {
+  ssr: false,
+});
+const VercelAnalytics = dynamic(() => import("@/components/VercelAnalytics"), {
+  ssr: false,
+});
+const GA4UserTracker = dynamic(
+  () =>
+    import("@/components/ga4-user-tracker").then((m) => ({
+      default: m.GA4UserTracker,
+    })),
+  { ssr: false },
+);
+const PageViewTracker = dynamic(
+  () =>
+    import("@/components/page-view-tracker").then((m) => ({
+      default: m.PageViewTracker,
+    })),
+  { ssr: false },
+);
+const FloatingCartIcon = dynamic(
+  () =>
+    import("@/components/floating-cart-icon/floating-cart-icon").then((m) => ({
+      default: m.FloatingCartIcon,
+    })),
+  { ssr: false },
+);
+const MobileBottomNav = dynamic(
+  () =>
+    import("@/components/mobile-bottom-nav/mobile-bottom-nav").then((m) => ({
+      default: m.MobileBottomNav,
+    })),
+  { ssr: false },
+);
+const Footer = dynamic(() => import("@/components/footer/footer"), {
+  ssr: false,
+});
 
 // Error boundary for messenger chat
-class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { hasError: boolean }> {
+class ErrorBoundary extends React.Component<
+  { children: React.ReactNode },
+  { hasError: boolean }
+> {
   state = { hasError: false };
-  static getDerivedStateFromError() { return { hasError: true }; }
-  render() { return this.state.hasError ? null : this.props.children; }
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+  render() {
+    return this.state.hasError ? null : this.props.children;
+  }
 }
 
 import React from "react";
@@ -110,8 +220,8 @@ export function LayoutDeferredComponents() {
         <MetaPixel />
       </Suspense>
 
-      {/* Vercel Analytics */}
-      <VercelAnalytics />
+      {/* Vercel Analytics — silently disabled outside Vercel hosting */}
+      {process.env.VERCEL === "1" && <VercelAnalytics />}
     </>
   );
 }

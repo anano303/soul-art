@@ -11,6 +11,7 @@ import { UsersModule } from '@/users/users.module';
 import { PushNotificationModule } from '@/push/push-notification.module';
 import { SalesCommissionModule } from '../sales-commission/sales-commission.module';
 import { PromotionModule } from '../promotions/promotion.module';
+import { VoucherModule } from '../vouchers/voucher.module';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { PromotionModule } from '../promotions/promotion.module';
     PushNotificationModule,
     forwardRef(() => SalesCommissionModule),
     forwardRef(() => PromotionModule),
+    VoucherModule,
   ],
   controllers: [OrdersController],
   providers: [OrdersService, StockReservationService],

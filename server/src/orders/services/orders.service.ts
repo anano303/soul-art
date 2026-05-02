@@ -25,6 +25,7 @@ import { InjectConnection } from '@nestjs/mongoose';
 import { Connection } from 'mongoose';
 import { SalesCommissionService } from '../../sales-commission/services/sales-commission.service';
 import { PromotionService } from '../../promotions/promotion.service';
+import { VoucherService } from '../../vouchers/services/voucher.service';
 
 @Injectable()
 export class OrdersService {
@@ -44,6 +45,8 @@ export class OrdersService {
     @Optional()
     @Inject(forwardRef(() => PromotionService))
     private readonly promotionService?: PromotionService,
+    @Optional()
+    private readonly voucherService?: VoucherService,
   ) {}
 
   private getPrimaryAppUrl(): string {
@@ -294,6 +297,7 @@ export class OrdersService {
       salesRefCode?: string;
       totalReferralDiscount?: number;
       hasReferralDiscount?: boolean;
+      voucherCode?: string;
     },
     userId: string,
     externalOrderId?: string,
@@ -310,6 +314,8 @@ export class OrdersService {
       totalReferralDiscount,
       hasReferralDiscount,
     } = orderAttrs;
+    const voucherCode = orderAttrs.voucherCode?.trim().toUpperCase() || null;
+    const paidCurrency: string = (orderAttrs as any).paidCurrency || 'GEL';
     if (orderItems && orderItems.length < 1)
       throw new BadRequestException('No order items received.');
     // Start MongoDB transaction to prevent race conditions
@@ -428,6 +434,44 @@ export class OrdersService {
             };
           }),
         );
+        // ─── Voucher application ─────────────────────────────────────────────
+        let finalPaidAmount: number =
+          (orderAttrs as any).paidAmount ?? totalPrice;
+        let finalTotalPrice: number = totalPrice;
+        let appliedVoucherCode: string | null = null;
+        let voucherDiscountAmount = 0;
+        let voucherCurrency: string = paidCurrency;
+
+        if (voucherCode && this.voucherService) {
+          const validation = await this.voucherService.validate(
+            voucherCode,
+            paidCurrency,
+          );
+          if (!validation.valid) {
+            throw new BadRequestException(
+              validation.message || 'ვაუჩერი არავალიდურია',
+            );
+          }
+          // Discount capped to the actual paid amount (cannot go negative)
+          voucherDiscountAmount = Math.min(validation.amount, finalPaidAmount);
+          voucherCurrency = validation.currency;
+          finalPaidAmount = Math.max(
+            0,
+            finalPaidAmount - voucherDiscountAmount,
+          );
+          // Proportionally reduce the GEL totalPrice
+          if (
+            (orderAttrs as any).paidAmount &&
+            (orderAttrs as any).paidAmount > 0
+          ) {
+            const ratio =
+              voucherDiscountAmount / (orderAttrs as any).paidAmount;
+            finalTotalPrice = Math.max(0, totalPrice * (1 - ratio));
+          }
+          appliedVoucherCode = voucherCode;
+        }
+        // ─────────────────────────────────────────────────────────────────────
+
         const createdOrder = await this.orderModel.create(
           [
             {
@@ -438,22 +482,37 @@ export class OrdersService {
               itemsPrice,
               taxPrice,
               shippingPrice,
-              totalPrice,
+              totalPrice: finalTotalPrice,
               currency: (orderAttrs as any).currency || 'GEL',
-              paidAmount: (orderAttrs as any).paidAmount,
+              paidAmount: finalPaidAmount,
               paidCurrency: (orderAttrs as any).paidCurrency,
               externalOrderId,
               salesRefCode: salesRefCode || null,
               totalReferralDiscount: totalReferralDiscount || 0,
               hasReferralDiscount: hasReferralDiscount || false,
+              voucherCode: appliedVoucherCode,
+              voucherDiscountAmount: voucherDiscountAmount,
+              voucherCurrency: voucherCurrency,
               // Credo installment needs longer reservation (7 days) since approval takes time
-              stockReservationExpires: paymentMethod === 'CredoInstallment'
-                ? new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
-                : new Date(Date.now() + 10 * 60 * 1000),
+              stockReservationExpires:
+                paymentMethod === 'CredoInstallment'
+                  ? new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+                  : new Date(Date.now() + 10 * 60 * 1000),
             },
           ],
           { session },
         );
+
+        // Atomically redeem voucher (links it to this order)
+        if (appliedVoucherCode && this.voucherService) {
+          await this.voucherService.redeem(
+            appliedVoucherCode,
+            voucherCurrency,
+            createdOrder[0]._id as Types.ObjectId,
+            new Types.ObjectId(userId),
+          );
+        }
+
         return createdOrder[0];
       });
 
@@ -481,6 +540,7 @@ export class OrdersService {
       currency?: string;
       paidAmount?: number;
       paidCurrency?: string;
+      voucherCode?: string;
     },
     externalOrderId?: string,
   ): Promise<OrderDocument> {
@@ -500,6 +560,7 @@ export class OrdersService {
       paidAmount,
       paidCurrency,
     } = orderAttrs;
+    const voucherCode = orderAttrs.voucherCode?.trim().toUpperCase() || null;
 
     if (orderItems && orderItems.length < 1)
       throw new BadRequestException('No order items received.');
@@ -626,6 +687,40 @@ export class OrdersService {
           }),
         );
 
+        // ─── Voucher application (guest) ─────────────────────────────────────
+        let guestFinalPaidAmount: number = paidAmount ?? totalPrice;
+        let guestFinalTotalPrice: number = totalPrice;
+        let guestAppliedVoucherCode: string | null = null;
+        let guestVoucherDiscountAmount = 0;
+        let guestVoucherCurrency: string = paidCurrency || 'GEL';
+
+        if (voucherCode && this.voucherService) {
+          const validation = await this.voucherService.validate(
+            voucherCode,
+            guestVoucherCurrency,
+          );
+          if (!validation.valid) {
+            throw new BadRequestException(
+              validation.message || 'ვაუჩერი არავალიდურია',
+            );
+          }
+          guestVoucherDiscountAmount = Math.min(
+            validation.amount,
+            guestFinalPaidAmount,
+          );
+          guestVoucherCurrency = validation.currency;
+          guestFinalPaidAmount = Math.max(
+            0,
+            guestFinalPaidAmount - guestVoucherDiscountAmount,
+          );
+          if (paidAmount && paidAmount > 0) {
+            const ratio = guestVoucherDiscountAmount / paidAmount;
+            guestFinalTotalPrice = Math.max(0, totalPrice * (1 - ratio));
+          }
+          guestAppliedVoucherCode = voucherCode;
+        }
+        // ─────────────────────────────────────────────────────────────────────
+
         const createdOrder = await this.orderModel.create(
           [
             {
@@ -638,22 +733,36 @@ export class OrdersService {
               itemsPrice,
               taxPrice,
               shippingPrice,
-              totalPrice,
+              totalPrice: guestFinalTotalPrice,
               currency: currency || 'GEL',
-              paidAmount,
+              paidAmount: guestFinalPaidAmount,
               paidCurrency,
               externalOrderId,
               salesRefCode: salesRefCode || null,
               totalReferralDiscount: totalReferralDiscount || 0,
               hasReferralDiscount: hasReferralDiscount || false,
+              voucherCode: guestAppliedVoucherCode,
+              voucherDiscountAmount: guestVoucherDiscountAmount,
+              voucherCurrency: guestVoucherCurrency,
               // Credo installment needs longer reservation (7 days) since approval takes time
-              stockReservationExpires: paymentMethod === 'CredoInstallment'
-                ? new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
-                : new Date(Date.now() + 10 * 60 * 1000),
+              stockReservationExpires:
+                paymentMethod === 'CredoInstallment'
+                  ? new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+                  : new Date(Date.now() + 10 * 60 * 1000),
             },
           ],
           { session },
         );
+
+        // Atomically redeem voucher (links it to this order)
+        if (guestAppliedVoucherCode && this.voucherService) {
+          await this.voucherService.redeem(
+            guestAppliedVoucherCode,
+            guestVoucherCurrency,
+            createdOrder[0]._id as Types.ObjectId,
+            null,
+          );
+        }
 
         return createdOrder[0];
       });
@@ -2064,5 +2173,140 @@ export class OrdersService {
       return hasSellerProduct;
     });
     return sellerOrders;
+  }
+
+  /**
+   * Create a voucher purchase order (no shipping, no product stock).
+   * Returns the order so the controller can create a BOG payment.
+   */
+  async createVoucherOrder(data: {
+    amount: 100 | 200 | 500;
+    currency: 'GEL' | 'USD' | 'EUR';
+    userId: string;
+    externalOrderId: string;
+  }): Promise<OrderDocument> {
+    const { amount, currency, userId, externalOrderId } = data;
+
+    const fakeShipping = {
+      address: 'Digital',
+      city: 'Digital',
+      postalCode: '',
+      country: 'GE',
+      phoneNumber: '',
+    };
+
+    const order = await this.orderModel.create({
+      user: userId,
+      orderType: 'voucher',
+      orderItems: [],
+      shippingDetails: fakeShipping,
+      paymentMethod: 'BOG',
+      itemsPrice: amount,
+      taxPrice: 0,
+      shippingPrice: 0,
+      totalPrice: amount,
+      currency,
+      paidAmount: amount,
+      paidCurrency: currency,
+      externalOrderId,
+      issuedVoucherAmount: amount,
+      issuedVoucherCurrency: currency,
+      stockReservationExpires: new Date(Date.now() + 30 * 60 * 1000), // 30 min
+    });
+
+    return order;
+  }
+
+  /**
+   * Called after BOG payment succeeds for a voucher order.
+   * Issues the voucher, marks order as paid, returns voucher code.
+   */
+  async fulfillVoucherOrder(
+    externalOrderId: string,
+    paymentResult: PaymentResult,
+  ): Promise<{ order: OrderDocument; voucherCode: string }> {
+    const order = await this.orderModel.findOne({ externalOrderId });
+    if (!order) {
+      throw new NotFoundException(
+        `Voucher order with external ID ${externalOrderId} not found`,
+      );
+    }
+    if (order.isPaid) {
+      throw new BadRequestException('Voucher order is already paid.');
+    }
+    if (order.orderType !== 'voucher') {
+      throw new BadRequestException('Order is not a voucher order.');
+    }
+
+    if (!this.voucherService) {
+      throw new Error('VoucherService not available');
+    }
+
+    // Issue the voucher
+    const issued = await this.voucherService.create({
+      amount: order.issuedVoucherAmount as 100 | 200 | 500,
+      currency: order.issuedVoucherCurrency as 'GEL' | 'USD' | 'EUR',
+    });
+
+    // Mark order as paid and store the issued code
+    order.isPaid = true;
+    order.paidAt = new Date().toISOString();
+    order.paymentResult = paymentResult;
+    order.status = 'paid';
+    order.issuedVoucherCode = issued.code;
+    order.stockReservationExpires = undefined;
+    await order.save();
+
+    // ── Send emails ────────────────────────────────────────────
+    try {
+      const populatedOrder: any = await this.orderModel
+        .findById(order._id)
+        .populate({
+          path: 'user',
+          select: 'email name ownerFirstName ownerLastName',
+        })
+        .lean();
+
+      const buyer = populatedOrder?.user;
+      const buyerEmail = buyer?.email as string | undefined;
+      const buyerName =
+        (buyer?.ownerFirstName
+          ? `${buyer.ownerFirstName} ${buyer.ownerLastName || ''}`.trim()
+          : buyer?.name) || 'მყიდველი';
+
+      const baseUrl = this.getPrimaryAppUrl();
+      const orderDetailsUrl = `${baseUrl}/orders/${order._id}`;
+
+      if (buyerEmail) {
+        await this.emailService.sendVoucherConfirmation({
+          to: buyerEmail,
+          customerName: buyerName,
+          voucherCode: issued.code,
+          amount: order.issuedVoucherAmount as number,
+          currency: order.issuedVoucherCurrency as string,
+          orderDetailsUrl,
+        });
+        this.logger.log(
+          `Voucher confirmation email sent to ${buyerEmail} for code ${issued.code}`,
+        );
+      }
+
+      // Admin notification
+      await this.emailService.sendVoucherAdminNotification({
+        voucherCode: issued.code,
+        amount: order.issuedVoucherAmount as number,
+        currency: order.issuedVoucherCurrency as string,
+        buyerEmail: buyerEmail || 'unknown',
+        buyerName,
+        orderId: String(order._id),
+      });
+    } catch (emailErr) {
+      this.logger.error(
+        `Failed to send voucher emails for order ${order._id}: ${emailErr.message}`,
+      );
+    }
+    // ───────────────────────────────────────────────────────────
+
+    return { order, voucherCode: issued.code };
   }
 }

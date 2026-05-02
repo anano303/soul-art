@@ -388,6 +388,101 @@
   margin-top: 1rem;
 }
 
+/* ─── Voucher styles ──────────────────────────────────────────────────────── */
+.voucher-input-section {
+  margin: 0.75rem 0;
+}
+
+.voucher-input-row {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.voucher-input {
+  flex: 1;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  letter-spacing: 0.05em;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.voucher-input:focus {
+  border-color: #6b7280;
+}
+
+.btn-voucher-apply {
+  padding: 0.5rem 1rem;
+  background: #111827;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.2s;
+}
+
+.btn-voucher-apply:hover:not(:disabled) {
+  background: #374151;
+}
+
+.btn-voucher-apply:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.voucher-error {
+  margin-top: 0.4rem;
+  font-size: 0.8rem;
+  color: #dc2626;
+}
+
+.voucher-applied-badge {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #ecfdf5;
+  border: 1px solid #10b981;
+  border-radius: 8px;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  color: #065f46;
+  gap: 0.5rem;
+}
+
+.btn-remove-voucher {
+  background: none;
+  border: none;
+  color: #6b7280;
+  cursor: pointer;
+  font-size: 0.875rem;
+  padding: 0 0.25rem;
+  line-height: 1;
+}
+
+.btn-remove-voucher:hover {
+  color: #dc2626;
+}
+
+.voucher-discount-row {
+  color: #059669;
+}
+
+.voucher-discount-amount {
+  color: #059669;
+  font-weight: 600;
+}
+
+.final-total-row {
+  border-top: 2px solid #111827;
+  padding-top: 0.5rem;
+  margin-top: 0.25rem;
+}
+/* ─────────────────────────────────────────────────────────────────────────── */
+
 .savings-icon {
   display: flex;
   align-items: center;
@@ -624,6 +719,16 @@
 .btn-bog-payment.selected {
   border: 2px solid #00d775;
   box-shadow: 0 0 0 2px rgba(0, 215, 117, 0.3);
+}
+
+.btn-bog-payment.voucher-full-cover {
+  background: linear-gradient(135deg, #15803d 0%, #166534 100%);
+  box-shadow: 0 2px 8px rgba(21, 128, 61, 0.3);
+}
+
+.btn-bog-payment.voucher-full-cover:hover:not(:disabled) {
+  background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+  box-shadow: 0 4px 16px rgba(21, 128, 61, 0.4);
 }
 
 .paypal-payment-content {

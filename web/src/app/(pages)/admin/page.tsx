@@ -116,6 +116,13 @@ export default function AdminDashboard() {
         roles: ["admin"], // მთავარი ადმინი
       },
       {
+        title: "ვაუჩერები",
+        href: "/admin/vouchers",
+        icon: "🎟",
+        description: "ვაუჩერების გენერაცია და მართვა (100/200/500 GEL/USD/EUR)",
+        roles: ["admin"],
+      },
+      {
         title: t("admin.geoTest"),
         href: "/admin/geo-test",
         icon: "🌍",

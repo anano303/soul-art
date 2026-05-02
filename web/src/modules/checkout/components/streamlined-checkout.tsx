@@ -87,8 +87,21 @@ export function StreamlinedCheckout() {
     {},
   );
   const [showPayPalButtons, setShowPayPalButtons] = useState(false);
-  const [exchangeRates, setExchangeRates] = useState<{ USD: number; EUR: number } | null>(null);
+  const [exchangeRates, setExchangeRates] = useState<{
+    USD: number;
+    EUR: number;
+  } | null>(null);
   const [foreignPaymentFee, setForeignPaymentFee] = useState<number>(20); // Default 20%
+
+  // Voucher state
+  const [voucherCode, setVoucherCode] = useState("");
+  const [appliedVoucher, setAppliedVoucher] = useState<{
+    code: string;
+    amount: number;
+    currency: string;
+  } | null>(null);
+  const [voucherError, setVoucherError] = useState<string | null>(null);
+  const [isValidatingVoucher, setIsValidatingVoucher] = useState(false);
 
   // Check for auction checkout mode on mount
   useEffect(() => {
@@ -116,7 +129,9 @@ export function StreamlinedCheckout() {
       try {
         const [ratesRes, feeRes] = await Promise.all([
           fetch(`${process.env.NEXT_PUBLIC_API_URL}/exchange-rate/latest`),
-          fetch(`${process.env.NEXT_PUBLIC_API_URL}/settings/foreign-payment-fee`),
+          fetch(
+            `${process.env.NEXT_PUBLIC_API_URL}/settings/foreign-payment-fee`,
+          ),
           fetchShippingRates(), // Fetch and cache shipping rates from API
         ]);
 
@@ -200,7 +215,7 @@ export function StreamlinedCheckout() {
   const baseShippingGel = shippingAddress
     ? calculateShipping(shippingCountry, shippingAddress?.city)
     : 0;
-  
+
   // Convert shipping to user's currency
   const shippingPrice = convertPrice(baseShippingGel);
 
@@ -210,21 +225,37 @@ export function StreamlinedCheckout() {
   // Total price in GEL (base prices)
   const totalPriceGEL = itemsPriceGEL + baseShippingGel;
 
+  // Apply voucher discount to the amount the user pays
+  const voucherDiscount = appliedVoucher
+    ? Math.min(appliedVoucher.amount, totalPrice)
+    : 0;
+  const finalPayAmount = Math.max(0, totalPrice - voucherDiscount);
+  const finalPayAmountGEL = Math.max(
+    0,
+    totalPrice > 0
+      ? totalPriceGEL * (finalPayAmount / totalPrice)
+      : totalPriceGEL,
+  );
+
   const totalUnits = checkoutItems.reduce((acc, item) => acc + item.qty, 0);
 
   // Currency symbol
-  const currencySymbol = currency === "USD" ? "$" : currency === "EUR" ? "€" : "₾";
-  
+  const currencySymbol =
+    currency === "USD" ? "$" : currency === "EUR" ? "€" : "₾";
+
   // Format price with currency symbol
   const formatPrice = (amount: number): string => {
     const formatted = amount.toFixed(2);
-    return currency === "USD" ? `${currencySymbol}${formatted}` : `${formatted} ${currencySymbol}`;
+    return currency === "USD"
+      ? `${currencySymbol}${formatted}`
+      : `${formatted} ${currencySymbol}`;
   };
 
   // Calculate total original price and savings (in user's currency)
   const totalOriginalPrice = items.reduce(
     (acc, item) =>
-      acc + convertPrice(originalPrices[item.productId] || item.price) * item.qty,
+      acc +
+      convertPrice(originalPrices[item.productId] || item.price) * item.qty,
     0,
   );
   const totalSavings = totalOriginalPrice - itemsPrice;
@@ -517,8 +548,51 @@ export function StreamlinedCheckout() {
     }
   };
 
+  // Apply voucher code
+  const handleApplyVoucher = async () => {
+    const code = voucherCode.trim();
+    if (!code) return;
+    setVoucherError(null);
+    setIsValidatingVoucher(true);
+    try {
+      const res = await apiClient.get(
+        `/vouchers/validate?code=${encodeURIComponent(code)}&currency=${currency}`,
+      );
+      const data = res.data as {
+        valid: boolean;
+        amount?: number;
+        currency?: string;
+        message?: string;
+      };
+      if (data.valid && data.amount && data.currency) {
+        setAppliedVoucher({
+          code: code.toUpperCase(),
+          amount: data.amount,
+          currency: data.currency,
+        });
+        setVoucherError(null);
+      } else {
+        setVoucherError(data.message || "ვაუჩერი არავალიდურია");
+        setAppliedVoucher(null);
+      }
+    } catch {
+      setVoucherError("ვაუჩერის შემოწმება ვერ მოხდა");
+      setAppliedVoucher(null);
+    } finally {
+      setIsValidatingVoucher(false);
+    }
+  };
+
+  const handleRemoveVoucher = () => {
+    setAppliedVoucher(null);
+    setVoucherCode("");
+    setVoucherError(null);
+  };
+
   // Handle order placement
-  const handlePlaceOrder = async (selectedMethod?: "BOG" | "PAYPAL" | "CredoInstallment") => {
+  const handlePlaceOrder = async (
+    selectedMethod?: "BOG" | "PAYPAL" | "CredoInstallment",
+  ) => {
     const methodToUse = selectedMethod || paymentMethod;
 
     // If auction mode, use auction-specific flow
@@ -609,6 +683,7 @@ export function StreamlinedCheckout() {
         salesRefCode?: string | null;
         totalReferralDiscount?: number;
         hasReferralDiscount?: boolean;
+        voucherCode?: string;
       } = {
         orderItems,
         shippingDetails: shippingAddress,
@@ -616,13 +691,14 @@ export function StreamlinedCheckout() {
         itemsPrice: itemsPriceGEL, // GEL base prices (for sellers)
         taxPrice: 0, // საკომისიო მოხსნილია
         shippingPrice: baseShippingGel, // GEL shipping cost
-        totalPrice: totalPriceGEL, // Total in GEL (base accounting)
+        totalPrice: finalPayAmountGEL, // Total in GEL (after voucher)
         currency: "GEL", // Base currency for accounting
-        paidAmount: totalPrice, // Amount customer actually pays in their currency
+        paidAmount: finalPayAmount, // Amount customer actually pays (after voucher)
         paidCurrency: currency, // Currency customer pays in (GEL/USD/EUR)
         salesRefCode: Cookies.get("sales_ref") || null,
         totalReferralDiscount,
         hasReferralDiscount,
+        voucherCode: appliedVoucher?.code || undefined,
       };
 
       // Add guest info if guest checkout
@@ -709,6 +785,21 @@ export function StreamlinedCheckout() {
 
   // Handle BOG payment
   const handleBOGPayment = async (orderId: string, amount: number) => {
+    // If voucher covers the full amount — no payment needed, mark as paid directly
+    if (amount <= 0) {
+      try {
+        await apiClient.post(`/orders/${orderId}/mark-paid-by-voucher`);
+        trackPurchase(0, currency, orderId);
+        await clearCart();
+        clearCheckout();
+        router.push(`/checkout/success?orderId=${orderId}`);
+      } catch (err) {
+        console.error("Failed to mark voucher-paid order:", err);
+        router.push(`/orders/${orderId}`);
+      }
+      return;
+    }
+
     setIsProcessingPayment(true);
     setCurrentOrderId(orderId);
     try {
@@ -856,7 +947,8 @@ export function StreamlinedCheckout() {
       console.error("Credo Installment Error:", error);
       toast({
         title: "განვადების შეცდომა",
-        description: "კრედო განვადების მოთხოვნა ვერ მოხერხდა. გთხოვთ, სცადოთ ხელახლა",
+        description:
+          "კრედო განვადების მოთხოვნა ვერ მოხერხდა. გთხოვთ, სცადოთ ხელახლა",
         variant: "destructive",
       });
     } finally {
@@ -1102,7 +1194,9 @@ export function StreamlinedCheckout() {
                     <p>
                       {shippingAddress.address}, {shippingAddress.city},{" "}
                       {shippingAddress.postalCode},{" "}
-                      {shippingCountries.find(c => c.countryCode === shippingAddress.country)?.countryName || shippingAddress.country}
+                      {shippingCountries.find(
+                        (c) => c.countryCode === shippingAddress.country,
+                      )?.countryName || shippingAddress.country}
                     </p>
                     <p>
                       <strong>{t("auth.phoneNumber")}:</strong>{" "}
@@ -1155,8 +1249,11 @@ export function StreamlinedCheckout() {
                                 {displayName}
                               </Link>
                               <p className="item-price">
-                                {item.qty} x {formatPrice(convertPrice(item.price))} ={" "}
-                                {formatPrice(convertPrice(item.price) * item.qty)}
+                                {item.qty} x{" "}
+                                {formatPrice(convertPrice(item.price))} ={" "}
+                                {formatPrice(
+                                  convertPrice(item.price) * item.qty,
+                                )}
                               </p>
                             </div>
                           </div>
@@ -1251,12 +1348,97 @@ export function StreamlinedCheckout() {
                 <span className="total-amount">{formatPrice(totalPrice)}</span>
               </div>
 
+              {/* Voucher discount row */}
+              {appliedVoucher && (
+                <div className="summary-row voucher-discount-row">
+                  <span>
+                    🎟 {language === "en" ? "Voucher" : "ვაუჩერი"} (
+                    {appliedVoucher.code})
+                  </span>
+                  <span className="voucher-discount-amount">
+                    - {formatPrice(voucherDiscount)}
+                  </span>
+                </div>
+              )}
+
+              {/* Final amount after voucher */}
+              {appliedVoucher && voucherDiscount > 0 && (
+                <div className="summary-row summary-total final-total-row">
+                  <span>
+                    {language === "en" ? "Final Total" : "საბოლოო ჯამი"}
+                  </span>
+                  <span className="total-amount">
+                    {formatPrice(finalPayAmount)}
+                  </span>
+                </div>
+              )}
+
+              {/* Voucher input */}
+              {currentStep === "review" && !isAuctionMode && (
+                <div className="voucher-input-section">
+                  {!appliedVoucher ? (
+                    <>
+                      <div className="voucher-input-row">
+                        <input
+                          type="text"
+                          className="voucher-input"
+                          placeholder={
+                            language === "en"
+                              ? "Voucher code (SOUL-XXXX-XXXX)"
+                              : "ვაუჩერის კოდი (SOUL-XXXX-XXXX)"
+                          }
+                          value={voucherCode}
+                          onChange={(e) => {
+                            setVoucherCode(e.target.value.toUpperCase());
+                            setVoucherError(null);
+                          }}
+                          onKeyDown={(e) =>
+                            e.key === "Enter" && handleApplyVoucher()
+                          }
+                        />
+                        <button
+                          className="btn-voucher-apply"
+                          onClick={handleApplyVoucher}
+                          disabled={isValidatingVoucher || !voucherCode.trim()}
+                        >
+                          {isValidatingVoucher
+                            ? "..."
+                            : language === "en"
+                              ? "Apply"
+                              : "გამოყენება"}
+                        </button>
+                      </div>
+                      {voucherError && (
+                        <p className="voucher-error">{voucherError}</p>
+                      )}
+                    </>
+                  ) : (
+                    <div className="voucher-applied-badge">
+                      <span>
+                        🎟 {appliedVoucher.code} —{" "}
+                        {formatPrice(appliedVoucher.amount)}{" "}
+                        {language === "en"
+                          ? "discount applied"
+                          : "ფასდაკლება გამოყენებულია"}
+                      </span>
+                      <button
+                        className="btn-remove-voucher"
+                        onClick={handleRemoveVoucher}
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
+
               {/* აუქციონისთვის savings არ ჩანდეს */}
               {!isAuctionMode && totalSavings > 0 && (
                 <div className="savings-banner">
                   <span className="savings-icon">✓</span>
                   <span className="savings-text">
-                    {currency === "GEL" ? "დაზოგავ" : "You save"}: <strong>{formatPrice(totalSavings)}</strong>
+                    {currency === "GEL" ? "დაზოგავ" : "You save"}:{" "}
+                    <strong>{formatPrice(totalSavings)}</strong>
                   </span>
                 </div>
               )}
@@ -1293,50 +1475,56 @@ export function StreamlinedCheckout() {
                       unavailableItems.length > 0 ||
                       isProcessingPayment
                     }
-                    className={`btn-bog-payment sidebar-action-btn mobile-place-order ${paymentMethod === "BOG" ? "selected" : ""}`}
+                    className={`btn-bog-payment sidebar-action-btn mobile-place-order ${paymentMethod === "BOG" ? "selected" : ""} ${finalPayAmount <= 0 ? "voucher-full-cover" : ""}`}
                   >
                     <div className="bog-payment-content">
                       <div className="card-icon">
-                        <svg
-                          width="32"
-                          height="24"
-                          viewBox="0 0 32 24"
-                          fill="none"
-                        >
-                          <rect
-                            x="1"
-                            y="1"
-                            width="30"
-                            height="22"
-                            rx="3"
-                            stroke="white"
-                            strokeWidth="2"
-                            fill="rgba(255,255,255,0.2)"
-                          />
-                          <line
-                            x1="1"
-                            y1="7"
-                            x2="31"
-                            y2="7"
-                            stroke="white"
-                            strokeWidth="2"
-                          />
-                          <rect
-                            x="4"
-                            y="14"
-                            width="10"
-                            height="4"
-                            rx="1"
-                            fill="white"
-                          />
-                        </svg>
+                        {finalPayAmount <= 0 ? (
+                          <svg width="28" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <polyline points="20 6 9 17 4 12" />
+                          </svg>
+                        ) : (
+                          <svg
+                            width="32"
+                            height="24"
+                            viewBox="0 0 32 24"
+                            fill="none"
+                          >
+                            <rect
+                              x="1"
+                              y="1"
+                              width="30"
+                              height="22"
+                              rx="3"
+                              stroke="white"
+                              strokeWidth="2"
+                              fill="rgba(255,255,255,0.2)"
+                            />
+                            <line
+                              x1="1"
+                              y1="7"
+                              x2="31"
+                              y2="7"
+                              stroke="white"
+                              strokeWidth="2"
+                            />
+                            <rect
+                              x="4"
+                              y="14"
+                              width="10"
+                              height="4"
+                              rx="1"
+                              fill="white"
+                            />
+                          </svg>
+                        )}
                       </div>
                       <div className="bog-payment-text">
                         <span className="bog-payment-title">
-                          {t("payment.cardPayment")}
+                          {finalPayAmount <= 0 ? "ვაუჩერით გადახდა" : t("payment.cardPayment")}
                         </span>
                         <span className="bog-payment-subtitle">
-                          {t("payment.allCardsAccepted")}
+                          {finalPayAmount <= 0 ? "ვაუჩერი სრულად ფარავს თანხას" : t("payment.allCardsAccepted")}
                         </span>
                       </div>
                       {(isValidating || isProcessingPayment) &&
@@ -1344,7 +1532,7 @@ export function StreamlinedCheckout() {
                     </div>
                     {!isValidating && !isProcessingPayment && (
                       <span className="bog-payment-amount">
-                        {formatPrice(totalPrice)}
+                        {finalPayAmount <= 0 ? "0 ₾" : formatPrice(finalPayAmount)}
                       </span>
                     )}
                   </button>
@@ -1365,15 +1553,19 @@ export function StreamlinedCheckout() {
                     className={`btn-bog-payment sidebar-action-btn mobile-place-order ${paymentMethod === "CredoInstallment" ? "selected" : ""}`}
                     style={{
                       marginTop: "8px",
-                      background: "linear-gradient(135deg, #1e3a5f 0%, #0d47a1 50%, #1565c0 100%)",
+                      background:
+                        "linear-gradient(135deg, #1e3a5f 0%, #0d47a1 50%, #1565c0 100%)",
                     }}
                     onMouseEnter={(e) => {
-                      e.currentTarget.style.background = "linear-gradient(135deg, #0d47a1 0%, #1565c0 50%, #1976d2 100%)";
+                      e.currentTarget.style.background =
+                        "linear-gradient(135deg, #0d47a1 0%, #1565c0 50%, #1976d2 100%)";
                       e.currentTarget.style.transform = "translateY(-2px)";
-                      e.currentTarget.style.boxShadow = "0 6px 20px rgba(13, 71, 161, 0.4)";
+                      e.currentTarget.style.boxShadow =
+                        "0 6px 20px rgba(13, 71, 161, 0.4)";
                     }}
                     onMouseLeave={(e) => {
-                      e.currentTarget.style.background = "linear-gradient(135deg, #1e3a5f 0%, #0d47a1 50%, #1565c0 100%)";
+                      e.currentTarget.style.background =
+                        "linear-gradient(135deg, #1e3a5f 0%, #0d47a1 50%, #1565c0 100%)";
                       e.currentTarget.style.transform = "translateY(0)";
                       e.currentTarget.style.boxShadow = "";
                     }}
@@ -1382,22 +1574,33 @@ export function StreamlinedCheckout() {
                       <img
                         src="/dayavi.webp"
                         alt="კრედო და-ყა-ვი"
-                        style={{ height: "66px", width: "auto", objectFit: "contain", flexShrink: 0 }}
+                        style={{
+                          height: "66px",
+                          width: "auto",
+                          objectFit: "contain",
+                          flexShrink: 0,
+                        }}
                       />
                       <div className="bog-payment-text">
                         <span className="bog-payment-title">
-                          {language === "ge" ? "განვადება 0%-ით" : "0% Installment"}
+                          {language === "ge"
+                            ? "განვადება 0%-ით"
+                            : "0% Installment"}
                         </span>
                         <span className="bog-payment-subtitle">
-                          {language === "ge" ? "კრედო ბანკი • 3-4 თვე" : "Credo Bank • 3-4 months"}
+                          {language === "ge"
+                            ? "კრედო ბანკი • 3-4 თვე"
+                            : "Credo Bank • 3-4 months"}
                         </span>
                       </div>
                       {(isValidating || isProcessingPayment) &&
-                        paymentMethod === "CredoInstallment" && <div className="spinner" />}
+                        paymentMethod === "CredoInstallment" && (
+                          <div className="spinner" />
+                        )}
                     </div>
                     {!isValidating && !isProcessingPayment && (
                       <span className="bog-payment-amount">
-                        {formatPrice(totalPrice)}
+                        {formatPrice(finalPayAmount)}
                       </span>
                     )}
                   </button>
@@ -1417,30 +1620,32 @@ export function StreamlinedCheckout() {
                     }
                     className={`btn-paypal-payment sidebar-action-btn ${paymentMethod === "PAYPAL" ? "selected" : ""}`}
                   >
-                  <div className="paypal-payment-content">
-                    <div className="paypal-icon">
-                      <Image
-                        src="/PayPal.svg"
-                        alt="PayPal"
-                        width={80}
-                        height={20}
-                      />
+                    <div className="paypal-payment-content">
+                      <div className="paypal-icon">
+                        <Image
+                          src="/PayPal.svg"
+                          alt="PayPal"
+                          width={80}
+                          height={20}
+                        />
+                      </div>
+                      <div className="paypal-payment-text">
+                        <span className="paypal-payment-title">PayPal</span>
+                        <span className="paypal-payment-subtitle">
+                          {t("payment.paypal.internationalCards")}
+                        </span>
+                      </div>
+                      {(isValidating || isProcessingPayment) &&
+                        paymentMethod === "PAYPAL" && (
+                          <div className="spinner" />
+                        )}
                     </div>
-                    <div className="paypal-payment-text">
-                      <span className="paypal-payment-title">PayPal</span>
-                      <span className="paypal-payment-subtitle">
-                        {t("payment.paypal.internationalCards")}
+                    {!isValidating && !isProcessingPayment && (
+                      <span className="bog-payment-amount">
+                        {formatPrice(totalPrice)}
                       </span>
-                    </div>
-                    {(isValidating || isProcessingPayment) &&
-                      paymentMethod === "PAYPAL" && <div className="spinner" />}
-                  </div>
-                  {!isValidating && !isProcessingPayment && (
-                    <span className="bog-payment-amount">
-                      {formatPrice(totalPrice)}
-                    </span>
-                  )}
-                </button>
+                    )}
+                  </button>
                 )}
               </div>
             )}
@@ -1574,7 +1779,8 @@ export function StreamlinedCheckout() {
                 }
               />
               <p className="paypal-conversion-note">
-                {t("payment.paypal.total") || "Total"}: {formatPrice(totalPrice)}
+                {t("payment.paypal.total") || "Total"}:{" "}
+                {formatPrice(totalPrice)}
               </p>
             </div>
 

@@ -37,6 +37,7 @@ import { StorageModule } from '../storage/storage.module';
 import { FaqModule } from '../faq/faq.module';
 import { BackupModule } from '../backup/backup.module';
 import { PromotionModule } from '../promotions/promotion.module';
+import { VoucherModule } from '../vouchers/voucher.module';
 
 @Module({
   imports: [
@@ -79,6 +80,7 @@ import { PromotionModule } from '../promotions/promotion.module';
     FaqModule,
     BackupModule,
     PromotionModule,
+    VoucherModule,
   ],
   controllers: [AppController],
   providers: [AppService, GoogleStrategy],

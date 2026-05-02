@@ -178,6 +178,27 @@ export class OrdersController {
     return this.ordersService.cancelOrder(id, body.reason);
   }
 
+  @UseGuards(JwtAuthGuard)
+  @Post(':id/mark-paid-by-voucher')
+  async markPaidByVoucher(
+    @Param('id') id: string,
+    @CurrentUser() user: UserDocument,
+  ) {
+    const order = await this.ordersService.findById(id);
+    if (!order) throw new BadRequestException('Order not found');
+    if (order.isPaid) return { success: true, message: 'Already paid' };
+    // Only allow if paidAmount is 0 (fully covered by voucher)
+    if ((order as any).paidAmount !== 0) {
+      throw new BadRequestException('Order is not fully covered by voucher');
+    }
+    return this.ordersService.updatePaid(id, {
+      id: `voucher_${id}`,
+      status: 'COMPLETED',
+      update_time: new Date().toISOString(),
+      email_address: user.email,
+    });
+  }
+
   @UseGuards(RolesGuard)
   @Post('release-expired-stock')
   async releaseExpiredStock() {
