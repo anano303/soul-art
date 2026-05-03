@@ -265,6 +265,9 @@ export function SalesManagerRegisterForm() {
               {t("auth.sendVerificationCode")}
             </button>
           )}
+          {errorMessage && !emailSent && (
+            <p className="error-text">{errorMessage}</p>
+          )}
         </div>
 
         {/* Verification Code */}

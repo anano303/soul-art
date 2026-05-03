@@ -724,6 +724,9 @@ export function SellerRegistrationFlow({
                   {language === "en" ? "Send Code" : "გაგზავნე კოდი"}
                 </button>
               )}
+              {verificationError && !emailSent && (
+                <span className="srf-error">{verificationError}</span>
+              )}
             </div>
 
             {emailSent && !isEmailVerified && (

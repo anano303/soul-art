@@ -268,6 +268,9 @@ export function RegisterForm() {
               {t("auth.sendVerificationCode")}
             </button>
           )}
+          {errorMessage && !emailSent && (
+            <p className="error-text">{errorMessage}</p>
+          )}
         </div>
 
         {emailSent && !isVerified && (
