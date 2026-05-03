@@ -1,6 +1,4 @@
-import dotenv from "dotenv";
 import { database } from "@/database/database";
-dotenv.config();
 
 export async function POST(req: Request) {
   const { code, email } = await req.json();

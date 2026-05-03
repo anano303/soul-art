@@ -1,7 +1,4 @@
-import { readFileSync, writeFile } from "fs";
 import { VerificationEntry } from "./verification-entry";
-
-const dbFilePath = process.env.DB_FILE_PATH || "db.json";
 
 class Database {
   private static instance: Database;
@@ -9,7 +6,6 @@ class Database {
 
   private constructor() {
     console.log("Database instance created");
-    this.fetchFromFS();
   }
 
   public static getInstance(): Database {
@@ -21,7 +17,6 @@ class Database {
 
   public async addEntry(entry: VerificationEntry): Promise<void> {
     this.entries.push(entry);
-    await this.writeFS();
   }
 
   public getEntry(email: string): VerificationEntry | undefined {
@@ -30,24 +25,11 @@ class Database {
 
   public clearDB(): void {
     this.entries = [];
-    this.writeFS();
   }
 
-  private fetchFromFS() {
-    try {
-      const data = readFileSync(dbFilePath, "utf-8");
-      this.entries = JSON.parse(data);
-    } catch (error) {
-      console.log(error);
-      this.clearDB();
-    }
-  }
-
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   private writeFS() {
-    return new Promise((resolve) => {
-      const data = JSON.stringify(this.entries);
-      writeFile(dbFilePath, data, resolve);
-    });
+    return Promise.resolve();
   }
 }
 

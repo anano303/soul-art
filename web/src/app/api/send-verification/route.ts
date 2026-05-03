@@ -1,7 +1,5 @@
 import nodemailer from "nodemailer";
-import dotenv from "dotenv";
 import { database } from "@/database/database";
-dotenv.config();
 
 // Verification code generation function
 const generateVerificationCode = () =>
