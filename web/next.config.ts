@@ -98,6 +98,8 @@ const nextConfig: NextConfig = {
   env: {
     EMAIL_USER: process.env.EMAIL_USER,
     EMAIL_PASS: process.env.EMAIL_PASS,
+    META_PIXEL_ACCESS_TOKEN: process.env.META_PIXEL_ACCESS_TOKEN,
+    STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY,
   },
   reactStrictMode: true,
   poweredByHeader: false,
