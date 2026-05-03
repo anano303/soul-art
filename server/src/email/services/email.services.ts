@@ -104,19 +104,17 @@ interface AdminOrderStatusPayload {
 
 @Injectable()
 export class EmailService {
-  private transporter;
-
-  constructor() {
-    this.transporter = nodemailer.createTransport({
-      host: emailConfig.host, // ✅ `service` არ არის საჭირო
+  private get transporter() {
+    return nodemailer.createTransport({
+      host: emailConfig.host,
       port: emailConfig.port,
       secure: emailConfig.secure,
       auth: {
-        user: emailConfig.auth.user,
-        pass: emailConfig.auth.pass,
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
       },
       tls: {
-        rejectUnauthorized: false, // ✅ სერტიფიკატის გადამოწმების გამორთვა
+        rejectUnauthorized: false,
       },
     });
   }
