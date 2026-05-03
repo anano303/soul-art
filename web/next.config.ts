@@ -95,6 +95,10 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+  env: {
+    EMAIL_USER: process.env.EMAIL_USER,
+    EMAIL_PASS: process.env.EMAIL_PASS,
+  },
   reactStrictMode: true,
   poweredByHeader: false,
   output: "standalone",
