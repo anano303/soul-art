@@ -16,6 +16,8 @@ export function SellerBalanceWidget({ userId }: SellerBalanceWidgetProps) {
   } = useQuery({
     queryKey: ["seller-balance", userId],
     queryFn: () => getSellerBalance(),
+    enabled: !!userId,
+    retry: 1,
     // Only fetch once when component mounts
     staleTime: 10 * 60 * 1000, // Consider data fresh for 10 minutes
     gcTime: 15 * 60 * 1000, // Keep in cache for 15 minutes
