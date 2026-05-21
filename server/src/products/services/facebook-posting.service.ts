@@ -176,6 +176,24 @@ export class FacebookPostingService {
   }
 
   /**
+   * Smart-mode link posts need an absolute public product URL.
+   */
+  private getAbsoluteProductUrl(product: ProductDocument): string | null {
+    const url = this.buildProductUrl(product);
+    return /^https?:\/\//i.test(url) ? url : null;
+  }
+
+  /**
+   * Avoid repeating the product URL in the first comment for link-preview posts.
+   */
+  private buildLinkPostCommentText(product: ProductDocument): string {
+    const sellerUrl = this.getSellerProfileUrl(product);
+    return sellerUrl
+      ? `👤 მაღაზიის გვერდი/პორტფოლიო: ${sellerUrl}`
+      : '';
+  }
+
+  /**
    * Add a comment with links to a Facebook post
    */
   private async addCommentToPost(
@@ -364,9 +382,30 @@ export class FacebookPostingService {
 
       const imageLimit = 5;
       const imagesToPost = images.slice(0, imageLimit);
+      const productUrl = this.getAbsoluteProductUrl(product);
 
       // Build comment text with links
       const commentText = this.buildCommentText(product);
+
+      if (imagesToPost.length === 1 && productUrl) {
+        const res = await axios.post(
+          `https://graph.facebook.com/v19.0/${this.pageId}/feed`,
+          null,
+          {
+            params: {
+              message,
+              link: productUrl,
+              access_token: this.pageAccessToken,
+            },
+          },
+        );
+        const postId = res.data?.id;
+        const linkPostCommentText = this.buildLinkPostCommentText(product);
+        if (postId && linkPostCommentText) {
+          await this.addCommentToPost(postId, linkPostCommentText);
+        }
+        return { success: true, postId };
+      }
 
       if (imagesToPost.length === 1) {
         const res = await axios.post(
@@ -443,6 +482,7 @@ export class FacebookPostingService {
       const images = Array.isArray(product.images)
         ? product.images.filter(Boolean).slice(0, 5)
         : [];
+      const productUrl = this.getAbsoluteProductUrl(product);
 
       if (images.length === 0) {
         // Text-only post
@@ -467,8 +507,28 @@ export class FacebookPostingService {
       // Build comment text with links
       const commentText = this.buildCommentText(product);
 
+      if (images.length === 1 && productUrl) {
+        const res = await axios.post(
+          `https://graph.facebook.com/v19.0/${groupId}/feed`,
+          null,
+          {
+            params: {
+              message,
+              link: productUrl,
+              access_token: this.pageAccessToken,
+            },
+          },
+        );
+        const postId = res.data?.id;
+        const linkPostCommentText = this.buildLinkPostCommentText(product);
+        if (postId && linkPostCommentText) {
+          await this.addCommentToPost(postId, linkPostCommentText);
+        }
+        return { success: true, postId };
+      }
+
       if (images.length === 1) {
-        // Single photo post
+        // Single photo post fallback when public product URL is unavailable
         const res = await axios.post(
           `https://graph.facebook.com/v19.0/${groupId}/photos`,
           null,
