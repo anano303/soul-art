@@ -139,13 +139,18 @@ export class FacebookPostingService {
     const originalInfo = this.formatOriginalStatus(product);
 
     const parts: string[] = [
-      `📌 ${title}`,
-      author ? `✍️ ავტორი: ${author}` : '',
+      `💎 ${title}`,
       desc ? `${desc}` : '',
       originalInfo ? `${originalInfo}` : '',
       materialInfo ? `${materialInfo}` : '',
       dimensionInfo ? `${dimensionInfo}` : '',
       `${priceBlock}`,
+      '✨ უნიკალური ნამუშევარი თქვენი სივრცისთვის',
+      '💳 4 თვემდე უპროცენტო განვადება',
+      '🚚 უფასო მიწოდება სასურველ მისამართზე',
+      '📩 მოგვწერეთ პირადში მეტი ინფორმაციისთვის',
+      '💬 და თქვენ რომელ სივრცეში განათავსებდით ამ ნამუშევარს?',
+      author ? `✍️ ავტორი: ${author}` : '',
       // Links are posted as a comment (better for FB/IG algorithm reach)
       tags ? `${tags}` : '',
     ].filter(Boolean);
