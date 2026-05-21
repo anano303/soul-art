@@ -152,7 +152,9 @@ export class FacebookPostingService {
       '💬 და თქვენ რომელ სივრცეში განათავსებდით ამ ნამუშევარს?',
       author ? `✍️ ავტორი: ${author}` : '',
       // Links are posted as a comment (better for FB/IG algorithm reach)
-      tags ? `${tags}` : '',
+      tags
+        ? `${tags}`
+        : '#soulart, #soulartge, #500ზემეტიხელოვანი, #ერთსივრცეში',
     ].filter(Boolean);
 
     return parts.join('\n');
