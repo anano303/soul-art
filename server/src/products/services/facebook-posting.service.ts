@@ -274,10 +274,10 @@ export class FacebookPostingService {
     const storeName = anyProd.user?.storeName as string | undefined;
     const userName = anyProd.user?.name as string | undefined;
     const artistSlug = anyProd.user?.artistSlug as string | undefined;
-    const author = brand || storeName || userName || null;
+    const author = storeName || brand || userName || null;
     // Optionally append slug if available
     if (author && artistSlug) {
-      return `${author} (${artistSlug})`;
+      return `${author} `;
     }
     return author;
   }
