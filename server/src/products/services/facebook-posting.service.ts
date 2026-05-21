@@ -170,7 +170,7 @@ export class FacebookPostingService {
 
     const lines: string[] = [];
     if (url) lines.push(`🔗 ნახვა/ყიდვა: ${url}`);
-    if (sellerUrl) lines.push(`👤 ავტორის გვერდი: ${sellerUrl}`);
+    if (sellerUrl) lines.push(`👤 მაღაზიის გვერდი/პორტფოლიო: ${sellerUrl}`);
 
     return lines.join('\n');
   }
