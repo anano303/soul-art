@@ -11,8 +11,7 @@ import { MulterError } from 'multer';
 import { MulterExceptionFilter } from '../interceptors/multer-exception.filter';
 
 /**
- * Logs every unhandled exception with a consistent [CRASH][HTTP] prefix
- * so DigitalOcean (or any) logs can be grepped to find what caused errors/restarts.
+ * Logs HTTP exceptions without marking expected client errors as crashes.
  * Delegates Multer errors to MulterExceptionFilter so response shape stays correct.
  */
 @Catch()
@@ -49,10 +48,16 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       status === 404 && /\.(?:png|ico|jpg|jpeg|webp|svg|gif|js|css|map|txt|xml|json)$/.test(req.url);
 
     if (!isStaticAssetMiss) {
-      this.logger.error(
-        `[CRASH][HTTP] ${req.method} ${req.url} → ${status} ${message}` +
+      if (status >= 500) {
+        this.logger.error(
+          `[CRASH][HTTP] ${req.method} ${req.url} -> ${status} ${message}` +
           (stack ? `\n${stack}` : ''),
-      );
+        );
+      } else {
+        this.logger.warn(
+          `[HTTP] ${req.method} ${req.url} -> ${status} ${message}`,
+        );
+      }
     }
 
     const body =
