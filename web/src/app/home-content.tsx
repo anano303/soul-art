@@ -38,10 +38,10 @@ const GiftCategories = dynamic(
   { ssr: false, loading: () => <div style={{ minHeight: "200px" }} /> },
 );
 
-const SpringCollection = dynamic(
-  () => import("@/components/SpringCollection/SpringCollection"),
-  { ssr: false, loading: () => <div style={{ minHeight: "300px" }} /> },
-);
+// const SpringCollection = dynamic(
+//   () => import("@/components/SpringCollection/SpringCollection"),
+//   { ssr: false, loading: () => <div style={{ minHeight: "300px" }} /> },
+// );
 
 const HomePageShop = dynamic(
   () => import("@/components/homePageShop/homePageShop"),
@@ -80,7 +80,8 @@ export default function HomeContent() {
       <DiscountedRail />
       <GiftCategories />
       <VoucherBanner />
-      <SpringCollection />
+      {/* <SpringCollection /> */}
+      
       <HomePageShop key={`home-shop-${language}`} />
       <PopularArtists />
       <HomeFAQ />

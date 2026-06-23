@@ -240,6 +240,8 @@ export const TRANSLATIONS: Translations = {
     navigation: {
       home: "მთავარი",
       shop: "შეიძინე ნამუშევრები",
+      paintings: "ნახატები",
+      handmadeItems: "ხელნაკეთი ნივთები",
       auction: "აუქციონი",
       auctions: "აუქციონები",
       myAuctions: "ჩემი აუქციონები",
@@ -2217,6 +2219,8 @@ export const TRANSLATIONS: Translations = {
     navigation: {
       home: "Home",
       shop: "Shop Artwork",
+      paintings: "Paintings",
+      handmadeItems: "Handmade Items",
       auction: "Auction",
       auctions: "Auctions",
       myAuctions: "My Auctions",
