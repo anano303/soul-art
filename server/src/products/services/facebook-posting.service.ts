@@ -24,6 +24,7 @@ export interface MultiPostResult {
 @Injectable()
 export class FacebookPostingService {
   private readonly logger = new Logger(FacebookPostingService.name);
+  private readonly handmadeMainCategoryId = '68768f850b55154655a8e88f';
   // Allow dedicated envs for posting so Pixel or other tokens don't conflict
   private readonly pageId =
     process.env.FACEBOOK_POSTS_PAGE_ID || process.env.FACEBOOK_PAGE_ID;
@@ -176,7 +177,11 @@ export class FacebookPostingService {
 
     return categoryValues.some((value) => {
       const normalized = value.toLowerCase().trim();
-      return normalized.includes('ხელნაკეთი') || normalized.includes('handmade');
+      return (
+        normalized === this.handmadeMainCategoryId ||
+        normalized.includes('ხელნაკეთი') ||
+        normalized.includes('handmade')
+      );
     });
   }
 
@@ -194,6 +199,17 @@ export class FacebookPostingService {
 
       if (typeof value === 'object') {
         const category = value as Record<string, unknown>;
+        const id = category._id || category.id;
+        if (typeof id === 'string') {
+          values.push(id);
+        } else if (id && typeof (id as any).toString === 'function') {
+          values.push((id as any).toString());
+        }
+
+        if (typeof (value as any).toHexString === 'function') {
+          values.push((value as any).toString());
+        }
+
         ['name', 'nameEn', 'title', 'titleEn', 'slug'].forEach((key) => {
           const field = category[key];
           if (typeof field === 'string') {
