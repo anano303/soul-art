@@ -137,6 +137,21 @@ export class FacebookPostingService {
     const materialInfo = this.formatMaterials(product);
     const dimensionInfo = this.formatDimensions(product);
     const originalInfo = this.formatOriginalStatus(product);
+    const marketingLines = this.isHandmadeProduct(product)
+      ? [
+          '✨ ხელით შექმნილი ნივთი, რომელიც ყოველდღიურობას განსაკუთრებულ ხასიათს მატებს',
+          '💳 4 თვემდე უპროცენტო განვადება',
+          '🚚 უფასო მიწოდება სასურველ მისამართზე',
+          '📩 მოგვწერეთ პირადში მეტი ინფორმაციისთვის',
+          '💬 ვის აჩუქებდით ან სად გამოიყენებდით ამ ხელნაკეთ ნივთს?',
+        ]
+      : [
+          '✨ უნიკალური ნამუშევარი თქვენი სივრცისთვის',
+          '💳 4 თვემდე უპროცენტო განვადება',
+          '🚚 უფასო მიწოდება სასურველ მისამართზე',
+          '📩 მოგვწერეთ პირადში მეტი ინფორმაციისთვის',
+          '💬 და თქვენ რომელ სივრცეში განათავსებდით ამ ნამუშევარს?',
+        ];
 
     const parts: string[] = [
       `💎 ${title}`,
@@ -145,11 +160,7 @@ export class FacebookPostingService {
       materialInfo ? `${materialInfo}` : '',
       dimensionInfo ? `${dimensionInfo}` : '',
       `${priceBlock}`,
-      '✨ უნიკალური ნამუშევარი თქვენი სივრცისთვის',
-      '💳 4 თვემდე უპროცენტო განვადება',
-      '🚚 უფასო მიწოდება სასურველ მისამართზე',
-      '📩 მოგვწერეთ პირადში მეტი ინფორმაციისთვის',
-      '💬 და თქვენ რომელ სივრცეში განათავსებდით ამ ნამუშევარს?',
+      ...marketingLines,
       author ? `✍️ ავტორი: ${author}` : '',
       // Links are posted as a comment (better for FB/IG algorithm reach)
       tags
@@ -158,6 +169,54 @@ export class FacebookPostingService {
     ].filter(Boolean);
 
     return parts.join('\n');
+  }
+
+  private isHandmadeProduct(product: ProductDocument): boolean {
+    const categoryValues = this.getProductCategoryValues(product);
+
+    return categoryValues.some((value) => {
+      const normalized = value.toLowerCase().trim();
+      return normalized.includes('ხელნაკეთი') || normalized.includes('handmade');
+    });
+  }
+
+  private getProductCategoryValues(product: ProductDocument): string[] {
+    const anyProd: any = product as any;
+    const values: string[] = [];
+
+    const collect = (value: unknown) => {
+      if (!value) return;
+
+      if (typeof value === 'string') {
+        values.push(value);
+        return;
+      }
+
+      if (typeof value === 'object') {
+        const category = value as Record<string, unknown>;
+        ['name', 'nameEn', 'title', 'titleEn', 'slug'].forEach((key) => {
+          const field = category[key];
+          if (typeof field === 'string') {
+            values.push(field);
+          }
+        });
+      }
+    };
+
+    collect(anyProd.category);
+    collect(anyProd.mainCategory);
+    collect(anyProd.mainCategoryEn);
+    collect(anyProd.subCategory);
+    collect(anyProd.subCategoryEn);
+
+    const categoryStructure = anyProd.categoryStructure;
+    if (categoryStructure) {
+      collect(categoryStructure.main);
+      collect(categoryStructure.sub);
+      collect(categoryStructure.subEn);
+    }
+
+    return values;
   }
 
   /**
