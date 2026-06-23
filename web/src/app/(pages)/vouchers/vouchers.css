@@ -22,7 +22,7 @@
   inset: 0;
   background: radial-gradient(
     ellipse at 70% 50%,
-    rgba(229, 62, 62, 0.12) 0%,
+    rgba(233, 198, 106, 0.14) 0%,
     transparent 65%
   );
   pointer-events: none;
@@ -79,9 +79,9 @@
   white-space: nowrap;
 }
 .vsp-badge--highlight {
-  background: rgba(229, 62, 62, 0.2);
-  border-color: rgba(229, 62, 62, 0.5);
-  color: #fca5a5;
+  background: rgba(233, 198, 106, 0.18);
+  border-color: rgba(233, 198, 106, 0.5);
+  color: #f0d894;
   font-weight: 600;
 }
 
@@ -110,8 +110,39 @@
   color: #fff;
   transition: transform 0.3s ease;
 }
+.vsp-card-inner::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 3px;
+  border-radius: 22px 22px 0 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(233, 198, 106, 0.9) 50%,
+    transparent 100%
+  );
+}
 .vsp-preview-card:hover .vsp-card-inner {
   transform: rotate(1deg) translateY(-4px);
+}
+.vsp-card-dreamcatcher {
+  position: absolute;
+  top: 50%;
+  left: -14px;
+  transform: translateY(-50%);
+  width: 96px;
+  height: 175px;
+  color: #e9c66a;
+  opacity: 0.18;
+  z-index: 0;
+  pointer-events: none;
+}
+.vsp-card-top,
+.vsp-card-amount,
+.vsp-card-bottom {
+  position: relative;
+  z-index: 1;
 }
 .vsp-card-top {
   display: flex;
@@ -120,18 +151,20 @@
   margin-bottom: 1.25rem;
 }
 .vsp-card-brand {
-  font-size: 1.2rem;
+  font-size: 1.35rem;
   font-weight: 800;
-  letter-spacing: 0.03em;
+  letter-spacing: 0.02em;
+  font-family: Georgia, "Times New Roman", serif;
 }
 .vsp-card-type {
   font-size: 0.68rem;
   text-transform: uppercase;
   letter-spacing: 0.16em;
-  color: rgba(255, 255, 255, 0.55);
+  color: #d4af37;
   text-align: right;
   max-width: 90px;
   line-height: 1.3;
+  font-family: Georgia, "Times New Roman", serif;
 }
 .vsp-card-amount {
   font-size: 3rem;
@@ -139,6 +172,11 @@
   line-height: 1;
   margin-bottom: 1.5rem;
   letter-spacing: -0.02em;
+  background: linear-gradient(135deg, #fdf6c9 0%, #e9c66a 45%, #bb9326 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: #e9c66a;
 }
 .vsp-card-bottom {
   display: flex;
@@ -174,7 +212,7 @@
   inset: -20px;
   background: radial-gradient(
     ellipse,
-    rgba(229, 62, 62, 0.2) 0%,
+    rgba(233, 198, 106, 0.22) 0%,
     transparent 70%
   );
   z-index: 0;
@@ -189,10 +227,30 @@
   gap: 3rem;
 }
 .vsp-section-title {
-  font-size: 1.35rem;
-  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  font-size: 1.4rem;
+  font-weight: 800;
   margin-bottom: 1.5rem;
   color: #111827;
+  letter-spacing: -0.01em;
+}
+.vsp-section-title::before {
+  content: "";
+  width: 30px;
+  height: 3px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, #e9c66a 0%, #bb9326 100%);
+  flex-shrink: 0;
+}
+
+/* Checkout layout — amounts (left) + purchase summary (right) */
+.vsp-checkout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(330px, 380px);
+  gap: 2.5rem;
+  align-items: start;
 }
 
 /* Amount cards */
@@ -233,10 +291,28 @@
   overflow: hidden;
 }
 .vsp-amount-btn.active .vsp-amount-card {
-  border-color: #e53e3e;
+  border-color: #bb9326;
   box-shadow:
-    0 0 0 3px rgba(229, 62, 62, 0.25),
+    0 0 0 3px rgba(187, 147, 38, 0.3),
     0 8px 32px rgba(0, 0, 0, 0.25);
+}
+.vsp-amount-dreamcatcher {
+  position: absolute;
+  top: 46%;
+  left: -16px;
+  transform: translateY(-50%);
+  width: 80px;
+  height: 145px;
+  color: #e9c66a;
+  opacity: 0.16;
+  z-index: 0;
+  pointer-events: none;
+}
+.vsp-amount-card-header,
+.vsp-amount-value,
+.vsp-amount-qr-row {
+  position: relative;
+  z-index: 1;
 }
 .vsp-amount-card-header {
   display: flex;
@@ -245,18 +321,20 @@
   margin-bottom: 0.75rem;
 }
 .vsp-amount-brand {
-  font-size: 0.95rem;
+  font-size: 1.05rem;
   font-weight: 800;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.02em;
+  font-family: Georgia, "Times New Roman", serif;
 }
 .vsp-amount-label {
-  font-size: 0.6rem;
+  font-size: 0.58rem;
   text-transform: uppercase;
-  letter-spacing: 0.14em;
-  color: rgba(255, 255, 255, 0.5);
+  letter-spacing: 0.12em;
+  color: #d4af37;
   text-align: right;
   max-width: 70px;
   line-height: 1.3;
+  font-family: Georgia, "Times New Roman", serif;
 }
 .vsp-amount-value {
   font-size: 2.6rem;
@@ -264,6 +342,11 @@
   line-height: 1;
   margin-bottom: auto;
   padding-bottom: 1rem;
+  background: linear-gradient(135deg, #fdf6c9 0%, #e9c66a 45%, #bb9326 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: #e9c66a;
 }
 .vsp-amount-qr-row {
   display: flex;
@@ -289,26 +372,43 @@
   right: -10px;
   width: 30px;
   height: 30px;
-  background: #e53e3e;
-  color: #fff;
+  background: linear-gradient(135deg, #e9c66a 0%, #bb9326 100%);
+  color: #2a2208;
   border-radius: 50%;
   font-size: 0.85rem;
-  font-weight: 700;
+  font-weight: 800;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 2px 8px rgba(229, 62, 62, 0.4);
+  box-shadow: 0 2px 10px rgba(143, 110, 24, 0.5);
   border: 2px solid #fff;
 }
 
 /* Purchase box */
 .vsp-purchase-box {
+  position: relative;
   background: #fff;
-  border: 1px solid #e5e7eb;
+  border: 1px solid #ece7da;
   border-radius: 20px;
   padding: 2rem;
-  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.06);
-  max-width: 480px;
+  box-shadow: 0 10px 36px rgba(120, 90, 20, 0.1);
+  width: 100%;
+  overflow: hidden;
+  position: sticky;
+  top: 1.5rem;
+}
+.vsp-purchase-box::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 4px;
+  background: linear-gradient(
+    90deg,
+    #fdf6c9 0%,
+    #e9c66a 35%,
+    #bb9326 70%,
+    #8f6e18 100%
+  );
 }
 .vsp-purchase-summary {
   margin-bottom: 1.5rem;
@@ -358,24 +458,39 @@
   justify-content: center;
   gap: 0.6rem;
   width: 100%;
-  padding: 1rem 1.5rem;
-  background: linear-gradient(135deg, #e53e3e 0%, #c53030 100%);
-  color: #fff;
-  border: none;
+  padding: 1.05rem 1.5rem;
+  background: linear-gradient(
+    180deg,
+    #fdf6c9 0%,
+    #e7c75a 22%,
+    #bb9326 55%,
+    #8f6e18 100%
+  );
+  color: #2a2208;
+  border: 2px solid #4a4416;
   border-radius: 14px;
-  font-size: 1rem;
-  font-weight: 700;
+  font-size: 1.05rem;
+  font-weight: 800;
   cursor: pointer;
   transition:
-    opacity 0.2s,
-    transform 0.15s;
+    transform 0.15s,
+    box-shadow 0.2s,
+    filter 0.2s;
   margin-bottom: 0.75rem;
-  letter-spacing: 0.01em;
-  box-shadow: 0 4px 14px rgba(229, 62, 62, 0.35);
+  letter-spacing: 0.02em;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.4);
+  box-shadow:
+    0 8px 22px rgba(143, 110, 24, 0.35),
+    inset 0 2px 2px rgba(255, 255, 255, 0.75),
+    inset 0 -3px 6px rgba(120, 90, 20, 0.55);
 }
 .vsp-btn-buy:hover:not(:disabled) {
-  opacity: 0.92;
-  transform: translateY(-1px);
+  transform: translateY(-2px);
+  filter: brightness(1.04);
+  box-shadow:
+    0 12px 28px rgba(143, 110, 24, 0.42),
+    inset 0 2px 2px rgba(255, 255, 255, 0.85),
+    inset 0 -3px 6px rgba(120, 90, 20, 0.55);
 }
 .vsp-btn-buy:disabled {
   opacity: 0.6;
@@ -385,8 +500,8 @@
   display: inline-block;
   width: 18px;
   height: 18px;
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  border-top-color: #fff;
+  border: 2px solid rgba(42, 34, 8, 0.25);
+  border-top-color: #2a2208;
   border-radius: 50%;
   animation: vsp-spin 0.7s linear infinite;
 }
@@ -402,8 +517,8 @@
   margin: 0;
 }
 .vsp-login-link {
-  color: #e53e3e;
-  font-weight: 600;
+  color: #8f6e18;
+  font-weight: 700;
   text-decoration: underline;
 }
 
@@ -415,14 +530,32 @@
 }
 .vsp-benefit-card {
   background: #fff;
-  border: 1px solid #e5e7eb;
+  border: 1px solid #ece7da;
   border-radius: 16px;
-  padding: 1.5rem;
+  padding: 1.6rem 1.5rem;
   box-shadow: 0 1px 8px rgba(0, 0, 0, 0.04);
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    border-color 0.2s ease;
+}
+.vsp-benefit-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(187, 147, 38, 0.4);
+  box-shadow: 0 14px 32px rgba(120, 90, 20, 0.12);
 }
 .vsp-benefit-icon {
-  font-size: 1.75rem;
-  margin-bottom: 0.75rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 13px;
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  background: linear-gradient(135deg, #fdf6c9 0%, #f1dda3 100%);
+  border: 1px solid rgba(187, 147, 38, 0.25);
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.7);
 }
 .vsp-benefit-title {
   font-size: 0.95rem;
@@ -447,17 +580,30 @@
   align-items: flex-start;
   gap: 1.25rem;
   background: #fff;
-  border: 1px solid #e5e7eb;
+  border: 1px solid #ece7da;
   border-radius: 14px;
   padding: 1.25rem 1.5rem;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    border-color 0.2s ease;
+}
+.vsp-step:hover {
+  transform: translateY(-2px);
+  border-color: rgba(187, 147, 38, 0.4);
+  box-shadow: 0 10px 26px rgba(120, 90, 20, 0.1);
 }
 .vsp-step-num {
-  font-size: 1.5rem;
+  font-size: 1.6rem;
   font-weight: 900;
-  color: #e5e7eb;
   line-height: 1;
-  min-width: 40px;
+  min-width: 42px;
   letter-spacing: -0.02em;
+  background: linear-gradient(135deg, #e9c66a 0%, #bb9326 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: #bb9326;
 }
 .vsp-step-title {
   font-weight: 700;
@@ -472,6 +618,17 @@
 }
 
 /* ── Responsive ── */
+
+@media (max-width: 980px) {
+  .vsp-checkout {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+  .vsp-purchase-box {
+    position: static;
+    max-width: 480px;
+  }
+}
 
 @media (max-width: 900px) {
   .vsp-amounts {
@@ -578,14 +735,56 @@
     align-items: center;
   }
   .vsp-amount-card {
-    width: min(300px, 85vw);
+    width: min(300px, 88vw);
     min-height: auto;
-    padding: 1rem;
+    padding: 1.1rem 1rem;
+  }
+  .vsp-amount-value {
+    font-size: 2.2rem;
   }
   .vsp-amount-qr-row {
     justify-content: space-between;
   }
   .vsp-card-inner {
-    width: min(280px, 88vw);
+    width: min(280px, 90vw);
+    padding: 1.5rem 1.25rem 1.25rem;
+  }
+  .vsp-card-amount {
+    font-size: 2.2rem;
+  }
+}
+
+/* ── Very small phones (≤ 360px) ── */
+@media (max-width: 360px) {
+  .vsp-hero {
+    padding: 2rem 0 2.5rem;
+  }
+  .vsp-content {
+    padding: 1.75rem 0.6rem 3.5rem;
+  }
+  .vsp-amount-card {
+    width: min(280px, 90vw);
+  }
+  .vsp-card-inner {
+    width: min(260px, 92vw);
+  }
+  .vsp-card-top {
+    margin-bottom: 1rem;
+  }
+  .vsp-card-amount {
+    font-size: 2rem;
+    margin-bottom: 1.1rem;
+  }
+  .vsp-card-code {
+    font-size: 0.82rem;
+    letter-spacing: 0.06em;
+  }
+  .vsp-purchase-box {
+    padding: 1.25rem 1.1rem;
+    border-radius: 16px;
+  }
+  .vsp-badge {
+    font-size: 0.72rem;
+    padding: 0.22rem 0.6rem;
   }
 }

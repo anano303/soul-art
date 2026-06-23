@@ -22,6 +22,51 @@ type Amount = (typeof AMOUNTS)[number];
 const voucherQrUrl = (amount: number, currency: string) =>
   `https://soulart.ge/vouchers?amount=${amount}&currency=${currency}`;
 
+/** ოქროსფერი dreamcatcher არტი — ბრენდული მოტივი ბარათებზე */
+function Dreamcatcher({ className }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 120 200"
+      fill="none"
+      aria-hidden="true"
+    >
+      <circle cx="60" cy="55" r="48" stroke="currentColor" strokeWidth="2" />
+      <circle cx="60" cy="55" r="34" stroke="currentColor" strokeWidth="1" />
+      <circle cx="60" cy="55" r="20" stroke="currentColor" strokeWidth="1" />
+      <circle cx="60" cy="55" r="5" fill="currentColor" />
+      {Array.from({ length: 12 }).map((_, i) => {
+        const a = (i / 12) * Math.PI * 2;
+        return (
+          <line
+            key={i}
+            x1={60 + Math.cos(a) * 5}
+            y1={55 + Math.sin(a) * 5}
+            x2={60 + Math.cos(a) * 48}
+            y2={55 + Math.sin(a) * 48}
+            stroke="currentColor"
+            strokeWidth="0.7"
+            opacity="0.6"
+          />
+        );
+      })}
+      <line x1="42" y1="100" x2="42" y2="150" stroke="currentColor" strokeWidth="1" />
+      <line x1="60" y1="103" x2="60" y2="175" stroke="currentColor" strokeWidth="1" />
+      <line x1="78" y1="100" x2="78" y2="150" stroke="currentColor" strokeWidth="1" />
+      {[
+        [42, 150],
+        [60, 175],
+        [78, 150],
+      ].map(([x, y], i) => (
+        <g key={i} transform={`translate(${x} ${y})`}>
+          <ellipse cx="0" cy="12" rx="5" ry="14" stroke="currentColor" strokeWidth="1" />
+          <line x1="0" y1="-2" x2="0" y2="26" stroke="currentColor" strokeWidth="0.7" />
+        </g>
+      ))}
+    </svg>
+  );
+}
+
 export default function VouchersShopPage() {
   const { user } = useAuth();
   const { language } = useLanguage();
@@ -180,6 +225,7 @@ export default function VouchersShopPage() {
           {/* Preview gift card */}
           <div className="vsp-preview-card">
             <div className="vsp-card-inner">
+              <Dreamcatcher className="vsp-card-dreamcatcher" />
               <div className="vsp-card-top">
                 <span className="vsp-card-brand">SoulArt</span>
                 <span className="vsp-card-type">
@@ -216,6 +262,7 @@ export default function VouchersShopPage() {
 
       {/* ── Main content ── */}
       <div className="vsp-content Container">
+        <div className="vsp-checkout">
         {/* Amount selector */}
         <section className="vsp-section">
           <h2 className="vsp-section-title">
@@ -229,6 +276,7 @@ export default function VouchersShopPage() {
                 onClick={() => setSelectedAmount(a)}
               >
                 <div className="vsp-amount-card">
+                  <Dreamcatcher className="vsp-amount-dreamcatcher" />
                   <div className="vsp-amount-card-header">
                     <span className="vsp-amount-brand">SoulArt</span>
                     <span className="vsp-amount-label">
@@ -330,6 +378,7 @@ export default function VouchersShopPage() {
             </p>
           )}
         </section>
+        </div>
 
         {/* Benefits */}
         <section className="vsp-benefits">
