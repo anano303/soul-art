@@ -3,13 +3,11 @@ import { ArtistProfileView } from "@/modules/artists/components/artist-profile-v
 import { ArtistProfileResponse } from "@/types";
 import type { Metadata } from "next";
 import {
-  GLOBAL_KEYWORDS,
   extractKeywordsFromText,
-  getArtistKeywords,
-  getProductKeywords,
   mergeKeywordSets,
   sanitizeKeyword,
 } from "@/lib/seo-keywords";
+import { buildAlternates, resolveLocale } from "@/lib/hreflang";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/v1";
 const SITE_BASE = process.env.NEXT_PUBLIC_CLIENT_URL || "https://soulart.ge";
@@ -38,7 +36,7 @@ async function fetchArtistProfile(
 
 type ArtistPageProps = {
   params: Promise<{ slug: string }>;
-  searchParams: Promise<{ post?: string }>;
+  searchParams: Promise<{ post?: string; lang?: string }>;
 };
 
 function resolveBiographyText(
@@ -103,27 +101,12 @@ const collectArtistKeywords = (
     values?.forEach(register);
   };
 
-  const registerImage = (url?: string | null) => {
-    if (!url) {
-      return;
-    }
-
-    const segments = url.split("/");
-    const fileName = segments.pop();
-    if (fileName) {
-      register(fileName.replace(/\.[^/.]+$/, " "));
-    }
-  };
-
   register(artist.name);
   register(artist.storeName);
   register(artist.artistSlug);
   registerText(artist.artistLocation ?? undefined);
   registerArray(artist.artistDisciplines ?? []);
   registerArray(artist.artistHighlights ?? []);
-  registerText(artist.artistSlug ?? undefined);
-  registerImage(artist.artistCoverImage ?? undefined);
-  registerImage(artist.storeLogo ?? undefined);
 
   registerText(biography);
 
@@ -140,12 +123,12 @@ const collectArtistKeywords = (
     });
   }
 
+  // Only the seller's OWN products — scoped, no cross-listing contamination.
   if (products?.items?.length) {
     products.items.forEach((product) => {
       register(product.name);
       register(product.brand);
       registerText(product.description ?? undefined);
-      product.images?.forEach(registerImage);
     });
   }
 
@@ -157,7 +140,8 @@ export async function generateMetadata({
   searchParams,
 }: ArtistPageProps): Promise<Metadata> {
   const { slug: originalSlug } = await params;
-  const { post: postId } = await searchParams;
+  const { post: postId, lang } = await searchParams;
+  const locale = resolveLocale(lang);
   let startIndex = 0;
   if (originalSlug.includes("@")) {
     startIndex = originalSlug.indexOf("@") + 1;
@@ -226,23 +210,19 @@ export async function generateMetadata({
       data.products ?? null,
     );
 
-    const [productKeywords, globalArtistKeywords] = await Promise.all([
-      getProductKeywords(),
-      getArtistKeywords(),
-    ]);
+    // Scoped strictly to this artist and their own products.
+    const keywords = mergeKeywordSets(artistKeywordSet).slice(0, 25);
 
-    const keywords = mergeKeywordSets(
-      artistKeywordSet,
-      productKeywords,
-      globalArtistKeywords,
-      GLOBAL_KEYWORDS,
-    ).slice(0, 200);
+    const localizedPath = postId ? `/@${slug}?post=${postId}` : `/@${slug}`;
 
     return {
-      title: `${displayName} | SoulArt Artist`,
+      title:
+        locale === "en"
+          ? `${displayName} | SoulArt Artist`
+          : `${displayName} | SoulArt ხელოვანი`,
       description,
       keywords: keywords.length ? keywords : undefined,
-      alternates: { canonical },
+      alternates: buildAlternates(localizedPath, locale),
       openGraph: {
         title: `${displayName} | SoulArt`,
         description,

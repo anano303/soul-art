@@ -1,12 +1,8 @@
 import { Metadata } from "next";
-import Script from "next/script";
-import {
-  GLOBAL_KEYWORDS,
-  collectProductKeywords,
-  getArtistKeywords,
-  getProductKeywords,
-  mergeKeywordSets,
-} from "@/lib/seo-keywords";
+import { collectProductKeywords, mergeKeywordSets } from "@/lib/seo-keywords";
+import { isInStock } from "@/lib/stock";
+import { generateBreadcrumbSchema } from "@/lib/product-schema";
+import { buildAlternates } from "@/lib/hreflang";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -118,11 +114,8 @@ export async function generateMetadata({
 
     const description = descriptionParts.join(" | ").slice(0, 300);
 
+    // Keywords scoped strictly to THIS product — no cross-listing data.
     const pageKeywords = collectProductKeywords(product);
-    const [globalProductKeywords, artistKeywords] = await Promise.all([
-      getProductKeywords(),
-      getArtistKeywords(),
-    ]);
 
     // დამატებითი keywords პროდუქტის ყველა ინფოდან
     const extraKeywords: string[] = [];
@@ -140,13 +133,7 @@ export async function generateMetadata({
       extraKeywords.push(product.mainCategory.name);
     if (product.subCategory?.name) extraKeywords.push(product.subCategory.name);
 
-    const keywords = mergeKeywordSets(
-      extraKeywords,
-      pageKeywords,
-      globalProductKeywords,
-      artistKeywords,
-      GLOBAL_KEYWORDS
-    ).slice(0, 250);
+    const keywords = mergeKeywordSets(extraKeywords, pageKeywords).slice(0, 25);
 
     return {
       title,
@@ -198,15 +185,16 @@ export async function generateMetadata({
         images:
           product.images?.length > 0 ? [product.images[0]] : ["/logo.png"],
       },
-      alternates: {
-        canonical: `https://soulart.ge/products/${id}`,
-      },
+      // Canonical (ka) + hreflang alternates pairing the ka / en versions.
+      alternates: buildAlternates(`/products/${id}`, "ka"),
       other: {
-        "product:price:amount": product.price,
+        "product:price:amount":
+          product.discountedPrice && product.discountedPrice < product.price
+            ? product.discountedPrice
+            : product.price,
         "product:price:currency": "GEL",
-        "product:availability": product.availability
-          ? "in stock"
-          : "out of stock",
+        // Same source of truth as the Buy button + JSON-LD (variant-aware).
+        "product:availability": isInStock(product) ? "in stock" : "out of stock",
         "product:brand": product.brand,
         "product:category": product.mainCategory?.name || "",
       },
@@ -321,10 +309,9 @@ export default async function ProductLayout({ children, params }: LayoutProps) {
           priceValidUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
             .toISOString()
             .split("T")[0],
-          availability:
-            product.stockQuantity > 0 || product.countInStock > 0
-              ? "https://schema.org/InStock"
-              : "https://schema.org/OutOfStock",
+          availability: isInStock(product)
+            ? "https://schema.org/InStock"
+            : "https://schema.org/OutOfStock",
           itemCondition: "https://schema.org/NewCondition",
           seller: {
             "@type": "Organization",
@@ -352,13 +339,24 @@ export default async function ProductLayout({ children, params }: LayoutProps) {
       }
     : null;
 
+  const breadcrumbLd = product
+    ? generateBreadcrumbSchema(product, id)
+    : null;
+
   return (
     <>
+      {/* Plain <script> tags so the JSON-LD is in the initial server HTML
+          (next/script injects client-side, which Google may not see). */}
       {jsonLd && (
-        <Script
-          id="product-jsonld"
+        <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+      )}
+      {breadcrumbLd && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
         />
       )}
       {children}

@@ -53,7 +53,15 @@ import { fetchWithAuth } from "@/lib/fetch-with-auth";
 import "./ShopPage.css";
 import Image from "next/image";
 
-const ShopContent = () => {
+interface ShopContentProps {
+  initialProducts?: Product[];
+  initialTotalPages?: number;
+}
+
+const ShopContent = ({
+  initialProducts = [],
+  initialTotalPages = 1,
+}: ShopContentProps) => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { t } = useLanguage();
@@ -73,10 +81,10 @@ const ShopContent = () => {
     priceRange: [number, number];
     sorting: { field: string; direction: "asc" | "desc" };
   } | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [products, setProducts] = useState<Product[]>([]);
+  const [isLoading, setIsLoading] = useState(initialProducts.length === 0);
+  const [products, setProducts] = useState<Product[]>(initialProducts);
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
+  const [totalPages, setTotalPages] = useState(initialTotalPages);
 
   // New filter state
   const [selectedCategoryId, setSelectedCategoryId] = useState<string>("");
@@ -138,6 +146,8 @@ const ShopContent = () => {
       }
     },
     refetchOnWindowFocus: false,
+    staleTime: 30 * 60 * 1000,
+    gcTime: 60 * 60 * 1000,
   });
 
   const getTheme = () => {

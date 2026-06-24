@@ -1,17 +1,17 @@
 import { Suspense } from "react";
 import ShopContent from "./ShopContent";
 import { Metadata } from "next";
+import type { Product } from "@/types";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 import {
   GLOBAL_KEYWORDS,
   extractKeywordsFromText,
-  getArtistKeywords,
-  getProductKeywords,
   mergeKeywordSets,
   sanitizeKeyword,
 } from "@/lib/seo-keywords";
+import { buildAlternates, resolveLocale } from "@/lib/hreflang";
 
 type ShopProduct = {
   name?: string | null;
@@ -124,6 +124,7 @@ export async function generateMetadata({
 
     // Get brand from search params
     const brand = typeof params?.brand === "string" ? params.brand : "";
+    const locale = resolveLocale(params?.lang);
 
     let apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/products?page=1&limit=1&sort=createdAt&direction=desc&populate=user&populate=images`;
     if (brand) {
@@ -141,9 +142,13 @@ export async function generateMetadata({
     let representativeImage = "/logo.png"; // fallback to logo
     let authorInfo = brand || "SoulArt"; // Use brand as default author for brand pages
     let title =
-      "პირველი პლატფორმა საქართველოში - ხელნაკეთი ნივთები და ნახატები | SoulArt";
+      locale === "en"
+        ? "Handmade items & paintings — Georgia's first online art platform | SoulArt"
+        : "პირველი პლატფორმა საქართველოში - ხელნაკეთი ნივთები და ნახატები | SoulArt";
     let description =
-      "შეიძინეთ უნიკალური ხელნაკეთი ნივთები და ნახატები SoulArt-ის ონლაინ პლატფორმაზე. ქართველი ხელოვანების ნამუშევრები, ხელნაკეთი ნივთები, აქსესუარები და დეკორი. ხარისხიანი ნივთები საუკეთესო ფასად საქართველოში. Shop unique handmade items and paintings.";
+      locale === "en"
+        ? "Shop unique handmade items and original paintings by Georgian artists on SoulArt — accessories, décor and gifts at the best prices in Georgia."
+        : "შეიძინეთ უნიკალური ხელნაკეთი ნივთები და ნახატები SoulArt-ის ონლაინ პლატფორმაზე. ქართველი ხელოვანების ნამუშევრები, ხელნაკეთი ნივთები, აქსესუარები და დეკორი. ხარისხიანი ნივთები საუკეთესო ფასად საქართველოში.";
     let latestProduct: ShopProduct | null = null;
 
     if (response.ok) {
@@ -183,7 +188,10 @@ export async function generateMetadata({
     // Update title and description to include brand/author info (outside API check)
     if (brand) {
       title = `${authorInfo}'s Art Shop | SoulArt`;
-      description = `შეიძინეთ ${authorInfo}-ის უნიკალური ნამუშევრები SoulArt-ის ონლაინ პლატფორმაზე. ქართველი ხელოვანების ნამუშევრები, ნახატები,  ხელნაკეთი ნივთები.`;
+      description =
+        locale === "en"
+          ? `Shop ${authorInfo}'s unique artworks on SoulArt — original Georgian art, paintings and handmade items.`
+          : `შეიძინეთ ${authorInfo}-ის უნიკალური ნამუშევრები SoulArt-ის ონლაინ პლატფორმაზე. ქართველი ხელოვანების ნამუშევრები, ნახატები, ხელნაკეთი ნივთები.`;
     }
 
     const pageKeywords = collectShopKeywords({
@@ -194,17 +202,9 @@ export async function generateMetadata({
       description,
     });
 
-    const [productKeywords, artistKeywords] = await Promise.all([
-      getProductKeywords(),
-      getArtistKeywords(),
-    ]);
-
-    const keywords = mergeKeywordSets(
-      pageKeywords,
-      productKeywords,
-      artistKeywords,
-      GLOBAL_KEYWORDS
-    ).slice(0, 200);
+    // Shop is the catalog landing page: representative product + site-wide
+    // brand terms only (no per-other-listing dumps).
+    const keywords = mergeKeywordSets(pageKeywords, GLOBAL_KEYWORDS).slice(0, 30);
 
     return {
       title,
@@ -249,11 +249,10 @@ export async function generateMetadata({
         description,
         images: [representativeImage],
       },
-      alternates: {
-        canonical: brand
-          ? `https://soulart.ge/shop?brand=${encodeURIComponent(brand)}`
-          : "https://soulart.ge/shop",
-      },
+      alternates: buildAlternates(
+        brand ? `/shop?brand=${encodeURIComponent(brand)}` : "/shop",
+        locale
+      ),
     };
   } catch (error) {
     console.error("Error generating shop metadata:", error);
@@ -288,11 +287,76 @@ export async function generateMetadata({
   }
 }
 
-const ShopPage = () => {
+// Server-side fetch of the first page so real product cards ship in the initial
+// HTML (getProducts() is client-only via fetchWithAuth, so we fetch directly here).
+async function getInitialShopProducts(sp: {
+  [key: string]: string | string[] | undefined;
+}): Promise<{ products: Product[]; totalPages: number }> {
+  try {
+    const get = (k: string) => (typeof sp[k] === "string" ? (sp[k] as string) : "");
+    const qp = new URLSearchParams();
+    qp.set("page", get("page") || "1");
+    qp.set("limit", "20");
+    qp.set("sortBy", get("sortBy") || "createdAt");
+    qp.set("sortDirection", get("sortDirection") || "desc");
+    qp.set("excludeOutOfStock", "true");
+    qp.set("includeVariants", "true");
+
+    for (const k of ["mainCategory", "subCategory", "ageGroup", "size", "color"]) {
+      const v = get(k);
+      if (v) qp.set(k, v);
+    }
+    const brand = get("brand");
+    if (brand) {
+      try {
+        qp.set("brand", decodeURIComponent(brand));
+      } catch {
+        qp.set("brand", brand);
+      }
+    }
+    const keyword = get("keyword");
+    if (keyword) qp.set("keyword", keyword);
+    if (get("discountOnly") === "true") qp.set("discounted", "true");
+    if (get("promo") === "true") qp.set("hasPromo", "true");
+    const min = get("minPrice");
+    const max = get("maxPrice");
+    if ((min && min !== "0") || (max && max !== "1000")) {
+      if (min) qp.set("minPrice", min);
+      if (max) qp.set("maxPrice", max);
+    }
+
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/products?${qp.toString()}`,
+      { cache: "no-store" }
+    );
+    if (!res.ok) return { products: [], totalPages: 1 };
+    const data = await res.json();
+    const items: Product[] = data.items || data.products || [];
+    const inStock = items.filter(
+      (p) =>
+        (p.countInStock ?? 0) > 0 ||
+        (Array.isArray(p.variants) && p.variants.some((v) => (v.stock ?? 0) > 0))
+    );
+    return { products: inStock, totalPages: data.pages || 1 };
+  } catch {
+    return { products: [], totalPages: 1 };
+  }
+}
+
+const ShopPage = async ({
+  searchParams,
+}: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}) => {
+  const sp = await searchParams;
+  const { products, totalPages } = await getInitialShopProducts(sp);
   return (
     <div>
       <Suspense fallback={<div>Loading...</div>}>
-        <ShopContent />
+        <ShopContent
+          initialProducts={products}
+          initialTotalPages={totalPages}
+        />
       </Suspense>
     </div>
   );

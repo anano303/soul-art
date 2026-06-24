@@ -328,42 +328,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "weekly" as const,
       priority: 0.8,
     },
-    {
-      url: `${baseUrl}/cart`,
-      lastModified: new Date(),
-      changeFrequency: "weekly" as const,
-      priority: 0.6,
-    },
-    {
-      url: `${baseUrl}/checkout`,
-      lastModified: new Date(),
-      changeFrequency: "weekly" as const,
-      priority: 0.6,
-    },
-    {
-      url: `${baseUrl}/login`,
-      lastModified: new Date(),
-      changeFrequency: "monthly" as const,
-      priority: 0.6,
-    },
-    {
-      url: `${baseUrl}/register`,
-      lastModified: new Date(),
-      changeFrequency: "monthly" as const,
-      priority: 0.6,
-    },
-    {
-      url: `${baseUrl}/forgot-password`,
-      lastModified: new Date(),
-      changeFrequency: "monthly" as const,
-      priority: 0.4,
-    },
-    {
-      url: `${baseUrl}/reset-password`,
-      lastModified: new Date(),
-      changeFrequency: "monthly" as const,
-      priority: 0.4,
-    },
+    // NOTE: /cart, /checkout, /login, /register, /forgot-password and
+    // /reset-password are intentionally NOT listed — they are disallowed in
+    // robots.ts (listing them causes "blocked by robots.txt" warnings) and
+    // carry no SEO value.
     {
       url: `${baseUrl}/become-seller`,
       lastModified: new Date(),

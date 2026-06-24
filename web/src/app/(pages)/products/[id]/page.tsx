@@ -1,57 +1,37 @@
-"use client";
-
-import { useQuery } from "@tanstack/react-query";
-import { fetchWithAuth } from "@/lib/fetch-with-auth";
-import { useParams, useSearchParams } from "next/navigation";
-import { useEffect } from "react";
-import HeartLoading from "@/components/HeartLoading/HeartLoading";
+import { notFound } from "next/navigation";
 import { ProductDetails } from "@/modules/products/components/product-details";
-import { useToast } from "@/hooks/use-toast";
+import ProductPromoToast from "./ProductPromoToast";
 
-export default function ProductPage() {
-  const params = useParams();
-  const searchParams = useSearchParams();
-  const { toast } = useToast();
-  const id = params?.id ? (params.id as string) : "";
+// Server-side fetch so product title/price/description ship in the initial HTML.
+async function getProduct(id: string) {
+  try {
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/products/${id}`,
+      { cache: "no-store" }
+    );
+    if (!res.ok) return null;
+    return res.json();
+  } catch {
+    return null;
+  }
+}
 
-  // Handle promo payment redirect
-  useEffect(() => {
-    const promo = searchParams.get("promo");
-    if (promo === "success") {
-      toast({
-        title: "✅ გადახდა წარმატებით შესრულდა!",
-        description:
-          "რეკლამის მოთხოვნა მიღებულია. რეკლამა გაეშვება მომდევნო 24 საათის განმავლობაში.",
-      });
-      // Clean up URL
-      window.history.replaceState({}, "", `/products/${id}`);
-    } else if (promo === "fail") {
-      toast({
-        variant: "destructive",
-        title: "❌ გადახდა ვერ შესრულდა",
-        description: "სცადეთ ხელახლა ან დაუკავშირდით მხარდაჭერას.",
-      });
-      window.history.replaceState({}, "", `/products/${id}`);
-    }
-  }, [searchParams, id, toast]);
+export default async function ProductPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
+  const product = await getProduct(id);
 
-  const { data: product, isLoading, isError } = useQuery({
-    queryKey: ["product", id],
-    queryFn: async () => {
-      const response = await fetchWithAuth(`/products/${id}`);
-      return response.json();
-    },
-    retry: false,
-  });
-
-  if (isLoading) return <HeartLoading size="medium" />;
-  if (isError || !product) return <div className="Container" style={{ textAlign: 'center', padding: '60px 20px' }}>
-    <h2>პროდუქტი ვერ მოიძებნა</h2>
-    <p style={{ marginTop: '10px', color: '#666' }}>ეს პროდუქტი წაშლილია ან არ არსებობს.</p>
-  </div>;
+  // Proper HTTP 404 for missing/deleted products (avoids soft-404 in Google).
+  if (!product || !product._id) {
+    notFound();
+  }
 
   return (
     <div className="Container">
+      <ProductPromoToast id={id} />
       <ProductDetails product={product} />
     </div>
   );

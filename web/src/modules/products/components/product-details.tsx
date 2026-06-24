@@ -21,7 +21,6 @@ import { Color, AgeGroupItem } from "@/types";
 import { optimizeCloudinaryUrl } from "@/lib/utils";
 
 import { ProductGrid } from "./product-grid";
-import ProductSchema from "@/components/ProductSchema";
 import { AddToCartButton } from "./AddToCartButton";
 import { trackViewContent } from "@/components/MetaPixel";
 import { useCart } from "@/modules/cart/context/cart-context";
@@ -812,8 +811,9 @@ export function ProductDetails({ product }: ProductDetailsProps) {
 
   return (
     <div className={`container product-details-container ${themeClass}`}>
-      {/* SEO Product Schema */}
-      <ProductSchema product={product} productId={product._id} />
+      {/* Product + Breadcrumb JSON-LD are server-rendered in products/[id]/layout.tsx
+          (in the initial HTML). No client-side schema injection here to avoid a
+          duplicate Product schema with divergent availability. */}
 
       <div className="grid">
         {/* Left Column - Images */}

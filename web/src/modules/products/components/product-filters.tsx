@@ -212,6 +212,10 @@ export function ProductFilters({
     },
     retry: 2,
     refetchOnWindowFocus: false,
+    // Categories change rarely — cache so the shop doesn't re-show a loader
+    // on every visit/navigation.
+    staleTime: 30 * 60 * 1000,
+    gcTime: 60 * 60 * 1000,
   });
 
   // Fetch subcategories based on selected category with error handling
@@ -240,6 +244,9 @@ export function ProductFilters({
     enabled: !!selectedCategoryId,
     retry: 2,
     refetchOnWindowFocus: false,
+    // Cache per category so reopening a category is instant.
+    staleTime: 30 * 60 * 1000,
+    gcTime: 60 * 60 * 1000,
   });
   // Fetch all available brands for filtering with error handling
   const {

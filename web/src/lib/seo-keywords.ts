@@ -399,90 +399,30 @@ export const collectProductKeywords = (
   registerKeywordsFromArray(map, product.sizes ?? undefined);
   registerKeywordsFromArray(map, product.ageGroups ?? undefined);
 
-  product.images?.forEach((image) => registerKeywordFromImage(map, image));
-  registerKeywordFromImage(map, product.brandLogo);
+  // NOTE: intentionally NOT registering image filenames (S3 hashes), numeric
+  // values (price/stock/views/dimensions/discount/delivery), or any PII
+  // (email/phone/account number/ID/owner names). Those are not genuine search
+  // keywords and previously leaked private seller data into <meta keywords>.
 
   product.variants?.forEach((variant) => {
     registerKeyword(map, variant?.name);
-    registerKeyword(map, variant?.sku);
     variant?.optionValues?.forEach((option) =>
       registerKeyword(map, option?.value)
     );
   });
 
-  if (product.dimensions) {
-    registerKeywordFromNumber(map, product.dimensions.width, "width");
-    registerKeywordFromNumber(map, product.dimensions.height, "height");
-    registerKeywordFromNumber(map, product.dimensions.depth, "depth");
-  }
-
-  registerKeywordFromNumber(map, product.discountPercentage, "discount");
-  registerYearFromDate(map, product.discountStartDate);
-  registerYearFromDate(map, product.discountEndDate);
-  registerKeywordFromNumber(map, product.minDeliveryDays, "min delivery");
-  registerKeywordFromNumber(map, product.maxDeliveryDays, "max delivery");
-  registerKeywordFromNumber(map, product.viewCount, "views");
-  registerKeywordFromNumber(map, product.rating, "rating");
-  registerKeywordFromNumber(map, product.numReviews, "reviews");
-  registerKeywordFromNumber(map, product.price, "price");
-  registerKeywordFromNumber(map, product.countInStock, "stock");
-
   registerBooleanKeyword(map, product.isOriginal, ["original"], ["copy"]);
 
+  // Only the seller's public artist identity — name/store/location/highlights.
   if (product.user) {
     registerKeyword(map, product.user.name);
     registerKeyword(map, product.user.storeName);
-    registerKeyword(map, product.user.firstName);
-    registerKeyword(map, product.user.lastName);
-    registerKeyword(map, product.user.username);
     registerKeyword(map, product.user.artistSlug);
     registerKeyword(map, product.user.artistLocation);
-    registerKeywordFromImage(map, product.user.storeLogo);
-
-    if (product.user.artistBio) {
-      Object.values(product.user.artistBio).forEach((entry) =>
-        registerKeywordsFromText(map, entry ?? undefined)
-      );
-    }
-
     registerKeywordsFromArray(map, product.user.artistHighlights ?? undefined);
-    product.user.artistGallery?.forEach((image) =>
-      registerKeywordFromImage(map, image)
-    );
-
-    if (product.user.artistSocials) {
-      Object.values(product.user.artistSocials).forEach((handle) =>
-        registerKeyword(map, handle ?? undefined)
-      );
-    }
-
-    registerBooleanKeyword(
-      map,
-      product.user.artistOpenForCommissions,
-      ["commissions open"],
-      ["commissions closed"]
-    );
-
-    registerKeywordFromNumber(map, product.user.followersCount, "followers");
-    registerKeywordFromNumber(map, product.user.followingCount, "following");
-    registerKeyword(map, product.user.ownerFirstName);
-    registerKeyword(map, product.user.ownerLastName);
-    registerKeyword(map, product.user.identificationNumber);
-    registerKeyword(map, product.user.accountNumber);
-
-    if (product.user.seller) {
-      registerKeyword(map, product.user.seller.storeName);
-      registerKeywordFromImage(map, product.user.seller.storeLogo);
-      registerKeyword(map, product.user.seller.ownerFirstName);
-      registerKeyword(map, product.user.seller.ownerLastName);
-      registerKeyword(map, product.user.seller.phoneNumber);
-      registerKeyword(map, product.user.seller.email);
-    }
   }
 
   product.reviews?.forEach((review) => {
-    registerKeyword(map, review?.name);
-    registerKeyword(map, review?.nameEn);
     registerKeywordsFromText(map, review?.comment ?? undefined);
   });
 
@@ -556,21 +496,17 @@ const fetchProductKeywordsInternal = cache(async (): Promise<string[]> => {
       }
 
       items.forEach((item) => {
+        // Public, search-relevant fields only. No image hashes, numeric values,
+        // youtube/url ids, or seller PII (those previously leaked into meta).
         registerKeyword(map, item.name);
         registerKeyword(map, item.nameEn);
-        registerKeyword(map, item.slug);
         registerKeyword(map, item.brand);
-        registerKeyword(map, item.brandLogo);
         registerKeyword(map, item.seoTitle);
         registerKeywordsFromText(map, item.seoDescription);
         registerKeywordsFromText(map, item.description);
         registerKeywordsFromText(map, item.descriptionEn);
         registerKeywordsFromText(map, item.summary);
         registerKeywordsFromText(map, item.summaryEn);
-        registerKeywordsFromText(map, item.videoDescription);
-        registerKeyword(map, item.youtubeVideoId);
-        registerKeyword(map, item.youtubeVideoUrl);
-        registerKeyword(map, item.youtubeEmbedUrl);
 
         registerKeywordsFromArray(map, item.materials);
         registerKeywordsFromArray(map, item.colors);
@@ -593,59 +529,10 @@ const fetchProductKeywordsInternal = cache(async (): Promise<string[]> => {
           registerKeyword(map, item.categoryStructure.ageGroup);
         }
 
-        registerKeyword(map, item.deliveryType);
-        if (item.deliveryType === "SELLER") {
-          registerKeywordsFromArray(map, [
-            "seller delivery",
-            "მოყვანა გამყიდველის მიერ",
-          ]);
-        } else if (item.deliveryType === "SoulArt") {
-          registerKeywordsFromArray(map, [
-            "soulart delivery",
-            "სოულარტის მიტანა",
-          ]);
-        }
-
-        registerKeywordFromNumber(
-          map,
-          item.minDeliveryDays,
-          "min delivery days"
-        );
-        registerKeywordFromNumber(
-          map,
-          item.maxDeliveryDays,
-          "max delivery days"
-        );
-        registerKeywordFromNumber(map, item.discountPercentage, "discount");
-        registerYearFromDate(map, item.discountStartDate);
-        registerYearFromDate(map, item.discountEndDate);
-
-        if (item.dimensions) {
-          registerKeywordFromNumber(map, item.dimensions.width, "width");
-          registerKeywordFromNumber(map, item.dimensions.height, "height");
-          registerKeywordFromNumber(map, item.dimensions.depth, "depth");
-        }
-
         registerBooleanKeyword(map, item.isOriginal, [
           "ორიგინალი ნამუშევარი",
           "original artwork",
         ]);
-
-        if (Array.isArray(item.reviews)) {
-          item.reviews.forEach((review) => {
-            registerKeyword(map, review.name);
-            registerKeyword(map, review.nameEn);
-            registerKeywordsFromText(map, review.comment);
-          });
-        }
-
-        registerKeywordFromNumber(map, item.viewCount, "views");
-        registerKeywordFromNumber(map, item.rating, "rating");
-        registerKeywordFromNumber(map, item.numReviews, "reviews");
-        registerKeywordFromNumber(map, item.price, "price");
-        registerKeywordFromNumber(map, item.countInStock, "stock");
-
-        item.images?.forEach((image) => registerKeywordFromImage(map, image));
 
         if (Array.isArray(item.hashtags)) {
           item.hashtags.forEach((tag) => {
@@ -658,7 +545,6 @@ const fetchProductKeywordsInternal = cache(async (): Promise<string[]> => {
         if (Array.isArray(item.variants)) {
           item.variants.forEach((variant) => {
             registerKeyword(map, variant.name);
-            registerKeyword(map, variant.sku);
             variant.optionValues?.forEach((option) =>
               registerKeyword(map, option?.value)
             );
@@ -668,53 +554,9 @@ const fetchProductKeywordsInternal = cache(async (): Promise<string[]> => {
         if (item.user) {
           registerKeyword(map, item.user.name);
           registerKeyword(map, item.user.storeName);
-          registerKeyword(map, item.user.firstName);
-          registerKeyword(map, item.user.lastName);
-          registerKeyword(map, item.user.username);
           registerKeyword(map, item.user.artistSlug);
           registerKeywordsFromText(map, item.user.artistLocation);
-          registerKeywordFromImage(map, item.user.storeLogo);
-
-          if (item.user.artistBio) {
-            Object.values(item.user.artistBio).forEach((value) =>
-              registerKeywordsFromText(map, value ?? undefined)
-            );
-          }
-
           registerKeywordsFromArray(map, item.user.artistHighlights ?? []);
-          item.user.artistGallery?.forEach((image) =>
-            registerKeywordFromImage(map, image)
-          );
-
-          if (item.user.artistSocials) {
-            Object.entries(item.user.artistSocials).forEach(([key, value]) => {
-              registerKeyword(map, key);
-              registerKeywordsFromText(map, value ?? undefined);
-            });
-          }
-
-          registerBooleanKeyword(
-            map,
-            item.user.artistOpenForCommissions,
-            ["commissions open", "საკომისიო ღიაა"],
-            ["commissions closed", "საკომისიო დახურულია"]
-          );
-
-          registerKeywordFromNumber(map, item.user.followersCount, "followers");
-          registerKeywordFromNumber(map, item.user.followingCount, "following");
-          registerKeyword(map, item.user.ownerFirstName);
-          registerKeyword(map, item.user.ownerLastName);
-          registerKeyword(map, item.user.identificationNumber);
-          registerKeyword(map, item.user.accountNumber);
-
-          if (item.user.seller) {
-            registerKeyword(map, item.user.seller.storeName);
-            registerKeywordFromImage(map, item.user.seller.storeLogo);
-            registerKeyword(map, item.user.seller.ownerFirstName);
-            registerKeyword(map, item.user.seller.ownerLastName);
-            registerKeyword(map, item.user.seller.phoneNumber);
-            registerKeyword(map, item.user.seller.email);
-          }
         }
       });
 
@@ -821,8 +663,6 @@ const fetchArtistKeywordsInternal = cache(async (): Promise<string[]> => {
         registerKeywordsFromArray(map, artist.artistDisciplines ?? []);
         registerKeywordsFromArray(map, artist.artistHighlights ?? []);
         registerKeywordsFromText(map, artist.bio);
-        registerKeywordFromImage(map, artist.artistCoverImage);
-        registerKeywordFromImage(map, artist.storeLogo);
 
         registerBooleanKeyword(
           map,
@@ -831,25 +671,11 @@ const fetchArtistKeywordsInternal = cache(async (): Promise<string[]> => {
           ["commissions closed", "საკომისიო დახურულია"]
         );
 
-        registerKeywordFromNumber(map, artist.followersCount, "followers");
-        registerKeywordFromNumber(map, artist.followingCount, "following");
-
         if (artist.artistBio) {
           Object.values(artist.artistBio).forEach((value) =>
             registerKeywordsFromText(map, value ?? undefined)
           );
         }
-
-        if (artist.artistSocials) {
-          Object.entries(artist.artistSocials).forEach(([key, value]) => {
-            registerKeyword(map, key);
-            registerKeywordsFromText(map, value ?? undefined);
-          });
-        }
-
-        artist.artistGallery?.forEach((image) =>
-          registerKeywordFromImage(map, image)
-        );
       });
 
       if (items.length < ARTIST_FETCH_LIMIT) {
