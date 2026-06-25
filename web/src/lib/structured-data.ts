@@ -3,8 +3,8 @@ export const organizationSchema = {
   "@type": "Organization",
   name: "SoulArt",
   alternateName: "ნახატები და ხელნაკეთი ნივთები",
-  url: "https://SoulArt.ge",
-  logo: "https://SoulArt.ge/logo.png",
+  url: "https://soulart.ge",
+  logo: "https://soulart.ge/logo.png",
   description: "ნახატები, ხელნაკეთი ნივთები და დეკორი",
   address: {
     "@type": "PostalAddress",
@@ -30,14 +30,14 @@ export const websiteSchema = {
   "@type": "WebSite",
   name: "SoulArt",
   alternateName: "SoulArt - ხელნაკეთი ნივთები და ნახატები",
-  url: "https://SoulArt.ge",
+  url: "https://soulart.ge",
   description: "ხელნაკეთი ნივთები და ნახატები",
   inLanguage: ["ka", "en"],
   potentialAction: {
     "@type": "SearchAction",
     target: {
       "@type": "EntryPoint",
-      urlTemplate: "https://SoulArt.ge/search/{search_term_string}",
+      urlTemplate: "https://soulart.ge/search/{search_term_string}",
     },
     "query-input": "required name=search_term_string",
   },
@@ -48,7 +48,7 @@ export const storeSchema = {
   "@type": "Store",
   name: "SoulArt",
   description: "ხელნაკეთი ნივთები და ნახატები",
-  url: "https://SoulArt.ge",
+  url: "https://soulart.ge",
   telephone: "+995-551-000-059", // შეცვალეთ რეალური ნომრით
   address: {
     "@type": "PostalAddress",

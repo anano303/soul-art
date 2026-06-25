@@ -2,11 +2,10 @@ import { Metadata } from "next";
 import {
   GLOBAL_KEYWORDS,
   extractKeywordsFromText,
-  getProductKeywords,
-  getArtistKeywords,
   mergeKeywordSets,
   sanitizeKeyword,
 } from "@/lib/seo-keywords";
+import { buildAlternates } from "@/lib/hreflang";
 import SingleForumPost from "./SingleForumPost";
 
 interface Forum {
@@ -83,10 +82,10 @@ const buildForumKeywords = (forum: Forum): string[] => {
     registerKeyword(comment.user?.name);
   });
 
-  registerKeyword(forum.image);
-  registerKeyword(forum.createdAt);
+  // NOTE: do NOT register forum.image (S3 hash) or forum.createdAt (date) —
+  // they are not real keywords.
 
-  return Array.from(keywordMap.values()).slice(0, 120);
+  return Array.from(keywordMap.values()).slice(0, 25);
 };
 
 export async function generateMetadata({
@@ -120,19 +119,15 @@ export async function generateMetadata({
     } | SoulArt.ge Forum`;
     const description = truncateText(textContent, 155);
 
+    // Scoped to THIS post (content, tags, author) + site brand terms — no
+    // cross-listing dumps of other products/artists.
     const forumKeywords = buildForumKeywords(forum);
-    const [productKeywords, artistKeywords] = await Promise.all([
-      getProductKeywords(),
-      getArtistKeywords(),
-    ]);
     const keywords = mergeKeywordSets(
       forumKeywords,
       forum.tags,
       [forum.user.name],
-      productKeywords,
-      artistKeywords,
       GLOBAL_KEYWORDS
-    ).slice(0, 180);
+    ).slice(0, 25);
 
     return {
       title,
@@ -173,9 +168,7 @@ export async function generateMetadata({
         images: forum.image ? [forum.image] : [],
       },
 
-      alternates: {
-        canonical: `https://soulart.ge/forum/${id}`,
-      },
+      alternates: buildAlternates(`/forum/${id}`, "ka"),
 
       robots: {
         index: true,
