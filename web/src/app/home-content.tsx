@@ -6,6 +6,7 @@ import HomePagesHead from "@/components/homePagesHead/homePagesHead";
 import { useLanguage } from "@/hooks/LanguageContext";
 import { trackPageView } from "@/lib/ga4-analytics";
 import VoucherBanner from "@/components/voucherBanner/VoucherBanner";
+import GuaranteeBanner from "@/components/guaranteeBanner/GuaranteeBanner";
 
 // Above-the-fold: hero slider
 // Below-the-fold components - all ssr: false to prevent hydration blocking
@@ -79,6 +80,7 @@ export default function HomeContent() {
       <PremiumRail />
       <DiscountedRail />
       <GiftCategories />
+      <GuaranteeBanner />
       <VoucherBanner />
       {/* <SpringCollection /> */}
       

@@ -1,0 +1,194 @@
+/* ===== Guarantee / buyer-protection banner (premium, navy + gold) ===== */
+
+.guarantee-banner {
+  position: relative;
+  width: 100%;
+  min-height: 380px;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  margin: 2.5rem 0;
+}
+
+.gb-bg {
+  object-fit: cover;
+  object-position: center;
+  z-index: 0;
+}
+
+/* navy wash — darker on the left for text legibility, fading to reveal the photo */
+.gb-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(
+    90deg,
+    rgba(1, 38, 69, 0.94) 0%,
+    rgba(1, 38, 69, 0.78) 42%,
+    rgba(1, 38, 69, 0.4) 78%,
+    rgba(1, 38, 69, 0.25) 100%
+  );
+}
+
+.gb-content {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 3rem 24px;
+  color: #fff;
+}
+
+.gb-badge {
+  display: inline-block;
+  background: rgba(233, 198, 106, 0.16);
+  border: 1px solid rgba(233, 198, 106, 0.55);
+  color: #f0d894;
+  border-radius: 100px;
+  padding: 0.35rem 0.95rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  margin-bottom: 1.1rem;
+}
+
+.gb-title {
+  max-width: 640px;
+  font-size: clamp(1.6rem, 3.2vw, 2.6rem);
+  font-weight: 900;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  margin: 0 0 1rem;
+  color: #fff;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.35);
+}
+
+.gb-text {
+  max-width: 560px;
+  font-size: clamp(0.95rem, 1.5vw, 1.15rem);
+  line-height: 1.65;
+  margin: 0;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+/* highlight the brand in gold */
+.gb-brand {
+  font-weight: 800;
+  background: linear-gradient(135deg, #fdf6c9 0%, #e9c66a 45%, #bb9326 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: #e9c66a;
+  white-space: nowrap;
+}
+
+/* ===== CTA buttons ===== */
+.gb-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.85rem;
+  margin-top: 1.8rem;
+}
+
+.gb-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.8rem 1.9rem;
+  border-radius: 100px;
+  font-size: 1rem;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.2s ease,
+    filter 0.2s ease,
+    background 0.2s ease,
+    color 0.2s ease;
+}
+
+/* primary — glossy gold (same language as the voucher CTA) */
+.gb-btn--gold {
+  background: linear-gradient(
+    180deg,
+    #fdf6c9 0%,
+    #e7c75a 22%,
+    #bb9326 55%,
+    #8f6e18 100%
+  );
+  color: #2a2208;
+  border: 2px solid #4a4416;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.4);
+  box-shadow:
+    0 8px 22px rgba(143, 110, 24, 0.4),
+    inset 0 2px 2px rgba(255, 255, 255, 0.7),
+    inset 0 -3px 6px rgba(120, 90, 20, 0.5);
+}
+.gb-btn--gold:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.05);
+  box-shadow:
+    0 12px 28px rgba(143, 110, 24, 0.5),
+    inset 0 2px 2px rgba(255, 255, 255, 0.85),
+    inset 0 -3px 6px rgba(120, 90, 20, 0.5);
+}
+
+/* secondary — glass / outline */
+.gb-btn--ghost {
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+  border: 1.5px solid rgba(255, 255, 255, 0.55);
+  backdrop-filter: blur(4px);
+}
+.gb-btn--ghost:hover {
+  transform: translateY(-2px);
+  background: rgba(255, 255, 255, 0.16);
+  border-color: #fff;
+}
+
+@media (max-width: 768px) {
+  .guarantee-banner {
+    min-height: 320px;
+    margin: 1.75rem 0;
+  }
+  /* slightly more even wash so text stays readable over a narrower image */
+  .gb-overlay {
+    background: linear-gradient(
+      90deg,
+      rgba(1, 38, 69, 0.92) 0%,
+      rgba(1, 38, 69, 0.82) 60%,
+      rgba(1, 38, 69, 0.55) 100%
+    );
+  }
+  .gb-content {
+    padding: 2.25rem 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .guarantee-banner {
+    min-height: 300px;
+  }
+  .gb-overlay {
+    background: linear-gradient(
+      180deg,
+      rgba(1, 38, 69, 0.86) 0%,
+      rgba(1, 38, 69, 0.8) 100%
+    );
+  }
+  .gb-badge {
+    font-size: 0.76rem;
+  }
+  .gb-actions {
+    gap: 0.6rem;
+    margin-top: 1.4rem;
+  }
+  .gb-btn {
+    padding: 0.7rem 1.4rem;
+    font-size: 0.92rem;
+    flex: 1 1 auto;
+  }
+}
