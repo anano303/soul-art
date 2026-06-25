@@ -17,6 +17,10 @@ import { useQuery } from "@tanstack/react-query";
 
 const PRIMARY_COLOR = "#012645";
 const SHOP_PAGE_STORAGE_KEY = "shopCurrentPage";
+// "No upper limit" sentinel for the price filter. The default max used to be
+// 1000, which broke links like the Premium rail (?minPrice=1500 with no max):
+// it produced an invalid range [1500, 1000] and returned zero products.
+const PRICE_MAX = 1_000_000;
 
 /** Spring collection keywords for multi-search */
 const SPRING_KEYWORDS = [
@@ -204,12 +208,6 @@ const ShopContent = ({
     if (brandParam) {
       try {
         decodedBrandParam = decodeURIComponent(brandParam).trim();
-        console.log(
-          "Brand parameter decoded:",
-          brandParam,
-          "->",
-          decodedBrandParam,
-        );
       } catch (error) {
         console.error("Error decoding brand parameter:", error);
         decodedBrandParam = brandParam.trim();
@@ -221,7 +219,13 @@ const ShopContent = ({
     const discountParam = searchParams?.get("discountOnly") === "true";
     const promoParam = searchParams?.get("promo") === "true";
     const minPriceParam = parseInt(searchParams?.get("minPrice") || "0");
-    const maxPriceParam = parseInt(searchParams?.get("maxPrice") || "1000");
+    let maxPriceParam = parseInt(searchParams?.get("maxPrice") || "1000");
+    // Deep-links (e.g. PremiumRail "View All") pass only minPrice, and the
+    // default max (1000) can be lower than that min — an impossible range that
+    // returns nothing. When max ends up below min, drop the upper cap.
+    if (maxPriceParam < minPriceParam) {
+      maxPriceParam = PRICE_MAX;
+    }
     const sortByParam = searchParams?.get("sortBy") || "createdAt";
     const sortDirectionParam =
       (searchParams?.get("sortDirection") as "asc" | "desc") || "desc";

@@ -3,26 +3,11 @@ import { collectProductKeywords, mergeKeywordSets } from "@/lib/seo-keywords";
 import { isInStock } from "@/lib/stock";
 import { generateBreadcrumbSchema } from "@/lib/product-schema";
 import { buildAlternates } from "@/lib/hreflang";
+import { getProduct } from "@/lib/get-product";
 
 interface LayoutProps {
   children: React.ReactNode;
   params: Promise<{ id: string }>;
-}
-
-// ფუნქცია პროდუქტის მოტანისთვის (რომ ორივე generateMetadata და layout-ში გამოვიყენოთ)
-async function getProduct(id: string) {
-  try {
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/products/${id}`,
-      {
-        cache: "no-store",
-      }
-    );
-    if (!response.ok) return null;
-    return response.json();
-  } catch {
-    return null;
-  }
 }
 
 export async function generateMetadata({
@@ -32,21 +17,14 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { id } = await params;
   try {
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/products/${id}`,
-      {
-        cache: "no-store",
-      }
-    );
+    const product = await getProduct(id);
 
-    if (!response.ok) {
+    if (!product) {
       return {
         title: "Product Not Found | SoulArt",
         description: "The requested product could not be found.",
       };
     }
-
-    const product = await response.json();
 
     // სრული სათაური პროდუქტის ყველა მონაცემით
     const categoryName =

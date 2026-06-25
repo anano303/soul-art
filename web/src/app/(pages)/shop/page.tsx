@@ -117,7 +117,6 @@ export async function generateMetadata({
 }: {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }): Promise<Metadata> {
-  console.log("generateMetadata called");
   try {
     // Await searchParams as it's now a Promise in Next.js 15+
     const params = await searchParams;
@@ -136,9 +135,6 @@ export async function generateMetadata({
       cache: "no-store",
     });
 
-    console.log("API URL:", apiUrl);
-    console.log("Response status:", response.status);
-
     let representativeImage = "/logo.png"; // fallback to logo
     let authorInfo = brand || "SoulArt"; // Use brand as default author for brand pages
     let title =
@@ -153,7 +149,6 @@ export async function generateMetadata({
 
     if (response.ok) {
       const data = await response.json();
-      console.log("API Response:", data); // დამატება
       const items = Array.isArray(data?.items)
         ? data.items
         : Array.isArray(data?.products)
@@ -181,8 +176,6 @@ export async function generateMetadata({
             : `https://soulart.ge${imageUrl}`;
         }
       }
-    } else {
-      console.log("API Error:", response.status); // დამატება
     }
 
     // Update title and description to include brand/author info (outside API check)
@@ -319,7 +312,12 @@ async function getInitialShopProducts(sp: {
     if (get("discountOnly") === "true") qp.set("discounted", "true");
     if (get("promo") === "true") qp.set("hasPromo", "true");
     const min = get("minPrice");
-    const max = get("maxPrice");
+    let max = get("maxPrice");
+    // Premium deep-links (e.g. PremiumRail) pass only minPrice; if a stale/odd
+    // max ends up below min it's an impossible range, so drop the upper cap.
+    if (min && max && Number(min) > Number(max)) {
+      max = "";
+    }
     if ((min && min !== "0") || (max && max !== "1000")) {
       if (min) qp.set("minPrice", min);
       if (max) qp.set("maxPrice", max);
