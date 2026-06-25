@@ -129,12 +129,16 @@ export function ProductFilters({
 
     if (showFilters) {
       document.body.style.overflow = "hidden";
+      // Hide floating widgets (e.g. promo button) that would overlap the ✕.
+      if (!isDesktop) document.body.classList.add("filter-modal-open");
     } else {
       document.body.style.overflow = "";
+      document.body.classList.remove("filter-modal-open");
     }
 
     return () => {
       document.body.style.overflow = "";
+      document.body.classList.remove("filter-modal-open");
     };
   }, [showFilters, isDesktop]);
 
