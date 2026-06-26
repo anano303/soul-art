@@ -136,6 +136,14 @@ export default function AdminDashboard() {
         description: "რეკლამის მოთხოვნების მართვა და დადასტურება",
         roles: ["admin", "seller"],
       },
+      {
+        title: "ფასის შეთავაზებები",
+        href: "/admin/price-offers",
+        icon: "💰",
+        description:
+          "მყიდველების ფასის მოთხოვნები, საკონტაქტო ინფო და გამყიდველის პასუხები",
+        roles: ["admin"],
+      },
     ];
 
     return allAdminSections.filter((section) =>

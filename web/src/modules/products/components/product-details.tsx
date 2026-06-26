@@ -30,6 +30,7 @@ import { useReferralPricing } from "@/hooks/use-referral-pricing";
 import { useCurrency } from "@/hooks/use-currency";
 import { ProductCallRequest } from "@/components/product-call-request/product-call-request";
 import { useAuth } from "@/hooks/use-auth";
+import PriceOfferModal from "./price-offer-modal";
 import { PromoteModal } from "@/modules/admin/components/promote-modal";
 
 type MediaItem =
@@ -190,6 +191,10 @@ export function ProductDetails({ product }: ProductDetailsProps) {
   const [isBuying, setIsBuying] = useState(false);
   const [isCallRequestOpen, setIsCallRequestOpen] = useState(false);
   const [showPromoteModal, setShowPromoteModal] = useState(false);
+  const [showOfferModal, setShowOfferModal] = useState(false);
+  const [acceptedOfferPrice, setAcceptedOfferPrice] = useState<number | null>(
+    null,
+  );
   const hasTrackedViewRef = useRef(false);
   const router = useRouter();
   const { t, language } = useLanguage();
@@ -641,6 +646,32 @@ export function ProductDetails({ product }: ProductDetailsProps) {
   useEffect(() => {
     hasTrackedViewRef.current = false;
   }, [product._id]);
+
+  // If the current buyer has a seller-accepted price for this product, show it.
+  useEffect(() => {
+    if (!currentUser || !product?._id) {
+      setAcceptedOfferPrice(null);
+      return;
+    }
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetchWithAuth(
+          `/price-offers/mine?productId=${product._id}`,
+        );
+        if (!res.ok) return;
+        const offer = await res.json();
+        if (!cancelled && offer && offer.offeredPrice) {
+          setAcceptedOfferPrice(offer.offeredPrice);
+        }
+      } catch {
+        /* ignore */
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [currentUser, product?._id]);
 
   useEffect(() => {
     if (hasTrackedViewRef.current) {
@@ -1548,6 +1579,104 @@ export function ProductDetails({ product }: ProductDetailsProps) {
                   </>
                 )}
               </button>
+
+              {/* Accepted personal price notice */}
+              {acceptedOfferPrice !== null && (
+                <div
+                  style={{
+                    marginTop: "10px",
+                    padding: "12px 16px",
+                    borderRadius: "12px",
+                    border: "1px solid rgba(187,147,38,0.45)",
+                    background:
+                      "linear-gradient(135deg, #fdf6c9 0%, #f6e7b0 100%)",
+                    color: "#5b4708",
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "2px",
+                  }}
+                >
+                  <span style={{ fontWeight: 800, fontSize: "15px" }}>
+                    ✅{" "}
+                    {language === "en"
+                      ? "Your approved price"
+                      : "შენთვის დადასტურებული ფასი"}
+                    : ₾{acceptedOfferPrice}
+                  </span>
+                  <span style={{ fontSize: "12.5px", opacity: 0.85 }}>
+                    {language === "en"
+                      ? "Add to cart — this price applies only to you at checkout."
+                      : "დაამატე კალათაში — ეს ფასი მხოლოდ შენთვის მოქმედებს გადახდისას."}
+                  </span>
+                </div>
+              )}
+
+              {/* Make an Offer Button */}
+              {!isOutOfStock && acceptedOfferPrice === null && (
+                <button
+                  type="button"
+                  onClick={() => setShowOfferModal(true)}
+                  title={
+                    language === "en"
+                      ? "Offer your price"
+                      : "შემოგვთავაზე შენი ფასი"
+                  }
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: "8px",
+                    width: "100%",
+                    padding: "12px 18px",
+                    marginTop: "10px",
+                    borderRadius: "12px",
+                    border: "2px solid #012645",
+                    background: "transparent",
+                    color: "#012645",
+                    fontFamily: "inherit",
+                    fontSize: "15px",
+                    fontWeight: 700,
+                    cursor: "pointer",
+                    transition: "all 0.2s ease",
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = "#012645";
+                    e.currentTarget.style.color = "#fff";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = "transparent";
+                    e.currentTarget.style.color = "#012645";
+                  }}
+                >
+                  <svg
+                    width="18"
+                    height="18"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z" />
+                    <line x1="7" y1="7" x2="7.01" y2="7" />
+                  </svg>
+                  <span>
+                    {language === "en"
+                      ? "Offer your price"
+                      : "შემოგვთავაზე შენი ფასი"}
+                  </span>
+                </button>
+              )}
+
+              {showOfferModal && (
+                <PriceOfferModal
+                  productId={product._id}
+                  productName={displayName}
+                  currentPrice={finalPrice}
+                  onClose={() => setShowOfferModal(false)}
+                />
+              )}
 
               {/* Credo Installment Button - Georgian customers only */}
               {currency === "GEL" && finalPrice >= 100 && (

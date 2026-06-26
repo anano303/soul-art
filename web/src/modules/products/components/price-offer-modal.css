@@ -1,0 +1,208 @@
+/* ===== Price Offer Modal (premium navy + gold) ===== */
+.po-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 11000;
+  background: rgba(1, 38, 69, 0.55);
+  backdrop-filter: blur(3px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  animation: po-fade 0.2s ease;
+}
+@keyframes po-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.po-modal {
+  position: relative;
+  width: 100%;
+  max-width: 440px;
+  max-height: 92vh;
+  overflow-y: auto;
+  background: #fff;
+  border-radius: 20px;
+  border: 1px solid #ece7da;
+  box-shadow: 0 24px 60px rgba(1, 38, 69, 0.35);
+  animation: po-pop 0.22s ease;
+}
+@keyframes po-pop {
+  from { transform: translateY(12px) scale(0.98); opacity: 0; }
+  to { transform: translateY(0) scale(1); opacity: 1; }
+}
+
+.po-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(1, 38, 69, 0.06);
+  color: #012645;
+  font-size: 15px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.po-close:hover {
+  background: rgba(1, 38, 69, 0.12);
+}
+
+/* header */
+.po-header {
+  padding: 1.75rem 1.75rem 1.25rem;
+  border-bottom: 1px solid #f0eee6;
+}
+.po-eyebrow {
+  display: inline-block;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #bb9326;
+  background: rgba(233, 198, 106, 0.14);
+  border: 1px solid rgba(233, 198, 106, 0.4);
+  border-radius: 100px;
+  padding: 0.25rem 0.7rem;
+  margin-bottom: 0.7rem;
+}
+.po-title {
+  margin: 0 0 0.4rem;
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: #012645;
+}
+.po-product {
+  margin: 0 0 0.25rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #1f2937;
+}
+.po-current {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #6b7280;
+}
+.po-current strong {
+  color: #012645;
+}
+
+/* form */
+.po-form {
+  padding: 1.25rem 1.75rem 1.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+.po-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+.po-field > span {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #374151;
+}
+.po-field input,
+.po-field textarea {
+  width: 100%;
+  padding: 0.7rem 0.9rem;
+  border: 1px solid #dcd9cf;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  font-family: inherit;
+  color: #1f2937;
+  background: #fcfbf8;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  box-sizing: border-box;
+}
+.po-field input:focus,
+.po-field textarea:focus {
+  outline: none;
+  border-color: #bb9326;
+  box-shadow: 0 0 0 3px rgba(187, 147, 38, 0.15);
+}
+.po-field textarea {
+  resize: vertical;
+  min-height: 48px;
+}
+.po-hint {
+  font-size: 0.76rem;
+  color: #6b7280;
+  line-height: 1.45;
+}
+
+.po-register {
+  border-top: 1px dashed #e5e2d6;
+  padding-top: 0.9rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+.po-register-note {
+  margin: 0;
+  font-size: 0.83rem;
+  line-height: 1.5;
+  color: #6b7280;
+  background: #f8f9fb;
+  padding: 0.7rem 0.85rem;
+  border-radius: 10px;
+}
+
+.po-error {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #b91c1c;
+  font-size: 0.85rem;
+  line-height: 1.45;
+  padding: 0.7rem 0.85rem;
+  border-radius: 10px;
+}
+
+/* submit — glossy gold */
+.po-submit {
+  margin-top: 0.4rem;
+  width: 100%;
+  padding: 0.9rem 1.5rem;
+  border-radius: 12px;
+  border: 2px solid #4a4416;
+  background: linear-gradient(
+    180deg,
+    #fdf6c9 0%,
+    #e7c75a 22%,
+    #bb9326 55%,
+    #8f6e18 100%
+  );
+  color: #2a2208;
+  font-size: 1rem;
+  font-weight: 800;
+  cursor: pointer;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.4);
+  box-shadow:
+    0 8px 20px rgba(143, 110, 24, 0.35),
+    inset 0 2px 2px rgba(255, 255, 255, 0.7),
+    inset 0 -3px 6px rgba(120, 90, 20, 0.5);
+  transition: transform 0.15s, filter 0.2s, box-shadow 0.2s;
+}
+.po-submit:hover:not(:disabled) {
+  transform: translateY(-2px);
+  filter: brightness(1.05);
+}
+.po-submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+@media (max-width: 480px) {
+  .po-header {
+    padding: 1.4rem 1.25rem 1rem;
+  }
+  .po-form {
+    padding: 1rem 1.25rem 1.4rem;
+  }
+  .po-title {
+    font-size: 1.25rem;
+  }
+}

@@ -243,6 +243,21 @@ export function RegisterForm() {
         </div>
 
         <div className="input-group">
+          <label htmlFor="phoneNumber">
+            {language === "en" ? "Contact phone" : "საკონტაქტო ნომერი"}
+          </label>
+          <input
+            id="phoneNumber"
+            type="tel"
+            placeholder="+995 5xx xx xx xx"
+            {...registerField("phoneNumber")}
+          />
+          {errors.phoneNumber && (
+            <p className="error-text">{errors.phoneNumber.message}</p>
+          )}
+        </div>
+
+        <div className="input-group">
           <label htmlFor="email">{t("auth.email")}</label>
           <div className="email-container">
             <input

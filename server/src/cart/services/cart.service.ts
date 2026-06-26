@@ -11,12 +11,14 @@ import { ProductsService } from '@/products/services/products.service';
 import { UserDocument } from '@/users/schemas/user.schema';
 import { CartItem } from '@/types/cart';
 import { ShippingDetails } from '@/types/shipping';
+import { PriceOffersService } from '@/price-offers/services/price-offers.service';
 
 @Injectable()
 export class CartService {
   constructor(
     @InjectModel(Cart.name) private cartModel: Model<CartDocument>,
     private productsService: ProductsService,
+    private priceOffersService: PriceOffersService,
   ) {}
 
   async getCart(user: UserDocument): Promise<CartDocument> {
@@ -118,6 +120,17 @@ export class CartService {
     const product = await this.productsService.findById(productId);
     if (!product) throw new NotFoundException('Product not found');
 
+    // Personalized price: if THIS buyer has a seller-accepted offer for this
+    // product, the server forces the offered price (ignoring any client price).
+    let effectivePrice = price;
+    const acceptedOffer = await this.priceOffersService.getAcceptedOffer(
+      String(user._id),
+      productId,
+    );
+    if (acceptedOffer) {
+      effectivePrice = acceptedOffer.offeredPrice;
+    }
+
     // Check if product is in stock
     let availableStock = 0;
     if (size || color || ageGroup) {
@@ -161,9 +174,9 @@ export class CartService {
 
     if (existingItem) {
       existingItem.qty = qty;
-      // Update price if provided (to handle discount changes)
-      if (price !== undefined) {
-        existingItem.price = price;
+      // Update price if provided (to handle discount / accepted-offer changes)
+      if (effectivePrice !== undefined) {
+        existingItem.price = effectivePrice;
       }
       // Update referral info if provided
       if (referralInfo) {
@@ -180,7 +193,7 @@ export class CartService {
         name: product.name,
         nameEn: product.nameEn,
         image: product.images[0],
-        price: price ?? product.price, // Use provided price (discounted) or fallback to product price
+        price: effectivePrice ?? product.price, // accepted-offer / discounted / list price
         originalPrice: referralInfo?.originalPrice ?? product.price,
         countInStock:
           product.variants?.find(

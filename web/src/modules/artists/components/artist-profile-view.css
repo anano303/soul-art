@@ -500,7 +500,7 @@
 .artist-profile__content {
   display: flex;
   flex-direction: column;
-  gap: 2.25rem;
+  /* gap: 2.25rem; */
   background: #fff;
 }
 

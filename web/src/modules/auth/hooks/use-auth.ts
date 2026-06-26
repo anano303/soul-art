@@ -23,6 +23,7 @@ export interface RegisterData {
   name: string;
   email: string;
   password: string;
+  phoneNumber?: string;
 }
 
 // Define seller registration data types

@@ -1,0 +1,160 @@
+.so-wrap {
+  max-width: 820px;
+  margin: 0 auto;
+  padding: 2rem 1rem 3rem;
+}
+
+/* Standalone /profile/offers page: clear the fixed site header + profile nav
+   so the heading isn't hidden behind them. (Not applied to embeds.) */
+.so-standalone .so-wrap {
+  padding-top: calc(var(--header-total, 80px) + 1.5rem);
+}
+.so-head h1 {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: #012645;
+  margin: 0 0 0.4rem;
+}
+.so-head p {
+  color: #6b7280;
+  font-size: 0.92rem;
+  margin: 0 0 1.5rem;
+  line-height: 1.5;
+}
+.so-empty {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: #6b7280;
+  background: #f8f9fb;
+  border-radius: 14px;
+}
+.so-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+.so-card {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  background: #fff;
+  border: 1px solid #ece7da;
+  border-radius: 14px;
+  padding: 1.1rem 1.25rem;
+  box-shadow: 0 1px 3px rgba(1, 38, 69, 0.04);
+}
+.so-thumb {
+  width: 64px;
+  height: 64px;
+  object-fit: cover;
+  border-radius: 10px;
+  flex-shrink: 0;
+  border: 1px solid #ece7da;
+}
+.so-card.so-accepted {
+  border-color: rgba(5, 150, 105, 0.4);
+}
+.so-card.so-rejected {
+  opacity: 0.75;
+}
+.so-card-main {
+  flex: 1;
+  min-width: 0;
+}
+.so-product {
+  font-weight: 700;
+  color: #012645;
+  margin-bottom: 0.45rem;
+}
+.so-prices {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.so-old {
+  color: #9ca3af;
+  text-decoration: line-through;
+  font-size: 0.95rem;
+}
+.so-arrow {
+  color: #bb9326;
+}
+.so-new {
+  font-weight: 800;
+  font-size: 1.15rem;
+  color: #bb9326;
+}
+.so-msg {
+  margin: 0.6rem 0 0;
+  font-size: 0.88rem;
+  color: #4b5563;
+  font-style: italic;
+}
+.so-card-side {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.6rem;
+  flex-shrink: 0;
+}
+.so-badge {
+  font-size: 0.74rem;
+  font-weight: 700;
+  padding: 0.25rem 0.6rem;
+  border-radius: 100px;
+  white-space: nowrap;
+}
+.so-badge-pending {
+  background: #fef3c7;
+  color: #92400e;
+}
+.so-badge-accepted {
+  background: #d1fae5;
+  color: #065f46;
+}
+.so-badge-rejected {
+  background: #fee2e2;
+  color: #991b1b;
+}
+.so-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+.so-btn {
+  border: none;
+  border-radius: 9px;
+  padding: 0.5rem 0.95rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: filter 0.15s, transform 0.15s;
+}
+.so-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+.so-accept {
+  background: linear-gradient(135deg, #059669, #047857);
+  color: #fff;
+}
+.so-reject {
+  background: #fff;
+  color: #b91c1c;
+  border: 1px solid #fecaca;
+}
+.so-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  filter: brightness(1.04);
+}
+
+@media (max-width: 560px) {
+  .so-card {
+    flex-direction: column;
+  }
+  .so-card-side {
+    align-items: flex-start;
+    flex-direction: row;
+    justify-content: space-between;
+    width: 100%;
+  }
+}

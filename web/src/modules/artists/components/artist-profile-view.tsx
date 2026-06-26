@@ -1123,6 +1123,30 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
       </section>
 
       <div className="artist-profile__content">
+        {/* Owner-only: link to incoming price offers (not the full list) */}
+        {isOwner && (
+          <div style={{ display: "flex", justifyContent: "flex-end", margin: "0 0 1rem" }}>
+            <Link
+              href="/profile/offers"
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "8px",
+                padding: "0.6rem 1.3rem",
+                borderRadius: "100px",
+                background: "linear-gradient(135deg, #012645, #02457a)",
+                color: "#fff",
+                textDecoration: "none",
+                fontWeight: 700,
+                fontSize: "0.9rem",
+                border: "1px solid rgba(233,198,106,0.4)",
+              }}
+            >
+              🏷️ {language === "en" ? "Price offers" : "ფასის შეთავაზებები"}
+            </Link>
+          </div>
+        )}
+
         {isOwner && showEditor && user && (
           <section className="artist-settings-panel">
             <h2 className="artist-settings-panel__title">

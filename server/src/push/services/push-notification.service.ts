@@ -44,7 +44,10 @@ export interface NotificationPayload {
       | 'auction_sold'
       | 'auction_payment_received'
       | 'auction_transferred'
-      | 'auction_no_winner';
+      | 'auction_no_winner'
+      | 'price_offer_received'
+      | 'price_offer_accepted'
+      | 'price_offer_rejected';
     id?: string;
   };
   tag: string;

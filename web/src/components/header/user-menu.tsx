@@ -55,7 +55,7 @@ export default function UserMenu({
   const [isOpenInternal, setIsOpenInternal] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
 
   // Helper functions for role checking
   const isSellerRole = (role?: string) => {
@@ -368,6 +368,20 @@ export default function UserMenu({
                     <span>{t("navigation.myAuctions")}</span>
                   </Link>
                 )}
+                {isSellerRole(user.role) && (
+                  <Link
+                    href="/profile/offers"
+                    className="dropdown-item"
+                    onClick={handleLinkClick}
+                  >
+                    <Tag size={18} />
+                    <span>
+                      {language === "en"
+                        ? "Price offers"
+                        : "ფასის შეთავაზებები"}
+                    </span>
+                  </Link>
+                )}
                 {isAuctionAdminRole(user.role) && (
                   <>
                     <Link
@@ -471,6 +485,16 @@ export default function UserMenu({
                 >
                   <Gift size={18} />
                   <span>ვაუჩერები</span>
+                </Link>
+                <Link
+                  href="/admin/price-offers"
+                  className="dropdown-item"
+                  onClick={handleLinkClick}
+                >
+                  <DollarSign size={18} />
+                  <span>
+                    {language === "en" ? "Price offers" : "ფასის შეთავაზებები"}
+                  </span>
                 </Link>
               </>
             )}

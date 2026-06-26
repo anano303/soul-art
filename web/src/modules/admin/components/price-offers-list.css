@@ -1,0 +1,168 @@
+.apo-wrap {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 1.5rem 1rem 3rem;
+}
+.apo-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+.apo-head h1 {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #012645;
+  margin: 0;
+}
+.apo-head select {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #dcd9cf;
+  border-radius: 9px;
+  font-size: 0.9rem;
+  background: #fff;
+}
+.apo-empty {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: #6b7280;
+  background: #f8f9fb;
+  border-radius: 14px;
+}
+.apo-table-scroll {
+  overflow-x: auto;
+  border: 1px solid #ece7da;
+  border-radius: 14px;
+}
+.apo-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+  min-width: 880px;
+}
+.apo-table th {
+  background: #f8f9fb;
+  text-align: left;
+  padding: 0.75rem 0.9rem;
+  font-weight: 700;
+  color: #374151;
+  border-bottom: 1px solid #ece7da;
+  white-space: nowrap;
+}
+.apo-table td {
+  padding: 0.8rem 0.9rem;
+  border-bottom: 1px solid #f1efe8;
+  vertical-align: top;
+  color: #1f2937;
+}
+.apo-product {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.apo-thumb {
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid #ece7da;
+  flex-shrink: 0;
+}
+.apo-sub {
+  font-size: 0.78rem;
+  color: #6b7280;
+}
+.apo-phone {
+  color: #047857;
+  font-weight: 600;
+}
+.apo-buyer > div:first-child {
+  font-weight: 600;
+}
+.apo-price {
+  white-space: nowrap;
+}
+.apo-old {
+  color: #9ca3af;
+  text-decoration: line-through;
+  margin-right: 6px;
+}
+.apo-new {
+  font-weight: 800;
+  color: #bb9326;
+}
+.apo-msg {
+  max-width: 240px;
+  font-style: italic;
+  color: #4b5563;
+}
+.apo-date {
+  white-space: nowrap;
+  color: #6b7280;
+}
+.apo-badge {
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 0.2rem 0.55rem;
+  border-radius: 100px;
+  text-transform: capitalize;
+}
+.apo-badge-pending {
+  background: #fef3c7;
+  color: #92400e;
+}
+.apo-badge-accepted {
+  background: #d1fae5;
+  color: #065f46;
+}
+.apo-badge-rejected {
+  background: #fee2e2;
+  color: #991b1b;
+}
+.apo-actions {
+  display: flex;
+  gap: 0.4rem;
+}
+.apo-btn {
+  border: none;
+  border-radius: 8px;
+  padding: 0.4rem 0.6rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.apo-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+.apo-accept {
+  background: #059669;
+  color: #fff;
+}
+.apo-reject {
+  background: #fff;
+  color: #b91c1c;
+  border: 1px solid #fecaca;
+}
+.apo-pager {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 1.25rem;
+}
+.apo-pager button {
+  width: 36px;
+  height: 36px;
+  border-radius: 9px;
+  border: 1px solid #dcd9cf;
+  background: #fff;
+  cursor: pointer;
+  font-size: 1.1rem;
+}
+.apo-pager button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}

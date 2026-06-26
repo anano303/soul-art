@@ -1533,6 +1533,7 @@ export const TRANSLATIONS: Translations = {
       devices: "მოწყობილობები",
       auctions: "ჩემი აუქციონები",
       wonAuctions: "მოგებული აუქციონები",
+      offers: "ფასის შეთავაზებები",
       settings: "პარამეტრები",
     },
 
@@ -3493,6 +3494,7 @@ export const TRANSLATIONS: Translations = {
       devices: "Devices",
       auctions: "Auctions",
       wonAuctions: "Won Auctions",
+      offers: "Price offers",
       settings: "Settings",
     },
 

@@ -44,4 +44,14 @@ export class RegisterDto {
   @IsOptional()
   @IsString()
   invitationCode?: string; // რეფერალური კოდი რომლითაც რეგისტრირდება
+
+  @ApiProperty({
+    example: '+995555000059',
+    description: 'საკონტაქტო ნომერი (არასავალდებულო)',
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(30)
+  phoneNumber?: string;
 }

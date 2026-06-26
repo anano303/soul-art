@@ -5,12 +5,14 @@ import { CartService } from './services/cart.service';
 import { Cart, CartSchema } from './schemas/cart.schema';
 import { ProductsModule } from '@/products/products.module';
 import { PromotionModule } from '@/promotions/promotion.module';
+import { PriceOffersModule } from '@/price-offers/price-offers.module';
 
 @Module({
   imports: [
     MongooseModule.forFeature([{ name: Cart.name, schema: CartSchema }]),
     ProductsModule,
     forwardRef(() => PromotionModule),
+    PriceOffersModule,
   ],
   controllers: [CartController],
   providers: [CartService],

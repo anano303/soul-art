@@ -1,9 +1,10 @@
 "use client";
 
 import { ProductsList } from "@/modules/admin/components/products-list";
+import SellerOffers from "@/modules/profile/components/seller-offers";
 import "./adminProduct.css";
 import { useEffect, useState } from "react";
-import { isLoggedIn } from "@/lib/auth";
+import { isLoggedIn, getUserData } from "@/lib/auth";
 import { useRouter } from "next/navigation";
 
 export default function AdminProductsPage() {
@@ -23,6 +24,9 @@ export default function AdminProductsPage() {
     return <div className="loading-container">იტვირთება...</div>;
   }
 
+  const role = getUserData()?.role?.toLowerCase() || "";
+  const isSeller = role.includes("seller");
+
   return (
     <div
       className="responsive-container"
@@ -34,6 +38,8 @@ export default function AdminProductsPage() {
       }}
     >
       <ProductsList />
+      {/* Seller's price offers, right below their product management */}
+      {isSeller && <SellerOffers />}
     </div>
   );
 }
