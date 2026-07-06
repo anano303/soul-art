@@ -74,13 +74,14 @@ const ReferralCodeInput = dynamic(
     ),
   { ssr: false },
 );
-const CallRequestPopup = dynamic(
-  () =>
-    import("@/components/call-request-popup/call-request-popup").then((m) => ({
-      default: m.CallRequestPopup,
-    })),
-  { ssr: false },
-);
+// დროებით გათიშულია
+// const CallRequestPopup = dynamic(
+//   () =>
+//     import("@/components/call-request-popup/call-request-popup").then((m) => ({
+//       default: m.CallRequestPopup,
+//     })),
+//   { ssr: false },
+// );
 const ImpersonationBanner = dynamic(
   () =>
     import("@/components/ImpersonationBanner/ImpersonationBanner").then(
@@ -186,8 +187,8 @@ export function LayoutDeferredComponents() {
       {/* Campaign Consent Prompt for Sellers */}
       <CampaignConsentPrompt />
 
-      {/* Call Request Popup */}
-      <CallRequestPopup />
+      {/* Call Request Popup - დროებით გათიშულია */}
+      {/* <CallRequestPopup /> */}
 
       {/* Admin Impersonation Banner */}
       <ImpersonationBanner />
