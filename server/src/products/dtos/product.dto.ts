@@ -237,6 +237,12 @@ export class ProductDto {
   @IsOptional()
   useArtistDefaultDiscount?: boolean;
 
+  // Admin-curated home-page sections ('premium' | 'discounted' | 'gifts' | 'top')
+  @IsArray()
+  @IsOptional()
+  @IsString({ each: true })
+  homeSections?: string[];
+
   // Add the missing property for existing images
   @IsString()
   @IsOptional()

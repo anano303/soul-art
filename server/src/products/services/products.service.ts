@@ -67,6 +67,7 @@ interface FindManyParams {
   excludeHiddenFromStore?: boolean; // If true, exclude products with hideFromStore=true
   excludeOutOfStock?: boolean; // If true, exclude products with no stock
   hasPromo?: boolean; // If true, only products with referralDiscountPercent > 0
+  homeSection?: string; // If set, only products manually assigned to this home-page section
 }
 
 @Injectable()
@@ -427,6 +428,7 @@ export class ProductsService {
       excludeHiddenFromStore = false,
       excludeOutOfStock = false,
       hasPromo = false,
+      homeSection,
     } = params;
 
     const pageNumber = parseInt(page);
@@ -668,6 +670,11 @@ export class ProductsService {
       andConditions.push({
         referralDiscountPercent: { $exists: true, $gt: 0 },
       });
+    }
+
+    // Filter by admin-curated home-page section (array membership)
+    if (homeSection) {
+      filter.homeSections = homeSection;
     }
 
     // Filter by price range
@@ -957,6 +964,8 @@ export class ProductsService {
     if (data.materials !== undefined) updateFields.materials = data.materials;
     if (data.materialsEn !== undefined)
       updateFields.materialsEn = data.materialsEn;
+    if (data.homeSections !== undefined)
+      updateFields.homeSections = data.homeSections;
     if (data.categoryStructure)
       updateFields.categoryStructure = data.categoryStructure;
 
@@ -1190,6 +1199,34 @@ export class ProductsService {
 
     console.log(
       `[Visibility] Product ${id} hideFromStore set to: ${hideFromStore}`,
+    );
+
+    return updatedProduct;
+  }
+
+  /**
+   * Update which admin-curated home-page sections a product appears in.
+   * Allowed section keys: 'premium' | 'discounted' | 'gifts' | 'top'.
+   */
+  async updateProductHomeSections(
+    id: string,
+    homeSections: string[],
+  ): Promise<ProductDocument> {
+    const product = await this.productModel.findById(id);
+    if (!product) {
+      throw new NotFoundException('პროდუქტი ვერ მოიძებნა');
+    }
+
+    const allowed = ['premium', 'discounted', 'gifts', 'top', 'category'];
+    const sanitized = Array.isArray(homeSections)
+      ? [...new Set(homeSections.filter((s) => allowed.includes(s)))]
+      : [];
+
+    product.homeSections = sanitized;
+    const updatedProduct = await product.save();
+
+    console.log(
+      `[HomeSections] Product ${id} homeSections set to: ${sanitized.join(', ')}`,
     );
 
     return updatedProduct;

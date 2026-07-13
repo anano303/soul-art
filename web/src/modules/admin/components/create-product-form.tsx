@@ -44,8 +44,19 @@ interface ProductFormData extends BaseProductFormData {
   // Campaign/Referral discount fields
   referralDiscountPercent?: number;
   useArtistDefaultDiscount?: boolean;
+  // Admin-curated home-page sections
+  homeSections?: string[];
   // New fields are already included in BaseProductFormData
 }
+
+// Admin-curated home-page sections. `key` must match the server/rail values.
+const HOME_SECTIONS: { key: string; ge: string; en: string }[] = [
+  { key: "premium", ge: "პრემიუმ ნახატები", en: "Premium Paintings" },
+  { key: "discounted", ge: "ფასდაკლებული", en: "Discounted" },
+  { key: "gifts", ge: "საჩუქრები", en: "Gifts" },
+  { key: "top", ge: "ტოპ ნივთები", en: "Top Items" },
+  { key: "category", ge: "კატეგორიის სექცია", en: "Category Section" },
+];
 
 interface CreateProductFormProps {
   initialData?: ProductFormData;
@@ -70,6 +81,7 @@ export function CreateProductForm({
     user?.role?.toLowerCase() === "seller" ||
     user?.role === "Seller" ||
     user?.role === "SELLER";
+  const isAdmin = user?.role?.toLowerCase() === "admin";
 
   // Debug logging
 
@@ -140,6 +152,11 @@ export function CreateProductForm({
   const [existingYoutubeVideoUrl, setExistingYoutubeVideoUrl] = useState<
     string | null
   >(initialData?.youtubeVideoUrl || null);
+
+  // Admin-only: which home-page sections this product is manually assigned to
+  const [homeSections, setHomeSections] = useState<string[]>(
+    initialData?.homeSections ?? []
+  );
 
   // New fields for original/copy and materials
   const [isOriginal, setIsOriginal] = useState<boolean>(true);
@@ -421,6 +438,13 @@ export function CreateProductForm({
       } else {
         setIsOriginal(true); // Default to true
       }
+
+      // Home-page section assignment (admin-curated)
+      setHomeSections(
+        Array.isArray(initialData.homeSections)
+          ? initialData.homeSections
+          : []
+      );
 
       if (initialData.dimensions) {
         setDimensions({
@@ -1285,6 +1309,11 @@ export function CreateProductForm({
         addToPortfolio ? "true" : "false"
       );
 
+      // Home-page section assignment (admin only)
+      if (isAdmin) {
+        formDataToSend.append("homeSections", JSON.stringify(homeSections));
+      }
+
       // Handle images - separate existing images from new ones
       const existingImages: string[] = [];
       const newFiles: File[] = [];
@@ -2121,6 +2150,72 @@ export function CreateProductForm({
               : "ორიგინალი პროდუქტები მონიშნულია როგორც ავთენტური. ასლები არის რეპროდუქციები."}
           </small>
         </div>
+        {/* Home-page sections (admin only) */}
+        {isAdmin && (
+          <div>
+            <label>
+              {language === "en"
+                ? "Show on home page in sections"
+                : "მთავარ გვერდზე გამოჩენა (სექციები)"}
+            </label>
+            <div
+              style={{
+                marginTop: "8px",
+                display: "flex",
+                flexWrap: "wrap",
+                gap: "10px",
+              }}
+            >
+              {HOME_SECTIONS.map((section) => {
+                const checked = homeSections.includes(section.key);
+                return (
+                  <label
+                    key={section.key}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      cursor: "pointer",
+                      padding: "6px 12px",
+                      borderRadius: "6px",
+                      border: "1px solid #e9ecef",
+                      backgroundColor: checked ? "#e3f2fd" : "transparent",
+                      transition: "all 0.2s",
+                    }}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={checked}
+                      onChange={() =>
+                        setHomeSections((prev) =>
+                          prev.includes(section.key)
+                            ? prev.filter((k) => k !== section.key)
+                            : [...prev, section.key]
+                        )
+                      }
+                      style={{ marginRight: "6px" }}
+                    />
+                    <span style={{ fontSize: "0.9rem", fontWeight: "500" }}>
+                      {language === "en" ? section.en : section.ge}
+                    </span>
+                  </label>
+                );
+              })}
+            </div>
+            <small
+              style={{
+                color: "#666",
+                fontSize: "0.85rem",
+                display: "block",
+                marginTop: "6px",
+                lineHeight: "1.4",
+              }}
+            >
+              {language === "en"
+                ? "Manually pick which home-page sections this product appears in. If a section has no products selected, it falls back to automatic selection."
+                : "აირჩიე მთავარი გვერდის რომელ სექციებში გამოჩნდეს ეს პროდუქტი. თუ სექციაში ვერცერთი პროდუქტი არაა მონიშნული, ავტომატურ შერჩევაზე გადადის."}
+            </small>
+          </div>
+        )}
         {/* Dimensions Section */}
         <div>
           <label>{language === "en" ? "Dimensions (cm)" : "ზომები (სმ)"}</label>

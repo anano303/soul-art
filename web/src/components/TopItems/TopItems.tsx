@@ -38,6 +38,24 @@ const TopItems: React.FC = () => {
         return cached;
       }
 
+      // 1) Admin-curated products for this section take priority
+      const curatedParams = new URLSearchParams({
+        page: "1",
+        limit: "7",
+        homeSection: "top",
+        excludeOutOfStock: "true",
+      });
+      const curatedResponse = await fetchWithAuth(
+        `/products?${curatedParams.toString()}`,
+      );
+      const curatedData = await curatedResponse.json();
+      const curated = (curatedData.items || []).slice(0, 7);
+      if (curated.length > 0) {
+        memoryCache.set(cacheKey, curated, 10 * 60 * 1000);
+        return curated;
+      }
+
+      // 2) Fallback: automatic rule-based selection (top rated)
       const searchParams = new URLSearchParams({
         page: "1",
         limit: "20",

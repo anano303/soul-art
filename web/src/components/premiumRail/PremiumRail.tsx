@@ -40,7 +40,27 @@ const PremiumRail = () => {
         return cached;
       }
 
-      // Fetch paintings sorted by price descending, exclude out of stock
+      const inStock = (p: Product) =>
+        (p.countInStock ?? 0) > 0 ||
+        (p.variants && p.variants.some((v) => (v.stock ?? 0) > 0));
+
+      // 1) Admin-curated products for this section take priority
+      const { items: curated = [] } = await getProducts(
+        1,
+        PREMIUM_RAIL_LIMIT,
+        {
+          homeSection: "premium",
+          excludeOutOfStock: "true",
+          includeVariants: "true",
+        },
+      );
+      const curatedInStock = curated.filter(inStock).slice(0, PREMIUM_RAIL_LIMIT);
+      if (curatedInStock.length > 0) {
+        memoryCache.set(cacheKey, curatedInStock, CACHE_TTL_SECONDS);
+        return curatedInStock;
+      }
+
+      // 2) Fallback: automatic rule-based selection (paintings, price desc)
       const { items = [] } = await getProducts(1, PREMIUM_RAIL_LIMIT * 3, {
         sortBy: "price",
         sortDirection: "desc",
@@ -52,11 +72,7 @@ const PremiumRail = () => {
 
       const filtered = items
         .filter((p) => p.price >= PREMIUM_PRICE_THRESHOLD)
-        .filter(
-          (p) =>
-            (p.countInStock ?? 0) > 0 ||
-            (p.variants && p.variants.some((v) => (v.stock ?? 0) > 0)),
-        )
+        .filter(inStock)
         .slice(0, PREMIUM_RAIL_LIMIT);
 
       memoryCache.set(cacheKey, filtered, CACHE_TTL_SECONDS);
@@ -66,8 +82,8 @@ const PremiumRail = () => {
   });
 
   const items = useMemo(() => {
+    // queryFn already applies section rules (curated vs. automatic); only guard stock here
     return premiumProducts
-      .filter((p) => p.price >= PREMIUM_PRICE_THRESHOLD)
       .filter(
         (p) =>
           (p.countInStock ?? 0) > 0 ||

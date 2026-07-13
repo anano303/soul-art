@@ -254,6 +254,12 @@ export class Product {
   // Hide from store/home pages but still visible on artist profile
   @Prop({ type: Boolean, default: false })
   hideFromStore?: boolean;
+
+  // Admin-curated home-page sections this product should appear in.
+  // Allowed values: 'premium' | 'discounted' | 'gifts' | 'top'.
+  // Empty = section falls back to its automatic (rule-based) selection.
+  @Prop({ type: [String], default: [] })
+  homeSections?: string[];
 }
 
 export const ProductSchema = SchemaFactory.createForClass(Product);
@@ -279,3 +285,4 @@ ProductSchema.index({ status: 1 }, { background: true });
 ProductSchema.index({ ageGroups: 1 }, { background: true, sparse: true });
 ProductSchema.index({ sizes: 1 }, { background: true, sparse: true });
 ProductSchema.index({ colors: 1 }, { background: true, sparse: true });
+ProductSchema.index({ homeSections: 1 }, { background: true, sparse: true });

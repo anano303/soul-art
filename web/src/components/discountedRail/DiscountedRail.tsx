@@ -71,6 +71,29 @@ const DiscountedRail = () => {
         return cached;
       }
 
+      const inStock = (p: Product) =>
+        (p.countInStock ?? 0) > 0 ||
+        (p.variants && p.variants.some((v) => (v.stock ?? 0) > 0));
+
+      // 1) Admin-curated products for this section take priority
+      const { items: curated = [] } = await getProducts(
+        1,
+        DISCOUNT_RAIL_LIMIT,
+        {
+          homeSection: "discounted",
+          excludeOutOfStock: "true",
+          includeVariants: "true",
+        },
+      );
+      const curatedInStock = curated
+        .filter(inStock)
+        .slice(0, DISCOUNT_RAIL_LIMIT);
+      if (curatedInStock.length > 0) {
+        memoryCache.set(cacheKey, curatedInStock, CACHE_TTL_SECONDS);
+        return curatedInStock;
+      }
+
+      // 2) Fallback: automatic rule-based selection (active discounts)
       const { items = [] } = await getProducts(1, DISCOUNT_RAIL_LIMIT * 2, {
         discounted: "true",
         sortBy: "discountPercentage",
@@ -80,11 +103,7 @@ const DiscountedRail = () => {
 
       const filtered = items
         .filter(hasActiveDiscount)
-        .filter(
-          (p) =>
-            (p.countInStock ?? 0) > 0 ||
-            (p.variants && p.variants.some((v) => (v.stock ?? 0) > 0)),
-        )
+        .filter(inStock)
         .slice(0, DISCOUNT_RAIL_LIMIT);
 
       memoryCache.set(cacheKey, filtered, CACHE_TTL_SECONDS);
@@ -94,8 +113,8 @@ const DiscountedRail = () => {
   });
 
   const items = useMemo(() => {
+    // queryFn already applies section rules (curated vs. automatic); only guard stock here
     return discountedProducts
-      .filter(hasActiveDiscount)
       .filter(
         (p) =>
           (p.countInStock ?? 0) > 0 ||

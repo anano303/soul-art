@@ -30,8 +30,18 @@ import HeartLoading from "@/components/HeartLoading/HeartLoading";
 import { DonationModal } from "@/components/donation/DonationModal";
 import { ProductStatus } from "@/types";
 import { updateProductVisibility } from "@/modules/products/api/update-product-visibility";
+import { updateProductHomeSections } from "@/modules/products/api/update-product-home-sections";
 import { useUsdRate } from "@/hooks/useUsdRate";
 import { toast } from "@/hooks/use-toast";
+
+// Admin-curated home-page sections. `key` must match the server/rail values.
+const HOME_SECTIONS: { key: string; ge: string; en: string }[] = [
+  { key: "premium", ge: "პრემიუმი", en: "Premium" },
+  { key: "discounted", ge: "ფასდაკლება", en: "Discount" },
+  { key: "gifts", ge: "საჩუქარი", en: "Gifts" },
+  { key: "top", ge: "ტოპ", en: "Top" },
+  { key: "category", ge: "კატეგორია", en: "Category" },
+];
 
 // Extended Product type to include mainCategory and subCategory properties
 interface ProductWithCategories extends Product {
@@ -382,6 +392,50 @@ export function ProductsList() {
       console.error("Error toggling visibility:", error);
     } finally {
       setTogglingVisibility((prev) => {
+        const newSet = new Set(prev);
+        newSet.delete(productId);
+        return newSet;
+      });
+    }
+  }
+
+  // State to track which products' home-section is being updated
+  const [togglingHomeSection, setTogglingHomeSection] = useState<Set<string>>(
+    new Set(),
+  );
+
+  // Toggle a single home-page section for a product (admin only)
+  async function handleHomeSectionToggle(
+    productId: string,
+    currentSections: string[],
+    sectionKey: string,
+  ): Promise<void> {
+    const current = Array.isArray(currentSections) ? currentSections : [];
+    const nextSections = current.includes(sectionKey)
+      ? current.filter((k) => k !== sectionKey)
+      : [...current, sectionKey];
+
+    setTogglingHomeSection((prev) => new Set(prev).add(productId));
+
+    try {
+      const result = await updateProductHomeSections(productId, nextSections);
+      if (result) {
+        queryClient.invalidateQueries({ queryKey: ["products"] });
+        setRefreshKey(Date.now());
+      } else {
+        toast({
+          title: language === "en" ? "Error" : "შეცდომა",
+          description:
+            language === "en"
+              ? "Failed to update home sections"
+              : "მთავარი გვერდის სექციების განახლება ვერ მოხერხდა",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error("Error toggling home section:", error);
+    } finally {
+      setTogglingHomeSection((prev) => {
         const newSet = new Set(prev);
         newSet.delete(productId);
         return newSet;
@@ -1391,6 +1445,11 @@ export function ProductsList() {
                 {language === "en" ? "VISIBILITY" : "ხილვადობა"}
               </th>
             )}
+            {isAdmin && (
+              <th className="prd-th">
+                {language === "en" ? "HOME PAGE" : "მთავარი გვერდი"}
+              </th>
+            )}
             <th className="prd-th">
               {language === "en" ? "DELIVERY" : "მიწოდება"}
             </th>
@@ -1406,7 +1465,7 @@ export function ProductsList() {
           {isLoading && products.length === 0 ? (
             <tr>
               <td
-                colSpan={isAdmin ? 13 : 11}
+                colSpan={isAdmin ? 14 : 11}
                 style={{ textAlign: "center", padding: "40px" }}
               >
                 <div
@@ -1444,7 +1503,7 @@ export function ProductsList() {
           ) : products.length === 0 ? (
             <tr>
               <td
-                colSpan={isAdmin ? 13 : 11}
+                colSpan={isAdmin ? 14 : 11}
                 style={{
                   textAlign: "center",
                   padding: "40px",
@@ -1620,6 +1679,60 @@ export function ProductsList() {
                             : "ხილული"}
                       </span>
                     </button>
+                  </td>
+                )}
+                {isAdmin && (
+                  <td className="prd-td">
+                    <div
+                      style={{
+                        display: "flex",
+                        flexWrap: "wrap",
+                        gap: "4px",
+                        maxWidth: "170px",
+                        opacity: togglingHomeSection.has(product._id) ? 0.5 : 1,
+                      }}
+                    >
+                      {HOME_SECTIONS.map((section) => {
+                        const active = (product.homeSections || []).includes(
+                          section.key,
+                        );
+                        return (
+                          <button
+                            key={section.key}
+                            onClick={() =>
+                              handleHomeSectionToggle(
+                                product._id,
+                                product.homeSections || [],
+                                section.key,
+                              )
+                            }
+                            disabled={togglingHomeSection.has(product._id)}
+                            title={
+                              language === "en"
+                                ? "Toggle home-page section"
+                                : "მთავარ გვერდზე ჩვენების მონიშვნა"
+                            }
+                            style={{
+                              padding: "3px 8px",
+                              borderRadius: "12px",
+                              border: `1px solid ${
+                                active ? "#012645" : "#dee2e6"
+                              }`,
+                              backgroundColor: active ? "#012645" : "white",
+                              color: active ? "white" : "#6c757d",
+                              fontSize: "11px",
+                              fontWeight: 500,
+                              cursor: togglingHomeSection.has(product._id)
+                                ? "wait"
+                                : "pointer",
+                              transition: "all 0.2s",
+                            }}
+                          >
+                            {language === "en" ? section.en : section.ge}
+                          </button>
+                        );
+                      })}
+                    </div>
                   </td>
                 )}
                 <td className="prd-td">

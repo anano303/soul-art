@@ -238,6 +238,8 @@ export interface Product {
   useArtistDefaultDiscount?: boolean; // Use artist's default discount instead of custom
   // Store visibility
   hideFromStore?: boolean;
+  // Admin-curated home-page sections ('premium' | 'discounted' | 'gifts' | 'top')
+  homeSections?: string[];
 }
 
 export enum ProductStatus {

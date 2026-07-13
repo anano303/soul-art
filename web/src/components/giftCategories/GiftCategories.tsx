@@ -33,6 +33,23 @@ const GiftCategories = () => {
         return cached;
       }
 
+      const inStock = (product: Product) =>
+        (product.countInStock ?? 0) > 0 ||
+        (product.variants && product.variants.some((v) => (v.stock ?? 0) > 0));
+
+      // 1) Admin-curated products for this section take priority
+      const { items: curated = [] } = await getProducts(1, GIFT_RAIL_LIMIT, {
+        homeSection: "gifts",
+        excludeOutOfStock: "true",
+        includeVariants: "true",
+      });
+      const curatedInStock = curated.filter(inStock).slice(0, GIFT_RAIL_LIMIT);
+      if (curatedInStock.length > 0) {
+        memoryCache.set(cacheKey, curatedInStock, CACHE_TTL_SECONDS);
+        return curatedInStock;
+      }
+
+      // 2) Fallback: automatic rule-based selection (products under 200 GEL)
       const { items = [] } = await getProducts(1, GIFT_RAIL_LIMIT * 2, {
         sortBy: "rating",
         sortDirection: "desc",
@@ -43,12 +60,7 @@ const GiftCategories = () => {
       // Filter products under 200 GEL (considering discounts) and in stock
       const filtered = items
         .filter((product) => {
-          // Check stock first
-          const hasStock =
-            (product.countInStock ?? 0) > 0 ||
-            (product.variants &&
-              product.variants.some((v) => (v.stock ?? 0) > 0));
-          if (!hasStock) return false;
+          if (!inStock(product)) return false;
 
           const price = product.price;
           const discountedPrice = product.discountPercentage
@@ -65,21 +77,14 @@ const GiftCategories = () => {
   });
 
   const items = useMemo(() => {
+    // queryFn already applies section rules (curated vs. automatic); only guard stock here
     return giftProducts
-      .filter((product) => {
-        // Check stock first
-        const hasStock =
+      .filter(
+        (product) =>
           (product.countInStock ?? 0) > 0 ||
           (product.variants &&
-            product.variants.some((v) => (v.stock ?? 0) > 0));
-        if (!hasStock) return false;
-
-        const price = product.price;
-        const discountedPrice = product.discountPercentage
-          ? price * (1 - product.discountPercentage / 100)
-          : price;
-        return discountedPrice <= 200;
-      })
+            product.variants.some((v) => (v.stock ?? 0) > 0)),
+      )
       .slice(0, GIFT_RAIL_LIMIT);
   }, [giftProducts]);
 

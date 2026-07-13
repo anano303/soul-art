@@ -102,23 +102,32 @@ const HomePageShop = () => {
           const categoryId = category.id || category._id || "";
           const categoryName = getCategoryName(category);
 
+          const inStock = (p: Product) =>
+            (p.countInStock ?? 0) > 0 ||
+            (p.variants && p.variants.some((v) => (v.stock ?? 0) > 0));
+
           try {
-            const { items = [] } = await getProducts(1, 12, {
+            // 1) Admin-curated products for this category take priority
+            const { items: curated = [] } = await getProducts(1, 8, {
               mainCategory: categoryId,
+              homeSection: "category",
               excludeOutOfStock: "true",
               includeVariants: "true",
-              sortBy: "createdAt",
-              sortDirection: "desc",
             });
+            const curatedInStock = curated.filter(inStock).slice(0, 8);
 
-            const categoryProds = items
-              .filter(
-                (p) =>
-                  (p.countInStock ?? 0) > 0 ||
-                  (p.variants &&
-                    p.variants.some((v) => (v.stock ?? 0) > 0))
-              )
-              .slice(0, 8);
+            // 2) Fallback: automatic (newest in category)
+            let categoryProds = curatedInStock;
+            if (categoryProds.length === 0) {
+              const { items = [] } = await getProducts(1, 12, {
+                mainCategory: categoryId,
+                excludeOutOfStock: "true",
+                includeVariants: "true",
+                sortBy: "createdAt",
+                sortDirection: "desc",
+              });
+              categoryProds = items.filter(inStock).slice(0, 8);
+            }
 
             if (categoryProds.length > 0) {
               return {

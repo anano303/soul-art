@@ -80,6 +80,7 @@ export class ProductsController {
     @Query('dimension') dimension: string,
     @Query('excludeOutOfStock') excludeOutOfStock: string,
     @Query('hasPromo') hasPromo: string,
+    @Query('homeSection') homeSection: string,
   ) {
     // Parse isOriginal parameter to handle multiple values (comma-separated)
     let parsedIsOriginal: boolean | undefined = undefined;
@@ -118,6 +119,7 @@ export class ProductsController {
       excludeHiddenFromStore: true, // Hide products marked as hidden from store
       excludeOutOfStock: excludeOutOfStock === 'true', // Hide out of stock products
       hasPromo: hasPromo === 'true', // Filter products with promo/referral discount
+      homeSection, // Only products manually assigned to this home-page section
     });
   }
 
@@ -685,6 +687,24 @@ export class ProductsController {
         addToPortfolio = rawAddToPortfolio;
       }
 
+      // Parse home-page section assignment (admin only). Sellers cannot curate the home page.
+      let homeSections: string[] = [];
+      if (user.role === Role.Admin) {
+        const rawHomeSections = (productData as any).homeSections;
+        if (typeof rawHomeSections === 'string') {
+          try {
+            const parsed = JSON.parse(rawHomeSections);
+            homeSections = Array.isArray(parsed)
+              ? parsed.filter((s) => typeof s === 'string')
+              : [];
+          } catch {
+            homeSections = [];
+          }
+        } else if (Array.isArray(rawHomeSections)) {
+          homeSections = rawHomeSections.filter((s) => typeof s === 'string');
+        }
+      }
+
       // Ensure materials is always an array
       if (!materials) {
         materials = [];
@@ -700,6 +720,7 @@ export class ProductsController {
         subCategory,
         videoDescription,
         existingImages: _existingImages,
+        homeSections: _rawHomeSections,
         ...otherProductData
       } = productData as any;
 
@@ -757,6 +778,8 @@ export class ProductsController {
           // Campaign discount fields
           referralDiscountPercent,
           useArtistDefaultDiscount,
+          // Admin-curated home-page sections
+          homeSections,
           // YouTube data (from form)
           ...(youtubeVideoId && {
             youtubeVideoId,
@@ -1170,6 +1193,29 @@ export class ProductsController {
         );
       }
 
+      // Home-page section assignment (admin only). Strip any value coming from sellers.
+      if (user.role === Role.Admin) {
+        const rawHomeSections = (productData as any).homeSections;
+        if (rawHomeSections !== undefined) {
+          if (typeof rawHomeSections === 'string') {
+            try {
+              const parsed = JSON.parse(rawHomeSections);
+              updateData.homeSections = Array.isArray(parsed)
+                ? parsed.filter((s: unknown) => typeof s === 'string')
+                : [];
+            } catch {
+              updateData.homeSections = [];
+            }
+          } else if (Array.isArray(rawHomeSections)) {
+            updateData.homeSections = rawHomeSections.filter(
+              (s: unknown) => typeof s === 'string',
+            );
+          }
+        }
+      } else {
+        delete (updateData as any).homeSections;
+      }
+
       // ========================================
       // GET YOUTUBE DATA FROM FORM (uploaded separately via /upload-video)
       // ========================================
@@ -1319,6 +1365,20 @@ export class ProductsController {
     @Body() { hideFromStore }: { hideFromStore: boolean },
   ) {
     return this.productsService.updateProductVisibility(id, hideFromStore);
+  }
+
+  @Put(':id/home-sections')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.Admin)
+  @ApiOperation({
+    summary: 'Set home-page sections for a product (Admin only)',
+  })
+  @ApiParam({ name: 'id', description: 'Product ID' })
+  async updateHomeSections(
+    @Param('id') id: string,
+    @Body() { homeSections }: { homeSections: string[] },
+  ) {
+    return this.productsService.updateProductHomeSections(id, homeSections);
   }
 
   @Post(':id/promote')
