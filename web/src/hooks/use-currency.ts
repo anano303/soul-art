@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Cookies from "js-cookie";
 
 export type Currency = "GEL" | "USD" | "EUR";
@@ -20,12 +20,17 @@ const CURRENCY_SYMBOLS: Record<Currency, string> = {
  * Returns currency code, symbol, and formatting function
  */
 export function useCurrency() {
-  const userCurrency = useMemo(() => {
-    // Get currency from cookie (set by middleware based on geo-detection)
+  // IMPORTANT: read the cookie only AFTER mount. Reading it during render makes
+  // the server (no cookie → GEL) and client (cookie → USD/EUR) produce
+  // different HTML, which causes React hydration errors. So we start at GEL on
+  // both server and first client render, then update once mounted.
+  const [userCurrency, setUserCurrency] = useState<Currency>("GEL");
+
+  useEffect(() => {
     const currency = Cookies.get("user_currency") as Currency | undefined;
-    
-    // Default to GEL if not set
-    return currency || "GEL";
+    if (currency === "USD" || currency === "EUR" || currency === "GEL") {
+      setUserCurrency(currency);
+    }
   }, []);
 
   const currencyFormat: CurrencyFormat = useMemo(() => {

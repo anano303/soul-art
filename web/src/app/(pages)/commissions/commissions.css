@@ -1,0 +1,298 @@
+.commission-page {
+  min-height: 70vh;
+  padding: 2rem 1rem 4rem;
+  background: #f8f9fb;
+}
+
+/* "Order" page hero background (order.png), fits every screen */
+.commission-page--order-bg {
+  background-image:
+    linear-gradient(rgba(1, 24, 45, 0.62), rgba(1, 24, 45, 0.62)),
+    url("/images/order.png");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.commission-page--order-bg .commission-h1,
+.commission-page--order-bg .commission-sub {
+  color: #ffffff;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.45);
+}
+
+.commission-container {
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.commission-h1 {
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: #012645;
+  margin: 0 0 0.5rem;
+}
+
+.commission-sub {
+  color: #6b7280;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  margin-bottom: 1.5rem;
+}
+
+.commission-form {
+  background: #fff;
+  border: 1px solid #ece7da;
+  border-radius: 14px;
+  padding: 1.5rem;
+}
+
+.commission-label {
+  display: block;
+  font-weight: 600;
+  color: #012645;
+  font-size: 0.9rem;
+  margin: 1rem 0 0.4rem;
+}
+
+.commission-input {
+  width: 100%;
+  padding: 0.7rem 0.85rem;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  outline: none;
+  transition: border-color 0.2s;
+  font-family: inherit;
+}
+
+.commission-input:focus {
+  border-color: #012645;
+}
+
+.commission-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+@media (max-width: 560px) {
+  .commission-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+.commission-type-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.commission-type-chip {
+  padding: 0.45rem 0.9rem;
+  border-radius: 100px;
+  border: 1px solid #dee2e6;
+  background: #fff;
+  color: #4b5563;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.commission-type-chip.active {
+  background: #012645;
+  color: #fff;
+  border-color: #012645;
+}
+
+.commission-upload-btn {
+  padding: 0.7rem 1.2rem;
+  border-radius: 8px;
+  border: 1px dashed #012645;
+  background: rgba(1, 38, 69, 0.04);
+  color: #012645;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.commission-previews {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-top: 0.75rem;
+}
+
+.commission-preview {
+  position: relative;
+  width: 80px;
+  height: 80px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid #ece7da;
+}
+
+.commission-submit {
+  width: 100%;
+  margin-top: 1.5rem;
+  padding: 0.9rem;
+  border: none;
+  border-radius: 100px;
+  background: linear-gradient(135deg, #012645, #02457a);
+  color: #fff;
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.commission-submit:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+/* ── Lists / cards (buyer + artist + admin views) ── */
+.commission-list {
+  max-width: 900px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.commission-card {
+  background: #fff;
+  border: 1px solid #ece7da;
+  border-radius: 14px;
+  padding: 1.25rem;
+}
+
+.commission-card-head {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+.commission-thumb {
+  position: relative;
+  width: 90px;
+  height: 90px;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid #ece7da;
+  flex-shrink: 0;
+  background: #f1f3f5;
+}
+
+.commission-badge {
+  display: inline-block;
+  padding: 0.25rem 0.7rem;
+  border-radius: 100px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.commission-badge.open { background: #e3f2fd; color: #1565c0; }
+.commission-badge.selecting { background: #fff3cd; color: #856404; }
+.commission-badge.paid { background: #d1ecf1; color: #0c5460; }
+.commission-badge.in_progress { background: #d1ecf1; color: #0c5460; }
+.commission-badge.completed { background: #dcfce7; color: #166534; }
+.commission-badge.cancelled,
+.commission-badge.expired { background: #f8d7da; color: #842029; }
+
+.offer-card {
+  border: 1px solid #eee;
+  border-radius: 10px;
+  padding: 0.9rem 1rem;
+  margin-top: 0.75rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.offer-meta {
+  font-size: 0.85rem;
+  color: #6b7280;
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-top: 0.3rem;
+}
+
+.offer-total {
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: #012645;
+}
+
+.offer-select-btn {
+  padding: 0.6rem 1.4rem;
+  border: none;
+  border-radius: 100px;
+  background: linear-gradient(180deg, #fdf6c9, #e7c75a 22%, #bb9326 55%, #8f6e18);
+  color: #2a2208;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.commission-empty {
+  text-align: center;
+  color: #6b7280;
+  padding: 3rem 1rem;
+}
+
+/* ── Direct / info notes ── */
+.commission-direct-note {
+  background: linear-gradient(135deg, #fdf6e3, #f6e9c6);
+  border: 1px solid #e7c75a;
+  color: #7a5c12;
+  border-radius: 10px;
+  padding: 0.85rem 1rem;
+  margin-bottom: 1rem;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.commission-info-banner {
+  background: #eef4fb;
+  border: 1px solid #cfe0f2;
+  color: #1c3d5a;
+  border-radius: 10px;
+  padding: 0.85rem 1rem;
+  margin-bottom: 1.5rem;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.commission-address {
+  margin-top: 0.5rem;
+}
+
+/* ── Payment method choice ── */
+.commission-pay-methods {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin-top: 0.4rem;
+}
+
+.commission-pay-installment {
+  padding: 0.6rem 1.4rem;
+  border: 1px solid #012645;
+  border-radius: 100px;
+  background: #fff;
+  color: #012645;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.commission-pay-installment:hover {
+  background: #012645;
+  color: #fff;
+}
+.commission-pay-installment:disabled,
+.offer-select-btn:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}

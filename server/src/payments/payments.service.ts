@@ -6,6 +6,7 @@ import { OrdersService } from '../orders/services/orders.service';
 import { AuctionService } from '../auctions/services/auction.service';
 import { EmailService } from '../email/services/email.services';
 import { PromotionService } from '../promotions/promotion.service';
+import { CommissionsService } from '../commissions/services/commissions.service';
 
 interface BogTokenResponse {
   access_token: string;
@@ -32,6 +33,8 @@ export class PaymentsService {
     private readonly emailService: EmailService,
     @Inject(forwardRef(() => PromotionService))
     private readonly promotionService: PromotionService,
+    @Inject(forwardRef(() => CommissionsService))
+    private readonly commissionsService: CommissionsService,
   ) {}
 
   private async getToken(): Promise<string> {
@@ -319,6 +322,19 @@ export class PaymentsService {
           }
         }
 
+        // ── Commission payment callback ─────────────────────────────────────
+        if (external_order_id.startsWith('commission_')) {
+          this.logger.log(
+            `Processing commission payment callback: ${external_order_id}`,
+          );
+          return await this.commissionsService.handleBogPaymentCallback(
+            external_order_id,
+            statusKey,
+            order_id,
+          );
+        }
+        // ───────────────────────────────────────────────────────────────────
+
         // First, try to find auction with this external_order_id
         try {
           const auction =
@@ -364,6 +380,25 @@ export class PaymentsService {
           console.log(
             `Order ${external_order_id} successfully updated with payment status`,
           );
+
+          // If this is a commission order (paid via the standard BOG button),
+          // sync the linked commission so it shows as paid + escrow is tracked.
+          try {
+            const order =
+              await this.ordersService.findByExternalOrderId(external_order_id);
+            if (order && (order as any).orderType === 'commission') {
+              await this.commissionsService.markPaidByOrderId(
+                (order as any)._id.toString(),
+                (order as any).paymentMethod || 'BOG',
+              );
+            }
+          } catch (syncErr) {
+            this.logger.error(
+              `Failed to sync commission for order ${external_order_id}: ${
+                syncErr instanceof Error ? syncErr.message : syncErr
+              }`,
+            );
+          }
 
           return {
             success: true,
@@ -549,6 +584,109 @@ export class PaymentsService {
       }
 
       throw new Error(error.message || 'Auction payment service error');
+    }
+  }
+
+  // Create BOG payment for a custom commission (mirrors createAuctionPayment)
+  async createCommissionPayment(data: {
+    commissionId: string;
+    externalOrderId: string;
+    title: string;
+    artworkPrice: number;
+    deliveryFee: number;
+    totalPayment: number;
+    successUrl?: string;
+    failUrl?: string;
+  }) {
+    try {
+      const token = await this.getToken();
+
+      const basket = [
+        {
+          quantity: 1,
+          unit_price: data.artworkPrice,
+          product_id: data.commissionId,
+          description: `Commission: ${data.title}`,
+        },
+      ];
+
+      if (data.deliveryFee > 0) {
+        basket.push({
+          quantity: 1,
+          unit_price: data.deliveryFee,
+          product_id: `${data.commissionId}-delivery`,
+          description: 'Delivery fee',
+        });
+      }
+
+      const callbackUrl =
+        this.configService.get('BOG_AUCTION_CALLBACK_URL') ||
+        this.configService.get('BOG_CALLBACK_URL');
+
+      const payload = {
+        callback_url: callbackUrl,
+        capture: 'automatic',
+        external_order_id: data.externalOrderId,
+        purchase_units: {
+          currency: 'GEL',
+          total_amount: data.totalPayment,
+          basket,
+        },
+        payment_method: [
+          'card',
+          'google_pay',
+          'apple_pay',
+          'bog_loyalty',
+          'bog_p2p',
+        ],
+        ttl: 10,
+        redirect_urls: {
+          success:
+            data.successUrl ||
+            `https://soulart.ge/checkout/success?commissionId=${data.commissionId}`,
+          fail:
+            data.failUrl ||
+            `https://soulart.ge/checkout/fail?commissionId=${data.commissionId}`,
+        },
+      };
+
+      this.logger.log(
+        `Creating BOG payment for commission ${data.commissionId}, total: ${data.totalPayment} GEL`,
+      );
+
+      const response = await axios.post<BogPaymentResponse>(
+        'https://api.bog.ge/payments/v1/ecommerce/orders',
+        payload,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+            'Accept-Language': 'ka',
+            'Idempotency-Key': uuidv4(),
+          },
+        },
+      );
+
+      this.logger.log(
+        `BOG Commission Payment Created: ${response.data.id}, externalOrderId: ${data.externalOrderId}`,
+      );
+
+      return {
+        bogOrderId: response.data.id,
+        redirectUrl: response.data._links.redirect.href,
+        externalOrderId: data.externalOrderId,
+      };
+    } catch (error) {
+      this.logger.error(
+        `BOG Commission Payment Error: ${error.message}`,
+        error.stack,
+      );
+      if (error.response) {
+        this.logger.error(
+          `BOG API Response: ${JSON.stringify(error.response.data)}`,
+        );
+      }
+      throw new Error(error.message || 'Commission payment service error');
     }
   }
 

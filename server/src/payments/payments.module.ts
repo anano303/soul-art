@@ -21,12 +21,14 @@ import {
 import { User, UserSchema } from '../users/schemas/user.schema';
 import { AuctionModule } from '../auctions/auction.module';
 import { PromotionModule } from '../promotions/promotion.module';
+import { CommissionsModule } from '../commissions/commissions.module';
 
 @Module({
   imports: [
     forwardRef(() => OrderModule),
     forwardRef(() => AuctionModule),
     forwardRef(() => PromotionModule),
+    forwardRef(() => CommissionsModule),
     ScheduleModule.forRoot(),
     MongooseModule.forFeature([
       { name: BalanceTransaction.name, schema: BalanceTransactionSchema },

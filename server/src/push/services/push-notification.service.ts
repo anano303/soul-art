@@ -47,7 +47,12 @@ export interface NotificationPayload {
       | 'auction_no_winner'
       | 'price_offer_received'
       | 'price_offer_accepted'
-      | 'price_offer_rejected';
+      | 'price_offer_rejected'
+      | 'commission_request'
+      | 'commission_offer'
+      | 'commission_selected'
+      | 'commission_paid'
+      | 'commission_completed';
     id?: string;
   };
   tag: string;

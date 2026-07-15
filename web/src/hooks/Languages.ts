@@ -1534,6 +1534,7 @@ export const TRANSLATIONS: Translations = {
       auctions: "ჩემი აუქციონები",
       wonAuctions: "მოგებული აუქციონები",
       offers: "ფასის შეთავაზებები",
+      commissions: "ინდივიდუალური შეკვეთები",
       settings: "პარამეტრები",
     },
 
@@ -3495,6 +3496,7 @@ export const TRANSLATIONS: Translations = {
       auctions: "Auctions",
       wonAuctions: "Won Auctions",
       offers: "Price offers",
+      commissions: "Custom orders",
       settings: "Settings",
     },
 

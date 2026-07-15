@@ -1,6 +1,7 @@
 import { isInStock } from "@/lib/stock";
 import { generateBreadcrumbSchema } from "@/lib/product-schema";
 import { getProduct } from "@/lib/get-product";
+import { extractProductId, productHref } from "@/lib/product-slug";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -10,7 +11,8 @@ interface LayoutProps {
 // NOTE: generateMetadata lives in page.tsx (it needs searchParams to read
 // ?lang=en). This layout only injects the JSON-LD structured data.
 export default async function ProductLayout({ children, params }: LayoutProps) {
-  const { id } = await params;
+  const { id: rawId } = await params;
+  const id = extractProductId(rawId);
   const product = await getProduct(id);
 
   // Parse dimensions
@@ -104,7 +106,7 @@ export default async function ProductLayout({ children, params }: LayoutProps) {
         // ფასი და შეთავაზება
         offers: {
           "@type": "Offer",
-          url: `https://soulart.ge/products/${id}`,
+          url: `https://soulart.ge${productHref(product)}`,
           priceCurrency: "GEL",
           price: product.discountedPrice || product.price,
           priceValidUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)

@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import { useLanguage } from "@/hooks/LanguageContext";
 import { optimizeCloudinaryUrl } from "@/lib/utils";
+import { productHref } from "@/lib/product-slug";
 
 const TopItems: React.FC = () => {
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -304,7 +305,7 @@ const TopItems: React.FC = () => {
     // Add product
     interleavedItems.push(
       <Link
-        href={`/products/${product._id}`}
+        href={productHref(product)}
         key={`product-${product._id}`}
         className={styles.itemLink}
       >

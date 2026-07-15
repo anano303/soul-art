@@ -16,6 +16,7 @@ import Star2 from "../../../assets/Images/startHandMade.png";
 import { useLanguage } from "@/hooks/LanguageContext";
 import { trackProductInteraction, trackAddToCart } from "@/lib/ga4-analytics";
 import { optimizeCloudinaryUrl } from "@/lib/utils";
+import { productHref } from "@/lib/product-slug";
 import { useReferralPricing } from "@/hooks/use-referral-pricing";
 import { useCurrency } from "@/hooks/use-currency";
 
@@ -271,7 +272,7 @@ export function ProductCard({
 
       {/* Product image and name - clickable link to product */}
       <Link
-        href={`/products/${product._id}`}
+        href={productHref(product)}
         onClick={() =>
           trackProductInteraction(product._id, "click", "product_card")
         }
@@ -397,7 +398,7 @@ export function ProductCard({
       </div>
 
       {/* Price - clickable link to product */}
-      <Link href={`/products/${product._id}`}>
+      <Link href={productHref(product)}>
         <div className="product-info product-info-bottom">
           <div className="product-details">
             <div className="priceAndRaiting">

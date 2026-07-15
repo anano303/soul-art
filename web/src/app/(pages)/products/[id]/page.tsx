@@ -6,6 +6,7 @@ import { getProduct } from "@/lib/get-product";
 import { collectProductKeywords, mergeKeywordSets } from "@/lib/seo-keywords";
 import { isInStock } from "@/lib/stock";
 import { buildAlternates, resolveLocale } from "@/lib/hreflang";
+import { extractProductId, productHref } from "@/lib/product-slug";
 
 // Metadata lives here (not in layout.tsx) because only a page receives
 // `searchParams`, which we need to read ?lang=en and emit English meta.
@@ -16,7 +17,8 @@ export async function generateMetadata({
   params: Promise<{ id: string }>;
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }): Promise<Metadata> {
-  const { id } = await params;
+  const { id: rawId } = await params;
+  const id = extractProductId(rawId);
   const { lang } = await searchParams;
   const locale = resolveLocale(lang);
   const en = locale === "en";
@@ -152,8 +154,8 @@ export async function generateMetadata({
         alternateLocale: en ? "ka_GE" : "en_US",
         siteName: "SoulArt",
         url: en
-          ? `https://soulart.ge/products/${id}?lang=en`
-          : `https://soulart.ge/products/${id}`,
+          ? `https://soulart.ge${productHref(product)}?lang=en`
+          : `https://soulart.ge${productHref(product)}`,
       },
       twitter: {
         card: "summary_large_image",
@@ -162,7 +164,7 @@ export async function generateMetadata({
         images: product.images?.length > 0 ? [product.images[0]] : ["/logo.png"],
       },
       // Self-referential canonical per locale + ka/en hreflang alternates.
-      alternates: buildAlternates(`/products/${id}`, locale),
+      alternates: buildAlternates(productHref(product), locale),
       other: {
         "product:price:amount":
           product.discountedPrice && product.discountedPrice < product.price
@@ -189,7 +191,8 @@ export default async function ProductPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
-  const { id } = await params;
+  const { id: rawId } = await params;
+  const id = extractProductId(rawId);
   const product = await getProduct(id);
 
   // Proper HTTP 404 for missing/deleted products (avoids soft-404 in Google).
@@ -199,7 +202,7 @@ export default async function ProductPage({
 
   return (
     <div className="Container">
-      <ProductPromoToast id={id} />
+      <ProductPromoToast />
       <ProductDetails product={product} />
     </div>
   );

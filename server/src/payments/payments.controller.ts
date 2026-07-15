@@ -276,6 +276,39 @@ export class PaymentsController {
     }
   }
 
+  // Create BOG payment for a custom commission
+  @UseGuards(JwtAuthGuard)
+  @UseInterceptors(createRateLimitInterceptor(paymentRateLimit))
+  @Post('bog/commission/create')
+  async createCommissionBogPayment(
+    @Body()
+    data: {
+      commissionId: string;
+      externalOrderId: string;
+      title: string;
+      artworkPrice: number;
+      deliveryFee: number;
+      totalPayment: number;
+    },
+  ) {
+    try {
+      const result = await this.paymentsService.createCommissionPayment({
+        commissionId: data.commissionId,
+        externalOrderId: data.externalOrderId,
+        title: data.title,
+        artworkPrice: data.artworkPrice,
+        deliveryFee: data.deliveryFee,
+        totalPayment: data.totalPayment,
+        successUrl: `https://soulart.ge/checkout/success?commissionId=${data.commissionId}`,
+        failUrl: `https://soulart.ge/checkout/fail?commissionId=${data.commissionId}`,
+      });
+      return result;
+    } catch (error) {
+      console.error('Commission BOG Payment Error:', error);
+      throw error;
+    }
+  }
+
   // PayPal Payment - Create order
   @UseInterceptors(createRateLimitInterceptor(paymentRateLimit))
   @Post('paypal/create')

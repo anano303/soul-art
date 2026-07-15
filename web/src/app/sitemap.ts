@@ -1,4 +1,5 @@
 import { MetadataRoute } from "next";
+import { productHref } from "@/lib/product-slug";
 
 // API-დან პროდუქტების მოტანა
 async function getProducts() {
@@ -381,8 +382,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const productPages = products
       .filter((product: any) => product && product._id)
       .map(
-        (product: { _id: string; updatedAt?: string; createdAt?: string }) => ({
-          url: `${baseUrl}/products/${product._id}`,
+        (product: {
+          _id: string;
+          name?: string;
+          nameEn?: string;
+          updatedAt?: string;
+          createdAt?: string;
+        }) => ({
+          url: `${baseUrl}${productHref(product)}`,
           lastModified: new Date(
             product.updatedAt || product.createdAt || new Date(),
           ),

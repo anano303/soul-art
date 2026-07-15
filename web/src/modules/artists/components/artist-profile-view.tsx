@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { productHref } from "@/lib/product-slug";
 import Image from "next/image";
 import {
   useMemo,
@@ -1097,6 +1098,32 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
                     onFollowChange={handleFollowChange}
                   />
                 )}
+                {!isOwner && Boolean(artist.artistOpenForCommissions) && (
+                  <Link
+                    href={`/commissions/new?artist=${artist.id}&artistName=${encodeURIComponent(
+                      artist.storeName || artist.name || ""
+                    )}`}
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: "6px",
+                      padding: "0.6rem 1.4rem",
+                      borderRadius: "100px",
+                      background:
+                        "linear-gradient(180deg,#fdf6c9,#e7c75a 22%,#bb9326 55%,#8f6e18)",
+                      color: "#2a2208",
+                      fontWeight: 800,
+                      fontSize: "0.9rem",
+                      textDecoration: "none",
+                      boxShadow: "0 6px 18px rgba(187,147,38,0.35)",
+                    }}
+                  >
+                    🎨{" "}
+                    {language === "en"
+                      ? "Order custom artwork"
+                      : "ინდივიდუალური შეკვეთა"}
+                  </Link>
+                )}
               </div>
             </div>
           </div>
@@ -2007,7 +2034,7 @@ function ProductCard({
   const [isDeleting, setIsDeleting] = useState(false);
   const [showPromoteModal, setShowPromoteModal] = useState(false);
   const image = product.images?.[0];
-  const href = `/products/${product.id}`;
+  const href = productHref(product);
 
   const discountPercentage = getActiveDiscountPercentage(product);
 

@@ -31,6 +31,7 @@ import {
   HelpCircle,
   BellRing,
   Rocket,
+  Palette,
 } from "lucide-react";
 
 // Add a style object for the FiraGo font
@@ -316,6 +317,18 @@ export default function UserMenu({
               <ShoppingBag size={18} />
               <span>{t("navigation.myOrders")}</span>
             </Link>
+            <Link
+              href="/commissions"
+              className="dropdown-item"
+              onClick={handleLinkClick}
+            >
+              <Palette size={18} />
+              <span>
+                {language === "en"
+                  ? "My custom orders"
+                  : "ჩემი ინდ. შეკვეთები"}
+              </span>
+            </Link>
 
             {/* რეფერალების ლინკი დროებით დაკომენტარებული */}
             {/* <Link
@@ -379,6 +392,20 @@ export default function UserMenu({
                       {language === "en"
                         ? "Price offers"
                         : "ფასის შეთავაზებები"}
+                    </span>
+                  </Link>
+                )}
+                {isSellerRole(user.role) && (
+                  <Link
+                    href="/profile/commissions"
+                    className="dropdown-item"
+                    onClick={handleLinkClick}
+                  >
+                    <Palette size={18} />
+                    <span>
+                      {language === "en"
+                        ? "Custom orders"
+                        : "ინდივიდუალური შეკვეთები"}
                     </span>
                   </Link>
                 )}
@@ -494,6 +521,18 @@ export default function UserMenu({
                   <DollarSign size={18} />
                   <span>
                     {language === "en" ? "Price offers" : "ფასის შეთავაზებები"}
+                  </span>
+                </Link>
+                <Link
+                  href="/admin/commissions"
+                  className="dropdown-item"
+                  onClick={handleLinkClick}
+                >
+                  <Palette size={18} />
+                  <span>
+                    {language === "en"
+                      ? "Custom orders"
+                      : "ინდივიდუალური შეკვეთები"}
                   </span>
                 </Link>
               </>

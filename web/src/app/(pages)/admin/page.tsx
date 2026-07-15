@@ -144,6 +144,14 @@ export default function AdminDashboard() {
           "მყიდველების ფასის მოთხოვნები, საკონტაქტო ინფო და გამყიდველის პასუხები",
         roles: ["admin"],
       },
+      {
+        title: "ინდივიდუალური შეკვეთები",
+        href: "/admin/commissions",
+        icon: "🎨",
+        description:
+          "მომხმარებელთა ინდივიდუალური შეკვეთები, მხატვრების შეთავაზებები და დასრულება",
+        roles: ["admin"],
+      },
     ];
 
     return allAdminSections.filter((section) =>

@@ -49,6 +49,11 @@ const HomePageShop = dynamic(
   { ssr: false, loading: () => <div style={{ minHeight: "400px" }} /> },
 );
 
+const CommissionBanner = dynamic(
+  () => import("@/components/commissionBanner/CommissionBanner"),
+  { ssr: false, loading: () => <div style={{ minHeight: "200px" }} /> },
+);
+
 const PopularArtists = dynamic(
   () => import("@/components/popularArtists/PopularArtists"),
   { ssr: false, loading: () => <div style={{ minHeight: "300px" }} /> },
@@ -81,6 +86,7 @@ export default function HomeContent() {
       <DiscountedRail />
       <GiftCategories />
       <GuaranteeBanner />
+      <CommissionBanner />
       <VoucherBanner />
       {/* <SpringCollection /> */}
       

@@ -39,6 +39,7 @@ import { BackupModule } from '../backup/backup.module';
 import { PromotionModule } from '../promotions/promotion.module';
 import { VoucherModule } from '../vouchers/voucher.module';
 import { PriceOffersModule } from '../price-offers/price-offers.module';
+import { CommissionsModule } from '../commissions/commissions.module';
 
 @Module({
   imports: [
@@ -83,6 +84,7 @@ import { PriceOffersModule } from '../price-offers/price-offers.module';
     PromotionModule,
     VoucherModule,
     PriceOffersModule,
+    CommissionsModule,
   ],
   controllers: [AppController],
   providers: [AppService, GoogleStrategy],

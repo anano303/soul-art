@@ -5,6 +5,7 @@ import Image from "next/image";
 import { StarIcon, X, Truck, Ruler, Package, Play } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
+import { productHref } from "@/lib/product-slug";
 import "./productDetails.scss";
 
 const PRIMARY_COLOR = "#012645";
@@ -971,7 +972,7 @@ export function ProductDetails({ product }: ProductDetailsProps) {
           <div className="image-action-buttons">
             {/* Share Button */}
             <ShareButton
-              url={`/products/${product._id}`}
+              url={productHref(product)}
               title={displayName}
               description={`${displayName} by ${product.brand}`}
             />

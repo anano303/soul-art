@@ -42,6 +42,16 @@ export class BalanceService {
   async processOrderEarnings(order: OrderDocument): Promise<void> {
     this.logger.log(`Processing earnings for order: ${order._id}`);
 
+    // Commission orders release escrow through CommissionsService.complete()
+    // (artwork −15% + full delivery). Skip the standard product earnings path
+    // so the artist is never double-credited.
+    if ((order as any).orderType === 'commission') {
+      this.logger.log(
+        `Order ${order._id} is a commission — skipping standard earnings (handled on completion).`,
+      );
+      return;
+    }
+
     // Check if earnings have already been processed for this order
     const existingTransactions = await this.balanceTransactionModel.findOne({
       order: order._id,
@@ -848,6 +858,57 @@ export class BalanceService {
 
     this.logger.log(
       `Auction earnings processed for seller ${sellerId}: ${amount} GEL (Auction: ${auctionTitle})`,
+    );
+  }
+
+  async addCommissionEarnings(
+    sellerId: string,
+    amount: number,
+    commissionId: string,
+    commissionTitle: string,
+  ): Promise<void> {
+    this.logger.log(
+      `Adding commission earnings for seller: ${sellerId}, amount: ${amount} GEL`,
+    );
+
+    let sellerBalance = await this.sellerBalanceModel.findOne({
+      seller: sellerId,
+    });
+
+    if (!sellerBalance) {
+      sellerBalance = new this.sellerBalanceModel({
+        seller: sellerId,
+        totalBalance: amount,
+        totalEarnings: amount,
+        pendingWithdrawals: 0,
+        totalWithdrawn: 0,
+      });
+    } else {
+      sellerBalance.totalBalance += amount;
+      sellerBalance.totalEarnings += amount;
+    }
+
+    await sellerBalance.save();
+
+    await this.userModel.findByIdAndUpdate(sellerId, {
+      $inc: { balance: amount },
+    });
+
+    const transaction = new this.balanceTransactionModel({
+      seller: sellerId,
+      order: null,
+      amount: amount,
+      type: 'commission_earning',
+      description: `ინდივიდუალური შეკვეთიდან შემოსავალი - ${commissionTitle}`,
+      commissionPercentage: 10,
+      commissionAmount: (amount / 0.9) * 0.1,
+      finalAmount: amount,
+    });
+
+    await transaction.save();
+
+    this.logger.log(
+      `Commission earnings processed for seller ${sellerId}: ${amount} GEL (Commission: ${commissionId} - ${commissionTitle})`,
     );
   }
 }

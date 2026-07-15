@@ -12,6 +12,7 @@ import {
   MapPin,
   Gavel,
   Trophy,
+  Palette,
 } from "lucide-react";
 
 const profileNavItems = [
@@ -51,6 +52,13 @@ const profileNavItems = [
     href: "/profile/auctions",
     icon: Gavel,
     labelKey: "profileNav.auctions",
+    requiresRole: "seller",
+  },
+  {
+    key: "commissions",
+    href: "/profile/commissions",
+    icon: Palette,
+    labelKey: "profileNav.commissions",
     requiresRole: "seller",
   },
   {

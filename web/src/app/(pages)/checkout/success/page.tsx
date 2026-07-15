@@ -25,6 +25,7 @@ function CheckoutSuccessContent() {
   const { guestInfo, clearCheckout } = useCheckout();
   const [orderId, setOrderId] = useState<string | null>(null);
   const [auctionId, setAuctionId] = useState<string | null>(null);
+  const [commissionId, setCommissionId] = useState<string | null>(null);
   const [guestEmail, setGuestEmail] = useState<string | null>(null);
   const [orderSummary, setOrderSummary] = useState<StoredOrderSummary | null>(
     null,
@@ -35,8 +36,10 @@ function CheckoutSuccessContent() {
     if (searchParams) {
       const orderIdParam = searchParams.get("orderId");
       const auctionIdParam = searchParams.get("auctionId");
+      const commissionIdParam = searchParams.get("commissionId");
       setOrderId(orderIdParam);
       setAuctionId(auctionIdParam);
+      setCommissionId(commissionIdParam);
 
       if (orderIdParam) {
         try {
@@ -274,6 +277,14 @@ function CheckoutSuccessContent() {
             </div>
           )}
 
+          {commissionId && !orderId && (
+            <div className="order-info">
+              <p className="order-info-text">
+                ინდივიდუალური შეკვეთა გადახდილია. მალე დაგიკავშირდებით.
+              </p>
+            </div>
+          )}
+
           <div className="buttons-container">
             {orderId ? (
               <Link href={`/orders/${orderId}`} className="btn-primary">
@@ -282,6 +293,10 @@ function CheckoutSuccessContent() {
             ) : auctionId ? (
               <Link href="/profile/won-auctions" className="btn-primary">
                 {t("payment.success.viewPurchases")}
+              </Link>
+            ) : commissionId ? (
+              <Link href="/commissions" className="btn-primary">
+                ჩემი შეკვეთები
               </Link>
             ) : null}
 

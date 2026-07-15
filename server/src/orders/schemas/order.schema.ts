@@ -31,7 +31,7 @@ export class Order {
   // Order type: regular (product orders) or auction (auction winner orders)
   @Prop({
     type: String,
-    enum: ['regular', 'auction', 'voucher'],
+    enum: ['regular', 'auction', 'voucher', 'commission'],
     default: 'regular',
   })
   orderType!: string;

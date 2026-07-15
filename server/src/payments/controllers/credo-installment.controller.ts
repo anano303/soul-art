@@ -13,6 +13,7 @@ import {
   CredoProduct,
 } from '../services/credo-installment.service';
 import { OrdersService } from '../../orders/services/orders.service';
+import { CommissionsService } from '../../commissions/services/commissions.service';
 import { paymentRateLimit } from '@/middleware/security.middleware';
 import { createRateLimitInterceptor } from '@/interceptors/rate-limit.interceptor';
 
@@ -33,6 +34,7 @@ export class CredoInstallmentController {
   constructor(
     private readonly credoInstallmentService: CredoInstallmentService,
     private readonly ordersService: OrdersService,
+    private readonly commissionsService: CommissionsService,
   ) {}
 
   @UseInterceptors(createRateLimitInterceptor(paymentRateLimit))
@@ -159,6 +161,24 @@ export class CredoInstallmentController {
             this.logger.log(
               `Credo installment order ${orderCode} marked as paid (status: ${statusId})`,
             );
+
+            // If this is a commission order, sync the commission (escrow held).
+            try {
+              const order =
+                await this.ordersService.findByExternalOrderId(orderCode);
+              if (order && (order as any).orderType === 'commission') {
+                await this.commissionsService.markPaidByOrderId(
+                  order._id.toString(),
+                  'CredoInstallment',
+                );
+              }
+            } catch (syncErr) {
+              this.logger.error(
+                `Failed to sync commission for Credo order ${orderCode}: ${
+                  syncErr instanceof Error ? syncErr.message : syncErr
+                }`,
+              );
+            }
           } catch (updateError) {
             this.logger.error(
               `Failed to update order for Credo status: ${updateError.message}`,
