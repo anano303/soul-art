@@ -15,8 +15,12 @@ const nextConfig: NextConfig = {
       static: 180,
     },
   },
-  // Empty turbopack config to silence warning about webpack config
-  turbopack: {},
+  // Pin the Turbopack workspace root to THIS folder. Without it Next picks the
+  // parent monorepo dir (two lockfiles present) which can break file-watching /
+  // HMR, so code & CSS edits silently keep serving the old bundle.
+  turbopack: {
+    root: __dirname,
+  },
   // Optimize compilation
   compiler: {
     removeConsole: process.env.NODE_ENV === "production",

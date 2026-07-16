@@ -2353,3 +2353,15 @@ a.artist-commission-btn:hover,
     padding: 0.6rem 1rem !important;
   }
 }
+
+/* Fix white gaps at 769–899px: the global .Container keeps its 20px padding
+   until 768px, but the artist hero goes full-bleed below 900px (mobile top
+   bar range). Cancel that padding for the artist page in this window so the
+   hero reaches the screen edges like it does on ≤768px. Cross-browser safe
+   (plain negative margins; body already has overflow-x: clip). */
+@media (min-width: 769px) and (max-width: 899px) {
+  .artist-profile {
+    margin: -20px -20px 0;
+    width: calc(100% + 40px);
+  }
+}

@@ -41,7 +41,11 @@ export async function getUsers(
       params.set("commissionFilter", commissionFilter);
     }
 
-    const response = await fetchWithAuth(`/users?${params.toString()}`);
+    // Admin data must always be fresh — never serve a stale browser HTTP cache
+    // (otherwise newly-added summary fields like commission counts go missing).
+    const response = await fetchWithAuth(`/users?${params.toString()}`, {
+      cache: "no-store",
+    });
     const data = await response.json();
 
     return data;
