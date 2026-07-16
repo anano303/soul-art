@@ -787,6 +787,8 @@ export class OrdersService {
     const filter: FilterQuery<Order> = {};
     if (orderType === 'auction') {
       filter.orderType = 'auction';
+    } else if (orderType === 'commission') {
+      filter.orderType = 'commission';
     } else if (orderType === 'regular') {
       filter.$or = [
         { orderType: 'regular' },
@@ -815,6 +817,7 @@ export class OrdersService {
           select: '_id name email phoneNumber storeName',
         },
       })
+      .populate('seller', '_id name email phoneNumber storeName')
       .sort({ createdAt: -1 })
       .lean();
 
@@ -2135,12 +2138,26 @@ export class OrdersService {
           select: '_id name email phoneNumber storeName',
         },
       })
+      .populate('seller', '_id name email phoneNumber storeName')
       .sort({ createdAt: -1 });
 
     // Filter orders to include:
     // 1. Regular orders containing seller's products
     // 2. Auction orders where the seller owns the auction
+    // 3. Commission orders where this seller is the chosen artist
     const sellerOrders = orders.filter((order) => {
+      // Commission orders: artist is stored directly on order.seller
+      if (order.orderType === 'commission' && (order as any).seller) {
+        const commissionSellerId =
+          typeof (order as any).seller === 'string'
+            ? (order as any).seller
+            : (order as any).seller?._id?.toString() ||
+              (order as any).seller?.toString();
+        if (commissionSellerId === sellerId) {
+          return true;
+        }
+      }
+
       // Check for auction orders where this seller owns the auction
       if (order.orderType === 'auction' && order.auctionId) {
         const auctionSellerId =

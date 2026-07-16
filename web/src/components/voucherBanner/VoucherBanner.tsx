@@ -19,13 +19,17 @@ function Dreamcatcher() {
       {/* web spokes */}
       {Array.from({ length: 12 }).map((_, i) => {
         const a = (i / 12) * Math.PI * 2;
+        // Round so the server and client render byte-identical attribute
+        // strings (raw Math.sin/cos differ in the last float digit across
+        // Node vs the browser and cause a hydration mismatch).
+        const r = (n: number) => Math.round(n * 1000) / 1000;
         return (
           <line
             key={i}
-            x1={60 + Math.cos(a) * 5}
-            y1={55 + Math.sin(a) * 5}
-            x2={60 + Math.cos(a) * 48}
-            y2={55 + Math.sin(a) * 48}
+            x1={r(60 + Math.cos(a) * 5)}
+            y1={r(55 + Math.sin(a) * 5)}
+            x2={r(60 + Math.cos(a) * 48)}
+            y2={r(55 + Math.sin(a) * 48)}
             stroke="currentColor"
             strokeWidth="0.7"
             opacity="0.6"

@@ -24,7 +24,7 @@ export interface Order {
     phoneNumber: string;
     fullName: string;
   };
-  orderType?: "regular" | "auction" | "voucher";
+  orderType?: "regular" | "auction" | "voucher" | "commission";
   auctionId?: {
     _id: string;
     title: string;

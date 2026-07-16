@@ -224,7 +224,8 @@ export default function RootLayout({
               (function() {
                 var ow=console.warn,oe=console.error;
                 console.warn=function(){var m=String(Array.prototype.join.call(arguments,' '));if(/(preload|CSS|chunk|link|seconds|was preloaded|Download|Third-party|cookie)/.test(m))return;ow.apply(console,arguments)};
-                console.error=function(){var m=String(Array.prototype.join.call(arguments,' '));if(/(madgicx|capig|facebook|fbevents|googletagmanager|analytics|Failed to load|Loading chunk|ChunkLoadError|net::ERR|hydrat)/.test(m))return;oe.apply(console,arguments)};
+                console.error=function(){var m=String(Array.prototype.join.call(arguments,' '));if(/(madgicx|capig|facebook|fbevents|googletagmanager|analytics|Failed to load|Loading chunk|ChunkLoadError|net::ERR)/.test(m))return;oe.apply(console,arguments)};
+                // (hydration warnings intentionally NOT suppressed — surface real bugs)
                 window.addEventListener('error',function(e){if(e.filename&&/(madgicx|capig|facebook|googletagmanager|connect\.facebook)/.test(e.filename))return true},true);
                 window.addEventListener('error',function(e){var m=String(e.message||'');if(/(Loading chunk|Failed to load|ChunkLoadError)/.test(m)){var k='cr_'+Date.now().toString().slice(0,-4);if(!sessionStorage.getItem(k)){sessionStorage.setItem(k,'1');location.reload()}}},true);
               })();

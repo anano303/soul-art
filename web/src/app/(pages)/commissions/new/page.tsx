@@ -72,8 +72,7 @@ function NewCommissionForm() {
     setPreviews(arr.map((f) => URL.createObjectURL(f)));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async () => {
     if (!description.trim() || !size.trim()) {
       toast({
         title: language === "en" ? "Missing fields" : "შეავსე ველები",
@@ -160,7 +159,7 @@ function NewCommissionForm() {
           </div>
         )}
 
-        <form className="commission-form" onSubmit={handleSubmit}>
+        <div className="commission-form">
           {/* Type */}
           <label className="commission-label">
             {language === "en" ? "Type" : "სტილი"}
@@ -304,9 +303,10 @@ function NewCommissionForm() {
           </div>
 
           <button
-            type="submit"
+            type="button"
             className="commission-submit"
             disabled={submitting}
+            onClick={handleSubmit}
           >
             {submitting
               ? language === "en"
@@ -316,7 +316,7 @@ function NewCommissionForm() {
               ? "Submit request"
               : "შეკვეთის განთავსება"}
           </button>
-        </form>
+        </div>
       </div>
     </div>
   );

@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiClient } from "@/lib/axios";
 import { login as loginApi, LoginData } from "@/modules/auth/api/login";
@@ -11,6 +12,16 @@ import {
 
 export function useAuth() {
   const queryClient = useQueryClient();
+
+  // Server and the very first client render must produce identical markup, or
+  // React throws a hydration error. Auth state comes from localStorage (client
+  // only), so we gate it behind `mounted`: until the component mounts we report
+  // "loading / logged-out" everywhere (same as the server), then reveal the
+  // real user. This fixes the app-wide hydration mismatch in the header.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Get currently logged in user data
   const {
@@ -116,11 +127,12 @@ export function useAuth() {
   });
 
   return {
-    user,
-    isLoading,
+    // Gated so server + first client render match (see `mounted` above).
+    user: mounted ? user : null,
+    isLoading: mounted ? isLoading : true,
     error,
     status,
-    isLoggedIn: !!user,
+    isLoggedIn: mounted ? !!user : false,
     login: loginMutation.mutate,
     logout: logoutMutation.mutate,
     loginStatus: loginMutation.status,

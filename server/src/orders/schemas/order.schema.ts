@@ -10,6 +10,11 @@ export class Order {
   @Prop({ type: mongoose.Schema.Types.ObjectId, required: false, ref: 'User' })
   user?: User;
 
+  // Seller/artist that fulfils this order. Used for non-product orders
+  // (auction, commission) where the seller can't be derived from a product.
+  @Prop({ type: mongoose.Schema.Types.ObjectId, required: false, ref: 'User' })
+  seller?: User;
+
   // Guest checkout information (when user is not authenticated)
   @Prop({
     required: false,

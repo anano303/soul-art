@@ -14,6 +14,7 @@ import {
   Tag,
   Gavel,
   ShoppingBag,
+  Palette,
 } from "lucide-react";
 import { Order } from "@/types/order";
 import "./orders-list.css";
@@ -35,9 +36,9 @@ export function OrdersList({
   const [userRole, setUserRole] = useState<string | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
   const [showDonation, setShowDonation] = useState(false);
-  const [orderTypeTab, setOrderTypeTab] = useState<"regular" | "auction">(
-    auctionAdminMode ? "auction" : "regular",
-  );
+  const [orderTypeTab, setOrderTypeTab] = useState<
+    "regular" | "auction" | "commission"
+  >(auctionAdminMode ? "auction" : "regular");
 
   useEffect(() => {
     const userData = getUserData();
@@ -174,6 +175,16 @@ export function OrdersList({
                 <Gavel size={16} />
                 აუქციონის
               </button>
+              <button
+                className={`orders-tab ${orderTypeTab === "commission" ? "active" : ""}`}
+                onClick={() => {
+                  setOrderTypeTab("commission");
+                  setPage(1);
+                }}
+              >
+                <Palette size={16} />
+                ინდივიდუალური
+              </button>
             </div>
           )}
         </div>
@@ -223,6 +234,9 @@ export function OrdersList({
                     {order.orderType === "auction" && (
                       <span className="auction-badge">#აუქციონი</span>
                     )}
+                    {order.orderType === "commission" && (
+                      <span className="auction-badge">#ინდ.შეკვეთა</span>
+                    )}
                   </td>
                   <td>
                     {order.user ? (
@@ -245,8 +259,31 @@ export function OrdersList({
                   </td>
                   <td>
                     {/* Show seller info - for auction orders from auctionId, for regular from orderItems */}
-                    {order.orderType === "auction" &&
-                    order.auctionId?.seller ? (
+                    {order.orderType === "commission" ? (
+                      <Link
+                        href="/admin/commissions"
+                        className="seller-info seller-link"
+                      >
+                        <div className="seller-name">
+                          <Palette className="icon" size={14} />
+                          {(order as any).seller?.storeName ||
+                            (order as any).seller?.name ||
+                            order.orderItems?.[0]?.name ||
+                            "ინდ. შეკვეთა"}
+                        </div>
+                        {(order as any).seller?.email && (
+                          <div className="seller-email">
+                            📧 {(order as any).seller.email}
+                          </div>
+                        )}
+                        {(order as any).seller?.phoneNumber && (
+                          <div className="seller-phone">
+                            📞 {(order as any).seller.phoneNumber}
+                          </div>
+                        )}
+                      </Link>
+                    ) : order.orderType === "auction" &&
+                      order.auctionId?.seller ? (
                       <Link
                         href={`/admin/users/${order.auctionId.seller._id}/edit`}
                         className="seller-info seller-link"
