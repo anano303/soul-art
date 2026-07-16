@@ -80,16 +80,18 @@ export default function HomeContent() {
     <div>
       <HomePagesHead />
       <TopItems />
-      <Banner />
+      <CommissionBanner />
+   
       <ExclusivePromoRail />
       <PremiumRail />
+         <Banner />
       <DiscountedRail />
       <GiftCategories />
       <GuaranteeBanner />
-      <CommissionBanner />
+
       <VoucherBanner />
       {/* <SpringCollection /> */}
-      
+
       <HomePageShop key={`home-shop-${language}`} />
       <PopularArtists />
       <HomeFAQ />

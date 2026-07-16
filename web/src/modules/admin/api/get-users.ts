@@ -8,7 +8,8 @@ export async function getUsers(
   role?: string,
   sortBy?: string,
   sortOrder?: string,
-  activeFilter?: string
+  activeFilter?: string,
+  commissionFilter?: string
 ): Promise<PaginatedResponse<User>> {
   try {
     const params = new URLSearchParams({
@@ -34,6 +35,10 @@ export async function getUsers(
 
     if (activeFilter && activeFilter !== "all") {
       params.set("activeFilter", activeFilter);
+    }
+
+    if (commissionFilter && commissionFilter !== "all") {
+      params.set("commissionFilter", commissionFilter);
     }
 
     const response = await fetchWithAuth(`/users?${params.toString()}`);

@@ -106,6 +106,7 @@ export interface MyOfferView {
   type: CommissionType;
   size: string;
   status: CommissionStatus;
+  isPaid?: boolean;
   referenceImages: string[];
   myOffer: {
     price: number;

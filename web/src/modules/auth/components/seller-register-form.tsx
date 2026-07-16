@@ -734,6 +734,24 @@ export function SellerRegisterForm() {
         </div>
 
         <div className="input-group">
+          <label htmlFor="facebookUrl">
+            Facebook ან სხვა სოც. ქსელის გვერდი{" "}
+            <span style={{ color: "#94a3b8", fontWeight: 400 }}>
+              (გთხოვ, მიუთითო — დაეხმარება მყიდველებს გაგიცნონ)
+            </span>
+          </label>
+          <input
+            id="facebookUrl"
+            type="url"
+            placeholder="https://facebook.com/myartpage ან Instagram/TikTok ბმული"
+            {...registerField("facebookUrl")}
+          />
+          {errors.facebookUrl && (
+            <p className="error-text">{errors.facebookUrl.message}</p>
+          )}
+        </div>
+
+        <div className="input-group">
           <label htmlFor="email">{t("auth.email")}</label>
           <input
             id="email"

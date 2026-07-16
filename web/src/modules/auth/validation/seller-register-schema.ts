@@ -41,4 +41,12 @@ export const sellerRegisterSchema = z.object({
       }
     ),
   invitationCode: z.string().optional(), // renamed from referralCode
+  facebookUrl: z
+    .string()
+    .optional()
+    .transform((value) => (value ?? "").trim())
+    .refine(
+      (value) => value === "" || /^https?:\/\/.+/.test(value),
+      "ბმული უნდა იწყებოდეს https:// -ით"
+    ),
 });

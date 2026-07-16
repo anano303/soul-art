@@ -23,6 +23,10 @@ import {
   SalesTracking,
   SalesTrackingDocument,
 } from '../../sales-commission/schemas/sales-tracking.schema';
+import {
+  Commission,
+  CommissionDocument,
+} from '../../commissions/schemas/commission.schema';
 import { hashPassword } from '@/utils/password';
 import { generateUsers } from '@/utils/seed-users';
 import { PaginatedResponse } from '@/types';
@@ -80,6 +84,8 @@ export class UsersService {
     private portfolioPostModel: Model<PortfolioPostDocument>,
     @InjectModel(SalesTracking.name)
     private salesTrackingModel: Model<SalesTrackingDocument>,
+    @InjectModel(Commission.name)
+    private commissionModel: Model<CommissionDocument>,
     private readonly userCloudinaryService: UserCloudinaryService,
     private readonly cloudinaryService: CloudinaryService,
     private readonly storageService: StorageService,
@@ -1225,17 +1231,20 @@ export class UsersService {
     sortBy?: string,
     sortOrder?: string,
     activeFilter?: string,
+    commissionFilter?: string,
   ): Promise<
     PaginatedResponse<UserDocument> & {
       sellerProductStats?: Record<
         string,
         { productCount: number; lastProductDate: Date | null }
       >;
+      commissionCounts?: Record<string, number>;
       summary: {
         totalUsers: number;
         roleCounts: Record<Role, number>;
         activeSellers: number;
         activeSalesManagers: number;
+        sellersAcceptingCommissions: number;
         campaignConsent?: {
           sellersWithAllProducts: number;
           sellersWithPerProduct: number;
@@ -1274,6 +1283,30 @@ export class UsersService {
         { storeName: { $regex: escapedKeyword, $options: 'i' } },
         { phoneNumber: { $regex: escapedKeyword, $options: 'i' } },
       ];
+    }
+
+    // "Accepts individual orders" filter — the artistOpenForCommissions flag
+    // the artist toggles on their own profile page.
+    if (commissionFilter === 'with') {
+      filters.artistOpenForCommissions = true;
+    } else if (commissionFilter === 'without') {
+      filters.artistOpenForCommissions = { $ne: true };
+    }
+
+    // Paid-commission counts per artist (shown as a badge in the list).
+    const commissionCountMap = new Map<string, number>();
+    if (isSellerFilter) {
+      const commissionAgg = await this.cachedStats<
+        Array<{ _id: any; count: number }>
+      >('sellerCommissionCounts', 30_000, () =>
+        this.commissionModel.aggregate([
+          { $match: { isPaid: true, 'selectedOffer.artist': { $ne: null } } },
+          { $group: { _id: '$selectedOffer.artist', count: { $sum: 1 } } },
+        ]),
+      );
+      commissionAgg.forEach((stat) => {
+        if (stat._id) commissionCountMap.set(stat._id.toString(), stat.count);
+      });
     }
 
     // Get seller product stats if filtering by seller role
@@ -1337,6 +1370,7 @@ export class UsersService {
       salesTotalWithdrawn: 1,
       salesPendingWithdrawal: 1,
       isVerified: 1,
+      artistOpenForCommissions: 1,
     };
 
     if (
@@ -1464,6 +1498,21 @@ export class UsersService {
       }
     });
 
+    // Sellers who accept individual commissions (profile toggle).
+    // Includes combined seller+sales-manager accounts too.
+    const sellersAcceptingCommissions = await this.cachedStats(
+      'sellersAcceptingCommissions',
+      30_000,
+      () =>
+        this.userModel.countDocuments({
+          role: { $in: [Role.Seller, Role.SellerAndSalesManager] },
+          artistOpenForCommissions: true,
+        }),
+    );
+    this.logger.log(
+      `[findAll] sellersAcceptingCommissions=${sellersAcceptingCommissions}, commissionFilter=${commissionFilter || 'none'}`,
+    );
+
     // Count active sales managers (those who have at least one tracking event)
     let activeSalesManagersCount = 0;
     try {
@@ -1549,11 +1598,13 @@ export class UsersService {
         string,
         { productCount: number; lastProductDate: Date | null }
       >;
+      commissionCounts?: Record<string, number>;
       summary: {
         totalUsers: number;
         roleCounts: Record<Role, number>;
         activeSellers: number;
         activeSalesManagers: number;
+        sellersAcceptingCommissions: number;
         campaignConsent: {
           sellersWithAllProducts: number;
           sellersWithPerProduct: number;
@@ -1571,12 +1622,18 @@ export class UsersService {
         roleCounts,
         activeSellers: activeSellersCount,
         activeSalesManagers: activeSalesManagersCount,
+        sellersAcceptingCommissions,
         campaignConsent: campaignConsentStats,
       },
     };
 
     if (isSellerFilter) {
       result.sellerProductStats = sellerProductStatsObj;
+      const commissionCountsObj: Record<string, number> = {};
+      commissionCountMap.forEach((value, key) => {
+        commissionCountsObj[key] = value;
+      });
+      result.commissionCounts = commissionCountsObj;
     }
 
     return result;
@@ -2002,6 +2059,10 @@ export class UsersService {
         role: Role.Seller,
         password: dto.password,
         artistSlug: resolvedArtistSlug,
+        // Facebook page link provided at registration → artist socials
+        ...(dto.facebookUrl?.trim()
+          ? { artistSocials: { facebook: dto.facebookUrl.trim() } }
+          : {}),
       };
 
       const seller = await this.create(sellerData);
@@ -3165,6 +3226,7 @@ export class UsersService {
    */
   async getSellersForBulkEmail(
     activeFilter: 'all' | 'active' | 'inactive' = 'all',
+    commissionFilter: 'all' | 'with' | 'without' = 'all',
   ): Promise<
     Array<{
       _id: string;
@@ -3172,11 +3234,13 @@ export class UsersService {
       email: string;
       brandName?: string;
       isActive: boolean;
+      acceptsCommissions: boolean;
+      commissionCount: number;
     }>
   > {
     const sellers = await this.userModel
       .find({ role: Role.Seller })
-      .select('_id name email storeName')
+      .select('_id name email storeName artistOpenForCommissions')
       .lean();
 
     // მივიღოთ პროდუქტების რაოდენობა თითოეული სელერისთვის
@@ -3196,6 +3260,20 @@ export class UsersService {
       }
     });
 
+    // ინდივიდუალური (commission) შეკვეთების რაოდენობა თითო მხატვარზე
+    // (მხოლოდ გადახდილი შეკვეთები, ე.ი. რეალურად მიღებული).
+    const commissionCounts = await this.commissionModel.aggregate([
+      { $match: { isPaid: true, 'selectedOffer.artist': { $ne: null } } },
+      { $group: { _id: '$selectedOffer.artist', count: { $sum: 1 } } },
+    ]);
+
+    const commissionCountMap = new Map<string, number>();
+    commissionCounts.forEach((stat) => {
+      if (stat._id) {
+        commissionCountMap.set(stat._id.toString(), stat.count);
+      }
+    });
+
     let result = sellers.map((s) => {
       const productCount = productCountMap.get(s._id.toString()) || 0;
       return {
@@ -3204,6 +3282,9 @@ export class UsersService {
         email: s.email,
         brandName: s.storeName,
         isActive: productCount > 0,
+        // The flag the artist toggles on their profile ("I accept commissions")
+        acceptsCommissions: !!(s as any).artistOpenForCommissions,
+        commissionCount: commissionCountMap.get(s._id.toString()) || 0,
       };
     });
 
@@ -3212,6 +3293,13 @@ export class UsersService {
       result = result.filter((s) => s.isActive);
     } else if (activeFilter === 'inactive') {
       result = result.filter((s) => !s.isActive);
+    }
+
+    // ვინც იღებს ინდივიდუალურ შეკვეთებს (პროფილზე ჩართული toggle)
+    if (commissionFilter === 'with') {
+      result = result.filter((s) => s.acceptsCommissions);
+    } else if (commissionFilter === 'without') {
+      result = result.filter((s) => !s.acceptsCommissions);
     }
 
     return result;
@@ -3818,11 +3906,15 @@ export class UsersService {
     message: string;
     notificationsCreated?: number;
   }> {
-    // Determine notification mode (with fallback for legacy boolean flag)
-    let notificationMode: 'none' | 'header-only' | 'both' = 'none';
+    // Determine notification mode (with fallback for legacy boolean flag).
+    // DEFAULT IS 'both': this endpoint is "send bulk EMAIL", so when the
+    // caller doesn't specify a mode the email must actually be sent.
+    // (Previously the default was 'none', which skipped sending entirely
+    // while still returning success — the admin saw "sent" but nothing went out.)
+    let notificationMode: 'none' | 'header-only' | 'both' = 'both';
     if (options?.notificationMode) {
       notificationMode = options.notificationMode;
-    } else if (options?.createInAppNotification) {
+    } else if (options?.createInAppNotification === true) {
       notificationMode = 'both';
     }
 

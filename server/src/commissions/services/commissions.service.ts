@@ -458,10 +458,42 @@ export class CommissionsService {
     const items = await this.commissionModel
       .find(filter)
       .select(
-        'type referenceImages description size material budget desiredDueDate offersDeadline offers createdAt shippingDetails targetArtist',
+        'type referenceImages description size material budget desiredDueDate offersDeadline offers createdAt shippingDetails targetArtist requester',
       )
       .sort({ createdAt: -1 })
       .lean();
+
+    // Buyer track record (anonymous): how many commissions they PAID and how
+    // many they abandoned (got offers but never paid before the deadline).
+    // Lets artists judge reliability without exposing the buyer's identity.
+    const requesterIds = [
+      ...new Set(items.map((c: any) => c.requester?.toString()).filter(Boolean)),
+    ];
+    const paidMap = new Map<string, number>();
+    const abandonedMap = new Map<string, number>();
+    if (requesterIds.length > 0) {
+      const [paidAgg, abandonedAgg] = await Promise.all([
+        this.commissionModel.aggregate([
+          { $match: { requester: { $in: requesterIds.map((id) => new Types.ObjectId(id)) }, isPaid: true } },
+          { $group: { _id: '$requester', count: { $sum: 1 } } },
+        ]),
+        this.commissionModel.aggregate([
+          {
+            $match: {
+              requester: { $in: requesterIds.map((id) => new Types.ObjectId(id)) },
+              status: CommissionStatus.Expired,
+              isPaid: false,
+              'offers.0': { $exists: true },
+            },
+          },
+          { $group: { _id: '$requester', count: { $sum: 1 } } },
+        ]),
+      ]);
+      paidAgg.forEach((s: any) => paidMap.set(s._id.toString(), s.count));
+      abandonedAgg.forEach((s: any) =>
+        abandonedMap.set(s._id.toString(), s.count),
+      );
+    }
 
     // Strip other artists' offers + private contact. Expose only the delivery
     // city/country so the artist can price delivery (they handle it).
@@ -469,6 +501,17 @@ export class CommissionsService {
       const myOffer = (c.offers || []).find(
         (o: any) => o.artist.toString() === String(artist._id),
       );
+      const rid = c.requester?.toString() || '';
+      const buyerPaidCount = paidMap.get(rid) || 0;
+      const buyerAbandonedCount = abandonedMap.get(rid) || 0;
+      // trusted → has paid before; risky → abandoned offers without paying;
+      // new → no history yet.
+      const buyerTrust: 'trusted' | 'risky' | 'new' =
+        buyerPaidCount > 0
+          ? 'trusted'
+          : buyerAbandonedCount > 0
+            ? 'risky'
+            : 'new';
       return {
         ...c,
         offersCount: (c.offers || []).length,
@@ -478,6 +521,10 @@ export class CommissionsService {
         deliveryCity: c.shippingDetails?.city || '',
         deliveryCountry: c.shippingDetails?.country || '',
         shippingDetails: undefined,
+        requester: undefined, // never expose buyer identity
+        buyerPaidCount,
+        buyerAbandonedCount,
+        buyerTrust,
       };
     });
   }
@@ -486,7 +533,9 @@ export class CommissionsService {
   async findMyOffers(artistId: string) {
     const items = await this.commissionModel
       .find({ 'offers.artist': artistId })
-      .select('type size status referenceImages offers selectedOffer createdAt')
+      .select(
+        'type size status isPaid referenceImages offers selectedOffer createdAt',
+      )
       .sort({ createdAt: -1 })
       .lean();
 
@@ -503,6 +552,7 @@ export class CommissionsService {
         type: c.type,
         size: c.size,
         status: c.status,
+        isPaid: !!c.isPaid,
         referenceImages: c.referenceImages,
         myOffer: myOffer || null,
         selected: !!selectedMine,

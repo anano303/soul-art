@@ -15,6 +15,15 @@ import {
   Product,
   ProductDocument,
 } from '../../products/schemas/product.schema';
+import {
+  Commission,
+  CommissionDocument,
+  CommissionStatus,
+} from '../../commissions/schemas/commission.schema';
+
+// SoulArt keeps 15% of the artwork price on commissions; the delivery fee goes
+// fully to the artist (they arrange delivery).
+const COMMISSION_RATE = 0.15;
 import { BankIntegrationService } from './bog-bank-integration.service';
 import { BogTransferService } from '../../payments/services/bog-transfer.service';
 import { EmailService } from '../../email/services/email.services';
@@ -31,6 +40,8 @@ export class BalanceService {
     @InjectModel(User.name) private userModel: Model<User>,
     @InjectModel(Product.name) private productModel: Model<Product>,
     @InjectModel(Order.name) private orderModel: Model<Order>,
+    @InjectModel(Commission.name)
+    private commissionModel: Model<CommissionDocument>,
     private bankIntegrationService: BankIntegrationService,
     private bogTransferService: BogTransferService,
     private emailService: EmailService,
@@ -42,12 +53,46 @@ export class BalanceService {
   async processOrderEarnings(order: OrderDocument): Promise<void> {
     this.logger.log(`Processing earnings for order: ${order._id}`);
 
-    // Commission orders release escrow through CommissionsService.complete()
-    // (artwork −15% + full delivery). Skip the standard product earnings path
-    // so the artist is never double-credited.
+    // Commission orders: releasing escrow is triggered by the SAME "mark
+    // delivered" action as products. The artist gets the artwork price −15%
+    // plus the full delivery fee. Idempotent via the commission status.
     if ((order as any).orderType === 'commission') {
+      const commission = await this.commissionModel.findOne({
+        orderId: order._id,
+      });
+      if (!commission) {
+        this.logger.warn(`No commission found for order ${order._id}.`);
+        return;
+      }
+      if (commission.status === CommissionStatus.Completed) {
+        this.logger.log(
+          `Commission ${commission._id} already completed — skipping.`,
+        );
+        return;
+      }
+
+      const artistId = commission.selectedOffer?.artist?.toString();
+      const artwork = order.itemsPrice || commission.selectedOffer?.price || 0;
+      const delivery =
+        order.shippingPrice || commission.selectedOffer?.deliveryPrice || 0;
+      const artistEarnings = Number(
+        (artwork * (1 - COMMISSION_RATE) + delivery).toFixed(2),
+      );
+
+      if (artistId && artistEarnings > 0) {
+        await this.addCommissionEarnings(
+          artistId,
+          artistEarnings,
+          commission._id.toString(),
+          `ინდ. შეკვეთა #${commission._id.toString().slice(-6)}`,
+        );
+      }
+
+      commission.status = CommissionStatus.Completed;
+      commission.completedAt = new Date();
+      await commission.save();
       this.logger.log(
-        `Order ${order._id} is a commission — skipping standard earnings (handled on completion).`,
+        `Commission ${commission._id} completed on delivery; artist credited ${artistEarnings} GEL.`,
       );
       return;
     }

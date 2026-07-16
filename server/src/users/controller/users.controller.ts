@@ -47,6 +47,7 @@ export class UsersController {
     @Query('sortBy') sortBy?: string,
     @Query('sortOrder') sortOrder?: string,
     @Query('activeFilter') activeFilter?: string,
+    @Query('commissionFilter') commissionFilter?: string,
   ) {
     const pageNumber = parseInt(page, 10);
     const limitNumber = parseInt(limit, 10);
@@ -59,6 +60,7 @@ export class UsersController {
       sortBy,
       sortOrder,
       activeFilter,
+      commissionFilter,
     );
   }
 
@@ -508,8 +510,12 @@ export class UsersController {
   @Get('admin/sellers-for-email')
   async getSellersForEmail(
     @Query('activeFilter') activeFilter?: 'all' | 'active' | 'inactive',
+    @Query('commissionFilter') commissionFilter?: 'all' | 'with' | 'without',
   ) {
-    return this.usersService.getSellersForBulkEmail(activeFilter || 'all');
+    return this.usersService.getSellersForBulkEmail(
+      activeFilter || 'all',
+      commissionFilter || 'all',
+    );
   }
 
   @ApiOperation({ summary: 'Get all customers for bulk email preview' })

@@ -131,6 +131,15 @@ export class SellerRegisterDto {
   invitationCode?: string; // რეფერალური კოდი რომლითაც რეგისტრირდება
 
   @ApiProperty({
+    example: 'https://facebook.com/myartpage',
+    description: 'მხატვრის Facebook გვერდის ბმული (არაუცილებელო)',
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  facebookUrl?: string;
+
+  @ApiProperty({
     example: 'digital-artistry',
     description:
       'არტისტის საჯარო სლაგი (მხოლოდ პატარა ასოები, ჰიფენები და ციფრები)',

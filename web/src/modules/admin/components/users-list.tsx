@@ -44,6 +44,7 @@ type SortOption =
   | "active-desc"
   | "active-asc";
 type ActiveFilter = "all" | "active" | "inactive";
+type CommissionFilter = "all" | "with" | "without";
 
 export function UsersList() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -53,6 +54,8 @@ export function UsersList() {
   const [roleFilter, setRoleFilter] = useState<RoleFilter>("all");
   const [sortOption, setSortOption] = useState<SortOption>("none");
   const [activeFilter, setActiveFilter] = useState<ActiveFilter>("all");
+  const [commissionFilter, setCommissionFilter] =
+    useState<CommissionFilter>("all");
   const [isInitialized, setIsInitialized] = useState(false);
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -148,6 +151,7 @@ export function UsersList() {
       sortBy,
       sortOrder,
       activeFilter,
+      commissionFilter,
     ],
     queryFn: () =>
       getUsers(
@@ -158,6 +162,7 @@ export function UsersList() {
         sortBy,
         sortOrder,
         isSellerFilter ? activeFilter : undefined,
+        isSellerFilter ? commissionFilter : undefined,
       ),
     retry: false,
     staleTime: 30 * 1000, // 30 seconds
@@ -263,9 +268,23 @@ export function UsersList() {
       inactiveSellers,
       activeSalesManagers,
       inactiveSalesManagers,
+      sellersAcceptingCommissions:
+        (data?.summary as { sellersAcceptingCommissions?: number })
+          ?.sellersAcceptingCommissions ?? 0,
       campaignConsent: campaignConsent ?? null,
     };
   }, [data]);
+
+  // Summary cards double as quick filters.
+  const applyCardFilter = (
+    role: RoleFilter,
+    commission: CommissionFilter = "all",
+  ) => {
+    setRoleFilter(role);
+    setCommissionFilter(commission);
+    setActiveFilter("all");
+    setPage(1);
+  };
 
   const totalPages = Math.max(data?.pages ?? 1, 1);
 
@@ -350,22 +369,60 @@ export function UsersList() {
               </select>
             </label>
           )}
+
+          {isSellerFilter && (
+            <label className="usr-select-wrapper">
+              <CheckCircle className="usr-filter-icon" />
+              <select
+                value={commissionFilter}
+                onChange={(event) => {
+                  setCommissionFilter(event.target.value as CommissionFilter);
+                  setPage(1);
+                }}
+                className="usr-select"
+              >
+                <option value="all">ინდ. შეკვეთა: ყველა</option>
+                <option value="with">იღებს ინდ. შეკვეთებს</option>
+                <option value="without">ინდ. შეკვეთის გარეშე</option>
+              </select>
+            </label>
+          )}
         </div>
 
         <div className="usr-summary">
-          <div className="usr-summary-card">
+          <button
+            type="button"
+            className={`usr-summary-card usr-summary-card--clickable ${
+              roleFilter === "all" ? "usr-summary-card--active" : ""
+            }`}
+            onClick={() => applyCardFilter("all")}
+          >
             <span className="usr-summary-label">Total users</span>
             <span className="usr-summary-value">
               {summary.totalUsers.toLocaleString()}
             </span>
-          </div>
-          <div className="usr-summary-card">
+          </button>
+          <button
+            type="button"
+            className={`usr-summary-card usr-summary-card--clickable ${
+              roleFilter === Role.Admin ? "usr-summary-card--active" : ""
+            }`}
+            onClick={() => applyCardFilter(Role.Admin)}
+          >
             <span className="usr-summary-label">Admins</span>
             <span className="usr-summary-value">
               {summary.admin.toLocaleString()}
             </span>
-          </div>
-          <div className="usr-summary-card">
+          </button>
+          <button
+            type="button"
+            className={`usr-summary-card usr-summary-card--clickable ${
+              roleFilter === Role.Seller && commissionFilter === "all"
+                ? "usr-summary-card--active"
+                : ""
+            }`}
+            onClick={() => applyCardFilter(Role.Seller)}
+          >
             <span className="usr-summary-label">Sellers</span>
             <span className="usr-summary-value">
               {summary.seller.toLocaleString()}
@@ -376,8 +433,28 @@ export function UsersList() {
                 </span>
               )}
             </span>
-          </div>
-          <div className="usr-summary-card">
+          </button>
+          <button
+            type="button"
+            className={`usr-summary-card usr-summary-card--clickable ${
+              roleFilter === Role.Seller && commissionFilter === "with"
+                ? "usr-summary-card--active"
+                : ""
+            }`}
+            onClick={() => applyCardFilter(Role.Seller, "with")}
+          >
+            <span className="usr-summary-label">🎨 იღებს ინდ. შეკვეთებს</span>
+            <span className="usr-summary-value">
+              {summary.sellersAcceptingCommissions.toLocaleString()}
+            </span>
+          </button>
+          <button
+            type="button"
+            className={`usr-summary-card usr-summary-card--clickable ${
+              roleFilter === Role.SalesManager ? "usr-summary-card--active" : ""
+            }`}
+            onClick={() => applyCardFilter(Role.SalesManager)}
+          >
             <span className="usr-summary-label">Sales Managers</span>
             <span className="usr-summary-value">
               {summary.salesManager.toLocaleString()}
@@ -386,19 +463,31 @@ export function UsersList() {
                 {summary.inactiveSalesManagers} არააქტიური)
               </span>
             </span>
-          </div>
-          <div className="usr-summary-card">
+          </button>
+          <button
+            type="button"
+            className={`usr-summary-card usr-summary-card--clickable ${
+              roleFilter === Role.Blogger ? "usr-summary-card--active" : ""
+            }`}
+            onClick={() => applyCardFilter(Role.Blogger)}
+          >
             <span className="usr-summary-label">Bloggers</span>
             <span className="usr-summary-value">
               {summary.blogger.toLocaleString()}
             </span>
-          </div>
-          <div className="usr-summary-card">
+          </button>
+          <button
+            type="button"
+            className={`usr-summary-card usr-summary-card--clickable ${
+              roleFilter === Role.User ? "usr-summary-card--active" : ""
+            }`}
+            onClick={() => applyCardFilter(Role.User)}
+          >
             <span className="usr-summary-label">Customers</span>
             <span className="usr-summary-value">
               {summary.user.toLocaleString()}
             </span>
-          </div>
+          </button>
         </div>
 
         {/* Campaign Consent Stats - always visible for admin */}
@@ -515,6 +604,12 @@ export function UsersList() {
               const productCount = sellerStats?.productCount ?? 0;
               const lastProductDate = sellerStats?.lastProductDate;
               const isActive = productCount > 0;
+              const commissionCount =
+                (data as { commissionCounts?: Record<string, number> })
+                  .commissionCounts?.[user._id] ?? 0;
+              const acceptsCommissions = !!(
+                user as { artistOpenForCommissions?: boolean }
+              ).artistOpenForCommissions;
 
               return (
                 <tr className="usr-tr" key={user._id}>
@@ -574,6 +669,19 @@ export function UsersList() {
                           <Package className="usr-icon" />
                           {productCount}
                         </span>
+                        {acceptsCommissions && (
+                          <span
+                            className="usr-product-count"
+                            style={{
+                              marginTop: 4,
+                              background: "#e3f2fd",
+                              color: "#1565c0",
+                            }}
+                            title="იღებს ინდივიდუალურ შეკვეთებს"
+                          >
+                            🎨 იღებს{commissionCount > 0 ? ` (${commissionCount})` : ""}
+                          </span>
+                        )}
                       </td>
                       <td className="usr-td">
                         {lastProductDate ? (

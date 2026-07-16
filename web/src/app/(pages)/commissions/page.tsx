@@ -5,13 +5,11 @@ import Link from "next/link";
 import Image from "next/image";
 import { useLanguage } from "@/hooks/LanguageContext";
 import { useUser } from "@/modules/auth/hooks/use-user";
-import { toast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 import {
   Commission,
   CommissionOfferView,
   COMMISSION_TYPE_LABELS,
-  confirmReceived,
   getCommission,
   getMyCommissions,
 } from "@/modules/commissions/api/commissions-api";
@@ -25,7 +23,6 @@ export default function MyCommissionsPage() {
   const [expanded, setExpanded] = useState<string | null>(null);
   const [offers, setOffers] = useState<CommissionOfferView[]>([]);
   const [loadingOffers, setLoadingOffers] = useState(false);
-  const [confirmingId, setConfirmingId] = useState<string | null>(null);
   const router = useRouter();
 
   const label = (c: Commission) =>
@@ -69,33 +66,6 @@ export default function MyCommissionsPage() {
   // full payment vs. installment), mirroring the auction checkout flow.
   const handleSelect = (commissionId: string, offerId: string) => {
     router.push(`/checkout/commission/${commissionId}?offerId=${offerId}`);
-  };
-
-  const handleConfirmReceived = async (commissionId: string) => {
-    if (
-      !confirm(
-        language === "en"
-          ? "Confirm you received the artwork? The artist will be paid."
-          : "დაადასტურე რომ მიიღე ნამუშევარი? მხატვარს ჩაერიცხება თანხა."
-      )
-    )
-      return;
-    setConfirmingId(commissionId);
-    try {
-      await confirmReceived(commissionId);
-      toast({
-        title: language === "en" ? "Confirmed. Thank you!" : "დადასტურდა. მადლობა!",
-      });
-      await load();
-    } catch (err) {
-      toast({
-        title: language === "en" ? "Error" : "შეცდომა",
-        description: err instanceof Error ? err.message : "",
-        variant: "destructive",
-      });
-    } finally {
-      setConfirmingId(null);
-    }
   };
 
   if (!isLoading && !user) {
@@ -202,21 +172,6 @@ export default function MyCommissionsPage() {
                       )}
                     </div>
                   </div>
-
-                  {c.isPaid && c.status !== "completed" && (
-                    <button
-                      className="commission-submit"
-                      style={{ marginTop: "1rem" }}
-                      disabled={confirmingId === c._id}
-                      onClick={() => handleConfirmReceived(c._id)}
-                    >
-                      {confirmingId === c._id
-                        ? "…"
-                        : language === "en"
-                        ? "✅ Confirm I received it"
-                        : "✅ დავადასტურებ მიღებას"}
-                    </button>
-                  )}
 
                   {canSelect && !c.isPaid && (
                     <button

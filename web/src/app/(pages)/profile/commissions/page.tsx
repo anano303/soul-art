@@ -22,6 +22,9 @@ interface AvailableItem extends Commission {
   isDirect?: boolean;
   deliveryCity?: string;
   deliveryCountry?: string;
+  buyerPaidCount?: number;
+  buyerAbandonedCount?: number;
+  buyerTrust?: "trusted" | "risky" | "new";
   myOffer?: {
     price: number;
     deliveryPrice: number;
@@ -178,6 +181,27 @@ export default function ArtistCommissionsPage() {
                               🎯 {language === "en" ? "Direct to you" : "პირდაპირ შენთვის"}
                             </span>
                           )}
+                          {c.buyerTrust === "trusted" && (
+                            <span className="commission-badge completed">
+                              🟢{" "}
+                              {language === "en"
+                                ? `Reliable buyer (${c.buyerPaidCount} paid)`
+                                : `სანდო მყიდველი (${c.buyerPaidCount} გადახდილი)`}
+                            </span>
+                          )}
+                          {c.buyerTrust === "risky" && (
+                            <span className="commission-badge expired">
+                              🔴{" "}
+                              {language === "en"
+                                ? "Unreliable — didn't pay before"
+                                : "არასანდო — ადრე არ გადაუხდია"}
+                            </span>
+                          )}
+                          {c.buyerTrust === "new" && (
+                            <span className="commission-badge open">
+                              ⚪ {language === "en" ? "New buyer" : "ახალი მყიდველი"}
+                            </span>
+                          )}
                         </div>
                         <div className="offer-meta">
                           <span>📐 {c.size}</span>
@@ -295,6 +319,19 @@ export default function ArtistCommissionsPage() {
                           {language === "en" ? "You were chosen 🎉" : "შენ აგირჩიეს 🎉"}
                         </span>
                       )}
+                      {m.selected &&
+                        (m.isPaid ? (
+                          <span className="commission-badge completed">
+                            ✅ {language === "en" ? "Paid" : "გადახდილია"}
+                          </span>
+                        ) : (
+                          <span className="commission-badge selecting">
+                            ⏳{" "}
+                            {language === "en"
+                              ? "Awaiting payment"
+                              : "გადაუხდელია — ელოდება გადახდას"}
+                          </span>
+                        ))}
                     </div>
                     <div className="offer-meta">
                       <span>📐 {m.size}</span>

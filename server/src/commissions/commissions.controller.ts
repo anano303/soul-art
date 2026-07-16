@@ -137,20 +137,9 @@ export class CommissionsController {
     return this.service.selectOffer(id, user, dto.offerId);
   }
 
-  // Buyer confirms they received the artwork → releases escrow to the artist.
-  @Put(':id/confirm-received')
-  @UseGuards(JwtAuthGuard)
-  confirmReceived(
-    @Param('id') id: string,
-    @CurrentUser() user: UserDocument,
-  ) {
-    return this.service.complete(id, {
-      userId: user._id.toString(),
-      isAdmin: user.role === Role.Admin,
-    });
-  }
-
   // Admin marks the commission completed → releases escrow to the artist.
+  // (Primary path is the standard "mark delivered" action on the orders page,
+  // which credits the artist via BalanceService — same as product orders.)
   @Put(':id/complete')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.Admin)

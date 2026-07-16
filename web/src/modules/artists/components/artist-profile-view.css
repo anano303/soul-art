@@ -30,7 +30,7 @@
   border-radius: 0;
 }
 
-@media (min-width: 769px) {
+@media (min-width: 900px) {
   .artist-hero {
     margin-top: 0;
     padding-top: 0;
@@ -2280,5 +2280,76 @@
 
   .artist-campaign-consent__option-desc {
     font-size: 0.75rem;
+  }
+}
+
+/* ── "Order custom artwork" CTA (artist hero) ─────────────────────────
+   Same look as the home-page commission banner button (.btn-commission-cta),
+   just smaller/compact. High-specificity selector + !important so nothing in
+   the hero's link styling can flatten it back into plain text.
+   (v2 — re-saved so the dev-server file watcher picks the block up) */
+.artist-hero__commission-row {
+  display: flex;
+  width: 100%;
+  margin-top: 0.85rem;
+}
+
+a.artist-commission-btn,
+.artist-commission-btn {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  padding: 0.6rem 1.5rem !important;
+  border-radius: 100px !important;
+  background: linear-gradient(
+    180deg,
+    #fdf6c9,
+    #e7c75a 22%,
+    #bb9326 55%,
+    #8f6e18
+  ) !important;
+  color: #2a2208 !important;
+  font-weight: 800 !important;
+  font-size: 0.88rem;
+  line-height: 1.2;
+  text-decoration: none !important;
+  text-align: center;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 6px 18px rgba(187, 147, 38, 0.35);
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
+  max-width: 100%;
+  white-space: nowrap;
+}
+
+a.artist-commission-btn:hover,
+.artist-commission-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 26px rgba(187, 147, 38, 0.5);
+  color: #2a2208 !important;
+}
+
+@media (max-width: 900px) {
+  
+  a.artist-commission-btn,
+  .artist-commission-btn {
+    font-size: 0.84rem;
+    padding: 0.55rem 1.25rem !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .artist-hero__commission-row {
+    margin-top: 0.6rem;
+  }
+  a.artist-commission-btn,
+  .artist-commission-btn {
+    width: 100%;
+    white-space: normal;
+    font-size: 0.85rem;
+    padding: 0.6rem 1rem !important;
   }
 }

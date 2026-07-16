@@ -48,6 +48,7 @@ export default function EditUserPage() {
         name: user.name,
         email: user.email,
         role: user.role,
+        phoneNumber: user.phoneNumber,
         ...(password && { password }),
       };
 
@@ -59,6 +60,14 @@ export default function EditUserPage() {
         updateData.phoneNumber = user.phoneNumber;
         updateData.identificationNumber = user.identificationNumber;
         updateData.accountNumber = user.accountNumber;
+        // Facebook გვერდის ლინკი (artistSocials-ში ინახება)
+        updateData.artistSocials = {
+          ...((user as { artistSocials?: Record<string, string> })
+            .artistSocials || {}),
+          facebook:
+            (user as { artistSocials?: { facebook?: string } }).artistSocials
+              ?.facebook || "",
+        };
       }
 
       // Sales Manager-ის საბანკო ველები და საკომისიო
@@ -97,7 +106,6 @@ export default function EditUserPage() {
 
   const isSeller = user.role === Role.Seller;
   const isSalesManager = user.role === Role.SalesManager;
-  const showBankDetails = isSeller || isSalesManager;
 
   return (
     <div className="edit-user-container">
@@ -129,6 +137,18 @@ export default function EditUserPage() {
               type="email"
               value={user.email}
               onChange={(e) => setUser({ ...user, email: e.target.value })}
+            />
+          </div>
+
+          <div className="form-group">
+            <label>საკონტაქტო ტელეფონი</label>
+            <input
+              type="tel"
+              value={user.phoneNumber || ""}
+              placeholder="+995 5XX XXX XXX"
+              onChange={(e) =>
+                setUser({ ...user, phoneNumber: e.target.value })
+              }
             />
           </div>
 
@@ -224,6 +244,45 @@ export default function EditUserPage() {
                     setUser({ ...user, accountNumber: e.target.value })
                   }
                 />
+              </div>
+            </div>
+
+            <div className="form-row">
+              <div className="form-group">
+                <label>Facebook გვერდი</label>
+                <input
+                  type="url"
+                  value={
+                    (user as { artistSocials?: { facebook?: string } })
+                      .artistSocials?.facebook || ""
+                  }
+                  placeholder="https://facebook.com/..."
+                  onChange={(e) =>
+                    setUser({
+                      ...user,
+                      artistSocials: {
+                        ...((user as { artistSocials?: Record<string, string> })
+                          .artistSocials || {}),
+                        facebook: e.target.value,
+                      },
+                    } as typeof user)
+                  }
+                />
+                {(user as { artistSocials?: { facebook?: string } })
+                  .artistSocials?.facebook && (
+                  <a
+                    href={
+                      (user as { artistSocials?: { facebook?: string } })
+                        .artistSocials?.facebook
+                    }
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="seller-page-link"
+                  >
+                    <span className="link-icon">🔗</span> გახსნა
+                    <span className="external-icon">↗</span>
+                  </a>
+                )}
               </div>
             </div>
 

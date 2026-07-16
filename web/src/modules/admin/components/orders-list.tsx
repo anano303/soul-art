@@ -124,7 +124,18 @@ export function OrdersList({
     );
   }
 
-  const orders = data?.items || [];
+  const allOrders = data?.items || [];
+  // Sellers get ALL their orders from the backend in one list, so filter by the
+  // active tab client-side. Admin is already filtered server-side by orderType.
+  const orders =
+    userRole === "seller"
+      ? allOrders.filter((o: Order) => {
+          if (orderTypeTab === "auction") return o.orderType === "auction";
+          if (orderTypeTab === "commission")
+            return o.orderType === "commission";
+          return o.orderType !== "auction" && o.orderType !== "commission";
+        })
+      : allOrders;
   const totalPages = data?.pages || 0;
 
   // შეკვეთის თანხის გამოსათვლელად სელერისა და აუქციონ ადმინისთვის
@@ -152,8 +163,10 @@ export function OrdersList({
       <div className="orders-header">
         <div className="orders-header-left">
           <h1 className="orders-title">Orders</h1>
-          {/* Order type tabs - only show for admin, not for auction_admin or sales manager */}
-          {!auctionAdminMode && !salesManagerMode && userRole === "admin" && (
+          {/* Order type tabs - for admin AND sellers (their own orders), not for auction_admin or sales manager */}
+          {!auctionAdminMode &&
+            !salesManagerMode &&
+            (userRole === "admin" || userRole === "seller") && (
             <div className="orders-tabs">
               <button
                 className={`orders-tab ${orderTypeTab === "regular" ? "active" : ""}`}

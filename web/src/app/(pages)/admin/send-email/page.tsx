@@ -33,7 +33,11 @@ interface Recipient {
   brandName?: string;
   salesRefCode?: string;
   isActive?: boolean;
+  acceptsCommissions?: boolean;
+  commissionCount?: number;
 }
+
+type CommissionFilter = "all" | "with" | "without";
 
 interface SendResult {
   success: boolean;
@@ -82,6 +86,8 @@ export default function SendEmailPage() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [searchQuery, setSearchQuery] = useState("");
   const [activeFilter, setActiveFilter] = useState<ActiveFilter>("all");
+  const [commissionFilter, setCommissionFilter] =
+    useState<CommissionFilter>("all");
 
   const config = recipientConfig[recipientType];
   const Icon = config.icon;
@@ -98,18 +104,25 @@ export default function SendEmailPage() {
     setSearchQuery("");
     setResult(null);
     setActiveFilter("all");
+    setCommissionFilter("all");
   }, [recipientType]);
 
   // Fetch recipients
   const { data: recipients = [], isLoading: recipientsLoading } = useQuery<
     Recipient[]
   >({
-    queryKey: ["admin", "recipients-for-email", recipientType, activeFilter],
+    queryKey: [
+      "admin",
+      "recipients-for-email",
+      recipientType,
+      activeFilter,
+      commissionFilter,
+    ],
     queryFn: async () => {
       let url = config.fetchUrl;
-      // Add activeFilter only for sellers
+      // Add filters only for sellers
       if (recipientType === "sellers") {
-        url = `${config.fetchUrl}?activeFilter=${activeFilter}`;
+        url = `${config.fetchUrl}?activeFilter=${activeFilter}&commissionFilter=${commissionFilter}`;
       }
       const res = await fetchWithAuth(url);
       if (!res.ok) throw new Error("Failed to fetch recipients");
@@ -168,6 +181,12 @@ export default function SendEmailPage() {
         message: data.message,
         [config.idField]: Array.from(selectedIds),
       };
+
+      // Sellers endpoint supports notification modes — this page's job is to
+      // actually SEND the email (plus in-app notification).
+      if (recipientType === "sellers") {
+        body.notificationMode = "both";
+      }
 
       const res = await fetchWithAuth(config.sendUrl, {
         method: "POST",
@@ -319,6 +338,17 @@ export default function SendEmailPage() {
                 <option value="active">აქტიური (პროდუქტი აქვს)</option>
                 <option value="inactive">არააქტიური (პროდუქტი არ აქვს)</option>
               </select>
+              <select
+                value={commissionFilter}
+                onChange={(e) =>
+                  setCommissionFilter(e.target.value as CommissionFilter)
+                }
+                className="filter-select"
+              >
+                <option value="all">ინდ. შეკვეთა: ყველა</option>
+                <option value="with">იღებს ინდ. შეკვეთებს</option>
+                <option value="without">ინდ. შეკვეთის გარეშე</option>
+              </select>
             </div>
           )}
 
@@ -369,6 +399,21 @@ export default function SendEmailPage() {
                         {recipient.salesRefCode}
                       </span>
                     )}
+                    {recipientType === "sellers" &&
+                      recipient.acceptsCommissions && (
+                        <span
+                          className="recipient-refcode"
+                          style={{
+                            background: "#e3f2fd",
+                            color: "#1565c0",
+                          }}
+                        >
+                          🎨 იღებს ინდ. შეკვეთებს
+                          {(recipient.commissionCount ?? 0) > 0
+                            ? ` (${recipient.commissionCount})`
+                            : ""}
+                        </span>
+                      )}
                   </div>
                 </div>
               ))

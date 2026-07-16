@@ -1098,33 +1098,26 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
                     onFollowChange={handleFollowChange}
                   />
                 )}
-                {!isOwner && Boolean(artist.artistOpenForCommissions) && (
+              </div>
+
+              {/* Commission CTA — own row so it never breaks the stats layout */}
+              {!isOwner && Boolean(artist.artistOpenForCommissions) && (
+                <div className="artist-hero__commission-row">
                   <Link
                     href={`/commissions/new?artist=${artist.id}&artistName=${encodeURIComponent(
                       artist.storeName || artist.name || ""
                     )}`}
-                    style={{
-                      display: "inline-flex",
-                      alignItems: "center",
-                      gap: "6px",
-                      padding: "0.6rem 1.4rem",
-                      borderRadius: "100px",
-                      background:
-                        "linear-gradient(180deg,#fdf6c9,#e7c75a 22%,#bb9326 55%,#8f6e18)",
-                      color: "#2a2208",
-                      fontWeight: 800,
-                      fontSize: "0.9rem",
-                      textDecoration: "none",
-                      boxShadow: "0 6px 18px rgba(187,147,38,0.35)",
-                    }}
+                    className="artist-commission-btn"
                   >
-                    🎨{" "}
-                    {language === "en"
-                      ? "Order custom artwork"
-                      : "ინდივიდუალური შეკვეთა"}
+                    <span aria-hidden="true">🎨</span>
+                    <span>
+                      {language === "en"
+                        ? "Order custom artwork"
+                        : "ინდივიდუალური შეკვეთა"}
+                    </span>
                   </Link>
-                )}
-              </div>
+                </div>
+              )}
             </div>
           </div>
 

@@ -16,6 +16,10 @@ import {
 import { Product, ProductSchema } from '../products/schemas/product.schema';
 import { Order, OrderSchema } from '../orders/schemas/order.schema';
 import {
+  Commission,
+  CommissionSchema,
+} from '../commissions/schemas/commission.schema';
+import {
   SellerBalance,
   SellerBalanceSchema,
 } from './schemas/seller-balance.schema';
@@ -78,6 +82,10 @@ import { SettingsModule } from '@/settings/settings.module';
       {
         name: Order.name,
         schema: OrderSchema,
+      },
+      {
+        name: Commission.name,
+        schema: CommissionSchema,
       },
       {
         name: SellerBalance.name,

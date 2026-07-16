@@ -1045,3 +1045,26 @@
     font-size: 0.7rem;
   }
 }
+
+/* ── Clickable summary cards (act as quick filters) ── */
+button.usr-summary-card {
+  font: inherit;
+  text-align: left;
+}
+
+.usr-summary-card--clickable {
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: border-color 0.15s ease, transform 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.usr-summary-card--clickable:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(1, 38, 69, 0.12);
+}
+
+.usr-summary-card--active {
+  border-color: #012645;
+  box-shadow: 0 6px 16px rgba(1, 38, 69, 0.15);
+}
