@@ -9,7 +9,7 @@ import { AuthProvider } from "@/components/auth-provider";
 import { LanguageProvider } from "@/hooks/LanguageContext";
 import { ThemeProvider } from "@/hooks/ThemeContext";
 import Header from "@/components/header/header";
-import { GLOBAL_KEYWORDS } from "@/lib/seo-keywords";
+import { HOME_KEYWORDS } from "@/lib/seo-keywords";
 
 const PRIMARY_COLOR = "#012645";
 
@@ -78,7 +78,7 @@ export const metadata: Metadata = {
     "Soulart - ნახატების და ხელნაკეთი ნივთების პირველი ონლაინ პლატფორმა   საქართველოში",
   description:
     "უნიკალური ხელნაკეთი ნივთები, ნახატები, ხელოვნების ნამუშევრები. ხარისხი, სანდოობა, ფასი. Unique handmade items, paintings, artworks in Georgia",
-  keywords: GLOBAL_KEYWORDS.slice(0, 200),
+  keywords: HOME_KEYWORDS,
     authors: [{ name: "Soulart" }],
     creator: "Soulart",
     publisher: "Soulart",

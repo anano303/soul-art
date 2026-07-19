@@ -8,6 +8,7 @@ import {
   sanitizeKeyword,
 } from "@/lib/seo-keywords";
 import { buildAlternates, resolveLocale } from "@/lib/hreflang";
+import { buildArtistJsonLd } from "@/lib/structured-data";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/v1";
 const SITE_BASE = process.env.NEXT_PUBLIC_CLIENT_URL || "https://soulart.ge";
@@ -270,12 +271,30 @@ export default async function ArtistPage({ params }: ArtistPageProps) {
   } else if (slug.includes("%40")) {
     startIndex = slug.indexOf("%40") + 3;
   }
-  const data = await fetchArtistProfile(
-    slug.toLowerCase().substring(startIndex),
-  );
+  const cleanSlug = slug.toLowerCase().substring(startIndex);
+  const data = await fetchArtistProfile(cleanSlug);
+
+  // schema.org Person/Organization structured data (crawler-facing, no UI).
+  const artist = data?.artist;
+  const artistJsonLd = artist
+    ? buildArtistJsonLd({
+        name: artist.storeName || artist.name,
+        url: buildAbsoluteUrl(`/@${cleanSlug}`),
+        image: artist.storeLogo || artist.artistCoverImage || undefined,
+        description: resolveBiographyText(artist.artistBio) || undefined,
+        // A named store reads as an Organization/brand; otherwise a Person.
+        isStore: Boolean(artist.storeName),
+      })
+    : null;
 
   return (
     <main className="Container">
+      {artistJsonLd && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(artistJsonLd) }}
+        />
+      )}
       <ArtistProfileView data={data} />
     </main>
   );

@@ -5,6 +5,7 @@ import ProductPromoToast from "./ProductPromoToast";
 import { getProduct } from "@/lib/get-product";
 import { collectProductKeywords, mergeKeywordSets } from "@/lib/seo-keywords";
 import { isInStock } from "@/lib/stock";
+import { buildProductJsonLd } from "@/lib/structured-data";
 import { buildAlternates, resolveLocale } from "@/lib/hreflang";
 import { extractProductId, productHref } from "@/lib/product-slug";
 
@@ -200,8 +201,28 @@ export default async function ProductPage({
     notFound();
   }
 
+  // schema.org/Product structured data (crawler-facing; no UI impact).
+  const effectivePrice =
+    product.discountedPrice && product.discountedPrice < product.price
+      ? product.discountedPrice
+      : product.price;
+  const productJsonLd = buildProductJsonLd({
+    name: product.name,
+    description: product.description,
+    images: product.images,
+    sku: product._id,
+    brand: product.brand,
+    price: effectivePrice,
+    inStock: isInStock(product),
+    url: `https://soulart.ge${productHref(product)}`,
+  });
+
   return (
     <div className="Container">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd) }}
+      />
       <ProductPromoToast />
       <ProductDetails product={product} />
     </div>

@@ -32,6 +32,24 @@ export const BASE_KEYWORDS: string[] = [
   "gallery",
 ];
 
+/**
+ * Homepage keywords — a short, scoped set (brand + top categories only).
+ * Deliberately NOT the full GLOBAL_KEYWORDS list (that reads as keyword
+ * stuffing). Mirrors the scoped approach used on /shop and /@username.
+ */
+export const HOME_KEYWORDS: string[] = [
+  "Soulart",
+  "soulart.ge",
+  "ნახატები",
+  "ხელნაკეთი ნივთები",
+  "ქართული ხელოვნება",
+  "ხელოვნების ონლაინ მაღაზია",
+  "handmade items",
+  "paintings",
+  "Georgian art marketplace",
+  "art marketplace Georgia",
+];
+
 export const ADDITIONAL_KEYWORDS: string[] = [
   "ნახატები",
   "ქართველი მხატვრების ნახატები",

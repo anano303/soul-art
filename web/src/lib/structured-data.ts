@@ -66,3 +66,63 @@ export const storeSchema = {
   openingHours: "Mo-Su 09:00-18:00", // შეცვალეთ რეალური საათებით
   priceRange: "$$",
 };
+
+/**
+ * schema.org/Product JSON-LD for a product detail page. Only emits fields that
+ * are actually populated (no empty strings/nulls). Availability maps to the
+ * real stock status.
+ */
+export function buildProductJsonLd(input: {
+  name: string;
+  description?: string | null;
+  images?: string[] | null;
+  sku?: string | null;
+  brand?: string | null;
+  price: number;
+  inStock: boolean;
+  url: string;
+}) {
+  const images = (input.images || []).filter(Boolean);
+  const schema: Record<string, unknown> = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: input.name,
+    offers: {
+      "@type": "Offer",
+      url: input.url,
+      priceCurrency: "GEL",
+      price: input.price,
+      availability: input.inStock
+        ? "https://schema.org/InStock"
+        : "https://schema.org/OutOfStock",
+      itemCondition: "https://schema.org/NewCondition",
+    },
+  };
+  if (images.length) schema.image = images;
+  if (input.description) schema.description = input.description;
+  if (input.sku) schema.sku = input.sku;
+  if (input.brand) schema.brand = { "@type": "Brand", name: input.brand };
+  return schema;
+}
+
+/**
+ * schema.org/Person (individual artist) or /Organization (store/brand) JSON-LD
+ * for an /@username profile page. Only emits populated fields.
+ */
+export function buildArtistJsonLd(input: {
+  name: string;
+  url: string;
+  image?: string | null;
+  description?: string | null;
+  isStore?: boolean;
+}) {
+  const schema: Record<string, unknown> = {
+    "@context": "https://schema.org",
+    "@type": input.isStore ? "Organization" : "Person",
+    name: input.name,
+    url: input.url,
+  };
+  if (input.image) schema.image = input.image;
+  if (input.description) schema.description = input.description;
+  return schema;
+}
