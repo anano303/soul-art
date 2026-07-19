@@ -92,14 +92,18 @@
   display: inline-block;
   padding: 14px 32px;
   margin-top: 20px;
-  background: linear-gradient(to left, var(--primary-color), #1b055b);
-  color: white;
-  font-weight: 600;
+  background: linear-gradient(
+    180deg,
+    var(--color-accent-light, #e9c66a),
+    var(--color-accent, #bb9326)
+  );
+  color: #2a2208;
+  font-weight: 700;
   text-decoration: none;
   transition: all 0.3s ease;
   border: none;
   cursor: pointer;
-  box-shadow: 0 4px 15px rgba(1, 38, 69, 0.3);
+  box-shadow: 0 6px 18px rgba(187, 147, 38, 0.35);
   animation: fadeInUp 0.8s ease-out 0.3s forwards;
   opacity: 0;
   position: relative;
@@ -108,8 +112,8 @@
 
 .banner-cta-btn:hover {
   transform: translateY(-3px);
-  box-shadow: 0 7px 20px rgba(1, 38, 69, 0.4);
-  background: linear-gradient(135deg, #01456b 0%, var(--primary-color) 100%);
+  box-shadow: 0 10px 26px rgba(187, 147, 38, 0.45);
+  background: linear-gradient(180deg, #f0d894 0%, var(--color-accent, #bb9326) 100%);
 }
 
 .banner-cta-btn:before {

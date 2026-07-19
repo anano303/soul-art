@@ -29,19 +29,26 @@
 
 .banner-cta-btn {
   display: inline-block;
-  background-color: var(--primary-color, #3498db);
-  color: white;
-  padding: 0.75rem 1.5rem;
-  font-weight: bold;
+  background: linear-gradient(
+    180deg,
+    var(--color-accent-light, #e9c66a),
+    var(--color-accent, #bb9326)
+  );
+  color: #2a2208;
+  padding: 0.85rem 2rem;
+  border-radius: 100px;
+  font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 1px;
-  transition: background-color 0.3s, transform 0.2s;
+  transition: background 0.3s, transform 0.2s, box-shadow 0.2s;
   text-decoration: none;
+  box-shadow: 0 6px 18px rgba(187, 147, 38, 0.35);
 }
 
 .banner-cta-btn:hover {
-  background-color: var(--primary-color-dark, #2980b9);
+  background: linear-gradient(180deg, #f0d894, var(--color-accent, #bb9326));
   transform: translateY(-2px);
+  box-shadow: 0 10px 26px rgba(187, 147, 38, 0.45);
 }
 
 .btn-text {

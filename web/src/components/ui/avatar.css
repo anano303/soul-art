@@ -1,0 +1,21 @@
+.sa-avatar {
+  border-radius: 50%;
+  flex-shrink: 0;
+  object-fit: cover;
+  display: inline-flex;
+  overflow: hidden;
+}
+
+.sa-avatar--img {
+  object-fit: cover;
+}
+
+.sa-avatar--initials {
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  user-select: none;
+  text-transform: uppercase;
+}

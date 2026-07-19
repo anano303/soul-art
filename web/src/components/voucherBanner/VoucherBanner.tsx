@@ -1,7 +1,8 @@
 "use client";
-import Link from "next/link";
+import { Ticket } from "lucide-react";
 import { useLanguage } from "@/hooks/LanguageContext";
 import { useCurrency } from "@/hooks/use-currency";
+import { Button } from "@/components/ui/button";
 import "./voucher-banner.css";
 
 function Dreamcatcher() {
@@ -73,7 +74,8 @@ export default function VoucherBanner() {
       <div className="voucher-banner-inner Container">
         <div className="voucher-banner-text">
           <span className="voucher-banner-tag">
-            🎟 {language === "en" ? "Gift Vouchers" : "საჩუქრის ვაუჩერები"}
+            <Ticket size={15} strokeWidth={2} aria-hidden="true" />
+            {language === "en" ? "Gift Vouchers" : "საჩუქრის ვაუჩერები"}
           </span>
           <h2 className="voucher-banner-title">
             {language === "en"
@@ -92,9 +94,9 @@ export default function VoucherBanner() {
               </span>
             ))}
           </div>
-          <Link href="/vouchers" className="btn-voucher-cta">
+          <Button href="/vouchers" variant="primary" size="lg">
             {language === "en" ? "Buy Voucher" : "შეიძინე ვაუჩერი"}
-          </Link>
+          </Button>
         </div>
 
         <div className="voucher-banner-cards" aria-hidden="true">

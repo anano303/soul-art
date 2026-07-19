@@ -37,6 +37,18 @@ const config = {
           blue: "#012645",
           gold: "#E8A317",
         },
+        // Unified brand palette (mirrors the CSS custom properties in
+        // globals.css :root). Use these for Tailwind utilities.
+        brand: {
+          navy: "#012645",
+          "navy-dark": "#011a30",
+          "navy-light": "#023a63",
+          gold: "#bb9326",
+          "gold-light": "#e7c75a",
+          "gold-dark": "#8f6e18",
+          cream: "#fdfaf6",
+          "cream-warm": "#f8f3eb",
+        },
       },
       fontFamily: {
         firago: [

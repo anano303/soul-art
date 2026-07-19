@@ -358,7 +358,7 @@ header {
         }
 
         &:hover {
-          color: #e0d849;
+          color: #e9c66a;
         }
 
         &::after {
@@ -368,7 +368,7 @@ header {
           left: 0;
           width: 0;
           height: 2px;
-          background-color: #e0d849;
+          background-color: #e9c66a;
           transition: width 0.3s ease;
         }
 
@@ -401,7 +401,7 @@ header {
         transform 0.2s ease;
 
       &:hover {
-        color: #e0d849;
+        color: #e9c66a;
       }
     }
 
@@ -448,7 +448,7 @@ header {
 
         &:hover {
           background: rgba(255, 255, 255, 0.1); /* Subtle hover background */
-          color: #e0d849; /* Change text color on hover to match other links */
+          color: #e9c66a; /* Change text color on hover to match other links */
         }
       }
     }

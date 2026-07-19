@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import Image from "next/image";
-import { StarIcon, X, Truck, Ruler, Package, Play } from "lucide-react";
+import { StarIcon, X, Truck, Ruler, Package, Play, Sparkles } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { productHref } from "@/lib/product-slug";
@@ -866,7 +866,7 @@ export function ProductDetails({ product }: ProductDetailsProps) {
                 {isDigitalCategory && categoryLabel && (
                   <div className="digital-category-badge detail-view">
                     <span className="digital-category-icon" aria-hidden="true">
-                      ✨
+                      <Sparkles size={14} strokeWidth={2} />
                     </span>
                     <span className="digital-category-text">
                       {categoryLabel}

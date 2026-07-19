@@ -4,6 +4,8 @@ import { useState, useEffect } from "react";
 import { useLanguage } from "@/hooks/LanguageContext";
 import "./ForumPost.css";
 import Image from "next/image";
+import { Star, MessageCircle } from "lucide-react";
+import { Avatar } from "@/components/ui/avatar";
 import Link from "next/link";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "@/hooks/use-toast";
@@ -694,25 +696,11 @@ const ForumPost = ({
         style={{ marginLeft: `${level * 20}px` }}
       >
         <div className="comment-header">
-          <Image
-            src={comment.author.profileImage || "/avatar.jpg"}
-            alt={comment.author.name}
-            width={25}
-            height={25}
+          <Avatar
+            src={comment.author.profileImage}
+            name={comment.author.name}
+            size={25}
             className="comment-avatar"
-            unoptimized
-            key={`comment-author-${comment.author._id}-${new Date().getTime()}`}
-            onError={(e) => {
-              console.warn(
-                "Failed to load comment author image:",
-                comment.author.profileImage,
-              );
-              // Fallback to default avatar
-              const imgElement = e.currentTarget as HTMLImageElement;
-              if (imgElement && imgElement.isConnected) {
-                imgElement.src = "/avatar.jpg";
-              }
-            }}
           />
           <span className="comment-author">{comment.author.name}</span>
         </div>
@@ -756,8 +744,12 @@ const ForumPost = ({
                     }
                   >
                     <span>{commentLikeCount}</span>
-                    <span className="art-like-icon">
-                      {isCommentLiked ? "💫" : "⭐"}
+                    <span
+                      className={`art-like-icon ${
+                        isCommentLiked ? "liked" : ""
+                      }`}
+                    >
+                      <Star size={18} fill="currentColor" strokeWidth={1.5} />
                     </span>
                   </button>
                 </>
@@ -812,61 +804,22 @@ const ForumPost = ({
     <div className="forum-post">
       <Image
         src={
-          optimizeCloudinaryUrl(image, { width: 200, quality: "auto:eco" }) ||
+          optimizeCloudinaryUrl(image, { width: 240, quality: "auto:good" }) ||
           image
         }
         alt="post image"
         width={80}
         height={80}
+        quality={90}
         className="forum-post-image"
       />
       <div className="forum-post-content">
         <div className="forum-post-author">
-          <Image
-            src={author.profileImage || "/avatar.jpg"}
-            alt={`${author.name}'s avatar`}
-            width={30}
-            height={30}
+          <Avatar
+            src={author.profileImage}
+            name={author.name}
+            size={30}
             className="forum-post-avatar"
-            unoptimized
-            key={`author-${author._id}-${new Date().getTime()}`}
-            onError={(e) => {
-              console.warn(
-                "Failed to load forum author image:",
-                author.profileImage,
-              );
-              // Retry with cache busting
-              const imgElement = e.currentTarget as HTMLImageElement;
-
-              // Check if element still exists in DOM
-              if (!imgElement || !imgElement.isConnected) {
-                return;
-              }
-
-              // Function to clean S3 URLs
-              const cleanS3Url = (url: string): string => {
-                if (url && url.includes("amazonaws.com") && url.includes("?")) {
-                  return url.split("?")[0];
-                }
-                return url;
-              };
-
-              if (author.profileImage) {
-                if (author.profileImage.includes("amazonaws.com")) {
-                  // Clean up S3 URLs
-                  const cleanedUrl = cleanS3Url(author.profileImage);
-                  imgElement.src = `${cleanedUrl}?retry=${new Date().getTime()}`;
-                } else {
-                  // Add cache busting for other URLs
-                  imgElement.src = `${author.profileImage}${
-                    author.profileImage.includes("?") ? "&" : "?"
-                  }retry=${new Date().getTime()}`;
-                }
-              } else {
-                // Use default avatar if all else fails
-                imgElement.src = "/avatar.jpg";
-              }
-            }}
           />
           <span className="forum-post-author-name">{author.name}</span>
           {isAuthorized && canModifyPost && (
@@ -993,7 +946,8 @@ const ForumPost = ({
             className="forum-post-comments"
             onClick={() => setShowComments(!showComments)}
           >
-            💬 {comments.length}
+            <MessageCircle size={17} strokeWidth={2} />
+            {comments.length}
           </span>
           <button
             className={`forum-post-favorite ${userLiked ? "favorited" : ""}`}

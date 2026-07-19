@@ -24,6 +24,8 @@ export function ReferralCodeInput({
   >("idle");
   const [message, setMessage] = useState("");
   const [hasActiveCode, setHasActiveCode] = useState(false);
+  const [dismissed, setDismissed] = useState(false);
+  const [isScrolling, setIsScrolling] = useState(false);
 
   // Only show on main page, shop page, and cart page
   const allowedPaths = ["/", "/shop", "/cart"];
@@ -31,6 +33,37 @@ export function ReferralCodeInput({
     (path) =>
       pathname === path || (path !== "/" && pathname?.startsWith(path + "?")),
   );
+
+  // Remember if the user dismissed the floating promo pill (per browser).
+  useEffect(() => {
+    if (localStorage.getItem("promoBadgeDismissed") === "1") {
+      setDismissed(true);
+    }
+  }, []);
+
+  const dismissPromo = useCallback(() => {
+    setDismissed(true);
+    try {
+      localStorage.setItem("promoBadgeDismissed", "1");
+    } catch {
+      // ignore
+    }
+  }, []);
+
+  // Shrink + fade the floating pill while scrolling (same as chat/cart).
+  useEffect(() => {
+    let timer: ReturnType<typeof setTimeout>;
+    const onScroll = () => {
+      setIsScrolling(true);
+      clearTimeout(timer);
+      timer = setTimeout(() => setIsScrolling(false), 700);
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      clearTimeout(timer);
+    };
+  }, []);
 
   // Check if user already has a referral code
   useEffect(() => {
@@ -144,13 +177,18 @@ export function ReferralCodeInput({
     return null;
   }
 
+  // If the floating pill was dismissed, hide it (unless a code is active).
+  if (dismissed && variant === "floating" && !hasActiveCode) {
+    return null;
+  }
+
   // Don't show if user already has active code (unless they want to change it)
   if (hasActiveCode && !isOpen) {
     return (
       <div
         className={`ref-code-active ${
           variant === "floating" ? "ref-code-floating" : ""
-        }`}
+        } ${variant === "floating" && isScrolling ? "scrolling" : ""}`}
       >
         <Gift size={14} />
         <span>{language === "en" ? "Promo active" : "პრომო აქტიურია"}</span>
@@ -170,21 +208,33 @@ export function ReferralCodeInput({
       <div
         className={`ref-code-container ${
           variant === "floating" ? "ref-code-floating" : ""
-        }`}
+        } ${variant === "floating" && isScrolling ? "scrolling" : ""}`}
       >
         {!isOpen ? (
-          <button
-            onClick={() => setIsOpen(true)}
-            className="ref-code-trigger"
-            title={
-              language === "en" ? "Enter promo code" : "შეიყვანეთ პრომო კოდი"
-            }
-          >
-            <Gift size={16} />
-            <span className="ref-code-trigger-text">
-              {language === "en" ? "Promo code" : "პრომო კოდი"}
-            </span>
-          </button>
+          <>
+            <button
+              onClick={() => setIsOpen(true)}
+              className="ref-code-trigger"
+              title={
+                language === "en" ? "Enter promo code" : "შეიყვანეთ პრომო კოდი"
+              }
+            >
+              <Gift size={16} />
+              <span className="ref-code-trigger-text">
+                {language === "en" ? "Promo code" : "პრომო კოდი"}
+              </span>
+            </button>
+            {variant === "floating" && (
+              <button
+                onClick={dismissPromo}
+                className="ref-code-dismiss"
+                title={language === "en" ? "Hide" : "დამალვა"}
+                aria-label={language === "en" ? "Hide promo code" : "დამალვა"}
+              >
+                <X size={12} />
+              </button>
+            )}
+          </>
         ) : (
           <div className="ref-code-input-wrapper">
             <input

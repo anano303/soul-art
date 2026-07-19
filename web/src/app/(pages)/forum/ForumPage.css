@@ -1,5 +1,17 @@
 .forum-page {
-  padding: 5%;
+  padding: 2.5rem 5% 4rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 1; /* keep the feed above the decorative gutter ornaments */
+}
+
+/* Clear the floating chat/cart bubbles on mobile so they never cover the last
+   post's text. Bubble sits ~75px from bottom + ~56px tall. */
+@media (max-width: 768px) {
+  .forum-page {
+    padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px));
+  }
 }
 
 .forum-header {

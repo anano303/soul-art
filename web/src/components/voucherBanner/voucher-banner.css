@@ -3,10 +3,15 @@
   background:
     radial-gradient(
       120% 120% at 80% 20%,
-      rgba(90, 70, 30, 0.35) 0%,
+      var(--color-accent-50, rgba(187, 147, 38, 0.28)) 0%,
       transparent 55%
     ),
-    linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+    linear-gradient(
+      135deg,
+      var(--color-primary-dark, #011a30) 0%,
+      var(--color-primary, #012645) 50%,
+      var(--color-primary-light, #023a63) 100%
+    );
   overflow: hidden;
 }
 
@@ -28,7 +33,9 @@
 }
 
 .voucher-banner-tag {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
   background: rgba(255, 255, 255, 0.15);
   border: 1px solid rgba(255, 255, 255, 0.25);
   border-radius: 100px;
@@ -143,7 +150,7 @@
 }
 
 .vbc-emerald {
-  background: linear-gradient(135deg, #1c4a3a 0%, #0c241c 100%);
+  background: linear-gradient(135deg, #024a78 0%, #012645 100%);
   transform: rotate(9deg);
   margin-left: -60px;
   z-index: 1;

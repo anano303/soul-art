@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { productHref } from "@/lib/product-slug";
+import { Avatar } from "@/components/ui/avatar";
 import Image from "next/image";
 import {
   useMemo,
@@ -929,11 +930,11 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
                   className="artist-hero__avatar-img"
                 />
               ) : (
-                <div className="artist-hero__avatar-placeholder">
-                  {(artist.storeName || artist.name || "?")
-                    .charAt(0)
-                    .toUpperCase()}
-                </div>
+                <Avatar
+                  name={artist.storeName || artist.name}
+                  size={150}
+                  className="artist-hero__avatar-img"
+                />
               )}
               {/* Avatar Edit Button - Facebook style with direct upload */}
               {isOwner && (

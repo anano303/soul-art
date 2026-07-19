@@ -41,7 +41,9 @@
 }
 
 .gb-badge {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
   background: rgba(233, 198, 106, 0.16);
   border: 1px solid rgba(233, 198, 106, 0.55);
   color: #f0d894;

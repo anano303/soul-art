@@ -1,7 +1,7 @@
 /* Popular Artists Section - Search Page Style */
 
 .popularArtists {
-  padding: 40px 5%;
+  padding: var(--space-section) 5%;
   background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
   display: flex;
   flex-direction: column;
@@ -22,7 +22,7 @@
   background: linear-gradient(
     135deg,
     rgba(1, 38, 69, 0.03) 0%,
-    rgba(69, 32, 1, 0.02) 50%,
+    rgba(143, 110, 24, 0.02) 50%,
     rgba(255, 215, 0, 0.05) 100%
   );
   backdrop-filter: blur(8px);
@@ -41,9 +41,9 @@
   background: linear-gradient(
     90deg,
     transparent,
-    var(--secondary-color, #452001) 20%,
+    var(--color-accent-dark, #8f6e18) 20%,
     var(--primary-color, #012645) 50%,
-    var(--secondary-color, #452001) 80%,
+    var(--color-accent-dark, #8f6e18) 80%,
     transparent
   );
   opacity: 0.6;
@@ -78,7 +78,7 @@
 }
 
 .popularArtists__icon {
-  color: var(--secondary-color, #452001);
+  color: inherit; /* match the heading's navy text colour */
   font-size: 28px;
   opacity: 0.85;
   transition: all 0.3s ease;
@@ -107,7 +107,7 @@
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
   border-radius: 16px;
-  border: 2px solid var(--secondary-color, #452001);
+  border: 2px solid var(--color-accent-dark, #8f6e18);
 }
 
 @keyframes shimmer {
@@ -124,8 +124,8 @@
   background: linear-gradient(135deg, #ffffff, #f8f9fa);
   border-radius: 16px;
   padding: 24px;
-  border: 2px solid var(--secondary-color, #452001);
-  box-shadow: 0 4px 20px rgba(1, 38, 69, 0.1);
+  border: 2px solid var(--color-accent-dark, #8f6e18);
+  box-shadow: 0 8px 24px rgba(1, 38, 69, 0.12);
   transition: all 0.3s ease;
   cursor: pointer;
   display: flex;
@@ -153,9 +153,18 @@
   padding: 6px 12px;
   border-radius: 20px;
   font-size: 14px;
-  font-weight: 700;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  font-weight: 800;
+  color: var(--primary-color, #012645);
+  box-shadow: 0 2px 8px rgba(1, 38, 69, 0.18);
   backdrop-filter: blur(4px);
+}
+
+/* Ranks #4–#8 (numbers, not medals): refined gold-outline ring */
+.popularArtists__rank--number {
+  border: 2px solid #c9a961;
+  box-shadow: 0 2px 8px rgba(1, 38, 69, 0.18),
+    inset 0 0 0 1px rgba(201, 169, 97, 0.35);
+  font-weight: 900;
 }
 
 .popularArtists__avatar {
@@ -169,7 +178,8 @@
   height: 60px;
   border-radius: 50%;
   object-fit: cover;
-  border: 3px solid rgba(255, 255, 255, 0.8);
+  border: 2px solid #c9a961;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
   transition: all 0.3s ease;
 }
 
@@ -278,7 +288,7 @@
 }
 
 .popularArtists__followers svg {
-  color: #90cdf4;
+  color: #e9c66a;
   font-size: 11px;
 }
 
@@ -295,18 +305,27 @@
 }
 
 .popularArtists__views svg {
-  color: #a0e4a0;
+  color: #e9c66a;
   font-size: 11px;
 }
 
-/* Card without cover image - darker background */
+/* Card without cover image — branded navy gradient + faint decorative texture
+   so it reads as intentional rather than empty. */
 .popularArtists__card--noImage {
-  background: linear-gradient(
-    135deg,
-    #1a3a4a 0%,
-    #012645 50%,
-    #0a2035 100%
-  ) !important;
+  background:
+    repeating-linear-gradient(
+      45deg,
+      rgba(255, 255, 255, 0.02) 0,
+      rgba(255, 255, 255, 0.02) 1px,
+      transparent 1px,
+      transparent 10px
+    ),
+    radial-gradient(
+      circle at 30% 20%,
+      rgba(201, 169, 97, 0.1),
+      transparent 55%
+    ),
+    linear-gradient(135deg, #1a3a5c 0%, #0a1f44 55%, #05152e 100%) !important;
 }
 
 .popularArtists__card--noImage .popularArtists__name,

@@ -4,6 +4,8 @@
   max-width: 800px;
   margin: 0 auto;
   padding: 0 1rem 4rem;
+  position: relative;
+  z-index: 1; /* keep FAQ content above the decorative gutter ornaments */
 }
 
 /* ===== HERO ===== */

@@ -54,6 +54,8 @@
 
 .digital-category-icon {
   font-size: 0.85rem;
+  display: inline-flex;
+  align-items: center;
 }
 
 .digital-category-text {
@@ -810,7 +812,8 @@
 
 /* In cart state styling */
 .addButtonCart.in-cart {
-  background: linear-gradient(to left, #28a745, #20c997);
+  background: #a67c3d;
+  color: #012645;
   position: relative;
   overflow: visible;
   padding: 8px 12px;
@@ -824,6 +827,7 @@
   font-weight: bold;
   margin-right: 6px;
   flex-shrink: 0;
+  color: #012645;
 }
 
 .addButtonCart.in-cart span {
@@ -832,9 +836,9 @@
 }
 
 .addButtonCart.in-cart:hover:not(:disabled) {
-  background: linear-gradient(to left, #218838, #17a2b8);
+  background: #b8974e;
   transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(40, 167, 69, 0.3);
+  box-shadow: 0 4px 8px rgba(166, 124, 61, 0.3);
 }
 
 /* Icon-only mode for add to cart button */
@@ -860,29 +864,36 @@
   content: "✓";
   font-size: 16px;
   font-weight: bold;
+  color: #012645;
 }
 
 /* Discount Badge */
+/* Regular discount % — solid DEEP bronze (the darker, dominant tag) */
 .discount-badge {
   position: absolute;
   top: 10px;
   right: 10px;
-  background-color: #e74c3c;
-  color: white;
+  background-color: #6b4a23;
+  color: #fff;
   padding: 4px 8px;
-  font-weight: bold;
+  font-weight: 700;
   z-index: 2;
-  border-radius: 4px;
+  border-radius: 6px;
   font-size: 0.9rem;
 }
 
-/* Campaign/Referral discount badge */
+/* Campaign/Referral discount — LIGHT outline pill, visually distinct from the
+   solid discount %, and fully flat (no ribbon/flag corner). */
 .campaign-discount-badge {
-  background: linear-gradient(135deg, #10b981, #059669) !important;
+  background: var(--color-neutral-bg, #fdfaf6) !important;
+  color: #8a5a2b !important;
+  border: 1px solid #c9a961;
   left: 10px;
   right: auto;
-  font-size: 0.85rem;
-  box-shadow: 0 2px 6px rgba(16, 185, 129, 0.4);
+  font-size: 0.8rem;
+  font-weight: 700;
+  border-radius: 100px;
+  box-shadow: 0 1px 4px rgba(1, 38, 69, 0.12);
 }
 
 /* When only campaign badge exists (no regular), keep it on the right */
@@ -901,17 +912,17 @@
 
 .original-price {
   text-decoration: line-through;
-  color: #888;
-  font-size: 0.8rem;
-  font-weight: 500;
-  opacity: 0.8;
+  color: #9ca3af;
+  font-size: 0.75rem;
+  font-weight: 400;
+  opacity: 0.9;
   white-space: nowrap;
   order: 2;
 }
 
 .discounted-price {
-  color: #dc2626;
-  font-weight: 700;
+  color: #8a5a2b;
+  font-weight: 800;
   order: 1;
 }
 
@@ -930,7 +941,7 @@
   align-items: center;
   gap: 4px;
   padding: 4px 10px;
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  background: #8a5a2b;
   color: white;
   font-size: 0.5rem;
   font-weight: 700;
@@ -938,7 +949,7 @@
   margin-bottom: 4px;
   text-transform: uppercase;
   letter-spacing: 0.02em;
-  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.4);
+  box-shadow: 0 2px 8px rgba(138, 90, 43, 0.4);
   animation: pulse-subtle 2s ease-in-out infinite;
 }
 
@@ -948,14 +959,14 @@
 }
 
 .referral-final-price {
-  color: #059669 !important;
+  color: #8a5a2b !important;
   font-weight: 800;
   font-size: 1.1rem;
 }
 
 /* Handmade theme referral price */
 .handmade-theme .referral-badge {
-  background: linear-gradient(135deg, var(--secondary-color), #9b2c2c);
+  background: linear-gradient(135deg, var(--secondary-color), #8a5a2b);
 }
 
 .handmade-theme .referral-final-price {

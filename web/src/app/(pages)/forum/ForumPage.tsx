@@ -6,6 +6,7 @@ import "./ForumPage.css";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { fetchWithAuth } from "@/lib/fetch-with-auth";
 import CreateForumModal from "./CreateForumModal";
+import { OrnamentMargins } from "@/components/ornamentMargins/OrnamentMargins";
 import { useUser } from "@/modules/auth/hooks/use-user";
 import Loading from "../admin/users/loading";
 import LoadingAnim from "@/components/loadingAnim/loadingAnim";
@@ -140,6 +141,7 @@ const ForumPage = () => {
 
   return (
     <div className="forum-page">
+      <OrnamentMargins />
       {isUserLoading || isForumsLoading ? (
         <div>
           {" "}

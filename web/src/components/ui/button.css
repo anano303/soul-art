@@ -1,0 +1,84 @@
+/* Standardised site buttons — pill shape, two variants. */
+.sa-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 100px;
+  font-family: inherit;
+  font-weight: 700;
+  line-height: 1.2;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: transform 0.15s ease, box-shadow 0.15s ease,
+    background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+  white-space: nowrap;
+}
+
+.sa-btn:disabled,
+.sa-btn[aria-disabled="true"] {
+  opacity: 0.6;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* Sizes */
+.sa-btn--sm {
+  padding: 0.4rem 1rem;
+  font-size: 0.82rem;
+}
+.sa-btn--md {
+  padding: 0.6rem 1.5rem;
+  font-size: 0.9rem;
+}
+.sa-btn--lg {
+  padding: 0.85rem 2rem;
+  font-size: 1rem;
+}
+
+.sa-btn--block {
+  width: 100%;
+}
+
+/* Primary — solid gold pill */
+.sa-btn--primary {
+  background: linear-gradient(
+    180deg,
+    var(--color-accent-light),
+    var(--color-accent) 55%,
+    var(--color-accent-dark)
+  );
+  color: #2a2208;
+  box-shadow: 0 6px 18px rgba(187, 147, 38, 0.32);
+}
+.sa-btn--primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 26px rgba(187, 147, 38, 0.45);
+}
+.sa-btn--primary:active {
+  transform: translateY(0);
+}
+
+/* Secondary — navy outline */
+.sa-btn--secondary {
+  background: transparent;
+  color: var(--color-primary);
+  border-color: var(--color-primary);
+}
+.sa-btn--secondary:hover {
+  background: var(--color-primary);
+  color: #fff;
+  transform: translateY(-2px);
+}
+
+/* On dark section backgrounds, secondary flips to a light outline */
+.sa-btn--secondary.on-dark {
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.6);
+}
+.sa-btn--secondary.on-dark:hover {
+  background: #fff;
+  color: var(--color-primary);
+}

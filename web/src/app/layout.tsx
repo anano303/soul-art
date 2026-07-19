@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
+import { Noto_Serif_Georgian } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
 import { Toaster } from "@/components/ui/toaster";
@@ -39,6 +40,15 @@ const firago = localFont({
   variable: "--font-firago",
   display: "swap",
   preload: true,
+});
+
+// Serif/display font for headings. Supports Georgian glyphs so h1–h3 render
+// correctly in Georgian. Body text stays on FiraGo.
+const notoSerifGeorgian = Noto_Serif_Georgian({
+  subsets: ["georgian", "latin"],
+  weight: ["500", "600", "700"],
+  variable: "--font-heading-serif",
+  display: "swap",
 });
 
 import { CartProvider } from "@/modules/cart/context/cart-context";
@@ -213,7 +223,7 @@ export default function RootLayout({
         {/* Third-party scripts moved to body end for better LCP */}
       </head>
       <body
-        className={`${firago.variable} antialiased min-h-screen flex flex-col`}
+        className={`${firago.variable} ${notoSerifGeorgian.variable} antialiased min-h-screen flex flex-col`}
         style={{ maxWidth: "100vw", overflowX: "clip" }}
         suppressHydrationWarning={true}
       >

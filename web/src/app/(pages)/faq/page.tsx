@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useLanguage } from "@/hooks/LanguageContext";
 import { ChevronDown, HelpCircle, Search } from "lucide-react";
+import { OrnamentMargins } from "@/components/ornamentMargins/OrnamentMargins";
 import "./faq.css";
 
 interface FaqItem {
@@ -69,6 +70,7 @@ export default function FaqPage() {
 
   return (
     <div className="faq-page">
+      <OrnamentMargins />
       {/* Hero */}
       <div className="faq-hero">
         <div className="faq-hero-icon">

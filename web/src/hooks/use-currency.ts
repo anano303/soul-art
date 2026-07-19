@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import Cookies from "js-cookie";
+import { formatPrice as formatNumber } from "@/lib/format-price";
 
 export type Currency = "GEL" | "USD" | "EUR";
 
@@ -40,13 +41,14 @@ export function useCurrency() {
       symbol,
       code: userCurrency,
       format: (amount: number) => {
-        const formatted = amount.toFixed(2);
-        
+        // Central formatter → thousand separators + trimmed trailing zeros.
+        const formatted = formatNumber(amount);
+
         // USD puts symbol before, others after
         if (userCurrency === "USD") {
           return `${symbol}${formatted}`;
         }
-        
+
         return `${formatted} ${symbol}`;
       },
     };

@@ -12,6 +12,7 @@ export function FloatingCartIcon() {
   const [isVisible, setIsVisible] = useState(false);
   const [isAnimatingOut, setIsAnimatingOut] = useState(false);
   const [showTooltip, setShowTooltip] = useState(false);
+  const [isScrolling, setIsScrolling] = useState(false);
 
   // Drag state using refs for immediate updates
   const [position, setPosition] = useState({ bottom: 80, left: 20 });
@@ -25,6 +26,23 @@ export function FloatingCartIcon() {
 
   const DRAG_THRESHOLD = 5; // მინიმალური პიქსელი რომ ჩაითვალოს drag-ად
 
+  // Shrink while the page is scrolling so it stops covering content (same
+  // behaviour as the chat bubble). Purely visual; restores after scroll stops.
+  useEffect(() => {
+    let timer: ReturnType<typeof setTimeout>;
+    const onScroll = () => {
+      if (isDraggingRef.current) return;
+      setIsScrolling(true);
+      clearTimeout(timer);
+      timer = setTimeout(() => setIsScrolling(false), 700);
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      clearTimeout(timer);
+    };
+  }, []);
+
   let cartData;
   try {
     cartData = useCart();
@@ -35,7 +53,8 @@ export function FloatingCartIcon() {
 
   const { totalItems } = cartData;
 
-  // Load saved position from localStorage
+  // Load saved position from localStorage, else default to bottom-right stacked
+  // above the chat bubble (chat: 24px bottom + 56px + 16px gap = 96px).
   useEffect(() => {
     const saved = localStorage.getItem("floatingCartPosition");
     if (saved) {
@@ -43,10 +62,19 @@ export function FloatingCartIcon() {
         const parsed = JSON.parse(saved);
         setPosition(parsed);
         positionRef.current = parsed;
+        return;
       } catch {
-        // ignore
+        // fall through to default
       }
     }
+    // Stack above the chat bubble; the chat sits higher on mobile.
+    const chatBottom = window.innerWidth <= 480 ? 75 : 24;
+    const defaultPos = {
+      bottom: chatBottom + 56 + 16,
+      left: Math.max(10, window.innerWidth - 56 - (window.innerWidth <= 480 ? 16 : 24)),
+    };
+    setPosition(defaultPos);
+    positionRef.current = defaultPos;
   }, []);
 
   // Save position to localStorage
@@ -121,7 +149,7 @@ export function FloatingCartIcon() {
   // Safe boundaries - არ შევიდეს header/footer/nav-ში
   const HEADER_HEIGHT = 80; // header სიმაღლე
   const FOOTER_HEIGHT = 80; // footer/nav სიმაღლე
-  const BUTTON_SIZE = 60;
+  const BUTTON_SIZE = 56;
   const PADDING = 10;
 
   // Global event listeners - always attached
@@ -275,7 +303,9 @@ export function FloatingCartIcon() {
       ref={buttonRef}
       className={`floating-cart-icon ${
         isAnimatingOut ? "animate-out" : "animate-in"
-      } ${isDragging ? "dragging" : ""}`}
+      } ${isDragging ? "dragging" : ""} ${
+        isScrolling && !isDragging ? "scrolling" : ""
+      }`}
       style={{
         bottom: `${position.bottom}px`,
         left: `${position.left}px`,

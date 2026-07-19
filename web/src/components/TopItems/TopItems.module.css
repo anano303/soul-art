@@ -21,8 +21,8 @@
     rgba(248, 243, 235, 0.98) 50%,
     rgba(245, 237, 227, 0.98) 100%
   ) !important;
-  box-shadow: 4px -3px 2px 0px #b06f51 !important;
-  border-bottom: 10px solid saddlebrown !important;
+  box-shadow: 4px -3px 2px 0px #8f6e18 !important;
+  border-bottom: 10px solid #8f6e18 !important;
   position: relative;
   overflow: hidden;
 }
@@ -39,8 +39,8 @@
       45deg,
       transparent,
       transparent 2px,
-      rgba(69, 32, 1, 0.04) 2px,
-      rgba(69, 32, 1, 0.04) 4px
+      rgba(143, 110, 24, 0.04) 2px,
+      rgba(143, 110, 24, 0.04) 4px
     ),
     repeating-linear-gradient(
       -45deg,
@@ -85,7 +85,7 @@
   content: "";
   position: absolute;
   inset: 4px;
-  border: 2px solid rgba(69, 32, 1, 0.3);
+  border: 2px solid rgba(143, 110, 24, 0.3);
   pointer-events: none;
   z-index: 1;
 }
@@ -122,7 +122,7 @@
 }
 
 .badgeBoard[data-badge="payment"] .badgeIcon {
-  color: rgba(69, 32, 1, 0.9);
+  color: rgba(143, 110, 24, 0.9);
 }
 
 .bogLogoSmall {
@@ -168,8 +168,8 @@
     rgba(248, 243, 235, 0.98) 50%,
     rgba(255, 255, 255, 0.98) 100%
   ) !important;
-  box-shadow: 4px -3px 2px 0px #b06f51 !important;
-  border-bottom: 10px solid saddlebrown !important;
+  box-shadow: 4px -3px 2px 0px #8f6e18 !important;
+  border-bottom: 10px solid #8f6e18 !important;
   position: relative;
   overflow: hidden;
 }
@@ -186,8 +186,8 @@
       90deg,
       transparent 0px,
       transparent 4px,
-      rgba(69, 32, 1, 0.03) 4px,
-      rgba(69, 32, 1, 0.03) 6px
+      rgba(143, 110, 24, 0.03) 4px,
+      rgba(143, 110, 24, 0.03) 6px
     ),
     repeating-linear-gradient(
       0deg,
@@ -283,7 +283,7 @@
 }
 
 .scroller {
-  /* border-top: 3px solid #080866; */
+  /* border-top: 3px solid #012645; */
   padding-top: 0;
   display: flex;
   overflow-x: auto;
@@ -320,10 +320,10 @@
   align-items: center;
   justify-content: center;
   min-width: 150px;
-  background-color: #080866;
-  border: 2px solid #080866;
+  background-color: #012645;
+  border: 2px solid #012645;
   border-radius: 8px;
-  box-shadow: 0 4px 8px #030344;
+  box-shadow: 0 4px 8px #011a30;
   position: relative;
   transition: transform 0.2s ease-in-out;
 }
@@ -426,7 +426,7 @@
   height: 200px;
   left: 50%;
   transform: translateX(-50%) rotate(2deg);
-  background: saddlebrown;
+  background: #8f6e18;
 }
 
 .board {
@@ -439,8 +439,8 @@
   top: 20px;
   left: 15px;
   border-radius: 5px;
-  box-shadow: 4px -3px 2px 0px #b06f51;
-  border-bottom: 10px solid saddlebrown;
+  box-shadow: 4px -3px 2px 0px #8f6e18;
+  border-bottom: 10px solid #8f6e18;
 }
 
 /* Larger easels for badge and stat boards */

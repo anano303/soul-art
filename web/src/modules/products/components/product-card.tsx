@@ -4,7 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Star, Tag } from "lucide-react";
+import { Tag, Sparkles } from "lucide-react";
 import "./ProductCard.css";
 import { Product } from "@/types";
 import { AddToCartButton } from "./AddToCartButton";
@@ -281,7 +281,7 @@ export function ProductCard({
           {isDigitalCategory && categoryLabel && (
             <div className="digital-category-badge">
               <span className="digital-category-icon" aria-hidden="true">
-                ✨
+                <Sparkles size={13} strokeWidth={2} />
               </span>
               <span className="digital-category-text">{categoryLabel}</span>
             </div>

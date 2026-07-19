@@ -90,6 +90,7 @@ export function ChatWidget() {
   const [quickReplies, setQuickReplies] = useState<string[]>([]);
   const [showFacebookOption, setShowFacebookOption] = useState(false);
   const [chatMode, setChatMode] = useState<"select" | "ai" | null>(null);
+  const [isScrolling, setIsScrolling] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const FACEBOOK_URL = "https://m.me/SoulArtge"; // SoulArt Facebook Messenger
@@ -101,6 +102,24 @@ export function ChatWidget() {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  // Shrink the floating button while the page is being scrolled so it stops
+  // covering content/buttons; it restores shortly after scrolling stops.
+  // Purely visual — does not affect the chat behaviour.
+  useEffect(() => {
+    if (isOpen) return;
+    let timer: ReturnType<typeof setTimeout>;
+    const onScroll = () => {
+      setIsScrolling(true);
+      clearTimeout(timer);
+      timer = setTimeout(() => setIsScrolling(false), 700);
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      clearTimeout(timer);
+    };
+  }, [isOpen]);
 
   const loadQuickReplies = useCallback(async () => {
     try {
@@ -228,7 +247,9 @@ export function ChatWidget() {
     <>
       {/* Chat Button */}
       <button
-        className={`chat-widget-button ${isOpen ? "hidden" : ""}`}
+        className={`chat-widget-button ${isOpen ? "hidden" : ""} ${
+          isScrolling ? "scrolling" : ""
+        }`}
         onClick={handleOpen}
         aria-label="გახსენი ჩატი"
       >

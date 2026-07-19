@@ -1,19 +1,19 @@
 .floating-cart-icon {
   position: fixed;
-  bottom: 80px;
-  left: 20px;
-  right: auto;
-  width: 60px;
-  height: 60px;
-  background: linear-gradient(135deg, #012645 0%, #1e40af 100%);
+  bottom: 96px;
+  right: 24px;
+  left: auto;
+  width: 56px;
+  height: 56px;
+  background: linear-gradient(135deg, #012645 0%, #023a63 100%);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: grab;
-  z-index: 1000;
-  box-shadow: 0 4px 20px rgba(1, 38, 69, 0.3);
-  transition: box-shadow 0.3s ease;
+  z-index: 9995;
+  box-shadow: 0 6px 20px rgba(1, 38, 69, 0.35);
+  transition: box-shadow 0.3s ease, transform 0.25s ease, opacity 0.25s ease;
   user-select: none;
   touch-action: none;
 }
@@ -23,6 +23,19 @@
   cursor: grabbing;
   box-shadow: 0 8px 40px rgba(1, 38, 69, 0.5);
   transform: scale(1.05);
+}
+
+/* Shrink + fade while the page scrolls so it stops covering content.
+   !important is required to override the finished floatIn animation, which
+   otherwise locks transform: scale(1) via `forwards`. */
+.floating-cart-icon.scrolling {
+  transform: scale(0.62) !important;
+  opacity: 0.55 !important;
+  box-shadow: 0 2px 10px rgba(1, 38, 69, 0.25);
+}
+.floating-cart-icon.scrolling:hover {
+  transform: scale(0.7) !important;
+  opacity: 1 !important;
 }
 
 /* Drag indicator */

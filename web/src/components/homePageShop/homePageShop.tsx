@@ -12,9 +12,8 @@ import { useLanguage } from "@/hooks/LanguageContext";
 import { useQuery } from "@tanstack/react-query";
 import { fetchWithAuth } from "@/lib/fetch-with-auth";
 import { memoryCache } from "@/lib/cache";
-import Image from "next/image";
 import { trackSeeMoreClick } from "@/lib/ga4-analytics";
-// import { Shirt, ShoppingBag, Footprints } from "lucide-react";
+import { TbPalette, TbNeedleThread } from "react-icons/tb";
 
 interface CategoryProducts {
   category: string;
@@ -278,29 +277,19 @@ const HomePageShop = () => {
                       }}
                     >
                       {categoryData.category}
-                      {/* ემოჯი ეფექტი */}
+                      {/* Minimalist line icon per category */}
                       {(categoryData.category === "ხელნაკეთი ნივთები" ||
                         categoryData.category === "Handmades" ||
                         categoryData.category === "ხელნაკეთი" ||
                         categoryData.category === "Handmade") && (
-                        <span className="category-emoji">
-                          <Image
-                            src="/handmade.png"
-                            alt="Handmade"
-                            width={30}
-                            height={30}
-                          />
+                        <span className="category-emoji" aria-hidden="true">
+                          <TbNeedleThread size={22} />
                         </span>
                       )}
                       {(categoryData.category === "ნახატები" ||
                         categoryData.category === "Paintings") && (
-                        <span className="category-emoji">
-                          <Image
-                            src="/loading.png"
-                            alt="Paintings"
-                            width={30}
-                            height={30}
-                          />
+                        <span className="category-emoji" aria-hidden="true">
+                          <TbPalette size={22} />
                         </span>
                       )}
                     </h2>

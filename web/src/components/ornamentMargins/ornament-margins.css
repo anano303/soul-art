@@ -1,0 +1,103 @@
+/* Decorative gold mandala ornaments in the page side-gutters.
+   Only visible on very wide screens; purely ambient (behind content). */
+.ornament-margins {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+/* Hidden below 1440px — no cost on smaller screens */
+@media (max-width: 1439px) {
+  .ornament-margins {
+    display: none;
+  }
+}
+
+.ornament-panel {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 22%;
+  max-width: 460px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+/* Navy wash that fades toward the content so there is no hard seam with the
+   centered column — blends into the site instead of a two-tone split. */
+.ornament-panel--left {
+  left: 0;
+  background: linear-gradient(
+    90deg,
+    rgba(1, 38, 69, 0.9) 0%,
+    rgba(1, 38, 69, 0.55) 45%,
+    rgba(1, 38, 69, 0) 100%
+  );
+}
+.ornament-panel--right {
+  right: 0;
+  background: linear-gradient(
+    270deg,
+    rgba(1, 38, 69, 0.9) 0%,
+    rgba(1, 38, 69, 0.55) 45%,
+    rgba(1, 38, 69, 0) 100%
+  );
+}
+
+.ornament-mandala {
+  width: 130%;
+  max-width: 480px;
+  height: auto;
+  color: #c9a961; /* gold — inherited by the SVG via currentColor */
+  opacity: 0.32;
+  filter: drop-shadow(0 0 18px rgba(201, 169, 97, 0.15));
+}
+
+/* ── Contained variant (home-page sections, cream background) ──────────────
+   Anchored to the section instead of the viewport, no navy wash, a slightly
+   deeper/steadier gold so it stays legible on cream. */
+.ornament-margins--contained {
+  position: absolute;
+}
+.ornament-margins--contained .ornament-panel--left,
+.ornament-margins--contained .ornament-panel--right {
+  background: none;
+}
+.ornament-margins--contained .ornament-mandala {
+  color: #a67c3d;
+  opacity: 0.16;
+  filter: none;
+}
+.ornament-margins--contained .ornament-panel::before,
+.ornament-margins--contained .ornament-panel::after {
+  border-color: rgba(166, 124, 61, 0.12);
+}
+
+/* mirror the right side for symmetry */
+.ornament-panel--right .ornament-mandala {
+  transform: scaleX(-1);
+}
+
+/* a second, faint echo of the motif stacked vertically for a taller "salon"
+   feel on very tall viewports */
+.ornament-panel::before,
+.ornament-panel::after {
+  content: "";
+  position: absolute;
+  width: 60%;
+  aspect-ratio: 1;
+  border: 1px solid rgba(201, 169, 97, 0.12);
+  border-radius: 50%;
+  left: 50%;
+  transform: translateX(-50%);
+}
+.ornament-panel::before {
+  top: 4%;
+}
+.ornament-panel::after {
+  bottom: 4%;
+}

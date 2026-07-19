@@ -1,17 +1,16 @@
 "use client";
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import { useLanguage } from "@/hooks/LanguageContext";
 import { useUser } from "@/modules/auth/hooks/use-user";
 import { fetchWithAuth } from "@/lib/fetch-with-auth";
 import { toast } from "@/hooks/use-toast";
+import { Avatar } from "@/components/ui/avatar";
 import {
   FaStar,
   FaCrown,
-  FaUser,
   FaUsers,
   FaEye,
   FaUserPlus,
@@ -282,7 +281,11 @@ const PopularArtists = () => {
                 backgroundRepeat: "no-repeat",
               }}
             >
-              <div className="popularArtists__rank">
+              <div
+                className={`popularArtists__rank ${
+                  index > 2 ? "popularArtists__rank--number" : ""
+                }`}
+              >
                 {index === 0
                   ? "🥇"
                   : index === 1
@@ -293,19 +296,12 @@ const PopularArtists = () => {
               </div>
 
               <div className="popularArtists__avatar">
-                {artist.avatarImage ? (
-                  <Image
-                    src={artist.avatarImage}
-                    alt={artist.storeName || artist.name}
-                    width={60}
-                    height={60}
-                    className="popularArtists__avatarImg"
-                  />
-                ) : (
-                  <div className="popularArtists__avatarPlaceholder">
-                    <FaUser size={24} />
-                  </div>
-                )}
+                <Avatar
+                  src={artist.avatarImage}
+                  name={artist.storeName || artist.name}
+                  size={60}
+                  className="popularArtists__avatarImg"
+                />
               </div>
 
               <div className="popularArtists__info">

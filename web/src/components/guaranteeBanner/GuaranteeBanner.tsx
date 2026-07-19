@@ -1,8 +1,9 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
+import { ShieldCheck } from "lucide-react";
 import { useLanguage } from "@/hooks/LanguageContext";
+import { Button } from "@/components/ui/button";
 import "./guarantee-banner.css";
 
 const PAINTINGS_CATEGORY_ID = "68768f6f0b55154655a8e882";
@@ -29,7 +30,8 @@ export default function GuaranteeBanner() {
 
       <div className="gb-content Container">
         <span className="gb-badge">
-          🛡 {en ? "Buyer protection" : "დაცული შენაძენი"}
+          <ShieldCheck size={15} strokeWidth={2} aria-hidden="true" />
+          {en ? "Buyer protection" : "დაცული შენაძენი"}
         </span>
 
         <h2 className="gb-title">
@@ -54,18 +56,21 @@ export default function GuaranteeBanner() {
         </p>
 
         <div className="gb-actions">
-          <Link
+          <Button
             href={`/shop?mainCategory=${PAINTINGS_CATEGORY_ID}`}
-            className="gb-btn gb-btn--gold"
+            variant="primary"
+            size="md"
           >
             {en ? "Paintings" : "ნახატები"}
-          </Link>
-          <Link
+          </Button>
+          <Button
             href={`/shop?mainCategory=${HANDMADE_CATEGORY_ID}`}
-            className="gb-btn gb-btn--ghost"
+            variant="secondary"
+            size="md"
+            className="on-dark"
           >
             {en ? "Handmade items" : "ხელნაკეთი ნივთები"}
-          </Link>
+          </Button>
         </div>
       </div>
     </section>

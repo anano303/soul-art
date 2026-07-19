@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useLanguage } from "@/hooks/LanguageContext";
 import { ChevronDown, HelpCircle, ArrowRight } from "lucide-react";
 import Link from "next/link";
+import { OrnamentMargins } from "@/components/ornamentMargins/OrnamentMargins";
 import "./HomeFAQ.css";
 
 interface FaqItem {
@@ -52,13 +53,16 @@ const HomeFAQ = () => {
 
   return (
     <section className="home-faq">
+      <OrnamentMargins contained />
       <div className="home-faq-container">
         {/* Header */}
         <div className="home-faq-header">
-          <div className="home-faq-icon">
-            <HelpCircle size={24} />
-          </div>
           <h2>
+            <HelpCircle
+              size={22}
+              className="home-faq-title-icon"
+              aria-hidden="true"
+            />
             {language === "en"
               ? "Frequently Asked Questions"
               : "ხშირად დასმული კითხვები"}

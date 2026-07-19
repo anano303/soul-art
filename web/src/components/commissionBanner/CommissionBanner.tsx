@@ -1,7 +1,8 @@
 "use client";
-import Link from "next/link";
 import Image from "next/image";
+import { Palette, Camera, MessageSquare, Gift } from "lucide-react";
 import { useLanguage } from "@/hooks/LanguageContext";
+import { Button } from "@/components/ui/button";
 import "./commission-banner.css";
 
 export default function CommissionBanner() {
@@ -23,7 +24,8 @@ export default function CommissionBanner() {
       <div className="commission-banner-inner Container">
         <div className="commission-banner-text">
           <span className="commission-banner-tag">
-            🎨 {language === "en" ? "Custom Order" : "ინდივიდუალური შეკვეთა"}
+            <Palette size={15} strokeWidth={2} aria-hidden="true" />
+            {language === "en" ? "Custom Order" : "ინდივიდუალური შეკვეთა"}
           </span>
           <h2 className="commission-banner-title">
             {language === "en"
@@ -37,18 +39,21 @@ export default function CommissionBanner() {
           </p>
           <div className="commission-banner-steps">
             <span className="commission-step">
-              📷 {language === "en" ? "Upload" : "ატვირთე"}
+              <Camera size={15} strokeWidth={2} aria-hidden="true" />
+              {language === "en" ? "Upload" : "ატვირთე"}
             </span>
             <span className="commission-step">
-              💬 {language === "en" ? "Get offers" : "მიიღე შეთავაზებები"}
+              <MessageSquare size={15} strokeWidth={2} aria-hidden="true" />
+              {language === "en" ? "Get offers" : "მიიღე შეთავაზებები"}
             </span>
             <span className="commission-step">
-              🎁 {language === "en" ? "Choose & pay" : "აირჩიე და გადაიხადე"}
+              <Gift size={15} strokeWidth={2} aria-hidden="true" />
+              {language === "en" ? "Choose & pay" : "აირჩიე და გადაიხადე"}
             </span>
           </div>
-          <Link href="/commissions/new" className="btn-commission-cta">
+          <Button href="/commissions/new" variant="primary" size="lg">
             {language === "en" ? "Place an Order" : "შეკვეთის განთავსება"}
-          </Link>
+          </Button>
         </div>
 
         <div className="commission-banner-art" aria-hidden="true">

@@ -45,7 +45,7 @@
 .footer-description {
   font-size: 1rem;
   line-height: 1.5;
-  color: #d1e7f3;
+  color: rgba(255, 255, 255, 0.85);
 }
 
 .footer-subtitle {
@@ -61,7 +61,7 @@
 }
 
 .footer-link {
-  color: #d1e7f3;
+  color: rgba(255, 255, 255, 0.85);
   text-decoration: none;
   font-size: 0.95rem;
   margin-bottom: 0.4rem;
@@ -78,13 +78,13 @@
 .footer-link-sub {
   display: block;
   font-size: 0.72rem;
-  color: #8bafc4;
+  color: rgba(255, 255, 255, 0.6);
   font-weight: 400;
   margin-top: 2px;
 }
 
 .footer-link:hover .footer-link-sub {
-  color: #d1e7f3;
+  color: rgba(255, 255, 255, 0.85);
 }
 
 .footer-link:hover {
@@ -108,7 +108,7 @@
 }
 
 .footer-link-small {
-  color: #8bafc4;
+  color: rgba(255, 255, 255, 0.6);
   text-decoration: none;
   font-size: 0.8rem;
   transition: color 0.3s ease;
@@ -130,11 +130,11 @@
 }
 
 .social-icon {
-  color: #d1e7f3;
+  color: rgba(255, 255, 255, 0.85);
   text-decoration: none;
   font-size: 0.85rem;
   padding: 0.4rem 0.75rem;
-  border: 1px solid #d1e7f3;
+  border: 1px solid rgba(255, 255, 255, 0.85);
   border-radius: 20px;
   transition: all 0.3s ease;
   white-space: nowrap;
@@ -189,7 +189,7 @@
   text-align: center;
   margin-top: 2rem;
   font-size: 0.9rem;
-  color: #d1e7f3;
+  color: rgba(255, 255, 255, 0.85);
 }
 
 /* @media (max-width: 1050px) and (min-width: 768px) {

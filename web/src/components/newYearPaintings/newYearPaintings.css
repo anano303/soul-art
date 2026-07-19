@@ -101,7 +101,7 @@
 }
 
 .new-year-paintings-title {
-  font-family: "FiraGo", serif;
+  font-family: var(--font-heading);
   font-size: clamp(1.5rem, 3vw, 2.2rem);
   font-weight: 800;
   color: #ffffff;

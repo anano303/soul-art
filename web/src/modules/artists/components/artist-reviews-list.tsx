@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Image from "next/image";
+import { Avatar } from "@/components/ui/avatar";
 import { apiClient } from "@/lib/axios";
 import { useLanguage } from "@/hooks/LanguageContext";
 import "./artist-reviews-list.css";
@@ -109,22 +109,12 @@ export function ArtistReviewsList({ artistId }: ArtistReviewsListProps) {
           <div key={index} className="artist-review-item">
             <div className="artist-review-header">
               <div className="artist-review-user">
-                <div className="artist-review-avatar">
-                  {review.userId?.profileImage || review.userId?.storeLogo ? (
-                    <Image
-                      src={
-                        review.userId.profileImage || review.userId.storeLogo!
-                      }
-                      alt={review.userId?.name || "User"}
-                      fill
-                      className="artist-review-avatar-image"
-                    />
-                  ) : (
-                    <span className="artist-review-avatar-letter">
-                      {review.userId?.name?.charAt(0).toUpperCase() || "U"}
-                    </span>
-                  )}
-                </div>
+                <Avatar
+                  src={review.userId?.profileImage || review.userId?.storeLogo}
+                  name={review.userId?.name || "User"}
+                  size={48}
+                  className="artist-review-avatar"
+                />
                 <div className="artist-review-user-info">
                   <span className="artist-review-username">
                     {review.userId?.name || "Anonymous"}

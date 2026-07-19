@@ -4,6 +4,7 @@ import "./homePageForum.css";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import ForumPost from "@/app/(pages)/forum/ForumPost";
+import { OrnamentMargins } from "@/components/ornamentMargins/OrnamentMargins";
 import Image from "next/image";
 import { useLanguage } from "@/hooks/LanguageContext";
 
@@ -59,6 +60,7 @@ const HomePageForum = () => {
 
   return (
     <div className="homePageForum">
+      <OrnamentMargins contained />
       <h2 className="homePageForumH1">
         <Image
           src="/chat-icon.svg"

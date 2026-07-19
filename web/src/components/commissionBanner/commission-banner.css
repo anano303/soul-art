@@ -52,7 +52,9 @@
 }
 
 .commission-banner-tag {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
   background: rgba(255, 255, 255, 0.15);
   border: 1px solid rgba(255, 255, 255, 0.25);
   border-radius: 100px;
@@ -88,12 +90,18 @@
 }
 
 .commission-step {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
   background: rgba(255, 255, 255, 0.12);
   border: 1px solid rgba(255, 255, 255, 0.25);
   border-radius: 8px;
   padding: 0.35rem 0.8rem;
   font-size: 0.9rem;
   color: #fff;
+}
+.commission-step svg {
+  color: var(--color-accent-light, #e7c75a);
 }
 
 .btn-commission-cta {

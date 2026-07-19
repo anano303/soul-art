@@ -5,14 +5,14 @@
   background: url("/git.png") center center / contain repeat;
   position: relative;
   overflow: hidden;
-  box-shadow: rgb(6 95 70 / 67%) 1px -20px 80px 40px;
+  box-shadow: rgb(1 38 69 / 67%) 1px -20px 80px 40px;
 }
 
 .exclusive-promo-section::before {
   content: "";
   position: absolute;
   inset: 0;
-  background: rgba(6, 95, 70, 0.78);
+  background: rgba(1, 38, 69, 0.78);
   pointer-events: none;
   z-index: 0;
 }
@@ -80,15 +80,15 @@
   padding: 0.7rem 1.4rem;
   background:
     repeating-linear-gradient(45deg, #0000, #0000 3px, #ffffff14 3px 6px),
-    linear-gradient(135deg, #10b981 0%, #065f46 100%);
-  color: white;
+    linear-gradient(135deg, #e9c66a 0%, #bb9326 100%);
+  color: #2a2208;
   text-decoration: none;
   border-radius: 8px;
   font-size: 0.9rem;
   font-weight: 700;
   white-space: nowrap;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
+  box-shadow: 0 4px 15px rgba(187, 147, 38, 0.4);
   letter-spacing: 0.02em;
   position: relative;
   overflow: hidden;
@@ -103,9 +103,9 @@
       rgba(255, 255, 255, 0.12) 3px,
       rgba(255, 255, 255, 0.12) 6px
     ),
-    linear-gradient(135deg, #34d399 0%, #10b981 100%);
+    linear-gradient(135deg, #e9c66a 0%, #bb9326 100%);
   transform: translateY(-3px);
-  box-shadow: 0 8px 25px rgba(16, 185, 129, 0.5);
+  box-shadow: 0 8px 25px rgba(187, 147, 38, 0.5);
 }
 
 .exclusive-products-scroll {
@@ -144,7 +144,7 @@
   position: relative !important;
   border-radius: 16px !important;
   overflow: hidden !important;
-  background: #065f46 !important;
+  background: #012645 !important;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15) !important;
   transition:
     transform 0.3s ease,
@@ -157,7 +157,7 @@
 
 .exclusive-promo-section .product-card:hover {
   transform: translateY(-6px) !important;
-  box-shadow: 0 16px 40px rgba(16, 185, 129, 0.3) !important;
+  box-shadow: 0 16px 40px rgba(187, 147, 38, 0.3) !important;
 }
 
 /* ===== IMAGE - LARGE FULL VIEW WITH GRADIENT OVERLAY ===== */
@@ -186,7 +186,7 @@ section.exclusive-promo-section .product-image {
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
-  background: #065f46 !important;
+  background: #012645 !important;
 }
 
 /* Blur edges on left and right sides of image */
@@ -199,7 +199,7 @@ section.exclusive-promo-section .product-image {
   height: 100% !important;
   background: linear-gradient(
     to right,
-    #065f46 0%,
+    #012645 0%,
     transparent 100%
   ) !important;
   pointer-events: none !important;
@@ -214,7 +214,7 @@ section.exclusive-promo-section .product-image {
   right: 0 !important;
   width: 40px !important;
   height: 100% !important;
-  background: linear-gradient(to left, #065f46 0%, transparent 100%) !important;
+  background: linear-gradient(to left, #012645 0%, transparent 100%) !important;
   pointer-events: none !important;
   z-index: 6 !important;
 }
@@ -230,9 +230,9 @@ section.exclusive-promo-section .product-image {
   background: linear-gradient(
     to bottom,
     transparent 0%,
-    rgba(6, 95, 70, 0.5) 40%,
-    rgba(6, 95, 70, 0.9) 80%,
-    rgba(6, 95, 70, 1) 100%
+    rgba(1, 38, 69, 0.5) 40%,
+    rgba(1, 38, 69, 0.9) 80%,
+    rgba(1, 38, 69, 1) 100%
   ) !important;
   pointer-events: none !important;
   z-index: 5 !important;
@@ -271,7 +271,7 @@ section.exclusive-promo-section .product-image {
 .exclusive-promo-section .product-info-top,
 .exclusive-promo-section .product-info-bottom {
   position: relative !important;
-  background: rgba(6, 95, 70, 0.98) !important;
+  background: rgba(1, 38, 69, 0.98) !important;
   padding: 4px 10px !important;
   margin: 0 !important;
 }
@@ -382,7 +382,7 @@ section.exclusive-promo-section .product-image {
 
 .exclusive-promo-section .product-price,
 .exclusive-promo-section .referral-final-price {
-  color: #4ade80 !important;
+  color: #e9c66a !important;
   font-weight: 800 !important;
   font-size: 1rem !important;
   margin: 0 !important;
@@ -422,10 +422,10 @@ section.exclusive-promo-section .product-image {
 }
 
 .exclusive-promo-section .discount-badge.campaign-discount-badge {
-  background: linear-gradient(135deg, #10b981, #059669) !important;
+  background: linear-gradient(135deg, #bb9326, #8f6e18) !important;
   right: auto !important;
   left: 8px !important;
-  box-shadow: 0 2px 6px rgba(16, 185, 129, 0.4) !important;
+  box-shadow: 0 2px 6px rgba(187, 147, 38, 0.4) !important;
 }
 
 .exclusive-promo-section
@@ -439,7 +439,7 @@ section.exclusive-promo-section .product-image {
   display: flex !important;
   gap: 6px !important;
   padding: 6px 10px 10px !important;
-  background: rgba(4, 70, 55, 1) !important;
+  background: rgba(1, 20, 38, 1) !important;
   margin: 0 !important;
   margin-top: auto !important;
 }
@@ -493,10 +493,10 @@ section.exclusive-promo-section .product-image {
       rgba(255, 255, 255, 0.08) 2px,
       rgba(255, 255, 255, 0.08) 4px
     ),
-    linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+    linear-gradient(135deg, #e9c66a 0%, #bb9326 100%) !important;
   border: none !important;
   border-radius: 8px !important;
-  color: white !important;
+  color: #2a2208 !important;
   font-size: 0.8rem !important;
   font-weight: 600 !important;
   display: flex !important;
@@ -504,7 +504,7 @@ section.exclusive-promo-section .product-image {
   justify-content: center !important;
   gap: 5px !important;
   transition: all 0.3s ease !important;
-  box-shadow: 0 3px 12px rgba(5, 150, 105, 0.35) !important;
+  box-shadow: 0 3px 12px rgba(187, 147, 38, 0.35) !important;
   cursor: pointer !important;
   position: relative !important;
   overflow: hidden !important;
@@ -519,9 +519,9 @@ section.exclusive-promo-section .product-image {
       rgba(255, 255, 255, 0.12) 2px,
       rgba(255, 255, 255, 0.12) 4px
     ),
-    linear-gradient(135deg, #34d399 0%, #10b981 100%) !important;
+    linear-gradient(135deg, #e9c66a 0%, #bb9326 100%) !important;
   transform: translateY(-2px) !important;
-  box-shadow: 0 5px 18px rgba(5, 150, 105, 0.5) !important;
+  box-shadow: 0 5px 18px rgba(187, 147, 38, 0.5) !important;
 }
 
 /* ===== RESPONSIVE ===== */
