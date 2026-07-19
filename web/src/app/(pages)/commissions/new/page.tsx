@@ -28,7 +28,7 @@ const TYPES = Object.keys(COMMISSION_TYPE_LABELS) as CommissionType[];
 function NewCommissionForm() {
   const { language } = useLanguage();
   const router = useRouter();
-  const { user, isLoading } = useUser();
+  const { user } = useUser();
   const searchParams = useSearchParams();
 
   const [type, setType] = useState<CommissionType>("portrait");
@@ -58,12 +58,9 @@ function NewCommissionForm() {
     if (artistName) setTargetArtistName(artistName);
   }, [searchParams]);
 
-  // Redirect to login if not authenticated.
-  useEffect(() => {
-    if (!isLoading && !user) {
-      router.push("/login?redirect=/commissions/new");
-    }
-  }, [isLoading, user, router]);
+  // NOTE: we intentionally do NOT redirect unauthenticated visitors away here.
+  // The form is public so Googlebot can crawl/index the page and so users see
+  // what they're signing up for. Login is enforced on submit instead (below).
 
   const handleFiles = (list: FileList | null) => {
     if (!list) return;
@@ -73,6 +70,11 @@ function NewCommissionForm() {
   };
 
   const handleSubmit = async () => {
+    // Login is required only to actually place the request.
+    if (!user) {
+      router.push("/login?redirect=/commissions/new");
+      return;
+    }
     if (!description.trim() || !size.trim()) {
       toast({
         title: language === "en" ? "Missing fields" : "შეავსე ველები",
