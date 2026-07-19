@@ -7,28 +7,29 @@ export default function robots(): MetadataRoute.Robots {
     rules: [
       {
         userAgent: "*",
-        allow: "/",
+        // NOTE: do NOT block /_next/ — Google needs /_next/static (JS/CSS to
+        // render client pages) and /_next/image (optimized product images for
+        // Google Images). Blocking it hides images + JS-rendered content.
+        allow: ["/", "/_next/static/", "/_next/image"],
         disallow: [
           "/admin/",
           "/profile/",
           "/checkout/",
           "/cart/",
           "/api/",
-          "/_next/",
           "/login/",
           "/register/",
         ],
       },
       {
         userAgent: "Googlebot",
-        allow: "/",
+        allow: ["/", "/_next/static/", "/_next/image"],
         disallow: [
           "/admin/",
           "/profile/",
           "/checkout/",
           "/cart/",
           "/api/",
-          "/_next/",
           "/login/",
           "/register/",
         ],

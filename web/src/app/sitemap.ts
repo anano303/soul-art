@@ -388,14 +388,22 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
           nameEn?: string;
           updatedAt?: string;
           createdAt?: string;
-        }) => ({
-          url: `${baseUrl}${productHref(product)}`,
-          lastModified: new Date(
-            product.updatedAt || product.createdAt || new Date(),
-          ),
-          changeFrequency: "weekly" as const,
-          priority: 0.8,
-        }),
+          images?: string[];
+        }) => {
+          // Absolute image URLs → emitted as <image:image> for Google Images.
+          const images = (product.images || [])
+            .filter((u) => typeof u === "string" && /^https?:\/\//.test(u))
+            .slice(0, 5);
+          return {
+            url: `${baseUrl}${productHref(product)}`,
+            lastModified: new Date(
+              product.updatedAt || product.createdAt || new Date(),
+            ),
+            changeFrequency: "weekly" as const,
+            priority: 0.8,
+            ...(images.length ? { images } : {}),
+          };
+        },
       );
 
     // კატეგორიების გვერდები
