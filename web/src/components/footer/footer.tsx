@@ -41,6 +41,13 @@ export default function Footer() {
               </Link>
             </li>
             <li>
+              <Link href="/commissions/new" className="footer-link">
+                {language === "en"
+                  ? "Custom Order"
+                  : "შეუკვეთე ინდივიდუალურად"}
+              </Link>
+            </li>
+            <li>
               <Link href="/auctions" className="footer-link">
                 {t("navigation.auction")}
               </Link>

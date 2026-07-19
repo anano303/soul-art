@@ -14,9 +14,9 @@ interface AvatarProps {
 // Same name → same colour, but constrained to the brand palette.
 const AVATAR_COLORS = [
   "#0a1f44", // navy
+  "#0f3d63", // navy (lighter) — replaces the slate tone that read purplish
   "#a67c3d", // gold-bronze
   "#6b4a23", // deep bronze
-  "#2c4a6e", // slate navy
   "#8a5a2b", // warm bronze
 ];
 

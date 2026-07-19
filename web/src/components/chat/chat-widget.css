@@ -6,9 +6,9 @@
   width: 56px;
   height: 56px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  background: #c9a961;
   border: none;
-  color: white;
+  color: #0a1f44;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -20,6 +20,7 @@
 
 .chat-widget-button:hover {
   transform: scale(1.1);
+  background: #a67c3d;
   box-shadow: 0 6px 30px rgba(99, 102, 241, 0.5);
 }
 
@@ -46,7 +47,9 @@
   width: 100%;
   height: 100%;
   border-radius: 50%;
-  background: rgba(99, 102, 241, 0.4);
+  /* Ring only (no fill) so it never washes the solid button face */
+  background: transparent;
+  border: 2px solid rgba(201, 169, 97, 0.55);
   animation: pulse 2s infinite;
 }
 
@@ -92,7 +95,7 @@
 
 /* Header */
 .chat-widget-header {
-  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  background: #0a1f44;
   color: white;
   padding: 16px 20px;
   display: flex;
@@ -210,16 +213,24 @@
 }
 
 .chat-mode-button.ai-mode {
-  border-color: #c7d2fe;
+  border-color: rgba(201, 169, 97, 0.4);
 }
 
 .chat-mode-button.ai-mode:hover {
-  border-color: #6366f1;
-  background: linear-gradient(135deg, #eef2ff 0%, #e0e7ff 100%);
+  border-color: #c9a961;
+  background: linear-gradient(135deg, #f6f1e4 0%, #f0e6cf 100%);
 }
 
+/* AI option icon as a gold circle with a navy glyph */
 .chat-mode-button.ai-mode svg {
-  color: #6366f1;
+  color: #0a1f44;
+  background: #c9a961;
+  border-radius: 50%;
+  padding: 8px;
+  width: 40px;
+  height: 40px;
+  box-sizing: border-box;
+  flex-shrink: 0;
 }
 
 .chat-mode-button.fb-mode {
@@ -474,9 +485,9 @@
 }
 
 .send-button {
-  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  background: #c9a961;
   border: none;
-  color: white;
+  color: #0a1f44;
   width: 44px;
   height: 44px;
   border-radius: 12px;
@@ -489,6 +500,7 @@
 
 .send-button:hover:not(:disabled) {
   transform: scale(1.05);
+  background: #a67c3d;
 }
 
 .send-button:disabled {

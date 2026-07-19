@@ -843,7 +843,7 @@
 
 /* Icon-only mode for add to cart button */
 .addButtonCart.icon-only {
-  padding: 0;
+  padding: 5px;
   width: 100%;
   height: 100%;
 }
