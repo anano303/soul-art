@@ -6,7 +6,7 @@ import { getProduct } from "@/lib/get-product";
 import { collectProductKeywords, mergeKeywordSets } from "@/lib/seo-keywords";
 import { isInStock } from "@/lib/stock";
 import { buildProductJsonLd } from "@/lib/structured-data";
-import { buildAlternates, resolveLocale } from "@/lib/hreflang";
+import { buildLocaleAlternates, resolveLocale } from "@/lib/hreflang";
 import { extractProductId, productHref } from "@/lib/product-slug";
 
 // Metadata lives here (not in layout.tsx) because only a page receives
@@ -165,7 +165,7 @@ export async function generateMetadata({
         images: product.images?.length > 0 ? [product.images[0]] : ["/logo.png"],
       },
       // Self-referential canonical per locale + ka/en hreflang alternates.
-      alternates: buildAlternates(productHref(product), locale),
+      alternates: buildLocaleAlternates(productHref(product), locale),
       other: {
         "product:price:amount":
           product.discountedPrice && product.discountedPrice < product.price

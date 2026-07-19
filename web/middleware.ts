@@ -80,6 +80,45 @@ const currencyMap: Record<string, string> = {
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
+  // ── SEO locale routing (Option B) — scoped to 4 page types ───────────────
+  // home, /shop, /products/*, /@artist. Runs ABOVE the bot early-exit so
+  // Googlebot gets the same server-rendered EN URLs.
+  const isSeoLocalePath = (p: string) =>
+    p === "/" ||
+    p === "/shop" ||
+    p.startsWith("/products/") ||
+    p.startsWith("/@") ||
+    p.startsWith("/%40"); // encoded "@"
+
+  const hasEnPrefix = pathname === "/en" || pathname.startsWith("/en/");
+
+  // (B) /en/<seo-path> → REWRITE (not redirect) to the real route with lang=en.
+  //     Browser URL stays /en/… ; server renders EN metadata; the client reads
+  //     the /en prefix. A rewrite never re-runs middleware → no loop.
+  if (hasEnPrefix) {
+    const stripped = pathname.replace(/^\/en/, "") || "/";
+    if (isSeoLocalePath(stripped)) {
+      const url = request.nextUrl.clone();
+      url.pathname = stripped;
+      url.searchParams.set("lang", "en");
+      return NextResponse.rewrite(url);
+    }
+    // non-SEO /en/* falls through to the existing /en catch-all redirect shim
+  }
+
+  // (A) legacy /shop?lang=en (etc.) → 301 to the canonical /en/shop.
+  //     Guarded by !hasEnPrefix so an /en URL is never redirected back.
+  if (
+    !hasEnPrefix &&
+    request.nextUrl.searchParams.get("lang") === "en" &&
+    isSeoLocalePath(pathname)
+  ) {
+    const url = request.nextUrl.clone();
+    url.pathname = pathname === "/" ? "/en" : `/en${pathname}`;
+    url.searchParams.delete("lang");
+    return NextResponse.redirect(url, 301);
+  }
+
   // 🤖 EARLY EXIT for bots — no geo detection, no cookies, just pass through
   const ua = request.headers.get("user-agent") || "";
   if (isBot(ua)) {
@@ -134,7 +173,6 @@ export async function middleware(request: NextRequest) {
   const autoLanguage = geo.country === "GE" ? "ge" : (geo.country ? "en" : null);
 
   // Redirect non-Georgian users to /en
-  const hasEnPrefix = pathname === "/en" || pathname.startsWith("/en/");
   const shouldBeInEnglish = !preferredLanguage && geo.country && geo.country !== "GE" && !hasEnPrefix;
 
   if (shouldBeInEnglish) {

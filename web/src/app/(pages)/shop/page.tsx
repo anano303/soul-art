@@ -11,7 +11,7 @@ import {
   mergeKeywordSets,
   sanitizeKeyword,
 } from "@/lib/seo-keywords";
-import { buildAlternates, resolveLocale } from "@/lib/hreflang";
+import { buildLocaleAlternates, resolveLocale } from "@/lib/hreflang";
 
 type ShopProduct = {
   name?: string | null;
@@ -242,7 +242,7 @@ export async function generateMetadata({
         description,
         images: [representativeImage],
       },
-      alternates: buildAlternates(
+      alternates: buildLocaleAlternates(
         brand ? `/shop?brand=${encodeURIComponent(brand)}` : "/shop",
         locale
       ),

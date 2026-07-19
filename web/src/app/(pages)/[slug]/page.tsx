@@ -7,7 +7,7 @@ import {
   mergeKeywordSets,
   sanitizeKeyword,
 } from "@/lib/seo-keywords";
-import { buildAlternates, resolveLocale } from "@/lib/hreflang";
+import { buildLocaleAlternates, resolveLocale } from "@/lib/hreflang";
 import { buildArtistJsonLd } from "@/lib/structured-data";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/v1";
@@ -223,7 +223,7 @@ export async function generateMetadata({
           : `${displayName} | SoulArt ხელოვანი`,
       description,
       keywords: keywords.length ? keywords : undefined,
-      alternates: buildAlternates(localizedPath, locale),
+      alternates: buildLocaleAlternates(localizedPath, locale),
       openGraph: {
         title: `${displayName} | SoulArt`,
         description,

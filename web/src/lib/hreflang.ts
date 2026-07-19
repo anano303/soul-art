@@ -40,3 +40,26 @@ export function buildAlternates(path: string, locale: Locale) {
     },
   };
 }
+
+/**
+ * Path-based (/en/...) alternates — for pages migrated to real locale routing
+ * (home, /shop, /products/[id], /@artist). English lives at /en/<path>, Georgian
+ * at the root, and each locale is self-canonical.
+ */
+function localeUrl(path: string, locale: Locale): string {
+  if (locale === "ka") return `${SITE}${path}`;
+  const [p, q] = path.split("?");
+  const enPath = p === "/" || p === "" ? "/en" : `/en${p}`;
+  return `${SITE}${enPath}${q ? `?${q}` : ""}`;
+}
+
+export function buildLocaleAlternates(path: string, locale: Locale) {
+  return {
+    canonical: localeUrl(path, locale),
+    languages: {
+      ka: localeUrl(path, "ka"),
+      en: localeUrl(path, "en"),
+      "x-default": localeUrl(path, "ka"),
+    },
+  };
+}

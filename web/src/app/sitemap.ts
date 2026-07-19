@@ -273,12 +273,18 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       lastModified: new Date(),
       changeFrequency: "daily" as const,
       priority: 1,
+      alternates: {
+        languages: { ka: baseUrl, en: `${baseUrl}/en` },
+      },
     },
     {
       url: `${baseUrl}/shop`,
       lastModified: new Date(),
       changeFrequency: "daily" as const,
       priority: 0.9,
+      alternates: {
+        languages: { ka: `${baseUrl}/shop`, en: `${baseUrl}/en/shop` },
+      },
     },
     {
       url: `${baseUrl}/forum`,
@@ -394,13 +400,20 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
           const images = (product.images || [])
             .filter((u) => typeof u === "string" && /^https?:\/\//.test(u))
             .slice(0, 5);
+          const href = productHref(product);
           return {
-            url: `${baseUrl}${productHref(product)}`,
+            url: `${baseUrl}${href}`,
             lastModified: new Date(
               product.updatedAt || product.createdAt || new Date(),
             ),
             changeFrequency: "weekly" as const,
             priority: 0.8,
+            alternates: {
+              languages: {
+                ka: `${baseUrl}${href}`,
+                en: `${baseUrl}/en${href}`,
+              },
+            },
             ...(images.length ? { images } : {}),
           };
         },
@@ -442,6 +455,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
           lastModified: new Date(lastModifiedValue),
           changeFrequency: "daily" as const,
           priority: 0.9,
+          alternates: {
+            languages: {
+              ka: `${baseUrl}/@${slug}`,
+              en: `${baseUrl}/en/@${slug}`,
+            },
+          },
         };
       })
       .filter(Boolean) as MetadataRoute.Sitemap;
