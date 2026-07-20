@@ -11,7 +11,7 @@ import Image from "next/image";
 
 interface FilterProps {
   onCategoryChange: (categoryId: string) => void;
-  onSubCategoryChange: (subcategoryId: string) => void;
+  onSubCategoryChange: (subcategoryId: string, slug?: string) => void;
   onAgeGroupChange: (ageGroup: string) => void;
   onSizeChange: (size: string) => void;
   onColorChange: (color: string) => void;
@@ -1114,7 +1114,10 @@ export function ProductFilters({
                             isSelected ? "selected" : ""
                           }`}
                           onClick={() => {
-                            onSubCategoryChange(subId);
+                            onSubCategoryChange(
+                              subId,
+                              (sub as { slug?: string }).slug,
+                            );
                           }}
                         >
                           <span className="pill-text">

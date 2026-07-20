@@ -597,7 +597,7 @@ const ShopContent = ({
   );
 
   const handleSubCategoryChange = useCallback(
-    (subcategoryId: string) => {
+    (subcategoryId: string, subSlug?: string) => {
       // Category routes own the URL: navigate to the clean /<main>/<sub-slug>
       // (or back to /<main> when deselected) instead of an in-place filter.
       if (categoryMode && mainSlug) {
@@ -612,7 +612,10 @@ const ShopContent = ({
         if (selectedSubCategoryIds.includes(subcategoryId)) {
           router.push(`/${mainSlug}`); // toggle the active sub off
         } else {
-          const slug = subSlugById[subcategoryId];
+          // Prefer the slug passed straight from the clicked pill — it's always
+          // available, unlike our own subcategories query which may still be
+          // loading (that race made clicks occasionally do nothing).
+          const slug = subSlug || subSlugById[subcategoryId];
           router.push(slug ? `/${mainSlug}/${slug}` : `/${mainSlug}`);
         }
         return;
