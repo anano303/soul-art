@@ -7,6 +7,7 @@ import {
   useState,
   useRef,
   useCallback,
+  useMemo,
 } from "react";
 import { ProductGrid } from "@/modules/products/components/product-grid";
 import { ProductFilters } from "@/modules/products/components/product-filters";
@@ -65,6 +66,7 @@ interface ShopContentProps {
   initialMainCategory?: string;
   initialSubCategoryId?: string;
   categoryMode?: boolean;
+  mainSlug?: string;
 }
 
 const ShopContent = ({
@@ -73,6 +75,7 @@ const ShopContent = ({
   initialMainCategory = "",
   initialSubCategoryId = "",
   categoryMode = false,
+  mainSlug = "",
 }: ShopContentProps) => {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -161,6 +164,36 @@ const ShopContent = ({
     staleTime: 30 * 60 * 1000,
     gcTime: 60 * 60 * 1000,
   });
+
+  // In categoryMode, load this category's subcategories so a sub selection can
+  // navigate to the clean /<main>/<sub-slug> URL.
+  const { data: subcategoriesData = [] } = useQuery<
+    Array<{ _id?: string; id?: string; slug?: string }>
+  >({
+    queryKey: ["subcategories", initialMainCategory],
+    queryFn: async () => {
+      try {
+        const response = await fetchWithAuth(
+          `/subcategories?categoryId=${initialMainCategory}`,
+        );
+        return response.json();
+      } catch {
+        return [];
+      }
+    },
+    enabled: categoryMode && !!initialMainCategory,
+    refetchOnWindowFocus: false,
+    staleTime: 30 * 60 * 1000,
+  });
+
+  const subSlugById = useMemo(() => {
+    const map: Record<string, string> = {};
+    subcategoriesData.forEach((s) => {
+      const id = s._id || s.id;
+      if (id && s.slug) map[id] = s.slug;
+    });
+    return map;
+  }, [subcategoriesData]);
 
   const getTheme = () => {
     if (!selectedCategoryId || !categories.length) return "default";
@@ -526,20 +559,37 @@ const ShopContent = ({
     [selectedCategoryId],
   );
 
-  const handleSubCategoryChange = useCallback((subcategoryId: string) => {
-    setCurrentPage(1);
-    if (!subcategoryId) {
-      setSelectedSubCategoryIds([]);
-    } else {
-      setSelectedSubCategoryIds((prev) => {
-        if (prev.includes(subcategoryId)) {
-          return prev.filter((id) => id !== subcategoryId);
+  const handleSubCategoryChange = useCallback(
+    (subcategoryId: string) => {
+      // Category routes own the URL: navigate to the clean /<main>/<sub-slug>
+      // (or back to /<main> when deselected) instead of an in-place filter.
+      if (categoryMode && mainSlug) {
+        const isDeselect =
+          !subcategoryId || selectedSubCategoryIds.includes(subcategoryId);
+        if (isDeselect) {
+          router.push(`/${mainSlug}`);
         } else {
-          return [...prev, subcategoryId];
+          const slug = subSlugById[subcategoryId];
+          router.push(slug ? `/${mainSlug}/${slug}` : `/${mainSlug}`);
         }
-      });
-    }
-  }, []);
+        return;
+      }
+
+      setCurrentPage(1);
+      if (!subcategoryId) {
+        setSelectedSubCategoryIds([]);
+      } else {
+        setSelectedSubCategoryIds((prev) => {
+          if (prev.includes(subcategoryId)) {
+            return prev.filter((id) => id !== subcategoryId);
+          } else {
+            return [...prev, subcategoryId];
+          }
+        });
+      }
+    },
+    [categoryMode, mainSlug, subSlugById, selectedSubCategoryIds, router],
+  );
 
   const handleAgeGroupChange = useCallback((ageGroup: string) => {
     setCurrentPage(1);

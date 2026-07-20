@@ -563,8 +563,16 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
     return resolveBiography(artist.artistBio, language);
   }, [artist.artistBio, language]);
 
+  // If the seller hasn't uploaded a cover, fall back to their first product's
+  // image so the hero never looks empty.
+  const firstProductImage = products?.items?.find(
+    (p) => p.images && p.images.length > 0,
+  )?.images?.[0];
   const heroBackground =
-    currentCoverImage || artist.artistCoverImage || undefined;
+    currentCoverImage ||
+    artist.artistCoverImage ||
+    firstProductImage ||
+    undefined;
   const avatar = currentAvatar || artist.storeLogo || undefined;
 
   const portfolioPosts = useMemo(() => portfolio?.posts ?? [], [portfolio]);

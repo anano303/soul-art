@@ -177,6 +177,7 @@ export async function CategoryRoutePage({
           initialMainCategory={main.id}
           initialSubCategoryId={subId || ""}
           categoryMode
+          mainSlug={mainSlug}
         />
       </Suspense>
     </div>

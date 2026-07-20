@@ -188,6 +188,14 @@
   border-radius: 50%;
 }
 
+/* Initials fallback (<Avatar>) sets an inline pixel size — force it to fill the
+   responsive circle instead, so it never spills out on smaller screens. */
+.artist-hero__avatar .sa-avatar--initials.artist-hero__avatar-img {
+  width: 100% !important;
+  height: 100% !important;
+  font-size: clamp(2.2rem, 9vw, 3.4rem) !important;
+}
+
 .artist-hero__avatar-placeholder {
   display: flex;
   align-items: center;
