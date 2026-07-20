@@ -24,6 +24,13 @@ export class Category {
   nameEn?: string;
 
   @ApiProperty({
+    description: 'URL slug (clean category route, e.g. "paintings")',
+    example: 'paintings',
+  })
+  @Prop({ index: true, unique: true, sparse: true })
+  slug?: string;
+
+  @ApiProperty({
     description: 'Category description',
     example: 'სხვადასხვა ტიპის ტანსაცმელი',
   })
@@ -73,6 +80,7 @@ CategorySchema.pre('save', function (next) {
   const allowedFields = [
     'name',
     'nameEn',
+    'slug',
     'description',
     'descriptionEn',
     'isActive',

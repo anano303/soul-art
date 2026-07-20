@@ -28,6 +28,13 @@ export class SubCategory {
   nameEn?: string;
 
   @ApiProperty({
+    description: 'URL slug (clean route segment, unique within the category)',
+    example: 'abstract-style',
+  })
+  @Prop({ required: false })
+  slug?: string;
+
+  @ApiProperty({
     description: 'Parent category',
     example: '60d21b4667d0d8992e610c85',
   })
@@ -82,6 +89,11 @@ export const SubCategorySchema = SchemaFactory.createForClass(SubCategory);
 
 // Create compound index for unique subcategories within a category
 SubCategorySchema.index({ name: 1, categoryId: 1 }, { unique: true });
+// Slug must be unique within its parent category (/paintings/<slug>)
+SubCategorySchema.index(
+  { slug: 1, categoryId: 1 },
+  { unique: true, sparse: true },
+);
 
 // Ensure the virtual id field is properly included in serialization
 SubCategorySchema.set('toJSON', {

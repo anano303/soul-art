@@ -13,6 +13,7 @@ import { useQuery } from "@tanstack/react-query";
 import { fetchWithAuth } from "@/lib/fetch-with-auth";
 import { memoryCache } from "@/lib/cache";
 import { trackSeeMoreClick } from "@/lib/ga4-analytics";
+import { categoryPath } from "@/lib/category-url";
 import { TbPalette, TbNeedleThread } from "react-icons/tb";
 
 interface CategoryProducts {
@@ -296,7 +297,7 @@ const HomePageShop = () => {
 
                     <div className="see-more-desktop see-more">
                       <Link
-                        href={`/shop?page=1&mainCategory=${categoryData.categoryId}`}
+                        href={categoryPath(categoryData.categoryId)}
                         onClick={() =>
                           trackSeeMoreClick(
                             categoryData.category,
@@ -324,7 +325,7 @@ const HomePageShop = () => {
                   />
                   <div className="see-more-mobile see-more">
                     <Link
-                      href={`/shop?page=1&mainCategory=${categoryData.categoryId}`}
+                      href={categoryPath(categoryData.categoryId)}
                       onClick={() =>
                         trackSeeMoreClick(
                           categoryData.category,

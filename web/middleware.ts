@@ -58,13 +58,6 @@ async function getGeoFromIP(ip: string) {
   }
 }
 
-const publicPaths = [
-  "/", "/login", "/register", "/forgot-password", "/reset-password",
-  "/auth-callback", "/become-seller", "/forum",
-  "/checkout", "/checkout/success", "/checkout/fail",
-  "/donation", "/donation/success", "/donation/fail",
-];
-
 const protectedPaths = ["/profile", "/orders"];
 
 // Currency mapping
@@ -75,6 +68,36 @@ const currencyMap: Record<string, string> = {
   LV: "EUR", LT: "EUR", SK: "EUR", SI: "EUR", CY: "EUR", MT: "EUR",
   LU: "EUR", PL: "EUR", CZ: "EUR", HU: "EUR", RO: "EUR", BG: "EUR",
   HR: "EUR", DK: "EUR", SE: "EUR", NO: "EUR", CH: "EUR", GB: "EUR",
+};
+
+// Clean-category redirect maps (from migrate-category-slugs.ts). Main
+// categories + subcategories that currently have LIVE products only.
+const CATEGORY_SLUG_MAP: Record<string, string> = {
+  "68768f6f0b55154655a8e882": "paintings",
+  "68768f850b55154655a8e88f": "handmade",
+};
+const SUBCATEGORY_SLUG_MAP: Record<string, string> = {
+  // paintings
+  "68768f990b55154655a8e89d": "paintings/abstraction",
+  "68769d0ba7672efd3181125a": "paintings/landscape",
+  "68769d2da7672efd31811268": "paintings/portrait",
+  "68769d44a7672efd31811277": "paintings/animation",
+  "68769d59a7672efd31811285": "paintings/graphics",
+  "68d8cce983c6d6636d570e76": "paintings/other",
+  "68d8cd3f83c6d6636d570ec1": "paintings/digital",
+  // handmade
+  "68768fad0b55154655a8e8ab": "handmade/dolls",
+  "6876c50c39d2cdf209e0f298": "handmade/flowers",
+  "6876c54c39d2cdf209e0f2a9": "handmade/wooden-products",
+  "6876c55f39d2cdf209e0f2b7": "handmade/candles",
+  "6876c57739d2cdf209e0f2c6": "handmade/clay",
+  "6876c6c639d2cdf209e0f3b2": "handmade/decor",
+  "6876ea6f39d2cdf209e0fa56": "handmade/jewelry",
+  "6876eab139d2cdf209e0fa66": "handmade/tablecloth",
+  "68d8cd7c83c6d6636d570eea": "handmade/others",
+  "68ded8658443c8f8dbec5cae": "handmade/knives",
+  "69ebd09de6971de744276184": "handmade/bags",
+  "69efb29b57e62ace369994bb": "handmade/epoxy",
 };
 
 export async function middleware(request: NextRequest) {
@@ -88,9 +111,43 @@ export async function middleware(request: NextRequest) {
     p === "/shop" ||
     p.startsWith("/products/") ||
     p.startsWith("/@") ||
-    p.startsWith("/%40"); // encoded "@"
+    p.startsWith("/%40") || // encoded "@"
+    p === "/paintings" ||
+    p.startsWith("/paintings/") ||
+    p === "/handmade" ||
+    p.startsWith("/handmade/");
 
   const hasEnPrefix = pathname === "/en" || pathname.startsWith("/en/");
+
+  // (C) legacy /shop?mainCategory=<id>[&subCategory=<id>] → clean category URL.
+  //     Only for "clean" category landings (no other filters/pages that would
+  //     be lost); filtered/paginated shop URLs stay on /shop. Runs before the
+  //     locale rules so it lands directly on the right (optionally /en) URL.
+  if (pathname === "/shop") {
+    const sp = request.nextUrl.searchParams;
+    const mc = sp.get("mainCategory");
+    const mainSlug = mc ? CATEGORY_SLUG_MAP[mc] : undefined;
+    if (mainSlug) {
+      const allowed = new Set(["mainCategory", "subCategory", "lang", "page"]);
+      const hasExtra = [...sp.keys()].some((k) => !allowed.has(k));
+      const pageOk = !sp.get("page") || sp.get("page") === "1";
+      const sc = sp.get("subCategory");
+      // If a subcategory is present but we have no clean slug for it, DON'T
+      // redirect (would silently drop the filter) — leave it on /shop.
+      const subResolvable = !sc || !!SUBCATEGORY_SLUG_MAP[sc];
+      if (!hasExtra && pageOk && subResolvable) {
+        let target =
+          sc && SUBCATEGORY_SLUG_MAP[sc]
+            ? `/${SUBCATEGORY_SLUG_MAP[sc]}`
+            : `/${mainSlug}`;
+        if (sp.get("lang") === "en") target = `/en${target}`;
+        const url = request.nextUrl.clone();
+        url.pathname = target;
+        url.search = "";
+        return NextResponse.redirect(url, 301);
+      }
+    }
+  }
 
   // (B) /en/<seo-path> → REWRITE (not redirect) to the real route with lang=en.
   //     Browser URL stays /en/… ; server renders EN metadata; the client reads

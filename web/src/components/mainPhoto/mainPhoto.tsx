@@ -6,6 +6,7 @@ import dynamic from "next/dynamic";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import "./mainPhoto.css";
 import { useLanguage } from "@/hooks/LanguageContext";
+import { categoryPath } from "@/lib/category-url";
 import { useAuth } from "@/hooks/use-auth";
 import { Role } from "@/types/role";
 import SearchBox from "../SearchBox/search-box";
@@ -193,7 +194,7 @@ const MainPhoto = () => {
             {CATEGORIES.map((cat) => (
               <Link
                 key={cat.id}
-                href={`/shop?page=1&mainCategory=${cat.id}`}
+                href={categoryPath(cat.id)}
                 className="hero-cat-btn"
               >
                 <Image

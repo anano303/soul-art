@@ -420,20 +420,33 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       );
 
     // კატეგორიების გვერდები
+    // Clean category URLs (/paintings, /handmade). id->slug map also drives
+    // the subcategory URLs below.
+    const catSlugById: Record<string, string> = {};
+    categories.forEach((c: { _id: string; slug?: string }) => {
+      if (c?._id && c.slug) catSlugById[String(c._id)] = c.slug;
+    });
     const categoryPages = categories
-      .filter((category: any) => category && category._id)
+      .filter((category: any) => category && category._id && category.slug)
       .map(
         (category: {
           _id: string;
+          slug: string;
           updatedAt?: string;
           createdAt?: string;
         }) => ({
-          url: `${baseUrl}/shop?category=${category._id}`,
+          url: `${baseUrl}/${category.slug}`,
           lastModified: new Date(
             category.updatedAt || category.createdAt || new Date(),
           ),
           changeFrequency: "weekly" as const,
-          priority: 0.7,
+          priority: 0.8,
+          alternates: {
+            languages: {
+              ka: `${baseUrl}/${category.slug}`,
+              en: `${baseUrl}/en/${category.slug}`,
+            },
+          },
         }),
       );
 
@@ -485,23 +498,45 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         priority: 0.75,
       }));
 
-    // ქვეკატეგორიების გვერდები (მაღაზიაში ფილტრაციისთვის)
+    // ქვეკატეგორიების სუფთა URL-ები (/paintings/<slug>) — მხოლოდ სლაგიანი
+    // ქვეკატეგორიები სლაგიანი მშობელი კატეგორიით.
+    const parentIdOf = (categoryId: unknown): string =>
+      categoryId && typeof categoryId === "object"
+        ? String(
+            (categoryId as { _id?: string; id?: string })._id ||
+              (categoryId as { _id?: string; id?: string }).id,
+          )
+        : String(categoryId ?? "");
     const subCategoryPages = subCategories
       .filter(
-        (subCat: any) => subCat && (subCat._id || subCat.id) && subCat.name,
+        (subCat: any) =>
+          subCat &&
+          (subCat._id || subCat.id) &&
+          subCat.slug &&
+          catSlugById[parentIdOf(subCat.categoryId)],
       )
       .map(
         (subCat: {
           _id?: string;
           id?: string;
           name: string;
-          categoryId?: string;
-        }) => ({
-          url: `${baseUrl}/shop?subCategory=${subCat._id || subCat.id}`,
-          lastModified: new Date(),
-          changeFrequency: "weekly" as const,
-          priority: 0.7,
-        }),
+          slug: string;
+          categoryId?: unknown;
+        }) => {
+          const path = `/${catSlugById[parentIdOf(subCat.categoryId)]}/${subCat.slug}`;
+          return {
+            url: `${baseUrl}${path}`,
+            lastModified: new Date(),
+            changeFrequency: "weekly" as const,
+            priority: 0.7,
+            alternates: {
+              languages: {
+                ka: `${baseUrl}${path}`,
+                en: `${baseUrl}/en${path}`,
+              },
+            },
+          };
+        },
       );
 
     // აუქციონების გვერდები - დინამიური მონაცემებით

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useLanguage } from "@/hooks/LanguageContext";
+import { categoryPath } from "@/lib/category-url";
 import "./heroCategories.css";
 
 const S3 = "https://soulart-s3.s3.eu-north-1.amazonaws.com";
@@ -35,7 +36,7 @@ const HeroCategories = () => {
         {CATEGORIES.map((cat) => (
           <Link
             key={cat.id}
-            href={`/shop?page=1&mainCategory=${cat.id}`}
+            href={categoryPath(cat.id)}
             className="hero-category-card"
           >
             <div className="hero-category-img-wrap">

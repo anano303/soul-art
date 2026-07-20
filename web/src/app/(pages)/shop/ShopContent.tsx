@@ -60,11 +60,19 @@ import Image from "next/image";
 interface ShopContentProps {
   initialProducts?: Product[];
   initialTotalPages?: number;
+  // Clean category routes (/paintings, /handmade/<sub>) seed the category from
+  // props and suppress the ?mainCategory= URL sync to keep the URL clean.
+  initialMainCategory?: string;
+  initialSubCategoryId?: string;
+  categoryMode?: boolean;
 }
 
 const ShopContent = ({
   initialProducts = [],
   initialTotalPages = 1,
+  initialMainCategory = "",
+  initialSubCategoryId = "",
+  categoryMode = false,
 }: ShopContentProps) => {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -197,8 +205,11 @@ const ShopContent = ({
     }
 
     const initialPage = hasValidPageParam ? parsedPageParam : storedPage;
-    const mainCategoryParam = searchParams?.get("mainCategory") || "";
-    const subCategoryParam = searchParams?.get("subCategory") || "";
+    // On clean category routes the id comes from props (no URL query).
+    const mainCategoryParam =
+      searchParams?.get("mainCategory") || initialMainCategory || "";
+    const subCategoryParam =
+      searchParams?.get("subCategory") || initialSubCategoryId || "";
     const ageGroupParam = searchParams?.get("ageGroup") || "";
     const sizeParam = searchParams?.get("size") || "";
     const colorParam = searchParams?.get("color") || "";
@@ -447,6 +458,9 @@ const ShopContent = ({
 
   useEffect(() => {
     if (!initializedRef.current) return;
+    // Category routes own the URL (/paintings/<sub>); don't rewrite it to
+    // /shop?mainCategory=… (would break the clean URL and 301-loop).
+    if (categoryMode) return;
 
     const params = new URLSearchParams();
     if (selectedCategoryId) params.set("mainCategory", selectedCategoryId);

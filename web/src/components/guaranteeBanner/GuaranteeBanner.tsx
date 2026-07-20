@@ -6,9 +6,6 @@ import { useLanguage } from "@/hooks/LanguageContext";
 import { Button } from "@/components/ui/button";
 import "./guarantee-banner.css";
 
-const PAINTINGS_CATEGORY_ID = "68768f6f0b55154655a8e882";
-const HANDMADE_CATEGORY_ID = "68768f850b55154655a8e88f";
-
 export default function GuaranteeBanner() {
   const { language } = useLanguage();
   const en = language === "en";
@@ -56,15 +53,11 @@ export default function GuaranteeBanner() {
         </p>
 
         <div className="gb-actions">
-          <Button
-            href={`/shop?mainCategory=${PAINTINGS_CATEGORY_ID}`}
-            variant="primary"
-            size="md"
-          >
+          <Button href="/paintings" variant="primary" size="md">
             {en ? "Paintings" : "ნახატები"}
           </Button>
           <Button
-            href={`/shop?mainCategory=${HANDMADE_CATEGORY_ID}`}
+            href="/handmade"
             variant="secondary"
             size="md"
             className="on-dark"
