@@ -121,13 +121,24 @@ export async function generateMetadata({
     // Await searchParams as it's now a Promise in Next.js 15+
     const params = await searchParams;
 
-    // Get brand from search params
+    // Get active filters from search params
     const brand = typeof params?.brand === "string" ? params.brand : "";
+    const mainCategory =
+      typeof params?.mainCategory === "string" ? params.mainCategory : "";
+    const subCategory =
+      typeof params?.subCategory === "string" ? params.subCategory : "";
     const locale = resolveLocale(params?.lang);
+    const en = locale === "en";
 
-    let apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/products?page=1&limit=1&sort=createdAt&direction=desc&populate=user&populate=images`;
+    let apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/products?page=1&limit=1&sort=createdAt&direction=desc&populate=user&populate=images&populate=mainCategory&populate=subCategory`;
     if (brand) {
       apiUrl += `&brand=${encodeURIComponent(brand)}`;
+    }
+    if (mainCategory) {
+      apiUrl += `&mainCategory=${encodeURIComponent(mainCategory)}`;
+    }
+    if (subCategory) {
+      apiUrl += `&subCategory=${encodeURIComponent(subCategory)}`;
     }
 
     // Fetch the most recent product (or most recent from specific brand) to use as representative image
@@ -146,6 +157,8 @@ export async function generateMetadata({
         ? "Shop unique handmade items and original paintings by Georgian artists on SoulArt — accessories, décor and gifts at the best prices in Georgia."
         : "შეიძინეთ უნიკალური ხელნაკეთი ნივთები და ნახატები SoulArt-ის ონლაინ პლატფორმაზე. ქართველი ხელოვანების ნამუშევრები, ხელნაკეთი ნივთები, აქსესუარები და დეკორი. ხარისხიანი ნივთები საუკეთესო ფასად საქართველოში.";
     let latestProduct: ShopProduct | null = null;
+    let hasResults = false; // does this filter combination have any products?
+    let categoryName = ""; // active sub/main category name for the title
 
     if (response.ok) {
       const data = await response.json();
@@ -156,8 +169,19 @@ export async function generateMetadata({
         : Array.isArray(data)
         ? data
         : [];
+      hasResults = items.length > 0;
       if (items.length > 0) {
         latestProduct = items[0];
+
+        // Resolve the active category name from the populated product
+        // (sub-category takes precedence over main category).
+        const nameOf = (
+          c?: string | { name?: string | null; title?: string | null } | null
+        ) =>
+          c && typeof c === "object" ? c.name ?? c.title ?? "" : "";
+        if (subCategory) categoryName = nameOf(latestProduct?.subCategory);
+        else if (mainCategory)
+          categoryName = nameOf(latestProduct?.mainCategory);
 
         // For brand pages, use the populated user information
         if (brand && latestProduct?.user) {
@@ -178,13 +202,18 @@ export async function generateMetadata({
       }
     }
 
-    // Update title and description to include brand/author info (outside API check)
+    // Title/description: brand > category > default (outside API check)
     if (brand) {
       title = `${authorInfo}'s Art Shop | SoulArt`;
       description =
         locale === "en"
           ? `Shop ${authorInfo}'s unique artworks on SoulArt — original Georgian art, paintings and handmade items.`
           : `შეიძინეთ ${authorInfo}-ის უნიკალური ნამუშევრები SoulArt-ის ონლაინ პლატფორმაზე. ქართველი ხელოვანების ნამუშევრები, ნახატები, ხელნაკეთი ნივთები.`;
+    } else if (categoryName) {
+      title = `${categoryName} | SoulArt`;
+      description = en
+        ? `Browse ${categoryName} on SoulArt — original works and handmade items by Georgian artists at the best prices in Georgia.`
+        : `${categoryName} — SoulArt-ზე ქართველი ხელოვანების ორიგინალი ნამუშევრები და ხელნაკეთი ნივთები საუკეთესო ფასად.`;
     }
 
     const pageKeywords = collectShopKeywords({
@@ -199,6 +228,20 @@ export async function generateMetadata({
     // brand terms only (no per-other-listing dumps).
     const keywords = mergeKeywordSets(pageKeywords, GLOBAL_KEYWORDS).slice(0, 30);
 
+    // Self-referencing canonical path including the active filters.
+    const filterQs: string[] = [];
+    if (brand) filterQs.push(`brand=${encodeURIComponent(brand)}`);
+    if (mainCategory)
+      filterQs.push(`mainCategory=${encodeURIComponent(mainCategory)}`);
+    if (subCategory)
+      filterQs.push(`subCategory=${encodeURIComponent(subCategory)}`);
+    const shopPath = filterQs.length ? `/shop?${filterQs.join("&")}` : "/shop";
+    // One locale-aware URL used for BOTH canonical and og:url (path-based /en).
+    const localeAlternates = buildLocaleAlternates(shopPath, locale);
+
+    // Empty filter combinations are thin content → noindex (but still follow).
+    const allowIndex = !((brand || mainCategory || subCategory) && !hasResults);
+
     return {
       title,
       description,
@@ -207,10 +250,10 @@ export async function generateMetadata({
       creator: authorInfo,
       publisher: "SoulArt",
       robots: {
-        index: true,
+        index: allowIndex,
         follow: true,
         googleBot: {
-          index: true,
+          index: allowIndex,
           follow: true,
           "max-image-preview": "large",
           "max-snippet": -1,
@@ -219,9 +262,7 @@ export async function generateMetadata({
       openGraph: {
         title,
         description,
-        url: brand
-          ? `https://soulart.ge/shop?brand=${encodeURIComponent(brand)}`
-          : "https://soulart.ge/shop",
+        url: localeAlternates.canonical,
         siteName: "SoulArt",
         images: [
           {
@@ -242,10 +283,7 @@ export async function generateMetadata({
         description,
         images: [representativeImage],
       },
-      alternates: buildLocaleAlternates(
-        brand ? `/shop?brand=${encodeURIComponent(brand)}` : "/shop",
-        locale
-      ),
+      alternates: localeAlternates,
     };
   } catch (error) {
     console.error("Error generating shop metadata:", error);

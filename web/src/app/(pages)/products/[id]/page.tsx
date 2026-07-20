@@ -129,6 +129,9 @@ export async function generateMetadata({
         ? [{ url: product.images[0], width: 1200, height: 630, alt: name }]
         : [{ url: "/logo.png", width: 1200, height: 630, alt: "SoulArt" }];
 
+    // One locale-aware URL used for BOTH canonical and og:url (path-based /en).
+    const localeAlternates = buildLocaleAlternates(productHref(product), locale);
+
     return {
       title,
       description,
@@ -154,9 +157,7 @@ export async function generateMetadata({
         locale: en ? "en_US" : "ka_GE",
         alternateLocale: en ? "ka_GE" : "en_US",
         siteName: "SoulArt",
-        url: en
-          ? `https://soulart.ge${productHref(product)}?lang=en`
-          : `https://soulart.ge${productHref(product)}`,
+        url: localeAlternates.canonical,
       },
       twitter: {
         card: "summary_large_image",
@@ -165,7 +166,7 @@ export async function generateMetadata({
         images: product.images?.length > 0 ? [product.images[0]] : ["/logo.png"],
       },
       // Self-referential canonical per locale + ka/en hreflang alternates.
-      alternates: buildLocaleAlternates(productHref(product), locale),
+      alternates: localeAlternates,
       other: {
         "product:price:amount":
           product.discountedPrice && product.discountedPrice < product.price

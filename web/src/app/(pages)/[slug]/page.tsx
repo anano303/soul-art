@@ -75,10 +75,12 @@ function buildAbsoluteUrl(path: string) {
   }
 }
 
+// Seller-level keywords ONLY: display name, bio/tags, and the general
+// categories/disciplines the seller works in — NEVER individual product
+// attributes (material / size / color / per-product name & description).
 const collectArtistKeywords = (
   artist: ArtistProfileResponse["artist"],
   biography: string,
-  products: ArtistProfileResponse["products"] | null,
 ): string[] => {
   const keywordMap = new Map<string, string>();
 
@@ -124,14 +126,10 @@ const collectArtistKeywords = (
     });
   }
 
-  // Only the seller's OWN products — scoped, no cross-listing contamination.
-  if (products?.items?.length) {
-    products.items.forEach((product) => {
-      register(product.name);
-      register(product.brand);
-      registerText(product.description ?? undefined);
-    });
-  }
+  // NOTE: intentionally NOT iterating the seller's products. Product-level
+  // attributes (material/size/color/name/description) don't belong in a
+  // seller page's keywords — the seller's disciplines (registered above)
+  // already cover the general categories they sell in.
 
   return Array.from(keywordMap.values());
 };
@@ -180,16 +178,15 @@ export async function generateMetadata({
       }
     }
 
-    // Use post-specific data if available, otherwise fall back to artist data
+    // Unique per-seller description: post caption (post shares) → seller bio →
+    // a simple name-based fallback (NOT a product-mirroring generic pattern).
     const description = postCaption
       ? postCaption.slice(0, 180) + (postCaption.length > 180 ? "…" : "")
       : biography
         ? biography.slice(0, 180) + (biography.length > 180 ? "…" : "")
-        : `${displayName} • SoulArt portfolio showcasing highlights and commissions.`;
-
-    const canonical = postId
-      ? buildAbsoluteUrl(`/@${slug}?post=${postId}`)
-      : buildAbsoluteUrl(`/@${slug}`);
+        : locale === "en"
+          ? `${displayName}'s works on SoulArt`
+          : `${displayName}-ის ნამუშევრები SoulArt-ზე`;
 
     // Use post image if available, otherwise use artist image
     const imageUrl =
@@ -205,16 +202,14 @@ export async function generateMetadata({
         ]
       : undefined;
 
-    const artistKeywordSet = collectArtistKeywords(
-      artist,
-      biography,
-      data.products ?? null,
-    );
+    const artistKeywordSet = collectArtistKeywords(artist, biography);
 
-    // Scoped strictly to this artist and their own products.
+    // Scoped strictly to this seller's own profile data.
     const keywords = mergeKeywordSets(artistKeywordSet).slice(0, 25);
 
     const localizedPath = postId ? `/@${slug}?post=${postId}` : `/@${slug}`;
+    // One locale-aware URL used for BOTH canonical and og:url (path-based /en).
+    const localeAlternates = buildLocaleAlternates(localizedPath, locale);
 
     return {
       title:
@@ -223,11 +218,11 @@ export async function generateMetadata({
           : `${displayName} | SoulArt ხელოვანი`,
       description,
       keywords: keywords.length ? keywords : undefined,
-      alternates: buildLocaleAlternates(localizedPath, locale),
+      alternates: localeAlternates,
       openGraph: {
         title: `${displayName} | SoulArt`,
         description,
-        url: canonical,
+        url: localeAlternates.canonical,
         type: "profile",
         siteName: "SoulArt",
         images,
