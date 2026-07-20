@@ -185,9 +185,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  /* Reserve close to a full grid's height so the loading → grid swap doesn't
-     shift the footer/page below it (CLS). */
-  min-height: 70vh;
+  height: 300px;
   font-size: 18px;
   color: #aaa;
 }
