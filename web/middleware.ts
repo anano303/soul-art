@@ -158,7 +158,10 @@ export async function middleware(request: NextRequest) {
       const url = request.nextUrl.clone();
       url.pathname = stripped;
       url.searchParams.set("lang", "en");
-      return NextResponse.rewrite(url);
+      // Tell the server layout to render <html lang="en"> for /en/* routes.
+      const requestHeaders = new Headers(request.headers);
+      requestHeaders.set("x-locale", "en");
+      return NextResponse.rewrite(url, { request: { headers: requestHeaders } });
     }
     // non-SEO /en/* falls through to the existing /en catch-all redirect shim
   }

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 import localFont from "next/font/local";
 import { Noto_Serif_Georgian } from "next/font/google";
 import "./globals.css";
@@ -155,13 +156,15 @@ export const metadata: Metadata = {
     },
   };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  // Locale is set by middleware: "en" for /en/* routes, "ka" (default) otherwise.
+  const locale = (await headers()).get("x-locale") === "en" ? "en" : "ka";
   return (
-    <html lang="en" data-scroll-behavior="smooth">
+    <html lang={locale} data-scroll-behavior="smooth">
       <head>
         {/* Favicon links */}
         <link
