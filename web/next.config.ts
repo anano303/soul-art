@@ -1,6 +1,11 @@
 import type { NextConfig } from "next";
 // @ts-ignore - next-pwa doesn't have official TypeScript declarations
 import withPWA from "next-pwa";
+import bundleAnalyzer from "@next/bundle-analyzer";
+
+const withBundleAnalyzer = bundleAnalyzer({
+  enabled: process.env.ANALYZE === "true",
+});
 
 const nextConfig: NextConfig = {
   experimental: {
@@ -215,7 +220,8 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default withPWA({
+export default withBundleAnalyzer(
+  withPWA({
   dest: "public",
   register: true,
   skipWaiting: true,
@@ -277,4 +283,5 @@ export default withPWA({
   fallbacks: {
     document: "/offline",
   },
-})(nextConfig);
+})(nextConfig),
+);
