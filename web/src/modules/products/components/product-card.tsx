@@ -290,7 +290,10 @@ export function ProductCard({
             src={productImage}
             alt={displayName}
             fill
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            // Grid cards render ~320–480px wide (min-width:320px, max-width:25%),
+            // 2 columns on tablets, ~1 column on phones. Cap the requested width
+            // so Next/Image serves a thumbnail-sized variant, not the 3840 breakpoint.
+            sizes="(max-width: 680px) 90vw, (max-width: 1024px) 45vw, 360px"
             loading="lazy"
             className="image"
           />

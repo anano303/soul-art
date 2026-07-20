@@ -82,6 +82,11 @@ const ShopContent = ({
   const { t } = useLanguage();
 
   const initializedRef = useRef(false);
+  // When the server already rendered this view's products (clean category
+  // routes), skip the first client fetch — it would just re-request the
+  // identical query the server already resolved. Filter/page changes after
+  // init still fetch normally.
+  const skipInitialFetchRef = useRef(initialProducts.length > 0);
   const pendingInitialStateRef = useRef<{
     page: number;
     mainCategory: string;
@@ -194,6 +199,16 @@ const ShopContent = ({
     });
     return map;
   }, [subcategoriesData]);
+
+  // Prefetch the clean sub-routes so switching categories is instant (Next
+  // preloads the RSC + its server-rendered products before the click).
+  useEffect(() => {
+    if (!categoryMode || !mainSlug) return;
+    router.prefetch(`/${mainSlug}`);
+    Object.values(subSlugById).forEach((slug) =>
+      router.prefetch(`/${mainSlug}/${slug}`),
+    );
+  }, [categoryMode, mainSlug, subSlugById, router]);
 
   const getTheme = () => {
     if (!selectedCategoryId || !categories.length) return "default";
@@ -383,6 +398,11 @@ const ShopContent = ({
 
   useEffect(() => {
     if (!initializedRef.current) return;
+    // First pass after init: the server already gave us these exact products.
+    if (skipInitialFetchRef.current) {
+      skipInitialFetchRef.current = false;
+      return;
+    }
 
     const loadProducts = async () => {
       setIsLoading(true);
