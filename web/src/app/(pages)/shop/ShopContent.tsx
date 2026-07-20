@@ -55,6 +55,7 @@ const SPRING_KEYWORDS = [
   "peony",
 ];
 import { fetchWithAuth } from "@/lib/fetch-with-auth";
+import { categoryPath } from "@/lib/category-url";
 import "./ShopPage.css";
 import Image from "next/image";
 
@@ -567,6 +568,22 @@ const ShopContent = ({
 
   const handleCategoryChange = useCallback(
     (categoryId: string) => {
+      // On clean category routes, switching the main category must NAVIGATE to
+      // that category's clean URL (/paintings ↔ /handmade), otherwise the URL
+      // (and the mainSlug used for sub-links) desyncs from the shown products.
+      if (categoryMode) {
+        if (!categoryId) {
+          router.push("/shop"); // deselect → full listing
+          return;
+        }
+        if (categoryId === initialMainCategory) return; // already here
+        const cat = categories.find(
+          (c) => c._id === categoryId || c.id === categoryId,
+        );
+        router.push(categoryPath(categoryId, (cat as { slug?: string })?.slug));
+        return;
+      }
+
       setCurrentPage(1);
       setSelectedCategoryId(categoryId);
       if (categoryId !== selectedCategoryId) {
@@ -576,7 +593,7 @@ const ShopContent = ({
         setSelectedColor("");
       }
     },
-    [selectedCategoryId],
+    [categoryMode, initialMainCategory, categories, router, selectedCategoryId],
   );
 
   const handleSubCategoryChange = useCallback(
@@ -584,10 +601,16 @@ const ShopContent = ({
       // Category routes own the URL: navigate to the clean /<main>/<sub-slug>
       // (or back to /<main> when deselected) instead of an in-place filter.
       if (categoryMode && mainSlug) {
-        const isDeselect =
-          !subcategoryId || selectedSubCategoryIds.includes(subcategoryId);
-        if (isDeselect) {
-          router.push(`/${mainSlug}`);
+        // Clearing the subcategory (the "All" pill, or the reset fired when the
+        // main category changes): only navigate to the category root if we're
+        // actually on a sub-route. Otherwise this would fight the main-category
+        // navigation with a competing router.push and cancel it.
+        if (!subcategoryId) {
+          if (selectedSubCategoryIds.length > 0) router.push(`/${mainSlug}`);
+          return;
+        }
+        if (selectedSubCategoryIds.includes(subcategoryId)) {
+          router.push(`/${mainSlug}`); // toggle the active sub off
         } else {
           const slug = subSlugById[subcategoryId];
           router.push(slug ? `/${mainSlug}/${slug}` : `/${mainSlug}`);

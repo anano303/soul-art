@@ -1004,8 +1004,12 @@ export function ProductFilters({
                             onCategoryChange("");
                             setShowSubcategories(false);
                           } else {
+                            // Switch main category. Do NOT also clear the
+                            // subcategory here — on clean category routes that
+                            // fires a second, competing navigation that cancels
+                            // the main-category switch. handleCategoryChange
+                            // resets the subcategory itself.
                             onCategoryChange(categoryId);
-                            onSubCategoryChange("");
                             setShowSubcategories(true);
                           }
                         }}
