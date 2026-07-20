@@ -155,7 +155,6 @@
     5% 100%,
     0% 95%
   ); */
-  max-height: min-content;
   background: var(--primary-color, #012645);
 }
 
