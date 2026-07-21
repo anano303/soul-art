@@ -49,6 +49,14 @@ export default function WhySoulArt() {
               across Georgia and a money-back guarantee if anything isn&apos;t
               right, so buying art online feels calm and trustworthy.
             </p>
+            <p>
+              Because every piece is made by hand, each one is a little different
+              — and that is exactly what makes it special. To discover new artists
+              and works, browse the categories: paintings, handmade items,
+              ceramics, jewellery and home décor. Message us any time if
+              you&apos;re looking for a particular style, size or budget, and
+              we&apos;ll help you find the right piece.
+            </p>
           </>
         ) : (
           <>
@@ -75,6 +83,14 @@ export default function WhySoulArt() {
               ბეჭდურ რეპროდუქციას, არამედ ხელით შექმნილ ორიგინალს. შესყიდვა
               მარტივი და უსაფრთხოა, მიწოდება კი მთელ საქართველოში ხდება, პრობლემის
               შემთხვევაში კი თანხის დაბრუნების გარანტიით სარგებლობ.
+            </p>
+            <p>
+              რადგან ყოველი ნამუშევარი ხელით არის შექმნილი, თითოეული ოდნავ
+              განსხვავებულია — სწორედ ეს ხდის მას განსაკუთრებულს. ახალი ავტორებისა
+              და ნამუშევრების აღმოსაჩენად დაათვალიერე კატეგორიები: ნახატები,
+              ხელნაკეთი ნივთები, კერამიკა, სამკაული და ინტერიერის დეკორი. მოგვწერე,
+              თუ კონკრეტული სტილის, ზომის ან ბიუჯეტის ნამუშევარს ეძებ — დაგეხმარებით
+              შესაფერისის მოძებნაში.
             </p>
           </>
         )}
