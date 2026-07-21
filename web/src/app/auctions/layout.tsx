@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://soulart.ge";
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://www.soulart.ge";
 
 export const metadata: Metadata = {
   title: "ხელოვნების აუქციონები | SoulArt - ქართული ხელოვნების მარკეტფლეისი",

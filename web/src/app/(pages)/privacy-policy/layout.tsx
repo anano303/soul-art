@@ -40,7 +40,7 @@ export const metadata: Metadata = {
     title: "კონფიდენციალურობის პოლიტიკა - SoulArt | Privacy Policy",
     description:
       "გაეცანით SoulArt-ის კონფიდენციალურობის პოლიტიკას. როგორ ვიყენებთ და ვიცავთ თქვენს პირად ინფორმაციას. ხელნაკეთი ნაწარმოებისა და ნახატების მარკეტპლეისი.",
-    url: "https://soulart.ge/privacy-policy",
+    url: "https://www.soulart.ge/privacy-policy",
     siteName: "SoulArt",
     images: [
       {
@@ -61,7 +61,7 @@ export const metadata: Metadata = {
     images: ["/logo.png"],
   },
   alternates: {
-    canonical: "https://soulart.ge/privacy-policy",
+    canonical: "https://www.soulart.ge/privacy-policy",
   },
 };
 

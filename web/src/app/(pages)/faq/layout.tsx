@@ -12,7 +12,7 @@ export const metadata: Metadata = {
   openGraph: {
     title,
     description,
-    url: "https://soulart.ge/faq",
+    url: "https://www.soulart.ge/faq",
     siteName: "SoulArt",
     locale: "ka_GE",
     type: "website",

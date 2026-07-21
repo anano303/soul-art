@@ -96,13 +96,13 @@ export const metadata: Metadata = {
     description:
       "გაიგე Soulart.ge-ს შესახებ - ქართული ონლაინ პლატფორმა ხელოვანებისა და ხელნაკეთი ნივთების მოყვარულებისთვის. ჩვენი ისტორია, დამფუძნებლები , მისია და ხედვა.",
     type: "website",
-    url: "https://soulart.ge/about",
+    url: "https://www.soulart.ge/about",
     siteName: "Soulart",
     locale: "ka_GE",
     alternateLocale: ["en_US"],
     images: [
       {
-        url: "https://soulart.ge/van-gogh.webp",
+        url: "https://www.soulart.ge/van-gogh.webp",
         width: 1200,
         height: 630,
         alt: "Soulart - ქართული პლატფორმა ხელოვანებისთვის",
@@ -115,13 +115,13 @@ export const metadata: Metadata = {
     title: "ჩვენს შესახებ | Soulart - About Us",
     description:
       "გაიგე Soulart.ge-ს შესახებ - ქართული ონლაინ პლატფორმა ხელოვანებისა და ხელნაკეთი ნივთების მოყვარულებისთვის.",
-    images: ["https://soulart.ge/van-gogh.webp"],
+    images: ["https://www.soulart.ge/van-gogh.webp"],
   },
   alternates: {
-    canonical: "https://soulart.ge/about",
+    canonical: "https://www.soulart.ge/about",
     languages: {
-      "ka-GE": "https://soulart.ge/about",
-      "en-US": "https://soulart.ge/about",
+      "ka-GE": "https://www.soulart.ge/about",
+      "en-US": "https://www.soulart.ge/about",
     },
   },
 };

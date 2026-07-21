@@ -140,7 +140,7 @@ export async function generateMetadata({
       openGraph: {
         title,
         description,
-        url: `https://soulart.ge/forum/${id}`,
+        url: `https://www.soulart.ge/forum/${id}`,
         siteName: "SoulArt.ge",
         images: forum.image
           ? [

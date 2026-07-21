@@ -40,7 +40,7 @@ export const metadata: Metadata = {
     title: "გახდი SoulArt-ის პარტნიორი - შემოსავალი ინფლუენსერებისთვის",
     description:
       "გაუზიარე SoulArt-ის პროდუქტები შენს აუდიტორიას და მიიღე საკომისიო ყოველი გაყიდვიდან. უფასო რეგისტრაცია!",
-    url: "https://soulart.ge/sales-manager-register",
+    url: "https://www.soulart.ge/sales-manager-register",
     siteName: "SoulArt",
     images: [
       {
@@ -61,7 +61,7 @@ export const metadata: Metadata = {
     images: ["/sales-manager.png"],
   },
   alternates: {
-    canonical: "https://soulart.ge/sales-manager-register",
+    canonical: "https://www.soulart.ge/sales-manager-register",
   },
 };
 

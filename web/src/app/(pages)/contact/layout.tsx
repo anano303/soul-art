@@ -41,7 +41,7 @@ export const metadata: Metadata = {
     title: "კონტაქტი - დაგვიკავშირდი | SoulArt",
     description:
       "გაგვიზიარე შენი შეკითხვები და წინადადებები. ჩვენი გუნდი მზად არის დაგეხმაროს ხელნაკეთი ნივთებისა და ნახატების შეძენასთან დაკავშირებით.",
-    url: "https://soulart.ge/contact",
+    url: "https://www.soulart.ge/contact",
     siteName: "SoulArt",
     images: [
       {
@@ -62,7 +62,7 @@ export const metadata: Metadata = {
     images: ["/logo.png"],
   },
   alternates: {
-    canonical: "https://soulart.ge/contact",
+    canonical: "https://www.soulart.ge/contact",
   },
 };
 

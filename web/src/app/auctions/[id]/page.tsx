@@ -539,7 +539,7 @@ export default function AuctionDetailPage() {
             ? "https://schema.org/SoldOut"
             : "https://schema.org/PreOrder",
       priceValidUntil: auction.endDate,
-      url: `https://soulart.ge/auctions/${auction._id}`,
+      url: `https://www.soulart.ge/auctions/${auction._id}`,
     },
     additionalProperty: [
       {

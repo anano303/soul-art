@@ -60,7 +60,7 @@ export async function POST(req: Request) {
                   ? `<tr>
                 <td style="padding: 10px 0; border-bottom: 1px solid #f3f4f6; color: #6b7280; font-size: 14px; width: 120px;">პროდუქტი</td>
                 <td style="padding: 10px 0; border-bottom: 1px solid #f3f4f6; font-weight: 600; font-size: 15px;">
-                  <a href="https://soulart.ge/products/${productId}" style="color: #2563eb; text-decoration: none;">${productName}</a>
+                  <a href="https://www.soulart.ge/products/${productId}" style="color: #2563eb; text-decoration: none;">${productName}</a>
                 </td>
               </tr>`
                   : ""

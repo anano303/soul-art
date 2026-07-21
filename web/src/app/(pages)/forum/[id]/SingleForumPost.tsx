@@ -90,11 +90,11 @@ export default function SingleForumPost({ postId }: SingleForumPostProps) {
         'name': forum.user.name,
       },
       'datePublished': forum.createdAt,
-      'url': `https://soulart.ge/forum/${forum._id}`,
+      'url': `https://www.soulart.ge/forum/${forum._id}`,
       'isPartOf': {
         '@type': 'WebSite',
         'name': 'SoulArt.ge',
-        'url': 'https://soulart.ge'
+        'url': 'https://www.soulart.ge'
       },
       'image': forum.image ? [forum.image] : [],
       'interactionStatistic': {

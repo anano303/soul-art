@@ -91,7 +91,7 @@ export function ProfileForm() {
   };
 
   const portfolioBaseUrl =
-    process.env.NEXT_PUBLIC_WEBSITE_URL || "https://soulart.ge";
+    process.env.NEXT_PUBLIC_WEBSITE_URL || "https://www.soulart.ge";
   const portfolioDisplayBase = portfolioBaseUrl
     .replace(/^https?:\/\//, "")
     .replace(/\/$/, "");

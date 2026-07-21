@@ -107,7 +107,7 @@ export async function POST(req: Request) {
 
     // Return the response Facebook expects
     const clientUrl =
-      process.env.NEXT_PUBLIC_CLIENT_URL || "https://soulart.ge";
+      process.env.NEXT_PUBLIC_CLIENT_URL || "https://www.soulart.ge";
     const statusUrl = `${clientUrl}/data-deletion-status?code=${confirmationCode}`;
 
     return new Response(

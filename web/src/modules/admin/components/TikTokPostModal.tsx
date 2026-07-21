@@ -110,7 +110,7 @@ export function TikTokPostModal({
         const slug =
           (product as Product & { slug?: string }).slug || product._id;
         setEditableDescription(
-          `✨ ${product.name || product.nameEn || ""}\n💰 ${price}\n\n🔗 https://soulart.ge/products/${slug}\n\n${hashtags}`,
+          `✨ ${product.name || product.nameEn || ""}\n💰 ${price}\n\n🔗 https://www.soulart.ge/products/${slug}\n\n${hashtags}`,
         );
 
         // Reset publish status

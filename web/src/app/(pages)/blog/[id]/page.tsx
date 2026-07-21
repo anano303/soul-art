@@ -289,7 +289,7 @@ export default async function BlogPostPage({ params }: BlogPageParams) {
   const authorName = getAuthorName(post);
   const canonicalUrl = WEB_BASE_URL
     ? `${WEB_BASE_URL}/blog/${post._id}`
-    : `https://soulart.ge/blog/${post._id}`;
+    : `https://www.soulart.ge/blog/${post._id}`;
 
   // JSON-LD Structured Data for Google Rich Snippets (Article schema)
   const jsonLd = {
@@ -309,7 +309,7 @@ export default async function BlogPostPage({ params }: BlogPageParams) {
       name: "SoulArt",
       logo: {
         "@type": "ImageObject",
-        url: "https://soulart.ge/logo.png",
+        url: "https://www.soulart.ge/logo.png",
       },
     },
     mainEntityOfPage: {

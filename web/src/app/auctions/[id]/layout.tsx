@@ -64,7 +64,7 @@ export async function generateMetadata({
 
   const auction = await getAuction(auctionId);
 
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://soulart.ge";
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://www.soulart.ge";
 
   if (!auction) {
     // Fallback metadata when auction not found or API unavailable

@@ -43,7 +43,7 @@ export const metadata: Metadata = {
     title: "დარეგისტრირდი SoulArt-ზე - შექმენი ანგარიში",
     description:
       "შექმენი შენი ანგარიში SoulArt-ზე და დაიწყე უნიკალური ხელნაკეთი ნივთებისა და ნახატების შეძენა.",
-    url: "https://soulart.ge/register",
+    url: "https://www.soulart.ge/register",
     siteName: "SoulArt",
     images: [
       {
@@ -64,7 +64,7 @@ export const metadata: Metadata = {
     images: ["/logo.png"],
   },
   alternates: {
-    canonical: "https://soulart.ge/register",
+    canonical: "https://www.soulart.ge/register",
   },
 };
 

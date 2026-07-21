@@ -106,7 +106,7 @@ export default async function ProductLayout({ children, params }: LayoutProps) {
         // ფასი და შეთავაზება
         offers: {
           "@type": "Offer",
-          url: `https://soulart.ge${productHref(product)}`,
+          url: `https://www.soulart.ge${productHref(product)}`,
           priceCurrency: "GEL",
           price: product.discountedPrice || product.price,
           priceValidUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
@@ -119,7 +119,7 @@ export default async function ProductLayout({ children, params }: LayoutProps) {
           seller: {
             "@type": "Organization",
             name: "SoulArt",
-            url: "https://soulart.ge",
+            url: "https://www.soulart.ge",
           },
         },
         // მწარმოებელი/გამყიდველი

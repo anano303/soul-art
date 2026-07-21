@@ -20,7 +20,7 @@ type Amount = (typeof AMOUNTS)[number];
 
 /** სავარაუდო QR კოდის URL — ვაუჩერის გამოყენება checkout-ზე */
 const voucherQrUrl = (amount: number, currency: string) =>
-  `https://soulart.ge/vouchers?amount=${amount}&currency=${currency}`;
+  `https://www.soulart.ge/vouchers?amount=${amount}&currency=${currency}`;
 
 /** ოქროსფერი dreamcatcher არტი — ბრენდული მოტივი ბარათებზე */
 function Dreamcatcher({ className }: { className?: string }) {

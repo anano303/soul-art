@@ -32,7 +32,7 @@ export const metadata: Metadata = {
     title: "დაგავიწყდა პაროლი? - აღადგინე SoulArt ანგარიში",
     description:
       "აღადგინე შენი SoulArt ანგარიში მარტივად და გააგრძელე უნიკალური ხელნაკეთი ნივთების შეძენა.",
-    url: "https://soulart.ge/forgot-password",
+    url: "https://www.soulart.ge/forgot-password",
     siteName: "SoulArt",
     images: [
       {
@@ -53,7 +53,7 @@ export const metadata: Metadata = {
     images: ["/logo.png"],
   },
   alternates: {
-    canonical: "https://soulart.ge/forgot-password",
+    canonical: "https://www.soulart.ge/forgot-password",
   },
 };
 

@@ -264,7 +264,7 @@ async function getAuctions() {
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl =
-    process.env.NEXT_PUBLIC_PRODUCTION_URL || "https://soulart.ge";
+    process.env.NEXT_PUBLIC_PRODUCTION_URL || "https://www.soulart.ge";
 
   // ძირითადი გვერდები
   const staticPages = [

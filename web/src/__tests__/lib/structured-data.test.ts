@@ -13,7 +13,7 @@ describe('lib/structured-data', () => {
       expect(organizationSchema.name).toBe('SoulArt');
     });
     it('has url', () => {
-      expect(organizationSchema.url).toBe('https://soulart.ge');
+      expect(organizationSchema.url).toBe('https://www.soulart.ge');
     });
     it('has address in Georgia', () => {
       expect(organizationSchema.address.addressCountry).toBe('GE');

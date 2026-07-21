@@ -197,7 +197,7 @@ export async function generateMetadata({
           // Ensure the image URL is absolute for OpenGraph
           representativeImage = imageUrl.startsWith("http")
             ? imageUrl
-            : `https://soulart.ge${imageUrl}`;
+            : `https://www.soulart.ge${imageUrl}`;
         }
       }
     }

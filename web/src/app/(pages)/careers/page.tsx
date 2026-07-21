@@ -168,10 +168,10 @@ export default function CareersPage() {
                 navigator.share({
                   title: "გაყიდვების მენეჯერი - SoulArt",
                   text: t.shareText,
-                  url: "https://soulart.ge/careers",
+                  url: "https://www.soulart.ge/careers",
                 });
               } else {
-                navigator.clipboard.writeText("https://soulart.ge/careers");
+                navigator.clipboard.writeText("https://www.soulart.ge/careers");
                 alert(language === "ge" ? "ლინკი დაკოპირდა!" : "Link copied!");
               }
             }}

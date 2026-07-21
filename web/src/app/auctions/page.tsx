@@ -171,11 +171,11 @@ function AuctionsContent() {
     name: "ხელოვნების აუქციონები | SoulArt",
     description:
       "იყიდეთ უნიკალური ხელოვნების ნიმუშები SoulArt აუქციონზე! ორიგინალი ნახატები და თანამედროვე ქართველი მხატვრების ნამუშევრები.",
-    url: "https://soulart.ge/auctions",
+    url: "https://www.soulart.ge/auctions",
     isPartOf: {
       "@type": "WebSite",
       name: "SoulArt",
-      url: "https://soulart.ge",
+      url: "https://www.soulart.ge",
     },
     mainEntity: {
       "@type": "ItemList",
@@ -199,7 +199,7 @@ function AuctionsContent() {
                   ? "https://schema.org/InStock"
                   : "https://schema.org/OutOfStock",
             },
-            url: `https://soulart.ge/auctions/${auction._id}`,
+            url: `https://www.soulart.ge/auctions/${auction._id}`,
           },
         })),
     },

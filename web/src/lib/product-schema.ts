@@ -2,7 +2,7 @@ import { Product } from "@/types";
 
 export function generateProductSchema(product: Product, productId: string) {
   const baseUrl =
-    process.env.NEXT_PUBLIC_PRODUCTION_URL || "https://soulart.ge";
+    process.env.NEXT_PUBLIC_PRODUCTION_URL || "https://www.soulart.ge";
 
   // ჰეშთეგების მომზადება SEO-სთვის
   const hashtagKeywords =
@@ -98,7 +98,7 @@ export function generateProductSchema(product: Product, productId: string) {
 
 export function generateBreadcrumbSchema(product: Product, productId: string) {
   const baseUrl =
-    process.env.NEXT_PUBLIC_PRODUCTION_URL || "https://soulart.ge";
+    process.env.NEXT_PUBLIC_PRODUCTION_URL || "https://www.soulart.ge";
 
   const items = [
     {

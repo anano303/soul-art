@@ -124,7 +124,7 @@ export function SellerRegistrationFlow({
   const manualCheckIdRef = useRef(0);
 
   const portfolioBaseUrl =
-    process.env.NEXT_PUBLIC_WEBSITE_URL || "https://soulart.ge";
+    process.env.NEXT_PUBLIC_WEBSITE_URL || "https://www.soulart.ge";
   const slugDisplayPrefix = `${portfolioBaseUrl.replace(/^https?:\/\//, "").replace(/\/$/, "")}/@`;
 
   // Step 1 form

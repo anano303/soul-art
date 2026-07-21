@@ -11,7 +11,7 @@ import { buildLocaleAlternates, resolveLocale } from "@/lib/hreflang";
 import { buildArtistJsonLd } from "@/lib/structured-data";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/v1";
-const SITE_BASE = process.env.NEXT_PUBLIC_CLIENT_URL || "https://soulart.ge";
+const SITE_BASE = process.env.NEXT_PUBLIC_CLIENT_URL || "https://www.soulart.ge";
 
 async function fetchArtistProfile(
   slug: string,

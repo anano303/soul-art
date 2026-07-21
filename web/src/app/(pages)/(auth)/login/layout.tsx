@@ -15,7 +15,7 @@ export const metadata: Metadata = {
     },
   },
   alternates: {
-    canonical: "https://soulart.ge/login",
+    canonical: "https://www.soulart.ge/login",
   },
 };
 

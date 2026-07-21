@@ -17,11 +17,10 @@ export default function GuaranteeBanner() {
     >
       <Image
         src="/handmade.webp"
-        alt=""
+        alt={en ? "Handmade items and paintings" : "ხელნაკეთი ნივთები და ნახატები"}
         fill
         sizes="100vw"
         className="gb-bg"
-        aria-hidden="true"
       />
       <div className="gb-overlay" />
 

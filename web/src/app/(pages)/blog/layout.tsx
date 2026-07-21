@@ -28,7 +28,7 @@ export const metadata: Metadata = {
   openGraph: {
     title,
     description,
-    url: "https://soulart.ge/blog",
+    url: "https://www.soulart.ge/blog",
     siteName: "SoulArt",
     locale: "ka_GE",
     type: "website",

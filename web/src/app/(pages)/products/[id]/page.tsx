@@ -215,7 +215,7 @@ export default async function ProductPage({
     brand: product.brand,
     price: effectivePrice,
     inStock: isInStock(product),
-    url: `https://soulart.ge${productHref(product)}`,
+    url: `https://www.soulart.ge${productHref(product)}`,
   });
 
   return (

@@ -86,7 +86,7 @@ export async function generateMetadata({
     openGraph: {
       title: `ძიება: ${decodedKeyword} - Soulart`,
       description: `ძიების შედეგები "${decodedKeyword}" - ხელნაკეთი ნივთები და ნახატები Soulart-ში.`,
-      url: `https://soulart.ge/search/${encodeURIComponent(decodedKeyword)}`,
+      url: `https://www.soulart.ge/search/${encodeURIComponent(decodedKeyword)}`,
       siteName: "Soulart",
       images: [
         {
@@ -106,7 +106,7 @@ export async function generateMetadata({
       images: ["/van-gogh.webp"],
     },
     alternates: {
-      canonical: `https://soulart.ge/search/${encodeURIComponent(
+      canonical: `https://www.soulart.ge/search/${encodeURIComponent(
         decodedKeyword
       )}`,
     },

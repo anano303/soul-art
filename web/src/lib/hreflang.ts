@@ -8,7 +8,7 @@
 //
 // `x-default` -> the Georgian (default) URL.
 
-const SITE = "https://soulart.ge";
+const SITE = "https://www.soulart.ge";
 
 export type Locale = "ka" | "en";
 

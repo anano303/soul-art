@@ -46,7 +46,7 @@ export const metadata: Metadata = {
     title: "ფორუმი - ხელოვანების თემატური სივრცე | SoulArt",
     description:
       "ქართველი ხელოვანებისა და ხელოვნების მოყვარულთა თემატური სივრცე. გაუზიარეთ ნამუშევრები და იპოვეთ თანამოაზრეები.",
-    url: "https://soulart.ge/forum",
+    url: "https://www.soulart.ge/forum",
     siteName: "SoulArt",
     images: [
       {
@@ -67,7 +67,7 @@ export const metadata: Metadata = {
     images: ["/logo.png"],
   },
   alternates: {
-    canonical: "https://soulart.ge/forum",
+    canonical: "https://www.soulart.ge/forum",
   },
 };
 

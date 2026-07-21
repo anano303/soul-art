@@ -23,7 +23,7 @@ export const metadata: Metadata = {
     title: "შეუკვეთე ინდივიდუალური ნამუშევარი | SoulArt",
     description:
       "ატვირთე ფოტო, აღწერე რა გინდა და მიიღე ფასები რამდენიმე ხელოვანისგან 24 საათში.",
-    url: "https://soulart.ge/commissions/new",
+    url: "https://www.soulart.ge/commissions/new",
     siteName: "SoulArt",
     locale: "ka_GE",
     type: "website",

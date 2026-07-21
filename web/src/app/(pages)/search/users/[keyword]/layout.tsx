@@ -86,7 +86,7 @@ export async function generateMetadata({
     openGraph: {
       title: `Artists: ${decodedKeyword} - Soulart`,
       description: `Discover talented artists matching "${decodedKeyword}" on Soulart`,
-      url: `https://soulart.ge/search/users/${keyword}`,
+      url: `https://www.soulart.ge/search/users/${keyword}`,
       siteName: "Soulart",
       images: [
         {
@@ -106,7 +106,7 @@ export async function generateMetadata({
       images: ["/logo.png"],
     },
     alternates: {
-      canonical: `https://soulart.ge/search/users/${keyword}`,
+      canonical: `https://www.soulart.ge/search/users/${keyword}`,
     },
   };
 }

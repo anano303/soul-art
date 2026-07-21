@@ -32,7 +32,7 @@ export const metadata: Metadata = {
     title: "პაროლის გადატვირთვა - ახალი პაროლის დაყენება",
     description:
       "დააყენე ახალი პაროლი შენი SoulArt ანგარიშისთვის და გააგრძელე უნიკალური ხელნაკეთი ნივთების შეძენა.",
-    url: "https://soulart.ge/reset-password",
+    url: "https://www.soulart.ge/reset-password",
     siteName: "SoulArt",
     images: [
       {
@@ -53,7 +53,7 @@ export const metadata: Metadata = {
     images: ["/logo.png"],
   },
   alternates: {
-    canonical: "https://soulart.ge/reset-password",
+    canonical: "https://www.soulart.ge/reset-password",
   },
 };
 

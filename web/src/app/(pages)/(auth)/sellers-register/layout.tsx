@@ -47,11 +47,11 @@ export const metadata: Metadata = {
     title: "გახდი SoulArt-ის ნაწილი - დაიწყე გაყიდვა SoulArt-ზე",
     description:
       "შექმენი შენი ონლაინ მაღაზია SoulArt-ზე. გაყიდე შენი ნახატები და ხელნაკეთი ნივთები ფართო აუდიტორიასთან.",
-    url: "https://soulart.ge/sellers-register",
+    url: "https://www.soulart.ge/sellers-register",
     siteName: "SoulArt",
     images: [
       {
-        url: "https://soulart.ge/seller.png",
+        url: "https://www.soulart.ge/seller.png",
         width: 1200,
         height: 630,
         alt: "გახდი გამყიდველი SoulArt-ზე - დაიწყე გაყიდვა შენი ნახატებისა და ხელნაკეთი ნივთების",
@@ -65,10 +65,10 @@ export const metadata: Metadata = {
     title: "გახდი SoulArt-ის ნაწილი - დაიწყე გაყიდვა SoulArt-ზე",
     description:
       "შექმენი შენი ონლაინ მაღაზია SoulArt-ზე. გაყიდე შენი ნახატები და ხელნაკეთი ნივთები.",
-    images: ["https://soulart.ge/seller.png"],
+    images: ["https://www.soulart.ge/seller.png"],
   },
   alternates: {
-    canonical: "https://soulart.ge/sellers-register",
+    canonical: "https://www.soulart.ge/sellers-register",
   },
 };
 

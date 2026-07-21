@@ -414,7 +414,7 @@ export function ArtistProfileSettings({
   }, [baselineValues, existingBio, form]);
 
   const portfolioBaseUrl =
-    process.env.NEXT_PUBLIC_WEBSITE_URL || "https://soulart.ge";
+    process.env.NEXT_PUBLIC_WEBSITE_URL || "https://www.soulart.ge";
   const buildPortfolioUrl = (slug: string) => `${portfolioBaseUrl}/@${slug}`;
 
   const slugField = form.register("artistSlug");

@@ -199,7 +199,11 @@ const MainPhoto = () => {
               >
                 <Image
                   src={cat.icon}
-                  alt=""
+                  alt={
+                    language === "en"
+                      ? `${cat.nameEn} category`
+                      : `${cat.name} კატეგორია`
+                  }
                   width={22}
                   height={22}
                   className="hero-cat-icon"
