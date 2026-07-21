@@ -71,87 +71,107 @@ export const viewport = {
   viewportFit: "cover",
 };
 
-export const metadata: Metadata = {
-  metadataBase: new URL(
-    process.env.NEXT_PUBLIC_CLIENT_URL || "https://www.soulart.ge",
-  ),
-  title: "SoulArt — ნახატები და ხელნაკეთი ნივთები საქართველოში",
-  description:
-    "500-ზე მეტი ქართველი ხელოვანის ორიგინალი ნახატები და ხელნაკეთი ნივთები ერთ სივრცეში SoulArt-ზე — უსაფრთხო შესყიდვა, პრობლემის შემთხვევაში თანხის დაბრუნების გარანტიით.",
-  keywords: HOME_KEYWORDS,
-  authors: [{ name: "Soulart" }],
-  creator: "Soulart",
-  publisher: "Soulart",
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
+// Base metadata for every page that doesn't set its own title/description.
+// Locale-aware: middleware sets the x-locale header ("en" on /en/* routes), so
+// /en pages get English base metadata instead of falling back to Georgian.
+export async function generateMetadata(): Promise<Metadata> {
+  const en = (await headers()).get("x-locale") === "en";
+
+  const title = en
+    ? "SoulArt — Paintings & Handmade Items by Georgian Artists"
+    : "SoulArt — ნახატები და ხელნაკეთი ნივთები საქართველოში";
+  const description = en
+    ? "Original paintings and handmade items by 500+ Georgian artists on SoulArt — secure checkout with a money-back guarantee if anything goes wrong."
+    : "500-ზე მეტი ქართველი ხელოვანის ორიგინალი ნახატები და ხელნაკეთი ნივთები ერთ სივრცეში SoulArt-ზე — უსაფრთხო შესყიდვა, პრობლემის შემთხვევაში თანხის დაბრუნების გარანტიით.";
+  const ogDescription = en
+    ? "Original paintings and handmade items by 500+ Georgian artists in one place."
+    : "500-ზე მეტი ქართველი ხელოვანის ორიგინალი ნახატები და ხელნაკეთი ნივთები ერთ სივრცეში.";
+  const imageAlt = en
+    ? "SoulArt — paintings and handmade items by Georgian artists"
+    : "SoulArt — ქართველი ხელოვანების ნახატები და ხელნაკეთი ნივთები";
+  const twitterDescription = en
+    ? "The best selection of handmade items and paintings in Georgia"
+    : "ხელნაკეთი ნივთების და ნახატების საუკეთესო არჩევანი საქართველოში";
+
+  return {
+    metadataBase: new URL(
+      process.env.NEXT_PUBLIC_CLIENT_URL || "https://www.soulart.ge",
+    ),
+    title,
+    description,
+    keywords: HOME_KEYWORDS,
+    authors: [{ name: "Soulart" }],
+    creator: "Soulart",
+    publisher: "Soulart",
+    robots: {
       index: true,
       follow: true,
-      "max-image-preview": "large",
-      "max-snippet": -1,
-      "max-video-preview": -1,
+      googleBot: {
+        index: true,
+        follow: true,
+        "max-image-preview": "large",
+        "max-snippet": -1,
+        "max-video-preview": -1,
+      },
     },
-  },
-  verification: {
-    google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION || undefined,
-  },
-  other: {
-    "google-site-verification":
-      process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION || "", // backup
-    "geo.region": "GE",
-    "geo.placename": "Georgia",
-    "geo.position": "41.7151;44.8271", // თბილისის კოორდინატები
-    ICBM: "41.7151, 44.8271",
-  },
-  icons: {
-    icon: "/icons/favicon/favicon-blue.ico",
-    shortcut: "/icons/favicon/favicon-blue.ico",
-    apple: "/icons/ios/icon-180x180.png",
-    other: [
-      {
-        rel: "icon",
-        url: "/icons/favicon/favicon-blue.ico",
-        type: "image/x-icon",
-      },
-      {
-        rel: "shortcut icon",
-        url: "/icons/favicon/favicon-blue.ico",
-        type: "image/x-icon",
-      },
-      { rel: "apple-touch-icon", url: "/icons/ios/icon-180x180.png" },
-      {
-        rel: "mask-icon",
-        url: "/icons/favicon/favicon-blue.ico",
-        color: PRIMARY_COLOR,
-      },
-    ],
-  },
-  openGraph: {
-    type: "website",
-    locale: "ka_GE",
-    url: "https://www.soulart.ge/",
-    siteName: "Soulart",
-    title: "SoulArt — ნახატები და ხელნაკეთი ნივთები საქართველოში",
-    description:
-      "500-ზე მეტი ქართველი ხელოვანის ორიგინალი ნახატები და ხელნაკეთი ნივთები ერთ სივრცეში.",
-    images: [
-      {
-        url: "/van-gogh.webp",
-        width: 1200,
-        height: 630,
-        alt: "SoulArt — ქართველი ხელოვანების ნახატები და ხელნაკეთი ნივთები",
-      },
-    ],
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "SoulArt — ნახატები და ხელნაკეთი ნივთები საქართველოში",
-    description:
-      "ხელნაკეთი ნივთების და ნახატების საუკეთესო არჩევანი საქართველოში",
-    images: ["/van-gogh.webp"],
-  },
-};
+    verification: {
+      google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION || undefined,
+    },
+    other: {
+      "google-site-verification":
+        process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION || "", // backup
+      "geo.region": "GE",
+      "geo.placename": "Georgia",
+      "geo.position": "41.7151;44.8271", // თბილისის კოორდინატები
+      ICBM: "41.7151, 44.8271",
+    },
+    icons: {
+      icon: "/icons/favicon/favicon-blue.ico",
+      shortcut: "/icons/favicon/favicon-blue.ico",
+      apple: "/icons/ios/icon-180x180.png",
+      other: [
+        {
+          rel: "icon",
+          url: "/icons/favicon/favicon-blue.ico",
+          type: "image/x-icon",
+        },
+        {
+          rel: "shortcut icon",
+          url: "/icons/favicon/favicon-blue.ico",
+          type: "image/x-icon",
+        },
+        { rel: "apple-touch-icon", url: "/icons/ios/icon-180x180.png" },
+        {
+          rel: "mask-icon",
+          url: "/icons/favicon/favicon-blue.ico",
+          color: PRIMARY_COLOR,
+        },
+      ],
+    },
+    openGraph: {
+      type: "website",
+      locale: en ? "en_US" : "ka_GE",
+      url: en ? "https://www.soulart.ge/en" : "https://www.soulart.ge/",
+      siteName: "Soulart",
+      title,
+      description: ogDescription,
+      images: [
+        {
+          url: "/van-gogh.webp",
+          width: 1200,
+          height: 630,
+          alt: imageAlt,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description: twitterDescription,
+      images: ["/van-gogh.webp"],
+    },
+  };
+}
 
 export default async function RootLayout({
   children,

@@ -42,12 +42,18 @@ export const HOME_KEYWORDS: string[] = [
   "soulart.ge",
   "ნახატები",
   "ხელნაკეთი ნივთები",
+  "ქართველი მხატვრები",
   "ქართული ხელოვნება",
   "ხელოვნების ონლაინ მაღაზია",
+  "ნახატების ყიდვა", // "buying paintings" — ტრანზაქციული intent
+  "ორიგინალი ნახატები", // "original paintings" — ხშირად საძებნია
+  "ქართული სუვენირი", // handmade-ის ხშირი ალტერნატიული საძიებო ტერმინი
   "handmade items",
   "paintings",
   "Georgian art marketplace",
   "art marketplace Georgia",
+  "buy Georgian art",
+  "original paintings online",
 ];
 
 export const ADDITIONAL_KEYWORDS: string[] = [
@@ -123,14 +129,14 @@ export const ADDITIONAL_KEYWORDS: string[] = [
 ];
 
 export const GLOBAL_KEYWORDS: string[] = Array.from(
-  new Set([...BASE_KEYWORDS, ...ADDITIONAL_KEYWORDS])
+  new Set([...BASE_KEYWORDS, ...ADDITIONAL_KEYWORDS]),
 );
 
 const NON_WORD_REGEX = /[^\p{L}\p{N}\s-]+/gu;
 const WORD_SPLIT_REGEX = /[\s,.;:!?()\[\]{}"“”'«»<>/|]+/gu;
 
 const normalizeKeyword = (
-  keyword: string | null | undefined
+  keyword: string | null | undefined,
 ): string | null => {
   if (!keyword) {
     return null;
@@ -166,23 +172,23 @@ const registerKeyword = (map: Map<string, string>, keyword?: string | null) => {
 
 const registerKeywordsFromArray = (
   map: Map<string, string>,
-  values?: Array<string | null | undefined> | null
+  values?: Array<string | null | undefined> | null,
 ) => {
   values?.forEach((value) => registerKeyword(map, value));
 };
 
 const registerKeywordsFromText = (
   map: Map<string, string>,
-  text?: string | null
+  text?: string | null,
 ) => {
   extractKeywordsFromText(text).forEach((keyword) =>
-    registerKeyword(map, keyword)
+    registerKeyword(map, keyword),
   );
 };
 
 const registerKeywordFromImage = (
   map: Map<string, string>,
-  imageUrl?: string | null
+  imageUrl?: string | null,
 ) => {
   if (!imageUrl) {
     return;
@@ -207,7 +213,7 @@ const registerKeywordFromImage = (
 const registerKeywordFromNumber = (
   map: Map<string, string>,
   value?: number | null,
-  prefix?: string
+  prefix?: string,
 ) => {
   if (value === undefined || value === null || Number.isNaN(value)) {
     return;
@@ -221,7 +227,7 @@ const registerBooleanKeyword = (
   map: Map<string, string>,
   value?: boolean | null,
   trueLabels?: string[],
-  falseLabels?: string[]
+  falseLabels?: string[],
 ) => {
   if (value === undefined || value === null) {
     return;
@@ -233,7 +239,7 @@ const registerBooleanKeyword = (
 
 const registerYearFromDate = (
   map: Map<string, string>,
-  date?: string | null
+  date?: string | null,
 ) => {
   if (!date) {
     return;
@@ -377,7 +383,7 @@ type ProductKeywordSource = {
 };
 
 export const collectProductKeywords = (
-  product?: ProductKeywordSource | null
+  product?: ProductKeywordSource | null,
 ): string[] => {
   if (!product) {
     return [];
@@ -399,17 +405,17 @@ export const collectProductKeywords = (
   registerKeywordsFromText(map, product.seoDescription);
 
   resolveCategoryKeywords(product.category).forEach((value) =>
-    registerKeyword(map, value)
+    registerKeyword(map, value),
   );
   resolveCategoryKeywords(product.subCategory).forEach((value) =>
-    registerKeyword(map, value)
+    registerKeyword(map, value),
   );
   resolveCategoryKeywords(product.mainCategory).forEach((value) =>
-    registerKeyword(map, value)
+    registerKeyword(map, value),
   );
 
   const normalizedHashtags = product.hashtags?.map((tag) =>
-    typeof tag === "string" ? tag.replace(/^#+/, "") : tag
+    typeof tag === "string" ? tag.replace(/^#+/, "") : tag,
   );
   registerKeywordsFromArray(map, normalizedHashtags ?? undefined);
   registerKeywordsFromArray(map, product.materials ?? undefined);
@@ -425,7 +431,7 @@ export const collectProductKeywords = (
   product.variants?.forEach((variant) => {
     registerKeyword(map, variant?.name);
     variant?.optionValues?.forEach((option) =>
-      registerKeyword(map, option?.value)
+      registerKeyword(map, option?.value),
     );
   });
 
@@ -457,7 +463,7 @@ const resolveCategoryKeywords = (category?: MaybeCategory): string[] => {
   }
 
   return [category.name, category.title].filter((value): value is string =>
-    Boolean(value)
+    Boolean(value),
   );
 };
 
@@ -490,7 +496,7 @@ const fetchProductKeywordsInternal = cache(async (): Promise<string[]> => {
         // Network error - API might be unavailable during build or SSR
         console.warn(
           "Network error fetching product keywords, skipping:",
-          fetchError instanceof Error ? fetchError.message : fetchError
+          fetchError instanceof Error ? fetchError.message : fetchError,
         );
         break;
       }
@@ -504,10 +510,10 @@ const fetchProductKeywordsInternal = cache(async (): Promise<string[]> => {
       const items: ProductKeywordSource[] = Array.isArray(data?.items)
         ? data.items
         : Array.isArray(data?.products)
-        ? data.products
-        : Array.isArray(data)
-        ? data
-        : [];
+          ? data.products
+          : Array.isArray(data)
+            ? data
+            : [];
 
       if (!items.length) {
         break;
@@ -532,13 +538,13 @@ const fetchProductKeywordsInternal = cache(async (): Promise<string[]> => {
         registerKeywordsFromArray(map, item.ageGroups);
 
         resolveCategoryKeywords(item.category).forEach((value) =>
-          registerKeyword(map, value)
+          registerKeyword(map, value),
         );
         resolveCategoryKeywords(item.subCategory).forEach((value) =>
-          registerKeyword(map, value)
+          registerKeyword(map, value),
         );
         resolveCategoryKeywords(item.mainCategory).forEach((value) =>
-          registerKeyword(map, value)
+          registerKeyword(map, value),
         );
 
         if (item.categoryStructure) {
@@ -564,7 +570,7 @@ const fetchProductKeywordsInternal = cache(async (): Promise<string[]> => {
           item.variants.forEach((variant) => {
             registerKeyword(map, variant.name);
             variant.optionValues?.forEach((option) =>
-              registerKeyword(map, option?.value)
+              registerKeyword(map, option?.value),
             );
           });
         }
@@ -649,7 +655,7 @@ const fetchArtistKeywordsInternal = cache(async (): Promise<string[]> => {
       } catch (fetchError) {
         console.warn(
           "Network error fetching artist keywords, skipping:",
-          fetchError instanceof Error ? fetchError.message : fetchError
+          fetchError instanceof Error ? fetchError.message : fetchError,
         );
         break;
       }
@@ -663,8 +669,8 @@ const fetchArtistKeywordsInternal = cache(async (): Promise<string[]> => {
       const items: ArtistKeywordSource[] = Array.isArray(data?.items)
         ? data.items
         : Array.isArray(data)
-        ? data
-        : [];
+          ? data
+          : [];
 
       if (!items.length) {
         break;
@@ -686,12 +692,12 @@ const fetchArtistKeywordsInternal = cache(async (): Promise<string[]> => {
           map,
           artist.artistOpenForCommissions,
           ["commissions open", "საკომისიო ღიაა"],
-          ["commissions closed", "საკომისიო დახურულია"]
+          ["commissions closed", "საკომისიო დახურულია"],
         );
 
         if (artist.artistBio) {
           Object.values(artist.artistBio).forEach((value) =>
-            registerKeywordsFromText(map, value ?? undefined)
+            registerKeywordsFromText(map, value ?? undefined),
           );
         }
       });
@@ -765,7 +771,7 @@ const fetchForumKeywordsInternal = cache(async (): Promise<string[]> => {
       } catch (fetchError) {
         console.warn(
           "Network error fetching forum keywords, skipping:",
-          fetchError instanceof Error ? fetchError.message : fetchError
+          fetchError instanceof Error ? fetchError.message : fetchError,
         );
         break;
       }
@@ -779,10 +785,10 @@ const fetchForumKeywordsInternal = cache(async (): Promise<string[]> => {
       const items: ForumKeywordSource[] = Array.isArray(data?.items)
         ? data.items
         : Array.isArray(data?.forums)
-        ? data.forums
-        : Array.isArray(data)
-        ? data
-        : [];
+          ? data.forums
+          : Array.isArray(data)
+            ? data
+            : [];
 
       if (!items.length) {
         break;
@@ -862,7 +868,7 @@ const fetchCategoryKeywordsInternal = cache(async (): Promise<string[]> => {
       } catch (fetchError) {
         console.warn(
           "Network error fetching category keywords, skipping:",
-          fetchError instanceof Error ? fetchError.message : fetchError
+          fetchError instanceof Error ? fetchError.message : fetchError,
         );
         break;
       }
@@ -876,10 +882,10 @@ const fetchCategoryKeywordsInternal = cache(async (): Promise<string[]> => {
       const items: CategoryKeywordSource[] = Array.isArray(data?.items)
         ? data.items
         : Array.isArray(data?.categories)
-        ? data.categories
-        : Array.isArray(data)
-        ? data
-        : [];
+          ? data.categories
+          : Array.isArray(data)
+            ? data
+            : [];
 
       if (!items.length) {
         break;
@@ -950,7 +956,7 @@ const fetchSubCategoryKeywordsInternal = cache(async (): Promise<string[]> => {
       } catch (fetchError) {
         console.warn(
           "Network error fetching subcategory keywords, skipping:",
-          fetchError instanceof Error ? fetchError.message : fetchError
+          fetchError instanceof Error ? fetchError.message : fetchError,
         );
         break;
       }
@@ -964,10 +970,10 @@ const fetchSubCategoryKeywordsInternal = cache(async (): Promise<string[]> => {
       const items: SubCategoryKeywordSource[] = Array.isArray(data?.items)
         ? data.items
         : Array.isArray(data?.subcategories)
-        ? data.subcategories
-        : Array.isArray(data)
-        ? data
-        : [];
+          ? data.subcategories
+          : Array.isArray(data)
+            ? data
+            : [];
 
       if (!items.length) {
         break;
@@ -1034,7 +1040,7 @@ const fetchBannerKeywordsInternal = cache(async (): Promise<string[]> => {
     } catch (fetchError) {
       console.warn(
         "Network error fetching banner keywords, skipping:",
-        fetchError instanceof Error ? fetchError.message : fetchError
+        fetchError instanceof Error ? fetchError.message : fetchError,
       );
       return [];
     }
@@ -1048,10 +1054,10 @@ const fetchBannerKeywordsInternal = cache(async (): Promise<string[]> => {
     const items: BannerKeywordSource[] = Array.isArray(data?.items)
       ? data.items
       : Array.isArray(data?.data)
-      ? data.data
-      : Array.isArray(data)
-      ? data
-      : [];
+        ? data.data
+        : Array.isArray(data)
+          ? data
+          : [];
 
     const map = new Map<string, string>();
 
