@@ -7,6 +7,8 @@ import { useLanguage } from "@/hooks/LanguageContext";
 import { trackPageView } from "@/lib/ga4-analytics";
 import VoucherBanner from "@/components/voucherBanner/VoucherBanner";
 import GuaranteeBanner from "@/components/guaranteeBanner/GuaranteeBanner";
+// Static import (not ssr:false) so the SEO body copy is in the server HTML.
+import WhySoulArt from "@/components/whySoulArt/WhySoulArt";
 
 // Above-the-fold: hero slider
 // Below-the-fold components - all ssr: false to prevent hydration blocking
@@ -94,6 +96,7 @@ export default function HomeContent() {
 
       <HomePageShop key={`home-shop-${language}`} />
       <PopularArtists />
+      <WhySoulArt />
       <HomeFAQ />
       <HomePageForum />
     </div>

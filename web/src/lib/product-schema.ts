@@ -1,4 +1,5 @@
 import { Product } from "@/types";
+import { categoryPath } from "@/lib/category-url";
 
 export function generateProductSchema(product: Product, productId: string) {
   const baseUrl =
@@ -131,7 +132,7 @@ export function generateBreadcrumbSchema(product: Product, productId: string) {
       "@type": "ListItem",
       position: 3,
       name: categoryName,
-      item: `${baseUrl}/shop?category=${categoryId}`,
+      item: `${baseUrl}${categoryPath(typeof categoryId === "string" ? categoryId : undefined)}`,
     });
   }
 

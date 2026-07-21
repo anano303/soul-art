@@ -234,7 +234,7 @@ export default function Header() {
               </Link>
             </li>
             <li>
-              <Link href="/shop?page=1">{t("navigation.shop")}</Link>
+              <Link href="/shop">{t("navigation.shop")}</Link>
             </li>
             <li>
               <Link href="/auctions">{t("navigation.auction")}</Link>

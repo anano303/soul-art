@@ -82,7 +82,7 @@ export async function generateMetadata(): Promise<Metadata> {
     : "SoulArt — ნახატები და ხელნაკეთი ნივთები საქართველოში";
   const description = en
     ? "Original paintings and handmade items by 500+ Georgian artists on SoulArt — secure checkout with a money-back guarantee if anything goes wrong."
-    : "500-ზე მეტი ქართველი ხელოვანის ორიგინალი ნახატები და ხელნაკეთი ნივთები ერთ სივრცეში SoulArt-ზე — უსაფრთხო შესყიდვა, პრობლემის შემთხვევაში თანხის დაბრუნების გარანტიით.";
+    : "500-ზე მეტი ქართველი ხელოვანის ორიგინალი ნახატები და ხელნაკეთი ნივთები SoulArt-ზე — უსაფრთხო შესყიდვა და თანხის დაბრუნების გარანტია.";
   const ogDescription = en
     ? "Original paintings and handmade items by 500+ Georgian artists in one place."
     : "500-ზე მეტი ქართველი ხელოვანის ორიგინალი ნახატები და ხელნაკეთი ნივთები ერთ სივრცეში.";
