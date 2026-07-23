@@ -6,9 +6,9 @@ export const organizationSchema = {
   url: "https://www.soulart.ge",
   logo: "https://www.soulart.ge/logo.png",
   description: "ნახატები, ხელნაკეთი ნივთები და დეკორი",
+  // Online-only business — no physical street address; keep city/country only.
   address: {
     "@type": "PostalAddress",
-    streetAddress: "თქვენი მისამართი", // შეცვალეთ რეალური მისამართით
     addressLocality: "თბილისი",
     addressRegion: "თბილისი",
     addressCountry: "GE",
@@ -50,12 +50,11 @@ export const storeSchema = {
   description: "ხელნაკეთი ნივთები და ნახატები",
   url: "https://www.soulart.ge",
   telephone: "+995-551-000-059", // შეცვალეთ რეალური ნომრით
+  // Online-only business — no physical street address / postal code.
   address: {
     "@type": "PostalAddress",
-    streetAddress: "თქვენი მისამართი", // შეცვალეთ რეალური მისამართით
     addressLocality: "თბილისი",
     addressRegion: "თბილისი",
-    postalCode: "0100", // შეცვალეთ რეალური postal code-ით
     addressCountry: "GE",
   },
   geo: {
