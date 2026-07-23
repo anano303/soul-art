@@ -306,8 +306,8 @@
   overflow-x: auto;
   overflow-y: hidden;
   padding: 4px 0 10px;
-  scrollbar-width: thin;
-  scrollbar-color: #012645 transparent;
+  /* scrollbar-width: thin;
+  scrollbar-color: #012645 transparent; */
 }
 
 .subcategories-grid::-webkit-scrollbar {

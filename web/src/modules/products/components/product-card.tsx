@@ -24,12 +24,15 @@ interface ProductCardProps {
   product: Product;
   className?: string;
   theme?: "default" | "handmade-theme";
+  // Above-the-fold cards load their image eagerly (LCP); the rest stay lazy.
+  priority?: boolean;
 }
 
 export function ProductCard({
   product,
   className = "",
   theme = "default",
+  priority = false,
 }: ProductCardProps) {
   const { language } = useLanguage();
   const router = useRouter();
@@ -294,7 +297,9 @@ export function ProductCard({
             // 2 columns on tablets, ~1 column on phones. Cap the requested width
             // so Next/Image serves a thumbnail-sized variant, not the 3840 breakpoint.
             sizes="(max-width: 680px) 90vw, (max-width: 1024px) 45vw, 360px"
-            loading="lazy"
+            {...(priority
+              ? { priority: true }
+              : { loading: "lazy" as const })}
             className="image"
           />
           <div className="product-card-overlay"></div>

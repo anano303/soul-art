@@ -298,8 +298,13 @@ export function ProductGrid({
     <div className="product-grid">
       <style jsx>{paginationStyles}</style>
       <div className="grid-container">
-        {products.map((product) => (
-          <ProductCard key={product._id} product={product} theme={theme} />
+        {products.map((product, index) => (
+          <ProductCard
+            key={product._id}
+            product={product}
+            theme={theme}
+            priority={index < 4}
+          />
         ))}
       </div>
 
