@@ -172,7 +172,6 @@ export async function CategoryRoutePage({
     <div>
       <Suspense fallback={<div>Loading...</div>}>
         <ShopContent
-          key={`${mainSlug}-${subId || "all"}`}
           initialProducts={products}
           initialTotalPages={totalPages}
           initialMainCategory={main.id}

@@ -287,6 +287,15 @@
   flex: 1;
 }
 
+/* While navigating between categories the current products stay visible but
+   dimmed (feedback), and the grid is non-interactive — the filters sidebar
+   stays fully clickable so rapid category switches are never dropped. */
+.products-area.is-nav-pending {
+  opacity: 0.5;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+}
+
 .reset-filters-btn {
   margin-top: 15px;
   padding: 10px 20px;

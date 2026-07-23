@@ -8,6 +8,7 @@ import {
   useRef,
   useCallback,
   useMemo,
+  useTransition,
 } from "react";
 import { ProductGrid } from "@/modules/products/components/product-grid";
 import { ProductFilters } from "@/modules/products/components/product-filters";
@@ -81,6 +82,11 @@ const ShopContent = ({
   const router = useRouter();
   const searchParams = useSearchParams();
   const { t } = useLanguage();
+  // Category navigation runs inside a transition so the filters stay fully
+  // interactive while the next route loads — clicks are never dropped, and
+  // isNavPending drives a lightweight "loading" state in the product area only
+  // (not a full-page swap that would hide the filters).
+  const [isNavPending, startNavTransition] = useTransition();
 
   const initializedRef = useRef(false);
   // When the server already rendered this view's products (clean category
@@ -88,6 +94,12 @@ const ShopContent = ({
   // identical query the server already resolved. Filter/page changes after
   // init still fetch normally.
   const skipInitialFetchRef = useRef(initialProducts.length > 0);
+  // Clean category routes reuse this SAME component instance across
+  // navigations (/paintings → /paintings/portrait → /handmade …). Instead of a
+  // heavy full remount on every click, we resync state to the fresh SSR data
+  // when the route identity changes (see the prop-sync effect below). This ref
+  // tracks the route we last synced.
+  const routeKeyRef = useRef<string | null>(null);
   const pendingInitialStateRef = useRef<{
     page: number;
     mainCategory: string;
@@ -210,6 +222,45 @@ const ShopContent = ({
       router.prefetch(`/${mainSlug}/${slug}`),
     );
   }, [categoryMode, mainSlug, subSlugById, router]);
+
+  // Prop-sync: on client navigation between category routes the component
+  // instance persists (same tree position) and only props change. Resync state
+  // to the new server-rendered data so displayed products always match the URL,
+  // without paying for a full remount (which froze the main thread and made
+  // rapid clicks get dropped).
+  useEffect(() => {
+    if (!categoryMode) return;
+    const routeKey = `${initialMainCategory}|${initialSubCategoryId}`;
+    if (routeKeyRef.current === null) {
+      // First mount — the init effect below seeds state from props.
+      routeKeyRef.current = routeKey;
+      return;
+    }
+    if (routeKeyRef.current === routeKey) return; // same route, nothing to do
+    routeKeyRef.current = routeKey;
+
+    // Fresh SSR data for the new category/subcategory — adopt it directly and
+    // skip the redundant client refetch the filter-change effect would trigger.
+    skipInitialFetchRef.current = true;
+    setProducts(initialProducts);
+    setTotalPages(initialTotalPages);
+    setSelectedCategoryId(initialMainCategory);
+    setSelectedSubCategoryIds(
+      initialSubCategoryId ? [initialSubCategoryId] : [],
+    );
+    setSelectedAgeGroup("");
+    setSelectedSize("");
+    setSelectedColor("");
+    setCurrentPage(1);
+    setIsLoading(false);
+    if (typeof window !== "undefined") window.scrollTo(0, 0);
+  }, [
+    categoryMode,
+    initialMainCategory,
+    initialSubCategoryId,
+    initialProducts,
+    initialTotalPages,
+  ]);
 
   const getTheme = () => {
     if (!selectedCategoryId || !categories.length) return "default";
@@ -573,14 +624,15 @@ const ShopContent = ({
       // (and the mainSlug used for sub-links) desyncs from the shown products.
       if (categoryMode) {
         if (!categoryId) {
-          router.push("/shop"); // deselect → full listing
+          startNavTransition(() => router.push("/shop")); // deselect → full listing
           return;
         }
         if (categoryId === initialMainCategory) return; // already here
         const cat = categories.find(
           (c) => c._id === categoryId || c.id === categoryId,
         );
-        router.push(categoryPath(categoryId, (cat as { slug?: string })?.slug));
+        const dest = categoryPath(categoryId, (cat as { slug?: string })?.slug);
+        startNavTransition(() => router.push(dest));
         return;
       }
 
@@ -606,17 +658,19 @@ const ShopContent = ({
         // actually on a sub-route. Otherwise this would fight the main-category
         // navigation with a competing router.push and cancel it.
         if (!subcategoryId) {
-          if (selectedSubCategoryIds.length > 0) router.push(`/${mainSlug}`);
+          if (selectedSubCategoryIds.length > 0)
+            startNavTransition(() => router.push(`/${mainSlug}`));
           return;
         }
         if (selectedSubCategoryIds.includes(subcategoryId)) {
-          router.push(`/${mainSlug}`); // toggle the active sub off
+          startNavTransition(() => router.push(`/${mainSlug}`)); // toggle off
         } else {
           // Prefer the slug passed straight from the clicked pill — it's always
           // available, unlike our own subcategories query which may still be
           // loading (that race made clicks occasionally do nothing).
           const slug = subSlug || subSlugById[subcategoryId];
-          router.push(slug ? `/${mainSlug}/${slug}` : `/${mainSlug}`);
+          const dest = slug ? `/${mainSlug}/${slug}` : `/${mainSlug}`;
+          startNavTransition(() => router.push(dest));
         }
         return;
       }
@@ -820,7 +874,11 @@ const ShopContent = ({
                 </div>
               </div>
 
-              <div className="products-area">
+              <div
+                className={`products-area${
+                  isNavPending ? " is-nav-pending" : ""
+                }`}
+              >
                 {isLoading ? (
                   <div className="loading-state">{t("shop.loading")}</div>
                 ) : products.length > 0 ? (
