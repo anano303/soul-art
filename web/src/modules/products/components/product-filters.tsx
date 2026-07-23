@@ -367,6 +367,38 @@ export function ProductFilters({
     useQuery<MaterialQueryResult>({
       queryKey: ["materials", selectedCategoryId, selectedSubCategoryId],
       queryFn: async () => {
+        // Fast path: lightweight distinct endpoint. Falls back to the legacy
+        // product scan below if it isn't deployed yet, so nothing breaks.
+        try {
+          const fp = new URLSearchParams();
+          if (selectedCategoryId) fp.append("mainCategory", selectedCategoryId);
+          if (
+            Array.isArray(selectedSubCategoryId) &&
+            selectedSubCategoryId.length > 0
+          ) {
+            fp.append("subCategory", selectedSubCategoryId.join(","));
+          } else if (
+            typeof selectedSubCategoryId === "string" &&
+            selectedSubCategoryId
+          ) {
+            fp.append("subCategory", selectedSubCategoryId);
+          }
+          const fpRes = await fetchWithAuth(
+            `/products/filter-options?${fp.toString()}`,
+          );
+          if (fpRes.ok) {
+            const d = await fpRes.json();
+            if (d && Array.isArray(d.materials)) {
+              return {
+                values: d.materials as string[],
+                translations: (d.translations || {}) as Record<string, string>,
+              };
+            }
+          }
+        } catch {
+          /* fall back to legacy product scan */
+        }
+
         try {
           const params = new URLSearchParams();
           if (selectedCategoryId)
@@ -486,6 +518,35 @@ export function ProductFilters({
   const { data: availableDimensions = [] } = useQuery<string[]>({
     queryKey: ["dimensions", selectedCategoryId, selectedSubCategoryId],
     queryFn: async () => {
+      // Fast path: lightweight distinct endpoint; falls back to the legacy
+      // product scan below if it isn't deployed yet.
+      try {
+        const fp = new URLSearchParams();
+        if (selectedCategoryId) fp.append("mainCategory", selectedCategoryId);
+        if (
+          Array.isArray(selectedSubCategoryId) &&
+          selectedSubCategoryId.length > 0
+        ) {
+          fp.append("subCategory", selectedSubCategoryId.join(","));
+        } else if (
+          typeof selectedSubCategoryId === "string" &&
+          selectedSubCategoryId
+        ) {
+          fp.append("subCategory", selectedSubCategoryId);
+        }
+        const fpRes = await fetchWithAuth(
+          `/products/filter-options?${fp.toString()}`,
+        );
+        if (fpRes.ok) {
+          const d = await fpRes.json();
+          if (d && Array.isArray(d.dimensions)) {
+            return d.dimensions as string[];
+          }
+        }
+      } catch {
+        /* fall back to legacy product scan */
+      }
+
       try {
         const params = new URLSearchParams();
         if (selectedCategoryId)

@@ -757,6 +757,102 @@ export class ProductsService {
     }
   }
 
+  /**
+   * Lightweight filter options (distinct materials + dimensions) for a category.
+   * Replaces the frontend workaround of fetching up to 1000 full products and
+   * extracting these client-side — this does it with cheap aggregation/distinct.
+   */
+  async getFilterOptions(
+    mainCategory?: string,
+    subCategory?: string,
+  ): Promise<{
+    materials: string[];
+    translations: Record<string, string>;
+    dimensions: string[];
+  }> {
+    try {
+      const match: Record<string, unknown> = {
+        status: ProductStatus.APPROVED,
+      };
+      if (mainCategory && Types.ObjectId.isValid(mainCategory)) {
+        match.mainCategory = new Types.ObjectId(mainCategory);
+      }
+      if (subCategory) {
+        const subs = subCategory
+          .split(',')
+          .map((s) => s.trim())
+          .filter((s) => Types.ObjectId.isValid(s))
+          .map((s) => new Types.ObjectId(s));
+        if (subs.length) match.subCategory = { $in: subs };
+      }
+
+      // materials (with ka->en translation) via index-matched pairs
+      const matPairs = await this.productModel.aggregate([
+        { $match: match },
+        {
+          $project: {
+            materials: { $ifNull: ['$materials', []] },
+            materialsEn: { $ifNull: ['$materialsEn', []] },
+          },
+        },
+        {
+          $project: {
+            pairs: {
+              $map: {
+                input: { $range: [0, { $size: '$materials' }] },
+                as: 'i',
+                in: {
+                  ka: { $arrayElemAt: ['$materials', '$$i'] },
+                  en: { $arrayElemAt: ['$materialsEn', '$$i'] },
+                },
+              },
+            },
+          },
+        },
+        { $unwind: '$pairs' },
+        { $group: { _id: '$pairs.ka', en: { $first: '$pairs.en' } } },
+      ]);
+
+      const materials: string[] = [];
+      const translations: Record<string, string> = {};
+      for (const p of matPairs) {
+        const ka = (p._id || '').toString().trim();
+        if (!ka) continue;
+        materials.push(ka);
+        const en = (p.en || '').toString().trim();
+        if (en) translations[ka] = en;
+      }
+
+      // dimensions — distinct returns only unique dimension objects, not full docs
+      const dimObjs = (await this.productModel.distinct(
+        'dimensions',
+        match,
+      )) as Array<{ width?: number; height?: number; depth?: number }>;
+      const dimSet = new Set<string>();
+      for (const d of dimObjs) {
+        if (d && d.width && d.height) {
+          const w = Number(d.width);
+          const h = Number(d.height);
+          const dep = d.depth ? Number(d.depth) : undefined;
+          if (Number.isFinite(w) && Number.isFinite(h)) {
+            dimSet.add(
+              dep && Number.isFinite(dep) ? `${w}x${h}x${dep}` : `${w}x${h}`,
+            );
+          }
+        }
+      }
+
+      return {
+        materials: materials.sort((a, b) => a.localeCompare(b)),
+        translations,
+        dimensions: Array.from(dimSet),
+      };
+    } catch (error) {
+      console.error('Error fetching filter options:', error);
+      return { materials: [], translations: {}, dimensions: [] };
+    }
+  }
+
   async findById(id: string): Promise<ProductDocument> {
     if (!Types.ObjectId.isValid(id))
       throw new BadRequestException('Invalid product ID.');

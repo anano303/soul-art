@@ -167,6 +167,17 @@ export class ProductsController {
     return this.productsService.findAllBrands();
   }
 
+  @Get('filter-options')
+  @ApiOperation({
+    summary: 'Get distinct materials + dimensions for a category (lightweight)',
+  })
+  async getFilterOptions(
+    @Query('mainCategory') mainCategory?: string,
+    @Query('subCategory') subCategory?: string,
+  ) {
+    return this.productsService.getFilterOptions(mainCategory, subCategory);
+  }
+
   @Get('topRated')
   async getTopRatedProducts() {
     const products = await this.productsService.findTopRated();
