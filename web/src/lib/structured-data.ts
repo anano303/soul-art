@@ -20,7 +20,7 @@ export const organizationSchema = {
     availableLanguage: ["Georgian", "English"],
   },
   sameAs: [
-    "https://www.facebook.com/profile.php?id=61574985443236", // შეცვალეთ რეალური სოციალური ქსელებით
+    "https://www.facebook.com/SoulArtGe", // შეცვალეთ რეალური სოციალური ქსელებით
     "https://www.instagram.com/SoulArt.ge",
   ],
 };

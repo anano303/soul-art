@@ -1,4 +1,5 @@
 import { Metadata } from "next";
+import { headers } from "next/headers";
 import {
   GLOBAL_KEYWORDS,
   extractKeywordsFromText,
@@ -40,7 +41,10 @@ const collectReferralKeywords = (
   return Array.from(keywordMap.values());
 };
 
-export async function generateMetadata(locale = "ge"): Promise<Metadata> {
+export async function generateMetadata(): Promise<Metadata> {
+  // Next calls generateMetadata with a props object, not a locale string — read
+  // the locale from the middleware's x-locale header instead.
+  const locale = (await headers()).get("x-locale") === "en" ? "en" : "ge";
   const metadata = {
     ge: {
       title: "რეფერალური სისტემა | SoulArt.ge",
