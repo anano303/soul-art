@@ -14,6 +14,13 @@ const nextConfig: NextConfig = {
     },
     // Optimize bundling and loading only in production
     optimizeCss: process.env.NODE_ENV === "production",
+    // Tree-shake named imports from large libraries so only what's used ships.
+    optimizePackageImports: [
+      "lucide-react",
+      "react-icons",
+      "framer-motion",
+      "@tanstack/react-query",
+    ],
     // Better caching
     staleTimes: {
       dynamic: 30,

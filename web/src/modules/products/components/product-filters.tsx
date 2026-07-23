@@ -87,6 +87,29 @@ export function ProductFilters({
     return Boolean(selectedDimension);
   });
 
+  // The materials & dimensions filters each fetch up to 1000 products and
+  // process them client-side, yet both sections are collapsed by default. Defer
+  // that heavy work off the navigation critical path (run when the browser is
+  // idle) so switching categories stays snappy. Re-deferred on every category
+  // change; if the user opens a section first, it fetches immediately.
+  const [heavyFiltersReady, setHeavyFiltersReady] = useState(false);
+  useEffect(() => {
+    setHeavyFiltersReady(false);
+    if (typeof window === "undefined") return;
+    const ric = window as unknown as {
+      requestIdleCallback?: (cb: () => void, o?: { timeout: number }) => number;
+      cancelIdleCallback?: (id: number) => void;
+    };
+    if (typeof ric.requestIdleCallback === "function") {
+      const id = ric.requestIdleCallback(() => setHeavyFiltersReady(true), {
+        timeout: 1500,
+      });
+      return () => ric.cancelIdleCallback?.(id);
+    }
+    const id = window.setTimeout(() => setHeavyFiltersReady(true), 700);
+    return () => window.clearTimeout(id);
+  }, [selectedCategoryId]);
+
   // Refs for scroll and positioning
   const filterButtonRef = useRef<HTMLButtonElement>(null);
   const filterContainerRef = useRef<HTMLDivElement>(null);
@@ -416,7 +439,8 @@ export function ProductFilters({
       },
       retry: 1,
       refetchOnWindowFocus: false,
-      enabled: !!selectedCategoryId,
+      enabled:
+        !!selectedCategoryId && (heavyFiltersReady || isMaterialSectionOpen),
     });
 
   const normalizedSelectedMaterials = useMemo(() => {
@@ -555,7 +579,8 @@ export function ProductFilters({
     },
     retry: 1,
     refetchOnWindowFocus: false,
-    enabled: !!selectedCategoryId,
+    enabled:
+      !!selectedCategoryId && (heavyFiltersReady || isDimensionSectionOpen),
   });
 
   const normalizedSelectedDimensions = useMemo(() => {
