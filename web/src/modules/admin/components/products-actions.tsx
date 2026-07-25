@@ -404,11 +404,10 @@ export function ProductsActions({
               pathname: `/admin/etsy/publish`,
               query: { id: product._id },
             }}
-            className="etsy-btn prd-action-link"
+            className="etsy-btn"
             title={
               language === "en" ? "Publish to Etsy" : "Etsy-ზე განთავსება"
             }
-            style={{ color: "#f1641e" }}
           >
             <Store size={18} />
           </Link>

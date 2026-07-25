@@ -304,3 +304,35 @@
   opacity: 0.6;
   cursor: not-allowed;
 }
+
+/* Etsy publish link — anchor styled like the other action buttons */
+.space-x-2 a.etsy-btn {
+  background: transparent;
+  border: 2px solid rgba(241, 100, 30, 0.3);
+  border-radius: 8px;
+  padding: 0.5rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: #f1641e;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 40px;
+  min-height: 40px;
+}
+
+.space-x-2 a.etsy-btn:hover {
+  background: linear-gradient(
+    135deg,
+    rgba(241, 100, 30, 0.12),
+    rgba(241, 100, 30, 0.05)
+  );
+  border-color: #f1641e;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(241, 100, 30, 0.15);
+}
+
+.space-x-2 a.etsy-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 6px rgba(241, 100, 30, 0.2);
+}
