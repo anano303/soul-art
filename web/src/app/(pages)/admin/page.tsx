@@ -102,6 +102,13 @@ export default function AdminDashboard() {
         roles: ["admin"], // მთავარი ადმინი
       },
       {
+        title: "Etsy ინტეგრაცია",
+        href: "/admin/etsy",
+        icon: "🛒",
+        description: "Etsy კავშირის სტატუსი, საკომისიო და listing-ის საფასური",
+        roles: ["admin"], // მთავარი ადმინი
+      },
+      {
         title: "Shipping Countries",
         href: "/admin/shipping-countries",
         icon: "🚚",

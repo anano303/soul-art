@@ -32,6 +32,7 @@ import {
   BellRing,
   Rocket,
   Palette,
+  Store,
 } from "lucide-react";
 
 // Add a style object for the FiraGo font
@@ -533,6 +534,16 @@ export default function UserMenu({
                     {language === "en"
                       ? "Custom orders"
                       : "ინდივიდუალური შეკვეთები"}
+                  </span>
+                </Link>
+                <Link
+                  href="/admin/etsy"
+                  className="dropdown-item"
+                  onClick={handleLinkClick}
+                >
+                  <Store size={18} />
+                  <span>
+                    {language === "en" ? "Etsy integration" : "Etsy ინტეგრაცია"}
                   </span>
                 </Link>
               </>

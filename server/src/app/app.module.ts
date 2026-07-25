@@ -37,6 +37,7 @@ import { StorageModule } from '../storage/storage.module';
 import { FaqModule } from '../faq/faq.module';
 import { BackupModule } from '../backup/backup.module';
 import { PromotionModule } from '../promotions/promotion.module';
+import { EtsyModule } from '../etsy/etsy.module';
 import { VoucherModule } from '../vouchers/voucher.module';
 import { PriceOffersModule } from '../price-offers/price-offers.module';
 import { CommissionsModule } from '../commissions/commissions.module';
@@ -85,6 +86,7 @@ import { CommissionsModule } from '../commissions/commissions.module';
     VoucherModule,
     PriceOffersModule,
     CommissionsModule,
+    EtsyModule,
   ],
   controllers: [AppController],
   providers: [AppService, GoogleStrategy],
