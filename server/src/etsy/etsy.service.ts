@@ -82,7 +82,19 @@ export class EtsyService {
   }
 
   async getConnectionStatus(): Promise<EtsyConnectionStatus> {
-    const doc = await this.getAuthDoc();
+    let doc = await this.getAuthDoc();
+
+    // Self-heal: the account may have had no shop at OAuth time (shop created
+    // later on etsy.com) — retry resolution whenever status is checked.
+    if (doc?.refreshToken && !doc.shopId) {
+      try {
+        await this.resolveShop(doc);
+        doc = await this.getAuthDoc();
+      } catch (error) {
+        this.logger.warn(`Etsy shop re-resolution failed: ${error.message}`);
+      }
+    }
+
     return {
       configured: this.isConfigured(),
       connected: Boolean(doc?.refreshToken),
@@ -203,29 +215,47 @@ export class EtsyService {
 
     // Resolve the shop attached to this Etsy account
     try {
-      const me = await this.apiRequest<{ user_id: number; shop_id: number }>(
-        'GET',
-        '/application/users/me',
-      );
-      if (me?.shop_id) {
-        const shop = await this.apiRequest<{ shop_id: number; shop_name: string }>(
-          'GET',
-          `/application/shops/${me.shop_id}`,
-        );
-        doc.shopId = String(me.shop_id);
-        doc.shopName = shop?.shop_name;
-        await doc.save();
-        this.logger.log(`Etsy shop resolved: ${shop?.shop_name} (${me.shop_id})`);
-      } else {
-        this.logger.warn(
-          'Connected Etsy account has no shop yet — create a shop on Etsy first',
-        );
-      }
+      await this.resolveShop(doc);
     } catch (error) {
       this.logger.warn(`Could not resolve Etsy shop info: ${error.message}`);
     }
 
     return this.getConnectionStatus();
+  }
+
+  private async resolveShop(doc: EtsyAuthDocument): Promise<void> {
+    const me = await this.apiRequest<{ user_id: number; shop_id: number }>(
+      'GET',
+      '/application/users/me',
+    );
+    if (me?.shop_id) {
+      const shop = await this.apiRequest<{ shop_id: number; shop_name: string }>(
+        'GET',
+        `/application/shops/${me.shop_id}`,
+      );
+      doc.shopId = String(me.shop_id);
+      doc.shopName = shop?.shop_name;
+      await doc.save();
+      this.logger.log(`Etsy shop resolved: ${shop?.shop_name} (${me.shop_id})`);
+    } else {
+      this.logger.warn(
+        'Connected Etsy account has no shop yet — create a shop on Etsy first',
+      );
+    }
+  }
+
+  /**
+   * The connected shop's ID, required by all listing endpoints.
+   */
+  async getShopId(): Promise<string> {
+    const doc = await this.getAuthDoc();
+    if (!doc?.shopId) {
+      throw new HttpException(
+        'No Etsy shop connected. Connect the shop via /etsy/auth first (the Etsy account must have a shop)',
+        HttpStatus.PRECONDITION_FAILED,
+      );
+    }
+    return doc.shopId;
   }
 
   private async requestTokens(body: Record<string, string>): Promise<{
@@ -376,18 +406,20 @@ export class EtsyService {
   async apiRequest<T = any>(
     method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE',
     path: string,
-    body?: Record<string, any>,
+    body?: Record<string, any> | FormData,
   ): Promise<T> {
     const accessToken = await this.getAccessToken();
+    const isForm = typeof FormData !== 'undefined' && body instanceof FormData;
 
     const response = await fetch(`${ETSY_API_BASE_URL}${path}`, {
       method,
       headers: {
         'x-api-key': this.keystring,
         Authorization: `Bearer ${accessToken}`,
-        ...(body ? { 'Content-Type': 'application/json' } : {}),
+        // FormData sets its own multipart Content-Type with boundary
+        ...(body && !isForm ? { 'Content-Type': 'application/json' } : {}),
       },
-      body: body ? JSON.stringify(body) : undefined,
+      body: isForm ? (body as FormData) : body ? JSON.stringify(body) : undefined,
     });
 
     const data = await response.json().catch(() => null);

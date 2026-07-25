@@ -8,6 +8,7 @@ import {
   X,
   Rocket,
   Copy,
+  Store,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
@@ -21,6 +22,7 @@ import Link from "next/link";
 import { useLanguage } from "@/hooks/LanguageContext";
 import { TikTokPostModal } from "./TikTokPostModal";
 import { PromoteModal } from "./promote-modal";
+import { EtsyPublishModal } from "./etsy-publish-modal";
 
 interface ProductsActionsProps {
   product: Product;
@@ -45,6 +47,7 @@ export function ProductsActions({
   const [showTikTokModal, setShowTikTokModal] = useState(false);
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [showPromoteModal, setShowPromoteModal] = useState(false);
+  const [showEtsyModal, setShowEtsyModal] = useState(false);
   const [rejectionReason, setRejectionReason] = useState("");
   const [isRejecting, setIsRejecting] = useState(false);
   const [mounted, setMounted] = useState(false);
@@ -381,6 +384,13 @@ export function ProductsActions({
           onClose={() => setShowPromoteModal(false)}
         />
 
+        {/* Etsy Publish Modal */}
+        <EtsyPublishModal
+          product={product}
+          isOpen={showEtsyModal}
+          onClose={() => setShowEtsyModal(false)}
+        />
+
         {/* Promote button - visible to sellers and admins */}
         {product.status === ProductStatus.APPROVED && (
           <button
@@ -391,6 +401,20 @@ export function ProductsActions({
             }
           >
             <Rocket size={18} />
+          </button>
+        )}
+
+        {/* Etsy button - visible to sellers and admins for approved products */}
+        {product.status === ProductStatus.APPROVED && (
+          <button
+            className="etsy-btn"
+            onClick={() => setShowEtsyModal(true)}
+            title={
+              language === "en" ? "Publish to Etsy" : "Etsy-ზე განთავსება"
+            }
+            style={{ color: "#f1641e" }}
+          >
+            <Store size={18} />
           </button>
         )}
 

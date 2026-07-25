@@ -2,18 +2,35 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { EtsyService } from './etsy.service';
+import { EtsyListingService } from './etsy-listing.service';
 import { EtsyController } from './etsy.controller';
 import { EtsyAuth, EtsyAuthSchema } from './schemas/etsy-auth.schema';
+import { EtsyListing, EtsyListingSchema } from './schemas/etsy-listing.schema';
+import { Product, ProductSchema } from '../products/schemas/product.schema';
+import { User, UserSchema } from '../users/schemas/user.schema';
+import {
+  SellerBalance,
+  SellerBalanceSchema,
+  BalanceTransaction,
+  BalanceTransactionSchema,
+} from '../users/schemas/seller-balance.schema';
+import { ExchangeRateModule } from '../exchange-rate/exchange-rate.module';
 
 @Module({
   imports: [
     ConfigModule,
+    ExchangeRateModule,
     MongooseModule.forFeature([
       { name: EtsyAuth.name, schema: EtsyAuthSchema },
+      { name: EtsyListing.name, schema: EtsyListingSchema },
+      { name: Product.name, schema: ProductSchema },
+      { name: User.name, schema: UserSchema },
+      { name: SellerBalance.name, schema: SellerBalanceSchema },
+      { name: BalanceTransaction.name, schema: BalanceTransactionSchema },
     ]),
   ],
   controllers: [EtsyController],
-  providers: [EtsyService],
-  exports: [EtsyService],
+  providers: [EtsyService, EtsyListingService],
+  exports: [EtsyService, EtsyListingService],
 })
 export class EtsyModule {}

@@ -13,8 +13,11 @@ import {
 } from '@nestjs/common';
 import { Response } from 'express';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { Param } from '@nestjs/common';
 import { EtsyService } from './etsy.service';
+import { EtsyListingService } from './etsy-listing.service';
 import { UpdateEtsySettingsDto } from './dto/update-etsy-settings.dto';
+import { CurrentUser } from '../decorators/current-user.decorator';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { RolesGuard } from '../guards/roles.guard';
 import { Roles } from '../decorators/roles.decorator';
@@ -23,7 +26,10 @@ import { Role } from '../types/role.enum';
 @ApiTags('etsy')
 @Controller('etsy')
 export class EtsyController {
-  constructor(private readonly etsyService: EtsyService) {}
+  constructor(
+    private readonly etsyService: EtsyService,
+    private readonly etsyListingService: EtsyListingService,
+  ) {}
 
   /**
    * Etsy კავშირის სტატუსი (კონფიგურაცია + OAuth)
@@ -154,6 +160,43 @@ export class EtsyController {
   @ApiOperation({ summary: 'Get connected Etsy shop info' })
   async getShop() {
     return this.etsyService.getShop();
+  }
+
+  /**
+   * პროდუქტის Etsy listing-ის გადახედვა — mapping, ფასი, ბლოკერები.
+   * გამყიდველი ხედავს საკუთარ პროდუქტებზე, ადმინი — ყველაზე.
+   */
+  @Get('products/:productId/preview')
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Preview how a product maps to an Etsy listing' })
+  async previewListing(
+    @Param('productId') productId: string,
+    @CurrentUser() user: any,
+  ) {
+    return this.etsyListingService.previewListing(productId, user);
+  }
+
+  /**
+   * პროდუქტის Etsy-ზე განთავსება (draft → images → activate → fee)
+   */
+  @Post('products/:productId/publish')
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Publish a product to the SoulArt Etsy shop' })
+  async publishProduct(
+    @Param('productId') productId: string,
+    @CurrentUser() user: any,
+  ) {
+    return this.etsyListingService.publishProduct(productId, user);
+  }
+
+  /**
+   * ჩემი Etsy listing-ები (ადმინისთვის — ყველა)
+   */
+  @Get('listings/mine')
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Get Etsy listings for the current seller' })
+  async getMyListings(@CurrentUser() user: any) {
+    return this.etsyListingService.getMyListings(user);
   }
 
   private renderResultPage(success: boolean, detail: string): string {

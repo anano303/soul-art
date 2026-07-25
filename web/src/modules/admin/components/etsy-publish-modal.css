@@ -1,0 +1,257 @@
+/* ── Etsy Publish Modal ── */
+
+.etsy-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 99999;
+  padding: 16px;
+  backdrop-filter: blur(4px);
+}
+
+.etsy-modal {
+  background: #fff;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 500px;
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 28px;
+  position: relative;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  animation: etsySlideUp 0.3s ease;
+  z-index: 100000;
+}
+
+@keyframes etsySlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.etsy-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #999;
+  padding: 4px;
+  border-radius: 50%;
+  transition: all 0.2s;
+}
+
+.etsy-close:hover {
+  color: #333;
+  background: #f0f0f0;
+}
+
+.etsy-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+  color: #f1641e; /* Etsy orange */
+}
+
+.etsy-header h2 {
+  font-size: 20px;
+  font-weight: 700;
+  margin: 0;
+  color: #222;
+}
+
+.etsy-product-name {
+  font-size: 14px;
+  color: #555;
+  margin-bottom: 16px;
+}
+
+.etsy-loading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: center;
+  padding: 24px 0;
+  color: #666;
+}
+
+.etsy-error {
+  background: #fdecea;
+  border: 1px solid #f5c6cb;
+  color: #b71c1c;
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 13px;
+  margin-bottom: 12px;
+}
+
+.etsy-success {
+  background: #e8f5e9;
+  border: 1px solid #a5d6a7;
+  border-radius: 8px;
+  padding: 14px;
+  font-size: 14px;
+  color: #1b5e20;
+  margin-bottom: 12px;
+}
+
+.etsy-info-box {
+  background: #e3f2fd;
+  border: 1px solid #90caf9;
+  border-radius: 8px;
+  padding: 14px;
+  font-size: 14px;
+  color: #0d47a1;
+  margin-bottom: 12px;
+}
+
+.etsy-listing-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  color: #f1641e;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.etsy-listing-link:hover {
+  text-decoration: underline;
+}
+
+.etsy-fee-explainer {
+  background: #fff8e1;
+  border: 1px solid #ffe082;
+  border-radius: 8px;
+  padding: 12px;
+  font-size: 13px;
+  color: #7a5c00;
+  line-height: 1.5;
+  margin-bottom: 16px;
+}
+
+.etsy-section {
+  margin-bottom: 16px;
+}
+
+.etsy-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 8px;
+}
+
+.etsy-price-rows {
+  border: 1px solid #eee;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.etsy-price-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 12px;
+  font-size: 13px;
+  color: #444;
+  border-bottom: 1px solid #f2f2f2;
+}
+
+.etsy-price-row:last-child {
+  border-bottom: none;
+}
+
+.etsy-price-final {
+  background: #fff4ef;
+  font-weight: 700;
+  color: #f1641e;
+}
+
+.etsy-preview-details {
+  font-size: 13px;
+  color: #444;
+  line-height: 1.6;
+}
+
+.etsy-preview-details p {
+  margin: 4px 0;
+}
+
+.etsy-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.etsy-tag {
+  background: #f0f0f0;
+  border-radius: 12px;
+  padding: 2px 10px;
+  font-size: 11px;
+  color: #555;
+}
+
+.etsy-blockers {
+  background: #fdecea;
+  border: 1px solid #f5c6cb;
+  border-radius: 8px;
+  padding: 10px 12px;
+  margin-bottom: 14px;
+}
+
+.etsy-blockers p {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: #b71c1c;
+  margin: 4px 0;
+}
+
+.etsy-submit-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: #f1641e;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 13px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.etsy-submit-btn:hover:not(:disabled) {
+  background: #d4551a;
+}
+
+.etsy-submit-btn:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+.etsy-submit-btn .spin,
+.etsy-loading .spin {
+  animation: etsySpin 1s linear infinite;
+}
+
+@keyframes etsySpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
