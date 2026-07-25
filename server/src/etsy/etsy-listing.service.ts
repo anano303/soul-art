@@ -148,9 +148,15 @@ export class EtsyListingService {
   private taxonomyCache: FlatTaxonomyNode[] | null = null;
   private taxonomyCacheAt = 0;
 
-  // Short-lived cache of the shop's first shipping profile id (checked on
-  // every preview — Etsy refuses physical listings without one)
+  // Short-lived caches of the shop's first shipping profile / readiness
+  // state (processing profile) ids — Etsy refuses physical listings
+  // without both, so previews check them before any payment
   private shippingProfileCache: {
+    shopId: string;
+    id: number | null;
+    at: number;
+  } | null = null;
+  private readinessStateCache: {
     shopId: string;
     id: number | null;
     at: number;
@@ -206,13 +212,16 @@ export class EtsyListingService {
     if (!status.connected) blockers.push('SHOP_NOT_CONNECTED');
     else if (!status.shopId) blockers.push('NO_ETSY_SHOP');
     else {
-      // Etsy rejects physical listings without a shipping profile — catch
-      // this BEFORE any money is taken. 'error' (lookup failed) doesn't
-      // block; the publish path re-checks with a fresh call anyway.
-      const shippingProfile = await this.lookupShippingProfileId(
-        status.shopId,
-      );
+      // Etsy rejects physical listings without a shipping profile and a
+      // readiness state (processing profile) — catch this BEFORE any money
+      // is taken. 'error' (lookup failed) doesn't block; the publish path
+      // re-checks with fresh calls anyway.
+      const [shippingProfile, readinessState] = await Promise.all([
+        this.lookupShippingProfileId(status.shopId),
+        this.lookupReadinessStateId(status.shopId),
+      ]);
       if (shippingProfile === null) blockers.push('NO_SHIPPING_PROFILE');
+      if (readinessState === null) blockers.push('NO_READINESS_STATE');
     }
     if (product.status !== ProductStatus.APPROVED) {
       blockers.push('PRODUCT_NOT_APPROVED');
@@ -416,11 +425,13 @@ export class EtsyListingService {
       payload.materials = preview.listing.materials;
     }
 
-    // Activation requirements — auto-pick the shop's first shipping profile
-    // and return policy when available
+    // Requirements for physical listings — auto-pick the shop's first
+    // shipping profile, readiness state and return policy when available
     const shippingProfileId = await this.pickShippingProfileId(shopId, warnings);
+    const readinessStateId = await this.pickReadinessStateId(shopId, warnings);
     const returnPolicyId = await this.pickReturnPolicyId(shopId, warnings);
     if (shippingProfileId) payload.shipping_profile_id = shippingProfileId;
+    if (readinessStateId) payload.readiness_state_id = readinessStateId;
     if (returnPolicyId) payload.return_policy_id = returnPolicyId;
 
     const created = await this.etsyService.apiRequest<any>(
@@ -773,6 +784,48 @@ export class EtsyListingService {
     }
   }
 
+  /**
+   * Cached (60s) readiness-state (processing profile) lookup for previews.
+   * Returns 'error' when Etsy can't be reached — not the same as "none".
+   */
+  private async lookupReadinessStateId(
+    shopId: string,
+  ): Promise<number | null | 'error'> {
+    const cache = this.readinessStateCache;
+    if (cache && cache.shopId === shopId && Date.now() - cache.at < 60_000) {
+      return cache.id;
+    }
+    try {
+      const data = await this.etsyService.apiRequest<{ results: any[] }>(
+        'GET',
+        `/application/shops/${shopId}/readiness-state-definitions`,
+      );
+      const id = data.results?.[0]?.readiness_state_id ?? null;
+      this.readinessStateCache = { shopId, id, at: Date.now() };
+      return id;
+    } catch {
+      return 'error';
+    }
+  }
+
+  private async pickReadinessStateId(
+    shopId: string,
+    warnings: string[],
+  ): Promise<number | null> {
+    try {
+      const data = await this.etsyService.apiRequest<{ results: any[] }>(
+        'GET',
+        `/application/shops/${shopId}/readiness-state-definitions`,
+      );
+      const state = data.results?.[0];
+      if (!state) return null;
+      return state.readiness_state_id;
+    } catch (error: any) {
+      warnings.push(`READINESS_STATES_FETCH_FAILED: ${error.message}`);
+      return null;
+    }
+  }
+
   private async pickShippingProfileId(
     shopId: string,
     warnings: string[],
@@ -1047,8 +1100,9 @@ export class EtsyListingService {
     }
 
     // The admin likely just fixed the shop setup (e.g. created a shipping
-    // profile) — don't let a stale cached lookup block the retry
+    // profile) — don't let stale cached lookups block the retry
     this.shippingProfileCache = null;
+    this.readinessStateCache = null;
 
     return this.publishPaidFeePayment(payment);
   }

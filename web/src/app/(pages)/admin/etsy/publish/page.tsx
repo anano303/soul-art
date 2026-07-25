@@ -109,6 +109,10 @@ const BLOCKER_MESSAGES: Record<string, { ka: string; en: string }> = {
     ka: "Etsy მაღაზიას ჯერ არ აქვს მიწოდების პროფილი — ადმინმა უნდა შექმნას Etsy Shop Manager → Settings → Delivery settings",
     en: "The Etsy shop has no shipping profile yet — an admin must create one in Etsy Shop Manager → Settings → Delivery settings",
   },
+  NO_READINESS_STATE: {
+    ka: "Etsy მაღაზიას არ აქვს Processing Profile — ადმინმა უნდა შექმნას Etsy Shop Manager → Settings → Shipping profiles & processing → Your processing profiles",
+    en: "The Etsy shop has no processing profile — an admin must create one in Etsy Shop Manager → Settings → Shipping profiles & processing → Your processing profiles",
+  },
 };
 
 function EtsyPublishContent() {
