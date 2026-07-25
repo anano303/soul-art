@@ -17,6 +17,8 @@ import {
 import { toast } from "@/hooks/use-toast";
 import { fetchWithAuth } from "@/lib/fetch-with-auth";
 import { useLanguage } from "@/hooks/LanguageContext";
+import { useUser } from "@/modules/auth/hooks/use-user";
+import { Role } from "@/types/role";
 import "./etsy-publish.css";
 
 interface ProductData {
@@ -135,7 +137,13 @@ const DRAFT_REASON_HINTS: Record<string, { ka: string; en: string }> = {
 function EtsyPublishContent() {
   const searchParams = useSearchParams();
   const { language } = useLanguage();
+  const { user } = useUser();
   const isKa = language !== "en";
+  // Impersonating admins also see the admin-level diagnostics
+  const isAdminView =
+    user?.role === Role.Admin ||
+    (typeof window !== "undefined" &&
+      Boolean(localStorage.getItem("impersonating_admin_id")));
 
   const productId = searchParams ? searchParams.get("id") : null;
   const paymentResult = searchParams ? searchParams.get("etsy") : null;
@@ -493,31 +501,47 @@ function EtsyPublishContent() {
                           : "Your artwork is on Etsy, but still a draft — buyers can't see it yet."
                       }`}
                 </p>
-                {listedInfo.state !== "active" && (
-                  <div className="etsy-draft-reasons">
-                    {(preview.alreadyListed?.warnings || [])
-                      .filter(
-                        (w) =>
-                          DRAFT_REASON_HINTS[w] ||
-                          w.startsWith("ACTIVATION_FAILED"),
-                      )
-                      .map((w) => (
-                        <p key={w}>
-                          ⚠️{" "}
-                          {DRAFT_REASON_HINTS[w]
-                            ? isKa
-                              ? DRAFT_REASON_HINTS[w].ka
-                              : DRAFT_REASON_HINTS[w].en
-                            : w}
-                        </p>
-                      ))}
-                    <p>
-                      {isKa
-                        ? "გამოსწორების შემდეგ დრაფტი გამოაქვეყნეთ Etsy Shop Manager-ში: Listings → Draft → Publish. სტატუსი აქ ავტომატურად სინქრონდება."
-                        : "After fixing, publish the draft in Etsy Shop Manager: Listings → Draft → Publish. The status here syncs automatically."}
-                    </p>
-                  </div>
-                )}
+                {listedInfo.state !== "active" &&
+                  (isAdminView ? (
+                    <div className="etsy-draft-reasons">
+                      {(preview.alreadyListed?.warnings || [])
+                        .filter(
+                          (w) =>
+                            DRAFT_REASON_HINTS[w] ||
+                            w.startsWith("ACTIVATION_FAILED"),
+                        )
+                        .map((w) => (
+                          <p key={w}>
+                            ⚠️{" "}
+                            {DRAFT_REASON_HINTS[w]
+                              ? isKa
+                                ? DRAFT_REASON_HINTS[w].ka
+                                : DRAFT_REASON_HINTS[w].en
+                              : w}
+                          </p>
+                        ))}
+                      <p>
+                        {isKa
+                          ? "გამოსწორების შემდეგ გამოაქვეყნეთ აქედან: ადმინი → Etsy Listing-ები → გამოქვეყნება, ან Etsy Shop Manager-იდან. სტატუსი ავტომატურად სინქრონდება."
+                          : "After fixing, publish from Admin → Etsy Listings → Publish, or from Etsy Shop Manager. The status syncs automatically."}
+                      </p>
+                      <p>
+                        <Link href="/admin/etsy/listings">
+                          {isKa
+                            ? "→ Listing-ების მართვა"
+                            : "→ Manage listings"}
+                        </Link>
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="etsy-draft-reasons">
+                      <p>
+                        {isKa
+                          ? "🛠️ SoulArt-ის ადმინისტრაცია უკვე ზრუნავს ამაზე — ნამუშევარი მალე გამოქვეყნდება Etsy-ზე. თქვენი მხრიდან დამატებითი გადახდა ან მოქმედება საჭირო არ არის."
+                          : "🛠️ SoulArt admins are taking care of it — your artwork will be live on Etsy soon. No extra payment or action is needed from you."}
+                      </p>
+                    </div>
+                  ))}
                 {listedInfo.listingUrl && (
                   <a
                     href={listedInfo.listingUrl}
