@@ -6,6 +6,10 @@ import { EtsyListingService } from './etsy-listing.service';
 import { EtsyController } from './etsy.controller';
 import { EtsyAuth, EtsyAuthSchema } from './schemas/etsy-auth.schema';
 import { EtsyListing, EtsyListingSchema } from './schemas/etsy-listing.schema';
+import {
+  EtsyFeePayment,
+  EtsyFeePaymentSchema,
+} from './schemas/etsy-fee-payment.schema';
 import { Product, ProductSchema } from '../products/schemas/product.schema';
 import { User, UserSchema } from '../users/schemas/user.schema';
 import {
@@ -23,6 +27,7 @@ import { ExchangeRateModule } from '../exchange-rate/exchange-rate.module';
     MongooseModule.forFeature([
       { name: EtsyAuth.name, schema: EtsyAuthSchema },
       { name: EtsyListing.name, schema: EtsyListingSchema },
+      { name: EtsyFeePayment.name, schema: EtsyFeePaymentSchema },
       { name: Product.name, schema: ProductSchema },
       { name: User.name, schema: UserSchema },
       { name: SellerBalance.name, schema: SellerBalanceSchema },

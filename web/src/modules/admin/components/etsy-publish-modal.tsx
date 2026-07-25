@@ -2,7 +2,15 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { createPortal } from "react-dom";
-import { X, Store, Loader2, ExternalLink, AlertTriangle } from "lucide-react";
+import {
+  X,
+  Store,
+  Loader2,
+  ExternalLink,
+  AlertTriangle,
+  Wallet,
+  CreditCard,
+} from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { fetchWithAuth } from "@/lib/fetch-with-auth";
 import { useLanguage } from "@/hooks/LanguageContext";
@@ -45,6 +53,9 @@ interface EtsyPreview {
     priceUsd: number;
     listingFeeGel: number;
     sellerBalanceGel: number | null;
+    canPayFromBalance: boolean;
+    soulartCommissionPercent: number;
+    sellerEarnsGel: number;
   };
 }
 
@@ -76,10 +87,6 @@ const BLOCKER_MESSAGES: Record<string, { ka: string; en: string }> = {
   NO_IMAGES: {
     ka: "პროდუქტს არ აქვს ფოტოები",
     en: "Product has no images",
-  },
-  INSUFFICIENT_BALANCE: {
-    ka: "ბალანსზე არასაკმარისი თანხაა listing-ის საფასურისთვის",
-    en: "Insufficient balance for the listing fee",
   },
 };
 
@@ -128,6 +135,31 @@ export function EtsyPublishModal({
       loadPreview();
     }
   }, [isOpen, loadPreview]);
+
+  const handleCardPay = async () => {
+    if (!productId) return;
+    setPublishing(true);
+    try {
+      const res = await fetchWithAuth("/payments/bog/etsy-listing/create", {
+        method: "POST",
+        body: JSON.stringify({ productId }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.redirectUrl) {
+        throw new Error(data?.message || "Payment initialization failed");
+      }
+      // After payment BOG redirects back; the listing publishes automatically
+      window.location.href = data.redirectUrl;
+    } catch (err) {
+      toast({
+        variant: "destructive",
+        title: isKa ? "შეცდომა" : "Error",
+        description:
+          err instanceof Error ? err.message : "Failed to start payment",
+      });
+      setPublishing(false);
+    }
+  };
 
   const handlePublish = async () => {
     if (!productId) return;
@@ -241,8 +273,8 @@ export function EtsyPublishModal({
               <p>
                 💡{" "}
                 {isKa
-                  ? `Etsy-ზე განთავსება ფასიანია: ერთჯერადი ${preview.pricing.listingFeeGel}₾ listing-ის საფასური (ჩამოგეჭრებათ ბალანსიდან). Etsy ასევე იღებს საკომისიოებს გაყიდვაზე და ვალუტის კონვერტაციაზე — ამიტომ Etsy-ზე ფასი თქვენს ფასზე ${preview.pricing.commissionPercent}%-ით მეტი იქნება. თქვენ გაყიდვისას მიიღებთ თქვენს სრულ ფასს.`
-                  : `Publishing on Etsy has costs: a one-time ${preview.pricing.listingFeeGel}₾ listing fee (deducted from your balance). Etsy also charges sale and currency-conversion fees — so the Etsy price will be ${preview.pricing.commissionPercent}% above your price. You still receive your full price when it sells.`}
+                  ? `Etsy-ზე განთავსება ფასიანია: ერთჯერადი ${preview.pricing.listingFeeGel}₾ listing-ის საფასური (გადაიხდით ბალანსიდან ან ბარათით). Etsy იღებს საკომისიოებს გაყიდვაზე და ვალუტის კონვერტაციაზე — ამიტომ Etsy-ზე ფასი თქვენს ფასზე ${preview.pricing.commissionPercent}%-ით მეტი იქნება. გაყიდვისას მიიღებთ იმდენივეს, რამდენსაც SoulArt-ზე გაყიდვისას: თქვენი ფასი გამოკლებული SoulArt-ის ${preview.pricing.soulartCommissionPercent}% საკომისიო = ${preview.pricing.sellerEarnsGel}₾.`
+                  : `Publishing on Etsy has costs: a one-time ${preview.pricing.listingFeeGel}₾ listing fee (paid from balance or by card). Etsy charges sale and currency-conversion fees — so the Etsy price will be ${preview.pricing.commissionPercent}% above your price. When it sells you earn the same as on SoulArt: your price minus SoulArt's ${preview.pricing.soulartCommissionPercent}% commission = ${preview.pricing.sellerEarnsGel}₾.`}
               </p>
             </div>
 
@@ -270,6 +302,14 @@ export function EtsyPublishModal({
                 </div>
                 <div className="etsy-price-row">
                   <span>
+                    {isKa
+                      ? `თქვენი შემოსავალი გაყიდვისას (−${preview.pricing.soulartCommissionPercent}% SoulArt)`
+                      : `Your earnings when sold (−${preview.pricing.soulartCommissionPercent}% SoulArt)`}
+                  </span>
+                  <span>{preview.pricing.sellerEarnsGel.toFixed(2)}₾</span>
+                </div>
+                <div className="etsy-price-row">
+                  <span>
                     {isKa ? "Listing-ის საფასური" : "Listing fee"}
                   </span>
                   <span>{preview.pricing.listingFeeGel}₾</span>
@@ -277,7 +317,7 @@ export function EtsyPublishModal({
                 {preview.pricing.sellerBalanceGel !== null && (
                   <div className="etsy-price-row">
                     <span>{isKa ? "თქვენი ბალანსი" : "Your balance"}</span>
-                    <span>{preview.pricing.sellerBalanceGel}₾</span>
+                    <span>{preview.pricing.sellerBalanceGel.toFixed(2)}₾</span>
                   </div>
                 )}
               </div>
@@ -334,26 +374,73 @@ export function EtsyPublishModal({
               </div>
             )}
 
-            {/* Publish button */}
-            <button
-              className="etsy-submit-btn"
-              onClick={handlePublish}
-              disabled={publishing || !preview.ready}
-            >
-              {publishing ? (
-                <>
-                  <Loader2 size={18} className="spin" />
-                  {isKa ? "ქვეყნდება Etsy-ზე..." : "Publishing to Etsy..."}
-                </>
-              ) : (
-                <>
-                  <Store size={18} />
+            {/* Payment / publish buttons */}
+            {preview.pricing.listingFeeGel > 0 ? (
+              <div className="etsy-pay-options">
+                <button
+                  className="etsy-submit-btn"
+                  onClick={handlePublish}
+                  disabled={
+                    publishing ||
+                    !preview.ready ||
+                    !preview.pricing.canPayFromBalance
+                  }
+                >
+                  {publishing ? (
+                    <Loader2 size={18} className="spin" />
+                  ) : (
+                    <Wallet size={18} />
+                  )}
                   {isKa
-                    ? `განთავსება — ${preview.pricing.listingFeeGel}₾`
-                    : `Publish — ${preview.pricing.listingFeeGel}₾`}
-                </>
-              )}
-            </button>
+                    ? `ბალანსიდან გადახდა — ${preview.pricing.listingFeeGel}₾`
+                    : `Pay from balance — ${preview.pricing.listingFeeGel}₾`}
+                </button>
+                {!preview.pricing.canPayFromBalance && (
+                  <p className="etsy-balance-hint">
+                    {isKa
+                      ? "ბალანსზე საკმარისი თანხა არ არის — გადაიხადეთ ბარათით"
+                      : "Not enough balance — pay by card instead"}
+                  </p>
+                )}
+                <button
+                  className="etsy-submit-btn etsy-card-btn"
+                  onClick={handleCardPay}
+                  disabled={publishing || !preview.ready}
+                >
+                  {publishing ? (
+                    <Loader2 size={18} className="spin" />
+                  ) : (
+                    <CreditCard size={18} />
+                  )}
+                  {isKa
+                    ? `ბარათით გადახდა — ${preview.pricing.listingFeeGel}₾`
+                    : `Pay by card — ${preview.pricing.listingFeeGel}₾`}
+                </button>
+                <p className="etsy-pay-note">
+                  {isKa
+                    ? "ბარათით გადახდის შემდეგ ნამუშევარი ავტომატურად გამოქვეყნდება Etsy-ზე"
+                    : "After card payment your artwork is published to Etsy automatically"}
+                </p>
+              </div>
+            ) : (
+              <button
+                className="etsy-submit-btn"
+                onClick={handlePublish}
+                disabled={publishing || !preview.ready}
+              >
+                {publishing ? (
+                  <>
+                    <Loader2 size={18} className="spin" />
+                    {isKa ? "ქვეყნდება Etsy-ზე..." : "Publishing to Etsy..."}
+                  </>
+                ) : (
+                  <>
+                    <Store size={18} />
+                    {isKa ? "განთავსება Etsy-ზე" : "Publish to Etsy"}
+                  </>
+                )}
+              </button>
+            )}
           </>
         )}
       </div>

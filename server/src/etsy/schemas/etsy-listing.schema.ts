@@ -48,6 +48,10 @@ export class EtsyListing {
   @Prop({ default: false })
   feeCharged!: boolean;
 
+  // balance | card | none
+  @Prop()
+  feePaymentMethod?: string;
+
   @Prop()
   taxonomyId?: number;
 

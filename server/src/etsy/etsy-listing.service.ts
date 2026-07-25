@@ -13,6 +13,10 @@ import {
   EtsyListingDocument,
 } from './schemas/etsy-listing.schema';
 import {
+  EtsyFeePayment,
+  EtsyFeePaymentDocument,
+} from './schemas/etsy-fee-payment.schema';
+import {
   Product,
   ProductDocument,
   ProductStatus,
@@ -46,6 +50,10 @@ import {
 
 const WHO_MADE = 'collective';
 const WHEN_MADE = '2020_2025';
+// SoulArt's site commission on every sale (matches balance.service.ts:
+// 10% standard; the 15% installment rate can't occur on Etsy sales).
+// Shown to sellers so their expected earnings are accurate.
+const SOULART_COMMISSION_PERCENT = 10;
 const MAX_TAGS = 13;
 const MAX_MATERIALS = 13;
 const MAX_IMAGES = 10;
@@ -102,7 +110,16 @@ export interface EtsyListingPreview {
     priceUsd: number;
     listingFeeGel: number;
     sellerBalanceGel: number | null;
+    canPayFromBalance: boolean;
+    soulartCommissionPercent: number;
+    sellerEarnsGel: number; // what the seller receives when it sells
   };
+}
+
+export interface PublishOptions {
+  // 'balance' (default): deduct the listing fee from the seller's balance.
+  // 'external': fee already paid by card (BOG) — skip balance charging.
+  feeSource?: 'balance' | 'external';
 }
 
 @Injectable()
@@ -125,6 +142,8 @@ export class EtsyListingService {
     private readonly sellerBalanceModel: Model<SellerBalance>,
     @InjectModel(BalanceTransaction.name)
     private readonly balanceTransactionModel: Model<BalanceTransaction>,
+    @InjectModel(EtsyFeePayment.name)
+    private readonly etsyFeePaymentModel: Model<EtsyFeePaymentDocument>,
   ) {}
 
   // ============================================
@@ -185,19 +204,18 @@ export class EtsyListingService {
       priceGel * (1 + settings.commissionPercent / 100);
     const priceUsd = this.roundEtsyPrice(priceWithCommissionGel * usdRate);
 
-    // Seller balance (the listing fee is charged from it)
+    // Seller balance — one of two ways to pay the listing fee (the other
+    // is a normal BOG card payment), so low balance is NOT a blocker
     const sellerId = (product.user as any)?._id ?? product.user;
     const balanceDoc = await this.sellerBalanceModel
       .findOne({ seller: sellerId })
       .lean()
       .exec();
-    const sellerBalanceGel = balanceDoc ? balanceDoc.totalBalance : 0;
-    if (
-      settings.listingFeeGel > 0 &&
-      sellerBalanceGel < settings.listingFeeGel
-    ) {
-      blockers.push('INSUFFICIENT_BALANCE');
-    }
+    const sellerBalanceGel = balanceDoc
+      ? Math.round(balanceDoc.totalBalance * 100) / 100
+      : 0;
+    const canPayFromBalance =
+      settings.listingFeeGel <= 0 || sellerBalanceGel >= settings.listingFeeGel;
 
     return {
       ready: blockers.length === 0 && !existing,
@@ -231,6 +249,11 @@ export class EtsyListingService {
         priceUsd,
         listingFeeGel: settings.listingFeeGel,
         sellerBalanceGel,
+        canPayFromBalance,
+        soulartCommissionPercent: SOULART_COMMISSION_PERCENT,
+        sellerEarnsGel:
+          Math.round(priceGel * (1 - SOULART_COMMISSION_PERCENT / 100) * 100) /
+          100,
       },
     };
   }
@@ -242,7 +265,9 @@ export class EtsyListingService {
   async publishProduct(
     productId: string,
     requester: { _id: any; role: string },
+    options: PublishOptions = {},
   ) {
+    const feeSource = options.feeSource ?? 'balance';
     const preview = await this.previewListing(productId, requester);
 
     if (preview.alreadyListed) {
@@ -261,6 +286,16 @@ export class EtsyListingService {
       throw new HttpException(
         'Could not resolve an Etsy category (taxonomy) for this product',
         HttpStatus.PRECONDITION_FAILED,
+      );
+    }
+    if (
+      feeSource === 'balance' &&
+      preview.pricing.listingFeeGel > 0 &&
+      !preview.pricing.canPayFromBalance
+    ) {
+      throw new HttpException(
+        'Insufficient balance for the Etsy listing fee — pay by card instead',
+        HttpStatus.PAYMENT_REQUIRED,
       );
     }
 
@@ -312,6 +347,14 @@ export class EtsyListingService {
       priceUsd: preview.pricing.priceUsd,
       commissionPercent: preview.pricing.commissionPercent,
       listingFeeGel: preview.pricing.listingFeeGel,
+      // Card fee is captured before publish; balance fee is charged on activation
+      feeCharged: feeSource === 'external',
+      feePaymentMethod:
+        preview.pricing.listingFeeGel > 0
+          ? feeSource === 'external'
+            ? 'card'
+            : 'balance'
+          : 'none',
       taxonomyId: preview.listing.taxonomyId,
       warnings,
     });
@@ -347,7 +390,12 @@ export class EtsyListingService {
     }
 
     // 4. Charge the seller's listing fee only when the listing went live
-    if (activated && preview.pricing.listingFeeGel > 0) {
+    // (card payments were already captured via BOG before publish)
+    if (
+      feeSource === 'balance' &&
+      activated &&
+      preview.pricing.listingFeeGel > 0
+    ) {
       try {
         await this.chargeListingFee(
           sellerId,
@@ -630,6 +678,116 @@ export class EtsyListingService {
     } catch (error) {
       warnings.push(`RETURN_POLICIES_FETCH_FAILED: ${error.message}`);
       return null;
+    }
+  }
+
+  // ============================================
+  // Card (BOG) fee payment
+  // ============================================
+
+  /**
+   * Validates that a product can be published and returns what the
+   * payments service needs to create the BOG order.
+   */
+  async prepareCardFeePayment(
+    productId: string,
+    requester: { _id: any; role: string },
+  ): Promise<{ feeGel: number; productName: string; sellerId: string }> {
+    const preview = await this.previewListing(productId, requester);
+
+    if (preview.alreadyListed) {
+      throw new HttpException(
+        'Product is already listed on Etsy',
+        HttpStatus.CONFLICT,
+      );
+    }
+    if (preview.blockers.length > 0) {
+      throw new HttpException(
+        `Cannot publish to Etsy: ${preview.blockers.join(', ')}`,
+        HttpStatus.PRECONDITION_FAILED,
+      );
+    }
+    if (preview.pricing.listingFeeGel <= 0) {
+      throw new HttpException(
+        'Listing fee is zero — publish directly, no payment needed',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    const product = await this.loadProductForRequester(productId, requester);
+    const sellerId = String((product.user as any)?._id ?? product.user);
+    return {
+      feeGel: preview.pricing.listingFeeGel,
+      productName: product.name,
+      sellerId,
+    };
+  }
+
+  /**
+   * Records the pending BOG payment so the callback can complete the publish.
+   */
+  async recordCardFeePayment(data: {
+    externalOrderId: string;
+    productId: string;
+    sellerId: string;
+    amountGel: number;
+  }): Promise<void> {
+    await this.etsyFeePaymentModel.create({
+      externalOrderId: data.externalOrderId,
+      product: data.productId,
+      seller: data.sellerId,
+      amountGel: data.amountGel,
+      status: 'pending',
+    });
+  }
+
+  /**
+   * Called from the BOG payment callback when an etsy_* payment completes:
+   * marks the fee as paid and publishes the listing on the seller's behalf.
+   */
+  async handleCardFeePaymentCompleted(
+    externalOrderId: string,
+  ): Promise<{ success: boolean; message: string }> {
+    const payment = await this.etsyFeePaymentModel.findOne({
+      externalOrderId,
+    });
+    if (!payment) {
+      this.logger.warn(`Etsy fee payment not found: ${externalOrderId}`);
+      return { success: false, message: 'Etsy fee payment record not found' };
+    }
+    if (payment.status !== 'pending') {
+      // Callback retries — already processed
+      return { success: true, message: `Already processed (${payment.status})` };
+    }
+
+    payment.status = 'paid';
+    await payment.save();
+
+    try {
+      const result = await this.publishProduct(
+        String(payment.product),
+        { _id: payment.seller, role: 'seller' },
+        { feeSource: 'external' },
+      );
+      payment.status = 'published';
+      payment.listingId = result.listingId;
+      await payment.save();
+      this.logger.log(
+        `Etsy listing published after card payment: ${result.listingId}`,
+      );
+      return { success: true, message: 'Etsy listing published' };
+    } catch (error: any) {
+      // Fee captured but publish failed — keep the record for admin follow-up
+      payment.status = 'publish_failed';
+      payment.error = error.message;
+      await payment.save();
+      this.logger.error(
+        `Etsy publish failed after paid fee ${externalOrderId}: ${error.message}`,
+      );
+      return {
+        success: false,
+        message: `Fee paid but publish failed: ${error.message}`,
+      };
     }
   }
 

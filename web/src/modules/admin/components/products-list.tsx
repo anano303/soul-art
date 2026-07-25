@@ -240,6 +240,36 @@ export function ProductsList() {
     }
   }, [page, debouncedSearchQuery, statusFilter, categoryFilter]);
 
+  // Returned from the BOG payment for an Etsy listing fee
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const etsyResult = params.get("etsy");
+    if (!etsyResult) return;
+
+    // Clean the query param so the toast doesn't repeat on refresh
+    params.delete("etsy");
+    const newQuery = params.toString();
+    window.history.replaceState(
+      null,
+      "",
+      window.location.pathname + (newQuery ? `?${newQuery}` : ""),
+    );
+
+    if (etsyResult === "success") {
+      toast({
+        title: "Etsy 🎉",
+        description:
+          "გადახდა წარმატებულია — ნამუშევარი ავტომატურად ქვეყნდება Etsy-ზე (შეიძლება რამდენიმე წუთი დასჭირდეს)",
+      });
+    } else {
+      toast({
+        variant: "destructive",
+        title: "Etsy",
+        description: "გადახდა ვერ შესრულდა — ნამუშევარი არ განთავსებულა",
+      });
+    }
+  }, []);
+
   // Check if we just returned from the edit page
   useEffect(() => {
     const returnFromEdit = sessionStorage.getItem("returnFromEdit");

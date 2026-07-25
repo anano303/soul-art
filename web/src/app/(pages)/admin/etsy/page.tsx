@@ -531,8 +531,11 @@ export default function EtsyAdminPage() {
             <strong>მაგალითი:</strong> გამყიდველის ფასი {examplePrice} GEL +{" "}
             {commissionPercent}% საკომისიო = <strong>{exampleWithCommission} GEL</strong>{" "}
             — ეს თანხა გადაითვლება USD-ში (NBG-ის კურსით) და ის გამოჩნდება Etsy-ზე.
-            გამყიდველი მიიღებს სრულ {examplePrice} GEL-ს. დამატებით, განთავსებისას
-            გამყიდველი იხდის {listingFeeGel} GEL-ს.
+            გაყიდვისას გამყიდველი მიიღებს{" "}
+            <strong>{Math.round(examplePrice * 0.9 * 100) / 100} GEL</strong>-ს —
+            ფასს გამოკლებული SoulArt-ის სტანდარტული 10% საკომისიო, ისევე როგორც
+            საიტზე გაყიდვისას. დამატებით, განთავსებისას გამყიდველი იხდის{" "}
+            {listingFeeGel} GEL-ს (ბალანსიდან ან ბარათით).
           </div>
         </div>
 

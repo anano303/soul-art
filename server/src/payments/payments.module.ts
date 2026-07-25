@@ -22,6 +22,7 @@ import { User, UserSchema } from '../users/schemas/user.schema';
 import { AuctionModule } from '../auctions/auction.module';
 import { PromotionModule } from '../promotions/promotion.module';
 import { CommissionsModule } from '../commissions/commissions.module';
+import { EtsyModule } from '../etsy/etsy.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { CommissionsModule } from '../commissions/commissions.module';
     forwardRef(() => AuctionModule),
     forwardRef(() => PromotionModule),
     forwardRef(() => CommissionsModule),
+    forwardRef(() => EtsyModule),
     ScheduleModule.forRoot(),
     MongooseModule.forFeature([
       { name: BalanceTransaction.name, schema: BalanceTransactionSchema },

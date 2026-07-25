@@ -245,6 +245,34 @@
   cursor: not-allowed;
 }
 
+.etsy-pay-options {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.etsy-card-btn {
+  background: #1a73e8;
+}
+
+.etsy-card-btn:hover:not(:disabled) {
+  background: #1557b0;
+}
+
+.etsy-balance-hint {
+  font-size: 12px;
+  color: #b71c1c;
+  margin: -4px 0 0;
+  text-align: center;
+}
+
+.etsy-pay-note {
+  font-size: 12px;
+  color: #777;
+  text-align: center;
+  margin: 0;
+}
+
 .etsy-submit-btn .spin,
 .etsy-loading .spin {
   animation: etsySpin 1s linear infinite;

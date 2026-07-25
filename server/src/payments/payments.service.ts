@@ -7,6 +7,7 @@ import { AuctionService } from '../auctions/services/auction.service';
 import { EmailService } from '../email/services/email.services';
 import { PromotionService } from '../promotions/promotion.service';
 import { CommissionsService } from '../commissions/services/commissions.service';
+import { EtsyListingService } from '../etsy/etsy-listing.service';
 
 interface BogTokenResponse {
   access_token: string;
@@ -35,6 +36,8 @@ export class PaymentsService {
     private readonly promotionService: PromotionService,
     @Inject(forwardRef(() => CommissionsService))
     private readonly commissionsService: CommissionsService,
+    @Inject(forwardRef(() => EtsyListingService))
+    private readonly etsyListingService: EtsyListingService,
   ) {}
 
   private async getToken(): Promise<string> {
@@ -270,6 +273,17 @@ export class PaymentsService {
               message: 'Failed to fulfill voucher order: ' + error.message,
             };
           }
+        }
+        // ───────────────────────────────────────────────────────────────────
+
+        // ── Etsy listing fee callback ──────────────────────────────────────
+        if (external_order_id.startsWith('etsy_')) {
+          this.logger.log(
+            `Processing Etsy listing fee callback: ${external_order_id}`,
+          );
+          return this.etsyListingService.handleCardFeePaymentCompleted(
+            external_order_id,
+          );
         }
         // ───────────────────────────────────────────────────────────────────
 
@@ -795,6 +809,87 @@ export class PaymentsService {
       );
       throw new Error(error.message || 'Promotion payment service error');
     }
+  }
+
+  // Create BOG payment for the Etsy listing fee (pay-as-you-go alternative
+  // to paying from the seller balance). The fee amount is taken from the
+  // server-side Etsy settings — never from the client.
+  async createEtsyListingFeePayment(data: {
+    productId: string;
+    requester: { _id: any; role: string };
+  }) {
+    const intent = await this.etsyListingService.prepareCardFeePayment(
+      data.productId,
+      data.requester,
+    );
+
+    const token = await this.getToken();
+    const externalOrderId = `etsy_${uuidv4()}`;
+    const origin = process.env.ALLOWED_ORIGINS || 'https://soulart.ge';
+
+    const payload = {
+      callback_url: this.configService.get('BOG_CALLBACK_URL'),
+      capture: 'automatic',
+      external_order_id: externalOrderId,
+      purchase_units: {
+        currency: 'GEL',
+        total_amount: intent.feeGel,
+        basket: [
+          {
+            quantity: 1,
+            unit_price: intent.feeGel,
+            product_id: data.productId,
+            description: 'Etsy listing-ის საფასური',
+          },
+        ],
+      },
+      payment_method: [
+        'card',
+        'google_pay',
+        'apple_pay',
+        'bog_loyalty',
+        'bog_p2p',
+      ],
+      ttl: 10,
+      redirect_urls: {
+        success: `${origin}/admin/products?etsy=success`,
+        fail: `${origin}/admin/products?etsy=fail`,
+      },
+    };
+
+    this.logger.log(
+      `Creating BOG Etsy fee payment for product ${data.productId}, fee: ${intent.feeGel} GEL`,
+    );
+
+    const response = await axios.post<BogPaymentResponse>(
+      'https://api.bog.ge/payments/v1/ecommerce/orders',
+      payload,
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+          'Accept-Language': 'ka',
+          'Idempotency-Key': uuidv4(),
+        },
+      },
+    );
+
+    await this.etsyListingService.recordCardFeePayment({
+      externalOrderId,
+      productId: data.productId,
+      sellerId: intent.sellerId,
+      amountGel: intent.feeGel,
+    });
+
+    this.logger.log(
+      `BOG Etsy fee payment created: ${response.data.id}, externalOrderId: ${externalOrderId}`,
+    );
+
+    return {
+      bogOrderId: response.data.id,
+      redirectUrl: response.data._links.redirect.href,
+      externalOrderId,
+    };
   }
 
   private async sendPromotionAdminEmail(promo: any) {

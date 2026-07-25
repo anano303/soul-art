@@ -239,6 +239,26 @@ export class PaymentsController {
     }
   }
 
+  // Create BOG payment for the Etsy listing fee
+  @UseGuards(JwtAuthGuard)
+  @UseInterceptors(createRateLimitInterceptor(paymentRateLimit))
+  @Post('bog/etsy-listing/create')
+  async createEtsyListingBogPayment(
+    @CurrentUser() user: UserDocument,
+    @Body() data: { productId: string },
+  ) {
+    try {
+      const result = await this.paymentsService.createEtsyListingFeePayment({
+        productId: data.productId,
+        requester: { _id: user._id, role: user.role },
+      });
+      return result;
+    } catch (error) {
+      console.error('Etsy listing fee BOG Payment Error:', error);
+      throw error;
+    }
+  }
+
   // Create BOG payment for auction
   @UseGuards(JwtAuthGuard)
   @UseInterceptors(createRateLimitInterceptor(paymentRateLimit))
