@@ -1095,8 +1095,14 @@ export class EtsyListingService {
 
     if (payment.status === 'pending' || payment.status === 'expired') {
       if (!payment.bogOrderId) {
+        // Legacy record from before bogOrderId was stored — unverifiable
+        // via API, so resolve it instead of leaving it stuck in the list
+        payment.status = 'failed';
+        payment.error =
+          'No BOG order id (legacy record) — cannot verify via API; check the BOG merchant dashboard manually if unsure';
+        await payment.save();
         throw new HttpException(
-          'Cannot verify payment: no BOG order id recorded',
+          'This record predates BOG order tracking and cannot be verified via API — removed from the attention list. If unsure, check the BOG merchant dashboard for a matching charge.',
           HttpStatus.BAD_REQUEST,
         );
       }
