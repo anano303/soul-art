@@ -22,7 +22,6 @@ import Link from "next/link";
 import { useLanguage } from "@/hooks/LanguageContext";
 import { TikTokPostModal } from "./TikTokPostModal";
 import { PromoteModal } from "./promote-modal";
-import { EtsyPublishModal } from "./etsy-publish-modal";
 import { useEtsyEnabled } from "@/hooks/use-etsy-enabled";
 
 interface ProductsActionsProps {
@@ -48,7 +47,6 @@ export function ProductsActions({
   const [showTikTokModal, setShowTikTokModal] = useState(false);
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [showPromoteModal, setShowPromoteModal] = useState(false);
-  const [showEtsyModal, setShowEtsyModal] = useState(false);
   const [rejectionReason, setRejectionReason] = useState("");
   const [isRejecting, setIsRejecting] = useState(false);
   const [mounted, setMounted] = useState(false);
@@ -386,13 +384,6 @@ export function ProductsActions({
           onClose={() => setShowPromoteModal(false)}
         />
 
-        {/* Etsy Publish Modal */}
-        <EtsyPublishModal
-          product={product}
-          isOpen={showEtsyModal}
-          onClose={() => setShowEtsyModal(false)}
-        />
-
         {/* Promote button - visible to sellers and admins */}
         {product.status === ProductStatus.APPROVED && (
           <button
@@ -408,16 +399,19 @@ export function ProductsActions({
 
         {/* Etsy button - gated by the Etsy feature flag */}
         {etsyEnabled && product.status === ProductStatus.APPROVED && (
-          <button
-            className="etsy-btn"
-            onClick={() => setShowEtsyModal(true)}
+          <Link
+            href={{
+              pathname: `/admin/etsy/publish`,
+              query: { id: product._id },
+            }}
+            className="etsy-btn prd-action-link"
             title={
               language === "en" ? "Publish to Etsy" : "Etsy-ზე განთავსება"
             }
             style={{ color: "#f1641e" }}
           >
             <Store size={18} />
-          </button>
+          </Link>
         )}
 
         <button

@@ -852,8 +852,8 @@ export class PaymentsService {
       ],
       ttl: 10,
       redirect_urls: {
-        success: `${origin}/admin/products?etsy=success`,
-        fail: `${origin}/admin/products?etsy=fail`,
+        success: `${origin}/admin/etsy/publish?id=${data.productId}&etsy=success`,
+        fail: `${origin}/admin/etsy/publish?id=${data.productId}&etsy=fail`,
       },
     };
 
