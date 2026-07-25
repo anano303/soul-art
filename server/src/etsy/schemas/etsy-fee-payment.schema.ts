@@ -12,6 +12,11 @@ export class EtsyFeePayment {
   @Prop({ required: true, unique: true })
   externalOrderId!: string; // etsy_<uuid>, matched in the BOG callback
 
+  // BOG's own order id — lets us verify the payment status directly with
+  // BOG when a callback never arrived (e.g. local testing, outages)
+  @Prop()
+  bogOrderId?: string;
+
   @Prop({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Product',

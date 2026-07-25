@@ -1,6 +1,7 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
+import { PaymentsModule } from '../payments/payments.module';
 import { EtsyService } from './etsy.service';
 import { EtsyListingService } from './etsy-listing.service';
 import { EtsyController } from './etsy.controller';
@@ -24,6 +25,7 @@ import { ExchangeRateModule } from '../exchange-rate/exchange-rate.module';
   imports: [
     ConfigModule,
     ExchangeRateModule,
+    forwardRef(() => PaymentsModule),
     MongooseModule.forFeature([
       { name: EtsyAuth.name, schema: EtsyAuthSchema },
       { name: EtsyListing.name, schema: EtsyListingSchema },

@@ -825,7 +825,13 @@ export class PaymentsService {
 
     const token = await this.getToken();
     const externalOrderId = `etsy_${uuidv4()}`;
-    const origin = process.env.ALLOWED_ORIGINS || 'https://soulart.ge';
+    // Frontend origin for post-payment redirects. ALLOWED_ORIGINS can be a
+    // comma-separated CORS list, so prefer the dedicated FRONTEND_URL var.
+    const origin =
+      process.env.FRONTEND_URL ||
+      (process.env.ALLOWED_ORIGINS || 'https://soulart.ge')
+        .split(',')[0]
+        .trim();
 
     // Record BEFORE creating the BOG order — a paid callback must never
     // arrive for an order we have no record of
@@ -892,6 +898,11 @@ export class PaymentsService {
       );
       throw error;
     }
+
+    await this.etsyListingService.attachBogOrderId(
+      externalOrderId,
+      response.data.id,
+    );
 
     this.logger.log(
       `BOG Etsy fee payment created: ${response.data.id}, externalOrderId: ${externalOrderId}`,

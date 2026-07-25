@@ -3,10 +3,13 @@ import {
   Logger,
   HttpException,
   HttpStatus,
+  Inject,
+  forwardRef,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { EtsyService } from './etsy.service';
+import { PaymentsService } from '../payments/payments.service';
 import { ExchangeRateService } from '../exchange-rate/exchange-rate.service';
 import {
   EtsyListing,
@@ -148,6 +151,8 @@ export class EtsyListingService {
     private readonly balanceTransactionModel: Model<BalanceTransaction>,
     @InjectModel(EtsyFeePayment.name)
     private readonly etsyFeePaymentModel: Model<EtsyFeePaymentDocument>,
+    @Inject(forwardRef(() => PaymentsService))
+    private readonly paymentsService: PaymentsService,
   ) {}
 
   // ============================================
@@ -791,6 +796,19 @@ export class EtsyListingService {
   }
 
   /**
+   * Stores BOG's order id once the order exists (for later reconciliation).
+   */
+  async attachBogOrderId(
+    externalOrderId: string,
+    bogOrderId: string,
+  ): Promise<void> {
+    await this.etsyFeePaymentModel.updateOne(
+      { externalOrderId },
+      { $set: { bogOrderId } },
+    );
+  }
+
+  /**
    * BOG order creation failed after the record was written.
    */
   async markCardFeePaymentFailed(
@@ -871,7 +889,10 @@ export class EtsyListingService {
   }
 
   /**
-   * Admin retry for a captured payment stuck in 'paid' or 'publish_failed'.
+   * Admin retry for a captured payment that never became a listing.
+   * 'paid'/'publish_failed' retry the publish directly; 'pending'/'expired'
+   * (callback never arrived — e.g. it went to another environment) are
+   * first verified against BOG's payment status API.
    */
   async retryFeePayment(
     paymentId: string,
@@ -883,12 +904,36 @@ export class EtsyListingService {
     if (payment.status === 'published') {
       return { success: true, message: 'Already published' };
     }
-    if (payment.status !== 'paid' && payment.status !== 'publish_failed') {
+
+    if (payment.status === 'pending' || payment.status === 'expired') {
+      if (!payment.bogOrderId) {
+        throw new HttpException(
+          'Cannot verify payment: no BOG order id recorded',
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+      const status = await this.paymentsService.getPaymentStatus(
+        payment.bogOrderId,
+      );
+      const statusKey = status?.order_status?.key?.toLowerCase();
+      if (statusKey !== 'completed') {
+        throw new HttpException(
+          `BOG reports the payment as '${statusKey || 'unknown'}' — not completed, nothing to publish`,
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+      payment.status = 'paid';
+      await payment.save();
+      this.logger.log(
+        `Etsy fee payment ${payment.externalOrderId} reconciled as paid via BOG status check`,
+      );
+    } else if (payment.status !== 'paid' && payment.status !== 'publish_failed') {
       throw new HttpException(
         `Cannot retry a payment in status '${payment.status}'`,
         HttpStatus.BAD_REQUEST,
       );
     }
+
     return this.publishPaidFeePayment(payment);
   }
 
@@ -950,9 +995,20 @@ export class EtsyListingService {
             },
           },
         ]),
-        // Payments needing attention: money captured but nothing published
+        // Payments needing attention: money captured but nothing published,
+        // plus checkouts whose callback never arrived (stale pending/expired)
         this.etsyFeePaymentModel
-          .find({ status: { $in: ['paid', 'publish_failed'] } })
+          .find({
+            $or: [
+              { status: { $in: ['paid', 'publish_failed', 'expired'] } },
+              {
+                status: 'pending',
+                createdAt: {
+                  $lt: new Date(Date.now() - PENDING_PAYMENT_TTL_MS),
+                },
+              },
+            ],
+          })
           .sort({ createdAt: -1 })
           .limit(50)
           .populate('product', 'name images')
