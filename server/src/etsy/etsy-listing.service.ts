@@ -172,10 +172,14 @@ export class EtsyListingService {
     const warnings: string[] = [];
 
     // Single feature flag controls the whole Etsy feature; admins can be
-    // separately allowed in for testing while it's off for sellers
-    const isAdmin = requester.role === 'admin';
+    // separately allowed in for testing while it's off for sellers.
+    // Impersonated sessions (admin logged in as a user) count as admin.
+    const isAdminContext =
+      requester.role === 'admin' ||
+      Boolean((requester as any).impersonatedBy);
     const featureEnabled =
-      settings.integrationEnabled || (isAdmin && settings.enabledForAdmins);
+      settings.integrationEnabled ||
+      (isAdminContext && settings.enabledForAdmins);
     if (!featureEnabled) {
       blockers.push('INTEGRATION_DISABLED');
     }

@@ -48,6 +48,7 @@ export interface TokenPayload {
   jti?: string; // Add this for refresh tokens
   sessionId?: string; // Add session tracking
   deviceTrusted?: boolean; // Add device trust info
+  impersonatedBy?: string; // Admin id when this session is an impersonation
 }
 
 export class UserResponseDto {

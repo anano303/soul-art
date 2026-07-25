@@ -38,6 +38,12 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       throw new UnauthorizedException();
     }
 
+    // Surface the impersonation marker (admin id) on request.user so
+    // feature checks can treat the session as admin-driven
+    if (payload.impersonatedBy) {
+      (user as any).impersonatedBy = payload.impersonatedBy;
+    }
+
     return user;
   }
 }

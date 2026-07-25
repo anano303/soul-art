@@ -264,8 +264,9 @@ export class AuthService {
       userAgent?: string;
       trusted?: boolean;
     },
+    extras?: { impersonatedBy?: string },
   ): Promise<AuthResponseDto> {
-    const tokens = await this.generateTokens(user, deviceInfo);
+    const tokens = await this.generateTokens(user, deviceInfo, extras);
 
     return {
       tokens,
@@ -284,6 +285,7 @@ export class AuthService {
   private async generateTokens(
     user: UserDocument,
     deviceInfo?: any,
+    extras?: { impersonatedBy?: string },
   ): Promise<TokensDto> {
     const jti = randomUUID();
     const sessionId = randomUUID();
@@ -297,6 +299,9 @@ export class AuthService {
           role: user.role,
           type: 'access',
           sessionId, // Link to session
+          ...(extras?.impersonatedBy
+            ? { impersonatedBy: extras.impersonatedBy }
+            : {}),
         } as TokenPayload,
         {
           expiresIn: '1h',
@@ -312,6 +317,9 @@ export class AuthService {
           type: 'refresh',
           jti,
           sessionId,
+          ...(extras?.impersonatedBy
+            ? { impersonatedBy: extras.impersonatedBy }
+            : {}),
         } as TokenPayload,
         {
           expiresIn: '30d',
@@ -463,24 +471,37 @@ export class AuthService {
         deviceTrusted = validDevice?.trusted || false;
       }
 
+      // Keep the impersonation marker across token rotations
+      const extras = payload.impersonatedBy
+        ? { impersonatedBy: payload.impersonatedBy }
+        : undefined;
+
       // Fallback to global refresh token for backward compatibility
       if (!validDevice && user.refreshToken === payload.jti) {
         console.log('🔄 Using legacy global refresh token');
         // Generate new tokens with device context (token rotation)
-        return this.generateTokens(user, {
-          ...deviceInfo,
-          trusted: deviceTrusted,
-        });
+        return this.generateTokens(
+          user,
+          {
+            ...deviceInfo,
+            trusted: deviceTrusted,
+          },
+          extras,
+        );
       }
 
       // If device-specific token found, use it
       if (validDevice) {
         console.log('🔄 Using device-specific refresh token');
         // Generate new tokens with device context (token rotation)
-        return this.generateTokens(user, {
-          ...deviceInfo,
-          trusted: deviceTrusted,
-        });
+        return this.generateTokens(
+          user,
+          {
+            ...deviceInfo,
+            trusted: deviceTrusted,
+          },
+          extras,
+        );
       }
 
       console.log('❌ No valid device or global token found');

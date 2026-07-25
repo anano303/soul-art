@@ -791,6 +791,9 @@ export class AuthController {
     const { tokens, user: userData } = await this.authService.login(
       targetUser,
       deviceInfo,
+      // Marks the session as an admin impersonation — lets feature flags
+      // in "admins only" mode (e.g. Etsy) work for the impersonated user
+      { impersonatedBy: admin._id.toString() },
     );
 
     let profileImage = null;

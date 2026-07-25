@@ -32,17 +32,24 @@ function loadFlags(): Promise<EtsyFlags> {
 /**
  * Whether the Etsy feature is available for the current user.
  * The master flag enables it for everyone; admins can be separately
- * allowed in for testing while it's off for sellers.
+ * allowed in for testing while it's off for sellers. Impersonated
+ * sessions (admin logged in as a user) count as admin — the backend
+ * honors this via the impersonatedBy JWT claim.
  */
 export function useEtsyEnabled(isAdmin: boolean): boolean {
   const [enabled, setEnabled] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
+    const impersonating =
+      typeof window !== "undefined" &&
+      Boolean(localStorage.getItem("impersonating_admin_id"));
+
     loadFlags().then((flags) => {
       if (cancelled) return;
       setEnabled(
-        flags.integrationEnabled || (isAdmin && flags.enabledForAdmins),
+        flags.integrationEnabled ||
+          ((isAdmin || impersonating) && flags.enabledForAdmins),
       );
     });
     return () => {
