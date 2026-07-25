@@ -70,8 +70,9 @@ const DEFAULT_TAGS = [
 ];
 const FALLBACK_TAXONOMY_KEYWORD = 'Painting';
 const TAXONOMY_CACHE_TTL_MS = 24 * 60 * 60 * 1000;
-// BOG checkout ttl is 10 min — pending payments older than this are abandoned
-const PENDING_PAYMENT_TTL_MS = 30 * 60 * 1000;
+// BOG checkout ttl is 10 min — a pending payment older than this cannot
+// complete anymore, so it's marked expired and the seller may retry
+const PENDING_PAYMENT_TTL_MS = 15 * 60 * 1000;
 // Stop uploading further images before serverless/callback timeouts hit
 const IMAGE_UPLOAD_BUDGET_MS = 40 * 1000;
 
@@ -121,6 +122,13 @@ export interface EtsyListingPreview {
     soulartCommissionPercent: number;
     sellerEarnsGel: number; // what the seller receives when it sells
   };
+  // A live card payment for this product: 'pending' (checkout open —
+  // blocks new payments until it expires) or 'paid' (publishing underway)
+  pendingPayment: {
+    status: string;
+    expiresAt: string;
+    secondsLeft: number | null;
+  } | null;
 }
 
 export interface PublishOptions {
@@ -233,6 +241,36 @@ export class EtsyListingService {
     const canPayFromBalance =
       settings.listingFeeGel <= 0 || sellerBalanceGel >= settings.listingFeeGel;
 
+    // Lazy-expire abandoned card checkouts, then surface any live payment
+    // so the FE can show its status and a countdown
+    await this.etsyFeePaymentModel.updateMany(
+      {
+        product: productId,
+        status: 'pending',
+        createdAt: { $lt: new Date(Date.now() - PENDING_PAYMENT_TTL_MS) },
+      },
+      { $set: { status: 'expired' } },
+    );
+    const livePayment = await this.etsyFeePaymentModel
+      .findOne({ product: productId, status: { $in: ['pending', 'paid'] } })
+      .sort({ createdAt: -1 })
+      .lean()
+      .exec();
+    let pendingPayment: EtsyListingPreview['pendingPayment'] = null;
+    if (livePayment) {
+      const expiresAtMs =
+        new Date((livePayment as any).createdAt).getTime() +
+        PENDING_PAYMENT_TTL_MS;
+      pendingPayment = {
+        status: livePayment.status,
+        expiresAt: new Date(expiresAtMs).toISOString(),
+        secondsLeft:
+          livePayment.status === 'pending'
+            ? Math.max(0, Math.ceil((expiresAtMs - Date.now()) / 1000))
+            : null,
+      };
+    }
+
     return {
       ready: blockers.length === 0 && !existing,
       blockers,
@@ -271,6 +309,7 @@ export class EtsyListingService {
           Math.round(priceGel * (1 - SOULART_COMMISSION_PERCENT / 100) * 100) /
           100,
       },
+      pendingPayment,
     };
   }
 
@@ -318,6 +357,14 @@ export class EtsyListingService {
       throw new HttpException(
         'Insufficient balance for the Etsy listing fee — pay by card instead',
         HttpStatus.PAYMENT_REQUIRED,
+      );
+    }
+    // A live card payment exists — don't allow a parallel balance publish
+    // (would double-charge: balance now + card when the checkout completes)
+    if (feeSource === 'balance' && preview.pendingPayment) {
+      throw new HttpException(
+        'A card payment for this product is already in progress',
+        HttpStatus.CONFLICT,
       );
     }
 

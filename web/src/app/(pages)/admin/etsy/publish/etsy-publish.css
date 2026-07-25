@@ -494,6 +494,38 @@
   cursor: pointer;
 }
 
+.etsy-checkout-countdown {
+  background: #fff8e1;
+  border: 1px solid #ffe082;
+  border-radius: 10px;
+  padding: 14px;
+  font-size: 13.5px;
+  color: #7a5c00;
+  text-align: center;
+}
+
+.etsy-countdown-timer {
+  font-size: 30px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: #b45309;
+  margin: 8px 0;
+}
+
+.etsy-checkout-countdown button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #b45309;
+  color: #fff;
+  border: none;
+  border-radius: 999px;
+  padding: 7px 14px;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
 .etsy-spin {
   animation: etsyPageSpin 1s linear infinite;
 }

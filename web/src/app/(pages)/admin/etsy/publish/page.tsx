@@ -57,6 +57,17 @@ interface EtsyPreview {
     soulartCommissionPercent: number;
     sellerEarnsGel: number;
   };
+  pendingPayment: {
+    status: string;
+    expiresAt: string;
+    secondsLeft: number | null;
+  } | null;
+}
+
+function formatCountdown(totalSeconds: number): string {
+  const m = Math.floor(totalSeconds / 60);
+  const s = totalSeconds % 60;
+  return `${m}:${String(s).padStart(2, "0")}`;
 }
 
 const BLOCKER_MESSAGES: Record<string, { ka: string; en: string }> = {
@@ -112,6 +123,7 @@ function EtsyPublishContent() {
     listingUrl?: string;
     state: string;
   } | null>(null);
+  const [countdown, setCountdown] = useState<number | null>(null);
 
   const loadData = useCallback(async () => {
     if (!productId) return;
@@ -143,6 +155,29 @@ function EtsyPublishContent() {
   useEffect(() => {
     loadData();
   }, [loadData]);
+
+  // Live countdown for a pending card-payment session; when it hits zero
+  // the backend has expired the payment, so reload to re-enable buttons
+  useEffect(() => {
+    const seconds = preview?.pendingPayment?.secondsLeft;
+    if (seconds == null) {
+      setCountdown(null);
+      return;
+    }
+    setCountdown(seconds);
+    const interval = setInterval(() => {
+      setCountdown((current) => {
+        if (current === null) return null;
+        if (current <= 1) {
+          clearInterval(interval);
+          loadData();
+          return 0;
+        }
+        return current - 1;
+      });
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [preview?.pendingPayment?.secondsLeft, loadData]);
 
   useEffect(() => {
     if (paymentResult === "fail") {
@@ -243,7 +278,10 @@ function EtsyPublishContent() {
   const images = product.images || [];
   const listedInfo = published || preview.alreadyListed;
   const awaitingCallback =
-    paymentResult === "success" && !listedInfo;
+    (paymentResult === "success" || preview.pendingPayment?.status === "paid") &&
+    !listedInfo;
+  const pendingCheckout =
+    preview.pendingPayment?.status === "pending" ? preview.pendingPayment : null;
 
   return (
     <div className="etsy-page">
@@ -490,8 +528,27 @@ function EtsyPublishContent() {
                   </div>
                 )}
 
+                {/* Pending checkout — previous payment session still open */}
+                {pendingCheckout && (
+                  <div className="etsy-checkout-countdown">
+                    <p>
+                      ⏳{" "}
+                      {isKa
+                        ? "ამ ნამუშევრისთვის გადახდის სესია უკვე გახსნილია. თუ გადახდას არ დაასრულებთ, სესია გაუქმდება და ხელახლა ცდას შეძლებთ:"
+                        : "A payment session for this artwork is already open. If you don't complete it, the session will be cancelled and you can retry in:"}
+                    </p>
+                    <div className="etsy-countdown-timer">
+                      {formatCountdown(countdown ?? 0)}
+                    </div>
+                    <button onClick={loadData} disabled={loading}>
+                      <RefreshCw size={14} />
+                      {isKa ? "სტატუსის განახლება" : "Refresh status"}
+                    </button>
+                  </div>
+                )}
+
                 {/* Payment buttons */}
-                {preview.pricing.listingFeeGel > 0 ? (
+                {pendingCheckout ? null : preview.pricing.listingFeeGel > 0 ? (
                   <div className="etsy-checkout-actions">
                     <button
                       className="etsy-btn-primary"
