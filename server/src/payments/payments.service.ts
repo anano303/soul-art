@@ -827,6 +827,16 @@ export class PaymentsService {
     const externalOrderId = `etsy_${uuidv4()}`;
     const origin = process.env.ALLOWED_ORIGINS || 'https://soulart.ge';
 
+    // Record BEFORE creating the BOG order — a paid callback must never
+    // arrive for an order we have no record of
+    await this.etsyListingService.recordCardFeePayment({
+      externalOrderId,
+      productId: data.productId,
+      sellerId: intent.sellerId,
+      amountGel: intent.feeGel,
+      payerRole: data.requester.role,
+    });
+
     const payload = {
       callback_url: this.configService.get('BOG_CALLBACK_URL'),
       capture: 'automatic',
@@ -861,25 +871,27 @@ export class PaymentsService {
       `Creating BOG Etsy fee payment for product ${data.productId}, fee: ${intent.feeGel} GEL`,
     );
 
-    const response = await axios.post<BogPaymentResponse>(
-      'https://api.bog.ge/payments/v1/ecommerce/orders',
-      payload,
-      {
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-          'Accept-Language': 'ka',
-          'Idempotency-Key': uuidv4(),
+    let response;
+    try {
+      response = await axios.post<BogPaymentResponse>(
+        'https://api.bog.ge/payments/v1/ecommerce/orders',
+        payload,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+            'Accept-Language': 'ka',
+            'Idempotency-Key': uuidv4(),
+          },
         },
-      },
-    );
-
-    await this.etsyListingService.recordCardFeePayment({
-      externalOrderId,
-      productId: data.productId,
-      sellerId: intent.sellerId,
-      amountGel: intent.feeGel,
-    });
+      );
+    } catch (error) {
+      await this.etsyListingService.markCardFeePaymentFailed(
+        externalOrderId,
+        error.message || 'BOG order creation failed',
+      );
+      throw error;
+    }
 
     this.logger.log(
       `BOG Etsy fee payment created: ${response.data.id}, externalOrderId: ${externalOrderId}`,

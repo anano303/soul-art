@@ -199,6 +199,29 @@ export class EtsyController {
     return this.etsyListingService.getMyListings(user);
   }
 
+  /**
+   * სტატისტიკა ადმინ გვერდისთვის — listing-ები, საფასურები,
+   * პრობლემური გადახდები
+   */
+  @Get('stats')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.Admin)
+  @ApiOperation({ summary: 'Etsy integration stats (admin)' })
+  async getStats() {
+    return this.etsyListingService.getStats();
+  }
+
+  /**
+   * გადახდილი, მაგრამ გამოუქვეყნებელი listing-ის ხელახლა ცდა
+   */
+  @Post('fee-payments/:paymentId/retry')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.Admin)
+  @ApiOperation({ summary: 'Retry publishing for a paid Etsy fee payment' })
+  async retryFeePayment(@Param('paymentId') paymentId: string) {
+    return this.etsyListingService.retryFeePayment(paymentId);
+  }
+
   private renderResultPage(success: boolean, detail: string): string {
     return `
       <html>

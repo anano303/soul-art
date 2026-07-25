@@ -67,6 +67,10 @@ const DEFAULT_TAGS = [
 ];
 const FALLBACK_TAXONOMY_KEYWORD = 'Painting';
 const TAXONOMY_CACHE_TTL_MS = 24 * 60 * 60 * 1000;
+// BOG checkout ttl is 10 min — pending payments older than this are abandoned
+const PENDING_PAYMENT_TTL_MS = 30 * 60 * 1000;
+// Stop uploading further images before serverless/callback timeouts hit
+const IMAGE_UPLOAD_BUDGET_MS = 40 * 1000;
 
 interface TaxonomyNode {
   id: number;
@@ -194,8 +198,11 @@ export class EtsyListingService {
       const node = await this.resolveTaxonomy(product);
       taxonomyId = node.id;
       taxonomyPath = node.path;
-    } catch (error) {
-      warnings.push(`TAXONOMY_UNRESOLVED: ${error.message}`);
+    } catch (error: any) {
+      // Publish is impossible without a taxonomy — this must block BEFORE
+      // any money is taken, so it's a blocker, not a warning
+      blockers.push('TAXONOMY_UNRESOLVED');
+      warnings.push(`taxonomy: ${error.message}`);
     }
 
     // Pricing: commission goes ON TOP of the seller's price
@@ -276,9 +283,15 @@ export class EtsyListingService {
         HttpStatus.CONFLICT,
       );
     }
-    if (preview.blockers.length > 0) {
+    // When the fee was already captured by card, the feature flag must not
+    // block the publish (admin testing / flag flipped between pay & callback)
+    const blockers =
+      feeSource === 'external'
+        ? preview.blockers.filter((b) => b !== 'INTEGRATION_DISABLED')
+        : preview.blockers;
+    if (blockers.length > 0) {
       throw new HttpException(
-        `Cannot publish to Etsy: ${preview.blockers.join(', ')}`,
+        `Cannot publish to Etsy: ${blockers.join(', ')}`,
         HttpStatus.PRECONDITION_FAILED,
       );
     }
@@ -607,8 +620,18 @@ export class EtsyListingService {
   ): Promise<number> {
     let uploaded = 0;
     let rank = 1;
+    const startedAt = Date.now();
 
     for (const url of imageUrls) {
+      // Runs inside HTTP requests (incl. the BOG callback) on serverless —
+      // stop before the function times out; the listing survives with the
+      // images uploaded so far
+      if (Date.now() - startedAt > IMAGE_UPLOAD_BUDGET_MS) {
+        warnings.push(
+          `IMAGE_UPLOAD_TIME_BUDGET: uploaded ${uploaded}/${imageUrls.length}`,
+        );
+        break;
+      }
       try {
         const response = await fetch(url);
         if (!response.ok) throw new Error(`download failed (${response.status})`);
@@ -714,6 +737,29 @@ export class EtsyListingService {
       );
     }
 
+    // Guard against double payments: expire abandoned checkouts, then block
+    // when a live payment already exists for this product
+    await this.etsyFeePaymentModel.updateMany(
+      {
+        product: productId,
+        status: 'pending',
+        createdAt: { $lt: new Date(Date.now() - PENDING_PAYMENT_TTL_MS) },
+      },
+      { $set: { status: 'expired' } },
+    );
+    const existing = await this.etsyFeePaymentModel
+      .findOne({ product: productId, status: { $in: ['pending', 'paid'] } })
+      .lean()
+      .exec();
+    if (existing) {
+      throw new HttpException(
+        existing.status === 'paid'
+          ? 'The listing fee is already paid for this product — publishing is in progress'
+          : 'A payment for this product is already in progress',
+        HttpStatus.CONFLICT,
+      );
+    }
+
     const product = await this.loadProductForRequester(productId, requester);
     const sellerId = String((product.user as any)?._id ?? product.user);
     return {
@@ -724,21 +770,37 @@ export class EtsyListingService {
   }
 
   /**
-   * Records the pending BOG payment so the callback can complete the publish.
+   * Records the BOG payment BEFORE the order is created with BOG, so a
+   * paid callback can never arrive for an order we have no record of.
    */
   async recordCardFeePayment(data: {
     externalOrderId: string;
     productId: string;
     sellerId: string;
     amountGel: number;
+    payerRole?: string;
   }): Promise<void> {
     await this.etsyFeePaymentModel.create({
       externalOrderId: data.externalOrderId,
       product: data.productId,
       seller: data.sellerId,
       amountGel: data.amountGel,
+      payerRole: data.payerRole,
       status: 'pending',
     });
+  }
+
+  /**
+   * BOG order creation failed after the record was written.
+   */
+  async markCardFeePaymentFailed(
+    externalOrderId: string,
+    error: string,
+  ): Promise<void> {
+    await this.etsyFeePaymentModel.updateOne(
+      { externalOrderId, status: 'pending' },
+      { $set: { status: 'failed', error: error.slice(0, 500) } },
+    );
   }
 
   /**
@@ -755,22 +817,39 @@ export class EtsyListingService {
       this.logger.warn(`Etsy fee payment not found: ${externalOrderId}`);
       return { success: false, message: 'Etsy fee payment record not found' };
     }
-    if (payment.status !== 'pending') {
-      // Callback retries — already processed
+    if (payment.status === 'published') {
+      return { success: true, message: 'Already published' };
+    }
+    // 'paid' is retryable: a crash/timeout between 'paid' and 'published'
+    // must not strand the payment — BOG callback retries land here again
+    if (payment.status !== 'pending' && payment.status !== 'paid') {
       return { success: true, message: `Already processed (${payment.status})` };
     }
 
-    payment.status = 'paid';
-    await payment.save();
+    if (payment.status === 'pending') {
+      payment.status = 'paid';
+      await payment.save();
+    }
 
+    return this.publishPaidFeePayment(payment);
+  }
+
+  /**
+   * Publishes the listing for a captured fee payment. Shared by the BOG
+   * callback and the admin retry endpoint.
+   */
+  private async publishPaidFeePayment(
+    payment: EtsyFeePaymentDocument,
+  ): Promise<{ success: boolean; message: string }> {
     try {
       const result = await this.publishProduct(
         String(payment.product),
-        { _id: payment.seller, role: 'seller' },
+        { _id: payment.seller, role: payment.payerRole || 'seller' },
         { feeSource: 'external' },
       );
       payment.status = 'published';
       payment.listingId = result.listingId;
+      payment.error = undefined;
       await payment.save();
       this.logger.log(
         `Etsy listing published after card payment: ${result.listingId}`,
@@ -782,13 +861,35 @@ export class EtsyListingService {
       payment.error = error.message;
       await payment.save();
       this.logger.error(
-        `Etsy publish failed after paid fee ${externalOrderId}: ${error.message}`,
+        `Etsy publish failed after paid fee ${payment.externalOrderId}: ${error.message}`,
       );
       return {
         success: false,
         message: `Fee paid but publish failed: ${error.message}`,
       };
     }
+  }
+
+  /**
+   * Admin retry for a captured payment stuck in 'paid' or 'publish_failed'.
+   */
+  async retryFeePayment(
+    paymentId: string,
+  ): Promise<{ success: boolean; message: string }> {
+    const payment = await this.etsyFeePaymentModel.findById(paymentId);
+    if (!payment) {
+      throw new HttpException('Fee payment not found', HttpStatus.NOT_FOUND);
+    }
+    if (payment.status === 'published') {
+      return { success: true, message: 'Already published' };
+    }
+    if (payment.status !== 'paid' && payment.status !== 'publish_failed') {
+      throw new HttpException(
+        `Cannot retry a payment in status '${payment.status}'`,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    return this.publishPaidFeePayment(payment);
   }
 
   // ============================================
@@ -801,15 +902,16 @@ export class EtsyListingService {
     productName: string,
     listingId: string,
   ): Promise<void> {
-    const balance = await this.sellerBalanceModel.findOne({
-      seller: sellerId,
-    });
-    if (!balance || balance.totalBalance < feeGel) {
+    // Atomic: guard and decrement in one operation so concurrent publishes
+    // or withdrawals can't race past the balance check
+    const updated = await this.sellerBalanceModel.findOneAndUpdate(
+      { seller: sellerId, totalBalance: { $gte: feeGel } },
+      { $inc: { totalBalance: -feeGel } },
+      { new: true },
+    );
+    if (!updated) {
       throw new Error('Insufficient seller balance for Etsy listing fee');
     }
-
-    balance.totalBalance -= feeGel;
-    await balance.save();
 
     await this.userModel.findByIdAndUpdate(sellerId, {
       $inc: { balance: -feeGel },
@@ -826,6 +928,79 @@ export class EtsyListingService {
     this.logger.log(
       `Charged ${feeGel} GEL Etsy listing fee from seller ${sellerId}`,
     );
+  }
+
+  // ============================================
+  // Stats / monitoring (admin page)
+  // ============================================
+
+  async getStats() {
+    const [stateAgg, feeAgg, problemPayments, recentListings] =
+      await Promise.all([
+        this.etsyListingModel.aggregate([
+          { $group: { _id: '$state', count: { $sum: 1 } } },
+        ]),
+        this.etsyListingModel.aggregate([
+          { $match: { feeCharged: true } },
+          {
+            $group: {
+              _id: '$feePaymentMethod',
+              count: { $sum: 1 },
+              totalGel: { $sum: '$listingFeeGel' },
+            },
+          },
+        ]),
+        // Payments needing attention: money captured but nothing published
+        this.etsyFeePaymentModel
+          .find({ status: { $in: ['paid', 'publish_failed'] } })
+          .sort({ createdAt: -1 })
+          .limit(50)
+          .populate('product', 'name images')
+          .populate('seller', 'name email')
+          .lean()
+          .exec(),
+        this.etsyListingModel
+          .find()
+          .sort({ createdAt: -1 })
+          .limit(10)
+          .populate('product', 'name images')
+          .populate('seller', 'name')
+          .lean()
+          .exec(),
+      ]);
+
+    const byState: Record<string, number> = {};
+    let total = 0;
+    for (const s of stateAgg) {
+      byState[s._id ?? 'unknown'] = s.count;
+      total += s.count;
+    }
+
+    const feesByMethod: Record<string, { count: number; totalGel: number }> =
+      {};
+    let feesTotalGel = 0;
+    for (const f of feeAgg) {
+      feesByMethod[f._id ?? 'unknown'] = {
+        count: f.count,
+        totalGel: Math.round(f.totalGel * 100) / 100,
+      };
+      feesTotalGel += f.totalGel;
+    }
+
+    return {
+      listings: {
+        total,
+        active: byState['active'] ?? 0,
+        draft: byState['draft'] ?? 0,
+        byState,
+      },
+      fees: {
+        totalGel: Math.round(feesTotalGel * 100) / 100,
+        byMethod: feesByMethod,
+      },
+      problemPayments,
+      recentListings,
+    };
   }
 
   // ============================================

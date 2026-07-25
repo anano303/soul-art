@@ -88,6 +88,10 @@ const BLOCKER_MESSAGES: Record<string, { ka: string; en: string }> = {
     ka: "პროდუქტს არ აქვს ფოტოები",
     en: "Product has no images",
   },
+  TAXONOMY_UNRESOLVED: {
+    ka: "პროდუქტს ვერ მოვუძებნეთ შესაბამისი Etsy კატეგორია",
+    en: "Could not find a matching Etsy category for this product",
+  },
 };
 
 function EtsyPublishContent() {

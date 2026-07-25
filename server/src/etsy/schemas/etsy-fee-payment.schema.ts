@@ -32,7 +32,12 @@ export class EtsyFeePayment {
   @Prop({ required: true })
   amountGel!: number;
 
+  // Role of the user who initiated the payment (seller | admin)
+  @Prop()
+  payerRole?: string;
+
   // pending → paid → published | publish_failed
+  // also: failed (BOG order creation failed) | expired (abandoned checkout)
   @Prop({ default: 'pending' })
   status!: string;
 

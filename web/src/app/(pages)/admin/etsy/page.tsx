@@ -20,6 +20,39 @@ interface EtsySettings {
   enabledForAdmins: boolean;
 }
 
+interface EtsyStats {
+  listings: {
+    total: number;
+    active: number;
+    draft: number;
+    byState: Record<string, number>;
+  };
+  fees: {
+    totalGel: number;
+    byMethod: Record<string, { count: number; totalGel: number }>;
+  };
+  problemPayments: Array<{
+    _id: string;
+    status: string;
+    amountGel: number;
+    error?: string;
+    createdAt?: string;
+    externalOrderId: string;
+    product?: { name?: string } | null;
+    seller?: { name?: string; email?: string } | null;
+  }>;
+  recentListings: Array<{
+    _id: string;
+    state: string;
+    listingUrl?: string;
+    priceUsd?: number;
+    feePaymentMethod?: string;
+    createdAt?: string;
+    product?: { name?: string } | null;
+    seller?: { name?: string } | null;
+  }>;
+}
+
 function Toggle({
   checked,
   disabled,
@@ -101,17 +134,23 @@ export default function EtsyAdminPage() {
   const [integrationEnabled, setIntegrationEnabled] = useState(false);
   const [enabledForAdmins, setEnabledForAdmins] = useState(true);
   const [togglingFlag, setTogglingFlag] = useState(false);
+  const [stats, setStats] = useState<EtsyStats | null>(null);
+  const [retryingId, setRetryingId] = useState<string | null>(null);
 
   const loadData = useCallback(async () => {
     try {
       setLoading(true);
-      const [statusRes, settingsRes] = await Promise.all([
+      const [statusRes, settingsRes, statsRes] = await Promise.all([
         fetchWithAuth("/etsy/status"),
         fetchWithAuth("/etsy/settings"),
+        fetchWithAuth("/etsy/stats"),
       ]);
 
       if (statusRes.ok) {
         setStatus(await statusRes.json());
+      }
+      if (statsRes.ok) {
+        setStats(await statsRes.json());
       }
       if (settingsRes.ok) {
         const data: EtsySettings = await settingsRes.json();
@@ -251,6 +290,27 @@ export default function EtsyAdminPage() {
       setMessage("❌ პარამეტრის შენახვა ვერ მოხერხდა");
     } finally {
       setTogglingFlag(false);
+    }
+  };
+
+  const retryPayment = async (paymentId: string) => {
+    setRetryingId(paymentId);
+    setMessage("");
+    try {
+      const res = await fetchWithAuth(`/etsy/fee-payments/${paymentId}/retry`, {
+        method: "POST",
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setMessage("✅ Listing-ი წარმატებით გამოქვეყნდა");
+      } else {
+        setMessage(`❌ ${data.message || "ხელახლა ცდა ვერ მოხერხდა"}`);
+      }
+      await loadData();
+    } catch {
+      setMessage("❌ ხელახლა ცდა ვერ მოხერხდა");
+    } finally {
+      setRetryingId(null);
     }
   };
 
@@ -474,6 +534,183 @@ export default function EtsyAdminPage() {
             </div>
           </div>
         </div>
+
+        {/* Stats & monitoring */}
+        {stats && (
+          <div className="bg-white shadow rounded-lg p-6 mb-6">
+            <h2 className="text-xl font-semibold mb-4">📊 სტატისტიკა</h2>
+
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-4">
+              <div className="border rounded p-4 text-center">
+                <div className="text-2xl font-bold">
+                  {stats.listings.total}
+                </div>
+                <div className="text-sm text-gray-600">სულ listing-ი</div>
+              </div>
+              <div className="border rounded p-4 text-center">
+                <div className="text-2xl font-bold text-green-600">
+                  {stats.listings.active}
+                </div>
+                <div className="text-sm text-gray-600">აქტიური</div>
+              </div>
+              <div className="border rounded p-4 text-center">
+                <div className="text-2xl font-bold text-yellow-600">
+                  {stats.listings.draft}
+                </div>
+                <div className="text-sm text-gray-600">დრაფტი</div>
+              </div>
+              <div className="border rounded p-4 text-center">
+                <div className="text-2xl font-bold text-blue-600">
+                  {stats.fees.totalGel}₾
+                </div>
+                <div className="text-sm text-gray-600">
+                  შეგროვებული საფასურები
+                </div>
+              </div>
+            </div>
+
+            {Object.keys(stats.fees.byMethod).length > 0 && (
+              <p className="text-sm text-gray-500 mb-4">
+                {Object.entries(stats.fees.byMethod)
+                  .map(
+                    ([method, m]) =>
+                      `${method === "card" ? "ბარათით" : method === "balance" ? "ბალანსიდან" : method}: ${m.count} × (${m.totalGel}₾)`,
+                  )
+                  .join(" · ")}
+              </p>
+            )}
+
+            {/* Problem payments — money captured, nothing published */}
+            {stats.problemPayments.length > 0 && (
+              <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded">
+                <h3 className="font-semibold text-red-800 mb-2">
+                  ⚠️ ყურადღებას საჭიროებს — გადახდილია, მაგრამ არ
+                  გამოქვეყნებულა ({stats.problemPayments.length})
+                </h3>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="text-left text-gray-600">
+                        <th className="px-2 py-1">პროდუქტი</th>
+                        <th className="px-2 py-1">გამყიდველი</th>
+                        <th className="px-2 py-1">თანხა</th>
+                        <th className="px-2 py-1">სტატუსი</th>
+                        <th className="px-2 py-1">შეცდომა</th>
+                        <th className="px-2 py-1"></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {stats.problemPayments.map((p) => (
+                        <tr key={p._id} className="border-t border-red-100">
+                          <td className="px-2 py-2">
+                            {p.product?.name || "—"}
+                          </td>
+                          <td className="px-2 py-2">
+                            {p.seller?.name || p.seller?.email || "—"}
+                          </td>
+                          <td className="px-2 py-2">{p.amountGel}₾</td>
+                          <td className="px-2 py-2 font-mono text-xs">
+                            {p.status}
+                          </td>
+                          <td
+                            className="px-2 py-2 text-xs text-red-700 max-w-[220px] truncate"
+                            title={p.error}
+                          >
+                            {p.error || "—"}
+                          </td>
+                          <td className="px-2 py-2">
+                            <button
+                              onClick={() => retryPayment(p._id)}
+                              disabled={retryingId === p._id}
+                              className="bg-red-600 text-white text-xs px-3 py-1 rounded hover:bg-red-700 disabled:bg-gray-400"
+                            >
+                              {retryingId === p._id
+                                ? "ცდება..."
+                                : "🔄 ხელახლა ცდა"}
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+
+            {/* Recent listings */}
+            {stats.recentListings.length > 0 && (
+              <div>
+                <h3 className="font-semibold text-gray-800 mb-2">
+                  ბოლო listing-ები
+                </h3>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead className="bg-gray-100">
+                      <tr className="text-left">
+                        <th className="px-2 py-1">პროდუქტი</th>
+                        <th className="px-2 py-1">გამყიდველი</th>
+                        <th className="px-2 py-1">ფასი</th>
+                        <th className="px-2 py-1">გადახდა</th>
+                        <th className="px-2 py-1">სტატუსი</th>
+                        <th className="px-2 py-1"></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {stats.recentListings.map((l) => (
+                        <tr key={l._id} className="border-t">
+                          <td className="px-2 py-2">
+                            {l.product?.name || "—"}
+                          </td>
+                          <td className="px-2 py-2">{l.seller?.name || "—"}</td>
+                          <td className="px-2 py-2">
+                            {l.priceUsd ? `$${l.priceUsd}` : "—"}
+                          </td>
+                          <td className="px-2 py-2 text-xs">
+                            {l.feePaymentMethod === "card"
+                              ? "💳 ბარათი"
+                              : l.feePaymentMethod === "balance"
+                                ? "👛 ბალანსი"
+                                : "—"}
+                          </td>
+                          <td className="px-2 py-2">
+                            <span
+                              className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
+                                l.state === "active"
+                                  ? "bg-green-100 text-green-700"
+                                  : "bg-yellow-100 text-yellow-700"
+                              }`}
+                            >
+                              {l.state}
+                            </span>
+                          </td>
+                          <td className="px-2 py-2">
+                            {l.listingUrl && (
+                              <a
+                                href={l.listingUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-blue-600 hover:underline text-xs"
+                              >
+                                Etsy ↗
+                              </a>
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+
+            {stats.listings.total === 0 &&
+              stats.problemPayments.length === 0 && (
+                <p className="text-gray-500 text-sm">
+                  ჯერ არცერთი listing-ი არ განთავსებულა Etsy-ზე.
+                </p>
+              )}
+          </div>
+        )}
 
         {/* Marketplace Settings */}
         <div className="bg-white shadow rounded-lg p-6 mb-6">
