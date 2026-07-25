@@ -123,11 +123,14 @@ export interface EtsyListingPreview {
     sellerEarnsGel: number; // what the seller receives when it sells
   };
   // A live card payment for this product: 'pending' (checkout open —
-  // blocks new payments until it expires) or 'paid' (publishing underway)
+  // blocks new payments until it expires), 'paid' (publishing underway)
+  // or 'publish_failed' (fee captured, publish needs a retry)
   pendingPayment: {
+    id: string;
     status: string;
     expiresAt: string;
     secondsLeft: number | null;
+    error: string | null;
   } | null;
 }
 
@@ -282,12 +285,14 @@ export class EtsyListingService {
         new Date((livePayment as any).createdAt).getTime() +
         PENDING_PAYMENT_TTL_MS;
       pendingPayment = {
+        id: String(livePayment._id),
         status: livePayment.status,
         expiresAt: new Date(expiresAtMs).toISOString(),
         secondsLeft:
           livePayment.status === 'pending'
             ? Math.max(0, Math.ceil((expiresAtMs - Date.now()) / 1000))
             : null,
+        error: livePayment.error ?? null,
       };
     }
 
@@ -987,17 +992,26 @@ export class EtsyListingService {
   }
 
   /**
-   * Admin retry for a captured payment that never became a listing.
+   * Retry for a captured payment that never became a listing — allowed for
+   * admins and for the payment's own seller (a retry never charges again).
    * 'paid'/'publish_failed' retry the publish directly; 'pending'/'expired'
    * (callback never arrived — e.g. it went to another environment) are
    * first verified against BOG's payment status API.
    */
   async retryFeePayment(
     paymentId: string,
+    requester: { _id: any; role: string },
   ): Promise<{ success: boolean; message: string }> {
     const payment = await this.etsyFeePaymentModel.findById(paymentId);
     if (!payment) {
       throw new HttpException('Fee payment not found', HttpStatus.NOT_FOUND);
+    }
+    const isOwner = String(payment.seller) === String(requester._id);
+    if (!isOwner && requester.role !== 'admin') {
+      throw new HttpException(
+        'You can only retry your own payments',
+        HttpStatus.FORBIDDEN,
+      );
     }
     if (payment.status === 'published') {
       return { success: true, message: 'Already published' };

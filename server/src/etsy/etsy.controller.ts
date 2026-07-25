@@ -212,14 +212,18 @@ export class EtsyController {
   }
 
   /**
-   * გადახდილი, მაგრამ გამოუქვეყნებელი listing-ის ხელახლა ცდა
+   * გადახდილი, მაგრამ გამოუქვეყნებელი listing-ის ხელახლა ცდა.
+   * ნებადართულია ადმინისთვის და თავად გადამხდელი გამყიდველისთვის —
+   * ხელახლა ცდა თანხას აღარ ჭრის.
    */
   @Post('fee-payments/:paymentId/retry')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.Admin)
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Retry publishing for a paid Etsy fee payment' })
-  async retryFeePayment(@Param('paymentId') paymentId: string) {
-    return this.etsyListingService.retryFeePayment(paymentId);
+  async retryFeePayment(
+    @Param('paymentId') paymentId: string,
+    @CurrentUser() user: any,
+  ) {
+    return this.etsyListingService.retryFeePayment(paymentId, user);
   }
 
   private renderResultPage(success: boolean, detail: string): string {

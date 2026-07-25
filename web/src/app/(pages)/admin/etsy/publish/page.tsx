@@ -58,9 +58,11 @@ interface EtsyPreview {
     sellerEarnsGel: number;
   };
   pendingPayment: {
+    id: string;
     status: string;
     expiresAt: string;
     secondsLeft: number | null;
+    error: string | null;
   } | null;
 }
 
@@ -219,6 +221,38 @@ function EtsyPublishContent() {
         description:
           err instanceof Error ? err.message : "Failed to publish to Etsy",
       });
+    } finally {
+      setPublishing(false);
+    }
+  };
+
+  const handleRetryPublish = async () => {
+    const paymentId = preview?.pendingPayment?.id;
+    if (!paymentId) return;
+    setPublishing(true);
+    try {
+      const res = await fetchWithAuth(`/etsy/fee-payments/${paymentId}/retry`, {
+        method: "POST",
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data?.message || "Retry failed");
+      }
+      toast({
+        title: isKa ? "გამოქვეყნდა Etsy-ზე! 🎉" : "Published to Etsy! 🎉",
+        description: isKa
+          ? "ნამუშევარი წარმატებით განთავსდა"
+          : "Your artwork was published successfully",
+      });
+      await loadData();
+    } catch (err) {
+      toast({
+        variant: "destructive",
+        title: isKa ? "ისევ ვერ მოხერხდა" : "Still failing",
+        description:
+          err instanceof Error ? err.message : "Retry failed",
+      });
+      await loadData();
     } finally {
       setPublishing(false);
     }
@@ -534,14 +568,44 @@ function EtsyPublishContent() {
                   </div>
                 )}
 
-                {/* Fee captured but publish failed — admin retry pending */}
+                {/* Fee captured but publish failed — reason + free retry */}
                 {failedPaidPayment && (
-                  <div className="etsy-checkout-blockers">
-                    <p>
-                      <AlertTriangle size={13} />
+                  <div className="etsy-failed-publish">
+                    <p className="etsy-failed-paid">
+                      ✅{" "}
                       {isKa
-                        ? "საფასური გადახდილია, მაგრამ Etsy-ზე გამოქვეყნება ვერ მოხერხდა. ხელახლა გადახდა საჭირო არ არის — ადმინისტრატორი გაასწორებს და listing-ი ავტომატურად გამოქვეყნდება."
-                        : "The fee is paid, but publishing to Etsy failed. No need to pay again — an admin will fix the issue and the listing will be published automatically."}
+                        ? "გადახდა წარმატებულია — თანხა მიღებულია"
+                        : "Payment successful — the fee is received"}
+                    </p>
+                    <p className="etsy-failed-title">
+                      <AlertTriangle size={14} />
+                      {isKa
+                        ? "Etsy-ზე გამოქვეყნება ვერ მოხერხდა:"
+                        : "Publishing to Etsy failed:"}
+                    </p>
+                    {preview.pendingPayment?.error && (
+                      <p className="etsy-failed-reason">
+                        {preview.pendingPayment.error}
+                      </p>
+                    )}
+                    <button
+                      className="etsy-btn-primary"
+                      onClick={handleRetryPublish}
+                      disabled={publishing}
+                    >
+                      {publishing ? (
+                        <Loader2 size={17} className="etsy-spin" />
+                      ) : (
+                        <RefreshCw size={17} />
+                      )}
+                      {isKa
+                        ? "ხელახლა ცდა — გადახდის გარეშე"
+                        : "Retry — no extra charge"}
+                    </button>
+                    <p className="etsy-failed-note">
+                      {isKa
+                        ? "ხელახლა ცდისას თანხა აღარ ჩამოგეჭრებათ"
+                        : "Retrying will not charge you again"}
                     </p>
                   </div>
                 )}
