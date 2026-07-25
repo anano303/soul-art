@@ -103,6 +103,10 @@ const BLOCKER_MESSAGES: Record<string, { ka: string; en: string }> = {
     ka: "პროდუქტს ვერ მოვუძებნეთ შესაბამისი Etsy კატეგორია",
     en: "Could not find a matching Etsy category for this product",
   },
+  NO_SHIPPING_PROFILE: {
+    ka: "Etsy მაღაზიას ჯერ არ აქვს მიწოდების პროფილი — ადმინმა უნდა შექმნას Etsy Shop Manager → Settings → Delivery settings",
+    en: "The Etsy shop has no shipping profile yet — an admin must create one in Etsy Shop Manager → Settings → Delivery settings",
+  },
 };
 
 function EtsyPublishContent() {
@@ -282,6 +286,8 @@ function EtsyPublishContent() {
     !listedInfo;
   const pendingCheckout =
     preview.pendingPayment?.status === "pending" ? preview.pendingPayment : null;
+  const failedPaidPayment =
+    preview.pendingPayment?.status === "publish_failed" && !listedInfo;
 
   return (
     <div className="etsy-page">
@@ -528,6 +534,18 @@ function EtsyPublishContent() {
                   </div>
                 )}
 
+                {/* Fee captured but publish failed — admin retry pending */}
+                {failedPaidPayment && (
+                  <div className="etsy-checkout-blockers">
+                    <p>
+                      <AlertTriangle size={13} />
+                      {isKa
+                        ? "საფასური გადახდილია, მაგრამ Etsy-ზე გამოქვეყნება ვერ მოხერხდა. ხელახლა გადახდა საჭირო არ არის — ადმინისტრატორი გაასწორებს და listing-ი ავტომატურად გამოქვეყნდება."
+                        : "The fee is paid, but publishing to Etsy failed. No need to pay again — an admin will fix the issue and the listing will be published automatically."}
+                    </p>
+                  </div>
+                )}
+
                 {/* Pending checkout — previous payment session still open */}
                 {pendingCheckout && (
                   <div className="etsy-checkout-countdown">
@@ -548,7 +566,8 @@ function EtsyPublishContent() {
                 )}
 
                 {/* Payment buttons */}
-                {pendingCheckout ? null : preview.pricing.listingFeeGel > 0 ? (
+                {pendingCheckout || failedPaidPayment ? null : preview.pricing
+                    .listingFeeGel > 0 ? (
                   <div className="etsy-checkout-actions">
                     <button
                       className="etsy-btn-primary"

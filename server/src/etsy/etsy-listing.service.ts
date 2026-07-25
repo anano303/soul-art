@@ -145,6 +145,14 @@ export class EtsyListingService {
   private taxonomyCache: FlatTaxonomyNode[] | null = null;
   private taxonomyCacheAt = 0;
 
+  // Short-lived cache of the shop's first shipping profile id (checked on
+  // every preview — Etsy refuses physical listings without one)
+  private shippingProfileCache: {
+    shopId: string;
+    id: number | null;
+    at: number;
+  } | null = null;
+
   constructor(
     private readonly etsyService: EtsyService,
     private readonly exchangeRateService: ExchangeRateService,
@@ -194,6 +202,15 @@ export class EtsyListingService {
     if (!status.configured) blockers.push('NOT_CONFIGURED');
     if (!status.connected) blockers.push('SHOP_NOT_CONNECTED');
     else if (!status.shopId) blockers.push('NO_ETSY_SHOP');
+    else {
+      // Etsy rejects physical listings without a shipping profile — catch
+      // this BEFORE any money is taken. 'error' (lookup failed) doesn't
+      // block; the publish path re-checks with a fresh call anyway.
+      const shippingProfile = await this.lookupShippingProfileId(
+        status.shopId,
+      );
+      if (shippingProfile === null) blockers.push('NO_SHIPPING_PROFILE');
+    }
     if (product.status !== ProductStatus.APPROVED) {
       blockers.push('PRODUCT_NOT_APPROVED');
     }
@@ -252,7 +269,10 @@ export class EtsyListingService {
       { $set: { status: 'expired' } },
     );
     const livePayment = await this.etsyFeePaymentModel
-      .findOne({ product: productId, status: { $in: ['pending', 'paid'] } })
+      .findOne({
+        product: productId,
+        status: { $in: ['pending', 'paid', 'publish_failed'] },
+      })
       .sort({ createdAt: -1 })
       .lean()
       .exec();
@@ -724,6 +744,30 @@ export class EtsyListingService {
   // Shipping profile / return policy (activation requirements)
   // ============================================
 
+  /**
+   * Cached (60s) shipping-profile lookup for previews. Returns 'error'
+   * when Etsy can't be reached — callers must not treat that as "none".
+   */
+  private async lookupShippingProfileId(
+    shopId: string,
+  ): Promise<number | null | 'error'> {
+    const cache = this.shippingProfileCache;
+    if (cache && cache.shopId === shopId && Date.now() - cache.at < 60_000) {
+      return cache.id;
+    }
+    try {
+      const data = await this.etsyService.apiRequest<{ results: any[] }>(
+        'GET',
+        `/application/shops/${shopId}/shipping-profiles`,
+      );
+      const id = data.results?.[0]?.shipping_profile_id ?? null;
+      this.shippingProfileCache = { shopId, id, at: Date.now() };
+      return id;
+    } catch {
+      return 'error';
+    }
+  }
+
   private async pickShippingProfileId(
     shopId: string,
     warnings: string[],
@@ -804,14 +848,17 @@ export class EtsyListingService {
       { $set: { status: 'expired' } },
     );
     const existing = await this.etsyFeePaymentModel
-      .findOne({ product: productId, status: { $in: ['pending', 'paid'] } })
+      .findOne({
+        product: productId,
+        status: { $in: ['pending', 'paid', 'publish_failed'] },
+      })
       .lean()
       .exec();
     if (existing) {
       throw new HttpException(
-        existing.status === 'paid'
-          ? 'The listing fee is already paid for this product — publishing is in progress'
-          : 'A payment for this product is already in progress',
+        existing.status === 'pending'
+          ? 'A payment for this product is already in progress'
+          : 'The listing fee is already paid for this product — no need to pay again, publishing will be retried',
         HttpStatus.CONFLICT,
       );
     }
@@ -984,6 +1031,10 @@ export class EtsyListingService {
         HttpStatus.BAD_REQUEST,
       );
     }
+
+    // The admin likely just fixed the shop setup (e.g. created a shipping
+    // profile) — don't let a stale cached lookup block the retry
+    this.shippingProfileCache = null;
 
     return this.publishPaidFeePayment(payment);
   }
