@@ -593,9 +593,15 @@ export default function EtsyAdminPage() {
             {stats.problemPayments.length > 0 && (
               <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded">
                 <h3 className="font-semibold text-red-800 mb-2">
-                  ⚠️ ყურადღებას საჭიროებს — გადახდილია, მაგრამ არ
-                  გამოქვეყნებულა ({stats.problemPayments.length})
+                  ⚠️ ყურადღებას საჭიროებს ({stats.problemPayments.length})
                 </h3>
+                <p className="text-xs text-red-700 mb-2">
+                  <strong>paid / publish_failed</strong> — თანხა მიღებულია,
+                  მაგრამ listing-ი არ გამოქვეყნებულა (ხელახლა ცდა უფასოა).{" "}
+                  <strong>expired / pending</strong> — მიტოვებული გადახდის
+                  სესია, სავარაუდოდ გადაუხდელი — „გადამოწმება" ამოწმებს BOG-ში
+                  და გადახდილს გამოაქვეყნებს, გადაუხდელს კი სიიდან წაშლის.
+                </p>
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
                     <thead>
@@ -635,7 +641,10 @@ export default function EtsyAdminPage() {
                             >
                               {retryingId === p._id
                                 ? "ცდება..."
-                                : "🔄 ხელახლა ცდა"}
+                                : p.status === "expired" ||
+                                    p.status === "pending"
+                                  ? "🔍 გადამოწმება"
+                                  : "🔄 ხელახლა ცდა"}
                             </button>
                           </td>
                         </tr>

@@ -1105,8 +1105,13 @@ export class EtsyListingService {
       );
       const statusKey = status?.order_status?.key?.toLowerCase();
       if (statusKey !== 'completed') {
+        // Verified unpaid — mark it so it stops appearing in the
+        // needs-attention list
+        payment.status = 'failed';
+        payment.error = `Verified with BOG: '${statusKey || 'unknown'}' — payment was never completed`;
+        await payment.save();
         throw new HttpException(
-          `BOG reports the payment as '${statusKey || 'unknown'}' — not completed, nothing to publish`,
+          `BOG reports the payment as '${statusKey || 'unknown'}' — it was never paid. Removed from the attention list.`,
           HttpStatus.BAD_REQUEST,
         );
       }
