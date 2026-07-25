@@ -48,6 +48,7 @@ interface EtsyStats {
     priceUsd?: number;
     feePaymentMethod?: string;
     createdAt?: string;
+    warnings?: string[];
     product?: { name?: string } | null;
     seller?: { name?: string } | null;
   }>;
@@ -679,8 +680,10 @@ export default function EtsyAdminPage() {
                                   ? "bg-green-100 text-green-700"
                                   : "bg-yellow-100 text-yellow-700"
                               }`}
+                              title={l.warnings?.join("\n") || undefined}
                             >
                               {l.state}
+                              {(l.warnings?.length ?? 0) > 0 && " ⚠️"}
                             </span>
                           </td>
                           <td className="px-2 py-2">

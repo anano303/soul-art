@@ -35,6 +35,7 @@ interface EtsyPreview {
     listingId: string;
     listingUrl?: string;
     state: string;
+    warnings?: string[];
   } | null;
   listing: {
     title: string;
@@ -112,6 +113,22 @@ const BLOCKER_MESSAGES: Record<string, { ka: string; en: string }> = {
   NO_READINESS_STATE: {
     ka: "Etsy მაღაზიას არ აქვს Processing Profile — ადმინმა უნდა შექმნას Etsy Shop Manager → Settings → Shipping profiles & processing → Your processing profiles",
     en: "The Etsy shop has no processing profile — an admin must create one in Etsy Shop Manager → Settings → Shipping profiles & processing → Your processing profiles",
+  },
+};
+
+// Why a created listing stayed in draft instead of going active
+const DRAFT_REASON_HINTS: Record<string, { ka: string; en: string }> = {
+  NO_RETURN_POLICY: {
+    ka: "მაღაზიას აკლია Return Policy — Etsy Shop Manager → Settings → Policy settings → Returns",
+    en: "The shop has no return policy — Etsy Shop Manager → Settings → Policy settings → Returns",
+  },
+  NO_SHIPPING_PROFILE: {
+    ka: "მაღაზიას აკლია მიწოდების პროფილი — Etsy Shop Manager → Settings → Delivery settings",
+    en: "The shop has no shipping profile — Etsy Shop Manager → Settings → Delivery settings",
+  },
+  NO_IMAGES_UPLOADED: {
+    ka: "ფოტოების ატვირთვა ვერ მოხერხდა",
+    en: "Image upload failed",
   },
 };
 
@@ -464,15 +481,43 @@ function EtsyPublishContent() {
             {listedInfo && (
               <div className="etsy-checkout-success">
                 <p>
-                  ✅{" "}
                   {listedInfo.state === "active"
-                    ? isKa
-                      ? "ნამუშევარი გამოქვეყნებულია Etsy-ზე!"
-                      : "Your artwork is live on Etsy!"
-                    : isKa
-                      ? "ნამუშევარი Etsy-ზეა დრაფტის სახით — მალე გააქტიურდება."
-                      : "Uploaded to Etsy as a draft — will be activated soon."}
+                    ? `✅ ${
+                        isKa
+                          ? "ნამუშევარი გამოქვეყნებულია Etsy-ზე!"
+                          : "Your artwork is live on Etsy!"
+                      }`
+                    : `📝 ${
+                        isKa
+                          ? "ნამუშევარი Etsy-ზეა, მაგრამ ჯერ დრაფტის სახით — მყიდველები ვერ ხედავენ."
+                          : "Your artwork is on Etsy, but still a draft — buyers can't see it yet."
+                      }`}
                 </p>
+                {listedInfo.state !== "active" && (
+                  <div className="etsy-draft-reasons">
+                    {(preview.alreadyListed?.warnings || [])
+                      .filter(
+                        (w) =>
+                          DRAFT_REASON_HINTS[w] ||
+                          w.startsWith("ACTIVATION_FAILED"),
+                      )
+                      .map((w) => (
+                        <p key={w}>
+                          ⚠️{" "}
+                          {DRAFT_REASON_HINTS[w]
+                            ? isKa
+                              ? DRAFT_REASON_HINTS[w].ka
+                              : DRAFT_REASON_HINTS[w].en
+                            : w}
+                        </p>
+                      ))}
+                    <p>
+                      {isKa
+                        ? "გამოსწორების შემდეგ დრაფტი გამოაქვეყნეთ Etsy Shop Manager-ში: Listings → Draft → Publish. სტატუსი აქ ავტომატურად სინქრონდება."
+                        : "After fixing, publish the draft in Etsy Shop Manager: Listings → Draft → Publish. The status here syncs automatically."}
+                    </p>
+                  </div>
+                )}
                 {listedInfo.listingUrl && (
                   <a
                     href={listedInfo.listingUrl}

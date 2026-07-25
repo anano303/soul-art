@@ -97,6 +97,7 @@ export interface EtsyListingPreview {
     listingId: string;
     listingUrl?: string;
     state: string;
+    warnings: string[];
   } | null;
   listing: {
     title: string;
@@ -233,6 +234,27 @@ export class EtsyListingService {
 
     const existing = await this.findActiveListing(productId);
 
+    // Sync our stored state with Etsy's live one — the listing may have
+    // been activated (or removed) manually in Etsy's Shop Manager
+    if (existing) {
+      try {
+        const live = await this.etsyService.apiRequest<any>(
+          'GET',
+          `/application/listings/${existing.listingId}`,
+        );
+        if (live?.state && live.state !== existing.state) {
+          this.logger.log(
+            `Etsy listing ${existing.listingId} state synced: ${existing.state} → ${live.state}`,
+          );
+          existing.state = live.state;
+          if (live.url) existing.listingUrl = live.url;
+          await existing.save();
+        }
+      } catch {
+        // Keep the stored state when Etsy is unreachable
+      }
+    }
+
     const title = this.buildTitle(product, warnings);
     const description = this.buildDescription(product, warnings);
     const tags = this.buildTags(product);
@@ -314,6 +336,7 @@ export class EtsyListingService {
             listingId: existing.listingId,
             listingUrl: existing.listingUrl,
             state: existing.state,
+            warnings: existing.warnings ?? [],
           }
         : null,
       listing: {
