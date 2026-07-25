@@ -17,6 +17,36 @@ interface EtsySettings {
   listingFeeGel: number;
   commissionPercent: number;
   integrationEnabled: boolean;
+  enabledForAdmins: boolean;
+}
+
+function Toggle({
+  checked,
+  disabled,
+  onChange,
+}: {
+  checked: boolean;
+  disabled?: boolean;
+  onChange: (value: boolean) => void;
+}) {
+  return (
+    <button
+      type="button"
+      role="switch"
+      aria-checked={checked}
+      disabled={disabled}
+      onClick={() => onChange(!checked)}
+      className={`relative inline-flex h-7 w-12 shrink-0 items-center rounded-full transition-colors focus:outline-none disabled:opacity-50 ${
+        checked ? "bg-green-500" : "bg-gray-300"
+      }`}
+    >
+      <span
+        className={`inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform ${
+          checked ? "translate-x-6" : "translate-x-1"
+        }`}
+      />
+    </button>
+  );
 }
 
 // Etsy-ს ოფიციალური საკომისიოები (etsy.com/legal/fees) — ცნობარი ადმინისთვის
@@ -69,6 +99,8 @@ export default function EtsyAdminPage() {
   const [listingFeeGel, setListingFeeGel] = useState<number>(2);
   const [commissionPercent, setCommissionPercent] = useState<number>(20);
   const [integrationEnabled, setIntegrationEnabled] = useState(false);
+  const [enabledForAdmins, setEnabledForAdmins] = useState(true);
+  const [togglingFlag, setTogglingFlag] = useState(false);
 
   const loadData = useCallback(async () => {
     try {
@@ -87,6 +119,7 @@ export default function EtsyAdminPage() {
         setListingFeeGel(data.listingFeeGel);
         setCommissionPercent(data.commissionPercent);
         setIntegrationEnabled(data.integrationEnabled);
+        setEnabledForAdmins(data.enabledForAdmins);
       }
     } catch (error) {
       console.error("Error loading Etsy data:", error);
@@ -183,6 +216,44 @@ export default function EtsyAdminPage() {
     }
   };
 
+  const toggleFlag = async (
+    field: "integrationEnabled" | "enabledForAdmins",
+    value: boolean,
+  ) => {
+    const setter =
+      field === "integrationEnabled" ? setIntegrationEnabled : setEnabledForAdmins;
+    const previous =
+      field === "integrationEnabled" ? integrationEnabled : enabledForAdmins;
+
+    setter(value); // optimistic
+    setTogglingFlag(true);
+    try {
+      const res = await fetchWithAuth("/etsy/settings", {
+        method: "PUT",
+        body: JSON.stringify({ [field]: value }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.message || "save failed");
+      }
+      setSettings(data);
+      setMessage(
+        field === "integrationEnabled"
+          ? value
+            ? "✅ Etsy ინტეგრაცია ჩაირთო — გამყიდველები ხედავენ Etsy-ს ფუნქციას"
+            : "✅ Etsy ინტეგრაცია გამოირთო გამყიდველებისთვის"
+          : value
+            ? "✅ ადმინებისთვის ტესტირება ჩართულია"
+            : "✅ ადმინებისთვის ტესტირება გამორთულია",
+      );
+    } catch {
+      setter(previous); // rollback
+      setMessage("❌ პარამეტრის შენახვა ვერ მოხერხდა");
+    } finally {
+      setTogglingFlag(false);
+    }
+  };
+
   const saveSettings = async () => {
     try {
       setWorking(true);
@@ -192,7 +263,6 @@ export default function EtsyAdminPage() {
         body: JSON.stringify({
           listingFeeGel,
           commissionPercent,
-          integrationEnabled,
         }),
       });
       const data = await res.json();
@@ -336,6 +406,75 @@ export default function EtsyAdminPage() {
           </div>
         </div>
 
+        {/* Feature Flag — controls the whole Etsy feature */}
+        <div
+          className={`shadow rounded-lg p-6 mb-6 border-2 ${
+            integrationEnabled
+              ? "bg-green-50 border-green-300"
+              : "bg-white border-gray-200"
+          }`}
+        >
+          <h2 className="text-xl font-semibold mb-1">
+            🚀 ინტეგრაციის მართვა
+          </h2>
+          <p className="text-sm text-gray-600 mb-5">
+            ერთი მთავარი ჩამრთველი აკონტროლებს მთელ Etsy ფუნქციონალს —
+            გამყიდველების ღილაკებს, ფასის კალკულაციას და ყველა შეთავაზებას.
+          </p>
+
+          <div className="flex items-center justify-between py-3 border-b border-gray-200">
+            <div className="pr-4">
+              <div className="font-semibold text-gray-900">
+                Etsy ინტეგრაცია გამყიდველებისთვის
+              </div>
+              <div className="text-sm text-gray-500">
+                ჩართვისას გამყიდველები დაინახავენ „Etsy-ზე განთავსების"
+                შესაძლებლობას თავიანთ ნამუშევრებზე
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <span
+                className={`text-sm font-bold ${
+                  integrationEnabled ? "text-green-600" : "text-gray-400"
+                }`}
+              >
+                {integrationEnabled ? "ჩართულია" : "გამორთულია"}
+              </span>
+              <Toggle
+                checked={integrationEnabled}
+                disabled={togglingFlag}
+                onChange={(v) => toggleFlag("integrationEnabled", v)}
+              />
+            </div>
+          </div>
+
+          <div className="flex items-center justify-between py-3">
+            <div className="pr-4">
+              <div className="font-semibold text-gray-900">
+                ტესტირება ადმინებისთვის
+              </div>
+              <div className="text-sm text-gray-500">
+                ადმინები იყენებენ Etsy ფუნქციას მაშინაც, როცა მთავარი
+                ჩამრთველი გამორთულია — ლაივზე გაშვებამდე შესამოწმებლად
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <span
+                className={`text-sm font-bold ${
+                  enabledForAdmins ? "text-green-600" : "text-gray-400"
+                }`}
+              >
+                {enabledForAdmins ? "ჩართულია" : "გამორთულია"}
+              </span>
+              <Toggle
+                checked={enabledForAdmins}
+                disabled={togglingFlag}
+                onChange={(v) => toggleFlag("enabledForAdmins", v)}
+              />
+            </div>
+          </div>
+        </div>
+
         {/* Marketplace Settings */}
         <div className="bg-white shadow rounded-lg p-6 mb-6">
           <h2 className="text-xl font-semibold mb-4">პარამეტრები</h2>
@@ -379,18 +518,6 @@ export default function EtsyAdminPage() {
               </p>
             </div>
           </div>
-
-          <label className="flex items-center gap-3 mb-4 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={integrationEnabled}
-              onChange={(e) => setIntegrationEnabled(e.target.checked)}
-              className="w-5 h-5"
-            />
-            <span className="font-medium">
-              Etsy-ზე განთავსების შეთავაზება გამყიდველებისთვის ჩართულია
-            </span>
-          </label>
 
           <button
             onClick={saveSettings}

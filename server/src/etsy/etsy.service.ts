@@ -349,12 +349,14 @@ export class EtsyService {
     listingFeeGel: number;
     commissionPercent: number;
     integrationEnabled: boolean;
+    enabledForAdmins: boolean;
   }> {
     const doc = await this.getAuthDoc();
     return {
       listingFeeGel: doc?.listingFeeGel ?? 2,
       commissionPercent: doc?.commissionPercent ?? 20,
       integrationEnabled: doc?.integrationEnabled ?? false,
+      enabledForAdmins: doc?.enabledForAdmins ?? true,
     };
   }
 
@@ -362,11 +364,13 @@ export class EtsyService {
     listingFeeGel?: number;
     commissionPercent?: number;
     integrationEnabled?: boolean;
+    enabledForAdmins?: boolean;
   }) {
     const $set: Record<string, any> = {};
     if (update.listingFeeGel !== undefined) $set.listingFeeGel = update.listingFeeGel;
     if (update.commissionPercent !== undefined) $set.commissionPercent = update.commissionPercent;
     if (update.integrationEnabled !== undefined) $set.integrationEnabled = update.integrationEnabled;
+    if (update.enabledForAdmins !== undefined) $set.enabledForAdmins = update.enabledForAdmins;
 
     if (Object.keys($set).length > 0) {
       await this.etsyAuthModel.updateOne(

@@ -23,6 +23,7 @@ import { useLanguage } from "@/hooks/LanguageContext";
 import { TikTokPostModal } from "./TikTokPostModal";
 import { PromoteModal } from "./promote-modal";
 import { EtsyPublishModal } from "./etsy-publish-modal";
+import { useEtsyEnabled } from "@/hooks/use-etsy-enabled";
 
 interface ProductsActionsProps {
   product: Product;
@@ -61,6 +62,7 @@ export function ProductsActions({
 
   // Just check for admin role
   const isAdmin = user?.role === Role.Admin;
+  const etsyEnabled = useEtsyEnabled(isAdmin);
   console.log("Role check:", {
     userRole: user?.role,
     adminRole: Role.Admin,
@@ -404,8 +406,8 @@ export function ProductsActions({
           </button>
         )}
 
-        {/* Etsy button - visible to sellers and admins for approved products */}
-        {product.status === ProductStatus.APPROVED && (
+        {/* Etsy button - gated by the Etsy feature flag */}
+        {etsyEnabled && product.status === ProductStatus.APPROVED && (
           <button
             className="etsy-btn"
             onClick={() => setShowEtsyModal(true)}

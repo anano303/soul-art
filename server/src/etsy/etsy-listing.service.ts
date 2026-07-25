@@ -143,7 +143,12 @@ export class EtsyListingService {
     const blockers: string[] = [];
     const warnings: string[] = [];
 
-    if (!settings.integrationEnabled && requester.role !== 'admin') {
+    // Single feature flag controls the whole Etsy feature; admins can be
+    // separately allowed in for testing while it's off for sellers
+    const isAdmin = requester.role === 'admin';
+    const featureEnabled =
+      settings.integrationEnabled || (isAdmin && settings.enabledForAdmins);
+    if (!featureEnabled) {
       blockers.push('INTEGRATION_DISABLED');
     }
     if (!status.configured) blockers.push('NOT_CONFIGURED');

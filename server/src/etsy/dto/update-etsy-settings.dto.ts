@@ -16,4 +16,8 @@ export class UpdateEtsySettingsDto {
   @IsOptional()
   @IsBoolean()
   integrationEnabled?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  enabledForAdmins?: boolean;
 }

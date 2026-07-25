@@ -50,9 +50,14 @@ export class EtsyAuth {
   @Prop({ default: 20 })
   commissionPercent?: number;
 
-  // Master switch for showing the "post to Etsy" option to sellers
+  // Master feature flag: controls the entire Etsy feature for sellers
+  // (publish buttons, promotions, price previews)
   @Prop({ default: false })
   integrationEnabled?: boolean;
+
+  // Admins can use the feature even while the master flag is off (testing)
+  @Prop({ default: true })
+  enabledForAdmins?: boolean;
 
   // Pending OAuth handshake (PKCE) — persisted so the callback works even
   // when it lands on a different serverless instance than the auth request
