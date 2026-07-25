@@ -539,7 +539,15 @@ export default function EtsyAdminPage() {
         {/* Stats & monitoring */}
         {stats && (
           <div className="bg-white shadow rounded-lg p-6 mb-6">
-            <h2 className="text-xl font-semibold mb-4">📊 სტატისტიკა</h2>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-semibold">📊 სტატისტიკა</h2>
+              <a
+                href="/admin/etsy/listings"
+                className="text-sm text-blue-600 hover:underline"
+              >
+                ყველა listing-ის მართვა →
+              </a>
+            </div>
 
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-4">
               <div className="border rounded p-4 text-center">

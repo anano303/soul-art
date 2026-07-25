@@ -1169,6 +1169,126 @@ export class EtsyListingService {
   }
 
   // ============================================
+  // Admin listing management
+  // ============================================
+
+  async getAllListings(state?: string) {
+    const filter: Record<string, any> = {};
+    if (state && state !== 'all') filter.state = state;
+    return this.etsyListingModel
+      .find(filter)
+      .sort({ createdAt: -1 })
+      .limit(200)
+      .populate('product', 'name images')
+      .populate('seller', 'name email')
+      .lean()
+      .exec();
+  }
+
+  /**
+   * Re-fetches the live state of one listing from Etsy and stores it.
+   */
+  async syncListingState(recordId: string) {
+    const record = await this.etsyListingModel.findById(recordId);
+    if (!record) {
+      throw new HttpException('Listing not found', HttpStatus.NOT_FOUND);
+    }
+    const live = await this.etsyService.apiRequest<any>(
+      'GET',
+      `/application/listings/${record.listingId}`,
+    );
+    if (live?.state && live.state !== record.state) {
+      record.state = live.state;
+      if (live.url) record.listingUrl = live.url;
+      await record.save();
+    }
+    return { state: record.state, listingUrl: record.listingUrl };
+  }
+
+  /**
+   * Activates a draft listing via the API. Re-attaches the shop's current
+   * shipping profile / readiness state / return policy (the draft may have
+   * been created before they existed). Charges the pending balance fee on
+   * success (card fees were captured at payment time).
+   */
+  async activateListing(recordId: string) {
+    const record = await this.etsyListingModel
+      .findById(recordId)
+      .populate('product', 'name');
+    if (!record) {
+      throw new HttpException('Listing not found', HttpStatus.NOT_FOUND);
+    }
+    if (record.state === 'active') {
+      return { success: true, state: 'active', message: 'Already active' };
+    }
+
+    const shopId = await this.etsyService.getShopId();
+    this.shippingProfileCache = null;
+    this.readinessStateCache = null;
+
+    const warnings: string[] = [];
+    const shippingProfileId = await this.pickShippingProfileId(
+      shopId,
+      warnings,
+    );
+    const readinessStateId = await this.pickReadinessStateId(shopId, warnings);
+    const returnPolicyId = await this.pickReturnPolicyId(shopId, warnings);
+
+    const patch: Record<string, any> = { state: 'active' };
+    if (shippingProfileId) patch.shipping_profile_id = shippingProfileId;
+    if (readinessStateId) patch.readiness_state_id = readinessStateId;
+    if (returnPolicyId) patch.return_policy_id = returnPolicyId;
+
+    const updated = await this.etsyService.apiRequest<any>(
+      'PATCH',
+      `/application/shops/${shopId}/listings/${record.listingId}`,
+      patch,
+    );
+
+    record.state = updated?.state || record.state;
+    if (updated?.url) record.listingUrl = updated.url;
+
+    if (record.state === 'active') {
+      // Activation reasons are resolved — drop the stale draft warnings
+      record.warnings = (record.warnings || []).filter(
+        (w) =>
+          !w.startsWith('NO_RETURN_POLICY') &&
+          !w.startsWith('NO_SHIPPING_PROFILE') &&
+          !w.startsWith('NO_IMAGES_UPLOADED') &&
+          !w.startsWith('ACTIVATION_FAILED'),
+      );
+
+      // Balance-flow fee is only charged once the listing goes live
+      if (
+        !record.feeCharged &&
+        record.feePaymentMethod === 'balance' &&
+        (record.listingFeeGel ?? 0) > 0
+      ) {
+        try {
+          await this.chargeListingFee(
+            record.seller,
+            record.listingFeeGel,
+            (record.product as any)?.name || 'product',
+            record.listingId,
+          );
+          record.feeCharged = true;
+        } catch (error: any) {
+          record.warnings.push(`FEE_CHARGE_FAILED: ${error.message}`);
+        }
+      }
+      this.logger.log(`Etsy listing ${record.listingId} activated via admin`);
+    }
+
+    await record.save();
+    return {
+      success: record.state === 'active',
+      state: record.state,
+      listingUrl: record.listingUrl,
+      warnings,
+    };
+  }
+
+  // ============================================
   // Stats / monitoring (admin page)
   // ============================================
 

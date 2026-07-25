@@ -200,6 +200,39 @@ export class EtsyController {
   }
 
   /**
+   * ყველა Etsy listing-ი (ადმინის მართვის გვერდისთვის)
+   */
+  @Get('listings')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.Admin)
+  @ApiOperation({ summary: 'All Etsy listings (admin management)' })
+  async getAllListings(@Query('state') state?: string) {
+    return this.etsyListingService.getAllListings(state);
+  }
+
+  /**
+   * დრაფტი listing-ის გააქტიურება API-თ
+   */
+  @Post('listings/:recordId/activate')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.Admin)
+  @ApiOperation({ summary: 'Activate a draft Etsy listing (admin)' })
+  async activateListing(@Param('recordId') recordId: string) {
+    return this.etsyListingService.activateListing(recordId);
+  }
+
+  /**
+   * listing-ის სტატუსის სინქრონიზაცია Etsy-დან
+   */
+  @Post('listings/:recordId/sync')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.Admin)
+  @ApiOperation({ summary: 'Sync a listing state from Etsy (admin)' })
+  async syncListing(@Param('recordId') recordId: string) {
+    return this.etsyListingService.syncListingState(recordId);
+  }
+
+  /**
    * სტატისტიკა ადმინ გვერდისთვის — listing-ები, საფასურები,
    * პრობლემური გადახდები
    */
