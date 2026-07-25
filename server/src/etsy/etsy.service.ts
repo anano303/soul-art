@@ -52,8 +52,18 @@ export class EtsyService {
   }
 
   private get sharedSecret(): string | undefined {
-    // Not used by Etsy's v3 OAuth (PKCE flow) — kept for completeness / future use
     return this.configService.get<string>('ETSY_SHARED_SECRET');
+  }
+
+  /**
+   * Etsy requires "keystring:shared_secret" in the x-api-key header
+   * (returns 403 "Shared secret is required in x-api-key header" otherwise).
+   * OAuth token requests still use the bare keystring as client_id.
+   */
+  private get apiKeyHeader(): string {
+    return this.sharedSecret
+      ? `${this.keystring}:${this.sharedSecret}`
+      : this.keystring;
   }
 
   private get redirectUri(): string | undefined {
@@ -61,13 +71,13 @@ export class EtsyService {
   }
 
   isConfigured(): boolean {
-    return Boolean(this.keystring && this.redirectUri);
+    return Boolean(this.keystring && this.sharedSecret && this.redirectUri);
   }
 
   private ensureConfigured() {
     if (!this.isConfigured()) {
       throw new HttpException(
-        'Etsy API is not configured. Set ETSY_KEYSTRING and ETSY_REDIRECT_URI in .env',
+        'Etsy API is not configured. Set ETSY_KEYSTRING, ETSY_SHARED_SECRET and ETSY_REDIRECT_URI in .env',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
@@ -418,7 +428,7 @@ export class EtsyService {
     const response = await fetch(`${ETSY_API_BASE_URL}${path}`, {
       method,
       headers: {
-        'x-api-key': this.keystring,
+        'x-api-key': this.apiKeyHeader,
         Authorization: `Bearer ${accessToken}`,
         // FormData sets its own multipart Content-Type with boundary
         ...(body && !isForm ? { 'Content-Type': 'application/json' } : {}),
@@ -448,7 +458,7 @@ export class EtsyService {
     this.ensureConfigured();
 
     const response = await fetch(`${ETSY_API_BASE_URL}/application/openapi-ping`, {
-      headers: { 'x-api-key': this.keystring },
+      headers: { 'x-api-key': this.apiKeyHeader },
     });
     const data = await response.json().catch(() => null);
 
