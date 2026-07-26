@@ -708,7 +708,7 @@ export class EtsyListingService {
       const exact = taxonomy
         .filter((n) => n.name.toLowerCase() === keyword)
         .sort((a, b) => b.depth - a.depth)[0];
-      if (exact) return exact;
+      if (exact) return this.refineTaxonomy(product, exact, taxonomy);
 
       const partial = taxonomy
         .filter(
@@ -717,10 +717,84 @@ export class EtsyListingService {
             keyword.includes(n.name.toLowerCase()),
         )
         .sort((a, b) => b.depth - a.depth)[0];
-      if (partial) return partial;
+      if (partial) return this.refineTaxonomy(product, partial, taxonomy);
     }
 
     throw new Error('No matching Etsy taxonomy node found');
+  }
+
+  // Words too generic to justify picking a more specific child node
+  private static readonly GENERIC_TAXONOMY_TOKENS = new Set([
+    'painting',
+    'paintings',
+    'art',
+    'arts',
+    'other',
+    'misc',
+    'supplies',
+    'items',
+  ]);
+
+  /**
+   * Etsy ranks listings better in specific categories ("Acrylic Paintings")
+   * than broad ones ("Painting"). Score the resolved node's descendants
+   * against the product's materials/name/hashtags and descend when there's
+   * a real signal; otherwise keep the base node.
+   */
+  private refineTaxonomy(
+    product: ProductDocument,
+    base: FlatTaxonomyNode,
+    taxonomy: FlatTaxonomyNode[],
+  ): FlatTaxonomyNode {
+    const corpus = [
+      product.nameEn,
+      product.name,
+      ...(product.materialsEn || []),
+      ...(product.materials || []),
+      ...(product.hashtags || []),
+      product.subCategoryEn,
+      product.categoryStructure?.subEn,
+    ]
+      .filter(Boolean)
+      .join(' ')
+      .toLowerCase();
+
+    const descendants = taxonomy.filter((n) =>
+      n.path.startsWith(`${base.path} > `),
+    );
+
+    let best: FlatTaxonomyNode | null = null;
+    let bestScore = 0;
+    for (const node of descendants) {
+      const tokens = node.name
+        .toLowerCase()
+        .split(/[^a-z]+/)
+        .filter(
+          (t) =>
+            t.length > 2 &&
+            !EtsyListingService.GENERIC_TAXONOMY_TOKENS.has(t),
+        );
+      let score = 0;
+      for (const token of tokens) {
+        // Match singular/plural loosely: "acrylic" in "Canvas, Acrylic, mixed"
+        if (corpus.includes(token.replace(/s$/, ''))) score++;
+      }
+      if (
+        score > bestScore ||
+        (score === bestScore && score > 0 && best && node.depth > best.depth)
+      ) {
+        best = node;
+        bestScore = score;
+      }
+    }
+
+    if (best && bestScore > 0) {
+      this.logger.log(
+        `Etsy taxonomy refined: "${base.path}" → "${best.path}" (score ${bestScore})`,
+      );
+      return best;
+    }
+    return base;
   }
 
   // ============================================
