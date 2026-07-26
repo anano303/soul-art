@@ -142,16 +142,14 @@ export default function EtsyGuidePage() {
             className="etsy-guide-btn etsy-guide-btn-primary"
           >
             <Store size={18} />
-            {isKa
-              ? "ჩემი ნამუშევრები — ვიპოვო Etsy ღილაკი"
-              : "My artworks — find the Etsy button"}
+            {isKa ? "ჩემი ნამუშევრები" : "My artworks"}
           </Link>
           <Link
             href="/admin/products/create"
             className="etsy-guide-btn etsy-guide-btn-secondary"
           >
             <Plus size={18} />
-            {isKa ? "დავამატო ახალი ნამუშევარი" : "Add a new artwork"}
+            {isKa ? "დაამატე ახალი ნამუშევარი" : "Add a new artwork"}
           </Link>
         </div>
         <p className="etsy-guide-cta-note">
