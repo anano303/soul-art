@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Plus } from "lucide-react";
+import { BookOpen } from "lucide-react";
 import { useLanguage } from "@/hooks/LanguageContext";
 import { useUser } from "@/modules/auth/hooks/use-user";
 import { Role } from "@/types/role";
@@ -52,12 +52,9 @@ export default function EtsyBanner() {
             >
               {isKa ? "განათავსე შენი ნამუშევარი" : "List your artwork"}
             </Link>
-            <Link
-              href="/admin/products/create"
-              className="etsy-banner-btn-outline"
-            >
-              <Plus size={16} />
-              {isKa ? "დაამატე ახალი ნამუშევარი" : "Add a new artwork"}
+            <Link href="/etsy-guide" className="etsy-banner-btn-outline">
+              <BookOpen size={16} />
+              {isKa ? "გაიგე მეტი" : "Learn more"}
             </Link>
           </div>
         </div>
