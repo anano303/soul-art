@@ -33,6 +33,7 @@ import {
   Rocket,
   Palette,
   Store,
+  Zap,
 } from "lucide-react";
 
 // Add a style object for the FiraGo font
@@ -544,6 +545,18 @@ export default function UserMenu({
                   <Store size={18} />
                   <span>
                     {language === "en" ? "Etsy integration" : "Etsy ინტეგრაცია"}
+                  </span>
+                </Link>
+                <Link
+                  href="/admin/etsy/auto-approved"
+                  className="dropdown-item"
+                  onClick={handleLinkClick}
+                >
+                  <Zap size={18} />
+                  <span>
+                    {language === "en"
+                      ? "Etsy auto-approved"
+                      : "Etsy ავტო-დამტკიცებული"}
                   </span>
                 </Link>
               </>

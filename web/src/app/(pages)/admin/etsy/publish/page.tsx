@@ -92,9 +92,9 @@ const BLOCKER_MESSAGES: Record<string, { ka: string; en: string }> = {
     ka: "Etsy ანგარიშზე მაღაზია ჯერ არ არის გახსნილი",
     en: "The Etsy account has no shop yet",
   },
-  PRODUCT_NOT_APPROVED: {
-    ka: "პროდუქტი ჯერ არ არის დამტკიცებული",
-    en: "Product is not approved yet",
+  PRODUCT_REJECTED: {
+    ka: "ეს ნამუშევარი უარყოფილია — Etsy-ზე განთავსება შეუძლებელია",
+    en: "This artwork was rejected — it cannot be listed on Etsy",
   },
   OUT_OF_STOCK: {
     ka: "პროდუქტი მარაგში არ არის",

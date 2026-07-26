@@ -1346,3 +1346,116 @@
     font-size: 0.9rem;
   }
 }
+
+/* ── Etsy opt-in (create form) ── */
+
+.etsy-create-promo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  background: linear-gradient(135deg, #061d36, #0a2647);
+  border: 1px solid rgba(212, 175, 55, 0.4);
+  border-radius: 12px;
+  padding: 14px 18px;
+}
+
+.etsy-create-promo-text strong {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: #d4af37;
+  font-size: 14.5px;
+  font-weight: 800;
+}
+
+.etsy-create-promo-text p {
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 12.5px;
+  line-height: 1.5;
+  margin: 4px 0 0;
+}
+
+.etsy-create-promo-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  flex-shrink: 0;
+  background: #f1641e;
+  color: #fff;
+  border: none;
+  border-radius: 999px;
+  padding: 9px 18px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.etsy-create-promo-btn:hover {
+  background: #d4551a;
+}
+
+.etsy-create-optin {
+  border: 1.5px solid rgba(241, 100, 30, 0.4);
+  background: #fff7f2;
+  border-radius: 12px;
+  padding: 14px 16px;
+  transition: box-shadow 0.3s;
+}
+
+.etsy-create-optin-pulse {
+  animation: etsyOptinPulse 1.6s ease-in-out 2;
+}
+
+@keyframes etsyOptinPulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(241, 100, 30, 0.55);
+  }
+  50% {
+    box-shadow: 0 0 0 10px rgba(241, 100, 30, 0);
+  }
+}
+
+.etsy-create-optin-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.etsy-create-optin-label input {
+  width: 18px;
+  height: 18px;
+  accent-color: #f1641e;
+}
+
+.etsy-create-optin-label span {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 14.5px;
+  font-weight: 700;
+  color: #b34a13;
+}
+
+.etsy-create-optin-label em {
+  font-style: normal;
+  font-weight: 600;
+  color: #8a6d3b;
+}
+
+.etsy-create-optin-hint {
+  margin: 8px 0 0 28px;
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: #7a5c3d;
+}
+
+@media (max-width: 640px) {
+  .etsy-create-promo {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

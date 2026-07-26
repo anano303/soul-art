@@ -58,6 +58,14 @@ export class EtsyListing {
   @Prop({ default: 0 })
   imagesUploaded?: number;
 
+  // The paid publish auto-approved a PENDING product (skipped admin queue)
+  @Prop({ default: false })
+  autoApproved?: boolean;
+
+  // An admin has reviewed the auto-approved listing (confirmed or reverted)
+  @Prop({ default: false })
+  autoApprovalReviewed?: boolean;
+
   @Prop({ type: [String], default: [] })
   warnings?: string[];
 }

@@ -1,9 +1,10 @@
 "use client";
 
-import { Loader2 } from "lucide-react";
+import { Loader2, Store, ArrowDown } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { toast } from "@/hooks/use-toast";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import { useEtsyEnabled } from "@/hooks/use-etsy-enabled";
 import { ProductFormData as BaseProductFormData } from "@/modules/products/validation/product";
 import { useLanguage } from "@/hooks/LanguageContext";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -82,6 +83,35 @@ export function CreateProductForm({
     user?.role === "Seller" ||
     user?.role === "SELLER";
   const isAdmin = user?.role?.toLowerCase() === "admin";
+
+  // Etsy opt-in: create the listing and continue straight to the Etsy
+  // publish page (feature-flag gated)
+  const etsyEnabled = useEtsyEnabled(isAdmin);
+  const [listOnEtsy, setListOnEtsy] = useState(false);
+  const [etsyFee, setEtsyFee] = useState<number | null>(null);
+  const [etsyOptInPulse, setEtsyOptInPulse] = useState(false);
+  const etsyOptInRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!etsyEnabled) return;
+    fetchWithAuth("/etsy/settings")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((s) => {
+        if (s && typeof s.listingFeeGel === "number") {
+          setEtsyFee(s.listingFeeGel);
+        }
+      })
+      .catch(() => {});
+  }, [etsyEnabled]);
+
+  const scrollToEtsyOptIn = () => {
+    etsyOptInRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "center",
+    });
+    setEtsyOptInPulse(true);
+    setTimeout(() => setEtsyOptInPulse(false), 3500);
+  };
 
   // Debug logging
 
@@ -1489,6 +1519,15 @@ export function CreateProductForm({
         resetForm();
       }
 
+      // Etsy opt-in: continue straight to the Etsy publish page. The
+      // product stays PENDING on SoulArt; paying the Etsy fee there
+      // publishes it on both platforms.
+      if (!isEdit && listOnEtsy && data?._id) {
+        sessionStorage.setItem("returnFromEdit", "true");
+        router.push(`/admin/etsy/publish?id=${data._id}`);
+        return;
+      }
+
       if (onSuccess) {
         // Set a flag to force refresh when we return to the products list
         sessionStorage.setItem("returnFromEdit", "true");
@@ -1683,6 +1722,32 @@ export function CreateProductForm({
         {serverError && (
           <div className="server-error">
             <p className="create-product-error text-center">{serverError}</p>
+          </div>
+        )}
+        {/* Etsy promo — scrolls to the opt-in checkbox at the bottom */}
+        {!isEdit && etsyEnabled && (
+          <div className="etsy-create-promo">
+            <div className="etsy-create-promo-text">
+              <strong>
+                <Store size={16} />
+                {language === "en"
+                  ? "Now on Etsy too!"
+                  : "ახლა Etsy-ზეც!"}
+              </strong>
+              <p>
+                {language === "en"
+                  ? "List this artwork on Etsy as well and reach millions of international buyers."
+                  : "განათავსე ეს ნამუშევარი Etsy-ზეც და მიაღწიე მილიონობით საერთაშორისო მყიდველამდე."}
+              </p>
+            </div>
+            <button
+              type="button"
+              className="etsy-create-promo-btn"
+              onClick={scrollToEtsyOptIn}
+            >
+              {language === "en" ? "List on Etsy" : "Etsy-ზე განთავსება"}
+              <ArrowDown size={15} />
+            </button>
           </div>
         )}
         {/* Campaign Discount Section - Only for sellers with per_product choice */}
@@ -2909,6 +2974,39 @@ export function CreateProductForm({
             </ul>
           </div>
         )}{" "}
+        {/* Etsy opt-in checkbox */}
+        {!isEdit && etsyEnabled && (
+          <div
+            ref={etsyOptInRef}
+            className={`etsy-create-optin ${etsyOptInPulse ? "etsy-create-optin-pulse" : ""}`}
+          >
+            <label className="etsy-create-optin-label">
+              <input
+                type="checkbox"
+                checked={listOnEtsy}
+                onChange={(e) => setListOnEtsy(e.target.checked)}
+              />
+              <span>
+                <Store size={16} />
+                {language === "en"
+                  ? "Also list on Etsy"
+                  : "ასევე განათავსე Etsy-ზე"}
+                {etsyFee !== null && etsyFee > 0 && (
+                  <em>
+                    {language === "en"
+                      ? ` (listing fee ${etsyFee}₾)`
+                      : ` (listing-ის საფასური ${etsyFee}₾)`}
+                  </em>
+                )}
+              </span>
+            </label>
+            <p className="etsy-create-optin-hint">
+              {language === "en"
+                ? "After creating the listing you'll see the Etsy preview with the USD price and pay the fee from your balance or by card."
+                : "შექმნის შემდეგ ნახავ Etsy-ის გვერდს — როგორ გამოჩნდება ნამუშევარი და რა ეღირება დოლარში — და გადაიხდი საფასურს ბალანსიდან ან ბარათით."}
+            </p>
+          </div>
+        )}
         <button
           type="submit"
           className="create-product-button"

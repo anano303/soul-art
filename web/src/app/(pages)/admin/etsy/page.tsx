@@ -541,12 +541,20 @@ export default function EtsyAdminPage() {
           <div className="bg-white shadow rounded-lg p-6 mb-6">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-semibold">📊 სტატისტიკა</h2>
-              <a
-                href="/admin/etsy/listings"
-                className="text-sm text-blue-600 hover:underline"
-              >
-                ყველა listing-ის მართვა →
-              </a>
+              <span className="flex items-center gap-4">
+                <a
+                  href="/admin/etsy/auto-approved"
+                  className="text-sm text-blue-600 hover:underline"
+                >
+                  ⚡ ავტო-დამტკიცებულები
+                </a>
+                <a
+                  href="/admin/etsy/listings"
+                  className="text-sm text-blue-600 hover:underline"
+                >
+                  ყველა listing-ის მართვა →
+                </a>
+              </span>
             </div>
 
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-4">

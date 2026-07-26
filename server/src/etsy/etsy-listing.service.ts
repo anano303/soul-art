@@ -10,6 +10,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { EtsyService } from './etsy.service';
 import { PaymentsService } from '../payments/payments.service';
+import { ProductsService } from '../products/services/products.service';
 import { ExchangeRateService } from '../exchange-rate/exchange-rate.service';
 import {
   EtsyListing,
@@ -179,6 +180,8 @@ export class EtsyListingService {
     private readonly etsyFeePaymentModel: Model<EtsyFeePaymentDocument>,
     @Inject(forwardRef(() => PaymentsService))
     private readonly paymentsService: PaymentsService,
+    @Inject(forwardRef(() => ProductsService))
+    private readonly productsService: ProductsService,
   ) {}
 
   // ============================================
@@ -224,8 +227,10 @@ export class EtsyListingService {
       if (shippingProfile === null) blockers.push('NO_SHIPPING_PROFILE');
       if (readinessState === null) blockers.push('NO_READINESS_STATE');
     }
-    if (product.status !== ProductStatus.APPROVED) {
-      blockers.push('PRODUCT_NOT_APPROVED');
+    // PENDING products are allowed: a paid Etsy publish auto-approves them
+    // (skips the admin queue by design). Only rejected products are blocked.
+    if (product.status === ProductStatus.REJECTED) {
+      blockers.push('PRODUCT_REJECTED');
     }
 
     const quantity = this.resolveQuantity(product);
@@ -537,6 +542,29 @@ export class EtsyListingService {
         warnings.push(`FEE_CHARGE_FAILED: ${error.message}`);
         this.logger.error(
           `Etsy listing ${listingId} activated but fee charge failed: ${error.message}`,
+        );
+      }
+    }
+
+    // 5. A settled fee auto-approves a PENDING product — to the seller it
+    // simply looks like a fast confirmation. Reuses the real approval flow
+    // (firstApprovedAt, referral bonus, social auto-post, notification).
+    const feeSettled =
+      preview.pricing.listingFeeGel <= 0 || record.feeCharged;
+    if (feeSettled && product.status === ProductStatus.PENDING) {
+      try {
+        await this.productsService.updateStatus(
+          String(product._id),
+          ProductStatus.APPROVED,
+        );
+        record.autoApproved = true;
+        this.logger.log(
+          `Product ${product._id} auto-approved after paid Etsy publish`,
+        );
+      } catch (error: any) {
+        warnings.push(`AUTO_APPROVE_FAILED: ${error.message}`);
+        this.logger.error(
+          `Auto-approve failed for product ${product._id}: ${error.message}`,
         );
       }
     }
@@ -1371,6 +1399,84 @@ export class EtsyListingService {
       listingUrl: record.listingUrl,
       warnings,
     };
+  }
+
+  // ============================================
+  // Auto-approved listings review (admin)
+  // ============================================
+
+  async getAutoApprovedListings(reviewed?: string) {
+    const filter: Record<string, any> = { autoApproved: true };
+    if (reviewed === 'false') filter.autoApprovalReviewed = { $ne: true };
+    if (reviewed === 'true') filter.autoApprovalReviewed = true;
+    return this.etsyListingModel
+      .find(filter)
+      .sort({ createdAt: -1 })
+      .limit(200)
+      .populate('product', 'name images price status')
+      .populate('seller', 'name email storeName')
+      .lean()
+      .exec();
+  }
+
+  /**
+   * Admin confirms the auto-approved listing is fine.
+   */
+  async confirmAutoApproved(recordId: string) {
+    const record = await this.etsyListingModel.findById(recordId);
+    if (!record) {
+      throw new HttpException('Listing not found', HttpStatus.NOT_FOUND);
+    }
+    record.autoApprovalReviewed = true;
+    await record.save();
+    return { success: true };
+  }
+
+  /**
+   * Admin reverts a rule-violating auto-approval: the product is rejected
+   * on SoulArt and the Etsy listing is deactivated. The fee stays charged.
+   */
+  async revertAutoApproved(recordId: string, reason?: string) {
+    const record = await this.etsyListingModel.findById(recordId);
+    if (!record) {
+      throw new HttpException('Listing not found', HttpStatus.NOT_FOUND);
+    }
+
+    await this.productsService.updateStatus(
+      String(record.product),
+      ProductStatus.REJECTED,
+      reason || 'Etsy ავტო-დამტკიცება გაუქმდა ადმინის მიერ',
+    );
+
+    // Take the listing off Etsy (only active listings can go inactive;
+    // drafts are not public anyway)
+    let etsyDeactivated = false;
+    if (record.state === 'active') {
+      try {
+        const shopId = await this.etsyService.getShopId();
+        const updated = await this.etsyService.apiRequest<any>(
+          'PATCH',
+          `/application/shops/${shopId}/listings/${record.listingId}`,
+          { state: 'inactive' },
+        );
+        record.state = updated?.state || 'inactive';
+        etsyDeactivated = true;
+      } catch (error: any) {
+        record.warnings = [
+          ...(record.warnings || []),
+          `REVERT_DEACTIVATE_FAILED: ${error.message}`,
+        ];
+      }
+    }
+
+    record.autoApprovalReviewed = true;
+    record.warnings = [...(record.warnings || []), 'REVERTED_BY_ADMIN'];
+    await record.save();
+
+    this.logger.log(
+      `Auto-approved Etsy listing ${record.listingId} reverted by admin`,
+    );
+    return { success: true, etsyDeactivated, state: record.state };
   }
 
   // ============================================

@@ -221,6 +221,44 @@ export class EtsyController {
   }
 
   /**
+   * ავტო-დამტკიცებული listing-ები (გადახდით გამოქვეყნებული, ადმინის
+   * გადამოწმების გარეშე) — შემდგომი კონტროლისთვის
+   */
+  @Get('auto-approved')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.Admin)
+  @ApiOperation({ summary: 'Auto-approved Etsy listings for admin review' })
+  async getAutoApproved(@Query('reviewed') reviewed?: string) {
+    return this.etsyListingService.getAutoApprovedListings(reviewed);
+  }
+
+  /**
+   * ავტო-დამტკიცებულის დადასტურება (ყველაფერი წესრიგშია)
+   */
+  @Post('auto-approved/:recordId/confirm')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.Admin)
+  @ApiOperation({ summary: 'Confirm an auto-approved listing (admin)' })
+  async confirmAutoApproved(@Param('recordId') recordId: string) {
+    return this.etsyListingService.confirmAutoApproved(recordId);
+  }
+
+  /**
+   * ავტო-დამტკიცების გაუქმება — პროდუქტი უარყოფილდება,
+   * Etsy listing-ი კი დეაქტივირდება
+   */
+  @Post('auto-approved/:recordId/revert')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.Admin)
+  @ApiOperation({ summary: 'Revert an auto-approved listing (admin)' })
+  async revertAutoApproved(
+    @Param('recordId') recordId: string,
+    @Body() body: { reason?: string },
+  ) {
+    return this.etsyListingService.revertAutoApproved(recordId, body?.reason);
+  }
+
+  /**
    * listing-ის სტატუსის სინქრონიზაცია Etsy-დან
    */
   @Post('listings/:recordId/sync')

@@ -397,8 +397,11 @@ export function ProductsActions({
           </button>
         )}
 
-        {/* Etsy button - gated by the Etsy feature flag */}
-        {etsyEnabled && product.status === ProductStatus.APPROVED && (
+        {/* Etsy button - gated by the Etsy feature flag. Pending products
+            are allowed: a paid Etsy publish auto-approves them */}
+        {etsyEnabled &&
+          (product.status === ProductStatus.APPROVED ||
+            product.status === ProductStatus.PENDING) && (
           <Link
             href={{
               pathname: `/admin/etsy/publish`,
