@@ -17,7 +17,7 @@ import "./etsy-banner.css";
 
 // Matches the SoulArt × Etsy campaign hero: navy globe background, gold
 // serif headline, three framed artworks and the "listing synced" connector.
-// Background image: web/public/etsy-banner-bg.jpg (gradient fallback).
+// Background image: web/public/etsy-banner-bg.png (gradient fallback).
 export default function EtsyBanner() {
   const { language } = useLanguage();
   const { user } = useUser();

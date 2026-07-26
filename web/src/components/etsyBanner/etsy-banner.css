@@ -1,11 +1,11 @@
 /* ── SoulArt × Etsy banner (campaign hero style) ──
-   Background image: /etsy-banner-bg.jpg (golden globe on navy);
+   Background image: /etsy-banner-bg.png (golden globe on navy);
    the gradient below is the fallback when the file is absent. */
 
 .etsy-banner-section {
   position: relative;
   background:
-    url("/etsy-banner-bg.jpg") right center / cover no-repeat,
+    url("/etsy-banner-bg.png") right center / cover no-repeat,
     linear-gradient(160deg, #061d36 0%, #0a2647 55%, #061d36 100%);
   background-color: #0a2647;
   padding: 60px 16px;
