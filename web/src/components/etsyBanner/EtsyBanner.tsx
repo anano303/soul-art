@@ -12,7 +12,7 @@ import { fetchWithAuth } from "@/lib/fetch-with-auth";
 import { memoryCache } from "@/lib/cache";
 import { optimizeCloudinaryUrl } from "@/lib/utils";
 import { Product } from "@/types";
-import soulartLogo from "@/assets/logo.png";
+import soulartLogo from "/icons/pwa/notification-badge.png";
 import "./etsy-banner.css";
 
 // Matches the SoulArt × Etsy campaign hero: navy globe background, gold
@@ -116,7 +116,7 @@ export default function EtsyBanner() {
             <div className="etsy-banner-sync-node">
               <div className="etsy-banner-sync-circle">
                 <Image
-                  src={soulartLogo}
+                  src='/icons/pwa/notification-badge.png'
                   alt="SoulArt"
                   width={44}
                   height={44}
