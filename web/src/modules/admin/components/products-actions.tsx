@@ -34,12 +34,15 @@ interface ProductsActionsProps {
     height?: number;
     depth?: number;
   };
+  // Guide deep-link (#etsy-button): state-driven pulse so it survives re-renders
+  highlightEtsy?: boolean;
 }
 
 export function ProductsActions({
   product,
   onStatusChange,
   onDelete,
+  highlightEtsy,
 }: ProductsActionsProps) {
   const { user } = useUser();
   const { language } = useLanguage();
@@ -407,7 +410,7 @@ export function ProductsActions({
               pathname: `/admin/etsy/publish`,
               query: { id: product._id },
             }}
-            className="etsy-btn"
+            className={`etsy-btn ${highlightEtsy ? "etsy-btn-highlight" : ""}`}
             title={
               language === "en" ? "Publish to Etsy" : "Etsy-ზე განთავსება"
             }

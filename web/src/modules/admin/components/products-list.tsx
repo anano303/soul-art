@@ -101,6 +101,8 @@ export function ProductsList() {
   } = useUsdRate();
   const [editingUsdRate, setEditingUsdRate] = useState<string>("");
   const [showUsdRateEdit, setShowUsdRateEdit] = useState(false);
+  // Guide deep-link (#etsy-button) pulse on the first row's Etsy button
+  const [etsyHighlight, setEtsyHighlight] = useState(false);
 
   // Bulk selection state
   const [selectedProducts, setSelectedProducts] = useState<Set<string>>(
@@ -243,6 +245,8 @@ export function ProductsList() {
   // Guide deep-link: /admin/products#etsy-button scrolls to the first Etsy
   // button and pulses it (used by the Etsy launch blog/banner). The button
   // renders asynchronously (feature-flag fetch), so poll until it appears.
+  // The pulse itself is state-driven (highlightEtsy prop) so re-renders
+  // can't wipe it, same as the create-form opt-in pulse.
   useEffect(() => {
     if (window.location.hash !== "#etsy-button") return;
     if (isLoading || !data) return;
@@ -260,12 +264,17 @@ export function ProductsList() {
       const btn = document.querySelector(".etsy-btn");
       if (btn) {
         clearInterval(interval);
-        btn.scrollIntoView({ behavior: "smooth", block: "center" });
-        btn.classList.add("etsy-btn-highlight");
-        setTimeout(() => btn.classList.remove("etsy-btn-highlight"), 8000);
+        setEtsyHighlight(true);
+        // Scroll to the button that actually carries the highlight class
+        setTimeout(() => {
+          const highlighted =
+            document.querySelector(".etsy-btn-highlight") || btn;
+          highlighted.scrollIntoView({ behavior: "smooth", block: "center" });
+        }, 150);
+        setTimeout(() => setEtsyHighlight(false), 8000);
         clearHash();
       } else if (tries >= 25) {
-        // ~7.5s — no Etsy button (no approved products or feature off)
+        // ~7.5s — no Etsy button (no products or feature off)
         clearInterval(interval);
         toast({
           title: "Etsy",
@@ -1846,6 +1855,7 @@ export function ProductsList() {
                     product={product}
                     onStatusChange={handleStatusChange}
                     onDelete={handleProductDeleted}
+                    highlightEtsy={etsyHighlight && idx === 0}
                     materials={
                       language === "en"
                         ? product.materialsEn && product.materialsEn.length > 0
