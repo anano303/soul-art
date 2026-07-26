@@ -240,6 +240,38 @@ export function ProductsList() {
     }
   }, [page, debouncedSearchQuery, statusFilter, categoryFilter]);
 
+  // Guide deep-link: /admin/products#etsy-button scrolls to the first Etsy
+  // button and pulses it (used by the Etsy launch blog/banner)
+  useEffect(() => {
+    if (window.location.hash !== "#etsy-button") return;
+    if (isLoading || !data) return;
+
+    const timer = setTimeout(() => {
+      const btn = document.querySelector(".etsy-btn");
+      if (btn) {
+        btn.scrollIntoView({ behavior: "smooth", block: "center" });
+        btn.classList.add("etsy-btn-highlight");
+        setTimeout(() => btn.classList.remove("etsy-btn-highlight"), 8000);
+      } else {
+        toast({
+          title: "Etsy",
+          description:
+            language === "en"
+              ? "Add an artwork first — after approval the Etsy publish button will appear"
+              : "ჯერ დაამატეთ ნამუშევარი — დამტკიცების შემდეგ გამოჩნდება Etsy-ზე განთავსების ღილაკი",
+        });
+      }
+      // Clear the hash so refreshes don't re-trigger the highlight
+      window.history.replaceState(
+        null,
+        "",
+        window.location.pathname + window.location.search,
+      );
+    }, 600);
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isLoading, data]);
+
   // Returned from the BOG payment for an Etsy listing fee
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);

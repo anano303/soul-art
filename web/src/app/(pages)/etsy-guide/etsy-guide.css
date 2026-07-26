@@ -1,0 +1,226 @@
+/* ── Etsy guide page ── */
+
+.etsy-guide-page {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 40px 16px 72px;
+  font-family: "FiraGo", sans-serif;
+}
+
+.etsy-guide-soon {
+  text-align: center;
+  padding: 90px 16px;
+  color: #555;
+}
+
+.etsy-guide-soon svg {
+  color: #f1641e;
+}
+
+.etsy-guide-soon h1 {
+  font-size: 26px;
+  margin: 14px 0 8px;
+  color: #222;
+}
+
+.etsy-guide-hero {
+  text-align: center;
+  margin-bottom: 42px;
+}
+
+.etsy-guide-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: rgba(241, 100, 30, 0.1);
+  border: 1px solid rgba(241, 100, 30, 0.4);
+  color: #d4551a;
+  border-radius: 999px;
+  padding: 6px 14px;
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 16px;
+}
+
+.etsy-guide-hero h1 {
+  font-size: clamp(26px, 4vw, 38px);
+  font-weight: 800;
+  color: #012645;
+  margin: 0 0 14px;
+  line-height: 1.25;
+}
+
+.etsy-guide-hero p {
+  font-size: 16px;
+  line-height: 1.7;
+  color: #555;
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+/* Steps */
+
+.etsy-guide-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-bottom: 42px;
+}
+
+.etsy-guide-step {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  background: #fff;
+  border: 1px solid #eee;
+  border-radius: 14px;
+  padding: 18px 20px;
+  box-shadow: 0 4px 18px rgba(1, 38, 69, 0.05);
+  position: relative;
+}
+
+.etsy-guide-step-num {
+  position: absolute;
+  top: -10px;
+  left: -6px;
+  background: #012645;
+  color: #fff;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.etsy-guide-step-icon {
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: rgba(241, 100, 30, 0.1);
+  color: #f1641e;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.etsy-guide-step h3 {
+  font-size: 16px;
+  font-weight: 700;
+  color: #222;
+  margin: 0 0 5px;
+}
+
+.etsy-guide-step p {
+  font-size: 14px;
+  line-height: 1.6;
+  color: #666;
+  margin: 0;
+}
+
+/* Facts */
+
+.etsy-guide-facts {
+  background: #fff8e1;
+  border: 1px solid #ffe082;
+  border-radius: 14px;
+  padding: 22px 24px;
+  margin-bottom: 42px;
+}
+
+.etsy-guide-facts h2 {
+  font-size: 18px;
+  font-weight: 800;
+  color: #7a5c00;
+  margin: 0 0 12px;
+}
+
+.etsy-guide-facts ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.etsy-guide-facts li {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  font-size: 14px;
+  line-height: 1.55;
+  color: #6b5300;
+}
+
+.etsy-guide-facts li svg {
+  flex-shrink: 0;
+  margin-top: 3px;
+  color: #2e7d32;
+}
+
+/* CTA */
+
+.etsy-guide-cta {
+  text-align: center;
+  background: linear-gradient(135deg, #012645, #0a3a63);
+  border-radius: 18px;
+  padding: 36px 22px;
+}
+
+.etsy-guide-cta h2 {
+  color: #fff;
+  font-size: 22px;
+  font-weight: 800;
+  margin: 0 0 20px;
+}
+
+.etsy-guide-cta-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+}
+
+.etsy-guide-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  border-radius: 999px;
+  padding: 13px 24px;
+  font-size: 14.5px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.etsy-guide-btn-primary {
+  background: #f1641e;
+  color: #fff;
+}
+
+.etsy-guide-btn-primary:hover {
+  background: #d4551a;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 22px rgba(241, 100, 30, 0.4);
+}
+
+.etsy-guide-btn-secondary {
+  background: transparent;
+  color: #fff;
+  border: 1.5px solid rgba(255, 255, 255, 0.5);
+}
+
+.etsy-guide-btn-secondary:hover {
+  border-color: #fff;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.etsy-guide-cta-note {
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 13px;
+  margin: 16px 0 0;
+}

@@ -22,7 +22,17 @@ interface CategoryProducts {
   products: Product[];
 }
 
-const HomePageShop = () => {
+const isPaintingsCategory = (name: string) =>
+  name === "ნახატები" || name === "Paintings";
+
+interface HomePageShopProps {
+  // 'paintings' renders only the paintings category, 'rest' renders the
+  // others (handmade etc.) — lets the homepage interleave banners between
+  // the category sections. Omit to render everything (default).
+  section?: "paintings" | "rest";
+}
+
+const HomePageShop = ({ section }: HomePageShopProps) => {
   const { t, language } = useLanguage();
   const [isLoading, setIsLoading] = useState(true);
   const [categoryProducts, setCategoryProducts] = useState<CategoryProducts[]>(
@@ -242,6 +252,18 @@ const HomePageShop = () => {
     };
   }, [categoryProducts.length, language]);
 
+  const visibleCategories =
+    section === "paintings"
+      ? categoryProducts.filter((c) => isPaintingsCategory(c.category))
+      : section === "rest"
+        ? categoryProducts.filter((c) => !isPaintingsCategory(c.category))
+        : categoryProducts;
+
+  // A filtered instance with nothing to show renders nothing (no empty state)
+  if (!isLoading && section && visibleCategories.length === 0) {
+    return null;
+  }
+
   return (
     <div className=" shop-container" key={`shop-container-${language}`}>
       <div className="content">
@@ -251,8 +273,8 @@ const HomePageShop = () => {
           </div>
         ) : (
           <div className="product-sections">
-            {categoryProducts.length > 0 ? (
-              categoryProducts.map((categoryData, index) => (
+            {visibleCategories.length > 0 ? (
+              visibleCategories.map((categoryData, index) => (
                 <div
                   key={`${categoryData.categoryId}-${language}-${index}`}
                   className="product-section"

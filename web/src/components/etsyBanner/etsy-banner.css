@@ -1,0 +1,191 @@
+/* ── SoulArt × Etsy banner (matches the FB campaign visuals) ── */
+
+.etsy-banner-section {
+  background: radial-gradient(
+      120% 160% at 80% 10%,
+      rgba(30, 74, 118, 0.55) 0%,
+      rgba(1, 38, 69, 0) 55%
+    ),
+    linear-gradient(160deg, #041f3a 0%, #012645 55%, #04223d 100%);
+  padding: 52px 16px;
+  overflow: hidden;
+}
+
+.etsy-banner-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 40px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.etsy-banner-text {
+  max-width: 580px;
+}
+
+.etsy-banner-eyebrow {
+  display: inline-block;
+  color: #d4af37;
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+
+.etsy-banner-title {
+  color: #fff;
+  font-size: clamp(26px, 3.6vw, 38px);
+  font-weight: 800;
+  line-height: 1.25;
+  margin: 0 0 14px;
+}
+
+.etsy-banner-gold {
+  color: #d4af37;
+}
+
+.etsy-banner-subtitle {
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 15.5px;
+  line-height: 1.7;
+  margin: 0 0 24px;
+}
+
+.etsy-banner-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px;
+}
+
+/* Glossy gold CTA — same family as the voucher banner button */
+.etsy-banner-btn-gold {
+  display: inline-block;
+  padding: 0.8rem 2.2rem;
+  background: linear-gradient(
+    180deg,
+    #fdf6c9 0%,
+    #e7c75a 22%,
+    #bb9326 55%,
+    #8f6e18 100%
+  );
+  color: #2a2208;
+  border: 3px solid #4a4416;
+  border-radius: 50px;
+  font-weight: 800;
+  font-size: 15px;
+  letter-spacing: 0.02em;
+  text-decoration: none;
+  box-shadow:
+    0 6px 18px rgba(0, 0, 0, 0.4),
+    inset 0 2px 2px rgba(255, 255, 255, 0.75),
+    inset 0 -3px 6px rgba(120, 90, 20, 0.6);
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.35);
+  transition:
+    transform 0.15s,
+    box-shadow 0.2s,
+    filter 0.2s;
+}
+
+.etsy-banner-btn-gold:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.05);
+  box-shadow:
+    0 10px 24px rgba(0, 0, 0, 0.45),
+    inset 0 2px 2px rgba(255, 255, 255, 0.85),
+    inset 0 -3px 6px rgba(120, 90, 20, 0.6);
+}
+
+.etsy-banner-btn-outline {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #fff;
+  border: 1.5px solid rgba(255, 255, 255, 0.45);
+  border-radius: 50px;
+  padding: 11px 22px;
+  font-size: 14px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.etsy-banner-btn-outline:hover {
+  border-color: #d4af37;
+  color: #d4af37;
+  background: rgba(212, 175, 55, 0.06);
+}
+
+/* Connected circles visual (SoulArt ○—○ Etsy) */
+
+.etsy-banner-visual {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.etsy-banner-circle {
+  width: 150px;
+  height: 150px;
+  border: 1.5px solid rgba(212, 175, 55, 0.75);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(
+    100% 100% at 50% 30%,
+    rgba(212, 175, 55, 0.08),
+    rgba(212, 175, 55, 0) 70%
+  );
+}
+
+.etsy-banner-brand {
+  color: #fff;
+  font-size: 22px;
+  font-weight: 800;
+  font-family: Georgia, "Times New Roman", serif;
+}
+
+.etsy-banner-etsy-word {
+  font-style: italic;
+}
+
+.etsy-banner-line {
+  position: relative;
+  width: 64px;
+  height: 1.5px;
+  background: rgba(212, 175, 55, 0.75);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.etsy-banner-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #d4af37;
+  transform: translateY(-0.5px);
+}
+
+@media (max-width: 900px) {
+  .etsy-banner-inner {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .etsy-banner-actions {
+    justify-content: center;
+  }
+
+  .etsy-banner-circle {
+    width: 110px;
+    height: 110px;
+  }
+
+  .etsy-banner-brand {
+    font-size: 17px;
+  }
+}

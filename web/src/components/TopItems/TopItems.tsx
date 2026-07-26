@@ -19,14 +19,20 @@ import {
   Package,
   Star,
   TrendingUp,
+  Store,
 } from "lucide-react";
 import { useLanguage } from "@/hooks/LanguageContext";
+import { useUser } from "@/modules/auth/hooks/use-user";
+import { Role } from "@/types/role";
+import { useEtsyEnabled } from "@/hooks/use-etsy-enabled";
 import { optimizeCloudinaryUrl } from "@/lib/utils";
 import { productHref } from "@/lib/product-slug";
 
 const TopItems: React.FC = () => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const { t, language } = useLanguage();
+  const { user } = useUser();
+  const etsyEnabled = useEtsyEnabled(user?.role === Role.Admin);
 
   const { data: topProducts, isLoading } = useQuery({
     queryKey: ["topProducts"],
@@ -183,7 +189,8 @@ const TopItems: React.FC = () => {
         clone.parentElement.removeChild(clone);
       }
     };
-  }, [topProducts]);
+    // etsyEnabled changes the rendered items, so the loop clone must rebuild
+  }, [topProducts, etsyEnabled]);
 
   if (isLoading) {
     return (
@@ -195,6 +202,23 @@ const TopItems: React.FC = () => {
 
   // Trust badges data
   const trustBadges = [
+    // Etsy integration — feature-flag gated, shown first
+    ...(etsyEnabled
+      ? [
+          {
+            id: "etsy",
+            icon: <Store size={26} strokeWidth={2.5} />,
+            title:
+              language === "en"
+                ? "Your art on Etsy too"
+                : "შენი ნამუშევრები Etsy-ზეც",
+            description:
+              language === "en"
+                ? "One click to the global market"
+                : "ერთი ღილაკით მსოფლიო ბაზარზე",
+          },
+        ]
+      : []),
     {
       id: "payment",
       icon:

@@ -90,6 +90,15 @@
   z-index: 1;
 }
 
+.badgeBoard[data-badge="etsy"]::after {
+  content: "";
+  position: absolute;
+  inset: 4px;
+  border: 2px solid rgba(241, 100, 30, 0.35);
+  pointer-events: none;
+  z-index: 1;
+}
+
 .badgeContent {
   display: flex;
   flex-direction: column;
@@ -123,6 +132,10 @@
 
 .badgeBoard[data-badge="payment"] .badgeIcon {
   color: rgba(143, 110, 24, 0.9);
+}
+
+.badgeBoard[data-badge="etsy"] .badgeIcon {
+  color: #f1641e;
 }
 
 .bogLogoSmall {

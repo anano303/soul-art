@@ -9,6 +9,14 @@ import VoucherBanner from "@/components/voucherBanner/VoucherBanner";
 import GuaranteeBanner from "@/components/guaranteeBanner/GuaranteeBanner";
 // Static import (not ssr:false) so the SEO body copy is in the server HTML.
 import WhySoulArt from "@/components/whySoulArt/WhySoulArt";
+import { useUser } from "@/modules/auth/hooks/use-user";
+import { Role } from "@/types/role";
+import { useEtsyEnabled } from "@/hooks/use-etsy-enabled";
+
+const EtsyBanner = dynamic(() => import("@/components/etsyBanner/EtsyBanner"), {
+  ssr: false,
+  loading: () => null,
+});
 
 // Above-the-fold: hero slider
 // Below-the-fold components - all ssr: false to prevent hydration blocking
@@ -73,6 +81,9 @@ const HomeFAQ = dynamic(() => import("@/components/homeFAQ/HomeFAQ"), {
 
 export default function HomeContent() {
   const { language } = useLanguage();
+  const { user } = useUser();
+  // Etsy feature flag also gates the new section arrangement for testing
+  const etsyEnabled = useEtsyEnabled(user?.role === Role.Admin);
 
   useEffect(() => {
     trackPageView("/", "Homepage");
@@ -82,19 +93,38 @@ export default function HomeContent() {
     <div>
       <HomePagesHead />
       <TopItems />
-      <CommissionBanner />
-   
-      <ExclusivePromoRail />
-      <PremiumRail />
-         <Banner />
-      <DiscountedRail />
-      <GiftCategories />
-      <GuaranteeBanner />
 
+      {etsyEnabled ? (
+        // New arrangement (behind the Etsy feature flag):
+        // Etsy banner → promo → premium → custom orders → deals → ads → gifts
+        <>
+          <EtsyBanner />
+          <ExclusivePromoRail />
+          <PremiumRail />
+          <CommissionBanner />
+          <DiscountedRail />
+          <Banner />
+          <GiftCategories />
+        </>
+      ) : (
+        // Original arrangement
+        <>
+          <CommissionBanner />
+          <ExclusivePromoRail />
+          <PremiumRail />
+          <Banner />
+          <DiscountedRail />
+          <GiftCategories />
+        </>
+      )}
+
+      {/* Vouchers → paintings → guarantee → handmade (independent of the flag) */}
       <VoucherBanner />
       {/* <SpringCollection /> */}
+      <HomePageShop key={`home-shop-paintings-${language}`} section="paintings" />
+      <GuaranteeBanner />
+      <HomePageShop key={`home-shop-rest-${language}`} section="rest" />
 
-      <HomePageShop key={`home-shop-${language}`} />
       <PopularArtists />
       <WhySoulArt />
       <HomeFAQ />

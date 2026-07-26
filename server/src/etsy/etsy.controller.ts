@@ -120,12 +120,11 @@ export class EtsyController {
 
   /**
    * Etsy-ს პარამეტრები — listing fee, საკომისიო, ჩართვა/გამორთვა.
-   * GET ხელმისაწვდომია ავტორიზებული მომხმარებლებისთვის (გამყიდველებს
-   * დასჭირდებათ ფასის კალკულაციისთვის), შეცვლა — მხოლოდ ადმინს.
+   * GET საჯაროა (მთავარი გვერდის სექციები feature flag-ზეა დამოკიდებული
+   * არაავტორიზებული ვიზიტორებისთვისაც), შეცვლა — მხოლოდ ადმინს.
    */
   @Get('settings')
-  @UseGuards(JwtAuthGuard)
-  @ApiOperation({ summary: 'Get Etsy marketplace settings' })
+  @ApiOperation({ summary: 'Get Etsy marketplace settings (public read)' })
   async getSettings() {
     return this.etsyService.getSettings();
   }

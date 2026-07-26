@@ -336,3 +336,21 @@
   transform: translateY(0);
   box-shadow: 0 2px 6px rgba(241, 100, 30, 0.2);
 }
+
+/* Guide highlight: pulses the Etsy button when arriving via #etsy-button */
+.space-x-2 a.etsy-btn.etsy-btn-highlight {
+  animation: etsyBtnPulse 1.6s ease-in-out 5;
+  border-color: #f1641e;
+}
+
+@keyframes etsyBtnPulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(241, 100, 30, 0.65);
+    transform: scale(1);
+  }
+  50% {
+    box-shadow: 0 0 0 12px rgba(241, 100, 30, 0);
+    transform: scale(1.12);
+  }
+}
