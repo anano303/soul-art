@@ -1349,6 +1349,12 @@
 
 /* ── Etsy opt-in (create form) ── */
 
+/* The form is a 2-column grid — both Etsy boxes span the full row */
+.create-product-form form > .etsy-create-promo,
+.create-product-form form > .etsy-create-optin {
+  grid-column: 1 / -1;
+}
+
 .etsy-create-promo {
   display: flex;
   align-items: center;
