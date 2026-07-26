@@ -1,27 +1,46 @@
-/* ── SoulArt × Etsy banner (matches the FB campaign visuals) ── */
+/* ── SoulArt × Etsy banner (campaign hero style) ──
+   Background image: /etsy-banner-bg.jpg (golden globe on navy);
+   the gradient below is the fallback when the file is absent. */
 
 .etsy-banner-section {
-  background: radial-gradient(
-      120% 160% at 80% 10%,
-      rgba(30, 74, 118, 0.55) 0%,
-      rgba(1, 38, 69, 0) 55%
-    ),
-    linear-gradient(160deg, #041f3a 0%, #012645 55%, #04223d 100%);
-  padding: 52px 16px;
+  position: relative;
+  background:
+    url("/etsy-banner-bg.jpg") right center / cover no-repeat,
+    linear-gradient(160deg, #061d36 0%, #0a2647 55%, #061d36 100%);
+  background-color: #0a2647;
+  padding: 60px 16px;
   overflow: hidden;
 }
 
+/* Darken so text stays readable over the globe artwork */
+.etsy-banner-section::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    rgba(6, 29, 54, 0.92) 0%,
+    rgba(6, 29, 54, 0.55) 45%,
+    rgba(6, 29, 54, 0.25) 100%
+  );
+  pointer-events: none;
+}
+
 .etsy-banner-inner {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 40px;
+  gap: 48px;
   max-width: 1200px;
   margin: 0 auto;
+  z-index: 1;
 }
 
+/* ── Left: copy ── */
+
 .etsy-banner-text {
-  max-width: 580px;
+  max-width: 520px;
 }
 
 .etsy-banner-eyebrow {
@@ -29,17 +48,22 @@
   color: #d4af37;
   font-size: 12.5px;
   font-weight: 700;
-  letter-spacing: 0.28em;
+  letter-spacing: 0.26em;
   text-transform: uppercase;
-  margin-bottom: 16px;
+  margin-bottom: 18px;
+}
+
+.etsy-banner-spark {
+  letter-spacing: 0;
 }
 
 .etsy-banner-title {
   color: #fff;
-  font-size: clamp(26px, 3.6vw, 38px);
-  font-weight: 800;
-  line-height: 1.25;
-  margin: 0 0 14px;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(30px, 4.2vw, 46px);
+  font-weight: 700;
+  line-height: 1.22;
+  margin: 0 0 16px;
 }
 
 .etsy-banner-gold {
@@ -48,9 +72,10 @@
 
 .etsy-banner-subtitle {
   color: rgba(255, 255, 255, 0.85);
-  font-size: 15.5px;
+  font-size: 16px;
   line-height: 1.7;
-  margin: 0 0 24px;
+  margin: 0 0 26px;
+  max-width: 440px;
 }
 
 .etsy-banner-actions {
@@ -60,10 +85,11 @@
   gap: 14px;
 }
 
-/* Glossy gold CTA — same family as the voucher banner button */
 .etsy-banner-btn-gold {
-  display: inline-block;
-  padding: 0.8rem 2.2rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 0.85rem 1.9rem;
   background: linear-gradient(
     180deg,
     #fdf6c9 0%,
@@ -72,17 +98,15 @@
     #8f6e18 100%
   );
   color: #2a2208;
-  border: 3px solid #4a4416;
-  border-radius: 50px;
-  font-weight: 800;
-  font-size: 15px;
-  letter-spacing: 0.02em;
+  border: 1px solid rgba(255, 246, 200, 0.5);
+  border-radius: 12px;
+  font-family: Georgia, "Times New Roman", serif;
+  font-weight: 700;
+  font-size: 16px;
   text-decoration: none;
   box-shadow:
     0 6px 18px rgba(0, 0, 0, 0.4),
-    inset 0 2px 2px rgba(255, 255, 255, 0.75),
-    inset 0 -3px 6px rgba(120, 90, 20, 0.6);
-  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.35);
+    inset 0 2px 2px rgba(255, 255, 255, 0.75);
   transition:
     transform 0.15s,
     box-shadow 0.2s,
@@ -92,22 +116,19 @@
 .etsy-banner-btn-gold:hover {
   transform: translateY(-2px);
   filter: brightness(1.05);
-  box-shadow:
-    0 10px 24px rgba(0, 0, 0, 0.45),
-    inset 0 2px 2px rgba(255, 255, 255, 0.85),
-    inset 0 -3px 6px rgba(120, 90, 20, 0.6);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.45);
 }
 
 .etsy-banner-btn-outline {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 9px;
   color: #fff;
-  border: 1.5px solid rgba(255, 255, 255, 0.45);
-  border-radius: 50px;
-  padding: 11px 22px;
-  font-size: 14px;
-  font-weight: 700;
+  border: 1.5px solid rgba(212, 175, 55, 0.55);
+  border-radius: 12px;
+  padding: 0.85rem 1.6rem;
+  font-size: 15px;
+  font-weight: 600;
   text-decoration: none;
   transition: all 0.2s ease;
 }
@@ -115,77 +136,206 @@
 .etsy-banner-btn-outline:hover {
   border-color: #d4af37;
   color: #d4af37;
-  background: rgba(212, 175, 55, 0.06);
+  background: rgba(212, 175, 55, 0.07);
 }
 
-/* Connected circles visual (SoulArt ○—○ Etsy) */
+/* ── Right: framed artworks + sync connector ── */
 
 .etsy-banner-visual {
   display: flex;
+  flex-direction: column;
   align-items: center;
+  gap: 26px;
   flex-shrink: 0;
 }
 
-.etsy-banner-circle {
-  width: 150px;
-  height: 150px;
-  border: 1.5px solid rgba(212, 175, 55, 0.75);
+.etsy-banner-frames {
+  display: flex;
+  align-items: center;
+}
+
+.etsy-banner-frame {
+  width: 128px;
+  height: 168px;
+  border: 3px solid #d4af37;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #0e2c50;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5);
+}
+
+.etsy-banner-frame:first-child {
+  transform: translateX(14px) rotate(-2deg);
+}
+
+.etsy-banner-frame:last-child {
+  transform: translateX(-14px) rotate(2deg);
+}
+
+.etsy-banner-frame-main {
+  width: 168px;
+  height: 218px;
+  z-index: 2;
+  box-shadow: 0 24px 56px rgba(0, 0, 0, 0.6);
+}
+
+.etsy-banner-frame img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.etsy-banner-frame-empty {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 34px;
+  background: linear-gradient(135deg, #10315a, #0a2647);
+}
+
+/* Sync connector card */
+
+.etsy-banner-sync {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: rgba(6, 29, 54, 0.72);
+  border: 1px solid rgba(212, 175, 55, 0.35);
+  border-radius: 18px;
+  padding: 16px 22px;
+  backdrop-filter: blur(4px);
+}
+
+.etsy-banner-sync-node {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 7px;
+}
+
+.etsy-banner-sync-node > span {
+  color: #fff;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 13.5px;
+  font-weight: 700;
+}
+
+.etsy-banner-sync-circle {
+  width: 62px;
+  height: 62px;
+  border: 1.5px solid rgba(212, 175, 55, 0.8);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: radial-gradient(
-    100% 100% at 50% 30%,
-    rgba(212, 175, 55, 0.08),
-    rgba(212, 175, 55, 0) 70%
+  background: rgba(212, 175, 55, 0.06);
+}
+
+.etsy-banner-soulart-logo {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+  filter: brightness(0) invert(1);
+}
+
+.etsy-banner-etsy-e {
+  color: #f1641e;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 32px;
+  font-weight: 700;
+}
+
+.etsy-banner-sync-line {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 150px;
+  padding-top: 2px;
+}
+
+.etsy-banner-sync-line::before {
+  content: "";
+  position: absolute;
+  top: 14px;
+  left: 0;
+  right: 0;
+  height: 1.5px;
+  background: linear-gradient(
+    90deg,
+    rgba(212, 175, 55, 0.9),
+    rgba(212, 175, 55, 0.4),
+    rgba(212, 175, 55, 0.9)
   );
 }
 
-.etsy-banner-brand {
-  color: #fff;
-  font-size: 22px;
-  font-weight: 800;
-  font-family: Georgia, "Times New Roman", serif;
-}
-
-.etsy-banner-etsy-word {
-  font-style: italic;
-}
-
-.etsy-banner-line {
+.etsy-banner-sync-check {
   position: relative;
-  width: 64px;
-  height: 1.5px;
-  background: rgba(212, 175, 55, 0.75);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.etsy-banner-dot {
-  width: 7px;
-  height: 7px;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
   background: #d4af37;
-  transform: translateY(-0.5px);
+  color: #0a2647;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 0 5px rgba(212, 175, 55, 0.2);
+  z-index: 1;
 }
 
-@media (max-width: 900px) {
+.etsy-banner-sync-caption {
+  margin-top: 10px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.etsy-banner-sync-caption strong {
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.etsy-banner-sync-caption em {
+  color: rgba(255, 255, 255, 0.65);
+  font-size: 12px;
+  font-style: normal;
+}
+
+/* ── Responsive ── */
+
+@media (max-width: 960px) {
   .etsy-banner-inner {
     flex-direction: column;
     text-align: center;
+  }
+
+  .etsy-banner-section::before {
+    background: rgba(6, 29, 54, 0.78);
   }
 
   .etsy-banner-actions {
     justify-content: center;
   }
 
-  .etsy-banner-circle {
-    width: 110px;
-    height: 110px;
+  .etsy-banner-frame {
+    width: 96px;
+    height: 128px;
   }
 
-  .etsy-banner-brand {
-    font-size: 17px;
+  .etsy-banner-frame-main {
+    width: 128px;
+    height: 168px;
+  }
+
+  .etsy-banner-sync {
+    padding: 12px 16px;
+  }
+
+  .etsy-banner-sync-line {
+    min-width: 100px;
   }
 }
