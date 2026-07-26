@@ -241,18 +241,32 @@ export function ProductsList() {
   }, [page, debouncedSearchQuery, statusFilter, categoryFilter]);
 
   // Guide deep-link: /admin/products#etsy-button scrolls to the first Etsy
-  // button and pulses it (used by the Etsy launch blog/banner)
+  // button and pulses it (used by the Etsy launch blog/banner). The button
+  // renders asynchronously (feature-flag fetch), so poll until it appears.
   useEffect(() => {
     if (window.location.hash !== "#etsy-button") return;
     if (isLoading || !data) return;
 
-    const timer = setTimeout(() => {
+    const clearHash = () =>
+      window.history.replaceState(
+        null,
+        "",
+        window.location.pathname + window.location.search,
+      );
+
+    let tries = 0;
+    const interval = setInterval(() => {
+      tries++;
       const btn = document.querySelector(".etsy-btn");
       if (btn) {
+        clearInterval(interval);
         btn.scrollIntoView({ behavior: "smooth", block: "center" });
         btn.classList.add("etsy-btn-highlight");
         setTimeout(() => btn.classList.remove("etsy-btn-highlight"), 8000);
-      } else {
+        clearHash();
+      } else if (tries >= 25) {
+        // ~7.5s — no Etsy button (no approved products or feature off)
+        clearInterval(interval);
         toast({
           title: "Etsy",
           description:
@@ -260,15 +274,10 @@ export function ProductsList() {
               ? "Add an artwork first — after approval the Etsy publish button will appear"
               : "ჯერ დაამატეთ ნამუშევარი — დამტკიცების შემდეგ გამოჩნდება Etsy-ზე განთავსების ღილაკი",
         });
+        clearHash();
       }
-      // Clear the hash so refreshes don't re-trigger the highlight
-      window.history.replaceState(
-        null,
-        "",
-        window.location.pathname + window.location.search,
-      );
-    }, 600);
-    return () => clearTimeout(timer);
+    }, 300);
+    return () => clearInterval(interval);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLoading, data]);
 
