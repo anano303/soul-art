@@ -27,23 +27,22 @@ export default function AboutPage() {
             {language === "en" ? (
               <>
                 <p>
-                  <strong>Levan Beroshvili -</strong> 👨‍💻 — A
-                  full-stack software engineer with over 10 years of experience,
-                  who has worked at leading international companies, including
-                  Microsoft. His expertise covers modern web technologies,
-                  building scalable systems, and implementing business logic. He
-                  also has experience in business management and deeply
-                  understands the challenges of entrepreneurship.
+                  <strong>Levan Beroshvili -</strong> 👨‍💻 — A full-stack software
+                  engineer with over 10 years of experience, who has worked at
+                  leading international companies, including Microsoft. His
+                  expertise covers modern web technologies, building scalable
+                  systems, and implementing business logic. He also has
+                  experience in business management and deeply understands the
+                  challenges of entrepreneurship.
                 </p>
                 <p>
-                  <strong>Ani Beroshvili -</strong> — A
-                  professional in multiple fields. She has been working in
-                  corporate sales since childhood 📊, while also being a
-                  software engineer 💻, lecturer 📚, and founder of her own
-                  companies. Over the years, she has accumulated knowledge and
-                  experience in technology, communication, and business. A
-                  mother of three 👩‍👧‍👦, who successfully balances family, career,
-                  and creativity in life.
+                  <strong>Ani Beroshvili -</strong> — A professional in multiple
+                  fields. She has been working in corporate sales since
+                  childhood 📊, while also being a software engineer 💻,
+                  lecturer 📚, and founder of her own companies. Over the years,
+                  she has accumulated knowledge and experience in technology,
+                  communication, and business. A mother of three 👩‍👧‍👦, who
+                  successfully balances family, career, and creativity in life.
                 </p>
                 <p>
                   Naturally came a stage when both their diverse interests and
@@ -114,15 +113,23 @@ export default function AboutPage() {
                   Soulart.ge —{" "}
                   {language === "en" ? "Co-founders" : "თანადამფუძნებლები"}
                 </p>
-                <p>{language === "en" ? "Individual Entrepreneur Ani Beroshvili , Tax Identification Number (TIN): 01030053649" : ""}</p>
-                 <p>
-                 
+                <p>
+                  {language === "en"
+                    ? "Individual Entrepreneur Ani Beroshvili , Tax Identification Number (TIN): 01030053649"
+                    : ""}
+                </p>
+                <p>
                   {language === "en" ? "email: lev.ani.comp@gmail.com" : ""}
-                  {language === "en" ? "contact: +995596000054; +995551000059" : ""}
-
+                  {language === "en"
+                    ? "contact: +995596000054; +995551000059"
+                    : ""}
                 </p>
                 {language === "en" ? (
                   <p className="author-tags">
+                    ART & CRAFTS
+                    <br />
+                    Painting & Handmade
+                    <br />
                     Software Engineering
                     <br />
                     Business Strategy • Sales Expertise
