@@ -19,6 +19,7 @@ import { fetchWithAuth } from "@/lib/fetch-with-auth";
 import { useLanguage } from "@/hooks/LanguageContext";
 import { useUser } from "@/modules/auth/hooks/use-user";
 import { Role } from "@/types/role";
+import EtsyDisabledNotice from "@/components/etsyDisabledNotice/EtsyDisabledNotice";
 import "./etsy-publish.css";
 
 interface ProductData {
@@ -351,6 +352,10 @@ function EtsyPublishContent() {
     preview.pendingPayment?.status === "pending" ? preview.pendingPayment : null;
   const failedPaidPayment =
     preview.pendingPayment?.status === "publish_failed" && !listedInfo;
+  // Outage kill switch: the backend refuses to publish, so the payment
+  // buttons give way to a "try again later" notice. An already-paid fee is
+  // still retried for free — that path is never blocked.
+  const temporarilyDisabled = preview.blockers.includes("TEMPORARILY_DISABLED");
 
   return (
     <div className="etsy-page">
@@ -625,19 +630,21 @@ function EtsyPublishContent() {
                     : `Etsy charges sale and currency-conversion fees — that's why the Etsy price is higher than yours. When it sells, you earn the same as on a SoulArt sale.`}
                 </div>
 
-                {/* Blockers */}
-                {preview.blockers.length > 0 && (
+                {/* Blockers — the outage one has its own notice below */}
+                {preview.blockers.some((b) => b !== "TEMPORARILY_DISABLED") && (
                   <div className="etsy-checkout-blockers">
-                    {preview.blockers.map((b) => (
-                      <p key={b}>
-                        <AlertTriangle size={13} />
-                        {BLOCKER_MESSAGES[b]
-                          ? isKa
-                            ? BLOCKER_MESSAGES[b].ka
-                            : BLOCKER_MESSAGES[b].en
-                          : b}
-                      </p>
-                    ))}
+                    {preview.blockers
+                      .filter((b) => b !== "TEMPORARILY_DISABLED")
+                      .map((b) => (
+                        <p key={b}>
+                          <AlertTriangle size={13} />
+                          {BLOCKER_MESSAGES[b]
+                            ? isKa
+                              ? BLOCKER_MESSAGES[b].ka
+                              : BLOCKER_MESSAGES[b].en
+                            : b}
+                        </p>
+                      ))}
                   </div>
                 )}
 
@@ -703,8 +710,9 @@ function EtsyPublishContent() {
                 )}
 
                 {/* Payment buttons */}
-                {pendingCheckout || failedPaidPayment ? null : preview.pricing
-                    .listingFeeGel > 0 ? (
+                {pendingCheckout || failedPaidPayment ? null : temporarilyDisabled ? (
+                  <EtsyDisabledNotice variant="checkout" />
+                ) : preview.pricing.listingFeeGel > 0 ? (
                   <div className="etsy-checkout-actions">
                     <button
                       className="etsy-btn-primary"

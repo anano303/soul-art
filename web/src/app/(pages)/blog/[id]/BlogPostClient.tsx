@@ -11,6 +11,8 @@ import {
 } from "lucide-react";
 import { useLanguage } from "@/hooks/LanguageContext";
 import { SocialShare } from "@/components/social-share";
+import { useEtsyStatus } from "@/hooks/use-etsy-enabled";
+import EtsyDisabledNotice from "@/components/etsyDisabledNotice/EtsyDisabledNotice";
 import { BlogPostData, PostType } from "./types";
 import "./blog-post.css";
 
@@ -104,6 +106,23 @@ const buildShareDescription = (
 export function BlogPostClient({ postId, initialPost }: BlogPostClientProps) {
   const { language } = useLanguage();
   const [post, setPost] = useState<BlogPostData | null>(initialPost);
+  const { temporarilyDisabled: etsyDisabled } = useEtsyStatus(false);
+
+  // The Etsy launch article points at /etsy-guide — while the integration is
+  // paused it carries the same outage warning as the guide itself.
+  const isEtsyPost = useMemo(() => {
+    const haystack = [
+      post?.title,
+      post?.titleEn,
+      post?.subtitle,
+      post?.subtitleEn,
+      post?.artistUsername,
+    ]
+      .filter(Boolean)
+      .join(" ")
+      .toLowerCase();
+    return haystack.includes("etsy");
+  }, [post]);
 
   useEffect(() => {
     setPost(initialPost);
@@ -270,6 +289,8 @@ export function BlogPostClient({ postId, initialPost }: BlogPostClientProps) {
               </div>
             )}
           </div>
+
+          {isEtsyPost && etsyDisabled && <EtsyDisabledNotice />}
 
           {isArticle && subtitle && (
             <h2 className="blog-post-subtitle-content">{subtitle}</h2>

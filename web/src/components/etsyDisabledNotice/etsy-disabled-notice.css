@@ -1,0 +1,52 @@
+.etsy-disabled-notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px 18px;
+  border: 1px solid #fcd34d;
+  border-left: 4px solid #f59e0b;
+  border-radius: 12px;
+  background: #fffbeb;
+  color: #78350f;
+}
+
+.etsy-disabled-icon {
+  flex-shrink: 0;
+  margin-top: 2px;
+  color: #d97706;
+}
+
+.etsy-disabled-text strong {
+  display: block;
+  font-size: 15px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.etsy-disabled-text p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.55;
+  color: #92400e;
+}
+
+/* Blog post / guide pages — sits between content blocks */
+.etsy-disabled-notice--inline {
+  margin: 20px 0;
+}
+
+/* Publish page — stands in for the payment buttons */
+.etsy-disabled-notice--checkout {
+  margin-top: 18px;
+  text-align: left;
+}
+
+@media (max-width: 480px) {
+  .etsy-disabled-notice {
+    padding: 14px;
+  }
+
+  .etsy-disabled-text p {
+    font-size: 13px;
+  }
+}

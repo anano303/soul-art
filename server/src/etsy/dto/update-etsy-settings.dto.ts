@@ -20,4 +20,8 @@ export class UpdateEtsySettingsDto {
   @IsOptional()
   @IsBoolean()
   enabledForAdmins?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  temporarilyDisabled?: boolean;
 }
