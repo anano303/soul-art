@@ -69,7 +69,9 @@ export default function EtsyGuidePage() {
     },
     {
       icon: <Globe size={22} />,
-      title: isKa ? "მზადაა — შენი ხელოვნება მსოფლიოშია!" : "Done — your art is global!",
+      title: isKa
+        ? "მზადაა — შენი ხელოვნება მსოფლიოშია!"
+        : "Done — your art is global!",
       text: isKa
         ? "ნამუშევარი ქვეყნდება SoulArt-ის ოფიციალურ Etsy მაღაზიაში და ხილვადია მილიონობით მყიდველისთვის."
         : "Your artwork is published in SoulArt's official Etsy shop, visible to millions of buyers.",
@@ -132,10 +134,27 @@ export default function EtsyGuidePage() {
         </ul>
       </div>
 
-      <div className="etsy-guide-cta">
+      <div className="etsy-guide-facts">
         <h2>
-          {isKa ? "სცადე ახლავე" : "Try it now"}
+          {isKa ? "რა უნდა გავითვალისწინო?" : "What should you keep in mind?"}
         </h2>
+        <ul>
+          <li>
+            <CheckCircle2 size={16} />
+            {isKa
+              ? "აუცილებლად ატვირთეთ მინიმუმ 4 სურათი და შეავსეთ ყველა საჭირო ველი ინგლისურ ენაზეც — წინააღმდეგ შემთხვევაში თქვენი ნამუშევრები არ გამოჩნდება Etsy-ს საძიებო სისტემაში."
+              : "Be sure to upload at least 4 photos and fill in all required fields in English as well — otherwise your listings won't show up in Etsy search results."}
+          </li>
+          <li>
+            <CheckCircle2 size={16} />
+            {isKa
+              ? "ფასში ტრანსპორტირების ღირებულება ნუ ჩართავთ — ამას Etsy თავად დაამატებს."
+              : "Don't add shipping cost into the price — Etsy adds this automatically."}
+          </li>
+        </ul>
+      </div>
+      <div className="etsy-guide-cta">
+        <h2>{isKa ? "სცადე ახლავე" : "Try it now"}</h2>
         <div className="etsy-guide-cta-buttons">
           <Link
             href="/admin/products#etsy-button"
