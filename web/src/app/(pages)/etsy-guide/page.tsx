@@ -13,13 +13,16 @@ import {
 import { useLanguage } from "@/hooks/LanguageContext";
 import { useUser } from "@/modules/auth/hooks/use-user";
 import { Role } from "@/types/role";
-import { useEtsyEnabled } from "@/hooks/use-etsy-enabled";
+import { useEtsyStatus } from "@/hooks/use-etsy-enabled";
+import EtsyDisabledNotice from "@/components/etsyDisabledNotice/EtsyDisabledNotice";
 import "./etsy-guide.css";
 
 export default function EtsyGuidePage() {
   const { language } = useLanguage();
   const { user } = useUser();
-  const etsyEnabled = useEtsyEnabled(user?.role === Role.Admin);
+  const { enabled: etsyEnabled, temporarilyDisabled } = useEtsyStatus(
+    user?.role === Role.Admin,
+  );
   const isKa = language !== "en";
 
   if (!etsyEnabled) {
@@ -94,6 +97,8 @@ export default function EtsyGuidePage() {
             : "SoulArt artworks are now on Etsy too — the world's largest handmade marketplace. One click and your art reaches international buyers."}
         </p>
       </div>
+
+      {temporarilyDisabled && <EtsyDisabledNotice />}
 
       <div className="etsy-guide-steps">
         {steps.map((step, i) => (

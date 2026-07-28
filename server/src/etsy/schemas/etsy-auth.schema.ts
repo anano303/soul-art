@@ -59,6 +59,12 @@ export class EtsyAuth {
   @Prop({ default: true })
   enabledForAdmins?: boolean;
 
+  // Outage kill switch: the feature stays launched (banners, guide, buttons
+  // all remain visible) but sellers cannot publish and are told to try later.
+  // Admins keep access via enabledForAdmins so they can verify the fix.
+  @Prop({ default: false })
+  temporarilyDisabled?: boolean;
+
   // Pending OAuth handshake (PKCE) — persisted so the callback works even
   // when it lands on a different serverless instance than the auth request
   @Prop()

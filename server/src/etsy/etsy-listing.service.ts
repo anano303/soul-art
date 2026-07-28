@@ -206,11 +206,13 @@ export class EtsyListingService {
     const isAdminContext =
       requester.role === 'admin' ||
       Boolean((requester as any).impersonatedBy);
-    const featureEnabled =
-      settings.integrationEnabled ||
-      (isAdminContext && settings.enabledForAdmins);
+    const adminOverride = isAdminContext && settings.enabledForAdmins;
+    const featureEnabled = settings.integrationEnabled || adminOverride;
     if (!featureEnabled) {
       blockers.push('INTEGRATION_DISABLED');
+    } else if (settings.temporarilyDisabled && !adminOverride) {
+      // Outage kill switch — the feature stays visible, publishing is paused
+      blockers.push('TEMPORARILY_DISABLED');
     }
     if (!status.configured) blockers.push('NOT_CONFIGURED');
     if (!status.connected) blockers.push('SHOP_NOT_CONNECTED');
@@ -393,11 +395,13 @@ export class EtsyListingService {
         HttpStatus.CONFLICT,
       );
     }
-    // When the fee was already captured by card, the feature flag must not
+    // When the fee was already captured by card, the feature flags must not
     // block the publish (admin testing / flag flipped between pay & callback)
     const blockers =
       feeSource === 'external'
-        ? preview.blockers.filter((b) => b !== 'INTEGRATION_DISABLED')
+        ? preview.blockers.filter(
+            (b) => b !== 'INTEGRATION_DISABLED' && b !== 'TEMPORARILY_DISABLED',
+          )
         : preview.blockers;
     if (blockers.length > 0) {
       throw new HttpException(
