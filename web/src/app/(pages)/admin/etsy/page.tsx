@@ -18,6 +18,7 @@ interface EtsySettings {
   commissionPercent: number;
   integrationEnabled: boolean;
   enabledForAdmins: boolean;
+  temporarilyDisabled: boolean;
 }
 
 interface EtsyStats {
@@ -134,6 +135,7 @@ export default function EtsyAdminPage() {
   const [commissionPercent, setCommissionPercent] = useState<number>(20);
   const [integrationEnabled, setIntegrationEnabled] = useState(false);
   const [enabledForAdmins, setEnabledForAdmins] = useState(true);
+  const [temporarilyDisabled, setTemporarilyDisabled] = useState(false);
   const [togglingFlag, setTogglingFlag] = useState(false);
   const [stats, setStats] = useState<EtsyStats | null>(null);
   const [retryingId, setRetryingId] = useState<string | null>(null);
@@ -160,6 +162,7 @@ export default function EtsyAdminPage() {
         setCommissionPercent(data.commissionPercent);
         setIntegrationEnabled(data.integrationEnabled);
         setEnabledForAdmins(data.enabledForAdmins);
+        setTemporarilyDisabled(data.temporarilyDisabled);
       }
     } catch (error) {
       console.error("Error loading Etsy data:", error);
@@ -257,13 +260,21 @@ export default function EtsyAdminPage() {
   };
 
   const toggleFlag = async (
-    field: "integrationEnabled" | "enabledForAdmins",
+    field: "integrationEnabled" | "enabledForAdmins" | "temporarilyDisabled",
     value: boolean,
   ) => {
-    const setter =
-      field === "integrationEnabled" ? setIntegrationEnabled : setEnabledForAdmins;
-    const previous =
-      field === "integrationEnabled" ? integrationEnabled : enabledForAdmins;
+    const setters = {
+      integrationEnabled: setIntegrationEnabled,
+      enabledForAdmins: setEnabledForAdmins,
+      temporarilyDisabled: setTemporarilyDisabled,
+    };
+    const previousValues = {
+      integrationEnabled,
+      enabledForAdmins,
+      temporarilyDisabled,
+    };
+    const setter = setters[field];
+    const previous = previousValues[field];
 
     setter(value); // optimistic
     setTogglingFlag(true);
@@ -277,15 +288,18 @@ export default function EtsyAdminPage() {
         throw new Error(data.message || "save failed");
       }
       setSettings(data);
-      setMessage(
-        field === "integrationEnabled"
-          ? value
-            ? "✅ Etsy ინტეგრაცია ჩაირთო — გამყიდველები ხედავენ Etsy-ს ფუნქციას"
-            : "✅ Etsy ინტეგრაცია გამოირთო გამყიდველებისთვის"
-          : value
-            ? "✅ ადმინებისთვის ტესტირება ჩართულია"
-            : "✅ ადმინებისთვის ტესტირება გამორთულია",
-      );
+      const messages = {
+        integrationEnabled: value
+          ? "✅ Etsy ინტეგრაცია ჩაირთო — გამყიდველები ხედავენ Etsy-ს ფუნქციას"
+          : "✅ Etsy ინტეგრაცია გამოირთო გამყიდველებისთვის",
+        enabledForAdmins: value
+          ? "✅ ადმინებისთვის ტესტირება ჩართულია"
+          : "✅ ადმინებისთვის ტესტირება გამორთულია",
+        temporarilyDisabled: value
+          ? "⏸️ Etsy ინტეგრაცია დროებით შეჩერდა — გამყიდველები ხედავენ გაფრთხილებას ტექნიკური სამუშაოების შესახებ"
+          : "✅ დროებითი შეჩერება მოიხსნა — განთავსება ისევ მუშაობს",
+      };
+      setMessage(messages[field]);
     } catch {
       setter(previous); // rollback
       setMessage("❌ პარამეტრის შენახვა ვერ მოხერხდა");
@@ -470,9 +484,11 @@ export default function EtsyAdminPage() {
         {/* Feature Flag — controls the whole Etsy feature */}
         <div
           className={`shadow rounded-lg p-6 mb-6 border-2 ${
-            integrationEnabled
-              ? "bg-green-50 border-green-300"
-              : "bg-white border-gray-200"
+            temporarilyDisabled
+              ? "bg-amber-50 border-amber-300"
+              : integrationEnabled
+                ? "bg-green-50 border-green-300"
+                : "bg-white border-gray-200"
           }`}
         >
           <h2 className="text-xl font-semibold mb-1">
@@ -505,6 +521,35 @@ export default function EtsyAdminPage() {
                 checked={integrationEnabled}
                 disabled={togglingFlag}
                 onChange={(v) => toggleFlag("integrationEnabled", v)}
+              />
+            </div>
+          </div>
+
+          <div className="flex items-center justify-between py-3 border-b border-gray-200">
+            <div className="pr-4">
+              <div className="font-semibold text-gray-900">
+                ⏸️ დროებით შეჩერება (ტექნიკური სამუშაოები)
+              </div>
+              <div className="text-sm text-gray-500">
+                ინტეგრაცია ხილვადი რჩება, მაგრამ განთავსების გვერდზე გადახდის
+                ღილაკების ნაცვლად გამყიდველები დაინახავენ შეტყობინებას, რომ
+                Etsy დროებით გამორთულია — გაფრთხილება გამოჩნდება ბლოგპოსტსა და
+                Etsy-ის გვერდზეც. ადმინებს ტესტირება „ტესტირება
+                ადმინებისთვის“-ის ჩართვისას შეუძლიათ.
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <span
+                className={`text-sm font-bold ${
+                  temporarilyDisabled ? "text-amber-600" : "text-gray-400"
+                }`}
+              >
+                {temporarilyDisabled ? "შეჩერებულია" : "აქტიურია"}
+              </span>
+              <Toggle
+                checked={temporarilyDisabled}
+                disabled={togglingFlag}
+                onChange={(v) => toggleFlag("temporarilyDisabled", v)}
               />
             </div>
           </div>
