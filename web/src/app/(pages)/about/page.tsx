@@ -121,7 +121,7 @@ export default function AboutPage() {
                 <p>
                   {language === "en" ? "email: lev.ani.comp@gmail.com" : ""}
                   {language === "en"
-                    ? "contact: +995596000054; +995551000059"
+                    ? "/ contact: +995596000054; +995551000059"
                     : ""}
                 </p>
                 {language === "en" ? (
