@@ -115,6 +115,12 @@ export default function AboutPage() {
                   {language === "en" ? "Co-founders" : "თანადამფუძნებლები"}
                 </p>
                 <p>{language === "en" ? "Individual Entrepreneur Ani Beroshvili , Tax Identification Number (TIN): 01030053649" : ""}</p>
+                 <p>
+                 
+                  {language === "en" ? "email: lev.ani.comp@gmail.com" : ""}
+                  {language === "en" ? "contact: +995596000054; +995551000059" : ""}
+
+                </p>
                 {language === "en" ? (
                   <p className="author-tags">
                     Software Engineering
