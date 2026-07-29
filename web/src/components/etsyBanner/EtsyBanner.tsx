@@ -8,6 +8,7 @@ import { useLanguage } from "@/hooks/LanguageContext";
 import { useUser } from "@/modules/auth/hooks/use-user";
 import { Role } from "@/types/role";
 import { useEtsyEnabled } from "@/hooks/use-etsy-enabled";
+import { useEtsyEntryHref } from "@/hooks/use-etsy-entry-href";
 import { fetchWithAuth } from "@/lib/fetch-with-auth";
 import { memoryCache } from "@/lib/cache";
 import { optimizeCloudinaryUrl } from "@/lib/utils";
@@ -22,6 +23,7 @@ export default function EtsyBanner() {
   const { language } = useLanguage();
   const { user } = useUser();
   const etsyEnabled = useEtsyEnabled(user?.role === Role.Admin);
+  const etsyEntryHref = useEtsyEntryHref();
   const isKa = language !== "en";
 
   const { data: artworks } = useQuery<Product[]>({
@@ -80,10 +82,7 @@ export default function EtsyBanner() {
               : "Publish your artwork once and reach millions of international buyers in just a few clicks."}
           </p>
           <div className="etsy-banner-actions">
-            <Link
-              href="/admin/products#etsy-button"
-              className="etsy-banner-btn-gold"
-            >
+            <Link href={etsyEntryHref} className="etsy-banner-btn-gold">
               {isKa ? "განათავსე შენი ნამუშევარი" : "List your artwork"}
               <ArrowRight size={16} />
             </Link>

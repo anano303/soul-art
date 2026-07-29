@@ -22,6 +22,7 @@ import {
 } from "@/types";
 import { useLanguage } from "@/hooks/LanguageContext";
 import { useUser } from "@/modules/auth/hooks/use-user";
+import { useEtsyEnabled } from "@/hooks/use-etsy-enabled";
 import { CloudinaryImage } from "@/components/cloudinary-image";
 import { ArtistProfileSettings } from "@/modules/profile/components/ArtistProfileSettings";
 import { GalleryLikeButton } from "@/components/gallery-like-button";
@@ -47,6 +48,7 @@ import {
   AlertTriangle,
   Rocket,
   Copy,
+  Store,
 } from "lucide-react";
 import { PromoteModal } from "@/modules/admin/components/promote-modal";
 import BrushTrail from "@/components/BrushTrail/BrushTrail";
@@ -220,6 +222,11 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
     artist.followersCount || 0,
   );
   const [reviewModalOpen, setReviewModalOpen] = useState(false);
+  // Etsy deep-link (#etsy-button) pulse on the first owner product's button
+  const [etsyHighlight, setEtsyHighlight] = useState(false);
+  const etsyEnabled = useEtsyEnabled(
+    String(user?.role ?? "").toLowerCase() === "admin",
+  );
   const [artistRating, setArtistRating] = useState(
     artist.artistDirectRating || 0,
   );
@@ -830,6 +837,42 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
     }
   }, [isOwner, ownerProductsLoaded, artist.artistSlug, artist.id]);
 
+  // Etsy deep-link: /@slug#etsy-button scrolls to the first Etsy button and
+  // pulses it (used by the Etsy banner, guide and launch blog post). The
+  // button renders asynchronously (owner products + feature-flag fetch), so
+  // poll until it appears. Mirrors the /admin/products behaviour.
+  useEffect(() => {
+    if (!isOwner || !ownerProductsLoaded) return;
+    if (window.location.hash !== "#etsy-button") return;
+
+    let tries = 0;
+    const interval = setInterval(() => {
+      tries++;
+      const btn = document.querySelector(".artist-product-card__etsy-btn");
+      if (btn) {
+        clearInterval(interval);
+        setEtsyHighlight(true);
+        setTimeout(() => {
+          const highlighted =
+            document.querySelector(".artist-product-card__etsy-btn--highlight") ||
+            btn;
+          highlighted.scrollIntoView({ behavior: "smooth", block: "center" });
+        }, 150);
+        setTimeout(() => setEtsyHighlight(false), 8000);
+        window.history.replaceState(
+          null,
+          "",
+          window.location.pathname + window.location.search,
+        );
+      } else if (tries >= 25) {
+        // ~7.5s — no Etsy button (no eligible artwork or the feature is off)
+        clearInterval(interval);
+      }
+    }, 300);
+
+    return () => clearInterval(interval);
+  }, [isOwner, ownerProductsLoaded]);
+
   // Gallery interactions
   const { getStatsForImage, updateStats } = useGalleryInteractions(
     artist.id,
@@ -1291,12 +1334,14 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
                   return displayProducts.length > 0 ? (
                     <>
                       <div className="artist-grid artist-grid--products">
-                        {displayProducts.map((product) => (
+                        {displayProducts.map((product, idx) => (
                           <ProductCard
                             key={product.id}
                             product={product}
                             language={language}
                             isOwner={isOwner}
+                            etsyEnabled={etsyEnabled}
+                            highlightEtsy={etsyHighlight && idx === 0}
                             onDelete={handleProductDelete}
                           />
                         ))}
@@ -2019,6 +2064,9 @@ interface ProductCardProps {
   product: ArtistProductSummary;
   language: "en" | "ge";
   isOwner?: boolean;
+  etsyEnabled?: boolean;
+  // Deep-link (#etsy-button): state-driven pulse so it survives re-renders
+  highlightEtsy?: boolean;
   onDelete?: (productId: string) => void;
 }
 
@@ -2026,6 +2074,8 @@ function ProductCard({
   product,
   language,
   isOwner,
+  etsyEnabled,
+  highlightEtsy,
   onDelete,
 }: ProductCardProps) {
   const { addToCart, isItemInCart } = useCart();
@@ -2286,17 +2336,42 @@ function ProductCard({
           >
             <Pencil size={16} />
           </Link>
-          <Link
-            href={{
-              pathname: `/admin/products/create`,
-              query: { duplicate: product.id },
-            }}
-            className="artist-product-card__edit-btn"
-            onClick={(e) => e.stopPropagation()}
-            title={language === "en" ? "Duplicate product" : "დაკოპირება"}
-          >
-            <Copy size={16} />
-          </Link>
+          {/* Etsy publish takes the duplicate button's slot — sellers manage
+              their work from here far more than from /admin/products. Pending
+              artworks qualify too: a paid Etsy publish auto-approves them.
+              Duplicate stays as the fallback when Etsy isn't available. */}
+          {etsyEnabled &&
+          (!product.status ||
+            product.status === "APPROVED" ||
+            product.status === "PENDING") ? (
+            <Link
+              href={{
+                pathname: `/admin/etsy/publish`,
+                query: { id: product.id },
+              }}
+              className={`artist-product-card__etsy-btn ${
+                highlightEtsy ? "artist-product-card__etsy-btn--highlight" : ""
+              }`}
+              onClick={(e) => e.stopPropagation()}
+              title={
+                language === "en" ? "Publish to Etsy" : "Etsy-ზე განთავსება"
+              }
+            >
+              <Store size={16} />
+            </Link>
+          ) : (
+            <Link
+              href={{
+                pathname: `/admin/products/create`,
+                query: { duplicate: product.id },
+              }}
+              className="artist-product-card__edit-btn"
+              onClick={(e) => e.stopPropagation()}
+              title={language === "en" ? "Duplicate product" : "დაკოპირება"}
+            >
+              <Copy size={16} />
+            </Link>
+          )}
           <button
             type="button"
             className="artist-product-card__delete-btn"

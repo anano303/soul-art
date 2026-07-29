@@ -14,6 +14,7 @@ import { useLanguage } from "@/hooks/LanguageContext";
 import { useUser } from "@/modules/auth/hooks/use-user";
 import { Role } from "@/types/role";
 import { useEtsyStatus } from "@/hooks/use-etsy-enabled";
+import { useEtsyEntryHref } from "@/hooks/use-etsy-entry-href";
 import EtsyDisabledNotice from "@/components/etsyDisabledNotice/EtsyDisabledNotice";
 import "./etsy-guide.css";
 
@@ -23,6 +24,7 @@ export default function EtsyGuidePage() {
   const { enabled: etsyEnabled, temporarilyDisabled } = useEtsyStatus(
     user?.role === Role.Admin,
   );
+  const etsyEntryHref = useEtsyEntryHref();
   const isKa = language !== "en";
 
   if (!etsyEnabled) {
@@ -162,7 +164,7 @@ export default function EtsyGuidePage() {
         <h2>{isKa ? "სცადე ახლავე" : "Try it now"}</h2>
         <div className="etsy-guide-cta-buttons">
           <Link
-            href="/admin/products#etsy-button"
+            href={etsyEntryHref}
             className="etsy-guide-btn etsy-guide-btn-primary"
           >
             <Store size={18} />

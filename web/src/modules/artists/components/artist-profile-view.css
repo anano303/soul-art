@@ -255,7 +255,8 @@
     height: 28px;
   }
 
-  .artist-product-card__edit-btn {
+  .artist-product-card__edit-btn,
+  .artist-product-card__etsy-btn {
     width: 32px;
     height: 32px;
     top: 0.5rem;
@@ -708,6 +709,49 @@
   color: #fff;
   transform: scale(1.1);
   box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+}
+
+/* Owner Etsy Button — occupies the old duplicate-button slot */
+.artist-product-card__etsy-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.95);
+  border: 2px solid rgba(241, 100, 30, 0.35);
+  color: #f1641e;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  text-decoration: none;
+}
+
+.artist-product-card__etsy-btn:hover {
+  background: linear-gradient(135deg, #f1641e, #d1500f);
+  border-color: #f1641e;
+  color: #fff;
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(241, 100, 30, 0.35);
+}
+
+/* Deep-link highlight: pulses when arriving via #etsy-button */
+.artist-product-card__etsy-btn--highlight {
+  animation: artistEtsyBtnPulse 1.6s ease-in-out 5;
+  border-color: #f1641e;
+}
+
+@keyframes artistEtsyBtnPulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(241, 100, 30, 0.65);
+    transform: scale(1);
+  }
+  50% {
+    box-shadow: 0 0 0 12px rgba(241, 100, 30, 0);
+    transform: scale(1.12);
+  }
 }
 
 /* Owner Delete Button */

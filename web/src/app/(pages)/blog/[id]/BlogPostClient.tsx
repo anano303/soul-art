@@ -12,6 +12,7 @@ import {
 import { useLanguage } from "@/hooks/LanguageContext";
 import { SocialShare } from "@/components/social-share";
 import { useEtsyStatus } from "@/hooks/use-etsy-enabled";
+import { useSellerPageHref } from "@/hooks/use-etsy-entry-href";
 import EtsyDisabledNotice from "@/components/etsyDisabledNotice/EtsyDisabledNotice";
 import { BlogPostData, PostType } from "./types";
 import "./blog-post.css";
@@ -107,6 +108,10 @@ export function BlogPostClient({ postId, initialPost }: BlogPostClientProps) {
   const { language } = useLanguage();
   const [post, setPost] = useState<BlogPostData | null>(initialPost);
   const { temporarilyDisabled: etsyDisabled } = useEtsyStatus(false);
+  // On the Etsy launch post, sellers go straight to their own page (where the
+  // publish button is) instead of the guide; everyone else keeps the link the
+  // post was authored with.
+  const sellerPageHref = useSellerPageHref();
 
   // The Etsy launch article points at /etsy-guide — while the integration is
   // paused it carries the same outage warning as the guide itself.
@@ -307,8 +312,12 @@ export function BlogPostClient({ postId, initialPost }: BlogPostClientProps) {
           {isArticle && post.artistUsername && (
             <div className="article-external-link">
               <a
-                href={post.artistUsername}
-                target="_blank"
+                href={
+                  isEtsyPost && sellerPageHref
+                    ? sellerPageHref
+                    : post.artistUsername
+                }
+                target={isEtsyPost && sellerPageHref ? undefined : "_blank"}
                 rel="noopener noreferrer"
                 className="external-link-btn"
               >
