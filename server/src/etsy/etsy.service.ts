@@ -442,7 +442,14 @@ export class EtsyService {
 
     const data = await response.json().catch(() => null);
     if (!response.ok) {
-      const message = data?.error || response.statusText;
+      // Etsy puts validation failures in `error`, but not always — fall back
+      // to the raw body, otherwise a 400 logs as a useless "Bad Request"
+      const detail =
+        data?.error ||
+        data?.error_description ||
+        (data ? JSON.stringify(data).slice(0, 500) : '') ||
+        response.statusText;
+      const message = `${response.status} ${detail}`;
       this.logger.error(`Etsy API ${method} ${path} failed: ${message}`);
       throw new HttpException(
         `Etsy API error: ${message}`,

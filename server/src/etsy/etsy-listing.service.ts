@@ -267,6 +267,10 @@ export class EtsyListingService {
     const tags = this.buildTags(product);
     const materials = this.buildMaterials(product);
 
+    if (!this.isPublishableTitle(title)) {
+      blockers.push('NO_VALID_TITLE');
+    }
+
     let taxonomyId: number | null = null;
     let taxonomyPath: string | null = null;
     try {
@@ -610,12 +614,46 @@ export class EtsyListingService {
     const source = product.nameEn?.trim() || product.name?.trim() || '';
     if (!product.nameEn?.trim()) warnings.push('NO_ENGLISH_TITLE');
 
-    // Strip emojis/control characters Etsy rejects, collapse whitespace
-    const cleaned = source
-      .replace(/[\u{1F000}-\u{1FFFF}\u{2600}-\u{27BF}]/gu, '')
+    // Etsy validates titles against an allow-list, not a blacklist:
+    // letters, decimal digits, punctuation, MATH symbols, whitespace, ™©®
+    // (docs regex: /[^\p{L}\p{Nd}\p{P}\p{Sm}\p{Zs}™©®]/u). Emoji are \p{So}
+    // and the lari sign is \p{Sc}, so both are dropped — matching Etsy's
+    // rule here instead of guessing ranges keeps 400s out of the paid path.
+    const cleaned = this.limitRepeatedSpecials(
+      source.replace(/[^\p{L}\p{Nd}\p{P}\p{Sm}\p{Zs}™©®]/gu, ''),
+    )
+      // last, so gaps left by dropped characters don't survive as double spaces
       .replace(/\s+/g, ' ')
       .trim();
     return cleaned.slice(0, MAX_TITLE_LENGTH);
+  }
+
+  /**
+   * Etsy allows %, :, & and + at most once each in a title — a second
+   * occurrence is another 400. Keep the first, drop the rest.
+   */
+  private limitRepeatedSpecials(title: string): string {
+    const seen = new Set<string>();
+    return title
+      .split('')
+      .filter((char) => {
+        if (!'%:&+'.includes(char)) return true;
+        if (seen.has(char)) return false;
+        seen.add(char);
+        return true;
+      })
+      .join('');
+  }
+
+  /**
+   * Etsy rejects a title with no letters or numbers in it (a 400 with no
+   * useful body). An all-emoji product name strips down to an empty string,
+   * so this has to block BEFORE the seller is charged the listing fee.
+   * Any script counts — Georgian titles are valid on Etsy, just discouraged
+   * (buildTitle already warns with NO_ENGLISH_TITLE).
+   */
+  private isPublishableTitle(title: string): boolean {
+    return /[\p{L}\p{N}]/u.test(title);
   }
 
   private buildDescription(

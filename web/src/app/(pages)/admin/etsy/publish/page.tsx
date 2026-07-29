@@ -105,6 +105,10 @@ const BLOCKER_MESSAGES: Record<string, { ka: string; en: string }> = {
     ka: "პროდუქტს არ აქვს ფოტოები",
     en: "Product has no images",
   },
+  NO_VALID_TITLE: {
+    ka: "ნამუშევრის სახელი მხოლოდ ემოჯებს/სიმბოლოებს შეიცავს — Etsy მოითხოვს ასოებს ან ციფრებს. დაარედაქტირეთ ნამუშევარი და შეავსეთ ინგლისური სახელი.",
+    en: "The artwork name has no letters or numbers (emoji/symbols only) — Etsy requires a real title. Edit the artwork and fill in the English name.",
+  },
   TAXONOMY_UNRESOLVED: {
     ka: "პროდუქტს ვერ მოვუძებნეთ შესაბამისი Etsy კატეგორია",
     en: "Could not find a matching Etsy category for this product",
