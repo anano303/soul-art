@@ -49,6 +49,10 @@ export class CommissionOffer {
   @Prop()
   message?: string;
 
+  // Samples of similar work the artist attaches to back up the offer.
+  @Prop({ type: [String], default: [] })
+  sampleImages!: string[];
+
   @Prop({ default: () => new Date() })
   createdAt!: Date;
 }

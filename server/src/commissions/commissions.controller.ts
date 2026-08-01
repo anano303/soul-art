@@ -3,6 +3,7 @@ import {
   Controller,
   Get,
   Param,
+  Patch,
   Post,
   Put,
   Query,
@@ -24,6 +25,7 @@ import { CommissionsService } from './services/commissions.service';
 import { CreateCommissionDto } from './dtos/create-commission.dto';
 import { SubmitOfferDto } from './dtos/submit-offer.dto';
 import { SelectOfferDto } from './dtos/select-offer.dto';
+import { UpdateCommissionContactDto } from './dtos/update-contact.dto';
 
 @Controller('commissions')
 export class CommissionsController {
@@ -114,16 +116,49 @@ export class CommissionsController {
     );
   }
 
-  // Artist submits/updates an offer.
+  // Buyer edits their own contact / delivery details.
+  @Patch(':id/contact')
+  @UseGuards(JwtAuthGuard)
+  updateContact(
+    @Param('id') id: string,
+    @CurrentUser() user: UserDocument,
+    @Body() dto: UpdateCommissionContactDto,
+  ) {
+    return this.service.updateContact(id, user._id.toString(), dto);
+  }
+
+  // Artist submits/updates an offer, optionally with samples of similar work.
+  // Multer ignores non-multipart requests, so plain JSON bodies still work.
   @Post(':id/offer')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.Seller, Role.SellerAndSalesManager, Role.Admin)
-  offer(
+  @UseInterceptors(
+    FilesInterceptor('samples', 5, {
+      storage: memoryStorage(),
+      limits: { fileSize: 15 * 1024 * 1024 },
+      fileFilter: (_req, file, cb) => {
+        cb(null, file.mimetype.startsWith('image/'));
+      },
+    }),
+  )
+  async offer(
     @Param('id') id: string,
     @CurrentUser() user: UserDocument,
     @Body() dto: SubmitOfferDto,
+    @UploadedFiles() files?: Express.Multer.File[],
   ) {
-    return this.service.submitOffer(id, user, dto);
+    const urls: string[] = [];
+    if (files && files.length > 0) {
+      for (const file of files) {
+        const result = await this.storage.uploadImage(file, {
+          folder: 'commissions/samples',
+          maxWidth: 1600,
+          maxHeight: 1600,
+        });
+        if (result?.url) urls.push(result.url);
+      }
+    }
+    return this.service.submitOffer(id, user, dto, urls);
   }
 
   // Buyer selects an offer → returns BOG payment init data.

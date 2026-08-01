@@ -49,6 +49,7 @@ export interface NotificationPayload {
       | 'price_offer_accepted'
       | 'price_offer_rejected'
       | 'commission_request'
+      | 'commission_address_changed'
       | 'commission_offer'
       | 'commission_selected'
       | 'commission_paid'

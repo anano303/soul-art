@@ -27,6 +27,8 @@ export interface CommissionOfferView {
   totalPrice: number;
   estimatedDays: number;
   message?: string;
+  /** Samples of similar work attached by the artist. */
+  sampleImages?: string[];
   rating?: number;
   reviewsCount?: number;
   completedCommissions?: number;
@@ -113,6 +115,7 @@ export interface MyOfferView {
     deliveryPrice: number;
     estimatedDays: number;
     message?: string;
+    sampleImages?: string[];
   } | null;
   selected: boolean;
   createdAt: string;
@@ -123,6 +126,28 @@ export async function getMyOffers(): Promise<MyOfferView[]> {
   return res.json();
 }
 
+export interface CommissionContactPayload {
+  phone?: string;
+  address?: string;
+  city?: string;
+  postalCode?: string;
+  country?: string;
+}
+
+// Buyer edits their own contact / delivery details (open or selecting only).
+export async function updateCommissionContact(
+  id: string,
+  dto: CommissionContactPayload
+): Promise<Commission> {
+  const res = await fetchWithAuth(`/commissions/${id}/contact`, {
+    method: "PATCH",
+    body: JSON.stringify(dto),
+  });
+  return res.json();
+}
+
+// Sent as multipart so the artist can attach samples of similar work.
+// New uploads replace the previous set; `clearSamples` drops them.
 export async function submitOffer(
   id: string,
   dto: {
@@ -130,11 +155,21 @@ export async function submitOffer(
     deliveryPrice: number;
     estimatedDays: number;
     message?: string;
-  }
+    clearSamples?: boolean;
+  },
+  samples?: File[]
 ): Promise<{ success: boolean }> {
+  const form = new FormData();
+  form.append("price", String(dto.price));
+  form.append("deliveryPrice", String(dto.deliveryPrice));
+  form.append("estimatedDays", String(dto.estimatedDays));
+  if (dto.message) form.append("message", dto.message);
+  if (dto.clearSamples) form.append("clearSamples", "true");
+  (samples || []).forEach((file) => form.append("samples", file));
+
   const res = await fetchWithAuth(`/commissions/${id}/offer`, {
     method: "POST",
-    body: JSON.stringify(dto),
+    body: form,
   });
   return res.json();
 }

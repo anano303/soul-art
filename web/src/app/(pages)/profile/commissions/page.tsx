@@ -15,6 +15,7 @@ import {
   submitOffer,
 } from "@/modules/commissions/api/commissions-api";
 import { ReferenceImages } from "@/modules/commissions/components/reference-images";
+import { OfferSamplesPicker } from "@/modules/commissions/components/offer-samples-picker";
 import "../../commissions/commissions.css";
 
 interface AvailableItem extends Commission {
@@ -30,6 +31,7 @@ interface AvailableItem extends Commission {
     deliveryPrice: number;
     estimatedDays: number;
     message?: string;
+    sampleImages?: string[];
   } | null;
 }
 
@@ -44,6 +46,9 @@ export default function ArtistCommissionsPage() {
     Record<string, { price: string; deliveryPrice: string; days: string; message: string }>
   >({});
   const [submittingId, setSubmittingId] = useState<string | null>(null);
+  // Samples of similar work, staged per commission until the offer is sent.
+  const [samples, setSamples] = useState<Record<string, File[]>>({});
+  const [clearSamples, setClearSamples] = useState<Record<string, boolean>>({});
 
   const typeLabel = (t: CommissionType) =>
     language === "en" ? COMMISSION_TYPE_LABELS[t].en : COMMISSION_TYPE_LABELS[t].ge;
@@ -89,15 +94,22 @@ export default function ArtistCommissionsPage() {
     }
     setSubmittingId(id);
     try {
-      await submitOffer(id, {
-        price: Number(f.price),
-        deliveryPrice: Number(f.deliveryPrice || 0),
-        estimatedDays: Number(f.days),
-        message: f.message?.trim() || undefined,
-      });
+      await submitOffer(
+        id,
+        {
+          price: Number(f.price),
+          deliveryPrice: Number(f.deliveryPrice || 0),
+          estimatedDays: Number(f.days),
+          message: f.message?.trim() || undefined,
+          clearSamples: clearSamples[id] || false,
+        },
+        samples[id] || []
+      );
       toast({
         title: language === "en" ? "Offer sent!" : "შეთავაზება გაიგზავნა!",
       });
+      setSamples((prev) => ({ ...prev, [id]: [] }));
+      setClearSamples((prev) => ({ ...prev, [id]: false }));
       await load();
     } catch (err) {
       toast({
@@ -266,6 +278,18 @@ export default function ArtistCommissionsPage() {
                         />
                       </div>
                     </div>
+                    <OfferSamplesPicker
+                      existing={c.myOffer?.sampleImages}
+                      files={samples[c._id] || []}
+                      onFilesChange={(files) =>
+                        setSamples((prev) => ({ ...prev, [c._id]: files }))
+                      }
+                      clearExisting={clearSamples[c._id] || false}
+                      onClearExistingChange={(clear) =>
+                        setClearSamples((prev) => ({ ...prev, [c._id]: clear }))
+                      }
+                    />
+
                     <button
                       className="commission-submit"
                       style={{ marginTop: "1rem" }}
@@ -329,6 +353,20 @@ export default function ArtistCommissionsPage() {
                         </>
                       )}
                     </div>
+                    {m.myOffer?.sampleImages?.length ? (
+                      <div style={{ marginTop: "0.6rem" }}>
+                        <div style={{ fontSize: "0.8rem", color: "#4b5563", marginBottom: "0.35rem" }}>
+                          {language === "en"
+                            ? "Samples you attached:"
+                            : "შენ მიერ მიმაგრებული ნიმუშები:"}
+                        </div>
+                        <ReferenceImages
+                          images={m.myOffer.sampleImages}
+                          alt={typeLabel(m.type)}
+                          thumbClassName="commission-preview"
+                        />
+                      </div>
+                    ) : null}
                   </div>
                 </div>
               </div>

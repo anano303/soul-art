@@ -13,6 +13,7 @@ import {
   getMyCommissions,
 } from "@/modules/commissions/api/commissions-api";
 import { ReferenceImages } from "@/modules/commissions/components/reference-images";
+import { ContactEditor } from "@/modules/commissions/components/contact-editor";
 import "./commissions.css";
 
 export default function MyCommissionsPage() {
@@ -166,6 +167,19 @@ export default function MyCommissionsPage() {
                     </div>
                   </div>
 
+                  <ContactEditor
+                    commission={c}
+                    onUpdated={(updated) =>
+                      setItems((prev) =>
+                        prev.map((it) =>
+                          it._id === updated._id
+                            ? { ...it, shippingDetails: updated.shippingDetails }
+                            : it
+                        )
+                      )
+                    }
+                  />
+
                   {canSelect && !c.isPaid && (
                     <button
                       className="commission-upload-btn"
@@ -233,6 +247,21 @@ export default function MyCommissionsPage() {
                                   “{o.message}”
                                 </p>
                               )}
+                              {o.sampleImages?.length ? (
+                                <div style={{ marginTop: "0.5rem" }}>
+                                  <div style={{ fontSize: "0.8rem", color: "#4b5563", marginBottom: "0.35rem" }}>
+                                    🖼{" "}
+                                    {language === "en"
+                                      ? "Similar work by this artist:"
+                                      : "მხატვრის მსგავსი ნამუშევრები:"}
+                                  </div>
+                                  <ReferenceImages
+                                    images={o.sampleImages}
+                                    alt={o.artistName}
+                                    thumbClassName="commission-preview"
+                                  />
+                                </div>
+                              ) : null}
                             </div>
                             <div style={{ textAlign: "right" }}>
                               <div className="offer-total">{o.totalPrice} ₾</div>

@@ -10,6 +10,7 @@
    which supplies size, radius and border. */
 .ref-thumb-btn {
   padding: 0;
+  flex-shrink: 0;
   cursor: zoom-in;
   transition: transform 0.15s ease, box-shadow 0.15s ease;
 }

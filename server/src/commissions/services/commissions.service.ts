@@ -27,6 +27,7 @@ import {
 import { Role } from '@/types/role.enum';
 import { CreateCommissionDto } from '../dtos/create-commission.dto';
 import { SubmitOfferDto } from '../dtos/submit-offer.dto';
+import { UpdateCommissionContactDto } from '../dtos/update-contact.dto';
 
 const OFFER_WINDOW_MS = 24 * 60 * 60 * 1000; // 24h for artists to bid
 const SELECTION_WINDOW_MS = 24 * 60 * 60 * 1000; // 24h for the buyer to pick
@@ -128,6 +129,7 @@ export class CommissionsService {
     commissionId: string,
     artist: UserDocument,
     dto: SubmitOfferDto,
+    sampleImages: string[] = [],
   ) {
     const commission = await this.commissionModel.findById(commissionId);
     if (!commission) {
@@ -168,6 +170,13 @@ export class CommissionsService {
       existing.estimatedDays = dto.estimatedDays;
       existing.message = dto.message;
       existing.artistName = artistName;
+      // New uploads replace the old set; otherwise keep what's there unless
+      // the artist explicitly cleared them.
+      if (sampleImages.length > 0) {
+        existing.sampleImages = sampleImages;
+      } else if (dto.clearSamples === 'true') {
+        existing.sampleImages = [];
+      }
     } else {
       commission.offers.push({
         artist: artist._id as any,
@@ -176,6 +185,7 @@ export class CommissionsService {
         deliveryPrice: dto.deliveryPrice,
         estimatedDays: dto.estimatedDays,
         message: dto.message,
+        sampleImages,
         createdAt: new Date(),
       });
     }
@@ -436,6 +446,118 @@ export class CommissionsService {
     return commission;
   }
 
+  // ──────────────────── CONTACT / DELIVERY EDIT ────────────────────
+  /**
+   * Buyer updates the contact + delivery details of their own request.
+   * Allowed while the request is still open, or after an offer was picked but
+   * not yet paid — with the city frozen in that case, because the selected
+   * offer's delivery price was quoted for the original city.
+   */
+  async updateContact(
+    commissionId: string,
+    userId: string,
+    dto: UpdateCommissionContactDto,
+  ) {
+    const commission = await this.commissionModel.findById(commissionId);
+    if (!commission) throw new NotFoundException('შეკვეთა ვერ მოიძებნა');
+    if (commission.requester.toString() !== userId) {
+      throw new ForbiddenException('ეს შეკვეთა შენი არაა');
+    }
+
+    const editable = [CommissionStatus.Open, CommissionStatus.Selecting];
+    if (!editable.includes(commission.status)) {
+      throw new BadRequestException(
+        'ამ ეტაპზე მონაცემების შეცვლა შეუძლებელია — დაუკავშირდი ადმინს',
+      );
+    }
+
+    const current = commission.shippingDetails;
+    const prevCity = current?.city || '';
+    const nextCity = dto.city?.trim() || prevCity;
+
+    if (
+      commission.status === CommissionStatus.Selecting &&
+      nextCity !== prevCity
+    ) {
+      throw new BadRequestException(
+        'შეთავაზების არჩევის შემდეგ ქალაქს ვერ შეცვლი — მიწოდების ფასი ამ ქალაქზეა გათვლილი. დაუკავშირდი ადმინს',
+      );
+    }
+
+    const phone = dto.phone?.trim() || commission.requesterPhone;
+    commission.shippingDetails = {
+      address: dto.address?.trim() || current?.address || '',
+      city: nextCity,
+      postalCode:
+        dto.postalCode !== undefined
+          ? dto.postalCode.trim()
+          : current?.postalCode,
+      country: dto.country?.trim() || current?.country || 'Georgia',
+      phoneNumber: phone,
+    };
+    commission.requesterPhone = phone;
+    await commission.save();
+
+    // Artists price delivery by city — tell the ones who already bid.
+    if (nextCity !== prevCity && (commission.offers?.length || 0) > 0) {
+      void this.notifyArtistsOfCityChange(commission, prevCity, nextCity);
+    }
+
+    return commission;
+  }
+
+  private async notifyArtistsOfCityChange(
+    commission: CommissionDocument,
+    prevCity: string,
+    nextCity: string,
+  ) {
+    try {
+      const base = this.clientUrl;
+      const label = this.typeLabel(commission.type);
+      const artistIds = [
+        ...new Set(
+          (commission.offers || []).map((o) => o.artist.toString()),
+        ),
+      ];
+      if (artistIds.length === 0) return;
+
+      const body = `${label} — მიწოდების ქალაქი შეიცვალა: ${
+        prevCity || '—'
+      } → ${nextCity}. საჭიროების შემთხვევაში განაახლე მიწოდების ფასი.`;
+
+      await this.pushService.sendToMultipleUsers(artistIds, {
+        title: '📍 შეკვეთის მისამართი შეიცვალა',
+        body,
+        icon: `${base}/icons/android/icon-192x192.png`,
+        badge: `${base}/icons/pwa/notification-badge.png`,
+        data: {
+          url: `${base}/profile/commissions`,
+          type: 'commission_address_changed',
+          id: commission._id.toString(),
+        },
+        tag: `commission-address-${commission._id.toString()}`,
+        requireInteraction: false,
+      });
+      await Promise.all(
+        artistIds.map((id) =>
+          this.pushInApp(id, {
+            title: 'მისამართი შეიცვალა',
+            message: body,
+            type: 'warning',
+            actionUrl: '/profile/commissions',
+            actionLabel: 'ნახვა',
+          }),
+        ),
+      );
+    } catch (err) {
+      this.logger.error(
+        `Failed to notify artists of city change: ${
+          err instanceof Error ? err.message : err
+        }`,
+      );
+    }
+  }
+
   // ─────────────────────────── QUERIES ───────────────────────────
   async findMine(userId: string) {
     return this.commissionModel
@@ -629,6 +751,7 @@ export class CommissionsService {
           totalPrice: o.price + (o.deliveryPrice || 0),
           estimatedDays: o.estimatedDays,
           message: o.message,
+          sampleImages: o.sampleImages || [],
           rating: artist?.artistRating || 0,
           reviewsCount: artist?.artistReviewsCount || 0,
           completedCommissions: completed,
@@ -736,19 +859,23 @@ export class CommissionsService {
       const label = this.typeLabel(commission.type);
 
       // Targeted request → only that artist; otherwise every opted-in artist.
-      let artistIds: string[];
+      let artists: Array<{ _id: unknown; email?: string; name?: string }>;
       if (commission.targetArtist) {
-        artistIds = [commission.targetArtist.toString()];
+        const target = await this.userModel
+          .findById(commission.targetArtist)
+          .select('_id email name')
+          .lean();
+        artists = target ? [target] : [];
       } else {
-        const artists = await this.userModel
+        artists = await this.userModel
           .find({
             artistOpenForCommissions: true,
             role: { $in: [Role.Seller, Role.SellerAndSalesManager] },
           })
-          .select('_id')
+          .select('_id email name')
           .lean();
-        artistIds = artists.map((a) => a._id.toString());
       }
+      const artistIds = artists.map((a) => String(a._id));
 
       // Reminder: the artist is responsible for delivery and must include its
       // price in the offer.
@@ -786,6 +913,10 @@ export class CommissionsService {
         );
       }
 
+      // Email — push only reaches artists who enabled browser notifications,
+      // so the 24h offer window would silently pass for everyone else.
+      await this.emailArtistsOfNewRequest(commission, artists);
+
       // Admin visibility.
       await this.pushService.sendToAdmins({
         ...payload,
@@ -816,6 +947,109 @@ export class CommissionsService {
           err instanceof Error ? err.message : err
         }`,
       );
+    }
+  }
+
+  /**
+   * Emails every notified artist about a new request. Buyer contact and the
+   * street address are NEVER included — artists only get the delivery
+   * city/country so they can price delivery (same rule as `findAvailable`).
+   */
+  private async emailArtistsOfNewRequest(
+    commission: CommissionDocument,
+    artists: Array<{ email?: string; name?: string }>,
+  ) {
+    const recipients = [
+      ...new Set(
+        artists
+          .map((a) => a.email?.trim().toLowerCase())
+          .filter((e): e is string => !!e),
+      ),
+    ];
+    if (recipients.length === 0) return;
+
+    const base = this.clientUrl;
+    const label = this.typeLabel(commission.type);
+    const city = commission.shippingDetails?.city || '—';
+    const country = commission.shippingDetails?.country || 'Georgia';
+    const deadline = this.formatTbilisi(commission.offersDeadline);
+    const isDirect = !!commission.targetArtist;
+
+    const rows = [
+      `<p style="margin:0 0 6px"><strong>ტიპი:</strong> ${label}</p>`,
+      `<p style="margin:0 0 6px"><strong>ზომა:</strong> ${commission.size}</p>`,
+      commission.material
+        ? `<p style="margin:0 0 6px"><strong>მასალა:</strong> ${commission.material}</p>`
+        : '',
+      commission.budget
+        ? `<p style="margin:0 0 6px"><strong>მყიდველის ბიუჯეტი:</strong> ${commission.budget} ₾</p>`
+        : '',
+      `<p style="margin:0 0 6px"><strong>მიწოდება:</strong> ${city}, ${country}</p>`,
+      `<p style="margin:12px 0 6px"><strong>აღწერა:</strong></p><p style="margin:0;color:#4b5563">${commission.description}</p>`,
+      `<p style="margin:16px 0 0;padding:10px 12px;background:#eef4fb;border:1px solid #cfe0f2;border-radius:8px;font-size:13px">
+         ⏳ შეთავაზების ვადა: <strong>${deadline}</strong> (24 საათი).<br/>
+         🚚 მიწოდებას შენ უზრუნველყოფ — მიუთითე მიწოდების ფასი ${city}-ისთვის.<br/>
+         💰 SoulArt-ის საკომისიო ინდ. შეკვეთებზე ${Math.round(
+           COMMISSION_COMMISSION_RATE * 100,
+         )}%-ია.
+       </p>`,
+      isDirect
+        ? ''
+        : `<p style="margin:14px 0 0;font-size:12px;color:#9ca3af">
+             ამ წერილს იღებ იმიტომ, რომ პროფილში ინდივიდუალური შეკვეთების მიღება გაქვს ჩართული.
+             გამორთვა შეგიძლია <a href="${base}/profile" style="color:#02457a">პროფილის პარამეტრებში</a>.
+           </p>`,
+    ].join('');
+
+    const html = this.simpleEmail(
+      isDirect
+        ? '🎯 პირდაპირი ინდივიდუალური შეკვეთა შენთვის'
+        : '🎨 ახალი ინდივიდუალური შეკვეთა',
+      rows,
+      `${base}/profile/commissions`,
+      'შეთავაზების გაგზავნა',
+    );
+    const subject = isDirect
+      ? `🎯 პირდაპირი ინდ. შეკვეთა შენთვის — ${label}`
+      : `🎨 ახალი ინდ. შეკვეთა — ${label} (${commission.size})`;
+
+    await this.sendEmailBatch(recipients, subject, html);
+  }
+
+  /** Sends the same email to many recipients in small batches (SMTP-friendly). */
+  private async sendEmailBatch(
+    recipients: string[],
+    subject: string,
+    html: string,
+    batchSize = 10,
+  ) {
+    let failed = 0;
+    for (let i = 0; i < recipients.length; i += batchSize) {
+      const batch = recipients.slice(i, i + batchSize);
+      const results = await Promise.allSettled(
+        batch.map((to) => this.emailService.sendMail({ to, subject, html })),
+      );
+      failed += results.filter((r) => r.status === 'rejected').length;
+    }
+    if (failed > 0) {
+      this.logger.warn(
+        `Commission email: ${failed}/${recipients.length} recipients failed`,
+      );
+    }
+  }
+
+  private formatTbilisi(date?: Date): string {
+    if (!date) return '—';
+    try {
+      return new Intl.DateTimeFormat('ka-GE', {
+        timeZone: 'Asia/Tbilisi',
+        day: '2-digit',
+        month: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+      }).format(date);
+    } catch {
+      return date.toISOString().slice(0, 16).replace('T', ' ');
     }
   }
 
