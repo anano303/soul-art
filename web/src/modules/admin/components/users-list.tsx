@@ -16,6 +16,7 @@ import {
   ArrowUpDown,
   Clock,
   LogIn,
+  Download,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { toast } from "@/hooks/use-toast";
@@ -30,6 +31,11 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 import { getUsers } from "../api/get-users";
+import {
+  downloadUsersXlsx,
+  type UsersExportExtras,
+} from "../utils/users-xlsx";
+import type { User } from "@/types";
 import { CreateUserModal } from "./create-user-modal";
 import HeartLoading from "@/components/HeartLoading/HeartLoading";
 
@@ -57,6 +63,7 @@ export function UsersList() {
   const [commissionFilter, setCommissionFilter] =
     useState<CommissionFilter>("all");
   const [isInitialized, setIsInitialized] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
   const router = useRouter();
   const queryClient = useQueryClient();
 
@@ -172,6 +179,63 @@ export function UsersList() {
     placeholderData: keepPreviousData,
     enabled: isInitialized,
   });
+
+  // Walks every page of the CURRENT filter (the API caps a page at 100) and
+  // writes one CSV — the on-screen page alone would export just 30 rows.
+  const handleExport = async () => {
+    setIsExporting(true);
+    try {
+      const users: User[] = [];
+      const productStats: UsersExportExtras["productStats"] = {};
+      const commissionCounts: Record<string, number> = {};
+
+      let currentPage = 1;
+      let totalPages = 1;
+      do {
+        const res = await getUsers(
+          currentPage,
+          100,
+          debouncedSearch,
+          roleFilter,
+          sortBy,
+          sortOrder,
+          isSellerFilter ? activeFilter : undefined,
+          isSellerFilter ? commissionFilter : undefined,
+        );
+        users.push(...((res.items as User[]) || []));
+        Object.assign(productStats, res.sellerProductStats || {});
+        Object.assign(
+          commissionCounts,
+          (res as { commissionCounts?: Record<string, number> })
+            .commissionCounts || {},
+        );
+        totalPages = res.pages || 1;
+        currentPage += 1;
+      } while (currentPage <= totalPages);
+
+      if (users.length === 0) {
+        toast({ title: "ექსპორტისთვის მონაცემი არ არის" });
+        return;
+      }
+
+      const stamp = new Date().toISOString().slice(0, 10);
+      await downloadUsersXlsx(
+        users,
+        `soulart-users-${roleFilter}-${stamp}.xlsx`,
+        { productStats, commissionCounts },
+      );
+      toast({ title: `ექსპორტირდა ${users.length} მომხმარებელი` });
+    } catch (err) {
+      console.error("Users export failed:", err);
+      toast({
+        title: "ექსპორტი ვერ მოხერხდა",
+        description: err instanceof Error ? err.message : "",
+        variant: "destructive",
+      });
+    } finally {
+      setIsExporting(false);
+    }
+  };
 
   const handleImpersonate = async (userId: string, userName: string) => {
     if (!confirm(`შეხვიდე სისტემაში როგორც "${userName}"?`)) return;
@@ -305,6 +369,15 @@ export function UsersList() {
           {isFetching && (
             <span className="usr-refresh-indicator">Refreshing…</span>
           )}
+          <button
+            className="usr-btn usr-export-btn"
+            onClick={handleExport}
+            disabled={isExporting}
+            title="მიმდინარე ფილტრით გაფილტრული სია Excel-ისთვის"
+          >
+            <Download className="usr-icon" />
+            {isExporting ? "იტვირთება…" : "Excel-ში ექსპორტი"}
+          </button>
           <button
             className="create-user-btn"
             onClick={() => setIsModalOpen(true)}

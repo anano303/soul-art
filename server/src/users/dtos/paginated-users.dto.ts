@@ -47,6 +47,9 @@ class UsersSummaryDto {
   activeSalesManagers?: number;
 
   @Expose()
+  sellersAcceptingCommissions?: number;
+
+  @Expose()
   @Type(() => CampaignConsentDto)
   campaignConsent?: CampaignConsentDto;
 }
@@ -79,4 +82,8 @@ export class PaginatedUsersDto {
 
   @Expose()
   sellerProductStats?: Record<string, SellerProductStatsDto>;
+
+  /** userId → number of commissions the seller has been selected for. */
+  @Expose()
+  commissionCounts?: Record<string, number>;
 }

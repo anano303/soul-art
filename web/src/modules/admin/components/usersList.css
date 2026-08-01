@@ -91,6 +91,32 @@
   display: flex;
   align-items: center;
   gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.usr-export-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.25rem;
+  background: #fff;
+  color: var(--primary-color, #012645);
+  border: 1px solid rgba(1, 38, 69, 0.25);
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 600;
+  font-family: var(--font-firago);
+  transition: all 0.25s ease;
+}
+
+.usr-export-btn:hover:not(:disabled) {
+  background: rgba(1, 38, 69, 0.06);
+  transform: translateY(-2px);
+}
+
+.usr-export-btn:disabled {
+  opacity: 0.6;
+  cursor: wait;
 }
 
 .usr-refresh-indicator {
