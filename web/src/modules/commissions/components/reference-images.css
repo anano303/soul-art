@@ -1,0 +1,90 @@
+/* ── Reference image thumbs + lightbox ── */
+.ref-thumbs {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  flex-shrink: 0;
+}
+
+/* Applied on top of the page's own thumb class (.commission-thumb / .cmc-thumb),
+   which supplies size, radius and border. */
+.ref-thumb-btn {
+  padding: 0;
+  cursor: zoom-in;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.ref-thumb-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(1, 38, 69, 0.25);
+}
+
+.ref-lightbox {
+  position: fixed;
+  inset: 0;
+  /* ჰედერი 10000-ზეა, mobile top-bar 10001, ნოტიფიკაციები 10030 — ზემოდან უნდა იყოს */
+  z-index: 100000;
+  background: rgba(0, 0, 0, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1rem;
+}
+
+.ref-lightbox-img {
+  position: relative;
+  width: min(90vw, 1100px);
+  height: min(85vh, 900px);
+}
+
+.ref-lightbox-close,
+.ref-lightbox-nav {
+  position: absolute;
+  z-index: 2;
+  border: none;
+  background: rgba(255, 255, 255, 0.9);
+  color: #012645;
+  border-radius: 50%;
+  width: 42px;
+  height: 42px;
+  font-size: 1.4rem;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ref-lightbox-close:hover,
+.ref-lightbox-nav:hover {
+  background: #fff;
+}
+
+.ref-lightbox-close {
+  top: calc(1rem + env(safe-area-inset-top));
+  right: max(1rem, env(safe-area-inset-right));
+}
+
+.ref-lightbox-nav.prev {
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.ref-lightbox-nav.next {
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.ref-lightbox-counter {
+  position: absolute;
+  bottom: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  color: #fff;
+  font-size: 0.9rem;
+  background: rgba(0, 0, 0, 0.5);
+  padding: 0.3rem 0.8rem;
+  border-radius: 100px;
+}

@@ -2,7 +2,6 @@
 
 import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
-import Image from "next/image";
 import Link from "next/link";
 import { ArrowLeft, Loader2, Truck } from "lucide-react";
 import { useLanguage } from "@/hooks/LanguageContext";
@@ -17,6 +16,7 @@ import {
   selectOffer,
   getCommission,
 } from "@/modules/commissions/api/commissions-api";
+import { ReferenceImages } from "@/modules/commissions/components/reference-images";
 import "./commission-checkout.css";
 
 function CommissionCheckout() {
@@ -119,17 +119,11 @@ function CommissionCheckout() {
         {/* Summary */}
         <div className="cmc-card">
           <div className="cmc-item">
-            <div className="cmc-thumb">
-              {commission.referenceImages?.[0] && (
-                <Image
-                  src={commission.referenceImages[0]}
-                  alt={label}
-                  fill
-                  sizes="90px"
-                  style={{ objectFit: "cover" }}
-                />
-              )}
-            </div>
+            <ReferenceImages
+              images={commission.referenceImages}
+              alt={label}
+              thumbClassName="cmc-thumb"
+            />
             <div>
               <h3 className="cmc-item-title">
                 {label} — {commission.size}

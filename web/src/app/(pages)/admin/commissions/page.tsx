@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { isLoggedIn, getUserData } from "@/lib/auth";
 import { useLanguage } from "@/hooks/LanguageContext";
@@ -12,6 +11,7 @@ import {
   COMMISSION_TYPE_LABELS,
   CommissionType,
 } from "@/modules/commissions/api/commissions-api";
+import { ReferenceImages } from "@/modules/commissions/components/reference-images";
 import "../../commissions/commissions.css";
 
 interface AdminCommission {
@@ -131,17 +131,10 @@ export default function AdminCommissionsPage() {
             {items.map((c) => (
               <div key={c._id} className="commission-card">
                 <div className="commission-card-head">
-                  <div className="commission-thumb">
-                    {c.referenceImages?.[0] && (
-                      <Image
-                        src={c.referenceImages[0]}
-                        alt={typeLabel(c.type)}
-                        fill
-                        sizes="90px"
-                        style={{ objectFit: "cover" }}
-                      />
-                    )}
-                  </div>
+                  <ReferenceImages
+                    images={c.referenceImages}
+                    alt={typeLabel(c.type)}
+                  />
                   <div style={{ flex: 1, minWidth: 220 }}>
                     <div style={{ display: "flex", gap: "0.5rem", alignItems: "center", flexWrap: "wrap" }}>
                       <strong>{typeLabel(c.type)}</strong>
@@ -193,6 +186,7 @@ export default function AdminCommissionsPage() {
           </div>
         )}
       </div>
+
     </div>
   );
 }

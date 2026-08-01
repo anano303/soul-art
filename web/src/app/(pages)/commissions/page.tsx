@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { useLanguage } from "@/hooks/LanguageContext";
 import { useUser } from "@/modules/auth/hooks/use-user";
 import { useRouter } from "next/navigation";
@@ -13,6 +12,7 @@ import {
   getCommission,
   getMyCommissions,
 } from "@/modules/commissions/api/commissions-api";
+import { ReferenceImages } from "@/modules/commissions/components/reference-images";
 import "./commissions.css";
 
 export default function MyCommissionsPage() {
@@ -117,17 +117,10 @@ export default function MyCommissionsPage() {
               return (
                 <div key={c._id} className="commission-card">
                   <div className="commission-card-head">
-                    <div className="commission-thumb">
-                      {c.referenceImages?.[0] && (
-                        <Image
-                          src={c.referenceImages[0]}
-                          alt={label(c)}
-                          fill
-                          sizes="90px"
-                          style={{ objectFit: "cover" }}
-                        />
-                      )}
-                    </div>
+                    <ReferenceImages
+                      images={c.referenceImages}
+                      alt={label(c)}
+                    />
                     <div style={{ flex: 1, minWidth: 200 }}>
                       <div style={{ display: "flex", gap: "0.5rem", alignItems: "center", flexWrap: "wrap" }}>
                         <strong>{label(c)}</strong>
