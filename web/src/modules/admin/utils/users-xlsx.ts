@@ -42,7 +42,7 @@ export async function downloadUsersXlsx(
   // The browser build is a UMD bundle, so it may land on `default` or on the
   // namespace itself depending on the bundler's interop.
   const mod = await import("exceljs");
-  const ExcelJS = ((mod as { default?: typeof mod }).default ?? mod) as typeof mod;
+  const ExcelJS = mod.default ?? mod;
 
   const workbook = new ExcelJS.Workbook();
   workbook.creator = "SoulArt admin";
