@@ -10,6 +10,18 @@ export interface ArtistSocialLinks {
   pinterest?: string;
 }
 
+/** "About me" clip hosted on YouTube. */
+export interface ArtistVideo {
+  _id?: string;
+  videoId?: string;
+  videoUrl?: string;
+  embedUrl?: string;
+  title?: string;
+  status: "processing" | "ready" | "failed";
+  error?: string;
+  uploadedAt?: string;
+}
+
 export interface ArtistProfile {
   id: string;
   name: string;
@@ -20,6 +32,8 @@ export interface ArtistProfile {
   artistDisciplines: string[];
   artistLocation?: string | null;
   artistOpenForCommissions: boolean;
+  /** "About me" clips shown on the public profile. */
+  artistVideos?: ArtistVideo[];
   artistSocials: ArtistSocialLinks;
   artistHighlights: string[];
   artistGallery: string[];
@@ -279,6 +293,7 @@ export interface User {
   artistDisciplines?: string[];
   artistLocation?: string | null;
   artistOpenForCommissions?: boolean;
+  artistVideos?: ArtistVideo[];
   sellerType?: "artist" | "handmade" | "both" | null;
   artistSocials?: ArtistSocialLinks;
   artistHighlights?: string[];

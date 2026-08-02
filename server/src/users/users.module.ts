@@ -50,6 +50,7 @@ import { GoogleStrategy } from '@/strategies/google.strategy';
 import { FacebookStrategy } from '@/strategies/facebook.strategy';
 import { EmailService } from '@/email/services/email.services';
 import { CloudinaryModule } from '@/cloudinary/cloudinary.module';
+import { YoutubeModule } from '@/youtube/youtube.module';
 import { UserCloudinaryService } from './services/user-cloudinary.service';
 import { ReferralsModule } from '../referrals/referrals.module';
 import { OrderModule } from '../orders/order.module';
@@ -107,6 +108,7 @@ import { SettingsModule } from '@/settings/settings.module';
       signOptions: { expiresIn: '10m' },
     }),
     CloudinaryModule, // Add Cloudinary module
+    YoutubeModule, // Artist "about me" videos are hosted on YouTube
     SettingsModule,
     forwardRef(() => PaymentsModule), // Add PaymentsModule for BOG transfer service
     forwardRef(() => ReferralsModule), // Add ReferralsModule for dependency injection

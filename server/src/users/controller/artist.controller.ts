@@ -231,6 +231,44 @@ export class ArtistController {
     return this.usersService.uploadArtistCoverImage(userId, file);
   }
 
+  @Post('videos')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.Seller, Role.SellerAndSalesManager)
+  @UseInterceptors(createRateLimitInterceptor(uploadRateLimit))
+  @UseInterceptors(
+    FileInterceptor('file', { limits: { fileSize: 100 * 1024 * 1024 } }),
+  )
+  @ApiOperation({ summary: 'Upload an artist "about me" video to YouTube' })
+  async uploadArtistVideo(
+    @CurrentUser() user: User,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
+    const userId = (user as any)?._id?.toString();
+
+    if (!userId) {
+      throw new BadRequestException('Unable to resolve current user');
+    }
+
+    return this.usersService.uploadArtistVideo(userId, file);
+  }
+
+  @Delete('videos/:entryId')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.Seller, Role.SellerAndSalesManager)
+  @ApiOperation({ summary: 'Remove an artist video (also from YouTube)' })
+  async removeArtistVideo(
+    @CurrentUser() user: User,
+    @Param('entryId') entryId: string,
+  ) {
+    const userId = (user as any)?._id?.toString();
+
+    if (!userId) {
+      throw new BadRequestException('Unable to resolve current user');
+    }
+
+    return this.usersService.removeArtistVideo(userId, entryId);
+  }
+
   @Post('gallery')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.Seller)

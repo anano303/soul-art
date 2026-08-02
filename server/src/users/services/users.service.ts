@@ -37,6 +37,10 @@ import { AdminProfileDto } from '../dtos/admin.profile.dto';
 import { UserCloudinaryService } from './user-cloudinary.service';
 import { CloudinaryService } from '@/cloudinary/services/cloudinary.service';
 import { StorageService } from '@/storage/storage.service';
+import { YoutubeService } from '@/youtube/youtube.service';
+import { promises as fsp } from 'fs';
+import * as os from 'os';
+import * as path from 'path';
 import { generateBaseArtistSlug } from '@/utils/slug-generator';
 import { detectBankFromIban } from '@/utils/georgian-banks';
 import { BalanceService } from './balance.service';
@@ -91,6 +95,7 @@ export class UsersService {
     private readonly storageService: StorageService,
     private readonly balanceService: BalanceService,
     private readonly settingsService: SettingsService,
+    private readonly youtubeService: YoutubeService,
     @Optional()
     @Inject(forwardRef(() => ReferralsService))
     private readonly referralsService?: ReferralsService,
@@ -480,6 +485,213 @@ export class UsersService {
       message: 'Artist cover image updated successfully',
       coverUrl,
     };
+  }
+
+  private static readonly MAX_ARTIST_VIDEOS = 5;
+
+  /**
+   * "About me" videos go straight to YouTube — they never touch our storage.
+   * The upload runs in the background so the artist is not stuck waiting; the
+   * entry starts as `processing` and flips to `ready` when YouTube replies.
+   */
+  async uploadArtistVideo(userId: string, file: Express.Multer.File) {
+    const user = await this.userModel.findById(userId);
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    if (user.role !== Role.Seller && user.role !== Role.SellerAndSalesManager) {
+      throw new BadRequestException('Only sellers can upload videos');
+    }
+
+    if (!file?.buffer?.length) {
+      throw new BadRequestException('ვიდეო ფაილი არ არის მიმაგრებული');
+    }
+
+    if (!file.mimetype?.startsWith('video/')) {
+      throw new BadRequestException('დასაშვებია მხოლოდ ვიდეო ფაილი');
+    }
+
+    if (file.size > 100 * 1024 * 1024) {
+      throw new BadRequestException('ვიდეოს ზომა არ უნდა აღემატებოდეს 100MB-ს');
+    }
+
+    const existing = user.artistVideos || [];
+    if (existing.length >= UsersService.MAX_ARTIST_VIDEOS) {
+      throw new BadRequestException(
+        `მაქსიმუმ ${UsersService.MAX_ARTIST_VIDEOS} ვიდეოა შესაძლებელი. ჯერ წაშალე ერთი.`,
+      );
+    }
+
+    const title = this.buildArtistVideoTitle(user);
+    const entryId = new Types.ObjectId();
+
+    await this.userModel.findByIdAndUpdate(userId, {
+      $push: {
+        artistVideos: {
+          _id: entryId,
+          title,
+          status: 'processing',
+          uploadedAt: new Date(),
+        },
+      },
+    });
+
+    // Fire and forget — the response goes out now.
+    void this.processArtistVideoUpload(
+      userId,
+      entryId.toString(),
+      file.buffer,
+      file.originalname,
+      title,
+      this.buildArtistVideoDescription(user),
+    );
+
+    const refreshed = await this.userModel
+      .findById(userId)
+      .select('artistVideos')
+      .lean();
+
+    return { videos: refreshed?.artistVideos || [] };
+  }
+
+  private buildArtistVideoTitle(user: UserDocument): string {
+    const name = user.storeName || user.name || 'SoulArt artist';
+    return `${name} — SoulArt`.slice(0, 100);
+  }
+
+  private buildArtistVideoDescription(user: UserDocument): string {
+    const base = (
+      process.env.PUBLIC_CLIENT_URL ||
+      process.env.CLIENT_URL ||
+      process.env.NEXT_PUBLIC_CLIENT_URL ||
+      'https://soulart.ge'
+    ).replace(/\/+$/, '');
+
+    const name = user.storeName || user.name || 'SoulArt artist';
+    const bioMap = user.artistBio as unknown as Map<string, string> | undefined;
+    const bio =
+      (bioMap && typeof bioMap.get === 'function'
+        ? bioMap.get('ge') || bioMap.get('en')
+        : undefined) || '';
+
+    const lines: string[] = [`🎨 ${name}`];
+    if (bio) lines.push('', bio.slice(0, 1500));
+    if (user.artistLocation) lines.push('', `📍 ${user.artistLocation}`);
+    if (user.artistDisciplines?.length) {
+      lines.push(`🖌️ ${user.artistDisciplines.slice(0, 6).join(', ')}`);
+    }
+    if (user.artistOpenForCommissions) {
+      lines.push('', '🎯 იღებს ინდივიდუალურ შეკვეთებს');
+    }
+
+    lines.push('');
+    if (user.artistSlug) {
+      lines.push(`🖼️ ნამუშევრები: ${base}/@${user.artistSlug}`);
+    } else {
+      lines.push(`🖼️ ნამუშევრები: ${base}`);
+    }
+    lines.push('', '✨ SoulArt — ქართული ხელოვნების პლატფორმა');
+
+    return lines.join('\n');
+  }
+
+  private async processArtistVideoUpload(
+    userId: string,
+    entryId: string,
+    buffer: Buffer,
+    originalName: string,
+    title: string,
+    description: string,
+  ): Promise<void> {
+    let tempDir: string | null = null;
+
+    try {
+      tempDir = await fsp.mkdtemp(path.join(os.tmpdir(), 'soulart-artist-'));
+      const extension = path.extname(originalName || '') || '.mp4';
+      const filePath = path.join(tempDir, `intro${extension}`);
+      await fsp.writeFile(filePath, buffer);
+
+      const result = await this.youtubeService.uploadVideo(filePath, {
+        title,
+        description,
+        tags: ['SoulArt', 'ქართული_ხელოვნება', 'Georgian_Art'],
+        privacyStatus: 'public',
+      });
+
+      await this.userModel.updateOne(
+        { _id: userId, 'artistVideos._id': entryId },
+        {
+          $set: {
+            'artistVideos.$.videoId': result.videoId,
+            'artistVideos.$.videoUrl': `https://www.youtube.com/watch?v=${result.videoId}`,
+            'artistVideos.$.embedUrl': `https://www.youtube.com/embed/${result.videoId}`,
+            'artistVideos.$.status': 'ready',
+          },
+        },
+      );
+      this.logger.log(`Artist video uploaded to YouTube: ${result.videoId}`);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      this.logger.error(`Artist video upload failed: ${message}`);
+      await this.userModel.updateOne(
+        { _id: userId, 'artistVideos._id': entryId },
+        {
+          $set: {
+            'artistVideos.$.status': 'failed',
+            'artistVideos.$.error': message.slice(0, 300),
+          },
+        },
+      );
+    } finally {
+      if (tempDir) {
+        await fsp.rm(tempDir, { recursive: true, force: true }).catch(() => {
+          /* best effort */
+        });
+      }
+    }
+  }
+
+  /** Removes the entry and the video from YouTube itself. */
+  async removeArtistVideo(userId: string, entryId: string) {
+    const user = await this.userModel.findById(userId);
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    const entry = (user.artistVideos || []).find(
+      (video) => String((video as { _id?: unknown })._id) === String(entryId),
+    );
+
+    if (!entry) {
+      throw new NotFoundException('ვიდეო ვერ მოიძებნა');
+    }
+
+    if (entry.videoId) {
+      try {
+        await this.youtubeService.deleteVideo(entry.videoId);
+      } catch (error) {
+        // Losing the YouTube copy is not worth blocking the removal.
+        this.logger.warn(
+          `Could not delete YouTube video ${entry.videoId}: ${
+            error instanceof Error ? error.message : error
+          }`,
+        );
+      }
+    }
+
+    await this.userModel.findByIdAndUpdate(userId, {
+      $pull: { artistVideos: { _id: entry._id } },
+    });
+
+    const refreshed = await this.userModel
+      .findById(userId)
+      .select('artistVideos')
+      .lean();
+
+    return { videos: refreshed?.artistVideos || [] };
   }
 
   async addArtistGalleryImage(userId: string, file: Express.Multer.File) {
@@ -907,6 +1119,9 @@ export class UsersService {
           artistLocation: artist.artistLocation ?? null,
           artistOpenForCommissions: artist.artistOpenForCommissions ?? false,
           sellerType: artist.sellerType ?? null,
+          artistVideos: (artist.artistVideos || []).filter(
+            (video) => video.status === 'ready' && video.embedUrl,
+          ),
           artistSocials: artist.artistSocials ?? {},
           followersCount: artist.followersCount ?? 0,
           followingCount: artist.followingCount ?? 0,

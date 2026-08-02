@@ -3,6 +3,18 @@ import { Document } from 'mongoose';
 import { Role } from '@/types/role.enum';
 import { SellerType } from '@/types/seller-type.enum';
 
+export interface ArtistVideo {
+  /** Mongo id of the embedded doc — used to address it before YouTube replies. */
+  _id?: unknown;
+  videoId?: string;
+  videoUrl?: string;
+  embedUrl?: string;
+  title?: string;
+  status: 'processing' | 'ready' | 'failed';
+  error?: string;
+  uploadedAt?: Date;
+}
+
 export interface ArtistSocialLinks {
   instagram?: string;
   facebook?: string;
@@ -232,6 +244,29 @@ export class User {
 
   @Prop({ type: Object, default: {} })
   artistSocials?: ArtistSocialLinks;
+
+  // "About me" videos, hosted on YouTube (keeps them off our storage).
+  // `uploadedAt` doubles as the record of the artist accepting that SoulArt
+  // may reuse the clip for promotion — the upload form states it.
+  @Prop({
+    type: [
+      {
+        videoId: { type: String },
+        videoUrl: { type: String },
+        embedUrl: { type: String },
+        title: { type: String },
+        status: {
+          type: String,
+          enum: ['processing', 'ready', 'failed'],
+          default: 'processing',
+        },
+        error: { type: String },
+        uploadedAt: { type: Date, default: Date.now },
+      },
+    ],
+    default: [],
+  })
+  artistVideos?: ArtistVideo[];
 
   @Prop({ type: [String], default: [] })
   artistHighlights?: string[];

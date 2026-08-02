@@ -501,3 +501,129 @@
     padding: 1rem;
   }
 }
+
+/* ── Profile completeness ── */
+.artist-completion {
+  margin-bottom: 1.25rem;
+  padding: 1rem 1.15rem;
+  border: 1px solid #ece7da;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #fdfbf6, #f4f8fc);
+}
+
+.artist-completion__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.6rem;
+}
+
+.artist-completion__title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #012645;
+}
+
+.artist-completion__value {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #02457a;
+}
+
+.artist-completion__bar {
+  height: 8px;
+  border-radius: 100px;
+  background: #e8edf3;
+  overflow: hidden;
+}
+
+.artist-completion__fill {
+  height: 100%;
+  border-radius: 100px;
+  background: linear-gradient(90deg, #02457a, #15803d);
+  transition: width 0.4s ease;
+}
+
+.artist-completion__missing {
+  margin: 0.7rem 0 0;
+  font-size: 0.8rem;
+  color: #6b7280;
+  line-height: 1.5;
+}
+
+.artist-completion__missing strong {
+  color: #012645;
+}
+
+/* ── "About me" videos (YouTube) ── */
+.artist-intro-video {
+  margin-top: 1.5rem;
+  padding: 1.1rem 1.15rem;
+  border: 1px solid #ece7da;
+  border-radius: 12px;
+  background: #fcfbf8;
+}
+
+.artist-intro-video h3 {
+  margin: 0 0 0.4rem;
+  font-size: 1rem;
+  color: #012645;
+}
+
+.artist-intro-video__list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1rem;
+  margin: 0.9rem 0;
+}
+
+.artist-intro-video__item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.artist-intro-video__item iframe {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border: none;
+  border-radius: 10px;
+  background: #000;
+}
+
+.artist-intro-video__status {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: 10px;
+  background: #f1f3f5;
+  color: #6b7280;
+  font-size: 0.85rem;
+  text-align: center;
+  padding: 0.5rem;
+}
+
+.artist-intro-video__status--failed {
+  background: #fdeeee;
+  color: #b91c1c;
+}
+
+.artist-intro-video__upload {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-top: 0.75rem;
+}
+
+.artist-button--danger {
+  border-color: #f0c2c2;
+  color: #b91c1c;
+}
+
+.artist-button--danger:hover:not(:disabled) {
+  background: #fdeeee;
+}

@@ -15,7 +15,8 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiClient } from "@/lib/axios";
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/hooks/LanguageContext";
-import { ArtistProfileResponse, User } from "@/types";
+import { ArtistProfileResponse, ArtistVideo, User } from "@/types";
+import { ArtistVideosPanel } from "@/modules/artists/components/artist-videos-panel";
 import "./ArtistProfileSettings.css";
 
 const socialFieldSchema = z
@@ -374,6 +375,15 @@ export function ArtistProfileSettings({
   const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [removingIndex, setRemovingIndex] = useState<number | null>(null);
   const galleryFileInputRef = useRef<HTMLInputElement>(null);
+
+  // "About me" videos — uploaded straight to YouTube, shown as embeds.
+  const [videos, setVideos] = useState<ArtistVideo[]>(
+    () =>
+      (user as { artistVideos?: ArtistVideo[] }).artistVideos ??
+      (artistDefaults as { artistVideos?: ArtistVideo[] } | undefined)
+        ?.artistVideos ??
+      []
+  );
   const sanitizedGalleryDraft = useMemo(
     () => sanitizeGallery(galleryDraft),
     [galleryDraft]
@@ -427,6 +437,74 @@ export function ArtistProfileSettings({
   const bioEnField = form.register("artistBioEn");
   const highlightsField = form.register("artistHighlightsInput");
   const disciplinesField = form.register("artistDisciplinesInput");
+
+  // Live completeness meter — nudges artists to finish the profile.
+  const watchedValues = form.watch();
+  const completion = useMemo(() => {
+    const socialsFilled = Object.values(watchedValues.artistSocials || {}).some(
+      (value) => typeof value === "string" && value.trim().length > 0
+    );
+
+    const checks: Array<{ done: boolean; labelGe: string; labelEn: string }> = [
+      {
+        done: Boolean(watchedValues.artistSlug?.trim() || baselineValues.slug),
+        labelGe: "გვერდის მისამართი",
+        labelEn: "page address",
+      },
+      {
+        done: Boolean(
+          watchedValues.artistBioGe?.trim() || watchedValues.artistBioEn?.trim()
+        ),
+        labelGe: "ბიოგრაფია",
+        labelEn: "biography",
+      },
+      {
+        done: Boolean(watchedValues.artistLocation?.trim()),
+        labelGe: "ლოკაცია",
+        labelEn: "location",
+      },
+      {
+        done: Boolean(baselineValues.cover),
+        labelGe: "ქავერ ფოტო",
+        labelEn: "cover photo",
+      },
+      {
+        done: Boolean(watchedValues.artistDisciplinesInput?.trim()),
+        labelGe: "მიმართულებები",
+        labelEn: "disciplines",
+      },
+      {
+        done: socialsFilled,
+        labelGe: "სოც. ბმული",
+        labelEn: "a social link",
+      },
+      {
+        done: sanitizedGalleryDraft.length >= 3,
+        labelGe: "3+ ფოტო გალერეაში",
+        labelEn: "3+ gallery photos",
+      },
+      {
+        done: videos.length > 0,
+        labelGe: "ვიდეო შენს შესახებ",
+        labelEn: "a video about you",
+      },
+    ];
+
+    const done = checks.filter((check) => check.done).length;
+    return {
+      percent: Math.round((done / checks.length) * 100),
+      missing: checks
+        .filter((check) => !check.done)
+        .map((check) => (language === "en" ? check.labelEn : check.labelGe)),
+    };
+  }, [
+    watchedValues,
+    baselineValues.slug,
+    baselineValues.cover,
+    sanitizedGalleryDraft.length,
+    videos.length,
+    language,
+  ]);
   const isOpenForCommissions = form.watch("artistOpenForCommissions");
 
   useEffect(() => {
@@ -850,6 +928,31 @@ export function ArtistProfileSettings({
 
   return (
     <section className="artist-settings">
+      <div className="artist-completion">
+        <div className="artist-completion__head">
+          <span className="artist-completion__title">
+            {language === "en"
+              ? "Profile completeness"
+              : "პროფილის შევსება"}
+          </span>
+          <span className="artist-completion__value">{completion.percent}%</span>
+        </div>
+        <div className="artist-completion__bar">
+          <div
+            className="artist-completion__fill"
+            style={{ width: `${completion.percent}%` }}
+          />
+        </div>
+        {completion.missing.length > 0 && (
+          <p className="artist-completion__missing">
+            <strong>
+              {language === "en" ? "Still missing:" : "დასამატებელია:"}
+            </strong>{" "}
+            {completion.missing.join(" · ")}
+          </p>
+        )}
+      </div>
+
       <form onSubmit={form.handleSubmit(onSubmit)} className="artist-form">
         <div className="artist-portfolio-cta">
           <div className="artist-portfolio-cta__header">
@@ -957,7 +1060,7 @@ export function ArtistProfileSettings({
           <p className="artist-settings__hint">
             {language === "en"
               ? "Helps us group sellers correctly — pick what fits you best."
-              : "გვეხმარება გამყიდველების სწორად დაჯგუფებაში — აირჩიე რაც შენ შეესაბამება."}
+              : "გვეხმარება გამყიდველების სწორად დაჯგუფებაში — აირჩიე რაც შენ შეგესაბამება."}
           </p>
         </div>
 
@@ -1090,6 +1193,17 @@ export function ArtistProfileSettings({
               )
             )}
           </div>
+        </div>
+
+        <div className="artist-intro-video">
+          <ArtistVideosPanel
+            videos={videos}
+            isOwner
+            onVideosChange={(next) => {
+              setVideos(next);
+              refreshUserData();
+            }}
+          />
         </div>
 
         <div className="artist-gallery-settings">

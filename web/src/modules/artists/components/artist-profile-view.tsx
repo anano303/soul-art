@@ -17,6 +17,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import {
   ArtistProfileResponse,
   ArtistProductSummary,
+  ArtistVideo,
   PortfolioImageSummary,
   User,
 } from "@/types";
@@ -25,6 +26,7 @@ import { useUser } from "@/modules/auth/hooks/use-user";
 import { useEtsyEnabled } from "@/hooks/use-etsy-enabled";
 import { CloudinaryImage } from "@/components/cloudinary-image";
 import { ArtistProfileSettings } from "@/modules/profile/components/ArtistProfileSettings";
+import { ArtistVideosPanel } from "./artist-videos-panel";
 import { GalleryLikeButton } from "@/components/gallery-like-button";
 import { GalleryComments } from "@/components/gallery-comments";
 import { GalleryViewer } from "@/components/gallery-viewer";
@@ -49,6 +51,7 @@ import {
   Rocket,
   Copy,
   Store,
+  Video as VideoIcon,
 } from "lucide-react";
 import { PromoteModal } from "@/modules/admin/components/promote-modal";
 import BrushTrail from "@/components/BrushTrail/BrushTrail";
@@ -210,8 +213,11 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
   const queryClient = useQueryClient();
   const { artist, products, portfolio } = data;
   const [showEditor, setShowEditor] = useState(false);
-  const [activeTab, setActiveTab] = useState<"sale" | "gallery" | "info">(
-    "sale",
+  const [activeTab, setActiveTab] = useState<
+    "sale" | "gallery" | "videos" | "info"
+  >("sale");
+  const [artistVideos, setArtistVideos] = useState<ArtistVideo[]>(
+    artist.artistVideos ?? [],
   );
   const [viewerOpen, setViewerOpen] = useState(false);
   const [viewerIndex, setViewerIndex] = useState(0);
@@ -418,6 +424,8 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
       const hash = window.location.hash;
       if (hash === "#portfolio") {
         setActiveTab("gallery");
+      } else if (hash === "#videos") {
+        setActiveTab("videos");
       } else if (hash === "#info") {
         setActiveTab("info");
       }
@@ -1260,6 +1268,21 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
             >
               <Grid3X3 className="artist-tabs__tab-icon" size={24} />
             </button>
+            {(isOwner || (artistVideos?.length ?? 0) > 0) && (
+              <button
+                type="button"
+                className={`artist-tabs__tab ${
+                  activeTab === "videos" ? "artist-tabs__tab--active" : ""
+                }`}
+                onClick={() => {
+                  setActiveTab("videos");
+                  window.history.replaceState(null, "", "#videos");
+                }}
+                title={language === "en" ? "Videos" : "ვიდეოები"}
+              >
+                <VideoIcon className="artist-tabs__tab-icon" size={24} />
+              </button>
+            )}
             <button
               type="button"
               className={`artist-tabs__tab ${
@@ -1609,6 +1632,16 @@ export function ArtistProfileView({ data }: ArtistProfileViewProps) {
                     </p>
                   </div>
                 )}
+              </section>
+            )}
+
+            {activeTab === "videos" && (
+              <section className="artist-tab-panel artist-tab-panel--videos">
+                <ArtistVideosPanel
+                  videos={artistVideos}
+                  isOwner={isOwner}
+                  onVideosChange={setArtistVideos}
+                />
               </section>
             )}
 

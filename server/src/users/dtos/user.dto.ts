@@ -113,6 +113,9 @@ export class UserDto {
   sellerType?: string;
 
   @Expose()
+  artistVideos?: unknown[];
+
+  @Expose()
   artistSocials?: object;
 
   @Expose()

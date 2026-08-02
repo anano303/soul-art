@@ -1,0 +1,129 @@
+.avp {
+  padding: 0.5rem 0 1rem;
+}
+
+.avp__intro {
+  border: 1px solid #ece7da;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #fdfbf6, #f4f8fc);
+  padding: 1.1rem 1.15rem;
+  margin-bottom: 1.25rem;
+}
+
+.avp__intro h3 {
+  margin: 0 0 0.4rem;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #012645;
+}
+
+.avp__intro p {
+  margin: 0 0 0.9rem;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: #4b5563;
+}
+
+.avp__actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.avp__file {
+  display: none;
+}
+
+.avp__upload {
+  padding: 0.6rem 1.4rem;
+  border: none;
+  border-radius: 100px;
+  background: linear-gradient(135deg, #012645, #02457a);
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.avp__upload:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.avp__hint {
+  font-size: 0.78rem;
+  color: #9ca3af;
+}
+
+.avp__error {
+  margin: 0.6rem 0 0;
+  font-size: 0.8rem;
+  color: #b91c1c;
+}
+
+.avp__empty {
+  text-align: center;
+  color: #6b7280;
+  font-size: 0.9rem;
+  padding: 2rem 1rem;
+}
+
+.avp__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.1rem;
+}
+
+.avp__item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.avp__item iframe {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border: none;
+  border-radius: 14px;
+  background: #000;
+}
+
+.avp__status {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: 14px;
+  background: #f1f3f5;
+  color: #6b7280;
+  font-size: 0.85rem;
+  text-align: center;
+  padding: 0.75rem;
+}
+
+.avp__status--failed {
+  background: #fdeeee;
+  color: #b91c1c;
+}
+
+.avp__remove {
+  align-self: flex-start;
+  padding: 0.35rem 0.9rem;
+  border: 1px solid #f0c2c2;
+  border-radius: 100px;
+  background: #fff;
+  color: #b91c1c;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.avp__remove:hover:not(:disabled) {
+  background: #fdeeee;
+}
+
+.avp__remove:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}

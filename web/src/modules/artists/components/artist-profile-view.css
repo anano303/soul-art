@@ -2417,3 +2417,23 @@ a.artist-commission-btn:hover,
     width: calc(100% + 40px);
   }
 }
+
+/* ── "About me" videos on the info tab ── */
+.artist-info-video {
+  margin-bottom: 1.5rem;
+}
+
+.artist-info-video__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1rem;
+}
+
+.artist-info-video__player {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border: none;
+  border-radius: 14px;
+  background: #000;
+  display: block;
+}
