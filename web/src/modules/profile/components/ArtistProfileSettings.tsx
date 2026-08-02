@@ -50,6 +50,7 @@ const artistFormSchema = z.object({
     .optional()
     .or(z.literal("")),
   artistOpenForCommissions: z.boolean().default(false),
+  sellerType: z.enum(["artist", "handmade", "both"]).default("artist"),
   artistHighlightsInput: z
     .string()
     .max(500, "მთავარი ხაზები არ უნდა აღემატებოდეს 500 სიმბოლოს")
@@ -292,6 +293,11 @@ export function ArtistProfileSettings({
     [userBioRecord, artistBioRecord]
   );
 
+  const userSellerType = (user as { sellerType?: string }).sellerType;
+  const defaultSellerType = (
+    artistDefaults as { sellerType?: string } | null | undefined
+  )?.sellerType;
+
   const baselineValues = useMemo(() => {
     const slug = user.artistSlug ?? artistDefaults?.artistSlug ?? "";
     const location =
@@ -300,6 +306,7 @@ export function ArtistProfileSettings({
       user.artistOpenForCommissions ??
       artistDefaults?.artistOpenForCommissions ??
       false;
+    const sellerType = userSellerType || defaultSellerType || "artist";
     const highlightsSource = sanitizeStringList(user.artistHighlights);
     const fallbackHighlights = sanitizeStringList(
       artistDefaults?.artistHighlights
@@ -330,6 +337,7 @@ export function ArtistProfileSettings({
       slug,
       location,
       openForCommissions,
+      sellerType: sellerType as "artist" | "handmade" | "both",
       highlights:
         highlightsSource.length > 0 ? highlightsSource : fallbackHighlights,
       disciplines:
@@ -339,6 +347,8 @@ export function ArtistProfileSettings({
       cover,
     };
   }, [
+    userSellerType,
+    defaultSellerType,
     artistDefaults?.artistDisciplines,
     artistDefaults?.artistGallery,
     artistDefaults?.artistCoverImage,
@@ -385,6 +395,7 @@ export function ArtistProfileSettings({
       artistBioGe: existingBio.ge || "",
       artistBioEn: existingBio.en || "",
       artistOpenForCommissions: baselineValues.openForCommissions,
+      sellerType: baselineValues.sellerType,
       artistHighlightsInput: baselineValues.highlights.join(", "),
       artistDisciplinesInput: baselineValues.disciplines.join(", "),
       artistSocials: baselineValues.socials,
@@ -402,6 +413,7 @@ export function ArtistProfileSettings({
         artistBioGe: existingBio.ge || "",
         artistBioEn: existingBio.en || "",
         artistOpenForCommissions: baselineValues.openForCommissions,
+      sellerType: baselineValues.sellerType,
         artistHighlightsInput: baselineValues.highlights.join(", "),
         artistDisciplinesInput: baselineValues.disciplines.join(", "),
         artistSocials: baselineValues.socials,
@@ -702,6 +714,10 @@ export function ArtistProfileSettings({
         payload.artistDisciplines = nextDisciplines;
       }
 
+      if (values.sellerType !== baselineValues.sellerType) {
+        payload.sellerType = values.sellerType;
+      }
+
       const currentOpenForCommissions = baselineValues.openForCommissions;
       if (values.artistOpenForCommissions !== currentOpenForCommissions) {
         payload.artistOpenForCommissions = values.artistOpenForCommissions;
@@ -931,6 +947,26 @@ export function ArtistProfileSettings({
             }
             {...locationField}
           />
+        </div>
+
+        <div className="artist-form__row">
+          <label htmlFor="sellerType">
+            {language === "en" ? "What do you make?" : "რას ქმნი?"}
+          </label>
+          <select id="sellerType" {...form.register("sellerType")}>
+            <option value="artist">
+              {language === "en" ? "Artist (paintings)" : "მხატვარი (ნახატები)"}
+            </option>
+            <option value="handmade">
+              {language === "en" ? "Handmade goods" : "ხელნაკეთი ნივთები"}
+            </option>
+            <option value="both">{language === "en" ? "Both" : "ორივე"}</option>
+          </select>
+          <p className="artist-settings__hint">
+            {language === "en"
+              ? "Helps us group sellers correctly — pick what fits you best."
+              : "გვეხმარება გამყიდველების სწორად დაჯგუფებაში — აირჩიე რაც შენ შეესაბამება."}
+          </p>
         </div>
 
         <div className="artist-form__row artist-form__row--switch">

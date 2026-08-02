@@ -294,6 +294,18 @@ export class ProductsController {
     return this.productsService.deleteOne(id);
   }
 
+  // Admin: rewrite the description of videos already on YouTube, so older
+  // uploads get the product link too. `limit` is capped at 200 (API quota).
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.Admin)
+  @Post('youtube/resync-descriptions')
+  async resyncYoutubeDescriptions(@Query('limit') limit?: string) {
+    const summary = await this.productYoutubeService.resyncVideoMetadata(
+      limit ? Number(limit) : 50,
+    );
+    return { success: summary.failed === 0, ...summary };
+  }
+
   // ========================================
   // UPLOAD VIDEO TO YOUTUBE IMMEDIATELY
   // ========================================

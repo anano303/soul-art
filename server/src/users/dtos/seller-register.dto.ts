@@ -1,5 +1,7 @@
 import {
+  IsBoolean,
   IsEmail,
+  IsEnum,
   IsNotEmpty,
   IsString,
   IsPhoneNumber,
@@ -11,6 +13,7 @@ import {
 } from 'class-validator';
 import { Transform } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
+import { SellerType } from '@/types/seller-type.enum';
 
 export class SellerRegisterDto {
   @ApiProperty({
@@ -140,6 +143,22 @@ export class SellerRegisterDto {
   facebookUrl?: string;
 
   @ApiProperty({
+    example: 'https://instagram.com/myartpage',
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  instagramUrl?: string;
+
+  @ApiProperty({
+    example: 'https://tiktok.com/@myartpage',
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  tiktokUrl?: string;
+
+  @ApiProperty({
     example: 'digital-artistry',
     description:
       'არტისტის საჯარო სლაგი (მხოლოდ პატარა ასოები, ჰიფენები და ციფრები)',
@@ -156,4 +175,26 @@ export class SellerRegisterDto {
       'Artist slug may only contain lowercase letters, numbers, and hyphens',
   })
   artistSlug?: string;
+
+  @ApiProperty({
+    enum: SellerType,
+    description: 'მხატვარი, ხელნაკეთი ნივთები, თუ ორივე',
+    required: false,
+  })
+  @IsOptional()
+  @IsEnum(SellerType)
+  sellerType?: SellerType;
+
+  @ApiProperty({
+    example: 'true',
+    description: 'იღებს თუ არა ინდივიდუალურ შეკვეთებს',
+    required: false,
+  })
+  @IsOptional()
+  // Registration is multipart (logo upload), so booleans arrive as strings.
+  @Transform(({ value }) =>
+    typeof value === 'string' ? value === 'true' : value,
+  )
+  @IsBoolean()
+  artistOpenForCommissions?: boolean;
 }

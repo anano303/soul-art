@@ -18,6 +18,36 @@ export default function SettingsPage() {
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
   const [allSettings, setAllSettings] = useState<Setting[]>([]);
+  const [ytLimit, setYtLimit] = useState<number>(50);
+  const [ytRunning, setYtRunning] = useState(false);
+  const [ytResult, setYtResult] = useState<string>("");
+
+  // Rewrites metadata of videos already on YouTube (older uploads had no
+  // product link, because the product did not exist yet at upload time).
+  const handleYoutubeResync = async () => {
+    setYtRunning(true);
+    setYtResult("");
+    try {
+      const res = await fetchWithAuth(
+        `/products/youtube/resync-descriptions?limit=${ytLimit}`,
+        { method: "POST" }
+      );
+      const data = await res.json();
+      const lines = [
+        `✅ განახლდა: ${data.updated} / ნაპოვნი: ${data.scanned}`,
+        data.skipped ? `გამოტოვებული: ${data.skipped}` : "",
+        data.failed ? `ვერ განახლდა: ${data.failed}` : "",
+        ...(data.errors || []).slice(0, 5),
+      ].filter(Boolean);
+      setYtResult(lines.join("\n"));
+    } catch (error) {
+      setYtResult(
+        `❌ ${error instanceof Error ? error.message : "შეცდომა"}`
+      );
+    } finally {
+      setYtRunning(false);
+    }
+  };
 
   useEffect(() => {
     loadSettings();
@@ -160,6 +190,48 @@ export default function SettingsPage() {
             {message}
           </div>
         )}
+
+        {/* YouTube descriptions backfill */}
+        <div className="bg-white shadow rounded-lg p-6 mb-6">
+          <h2 className="text-xl font-semibold mb-4">
+            YouTube აღწერების განახლება
+          </h2>
+          <p className="text-gray-600 mb-4">
+            უკვე ატვირთულ ვიდეოებს გადააწერს სათაურს, აღწერას და თეგებს —
+            პროდუქტის სწორი ბმულით, ფასით და დეტალებით. ვიდეო თავიდან არ
+            იტვირთება. YouTube-ის დღიური ლიმიტის გამო ერთ ჯერზე მაქსიმუმ 200
+            ვიდეოა შესაძლებელი (ყოველი განახლება 50 ერთეულს ხარჯავს 10 000-იდან).
+          </p>
+
+          <div className="flex items-end gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                რამდენი ვიდეო
+              </label>
+              <input
+                type="number"
+                min={1}
+                max={200}
+                value={ytLimit}
+                onChange={(e) => setYtLimit(Number(e.target.value))}
+                className="border rounded px-3 py-2 w-32"
+              />
+            </div>
+            <button
+              onClick={handleYoutubeResync}
+              disabled={ytRunning}
+              className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 disabled:opacity-50"
+            >
+              {ytRunning ? "მიმდინარეობს…" : "აღწერების განახლება"}
+            </button>
+          </div>
+
+          {ytResult && (
+            <p className="text-sm text-gray-700 mt-4 whitespace-pre-line">
+              {ytResult}
+            </p>
+          )}
+        </div>
 
         {/* Foreign Payment Fee */}
         <div className="bg-white shadow rounded-lg p-6 mb-6">

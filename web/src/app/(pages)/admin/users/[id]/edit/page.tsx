@@ -6,6 +6,7 @@ import { toast } from "@/hooks/use-toast";
 import { fetchWithAuth } from "@/lib/fetch-with-auth";
 import { Role } from "@/types/role";
 import { User } from "@/types";
+import { SOCIAL_FIELDS } from "@/modules/profile/components/seller-public-settings";
 import "./edit-user.css";
 
 export default function EditUserPage() {
@@ -60,14 +61,17 @@ export default function EditUserPage() {
         updateData.phoneNumber = user.phoneNumber;
         updateData.identificationNumber = user.identificationNumber;
         updateData.accountNumber = user.accountNumber;
-        // Facebook გვერდის ლინკი (artistSocials-ში ინახება)
-        updateData.artistSocials = {
-          ...((user as { artistSocials?: Record<string, string> })
-            .artistSocials || {}),
-          facebook:
-            (user as { artistSocials?: { facebook?: string } }).artistSocials
-              ?.facebook || "",
-        };
+        // ყველა სოც. ბმული (artistSocials-ში ინახება, სერვერზე ერწყმის ძველს)
+        const socials = (user as { artistSocials?: Record<string, string> })
+          .artistSocials;
+        updateData.artistSocials = Object.fromEntries(
+          SOCIAL_FIELDS.map(({ key }) => [key, socials?.[key] || ""])
+        );
+        updateData.sellerType =
+          (user as { sellerType?: string }).sellerType || "artist";
+        updateData.artistOpenForCommissions = !!(
+          user as { artistOpenForCommissions?: boolean }
+        ).artistOpenForCommissions;
       }
 
       // Sales Manager-ის საბანკო ველები და საკომისიო
@@ -249,42 +253,94 @@ export default function EditUserPage() {
 
             <div className="form-row">
               <div className="form-group">
-                <label>Facebook გვერდი</label>
-                <input
-                  type="url"
-                  value={
-                    (user as { artistSocials?: { facebook?: string } })
-                      .artistSocials?.facebook || ""
-                  }
-                  placeholder="https://facebook.com/..."
+                <label>რას ქმნის</label>
+                <select
+                  value={(user as { sellerType?: string }).sellerType || "artist"}
                   onChange={(e) =>
-                    setUser({
-                      ...user,
-                      artistSocials: {
-                        ...((user as { artistSocials?: Record<string, string> })
-                          .artistSocials || {}),
-                        facebook: e.target.value,
-                      },
-                    } as typeof user)
+                    setUser({ ...user, sellerType: e.target.value } as typeof user)
                   }
-                />
-                {(user as { artistSocials?: { facebook?: string } })
-                  .artistSocials?.facebook && (
-                  <a
-                    href={
-                      (user as { artistSocials?: { facebook?: string } })
-                        .artistSocials?.facebook
+                >
+                  <option value="artist">მხატვარი (ნახატები)</option>
+                  <option value="handmade">ხელნაკეთი ნივთები</option>
+                  <option value="both">ორივე</option>
+                </select>
+              </div>
+              <div className="form-group">
+                <label>ინდივიდუალური შეკვეთები</label>
+                <label
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "0.5rem",
+                    cursor: "pointer",
+                  }}
+                >
+                  <input
+                    type="checkbox"
+                    style={{ width: "auto" }}
+                    checked={
+                      !!(user as { artistOpenForCommissions?: boolean })
+                        .artistOpenForCommissions
                     }
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="seller-page-link"
-                  >
-                    <span className="link-icon">🔗</span> გახსნა
-                    <span className="external-icon">↗</span>
-                  </a>
-                )}
+                    onChange={(e) =>
+                      setUser({
+                        ...user,
+                        artistOpenForCommissions: e.target.checked,
+                      } as typeof user)
+                    }
+                  />
+                  <span>🎨 იღებს ინდ. შეკვეთებს</span>
+                </label>
               </div>
             </div>
+
+            {/* Every network, not just Facebook — sellers register with
+                whatever they have (Instagram, TikTok, …). */}
+            {SOCIAL_FIELDS.map(({ key, label, placeholder }) => {
+              const current =
+                (user as { artistSocials?: Record<string, string> })
+                  .artistSocials?.[key] || "";
+              return (
+                <div className="form-row" key={key}>
+                  <div className="form-group">
+                    <label>{label}</label>
+                    <input
+                      type="text"
+                      value={current}
+                      placeholder={placeholder}
+                      onChange={(e) =>
+                        setUser({
+                          ...user,
+                          artistSocials: {
+                            ...((
+                              user as {
+                                artistSocials?: Record<string, string>;
+                              }
+                            ).artistSocials || {}),
+                            [key]: e.target.value,
+                          },
+                        } as typeof user)
+                      }
+                    />
+                    {current && (
+                      <a
+                        href={
+                          current.startsWith("http")
+                            ? current
+                            : `https://${current}`
+                        }
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="seller-page-link"
+                      >
+                        <span className="link-icon">🔗</span> გახსნა
+                        <span className="external-icon">↗</span>
+                      </a>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
 
             {user.storeLogo && (
               <div className="form-group">

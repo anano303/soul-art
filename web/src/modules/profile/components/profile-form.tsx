@@ -15,6 +15,10 @@ import { useLanguage } from "@/hooks/LanguageContext";
 import { SellerBalanceWidget } from "@/modules/balance/components/seller-balance-widget";
 import { BecomeSellerButton } from "@/components/become-seller-button/become-seller-button";
 import { GEORGIAN_BANKS, detectBankFromIban } from "@/utils/georgian-banks";
+import {
+  SellerPublicSettings,
+  type SocialLinks,
+} from "./seller-public-settings";
 const SLUG_PATTERN = /^[a-z0-9]*(?:-[a-z0-9]+)*$/;
 const formSchema = z
   .object({
@@ -728,6 +732,21 @@ export function ProfileForm() {
       {/* Balance widget only for sellers, not admins */}
       {isSellerRole(user?.role) && user._id && (
         <SellerBalanceWidget userId={user._id} />
+      )}
+
+      {/* Seller type, custom orders and social links — same fields the public
+          artist page and the admin editor use. */}
+      {isSellerRole(user?.role) && user._id && (
+        <SellerPublicSettings
+          sellerType={(user as { sellerType?: string | null }).sellerType}
+          openForCommissions={
+            (user as { artistOpenForCommissions?: boolean })
+              .artistOpenForCommissions
+          }
+          socials={
+            (user as { artistSocials?: SocialLinks | null }).artistSocials
+          }
+        />
       )}
 
       <div className="profile-images-container">

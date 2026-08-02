@@ -1,0 +1,105 @@
+.sps-card {
+  border: 1px solid #ece7da;
+  border-radius: 14px;
+  background: #fff;
+  padding: 1.25rem;
+  margin: 1.5rem 0;
+}
+
+.sps-title {
+  margin: 0 0 1rem;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #012645;
+}
+
+.sps-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-bottom: 0.85rem;
+}
+
+.sps-row label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #012645;
+}
+
+.sps-row input,
+.sps-row select {
+  width: 100%;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-family: inherit;
+  outline: none;
+  background: #fff;
+}
+
+.sps-row input:focus,
+.sps-row select:focus {
+  border-color: #012645;
+}
+
+.sps-checkbox {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  cursor: pointer;
+  margin-bottom: 1rem;
+}
+
+.sps-checkbox input {
+  width: auto;
+  margin-top: 0.25rem;
+}
+
+.sps-checkbox span {
+  font-size: 0.9rem;
+  color: #012645;
+  font-weight: 600;
+}
+
+.sps-checkbox small {
+  display: block;
+  font-weight: 400;
+  color: #6b7280;
+  font-size: 0.8rem;
+  margin-top: 0.15rem;
+}
+
+.sps-socials h4 {
+  margin: 0 0 0.6rem;
+  font-size: 0.9rem;
+  color: #012645;
+}
+
+.sps-socials-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 1rem;
+}
+
+@media (max-width: 560px) {
+  .sps-socials-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.sps-save {
+  margin-top: 0.5rem;
+  padding: 0.7rem 2rem;
+  border: none;
+  border-radius: 100px;
+  background: linear-gradient(135deg, #012645, #02457a);
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.sps-save:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}

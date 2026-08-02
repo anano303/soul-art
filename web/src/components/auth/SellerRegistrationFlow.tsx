@@ -5,7 +5,10 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useAuth } from "@/hooks/use-auth";
-import { useBecomeSeller, extractErrorMessage } from "@/modules/auth/hooks/use-auth";
+import {
+  useBecomeSeller,
+  extractErrorMessage,
+} from "@/modules/auth/hooks/use-auth";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "@/hooks/use-toast";
 import { useLanguage } from "@/hooks/LanguageContext";
@@ -58,6 +61,12 @@ const step2Schema = z
           v === "" || (v.length >= 3 && v.length <= 40 && SLUG_PATTERN.test(v)),
         { message: "სლაგი უნდა შედგებოდეს 3-40 სიმბოლოსგან" },
       ),
+    // Same fields the profile and the artist page use.
+    sellerType: z.enum(["artist", "handmade", "both"]).default("artist"),
+    artistOpenForCommissions: z.boolean().default(false),
+    facebookUrl: z.string().optional(),
+    instagramUrl: z.string().optional(),
+    tiktokUrl: z.string().optional(),
   })
   .refine(
     (data) => {
@@ -141,6 +150,11 @@ export function SellerRegistrationFlow({
       accountNumber: "",
       beneficiaryBankCode: "",
       artistSlug: "",
+      sellerType: "artist",
+      artistOpenForCommissions: false,
+      facebookUrl: "",
+      instagramUrl: "",
+      tiktokUrl: "",
     },
   });
 
@@ -887,15 +901,24 @@ export function SellerRegistrationFlow({
             </div>
 
             <div className="srf-form-group">
-              <label>
-                {language === "en" ? "Portfolio Link" : "პორტფოლიოს ბმული"}
+              <label htmlFor="artistSlug">
+                {language === "en"
+                  ? "Your page address on SoulArt"
+                  : "შენი გვერდის მისამართი SoulArt-ზე"}
               </label>
+              <span className="srf-logo-placeholder-hint">
+                {language === "en"
+                  ? "Only the name — latin letters, numbers or hyphens (e.g. firosmani). Not a social media link."
+                  : "მხოლოდ სახელი — ლათინურად, ციფრებით ან დეფისით (მაგ: firosmani). სოც. ქსელის ბმული არ ჩაწერო."}
+              </span>
               <div className="srf-slug-wrapper">
                 <span className="srf-slug-prefix">{slugDisplayPrefix}</span>
                 <input
+                  id="artistSlug"
                   type="text"
                   value={slugInput}
                   onChange={(e) => handleSlugInputChange(e.target.value)}
+                  placeholder="firosmani"
                   className="srf-slug-input"
                 />
               </div>
@@ -909,6 +932,83 @@ export function SellerRegistrationFlow({
                   {slugMessage}
                 </span>
               )}
+            </div>
+
+            <div className="srf-form-group">
+              <label htmlFor="sellerType">
+                {language === "en" ? "What do you make?" : "რას ქმნი?"} *
+              </label>
+              <select
+                id="sellerType"
+                className="srf-input"
+                {...step2Form.register("sellerType")}
+              >
+                <option value="artist">
+                  {language === "en"
+                    ? "Artist (paintings)"
+                    : "მხატვარი (ნახატები)"}
+                </option>
+                <option value="handmade">
+                  {language === "en" ? "Handmade goods" : "ხელნაკეთი ნივთები"}
+                </option>
+                <option value="both">
+                  {language === "en" ? "Both" : "ორივე"}
+                </option>
+              </select>
+            </div>
+
+            <div className="srf-form-group">
+              <label className="srf-checkbox-label">
+                <input
+                  type="checkbox"
+                  {...step2Form.register("artistOpenForCommissions")}
+                />
+                <span>
+                  🎨{" "}
+                  {language === "en"
+                    ? "I accept individual (custom) orders"
+                    : "ვიღებ ინდივიდუალურ შეკვეთებს"}
+                </span>
+              </label>
+              <span className="srf-logo-placeholder-hint">
+                {language === "en"
+                  ? "Buyers can send you custom requests. Changeable later in your profile."
+                  : "მყიდველები გამოგიგზავნიან ინდ. შეკვეთებს. პროფილიდან შეცვლადია."}
+              </span>
+            </div>
+
+            <div className="srf-form-group">
+              <label htmlFor="facebookUrl">
+                {language === "en" ? "Social links" : "სოციალური ბმულები"}
+              </label>
+              <span className="srf-logo-placeholder-hint">
+                {language === "en"
+                  ? "Optional — fill in whichever you have."
+                  : "არასავალდებულო — შეავსე რომელიც გაქვს."}
+              </span>
+              <div className="srf-socials-grid">
+                <input
+                  id="facebookUrl"
+                  type="text"
+                  className="srf-input"
+                  placeholder="facebook.com/myartpage"
+                  {...step2Form.register("facebookUrl")}
+                />
+                <input
+                  id="instagramUrl"
+                  type="text"
+                  className="srf-input"
+                  placeholder="instagram.com/myartpage"
+                  {...step2Form.register("instagramUrl")}
+                />
+                <input
+                  id="tiktokUrl"
+                  type="text"
+                  className="srf-input"
+                  placeholder="tiktok.com/@myartpage"
+                  {...step2Form.register("tiktokUrl")}
+                />
+              </div>
             </div>
 
             <div className="srf-form-group">

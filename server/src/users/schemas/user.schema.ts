@@ -1,6 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
 import { Role } from '@/types/role.enum';
+import { SellerType } from '@/types/seller-type.enum';
 
 export interface ArtistSocialLinks {
   instagram?: string;
@@ -225,6 +226,10 @@ export class User {
 
   @Prop({ type: Boolean, default: false })
   artistOpenForCommissions?: boolean;
+
+  // Painter / handmade goods / both — picked at registration, editable later.
+  @Prop({ type: String, enum: SellerType, default: null })
+  sellerType?: SellerType | null;
 
   @Prop({ type: Object, default: {} })
   artistSocials?: ArtistSocialLinks;

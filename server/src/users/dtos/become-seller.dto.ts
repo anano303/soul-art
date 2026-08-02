@@ -1,4 +1,6 @@
 import {
+  IsBoolean,
+  IsEnum,
   IsNotEmpty,
   IsString,
   IsPhoneNumber,
@@ -8,6 +10,7 @@ import {
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
+import { SellerType } from '@/types/seller-type.enum';
 
 export class BecomeSellerDto {
   @ApiProperty({
@@ -110,4 +113,33 @@ export class BecomeSellerDto {
       'Artist slug may only contain lowercase letters, numbers, and hyphens',
   })
   artistSlug?: string;
+
+  @ApiProperty({ enum: SellerType, required: false })
+  @IsOptional()
+  @IsEnum(SellerType)
+  sellerType?: SellerType;
+
+  @ApiProperty({ example: 'true', required: false })
+  @IsOptional()
+  // Multipart form → booleans arrive as strings.
+  @Transform(({ value }) =>
+    typeof value === 'string' ? value === 'true' : value,
+  )
+  @IsBoolean()
+  artistOpenForCommissions?: boolean;
+
+  @ApiProperty({ example: 'facebook.com/myartpage', required: false })
+  @IsOptional()
+  @IsString()
+  facebookUrl?: string;
+
+  @ApiProperty({ example: 'instagram.com/myartpage', required: false })
+  @IsOptional()
+  @IsString()
+  instagramUrl?: string;
+
+  @ApiProperty({ example: 'tiktok.com/@myartpage', required: false })
+  @IsOptional()
+  @IsString()
+  tiktokUrl?: string;
 }

@@ -41,6 +41,10 @@ export const sellerRegisterSchema = z.object({
       }
     ),
   invitationCode: z.string().optional(), // renamed from referralCode
+  // What the seller makes + whether they take custom orders. Same fields the
+  // profile and the public artist page use.
+  sellerType: z.enum(["artist", "handmade", "both"]).default("artist"),
+  artistOpenForCommissions: z.boolean().default(false),
   facebookUrl: z
     .string()
     .optional()

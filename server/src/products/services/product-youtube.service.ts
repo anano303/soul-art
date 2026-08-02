@@ -145,6 +145,77 @@ export class ProductYoutubeService {
   }
 
   /**
+   * Rewrites title/description/tags of videos that are already on YouTube so
+   * old uploads get the product link too. No re-upload — a metadata-only
+   * `videos.update` call per video.
+   *
+   * Costs 50 quota units per video against a 10.000/day budget, hence the
+   * batch limit.
+   */
+  async resyncVideoMetadata(limit = 50): Promise<{
+    scanned: number;
+    updated: number;
+    skipped: number;
+    failed: number;
+    errors: string[];
+  }> {
+    const summary = {
+      scanned: 0,
+      updated: 0,
+      skipped: 0,
+      failed: 0,
+      errors: [] as string[],
+    };
+
+    if (!this.isYoutubeConfigured()) {
+      summary.errors.push('YouTube credentials are not configured');
+      return summary;
+    }
+
+    const safeLimit = Math.min(Math.max(Number(limit) || 50, 1), 200);
+    const products = await this.productModel
+      .find({
+        youtubeVideoId: { $exists: true, $nin: [null, ''] },
+      })
+      .sort({ updatedAt: -1 })
+      .limit(safeLimit)
+      .populate('user', 'name artistSlug email')
+      .exec();
+
+    summary.scanned = products.length;
+
+    for (const product of products) {
+      const videoId = (product as any).youtubeVideoId as string;
+      const owner = (product as any).user as UserDocument | null;
+      if (!videoId || !owner) {
+        summary.skipped += 1;
+        continue;
+      }
+
+      try {
+        const metadata = this.buildVideoMetadata(
+          product as unknown as ProductDocument,
+          owner,
+        );
+        await this.youtubeService.updateVideo(videoId, {
+          title: metadata.title,
+          description: metadata.description,
+          tags: metadata.tags,
+        });
+        summary.updated += 1;
+        this.logger.log(`♻️  Refreshed YouTube metadata for ${videoId}`);
+      } catch (error) {
+        summary.failed += 1;
+        const message = error instanceof Error ? error.message : String(error);
+        summary.errors.push(`${videoId}: ${message}`);
+        this.logger.warn(`Failed to refresh ${videoId}: ${message}`);
+      }
+    }
+
+    return summary;
+  }
+
+  /**
    * Videos picked in a form that was never submitted would pile up on disk.
    */
   @Cron(CronExpression.EVERY_6_HOURS)

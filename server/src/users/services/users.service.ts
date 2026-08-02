@@ -647,6 +647,10 @@ export class UsersService {
       update.artistOpenForCommissions = dto.artistOpenForCommissions;
     }
 
+    if (dto.sellerType !== undefined) {
+      update.sellerType = dto.sellerType;
+    }
+
     if (dto.artistSocials !== undefined) {
       update.artistSocials = this.sanitizeSocialLinks(dto.artistSocials);
     }
@@ -894,6 +898,7 @@ export class UsersService {
           artistDisciplines: artist.artistDisciplines ?? [],
           artistLocation: artist.artistLocation ?? null,
           artistOpenForCommissions: artist.artistOpenForCommissions ?? false,
+          sellerType: artist.sellerType ?? null,
           artistSocials: artist.artistSocials ?? {},
           followersCount: artist.followersCount ?? 0,
           followingCount: artist.followingCount ?? 0,
@@ -1809,6 +1814,28 @@ export class UsersService {
         updateData.salesCommissionRate = updateDto.salesCommissionRate;
       }
 
+      // Social links are merged, so sending only Facebook keeps the rest.
+      if (updateDto.artistSocials !== undefined) {
+        const incoming = Object.fromEntries(
+          Object.entries(updateDto.artistSocials).filter(
+            ([, value]) => typeof value === 'string',
+          ),
+        );
+        updateData.artistSocials = {
+          ...(user.artistSocials || {}),
+          ...incoming,
+        };
+      }
+
+      if (updateDto.artistOpenForCommissions !== undefined) {
+        updateData.artistOpenForCommissions =
+          updateDto.artistOpenForCommissions;
+      }
+
+      if (updateDto.sellerType !== undefined) {
+        updateData.sellerType = updateDto.sellerType;
+      }
+
       if (Object.keys(updateData).length === 0) {
         return user;
       }
@@ -2018,6 +2045,22 @@ export class UsersService {
     }
   }
 
+  /**
+   * Maps the flat social URLs collected at registration into `artistSocials`.
+   * Returns {} when nothing was filled, so the schema default stays untouched.
+   */
+  private buildRegistrationSocials(dto: {
+    facebookUrl?: string;
+    instagramUrl?: string;
+    tiktokUrl?: string;
+  }): { artistSocials?: Record<string, string> } {
+    const socials: Record<string, string> = {};
+    if (dto.facebookUrl?.trim()) socials.facebook = dto.facebookUrl.trim();
+    if (dto.instagramUrl?.trim()) socials.instagram = dto.instagramUrl.trim();
+    if (dto.tiktokUrl?.trim()) socials.tiktok = dto.tiktokUrl.trim();
+    return Object.keys(socials).length > 0 ? { artistSocials: socials } : {};
+  }
+
   async createSellerWithLogo(
     dto: SellerRegisterDto,
     logoFile?: Express.Multer.File,
@@ -2059,10 +2102,8 @@ export class UsersService {
         role: Role.Seller,
         password: dto.password,
         artistSlug: resolvedArtistSlug,
-        // Facebook page link provided at registration → artist socials
-        ...(dto.facebookUrl?.trim()
-          ? { artistSocials: { facebook: dto.facebookUrl.trim() } }
-          : {}),
+        // Social links provided at registration → artist socials
+        ...this.buildRegistrationSocials(dto),
       };
 
       const seller = await this.create(sellerData);
@@ -2461,6 +2502,24 @@ export class UsersService {
         beneficiaryBankCode:
           becomeSellerDto.beneficiaryBankCode || user.beneficiaryBankCode,
       };
+
+      // What they make + custom orders + social links, collected on the same
+      // registration step as everything else.
+      if (becomeSellerDto.sellerType !== undefined) {
+        updateData.sellerType = becomeSellerDto.sellerType;
+      }
+      if (becomeSellerDto.artistOpenForCommissions !== undefined) {
+        updateData.artistOpenForCommissions =
+          becomeSellerDto.artistOpenForCommissions;
+      }
+      const registrationSocials =
+        this.buildRegistrationSocials(becomeSellerDto).artistSocials;
+      if (registrationSocials) {
+        updateData.artistSocials = {
+          ...(user.artistSocials || {}),
+          ...registrationSocials,
+        };
+      }
 
       // Auto-populate owner first and last name from existing user name
       if (user.name) {

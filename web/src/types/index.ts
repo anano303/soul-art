@@ -280,6 +280,7 @@ export interface User {
   artistDisciplines?: string[];
   artistLocation?: string | null;
   artistOpenForCommissions?: boolean;
+  sellerType?: "artist" | "handmade" | "both" | null;
   artistSocials?: ArtistSocialLinks;
   artistHighlights?: string[];
   artistGallery?: string[];

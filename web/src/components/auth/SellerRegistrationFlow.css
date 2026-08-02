@@ -451,3 +451,103 @@
 .srf-contract-link:hover {
   text-decoration: underline;
 }
+
+/* Seller type + custom orders + social links (registration step 2) */
+.srf-form-group select.srf-input {
+  appearance: auto;
+  cursor: pointer;
+}
+
+.srf-form-group .srf-input + .srf-input {
+  margin-top: 0.5rem;
+}
+
+.srf-checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.srf-checkbox-label input[type="checkbox"] {
+  width: auto;
+  margin: 0;
+  cursor: pointer;
+}
+
+/* ── Step 2 density ──────────────────────────────────────────────
+   The second step has a lot of fields; keep it readable without the
+   form running off the screen on small phones. */
+.srf-form-group .srf-logo-placeholder-hint {
+  line-height: 1.35;
+  margin-top: -0.15rem;
+}
+
+/* Social links side by side instead of a tall stack. */
+.srf-socials-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
+.srf-socials-grid .srf-input + .srf-input {
+  margin-top: 0;
+}
+
+@media (max-width: 640px) {
+  .srf-socials-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Narrow phones (≤380px): shrink every step-2 control a notch. */
+@media (max-width: 380px) {
+  .srf-form {
+    gap: 0.75rem;
+  }
+
+  .srf-form-group {
+    gap: 0.25rem;
+  }
+
+  .srf-form-group label {
+    font-size: 0.8rem;
+  }
+
+  .srf-logo-placeholder-hint {
+    font-size: 0.7rem;
+  }
+
+  .srf-input,
+  .srf-slug-input {
+    padding: 0.55rem 0.7rem;
+    font-size: 0.85rem;
+  }
+
+  /* The "soulart.ge/@" prefix eats the whole row — put it on its own line. */
+  .srf-slug-wrapper {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .srf-slug-prefix {
+    border-right: none;
+    border-bottom: 1px solid #d1d5db;
+    padding: 0.4rem 0.7rem;
+    font-size: 0.75rem;
+  }
+
+  .srf-checkbox-label {
+    font-size: 0.85rem;
+    align-items: flex-start;
+  }
+
+  .srf-step-indicator {
+    margin-bottom: 1.25rem;
+  }
+
+  .srf-step-line {
+    width: 36px;
+  }
+}

@@ -3,6 +3,7 @@ import {
   ArrayUnique,
   IsArray,
   IsBoolean,
+  IsEnum,
   IsObject,
   IsOptional,
   IsString,
@@ -11,6 +12,7 @@ import {
   ValidateNested,
 } from 'class-validator';
 import { Type } from 'class-transformer';
+import { SellerType } from '@/types/seller-type.enum';
 
 export class ArtistSocialLinksDto {
   @IsOptional()
@@ -88,6 +90,10 @@ export class UpdateArtistProfileDto {
   @IsOptional()
   @IsBoolean()
   artistOpenForCommissions?: boolean;
+
+  @IsOptional()
+  @IsEnum(SellerType)
+  sellerType?: SellerType;
 
   @IsOptional()
   @ValidateNested()

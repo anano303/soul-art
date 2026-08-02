@@ -110,6 +110,9 @@ export class UserDto {
   artistOpenForCommissions?: boolean;
 
   @Expose()
+  sellerType?: string;
+
+  @Expose()
   artistSocials?: object;
 
   @Expose()

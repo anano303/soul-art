@@ -1,5 +1,7 @@
 import { Role } from '@/types/role.enum';
+import { SellerType } from '@/types/seller-type.enum';
 import {
+  IsBoolean,
   IsEmail,
   IsString,
   MinLength,
@@ -9,8 +11,10 @@ import {
   IsNumber,
   Min,
   Max,
+  ValidateNested,
 } from 'class-validator';
-import { Transform } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
+import { ArtistSocialLinksDto } from './update-artist-profile.dto';
 
 export class AdminProfileDto {
   @IsString()
@@ -63,4 +67,23 @@ export class AdminProfileDto {
   @Max(100)
   @Transform(({ value }) => (value !== undefined ? Number(value) : undefined))
   salesCommissionRate?: number;
+
+  // სოციალური ბმულები (Facebook და სხვა) — ინახება artistSocials-ში
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => ArtistSocialLinksDto)
+  artistSocials?: ArtistSocialLinksDto;
+
+  // იღებს თუ არა ინდივიდუალურ შეკვეთებს
+  @IsOptional()
+  @Transform(({ value }) =>
+    typeof value === 'string' ? value === 'true' : value,
+  )
+  @IsBoolean()
+  artistOpenForCommissions?: boolean;
+
+  // მხატვარი / ხელნაკეთი ნივთები / ორივე
+  @IsOptional()
+  @IsEnum(SellerType)
+  sellerType?: SellerType;
 }

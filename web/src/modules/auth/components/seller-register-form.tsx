@@ -752,6 +752,61 @@ export function SellerRegisterForm() {
         </div>
 
         <div className="input-group">
+          <label htmlFor="sellerType">
+            {language === "en" ? "What do you make?" : "რას ქმნი?"}
+          </label>
+          <select id="sellerType" {...registerField("sellerType")}>
+            <option value="artist">
+              {language === "en" ? "Artist (paintings)" : "მხატვარი (ნახატები)"}
+            </option>
+            <option value="handmade">
+              {language === "en" ? "Handmade goods" : "ხელნაკეთი ნივთები"}
+            </option>
+            <option value="both">
+              {language === "en" ? "Both" : "ორივე"}
+            </option>
+          </select>
+          {errors.sellerType && (
+            <p className="error-text">{errors.sellerType.message}</p>
+          )}
+        </div>
+
+        <div className="input-group">
+          <label
+            style={{
+              display: "flex",
+              alignItems: "flex-start",
+              gap: "0.5rem",
+              cursor: "pointer",
+            }}
+          >
+            <input
+              type="checkbox"
+              style={{ width: "auto", marginTop: "0.25rem" }}
+              {...registerField("artistOpenForCommissions")}
+            />
+            <span>
+              🎨{" "}
+              {language === "en"
+                ? "I accept individual (custom) orders"
+                : "ვიღებ ინდივიდუალურ შეკვეთებს"}
+              <span
+                style={{
+                  display: "block",
+                  color: "#94a3b8",
+                  fontWeight: 400,
+                  fontSize: "0.85rem",
+                }}
+              >
+                {language === "en"
+                  ? "Buyers can request a custom piece from you and you get notified about new requests."
+                  : "მყიდველები შეძლებენ შენთვის ინდ. შეკვეთის გამოგზავნას და ახალ შეკვეთებზე შეტყობინებას მიიღებ. შემდეგ პროფილიდანაც შეგიძლია შეცვლა."}
+              </span>
+            </span>
+          </label>
+        </div>
+
+        <div className="input-group">
           <label htmlFor="email">{t("auth.email")}</label>
           <input
             id="email"

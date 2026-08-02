@@ -193,7 +193,8 @@ export class ArtistController {
 
   @Patch('profile')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.Seller)
+  // Combined seller + sales-manager accounts are sellers too.
+  @Roles(Role.Seller, Role.SellerAndSalesManager)
   @ApiOperation({ summary: 'Update authenticated artist profile' })
   @ApiResponse({ status: 200, description: 'Updated artist profile' })
   async updateArtistProfile(
