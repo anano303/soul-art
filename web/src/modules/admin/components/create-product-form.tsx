@@ -174,11 +174,11 @@ export function CreateProductForm({
   const [videoError, setVideoError] = useState<string | null>(null);
   const [videoUploading, setVideoUploading] = useState(false);
   const [videoUploadProgress, setVideoUploadProgress] = useState<string>("");
-  const [uploadedYoutubeData, setUploadedYoutubeData] = useState<{
-    videoId: string;
-    videoUrl: string;
-    embedUrl: string;
-  } | null>(null);
+  // The video is parked on the server; YouTube upload happens in the
+  // background after the product is saved, so nobody waits for it here.
+  const [pendingVideoToken, setPendingVideoToken] = useState<string | null>(
+    null
+  );
   const [existingYoutubeVideoUrl, setExistingYoutubeVideoUrl] = useState<
     string | null
   >(initialData?.youtubeVideoUrl || null);
@@ -1022,19 +1022,16 @@ export function CreateProductForm({
     setVideoError(null);
     setVideoUploading(true);
     setVideoUploadProgress(
-      language === "en" ? "Uploading to YouTube..." : "იტვირთება YouTube-ზე..."
+      language === "en" ? "Uploading video..." : "ვიდეო იტვირთება..."
     );
 
     try {
-      // Create FormData for video upload
+      // Only sends the file to our server — the YouTube upload happens later,
+      // in the background, once the product exists.
       const videoFormData = new FormData();
       videoFormData.append("video", file);
-      videoFormData.append("productName", formData.name || "Product Video");
-      videoFormData.append("productDescription", formData.description || "");
-      videoFormData.append("price", String(formData.price || 0));
-      videoFormData.append("brand", formData.brand || user?.name || "SoulArt");
 
-      console.log("📹 Uploading video to YouTube immediately...", {
+      console.log("📹 Sending video to server (staging)...", {
         name: file.name,
         size: (file.size / 1024 / 1024).toFixed(2) + "MB",
       });
@@ -1054,25 +1051,19 @@ export function CreateProductForm({
       }
 
       const result = await response.json();
-      console.log("✅ YouTube upload complete:", result);
+      console.log("✅ Video staged:", result);
 
-      setUploadedYoutubeData({
-        videoId: result.videoId,
-        videoUrl: result.videoUrl,
-        embedUrl: result.embedUrl,
-      });
+      setPendingVideoToken(result.videoToken);
       setVideoUploadProgress(
-        language === "en"
-          ? "✅ Uploaded to YouTube!"
-          : "✅ აიტვირთა YouTube-ზე!"
+        language === "en" ? "✅ Video attached!" : "✅ ვიდეო მიმაგრებულია!"
       );
 
       toast({
-        title: language === "en" ? "Video Uploaded" : "ვიდეო აიტვირთა",
+        title: language === "en" ? "Video attached" : "ვიდეო მიმაგრდა",
         description:
           language === "en"
-            ? "Video successfully uploaded to YouTube"
-            : "ვიდეო წარმატებით აიტვირთა YouTube-ზე",
+            ? "It will be published to YouTube in the background after you save the product."
+            : "პროდუქტის შენახვის შემდეგ YouTube-ზე ფონურად აიტვირთება — ლოდინი არ დაგჭირდება.",
       });
     } catch (error) {
       console.error("❌ YouTube upload error:", error);
@@ -1085,7 +1076,7 @@ export function CreateProductForm({
               error instanceof Error ? error.message : "უცნობი შეცდომა"
             }`
       );
-      setUploadedYoutubeData(null);
+      setPendingVideoToken(null);
       setVideoUploadProgress("");
     } finally {
       setVideoUploading(false);
@@ -1095,7 +1086,7 @@ export function CreateProductForm({
   const handleRemoveVideo = () => {
     setVideoFile(null);
     setVideoError(null);
-    setUploadedYoutubeData(null);
+    setPendingVideoToken(null);
     setVideoUploadProgress("");
     const input = document.getElementById(
       "productVideo"
@@ -1376,12 +1367,14 @@ export function CreateProductForm({
         return;
       }
 
-      // Add YouTube data if video was uploaded
-      if (uploadedYoutubeData) {
-        console.log("📹 Adding YouTube data to FormData:", uploadedYoutubeData);
-        formDataToSend.append("youtubeVideoId", uploadedYoutubeData.videoId);
-        formDataToSend.append("youtubeVideoUrl", uploadedYoutubeData.videoUrl);
-        formDataToSend.append("youtubeEmbedUrl", uploadedYoutubeData.embedUrl);
+      // Hand over the staged video — the server uploads it to YouTube after
+      // saving, with the real product link in the description.
+      if (pendingVideoToken) {
+        console.log("📹 Attaching staged video:", pendingVideoToken);
+        formDataToSend.append("videoToken", pendingVideoToken);
+        if (existingYoutubeVideoUrl) {
+          formDataToSend.append("youtubeVideoUrl", existingYoutubeVideoUrl);
+        }
       } else if (existingYoutubeVideoUrl) {
         console.log(
           "📹 Keeping existing YouTube URL:",
@@ -1870,7 +1863,7 @@ export function CreateProductForm({
             <label htmlFor="productVideo">
               {language === "en" ? "Video" : "ვიდეო"}
               {/* Green checkmark when video uploaded */}
-              {(uploadedYoutubeData || videoFile) && !videoUploading && (
+              {(pendingVideoToken || videoFile) && !videoUploading && (
                 <span
                   className="video-success-check"
                   title={language === "en" ? "Uploaded" : "აიტვირთა"}
@@ -1888,7 +1881,7 @@ export function CreateProductForm({
             )}
 
             {!videoUploading &&
-              (uploadedYoutubeData || videoFile ? (
+              (pendingVideoToken || videoFile ? (
                 <div className="video-uploaded-input">
                   <span className="uploaded-text">
                     {language === "en" ? "Uploaded" : "ატვირთულია"}
@@ -1898,7 +1891,7 @@ export function CreateProductForm({
                     className="remove-video-btn"
                     onClick={() => {
                       setVideoFile(null);
-                      setUploadedYoutubeData(null);
+                      setPendingVideoToken(null);
                     }}
                   >
                     ✕
@@ -1940,21 +1933,11 @@ export function CreateProductForm({
           </div>
         </div>
         {/* Image previews and video embed - full width below */}
-        {(formData.images.length > 0 || uploadedYoutubeData) && (
+        {(formData.images.length > 0 || pendingVideoToken) && (
           <div className="image-preview-container">
-            {/* Video embed thumbnail first */}
-            {uploadedYoutubeData && (
+            {/* No YouTube embed yet — the video is uploaded after saving. */}
+            {pendingVideoToken && (
               <div className="image-preview video-preview">
-                <iframe
-                  src={uploadedYoutubeData.embedUrl}
-                  width="100"
-                  height="100"
-                  frameBorder="0"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                  title="Video preview"
-                  style={{ pointerEvents: "none" }}
-                ></iframe>
                 <div className="video-overlay-icon">▶</div>
               </div>
             )}

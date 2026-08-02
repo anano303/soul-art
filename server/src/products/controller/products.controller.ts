@@ -354,61 +354,35 @@ export class ProductsController {
       throw new BadRequestException('No video file provided');
     }
 
-    console.log('📹 Immediate YouTube upload request:', {
+    console.log('📹 Video received for staging:', {
       userId: user._id,
       userName: user.name,
       videoName: videoFile.originalname,
       videoSize: videoFile.size,
-      productName: body.productName,
     });
 
     try {
-      const videoFileData = this.prepareFileForBackground(videoFile);
+      // Only park the file here. The YouTube upload runs after the product is
+      // saved, so nobody waits for it and the description can carry the real
+      // product link.
+      const videoToken = await this.productYoutubeService.stagePendingVideo(
+        videoFile.path,
+        videoFile.originalname,
+      );
 
-      if (!videoFileData) {
-        throw new BadRequestException('Failed to process video file');
-      }
-
-      const tempProductData = {
-        name: body.productName || 'Product Video',
-        description: body.productDescription || '',
-        price: body.price ? Number(body.price) : 0,
-        brand: body.brand || user.name || 'SoulArt',
-        category: 'Other',
-      };
-
-      const youtubeResult = await this.productYoutubeService.uploadVideoSync({
-        productData: tempProductData,
-        user,
-        videoFile: videoFileData,
-      });
-
-      if (!youtubeResult) {
-        throw new BadRequestException(
-          'YouTube upload failed - no result returned',
-        );
-      }
-
-      console.log('✅ Immediate YouTube upload success:', youtubeResult);
-
-      return {
-        success: true,
-        videoId: youtubeResult.videoId,
-        videoUrl: youtubeResult.videoUrl,
-        embedUrl: youtubeResult.embedUrl,
-      };
+      return { success: true, videoToken };
     } catch (error) {
-      console.error('❌ Immediate YouTube upload error:', error);
-      throw new BadRequestException(`YouTube upload failed: ${error.message}`);
-    } finally {
-      // Cleanup temp file
+      console.error('❌ Failed to stage video:', error);
       if (videoFile?.path) {
         try {
           require('fs').unlinkSync(videoFile.path);
-        } catch (e) {
+        } catch {
           console.warn('Failed to cleanup video temp file');
         }
       }
+      throw new BadRequestException(
+        `Video upload failed: ${error.message}`,
+      );
     }
   }
 
@@ -801,6 +775,14 @@ export class ProductsController {
         {
           addToPortfolio: addToPortfolio ?? true,
         },
+      );
+
+      // Kick off the YouTube upload in the background — the response goes out
+      // now, the worker attaches the video to the product when it is done.
+      this.productYoutubeService.queueProductVideoUpload(
+        createdProduct as any,
+        user,
+        (productData as any).videoToken,
       );
 
       // Cleanup image temp files
@@ -1259,6 +1241,15 @@ export class ProductsController {
       }
 
       const updatedProduct = await this.productsService.update(id, updateData);
+
+      // Background YouTube upload for a video added while editing.
+      if (updatedProduct) {
+        this.productYoutubeService.queueProductVideoUpload(
+          updatedProduct as any,
+          user,
+          (productData as any).videoToken,
+        );
+      }
 
       // Cleanup image temp files
       if (files?.images?.length) {

@@ -124,6 +124,11 @@ interface WorkerData {
   userId: string;
   images: string[];
   videoFilePath?: string;
+  // Metadata prepared by the service once the product is saved.
+  title?: string;
+  description?: string;
+  tags?: string[];
+  cleanupVideoFile?: boolean;
 }
 
 async function processVideo() {
@@ -366,8 +371,13 @@ async function processVideo() {
       georgianDescription += `🏷️ ბრენდი: ${data.brand}\n`;
     }
 
-    georgianDescription += `\n🛒 შესყიდვის ბმული: https://soulart.ge/product/${data.productId}\n`;
-    georgianDescription += `🎨 ავტორის ყველა ნამუშევარი: https://soulart.ge/artist/${data.userId}\n`;
+    const siteBase = (
+      process.env.PUBLIC_CLIENT_URL ||
+      process.env.CLIENT_URL ||
+      process.env.NEXT_PUBLIC_CLIENT_URL ||
+      'https://soulart.ge'
+    ).replace(/\/+$/, '');
+    georgianDescription += `\n🛒 შესყიდვის ბმული: ${siteBase}/products/${data.productId}\n`;
     georgianDescription += `\n✨ SoulArt - ქართული ხელოვნების პლატფორმა`;
 
     // Build tags with product name, category, brand
@@ -388,14 +398,17 @@ async function processVideo() {
       tags.push(data.userName);
     }
 
-    // Upload to YouTube
+    // Metadata built by the service from the SAVED product wins — it carries
+    // the real product link. The locally built one is only a fallback.
     const uploadOptions = {
-      title: `${data.productName} - ${data.userName || 'SoulArt'}`.substring(
-        0,
-        100,
-      ),
-      description: georgianDescription,
-      tags: tags.slice(0, 15), // YouTube allows max 15 tags
+      title: (
+        data.title?.trim() || `${data.productName} - ${data.userName || 'SoulArt'}`
+      ).substring(0, 100),
+      description: data.description?.trim() || georgianDescription,
+      tags: (Array.isArray(data.tags) && data.tags.length
+        ? data.tags
+        : tags
+      ).slice(0, 15), // YouTube allows max 15 tags
       privacyStatus: 'public' as const,
     };
 

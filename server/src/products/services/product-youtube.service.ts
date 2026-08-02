@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { Cron, CronExpression } from '@nestjs/schedule';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Worker } from 'worker_threads';
@@ -39,6 +40,188 @@ export class ProductYoutubeService {
     private readonly configService: ConfigService,
     @InjectModel(Product.name) private productModel: Model<Product>,
   ) {}
+
+  /** Where a picked video waits between "file chosen" and "product saved". */
+  private get pendingVideoDir(): string {
+    return path.join(process.cwd(), 'uploads', 'pending-videos');
+  }
+
+  /**
+   * Moves an uploaded video into a pending slot and returns its token.
+   * Nothing is sent to YouTube yet — the product does not exist at this point,
+   * so its link and details could not go into the description anyway.
+   */
+  async stagePendingVideo(
+    tempPath: string,
+    originalName: string,
+  ): Promise<string> {
+    await fsp.mkdir(this.pendingVideoDir, { recursive: true });
+
+    const rawExt = path.extname(originalName || '').toLowerCase();
+    const extension = /^\.[a-z0-9]{2,5}$/.test(rawExt) ? rawExt : '.mp4';
+    const token = `${Date.now()}-${Math.round(Math.random() * 1e9)}${extension}`;
+    const target = path.join(this.pendingVideoDir, token);
+
+    try {
+      await fsp.rename(tempPath, target);
+    } catch {
+      // rename fails across devices/volumes — fall back to copy + remove.
+      await fsp.copyFile(tempPath, target);
+      await fsp.unlink(tempPath).catch(() => undefined);
+    }
+
+    this.logger.log(`📥 Video staged for later upload: ${token}`);
+    return token;
+  }
+
+  /**
+   * Fire-and-forget YouTube upload for an ALREADY SAVED product. Returns
+   * immediately so neither the seller nor the admin waits for YouTube; the
+   * worker patches the product with the video ids once it finishes.
+   */
+  queueProductVideoUpload(
+    product: ProductDocument,
+    user: UserDocument,
+    videoToken?: string | null,
+  ): void {
+    if (!videoToken) return;
+    void this.runPendingVideoUpload(product, user, videoToken).catch((error) =>
+      this.logger.error(
+        `❌ Pending YouTube upload failed for product ${product._id}: ${
+          error instanceof Error ? error.message : error
+        }`,
+      ),
+    );
+  }
+
+  private async runPendingVideoUpload(
+    product: ProductDocument,
+    user: UserDocument,
+    videoToken: string,
+  ): Promise<void> {
+    const safeToken = path.basename(videoToken);
+    if (!/^[\w.-]+$/.test(safeToken)) {
+      this.logger.warn(`Rejected suspicious video token: ${videoToken}`);
+      return;
+    }
+
+    const videoFilePath = path.join(this.pendingVideoDir, safeToken);
+    if (!fs.existsSync(videoFilePath)) {
+      this.logger.warn(`Staged video not found: ${videoFilePath}`);
+      return;
+    }
+
+    if (!this.isYoutubeConfigured()) {
+      this.logger.warn('YouTube not configured — dropping staged video.');
+      await fsp.unlink(videoFilePath).catch(() => undefined);
+      return;
+    }
+
+    // Built from the saved product, so the description carries the real
+    // product link, the artist page and every detail.
+    const metadata = this.buildVideoMetadata(product, user);
+
+    this.spawnYoutubeWorker({
+      productId: product._id.toString(),
+      productName: String(product.name || ''),
+      productDescription: String(product.description || ''),
+      price: product.price || 0,
+      discountPercentage: (product as any).discountPercentage || 0,
+      brand: String(product.brand || ''),
+      category: String(product.category || ''),
+      userName: String(user.name || ''),
+      userEmail: String(user.email || ''),
+      userId: user._id.toString(),
+      images: Array.isArray(product.images)
+        ? product.images.map((img) => String(img)).filter(Boolean)
+        : [],
+      videoFilePath,
+      // Pre-built metadata wins over whatever the worker would compose.
+      title: metadata.title,
+      description: metadata.description,
+      tags: metadata.tags,
+      cleanupVideoFile: true,
+    });
+  }
+
+  /**
+   * Videos picked in a form that was never submitted would pile up on disk.
+   */
+  @Cron(CronExpression.EVERY_6_HOURS)
+  async cleanupStaleStagedVideos(): Promise<void> {
+    try {
+      if (!fs.existsSync(this.pendingVideoDir)) return;
+      const maxAgeMs = 24 * 60 * 60 * 1000;
+      const now = Date.now();
+      const entries = await fsp.readdir(this.pendingVideoDir);
+
+      for (const entry of entries) {
+        const filePath = path.join(this.pendingVideoDir, entry);
+        try {
+          const stat = await fsp.stat(filePath);
+          if (now - stat.mtimeMs > maxAgeMs) {
+            await fsp.unlink(filePath);
+            this.logger.log(`🧹 Removed stale staged video: ${entry}`);
+          }
+        } catch {
+          /* file vanished mid-sweep — nothing to do */
+        }
+      }
+    } catch (error) {
+      this.logger.warn(
+        `Failed to sweep staged videos: ${
+          error instanceof Error ? error.message : error
+        }`,
+      );
+    }
+  }
+
+  /**
+   * Spawns the upload worker and wires its lifecycle: on success the product
+   * gets its YouTube ids, on exit the staged file is removed.
+   */
+  private spawnYoutubeWorker(
+    workerData: Record<string, unknown> & {
+      productId: string;
+      videoFilePath: string;
+      cleanupVideoFile?: boolean;
+    },
+  ): void {
+    const workerPath = path.join(__dirname, '../workers/youtube.worker.js');
+    const worker = new Worker(workerPath, { workerData });
+
+    worker.on('message', async (message) => {
+      if (message?.success && message.data?.videoId) {
+        try {
+          await this.productModel.findByIdAndUpdate(message.data.productId, {
+            youtubeVideoId: message.data.videoId,
+            youtubeVideoUrl: message.data.videoUrl,
+            youtubeEmbedUrl: message.data.embedUrl,
+          });
+          this.logger.log(
+            `✅ Product ${message.data.productId} linked to YouTube video ${message.data.videoId}`,
+          );
+        } catch (error) {
+          this.logger.error('❌ Failed to attach YouTube video:', error);
+        }
+      } else {
+        this.logger.error(`❌ YouTube worker failed: ${message?.error}`);
+      }
+    });
+
+    worker.on('error', (error) => {
+      this.logger.error(`💥 YouTube worker error: ${error.message}`);
+    });
+
+    worker.on('exit', (code) => {
+      if (code !== 0) {
+        this.logger.error(`❌ YouTube worker exited with code ${code}`);
+      }
+      if (workerData.cleanupVideoFile) {
+        void fsp.unlink(workerData.videoFilePath).catch(() => undefined);
+      }
+    });
+  }
 
   async handleProductVideoUpload({
     product,
